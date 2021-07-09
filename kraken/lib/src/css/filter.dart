@@ -139,12 +139,21 @@ mixin CSSFilterEffectsMixin {
 
   // Get the image filter.
   static ImageFilter? _parseImageFilters(List<CSSFunctionalNotation> functions, RenderStyle renderStyle) {
+    Size viewportSize = renderStyle.viewportSize;
+    RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
+    double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
+    double fontSize = renderStyle.fontSize;
     if (functions.length > 0) {
       for (int i = 0; i < functions.length; i ++) {
         CSSFunctionalNotation f = functions[i];
         switch (f.name.toLowerCase()) {
           case BLUR:
-            double amount = CSSLength.parseLength(f.args.first, renderStyle: renderStyle)!;
+            double amount = CSSLength.parseLength(
+              f.args.first,
+              viewportSize: viewportSize,
+              rootFontSize: rootFontSize,
+              fontSize: fontSize
+            )!;
             return ImageFilter.blur(sigmaX: amount, sigmaY: amount);
         }
       }

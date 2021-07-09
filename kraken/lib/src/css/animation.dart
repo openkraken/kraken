@@ -482,6 +482,14 @@ class KeyframeEffect extends AnimationEffect {
   static List<_Interpolation> _makeInterpolations(Map<String, List<Keyframe>> propertySpecificKeyframeGroups, Size? viewportSize, RenderStyle? renderStyle) {
     List<_Interpolation> interpolations = [];
 
+    double? rootFontSize;
+    double? fontSize;
+    if (renderStyle != null) {
+      RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
+      rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
+      fontSize = renderStyle.fontSize;
+    }
+
     propertySpecificKeyframeGroups.forEach((String property, List<Keyframe> keyframes) {
       for (int i = 0; i < keyframes.length - 1; i++) {
         int startIndex = i;
@@ -517,8 +525,8 @@ class KeyframeEffect extends AnimationEffect {
           startOffset,
           endOffset,
           _parseEasing(keyframes[startIndex].easing),
-          parseProperty(left, viewportSize, renderStyle),
-          parseProperty(right, viewportSize, renderStyle),
+          parseProperty(left, viewportSize, rootFontSize, fontSize),
+          parseProperty(right, viewportSize, rootFontSize, fontSize),
           handlers[1]
         );
 

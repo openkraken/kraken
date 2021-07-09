@@ -476,6 +476,10 @@ class RenderStyle
     List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(transformStr);
     final String TRANSLATE = 'translate';
     bool isPercentageExist = false;
+    Size viewportSize = renderStyle.viewportSize;
+    RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
+    double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
+    double fontSize = renderStyle.fontSize;
 
     Matrix4? matrix4;
     for (CSSFunctionalNotation method in methods) {
@@ -490,7 +494,12 @@ class RenderStyle
             translateY = (size!.height * percentage).toString() + 'px';
             isPercentageExist = true;
           }
-          y = CSSLength.toDisplayPortValue(translateY, renderStyle: renderStyle) ?? 0;
+          y = CSSLength.toDisplayPortValue(
+            translateY,
+            viewportSize: viewportSize,
+            rootFontSize: rootFontSize,
+            fontSize: fontSize
+          ) ?? 0;
         } else {
           y = 0;
         }
@@ -500,7 +509,12 @@ class RenderStyle
           translateX = (size!.width * percentage).toString() + 'px';
           isPercentageExist = true;
         }
-        x = CSSLength.toDisplayPortValue(translateX, renderStyle: renderStyle) ?? 0;
+        x = CSSLength.toDisplayPortValue(
+          translateX,
+          viewportSize: viewportSize,
+          rootFontSize: rootFontSize,
+          fontSize: fontSize
+        ) ?? 0;
         transform = Matrix4.identity()..translate(x, y);
       }
       if (transform != null) {

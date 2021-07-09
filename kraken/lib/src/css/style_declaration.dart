@@ -8,6 +8,7 @@ import 'dart:ui';
 
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/src/css/animation.dart';
 
 const String SAFE_AREA_INSET = 'safe-area-inset';
@@ -478,6 +479,15 @@ class CSSStyleDeclaration {
       return _expandShorthand(propertyName, normalizedValue, viewportSize);
     }
 
+
+    double? rootFontSize;
+    double? fontSize;
+    if (renderStyle != null) {
+      RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
+      rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
+      fontSize = renderStyle.fontSize;
+    }
+    
     switch (propertyName) {
       case WIDTH:
       case HEIGHT:
@@ -543,7 +553,7 @@ class CSSStyleDeclaration {
         if (!CSSBackground.isValidBackgroundRepeatValue(normalizedValue)) return;
         break;
       case TRANSFORM:
-        if (!CSSTransform.isValidTransformValue(normalizedValue, viewportSize, renderStyle)) {
+        if (!CSSTransform.isValidTransformValue(normalizedValue, viewportSize, rootFontSize, fontSize)) {
           return;
         }
         break;

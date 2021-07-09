@@ -4,6 +4,7 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
@@ -424,7 +425,16 @@ mixin CSSFlexboxMixin on RenderStyleBase {
   double? _getFlexBasis(CSSStyleDeclaration style) {
     String basisStr = style[FLEX_BASIS];
     RenderStyle renderStyle = this as RenderStyle;
-    double? flexBasis = CSSLength.toDisplayPortValue(basisStr, renderStyle: renderStyle);
+    Size viewportSize = renderStyle.viewportSize;
+    RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
+    double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
+    double fontSize = renderStyle.fontSize;
+    double? flexBasis = CSSLength.toDisplayPortValue(
+      basisStr,
+      viewportSize: viewportSize,
+      rootFontSize: rootFontSize,
+      fontSize: fontSize
+    );
     if (basisStr.isNotEmpty && basisStr != AUTO) {
       if (flexBasis! < 0) {
         flexBasis = null;

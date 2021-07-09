@@ -80,6 +80,8 @@ typedef void BeforeRendererAttach();
 typedef void AfterRendererAttach();
 /// Return the targetId of current element.
 typedef int GetTargetId();
+/// Get the font size of root element
+typedef double GetRootElementFontSize();
 
 /// Delegate methods passed to renderBoxModel for actions involved with element
 /// (eg. convert renderBoxModel to repaint boundary then attach to element).
@@ -90,6 +92,7 @@ class ElementDelegate {
   BeforeRendererAttach beforeRendererAttach;
   AfterRendererAttach afterRendererAttach;
   GetTargetId getTargetId;
+  GetRootElementFontSize getRootElementFontSize;
 
   ElementDelegate(
     this.markRendererNeedsLayout,
@@ -97,7 +100,8 @@ class ElementDelegate {
     this.detachRenderer,
     this.beforeRendererAttach,
     this.afterRendererAttach,
-    this.getTargetId
+    this.getTargetId,
+    this.getRootElementFontSize
   );
 }
 
@@ -188,6 +192,7 @@ class Element extends Node
       _beforeRendererAttach,
       _afterRendererAttach,
       _getTargetId,
+      _getRootElementFontSize
     );
   }
 
@@ -219,6 +224,15 @@ class Element extends Node
 
   int _getTargetId() {
     return targetId;
+  }
+
+  double _getRootElementFontSize() {
+    Element rootElement = elementManager.viewportElement;
+    if (rootElement == null) {
+      return CSSText.DEFAULT_FONT_SIZE;
+    }
+    RenderBoxModel rootBoxModel = rootElement.renderBoxModel!;
+    return rootBoxModel.renderStyle.fontSize;
   }
 
   @override
@@ -955,7 +969,14 @@ class Element extends Node
     }
 
     RenderStyle renderStyle = renderBoxModel!.renderStyle;
-    double? presentValue = CSSLength.toDisplayPortValue(present, renderStyle: renderStyle);
+    double rootFontSize = _getRootElementFontSize();
+    double fontSize = renderStyle.fontSize;
+    double? presentValue = CSSLength.toDisplayPortValue(
+      present,
+      viewportSize: viewportSize,
+      rootFontSize: rootFontSize,
+      fontSize: fontSize
+    );
     if (presentValue == null) return;
     renderStyle.updateOffset(property, presentValue);
   }
@@ -996,7 +1017,14 @@ class Element extends Node
     }
 
     RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
-    double presentValue = CSSLength.toDisplayPortValue(present, renderStyle: renderStyle) ?? 0;
+    double rootFontSize = _getRootElementFontSize();
+    double fontSize = renderStyle.fontSize;
+    double? presentValue = CSSLength.toDisplayPortValue(
+      present,
+      viewportSize: viewportSize,
+      rootFontSize: rootFontSize,
+      fontSize: fontSize
+    ) ?? 0;
     renderStyle.updatePadding(property, presentValue);
   }
 
@@ -1012,7 +1040,14 @@ class Element extends Node
     }
 
     RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
-    double? presentValue = CSSLength.toDisplayPortValue(present, renderStyle: renderStyle);
+    double rootFontSize = _getRootElementFontSize();
+    double fontSize = renderStyle.fontSize;
+    double? presentValue = CSSLength.toDisplayPortValue(
+      present,
+      viewportSize: viewportSize,
+      rootFontSize: rootFontSize,
+      fontSize: fontSize
+    );
     renderStyle.updateSizing(property, presentValue);
   }
 
@@ -1028,7 +1063,14 @@ class Element extends Node
     }
 
     RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
-    double presentValue = CSSLength.toDisplayPortValue(present, renderStyle: renderStyle) ?? 0;
+    double rootFontSize = _getRootElementFontSize();
+    double fontSize = renderStyle.fontSize;
+    double? presentValue = CSSLength.toDisplayPortValue(
+      present,
+      viewportSize: viewportSize,
+      rootFontSize: rootFontSize,
+      fontSize: fontSize
+    ) ?? 0;
     renderStyle.updateMargin(property, presentValue);
     // Margin change in flex layout may affect transformed display
     // https://www.w3.org/TR/css-display-3/#transformations
@@ -1113,7 +1155,9 @@ class Element extends Node
     }
 
     RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
-    Matrix4? matrix4 = CSSTransform.parseTransform(present, renderStyle.viewportSize, renderStyle);
+    double rootFontSize = _getRootElementFontSize();
+    double fontSize = renderStyle.fontSize;
+    Matrix4? matrix4 = CSSTransform.parseTransform(present, viewportSize, rootFontSize, fontSize);
     renderStyle.updateTransform(matrix4);
   }
 

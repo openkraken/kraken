@@ -493,6 +493,11 @@ mixin CSSBoxMixin on RenderStyleBase {
     if (style.contains(BOX_SHADOW)) {
       boxShadow = [];
       var shadows = CSSStyleProperty.getShadowValues(style[BOX_SHADOW]);
+      Size viewportSize = renderStyle.viewportSize;
+      RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
+      double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
+      double fontSize = renderStyle.fontSize;
+
       if (shadows != null) {
         for (var shadowDefinitions in shadows) {
           // Specifies the color of the shadow. If the color is absent, it defaults to currentColor.
@@ -501,10 +506,30 @@ mixin CSSBoxMixin on RenderStyleBase {
             colorDefinition = style.getCurrentColor();
           }
           Color? color = CSSColor.parseColor(colorDefinition);
-          double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[1], renderStyle: renderStyle) ?? 0;
-          double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[2], renderStyle: renderStyle) ?? 0;
-          double blurRadius = CSSLength.toDisplayPortValue(shadowDefinitions[3], renderStyle: renderStyle) ?? 0;
-          double spreadRadius = CSSLength.toDisplayPortValue(shadowDefinitions[4], renderStyle: renderStyle) ?? 0;
+          double offsetX = CSSLength.toDisplayPortValue(
+            shadowDefinitions[1],
+            viewportSize: viewportSize,
+            rootFontSize: rootFontSize,
+            fontSize: fontSize
+          ) ?? 0;
+          double offsetY = CSSLength.toDisplayPortValue(
+            shadowDefinitions[2],
+            viewportSize: viewportSize,
+            rootFontSize: rootFontSize,
+            fontSize: fontSize
+          ) ?? 0;
+          double blurRadius = CSSLength.toDisplayPortValue(
+            shadowDefinitions[3],
+            viewportSize: viewportSize,
+            rootFontSize: rootFontSize,
+            fontSize: fontSize
+          ) ?? 0;
+          double spreadRadius = CSSLength.toDisplayPortValue(
+            shadowDefinitions[4],
+            viewportSize: viewportSize,
+            rootFontSize: rootFontSize,
+            fontSize: fontSize
+          ) ?? 0;
           bool inset = shadowDefinitions[5] == INSET;
 
           if (color != null) {
@@ -557,6 +582,11 @@ class CSSBorderSide {
   static String BOTTOM = 'Bottom';
 
   static double? getBorderWidth(String input, RenderStyle renderStyle) {
+    Size viewportSize = renderStyle.viewportSize;
+    RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
+    double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
+    double fontSize = renderStyle.fontSize;
+
     // https://drafts.csswg.org/css2/#border-width-properties
     // The interpretation of the first three values depends on the user agent.
     // The following relationships must hold, however:
@@ -573,7 +603,12 @@ class CSSBorderSide {
         borderWidth = 5;
         break;
       default:
-        borderWidth = CSSLength.toDisplayPortValue(input, renderStyle: renderStyle);
+        borderWidth = CSSLength.toDisplayPortValue(
+          input,
+          viewportSize: viewportSize,
+          rootFontSize: rootFontSize,
+          fontSize: fontSize
+        );
     }
     return borderWidth;
   }
@@ -623,15 +658,35 @@ class CSSBorderRadius {
   static Radius none = Radius.zero;
 
   static Radius? getRadius(String radius, RenderStyle renderStyle) {
+    Size viewportSize = renderStyle.viewportSize;
+    RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
+    double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
+    double fontSize = renderStyle.fontSize;
+    
     if (radius.isNotEmpty) {
       // border-top-left-radius: horizontal vertical
       List<String> values = radius.split(_spaceRegExp);
       if (values.length == 1) {
-        double? circular = CSSLength.toDisplayPortValue(values[0], renderStyle: renderStyle);
+        double? circular = CSSLength.toDisplayPortValue(
+          values[0],
+          viewportSize: viewportSize,
+          rootFontSize: rootFontSize,
+          fontSize: fontSize
+        );
         if (circular != null) return Radius.circular(circular);
       } else if (values.length == 2) {
-        double? x = CSSLength.toDisplayPortValue(values[0], renderStyle: renderStyle);
-        double? y = CSSLength.toDisplayPortValue(values[1], renderStyle: renderStyle);
+        double? x = CSSLength.toDisplayPortValue(
+          values[0],
+          viewportSize: viewportSize,
+          rootFontSize: rootFontSize,
+          fontSize: fontSize
+        );
+        double? y = CSSLength.toDisplayPortValue(
+          values[1],
+          viewportSize: viewportSize,
+          rootFontSize: rootFontSize,
+          fontSize: fontSize
+        );
         if (x != null && y != null) return Radius.elliptical(x, y);
       }
     }

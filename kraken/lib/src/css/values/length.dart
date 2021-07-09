@@ -74,38 +74,49 @@ class CSSLength {
     return double.tryParse(percentage.split('%')[0])! / 100;
   }
 
-  static double? parseLength(String unitedValue, { Size? viewportSize, RenderStyle? renderStyle }) {
-    return toDisplayPortValue(unitedValue, viewportSize: viewportSize, renderStyle: renderStyle);
+  static double? parseLength(
+    String unitedValue,
+    {
+      Size? viewportSize,
+      double? rootFontSize,
+      double? fontSize
+    }
+  ) {
+    return toDisplayPortValue(
+      unitedValue,
+      viewportSize: viewportSize,
+      rootFontSize: rootFontSize,
+      fontSize: fontSize
+    );
   }
 
-  static double? toDisplayPortValue(String? unitedValue, { Size? viewportSize, RenderStyle? renderStyle }) {
+  static double? toDisplayPortValue(
+    String? unitedValue,
+    {
+      Size? viewportSize,
+      double? rootFontSize,
+      double? fontSize
+    }
+  ) {
     if (unitedValue == null || unitedValue.isEmpty) return null;
 
     unitedValue = unitedValue.trim();
     if (unitedValue == INITIAL) return null;
 
     double? displayPortValue;
-    Size _viewportSize = renderStyle != null ? renderStyle.viewportSize : viewportSize!;
-    double viewportWidth = _viewportSize.width;
-    double viewportHeight = _viewportSize.height;
+    double viewportWidth = viewportSize!.width;
+    double viewportHeight = viewportSize.height;
 
     // Only '0' is accepted with no unit.
     if (unitedValue == ZERO) {
       return 0;
     } else if (unitedValue.endsWith(REM)) {
       double? currentValue = double.tryParse(unitedValue.split(REM)[0]);
-      if (currentValue == null || renderStyle == null) return null;
-      RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
-      RenderBoxModel? rootBoxModel = renderBoxModel.getRootBoxModel();
-      if (rootBoxModel != null) {
-        double rootFontSize = rootBoxModel.renderStyle.fontSize;
-        return rootFontSize * currentValue;
-      }
-      return null;
+      if (currentValue == null || rootFontSize == null) return null;
+      return rootFontSize * currentValue;
     } else if (unitedValue.endsWith(EM)) {
       double? currentValue = double.tryParse(unitedValue.split(EM)[0]);
-      if (currentValue == null || renderStyle == null) return null;
-      double fontSize = renderStyle.fontSize;
+      if (currentValue == null || fontSize == null) return null;
       return fontSize * currentValue;
     } else if (unitedValue.endsWith(RPX)) {
       double? currentValue = double.tryParse(unitedValue.split(RPX)[0]);
