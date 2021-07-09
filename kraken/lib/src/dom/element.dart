@@ -230,9 +230,6 @@ class Element extends Node
 
   double _getRootElementFontSize() {
     Element rootElement = elementManager.viewportElement;
-    if (rootElement == null) {
-      return CSSText.DEFAULT_FONT_SIZE;
-    }
     RenderBoxModel rootBoxModel = rootElement.renderBoxModel!;
     return rootBoxModel.renderStyle.fontSize;
   }

@@ -8,7 +8,6 @@
 import 'dart:ui';
 
 import 'package:kraken/css.dart';
-import 'package:kraken/rendering.dart';
 
 // https://drafts.csswg.org/css-values-3/#absolute-lengths
 const _1in = 96; // 1in = 2.54cm = 96px
