@@ -112,6 +112,8 @@ private:
   void *owner;
 
   void traverseHTML(GumboNode * node, ElementInstance* element);
+
+  void parseProperty(ElementInstance* element, GumboElement * gumboElement);
 };
 
 class KRAKEN_EXPORT JSFunctionHolder {

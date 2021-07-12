@@ -20,6 +20,42 @@ HTMLParser::HTMLParser(std::unique_ptr<JSContext> &context, const JSExceptionHan
 
 }
 
+void HTMLParser::parseProperty(ElementInstance* element, GumboElement * gumboElement) {
+  GumboVector * attributes = &gumboElement->attributes;
+  for (int j = 0; j < attributes->length; ++j) {
+    GumboAttribute* attribute = (GumboAttribute*) attributes->data[j];
+
+    if (strcmp(attribute->name, "style") == 0) {
+      std::vector<std::string> arrStyles;
+      std::string::size_type prev_pos = 0, pos = 0;
+      std::string strStyles = attribute->value;
+
+      while ((pos = strStyles.find(";", pos)) != std::string::npos) {
+        arrStyles.push_back(strStyles.substr(prev_pos, pos - prev_pos));
+        prev_pos = ++pos;
+      }
+      arrStyles.push_back(strStyles.substr(prev_pos, pos-prev_pos));
+
+      JSStringRef propertyName = JSStringCreateWithUTF8CString("style");
+      JSValueRef styleRef = JSObjectGetProperty(m_context->context(), element->object, propertyName, nullptr);
+      JSObjectRef style = JSValueToObject(m_context->context(), styleRef, nullptr);
+      auto styleDeclarationInstance = static_cast<StyleDeclarationInstance *>(JSObjectGetPrivate(style));
+
+      for (auto s : arrStyles) {
+        std::string::size_type position = s.find(":");
+        if (position != s.npos) {
+          std::string styleKey = s.substr(0, position);
+          styleDeclarationInstance->internalSetProperty(styleKey, JSValueMakeString(m_context->context() ,JSStringCreateWithUTF8CString(s.substr(position + 1, s.length()).c_str())), nullptr);
+        }
+      }
+    } else {
+      std::string strName = attribute->name;
+      JSValueRef valueRef = JSValueMakeString(m_context->context(), JSStringCreateWithUTF8CString(attribute->value));
+      element->setProperty(strName, valueRef, nullptr);
+    }
+  }
+}
+
 void HTMLParser::traverseHTML(GumboNode * node, ElementInstance* element) {
   const GumboVector* children = &node->v.element.children;
   for (int i = 0; i < children->length; ++i) {
@@ -28,6 +64,7 @@ void HTMLParser::traverseHTML(GumboNode * node, ElementInstance* element) {
     if (child->type == GUMBO_NODE_ELEMENT) {
       auto newElement = JSElement::buildElementInstance(m_context.get(), gumbo_normalized_tagname(child->v.element.tag));
       element->internalAppendChild(newElement);
+      parseProperty(newElement, &child->v.element);
 
       // eval javascript when <script>//code...</script>.
       if (child->v.element.tag == GUMBO_TAG_SCRIPT && (GumboNode*) child->v.element.children.data[0] != nullptr) {
@@ -35,42 +72,9 @@ void HTMLParser::traverseHTML(GumboNode * node, ElementInstance* element) {
         JSEvaluateScript(m_context->context(), jsCode, nullptr, nullptr, 0, nullptr);
       }
 
-      GumboVector* attributes = &child->v.element.attributes;
-      for (int j = 0; j < attributes->length; ++j) {
-        GumboAttribute* attribute = (GumboAttribute*) attributes->data[j];
-
-        if (strcmp(attribute->name, "style") == 0) {
-          std::vector<std::string> arrStyles;
-          std::string::size_type prev_pos = 0, pos = 0;
-          std::string strStyles = attribute->value;
-
-          while ((pos = strStyles.find(";", pos)) != std::string::npos) {
-            arrStyles.push_back(strStyles.substr(prev_pos, pos - prev_pos));
-            prev_pos = ++pos;
-          }
-          arrStyles.push_back(strStyles.substr(prev_pos, pos-prev_pos));
-
-          JSStringRef propertyName = JSStringCreateWithUTF8CString("style");
-          JSValueRef styleRef = JSObjectGetProperty(m_context->context(), newElement->object, propertyName, nullptr);
-          JSObjectRef style = JSValueToObject(m_context->context(), styleRef, nullptr);
-          auto styleDeclarationInstance = static_cast<StyleDeclarationInstance *>(JSObjectGetPrivate(style));
-
-          for (auto s : arrStyles) {
-            std::string::size_type position = s.find(":");
-            if (position != s.npos) {
-              std::string styleKey = s.substr(0, position);
-              styleDeclarationInstance->internalSetProperty(styleKey, JSValueMakeString(m_context->context() ,JSStringCreateWithUTF8CString(s.substr(position + 1, s.length()).c_str())), nullptr);
-            }
-          }
-        } else {
-          std::string strName = attribute->name;
-          JSValueRef valueRef = JSValueMakeString(m_context->context(), JSStringCreateWithUTF8CString(attribute->value));
-          newElement->setProperty(strName, valueRef, nullptr);
-        }
+      if (child->v.element.tag != GUMBO_TAG_SCRIPT) {
+        traverseHTML(child, newElement);
       }
-
-      traverseHTML(child, newElement);
-
     } else if (child->type == GUMBO_NODE_TEXT) {
       auto newTextNodeInstance = new JSTextNode::TextNodeInstance(JSTextNode::instance(m_context.get()),
                                                                   JSStringCreateWithUTF8CString(child->v.text.text));
