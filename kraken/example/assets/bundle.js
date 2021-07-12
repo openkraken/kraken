@@ -6,5 +6,6 @@ p.style.textAlign = 'center';
 p.appendChild(text1);
 p.appendChild(br);
 p.appendChild(text2);
+p.dataTest = 123;
 
 document.body.appendChild(p);

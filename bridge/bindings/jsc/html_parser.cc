@@ -40,6 +40,7 @@ void HTMLParser::parseProperty(ElementInstance* element, GumboElement * gumboEle
       JSValueRef styleRef = JSObjectGetProperty(m_context->context(), element->object, propertyName, nullptr);
       JSObjectRef style = JSValueToObject(m_context->context(), styleRef, nullptr);
       auto styleDeclarationInstance = static_cast<StyleDeclarationInstance *>(JSObjectGetPrivate(style));
+      JSStringRelease(propertyName);
 
       for (auto s : arrStyles) {
         std::string::size_type position = s.find(":");
@@ -57,7 +58,14 @@ void HTMLParser::parseProperty(ElementInstance* element, GumboElement * gumboEle
       std::string strValue = attribute->value;
       std::transform(strValue.begin(), strValue.end(), strValue.begin(), ::tolower);
       JSValueRef valueRef = JSValueMakeString(m_context->context(), JSStringCreateWithUTF8CString(strValue.c_str()));
-      element->setProperty(strName, valueRef, nullptr);
+
+      JSStringRef attributesName = JSStringCreateWithUTF8CString("attributes");
+      JSValueRef attributesRef = JSObjectGetProperty(m_context->context(), element->object, attributesName, nullptr);
+      JSObjectRef attributes = JSValueToObject(m_context->context(), attributesRef, nullptr);
+      auto attributesInstance = static_cast<JSElementAttributes *>(JSObjectGetPrivate(attributes));
+      attributesInstance->setProperty(strName, valueRef, nullptr);
+
+      JSStringRelease(attributesName);
     }
   }
 }
