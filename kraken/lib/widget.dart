@@ -67,9 +67,11 @@ class _WidgetCustomElement extends dom.Element {
   }
 
   void _handleBuildScheduled() {
-    // Register drawFrame callback
+    // Register drawFrame callback same with [WidgetsBinding.drawFrame]
     SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
       _buildOwner.buildScope(_renderViewElement);
+      // ignore: invalid_use_of_protected_member
+      RendererBinding.instance!.drawFrame();
       _buildOwner.finalizeTree();
     });
     SchedulerBinding.instance!.ensureVisualUpdate();
