@@ -44,15 +44,14 @@ void HTMLParser::traverseHTML(GumboNode * node, ElementInstance* element) {
           std::string::size_type prev_pos = 0, pos = 0;
           std::string strStyles = attribute->value;
 
-          while((pos = strStyles.find(";", pos)) != std::string::npos) {
+          while ((pos = strStyles.find(";", pos)) != std::string::npos) {
             arrStyles.push_back(strStyles.substr(prev_pos, pos - prev_pos));
             prev_pos = ++pos;
           }
           arrStyles.push_back(strStyles.substr(prev_pos, pos-prev_pos));
 
           JSStringRef propertyName = JSStringCreateWithUTF8CString("style");
-          JSValueRef exc = nullptr; // exception
-          JSValueRef styleRef = JSObjectGetProperty(m_context->context(), newElement->object, propertyName, &exc);
+          JSValueRef styleRef = JSObjectGetProperty(m_context->context(), newElement->object, propertyName, nullptr);
           JSObjectRef style = JSValueToObject(m_context->context(), styleRef, nullptr);
           auto styleDeclarationInstance = static_cast<StyleDeclarationInstance *>(JSObjectGetPrivate(style));
 
@@ -63,7 +62,6 @@ void HTMLParser::traverseHTML(GumboNode * node, ElementInstance* element) {
               styleDeclarationInstance->internalSetProperty(styleKey, JSValueMakeString(m_context->context() ,JSStringCreateWithUTF8CString(s.substr(position + 1, s.length()).c_str())), nullptr);
             }
           }
-
         }
       }
 
@@ -78,12 +76,21 @@ void HTMLParser::traverseHTML(GumboNode * node, ElementInstance* element) {
 }
 
 bool HTMLParser::parseHTML(const uint16_t *code, size_t codeLength) {
+  // gumbo-parser parse HTML.
+  JSStringRef sourceRef = JSStringCreateWithCharacters(code, codeLength);
+  std::string html = JSStringToStdString(sourceRef);
+  int html_length = html.length();
+  GumboOutput* htmlTree = gumbo_parse_with_options(
+    &kGumboDefaultOptions, html.c_str(), html_length);
+
+  const GumboVector *root_children = &htmlTree->root->v.element.children;
+
+  // find body.
   ElementInstance* body;
   auto document = DocumentInstance::instance(m_context.get());
   for (int i = 0; i < document->documentElement->childNodes.size(); ++i) {
     NodeInstance* node = document->documentElement->childNodes[i];
     ElementInstance* element = reinterpret_cast<ElementInstance *>(node);
-
 
     if (element->tagName() == "BODY") {
       body = element;
@@ -92,16 +99,6 @@ bool HTMLParser::parseHTML(const uint16_t *code, size_t codeLength) {
   }
 
   if (body != nullptr) {
-    JSStringRef sourceRef = JSStringCreateWithCharacters(code, codeLength);
-
-    std::string html = JSStringToStdString(sourceRef);
-
-    int html_length = html.length();
-    GumboOutput* htmlTree = gumbo_parse_with_options(
-      &kGumboDefaultOptions, html.c_str(), html_length);
-
-    const GumboVector *root_children = &htmlTree->root->v.element.children;
-
     for (int i = 0; i < root_children->length; ++i) {
       GumboNode* child =(GumboNode*) root_children->data[i];
       if (child->v.element.tag == GUMBO_TAG_BODY) {
