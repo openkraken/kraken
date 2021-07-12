@@ -29,6 +29,12 @@ void HTMLParser::traverseHTML(GumboNode * node, ElementInstance* element) {
       auto newElement = JSElement::buildElementInstance(m_context.get(), gumbo_normalized_tagname(child->v.element.tag));
       element->internalAppendChild(newElement);
 
+      // eval javascript when <script>//code...</script>.
+      if (child->v.element.tag == GUMBO_TAG_SCRIPT && (GumboNode*) child->v.element.children.data[0] != nullptr) {
+        JSStringRef jsCode = JSStringCreateWithUTF8CString(((GumboNode*) child->v.element.children.data[0])->v.text.text);
+        JSEvaluateScript(m_context->context(), jsCode, nullptr, nullptr, 0, nullptr);
+      }
+
       GumboVector* attributes = &child->v.element.attributes;
       for (int j = 0; j < attributes->length; ++j) {
         GumboAttribute* attribute = (GumboAttribute*) attributes->data[j];
