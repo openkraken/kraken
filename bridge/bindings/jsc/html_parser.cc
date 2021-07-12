@@ -53,7 +53,10 @@ void HTMLParser::parseProperty(ElementInstance* element, GumboElement * gumboEle
       }
     } else {
       std::string strName = attribute->name;
-      JSValueRef valueRef = JSValueMakeString(m_context->context(), JSStringCreateWithUTF8CString(attribute->value));
+      std::transform(strName.begin(), strName.end(), strName.begin(), ::tolower);
+      std::string strValue = attribute->value;
+      std::transform(strValue.begin(), strValue.end(), strValue.begin(), ::tolower);
+      JSValueRef valueRef = JSValueMakeString(m_context->context(), JSStringCreateWithUTF8CString(strValue.c_str()));
       element->setProperty(strName, valueRef, nullptr);
     }
   }
