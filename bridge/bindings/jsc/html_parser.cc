@@ -45,7 +45,10 @@ void HTMLParser::parseProperty(ElementInstance* element, GumboElement * gumboEle
         std::string::size_type position = s.find(":");
         if (position != s.npos) {
           std::string styleKey = s.substr(0, position);
-          styleDeclarationInstance->internalSetProperty(styleKey, JSValueMakeString(m_context->context() ,JSStringCreateWithUTF8CString(s.substr(position + 1, s.length()).c_str())), nullptr);
+          std::transform(styleKey.begin(), styleKey.end(), styleKey.begin(), ::tolower);
+          std::string styleValue = s.substr(position + 1, s.length());
+          std::transform(styleValue.begin(), styleValue.end(), styleValue.begin(), ::tolower);
+          styleDeclarationInstance->internalSetProperty(styleKey, JSValueMakeString(m_context->context() ,JSStringCreateWithUTF8CString(styleValue.c_str())), nullptr);
         }
       }
     } else {
@@ -72,6 +75,7 @@ void HTMLParser::traverseHTML(GumboNode * node, ElementInstance* element) {
         JSEvaluateScript(m_context->context(), jsCode, nullptr, nullptr, 0, nullptr);
       }
 
+      // Avoid creating a large number of textNode in script Element.
       if (child->v.element.tag != GUMBO_TAG_SCRIPT) {
         traverseHTML(child, newElement);
       }
