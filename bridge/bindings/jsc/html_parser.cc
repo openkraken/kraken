@@ -64,6 +64,7 @@ void HTMLParser::parseProperty(ElementInstance* element, GumboElement * gumboEle
       JSObjectRef attributes = JSValueToObject(m_context->context(), attributesRef, nullptr);
       auto attributesInstance = static_cast<JSElementAttributes *>(JSObjectGetPrivate(attributes));
       attributesInstance->setProperty(strName, valueRef, nullptr);
+      element->setProperty(strName, valueRef, nullptr);
 
       JSStringRelease(attributesName);
     }
