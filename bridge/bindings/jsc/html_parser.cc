@@ -62,6 +62,10 @@ void HTMLParser::traverseHTML(GumboNode * node, ElementInstance* element) {
               styleDeclarationInstance->internalSetProperty(styleKey, JSValueMakeString(m_context->context() ,JSStringCreateWithUTF8CString(s.substr(position + 1, s.length()).c_str())), nullptr);
             }
           }
+        } else {
+          std::string strName = attribute->name;
+          JSValueRef valueRef = JSValueMakeString(m_context->context(), JSStringCreateWithUTF8CString(attribute->value));
+          newElement->setProperty(strName, valueRef, nullptr);
         }
       }
 
