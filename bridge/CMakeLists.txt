@@ -49,37 +49,6 @@ list(APPEND BRIDGE_SOURCE
     foundation/bridge_callback.h
     dart_methods.cc
     polyfill/dist/polyfill.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/attribute.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/attribute.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/char_ref.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/char_ref.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/error.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/error.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/gumbo.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/insertion_mode.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/parser.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/parser.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_buffer.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_buffer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_piece.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_piece.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tag_enum.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tag_gperf.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tag_sizes.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tag_strings.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tag.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_piece.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_piece.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/token_type.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tokenizer_states.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tokenizer.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tokenizer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/utf8.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/utf8.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/util.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/util.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/vector.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/vector.h
 )
 
 list(APPEND GUMBO_PAESER
@@ -266,6 +235,9 @@ list(APPEND PUBLIC_HEADER
 add_library(kraken SHARED ${BRIDGE_SOURCE})
 add_library(kraken_static STATIC ${BRIDGE_SOURCE})
 
+add_library(gunbo_parse SHARED ${GUMBO_PAESER})
+add_library(gunbo_parse_static STATIC ${GUMBO_PAESER})
+
 if (${IS_ANDROID})
   find_library(log-lib log)
   add_definitions(-DIS_ANDROID=1)
@@ -276,7 +248,7 @@ endif ()
 target_include_directories(kraken PRIVATE
   ${BRIDGE_INCLUDE}
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
-target_link_libraries(kraken PRIVATE ${BRIDGE_LINK_LIBS})
+target_link_libraries(kraken PRIVATE ${BRIDGE_LINK_LIBS} gunbo_parse)
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "release" OR ${CMAKE_BUILD_TYPE} STREQUAL "relwithdebinfo")
   ## http://ptspts.blogspot.com/2013/12/how-to-make-smaller-c-and-c-binaries.html
@@ -291,7 +263,7 @@ endif()
 target_include_directories(kraken_static PRIVATE
         ${BRIDGE_INCLUDE}
         ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
-target_link_libraries(kraken_static ${BRIDGE_LINK_LIBS})
+target_link_libraries(kraken_static ${BRIDGE_LINK_LIBS} gunbo_parse_static)
 
 execute_process(
   COMMAND grep version: ./pubspec.yaml
