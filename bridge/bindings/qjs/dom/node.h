@@ -6,7 +6,7 @@
 #ifndef KRAKENBRIDGE_NODE_H
 #define KRAKENBRIDGE_NODE_H
 
-#include "bindings/qjs/dom/event_target.h"
+#include "event_target.h"
 
 namespace kraken::binding::qjs {
 

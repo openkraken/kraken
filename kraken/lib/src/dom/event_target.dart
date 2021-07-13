@@ -4,7 +4,6 @@
  */
 
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:ffi/ffi.dart';
@@ -19,45 +18,13 @@ void callNativeMethods(Pointer<NativeEventTarget> nativeEventTarget, Pointer<Nat
   String method = nativeStringToString(nativeMethod);
   List<dynamic> values = List.generate(argc, (i) {
     Pointer<NativeValue> nativeValue = argv.elementAt(i);
-    JSValueType valueType = JSValueType.values[nativeValue.ref.tag];
-    switch(valueType) {
-      case JSValueType.TAG_STRING:
-        return nativeStringToString(Pointer.fromAddress(nativeValue.ref.u));
-      case JSValueType.TAG_INT:
-        return nativeValue.ref.u;
-      case JSValueType.TAG_BOOL:
-        return nativeValue.ref.u == 1;
-      case JSValueType.TAG_NULL:
-        return null;
-      case JSValueType.TAG_FLOAT64:
-        return nativeValue.ref.float64;
-      case JSValueType.TAG_JSON:
-        return jsonDecode(nativeStringToString(Pointer.fromAddress(nativeValue.ref.u)));
-    }
+    JSValueType type = JSValueType.values[nativeValue.ref.tag];
+    return fromNativeValue(type, nativeValue);
   });
 
   EventTarget eventTarget = EventTarget.getEventTargetOfNativePtr(nativeEventTarget);
   dynamic result = eventTarget.handleJSCall(method, values);
-
-  if (result == null) {
-    returnedValue.ref.tag = JSValueType.TAG_NULL.index;
-  } else if (result is int) {
-    returnedValue.ref.tag = JSValueType.TAG_INT.index;
-    returnedValue.ref.u = result;
-  } else if (result is bool) {
-    returnedValue.ref.tag = JSValueType.TAG_BOOL.index;
-    returnedValue.ref.u = result ? 1 : 0;
-  } else if (result is double) {
-    returnedValue.ref.tag = JSValueType.TAG_FLOAT64.index;
-    returnedValue.ref.float64 = result;
-  } else if (result is String) {
-    returnedValue.ref.tag = JSValueType.TAG_STRING.index;
-    returnedValue.ref.u = stringToNativeString(result).address;
-  } else if (result is Object) {
-    String str = jsonEncode(result);
-    returnedValue.ref.tag = JSValueType.TAG_JSON.index;
-    returnedValue.ref.u = str.toNativeUtf8().address;
-  }
+  toNativeValue(returnedValue, result);
 }
 
 Pointer<NativeFunction<NativeCallNativeMethods>> _nativeCallNativeMethods = Pointer.fromFunction(callNativeMethods);

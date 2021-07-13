@@ -6,8 +6,17 @@
 #include "native_value.h"
 #include "bindings/qjs/qjs_patch.h"
 #include "kraken_bridge.h"
+#include "dom/element.h"
 
 namespace kraken::binding::qjs {
+
+NativeValue Native_NewNull() {
+  return (NativeValue){
+    0,
+    .u = {.int64 = 0},
+    NativeTag::TAG_NULL
+  };
+}
 
 NativeValue Native_NewString(NativeString *string) {
   return (NativeValue){
@@ -51,6 +60,27 @@ NativeValue Native_NewJSON(JSContext *context, JSValue &value) {
   };
 }
 
+NativeValue jsValueToNativeValue(QjsContext *ctx, JSValue &value) {
+  if (JS_IsNull(value) || JS_IsUndefined(value)) {
+    return Native_NewNull();
+  } else if (JS_IsBool(value)) {
+    return Native_NewBool(JS_ToBool(ctx, value));
+  } else if (JS_IsNumber(value)) {
+    double v;
+    JS_ToFloat64(ctx, &v, value);
+    return Native_NewFloat64(v);
+  } else if (JS_IsString(value)) {
+    NativeString *string = jsValueToNativeString(ctx, value);
+    return Native_NewString(string);
+  } else if (JS_IsObject(value)) {
+    JSValue stringifyedString = JS_JSONStringify(ctx, value, JS_UNDEFINED, JS_UNDEFINED);
+    NativeString *string = jsValueToNativeString(ctx, stringifyedString);
+    return Native_NewString(string);
+  }
+
+  return Native_NewNull();
+}
+
 JSValue nativeValueToJSValue(JSContext *context, NativeValue &value) {
   switch (value.tag) {
   case NativeTag::TAG_STRING: {
@@ -78,8 +108,16 @@ JSValue nativeValueToJSValue(JSContext *context, NativeValue &value) {
     delete str;
     return returnedValue;
   }
+  case NativeTag::TAG_POINTER: {
+    auto *ptr = value.u.ptr;
+    int ptrType = (int)value.float64;
+    if (ptrType == JSPointerType::NativeBoundingClientRect) {
+      return (new BoundingClientRect(context, static_cast<NativeBoundingClientRect *>(ptr)))->jsObject;
+    }
+  }
   }
   return JS_NULL;
 }
+
 
 } // namespace kraken::binding::qjs

@@ -14,7 +14,12 @@ enum NativeTag {
   TAG_BOOL        = 2,
   TAG_NULL        = 3,
   TAG_FLOAT64     = 4,
-  TAG_JSON = 5,
+  TAG_JSON        = 5,
+  TAG_POINTER     = 6
+};
+
+enum JSPointerType {
+  NativeBoundingClientRect = 0
 };
 
 namespace kraken::binding::qjs {
@@ -29,11 +34,13 @@ struct NativeValue {
   int64_t tag;
 };
 
+NativeValue Native_NewNull();
 NativeValue Native_NewString(NativeString *string);
 NativeValue Native_NewFloat64(double value);
 NativeValue Native_NewBool(bool value);
 NativeValue Native_NewInt32(int32_t value);
 NativeValue Native_NewJSON(JSContext *context, JSValue &value);
+NativeValue jsValueToNativeValue(QjsContext *ctx, JSValue &value);
 JSValue nativeValueToJSValue(JSContext *context, NativeValue &value);
 
 }

@@ -15,6 +15,8 @@ namespace kraken::binding::qjs {
 
 class EventTargetInstance;
 class NativeEventTarget;
+class CSSStyleDeclaration;
+class StyleDeclarationInstance;
 
 class EventTarget : public HostClass {
 public:
@@ -68,7 +70,7 @@ public:
 
   bool dispatchEvent(EventInstance *event);
 
-  JSValue callNativeMethods(NativeString *method, int32_t argc,
+  JSValue callNativeMethods(const char* method, int32_t argc,
                                 NativeValue *argv);
 
 protected:
@@ -79,6 +81,7 @@ private:
   std::unordered_map<std::string, std::forward_list<JSValue>> _eventHandlers;
   std::unordered_map<std::string, JSValue> _propertyEventHandler;
   friend EventTarget;
+  friend StyleDeclarationInstance;
 };
 
 void bindEventTarget(std::unique_ptr<JSContext> &context);

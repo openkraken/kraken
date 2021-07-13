@@ -74,32 +74,32 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   EventClient? eventClient;
 
   ElementManager({ required this.contextId, required this.viewport, required this.controller, this.showPerformanceOverlayOverride = false, this.eventClient }) {
-    // if (kProfileMode) {
-    //   PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_PROPERTY_INIT);
-    //   PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_INIT_START);
-    // }
-    //
-    // HTMLElement documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId]!, this);
-    // setEventTarget(documentElement);
-    //
-    // viewportElement = documentElement;
-    // viewport.child = viewportElement.renderBoxModel;
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_PROPERTY_INIT);
+      PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_INIT_START);
+    }
+
+    HTMLElement documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId]!, this);
+    setEventTarget(documentElement);
+
+    viewportElement = documentElement;
+    viewport.child = viewportElement.renderBoxModel;
     _viewportRenderObject = viewport;
-    //
-    // if (kProfileMode) {
-    //   PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_INIT_END);
-    // }
-    //
-    // _setupObserver();
-    //
-    Window window = Window(WINDOW_ID, windowNativePtrMap[contextId]!, this);
+
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_INIT_END);
+    }
+
+    _setupObserver();
+
+    Window window = Window(WINDOW_ID, windowNativePtrMap[contextId]!, this, viewportElement);
     setEventTarget(window);
-    //
-    // document = Document(DOCUMENT_ID, documentNativePtrMap[contextId]!, this, documentElement);
-    // document.appendChild(documentElement);
-    // setEventTarget(document);
-    //
-    // element_registry.defineBuiltInElements();
+
+    document = Document(DOCUMENT_ID, documentNativePtrMap[contextId]!, this, documentElement);
+    document.appendChild(documentElement);
+    setEventTarget(document);
+
+    element_registry.defineBuiltInElements();
   }
 
   void _setupObserver() {

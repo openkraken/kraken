@@ -8,12 +8,24 @@
 
 #include "node.h"
 #include "style_declaration.h"
+#include "bindings/qjs/host_object.h"
 
 namespace kraken::binding::qjs {
 
 class ElementInstance;
 class Element;
 using ElementCreator = ElementInstance *(*)(Element *element, JSValue &tagName);
+
+struct NativeBoundingClientRect {
+  double x;
+  double y;
+  double width;
+  double height;
+  double top;
+  double right;
+  double bottom;
+  double left;
+};
 
 class Element : public Node {
 public:
@@ -74,6 +86,17 @@ private:
   JSAtom m_tagName;
   friend Element;
   StyleDeclarationInstance *m_style{new StyleDeclarationInstance(CSSStyleDeclaration::instance(m_context), this)};
+};
+
+class BoundingClientRect : public HostObject<BoundingClientRect> {
+public:
+  BoundingClientRect() = delete;
+  explicit BoundingClientRect(JSContext *context, NativeBoundingClientRect *nativeBoundingClientRect): HostObject<BoundingClientRect>(context, "BoundingClientRect") {
+
+  };
+
+private:
+  NativeBoundingClientRect *m_nativeBoundingClientRect{nullptr};
 };
 
 } // namespace kraken::binding::qjs

@@ -240,14 +240,22 @@ EventTargetInstance::EventTargetInstance(EventTarget *eventTarget) : Instance(ev
   globalEventTargetId++;
 }
 
-JSValue EventTargetInstance::callNativeMethods(NativeString *method, int32_t argc,
+JSValue EventTargetInstance::callNativeMethods(const char* method, int32_t argc,
                                                    NativeValue *argv) {
   if (nativeEventTarget.callNativeMethods == nullptr) {
     return JS_ThrowTypeError(m_ctx, "Failed to call native dart methods: callNativeMethods not initialized.");
   }
 
+  std::u16string methodString;
+  fromUTF8(method, methodString);
+
+  NativeString m{
+      reinterpret_cast<const uint16_t *>(methodString.c_str()),
+      static_cast<int32_t>(methodString.size())
+  };
+
   NativeValue nativeValue{};
-  nativeEventTarget.callNativeMethods(&nativeEventTarget, &nativeValue, method, argc, argv);
+  nativeEventTarget.callNativeMethods(&nativeEventTarget, &nativeValue, &m, argc, argv);
   JSValue returnValue = nativeValueToJSValue(m_context, nativeValue);
   return returnValue;
 }
