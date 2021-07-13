@@ -6,6 +6,7 @@
 #include "document.h"
 #include "element.h"
 #include "event.h"
+#include "dart_methods.h"
 
 namespace kraken::binding::qjs {
 
@@ -16,8 +17,11 @@ void bindDocument(std::unique_ptr<JSContext> &context) {
   context->defineGlobalProperty("document", documentInstance);
 }
 
+OBJECT_INSTANCE_IMPL(Document);
+
 JSValue Document::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
-  return EventTarget::constructor(ctx, func_obj, this_val, argc, argv);
+  auto *instance = new DocumentInstance(this);
+  return instance->instanceObject;
 }
 
 JSValue Document::createEvent(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
@@ -100,16 +104,27 @@ PROP_SETTER(Document, documentElement)(QjsContext *ctx, JSValue this_val, int ar
 }
 
 DocumentInstance::DocumentInstance(Document *document): NodeInstance(document, NodeType::DOCUMENT_NODE, this) {
-//  JSStringRef tagName = JSStringCreateWithUTF8CString("HTML");
-//  documentElement = new ElementInstance(JSElement::instance(document->context), tagName, HTML_TARGET_ID);
-//  documentElement->m_document = this;
-//  documentElement->parentNode = this;
-//  JSStringHolder documentElementStringHolder = JSStringHolder(context, "documentElement");
-//  JSObjectSetProperty(ctx, object, documentElementStringHolder.getString(),
-//                      documentElement->object, kJSPropertyAttributeReadOnly, nullptr);
-//
-//  instanceMap[document->context] = this;
-//  getDartMethod()->initDocument(contextId, nativeDocument);
+  m_instanceMap[Document::instance(m_context)] = this;
+
+  JSAtom htmlTagName = JS_NewAtom(m_ctx, "HTML");
+  JSValue htmlTagValue = JS_AtomToValue(m_ctx, htmlTagName);
+  JSValue htmlArgs[] = {
+    htmlTagValue
+  };
+  JSValue documentElementValue = JS_CallConstructor(m_ctx, Element::instance(m_context)->classObject, 1, htmlArgs);
+  auto *documentElement = static_cast<ElementInstance *>(JS_GetOpaque(documentElementValue, kHostClassInstanceClassId));
+  documentElement->parentNode = this;
+
+  JSAtom documentElementTag = JS_NewAtom(m_ctx, "documentElement");
+  JS_SetProperty(m_ctx, instanceObject, documentElementTag, documentElementValue);
+
+  JS_FreeAtom(m_ctx, documentElementTag);
+  JS_FreeAtom(m_ctx, htmlTagName);
+
+  getDartMethod()->initHTML(m_context->getContextId(), &documentElement->nativeEventTarget);
+  getDartMethod()->initDocument(m_context->getContextId(), &nativeEventTarget);
 }
+
+std::unordered_map<Document *, DocumentInstance *> DocumentInstance::m_instanceMap {};
 
 }
