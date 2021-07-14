@@ -80,6 +80,10 @@ typedef RenderObject BeforeRendererAttach();
 typedef void AfterRendererAttach();
 /// Return the targetId of current element.
 typedef int GetTargetId();
+/// Focus the input element.
+typedef void FocusInput();
+/// Blur the input element.
+typedef void BlurInput();
 
 /// Delegate methods passed to renderBoxModel for actions involved with element
 /// (eg. convert renderBoxModel to repaint boundary then attach to element).
@@ -90,6 +94,8 @@ class ElementDelegate {
   BeforeRendererAttach beforeRendererAttach;
   AfterRendererAttach afterRendererAttach;
   GetTargetId getTargetId;
+  FocusInput focusInput;
+  BlurInput blurInput;
 
   ElementDelegate(
     this.markRendererNeedsLayout,
@@ -97,7 +103,9 @@ class ElementDelegate {
     this.detachRenderer,
     this.beforeRendererAttach,
     this.afterRendererAttach,
-    this.getTargetId
+    this.getTargetId,
+    this.focusInput,
+    this.blurInput
   );
 }
 
@@ -188,6 +196,8 @@ class Element extends Node
       _beforeRendererAttach,
       _afterRendererAttach,
       _getTargetId,
+      _focusInput,
+      _blurInput,
     );
   }
 
@@ -220,6 +230,16 @@ class Element extends Node
 
   int _getTargetId() {
     return targetId;
+  }
+  
+  void _focusInput() {
+    InputElement input = this as InputElement;
+    input.focus();
+  }
+  
+  void _blurInput() {
+    InputElement input = this as InputElement;
+    input.blur();
   }
 
   @override

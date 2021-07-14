@@ -8,12 +8,16 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:kraken/kraken.dart';
+import 'package:kraken/rendering.dart';
+import 'package:kraken/dom.dart' as dom;
 import 'package:kraken/module.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/css.dart';
 
-class Kraken extends StatelessWidget {
+class Kraken extends StatefulWidget {
   // The background color for viewport, default to transparent.
   final Color? background;
 
@@ -131,19 +135,164 @@ class Kraken extends StatelessWidget {
   }
 
   @override
+  _KrakenState createState() => _KrakenState();
+
+}
+class _KrakenState extends State<Kraken> {
+  Map<LogicalKeySet, Intent>? _shortcutMap;
+  Map<Type, Action<Intent>>? _actionMap;
+  _KrakenRenderObjectWidget? _krakenRenderObjectWidget;
+  late FocusNode _krakenFocus;
+
+  @override
+  void initState() {
+    _shortcutMap = <LogicalKeySet, Intent>{
+      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+      LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+      LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+      LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+    };
+    _actionMap = <Type, Action<Intent>>{
+      NextFocusIntent: CallbackAction<NextFocusIntent>(onInvoke: _handleNextFocus),
+      PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(onInvoke: _handlePreviousFocus),
+      DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(onInvoke: _handleDirectionFocus),
+    };
+    _krakenFocus = FocusNode(debugLabel: 'Kraken');
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return _KrakenRenderObjectWidget(this);
+    return FocusableActionDetector(
+      actions: _actionMap,
+      shortcuts: _shortcutMap,
+      focusNode: _krakenFocus,
+      onFocusChange: _handleFocusChange,
+      child: _krakenRenderObjectWidget = _KrakenRenderObjectWidget(context.widget as Kraken)
+    );
+  }
+
+  void _handleFocusChange(bool focused) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.length != 0) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      if (focusedEditable != null) {
+        if (focused) {
+          _focusEditable(focusedEditable);
+        } else {
+          _blurEditable(focusedEditable);
+        }
+      }
+    }
+  }
+
+  /// Move focus to the next element after the day grid.
+  void _handleNextFocus(NextFocusIntent intent) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.length != 0) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      // None editable is focused, focus the first editable.
+      if (focusedEditable == null) {
+        _krakenFocus.requestFocus();
+        _focusEditable(editables[0]);
+        
+      // Some editable is focused, focus the next editable, if it is the last editable,
+      // then focus the next widget.
+      } else {
+        int idx = editables.indexOf(focusedEditable);
+        if (idx == editables.length - 1) {
+          _krakenFocus.nextFocus();
+        } else {
+          _krakenFocus.requestFocus();
+          _blurEditable(editables[idx]);
+          _focusEditable(editables[idx + 1]);
+        }
+      }
+    // None editable exists, focus the next widget.
+    } else {
+      _krakenFocus.nextFocus();
+    }
+  }
+
+  void _handlePreviousFocus(PreviousFocusIntent intent) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.length != 0) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      // None editable is focused, focus the last editable.
+      if (focusedEditable == null) {
+        _krakenFocus.requestFocus();
+        _focusEditable(editables[editables.length - 1]);
+
+        // Some editable is focused, focus the previous editable, if it is the first editable,
+        // then focus the previous widget.
+      } else {
+        int idx = editables.indexOf(focusedEditable);
+        if (idx == 0) {
+          _krakenFocus.previousFocus();
+        } else {
+          _krakenFocus.requestFocus();
+          _blurEditable(editables[idx]);
+          _focusEditable(editables[idx - 1]);
+        }
+      }
+    // None editable exists, focus the previous widget.
+    } else {
+      _krakenFocus.previousFocus();
+    }
+  }
+
+  void _handleDirectionFocus(DirectionalFocusIntent intent) {
+  }
+
+  void _focusEditable(RenderEditable renderEditable) {
+    dom.RenderInputBox renderInputBox = renderEditable.parent as dom.RenderInputBox;
+    RenderIntrinsic renderIntrisic = renderInputBox.parent as RenderIntrinsic;
+    renderIntrisic.elementDelegate.focusInput();
+  }
+  
+  void _blurEditable(RenderEditable renderEditable) {
+    dom.RenderInputBox renderInputBox = renderEditable.parent as dom.RenderInputBox;
+    RenderIntrinsic renderIntrisic = renderInputBox.parent as RenderIntrinsic;
+    renderIntrisic.elementDelegate.blurInput();
+  }
+
+  List<RenderEditable> _findEditables(RenderObject parent) {
+    List<RenderEditable> result = [];
+    parent.visitChildren((RenderObject child) {
+      if (child is RenderEditable) {
+        result.add(child);
+      } else {
+        List<RenderEditable> children = _findEditables(child);
+        result.addAll(children);
+      }
+    });
+    return result;
+  }
+
+  RenderEditable? _findFocusedEditable(List<RenderEditable> editables) {
+    RenderEditable? result;
+    if (editables.length != 0) {
+      editables.forEach((RenderEditable editable) {
+        if (editable.hasFocus) {
+          result = editable;
+        }
+      });
+    }
+    return result;
   }
 }
 
+
 class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
-  const _KrakenRenderObjectWidget(Kraken widget, {Key? key})
+  _KrakenRenderObjectWidget(Kraken widget, {Key? key})
       : _krakenWidget = widget,
         super(key: key);
 
   final Kraken _krakenWidget;
-
+  
   @override
   RenderObject createRenderObject(BuildContext context) {
     if (kProfileMode) {
@@ -173,7 +322,6 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_INIT_END);
     }
-
     return controller.view.getRootRenderObject();
   }
 
