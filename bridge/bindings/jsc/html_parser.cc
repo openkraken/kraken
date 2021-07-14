@@ -79,7 +79,8 @@ void HTMLParser::traverseHTML(GumboNode * node, ElementInstance* element) {
     GumboNode* child = (GumboNode*) children->data[i];
 
     if (child->type == GUMBO_NODE_ELEMENT) {
-      auto newElement = JSElement::buildElementInstance(m_context.get(), gumbo_normalized_tagname(child->v.element.tag));
+      std::string tagName = gumbo_normalized_tagname(child->v.element.tag);
+      auto newElement = JSElement::buildElementInstance(m_context.get(), tagName);
       element->internalAppendChild(newElement);
       parseProperty(newElement, &child->v.element);
 
