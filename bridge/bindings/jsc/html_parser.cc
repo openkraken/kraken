@@ -85,7 +85,7 @@ void HTMLParser::traverseHTML(GumboNode * node, ElementInstance* element) {
       parseProperty(newElement, &child->v.element);
 
       // eval javascript when <script>//code...</script>.
-      if (child->v.element.tag == GUMBO_TAG_SCRIPT && (GumboNode*) child->v.element.children.data[0] != nullptr) {
+      if (child->v.element.tag == GUMBO_TAG_SCRIPT && child->v.element.children.length > 0) {
         JSStringRef jsCode = JSStringCreateWithUTF8CString(((GumboNode*) child->v.element.children.data[0])->v.text.text);
         JSEvaluateScript(m_context->context(), jsCode, nullptr, nullptr, 0, nullptr);
       }
