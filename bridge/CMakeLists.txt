@@ -309,8 +309,6 @@ add_definitions(-DAPP_REV="${GIT_HEAD}") # Read from git head sha1
 if (${ENABLE_TEST})
   add_compile_definitions(IS_TEST=true)
   include(./test/test.cmake)
-else()
-  add_compile_options(-DFLUTTER_BACKEND=1)
 endif()
 
 if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")

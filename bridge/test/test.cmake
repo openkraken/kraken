@@ -33,6 +33,9 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
 
   target_compile_options(quickjs PUBLIC -DDUMP_LEAKS=1)
   target_compile_options(kraken PUBLIC -DDUMP_LEAKS=1)
+
+  target_compile_definitions(kraken_unit_test PUBLIC -DFLUTTER_BACKEND=0)
+  target_compile_definitions(kraken PUBLIC -DFLUTTER_BACKEND=1)
 endif()
 
 ### kraken_integration support library

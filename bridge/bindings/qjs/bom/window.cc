@@ -18,7 +18,6 @@ void bindWindow(std::unique_ptr<JSContext> &context) {
   context->defineGlobalProperty("Window", windowConstructor->classObject);
 
   auto *window = new WindowInstance(windowConstructor);
-  context->defineGlobalProperty("window", window->instanceObject);
   JS_SetOpaque(context->global(), window);
 }
 
@@ -131,6 +130,7 @@ WindowInstance::WindowInstance(Window *window): EventTargetInstance(window) {
   if (getDartMethod()->initWindow != nullptr) {
     getDartMethod()->initWindow(context()->getContextId(), &nativeEventTarget);
   }
+  m_context->m_window = this;
 }
 
 }

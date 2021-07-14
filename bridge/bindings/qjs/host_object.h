@@ -27,7 +27,7 @@ public:
     JS_SetOpaque(jsObject, this);
   }
 
-  JSValue jsObject;
+  JSValue jsObject{JS_NULL};
 
 protected:
   virtual ~HostObject() = default;

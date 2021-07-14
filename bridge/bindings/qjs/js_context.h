@@ -19,6 +19,7 @@ namespace kraken::binding::qjs {
 static JSClassID kGlobalCustomClassId{0};
 
 JSRuntime *getGlobalJSRuntime();
+class WindowInstance;
 
 class JSContext {
 public:
@@ -51,6 +52,8 @@ private:
   std::atomic<bool> ctxInvalid_{false};
   QjsContext *m_ctx{nullptr};
   std::forward_list<JSValue> m_globalProps;
+  friend WindowInstance;
+  WindowInstance *m_window{nullptr};
 };
 
 class ObjectProperty {

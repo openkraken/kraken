@@ -6,6 +6,7 @@
 #include "js_context.h"
 #include "kraken_bridge.h"
 #include "qjs_patch.h"
+#include "bindings/qjs/bom/window.h"
 
 namespace kraken::binding::qjs {
 
@@ -56,6 +57,8 @@ JSContext::~JSContext() {
   for (auto &prop : m_globalProps) {
     JS_FreeValue(m_ctx, prop);
   }
+
+  JS_FreeValue(m_ctx, m_window->instanceObject);
 
   JS_RunGC(m_runtime);
   JS_FreeValue(m_ctx, globalObject);
@@ -149,10 +152,7 @@ void JSContext::reportError(JSValueConst &error) {
 
 void JSContext::defineGlobalProperty(const char *prop, JSValue value) {
   JSAtom atom = JS_NewAtom(m_ctx, prop);
-  //  JS_DefineProperty(m_ctx, globalObject, atom, value, JS_UNDEFINED, JS_UNDEFINED, JS_PROP_HAS_VALUE);
-  //  JS_SetProperty(m_ctx, globalObject, atom, value);
   JS_SetProperty(m_ctx, globalObject, atom, value);
-//  m_globalProps.emplace_front(value);
   JS_FreeAtom(m_ctx, atom);
 }
 

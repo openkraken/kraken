@@ -42,9 +42,11 @@ class WindowInstance : public EventTargetInstance {
 public:
   WindowInstance() = delete;
   explicit WindowInstance(Window *window);
+  ~WindowInstance() {}
 private:
   Location *m_location;
   friend Window;
+  friend JSContext;
 };
 
 

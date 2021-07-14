@@ -124,7 +124,7 @@ DocumentInstance::DocumentInstance(Document *document): NodeInstance(document, N
   JS_FreeValue(m_ctx, htmlTagValue);
 
 #if FLUTTER_BACKEND
-  getDartMethod()->initHTML(m_context->getContextId(), &documentElement->nativeEventTarget);
+  getDartMethod()->initHTML(m_context->getContextId(), &m_documentElement->nativeEventTarget);
   getDartMethod()->initDocument(m_context->getContextId(), &nativeEventTarget);
 #endif
 }

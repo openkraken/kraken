@@ -33,7 +33,7 @@ struct NativeBoundingClientRect {
 class ElementAttributes : public HostObject {
 public:
   ElementAttributes() = delete;
-  ElementAttributes(JSContext *context) : HostObject(context, "ElementAttributes") {
+  explicit ElementAttributes(JSContext *context) : HostObject(context, "ElementAttributes") {
 
   }
   ~ElementAttributes() {};
