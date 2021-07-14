@@ -141,7 +141,6 @@ class Kraken extends StatefulWidget {
 class _KrakenState extends State<Kraken> {
   Map<LogicalKeySet, Intent>? _shortcutMap;
   Map<Type, Action<Intent>>? _actionMap;
-  _KrakenRenderObjectWidget? _krakenRenderObjectWidget;
   late FocusNode _krakenFocus;
 
   @override
@@ -157,7 +156,7 @@ class _KrakenState extends State<Kraken> {
       PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(onInvoke: _handlePreviousFocus),
       DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(onInvoke: _handleDirectionFocus),
     };
-    _krakenFocus = FocusNode(debugLabel: 'Kraken');
+    _krakenFocus = FocusNode();
   }
 
   @override
@@ -167,7 +166,7 @@ class _KrakenState extends State<Kraken> {
       shortcuts: _shortcutMap,
       focusNode: _krakenFocus,
       onFocusChange: _handleFocusChange,
-      child: _krakenRenderObjectWidget = _KrakenRenderObjectWidget(context.widget as Kraken)
+      child: _KrakenRenderObjectWidget(context.widget as Kraken)
     );
   }
 
@@ -176,17 +175,17 @@ class _KrakenState extends State<Kraken> {
     List<RenderEditable> editables = _findEditables(_rootRenderObject!);
     if (editables.length != 0) {
       RenderEditable? focusedEditable = _findFocusedEditable(editables);
-      if (focusedEditable != null) {
-        if (focused) {
-          _focusEditable(focusedEditable);
-        } else {
+      if (focused) {
+        // @TODO: need to detect hotkey to determine focus order of inputs in kraken widget.
+        _focusEditable(editables[0]);
+      } else {
+        if (focusedEditable != null) {
           _blurEditable(focusedEditable);
         }
       }
     }
   }
 
-  /// Move focus to the next element after the day grid.
   void _handleNextFocus(NextFocusIntent intent) {
     RenderObject? _rootRenderObject = context.findRenderObject();
     List<RenderEditable> editables = _findEditables(_rootRenderObject!);
@@ -322,7 +321,7 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_INIT_END);
     }
-    
+
     return controller.view.getRootRenderObject();
   }
 
