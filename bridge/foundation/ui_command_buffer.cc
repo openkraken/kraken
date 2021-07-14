@@ -32,8 +32,10 @@ void UICommandBuffer::addCommand(int32_t id, int32_t type, void *nativePtr) {
 
 void UICommandBuffer::addCommand(int32_t id, int32_t type, NativeString &args_01, void *nativePtr) {
   if (!update_batched) {
+#if FLUTTER_BACKEND
     kraken::getDartMethod()->requestBatchUpdate(contextId);
     update_batched = true;
+#endif
   }
 
   UICommandItem item{id, type, args_01, nativePtr};
@@ -42,10 +44,12 @@ void UICommandBuffer::addCommand(int32_t id, int32_t type, NativeString &args_01
 
 void UICommandBuffer::addCommand(int32_t id, int32_t type, NativeString &args_01, NativeString &args_02,
                                                 void *nativePtr) {
+#if FLUTTER_BACKEND
   if (!update_batched) {
     kraken::getDartMethod()->requestBatchUpdate(contextId);
     update_batched = true;
   }
+#endif
   UICommandItem item{id, type, args_01, args_02, nativePtr};
   queue.emplace_back(item);
 }

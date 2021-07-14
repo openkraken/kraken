@@ -9,8 +9,11 @@
 #include "node.h"
 #include "style_declaration.h"
 #include "bindings/qjs/host_object.h"
+#include <unordered_map>
 
 namespace kraken::binding::qjs {
+
+void bindElement(std::unique_ptr<JSContext> &context);
 
 class ElementInstance;
 class Element;
@@ -25,6 +28,23 @@ struct NativeBoundingClientRect {
   double right;
   double bottom;
   double left;
+};
+
+class ElementAttributes : public HostObject {
+public:
+  ElementAttributes() = delete;
+  ElementAttributes(JSContext *context) : HostObject(context, "ElementAttributes") {
+
+  }
+  ~ElementAttributes() {};
+
+  JSValue getAttribute(std::string &name);
+  JSValue setAttribute(std::string &name, JSValue value);
+  bool hasAttribute(std::string &name);
+  void removeAttribute(std::string &name);
+
+private:
+  std::unordered_map<std::string, JSValue> m_attributes;
 };
 
 class Element : public Node {
@@ -61,7 +81,9 @@ class ElementInstance : public NodeInstance {
 public:
   ElementInstance() = delete;
   ~ElementInstance() override {
-      delete m_style;
+    JS_FreeValue(m_ctx, m_style->instanceObject);
+    JS_FreeValue(m_ctx, m_attributes->jsObject);
+    JS_FreeAtom(m_ctx, m_tagName);
   }
   JSValue getStringValueProperty(std::string &name);
   std::string internalGetTextContent() override;
@@ -86,12 +108,13 @@ private:
   JSAtom m_tagName;
   friend Element;
   StyleDeclarationInstance *m_style{new StyleDeclarationInstance(CSSStyleDeclaration::instance(m_context), this)};
+  ElementAttributes *m_attributes{new ElementAttributes(m_context)};
 };
 
-class BoundingClientRect : public HostObject<BoundingClientRect> {
+class BoundingClientRect : public HostObject {
 public:
   BoundingClientRect() = delete;
-  explicit BoundingClientRect(JSContext *context, NativeBoundingClientRect *nativeBoundingClientRect): HostObject<BoundingClientRect>(context, "BoundingClientRect") {
+  explicit BoundingClientRect(JSContext *context, NativeBoundingClientRect *nativeBoundingClientRect): HostObject(context, "BoundingClientRect") {
 
   };
 

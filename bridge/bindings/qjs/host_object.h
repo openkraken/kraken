@@ -12,7 +12,7 @@ namespace kraken::binding::qjs {
 
 static JSClassID kHostObjectClassId = 54;
 
-template <class T> class HostObject {
+class HostObject {
 public:
   KRAKEN_DISALLOW_COPY_AND_ASSIGN(HostObject);
 
@@ -20,7 +20,7 @@ public:
   HostObject(JSContext *context, std::string name)
     : m_context(context), m_name(std::move(name)), m_ctx(context->ctx()), m_contextId(context->getContextId()) {
     JSClassDef def{};
-    def.class_name = name.c_str();
+    def.class_name = m_name.c_str();
     def.finalizer = proxyFinalize;
     JS_NewClass(context->runtime(), kHostObjectClassId, &def);
     jsObject = JS_NewObjectClass(m_ctx, kHostObjectClassId);
@@ -30,7 +30,7 @@ public:
   JSValue jsObject;
 
 protected:
-  ~HostObject() = default;
+  virtual ~HostObject() = default;
   std::string m_name;
   JSContext *m_context;
   int32_t m_contextId;
@@ -38,7 +38,7 @@ protected:
 
 private:
   static void proxyFinalize(JSRuntime *rt, JSValue val) {
-    auto hostObject = static_cast<T *>(JS_GetOpaque(val, kHostObjectClassId));
+    auto hostObject = static_cast<HostObject *>(JS_GetOpaque(val, kHostObjectClassId));
     JS_FreeValue(hostObject->m_ctx, hostObject->jsObject);
     delete hostObject;
   };

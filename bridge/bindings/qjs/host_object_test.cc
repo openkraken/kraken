@@ -12,9 +12,9 @@ namespace kraken::binding::qjs {
 
 static bool isSampleFree = false;
 
-class SampleObject : public HostObject<SampleObject> {
+class SampleObject : public HostObject {
 public:
-  explicit SampleObject(JSContext *context) : HostObject(context, "Screen"){};
+  explicit SampleObject(JSContext *context) : HostObject(context, "SampleObject"){};
   ~SampleObject() {
     isSampleFree = true;
   }

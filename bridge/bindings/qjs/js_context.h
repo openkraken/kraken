@@ -120,6 +120,7 @@ std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionH
 NativeString *jsValueToNativeString(QjsContext *ctx, JSValue &value);
 void buildUICommandArgs(QjsContext *ctx, JSValue key, NativeString &args_01);
 NativeString *stringToNativeString(std::string &string);
+std::string jsValueToStdString(QjsContext *ctx, JSValue &value);
 
 
 } // namespace kraken::binding::qjs

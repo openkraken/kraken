@@ -13,7 +13,7 @@ namespace kraken::binding::qjs {
 
 void updateLocation(std::string url);
 
-class Location : public HostObject<Location> {
+class Location : public HostObject {
 public:
   Location() = delete;
   explicit Location(JSContext *context) : HostObject(context, "Location") {}

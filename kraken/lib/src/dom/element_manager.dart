@@ -82,6 +82,8 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     HTMLElement documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId]!, this);
     setEventTarget(documentElement);
 
+    print('create html Element');
+
     viewportElement = documentElement;
     viewport.child = viewportElement.renderBoxModel;
     _viewportRenderObject = viewport;

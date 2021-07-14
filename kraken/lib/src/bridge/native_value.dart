@@ -27,7 +27,8 @@ enum JSValueType {
 }
 
 enum JSPointerType {
-  NativeBoundingClientRect
+  NativeBoundingClientRect,
+  NativeCanvasRenderingContext2D
 }
 
 dynamic fromNativeValue(JSValueType type, Pointer<NativeValue> nativeValue) {
@@ -47,6 +48,8 @@ dynamic fromNativeValue(JSValueType type, Pointer<NativeValue> nativeValue) {
       switch (pointerType) {
         case JSPointerType.NativeBoundingClientRect:
           return Pointer.fromAddress(nativeValue.ref.u).cast<NativeBoundingClientRect>();
+        case JSPointerType.NativeCanvasRenderingContext2D:
+          return Pointer.fromAddress(nativeValue.ref.u).cast<NativeCanvasRenderingContext2D>();
       }
     case JSValueType.TAG_JSON:
       return jsonDecode(nativeStringToString(Pointer.fromAddress(nativeValue.ref.u)));

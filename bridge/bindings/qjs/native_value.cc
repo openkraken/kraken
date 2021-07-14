@@ -73,8 +73,8 @@ NativeValue jsValueToNativeValue(QjsContext *ctx, JSValue &value) {
     NativeString *string = jsValueToNativeString(ctx, value);
     return Native_NewString(string);
   } else if (JS_IsObject(value)) {
-    JSValue stringifyedString = JS_JSONStringify(ctx, value, JS_UNDEFINED, JS_UNDEFINED);
-    NativeString *string = jsValueToNativeString(ctx, stringifyedString);
+    JSValue stringifiedString = JS_JSONStringify(ctx, value, JS_UNDEFINED, JS_UNDEFINED);
+    NativeString *string = jsValueToNativeString(ctx, stringifiedString);
     return Native_NewString(string);
   }
 
@@ -113,6 +113,8 @@ JSValue nativeValueToJSValue(JSContext *context, NativeValue &value) {
     int ptrType = (int)value.float64;
     if (ptrType == JSPointerType::NativeBoundingClientRect) {
       return (new BoundingClientRect(context, static_cast<NativeBoundingClientRect *>(ptr)))->jsObject;
+    } else if (ptrType == JSPointerType::NativeCanvasRenderingContext2D) {
+      // TODO: support canvasElement.
     }
   }
   }

@@ -37,12 +37,14 @@ private:
   ObjectFunction m_createTextNode{m_context, m_prototypeObject, "createTextNode", createTextNode, 1};
   ObjectFunction m_getElementById{m_context, m_prototypeObject, "getElementById", getElementById, 1};
   ObjectFunction m_getElementsByTagName{m_context, m_prototypeObject, "getElementsByTagName", getElementsByTagName, 1};
+  friend DocumentInstance;
 };
 
 class DocumentInstance : public NodeInstance {
 public:
   DocumentInstance() = delete;
   explicit DocumentInstance(Document *document);
+  ~DocumentInstance();
 
   static std::unordered_map<Document *, DocumentInstance *> m_instanceMap;
   static DocumentInstance *instance(Document *document) {
@@ -57,6 +59,8 @@ private:
   //  void addElementById(JSValueRef id, ElementInstance *element);
   //  std::unordered_map<std::string, std::vector<ElementInstance *>> elementMapById;
   ElementInstance *m_documentElement{nullptr};
+
+  friend Document;
 };
 
 } // namespace kraken::binding::qjs

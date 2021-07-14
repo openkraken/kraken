@@ -6,8 +6,8 @@
 #ifndef KRAKEN_JS_QJS_BRIDGE_H_
 #define KRAKEN_JS_QJS_BRIDGE_H_
 
-#include "foundation/bridge_callback.h"
 #include "include/kraken_bridge.h"
+#include "foundation/bridge_callback.h"
 #include <quickjs/quickjs.h>
 
 #include <atomic>

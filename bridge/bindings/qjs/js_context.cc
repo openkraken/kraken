@@ -191,4 +191,11 @@ JSRuntime *getGlobalJSRuntime() {
   return m_runtime;
 }
 
+std::string jsValueToStdString(QjsContext *ctx, JSValue &value) {
+  const char* cString = JS_ToCString(ctx, value);
+  std::string str = std::string(cString);
+  JS_FreeCString(ctx, cString);
+  return str;
+}
+
 } // namespace kraken::binding::qjs

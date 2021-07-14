@@ -12,7 +12,7 @@
 
 namespace kraken::binding::qjs {
 
-class JSScreen : public HostObject<JSScreen> {
+class JSScreen : public HostObject {
 public:
   explicit JSScreen(JSContext *context) : HostObject(context, "Screen"){};
 private:

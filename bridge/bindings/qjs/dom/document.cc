@@ -11,7 +11,7 @@
 namespace kraken::binding::qjs {
 
 void bindDocument(std::unique_ptr<JSContext> &context) {
-  auto *documentConstructor = new Document(context.get());
+  auto *documentConstructor = Document::instance(context.get());
   JSValue documentInstance = JS_CallConstructor(context->ctx(), documentConstructor->classObject, 0, nullptr);
   context->defineGlobalProperty("Document", documentConstructor->classObject);
   context->defineGlobalProperty("document", documentInstance);
@@ -97,7 +97,8 @@ PROP_GETTER(Document, cookie)(QjsContext *ctx, JSValue this_val, int argc, JSVal
 PROP_SETTER(Document, cookie)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {  return JS_NULL;}
 
 PROP_GETTER(Document, documentElement)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  return JS_NULL;
+  auto *document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  return document->m_documentElement->instanceObject;
 }
 PROP_SETTER(Document, documentElement)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
@@ -112,19 +113,27 @@ DocumentInstance::DocumentInstance(Document *document): NodeInstance(document, N
     htmlTagValue
   };
   JSValue documentElementValue = JS_CallConstructor(m_ctx, Element::instance(m_context)->classObject, 1, htmlArgs);
-  auto *documentElement = static_cast<ElementInstance *>(JS_GetOpaque(documentElementValue, kHostClassInstanceClassId));
-  documentElement->parentNode = this;
+  JS_FreeValue(m_ctx, documentElementValue);
+//  auto *documentElement = static_cast<ElementInstance *>(JS_GetOpaque(documentElementValue, kHostClassInstanceClassId));
+//  documentElement->parentNode = this;
 
   JSAtom documentElementTag = JS_NewAtom(m_ctx, "documentElement");
-  JS_SetProperty(m_ctx, instanceObject, documentElementTag, documentElementValue);
+//  JS_SetProperty(m_ctx, instanceObject, documentElementTag, documentElementValue);
 
   JS_FreeAtom(m_ctx, documentElementTag);
   JS_FreeAtom(m_ctx, htmlTagName);
+  JS_FreeValue(m_ctx, htmlTagValue);
 
+#if FLUTTER_BACKEND
   getDartMethod()->initHTML(m_context->getContextId(), &documentElement->nativeEventTarget);
   getDartMethod()->initDocument(m_context->getContextId(), &nativeEventTarget);
+#endif
 }
 
 std::unordered_map<Document *, DocumentInstance *> DocumentInstance::m_instanceMap {};
+
+DocumentInstance::~DocumentInstance() {
+//  JS_FreeValue(m_ctx, m_documentElement->instanceObject);
+}
 
 }

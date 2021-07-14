@@ -22,7 +22,6 @@ enum ViewModuleProperty {
 }
 
 mixin ElementNativeMethods on Node {
-  @override
   dynamic handleJSCall(String method, List<dynamic> argv) {
     Element element = (this as Element);
     switch(method) {
@@ -41,6 +40,7 @@ mixin ElementNativeMethods on Node {
       case 'scrollBy':
         return _scrollBy(element, argv[0], argv[1]);
     }
+    return super.handleJSCall(method, argv);
   }
 
   static double _getViewModuleProperty(Element element, int property) {

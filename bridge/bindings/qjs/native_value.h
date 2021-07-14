@@ -19,7 +19,8 @@ enum NativeTag {
 };
 
 enum JSPointerType {
-  NativeBoundingClientRect = 0
+  NativeBoundingClientRect       = 0,
+  NativeCanvasRenderingContext2D = 1
 };
 
 namespace kraken::binding::qjs {

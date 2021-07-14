@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 
-#include "foundation/logging.h"
 #include "polyfill.h"
 
 #include "dart_methods.h"
@@ -15,42 +14,15 @@
 #include "bindings/qjs/bom/console.h"
 #include "bindings/qjs/bom/timer.h"
 #include "bindings/qjs/bom/blob.h"
+#include "bindings/qjs/bom/window.h"
 #include "bindings/qjs/kraken.h"
 #include "bindings/qjs/module_manager.h"
 #include "bindings/qjs/dom/event_target.h"
+#include "bindings/qjs/dom/event.h"
+#include "bindings/qjs/dom/element.h"
+#include "bindings/qjs/dom/document.h"
+#include "bindings/qjs/dom/style_declaration.h"
 
-//#include "bindings/jsc/KOM/timer.h"
-//#include "bindings/jsc/DOM/comment_node.h"
-//#include "bindings/jsc/DOM/custom_event.h"
-//#include "bindings/jsc/DOM/document.h"
-//#include "bindings/jsc/DOM/element.h"
-//#include "bindings/jsc/DOM/elements/image_element.h"
-//#include "bindings/jsc/DOM/elements/input_element.h"
-//#include "bindings/jsc/DOM/elements/svg_element.h"
-//#include "bindings/jsc/DOM/event.h"
-//#include "bindings/jsc/DOM/custom_event.h"
-//#include "bindings/jsc/DOM/events/gesture_event.h"
-//#include "bindings/jsc/DOM/events/mouse_event.h"
-//#include "bindings/jsc/DOM/events/input_event.h"
-//#include "bindings/jsc/DOM/event_target.h"
-//#include "bindings/jsc/DOM/events/close_event.h"
-//#include "bindings/jsc/DOM/events/input_event.h"
-//#include "bindings/jsc/DOM/events/intersection_change_event.h"
-//#include "bindings/jsc/DOM/events/media_error_event.h"
-//#include "bindings/jsc/DOM/events/message_event.h"
-//#include "bindings/jsc/DOM/events/touch_event.h"
-//#include "bindings/jsc/DOM/node.h"
-//#include "bindings/jsc/DOM/style_declaration.h"
-//#include "bindings/jsc/DOM/text_node.h"
-//#include "bindings/jsc/KOM/blob.h"
-//#include "bindings/jsc/KOM/console.h"
-//#include "bindings/jsc/KOM/location.h"
-//#include "bindings/jsc/KOM/performance.h"
-//#include "bindings/jsc/KOM/screen.h"
-//#include "bindings/jsc/KOM/window.h"
-//#include "bindings/jsc/js_context_internal.h"
-//#include "bindings/jsc/kraken.h"
-//#include "bindings/jsc/ui_manager.h"
 
 namespace kraken {
 
@@ -90,7 +62,8 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindModuleManager(m_context);
   bindEventTarget(m_context);
   bindBlob(m_context);
-//  bindEvent(m_context);
+  bindWindow(m_context);
+  bindEvent(m_context);
 //  bindMouseEvent(m_context);
 //  bindCustomEvent(m_context);
 //  bindCloseEvent(m_context);
@@ -101,17 +74,17 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 //  bindIntersectionChangeEvent(m_context);
 //  bindMessageEvent(m_context);
 //  bindEventTarget(m_context);
-//  bindDocument(m_context);
+  bindDocument(m_context);
 //  bindNode(m_context);
 //  bindTextNode(m_context);
 //  bindCommentNode(m_context);
-//  bindElement(m_context);
+  bindElement(m_context);
 //  bindImageElement(m_context);
 //  bindInputElement(m_context);
 //  bindSVGElement(m_context);
 //  bindWindow(m_context);
 //  bindPerformance(m_context);
-//  bindCSSStyleDeclaration(m_context);
+  bindCSSStyleDeclaration(m_context);
 //  bindScreen(m_context);
 //  bindBlob(m_context);
 

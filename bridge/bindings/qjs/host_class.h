@@ -79,7 +79,7 @@ public:
   Instance(HostClass *hostClass, std::string name)
       : m_context(hostClass->context()), m_hostClass(hostClass), m_name(std::move(name)), m_ctx(m_context->ctx()) {
     JSClassDef def{};
-    def.class_name = name.c_str();
+    def.class_name = m_name.c_str();
     def.finalizer = proxyInstanceFinalize;
     JS_NewClass(m_context->runtime(), kHostClassInstanceClassId, &def);
     instanceObject = JS_NewObjectClass(m_ctx, kHostClassInstanceClassId);

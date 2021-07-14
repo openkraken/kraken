@@ -223,6 +223,16 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
       bindings/qjs/dom/event_target.h
       bindings/qjs/dom/event.cc
       bindings/qjs/dom/event.h
+      bindings/qjs/dom/node.h
+      bindings/qjs/dom/node.cc
+      bindings/qjs/dom/element.cc
+      bindings/qjs/dom/element.h
+      bindings/qjs/dom/document.cc
+      bindings/qjs/dom/document.h
+      bindings/qjs/dom/style_declaration.cc
+      bindings/qjs/dom/style_declaration.h
+      bindings/qjs/dom/elements/canvas_element.cc
+      bindings/qjs/dom/elements/canvas_element.h
       bindings/qjs/bom/blob.cc
       bindings/qjs/bom/blob.h
       bindings/qjs/bom/location.h
@@ -239,7 +249,6 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   target_compile_options(quickjs PUBLIC -DCONFIG_VERSION=${\"QUICKJS_VERSION\"})
 
 endif()
-
 
 list(APPEND PUBLIC_HEADER
   include/kraken_bridge.h
@@ -300,7 +309,9 @@ add_definitions(-DAPP_REV="${GIT_HEAD}") # Read from git head sha1
 if (${ENABLE_TEST})
   add_compile_definitions(IS_TEST=true)
   include(./test/test.cmake)
-endif ()
+else()
+  add_compile_options(-DFLUTTER_BACKEND=1)
+endif()
 
 if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_jsc)
