@@ -196,7 +196,7 @@ class _KrakenState extends State<Kraken> {
       if (focusedEditable == null) {
         _krakenFocus.requestFocus();
         _focusEditable(editables[0]);
-        
+
       // Some editable is focused, focus the next editable, if it is the last editable,
       // then focus the next widget.
       } else {
@@ -251,7 +251,7 @@ class _KrakenState extends State<Kraken> {
     RenderIntrinsic renderIntrisic = renderInputBox.parent as RenderIntrinsic;
     renderIntrisic.elementDelegate.focusInput();
   }
-  
+
   void _blurEditable(RenderEditable renderEditable) {
     dom.RenderInputBox renderInputBox = renderEditable.parent as dom.RenderInputBox;
     RenderIntrinsic renderIntrisic = renderInputBox.parent as RenderIntrinsic;
@@ -287,12 +287,12 @@ class _KrakenState extends State<Kraken> {
 
 class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
-  _KrakenRenderObjectWidget(Kraken widget, {Key? key})
+  const _KrakenRenderObjectWidget(Kraken widget, {Key? key})
       : _krakenWidget = widget,
         super(key: key);
 
   final Kraken _krakenWidget;
-  
+
   @override
   RenderObject createRenderObject(BuildContext context) {
     if (kProfileMode) {
@@ -322,6 +322,7 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_INIT_END);
     }
+    
     return controller.view.getRootRenderObject();
   }
 
