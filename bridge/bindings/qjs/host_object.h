@@ -39,7 +39,9 @@ protected:
 private:
   static void proxyFinalize(JSRuntime *rt, JSValue val) {
     auto hostObject = static_cast<HostObject *>(JS_GetOpaque(val, kHostObjectClassId));
-    JS_FreeValue(hostObject->m_ctx, hostObject->jsObject);
+    if (hostObject->m_context->isValid()) {
+      JS_FreeValue(hostObject->m_ctx, hostObject->jsObject);
+    }
     delete hostObject;
   };
 };

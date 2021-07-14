@@ -113,12 +113,11 @@ DocumentInstance::DocumentInstance(Document *document): NodeInstance(document, N
     htmlTagValue
   };
   JSValue documentElementValue = JS_CallConstructor(m_ctx, Element::instance(m_context)->classObject, 1, htmlArgs);
-  JS_FreeValue(m_ctx, documentElementValue);
-//  auto *documentElement = static_cast<ElementInstance *>(JS_GetOpaque(documentElementValue, kHostClassInstanceClassId));
-//  documentElement->parentNode = this;
+  m_documentElement = static_cast<ElementInstance *>(JS_GetOpaque(documentElementValue, kHostClassInstanceClassId));
+  m_documentElement->parentNode = this;
 
   JSAtom documentElementTag = JS_NewAtom(m_ctx, "documentElement");
-//  JS_SetProperty(m_ctx, instanceObject, documentElementTag, documentElementValue);
+  JS_SetProperty(m_ctx, instanceObject, documentElementTag, documentElementValue);
 
   JS_FreeAtom(m_ctx, documentElementTag);
   JS_FreeAtom(m_ctx, htmlTagName);
@@ -133,7 +132,7 @@ DocumentInstance::DocumentInstance(Document *document): NodeInstance(document, N
 std::unordered_map<Document *, DocumentInstance *> DocumentInstance::m_instanceMap {};
 
 DocumentInstance::~DocumentInstance() {
-//  JS_FreeValue(m_ctx, m_documentElement->instanceObject);
+  JS_FreeValue(m_ctx, m_documentElement->instanceObject);
 }
 
 }

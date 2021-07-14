@@ -1,4 +1,4 @@
-import 'es6-promise/dist/es6-promise.auto';
+// import 'es6-promise/dist/es6-promise.auto';
 import './dom';
 import { console } from './console';
 import { WebSocket } from './websocket';
@@ -14,20 +14,20 @@ import { kraken } from './kraken';
 import { history } from './history';
 
 defineGlobalProperty('console', console);
-defineGlobalProperty('WebSocket', WebSocket);
-defineGlobalProperty('Request', Request);
-defineGlobalProperty('Response', Response);
-defineGlobalProperty('Headers', Headers);
-defineGlobalProperty('fetch', fetch);
-defineGlobalProperty('matchMedia', matchMedia);
-defineGlobalProperty('location', location);
-defineGlobalProperty('navigator', navigator);
-defineGlobalProperty('XMLHttpRequest', XMLHttpRequest);
-defineGlobalProperty('asyncStorage', asyncStorage);
-defineGlobalProperty('URLSearchParams', URLSearchParams);
-defineGlobalProperty('URL', URL);
-defineGlobalProperty('kraken', kraken);
-defineGlobalProperty('__history__', history, false);
+// defineGlobalProperty('WebSocket', WebSocket);
+// defineGlobalProperty('Request', Request);
+// defineGlobalProperty('Response', Response);
+// defineGlobalProperty('Headers', Headers);
+// defineGlobalProperty('fetch', fetch);
+// defineGlobalProperty('matchMedia', matchMedia);
+// defineGlobalProperty('location', location);
+// defineGlobalProperty('navigator', navigator);
+// defineGlobalProperty('XMLHttpRequest', XMLHttpRequest);
+// defineGlobalProperty('asyncStorage', asyncStorage);
+// defineGlobalProperty('URLSearchParams', URLSearchParams);
+// defineGlobalProperty('URL', URL);
+// defineGlobalProperty('kraken', kraken);
+// defineGlobalProperty('__history__', history, false);
 
 function defineGlobalProperty(key: string, value: any, isEnumerable: boolean = true) {
   Object.defineProperty(globalThis, key, {
