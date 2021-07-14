@@ -466,21 +466,26 @@ class Touch {
 
 /// reference: https://w3c.github.io/touch-events/#touchlist-interface
 class TouchList {
-  List<Touch> items = [];
-  int get length => items.length;
+  List<Touch> _items = [];
+  int get length => _items.length;
 
   Touch item(int index) {
-    return items[index];
+    return _items[index];
   }
 
   Touch operator[](int index) {
-    return items[index];
+    return _items[index];
+  }
+
+  // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/dom/TouchList.h#L54
+  void append(Touch touch) {
+    _items.add(touch);
   }
 
   Pointer<Pointer<NativeTouch>> toNative() {
-    Pointer<Pointer<NativeTouch>> touchList = malloc.allocate<NativeTouch>(sizeOf<NativeTouch>() * items.length).cast<Pointer<NativeTouch>>();
-    for (int i = 0; i < items.length; i ++) {
-      touchList[i] = items[i].toNative();
+    Pointer<Pointer<NativeTouch>> touchList = malloc.allocate<NativeTouch>(sizeOf<NativeTouch>() * _items.length).cast<Pointer<NativeTouch>>();
+    for (int i = 0; i < _items.length; i ++) {
+      touchList[i] = _items[i].toNative();
     }
 
     return touchList;
