@@ -54,6 +54,7 @@ class NodeInstance : public EventTargetInstance {
 public:
   NodeInstance() = delete;
   explicit NodeInstance(Node *node, NodeType nodeType, DocumentInstance *document) : EventTargetInstance(node), m_document(document) {}
+  ~NodeInstance();
   bool isConnected();
   DocumentInstance *ownerDocument();
   NodeInstance *firstChild();
@@ -86,6 +87,7 @@ private:
   void ensureDetached(NodeInstance *node);
   friend DocumentInstance;
   friend Node;
+  int32_t _referenceCount{0};
 };
 
 } // namespace kraken::binding::qjs

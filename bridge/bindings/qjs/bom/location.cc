@@ -23,7 +23,7 @@ PROP_SETTER(Location, href)(QjsContext *ctx, JSValue this_val, int argc, JSValue
 }
 
 JSValue Location::reload(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *location = static_cast<Location *>(JS_GetOpaque(this_val, kHostObjectClassId));
+  auto *location = static_cast<Location *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   if (getDartMethod()->reloadApp == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'reload': dart method (reloadApp) is not registered.");
   }

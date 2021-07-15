@@ -10,8 +10,6 @@
 
 namespace kraken::binding::qjs {
 
-static JSClassID kHostObjectClassId = 54;
-
 class HostObject {
 public:
   KRAKEN_DISALLOW_COPY_AND_ASSIGN(HostObject);
@@ -22,8 +20,8 @@ public:
     JSClassDef def{};
     def.class_name = m_name.c_str();
     def.finalizer = proxyFinalize;
-    JS_NewClass(context->runtime(), kHostObjectClassId, &def);
-    jsObject = JS_NewObjectClass(m_ctx, kHostObjectClassId);
+    JS_NewClass(context->runtime(), JSContext::kHostObjectClassId, &def);
+    jsObject = JS_NewObjectClass(m_ctx, JSContext::kHostObjectClassId);
     JS_SetOpaque(jsObject, this);
   }
 
@@ -38,7 +36,7 @@ protected:
 
 private:
   static void proxyFinalize(JSRuntime *rt, JSValue val) {
-    auto hostObject = static_cast<HostObject *>(JS_GetOpaque(val, kHostObjectClassId));
+    auto hostObject = static_cast<HostObject *>(JS_GetOpaque(val, JSContext::kHostObjectClassId));
     if (hostObject->m_context->isValid()) {
       JS_FreeValue(hostObject->m_ctx, hostObject->jsObject);
     }

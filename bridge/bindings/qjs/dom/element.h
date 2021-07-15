@@ -33,10 +33,10 @@ struct NativeBoundingClientRect {
 class ElementAttributes : public HostObject {
 public:
   ElementAttributes() = delete;
-  explicit ElementAttributes(JSContext *context) : HostObject(context, "ElementAttributes") {
-
-  }
-  ~ElementAttributes() {};
+  explicit ElementAttributes(JSContext *context) : HostObject(context, "ElementAttributes") {}
+  ~ElementAttributes() {
+    KRAKEN_LOG(VERBOSE) << "delete attributes";
+  };
 
   JSValue getAttribute(std::string &name);
   JSValue setAttribute(std::string &name, JSValue value);
@@ -70,7 +70,7 @@ public:
 
   OBJECT_INSTANCE(Element);
 
-  DEFINE_HOST_CLASS_PROPERTY(17, style, attributes, nodeName, tagName, offsetLeft, offsetTop, offsetWidth, offsetHeight,
+  DEFINE_HOST_CLASS_PROPERTY(15, nodeName, tagName, offsetLeft, offsetTop, offsetWidth, offsetHeight,
                              clientWidth, clientHeight, clientTop, clientLeft, scrollTop, scrollLeft, scrollHeight,
                              scrollWidth, children);
 private:
@@ -81,8 +81,6 @@ class ElementInstance : public NodeInstance {
 public:
   ElementInstance() = delete;
   ~ElementInstance() override {
-    JS_FreeValue(m_ctx, m_style->instanceObject);
-    JS_FreeValue(m_ctx, m_attributes->jsObject);
     JS_FreeAtom(m_ctx, m_tagName);
   }
   JSValue getStringValueProperty(std::string &name);
@@ -97,7 +95,7 @@ public:
   std::string getRegisteredTagName();
 
 private:
-  explicit ElementInstance(Element *element, JSValue &tagName);
+  explicit ElementInstance(Element *element, JSValue &tagName, bool shouldAddUICommand);
   void _notifyNodeRemoved(NodeInstance *node) override;
   void _notifyChildRemoved();
   void _notifyNodeInsert(NodeInstance *insertNode) override;
@@ -107,8 +105,8 @@ private:
 
   JSAtom m_tagName;
   friend Element;
-  StyleDeclarationInstance *m_style{new StyleDeclarationInstance(CSSStyleDeclaration::instance(m_context), this)};
-  ElementAttributes *m_attributes{new ElementAttributes(m_context)};
+  StyleDeclarationInstance *m_style{nullptr};
+  ElementAttributes *m_attributes{nullptr};
 };
 
 class BoundingClientRect : public HostObject {

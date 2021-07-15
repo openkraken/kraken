@@ -16,7 +16,7 @@ using QjsContext = JSContext;
 
 namespace kraken::binding::qjs {
 
-static JSClassID kGlobalCustomClassId{0};
+static std::once_flag kinitJSClassIDFlag;
 
 JSRuntime *getGlobalJSRuntime();
 class WindowInstance;
@@ -30,11 +30,11 @@ public:
   bool evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine);
   bool evaluateJavaScript(const char16_t *code, size_t length, const char *sourceURL, int startLine);
   bool evaluateJavaScript(const char *code, size_t codeLength, const char *sourceURL, int startLine);
-  bool isValid();
+  bool isValid() const;
   JSValue global();
   QjsContext *ctx();
   JSRuntime *runtime();
-  int32_t getContextId();
+  int32_t getContextId() const;
   void *getOwner();
   bool handleException(JSValue *exc);
   void reportError(JSValueConst &error);
@@ -44,12 +44,17 @@ public:
 
   int32_t uniqueId;
 
+  static JSClassID kHostClassClassId;
+  static JSClassID kHostClassInstanceClassId;
+  static JSClassID kHostObjectClassId;
+  static JSClassID kHostClassExoticInstanceClassId;
+
 private:
   int32_t contextId;
   JSExceptionHandler _handler;
   void *owner;
   JSValue globalObject{JS_NULL};
-  std::atomic<bool> ctxInvalid_{false};
+  bool ctxInvalid_{false};
   QjsContext *m_ctx{nullptr};
   std::forward_list<JSValue> m_globalProps;
   friend WindowInstance;

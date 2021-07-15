@@ -45,13 +45,21 @@ class StyleDeclarationInstance : public Instance {
 public:
   StyleDeclarationInstance() = delete;
   explicit StyleDeclarationInstance(CSSStyleDeclaration *cssStyleDeclaration, EventTargetInstance *ownerEventTarget)
-    : Instance(cssStyleDeclaration, "CSSStyleDeclaration"), m_ownerEventTarget(ownerEventTarget) {};
-  ~StyleDeclarationInstance() {};
+    : Instance(cssStyleDeclaration, "CSSStyleDeclaration", m_exoticMethods), m_ownerEventTarget(ownerEventTarget) {};
+  ~StyleDeclarationInstance();
   bool internalSetProperty(std::string &name, JSValue value);
   void internalRemoveProperty(std::string &name);
   JSValue internalGetPropertyValue(std::string &name);
 
 private:
+  static int setProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
+                      JSValueConst value, JSValueConst receiver, int flags);
+
+  JSValue getProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
+                          JSValueConst receiver);
+
+  static JSClassExoticMethods m_exoticMethods;
+
   std::unordered_map<std::string, JSValue> properties;
   const EventTargetInstance *m_ownerEventTarget;
   friend EventTargetInstance;

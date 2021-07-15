@@ -10,9 +10,6 @@
 
 namespace kraken::binding::qjs {
 
-static JSClassID kHostClassClassId = 52;
-static JSClassID kHostClassInstanceClassId = 53;
-
 class HostClass {
 public:
   KRAKEN_DISALLOW_COPY_AND_ASSIGN(HostClass);
@@ -23,8 +20,8 @@ public:
     def.class_name = m_name.c_str();
     def.finalizer = proxyFinalize;
     def.call = proxyCall;
-    JS_NewClass(context->runtime(), kHostClassClassId, &def);
-    classObject = JS_NewObjectClass(context->ctx(), kHostClassClassId);
+    JS_NewClass(context->runtime(), JSContext::kHostClassClassId, &def);
+    classObject = JS_NewObjectClass(context->ctx(), JSContext::kHostClassClassId);
     m_prototypeObject = JS_NewObject(m_ctx);
 
     JSAtom prototypeKey = JS_NewAtom(m_ctx, "prototype");
@@ -54,7 +51,7 @@ protected:
 
 private:
   static void proxyFinalize(JSRuntime *rt, JSValue val) {
-    auto hostObject = static_cast<HostClass *>(JS_GetOpaque(val, kHostClassClassId));
+    auto hostObject = static_cast<HostClass *>(JS_GetOpaque(val, JSContext::kHostClassClassId));
     if (hostObject->context()->isValid()) {
       JS_FreeValue(hostObject->m_ctx, hostObject->classObject);
     }
@@ -62,7 +59,7 @@ private:
   };
   static JSValue proxyCall(QjsContext *ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst *argv,
                            int flags) {
-    auto *hostClass = static_cast<HostClass *>(JS_GetOpaque(func_obj, kHostClassClassId));
+    auto *hostClass = static_cast<HostClass *>(JS_GetOpaque(func_obj, JSContext::kHostClassClassId));
 
     JSAtom prototypeKey = JS_NewAtom(ctx, "prototype");
     JSValue proto = JS_GetProperty(ctx, this_val, prototypeKey);
@@ -76,13 +73,24 @@ private:
 
 class Instance {
 public:
-  Instance(HostClass *hostClass, std::string name)
+  explicit Instance(HostClass *hostClass, std::string name)
       : m_context(hostClass->context()), m_hostClass(hostClass), m_name(std::move(name)), m_ctx(m_context->ctx()) {
     JSClassDef def{};
     def.class_name = m_name.c_str();
     def.finalizer = proxyInstanceFinalize;
-    JS_NewClass(m_context->runtime(), kHostClassInstanceClassId, &def);
-    instanceObject = JS_NewObjectClass(m_ctx, kHostClassInstanceClassId);
+    JS_NewClass(m_context->runtime(), JSContext::kHostClassInstanceClassId, &def);
+    instanceObject = JS_NewObjectClass(m_ctx, JSContext::kHostClassInstanceClassId);
+    JS_SetOpaque(instanceObject, this);
+  };
+
+  explicit Instance(HostClass *hostClass, std::string name, JSClassExoticMethods &exotic)
+    : m_context(hostClass->context()), m_hostClass(hostClass), m_name(std::move(name)), m_ctx(m_context->ctx()) {
+    JSClassDef def{};
+    def.class_name = m_name.c_str();
+    def.finalizer = proxyExoticInstanceFinalize;
+    def.exotic = &exotic;
+    JS_NewClass(m_context->runtime(), JSContext::kHostClassExoticInstanceClassId, &def);
+    instanceObject = JS_NewObjectClass(m_ctx, JSContext::kHostClassExoticInstanceClassId);
     JS_SetOpaque(instanceObject, this);
   };
   JSValue instanceObject;
@@ -98,7 +106,16 @@ protected:
   std::string m_name;
 
   static void proxyInstanceFinalize(JSRuntime *rt, JSValue val) {
-    auto *instance = static_cast<Instance *>(JS_GetOpaque(val, kHostClassInstanceClassId));
+    auto *instance = static_cast<Instance *>(JS_GetOpaque(val, JSContext::kHostClassInstanceClassId));
+    if (instance->context()->isValid()) {
+      JS_FreeValue(instance->m_ctx, instance->instanceObject);
+    }
+    delete instance;
+  };
+
+  static void proxyExoticInstanceFinalize(JSRuntime *rt, JSValue val) {
+    auto *instance = static_cast<Instance *>(JS_GetOpaque(val, JSContext::kHostClassExoticInstanceClassId));
+    KRAKEN_LOG(VERBOSE) << "finalize exotic " << instance->m_name;
     if (instance->context()->isValid()) {
       JS_FreeValue(instance->m_ctx, instance->instanceObject);
     }

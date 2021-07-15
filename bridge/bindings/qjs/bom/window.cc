@@ -23,7 +23,7 @@ void bindWindow(std::unique_ptr<JSContext> &context) {
 
 JSValue Window::open(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   JSValue &url = argv[0];
-  auto window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   NativeValue arguments[] = {
     jsValueToNativeValue(ctx, argv[0])
   };
@@ -32,7 +32,7 @@ JSValue Window::open(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv)
 JSValue Window::scrollTo(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   JSValue &x = argv[0];
   JSValue &y = argv[1];
-  auto window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   NativeValue arguments[] = {
     jsValueToNativeValue(ctx, argv[0]),
     jsValueToNativeValue(ctx, argv[1])
@@ -42,7 +42,7 @@ JSValue Window::scrollTo(QjsContext *ctx, JSValue this_val, int argc, JSValue *a
 JSValue Window::scrollBy(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   JSValue &x = argv[0];
   JSValue &y = argv[1];
-  auto window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   NativeValue arguments[] = {
     jsValueToNativeValue(ctx, argv[0]),
     jsValueToNativeValue(ctx, argv[1])
@@ -77,7 +77,7 @@ PROP_SETTER(Window, colorScheme)(QjsContext *ctx, JSValue this_val, int argc, JS
 }
 
 PROP_GETTER(Window, __location__)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   if (window == nullptr) return JS_UNDEFINED;
   return window->m_location->jsObject;
 }
@@ -86,7 +86,7 @@ PROP_SETTER(Window, __location__)(QjsContext *ctx, JSValue this_val, int argc, J
 }
 
 PROP_GETTER(Window, window)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   if (window == nullptr) return JS_UNDEFINED;
   return window->instanceObject;
 }
@@ -94,7 +94,7 @@ PROP_SETTER(Window, window)(QjsContext *ctx, JSValue this_val, int argc, JSValue
   return JS_NULL;
 }
 PROP_GETTER(Window, parent)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   if (window == nullptr) return JS_UNDEFINED;
   return window->instanceObject;
 }

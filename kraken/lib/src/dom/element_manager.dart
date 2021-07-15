@@ -82,8 +82,6 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     HTMLElement documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId]!, this);
     setEventTarget(documentElement);
 
-    print('create html Element');
-
     viewportElement = documentElement;
     viewport.child = viewportElement.renderBoxModel;
     _viewportRenderObject = viewport;
@@ -152,7 +150,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   Element createElement(
-      int id, Pointer nativePtr, String type, Map<String, dynamic>? props, List<String>? events) {
+      int id, Pointer<NativeEventTarget> nativePtr, String type, Map<String, dynamic>? props, List<String>? events) {
     assert(!existsTarget(id), 'ERROR: Can not create element with same id "$id"');
 
     List<String> eventList;

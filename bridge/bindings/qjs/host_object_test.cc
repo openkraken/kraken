@@ -22,11 +22,11 @@ private:
   class FooPropertyDescriptor {
   public:
     static JSValue getter(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-      auto *sampleObject = static_cast<SampleObject *>(JS_GetOpaque(this_val, kHostObjectClassId));
+      auto *sampleObject = static_cast<SampleObject *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
       return JS_NewFloat64(ctx, sampleObject->m_foo);
     }
     static JSValue setter(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-      auto *sampleObject = static_cast<SampleObject *>(JS_GetOpaque(this_val, kHostObjectClassId));
+      auto *sampleObject = static_cast<SampleObject *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
       double f;
       JS_ToFloat64(ctx, &f, argv[0]);
       sampleObject->m_foo = f;

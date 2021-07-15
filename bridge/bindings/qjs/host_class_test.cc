@@ -35,7 +35,7 @@ class SampleClass : public ParentClass {
 public:
   explicit SampleClass(JSContext *context) : ParentClass(context) {}
   JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override {
-    auto *sampleClass = static_cast<SampleClass *>(JS_GetOpaque(func_obj, kHostClassClassId));
+    auto *sampleClass = static_cast<SampleClass *>(JS_GetOpaque(func_obj, JSContext::kHostClassClassId));
     auto *instance = new SampleClassInstance(sampleClass);
     return instance->instanceObject;
   }
@@ -208,6 +208,62 @@ TEST(HostClass, multipleInstance) {
     JS_FreeValue(context->ctx(), object);
   }
 
+  delete bridge;
+  EXPECT_EQ(errorCalled, false);
+}
+
+
+class ExoticClass : public HostClass {
+public:
+  ExoticClass() = delete;
+  explicit ExoticClass(JSContext *context) : HostClass(context, "ExoticClass") {}
+  JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv);
+private:
+
+};
+
+class ExoticClassInstance : public Instance {
+public:
+  ExoticClassInstance() = delete;
+  JSClassExoticMethods methods{
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    setProperty
+  };
+
+  explicit ExoticClassInstance(ExoticClass *exoticClass) : Instance(exoticClass, "ExoticClass", methods) {};
+
+  static int setProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
+                         JSValueConst value, JSValueConst receiver, int flags) {
+    KRAKEN_LOG(VERBOSE) << JS_AtomToCString(ctx, atom);
+    return 0;
+  }
+  ~ExoticClassInstance() {
+    KRAKEN_LOG(VERBOSE) << "delete";
+  }
+};
+
+JSValue ExoticClass::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
+  return (new ExoticClassInstance(this))->instanceObject;
+}
+
+TEST(HostClass, exoticClass) {
+  bool static errorCalled = false;
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+    KRAKEN_LOG(VERBOSE) << errmsg;
+    errorCalled = true;
+  });
+
+  auto &context = bridge->getContext();
+  auto *constructor = new ExoticClass(context.get());
+  context->defineGlobalProperty("ExoticClass", constructor->classObject);
+
+  std::string code = "globalThis.obj = new ExoticClass();";
+  context->evaluateJavaScript(code.c_str(), code.size(), "vm://", 0);
   delete bridge;
   EXPECT_EQ(errorCalled, false);
 }

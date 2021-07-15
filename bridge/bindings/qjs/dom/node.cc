@@ -13,7 +13,7 @@ JSValue Node::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, i
   return JS_ThrowTypeError(ctx, "Illegal constructor");
 }
 JSValue Node::cloneNode(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto selfInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto selfInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
 
   JSValue deepValue;
   if (argc < 1) {
@@ -31,7 +31,7 @@ JSValue Node::cloneNode(QjsContext *ctx, JSValue this_val, int argc, JSValue *ar
     auto element = static_cast<ElementInstance *>(selfInstance);
 
     JSValue rootElement = copyNodeValue(ctx, static_cast<NodeInstance *>(element));
-    auto rootNodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(rootElement, kHostClassInstanceClassId));
+    auto rootNodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(rootElement, JSContext::kHostClassInstanceClassId));
 
     if (deep) {
       traverseCloneNode(ctx, static_cast<ElementInstance *>(element), static_cast<ElementInstance *>(rootNodeInstance));
@@ -54,7 +54,7 @@ JSValue Node::appendChild(QjsContext *ctx, JSValue this_val, int argc, JSValue *
     return JS_ThrowTypeError(ctx, "Failed to execute 'appendChild' on 'Node': first argument is required.");
   }
 
-  auto selfInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto selfInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   if (selfInstance == nullptr) return JS_ThrowTypeError(ctx, "this object is not a instance of Node.");
   JSValue &nodeValue = argv[0];
 
@@ -62,7 +62,7 @@ JSValue Node::appendChild(QjsContext *ctx, JSValue this_val, int argc, JSValue *
     return JS_ThrowTypeError(ctx, "Failed to execute 'appendChild' on 'Node': first arguments should be an Node type.");
   }
 
-  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(nodeValue, kHostClassInstanceClassId));
+  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(nodeValue, JSContext::kHostClassInstanceClassId));
 
   if (nodeInstance == nullptr || nodeInstance->document() != selfInstance->document()) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'appendChild' on 'Node': first arguments should be an Node type.");
@@ -76,7 +76,7 @@ JSValue Node::appendChild(QjsContext *ctx, JSValue this_val, int argc, JSValue *
   return nodeInstance->instanceObject;
 }
 JSValue Node::remove(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto selfInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto selfInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   selfInstance->internalRemove();
   return JS_UNDEFINED;
 }
@@ -91,8 +91,8 @@ JSValue Node::removeChild(QjsContext *ctx, JSValue this_val, int argc, JSValue *
     return JS_ThrowTypeError(ctx, "Uncaught TypeError: Failed to execute 'removeChild' on 'Node': 1st arguments is not object");
   }
 
-  auto selfInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
-  auto nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(nodeValue, kHostClassInstanceClassId));
+  auto selfInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(nodeValue, JSContext::kHostClassInstanceClassId));
 
   if (nodeInstance == nullptr || nodeInstance->document() != selfInstance->document()) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'removeChild' on 'Node': 1st arguments is not a Node object.");
@@ -116,13 +116,13 @@ JSValue Node::insertBefore(QjsContext *ctx, JSValue this_val, int argc, JSValue 
   NodeInstance *referenceInstance = nullptr;
 
   if (JS_IsObject(referenceNodeValue)) {
-    referenceInstance = static_cast<NodeInstance *>(JS_GetOpaque(referenceNodeValue, kHostClassInstanceClassId));
+    referenceInstance = static_cast<NodeInstance *>(JS_GetOpaque(referenceNodeValue, JSContext::kHostClassInstanceClassId));
   } else if (!JS_IsNull(referenceNodeValue)) {
     return JS_ThrowTypeError(ctx, "TypeError: Failed to execute 'insertBefore' on 'Node': parameter 2 is not of type 'Node'");
   }
 
-  auto selfInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
-  auto nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(nodeValue, kHostClassInstanceClassId));
+  auto selfInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(nodeValue, JSContext::kHostClassInstanceClassId));
 
   if (nodeInstance == nullptr || nodeInstance->document() != selfInstance->document()) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'insertBefore' on 'Node': parameter 1 is not of type 'Node'");
@@ -146,9 +146,9 @@ JSValue Node::replaceChild(QjsContext *ctx, JSValue this_val, int argc, JSValue 
     return JS_ThrowTypeError(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 2 arguments is not object.");
   }
 
-  auto selfInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
-  auto newChildInstance = static_cast<NodeInstance *>(JS_GetOpaque(newChildValue, kHostClassInstanceClassId));
-  auto oldChildInstance = static_cast<NodeInstance *>(JS_GetOpaque(oldChildValue, kHostClassInstanceClassId));
+  auto selfInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto newChildInstance = static_cast<NodeInstance *>(JS_GetOpaque(newChildValue, JSContext::kHostClassInstanceClassId));
+  auto oldChildInstance = static_cast<NodeInstance *>(JS_GetOpaque(oldChildValue, JSContext::kHostClassInstanceClassId));
 
   if (oldChildInstance == nullptr || oldChildInstance->parentNode != selfInstance ||
       oldChildInstance->document() != selfInstance->document()) {
@@ -166,7 +166,7 @@ JSValue Node::replaceChild(QjsContext *ctx, JSValue this_val, int argc, JSValue 
 void Node::traverseCloneNode(QjsContext *ctx, NodeInstance *element, NodeInstance *parentElement) {
   for (auto iter : element->childNodes) {
     JSValue newNode = copyNodeValue(ctx, static_cast<NodeInstance *>(iter));
-    auto newNodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(newNode, kHostClassInstanceClassId));
+    auto newNodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(newNode, JSContext::kHostClassInstanceClassId));
     parentElement->internalAppendChild(newNodeInstance);
     // element node needs recursive child nodes.
     if (iter->nodeType == NodeType::ELEMENT_NODE) {
@@ -185,7 +185,7 @@ JSValue Node::copyNodeValue(QjsContext *ctx, NodeInstance *node) {
       JS_NewString(element->m_ctx, tagName.c_str())
     };
     JSValue newElementValue = JS_CallConstructor(element->context()->ctx(), Element::instance(element->context())->classObject, 1, arguments);
-    auto *newElement = static_cast<ElementInstance *>(JS_GetOpaque(newElementValue, kHostClassInstanceClassId));
+    auto *newElement = static_cast<ElementInstance *>(JS_GetOpaque(newElementValue, JSContext::kHostClassInstanceClassId));
 
     /* copy attributes */
 //    JSStringHolder attributesStringHolder = JSStringHolder(element->document()->context, "attributes");
@@ -221,7 +221,7 @@ JSValue Node::copyNodeValue(QjsContext *ctx, NodeInstance *node) {
 }
 
 PROP_GETTER(Node, isConnected)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   return JS_NewBool(ctx, nodeInstance->isConnected());
 }
 PROP_SETTER(Node, isConnected)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
@@ -229,7 +229,7 @@ PROP_SETTER(Node, isConnected)(QjsContext *ctx, JSValue this_val, int argc, JSVa
 }
 
 PROP_GETTER(Node, ownerDocument)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
 //  return nodeInstance->m_document->instanceObject;
   return JS_NULL;
 }
@@ -238,7 +238,7 @@ PROP_SETTER(Node, ownerDocument)(QjsContext *ctx, JSValue this_val, int argc, JS
 }
 
 PROP_GETTER(Node, firstChild)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   auto *instance = nodeInstance->firstChild();
   return instance != nullptr ? instance->instanceObject : JS_NULL;
 }
@@ -247,7 +247,7 @@ PROP_SETTER(Node, firstChild)(QjsContext *ctx, JSValue this_val, int argc, JSVal
 }
 
 PROP_GETTER(Node, lastChild)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   auto *instance = nodeInstance->lastChild();
   return instance != nullptr ? instance->instanceObject : JS_NULL;
 }
@@ -256,7 +256,7 @@ PROP_SETTER(Node, lastChild)(QjsContext *ctx, JSValue this_val, int argc, JSValu
 }
 
 PROP_GETTER(Node, parentNode)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   if (nodeInstance->parentNode == nullptr) return JS_NULL;
   return nodeInstance->parentNode->instanceObject;
 }
@@ -265,7 +265,7 @@ PROP_SETTER(Node, parentNode)(QjsContext *ctx, JSValue this_val, int argc, JSVal
 }
 
 PROP_GETTER(Node, childNodes)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   JSValue arrayObject = JS_NewArray(ctx);
   size_t len = nodeInstance->childNodes.size();
   for (int i = 0; i < len; i ++) {
@@ -278,7 +278,7 @@ PROP_SETTER(Node, childNodes)(QjsContext *ctx, JSValue this_val, int argc, JSVal
 }
 
 PROP_GETTER(Node, previousSibling)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   auto *instance = nodeInstance->previousSibling();
   return instance != nullptr ? instance->instanceObject : JS_NULL;
 }
@@ -287,7 +287,7 @@ PROP_SETTER(Node, previousSibling)(QjsContext *ctx, JSValue this_val, int argc, 
 }
 
 PROP_GETTER(Node, nextSibling)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   auto *instance = nodeInstance->nextSibling();
   return instance != nullptr ? instance->instanceObject : JS_NULL;
 }
@@ -296,7 +296,7 @@ PROP_SETTER(Node, nextSibling)(QjsContext *ctx, JSValue this_val, int argc, JSVa
 }
 
 PROP_GETTER(Node, nodeType)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   return JS_NewUint32(ctx, nodeInstance->nodeType);
 }
 PROP_SETTER(Node, nodeType)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
@@ -304,12 +304,12 @@ PROP_SETTER(Node, nodeType)(QjsContext *ctx, JSValue this_val, int argc, JSValue
 }
 
 PROP_GETTER(Node, textContent)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   std::string textContent = nodeInstance->internalGetTextContent();
   return JS_NewString(ctx, textContent.c_str());
 }
 PROP_SETTER(Node, textContent)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   nodeInstance->internalSetTextContent(argv[0]);
   return JS_NULL;
 }
@@ -482,11 +482,29 @@ JSValue NodeInstance::internalReplaceChild(NodeInstance *newChild, NodeInstance 
 
   return oldChild->instanceObject;
 }
+
+NodeInstance::~NodeInstance() {
+  if (m_context->isValid()) {
+    for (auto &node : childNodes) {
+      node->parentNode = nullptr;
+      node->unrefer();
+      assert(node->_referenceCount <= 0 &&
+             ("Node recycled with a dangling node " + std::to_string(node->eventTargetId)).c_str());
+    }
+  }
+}
+
 void NodeInstance::refer() {
-  JS_DupValue(m_ctx, instanceObject);
+  if (_referenceCount == 0) {
+    JS_DupValue(m_ctx, instanceObject);
+  }
+
 }
 void NodeInstance::unrefer() {
-  JS_FreeValue(m_ctx, instanceObject);
+  _referenceCount--;
+  if (_referenceCount == 0 && m_context->isValid()) {
+    JS_FreeValue(m_ctx, instanceObject);
+  }
 }
 void NodeInstance::_notifyNodeRemoved(NodeInstance *node) {}
 void NodeInstance::_notifyNodeInsert(NodeInstance *node) {}

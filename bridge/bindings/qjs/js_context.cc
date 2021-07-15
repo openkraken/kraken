@@ -11,7 +11,11 @@
 namespace kraken::binding::qjs {
 
 static std::atomic<int32_t> context_unique_id{0};
-std::once_flag kGlobalClassIdFlag;
+
+JSClassID JSContext::kHostClassClassId {0};
+JSClassID JSContext::kHostClassInstanceClassId {0};
+JSClassID JSContext::kHostClassExoticInstanceClassId {0};
+JSClassID JSContext::kHostObjectClassId {0};
 
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner) {
   return std::make_unique<JSContext>(contextId, handler, owner);
@@ -27,6 +31,13 @@ static JSRuntime *m_runtime{nullptr};
 
 JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner)
   : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false), uniqueId(context_unique_id++) {
+
+  std::call_once(kinitJSClassIDFlag, []() {
+    JS_NewClassID(&kHostClassClassId);
+    JS_NewClassID(&kHostClassInstanceClassId);
+    JS_NewClassID(&kHostClassExoticInstanceClassId);
+    JS_NewClassID(&kHostObjectClassId);
+  });
 
   if (m_runtime == nullptr) {
     m_runtime = JS_NewRuntime();
@@ -95,11 +106,11 @@ bool JSContext::evaluateJavaScript(const char *code, size_t codeLength, const ch
   return hasException;
 }
 
-bool JSContext::isValid() {
+bool JSContext::isValid() const {
   return !ctxInvalid_;
 }
 
-int32_t JSContext::getContextId() {
+int32_t JSContext::getContextId() const {
   assert(!ctxInvalid_ && "context has been released");
   return contextId;
 }

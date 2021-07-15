@@ -236,7 +236,7 @@ class KrakenViewController {
     return completer.future;
   }
 
-  Element createElement(int id, Pointer nativePtr, String tagName) {
+  Element createElement(int id, Pointer<NativeEventTarget> nativePtr, String tagName) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_ELEMENT_START, uniqueId: id);
     }

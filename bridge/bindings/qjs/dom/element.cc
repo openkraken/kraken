@@ -76,9 +76,12 @@ JSValue Element::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val
   ElementInstance *element;
   if (elementCreatorMap.count(name) > 0) {
     element = elementCreatorMap[name](this, tagName);
+  } else if (name == "HTML") {
+    element = new ElementInstance(this, tagName, false);
+    element->eventTargetId = HTML_TARGET_ID;
   } else {
     // Fallback to default Element class
-    element = new ElementInstance(this, tagName);
+    element = new ElementInstance(this, tagName, true);
   }
 
   JS_FreeCString(m_ctx, cName);
@@ -87,7 +90,7 @@ JSValue Element::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val
 }
 
 JSValue Element::getBoundingClientRect(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   getDartMethod()->flushUICommand();
   return element->callNativeMethods("getBoundingClientRect", 0, nullptr);
 }
@@ -103,7 +106,7 @@ JSValue Element::hasAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
     return JS_ThrowTypeError(ctx, "Failed to execute 'setAttribute' on 'Element': name attribute is not valid.");
   }
 
-  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   auto *attributes = element->m_attributes;
 
   const char* cname = JS_ToCString(ctx, nameValue);
@@ -127,7 +130,7 @@ JSValue Element::setAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
     return JS_ThrowTypeError(ctx, "Failed to execute 'setAttribute' on 'Element': name attribute is not valid.");
   }
 
-  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   std::string name = jsValueToStdString(ctx, nameValue);
   std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
@@ -165,7 +168,7 @@ JSValue Element::getAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
     return JS_ThrowTypeError(ctx, "Failed to execute 'setAttribute' on 'Element': name attribute is not valid.");
   }
 
-  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   std::string name = jsValueToStdString(ctx, nameValue);
 
   auto *attributes = element->m_attributes;
@@ -188,7 +191,7 @@ JSValue Element::removeAttribute(QjsContext *ctx, JSValue this_val, int argc, JS
     return JS_ThrowTypeError(ctx, "Failed to execute 'removeAttribute' on 'Element': name attribute is not valid.");
   }
 
-  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   std::string name = jsValueToStdString(ctx, nameValue);
   auto *attributes = element->m_attributes;
 
@@ -230,19 +233,19 @@ void Element::defineElement(const std::string &tagName, ElementCreator creator) 
   elementCreatorMap[tagName] = creator;
 }
 
-PROP_GETTER(Element, style)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
-  return element->m_style->instanceObject;
-}
-
-PROP_SETTER(Element, style)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
-
-PROP_GETTER(Element, attributes)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
-
-PROP_SETTER(Element, attributes)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
+//PROP_GETTER(Element, style)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+//  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+//  return element->m_style->instanceObject;
+//}
+//
+//PROP_SETTER(Element, style)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
+//
+//PROP_GETTER(Element, attributes)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
+//
+//PROP_SETTER(Element, attributes)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
 PROP_GETTER(Element, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   std::string tagName = element->tagName();
   return JS_NewString(ctx, tagName.c_str());
 }
@@ -250,7 +253,7 @@ PROP_GETTER(Element, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSVa
 PROP_SETTER(Element, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
 PROP_GETTER(Element, tagName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   std::string tagName = element->tagName();
   return JS_NewString(ctx, tagName.c_str());
 }
@@ -346,15 +349,24 @@ void ElementInstance::_didModifyAttribute(std::string &name, JSValue &oldId, JSV
 
 void ElementInstance::_beforeUpdateId(JSValue &oldId, JSValue &newId) {}
 
-ElementInstance::ElementInstance(Element *element, JSValue &tagName) :
-    NodeInstance(element, NodeType::ELEMENT_NODE,
-                 DocumentInstance::instance(
-                     Document::instance(
-                         element->m_context))),
-    m_tagName(JS_ValueToAtom(m_ctx, tagName)) {
-  NativeString *args_01 = jsValueToNativeString(m_ctx, tagName);
-  ::foundation::UICommandBuffer::instance(m_context->getContextId())
+ElementInstance::ElementInstance(Element *element, JSValue &tagName, bool shouldAddUICommand) :
+  NodeInstance(element, NodeType::ELEMENT_NODE,
+               DocumentInstance::instance(
+                 Document::instance(
+                   element->m_context))),
+  m_tagName(JS_ValueToAtom(m_ctx, tagName)) {
+
+  m_attributes = new ElementAttributes(m_context);
+  m_style = new StyleDeclarationInstance(CSSStyleDeclaration::instance(m_context), this);
+
+  JS_SetPropertyStr(m_ctx, instanceObject, "style", m_style->instanceObject);
+  JS_SetPropertyStr(m_ctx, instanceObject, "attributes", m_attributes->jsObject);
+
+  if (shouldAddUICommand) {
+    NativeString *args_01 = jsValueToNativeString(m_ctx, tagName);
+    ::foundation::UICommandBuffer::instance(m_context->getContextId())
       ->addCommand(eventTargetId, UICommand::createElement, *args_01, &nativeEventTarget);
+  }
 }
 
 }

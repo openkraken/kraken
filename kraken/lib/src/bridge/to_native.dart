@@ -385,7 +385,7 @@ void flushUICommand() {
       try {
         switch (commandType) {
           case UICommandType.createElement:
-            controller.view.createElement(id, nativePtr, command.args[0]);
+            controller.view.createElement(id, nativePtr.cast<NativeEventTarget>(), command.args[0]);
             break;
           case UICommandType.createTextNode:
             controller.view.createTextNode(id, nativePtr.cast<NativeEventTarget>(), command.args[0]);

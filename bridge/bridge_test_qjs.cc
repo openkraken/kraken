@@ -45,7 +45,7 @@ static JSValue matchImageSnapshot(QjsContext *ctx, JSValueConst this_val, int ar
       ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 1 (blob) must be an Blob object.");
   }
   auto blob = static_cast<kraken::binding::qjs::BlobInstance *>(
-    JS_GetOpaque(blobValue, kraken::binding::qjs::kHostClassInstanceClassId));
+    JS_GetOpaque(blobValue, kraken::binding::qjs::JSContext::kHostClassInstanceClassId));
 
   if (blob == nullptr) {
     return JS_ThrowTypeError(
@@ -108,17 +108,22 @@ static JSValue environment(QjsContext *ctx, JSValueConst this_val, int argc, JSV
 
 static JSValue simulatePointer(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
   if (getDartMethod()->simulatePointer == nullptr) {
-    return JS_ThrowTypeError(
-      ctx, "Failed to execute '__kraken_simulate_pointer__': dart method(simulatePointer) is not registered.");
+    return JS_ThrowTypeError(ctx,
+                             "Failed to execute '__kraken_simulate_pointer__': dart method(simulatePointer) is not registered.");
   }
 
   auto *context = static_cast<binding::qjs::JSContext *>(JS_GetContextOpaque(ctx));
 
   JSValue &inputArrayValue = argv[0];
-
   if (!JS_IsObject(inputArrayValue)) {
     return JS_ThrowTypeError(ctx,
                              "Failed to execute '__kraken_simulate_pointer__': first arguments should be an array.");
+  }
+
+  JSValue &pointerValue = argv[1];
+  if (!JS_IsNumber(pointerValue)) {
+    return JS_ThrowTypeError(ctx,
+                             "Failed to execute '__kraken_simulate_pointer__': second arguments should be an number.");
   }
 
   uint32_t length;
@@ -149,17 +154,21 @@ static JSValue simulatePointer(QjsContext *ctx, JSValueConst this_val, int argc,
     mousePointerList[i] = mouse;
   }
 
-  getDartMethod()->simulatePointer(mousePointerList, length);
+//  int32_t pointer = JSValueToNumber(ctx, pointerValue, exception);
+  uint32_t pointer;
+  JS_ToUint32(ctx, &pointer, pointerValue);
+
+  getDartMethod()->simulatePointer(mousePointerList, length, pointer);
 
   delete[] mousePointerList;
 
   return JS_NULL;
 }
 
-static JSValue simulateKeyPress(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-  if (getDartMethod()->simulateKeyPress == nullptr) {
+static JSValue simulateInputText(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+  if (getDartMethod()->simulateInputText == nullptr) {
     return JS_ThrowTypeError(
-      ctx, "Failed to execute '__kraken_simulate_keypress__': dart method(simulateKeyPress) is not registered.");
+      ctx, "Failed to execute '__kraken_simulate_keypress__': dart method(simulateInputText) is not registered.");
   }
 
   JSValue &charStringValue = argv[0];
@@ -170,7 +179,7 @@ static JSValue simulateKeyPress(QjsContext *ctx, JSValueConst this_val, int argc
   }
 
   NativeString *nativeString = kraken::binding::qjs::jsValueToNativeString(ctx, charStringValue);
-  getDartMethod()->simulateKeyPress(nativeString);
+  getDartMethod()->simulateInputText(nativeString);
   nativeString->free();
   return JS_NULL;
 };
@@ -181,15 +190,16 @@ JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->
   QJS_GLOBAL_BINDING_FUNCTION(context, matchImageSnapshot, "__kraken_match_image_snapshot__", 3);
   QJS_GLOBAL_BINDING_FUNCTION(context, environment, "__kraken_environment__", 0);
   QJS_GLOBAL_BINDING_FUNCTION(context, simulatePointer, "__kraken_simulate_pointer__", 1);
-  QJS_GLOBAL_BINDING_FUNCTION(context, simulateKeyPress, "__kraken_simulate_keypress__", 1);
+  QJS_GLOBAL_BINDING_FUNCTION(context, simulateInputText, "__kraken_simulate_inputtext__", 1);
 
   initKrakenTestFramework(bridge);
 }
 
 struct ExecuteCallbackContext {
   ExecuteCallbackContext() = delete;
+
   explicit ExecuteCallbackContext(binding::qjs::JSContext *context, ExecuteCallback executeCallback)
-    : executeCallback(executeCallback), context(context){};
+    : executeCallback(executeCallback), context(context) {};
   ExecuteCallback executeCallback;
   binding::qjs::JSContext *context;
 };
@@ -202,7 +212,8 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
     return;
   }
 
-  auto done = [](QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic, JSValue *func_data) -> JSValue {
+  auto done = [](QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic,
+                 JSValue *func_data) -> JSValue {
     JSValue &statusValue = argv[0];
     JSValue proxyObject = func_data[0];
     auto *callbackContext = static_cast<ExecuteCallbackContext *>(JS_GetOpaque(proxyObject, 1));
@@ -219,7 +230,7 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
   auto *callbackContext = new ExecuteCallbackContext(context.get(), executeCallback);
   JSValue proxyObject = JS_NewObject(context->ctx());
   JS_SetOpaque(proxyObject, callbackContext);
-  JSValue callbackData[] {
+  JSValue callbackData[]{
     proxyObject
   };
   JSValue callback = JS_NewCFunctionData(context->ctx(), done, 0, 0, 1, callbackData);

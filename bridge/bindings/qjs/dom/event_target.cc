@@ -41,7 +41,7 @@ JSValue EventTarget::addEventListener(QjsContext *ctx, JSValue this_val, int arg
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: type and listener are required.");
   }
 
-  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   if (eventTargetInstance == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
@@ -98,7 +98,7 @@ JSValue EventTarget::removeEventListener(QjsContext *ctx, JSValue this_val, int 
     return JS_ThrowTypeError(ctx, "Failed to removeEventListener: at least type and listener are required.");
   }
 
-  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   if (eventTargetInstance == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
@@ -157,13 +157,13 @@ JSValue EventTarget::dispatchEvent(QjsContext *ctx, JSValue this_val, int argc, 
     return JS_ThrowTypeError(ctx, "Failed to dispatchEvent: first arguments should be an event object");
   }
 
-  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   if (eventTargetInstance == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
 
   JSValue &eventValue = argv[0];
-  auto eventInstance = reinterpret_cast<EventInstance *>(JS_GetOpaque(eventValue, kHostClassInstanceClassId));
+  auto eventInstance = reinterpret_cast<EventInstance *>(JS_GetOpaque(eventValue, JSContext::kHostClassInstanceClassId));
   return JS_NewBool(ctx, eventTargetInstance->dispatchEvent(eventInstance));
 }
 
@@ -221,7 +221,7 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
 }
 
 JSValue EventTarget::__kraken_clear_event_listener(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
   if (eventTargetInstance == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
