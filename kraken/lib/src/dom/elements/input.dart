@@ -11,6 +11,7 @@ import 'dart:math' as math;
 import 'package:kraken/bridge.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show FocusNode;
 import 'package:flutter/rendering.dart' hide RenderEditable;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -113,6 +114,11 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   static void setFocus(InputElement inputElement) {
     if (InputElement.focusInputElement != inputElement) {
       clearFocus();
+      // Focus kraken widget to get focus from other widgets.
+      FocusNode? focusNode = inputElement.elementManager.focusNode;
+      if (focusNode != null) {
+        focusNode.requestFocus();
+      }
       InputElement.focusInputElement = inputElement;
       inputElement.focus();
     }

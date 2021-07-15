@@ -317,6 +317,7 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
       navigationDelegate: _krakenWidget.navigationDelegate,
       devToolsService: _krakenWidget.devToolsService,
       httpClientInterceptor: _krakenWidget.httpClientInterceptor,
+      focusNode: _krakenWidget.focusNode,
     );
 
     if (kProfileMode) {
