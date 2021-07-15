@@ -148,15 +148,18 @@ class _KrakenState extends State<Kraken> {
   void initState() {
     super.initState();
     _shortcutMap = <LogicalKeySet, Intent>{
-      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
-      LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
-      LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
-      LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const MoveSelectionLeftTextIntent(),
+      LogicalKeySet(LogicalKeyboardKey.arrowRight): const MoveSelectionRightTextIntent(),
+      LogicalKeySet(LogicalKeyboardKey.arrowDown): const MoveSelectionDownTextIntent(),
+      LogicalKeySet(LogicalKeyboardKey.arrowUp): const MoveSelectionUpTextIntent(),
     };
     _actionMap = <Type, Action<Intent>>{
       NextFocusIntent: CallbackAction<NextFocusIntent>(onInvoke: _handleNextFocus),
       PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(onInvoke: _handlePreviousFocus),
-      DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(onInvoke: _handleDirectionFocus),
+      MoveSelectionLeftTextIntent: CallbackAction<MoveSelectionLeftTextIntent>(onInvoke: _handleMoveSelectionLeftText),
+      MoveSelectionRightTextIntent: CallbackAction<MoveSelectionRightTextIntent>(onInvoke: _handleMoveSelectionRightText),
+      MoveSelectionDownTextIntent: CallbackAction<MoveSelectionToEndTextIntent>(onInvoke: _handleMoveSelectionToEndText),
+      MoveSelectionUpTextIntent: CallbackAction<MoveSelectionToStartTextIntent>(onInvoke: _handleMoveSelectionToStartText),
     };
     _focusNode = (context.widget as Kraken).focusNode;
   }
@@ -244,9 +247,42 @@ class _KrakenState extends State<Kraken> {
     }
   }
 
-  void _handleDirectionFocus(DirectionalFocusIntent intent) {
+  void _handleMoveSelectionLeftText(MoveSelectionLeftTextIntent intent) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.length != 0) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      focusedEditable!.moveSelectionLeft(SelectionChangedCause.keyboard);
+    }
+  }
+  
+  void _handleMoveSelectionRightText(MoveSelectionRightTextIntent intent) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.length != 0) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      focusedEditable!.moveSelectionRight(SelectionChangedCause.keyboard);
+    }
   }
 
+  void _handleMoveSelectionToEndText(MoveSelectionToEndTextIntent intent) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.length != 0) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      focusedEditable!.moveSelectionToEnd(SelectionChangedCause.keyboard);
+    }
+  }
+
+  void _handleMoveSelectionToStartText(MoveSelectionToStartTextIntent intent) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.length != 0) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      focusedEditable!.moveSelectionToStart(SelectionChangedCause.keyboard);
+    }
+  }
+  
   void _focusEditable(RenderEditable renderEditable) {
     dom.RenderInputBox renderInputBox = renderEditable.parent as dom.RenderInputBox;
     RenderIntrinsic renderIntrisic = renderInputBox.parent as RenderIntrinsic;
