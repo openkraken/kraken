@@ -235,8 +235,8 @@ list(APPEND PUBLIC_HEADER
 add_library(kraken SHARED ${BRIDGE_SOURCE})
 add_library(kraken_static STATIC ${BRIDGE_SOURCE})
 
-add_library(gunbo_parse SHARED ${GUMBO_PAESER})
-add_library(gunbo_parse_static STATIC ${GUMBO_PAESER})
+add_library(gumbo_parse SHARED ${GUMBO_PAESER})
+add_library(gumbo_parse_static STATIC ${GUMBO_PAESER})
 
 if (${IS_ANDROID})
   find_library(log-lib log)
@@ -248,7 +248,7 @@ endif ()
 target_include_directories(kraken PRIVATE
   ${BRIDGE_INCLUDE}
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
-target_link_libraries(kraken PRIVATE ${BRIDGE_LINK_LIBS} gunbo_parse)
+target_link_libraries(kraken PRIVATE ${BRIDGE_LINK_LIBS} gumbo_parse)
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "release" OR ${CMAKE_BUILD_TYPE} STREQUAL "relwithdebinfo")
   ## http://ptspts.blogspot.com/2013/12/how-to-make-smaller-c-and-c-binaries.html
@@ -263,7 +263,7 @@ endif()
 target_include_directories(kraken_static PRIVATE
         ${BRIDGE_INCLUDE}
         ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
-target_link_libraries(kraken_static ${BRIDGE_LINK_LIBS} gunbo_parse_static)
+target_link_libraries(kraken_static ${BRIDGE_LINK_LIBS} gumbo_parse_static)
 
 execute_process(
   COMMAND grep version: ./pubspec.yaml
@@ -298,6 +298,11 @@ if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
           PROPERTIES
           LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
           )
+  set_target_properties(gumbo_parse
+          PROPERTIES
+          LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
+          )
+
   set_target_properties(kraken_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}")
 elseif (IS_ANDROID)
   # android do nothing
