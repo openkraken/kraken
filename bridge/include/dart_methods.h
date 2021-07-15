@@ -59,8 +59,8 @@ struct MousePointer {
   double y;
   double change;
 };
-using SimulatePointer = void (*)(MousePointer **, int32_t length);
-using SimulateKeyPress = void (*)(NativeString *nativeString);
+using SimulatePointer = void (*)(MousePointer **, int32_t length, int32_t pointer);
+using SimulateInputText = void (*)(NativeString *nativeString);
 
 namespace kraken {
 struct DartMethodPointer {
@@ -81,7 +81,7 @@ struct DartMethodPointer {
   MatchImageSnapshot matchImageSnapshot{nullptr};
   Environment environment{nullptr};
   SimulatePointer simulatePointer{nullptr};
-  SimulateKeyPress simulateKeyPress{nullptr};
+  SimulateInputText simulateInputText{nullptr};
   FlushUICommand flushUICommand{nullptr};
 #if ENABLE_PROFILE
   GetPerformanceEntries getPerformanceEntries{nullptr};

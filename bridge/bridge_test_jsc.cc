@@ -158,6 +158,13 @@ JSValueRef simulatePointer(JSContextRef ctx, JSObjectRef function, JSObjectRef t
     return nullptr;
   }
 
+  const JSValueRef &secondArgsValueRef = arguments[1];
+  if (!JSValueIsNumber(ctx, secondArgsValueRef)) {
+    binding::jsc::throwJSError(ctx, "Failed to execute '__kraken_simulate_pointer__': second arguments should be an number.",
+                    exception);
+    return nullptr;
+  }
+
   JSObjectRef inputArrayObjectRef = JSValueToObject(ctx, firstArgsValueRef, exception);
   size_t length;
 
@@ -182,25 +189,27 @@ JSValueRef simulatePointer(JSContextRef ctx, JSObjectRef function, JSObjectRef t
     mousePointerList[i] = mouse;
   }
 
-  getDartMethod()->simulatePointer(mousePointerList, length);
+  int32_t pointer = JSValueToNumber(ctx, secondArgsValueRef, exception);
+
+  getDartMethod()->simulatePointer(mousePointerList, length, pointer);
 
   delete[] mousePointerList;
 
   return nullptr;
 }
 
-JSValueRef simulateKeyPress(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+JSValueRef simulateInputText(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                             const JSValueRef *arguments, JSValueRef *exception) {
-  if (getDartMethod()->simulateKeyPress == nullptr) {
+  if (getDartMethod()->simulateInputText == nullptr) {
     binding::jsc::throwJSError(ctx,
-                    "Failed to execute '__kraken_simulate_keypress__': dart method(simulateKeyPress) is not registered.",
+                    "Failed to execute '__kraken_simulate_inputtext__': dart method(simulateInputText) is not registered.",
                     exception);
     return nullptr;
   }
 
   const JSValueRef &firstArgsValueRef = arguments[0];
   if (!JSValueIsString(ctx, firstArgsValueRef)) {
-    binding::jsc::throwJSError(ctx, "Failed to execute '__kraken_simulate_keypress__': first arguments should be a string.",
+    binding::jsc::throwJSError(ctx, "Failed to execute '__kraken_simulate_inputtext__': first arguments should be a string.",
                     exception);
     return nullptr;
   }
@@ -209,7 +218,7 @@ JSValueRef simulateKeyPress(JSContextRef ctx, JSObjectRef function, JSObjectRef 
   NativeString nativeString{};
   nativeString.length = JSStringGetLength(charsStringRef);
   nativeString.string = JSStringGetCharactersPtr(charsStringRef);
-  getDartMethod()->simulateKeyPress(&nativeString);
+  getDartMethod()->simulateInputText(&nativeString);
   JSStringRelease(charsStringRef);
   return nullptr;
 }
@@ -220,7 +229,7 @@ JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->
   JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_match_image_snapshot__", matchImageSnapshot);
   JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_environment__", environment);
   JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_simulate_pointer__", simulatePointer);
-  JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_simulate_keypress__", simulateKeyPress);
+  JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_simulate_inputtext__", simulateInputText);
 
   initKrakenTestFramework(bridge);
 }

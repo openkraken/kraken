@@ -154,13 +154,12 @@ class RenderFlexLayout extends RenderLayoutBox {
   /// start of the main axis and the center of the cross axis.
   RenderFlexLayout({
     List<RenderBox>? children,
-    required int targetId,
-    ElementManager? elementManager,
     required RenderStyle renderStyle,
+    required ElementDelegate elementDelegate
   }) : super(
-            targetId: targetId,
-            renderStyle: renderStyle,
-            elementManager: elementManager) {
+    renderStyle: renderStyle,
+    elementDelegate: elementDelegate
+  ) {
     addAll(children);
   }
 
@@ -505,7 +504,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   double _getShrinkConstraints(RenderBox child,
       Map<int?, _RunChild> runChildren, double remainingFreeSpace) {
     double totalWeightedFlexShrink = 0;
-    runChildren.forEach((int? targetId, _RunChild runChild) {
+    runChildren.forEach((int? hashCode, _RunChild runChild) {
       double childOriginalMainSize = runChild.originalMainSize;
       RenderBox child = runChild.child;
       if (!runChild.frozen) {
@@ -516,9 +515,9 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     int? childNodeId;
     if (child is RenderTextBox) {
-      childNodeId = child.targetId;
+      childNodeId = child.hashCode;
     } else if (child is RenderBoxModel) {
-      childNodeId = child.targetId;
+      childNodeId = child.hashCode;
     }
 
     _RunChild current = runChildren[childNodeId]!;
@@ -616,7 +615,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     if (kProfileMode) {
       childLayoutDuration = 0;
       PerformanceTiming.instance()
-          .mark(PERF_FLEX_LAYOUT_START, uniqueId: targetId);
+          .mark(PERF_FLEX_LAYOUT_START, uniqueId: hashCode);
     }
 
     beforeLayout();
@@ -687,7 +686,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       int amendEndTime =
           flexLayoutEndTime.microsecondsSinceEpoch - childLayoutDuration;
       PerformanceTiming.instance().mark(PERF_FLEX_LAYOUT_END,
-          uniqueId: targetId, startTime: amendEndTime);
+          uniqueId: hashCode, startTime: amendEndTime);
     }
   }
 
@@ -1069,9 +1068,9 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       int? childNodeId;
       if (child is RenderTextBox) {
-        childNodeId = child.targetId;
+        childNodeId = child.hashCode;
       } else if (child is RenderBoxModel) {
-        childNodeId = child.targetId;
+        childNodeId = child.hashCode;
       }
 
       if (child is RenderPositionHolder && isPlaceholderPositioned(child)) {
@@ -1291,9 +1290,9 @@ class RenderFlexLayout extends RenderLayoutBox {
       RenderBox child = runChild.child;
       int? childNodeId;
       if (child is RenderTextBox) {
-        childNodeId = child.targetId;
+        childNodeId = child.hashCode;
       } else if (child is RenderBoxModel) {
-        childNodeId = child.targetId;
+        childNodeId = child.hashCode;
       }
 
       _RunChild? current = runChildren[childNodeId];
@@ -1443,7 +1442,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       double totalSpace = 0;
       // Flex factor calculation depends on flex-basis if exists.
-      void calTotalSpace(int? targetId, _RunChild runChild) {
+      void calTotalSpace(int? hashCode, _RunChild runChild) {
         double childSpace = runChild.originalMainSize;
         RenderBox child = runChild.child;
         double marginHorizontal = 0;
@@ -1653,7 +1652,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       double flexShrink = _getFlexShrink(child);
       // Change main axis constraints
       if ((isFlexGrow && flexGrow > 0) || (isFlexShrink && flexShrink > 0)) {
-        double mainSize = metrics.runChildren[child.targetId]!.adjustedMainSize;
+        double mainSize = metrics.runChildren[child.hashCode]!.adjustedMainSize;
         if (isHorizontalFlexDirection) {
           minConstraintWidth = maxConstraintWidth = mainSize;
         } else {
@@ -1798,7 +1797,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
     Map<int?, _RunChild> runChildren = runMetrics.runChildren;
     double runMainExtent = 0;
-    void iterateRunChildren(int? targetId, _RunChild runChild) {
+    void iterateRunChildren(int? hashCode, _RunChild runChild) {
       RenderBox child = runChild.child;
       double runChildMainSize =
           isHorizontalFlexDirection ? child.size.width : child.size.height;
@@ -1842,7 +1841,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     Map<int?, _RunChild> runChildren = runMetrics.runChildren;
     double runCrossExtent = 0;
     List<double> runChildrenCrossSize = [];
-    void iterateRunChildren(int? targetId, _RunChild runChild) {
+    void iterateRunChildren(int? hashCode, _RunChild runChild) {
       RenderBox child = runChild.child;
       double runChildCrossSize =
           isHorizontalFlexDirection ? child.size.height : child.size.width;
@@ -1907,7 +1906,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       // Scrollable cross size collection of each child in the line
       List<double> scrollableCrossSizeOfChildren = [];
 
-      void iterateRunChildren(int? targetId, _RunChild runChild) {
+      void iterateRunChildren(int? hashCode, _RunChild runChild) {
         RenderBox child = runChild.child;
         // Total main size of previous siblings
         double preSiblingsMainSize = 0;
@@ -2629,9 +2628,9 @@ class RenderFlexLayout extends RenderLayoutBox {
   RenderRecyclerLayout toRenderRecyclerLayout() {
     List<RenderBox?> children = getDetachedChildrenAsList() as List<RenderBox?>;
     RenderRecyclerLayout renderRecyclerLayout = RenderRecyclerLayout(
-        targetId: targetId,
-        renderStyle: renderStyle,
-        elementManager: elementManager);
+      renderStyle: renderStyle,
+      elementDelegate: elementDelegate,
+    );
     renderRecyclerLayout.addAll(children);
     return copyWith(renderRecyclerLayout);
   }
@@ -2640,34 +2639,32 @@ class RenderFlexLayout extends RenderLayoutBox {
   RenderFlowLayout toFlowLayout() {
     List<RenderObject> children = getDetachedChildrenAsList();
     RenderFlowLayout flowLayout = RenderFlowLayout(
-        children: children as List<RenderBox>,
-        targetId: targetId,
-        renderStyle: renderStyle,
-        elementManager: elementManager);
+      children: children as List<RenderBox>,
+      renderStyle: renderStyle,
+      elementDelegate: elementDelegate,
+    );
     return copyWith(flowLayout);
   }
 
   /// Convert [RenderFlexLayout] to [RenderSelfRepaintFlexLayout]
   RenderSelfRepaintFlexLayout toSelfRepaint() {
     List<RenderObject> children = getDetachedChildrenAsList();
-    RenderSelfRepaintFlexLayout selfRepaintFlexLayout =
-        RenderSelfRepaintFlexLayout(
-            children: children as List<RenderBox>,
-            targetId: targetId,
-            renderStyle: renderStyle,
-            elementManager: elementManager);
+    RenderSelfRepaintFlexLayout selfRepaintFlexLayout = RenderSelfRepaintFlexLayout(
+      children: children as List<RenderBox>,
+      renderStyle: renderStyle,
+      elementDelegate: elementDelegate,
+    );
     return copyWith(selfRepaintFlexLayout);
   }
 
   /// Convert [RenderFlexLayout] to [RenderSelfRepaintFlowLayout]
   RenderSelfRepaintFlowLayout toSelfRepaintFlowLayout() {
     List<RenderObject?> children = getDetachedChildrenAsList();
-    RenderSelfRepaintFlowLayout selfRepaintFlowLayout =
-        RenderSelfRepaintFlowLayout(
-            children: children as List<RenderBox>,
-            targetId: targetId,
-            renderStyle: renderStyle,
-            elementManager: elementManager);
+    RenderSelfRepaintFlowLayout selfRepaintFlowLayout = RenderSelfRepaintFlowLayout(
+      children: children as List<RenderBox>,
+      renderStyle: renderStyle,
+      elementDelegate: elementDelegate,
+    );
     return copyWith(selfRepaintFlowLayout);
   }
 }
@@ -2676,14 +2673,13 @@ class RenderFlexLayout extends RenderLayoutBox {
 class RenderSelfRepaintFlexLayout extends RenderFlexLayout {
   RenderSelfRepaintFlexLayout({
     List<RenderBox>? children,
-    required int targetId,
-    ElementManager? elementManager,
     required RenderStyle renderStyle,
+    required ElementDelegate elementDelegate
   }) : super(
-            children: children,
-            targetId: targetId,
-            elementManager: elementManager,
-            renderStyle: renderStyle);
+    children: children,
+    renderStyle: renderStyle,
+    elementDelegate: elementDelegate
+  );
 
   @override
   bool get isRepaintBoundary => true;
@@ -2691,12 +2687,11 @@ class RenderSelfRepaintFlexLayout extends RenderFlexLayout {
   /// Convert [RenderSelfRepaintFlexLayout] to [RenderFlowLayout]
   RenderSelfRepaintFlowLayout toFlowLayout() {
     List<RenderObject> children = getDetachedChildrenAsList();
-    RenderSelfRepaintFlowLayout selfRepaintFlowLayout =
-        RenderSelfRepaintFlowLayout(
-            children: children as List<RenderBox>?,
-            targetId: targetId,
-            renderStyle: renderStyle,
-            elementManager: elementManager);
+    RenderSelfRepaintFlowLayout selfRepaintFlowLayout = RenderSelfRepaintFlowLayout(
+      children: children as List<RenderBox>?,
+      renderStyle: renderStyle,
+      elementDelegate: elementDelegate,
+    );
     return copyWith(selfRepaintFlowLayout);
   }
 
@@ -2704,10 +2699,10 @@ class RenderSelfRepaintFlexLayout extends RenderFlexLayout {
   RenderFlexLayout toParentRepaint() {
     List<RenderObject> children = getDetachedChildrenAsList();
     RenderFlexLayout flexLayout = RenderFlexLayout(
-        children: children as List<RenderBox>,
-        targetId: targetId,
-        renderStyle: renderStyle,
-        elementManager: elementManager);
+      children: children as List<RenderBox>,
+      renderStyle: renderStyle,
+      elementDelegate: elementDelegate,
+    );
     return copyWith(flexLayout);
   }
 
@@ -2715,10 +2710,10 @@ class RenderSelfRepaintFlexLayout extends RenderFlexLayout {
   RenderFlowLayout toParentRepaintFlowLayout() {
     List<RenderObject> children = getDetachedChildrenAsList();
     RenderFlowLayout flowLayout = RenderFlowLayout(
-        children: children as List<RenderBox>?,
-        targetId: targetId,
-        renderStyle: renderStyle,
-        elementManager: elementManager);
+      children: children as List<RenderBox>?,
+      renderStyle: renderStyle,
+      elementDelegate: elementDelegate,
+    );
     return copyWith(flowLayout);
   }
 }

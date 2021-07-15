@@ -6,6 +6,7 @@
 import 'package:kraken/rendering.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/scheduler.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 
@@ -13,6 +14,9 @@ class GestureManager {
 
   static GestureManager? _instance;
   GestureManager._();
+
+  static const int MAX_STEP_MS = 16;
+  final Throttling _throttler = Throttling(duration: Duration(milliseconds: MAX_STEP_MS));
 
   factory GestureManager.instance() {
     if (_instance == null) {
@@ -45,6 +49,12 @@ class GestureManager {
   List<RenderBox> _hitTestList = [];
 
   RenderPointerListenerMixin? _target;
+
+  Map<int, PointerEvent> _pointerToEvent = Map();
+
+  Map<int, RenderPointerListenerMixin> _pointerToTarget = Map();
+
+  List<int> _points = [];
 
   void addTargetToList(RenderBox target) {
     _hitTestList.add(target);
@@ -83,66 +93,136 @@ class GestureManager {
       }
     }
 
+    String touchType = EVENT_TOUCH_CANCEL;
+
     if (event is PointerDownEvent) {
+      touchType = EVENT_TOUCH_START;
+      _pointerToEvent[event.pointer] = event;
+      _points.add(event.pointer);
+
       // Add pointer to gestures then register the gesture recognizer to the arena.
       gestures.forEach((key, gesture) {
         // Register the recognizer that needs to be monitored.
         if (events.contains(key)) {
-          gesture.addPointer(event);
+          gesture.addPointer(event as PointerDownEvent);
         }
       });
 
       // The target node triggered by the gesture is the bottom node of hitTest.
       // The scroll element needs to be judged by isScrollingContentBox to find the real element upwards.
-      _target = null;
       if (_hitTestList.isNotEmpty) {
         for (int i = 0; i < _hitTestList.length; i++) {
           RenderBox renderBox = _hitTestList[i];
           if ((renderBox is RenderBoxModel && !renderBox.isScrollingContentBox) || renderBox is RenderViewportBox) {
-            _target = renderBox as RenderPointerListenerMixin;
+            _pointerToTarget[event.pointer] = renderBox as RenderPointerListenerMixin;
             break;
           }
         }
       }
+
+      clearTargetList();
+    } else if (event is PointerMoveEvent) {
+      touchType = EVENT_TOUCH_MOVE;
+      _pointerToEvent[event.pointer] = event;
+    } else if (event is PointerUpEvent) {
+      touchType = EVENT_TOUCH_END;
+    } else if (event is PointerCancelEvent) {
+      touchType = EVENT_TOUCH_CANCEL;
     }
 
-    if (_target != null) {
-      if (_target!.onPointerDown != null && event is PointerDownEvent)
-        _target!.onPointerDown!(event);
-      if (_target!.onPointerMove != null && event is PointerMoveEvent)
-        _target!.onPointerMove!(event);
-      if (_target!.onPointerUp != null && event is PointerUpEvent)
-        _target!.onPointerUp!(event);
-      if (_target!.onPointerCancel != null && event is PointerCancelEvent)
-        _target!.onPointerCancel!(event);
-      if (_target!.onPointerSignal != null && event is PointerSignalEvent)
-        _target!.onPointerSignal!(event);
+    if (_pointerToTarget[event.pointer] != null) {
+      RenderPointerListenerMixin currentTarget = _pointerToTarget[event.pointer] as RenderPointerListenerMixin;
+
+      TouchEvent e = TouchEvent(touchType);
+      var pointerEventOriginal = event.original;
+      // Use original event, prevent to be relative coordinate
+      if (pointerEventOriginal != null) event = pointerEventOriginal;
+
+      for (int i = 0; i < _points.length; i++) {
+        int pointer = _points[i];
+        PointerEvent point = _pointerToEvent[pointer] as PointerEvent;
+        RenderPointerListenerMixin target = _pointerToTarget[pointer] as RenderPointerListenerMixin;
+
+        EventTarget node = target.getEventTarget!();
+
+        Touch touch = Touch(
+          identifier: point.pointer,
+          target: node,
+          screenX: point.position.dx,
+          screenY: point.position.dy,
+          clientX: point.localPosition.dx,
+          clientY: point.localPosition.dy,
+          pageX: point.localPosition.dx,
+          pageY: point.localPosition.dy,
+          radiusX: point.radiusMajor,
+          radiusY: point.radiusMinor,
+          rotationAngle: point.orientation,
+          force: point.pressure,
+        );
+
+        if (pointer == event.pointer) {
+          e.changedTouches.append(touch);
+        }
+
+        if (currentTarget == target) {
+          e.targetTouches.append(touch);
+        }
+
+        e.touches.append(touch);
+      }
+
+      if (currentTarget.dispatchEvent != null) {
+        if (touchType == EVENT_TOUCH_MOVE) {
+          _throttler.throttle(() {
+            currentTarget.dispatchEvent!(e);
+          });
+        } else {
+          currentTarget.dispatchEvent!(e);
+        }
+      }
+
+      if (event is PointerUpEvent || event is PointerCancelEvent) {
+        // Multi pointer operations in the web will organize click and other gesture triggers.
+        if (_pointerToTarget.length == 1 && _pointerToTarget[event.pointer] != null) {
+          _target = _pointerToTarget[event.pointer];
+        } else {
+          _target = null;
+        }
+
+        _points.remove(event.pointer);
+        _pointerToEvent.remove(event.pointer);
+        _pointerToTarget.remove(event.pointer);
+      }
     }
   }
 
   void onClick(String eventType, { PointerDownEvent? down, PointerUpEvent? up }) {
     if (_target != null && _target!.onClick != null) {
-      _target!.onClick!(eventType, up: up);
+      if (_target!.onClick != null) {
+        _target!.onClick!(eventType, up: up);
+      }
     }
   }
 
   void onSwipe(Event event) {
     if (_target != null && _target!.onSwipe != null) {
-      _target!.onSwipe!(event);
+      if (_target!.onSwipe != null) {
+        _target!.onSwipe!(event);
+      }
     }
   }
 
   void onPanStart(DragStartDetails details) {
     if (_target != null && _target!.onPan != null) {
       _target!.onPan!(
-          GestureEvent(
-              EVENT_PAN,
-              GestureEventInit(
-                  state: EVENT_STATE_START,
-                  deltaX: details.globalPosition.dx,
-                  deltaY: details.globalPosition.dy
-              )
+        GestureEvent(
+          EVENT_PAN,
+          GestureEventInit(
+            state: EVENT_STATE_START,
+            deltaX: details.globalPosition.dx,
+            deltaY: details.globalPosition.dy
           )
+        )
       );
     }
   }
@@ -165,14 +245,14 @@ class GestureManager {
   void onPanEnd(DragEndDetails details) {
     if (_target != null && _target!.onPan != null) {
       _target!.onPan!(
-          GestureEvent(
-              EVENT_PAN,
-              GestureEventInit(
-                  state: EVENT_STATE_END,
-                  velocityX: details.velocity.pixelsPerSecond.dx,
-                  velocityY: details.velocity.pixelsPerSecond.dy
-              )
+        GestureEvent(
+          EVENT_PAN,
+          GestureEventInit(
+            state: EVENT_STATE_END,
+            velocityX: details.velocity.pixelsPerSecond.dx,
+            velocityY: details.velocity.pixelsPerSecond.dy
           )
+        )
       );
     }
   }
@@ -180,10 +260,10 @@ class GestureManager {
   void onScaleStart(ScaleStartDetails details) {
     if (_target != null && _target!.onScale != null) {
       _target!.onScale!(
-          GestureEvent(
-              EVENT_SCALE,
-              GestureEventInit( state: EVENT_STATE_START )
-          )
+        GestureEvent(
+          EVENT_SCALE,
+          GestureEventInit( state: EVENT_STATE_START )
+        )
       );
     }
   }
@@ -191,14 +271,14 @@ class GestureManager {
   void onScaleUpdate(ScaleUpdateDetails details) {
     if (_target != null && _target!.onScale != null) {
       _target!.onScale!(
-          GestureEvent(
-              EVENT_SCALE,
-              GestureEventInit(
-                  state: EVENT_STATE_UPDATE,
-                  rotation: details.rotation,
-                  scale: details.scale
-              )
+        GestureEvent(
+          EVENT_SCALE,
+          GestureEventInit(
+            state: EVENT_STATE_UPDATE,
+            rotation: details.rotation,
+            scale: details.scale
           )
+        )
       );
     }
   }
@@ -206,10 +286,10 @@ class GestureManager {
   void onScaleEnd(ScaleEndDetails details) {
     if (_target != null && _target!.onScale != null) {
       _target!.onScale!(
-          GestureEvent(
-              EVENT_SCALE,
-              GestureEventInit( state: EVENT_STATE_END )
-          )
+        GestureEvent(
+          EVENT_SCALE,
+          GestureEventInit( state: EVENT_STATE_END )
+        )
       );
     }
   }
@@ -217,13 +297,13 @@ class GestureManager {
   void onLongPressEnd(LongPressEndDetails details) {
     if (_target != null && _target!.onLongPress != null) {
       _target!.onLongPress!(
-          GestureEvent(
-              EVENT_LONG_PRESS,
-              GestureEventInit(
-                  deltaX: details.globalPosition.dx,
-                  deltaY: details.globalPosition.dy
-              )
+        GestureEvent(
+          EVENT_LONG_PRESS,
+          GestureEventInit(
+            deltaX: details.globalPosition.dx,
+            deltaY: details.globalPosition.dy
           )
+        )
       );
     }
   }

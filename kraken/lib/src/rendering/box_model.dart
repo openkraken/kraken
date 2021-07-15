@@ -148,14 +148,13 @@ class RenderLayoutBox extends RenderBoxModel
             ContainerBoxParentData<RenderBox>>,
         RenderBoxContainerDefaultsMixin<RenderBox,
             ContainerBoxParentData<RenderBox>> {
-  RenderLayoutBox(
-      {required int targetId,
-      required RenderStyle renderStyle,
-      ElementManager? elementManager})
-      : super(
-            targetId: targetId,
-            renderStyle: renderStyle,
-            elementManager: elementManager);
+  RenderLayoutBox({
+    required RenderStyle renderStyle,
+    required ElementDelegate elementDelegate
+  }) : super(
+    renderStyle: renderStyle,
+    elementDelegate: elementDelegate
+  );
 
   @override
   void markNeedsLayout() {
@@ -480,14 +479,13 @@ class RenderBoxModel extends RenderBox
         RenderImageFilter,
         RenderObjectWithControllerMixin {
   RenderBoxModel({
-    required this.targetId,
-    required this.renderStyle,
-    this.elementManager,
+    required RenderStyle renderStyle,
+    required ElementDelegate elementDelegate
   })  : super() {
     renderStyle.renderBoxModel = this;
+    _elementDelegate = elementDelegate;
+    _renderStyle = renderStyle;
   }
-
-  RenderStyle renderStyle;
 
   @override
   bool get alwaysNeedsCompositing => opacityAlwaysNeedsCompositing();
@@ -495,6 +493,12 @@ class RenderBoxModel extends RenderBox
   RenderPositionHolder? renderPositionHolder;
 
   bool _debugShouldPaintOverlay = false;
+
+  late RenderStyle _renderStyle;
+  RenderStyle get renderStyle => _renderStyle;
+
+  late ElementDelegate _elementDelegate;
+  ElementDelegate get elementDelegate => _elementDelegate;
 
   bool get debugShouldPaintOverlay => _debugShouldPaintOverlay;
 
@@ -555,11 +559,6 @@ class RenderBoxModel extends RenderBox
       _shouldLazyCalLineHeight = value;
     }
   }
-
-  // id of current element
-  int targetId;
-
-  ElementManager? elementManager;
 
   // When RenderBoxModel is scrolling box, contentConstraints are always equal to BoxConstraints();
   bool isScrollingContentBox = false;
@@ -633,10 +632,14 @@ class RenderBoxModel extends RenderBox
       ..scrollOffsetY = scrollOffsetY
 
       // Copy pointer listener
-      ..onPointerDown = onPointerDown
-      ..onPointerCancel = onPointerCancel
-      ..onPointerUp = onPointerUp
-      ..onPointerMove = onPointerMove
+      ..getEventTarget = getEventTarget
+      ..dispatchEvent = dispatchEvent
+      ..getEventHandlers = getEventHandlers
+      ..onClick = onClick
+      ..onSwipe = onSwipe
+      ..onPan = onPan
+      ..onScale = onScale
+      ..onLongPress = onLongPress
       ..onPointerSignal = onPointerSignal
 
       // Copy renderPositionHolder
@@ -1349,11 +1352,11 @@ class RenderBoxModel extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     if (kProfileMode) {
       childPaintDuration = 0;
-      PerformanceTiming.instance().mark(PERF_PAINT_START, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_PAINT_START, uniqueId: hashCode);
     }
     if (isCSSVisibilityHidden) {
       if (kProfileMode) {
-        PerformanceTiming.instance().mark(PERF_PAINT_END, uniqueId: targetId);
+        PerformanceTiming.instance().mark(PERF_PAINT_END, uniqueId: hashCode);
       }
       return;
     }
@@ -1363,7 +1366,7 @@ class RenderBoxModel extends RenderBox
       int amendEndTime =
           DateTime.now().microsecondsSinceEpoch - childPaintDuration;
       PerformanceTiming.instance()
-          .mark(PERF_PAINT_END, uniqueId: targetId, startTime: amendEndTime);
+          .mark(PERF_PAINT_END, uniqueId: hashCode, startTime: amendEndTime);
     }
   }
 
@@ -1616,7 +1619,6 @@ class RenderBoxModel extends RenderBox
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty('targetId', targetId, missingIfNull: true));
     properties.add(DiagnosticsProperty('contentSize', _contentSize));
     properties.add(DiagnosticsProperty(
         'contentConstraints', _contentConstraints,

@@ -185,9 +185,7 @@ class TextNode extends Node {
 
     InlineSpan text = CSSTextMixin.createTextSpan(_data!, parentElement: parentElement);
     RenderTextBox renderTextBox = _renderTextBox = RenderTextBox(text,
-      targetId: targetId,
       style: null,
-      elementManager: elementManager,
     );
     return renderTextBox;
   }

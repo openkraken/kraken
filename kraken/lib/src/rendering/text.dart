@@ -16,9 +16,7 @@ class RenderTextBox extends RenderBox
     with RenderObjectWithChildMixin<RenderBox> {
   RenderTextBox(
     InlineSpan text, {
-    this.targetId,
     this.style,
-    this.elementManager,
   }) {
     _renderParagraph = KrakenRenderParagraph(
       text,
@@ -29,9 +27,7 @@ class RenderTextBox extends RenderBox
   }
 
   KrakenRenderParagraph? _renderParagraph;
-  int? targetId;
   CSSStyleDeclaration? style;
-  ElementManager? elementManager;
 
   BoxSizeType? widthSizeType;
   BoxSizeType? heightSizeType;

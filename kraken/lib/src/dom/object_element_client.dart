@@ -31,4 +31,9 @@ abstract class ObjectElementClient {
   dynamic getProperty(String key);
 
   void removeProperty(String key);
+
+  void willAttachRenderer();
+  void didAttachRenderer();
+  void willDetachRenderer();
+  void didDetachRenderer();
 }

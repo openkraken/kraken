@@ -141,6 +141,24 @@ class CustomObjectElement implements ObjectElementClient {
     controller!.dispose();
     controller = null;
   }
+
+  @override
+  void didAttachRenderer() {}
+
+  @override
+  void didDetachRenderer() {
+    controller!.pause();
+    controller!.dispose();
+    controller = null;
+  }
+
+  @override
+  void willAttachRenderer() {
+  }
+
+  @override
+  void willDetachRenderer() {
+  }
 }
 
 ObjectElementClient customObjectElementFactory(ObjectElementHost host) {

@@ -68,7 +68,7 @@ void printError(int32_t contextId, const char* errmsg) {
 namespace {
 
 void disposeAllBridge() {
-  for (int i = 0; i <= poolIndex; i++) {
+  for (int i = 0; i <= poolIndex && i < maxPoolSize; i++) {
     disposeContext(i);
   }
   poolIndex = 0;
@@ -117,7 +117,7 @@ void disposeContext(int32_t contextId) {
 
 int32_t allocateNewContext(int32_t targetContextId) {
   if (targetContextId == -1) {
-    targetContextId = poolIndex++;
+    targetContextId = ++poolIndex;
   }
 
   if (targetContextId >= maxPoolSize) {
@@ -129,7 +129,7 @@ int32_t allocateNewContext(int32_t targetContextId) {
                                                 .c_str());
   auto context = new kraken::JSBridge(targetContextId, printError);
   contextPool[targetContextId] = context;
-  return poolIndex;
+  return targetContextId;
 }
 
 void *getJSContext(int32_t contextId) {

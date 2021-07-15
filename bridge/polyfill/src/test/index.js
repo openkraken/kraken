@@ -142,7 +142,7 @@ PointerChange.move = 5;
 PointerChange.up = 6;
 global.PointerChange = PointerChange;
 
-global.simulatePointer = function simulatePointer(list) {
+global.simulatePointer = function simulatePointer(list, pointer) {
   return new Promise((resolve) => {
     requestAnimationFrame(() => {
       if (!Array.isArray(list)) throw new Error('list should be an array');
@@ -154,14 +154,14 @@ global.simulatePointer = function simulatePointer(list) {
         if (typeof value[2] != 'number') throw new Error(`list[${i}][2] should be an number`);
       });
 
-      __kraken_simulate_pointer__(list);
+      __kraken_simulate_pointer__(list, pointer);
 
       resolve();
     });
   });
 }
 
-global.simulateKeyPress = __kraken_simulate_keypress__;
+global.simulateInputText = __kraken_simulate_inputtext__;
 
 function resetDocumentElement() {
   window.scrollTo(0, 0);

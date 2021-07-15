@@ -7,7 +7,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:ui';
 import 'dart:ffi';
-
+import 'dart:math' as math;
 import 'package:kraken/bridge.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -17,6 +17,7 @@ import 'package:flutter/services.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
+import 'package:flutter/rendering.dart';
 
 const String INPUT = 'INPUT';
 const String VALUE = 'value';
@@ -30,9 +31,12 @@ const String VALUE = 'value';
 /// Otherwise, use 300px for the width and/or 150px for the height as needed.
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
-  WIDTH: '150px',
   BORDER: '1px solid #767676',
 };
+
+// The default width ratio to multiple for calculating the default width of input
+// when width is not set.
+const int _FONT_SIZE_RATIO = 10;
 
 typedef ValueChanged<T> = void Function(T value);
 // The time it takes for the cursor to fade from fully opaque to fully
@@ -47,6 +51,9 @@ const Duration _kCursorBlinkWaitForStart = Duration(milliseconds: 150);
 const TextSelection blurSelection = TextSelection.collapsed(offset: -1);
 
 class EditableTextDelegate implements TextSelectionDelegate {
+  InputElement _inputElement;
+  EditableTextDelegate(this._inputElement);
+
   TextEditingValue _textEditingValue = TextEditingValue();
 
   @override
@@ -54,7 +61,7 @@ class EditableTextDelegate implements TextSelectionDelegate {
 
   @override
   set textEditingValue(TextEditingValue value) {
-    _textEditingValue = value;
+    // Deprecated, update the lasted value in the userUpdateTextEditingValue.
   }
 
   @override
@@ -83,7 +90,7 @@ class EditableTextDelegate implements TextSelectionDelegate {
 
   @override
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {
-    _textEditingValue = value;
+    _inputElement._formatAndSetValue(value, userInteraction: true, cause: cause);
   }
 }
 
@@ -99,9 +106,11 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   static void setFocus(InputElement inputElement) {
-    clearFocus();
-    InputElement.focusInputElement = inputElement;
-    inputElement.focus();
+    if (InputElement.focusInputElement != inputElement) {
+      clearFocus();
+      InputElement.focusInputElement = inputElement;
+      inputElement.focus();
+    }
   }
 
   // el.width
@@ -145,28 +154,16 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   ViewportOffset offset = ViewportOffset.zero();
   bool obscureText = false;
-  bool autoCorrect = false;
-  TextSelectionDelegate textSelectionDelegate = EditableTextDelegate();
+  bool autoCorrect = true;
+  late EditableTextDelegate _textSelectionDelegate;
   TextSpan? _actualText;
+  RenderInputBox? _renderInputBox;
   RenderEditable? _renderEditable;
   TextInputConnection? _textInputConnection;
 
   // This value is an eyeball estimation of the time it takes for the iOS cursor
   // to ease in and out.
   static const Duration _fadeDuration = Duration(milliseconds: 250);
-
-  // Input text-overflow not follow text rules.
-  TextOverflow get textOverflow {
-    switch(style[TEXT_OVERFLOW]) {
-      case 'ellipsis':
-        return TextOverflow.ellipsis;
-      case 'fade':
-        return TextOverflow.fade;
-      case 'clip':
-      default:
-        return TextOverflow.clip;
-    }
-  }
 
   String get placeholderText => properties['placeholder'] ?? '';
 
@@ -177,7 +174,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     );
   }
 
-  TextInputConfiguration? textInputConfiguration;
+  TextInputConfiguration? _textInputConfiguration;
 
   InputElement(
     int targetId,
@@ -187,7 +184,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
-  }) : super(targetId, nativeEventTarget, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true);
+  }) : super(targetId, nativeEventTarget, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
+    _textSelectionDelegate = EditableTextDelegate(this);
+  }
 
   @override
   void didAttachRenderer() {
@@ -198,6 +197,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
     AnimationController animationController = _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     animationController.addListener(_onCursorColorTick);
+
+    // Set default width of input when width is not set in style.
+    if (renderBoxModel!.renderStyle.width == null) {
+      double fontSize = renderBoxModel!.renderStyle.fontSize;
+      renderBoxModel!.renderStyle.width = fontSize * _FONT_SIZE_RATIO;
+    }
 
     addChild(createRenderBox());
 
@@ -234,6 +239,19 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void setStyle(String key, value) {
     super.setStyle(key, value);
 
+    if (_renderInputBox != null) {
+      RenderStyle renderStyle = renderBoxModel!.renderStyle;
+      if (key == HEIGHT || (key == LINE_HEIGHT && renderStyle.height == null)) {
+        _renderInputBox!.markNeedsLayout();
+
+      // It needs to judge width in style here cause
+      // width in renderStyle may be set in node attach.
+      } else if (key == FONT_SIZE && style[WIDTH].isEmpty) {
+        double fontSize = renderStyle.fontSize;
+        renderStyle.width = fontSize * _FONT_SIZE_RATIO;
+        _renderInputBox!.markNeedsLayout();
+      }
+    }
     // @TODO: Filter style properties that used by text span.
     _rebuildTextSpan();
   }
@@ -242,20 +260,16 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     // Rebuilt text span, for style has changed.
     _actualText = _buildTextSpan(text: _actualText?.text);
     TextEditingValue value = TextEditingValue(text: _actualText!.text!);
-    textSelectionDelegate.userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
+    _textSelectionDelegate.userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
     TextSpan? text = obscureText ? _buildPasswordTextSpan(_actualText!.text!) : _actualText;
     if (_renderEditable != null) {
       _renderEditable!.text = _actualText!.text!.length == 0
           ? placeholderTextSpan
           : text;
-      _renderEditable!.textOverflow = textOverflow;
     }
   }
 
-  TextSpan _buildTextSpan({ String? text = '' }) {
-    if (text == null || text.length == 0) {
-      text = properties[VALUE] ?? '';
-    }
+  TextSpan _buildTextSpan({ String? text }) {
     return CSSTextMixin.createTextSpan(text ?? '', parentElement: this);
   }
 
@@ -266,27 +280,22 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   Color get cursorColor => CSSColor.initial;
 
   @override
-  void handlePointDown(PointerDownEvent pointEvent) {
-    super.handlePointDown(pointEvent);
-    InputElement.setFocus(this);
-    // @TODO: selection.
-  }
-
-  @override
-  void handlePointMove(PointerMoveEvent pointEvent) {
-    super.handlePointMove(pointEvent);
-
-    // @TODO: selection.
-  }
-
-  @override
-  void handlePointUp(PointerUpEvent pointEvent) {
-    super.handlePointUp(pointEvent);
-    // @TODO: selection.
+  void dispatchEvent(Event event) {
+    super.dispatchEvent(event);
+    if (event.type == EVENT_TOUCH_START) {
+      InputElement.setFocus(this);
+      // @TODO: selection.
+    } else if (event.type == EVENT_TOUCH_MOVE) {
+      // @TODO: selection.
+    } else if (event.type == EVENT_TOUCH_END) {
+      // @TODO: selection.
+    }
   }
 
   void focus() {
     if (isRendererAttached) {
+      // Set focus that make it add keyboard listener
+      _renderEditable!.hasFocus = true;
       activeTextInput();
       dispatchEvent(Event('focus'));
     }
@@ -294,6 +303,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   void blur() {
     if (isRendererAttached) {
+      // Set focus that make it remove keyboard listener
+      _renderEditable!.hasFocus = false;
       deactiveTextInput();
       dispatchEvent(Event('blur'));
     }
@@ -307,22 +318,20 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void activeTextInput() {
     _inputValueAtBegin = properties[VALUE];
 
-    if (textInputConfiguration == null) {
-      textInputConfiguration = TextInputConfiguration(
-        inputType: _textInputType,
-        obscureText: obscureText,
-        autocorrect: autoCorrect,
-        inputAction: _textInputAction, // newline to multilines
-        textCapitalization: TextCapitalization.none,
-        keyboardAppearance: Brightness.light,
-      );
-    }
+    _textInputConfiguration ??= TextInputConfiguration(
+      inputType: _textInputType,
+      obscureText: obscureText,
+      autocorrect: autoCorrect,
+      inputAction: _textInputAction, // newline to multilines
+      textCapitalization: TextCapitalization.none,
+      keyboardAppearance: Brightness.light,
+    );
 
     if (_textInputConnection == null || !_textInputConnection!.attached) {
-      final TextEditingValue localValue = textSelectionDelegate.textEditingValue;
+      final TextEditingValue localValue = _textSelectionDelegate._textEditingValue;
       _lastKnownRemoteTextEditingValue = localValue;
 
-      _textInputConnection = TextInput.attach(this, textInputConfiguration!);
+      _textInputConnection = TextInput.attach(this, _textInputConfiguration!);
       _textInputConnection!.setEditingState(localValue);
     }
 
@@ -330,9 +339,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     if (!_hideVirtualKeyboard) {
       _textInputConnection!.show();
     }
-
     _startCursorTimer();
-    _renderEditable!.markNeedsTextLayout();
   }
 
   void deactiveTextInput() {
@@ -341,21 +348,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       _textInputConnection!.close();
     }
     _stopCursorTimer();
-    _renderEditable!.markNeedsTextLayout();
-  }
-
-  void onSelectionChanged(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
-    // When first focus input will trigger selection change
-    if (selection.baseOffset == selection.extentOffset) return;
-
-    TextEditingValue value = textSelectionDelegate.textEditingValue.copyWith(
-        selection: renderObject.text == placeholderTextSpan ? blurSelection : selection, composing: TextRange.empty);
-
-    updateEditingValue(value);
   }
 
   bool get multiLine => maxLines > 1;
   bool get _hasFocus => InputElement.focusInputElement == this;
+  // The Number.MAX_SAFE_INTEGER constant represents the maximum safe integer in JavaScript (2^53 - 1).
+  int _maxLength = 9007199254740992;
 
   RenderEditable createRenderEditable() {
     if (_actualText == null) {
@@ -372,7 +370,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       text: text,
       cursorColor: cursorColor,
       showCursor: _cursorVisibilityNotifier,
-      hasFocus: _hasFocus,
       maxLines: maxLines,
       minLines: minLines,
       expands: false,
@@ -383,39 +380,28 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       offset: offset,
       readOnly: false,
       forceLine: true,
-      onSelectionChanged: onSelectionChanged,
       onCaretChanged: _handleCaretChanged,
       obscureText: obscureText,
       cursorWidth: 1.0,
       cursorRadius: Radius.zero,
       cursorOffset: Offset.zero,
       enableInteractiveSelection: true,
-      textSelectionDelegate: textSelectionDelegate,
+      textSelectionDelegate: _textSelectionDelegate,
       devicePixelRatio: window.devicePixelRatio,
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
-      textOverflow: textOverflow,
     );
     return _renderEditable!;
   }
 
-  RenderBox createRenderBox() {
+  RenderInputBox createRenderBox() {
     assert(renderBoxModel is RenderIntrinsic);
     RenderEditable renderEditable = createRenderEditable();
-    RenderIntrinsic renderIntrinsic = (renderBoxModel as RenderIntrinsic?)!;
-    RenderStyle renderStyle = renderIntrinsic.renderStyle;
-    // Make render editable vertically center.
-    double dy = renderStyle.height == null
-        ? 0
-        : (renderStyle.height!
-            - renderEditable.preferredLineHeight
-            - renderIntrinsic.renderStyle.borderTop
-            - renderIntrinsic.renderStyle.borderBottom) / 2;
-    RenderOffsetBox renderOffsetBox = RenderOffsetBox(
-      offset: Offset(0, dy),
+
+    _renderInputBox = RenderInputBox(
       child: renderEditable,
     );
-    return renderOffsetBox;
+    return _renderInputBox!;
   }
 
   @override
@@ -465,62 +451,137 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   void _hideSelectionOverlayIfNeeded() {
-    // todo: selection overlay.
+    // TODO: hide selection overlay.
   }
 
   bool get _hasInputConnection => _textInputConnection != null && _textInputConnection!.attached;
   TextEditingValue? _lastKnownRemoteTextEditingValue;
 
   void _updateRemoteEditingValueIfNeeded() {
-    if (!_hasInputConnection) return;
-    final TextEditingValue localValue = textSelectionDelegate.textEditingValue;
-    if (localValue == _lastKnownRemoteTextEditingValue) return;
-    _lastKnownRemoteTextEditingValue = localValue;
+    if (_batchEditDepth > 0 || !_hasInputConnection)
+      return;
+    final TextEditingValue localValue = _value;
+    if (localValue == _lastKnownRemoteTextEditingValue)
+      return;
     _textInputConnection!.setEditingState(localValue);
+    _lastKnownRemoteTextEditingValue = localValue;
   }
 
-  void formatAndSetValue(TextEditingValue value, { bool shouldDispatchEvent = false }) {
-    final bool textChanged = textSelectionDelegate.textEditingValue.text != value.text;
-    textSelectionDelegate.userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
+  TextEditingValue get _value => _textSelectionDelegate._textEditingValue;
+  set _value(TextEditingValue value) {
+    _textSelectionDelegate._textEditingValue = value;
+  }
+
+
+  int _batchEditDepth = 0;
+  /// Begins a new batch edit, within which new updates made to the text editing
+  /// value will not be sent to the platform text input plugin.
+  ///
+  /// Batch edits nest. When the outermost batch edit finishes, [endBatchEdit]
+  /// will attempt to send [currentTextEditingValue] to the text input plugin if
+  /// it detected a change.
+  void beginBatchEdit() {
+    _batchEditDepth += 1;
+  }
+
+  /// Ends the current batch edit started by the last call to [beginBatchEdit],
+  /// and send [currentTextEditingValue] to the text input plugin if needed.
+  ///
+  /// Throws an error in debug mode if this [EditableText] is not in a batch
+  /// edit.
+  void endBatchEdit() {
+    _batchEditDepth -= 1;
+    assert(
+    _batchEditDepth >= 0,
+    'Unbalanced call to endBatchEdit: beginBatchEdit must be called first.',
+    );
+    _updateRemoteEditingValueIfNeeded();
+  }
+
+  void _formatAndSetValue(TextEditingValue value, { bool userInteraction = false, SelectionChangedCause? cause }) {
+    if (userInteraction && value.text.length > _maxLength) return;
+
+    final bool textChanged = _value.text != value.text
+        || (!_value.composing.isCollapsed && value.composing.isCollapsed);
+    final bool selectionChanged = _value.selection != value.selection;
+
+
+    // Put all optional user callback invocations in a batch edit to prevent
+    // sending multiple `TextInput.updateEditingValue` messages.
+    beginBatchEdit();
+    _value = value;
+
+    // Changes made by the keyboard can sometimes be "out of band" for listening
+    // components, so always send those events, even if we didn't think it
+    // changed. Also, the user long pressing should always send a selection change
+    // as well.
+    if (selectionChanged || (userInteraction &&
+        (cause == SelectionChangedCause.longPress || cause == SelectionChangedCause.keyboard))) {
+      _handleSelectionChanged(value.selection, cause);
+    }
 
     if (textChanged) {
-      _updateRemoteEditingValueIfNeeded();
-      if (_renderEditable != null) {
-        if (value.text.length == 0) {
-          _renderEditable!.text = placeholderTextSpan;
-        } else if (obscureText) {
-          _renderEditable!.text = _buildPasswordTextSpan(value.text);
-        } else {
-          _actualText = _renderEditable!.text = _buildTextSpan(text: value.text);
-        }
-      } else {
-        // Update text when input element is not appended to dom yet.
-        _actualText = _buildTextSpan(text: value.text);
-      }
-      // Sync value to input element property
-      properties[VALUE] = value.text;
-      if (shouldDispatchEvent) {
-        // TODO: return the string containing the data that was added to the element,
-        // which MAY be null if it doesn't apply.
-        String inputData = '';
-        InputEvent inputEvent = InputEvent(inputData);
-        dispatchEvent(inputEvent);
-      }
+      _handleTextChanged(value.text, userInteraction, cause);
     }
+
+    endBatchEdit();
 
     if (_renderEditable != null) {
       _renderEditable!.selection = value.selection;
     }
   }
 
+  void _handleTextChanged(String text, bool userInteraction, SelectionChangedCause? cause) {
+    if (_renderEditable != null) {
+      if (text.length == 0) {
+        _renderEditable!.text = placeholderTextSpan;
+      } else if (obscureText) {
+        _renderEditable!.text = _buildPasswordTextSpan(text);
+      } else {
+        _actualText = _renderEditable!.text = _buildTextSpan(text: text);
+      }
+    } else {
+      // Update text when input element is not appended to dom yet.
+      _actualText = _buildTextSpan(text: text);
+    }
+
+    // Sync value to input element property
+    properties[VALUE] = text;
+    if (userInteraction) {
+      // TODO: return the string containing the input data that was added to the element,
+      // which MAY be null if it doesn't apply.
+      String inputData = '';
+      // https://www.w3.org/TR/input-events-1/#interface-InputEvent-Attributes
+      String inputType = '';
+      InputEvent inputEvent = InputEvent(inputData, inputType: inputType);
+      dispatchEvent(inputEvent);
+    }
+  }
+
+  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
+    // TODO: show selection layer and emit selection changed event
+
+    // To keep the cursor from blinking while it moves, restart the timer here.
+    if (_cursorTimer != null) {
+      _stopCursorTimer(resetCharTicks: false);
+      _startCursorTimer();
+    }
+  }
+
+  void requestKeyboard() {
+    if (_hasFocus) {
+      _textInputConnection!.show();
+    }
+  }
+
   @override
   void updateEditingValue(TextEditingValue value) {
-    if (value.text != textSelectionDelegate.textEditingValue.text) {
+    if (value.text != _textSelectionDelegate._textEditingValue.text) {
       _hideSelectionOverlayIfNeeded();
       _showCaretOnScreen();
     }
     _lastKnownRemoteTextEditingValue = value;
-    formatAndSetValue(value, shouldDispatchEvent: true);
+    _formatAndSetValue(value, userInteraction: true);
     // To keep the cursor from blinking while typing, we want to restart the
     // cursor timer every time a new character is typed.
     _stopCursorTimer(resetCharTicks: false);
@@ -528,7 +589,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   void _triggerChangeEvent() {
-    String currentValue = textSelectionDelegate.textEditingValue.text;
+    String currentValue = _textSelectionDelegate._textEditingValue.text;
     if (_inputValueAtBegin != currentValue) {
       Event changeEvent = Event(EVENT_CHANGE);
       dispatchEvent(changeEvent);
@@ -541,14 +602,14 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
     if (key == VALUE) {
       String text = value?.toString() ?? '';
-      TextRange composing = textSelectionDelegate.textEditingValue.composing;
+      TextRange composing = _textSelectionDelegate._textEditingValue.composing;
       TextSelection selection = TextSelection.collapsed(offset: text.length);
       TextEditingValue newTextEditingValue = TextEditingValue(
         text: text,
         selection: selection,
         composing: composing,
       );
-      formatAndSetValue(newTextEditingValue);
+      _formatAndSetValue(newTextEditingValue);
     } else if (key == 'placeholder') {
       // Update placeholder text.
       _rebuildTextSpan();
@@ -558,6 +619,11 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       _setType(value);
     } else if (key == 'inputmode') {
       _setInputMode(value);
+    } else if (key == 'maxlength') {
+      value = int.tryParse(value);
+      if (value > 0) {
+        _maxLength = value;
+      }
     }
   }
 
@@ -753,7 +819,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   // Abstract class method added after flutter@1.15
   @override
-  TextEditingValue get currentTextEditingValue => textSelectionDelegate.textEditingValue;
+  TextEditingValue get currentTextEditingValue => _textSelectionDelegate._textEditingValue;
 
   @override
   // TODO: implement currentAutofillScope
@@ -776,21 +842,29 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 }
 
-class RenderOffsetBox extends RenderProxyBox {
-  RenderOffsetBox({
-    RenderBox? child,
-    Offset? offset
-  }) : assert(offset != null),
-        _offset = offset,
-        super(child);
+class RenderInputBox extends RenderProxyBox {
+  RenderInputBox({
+    required RenderEditable child,
+  }) : super(child);
 
-  Offset? _offset;
-  Offset? get offset => _offset;
-  set(Offset? value) {
-    if (value != null && value != _offset) {
-      _offset = value;
-      markNeedsLayout();
+  Offset? get _offset {
+    RenderIntrinsic renderIntrinsic = (parent as RenderIntrinsic?)!;
+    RenderStyle renderStyle = renderIntrinsic.renderStyle;
+
+    double intrinsicInputHeight = (child as RenderEditable).preferredLineHeight
+      + renderStyle.paddingTop + renderStyle.paddingBottom
+      + renderStyle.borderTop + renderStyle.borderBottom;
+
+    // Make render editable vertically center.
+    double dy;
+    if (renderStyle.height != null) {
+      dy = (renderStyle.height! - intrinsicInputHeight) / 2;
+    } else if (renderStyle.lineHeight != null && renderStyle.lineHeight! > intrinsicInputHeight) {
+      dy = (renderStyle.lineHeight! - intrinsicInputHeight) /2;
+    } else {
+      dy = 0;
     }
+    return Offset(0, dy);
   }
 
   @override
@@ -802,6 +876,33 @@ class RenderOffsetBox extends RenderProxyBox {
       if (child != null) {
         context.paintChild(child!, transformedOffset);
       }
+    }
+  }
+
+  @override
+  void performLayout() {
+    if (child != null) {
+      child!.layout(constraints, parentUsesSize: true);
+      Size childSize = child!.size;
+      double width = constraints.maxWidth != double.infinity ?
+        constraints.maxWidth : childSize.width;
+
+      RenderIntrinsic renderIntrinsic = parent as RenderIntrinsic;
+      RenderStyle renderStyle = renderIntrinsic.renderStyle;
+
+      double height;
+      // Height priority: height > max(line-height, child height) > child height
+      if (constraints.maxHeight != double.infinity) {
+        height = constraints.maxHeight;
+      } else if (renderStyle.lineHeight != null) {
+        height = math.max(renderStyle.lineHeight!, childSize.height);
+      } else {
+        height = childSize.height;
+      }
+
+      size = Size(width, height);
+    } else {
+      size = computeSizeForNoChild(constraints);
     }
   }
 }
