@@ -8,7 +8,6 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/rendering.dart';
@@ -143,7 +142,6 @@ class _KrakenState extends State<Kraken> {
   Map<Type, Action<Intent>>? _actionMap;
   late FocusNode _krakenFocus;
 
-  @override
   void initState() {
     _shortcutMap = <LogicalKeySet, Intent>{
       LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
@@ -273,11 +271,11 @@ class _KrakenState extends State<Kraken> {
   RenderEditable? _findFocusedEditable(List<RenderEditable> editables) {
     RenderEditable? result;
     if (editables.length != 0) {
-      editables.forEach((RenderEditable editable) {
+      for (RenderEditable editable in editables) {
         if (editable.hasFocus) {
           result = editable;
         }
-      });
+      }
     }
     return result;
   }
