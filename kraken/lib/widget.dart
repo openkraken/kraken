@@ -62,6 +62,8 @@ class Kraken extends StatefulWidget {
 
   final HttpClientInterceptor? httpClientInterceptor;
 
+  final FocusNode focusNode = FocusNode();
+
   KrakenController? get controller {
     return KrakenController.getControllerOfName(shortHash(this));
   }
@@ -140,9 +142,11 @@ class Kraken extends StatefulWidget {
 class _KrakenState extends State<Kraken> {
   Map<LogicalKeySet, Intent>? _shortcutMap;
   Map<Type, Action<Intent>>? _actionMap;
-  late FocusNode _krakenFocus;
+  late FocusNode _focusNode;
 
+  @override
   void initState() {
+    super.initState();
     _shortcutMap = <LogicalKeySet, Intent>{
       LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
       LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
@@ -154,7 +158,7 @@ class _KrakenState extends State<Kraken> {
       PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(onInvoke: _handlePreviousFocus),
       DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(onInvoke: _handleDirectionFocus),
     };
-    _krakenFocus = FocusNode();
+    _focusNode = (context.widget as Kraken).focusNode;
   }
 
   @override
@@ -162,7 +166,7 @@ class _KrakenState extends State<Kraken> {
     return FocusableActionDetector(
       actions: _actionMap,
       shortcuts: _shortcutMap,
-      focusNode: _krakenFocus,
+      focusNode: _focusNode,
       onFocusChange: _handleFocusChange,
       child: _KrakenRenderObjectWidget(context.widget as Kraken)
     );
@@ -191,7 +195,7 @@ class _KrakenState extends State<Kraken> {
       RenderEditable? focusedEditable = _findFocusedEditable(editables);
       // None editable is focused, focus the first editable.
       if (focusedEditable == null) {
-        _krakenFocus.requestFocus();
+        _focusNode.requestFocus();
         _focusEditable(editables[0]);
 
       // Some editable is focused, focus the next editable, if it is the last editable,
@@ -199,16 +203,16 @@ class _KrakenState extends State<Kraken> {
       } else {
         int idx = editables.indexOf(focusedEditable);
         if (idx == editables.length - 1) {
-          _krakenFocus.nextFocus();
+          _focusNode.nextFocus();
         } else {
-          _krakenFocus.requestFocus();
+          _focusNode.requestFocus();
           _blurEditable(editables[idx]);
           _focusEditable(editables[idx + 1]);
         }
       }
     // None editable exists, focus the next widget.
     } else {
-      _krakenFocus.nextFocus();
+      _focusNode.nextFocus();
     }
   }
 
@@ -219,7 +223,7 @@ class _KrakenState extends State<Kraken> {
       RenderEditable? focusedEditable = _findFocusedEditable(editables);
       // None editable is focused, focus the last editable.
       if (focusedEditable == null) {
-        _krakenFocus.requestFocus();
+        _focusNode.requestFocus();
         _focusEditable(editables[editables.length - 1]);
 
         // Some editable is focused, focus the previous editable, if it is the first editable,
@@ -227,16 +231,16 @@ class _KrakenState extends State<Kraken> {
       } else {
         int idx = editables.indexOf(focusedEditable);
         if (idx == 0) {
-          _krakenFocus.previousFocus();
+          _focusNode.previousFocus();
         } else {
-          _krakenFocus.requestFocus();
+          _focusNode.requestFocus();
           _blurEditable(editables[idx]);
           _focusEditable(editables[idx - 1]);
         }
       }
     // None editable exists, focus the previous widget.
     } else {
-      _krakenFocus.previousFocus();
+      _focusNode.previousFocus();
     }
   }
 
@@ -280,7 +284,6 @@ class _KrakenState extends State<Kraken> {
     return result;
   }
 }
-
 
 class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
