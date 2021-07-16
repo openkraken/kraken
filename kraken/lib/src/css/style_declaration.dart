@@ -8,6 +8,7 @@ import 'dart:ui';
 
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/src/css/animation.dart';
 
 const String SAFE_AREA_INSET = 'safe-area-inset';
@@ -171,7 +172,7 @@ class CSSStyleDeclaration {
     return _propertyRunningTransition.containsKey(property);
   }
 
-  void _transition(String propertyName, begin, end, Size? viewportSize) {
+  void _transition(String propertyName, begin, end, Size? viewportSize, RenderStyle? renderStyle) {
     if (_hasRunningTransition(propertyName)) {
       Animation animation = _propertyRunningTransition[propertyName]!;
       animation.cancel();
@@ -203,7 +204,7 @@ class CSSStyleDeclaration {
       Keyframe(propertyName, begin, 0, LINEAR),
       Keyframe(propertyName, end, 1, LINEAR),
     ];
-    KeyframeEffect effect = KeyframeEffect(this, target, keyframes, options, viewportSize);
+    KeyframeEffect effect = KeyframeEffect(this, target, keyframes, options, viewportSize, renderStyle);
     Animation animation = Animation(effect);
     _propertyRunningTransition[propertyName] = animation;
 
@@ -459,7 +460,7 @@ class CSSStyleDeclaration {
 
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
-  void setProperty(String propertyName, value, [Size? viewportSize]) {
+  void setProperty(String propertyName, value, [Size? viewportSize, RenderStyle? renderStyle]) {
     // Null or empty value means should be removed.
     if (isNullOrEmptyValue(value)) {
       removeProperty(propertyName);
@@ -478,6 +479,15 @@ class CSSStyleDeclaration {
       return _expandShorthand(propertyName, normalizedValue, viewportSize);
     }
 
+
+    double? rootFontSize;
+    double? fontSize;
+    if (renderStyle != null) {
+      RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
+      rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
+      fontSize = renderStyle.fontSize;
+    }
+    
     switch (propertyName) {
       case WIDTH:
       case HEIGHT:
@@ -543,7 +553,7 @@ class CSSStyleDeclaration {
         if (!CSSBackground.isValidBackgroundRepeatValue(normalizedValue)) return;
         break;
       case TRANSFORM:
-        if (!CSSTransform.isValidTransformValue(normalizedValue, viewportSize)) {
+        if (!CSSTransform.isValidTransformValue(normalizedValue, viewportSize, rootFontSize, fontSize)) {
           return;
         }
         break;
@@ -563,7 +573,7 @@ class CSSStyleDeclaration {
     }
 
     if (_shouldTransition(propertyName, prevValue, normalizedValue)) {
-      _transition(propertyName, prevValue, normalizedValue, viewportSize);
+      _transition(propertyName, prevValue, normalizedValue, viewportSize, renderStyle);
     } else {
       setRenderStyleProperty(propertyName, prevValue, normalizedValue);
     }
@@ -601,6 +611,26 @@ class CSSStyleDeclaration {
       setRenderStyleProperty(key, null, normalizedValue);
     });
   }
+  
+  /// Set all style properties with em unit.
+  void setEmProperties() {
+    _properties.forEach((key, value) {
+      if (key != FONT_SIZE && value.endsWith(CSSLength.EM)) {
+        String normalizedValue = _normalizeValue(value);
+        setRenderStyleProperty(key, null, normalizedValue);
+      }
+    });
+  }
+  
+  /// Set all style properties with rem unit.
+  void setRemProperties() {
+    _properties.forEach((key, value) {
+      if (key != FONT_SIZE && value.endsWith(CSSLength.REM)) {
+        String normalizedValue = _normalizeValue(value);
+        setRenderStyleProperty(key, null, normalizedValue);
+      }
+    });
+  }
 
   void dispose() {
     target = null;
@@ -609,13 +639,6 @@ class CSSStyleDeclaration {
     _styleChangeListeners.clear();
     _transitions.clear();
     _propertyRunningTransition.clear();
-  }
-
-  double? getLengthByPropertyName(String propertyName, ElementManager elementManager) {
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
-    return CSSLength.toDisplayPortValue(getPropertyValue(propertyName), viewportSize);
   }
 
   static bool isNullOrEmptyValue(value) {

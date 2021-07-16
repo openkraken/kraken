@@ -106,7 +106,7 @@ mixin CSSTextMixin on RenderStyleBase {
   List<String>? _fontFamily;
   List<String>? get fontFamily {
     if (CSSText.DEFAULT_FONT_FAMILY_FALLBACK != null) {
-      return CSSText.getFontFamilyFallback(renderBoxModel!.renderStyle.style!);
+      return CSSText.getFontFamilyFallback(renderBoxModel!.renderStyle.style);
     }
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
@@ -136,8 +136,11 @@ mixin CSSTextMixin on RenderStyleBase {
   set fontSize(double value) {
     if (_fontSize == value) return;
     _fontSize = value;
+    // Need update all em unit style of own element when font size changed.
+    style.setEmProperties();
+
     // Update all the children text with specified style property not set due to style inheritance.
-    _updateNestChildrenText(renderBoxModel!, FONT_SIZE);
+    _updateFontSize(renderBoxModel!, renderBoxModel!, renderBoxModel!.isDocumentRootBox);
   }
 
   double? _lineHeight;
@@ -255,7 +258,7 @@ mixin CSSTextMixin on RenderStyleBase {
       renderBoxModel.visitChildren((RenderObject child) {
         if (child is RenderLayoutBox) {
           // Only need to layout when the specified style property is not set.
-          if (child.renderStyle.style?[styleProperty].isEmpty) {
+          if (child.renderStyle.style[styleProperty].isEmpty) {
             _markChildrenNeedsLayoutByLineHeight(child, styleProperty);
           }
         } else if (child is RenderTextBox) {
@@ -276,7 +279,7 @@ mixin CSSTextMixin on RenderStyleBase {
       renderBoxModel.visitChildren((RenderObject child) {
         if (child is RenderLayoutBox) {
           // Only need to layout when the specified style property is not set.
-          if (child.renderStyle.style?[styleProperty].isEmpty) {
+          if (child.renderStyle.style[styleProperty].isEmpty) {
             _markChildrenNeedsLayoutByWhiteSpace(child, styleProperty);
           }
         } else if (child is RenderTextBox) {
@@ -319,10 +322,45 @@ mixin CSSTextMixin on RenderStyleBase {
     renderBoxModel.visitChildren((RenderObject child) {
       if (child is RenderBoxModel) {
         // Only need to update child text when style property is not set.
-        if (child.renderStyle.style?[styleProperty].isEmpty) {
+        if (child.renderStyle.style[styleProperty].isEmpty) {
           _updateNestChildrenText(child, styleProperty);
+          // Need update all em unit style of child when its font size is inherited.
+          if (styleProperty == FONT_SIZE) {
+            child.renderStyle.style.setEmProperties();
+          }
         }
       } else if (child is RenderTextBox) {
+        // Need to recreate text span cause text style can not be set alone.
+        RenderBoxModel parentRenderBoxModel = child.parent as RenderBoxModel;
+        KrakenRenderParagraph renderParagraph = child.child as KrakenRenderParagraph;
+        String? text = renderParagraph.text.text;
+        child.text = CSSTextMixin.createTextSpan(text, parentRenderBoxModel: parentRenderBoxModel);
+      }
+    });
+  }
+
+  // Update font-size may affect following style:
+  // 1. Nested children text size due to style inheritance.
+  // 2. Em unit: style of own element with em unit and nested children with no font-size set due to style inheritance.
+  // 3. Rem unit: nested children with rem set.
+  void _updateFontSize(RenderBoxModel renderBoxModel, RenderBoxModel oriRenderBoxModel, bool isDocumentRoot) {
+    renderBoxModel.visitChildren((RenderObject child) {
+      if (child is RenderBoxModel) {
+        // Only need to update child text when style property is not set.
+        if (isDocumentRoot || child.renderStyle.style[FONT_SIZE].isEmpty) {
+          _updateFontSize(child, oriRenderBoxModel, isDocumentRoot);
+          // Need update all em unit style of child when its font size is inherited.
+          child.renderStyle.style.setEmProperties();
+
+          if (isDocumentRoot) {
+            child.renderStyle.style.setRemProperties();
+          }
+        }
+
+      // Only need to update text when its parent has no font-size set.
+      } else if (child is RenderTextBox &&
+        (renderBoxModel == oriRenderBoxModel || renderBoxModel.renderStyle.style[FONT_SIZE].isEmpty)
+      ) {
         // Need to recreate text span cause text style can not be set alone.
         RenderBoxModel parentRenderBoxModel = child.parent as RenderBoxModel;
         KrakenRenderParagraph renderParagraph = child.child as KrakenRenderParagraph;
@@ -342,7 +380,7 @@ mixin CSSTextMixin on RenderStyleBase {
       viewportSize = parentElement.viewportSize;
       parentRenderBoxModel = parentElement.renderBoxModel;
     } else {
-      parentStyle = parentRenderBoxModel!.renderStyle.style!;
+      parentStyle = parentRenderBoxModel!.renderStyle.style;
       viewportSize = parentRenderBoxModel.renderStyle.viewportSize;
     }
 
@@ -387,15 +425,15 @@ mixin CSSTextMixin on RenderStyleBase {
     FontStyle? fontStyle = parentRenderStyle != null ?
       parentRenderStyle.fontStyle : CSSText.getFontStyle(parentStyle);
     double? fontSize = parentRenderStyle != null ?
-      parentRenderStyle.fontSize : CSSText.getFontSize(parentStyle, viewportSize);
+      parentRenderStyle.fontSize : CSSText.getFontSize(parentStyle, viewportSize: viewportSize);
     List<String>? fontFamily = parentRenderStyle != null ?
       parentRenderStyle.fontFamily : CSSText.getFontFamilyFallback(parentStyle);
     double? letterSpacing = parentRenderStyle != null ?
-      parentRenderStyle.letterSpacing : CSSText.getLetterSpacing(parentStyle, viewportSize);
+      parentRenderStyle.letterSpacing : CSSText.getLetterSpacing(parentStyle, viewportSize: viewportSize);
     double? wordSpacing = parentRenderStyle != null ?
-      parentRenderStyle.wordSpacing : CSSText.getWordSpacing(parentStyle, viewportSize);
+      parentRenderStyle.wordSpacing : CSSText.getWordSpacing(parentStyle, viewportSize: viewportSize);
     List<Shadow>? textShadow = parentRenderStyle != null ?
-      parentRenderStyle.textShadow : CSSText.getTextShadow(parentStyle, viewportSize);
+      parentRenderStyle.textShadow : CSSText.getTextShadow(parentStyle, viewportSize: viewportSize);
 
     return TextStyle(
       color: color,
@@ -418,51 +456,82 @@ mixin CSSTextMixin on RenderStyleBase {
   }
 
   void updateTextStyle(String? property) {
+    RenderStyle renderStyle = this as RenderStyle;
+    Size viewportSize = renderStyle.viewportSize;
+    RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
+    double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
+    double _fontSize = renderStyle.fontSize;
+
     switch (property) {
       case COLOR:
-        color = CSSText.getTextColor(style!);
+        color = CSSText.getTextColor(style);
         break;
       case TEXT_DECORATION_LINE:
-        textDecorationLine = CSSText.getTextDecorationLine(style!);
+        textDecorationLine = CSSText.getTextDecorationLine(style);
         break;
       case TEXT_DECORATION_STYLE:
-        textDecorationColor = CSSText.getTextDecorationColor(style!);
+        textDecorationColor = CSSText.getTextDecorationColor(style);
         break;
       case TEXT_DECORATION_COLOR:
-        textDecorationStyle = CSSText.getTextDecorationStyle(style!);
+        textDecorationStyle = CSSText.getTextDecorationStyle(style);
         break;
       case FONT_WEIGHT:
-        fontWeight = CSSText.getFontWeight(style!);
+        fontWeight = CSSText.getFontWeight(style);
         break;
       case FONT_STYLE:
-        fontStyle = CSSText.getFontStyle(style!);
+        fontStyle = CSSText.getFontStyle(style);
         break;
       case FONT_FAMILY:
-        fontFamily = CSSText.getFontFamilyFallback(style!);
+        fontFamily = CSSText.getFontFamilyFallback(style);
         break;
       case FONT_SIZE:
-        fontSize = CSSText.getFontSize(style!, viewportSize);
+        fontSize = CSSText.getFontSize(
+          style,
+          viewportSize: viewportSize,
+          rootFontSize: rootFontSize,
+          fontSize: _fontSize
+        );
         break;
       case LINE_HEIGHT:
-        lineHeight = CSSText.getLineHeight(style!, viewportSize);
+        lineHeight = CSSText.getLineHeight(
+          style,
+          viewportSize: viewportSize,
+          rootFontSize: rootFontSize,
+          fontSize: fontSize
+        );
         break;
       case LETTER_SPACING:
-        letterSpacing = CSSText.getLetterSpacing(style!, viewportSize);
+        letterSpacing = CSSText.getLetterSpacing(
+          style,
+          viewportSize: viewportSize,
+          rootFontSize: rootFontSize,
+          fontSize: fontSize
+        );
         break;
       case WORD_SPACING:
-        wordSpacing = CSSText.getWordSpacing(style!, viewportSize);
+        wordSpacing = CSSText.getWordSpacing(
+          style,
+          viewportSize: viewportSize,
+          rootFontSize: rootFontSize,
+          fontSize: fontSize
+        );
         break;
       case TEXT_SHADOW:
-        textShadow = CSSText.getTextShadow(style!, viewportSize);
+        textShadow = CSSText.getTextShadow(
+          style,
+          viewportSize: viewportSize,
+          rootFontSize: rootFontSize,
+          fontSize: fontSize
+        );
         break;
       case WHITE_SPACE:
-        whiteSpace = CSSText.getWhiteSpace(style!);
+        whiteSpace = CSSText.getWhiteSpace(style);
         break;
       case TEXT_OVERFLOW:
         textOverflow = CSSText.getTextOverflow(renderStyle: this as RenderStyle);
         break;
       case LINE_CLAMP:
-        lineClamp = CSSText.getLineClamp(style!);
+        lineClamp = CSSText.getLineClamp(style);
         break;
     }
   }
@@ -495,15 +564,39 @@ class CSSText {
     return value == 'solid' || value == 'double' || value == 'dotted' || value == 'dashed' || value == 'wavy';
   }
 
-  static double? getLineHeight(CSSStyleDeclaration style, Size viewportSize) {
-    return parseLineHeight(style[LINE_HEIGHT], getFontSize(style, viewportSize), viewportSize);
+  static double? getLineHeight(CSSStyleDeclaration style, {
+    Size? viewportSize,
+    double? rootFontSize,
+    double? fontSize
+  }) {
+    double _fontSize = getFontSize(
+      style,
+      viewportSize: viewportSize,
+      rootFontSize: rootFontSize,
+      fontSize: fontSize
+    );
+    return parseLineHeight(
+      style[LINE_HEIGHT],
+      viewportSize: viewportSize,
+      rootFontSize: rootFontSize,
+      fontSize: _fontSize
+    );
   }
 
-  static double? parseLineHeight(String value, double fontSize, Size viewportSize) {
+  static double? parseLineHeight(String value, {
+    Size? viewportSize,
+    double? rootFontSize,
+    required double fontSize
+  }) {
     double? lineHeight;
     if (value.isNotEmpty) {
       if (CSSLength.isLength(value)) {
-        double lineHeightValue = CSSLength.toDisplayPortValue(value, viewportSize)!;
+        double lineHeightValue = CSSLength.toDisplayPortValue(
+          value, viewportSize:
+          viewportSize,
+          rootFontSize: rootFontSize,
+          fontSize: fontSize
+        )!;
         if (lineHeightValue > 0) {
           lineHeight = lineHeightValue;
         }
@@ -747,31 +840,58 @@ class CSSText {
   }
 
   static double DEFAULT_FONT_SIZE = 16.0;
-  static double getFontSize(CSSStyleDeclaration style, Size viewportSize) {
+  static double getFontSize(CSSStyleDeclaration style, {
+    Size? viewportSize,
+    double? rootFontSize,
+    double? fontSize
+  }) {
     if (style.contains(FONT_SIZE)) {
-      return CSSLength.toDisplayPortValue(style[FONT_SIZE], viewportSize) ?? DEFAULT_FONT_SIZE;
+      return CSSLength.toDisplayPortValue(
+        style[FONT_SIZE],
+        viewportSize: viewportSize,
+        rootFontSize: rootFontSize,
+        fontSize: fontSize
+      ) ?? DEFAULT_FONT_SIZE;
     } else {
       return DEFAULT_FONT_SIZE;
     }
   }
 
-  static double getLetterSpacing(CSSStyleDeclaration style, Size viewportSize) {
+  static double getLetterSpacing(CSSStyleDeclaration style, {
+    Size? viewportSize,
+    double? rootFontSize,
+    double? fontSize
+  }) {
     if (style.contains(LETTER_SPACING)) {
       String _letterSpacing = style[LETTER_SPACING];
       if (_letterSpacing == NORMAL) return DEFAULT_LETTER_SPACING;
 
-      return CSSLength.toDisplayPortValue(_letterSpacing, viewportSize) ?? DEFAULT_LETTER_SPACING;
+      return CSSLength.toDisplayPortValue(
+        _letterSpacing,
+        viewportSize: viewportSize,
+        rootFontSize: rootFontSize,
+        fontSize: fontSize
+      ) ?? DEFAULT_LETTER_SPACING;
     } else {
       return DEFAULT_LETTER_SPACING;
     }
   }
 
-  static double getWordSpacing(CSSStyleDeclaration style, Size viewportSize) {
+  static double getWordSpacing(CSSStyleDeclaration style, {
+    Size? viewportSize,
+    double? rootFontSize,
+    double? fontSize
+  }) {
     if (style.contains(WORD_SPACING)) {
       String _wordSpacing = style[WORD_SPACING];
       if (_wordSpacing == NORMAL) return DEFAULT_WORD_SPACING;
 
-      return CSSLength.toDisplayPortValue(_wordSpacing, viewportSize) ?? DEFAULT_WORD_SPACING;
+      return CSSLength.toDisplayPortValue(
+        _wordSpacing,
+        viewportSize: viewportSize,
+        rootFontSize: rootFontSize,
+        fontSize: fontSize
+      ) ?? DEFAULT_WORD_SPACING;
     } else {
       return DEFAULT_WORD_SPACING;
     }
@@ -792,7 +912,11 @@ class CSSText {
     return null;
   }
 
-  static List<Shadow> getTextShadow(CSSStyleDeclaration style, Size viewportSize) {
+  static List<Shadow> getTextShadow(CSSStyleDeclaration style, {
+    Size? viewportSize,
+    double? rootFontSize,
+    double? fontSize
+  }) {
     List<Shadow> textShadows = [];
     if (style.contains(TEXT_SHADOW)) {
       var shadows = CSSStyleProperty.getShadowValues(style[TEXT_SHADOW]);
@@ -800,9 +924,24 @@ class CSSText {
         for (var shadowDefinitions in shadows) {
           // Specifies the color of the shadow. If the color is absent, it defaults to currentColor.
           Color? color = CSSColor.parseColor(shadowDefinitions[0] ?? style.getCurrentColor());
-          double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[1], viewportSize) ?? 0;
-          double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[2], viewportSize) ?? 0;
-          double blurRadius = CSSLength.toDisplayPortValue(shadowDefinitions[3], viewportSize) ?? 0;
+          double offsetX = CSSLength.toDisplayPortValue(
+            shadowDefinitions[1],
+            viewportSize: viewportSize,
+            rootFontSize: rootFontSize,
+            fontSize: fontSize
+          ) ?? 0;
+          double offsetY = CSSLength.toDisplayPortValue(
+            shadowDefinitions[2],
+            viewportSize: viewportSize,
+            rootFontSize: rootFontSize,
+            fontSize: fontSize
+          ) ?? 0;
+          double blurRadius = CSSLength.toDisplayPortValue(
+            shadowDefinitions[3],
+            viewportSize: viewportSize,
+            rootFontSize: rootFontSize,
+            fontSize: fontSize
+          ) ?? 0;
 
           if (color != null) {
             textShadows.add(Shadow(

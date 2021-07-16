@@ -102,16 +102,12 @@ class CanvasElement extends Element {
 
   // RenderingContext? getContext(DOMString contextId, optional any options = null);
   CanvasRenderingContext2D getContext(String contextId, {dynamic options}) {
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
-
     switch (contextId) {
       case '2d':
         if (painter.context == null) {
           CanvasRenderingContext2D context2d = CanvasRenderingContext2D();
           context2d.canvas = this;
-          context2d.viewportSize = viewportSize;
+          context2d.renderStyle = renderBoxModel!.renderStyle;
           painter.context = context2d;
         }
         return painter.context!;

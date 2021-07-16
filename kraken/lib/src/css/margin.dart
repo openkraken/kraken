@@ -50,28 +50,28 @@ mixin CSSMarginMixin on RenderStyleBase {
   CSSMargin get marginTop {
     _resolve();
     double length = _resolvedMargin != null ? _resolvedMargin!.top : 0;
-    bool isAuto = style![MARGIN_TOP] == AUTO;
+    bool isAuto = style[MARGIN_TOP] == AUTO;
     return CSSMargin(length: length, isAuto: isAuto);
   }
 
   CSSMargin get marginRight {
     _resolve();
     double length = _resolvedMargin != null ? _resolvedMargin!.right : 0;
-    bool isAuto = style![MARGIN_RIGHT] == AUTO;
+    bool isAuto = style[MARGIN_RIGHT] == AUTO;
     return CSSMargin(length: length, isAuto: isAuto);
   }
 
   CSSMargin get marginBottom {
     _resolve();
     double length = _resolvedMargin != null ? _resolvedMargin!.bottom : 0;
-    bool isAuto = style![MARGIN_BOTTOM] == AUTO;
+    bool isAuto = style[MARGIN_BOTTOM] == AUTO;
     return CSSMargin(length: length, isAuto: isAuto);
   }
 
   CSSMargin get marginLeft {
     _resolve();
     double length = _resolvedMargin != null ? _resolvedMargin!.left : 0;
-    bool isAuto = style![MARGIN_LEFT] == AUTO;
+    bool isAuto = style[MARGIN_LEFT] == AUTO;
     return CSSMargin(length: length, isAuto: isAuto);
   }
 

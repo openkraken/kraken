@@ -80,6 +80,8 @@ typedef RenderObject BeforeRendererAttach();
 typedef void AfterRendererAttach();
 /// Return the targetId of current element.
 typedef int GetTargetId();
+/// Get the font size of root element
+typedef double GetRootElementFontSize();
 
 /// Delegate methods passed to renderBoxModel for actions involved with element
 /// (eg. convert renderBoxModel to repaint boundary then attach to element).
@@ -90,6 +92,7 @@ class ElementDelegate {
   BeforeRendererAttach beforeRendererAttach;
   AfterRendererAttach afterRendererAttach;
   GetTargetId getTargetId;
+  GetRootElementFontSize getRootElementFontSize;
 
   ElementDelegate(
     this.markRendererNeedsLayout,
@@ -97,7 +100,8 @@ class ElementDelegate {
     this.detachRenderer,
     this.beforeRendererAttach,
     this.afterRendererAttach,
-    this.getTargetId
+    this.getTargetId,
+    this.getRootElementFontSize
   );
 }
 
@@ -188,6 +192,7 @@ class Element extends Node
       _beforeRendererAttach,
       _afterRendererAttach,
       _getTargetId,
+      _getRootElementFontSize
     );
   }
 
@@ -214,12 +219,19 @@ class Element extends Node
   }
 
   void _afterRendererAttach() {
+    style.applyTargetProperties();
     didAttachRenderer();
     ensureChildAttached();
   }
 
   int _getTargetId() {
     return targetId;
+  }
+
+  double _getRootElementFontSize() {
+    Element rootElement = elementManager.viewportElement;
+    RenderBoxModel rootBoxModel = rootElement.renderBoxModel!;
+    return rootBoxModel.renderStyle.fontSize;
   }
 
   @override
@@ -231,24 +243,18 @@ class Element extends Node
       return renderer!;
     }
 
-    RenderStyle? renderStyle;
     // Content children layout, BoxModel content.
     if (_isIntrinsicBox) {
-      RenderIntrinsic renderIntrinsic = _renderIntrinsic = createRenderIntrinsic(
+      _renderIntrinsic = createRenderIntrinsic(
         this,
         repaintSelf: repaintSelf,
       );
-      renderStyle = renderIntrinsic.renderStyle;
     } else {
-      RenderLayoutBox renderLayoutBox = _renderLayoutBox = createRenderLayout(
+      _renderLayoutBox = createRenderLayout(
         this,
         repaintSelf: repaintSelf,
       );
-      renderStyle = renderLayoutBox.renderStyle;
     }
-
-    /// Set display and transformedDisplay when display is not set in style
-    renderStyle.initDisplay(style, defaultDisplay);
 
     return renderer!;
   }
@@ -262,6 +268,9 @@ class Element extends Node
   @override
   void didAttachRenderer() {
     RenderBoxModel _renderBoxModel = renderBoxModel!;
+
+    // Set display and transformedDisplay when display is not set in style.
+    _renderBoxModel.renderStyle.initDisplay(style, defaultDisplay);
 
     // Bind pointer responder.
     addEventResponder(_renderBoxModel);
@@ -369,6 +378,14 @@ class Element extends Node
       ContainerParentDataMixin<RenderBox>? _parentData = _renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>?;
       if (_parentData != null) {
         previousSibling = _parentData.previousSibling;
+        // Get the renderBox before the RenderPositionHolder to find the renderBox to insert after
+        // cause renderPositionHolder of sticky element lays before the renderBox.
+        if (previousSibling is RenderPositionHolder) {
+          ContainerParentDataMixin<RenderBox>? _parentData = previousSibling.parentData as ContainerParentDataMixin<RenderBox>?;
+          if (_parentData != null) {
+            previousSibling = _parentData.previousSibling;
+          }
+        }
         parentRenderObject.remove(_renderBoxModel);
       }
     }
@@ -393,10 +410,6 @@ class Element extends Node
   void _updatePosition(CSSPositionType prevPosition, CSSPositionType currentPosition) {
     RenderBoxModel _renderBoxModel = renderBoxModel!;
     Element _parentElement = parentElement!;
-
-    if (_renderBoxModel.parent is RenderLayoutBox) {
-      _renderBoxModel.renderStyle.position = currentPosition;
-    }
 
     // Remove fixed children before convert to non repaint boundary renderObject
     if (currentPosition != CSSPositionType.fixed) {
@@ -526,7 +539,7 @@ class Element extends Node
           parentRenderLayoutBox.insert(child.renderBoxModel!, after: after);
 
           if (positionType == CSSPositionType.sticky) {
-            _addPositionHolder(parentRenderLayoutBox, child);
+            _addPositionHolder(parentRenderLayoutBox, child, positionType);
           }
         }
         break;
@@ -538,58 +551,9 @@ class Element extends Node
   void attachTo(Element parent, {RenderBox? after}) {
     CSSDisplay display = CSSDisplayMixin.getDisplay(style[DISPLAY] ?? defaultDisplay);
     if (display != CSSDisplay.none) {
-      willAttachRenderer();
-      style.applyTargetProperties();
-
-      CSSDisplay? parentDisplayValue = parent.renderBoxModel!.renderStyle.display;
-      // InlineFlex or Flex
-      bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex ||
-          parentDisplayValue == CSSDisplay.inlineFlex;
-
+      _beforeRendererAttach();
       parent.addChildRenderObject(this, after: after);
-
-      ensureChildAttached();
-
-      /// Update flex siblings.
-      if (isParentFlexDisplayType) {
-        for (Element child in parent.children) {
-          RenderBoxModel? childRenderBoxModel = child.renderBoxModel;
-          if (parent.renderBoxModel is RenderFlexLayout && childRenderBoxModel != null) {
-            childRenderBoxModel.renderStyle.updateFlexItem();
-            childRenderBoxModel.markNeedsLayout();
-          }
-        }
-      }
-
-      RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-
-      /// Recalculate gradient after node attached when gradient length cannot be obtained from style
-      if (selfRenderBoxModel.shouldRecalGradient) {
-        String backgroundImage = style[BACKGROUND_IMAGE];
-        int contextId = elementManager.contextId;
-        selfRenderBoxModel.renderStyle.updateBox(BACKGROUND_IMAGE, backgroundImage, backgroundImage, contextId);
-        selfRenderBoxModel.shouldRecalGradient = false;
-      }
-
-      /// Calculate font-size which is percentage when node attached
-      /// where it can access the font-size of its parent element
-      if (selfRenderBoxModel.shouldLazyCalFontSize) {
-        _updatePercentageFontSize();
-        selfRenderBoxModel.shouldLazyCalFontSize = false;
-      }
-
-      /// Calculate line-height which is percentage when node attached
-      /// where it can access the font-size of its own element
-      if (selfRenderBoxModel.shouldLazyCalLineHeight) {
-        _updatePercentageLineHeight();
-        selfRenderBoxModel.shouldLazyCalLineHeight = false;
-      }
-
-      RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
-
-      /// Set display and transformedDisplay when display is not set in style
-      renderStyle.initDisplay(style, defaultDisplay);
-      didAttachRenderer();
+      _afterRendererAttach();
     }
   }
 
@@ -726,14 +690,14 @@ class Element extends Node
     _setPositionedChildParentData(parentRenderLayoutBox, child);
     parentRenderLayoutBox.add(childRenderBoxModel);
 
-    _addPositionHolder(parentRenderLayoutBox, child);
+    _addPositionHolder(parentRenderLayoutBox, child, position);
   }
 
-  void _addPositionHolder(RenderLayoutBox parentRenderLayoutBox, Element child) {
+  void _addPositionHolder(RenderLayoutBox parentRenderLayoutBox, Element child, CSSPositionType position) {
     Size preferredSize = Size.zero;
     RenderBoxModel childRenderBoxModel = child.renderBoxModel!;
     RenderStyle childRenderStyle = childRenderBoxModel.renderStyle;
-    if (childRenderStyle.position == CSSPositionType.sticky) {
+    if (position == CSSPositionType.sticky) {
       preferredSize = Size(0, 0);
     } else if (childRenderStyle.display != CSSDisplay.inline) {
       preferredSize = Size(
@@ -745,7 +709,7 @@ class Element extends Node
     childRenderBoxModel.renderPositionHolder = childPositionHolder;
     childPositionHolder.realDisplayedBox = childRenderBoxModel;
 
-    if (childRenderStyle.position == CSSPositionType.sticky) {
+    if (position == CSSPositionType.sticky) {
       // Placeholder of sticky renderBox need to inherit offset from original renderBox,
       // so it needs to layout before original renderBox
       RenderBox? preSibling = parentRenderLayoutBox.childBefore(childRenderBoxModel);
@@ -970,12 +934,12 @@ class Element extends Node
 
   void _stylePositionChangedListener(String property, String? original, String present) {
     /// Update position.
-    CSSPositionType prevPosition = CSSPositionMixin.parsePositionType(original);
+    CSSPositionType prevPosition = renderBoxModel!.renderStyle.position;
     CSSPositionType currentPosition = CSSPositionMixin.parsePositionType(present);
 
-    renderBoxModel!.renderStyle.updatePosition(property, present);
     // Position changed.
     if (prevPosition != currentPosition) {
+      renderBoxModel!.renderStyle.updatePosition(property, present);
       _updatePosition(prevPosition, currentPosition);
     }
   }
@@ -1003,9 +967,17 @@ class Element extends Node
       return;
     }
 
-    double? presentValue = CSSLength.toDisplayPortValue(present, viewportSize);
+    RenderStyle renderStyle = renderBoxModel!.renderStyle;
+    double rootFontSize = _getRootElementFontSize();
+    double fontSize = renderStyle.fontSize;
+    double? presentValue = CSSLength.toDisplayPortValue(
+      present,
+      viewportSize: viewportSize,
+      rootFontSize: rootFontSize,
+      fontSize: fontSize
+    );
     if (presentValue == null) return;
-    renderBoxModel!.renderStyle.updateOffset(property, presentValue);
+    renderStyle.updateOffset(property, presentValue);
   }
 
   void _styleTextAlignChangedListener(String property, String? original, String present) {
@@ -1043,8 +1015,16 @@ class Element extends Node
       return;
     }
 
-    double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
-    selfRenderBoxModel.renderStyle.updatePadding(property, presentValue);
+    RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
+    double rootFontSize = _getRootElementFontSize();
+    double fontSize = renderStyle.fontSize;
+    double? presentValue = CSSLength.toDisplayPortValue(
+      present,
+      viewportSize: viewportSize,
+      rootFontSize: rootFontSize,
+      fontSize: fontSize
+    ) ?? 0;
+    renderStyle.updatePadding(property, presentValue);
   }
 
   void _styleSizeChangedListener(String property, String? original, String present) {
@@ -1058,8 +1038,16 @@ class Element extends Node
       return;
     }
 
-    double? presentValue = CSSLength.toDisplayPortValue(present, viewportSize);
-    selfRenderBoxModel.renderStyle.updateSizing(property, presentValue);
+    RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
+    double rootFontSize = _getRootElementFontSize();
+    double fontSize = renderStyle.fontSize;
+    double? presentValue = CSSLength.toDisplayPortValue(
+      present,
+      viewportSize: viewportSize,
+      rootFontSize: rootFontSize,
+      fontSize: fontSize
+    );
+    renderStyle.updateSizing(property, presentValue);
   }
 
   void _styleMarginChangedListener(String property, String? original, String present) {
@@ -1073,8 +1061,15 @@ class Element extends Node
       return;
     }
 
-    double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
     RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
+    double rootFontSize = _getRootElementFontSize();
+    double fontSize = renderStyle.fontSize;
+    double? presentValue = CSSLength.toDisplayPortValue(
+      present,
+      viewportSize: viewportSize,
+      rootFontSize: rootFontSize,
+      fontSize: fontSize
+    ) ?? 0;
     renderStyle.updateMargin(property, presentValue);
     // Margin change in flex layout may affect transformed display
     // https://www.w3.org/TR/css-display-3/#transformations
@@ -1158,8 +1153,11 @@ class Element extends Node
       return;
     }
 
-    Matrix4? matrix4 = CSSTransform.parseTransform(present, viewportSize);
-    selfRenderBoxModel.renderStyle.updateTransform(matrix4);
+    RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
+    double rootFontSize = _getRootElementFontSize();
+    double fontSize = renderStyle.fontSize;
+    Matrix4? matrix4 = CSSTransform.parseTransform(present, viewportSize, rootFontSize, fontSize);
+    renderStyle.updateTransform(matrix4);
   }
 
   void _styleTransformOriginChangedListener(String property, String? original, String present) {
@@ -1169,26 +1167,17 @@ class Element extends Node
 
   // Update text related style
   void _updateTextStyle(String property) {
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
     /// Percentage font-size should be resolved when node attached
     /// cause it needs to know its parents style
     if (property == FONT_SIZE && CSSLength.isPercentage(style[FONT_SIZE])) {
-      if (selfRenderBoxModel.attached) {
-        _updatePercentageFontSize();
-      } else {
-        selfRenderBoxModel.shouldLazyCalFontSize = true;
-      }
+      _updatePercentageFontSize();
       return;
     }
 
     /// Percentage line-height should be resolved when node attached
     /// cause it needs to know other style in its own element
     if (property == LINE_HEIGHT && CSSLength.isPercentage(style[LINE_HEIGHT])) {
-      if (selfRenderBoxModel.attached) {
-        _updatePercentageLineHeight();
-      } else {
-        selfRenderBoxModel.shouldLazyCalLineHeight = true;
-      }
+      _updatePercentageLineHeight();
       return;
     }
     renderBoxModel!.renderStyle.updateTextStyle(property);
@@ -1221,14 +1210,14 @@ class Element extends Node
     // then trigger the animation phase.
     if (key == TRANSITION) {
       SchedulerBinding.instance!.addPostFrameCallback((timestamp) {
-        style.setProperty(key, value, viewportSize);
+        style.setProperty(key, value, viewportSize, renderBoxModel?.renderStyle);
       });
       return;
     } else {
       CSSDisplay originalDisplay = CSSDisplayMixin.getDisplay(style[DISPLAY] ?? defaultDisplay);
       // @NOTE: See [CSSStyleDeclaration.setProperty], value change will trigger
       // [StyleChangeListener] to be invoked in sync.
-      style.setProperty(key, value, viewportSize);
+      style.setProperty(key, value, viewportSize, renderBoxModel?.renderStyle);
 
       // When renderer and style listener is not created when original display is none,
       // thus it needs to create renderer when style changed.
