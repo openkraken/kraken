@@ -152,14 +152,15 @@ class _KrakenState extends State<Kraken> {
       LogicalKeySet(LogicalKeyboardKey.arrowRight): const MoveSelectionRightTextIntent(),
       LogicalKeySet(LogicalKeyboardKey.arrowDown): const MoveSelectionDownTextIntent(),
       LogicalKeySet(LogicalKeyboardKey.arrowUp): const MoveSelectionUpTextIntent(),
+      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const ExtendSelectionRightTextIntent(),
     };
     _actionMap = <Type, Action<Intent>>{
       NextFocusIntent: CallbackAction<NextFocusIntent>(onInvoke: _handleNextFocus),
       PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(onInvoke: _handlePreviousFocus),
       MoveSelectionLeftTextIntent: CallbackAction<MoveSelectionLeftTextIntent>(onInvoke: _handleMoveSelectionLeftText),
       MoveSelectionRightTextIntent: CallbackAction<MoveSelectionRightTextIntent>(onInvoke: _handleMoveSelectionRightText),
-      MoveSelectionDownTextIntent: CallbackAction<MoveSelectionToEndTextIntent>(onInvoke: _handleMoveSelectionToEndText),
-      MoveSelectionUpTextIntent: CallbackAction<MoveSelectionToStartTextIntent>(onInvoke: _handleMoveSelectionToStartText),
+      MoveSelectionToEndTextIntent: CallbackAction<MoveSelectionToEndTextIntent>(onInvoke: _handleMoveSelectionToEndText),
+      MoveSelectionToStartTextIntent: CallbackAction<MoveSelectionToStartTextIntent>(onInvoke: _handleMoveSelectionToStartText),
     };
     _focusNode = (context.widget as Kraken).focusNode;
   }
