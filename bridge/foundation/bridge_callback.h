@@ -8,6 +8,8 @@
 
 #ifdef KRAKEN_JSC_ENGINE
 #include "bindings/jsc/js_context_internal.h"
+#elif KRAKEN_QUICK_JS_ENGINE
+#include "bindings/qjs/js_context.h"
 #endif
 
 #include <atomic>
@@ -27,36 +29,60 @@ public:
     contextList.clear();
   }
 
+#if KRAKEN_JSC_ENGINE
   struct Context {
     Context(kraken::binding::jsc::JSContext &context, JSValueRef callback, JSValueRef *exception)
-      : _context(context), _callback(callback) {
+      : m_context(context), m_callback(callback) {
       JSValueProtect(context.context(), callback);
     };
     Context(kraken::binding::jsc::JSContext &context, JSValueRef callback, JSValueRef secondaryCallback,
             JSValueRef *exception)
-      : _context(context), _callback(callback), _secondaryCallback(secondaryCallback) {
+      : m_context(context), m_callback(callback), m_secondaryCallback(secondaryCallback) {
       JSValueProtect(context.context(), callback);
       JSValueProtect(context.context(), secondaryCallback);
     };
     ~Context() {
-      JSValueUnprotect(_context.context(), _callback);
+      JSValueUnprotect(m_context.context(), m_callback);
 
-      if (_secondaryCallback != nullptr) {
-        JSValueUnprotect(_context.context(), _secondaryCallback);
+      if (m_secondaryCallback != nullptr) {
+        JSValueUnprotect(m_context.context(), m_secondaryCallback);
       }
     }
-    kraken::binding::jsc::JSContext &_context;
-    JSValueRef _callback{nullptr};
-    JSValueRef _secondaryCallback{nullptr};
+    kraken::binding::jsc::JSContext &m_context;
+    JSValueRef m_callback{nullptr};
+    JSValueRef m_secondaryCallback{nullptr};
   };
+#elif KRAKEN_QUICK_JS_ENGINE
+  struct Context {
+    Context(kraken::binding::qjs::JSContext &context, JSValue callback)
+      : m_context(context), m_callback(callback) {
+      JS_DupValue(context.ctx(), callback);
+    };
+    Context(kraken::binding::qjs::JSContext &context, JSValue callback, JSValue secondaryCallback)
+      : m_context(context), m_callback(callback), m_secondaryCallback(secondaryCallback) {
+      JS_DupValue(context.ctx(), callback);
+      JS_DupValue(context.ctx(), secondaryCallback);
+    };
+    ~Context() {
+      JS_FreeValue(m_context.ctx(), m_callback);
+      if (!JS_IsNull(m_secondaryCallback)) {
+        JS_FreeValue(m_context.ctx(), m_secondaryCallback);
+      }
+    }
+    kraken::binding::qjs::JSContext &m_context;
+    int32_t m_func_count{0};
+    JSValue m_callback{JS_NULL};
+    JSValue m_secondaryCallback{JS_NULL};
+  };
+#endif
 
   // An wrapper to register an callback outside of bridge and wait for callback to bridge.
   template <typename T>
   T registerCallback(std::unique_ptr<Context> &&context, std::function<T(BridgeCallback::Context *, int32_t)> fn) {
     Context *p = context.get();
     assert(p != nullptr && "Callback context can not be nullptr");
-    auto &jsContext = context->_context;
-    int32_t contextId = context->_context.getContextId();
+    auto &jsContext = context->m_context;
+    int32_t contextId = context->m_context.getContextId();
     contextList.emplace_back(std::move(context));
     return fn(p, contextId);
   }

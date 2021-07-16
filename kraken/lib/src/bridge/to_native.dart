@@ -243,6 +243,15 @@ typedef DartClearUICommandItems = void Function(int contextId);
 final DartClearUICommandItems _clearUICommandItems =
     nativeDynamicLibrary.lookup<NativeFunction<NativeClearUICommandItems>>('clearUICommandItems').asFunction();
 
+typedef NativeExecutePendingJob = Void Function();
+typedef DartExecutePendingJob = void Function();
+final DartExecutePendingJob _executeJSPendingJob =
+nativeDynamicLibrary.lookup<NativeFunction<NativeExecutePendingJob>>('executeJSPendingJob').asFunction();
+
+void executeJSPendingJob() {
+  _executeJSPendingJob();
+}
+
 class UICommand {
   late final UICommandType type;
   late final int id;
@@ -376,13 +385,13 @@ void flushUICommand() {
       try {
         switch (commandType) {
           case UICommandType.createElement:
-            controller.view.createElement(id, nativePtr, command.args[0]);
+            controller.view.createElement(id, nativePtr.cast<NativeEventTarget>(), command.args[0]);
             break;
           case UICommandType.createTextNode:
-            controller.view.createTextNode(id, nativePtr.cast<NativeTextNode>(), command.args[0]);
+            controller.view.createTextNode(id, nativePtr.cast<NativeEventTarget>(), command.args[0]);
             break;
           case UICommandType.createComment:
-            controller.view.createComment(id, nativePtr.cast<NativeCommentNode>(), command.args[0]);
+            controller.view.createComment(id, nativePtr.cast<NativeEventTarget>(), command.args[0]);
             break;
           case UICommandType.disposeEventTarget:
             ElementManager.disposeEventTarget(controller.view.contextId, id);

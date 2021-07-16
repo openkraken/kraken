@@ -282,9 +282,9 @@ class CanvasRenderingContext2D {
   }
 
   // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
-  static void _drawImage(Pointer<NativeCanvasRenderingContext2D> nativePtr, int argumentCount, Pointer<NativeImgElement> imagePtr,
+  static void _drawImage(Pointer<NativeCanvasRenderingContext2D> nativePtr, int argumentCount, Pointer<NativeEventTarget> imagePtr,
       double sx, double sy, double sWidth, double sHeight, double dx, double dy, double dWidth, double dHeight) {
-    ImageElement imageElement = ImageElement.getImageElementOfNativePtr(imagePtr);
+    ImageElement imageElement = EventTarget.getEventTargetOfNativePtr(imagePtr) as ImageElement;
     CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2DOfNativePtr(nativePtr);
     canvasRenderingContext2D.drawImage(argumentCount, imageElement.image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
   }

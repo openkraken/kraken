@@ -11,6 +11,6 @@ const Map<String, dynamic> _defaultStyle = {
 const String HEAD = 'HEAD';
 
 class HeadElement extends Element {
-  HeadElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  HeadElement(int targetId, Pointer<NativeEventTarget>   nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: HEAD, defaultStyle: _defaultStyle);
 }

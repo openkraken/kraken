@@ -10,6 +10,7 @@
 // All the struct which prefix with NativeXXX struct (exp: NativeElement) has a corresponding struct in Dart code.
 // All struct members include variables and functions must be follow the same order with Dart class, to keep the same memory layout cross dart and C++ code.
 #include "kraken_foundation.h"
+#include "kraken_bridge_jsc_config.h"
 #include <JavaScriptCore/JavaScript.h>
 #include <chrono>
 #include <deque>
@@ -19,8 +20,6 @@
 #include <unordered_map>
 #include <vector>
 #include <forward_list>
-
-using JSExceptionHandler = std::function<void(int32_t contextId, const char *errmsg)>;
 
 class NativeString;
 

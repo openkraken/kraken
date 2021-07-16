@@ -13,7 +13,7 @@ const Map<String, dynamic> _defaultStyle = {
 const String SCRIPT = 'SCRIPT';
 
 class ScriptElement extends Element {
-  ScriptElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  ScriptElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: SCRIPT, defaultStyle: _defaultStyle);
 
   @override

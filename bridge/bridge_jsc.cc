@@ -3,8 +3,6 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKEN_ENABLE_JSA
-
 #include "bridge_jsc.h"
 #include "foundation/logging.h"
 #include "polyfill.h"
@@ -122,11 +120,6 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 #if ENABLE_PROFILE
   nativePerformance->mark(PERF_JS_POLYFILL_INIT_END);
 #endif
-
-#ifdef KRAKEN_ENABLE_JSA
-  Object promiseHandler = m_context->global().getPropertyAsObject(*m_context, "__global_unhandled_promise_handler__");
-  m_context->setUnhandledPromiseRejectionHandler(promiseHandler);
-#endif
 }
 
 void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType, void *event, NativeString *extra) {
@@ -178,10 +171,10 @@ void JSBridge::evaluateScript(const NativeString *script, const char *url, int s
 #endif
 }
 
-void JSBridge::evaluateScript(const std::u16string &script, const char *url, int startLine) {
+void JSBridge::evaluateScript(const uint16_t *script, size_t length, const char *url, int startLine) {
   if (!m_context->isValid()) return;
   binding::jsc::updateLocation(url);
-  m_context->evaluateJavaScript(script.c_str(), script.size(), url, startLine);
+  m_context->evaluateJavaScript(script, length, url, startLine);
 }
 
 JSBridge::~JSBridge() {
@@ -218,5 +211,3 @@ JSGlobalContextRef getGlobalContextRef(int32_t contextId) {
   auto bridge = static_cast<kraken::JSBridge *>(getJSContext(contextId));
   return bridge->getContext()->context();
 };
-
-#endif

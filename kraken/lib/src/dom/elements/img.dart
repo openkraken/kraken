@@ -28,10 +28,10 @@ const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
 };
 
-final Pointer<NativeFunction<GetImageWidth>> nativeGetImageWidth =  Pointer.fromFunction(ImageElement.getImageWidth, 0.0);
-final Pointer<NativeFunction<GetImageHeight>> nativeGetImageHeight =  Pointer.fromFunction(ImageElement.getImageHeight, 0.0);
-final Pointer<NativeFunction<GetImageWidth>> nativeGetImageNaturalWidth =  Pointer.fromFunction(ImageElement.getImageNaturalWidth, 0.0);
-final Pointer<NativeFunction<GetImageHeight>> nativeGetImageNaturalHeight =  Pointer.fromFunction(ImageElement.getImageNaturalHeight, 0.0);
+// final Pointer<NativeFunction<GetImageWidth>> nativeGetImageWidth =  Pointer.fromFunction(ImageElement.getImageWidth, 0.0);
+// final Pointer<NativeFunction<GetImageHeight>> nativeGetImageHeight =  Pointer.fromFunction(ImageElement.getImageHeight, 0.0);
+// final Pointer<NativeFunction<GetImageWidth>> nativeGetImageNaturalWidth =  Pointer.fromFunction(ImageElement.getImageNaturalWidth, 0.0);
+// final Pointer<NativeFunction<GetImageHeight>> nativeGetImageNaturalHeight =  Pointer.fromFunction(ImageElement.getImageNaturalHeight, 0.0);
 
 class ImageElement extends Element {
   String? _source;
@@ -58,50 +58,47 @@ class ImageElement extends Element {
 
   static SplayTreeMap<int, ImageElement> _nativeMap = SplayTreeMap();
 
-  static ImageElement getImageElementOfNativePtr(Pointer<NativeImgElement> nativeImageElement) {
-    ImageElement? element = _nativeMap[nativeImageElement.address];
-    if (element == null) throw FlutterError('Can not get element from nativeElement: $nativeImageElement');
-    return element;
-  }
+  // static ImageElement getImageElementOfNativePtr(Pointer<NativeImgElement> nativeImageElement) {
+  //   ImageElement? element = _nativeMap[nativeImageElement.address];
+  //   if (element == null) throw FlutterError('Can not get element from nativeElement: $nativeImageElement');
+  //   return element;
+  // }
+  //
+  // static double? getImageWidth(Pointer<NativeImgElement> nativeImageElement) {
+  //   ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
+  //   return imageElement.width;
+  // }
+  //
+  // static double? getImageHeight(Pointer<NativeImgElement> nativeImageElement) {
+  //   ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
+  //   return imageElement.height;
+  // }
+  //
+  // // https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/naturalWidth
+  // static double getImageNaturalWidth(Pointer<NativeImgElement> nativeImageElement) {
+  //   ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
+  //   return imageElement.naturalWidth;
+  // }
+  //
+  // static double getImageNaturalHeight(Pointer<NativeImgElement> nativeImageElement) {
+  //   ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
+  //   return imageElement.naturalHeight;
+  // }
 
-  static double? getImageWidth(Pointer<NativeImgElement> nativeImageElement) {
-    ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-    return imageElement.width;
-  }
-
-  static double? getImageHeight(Pointer<NativeImgElement> nativeImageElement) {
-    ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-    return imageElement.height;
-  }
-
-  // https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/naturalWidth
-  static double getImageNaturalWidth(Pointer<NativeImgElement> nativeImageElement) {
-    ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-    return imageElement.naturalWidth;
-  }
-
-  static double getImageNaturalHeight(Pointer<NativeImgElement> nativeImageElement) {
-    ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-    return imageElement.naturalHeight;
-  }
-
-  final Pointer<NativeImgElement> nativeImgElement;
-
-  ImageElement(int targetId, this.nativeImgElement, ElementManager elementManager)
+  ImageElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
       : super(
       targetId,
-      nativeImgElement.ref.nativeElement,
+      nativeEventTarget,
       elementManager,
       isIntrinsicBox: true,
       tagName: IMAGE,
       defaultStyle: _defaultStyle) {
     _renderStreamListener = ImageStreamListener(_renderImageStream);
-    _nativeMap[nativeImgElement.address] = this;
 
-    nativeImgElement.ref.getImageWidth = nativeGetImageWidth;
-    nativeImgElement.ref.getImageHeight = nativeGetImageHeight;
-    nativeImgElement.ref.getImageNaturalWidth = nativeGetImageNaturalWidth;
-    nativeImgElement.ref.getImageNaturalHeight = nativeGetImageNaturalHeight;
+    // nativeImgElement.ref.getImageWidth = nativeGetImageWidth;
+    // nativeImgElement.ref.getImageHeight = nativeGetImageHeight;
+    // nativeImgElement.ref.getImageNaturalWidth = nativeGetImageNaturalWidth;
+    // nativeImgElement.ref.getImageNaturalHeight = nativeGetImageNaturalHeight;
   }
 
   ui.Image? get image => _imageInfo?.image;
@@ -134,7 +131,6 @@ class ImageElement extends Element {
     _image = null;
     _imageBox = null;
     _imageStream = null;
-    _nativeMap.remove(nativeImgElement.address);
   }
 
   double? get width {

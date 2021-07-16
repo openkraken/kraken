@@ -15,7 +15,7 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class BodyElement extends Element {
-  BodyElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  BodyElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super( targetId, nativePtr, elementManager, tagName: BODY, defaultStyle: _defaultStyle);
 
   @override

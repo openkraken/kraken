@@ -8,11 +8,14 @@
 #include "foundation/logging.h"
 #include "foundation/ui_task_queue.h"
 #include "foundation/inspector_task_queue.h"
-#include "bindings/jsc/KOM/performance.h"
 
-#ifdef KRAKEN_ENABLE_JSA
-#include "bridge_jsa.h"
-#elif KRAKEN_JSC_ENGINE
+#if KRAKEN_JSC_ENGINE
+#include "bindings/jsc/KOM/performance.h"
+#elif KRAKEN_QUICK_JS_ENGINE
+#include "bridge_qjs.h"
+#endif
+
+#if KRAKEN_JSC_ENGINE
 #include "bridge_jsc.h"
 #endif
 
@@ -106,10 +109,10 @@ void disposeContext(int32_t contextId) {
   auto context = static_cast<kraken::JSBridge *>(contextPool[contextId]);
   delete context;
   contextPool[contextId] = nullptr;
-#if ENABLE_PROFILE
-  auto nativePerformance = kraken::binding::jsc::NativePerformance::instance(contextId);
-  nativePerformance->entries.clear();
-#endif
+//#if ENABLE_PROFILE
+//  auto nativePerformance = kraken::binding::jsc::NativePerformance::instance(contextId);
+//  nativePerformance->entries.clear();
+//#endif
 }
 
 int32_t allocateNewContext(int32_t targetContextId) {
@@ -244,6 +247,22 @@ void registerPluginSource(NativeString *code, const char *pluginName) {
     code->length
   };
 }
+
+#if KRAKEN_QUICK_JS_ENGINE
+void executeJSPendingJob() {
+#if KRAKEN_QUICK_JS_ENGINE
+  JSRuntime *runtime = kraken::binding::qjs::getGlobalJSRuntime();
+  int finished = 1;
+  while (finished != 0) {
+    QjsContext *ctx;
+    finished = JS_ExecutePendingJob(runtime, &ctx);
+    if (finished == -1) {
+      break;
+    }
+  }
+#endif
+}
+#endif
 
 NativeString *NativeString::clone() {
   NativeString *newNativeString = new NativeString();

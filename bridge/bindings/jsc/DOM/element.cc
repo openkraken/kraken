@@ -545,26 +545,26 @@ JSValueRef JSElement::toBlob(JSContextRef ctx, JSObjectRef function, JSObjectRef
     auto handleTransientToBlobCallback = [](void *ptr, int32_t contextId, const char *error, uint8_t *bytes,
                                             int32_t length) {
       auto callbackContext = static_cast<BridgeCallback::Context *>(ptr);
-      JSContext &_context = callbackContext->_context;
-      JSContextRef ctx = callbackContext->_context.context();
+      JSContext &_context = callbackContext->m_context;
+      JSContextRef ctx = callbackContext->m_context.context();
 
-      JSValueRef resolveValueRef = callbackContext->_callback;
-      JSValueRef rejectValueRef = callbackContext->_secondaryCallback;
+      JSValueRef resolveValueRef = callbackContext->m_callback;
+      JSValueRef rejectValueRef = callbackContext->m_secondaryCallback;
 
       if (!checkContext(contextId, &_context)) return;
       if (error != nullptr) {
         JSStringRef errorStringRef = JSStringCreateWithUTF8CString(error);
         const JSValueRef arguments[] = {JSValueMakeString(ctx, errorStringRef)};
         JSObjectRef rejectObjectRef = JSValueToObject(ctx, rejectValueRef, nullptr);
-        JSObjectCallAsFunction(ctx, rejectObjectRef, callbackContext->_context.global(), 1, arguments, nullptr);
+        JSObjectCallAsFunction(ctx, rejectObjectRef, callbackContext->m_context.global(), 1, arguments, nullptr);
       } else {
         std::vector<uint8_t> vec(bytes, bytes + length);
         JSObjectRef resolveObjectRef = JSValueToObject(ctx, resolveValueRef, nullptr);
-        JSBlob *Blob = JSBlob::instance(&callbackContext->_context);
+        JSBlob *Blob = JSBlob::instance(&callbackContext->m_context);
         auto blob = new JSBlob::BlobInstance(Blob, std::move(vec));
         const JSValueRef arguments[] = {blob->object};
 
-        JSObjectCallAsFunction(ctx, resolveObjectRef, callbackContext->_context.global(), 1, arguments, nullptr);
+        JSObjectCallAsFunction(ctx, resolveObjectRef, callbackContext->m_context.global(), 1, arguments, nullptr);
       }
     };
 

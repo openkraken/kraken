@@ -14,9 +14,9 @@ namespace kraken::binding::jsc {
 using namespace kraken::foundation;
 
 void handleTimerCallback(BridgeCallback::Context *callbackContext, const char *errmsg) {
-  auto &_context = callbackContext->_context;
+  auto &_context = callbackContext->m_context;
   JSValueRef exception = nullptr;
-  if (callbackContext->_callback == nullptr) {
+  if (callbackContext->m_callback == nullptr) {
     // throw JSError inside of dart function callback will directly cause crash
     // so we handle it instead of throw
     throwJSError(_context.context(), "Failed to trigger callback: timer callback is null.", &exception);
@@ -24,7 +24,7 @@ void handleTimerCallback(BridgeCallback::Context *callbackContext, const char *e
     return;
   }
 
-  if (!JSValueIsObject(_context.context(), callbackContext->_callback)) {
+  if (!JSValueIsObject(_context.context(), callbackContext->m_callback)) {
     return;
   }
 
@@ -34,14 +34,14 @@ void handleTimerCallback(BridgeCallback::Context *callbackContext, const char *e
     return;
   }
 
-  JSObjectRef callbackObjectRef = JSValueToObject(_context.context(), callbackContext->_callback, &exception);
+  JSObjectRef callbackObjectRef = JSValueToObject(_context.context(), callbackContext->m_callback, &exception);
   JSObjectCallAsFunction(_context.context(), callbackObjectRef, _context.global(), 0, nullptr, &exception);
   _context.handleException(exception);
 }
 
 void handlePersistentCallback(void *ptr, int32_t contextId, const char *errmsg) {
   auto *callbackContext = static_cast<BridgeCallback::Context *>(ptr);
-  JSContext &_context = callbackContext->_context;
+  JSContext &_context = callbackContext->m_context;
   if (!checkContext(contextId, &_context)) return;
 
   if (!_context.isValid()) return;
@@ -51,14 +51,14 @@ void handlePersistentCallback(void *ptr, int32_t contextId, const char *errmsg) 
 
 void handleRAFTransientCallback(void *ptr, int32_t contextId, double highResTimeStamp, const char *errmsg) {
   auto *callbackContext = static_cast<BridgeCallback::Context *>(ptr);
-  JSContext &_context = callbackContext->_context;
+  JSContext &_context = callbackContext->m_context;
   if (!checkContext(contextId, &_context)) return;
 
   if (!_context.isValid()) return;
 
   JSValueRef exception = nullptr;
 
-  if (callbackContext->_callback == nullptr) {
+  if (callbackContext->m_callback == nullptr) {
     // throw JSError inside of dart function callback will directly cause crash
     // so we handle it instead of throw
     throwJSError(_context.context(), "Failed to trigger callback: requestAnimationFrame callback is null.",
@@ -67,7 +67,7 @@ void handleRAFTransientCallback(void *ptr, int32_t contextId, double highResTime
     return;
   }
 
-  if (!JSValueIsObject(_context.context(), callbackContext->_callback)) {
+  if (!JSValueIsObject(_context.context(), callbackContext->m_callback)) {
     return;
   }
 
@@ -77,24 +77,24 @@ void handleRAFTransientCallback(void *ptr, int32_t contextId, double highResTime
     return;
   }
 
-  JSObjectRef callbackObjectRef = JSValueToObject(_context.context(), callbackContext->_callback, &exception);
+  JSObjectRef callbackObjectRef = JSValueToObject(_context.context(), callbackContext->m_callback, &exception);
 
   const JSValueRef args[1]{JSValueMakeNumber(_context.context(), highResTimeStamp)};
 
   JSObjectCallAsFunction(_context.context(), callbackObjectRef, _context.global(), 1, args, &exception);
   _context.handleException(exception);
-  auto bridge = static_cast<JSBridge *>(callbackContext->_context.getOwner());
+  auto bridge = static_cast<JSBridge *>(callbackContext->m_context.getOwner());
   bridge->bridgeCallback->freeBridgeCallbackContext(callbackContext);
 }
 
 void handleTransientCallback(void *ptr, int32_t contextId, const char *errmsg) {
   auto *callbackContext = static_cast<BridgeCallback::Context *>(ptr);
-  JSContext &_context = callbackContext->_context;
+  JSContext &_context = callbackContext->m_context;
   if (!checkContext(contextId, &_context)) return;
 
   handleTimerCallback(callbackContext, errmsg);
 
-  auto bridge = static_cast<JSBridge *>(callbackContext->_context.getOwner());
+  auto bridge = static_cast<JSBridge *>(callbackContext->m_context.getOwner());
   bridge->bridgeCallback->freeBridgeCallbackContext(callbackContext);
 }
 

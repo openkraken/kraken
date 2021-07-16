@@ -3,14 +3,40 @@
  * Author: Kraken Team.
  */
 
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
+import 'package:ffi/ffi.dart';
 import 'dart:ffi';
+import 'dart:collection';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 
 typedef EventHandler = void Function(Event event);
 
-class EventTarget {
+void callNativeMethods(Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeValue> returnedValue, Pointer<NativeString> nativeMethod, int argc, Pointer<NativeValue> argv) {
+  String method = nativeStringToString(nativeMethod);
+  List<dynamic> values = List.generate(argc, (i) {
+    Pointer<NativeValue> nativeValue = argv.elementAt(i);
+    JSValueType type = JSValueType.values[nativeValue.ref.tag];
+    return fromNativeValue(type, nativeValue);
+  });
+
+  EventTarget eventTarget = EventTarget.getEventTargetOfNativePtr(nativeEventTarget);
+  dynamic result = eventTarget.handleJSCall(method, values);
+  toNativeValue(returnedValue, result);
+}
+
+Pointer<NativeFunction<NativeCallNativeMethods>> _nativeCallNativeMethods = Pointer.fromFunction(callNativeMethods);
+
+abstract class EventTarget {
+  static SplayTreeMap<int, EventTarget> _nativeMap = SplayTreeMap();
+  static EventTarget getEventTargetOfNativePtr(Pointer<NativeEventTarget> nativePtr) {
+    EventTarget? target = _nativeMap[nativePtr.address];
+    if (target == null) throw FlutterError('Can not get eventTarget of nativePtr: $nativePtr');
+    return target;
+  }
+
   // A unique target identifier.
   final int targetId;
 
@@ -23,7 +49,10 @@ class EventTarget {
   @protected
   Map<String, List<EventHandler>> eventHandlers = {};
 
-  EventTarget(this.targetId, this.nativeEventTargetPtr, this.elementManager);
+  EventTarget(this.targetId, this.nativeEventTargetPtr, this.elementManager) {
+    nativeEventTargetPtr.ref.callNativeMethods = _nativeCallNativeMethods;
+    _nativeMap[nativeEventTargetPtr.address] = this;
+  }
 
   void addEvent(String eventType) {}
 
@@ -59,9 +88,12 @@ class EventTarget {
     return eventHandlers;
   }
 
+  dynamic handleJSCall(String method, List<dynamic> argv);
+
   @mustCallSuper
   void dispose() {
     elementManager.removeTarget(this);
     eventHandlers.clear();
+    _nativeMap.remove(nativeEventTargetPtr.address);
   }
 }

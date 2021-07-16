@@ -22,11 +22,6 @@ import 'package:flutter/rendering.dart';
 const String INPUT = 'INPUT';
 const String VALUE = 'value';
 
-final Pointer<NativeFunction<GetInputWidth>> nativeGetInputWidth = Pointer.fromFunction(InputElement.getInputWidth, 0.0);
-final Pointer<NativeFunction<GetInputHeight>> nativeGetInputHeight = Pointer.fromFunction(InputElement.getInputHeight, 0.0);
-final Pointer<NativeFunction<InputElementMethodVoidCallback>> nativeInputMethodFocus = Pointer.fromFunction(InputElement.callMethodFocus);
-final Pointer<NativeFunction<InputElementMethodVoidCallback>> nativeInputMethodBlur = Pointer.fromFunction(InputElement.callMethodBlur);
-
 /// https://www.w3.org/TR/css-sizing-3/#intrinsic-sizes
 /// For boxes without a preferred aspect ratio:
 /// If the available space is definite in the appropriate dimension, use the stretch fit into that size in that dimension.
@@ -118,41 +113,32 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
   }
 
-  static SplayTreeMap<int, InputElement> _nativeMap = SplayTreeMap();
-
-  static InputElement getInputElementOfNativePtr(Pointer<NativeInputElement> nativePtr) {
-    InputElement? element = _nativeMap[nativePtr.address];
-    if (element == null) throw FlutterError('Can not get element from nativeElement: $nativePtr');
-    return element;
-  }
-
   // el.width
-  static double getInputWidth(Pointer<NativeInputElement> nativeInputElement) {
-    // @TODO: Apply algorithm of input element property width.
-    return 0.0;
-  }
+  // static double getInputWidth(Pointer<NativeInputElement> nativeInputElement) {
+  //   // @TODO: Apply algorithm of input element property width.
+  //   return 0.0;
+  // }
 
   // el.height
-  static double getInputHeight(Pointer<NativeInputElement> nativeInputElement) {
-    // @TODO: Apply algorithm of input element property height.
-    return 0.0;
-  }
+  // static double getInputHeight(Pointer<NativeInputElement> nativeInputElement) {
+  //   // @TODO: Apply algorithm of input element property height.
+  //   return 0.0;
+  // }
 
-  static void callMethodFocus(Pointer<NativeInputElement> nativeInputElement) {
-    InputElement inputElement = getInputElementOfNativePtr(nativeInputElement);
-    InputElement.setFocus(inputElement);
-  }
-
-  static void callMethodBlur(Pointer<NativeInputElement> nativeInputElement) {
-    InputElement inputElement = getInputElementOfNativePtr(nativeInputElement);
-    if (inputElement == InputElement.focusInputElement) {
-      InputElement.clearFocus();
-    }
-  }
+  // static void callMethodFocus(Pointer<NativeInputElement> nativeInputElement) {
+  //   InputElement inputElement = getInputElementOfNativePtr(nativeInputElement);
+  //   InputElement.setFocus(inputElement);
+  // }
+  //
+  // static void callMethodBlur(Pointer<NativeInputElement> nativeInputElement) {
+  //   InputElement inputElement = getInputElementOfNativePtr(nativeInputElement);
+  //   if (inputElement == InputElement.focusInputElement) {
+  //     InputElement.clearFocus();
+  //   }
+  // }
 
   static String obscuringCharacter = '•';
 
-  final Pointer<NativeInputElement> nativeInputElement;
   Timer? _cursorTimer;
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(false);
@@ -192,21 +178,14 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   InputElement(
     int targetId,
-    this.nativeInputElement,
+    Pointer<NativeEventTarget> nativeEventTarget,
     ElementManager elementManager, {
     this.textAlign = TextAlign.left,
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
-  }) : super(targetId, nativeInputElement.ref.nativeElement, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
-    _nativeMap[nativeInputElement.address] = this;
-
+  }) : super(targetId, nativeEventTarget, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
     _textSelectionDelegate = EditableTextDelegate(this);
-
-    nativeInputElement.ref.getInputWidth = nativeGetInputWidth;
-    nativeInputElement.ref.getInputHeight = nativeGetInputHeight;
-    nativeInputElement.ref.focus = nativeInputMethodFocus;
-    nativeInputElement.ref.blur = nativeInputMethodBlur;
   }
 
   @override
@@ -860,7 +839,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   void dispose() {
     super.dispose();
-    _nativeMap.remove(nativeInputElement.address);
   }
 }
 

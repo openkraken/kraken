@@ -14,6 +14,7 @@
 
 #if KRAKEN_JSC_ENGINE
 #include "kraken_bridge_jsc.h"
+#elif KRAKEN_QUICK_JS_ENGINE
 #endif
 
 #define KRAKEN_EXPORT_C extern "C" __attribute__((visibility("default"))) __attribute__((used))
@@ -124,6 +125,9 @@ KRAKEN_EXPORT_C
 void registerContextDisposedCallbacks(int32_t contextId, Task task, void *data);
 KRAKEN_EXPORT_C
 void registerPluginSource(NativeString* code, const char *pluginName);
+
+KRAKEN_EXPORT_C
+void executeJSPendingJob();
 
 KRAKEN_EXPORT
 void setConsoleMessageHandler(ConsoleMessageHandler handler);

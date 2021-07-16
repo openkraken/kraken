@@ -3,7 +3,6 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14)
 project(KrakenBridge)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_C_FLAGS -flto)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 string(TOLOWER ${CMAKE_SYSTEM_NAME} CMAKE_SYSTEM_NAME)
 string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
@@ -24,6 +23,11 @@ string(REGEX REPLACE "\n$" "" DART_SDK "${DART_SDK}")
 list(APPEND PUBLIC_HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
 )
+
+if (ENABLE_ASAN)
+  add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+  add_link_options(-fsanitize=address -fno-omit-frame-pointer)
+endif()
 
 list(APPEND BRIDGE_SOURCE
     kraken_bridge.cc
@@ -52,13 +56,15 @@ list(APPEND BRIDGE_SOURCE
 )
 
 list(APPEND BRIDGE_INCLUDE
-  ./foundation
-  ./
-  ./include
-  ./polyfill/dist
+  ${CMAKE_CURRENT_LIST_DIR}/foundation
+  ${CMAKE_CURRENT_LIST_DIR}
+  ${CMAKE_CURRENT_LIST_DIR}/include
+  ${CMAKE_CURRENT_LIST_DIR}/polyfill/dist
   ${DART_SDK}
   ${ADDITIONAL_INCLUDE_DIRS}
   )
+
+set(BINDING_DIR ${CMAKE_CURRENT_LIST_DIR}/bindings)
 
 if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   add_compile_options(-DKRAKEN_JSC_ENGINE=1)
@@ -173,23 +179,75 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   )
 
   list(APPEND QUICK_JS_SOURCE
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.c
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp.c
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp-opcode.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode.c
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode-table.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/list.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs.c
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-atom.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-opcode.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp-opcode.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode-table.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/list.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-atom.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-opcode.h
   )
   add_library(quickjs SHARED ${QUICK_JS_SOURCE})
 
+  list(APPEND BRIDGE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
+  list(APPEND BRIDGE_LINK_LIBS quickjs)
+
+  list(APPEND BRIDGE_SOURCE
+      bridge_qjs.cc
+      bridge_qjs.h
+      bindings/qjs/js_context.cc
+      bindings/qjs/js_context.h
+      bindings/qjs/native_value.cc
+      bindings/qjs/native_value.h
+      bindings/qjs/host_object.h
+      bindings/qjs/host_class.h
+      bindings/qjs/qjs_patch.cc
+      bindings/qjs/qjs_patch.h
+      bindings/qjs/module_manager.cc
+      bindings/qjs/module_manager.h
+      bindings/qjs/kraken.cc
+      bindings/qjs/kraken.h
+      bindings/qjs/bom/console.cc
+      bindings/qjs/bom/console.h
+      bindings/qjs/bom/screen.cc
+      bindings/qjs/bom/screen.h
+      bindings/qjs/bom/timer.cc
+      bindings/qjs/bom/timer.h
+      bindings/qjs/dom/event_target.cc
+      bindings/qjs/dom/event_target.h
+      bindings/qjs/dom/event.cc
+      bindings/qjs/dom/event.h
+      bindings/qjs/dom/node.h
+      bindings/qjs/dom/node.cc
+      bindings/qjs/dom/element.cc
+      bindings/qjs/dom/element.h
+      bindings/qjs/dom/document.cc
+      bindings/qjs/dom/document.h
+      bindings/qjs/dom/style_declaration.cc
+      bindings/qjs/dom/style_declaration.h
+      bindings/qjs/dom/elements/canvas_element.cc
+      bindings/qjs/dom/elements/canvas_element.h
+      bindings/qjs/bom/blob.cc
+      bindings/qjs/bom/blob.h
+      bindings/qjs/bom/location.h
+      bindings/qjs/bom/location.cc
+      bindings/qjs/bom/window.cc
+      bindings/qjs/bom/window.h
+      bindings/qjs/dom/custom_event.cc
+      bindings/qjs/dom/custom_event.h
+  )
+
+  # Quickjs use __builtin_frame_address() to get stack pointer, we should add follow options to get it work with -O2
+  # https://stackoverflow.com/questions/14735010/how-do-you-get-gccs-builtin-frame-address-to-work-with-o2
+  add_compile_options(-fno-optimize-sibling-calls -fno-omit-frame-pointer)
   target_compile_options(quickjs PUBLIC -DCONFIG_VERSION=${\"QUICKJS_VERSION\"})
+
 endif()
 
 list(APPEND PUBLIC_HEADER
@@ -211,13 +269,17 @@ target_include_directories(kraken PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
 target_link_libraries(kraken PRIVATE ${BRIDGE_LINK_LIBS})
 
-if (${CMAKE_BUILD_TYPE} STREQUAL "release" OR ${CMAKE_BUILD_TYPE} STREQUAL "relwithdebinfo")
-  ## http://ptspts.blogspot.com/2013/12/how-to-make-smaller-c-and-c-binaries.html
-  ### remove dynamic_cast and exceptions
-  target_compile_options(kraken PRIVATE -fno-exceptions -fvisibility=hidden)
-else()
-  ### remove dynamic_cast and exceptions
-  target_compile_options(kraken PRIVATE -fno-exceptions)
+if($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
+  if (${CMAKE_BUILD_TYPE} STREQUAL "release" OR ${CMAKE_BUILD_TYPE} STREQUAL "relwithdebinfo")
+    ## http://ptspts.blogspot.com/2013/12/how-to-make-smaller-c-and-c-binaries.html
+    ### remove dynamic_cast and exceptions
+    target_compile_options(kraken PRIVATE -fno-exceptions -fvisibility=hidden)
+  else()
+    ### remove dynamic_cast and exceptions
+    target_compile_options(kraken PRIVATE -fno-exceptions)
+  endif()
+elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
+  target_compile_options(kraken PRIVATE -fno-exceptions -fvisibility=hidden -fno-rtti)
 endif()
 
 ### KrakenStatic
@@ -247,11 +309,14 @@ add_definitions(-DAPP_REV="${GIT_HEAD}") # Read from git head sha1
 if (${ENABLE_TEST})
   add_compile_definitions(IS_TEST=true)
   include(./test/test.cmake)
-endif ()
+endif()
 
 if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_jsc)
   set_target_properties(kraken_static PROPERTIES OUTPUT_NAME kraken_jsc)
+elseif ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
+  set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_quickjs)
+  set_target_properties(kraken_static PROPERTIES OUTPUT_NAME kraken_quickjs)
 endif()
 
 if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
@@ -260,6 +325,10 @@ if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
           LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
           )
   set_target_properties(kraken_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}")
+
+  if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
+    set_target_properties(quickjs PROPERTIES LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}")
+  endif()
 elseif (IS_ANDROID)
   # android do nothing
 endif()

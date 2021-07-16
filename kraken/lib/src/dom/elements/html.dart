@@ -13,7 +13,7 @@ import 'package:kraken/kraken.dart';
 const String HTML = 'HTML';
 
 class HTMLElement extends Element {
-  HTMLElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  HTMLElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(
       targetId,
       nativePtr,

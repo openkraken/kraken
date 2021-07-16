@@ -8,9 +8,6 @@
 
 #include "kraken_bridge.h"
 
-#ifdef ENABLE_TEST
-#include "kraken_bridge_test.h"
-#endif
 #include <memory>
 #include <thread>
 

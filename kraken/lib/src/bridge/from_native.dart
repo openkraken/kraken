@@ -304,25 +304,25 @@ void _flushUICommand() {
 final Pointer<NativeFunction<NativeFlushUICommand>> _nativeFlushUICommand = Pointer.fromFunction(_flushUICommand);
 
 // HTML Element is special element which created at initialize time, so we can't use UICommandQueue to init.
-typedef NativeInitHTML = Void Function(Int32 contextId, Pointer<NativeElement> nativePtr);
-void _initHTML(int contextId, Pointer<NativeElement> nativePtr) {
+typedef NativeInitHTML = Void Function(Int32 contextId, Pointer<NativeEventTarget> nativePtr);
+void _initHTML(int contextId, Pointer<NativeEventTarget> nativePtr) {
   ElementManager.htmlNativePtrMap[contextId] = nativePtr;
 }
 final Pointer<NativeFunction<NativeInitHTML>> _nativeInitHTML = Pointer.fromFunction(_initHTML);
 
-typedef NativeInitWindow = Void Function(Int32 contextId, Pointer<NativeWindow> nativePtr);
-typedef DartInitWindow = void Function(int contextId, Pointer<NativeWindow> nativePtr);
+typedef NativeInitWindow = Void Function(Int32 contextId, Pointer<NativeEventTarget> nativePtr);
+typedef DartInitWindow = void Function(int contextId, Pointer<NativeEventTarget> nativePtr);
 
-void _initWindow(int contextId, Pointer<NativeWindow> nativePtr) {
+void _initWindow(int contextId, Pointer<NativeEventTarget> nativePtr) {
   ElementManager.windowNativePtrMap[contextId] = nativePtr;
 }
 
 final Pointer<NativeFunction<NativeInitWindow>> _nativeInitWindow = Pointer.fromFunction(_initWindow);
 
-typedef NativeInitDocument = Void Function(Int32 contextId, Pointer<NativeDocument> nativePtr);
-typedef DartInitDocument = void Function(int contextId, Pointer<NativeDocument> nativePtr);
+typedef NativeInitDocument = Void Function(Int32 contextId, Pointer<NativeEventTarget> nativePtr);
+typedef DartInitDocument = void Function(int contextId, Pointer<NativeEventTarget> nativePtr);
 
-void _initDocument(int contextId, Pointer<NativeDocument> nativePtr) {
+void _initDocument(int contextId, Pointer<NativeEventTarget> nativePtr) {
   ElementManager.documentNativePtrMap[contextId] = nativePtr;
 }
 
