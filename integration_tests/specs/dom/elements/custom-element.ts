@@ -1,4 +1,4 @@
-fdescribe('custom element', () => {
+describe('custom element', () => {
   it('use flutter text', async () => {
     const text = document.createElement('flutter-text');
     text.setAttribute('value', 'Hello');
