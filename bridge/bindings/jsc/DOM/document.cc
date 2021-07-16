@@ -90,7 +90,6 @@ JSValueRef JSDocument::createTextNode(JSContextRef ctx, JSObjectRef function, JS
   auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
   auto TextNode = JSTextNode::instance(document->context);
   auto textNodeInstance = JSObjectCallAsConstructor(ctx, TextNode->classObject, 1, arguments, exception);
-  auto textNode = reinterpret_cast<JSTextNode::TextNodeInstance *>(JSObjectGetPrivate(textNodeInstance));
   return textNodeInstance;
 }
 
