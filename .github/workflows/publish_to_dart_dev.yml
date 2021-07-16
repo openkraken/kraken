@@ -11,6 +11,6 @@ jobs:
     - name: NPM INSTALL
       run: npm install
     - name: Build bridge binary
-      run: node scripts/prepare_kraken_release_binary.js
+      run: npm run build:bridge:all:release
     - name: Publish to dart.dev
       run: cd kraken && flutter pub publish --force
