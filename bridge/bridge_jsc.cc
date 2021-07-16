@@ -145,10 +145,8 @@ void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType
   }
 
   for (const auto &callback : krakenModuleListenerList) {
-    if (exception != nullptr) {
-      m_context->handleException(exception);
-      return;
-    }
+    // The last callback function may be a method such as reload, which releas JSContext. If JSContext has been released, it may access a null pointer and cause a crash.
+    if (m_context == nullptr || !m_context->isValid()) break;
 
     JSStringRef moduleNameStringRef = JSStringCreateWithCharacters(moduleName->string, moduleName->length);
     JSStringRef moduleExtraDataRef = JSStringCreateWithCharacters(extra->string, extra->length);
@@ -158,9 +156,12 @@ void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType
       JSValueMakeFromJSONString(m_context->context(), moduleExtraDataRef)
     };
     JSObjectCallAsFunction(m_context->context(), callback, m_context->global(), 3, args, &exception);
-  }
 
-  m_context->handleException(exception);
+    if (exception != nullptr) {
+      m_context->handleException(exception);
+      break;
+    }
+  }
 }
 
 void JSBridge::evaluateScript(const NativeString *script, const char *url, int startLine) {
