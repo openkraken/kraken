@@ -155,15 +155,15 @@ class Cubic {
 const ease = new Cubic(0.25, 0.1, 0.25, 1.0);
 
 // Simulate an mouse click action
-async function simulateClick(x: number, y: number) {
+async function simulateClick(x: number, y: number, pointer: number = 0) {
   await simulatePointer([
     [x, y, PointerChange.down],
     [x, y, PointerChange.up]
-  ]);
+  ], pointer);
 }
 
 // Simulate an mouse swipe action.
-async function simulateSwipe(startX: number, startY: number, endX: number, endY: number, duration: number) {
+async function simulateSwipe(startX: number, startY: number, endX: number, endY: number, duration: number, pointer: number = 0) {
   let params: [number, number, number][] = [[startX, startY, PointerChange.down]];
   let pointerMoveDelay = 0.001;
   let totalCount = duration / pointerMoveDelay;
@@ -179,7 +179,21 @@ async function simulateSwipe(startX: number, startY: number, endX: number, endY:
   }
 
   params.push([endX, endY, PointerChange.up]);
-  await simulatePointer(params);
+  await simulatePointer(params, pointer);
+}
+
+// Simulate an point down action.
+async function simulatePointDown(x: number, y: number, pointer: number = 0) {
+  await simulatePointer([
+    [x, y, PointerChange.down],
+  ], pointer);
+}
+
+// Simulate an point up action.
+async function simulatePoinrUp(x: number, y: number, pointer: number = 0) {
+  await simulatePointer([
+    [x, y, PointerChange.up],
+  ], pointer);
 }
 
 function append(parent: HTMLElement, child: Node) {
@@ -211,4 +225,6 @@ Object.assign(global, {
   simulateClick,
   sleep,
   snapshot,
+  simulatePointDown,
+  simulatePoinrUp,
 });

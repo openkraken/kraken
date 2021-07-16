@@ -523,31 +523,6 @@ class RenderBoxModel extends RenderBox
     return _contentConstraints;
   }
 
-  /// Whether need to recalculate gradient when setting style used in cases
-  /// when linear-gradient has length specified and layout has no size in gradient direction
-  /// such as 'linear-gradient(to right, red 0px, red 50px, orange 50px, orange 80px)' and style has no width set
-  bool _shouldRecalGradient = false;
-
-  bool get shouldRecalGradient => _shouldRecalGradient;
-
-  set shouldRecalGradient(bool value) {
-    if (_shouldRecalGradient != value) {
-      _shouldRecalGradient = value;
-    }
-  }
-
-  /// Used when setting percentage font-size style, it needs to be calculated when node attached
-  /// where it needs to know the font-size of its parent element
-  bool _shouldLazyCalFontSize = false;
-
-  bool get shouldLazyCalFontSize => _shouldLazyCalFontSize;
-
-  set shouldLazyCalFontSize(bool value) {
-    if (_shouldLazyCalFontSize != value) {
-      _shouldLazyCalFontSize = value;
-    }
-  }
-
   /// Used when setting percentage line-height style, it needs to be calculated when node attached
   /// where it needs to know the font-size of its own element
   bool _shouldLazyCalLineHeight = false;
@@ -632,10 +607,14 @@ class RenderBoxModel extends RenderBox
       ..scrollOffsetY = scrollOffsetY
 
       // Copy pointer listener
-      ..onPointerDown = onPointerDown
-      ..onPointerCancel = onPointerCancel
-      ..onPointerUp = onPointerUp
-      ..onPointerMove = onPointerMove
+      ..getEventTarget = getEventTarget
+      ..dispatchEvent = dispatchEvent
+      ..getEventHandlers = getEventHandlers
+      ..onClick = onClick
+      ..onSwipe = onSwipe
+      ..onPan = onPan
+      ..onScale = onScale
+      ..onLongPress = onLongPress
       ..onPointerSignal = onPointerSignal
 
       // Copy renderPositionHolder
@@ -1576,7 +1555,7 @@ class RenderBoxModel extends RenderBox
   RenderBoxModel? getSelfParentWithSpecifiedStyle(String styleProperty) {
     RenderObject? _parent = this;
     while (_parent != null && _parent is! RenderViewportBox) {
-      if (_parent is RenderBoxModel && _parent.renderStyle.style![styleProperty].isNotEmpty) {
+      if (_parent is RenderBoxModel && _parent.renderStyle.style[styleProperty].isNotEmpty) {
         break;
       }
       if (_parent.parent != null) {
@@ -1590,6 +1569,15 @@ class RenderBoxModel extends RenderBox
     }
 
     return _parent != null ? _parent as RenderBoxModel : null;
+  }
+
+  /// Get the root box model of document which corresponds to html element.
+  RenderBoxModel? getRootBoxModel() {
+    RenderBoxModel _self = this;
+    while (_self.parent != null && _self.parent is! RenderViewportBox) {
+      _self = _self.parent as RenderBoxModel;
+    }
+    return _self.parent is RenderViewportBox ? _self : null;
   }
 
   @override

@@ -1,3 +1,18 @@
+## 0.8.1
+
+**Features**
+
++ input element not support maxlength property https://github.com/openkraken/kraken/pull/450
++ support em and rem CSS length https://github.com/openkraken/kraken/pull/475
+
+
+**Bug Fixed**
+
++ remove same origin policy for xhr https://github.com/openkraken/kraken/pull/463
++ fix error when scroll to top in silver box https://github.com/openkraken/kraken/issues/468
++ fix js contextId allocate order error https://github.com/openkraken/kraken/pull/474 https://github.com/openkraken/kraken/pull/477
+
+
 ## 0.8.0+2
 
 **Features**

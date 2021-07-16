@@ -91,7 +91,6 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     HTMLElement documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId]!, this);
     setEventTarget(documentElement);
 
-    viewportElement = documentElement;
     viewport.child = viewportElement.renderBoxModel;
     _viewportRenderObject = viewport;
 

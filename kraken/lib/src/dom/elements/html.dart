@@ -27,6 +27,7 @@ class HTMLElement extends Element {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_PROPERTY_INIT);
     }
+    elementManager.viewportElement = this;
     // Init renderer
     willAttachRenderer();
     // Init default render style value

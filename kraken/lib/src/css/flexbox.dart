@@ -275,18 +275,18 @@ mixin CSSFlexboxMixin on RenderStyleBase {
   }
 
   void updateFlexbox() {
-    flexDirection = _getFlexDirection(style!);
-    flexWrap = _getFlexWrap(style!);
-    justifyContent = _getJustifyContent(style!);
-    alignItems = _getAlignItems(style!);
-    alignContent = _getAlignContent(style!);
+    flexDirection = _getFlexDirection(style);
+    flexWrap = _getFlexWrap(style);
+    justifyContent = _getJustifyContent(style);
+    alignItems = _getAlignItems(style);
+    alignContent = _getAlignContent(style);
   }
 
   void updateFlexItem() {
-    flexGrow = _getFlexGrow(style!);
-    flexShrink = _getFlexShrink(style!);
-    flexBasis = _getFlexBasis(style!, viewportSize);
-    alignSelf = _getAlignSelf(style!);
+    flexGrow = _getFlexGrow(style);
+    flexShrink = _getFlexShrink(style);
+    flexBasis = _getFlexBasis(style);
+    alignSelf = _getAlignSelf(style);
   }
 
   FlexDirection _getFlexDirection(CSSStyleDeclaration style) {
@@ -422,9 +422,19 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     return flexShrink != null && flexShrink >= 0 ? flexShrink : 1.0;
   }
 
-  double? _getFlexBasis(CSSStyleDeclaration style, Size viewportSize) {
+  double? _getFlexBasis(CSSStyleDeclaration style) {
     String basisStr = style[FLEX_BASIS];
-    double? flexBasis = CSSLength.toDisplayPortValue(basisStr, viewportSize);
+    RenderStyle renderStyle = this as RenderStyle;
+    Size viewportSize = renderStyle.viewportSize;
+    RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
+    double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
+    double fontSize = renderStyle.fontSize;
+    double? flexBasis = CSSLength.toDisplayPortValue(
+      basisStr,
+      viewportSize: viewportSize,
+      rootFontSize: rootFontSize,
+      fontSize: fontSize
+    );
     if (basisStr.isNotEmpty && basisStr != AUTO) {
       if (flexBasis! < 0) {
         flexBasis = null;

@@ -86,8 +86,6 @@ class RenderViewportBox extends RenderProxyBox
       // Add viewport to hitTest list.
       GestureManager.instance().addTargetToList(this);
       _verticalDragGestureRecognizer.addPointer(event);
-    } else if (event is PointerUpEvent) {
-      GestureManager.instance().clearTargetList();
     }
 
     // Add pointer to GestureManager.
