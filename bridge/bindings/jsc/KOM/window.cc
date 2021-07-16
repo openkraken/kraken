@@ -13,7 +13,8 @@ WindowInstance::WindowInstance(JSWindow *window)
   : EventTargetInstance(window, WINDOW_TARGET_ID), nativeWindow(new NativeWindow(nativeEventTarget)) {
   location_ = new JSLocation(context);
 
-  // window.self should be window.
+  // https://developer.mozilla.org/zh-CN/docs/Web/API/Window/self
+  // window.self should be window in kraken.
   std::string self = "self";
   setProperty(self, this->object, nullptr);
 
