@@ -102,7 +102,7 @@ class _KrakenAdapterWidgetPropertiesState extends State<_KrakenAdapterWidget> {
   WidgetCreator _widgetCreator;
   _KrakenAdapterWidgetPropertiesState(this._widgetCreator, this._properties);
 
-  void onAttributeChanged(properties) {
+  void onAttributeChanged(Map<String, dynamic> properties) {
     setState(() {
       _properties = properties;
     });
