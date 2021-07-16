@@ -13,6 +13,10 @@ WindowInstance::WindowInstance(JSWindow *window)
   : EventTargetInstance(window, WINDOW_TARGET_ID), nativeWindow(new NativeWindow(nativeEventTarget)) {
   location_ = new JSLocation(context);
 
+  // window.self should be window.
+  std::string self = "self";
+  setProperty(self, this->object, nullptr);
+
   getDartMethod()->initWindow(window->contextId, nativeWindow);
 }
 
