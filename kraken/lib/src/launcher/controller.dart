@@ -11,7 +11,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-
+import 'package:flutter/widgets.dart' show FocusNode;
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/module.dart';
@@ -85,6 +85,8 @@ class KrakenViewController {
   }
 
   Color? background;
+  
+  FocusNode? focusNode;
 
   KrakenViewController(
     this._viewportWidth,
@@ -97,6 +99,7 @@ class KrakenViewController {
     this.navigationDelegate,
     this.gestureClient,
     this.eventClient,
+    this.focusNode,
   }) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT);
@@ -139,6 +142,7 @@ class KrakenViewController {
       showPerformanceOverlayOverride: showPerformanceOverlay,
       controller: rootController,
       eventClient: eventClient,
+      focusNode: focusNode,
     );
 
     if (kProfileMode) {
@@ -418,6 +422,8 @@ class KrakenController {
     return getControllerOfJSContextId(contextId);
   }
 
+  FocusNode? focusNode;
+  
   LoadHandler? onLoad;
 
   // Error handler when load bundle failed.
@@ -463,6 +469,7 @@ class KrakenController {
     EventClient? eventClient,
     KrakenNavigationDelegate? navigationDelegate,
     KrakenMethodChannel? methodChannel,
+    this.focusNode,
     this.onLoad,
     this.onLoadError,
     this.onJSError,
@@ -490,6 +497,7 @@ class KrakenController {
         navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate(),
         gestureClient: _gestureClient,
         eventClient: _eventClient,
+        focusNode: focusNode,
     );
 
     if (kProfileMode) {

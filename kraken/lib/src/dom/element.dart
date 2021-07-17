@@ -80,6 +80,10 @@ typedef RenderObject BeforeRendererAttach();
 typedef void AfterRendererAttach();
 /// Return the targetId of current element.
 typedef int GetTargetId();
+/// Focus the input element.
+typedef void FocusInput();
+/// Blur the input element.
+typedef void BlurInput();
 /// Get the font size of root element
 typedef double GetRootElementFontSize();
 
@@ -92,6 +96,8 @@ class ElementDelegate {
   BeforeRendererAttach beforeRendererAttach;
   AfterRendererAttach afterRendererAttach;
   GetTargetId getTargetId;
+  FocusInput focusInput;
+  BlurInput blurInput;
   GetRootElementFontSize getRootElementFontSize;
 
   ElementDelegate(
@@ -101,6 +107,8 @@ class ElementDelegate {
     this.beforeRendererAttach,
     this.afterRendererAttach,
     this.getTargetId,
+    this.focusInput,
+    this.blurInput,
     this.getRootElementFontSize
   );
 }
@@ -192,6 +200,8 @@ class Element extends Node
       _beforeRendererAttach,
       _afterRendererAttach,
       _getTargetId,
+      _focusInput,
+      _blurInput,
       _getRootElementFontSize
     );
   }
@@ -226,6 +236,16 @@ class Element extends Node
 
   int _getTargetId() {
     return targetId;
+  }
+  
+  void _focusInput() {
+    InputElement input = this as InputElement;
+    input.focus();
+  }
+  
+  void _blurInput() {
+    InputElement input = this as InputElement;
+    input.blur();
   }
 
   double _getRootElementFontSize() {

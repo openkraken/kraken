@@ -8,12 +8,15 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:kraken/kraken.dart';
+import 'package:kraken/rendering.dart';
+import 'package:kraken/dom.dart' as dom;
 import 'package:kraken/module.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/css.dart';
 
-class Kraken extends StatelessWidget {
+class Kraken extends StatefulWidget {
   // The background color for viewport, default to transparent.
   final Color? background;
 
@@ -58,6 +61,8 @@ class Kraken extends StatelessWidget {
   final EventClient? eventClient;
 
   final HttpClientInterceptor? httpClientInterceptor;
+
+  final FocusNode focusNode = FocusNode();
 
   KrakenController? get controller {
     return KrakenController.getControllerOfName(shortHash(this));
@@ -131,8 +136,189 @@ class Kraken extends StatelessWidget {
   }
 
   @override
+  _KrakenState createState() => _KrakenState();
+
+}
+class _KrakenState extends State<Kraken> {
+  Map<LogicalKeySet, Intent>? _shortcutMap;
+  Map<Type, Action<Intent>>? _actionMap;
+  late FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _shortcutMap = <LogicalKeySet, Intent>{
+      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const MoveSelectionLeftTextIntent(),
+      LogicalKeySet(LogicalKeyboardKey.arrowRight): const MoveSelectionRightTextIntent(),
+      LogicalKeySet(LogicalKeyboardKey.arrowDown): const MoveSelectionDownTextIntent(),
+      LogicalKeySet(LogicalKeyboardKey.arrowUp): const MoveSelectionUpTextIntent(),
+      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const ExtendSelectionRightTextIntent(),
+    };
+    _actionMap = <Type, Action<Intent>>{
+      NextFocusIntent: CallbackAction<NextFocusIntent>(onInvoke: _handleNextFocus),
+      PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(onInvoke: _handlePreviousFocus),
+      MoveSelectionLeftTextIntent: CallbackAction<MoveSelectionLeftTextIntent>(onInvoke: _handleMoveSelectionLeftText),
+      MoveSelectionRightTextIntent: CallbackAction<MoveSelectionRightTextIntent>(onInvoke: _handleMoveSelectionRightText),
+      MoveSelectionToEndTextIntent: CallbackAction<MoveSelectionToEndTextIntent>(onInvoke: _handleMoveSelectionToEndText),
+      MoveSelectionToStartTextIntent: CallbackAction<MoveSelectionToStartTextIntent>(onInvoke: _handleMoveSelectionToStartText),
+    };
+    _focusNode = (context.widget as Kraken).focusNode;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return _KrakenRenderObjectWidget(this);
+    return FocusableActionDetector(
+      actions: _actionMap,
+      shortcuts: _shortcutMap,
+      focusNode: _focusNode,
+      onFocusChange: _handleFocusChange,
+      child: _KrakenRenderObjectWidget(context.widget as Kraken)
+    );
+  }
+
+  void _handleFocusChange(bool focused) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.length != 0) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      if (focused) {
+        // @TODO: need to detect hotkey to determine focus order of inputs in kraken widget.
+        _focusEditable(editables[0]);
+      } else {
+        if (focusedEditable != null) {
+          _blurEditable(focusedEditable);
+        }
+      }
+    }
+  }
+
+  void _handleNextFocus(NextFocusIntent intent) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.length != 0) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      // None editable is focused, focus the first editable.
+      if (focusedEditable == null) {
+        _focusNode.requestFocus();
+        _focusEditable(editables[0]);
+
+      // Some editable is focused, focus the next editable, if it is the last editable,
+      // then focus the next widget.
+      } else {
+        int idx = editables.indexOf(focusedEditable);
+        if (idx == editables.length - 1) {
+          _focusNode.nextFocus();
+        } else {
+          _focusNode.requestFocus();
+          _blurEditable(editables[idx]);
+          _focusEditable(editables[idx + 1]);
+        }
+      }
+    // None editable exists, focus the next widget.
+    } else {
+      _focusNode.nextFocus();
+    }
+  }
+
+  void _handlePreviousFocus(PreviousFocusIntent intent) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.length != 0) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      // None editable is focused, focus the last editable.
+      if (focusedEditable == null) {
+        _focusNode.requestFocus();
+        _focusEditable(editables[editables.length - 1]);
+
+        // Some editable is focused, focus the previous editable, if it is the first editable,
+        // then focus the previous widget.
+      } else {
+        int idx = editables.indexOf(focusedEditable);
+        if (idx == 0) {
+          _focusNode.previousFocus();
+        } else {
+          _focusNode.requestFocus();
+          _blurEditable(editables[idx]);
+          _focusEditable(editables[idx - 1]);
+        }
+      }
+    // None editable exists, focus the previous widget.
+    } else {
+      _focusNode.previousFocus();
+    }
+  }
+
+  void _handleMoveSelectionLeftText(MoveSelectionLeftTextIntent intent) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.length != 0) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      focusedEditable!.moveSelectionLeft(SelectionChangedCause.keyboard);
+    }
+  }
+  
+  void _handleMoveSelectionRightText(MoveSelectionRightTextIntent intent) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.length != 0) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      focusedEditable!.moveSelectionRight(SelectionChangedCause.keyboard);
+    }
+  }
+
+  void _handleMoveSelectionToEndText(MoveSelectionToEndTextIntent intent) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.length != 0) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      focusedEditable!.moveSelectionToEnd(SelectionChangedCause.keyboard);
+    }
+  }
+
+  void _handleMoveSelectionToStartText(MoveSelectionToStartTextIntent intent) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.length != 0) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      focusedEditable!.moveSelectionToStart(SelectionChangedCause.keyboard);
+    }
+  }
+  
+  void _focusEditable(RenderEditable renderEditable) {
+    dom.RenderInputBox renderInputBox = renderEditable.parent as dom.RenderInputBox;
+    RenderIntrinsic renderIntrisic = renderInputBox.parent as RenderIntrinsic;
+    renderIntrisic.elementDelegate.focusInput();
+  }
+
+  void _blurEditable(RenderEditable renderEditable) {
+    dom.RenderInputBox renderInputBox = renderEditable.parent as dom.RenderInputBox;
+    RenderIntrinsic renderIntrisic = renderInputBox.parent as RenderIntrinsic;
+    renderIntrisic.elementDelegate.blurInput();
+  }
+
+  List<RenderEditable> _findEditables(RenderObject parent) {
+    List<RenderEditable> result = [];
+    parent.visitChildren((RenderObject child) {
+      if (child is RenderEditable) {
+        result.add(child);
+      } else {
+        List<RenderEditable> children = _findEditables(child);
+        result.addAll(children);
+      }
+    });
+    return result;
+  }
+
+  RenderEditable? _findFocusedEditable(List<RenderEditable> editables) {
+    RenderEditable? result;
+    if (editables.length != 0) {
+      for (RenderEditable editable in editables) {
+        if (editable.hasFocus) {
+          result = editable;
+        }
+      }
+    }
+    return result;
   }
 }
 
@@ -168,6 +354,7 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
       navigationDelegate: _krakenWidget.navigationDelegate,
       devToolsService: _krakenWidget.devToolsService,
       httpClientInterceptor: _krakenWidget.httpClientInterceptor,
+      focusNode: _krakenWidget.focusNode,
     );
 
     if (kProfileMode) {
