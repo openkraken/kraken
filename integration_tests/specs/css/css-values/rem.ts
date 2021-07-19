@@ -1,5 +1,5 @@
 describe("rem", () => {
-  fit("should works with font size of html", async () => {
+  it("should works with font size of html", async (done) => {
     let div;
     let div2;
     let div3;
