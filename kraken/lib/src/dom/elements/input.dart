@@ -306,16 +306,35 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   Color get cursorColor => CSSColor.initial;
 
+  Offset? _selectStartPosition;
+  
   @override
   void dispatchEvent(Event event) {
     super.dispatchEvent(event);
     if (event.type == EVENT_TOUCH_START) {
       InputElement.setFocus(this);
+
+      TouchList touches = (event as TouchEvent).touches;
+      if (touches.length > 1) return;
+      Touch touch = touches.item(0);
+      _selectStartPosition = Offset(touch.clientX, touch.clientY);
+      
       // @TODO: selection.
     } else if (event.type == EVENT_TOUCH_MOVE) {
       // @TODO: selection.
     } else if (event.type == EVENT_TOUCH_END) {
       // @TODO: selection.
+
+      TouchList touches = (event as TouchEvent).touches;
+      if (touches.length > 1) return;
+      Touch touch = touches.item(0);
+      Offset _selectEndPosition = Offset(touch.clientX, touch.clientY);
+      
+      _renderEditable!.selectPositionAt(
+        from: _selectStartPosition!,
+        to: _selectEndPosition,
+        cause: SelectionChangedCause.drag,
+      );
     }
   }
 
