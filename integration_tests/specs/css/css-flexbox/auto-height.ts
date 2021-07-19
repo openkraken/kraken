@@ -90,4 +90,38 @@ describe('auto-height', () => {
 
     await snapshot();
   });
+
+  it("should works with padding and flex item of flex-basis 0", async () => {
+    let container;
+
+    container = createElement(
+      'div',
+      {
+        style: {
+          "display": "flex",
+          "flexDirection": "column",
+          "padding": "4vw 0vw",
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            "flex": "1",
+            "overflow": "scroll"
+          }
+        }, [
+          createElement('div', {
+            style: {
+              width: '100px',
+              height: '100px',
+              background: 'green'    
+            }
+          }),
+        ])
+      ]);
+
+    BODY.appendChild(container);
+
+    await snapshot();
+  });
 });
