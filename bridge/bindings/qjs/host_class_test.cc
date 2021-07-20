@@ -6,6 +6,7 @@
 #include "gtest/gtest.h"
 #include "host_class.h"
 #include "bridge_qjs.h"
+#include <unordered_map>
 
 namespace kraken::binding::qjs {
 
@@ -24,16 +25,29 @@ private:
 };
 
 class SampleClass;
+static JSClassID kSampleClassId{0};
 
 class SampleClassInstance : public Instance {
 public:
-  explicit SampleClassInstance(HostClass *sampleClass) : Instance(sampleClass, "SampleClass") {};
+  explicit SampleClassInstance(HostClass *sampleClass) : Instance(sampleClass, "SampleClass", kSampleClassId, finalizer) {};
 private:
+  static void finalizer(JSRuntime *rt, JSValue v) {
+    auto *instance = static_cast<SampleClassInstance *>(JS_GetOpaque(v, kSampleClassId));
+    if (instance->context()->isValid()) {
+      JS_FreeValue(instance->m_ctx, instance->instanceObject);
+    }
+    delete instance;
+  }
 };
 
+std::once_flag kSampleClassOnceFlag;
 class SampleClass : public ParentClass {
 public:
-  explicit SampleClass(JSContext *context) : ParentClass(context) {}
+  explicit SampleClass(JSContext *context) : ParentClass(context) {
+    std::call_once(kSampleClassOnceFlag, []() {
+      JS_NewClassID(&kSampleClassId);
+    });
+  }
   JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override {
     auto *sampleClass = static_cast<SampleClass *>(JS_GetOpaque(func_obj, JSContext::kHostClassClassId));
     auto *instance = new SampleClassInstance(sampleClass);
@@ -212,39 +226,80 @@ TEST(HostClass, multipleInstance) {
   EXPECT_EQ(errorCalled, false);
 }
 
+std::once_flag kExoticClassOnceFlag;
 
+class ExoticClassInstance;
 class ExoticClass : public HostClass {
 public:
+  static JSClassID exoticClassID;
   ExoticClass() = delete;
-  explicit ExoticClass(JSContext *context) : HostClass(context, "ExoticClass") {}
+  explicit ExoticClass(JSContext *context) : HostClass(context, "ExoticClass") {
+    std::call_once(kExoticClassOnceFlag, []() {
+      JS_NewClassID(&exoticClassID);
+    });
+  }
   JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv);
 private:
-
+  friend ExoticClassInstance;
 };
+
+JSClassID ExoticClass::exoticClassID{0};
+static bool exoticClassFreed = false;
 
 class ExoticClassInstance : public Instance {
 public:
   ExoticClassInstance() = delete;
-  JSClassExoticMethods methods{
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    setProperty
+  static JSClassExoticMethods methods;
+
+  explicit ExoticClassInstance(ExoticClass *exoticClass) : Instance(exoticClass, "ExoticClass", methods, ExoticClass::exoticClassID, finalizer) {};
+
+  static JSValue getProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
+                          JSValueConst receiver) {
+
+    auto *instance = static_cast<ExoticClassInstance *>(JS_GetOpaque(obj, ExoticClass::exoticClassID));
+    auto *prototype = static_cast<ExoticClass *>(instance->prototype());
+    if (JS_HasProperty(ctx, prototype->m_prototypeObject, atom)) {
+      return JS_GetProperty(ctx, prototype->m_prototypeObject, atom);
+    }
+
+    if (instance->m_properties.count(atom) > 0) {
+      return instance->m_properties[atom];
+    }
+
+    return JS_NULL;
   };
 
-  explicit ExoticClassInstance(ExoticClass *exoticClass) : Instance(exoticClass, "ExoticClass", methods) {};
+  static void finalizer(JSRuntime *rt, JSValue val) {
+    auto *instance = static_cast<ExoticClassInstance *>(JS_GetOpaque(val, ExoticClass::exoticClassID));
+    if (instance->context()->isValid()) {
+      JS_FreeValue(instance->m_ctx, instance->instanceObject);
+    }
+    delete instance;
+  };
 
   static int setProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
                          JSValueConst value, JSValueConst receiver, int flags) {
-    KRAKEN_LOG(VERBOSE) << JS_AtomToCString(ctx, atom);
+    auto *instance = static_cast<ExoticClassInstance *>(JS_GetOpaque(obj, ExoticClass::exoticClassID));
+    instance->m_properties[atom] = JS_DupValue(ctx, value);
     return 0;
   }
   ~ExoticClassInstance() {
-    KRAKEN_LOG(VERBOSE) << "delete";
+    exoticClassFreed = true;
   }
+  friend ExoticClass;
+
+private:
+  std::unordered_map<JSAtom, JSValue> m_properties;
+};
+
+JSClassExoticMethods ExoticClassInstance::methods{
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  getProperty,
+  setProperty
 };
 
 JSValue ExoticClass::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
@@ -253,19 +308,30 @@ JSValue ExoticClass::constructor(QjsContext *ctx, JSValue func_obj, JSValue this
 
 TEST(HostClass, exoticClass) {
   bool static errorCalled = false;
+  bool static logCalled = false;
   auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
+  kraken::JSBridge::consoleMessageHandler = [](void *ctx, const std::string &message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(), "10");
+  };
 
   auto &context = bridge->getContext();
   auto *constructor = new ExoticClass(context.get());
   context->defineGlobalProperty("ExoticClass", constructor->classObject);
 
-  std::string code = "globalThis.obj = new ExoticClass();";
+  std::string code = "globalThis.obj = new ExoticClass();"
+                     "var key = 'onclick'; "
+                     "var otherKey = 'o' + 'n' + 'c' + 'l' + 'i' + 'c' + 'k';"
+                     "obj[key] = function() {return 10;};"
+                     "console.log(obj[otherKey]());";
   context->evaluateJavaScript(code.c_str(), code.size(), "vm://", 0);
   delete bridge;
   EXPECT_EQ(errorCalled, false);
+  EXPECT_EQ(exoticClassFreed, true);
+  EXPECT_EQ(logCalled, true);
 }
 
 }

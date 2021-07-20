@@ -7,6 +7,7 @@
 #define KRAKENBRIDGE_HOST_CLASS_H
 
 #include "js_context.h"
+#include "third_party/quickjs/quickjs.h"
 
 namespace kraken::binding::qjs {
 
@@ -73,24 +74,24 @@ private:
 
 class Instance {
 public:
-  explicit Instance(HostClass *hostClass, std::string name)
+  explicit Instance(HostClass *hostClass, std::string name, JSClassID classId, JSClassFinalizer finalizer)
       : m_context(hostClass->context()), m_hostClass(hostClass), m_name(std::move(name)), m_ctx(m_context->ctx()) {
     JSClassDef def{};
     def.class_name = m_name.c_str();
-    def.finalizer = proxyInstanceFinalize;
-    JS_NewClass(m_context->runtime(), JSContext::kHostClassInstanceClassId, &def);
-    instanceObject = JS_NewObjectClass(m_ctx, JSContext::kHostClassInstanceClassId);
+    def.finalizer = finalizer;
+    JS_NewClass(m_context->runtime(), classId, &def);
+    instanceObject = JS_NewObjectClass(m_ctx, classId);
     JS_SetOpaque(instanceObject, this);
   };
 
-  explicit Instance(HostClass *hostClass, std::string name, JSClassExoticMethods &exotic)
+  explicit Instance(HostClass *hostClass, std::string name, JSClassExoticMethods &exotic, JSClassID classId, JSClassFinalizer finalizer)
     : m_context(hostClass->context()), m_hostClass(hostClass), m_name(std::move(name)), m_ctx(m_context->ctx()) {
     JSClassDef def{};
     def.class_name = m_name.c_str();
-    def.finalizer = proxyExoticInstanceFinalize;
+    def.finalizer = finalizer;
     def.exotic = &exotic;
-    JS_NewClass(m_context->runtime(), JSContext::kHostClassExoticInstanceClassId, &def);
-    instanceObject = JS_NewObjectClass(m_ctx, JSContext::kHostClassExoticInstanceClassId);
+    int32_t success = JS_NewClass(m_context->runtime(), classId, &def);
+    instanceObject = JS_NewObjectClass(m_ctx, classId);
     JS_SetOpaque(instanceObject, this);
   };
   JSValue instanceObject;
@@ -104,23 +105,6 @@ protected:
   QjsContext *m_ctx{nullptr};
   HostClass *m_hostClass{nullptr};
   std::string m_name;
-
-  static void proxyInstanceFinalize(JSRuntime *rt, JSValue val) {
-    auto *instance = static_cast<Instance *>(JS_GetOpaque(val, JSContext::kHostClassInstanceClassId));
-    if (instance->context()->isValid()) {
-      JS_FreeValue(instance->m_ctx, instance->instanceObject);
-    }
-    delete instance;
-  };
-
-  static void proxyExoticInstanceFinalize(JSRuntime *rt, JSValue val) {
-    auto *instance = static_cast<Instance *>(JS_GetOpaque(val, JSContext::kHostClassExoticInstanceClassId));
-    KRAKEN_LOG(VERBOSE) << "finalize exotic " << instance->m_name;
-    if (instance->context()->isValid()) {
-      JS_FreeValue(instance->m_ctx, instance->instanceObject);
-    }
-    delete instance;
-  };
 };
 
 } // namespace kraken::binding::qjs

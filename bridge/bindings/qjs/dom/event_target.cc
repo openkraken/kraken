@@ -9,7 +9,8 @@
 
 namespace kraken::binding::qjs {
 
-static std::atomic<int64_t> globalEventTargetId{0};
+static std::atomic<int32_t> globalEventTargetId{0};
+std::once_flag kInitEventTargetOnceFlag;
 
 JSValue EventTarget::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   if (argc == 1) {
@@ -36,12 +37,21 @@ JSValue EventTarget::constructor(QjsContext *ctx, JSValue func_obj, JSValue this
   return eventTarget->instanceObject;
 }
 
+void EventTarget::_initClassId() {
+  std::call_once(kInitEventTargetOnceFlag, []() {
+    JS_NewClassID(&kEventTargetClassID);
+  });
+}
+
+JSClassID EventTarget::kEventTargetClassID{0};
+
 JSValue EventTarget::addEventListener(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (argc < 2) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: type and listener are required.");
   }
 
-  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val,
+                                                                              EventTarget::kEventTargetClassID));
   if (eventTargetInstance == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
@@ -98,7 +108,8 @@ JSValue EventTarget::removeEventListener(QjsContext *ctx, JSValue this_val, int 
     return JS_ThrowTypeError(ctx, "Failed to removeEventListener: at least type and listener are required.");
   }
 
-  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val,
+                                                                              EventTarget::kEventTargetClassID));
   if (eventTargetInstance == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
@@ -142,7 +153,7 @@ JSValue EventTarget::removeEventListener(QjsContext *ctx, JSValue this_val, int 
 
     auto constructor = reinterpret_cast<EventTarget *>(eventTargetInstance->prototype());
     auto isJsOnlyEvent = std::find(constructor->m_jsOnlyEvents.begin(), constructor->m_jsOnlyEvents.end(), eventType) !=
-        constructor->m_jsOnlyEvents.end();
+                         constructor->m_jsOnlyEvents.end();
 
     if (!isJsOnlyEvent) {
       foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetInstance->eventTargetId,
@@ -157,13 +168,15 @@ JSValue EventTarget::dispatchEvent(QjsContext *ctx, JSValue this_val, int argc, 
     return JS_ThrowTypeError(ctx, "Failed to dispatchEvent: first arguments should be an event object");
   }
 
-  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val,
+                                                                              EventTarget::kEventTargetClassID));
   if (eventTargetInstance == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
 
   JSValue &eventValue = argv[0];
-  auto eventInstance = reinterpret_cast<EventInstance *>(JS_GetOpaque(eventValue, JSContext::kHostClassInstanceClassId));
+  auto eventInstance = reinterpret_cast<EventInstance *>(JS_GetOpaque(eventValue,
+                                                                      EventTarget::kEventTargetClassID));
   return JS_NewBool(ctx, eventTargetInstance->dispatchEvent(eventInstance));
 }
 
@@ -191,16 +204,17 @@ bool EventTargetInstance::dispatchEvent(EventInstance *event) {
 }
 
 bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
-  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t *>(eventInstance->nativeEvent->type->string),
-                                               eventInstance->nativeEvent->type->length);
+  std::u16string u16EventType = std::u16string(
+    reinterpret_cast<const char16_t *>(eventInstance->nativeEvent->type->string),
+    eventInstance->nativeEvent->type->length);
   std::string eventType = toUTF8(u16EventType);
   auto stack = _eventHandlers[eventType];
 
   // Dispatch event listeners writen by addEventListener
-  auto _dispatchEvent = [&eventInstance, this](JSValue& handler) {
+  auto _dispatchEvent = [&eventInstance, this](JSValue &handler) {
     if (eventInstance->propagationImmediatelyStopped()) return;
 
-    JSValue arguments[] = { eventInstance->instanceObject };
+    JSValue arguments[] = {eventInstance->instanceObject};
     // The third params `thisObject` to null equals global object.
     JSValue returnedValue = JS_Call(m_ctx, handler, JS_NULL, 1, arguments);
     m_context->handleException(&returnedValue);
@@ -221,7 +235,8 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
 }
 
 JSValue EventTarget::__kraken_clear_event_listener(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val,
+                                                                              EventTarget::kEventTargetClassID));
   if (eventTargetInstance == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
@@ -235,13 +250,21 @@ JSValue EventTarget::__kraken_clear_event_listener(QjsContext *ctx, JSValue this
   return JS_NULL;
 }
 
-EventTargetInstance::EventTargetInstance(EventTarget *eventTarget) : Instance(eventTarget, "EventTarget") {
-  eventTargetId = globalEventTargetId;
-  globalEventTargetId++;
+EventTargetInstance::EventTargetInstance(EventTarget *eventTarget, JSClassExoticMethods &exoticMethods) : Instance(
+  eventTarget, "EventTarget", exoticMethods, EventTarget::kEventTargetClassID,
+  finalize) {
+  eventTargetId = globalEventTargetId++;
 }
 
-JSValue EventTargetInstance::callNativeMethods(const char* method, int32_t argc,
-                                                   NativeValue *argv) {
+EventTargetInstance::EventTargetInstance(EventTarget *eventTarget) : Instance(eventTarget, "EventTarget",
+                                                                              EventTarget::kEventTargetClassID,
+                                                                              finalize) {
+  eventTargetId = globalEventTargetId++;
+}
+
+
+JSValue EventTargetInstance::callNativeMethods(const char *method, int32_t argc,
+                                               NativeValue *argv) {
   if (nativeEventTarget.callNativeMethods == nullptr) {
     return JS_ThrowTypeError(m_ctx, "Failed to call native dart methods: callNativeMethods not initialized.");
   }
@@ -250,8 +273,8 @@ JSValue EventTargetInstance::callNativeMethods(const char* method, int32_t argc,
   fromUTF8(method, methodString);
 
   NativeString m{
-      reinterpret_cast<const uint16_t *>(methodString.c_str()),
-      static_cast<int32_t>(methodString.size())
+    reinterpret_cast<const uint16_t *>(methodString.c_str()),
+    static_cast<int32_t>(methodString.size())
   };
 
   NativeValue nativeValue{};
@@ -260,8 +283,16 @@ JSValue EventTargetInstance::callNativeMethods(const char* method, int32_t argc,
   return returnValue;
 }
 
+void EventTargetInstance::finalize(JSRuntime *rt, JSValue val) {
+  auto *eventTarget = static_cast<EventTargetInstance *>(JS_GetOpaque(val, EventTarget::kEventTargetClassID));
+  if (eventTarget->context()->isValid()) {
+    JS_FreeValue(eventTarget->m_ctx, eventTarget->instanceObject);
+  }
+  delete eventTarget;
+}
+
 void bindEventTarget(std::unique_ptr<JSContext> &context) {
-  auto *eventTargetConstructor = new EventTarget(context.get());
+  auto *eventTargetConstructor = new EventTarget(context.get(), "EventTarget");
   // Set globalThis and Window's prototype to EventTarget's prototype to support EventTarget methods in global.
   JS_SetPrototype(context->ctx(), context->global(), eventTargetConstructor->prototype());
   context->defineGlobalProperty("EventTarget", eventTargetConstructor->classObject);

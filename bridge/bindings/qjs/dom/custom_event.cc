@@ -24,7 +24,7 @@ JSValue CustomEvent::initCustomEvent(QjsContext *ctx, JSValue this_val, int argc
       ctx, "Failed to execute 'initCustomEvent' on 'CustomEvent': 1 argument required, but only 0 present");
   }
 
-  auto *eventInstance = static_cast<CustomEventInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto *eventInstance = static_cast<CustomEventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
   if (eventInstance == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
@@ -68,12 +68,12 @@ JSValue CustomEvent::constructor(QjsContext *ctx, JSValue func_obj, JSValue this
 }
 
 PROP_GETTER(CustomEvent, detail)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *customEventInstance = static_cast<CustomEventInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto *customEventInstance = static_cast<CustomEventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
   return customEventInstance->getDetail();
 }
 PROP_SETTER(CustomEvent, detail)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (argc == 0) return JS_NULL;
-  auto *customEventInstance = static_cast<CustomEventInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto *customEventInstance = static_cast<CustomEventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
   customEventInstance->setDetail(argv[0]);
   return JS_NULL;
 }

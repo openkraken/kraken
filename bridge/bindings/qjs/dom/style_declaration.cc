@@ -9,6 +9,8 @@
 
 namespace kraken::binding::qjs {
 
+std::once_flag kinitCSSStyleDeclarationFlag;
+
 OBJECT_INSTANCE_IMPL(CSSStyleDeclaration);
 
 void bindCSSStyleDeclaration(std::unique_ptr<JSContext> &context) {
@@ -53,16 +55,24 @@ JSValue CSSStyleDeclaration::constructor(QjsContext *ctx, JSValue func_obj, JSVa
   JSValue &eventTargetValue = argv[0];
 
   auto eventTargetInstance =
-    static_cast<EventTargetInstance *>(JS_GetOpaque(eventTargetValue, JSContext::kHostClassInstanceClassId));
+    static_cast<EventTargetInstance *>(JS_GetOpaque(eventTargetValue, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
   auto style = new StyleDeclarationInstance(this, eventTargetInstance);
   return style->instanceObject;
+}
+
+JSClassID CSSStyleDeclaration::kCSSStyleDeclarationClassId{0};
+
+CSSStyleDeclaration::CSSStyleDeclaration(JSContext *context) : HostClass(context, "CSSStyleDeclaration") {
+  std::call_once(kinitCSSStyleDeclarationFlag, []() {
+    JS_NewClassID(&kCSSStyleDeclarationClassId);
+  });
 }
 
 JSValue CSSStyleDeclaration::setProperty(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (argc < 2)
     return JS_ThrowTypeError(ctx,
                              "Failed to execute 'setProperty' on 'CSSStyleDeclaration': 2 arguments required, but only 0 present.");
-  auto *instance = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto *instance = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(this_val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
   JSValue &propertyNameValue = argv[0];
   JSValue &propertyValue = argv[1];
 
@@ -80,7 +90,7 @@ JSValue CSSStyleDeclaration::removeProperty(QjsContext *ctx, JSValue this_val, i
   if (argc < 1)
     return JS_ThrowTypeError(ctx,
                              "Failed to execute 'removeProperty' on 'CSSStyleDeclaration': 1 arguments required, but only 0 present.");
-  auto *instance = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto *instance = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(this_val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
 
   JSValue &propertyNameValue = argv[0];
 
@@ -98,7 +108,7 @@ JSValue CSSStyleDeclaration::getPropertyValue(QjsContext *ctx, JSValue this_val,
   if (argc < 1)
     return JS_ThrowTypeError(ctx,
                              "Failed to execute 'getPropertyValue' on 'CSSStyleDeclaration': 1 arguments required, but only 0 present.");
-  auto *instance = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto *instance = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(this_val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
   JSValue &propertyNameValue = argv[0];
   const char *cPropertyName = JS_ToCString(ctx, propertyNameValue);
   std::string propertyName = std::string(cPropertyName);
@@ -154,7 +164,7 @@ JSValue StyleDeclarationInstance::internalGetPropertyValue(std::string &name) {
 
 int StyleDeclarationInstance::setProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver,
                                           int flags) {
-  auto *style = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(receiver, JSContext::kHostClassExoticInstanceClassId));
+  auto *style = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(receiver, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
   const char* cname = JS_AtomToCString(ctx, atom);
   std::string name = std::string(cname);
   bool success = style->internalSetProperty(name, value);

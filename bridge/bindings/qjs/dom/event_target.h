@@ -20,13 +20,18 @@ class StyleDeclarationInstance;
 
 class EventTarget : public HostClass {
 public:
+  static JSClassID kEventTargetClassID;
+
   JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
   EventTarget() = delete;
-  explicit EventTarget(JSContext *context) : HostClass(context, "EventTarget") {}
-  explicit EventTarget(JSContext *context, const char* name): HostClass(context, name) {};
+  explicit EventTarget(JSContext *context, const char* name): HostClass(context, name) {
+    _initClassId();
+  };
 
 private:
   std::vector<std::string> m_jsOnlyEvents;
+
+  static void _initClassId();
 
   static JSValue addEventListener(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue removeEventListener(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
@@ -66,6 +71,7 @@ struct NativeEventTarget {
 class EventTargetInstance : public Instance {
 public:
   EventTargetInstance() = delete;
+  explicit EventTargetInstance(EventTarget *eventTarget, JSClassExoticMethods &exoticMethods);
   explicit EventTargetInstance(EventTarget *eventTarget);
 
   bool dispatchEvent(EventInstance *event);
@@ -80,6 +86,7 @@ private:
   bool internalDispatchEvent(EventInstance *eventInstance);
   std::unordered_map<std::string, std::forward_list<JSValue>> _eventHandlers;
   std::unordered_map<std::string, JSValue> _propertyEventHandler;
+  static void finalize(JSRuntime *rt, JSValue val);
   friend EventTarget;
   friend StyleDeclarationInstance;
 };

@@ -40,7 +40,7 @@ JSValue Document::createEvent(QjsContext *ctx, JSValue this_val, int argc, JSVal
     NativeString *nativeEventType = jsValueToNativeString(ctx, eventTypeValue);
     auto nativeEvent = new NativeEvent(nativeEventType);
 
-    auto document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+    auto document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
     auto e = Event::buildEventInstance(eventType, document->context(), nativeEvent, false);
     return e->instanceObject;
   } else {
@@ -58,7 +58,7 @@ JSValue Document::createElement(QjsContext *ctx, JSValue this_val, int argc, JSV
     return JS_ThrowTypeError(ctx, "Failed to createElement: tagName should be a string.");
   }
 
-  auto document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
   JSValue element = JS_CallConstructor(ctx, Element::instance(document->context())->classObject, argc, argv);
   return element;
 }
@@ -97,7 +97,7 @@ PROP_GETTER(Document, cookie)(QjsContext *ctx, JSValue this_val, int argc, JSVal
 PROP_SETTER(Document, cookie)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {  return JS_NULL;}
 
 PROP_GETTER(Document, documentElement)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto *document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
   return document->m_documentElement->instanceObject;
 }
 PROP_SETTER(Document, documentElement)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
@@ -113,7 +113,7 @@ DocumentInstance::DocumentInstance(Document *document): NodeInstance(document, N
     htmlTagValue
   };
   JSValue documentElementValue = JS_CallConstructor(m_ctx, Element::instance(m_context)->classObject, 1, htmlArgs);
-  m_documentElement = static_cast<ElementInstance *>(JS_GetOpaque(documentElementValue, JSContext::kHostClassInstanceClassId));
+  m_documentElement = static_cast<ElementInstance *>(JS_GetOpaque(documentElementValue, EventTarget::kEventTargetClassID));
   m_documentElement->parentNode = this;
 
   JSAtom documentElementTag = JS_NewAtom(m_ctx, "documentElement");

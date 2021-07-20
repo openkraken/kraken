@@ -18,9 +18,11 @@ using EventCreator = EventInstance *(*)(JSContext *context, void *nativeEvent);
 
 class Event : public HostClass {
 public:
+  static JSClassID kEventClassID;
+
   JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
   Event() = delete;
-  explicit Event(JSContext *context): HostClass(context, "Event") {}
+  explicit Event(JSContext *context);
 
   static EventInstance *buildEventInstance(std::string &eventType, JSContext *context, void *nativeEvent,
                                            bool isCustomEvent);
@@ -64,6 +66,9 @@ protected:
   bool m_cancelled{false};
   bool m_propagationStopped{false};
   bool m_propagationImmediatelyStopped{false};
+
+private:
+  static void finalizer(JSRuntime *rt, JSValue val);
 };
 
 }

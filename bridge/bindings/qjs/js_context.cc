@@ -13,8 +13,6 @@ namespace kraken::binding::qjs {
 static std::atomic<int32_t> context_unique_id{0};
 
 JSClassID JSContext::kHostClassClassId {0};
-JSClassID JSContext::kHostClassInstanceClassId {0};
-JSClassID JSContext::kHostClassExoticInstanceClassId {0};
 JSClassID JSContext::kHostObjectClassId {0};
 
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner) {
@@ -34,8 +32,6 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
 
   std::call_once(kinitJSClassIDFlag, []() {
     JS_NewClassID(&kHostClassClassId);
-    JS_NewClassID(&kHostClassInstanceClassId);
-    JS_NewClassID(&kHostClassExoticInstanceClassId);
     JS_NewClassID(&kHostObjectClassId);
   });
 

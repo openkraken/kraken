@@ -45,9 +45,7 @@ public:
   int32_t uniqueId;
 
   static JSClassID kHostClassClassId;
-  static JSClassID kHostClassInstanceClassId;
   static JSClassID kHostObjectClassId;
-  static JSClassID kHostClassExoticInstanceClassId;
 
 private:
   int32_t contextId;
@@ -101,7 +99,7 @@ public:
 #endif
 
     JS_DefinePropertyValue(context->ctx(), thisObject, key, f,
-                           JS_PROP_C_W_E);
+                           JS_PROP_ENUMERABLE);
     JS_FreeAtom(context->ctx(), key);
   };
 };

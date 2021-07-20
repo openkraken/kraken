@@ -25,9 +25,11 @@ class CSSStyleDeclaration : public HostClass {
 public:
   OBJECT_INSTANCE(CSSStyleDeclaration);
 
+  static JSClassID kCSSStyleDeclarationClassId;
+
   CSSStyleDeclaration() = delete;
   ~CSSStyleDeclaration() {};
-  explicit CSSStyleDeclaration(JSContext *context): HostClass(context, "CSSStyleDeclaration") {};
+  explicit CSSStyleDeclaration(JSContext *context);
 
   JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
 
@@ -45,7 +47,7 @@ class StyleDeclarationInstance : public Instance {
 public:
   StyleDeclarationInstance() = delete;
   explicit StyleDeclarationInstance(CSSStyleDeclaration *cssStyleDeclaration, EventTargetInstance *ownerEventTarget)
-    : Instance(cssStyleDeclaration, "CSSStyleDeclaration", m_exoticMethods), m_ownerEventTarget(ownerEventTarget) {};
+    : Instance(cssStyleDeclaration, "CSSStyleDeclaration", m_exoticMethods, CSSStyleDeclaration::kCSSStyleDeclarationClassId, finalize), m_ownerEventTarget(ownerEventTarget) {};
   ~StyleDeclarationInstance();
   bool internalSetProperty(std::string &name, JSValue value);
   void internalRemoveProperty(std::string &name);
@@ -57,6 +59,14 @@ private:
 
   JSValue getProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
                           JSValueConst receiver);
+
+  static void finalize(JSRuntime *rt, JSValue val) {
+    auto *instance = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
+    if (instance->context()->isValid()) {
+      JS_FreeValue(instance->m_ctx, instance->instanceObject);
+    }
+    delete instance;
+  }
 
   static JSClassExoticMethods m_exoticMethods;
 

@@ -8,6 +8,8 @@
 
 namespace kraken::binding::qjs {
 
+std::once_flag kBlobInitOnceFlag;
+
 void bindBlob(std::unique_ptr<JSContext> &context) {
   auto *constructor = Blob::instance(context.get());
   context->defineGlobalProperty("Blob", constructor->classObject);
@@ -15,7 +17,13 @@ void bindBlob(std::unique_ptr<JSContext> &context) {
 
 OBJECT_INSTANCE_IMPL(Blob);
 
-Blob::Blob(JSContext *context) : HostClass(context, "Blob") {}
+Blob::Blob(JSContext *context) : HostClass(context, "Blob") {
+  std::call_once(kBlobInitOnceFlag, []() {
+    JS_NewClassID(&kBlobClassID);
+  });
+}
+
+JSClassID Blob::kBlobClassID{0};
 
 JSValue Blob::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   BlobBuilder builder;
@@ -59,7 +67,7 @@ JSValue Blob::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, i
 }
 
 PROP_GETTER(Blob, type)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *blobInstance = static_cast<BlobInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto *blobInstance = static_cast<BlobInstance *>(JS_GetOpaque(this_val, Blob::kBlobClassID));
   return JS_NewString(blobInstance->m_ctx, blobInstance->mimeType.empty() ? "" : blobInstance->mimeType.c_str());
 }
 PROP_SETTER(Blob, type)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
@@ -67,7 +75,7 @@ PROP_SETTER(Blob, type)(QjsContext *ctx, JSValue this_val, int argc, JSValue *ar
 }
 
 PROP_GETTER(Blob, size)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *blobInstance = static_cast<BlobInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto *blobInstance = static_cast<BlobInstance *>(JS_GetOpaque(this_val, Blob::kBlobClassID));
   return JS_NewFloat64(blobInstance->m_ctx, blobInstance->_size);
 }
 PROP_SETTER(Blob, size)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
@@ -85,7 +93,7 @@ JSValue Blob::arrayBuffer(QjsContext *ctx, JSValue this_val, int argc, JSValue *
   JSValue resolving_funcs[2];
   JSValue promise = JS_NewPromiseCapability(ctx, resolving_funcs);
 
-  auto blob = static_cast<BlobInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto blob = static_cast<BlobInstance *>(JS_GetOpaque(this_val, Blob::kBlobClassID));
 
   JS_DupValue(ctx, blob->instanceObject);
 
@@ -120,7 +128,7 @@ JSValue Blob::slice(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) 
   JSValue &endValue = argv[1];
   JSValue &contentTypeValue = argv[2];
 
-  auto *blob = static_cast<BlobInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto *blob = static_cast<BlobInstance *>(JS_GetOpaque(this_val, Blob::kBlobClassID));
   uint32_t start = 0;
   uint32_t end = blob->_data.size();
   std::string mimeType = blob->mimeType;
@@ -154,7 +162,7 @@ JSValue Blob::text(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   JSValue resolving_funcs[2];
   JSValue promise = JS_NewPromiseCapability(ctx, resolving_funcs);
 
-  auto blob = static_cast<BlobInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto blob = static_cast<BlobInstance *>(JS_GetOpaque(this_val, Blob::kBlobClassID));
   JS_DupValue(ctx, blob->instanceObject);
 
   auto *promiseContext = new PromiseContext{blob, resolving_funcs[0], resolving_funcs[1], promise};
@@ -181,6 +189,15 @@ JSValue Blob::text(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
 
   return promise;
 }
+
+void BlobInstance::finalize(JSRuntime *rt, JSValue val) {
+  auto *eventTarget = static_cast<BlobInstance *>(JS_GetOpaque(val, Blob::kBlobClassID));
+  if (eventTarget->context()->isValid()) {
+    JS_FreeValue(eventTarget->m_ctx, eventTarget->instanceObject);
+  }
+  delete eventTarget;
+}
+
 
 void BlobBuilder::append(JSContext &context, BlobInstance *blob) {
   std::vector<uint8_t> blobData = blob->_data;
@@ -212,7 +229,7 @@ void BlobBuilder::append(JSContext &context, JSValue &value) {
     }
   } else if (JS_IsObject(value)) {
     if (JS_IsInstanceOf(context.ctx(), value, Blob::instance(&context)->classObject)) {
-      auto blob = static_cast<BlobInstance *>(JS_GetOpaque(value, JSContext::kHostClassInstanceClassId));
+      auto blob = static_cast<BlobInstance *>(JS_GetOpaque(value, Blob::kBlobClassID));
       if (blob == nullptr) return;
       if (std::string(blob->m_name) == "Blob") {
         std::vector<uint8_t> blobData = blob->_data;

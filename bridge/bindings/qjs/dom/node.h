@@ -20,12 +20,13 @@ enum NodeType {
 };
 
 class NodeInstance;
+
 class DocumentInstance;
 
 class Node : public EventTarget {
 public:
   Node() = delete;
-  Node(JSContext *context, const std::string &className): EventTarget(context, className.c_str()) {}
+  Node(JSContext *context, const std::string &className) : EventTarget(context, className.c_str()) {}
 
   JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
 
@@ -53,7 +54,10 @@ private:
 class NodeInstance : public EventTargetInstance {
 public:
   NodeInstance() = delete;
-  explicit NodeInstance(Node *node, NodeType nodeType, DocumentInstance *document) : EventTargetInstance(node), m_document(document) {}
+  explicit NodeInstance(Node *node, NodeType nodeType, DocumentInstance *document) : EventTargetInstance(node),
+                                                                                     m_document(document) {}
+  explicit NodeInstance(Node *node, NodeType nodeType, DocumentInstance *document, JSClassExoticMethods &exoticMethods) :
+    EventTargetInstance(node, exoticMethods), m_document(document) {}
   ~NodeInstance();
   bool isConnected();
   DocumentInstance *ownerDocument();

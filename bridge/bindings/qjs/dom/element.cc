@@ -6,6 +6,9 @@
 #include "element.h"
 #include "document.h"
 #include "dart_methods.h"
+#include "bridge_qjs.h"
+#include "bindings/qjs/bom/blob.h"
+#include "foundation/bridge_callback.h"
 
 namespace kraken::binding::qjs {
 
@@ -38,7 +41,9 @@ JSValue ElementAttributes::setAttribute(std::string &name, JSValue value) {
   JS_DupValue(m_ctx, value);
 
   if (numberIndex) {
-    return JS_ThrowTypeError(m_ctx,"Failed to execute 'setAttribute' on 'Element': '%s' is not a valid attribute name.", name.c_str());
+    return JS_ThrowTypeError(m_ctx,
+                             "Failed to execute 'setAttribute' on 'Element': '%s' is not a valid attribute name.",
+                             name.c_str());
   }
 
   m_attributes[name] = value;
@@ -90,14 +95,15 @@ JSValue Element::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val
 }
 
 JSValue Element::getBoundingClientRect(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
   getDartMethod()->flushUICommand();
   return element->callNativeMethods("getBoundingClientRect", 0, nullptr);
 }
 
 JSValue Element::hasAttribute(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (argc < 1) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'hasAttribute' on 'Element': 1 argument required, but only 0 present");
+    return JS_ThrowTypeError(ctx,
+                             "Failed to execute 'hasAttribute' on 'Element': 1 argument required, but only 0 present");
   }
 
   JSValue &nameValue = argv[0];
@@ -106,10 +112,10 @@ JSValue Element::hasAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
     return JS_ThrowTypeError(ctx, "Failed to execute 'setAttribute' on 'Element': name attribute is not valid.");
   }
 
-  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
   auto *attributes = element->m_attributes;
 
-  const char* cname = JS_ToCString(ctx, nameValue);
+  const char *cname = JS_ToCString(ctx, nameValue);
   std::string name = std::string(cname);
 
   JSValue result = JS_NewBool(ctx, attributes->hasAttribute(name));
@@ -120,7 +126,9 @@ JSValue Element::hasAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
 
 JSValue Element::setAttribute(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (argc != 2) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'setAttribute' on 'Element': 2 arguments required, but only %d present", argc);
+    return JS_ThrowTypeError(ctx,
+                             "Failed to execute 'setAttribute' on 'Element': 2 arguments required, but only %d present",
+                             argc);
   }
 
   JSValue &nameValue = argv[0];
@@ -130,7 +138,7 @@ JSValue Element::setAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
     return JS_ThrowTypeError(ctx, "Failed to execute 'setAttribute' on 'Element': name attribute is not valid.");
   }
 
-  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
   std::string name = jsValueToStdString(ctx, nameValue);
   std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
@@ -159,7 +167,8 @@ JSValue Element::setAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
 
 JSValue Element::getAttribute(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (argc != 1) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'getAttribute' on 'Element': 1 argument required, but only 0 present");
+    return JS_ThrowTypeError(ctx,
+                             "Failed to execute 'getAttribute' on 'Element': 1 argument required, but only 0 present");
   }
 
   JSValue &nameValue = argv[0];
@@ -168,7 +177,7 @@ JSValue Element::getAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
     return JS_ThrowTypeError(ctx, "Failed to execute 'setAttribute' on 'Element': name attribute is not valid.");
   }
 
-  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
   std::string name = jsValueToStdString(ctx, nameValue);
 
   auto *attributes = element->m_attributes;
@@ -182,7 +191,8 @@ JSValue Element::getAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
 
 JSValue Element::removeAttribute(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (argc != 1) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'removeAttribute' on 'Element': 1 argument required, but only 0 present");
+    return JS_ThrowTypeError(ctx,
+                             "Failed to execute 'removeAttribute' on 'Element': 1 argument required, but only 0 present");
   }
 
   JSValue &nameValue = argv[0];
@@ -191,7 +201,7 @@ JSValue Element::removeAttribute(QjsContext *ctx, JSValue this_val, int argc, JS
     return JS_ThrowTypeError(ctx, "Failed to execute 'removeAttribute' on 'Element': name attribute is not valid.");
   }
 
-  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
   std::string name = jsValueToStdString(ctx, nameValue);
   auto *attributes = element->m_attributes;
 
@@ -209,8 +219,99 @@ JSValue Element::removeAttribute(QjsContext *ctx, JSValue this_val, int argc, JS
   return JS_NULL;
 }
 
+struct ToBlobPromiseContext : public foundation::BridgeCallback::Context {
+  explicit ToBlobPromiseContext(int32_t eventTargetId, double devicePixelRatio, JSValue promise,
+                                kraken::binding::qjs::JSContext &context, JSValue callback, JSValue secondaryCallback)
+    : foundation::BridgeCallback::Context(context, callback, secondaryCallback), eventTargetId(eventTargetId),
+      devicePixelRatio(devicePixelRatio), promise(promise) {};
+
+  int32_t eventTargetId;
+  double devicePixelRatio;
+  JSValue promise;
+};
+
 JSValue Element::toBlob(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  return JSValue();
+  double devicePixelRatio = 1.0;
+
+  if (argc > 0) {
+    JSValue &devicePixelRatioValue = argv[0];
+
+    if (!JS_IsNumber(devicePixelRatioValue)) {
+      return JS_ThrowTypeError(ctx, "Failed to export blob: parameter 2 (devicePixelRatio) is not an number.");
+    }
+
+    JS_ToFloat64(ctx, &devicePixelRatio, devicePixelRatioValue);
+  }
+
+  if (getDartMethod()->toBlob == nullptr) {
+    return JS_ThrowTypeError(ctx, "Failed to export blob: dart method (toBlob) is not registered.");
+  }
+
+  auto *element = reinterpret_cast<ElementInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
+  getDartMethod()->flushUICommand();
+  auto bridge = static_cast<JSBridge *>(element->m_context->getOwner());
+
+  auto blobCallback = [](void *callbackContext, int32_t contextId, const char *error, uint8_t *bytes,
+                         int32_t length) {
+    auto toBlobPromiseContext = static_cast<ToBlobPromiseContext *>(callbackContext);
+    QjsContext *ctx = toBlobPromiseContext->m_context.ctx();
+    if (error == nullptr) {
+      std::vector<uint8_t> vec(bytes, bytes + length);
+      JSValue arrayBuffer = JS_NewArrayBuffer(ctx, bytes, length, nullptr, nullptr, false);
+      Blob *constructor = Blob::instance(&toBlobPromiseContext->m_context);
+      JSValue argumentsArray = JS_NewArray(ctx);
+      JS_SetPropertyUint32(ctx, argumentsArray, 0, arrayBuffer);
+
+      JSValue arguments[] = {
+        argumentsArray
+      };
+      JSValue blobValue = JS_CallConstructor(ctx, constructor->classObject, 1, arguments);
+      if (JS_IsException(blobValue)) {
+        toBlobPromiseContext->m_context.handleException(&blobValue);
+      } else {
+        JSValue resolveArguments[] = {
+          blobValue
+        };
+        JS_Call(ctx, toBlobPromiseContext->m_callback, toBlobPromiseContext->promise, 1, resolveArguments);
+      }
+
+      JS_FreeValue(ctx, blobValue);
+      JS_FreeValue(ctx, arrayBuffer);
+    } else {
+      JSValue errorObject = JS_NewError(ctx);
+      JSValue errorMessage = JS_NewString(ctx, error);
+      JS_DefinePropertyValueStr(ctx, errorObject, "message", errorMessage,
+                                JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
+
+      JSValue rejectArguments[] = {
+        errorObject
+      };
+      JS_Call(ctx, toBlobPromiseContext->m_secondaryCallback, toBlobPromiseContext->promise, 1, rejectArguments);
+      JS_FreeValue(ctx, errorObject);
+    }
+  };
+
+  JSValue resolving_funcs[2];
+  JSValue promise = JS_NewPromiseCapability(ctx, resolving_funcs);
+
+  auto toBlobPromiseContext = std::make_unique<ToBlobPromiseContext>(
+    element->eventTargetId,
+    devicePixelRatio,
+    promise,
+    *element->context(),
+    resolving_funcs[0],
+    resolving_funcs[1]
+  );
+
+  bridge->bridgeCallback->registerCallback<void>(
+    std::move(toBlobPromiseContext), [blobCallback](
+      foundation::BridgeCallback::Context *callbackContext, int32_t contextId) {
+      auto *toBlobPromiseContext = reinterpret_cast<ToBlobPromiseContext *>(callbackContext);
+      getDartMethod()->toBlob(callbackContext, contextId, blobCallback, toBlobPromiseContext->eventTargetId,
+                              toBlobPromiseContext->devicePixelRatio);
+    });
+
+  return promise;
 }
 
 JSValue Element::click(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
@@ -233,19 +334,8 @@ void Element::defineElement(const std::string &tagName, ElementCreator creator) 
   elementCreatorMap[tagName] = creator;
 }
 
-//PROP_GETTER(Element, style)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-//  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
-//  return element->m_style->instanceObject;
-//}
-//
-//PROP_SETTER(Element, style)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
-//
-//PROP_GETTER(Element, attributes)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
-//
-//PROP_SETTER(Element, attributes)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
-
 PROP_GETTER(Element, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
   std::string tagName = element->tagName();
   return JS_NewString(ctx, tagName.c_str());
 }
@@ -253,7 +343,7 @@ PROP_GETTER(Element, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSVa
 PROP_SETTER(Element, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
 PROP_GETTER(Element, tagName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, JSContext::kHostClassInstanceClassId));
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
   std::string tagName = element->tagName();
   return JS_NewString(ctx, tagName.c_str());
 }
@@ -353,7 +443,7 @@ ElementInstance::ElementInstance(Element *element, JSValue &tagName, bool should
   NodeInstance(element, NodeType::ELEMENT_NODE,
                DocumentInstance::instance(
                  Document::instance(
-                   element->m_context))),
+                   element->m_context)), exoticMethods),
   m_tagName(JS_ValueToAtom(m_ctx, tagName)) {
 
   m_attributes = new ElementAttributes(m_context);
@@ -367,6 +457,18 @@ ElementInstance::ElementInstance(Element *element, JSValue &tagName, bool should
     ::foundation::UICommandBuffer::instance(m_context->getContextId())
       ->addCommand(eventTargetId, UICommand::createElement, *args_01, &nativeEventTarget);
   }
+}
+
+JSValue ElementInstance::getProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSValue receiver) {
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(obj, EventTarget::kEventTargetClassID));
+  auto *prototype = static_cast<Element *>(element->prototype());
+  if (JS_HasProperty(ctx, prototype->m_prototypeObject, atom)) {
+    return JS_GetProperty(ctx, prototype->m_prototypeObject, atom);
+  }
+
+  KRAKEN_LOG(VERBOSE) << "element getProperty " << JS_AtomToCString(ctx, atom);
+
+  return JS_NULL;
 }
 
 }

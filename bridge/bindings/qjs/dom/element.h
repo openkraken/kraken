@@ -35,7 +35,6 @@ public:
   ElementAttributes() = delete;
   explicit ElementAttributes(JSContext *context) : HostObject(context, "ElementAttributes") {}
   ~ElementAttributes() {
-    KRAKEN_LOG(VERBOSE) << "delete attributes";
   };
 
   JSValue getAttribute(std::string &name);
@@ -74,6 +73,16 @@ public:
                              clientWidth, clientHeight, clientTop, clientLeft, scrollTop, scrollLeft, scrollHeight,
                              scrollWidth, children);
 private:
+  ObjectFunction m_getBoundingClientRect{m_context, m_prototypeObject, "getBoundingClientRect", getBoundingClientRect, 0};
+  ObjectFunction m_hasAttribute{m_context, m_prototypeObject, "hasAttribute", hasAttribute, 1};
+  ObjectFunction m_setAttribute{m_context, m_prototypeObject, "setAttribute", setAttribute, 2};
+  ObjectFunction m_getAttribute{m_context, m_prototypeObject, "getAttribute", getAttribute, 2};
+  ObjectFunction m_removeAttribute{m_context, m_prototypeObject, "removeAttribute", removeAttribute, 1};
+  ObjectFunction m_toBlob{m_context, m_prototypeObject, "toBlob", toBlob, 0};
+  ObjectFunction m_click{m_context, m_prototypeObject, "click", click, 0};
+  ObjectFunction m_scroll{m_context, m_prototypeObject, "scroll", scroll, 2};
+  ObjectFunction m_scrollTo{m_context, m_prototypeObject, "scrollTo", scroll, 2};
+  ObjectFunction m_scrollBy{m_context, m_prototypeObject, "scrollBy", scrollBy, 2};
   friend ElementInstance;
 };
 
@@ -107,6 +116,19 @@ private:
   friend Element;
   StyleDeclarationInstance *m_style{nullptr};
   ElementAttributes *m_attributes{nullptr};
+
+  static JSValue getProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
+                                 JSValueConst receiver);
+
+  JSClassExoticMethods exoticMethods{
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    getProperty,
+    nullptr
+  };
 };
 
 class BoundingClientRect : public HostObject {
