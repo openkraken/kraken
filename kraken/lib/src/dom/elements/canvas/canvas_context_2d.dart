@@ -13,7 +13,6 @@ import 'package:flutter/painting.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'canvas_context.dart';
 import 'canvas_path_2d.dart';
