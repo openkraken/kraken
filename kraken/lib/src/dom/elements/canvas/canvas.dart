@@ -80,6 +80,8 @@ class CanvasElement extends Element {
     painter = CanvasPainter(repaint: repaintNotifier);
   }
 
+  late CanvasRenderingContext2D context2d;
+
   @override
   void willAttachRenderer() {
     super.willAttachRenderer();
@@ -90,6 +92,16 @@ class CanvasElement extends Element {
 
     addChild(renderCustomPaint!);
     style.addStyleChangeListener(_styleChangedListener);
+  }
+
+  @override
+  void didAttachRenderer() {
+    super.didAttachRenderer();
+    double? rootFontSize = renderBoxModel!.elementDelegate.getRootElementFontSize();
+    double? fontSize = renderBoxModel!.renderStyle.fontSize;
+    context2d.viewportSize = viewportSize;
+    context2d.rootFontSize = rootFontSize;
+    context2d.fontSize = fontSize;
   }
 
   @override
@@ -105,9 +117,8 @@ class CanvasElement extends Element {
     switch (contextId) {
       case '2d':
         if (painter.context == null) {
-          CanvasRenderingContext2D context2d = CanvasRenderingContext2D();
+          context2d = CanvasRenderingContext2D();
           context2d.canvas = this;
-          context2d.renderStyle = renderBoxModel!.renderStyle;
           painter.context = context2d;
         }
         return painter.context!;
