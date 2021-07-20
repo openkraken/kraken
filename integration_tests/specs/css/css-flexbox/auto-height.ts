@@ -91,7 +91,7 @@ describe('auto-height', () => {
     await snapshot();
   });
 
-  it("should works with padding and flex item of flex-basis 0", async () => {
+  it('should works with padding and flex item of flex-basis 0', async () => {
     let container;
 
     container = createElement(
