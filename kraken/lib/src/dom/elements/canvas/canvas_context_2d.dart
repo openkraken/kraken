@@ -13,7 +13,6 @@ import 'package:flutter/painting.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'canvas_context.dart';
 import 'canvas_path_2d.dart';
@@ -364,7 +363,9 @@ class CanvasRenderingContext2D {
 
   CanvasRenderingContext2DSettings getContextAttributes() => _settings;
 
-  late RenderStyle renderStyle;
+  late Size viewportSize;
+  late double? fontSize;
+  late double? rootFontSize;
   late CanvasElement canvas;
   // HACK: We need record the current matrix state because flutter canvas not export resetTransform now.
   // https://github.com/flutter/engine/pull/25449
@@ -870,20 +871,17 @@ class CanvasRenderingContext2D {
     if (_fontProperties.isEmpty) {
       _parseFont(_DEFAULT_FONT);
     }
-    Size viewportSize = renderStyle.viewportSize;
-    RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
-    double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
-    double? fontSize = CSSLength.toDisplayPortValue(
+    double? _fontSize = CSSLength.toDisplayPortValue(
       _fontProperties[FONT_SIZE] ?? '10px',
       viewportSize: viewportSize,
       rootFontSize: rootFontSize,
-      fontSize: renderStyle.fontSize
+      fontSize: fontSize
     );
     var fontFamilyFallback = CSSText.parseFontFamilyFallback(_fontProperties[FONT_FAMILY] ?? 'sans-serif');
     FontWeight fontWeight = CSSText.parseFontWeight(_fontProperties[FONT_WEIGHT]);
     if (shouldStrokeText) {
       return TextStyle(
-          fontSize: fontSize,
+          fontSize: _fontSize,
           fontFamilyFallback: fontFamilyFallback,
           foreground: Paint()
             ..strokeJoin = lineJoin
@@ -897,7 +895,7 @@ class CanvasRenderingContext2D {
     } else {
       return TextStyle(
         color: color,
-        fontSize: fontSize,
+        fontSize: _fontSize,
         fontFamilyFallback: fontFamilyFallback,
         fontWeight: fontWeight,
       );
