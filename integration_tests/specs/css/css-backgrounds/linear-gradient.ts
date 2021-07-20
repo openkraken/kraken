@@ -12,6 +12,19 @@ describe('Background linear-gradient', () => {
     await snapshot(div1);
   });
 
+  it('linear-gradient with many right brackets', async () => {
+    var div1 = document.createElement('div');
+    Object.assign(div1.style, {
+      width: '200px',
+      height: '100px',
+      backgroundImage: 'linear-gradient(to right, rgba(35, 35, 35, 0.8), rgba(35, 35, 35, 0.1))'
+    });
+
+    append(BODY, div1);
+    await snapshot(div1);
+  });
+
+
   it('linear-gradient and remove', async (done) => {
     var div1 = document.createElement('div');
     Object.assign(div1.style, {
