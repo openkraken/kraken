@@ -30,6 +30,23 @@ describe('linear-gradient', () => {
 
     await snapshot();
   });
+
+  it('3', async () => {
+    let gradient;
+    gradient = createElement('div', {
+      id: 'gradient',
+      style: {
+        width: '400px',
+        height: '300px',
+        'background-image': 'linear-gradient(to right, rgba(35, 35, 35, 0.8), rgba(35, 35, 35, 0.1))',
+        'box-sizing': 'border-box',
+      },
+    });
+    BODY.appendChild(gradient);
+
+    await snapshot();
+  });
+
   it('ref', async () => {
     let gradient;
     gradient = createElement('div', {
