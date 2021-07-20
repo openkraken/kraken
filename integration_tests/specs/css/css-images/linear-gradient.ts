@@ -31,7 +31,7 @@ describe('linear-gradient', () => {
     await snapshot();
   });
 
-  it('3', async () => {
+  it('3 linear-gradient with many right brackets', async () => {
     let gradient;
     gradient = createElement('div', {
       id: 'gradient',
