@@ -31,7 +31,7 @@ JSValue krakenModuleListener(QjsContext *ctx, JSValueConst this_val, int argc, J
 
   auto context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
   auto bridge = static_cast<JSBridge *>(context->getOwner());
-  bridge->krakenModuleListenerList.push_back(callbackValue);
+  bridge->krakenModuleListenerList.push_back(JS_DupValue(ctx, callbackValue));
   return JS_NULL;
 }
 

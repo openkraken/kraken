@@ -179,23 +179,23 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   )
 
   list(APPEND QUICK_JS_SOURCE
-    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/cutils.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/cutils.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/libregexp.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/libregexp.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/libregexp-opcode.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/libunicode.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/libunicode.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/libunicode-table.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/list.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/quickjs.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/quickjs.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/quickjs-atom.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/quickjs-opcode.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp-opcode.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode-table.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/list.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-atom.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-opcode.h
   )
   add_library(quickjs SHARED ${QUICK_JS_SOURCE})
 
-  list(APPEND BRIDGE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../third_party)
+  list(APPEND BRIDGE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
   list(APPEND BRIDGE_LINK_LIBS quickjs)
 
   list(APPEND BRIDGE_SOURCE

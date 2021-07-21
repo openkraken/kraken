@@ -77,7 +77,7 @@ PROP_SETTER(Window, colorScheme)(QjsContext *ctx, JSValue this_val, int argc, JS
 }
 
 PROP_GETTER(Window, __location__)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
+  auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, 1));
   if (window == nullptr) return JS_UNDEFINED;
   return window->m_location->jsObject;
 }
@@ -131,6 +131,8 @@ WindowInstance::WindowInstance(Window *window): EventTargetInstance(window) {
     getDartMethod()->initWindow(context()->getContextId(), &nativeEventTarget);
   }
   m_context->m_window = this;
+  m_location = new Location(m_context);
+  JS_DupValue(m_ctx, m_location->jsObject);
 }
 
 }

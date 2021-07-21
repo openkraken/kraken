@@ -98,7 +98,7 @@ JSValue EventTarget::addEventListener(QjsContext *ctx, JSValue this_val, int arg
   }
 
   std::forward_list<JSValue> &handlers = eventTargetInstance->_eventHandlers[eventType];
-  handlers.emplace_after(handlers.cbefore_begin(), JS_DupValue(ctx, callback));
+  handlers.push_front(JS_DupValue(ctx, callback));
 
   return JS_UNDEFINED;
 }
@@ -260,6 +260,18 @@ EventTargetInstance::EventTargetInstance(EventTarget *eventTarget) : Instance(ev
                                                                               EventTarget::kEventTargetClassID,
                                                                               finalize) {
   eventTargetId = globalEventTargetId++;
+}
+
+EventTargetInstance::~EventTargetInstance() {
+  for (auto &it : _eventHandlers) {
+    for (auto &handler : it.second) {
+      JS_FreeValue(m_ctx, handler);
+    }
+  }
+
+  for (auto &p : _propertyEventHandler) {
+    JS_FreeValue(m_ctx, p.second);
+  }
 }
 
 

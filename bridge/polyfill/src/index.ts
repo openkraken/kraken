@@ -20,7 +20,7 @@ defineGlobalProperty('console', console);
 // defineGlobalProperty('Headers', Headers);
 // defineGlobalProperty('fetch', fetch);
 // defineGlobalProperty('matchMedia', matchMedia);
-// defineGlobalProperty('location', location);
+defineGlobalProperty('location', location);
 // defineGlobalProperty('navigator', navigator);
 // defineGlobalProperty('XMLHttpRequest', XMLHttpRequest);
 // defineGlobalProperty('asyncStorage', asyncStorage);

@@ -73,6 +73,7 @@ public:
   EventTargetInstance() = delete;
   explicit EventTargetInstance(EventTarget *eventTarget, JSClassExoticMethods &exoticMethods);
   explicit EventTargetInstance(EventTarget *eventTarget);
+  ~EventTargetInstance();
 
   bool dispatchEvent(EventInstance *event);
 

@@ -45,7 +45,7 @@ static JSValue matchImageSnapshot(QjsContext *ctx, JSValueConst this_val, int ar
       ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 1 (blob) must be an Blob object.");
   }
   auto blob = static_cast<kraken::binding::qjs::BlobInstance *>(
-    JS_GetOpaque(blobValue, kraken::binding::qjs::JSContext::kHostClassInstanceClassId));
+    JS_GetOpaque(blobValue, kraken::binding::qjs::Blob::kBlobClassID));
 
   if (blob == nullptr) {
     return JS_ThrowTypeError(

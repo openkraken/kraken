@@ -1,4 +1,3 @@
-import { krakenInvokeModule } from './bridge';
 import { URL } from './url';
 import { kraken } from './kraken';
 
@@ -47,8 +46,8 @@ export const location = {
       kraken.invokeModule('Navigation', 'goTo', assignURL);
     };
   },
-  get reload() {
-    return krakenLocation.reload;
+  reload() {
+    return krakenLocation.reload.call(krakenLocation);
   },
   get replace() {
     return (replaceURL: string) => {

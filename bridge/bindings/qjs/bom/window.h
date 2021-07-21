@@ -42,9 +42,11 @@ class WindowInstance : public EventTargetInstance {
 public:
   WindowInstance() = delete;
   explicit WindowInstance(Window *window);
-  ~WindowInstance() {}
+  ~WindowInstance() {
+    JS_FreeValue(m_ctx, m_location->jsObject);
+  }
 private:
-  Location *m_location;
+  Location *m_location{nullptr};
   friend Window;
   friend JSContext;
 };
