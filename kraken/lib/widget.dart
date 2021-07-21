@@ -4,14 +4,115 @@
  */
 import 'dart:io';
 import 'dart:ui';
+import 'dart:ffi';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/src/dom/element_registry.dart';
+import 'package:kraken/bridge.dart';
+import 'package:kraken/dom.dart' as dom;
+
+typedef WidgetCreator = Widget Function(Map<String, dynamic>);
+class _WidgetCustomElement extends dom.Element {
+  late WidgetCreator _widgetCreator;
+  late Element _renderViewElement;
+  late BuildOwner _buildOwner;
+  late Widget _widget;
+  _KrakenAdapterWidgetPropertiesState? _propertiesState;
+  _WidgetCustomElement(int targetId, Pointer<NativeElement> nativePtr, dom.ElementManager elementManager, String tagName, WidgetCreator creator)
+      : super(
+      targetId,
+      nativePtr,
+      elementManager,
+      tagName: tagName,
+      isIntrinsicBox: true,
+      defaultStyle: {
+        DISPLAY: INLINE_BLOCK,
+      }
+  ) {
+    _widgetCreator = creator;
+  }
+
+  @override
+  void didAttachRenderer() {
+    super.didAttachRenderer();
+
+    WidgetsFlutterBinding.ensureInitialized();
+
+    _propertiesState = _KrakenAdapterWidgetPropertiesState(_widgetCreator, properties);
+    _widget = _KrakenAdapterWidget(_propertiesState!);
+    _attachWidget(_widget);
+  }
+
+  @override
+  void removeProperty(String key) {
+    super.removeProperty(key);
+    if (_propertiesState != null) {
+      _propertiesState!.onAttributeChanged(properties);
+    }
+  }
+
+  @override
+  void setProperty(String key, dynamic value) {
+    super.setProperty(key, value);
+    if (_propertiesState != null) {
+      _propertiesState!.onAttributeChanged(properties);
+    }
+  }
+
+  void _handleBuildScheduled() {
+    // Register drawFrame callback same with [WidgetsBinding.drawFrame]
+    SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+      _buildOwner.buildScope(_renderViewElement);
+      // ignore: invalid_use_of_protected_member
+      RendererBinding.instance!.drawFrame();
+      _buildOwner.finalizeTree();
+    });
+    SchedulerBinding.instance!.ensureVisualUpdate();
+  }
+
+  void _attachWidget(Widget widget) {
+    // A new buildOwner difference with flutter's buildOwner
+    _buildOwner = BuildOwner(focusManager: WidgetsBinding.instance!.buildOwner!.focusManager);
+    _buildOwner.onBuildScheduled = _handleBuildScheduled;
+    _renderViewElement = RenderObjectToWidgetAdapter<RenderBox>(
+        child: widget,
+        container: renderBoxModel as RenderObjectWithChildMixin<RenderBox>,
+      ).attachToRenderTree(_buildOwner);
+  }
+}
+
+class _KrakenAdapterWidget extends StatefulWidget {
+  final _KrakenAdapterWidgetPropertiesState _state;
+  _KrakenAdapterWidget(this._state);
+  @override
+  State<StatefulWidget> createState() {
+    return _state;
+  }
+}
+
+class _KrakenAdapterWidgetPropertiesState extends State<_KrakenAdapterWidget> {
+  Map<String, dynamic> _properties;
+  WidgetCreator _widgetCreator;
+  _KrakenAdapterWidgetPropertiesState(this._widgetCreator, this._properties);
+
+  void onAttributeChanged(Map<String, dynamic> properties) {
+    setState(() {
+      _properties = properties;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _widgetCreator(_properties);
+  }
+}
 
 class Kraken extends StatelessWidget {
   // The background color for viewport, default to transparent.
@@ -61,6 +162,22 @@ class Kraken extends StatelessWidget {
 
   KrakenController? get controller {
     return KrakenController.getControllerOfName(shortHash(this));
+  }
+
+  static bool _isValidCustomElementName(localName) {
+    return RegExp(r'^[a-z][.0-9_a-z]*-[\-.0-9_a-z]*$').hasMatch(localName);
+  }
+
+  static void defineCustomElement(String localName, WidgetCreator creator) {
+    if (!_isValidCustomElementName(localName)) {
+      throw ArgumentError('The element name "$localName" is not valid.');
+    }
+
+    String tagName = localName.toUpperCase();
+
+    defineElement(tagName, (id, nativePtr, elementManager) {
+      return _WidgetCustomElement(id, nativePtr.cast<NativeElement>(), elementManager, tagName, creator);
+    });
   }
 
   loadContent(String bundleContent) async {
@@ -152,6 +269,11 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
 
     double viewportWidth = _krakenWidget.viewportWidth ?? window.physicalSize.width / window.devicePixelRatio;
     double viewportHeight = _krakenWidget.viewportHeight ?? window.physicalSize.height / window.devicePixelRatio;
+    
+    if (viewportWidth == 0.0 && viewportHeight == 0.0) {
+      throw FlutterError('''Can\'t get viewportSize from window. Please set viewportWidth and viewportHeight manually.
+This situation often happened when you trying creating kraken when FlutterView not initialized.''');
+    };
 
     KrakenController controller = KrakenController(shortHash(_krakenWidget.hashCode), viewportWidth, viewportHeight,
       background: _krakenWidget.background,
