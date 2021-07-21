@@ -128,6 +128,16 @@ JSValueRef JSWindow::open(JSContextRef ctx, JSObjectRef function, JSObjectRef th
   return nullptr;
 }
 
+//JSValueRef JSWindow::postMessage(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+//                          size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+//  KRAKEN_LOG(INFO) << "postMessage";
+//  const JSValueRef messageRef = arguments[0];
+//  JSStringRef message = JSValueToStringCopy(ctx, messageRef, exception);
+//  auto window = reinterpret_cast<WindowInstance *>(JSObjectGetPrivate(thisObject));
+//  window->dispatchEvent();
+//  return nullptr;
+//}
+
 JSValueRef JSWindow::scrollTo(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) {
   const JSValueRef xValueRef = arguments[0];

@@ -23,3 +23,12 @@ Object.defineProperty(document, 'body', {
   enumerable: true,
   configurable: false
 });
+
+window.postMessage = (message, origin) => {
+  window.dispatchEvent(new MessageEvent('message', {
+    data: message,
+    origin,
+  }));
+}
+
+
