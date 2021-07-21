@@ -1698,6 +1698,14 @@ class RenderFlexLayout extends RenderLayoutBox {
             }
             minConstraintHeight = maxConstraintHeight = stretchedHeight;
           }
+
+          // Replaced element in flexbox with no size in cross axis should stretch according the intrinsic ratio.
+          if (child is RenderIntrinsic &&
+            child.renderStyle.width == null &&
+            child.intrinsicRatio != null
+          ) {
+            minConstraintWidth = maxConstraintWidth = minConstraintHeight / child.intrinsicRatio!;
+          }
         } else {
           CSSMargin marginLeft = childRenderStyle.marginLeft;
           CSSMargin marginRight = childRenderStyle.marginRight;
@@ -1730,6 +1738,14 @@ class RenderFlexLayout extends RenderLayoutBox {
               stretchedWidth = childCrossSize;
             }
             minConstraintWidth = maxConstraintWidth = stretchedWidth;
+          }
+
+          // Replaced element in flexbox with no size in cross axis should stretch according the intrinsic ratio.
+          if (child is RenderIntrinsic &&
+            child.renderStyle.height == null &&
+            child.intrinsicRatio != null
+          ) {
+            minConstraintHeight = maxConstraintHeight = minConstraintWidth * child.intrinsicRatio!;
           }
         }
       }
