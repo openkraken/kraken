@@ -19,7 +19,6 @@ import 'package:kraken/gesture.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/src/dom/element_registry.dart';
 import 'package:kraken/bridge.dart';
-import 'package:kraken/dom.dart' as dom;
 
 typedef WidgetCreator = Widget Function(Map<String, dynamic>);
 class _WidgetCustomElement extends dom.Element {
