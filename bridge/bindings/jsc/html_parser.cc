@@ -47,8 +47,12 @@ void HTMLParser::parseProperty(ElementInstance* element, GumboElement * gumboEle
         if (position != s.npos) {
           std::string styleKey = s.substr(0, position);
           std::transform(styleKey.begin(), styleKey.end(), styleKey.begin(), ::tolower);
+          trim(styleKey);
+
           std::string styleValue = s.substr(position + 1, s.length());
           std::transform(styleValue.begin(), styleValue.end(), styleValue.begin(), ::tolower);
+          trim(styleValue);
+          
           styleDeclarationInstance->internalSetProperty(styleKey, JSValueMakeString(m_context->context() ,JSStringCreateWithUTF8CString(styleValue.c_str())), nullptr);
         }
       }
