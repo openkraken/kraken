@@ -796,4 +796,81 @@ describe('flexbox flex-shrink', () => {
 
     await snapshot();
   });
+
+  it('should work with image with no size set', async () => {
+    const container = createElement(
+      'div',
+      {
+        style: {
+          "display": "flex",
+          "width": "100px",
+          "height": "100px",
+        },
+      },
+      [
+        (createElement('img', {
+          src: 'assets/100x100-green.png',
+          style: {
+            "marginLeft": "20px"
+          },
+        })),
+        (createElement('img', {
+          src: 'assets/100x100-blue-and-orange.png',
+          style: {
+            "width": "100px",
+            "height": "100px",
+          },
+        })),
+      ]
+    );
+
+    document.body.appendChild(container);
+    await snapshot();
+  });
+
+  it('should work with flex item with overflow hidden', async () => {
+    const container = createElement(
+      'div',
+      {
+        style: {
+          "boxSizing": "border-box",
+          "display": "flex",
+          "flexDirection": "column",
+          "flexShrink": "0",
+          "alignContent": "flex-start",
+          "border": "0 solid black",
+          "margin": "0",
+          "padding": "0",
+          "minWidth": "0",
+          "width": "100px",
+          "height": "100px",
+        },
+      },
+      [
+        (createElement('img', {
+          src: 'assets/100x100-green.png',
+          style: {
+            "display": "flex",
+            "position": "relative",
+            "alignItems": "center",
+            "flexDirection": "row",
+            "justifyContent": "center",
+            "marginTop": "10px",
+          },
+        })),
+        (createElement('div', {
+          style: {
+            "width": "100px",
+            "height": "100px",
+            "overflow": "hidden",
+            "background": "yellow"
+        },
+        })),
+      ]
+    );
+
+    document.body.appendChild(container);
+    await snapshot();
+  });
+
 });
