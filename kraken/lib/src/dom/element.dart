@@ -224,7 +224,6 @@ class Element extends Node
 
   RenderObject _beforeRendererAttach() {
     willAttachRenderer();
-    style.applyTargetProperties();
     return renderer!;
   }
 
