@@ -17,7 +17,7 @@ const _1Q = _1cm / 40; // 1Q = 1/40th of 1cm
 const _1pc = _1in / 6; // 1pc = 1/6th of 1in
 const _1pt = _1in / 72; // 1pt = 1/72th of 1in
 
-final _lengthRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?px|rpx|vw|vh|vmin|vmax|in|cm|mm|pc|pt$', caseSensitive: false);
+final _lengthRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?px|rpx|vw|vh|vmin|vmax|rem|em|in|cm|mm|pc|pt$', caseSensitive: false);
 final _percentageRegExp = RegExp(r'^\d+\%$', caseSensitive: false);
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#lengths
@@ -34,6 +34,8 @@ class CSSLength {
   static const String PC = 'pc';
   static const String PT = 'pt';
   static const String Q = 'q';
+  static const String EM = 'em';
+  static const String REM = 'rem';
 
   static double? toDouble(value) {
     if (value is double) {
@@ -71,11 +73,30 @@ class CSSLength {
     return double.tryParse(percentage.split('%')[0])! / 100;
   }
 
-  static double? parseLength(String unitedValue, Size? viewportSize) {
-    return toDisplayPortValue(unitedValue, viewportSize);
+  static double? parseLength(
+    String unitedValue,
+    {
+      Size? viewportSize,
+      double? rootFontSize,
+      double? fontSize
+    }
+  ) {
+    return toDisplayPortValue(
+      unitedValue,
+      viewportSize: viewportSize,
+      rootFontSize: rootFontSize,
+      fontSize: fontSize
+    );
   }
 
-  static double? toDisplayPortValue(String? unitedValue, Size? viewportSize) {
+  static double? toDisplayPortValue(
+    String? unitedValue,
+    {
+      Size? viewportSize,
+      double? rootFontSize,
+      double? fontSize
+    }
+  ) {
     if (unitedValue == null || unitedValue.isEmpty) return null;
 
     unitedValue = unitedValue.trim();
@@ -88,6 +109,14 @@ class CSSLength {
     // Only '0' is accepted with no unit.
     if (unitedValue == ZERO) {
       return 0;
+    } else if (unitedValue.endsWith(REM)) {
+      double? currentValue = double.tryParse(unitedValue.split(REM)[0]);
+      if (currentValue == null || rootFontSize == null) return null;
+      return rootFontSize * currentValue;
+    } else if (unitedValue.endsWith(EM)) {
+      double? currentValue = double.tryParse(unitedValue.split(EM)[0]);
+      if (currentValue == null || fontSize == null) return null;
+      return fontSize * currentValue;
     } else if (unitedValue.endsWith(RPX)) {
       double? currentValue = double.tryParse(unitedValue.split(RPX)[0]);
       if (currentValue == null) return null;

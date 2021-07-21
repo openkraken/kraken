@@ -80,6 +80,9 @@ class CanvasElement extends Element {
     painter = CanvasPainter(repaint: repaintNotifier);
   }
 
+  // Currently only 2d rendering context for canvas is supported.
+  CanvasRenderingContext2D? context2d;
+
   @override
   void willAttachRenderer() {
     super.willAttachRenderer();
@@ -93,6 +96,19 @@ class CanvasElement extends Element {
   }
 
   @override
+  void didAttachRenderer() {
+    super.didAttachRenderer();
+    double? rootFontSize = renderBoxModel!.elementDelegate.getRootElementFontSize();
+    double? fontSize = renderBoxModel!.renderStyle.fontSize;
+    if (context2d == null) {
+      context2d = CanvasRenderingContext2D();
+    }
+    context2d!.viewportSize = viewportSize;
+    context2d!.rootFontSize = rootFontSize;
+    context2d!.fontSize = fontSize;
+  }
+
+  @override
   void didDetachRenderer() {
     super.didDetachRenderer();
     style.removeStyleChangeListener(_styleChangedListener);
@@ -102,16 +118,13 @@ class CanvasElement extends Element {
 
   // RenderingContext? getContext(DOMString contextId, optional any options = null);
   CanvasRenderingContext2D getContext(String contextId, {dynamic options}) {
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
-
     switch (contextId) {
       case '2d':
         if (painter.context == null) {
-          CanvasRenderingContext2D context2d = CanvasRenderingContext2D();
-          context2d.canvas = this;
-          context2d.viewportSize = viewportSize;
+          if (context2d == null) {
+            context2d = CanvasRenderingContext2D();
+          }
+          context2d!.canvas = this;
           painter.context = context2d;
         }
         return painter.context!;

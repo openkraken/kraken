@@ -27,7 +27,7 @@ mixin CSSFlowMixin on RenderStyleBase {
     if (_textAlign == value) return;
     _textAlign = value;
     // Update all the children flow layout with specified style property not set due to style inheritance.
-    _markFlowLayoutNeedsLayout(renderBoxModel!, TEXT_ALIGN);
+    _markFlowLayoutNeedsLayout(renderBoxModel, TEXT_ALIGN);
   }
 
   /// Mark flow layout and all the children flow layout with specified style property not set needs layout.
@@ -37,7 +37,7 @@ mixin CSSFlowMixin on RenderStyleBase {
       renderBoxModel.visitChildren((RenderObject child) {
         if (child is RenderFlowLayout) {
           // Only need to layout when the specified style property is not set.
-          if (child.renderStyle.style?[styleProperty].isEmpty) {
+          if (child.renderStyle.style[styleProperty].isEmpty) {
             _markFlowLayoutNeedsLayout(child, styleProperty);
           }
         }
@@ -46,7 +46,7 @@ mixin CSSFlowMixin on RenderStyleBase {
   }
 
   void updateFlow() {
-    CSSStyleDeclaration style = this.style!;
+    CSSStyleDeclaration style = this.style;
     textAlign = _getTextAlign(style);
   }
 
