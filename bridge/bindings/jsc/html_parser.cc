@@ -34,7 +34,7 @@ void HTMLParser::parseProperty(ElementInstance* element, GumboElement * gumboEle
         arrStyles.push_back(strStyles.substr(prev_pos, pos - prev_pos));
         prev_pos = ++pos;
       }
-      arrStyles.push_back(strStyles.substr(prev_pos, pos-prev_pos));
+      arrStyles.push_back(strStyles.substr(prev_pos, pos - prev_pos));
 
       JSStringRef propertyName = JSStringCreateWithUTF8CString("style");
       JSValueRef styleRef = JSObjectGetProperty(m_context->context(), element->object, propertyName, nullptr);
