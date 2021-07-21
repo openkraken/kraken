@@ -512,6 +512,9 @@ class RenderFlexLayout extends RenderLayoutBox {
         totalWeightedFlexShrink += childOriginalMainSize * childFlexShrink;
       }
     });
+    if (totalWeightedFlexShrink == 0) {
+      return 0;
+    }
 
     int? childNodeId;
     if (child is RenderTextBox) {
@@ -1321,7 +1324,8 @@ class RenderFlexLayout extends RenderLayoutBox {
         /// If child's mainAxis have clips, it will create a new format context in it's children's.
         /// so we do't need to care about child's size.
         if (child is RenderBoxModel && _isChildMainAxisClip(child)) {
-          computedSize = originalMainSize + remainingFreeSpace;
+          computedSize = originalMainSize + remainingFreeSpace > 0 ?
+            originalMainSize + remainingFreeSpace : 0;
         } else {
           double shrinkValue =
               _getShrinkConstraints(child, runChildren, remainingFreeSpace);
