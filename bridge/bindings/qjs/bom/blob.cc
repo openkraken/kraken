@@ -55,7 +55,8 @@ JSValue Blob::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, i
 
   JSValue mimeTypeValue = JS_GetProperty(ctx, optionValue, mimeTypeKey);
   builder.append(*constructor->m_context, mimeTypeValue);
-  std::string mimeType = JS_ToCString(ctx, mimeTypeValue);
+  const char* cMineType = JS_ToCString(ctx, mimeTypeValue);
+  std::string mimeType = std::string(cMineType);
 
   auto *blob = new BlobInstance(constructor, builder.finalize(), mimeType);
 
@@ -142,7 +143,8 @@ JSValue Blob::slice(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) 
   }
 
   if (argc > 2 && !JS_IsUndefined(contentTypeValue)) {
-    mimeType = JS_ToCString(ctx, contentTypeValue);
+    const char* cmimeType = JS_ToCString(ctx, contentTypeValue);
+    mimeType = std::string(cmimeType);
     JS_FreeCString(ctx, mimeType.c_str());
   }
 

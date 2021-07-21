@@ -45,7 +45,6 @@ public:
   DocumentInstance() = delete;
   explicit DocumentInstance(Document *document);
   ~DocumentInstance();
-
   static std::unordered_map<Document *, DocumentInstance *> m_instanceMap;
   static DocumentInstance *instance(Document *document) {
     if (m_instanceMap.count(document) == 0) {
@@ -61,6 +60,7 @@ private:
   ElementInstance *m_documentElement{nullptr};
 
   friend Document;
+  friend JSContext;
 };
 
 } // namespace kraken::binding::qjs

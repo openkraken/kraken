@@ -149,8 +149,9 @@ EventInstance *Event::buildEventInstance(std::string &eventType, JSContext *cont
 }
 
 EventInstance::EventInstance(Event *event, NativeEvent *nativeEvent)
-  : nativeEvent(nativeEvent), Instance(event, "Event", Event::kEventClassID, finalizer) {}
+  : nativeEvent(nativeEvent), Instance(event, "Event", nullptr, Event::kEventClassID, finalizer) {}
 EventInstance::EventInstance(Event *jsEvent, std::string eventType, JSValue eventInit) : Instance(jsEvent, "Event",
+                                                                                                  nullptr,
                                                                                                   Event::kEventClassID,
                                                                                                   finalizer) {
   nativeEvent = new NativeEvent(stringToNativeString(eventType));

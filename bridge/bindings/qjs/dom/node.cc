@@ -498,7 +498,7 @@ void NodeInstance::refer() {
   if (_referenceCount == 0) {
     JS_DupValue(m_ctx, instanceObject);
   }
-
+  _referenceCount++;
 }
 void NodeInstance::unrefer() {
   _referenceCount--;

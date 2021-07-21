@@ -80,13 +80,13 @@ JSValue Element::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val
 
   ElementInstance *element;
   if (elementCreatorMap.count(name) > 0) {
-    element = elementCreatorMap[name](this, tagName);
+    element = elementCreatorMap[name](this, cName);
   } else if (name == "HTML") {
-    element = new ElementInstance(this, tagName, false);
+    element = new ElementInstance(this, cName, false);
     element->eventTargetId = HTML_TARGET_ID;
   } else {
     // Fallback to default Element class
-    element = new ElementInstance(this, tagName, true);
+    element = new ElementInstance(this, cName, true);
   }
 
   JS_FreeCString(m_ctx, cName);
@@ -413,8 +413,7 @@ std::string ElementInstance::internalGetTextContent() {
 void ElementInstance::internalSetTextContent(JSValue content) {}
 
 std::string ElementInstance::tagName() {
-  const char *cTagName = JS_AtomToCString(m_ctx, m_tagName);
-  std::string tagName = std::string(cTagName);
+  std::string tagName = std::string(m_tagName);
   std::transform(tagName.begin(), tagName.end(), tagName.begin(), ::toupper);
   return tagName;
 }
@@ -439,12 +438,12 @@ void ElementInstance::_didModifyAttribute(std::string &name, JSValue &oldId, JSV
 
 void ElementInstance::_beforeUpdateId(JSValue &oldId, JSValue &newId) {}
 
-ElementInstance::ElementInstance(Element *element, JSValue &tagName, bool shouldAddUICommand) :
+ElementInstance::ElementInstance(Element *element, const char* tagName, bool shouldAddUICommand) :
+  m_tagName(tagName),
   NodeInstance(element, NodeType::ELEMENT_NODE,
                DocumentInstance::instance(
                  Document::instance(
-                   element->m_context)), exoticMethods),
-  m_tagName(JS_ValueToAtom(m_ctx, tagName)) {
+                   element->m_context)), exoticMethods, tagName) {
 
   m_attributes = new ElementAttributes(m_context);
   m_style = new StyleDeclarationInstance(CSSStyleDeclaration::instance(m_context), this);
@@ -453,7 +452,8 @@ ElementInstance::ElementInstance(Element *element, JSValue &tagName, bool should
   JS_SetPropertyStr(m_ctx, instanceObject, "attributes", m_attributes->jsObject);
 
   if (shouldAddUICommand) {
-    NativeString *args_01 = jsValueToNativeString(m_ctx, tagName);
+    std::string str = std::string(tagName);
+    NativeString *args_01 = stringToNativeString(str);
     ::foundation::UICommandBuffer::instance(m_context->getContextId())
       ->addCommand(eventTargetId, UICommand::createElement, *args_01, &nativeEventTarget);
   }
@@ -469,6 +469,9 @@ JSValue ElementInstance::getProperty(QjsContext *ctx, JSValue obj, JSAtom atom, 
   KRAKEN_LOG(VERBOSE) << "element getProperty " << JS_AtomToCString(ctx, atom);
 
   return JS_NULL;
+}
+int ElementInstance::setProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver, int flags) {
+  return 0;
 }
 
 }

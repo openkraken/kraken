@@ -104,7 +104,7 @@ PROP_SETTER(Document, documentElement)(QjsContext *ctx, JSValue this_val, int ar
   return JS_NULL;
 }
 
-DocumentInstance::DocumentInstance(Document *document): NodeInstance(document, NodeType::DOCUMENT_NODE, this) {
+DocumentInstance::DocumentInstance(Document *document): NodeInstance(document, NodeType::DOCUMENT_NODE, this, "document") {
   m_instanceMap[Document::instance(m_context)] = this;
 
   JSAtom htmlTagName = JS_NewAtom(m_ctx, "HTML");

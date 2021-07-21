@@ -33,7 +33,7 @@ JSValue EventTarget::constructor(QjsContext *ctx, JSValue func_obj, JSValue this
 
     JS_FreeValue(ctx, lengthValue);
   }
-  auto eventTarget = new EventTargetInstance(this);
+  auto eventTarget = new EventTargetInstance(this, "EventTarget");
   return eventTarget->instanceObject;
 }
 
@@ -71,7 +71,8 @@ JSValue EventTarget::addEventListener(QjsContext *ctx, JSValue this_val, int arg
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: callback should be an function.");
   }
 
-  std::string eventType = JS_ToCString(ctx, eventTypeValue);
+  const char* cEventType = JS_ToCString(ctx, eventTypeValue);
+  std::string eventType = std::string(cEventType);
 
   // Init list.
   if (eventTargetInstance->_eventHandlers.count(eventType) == 0) {
@@ -98,7 +99,15 @@ JSValue EventTarget::addEventListener(QjsContext *ctx, JSValue this_val, int arg
   }
 
   std::forward_list<JSValue> &handlers = eventTargetInstance->_eventHandlers[eventType];
-  handlers.push_front(JS_DupValue(ctx, callback));
+  JSValue newCallback = JS_DupValue(ctx, callback);
+
+  // Create strong reference between callback and eventTargetObject.
+  // So gc can mark this object and recycle it.
+  std::string privateKey = eventType + "_" + std::to_string(reinterpret_cast<int64_t>(JS_VALUE_GET_PTR(callback)));
+  JS_DefinePropertyValueStr(ctx, eventTargetInstance->instanceObject, privateKey.c_str(), newCallback, JS_PROP_NORMAL);
+
+  handlers.push_front(newCallback);
+  JS_FreeCString(ctx, cEventType);
 
   return JS_UNDEFINED;
 }
@@ -129,15 +138,19 @@ JSValue EventTarget::removeEventListener(QjsContext *ctx, JSValue this_val, int 
     return JS_ThrowTypeError(ctx, "Failed to removeEventListener: callback should be an function.");
   }
 
-  std::string eventType = JS_ToCString(ctx, eventTypeValue);
+  const char* cEventType = JS_ToCString(ctx, eventTypeValue);
+  std::string eventType = std::string(cEventType);
   if (eventTargetInstance->_eventHandlers.count(eventType) == 0) {
     return JS_UNDEFINED;
   }
 
   std::forward_list<JSValue> &handlers = eventTargetInstance->_eventHandlers[eventType];
-  handlers.remove_if([&callback, &ctx](JSValue function) {
+  handlers.remove_if([&callback, &eventType, &ctx, &eventTargetInstance](JSValue function) {
     if (JS_VALUE_GET_PTR(function) == JS_VALUE_GET_PTR(callback)) {
-      JS_FreeValue(ctx, function);
+      std::string privateKey = eventType + "_" + std::to_string(reinterpret_cast<int64_t>(JS_VALUE_GET_PTR(callback)));
+      JSAtom privateKeyAtom = JS_NewAtom(ctx, privateKey.c_str());
+      JS_DeleteProperty(ctx, eventTargetInstance->instanceObject, privateKeyAtom, 0);
+      JS_FreeAtom(ctx, privateKeyAtom);
       return true;
     }
     return false;
@@ -160,6 +173,8 @@ JSValue EventTarget::removeEventListener(QjsContext *ctx, JSValue this_val, int 
                                                                    UICommand::removeEvent, args_01, nullptr);
     }
   }
+
+  JS_FreeCString(ctx, cEventType);
   return JS_UNDEFINED;
 }
 
@@ -250,30 +265,20 @@ JSValue EventTarget::__kraken_clear_event_listener(QjsContext *ctx, JSValue this
   return JS_NULL;
 }
 
-EventTargetInstance::EventTargetInstance(EventTarget *eventTarget, JSClassExoticMethods &exoticMethods) : Instance(
-  eventTarget, "EventTarget", exoticMethods, EventTarget::kEventTargetClassID,
+EventTargetInstance::EventTargetInstance(EventTarget *eventTarget, JSClassExoticMethods &exoticMethods, const char* name) : Instance(
+  eventTarget, name, &exoticMethods, EventTarget::kEventTargetClassID,
   finalize) {
   eventTargetId = globalEventTargetId++;
 }
 
-EventTargetInstance::EventTargetInstance(EventTarget *eventTarget) : Instance(eventTarget, "EventTarget",
+EventTargetInstance::EventTargetInstance(EventTarget *eventTarget, const char* name) : Instance(eventTarget, name,
+                                                                              nullptr,
                                                                               EventTarget::kEventTargetClassID,
                                                                               finalize) {
   eventTargetId = globalEventTargetId++;
 }
 
-EventTargetInstance::~EventTargetInstance() {
-  for (auto &it : _eventHandlers) {
-    for (auto &handler : it.second) {
-      JS_FreeValue(m_ctx, handler);
-    }
-  }
-
-  for (auto &p : _propertyEventHandler) {
-    JS_FreeValue(m_ctx, p.second);
-  }
-}
-
+EventTargetInstance::~EventTargetInstance() {}
 
 JSValue EventTargetInstance::callNativeMethods(const char *method, int32_t argc,
                                                NativeValue *argv) {
@@ -297,6 +302,7 @@ JSValue EventTargetInstance::callNativeMethods(const char *method, int32_t argc,
 
 void EventTargetInstance::finalize(JSRuntime *rt, JSValue val) {
   auto *eventTarget = static_cast<EventTargetInstance *>(JS_GetOpaque(val, EventTarget::kEventTargetClassID));
+  KRAKEN_LOG(VERBOSE) << "finalize.." << eventTarget->m_name;
   if (eventTarget->context()->isValid()) {
     JS_FreeValue(eventTarget->m_ctx, eventTarget->instanceObject);
   }

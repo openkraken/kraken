@@ -17,7 +17,7 @@ void bindElement(std::unique_ptr<JSContext> &context);
 
 class ElementInstance;
 class Element;
-using ElementCreator = ElementInstance *(*)(Element *element, JSValue &tagName);
+using ElementCreator = ElementInstance *(*)(Element *element, const char *tagName);
 
 struct NativeBoundingClientRect {
   double x;
@@ -90,7 +90,6 @@ class ElementInstance : public NodeInstance {
 public:
   ElementInstance() = delete;
   ~ElementInstance() override {
-    JS_FreeAtom(m_ctx, m_tagName);
   }
   JSValue getStringValueProperty(std::string &name);
   std::string internalGetTextContent() override;
@@ -104,7 +103,7 @@ public:
   std::string getRegisteredTagName();
 
 private:
-  explicit ElementInstance(Element *element, JSValue &tagName, bool shouldAddUICommand);
+  explicit ElementInstance(Element *element, const char* tagName, bool shouldAddUICommand);
   void _notifyNodeRemoved(NodeInstance *node) override;
   void _notifyChildRemoved();
   void _notifyNodeInsert(NodeInstance *insertNode) override;
@@ -112,13 +111,15 @@ private:
   void _didModifyAttribute(std::string &name, JSValue &oldId, JSValue &newId);
   void _beforeUpdateId(JSValue &oldId, JSValue &newId);
 
-  JSAtom m_tagName;
+  const char* m_tagName;
   friend Element;
   StyleDeclarationInstance *m_style{nullptr};
   ElementAttributes *m_attributes{nullptr};
 
   static JSValue getProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
                                  JSValueConst receiver);
+  int setProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
+                      JSValueConst value, JSValueConst receiver, int flags);
 
   JSClassExoticMethods exoticMethods{
     nullptr,

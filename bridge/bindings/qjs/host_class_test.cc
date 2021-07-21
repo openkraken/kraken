@@ -29,7 +29,7 @@ static JSClassID kSampleClassId{0};
 
 class SampleClassInstance : public Instance {
 public:
-  explicit SampleClassInstance(HostClass *sampleClass) : Instance(sampleClass, "SampleClass", kSampleClassId, finalizer) {};
+  explicit SampleClassInstance(HostClass *sampleClass) : Instance(sampleClass, "SampleClass", nullptr, kSampleClassId, finalizer) {};
 private:
   static void finalizer(JSRuntime *rt, JSValue v) {
     auto *instance = static_cast<SampleClassInstance *>(JS_GetOpaque(v, kSampleClassId));
@@ -251,7 +251,7 @@ public:
   ExoticClassInstance() = delete;
   static JSClassExoticMethods methods;
 
-  explicit ExoticClassInstance(ExoticClass *exoticClass) : Instance(exoticClass, "ExoticClass", methods, ExoticClass::exoticClassID, finalizer) {};
+  explicit ExoticClassInstance(ExoticClass *exoticClass) : Instance(exoticClass, "ExoticClass", &methods, ExoticClass::exoticClassID, finalizer) {};
 
   static JSValue getProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
                           JSValueConst receiver) {

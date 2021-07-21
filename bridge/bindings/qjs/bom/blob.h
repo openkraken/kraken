@@ -42,11 +42,11 @@ private:
 class BlobInstance : public Instance {
 public:
   BlobInstance() = delete;
-  explicit BlobInstance(Blob *blob): Instance(blob, "Blob", Blob::kBlobClassID, finalize) {};
+  explicit BlobInstance(Blob *blob): Instance(blob, "Blob", nullptr, Blob::kBlobClassID, finalize) {};
   explicit BlobInstance(Blob *blob, std::vector<uint8_t> &&data)
-      : _size(data.size()), _data(std::move(data)), Instance(blob, "Blob", Blob::kBlobClassID, finalize){};
+      : _size(data.size()), _data(std::move(data)), Instance(blob, "Blob", nullptr, Blob::kBlobClassID, finalize){};
   explicit BlobInstance(Blob *blob, std::vector<uint8_t> &&data, std::string &mime)
-      : mimeType(mime), _size(data.size()), _data(std::move(data)), Instance(blob, "Blob", Blob::kBlobClassID, finalize){};
+      : mimeType(mime), _size(data.size()), _data(std::move(data)), Instance(blob, "Blob", nullptr, Blob::kBlobClassID, finalize){};
 
   /// get an pointer of bytes data from JSBlob
   uint8_t *bytes();

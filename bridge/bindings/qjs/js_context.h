@@ -7,8 +7,8 @@
 #define KRAKENBRIDGE_JS_CONTEXT_H
 
 #include "kraken_foundation.h"
-#include <forward_list>
 #include <memory>
+#include <unordered_map>
 #include <quickjs/quickjs.h>
 #include "js_context_macros.h"
 
@@ -20,6 +20,7 @@ static std::once_flag kinitJSClassIDFlag;
 
 JSRuntime *getGlobalJSRuntime();
 class WindowInstance;
+class DocumentInstance;
 
 class JSContext {
 public:
@@ -54,8 +55,8 @@ private:
   JSValue globalObject{JS_NULL};
   bool ctxInvalid_{false};
   QjsContext *m_ctx{nullptr};
-  std::forward_list<JSValue> m_globalProps;
   friend WindowInstance;
+  friend DocumentInstance;
   WindowInstance *m_window{nullptr};
 };
 

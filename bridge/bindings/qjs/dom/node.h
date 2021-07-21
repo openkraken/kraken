@@ -54,10 +54,10 @@ private:
 class NodeInstance : public EventTargetInstance {
 public:
   NodeInstance() = delete;
-  explicit NodeInstance(Node *node, NodeType nodeType, DocumentInstance *document) : EventTargetInstance(node),
+  explicit NodeInstance(Node *node, NodeType nodeType, DocumentInstance *document, const char* name) : EventTargetInstance(node, name),
                                                                                      m_document(document) {}
-  explicit NodeInstance(Node *node, NodeType nodeType, DocumentInstance *document, JSClassExoticMethods &exoticMethods) :
-    EventTargetInstance(node, exoticMethods), m_document(document) {}
+  explicit NodeInstance(Node *node, NodeType nodeType, DocumentInstance *document, JSClassExoticMethods &exoticMethods, const char *name) :
+    EventTargetInstance(node, exoticMethods, name), m_document(document) {}
   ~NodeInstance();
   bool isConnected();
   DocumentInstance *ownerDocument();

@@ -8,8 +8,10 @@
 
 #include "bindings/qjs/dom/event.h"
 #include "bindings/qjs/host_class.h"
+#include "bindings/qjs/host_object.h"
 #include "bindings/qjs/js_context.h"
 #include "bindings/qjs/native_value.h"
+#include <forward_list>
 
 namespace kraken::binding::qjs {
 
@@ -71,8 +73,8 @@ struct NativeEventTarget {
 class EventTargetInstance : public Instance {
 public:
   EventTargetInstance() = delete;
-  explicit EventTargetInstance(EventTarget *eventTarget, JSClassExoticMethods &exoticMethods);
-  explicit EventTargetInstance(EventTarget *eventTarget);
+  explicit EventTargetInstance(EventTarget *eventTarget, JSClassExoticMethods &exoticMethods, const char* name);
+  explicit EventTargetInstance(EventTarget *eventTarget, const char* name);
   ~EventTargetInstance();
 
   bool dispatchEvent(EventInstance *event);

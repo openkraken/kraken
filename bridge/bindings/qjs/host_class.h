@@ -74,22 +74,12 @@ private:
 
 class Instance {
 public:
-  explicit Instance(HostClass *hostClass, std::string name, JSClassID classId, JSClassFinalizer finalizer)
-      : m_context(hostClass->context()), m_hostClass(hostClass), m_name(std::move(name)), m_ctx(m_context->ctx()) {
-    JSClassDef def{};
-    def.class_name = m_name.c_str();
-    def.finalizer = finalizer;
-    JS_NewClass(m_context->runtime(), classId, &def);
-    instanceObject = JS_NewObjectClass(m_ctx, classId);
-    JS_SetOpaque(instanceObject, this);
-  };
-
-  explicit Instance(HostClass *hostClass, std::string name, JSClassExoticMethods &exotic, JSClassID classId, JSClassFinalizer finalizer)
+  explicit Instance(HostClass *hostClass, std::string name, JSClassExoticMethods *exotic, JSClassID classId, JSClassFinalizer finalizer)
     : m_context(hostClass->context()), m_hostClass(hostClass), m_name(std::move(name)), m_ctx(m_context->ctx()) {
     JSClassDef def{};
     def.class_name = m_name.c_str();
     def.finalizer = finalizer;
-    def.exotic = &exotic;
+    def.exotic = exotic;
     int32_t success = JS_NewClass(m_context->runtime(), classId, &def);
     instanceObject = JS_NewObjectClass(m_ctx, classId);
     JS_SetOpaque(instanceObject, this);

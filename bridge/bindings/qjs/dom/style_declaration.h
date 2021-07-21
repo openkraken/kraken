@@ -47,7 +47,7 @@ class StyleDeclarationInstance : public Instance {
 public:
   StyleDeclarationInstance() = delete;
   explicit StyleDeclarationInstance(CSSStyleDeclaration *cssStyleDeclaration, EventTargetInstance *ownerEventTarget)
-    : Instance(cssStyleDeclaration, "CSSStyleDeclaration", m_exoticMethods, CSSStyleDeclaration::kCSSStyleDeclarationClassId, finalize), m_ownerEventTarget(ownerEventTarget) {};
+    : Instance(cssStyleDeclaration, "CSSStyleDeclaration", &m_exoticMethods, CSSStyleDeclaration::kCSSStyleDeclarationClassId, finalize), m_ownerEventTarget(ownerEventTarget) {};
   ~StyleDeclarationInstance();
   bool internalSetProperty(std::string &name, JSValue value);
   void internalRemoveProperty(std::string &name);

@@ -60,7 +60,8 @@ JSValue CustomEvent::constructor(QjsContext *ctx, JSValue func_obj, JSValue this
     customEventInit = argv[1];
   }
 
-  std::string customEventType = JS_ToCString(ctx, typeArgsValue);
+  const char* cCustomEventType = JS_ToCString(ctx, typeArgsValue);
+  std::string customEventType = std::string(cCustomEventType);
   auto *customEvent = new CustomEventInstance(CustomEvent::instance(context()), customEventType, customEventInit);
   JS_FreeCString(ctx, customEventType.c_str());
 
