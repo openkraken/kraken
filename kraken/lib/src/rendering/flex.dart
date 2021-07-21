@@ -1706,6 +1706,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           // Replaced element in flexbox with no size in cross axis should stretch according the intrinsic ratio.
           if (child is RenderIntrinsic &&
             child.renderStyle.width == null &&
+            child.renderStyle.minWidth == null &&
             child.intrinsicRatio != null
           ) {
             minConstraintWidth = maxConstraintWidth = minConstraintHeight / child.intrinsicRatio!;
@@ -1747,6 +1748,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           // Replaced element in flexbox with no size in cross axis should stretch according the intrinsic ratio.
           if (child is RenderIntrinsic &&
             child.renderStyle.height == null &&
+            child.renderStyle.minHeight == null &&
             child.intrinsicRatio != null
           ) {
             minConstraintHeight = maxConstraintHeight = minConstraintWidth * child.intrinsicRatio!;
