@@ -9,6 +9,8 @@
 
 namespace kraken::binding::qjs {
 
+std::once_flag kWindowInitOnceFlag;
+
 OBJECT_INSTANCE_IMPL(Window);
 
 void bindWindow(std::unique_ptr<JSContext> &context) {
@@ -21,9 +23,21 @@ void bindWindow(std::unique_ptr<JSContext> &context) {
   JS_SetOpaque(context->global(), window);
 }
 
+JSClassID Window::kWindowClassId{0};
+
+Window::Window(JSContext *context) : EventTarget(context, "Window") {
+  std::call_once(kWindowInitOnceFlag, []() {
+    JS_NewClassID(&kWindowClassId);
+  });
+}
+
+JSClassID Window::classId() {
+  return kWindowClassId;
+}
+
 JSValue Window::open(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   JSValue &url = argv[0];
-  auto window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
+  auto window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, Window::classId()));
   NativeValue arguments[] = {
     jsValueToNativeValue(ctx, argv[0])
   };
@@ -32,7 +46,7 @@ JSValue Window::open(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv)
 JSValue Window::scrollTo(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   JSValue &x = argv[0];
   JSValue &y = argv[1];
-  auto window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
+  auto window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, Window::classId()));
   NativeValue arguments[] = {
     jsValueToNativeValue(ctx, argv[0]),
     jsValueToNativeValue(ctx, argv[1])
@@ -42,7 +56,7 @@ JSValue Window::scrollTo(QjsContext *ctx, JSValue this_val, int argc, JSValue *a
 JSValue Window::scrollBy(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   JSValue &x = argv[0];
   JSValue &y = argv[1];
-  auto window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
+  auto window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, Window::classId()));
   NativeValue arguments[] = {
     jsValueToNativeValue(ctx, argv[0]),
     jsValueToNativeValue(ctx, argv[1])
@@ -86,7 +100,7 @@ PROP_SETTER(Window, __location__)(QjsContext *ctx, JSValue this_val, int argc, J
 }
 
 PROP_GETTER(Window, window)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
+  auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, Window::classId()));
   if (window == nullptr) return JS_UNDEFINED;
   return window->instanceObject;
 }
@@ -94,7 +108,7 @@ PROP_SETTER(Window, window)(QjsContext *ctx, JSValue this_val, int argc, JSValue
   return JS_NULL;
 }
 PROP_GETTER(Window, parent)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
+  auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, Window::classId()));
   if (window == nullptr) return JS_UNDEFINED;
   return window->instanceObject;
 }
@@ -126,7 +140,7 @@ PROP_SETTER(Window, scrollY)(QjsContext *ctx, JSValue this_val, int argc, JSValu
   return JS_NULL;
 }
 
-WindowInstance::WindowInstance(Window *window): EventTargetInstance(window, "window") {
+WindowInstance::WindowInstance(Window *window) : EventTargetInstance(window, Window::classId(), "window") {
   if (getDartMethod()->initWindow != nullptr) {
     getDartMethod()->initWindow(context()->getContextId(), &nativeEventTarget);
   }

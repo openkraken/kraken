@@ -10,12 +10,27 @@
 
 namespace kraken::binding::qjs {
 
+std::once_flag kDocumentInitOnceFlag;
+
 void bindDocument(std::unique_ptr<JSContext> &context) {
   auto *documentConstructor = Document::instance(context.get());
   JSValue documentInstance = JS_CallConstructor(context->ctx(), documentConstructor->classObject, 0, nullptr);
   context->defineGlobalProperty("Document", documentConstructor->classObject);
   context->defineGlobalProperty("document", documentInstance);
 }
+
+JSClassID Document::kDocumentClassID{0};
+
+Document::Document(JSContext *context) : Node(context, "Document") {
+  std::call_once(kDocumentInitOnceFlag, []() {
+    JS_NewClassID(&kDocumentClassID);
+  });
+}
+
+JSClassID Document::classId() {
+  return kDocumentClassID;
+}
+
 
 OBJECT_INSTANCE_IMPL(Document);
 
@@ -40,7 +55,7 @@ JSValue Document::createEvent(QjsContext *ctx, JSValue this_val, int argc, JSVal
     NativeString *nativeEventType = jsValueToNativeString(ctx, eventTypeValue);
     auto nativeEvent = new NativeEvent(nativeEventType);
 
-    auto document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
+    auto document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, Document::classId()));
     auto e = Event::buildEventInstance(eventType, document->context(), nativeEvent, false);
     return e->instanceObject;
   } else {
@@ -58,7 +73,7 @@ JSValue Document::createElement(QjsContext *ctx, JSValue this_val, int argc, JSV
     return JS_ThrowTypeError(ctx, "Failed to createElement: tagName should be a string.");
   }
 
-  auto document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
+  auto document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, Document::classId()));
   JSValue element = JS_CallConstructor(ctx, Element::instance(document->context())->classObject, argc, argv);
   return element;
 }
@@ -97,14 +112,14 @@ PROP_GETTER(Document, cookie)(QjsContext *ctx, JSValue this_val, int argc, JSVal
 PROP_SETTER(Document, cookie)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {  return JS_NULL;}
 
 PROP_GETTER(Document, documentElement)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
+  auto *document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, Document::classId()));
   return document->m_documentElement->instanceObject;
 }
 PROP_SETTER(Document, documentElement)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
-DocumentInstance::DocumentInstance(Document *document): NodeInstance(document, NodeType::DOCUMENT_NODE, this, "document") {
+DocumentInstance::DocumentInstance(Document *document): NodeInstance(document, NodeType::DOCUMENT_NODE, this, Document::classId(), "document") {
   m_instanceMap[Document::instance(m_context)] = this;
 
   JSAtom htmlTagName = JS_NewAtom(m_ctx, "HTML");
@@ -113,7 +128,7 @@ DocumentInstance::DocumentInstance(Document *document): NodeInstance(document, N
     htmlTagValue
   };
   JSValue documentElementValue = JS_CallConstructor(m_ctx, Element::instance(m_context)->classObject, 1, htmlArgs);
-  m_documentElement = static_cast<ElementInstance *>(JS_GetOpaque(documentElementValue, EventTarget::kEventTargetClassID));
+  m_documentElement = static_cast<ElementInstance *>(JS_GetOpaque(documentElementValue, Element::classId()));
   m_documentElement->parentNode = this;
 
   JSAtom documentElementTag = JS_NewAtom(m_ctx, "documentElement");

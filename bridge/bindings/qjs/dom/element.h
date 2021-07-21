@@ -48,8 +48,11 @@ private:
 
 class Element : public Node {
 public:
+  static JSClassID kElementClassId;
   Element() = delete;
-  explicit Element(JSContext *context): Node(context, "Element") {}
+  explicit Element(JSContext *context);
+
+  static JSClassID classId();
 
   JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
 
@@ -102,6 +105,8 @@ public:
   std::string tagName();
   std::string getRegisteredTagName();
 
+  static inline JSClassID classID();
+
 private:
   explicit ElementInstance(Element *element, const char* tagName, bool shouldAddUICommand);
   void _notifyNodeRemoved(NodeInstance *node) override;
@@ -118,18 +123,10 @@ private:
 
   static JSValue getProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
                                  JSValueConst receiver);
-  int setProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
+  static int setProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
                       JSValueConst value, JSValueConst receiver, int flags);
 
-  JSClassExoticMethods exoticMethods{
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    getProperty,
-    nullptr
-  };
+  static JSClassExoticMethods exoticMethods;
 };
 
 class BoundingClientRect : public HostObject {

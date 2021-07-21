@@ -18,12 +18,16 @@ class WindowInstance;
 
 class Window : public EventTarget {
 public:
+  static JSClassID kWindowClassId;
+
+  static JSClassID classId();
+
   static JSValue open(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue scrollTo(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue scrollBy(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
 
   Window() = delete;
-  explicit Window(JSContext *context): EventTarget(context, "Window") {};
+  explicit Window(JSContext *context);
 
   OBJECT_INSTANCE(Window);
 private:

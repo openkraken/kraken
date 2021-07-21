@@ -14,6 +14,7 @@ extern "C" {
 
 uint16_t *JS_ToUnicode(JSContext *ctx, JSValueConst value, uint32_t *length);
 JSValue JS_NewUnicodeString(JSRuntime *runtime, JSContext *ctx, const uint16_t *code, uint32_t length);
+JSClassID JSValueGetClassId(JSValue);
 
 #ifdef __cplusplus
 }

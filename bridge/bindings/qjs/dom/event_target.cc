@@ -6,11 +6,13 @@
 #include "event_target.h"
 #include "event.h"
 #include "kraken_bridge.h"
+#include "bindings/qjs/qjs_patch.h"
+#include "element.h"
+#include "document.h"
 
 namespace kraken::binding::qjs {
 
 static std::atomic<int32_t> globalEventTargetId{0};
-std::once_flag kInitEventTargetOnceFlag;
 
 JSValue EventTarget::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   if (argc == 1) {
@@ -33,25 +35,29 @@ JSValue EventTarget::constructor(QjsContext *ctx, JSValue func_obj, JSValue this
 
     JS_FreeValue(ctx, lengthValue);
   }
-  auto eventTarget = new EventTargetInstance(this, "EventTarget");
+  auto eventTarget = new EventTargetInstance(this, EventTarget::classId(), "EventTarget");
   return eventTarget->instanceObject;
 }
 
-void EventTarget::_initClassId() {
-  std::call_once(kInitEventTargetOnceFlag, []() {
-    JS_NewClassID(&kEventTargetClassID);
-  });
+JSClassID EventTarget::classId() {
+  assert_m(false, "classId is not implemented");
 }
 
-JSClassID EventTarget::kEventTargetClassID{0};
+JSClassID EventTarget::classId(JSValue &value) {
+  JSClassID classId = JSValueGetClassId(value);
+  if (classId == Element::classId() || Document::classId()) {
+    return classId;
+  }
+
+  assert_m(false, "can not identify value type.");
+}
 
 JSValue EventTarget::addEventListener(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (argc < 2) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: type and listener are required.");
   }
 
-  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val,
-                                                                              EventTarget::kEventTargetClassID));
+  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val, EventTarget::classId(this_val)));
   if (eventTargetInstance == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
@@ -71,7 +77,7 @@ JSValue EventTarget::addEventListener(QjsContext *ctx, JSValue this_val, int arg
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: callback should be an function.");
   }
 
-  const char* cEventType = JS_ToCString(ctx, eventTypeValue);
+  const char *cEventType = JS_ToCString(ctx, eventTypeValue);
   std::string eventType = std::string(cEventType);
 
   // Init list.
@@ -117,8 +123,7 @@ JSValue EventTarget::removeEventListener(QjsContext *ctx, JSValue this_val, int 
     return JS_ThrowTypeError(ctx, "Failed to removeEventListener: at least type and listener are required.");
   }
 
-  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val,
-                                                                              EventTarget::kEventTargetClassID));
+  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val, EventTarget::classId(this_val)));
   if (eventTargetInstance == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
@@ -138,7 +143,7 @@ JSValue EventTarget::removeEventListener(QjsContext *ctx, JSValue this_val, int 
     return JS_ThrowTypeError(ctx, "Failed to removeEventListener: callback should be an function.");
   }
 
-  const char* cEventType = JS_ToCString(ctx, eventTypeValue);
+  const char *cEventType = JS_ToCString(ctx, eventTypeValue);
   std::string eventType = std::string(cEventType);
   if (eventTargetInstance->_eventHandlers.count(eventType) == 0) {
     return JS_UNDEFINED;
@@ -184,14 +189,14 @@ JSValue EventTarget::dispatchEvent(QjsContext *ctx, JSValue this_val, int argc, 
   }
 
   auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val,
-                                                                              EventTarget::kEventTargetClassID));
+                                                                              EventTarget::classId(this_val)));
   if (eventTargetInstance == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
 
   JSValue &eventValue = argv[0];
   auto eventInstance = reinterpret_cast<EventInstance *>(JS_GetOpaque(eventValue,
-                                                                      EventTarget::kEventTargetClassID));
+                                                                      EventTarget::classId(eventValue)));
   return JS_NewBool(ctx, eventTargetInstance->dispatchEvent(eventInstance));
 }
 
@@ -251,7 +256,7 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
 
 JSValue EventTarget::__kraken_clear_event_listener(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val,
-                                                                              EventTarget::kEventTargetClassID));
+                                                                              EventTarget::classId(this_val)));
   if (eventTargetInstance == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
@@ -265,17 +270,24 @@ JSValue EventTarget::__kraken_clear_event_listener(QjsContext *ctx, JSValue this
   return JS_NULL;
 }
 
-EventTargetInstance::EventTargetInstance(EventTarget *eventTarget, JSClassExoticMethods &exoticMethods, const char* name) : Instance(
-  eventTarget, name, &exoticMethods, EventTarget::kEventTargetClassID,
+EventTargetInstance::EventTargetInstance(EventTarget *eventTarget, JSClassID classId,
+                                         JSClassExoticMethods &exoticMethods, const char *name) : Instance(
+  eventTarget, name, &exoticMethods, classId,
   finalize) {
   eventTargetId = globalEventTargetId++;
 }
 
-EventTargetInstance::EventTargetInstance(EventTarget *eventTarget, const char* name) : Instance(eventTarget, name,
-                                                                              nullptr,
-                                                                              EventTarget::kEventTargetClassID,
-                                                                              finalize) {
+EventTargetInstance::EventTargetInstance(EventTarget *eventTarget, JSClassID classId, const char *name) : Instance(
+  eventTarget,
+  name,
+  nullptr,
+  classId,
+  finalize) {
   eventTargetId = globalEventTargetId++;
+}
+
+JSClassID EventTargetInstance::classId() {
+  assert_m(false, "classId is not implemented");
 }
 
 EventTargetInstance::~EventTargetInstance() {}
@@ -301,8 +313,7 @@ JSValue EventTargetInstance::callNativeMethods(const char *method, int32_t argc,
 }
 
 void EventTargetInstance::finalize(JSRuntime *rt, JSValue val) {
-  auto *eventTarget = static_cast<EventTargetInstance *>(JS_GetOpaque(val, EventTarget::kEventTargetClassID));
-  KRAKEN_LOG(VERBOSE) << "finalize.." << eventTarget->m_name;
+  auto *eventTarget = static_cast<EventTargetInstance *>(JS_GetOpaque(val, EventTarget::classId(val)));
   if (eventTarget->context()->isValid()) {
     JS_FreeValue(eventTarget->m_ctx, eventTarget->instanceObject);
   }

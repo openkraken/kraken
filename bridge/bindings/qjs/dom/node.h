@@ -30,6 +30,10 @@ public:
 
   JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
 
+  static JSClassID classId();
+
+  static JSClassID classId(JSValue &value);
+
   static JSValue cloneNode(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue appendChild(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue remove(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
@@ -54,10 +58,10 @@ private:
 class NodeInstance : public EventTargetInstance {
 public:
   NodeInstance() = delete;
-  explicit NodeInstance(Node *node, NodeType nodeType, DocumentInstance *document, const char* name) : EventTargetInstance(node, name),
+  explicit NodeInstance(Node *node, NodeType nodeType, DocumentInstance *document, JSClassID classId, const char* name) : EventTargetInstance(node, classId, name),
                                                                                      m_document(document) {}
-  explicit NodeInstance(Node *node, NodeType nodeType, DocumentInstance *document, JSClassExoticMethods &exoticMethods, const char *name) :
-    EventTargetInstance(node, exoticMethods, name), m_document(document) {}
+  explicit NodeInstance(Node *node, NodeType nodeType, DocumentInstance *document, JSClassID classId, JSClassExoticMethods &exoticMethods, const char *name) :
+    EventTargetInstance(node, classId, exoticMethods, name), m_document(document) {}
   ~NodeInstance();
   bool isConnected();
   DocumentInstance *ownerDocument();

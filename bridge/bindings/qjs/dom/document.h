@@ -15,8 +15,12 @@ void bindDocument(std::unique_ptr<JSContext> &context);
 
 class Document : public Node {
 public:
+  static JSClassID kDocumentClassID;
+
   Document() = delete;
-  Document(JSContext *context) : Node(context, "Document") {}
+  Document(JSContext *context);
+
+  static JSClassID classId();
 
   JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
 

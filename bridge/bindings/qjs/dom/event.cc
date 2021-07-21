@@ -174,7 +174,7 @@ EventInstance::EventInstance(Event *jsEvent, std::string eventType, JSValue even
 }
 
 void EventInstance::finalizer(JSRuntime *rt, JSValue val) {
-  auto *event = static_cast<EventInstance *>(JS_GetOpaque(val, EventTarget::kEventTargetClassID));
+  auto *event = static_cast<EventInstance *>(JS_GetOpaque(val, Event::kEventClassID));
   if (event->context()->isValid()) {
     JS_FreeValue(event->m_ctx, event->instanceObject);
   }

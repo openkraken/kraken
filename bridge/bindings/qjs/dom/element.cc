@@ -12,12 +12,26 @@
 
 namespace kraken::binding::qjs {
 
+std::once_flag kElementInitOnceFlag;
+
 void bindElement(std::unique_ptr<JSContext> &context) {
   auto *constructor = Element::instance(context.get());
   context->defineGlobalProperty("Element", constructor->classObject);
 }
 
 OBJECT_INSTANCE_IMPL(Element);
+
+JSClassID Element::kElementClassId{0};
+
+Element::Element(JSContext *context): Node(context, "Element") {
+  std::call_once(kElementInitOnceFlag, []() {
+    JS_NewClassID(&kElementClassId);
+  });
+}
+
+JSClassID Element::classId() {
+  return kElementClassId;
+}
 
 static inline bool isNumberIndex(std::string &name) {
   if (name.empty()) return false;
@@ -95,7 +109,7 @@ JSValue Element::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val
 }
 
 JSValue Element::getBoundingClientRect(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
+  auto element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   getDartMethod()->flushUICommand();
   return element->callNativeMethods("getBoundingClientRect", 0, nullptr);
 }
@@ -112,7 +126,7 @@ JSValue Element::hasAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
     return JS_ThrowTypeError(ctx, "Failed to execute 'setAttribute' on 'Element': name attribute is not valid.");
   }
 
-  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   auto *attributes = element->m_attributes;
 
   const char *cname = JS_ToCString(ctx, nameValue);
@@ -138,7 +152,7 @@ JSValue Element::setAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
     return JS_ThrowTypeError(ctx, "Failed to execute 'setAttribute' on 'Element': name attribute is not valid.");
   }
 
-  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   std::string name = jsValueToStdString(ctx, nameValue);
   std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
@@ -177,7 +191,7 @@ JSValue Element::getAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
     return JS_ThrowTypeError(ctx, "Failed to execute 'setAttribute' on 'Element': name attribute is not valid.");
   }
 
-  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   std::string name = jsValueToStdString(ctx, nameValue);
 
   auto *attributes = element->m_attributes;
@@ -201,7 +215,7 @@ JSValue Element::removeAttribute(QjsContext *ctx, JSValue this_val, int argc, JS
     return JS_ThrowTypeError(ctx, "Failed to execute 'removeAttribute' on 'Element': name attribute is not valid.");
   }
 
-  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   std::string name = jsValueToStdString(ctx, nameValue);
   auto *attributes = element->m_attributes;
 
@@ -247,7 +261,7 @@ JSValue Element::toBlob(QjsContext *ctx, JSValue this_val, int argc, JSValue *ar
     return JS_ThrowTypeError(ctx, "Failed to export blob: dart method (toBlob) is not registered.");
   }
 
-  auto *element = reinterpret_cast<ElementInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
+  auto *element = reinterpret_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   getDartMethod()->flushUICommand();
   auto bridge = static_cast<JSBridge *>(element->m_context->getOwner());
 
@@ -335,7 +349,7 @@ void Element::defineElement(const std::string &tagName, ElementCreator creator) 
 }
 
 PROP_GETTER(Element, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   std::string tagName = element->tagName();
   return JS_NewString(ctx, tagName.c_str());
 }
@@ -343,7 +357,7 @@ PROP_GETTER(Element, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSVa
 PROP_SETTER(Element, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
 PROP_GETTER(Element, tagName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, EventTarget::kEventTargetClassID));
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   std::string tagName = element->tagName();
   return JS_NewString(ctx, tagName.c_str());
 }
@@ -402,6 +416,10 @@ PROP_GETTER(Element, children)(QjsContext *ctx, JSValue this_val, int argc, JSVa
 
 PROP_SETTER(Element, children)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
+JSClassID ElementInstance::classID() {
+  return Element::classId();
+}
+
 JSValue ElementInstance::getStringValueProperty(std::string &name) {
   return JSValue();
 }
@@ -443,13 +461,13 @@ ElementInstance::ElementInstance(Element *element, const char* tagName, bool sho
   NodeInstance(element, NodeType::ELEMENT_NODE,
                DocumentInstance::instance(
                  Document::instance(
-                   element->m_context)), exoticMethods, tagName) {
+                   element->m_context)), Element::classId(), exoticMethods, tagName) {
 
   m_attributes = new ElementAttributes(m_context);
   m_style = new StyleDeclarationInstance(CSSStyleDeclaration::instance(m_context), this);
 
-  JS_SetPropertyStr(m_ctx, instanceObject, "style", m_style->instanceObject);
-  JS_SetPropertyStr(m_ctx, instanceObject, "attributes", m_attributes->jsObject);
+  JS_DefinePropertyValueStr(m_ctx, instanceObject, "style", m_style->instanceObject, JS_PROP_NORMAL | JS_PROP_ENUMERABLE);
+  JS_DefinePropertyValueStr(m_ctx, instanceObject, "attributes", m_attributes->jsObject, JS_PROP_NORMAL | JS_PROP_ENUMERABLE);
 
   if (shouldAddUICommand) {
     std::string str = std::string(tagName);
@@ -459,8 +477,18 @@ ElementInstance::ElementInstance(Element *element, const char* tagName, bool sho
   }
 }
 
+JSClassExoticMethods ElementInstance::exoticMethods {
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  getProperty,
+  setProperty
+};
+
 JSValue ElementInstance::getProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSValue receiver) {
-  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(obj, EventTarget::kEventTargetClassID));
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(obj, Element::classId()));
   auto *prototype = static_cast<Element *>(element->prototype());
   if (JS_HasProperty(ctx, prototype->m_prototypeObject, atom)) {
     return JS_GetProperty(ctx, prototype->m_prototypeObject, atom);
@@ -471,6 +499,7 @@ JSValue ElementInstance::getProperty(QjsContext *ctx, JSValue obj, JSAtom atom, 
   return JS_NULL;
 }
 int ElementInstance::setProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver, int flags) {
+  KRAKEN_LOG(VERBOSE) << "setProperty: " << JS_AtomToCString(ctx, atom);
   return 0;
 }
 
