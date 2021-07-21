@@ -24,13 +24,15 @@ JSMessageEvent::JSMessageEvent(JSContext *context) : JSEvent(context, "MessageEv
 
 JSObjectRef JSMessageEvent::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                                 const JSValueRef *arguments, JSValueRef *exception) {
-  if (argumentCount != 1) {
+  if (argumentCount == 0) {
     throwJSError(ctx, "Failed to construct 'JSMessageEvent': 1 argument required, but only 0 present.", exception);
     return nullptr;
   }
 
-  JSStringRef dataStringRef = JSValueToStringCopy(ctx, arguments[0], exception);
-  auto event = new MessageEventInstance(this, dataStringRef);
+  JSStringRef eventTypeStringRef = JSValueToStringCopy(ctx, arguments[0], exception);
+  std::string eventType = JSStringToStdString(eventTypeStringRef);
+  JSValueRef dataRef = arguments[1];
+  auto event = new MessageEventInstance(this, eventType, dataRef);
   return event->object;
 }
 
@@ -40,13 +42,40 @@ JSValueRef JSMessageEvent::getProperty(std::string &name, JSValueRef *exception)
 
 MessageEventInstance::MessageEventInstance(JSMessageEvent *jsMessageEvent, NativeMessageEvent *nativeMessageEvent)
   : EventInstance(jsMessageEvent, nativeMessageEvent->nativeEvent), nativeMessageEvent(nativeMessageEvent) {
-  if (nativeMessageEvent->data != nullptr) m_data.setString(nativeMessageEvent->data);
+  if (nativeMessageEvent->data != nullptr) {
+    JSStringRef dataRef = JSStringCreateWithCharacters(nativeMessageEvent->data->string, nativeMessageEvent->data->length);
+
+    m_data.setString(JSValueCreateJSONString(ctx, JSValueMakeString(ctx, dataRef), 0, nullptr));
+  }
   if (nativeMessageEvent->origin != nullptr) m_origin.setString(nativeMessageEvent->origin);
 }
 
-MessageEventInstance::MessageEventInstance(JSMessageEvent *jsMessageEvent, JSStringRef data)
-  : EventInstance(jsMessageEvent, "message", nullptr, nullptr) {
+MessageEventInstance::MessageEventInstance(JSMessageEvent *jsMessageEvent, std::string eventType, JSValueRef eventInitValueRef)
+  : EventInstance(jsMessageEvent, eventType, nullptr, nullptr) {
   nativeMessageEvent = new NativeMessageEvent(nativeEvent);
+
+  JSObjectRef eventInitObjRef = JSValueToObject(ctx, eventInitValueRef, nullptr);
+
+  JSStringRef strData = JSStringCreateWithUTF8CString("data");
+  JSValueRef data = JSObjectGetProperty(ctx, eventInitObjRef, strData, nullptr);
+
+  if (data != nullptr && !JSValueIsUndefined(ctx, data)) {
+    std::string aaa = JSStringToStdString(JSValueToStringCopy(ctx, data, nullptr));
+    KRAKEN_LOG(VERBOSE) << "aaa";
+    KRAKEN_LOG(VERBOSE) << aaa;
+  //    m_data.setString(JSValueToStringCopy(ctx, data, nullptr));
+    m_data.setString(JSValueCreateJSONString(ctx, data, 0 ,nullptr));
+  }
+
+  JSStringRef strOrigin = JSStringCreateWithUTF8CString("origin");
+  JSValueRef origin = JSObjectGetProperty(ctx, eventInitObjRef, strOrigin, nullptr);
+
+//  std::string bbb = JSStringToStdString(JSValueToStringCopy(ctx, origin, nullptr));
+//  KRAKEN_LOG(VERBOSE) << "bbb";
+//  KRAKEN_LOG(VERBOSE) << bbb;
+  if (origin != nullptr && !JSValueIsUndefined(ctx, origin)) {
+    m_origin.setString(JSValueToStringCopy(ctx, origin, nullptr));
+  }
 }
 
 JSValueRef MessageEventInstance::getProperty(std::string &name, JSValueRef *exception) {
@@ -58,7 +87,7 @@ JSValueRef MessageEventInstance::getProperty(std::string &name, JSValueRef *exce
 
   switch(property) {
   case JSMessageEvent::MessageEventProperty::data:
-    return m_data.makeString();
+    return JSValueMakeFromJSONString(ctx, m_data.getString());
   case JSMessageEvent::MessageEventProperty::origin:
     return m_origin.makeString();
   }
@@ -90,9 +119,15 @@ bool MessageEventInstance::setProperty(std::string &name, JSValueRef value, JSVa
 }
 
 MessageEventInstance::~MessageEventInstance() {
-  nativeMessageEvent->data->free();
-  nativeMessageEvent->origin->free();
-  delete nativeMessageEvent;
+//  if (nativeMessageEvent != nullptr) {
+//    if (nativeMessageEvent->data->string != nullptr) {
+//      nativeMessageEvent->data->free();
+//    }
+//    if (nativeMessageEvent->origin->string != nullptr) {
+//      nativeMessageEvent->origin->free();
+//    }
+//    delete nativeMessageEvent;
+//  }
 }
 
 void MessageEventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
