@@ -83,10 +83,13 @@ public:
 protected:
   NativeEventTarget nativeEventTarget{this};
   int32_t eventTargetId;
-private:
-  bool internalDispatchEvent(EventInstance *eventInstance);
   std::unordered_map<std::string, std::forward_list<JSValue>> _eventHandlers;
   std::unordered_map<std::string, JSValue> _propertyEventHandler;
+
+  void setPropertyHandler(std::string &name, JSValue value);
+  JSValue getPropertyHandler(std::string &name);
+private:
+  bool internalDispatchEvent(EventInstance *eventInstance);
   static void finalize(JSRuntime *rt, JSValue val);
   friend EventTarget;
   friend StyleDeclarationInstance;

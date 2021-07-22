@@ -312,6 +312,55 @@ JSValue EventTargetInstance::callNativeMethods(const char *method, int32_t argc,
   return returnValue;
 }
 
+void EventTargetInstance::setPropertyHandler(std::string &name, JSValue value) {
+  std::string eventType = name.substr(2);
+
+  // We need to remove previous eventHandler when setting new eventHandler with same eventType.
+  if (_propertyEventHandler.count(eventType) > 0) {
+    JSValue callback = _propertyEventHandler[eventType];
+    std::string privateKey = eventType + "_" + std::to_string(reinterpret_cast<int64_t>(JS_VALUE_GET_PTR(callback)));
+    JSAtom privateKeyAtom = JS_NewAtom(m_ctx, privateKey.c_str());
+    JS_DeleteProperty(m_ctx, instanceObject, privateKeyAtom, 0);
+    JS_FreeAtom(m_ctx, privateKeyAtom);
+    _propertyEventHandler.erase(eventType);
+  }
+
+  // When evaluate scripts like 'element.onclick = null', we needs to remove the event handlers callbacks
+  if (JS_IsNull(value)) {
+    return;
+  }
+
+  // Create strong reference between callback and eventTargetObject.
+  // So gc can mark this object and recycle it.
+  JSValue newCallback = JS_DupValue(m_ctx, value);
+  std::string privateKey = eventType + "_" + std::to_string(reinterpret_cast<int64_t>(JS_VALUE_GET_PTR(newCallback)));
+  JS_DefinePropertyValueStr(m_ctx, instanceObject, privateKey.c_str(), newCallback, JS_PROP_NORMAL);
+
+  _propertyEventHandler[eventType] = newCallback;
+
+  auto Event = reinterpret_cast<EventTarget *>(prototype());
+  auto isJsOnlyEvent = std::find(Event->m_jsOnlyEvents.begin(), Event->m_jsOnlyEvents.end(), name.substr(2)) !=
+                       Event->m_jsOnlyEvents.end();
+
+  if (isJsOnlyEvent) return;
+
+  if (_eventHandlers.empty()) {
+    int32_t contextId = m_context->getContextId();
+    NativeString *args_01 = stringToNativeString(eventType);
+    int32_t type = JS_IsFunction(m_ctx, value) ? UICommand::addEvent : UICommand::removeEvent;
+    foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetId, type, *args_01, nullptr);
+  }
+}
+
+JSValue EventTargetInstance::getPropertyHandler(std::string &name) {
+  std::string eventType = name.substr(2);
+
+  if (_propertyEventHandler.count(eventType) == 0) {
+    return JS_NULL;
+  }
+  return JS_DupValue(m_ctx, _propertyEventHandler[eventType]);
+}
+
 void EventTargetInstance::finalize(JSRuntime *rt, JSValue val) {
   auto *eventTarget = static_cast<EventTargetInstance *>(JS_GetOpaque(val, EventTarget::classId(val)));
   if (eventTarget->context()->isValid()) {

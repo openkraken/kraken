@@ -29,6 +29,7 @@ TEST(EventTarget, propertyEventHandler) {
   bool static logCalled = false;
   kraken::JSBridge::consoleMessageHandler = [](void *ctx, const std::string &message, int logLevel) {
     logCalled = true;
+    EXPECT_STREQ(message.c_str(), "ƒ () 1234");
   };
   auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
@@ -36,10 +37,13 @@ TEST(EventTarget, propertyEventHandler) {
   });
   auto &context = bridge->getContext();
   const char* code = "let div = document.createElement('div'); "
-                     "div.onclick = function() { console.log(1234); };"
-                     "console.log(div.onclick);";
+                     "div.onclick = function() { return 1234; };"
+                     "document.body.appendChild(div);"
+                     "let f = div.onclick;"
+                     "console.log(f, div.onclick());";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   delete bridge;
   EXPECT_EQ(errorCalled, false);
+  EXPECT_EQ(logCalled, true);
 }
 

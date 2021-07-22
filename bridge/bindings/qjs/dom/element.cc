@@ -494,12 +494,35 @@ JSValue ElementInstance::getProperty(QjsContext *ctx, JSValue obj, JSAtom atom, 
     return JS_GetProperty(ctx, prototype->m_prototypeObject, atom);
   }
 
-  KRAKEN_LOG(VERBOSE) << "element getProperty " << JS_AtomToCString(ctx, atom);
+  const char* ckey = JS_AtomToCString(ctx, atom);
+  std::string key = std::string(ckey);
+  JS_FreeCString(ctx, ckey);
 
-  return JS_NULL;
+  if (key.substr(0, 2) == "on") {
+    return element->getPropertyHandler(key);
+  }
+
+  return JS_DupValue(ctx, element->m_properties[atom]);
 }
 int ElementInstance::setProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver, int flags) {
-  KRAKEN_LOG(VERBOSE) << "setProperty: " << JS_AtomToCString(ctx, atom);
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(obj, Element::classId()));
+  const char* ckey = JS_AtomToCString(ctx, atom);
+  std::string key = std::string(ckey);
+
+  if (key.substr(0, 2) == "on") {
+    element->setPropertyHandler(key, value);
+  } else {
+    JSValue newValue = JS_DupValue(ctx, value);
+
+    element->m_properties[atom] = newValue;
+
+    // Create strong reference and gc can find it.
+    std::string privateKey = "_" + std::to_string(reinterpret_cast<int64_t>(JS_VALUE_GET_PTR(newValue)));
+    JS_DefinePropertyValueStr(ctx, element->instanceObject, privateKey.c_str(), newValue, JS_PROP_NORMAL);
+  }
+
+  JS_FreeCString(ctx, ckey);
+
   return 0;
 }
 

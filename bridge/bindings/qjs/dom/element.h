@@ -121,6 +121,8 @@ private:
   StyleDeclarationInstance *m_style{nullptr};
   ElementAttributes *m_attributes{nullptr};
 
+  std::unordered_map<JSAtom, JSValue> m_properties;
+
   static JSValue getProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
                                  JSValueConst receiver);
   static int setProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
