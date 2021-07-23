@@ -424,7 +424,7 @@ JSValue ElementInstance::getStringValueProperty(std::string &name) {
   return JSValue();
 }
 
-std::string ElementInstance::internalGetTextContent() {
+JSValue ElementInstance::internalGetTextContent() {
   return NodeInstance::internalGetTextContent();
 }
 

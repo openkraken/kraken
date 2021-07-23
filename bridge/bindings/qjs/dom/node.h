@@ -73,7 +73,7 @@ public:
   void internalRemove();
   NodeInstance *internalRemoveChild(NodeInstance *node);
   JSValue internalInsertBefore(NodeInstance *node, NodeInstance *referenceNode);
-  virtual std::string internalGetTextContent();
+  virtual JSValue internalGetTextContent();
   virtual void internalSetTextContent(JSValue content);
   JSValue internalReplaceChild(NodeInstance *newChild, NodeInstance *oldChild);
 

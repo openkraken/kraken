@@ -21,6 +21,7 @@
 #include "bindings/qjs/dom/event.h"
 #include "bindings/qjs/dom/element.h"
 #include "bindings/qjs/dom/document.h"
+#include "bindings/qjs/dom/text_node.h"
 #include "bindings/qjs/dom/style_declaration.h"
 
 
@@ -76,7 +77,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 //  bindEventTarget(m_context);
   bindDocument(m_context);
 //  bindNode(m_context);
-//  bindTextNode(m_context);
+  bindTextNode(m_context);
 //  bindCommentNode(m_context);
   bindElement(m_context);
 //  bindImageElement(m_context);

@@ -95,7 +95,7 @@ public:
   ~ElementInstance() override {
   }
   JSValue getStringValueProperty(std::string &name);
-  std::string internalGetTextContent() override;
+  JSValue internalGetTextContent() override;
   void internalSetTextContent(JSValue content) override;
 //  JSHostObjectHolder<JSElementAttributes> &getAttributes();
 //  JSHostClassHolder &getStyle();

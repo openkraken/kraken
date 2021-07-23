@@ -320,8 +320,7 @@ PROP_SETTER(Node, nodeType)(QjsContext *ctx, JSValue this_val, int argc, JSValue
 
 PROP_GETTER(Node, textContent)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, Node::classId(this_val)));
-  std::string textContent = nodeInstance->internalGetTextContent();
-  return JS_NewString(ctx, textContent.c_str());
+  return nodeInstance->internalGetTextContent();
 }
 PROP_SETTER(Node, textContent)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, Node::classId(this_val)));
@@ -460,8 +459,8 @@ JSValue NodeInstance::internalInsertBefore(NodeInstance *node, NodeInstance *ref
 
   return JS_NULL;
 }
-std::string NodeInstance::internalGetTextContent() {
-  return "";
+JSValue NodeInstance::internalGetTextContent() {
+  return JS_NULL;
 }
 void NodeInstance::internalSetTextContent(JSValue content) {}
 JSValue NodeInstance::internalReplaceChild(NodeInstance *newChild, NodeInstance *oldChild) {
