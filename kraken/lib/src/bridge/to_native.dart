@@ -75,8 +75,8 @@ final DartInvokeEventListener _invokeModuleEvent =
 
 void invokeModuleEvent(int contextId, String moduleName, Event? event, String extra) {
   Pointer<NativeString> nativeModuleName = stringToNativeString(moduleName);
-  Pointer<Void> nativeEvent = event == null ? nullptr : event.toNative().cast<Void>();
-  _invokeModuleEvent(contextId, nativeModuleName, event == null ? nullptr : event.type.toNativeUtf8(), nativeEvent, stringToNativeString(extra));
+  Pointer<Void> rawEvent = event == null ? nullptr : event.toRaw().cast<Void>();
+  _invokeModuleEvent(contextId, nativeModuleName, event == null ? nullptr : event.type.toNativeUtf8(), rawEvent, stringToNativeString(extra));
   freeNativeString(nativeModuleName);
 }
 
@@ -86,10 +86,10 @@ typedef DartDispatchEvent = void Function(
 void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Event event) {
   Pointer<NativeEventTarget> nativeEventTarget = nativePtr;
   DartDispatchEvent dispatchEvent = nativeEventTarget.ref.dispatchEvent.asFunction();
-  Pointer<Void> nativeEvent = event.toNative().cast<Void>();
+  Pointer<Void> rawEvent = event.toRaw().cast<Void>();
   bool isCustomEvent = event is CustomEvent;
   Pointer<NativeString> eventTypeString = stringToNativeString(event.type);
-  dispatchEvent(nativeEventTarget, eventTypeString, nativeEvent, isCustomEvent ? 1 : 0);
+  dispatchEvent(nativeEventTarget, eventTypeString, rawEvent, isCustomEvent ? 1 : 0);
   freeNativeString(eventTypeString);
 }
 
@@ -281,7 +281,7 @@ const int args01StringMemOffset = 2;
 const int args02StringMemOffset = 3;
 const int nativePtrMemOffset = 4;
 
-final bool isEnabledLog = kDebugMode && Platform.environment['ENABLE_KRAKEN_JS_LOG'] == 'true';
+final bool isEnabledLog = true;
 
 // We found there are performance bottleneck of reading native memory with Dart FFI API.
 // So we align all UI instructions to a whole block of memory, and then convert them into a dart array at one time,

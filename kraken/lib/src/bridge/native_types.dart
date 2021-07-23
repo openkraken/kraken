@@ -17,143 +17,182 @@ class NativeKrakenInfo extends Struct {
   external Pointer<NativeFunction<NativeGetUserAgent>> getUserAgent;
 }
 
-class NativeEvent extends Struct {
-  external Pointer<NativeString> type;
-
+// For memory compatibility between NativeEvent and other struct which inherit NativeEvent(exp: NativeTouchEvent, NativeGestureEvent),
+// We choose to make all this structs have same memory layout. But dart lang did't provide semantically syntax to achieve this (like inheritance a class which extends Struct
+// or declare struct memory by value).
+// The only worked ways is use raw bytes to store NativeEvent members.
+class RawNativeEvent extends Struct {
+// Raw bytes represent the following fields.
+//   NativeString *type;
+//   int64_t bubbles;
+//   int64_t cancelable;
+//   int64_t timeStamp;
+//   int64_t defaultPrevented;
+//   void *target;
+//   void *currentTarget;
+  external Pointer<Uint64> bytes;
   @Int64()
-  external int bubbles;
-
-  @Int64()
-  external int cancelable;
-
-  @Int64()
-  external int timeStamp;
-
-  @Int64()
-  external int defaultPrevented;
-
-  external Pointer target;
-
-  external Pointer currentTarget;
+  external int length;
 }
 
-class NativeInputEvent extends Struct {
-  external Pointer<NativeEvent> nativeEvent;
-  external Pointer<NativeString> inputType;
-  external Pointer<NativeString> data;
+class RawNativeInputEvent extends Struct {
+// Raw bytes represent the following fields.
+//   NativeString *type;
+//   int64_t bubbles;
+//   int64_t cancelable;
+//   int64_t timeStamp;
+//   int64_t defaultPrevented;
+//   void *target;
+//   void *currentTarget;
+//   NativeString *inputType;
+//   NativeString *data
+  external Pointer<Uint64> bytes;
+  @Int64()
+  external int length;
 }
 
-class NativeMediaErrorEvent extends Struct {
-  external Pointer<NativeEvent> nativeEvent;
-
+class RawNativeMediaErrorEvent extends Struct {
+// Raw bytes represent the following fields.
+//   NativeString *type;
+//   int64_t bubbles;
+//   int64_t cancelable;
+//   int64_t timeStamp;
+//   int64_t defaultPrevented;
+//   void *target;
+//   void *currentTarget;
+//   int64_t code;
+//   NativeString *message;
+  external Pointer<Uint64> bytes;
   @Int64()
-  external int code;
-
-  external Pointer<NativeString> message;
+  external int length;
 }
 
-class NativeMessageEvent extends Struct {
-  external Pointer<NativeEvent> nativeEvent;
-
-  external Pointer<NativeString> data;
-  external Pointer<NativeString> origin;
+class RawNativeMessageEvent extends Struct {
+// Raw bytes represent the following fields.
+//   NativeString *type;
+//   int64_t bubbles;
+//   int64_t cancelable;
+//   int64_t timeStamp;
+//   int64_t defaultPrevented;
+//   void *target;
+//   void *currentTarget;
+//   NativeString *data;
+//   NativeString *origin;
+  external Pointer<Uint64> bytes;
+  @Int64()
+  external int length;
+}
+//
+class RawNativeCustomEvent extends Struct {
+// Raw bytes represent the following fields.
+//   NativeString *type;
+//   int64_t bubbles;
+//   int64_t cancelable;
+//   int64_t timeStamp;
+//   int64_t defaultPrevented;
+//   void *target;
+//   void *currentTarget;
+//   NativeString *detail;
+  external Pointer<Uint64> bytes;
+  @Int64()
+  external int length;
 }
 
-class NativeCustomEvent extends Struct {
-  external Pointer<NativeEvent> nativeEvent;
-
-  external Pointer<NativeString> detail;
+class RawNativeMouseEvent extends Struct {
+// Raw bytes represent the following fields.
+//   NativeString *type;
+//   int64_t bubbles;
+//   int64_t cancelable;
+//   int64_t timeStamp;
+//   int64_t defaultPrevented;
+//   void *target;
+//   void *currentTarget;
+//   double clientX;
+//   double clientY;
+//   double offsetX;
+//   double offsetY;
+  external Pointer<Uint64> bytes;
+  @Int64()
+  external int length;
 }
 
-class NativeMouseEvent extends Struct {
-  external Pointer<NativeEvent> nativeEvent;
-
-  @Double()
-  external double clientX;
-
-  @Double()
-  external double clientY;
-
-  @Double()
-  external double offsetX;
-
-  @Double()
-  external double offsetY;
+class RawNativeGestureEvent extends Struct {
+// Raw bytes represent the following fields.
+//   NativeString *type;
+//   int64_t bubbles;
+//   int64_t cancelable;
+//   int64_t timeStamp;
+//   int64_t defaultPrevented;
+//   void *target;
+//   void *currentTarget;
+//   NativeString *state;
+//   NativeString *direction;
+//   double deltaX;
+//   double deltaY;
+//   double velocityX;
+//   double velocityY;
+//   double scale;
+//   double rotation;
+  external Pointer<Uint64> bytes;
+  @Int64()
+  external int length;
 }
 
-class NativeGestureEvent extends Struct {
-  external Pointer<NativeEvent> nativeEvent;
-
-  external Pointer<NativeString> state;
-
-  external Pointer<NativeString> direction;
-
-  @Double()
-  external double deltaX;
-
-  @Double()
-  external double deltaY;
-
-  @Double()
-  external double velocityX;
-
-  @Double()
-  external double velocityY;
-
-  @Double()
-  external double scale;
-
-  @Double()
-  external double rotation;
+class RawNativeCloseEvent extends Struct {
+// Raw bytes represent the following fields.
+//   NativeString *type;
+//   int64_t bubbles;
+//   int64_t cancelable;
+//   int64_t timeStamp;
+//   int64_t defaultPrevented;
+//   void *target;
+//   void *currentTarget;
+//   int64_t code;
+//   NativeString *reason;
+//   int64_t wasClean;
+  external Pointer<Uint64> bytes;
+  @Int64()
+  external int length;
 }
 
-class NativeCloseEvent extends Struct {
-  external Pointer<NativeEvent> nativeEvent;
-
+class RawNativeIntersectionChangeEvent extends Struct {
+// Raw bytes represent the following fields.
+//   NativeString *type;
+//   int64_t bubbles;
+//   int64_t cancelable;
+//   int64_t timeStamp;
+//   int64_t defaultPrevented;
+//   void *target;
+//   void *currentTarget;
+//   double intersectionRatio;
+  external Pointer<Uint64> bytes;
   @Int64()
-  external int code;
-
-  external Pointer<NativeString> reason;
-
-  @Int64()
-  external int wasClean;
+  external int length;
 }
 
-class NativeIntersectionChangeEvent extends Struct {
-  external Pointer<NativeEvent> nativeEvent;
-
-  @Double()
-  external double intersectionRatio;
-}
-
-class NativeTouchEvent extends Struct {
-  external Pointer<NativeEvent> nativeEvent;
-
-  external Pointer<Pointer<NativeTouch>> touches;
+class RawNativeTouchEvent extends Struct {
+// Raw bytes represent the following fields.
+//   NativeString *type;
+//   int64_t bubbles;
+//   int64_t cancelable;
+//   int64_t timeStamp;
+//   int64_t defaultPrevented;
+//   void *target;
+//   void *currentTarget;
+//   double intersectionRatio;
+//   NativeTouch **touches;
+//   int64_t touchLength;
+//   NativeTouch **targetTouches;
+//   int64_t targetTouchLength;
+//   NativeTouch **changedTouches;
+//   int64_t changedTouchesLength;
+//   int64_t altKey;
+//   int64_t metaKey;
+//   int64_t ctrlKey;
+//   int64_t shiftKey;
+  external Pointer<Uint64> bytes;
   @Int64()
-  external int touchLength;
-
-  external Pointer<Pointer<NativeTouch>> targetTouches;
-
-  @Int64()
-  external int targetTouchesLength;
-
-  external Pointer<Pointer<NativeTouch>> changedTouches;
-
-  @Int64()
-  external int changedTouchesLength;
-
-  @Int64()
-  external int altKey;
-
-  @Int64()
-  external int metaKey;
-
-  @Int64()
-  external int ctrlKey;
-
-  @Int64()
-  external int shiftKey;
+  external int length;
 }
 
 class NativeTouch extends Struct {

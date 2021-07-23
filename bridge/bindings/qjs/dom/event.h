@@ -34,9 +34,7 @@ private:
 };
 
 struct NativeEvent {
-  NativeEvent() = delete;
-  explicit NativeEvent(NativeString *eventType) : type(eventType){};
-  NativeString *type;
+  NativeString *type{nullptr};
   int64_t bubbles{0};
   int64_t cancelable{0};
   int64_t timeStamp{0};
@@ -47,15 +45,21 @@ struct NativeEvent {
   void *currentTarget{nullptr};
 };
 
+struct RawEvent {
+  uint64_t *bytes;
+  int64_t length;
+};
+
+NativeEvent* rawEventToNativeEvent(RawEvent &rawEvent);
+
 class EventInstance : public Instance {
 public:
   EventInstance() = delete;
-  explicit EventInstance(Event *event, NativeEvent *nativeEvent);
-  explicit EventInstance(Event *jsEvent, std::string eventType, JSValue eventInit);
   ~EventInstance() override {
     delete nativeEvent;
   }
 
+  static EventInstance *fromNativeEvent(Event *event, NativeEvent *nativeEvent);
   NativeEvent *nativeEvent{nullptr};
 
   inline const bool propagationStopped() { return m_propagationStopped; }
@@ -63,6 +67,8 @@ public:
   inline void cancelled(bool v) { m_cancelled = v; }
   inline const bool propagationImmediatelyStopped() { return m_propagationImmediatelyStopped; }
 protected:
+  explicit EventInstance(Event *jsEvent, std::string eventType, JSValue eventInit);
+  explicit EventInstance(Event *jsEvent, NativeEvent *nativeEvent);
   bool m_cancelled{false};
   bool m_propagationStopped{false};
   bool m_propagationImmediatelyStopped{false};

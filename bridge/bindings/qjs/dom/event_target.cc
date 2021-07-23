@@ -377,13 +377,15 @@ void bindEventTarget(std::unique_ptr<JSContext> &context) {
 }
 
 void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *nativeEventType,
-                                          void *nativeEvent, int32_t isCustomEvent) {
+                                          void *rawEvent, int32_t isCustomEvent) {
   assert_m(nativeEventTarget->instance != nullptr, "NativeEventTarget should have owner");
   EventTargetInstance *eventTargetInstance = nativeEventTarget->instance;
   JSContext *context = eventTargetInstance->context();
   std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t *>(nativeEventType->string),
                                                nativeEventType->length);
   std::string eventType = toUTF8(u16EventType);
+  auto *raw = static_cast<RawEvent *>(rawEvent);
+  NativeEvent *nativeEvent = rawEventToNativeEvent(*raw);
   EventInstance *eventInstance = Event::buildEventInstance(eventType, context, nativeEvent, isCustomEvent == 1);
   eventInstance->nativeEvent->target = eventTargetInstance;
   eventTargetInstance->dispatchEvent(eventInstance);

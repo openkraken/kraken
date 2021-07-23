@@ -142,10 +142,26 @@ EventInstance *Event::buildEventInstance(std::string &eventType, JSContext *cont
   } else if (m_eventCreatorMap.count(eventType) > 0) {
     eventInstance = m_eventCreatorMap[eventType](context, nativeEvent);
   } else {
-    eventInstance = new EventInstance(Event::instance(context), reinterpret_cast<NativeEvent *>(nativeEvent));
+    eventInstance = EventInstance::fromNativeEvent(Event::instance(context), static_cast<NativeEvent *>(nativeEvent));
   }
 
   return eventInstance;
+}
+
+NativeEvent* rawEventToNativeEvent(RawEvent &rawEvent) {
+  return new NativeEvent{
+    reinterpret_cast<NativeString *>(rawEvent.bytes[0]),
+    static_cast<int64_t>(rawEvent.bytes[1]),
+    static_cast<int64_t>(rawEvent.bytes[2]),
+    static_cast<int64_t>(rawEvent.bytes[3]),
+    static_cast<int64_t>(rawEvent.bytes[4]),
+    reinterpret_cast<void *>(rawEvent.bytes[5]),
+    reinterpret_cast<void *>(rawEvent.bytes[6])
+  };
+}
+
+EventInstance * EventInstance::fromNativeEvent(Event *event, NativeEvent *nativeEvent) {
+  return new EventInstance(event, nativeEvent);
 }
 
 EventInstance::EventInstance(Event *event, NativeEvent *nativeEvent)
@@ -154,7 +170,9 @@ EventInstance::EventInstance(Event *jsEvent, std::string eventType, JSValue even
                                                                                                   nullptr,
                                                                                                   Event::kEventClassID,
                                                                                                   finalizer) {
-  nativeEvent = new NativeEvent(stringToNativeString(eventType));
+  nativeEvent = new NativeEvent{
+    stringToNativeString(eventType)
+  };
   auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
   nativeEvent->timeStamp = ms.count();
 

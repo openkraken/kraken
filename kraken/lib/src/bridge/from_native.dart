@@ -43,6 +43,18 @@ Pointer<NativeString> stringToNativeString(String string) {
   return nativeString;
 }
 
+int doubleToUint64(double value) {
+  var byteData = ByteData(8);
+  byteData.setFloat64(0, value);
+  return byteData.getUint64(0);
+}
+
+double uInt64ToDouble(int value) {
+  var byteData = ByteData(8);
+  byteData.setInt64(0, value);
+  return byteData.getFloat64(0);
+}
+
 String nativeStringToString(Pointer<NativeString> pointer) {
   return uint16ToString(pointer.ref.string, pointer.ref.length);
 }
