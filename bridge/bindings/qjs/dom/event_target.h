@@ -11,7 +11,7 @@
 #include "bindings/qjs/host_object.h"
 #include "bindings/qjs/js_context.h"
 #include "bindings/qjs/native_value.h"
-#include <forward_list>
+#include <deque>
 
 namespace kraken::binding::qjs {
 
@@ -83,7 +83,7 @@ public:
 protected:
   NativeEventTarget nativeEventTarget{this};
   int32_t eventTargetId;
-  std::unordered_map<std::string, std::forward_list<JSValue>> _eventHandlers;
+  std::unordered_map<std::string, std::deque<JSValue>> _eventHandlers;
   std::unordered_map<std::string, JSValue> _propertyEventHandler;
 
   void setPropertyHandler(std::string &name, JSValue value);

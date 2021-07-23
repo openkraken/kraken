@@ -82,13 +82,11 @@ JSValue EventTarget::addEventListener(QjsContext *ctx, JSValue this_val, int arg
 
   // Init list.
   if (eventTargetInstance->_eventHandlers.count(eventType) == 0) {
-    eventTargetInstance->_eventHandlers[eventType] = std::forward_list<JSValue>();
+    eventTargetInstance->_eventHandlers[eventType] = std::deque<JSValue>();
   }
 
-  JSValue &propertyHandlers = eventTargetInstance->_propertyEventHandler[eventType];
-
   // Dart needs to be notified for the first registration event.
-  if (eventTargetInstance->_eventHandlers[eventType].empty() || JS_IsFunction(ctx, propertyHandlers)) {
+  if (eventTargetInstance->_eventHandlers[eventType].empty() || eventTargetInstance->_propertyEventHandler.count(eventType) > 0) {
     int32_t contextId = eventTargetInstance->prototype()->contextId();
 
     NativeString args_01{};
@@ -104,7 +102,7 @@ JSValue EventTarget::addEventListener(QjsContext *ctx, JSValue this_val, int arg
     }
   }
 
-  std::forward_list<JSValue> &handlers = eventTargetInstance->_eventHandlers[eventType];
+  std::deque<JSValue> &handlers = eventTargetInstance->_eventHandlers[eventType];
   JSValue newCallback = JS_DupValue(ctx, callback);
 
   // Create strong reference between callback and eventTargetObject.
@@ -149,8 +147,8 @@ JSValue EventTarget::removeEventListener(QjsContext *ctx, JSValue this_val, int 
     return JS_UNDEFINED;
   }
 
-  std::forward_list<JSValue> &handlers = eventTargetInstance->_eventHandlers[eventType];
-  handlers.remove_if([&callback, &eventType, &ctx, &eventTargetInstance](JSValue function) {
+  std::deque<JSValue> &handlers = eventTargetInstance->_eventHandlers[eventType];
+  std::remove_if(handlers.begin(), handlers.end(), [&callback, &eventType, &ctx, &eventTargetInstance](JSValue function) {
     if (JS_VALUE_GET_PTR(function) == JS_VALUE_GET_PTR(callback)) {
       std::string privateKey = eventType + "_" + std::to_string(reinterpret_cast<int64_t>(JS_VALUE_GET_PTR(callback)));
       JSAtom privateKeyAtom = JS_NewAtom(ctx, privateKey.c_str());
@@ -161,8 +159,7 @@ JSValue EventTarget::removeEventListener(QjsContext *ctx, JSValue this_val, int 
     return false;
   });
 
-  JSValue &propertyHandler = eventTargetInstance->_propertyEventHandler[eventType];
-  if (handlers.empty() && JS_IsFunction(ctx, propertyHandler)) {
+  if (handlers.empty() && eventTargetInstance->_propertyEventHandler.count(eventType) > 0) {
     // Dart needs to be notified for handles is empty.
     int32_t contextId = eventTargetInstance->prototype()->contextId();
 
@@ -212,12 +209,12 @@ bool EventTargetInstance::dispatchEvent(EventInstance *event) {
 
   // Bubble event to root event target.
   if (event->nativeEvent->bubbles == 1 && !event->propagationStopped()) {
-//    auto node = reinterpret_cast<NodeInstance *>(event->nativeEvent->currentTarget);
-//    NodeInstance* parent = node->parentNode;
-//
-//    if (parent != nullptr) {
-//      parent->dispatchEvent(event);
-//    }
+    auto node = reinterpret_cast<NodeInstance *>(event->nativeEvent->currentTarget);
+    NodeInstance* parent = node->parentNode;
+
+    if (parent != nullptr) {
+      parent->dispatchEvent(event);
+    }
   }
 
   return event->cancelled();
