@@ -231,6 +231,8 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
       bindings/qjs/dom/document.h
       bindings/qjs/dom/text_node.cc
       bindings/qjs/dom/text_node.h
+      bindings/qjs/dom/comment_node.cc
+      bindings/qjs/dom/comment_node.h
       bindings/qjs/dom/style_declaration.cc
       bindings/qjs/dom/style_declaration.h
       bindings/qjs/dom/elements/canvas_element.cc

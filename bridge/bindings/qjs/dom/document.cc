@@ -5,6 +5,7 @@
 
 #include "document.h"
 #include "element.h"
+#include "text_node.h"
 #include "event.h"
 #include "dart_methods.h"
 
@@ -79,7 +80,13 @@ JSValue Document::createElement(QjsContext *ctx, JSValue this_val, int argc, JSV
 }
 
 JSValue Document::createTextNode(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  return JSValue();
+  if (argc != 1) {
+    return JS_ThrowTypeError(ctx, "Failed to execute 'createTextNode' on 'Document': 1 argument required, but only 0 present.");
+  }
+
+  auto *document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, Document::classId()));
+  JSValue textNode = JS_CallConstructor(ctx, TextNode::instance(document->m_context)->classObject, argc, argv);
+  return textNode;
 }
 JSValue Document::createComment(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JSValue();
