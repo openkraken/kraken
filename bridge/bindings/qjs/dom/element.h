@@ -94,7 +94,6 @@ public:
   ElementInstance() = delete;
   ~ElementInstance() override {
   }
-  JSValue getStringValueProperty(std::string &name);
   JSValue internalGetTextContent() override;
   void internalSetTextContent(JSValue content) override;
 //  JSHostObjectHolder<JSElementAttributes> &getAttributes();

@@ -6,10 +6,23 @@
 #include "document.h"
 #include "element.h"
 #include "text_node.h"
+#include "comment_node.h"
 #include "event.h"
 #include "dart_methods.h"
 
 namespace kraken::binding::qjs {
+
+void traverseNode(NodeInstance *node, TraverseHandler handler) {
+  bool shouldExit = handler(node);
+  if (shouldExit) return;
+
+  if (!node->childNodes.empty()) {
+    for (auto &n : node->childNodes) {
+      traverseNode(n, handler);
+    }
+  }
+}
+
 
 std::once_flag kDocumentInitOnceFlag;
 
@@ -31,7 +44,6 @@ Document::Document(JSContext *context) : Node(context, "Document") {
 JSClassID Document::classId() {
   return kDocumentClassID;
 }
-
 
 OBJECT_INSTANCE_IMPL(Document);
 
@@ -89,13 +101,67 @@ JSValue Document::createTextNode(QjsContext *ctx, JSValue this_val, int argc, JS
   return textNode;
 }
 JSValue Document::createComment(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  return JSValue();
+  auto *document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, Document::classId()));
+  JSValue commentNode = JS_CallConstructor(ctx, Comment::instance(document->m_context)->classObject, argc, argv);
+  return commentNode;
 }
 JSValue Document::getElementById(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  return JSValue();
+  if (argc < 1) {
+    return JS_ThrowTypeError(ctx, "Uncaught TypeError: Failed to execute 'getElementById' on 'Document': 1 argument required, but only 0 present.");
+  }
+
+  auto *document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, Document::classId()));
+  JSValue &idValue = argv[0];
+
+  if (!JS_IsString(idValue)) return JS_NULL;
+
+  JSAtom id = JS_ValueToAtom(ctx, idValue);
+
+  if (document->m_elementMapById.count(id) == 0) return JS_NULL;
+
+  auto targetElementList = document->m_elementMapById[id];
+  if (targetElementList.empty()) return JS_NULL;
+
+  for (auto &element : targetElementList) {
+    if (element->isConnected()) return element->instanceObject;
+  }
+
+  return JS_NULL;
 }
 JSValue Document::getElementsByTagName(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  return JSValue();
+  if (argc < 1) {
+    return JS_ThrowTypeError(ctx, "Uncaught TypeError: Failed to execute 'getElementsByTagName' on 'Document': 1 argument required, "
+                 "but only 0 present.");
+  }
+
+  auto *document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, Document::classId()));
+  JSValue &tagNameValue = argv[0];
+  std::string tagName = jsValueToStdString(ctx, tagNameValue);
+  std::transform(tagName.begin(), tagName.end(), tagName.begin(), ::toupper);
+
+  std::vector<ElementInstance *> elements;
+
+  traverseNode(document->m_documentElement, [tagName, &elements](NodeInstance *node) {
+    if (node->nodeType == NodeType::ELEMENT_NODE) {
+      auto element = static_cast<ElementInstance *>(node);
+      if (element->tagName() == tagName) {
+        elements.emplace_back(element);
+      }
+    }
+
+    return false;
+  });
+
+  JSValue array = JS_NewArray(ctx);
+  JSValue pushMethod = JS_GetPropertyStr(ctx, array, "push");
+
+  for (auto & element : elements) {
+    JSValue arguments[] = {
+      element->instanceObject
+    };
+    JS_Call(ctx, pushMethod, array, 1, arguments);
+  }
+  return array;
 }
 
 PROP_GETTER(Document, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
@@ -156,5 +222,6 @@ std::unordered_map<Document *, DocumentInstance *> DocumentInstance::m_instanceM
 DocumentInstance::~DocumentInstance() {
   JS_FreeValue(m_ctx, m_documentElement->instanceObject);
 }
+
 
 }

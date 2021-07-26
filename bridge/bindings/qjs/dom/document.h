@@ -13,6 +13,8 @@ namespace kraken::binding::qjs {
 
 void bindDocument(std::unique_ptr<JSContext> &context);
 
+using TraverseHandler = std::function<bool(NodeInstance *)>;
+
 class Document : public Node {
 public:
   static JSClassID kDocumentClassID;
@@ -60,7 +62,7 @@ public:
 private:
   //  void removeElementById(JSValueRef id, ElementInstance *element);
   //  void addElementById(JSValueRef id, ElementInstance *element);
-  //  std::unordered_map<std::string, std::vector<ElementInstance *>> elementMapById;
+  std::unordered_map<JSAtom, std::vector<ElementInstance *>> m_elementMapById;
   ElementInstance *m_documentElement{nullptr};
 
   friend Document;
