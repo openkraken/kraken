@@ -34,13 +34,13 @@ class ElementAttributes : public HostObject {
 public:
   ElementAttributes() = delete;
   explicit ElementAttributes(JSContext *context) : HostObject(context, "ElementAttributes") {}
-  ~ElementAttributes() {
-  };
+  ~ElementAttributes();
 
   JSValue getAttribute(std::string &name);
   JSValue setAttribute(std::string &name, JSValue value);
   bool hasAttribute(std::string &name);
   void removeAttribute(std::string &name);
+  void copyWith(ElementAttributes *attributes);
 
 private:
   std::unordered_map<std::string, JSValue> m_attributes;
@@ -97,7 +97,6 @@ public:
   JSValue internalGetTextContent() override;
   void internalSetTextContent(JSValue content) override;
 //  JSHostObjectHolder<JSElementAttributes> &getAttributes();
-//  JSHostClassHolder &getStyle();
 //  void setStyle(JSHostClassHolder &style);
 //  void setAttributes(JSHostObjectHolder<JSElementAttributes> &attributes);
 
@@ -117,6 +116,9 @@ private:
 
   const char* m_tagName;
   friend Element;
+  friend NodeInstance;
+  friend Node;
+  friend DocumentInstance;
   StyleDeclarationInstance *m_style{nullptr};
   ElementAttributes *m_attributes{nullptr};
 

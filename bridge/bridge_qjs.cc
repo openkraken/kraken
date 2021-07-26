@@ -77,7 +77,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 //  bindMessageEvent(m_context);
 //  bindEventTarget(m_context);
   bindDocument(m_context);
-//  bindNode(m_context);
+  bindNode(m_context);
   bindTextNode(m_context);
   bindCommentNode(m_context);
   bindElement(m_context);

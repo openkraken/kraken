@@ -15,6 +15,8 @@ void bindDocument(std::unique_ptr<JSContext> &context);
 
 using TraverseHandler = std::function<bool(NodeInstance *)>;
 
+void traverseNode(NodeInstance *node, TraverseHandler handler);
+
 class Document : public Node {
 public:
   static JSClassID kDocumentClassID;
@@ -60,12 +62,13 @@ public:
   }
 
 private:
-  //  void removeElementById(JSValueRef id, ElementInstance *element);
-  //  void addElementById(JSValueRef id, ElementInstance *element);
+  void removeElementById(JSValue id, ElementInstance *element);
+  void addElementById(JSValue id, ElementInstance *element);
   std::unordered_map<JSAtom, std::vector<ElementInstance *>> m_elementMapById;
   ElementInstance *m_documentElement{nullptr};
 
   friend Document;
+  friend ElementInstance;
   friend JSContext;
 };
 

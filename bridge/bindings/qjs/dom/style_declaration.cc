@@ -162,6 +162,12 @@ JSValue StyleDeclarationInstance::internalGetPropertyValue(std::string &name) {
   return properties[name];
 }
 
+void StyleDeclarationInstance::copyWith(StyleDeclarationInstance *instance) {
+  for(auto &attr : instance->properties) {
+    properties[attr.first] = JS_DupValue(m_ctx, attr.second);
+  }
+}
+
 int StyleDeclarationInstance::setProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver,
                                           int flags) {
   auto *style = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(receiver, CSSStyleDeclaration::kCSSStyleDeclarationClassId));

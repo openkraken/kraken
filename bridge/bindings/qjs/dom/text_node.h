@@ -33,10 +33,12 @@ class TextNodeInstance : public NodeInstance {
 public:
   TextNodeInstance() = delete;
   explicit TextNodeInstance(TextNode *textNode, JSValue textData);
+  ~TextNodeInstance();
 private:
   JSValue internalGetTextContent() override;
   void internalSetTextContent(JSValue content) override;
   friend TextNode;
+  friend Node;
 
   JSValue m_data{JS_NULL};
 };

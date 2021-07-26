@@ -25,6 +25,8 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     ./bindings/qjs/host_object_test.cc
     ./bindings/qjs/host_class_test.cc
     ./bindings/qjs/dom/event_target_test.cc
+    ./bindings/qjs/dom/element_test.cc
+    ./bindings/qjs/dom/document_test.cc
   )
 
   ### kraken_unit_test executable

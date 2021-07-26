@@ -10,6 +10,8 @@
 
 namespace kraken::binding::qjs {
 
+void bindNode(std::unique_ptr<JSContext> &context);
+
 enum NodeType {
   ELEMENT_NODE = 1,
   TEXT_NODE = 3,
@@ -20,13 +22,17 @@ enum NodeType {
 };
 
 class NodeInstance;
-
+class ElementInstance;
 class DocumentInstance;
+class TextNodeInstance;
 
 class Node : public EventTarget {
 public:
   Node() = delete;
   Node(JSContext *context, const std::string &className) : EventTarget(context, className.c_str()) {}
+  Node(JSContext *context) : EventTarget(context, "Node") {}
+
+  OBJECT_INSTANCE(Node);
 
   JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
 
@@ -53,6 +59,8 @@ private:
 
   static void traverseCloneNode(QjsContext *ctx, NodeInstance *element, NodeInstance *parentElement);
   static JSValue copyNodeValue(QjsContext *ctx, NodeInstance *element);
+  friend ElementInstance;
+  friend TextNodeInstance;
 };
 
 class NodeInstance : public EventTargetInstance {
@@ -95,6 +103,7 @@ private:
   void ensureDetached(NodeInstance *node);
   friend DocumentInstance;
   friend Node;
+  friend ElementInstance;
   int32_t _referenceCount{0};
 };
 

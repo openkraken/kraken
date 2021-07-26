@@ -73,6 +73,11 @@ TextNodeInstance::TextNodeInstance(TextNode *textNode, JSValue text) : NodeInsta
   foundation::UICommandBuffer::instance(m_context->getContextId())
     ->addCommand(eventTargetId, UICommand::createTextNode, *args_01, &nativeEventTarget);
 }
+
+TextNodeInstance::~TextNodeInstance() {
+  JS_FreeValue(m_ctx, m_data);
+}
+
 JSValue TextNodeInstance::internalGetTextContent() {
   return m_data;
 }

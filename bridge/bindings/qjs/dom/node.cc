@@ -7,9 +7,17 @@
 #include "kraken_bridge.h"
 #include "element.h"
 #include "document.h"
+#include "text_node.h"
 #include "bindings/qjs/qjs_patch.h"
 
 namespace kraken::binding::qjs {
+
+void bindNode(std::unique_ptr<JSContext> &context) {
+  auto *constructor = Node::instance(context.get());
+  context->defineGlobalProperty("Node", constructor->classObject);
+}
+
+OBJECT_INSTANCE_IMPL(Node);
 
 JSValue Node::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   return JS_ThrowTypeError(ctx, "Illegal constructor");
@@ -54,12 +62,9 @@ JSValue Node::cloneNode(QjsContext *ctx, JSValue this_val, int argc, JSValue *ar
     }
     return rootNodeInstance->instanceObject;
   } else if (selfInstance->nodeType == NodeType::TEXT_NODE) {
-//    auto textNode = static_cast<JSTextNode::TextNodeInstance *>(selfInstance);
-//    JSValueRef newTextNodeRef = copyNodeValue(ctx, static_cast<NodeInstance *>(textNode));
-//    JSObjectRef newTextNodeObjectRef = JSValueToObject(ctx, newTextNodeRef, nullptr);
-//    auto newTextNodeObjectInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(newTextNodeObjectRef));
-//
-//    return newTextNodeObjectInstance->object;
+    auto textNode = static_cast<TextNodeInstance *>(selfInstance);
+    JSValue newTextNode = copyNodeValue(ctx, static_cast<NodeInstance *>(textNode));
+    return newTextNode;
   } else {
     return JS_NULL;
   }
@@ -186,7 +191,7 @@ void Node::traverseCloneNode(QjsContext *ctx, NodeInstance *element, NodeInstanc
     parentElement->internalAppendChild(newNodeInstance);
     // element node needs recursive child nodes.
     if (iter->nodeType == NodeType::ELEMENT_NODE) {
-//      traverseCloneNode(ctx, static_cast<ElementInstance *>(iter), static_cast<ElementInstance *>(newNodeInstance));
+      traverseCloneNode(ctx, static_cast<ElementInstance *>(iter), static_cast<ElementInstance *>(newNodeInstance));
     }
   }
 }
@@ -204,20 +209,10 @@ JSValue Node::copyNodeValue(QjsContext *ctx, NodeInstance *node) {
     auto *newElement = static_cast<ElementInstance *>(JS_GetOpaque(newElementValue, Node::classId(newElementValue)));
 
     /* copy attributes */
-//    JSStringHolder attributesStringHolder = JSStringHolder(element->document()->context, "attributes");
-//    JSValueRef attributeValueRef =
-//        JSObjectGetProperty(ctx, element->object, attributesStringHolder.getString(), nullptr);
-//    JSObjectRef attributeObjectRef = JSValueToObject(ctx, attributeValueRef, nullptr);
-//    auto mAttributes = reinterpret_cast<JSElementAttributes *>(JSObjectGetPrivate(attributeObjectRef));
-//
-//    std::map<std::string, JSValueRef> &attributesMap = mAttributes->getAttributesMap();
-//    std::vector<JSValueRef> &attributesVector = mAttributes->getAttributesVector();
-//
-//    (*newElement->getAttributes())->setAttributesMap(attributesMap);
-//    (*newElement->getAttributes())->setAttributesVector(attributesVector);
-//
-//    /* copy style */
-//    newElement->setStyle(element->getStyle());
+    newElement->m_attributes->copyWith(element->m_attributes);
+
+    /* copy style */
+    newElement->m_style->copyWith(element->m_style);
 
     std::string newNodeEventTargetId = std::to_string(newElement->eventTargetId);
     NativeString *args_01 = stringToNativeString(newNodeEventTargetId);
@@ -226,12 +221,12 @@ JSValue Node::copyNodeValue(QjsContext *ctx, NodeInstance *node) {
 
     return newElement->instanceObject;
   } else if (node->nodeType == TEXT_NODE) {
-//    JSTextNode::TextNodeInstance *textNode = reinterpret_cast<JSTextNode::TextNodeInstance *>(node);
-//
-//    std::string content = textNode->internalGetTextContent();
-//    auto newTextNodeInstance = new JSTextNode::TextNodeInstance(JSTextNode::instance(textNode->document()->context),
-//                                                                JSStringCreateWithUTF8CString(content.c_str()));
-//    return newTextNodeInstance->object;
+    auto *textNode = reinterpret_cast<TextNodeInstance *>(node);
+    JSValue textContent = textNode->internalGetTextContent();
+    JSValue arguments[] = {
+      textContent
+    };
+    return JS_CallConstructor(ctx, TextNode::instance(textNode->m_context)->classObject, 1, arguments);
   }
   return JS_NULL;
 }
@@ -284,7 +279,7 @@ PROP_GETTER(Node, childNodes)(QjsContext *ctx, JSValue this_val, int argc, JSVal
   JSValue arrayObject = JS_NewArray(ctx);
   size_t len = nodeInstance->childNodes.size();
   for (int i = 0; i < len; i ++) {
-    JS_SetPropertyUint32(ctx, arrayObject, i, nodeInstance->childNodes[i]->instanceObject);
+    JS_SetPropertyUint32(ctx, arrayObject, i, JS_DupValue(nodeInstance->m_ctx, nodeInstance->childNodes[i]->instanceObject));
   }
   return arrayObject;
 }
@@ -509,16 +504,14 @@ NodeInstance::~NodeInstance() {
 }
 
 void NodeInstance::refer() {
-  if (_referenceCount == 0) {
-    JS_DupValue(m_ctx, instanceObject);
-  }
-  _referenceCount++;
+  JS_DupValue(m_ctx, instanceObject);
 }
 void NodeInstance::unrefer() {
-  _referenceCount--;
-  if (_referenceCount == 0 && m_context->isValid()) {
-    JS_FreeValue(m_ctx, instanceObject);
-  }
+//  _referenceCount--;
+//  if (_referenceCount == 0 && m_context->isValid()) {
+//    JS_FreeValue(m_ctx, instanceObject);
+//  }
+  JS_FreeValue(m_ctx, instanceObject);
 }
 void NodeInstance::_notifyNodeRemoved(NodeInstance *node) {}
 void NodeInstance::_notifyNodeInsert(NodeInstance *node) {}

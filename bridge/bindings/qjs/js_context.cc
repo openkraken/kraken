@@ -161,7 +161,7 @@ void JSContext::defineGlobalProperty(const char *prop, JSValue value) {
 
 NativeString *jsValueToNativeString(QjsContext *ctx, JSValue &value) {
   if (!JS_IsString(value)) {
-    return nullptr;
+    value = JS_ToString(ctx, value);
   }
 
   uint32_t length;

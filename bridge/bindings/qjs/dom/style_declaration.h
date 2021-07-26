@@ -53,6 +53,8 @@ public:
   void internalRemoveProperty(std::string &name);
   JSValue internalGetPropertyValue(std::string &name);
 
+  void copyWith(StyleDeclarationInstance *instance);
+
 private:
   static int setProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
                       JSValueConst value, JSValueConst receiver, int flags);

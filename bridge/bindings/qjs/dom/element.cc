@@ -49,10 +49,14 @@ JSValue ElementAttributes::getAttribute(std::string &name) {
   return m_attributes[name];
 }
 
+ElementAttributes::~ElementAttributes() {
+  for (auto &attr : m_attributes) {
+    JS_FreeValue(m_ctx, attr.second);
+  }
+}
+
 JSValue ElementAttributes::setAttribute(std::string &name, JSValue value) {
   bool numberIndex = isNumberIndex(name);
-
-  JS_DupValue(m_ctx, value);
 
   if (numberIndex) {
     return JS_ThrowTypeError(m_ctx,
@@ -60,7 +64,7 @@ JSValue ElementAttributes::setAttribute(std::string &name, JSValue value) {
                              name.c_str());
   }
 
-  m_attributes[name] = value;
+  m_attributes[name] =  JS_DupValue(m_ctx, value);;
 
   return JS_NULL;
 }
@@ -79,6 +83,12 @@ void ElementAttributes::removeAttribute(std::string &name) {
   JSValue &value = m_attributes[name];
   JS_FreeValue(m_ctx, value);
   m_attributes.erase(name);
+}
+
+void ElementAttributes::copyWith(ElementAttributes *attributes) {
+  for (auto &attr : attributes->m_attributes) {
+    m_attributes[attr.first] = JS_DupValue(m_ctx, attr.second);
+  }
 }
 
 JSValue Element::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
@@ -507,7 +517,7 @@ PROP_GETTER(Element, children)(QjsContext *ctx, JSValue this_val, int argc, JSVa
   for (auto &childNode : element->childNodes) {
     if (childNode->nodeType == NodeType::ELEMENT_NODE) {
       JSValue arguments[] = {
-        childNode->instanceObject
+        JS_DupValue(element->m_ctx, childNode->instanceObject)
       };
       JS_Call(ctx, pushMethod, array, 1, arguments);
     }
@@ -537,21 +547,72 @@ std::string ElementInstance::getRegisteredTagName() {
   return std::string();
 }
 
-void ElementInstance::_notifyNodeRemoved(NodeInstance *node) {
-  NodeInstance::_notifyNodeRemoved(node);
+void ElementInstance::_notifyNodeRemoved(NodeInstance *insertionNode) {
+  if (insertionNode->isConnected()) {
+    traverseNode(this, [](NodeInstance *node) {
+      auto *Element = Element::instance(node->m_context);
+      if (node->prototype() == Element) {
+        auto element = reinterpret_cast<ElementInstance *>(node);
+        element->_notifyChildRemoved();
+      }
+
+      return false;
+    });
+  }
 }
 
-void ElementInstance::_notifyChildRemoved() {}
+void ElementInstance::_notifyChildRemoved() {
+  std::string id = "id";
+  if (m_attributes->hasAttribute(id)) {
+    JSValue v = m_attributes->getAttribute(id);
+    document()->removeElementById(v, this);
+  }
+}
 
 void ElementInstance::_notifyNodeInsert(NodeInstance *insertNode) {
-  NodeInstance::_notifyNodeInsert(insertNode);
+  if (insertNode->isConnected()) {
+    traverseNode(this, [](NodeInstance *node) {
+      auto *Element = Element::instance(node->m_context);
+      if (node->prototype() == Element) {
+        auto element = reinterpret_cast<ElementInstance *>(node);
+        element->_notifyChildInsert();
+      }
+
+      return false;
+    });
+  }
 }
 
-void ElementInstance::_notifyChildInsert() {}
+void ElementInstance::_notifyChildInsert() {
+  std::string idKey = "id";
+  if (m_attributes->hasAttribute(idKey)) {
+    JSValue v = m_attributes->getAttribute(idKey);
+    document()->addElementById(v, this);
+  }
+}
 
-void ElementInstance::_didModifyAttribute(std::string &name, JSValue &oldId, JSValue &newId) {}
+void ElementInstance::_didModifyAttribute(std::string &name, JSValue &oldId, JSValue &newId) {
+  if (name == "id") {
+    _beforeUpdateId(oldId, newId);
+  }
+}
 
-void ElementInstance::_beforeUpdateId(JSValue &oldId, JSValue &newId) {}
+void ElementInstance::_beforeUpdateId(JSValue &oldId, JSValue &newId) {
+  JSAtom oldIdAtom = JS_ValueToAtom(m_ctx, oldId);
+  JSAtom newIdAtom = JS_ValueToAtom(m_ctx, newId);
+
+  if (oldIdAtom == newIdAtom) {
+    return;
+  }
+
+  if (!JS_IsNull(oldId)) {
+    document()->removeElementById(oldId, this);
+  }
+
+  if (!JS_IsNull(newId)) {
+    document()->addElementById(newId, this);
+  }
+}
 
 ElementInstance::ElementInstance(Element *element, const char *tagName, bool shouldAddUICommand) :
   m_tagName(tagName),

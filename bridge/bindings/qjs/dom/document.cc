@@ -123,7 +123,7 @@ JSValue Document::getElementById(QjsContext *ctx, JSValue this_val, int argc, JS
   if (targetElementList.empty()) return JS_NULL;
 
   for (auto &element : targetElementList) {
-    if (element->isConnected()) return element->instanceObject;
+    if (element->isConnected()) return JS_DupValue(ctx, element->instanceObject);
   }
 
   return JS_NULL;
@@ -157,7 +157,7 @@ JSValue Document::getElementsByTagName(QjsContext *ctx, JSValue this_val, int ar
 
   for (auto & element : elements) {
     JSValue arguments[] = {
-      element->instanceObject
+      JS_DupValue(document->m_ctx, element->instanceObject)
     };
     JS_Call(ctx, pushMethod, array, 1, arguments);
   }
@@ -221,6 +221,26 @@ std::unordered_map<Document *, DocumentInstance *> DocumentInstance::m_instanceM
 
 DocumentInstance::~DocumentInstance() {
   JS_FreeValue(m_ctx, m_documentElement->instanceObject);
+}
+void DocumentInstance::removeElementById(JSValue id, ElementInstance *element) {
+  JSAtom atom = JS_ValueToAtom(m_ctx, id);
+  if (m_elementMapById.count(atom) > 0) {
+    auto &list = m_elementMapById[atom];
+    list.erase(std::find(list.begin(), list.end(), element));
+  }
+}
+void DocumentInstance::addElementById(JSValue id, ElementInstance *element) {
+  JSAtom atom = JS_ValueToAtom(m_ctx, id);
+  if (m_elementMapById.count(atom) == 0) {
+    m_elementMapById[atom] = std::vector<ElementInstance *>();
+  }
+
+  auto &list = m_elementMapById[atom];
+  auto it = std::find(list.begin(), list.end(), element);
+
+  if (it == list.end()) {
+    m_elementMapById[atom].emplace_back(element);
+  }
 }
 
 
