@@ -13,7 +13,7 @@ WindowInstance::WindowInstance(JSWindow *window)
   : EventTargetInstance(window, WINDOW_TARGET_ID), nativeWindow(new NativeWindow(nativeEventTarget)) {
   location_ = new JSLocation(context);
 
-  getDartMethod()->initWindow(window->contextId, nativeWindow);
+  getDartMethod(context->getOwner())->initWindow(window->contextId, nativeWindow);
 }
 
 WindowInstance::~WindowInstance() {
@@ -34,22 +34,22 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
 
     switch (property) {
     case WindowProperty::devicePixelRatio: {
-      if (getDartMethod()->devicePixelRatio == nullptr) {
+      if (getDartMethod(context->getOwner())->devicePixelRatio == nullptr) {
         throwJSError(context->context(),
                         "Failed to read devicePixelRatio: dart method (devicePixelRatio) is not register.", exception);
         return nullptr;
       }
 
-      double devicePixelRatio = getDartMethod()->devicePixelRatio(_hostClass->contextId);
+      double devicePixelRatio = getDartMethod(context->getOwner())->devicePixelRatio(_hostClass->contextId);
       return JSValueMakeNumber(context->context(), devicePixelRatio);
     }
     case WindowProperty::colorScheme: {
-      if (getDartMethod()->platformBrightness == nullptr) {
+      if (getDartMethod(context->getOwner())->platformBrightness == nullptr) {
         throwJSError(context->context(),
                         "Failed to read colorScheme: dart method (platformBrightness) not register.", exception);
         return nullptr;
       }
-      const NativeString *code = getDartMethod()->platformBrightness(_hostClass->contextId);
+      const NativeString *code = getDartMethod(context->getOwner())->platformBrightness(_hostClass->contextId);
       JSStringRef resultRef = JSStringCreateWithCharacters(code->string, code->length);
       return JSValueMakeString(context->context(), resultRef);
     }
@@ -65,11 +65,11 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
       return history;
     }
     case WindowProperty::scrollX: {
-      getDartMethod()->flushUICommand();
+      getDartMethod(context->getOwner())->flushUICommand();
       return JSValueMakeNumber(_hostClass->ctx, nativeWindow->scrollX(nativeWindow));
     }
     case WindowProperty::scrollY: {
-      getDartMethod()->flushUICommand();
+      getDartMethod(context->getOwner())->flushUICommand();
       return JSValueMakeNumber(_hostClass->ctx, nativeWindow->scrollY(nativeWindow));
     }
     }
@@ -139,9 +139,9 @@ JSValueRef JSWindow::scrollTo(JSContextRef ctx, JSObjectRef function, JSObjectRe
     y = JSValueToNumber(ctx, yValueRef, exception);
   }
 
-  getDartMethod()->flushUICommand();
   auto window = reinterpret_cast<WindowInstance *>(JSObjectGetPrivate(thisObject));
-  window->nativeWindow->scrollTo(window->nativeWindow, x, y);
+    getDartMethod(window->context->getOwner())->flushUICommand();
+    window->nativeWindow->scrollTo(window->nativeWindow, x, y);
 
   return nullptr;
 }
@@ -162,9 +162,9 @@ JSValueRef JSWindow::scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectRe
     y = JSValueToNumber(ctx, yValueRef, exception);
   }
 
-  getDartMethod()->flushUICommand();
   auto window = reinterpret_cast<WindowInstance *>(JSObjectGetPrivate(thisObject));
-  window->nativeWindow->scrollBy(window->nativeWindow, x, y);
+    getDartMethod(window->context->getOwner())->flushUICommand();
+    window->nativeWindow->scrollBy(window->nativeWindow, x, y);
 
   return nullptr;
 }

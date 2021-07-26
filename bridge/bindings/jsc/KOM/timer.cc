@@ -134,7 +134,7 @@ JSValueRef setTimeout(JSContextRef ctx, JSObjectRef function, JSObjectRef thisOb
     return nullptr;
   }
 
-  if (getDartMethod()->setTimeout == nullptr) {
+  if (getDartMethod(context->getOwner())->setTimeout == nullptr) {
     throwJSError(ctx, "Failed to execute 'setTimeout': dart method (setTimeout) is not registered.", exception);
     return nullptr;
   }
@@ -143,7 +143,7 @@ JSValueRef setTimeout(JSContextRef ctx, JSObjectRef function, JSObjectRef thisOb
   auto bridge = static_cast<JSBridge *>(context->getOwner());
   auto timerId = bridge->bridgeCallback->registerCallback<int32_t>(
     std::move(callbackContext), [&timeout](BridgeCallback::Context *callbackContext, int32_t contextId) {
-      return getDartMethod()->setTimeout(callbackContext, contextId, handleTransientCallback, timeout);
+      return getDartMethod(callbackContext->_context.getOwner())->setTimeout(callbackContext, contextId, handleTransientCallback, timeout);
     });
 
   // `-1` represents ffi error occurred.
@@ -191,7 +191,7 @@ JSValueRef setInterval(JSContextRef ctx, JSObjectRef function, JSObjectRef thisO
     return nullptr;
   }
 
-  if (getDartMethod()->setInterval == nullptr) {
+  if (getDartMethod(context->getOwner())->setInterval == nullptr) {
     throwJSError(ctx, "Failed to execute 'setInterval': dart method (setInterval) is not registered.", exception);
     return nullptr;
   }
@@ -201,7 +201,7 @@ JSValueRef setInterval(JSContextRef ctx, JSObjectRef function, JSObjectRef thisO
   auto bridge = static_cast<JSBridge *>(context->getOwner());
   auto timerId = bridge->bridgeCallback->registerCallback<int32_t>(
     std::move(callbackContext), [&timeout](BridgeCallback::Context *callbackContext, int32_t contextId) {
-      return getDartMethod()->setInterval(callbackContext, contextId, handlePersistentCallback, timeout);
+      return getDartMethod(callbackContext->_context.getOwner())->setInterval(callbackContext, contextId, handlePersistentCallback, timeout);
     });
 
   if (timerId == -1) {
@@ -228,12 +228,12 @@ JSValueRef clearTimeout(JSContextRef ctx, JSObjectRef function, JSObjectRef this
 
   auto id = static_cast<int32_t>(JSValueToNumber(ctx, timerIdValueRef, exception));
 
-  if (getDartMethod()->clearTimeout == nullptr) {
+  if (getDartMethod(context->getOwner())->clearTimeout == nullptr) {
     throwJSError(ctx, "Failed to execute 'clearTimeout': dart method (clearTimeout) is not registered.", exception);
     return nullptr;
   }
 
-  getDartMethod()->clearTimeout(context->getContextId(), id);
+  getDartMethod(context->getOwner())->clearTimeout(context->getContextId(), id);
   return nullptr;
 }
 
@@ -256,14 +256,14 @@ JSValueRef cancelAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObject
 
   auto id = static_cast<int32_t>(JSValueToNumber(ctx, requestIdValueRef, exception));
 
-  if (getDartMethod()->cancelAnimationFrame == nullptr) {
+  if (getDartMethod(context->getOwner())->cancelAnimationFrame == nullptr) {
     throwJSError(ctx,
                     "Failed to execute 'cancelAnimationFrame': dart method (cancelAnimationFrame) is not registered.",
                     exception);
     return nullptr;
   }
 
-  getDartMethod()->cancelAnimationFrame(context->getContextId(), id);
+  getDartMethod(context->getOwner())->cancelAnimationFrame(context->getContextId(), id);
 
   return nullptr;
 }
@@ -296,16 +296,16 @@ JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjec
   // the context pointer which will be pass by pointer address to dart code.
   auto callbackContext = std::make_unique<BridgeCallback::Context>(*context, callbackObjectRef, exception);
 
-  if (getDartMethod()->flushUICommand == nullptr) {
+  if (getDartMethod(context->getOwner())->flushUICommand == nullptr) {
     throwJSError(ctx,
                     "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.",
                     exception);
     return nullptr;
   }
   // Flush all pending ui messages.
-  getDartMethod()->flushUICommand();
+  getDartMethod(context->getOwner())->flushUICommand();
 
-  if (getDartMethod()->requestAnimationFrame == nullptr) {
+  if (getDartMethod(context->getOwner())->requestAnimationFrame == nullptr) {
     throwJSError(ctx,
                     "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) is not registered.",
                     exception);
@@ -315,7 +315,7 @@ JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjec
   auto bridge = static_cast<JSBridge *>(context->getOwner());
   int32_t requestId = bridge->bridgeCallback->registerCallback<int32_t>(
     std::move(callbackContext), [](BridgeCallback::Context *callbackContext, int32_t contextId) {
-      return getDartMethod()->requestAnimationFrame(callbackContext, contextId, handleRAFTransientCallback);
+      return getDartMethod(callbackContext->_context.getOwner())->requestAnimationFrame(callbackContext, contextId, handleRAFTransientCallback);
     });
 
   // `-1` represents some error occurred.

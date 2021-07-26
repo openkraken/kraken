@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ffi';
+import 'dart:isolate';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -129,14 +130,18 @@ void evaluateScripts(int contextId, String code, String url, int line) {
 }
 
 // Register initJsEngine
-typedef NativeInitJSContextPool = Void Function(Int32 poolSize);
-typedef DartInitJSContextPool = void Function(int poolSize);
+typedef NativeInitJSContextPool = Int32 Function(Int32 isolateHash, Int32 poolSize);
+typedef DartInitJSContextPool = int Function(int isolateHash, int poolSize);
 
 final DartInitJSContextPool _initJSContextPool =
     nativeDynamicLibrary.lookup<NativeFunction<NativeInitJSContextPool>>('initJSContextPool').asFunction();
 
-void initJSContextPool(int poolSize) {
-  _initJSContextPool(poolSize);
+int initJSContextPool(int poolSize) {
+  if(kDebugMode) {
+    print("KrakenTy initJSContextPool poolSize[$poolSize]");
+  }
+  int isolateHash = Isolate.current.hashCode;
+  return _initJSContextPool(isolateHash, poolSize);
 }
 
 typedef NativeDisposeContext = Void Function(Int32 contextId);
@@ -149,14 +154,18 @@ void disposeContext(int contextId) {
   _disposeContext(contextId);
 }
 
-typedef NativeAllocateNewContext = Int32 Function(Int32);
-typedef DartAllocateNewContext = int Function(int);
+typedef NativeAllocateNewContext = Int32 Function(Int32 isolateHash, Int32);
+typedef DartAllocateNewContext = int Function(int isolateHash, int);
 
 final DartAllocateNewContext _allocateNewContext =
     nativeDynamicLibrary.lookup<NativeFunction<NativeAllocateNewContext>>('allocateNewContext').asFunction();
 
 int allocateNewContext([int targetContextId = -1]) {
-  return _allocateNewContext(targetContextId);
+  int ret = _allocateNewContext(Isolate.current.hashCode, targetContextId);
+  if(kDebugMode) {
+    print("KrakenTy allocateNewContext[$ret]");
+  }
+  return ret;
 }
 
 // Regisdster reloadJsContext

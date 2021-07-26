@@ -9,12 +9,12 @@
 namespace kraken::binding::jsc {
 
 JSValueRef JSScreen::getProperty(std::string &name, JSValueRef *exception) {
-  if (getDartMethod()->getScreen == nullptr) {
+  if (getDartMethod(context->getOwner())->getScreen == nullptr) {
     throwJSError(context->context(), "Failed to read screen: dart method (getScreen) is not registered.", exception);
     return nullptr;
   }
 
-  Screen *screen = getDartMethod()->getScreen(context->getContextId());
+  Screen *screen = getDartMethod(context->getOwner())->getScreen(context->getContextId());
 
   if (name == "width" || name == "availWidth") {
     return JSValueMakeNumber(context->context(), screen->width);

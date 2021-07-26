@@ -4,15 +4,40 @@
  */
 
 #include "dart_methods.h"
-#include "kraken_bridge.h"
+#include "bridge_jsc.h"
 #include <memory>
 
 namespace kraken {
 
-std::shared_ptr<DartMethodPointer> methodPointer = std::make_shared<DartMethodPointer>();
+    std::unordered_map<int32_t, std::shared_ptr<DartMethodPointer>> methodPointerMap{};
 
-std::shared_ptr<DartMethodPointer> getDartMethod() {
+std::shared_ptr<DartMethodPointer> getDartMethod(void* owner) {
+    auto bridge = static_cast<kraken::JSBridge*>(owner);
+    int32_t isolateHash = bridge->isolateHash;
+    if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+        KRAKEN_LOG(VERBOSE) << "getDartMethod(void* owner)  bridge::--> " << bridge << std::endl;
+        KRAKEN_LOG(VERBOSE) << "getDartMethod(void* owner)  bridge::-->isolateHash " << bridge->isolateHash << std::endl;
+    }
+
+  return getDartMethod(isolateHash);
+}
+
+std::shared_ptr<DartMethodPointer> getDartMethod(int32_t isolateHash) {
   std::__thread_id currentThread = std::this_thread::get_id();
+    std::shared_ptr<DartMethodPointer> methodPointer;
+    if(methodPointerMap[isolateHash] == NULL){
+        if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+            KRAKEN_LOG(VERBOSE) << "getDartMethod create isolateHash::--> " << isolateHash << std::endl;
+        }
+        std::shared_ptr<DartMethodPointer> sharedPtr = std::make_shared<DartMethodPointer>();
+        if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+            KRAKEN_LOG(VERBOSE)<< "getDartMethod create std::shared_ptr<DartMethodPointer> sharedPtr:: " << sharedPtr << std::endl;
+        }
+        methodPointerMap[isolateHash] = sharedPtr;
+        methodPointer = methodPointerMap[isolateHash];
+    } else {
+        methodPointer = methodPointerMap[isolateHash];
+    }
 
 #ifndef NDEBUG
   // Dart methods can only invoked from Flutter UI threads. Javascript Debugger like Safari Debugger can invoke
@@ -20,14 +45,25 @@ std::shared_ptr<DartMethodPointer> getDartMethod() {
   // @TODO: implement task loops for async method call.
   if (currentThread != getUIThreadId()) {
     // return empty struct to stop further behavior.
-    return std::make_shared<DartMethodPointer>();
+      if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+          KRAKEN_LOG(VERBOSE)<< "getDartMethod(int32_t isolateHash) getUIThreadId():: " << getUIThreadId() << std::endl;
+          KRAKEN_LOG(VERBOSE)<< "getDartMethod(int32_t isolateHash) currentThread != getUIThreadId() true:: methodPointer" << methodPointer<< std::endl;
+      }
+      //@todo !!!!!!
+//    return std::make_shared<DartMethodPointer>();
   }
 #endif
 
   return methodPointer;
 }
 
-void registerDartMethods(uint64_t *methodBytes, int32_t length) {
+void registerDartMethods(int32_t isolateHash, uint64_t *methodBytes, int32_t length) {
+    std::shared_ptr<DartMethodPointer> methodPointer = getDartMethod(isolateHash);
+    if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+        KRAKEN_LOG(VERBOSE) << "registerDartMethods: isolateHash---->>> : " << isolateHash << std::endl;
+        KRAKEN_LOG(VERBOSE) << "registerDartMethods: methodPointer: " << methodPointer << std::endl;
+        KRAKEN_LOG(VERBOSE) << "registerDartMethods: methodBytes:" << methodBytes << std::endl;
+    }
   size_t i = 0;
 
   methodPointer->invokeModule = reinterpret_cast<InvokeModule>(methodBytes[i++]);
@@ -61,6 +97,8 @@ void registerDartMethods(uint64_t *methodBytes, int32_t length) {
 
 void registerTestEnvDartMethods(uint64_t *methodBytes, int32_t length) {
   size_t i = 0;
+    int32_t keyHash = 0;
+    std::shared_ptr<DartMethodPointer> methodPointer = getDartMethod(keyHash);
 
   methodPointer->onJsError = reinterpret_cast<OnJSError>(methodBytes[i++]);
   methodPointer->matchImageSnapshot = reinterpret_cast<MatchImageSnapshot>(methodBytes[i++]);

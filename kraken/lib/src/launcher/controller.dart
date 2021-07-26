@@ -172,6 +172,9 @@ class KrakenViewController {
 
   void evaluateJavaScripts(String code, [String source = 'kraken://']) {
     assert(!_disposed, "Kraken have already disposed");
+    if (kDebugMode) {
+      print("KrakenTy evaluateScripts evaluateJavaScripts contextId[$contextId] url[$code]");
+    }
     evaluateScripts(_contextId, code, source, 0);
   }
 

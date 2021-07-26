@@ -44,9 +44,8 @@ int initBridge() {
   }
 
   if (_firstView) {
-    initJSContextPool(kKrakenJSBridgePoolSize);
+    contextId =  initJSContextPool(kKrakenJSBridgePoolSize);
     _firstView = false;
-    contextId = 0;
   } else {
     contextId = allocateNewContext();
     if (contextId == -1) {

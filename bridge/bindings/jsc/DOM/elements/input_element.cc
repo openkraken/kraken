@@ -33,11 +33,12 @@ JSObjectRef JSInputElement::instanceConstructor(JSContextRef ctx, JSObjectRef co
 
 JSValueRef JSInputElement::focus(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                  const JSValueRef *arguments, JSValueRef *exception) {
-  getDartMethod()->flushUICommand();
 
   auto elementInstance =
     static_cast<JSInputElement::InputElementInstance *>(JSObjectGetPrivate(thisObject));
-  assert_m(elementInstance->nativeInputElement->focus != nullptr,
+    getDartMethod(elementInstance->context->getOwner())->flushUICommand();
+
+    assert_m(elementInstance->nativeInputElement->focus != nullptr,
            "Failed to call dart method: focus() is nullptr");
   elementInstance->nativeInputElement->focus(elementInstance->nativeInputElement);
   return nullptr;
@@ -45,10 +46,11 @@ JSValueRef JSInputElement::focus(JSContextRef ctx, JSObjectRef function, JSObjec
 
 JSValueRef JSInputElement::blur(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                 const JSValueRef *arguments, JSValueRef *exception) {
-  getDartMethod()->flushUICommand();
 
   auto elementInstance =
     static_cast<JSInputElement::InputElementInstance *>(JSObjectGetPrivate(thisObject));
+    getDartMethod(elementInstance->context->getOwner())->flushUICommand();
+
   assert_m(elementInstance->nativeInputElement->blur != nullptr,
            "Failed to call dart method: blur() is nullptr");
   elementInstance->nativeInputElement->blur(elementInstance->nativeInputElement);
@@ -78,11 +80,11 @@ JSValueRef JSInputElement::InputElementInstance::getProperty(std::string &name, 
     auto &&property = propertyMap[name];
     switch (property) {
     case InputElementProperty::width: {
-      getDartMethod()->flushUICommand();
+      getDartMethod(context->getOwner())->flushUICommand();
       return JSValueMakeNumber(_hostClass->ctx, nativeInputElement->getInputWidth(nativeInputElement));
     }
     case InputElementProperty::height: {
-      getDartMethod()->flushUICommand();
+      getDartMethod(context->getOwner())->flushUICommand();
       return JSValueMakeNumber(_hostClass->ctx, nativeInputElement->getInputHeight(nativeInputElement));
     }
     default: {

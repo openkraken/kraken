@@ -33,13 +33,13 @@ JSValueRef JSLocation::reload(JSContextRef ctx, JSObjectRef function, JSObjectRe
                               const JSValueRef *arguments, JSValueRef *exception) {
   auto jsLocation = static_cast<JSLocation *>(JSObjectGetPrivate(function));
 
-  if (getDartMethod()->reloadApp == nullptr) {
+  if (getDartMethod(jsLocation->context->getOwner())->reloadApp == nullptr) {
     throwJSError(ctx, "Failed to execute 'reload': dart method (reloadApp) is not registered.", exception);
     return nullptr;
   }
 
-  getDartMethod()->flushUICommand();
-  getDartMethod()->reloadApp(jsLocation->context->getContextId());
+  getDartMethod(jsLocation->context->getOwner())->flushUICommand();
+  getDartMethod(jsLocation->context->getOwner())->reloadApp(jsLocation->context->getContextId());
 
   return nullptr;
 }

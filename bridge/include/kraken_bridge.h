@@ -84,11 +84,11 @@ typedef void (*Task)(void *);
 typedef void (*ConsoleMessageHandler)(void* ctx, const std::string &message, int logLevel);
 
 KRAKEN_EXPORT_C
-void initJSContextPool(int poolSize);
+int32_t initJSContextPool(int32_t isolateHash, int poolSize);
 KRAKEN_EXPORT_C
 void disposeContext(int32_t contextId);
 KRAKEN_EXPORT_C
-int32_t allocateNewContext(int32_t targetContextId);
+int32_t allocateNewContext(int32_t isolateHash, int32_t targetContextId);
 KRAKEN_EXPORT_C
 void *getJSContext(int32_t contextId);
 bool checkContext(int32_t contextId);
@@ -101,7 +101,7 @@ KRAKEN_EXPORT_C
 void invokeModuleEvent(int32_t contextId, NativeString *module, const char *eventType, void *event,
                        NativeString *extra);
 KRAKEN_EXPORT_C
-void registerDartMethods(uint64_t *methodBytes, int32_t length);
+void registerDartMethods(int32_t isolateHash, uint64_t *methodBytes, int32_t length);
 KRAKEN_EXPORT_C
 Screen *createScreen(double width, double height);
 KRAKEN_EXPORT_C

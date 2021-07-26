@@ -263,7 +263,7 @@ DocumentInstance::DocumentInstance(JSDocument *document)
                       documentElement->object, kJSPropertyAttributeReadOnly, nullptr);
 
   instanceMap[document->context] = this;
-  getDartMethod()->initDocument(contextId, nativeDocument);
+  getDartMethod(document->context->getOwner())->initDocument(contextId, nativeDocument);
 }
 
 JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exception) {

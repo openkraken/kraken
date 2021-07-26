@@ -136,10 +136,10 @@ JSValueRef JSCanvasElement::getContext(JSContextRef ctx, JSObjectRef function,
   NativeString contextId{};
   contextId.string = JSStringGetCharactersPtr(contextIdStringRef);
   contextId.length = JSStringGetLength(contextIdStringRef);
+    auto elementInstance = reinterpret_cast<JSCanvasElement::CanvasElementInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(elementInstance->context->getOwner())->flushUICommand();
 
-  auto elementInstance = reinterpret_cast<JSCanvasElement::CanvasElementInstance *>(JSObjectGetPrivate(thisObject));
   assert_m(elementInstance->nativeCanvasElement->getContext != nullptr,
            "Failed to call getContext(): dart method is nullptr");
   NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D =
@@ -229,7 +229,7 @@ bool CanvasRenderingContext2D::CanvasRenderingContext2DInstance::setProperty(std
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
-    getDartMethod()->flushUICommand();
+    getDartMethod(context->getOwner())->flushUICommand();
 
     switch (property) {
     case CanvasRenderingContext2DProperty::direction: {
@@ -402,7 +402,7 @@ JSValueRef CanvasRenderingContext2D::arc(JSContextRef ctx, JSObjectRef function,
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->arc != nullptr,
            "Failed to execute arc(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->arc(instance->nativeCanvasRenderingContext2D, x, y, radius, startAngle, endAngle, counterclockwise ? 1 : 0);
@@ -432,7 +432,7 @@ JSValueRef CanvasRenderingContext2D::arcTo(JSContextRef ctx, JSObjectRef functio
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->arcTo != nullptr,
            "Failed to execute arcTo(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->arcTo(instance->nativeCanvasRenderingContext2D, x1, y1, x2, y2, radius);
@@ -447,7 +447,7 @@ JSValueRef CanvasRenderingContext2D::beginPath(JSContextRef ctx, JSObjectRef fun
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->beginPath != nullptr,
            "Failed to execute beginPath(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->beginPath(instance->nativeCanvasRenderingContext2D);
@@ -477,7 +477,7 @@ JSValueRef CanvasRenderingContext2D::bezierCurveTo(JSContextRef ctx, JSObjectRef
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->bezierCurveTo != nullptr,
            "Failed to execute bezierCurveTo(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->bezierCurveTo(instance->nativeCanvasRenderingContext2D, cp1x, cp1y, cp2x, cp2y, x, y);
@@ -492,7 +492,7 @@ JSValueRef CanvasRenderingContext2D::closePath(JSContextRef ctx, JSObjectRef fun
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->closePath != nullptr,
            "Failed to execute closePath(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->closePath(instance->nativeCanvasRenderingContext2D);
@@ -522,7 +522,7 @@ JSValueRef CanvasRenderingContext2D::clip(JSContextRef ctx, JSObjectRef function
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->clip != nullptr,
            "Failed to execute clip(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->clip(instance->nativeCanvasRenderingContext2D, &fillRuleNativeString);
@@ -567,7 +567,7 @@ JSValueRef CanvasRenderingContext2D::drawImage(JSContextRef ctx, JSObjectRef fun
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->drawImage != nullptr,
            "Failed to execute drawImage(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->drawImage(instance->nativeCanvasRenderingContext2D,
@@ -608,7 +608,7 @@ JSValueRef CanvasRenderingContext2D::ellipse(JSContextRef ctx, JSObjectRef funct
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->ellipse != nullptr,
            "Failed to execute ellipse(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->ellipse(instance->nativeCanvasRenderingContext2D, x, y, radiusX, radiusY, rotation, startAngle, endAngle, counterclockwise ? 1 : 0);
@@ -639,7 +639,7 @@ JSValueRef CanvasRenderingContext2D::fill(JSContextRef ctx, JSObjectRef function
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->fill != nullptr,
            "Failed to execute fill(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->fill(instance->nativeCanvasRenderingContext2D, &fillRuleNativeString);
@@ -665,7 +665,7 @@ JSValueRef CanvasRenderingContext2D::translate(JSContextRef ctx, JSObjectRef fun
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->translate != nullptr,
            "Failed to execute translate(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->translate(instance->nativeCanvasRenderingContext2D, x, y);
@@ -693,7 +693,7 @@ JSValueRef CanvasRenderingContext2D::fillRect(JSContextRef ctx, JSObjectRef func
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->fillRect != nullptr,
            "Failed to execute fillRect(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->fillRect(instance->nativeCanvasRenderingContext2D, x, y, width, height);
@@ -722,7 +722,7 @@ JSValueRef CanvasRenderingContext2D::rect(JSContextRef ctx, JSObjectRef function
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->rect != nullptr,
            "Failed to execute rect(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->rect(instance->nativeCanvasRenderingContext2D, x, y, width, height);
@@ -748,7 +748,7 @@ JSValueRef CanvasRenderingContext2D::rotate(JSContextRef ctx, JSObjectRef functi
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->rotate != nullptr,
            "Failed to execute rotate(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->rotate(instance->nativeCanvasRenderingContext2D, angle);
@@ -777,7 +777,7 @@ JSValueRef CanvasRenderingContext2D::clearRect(JSContextRef ctx, JSObjectRef fun
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->clearRect != nullptr,
            "Failed to execute clearRect(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->clearRect(instance->nativeCanvasRenderingContext2D, x, y, width, height);
@@ -804,7 +804,7 @@ JSValueRef CanvasRenderingContext2D::strokeRect(
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->strokeRect != nullptr,
            "Failed to execute strokeRect(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->strokeRect(instance->nativeCanvasRenderingContext2D, x, y, width, height);
@@ -842,7 +842,7 @@ JSValueRef CanvasRenderingContext2D::fillText(JSContextRef ctx, JSObjectRef func
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->fillText != nullptr,
            "Failed to execute fillText(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->fillText(instance->nativeCanvasRenderingContext2D, &text, x, y, maxWidth);
@@ -868,7 +868,7 @@ JSValueRef CanvasRenderingContext2D::lineTo(JSContextRef ctx, JSObjectRef functi
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->lineTo != nullptr,
            "Failed to execute lineTo(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->lineTo(instance->nativeCanvasRenderingContext2D, x, y);
@@ -894,7 +894,7 @@ JSValueRef CanvasRenderingContext2D::moveTo(JSContextRef ctx, JSObjectRef functi
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->moveTo != nullptr,
            "Failed to execute moveTo(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->moveTo(instance->nativeCanvasRenderingContext2D, x, y);
@@ -920,7 +920,7 @@ JSValueRef CanvasRenderingContext2D::quadraticCurveTo(
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->quadraticCurveTo != nullptr,
            "Failed to execute quadraticCurveTo(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->quadraticCurveTo(instance->nativeCanvasRenderingContext2D, cpx, cpy, x, y);
@@ -956,7 +956,7 @@ JSValueRef CanvasRenderingContext2D::strokeText(
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->strokeText != nullptr,
            "Failed to execute strokeText(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->strokeText(instance->nativeCanvasRenderingContext2D, &text, x, y, maxWidth);
@@ -970,7 +970,7 @@ JSValueRef CanvasRenderingContext2D::save(JSContextRef ctx, JSObjectRef function
                                           JSValueRef *exception) {
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->save != nullptr,
            "Failed to execute save(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->save(instance->nativeCanvasRenderingContext2D);
@@ -985,7 +985,7 @@ JSValueRef CanvasRenderingContext2D::stroke(JSContextRef ctx, JSObjectRef functi
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->stroke != nullptr,
            "Failed to execute stroke(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->stroke(instance->nativeCanvasRenderingContext2D);
@@ -1012,7 +1012,7 @@ JSValueRef CanvasRenderingContext2D::scale(JSContextRef ctx, JSObjectRef functio
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->scale != nullptr,
            "Failed to execute scale(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->scale(instance->nativeCanvasRenderingContext2D, x, y);
@@ -1027,7 +1027,7 @@ JSValueRef CanvasRenderingContext2D::restore(JSContextRef ctx, JSObjectRef funct
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->restore != nullptr,
            "Failed to execute restore(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->restore(instance->nativeCanvasRenderingContext2D);
@@ -1042,7 +1042,7 @@ JSValueRef CanvasRenderingContext2D::resetTransform(JSContextRef ctx, JSObjectRe
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->resetTransform != nullptr,
            "Failed to execute resetTransform(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->resetTransform(instance->nativeCanvasRenderingContext2D);
@@ -1072,7 +1072,7 @@ JSValueRef CanvasRenderingContext2D::setTransform(JSContextRef ctx, JSObjectRef 
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->setTransform != nullptr,
            "Failed to execute setTransform(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->setTransform(instance->nativeCanvasRenderingContext2D, a, b, c, d, e, f);
@@ -1102,7 +1102,7 @@ JSValueRef CanvasRenderingContext2D::transform(JSContextRef ctx, JSObjectRef fun
   auto instance =
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
-  getDartMethod()->flushUICommand();
+  getDartMethod(instance->context->getOwner())->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->transform != nullptr,
            "Failed to execute transform(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->transform(instance->nativeCanvasRenderingContext2D, a, b, c, d, e, f);

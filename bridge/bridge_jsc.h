@@ -21,7 +21,7 @@ class JSBridge final {
 public:
   static ConsoleMessageHandler consoleMessageHandler;
   JSBridge() = delete;
-  JSBridge(int32_t jsContext, const JSExceptionHandler &handler);
+  JSBridge(int32_t isolateHash, int32_t jsContext, const JSExceptionHandler &handler);
   ~JSBridge();
 
   static std::unordered_map<std::string, NativeString> pluginSourceCode;
@@ -29,6 +29,7 @@ public:
   std::deque<JSObjectRef> krakenModuleListenerList;
 
   int32_t contextId;
+  int32_t isolateHash;
   foundation::BridgeCallback *bridgeCallback;
   // the owner pointer which take JSBridge as property.
   void *owner;

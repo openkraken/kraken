@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:isolate';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -374,8 +375,8 @@ final List<int> _dartNativeMethods = [
   _nativeOnJsError.address,
 ];
 
-typedef NativeRegisterDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);
-typedef DartRegisterDartMethods = void Function(Pointer<Uint64> methodBytes, int length);
+typedef NativeRegisterDartMethods = Void Function(Int32 isolateHash, Pointer<Uint64> methodBytes, Int32 length);
+typedef DartRegisterDartMethods = void Function(int isolateHash,Pointer<Uint64> methodBytes, int length);
 
 final DartRegisterDartMethods _registerDartMethods =
     nativeDynamicLibrary.lookup<NativeFunction<NativeRegisterDartMethods>>('registerDartMethods').asFunction();
@@ -384,5 +385,9 @@ void registerDartMethodsToCpp() {
   Pointer<Uint64> bytes = malloc.allocate<Uint64>(sizeOf<Uint64>() * _dartNativeMethods.length);
   Uint64List nativeMethodList = bytes.asTypedList(_dartNativeMethods.length);
   nativeMethodList.setAll(0, _dartNativeMethods);
-  _registerDartMethods(bytes, _dartNativeMethods.length);
+  //todo tobe remove
+  print('nativeMethodList[0]' + nativeMethodList[0].toString());
+  print('_dartNativeMethods[0]' + _dartNativeMethods[0].toString());
+  print('_nativeInvokeModule.address' + _nativeInvokeModule.address.toString());
+  _registerDartMethods(Isolate.current.hashCode, bytes, _dartNativeMethods.length);
 }

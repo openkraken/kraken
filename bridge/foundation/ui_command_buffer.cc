@@ -8,11 +8,11 @@
 
 namespace foundation {
 
-UICommandBuffer::UICommandBuffer(int32_t contextId) : contextId(contextId) {}
+UICommandBuffer::UICommandBuffer(int32_t contextId) : isolateHash(isolateHash), contextId(contextId) {}
 
 void UICommandBuffer::addCommand(int32_t id, int32_t type, void *nativePtr, bool batchedUpdate) {
   if (batchedUpdate) {
-    kraken::getDartMethod()->requestBatchUpdate(contextId);
+    kraken::getDartMethod(isolateHash)->requestBatchUpdate(contextId);
     update_batched = true;
   }
 
@@ -22,7 +22,7 @@ void UICommandBuffer::addCommand(int32_t id, int32_t type, void *nativePtr, bool
 
 void UICommandBuffer::addCommand(int32_t id, int32_t type, void *nativePtr) {
   if (!update_batched) {
-    kraken::getDartMethod()->requestBatchUpdate(contextId);
+    kraken::getDartMethod(isolateHash)->requestBatchUpdate(contextId);
     update_batched = true;
   }
 
@@ -32,7 +32,18 @@ void UICommandBuffer::addCommand(int32_t id, int32_t type, void *nativePtr) {
 
 void UICommandBuffer::addCommand(int32_t id, int32_t type, NativeString &args_01, void *nativePtr) {
   if (!update_batched) {
-    kraken::getDartMethod()->requestBatchUpdate(contextId);
+      void * bridge = getJSContext(contextId);
+      std::shared_ptr<kraken::DartMethodPointer> methodPointer = kraken::getDartMethod(isolateHash);
+      if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+          KRAKEN_LOG(VERBOSE)
+          << " addCommand(int32_t id, int32_t type, NativeString &args_01, void *nativePtr)  bridge::--> " << bridge
+          << std::endl;
+          KRAKEN_LOG(VERBOSE)
+          << " addCommand(int32_t id, int32_t type, NativeString &args_01, void *nativePtr)  methodPointer::--> "
+          << methodPointer << std::endl;
+      }
+
+    methodPointer->requestBatchUpdate(contextId);
     update_batched = true;
   }
 
@@ -43,7 +54,7 @@ void UICommandBuffer::addCommand(int32_t id, int32_t type, NativeString &args_01
 void UICommandBuffer::addCommand(int32_t id, int32_t type, NativeString &args_01, NativeString &args_02,
                                                 void *nativePtr) {
   if (!update_batched) {
-    kraken::getDartMethod()->requestBatchUpdate(contextId);
+    kraken::getDartMethod(getJSContext(contextId))->requestBatchUpdate(contextId);
     update_batched = true;
   }
   UICommandItem item{id, type, args_01, args_02, nativePtr};

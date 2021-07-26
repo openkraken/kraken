@@ -439,6 +439,10 @@ void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, 
   std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t *>(nativeEventType->string),
                                                nativeEventType->length);
   std::string eventType = toUTF8(u16EventType);
+        if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+            KRAKEN_LOG(VERBOSE) << "TYLOR dispatchEventImpl ::--> " << eventType << std::endl;
+        }
+
   EventInstance *eventInstance = JSEvent::buildEventInstance(eventType, context, nativeEvent, isCustomEvent == 1);
   eventInstance->nativeEvent->target = eventTargetInstance;
   eventTargetInstance->dispatchEvent(eventInstance);

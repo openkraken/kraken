@@ -112,14 +112,15 @@ JSValueRef krakenInvokeModule(JSContextRef ctx, JSObjectRef function, JSObjectRe
     callbackValueRef = JSValueToObject(ctx, arguments[3], exception);
   }
 
-  if (getDartMethod()->invokeModule == nullptr) {
+    std::unique_ptr<BridgeCallback::Context> callbackContext = nullptr;
+    auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
+
+  if (getDartMethod(context->getOwner())->invokeModule == nullptr) {
     throwJSError(ctx, "Failed to execute '__kraken_invoke_module__': dart method (invokeModule) is not registered.",
                  exception);
     return nullptr;
   }
 
-  std::unique_ptr<BridgeCallback::Context> callbackContext = nullptr;
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
 
   NativeString *moduleName = stringRefToNativeString(moduleNameStringRef);
   NativeString *method = stringRefToNativeString(methodStringRef);
@@ -142,12 +143,12 @@ JSValueRef krakenInvokeModule(JSContextRef ctx, JSObjectRef function, JSObjectRe
     result = bridge->bridgeCallback->registerCallback<NativeString *>(
       std::move(callbackContext),
       [moduleName, method, params](BridgeCallback::Context *bridgeContext, int32_t contextId) {
-        NativeString *response = getDartMethod()->invokeModule(bridgeContext, contextId, moduleName, method, params,
+        NativeString *response = getDartMethod(bridgeContext->_context.getOwner())->invokeModule(bridgeContext, contextId, moduleName, method, params,
                                                                handleInvokeModuleTransientCallback);
         return response;
       });
   } else {
-    result = getDartMethod()->invokeModule(callbackContext.get(), context->getContextId(), moduleName, method, params,
+    result = getDartMethod(context->getOwner())->invokeModule(callbackContext.get(), context->getContextId(), moduleName, method, params,
                                            handleInvokeModuleUnexpectedCallback);
   }
 
@@ -169,13 +170,15 @@ JSValueRef krakenInvokeModule(JSContextRef ctx, JSObjectRef function, JSObjectRe
 
 JSValueRef flushUICommand(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                           JSValueRef const *arguments, JSValueRef *exception) {
-  if (getDartMethod()->flushUICommand == nullptr) {
+    std::unique_ptr<BridgeCallback::Context> callbackContext = nullptr;
+    auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
+  if (getDartMethod(context->getOwner())->flushUICommand == nullptr) {
     throwJSError(ctx,
                  "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.",
                  exception);
     return nullptr;
   }
-  getDartMethod()->flushUICommand();
+  getDartMethod(context->getOwner())->flushUICommand();
   return nullptr;
 }
 
