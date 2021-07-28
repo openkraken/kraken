@@ -50,6 +50,25 @@ MessageEventInstance::MessageEventInstance(JSMessageEvent *jsMessageEvent, Nativ
   if (nativeMessageEvent->origin != nullptr) m_origin.setString(nativeMessageEvent->origin);
 }
 
+MessageEventInstance::MessageEventInstance(JSMessageEvent *jsMessageEvent, std::string eventType, JSValueRef data, JSValueRef origin)
+  : EventInstance(jsMessageEvent, eventType, nullptr, nullptr) {
+  nativeMessageEvent = new NativeMessageEvent(nativeEvent);
+
+  if (data != nullptr && !JSValueIsUndefined(ctx, data)) {
+    JSStringRef dataStringRef = JSValueCreateJSONString(ctx, data, 0 ,nullptr);
+    if (dataStringRef != nullptr) {
+      m_data.setString(dataStringRef);
+    }
+  }
+
+  if (origin != nullptr && !JSValueIsUndefined(ctx, origin)) {
+    JSStringRef originStringRef = JSValueToStringCopy(ctx, origin, nullptr);
+    if (originStringRef != nullptr) {
+      m_origin.setString(originStringRef);
+    }
+  }
+}
+
 MessageEventInstance::MessageEventInstance(JSMessageEvent *jsMessageEvent, std::string eventType, JSValueRef eventInitValueRef)
   : EventInstance(jsMessageEvent, eventType, nullptr, nullptr) {
   nativeMessageEvent = new NativeMessageEvent(nativeEvent);
@@ -60,19 +79,12 @@ MessageEventInstance::MessageEventInstance(JSMessageEvent *jsMessageEvent, std::
   JSValueRef data = JSObjectGetProperty(ctx, eventInitObjRef, strData, nullptr);
 
   if (data != nullptr && !JSValueIsUndefined(ctx, data)) {
-    std::string aaa = JSStringToStdString(JSValueToStringCopy(ctx, data, nullptr));
-    KRAKEN_LOG(VERBOSE) << "aaa";
-    KRAKEN_LOG(VERBOSE) << aaa;
-  //    m_data.setString(JSValueToStringCopy(ctx, data, nullptr));
     m_data.setString(JSValueCreateJSONString(ctx, data, 0 ,nullptr));
   }
 
   JSStringRef strOrigin = JSStringCreateWithUTF8CString("origin");
   JSValueRef origin = JSObjectGetProperty(ctx, eventInitObjRef, strOrigin, nullptr);
 
-//  std::string bbb = JSStringToStdString(JSValueToStringCopy(ctx, origin, nullptr));
-//  KRAKEN_LOG(VERBOSE) << "bbb";
-//  KRAKEN_LOG(VERBOSE) << bbb;
   if (origin != nullptr && !JSValueIsUndefined(ctx, origin)) {
     m_origin.setString(JSValueToStringCopy(ctx, origin, nullptr));
   }

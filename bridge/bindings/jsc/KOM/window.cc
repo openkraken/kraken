@@ -128,15 +128,20 @@ JSValueRef JSWindow::open(JSContextRef ctx, JSObjectRef function, JSObjectRef th
   return nullptr;
 }
 
-//JSValueRef JSWindow::postMessage(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-//                          size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
-//  KRAKEN_LOG(INFO) << "postMessage";
-//  const JSValueRef messageRef = arguments[0];
-//  JSStringRef message = JSValueToStringCopy(ctx, messageRef, exception);
-//  auto window = reinterpret_cast<WindowInstance *>(JSObjectGetPrivate(thisObject));
-//  window->dispatchEvent();
-//  return nullptr;
-//}
+// https://developer.mozilla.org/zh-CN/docs/Web/API/Window/postMessage
+JSValueRef JSWindow::postMessage(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                          size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+  const JSValueRef messageRef = arguments[0];
+  const JSValueRef originRef = arguments[1];
+  auto content = static_cast<JSContext *>(JSObjectGetPrivate(function));
+
+  EventInstance *eventInstance = new MessageEventInstance(JSMessageEvent::instance(content), "message", messageRef, originRef);
+
+  auto window = reinterpret_cast<WindowInstance *>(JSObjectGetPrivate(thisObject));
+  window->dispatchEvent(eventInstance);
+
+  return nullptr;
+}
 
 JSValueRef JSWindow::scrollTo(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) {

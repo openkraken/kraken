@@ -40,6 +40,7 @@ public:
   MessageEventInstance() = delete;
   explicit MessageEventInstance(JSMessageEvent *jsMessageEvent, NativeMessageEvent *nativeMessageEvent);
   explicit MessageEventInstance(JSMessageEvent *jsMessageEvent, std::string eventType, JSValueRef eventInitValueRef);
+  explicit MessageEventInstance(JSMessageEvent *jsMessageEvent, std::string eventType, JSValueRef data, JSValueRef origin);
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
