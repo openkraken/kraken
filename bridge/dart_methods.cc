@@ -14,7 +14,7 @@ namespace kraken {
 std::shared_ptr<DartMethodPointer> getDartMethod(void* owner) {
     auto bridge = static_cast<kraken::JSBridge*>(owner);
     int32_t isolateHash = bridge->isolateHash;
-    if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+    if (std::getenv("ENABLE_MULTI_RUNTIME_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_MULTI_RUNTIME_JS_LOG"), "true") == 0) {
         KRAKEN_LOG(VERBOSE) << "getDartMethod(void* owner)  bridge::--> " << bridge << std::endl;
         KRAKEN_LOG(VERBOSE) << "getDartMethod(void* owner)  bridge::-->isolateHash " << bridge->isolateHash << std::endl;
     }
@@ -26,11 +26,11 @@ std::shared_ptr<DartMethodPointer> getDartMethod(int32_t isolateHash) {
   std::__thread_id currentThread = std::this_thread::get_id();
     std::shared_ptr<DartMethodPointer> methodPointer;
     if(methodPointerMap[isolateHash] == NULL){
-        if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+        if (std::getenv("ENABLE_MULTI_RUNTIME_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_MULTI_RUNTIME_JS_LOG"), "true") == 0) {
             KRAKEN_LOG(VERBOSE) << "getDartMethod create isolateHash::--> " << isolateHash << std::endl;
         }
         std::shared_ptr<DartMethodPointer> sharedPtr = std::make_shared<DartMethodPointer>();
-        if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+        if (std::getenv("ENABLE_MULTI_RUNTIME_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_MULTI_RUNTIME_JS_LOG"), "true") == 0) {
             KRAKEN_LOG(VERBOSE)<< "getDartMethod create std::shared_ptr<DartMethodPointer> sharedPtr:: " << sharedPtr << std::endl;
         }
         methodPointerMap[isolateHash] = sharedPtr;
@@ -45,7 +45,7 @@ std::shared_ptr<DartMethodPointer> getDartMethod(int32_t isolateHash) {
   // @TODO: implement task loops for async method call.
   if (currentThread != getUIThreadId()) {
     // return empty struct to stop further behavior.
-      if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+      if (std::getenv("ENABLE_MULTI_RUNTIME_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_MULTI_RUNTIME_JS_LOG"), "true") == 0) {
           KRAKEN_LOG(VERBOSE)<< "getDartMethod(int32_t isolateHash) getUIThreadId():: " << getUIThreadId() << std::endl;
           KRAKEN_LOG(VERBOSE)<< "getDartMethod(int32_t isolateHash) currentThread != getUIThreadId() true:: methodPointer" << methodPointer<< std::endl;
       }
@@ -59,7 +59,7 @@ std::shared_ptr<DartMethodPointer> getDartMethod(int32_t isolateHash) {
 
 void registerDartMethods(int32_t isolateHash, uint64_t *methodBytes, int32_t length) {
     std::shared_ptr<DartMethodPointer> methodPointer = getDartMethod(isolateHash);
-    if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+    if (std::getenv("ENABLE_MULTI_RUNTIME_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_MULTI_RUNTIME_JS_LOG"), "true") == 0) {
         KRAKEN_LOG(VERBOSE) << "registerDartMethods: isolateHash---->>> : " << isolateHash << std::endl;
         KRAKEN_LOG(VERBOSE) << "registerDartMethods: methodPointer: " << methodPointer << std::endl;
         KRAKEN_LOG(VERBOSE) << "registerDartMethods: methodBytes:" << methodBytes << std::endl;

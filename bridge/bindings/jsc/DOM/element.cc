@@ -164,13 +164,6 @@ ElementInstance::ElementInstance(JSElement *element, JSStringRef tagNameStringRe
   m_tagName.setString(tagNameStringRef);
   // Do not needs to send create element for HTML element.
   if (targetId == HTML_TARGET_ID) {
-    if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
-      KRAKEN_LOG(VERBOSE) << "ElementInstance: &HTML_TARGET_ID element: " << element << std::endl;
-      KRAKEN_LOG(VERBOSE) << "ElementInstance: &HTML_TARGET_ID element->context" << element->context << std::endl;
-      KRAKEN_LOG(VERBOSE)
-      << "ElementInstance: &HTML_TARGET_ID element->context->getOwner()" << element->context->getOwner()
-      << std::endl;
-    }
     assert_m(getDartMethod(element->context->getOwner())->initHTML != nullptr,
              "Failed to execute initHTML(): dart method is nullptr.");
     getDartMethod(element->context->getOwner())->initHTML(element->contextId, nativeElement);

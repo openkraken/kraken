@@ -34,7 +34,7 @@ void UICommandBuffer::addCommand(int32_t id, int32_t type, NativeString &args_01
   if (!update_batched) {
     void *bridge = getJSContext(contextId);
     std::shared_ptr<kraken::DartMethodPointer> methodPointer = kraken::getDartMethod(isolateHash);
-    if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+    if (std::getenv("ENABLE_MULTI_RUNTIME_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_MULTI_RUNTIME_JS_LOG"), "true") == 0) {
       KRAKEN_LOG(VERBOSE)
       << " addCommand(int32_t id, int32_t type, NativeString &args_01, void *nativePtr)  bridge::--> " << bridge
       << std::endl;

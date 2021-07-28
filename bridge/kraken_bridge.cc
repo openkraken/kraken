@@ -67,7 +67,7 @@ void printError(int32_t contextId, const char *errmsg) {
 namespace {
 
 void disposeAllBridge() {
-  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+  if (std::getenv("ENABLE_MULTI_RUNTIME_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_MULTI_RUNTIME_JS_LOG"), "true") == 0) {
     KRAKEN_LOG(VERBOSE) << "disposeAllBridge" << std::endl;
   }
   for (int i = 0; i <= poolIndex && i < maxPoolSize; i++) {
@@ -91,7 +91,7 @@ int32_t searchForAvailableContextId() {
 int32_t initJSContextPool(int32_t isolateHash, int poolSize) {
   std::lock_guard<std::recursive_mutex> guard(bridge_runtime_mutex_);
   uiThreadId = std::this_thread::get_id();
-  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+  if (std::getenv("ENABLE_MULTI_RUNTIME_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_MULTI_RUNTIME_JS_LOG"), "true") == 0) {
     KRAKEN_LOG(VERBOSE) << "initJSContextPool" << inited << std::endl;
     KRAKEN_LOG(VERBOSE) << "initJSContextPool isolateHash::--> " << isolateHash << std::endl;
     KRAKEN_LOG(VERBOSE) << "initJSContextPool uiThreadId::--> " << uiThreadId << std::endl;
@@ -119,7 +119,7 @@ int32_t initJSContextPool(int32_t isolateHash, int poolSize) {
 
 void disposeContext(int32_t contextId) {
   std::lock_guard<std::recursive_mutex> guard(bridge_runtime_mutex_);
-  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+  if (std::getenv("ENABLE_MULTI_RUNTIME_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_MULTI_RUNTIME_JS_LOG"), "true") == 0) {
     KRAKEN_LOG(VERBOSE) << "disposeContext" << contextId << std::endl;
   }
   assert(contextId < maxPoolSize);
@@ -154,7 +154,7 @@ int32_t allocateNewContext(int32_t isolateHash, int32_t targetContextId) {
 
 void *getJSContext(int32_t contextId) {
     std::lock_guard<std::recursive_mutex> guard(bridge_runtime_mutex_);
-    if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+    if (std::getenv("ENABLE_MULTI_RUNTIME_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_MULTI_RUNTIME_JS_LOG"), "true") == 0) {
         KRAKEN_LOG(VERBOSE) << "getJSContext:: contextId " << contextId << std::endl;
         KRAKEN_LOG(VERBOSE) << "getJSContext:: contextPool[contextId] " << contextPool[contextId] << std::endl;
     }
