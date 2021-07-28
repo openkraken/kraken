@@ -144,8 +144,20 @@ class CSSStyleDeclaration {
     if ((prevValue == null && CSSLength.isAuto(CSSInitialValues[property])) || CSSLength.isAuto(prevValue) || CSSLength.isAuto(nextValue)) {
       return false;
     }
-    return CSSTransformHandlers[property] != null &&
-      (_transitions.containsKey(property) || _transitions.containsKey(ALL));
+
+    if (CSSTransformHandlers[property] != null &&
+      (_transitions.containsKey(property) || _transitions.containsKey(ALL))) {
+      bool shouldTransition = false;
+      // Transtion will be disabled when all transition has transitionDuration as 0.
+      _transitions.forEach((String transitionKey, List transitionOptions) {
+        double duration = CSSTime.parseTime(transitionOptions[0]).toDouble();
+        if (duration != 0) {
+          shouldTransition = true;
+        }
+      });
+      return shouldTransition;
+    }
+    return false;
   }
 
   EffectTiming? _getTransitionEffectTiming(String property) {
