@@ -82,7 +82,7 @@ public class Kraken {
     }
   }
 
-  public void destory() {
+  public void destroy() {
     sdkMap.remove(flutterEngine);
     flutterEngine = null;
   }
