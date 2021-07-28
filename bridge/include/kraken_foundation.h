@@ -75,7 +75,7 @@ public:
   KRAKEN_EXPORT UICommandItem *data();
   KRAKEN_EXPORT int64_t size();
   KRAKEN_EXPORT void clear();
-    int32_t isolateHash;
+  int32_t isolateHash;
 
 private:
   int32_t contextId;

@@ -112,8 +112,8 @@ JSValueRef krakenInvokeModule(JSContextRef ctx, JSObjectRef function, JSObjectRe
     callbackValueRef = JSValueToObject(ctx, arguments[3], exception);
   }
 
-    std::unique_ptr<BridgeCallback::Context> callbackContext = nullptr;
-    auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
+  std::unique_ptr<BridgeCallback::Context> callbackContext = nullptr;
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
 
   if (getDartMethod(context->getOwner())->invokeModule == nullptr) {
     throwJSError(ctx, "Failed to execute '__kraken_invoke_module__': dart method (invokeModule) is not registered.",
@@ -143,7 +143,7 @@ JSValueRef krakenInvokeModule(JSContextRef ctx, JSObjectRef function, JSObjectRe
     result = bridge->bridgeCallback->registerCallback<NativeString *>(
       std::move(callbackContext),
       [moduleName, method, params](BridgeCallback::Context *bridgeContext, int32_t contextId) {
-        NativeString *response = getDartMethod(bridgeContext->_context.getOwner())->invokeModule(bridgeContext, contextId, moduleName, method, params,
+        NativeString *response = getDartMethod(bridgeContext->_context.getOwner())->invokeModule(bridgeContext,contextId, moduleName, method, params,
                                                                handleInvokeModuleTransientCallback);
         return response;
       });
@@ -170,8 +170,8 @@ JSValueRef krakenInvokeModule(JSContextRef ctx, JSObjectRef function, JSObjectRe
 
 JSValueRef flushUICommand(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                           JSValueRef const *arguments, JSValueRef *exception) {
-    std::unique_ptr<BridgeCallback::Context> callbackContext = nullptr;
-    auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
+  std::unique_ptr<BridgeCallback::Context> callbackContext = nullptr;
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
   if (getDartMethod(context->getOwner())->flushUICommand == nullptr) {
     throwJSError(ctx,
                  "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.",

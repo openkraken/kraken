@@ -56,8 +56,8 @@ std::__thread_id getUIThreadId() {
   return uiThreadId;
 }
 
-void printError(int32_t contextId, const char* errmsg) {
-    kraken::JSBridge* bridge = static_cast<kraken::JSBridge* >(getJSContext(contextId));
+void printError(int32_t contextId, const char *errmsg) {
+  kraken::JSBridge *bridge = static_cast<kraken::JSBridge * >(getJSContext(contextId));
   if (kraken::getDartMethod(bridge)->onJsError != nullptr) {
     kraken::getDartMethod(bridge)->onJsError(contextId, errmsg);
   }
@@ -67,12 +67,12 @@ void printError(int32_t contextId, const char* errmsg) {
 namespace {
 
 void disposeAllBridge() {
-    if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
-        KRAKEN_LOG(VERBOSE) << "disposeAllBridge" << std::endl;
-    }
-    for (int i = 0; i <= poolIndex && i < maxPoolSize; i++) {
-        disposeContext(i);
-    }
+  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+    KRAKEN_LOG(VERBOSE) << "disposeAllBridge" << std::endl;
+  }
+  for (int i = 0; i <= poolIndex && i < maxPoolSize; i++) {
+    disposeContext(i);
+  }
   poolIndex = 0;
   inited = false;
 }
@@ -89,40 +89,40 @@ int32_t searchForAvailableContextId() {
 } // namespace
 
 int32_t initJSContextPool(int32_t isolateHash, int poolSize) {
-    std::lock_guard<std::recursive_mutex> guard(bridge_runtime_mutex_);
-    uiThreadId = std::this_thread::get_id();
-    if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
-        KRAKEN_LOG(VERBOSE) << "initJSContextPool" << inited << std::endl;
-        KRAKEN_LOG(VERBOSE) << "initJSContextPool isolateHash::--> " << isolateHash << std::endl;
-        KRAKEN_LOG(VERBOSE) << "initJSContextPool uiThreadId::--> " << uiThreadId << std::endl;
-    }
-    // When dart hot restarted, should dispose previous bridge and clear task message queue.
-    if (!inited) {
+  std::lock_guard<std::recursive_mutex> guard(bridge_runtime_mutex_);
+  uiThreadId = std::this_thread::get_id();
+  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+    KRAKEN_LOG(VERBOSE) << "initJSContextPool" << inited << std::endl;
+    KRAKEN_LOG(VERBOSE) << "initJSContextPool isolateHash::--> " << isolateHash << std::endl;
+    KRAKEN_LOG(VERBOSE) << "initJSContextPool uiThreadId::--> " << uiThreadId << std::endl;
+  }
+  // When dart hot restarted, should dispose previous bridge and clear task message queue.
+  if (!inited) {
 //        if (inited) {
 //            disposeAllBridge();
-//            foundation::UICommandBuffer::instance(0)->isolateHash = isolateHash;
+//            ::foundation::UICommandBuffer::instance(0)->isolateHash = isolateHash;
 //            foundation::UICommandBuffer::instance(0)->clear();
 //        };
-        contextPool = new kraken::JSBridge *[poolSize];
-        for (int i = 1; i < poolSize; i++) {
-            contextPool[i] = nullptr;
-        }
-
-        inited = true;
-        maxPoolSize = poolSize;
+    contextPool = new kraken::JSBridge *[poolSize];
+    for (int i = 1; i < poolSize; i++) {
+      contextPool[i] = nullptr;
     }
 
-    poolIndex++;
-      contextPool[poolIndex] = new kraken::JSBridge(isolateHash, poolIndex, printError);
-    return poolIndex;
+    inited = true;
+    maxPoolSize = poolSize;
+  }
+
+  poolIndex++;
+  contextPool[poolIndex] = new kraken::JSBridge(isolateHash, poolIndex, printError);
+  return poolIndex;
 }
 
 void disposeContext(int32_t contextId) {
-    std::lock_guard<std::recursive_mutex> guard(bridge_runtime_mutex_);
-    if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
-        KRAKEN_LOG(VERBOSE) << "disposeContext" << contextId << std::endl;
-    }
-    assert(contextId < maxPoolSize);
+  std::lock_guard<std::recursive_mutex> guard(bridge_runtime_mutex_);
+  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+    KRAKEN_LOG(VERBOSE) << "disposeContext" << contextId << std::endl;
+  }
+  assert(contextId < maxPoolSize);
   if (contextPool[contextId] == nullptr) return;
   auto context = static_cast<kraken::JSBridge *>(contextPool[contextId]);
   delete context;
@@ -147,8 +147,8 @@ int32_t allocateNewContext(int32_t isolateHash, int32_t targetContextId) {
                                                 .c_str());
 
   auto context = new kraken::JSBridge(isolateHash, targetContextId, printError);
-    foundation::UICommandBuffer::instance(targetContextId)->isolateHash = isolateHash;
-    contextPool[targetContextId] = context;
+  foundation::UICommandBuffer::instance(targetContextId)->isolateHash = isolateHash;
+  contextPool[targetContextId] = context;
   return targetContextId;
 }
 
@@ -165,13 +165,13 @@ void *getJSContext(int32_t contextId) {
 }
 
 bool checkContext(int32_t contextId) {
-    std::lock_guard<std::recursive_mutex> guard(bridge_runtime_mutex_);
-    return inited && contextId < maxPoolSize && contextPool[contextId] != nullptr;
+  std::lock_guard<std::recursive_mutex> guard(bridge_runtime_mutex_);
+  return inited && contextId < maxPoolSize && contextPool[contextId] != nullptr;
 }
 
 bool checkContext(int32_t contextId, void *context) {
-    std::lock_guard<std::recursive_mutex> guard(bridge_runtime_mutex_);
-    if (contextPool[contextId] == nullptr) return false;
+  std::lock_guard<std::recursive_mutex> guard(bridge_runtime_mutex_);
+  if (contextPool[contextId] == nullptr) return false;
   auto bridge = static_cast<kraken::JSBridge *>(getJSContext(contextId));
   return bridge->getContext().get() == context;
 }
@@ -183,8 +183,8 @@ void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFi
 }
 
 void reloadJsContext(int32_t contextId) {
-    std::lock_guard<std::recursive_mutex> guard(bridge_runtime_mutex_);
-    assert(checkContext(contextId) && "reloadJSContext: contextId is not valid");
+  std::lock_guard<std::recursive_mutex> guard(bridge_runtime_mutex_);
+  assert(checkContext(contextId) && "reloadJSContext: contextId is not valid");
   auto bridgePtr = getJSContext(contextId);
   auto context = static_cast<kraken::JSBridge *>(bridgePtr);
   auto newContext = new kraken::JSBridge(context->isolateHash, contextId, printError);

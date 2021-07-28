@@ -136,7 +136,7 @@ JSValueRef JSCanvasElement::getContext(JSContextRef ctx, JSObjectRef function,
   NativeString contextId{};
   contextId.string = JSStringGetCharactersPtr(contextIdStringRef);
   contextId.length = JSStringGetLength(contextIdStringRef);
-    auto elementInstance = reinterpret_cast<JSCanvasElement::CanvasElementInstance *>(JSObjectGetPrivate(thisObject));
+  auto elementInstance = reinterpret_cast<JSCanvasElement::CanvasElementInstance *>(JSObjectGetPrivate(thisObject));
 
   getDartMethod(elementInstance->context->getOwner())->flushUICommand();
 

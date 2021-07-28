@@ -58,8 +58,9 @@ ConsoleMessageHandler JSBridge::consoleMessageHandler {nullptr};
  * JSRuntime
  */
 JSBridge::JSBridge(int32_t isolateHash, int32_t contextId, const JSExceptionHandler &handler) : isolateHash(isolateHash), contextId(contextId) {
-        ::foundation::UICommandBuffer::instance(contextId)->isolateHash = isolateHash;
-        auto errorHandler = [handler, this](int32_t contextId, const char *errmsg) {
+  //@todo hack maybe add init method
+  ::foundation::UICommandBuffer::instance(contextId)->isolateHash = isolateHash;
+  auto errorHandler = [handler, this](int32_t contextId, const char *errmsg) {
     handler(contextId, errmsg);
     // trigger window.onerror handler.
     // TODO: trigger onerror event.

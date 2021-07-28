@@ -36,9 +36,9 @@ JSValueRef JSInputElement::focus(JSContextRef ctx, JSObjectRef function, JSObjec
 
   auto elementInstance =
     static_cast<JSInputElement::InputElementInstance *>(JSObjectGetPrivate(thisObject));
-    getDartMethod(elementInstance->context->getOwner())->flushUICommand();
+  getDartMethod(elementInstance->context->getOwner())->flushUICommand();
 
-    assert_m(elementInstance->nativeInputElement->focus != nullptr,
+  assert_m(elementInstance->nativeInputElement->focus != nullptr,
            "Failed to call dart method: focus() is nullptr");
   elementInstance->nativeInputElement->focus(elementInstance->nativeInputElement);
   return nullptr;
@@ -49,7 +49,7 @@ JSValueRef JSInputElement::blur(JSContextRef ctx, JSObjectRef function, JSObject
 
   auto elementInstance =
     static_cast<JSInputElement::InputElementInstance *>(JSObjectGetPrivate(thisObject));
-    getDartMethod(elementInstance->context->getOwner())->flushUICommand();
+  getDartMethod(elementInstance->context->getOwner())->flushUICommand();
 
   assert_m(elementInstance->nativeInputElement->blur != nullptr,
            "Failed to call dart method: blur() is nullptr");

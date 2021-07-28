@@ -15,13 +15,13 @@ void bindCSSStyleDeclaration(std::unique_ptr<JSContext> &context) {
 }
 
 namespace {
-    std::recursive_mutex style_runtime_mutex_;
+std::recursive_mutex style_runtime_mutex_;
 static std::string parseJavaScriptCSSPropertyName(std::string &propertyName) {
   static std::unordered_map<std::string, std::string> propertyCache{};
 
-    std::lock_guard<std::recursive_mutex> guard(style_runtime_mutex_);
+  std::lock_guard<std::recursive_mutex> guard(style_runtime_mutex_);
 
-    if (propertyCache.count(propertyName) > 0) {
+  if (propertyCache.count(propertyName) > 0) {
     return propertyCache[propertyName];
   }
 
@@ -54,16 +54,16 @@ CSSStyleDeclaration::CSSStyleDeclaration(JSContext *context) : HostClass(context
 std::unordered_map<JSContext *, CSSStyleDeclaration *> CSSStyleDeclaration::instanceMap{};
 
 CSSStyleDeclaration *CSSStyleDeclaration::instance(JSContext *context) {
-    std::lock_guard<std::recursive_mutex> guard(style_runtime_mutex_);
-    if (instanceMap.count(context) == 0) {
+  std::lock_guard<std::recursive_mutex> guard(style_runtime_mutex_);
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new CSSStyleDeclaration(context);
   }
   return instanceMap[context];
 }
 
 CSSStyleDeclaration::~CSSStyleDeclaration() {
-    std::lock_guard<std::recursive_mutex> guard(style_runtime_mutex_);
-    instanceMap.erase(context);
+  std::lock_guard<std::recursive_mutex> guard(style_runtime_mutex_);
+  instanceMap.erase(context);
 }
 
 JSObjectRef CSSStyleDeclaration::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,

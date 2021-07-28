@@ -122,8 +122,8 @@ JSValueRef matchImageSnapshot(JSContextRef ctx, JSObjectRef function, JSObjectRe
   bridge->bridgeCallback->registerCallback<void>(
     std::move(callbackContext),
     [&blob, &nativeString, &fn](BridgeCallback::Context *callbackContext, int32_t contextId) {
-        auto &_context = callbackContext->_context;
-        getDartMethod(_context.getOwner())->matchImageSnapshot(callbackContext, contextId, blob->bytes(), blob->size(), &nativeString, fn);
+      auto &_context = callbackContext->_context;
+      getDartMethod(_context.getOwner())->matchImageSnapshot(callbackContext, contextId, blob->bytes(), blob->size(),&nativeString, fn);
     });
 
   return nullptr;
@@ -131,8 +131,8 @@ JSValueRef matchImageSnapshot(JSContextRef ctx, JSObjectRef function, JSObjectRe
 
 JSValueRef environment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                        const JSValueRef *arguments, JSValueRef *exception) {
-    auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(function));
-    if (getDartMethod(context->getOwner())->environment == nullptr) {
+  auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(function));
+  if (getDartMethod(context->getOwner())->environment == nullptr) {
     binding::jsc::throwJSError(ctx, "Failed to execute '__kraken_environment__': dart method (environment) is not registered.",
                     exception);
     return nullptr;
@@ -144,8 +144,8 @@ JSValueRef environment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisO
 
 JSValueRef simulatePointer(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                            const JSValueRef *arguments, JSValueRef *exception) {
-    auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(function));
-    if (getDartMethod(context->getOwner())->simulatePointer == nullptr) {
+  auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(function));
+  if (getDartMethod(context->getOwner())->simulatePointer == nullptr) {
     binding::jsc::throwJSError(ctx,
                     "Failed to execute '__kraken_simulate_pointer__': dart method(simulatePointer) is not registered.",
                     exception);
@@ -201,9 +201,9 @@ JSValueRef simulatePointer(JSContextRef ctx, JSObjectRef function, JSObjectRef t
 
 JSValueRef simulateInputText(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                             const JSValueRef *arguments, JSValueRef *exception) {
-    auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(function));
+  auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(function));
 
-    if (getDartMethod(context->getOwner())->simulateInputText == nullptr) {
+  if (getDartMethod(context->getOwner())->simulateInputText == nullptr) {
     binding::jsc::throwJSError(ctx,
                     "Failed to execute '__kraken_simulate_inputtext__': dart method(simulateInputText) is not registered.",
                     exception);

@@ -140,8 +140,8 @@ JSValueRef JSWindow::scrollTo(JSContextRef ctx, JSObjectRef function, JSObjectRe
   }
 
   auto window = reinterpret_cast<WindowInstance *>(JSObjectGetPrivate(thisObject));
-    getDartMethod(window->context->getOwner())->flushUICommand();
-    window->nativeWindow->scrollTo(window->nativeWindow, x, y);
+  getDartMethod(window->context->getOwner())->flushUICommand();
+  window->nativeWindow->scrollTo(window->nativeWindow, x, y);
 
   return nullptr;
 }
@@ -163,8 +163,8 @@ JSValueRef JSWindow::scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectRe
   }
 
   auto window = reinterpret_cast<WindowInstance *>(JSObjectGetPrivate(thisObject));
-    getDartMethod(window->context->getOwner())->flushUICommand();
-    window->nativeWindow->scrollBy(window->nativeWindow, x, y);
+  getDartMethod(window->context->getOwner())->flushUICommand();
+  window->nativeWindow->scrollBy(window->nativeWindow, x, y);
 
   return nullptr;
 }
