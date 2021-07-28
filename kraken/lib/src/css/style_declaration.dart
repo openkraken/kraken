@@ -6,6 +6,7 @@
  */
 import 'dart:ui';
 
+import 'package:vector_math/vector_math_64.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
@@ -213,7 +214,7 @@ class CSSStyleDeclaration {
     };
 
     animation.onfinish = (AnimationPlaybackEvent event) {
-      _setTransitionEndProperty(propertyName, end);
+      _setTransitionEndProperty(propertyName, begin, end);
       _propertyRunningTransition.remove(propertyName);
       CSSTransition.dispatchTransitionEvent(target, CSSTransitionEvent.end);
     };
@@ -222,8 +223,7 @@ class CSSStyleDeclaration {
     animation.play();
   }
 
-  _setTransitionEndProperty(String propertyName, value) {
-    String? prevValue = _properties[propertyName];
+  _setTransitionEndProperty(String propertyName, String? prevValue, String value) {
     if (value == prevValue) return;
     _properties[propertyName] = value;
     setRenderStyleProperty(propertyName, prevValue, value);
@@ -487,7 +487,7 @@ class CSSStyleDeclaration {
       rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
       fontSize = renderStyle.fontSize;
     }
-    
+
     switch (propertyName) {
       case WIDTH:
       case HEIGHT:
@@ -556,6 +556,16 @@ class CSSStyleDeclaration {
         if (!CSSTransform.isValidTransformValue(normalizedValue, viewportSize, rootFontSize, fontSize)) {
           return;
         }
+        // Transform should converted to matrix4 value to compare cause case such as
+        // `translate3d(750rpx, 0rpx, 0rpx)` and `translate3d(100vw, 0vw, 0vw)` should considered to be equal.
+        // Note this comparison cannot be done in style listener cause prevValue cannot be get in animation case.
+        if (prevValue != null) {
+          Matrix4? prevMatrix4 = CSSTransform.parseTransform(prevValue, viewportSize, rootFontSize, fontSize);
+          Matrix4? matrix4 = CSSTransform.parseTransform(normalizedValue, viewportSize, rootFontSize, fontSize);
+          if (prevMatrix4 == matrix4) {
+            return;
+          }
+        }
         break;
     }
 
@@ -611,7 +621,7 @@ class CSSStyleDeclaration {
       setRenderStyleProperty(key, null, normalizedValue);
     });
   }
-  
+
   /// Set all style properties with em unit.
   void setEmProperties() {
     _properties.forEach((key, value) {
@@ -621,7 +631,7 @@ class CSSStyleDeclaration {
       }
     });
   }
-  
+
   /// Set all style properties with rem unit.
   void setRemProperties() {
     _properties.forEach((key, value) {
