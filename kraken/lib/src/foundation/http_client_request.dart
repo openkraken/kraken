@@ -6,6 +6,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:kraken/foundation.dart';
+import 'queue.dart';
+
+final _requestQueue = Queue(parallel: 10);
 
 class ProxyHttpClientRequest extends HttpClientRequest {
   final HttpClientRequest _clientRequest;
@@ -13,10 +16,6 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   ProxyHttpClientRequest(HttpClientRequest clientRequest, KrakenHttpOverrides httpOverrides)
       : _clientRequest = clientRequest,
         _httpOverrides = httpOverrides;
-
-  String? _getContextId(HttpClientRequest request) {
-    return request.headers.value(HttpHeaderContextID);
-  }
 
   @override
   Encoding get encoding => _clientRequest.encoding;
@@ -78,18 +77,16 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
   @override
   Future<HttpClientResponse> close() async {
-    if (_httpOverrides.shouldOverride(_clientRequest)) {
-      String? contextId = _getContextId(_clientRequest);
-      if (contextId != null) {
-        _clientRequest.headers.removeAll(HttpHeaderContextID);
-        HttpClientInterceptor _clientInterceptor = _httpOverrides.getInterceptor(contextId);
-        HttpClientRequest _request = await _beforeRequest(_clientInterceptor, _clientRequest) ?? _clientRequest;
-        HttpClientResponse _interceptedResponse = await _shouldInterceptRequest(_clientInterceptor, _request) ?? await _request.close();
-        return await _afterResponse(_clientInterceptor, _request, _interceptedResponse) ?? _interceptedResponse;
-      }
+
+    String? contextId = KrakenHttpOverrides.takeContextHeader(_clientRequest);
+    if (contextId != null && _httpOverrides.hasInterceptor(contextId)) {
+      HttpClientInterceptor clientInterceptor = _httpOverrides.getInterceptor(contextId);
+      HttpClientRequest _request = await _beforeRequest(clientInterceptor, _clientRequest) ?? _clientRequest;
+      HttpClientResponse _interceptedResponse = await _shouldInterceptRequest(clientInterceptor, _request) ?? await _requestQueue.add(_request.close);
+      return await _afterResponse(clientInterceptor, _request, _interceptedResponse) ?? _interceptedResponse;
     }
 
-    return _clientRequest.close();
+    return _requestQueue.add(_clientRequest.close);
   }
 
   @override

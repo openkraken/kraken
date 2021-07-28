@@ -129,7 +129,7 @@ ImageProvider defaultNetworkProviderFactory(String url, [dynamic param]) {
   if (param is List) contextId = param[0]?.toString();
   NetworkImage networkImage = NetworkImage(url, headers: {
     HttpHeaders.userAgentHeader: getKrakenInfo().userAgent,
-    HttpHeaderContextID: contextId!,
+    HttpHeaderContext: contextId!,
   });
   return networkImage;
 }
