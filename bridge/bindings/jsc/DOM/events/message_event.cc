@@ -131,15 +131,15 @@ bool MessageEventInstance::setProperty(std::string &name, JSValueRef value, JSVa
 }
 
 MessageEventInstance::~MessageEventInstance() {
-//  if (nativeMessageEvent != nullptr) {
-//    if (nativeMessageEvent->data->string != nullptr) {
-//      nativeMessageEvent->data->free();
-//    }
-//    if (nativeMessageEvent->origin->string != nullptr) {
-//      nativeMessageEvent->origin->free();
-//    }
-//    delete nativeMessageEvent;
-//  }
+  if (nativeMessageEvent != nullptr) {
+    if (nativeMessageEvent->data->string != nullptr) {
+      nativeMessageEvent->data->free();
+    }
+    if (nativeMessageEvent->origin->string != nullptr) {
+      nativeMessageEvent->origin->free();
+    }
+    delete nativeMessageEvent;
+  }
 }
 
 void MessageEventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
