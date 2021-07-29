@@ -137,9 +137,6 @@ final DartInitJSContextPool _initJSContextPool =
     nativeDynamicLibrary.lookup<NativeFunction<NativeInitJSContextPool>>('initJSContextPool').asFunction();
 
 int initJSContextPool(int poolSize) {
-  if (kDebugMode) {
-    print("KrakenTy initJSContextPool poolSize[$poolSize]");
-  }
   int isolateHash = Isolate.current.hashCode;
   return _initJSContextPool(isolateHash, poolSize);
 }
@@ -162,9 +159,6 @@ final DartAllocateNewContext _allocateNewContext =
 
 int allocateNewContext([int targetContextId = -1]) {
   int ret = _allocateNewContext(Isolate.current.hashCode, targetContextId);
-  if (kDebugMode) {
-    print("KrakenTy allocateNewContext[$ret]");
-  }
   return ret;
 }
 
