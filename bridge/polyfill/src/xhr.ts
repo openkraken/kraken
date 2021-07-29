@@ -98,6 +98,11 @@ export class XMLHttpRequest extends EventTarget {
     }
 
     url = url.toString();
+    if (!/^([a-z][a-z\d\+\-\.]*:)?\/\//.test(url)) {
+      // relative path.
+      url = location.protocol + '//' + location.host + url;
+    }
+    
     if (!url.match(/^http/)) {
       url = location.protocol + url;
     }
