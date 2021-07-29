@@ -59,7 +59,7 @@ private:
   static int setProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
                       JSValueConst value, JSValueConst receiver, int flags);
 
-  JSValue getProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
+  static JSValue getProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
                           JSValueConst receiver);
 
   static void finalize(JSRuntime *rt, JSValue val) {

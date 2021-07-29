@@ -159,7 +159,12 @@ void StyleDeclarationInstance::internalRemoveProperty(std::string &name) {
 
 JSValue StyleDeclarationInstance::internalGetPropertyValue(std::string &name) {
   name = parseJavaScriptCSSPropertyName(name);
-  return properties[name];
+
+  if (properties.count(name) > 0) {
+    return properties[name];
+  }
+
+  return JS_NULL;
 }
 
 void StyleDeclarationInstance::copyWith(StyleDeclarationInstance *instance) {
@@ -179,11 +184,10 @@ int StyleDeclarationInstance::setProperty(QjsContext *ctx, JSValue obj, JSAtom a
 }
 
 JSValue StyleDeclarationInstance::getProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSValue receiver) {
-//  if (properties.count(name) > 0) {
-//    return properties[name];
-//  }
-//
-//  return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(""));
+  auto *style = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(receiver, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
+  const char* cname = JS_AtomToCString(ctx, atom);
+  std::string name = std::string(cname);
+  return style->internalGetPropertyValue(name);
 }
 
 JSClassExoticMethods StyleDeclarationInstance::m_exoticMethods{
@@ -192,7 +196,7 @@ JSClassExoticMethods StyleDeclarationInstance::m_exoticMethods{
   nullptr,
   nullptr,
   nullptr,
-  nullptr,
+  getProperty,
   setProperty,
 };
 

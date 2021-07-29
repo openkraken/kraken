@@ -30,15 +30,16 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   )
 
   ### kraken_unit_test executable
-  add_executable(kraken_unit_test ${KRAKEN_UNIT_TEST_SOURCE})
+  add_executable(kraken_unit_test ${KRAKEN_UNIT_TEST_SOURCE} ${KRAKEN_TEST_SOURCE} ${BRIDGE_SOURCE})
   target_include_directories(kraken_unit_test PUBLIC ./third_party/googletest/googletest/include ${BRIDGE_INCLUDE})
-  target_link_libraries(kraken_unit_test gtest gtest_main kraken_static quickjs)
+  target_link_libraries(kraken_unit_test gtest gtest_main quickjs)
 
   target_compile_options(quickjs PUBLIC -DDUMP_LEAKS=1)
   target_compile_options(kraken PUBLIC -DDUMP_LEAKS=1)
 
   target_compile_definitions(kraken_unit_test PUBLIC -DFLUTTER_BACKEND=0)
   target_compile_definitions(kraken PUBLIC -DFLUTTER_BACKEND=1)
+  target_compile_definitions(kraken_static PUBLIC -DFLUTTER_BACKEND=1)
 endif()
 
 ### kraken_integration support library
