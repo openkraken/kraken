@@ -382,7 +382,9 @@ void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, 
                                                nativeEventType->length);
   std::string eventType = toUTF8(u16EventType);
   auto *raw = static_cast<RawEvent *>(rawEvent);
-  NativeEvent *nativeEvent = rawEventToNativeEvent(*raw);
+  // NativeEvent members are memory aligned corresponding to NativeEvent.
+  // So we can reinterpret_cast raw bytes pointer to NativeEvent type directly.
+  auto *nativeEvent = reinterpret_cast<NativeEvent *>(raw->bytes);
   EventInstance *eventInstance = Event::buildEventInstance(eventType, context, nativeEvent, isCustomEvent == 1);
   eventInstance->nativeEvent->target = eventTargetInstance;
   eventTargetInstance->dispatchEvent(eventInstance);

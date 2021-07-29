@@ -148,18 +148,6 @@ EventInstance *Event::buildEventInstance(std::string &eventType, JSContext *cont
   return eventInstance;
 }
 
-NativeEvent* rawEventToNativeEvent(RawEvent &rawEvent) {
-  return new NativeEvent{
-    reinterpret_cast<NativeString *>(rawEvent.bytes[0]),
-    static_cast<int64_t>(rawEvent.bytes[1]),
-    static_cast<int64_t>(rawEvent.bytes[2]),
-    static_cast<int64_t>(rawEvent.bytes[3]),
-    static_cast<int64_t>(rawEvent.bytes[4]),
-    reinterpret_cast<void *>(rawEvent.bytes[5]),
-    reinterpret_cast<void *>(rawEvent.bytes[6])
-  };
-}
-
 EventInstance * EventInstance::fromNativeEvent(Event *event, NativeEvent *nativeEvent) {
   return new EventInstance(event, nativeEvent);
 }

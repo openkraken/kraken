@@ -50,8 +50,6 @@ struct RawEvent {
   int64_t length;
 };
 
-NativeEvent* rawEventToNativeEvent(RawEvent &rawEvent);
-
 class EventInstance : public Instance {
 public:
   EventInstance() = delete;
