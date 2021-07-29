@@ -29,7 +29,7 @@ abstract class KrakenBundle {
   KrakenBundle(this.url);
 
   // Unique resource locator.
-  final Uri url;
+  final String url;
   // JS Content
   late String content;
   // JS line offset, default to 0.
@@ -44,17 +44,14 @@ abstract class KrakenBundle {
 
   static Future<KrakenBundle> getBundle(String path, { String? contentOverride, required int contextId }) async {
     KrakenBundle bundle;
-    Uri uri = Uri.parse(path);
-    if (contentOverride != null && contentOverride.isNotEmpty) {
-      bundle = RawBundle(contentOverride, uri);
-    } else {
-      // Treat empty scheme as https.
-      if (path.startsWith('//')) path = 'https' + path;
 
-      if (uri.isScheme('HTTP') || uri.isScheme('HTTPS')) {
-        bundle = NetworkBundle(uri, contextId: contextId);
+    if (contentOverride != null && contentOverride.isNotEmpty) {
+      bundle = RawBundle(contentOverride, path);
+    } else {
+      if(path.startsWith('file://')) {
+        bundle = AssetsBundle(path);
       } else {
-        bundle = AssetsBundle(uri);
+        bundle = NetworkBundle(path, contextId: contextId);
       }
     }
 
@@ -79,7 +76,7 @@ abstract class KrakenBundle {
 }
 
 class RawBundle extends KrakenBundle {
-  RawBundle(String content, Uri url)
+  RawBundle(String content, String url)
       : super(url) {
     this.content = content;
   }
@@ -90,14 +87,33 @@ class RawBundle extends KrakenBundle {
   }
 }
 
+Map<int, String> hostMap = Map();
+Map<int, String> schemeMap = Map();
+Map<int, int> portMap = Map();
+
 class NetworkBundle extends KrakenBundle {
   int contextId;
-  NetworkBundle(Uri url, { required this.contextId })
+  NetworkBundle(String url, { required this.contextId })
       : super(url);
 
   @override
   Future<void> resolve() async {
-    NetworkAssetBundle bundle = NetworkAssetBundle(url, contextId: contextId);
+    String path = url;
+    // Treat empty scheme as https.
+    if (path.startsWith('//')) path = 'https' + path;
+
+    RegExp exp = RegExp("^([a-z][a-z\d\+\-\.]*:)?\/\/");
+    if (!exp.hasMatch(path) && hostMap[contextId] != null) {
+      // relative path.
+      path = schemeMap[contextId]! + '://' + hostMap[contextId]! + ':' + portMap[contextId]!.toString() + path;
+    }
+
+    Uri uri = Uri.parse(path);
+    hostMap[contextId] = uri.host;
+    schemeMap[contextId] = uri.scheme;
+    portMap[contextId] = uri.port;
+
+    NetworkAssetBundle bundle = NetworkAssetBundle(uri, contextId: contextId);
     bundle.httpClient.userAgent = getKrakenInfo().userAgent;
     String absoluteURL = url.toString();
     ByteData bytes = await bundle.load(absoluteURL);
@@ -160,7 +176,7 @@ class NetworkAssetBundle extends AssetBundle {
 }
 
 class AssetsBundle extends KrakenBundle {
-  AssetsBundle(Uri url)
+  AssetsBundle(String url)
       : super(url);
 
   @override
