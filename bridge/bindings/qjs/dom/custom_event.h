@@ -13,10 +13,7 @@ namespace kraken::binding::qjs {
 void bindCustomEvent(std::unique_ptr<JSContext> &context);
 
 struct NativeCustomEvent {
-  NativeCustomEvent() = delete;
-  explicit NativeCustomEvent(NativeEvent *nativeEvent) : nativeEvent(nativeEvent){};
-
-  NativeEvent *nativeEvent;
+  NativeEvent nativeEvent;
   NativeString *detail{nullptr};
 };
 

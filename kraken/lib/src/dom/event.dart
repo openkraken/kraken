@@ -159,7 +159,7 @@ class MouseEvent extends Event {
 
     Pointer<RawNativeMouseEvent> rawEvent = super.toRaw(methods.length).cast<RawNativeMouseEvent>();
     Uint64List bytes = rawEvent.ref.bytes.asTypedList((rawEvent.ref.length + methods.length));
-    bytes.setAll(rawEvent.ref.length - 1, methods);
+    bytes.setAll(rawEvent.ref.length, methods);
 
     return rawEvent;
   }
@@ -238,7 +238,7 @@ class GestureEvent extends Event {
 
     Pointer<RawNativeGestureEvent> rawEvent = super.toRaw(methods.length).cast<RawNativeGestureEvent>();
     Uint64List bytes = rawEvent.ref.bytes.asTypedList((rawEvent.ref.length + methods.length));
-    bytes.setAll(rawEvent.ref.length - 1, methods);
+    bytes.setAll(rawEvent.ref.length, methods);
 
     return rawEvent;
   }
@@ -267,7 +267,7 @@ class CustomEvent extends Event {
 
     Pointer<RawNativeCustomEvent> rawEvent = super.toRaw(methods.length).cast<RawNativeCustomEvent>();
     Uint64List bytes = rawEvent.ref.bytes.asTypedList((rawEvent.ref.length + methods.length));
-    bytes.setAll(rawEvent.ref.length - 1, methods);
+    bytes.setAll(rawEvent.ref.length, methods);
 
     return rawEvent;
   }
@@ -289,7 +289,7 @@ class InputEvent extends Event {
 
     Pointer<RawNativeInputEvent> rawEvent = super.toRaw(methods.length).cast<RawNativeInputEvent>();
     Uint64List bytes = rawEvent.ref.bytes.asTypedList((rawEvent.ref.length + methods.length));
-    bytes.setAll(rawEvent.ref.length - 1, methods);
+    bytes.setAll(rawEvent.ref.length, methods);
 
     return rawEvent;
   }
@@ -342,7 +342,7 @@ class MediaError extends Event {
 
     Pointer<RawNativeMediaErrorEvent> rawEvent = super.toRaw(methods.length).cast<RawNativeMediaErrorEvent>();
     Uint64List bytes = rawEvent.ref.bytes.asTypedList((rawEvent.ref.length + methods.length));
-    bytes.setAll(rawEvent.ref.length - 1, methods);
+    bytes.setAll(rawEvent.ref.length, methods);
 
     return rawEvent;
   }
@@ -368,7 +368,7 @@ class MessageEvent extends Event {
 
     Pointer<RawNativeMessageEvent> rawEvent = super.toRaw(methods.length).cast<RawNativeMessageEvent>();
     Uint64List bytes = rawEvent.ref.bytes.asTypedList((rawEvent.ref.length + methods.length));
-    bytes.setAll(rawEvent.ref.length - 1, methods);
+    bytes.setAll(rawEvent.ref.length, methods);
 
     return rawEvent;
   }
@@ -396,7 +396,7 @@ class CloseEvent extends Event {
 
     Pointer<RawNativeCloseEvent> rawEvent = super.toRaw(methods.length).cast<RawNativeCloseEvent>();
     Uint64List bytes = rawEvent.ref.bytes.asTypedList((rawEvent.ref.length + methods.length));
-    bytes.setAll(rawEvent.ref.length - 1, methods);
+    bytes.setAll(rawEvent.ref.length, methods);
 
     return rawEvent;
   }
@@ -413,7 +413,7 @@ class IntersectionChangeEvent extends Event {
 
     Pointer<RawNativeIntersectionChangeEvent> rawEvent = super.toRaw(methods.length).cast<RawNativeIntersectionChangeEvent>();
     Uint64List bytes = rawEvent.ref.bytes.asTypedList((rawEvent.ref.length + methods.length));
-    bytes.setAll(rawEvent.ref.length - 1, methods);
+    bytes.setAll(rawEvent.ref.length, methods);
 
     return rawEvent;
   }
@@ -448,7 +448,7 @@ class TouchEvent extends Event {
 
     Pointer<RawNativeTouchEvent> rawEvent = super.toRaw(methods.length).cast<RawNativeTouchEvent>();
     Uint64List bytes = rawEvent.ref.bytes.asTypedList((rawEvent.ref.length + methods.length));
-    bytes.setAll(rawEvent.ref.length - 1, methods);
+    bytes.setAll(rawEvent.ref.length, methods);
 
     return rawEvent;
   }

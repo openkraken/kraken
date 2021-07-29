@@ -90,7 +90,7 @@ CustomEventInstance::CustomEventInstance(CustomEvent *jsCustomEvent, std::string
 }
 
 CustomEventInstance::CustomEventInstance(CustomEvent *jsCustomEvent, NativeCustomEvent *nativeCustomEvent)
-  : nativeCustomEvent(nativeCustomEvent), EventInstance(jsCustomEvent, nativeCustomEvent->nativeEvent) {
+  : nativeCustomEvent(nativeCustomEvent), EventInstance(jsCustomEvent, reinterpret_cast<NativeEvent *>(nativeCustomEvent)) {
   JSValue newDetail = JS_NewUnicodeString(jsCustomEvent->context()->runtime(), jsCustomEvent->context()->ctx(),
                                           nativeCustomEvent->detail->string, nativeCustomEvent->detail->length);
   nativeCustomEvent->detail->free();
