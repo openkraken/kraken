@@ -10,6 +10,28 @@ import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 
+const String MATRIX = 'matrix';
+const String MATRIX_3D = 'matrix3d';
+const String TRANSLATE = 'translate';
+const String TRANSLATE_3D = 'translate3d';
+const String TRANSLATE_X = 'translatex';
+const String TRANSLATE_Y = 'translatey';
+const String TRANSLATE_Z = 'translatez';
+const String ROTATE = 'rotate';
+const String ROTATE_3D = 'rotate3d';
+const String ROTATE_X = 'rotatex';
+const String ROTATE_Y = 'rotatey';
+const String ROTATE_Z = 'rotatez';
+const String SCALE = 'scale';
+const String SCALE_3D = 'scale3d';
+const String SCALE_X = 'scalex';
+const String SCALE_Y = 'scaley';
+const String SCALE_Z = 'scalez';
+const String SKEW = 'skew';
+const String SKEW_X = 'skewx';
+const String SKEW_Y = 'skewy';
+const String PERSPECTIVE = 'perspective';
+
 // CSS Transforms: https://drafts.csswg.org/css-transforms/
 final RegExp _spaceRegExp = RegExp(r'\s+(?![^(]*\))');
 
@@ -840,28 +862,6 @@ class CSSTransform {
     }
     return matrix4;
   }
-
-  static const String MATRIX = 'matrix';
-  static const String MATRIX_3D = 'matrix3d';
-  static const String TRANSLATE = 'translate';
-  static const String TRANSLATE_3D = 'translate3d';
-  static const String TRANSLATE_X = 'translatex';
-  static const String TRANSLATE_Y = 'translatey';
-  static const String TRANSLATE_Z = 'translatez';
-  static const String ROTATE = 'rotate';
-  static const String ROTATE_3D = 'rotate3d';
-  static const String ROTATE_X = 'rotatex';
-  static const String ROTATE_Y = 'rotatey';
-  static const String ROTATE_Z = 'rotatez';
-  static const String SCALE = 'scale';
-  static const String SCALE_3D = 'scale3d';
-  static const String SCALE_X = 'scalex';
-  static const String SCALE_Y = 'scaley';
-  static const String SCALE_Z = 'scalez';
-  static const String SKEW = 'skew';
-  static const String SKEW_X = 'skewx';
-  static const String SKEW_Y = 'skewy';
-  static const String PERSPECTIVE = 'perspective';
 
   static Matrix4? _parseTransform(CSSFunctionalNotation method, [Size? viewportSize, double? rootFontSize, double? fontSize]) {
     switch (method.name) {
