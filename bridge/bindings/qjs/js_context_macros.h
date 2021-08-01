@@ -7,16 +7,16 @@
 #define KRAKENBRIDGE_JS_CONTEXT_MACROS_H
 
 #define OBJECT_INSTANCE(NAME)                                                                                          \
-  static std::unordered_map<JSContext *, NAME *> m_instanceMap;                                                        \
+  static std::unordered_map<int32_t, NAME *> m_instanceMap;                                                        \
   static NAME *instance(JSContext *context) {                                                                          \
-    if (m_instanceMap.count(context) == 0) {                                                                           \
-      m_instanceMap[context] = new NAME(context);                                                                      \
+    if (m_instanceMap.count(context->uniqueId) == 0) {                                                                           \
+      m_instanceMap[context->uniqueId] = new NAME(context);                                                                      \
     }                                                                                                                  \
-    return m_instanceMap[context];                                                                                     \
+    return m_instanceMap[context->uniqueId];                                                                                     \
   }
 
 #define OBJECT_INSTANCE_IMPL(NAME)                                                                                     \
-  std::unordered_map<JSContext *, NAME *> NAME::m_instanceMap {}
+  std::unordered_map<int32_t, NAME *> NAME::m_instanceMap {}
 
 #define QJS_GLOBAL_BINDING_FUNCTION(context, function, name, argc)                                                     \
   {                                                                                                                    \

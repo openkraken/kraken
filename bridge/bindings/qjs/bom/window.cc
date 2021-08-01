@@ -146,7 +146,6 @@ WindowInstance::WindowInstance(Window *window) : EventTargetInstance(window, Win
   }
   m_context->m_window = this;
   m_location = new Location(m_context);
-  JS_DupValue(m_ctx, m_location->jsObject);
 }
 
 }
