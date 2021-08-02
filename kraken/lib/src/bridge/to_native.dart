@@ -426,5 +426,30 @@ void flushUICommand() {
         print('$e\n$stack');
       }
     }
+
+    // Set RenderStyle after all styles have been set cause
+    // some styles such as `transition` do not care about style setting order.
+    // `transtion: all 1s ease; width: 100px;` and `width: 100px; transtion: all 1s ease;`
+    // should be considered equal.
+    for (int i = 0; i < commandLength; i++) {
+      UICommand command = commands[i];
+      UICommandType commandType = command.type;
+      int id = command.id;
+      Pointer nativePtr = command.nativePtr;
+
+      try {
+        switch (commandType) {
+          case UICommandType.setStyle:
+            String key = command.args[0];
+            String value = command.args[1];
+            controller.view.setRenderStyle(id, key, value);
+            break;
+          default:
+            break;
+        }
+      } catch (e, stack) {
+        print('$e\n$stack');
+      }
+    }
   }
 }
