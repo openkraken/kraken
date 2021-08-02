@@ -435,7 +435,6 @@ void flushUICommand() {
       UICommand command = commands[i];
       UICommandType commandType = command.type;
       int id = command.id;
-      Pointer nativePtr = command.nativePtr;
 
       try {
         switch (commandType) {
