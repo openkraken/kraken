@@ -1191,16 +1191,22 @@ class Element extends Node
   // Universal style property change callback.
   @mustCallSuper
   void setStyle(String key, dynamic value) {
-    style.setProperty(key, value, viewportSize, renderBoxModel?.renderStyle);
+    // @HACK: delay transition property at next frame to make sure transition trigger after all style had been set.
+    // https://github.com/WebKit/webkit/blob/master/Source/WebCore/style/StyleTreeResolver.cpp#L220
+    // This it not a good solution between webkit implementation which write all new style property into an RenderStyle object
+    // then trigger the animation phase.
+    if (key == TRANSITION) {
+      SchedulerBinding.instance!.addPostFrameCallback((timestamp) {
+        style.setProperty(key, value, viewportSize, renderBoxModel?.renderStyle);
+      });
+    } else {
+      style.setProperty(key, value, viewportSize, renderBoxModel?.renderStyle);
+    }
   }
 
   // Universal RenderStyle set callback.
   @mustCallSuper
   void setRenderStyle(String key, dynamic value) {
-    // @HACK: delay transition property at next frame to make sure transition trigger after all style had been set.
-    // https://github.com/WebKit/webkit/blob/master/Source/WebCore/style/StyleTreeResolver.cpp#L220
-    // This it not a good solution between webkit implementation which write all new style property into an RenderStyle object
-    // then trigger the animation phase.
     if (key == TRANSITION) {
       SchedulerBinding.instance!.addPostFrameCallback((timestamp) {
         style.setRenderStyle(key, value, viewportSize, renderBoxModel?.renderStyle);
