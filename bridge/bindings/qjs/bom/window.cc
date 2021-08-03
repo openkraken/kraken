@@ -93,7 +93,7 @@ PROP_SETTER(Window, colorScheme)(QjsContext *ctx, JSValue this_val, int argc, JS
 PROP_GETTER(Window, __location__)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, 1));
   if (window == nullptr) return JS_UNDEFINED;
-  return window->m_location->jsObject;
+  return JS_DupValue(ctx, window->m_location->jsObject);
 }
 PROP_SETTER(Window, __location__)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
