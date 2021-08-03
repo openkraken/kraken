@@ -30,6 +30,7 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     ./bindings/qjs/dom/text_node_test.cc
     ./bindings/qjs/bom/window_test.cc
     ./bindings/qjs/dom/custom_event_test.cc
+    ./test/test_framework_test.cc
   )
 
   ### kraken_unit_test executable

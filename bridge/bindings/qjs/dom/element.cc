@@ -650,7 +650,6 @@ JSClassExoticMethods ElementInstance::exoticMethods{
 JSValue ElementInstance::getProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSValue receiver) {
   auto *element = static_cast<ElementInstance *>(JS_GetOpaque(obj, Element::classId()));
   auto *prototype = static_cast<Element *>(element->prototype());
-  KRAKEN_LOG(VERBOSE) << "getProperty: " << JS_AtomToCString(ctx, atom);
   if (JS_HasProperty(ctx, prototype->m_prototypeObject, atom)) {
     return JS_GetPropertyInternal(ctx, prototype->m_prototypeObject, atom, element->instanceObject, 0);
   }

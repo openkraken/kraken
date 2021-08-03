@@ -225,6 +225,7 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
     NativeString *status = kraken::binding::qjs::jsValueToNativeString(ctx, statusValue);
     callbackContext->executeCallback(callbackContext->context->getContextId(), status);
     status->free();
+    JS_FreeValue(ctx, proxyObject);
     return JS_NULL;
   };
   auto *callbackContext = new ExecuteCallbackContext(context.get(), executeCallback);
@@ -238,6 +239,7 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
   JSValue arguments[] = {callback};
   JS_Call(context->ctx(), executeTestCallback, executeTestCallback, 1, arguments);
   JS_FreeValue(context->ctx(), executeTestCallback);
+  JS_FreeValue(context->ctx(), callback);
   executeTestCallback = JS_NULL;
 }
 
