@@ -128,6 +128,7 @@ NativeString *jsValueToNativeString(QjsContext *ctx, JSValue &value);
 void buildUICommandArgs(QjsContext *ctx, JSValue key, NativeString &args_01);
 NativeString *stringToNativeString(std::string &string);
 std::string jsValueToStdString(QjsContext *ctx, JSValue &value);
+std::string jsAtomToStdString(QjsContext *ctx, JSAtom atom);
 
 
 } // namespace kraken::binding::qjs

@@ -105,13 +105,13 @@ JSValue Element::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val
 
   ElementInstance *element;
   if (elementCreatorMap.count(name) > 0) {
-    element = elementCreatorMap[name](this, cName);
+    element = elementCreatorMap[name](this, name);
   } else if (name == "HTML") {
-    element = new ElementInstance(this, cName, false);
+    element = new ElementInstance(this, name, false);
     element->eventTargetId = HTML_TARGET_ID;
   } else {
     // Fallback to default Element class
-    element = new ElementInstance(this, cName, true);
+    element = new ElementInstance(this, name, true);
   }
 
   JS_FreeCString(m_ctx, cName);
@@ -615,7 +615,7 @@ void ElementInstance::_beforeUpdateId(JSValue &oldId, JSValue &newId) {
   }
 }
 
-ElementInstance::ElementInstance(Element *element, const char *tagName, bool shouldAddUICommand) :
+ElementInstance::ElementInstance(Element *element, std::string tagName, bool shouldAddUICommand) :
   m_tagName(tagName),
   NodeInstance(element, NodeType::ELEMENT_NODE,
                DocumentInstance::instance(
@@ -631,8 +631,7 @@ ElementInstance::ElementInstance(Element *element, const char *tagName, bool sho
                             JS_PROP_NORMAL | JS_PROP_ENUMERABLE);
 
   if (shouldAddUICommand) {
-    std::string str = std::string(tagName);
-    NativeString *args_01 = stringToNativeString(str);
+    NativeString *args_01 = stringToNativeString(tagName);
     ::foundation::UICommandBuffer::instance(m_context->getContextId())
       ->addCommand(eventTargetId, UICommand::createElement, *args_01, &nativeEventTarget);
   }
@@ -651,6 +650,7 @@ JSClassExoticMethods ElementInstance::exoticMethods{
 JSValue ElementInstance::getProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSValue receiver) {
   auto *element = static_cast<ElementInstance *>(JS_GetOpaque(obj, Element::classId()));
   auto *prototype = static_cast<Element *>(element->prototype());
+  KRAKEN_LOG(VERBOSE) << "getProperty: " << JS_AtomToCString(ctx, atom);
   if (JS_HasProperty(ctx, prototype->m_prototypeObject, atom)) {
     return JS_GetPropertyInternal(ctx, prototype->m_prototypeObject, atom, element->instanceObject, 0);
   }

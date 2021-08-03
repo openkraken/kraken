@@ -74,8 +74,8 @@ struct NativeEventTarget {
 class EventTargetInstance : public Instance {
 public:
   EventTargetInstance() = delete;
-  explicit EventTargetInstance(EventTarget *eventTarget, JSClassID classId, JSClassExoticMethods &exoticMethods, const char* name);
-  explicit EventTargetInstance(EventTarget *eventTarget, JSClassID classId, const char* name);
+  explicit EventTargetInstance(EventTarget *eventTarget, JSClassID classId, JSClassExoticMethods &exoticMethods, std::string name);
+  explicit EventTargetInstance(EventTarget *eventTarget, JSClassID classId, std::string name);
   ~EventTargetInstance();
 
   bool dispatchEvent(EventInstance *event);

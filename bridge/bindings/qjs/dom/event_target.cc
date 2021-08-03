@@ -4,6 +4,8 @@
  */
 
 #include "event_target.h"
+
+#include <utility>
 #include "event.h"
 #include "kraken_bridge.h"
 #include "bindings/qjs/qjs_patch.h"
@@ -284,15 +286,15 @@ JSValue EventTarget::__kraken_clear_event_listener(QjsContext *ctx, JSValue this
 #endif
 
 EventTargetInstance::EventTargetInstance(EventTarget *eventTarget, JSClassID classId,
-                                         JSClassExoticMethods &exoticMethods, const char *name) : Instance(
+                                         JSClassExoticMethods &exoticMethods, std::string name) : Instance(
   eventTarget, name, &exoticMethods, classId,
   finalize) {
   eventTargetId = globalEventTargetId++;
 }
 
-EventTargetInstance::EventTargetInstance(EventTarget *eventTarget, JSClassID classId, const char *name) : Instance(
+EventTargetInstance::EventTargetInstance(EventTarget *eventTarget, JSClassID classId, std::string name) : Instance(
   eventTarget,
-  name,
+  std::move(name),
   nullptr,
   classId,
   finalize) {

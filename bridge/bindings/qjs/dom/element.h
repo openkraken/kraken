@@ -17,7 +17,7 @@ void bindElement(std::unique_ptr<JSContext> &context);
 
 class ElementInstance;
 class Element;
-using ElementCreator = ElementInstance *(*)(Element *element, const char *tagName);
+using ElementCreator = ElementInstance *(*)(Element *element, std::string tagName);
 
 struct NativeBoundingClientRect {
   double x;
@@ -106,7 +106,7 @@ public:
   static inline JSClassID classID();
 
 private:
-  explicit ElementInstance(Element *element, const char* tagName, bool shouldAddUICommand);
+  explicit ElementInstance(Element *element, std::string tagName, bool shouldAddUICommand);
   void _notifyNodeRemoved(NodeInstance *node) override;
   void _notifyChildRemoved();
   void _notifyNodeInsert(NodeInstance *insertNode) override;
@@ -114,7 +114,7 @@ private:
   void _didModifyAttribute(std::string &name, JSValue &oldId, JSValue &newId);
   void _beforeUpdateId(JSValue &oldId, JSValue &newId);
 
-  const char* m_tagName;
+  std::string m_tagName;
   friend Element;
   friend NodeInstance;
   friend Node;

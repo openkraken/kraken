@@ -6,6 +6,8 @@
 #ifndef KRAKENBRIDGE_NODE_H
 #define KRAKENBRIDGE_NODE_H
 
+#include <utility>
+
 #include "event_target.h"
 
 namespace kraken::binding::qjs {
@@ -70,9 +72,9 @@ private:
 class NodeInstance : public EventTargetInstance {
 public:
   NodeInstance() = delete;
-  explicit NodeInstance(Node *node, NodeType nodeType, DocumentInstance *document, JSClassID classId, const char* name) : EventTargetInstance(node, classId, name),
+  explicit NodeInstance(Node *node, NodeType nodeType, DocumentInstance *document, JSClassID classId, std::string name) : EventTargetInstance(node, classId, std::move(name)),
                                                                                      m_document(document), nodeType(nodeType) {}
-  explicit NodeInstance(Node *node, NodeType nodeType, DocumentInstance *document, JSClassID classId, JSClassExoticMethods &exoticMethods, const char *name) :
+  explicit NodeInstance(Node *node, NodeType nodeType, DocumentInstance *document, JSClassID classId, JSClassExoticMethods &exoticMethods, std::string name) :
     EventTargetInstance(node, classId, exoticMethods, name), m_document(document), nodeType(nodeType) {}
   ~NodeInstance();
   bool isConnected();

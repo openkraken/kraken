@@ -201,4 +201,11 @@ std::string jsValueToStdString(QjsContext *ctx, JSValue &value) {
   return str;
 }
 
+std::string jsAtomToStdString(QjsContext *ctx, JSAtom atom) {
+  const char* cstr = JS_AtomToCString(ctx, atom);
+  std::string str = std::string(cstr);
+  JS_FreeCString(ctx, cstr);
+  return str;
+}
+
 } // namespace kraken::binding::qjs
