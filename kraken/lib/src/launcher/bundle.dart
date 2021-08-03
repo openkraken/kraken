@@ -42,8 +42,12 @@ abstract class KrakenBundle {
 
   Future<void> resolve();
 
-  static Future<KrakenBundle> getBundle(String path, { String? contentOverride, required int contextId }) async {
+  static Future<KrakenBundle> getBundle(String path, { String? contentOverride, required int contextId, bool? needUpdateUrl }) async {
     KrakenBundle bundle;
+
+    if (needUpdateUrl == true) {
+      updateUrl(path);
+    }
 
     if (contentOverride != null && contentOverride.isNotEmpty) {
       bundle = RawBundle(contentOverride, path);
@@ -87,10 +91,6 @@ class RawBundle extends KrakenBundle {
   }
 }
 
-Map<int, String> hostMap = Map();
-Map<int, String> schemeMap = Map();
-Map<int, int> portMap = Map();
-
 class NetworkBundle extends KrakenBundle {
   int contextId;
   NetworkBundle(String url, { required this.contextId })
@@ -103,15 +103,13 @@ class NetworkBundle extends KrakenBundle {
     if (path.startsWith('//')) path = 'https' + path;
 
     RegExp exp = RegExp("^([a-z][a-z\d\+\-\.]*:)?\/\/");
-    if (!exp.hasMatch(path) && hostMap[contextId] != null) {
+    if (!exp.hasMatch(path)) {
       // relative path.
-      path = schemeMap[contextId]! + '://' + hostMap[contextId]! + ':' + portMap[contextId]!.toString() + path;
+      Uri uriHref = Uri.parse(href);
+      path = uriHref.scheme + '://' + uriHref.host + ':' + uriHref.port.toString() + path;
     }
 
     Uri uri = Uri.parse(path);
-    hostMap[contextId] = uri.host;
-    schemeMap[contextId] = uri.scheme;
-    portMap[contextId] = uri.port;
 
     NetworkAssetBundle bundle = NetworkAssetBundle(uri, contextId: contextId);
     bundle.httpClient.userAgent = getKrakenInfo().userAgent;

@@ -13,6 +13,7 @@ import 'package:kraken/launcher.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/src/module/performance_timing.dart';
+import 'package:kraken/foundation.dart';
 import 'platform.dart';
 import 'native_types.dart';
 
@@ -353,6 +354,17 @@ void _onJSError(int contextId, Pointer<Utf8> charStr) {
 
 final Pointer<NativeFunction<NativeJSError>> _nativeOnJsError = Pointer.fromFunction(_onJSError);
 
+Pointer<NativeString> _onGetHref() {
+  Pointer<NativeString> nativeString = malloc.allocate<NativeString>(sizeOf<NativeString>());
+  nativeString.ref.string = _stringToUint16(href);
+  nativeString.ref.length = href.length;
+  return nativeString;
+}
+
+typedef NativeGetHref = Pointer<NativeString> Function();
+
+final Pointer<NativeFunction<NativeGetHref>> _nativeGetHref = Pointer.fromFunction(_onGetHref);
+
 final List<int> _dartNativeMethods = [
   _nativeInvokeModule.address,
   _nativeRequestBatchUpdate.address,
@@ -372,6 +384,7 @@ final List<int> _dartNativeMethods = [
   _nativeInitDocument.address,
   _nativeGetEntries.address,
   _nativeOnJsError.address,
+  _nativeGetHref.address,
 ];
 
 typedef NativeRegisterDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);

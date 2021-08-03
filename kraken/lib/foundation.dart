@@ -10,3 +10,4 @@ export 'src/foundation/http_client_request.dart';
 export 'src/foundation/http_client_response.dart';
 export 'src/foundation/http_headers.dart';
 export 'src/foundation/http_overrides.dart';
+export 'src/foundation/url.dart';
