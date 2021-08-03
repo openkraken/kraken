@@ -14,7 +14,7 @@ namespace kraken::binding::qjs {
 std::once_flag kEventInitOnceFlag;
 
 void bindEvent(std::unique_ptr<JSContext> &context) {
-  auto *constructor = new Event(context.get());
+  auto *constructor = Event::instance(context.get());
   context->defineGlobalProperty("Event", constructor->classObject);
 }
 
@@ -154,13 +154,16 @@ EventInstance * EventInstance::fromNativeEvent(Event *event, NativeEvent *native
 
 EventInstance::EventInstance(Event *event, NativeEvent *nativeEvent)
   : nativeEvent(nativeEvent), Instance(event, "Event", nullptr, Event::kEventClassID, finalizer) {}
-EventInstance::EventInstance(Event *jsEvent, std::string eventType, JSValue eventInit) : Instance(jsEvent, "Event",
+EventInstance::EventInstance(Event *jsEvent, JSAtom eventType, JSValue eventInit) : Instance(jsEvent, "Event",
                                                                                                   nullptr,
                                                                                                   Event::kEventClassID,
                                                                                                   finalizer) {
+  JSValue v = JS_AtomToValue(m_ctx, eventType);
   nativeEvent = new NativeEvent{
-    stringToNativeString(eventType)
+    jsValueToNativeString(m_ctx, v)
   };
+  JS_FreeValue(m_ctx, v);
+
   auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
   nativeEvent->timeStamp = ms.count();
 

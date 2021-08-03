@@ -20,7 +20,9 @@ struct NativeCustomEvent {
 class CustomEvent : public Event {
 public:
   CustomEvent() = delete;
-  explicit CustomEvent(JSContext *context) : Event(context) {};
+  explicit CustomEvent(JSContext *context) : Event(context) {
+    JS_SetPrototype(m_ctx, m_prototypeObject, Event::instance(m_context)->prototype());
+  };
   JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
 
   static JSValue initCustomEvent(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
@@ -34,7 +36,7 @@ private:
 
 class CustomEventInstance : public EventInstance {
 public:
-  explicit CustomEventInstance(CustomEvent *jsCustomEvent, std::string CustomEventType, JSValue eventInit);
+  explicit CustomEventInstance(CustomEvent *jsCustomEvent, JSAtom CustomEventType, JSValue eventInit);
   explicit CustomEventInstance(CustomEvent *jsCustomEvent, NativeCustomEvent* nativeCustomEvent);
   ~CustomEventInstance() override {
     delete nativeCustomEvent;

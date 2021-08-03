@@ -17,6 +17,8 @@ public:
     return HostClass::constructor(ctx, func_obj, this_val, argc, argv);
   }
 
+  OBJECT_INSTANCE(ParentClass);
+
   static JSValue foo(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     return JS_NewFloat64(ctx, 20);
   }
@@ -24,12 +26,15 @@ private:
   ObjectFunction m_foo{m_context, m_prototypeObject, "foo", foo, 0};
 };
 
+OBJECT_INSTANCE_IMPL(ParentClass);
+
 class SampleClass;
 static JSClassID kSampleClassId{0};
 
 class SampleClassInstance : public Instance {
 public:
-  explicit SampleClassInstance(HostClass *sampleClass) : Instance(sampleClass, "SampleClass", nullptr, kSampleClassId, finalizer) {};
+  explicit SampleClassInstance(HostClass *sampleClass) : Instance(sampleClass, "SampleClass", nullptr, kSampleClassId, finalizer) {
+  };
 private:
   static void finalizer(JSRuntime *rt, JSValue v) {
     auto *instance = static_cast<SampleClassInstance *>(JS_GetOpaque(v, kSampleClassId));
@@ -47,6 +52,7 @@ public:
     std::call_once(kSampleClassOnceFlag, []() {
       JS_NewClassID(&kSampleClassId);
     });
+    JS_SetPrototype(m_ctx, m_prototypeObject, ParentClass::instance(m_context)->prototype());
   }
   JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override {
     auto *sampleClass = static_cast<SampleClass *>(JS_GetOpaque(func_obj, JSContext::kHostClassClassId));
@@ -75,7 +81,9 @@ TEST(HostClass, newInstance) {
   });
   auto &context = bridge->getContext();
   auto *sampleObject = new SampleClass(context.get());
+  auto *parentObject = ParentClass::instance(context.get());
   context->defineGlobalProperty("SampleClass", sampleObject->classObject);
+  context->defineGlobalProperty("ParentClass", parentObject->classObject);
   const char* code = "let obj = new SampleClass(1,2,3,4); console.log(obj.f())";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   delete bridge;
@@ -96,11 +104,13 @@ TEST(HostClass, instanceOf) {
   });
   auto &context = bridge->getContext();
   auto *sampleObject = new SampleClass(context.get());
+  auto *parentObject = ParentClass::instance(context.get());
   // Test for C API
   context->defineGlobalProperty("SampleClass", sampleObject->classObject);
+  context->defineGlobalProperty("ParentClass", parentObject->classObject);
   JSValue args[] = {};
   JSValue object = JS_CallConstructor(context->ctx(), sampleObject->classObject, 0, args);
-  bool isInstanceof = JS_IsInstanceOf(context->ctx(), object, sampleObject->classObject);
+  bool isInstanceof = JS_IsInstanceOf(context->ctx(), object, parentObject->classObject);
   EXPECT_EQ(isInstanceof, true);
   JS_FreeValue(context->ctx(), object);
 
@@ -126,6 +136,9 @@ TEST(HostClass, inheritance) {
   auto &context = bridge->getContext();
   auto *sampleObject = new SampleClass(context.get());
 
+  auto *parentObject = ParentClass::instance(context.get());
+  context->defineGlobalProperty("ParentClass", parentObject->classObject);
+
   context->defineGlobalProperty("SampleClass", sampleObject->classObject);
 
   const char* code = "let obj = new SampleClass(1,2,3,4);\n"
@@ -149,6 +162,9 @@ TEST(HostClass, inherintanceInJavaScript) {
   });
   auto &context = bridge->getContext();
   auto *sampleObject = new SampleClass(context.get());
+
+  auto *parentObject = ParentClass::instance(context.get());
+  context->defineGlobalProperty("ParentClass", parentObject->classObject);
 
   context->defineGlobalProperty("SampleClass", sampleObject->classObject);
 
@@ -179,6 +195,9 @@ TEST(HostClass, multipleInstance) {
     KRAKEN_LOG(VERBOSE) << errmsg;
   });
   auto &context = bridge->getContext();
+
+  auto *parentObject = ParentClass::instance(context.get());
+  context->defineGlobalProperty("ParentClass", parentObject->classObject);
 
   // Test for C API 1
   {

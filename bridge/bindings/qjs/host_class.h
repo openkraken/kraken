@@ -18,7 +18,7 @@ public:
   HostClass(JSContext *context, std::string name)
     : m_context(context), m_name(std::move(name)), m_ctx(context->ctx()), m_contextId(context->getContextId()) {
     JSClassDef def{};
-    def.class_name = m_name.c_str();
+    def.class_name = "HostClass";
     def.finalizer = proxyFinalize;
     def.call = proxyCall;
     JS_NewClass(context->runtime(), JSContext::kHostClassClassId, &def);
@@ -77,7 +77,7 @@ public:
   explicit Instance(HostClass *hostClass, std::string name, JSClassExoticMethods *exotic, JSClassID classId, JSClassFinalizer finalizer)
     : m_context(hostClass->context()), m_hostClass(hostClass), m_name(std::move(name)), m_ctx(m_context->ctx()) {
     JSClassDef def{};
-    def.class_name = m_name.c_str();
+    def.class_name = "HostClass::instance";
     def.finalizer = finalizer;
     def.exotic = exotic;
     int32_t success = JS_NewClass(m_context->runtime(), classId, &def);

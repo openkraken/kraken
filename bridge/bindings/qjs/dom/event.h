@@ -27,9 +27,10 @@ public:
   static EventInstance *buildEventInstance(std::string &eventType, JSContext *context, void *nativeEvent,
                                            bool isCustomEvent);
 
+  OBJECT_INSTANCE(Event);
+
 private:
   static std::unordered_map<std::string, EventCreator> m_eventCreatorMap;
-  OBJECT_INSTANCE(Event);
   DEFINE_HOST_CLASS_PROPERTY(10, Type, Bubbles, Cancelable, Timestamp, DefaultPrevented, Target, SrcElement, CurrentTarget, ReturnValue, CancelBubble)
 };
 
@@ -65,7 +66,7 @@ public:
   inline void cancelled(bool v) { m_cancelled = v; }
   inline const bool propagationImmediatelyStopped() { return m_propagationImmediatelyStopped; }
 protected:
-  explicit EventInstance(Event *jsEvent, std::string eventType, JSValue eventInit);
+  explicit EventInstance(Event *jsEvent, JSAtom eventType, JSValue eventInit);
   explicit EventInstance(Event *jsEvent, NativeEvent *nativeEvent);
   bool m_cancelled{false};
   bool m_propagationStopped{false};

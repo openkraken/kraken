@@ -22,6 +22,7 @@ TextNode::TextNode(JSContext *context) :  Node(context, "TextNode") {
   std::call_once(kTextNodeInitFlag, []() {
     JS_NewClassID(&kTextNodeClassId);
   });
+  JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
 }
 
 OBJECT_INSTANCE_IMPL(TextNode);

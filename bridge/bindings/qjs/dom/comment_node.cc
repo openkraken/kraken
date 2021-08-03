@@ -28,6 +28,7 @@ Comment::Comment(JSContext *context) : Node(context, "Comment") {
   std::call_once(kCommentInitFlag, []() {
     JS_NewClassID(&kCommentClassId);
   });
+  JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
 }
 
 JSValue Comment::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {

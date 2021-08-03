@@ -39,6 +39,7 @@ Document::Document(JSContext *context) : Node(context, "Document") {
   std::call_once(kDocumentInitOnceFlag, []() {
     JS_NewClassID(&kDocumentClassID);
   });
+  JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
 }
 
 JSClassID Document::classId() {

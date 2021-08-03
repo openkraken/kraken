@@ -20,15 +20,19 @@ class NativeEventTarget;
 class CSSStyleDeclaration;
 class StyleDeclarationInstance;
 
+void bindEventTarget(std::unique_ptr<JSContext> &context);
+
 class EventTarget : public HostClass {
 public:
   JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
   EventTarget() = delete;
-  explicit EventTarget(JSContext *context, const char* name): HostClass(context, name) {
-  };
+  explicit EventTarget(JSContext *context, const char* name);
+  EventTarget(JSContext *context);
 
   static JSClassID classId();
   static JSClassID classId(JSValue &value);
+
+  OBJECT_INSTANCE(EventTarget);
 
 private:
   std::vector<std::string> m_jsOnlyEvents;
@@ -94,8 +98,6 @@ private:
   friend EventTarget;
   friend StyleDeclarationInstance;
 };
-
-void bindEventTarget(std::unique_ptr<JSContext> &context);
 
 } // namespace kraken::binding::qjs
 

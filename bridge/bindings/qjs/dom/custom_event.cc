@@ -60,10 +60,9 @@ JSValue CustomEvent::constructor(QjsContext *ctx, JSValue func_obj, JSValue this
     customEventInit = argv[1];
   }
 
-  const char* cCustomEventType = JS_ToCString(ctx, typeArgsValue);
-  std::string customEventType = std::string(cCustomEventType);
-  auto *customEvent = new CustomEventInstance(CustomEvent::instance(context()), customEventType, customEventInit);
-  JS_FreeCString(ctx, customEventType.c_str());
+  JSAtom typeAtom = JS_ValueToAtom(m_ctx, typeArgsValue);
+  auto *customEvent = new CustomEventInstance(CustomEvent::instance(context()), typeAtom, customEventInit);
+  JS_FreeAtom(m_ctx, typeAtom);
 
   return customEvent->instanceObject;
 }
@@ -79,13 +78,14 @@ PROP_SETTER(CustomEvent, detail)(QjsContext *ctx, JSValue this_val, int argc, JS
   return JS_NULL;
 }
 
-CustomEventInstance::CustomEventInstance(CustomEvent *jsCustomEvent, std::string customEventType, JSValue eventInit)
-  : EventInstance(jsCustomEvent, std::move(customEventType), eventInit) {
+CustomEventInstance::CustomEventInstance(CustomEvent *jsCustomEvent, JSAtom customEventType, JSValue eventInit)
+  : EventInstance(jsCustomEvent, customEventType, eventInit) {
   if (!JS_IsNull(eventInit)) {
     JSAtom detailKey = JS_NewAtom(m_ctx, "detail");
     if (JS_HasProperty(m_ctx, eventInit, detailKey)) {
       m_detail.setValue(JS_GetProperty(m_ctx, eventInit, detailKey));
     }
+    JS_FreeAtom(m_ctx, detailKey);
   }
 }
 

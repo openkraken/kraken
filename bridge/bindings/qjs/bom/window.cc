@@ -29,6 +29,7 @@ Window::Window(JSContext *context) : EventTarget(context, "Window") {
   std::call_once(kWindowInitOnceFlag, []() {
     JS_NewClassID(&kWindowClassId);
   });
+  JS_SetPrototype(m_ctx, m_prototypeObject, EventTarget::instance(m_context)->prototype());
 }
 
 JSClassID Window::classId() {

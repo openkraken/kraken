@@ -29,8 +29,12 @@ class TextNodeInstance;
 class Node : public EventTarget {
 public:
   Node() = delete;
-  Node(JSContext *context, const std::string &className) : EventTarget(context, className.c_str()) {}
-  Node(JSContext *context) : EventTarget(context, "Node") {}
+  Node(JSContext *context, const std::string &className) : EventTarget(context, className.c_str()) {
+    JS_SetPrototype(m_ctx, m_prototypeObject, EventTarget::instance(m_context)->prototype());
+  }
+  Node(JSContext *context) : EventTarget(context, "Node") {
+    JS_SetPrototype(m_ctx, m_prototypeObject, EventTarget::instance(m_context)->prototype());
+  }
 
   OBJECT_INSTANCE(Node);
 

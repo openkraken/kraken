@@ -27,6 +27,7 @@ Element::Element(JSContext *context) : Node(context, "Element") {
   std::call_once(kElementInitOnceFlag, []() {
     JS_NewClassID(&kElementClassId);
   });
+  JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
 }
 
 JSClassID Element::classId() {

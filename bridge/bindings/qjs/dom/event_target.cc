@@ -14,6 +14,20 @@ namespace kraken::binding::qjs {
 
 static std::atomic<int32_t> globalEventTargetId{0};
 
+void bindEventTarget(std::unique_ptr<JSContext> &context) {
+  auto *constructor = EventTarget::instance(context.get());
+  // Set globalThis and Window's prototype to EventTarget's prototype to support EventTarget methods in global.
+  JS_SetPrototype(context->ctx(), context->global(), constructor->classObject);
+  context->defineGlobalProperty("EventTarget", constructor->classObject);
+}
+
+EventTarget::EventTarget(JSContext *context, const char *name): HostClass(context, name) {
+}
+EventTarget::EventTarget(JSContext *context) : HostClass(context, "EventTarget") {
+}
+
+OBJECT_INSTANCE_IMPL(EventTarget);
+
 JSValue EventTarget::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   if (argc == 1) {
     JSValue &jsOnlyEvents = argv[0];
@@ -364,13 +378,6 @@ void EventTargetInstance::finalize(JSRuntime *rt, JSValue val) {
     JS_FreeValue(eventTarget->m_ctx, eventTarget->instanceObject);
   }
   delete eventTarget;
-}
-
-void bindEventTarget(std::unique_ptr<JSContext> &context) {
-  auto *eventTargetConstructor = new EventTarget(context.get(), "EventTarget");
-  // Set globalThis and Window's prototype to EventTarget's prototype to support EventTarget methods in global.
-  JS_SetPrototype(context->ctx(), context->global(), eventTargetConstructor->prototype());
-  context->defineGlobalProperty("EventTarget", eventTargetConstructor->classObject);
 }
 
 void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *nativeEventType,
