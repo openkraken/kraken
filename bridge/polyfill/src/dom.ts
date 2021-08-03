@@ -23,3 +23,8 @@ Object.defineProperty(document, 'body', {
   enumerable: true,
   configurable: false
 });
+
+// @ts-ignore
+// https://github.com/vuejs/vue-next/blob/master/packages/runtime-dom/src/index.ts#L188
+window.ShadowRoot = () => {};
+// @ts-ignore
