@@ -199,7 +199,6 @@ KrakenInfo *getKrakenInfo() {
     krakenInfo->app_revision = APP_REV;
     krakenInfo->app_version = APP_VERSION;
     krakenInfo->system_name = SYSTEM_NAME;
-    krakenInfo->getUserAgent = getUserAgent;
   }
 
   return krakenInfo;
