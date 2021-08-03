@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/module.dart';
+import 'package:kraken/launcher.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -46,7 +47,8 @@ abstract class KrakenBundle {
     KrakenBundle bundle;
 
     if (needUpdateUrl == true) {
-      updateUrl(path);
+      KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
+      controller.updateHref(path);
     }
 
     if (contentOverride != null && contentOverride.isNotEmpty) {
@@ -105,7 +107,8 @@ class NetworkBundle extends KrakenBundle {
     RegExp exp = RegExp("^([a-z][a-z\d\+\-\.]*:)?\/\/");
     if (!exp.hasMatch(path)) {
       // relative path.
-      Uri uriHref = Uri.parse(href);
+      KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
+      Uri uriHref = Uri.parse(controller.href);
       path = uriHref.scheme + '://' + uriHref.host + ':' + uriHref.port.toString() + path;
     }
 

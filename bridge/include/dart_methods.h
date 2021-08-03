@@ -38,7 +38,7 @@ typedef NativeString *(*PlatformBrightness)(int32_t contextId);
 typedef void (*ToBlob)(void *callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId,
                        double devicePixelRatio);
 typedef void (*OnJSError)(int32_t contextId, const char *);
-typedef NativeString *(*GetHref)();
+typedef NativeString *(*GetHref)(int32_t contextId);
 typedef void (*FlushUICommand)();
 typedef void (*InitHTML)(int32_t contextId, void *nativePtr);
 typedef void (*InitWindow)(int32_t contextId, void *nativePtr);

@@ -13,7 +13,6 @@ import 'package:kraken/launcher.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/src/module/performance_timing.dart';
-import 'package:kraken/foundation.dart';
 import 'platform.dart';
 import 'native_types.dart';
 
@@ -354,14 +353,15 @@ void _onJSError(int contextId, Pointer<Utf8> charStr) {
 
 final Pointer<NativeFunction<NativeJSError>> _nativeOnJsError = Pointer.fromFunction(_onJSError);
 
-Pointer<NativeString> _onGetHref() {
+Pointer<NativeString> _onGetHref(int contextId) {
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
   Pointer<NativeString> nativeString = malloc.allocate<NativeString>(sizeOf<NativeString>());
-  nativeString.ref.string = _stringToUint16(href);
-  nativeString.ref.length = href.length;
+  nativeString.ref.string = _stringToUint16(controller.href);
+  nativeString.ref.length = controller.href.length;
   return nativeString;
 }
 
-typedef NativeGetHref = Pointer<NativeString> Function();
+typedef NativeGetHref = Pointer<NativeString> Function(Int32 contextId);
 
 final Pointer<NativeFunction<NativeGetHref>> _nativeGetHref = Pointer.fromFunction(_onGetHref);
 
