@@ -21,7 +21,7 @@ typedef StyleChangeListener = void Function(String property,  String? original, 
 
 // https://github.com/WebKit/webkit/blob/master/Source/WebCore/css/CSSProperties.json
 
-Map<String, String> CSSInitialValues = {
+Map CSSInitialValues = {
   BACKGROUND_COLOR: TRANSPARENT,
   BACKGROUND_POSITION: '0% 0%',
   BORDER_BOTTOM_COLOR: CURRENT_COLOR,
@@ -135,26 +135,18 @@ class CSSStyleDeclaration {
     return currentColor ?? CSSColor.INITIAL_COLOR;
   }
 
-  void setDefaultProperty() {
-    CSSInitialValues.forEach((String propertyName, String propertyValue) {
-      if (_properties[propertyName] == null) {
-        _properties[propertyName] = propertyValue;
-      }
-    });
-  }
-
   set transitions(Map<String, List> value) {
     _transitions = value;
   }
 
-  bool _shouldTransition(String property, String? prevValue, String nextValue) {
+  bool _shouldTransition(String property, String? prevValue, String nextValue, RenderBoxModel? renderBoxModel) {
     // When begin propertyValue is AUTO, skip animation and trigger style update directly.
-    if ((prevValue == null && CSSLength.isAuto(CSSInitialValues[property])) || CSSLength.isAuto(prevValue) || CSSLength.isAuto(nextValue)) {
+    if (CSSLength.isAuto(prevValue) || CSSLength.isAuto(nextValue)) {
       return false;
     }
 
-    // Transition works when style changes, not for the first time when style initiated.
-    return prevValue != null &&
+    // Transition does not work when renderBoxModel has not been layouted yet.
+    return renderBoxModel != null && renderBoxModel.firstLayouted &&
       CSSTransformHandlers[property] != null &&
       (_transitions.containsKey(property) || _transitions.containsKey(ALL));
   }
@@ -690,7 +682,7 @@ class CSSStyleDeclaration {
   }
 
   /// Modify RenderStyle after property is set in CSS declaration.
-  void setRenderStyle(String propertyName, value, [Size? viewportSize, RenderStyle? renderStyle]) {
+  void setRenderStyle(String propertyName, value, [Size? viewportSize, RenderBoxModel? renderBoxModel]) {
     if (CSSShorthandProperty[propertyName] != null) {
       return _setShorthandRenderStyle(propertyName, viewportSize);
     }
@@ -701,8 +693,8 @@ class CSSStyleDeclaration {
     if (currentValue == null || currentValue == prevValue) {
       return;
     }
-
-    if (_shouldTransition(propertyName, prevValue, currentValue)) {
+    RenderStyle? renderStyle = renderBoxModel?.renderStyle;
+    if (_shouldTransition(propertyName, prevValue, currentValue, renderBoxModel)) {
       _transition(propertyName, prevValue, currentValue, viewportSize, renderStyle);
     } else {
       setRenderStyleProperty(propertyName, prevValue, currentValue);

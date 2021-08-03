@@ -554,10 +554,10 @@ class Element extends Node
       _afterRendererAttach();
     }
 
-    // Default styles should be set after node is attached to tree
-    // cause transition property does not work before node attach.
+    // CSS Transition works after dom has layouted, so it needs to mark
+    // the renderBoxModel as layouted on the next frame.
     SchedulerBinding.instance!.addPostFrameCallback((timestamp) {
-      style.setDefaultProperty();
+      renderBoxModel?.firstLayouted = true;
     });
   }
 
@@ -1219,7 +1219,7 @@ class Element extends Node
   void setRenderStyle(String key, dynamic value) {
     // @NOTE: See [CSSStyleDeclaration.setProperty], value change will trigger
     // [StyleChangeListener] to be invoked in sync.
-    style.setRenderStyle(key, value, viewportSize, renderBoxModel?.renderStyle);
+    style.setRenderStyle(key, value, viewportSize, renderBoxModel);
   }
 
   @mustCallSuper
