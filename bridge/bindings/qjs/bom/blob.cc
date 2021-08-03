@@ -150,6 +150,7 @@ JSValue Blob::slice(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) 
 
   if (start == 0 && end == blob->_data.size()) {
     auto newBlob = new BlobInstance(reinterpret_cast<Blob *>(blob->m_hostClass), std::move(blob->_data), mimeType);
+    JS_SetPrototype(blob->m_ctx, newBlob->instanceObject, blob->m_hostClass->prototype());
     return newBlob->instanceObject;
   }
   std::vector<uint8_t> newData;
@@ -157,6 +158,7 @@ JSValue Blob::slice(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) 
   newData.insert(newData.begin(), blob->_data.begin() + start, blob->_data.end() - (blob->_data.size() - end));
 
   auto newBlob = new BlobInstance(reinterpret_cast<Blob *>(blob->m_hostClass), std::move(newData), mimeType);
+  JS_SetPrototype(blob->m_ctx, newBlob->instanceObject, blob->m_hostClass->prototype());
   return newBlob->instanceObject;
 }
 

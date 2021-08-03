@@ -504,14 +504,16 @@ NodeInstance::~NodeInstance() {
 }
 
 void NodeInstance::refer() {
-  JS_DupValue(m_ctx, instanceObject);
+  if (_referenceCount == 0) {
+    JS_DupValue(m_ctx, instanceObject);
+  }
+  _referenceCount++;
 }
 void NodeInstance::unrefer() {
-//  _referenceCount--;
-//  if (_referenceCount == 0 && m_context->isValid()) {
-//    JS_FreeValue(m_ctx, instanceObject);
-//  }
-  JS_FreeValue(m_ctx, instanceObject);
+  _referenceCount--;
+  if (_referenceCount == 0 && m_context->isValid()) {
+    JS_FreeValue(m_ctx, instanceObject);
+  }
 }
 void NodeInstance::_notifyNodeRemoved(NodeInstance *node) {}
 void NodeInstance::_notifyNodeInsert(NodeInstance *node) {}

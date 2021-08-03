@@ -33,7 +33,7 @@ Window::Window(JSContext *context) : EventTarget(context, "Window") {
 }
 
 JSClassID Window::classId() {
-  return kWindowClassId;
+  return 1;
 }
 
 JSValue Window::open(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
@@ -141,7 +141,7 @@ PROP_SETTER(Window, scrollY)(QjsContext *ctx, JSValue this_val, int argc, JSValu
   return JS_NULL;
 }
 
-WindowInstance::WindowInstance(Window *window) : EventTargetInstance(window, Window::classId(), "window") {
+WindowInstance::WindowInstance(Window *window) : EventTargetInstance(window, Window::kWindowClassId, "window") {
   if (getDartMethod()->initWindow != nullptr) {
     getDartMethod()->initWindow(context()->getContextId(), &nativeEventTarget);
   }
