@@ -656,6 +656,14 @@ class CSSStyleDeclaration {
           return;
         }
         break;
+    }
+
+    if (prevValue != null) {
+      _prevProperties[propertyName] = prevValue;
+    }
+    _properties[propertyName] = normalizedValue;
+
+    switch (propertyName) {
       case TRANSITION_DELAY:
       case TRANSITION_DURATION:
       case TRANSITION_TIMING_FUNCTION:
@@ -663,11 +671,6 @@ class CSSStyleDeclaration {
         CSSTransition.updateTransition(this);
         break;
     }
-
-    if (prevValue != null) {
-      _prevProperties[propertyName] = prevValue;
-    }
-    _properties[propertyName] = normalizedValue;
 
     // https://github.com/WebKit/webkit/blob/master/Source/WebCore/animation/AnimationTimeline.cpp#L257
     // Any animation found in previousAnimations but not found in newAnimations is not longer current and should be canceled.
