@@ -204,6 +204,16 @@ class CanvasElement extends Element {
   }
 
   @override
+  dynamic handleJSCall(String method, List argv) {
+    switch(method) {
+      case 'getContext':
+        return getContext(argv[0]).nativeCanvasRenderingContext2D;
+    }
+
+    return super.handleJSCall(method, argv);
+  }
+
+  @override
   void dispose() {
     super.dispose();
     // If not getContext and element is disposed that context is not existed.

@@ -177,14 +177,13 @@ function findDebugJSEngine(platform) {
 }
 
 task('build-darwin-kraken-lib', done => {
+  let externCmakeArgs = [];
   let buildType = 'Debug';
   if (process.env.KRAKEN_BUILD === 'Release') {
     buildType = 'RelWithDebInfo';
   }
 
   let builtWithDebugJsc = program.jsEngine === 'jsc' && !!program.builtWithDebugJsc;
-
-  let externCmakeArgs = [];
 
   if (isProfile) {
     externCmakeArgs.push('-DENABLE_PROFILE=TRUE');

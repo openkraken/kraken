@@ -281,7 +281,7 @@ const int args01StringMemOffset = 2;
 const int args02StringMemOffset = 3;
 const int nativePtrMemOffset = 4;
 
-final bool isEnabledLog = true;
+final bool isEnabledLog = kDebugMode && Platform.environment['ENABLE_KRAKEN_JS_LOG'] == 'true';
 
 // We found there are performance bottleneck of reading native memory with Dart FFI API.
 // So we align all UI instructions to a whole block of memory, and then convert them into a dart array at one time,
