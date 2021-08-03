@@ -724,6 +724,10 @@ class CSSStyleDeclaration {
     for (int i = 0; i < _styleChangeListeners.length; i++) {
       StyleChangeListener listener = _styleChangeListeners[i];
       listener(property, original, present);
+      // Override previous property after property is set.
+      if (_properties[property] != null) {
+        _prevProperties[property] = _properties[property]!;
+      }
     }
   }
 
