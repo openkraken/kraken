@@ -27,4 +27,3 @@ Object.defineProperty(document, 'body', {
 // @ts-ignore
 // https://github.com/vuejs/vue-next/blob/master/packages/runtime-dom/src/index.ts#L188
 window.ShadowRoot = () => {};
-// @ts-ignore
