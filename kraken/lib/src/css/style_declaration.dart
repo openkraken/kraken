@@ -137,7 +137,9 @@ class CSSStyleDeclaration {
 
   void setDefaultProperty() {
     CSSInitialValues.forEach((String propertyName, String propertyValue) {
-      _properties[propertyName] = propertyValue;
+      if (_properties[propertyName] == null) {
+        _properties[propertyName] = propertyValue;
+      }
     });
   }
 

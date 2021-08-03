@@ -1197,16 +1197,8 @@ class Element extends Node
   // Universal style property change callback.
   @mustCallSuper
   void setStyle(String key, dynamic value) {
-    style.setProperty(key, value, viewportSize, renderBoxModel?.renderStyle);
-  }
-
-  // Universal RenderStyle set callback.
-  @mustCallSuper
-  void setRenderStyle(String key, dynamic value) {
     CSSDisplay originalDisplay = CSSDisplayMixin.getDisplay(style[DISPLAY] ?? defaultDisplay);
-    // @NOTE: See [CSSStyleDeclaration.setProperty], value change will trigger
-    // [StyleChangeListener] to be invoked in sync.
-    style.setRenderStyle(key, value, viewportSize, renderBoxModel?.renderStyle);
+    style.setProperty(key, value, viewportSize, renderBoxModel?.renderStyle);
 
     // When renderer and style listener is not created when original display is none,
     // thus it needs to create renderer when style changed.
@@ -1220,6 +1212,14 @@ class Element extends Node
       }
       attachTo(parent, after: after);
     }
+  }
+
+  // Universal RenderStyle set callback.
+  @mustCallSuper
+  void setRenderStyle(String key, dynamic value) {
+    // @NOTE: See [CSSStyleDeclaration.setProperty], value change will trigger
+    // [StyleChangeListener] to be invoked in sync.
+    style.setRenderStyle(key, value, viewportSize, renderBoxModel?.renderStyle);
   }
 
   @mustCallSuper
