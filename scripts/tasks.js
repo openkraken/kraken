@@ -205,7 +205,12 @@ task('build-darwin-kraken-lib', done => {
     }
   });
 
-  execSync(`cmake --build ${paths.bridge}/cmake-build-macos-x86_64 --target kraken kraken_test -- -j 12`, {
+  let krakenTargets = ['kraken kraken_test'];
+  if (program.jsEngine === 'quickjs') {
+    krakenTargets.push('kraken_unit_test');
+  }
+
+  execSync(`cmake --build ${paths.bridge}/cmake-build-macos-x86_64 --target ${krakenTargets.join(' ')} -- -j 6`, {
     stdio: 'inherit'
   });
 
@@ -225,6 +230,11 @@ task('build-darwin-kraken-lib', done => {
     }
   }
 
+  done();
+});
+
+task('run-bridge-unit-test', done => {
+  execSync(`${path.join(paths.bridge, 'build/macos/lib/x86_64/kraken_unit_test')}`, {stdio: 'inherit'});
   done();
 });
 

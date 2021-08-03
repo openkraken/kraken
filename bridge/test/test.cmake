@@ -43,6 +43,13 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   target_compile_definitions(kraken_unit_test PUBLIC -DFLUTTER_BACKEND=0)
   target_compile_definitions(kraken PUBLIC -DFLUTTER_BACKEND=1)
   target_compile_definitions(kraken_static PUBLIC -DFLUTTER_BACKEND=1)
+  if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
+    message(1)
+    set_target_properties(kraken_unit_test
+            PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
+            )
+  endif()
 endif()
 
 ### kraken_integration support library
