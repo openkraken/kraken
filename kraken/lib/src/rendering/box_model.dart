@@ -629,6 +629,9 @@ class RenderBoxModel extends RenderBox
       // Copy renderPositionHolder
       ..renderPositionHolder = renderPositionHolder
 
+      // Copy first layouted flag
+      ..firstLayouted = firstLayouted
+
       // Copy parentData
       ..parentData = parentData;
   }

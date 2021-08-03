@@ -257,8 +257,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   @override
-  void setStyle(String key, value) {
-    super.setStyle(key, value);
+  void setRenderStyle(String key, value) {
+    super.setRenderStyle(key, value);
 
     if (_renderInputBox != null) {
       RenderStyle renderStyle = renderBoxModel!.renderStyle;
