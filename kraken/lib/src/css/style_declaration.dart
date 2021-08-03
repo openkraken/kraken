@@ -21,7 +21,7 @@ typedef StyleChangeListener = void Function(String property,  String? original, 
 
 // https://github.com/WebKit/webkit/blob/master/Source/WebCore/css/CSSProperties.json
 
-Map CSSInitialValues = {
+Map<String, String> CSSInitialValues = {
   BACKGROUND_COLOR: TRANSPARENT,
   BACKGROUND_POSITION: '0% 0%',
   BORDER_BOTTOM_COLOR: CURRENT_COLOR,
@@ -133,6 +133,12 @@ class CSSStyleDeclaration {
   String getCurrentColor() {
     String? currentColor = _properties[COLOR];
     return currentColor ?? CSSColor.INITIAL_COLOR;
+  }
+
+  void setDefaultProperty() {
+    CSSInitialValues.forEach((String propertyName, String propertyValue) {
+      _properties[propertyName] = propertyValue;
+    });
   }
 
   set transitions(Map<String, List> value) {

@@ -553,6 +553,12 @@ class Element extends Node
       parent.addChildRenderObject(this, after: after);
       _afterRendererAttach();
     }
+
+    // Default styles should be set after node is attached to tree
+    // cause transition property does not work before node attach.
+    SchedulerBinding.instance!.addPostFrameCallback((timestamp) {
+      style.setDefaultProperty();
+    });
   }
 
   // Detach renderObject of current node from parent
