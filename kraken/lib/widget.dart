@@ -25,7 +25,7 @@ class _WidgetCustomElement extends dom.Element {
   late BuildOwner _buildOwner;
   late Widget _widget;
   _KrakenAdapterWidgetPropertiesState? _propertiesState;
-  _WidgetCustomElement(int targetId, Pointer<NativeElement> nativePtr, dom.ElementManager elementManager, String tagName, WidgetCreator creator)
+  _WidgetCustomElement(int targetId, Pointer<NativeEventTarget> nativePtr, dom.ElementManager elementManager, String tagName, WidgetCreator creator)
       : super(
       targetId,
       nativePtr,
@@ -176,7 +176,7 @@ class Kraken extends StatelessWidget {
     String tagName = localName.toUpperCase();
 
     defineElement(tagName, (id, nativePtr, elementManager) {
-      return _WidgetCustomElement(id, nativePtr.cast<NativeElement>(), elementManager, tagName, creator);
+      return _WidgetCustomElement(id, nativePtr.cast<NativeEventTarget>(), elementManager, tagName, creator);
     });
   }
 
@@ -269,7 +269,7 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
 
     double viewportWidth = _krakenWidget.viewportWidth ?? window.physicalSize.width / window.devicePixelRatio;
     double viewportHeight = _krakenWidget.viewportHeight ?? window.physicalSize.height / window.devicePixelRatio;
-    
+
     if (viewportWidth == 0.0 && viewportHeight == 0.0) {
       throw FlutterError('''Can\'t get viewportSize from window. Please set viewportWidth and viewportHeight manually.
 This situation often happened when you trying creating kraken when FlutterView not initialized.''');

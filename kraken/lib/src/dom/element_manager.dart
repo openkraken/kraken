@@ -405,17 +405,17 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       viewport.bottomInset = bottomInset;
     } else {
       bool shouldScrollByToCenter = false;
-      // InputElement? focusInputElement = InputElement.focusInputElement;
-      // if (focusInputElement != null) {
-      //   RenderBox? renderer = focusInputElement.renderer as RenderBox?;
-      //   if (renderer != null && renderer.hasSize) {
-      //     Offset focusOffset = renderer.localToGlobal(Offset.zero);
-      //     // FOCUS_VIEWINSET_BOTTOM_OVERALL to meet border case.
-      //     if (focusOffset.dy > viewportHeight - bottomInset - FOCUS_VIEWINSET_BOTTOM_OVERALL) {
-      //       shouldScrollByToCenter = true;
-      //     }
-      //   }
-      // }
+      InputElement? focusInputElement = InputElement.focusInputElement;
+      if (focusInputElement != null) {
+        RenderBox? renderer = focusInputElement.renderer as RenderBox?;
+        if (renderer != null && renderer.hasSize) {
+          Offset focusOffset = renderer.localToGlobal(Offset.zero);
+          // FOCUS_VIEWINSET_BOTTOM_OVERALL to meet border case.
+          if (focusOffset.dy > viewportHeight - bottomInset - FOCUS_VIEWINSET_BOTTOM_OVERALL) {
+            shouldScrollByToCenter = true;
+          }
+        }
+      }
       // Show keyboard
       viewport.bottomInset = bottomInset;
       if (shouldScrollByToCenter) {

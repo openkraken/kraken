@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'dart:ui';
 import 'dart:ffi';
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';

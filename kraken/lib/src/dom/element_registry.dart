@@ -21,8 +21,8 @@ void defineElement(String name, ElementCreator creator) {
 Element createElement(int id, Pointer<NativeEventTarget> nativePtr, String name, ElementManager elementManager) {
   ElementCreator? creator = _elementRegistry[name];
   if (creator == null) {
-    print('ERROR: unexpected element type "$type"');
-    return Element(id, nativePtr.cast<NativeElement>(), elementManager, tagName: UNKNOWN);
+    print('ERROR: unexpected element type "$name"');
+    return Element(id, nativePtr, elementManager, tagName: UNKNOWN);
   }
 
   Element element = creator(id, nativePtr, elementManager);

@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 
-import 'dart:collection';
 import 'dart:ffi';
 import 'dart:ui';
 import 'package:kraken/bridge.dart';

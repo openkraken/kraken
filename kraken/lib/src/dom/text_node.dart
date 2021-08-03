@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 
-import 'dart:collection';
 import 'dart:ffi';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';

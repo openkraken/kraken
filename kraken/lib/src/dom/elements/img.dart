@@ -13,7 +13,6 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/bridge.dart';
 import 'dart:async';
 import 'dart:ffi';
-import 'dart:collection';
 
 const String IMAGE = 'IMG';
 
@@ -27,11 +26,6 @@ bool _isNumberString(String str) {
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
 };
-
-// final Pointer<NativeFunction<GetImageWidth>> nativeGetImageWidth =  Pointer.fromFunction(ImageElement.getImageWidth, 0.0);
-// final Pointer<NativeFunction<GetImageHeight>> nativeGetImageHeight =  Pointer.fromFunction(ImageElement.getImageHeight, 0.0);
-// final Pointer<NativeFunction<GetImageWidth>> nativeGetImageNaturalWidth =  Pointer.fromFunction(ImageElement.getImageNaturalWidth, 0.0);
-// final Pointer<NativeFunction<GetImageHeight>> nativeGetImageNaturalHeight =  Pointer.fromFunction(ImageElement.getImageNaturalHeight, 0.0);
 
 class ImageElement extends Element {
   String? _source;
@@ -55,8 +49,6 @@ class ImageElement extends Element {
 
   // Whether is multiframe image
   bool isMultiframe = false;
-
-  static SplayTreeMap<int, ImageElement> _nativeMap = SplayTreeMap();
 
   // static ImageElement getImageElementOfNativePtr(Pointer<NativeImgElement> nativeImageElement) {
   //   ImageElement? element = _nativeMap[nativeImageElement.address];

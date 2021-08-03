@@ -4,7 +4,6 @@
  */
 
 import 'dart:async';
-import 'dart:collection';
 import 'dart:ui';
 import 'dart:ffi';
 import 'dart:math' as math;

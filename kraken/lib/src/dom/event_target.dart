@@ -3,10 +3,8 @@
  * Author: Kraken Team.
  */
 
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
-import 'package:ffi/ffi.dart';
 import 'dart:ffi';
 import 'dart:collection';
 import 'package:kraken/bridge.dart';
