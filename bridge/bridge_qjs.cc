@@ -19,6 +19,7 @@
 #include "bindings/qjs/module_manager.h"
 #include "bindings/qjs/dom/event_target.h"
 #include "bindings/qjs/dom/event.h"
+#include "bindings/qjs/dom/custom_event.h"
 #include "bindings/qjs/dom/element.h"
 #include "bindings/qjs/dom/document.h"
 #include "bindings/qjs/dom/text_node.h"
@@ -67,7 +68,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindWindow(m_context);
   bindEvent(m_context);
 //  bindMouseEvent(m_context);
-//  bindCustomEvent(m_context);
+  bindCustomEvent(m_context);
 //  bindCloseEvent(m_context);
 //  bindGestureEvent(m_context);
 //  bindMediaErrorEvent(m_context);

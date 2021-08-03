@@ -62,13 +62,16 @@ class JasmineTracker {
         clearAllTimer();
         clearAllEventsListeners();
         resetDocumentElement();
-        kraken.methodChannel.clearMethodCallHandler();
+        // kraken.methodChannel.clearMethodCallHandler();
         resolve();
       } catch (e) {
         console.log(e);
         reject(e);
       }
     });
+  }
+  specStarted(result) {
+    console.log('start ', result.fullName);
   }
 }
 
