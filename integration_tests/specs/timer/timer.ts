@@ -1,4 +1,4 @@
-describe('setTimeout', () => {
+fdescribe('setTimeout', () => {
   it('resolve after 100ms', done => {
     const startTime = Date.now();
     setTimeout(() => {
@@ -58,7 +58,7 @@ describe('clearTimeout', () => {
     const timer = setTimeout(() => {
       done.fail('clearTimeout not works.');
     }, 200);
-    
+
     clearTimeout(timer);
     setTimeout(done, 250);
   });
@@ -66,7 +66,7 @@ describe('clearTimeout', () => {
   it('should accept non-numberic value', () => {
     var timer;
     clearTimeout(timer);
-    
+
     timer = 'foo';
     clearTimeout(timer);
 
