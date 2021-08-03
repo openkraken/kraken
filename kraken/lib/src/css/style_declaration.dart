@@ -144,7 +144,10 @@ class CSSStyleDeclaration {
     if ((prevValue == null && CSSLength.isAuto(CSSInitialValues[property])) || CSSLength.isAuto(prevValue) || CSSLength.isAuto(nextValue)) {
       return false;
     }
-    return CSSTransformHandlers[property] != null &&
+
+    // Transition works when style changes, not for the first time when style initiated.
+    return prevValue != null &&
+      CSSTransformHandlers[property] != null &&
       (_transitions.containsKey(property) || _transitions.containsKey(ALL));
   }
 
@@ -583,7 +586,7 @@ class CSSStyleDeclaration {
       rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
       fontSize = renderStyle.fontSize;
     }
-    
+
     switch (propertyName) {
       case WIDTH:
       case HEIGHT:
@@ -687,14 +690,14 @@ class CSSStyleDeclaration {
     String? currentValue = _properties[propertyName];
     String? prevValue = _prevProperties[propertyName];
 
-    if (currentValue == prevValue) return;
+    if (currentValue == null || currentValue == prevValue) {
+      return;
+    }
 
-    if (currentValue != null) {
-      if (_shouldTransition(propertyName, prevValue, currentValue)) {
-        _transition(propertyName, prevValue, currentValue, viewportSize, renderStyle);
-      } else {
-        setRenderStyleProperty(propertyName, prevValue, currentValue);
-      }
+    if (_shouldTransition(propertyName, prevValue, currentValue)) {
+      _transition(propertyName, prevValue, currentValue, viewportSize, renderStyle);
+    } else {
+      setRenderStyleProperty(propertyName, prevValue, currentValue);
     }
   }
 
@@ -730,7 +733,7 @@ class CSSStyleDeclaration {
       setRenderStyleProperty(key, null, normalizedValue);
     });
   }
-  
+
   /// Set all style properties with em unit.
   void setEmProperties() {
     _properties.forEach((key, value) {
@@ -740,7 +743,7 @@ class CSSStyleDeclaration {
       }
     });
   }
-  
+
   /// Set all style properties with rem unit.
   void setRemProperties() {
     _properties.forEach((key, value) {

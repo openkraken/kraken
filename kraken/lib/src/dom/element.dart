@@ -1191,45 +1191,28 @@ class Element extends Node
   // Universal style property change callback.
   @mustCallSuper
   void setStyle(String key, dynamic value) {
-    // @HACK: delay transition property at next frame to make sure transition trigger after all style had been set.
-    // https://github.com/WebKit/webkit/blob/master/Source/WebCore/style/StyleTreeResolver.cpp#L220
-    // This it not a good solution between webkit implementation which write all new style property into an RenderStyle object
-    // then trigger the animation phase.
-    if (key == TRANSITION) {
-      SchedulerBinding.instance!.addPostFrameCallback((timestamp) {
-        style.setProperty(key, value, viewportSize, renderBoxModel?.renderStyle);
-      });
-    } else {
-      style.setProperty(key, value, viewportSize, renderBoxModel?.renderStyle);
-    }
+    style.setProperty(key, value, viewportSize, renderBoxModel?.renderStyle);
   }
 
   // Universal RenderStyle set callback.
   @mustCallSuper
   void setRenderStyle(String key, dynamic value) {
-    if (key == TRANSITION) {
-      SchedulerBinding.instance!.addPostFrameCallback((timestamp) {
-        style.setRenderStyle(key, value, viewportSize, renderBoxModel?.renderStyle);
-      });
-      return;
-    } else {
-      CSSDisplay originalDisplay = CSSDisplayMixin.getDisplay(style[DISPLAY] ?? defaultDisplay);
-      // @NOTE: See [CSSStyleDeclaration.setProperty], value change will trigger
-      // [StyleChangeListener] to be invoked in sync.
-      style.setRenderStyle(key, value, viewportSize, renderBoxModel?.renderStyle);
+    CSSDisplay originalDisplay = CSSDisplayMixin.getDisplay(style[DISPLAY] ?? defaultDisplay);
+    // @NOTE: See [CSSStyleDeclaration.setProperty], value change will trigger
+    // [StyleChangeListener] to be invoked in sync.
+    style.setRenderStyle(key, value, viewportSize, renderBoxModel?.renderStyle);
 
-      // When renderer and style listener is not created when original display is none,
-      // thus it needs to create renderer when style changed.
-      if (originalDisplay == CSSDisplay.none && key == DISPLAY && value != NONE) {
-        RenderBox? after;
-        Element parent = this.parent as Element;
-        if (parent.scrollingContentLayoutBox != null) {
-          after = parent.scrollingContentLayoutBox!.lastChild;
-        } else {
-          after = (parent.renderBoxModel as RenderLayoutBox).lastChild;
-        }
-        attachTo(parent, after: after);
+    // When renderer and style listener is not created when original display is none,
+    // thus it needs to create renderer when style changed.
+    if (originalDisplay == CSSDisplay.none && key == DISPLAY && value != NONE) {
+      RenderBox? after;
+      Element parent = this.parent as Element;
+      if (parent.scrollingContentLayoutBox != null) {
+        after = parent.scrollingContentLayoutBox!.lastChild;
+      } else {
+        after = (parent.renderBoxModel as RenderLayoutBox).lastChild;
       }
+      attachTo(parent, after: after);
     }
   }
 
