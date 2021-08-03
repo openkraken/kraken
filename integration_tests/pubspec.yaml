@@ -30,7 +30,7 @@ dependencies:
 #  kraken_video_player: ^0.4.0
 #  kraken_websocket: ^0.2.0
 #  kraken_animation_player: ^0.2.0
-#  kraken_webview: ^0.6.0
+#  kraken_webview: ^0.7.0
 
 dev_dependencies:
   flutter_test:

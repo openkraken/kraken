@@ -105,16 +105,16 @@ mixin CSSPositionMixin on RenderStyleBase {
   void updateOffset(String property, double value, {bool shouldMarkNeedsLayout = true}) {
     switch (property) {
       case TOP:
-        top = CSSOffset(length: value, isAuto: style![TOP] == AUTO);
+        top = CSSOffset(length: value, isAuto: style[TOP] == AUTO);
         break;
       case LEFT:
-        left = CSSOffset(length: value, isAuto: style![LEFT] == AUTO);
+        left = CSSOffset(length: value, isAuto: style[LEFT] == AUTO);
         break;
       case RIGHT:
-        right = CSSOffset(length: value, isAuto: style![RIGHT] == AUTO);
+        right = CSSOffset(length: value, isAuto: style[RIGHT] == AUTO);
         break;
       case BOTTOM:
-        bottom = CSSOffset(length: value, isAuto: style![BOTTOM] == AUTO);
+        bottom = CSSOffset(length: value, isAuto: style[BOTTOM] == AUTO);
         break;
     }
     /// Should mark parent needsLayout directly cause positioned element is rendered as relayoutBoundary
@@ -126,7 +126,7 @@ mixin CSSPositionMixin on RenderStyleBase {
 
   void updatePosition(String property, String present) {
     RenderStyle renderStyle = this as RenderStyle;
-    position = parsePositionType(style![POSITION]);
+    position = parsePositionType(style[POSITION]);
     // Position change may affect transformed display
     // https://www.w3.org/TR/css-display-3/#transformations
     renderStyle.transformedDisplay = renderStyle.getTransformedDisplay();

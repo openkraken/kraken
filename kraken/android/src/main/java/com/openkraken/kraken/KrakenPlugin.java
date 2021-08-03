@@ -75,7 +75,7 @@ public class KrakenPlugin implements FlutterPlugin, MethodCallHandler {
         channel.setMethodCallHandler(null);
         Kraken kraken = Kraken.get(flutterEngine);
         if (kraken == null) return;
-        kraken.destory();
+        kraken.destroy();
         flutterEngine = null;
     }
 }

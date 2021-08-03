@@ -13,6 +13,7 @@ import 'bridge/from_native.dart';
 import 'bridge/to_native.dart';
 import 'bridge/test_input.dart';
 import 'custom/custom_object_element.dart';
+import 'custom/custom_element_widget.dart';
 import 'package:kraken/gesture.dart';
 // import 'package:kraken_websocket/kraken_websocket.dart';
 // import 'package:kraken_animation_player/kraken_animation_player.dart';
@@ -57,6 +58,7 @@ void main() async {
   // KrakenAnimationPlayer.initialize();
   // KrakenVideoPlayer.initialize();
   // KrakenWebView.initialize();
+  // defineKrakenCustomElements();
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
   CSSText.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
   // setObjectElementFactory(customObjectElementFactory);

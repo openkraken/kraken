@@ -4,13 +4,13 @@ on: [workflow_dispatch]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  integration_test:
-    runs-on: self-hosted
+  publishToPubDev:
+    runs-on: [self-hosted, flutter_2.2.0]
     steps:
     - uses: actions/checkout@v2
     - name: NPM INSTALL
       run: npm install
     - name: Build bridge binary
-      run: node scripts/prepare_kraken_release_binary.js
+      run: npm run build:bridge:all:release
     - name: Publish to dart.dev
       run: cd kraken && flutter pub publish --force

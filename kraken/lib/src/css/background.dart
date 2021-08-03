@@ -50,7 +50,7 @@ class CSSBackground {
   }
 
   static bool isValidBackgroundImageValue(String value) {
-    return (value.indexOf(')') == value.length - 1) &&
+    return (value.lastIndexOf(')') == value.length - 1) &&
         (value.startsWith('url(') ||
         value.startsWith('linear-gradient(') ||
         value.startsWith('repeating-linear-gradient(') ||
@@ -144,12 +144,16 @@ class CSSBackground {
 
   static Gradient? getBackgroundGradient(CSSStyleDeclaration? style, RenderBoxModel renderBoxModel, CSSFunctionalNotation method) {
     Gradient? gradient;
-    Size viewportSize = renderBoxModel.renderStyle.viewportSize;
 
     if (method.args.length > 1) {
       List<Color> colors = [];
       List<double> stops = [];
       int start = 0;
+      RenderStyle renderStyle = renderBoxModel.renderStyle;
+      Size viewportSize = renderStyle.viewportSize;
+      double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
+      double fontSize = renderStyle.fontSize;
+
       switch (method.name) {
         case 'linear-gradient':
         case 'repeating-linear-gradient':
@@ -176,7 +180,12 @@ class CSSBackground {
                     end = Alignment.centerLeft;
                   }
                   if (style![WIDTH].isNotEmpty) {
-                    gradientLength = CSSLength.toDisplayPortValue(style[WIDTH], viewportSize);
+                    gradientLength = CSSLength.toDisplayPortValue(
+                      style[WIDTH],
+                      viewportSize: viewportSize,
+                      rootFontSize: rootFontSize,
+                      fontSize: fontSize
+                    );
                   } else if (renderBoxModel.attached) {
                     gradientLength = RenderBoxModel.getLogicalContentWidth(renderBoxModel);
                   }
@@ -195,7 +204,12 @@ class CSSBackground {
                     end = Alignment.topCenter;
                   }
                   if (style![HEIGHT].isNotEmpty) {
-                    gradientLength = CSSLength.toDisplayPortValue(style[HEIGHT], viewportSize);
+                    gradientLength = CSSLength.toDisplayPortValue(
+                      style[HEIGHT],
+                      viewportSize: viewportSize,
+                      rootFontSize: rootFontSize,
+                      fontSize: fontSize
+                    );
                   } else if (renderBoxModel.attached) {
                     gradientLength = RenderBoxModel.getLogicalContentHeight(renderBoxModel);
                   }
@@ -215,7 +229,12 @@ class CSSBackground {
                   }
 
                   if (style![WIDTH].isNotEmpty) {
-                    gradientLength = CSSLength.toDisplayPortValue(style[WIDTH], viewportSize);
+                    gradientLength = CSSLength.toDisplayPortValue(
+                      style[WIDTH],
+                      viewportSize: viewportSize,
+                      rootFontSize: rootFontSize,
+                      fontSize: fontSize
+                    );
                   } else if (renderBoxModel.attached) {
                     gradientLength = RenderBoxModel.getLogicalContentWidth(renderBoxModel);
                   }
@@ -235,7 +254,12 @@ class CSSBackground {
                     end = Alignment.bottomCenter;
                   }
                   if (style![HEIGHT].isNotEmpty) {
-                    gradientLength = CSSLength.toDisplayPortValue(style[HEIGHT], viewportSize);
+                    gradientLength = CSSLength.toDisplayPortValue(
+                      style[HEIGHT],
+                      viewportSize: viewportSize,
+                      rootFontSize: rootFontSize,
+                      fontSize: fontSize
+                    );
                   } else if (renderBoxModel.attached) {
                     gradientLength = RenderBoxModel.getLogicalContentHeight(renderBoxModel);
                   }
@@ -363,12 +387,15 @@ class CSSBackground {
       strings = src.split(' ');
     }
 
-    Size viewportSize = renderBoxModel.renderStyle.viewportSize;
-
     if (strings.length >= 1) {
       double? stop = defaultStop;
       if (strings.length >= 2) {
         try {
+          RenderStyle renderStyle = renderBoxModel.renderStyle;
+          Size viewportSize = renderStyle.viewportSize;
+          double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
+          double fontSize = renderStyle.fontSize;
+
           for (int i = 1; i < strings.length; i++) {
             if (CSSPercentage.isPercentage(strings[i])) {
               stop = CSSPercentage.parsePercentage(strings[i]);
@@ -376,11 +403,12 @@ class CSSBackground {
               stop = CSSAngle.parseAngle(strings[i])! / (math.pi * 2);
             } else if (CSSLength.isLength(strings[i])) {
               if (gradientLength != null) {
-                stop = CSSLength.toDisplayPortValue(strings[i], viewportSize)! / gradientLength;
-              } else if (!renderBoxModel.attached) {
-                /// When node is not attached and has no width/height, gradient length
-                /// cannot be obtained, so wait for renderBoxModel attached to recalculate gradient length
-                renderBoxModel.shouldRecalGradient = true;
+                stop = CSSLength.toDisplayPortValue(
+                  strings[i],
+                  viewportSize: viewportSize,
+                  rootFontSize: rootFontSize,
+                  fontSize: fontSize
+                )! / gradientLength;
               }
             }
             colorGradients.add(CSSColorStop(CSSColor.parseColor(strings[0]), stop));

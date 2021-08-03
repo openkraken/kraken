@@ -6,6 +6,7 @@
  */
 import 'package:flutter/painting.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
 
 final RegExp _splitRegExp = RegExp(r'\s+');
 
@@ -53,11 +54,20 @@ class CSSPosition {
   }
 
   /// Parse background-position-x/background-position-y from string to CSSBackgroundPosition type.
-  static CSSBackgroundPosition parsePosition(String input, Size viewportSize, bool isHorizontal) {
+  static CSSBackgroundPosition parsePosition(String input, RenderStyle renderStyle, bool isHorizontal) {
     if (CSSLength.isPercentage(input)) {
       return CSSBackgroundPosition(percentage: _gatValuePercentage(input));
     } else if (CSSLength.isLength(input)) {
-      return CSSBackgroundPosition(length: CSSLength.toDisplayPortValue(input, viewportSize));
+      Size viewportSize = renderStyle.viewportSize;
+      RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
+      double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
+      double fontSize = renderStyle.fontSize;
+      return CSSBackgroundPosition(length: CSSLength.toDisplayPortValue(
+        input,
+        viewportSize: viewportSize,
+        rootFontSize: rootFontSize,
+        fontSize: fontSize
+      ));
     } else {
       if (isHorizontal) {
         switch (input) {

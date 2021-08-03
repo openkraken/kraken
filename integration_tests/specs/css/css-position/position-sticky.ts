@@ -2906,6 +2906,41 @@ describe('position-sticky', () => {
     await snapshot();
   });
 
+  it('transforms-translate works with position sticky element', async (done) => {
+    let sticky;
+    let scroller;
+    scroller = createElementWithStyle(
+      'div',
+      {
+        position: 'relative',
+        width: '100px',
+        height: '200px',
+        overflow: 'scroll',
+        border: '1px solid rgb(0, 0, 0)',
+      },
+      [
+        (sticky = createElementWithStyle('div', {
+          display: 'flex',
+          top: '50px',
+          position: 'sticky',
+          height: '100px',
+          width: '100px',
+          'background-color': 'green',
+        })),
+      ]
+    );
+
+    BODY.appendChild(scroller);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      sticky.style.transform = 'translateY(-100px)';
+      await snapshot();
+      done();
+    });
+  });
+
   it('should work with image', async () => {
     let div;
     div = createElement(

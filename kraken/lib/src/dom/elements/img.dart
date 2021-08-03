@@ -359,9 +359,12 @@ class ImageElement extends Element {
   @override
   void setProperty(String key, dynamic value) {
     super.setProperty(key, value);
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
+    double? rootFontSize;
+    double? fontSize;
+    if (renderBoxModel != null) {
+      rootFontSize = renderBoxModel!.elementDelegate.getRootElementFontSize();
+      fontSize = renderBoxModel!.renderStyle.fontSize;
+    }
 
     // Reset frame number to zero when image needs to reload
     _frameNumber = 0;
@@ -376,14 +379,24 @@ class ImageElement extends Element {
         value += 'px';
       }
 
-      _propertyWidth = CSSLength.toDisplayPortValue(value, viewportSize);
+      _propertyWidth = CSSLength.toDisplayPortValue(
+        value,
+        viewportSize: viewportSize,
+        rootFontSize: rootFontSize,
+        fontSize: fontSize
+      );
       _resize();
     } else if (key == HEIGHT) {
       if (value is String && _isNumberString(value)) {
         value += 'px';
       }
 
-      _propertyHeight = CSSLength.toDisplayPortValue(value, viewportSize);
+      _propertyHeight = CSSLength.toDisplayPortValue(
+        value,
+        viewportSize: viewportSize,
+        rootFontSize: rootFontSize,
+        fontSize: fontSize
+      );
       _resize();
     }
   }

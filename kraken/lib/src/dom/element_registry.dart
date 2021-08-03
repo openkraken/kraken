@@ -11,18 +11,18 @@ import 'package:kraken/dom.dart';
 typedef ElementCreator = Element Function(int id, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager);
 final Map<String, ElementCreator> _elementRegistry = Map();
 
-void defineElement(String type, ElementCreator creator) {
-  if (_elementRegistry.containsKey(type)) {
-    throw Exception('Redefined element of type: $type');
+void defineElement(String name, ElementCreator creator) {
+  if (_elementRegistry.containsKey(name)) {
+    throw Exception('A element with name "$name" has already been defined.');
   }
-  _elementRegistry[type] = creator;
+  _elementRegistry[name] = creator;
 }
 
-Element createElement(int id, Pointer<NativeEventTarget> nativePtr, String type, ElementManager elementManager) {
-  ElementCreator? creator = _elementRegistry[type];
+Element createElement(int id, Pointer<NativeEventTarget> nativePtr, String name, ElementManager elementManager) {
+  ElementCreator? creator = _elementRegistry[name];
   if (creator == null) {
     print('ERROR: unexpected element type "$type"');
-    return Element(id, nativePtr, elementManager, tagName: UNKNOWN);
+    return Element(id, nativePtr.cast<NativeElement>(), elementManager, tagName: UNKNOWN);
   }
 
   Element element = creator(id, nativePtr, elementManager);
