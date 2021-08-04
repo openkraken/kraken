@@ -19,7 +19,7 @@ class URLParser {
     if (path.startsWith('//')) path = 'https' + path;
 
     RegExp exp = RegExp("^([a-z][a-z\d\+\-\.]*:)?\/\/");
-    if (!exp.hasMatch(path)) {
+    if (!exp.hasMatch(path) && _contextId != null) {
       // relative path.
       KrakenController controller = KrakenController.getControllerOfJSContextId(_contextId)!;
       Uri uriHref = Uri.parse(controller.href);
