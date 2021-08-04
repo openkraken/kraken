@@ -114,14 +114,34 @@ typedef NativeEvaluateScripts = Void Function(
 typedef DartEvaluateScripts = void Function(
     int contextId, Pointer<NativeString> code, Pointer<Utf8> url, int startLine);
 
+// Register parseHTML
+typedef NativeParseHTML = Void Function(
+    Int32 contextId, Pointer<NativeString> code, Pointer<Utf8> url);
+typedef DartParseHTML = void Function(
+    int contextId, Pointer<NativeString> code, Pointer<Utf8> url);
+
 final DartEvaluateScripts _evaluateScripts =
 nativeDynamicLibrary.lookup<NativeFunction<NativeEvaluateScripts>>('evaluateScripts').asFunction();
+
+final DartParseHTML _parseHTML =
+nativeDynamicLibrary.lookup<NativeFunction<NativeParseHTML>>('parseHTML').asFunction();
 
 void evaluateScripts(int contextId, String code, String url, int line) {
   Pointer<NativeString> nativeString = stringToNativeString(code);
   Pointer<Utf8> _url = url.toNativeUtf8();
   try {
     _evaluateScripts(contextId, nativeString, _url, line);
+  } catch (e, stack) {
+    print('$e\n$stack');
+  }
+  freeNativeString(nativeString);
+}
+
+void parseHTML(int contextId, String code, String url) {
+  Pointer<NativeString> nativeString = stringToNativeString(code);
+  Pointer<Utf8> _url = url.toNativeUtf8();
+  try {
+    _parseHTML(contextId, nativeString, _url);
   } catch (e, stack) {
     print('$e\n$stack');
   }
