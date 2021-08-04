@@ -233,6 +233,11 @@ mixin CSSBoxMixin on RenderStyleBase {
 
   void updateBackgroundColor([Color? color]) {
     Color? bgColor = color ?? CSSBackground.getBackgroundColor(style);
+
+    if (decoration == null) {
+      decoration = getCSSBoxDecoration();
+    }
+
     CSSBoxDecoration? prevBoxDecoration = decoration;
 
     // If change bg color from some color to null, which must be explicitly transparent.
