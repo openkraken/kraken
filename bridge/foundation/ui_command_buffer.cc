@@ -22,7 +22,9 @@ void UICommandBuffer::addCommand(int32_t id, int32_t type, void *nativePtr, bool
 
 void UICommandBuffer::addCommand(int32_t id, int32_t type, void *nativePtr) {
   if (!update_batched) {
+#if FLUTTER_BACKEND
     kraken::getDartMethod()->requestBatchUpdate(contextId);
+#endif
     update_batched = true;
   }
 

@@ -95,7 +95,6 @@ public:
   NodeInstance *parentNode{nullptr};
   std::vector<NodeInstance *> childNodes;
 
-  void refer();
   void unrefer();
   inline DocumentInstance *document() {
     return m_document;

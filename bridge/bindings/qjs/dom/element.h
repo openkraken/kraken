@@ -96,9 +96,6 @@ public:
   }
   JSValue internalGetTextContent() override;
   void internalSetTextContent(JSValue content) override;
-//  JSHostObjectHolder<JSElementAttributes> &getAttributes();
-//  void setStyle(JSHostClassHolder &style);
-//  void setAttributes(JSHostObjectHolder<JSElementAttributes> &attributes);
 
   std::string tagName();
   std::string getRegisteredTagName();

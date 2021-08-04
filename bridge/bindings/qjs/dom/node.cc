@@ -94,7 +94,7 @@ JSValue Node::appendChild(QjsContext *ctx, JSValue this_val, int argc, JSValue *
   }
 
   selfInstance->internalAppendChild(nodeInstance);
-  return nodeInstance->instanceObject;
+  return JS_DupValue(ctx, nodeInstance->instanceObject);
 }
 JSValue Node::remove(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto selfInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, Node::classId(this_val)));
@@ -181,7 +181,7 @@ JSValue Node::replaceChild(QjsContext *ctx, JSValue this_val, int argc, JSValue 
     return JS_ThrowTypeError(ctx, "Failed to execute 'replaceChild' on 'Node': The new node is not a type of node.");
   }
 
-  return selfInstance->internalReplaceChild(newChildInstance, oldChildInstance);
+  return JS_DupValue(ctx, selfInstance->internalReplaceChild(newChildInstance, oldChildInstance));
 }
 
 void Node::traverseCloneNode(QjsContext *ctx, NodeInstance *element, NodeInstance *parentElement) {
@@ -385,7 +385,6 @@ void NodeInstance::internalAppendChild(NodeInstance *node) {
   ensureDetached(node);
   childNodes.emplace_back(node);
   node->parentNode = this;
-  node->refer();
 
   node->_notifyNodeInsert(this);
 
@@ -438,7 +437,6 @@ JSValue NodeInstance::internalInsertBefore(NodeInstance *node, NodeInstance *ref
 
       parentChildNodes.insert(it, node);
       node->parentNode = parent;
-      node->refer();
       node->_notifyNodeInsert(parent);
 
       std::string nodeEventTargetId = std::to_string(node->eventTargetId);
@@ -472,7 +470,6 @@ JSValue NodeInstance::internalReplaceChild(NodeInstance *newChild, NodeInstance 
   newChild->parentNode = this;
   childNodes.erase(childIndex);
   childNodes.insert(childIndex, newChild);
-  newChild->refer();
 
   oldChild->_notifyNodeRemoved(this);
   newChild->_notifyNodeInsert(this);
@@ -501,13 +498,6 @@ NodeInstance::~NodeInstance() {
              ("Node recycled with a dangling node " + std::to_string(node->eventTargetId)).c_str());
     }
   }
-}
-
-void NodeInstance::refer() {
-  if (_referenceCount == 0) {
-    JS_DupValue(m_ctx, instanceObject);
-  }
-  _referenceCount++;
 }
 void NodeInstance::unrefer() {
   _referenceCount--;
