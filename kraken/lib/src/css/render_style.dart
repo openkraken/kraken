@@ -483,7 +483,7 @@ class RenderStyle
     Matrix4? matrix4;
     for (CSSFunctionalNotation method in methods) {
       Matrix4? transform;
-      if (method.name == TRANSLATE && method.args.length >= 1 && method.args.length <= 2) {
+      if (method.name == CSSTransform.TRANSLATE && method.args.length >= 1 && method.args.length <= 2) {
         double y;
         double x;
         if (method.args.length == 2) {
@@ -516,7 +516,7 @@ class RenderStyle
         ) ?? 0;
         transform = Matrix4.identity()..translate(x, y);
 
-      } else if (method.name == TRANSLATE_3D && method.args.length >= 1 && method.args.length <= 3) {
+      } else if (method.name == CSSTransform.TRANSLATE_3D && method.args.length >= 1 && method.args.length <= 3) {
         double z;
         double y;
         double x;
@@ -564,7 +564,7 @@ class RenderStyle
         ) ?? 0;
         transform = Matrix4.identity()..translate(x, y, z);
 
-      } else if (method.name == TRANSLATE_X && method.args.length == 1) {
+      } else if (method.name == CSSTransform.TRANSLATE_X && method.args.length == 1) {
         String translateX = method.args[0].trim();
         if (CSSLength.isPercentage(translateX)) {
           double percentage = CSSLength.parsePercentage(translateX);
@@ -579,7 +579,7 @@ class RenderStyle
         ) ?? 0;
         transform = Matrix4.identity()..translate(x);
 
-      } else if (method.name == TRANSLATE_Y && method.args.length == 1) {
+      } else if (method.name == CSSTransform.TRANSLATE_Y && method.args.length == 1) {
         String translateY = method.args[0].trim();
         if (CSSLength.isPercentage(translateY)) {
           double percentage = CSSLength.parsePercentage(translateY);
@@ -612,18 +612,18 @@ class RenderStyle
     bool isPercentageExist = false;
     List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(transformStr);
     for (CSSFunctionalNotation method in methods) {
-      if ((method.name == TRANSLATE &&
+      if ((method.name == CSSTransform.TRANSLATE &&
           ((method.args.length == 1 && CSSLength.isPercentage(method.args[0])) ||
             (method.args.length == 2 && (CSSLength.isPercentage(method.args[0]) || CSSLength.isPercentage(method.args[1]))))) ||
 
-        (method.name == TRANSLATE_3D &&
+        (method.name == CSSTransform.TRANSLATE_3D &&
           ((method.args.length == 1 && CSSLength.isPercentage(method.args[0])) ||
             (method.args.length == 2 && (CSSLength.isPercentage(method.args[0]) || CSSLength.isPercentage(method.args[1]))) ||
             (method.args.length == 3 && (CSSLength.isPercentage(method.args[0]) || CSSLength.isPercentage(method.args[1]) || CSSLength.isPercentage(method.args[2]))))) ||
 
-        (method.name == TRANSLATE_X && (method.args.length == 1 && CSSLength.isPercentage(method.args[0]))) ||
+        (method.name == CSSTransform.TRANSLATE_X && (method.args.length == 1 && CSSLength.isPercentage(method.args[0]))) ||
 
-        (method.name == TRANSLATE_Y && (method.args.length == 1 && CSSLength.isPercentage(method.args[0])))
+        (method.name == CSSTransform.TRANSLATE_Y && (method.args.length == 1 && CSSLength.isPercentage(method.args[0])))
     ) {
         isPercentageExist = true;
       }
