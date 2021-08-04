@@ -1466,19 +1466,9 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       runChildren.forEach(calTotalSpace);
 
-      double initialFreeSpace;
-      if (mainSizeType == BoxSizeType.automatic) {
-        // The main size of container may be larger than some flex line due to
-        // its children auto expanded.
-        bool isHorizontalFlexDirection =
-            CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
-        double containerSize = isHorizontalFlexDirection
-            ? constraints.minWidth
-            : constraints.minHeight;
-        initialFreeSpace = math.max(containerSize - totalSpace, 0);
-      } else {
-        initialFreeSpace = maxMainSize! - totalSpace;
-      }
+      // Flexbox with no size on main axis should adapt the main axis size with children.
+      double initialFreeSpace = mainSizeType != BoxSizeType.automatic ?
+        maxMainSize! - totalSpace : 0;
 
       bool isFlexGrow = initialFreeSpace > 0 && totalFlexGrow > 0;
       bool isFlexShrink = initialFreeSpace < 0 && totalFlexShrink > 0;
