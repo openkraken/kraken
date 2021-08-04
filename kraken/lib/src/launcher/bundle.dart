@@ -54,10 +54,10 @@ abstract class KrakenBundle {
     if (contentOverride != null && contentOverride.isNotEmpty) {
       bundle = RawBundle(contentOverride, path);
     } else {
-      if(path.startsWith('file://')) {
-        bundle = AssetsBundle(path.substring('file://'.length));
-      } else {
+      if (path.startsWith('//') || path.startsWith('/') || path.startsWith('http://') || path.startsWith('https://')) {
         bundle = NetworkBundle(path, contextId: contextId);
+      } else {
+        bundle = AssetsBundle(path);
       }
     }
 

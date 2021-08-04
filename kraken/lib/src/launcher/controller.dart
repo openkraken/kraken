@@ -656,11 +656,6 @@ class KrakenController {
     _bundlePath =  bundlePath ?? _bundlePath;
     _bundleURL =  bundleURL ?? _bundleURL;
 
-    // Local files follow the file protocol.
-    if (_bundlePath != null && !_bundlePath!.startsWith('file://')) {
-      _bundlePath = 'file://' + _bundlePath!;
-    }
-
     String? url = _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
 
     if (url == null && methodChannel is KrakenNativeChannel) {
