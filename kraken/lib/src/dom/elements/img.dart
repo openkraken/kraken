@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/foundation.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/bridge.dart';
 import 'dart:async';
@@ -411,7 +412,7 @@ class ImageElement extends Element {
       _source = source;
       if (source != null && source.isNotEmpty) {
         _removeStreamListener();
-        _image = CSSUrl.parseUrl(source, cache: properties['caching'], contextId: elementManager.contextId);
+        _image = CSSUrl.parseUrl(URLParser(source, contextId: elementManager.contextId).toString(), cache: properties['caching'], contextId: elementManager.contextId);
         _imageStream = _image!.resolve(ImageConfiguration.empty);
         _imageStream!.addListener(_renderStreamListener);
 

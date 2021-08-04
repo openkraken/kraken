@@ -100,21 +100,7 @@ class NetworkBundle extends KrakenBundle {
 
   @override
   Future<void> resolve() async {
-    String path = url;
-    // Treat empty scheme as https.
-    if (path.startsWith('//')) path = 'https' + path;
-
-    RegExp exp = RegExp("^([a-z][a-z\d\+\-\.]*:)?\/\/");
-    if (!exp.hasMatch(path)) {
-      // relative path.
-      KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
-      Uri uriHref = Uri.parse(controller.href);
-      path = uriHref.scheme + '://' + uriHref.host + ':' + uriHref.port.toString() + path;
-    }
-
-    Uri uri = Uri.parse(path);
-
-    NetworkAssetBundle bundle = NetworkAssetBundle(uri, contextId: contextId);
+    NetworkAssetBundle bundle = NetworkAssetBundle(URLParser(url, contextId: contextId).url, contextId: contextId);
     bundle.httpClient.userAgent = getKrakenInfo().userAgent;
     String absoluteURL = url.toString();
     ByteData bytes = await bundle.load(absoluteURL);
