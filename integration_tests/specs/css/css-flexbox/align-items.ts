@@ -1129,5 +1129,29 @@ describe('align-items', () => {
 
     await snapshot();
   });
+
+  it('should works with img with no size set', async () => {
+    const container = createElement(
+      'div',
+      {
+        style: {
+          "display": "flex",
+          "width": "100px",
+          "height": "100px",
+        },
+      },
+      [
+        (createElement('img', {
+          src: 'assets/100x100-green.png',
+          style: {
+            "marginLeft": "20px",
+          },
+        })),
+      ]
+    );
+
+    document.body.appendChild(container);
+    await snapshot(0.1);
+  });
 });
 

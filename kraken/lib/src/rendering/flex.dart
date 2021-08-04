@@ -512,6 +512,9 @@ class RenderFlexLayout extends RenderLayoutBox {
         totalWeightedFlexShrink += childOriginalMainSize * childFlexShrink;
       }
     });
+    if (totalWeightedFlexShrink == 0) {
+      return 0;
+    }
 
     int? childNodeId;
     if (child is RenderTextBox) {
@@ -1321,7 +1324,8 @@ class RenderFlexLayout extends RenderLayoutBox {
         /// If child's mainAxis have clips, it will create a new format context in it's children's.
         /// so we do't need to care about child's size.
         if (child is RenderBoxModel && _isChildMainAxisClip(child)) {
-          computedSize = originalMainSize + remainingFreeSpace;
+          computedSize = originalMainSize + remainingFreeSpace > 0 ?
+            originalMainSize + remainingFreeSpace : 0;
         } else {
           double shrinkValue =
               _getShrinkConstraints(child, runChildren, remainingFreeSpace);
@@ -1688,6 +1692,15 @@ class RenderFlexLayout extends RenderLayoutBox {
             }
             minConstraintHeight = maxConstraintHeight = stretchedHeight;
           }
+
+          // Replaced element in flexbox with no size in cross axis should stretch according the intrinsic ratio.
+          if (child is RenderIntrinsic &&
+            child.renderStyle.width == null &&
+            child.renderStyle.minWidth == null &&
+            child.intrinsicRatio != null
+          ) {
+            minConstraintWidth = maxConstraintWidth = minConstraintHeight / child.intrinsicRatio!;
+          }
         } else {
           CSSMargin marginLeft = childRenderStyle.marginLeft;
           CSSMargin marginRight = childRenderStyle.marginRight;
@@ -1720,6 +1733,15 @@ class RenderFlexLayout extends RenderLayoutBox {
               stretchedWidth = childCrossSize;
             }
             minConstraintWidth = maxConstraintWidth = stretchedWidth;
+          }
+
+          // Replaced element in flexbox with no size in cross axis should stretch according the intrinsic ratio.
+          if (child is RenderIntrinsic &&
+            child.renderStyle.height == null &&
+            child.renderStyle.minHeight == null &&
+            child.intrinsicRatio != null
+          ) {
+            minConstraintHeight = maxConstraintHeight = minConstraintWidth * child.intrinsicRatio!;
           }
         }
       }
