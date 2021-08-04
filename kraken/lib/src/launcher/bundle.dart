@@ -49,7 +49,10 @@ abstract class KrakenBundle {
       bundle = RawBundle(contentOverride, uri);
     } else {
       // Treat empty scheme as https.
-      if (path.startsWith('//')) path = 'https' + path;
+      if (path.startsWith('//')) {
+        path = 'https:' + path;
+        uri = Uri.parse(path);
+      }
 
       if (uri.isScheme('HTTP') || uri.isScheme('HTTPS')) {
         bundle = NetworkBundle(uri, contextId: contextId);
