@@ -15,7 +15,6 @@ class URLParser {
 
   URLParser(String url, { int? contextId }) {
     String path = url;
-    String originURL = url;
 
     if(contextId != null) {
       _contextId = contextId;
@@ -40,7 +39,7 @@ class URLParser {
       }
 
       if (urlClient != null) {
-        path = urlClient.parser(url, originURL);
+        path = urlClient.parser(path, url);
       }
     }
 
