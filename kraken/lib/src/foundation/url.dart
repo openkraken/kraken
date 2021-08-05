@@ -3,12 +3,9 @@
  * Author: Kraken Team.
  */
 
-import 'package:dio/dio.dart';
 import 'package:kraken/launcher.dart';
 
-
 abstract class URLClient {
-  @override
   String parser(String url, String originURL);
 }
 
