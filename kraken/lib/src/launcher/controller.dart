@@ -449,6 +449,10 @@ class KrakenController {
 
   EventClient? _eventClient;
 
+  URLClient? _urlClient;
+
+  URLClient? get urlClient => _urlClient;
+
   KrakenController(
     String? name,
     double viewportWidth,
@@ -460,6 +464,7 @@ class KrakenController {
     String? bundleContent,
     Color? background,
     GestureClient? gestureClient,
+    URLClient? urlClient,
     EventClient? eventClient,
     KrakenNavigationDelegate? navigationDelegate,
     KrakenMethodChannel? methodChannel,
@@ -473,6 +478,7 @@ class KrakenController {
         _bundlePath = bundlePath,
         _bundleContent = bundleContent,
         _gestureClient = gestureClient,
+        _urlClient = urlClient,
         _eventClient = eventClient {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_PROPERTY_INIT);
