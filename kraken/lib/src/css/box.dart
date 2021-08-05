@@ -37,14 +37,14 @@ class CSSBackgroundSize {
   });
 
   BoxFit? fit;
-  dynamic? width;
-  dynamic? height;
+  dynamic width;
+  dynamic height;
 
   static const String CONTAIN = 'contain';
   static const String COVER = 'cover';
   static const String AUTO = 'auto';
 
-  static dynamic? _parseLengthPercentageValue(String value, {
+  static dynamic _parseLengthPercentageValue(String value, {
     Size? viewportSize,
     double? rootFontSize,
     double? fontSize
@@ -70,7 +70,7 @@ class CSSBackgroundSize {
   }) {
     List<String> values = value.split(_spaceRegExp);
     if (values.length == 1) {
-      dynamic? parsedValue = _parseLengthPercentageValue(value,
+      dynamic parsedValue = _parseLengthPercentageValue(value,
         viewportSize: viewportSize,
         rootFontSize: rootFontSize,
         fontSize: fontSize,
@@ -82,12 +82,12 @@ class CSSBackgroundSize {
         );
       }
     } else if (values.length == 2) {
-      dynamic? parsedWidth = _parseLengthPercentageValue(values[0],
+      dynamic parsedWidth = _parseLengthPercentageValue(values[0],
         viewportSize: viewportSize,
         rootFontSize: rootFontSize,
         fontSize: fontSize,
       );
-      dynamic? parsedHeight = _parseLengthPercentageValue(values[1],
+      dynamic parsedHeight = _parseLengthPercentageValue(values[1],
         viewportSize: viewportSize,
         rootFontSize: rootFontSize,
         fontSize: fontSize,
@@ -790,7 +790,7 @@ class CSSBorderRadius {
     RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
     double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
     double fontSize = renderStyle.fontSize;
-    
+
     if (radius.isNotEmpty) {
       // border-top-left-radius: horizontal vertical
       List<String> values = radius.split(_spaceRegExp);
