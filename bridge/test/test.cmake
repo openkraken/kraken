@@ -25,6 +25,7 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     ./bindings/qjs/host_object_test.cc
     ./bindings/qjs/host_class_test.cc
     ./bindings/qjs/dom/event_target_test.cc
+    ./bindings/qjs/dom/node_test.cc
     ./bindings/qjs/dom/element_test.cc
     ./bindings/qjs/dom/document_test.cc
     ./bindings/qjs/dom/text_node_test.cc

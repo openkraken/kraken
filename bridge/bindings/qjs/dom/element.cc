@@ -533,7 +533,26 @@ JSClassID ElementInstance::classID() {
 }
 
 JSValue ElementInstance::internalGetTextContent() {
-  return NodeInstance::internalGetTextContent();
+  JSValue array = JS_NewArray(m_ctx);
+  JSValue pushMethod = JS_GetPropertyStr(m_ctx, array, "push");
+
+  for (auto &node : childNodes) {
+    JSValue nodeText = node->internalGetTextContent();
+    JS_Call(m_ctx, pushMethod, array, 1, &nodeText);
+  }
+
+  JSValue joinMethod = JS_GetPropertyStr(m_ctx, array, "join");
+  JSValue emptyString = JS_NewString(m_ctx, "");
+  JSValue joinArgs[] = {
+    emptyString
+  };
+  JSValue returnValue = JS_Call(m_ctx, joinMethod, array, 1, joinArgs);
+
+  JS_FreeValue(m_ctx, array);
+  JS_FreeValue(m_ctx, pushMethod);
+  JS_FreeValue(m_ctx, joinMethod);
+  JS_FreeValue(m_ctx, emptyString);
+  return returnValue;
 }
 
 void ElementInstance::internalSetTextContent(JSValue content) {}
