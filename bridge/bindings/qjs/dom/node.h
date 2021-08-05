@@ -69,13 +69,20 @@ private:
   friend TextNodeInstance;
 };
 
+struct NodeLink {
+  NodeInstance *nodeInstance;
+  list_head link;
+};
+
 class NodeInstance : public EventTargetInstance {
 public:
   NodeInstance() = delete;
   explicit NodeInstance(Node *node, NodeType nodeType, DocumentInstance *document, JSClassID classId, std::string name) : EventTargetInstance(node, classId, std::move(name)),
-                                                                                     m_document(document), nodeType(nodeType) {}
+                                                                                     m_document(document), nodeType(nodeType) {
+  }
   explicit NodeInstance(Node *node, NodeType nodeType, DocumentInstance *document, JSClassID classId, JSClassExoticMethods &exoticMethods, std::string name) :
-    EventTargetInstance(node, classId, exoticMethods, name), m_document(document), nodeType(nodeType) {}
+    EventTargetInstance(node, classId, exoticMethods, name), m_document(document), nodeType(nodeType) {
+  }
   ~NodeInstance();
   bool isConnected();
   DocumentInstance *ownerDocument();
@@ -95,6 +102,9 @@ public:
   NodeInstance *parentNode{nullptr};
   std::vector<NodeInstance *> childNodes;
 
+  NodeLink nodeLink{this};
+
+  void refer();
   void unrefer();
   inline DocumentInstance *document() {
     return m_document;

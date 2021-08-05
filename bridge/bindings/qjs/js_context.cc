@@ -36,6 +36,8 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
     JS_NewClassID(&kHostObjectClassId);
   });
 
+  init_list_head(&node_list);
+
   if (m_runtime == nullptr) {
     m_runtime = JS_NewRuntime();
   }
@@ -62,6 +64,13 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
 JSContext::~JSContext() {
   JS_FreeValue(m_ctx, m_window->instanceObject);
   ctxInvalid_ = true;
+
+  // Manual free nodes
+  struct list_head *el, *el1;
+  list_for_each_safe(el, el1, &node_list) {
+    auto *node = list_entry(el, NodeLink, link);
+    JS_FreeValue(m_ctx, node->nodeInstance->instanceObject);
+  }
 
   JS_RunGC(m_runtime);
   JS_FreeValue(m_ctx, globalObject);

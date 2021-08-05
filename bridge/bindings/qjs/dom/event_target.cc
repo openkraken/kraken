@@ -267,7 +267,7 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
   return eventInstance->cancelled();
 }
 
-#if defined(IS_TEST)
+#if IS_TEST
 JSValue EventTarget::__kraken_clear_event_listener(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val,
                                                                               EventTarget::classId(this_val)));

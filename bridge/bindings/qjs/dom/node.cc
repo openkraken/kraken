@@ -384,7 +384,9 @@ NodeInstance *NodeInstance::nextSibling() {
 void NodeInstance::internalAppendChild(NodeInstance *node) {
   ensureDetached(node);
   childNodes.emplace_back(node);
+  list_add_tail(&node->nodeLink.link, &m_context->node_list);
   node->parentNode = this;
+  node->refer();
 
   node->_notifyNodeInsert(this);
 
@@ -408,6 +410,7 @@ NodeInstance *NodeInstance::internalRemoveChild(NodeInstance *node) {
     childNodes.erase(it);
     node->parentNode = nullptr;
     node->unrefer();
+    list_del(&node->nodeLink.link);
     node->_notifyNodeRemoved(this);
     foundation::UICommandBuffer::instance(node->m_context->getContextId())
         ->addCommand(node->eventTargetId, UICommand::removeNode, nullptr);
@@ -437,6 +440,8 @@ JSValue NodeInstance::internalInsertBefore(NodeInstance *node, NodeInstance *ref
 
       parentChildNodes.insert(it, node);
       node->parentNode = parent;
+      node->refer();
+      list_add_tail(&node->nodeLink.link, &m_context->node_list);
       node->_notifyNodeInsert(parent);
 
       std::string nodeEventTargetId = std::to_string(node->eventTargetId);
@@ -461,6 +466,7 @@ JSValue NodeInstance::internalReplaceChild(NodeInstance *newChild, NodeInstance 
   assert_m(newChild->parentNode == nullptr, "ReplaceChild Error: newChild was not detached.");
   oldChild->parentNode = nullptr;
   oldChild->unrefer();
+  list_del(&oldChild->nodeLink.link);
 
   auto childIndex = std::find(childNodes.begin(), childNodes.end(), oldChild);
   if (childIndex == childNodes.end()) {
@@ -470,6 +476,8 @@ JSValue NodeInstance::internalReplaceChild(NodeInstance *newChild, NodeInstance 
   newChild->parentNode = this;
   childNodes.erase(childIndex);
   childNodes.insert(childIndex, newChild);
+  newChild->refer();
+  list_add_tail(&newChild->nodeLink.link, &m_context->node_list);
 
   oldChild->_notifyNodeRemoved(this);
   newChild->_notifyNodeInsert(this);
@@ -490,20 +498,12 @@ JSValue NodeInstance::internalReplaceChild(NodeInstance *newChild, NodeInstance 
 }
 
 NodeInstance::~NodeInstance() {
-  if (m_context->isValid()) {
-    for (auto &node : childNodes) {
-      node->parentNode = nullptr;
-      node->unrefer();
-      assert(node->_referenceCount <= 0 &&
-             ("Node recycled with a dangling node " + std::to_string(node->eventTargetId)).c_str());
-    }
-  }
+}
+void NodeInstance::refer() {
+  JS_DupValue(m_ctx, instanceObject);
 }
 void NodeInstance::unrefer() {
-  _referenceCount--;
-  if (_referenceCount == 0 && m_context->isValid()) {
-    JS_FreeValue(m_ctx, instanceObject);
-  }
+  JS_FreeValue(m_ctx, instanceObject);
 }
 void NodeInstance::_notifyNodeRemoved(NodeInstance *node) {}
 void NodeInstance::_notifyNodeInsert(NodeInstance *node) {}

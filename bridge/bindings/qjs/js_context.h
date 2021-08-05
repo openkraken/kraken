@@ -10,6 +10,7 @@
 #include <memory>
 #include <unordered_map>
 #include <quickjs/quickjs.h>
+#include <quickjs/list.h>
 #include "js_context_macros.h"
 
 using QjsContext = JSContext;
@@ -44,6 +45,7 @@ public:
   std::chrono::time_point<std::chrono::system_clock> timeOrigin;
 
   int32_t uniqueId;
+  struct list_head node_list;
 
   static JSClassID kHostClassClassId;
   static JSClassID kHostObjectClassId;
