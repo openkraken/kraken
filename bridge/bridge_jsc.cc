@@ -46,6 +46,7 @@
 #include "bindings/jsc/js_context_internal.h"
 #include "bindings/jsc/kraken.h"
 #include "bindings/jsc/ui_manager.h"
+#include "bindings/jsc/html_parser.h"
 
 namespace kraken {
 
@@ -71,6 +72,8 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bridgeCallback = new foundation::BridgeCallback();
 
   m_context = binding::jsc::createJSContext(contextId, errorHandler, this);
+
+  m_html_parser = binding::jsc::createHTMLParser(m_context, errorHandler, this);
 
 #if ENABLE_PROFILE
   auto nativePerformance = binding::jsc::NativePerformance::instance(m_context->uniqueId);
@@ -164,17 +167,26 @@ void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType
   }
 }
 
+// parse html.
+void JSBridge::parseHTML(const NativeString *script, const char *url) {
+  if (!m_context->isValid()) return;
+  binding::jsc::updateLocation(url);
+
+  m_html_parser->parseHTML(script->string, script->length);
+}
+
+// eval javascript.
 void JSBridge::evaluateScript(const NativeString *script, const char *url, int startLine) {
   if (!m_context->isValid()) return;
 
-#if ENABLE_PROFILE
-  auto nativePerformance = binding::jsc::NativePerformance::instance(m_context->uniqueId);
-  nativePerformance->mark(PERF_JS_PARSE_TIME_START);
-  std::u16string patchedCode = std::u16string(u"performance.mark('js_parse_time_end');") + std::u16string(reinterpret_cast<const char16_t *>(script->string));
-  m_context->evaluateJavaScript(patchedCode.c_str(), patchedCode.size(), url, startLine);
-#else
-  m_context->evaluateJavaScript(script->string, script->length, url, startLine);
-#endif
+  #if ENABLE_PROFILE
+    auto nativePerformance = binding::jsc::NativePerformance::instance(m_context->uniqueId);
+    nativePerformance->mark(PERF_JS_PARSE_TIME_START);
+    std::u16string patchedCode = std::u16string(u"performance.mark('js_parse_time_end');") + std::u16string(reinterpret_cast<const char16_t *>(script->string));
+    m_context->evaluateJavaScript(patchedCode.c_str(), patchedCode.size(), url, startLine);
+  #else
+    m_context->evaluateJavaScript(script->string, script->length, url, startLine);
+  #endif
 }
 
 void JSBridge::evaluateScript(const std::u16string &script, const char *url, int startLine) {
