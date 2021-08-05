@@ -170,7 +170,6 @@ void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType
 // parse html.
 void JSBridge::parseHTML(const NativeString *script, const char *url) {
   if (!m_context->isValid()) return;
-  binding::jsc::updateLocation(url);
 
   m_html_parser->parseHTML(script->string, script->length);
 }
