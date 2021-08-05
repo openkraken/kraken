@@ -78,7 +78,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   @override
   Future<HttpClientResponse> close() async {
 
-    String? contextId = KrakenHttpOverrides.takeContextHeader(_clientRequest);
+    String? contextId = KrakenHttpOverrides.getContextHeader(_clientRequest);
     if (contextId != null && _httpOverrides.hasInterceptor(contextId)) {
       HttpClientInterceptor clientInterceptor = _httpOverrides.getInterceptor(contextId);
       HttpClientRequest _request = await _beforeRequest(clientInterceptor, _clientRequest) ?? _clientRequest;

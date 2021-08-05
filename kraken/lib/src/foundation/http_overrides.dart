@@ -7,8 +7,8 @@ import 'package:kraken/launcher.dart';
 import 'http_client_interceptor.dart';
 import 'http_client.dart';
 
-
-const String HttpHeaderContext = 'krakencontext';
+// TODO: do not use header to mark context
+const String HttpHeaderContext = 'x-context';
 class KrakenHttpOverrides extends HttpOverrides {
   static KrakenHttpOverrides? _instance;
   KrakenHttpOverrides._();
@@ -20,11 +20,8 @@ class KrakenHttpOverrides extends HttpOverrides {
     return _instance!;
   }
 
-  static String? takeContextHeader(HttpClientRequest request) {
+  static String? getContextHeader(HttpClientRequest request) {
     String? contextId = request.headers.value(HttpHeaderContext);
-    if (contextId != null) {
-      request.headers.removeAll(HttpHeaderContext);
-    }
     return contextId;
   }
 

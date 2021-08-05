@@ -5,8 +5,7 @@
 
 import 'dart:async';
 import 'dart:io';
-
-import 'package:dio/dio.dart';
+import 'package:http/http.dart' as http;
 import 'package:kraken/bridge.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/foundation.dart';
@@ -27,59 +26,45 @@ class FetchModule extends BaseModule {
     String url = method;
     Map<String, dynamic> options = params;
 
-    _fetch(url, options, contextId: moduleManager!.contextId).then((Response response) {
-      callback(data: ['', response.statusCode, response.data]);
+    _fetch(url, options, contextId: moduleManager!.contextId).then((http.Response response) {
+      callback(data: ['', response.statusCode, response.body]);
     }).catchError((e, stack) {
-      if (e is DioError && e.type == DioErrorType.response) {
-        callback(data: [e.toString(), e.response!.statusCode, EMPTY_STRING]);
-      } else {
-        callback(error: '$e\n$stack');
-      }
+      callback(error: '$e\n$stack');
     });
 
     return '';
   }
 }
 
-Future<Response> _fetch(String url, Map<String, dynamic> map, { required int contextId }) async {
-  Future<Response> future;
-  String method = map['method'] ?? 'GET';
+Future<http.Response> _fetch(String url, Map<String, dynamic> options, { required int contextId }) async {
+  Uri uri = Uri.parse(url);
+  String method = options['method'] ?? 'GET';
 
-  if (map['headers'] == null) {
-    map['headers'] = {HttpHeaders.userAgentHeader: getKrakenInfo().userAgent};
+  if (options['headers'] == null) {
+    options['headers'] = {HttpHeaders.userAgentHeader: getKrakenInfo().userAgent};
   }
 
-  var headers = map['headers'];
+  Map<String, String> headers = Map<String, String>.from(options['headers']);
+
   if (headers[HttpHeaders.userAgentHeader] == null) {
     headers[HttpHeaders.userAgentHeader] = getKrakenInfo().userAgent;
   }
 
   headers[HttpHeaderContext] = contextId.toString();
 
-  BaseOptions options =
-      BaseOptions(headers: headers, method: method, responseType: ResponseType.plain);
-
   switch (method) {
     case 'POST':
-      future = Dio(options).post(url, data: map['body']);
-      break;
+      return http.post(uri, headers: headers, body: options['body']);
     case 'PUT':
-      future = Dio(options).put(url, data: map['body']);
-      break;
+      return http.put(uri, headers: headers, body: options['body']);
     case 'PATCH':
-      future = Dio(options).patch(url, data: map['body']);
-      break;
+      return http.patch(uri, headers: headers, body: options['body']);
     case 'DELETE':
-      future = Dio(options).delete(url, data: map['body']);
-      break;
+      return http.delete(uri, headers: headers, body: options['body']);
     case 'HEAD':
-      future = Dio(options).head(url);
-      break;
+      return http.head(uri, headers: headers);
     case 'GET':
     default:
-      future = Dio(options).get(url);
-      break;
+      return http.get(uri, headers: headers);
   }
-
-  return future;
 }
