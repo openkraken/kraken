@@ -292,6 +292,7 @@ class BoxDecorationPainter extends BoxPainter {
       _decoration.image!,
       renderStyle.backgroundPositionX,
       renderStyle.backgroundPositionY,
+      renderStyle.backgroundSize,
       onChanged!
     );
     Path? clipPath;
@@ -481,11 +482,18 @@ class BoxDecorationPainter extends BoxPainter {
 /// Forked from flutter of [DecorationImagePainter] Class.
 /// https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/decoration_image.dart#L208
 class BoxDecorationImagePainter {
-  BoxDecorationImagePainter._(this._details, this._backgroundPositionX, this._backgroundPositionY, this._onChanged);
+  BoxDecorationImagePainter._(
+    this._details,
+    this._backgroundPositionX,
+    this._backgroundPositionY,
+    this._backgroundSize,
+    this._onChanged
+  );
 
   final DecorationImage _details;
   final CSSBackgroundPosition _backgroundPositionX;
   final CSSBackgroundPosition _backgroundPositionY;
+  final CSSBackgroundSize _backgroundSize;
   final VoidCallback _onChanged;
 
   ImageStream? _imageStream;
@@ -540,9 +548,9 @@ class BoxDecorationImagePainter {
       debugImageLabel: _image!.debugLabel,
       scale: _details.scale * _image!.scale,
       colorFilter: _details.colorFilter,
-      fit: _details.fit,
       positionX: _backgroundPositionX,
       positionY: _backgroundPositionY,
+      backgroundSize: _backgroundSize,
       centerSlice: _details.centerSlice,
       repeat: _details.repeat,
       flipHorizontally: flipHorizontally,
@@ -606,9 +614,9 @@ void _paintImage({
   String? debugImageLabel,
   double scale = 1.0,
   ColorFilter? colorFilter,
-  BoxFit? fit,
   required CSSBackgroundPosition positionX,
   required CSSBackgroundPosition positionY,
+  required CSSBackgroundSize backgroundSize,
   Rect? centerSlice,
   ImageRepeat repeat = ImageRepeat.noRepeat,
   bool flipHorizontally = false,
@@ -632,11 +640,24 @@ void _paintImage({
     outputSize = outputSize - sliceBorder as Size;
     inputSize = inputSize - sliceBorder * scale as Size;
   }
-  fit ??= centerSlice == null ? BoxFit.scaleDown : BoxFit.fill;
-  assert(centerSlice == null || (fit != BoxFit.none && fit != BoxFit.cover));
-  final FittedSizes fittedSizes = applyBoxFit(fit, inputSize / scale, outputSize);
-  final Size sourceSize = fittedSizes.source * scale;
-  Size destinationSize = fittedSizes.destination;
+  BoxFit? fit = backgroundSize.fit;
+
+  Size sourceSize = inputSize;
+  Size destinationSize = outputSize;
+
+  if (backgroundSize.width != null && backgroundSize.height != null) {
+    sourceSize = inputSize;
+    double width = backgroundSize.width! is String && CSSLength.isPercentage(backgroundSize.width!) ?
+      CSSLength.parsePercentage(backgroundSize.width!) * outputSize.width : backgroundSize.width;
+    double height = backgroundSize.height! is String && CSSLength.isPercentage(backgroundSize.height!) ?
+      CSSLength.parsePercentage(backgroundSize.height!) * outputSize.height : backgroundSize.height;
+    destinationSize = Size(width, height);
+  } else {
+    final FittedSizes fittedSizes = applyBoxFit(fit!, inputSize / scale, outputSize);
+    sourceSize = fittedSizes.source * scale;
+    destinationSize = fittedSizes.destination;
+  }
+
   if (centerSlice != null) {
     outputSize += sliceBorder!;
     destinationSize += sliceBorder;

@@ -29,6 +29,113 @@ class CSSBackgroundPosition {
   double? percentage;
 }
 
+class CSSBackgroundSize {
+  CSSBackgroundSize({
+    this.fit,
+    this.width,
+    this.height,
+  });
+
+  BoxFit? fit;
+  dynamic? width;
+  dynamic? height;
+
+  static const String CONTAIN = 'contain';
+  static const String COVER = 'cover';
+  static const String AUTO = 'auto';
+
+  static dynamic? _parseLengthPercentageValue(String value, {
+    Size? viewportSize,
+    double? rootFontSize,
+    double? fontSize
+  }) {
+    if (CSSLength.isLength(value)) {
+      double? length = CSSLength.toDisplayPortValue(
+        value,
+        viewportSize: viewportSize,
+        rootFontSize: rootFontSize,
+        fontSize: fontSize
+      );
+      return length;
+    } else if (CSSLength.isPercentage(value)) {
+      return value;
+    }
+    return null;
+  }
+
+  static CSSBackgroundSize _parseSizeValue(String value, {
+    Size? viewportSize,
+    double? rootFontSize,
+    double? fontSize
+  }) {
+    List<String> values = value.split(_spaceRegExp);
+    if (values.length == 1) {
+      dynamic? parsedValue = _parseLengthPercentageValue(value,
+        viewportSize: viewportSize,
+        rootFontSize: rootFontSize,
+        fontSize: fontSize,
+      );
+      if (parsedValue != null) {
+        return CSSBackgroundSize(
+          width: parsedValue,
+          height: parsedValue,
+        );
+      }
+    } else if (values.length == 2) {
+      dynamic? parsedWidth = _parseLengthPercentageValue(values[0],
+        viewportSize: viewportSize,
+        rootFontSize: rootFontSize,
+        fontSize: fontSize,
+      );
+      dynamic? parsedHeight = _parseLengthPercentageValue(values[1],
+        viewportSize: viewportSize,
+        rootFontSize: rootFontSize,
+        fontSize: fontSize,
+      );
+      if (parsedWidth != null && parsedHeight != null) {
+        return CSSBackgroundSize(
+          width: parsedWidth,
+          height: parsedHeight,
+        );
+      }
+    }
+
+    return CSSBackgroundSize(
+      fit: BoxFit.none
+    );
+  }
+
+  static CSSBackgroundSize parseValue(String value, {
+    Size? viewportSize,
+    double? rootFontSize,
+    double? fontSize
+  }) {
+    switch (value) {
+      case CONTAIN:
+        return CSSBackgroundSize(
+          fit: BoxFit.contain
+        );
+      case COVER:
+        return CSSBackgroundSize(
+          fit: BoxFit.cover
+        );
+      case AUTO:
+        return CSSBackgroundSize(
+          fit: BoxFit.none
+        );
+      default:
+        return _parseSizeValue(value,
+          viewportSize: viewportSize,
+          rootFontSize: rootFontSize,
+          fontSize: fontSize,
+        );
+    }
+  }
+
+  @override
+  String toString() => 'CSSBackgroundSize(fit: $fit, width: $width, height: $height)';
+}
+
 /// - background
 /// - border
 mixin CSSBoxMixin on RenderStyleBase {
@@ -77,6 +184,16 @@ mixin CSSBoxMixin on RenderStyleBase {
     if (value == null) return;
     if (value == _backgroundPositionY) return;
     _backgroundPositionY = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+
+  /// Background-size
+  CSSBackgroundSize get backgroundSize => _backgroundSize;
+  CSSBackgroundSize _backgroundSize = CSSBackgroundSize(fit: BoxFit.none);
+  set backgroundSize(CSSBackgroundSize? value) {
+    if (value == null) return;
+    if (value == _backgroundSize) return;
+    _backgroundSize = value;
     renderBoxModel!.markNeedsPaint();
   }
 
@@ -167,7 +284,11 @@ mixin CSSBoxMixin on RenderStyleBase {
     return constraints;
   }
 
-  void updateBox(String property, String? original, String present, int contextId) {
+  void updateBox(String property, String present, int contextId, {
+    Size? viewportSize,
+    double? rootFontSize,
+    double? fontSize
+  }) {
     RenderStyle renderStyle = this as RenderStyle;
 
     if (property == BACKGROUND_IMAGE) {
@@ -188,6 +309,13 @@ mixin CSSBoxMixin on RenderStyleBase {
         backgroundPositionX = CSSPosition.parsePosition(present, renderStyle, true);
       } else if (property == BACKGROUND_POSITION_Y) {
         backgroundPositionY = CSSPosition.parsePosition(present, renderStyle, false);
+      } else if (property == BACKGROUND_SIZE) {
+        backgroundSize = CSSBackgroundSize.parseValue(
+          present,
+          viewportSize: viewportSize,
+          rootFontSize: rootFontSize,
+          fontSize: fontSize,
+        );
       } else if (property.startsWith(BACKGROUND)) {
         // Including BACKGROUND_REPEAT, BACKGROUND_IMAGE,
         //   BACKGROUND_SIZE, BACKGROUND_ORIGIN, BACKGROUND_CLIP.

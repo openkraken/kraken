@@ -1110,7 +1110,15 @@ class Element extends Node
 
   void _styleBoxChangedListener(String property, String? original, String present) {
     int contextId = elementManager.contextId;
-    renderBoxModel!.renderStyle.updateBox(property, original, present, contextId);
+    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
+    double rootFontSize = _getRootElementFontSize();
+    double fontSize = selfRenderBoxModel.renderStyle.fontSize;
+    renderBoxModel!.renderStyle.updateBox(
+      property, present, contextId,
+      viewportSize: viewportSize,
+      rootFontSize: rootFontSize,
+      fontSize: fontSize,
+    );
   }
 
   void _styleBorderRadiusChangedListener(String property, String? original, String present) {
