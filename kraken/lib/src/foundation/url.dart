@@ -21,16 +21,17 @@ class URLParser {
       _contextId = contextId;
       KrakenController controller = KrakenController.getControllerOfJSContextId(_contextId)!;
       URLClient? urlClient = controller.urlClient;
+      Uri uriHref = Uri.parse(controller.href);
+      String href = controller.href;
 
       // Treat empty scheme as https.
-      if (path.startsWith('//')) path = 'https' + path;
+      if (path.startsWith('//')) {
+        path = 'https:' + path;
+      }
 
       RegExp exp = RegExp("^([a-z][a-z\d\+\-\.]*:)?\/\/");
       if (!exp.hasMatch(path) && _contextId != null && path.startsWith('//')) {
         // relative path.
-        KrakenController controller = KrakenController.getControllerOfJSContextId(_contextId)!;
-        Uri uriHref = Uri.parse(controller.href);
-        String href = controller.href;
         if (path.startsWith('/')) {
           path = uriHref.scheme + '://' + uriHref.host + ':' + uriHref.port.toString() + path;
         } else {
