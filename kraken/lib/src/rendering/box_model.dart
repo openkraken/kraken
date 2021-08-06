@@ -91,22 +91,44 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox,
   ///    hit-testing strategy.
   bool defaultHitTestChildren(BoxHitTestResult result, {Offset? position}) {
     // The x, y parameters have the top left of the node's box as the origin.
-    ChildType? child = lastChild;
-    while (child != null) {
-      final ParentDataType childParentData = child.parentData as ParentDataType;
-      final bool isHit = result.addWithPaintOffset(
-        offset: childParentData.offset == Offset.zero
-            ? null
-            : childParentData.offset,
-        position: position!,
-        hitTest: (BoxHitTestResult result, Offset transformed) {
-          assert(transformed == position - childParentData.offset);
-          return child!.hitTest(result, position: transformed);
-        },
-      );
-      if (isHit) return true;
-      child = childParentData.previousSibling;
+
+    //if (false) {
+    if (this is RenderLayoutBox) {
+      List<RenderObject?> sortedChildren = (this as RenderLayoutBox).sortedChildren;
+      for (int i = sortedChildren.length - 1; i >= 0; i--) {
+        ChildType child = sortedChildren[i] as ChildType;
+        final ParentDataType childParentData = child.parentData as ParentDataType;
+        final bool isHit = result.addWithPaintOffset(
+          offset: childParentData.offset == Offset.zero
+              ? null
+              : childParentData.offset,
+          position: position!,
+          hitTest: (BoxHitTestResult result, Offset transformed) {
+            assert(transformed == position - childParentData.offset);
+            return child.hitTest(result, position: transformed);
+          },
+        );
+        if (isHit) return true;
+      }
+    } else {
+      ChildType? child = lastChild;
+      while (child != null) {
+        final ParentDataType childParentData = child.parentData as ParentDataType;
+        final bool isHit = result.addWithPaintOffset(
+          offset: childParentData.offset == Offset.zero
+              ? null
+              : childParentData.offset,
+          position: position!,
+          hitTest: (BoxHitTestResult result, Offset transformed) {
+            assert(transformed == position - childParentData.offset);
+            return child!.hitTest(result, position: transformed);
+          },
+        );
+        if (isHit) return true;
+        child = childParentData.previousSibling;
+      }
     }
+
     return false;
   }
 
