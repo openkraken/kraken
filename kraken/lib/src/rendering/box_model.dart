@@ -92,8 +92,8 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox,
   bool defaultHitTestChildren(BoxHitTestResult result, {Offset? position}) {
     // The x, y parameters have the top left of the node's box as the origin.
 
-    //if (false) {
     if (this is RenderLayoutBox) {
+      // The z-index needs to be sorted, and higher-level nodes are processed first.
       List<RenderObject?> sortedChildren = (this as RenderLayoutBox).sortedChildren;
       for (int i = sortedChildren.length - 1; i >= 0; i--) {
         ChildType child = sortedChildren[i] as ChildType;
