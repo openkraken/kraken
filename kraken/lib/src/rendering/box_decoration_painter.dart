@@ -633,7 +633,10 @@ void _paintImage({
   if (rect.isEmpty)
     return;
   Size outputSize = rect.size;
-  Size inputSize = Size(image.width.toDouble(), image.height.toDouble());
+  double imageWidth = image.width.toDouble();
+  double imageHeight = image.height.toDouble();
+  Size inputSize = Size(imageWidth, imageHeight);
+  double imageRatio = imageWidth / imageHeight;
   Offset? sliceBorder;
   if (centerSlice != null) {
     sliceBorder = inputSize / scale - centerSlice.size as Offset;
@@ -646,12 +649,23 @@ void _paintImage({
   Size destinationSize = outputSize;
 
   // Set length/percentage value of background-size.
-  if (backgroundSize.width != null && backgroundSize.height != null) {
+  if (backgroundSize.width != null) {
+    double height;
     sourceSize = inputSize;
     double width = backgroundSize.width! is String && CSSLength.isPercentage(backgroundSize.width!) ?
       CSSLength.parsePercentage(backgroundSize.width!) * outputSize.width : backgroundSize.width;
-    double height = backgroundSize.height! is String && CSSLength.isPercentage(backgroundSize.height!) ?
-      CSSLength.parsePercentage(backgroundSize.height!) * outputSize.height : backgroundSize.height;
+
+    // Two value is set.
+    if (backgroundSize.height != null) {
+      height = backgroundSize.height! is String && CSSLength.isPercentage(backgroundSize.height!) ?
+        CSSLength.parsePercentage(backgroundSize.height!) * outputSize.height : backgroundSize.height;
+
+    // Only one value is set, the second value is resolved as auto. And auto for one dimension
+    // is resolved by using the image’s natural aspect ratio and the size of the other dimension.
+    } else {
+      height = width / imageRatio;
+    }
+
     destinationSize = Size(width, height);
 
   // Set keyword value(contain/cover/auto) of background-size.

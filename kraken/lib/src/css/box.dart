@@ -83,7 +83,6 @@ class CSSBackgroundSize {
       if (parsedValue != null) {
         return CSSBackgroundSize(
           width: parsedValue,
-          height: parsedValue,
         );
       }
     } else if (values.length == 2) {
