@@ -31,13 +31,13 @@ class CSSBackgroundPosition {
 
 class CSSBackgroundSize {
   CSSBackgroundSize({
-    this.fit,
+    required this.fit,
     this.width,
     this.height,
   });
 
   // Keyword value (contain/cover/auto)
-  BoxFit? fit;
+  BoxFit fit = BoxFit.none;
 
   // Length/percentage value
   dynamic width;
@@ -60,7 +60,7 @@ class CSSBackgroundSize {
         fontSize: fontSize
       );
       return length;
-    } else if (CSSLength.isPercentage(value)) {
+    } else if (CSSLength.isPercentage(value) || value == AUTO) {
       // Percentage value should be parsed on the paint phase cause
       // it depends on the final layouted size of background's container.
       return value;
@@ -82,6 +82,7 @@ class CSSBackgroundSize {
       );
       if (parsedValue != null) {
         return CSSBackgroundSize(
+          fit: BoxFit.none,
           width: parsedValue,
         );
       }
@@ -96,8 +97,11 @@ class CSSBackgroundSize {
         rootFontSize: rootFontSize,
         fontSize: fontSize,
       );
+
+      // Value which is neither length/percentage/auto is considered to be invalid.
       if (parsedWidth != null && parsedHeight != null) {
         return CSSBackgroundSize(
+          fit: BoxFit.none,
           width: parsedWidth,
           height: parsedHeight,
         );

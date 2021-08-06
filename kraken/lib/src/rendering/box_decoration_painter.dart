@@ -648,29 +648,39 @@ void _paintImage({
   Size sourceSize = inputSize;
   Size destinationSize = outputSize;
 
-  // Set length/percentage value of background-size.
-  if (backgroundSize.width != null) {
-    double height;
-    sourceSize = inputSize;
-    double width = backgroundSize.width! is String && CSSLength.isPercentage(backgroundSize.width!) ?
-      CSSLength.parsePercentage(backgroundSize.width!) * outputSize.width : backgroundSize.width;
+  dynamic backgroundWidth = backgroundSize.width;
+  dynamic backgroundHeight = backgroundSize.height;
 
-    // Two value is set.
-    if (backgroundSize.height != null) {
-      height = backgroundSize.height! is String && CSSLength.isPercentage(backgroundSize.height!) ?
-        CSSLength.parsePercentage(backgroundSize.height!) * outputSize.height : backgroundSize.height;
-
-    // Only one value is set, the second value is resolved as auto. And auto for one dimension
-    // is resolved by using the image’s natural aspect ratio and the size of the other dimension.
-    } else {
-      height = width / imageRatio;
-    }
-
+  // One value is set, eg `100px`.
+  // Two values are set, eg `100px auto`.
+  if (backgroundWidth != null && backgroundWidth != AUTO &&
+    (backgroundHeight == null || backgroundHeight == AUTO)
+  ) {
+    double width = backgroundWidth! is String && CSSLength.isPercentage(backgroundWidth!) ?
+      CSSLength.parsePercentage(backgroundWidth!) * outputSize.width : backgroundWidth;
+    double height = width / imageRatio;
     destinationSize = Size(width, height);
 
-  // Set keyword value(contain/cover/auto) of background-size.
+  // Two values are set, eg `auto 100px`.
+  } else if (backgroundWidth == AUTO && backgroundHeight != null && backgroundHeight != AUTO) {
+    double height = backgroundHeight! is String && CSSLength.isPercentage(backgroundHeight!) ?
+      CSSLength.parsePercentage(backgroundHeight!) * outputSize.height : backgroundHeight;
+    double width = height * imageRatio;
+    destinationSize = Size(width, height);
+
+  // Two values are set, eg `100px 100px`.
+  } else if (backgroundWidth != null && backgroundWidth != AUTO &&
+    backgroundHeight != null && backgroundHeight != AUTO
+  ) {
+    double width = backgroundWidth! is String && CSSLength.isPercentage(backgroundWidth!) ?
+      CSSLength.parsePercentage(backgroundWidth!) * outputSize.width : backgroundWidth;
+    double height = backgroundHeight! is String && CSSLength.isPercentage(backgroundHeight!) ?
+      CSSLength.parsePercentage(backgroundHeight!) * outputSize.height : backgroundHeight;
+    destinationSize = Size(width, height);
+
+  // Keyword values are set(contain|cover|auto), eg `contain`, `auto auto`.
   } else {
-    final FittedSizes fittedSizes = applyBoxFit(fit!, inputSize / scale, outputSize);
+    final FittedSizes fittedSizes = applyBoxFit(fit, inputSize / scale, outputSize);
     sourceSize = fittedSizes.source * scale;
     destinationSize = fittedSizes.destination;
   }

@@ -1,4 +1,4 @@
-describe('Background-size', () => {
+fdescribe('Background-size', () => {
   it('should works with contain', async () => {
     let div1;
     let div = createElement(
@@ -71,6 +71,78 @@ describe('Background-size', () => {
     await snapshot(0.1);
   });
   
+  it('should works with auto of two values', async () => {
+    let div1;
+    let div = createElement(
+     'div',
+     {
+       style: {},
+     },
+     [
+       (div1 = createElement('div', {
+         style: {
+           height: '150px',
+           width: '200px',
+           backgroundColor: '#999',
+           backgroundImage: 'url(assets/100x100-green.png)',
+           backgroundRepeat: 'no-repeat',
+           backgroundSize: 'auto auto'
+         },
+       })),
+     ]
+    );
+    append(BODY, div);
+    await snapshot(0.1);
+  });
+
+  it('should works with auto of first value', async () => {
+    let div1;
+    let div = createElement(
+     'div',
+     {
+       style: {},
+     },
+     [
+       (div1 = createElement('div', {
+         style: {
+           height: '150px',
+           width: '200px',
+           backgroundColor: '#999',
+           backgroundImage: 'url(assets/100x100-green.png)',
+           backgroundRepeat: 'no-repeat',
+           backgroundSize: 'auto 130px'
+         },
+       })),
+     ]
+    );
+    append(BODY, div);
+    await snapshot(0.1);
+  });
+
+  it('should works with auto of second value', async () => {
+    let div1;
+    let div = createElement(
+     'div',
+     {
+       style: {},
+     },
+     [
+       (div1 = createElement('div', {
+         style: {
+           height: '150px',
+           width: '200px',
+           backgroundColor: '#999',
+           backgroundImage: 'url(assets/100x100-green.png)',
+           backgroundRepeat: 'no-repeat',
+           backgroundSize: '80px auto'
+         },
+       })),
+     ]
+    );
+    append(BODY, div);
+    await snapshot(0.1);
+  });
+
   it('should works with one value of length', async () => {
     let div1;
     let div = createElement(
