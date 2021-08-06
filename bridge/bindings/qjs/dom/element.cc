@@ -244,15 +244,12 @@ JSValue Element::removeAttribute(QjsContext *ctx, JSValue this_val, int argc, JS
   return JS_NULL;
 }
 
-struct ToBlobPromiseContext : public foundation::BridgeCallback::Context {
-  explicit ToBlobPromiseContext(int32_t eventTargetId, double devicePixelRatio, JSValue promise,
-                                kraken::binding::qjs::JSContext &context, JSValue callback, JSValue secondaryCallback)
-    : foundation::BridgeCallback::Context(context, callback, secondaryCallback), eventTargetId(eventTargetId),
-      devicePixelRatio(devicePixelRatio), promise(promise) {};
-
-  int32_t eventTargetId;
+struct ToBlobPromiseContext {
+  JSContext *context;
   double devicePixelRatio;
   JSValue promise;
+  JSValue resolve;
+  JSValue reject;
 };
 
 JSValue Element::toBlob(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
@@ -274,67 +271,62 @@ JSValue Element::toBlob(QjsContext *ctx, JSValue this_val, int argc, JSValue *ar
 
   auto *element = reinterpret_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   getDartMethod()->flushUICommand();
-  auto bridge = static_cast<JSBridge *>(element->m_context->getOwner());
 
   auto blobCallback = [](void *callbackContext, int32_t contextId, const char *error, uint8_t *bytes,
                          int32_t length) {
     auto toBlobPromiseContext = static_cast<ToBlobPromiseContext *>(callbackContext);
-    QjsContext *ctx = toBlobPromiseContext->m_context.ctx();
+    QjsContext *ctx = toBlobPromiseContext->context->ctx();
     if (error == nullptr) {
       std::vector<uint8_t> vec(bytes, bytes + length);
       JSValue arrayBuffer = JS_NewArrayBuffer(ctx, bytes, length, nullptr, nullptr, false);
-      Blob *constructor = Blob::instance(&toBlobPromiseContext->m_context);
+      Blob *constructor = Blob::instance(toBlobPromiseContext->context);
       JSValue argumentsArray = JS_NewArray(ctx);
-      JS_SetPropertyUint32(ctx, argumentsArray, 0, arrayBuffer);
+      JSValue pushMethod = JS_GetPropertyStr(ctx, argumentsArray, "push");
+      JS_Call(ctx, pushMethod, argumentsArray, 1, &arrayBuffer);
+      JSValue blobValue = JS_CallConstructor(ctx, constructor->classObject, 1, &argumentsArray);
 
-      JSValue arguments[] = {
-        argumentsArray
-      };
-      JSValue blobValue = JS_CallConstructor(ctx, constructor->classObject, 1, arguments);
       if (JS_IsException(blobValue)) {
-        toBlobPromiseContext->m_context.handleException(&blobValue);
+        toBlobPromiseContext->context->handleException(&blobValue);
       } else {
-        JSValue resolveArguments[] = {
-          blobValue
-        };
-        JS_Call(ctx, toBlobPromiseContext->m_callback, toBlobPromiseContext->promise, 1, resolveArguments);
+        JS_Call(ctx, toBlobPromiseContext->resolve, toBlobPromiseContext->promise, 1, &blobValue);
       }
 
+      JS_FreeValue(ctx, pushMethod);
       JS_FreeValue(ctx, blobValue);
+      JS_FreeValue(ctx, argumentsArray);
       JS_FreeValue(ctx, arrayBuffer);
     } else {
       JSValue errorObject = JS_NewError(ctx);
       JSValue errorMessage = JS_NewString(ctx, error);
       JS_DefinePropertyValueStr(ctx, errorObject, "message", errorMessage,
                                 JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
-
-      JSValue rejectArguments[] = {
-        errorObject
-      };
-      JS_Call(ctx, toBlobPromiseContext->m_secondaryCallback, toBlobPromiseContext->promise, 1, rejectArguments);
+      JS_Call(ctx, toBlobPromiseContext->reject, toBlobPromiseContext->promise, 1, &errorObject);
       JS_FreeValue(ctx, errorObject);
+      JS_FreeValue(ctx, errorMessage);
     }
+
+    JS_FreeValue(ctx, toBlobPromiseContext->resolve);
+    JS_FreeValue(ctx, toBlobPromiseContext->reject);
   };
 
   JSValue resolving_funcs[2];
   JSValue promise = JS_NewPromiseCapability(ctx, resolving_funcs);
 
-  auto toBlobPromiseContext = std::make_unique<ToBlobPromiseContext>(
-    element->eventTargetId,
+  auto toBlobPromiseContext = new ToBlobPromiseContext{
+    element->m_context,
     devicePixelRatio,
     promise,
-    *element->context(),
     resolving_funcs[0],
     resolving_funcs[1]
-  );
+  };
 
-  bridge->bridgeCallback->registerCallback<void>(
-    std::move(toBlobPromiseContext), [blobCallback](
-      foundation::BridgeCallback::Context *callbackContext, int32_t contextId) {
-      auto *toBlobPromiseContext = reinterpret_cast<ToBlobPromiseContext *>(callbackContext);
-      getDartMethod()->toBlob(callbackContext, contextId, blobCallback, toBlobPromiseContext->eventTargetId,
-                              toBlobPromiseContext->devicePixelRatio);
-    });
+  getDartMethod()->toBlob(
+    static_cast<void *>(toBlobPromiseContext),
+    element->m_context->getContextId(),
+    blobCallback,
+    element->eventTargetId,
+    toBlobPromiseContext->devicePixelRatio
+  );
 
   return promise;
 }
