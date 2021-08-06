@@ -645,6 +645,7 @@ void _paintImage({
   Size sourceSize = inputSize;
   Size destinationSize = outputSize;
 
+  // Set length/percentage value of background-size.
   if (backgroundSize.width != null && backgroundSize.height != null) {
     sourceSize = inputSize;
     double width = backgroundSize.width! is String && CSSLength.isPercentage(backgroundSize.width!) ?
@@ -652,6 +653,8 @@ void _paintImage({
     double height = backgroundSize.height! is String && CSSLength.isPercentage(backgroundSize.height!) ?
       CSSLength.parsePercentage(backgroundSize.height!) * outputSize.height : backgroundSize.height;
     destinationSize = Size(width, height);
+
+  // Set keyword value(contain/cover/auto) of background-size.
   } else {
     final FittedSizes fittedSizes = applyBoxFit(fit!, inputSize / scale, outputSize);
     sourceSize = fittedSizes.source * scale;

@@ -36,7 +36,10 @@ class CSSBackgroundSize {
     this.height,
   });
 
+  // Keyword value (contain/cover/auto)
   BoxFit? fit;
+
+  // Length/percentage value
   dynamic width;
   dynamic height;
 
@@ -58,6 +61,8 @@ class CSSBackgroundSize {
       );
       return length;
     } else if (CSSLength.isPercentage(value)) {
+      // Percentage value should be parsed on the paint phase cause
+      // it depends on the final layouted size of background's container.
       return value;
     }
     return null;
