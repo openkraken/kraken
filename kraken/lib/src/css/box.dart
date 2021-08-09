@@ -59,7 +59,8 @@ class CSSBackgroundSize {
         rootFontSize: rootFontSize,
         fontSize: fontSize
       );
-      return length;
+      // Negative value is invalid.
+      return length != null && length >=0 ? length : null;
     } else if (CSSLength.isPercentage(value) || value == AUTO) {
       // Percentage value should be parsed on the paint phase cause
       // it depends on the final layouted size of background's container.
