@@ -4,6 +4,7 @@
  */
 
 import 'dart:ui' as ui show Image;
+import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -636,7 +637,7 @@ void _paintImage({
   double imageWidth = image.width.toDouble();
   double imageHeight = image.height.toDouble();
   Size inputSize = Size(imageWidth, imageHeight);
-  double imageRatio = imageWidth / imageHeight;
+  double aspectRatio = imageWidth / imageHeight;
   Offset? sliceBorder;
   if (centerSlice != null) {
     sliceBorder = inputSize / scale - centerSlice.size as Offset;
@@ -651,24 +652,23 @@ void _paintImage({
   dynamic backgroundWidth = backgroundSize.width;
   dynamic backgroundHeight = backgroundSize.height;
 
-  // One value is set, eg `100px`.
-  // Two values are set, eg `100px auto`.
+  // Only background width is set, eg `100px`, `100px auto`.
   if (backgroundWidth != null && backgroundWidth != AUTO &&
     (backgroundHeight == null || backgroundHeight == AUTO)
   ) {
     double width = backgroundWidth! is String && CSSLength.isPercentage(backgroundWidth!) ?
       CSSLength.parsePercentage(backgroundWidth!) * outputSize.width : backgroundWidth;
-    double height = width / imageRatio;
-    destinationSize = Size(width, height);
+    double height = width / aspectRatio;
+    destinationSize = Size(math.min(outputSize.width, width), math.min(outputSize.height, height));
 
-  // Two values are set, eg `auto 100px`.
+  // Only background height is set, eg `auto 100px`.
   } else if (backgroundWidth == AUTO && backgroundHeight != null && backgroundHeight != AUTO) {
     double height = backgroundHeight! is String && CSSLength.isPercentage(backgroundHeight!) ?
       CSSLength.parsePercentage(backgroundHeight!) * outputSize.height : backgroundHeight;
-    double width = height * imageRatio;
-    destinationSize = Size(width, height);
+    double width = height * aspectRatio;
+    destinationSize = Size(math.min(outputSize.width, width), math.min(outputSize.height, height));
 
-  // Two values are set, eg `100px 100px`.
+  // Both background width and height are set, eg `100px 100px`.
   } else if (backgroundWidth != null && backgroundWidth != AUTO &&
     backgroundHeight != null && backgroundHeight != AUTO
   ) {
@@ -676,7 +676,7 @@ void _paintImage({
       CSSLength.parsePercentage(backgroundWidth!) * outputSize.width : backgroundWidth;
     double height = backgroundHeight! is String && CSSLength.isPercentage(backgroundHeight!) ?
       CSSLength.parsePercentage(backgroundHeight!) * outputSize.height : backgroundHeight;
-    destinationSize = Size(width, height);
+    destinationSize = Size(math.min(outputSize.width, width), math.min(outputSize.height, height));
 
   // Keyword values are set(contain|cover|auto), eg `contain`, `auto auto`.
   } else {
