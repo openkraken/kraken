@@ -193,6 +193,7 @@ void Node::traverseCloneNode(QjsContext *ctx, NodeInstance *element, NodeInstanc
     if (iter->nodeType == NodeType::ELEMENT_NODE) {
       traverseCloneNode(ctx, static_cast<ElementInstance *>(iter), static_cast<ElementInstance *>(newNodeInstance));
     }
+    JS_FreeValue(ctx, newNode);
   }
 }
 

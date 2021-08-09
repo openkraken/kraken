@@ -151,3 +151,47 @@ console.log(div.style.width == div2.style.height, div.getAttribute('id') == '123
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);
 }
+
+TEST(Node, nestedNode) {
+  std::string code = R"(
+const div = document.createElement('div');
+div.style.width = '100px';
+div.style.height = '100px';
+div.style.backgroundColor = 'green';
+div.setAttribute('id', '123');
+document.body.appendChild(div)
+
+const child = document.createElement('div');
+child.style.width = '10px';
+child.style.height = '10px';
+child.style.backgroundColor = 'blue';
+div.setAttribute('id', 'child123');
+div.appendChild(child);
+
+const child2 = document.createElement('div');
+child2.style.width = '10px';
+child2.style.height = '10px';
+child2.style.backgroundColor = 'yellow';
+div.setAttribute('id', 'child123');
+div.appendChild(child2);
+
+const div2 = div.cloneNode(true);
+document.body.appendChild(div2)
+)";
+
+  bool static errorCalled = false;
+  bool static logCalled = false;
+  kraken::JSBridge::consoleMessageHandler = [](void *ctx, const std::string &message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(), "true true true");
+  };
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+    KRAKEN_LOG(VERBOSE) << errmsg;
+    errorCalled = true;
+  });
+  auto &context = bridge->getContext();
+  bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
+  delete bridge;
+  EXPECT_EQ(errorCalled, false);
+//  EXPECT_EQ(logCalled, true);
+}
