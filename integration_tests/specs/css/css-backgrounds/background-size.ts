@@ -1,4 +1,4 @@
-fdescribe('Background-size', () => {
+describe('Background-size', () => {
   it('should works with contain', async () => {
     let div1;
     let div = createElement(
