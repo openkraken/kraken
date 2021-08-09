@@ -71,11 +71,11 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
 
   if (${IS_ANDROID})
     list(APPEND BRIDGE_INCLUDE
-            ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/JavaScriptCore/include
+            ${CMAKE_CURRENT_SOURCE_DIR}/third_party/JavaScriptCore/include
             )
     add_library(JavaScriptCore SHARED IMPORTED)
     set_target_properties(JavaScriptCore PROPERTIES IMPORTED_LOCATION
-            "${CMAKE_CURRENT_SOURCE_DIR}/../third_party/JavaScriptCore/lib/android/${ANDROID_ABI}/libjsc.so"
+            "${CMAKE_CURRENT_SOURCE_DIR}/third_party/JavaScriptCore/lib/android/${ANDROID_ABI}/libjsc.so"
             )
     list(APPEND BRIDGE_LINK_LIBS
             JavaScriptCore
