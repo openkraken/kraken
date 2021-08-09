@@ -61,6 +61,15 @@ class KrakenHttpOverrides extends HttpOverrides {
     return httpClient;
   }
 
+  @override
+  String findProxyFromEnvironment(Uri url, Map<String, String>? environment) {
+    if (parentHttpOverrides != null) {
+      return parentHttpOverrides!.findProxyFromEnvironment(url, environment);
+    } else {
+      return super.findProxyFromEnvironment(url, environment);
+    }
+  }
+
   bool shouldOverride(HttpClientRequest request) {
     String? contextId = request.headers.value(HttpHeaderContextID);
     return contextId != null && _contextIdToHttpClientInterceptorMap.containsKey(contextId);
