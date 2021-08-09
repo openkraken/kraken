@@ -58,7 +58,7 @@ TEST(HostObject, defineProperty) {
   });
   auto &context = bridge->getContext();
   auto *sampleObject = new SampleObject(context.get());
-  JSValue &object = sampleObject->jsObject;
+  JSValue object = sampleObject->jsObject;
   context->defineGlobalProperty("o", object);
   const char* code = "o.foo++; console.log(o);";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
@@ -80,7 +80,7 @@ TEST(HostObject, defineFunction) {
   });
   auto &context = bridge->getContext();
   auto *sampleObject = new SampleObject(context.get());
-  JSValue &object = sampleObject->jsObject;
+  JSValue object = sampleObject->jsObject;
   context->defineGlobalProperty("o", object);
   const char* code = "console.log(o.f(10))";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);

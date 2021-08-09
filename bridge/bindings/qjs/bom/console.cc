@@ -9,7 +9,7 @@ namespace kraken::binding::qjs {
 
 JSValue print(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
   std::stringstream stream;
-  JSValue &log = argv[0];
+  JSValue log = argv[0];
   if (JS_IsString(log)) {
     const char* buffer = JS_ToCString(ctx, log);
     stream << buffer;
@@ -20,7 +20,7 @@ JSValue print(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *ar
 
   auto *context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
   const char *logLevel = "info";
-  JSValue &level = argv[1];
+  JSValue level = argv[1];
   if (JS_IsString(level)) {
     logLevel = JS_ToCString(ctx, level);
     JS_FreeCString(ctx, logLevel);

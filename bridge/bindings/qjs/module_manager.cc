@@ -18,7 +18,7 @@ JSValue krakenModuleListener(QjsContext *ctx, JSValueConst this_val, int argc, J
       ctx, "Failed to execute '__kraken_module_listener__': 1 parameter required, but only 0 present.");
   }
 
-  JSValue &callbackValue = argv[0];
+  JSValue callbackValue = argv[0];
   if (!JS_IsObject(callbackValue)) {
     return JS_ThrowTypeError(
       ctx, "Failed to execute '__kraken_module_listener__': parameter 1 (callback) must be a function.");
@@ -55,7 +55,7 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
     return;
   }
 
-  JSValue &callback = obj->m_callback;
+  JSValue callback = obj->m_callback;
   JSValue returnValue;
   if (errmsg != nullptr) {
     JSValue errorMessage = JS_NewUnicodeString(obj->m_context.runtime(), ctx, errmsg->string, errmsg->length);
@@ -87,8 +87,8 @@ JSValue krakenInvokeModule(QjsContext *ctx, JSValueConst this_val, int argc, JSV
     return JS_ThrowTypeError(ctx, "Failed to execute 'kraken.invokeModule()': 2 arguments required.");
   }
 
-  JSValue &moduleNameValue = argv[0];
-  JSValue &methodValue = argv[1];
+  JSValue moduleNameValue = argv[0];
+  JSValue methodValue = argv[1];
   JSValue paramsValue = JS_NULL;
   JSValue callbackValue = JS_NULL;
 

@@ -77,7 +77,7 @@ JSValue Node::appendChild(QjsContext *ctx, JSValue this_val, int argc, JSValue *
 
   auto selfInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, Node::classId(this_val)));
   if (selfInstance == nullptr) return JS_ThrowTypeError(ctx, "this object is not a instance of Node.");
-  JSValue &nodeValue = argv[0];
+  JSValue nodeValue = argv[0];
 
   if (!JS_IsObject(nodeValue)) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'appendChild' on 'Node': first arguments should be an Node type.");
@@ -106,7 +106,7 @@ JSValue Node::removeChild(QjsContext *ctx, JSValue this_val, int argc, JSValue *
     return JS_ThrowTypeError(ctx, "Uncaught TypeError: Failed to execute 'removeChild' on 'Node': 1 arguments required");
   }
 
-  JSValue &nodeValue = argv[0];
+  JSValue nodeValue = argv[0];
 
   if (!JS_IsObject(nodeValue)) {
     return JS_ThrowTypeError(ctx, "Uncaught TypeError: Failed to execute 'removeChild' on 'Node': 1st arguments is not object");
@@ -127,8 +127,8 @@ JSValue Node::insertBefore(QjsContext *ctx, JSValue this_val, int argc, JSValue 
     return JS_ThrowTypeError(ctx, "Failed to execute 'insertBefore' on 'Node': 2 arguments is required.");
   }
 
-  JSValue &nodeValue = argv[0];
-  JSValue &referenceNodeValue = argv[1];
+  JSValue nodeValue = argv[0];
+  JSValue referenceNodeValue = argv[1];
 
   if (!JS_IsObject(nodeValue)) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'insertBefore' on 'Node': the node element is not object.");
@@ -156,8 +156,8 @@ JSValue Node::replaceChild(QjsContext *ctx, JSValue this_val, int argc, JSValue 
     return JS_ThrowTypeError(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 2 arguments required");
   }
 
-  JSValue &newChildValue = argv[0];
-  JSValue &oldChildValue = argv[1];
+  JSValue newChildValue = argv[0];
+  JSValue oldChildValue = argv[1];
 
   if (!JS_IsObject(newChildValue)) {
     return JS_ThrowTypeError(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 1 arguments is not object");

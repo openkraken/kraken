@@ -32,7 +32,7 @@ OBJECT_INSTANCE_IMPL(EventTarget);
 
 JSValue EventTarget::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   if (argc == 1) {
-    JSValue &jsOnlyEvents = argv[0];
+    JSValue jsOnlyEvents = argv[0];
 
     if (!JS_IsArray(ctx, jsOnlyEvents)) {
       return JS_ThrowTypeError(ctx, "Failed to new Event: jsOnlyEvents is not an array.");
@@ -78,8 +78,8 @@ JSValue EventTarget::addEventListener(QjsContext *ctx, JSValue this_val, int arg
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
 
-  JSValue &eventTypeValue = argv[0];
-  JSValue &callback = argv[1];
+  JSValue eventTypeValue = argv[0];
+  JSValue callback = argv[1];
 
   if (!JS_IsString(eventTypeValue)) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: eventName should be an string.");
@@ -142,8 +142,8 @@ JSValue EventTarget::removeEventListener(QjsContext *ctx, JSValue this_val, int 
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
 
-  JSValue &eventTypeValue = argv[0];
-  JSValue &callback = argv[1];
+  JSValue eventTypeValue = argv[0];
+  JSValue callback = argv[1];
 
   if (!JS_IsString(eventTypeValue)) {
     return JS_ThrowTypeError(ctx, "Failed to removeEventListener: eventName should be an string.");
@@ -207,7 +207,7 @@ JSValue EventTarget::dispatchEvent(QjsContext *ctx, JSValue this_val, int argc, 
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
 
-  JSValue &eventValue = argv[0];
+  JSValue eventValue = argv[0];
   auto eventInstance = reinterpret_cast<EventInstance *>(JS_GetOpaque(eventValue,
                                                                       EventTarget::classId(eventValue)));
   return JS_NewBool(ctx, eventTargetInstance->dispatchEvent(eventInstance));

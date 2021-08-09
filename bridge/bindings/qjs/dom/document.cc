@@ -58,7 +58,7 @@ JSValue Document::createEvent(QjsContext *ctx, JSValue this_val, int argc, JSVal
     return JS_ThrowTypeError(ctx, "Failed to argumentCount: 1 argument required, but only 0 present.");
   }
 
-  JSValue &eventTypeValue = argv[0];
+  JSValue eventTypeValue = argv[0];
   if (!JS_IsString(eventTypeValue)) {
     return JS_ThrowTypeError(ctx, "Failed to createEvent: type should be a string.");
   }
@@ -82,7 +82,7 @@ JSValue Document::createElement(QjsContext *ctx, JSValue this_val, int argc, JSV
     return JS_ThrowTypeError(ctx, "Failed to createElement: 1 argument required, but only 0 present.");
   }
 
-  JSValue &tagNameValue = argv[0];
+  JSValue tagNameValue = argv[0];
   if (!JS_IsString(tagNameValue)) {
     return JS_ThrowTypeError(ctx, "Failed to createElement: tagName should be a string.");
   }
@@ -112,7 +112,7 @@ JSValue Document::getElementById(QjsContext *ctx, JSValue this_val, int argc, JS
   }
 
   auto *document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, Document::classId()));
-  JSValue &idValue = argv[0];
+  JSValue idValue = argv[0];
 
   if (!JS_IsString(idValue)) return JS_NULL;
 
@@ -136,7 +136,7 @@ JSValue Document::getElementsByTagName(QjsContext *ctx, JSValue this_val, int ar
   }
 
   auto *document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, Document::classId()));
-  JSValue &tagNameValue = argv[0];
+  JSValue tagNameValue = argv[0];
   std::string tagName = jsValueToStdString(ctx, tagNameValue);
   std::transform(tagName.begin(), tagName.end(), tagName.begin(), ::toupper);
 

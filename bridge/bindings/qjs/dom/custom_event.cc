@@ -29,7 +29,7 @@ JSValue CustomEvent::initCustomEvent(QjsContext *ctx, JSValue this_val, int argc
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
 
-  JSValue &typeValue = argv[0];
+  JSValue typeValue = argv[0];
   eventInstance->nativeEvent->type = jsValueToNativeString(ctx, typeValue);
 
   if (argc <= 2) {
@@ -53,7 +53,7 @@ JSValue CustomEvent::constructor(QjsContext *ctx, JSValue func_obj, JSValue this
     return JS_ThrowTypeError(ctx, "Failed to construct 'CustomEvent': 1 argument required, but only 0 present.");
   }
 
-  JSValue &typeArgsValue = argv[0];
+  JSValue typeArgsValue = argv[0];
   JSValue customEventInit = JS_NULL;
 
   if (argc == 2) {

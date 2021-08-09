@@ -52,7 +52,7 @@ JSValue CSSStyleDeclaration::constructor(QjsContext *ctx, JSValue func_obj, JSVa
     return JS_ThrowTypeError(ctx, "Illegal constructor");
   }
 
-  JSValue &eventTargetValue = argv[0];
+  JSValue eventTargetValue = argv[0];
 
   auto eventTargetInstance =
     static_cast<EventTargetInstance *>(JS_GetOpaque(eventTargetValue, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
@@ -73,8 +73,8 @@ JSValue CSSStyleDeclaration::setProperty(QjsContext *ctx, JSValue this_val, int 
     return JS_ThrowTypeError(ctx,
                              "Failed to execute 'setProperty' on 'CSSStyleDeclaration': 2 arguments required, but only 0 present.");
   auto *instance = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(this_val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
-  JSValue &propertyNameValue = argv[0];
-  JSValue &propertyValue = argv[1];
+  JSValue propertyNameValue = argv[0];
+  JSValue propertyValue = argv[1];
 
   const char *cPropertyName = JS_ToCString(ctx, propertyNameValue);
   std::string propertyName = std::string(cPropertyName);
@@ -92,7 +92,7 @@ JSValue CSSStyleDeclaration::removeProperty(QjsContext *ctx, JSValue this_val, i
                              "Failed to execute 'removeProperty' on 'CSSStyleDeclaration': 1 arguments required, but only 0 present.");
   auto *instance = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(this_val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
 
-  JSValue &propertyNameValue = argv[0];
+  JSValue propertyNameValue = argv[0];
 
   const char *cPropertyName = JS_ToCString(ctx, propertyNameValue);
   std::string propertyName = std::string(cPropertyName);
@@ -109,7 +109,7 @@ JSValue CSSStyleDeclaration::getPropertyValue(QjsContext *ctx, JSValue this_val,
     return JS_ThrowTypeError(ctx,
                              "Failed to execute 'getPropertyValue' on 'CSSStyleDeclaration': 1 arguments required, but only 0 present.");
   auto *instance = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(this_val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
-  JSValue &propertyNameValue = argv[0];
+  JSValue propertyNameValue = argv[0];
   const char *cPropertyName = JS_ToCString(ctx, propertyNameValue);
   std::string propertyName = std::string(cPropertyName);
 

@@ -37,7 +37,7 @@ JSClassID Window::classId() {
 }
 
 JSValue Window::open(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  JSValue &url = argv[0];
+  JSValue url = argv[0];
   auto window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, Window::classId()));
   NativeValue arguments[] = {
     jsValueToNativeValue(ctx, argv[0])
@@ -45,8 +45,8 @@ JSValue Window::open(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv)
   return window->callNativeMethods("open", 1, arguments);
 }
 JSValue Window::scrollTo(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  JSValue &x = argv[0];
-  JSValue &y = argv[1];
+  JSValue x = argv[0];
+  JSValue y = argv[1];
   auto window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, Window::classId()));
   NativeValue arguments[] = {
     jsValueToNativeValue(ctx, argv[0]),
@@ -55,8 +55,8 @@ JSValue Window::scrollTo(QjsContext *ctx, JSValue this_val, int argc, JSValue *a
   return window->callNativeMethods("scroll", 2, arguments);
 }
 JSValue Window::scrollBy(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  JSValue &x = argv[0];
-  JSValue &y = argv[1];
+  JSValue x = argv[0];
+  JSValue y = argv[1];
   auto window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, Window::classId()));
   NativeValue arguments[] = {
     jsValueToNativeValue(ctx, argv[0]),

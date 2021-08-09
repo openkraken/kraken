@@ -61,8 +61,8 @@ static JSValue setTimeout(QjsContext *ctx, JSValueConst this_val, int argc, JSVa
   }
 
   auto context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
-  JSValue &callbackValue = argv[0];
-  JSValue &timeoutValue = argv[1];
+  JSValue callbackValue = argv[0];
+  JSValue timeoutValue = argv[1];
 
   if (!JS_IsObject(callbackValue)) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'setTimeout': parameter 1 (callback) must be a function.");
@@ -144,8 +144,8 @@ static JSValue setInterval(QjsContext *ctx, JSValueConst this_val, int argc, JSV
   }
 
   auto context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
-  JSValue &callbackValue = argv[0];
-  JSValue &timeoutValue = argv[1];
+  JSValue callbackValue = argv[0];
+  JSValue timeoutValue = argv[1];
 
   if (!JS_IsObject(callbackValue)) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'setInterval': parameter 1 (callback) must be a function.");
@@ -191,7 +191,7 @@ static JSValue requestAnimationFrame(QjsContext *ctx, JSValueConst this_val, int
   }
 
   auto context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
-  JSValue &callbackValue = argv[0];
+  JSValue callbackValue = argv[0];
 
   if (!JS_IsObject(callbackValue)) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.");
@@ -238,7 +238,7 @@ static JSValue clearTimeout(QjsContext *ctx, JSValueConst this_val, int argc, JS
 
   auto context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
 
-  JSValue &timeIdValue = argv[0];
+  JSValue timeIdValue = argv[0];
   if (!JS_IsNumber(timeIdValue)) {
     return JS_NULL;
   }
@@ -259,7 +259,7 @@ static JSValue cancelAnimationFrame(QjsContext *ctx, JSValueConst this_val, int 
     return JS_ThrowTypeError(ctx, "Failed to execute 'cancelAnimationFrame': 1 argument required, but only 0 present.");
   }
   auto context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
-  JSValue &requestIdValue = argv[0];
+  JSValue requestIdValue = argv[0];
   if (!JS_IsNumber(requestIdValue)) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'cancelAnimationFrame': parameter 1 (timer) is not a timer kind.");
   }

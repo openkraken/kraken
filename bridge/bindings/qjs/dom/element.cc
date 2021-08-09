@@ -94,7 +94,7 @@ void ElementAttributes::copyWith(ElementAttributes *attributes) {
 
 JSValue Element::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   if (argc == 0) return JS_ThrowTypeError(ctx, "Illegal constructor");
-  JSValue &tagName = argv[0];
+  JSValue tagName = argv[0];
 
   if (!JS_IsString(tagName)) {
     return JS_ThrowTypeError(ctx, "Illegal constructor");
@@ -131,7 +131,7 @@ JSValue Element::hasAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
                              "Failed to execute 'hasAttribute' on 'Element': 1 argument required, but only 0 present");
   }
 
-  JSValue &nameValue = argv[0];
+  JSValue nameValue = argv[0];
 
   if (!JS_IsString(nameValue)) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'setAttribute' on 'Element': name attribute is not valid.");
@@ -156,7 +156,7 @@ JSValue Element::setAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
                              argc);
   }
 
-  JSValue &nameValue = argv[0];
+  JSValue nameValue = argv[0];
   JSValue attributeValue = argv[1];
   JSValue attributeString = JS_ToString(ctx, attributeValue);
   JSAtom attributeAtom = JS_ValueToAtom(ctx, attributeString);
@@ -200,7 +200,7 @@ JSValue Element::getAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
                              "Failed to execute 'getAttribute' on 'Element': 1 argument required, but only 0 present");
   }
 
-  JSValue &nameValue = argv[0];
+  JSValue nameValue = argv[0];
 
   if (!JS_IsString(nameValue)) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'setAttribute' on 'Element': name attribute is not valid.");
@@ -224,7 +224,7 @@ JSValue Element::removeAttribute(QjsContext *ctx, JSValue this_val, int argc, JS
                              "Failed to execute 'removeAttribute' on 'Element': 1 argument required, but only 0 present");
   }
 
-  JSValue &nameValue = argv[0];
+  JSValue nameValue = argv[0];
 
   if (!JS_IsString(nameValue)) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'removeAttribute' on 'Element': name attribute is not valid.");
@@ -259,7 +259,7 @@ JSValue Element::toBlob(QjsContext *ctx, JSValue this_val, int argc, JSValue *ar
   double devicePixelRatio = 1.0;
 
   if (argc > 0) {
-    JSValue &devicePixelRatioValue = argv[0];
+    JSValue devicePixelRatioValue = argv[0];
 
     if (!JS_IsNumber(devicePixelRatioValue)) {
       return JS_ThrowTypeError(ctx, "Failed to export blob: parameter 2 (devicePixelRatio) is not an number.");
