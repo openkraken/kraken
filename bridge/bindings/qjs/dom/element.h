@@ -36,14 +36,14 @@ public:
   explicit ElementAttributes(JSContext *context) : HostObject(context, "ElementAttributes") {}
   ~ElementAttributes();
 
-  JSValue getAttribute(std::string &name);
-  JSValue setAttribute(std::string &name, JSValue value);
+  JSAtom getAttribute(std::string &name);
+  JSValue setAttribute(std::string &name, JSAtom value);
   bool hasAttribute(std::string &name);
   void removeAttribute(std::string &name);
   void copyWith(ElementAttributes *attributes);
 
 private:
-  std::unordered_map<std::string, JSValue> m_attributes;
+  std::unordered_map<std::string, JSAtom> m_attributes;
 };
 
 class Element : public Node {
@@ -108,8 +108,8 @@ private:
   void _notifyChildRemoved();
   void _notifyNodeInsert(NodeInstance *insertNode) override;
   void _notifyChildInsert();
-  void _didModifyAttribute(std::string &name, JSValue &oldId, JSValue &newId);
-  void _beforeUpdateId(JSValue &oldId, JSValue &newId);
+  void _didModifyAttribute(std::string &name, JSAtom oldId, JSAtom newId);
+  void _beforeUpdateId(JSAtom oldId, JSAtom newId);
 
   std::string m_tagName;
   friend Element;

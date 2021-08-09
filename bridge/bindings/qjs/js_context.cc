@@ -169,8 +169,10 @@ void JSContext::defineGlobalProperty(const char *prop, JSValue value) {
 }
 
 NativeString *jsValueToNativeString(QjsContext *ctx, JSValue &value) {
+  bool isValueString = true;
   if (!JS_IsString(value)) {
     value = JS_ToString(ctx, value);
+    isValueString = false;
   }
 
   uint32_t length;
@@ -178,7 +180,12 @@ NativeString *jsValueToNativeString(QjsContext *ctx, JSValue &value) {
   NativeString tmp{};
   tmp.string = buffer;
   tmp.length = length;
-  return tmp.clone();
+  NativeString *cloneString = tmp.clone();
+
+  if (!isValueString) {
+    JS_FreeValue(ctx, value);
+  }
+  return cloneString;
 }
 
 void buildUICommandArgs(QjsContext *ctx, JSValue key, NativeString &args_01) {

@@ -202,10 +202,13 @@ JSValue Node::copyNodeValue(QjsContext *ctx, NodeInstance *node) {
 
     /* createElement */
     std::string tagName = element->getRegisteredTagName();
+    JSValue tagNameValue = JS_NewString(element->m_ctx, tagName.c_str());
     JSValue arguments[] = {
-      JS_NewString(element->m_ctx, tagName.c_str())
+      tagNameValue
     };
     JSValue newElementValue = JS_CallConstructor(element->context()->ctx(), Element::instance(element->context())->classObject, 1, arguments);
+    JS_FreeValue(ctx, tagNameValue);
+
     auto *newElement = static_cast<ElementInstance *>(JS_GetOpaque(newElementValue, Node::classId(newElementValue)));
 
     /* copy attributes */

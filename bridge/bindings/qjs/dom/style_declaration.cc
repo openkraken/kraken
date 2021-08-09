@@ -161,7 +161,7 @@ JSValue StyleDeclarationInstance::internalGetPropertyValue(std::string &name) {
   name = parseJavaScriptCSSPropertyName(name);
 
   if (properties.count(name) > 0) {
-    return properties[name];
+    return JS_DupValue(m_ctx, properties[name]);
   }
 
   return JS_NULL;
@@ -187,7 +187,9 @@ JSValue StyleDeclarationInstance::getProperty(QjsContext *ctx, JSValue obj, JSAt
   auto *style = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(receiver, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
   const char* cname = JS_AtomToCString(ctx, atom);
   std::string name = std::string(cname);
-  return style->internalGetPropertyValue(name);
+  JSValue result = style->internalGetPropertyValue(name);
+  JS_FreeCString(ctx, cname);
+  return result;
 }
 
 JSClassExoticMethods StyleDeclarationInstance::m_exoticMethods{

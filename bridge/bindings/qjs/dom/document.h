@@ -62,8 +62,8 @@ public:
   }
 
 private:
-  void removeElementById(JSValue id, ElementInstance *element);
-  void addElementById(JSValue id, ElementInstance *element);
+  void removeElementById(JSAtom id, ElementInstance *element);
+  void addElementById(JSAtom id, ElementInstance *element);
   std::unordered_map<JSAtom, std::vector<ElementInstance *>> m_elementMapById;
   ElementInstance *m_documentElement{nullptr};
 

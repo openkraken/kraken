@@ -33,8 +33,8 @@ JSValue Blob::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, i
     return blob->instanceObject;
   }
 
-  JSValue &arrayValue = argv[0];
-  JSValue &optionValue = argv[1];
+  JSValue arrayValue = argv[0];
+  JSValue optionValue = argv[1];
 
   if (!JS_IsArray(ctx, arrayValue)) {
     return JS_ThrowTypeError(ctx, "Failed to construct 'Blob': The provided value cannot be converted to a sequence");
@@ -125,9 +125,9 @@ JSValue Blob::arrayBuffer(QjsContext *ctx, JSValue this_val, int argc, JSValue *
 }
 
 JSValue Blob::slice(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  JSValue &startValue = argv[0];
-  JSValue &endValue = argv[1];
-  JSValue &contentTypeValue = argv[2];
+  JSValue startValue = argv[0];
+  JSValue endValue = argv[1];
+  JSValue contentTypeValue = argv[2];
 
   auto *blob = static_cast<BlobInstance *>(JS_GetOpaque(this_val, Blob::kBlobClassID));
   uint32_t start = 0;

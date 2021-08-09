@@ -40,11 +40,11 @@ static inline bool isNumberIndex(std::string &name) {
   return f >= '0' && f <= '9';
 }
 
-JSValue ElementAttributes::getAttribute(std::string &name) {
+JSAtom ElementAttributes::getAttribute(std::string &name) {
   bool numberIndex = isNumberIndex(name);
 
   if (numberIndex) {
-    return JS_NULL;
+    return JS_ATOM_NULL;
   }
 
   return m_attributes[name];
@@ -52,11 +52,11 @@ JSValue ElementAttributes::getAttribute(std::string &name) {
 
 ElementAttributes::~ElementAttributes() {
   for (auto &attr : m_attributes) {
-    JS_FreeValue(m_ctx, attr.second);
+    JS_FreeAtom(m_ctx, attr.second);
   }
 }
 
-JSValue ElementAttributes::setAttribute(std::string &name, JSValue value) {
+JSValue ElementAttributes::setAttribute(std::string &name, JSAtom atom) {
   bool numberIndex = isNumberIndex(name);
 
   if (numberIndex) {
@@ -65,7 +65,7 @@ JSValue ElementAttributes::setAttribute(std::string &name, JSValue value) {
                              name.c_str());
   }
 
-  m_attributes[name] =  JS_DupValue(m_ctx, value);;
+  m_attributes[name] = atom;
 
   return JS_NULL;
 }
@@ -81,14 +81,14 @@ bool ElementAttributes::hasAttribute(std::string &name) {
 }
 
 void ElementAttributes::removeAttribute(std::string &name) {
-  JSValue &value = m_attributes[name];
-  JS_FreeValue(m_ctx, value);
+  JSAtom value = m_attributes[name];
+  JS_FreeAtom(m_ctx, value);
   m_attributes.erase(name);
 }
 
 void ElementAttributes::copyWith(ElementAttributes *attributes) {
   for (auto &attr : attributes->m_attributes) {
-    m_attributes[attr.first] = JS_DupValue(m_ctx, attr.second);
+    m_attributes[attr.first] = JS_DupAtom(m_ctx, attr.second);
   }
 }
 
@@ -157,7 +157,9 @@ JSValue Element::setAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
   }
 
   JSValue &nameValue = argv[0];
-  JSValue &attributeValue = argv[1];
+  JSValue attributeValue = argv[1];
+  JSValue attributeString = JS_ToString(ctx, attributeValue);
+  JSAtom attributeAtom = JS_ValueToAtom(ctx, attributeString);
 
   if (!JS_IsString(nameValue)) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'setAttribute' on 'Element': name attribute is not valid.");
@@ -170,22 +172,24 @@ JSValue Element::setAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
   auto *attributes = element->m_attributes;
 
   if (attributes->hasAttribute(name)) {
-    JSValue oldValue = attributes->getAttribute(name);
-    JSValue exception = attributes->setAttribute(name, attributeValue);
+    JSAtom oldAtom = attributes->getAttribute(name);
+    JSValue exception = attributes->setAttribute(name, attributeAtom);
     if (JS_IsException(exception)) return exception;
-    element->_didModifyAttribute(name, oldValue, attributeValue);
+    element->_didModifyAttribute(name, oldAtom, attributeAtom);
+    JS_FreeAtom(ctx, oldAtom);
   } else {
-    JSValue exception = attributes->setAttribute(name, attributeValue);
+    JSValue exception = attributes->setAttribute(name, attributeAtom);
     if (JS_IsException(exception)) return exception;
-    JSValue oldValue = JS_NULL;
-    element->_didModifyAttribute(name, oldValue, attributeValue);
+    element->_didModifyAttribute(name, JS_ATOM_NULL, attributeAtom);
   }
 
   NativeString *args_01 = stringToNativeString(name);
-  NativeString *args_02 = jsValueToNativeString(ctx, attributeValue);
+  NativeString *args_02 = jsValueToNativeString(ctx, attributeString);
 
   ::foundation::UICommandBuffer::instance(element->m_context->getContextId())
     ->addCommand(element->eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+
+  JS_FreeValue(ctx, attributeString);
 
   return JS_NULL;
 }
@@ -208,7 +212,7 @@ JSValue Element::getAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
   auto *attributes = element->m_attributes;
 
   if (attributes->hasAttribute(name)) {
-    return attributes->getAttribute(name);
+    return JS_AtomToValue(ctx, attributes->getAttribute(name));
   }
 
   return JS_NULL;
@@ -231,10 +235,9 @@ JSValue Element::removeAttribute(QjsContext *ctx, JSValue this_val, int argc, JS
   auto *attributes = element->m_attributes;
 
   if (attributes->hasAttribute(name)) {
-    JSValue idRef = attributes->getAttribute(name);
+    JSAtom id = attributes->getAttribute(name);
     element->m_attributes->removeAttribute(name);
-    JSValue newValue = JS_NULL;
-    element->_didModifyAttribute(name, idRef, newValue);
+    element->_didModifyAttribute(name, id, JS_ATOM_NULL);
 
     NativeString *args_01 = stringToNativeString(name);
     ::foundation::UICommandBuffer::instance(element->m_context->getContextId())
@@ -556,7 +559,7 @@ std::string ElementInstance::tagName() {
 }
 
 std::string ElementInstance::getRegisteredTagName() {
-  return std::string();
+  return m_tagName;
 }
 
 void ElementInstance::_notifyNodeRemoved(NodeInstance *insertionNode) {
@@ -576,7 +579,7 @@ void ElementInstance::_notifyNodeRemoved(NodeInstance *insertionNode) {
 void ElementInstance::_notifyChildRemoved() {
   std::string id = "id";
   if (m_attributes->hasAttribute(id)) {
-    JSValue v = m_attributes->getAttribute(id);
+    JSAtom v = m_attributes->getAttribute(id);
     document()->removeElementById(v, this);
   }
 }
@@ -598,30 +601,27 @@ void ElementInstance::_notifyNodeInsert(NodeInstance *insertNode) {
 void ElementInstance::_notifyChildInsert() {
   std::string idKey = "id";
   if (m_attributes->hasAttribute(idKey)) {
-    JSValue v = m_attributes->getAttribute(idKey);
+    JSAtom v = m_attributes->getAttribute(idKey);
     document()->addElementById(v, this);
   }
 }
 
-void ElementInstance::_didModifyAttribute(std::string &name, JSValue &oldId, JSValue &newId) {
+void ElementInstance::_didModifyAttribute(std::string &name, JSAtom oldId, JSAtom newId) {
   if (name == "id") {
     _beforeUpdateId(oldId, newId);
   }
 }
 
-void ElementInstance::_beforeUpdateId(JSValue &oldId, JSValue &newId) {
-  JSAtom oldIdAtom = JS_ValueToAtom(m_ctx, oldId);
-  JSAtom newIdAtom = JS_ValueToAtom(m_ctx, newId);
-
-  if (oldIdAtom == newIdAtom) {
+void ElementInstance::_beforeUpdateId(JSAtom oldId, JSAtom newId) {
+  if (oldId == newId) {
     return;
   }
 
-  if (!JS_IsNull(oldId)) {
+  if (oldId != JS_ATOM_NULL) {
     document()->removeElementById(oldId, this);
   }
 
-  if (!JS_IsNull(newId)) {
+  if (newId != JS_ATOM_NULL) {
     document()->addElementById(newId, this);
   }
 }
