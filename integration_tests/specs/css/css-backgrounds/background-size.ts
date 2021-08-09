@@ -308,4 +308,109 @@ describe('Background-size', () => {
     append(BODY, div);
     await snapshot(0.1);
   });
+
+  it('should works with the height of background size bigger than the height of image container', async () => {
+    let div1;
+    let div = createElement(
+     'div',
+     {
+       style: {},
+     },
+     [
+       (div1 = createElement('div', {
+         style: {
+           height: '150px',
+           width: '200px',
+           backgroundColor: '#999',
+           backgroundImage: 'url(assets/100x100-green.png)',
+           backgroundRepeat: 'no-repeat',
+           backgroundSize: '180px',
+         },
+       })),
+     ]
+    );
+    append(BODY, div);
+    await snapshot(0.1);
+  });
+
+  it('should works with the width of background size bigger than the width of image container', async () => {
+    let div1;
+    let div = createElement(
+     'div',
+     {
+       style: {},
+     },
+     [
+       (div1 = createElement('div', {
+         style: {
+           height: '150px',
+           width: '200px',
+           backgroundColor: '#999',
+           backgroundImage: 'url(assets/100x100-green.png)',
+           backgroundRepeat: 'no-repeat',
+           backgroundSize: '280px 120px',
+         },
+       })),
+     ]
+    );
+    append(BODY, div);
+    await snapshot(0.1);
+  });
+
+  
+  it('should not work with negative value', async () => {
+    let div1;
+    let div = createElement(
+     'div',
+     {
+       style: {},
+     },
+     [
+       (div1 = createElement('div', {
+         style: {
+           height: '150px',
+           width: '200px',
+           backgroundColor: '#999',
+           backgroundImage: 'url(assets/100x100-green.png)',
+           backgroundRepeat: 'no-repeat',
+           backgroundSize: '170px -50px'
+         },
+       })),
+     ]
+    );
+    append(BODY, div);
+    await snapshot(0.1);
+  });
+
+  it('should works with background-size value change', async (done) => {
+    let div1;
+    let div = createElement(
+     'div',
+     {
+       style: {},
+     },
+     [
+       (div1 = createElement('div', {
+         style: {
+           height: '150px',
+           width: '200px',
+           backgroundColor: '#999',
+           backgroundImage: 'url(assets/100x100-green.png)',
+           backgroundRepeat: 'no-repeat',
+           backgroundSize: '120px 30px',
+           backgroundPosition: '10px 10px'
+         },
+       })),
+     ]
+    );
+    append(BODY, div);
+    await snapshot(0.1);
+
+    requestAnimationFrame(async () => {
+      div1.style.backgroundSize = '80px';
+      div1.style.backgroundPosition = '40px 40px';
+      await snapshot();
+      done();
+    });
+  });
 });
