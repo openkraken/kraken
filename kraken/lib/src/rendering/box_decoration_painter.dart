@@ -288,7 +288,7 @@ class BoxDecorationPainter extends BoxPainter {
   void _paintBackgroundImage(
     Canvas canvas, Rect rect, ImageConfiguration configuration) {
     if (_decoration.image == null) return;
-    _imagePainter ??= BoxDecorationImagePainter._(
+    _imagePainter = BoxDecorationImagePainter._(
       _decoration.image!,
       renderStyle.backgroundPositionX,
       renderStyle.backgroundPositionY,
