@@ -9,4 +9,11 @@ describe('Tags div', () => {
 
     await snapshot();
   });
+  
+  it('instanceof HTMLElement', () => {
+    let div = document.createElement('div');
+    expect(div instanceof Element).toBe(true);
+    expect(div instanceof HTMLElement).toBe(true);
+
+  });
 });

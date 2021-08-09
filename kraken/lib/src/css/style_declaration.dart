@@ -6,6 +6,7 @@
  */
 import 'dart:ui';
 
+import 'package:vector_math/vector_math_64.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
@@ -146,9 +147,20 @@ class CSSStyleDeclaration {
     }
 
     // Transition does not work when renderBoxModel has not been layouted yet.
-    return renderBoxModel != null && renderBoxModel.firstLayouted &&
+    if (renderBoxModel != null && renderBoxModel.firstLayouted &&
       CSSTransformHandlers[property] != null &&
-      (_transitions.containsKey(property) || _transitions.containsKey(ALL));
+      (_transitions.containsKey(property) || _transitions.containsKey(ALL))) {
+      bool shouldTransition = false;
+      // Transtion will be disabled when all transition has transitionDuration as 0.
+      _transitions.forEach((String transitionKey, List transitionOptions) {
+        double duration = CSSTime.parseTime(transitionOptions[0]).toDouble();
+        if (duration != 0) {
+          shouldTransition = true;
+        }
+      });
+      return shouldTransition;
+    }
+    return false;
   }
 
   EffectTiming? _getTransitionEffectTiming(String property) {
@@ -217,7 +229,7 @@ class CSSStyleDeclaration {
     };
 
     animation.onfinish = (AnimationPlaybackEvent event) {
-      _setTransitionEndProperty(propertyName, end);
+      _setTransitionEndProperty(propertyName, begin, end);
       _propertyRunningTransition.remove(propertyName);
       CSSTransition.dispatchTransitionEvent(target, CSSTransitionEvent.end);
     };
@@ -226,8 +238,7 @@ class CSSStyleDeclaration {
     animation.play();
   }
 
-  _setTransitionEndProperty(String propertyName, value) {
-    String? prevValue = _properties[propertyName];
+  _setTransitionEndProperty(String propertyName, String? prevValue, String value) {
     if (value == prevValue) return;
     _properties[propertyName] = value;
     setRenderStyleProperty(propertyName, prevValue, value);
@@ -654,6 +665,16 @@ class CSSStyleDeclaration {
       case TRANSFORM:
         if (!CSSTransform.isValidTransformValue(normalizedValue, viewportSize, rootFontSize, fontSize)) {
           return;
+        }
+        // Transform should converted to matrix4 value to compare cause case such as
+        // `translate3d(750rpx, 0rpx, 0rpx)` and `translate3d(100vw, 0vw, 0vw)` should considered to be equal.
+        // Note this comparison cannot be done in style listener cause prevValue cannot be get in animation case.
+        if (prevValue != null) {
+          Matrix4? prevMatrix4 = CSSTransform.parseTransform(prevValue, viewportSize, rootFontSize, fontSize);
+          Matrix4? matrix4 = CSSTransform.parseTransform(normalizedValue, viewportSize, rootFontSize, fontSize);
+          if (prevMatrix4 == matrix4) {
+            return;
+          }
         }
         break;
     }
