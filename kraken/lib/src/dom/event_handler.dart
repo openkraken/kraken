@@ -18,6 +18,7 @@ mixin EventHandlerMixin on EventTarget {
 
   void addEventResponder(RenderPointerListenerMixin renderBox) {
     renderBox.onClick = handleMouseEvent;
+    renderBox.onDoubleClick = dispatchEvent;
     renderBox.onSwipe = dispatchEvent;
     renderBox.onPan = dispatchEvent;
     renderBox.onScale = dispatchEvent;
@@ -29,6 +30,7 @@ mixin EventHandlerMixin on EventTarget {
 
   void removeEventResponder(RenderPointerListenerMixin renderBox) {
     renderBox.onClick = null;
+    renderBox.onDoubleClick = null;
     renderBox.onSwipe = null;
     renderBox.onPan = null;
     renderBox.onScale = null;
