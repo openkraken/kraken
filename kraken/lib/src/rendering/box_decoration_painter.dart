@@ -4,6 +4,7 @@
  */
 
 import 'dart:ui' as ui show Image;
+import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -288,10 +289,11 @@ class BoxDecorationPainter extends BoxPainter {
   void _paintBackgroundImage(
     Canvas canvas, Rect rect, ImageConfiguration configuration) {
     if (_decoration.image == null) return;
-    _imagePainter ??= BoxDecorationImagePainter._(
+    _imagePainter = BoxDecorationImagePainter._(
       _decoration.image!,
       renderStyle.backgroundPositionX,
       renderStyle.backgroundPositionY,
+      renderStyle.backgroundSize,
       onChanged!
     );
     Path? clipPath;
@@ -481,11 +483,18 @@ class BoxDecorationPainter extends BoxPainter {
 /// Forked from flutter of [DecorationImagePainter] Class.
 /// https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/decoration_image.dart#L208
 class BoxDecorationImagePainter {
-  BoxDecorationImagePainter._(this._details, this._backgroundPositionX, this._backgroundPositionY, this._onChanged);
+  BoxDecorationImagePainter._(
+    this._details,
+    this._backgroundPositionX,
+    this._backgroundPositionY,
+    this._backgroundSize,
+    this._onChanged
+  );
 
   final DecorationImage _details;
   final CSSBackgroundPosition _backgroundPositionX;
   final CSSBackgroundPosition _backgroundPositionY;
+  final CSSBackgroundSize _backgroundSize;
   final VoidCallback _onChanged;
 
   ImageStream? _imageStream;
@@ -540,9 +549,9 @@ class BoxDecorationImagePainter {
       debugImageLabel: _image!.debugLabel,
       scale: _details.scale * _image!.scale,
       colorFilter: _details.colorFilter,
-      fit: _details.fit,
       positionX: _backgroundPositionX,
       positionY: _backgroundPositionY,
+      backgroundSize: _backgroundSize,
       centerSlice: _details.centerSlice,
       repeat: _details.repeat,
       flipHorizontally: flipHorizontally,
@@ -606,9 +615,9 @@ void _paintImage({
   String? debugImageLabel,
   double scale = 1.0,
   ColorFilter? colorFilter,
-  BoxFit? fit,
   required CSSBackgroundPosition positionX,
   required CSSBackgroundPosition positionY,
+  required CSSBackgroundSize backgroundSize,
   Rect? centerSlice,
   ImageRepeat repeat = ImageRepeat.noRepeat,
   bool flipHorizontally = false,
@@ -625,18 +634,57 @@ void _paintImage({
   if (rect.isEmpty)
     return;
   Size outputSize = rect.size;
-  Size inputSize = Size(image.width.toDouble(), image.height.toDouble());
+  double imageWidth = image.width.toDouble();
+  double imageHeight = image.height.toDouble();
+  Size inputSize = Size(imageWidth, imageHeight);
+  double aspectRatio = imageWidth / imageHeight;
   Offset? sliceBorder;
   if (centerSlice != null) {
     sliceBorder = inputSize / scale - centerSlice.size as Offset;
     outputSize = outputSize - sliceBorder as Size;
     inputSize = inputSize - sliceBorder * scale as Size;
   }
-  fit ??= centerSlice == null ? BoxFit.scaleDown : BoxFit.fill;
-  assert(centerSlice == null || (fit != BoxFit.none && fit != BoxFit.cover));
-  final FittedSizes fittedSizes = applyBoxFit(fit, inputSize / scale, outputSize);
-  final Size sourceSize = fittedSizes.source * scale;
-  Size destinationSize = fittedSizes.destination;
+  BoxFit? fit = backgroundSize.fit;
+
+  Size sourceSize = inputSize;
+  Size destinationSize = outputSize;
+
+  dynamic backgroundWidth = backgroundSize.width;
+  dynamic backgroundHeight = backgroundSize.height;
+
+  // Only background width is set, eg `100px`, `100px auto`.
+  if (backgroundWidth != null && backgroundWidth != AUTO &&
+    (backgroundHeight == null || backgroundHeight == AUTO)
+  ) {
+    double width = backgroundWidth! is String && CSSLength.isPercentage(backgroundWidth!) ?
+      CSSLength.parsePercentage(backgroundWidth!) * outputSize.width : backgroundWidth;
+    double height = width / aspectRatio;
+    destinationSize = Size(math.min(outputSize.width, width), math.min(outputSize.height, height));
+
+  // Only background height is set, eg `auto 100px`.
+  } else if (backgroundWidth == AUTO && backgroundHeight != null && backgroundHeight != AUTO) {
+    double height = backgroundHeight! is String && CSSLength.isPercentage(backgroundHeight!) ?
+      CSSLength.parsePercentage(backgroundHeight!) * outputSize.height : backgroundHeight;
+    double width = height * aspectRatio;
+    destinationSize = Size(math.min(outputSize.width, width), math.min(outputSize.height, height));
+
+  // Both background width and height are set, eg `100px 100px`.
+  } else if (backgroundWidth != null && backgroundWidth != AUTO &&
+    backgroundHeight != null && backgroundHeight != AUTO
+  ) {
+    double width = backgroundWidth! is String && CSSLength.isPercentage(backgroundWidth!) ?
+      CSSLength.parsePercentage(backgroundWidth!) * outputSize.width : backgroundWidth;
+    double height = backgroundHeight! is String && CSSLength.isPercentage(backgroundHeight!) ?
+      CSSLength.parsePercentage(backgroundHeight!) * outputSize.height : backgroundHeight;
+    destinationSize = Size(math.min(outputSize.width, width), math.min(outputSize.height, height));
+
+  // Keyword values are set(contain|cover|auto), eg `contain`, `auto auto`.
+  } else {
+    final FittedSizes fittedSizes = applyBoxFit(fit, inputSize / scale, outputSize);
+    sourceSize = fittedSizes.source * scale;
+    destinationSize = fittedSizes.destination;
+  }
+
   if (centerSlice != null) {
     outputSize += sliceBorder!;
     destinationSize += sliceBorder;

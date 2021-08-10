@@ -193,4 +193,134 @@ describe('Transition all', () => {
       doneFn();
     }, 100);
   });
+
+  it('set the transition property style before node layout does not work 1', async () => {
+    const container1 = document.createElement('div');
+    document.body.appendChild(container1);
+    setElementStyle(container1, {
+      position: 'absolute',
+      top: '100px',
+      left: 0,
+      padding: '20px',
+      backgroundColor: '#999',
+      transition: 'all 1s linear',
+      transform: 'translate3d(200px, 0, 0)',
+    });
+    container1.appendChild(document.createTextNode('DIV'));
+    await snapshot();
+  });
+
+  it('set the transition property style before node layout does not work 2', async () => {
+    const container1 = document.createElement('div');
+    document.body.appendChild(container1);
+    setElementStyle(container1, {
+      position: 'absolute',
+      top: '100px',
+      left: 0,
+      padding: '20px',
+      backgroundColor: '#999',
+      transform: 'translate3d(200px, 0, 0)',
+    });
+    container1.appendChild(document.createTextNode('DIV'));
+    await snapshot();
+
+    requestAnimationFrame(() => {
+      setElementStyle(container1, {
+        transition: 'all 1s linear',
+      });
+    });
+  });
+
+  it('set the transition property style after node layout does work', async (done) => {
+    const container1 = document.createElement('div');
+    document.body.appendChild(container1);
+    setElementStyle(container1, {
+      position: 'absolute',
+      top: '100px',
+      left: 0,
+      padding: '20px',
+      backgroundColor: '#999',
+      transition: 'all 1s linear',
+    });
+    container1.appendChild(document.createTextNode('DIV'));
+    await snapshot();
+
+    requestAnimationFrame(() => {
+      setElementStyle(container1, {
+        transform: 'translate3d(200px, 0, 0)',
+      });
+
+      setTimeout(async () => {
+        await snapshot();
+      }, 500);
+
+      // Wait for animation finished.
+      setTimeout(async () => {
+        await snapshot();
+        done();
+      }, 1100);
+    });
+  });
+
+  it('set the transition style and the transition property style at the same time after node layout does work', async (done) => {
+    const container1 = document.createElement('div');
+    document.body.appendChild(container1);
+    setElementStyle(container1, {
+      position: 'absolute',
+      top: '100px',
+      left: 0,
+      padding: '20px',
+      backgroundColor: '#999',
+    });
+    container1.appendChild(document.createTextNode('DIV'));
+    await snapshot();
+
+    requestAnimationFrame(() => {
+      setElementStyle(container1, {
+        transition: 'all 1s linear',
+        transform: 'translate3d(200px, 0, 0)',
+      });
+
+      setTimeout(async () => {
+        await snapshot();
+      }, 500);
+
+      // Wait for animation finished.
+      setTimeout(async () => {
+        await snapshot();
+        done();
+      }, 1100);
+    });
+  });
+
+  it('move the transition property style before the transition style after node layout also works', async (done) => {
+    const container1 = document.createElement('div');
+    document.body.appendChild(container1);
+    setElementStyle(container1, {
+      position: 'absolute',
+      top: '100px',
+      left: 0,
+      padding: '20px',
+      backgroundColor: '#999',
+    });
+    container1.appendChild(document.createTextNode('DIV'));
+    await snapshot();
+
+    requestAnimationFrame(() => {
+      setElementStyle(container1, {
+        transform: 'translate3d(200px, 0, 0)',
+        transition: 'all 1s linear',
+      });
+
+      setTimeout(async () => {
+        await snapshot();
+      }, 500);
+
+      // Wait for animation finished.
+      setTimeout(async () => {
+        await snapshot();
+        done();
+      }, 1100);
+    });
+  });
 });

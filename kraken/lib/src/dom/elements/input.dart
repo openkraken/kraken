@@ -8,6 +8,7 @@ import 'dart:collection';
 import 'dart:ui';
 import 'dart:ffi';
 import 'dart:math' as math;
+import 'package:flutter/gestures.dart';
 import 'package:kraken/bridge.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -257,8 +258,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   @override
-  void setStyle(String key, value) {
-    super.setStyle(key, value);
+  void setRenderStyle(String key, value) {
+    super.setRenderStyle(key, value);
 
     if (_renderInputBox != null) {
       RenderStyle renderStyle = renderBoxModel!.renderStyle;
@@ -304,12 +305,29 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void dispatchEvent(Event event) {
     super.dispatchEvent(event);
     if (event.type == EVENT_TOUCH_START) {
-      InputElement.setFocus(this);
+      TouchEvent e = (event as TouchEvent);
+      if (e.touches.length == 1) {
+        InputElement.setFocus(this);
+
+        Touch touch = e.touches[0];
+        final TapDownDetails details = TapDownDetails(
+          globalPosition: Offset(touch.screenX, touch.screenY),
+          localPosition: Offset(touch.clientX, touch.clientY),
+          kind: PointerDeviceKind.touch,
+        );
+
+        _renderEditable!.handleTapDown(details);
+      }
+
       // @TODO: selection.
     } else if (event.type == EVENT_TOUCH_MOVE) {
       // @TODO: selection.
     } else if (event.type == EVENT_TOUCH_END) {
       // @TODO: selection.
+    } else if (event.type == EVENT_CLICK) {
+      _renderEditable!.handleTap();
+    } else if (event.type == EVENT_LONG_PRESS) {
+      _renderEditable!.handleLongPress();
     }
   }
 
@@ -411,6 +429,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       devicePixelRatio: window.devicePixelRatio,
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
+      ignorePointer: true,
     );
     return _renderEditable!;
   }

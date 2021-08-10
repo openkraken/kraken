@@ -110,34 +110,10 @@ class CSSBackground {
       }
     }
 
-    BoxFit boxFit = BoxFit.none;
-    if (style[BACKGROUND_SIZE].isNotEmpty) {
-      switch (style[BACKGROUND_SIZE]) {
-        case COVER:
-          boxFit = BoxFit.cover;
-          break;
-        case CONTAIN:
-          boxFit = BoxFit.contain;
-          break;
-        case FILL:
-          boxFit = BoxFit.fill;
-          break;
-        case FIT_WIDTH:
-          boxFit = BoxFit.fitWidth;
-          break;
-        case FIT_HEIGTH:
-          boxFit = BoxFit.fitHeight;
-          break;
-        case SCALE_DOWN:
-          boxFit = BoxFit.scaleDown;
-          break;
-      }
-    }
-
     backgroundImage = DecorationImage(
-        image: CSSUrl.parseUrl(url, contextId: contextId)!,
-        repeat: imageRepeat,
-        fit: boxFit);
+      image: CSSUrl.parseUrl(url, contextId: contextId)!,
+      repeat: imageRepeat,
+    );
 
     return backgroundImage;
   }

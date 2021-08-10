@@ -48,6 +48,7 @@ const String EVENT_SWIPE = 'swipe';
 const String EVENT_PAN = 'pan';
 const String EVENT_SCALE = 'scale';
 const String EVENT_LONG_PRESS = 'longpress';
+const String EVENT_DOUBLE_CLICK = 'dblclick';
 
 const String EVENT_STATE_START = 'start';
 const String EVENT_STATE_UPDATE = 'update';

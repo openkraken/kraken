@@ -40,6 +40,9 @@ abstract class KrakenBundle {
 
   bool isResolved = false;
 
+  // Bundle contentType.
+  ContentType? contentType;
+
   Future<void> resolve();
 
   static Future<KrakenBundle> getBundle(String path, { String? contentOverride, required int contextId }) async {
@@ -73,7 +76,13 @@ abstract class KrakenBundle {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_START);
     }
 
-    evaluateScripts(contextId, content, url.toString(), lineOffset);
+    if (contentType?.mimeType == ContentType.html.mimeType || url.toString().contains('.html')) {
+      // parse html.
+      parseHTML(contextId, content, url.toString());
+    } else {
+      // eval JavaScript.
+      evaluateScripts(contextId, content, url.toString(), lineOffset);
+    }
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_END);
@@ -104,6 +113,7 @@ class NetworkBundle extends KrakenBundle {
     bundle.httpClient.userAgent = getKrakenInfo().userAgent;
     String absoluteURL = url.toString();
     ByteData bytes = await bundle.load(absoluteURL);
+    contentType = bundle.contentType;
     content = await _resolveStringFromData(bytes, absoluteURL);
     isResolved = true;
   }
@@ -128,6 +138,7 @@ class NetworkAssetBundle extends AssetBundle {
   final Uri _baseUrl;
   final int contextId;
   final HttpClient httpClient;
+  ContentType? contentType;
 
   Uri _urlFromKey(String key) => _baseUrl.resolve(key);
 
@@ -142,6 +153,7 @@ class NetworkAssetBundle extends AssetBundle {
         IntProperty('HTTP status code', response.statusCode),
       ]);
     final Uint8List bytes = await consolidateHttpClientResponseBytes(response);
+    contentType = response.headers.contentType;
     return bytes.buffer.asByteData();
   }
 
