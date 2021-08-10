@@ -364,4 +364,15 @@ describe('Tags input', () => {
       });
     });
   });
+
+  it('support work with click', (done) => {
+    const input = document.createElement('input');
+    input.setAttribute('value', 'Input 1');
+    document.body.appendChild(input);
+    input.addEventListener('click', function handler() {
+      done();
+    });
+
+    simulateClick(10, 10);
+  });
 });
