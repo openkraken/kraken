@@ -4,9 +4,8 @@ project(KrakenBridge)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-string(TOLOWER ${CMAKE_SYSTEM_NAME} CMAKE_SYSTEM_NAME)
-string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_XCODE_SCHEME_GUARD_MALLOC ON)
 
 if(${ENABLE_PROFILE})
   add_definitions(-DENABLE_PROFILE=1)
@@ -274,7 +273,7 @@ target_include_directories(kraken PRIVATE
 target_link_libraries(kraken PRIVATE ${BRIDGE_LINK_LIBS})
 
 if($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
-  if (${CMAKE_BUILD_TYPE} STREQUAL "release" OR ${CMAKE_BUILD_TYPE} STREQUAL "relwithdebinfo")
+  if (${CMAKE_BUILD_TYPE} STREQUAL "Release" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
     ## http://ptspts.blogspot.com/2013/12/how-to-make-smaller-c-and-c-binaries.html
     ### remove dynamic_cast and exceptions
     target_compile_options(kraken PRIVATE -fno-exceptions -fvisibility=hidden)
@@ -337,7 +336,7 @@ elseif (IS_ANDROID)
   # android do nothing
 endif()
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "ios")
+if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
   set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
   set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "")
 

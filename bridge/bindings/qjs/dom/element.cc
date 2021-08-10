@@ -291,13 +291,16 @@ JSValue Element::toBlob(QjsContext *ctx, JSValue this_val, int argc, JSValue *ar
       if (JS_IsException(blobValue)) {
         toBlobPromiseContext->context->handleException(&blobValue);
       } else {
-        JS_Call(ctx, toBlobPromiseContext->resolve, toBlobPromiseContext->promise, 1, &blobValue);
+        JSValue ret = JS_Call(ctx, toBlobPromiseContext->resolve, toBlobPromiseContext->promise, 1, &blobValue);
+        JS_FreeValue(ctx, ret);
       }
 
       JS_FreeValue(ctx, pushMethod);
       JS_FreeValue(ctx, blobValue);
       JS_FreeValue(ctx, argumentsArray);
       JS_FreeValue(ctx, arrayBuffer);
+
+      printf("arrayBuffer: %p, argumentsArray: %p, pushMethod: %p, blobValue: %p", JS_VALUE_GET_PTR(arrayBuffer), JS_VALUE_GET_PTR(argumentsArray), JS_VALUE_GET_PTR(pushMethod), JS_VALUE_GET_PTR(blobValue));
     } else {
       JSValue errorObject = JS_NewError(ctx);
       JSValue errorMessage = JS_NewString(ctx, error);
@@ -310,6 +313,8 @@ JSValue Element::toBlob(QjsContext *ctx, JSValue this_val, int argc, JSValue *ar
 
     JS_FreeValue(ctx, toBlobPromiseContext->resolve);
     JS_FreeValue(ctx, toBlobPromiseContext->reject);
+
+    printf("\n");
   };
 
   JSValue resolving_funcs[2];
@@ -330,6 +335,9 @@ JSValue Element::toBlob(QjsContext *ctx, JSValue this_val, int argc, JSValue *ar
     element->eventTargetId,
     toBlobPromiseContext->devicePixelRatio
   );
+
+  printf("promise: %p, resolve: %p, reject: %p ", JS_VALUE_GET_PTR(promise), JS_VALUE_GET_PTR(resolving_funcs[0]),
+         JS_VALUE_GET_PTR(resolving_funcs[1]));
 
   return promise;
 }

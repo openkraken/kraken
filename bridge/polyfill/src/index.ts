@@ -1,17 +1,17 @@
 // import 'es6-promise/dist/es6-promise.auto';
 import './dom';
 import { console } from './console';
-import { WebSocket } from './websocket';
-import { fetch, Request, Response, Headers } from './fetch';
-import { matchMedia } from './match-media';
+// import { WebSocket } from './websocket';
+// import { fetch, Request, Response, Headers } from './fetch';
+// import { matchMedia } from './match-media';
 import { location } from './location';
-import { navigator } from './navigator';
-import { XMLHttpRequest } from './xhr';
-import { asyncStorage } from './async-storage';
-import { URLSearchParams } from './url-search-params';
-import { URL } from './url';
-import { kraken } from './kraken';
-import { history } from './history';
+// import { navigator } from './navigator';
+// import { XMLHttpRequest } from './xhr';
+// import { asyncStorage } from './async-storage';
+// import { URLSearchParams } from './url-search-params';
+// import { URL } from './url';
+// import { kraken } from './kraken';
+// import { history } from './history';
 
 defineGlobalProperty('console', console);
 // defineGlobalProperty('WebSocket', WebSocket);

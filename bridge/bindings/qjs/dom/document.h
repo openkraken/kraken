@@ -43,6 +43,7 @@ private:
   ObjectFunction m_createEvent{m_context, m_prototypeObject, "createEvent", createEvent, 1};
   ObjectFunction m_createElement{m_context, m_prototypeObject, "createElement", createElement, 1};
   ObjectFunction m_createTextNode{m_context, m_prototypeObject, "createTextNode", createTextNode, 1};
+  ObjectFunction m_createComment{m_context, m_prototypeObject, "createComment", createComment, 1};
   ObjectFunction m_getElementById{m_context, m_prototypeObject, "getElementById", getElementById, 1};
   ObjectFunction m_getElementsByTagName{m_context, m_prototypeObject, "getElementsByTagName", getElementsByTagName, 1};
   friend DocumentInstance;
