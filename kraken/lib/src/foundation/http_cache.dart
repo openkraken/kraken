@@ -412,7 +412,7 @@ class HttpCacheObject {
     return result;
   }
 
-  bool isDateTimeValid() => expiredTime != null && expiredTime!.isBefore(DateTime.now());
+  bool isDateTimeValid() => expiredTime != null && expiredTime!.isAfter(DateTime.now());
 
   /**
    * Read the index file.
