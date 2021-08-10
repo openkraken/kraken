@@ -512,6 +512,15 @@ class RenderBoxModel extends RenderBox
     }
   }
 
+  // Whether renderBoxModel has been layouted for the first time.
+  bool _firstLayouted = false;
+  bool get firstLayouted => _firstLayouted;
+  set firstLayouted(bool value) {
+    if (_firstLayouted != value) {
+      _firstLayouted = value;
+    }
+  }
+
   bool _debugHasBoxLayout = false;
 
   int childPaintDuration = 0;
@@ -622,6 +631,9 @@ class RenderBoxModel extends RenderBox
 
       // Copy renderPositionHolder
       ..renderPositionHolder = renderPositionHolder
+
+      // Copy first layouted flag
+      ..firstLayouted = firstLayouted
 
       // Copy parentData
       ..parentData = parentData;
