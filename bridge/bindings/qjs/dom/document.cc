@@ -9,6 +9,7 @@
 #include "comment_node.h"
 #include "event.h"
 #include "dart_methods.h"
+#include "all_collection.h"
 
 namespace kraken::binding::qjs {
 
@@ -173,8 +174,15 @@ PROP_SETTER(Document, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSV
 }
 
 PROP_GETTER(Document, all)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  // TODO: support HTMLAllCollection
-  return JS_NULL;
+  auto *document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, Document::classId()));
+  auto all = new AllCollection(document->m_context);
+
+  traverseNode(document->m_documentElement, [&all](NodeInstance *node) {
+    all->internalAdd(node, nullptr);
+    return false;
+  });
+
+  return all->jsObject;
 }
 PROP_SETTER(Document, all)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;

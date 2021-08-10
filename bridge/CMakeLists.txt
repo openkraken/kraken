@@ -244,6 +244,8 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
       bindings/qjs/bom/window.h
       bindings/qjs/dom/custom_event.cc
       bindings/qjs/dom/custom_event.h
+      bindings/qjs/dom/all_collection.cc
+      bindings/qjs/dom/all_collection.h
   )
 
   # Quickjs use __builtin_frame_address() to get stack pointer, we should add follow options to get it work with -O2
