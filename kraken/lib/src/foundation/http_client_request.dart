@@ -91,11 +91,9 @@ class ProxyHttpClientRequest extends HttpClientRequest {
         //        if hit, no need to open request.
         HttpCacheManager cacheManager = HttpCacheManager.instanceWithContextId(contextId);
         HttpCacheObject? cacheObject = await cacheManager.getCacheObject(_request);
-        print('cacheO ject $cacheObject');
         if (cacheObject != null) {
           HttpClientResponse? cacheResponse = await cacheObject.toHttpClientResponse();
           if (cacheResponse != null) {
-            print('缓存生效了 ${_request.uri} $cacheResponse');
             return cacheResponse;
           }
         }
