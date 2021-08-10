@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 import 'dart:io';
+import 'package:kraken/foundation.dart';
 import 'package:kraken/launcher.dart';
 import 'http_client_interceptor.dart';
 import 'http_client.dart';

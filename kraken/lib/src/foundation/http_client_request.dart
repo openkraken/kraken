@@ -78,14 +78,31 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
   @override
   Future<HttpClientResponse> close() async {
+    // HttpOverrides
     if (_httpOverrides.shouldOverride(_clientRequest)) {
       String? contextId = _getContextId(_clientRequest);
       if (contextId != null) {
         _clientRequest.headers.removeAll(HttpHeaderContextID);
+
         HttpClientInterceptor _clientInterceptor = _httpOverrides.getInterceptor(contextId);
         HttpClientRequest _request = await _beforeRequest(_clientInterceptor, _clientRequest) ?? _clientRequest;
+
+        // Cache: handle cache-control and expires,
+        //        if hit, no need to open request.
+        HttpCacheManager cacheManager = HttpCacheManager.instanceWithContextId(contextId);
+        HttpCacheObject? cacheObject = await cacheManager.getCacheObject(_request);
+        print('cacheO ject $cacheObject');
+        if (cacheObject != null) {
+          HttpClientResponse? cacheResponse = await cacheObject.toHttpClientResponse();
+          if (cacheResponse != null) {
+            print('缓存生效了 ${_request.uri} $cacheResponse');
+            return cacheResponse;
+          }
+        }
+
         HttpClientResponse _interceptedResponse = await _shouldInterceptRequest(_clientInterceptor, _request) ?? await _request.close();
-        return await _afterResponse(_clientInterceptor, _request, _interceptedResponse) ?? _interceptedResponse;
+        HttpClientResponse response = await _afterResponse(_clientInterceptor, _request, _interceptedResponse) ?? _interceptedResponse;
+        return HttpCacheManager.cacheHttpResource(contextId, response, _request);
       }
     }
 

@@ -14,8 +14,6 @@ class _HttpConnectionInfo implements HttpConnectionInfo {
 }
 
 class HttpClientStreamResponse extends Stream<List<int>> implements HttpClientResponse {
-  String mime;
-  String encoding;
   Stream<List<int>> data;
 
   int statusCode;
@@ -23,8 +21,8 @@ class HttpClientStreamResponse extends Stream<List<int>> implements HttpClientRe
   Map<String, String> responseHeaders;
   SingleHttpHeaders? _singleHttpHeaders;
 
-  HttpClientStreamResponse(this.mime, this.encoding, this.data, {
-    this.statusCode = 200,
+  HttpClientStreamResponse(this.data, {
+    this.statusCode = HttpStatus.ok,
     this.reasonPhrase = '',
     this.responseHeaders = const {},
   });
