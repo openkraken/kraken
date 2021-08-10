@@ -158,10 +158,7 @@ JSValue Document::getElementsByTagName(QjsContext *ctx, JSValue this_val, int ar
   JSValue pushMethod = JS_GetPropertyStr(ctx, array, "push");
 
   for (auto & element : elements) {
-    JSValue arguments[] = {
-      JS_DupValue(document->m_ctx, element->instanceObject)
-    };
-    JS_Call(ctx, pushMethod, array, 1, arguments);
+    JS_Call(ctx, pushMethod, array, 1, &element->instanceObject);
   }
   return array;
 }

@@ -246,10 +246,8 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
   // Dispatch event listeners writen by addEventListener
   auto _dispatchEvent = [&eventInstance, this](JSValue &handler) {
     if (eventInstance->propagationImmediatelyStopped()) return;
-
-    JSValue arguments[] = {eventInstance->instanceObject};
     // The third params `thisObject` to null equals global object.
-    JSValue returnedValue = JS_Call(m_ctx, handler, JS_NULL, 1, arguments);
+    JSValue returnedValue = JS_Call(m_ctx, handler, JS_NULL, 1, &eventInstance->instanceObject);
     m_context->handleException(&returnedValue);
   };
 
@@ -399,6 +397,7 @@ void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, 
   EventInstance *eventInstance = Event::buildEventInstance(eventType, context, nativeEvent, isCustomEvent == 1);
   eventInstance->nativeEvent->target = eventTargetInstance;
   eventTargetInstance->dispatchEvent(eventInstance);
+  JS_FreeValue(context->ctx(), eventInstance->instanceObject);
 }
 
 } // namespace kraken::binding::qjs

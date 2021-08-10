@@ -336,15 +336,29 @@ JSValue Element::toBlob(QjsContext *ctx, JSValue this_val, int argc, JSValue *ar
 }
 
 JSValue Element::click(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  return JSValue();
+  getDartMethod()->flushUICommand();
+  auto element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
+  return element->callNativeMethods("click", 0, nullptr);
 }
 
 JSValue Element::scroll(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  return JSValue();
+  getDartMethod()->flushUICommand();
+  auto element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
+  NativeValue arguments[] = {
+    jsValueToNativeValue(ctx, argv[0]),
+    jsValueToNativeValue(ctx, argv[1])
+  };
+  return element->callNativeMethods("click", 2, arguments);
 }
 
 JSValue Element::scrollBy(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  return JSValue();
+  getDartMethod()->flushUICommand();
+  auto element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
+  NativeValue arguments[] = {
+    jsValueToNativeValue(ctx, argv[0]),
+    jsValueToNativeValue(ctx, argv[1])
+  };
+  return element->callNativeMethods("scrollBy", 2, arguments);
 }
 
 std::unordered_map<std::string, ElementCreator> Element::elementCreatorMap{};
@@ -513,12 +527,11 @@ PROP_GETTER(Element, children)(QjsContext *ctx, JSValue this_val, int argc, JSVa
 
   for (auto &childNode : element->childNodes) {
     if (childNode->nodeType == NodeType::ELEMENT_NODE) {
-      JSValue arguments[] = {
-        JS_DupValue(element->m_ctx, childNode->instanceObject)
-      };
-      JS_Call(ctx, pushMethod, array, 1, arguments);
+      JS_Call(ctx, pushMethod, array, 1, &childNode->instanceObject);
     }
   }
+
+  JS_FreeValue(ctx, pushMethod);
 
   return array;
 }
@@ -696,6 +709,70 @@ int ElementInstance::setProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSVa
   JS_FreeCString(ctx, ckey);
 
   return 0;
+}
+
+PROP_GETTER(BoundingClientRect, x)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *boundingClientRect = static_cast<BoundingClientRect *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->x);
+}
+PROP_SETTER(BoundingClientRect, x)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JS_NULL;
+}
+
+PROP_GETTER(BoundingClientRect, y)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *boundingClientRect = static_cast<BoundingClientRect *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->y);
+}
+PROP_SETTER(BoundingClientRect, y)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JS_NULL;
+}
+
+PROP_GETTER(BoundingClientRect, width)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *boundingClientRect = static_cast<BoundingClientRect *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->width);
+}
+PROP_SETTER(BoundingClientRect, width)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JS_NULL;
+}
+
+PROP_GETTER(BoundingClientRect, height)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *boundingClientRect = static_cast<BoundingClientRect *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->height);
+}
+PROP_SETTER(BoundingClientRect, height)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JS_NULL;
+}
+
+PROP_GETTER(BoundingClientRect, top)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *boundingClientRect = static_cast<BoundingClientRect *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->top);
+}
+PROP_SETTER(BoundingClientRect, top)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JS_NULL;
+}
+
+PROP_GETTER(BoundingClientRect, right)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *boundingClientRect = static_cast<BoundingClientRect *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->right);
+}
+PROP_SETTER(BoundingClientRect, right)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JS_NULL;
+}
+
+PROP_GETTER(BoundingClientRect, bottom)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *boundingClientRect = static_cast<BoundingClientRect *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->bottom);
+}
+PROP_SETTER(BoundingClientRect, bottom)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JS_NULL;
+}
+
+PROP_GETTER(BoundingClientRect, left)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *boundingClientRect = static_cast<BoundingClientRect *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->left);
+}
+PROP_SETTER(BoundingClientRect, left)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JS_NULL;
 }
 
 }

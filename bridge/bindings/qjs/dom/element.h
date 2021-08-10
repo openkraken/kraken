@@ -16,7 +16,9 @@ namespace kraken::binding::qjs {
 void bindElement(std::unique_ptr<JSContext> &context);
 
 class ElementInstance;
+
 class Element;
+
 using ElementCreator = ElementInstance *(*)(Element *element, std::string tagName);
 
 struct NativeBoundingClientRect {
@@ -66,7 +68,7 @@ public:
   static JSValue scroll(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue scrollBy(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
 
-  static void defineElement(const std::string& tagName, ElementCreator creator);
+  static void defineElement(const std::string &tagName, ElementCreator creator);
 
   static std::unordered_map<std::string, ElementCreator> elementCreatorMap;
 
@@ -76,7 +78,8 @@ public:
                              clientWidth, clientHeight, clientTop, clientLeft, scrollTop, scrollLeft, scrollHeight,
                              scrollWidth, children);
 private:
-  ObjectFunction m_getBoundingClientRect{m_context, m_prototypeObject, "getBoundingClientRect", getBoundingClientRect, 0};
+  ObjectFunction m_getBoundingClientRect{m_context, m_prototypeObject, "getBoundingClientRect", getBoundingClientRect,
+                                         0};
   ObjectFunction m_hasAttribute{m_context, m_prototypeObject, "hasAttribute", hasAttribute, 1};
   ObjectFunction m_setAttribute{m_context, m_prototypeObject, "setAttribute", setAttribute, 2};
   ObjectFunction m_getAttribute{m_context, m_prototypeObject, "getAttribute", getAttribute, 2};
@@ -122,9 +125,9 @@ private:
   std::unordered_map<JSAtom, JSValue> m_properties;
 
   static JSValue getProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
-                                 JSValueConst receiver);
+                             JSValueConst receiver);
   static int setProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
-                      JSValueConst value, JSValueConst receiver, int flags);
+                         JSValueConst value, JSValueConst receiver, int flags);
 
   static JSClassExoticMethods exoticMethods;
 };
@@ -132,9 +135,12 @@ private:
 class BoundingClientRect : public HostObject {
 public:
   BoundingClientRect() = delete;
-  explicit BoundingClientRect(JSContext *context, NativeBoundingClientRect *nativeBoundingClientRect): HostObject(context, "BoundingClientRect") {
+  explicit BoundingClientRect(JSContext *context, NativeBoundingClientRect *nativeBoundingClientRect) : HostObject(
+    context, "BoundingClientRect"), m_nativeBoundingClientRect(nativeBoundingClientRect) {
 
   };
+
+  DEFINE_HOST_OBJECT_PROPERTY(8, x, y, width, height, top, right, bottom, left);
 
 private:
   NativeBoundingClientRect *m_nativeBoundingClientRect{nullptr};

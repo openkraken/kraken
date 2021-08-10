@@ -245,7 +245,7 @@ PROP_SETTER(Node, isConnected)(QjsContext *ctx, JSValue this_val, int argc, JSVa
 
 PROP_GETTER(Node, ownerDocument)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, Node::classId(this_val)));
-  return nodeInstance->m_document->instanceObject;
+  return JS_DupValue(ctx, nodeInstance->m_document->instanceObject);
 }
 PROP_SETTER(Node, ownerDocument)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
