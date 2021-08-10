@@ -31,7 +31,10 @@ class URLParser {
         if (path.startsWith('/')) {
           path = uriHref.scheme + '://' + uriHref.host + ':' + uriHref.port.toString() + path;
         } else {
-          path = href.substring(0, href.lastIndexOf('/')) + '/' + path;
+          int lastPath = href.lastIndexOf('/');
+          if (lastPath >= 0) {
+            path = href.substring(0, href.lastIndexOf('/')) + '/' + path;
+          }
         }
       }
 

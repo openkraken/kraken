@@ -18,6 +18,7 @@ import 'package:kraken_websocket/kraken_websocket.dart';
 import 'package:kraken_animation_player/kraken_animation_player.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
 import 'package:kraken_webview/kraken_webview.dart';
+import 'package:kraken/foundation.dart';
 
 String? pass = (AnsiPen()..green())('[TEST PASS]');
 String? err = (AnsiPen()..red())('[TEST FAILED]');
@@ -48,6 +49,31 @@ class NativeGestureClient implements GestureClient {
 
   @override
   void dragEndCallback(DragEndDetails details) {
+  }
+}
+
+class CustomHttpClientInterceptor implements HttpClientInterceptor {
+  @override
+  Future<HttpClientRequest?> beforeRequest(HttpClientRequest request) async {
+    return null;
+  }
+
+  @override
+  Future<HttpClientResponse?> afterResponse(HttpClientRequest request, HttpClientResponse response) async {
+    return null;
+  }
+
+  @override
+  Future<HttpClientResponse?> shouldInterceptRequest(HttpClientRequest request) async {
+    return null;
+  }
+
+  @override
+  String customURLParser(String url, String originURL) {
+    if (url.contains('assets')) {
+      return originURL;
+    }
+    return url;
   }
 }
 
@@ -98,6 +124,7 @@ void main() async {
       disableViewportHeightAssertion: true,
       javaScriptChannel: javaScriptChannel,
       gestureClient: NativeGestureClient(gestureClientID:i),
+      httpClientInterceptor: CustomHttpClientInterceptor(),
     );
     widgets.add(krakenMap[i]!);
   }
