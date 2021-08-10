@@ -4,10 +4,7 @@
  */
 
 import 'package:kraken/launcher.dart';
-
-abstract class URLClient {
-  String parser(String url, String originURL);
-}
+import 'package:kraken/foundation.dart';
 
 class URLParser {
   String _url = '';
@@ -19,7 +16,7 @@ class URLParser {
     if(contextId != null) {
       _contextId = contextId;
       KrakenController controller = KrakenController.getControllerOfJSContextId(_contextId)!;
-      URLClient? urlClient = controller.urlClient;
+      HttpClientInterceptor? httpClientInterceptor = controller.httpClientInterceptor;
       Uri uriHref = Uri.parse(controller.href);
       String href = controller.href;
 
@@ -29,7 +26,7 @@ class URLParser {
       }
 
       RegExp exp = RegExp("^([a-z][a-z\d\+\-\.]*:)?\/\/");
-      if (!exp.hasMatch(path) && _contextId != null && path.startsWith('//')) {
+      if (!exp.hasMatch(path) && _contextId != null) {
         // relative path.
         if (path.startsWith('/')) {
           path = uriHref.scheme + '://' + uriHref.host + ':' + uriHref.port.toString() + path;
@@ -38,8 +35,8 @@ class URLParser {
         }
       }
 
-      if (urlClient != null) {
-        path = urlClient.parser(path, url);
+      if (httpClientInterceptor != null) {
+        path = httpClientInterceptor.customURLParser(path, url);
       }
     }
 

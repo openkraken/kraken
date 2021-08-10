@@ -22,4 +22,6 @@ abstract class HttpClientInterceptor {
   Future<HttpClientResponse?> afterResponse(HttpClientRequest request, HttpClientResponse response);
 
   Future<HttpClientResponse?> shouldInterceptRequest(HttpClientRequest request);
+
+  String customURLParser(String url, String originURL);
 }
