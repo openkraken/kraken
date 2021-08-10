@@ -8,6 +8,7 @@ import 'dart:collection';
 import 'dart:ui';
 import 'dart:ffi';
 import 'dart:math' as math;
+import 'package:flutter/gestures.dart';
 import 'package:kraken/bridge.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -99,6 +100,97 @@ class EditableTextDelegate implements TextSelectionDelegate {
   }
 }
 
+class CustomizeRenderEditable extends RenderEditable {
+  CustomizeRenderEditable({
+    TextSpan? text,
+    required TextDirection textDirection,
+    TextAlign textAlign = TextAlign.start,
+    Color? cursorColor,
+    Color? backgroundCursorColor,
+    ValueNotifier<bool>? showCursor,
+    bool? hasFocus,
+    required LayerLink startHandleLayerLink,
+    required LayerLink endHandleLayerLink,
+    int? maxLines = 1,
+    int? minLines,
+    bool expands = false,
+    StrutStyle? strutStyle,
+    Color? selectionColor,
+    double textScaleFactor = 1.0,
+    TextSelection? selection,
+    required ViewportOffset offset,
+    CaretChangedHandler? onCaretChanged,
+    bool ignorePointer = false,
+    bool readOnly = false,
+    bool forceLine = true,
+    TextHeightBehavior? textHeightBehavior,
+    TextWidthBasis textWidthBasis = TextWidthBasis.parent,
+    String obscuringCharacter = '•',
+    bool obscureText = false,
+    Locale? locale,
+    double cursorWidth = 1.0,
+    double? cursorHeight,
+    Radius? cursorRadius,
+    bool paintCursorAboveText = false,
+    Offset cursorOffset = Offset.zero,
+    double devicePixelRatio = 1.0,
+    bool? enableInteractiveSelection,
+    TextRange? promptRectRange,
+    Color? promptRectColor,
+    Clip clipBehavior = Clip.hardEdge,
+    required TextSelectionDelegate textSelectionDelegate,
+    RenderEditablePainter? painter,
+    RenderEditablePainter? foregroundPainter
+  }) : super(
+    text: text,
+    textDirection: textDirection,
+    textAlign: textAlign,
+    cursorColor: cursorColor,
+    backgroundCursorColor: backgroundCursorColor,
+    showCursor: showCursor,
+    hasFocus: hasFocus,
+    startHandleLayerLink: startHandleLayerLink,
+    endHandleLayerLink: endHandleLayerLink,
+    maxLines: maxLines,
+    expands: expands,
+    strutStyle: strutStyle,
+    selectionColor: selectionColor,
+    textScaleFactor: textScaleFactor,
+    selection: selection,
+    offset: offset,
+    onCaretChanged: onCaretChanged,
+    ignorePointer: ignorePointer,
+    readOnly: readOnly,
+    forceLine: forceLine,
+    textHeightBehavior: textHeightBehavior,
+    textWidthBasis: textWidthBasis,
+    obscuringCharacter: obscuringCharacter,
+    obscureText: obscureText,
+    locale: locale,
+    cursorWidth: cursorWidth,
+    cursorHeight: cursorHeight,
+    cursorRadius: cursorRadius,
+    paintCursorAboveText: paintCursorAboveText,
+    cursorOffset: cursorOffset,
+    devicePixelRatio: devicePixelRatio,
+    enableInteractiveSelection: enableInteractiveSelection,
+    promptRectRange: promptRectRange,
+    promptRectColor: promptRectColor,
+    clipBehavior: clipBehavior,
+    textSelectionDelegate: textSelectionDelegate,
+    painter: painter,
+    foregroundPainter: foregroundPainter,
+  );
+
+  void handleDown(TapDownDetails details) {
+    handleTapDown(details);
+  }
+
+  void handleClick() {
+    handleTap();
+  }
+}
+
 class InputElement extends Element implements TextInputClient, TickerProvider {
   static InputElement? focusInputElement;
 
@@ -172,7 +264,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   late EditableTextDelegate _textSelectionDelegate;
   TextSpan? _actualText;
   RenderInputBox? _renderInputBox;
-  RenderEditable? _renderEditable;
+  CustomizeRenderEditable? _renderEditable;
   TextInputConnection? _textInputConnection;
 
   // This value is an eyeball estimation of the time it takes for the iOS cursor
@@ -304,12 +396,27 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void dispatchEvent(Event event) {
     super.dispatchEvent(event);
     if (event.type == EVENT_TOUCH_START) {
-      InputElement.setFocus(this);
+      TouchEvent e = (event as TouchEvent);
+      if (e.touches.length == 1) {
+        InputElement.setFocus(this);
+
+        Touch touch = e.touches[0];
+        final TapDownDetails details = TapDownDetails(
+          globalPosition: Offset(touch.screenX, touch.screenY),
+          localPosition: Offset(touch.clientX, touch.clientY),
+          kind: PointerDeviceKind.touch,
+        );
+
+        _renderEditable!.handleDown(details);
+      }
+
       // @TODO: selection.
     } else if (event.type == EVENT_TOUCH_MOVE) {
       // @TODO: selection.
     } else if (event.type == EVENT_TOUCH_END) {
       // @TODO: selection.
+    } else if (event.type == EVENT_CLICK) {
+      _renderEditable!.handleClick();
     }
   }
 
@@ -387,7 +494,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       text = _buildPasswordTextSpan(text.text!);
     }
 
-    _renderEditable = RenderEditable(
+    _renderEditable = CustomizeRenderEditable(
       text: text,
       cursorColor: cursorColor,
       showCursor: _cursorVisibilityNotifier,
@@ -411,6 +518,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       devicePixelRatio: window.devicePixelRatio,
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
+      ignorePointer: true,
     );
     return _renderEditable!;
   }
