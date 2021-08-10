@@ -28,6 +28,8 @@ mixin RenderPointerListenerMixin on RenderBox {
 
   GestureCallback? onSwipe;
 
+  GestureCallback? onDoubleClick;
+
   GestureCallback? onPan;
 
   GestureCallback? onScale;

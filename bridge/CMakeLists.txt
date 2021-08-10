@@ -3,7 +3,6 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14)
 project(KrakenBridge)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_C_FLAGS -flto)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 string(TOLOWER ${CMAKE_SYSTEM_NAME} CMAKE_SYSTEM_NAME)
 string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
@@ -235,7 +234,6 @@ list(APPEND PUBLIC_HEADER
 add_library(kraken SHARED ${BRIDGE_SOURCE})
 add_library(kraken_static STATIC ${BRIDGE_SOURCE})
 
-add_library(gumbo_parse SHARED ${GUMBO_PAESER})
 add_library(gumbo_parse_static STATIC ${GUMBO_PAESER})
 
 if (${IS_ANDROID})
@@ -248,7 +246,7 @@ endif ()
 target_include_directories(kraken PRIVATE
   ${BRIDGE_INCLUDE}
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
-target_link_libraries(kraken PRIVATE ${BRIDGE_LINK_LIBS} gumbo_parse)
+target_link_libraries(kraken PRIVATE ${BRIDGE_LINK_LIBS} gumbo_parse_static)
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "release" OR ${CMAKE_BUILD_TYPE} STREQUAL "relwithdebinfo")
   ## http://ptspts.blogspot.com/2013/12/how-to-make-smaller-c-and-c-binaries.html
@@ -295,10 +293,6 @@ endif()
 
 if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
   set_target_properties(kraken
-          PROPERTIES
-          LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
-          )
-  set_target_properties(gumbo_parse
           PROPERTIES
           LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
           )

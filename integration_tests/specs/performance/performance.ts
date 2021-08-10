@@ -18,4 +18,20 @@ describe('Performance', () => {
   it('init startTime should less than 1000', () => {
     expect(startTime).toBeLessThan(1000);
   });
+
+  it('clearMarks', () => {
+    performance.mark('abc');
+    performance.mark('efg');
+    let entries = performance.getEntries();
+    let hasAbc = entries.some(e => e.name === 'abc');
+    let hasEfg = entries.some(e => e.name === 'efg');
+    expect(hasAbc).toBe(true);
+    expect(hasEfg).toBe(true);
+    performance.clearMarks('efg');
+    entries = performance.getEntries();
+    hasAbc = entries.some(e => e.name === 'abc');
+    hasEfg = entries.some(e => e.name === 'efg');
+    expect(hasAbc).toBe(true);
+    expect(hasEfg).toBe(false);
+  });
 });
