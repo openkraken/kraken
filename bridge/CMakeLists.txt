@@ -235,7 +235,6 @@ list(APPEND PUBLIC_HEADER
 add_library(kraken SHARED ${BRIDGE_SOURCE})
 add_library(kraken_static STATIC ${BRIDGE_SOURCE})
 
-add_library(gumbo_parse SHARED ${GUMBO_PAESER})
 add_library(gumbo_parse_static STATIC ${GUMBO_PAESER})
 
 if (${IS_ANDROID})
