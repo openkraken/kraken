@@ -5,8 +5,8 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:kraken/foundation.dart';
@@ -94,7 +94,6 @@ class HttpCacheManager {
         _maxCachedObjects = maxCachedObjects;
 
   Future<HttpCacheObject?> getCacheObject(HttpClientRequest request) async {
-    print('Get cache object, origin $_origin, url: ${request.uri}');
     HttpCacheObject? cacheObject = await getObject(request.uri);
     if (cacheObject != null) {
       // 1. Check cache-control rule
@@ -119,7 +118,6 @@ class HttpCacheManager {
   }
 
   static Future<bool> _hitDiskCache(String hash, String cacheDirectory) {
-
     final indexFile = File(path.join(cacheDirectory, hash));
     return indexFile.exists();
   }
@@ -140,8 +138,8 @@ class HttpCacheManager {
       File indexFile = File(path.join(cacheDirectory.path, hash));
       final bool isIndexFileExist = await indexFile.exists();
       if (isIndexFileExist) {
-        File blobFile = File(path.join(cacheDirectory.path, '$hash-blob'));
-        HttpCacheObject cacheObject = HttpCacheObject._(url, cacheDirectory.path, hash: hash, data: blobFile.openRead());
+        HttpCacheObject cacheObject = HttpCacheObject._(url, cacheDirectory.path, hash: hash);
+        await cacheObject.read();
         return cacheObject;
       }
     }
@@ -163,7 +161,7 @@ class HttpClientProxyResponse extends Stream<List<int>> implements HttpClientRes
   final HttpClientResponse response;
   final HttpCacheObject cacheObject;
 
-  IOSink? _blobSink;
+  EventSink<List<int>>? _blobSink;
 
   HttpClientProxyResponse(this.response, this.cacheObject);
 
@@ -251,24 +249,70 @@ class HttpClientProxyResponse extends Stream<List<int>> implements HttpClientRes
   }
 }
 
+class HttpCacheObjectBlob extends EventSink<List<int>> {
+  final String path;
+  final File _file;
+  IOSink? _writer;
+
+  HttpCacheObjectBlob(this.path) : _file = File(path);
+
+  @override
+  void add(List<int> data) {
+    if (_writer == null) {
+      _writer = _file.openWrite();
+    }
+    _writer!.add(data);
+  }
+
+  @override
+  void addError(Object error, [StackTrace? stackTrace]) {
+    if (_writer != null) {
+      _writer!.addError(error, stackTrace);
+    }
+    print('Error while writing to cache blob, $error');
+    if (stackTrace != null) {
+      print('\n$stackTrace');
+    }
+  }
+
+  @override
+  void close() {
+    if (_writer != null) {
+      _writer!.close();
+    }
+  }
+
+  Future<bool> exists() {
+    return _file.exists();
+  }
+
+  Stream<List<int>> openRead() {
+    return _file.openRead();
+  }
+
+  Future<void> remove() async {
+    await _file.delete();
+  }
+}
+
 class HttpCacheObject {
   // The cached url of resource.
-  final String url;
+  String url;
 
   // When the file is out-of-date
-  final DateTime? expiredTime;
+  DateTime? expiredTime;
 
   // The eTag provided by the server.
-  final String? eTag;
+  String? eTag;
 
   // The length of content.
-  final int? contentLength;
+  int? contentLength;
 
   // When file was last used.
-  final DateTime? lastUsed;
+  DateTime? lastUsed;
 
   // When file was last modified.
-  final DateTime? lastModified;
+  DateTime? lastModified;
 
   // The directory to store cache file.
   final String cacheDirectory;
@@ -276,8 +320,11 @@ class HttpCacheObject {
   // The storage filename.
   final String hash;
 
-  // The stream data in raw format.
-  final Stream<List<int>> data;
+  // The index file.
+  final File _file;
+
+  // The blob.
+  HttpCacheObjectBlob _blob;
 
   // Whether finished.
   bool fullySaved = false;
@@ -289,8 +336,8 @@ class HttpCacheObject {
     this.lastUsed,
     this.lastModified,
     required this.hash,
-    required this.data
-  });
+  }) : _file = File(path.join(cacheDirectory, hash)),
+        _blob = HttpCacheObjectBlob(path.join(cacheDirectory, '$hash-blob'));
 
   factory HttpCacheObject.fromResponse(String url, HttpClientResponse response, String cacheDirectory) {
     DateTime expiredTime = _getExpiredTimeFromResponseHeaders(response.headers);
@@ -311,11 +358,10 @@ class HttpCacheObject {
       hash: hash,
       lastModified: lastModified,
       lastUsed: DateTime.now(),
-      data: response,
     );
   }
 
-  static final DateTime alwaysExpired = DateTime.fromMicrosecondsSinceEpoch(0);
+  static final DateTime alwaysExpired = DateTime.fromMillisecondsSinceEpoch(0);
 
   static DateTime _getExpiredTimeFromResponseHeaders(HttpHeaders headers) {
     List<String>? cacheControls = headers[HttpHeaders.cacheControlHeader];
@@ -328,33 +374,140 @@ class HttpCacheObject {
     return headers.expires ?? alwaysExpired;
   }
 
-  bool isDateTimeValid() => expiredTime != null && expiredTime!.isBefore(DateTime.now());
+  static int NetworkType = 0x01;
+  static int Reserved = 0x00;
 
-  Future<void> writeIndex() async {
-    final String indexFilename = hash;
-    final File indexFile = File(path.join(cacheDirectory, indexFilename));
+  static void writeString(BytesBuilder bytesBuilder, String str, int size) {
+    final int strLength = str.length;
+    for (int i = 0; i < size; i++) {
+      bytesBuilder.addByte(strLength >> (i * 8) & 0xff);
+    }
 
-    await indexFile.writeAsBytes([
-      0x01,
-      0x00
-    ]);
+    bytesBuilder.add(str.codeUnits);
   }
 
-  String get blobFilename => '$hash-blob';
+  static void writeInteger(BytesBuilder bytesBuilder, int data, int size) {
+    for (int i = 0; i < size; i++) {
+      bytesBuilder.addByte(data >> (i * 8) & 0xff);
+    }
+  }
 
-  IOSink openBlobWrite() {
-    final File blobFile = File(path.join(cacheDirectory, blobFilename));
-    return blobFile.openWrite();
+  static List<int> fromBytes(List<int> list, int size) {
+    if (list.length % size != 0) {
+      throw ArgumentError('Wrong size');
+    }
+
+    final result = <int>[];
+    for (var i = 0; i < list.length; i += size) {
+      var value = 0;
+      for (var j = 0; j < size; j++) {
+        var byte = list[i + j];
+        final val = (byte & 0xff) << (j * 8);
+        value |= val;
+      }
+
+      result.add(value);
+    }
+
+    return result;
+  }
+
+  bool isDateTimeValid() => expiredTime != null && expiredTime!.isBefore(DateTime.now());
+
+  /**
+   * Read the index file.
+   */
+  Future<void> read() async {
+    Uint8List bytes = await _file.readAsBytes();
+    int index = 0, length = bytes.length;
+
+    // Resverd units.
+    index += 4;
+
+    // Read expiredTime.
+    Uint8List expiredTimestamp = bytes.sublist(index, index + 8);
+    expiredTime = DateTime.fromMillisecondsSinceEpoch(fromBytes(expiredTimestamp, 8).single);
+    index += 8;
+
+    // Read lastUsed.
+    Uint8List lastUsedTimestamp = bytes.sublist(index, index + 8);
+    lastUsed = DateTime.fromMillisecondsSinceEpoch(fromBytes(lastUsedTimestamp, 8).single);
+    index += 8;
+
+    // Read lastModified.
+    Uint8List lastModifiedTimestamp = bytes.sublist(index, index + 8);
+    lastModified = DateTime.fromMillisecondsSinceEpoch(fromBytes(lastModifiedTimestamp, 8).single);
+    index += 8;
+
+    // Read contentLength.
+    contentLength = fromBytes(bytes.sublist(index, index + 4), 4).single;
+    index += 4;
+
+
+    // Read url.
+    Uint8List urlLengthValue = bytes.sublist(index, index + 4);
+    int urlLength = fromBytes(urlLengthValue, 4).single;
+    index += 4;
+
+    Uint8List urlValue = bytes.sublist(index, index + urlLength);
+    url = urlValue.toString();
+    index += urlLength;
+
+    // Read eTag.
+    int eTagLength = fromBytes(bytes.sublist(index, index + 2), 2).single;
+    index += 2;
+
+    Uint8List eTagValue = bytes.sublist(index, index + eTagLength);
+    eTag = eTagValue.toString();
+  }
+
+  Future<void> writeIndex() async {
+    final BytesBuilder bytesBuilder = BytesBuilder();
+
+    // Index bytes format:
+    // | Type x 1B | Reserved x 3B | ExpiredTimeStamp x 8B |
+    bytesBuilder.add([
+      NetworkType, Reserved, Reserved, Reserved,
+    ]);
+
+
+    // | ExpiredTimeStamp x 8 |
+    final int expiredTimeStamp = (expiredTime ?? alwaysExpired).millisecondsSinceEpoch;
+    writeInteger(bytesBuilder, expiredTimeStamp, 8);
+
+    // | LastUsedTimeStamp x 8 |
+    final int lastUsedTimeStamp = (lastUsed ?? DateTime.now()).millisecondsSinceEpoch;
+    writeInteger(bytesBuilder, lastUsedTimeStamp, 8);
+
+    // | LastModifiedTimeStamp x 8 |
+    final int lastModifiedTimestamp = (lastModified ?? alwaysExpired).millisecondsSinceEpoch;
+    writeInteger(bytesBuilder, lastModifiedTimestamp, 8);
+
+    // | ContentLength x 4B |
+    writeInteger(bytesBuilder, contentLength ?? 0, 4);
+
+    // | Length of url x 4B | URL Payload x N |
+    writeString(bytesBuilder, url, 4);
+
+    // | Length of eTag x 2B | eTag payload x N |
+    // Store url length, 4B max respresents (0x)ffffffff -> 4294967295 (4GB)
+    writeString(bytesBuilder, eTag ?? '', 2);
+
+    // The index file will not be TOO LARGE,
+    // so take bytes at one time.
+    await _file.writeAsBytes(bytesBuilder.takeBytes());
+  }
+
+  EventSink<List<int>> openBlobWrite() {
+    return _blob;
   }
 
   // Remove all the cached files.
   void remove() async {
     final File indexFile = File(path.join(cacheDirectory, hash));
-    final File blobFile = File(path.join(cacheDirectory, blobFilename));
-
     await Future.wait([
       indexFile.delete(),
-      blobFile.delete(),
+      _blob.remove(),
     ]);
   }
 
@@ -365,27 +518,24 @@ class HttpCacheObject {
       if (contentLength != null) HttpHeaders.contentLengthHeader: contentLength.toString(),
       if (lastModified != null) HttpHeaders.lastModifiedHeader: HttpDate.format(lastModified!),
       // @TODO: for debug usage.
-      "x-kraken-cache": "from disk cache",
+      "x-kraken-cache": "From http cache",
     };
   }
 
   Future<HttpClientResponse?> toHttpClientResponse() async {
-    final File indexFile = File(path.join(cacheDirectory, hash));
-    final bool isIndexExist = await indexFile.exists();
+    final bool isIndexExist = await _file.exists();
     if (!isIndexExist) {
       return null;
     }
 
-    final File blobFile = File(path.join(cacheDirectory, blobFilename));
-    final bool isBlobExist = await blobFile.exists();
+    final bool isBlobExist = await _blob.exists();
     if (!isBlobExist) {
       return null;
     }
 
     return HttpClientStreamResponse(
-      blobFile.openRead(),
+      _blob.openRead(),
       statusCode: HttpStatus.ok,
-      reasonPhrase: "From Cache",
       responseHeaders: _getResponseHeaders(),
     );
   }
