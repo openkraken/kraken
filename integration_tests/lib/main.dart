@@ -109,7 +109,7 @@ void main() async {
       disableViewportHeightAssertion: true,
       javaScriptChannel: javaScriptChannel,
       gestureClient: NativeGestureClient(gestureClientID:i),
-      httpClientInterceptor: CustomHttpClientInterceptor(),
+      uriInterceptor: CustomUriInterceptor(),
     );
     widgets.add(krakenMap[i]!);
   }
