@@ -4,8 +4,6 @@
  */
 
 #include "timer.h"
-#include "bridge_callback.h"
-#include "bridge_qjs.h"
 #include "dart_methods.h"
 #include "bindings/qjs/qjs_patch.h"
 

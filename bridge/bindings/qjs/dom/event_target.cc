@@ -276,11 +276,6 @@ JSValue EventTarget::__kraken_clear_event_listener(QjsContext *ctx, JSValue this
   if (eventTargetInstance == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
-  for (auto &it : eventTargetInstance->_eventHandlers) {
-    for (auto &handler : it.second) {
-      JS_FreeValue(eventTargetInstance->m_ctx, handler);
-    }
-  }
 
   eventTargetInstance->_eventHandlers.clear();
   return JS_NULL;

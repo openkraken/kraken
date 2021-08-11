@@ -33,96 +33,96 @@ JSValue Event::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, 
 OBJECT_INSTANCE_IMPL(Event);
 std::unordered_map<std::string, EventCreator> Event::m_eventCreatorMap{};
 
-PROP_GETTER(Event, Type)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(Event, type)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *eventInstance = static_cast<EventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
   return JS_NewUnicodeString(eventInstance->context()->runtime(), eventInstance->context()->ctx(),
                              eventInstance->nativeEvent->type->string, eventInstance->nativeEvent->type->length);
 }
-PROP_SETTER(Event, Type)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(Event, type)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(Event, Bubbles)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(Event, bubbles)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *eventInstance = static_cast<EventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
   return JS_NewBool(ctx, eventInstance->nativeEvent->bubbles);
 }
-PROP_SETTER(Event, Bubbles)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(Event, bubbles)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(Event, Cancelable)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(Event, cancelable)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *eventInstance = static_cast<EventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
   return JS_NewBool(ctx, eventInstance->nativeEvent->cancelable);
 }
-PROP_SETTER(Event, Cancelable)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(Event, cancelable)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(Event, Timestamp)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(Event, timestamp)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *eventInstance = static_cast<EventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
   return JS_NewInt64(ctx, eventInstance->nativeEvent->timeStamp);
 }
-PROP_SETTER(Event, Timestamp)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(Event, timestamp)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(Event, DefaultPrevented)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(Event, defaultPrevented)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *eventInstance = static_cast<EventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
   return JS_NewBool(ctx, eventInstance->cancelled());
 }
-PROP_SETTER(Event, DefaultPrevented)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(Event, defaultPrevented)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(Event, Target)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(Event, target)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *eventInstance = static_cast<EventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
   if (eventInstance->nativeEvent->target != nullptr) {
     auto instance = reinterpret_cast<EventTargetInstance *>(eventInstance->nativeEvent->target);
-    return instance->instanceObject;
+    return JS_DupValue(ctx, instance->instanceObject);
   }
   return JS_NULL;
 }
-PROP_SETTER(Event, Target)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(Event, target)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(Event, SrcElement)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(Event, srcElement)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *eventInstance = static_cast<EventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
   if (eventInstance->nativeEvent->target != nullptr) {
     auto instance = reinterpret_cast<EventTargetInstance *>(eventInstance->nativeEvent->target);
-    return instance->instanceObject;
+    return JS_DupValue(ctx, instance->instanceObject);
   }
   return JS_NULL;
 }
-PROP_SETTER(Event, SrcElement)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(Event, srcElement)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(Event, CurrentTarget)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(Event, currentTarget)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *eventInstance = static_cast<EventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
   if (eventInstance->nativeEvent->currentTarget != nullptr) {
     auto instance = reinterpret_cast<EventTargetInstance *>(eventInstance->nativeEvent->currentTarget);
-    return instance->instanceObject;
+    return JS_DupValue(ctx, instance->instanceObject);
   }
   return JS_NULL;
 }
-PROP_SETTER(Event, CurrentTarget)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(Event, currentTarget)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(Event, ReturnValue)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(Event, returnValue)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *eventInstance = static_cast<EventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
   return JS_NewBool(ctx, !eventInstance->cancelled());
 }
-PROP_SETTER(Event, ReturnValue)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(Event, returnValue)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(Event, CancelBubble)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(Event, cancelBubble)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *eventInstance = static_cast<EventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
   return JS_NewBool(ctx, eventInstance->cancelled());
 }
-PROP_SETTER(Event, CancelBubble)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(Event, cancelBubble)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (argc == 0) return JS_NULL;
 
   auto *eventInstance = static_cast<EventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
@@ -145,7 +145,30 @@ EventInstance *Event::buildEventInstance(std::string &eventType, JSContext *cont
     eventInstance = EventInstance::fromNativeEvent(Event::instance(context), static_cast<NativeEvent *>(nativeEvent));
   }
 
+  JS_SetPrototype(context->ctx(), eventInstance->instanceObject, Event::instance(context)->m_prototypeObject);
+
   return eventInstance;
+}
+
+JSValue Event::stopPropagation(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *event = static_cast<EventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
+  event->m_propagationStopped = true;
+  return JS_NULL;
+}
+
+JSValue Event::stopImmediatePropagation(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *event = static_cast<EventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
+  event->m_propagationStopped = true;
+  event->m_propagationImmediatelyStopped = true;
+  return JS_NULL;
+}
+
+JSValue Event::preventDefault(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *event = static_cast<EventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
+  if (event->nativeEvent->cancelable) {
+    event->m_cancelled = true;
+  }
+  return JS_NULL;
 }
 
 EventInstance * EventInstance::fromNativeEvent(Event *event, NativeEvent *nativeEvent) {
