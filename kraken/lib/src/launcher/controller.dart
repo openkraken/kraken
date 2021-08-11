@@ -409,7 +409,9 @@ class KrakenModuleController with TimerMixin, ScheduleFrameMixin {
 class KrakenController {
   static SplayTreeMap<int, KrakenController?> _controllerMap = SplayTreeMap();
   static Map<String, int> _nameIdMap = Map();
-  UriParser? uriParser;
+
+  late UriParser _uriParser;
+  UriParser get uriParser => _uriParser;
 
   static KrakenController? getControllerOfJSContextId(int? contextId) {
     if (!_controllerMap.containsKey(contextId)) {
@@ -509,6 +511,7 @@ class KrakenController {
     }
 
     _module = KrakenModuleController(this, _view.contextId);
+
     assert(!_controllerMap.containsKey(_view.contextId),
         "found exist contextId of KrakenController, contextId: ${_view.contextId}");
     _controllerMap[_view.contextId] = this;
@@ -517,10 +520,9 @@ class KrakenController {
       _nameIdMap[name] = _view.contextId;
     }
 
-    uriParser = UriParser(_view.contextId);
-
+    _uriParser = UriParser(_view.contextId);
     if (uriInterceptor != null) {
-      uriParser!.registerInterceptor(uriInterceptor);
+      _uriParser.registerInterceptor(uriInterceptor);
     }
 
     if (httpClientInterceptor != null) {
