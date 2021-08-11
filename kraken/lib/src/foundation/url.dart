@@ -51,8 +51,12 @@ class UriParser {
 
   UriInterceptor? _uriInterceptor;
 
-  void register(UriInterceptor? uriInterceptor) {
+  void registerInterceptor(UriInterceptor? uriInterceptor) {
     _uriInterceptor = uriInterceptor;
+  }
+
+  void disposeInterceptor() {
+    _uriInterceptor = null;
   }
 
   Uri get url {
