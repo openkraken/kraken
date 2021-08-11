@@ -34,7 +34,11 @@ JSValue Blob::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, i
   }
 
   JSValue arrayValue = argv[0];
-  JSValue optionValue = argv[1];
+  JSValue optionValue = JS_UNDEFINED;
+
+  if (argc > 1) {
+    optionValue = argv[1];
+  }
 
   if (!JS_IsArray(ctx, arrayValue)) {
     return JS_ThrowTypeError(ctx, "Failed to construct 'Blob': The provided value cannot be converted to a sequence");

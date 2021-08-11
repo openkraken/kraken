@@ -7,50 +7,49 @@
 #include "bridge_callback.h"
 #include "bridge_qjs.h"
 #include "dart_methods.h"
+#include "bindings/qjs/qjs_patch.h"
 
 namespace kraken::binding::qjs {
 
-static void handleTimerCallback(kraken::foundation::BridgeCallback::Context *callbackContext, const char *errmsg) {
-  auto &_context = callbackContext->m_context;
-  if (JS_IsNull(callbackContext->m_callback)) {
+static void handleTimerCallback(TimerCallbackContext *callbackContext, const char *errmsg) {
+  if (JS_IsNull(callbackContext->callback)) {
     // throw JSError inside of dart function callback will directly cause crash
     // so we handle it instead of throw
-    JSValue exception = JS_ThrowTypeError(_context.ctx(), "Failed to trigger callback: timer callback is null.");
-    _context.handleException(&exception);
+    JSValue exception = JS_ThrowTypeError(callbackContext->context->ctx(), "Failed to trigger callback: timer callback is null.");
+    callbackContext->context->handleException(&exception);
     return;
   }
 
-  if (!JS_IsObject(callbackContext->m_callback)) {
+  if (!JS_IsObject(callbackContext->callback)) {
     return;
   }
 
   if (errmsg != nullptr) {
-    JSValue exception = JS_ThrowTypeError(_context.ctx(), "%s", errmsg);
-    _context.handleException(&exception);
+    JSValue exception = JS_ThrowTypeError(callbackContext->context->ctx(), "%s", errmsg);
+    callbackContext->context->handleException(&exception);
     return;
   }
 
-  JSValue returnValue = JS_Call(_context.ctx(), callbackContext->m_callback, _context.global(), 0, nullptr);
-  _context.handleException(&returnValue);
+  JSValue returnValue = JS_Call(callbackContext->context->ctx(), callbackContext->callback, callbackContext->context->global(), 0, nullptr);
+  callbackContext->context->handleException(&returnValue);
 }
 
 static void handleTransientCallback(void *ptr, int32_t contextId, const char *errmsg) {
-  auto *callbackContext = static_cast<kraken::foundation::BridgeCallback::Context *>(ptr);
-  JSContext &_context = callbackContext->m_context;
-  if (!checkContext(contextId, &_context)) return;
+  auto *callbackContext = static_cast<TimerCallbackContext *>(ptr);
+  if (!checkContext(contextId, callbackContext->context)) return;
 
   handleTimerCallback(callbackContext, errmsg);
 
-  auto bridge = static_cast<JSBridge *>(callbackContext->m_context.getOwner());
-  bridge->bridgeCallback->freeBridgeCallbackContext(callbackContext);
+  list_del(&callbackContext->link);
+  JS_FreeValue(callbackContext->context->ctx(), callbackContext->callback);
+  delete callbackContext;
 }
 
 static void handlePersistentCallback(void *ptr, int32_t contextId, const char *errmsg) {
-  auto *callbackContext = static_cast<kraken::foundation::BridgeCallback::Context *>(ptr);
-  JSContext &_context = callbackContext->m_context;
-  if (!checkContext(contextId, &_context)) return;
+  auto *callbackContext = static_cast<TimerCallbackContext *>(ptr);
+  if (!checkContext(contextId, callbackContext->context)) return;
 
-  if (!_context.isValid()) return;
+  if (!callbackContext->context->isValid()) return;
 
   handleTimerCallback(callbackContext, errmsg);
 }
@@ -87,13 +86,13 @@ static JSValue setTimeout(QjsContext *ctx, JSValueConst this_val, int argc, JSVa
     return JS_ThrowTypeError(ctx, "Failed to execute 'setTimeout': dart method (setTimeout) is not registered.");
   }
 
-  auto callbackContext = std::make_unique<kraken::foundation::BridgeCallback::Context>(*context, callbackValue);
-  auto bridge = static_cast<JSBridge *>(context->getOwner());
-  auto timerId = bridge->bridgeCallback->registerCallback<int32_t>(
-    std::move(callbackContext),
-    [&timeout](kraken::foundation::BridgeCallback::Context *callbackContext, int32_t contextId) {
-      return getDartMethod()->setTimeout(callbackContext, contextId, handleTransientCallback, timeout);
-    });
+  auto *callbackContext = new TimerCallbackContext{
+    JS_DupValue(ctx, callbackValue),
+    context
+  };
+  list_add_tail(&callbackContext->link, &context->timer_list);
+
+  auto timerId = getDartMethod()->setTimeout(callbackContext, context->getContextId(), handleTransientCallback, timeout);
 
   // `-1` represents ffi error occurred.
   if (timerId == -1) {
