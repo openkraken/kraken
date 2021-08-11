@@ -32,6 +32,9 @@ class HttpCacheObject {
   // When file was last modified.
   DateTime? lastModified;
 
+  // The initial origin when caches.
+  String? origin;
+
   // The directory to store cache file.
   final String cacheDirectory;
 
@@ -54,6 +57,7 @@ class HttpCacheObject {
     this.contentLength,
     this.lastUsed,
     this.lastModified,
+    this.origin,
     required this.hash,
   }) : _file = File(path.join(cacheDirectory, hash)),
         _blob = HttpCacheObjectBlob(path.join(cacheDirectory, '$hash-blob'));

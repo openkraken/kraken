@@ -114,7 +114,7 @@ class HttpCacheController {
 
   // The entry for getting cache by request.
   Future<HttpCacheObject?> getCacheObject(HttpClientRequest request) async {
-    HttpCacheObject? cacheObject = await getObject(request.uri);
+    HttpCacheObject? cacheObject = await _getObject(request.uri);
     if (cacheObject != null) {
       // 1. Check cache-control rule
       // 2. Check expires
@@ -141,7 +141,7 @@ class HttpCacheController {
   }
 
   // Get the CacheObject by uri, no validation needed here.
-  Future<HttpCacheObject?> getObject(Uri uri) async {
+  Future<HttpCacheObject?> _getObject(Uri uri) async {
     // L2 cache in memory.
     final String key = _getCacheKey(uri);
     if (_caches.containsKey(key)) {
@@ -151,7 +151,7 @@ class HttpCacheController {
     // Get cache in disk.
     final String hash = md5.convert(utf8.encode(key)).toString();
     final Directory cacheDirectory = await _getCacheDirectory();
-    HttpCacheObject cacheObject = HttpCacheObject(key, cacheDirectory.path, hash: hash);
+    HttpCacheObject cacheObject = HttpCacheObject(key, cacheDirectory.path, hash: hash, origin: _origin);
 
     await cacheObject.read();
 
