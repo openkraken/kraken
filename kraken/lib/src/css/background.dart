@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/kraken.dart';
 
 // CSS Backgrounds: https://drafts.csswg.org/css-backgrounds/
 // CSS Images: https://drafts.csswg.org/css-images-3/
@@ -110,8 +111,9 @@ class CSSBackground {
       }
     }
 
+    KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
     backgroundImage = DecorationImage(
-      image: CSSUrl.parseUrl(url, contextId: contextId)!,
+      image: CSSUrl.parseUrl(controller.uriParser!.parse(Uri.parse(url)).toString(), contextId: contextId)!,
       repeat: imageRepeat,
     );
 

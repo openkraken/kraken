@@ -24,7 +24,7 @@ class FetchModule extends BaseModule {
 
   @override
   String invoke(String method, dynamic params, InvokeModuleCallback callback) {
-    String url = method;
+    String url = (moduleManager!.controller.uriParser!.parse(Uri.parse(method))).toString();
     Map<String, dynamic> options = params;
 
     _fetch(url, options, contextId: moduleManager!.contextId).then((Response response) {
@@ -41,7 +41,7 @@ class FetchModule extends BaseModule {
   }
 }
 
-Future<Response> _fetch(String path, Map<String, dynamic> map, { required int contextId }) async {
+Future<Response> _fetch(String url, Map<String, dynamic> map, { required int contextId }) async {
   Future<Response> future;
   String method = map['method'] ?? 'GET';
 
@@ -57,8 +57,6 @@ Future<Response> _fetch(String path, Map<String, dynamic> map, { required int co
 
   BaseOptions options =
       BaseOptions(headers: headers, method: method, responseType: ResponseType.plain);
-
-  String url = URLParser(path, contextId: contextId).toString();
 
   switch (method) {
     case 'POST':

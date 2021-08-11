@@ -8,7 +8,6 @@ import 'dart:io';
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/painting.dart';
-import 'package:kraken/foundation.dart';
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#urls
 class CSSUrl {
@@ -22,8 +21,8 @@ class CSSUrl {
 
     ImageProvider? imageProvider;
 
-    if (rawInput.startsWith('//') || rawInput.startsWith('/') || rawInput.startsWith('http://') || rawInput.startsWith('https://')) {
-      String url = URLParser(rawInput, contextId: contextId).toString();
+    if (rawInput.startsWith('//') || rawInput.startsWith('http://') || rawInput.startsWith('https://')) {
+      String url = rawInput.startsWith('//') ? 'https:' + rawInput : rawInput;
       // @TODO: caching also works after image downloaded
       if (cache == 'store' || cache == 'auto') {
         imageProvider = getImageProviderFactory(ImageType.cached)(url);

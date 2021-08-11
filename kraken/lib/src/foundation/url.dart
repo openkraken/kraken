@@ -6,15 +6,18 @@
 import 'package:kraken/launcher.dart';
 import 'package:kraken/foundation.dart';
 
-class URLParser {
+class UriParser {
   String _url = '';
   int? _contextId;
 
-  URLParser(String url, { int? contextId }) {
-    String path = url;
+  UriParser(int contextId) {
+    _contextId = contextId;
+  }
 
-    if(contextId != null) {
-      _contextId = contextId;
+  Uri parse(Uri uri) {
+    String path = uri.toString();
+
+    if(_contextId != null) {
       KrakenController controller = KrakenController.getControllerOfJSContextId(_contextId)!;
       HttpClientInterceptor? httpClientInterceptor = controller.httpClientInterceptor;
       Uri uriHref = Uri.parse(controller.href);
@@ -39,11 +42,11 @@ class URLParser {
       }
 
       if (httpClientInterceptor != null) {
-        path = httpClientInterceptor.customURLParser(path, url);
+        path = httpClientInterceptor.customURLParser(path, uri.toString());
       }
     }
 
-    _url = path;
+    return Uri.parse(path);
   }
 
   Uri get url {
