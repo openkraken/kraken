@@ -18,12 +18,8 @@ class UriParser {
 
   UriInterceptor? _uriInterceptor;
 
-  void registerInterceptor(UriInterceptor? uriInterceptor) {
+  set uriInterceptor(UriInterceptor uriInterceptor) {
     _uriInterceptor = uriInterceptor;
-  }
-
-  void disposeInterceptor() {
-    _uriInterceptor = null;
   }
 
   Uri parse(Uri uri) {

@@ -522,7 +522,7 @@ class KrakenController {
 
     _uriParser = UriParser(_view.contextId);
     if (uriInterceptor != null) {
-      _uriParser.registerInterceptor(uriInterceptor);
+      _uriParser.uriInterceptor = uriInterceptor;
     }
 
     if (httpClientInterceptor != null) {
