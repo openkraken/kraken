@@ -103,38 +103,39 @@ static JSValue setTimeout(QjsContext *ctx, JSValueConst this_val, int argc, JSVa
 }
 
 static void handleRAFTransientCallback(void *ptr, int32_t contextId, double highResTimeStamp, const char *errmsg) {
-  auto *callbackContext = static_cast<kraken::foundation::BridgeCallback::Context *>(ptr);
-  JSContext &_context = callbackContext->m_context;
-  if (!checkContext(contextId, &_context)) return;
+  auto *callbackContext = static_cast<TimerCallbackContext *>(ptr);
+  if (!checkContext(contextId, callbackContext->context)) return;
 
-  if (!_context.isValid()) return;
+  if (!callbackContext->context->isValid()) return;
 
-  if (JS_IsNull(callbackContext->m_callback)) {
+  if (JS_IsNull(callbackContext->callback)) {
     // throw JSError inside of dart function callback will directly cause crash
     // so we handle it instead of throw
-    JSValue exception = JS_ThrowTypeError(_context.ctx(), "Failed to trigger callback: requestAnimationFrame callback is null.");
-    _context.handleException(&exception);
+    JSValue exception = JS_ThrowTypeError(callbackContext->context->ctx(), "Failed to trigger callback: requestAnimationFrame callback is null.");
+    callbackContext->context->handleException(&exception);
     return;
   }
 
-  if (!JS_IsObject(callbackContext->m_callback)) {
+  if (!JS_IsObject(callbackContext->callback)) {
     return;
   }
 
   if (errmsg != nullptr) {
-    JSValue exception = JS_ThrowTypeError(_context.ctx(), "%s", errmsg);
-    _context.handleException(&exception);
+    JSValue exception = JS_ThrowTypeError(callbackContext->context->ctx(), "%s", errmsg);
+    callbackContext->context->handleException(&exception);
     return;
   }
 
   JSValue arguments[] = {
-    JS_NewFloat64(_context.ctx(), highResTimeStamp)
+    JS_NewFloat64(callbackContext->context->ctx(), highResTimeStamp)
   };
 
-  JSValue returnValue = JS_Call(_context.ctx(), callbackContext->m_callback, _context.global(), 1, arguments);
-  _context.handleException(&returnValue);
-  auto bridge = static_cast<JSBridge *>(callbackContext->m_context.getOwner());
-  bridge->bridgeCallback->freeBridgeCallbackContext(callbackContext);
+  JSValue returnValue = JS_Call(callbackContext->context->ctx(), callbackContext->callback, callbackContext->context->global(), 1, arguments);
+  callbackContext->context->handleException(&returnValue);
+
+  list_del(&callbackContext->link);
+  JS_FreeValue(callbackContext->context->ctx(), callbackContext->callback);
+  delete callbackContext;
 }
 
 static JSValue setInterval(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -169,13 +170,12 @@ static JSValue setInterval(QjsContext *ctx, JSValueConst this_val, int argc, JSV
   }
 
   // the context pointer which will be pass by pointer address to dart code.
-  auto callbackContext = std::make_unique<kraken::foundation::BridgeCallback::Context>(*context, callbackValue);
-  auto bridge = static_cast<JSBridge *>(context->getOwner());
-  auto timerId = bridge->bridgeCallback->registerCallback<int32_t>(
-    std::move(callbackContext),
-    [&timeout](kraken::foundation::BridgeCallback::Context *callbackContext, int32_t contextId) {
-      return getDartMethod()->setInterval(callbackContext, contextId, handlePersistentCallback, timeout);
-    });
+  auto *callbackContext = new TimerCallbackContext{
+    JS_DupValue(ctx, callbackValue),
+    context
+  };
+  list_add_tail(&callbackContext->link, &context->timer_list);
+  uint32_t timerId = getDartMethod()->setInterval(callbackContext, context->getContextId(), handlePersistentCallback, timeout);
 
   if (timerId == -1) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'setInterval': dart method (setInterval) got unexpected error.");
@@ -196,13 +196,9 @@ static JSValue requestAnimationFrame(QjsContext *ctx, JSValueConst this_val, int
     return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.");
   }
 
-
   if (!JS_IsFunction(ctx, callbackValue)) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.");
   }
-
-  // the context pointer which will be pass by pointer address to dart code.
-  auto callbackContext = std::make_unique<kraken::foundation::BridgeCallback::Context>(*context, callbackValue);
 
   if (getDartMethod()->flushUICommand == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.");
@@ -214,11 +210,13 @@ static JSValue requestAnimationFrame(QjsContext *ctx, JSValueConst this_val, int
     return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) is not registered.");
   }
 
-  auto bridge = static_cast<JSBridge *>(context->getOwner());
-  uint32_t requestId = bridge->bridgeCallback->registerCallback<int32_t>(
-      std::move(callbackContext), [](kraken::foundation::BridgeCallback::Context *callbackContext, int32_t contextId) {
-        return getDartMethod()->requestAnimationFrame(callbackContext, contextId, handleRAFTransientCallback);
-      });
+  auto *callbackContext = new TimerCallbackContext{
+    JS_DupValue(ctx, callbackValue),
+    context
+  };
+  list_add_tail(&callbackContext->link, &context->timer_list);
+
+  uint32_t requestId = getDartMethod()->requestAnimationFrame(callbackContext, context->getContextId(), handleRAFTransientCallback);
 
   // `-1` represents some error occurred.
   if (requestId == -1) {

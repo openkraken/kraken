@@ -38,10 +38,6 @@ class CustomEventInstance : public EventInstance {
 public:
   explicit CustomEventInstance(CustomEvent *jsCustomEvent, JSAtom CustomEventType, JSValue eventInit);
   explicit CustomEventInstance(CustomEvent *jsCustomEvent, NativeCustomEvent* nativeCustomEvent);
-  ~CustomEventInstance() override {
-    delete nativeCustomEvent;
-  }
-
   void inline setDetail(JSValue value) {
     m_detail.setValue(value);
   }
