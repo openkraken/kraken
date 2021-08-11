@@ -89,7 +89,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
         // Cache: handle cache-control and expires,
         //        if hit, no need to open request.
-        HttpCacheManager cacheManager = HttpCacheManager.instanceWithContextId(contextId);
+        HttpCacheController cacheManager = HttpCacheController.instanceWithContextId(contextId);
         HttpCacheObject? cacheObject = await cacheManager.getCacheObject(_request);
         if (cacheObject != null) {
           HttpClientResponse? cacheResponse = await cacheObject.toHttpClientResponse();
@@ -100,7 +100,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
         HttpClientResponse _interceptedResponse = await _shouldInterceptRequest(_clientInterceptor, _request) ?? await _request.close();
         HttpClientResponse response = await _afterResponse(_clientInterceptor, _request, _interceptedResponse) ?? _interceptedResponse;
-        return HttpCacheManager.cacheHttpResource(contextId, response, _request);
+        return HttpCacheController.cacheHttpResource(contextId, response, _request);
       }
     }
 
