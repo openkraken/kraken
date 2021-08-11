@@ -89,7 +89,6 @@ KrakenHttpOverrides setupHttpOverrides(HttpClientInterceptor? httpClientIntercep
     httpOverrides.registerKrakenContext(controller, httpClientInterceptor);
   }
 
-  // FIXME: will override existed
   HttpOverrides.global = httpOverrides;
   return httpOverrides;
 }
