@@ -23,7 +23,7 @@ void bindEventTarget(std::unique_ptr<JSContext> &context) {
   context->defineGlobalProperty("EventTarget", constructor->classObject);
 }
 
-EventTarget::EventTarget(JSContext *context, const char *name): HostClass(context, name) {
+EventTarget::EventTarget(JSContext *context, const char *name) : HostClass(context, name) {
 }
 EventTarget::EventTarget(JSContext *context) : HostClass(context, "EventTarget") {
 }
@@ -73,7 +73,8 @@ JSValue EventTarget::addEventListener(QjsContext *ctx, JSValue this_val, int arg
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: type and listener are required.");
   }
 
-  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val, EventTarget::classId(this_val)));
+  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val,
+                                                                              EventTarget::classId(this_val)));
   if (eventTargetInstance == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
@@ -98,11 +99,12 @@ JSValue EventTarget::addEventListener(QjsContext *ctx, JSValue this_val, int arg
 
   // Init list.
   if (eventTargetInstance->_eventHandlers.count(eventType) == 0) {
-    eventTargetInstance->_eventHandlers[eventType] = std::deque<JSValue>();
+    eventTargetInstance->_eventHandlers[eventType] = std::vector<JSValue>();
   }
 
   // Dart needs to be notified for the first registration event.
-  if (eventTargetInstance->_eventHandlers[eventType].empty() || eventTargetInstance->_propertyEventHandler.count(eventType) > 0) {
+  if (eventTargetInstance->_eventHandlers[eventType].empty() ||
+      eventTargetInstance->_propertyEventHandler.count(eventType) > 0) {
     int32_t contextId = eventTargetInstance->prototype()->contextId();
 
     NativeString args_01{};
@@ -118,7 +120,7 @@ JSValue EventTarget::addEventListener(QjsContext *ctx, JSValue this_val, int arg
     }
   }
 
-  std::deque<JSValue> &handlers = eventTargetInstance->_eventHandlers[eventType];
+  std::vector<JSValue> &handlers = eventTargetInstance->_eventHandlers[eventType];
   JSValue newCallback = JS_DupValue(ctx, callback);
 
   // Create strong reference between callback and eventTargetObject.
@@ -126,7 +128,7 @@ JSValue EventTarget::addEventListener(QjsContext *ctx, JSValue this_val, int arg
   std::string privateKey = eventType + "_" + std::to_string(reinterpret_cast<int64_t>(JS_VALUE_GET_PTR(callback)));
   JS_DefinePropertyValueStr(ctx, eventTargetInstance->instanceObject, privateKey.c_str(), newCallback, JS_PROP_NORMAL);
 
-  handlers.push_front(newCallback);
+  handlers.push_back(newCallback);
   JS_FreeCString(ctx, cEventType);
 
   return JS_UNDEFINED;
@@ -137,7 +139,8 @@ JSValue EventTarget::removeEventListener(QjsContext *ctx, JSValue this_val, int 
     return JS_ThrowTypeError(ctx, "Failed to removeEventListener: at least type and listener are required.");
   }
 
-  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val, EventTarget::classId(this_val)));
+  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val,
+                                                                              EventTarget::classId(this_val)));
   if (eventTargetInstance == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
@@ -163,17 +166,18 @@ JSValue EventTarget::removeEventListener(QjsContext *ctx, JSValue this_val, int 
     return JS_UNDEFINED;
   }
 
-  std::deque<JSValue> &handlers = eventTargetInstance->_eventHandlers[eventType];
-  std::remove_if(handlers.begin(), handlers.end(), [&callback, &eventType, &ctx, &eventTargetInstance](JSValue function) {
+  std::vector<JSValue> &handlers = eventTargetInstance->_eventHandlers[eventType];
+  std::string privateKey = eventType + "_" + std::to_string(reinterpret_cast<int64_t>(JS_VALUE_GET_PTR(callback)));
+  JSAtom privateKeyAtom = JS_NewAtom(ctx, privateKey.c_str());
+  JS_DeleteProperty(ctx, eventTargetInstance->instanceObject, privateKeyAtom, 0);
+  JS_FreeAtom(ctx, privateKeyAtom);
+
+  handlers.erase(std::remove_if(handlers.begin(), handlers.end(), [callback](JSValue function) {
     if (JS_VALUE_GET_PTR(function) == JS_VALUE_GET_PTR(callback)) {
-      std::string privateKey = eventType + "_" + std::to_string(reinterpret_cast<int64_t>(JS_VALUE_GET_PTR(callback)));
-      JSAtom privateKeyAtom = JS_NewAtom(ctx, privateKey.c_str());
-      JS_DeleteProperty(ctx, eventTargetInstance->instanceObject, privateKeyAtom, 0);
-      JS_FreeAtom(ctx, privateKeyAtom);
       return true;
     }
     return false;
-  });
+  }), handlers.end());
 
   if (handlers.empty() && eventTargetInstance->_propertyEventHandler.count(eventType) > 0) {
     // Dart needs to be notified for handles is empty.
@@ -226,7 +230,7 @@ bool EventTargetInstance::dispatchEvent(EventInstance *event) {
   // Bubble event to root event target.
   if (event->nativeEvent->bubbles == 1 && !event->propagationStopped()) {
     auto node = reinterpret_cast<NodeInstance *>(event->nativeEvent->currentTarget);
-    NodeInstance* parent = node->parentNode;
+    NodeInstance *parent = node->parentNode;
 
     if (parent != nullptr) {
       parent->dispatchEvent(event);

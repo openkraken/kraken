@@ -87,7 +87,7 @@ public:
 protected:
   NativeEventTarget nativeEventTarget{this};
   int32_t eventTargetId;
-  std::unordered_map<std::string, std::deque<JSValue>> _eventHandlers;
+  std::unordered_map<std::string, std::vector<JSValue>> _eventHandlers;
   std::unordered_map<std::string, JSValue> _propertyEventHandler;
 
   void setPropertyHandler(std::string &name, JSValue value);
