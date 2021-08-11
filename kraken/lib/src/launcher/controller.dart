@@ -680,14 +680,17 @@ class KrakenController {
       url = await (methodChannel as KrakenNativeChannel).getUrl();
     }
 
+    url = url ?? '';
     if (onLoadError != null) {
       try {
-        _bundle = await KrakenBundle.getBundle(url ?? '', contentOverride: _bundleContent, contextId: view.contextId);
+        _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent, contextId: view.contextId);
       } catch (e, stack) {
         onLoadError!(FlutterError(e.toString()), stack);
       }
     } else {
-      _bundle = await KrakenBundle.getBundle(url ?? '', contentOverride: _bundleContent, contextId: view.contextId, isLoadPage: true);
+      _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent, contextId: view.contextId);
+      KrakenController controller = KrakenController.getControllerOfJSContextId(view.contextId)!;
+      controller.href = url;
     }
 
     if (kProfileMode) {
