@@ -19,18 +19,21 @@ class FetchModule extends BaseModule {
   FetchModule(ModuleManager? moduleManager) : super(moduleManager);
 
   @override
-  void dispose() {}
+  void dispose() {
+    _httpClient?.close(force: true);
+    _httpClient = null;
+  }
+
+  HttpClient? _httpClient;
+  HttpClient get httpClient => _httpClient ?? (_httpClient = HttpClient());
 
   @override
-  String invoke(String method, dynamic params, InvokeModuleCallback callback) {
-    String url = method;
+  String invoke(String url, params, InvokeModuleCallback callback) {
     Map<String, dynamic> options = params;
-    HttpClient httpClient = HttpClient();
-    Uri uri;
-    try {
-      uri = Uri.parse(url);
-    } catch (err, stack) {
-      callback(error: '$err $stack');
+
+    Uri? uri = Uri.tryParse(url);
+    if (uri == null) {
+      callback(error: 'Can\'t parse url.');
       return EMPTY_STRING;
     }
 
@@ -44,27 +47,30 @@ class FetchModule extends BaseModule {
         request.headers.add(HttpHeaderContextID, moduleManager!.contextId.toString());
 
         var data = options['body'];
-        if (data != null) {
-          // @TODO: how to encode and convert type?
+        if (data is List<int>) {
           request.add(data);
+        } else {
+          // Treat as string as default.
+          request.add(data.toString().codeUnits);
         }
 
         return request.close();
       })
       .then((HttpClientResponse response) {
-        StringBuffer content = StringBuffer();
-        response.transform(utf8.decoder).listen((String contents) {
-          content.write(contents);
-        }).onDone(() {
-          if (response.statusCode == HttpStatus.ok) {
-            callback(data: [EMPTY_STRING, response.statusCode, content.toString()]);
-          } else {
-            callback(error: '${response.statusCode} ${response.reasonPhrase}');
-          }
+        StringBuffer contentBuffer = StringBuffer();
 
-          // Terminate the httpClient instance.
-          httpClient.close();
-        });
+        response
+          // @TODO: Consider binary format, now callback tunnel only accept strings.
+          .transform(utf8.decoder)
+          .listen(contentBuffer.write)
+          ..onDone(() {
+            // @TODO: response.headers not transmitted.
+            callback(data: [EMPTY_STRING, response.statusCode, contentBuffer.toString()]);
+          })
+          ..onError((Object error, StackTrace? stackTrace) {
+            print('Error while request $url, $error\n$stackTrace');
+            callback(error: '$error\n$stackTrace');
+          });
       });
     return EMPTY_STRING;
   }

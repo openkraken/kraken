@@ -24,7 +24,11 @@ class HttpCacheController {
       // Set https as default scheme.
       contextUri = Uri(scheme: 'https', host: contextUri.host, port: contextUri.port);
     }
-    return contextUri.origin;
+    if (contextUri.isScheme('http') || contextUri.isScheme('https')) {
+      return contextUri.origin;
+    } else {
+      return '<local>';
+    }
   }
 
   static Directory? _cacheDirectory;
@@ -77,9 +81,11 @@ class HttpCacheController {
     KrakenController? controller = KrakenController.getControllerOfJSContextId(int.tryParse(id));
     String? contextUrl;
     if (controller != null) {
-      if (controller.bundleURL != null) {
+      if (controller.bundleContent != null) {
+        contextUrl = 'vm://bundle_content/$id';
+      } if (controller.bundleURL != null) {
         contextUrl = controller.bundleURL!;
-      } else {
+      } else if (controller.bundlePath != null) {
         contextUrl = 'file://${controller.bundlePath}';
       }
     }
