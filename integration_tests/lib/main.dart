@@ -55,10 +55,10 @@ class NativeGestureClient implements GestureClient {
 class CustomUriInterceptor implements UriInterceptor {
   @override
   Uri parse(Uri uri, Uri originUri) {
-    if (url.toString().contains('assets')) {
-      return originURL;
+    if (uri.toString().contains('assets')) {
+      return originUri;
     }
-    return url;
+    return uri;
   }
 }
 
