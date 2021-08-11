@@ -10,12 +10,21 @@ abstract class UriInterceptor {
 }
 
 class UriParser {
-  String _url = '';
   int _contextId;
 
   static RegExp exp = RegExp("^([a-z][a-z\d\+\-\.]*:)?\/\/");
 
   UriParser(contextId) : _contextId = contextId;
+
+  UriInterceptor? _uriInterceptor;
+
+  void registerInterceptor(UriInterceptor? uriInterceptor) {
+    _uriInterceptor = uriInterceptor;
+  }
+
+  void disposeInterceptor() {
+    _uriInterceptor = null;
+  }
 
   Uri parse(Uri uri) {
     String path = uri.toString();
@@ -47,23 +56,5 @@ class UriParser {
     }
 
     return Uri.parse(path);
-  }
-
-  UriInterceptor? _uriInterceptor;
-
-  void registerInterceptor(UriInterceptor? uriInterceptor) {
-    _uriInterceptor = uriInterceptor;
-  }
-
-  void disposeInterceptor() {
-    _uriInterceptor = null;
-  }
-
-  Uri get url {
-    return Uri.parse(_url);
-  }
-
-  String toString() {
-    return _url;
   }
 }
