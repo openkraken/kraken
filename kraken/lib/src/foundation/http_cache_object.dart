@@ -83,10 +83,25 @@ class HttpCacheObject {
   static final DateTime alwaysExpired = DateTime.fromMillisecondsSinceEpoch(0);
 
   static DateTime _getExpiredTimeFromResponseHeaders(HttpHeaders headers) {
+    // CacheControl's multiple directives are comma-separated.
     List<String>? cacheControls = headers[HttpHeaders.cacheControlHeader];
     if (cacheControls != null) {
       for (String cacheControl in cacheControls) {
-        // @TODO: maxAge rule.
+        cacheControl = cacheControl.toLowerCase();
+
+        if (cacheControl.startsWith('no-store')) {
+          // Will never save cache.
+          return alwaysExpired;
+        } else if (cacheControl.startsWith('no-cache')) {
+          String? eTag = headers.value(HttpHeaders.etagHeader);
+          if (eTag == null) {
+            // Since no-cache is determined, eTag must be provided to compare.
+            return alwaysExpired;
+          }
+        } else if (cacheControl.startsWith('max-age=')) {
+          int maxAge = int.tryParse(cacheControl.substring(8)) ?? 0;
+          return DateTime.now().add(Duration(seconds: maxAge));
+        }
       }
     }
 
