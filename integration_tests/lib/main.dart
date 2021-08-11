@@ -52,25 +52,10 @@ class NativeGestureClient implements GestureClient {
   }
 }
 
-class CustomHttpClientInterceptor implements HttpClientInterceptor {
+class CustomUriInterceptor implements UriInterceptor {
   @override
-  Future<HttpClientRequest?> beforeRequest(HttpClientRequest request) async {
-    return null;
-  }
-
-  @override
-  Future<HttpClientResponse?> afterResponse(HttpClientRequest request, HttpClientResponse response) async {
-    return null;
-  }
-
-  @override
-  Future<HttpClientResponse?> shouldInterceptRequest(HttpClientRequest request) async {
-    return null;
-  }
-
-  @override
-  String customURLParser(String url, String originURL) {
-    if (url.contains('assets')) {
+  Uri parse(Uri uri, Uri originUri) {
+    if (url.toString().contains('assets')) {
       return originURL;
     }
     return url;
