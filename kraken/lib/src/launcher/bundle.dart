@@ -46,10 +46,10 @@ abstract class KrakenBundle {
 
   Future<void> resolve();
 
-  static Future<KrakenBundle> getBundle(String path, { String? contentOverride, required int contextId, bool? needUpdateUrl }) async {
+  static Future<KrakenBundle> getBundle(String path, { String? contentOverride, required int contextId, bool isLoadPage = false }) async {
     KrakenBundle bundle;
 
-    if (needUpdateUrl == true) {
+    if (isLoadPage) {
       KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
       controller.href = path;
     }

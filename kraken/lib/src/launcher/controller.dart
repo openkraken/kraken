@@ -680,7 +680,7 @@ class KrakenController {
         onLoadError!(FlutterError(e.toString()), stack);
       }
     } else {
-      _bundle = await KrakenBundle.getBundle(url ?? '', contentOverride: _bundleContent, contextId: view.contextId, needUpdateUrl: true);
+      _bundle = await KrakenBundle.getBundle(url ?? '', contentOverride: _bundleContent, contextId: view.contextId, isLoadPage: true);
     }
 
     if (kProfileMode) {
