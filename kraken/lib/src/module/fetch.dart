@@ -37,6 +37,14 @@ class FetchModule extends BaseModule {
       return EMPTY_STRING;
     }
 
+    _handleError(Object error, StackTrace? stackTrace) {
+      print('Error while fetching for $url, message: \n$error');
+      if (stackTrace != null) {
+        print('\n$stackTrace');
+      }
+      callback(error: '$error\n$stackTrace');
+    }
+
     httpClient.openUrl(options['method'] ?? 'GET', uri)
       .then((HttpClientRequest request) {
         // Reset Kraken UA.
@@ -49,7 +57,7 @@ class FetchModule extends BaseModule {
         var data = options['body'];
         if (data is List<int>) {
           request.add(data);
-        } else {
+        } else if (data != null) {
           // Treat as string as default.
           request.add(data.toString().codeUnits);
         }
@@ -67,11 +75,10 @@ class FetchModule extends BaseModule {
             // @TODO: response.headers not transmitted.
             callback(data: [EMPTY_STRING, response.statusCode, contentBuffer.toString()]);
           })
-          ..onError((Object error, StackTrace? stackTrace) {
-            print('Error while request $url, $error\n$stackTrace');
-            callback(error: '$error\n$stackTrace');
-          });
-      });
+          ..onError(_handleError);
+      })
+      .catchError(_handleError);
+
     return EMPTY_STRING;
   }
 }
