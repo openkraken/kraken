@@ -113,7 +113,7 @@ class CSSBackground {
 
     if (contextId != null) {
       KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
-      url = controller.uriParser.parse(Uri.parse(url)).toString();
+      url = controller.uriParser.parse(contextId, Uri.parse(url)).toString();
     }
 
 

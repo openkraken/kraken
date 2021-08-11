@@ -52,9 +52,11 @@ class NativeGestureClient implements GestureClient {
   }
 }
 
-class CustomUriInterceptor implements UriInterceptor {
+class CustomUriParser extends UriParser {
   @override
-  Uri parse(Uri uri, Uri originUri) {
+  Uri parse(int contextId, Uri originUri) {
+    Uri uri = super.parse(contextId, originUri);
+
     if (uri.toString().contains('assets')) {
       return originUri;
     }
@@ -109,7 +111,7 @@ void main() async {
       disableViewportHeightAssertion: true,
       javaScriptChannel: javaScriptChannel,
       gestureClient: NativeGestureClient(gestureClientID:i),
-      uriInterceptor: CustomUriInterceptor(),
+      customUriParser: CustomUriParser(),
     );
     widgets.add(krakenMap[i]!);
   }

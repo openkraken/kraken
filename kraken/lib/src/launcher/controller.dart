@@ -411,6 +411,7 @@ class KrakenController {
   static Map<String, int> _nameIdMap = Map();
 
   late UriParser _uriParser;
+
   UriParser get uriParser => _uriParser;
 
   static KrakenController? getControllerOfJSContextId(int? contextId) {
@@ -476,7 +477,7 @@ class KrakenController {
     EventClient? eventClient,
     KrakenNavigationDelegate? navigationDelegate,
     KrakenMethodChannel? methodChannel,
-    UriInterceptor? uriInterceptor,
+    UriParser? customUriParser,
     this.onLoad,
     this.onLoadError,
     this.onJSError,
@@ -520,9 +521,11 @@ class KrakenController {
       _nameIdMap[name] = _view.contextId;
     }
 
-    _uriParser = UriParser(_view.contextId);
-    if (uriInterceptor != null) {
-      _uriParser.uriInterceptor = uriInterceptor;
+
+    if (customUriParser != null) {
+      _uriParser = customUriParser;
+    } else {
+      _uriParser = UriParser();
     }
 
     if (httpClientInterceptor != null) {
