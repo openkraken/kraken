@@ -10,6 +10,8 @@ class UriParser {
   String _url = '';
   int _contextId;
 
+  static RegExp exp = RegExp("^([a-z][a-z\d\+\-\.]*:)?\/\/");
+
   UriParser(contextId) : _contextId = contextId;
 
   Uri parse(Uri uri) {
@@ -17,15 +19,15 @@ class UriParser {
 
     KrakenController controller = KrakenController.getControllerOfJSContextId(_contextId)!;
     HttpClientInterceptor? httpClientInterceptor = controller.httpClientInterceptor;
-    Uri uriHref = Uri.parse(controller.href);
+
     String href = controller.href;
+    Uri uriHref = Uri.parse(href);
 
     // Treat empty scheme as https.
     if (path.startsWith('//')) {
       path = 'https:' + path;
     }
 
-    RegExp exp = RegExp("^([a-z][a-z\d\+\-\.]*:)?\/\/");
     if (!exp.hasMatch(path) && _contextId != null) {
       // relative path.
       if (path.startsWith('/')) {
