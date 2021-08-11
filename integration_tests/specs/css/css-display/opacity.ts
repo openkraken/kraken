@@ -35,4 +35,41 @@ describe('Opacity', () => {
       done();
     });
   });
+
+  it('change from 1 to 0', async (done) => {
+    let div1;
+    let div = createElement(
+     'div',
+     {
+       style: {},
+     },
+     [
+       (div1 = createElement('div', {
+         style: {
+           backgroundColor: 'red',
+           display: 'inline-block',
+           height: '100px',
+           width: '100px',
+         },
+       })),
+       createElement('div', {
+         style: {
+           backgroundColor: 'green',
+           display: 'inline-block',
+           height: '100px',
+           width: '100px',
+         },
+       }),
+     ]
+   );
+   append(BODY, div);
+   await snapshot();
+
+   requestAnimationFrame(async () => {
+     div1.style.opacity = 0;
+     await snapshot();
+     done();
+   });
+  });
+
 });

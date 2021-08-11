@@ -6,6 +6,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:kraken/foundation.dart';
+import 'queue.dart';
+
+final _requestQueue = Queue(parallel: 10);
 
 class ProxyHttpClientRequest extends HttpClientRequest {
   final HttpClientRequest _clientRequest;
@@ -13,10 +16,6 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   ProxyHttpClientRequest(HttpClientRequest clientRequest, KrakenHttpOverrides httpOverrides)
       : _clientRequest = clientRequest,
         _httpOverrides = httpOverrides;
-
-  String? _getContextId(HttpClientRequest request) {
-    return request.headers.value(HttpHeaderContextID);
-  }
 
   @override
   Encoding get encoding => _clientRequest.encoding;
@@ -78,32 +77,30 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
   @override
   Future<HttpClientResponse> close() async {
+    String? contextId = KrakenHttpOverrides.getContextHeader(_clientRequest);
+
     // HttpOverrides
-    if (_httpOverrides.shouldOverride(_clientRequest)) {
-      String? contextId = _getContextId(_clientRequest);
-      if (contextId != null) {
+    if (contextId != null && _httpOverrides.hasInterceptor(contextId)) {
+      HttpClientInterceptor _clientInterceptor = _httpOverrides.getInterceptor(contextId);
+      HttpClientRequest _request = await _beforeRequest(_clientInterceptor, _clientRequest) ?? _clientRequest;
 
-        HttpClientInterceptor _clientInterceptor = _httpOverrides.getInterceptor(contextId);
-        HttpClientRequest _request = await _beforeRequest(_clientInterceptor, _clientRequest) ?? _clientRequest;
-
-        // Cache: handle cache-control and expires,
-        //        if hit, no need to open request.
-        HttpCacheController cacheManager = HttpCacheController.instanceWithContextId(contextId);
-        HttpCacheObject? cacheObject = await cacheManager.getCacheObject(_request);
-        if (cacheObject != null) {
-          HttpClientResponse? cacheResponse = await cacheObject.toHttpClientResponse();
-          if (cacheResponse != null) {
-            return cacheResponse;
-          }
+      // Cache: handle cache-control and expires,
+      //        if hit, no need to open request.
+      HttpCacheController cacheManager = HttpCacheController.instanceWithContextId(contextId);
+      HttpCacheObject? cacheObject = await cacheManager.getCacheObject(_request);
+      if (cacheObject != null) {
+        HttpClientResponse? cacheResponse = await cacheObject.toHttpClientResponse();
+        if (cacheResponse != null) {
+          return cacheResponse;
         }
-
-        HttpClientResponse _interceptedResponse = await _shouldInterceptRequest(_clientInterceptor, _request) ?? await _request.close();
-        HttpClientResponse response = await _afterResponse(_clientInterceptor, _request, _interceptedResponse) ?? _interceptedResponse;
-        return HttpCacheController.cacheHttpResource(contextId, response, _request);
       }
+
+      HttpClientResponse _interceptedResponse = await _shouldInterceptRequest(_clientInterceptor, _request) ?? await _request.close();
+      HttpClientResponse response = await _afterResponse(_clientInterceptor, _request, _interceptedResponse) ?? _interceptedResponse;
+      return HttpCacheController.cacheHttpResource(contextId, response, _request);
     }
 
-    return _clientRequest.close();
+    return _requestQueue.add(_clientRequest.close);
   }
 
   @override

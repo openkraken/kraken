@@ -51,8 +51,8 @@ class FetchModule extends BaseModule {
         request.headers.removeAll(HttpHeaders.userAgentHeader);
         request.headers.add(HttpHeaders.userAgentHeader, getKrakenInfo().userAgent);
 
-        // Add ContextID Header
-        request.headers.add(HttpHeaderContextID, moduleManager!.contextId.toString());
+        // Set ContextID Header
+        request.headers.set(HttpHeaderContext, moduleManager!.contextId.toString());
 
         var data = options['body'];
         if (data is List<int>) {

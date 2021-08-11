@@ -386,6 +386,8 @@ void flushUICommand() {
       PerformanceTiming.instance().mark(PERF_FLUSH_UI_COMMAND_END);
     }
 
+    List<List<String>> _renderStyleCommands = [];
+
     // For new ui commands, we needs to tell engine to update frames.
     for (int i = 0; i < commandLength; i++) {
       UICommand command = commands[i];
@@ -429,6 +431,7 @@ void flushUICommand() {
             String key = command.args[0];
             String value = command.args[1];
             controller.view.setStyle(id, key, value);
+            _renderStyleCommands.add([id.toString(), key, value]);
             break;
           case UICommandType.setProperty:
             String key = command.args[0];
@@ -446,5 +449,12 @@ void flushUICommand() {
         print('$e\n$stack');
       }
     }
+
+    for (int i = 0; i < _renderStyleCommands.length; i ++) {
+      var pair = _renderStyleCommands[i];
+      controller.view.setRenderStyle(int.parse(pair[0]), pair[1], pair[2]);
+    }
+
+    _renderStyleCommands.clear();
   }
 }
