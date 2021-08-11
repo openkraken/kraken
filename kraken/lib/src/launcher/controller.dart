@@ -588,11 +588,9 @@ class KrakenController {
 
   String _href = '';
 
-  void updateHref(String url) {
-    _href = url;
-  }
-
   String get href => _href;
+
+  set href(String value) => _href = value;
 
   // reload current kraken view.
   Future<void> reload() async {

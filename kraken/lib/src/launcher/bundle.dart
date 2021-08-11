@@ -51,7 +51,7 @@ abstract class KrakenBundle {
 
     if (needUpdateUrl == true) {
       KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
-      controller.updateHref(path);
+      controller.href = path;
     }
 
     if (contentOverride != null && contentOverride.isNotEmpty) {
