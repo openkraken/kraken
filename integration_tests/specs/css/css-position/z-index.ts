@@ -441,4 +441,34 @@ describe('z-index', () => {
 
     await snapshot();
   });
+
+  it('works with click', async (done) => {
+    const div = document.createElement('div');
+    div.style.position = 'relative';
+    div.style.width = '100px';
+    div.style.height = '100px';
+
+    const div2 = document.createElement('div');
+    div2.style.position = 'absolute';
+    div2.style.zIndex = '2';
+    div2.style.width = '100%';
+    div2.style.height = '100%';
+    div2.style.background = 'blue';
+    div2.addEventListener('click', ()=>{
+      done();
+    })
+
+    const div3 = document.createElement('div');
+    div3.style.position = 'absolute';
+    div3.style.zIndex = '1';
+    div3.style.width = '100%';
+    div3.style.height = '100%';
+    div3.style.background = 'red';
+
+    document.body.appendChild(div);
+    div.appendChild(div2);
+    div.appendChild(div3);
+
+    await simulateClick(10, 10);
+  })
 });

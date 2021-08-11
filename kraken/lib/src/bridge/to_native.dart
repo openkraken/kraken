@@ -114,14 +114,34 @@ typedef NativeEvaluateScripts = Void Function(
 typedef DartEvaluateScripts = void Function(
     int contextId, Pointer<NativeString> code, Pointer<Utf8> url, int startLine);
 
+// Register parseHTML
+typedef NativeParseHTML = Void Function(
+    Int32 contextId, Pointer<NativeString> code, Pointer<Utf8> url);
+typedef DartParseHTML = void Function(
+    int contextId, Pointer<NativeString> code, Pointer<Utf8> url);
+
 final DartEvaluateScripts _evaluateScripts =
 nativeDynamicLibrary.lookup<NativeFunction<NativeEvaluateScripts>>('evaluateScripts').asFunction();
+
+final DartParseHTML _parseHTML =
+nativeDynamicLibrary.lookup<NativeFunction<NativeParseHTML>>('parseHTML').asFunction();
 
 void evaluateScripts(int contextId, String code, String url, int line) {
   Pointer<NativeString> nativeString = stringToNativeString(code);
   Pointer<Utf8> _url = url.toNativeUtf8();
   try {
     _evaluateScripts(contextId, nativeString, _url, line);
+  } catch (e, stack) {
+    print('$e\n$stack');
+  }
+  freeNativeString(nativeString);
+}
+
+void parseHTML(int contextId, String code, String url) {
+  Pointer<NativeString> nativeString = stringToNativeString(code);
+  Pointer<Utf8> _url = url.toNativeUtf8();
+  try {
+    _parseHTML(contextId, nativeString, _url);
   } catch (e, stack) {
     print('$e\n$stack');
   }
@@ -366,6 +386,8 @@ void flushUICommand() {
       PerformanceTiming.instance().mark(PERF_FLUSH_UI_COMMAND_END);
     }
 
+    List<List<String>> _renderStyleCommands = [];
+
     // For new ui commands, we needs to tell engine to update frames.
     for (int i = 0; i < commandLength; i++) {
       UICommand command = commands[i];
@@ -409,6 +431,7 @@ void flushUICommand() {
             String key = command.args[0];
             String value = command.args[1];
             controller.view.setStyle(id, key, value);
+            _renderStyleCommands.add([id.toString(), key, value]);
             break;
           case UICommandType.setProperty:
             String key = command.args[0];
@@ -426,5 +449,12 @@ void flushUICommand() {
         print('$e\n$stack');
       }
     }
+
+    for (int i = 0; i < _renderStyleCommands.length; i ++) {
+      var pair = _renderStyleCommands[i];
+      controller.view.setRenderStyle(int.parse(pair[0]), pair[1], pair[2]);
+    }
+
+    _renderStyleCommands.clear();
   }
 }

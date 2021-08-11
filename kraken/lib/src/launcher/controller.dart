@@ -325,6 +325,16 @@ class KrakenViewController {
     }
   }
 
+  void setRenderStyle(int targetId, String key, String value) {
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_SET_RENDER_STYLE_START, uniqueId: targetId);
+    }
+    _elementManager.setRenderStyle(targetId, key, value);
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_SET_RENDER_STYLE_END, uniqueId: targetId);
+    }
+  }
+
   void setProperty(int targetId, String key, String value) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_SET_PROPERTIES_START, uniqueId: targetId);

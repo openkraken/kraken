@@ -12,6 +12,7 @@
 #include <mutex>
 #include <vector>
 
+
 namespace kraken::binding::jsc {
 
 std::vector<JSStaticFunction> JSContext::globalFunctions{};

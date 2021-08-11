@@ -55,7 +55,6 @@ void launch({
   if (window.physicalSize == Size.zero) {
     window.onMetricsChanged = () async {
       if (window.physicalSize == Size.zero) {
-        window.onMetricsChanged = _ordinaryOnMetricsChanged;
         return;
       }
 

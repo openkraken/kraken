@@ -100,12 +100,11 @@ class AnimationTimeline {
 
   List<Animation> _getActiveAnimations() {
     List<Animation> activeAnimations = [];
+
     for (Animation animation in _animations) {
       AnimationPlayState playState = animation.playState;
       if (playState != AnimationPlayState.finished && playState != AnimationPlayState.idle) {
         activeAnimations.add(animation);
-      } else {
-        animation._tick(_currentTime);
       }
     }
     return activeAnimations;

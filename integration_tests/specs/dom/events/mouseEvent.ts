@@ -231,4 +231,18 @@ describe('MouseEvent', () => {
 
     img2.click();
   })
+
+  it('should work with dblclick', async (done) => {
+    const div = document.createElement('div');
+    div.style.width = '100px';
+    div.style.height = '100px';
+    div.style.backgroundColor = 'red';
+    document.body.appendChild(div);
+    div.addEventListener('dblclick', (e)=>{
+      done();
+    })
+    await simulateClick(10.0, 10.0, 0);
+    await sleep(0.1);
+    await simulateClick(10.0, 10.0 , 1);
+  });
 });

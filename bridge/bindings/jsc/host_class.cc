@@ -61,10 +61,10 @@ bool HostClass::proxyHasInstance(JSContextRef ctx, JSObjectRef constructor, JSVa
 
   JSObjectRef instanceObject = JSValueToObject(ctx, possibleInstance, exception);
   auto constructorHostClass = static_cast<HostClass *>(JSObjectGetPrivate(constructor));
-  auto instanceHostClass = static_cast<HostClass *>(JSObjectGetPrivate(instanceObject));
+  auto instanceHostClass = static_cast<Instance *>(JSObjectGetPrivate(instanceObject));
 
   if (constructorHostClass == nullptr || instanceHostClass == nullptr) return false;
-  return constructorHostClass == instanceHostClass;
+  return instanceHostClass->prototype<HostClass>() == constructorHostClass;
 }
 
 JSObjectRef HostClass::proxyCallAsConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,

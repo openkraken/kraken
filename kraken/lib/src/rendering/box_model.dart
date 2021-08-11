@@ -91,8 +91,11 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox,
   ///    hit-testing strategy.
   bool defaultHitTestChildren(BoxHitTestResult result, {Offset? position}) {
     // The x, y parameters have the top left of the node's box as the origin.
-    ChildType? child = lastChild;
-    while (child != null) {
+
+    // The z-index needs to be sorted, and higher-level nodes are processed first.
+    List<RenderObject?> sortedChildren = (this as RenderLayoutBox).sortedChildren;
+    for (int i = sortedChildren.length - 1; i >= 0; i--) {
+      ChildType child = sortedChildren[i] as ChildType;
       final ParentDataType childParentData = child.parentData as ParentDataType;
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset == Offset.zero
@@ -101,12 +104,12 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox,
         position: position!,
         hitTest: (BoxHitTestResult result, Offset transformed) {
           assert(transformed == position - childParentData.offset);
-          return child!.hitTest(result, position: transformed);
+          return child.hitTest(result, position: transformed);
         },
       );
       if (isHit) return true;
-      child = childParentData.previousSibling;
     }
+
     return false;
   }
 
@@ -509,6 +512,15 @@ class RenderBoxModel extends RenderBox
     }
   }
 
+  // Whether renderBoxModel has been layouted for the first time.
+  bool _firstLayouted = false;
+  bool get firstLayouted => _firstLayouted;
+  set firstLayouted(bool value) {
+    if (_firstLayouted != value) {
+      _firstLayouted = value;
+    }
+  }
+
   bool _debugHasBoxLayout = false;
 
   int childPaintDuration = 0;
@@ -619,6 +631,9 @@ class RenderBoxModel extends RenderBox
 
       // Copy renderPositionHolder
       ..renderPositionHolder = renderPositionHolder
+
+      // Copy first layouted flag
+      ..firstLayouted = firstLayouted
 
       // Copy parentData
       ..parentData = parentData;

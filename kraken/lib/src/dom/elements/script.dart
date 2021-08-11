@@ -46,7 +46,9 @@ class ScriptElement extends Element {
   @override
   void connectedCallback() {
     super.connectedCallback();
-    String src = getProperty('src');
-    _fetchBundle(src);
+    String? src = getProperty('src');
+    if (src != null) {
+      _fetchBundle(src);
+    }
   }
 }

@@ -144,7 +144,7 @@ class Kraken extends StatefulWidget {
   final KrakenNavigationDelegate? navigationDelegate;
 
   // A method channel for receiving messaged from JavaScript code and sending message to JavaScript.
-  final KrakenJavaScriptChannel? javaScriptChannel;
+  final KrakenMethodChannel? javaScriptChannel;
 
   final LoadErrorHandler? onLoadError;
 
