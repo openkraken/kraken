@@ -30,7 +30,7 @@ abstract class KrakenBundle {
   KrakenBundle(this.url);
 
   // Unique resource locator.
-  final String url;
+  final Uri url;
   // JS Content
   late String content;
   // JS line offset, default to 0.
@@ -55,12 +55,12 @@ abstract class KrakenBundle {
     }
 
     if (contentOverride != null && contentOverride.isNotEmpty) {
-      bundle = RawBundle(contentOverride, path);
+      bundle = RawBundle(contentOverride, Uri.parse(path));
     } else {
       if (path.startsWith('//') || path.startsWith('/') || path.startsWith('http://') || path.startsWith('https://')) {
-        bundle = NetworkBundle(path, contextId: contextId);
+        bundle = NetworkBundle(Uri.parse(path), contextId: contextId);
       } else {
-        bundle = AssetsBundle(path);
+        bundle = AssetsBundle(Uri.parse(path));
       }
     }
 
@@ -91,7 +91,7 @@ abstract class KrakenBundle {
 }
 
 class RawBundle extends KrakenBundle {
-  RawBundle(String content, String url)
+  RawBundle(String content, Uri url)
       : super(url) {
     this.content = content;
   }
@@ -104,14 +104,14 @@ class RawBundle extends KrakenBundle {
 
 class NetworkBundle extends KrakenBundle {
   int contextId;
-  NetworkBundle(String url, { required this.contextId })
+  NetworkBundle(Uri url, { required this.contextId })
       : super(url);
 
   @override
   Future<void> resolve() async {
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
 
-    NetworkAssetBundle bundle = NetworkAssetBundle(controller.uriParser!.parse(Uri.parse(url)), contextId: contextId);
+    NetworkAssetBundle bundle = NetworkAssetBundle(controller.uriParser!.parse(url), contextId: contextId);
     bundle.httpClient.userAgent = getKrakenInfo().userAgent;
     String absoluteURL = url.toString();
     ByteData bytes = await bundle.load(absoluteURL);
@@ -177,7 +177,7 @@ class NetworkAssetBundle extends AssetBundle {
 }
 
 class AssetsBundle extends KrakenBundle {
-  AssetsBundle(String url)
+  AssetsBundle(Uri url)
       : super(url);
 
   @override

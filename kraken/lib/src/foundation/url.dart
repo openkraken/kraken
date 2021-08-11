@@ -39,7 +39,7 @@ class UriParser {
       path = 'https:' + path;
     }
 
-    if (!exp.hasMatch(path) && _contextId != null) {
+    if (!exp.hasMatch(path)) {
       // relative path.
       if (path.startsWith('/')) {
         path = uriHref.scheme + '://' + uriHref.host + ':' + uriHref.port.toString() + path;
