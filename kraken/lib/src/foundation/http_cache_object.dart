@@ -64,9 +64,9 @@ class HttpCacheObject {
 
   factory HttpCacheObject.fromResponse(String url, HttpClientResponse response, String cacheDirectory) {
     DateTime expiredTime = _getExpiredTimeFromResponseHeaders(response.headers);
-    List<String>? eTags = response.headers[HttpHeaders.etagHeader];
+    String? eTag = response.headers.value(HttpHeaders.etagHeader);
     int contentLength = response.headers.contentLength;
-    String? lastModifiedValue = response.headers[HttpHeaders.lastModifiedHeader]?.single;
+    String? lastModifiedValue = response.headers.value(HttpHeaders.lastModifiedHeader);
     DateTime? lastModified = lastModifiedValue != null
         ? DateTime.tryParse(lastModifiedValue)
         : null;
@@ -75,7 +75,7 @@ class HttpCacheObject {
     final String hash = md5.convert(utf8.encode(url)).toString();
 
     return HttpCacheObject(url, cacheDirectory,
-      eTag: eTags?.single,
+      eTag: eTag,
       expiredTime: expiredTime,
       contentLength: contentLength,
       hash: hash,

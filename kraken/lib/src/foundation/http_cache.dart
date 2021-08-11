@@ -121,7 +121,7 @@ class HttpCacheController {
       if (cacheObject.isDateTimeValid()) return cacheObject;
 
       // 3. Check eTag by if-non-match
-      final String? requestEtag = request.headers[HttpHeaders.ifNoneMatchHeader]?.single;
+      final String? requestEtag = request.headers.value(HttpHeaders.ifNoneMatchHeader);
       if (requestEtag != null
           && requestEtag == cacheObject.eTag) {
         return cacheObject;
