@@ -160,6 +160,8 @@ class Kraken extends StatelessWidget {
 
   final HttpClientInterceptor? httpClientInterceptor;
 
+  final UriInterceptor ? uriInterceptor;
+
   KrakenController? get controller {
     return KrakenController.getControllerOfName(shortHash(this));
   }
@@ -224,6 +226,7 @@ class Kraken extends StatelessWidget {
     this.devToolsService,
     // Kraken's http client interceptor.
     this.httpClientInterceptor,
+    this.uriInterceptor,
     // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
     // Maybe got unexpected error when change to other values, use this at your own risk!
     // We will fixed this on next version released. (v0.6.0)
@@ -290,6 +293,7 @@ This situation often happened when you trying creating kraken when FlutterView n
       navigationDelegate: _krakenWidget.navigationDelegate,
       devToolsService: _krakenWidget.devToolsService,
       httpClientInterceptor: _krakenWidget.httpClientInterceptor,
+      uriInterceptor: _krakenWidget.uriInterceptor,
     );
 
     if (kProfileMode) {

@@ -4,7 +4,10 @@
  */
 
 import 'package:kraken/launcher.dart';
-import 'package:kraken/foundation.dart';
+
+abstract class UriInterceptor {
+  Uri parse(Uri uri, Uri originUri);
+}
 
 class UriParser {
   String _url = '';
@@ -18,7 +21,6 @@ class UriParser {
     String path = uri.toString();
 
     KrakenController controller = KrakenController.getControllerOfJSContextId(_contextId)!;
-    HttpClientInterceptor? httpClientInterceptor = controller.httpClientInterceptor;
 
     String href = controller.href;
     Uri uriHref = Uri.parse(href);
@@ -40,11 +42,17 @@ class UriParser {
       }
     }
 
-    if (httpClientInterceptor != null) {
-      path = httpClientInterceptor.customURLParser(path, uri.toString());
+    if (_uriInterceptor != null) {
+      return _uriInterceptor!.parse(Uri.parse(path), uri);
     }
 
     return Uri.parse(path);
+  }
+
+  UriInterceptor? _uriInterceptor;
+
+  void register(UriInterceptor? uriInterceptor) {
+    _uriInterceptor = uriInterceptor;
   }
 
   Uri get url {

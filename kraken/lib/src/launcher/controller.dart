@@ -474,6 +474,7 @@ class KrakenController {
     EventClient? eventClient,
     KrakenNavigationDelegate? navigationDelegate,
     KrakenMethodChannel? methodChannel,
+    UriInterceptor? uriInterceptor,
     this.onLoad,
     this.onLoadError,
     this.onJSError,
@@ -517,6 +518,10 @@ class KrakenController {
     }
 
     uriParser = UriParser(_view.contextId);
+
+    if (uriInterceptor != null) {
+      uriParser!.register(uriInterceptor);
+    }
 
     if (httpClientInterceptor != null) {
       setupHttpOverrides(httpClientInterceptor!, controller: this);
