@@ -30,9 +30,9 @@ class KrakenHttpOverrides extends HttpOverrides {
     request.headers.set(HttpHeaderContext, contextId);
   }
 
-  static Uri getOrigin(String contextId) {
+  static Uri getOrigin(int? contextId) {
     KrakenController? controller = KrakenController
-        .getControllerOfJSContextId(int.tryParse(contextId));
+        .getControllerOfJSContextId(contextId);
     if (controller != null) {
       if (controller.bundleURL != null) {
         return Uri.parse(controller.bundleURL!);
@@ -41,7 +41,7 @@ class KrakenHttpOverrides extends HttpOverrides {
       }
     }
     // The fallback origin uri, like `vm://bundle/0`
-    return Uri(scheme: 'vm', host: 'bundle', path: contextId);
+    return Uri(scheme: 'vm', host: 'bundle', path: '$contextId');
   }
 
   final HttpOverrides? parentHttpOverrides = HttpOverrides.current;

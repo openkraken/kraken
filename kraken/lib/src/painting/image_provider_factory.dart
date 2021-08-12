@@ -120,7 +120,7 @@ void setCustomImageProviderFactory(ImageType imageType, ImageProviderFactory cus
 
 /// default ImageProviderFactory implementation of [ImageType.cached]
 ImageProvider defaultCachedProviderFactory(String url, [dynamic param]) {
-  return CachedNetworkImage(url);
+  return CachedNetworkImage(url, contextId: param);
 }
 
 /// default ImageProviderFactory implementation of [ImageType.network]

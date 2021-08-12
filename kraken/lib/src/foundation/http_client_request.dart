@@ -82,7 +82,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
     HttpClientRequest request = _clientRequest;
     String? contextId = KrakenHttpOverrides.getContextHeader(_clientRequest);
     if (contextId != null) {
-      Uri origin = KrakenHttpOverrides.getOrigin(contextId);
+      Uri origin = KrakenHttpOverrides.getOrigin(int.tryParse(contextId));
 
       // Set the default origin.
       if (request.headers[HttpHeadersOrigin] == null) {

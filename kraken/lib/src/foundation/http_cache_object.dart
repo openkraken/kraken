@@ -8,7 +8,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as path;
 
 import 'http_client_response.dart';
@@ -39,7 +38,7 @@ class HttpCacheObject {
   final String cacheDirectory;
 
   // The storage filename.
-  final String hash;
+  final int hash;
 
   // The index file.
   final File _file;
@@ -59,7 +58,7 @@ class HttpCacheObject {
     this.lastModified,
     this.origin,
     required this.hash,
-  }) : _file = File(path.join(cacheDirectory, hash)),
+  }) : _file = File(path.join(cacheDirectory, '$hash')),
         _blob = HttpCacheObjectBlob(path.join(cacheDirectory, '$hash-blob'));
 
   factory HttpCacheObject.fromResponse(String url, HttpClientResponse response, String cacheDirectory) {
@@ -71,14 +70,11 @@ class HttpCacheObject {
         ? DateTime.tryParse(lastModifiedValue)
         : null;
 
-    // Since md5 is more efficient among other hashing algorithms.
-    final String hash = md5.convert(utf8.encode(url)).toString();
-
     return HttpCacheObject(url, cacheDirectory,
       eTag: eTag,
       expiredTime: expiredTime,
       contentLength: contentLength,
-      hash: hash,
+      hash: url.hashCode,
       lastModified: lastModified,
       lastUsed: DateTime.now(),
     );
@@ -246,7 +242,7 @@ class HttpCacheObject {
     writeString(bytesBuilder, url, 4);
 
     // | Length of eTag x 2B | eTag payload x N |
-    // Store url length, 4B max respresents (0x)ffffffff -> 4294967295 (4GB)
+    // Store url length, 4B max represents (0x)ffffffff -> 4294967295 (4GB)
     writeString(bytesBuilder, eTag ?? '', 2);
 
     // The index file will not be TOO LARGE,
@@ -262,7 +258,7 @@ class HttpCacheObject {
 
   // Remove all the cached files.
   void remove() async {
-    final File indexFile = File(path.join(cacheDirectory, hash));
+    final File indexFile = File(path.join(cacheDirectory, '$hash'));
     await Future.wait([
       indexFile.delete(),
       _blob.remove(),
@@ -281,15 +277,18 @@ class HttpCacheObject {
     };
   }
 
-  Future<HttpClientResponse?> toHttpClientResponse({
-    HttpClientResponse? originalResponse }) async {
+  Future<bool> get _exists async {
     final bool isIndexExist = await _file.exists();
     if (!isIndexExist) {
-      return null;
+      return false;
     }
 
-    final bool isBlobExist = await _blob.exists();
-    if (!isBlobExist) {
+    return await _blob.exists();
+  }
+
+  Future<HttpClientResponse?> toHttpClientResponse({
+    HttpClientResponse? originalResponse }) async {
+    if (!await _exists) {
       return null;
     }
 
@@ -298,6 +297,27 @@ class HttpCacheObject {
       statusCode: HttpStatus.ok,
       responseHeaders: _getResponseHeaders(),
     );
+  }
+
+  Future<Uint8List?> toBinaryContent() async {
+    if (!await _exists) {
+      return null;
+    }
+
+    // Open read.
+    Stream<List<int>> blobStream = _blob.openRead();
+
+    // Consume stream.
+    Completer<Uint8List> completer = Completer<Uint8List>();
+    ByteConversionSink sink = ByteConversionSink.withCallback(
+            (bytes) => completer.complete(Uint8List.fromList(bytes)));
+    blobStream.listen(
+        sink.add,
+        onError: completer.completeError,
+        onDone: sink.close,
+        cancelOnError: true);
+
+    return completer.future;
   }
 
   Future<void> updateIndex(HttpClientResponse response) async {

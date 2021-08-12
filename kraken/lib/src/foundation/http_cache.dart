@@ -4,10 +4,8 @@
  */
 import 'dart:async';
 import 'dart:collection';
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:crypto/crypto.dart';
 import 'package:kraken/foundation.dart';
 import 'package:path/path.dart' as path;
 
@@ -32,7 +30,7 @@ class HttpCacheController {
   }
 
   static Directory? _cacheDirectory;
-  static Future<Directory> _getCacheDirectory() async {
+  static Future<Directory> getCacheDirectory() async {
     if (_cacheDirectory != null) {
       return _cacheDirectory!;
     }
@@ -79,35 +77,6 @@ class HttpCacheController {
       : _origin = origin,
         _maxCachedObjects = maxCachedObjects;
 
-  // // The entry for getting cache by request.
-  // Future<HttpCacheObject?> getCacheObject(HttpClientRequest request) async {
-  //   HttpCacheObject? cacheObject = await _getObject(request.uri);
-  //   if (cacheObject != null) {
-  //     // 1. Check cache-control rule
-  //     // 2. Check expires
-  //     if (cacheObject.isDateTimeValid()) return cacheObject;
-  //
-  //     // 3. Check eTag by if-non-match
-  //     final String? requestEtag = request.headers.value(HttpHeaders.ifNoneMatchHeader);
-  //     if (requestEtag != null
-  //         && requestEtag == cacheObject.eTag) {
-  //       return cacheObject;
-  //     }
-  //
-  //     // 4. Check last-modified by if-modified-since
-  //     DateTime? ifModifiedSince = request.headers.ifModifiedSince;
-  //     if (ifModifiedSince != null
-  //         && cacheObject.lastModified != null
-  //         && ifModifiedSince.isAtSameMomentAs(cacheObject.lastModified!)) {
-  //       return cacheObject;
-  //     }
-  //
-  //     // Miss cache.
-  //   }
-  //   return null;
-  // }
-
-
   // Get the CacheObject by uri, no validation needed here.
   Future<HttpCacheObject?> getCacheObject(Uri uri) async {
     // L2 cache in memory.
@@ -117,8 +86,8 @@ class HttpCacheController {
     }
 
     // Get cache in disk.
-    final String hash = md5.convert(utf8.encode(key)).toString();
-    final Directory cacheDirectory = await _getCacheDirectory();
+    final int hash = key.hashCode;
+    final Directory cacheDirectory = await getCacheDirectory();
     HttpCacheObject cacheObject = HttpCacheObject(key, cacheDirectory.path, hash: hash, origin: _origin);
 
     await cacheObject.read();
@@ -162,7 +131,7 @@ class HttpCacheController {
           .fromResponse(
           _getCacheKey(request.uri),
           response,
-          (await _getCacheDirectory()).path
+          (await getCacheDirectory()).path
       );
 
       // Cache the object.

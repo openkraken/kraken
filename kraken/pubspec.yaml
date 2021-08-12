@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  crypto: ^3.0.1
   path: ^1.8.0
   meta: ^1.3.0
   ffi: ^1.0.0

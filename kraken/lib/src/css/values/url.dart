@@ -25,7 +25,7 @@ class CSSUrl {
       String url = rawInput.startsWith('//') ? 'https:' + rawInput : rawInput;
       // @TODO: caching also works after image downloaded
       if (cache == 'store' || cache == 'auto') {
-        imageProvider = getImageProviderFactory(ImageType.cached)(url);
+        imageProvider = getImageProviderFactory(ImageType.cached)(url, [contextId]);
       } else {
         imageProvider = getImageProviderFactory(ImageType.network)(url, [contextId]);
       }
