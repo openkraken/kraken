@@ -158,6 +158,9 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
       // Step 6: Intercept response by cache controller (handle 304).
       return cacheController.interceptResponse(request, response!, cacheObject);
+    } else {
+      _clientRequest.add(_data);
+      _data.clear();
     }
 
     return _requestQueue.add(request.close);
