@@ -47,6 +47,7 @@ public:
   int32_t uniqueId;
   struct list_head node_list;
   struct list_head timer_list;
+  struct list_head document_list;
 
   static JSClassID kHostClassClassId;
   static JSClassID kHostObjectClassId;

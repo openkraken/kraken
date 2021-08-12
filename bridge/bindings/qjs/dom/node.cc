@@ -120,7 +120,7 @@ JSValue Node::removeChild(QjsContext *ctx, JSValue this_val, int argc, JSValue *
   }
 
   auto removedNode = selfInstance->internalRemoveChild(nodeInstance);
-  return removedNode->instanceObject;
+  return JS_DupValue(ctx, removedNode->instanceObject);
 }
 JSValue Node::insertBefore(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (argc < 2) {

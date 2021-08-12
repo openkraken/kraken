@@ -65,7 +65,7 @@ JSValue ElementAttributes::setAttribute(std::string &name, JSAtom atom) {
                              name.c_str());
   }
 
-  m_attributes[name] = atom;
+  m_attributes[name] = JS_DupAtom(m_ctx, atom);
 
   return JS_NULL;
 }
@@ -190,6 +190,7 @@ JSValue Element::setAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
     ->addCommand(element->eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
 
   JS_FreeValue(ctx, attributeString);
+  JS_FreeAtom(ctx, attributeAtom);
 
   return JS_NULL;
 }

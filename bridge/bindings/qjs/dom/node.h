@@ -103,6 +103,7 @@ public:
   std::vector<NodeInstance *> childNodes;
 
   NodeLink nodeLink{this};
+  NodeLink documentLink{this};
 
   void refer();
   void unrefer();

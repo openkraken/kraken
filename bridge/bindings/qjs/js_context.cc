@@ -39,6 +39,7 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
 
   init_list_head(&node_list);
   init_list_head(&timer_list);
+  init_list_head(&document_list);
 
   if (m_runtime == nullptr) {
     m_runtime = JS_NewRuntime();
@@ -67,11 +68,22 @@ JSContext::~JSContext() {
   JS_FreeValue(m_ctx, m_window->instanceObject);
   ctxInvalid_ = true;
 
-  // Manual free nodes
+  // Manual free nodes bound by each other.
   {
     struct list_head *el, *el1;
     list_for_each_safe(el, el1, &node_list) {
       auto *node = list_entry(el, NodeLink, link);
+      KRAKEN_LOG(VERBOSE) << "node eventtargetId " << JS_VALUE_GET_PTR(node->nodeInstance->instanceObject) << " " << el1;
+      JS_FreeValue(m_ctx, node->nodeInstance->instanceObject);
+    }
+  }
+
+  // Manual free nods bound by document.
+  {
+    struct list_head *el, *el1;
+    list_for_each_safe(el, el1, &document_list) {
+      auto *node = list_entry(el, NodeLink, link);
+      KRAKEN_LOG(VERBOSE) << "free document link " << JS_VALUE_GET_PTR(node->nodeInstance->instanceObject) << " " << el1;
       JS_FreeValue(m_ctx, node->nodeInstance->instanceObject);
     }
   }

@@ -122,6 +122,8 @@ JSValue Document::getElementById(QjsContext *ctx, JSValue this_val, int argc, JS
   if (document->m_elementMapById.count(id) == 0) return JS_NULL;
 
   auto targetElementList = document->m_elementMapById[id];
+  JS_FreeAtom(ctx, id);
+
   if (targetElementList.empty()) return JS_NULL;
 
   for (auto &element : targetElementList) {
@@ -231,6 +233,8 @@ DocumentInstance::~DocumentInstance() {
 void DocumentInstance::removeElementById(JSAtom id, ElementInstance *element) {
   if (m_elementMapById.count(id) > 0) {
     auto &list = m_elementMapById[id];
+    JS_FreeValue(m_ctx, element->instanceObject);
+    list_del(&element->documentLink.link);
     list.erase(std::find(list.begin(), list.end(), element));
   }
 }
@@ -243,6 +247,8 @@ void DocumentInstance::addElementById(JSAtom id, ElementInstance *element) {
   auto it = std::find(list.begin(), list.end(), element);
 
   if (it == list.end()) {
+    JS_DupValue(m_ctx, element->instanceObject);
+    list_add_tail(&element->documentLink.link, &m_context->document_list);
     m_elementMapById[id].emplace_back(element);
   }
 }
