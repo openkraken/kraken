@@ -12,7 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/kraken.dart';
+import 'package:kraken/launcher.dart';
 
 // CSS Backgrounds: https://drafts.csswg.org/css-backgrounds/
 // CSS Images: https://drafts.csswg.org/css-images-3/
