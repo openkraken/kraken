@@ -8,15 +8,10 @@
 
 namespace kraken::binding::jsc {
 
-std::string href = "";
-
-void updateLocation(std::string url = "") {
-  href = url;
-}
-
 JSValueRef JSLocation::getProperty(std::string &name, JSValueRef *exception) {
   if (name == "href") {
-    JSStringRef hrefRef = JSStringCreateWithUTF8CString(href.c_str());
+    NativeString *nativeHref = getDartMethod()->getHref(contextId);
+    JSStringRef hrefRef = JSStringCreateWithCharacters(nativeHref->string, nativeHref->length);
     return JSValueMakeString(context->context(), hrefRef);
   }
 

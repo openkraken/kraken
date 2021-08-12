@@ -18,6 +18,7 @@ import 'package:kraken_websocket/kraken_websocket.dart';
 import 'package:kraken_animation_player/kraken_animation_player.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
 import 'package:kraken_webview/kraken_webview.dart';
+import 'package:kraken/foundation.dart';
 
 String? pass = (AnsiPen()..green())('[TEST PASS]');
 String? err = (AnsiPen()..red())('[TEST FAILED]');
@@ -48,6 +49,18 @@ class NativeGestureClient implements GestureClient {
 
   @override
   void dragEndCallback(DragEndDetails details) {
+  }
+}
+
+class MyUriInterceptor extends UriInterceptor {
+  @override
+  Uri parse(int contextId, Uri originUri) {
+    Uri uri = super.parse(contextId, originUri);
+
+    if (uri.toString().contains('assets')) {
+      return originUri;
+    }
+    return uri;
   }
 }
 
@@ -98,6 +111,7 @@ void main() async {
       disableViewportHeightAssertion: true,
       javaScriptChannel: javaScriptChannel,
       gestureClient: NativeGestureClient(gestureClientID:i),
+      uriInterceptor: MyUriInterceptor(),
     );
     widgets.add(krakenMap[i]!);
   }

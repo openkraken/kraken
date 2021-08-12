@@ -160,6 +160,8 @@ class Kraken extends StatelessWidget {
 
   final HttpClientInterceptor? httpClientInterceptor;
 
+  final UriInterceptor? uriInterceptor;
+
   KrakenController? get controller {
     return KrakenController.getControllerOfName(shortHash(this));
   }
@@ -224,6 +226,7 @@ class Kraken extends StatelessWidget {
     this.devToolsService,
     // Kraken's http client interceptor.
     this.httpClientInterceptor,
+    this.uriInterceptor,
     // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
     // Maybe got unexpected error when change to other values, use this at your own risk!
     // We will fixed this on next version released. (v0.6.0)
@@ -269,7 +272,7 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
 
     double viewportWidth = _krakenWidget.viewportWidth ?? window.physicalSize.width / window.devicePixelRatio;
     double viewportHeight = _krakenWidget.viewportHeight ?? window.physicalSize.height / window.devicePixelRatio;
-    
+
     if (viewportWidth == 0.0 && viewportHeight == 0.0) {
       throw FlutterError('''Can\'t get viewportSize from window. Please set viewportWidth and viewportHeight manually.
 This situation often happened when you trying creating kraken when FlutterView not initialized.''');
@@ -290,6 +293,7 @@ This situation often happened when you trying creating kraken when FlutterView n
       navigationDelegate: _krakenWidget.navigationDelegate,
       devToolsService: _krakenWidget.devToolsService,
       httpClientInterceptor: _krakenWidget.httpClientInterceptor,
+      uriInterceptor: _krakenWidget.uriInterceptor
     );
 
     if (kProfileMode) {

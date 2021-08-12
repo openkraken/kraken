@@ -170,7 +170,6 @@ void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType
 // parse html.
 void JSBridge::parseHTML(const NativeString *script, const char *url) {
   if (!m_context->isValid()) return;
-  binding::jsc::updateLocation(url);
 
   m_html_parser->parseHTML(script->string, script->length);
 }
@@ -178,7 +177,6 @@ void JSBridge::parseHTML(const NativeString *script, const char *url) {
 // eval javascript.
 void JSBridge::evaluateScript(const NativeString *script, const char *url, int startLine) {
   if (!m_context->isValid()) return;
-  binding::jsc::updateLocation(url);
 
   #if ENABLE_PROFILE
     auto nativePerformance = binding::jsc::NativePerformance::instance(m_context->uniqueId);
@@ -192,7 +190,6 @@ void JSBridge::evaluateScript(const NativeString *script, const char *url, int s
 
 void JSBridge::evaluateScript(const std::u16string &script, const char *url, int startLine) {
   if (!m_context->isValid()) return;
-  binding::jsc::updateLocation(url);
   m_context->evaluateJavaScript(script.c_str(), script.size(), url, startLine);
 }
 

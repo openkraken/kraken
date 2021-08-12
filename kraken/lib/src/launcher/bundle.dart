@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/module.dart';
+import 'package:kraken/launcher.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -47,20 +48,14 @@ abstract class KrakenBundle {
 
   static Future<KrakenBundle> getBundle(String path, { String? contentOverride, required int contextId }) async {
     KrakenBundle bundle;
-    Uri uri = Uri.parse(path);
-    if (contentOverride != null && contentOverride.isNotEmpty) {
-      bundle = RawBundle(contentOverride, uri);
-    } else {
-      // Treat empty scheme as https.
-      if (path.startsWith('//')) {
-        path = 'https:' + path;
-        uri = Uri.parse(path);
-      }
 
-      if (uri.isScheme('HTTP') || uri.isScheme('HTTPS')) {
-        bundle = NetworkBundle(uri, contextId: contextId);
+    if (contentOverride != null && contentOverride.isNotEmpty) {
+      bundle = RawBundle(contentOverride, Uri.parse(path));
+    } else {
+      if (path.startsWith('//') || path.startsWith('/') || path.startsWith('http://') || path.startsWith('https://')) {
+        bundle = NetworkBundle(Uri.parse(path), contextId: contextId);
       } else {
-        bundle = AssetsBundle(uri);
+        bundle = AssetsBundle(Uri.parse(path));
       }
     }
 
@@ -109,7 +104,9 @@ class NetworkBundle extends KrakenBundle {
 
   @override
   Future<void> resolve() async {
-    NetworkAssetBundle bundle = NetworkAssetBundle(url, contextId: contextId);
+    KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
+
+    NetworkAssetBundle bundle = NetworkAssetBundle(controller.uriInterceptor!.parse(contextId, url), contextId: contextId);
     bundle.httpClient.userAgent = getKrakenInfo().userAgent;
     String absoluteURL = url.toString();
     ByteData bytes = await bundle.load(absoluteURL);
