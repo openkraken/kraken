@@ -523,7 +523,7 @@ class KrakenController {
       setupHttpOverrides(httpClientInterceptor!, controller: this);
     }
 
-    if (uriInterceptor != null) {
+    if (uriInterceptor == null) {
       uriInterceptor = UriInterceptor();
     }
 
