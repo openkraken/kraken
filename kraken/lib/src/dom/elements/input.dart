@@ -319,7 +319,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       Touch touch = touches.item(0);
       _selectStartPosition = Offset(touch.clientX, touch.clientY);
 
-      TouchEvent e = (event as TouchEvent);
+      TouchEvent e = event;
       if (e.touches.length == 1) {
         Touch touch = e.touches[0];
         final TapDownDetails details = TapDownDetails(

@@ -235,14 +235,13 @@ class Element extends Node
   int _getTargetId() {
     return targetId;
   }
-  
+
   void _focusInput() {
     InputElement input = this as InputElement;
     InputElement.setFocus(input);
   }
-  
+
   void _blurInput() {
-    InputElement input = this as InputElement;
     InputElement.clearFocus();
   }
 
