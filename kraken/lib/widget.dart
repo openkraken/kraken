@@ -299,7 +299,9 @@ class _KrakenState extends State<Kraken> {
       RenderEditable? focusedEditable = _findFocusedEditable(editables);
       if (focused) {
         // @TODO: need to detect hotkey to determine focus order of inputs in kraken widget.
-        _focusEditable(editables[0]);
+        if (dom.InputElement.focusInputElement == null) {
+          _focusEditable(editables[0]);
+        }
       } else {
         if (focusedEditable != null) {
           _blurEditable(focusedEditable);
@@ -324,6 +326,7 @@ class _KrakenState extends State<Kraken> {
         int idx = editables.indexOf(focusedEditable);
         if (idx == editables.length - 1) {
           _focusNode.nextFocus();
+          _blurEditable(editables[editables.length - 1]);
         } else {
           _focusNode.requestFocus();
           _blurEditable(editables[idx]);
@@ -352,6 +355,7 @@ class _KrakenState extends State<Kraken> {
         int idx = editables.indexOf(focusedEditable);
         if (idx == 0) {
           _focusNode.previousFocus();
+          _blurEditable(editables[0]);
         } else {
           _focusNode.requestFocus();
           _blurEditable(editables[idx]);

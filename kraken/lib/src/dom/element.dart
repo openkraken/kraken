@@ -238,12 +238,12 @@ class Element extends Node
   
   void _focusInput() {
     InputElement input = this as InputElement;
-    input.focus();
+    InputElement.setFocus(input);
   }
   
   void _blurInput() {
     InputElement input = this as InputElement;
-    input.blur();
+    InputElement.clearFocus();
   }
 
   double _getRootElementFontSize() {

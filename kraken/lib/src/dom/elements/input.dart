@@ -114,12 +114,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   static void setFocus(InputElement inputElement) {
     if (InputElement.focusInputElement != inputElement) {
-      clearFocus();
       // Focus kraken widget to get focus from other widgets.
       FocusNode? focusNode = inputElement.elementManager.focusNode;
       if (focusNode != null) {
         focusNode.requestFocus();
       }
+      clearFocus();
       InputElement.focusInputElement = inputElement;
       inputElement.focus();
     }
@@ -308,22 +308,19 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   Color get cursorColor => CSSColor.initial;
 
   Offset? _selectStartPosition;
-  
+
   @override
   void dispatchEvent(Event event) {
     super.dispatchEvent(event);
-    if (event.type == EVENT_TOUCH_START) {
-      InputElement.setFocus(this);
 
+    if (event.type == EVENT_TOUCH_START) {
       TouchList touches = (event as TouchEvent).touches;
       if (touches.length > 1) return;
       Touch touch = touches.item(0);
       _selectStartPosition = Offset(touch.clientX, touch.clientY);
-      
+
       TouchEvent e = (event as TouchEvent);
       if (e.touches.length == 1) {
-        InputElement.setFocus(this);
-
         Touch touch = e.touches[0];
         final TapDownDetails details = TapDownDetails(
           globalPosition: Offset(touch.screenX, touch.screenY),
@@ -342,7 +339,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       if (touches.length > 1) return;
       Touch touch = touches.item(0);
       Offset _selectEndPosition = Offset(touch.clientX, touch.clientY);
-      
+
       _renderEditable!.selectPositionAt(
         from: _selectStartPosition!,
         to: _selectEndPosition,
@@ -350,6 +347,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       );
     } else if (event.type == EVENT_CLICK) {
       _renderEditable!.handleTap();
+      InputElement.setFocus(this);
     } else if (event.type == EVENT_LONG_PRESS) {
       _renderEditable!.handleLongPress();
     }
