@@ -106,7 +106,7 @@ class NetworkBundle extends KrakenBundle {
   Future<void> resolve() async {
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
 
-    NetworkAssetBundle bundle = NetworkAssetBundle(controller.uriParser.parse(contextId, url), contextId: contextId);
+    NetworkAssetBundle bundle = NetworkAssetBundle(controller.uriInterceptor.parse(contextId, url), contextId: contextId);
     bundle.httpClient.userAgent = getKrakenInfo().userAgent;
     String absoluteURL = url.toString();
     ByteData bytes = await bundle.load(absoluteURL);

@@ -52,7 +52,7 @@ class NativeGestureClient implements GestureClient {
   }
 }
 
-class CustomUriParser extends UriParser {
+class MyUriInterceptor extends UriInterceptor {
   @override
   Uri parse(int contextId, Uri originUri) {
     Uri uri = super.parse(contextId, originUri);
@@ -111,7 +111,7 @@ void main() async {
       disableViewportHeightAssertion: true,
       javaScriptChannel: javaScriptChannel,
       gestureClient: NativeGestureClient(gestureClientID:i),
-      customUriParser: CustomUriParser(),
+      uriInterceptor: MyUriInterceptor(),
     );
     widgets.add(krakenMap[i]!);
   }

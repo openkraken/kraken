@@ -5,11 +5,7 @@
 
 import 'package:kraken/launcher.dart';
 
-abstract class UriInterceptor {
-  Uri parse(Uri uri, Uri originUri);
-}
-
-class UriParser {
+class UriInterceptor {
 
   static RegExp exp = RegExp("^([a-z][a-z\d\+\-\.]*:)?\/\/");
 

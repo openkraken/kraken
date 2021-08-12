@@ -410,9 +410,9 @@ class KrakenController {
   static SplayTreeMap<int, KrakenController?> _controllerMap = SplayTreeMap();
   static Map<String, int> _nameIdMap = Map();
 
-  late UriParser _uriParser;
+  late UriInterceptor _uriInterceptor;
 
-  UriParser get uriParser => _uriParser;
+  UriInterceptor get uriInterceptor => _uriInterceptor;
 
   static KrakenController? getControllerOfJSContextId(int? contextId) {
     if (!_controllerMap.containsKey(contextId)) {
@@ -477,7 +477,7 @@ class KrakenController {
     EventClient? eventClient,
     KrakenNavigationDelegate? navigationDelegate,
     KrakenMethodChannel? methodChannel,
-    UriParser? customUriParser,
+    UriInterceptor? uriInterceptor,
     this.onLoad,
     this.onLoadError,
     this.onJSError,
@@ -522,10 +522,10 @@ class KrakenController {
     }
 
 
-    if (customUriParser != null) {
-      _uriParser = customUriParser;
+    if (uriInterceptor != null) {
+      _uriInterceptor = uriInterceptor;
     } else {
-      _uriParser = UriParser();
+      _uriInterceptor = UriInterceptor();
     }
 
     if (httpClientInterceptor != null) {
