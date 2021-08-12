@@ -18,7 +18,10 @@ class _HttpHeaders implements HttpHeaders {
 
   @override
   int get contentLength {
-    String val = value(HttpHeaders.contentLengthHeader);
+    String? val = value(HttpHeaders.contentLengthHeader);
+    if (val == null) {
+      return -1;
+    }
     return int.tryParse(val) ?? -1;
   }
 
@@ -170,7 +173,7 @@ class _HttpHeaders implements HttpHeaders {
   }
 
   @override
-  String value(String name) {
+  String? value(String name) {
     return _headers[name];
   }
 
