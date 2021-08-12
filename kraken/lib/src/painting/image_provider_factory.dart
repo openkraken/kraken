@@ -120,13 +120,19 @@ void setCustomImageProviderFactory(ImageType imageType, ImageProviderFactory cus
 
 /// default ImageProviderFactory implementation of [ImageType.cached]
 ImageProvider defaultCachedProviderFactory(String url, [dynamic param]) {
-  return CachedNetworkImage(url, contextId: param);
+  int? contextId;
+  if (param is List && param.length > 0) {
+    contextId = param[0];
+  }
+  return CachedNetworkImage(url, contextId: contextId);
 }
 
 /// default ImageProviderFactory implementation of [ImageType.network]
 ImageProvider defaultNetworkProviderFactory(String url, [dynamic param]) {
   String? contextId;
-  if (param is List) contextId = param[0]?.toString();
+  if (param is List && param.length > 0) {
+    contextId = param[0]?.toString();
+  }
   NetworkImage networkImage = NetworkImage(url, headers: {
     HttpHeaders.userAgentHeader: getKrakenInfo().userAgent,
     HttpHeaderContext: contextId!,
