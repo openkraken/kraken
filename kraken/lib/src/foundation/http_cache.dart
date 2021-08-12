@@ -9,25 +9,25 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:kraken/foundation.dart';
-import 'package:kraken/launcher.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
 import 'http_cache_object.dart';
 
 class HttpCacheController {
-  static final String _cachePath = "Kraken/HttpCaches";
   static Map<String, HttpCacheController> _controllers = HashMap();
 
-  static String _getOrigin(Uri contextUri) {
-    if (contextUri.scheme.isEmpty) {
+  // Returns the origin of the URI in the form scheme://host:port
+  static String _getOrigin(Uri uri) {
+    if (uri.scheme.isEmpty) {
       // Set https as default scheme.
-      contextUri = Uri(scheme: 'https', host: contextUri.host, port: contextUri.port);
+      uri = uri.replace(scheme: 'https');
     }
-    if (contextUri.isScheme('http') || contextUri.isScheme('https')) {
-      return contextUri.origin;
+
+    if (uri.isScheme('http')
+        || uri.isScheme('https')) {
+      return uri.origin;
     } else {
-      return '<local>';
+      return '${uri.scheme}://${uri.host}:${uri.port}';
     }
   }
 
@@ -37,8 +37,8 @@ class HttpCacheController {
       return _cacheDirectory!;
     }
 
-    final Directory appTempDirectory = await getTemporaryDirectory();
-    final Directory cacheDirectory = Directory(path.join(appTempDirectory.path, _cachePath));
+    final String appTemporaryPath = await getKrakenTemporaryPath();
+    final Directory cacheDirectory = Directory(path.join(appTemporaryPath, 'HttpCaches'));
     bool isThere = await cacheDirectory.exists();
     if (!isThere) {
       await cacheDirectory.create(recursive: true);
@@ -55,41 +55,8 @@ class HttpCacheController {
     return uriWithoutFragment.toString();
   }
 
-  /**
-   * Entry for saving a http client response to cache.
-   */
-  static Future<HttpClientResponse> cacheHttpResource(
-      String contextId,
-      HttpClientResponse response,
-      HttpClientRequest request) async {
-    final Directory cacheDirectory = await _getCacheDirectory();
-    final String key = _getCacheKey(request.uri);
-
-    // Create cache object.
-    HttpCacheObject cacheObject = HttpCacheObject
-        .fromResponse(key, response, cacheDirectory.path);
-
-    // Cache the object.
-    HttpCacheController
-        .instanceWithContextId(contextId)
-        .putObject(request.uri, cacheObject);
-
-    return HttpClientCachedResponse(response, cacheObject);
-  }
-
-  factory HttpCacheController.instanceWithContextId(String id) {
-    KrakenController? controller = KrakenController.getControllerOfJSContextId(int.tryParse(id));
-    String? contextUrl;
-    if (controller != null) {
-      if (controller.bundleContent != null) {
-        contextUrl = 'vm://bundle_content/$id';
-      } if (controller.bundleURL != null) {
-        contextUrl = controller.bundleURL!;
-      } else if (controller.bundlePath != null) {
-        contextUrl = 'file://${controller.bundlePath}';
-      }
-    }
-    String origin = _getOrigin(Uri.parse(contextUrl ?? 'anonymous://'));
+  factory HttpCacheController.instance(Uri uri) {
+    String origin = _getOrigin(uri);
     if (_controllers.containsKey(origin)) {
       return _controllers[origin]!;
     } else {
@@ -112,36 +79,37 @@ class HttpCacheController {
       : _origin = origin,
         _maxCachedObjects = maxCachedObjects;
 
-  // The entry for getting cache by request.
-  Future<HttpCacheObject?> getCacheObject(HttpClientRequest request) async {
-    HttpCacheObject? cacheObject = await _getObject(request.uri);
-    if (cacheObject != null) {
-      // 1. Check cache-control rule
-      // 2. Check expires
-      if (cacheObject.isDateTimeValid()) return cacheObject;
+  // // The entry for getting cache by request.
+  // Future<HttpCacheObject?> getCacheObject(HttpClientRequest request) async {
+  //   HttpCacheObject? cacheObject = await _getObject(request.uri);
+  //   if (cacheObject != null) {
+  //     // 1. Check cache-control rule
+  //     // 2. Check expires
+  //     if (cacheObject.isDateTimeValid()) return cacheObject;
+  //
+  //     // 3. Check eTag by if-non-match
+  //     final String? requestEtag = request.headers.value(HttpHeaders.ifNoneMatchHeader);
+  //     if (requestEtag != null
+  //         && requestEtag == cacheObject.eTag) {
+  //       return cacheObject;
+  //     }
+  //
+  //     // 4. Check last-modified by if-modified-since
+  //     DateTime? ifModifiedSince = request.headers.ifModifiedSince;
+  //     if (ifModifiedSince != null
+  //         && cacheObject.lastModified != null
+  //         && ifModifiedSince.isAtSameMomentAs(cacheObject.lastModified!)) {
+  //       return cacheObject;
+  //     }
+  //
+  //     // Miss cache.
+  //   }
+  //   return null;
+  // }
 
-      // 3. Check eTag by if-non-match
-      final String? requestEtag = request.headers.value(HttpHeaders.ifNoneMatchHeader);
-      if (requestEtag != null
-          && requestEtag == cacheObject.eTag) {
-        return cacheObject;
-      }
-
-      // 4. Check last-modified by if-modified-since
-      DateTime? ifModifiedSince = request.headers.ifModifiedSince;
-      if (ifModifiedSince != null
-          && cacheObject.lastModified != null
-          && ifModifiedSince.isAtSameMomentAs(cacheObject.lastModified!)) {
-        return cacheObject;
-      }
-
-      // Miss cache.
-    }
-    return null;
-  }
 
   // Get the CacheObject by uri, no validation needed here.
-  Future<HttpCacheObject?> _getObject(Uri uri) async {
+  Future<HttpCacheObject?> getCacheObject(Uri uri) async {
     // L2 cache in memory.
     final String key = _getCacheKey(uri);
     if (_caches.containsKey(key)) {
@@ -169,6 +137,40 @@ class HttpCacheController {
     }
     final String key = _getCacheKey(uri);
     _caches.update(key, (value) => cacheObject, ifAbsent: () => cacheObject);
+  }
+
+  Future<HttpClientResponse> interceptResponse(
+      HttpClientRequest request,
+      HttpClientResponse response,
+      HttpCacheObject? cacheObject) async {
+
+    if (cacheObject != null) {
+      await cacheObject.updateIndex(response);
+
+      // Handle with HTTP 304
+      if (response.statusCode == HttpStatus.notModified) {
+        HttpClientResponse? cachedResponse  = await cacheObject.toHttpClientResponse();
+        if (cachedResponse != null) {
+          return cachedResponse;
+        }
+      }
+    }
+
+    if (response.statusCode == HttpStatus.ok) {
+      // Create cache object.
+      HttpCacheObject cacheObject = HttpCacheObject
+          .fromResponse(
+          _getCacheKey(request.uri),
+          response,
+          (await _getCacheDirectory()).path
+      );
+
+      // Cache the object.
+      putObject(request.uri, cacheObject);
+
+      return HttpClientCachedResponse(response, cacheObject);
+    }
+    return response;
   }
 }
 

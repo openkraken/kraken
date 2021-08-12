@@ -152,6 +152,11 @@ class HttpCacheObject {
 
   bool isDateTimeValid() => expiredTime != null && expiredTime!.isAfter(DateTime.now());
 
+  // Validate the cache-control and expires.
+  bool hitLocalCache(HttpClientRequest request) {
+    return isDateTimeValid();
+  }
+
   /**
    * Read the index file.
    */
@@ -166,7 +171,7 @@ class HttpCacheObject {
       Uint8List bytes = await _file.readAsBytes();
       int index = 0;
 
-      // Resverd units.
+      // Reserved units.
       index += 4;
 
       // Read expiredTime.
@@ -188,14 +193,13 @@ class HttpCacheObject {
       contentLength = fromBytes(bytes.sublist(index, index + 4), 4).single;
       index += 4;
 
-
       // Read url.
       Uint8List urlLengthValue = bytes.sublist(index, index + 4);
       int urlLength = fromBytes(urlLengthValue, 4).single;
       index += 4;
 
       Uint8List urlValue = bytes.sublist(index, index + urlLength);
-      url = urlValue.toString();
+      url = utf8.decode(urlValue);
       index += urlLength;
 
       // Read eTag.
@@ -203,7 +207,7 @@ class HttpCacheObject {
       index += 2;
 
       Uint8List eTagValue = bytes.sublist(index, index + eTagLength);
-      eTag = eTagValue.toString();
+      eTag = utf8.decode(eTagValue);
 
       _valid = true;
     } catch (message, stackTrace) {
@@ -277,7 +281,8 @@ class HttpCacheObject {
     };
   }
 
-  Future<HttpClientResponse?> toHttpClientResponse() async {
+  Future<HttpClientResponse?> toHttpClientResponse({
+    HttpClientResponse? originalResponse }) async {
     final bool isIndexExist = await _file.exists();
     if (!isIndexExist) {
       return null;
@@ -293,6 +298,46 @@ class HttpCacheObject {
       statusCode: HttpStatus.ok,
       responseHeaders: _getResponseHeaders(),
     );
+  }
+
+  Future<void> updateIndex(HttpClientResponse response) async {
+    bool indexChanged = false;
+
+    // Update eTag.
+    String? remoteEtag = response.headers.value(HttpHeaders.etagHeader);
+    if (remoteEtag != null && remoteEtag != eTag) {
+      eTag = remoteEtag;
+      indexChanged = true;
+    }
+
+    // Update lastModified
+    String? remoteLastModifiedString = response.headers.value(HttpHeaders.lastModifiedHeader);
+    if (remoteLastModifiedString != null) {
+      DateTime? remoteLastModified = DateTime.tryParse(remoteLastModifiedString);
+      if (remoteLastModified != null
+          && (lastModified == null || !remoteLastModified.isAtSameMomentAs(lastModified!))) {
+        lastModified = remoteLastModified;
+        indexChanged = true;
+      }
+    }
+
+    // Update expires.
+    if (response.headers.expires != null) {
+      expiredTime = _getExpiredTimeFromResponseHeaders(response.headers);
+      indexChanged = true;
+    }
+
+    // Update content length.
+    int contentLength = response.headers.contentLength;
+    if (!contentLength.isNegative && contentLength != this.contentLength) {
+      this.contentLength = contentLength;
+      indexChanged = true;
+    }
+
+    // Update index.
+    if (indexChanged) {
+      await writeIndex();
+    }
   }
 }
 

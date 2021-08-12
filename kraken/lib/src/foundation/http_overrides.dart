@@ -3,15 +3,15 @@
  * Author: Kraken Team.
  */
 import 'dart:io';
+
 import 'package:kraken/foundation.dart';
 import 'package:kraken/launcher.dart';
-import 'http_client_interceptor.dart';
-import 'http_client.dart';
 
-// TODO: do not use header to mark context
+// TODO: Don't use header to mark context.
 const String HttpHeaderContext = 'x-context';
 class KrakenHttpOverrides extends HttpOverrides {
   static KrakenHttpOverrides? _instance;
+
   KrakenHttpOverrides._();
 
   factory KrakenHttpOverrides.instance() {
@@ -28,6 +28,20 @@ class KrakenHttpOverrides extends HttpOverrides {
 
   static void setContextHeader(HttpClientRequest request, String contextId) {
     request.headers.set(HttpHeaderContext, contextId);
+  }
+
+  static Uri getOrigin(String contextId) {
+    KrakenController? controller = KrakenController
+        .getControllerOfJSContextId(int.tryParse(contextId));
+    if (controller != null) {
+      if (controller.bundleURL != null) {
+        return Uri.parse(controller.bundleURL!);
+      } else if (controller.bundlePath != null) {
+        return Directory(controller.bundlePath!).uri;
+      }
+    }
+    // The fallback origin uri, like `vm://bundle/0`
+    return Uri(scheme: 'vm', host: 'bundle', path: contextId);
   }
 
   final HttpOverrides? parentHttpOverrides = HttpOverrides.current;
@@ -83,14 +97,12 @@ class KrakenHttpOverrides extends HttpOverrides {
 }
 
 KrakenHttpOverrides setupHttpOverrides(HttpClientInterceptor? httpClientInterceptor, { required KrakenController controller }) {
-
-  KrakenHttpOverrides httpOverrides = KrakenHttpOverrides.instance();
+  final KrakenHttpOverrides httpOverrides = KrakenHttpOverrides.instance();
 
   if (httpClientInterceptor != null) {
     httpOverrides.registerKrakenContext(controller, httpClientInterceptor);
   }
 
-  // FIXME: will override existed
   HttpOverrides.global = httpOverrides;
   return httpOverrides;
 }

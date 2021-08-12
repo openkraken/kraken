@@ -75,32 +75,77 @@ class ProxyHttpClientRequest extends HttpClientRequest {
     return null;
   }
 
+  static const String HttpHeadersOrigin = 'Origin';
+
   @override
   Future<HttpClientResponse> close() async {
+    HttpClientRequest request = _clientRequest;
     String? contextId = KrakenHttpOverrides.getContextHeader(_clientRequest);
+    if (contextId != null) {
+      Uri origin = KrakenHttpOverrides.getOrigin(contextId);
 
-    // HttpOverrides
-    if (contextId != null && _httpOverrides.hasInterceptor(contextId)) {
-      HttpClientInterceptor _clientInterceptor = _httpOverrides.getInterceptor(contextId);
-      HttpClientRequest _request = await _beforeRequest(_clientInterceptor, _clientRequest) ?? _clientRequest;
+      // Set the default origin.
+      if (request.headers[HttpHeadersOrigin] == null) {
+        request.headers.set(HttpHeadersOrigin, origin.toString());
+      }
 
-      // Cache: handle cache-control and expires,
+      HttpClientInterceptor? clientInterceptor;
+      if (_httpOverrides.hasInterceptor(contextId)) {
+        clientInterceptor = _httpOverrides.getInterceptor(contextId);
+      }
+
+      // Step 1: Handle request.
+      if (clientInterceptor != null) {
+        request = await _beforeRequest(clientInterceptor, request) ?? request;
+      }
+
+      // Step 2: Handle cache-control and expires,
       //        if hit, no need to open request.
-      HttpCacheController cacheManager = HttpCacheController.instanceWithContextId(contextId);
-      HttpCacheObject? cacheObject = await cacheManager.getCacheObject(_request);
-      if (cacheObject != null) {
+      HttpCacheController cacheController = HttpCacheController.instance(origin);
+      HttpCacheObject? cacheObject = await cacheController.getCacheObject(request.uri);
+      if (cacheObject != null
+          && cacheObject.hitLocalCache(request)) {
         HttpClientResponse? cacheResponse = await cacheObject.toHttpClientResponse();
         if (cacheResponse != null) {
           return cacheResponse;
         }
       }
 
-      HttpClientResponse _interceptedResponse = await _shouldInterceptRequest(_clientInterceptor, _request) ?? await _request.close();
-      HttpClientResponse response = await _afterResponse(_clientInterceptor, _request, _interceptedResponse) ?? _interceptedResponse;
-      return HttpCacheController.cacheHttpResource(contextId, response, _request);
+      // Step 3: Handle negotiate cache request header.
+      if (cacheObject != null
+          && request.headers.ifModifiedSince == null
+          && request.headers.value(HttpHeaders.ifNoneMatchHeader) == null) {
+        // ETag has higher priority of lastModified.
+        if (cacheObject.eTag != null) {
+          request.headers.set(HttpHeaders.ifNoneMatchHeader, cacheObject.eTag!);
+        } else if (cacheObject.lastModified != null) {
+          request.headers.set(HttpHeaders.ifModifiedSinceHeader,
+              HttpDate.format(cacheObject.lastModified!));
+        }
+      }
+
+      // Step 4: Lifecycle of shouldInterceptRequest
+      HttpClientResponse? response;
+      if (clientInterceptor != null) {
+        response = await _shouldInterceptRequest(clientInterceptor, request);
+      }
+
+      // After this, response should not be null.
+      if (response == null) {
+        response = await _requestQueue.add(() async => cacheController
+            .interceptResponse(request, await request.close(), cacheObject));
+      }
+
+      // Step 5: Lifecycle of afterResponse.
+      if (clientInterceptor != null) {
+        response = await _afterResponse(clientInterceptor, request, response!) ?? response;
+      }
+
+      // Step 6: Intercept response by cache controller (handle 304).
+      return cacheController.interceptResponse(request, response!, cacheObject);
     }
 
-    return _requestQueue.add(_clientRequest.close);
+    return _requestQueue.add(request.close);
   }
 
   @override
