@@ -228,7 +228,7 @@ DocumentInstance::DocumentInstance(Document *document): NodeInstance(document, N
 std::unordered_map<Document *, DocumentInstance *> DocumentInstance::m_instanceMap {};
 
 DocumentInstance::~DocumentInstance() {
-  JS_FreeValue(m_ctx, m_documentElement->instanceObject);
+//  JS_FreeValue(m_ctx, m_documentElement->instanceObject);
 }
 void DocumentInstance::removeElementById(JSAtom id, ElementInstance *element) {
   if (m_elementMapById.count(id) > 0) {

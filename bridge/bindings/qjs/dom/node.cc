@@ -388,7 +388,7 @@ NodeInstance *NodeInstance::nextSibling() {
 void NodeInstance::internalAppendChild(NodeInstance *node) {
   ensureDetached(node);
   childNodes.emplace_back(node);
-  node->parentNode = this;
+  node->setParentNode(this);
   node->refer();
 
   node->_notifyNodeInsert(this);
@@ -411,7 +411,7 @@ NodeInstance *NodeInstance::internalRemoveChild(NodeInstance *node) {
 
   if (it != childNodes.end()) {
     childNodes.erase(it);
-    node->parentNode = nullptr;
+    node->removeParentNode();
     node->unrefer();
     node->_notifyNodeRemoved(this);
     foundation::UICommandBuffer::instance(node->m_context->getContextId())
@@ -441,7 +441,7 @@ JSValue NodeInstance::internalInsertBefore(NodeInstance *node, NodeInstance *ref
       }
 
       parentChildNodes.insert(it, node);
-      node->parentNode = parent;
+      node->setParentNode(parent);
       node->refer();
       node->_notifyNodeInsert(parent);
 
@@ -465,7 +465,7 @@ void NodeInstance::internalSetTextContent(JSValue content) {}
 JSValue NodeInstance::internalReplaceChild(NodeInstance *newChild, NodeInstance *oldChild) {
   ensureDetached(newChild);
   assert_m(newChild->parentNode == nullptr, "ReplaceChild Error: newChild was not detached.");
-  oldChild->parentNode = nullptr;
+  oldChild->removeParentNode();
   oldChild->unrefer();
 
   auto childIndex = std::find(childNodes.begin(), childNodes.end(), oldChild);
@@ -473,7 +473,7 @@ JSValue NodeInstance::internalReplaceChild(NodeInstance *newChild, NodeInstance 
     return JS_ThrowTypeError(m_ctx, "Failed to execute 'replaceChild' on 'Node': old child is not exist on childNodes.");
   }
 
-  newChild->parentNode = this;
+  newChild->setParentNode(this);
   childNodes.erase(childIndex);
   childNodes.insert(childIndex, newChild);
   newChild->refer();
@@ -496,6 +496,18 @@ JSValue NodeInstance::internalReplaceChild(NodeInstance *newChild, NodeInstance 
   return oldChild->instanceObject;
 }
 
+void NodeInstance::setParentNode(NodeInstance *parent) {
+  parentNode = parent;
+  JS_DefinePropertyValueStr(m_ctx, instanceObject, "parentNode", JS_DupValue(m_ctx, parent->instanceObject), JS_PROP_ENUMERABLE);
+}
+
+void NodeInstance::removeParentNode() {
+  parentNode = nullptr;
+  JSAtom parentNodeAtom = JS_NewAtom(m_ctx, "parentNode");
+  JS_DeleteProperty(m_ctx, instanceObject, parentNodeAtom, 0);
+  JS_FreeAtom(m_ctx, parentNodeAtom);
+}
+
 NodeInstance::~NodeInstance() {
 }
 void NodeInstance::refer() {
@@ -514,7 +526,7 @@ void NodeInstance::ensureDetached(NodeInstance *node) {
     if (it != node->parentNode->childNodes.end()) {
       node->_notifyNodeRemoved(node->parentNode);
       node->parentNode->childNodes.erase(it);
-      node->parentNode = nullptr;
+      node->removeParentNode();
       node->unrefer();
     }
   }

@@ -73,7 +73,6 @@ JSContext::~JSContext() {
     struct list_head *el, *el1;
     list_for_each_safe(el, el1, &node_list) {
       auto *node = list_entry(el, NodeLink, link);
-      KRAKEN_LOG(VERBOSE) << "node eventtargetId " << JS_VALUE_GET_PTR(node->nodeInstance->instanceObject) << " " << el1;
       JS_FreeValue(m_ctx, node->nodeInstance->instanceObject);
     }
   }
@@ -83,7 +82,6 @@ JSContext::~JSContext() {
     struct list_head *el, *el1;
     list_for_each_safe(el, el1, &document_list) {
       auto *node = list_entry(el, NodeLink, link);
-      KRAKEN_LOG(VERBOSE) << "free document link " << JS_VALUE_GET_PTR(node->nodeInstance->instanceObject) << " " << el1;
       JS_FreeValue(m_ctx, node->nodeInstance->instanceObject);
     }
   }

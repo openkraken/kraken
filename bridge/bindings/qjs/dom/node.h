@@ -98,6 +98,8 @@ public:
   virtual void internalSetTextContent(JSValue content);
   JSValue internalReplaceChild(NodeInstance *newChild, NodeInstance *oldChild);
 
+  void setParentNode(NodeInstance *parent);
+  void removeParentNode();
   NodeType nodeType;
   NodeInstance *parentNode{nullptr};
   std::vector<NodeInstance *> childNodes;
