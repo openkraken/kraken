@@ -410,9 +410,7 @@ class KrakenController {
   static SplayTreeMap<int, KrakenController?> _controllerMap = SplayTreeMap();
   static Map<String, int> _nameIdMap = Map();
 
-  late UriInterceptor _uriInterceptor;
-
-  UriInterceptor get uriInterceptor => _uriInterceptor;
+  UriInterceptor? uriInterceptor;
 
   static KrakenController? getControllerOfJSContextId(int? contextId) {
     if (!_controllerMap.containsKey(contextId)) {
@@ -477,12 +475,12 @@ class KrakenController {
     EventClient? eventClient,
     KrakenNavigationDelegate? navigationDelegate,
     KrakenMethodChannel? methodChannel,
-    UriInterceptor? uriInterceptor,
     this.onLoad,
     this.onLoadError,
     this.onJSError,
     this.httpClientInterceptor,
-    this.devToolsService
+    this.devToolsService,
+    this.uriInterceptor
   })  : _name = name,
         _bundleURL = bundleURL,
         _bundlePath = bundlePath,
@@ -521,15 +519,12 @@ class KrakenController {
       _nameIdMap[name] = _view.contextId;
     }
 
-
-    if (uriInterceptor != null) {
-      _uriInterceptor = uriInterceptor;
-    } else {
-      _uriInterceptor = UriInterceptor();
-    }
-
     if (httpClientInterceptor != null) {
       setupHttpOverrides(httpClientInterceptor!, controller: this);
+    }
+
+    if (uriInterceptor != null) {
+      uriInterceptor = UriInterceptor();
     }
 
     if (devToolsService != null) {

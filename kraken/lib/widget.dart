@@ -293,7 +293,7 @@ This situation often happened when you trying creating kraken when FlutterView n
       navigationDelegate: _krakenWidget.navigationDelegate,
       devToolsService: _krakenWidget.devToolsService,
       httpClientInterceptor: _krakenWidget.httpClientInterceptor,
-      uriInterceptor: _krakenWidget.uriInterceptor,
+      uriInterceptor: _krakenWidget.uriInterceptor
     );
 
     if (kProfileMode) {
