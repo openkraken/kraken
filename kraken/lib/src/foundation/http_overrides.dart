@@ -22,26 +22,11 @@ class KrakenHttpOverrides extends HttpOverrides {
   }
 
   static String? getContextHeader(HttpClientRequest request) {
-    String? contextId = request.headers.value(HttpHeaderContext);
-    return contextId;
+    return request.headers.value(HttpHeaderContext);
   }
 
   static void setContextHeader(HttpClientRequest request, String contextId) {
     request.headers.set(HttpHeaderContext, contextId);
-  }
-
-  static Uri getOrigin(int? contextId) {
-    KrakenController? controller = KrakenController
-        .getControllerOfJSContextId(contextId);
-    if (controller != null) {
-      if (controller.bundleURL != null) {
-        return Uri.parse(controller.bundleURL!);
-      } else if (controller.bundlePath != null) {
-        return Directory(controller.bundlePath!).uri;
-      }
-    }
-    // The fallback origin uri, like `vm://bundle/0`
-    return Uri(scheme: 'vm', host: 'bundle', path: '$contextId');
   }
 
   final HttpOverrides? parentHttpOverrides = HttpOverrides.current;
@@ -107,3 +92,31 @@ KrakenHttpOverrides setupHttpOverrides(HttpClientInterceptor? httpClientIntercep
   return httpOverrides;
 }
 
+Uri getReferrer(int? contextId) {
+  KrakenController? controller = KrakenController
+      .getControllerOfJSContextId(contextId);
+  if (controller != null) {
+    if (controller.bundleURL != null) {
+      return Uri.parse(controller.bundleURL!);
+    } else if (controller.bundlePath != null) {
+      return Directory(controller.bundlePath!).uri;
+    }
+  }
+  // The fallback origin uri, like `vm://bundle/0`
+  return Uri(scheme: 'vm', host: 'bundle', path: '$contextId');
+}
+
+// Returns the origin of the URI in the form scheme://host:port
+String getOrigin(Uri uri) {
+  if (uri.scheme.isEmpty) {
+    // Set https as default scheme.
+    uri = uri.replace(scheme: 'https');
+  }
+
+  if (uri.isScheme('http')
+      || uri.isScheme('https')) {
+    return uri.origin;
+  } else {
+    return '${uri.scheme}://${uri.host}:${uri.port}';
+  }
+}

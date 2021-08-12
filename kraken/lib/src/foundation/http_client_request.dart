@@ -2,6 +2,7 @@
  * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -30,9 +31,12 @@ class ProxyHttpClientRequest extends HttpClientRequest {
     _clientRequest.abort(exception, stackTrace);
   }
 
+  // Saving all the data before calling real `close` to [HttpClientRequest].
+  final List<int> _data = [];
+
   @override
   void add(List<int> data) {
-    _clientRequest.add(data);
+    _data.addAll(data);
   }
 
   @override
@@ -41,8 +45,16 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   }
 
   @override
-  Future addStream(Stream<List<int>> stream) {
-    return _clientRequest.addStream(stream);
+  Future<void> addStream(Stream<List<int>> stream) {
+    // Consume stream.
+    Completer<void> completer = Completer();
+    stream.listen(
+      _data.addAll,
+      onError: completer.completeError,
+      onDone: completer.complete,
+      cancelOnError: true
+    );
+    return completer.future;
   }
 
   Future<HttpClientRequest?> _beforeRequest(HttpClientInterceptor _clientInterceptor, HttpClientRequest _clientRequest) async {
@@ -75,19 +87,18 @@ class ProxyHttpClientRequest extends HttpClientRequest {
     return null;
   }
 
-  static const String HttpHeadersOrigin = 'Origin';
+  static const String _HttpHeadersOrigin = 'origin';
 
   @override
   Future<HttpClientResponse> close() async {
     HttpClientRequest request = _clientRequest;
     String? contextId = KrakenHttpOverrides.getContextHeader(_clientRequest);
     if (contextId != null) {
-      Uri origin = KrakenHttpOverrides.getOrigin(int.tryParse(contextId));
-
-      // Set the default origin.
-      if (request.headers[HttpHeadersOrigin] == null) {
-        request.headers.set(HttpHeadersOrigin, origin.toString());
-      }
+      // Set the default origin and referrer.
+      Uri referrer = getReferrer(int.tryParse(contextId));
+      request.headers.set(HttpHeaders.refererHeader, referrer.toString());
+      String origin = getOrigin(referrer);
+      request.headers.set(_HttpHeadersOrigin, origin);
 
       HttpClientInterceptor? clientInterceptor;
       if (_httpOverrides.hasInterceptor(contextId)) {
@@ -123,6 +134,10 @@ class ProxyHttpClientRequest extends HttpClientRequest {
               HttpDate.format(cacheObject.lastModified!));
         }
       }
+
+      // Send the real data to backend client.
+      _clientRequest.add(_data);
+      _data.clear();
 
       // Step 4: Lifecycle of shouldInterceptRequest
       HttpClientResponse? response;

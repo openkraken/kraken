@@ -14,21 +14,6 @@ import 'http_cache_object.dart';
 class HttpCacheController {
   static Map<String, HttpCacheController> _controllers = HashMap();
 
-  // Returns the origin of the URI in the form scheme://host:port
-  static String _getOrigin(Uri uri) {
-    if (uri.scheme.isEmpty) {
-      // Set https as default scheme.
-      uri = uri.replace(scheme: 'https');
-    }
-
-    if (uri.isScheme('http')
-        || uri.isScheme('https')) {
-      return uri.origin;
-    } else {
-      return '${uri.scheme}://${uri.host}:${uri.port}';
-    }
-  }
-
   static Directory? _cacheDirectory;
   static Future<Directory> getCacheDirectory() async {
     if (_cacheDirectory != null) {
@@ -53,8 +38,7 @@ class HttpCacheController {
     return uriWithoutFragment.toString();
   }
 
-  factory HttpCacheController.instance(Uri uri) {
-    String origin = _getOrigin(uri);
+  factory HttpCacheController.instance(String origin) {
     if (_controllers.containsKey(origin)) {
       return _controllers[origin]!;
     } else {
