@@ -97,19 +97,9 @@ export class XMLHttpRequest extends EventTarget {
       throw new Error("SecurityError: Request method not allowed");
     }
 
-    url = url.toString();
-    if (!/^([a-z][a-z\d\+\-\.]*:)?\/\//.test(url)) {
-      // relative path.
-      url = location.protocol + '//' + location.host + url;
-    }
-    
-    if (!url.match(/^http/)) {
-      url = location.protocol + url;
-    }
-
     this.settings = {
       "method": method,
-      "url": url,
+      "url": url.toString(),
       "async": (typeof async !== "boolean" ? true : async),
       "user": user || null,
       "password": password || null
