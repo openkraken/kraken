@@ -33,7 +33,7 @@
     static JSValue getter(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);                       \
     static JSValue setter(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);                       \
   };                                                                                                                   \
-  ObjectProperty m_##NAME{m_context, m_prototypeObject, #NAME, NAME##PropertyDescriptor::getter,                       \
+  ObjectProperty __##NAME{m_context, instanceObject, #NAME, NAME##PropertyDescriptor::getter,                       \
                           NAME##PropertyDescriptor::setter};
 
 #define HOST_OBJECT_PROPERTY_ITEM(NAME)                                                                                \

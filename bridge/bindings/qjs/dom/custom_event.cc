@@ -67,11 +67,11 @@ JSValue CustomEvent::constructor(QjsContext *ctx, JSValue func_obj, JSValue this
   return customEvent->instanceObject;
 }
 
-PROP_GETTER(CustomEvent, detail)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(CustomEventInstance, detail)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *customEventInstance = static_cast<CustomEventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
   return customEventInstance->getDetail();
 }
-PROP_SETTER(CustomEvent, detail)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(CustomEventInstance, detail)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (argc == 0) return JS_NULL;
   auto *customEventInstance = static_cast<CustomEventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
   customEventInstance->setDetail(argv[0]);

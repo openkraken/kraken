@@ -71,19 +71,19 @@ JSValue Blob::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, i
   return blob->instanceObject;
 }
 
-PROP_GETTER(Blob, type)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(BlobInstance, type)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *blobInstance = static_cast<BlobInstance *>(JS_GetOpaque(this_val, Blob::kBlobClassID));
   return JS_NewString(blobInstance->m_ctx, blobInstance->mimeType.empty() ? "" : blobInstance->mimeType.c_str());
 }
-PROP_SETTER(Blob, type)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(BlobInstance, type)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(Blob, size)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(BlobInstance, size)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *blobInstance = static_cast<BlobInstance *>(JS_GetOpaque(this_val, Blob::kBlobClassID));
   return JS_NewFloat64(blobInstance->m_ctx, blobInstance->_size);
 }
-PROP_SETTER(Blob, size)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(BlobInstance, size)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 

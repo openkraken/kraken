@@ -74,9 +74,6 @@ public:
 
   OBJECT_INSTANCE(Element);
 
-  DEFINE_HOST_CLASS_PROPERTY(15, nodeName, tagName, offsetLeft, offsetTop, offsetWidth, offsetHeight,
-                             clientWidth, clientHeight, clientTop, clientLeft, scrollTop, scrollLeft, scrollHeight,
-                             scrollWidth, children);
 private:
   ObjectFunction m_getBoundingClientRect{m_context, m_prototypeObject, "getBoundingClientRect", getBoundingClientRect,
                                          0};
@@ -106,6 +103,9 @@ public:
   static inline JSClassID classID();
 
 private:
+  DEFINE_HOST_CLASS_PROPERTY(15, nodeName, tagName, offsetLeft, offsetTop, offsetWidth, offsetHeight,
+                             clientWidth, clientHeight, clientTop, clientLeft, scrollTop, scrollLeft, scrollHeight,
+                             scrollWidth, children);
   explicit ElementInstance(Element *element, std::string tagName, bool shouldAddUICommand);
   void _notifyNodeRemoved(NodeInstance *node) override;
   void _notifyChildRemoved();

@@ -25,7 +25,6 @@ public:
 
   JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
 private:
-  DEFINE_HOST_CLASS_PROPERTY(4, data, textContent, nodeValue, nodeName);
   friend TextNodeInstance;
 };
 
@@ -35,6 +34,7 @@ public:
   explicit TextNodeInstance(TextNode *textNode, JSValue textData);
   ~TextNodeInstance();
 private:
+  DEFINE_HOST_CLASS_PROPERTY(4, data, textContent, nodeValue, nodeName);
   JSValue internalGetTextContent() override;
   void internalSetTextContent(JSValue content) override;
   friend TextNode;

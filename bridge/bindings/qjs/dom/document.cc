@@ -167,14 +167,14 @@ JSValue Document::getElementsByTagName(QjsContext *ctx, JSValue this_val, int ar
   return array;
 }
 
-PROP_GETTER(Document, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(DocumentInstance, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NewString(ctx, "#document");
 }
-PROP_SETTER(Document, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(DocumentInstance, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(Document, all)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(DocumentInstance, all)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, Document::classId()));
   auto all = new AllCollection(document->m_context);
 
@@ -185,22 +185,14 @@ PROP_GETTER(Document, all)(QjsContext *ctx, JSValue this_val, int argc, JSValue 
 
   return all->jsObject;
 }
-PROP_SETTER(Document, all)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(DocumentInstance, all)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(Document, cookie)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(DocumentInstance, cookie)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
-PROP_SETTER(Document, cookie)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {  return JS_NULL;}
-
-PROP_GETTER(Document, documentElement)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, Document::classId()));
-  return document->m_documentElement->instanceObject;
-}
-PROP_SETTER(Document, documentElement)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  return JS_NULL;
-}
+PROP_SETTER(DocumentInstance, cookie)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {  return JS_NULL;}
 
 DocumentInstance::DocumentInstance(Document *document): NodeInstance(document, NodeType::DOCUMENT_NODE, this, Document::classId(), "document") {
   m_instanceMap[Document::instance(m_context)] = this;

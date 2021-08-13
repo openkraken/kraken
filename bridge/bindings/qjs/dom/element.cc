@@ -6,6 +6,7 @@
 #include "element.h"
 #include "document.h"
 #include "dart_methods.h"
+#include "text_node.h"
 #include "bridge_qjs.h"
 #include "bindings/qjs/bom/blob.h"
 #include "foundation/bridge_callback.h"
@@ -370,21 +371,21 @@ void Element::defineElement(const std::string &tagName, ElementCreator creator) 
   elementCreatorMap[tagName] = creator;
 }
 
-PROP_GETTER(Element, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(ElementInstance, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   std::string tagName = element->tagName();
   return JS_NewString(ctx, tagName.c_str());
 }
 
-PROP_SETTER(Element, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
+PROP_SETTER(ElementInstance, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
-PROP_GETTER(Element, tagName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(ElementInstance, tagName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   std::string tagName = element->tagName();
   return JS_NewString(ctx, tagName.c_str());
 }
 
-PROP_SETTER(Element, tagName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
+PROP_SETTER(ElementInstance, tagName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
 enum class ViewModuleProperty {
   offsetTop,
@@ -401,7 +402,7 @@ enum class ViewModuleProperty {
   scrollWidth
 };
 
-PROP_GETTER(Element, offsetLeft)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(ElementInstance, offsetLeft)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   getDartMethod()->flushUICommand();
   auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {
@@ -409,9 +410,9 @@ PROP_GETTER(Element, offsetLeft)(QjsContext *ctx, JSValue this_val, int argc, JS
   };
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
-PROP_SETTER(Element, offsetLeft)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
+PROP_SETTER(ElementInstance, offsetLeft)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
-PROP_GETTER(Element, offsetTop)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(ElementInstance, offsetTop)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   getDartMethod()->flushUICommand();
   auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {
@@ -419,9 +420,9 @@ PROP_GETTER(Element, offsetTop)(QjsContext *ctx, JSValue this_val, int argc, JSV
   };
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
-PROP_SETTER(Element, offsetTop)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
+PROP_SETTER(ElementInstance, offsetTop)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
-PROP_GETTER(Element, offsetWidth)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(ElementInstance, offsetWidth)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   getDartMethod()->flushUICommand();
   auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {
@@ -429,9 +430,9 @@ PROP_GETTER(Element, offsetWidth)(QjsContext *ctx, JSValue this_val, int argc, J
   };
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
-PROP_SETTER(Element, offsetWidth)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
+PROP_SETTER(ElementInstance, offsetWidth)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
-PROP_GETTER(Element, offsetHeight)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(ElementInstance, offsetHeight)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   getDartMethod()->flushUICommand();
   auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {
@@ -439,9 +440,9 @@ PROP_GETTER(Element, offsetHeight)(QjsContext *ctx, JSValue this_val, int argc, 
   };
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
-PROP_SETTER(Element, offsetHeight)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
+PROP_SETTER(ElementInstance, offsetHeight)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
-PROP_GETTER(Element, clientWidth)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(ElementInstance, clientWidth)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   getDartMethod()->flushUICommand();
   auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {
@@ -449,9 +450,9 @@ PROP_GETTER(Element, clientWidth)(QjsContext *ctx, JSValue this_val, int argc, J
   };
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
-PROP_SETTER(Element, clientWidth)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
+PROP_SETTER(ElementInstance, clientWidth)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
-PROP_GETTER(Element, clientHeight)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(ElementInstance, clientHeight)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   getDartMethod()->flushUICommand();
   auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {
@@ -459,9 +460,9 @@ PROP_GETTER(Element, clientHeight)(QjsContext *ctx, JSValue this_val, int argc, 
   };
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
-PROP_SETTER(Element, clientHeight)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
+PROP_SETTER(ElementInstance, clientHeight)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
-PROP_GETTER(Element, clientTop)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(ElementInstance, clientTop)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   getDartMethod()->flushUICommand();
   auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {
@@ -469,9 +470,9 @@ PROP_GETTER(Element, clientTop)(QjsContext *ctx, JSValue this_val, int argc, JSV
   };
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
-PROP_SETTER(Element, clientTop)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
+PROP_SETTER(ElementInstance, clientTop)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
-PROP_GETTER(Element, clientLeft)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(ElementInstance, clientLeft)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   getDartMethod()->flushUICommand();
   auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {
@@ -479,9 +480,9 @@ PROP_GETTER(Element, clientLeft)(QjsContext *ctx, JSValue this_val, int argc, JS
   };
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
-PROP_SETTER(Element, clientLeft)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
+PROP_SETTER(ElementInstance, clientLeft)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
-PROP_GETTER(Element, scrollTop)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(ElementInstance, scrollTop)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   getDartMethod()->flushUICommand();
   auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {
@@ -489,9 +490,9 @@ PROP_GETTER(Element, scrollTop)(QjsContext *ctx, JSValue this_val, int argc, JSV
   };
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
-PROP_SETTER(Element, scrollTop)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
+PROP_SETTER(ElementInstance, scrollTop)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
-PROP_GETTER(Element, scrollLeft)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(ElementInstance, scrollLeft)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   getDartMethod()->flushUICommand();
   auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {
@@ -499,9 +500,9 @@ PROP_GETTER(Element, scrollLeft)(QjsContext *ctx, JSValue this_val, int argc, JS
   };
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
-PROP_SETTER(Element, scrollLeft)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
+PROP_SETTER(ElementInstance, scrollLeft)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
-PROP_GETTER(Element, scrollHeight)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(ElementInstance, scrollHeight)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   getDartMethod()->flushUICommand();
   auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {
@@ -509,9 +510,9 @@ PROP_GETTER(Element, scrollHeight)(QjsContext *ctx, JSValue this_val, int argc, 
   };
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
-PROP_SETTER(Element, scrollHeight)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
+PROP_SETTER(ElementInstance, scrollHeight)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
-PROP_GETTER(Element, scrollWidth)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(ElementInstance, scrollWidth)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   getDartMethod()->flushUICommand();
   auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {
@@ -519,9 +520,9 @@ PROP_GETTER(Element, scrollWidth)(QjsContext *ctx, JSValue this_val, int argc, J
   };
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
-PROP_SETTER(Element, scrollWidth)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
+PROP_SETTER(ElementInstance, scrollWidth)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
-PROP_GETTER(Element, children)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(ElementInstance, children)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   JSValue array = JS_NewArray(ctx);
   JSValue pushMethod = JS_GetPropertyStr(ctx, array, "push");
@@ -536,7 +537,7 @@ PROP_GETTER(Element, children)(QjsContext *ctx, JSValue this_val, int argc, JSVa
 
   return array;
 }
-PROP_SETTER(Element, children)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
+PROP_SETTER(ElementInstance, children)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
 JSClassID ElementInstance::classID() {
   return Element::classId();

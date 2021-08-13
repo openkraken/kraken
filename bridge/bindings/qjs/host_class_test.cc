@@ -307,8 +307,26 @@ public:
   }
   friend ExoticClass;
 
+  class ClassNamePropertyDescriptor {
+  public:
+    static JSValue getter(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+      auto *instance = static_cast<ExoticClassInstance *>(JS_GetOpaque(this_val, ExoticClass::exoticClassID));
+      return JS_NewFloat64(ctx, instance->classValue);
+    };
+    static JSValue setter(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+      auto *instance = static_cast<ExoticClassInstance *>(JS_GetOpaque(this_val, ExoticClass::exoticClassID));
+      double v;
+      JS_ToFloat64(ctx, &v, argv[0]);
+      instance->classValue = v;
+      return JS_NULL;
+    };
+  };
+  ObjectProperty m_getClassName{m_context, instanceObject, "className", ClassNamePropertyDescriptor::getter,
+                                ClassNamePropertyDescriptor::setter};
+
 private:
   std::unordered_map<JSAtom, JSValue> m_properties;
+  double classValue{100.0};
 };
 
 JSClassExoticMethods ExoticClassInstance::methods{
@@ -346,6 +364,32 @@ TEST(HostClass, exoticClass) {
                      "var otherKey = 'o' + 'n' + 'c' + 'l' + 'i' + 'c' + 'k';"
                      "obj[key] = function() {return 10;};"
                      "console.log(obj[otherKey]());";
+  context->evaluateJavaScript(code.c_str(), code.size(), "vm://", 0);
+  delete bridge;
+  EXPECT_EQ(errorCalled, false);
+  EXPECT_EQ(exoticClassFreed, true);
+  EXPECT_EQ(logCalled, true);
+}
+
+TEST(HostClass, setExoticClassProperty) {
+  bool static errorCalled = false;
+  bool static logCalled = false;
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+    KRAKEN_LOG(VERBOSE) << errmsg;
+    errorCalled = true;
+  });
+  kraken::JSBridge::consoleMessageHandler = [](void *ctx, const std::string &message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(), "200");
+  };
+
+  auto &context = bridge->getContext();
+  auto *constructor = new ExoticClass(context.get());
+  context->defineGlobalProperty("ExoticClass", constructor->classObject);
+
+  std::string code = "var obj = new ExoticClass();"
+                     "obj.className = 200.0;"
+                     "console.log(obj.className);";
   context->evaluateJavaScript(code.c_str(), code.size(), "vm://", 0);
   delete bridge;
   EXPECT_EQ(errorCalled, false);

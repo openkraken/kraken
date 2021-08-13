@@ -31,7 +31,6 @@ public:
   static JSValue text(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
 
 private:
-  DEFINE_HOST_CLASS_PROPERTY(2, type, size);
   friend BlobInstance;
 
   ObjectFunction m_arrayBuffer{m_context, m_prototypeObject, "arrayBuffer", arrayBuffer, 0};
@@ -53,6 +52,7 @@ public:
   /// get bytes data's length
   int32_t size();
 private:
+  DEFINE_HOST_CLASS_PROPERTY(2, type, size);
   size_t _size;
   std::string mimeType{""};
   std::vector<uint8_t> _data;

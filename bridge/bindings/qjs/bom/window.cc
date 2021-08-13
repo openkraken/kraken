@@ -65,7 +65,7 @@ JSValue Window::scrollBy(QjsContext *ctx, JSValue this_val, int argc, JSValue *a
   return window->callNativeMethods("scrollBy", 2, arguments);
 }
 
-PROP_GETTER(Window, devicePixelRatio)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(WindowInstance, devicePixelRatio)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (getDartMethod()->devicePixelRatio == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to read devicePixelRatio: dart method (devicePixelRatio) is not register.");
   }
@@ -74,11 +74,11 @@ PROP_GETTER(Window, devicePixelRatio)(QjsContext *ctx, JSValue this_val, int arg
   double devicePixelRatio = getDartMethod()->devicePixelRatio(context->getContextId());
   return JS_NewFloat64(ctx, devicePixelRatio);
 }
-PROP_SETTER(Window, devicePixelRatio)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(WindowInstance, devicePixelRatio)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(Window, colorScheme)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(WindowInstance, colorScheme)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (getDartMethod()->platformBrightness == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to read colorScheme: dart method (platformBrightness) not register.");
   }
@@ -87,57 +87,57 @@ PROP_GETTER(Window, colorScheme)(QjsContext *ctx, JSValue this_val, int argc, JS
   const NativeString *code = getDartMethod()->platformBrightness(context->getContextId());
   return JS_NewUnicodeString(context->runtime(), ctx, code->string, code->length);
 }
-PROP_SETTER(Window, colorScheme)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(WindowInstance, colorScheme)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(Window, __location__)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(WindowInstance, __location__)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, 1));
   if (window == nullptr) return JS_UNDEFINED;
   return JS_DupValue(ctx, window->m_location->jsObject);
 }
-PROP_SETTER(Window, __location__)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(WindowInstance, __location__)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(Window, window)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(WindowInstance, window)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, Window::classId()));
   if (window == nullptr) return JS_UNDEFINED;
   return window->instanceObject;
 }
-PROP_SETTER(Window, window)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(WindowInstance, window)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
-PROP_GETTER(Window, parent)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(WindowInstance, parent)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, Window::classId()));
   if (window == nullptr) return JS_UNDEFINED;
   return window->instanceObject;
 }
-PROP_SETTER(Window, parent)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(WindowInstance, parent)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(Window, history)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(WindowInstance, history)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
   return JS_GetPropertyStr(ctx, context->global(), "__history__");
 }
-PROP_SETTER(Window, history)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(WindowInstance, history)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(Window, scrollX)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(WindowInstance, scrollX)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, 1));
   return window->callNativeMethods("scrollX", 0, nullptr);
 }
-PROP_SETTER(Window, scrollX)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(WindowInstance, scrollX)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(Window, scrollY)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(WindowInstance, scrollY)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, 1));
   return window->callNativeMethods("scrollY", 0, nullptr);
 }
-PROP_SETTER(Window, scrollY)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(WindowInstance, scrollY)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 

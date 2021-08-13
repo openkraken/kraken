@@ -28,8 +28,6 @@ public:
 
   JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
 
-  DEFINE_HOST_CLASS_PROPERTY(4, nodeName, all, cookie, documentElement);
-
   OBJECT_INSTANCE(Document);
 
   static JSValue createEvent(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
@@ -63,6 +61,8 @@ public:
   }
 
 private:
+  DEFINE_HOST_CLASS_PROPERTY(3, nodeName, all, cookie);
+
   void removeElementById(JSAtom id, ElementInstance *element);
   void addElementById(JSAtom id, ElementInstance *element);
   std::unordered_map<JSAtom, std::vector<ElementInstance *>> m_elementMapById;

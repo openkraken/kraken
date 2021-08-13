@@ -25,8 +25,6 @@ public:
 
   JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
 
-  DEFINE_HOST_CLASS_PROPERTY(3, data, nodeName, length)
-
 private:
   friend CommentInstance;
 };
@@ -35,7 +33,10 @@ class CommentInstance : public NodeInstance {
 public:
   CommentInstance() = delete;
   explicit CommentInstance(Comment *comment);
+
 private:
+  DEFINE_HOST_CLASS_PROPERTY(3, data, nodeName, length)
+
   friend Comment;
 };
 
