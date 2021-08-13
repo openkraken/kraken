@@ -113,9 +113,8 @@ class CSSBackground {
 
     if (contextId != null) {
       KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
-      url = controller.uriParser!.resolve(Uri.parse(url), Uri.parse(controller.href)).toString();
+      url = controller.uriParser!.resolve(Uri.parse(url), Uri.parse(controller.href));
     }
-
 
     backgroundImage = DecorationImage(
       image: CSSUrl.parseUrl(url, contextId: contextId)!,
