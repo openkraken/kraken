@@ -20,7 +20,6 @@ class JSHistory : public HostObject {
 public:
   JSHistory(JSContext *context) : HostObject(context, JSHistoryName) {}
   ~JSHistory() override;
-  JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
 
 
 private:
