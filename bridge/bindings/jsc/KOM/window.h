@@ -8,6 +8,7 @@
 #include "bindings/jsc/DOM/event_target.h"
 #include "bindings/jsc/js_context_internal.h"
 #include "location.h"
+#include "history.h"
 
 #include <array>
 #include <memory>
@@ -63,6 +64,7 @@ public:
 
 private:
   JSLocation *location_;
+  JSHistory *history_;
 };
 
 using Window_Open = void (*)(NativeWindow *nativeWindow, NativeString *url);

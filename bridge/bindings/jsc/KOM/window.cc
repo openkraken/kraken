@@ -12,6 +12,7 @@ namespace kraken::binding::jsc {
 WindowInstance::WindowInstance(JSWindow *window)
   : EventTargetInstance(window, WINDOW_TARGET_ID), nativeWindow(new NativeWindow(nativeEventTarget)) {
   location_ = new JSLocation(context);
+  history_ = new JSHistory(context);
 
   // https://developer.mozilla.org/zh-CN/docs/Web/API/Window/self
   // window.self should be window in kraken.
