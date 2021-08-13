@@ -162,6 +162,8 @@ JSValue Document::getElementsByTagName(QjsContext *ctx, JSValue this_val, int ar
   for (auto & element : elements) {
     JS_Call(ctx, pushMethod, array, 1, &element->instanceObject);
   }
+
+  JS_FreeValue(ctx, pushMethod);
   return array;
 }
 
