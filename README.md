@@ -1,6 +1,6 @@
 ![kraken Post](https://user-images.githubusercontent.com/677114/101163298-6264ae80-366e-11eb-9151-f560d18c2ceb.png)
 
-# Kraken [![pub package](https://img.shields.io/pub/v/kraken.svg)](https://pub.dev/packages/kraken) [![Integration Test WorkFlow](https://github.com/openkraken/kraken/actions/workflows/integration_test.yml/badge.svg?branch=main)](https://github.com/openkraken/kraken/actions/workflows/integration_test.yml)
+# [Kraken](https://openkraken.com/) [![pub package](https://img.shields.io/pub/v/kraken.svg)](https://pub.dev/packages/kraken) [![Integration Test WorkFlow](https://github.com/openkraken/kraken/actions/workflows/integration_test.yml/badge.svg?branch=main)](https://github.com/openkraken/kraken/actions/workflows/integration_test.yml)
 
 ## 💁 Have a try
 

@@ -28,7 +28,8 @@ class FetchModule extends BaseModule {
   HttpClient get httpClient => _httpClient ?? (_httpClient = HttpClient());
 
   @override
-  String invoke(String url, params, InvokeModuleCallback callback) {
+  String invoke(String method, params, InvokeModuleCallback callback) {
+    String url = (moduleManager!.controller.uriInterceptor!.parse(moduleManager!.contextId, Uri.parse(method))).toString();
     Map<String, dynamic> options = params;
 
     Uri? uri = Uri.tryParse(url);

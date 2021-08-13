@@ -410,6 +410,8 @@ class KrakenController {
   static SplayTreeMap<int, KrakenController?> _controllerMap = SplayTreeMap();
   static Map<String, int> _nameIdMap = Map();
 
+  UriInterceptor? uriInterceptor;
+
   static KrakenController? getControllerOfJSContextId(int? contextId) {
     if (!_controllerMap.containsKey(contextId)) {
       return null;
@@ -477,7 +479,8 @@ class KrakenController {
     this.onLoadError,
     this.onJSError,
     this.httpClientInterceptor,
-    this.devToolsService
+    this.devToolsService,
+    this.uriInterceptor
   })  : _name = name,
         _bundleURL = bundleURL,
         _bundlePath = bundlePath,
@@ -507,6 +510,7 @@ class KrakenController {
     }
 
     _module = KrakenModuleController(this, _view.contextId);
+
     assert(!_controllerMap.containsKey(_view.contextId),
         'found exist contextId of KrakenController, contextId: ${_view.contextId}');
     _controllerMap[_view.contextId] = this;
@@ -516,6 +520,10 @@ class KrakenController {
     }
 
     setupHttpOverrides(httpClientInterceptor, controller: this);
+
+    if (uriInterceptor == null) {
+      uriInterceptor = UriInterceptor();
+    }
 
     if (devToolsService != null) {
       devToolsService!.init(this);
@@ -580,6 +588,12 @@ class KrakenController {
 
     return completer.future;
   }
+
+  String _href = '';
+
+  String get href => _href;
+
+  set href(String value) => _href = value;
 
   // reload current kraken view.
   Future<void> reload() async {
@@ -655,20 +669,24 @@ class KrakenController {
     _bundleContent = bundleContent ?? _bundleContent;
     _bundlePath =  bundlePath ?? _bundlePath;
     _bundleURL =  bundleURL ?? _bundleURL;
+
     String? url = _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
 
     if (url == null && methodChannel is KrakenNativeChannel) {
       url = await (methodChannel as KrakenNativeChannel).getUrl();
     }
 
+    url = url ?? '';
     if (onLoadError != null) {
       try {
-        _bundle = await KrakenBundle.getBundle(url ?? '', contentOverride: _bundleContent, contextId: view.contextId);
+        _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent, contextId: view.contextId);
       } catch (e, stack) {
         onLoadError!(FlutterError(e.toString()), stack);
       }
     } else {
-      _bundle = await KrakenBundle.getBundle(url ?? '', contentOverride: _bundleContent, contextId: view.contextId);
+      _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent, contextId: view.contextId);
+      KrakenController controller = KrakenController.getControllerOfJSContextId(view.contextId)!;
+      controller.href = url;
     }
 
     if (kProfileMode) {
