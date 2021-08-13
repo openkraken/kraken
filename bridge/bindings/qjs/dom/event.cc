@@ -27,7 +27,16 @@ Event::Event(JSContext *context) : HostClass(context, "Event") {
 }
 
 JSValue Event::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
-  return HostClass::constructor(ctx, func_obj, this_val, argc, argv);
+  if (argc < 1) {
+    return JS_ThrowTypeError(ctx, "Failed to construct 'Event': 1 argument required, but only 0 present.");
+  }
+
+  JSValue eventTypeValue = argv[0];
+  std::string eventType = jsValueToStdString(ctx, eventTypeValue);
+
+  auto *nativeEvent = new NativeEvent{stringToNativeString(eventType)};
+  auto *event = Event::buildEventInstance(eventType, m_context, nativeEvent, false);
+  return event->instanceObject;
 }
 
 OBJECT_INSTANCE_IMPL(Event);
