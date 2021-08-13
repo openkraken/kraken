@@ -29,11 +29,11 @@ JSClassID Node::classId() {
 
 JSClassID Node::classId(JSValue &value) {
   JSClassID classId = JSValueGetClassId(value);
-  if (classId == Element::classId() || Document::classId()) {
+  if (classId == Element::classId() || classId == Document::classId() || classId == TextNode::classId()) {
     return classId;
   }
 
-  assert_m(false, "can not identify value type.");
+  return 0;
 }
 
 JSValue Node::cloneNode(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
@@ -498,12 +498,14 @@ JSValue NodeInstance::internalReplaceChild(NodeInstance *newChild, NodeInstance 
 
 void NodeInstance::setParentNode(NodeInstance *parent) {
   parentNode = parent;
-  JS_DefinePropertyValueStr(m_ctx, instanceObject, "parentNode", JS_DupValue(m_ctx, parent->instanceObject), JS_PROP_ENUMERABLE);
+  std::string privateKey = std::to_string((uint64_t)JS_VALUE_GET_PTR(parent->instanceObject));
+  JS_DefinePropertyValueStr(m_ctx, instanceObject, privateKey.c_str(), JS_DupValue(m_ctx, parent->instanceObject), JS_PROP_NORMAL);
 }
 
 void NodeInstance::removeParentNode() {
+  std::string privateKey = std::to_string((uint64_t)JS_VALUE_GET_PTR(parentNode->instanceObject));
   parentNode = nullptr;
-  JSAtom parentNodeAtom = JS_NewAtom(m_ctx, "parentNode");
+  JSAtom parentNodeAtom = JS_NewAtom(m_ctx, privateKey.c_str());
   JS_DeleteProperty(m_ctx, instanceObject, parentNodeAtom, 0);
   JS_FreeAtom(m_ctx, parentNodeAtom);
 }
