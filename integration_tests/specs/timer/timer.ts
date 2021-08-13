@@ -1,4 +1,4 @@
-fdescribe('setTimeout', () => {
+describe('setTimeout', () => {
   it('resolve after 100ms', done => {
     const startTime = Date.now();
     setTimeout(() => {

@@ -150,7 +150,7 @@ describe('DOM EventTarget', () => {
 
     div2.click();
     div2.click();
-    
+
     expect(count1).toBe(0);
     expect(count2).toBe(2);
   });

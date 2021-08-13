@@ -257,11 +257,11 @@ class KrakenViewController {
     }
   }
 
-  void createComment(int id, Pointer<NativeEventTarget> nativePtr, String data) {
+  void createComment(int id, Pointer<NativeEventTarget> nativePtr) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_COMMENT_START, uniqueId: id);
     }
-    _elementManager.createComment(id, nativePtr, data);
+    _elementManager.createComment(id, nativePtr);
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_COMMENT_END, uniqueId: id);
     }

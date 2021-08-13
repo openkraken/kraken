@@ -17,11 +17,8 @@ enum NodeType {
 }
 
 class Comment extends Node {
-  Comment(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager, this.data)
+  Comment(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
       : super(NodeType.COMMENT_NODE, targetId, nativeEventTarget, elementManager, '#comment');
-
-  // The comment information.
-  String data;
 
   @override
   RenderObject? get renderer => null;

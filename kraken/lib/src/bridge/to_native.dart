@@ -391,7 +391,7 @@ void flushUICommand() {
             controller.view.createTextNode(id, nativePtr.cast<NativeEventTarget>(), command.args[0]);
             break;
           case UICommandType.createComment:
-            controller.view.createComment(id, nativePtr.cast<NativeEventTarget>(), command.args[0]);
+            controller.view.createComment(id, nativePtr.cast<NativeEventTarget>());
             break;
           case UICommandType.disposeEventTarget:
             ElementManager.disposeEventTarget(controller.view.contextId, id);

@@ -8,6 +8,7 @@
 #include "element.h"
 #include "document.h"
 #include "text_node.h"
+#include "comment_node.h"
 #include "bindings/qjs/qjs_patch.h"
 
 namespace kraken::binding::qjs {
@@ -29,7 +30,7 @@ JSClassID Node::classId() {
 
 JSClassID Node::classId(JSValue &value) {
   JSClassID classId = JSValueGetClassId(value);
-  if (classId == Element::classId() || classId == Document::classId() || classId == TextNode::classId()) {
+  if (classId == Element::classId() || classId == Document::classId() || classId == TextNode::classId() || classId == Comment::classId()) {
     return classId;
   }
 
@@ -412,10 +413,10 @@ NodeInstance *NodeInstance::internalRemoveChild(NodeInstance *node) {
   if (it != childNodes.end()) {
     childNodes.erase(it);
     node->removeParentNode();
-    node->unrefer();
     node->_notifyNodeRemoved(this);
     foundation::UICommandBuffer::instance(node->m_context->getContextId())
         ->addCommand(node->eventTargetId, UICommand::removeNode, nullptr);
+    node->unrefer();
   }
 
   return node;
@@ -517,8 +518,8 @@ void NodeInstance::refer() {
   list_add_tail(&nodeLink.link, &m_context->node_list);
 }
 void NodeInstance::unrefer() {
-  JS_FreeValue(m_ctx, instanceObject);
   list_del(&nodeLink.link);
+  JS_FreeValue(m_ctx, instanceObject);
 }
 void NodeInstance::_notifyNodeRemoved(NodeInstance *node) {}
 void NodeInstance::_notifyNodeInsert(NodeInstance *node) {}

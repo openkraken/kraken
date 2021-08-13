@@ -10,10 +10,22 @@ const resetRuntimePath = path.join(context, 'runtime/reset');
 const buildPath = path.join(context, '.specs');
 const testPath = path.join(context, 'specs');
 const snapshotPath = path.join(context, 'snapshots');
-const entryFiles = glob.sync('specs/**/*.{js,jsx,ts,tsx}', {
-  cwd: context,
-  ignore: 'node_modules/**',
-}).map((file) => './' + file);
+// const entryFiles = glob.sync('specs/**/*.{js,jsx,ts,tsx}', {
+//   cwd: context,
+//   ignore: 'node_modules/**',
+// }).map((file) => './' + file);
+const entryFiles = [
+  './specs/dom/nodes/append-child.tsx',
+  './specs/dom/nodes/clone-node.ts',
+  './specs/timer/timer.ts',
+  './specs/dom/nodes/document.ts',
+  './specs/dom/nodes/element.ts',
+  './specs/dom/nodes/event-target.ts',
+  './specs/dom/nodes/get-element-by-id.ts',
+  './specs/dom/nodes/get-element-by-tag-name.ts',
+  './specs/dom/nodes/insert-before.ts',
+  './specs/dom/nodes/node.ts'
+];
 
 // Add global vars
 entryFiles.unshift(globalRuntimePath);

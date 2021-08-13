@@ -566,7 +566,18 @@ JSValue ElementInstance::internalGetTextContent() {
   return returnValue;
 }
 
-void ElementInstance::internalSetTextContent(JSValue content) {}
+void ElementInstance::internalSetTextContent(JSValue content) {
+  auto node = firstChild();
+  while (node != nullptr) {
+    internalRemoveChild(node);
+    node = firstChild();
+  }
+
+  JSValue textNodeValue = JS_CallConstructor(m_ctx, TextNode::instance(m_context)->classObject, 1, &content);
+  auto *textNodeInstance = static_cast<TextNodeInstance *>(JS_GetOpaque(textNodeValue, TextNode::classId()));
+  internalAppendChild(textNodeInstance);
+  JS_FreeValue(m_ctx, textNodeValue);
+}
 
 std::string ElementInstance::tagName() {
   std::string tagName = std::string(m_tagName);

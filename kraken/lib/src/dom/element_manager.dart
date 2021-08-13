@@ -170,8 +170,8 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     setEventTarget(textNode);
   }
 
-  void createComment(int id, Pointer<NativeEventTarget> nativePtr, String data) {
-    EventTarget comment = Comment(id, nativePtr, this, data);
+  void createComment(int id, Pointer<NativeEventTarget> nativePtr) {
+    EventTarget comment = Comment(id, nativePtr, this);
     setEventTarget(comment);
   }
 
