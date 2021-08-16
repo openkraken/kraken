@@ -17,7 +17,7 @@ import 'package:kraken/painting.dart';
 /// This class allows user to customize Kraken's image loading.
 
 /// A factory function allow user to build an customized ImageProvider class.
-typedef ImageProviderFactory = ImageProvider? Function(String url, [param]);
+typedef ImageProviderFactory = ImageProvider? Function(String url, [dynamic param]);
 
 /// defines the types of supported image source.
 enum ImageType {
