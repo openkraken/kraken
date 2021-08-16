@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'http_cache.dart';
+import 'http_cache_object.dart';
 import 'http_overrides.dart';
 import 'http_client_interceptor.dart';
 import 'queue.dart';
