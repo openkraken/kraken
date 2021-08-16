@@ -519,7 +519,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
     switch (action) {
       case TextInputAction.done:
         _triggerChangeEvent();
-        blur();
+        InputElement.clearFocus();
         break;
       case TextInputAction.none:
         // TODO: Handle this case.
