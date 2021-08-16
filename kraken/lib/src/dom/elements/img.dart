@@ -411,7 +411,9 @@ class ImageElement extends Element {
       _source = source;
       if (source != null && source.isNotEmpty) {
         _removeStreamListener();
-        _image = CSSUrl.parseUrl(elementManager.controller.uriInterceptor!.parse(elementManager.contextId, Uri.parse(source)).toString(), cache: properties['caching'], contextId: elementManager.contextId);
+
+        Uri relativeUri = Uri.parse(elementManager.controller.href);
+        _image = CSSUrl.parseUrl(elementManager.controller.uriParser!.resolve(Uri.parse(source), relativeUri), cache: properties['caching'], contextId: elementManager.contextId);
         _imageStream = _image!.resolve(ImageConfiguration.empty);
         _imageStream!.addListener(_renderStreamListener);
 
