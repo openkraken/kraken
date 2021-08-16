@@ -5,7 +5,7 @@
 import 'dart:io';
 
 import 'package:kraken/foundation.dart';
-import 'package:kraken/launcher.dart';
+import 'package:kraken/kraken.dart';
 
 // TODO: Don't use header to mark context.
 const String HttpHeaderContext = 'x-context';
@@ -21,33 +21,35 @@ class KrakenHttpOverrides extends HttpOverrides {
     return _instance!;
   }
 
-  static String? getContextHeader(HttpClientRequest request) {
-    return request.headers.value(HttpHeaderContext);
+  static int? getContextHeader(HttpClientRequest request) {
+    String? intVal = request.headers.value(HttpHeaderContext);
+    if (intVal == null) {
+      return null;
+    }
+    return int.tryParse(intVal);
   }
 
-  static void setContextHeader(HttpClientRequest request, String contextId) {
-    request.headers.set(HttpHeaderContext, contextId);
+  static void setContextHeader(HttpClientRequest request, int contextId) {
+    request.headers.set(HttpHeaderContext, contextId.toString());
   }
 
   final HttpOverrides? parentHttpOverrides = HttpOverrides.current;
-  final Map<String, HttpClientInterceptor> _contextIdToHttpClientInterceptorMap = Map<String, HttpClientInterceptor>();
+  final Map<int, HttpClientInterceptor> _contextIdToHttpClientInterceptorMap = Map<int, HttpClientInterceptor>();
 
-  void registerKrakenContext(KrakenController controller, HttpClientInterceptor httpClientInterceptor) {
-    String contextId = controller.view.contextId.toString();
+  void registerKrakenContext(int contextId, HttpClientInterceptor httpClientInterceptor) {
     _contextIdToHttpClientInterceptorMap[contextId] = httpClientInterceptor;
   }
 
-  void unregisterKrakenContext(KrakenController controller) {
-    String contextId = controller.view.contextId.toString();
+  bool unregisterKrakenContext(int contextId) {
     // Returns true if [value] was in the map, false otherwise.
-    _contextIdToHttpClientInterceptorMap.remove(contextId);
+    return _contextIdToHttpClientInterceptorMap.remove(contextId) != null;
   }
 
-  bool hasInterceptor(String contextId) {
+  bool hasInterceptor(int contextId) {
     return _contextIdToHttpClientInterceptorMap.containsKey(contextId);
   }
 
-  HttpClientInterceptor getInterceptor(String contextId) {
+  HttpClientInterceptor getInterceptor(int contextId) {
     return _contextIdToHttpClientInterceptorMap[contextId]!;
   }
 
@@ -81,29 +83,15 @@ class KrakenHttpOverrides extends HttpOverrides {
   }
 }
 
-KrakenHttpOverrides setupHttpOverrides(HttpClientInterceptor? httpClientInterceptor, { required KrakenController controller }) {
+KrakenHttpOverrides setupHttpOverrides(HttpClientInterceptor? httpClientInterceptor, { required int contextId }) {
   final KrakenHttpOverrides httpOverrides = KrakenHttpOverrides.instance();
 
   if (httpClientInterceptor != null) {
-    httpOverrides.registerKrakenContext(controller, httpClientInterceptor);
+    httpOverrides.registerKrakenContext(contextId, httpClientInterceptor);
   }
 
   HttpOverrides.global = httpOverrides;
   return httpOverrides;
-}
-
-Uri getReferrer(int? contextId) {
-  KrakenController? controller = KrakenController
-      .getControllerOfJSContextId(contextId);
-  if (controller != null) {
-    if (controller.bundleURL != null) {
-      return Uri.parse(controller.bundleURL!);
-    } else if (controller.bundlePath != null) {
-      return Directory(controller.bundlePath!).uri;
-    }
-  }
-  // The fallback origin uri, like `vm://bundle/0`
-  return Uri(scheme: 'vm', host: 'bundle', path: '$contextId');
 }
 
 // Returns the origin of the URI in the form scheme://host:port
@@ -119,4 +107,14 @@ String getOrigin(Uri uri) {
   } else {
     return '${uri.scheme}://${uri.host}:${uri.port}';
   }
+}
+
+// @TODO: Remove controller dependency.
+Uri getReferrer(int? contextId) {
+  KrakenController? controller = KrakenController
+      .getControllerOfJSContextId(contextId);
+  if (controller != null) {
+    return controller.referrer;
+  }
+  return KrakenController.fallbackBundleUri(contextId ?? 0);
 }

@@ -95,10 +95,10 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   @override
   Future<HttpClientResponse> close() async {
     HttpClientRequest request = _clientRequest;
-    String? contextId = KrakenHttpOverrides.getContextHeader(_clientRequest);
+    int? contextId = KrakenHttpOverrides.getContextHeader(_clientRequest);
     if (contextId != null) {
       // Set the default origin and referrer.
-      Uri referrer = getReferrer(int.tryParse(contextId));
+      Uri referrer = getReferrer(contextId);
       request.headers.set(HttpHeaders.refererHeader, referrer.toString());
       String origin = getOrigin(referrer);
       request.headers.set(_HttpHeadersOrigin, origin);
@@ -116,9 +116,8 @@ class ProxyHttpClientRequest extends HttpClientRequest {
       // Step 2: Handle cache-control and expires,
       //        if hit, no need to open request.
       HttpCacheController cacheController = HttpCacheController.instance(origin);
-      HttpCacheObject? cacheObject = await cacheController.getCacheObject(request.uri);
-      if (cacheObject != null
-          && cacheObject.hitLocalCache(request)) {
+      HttpCacheObject cacheObject = await cacheController.getCacheObject(request.uri);
+      if (cacheObject.hitLocalCache(request)) {
         HttpClientResponse? cacheResponse = await cacheObject.toHttpClientResponse();
         if (cacheResponse != null) {
           return cacheResponse;
@@ -126,8 +125,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
       }
 
       // Step 3: Handle negotiate cache request header.
-      if (cacheObject != null
-          && request.headers.ifModifiedSince == null
+      if (request.headers.ifModifiedSince == null
           && request.headers.value(HttpHeaders.ifNoneMatchHeader) == null) {
         // ETag has higher priority of lastModified.
         if (cacheObject.eTag != null) {

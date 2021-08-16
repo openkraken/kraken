@@ -35,7 +35,8 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
   }
 
   Future<Uint8List> loadFile(CachedNetworkImage key, StreamController<ImageChunkEvent> chunkEvents) async {
-    HttpCacheController cacheController = HttpCacheController.instance(getOrigin(getReferrer(contextId)));
+    HttpCacheController cacheController = HttpCacheController.instance(
+        getOrigin(getReferrer(contextId)));
 
     Uri uri = Uri.parse(url);
     HttpCacheObject? cacheObject = await cacheController.getCacheObject(uri);

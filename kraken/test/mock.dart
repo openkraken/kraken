@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 
 /// [MockedHttpServer] used for mock HTTP servers.
 /// Usage: putting `RAW HTTP Response` in txt to `mocks/http/$METHOD_$PATH.txt`
-/// Example:  `mocks/http/GET_/foo.txt` content will response to request that `GET /foo`
+/// Example:  `mocks/http/GET_foo` content will response to request that `GET /foo`
 class MockedHttpServer {
   static MockedHttpServer? _instance;
 
@@ -22,7 +22,7 @@ class MockedHttpServer {
   }
 
   static int _randomPort() {
-    return new Random().nextInt(55535) + 10000;
+    return Random().nextInt(55535) + 10000;
   }
 
   final int port = _randomPort();

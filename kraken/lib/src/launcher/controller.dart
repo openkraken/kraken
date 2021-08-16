@@ -509,17 +509,19 @@ class KrakenController {
       PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_INIT_END);
     }
 
-    _module = KrakenModuleController(this, _view.contextId);
+    final int contextId = _view.contextId;
 
-    assert(!_controllerMap.containsKey(_view.contextId),
-        'found exist contextId of KrakenController, contextId: ${_view.contextId}');
-    _controllerMap[_view.contextId] = this;
+    _module = KrakenModuleController(this, contextId);
+
+    assert(!_controllerMap.containsKey(contextId),
+        'found exist contextId of KrakenController, contextId: $contextId');
+    _controllerMap[contextId] = this;
     assert(!_nameIdMap.containsKey(name), 'found exist name of KrakenController, name: $name');
     if (name != null) {
-      _nameIdMap[name] = _view.contextId;
+      _nameIdMap[name] = contextId;
     }
 
-    setupHttpOverrides(httpClientInterceptor, controller: this);
+    setupHttpOverrides(httpClientInterceptor, contextId: contextId);
 
     if (uriParser == null) {
       uriParser = UriParser();
@@ -545,6 +547,21 @@ class KrakenController {
   // the bundle manager which used to download javascript source and run.
   KrakenBundle? _bundle;
   KrakenBundle? get bundle => _bundle;
+
+  Uri get referrer {
+    if (bundleURL != null) {
+      return Uri.parse(bundleURL!);
+    } else if (bundlePath != null) {
+      return Directory(bundlePath!).uri;
+    } else {
+      return fallbackBundleUri(_view.contextId);
+    }
+  }
+
+  static Uri fallbackBundleUri(int id) {
+    // The fallback origin uri, like `vm://bundle/0`
+    return Uri(scheme: 'vm', host: 'bundle', path: '$id');
+  }
 
   void setNavigationDelegate(KrakenNavigationDelegate delegate) {
     _view.navigationDelegate = delegate;

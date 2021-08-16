@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 
 import 'http_client_response.dart';
@@ -272,8 +273,7 @@ class HttpCacheObject {
       if (expiredTime != null) HttpHeaders.expiresHeader: HttpDate.format(expiredTime!),
       if (contentLength != null) HttpHeaders.contentLengthHeader: contentLength.toString(),
       if (lastModified != null) HttpHeaders.lastModifiedHeader: HttpDate.format(lastModified!),
-      // @TODO: for debug usage.
-      "x-kraken-cache": "From http cache",
+      if (kDebugMode) "x-kraken-cache": "From http cache",
     };
   }
 

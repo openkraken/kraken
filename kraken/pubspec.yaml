@@ -16,7 +16,7 @@ dependencies:
   connectivity: ^3.0.4
   shared_preferences: ^2.0.5
   device_info: ^2.0.1 # Only support iOS and Android.
-  path_provider: ^2.0.1
+  path_provider: ^2.0.2
   vector_math: ^2.1.0
   characters: ^1.1.0
   vibration: ^1.7.4-nullsafety.0

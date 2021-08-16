@@ -62,11 +62,11 @@ class HttpCacheController {
         _maxCachedObjects = maxCachedObjects;
 
   // Get the CacheObject by uri, no validation needed here.
-  Future<HttpCacheObject?> getCacheObject(Uri uri) async {
+  Future<HttpCacheObject> getCacheObject(Uri uri) async {
     // L2 cache in memory.
     final String key = _getCacheKey(uri);
     if (_caches.containsKey(key)) {
-      return _caches[key];
+      return _caches[key]!;
     }
 
     // Get cache in disk.
@@ -76,11 +76,7 @@ class HttpCacheController {
 
     await cacheObject.read();
 
-    if (cacheObject.valid) {
-      return cacheObject;
-    }
-
-    return null;
+    return cacheObject;
   }
 
   // Add or update the httpCacheObject to memory cache.
@@ -95,17 +91,15 @@ class HttpCacheController {
   Future<HttpClientResponse> interceptResponse(
       HttpClientRequest request,
       HttpClientResponse response,
-      HttpCacheObject? cacheObject) async {
+      HttpCacheObject cacheObject) async {
 
-    if (cacheObject != null) {
-      await cacheObject.updateIndex(response);
+    await cacheObject.updateIndex(response);
 
-      // Handle with HTTP 304
-      if (response.statusCode == HttpStatus.notModified) {
-        HttpClientResponse? cachedResponse  = await cacheObject.toHttpClientResponse();
-        if (cachedResponse != null) {
-          return cachedResponse;
-        }
+    // Handle with HTTP 304
+    if (response.statusCode == HttpStatus.notModified) {
+      HttpClientResponse? cachedResponse  = await cacheObject.toHttpClientResponse();
+      if (cachedResponse != null) {
+        return cachedResponse;
       }
     }
 
