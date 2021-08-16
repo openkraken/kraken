@@ -11,7 +11,8 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver, RouteInformation, FocusNode;
+import 'package:flutter/widgets.dart' show
+  WidgetsBinding, WidgetsBindingObserver, RouteInformation, FocusNode, BuildContext;
 import 'dart:ffi';
 
 import 'package:kraken/gesture.dart';
@@ -75,6 +76,8 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   FocusNode? focusNode;
 
+  BuildContext? context;
+
   ElementManager({
     required this.contextId,
     required this.viewport,
@@ -82,6 +85,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     this.showPerformanceOverlayOverride = false,
     this.eventClient,
     this.focusNode,
+    this.context,
   }) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_PROPERTY_INIT);

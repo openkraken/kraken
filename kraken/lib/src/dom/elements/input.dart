@@ -8,6 +8,9 @@ import 'dart:collection';
 import 'dart:ui';
 import 'dart:ffi';
 import 'dart:math' as math;
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:kraken/bridge.dart';
 import 'package:flutter/animation.dart';
@@ -16,7 +19,7 @@ import 'package:flutter/widgets.dart' show FocusNode;
 import 'package:flutter/rendering.dart' hide RenderEditable;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:kraken/dom.dart';
+import 'package:kraken/dom.dart' as dom;
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 import 'package:flutter/rendering.dart';
@@ -101,7 +104,7 @@ class EditableTextDelegate implements TextSelectionDelegate {
   }
 }
 
-class InputElement extends Element implements TextInputClient, TickerProvider {
+class InputElement extends dom.Element implements TextInputClient, TickerProvider {
   static InputElement? focusInputElement;
 
   static void clearFocus() {
@@ -200,7 +203,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   InputElement(
     int targetId,
     this.nativeInputElement,
-    ElementManager elementManager, {
+    dom.ElementManager elementManager, {
     this.textAlign = TextAlign.left,
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
@@ -221,7 +224,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     super.didAttachRenderer();
 
     // Make element listen to click event to trigger focus.
-    addEvent(EVENT_CLICK);
+    addEvent(dom.EVENT_CLICK);
 
     AnimationController animationController = _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     animationController.addListener(_onCursorColorTick);
@@ -310,18 +313,18 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   Offset? _selectStartPosition;
 
   @override
-  void dispatchEvent(Event event) {
+  void dispatchEvent(dom.Event event) {
     super.dispatchEvent(event);
 
-    if (event.type == EVENT_TOUCH_START) {
-      TouchList touches = (event as TouchEvent).touches;
+    if (event.type == dom.EVENT_TOUCH_START) {
+      dom.TouchList touches = (event as dom.TouchEvent).touches;
       if (touches.length > 1) return;
-      Touch touch = touches.item(0);
+      dom.Touch touch = touches.item(0);
       _selectStartPosition = Offset(touch.clientX, touch.clientY);
 
-      TouchEvent e = event;
+      dom.TouchEvent e = event;
       if (e.touches.length == 1) {
-        Touch touch = e.touches[0];
+        dom.Touch touch = e.touches[0];
         final TapDownDetails details = TapDownDetails(
           globalPosition: Offset(touch.screenX, touch.screenY),
           localPosition: Offset(touch.clientX, touch.clientY),
@@ -330,14 +333,13 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
         _renderEditable!.handleTapDown(details);
       }
-      // @TODO: selection.
-    } else if (event.type == EVENT_TOUCH_MOVE) {
-      // @TODO: selection.
-    } else if (event.type == EVENT_TOUCH_END) {
-      // @TODO: selection.
-      TouchList touches = (event as TouchEvent).touches;
+
+    } else if (event.type == dom.EVENT_TOUCH_MOVE ||
+      event.type == dom.EVENT_TOUCH_END
+    ) {
+      dom.TouchList touches = (event as dom.TouchEvent).touches;
       if (touches.length > 1) return;
-      Touch touch = touches.item(0);
+      dom.Touch touch = touches.item(0);
       Offset _selectEndPosition = Offset(touch.clientX, touch.clientY);
 
       _renderEditable!.selectPositionAt(
@@ -345,11 +347,13 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         to: _selectEndPosition,
         cause: SelectionChangedCause.drag,
       );
-    } else if (event.type == EVENT_CLICK) {
+    } else if (event.type == dom.EVENT_CLICK) {
       _renderEditable!.handleTap();
       InputElement.setFocus(this);
-    } else if (event.type == EVENT_LONG_PRESS) {
+    } else if (event.type == dom.EVENT_LONG_PRESS) {
       _renderEditable!.handleLongPress();
+    } else if (event.type == dom.EVENT_DOUBLE_CLICK) {
+      _renderEditable!.handleDoubleTap();
     }
   }
 
@@ -358,7 +362,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       // Set focus that make it add keyboard listener
       _renderEditable!.hasFocus = true;
       activeTextInput();
-      dispatchEvent(Event('focus'));
+      dispatchEvent(dom.Event('focus'));
     }
   }
 
@@ -367,7 +371,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       // Set focus that make it remove keyboard listener
       _renderEditable!.hasFocus = false;
       deactiveTextInput();
-      dispatchEvent(Event('blur'));
+      dispatchEvent(dom.Event('blur'));
     }
   }
 
@@ -427,6 +431,26 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       text = _buildPasswordTextSpan(text.text!);
     }
 
+    BuildContext context = elementManager.context!;
+    final ThemeData theme = Theme.of(context);
+    final TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
+    final Color selectionColor;
+
+    switch (theme.platform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
+        selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
+        break;
+
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+        break;
+    }
+
     _renderEditable = RenderEditable(
       text: text,
       cursorColor: cursorColor,
@@ -438,6 +462,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       textAlign: textAlign,
       textDirection: textDirection,
       selection: blurSelection, // Default to blur
+      selectionColor: selectionColor,
       offset: offset,
       readOnly: false,
       forceLine: true,
@@ -615,13 +640,51 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       String inputData = '';
       // https://www.w3.org/TR/input-events-1/#interface-InputEvent-Attributes
       String inputType = '';
-      InputEvent inputEvent = InputEvent(inputData, inputType: inputType);
+      dom.InputEvent inputEvent = dom.InputEvent(inputData, inputType: inputType);
       dispatchEvent(inputEvent);
     }
   }
 
+  TextSelectionOverlay? _selectionOverlay;
+
+  // @TODO Add textSelectionControls for other platforms.
+  TextSelectionControls? selectionControls = cupertinoDesktopTextSelectionControls;
+
+  final GlobalKey _editableKey = GlobalKey();
+  final ClipboardStatusNotifier? _clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
+  final LayerLink _toolbarLayerLink = LayerLink();
+  final LayerLink _startHandleLayerLink = LayerLink();
+  final LayerLink _endHandleLayerLink = LayerLink();
+
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     // TODO: show selection layer and emit selection changed event
+    if (_renderEditable == null) {
+      return;
+    }
+
+    if (selectionControls == null) {
+      _selectionOverlay?.hide();
+      _selectionOverlay = null;
+    } else {
+      if (_selectionOverlay == null) {
+        _selectionOverlay = TextSelectionOverlay(
+          clipboardStatus: _clipboardStatus,
+          context: elementManager.context!,
+          value: _value,
+          toolbarLayerLink: _toolbarLayerLink,
+          startHandleLayerLink: _startHandleLayerLink,
+          endHandleLayerLink: _endHandleLayerLink,
+          renderObject: _renderEditable!,
+          selectionControls: selectionControls,
+          selectionDelegate: _textSelectionDelegate,
+          dragStartBehavior: DragStartBehavior.start,
+        );
+      } else {
+        _selectionOverlay!.update(_value);
+      }
+      _selectionOverlay!.handlesVisible = true;
+      _selectionOverlay!.showHandles();
+    }
 
     // To keep the cursor from blinking while it moves, restart the timer here.
     if (_cursorTimer != null) {
@@ -653,7 +716,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void _triggerChangeEvent() {
     String currentValue = _textSelectionDelegate._textEditingValue.text;
     if (_inputValueAtBegin != currentValue) {
-      Event changeEvent = Event(EVENT_CHANGE);
+      dom.Event changeEvent = dom.Event(dom.EVENT_CHANGE);
       dispatchEvent(changeEvent);
     }
   }

@@ -288,7 +288,7 @@ class _KrakenState extends State<Kraken> {
       shortcuts: _shortcutMap,
       focusNode: _focusNode,
       onFocusChange: _handleFocusChange,
-      child: _KrakenRenderObjectWidget(context.widget as Kraken)
+      child: _KrakenRenderObjectWidget(context.widget as Kraken, context)
     );
   }
 
@@ -444,11 +444,13 @@ class _KrakenState extends State<Kraken> {
 
 class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
-  const _KrakenRenderObjectWidget(Kraken widget, {Key? key})
+  const _KrakenRenderObjectWidget(Kraken widget, BuildContext context, {Key? key})
       : _krakenWidget = widget,
+        _context = context,
         super(key: key);
 
   final Kraken _krakenWidget;
+  final BuildContext _context; 
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -480,6 +482,7 @@ This situation often happened when you trying creating kraken when FlutterView n
       devToolsService: _krakenWidget.devToolsService,
       httpClientInterceptor: _krakenWidget.httpClientInterceptor,
       focusNode: _krakenWidget.focusNode,
+      context: _context,
     );
 
     if (kProfileMode) {
