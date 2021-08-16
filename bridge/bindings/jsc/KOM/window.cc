@@ -65,10 +65,7 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
     case WindowProperty::window:
       return this->object;
     case WindowProperty::history: {
-      JSStringRef key = JSStringCreateWithUTF8CString("__history__");
-      JSValueRef history = JSObjectGetProperty(_hostClass->ctx, _hostClass->context->global(), key, exception);
-      JSStringRelease(key);
-      return history;
+      return history_->jsObject;
     }
     case WindowProperty::scrollX: {
       getDartMethod()->flushUICommand();
