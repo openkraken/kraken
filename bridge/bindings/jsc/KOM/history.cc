@@ -28,6 +28,8 @@ JSValueRef JSHistory::back(JSContextRef ctx, JSObjectRef function, JSObjectRef t
     history->m_previous_stack.pop();
     history->m_next_stack.push(item);
   }
+
+  return nullptr;
 }
 
 JSValueRef JSHistory::forward(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
@@ -38,6 +40,18 @@ JSValueRef JSHistory::forward(JSContextRef ctx, JSObjectRef function, JSObjectRe
     HistoryItem& item = history->m_next_stack.top();
     history->m_next_stack.pop();
     history->m_previous_stack.push(item);
+  }
+
+  return nullptr;
+}
+
+void JSHistory::addItem(HistoryItem &historyItem) {
+  m_previous_stack.push(historyItem);
+
+  // clear.
+  while(!m_next_stack.empty())
+  {
+    m_next_stack.pop();
   }
 }
 

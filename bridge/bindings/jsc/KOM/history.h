@@ -34,16 +34,7 @@ public:
   static JSValueRef forward(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                   const JSValueRef *arguments, JSValueRef *exception);
 private:
-  void addItem(std::string href, JSValueRef state) {
-    HistoryItem historyItem = { href, state };
-    m_previous_stack.push(historyItem);
-
-    // clear.
-    while(!m_next_stack.empty())
-    {
-      m_next_stack.pop();
-    }
-  }
+  void addItem(HistoryItem &historyItem);
   std::stack<HistoryItem> m_previous_stack;
   std::stack<HistoryItem> m_next_stack;
 
