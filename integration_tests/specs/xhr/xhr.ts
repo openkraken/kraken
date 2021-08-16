@@ -15,7 +15,7 @@ describe('XMLHttpRequest', () => {
         done();
       }
     };
-    xhr.open('GET', 'https://kraken.oss-cn-hangzhou.aliyuncs.com/data/data.json', true);
+    xhr.open('GET', `http://127.0.0.1:${MOCKED_HTTP_SERVER_PORT}/001`, true);
     xhr.setRequestHeader('Accept', 'application/json');
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.send();

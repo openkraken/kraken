@@ -13,6 +13,7 @@ import 'bridge/to_native.dart';
 import 'bridge/test_input.dart';
 import 'custom/custom_object_element.dart';
 import 'custom/custom_element_widget.dart';
+import 'mocks/MockedHttpServer.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken_websocket/kraken_websocket.dart';
 import 'package:kraken_animation_player/kraken_animation_player.dart';
@@ -59,6 +60,10 @@ void main() async {
   KrakenWebView.initialize();
   defineKrakenCustomElements();
 
+  // Mocked HTTP server.
+  var mockedHttpServer = MockedHttpServer.getInstance();
+  print('Mocked HTTP server started at: http://127.0.0.1:${mockedHttpServer.port}');
+
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
   CSSText.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
   setObjectElementFactory(customObjectElementFactory);
@@ -97,7 +102,7 @@ void main() async {
       disableViewportWidthAssertion: true,
       disableViewportHeightAssertion: true,
       javaScriptChannel: javaScriptChannel,
-      gestureClient: NativeGestureClient(gestureClientID:i),
+      gestureClient: NativeGestureClient(gestureClientID: i),
     );
     widgets.add(krakenMap[i]!);
   }

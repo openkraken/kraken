@@ -1,0 +1,16 @@
+HTTP/1.1 200 OK
+Date: Mon, 16 Aug 2021 10:17:45 GMT
+Content-Type: application/json
+Content-Length: 72
+Connection: keep-alive
+Accept-Ranges: bytes
+ETag: "4EE5B35FB8C5FB2CF8041FC41D3D199E"
+Last-Modified: Sun, 15 Mar 2020 11:32:20 GMT
+Content-MD5: TuWzX7jF+yz4BB/EHT0Zng==
+
+{
+    "method": "GET",
+    "data": {
+        "userName": "12345"
+    }
+}
