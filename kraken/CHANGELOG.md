@@ -1,3 +1,31 @@
+## 0.8.2
+
+**Features**
+
++ Support percentage for translate3d translateX and translateY https://github.com/openkraken/kraken/pull/547
++ Add findProxyFromEnvironment methods in HttpOverrides. https://github.com/openkraken/kraken/pull/551/files
++ Treat empty scheme as https protocol. https://github.com/openkraken/kraken/pull/557/files
++ Support length/percentage value for background-size. https://github.com/openkraken/kraken/pull/568
++ Support dbclick event. https://github.com/openkraken/kraken/pull/573
+
+
+**Bug Fixed**
+
++ Fix crash when HMR enabled. https://github.com/openkraken/kraken/pull/507
++ Fix parent box height can't auto caculate by scrollable container children. https://github.com/openkraken/kraken/pull/517
++ Fix linear-gradient parse failed when have more than one bracket. https://github.com/openkraken/kraken/pull/518
++ Fix image flex items have no size. https://github.com/openkraken/kraken/pull/520
++ Fix transition throw error. https://github.com/openkraken/kraken/pull/542
++ Fix empty screen in launcher mode. https://github.com/openkraken/kraken/pull/544
++ Fix element instanceof HTMLElement return false https://github.com/openkraken/kraken/pull/546
++ Fix transition animation execution order. https://github.com/openkraken/kraken/pull/559
++ Fix transition of backgroundColor with no default value not working. https://github.com/openkraken/kraken/pull/562
++ Fix opacity 0 not working. https://github.com/openkraken/kraken/pull/565
++ Fix hittest with z-index order. https://github.com/openkraken/kraken/pull/572
++ Fix click event not triggerd on input element. https://github.com/openkraken/kraken/pull/575
++ Fix ios bridge build. https://github.com/openkraken/kraken/pull/576
+
+
 ## 0.8.1
 
 **Features**

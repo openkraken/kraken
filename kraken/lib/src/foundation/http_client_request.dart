@@ -6,7 +6,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:kraken/foundation.dart';
+import 'http_cache.dart';
+import 'http_cache_object.dart';
+import 'http_overrides.dart';
+import 'http_client_interceptor.dart';
 import 'queue.dart';
 
 final _requestQueue = Queue(parallel: 10);

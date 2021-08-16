@@ -19,6 +19,7 @@ import 'package:kraken_websocket/kraken_websocket.dart';
 import 'package:kraken_animation_player/kraken_animation_player.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
 import 'package:kraken_webview/kraken_webview.dart';
+import 'package:kraken/foundation.dart';
 
 String? pass = (AnsiPen()..green())('[TEST PASS]');
 String? err = (AnsiPen()..red())('[TEST FAILED]');
@@ -49,6 +50,15 @@ class NativeGestureClient implements GestureClient {
 
   @override
   void dragEndCallback(DragEndDetails details) {
+  }
+}
+
+// Test for UriParser.
+class MyUriParser extends UriParser {
+  @override
+  String resolve(Uri base, Uri relative) {
+    String uri = super.resolve(base, relative);
+    return uri;
   }
 }
 
@@ -103,6 +113,7 @@ void main() async {
       disableViewportHeightAssertion: true,
       javaScriptChannel: javaScriptChannel,
       gestureClient: NativeGestureClient(gestureClientID: i),
+      uriParser: MyUriParser(),
     );
     widgets.add(krakenMap[i]!);
   }

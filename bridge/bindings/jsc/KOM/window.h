@@ -31,6 +31,9 @@ public:
                            const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef postMessage(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef arguments[], JSValueRef *exception);
+
 
 private:
   JSWindow(JSContext *context) : JSEventTarget(context, JSWindowName){};
@@ -40,12 +43,13 @@ private:
   JSFunctionHolder m_scroll{context, prototypeObject, this, "scroll", scrollTo};
   JSFunctionHolder m_scrollTo{context, prototypeObject, this, "scrollTo", scrollTo};
   JSFunctionHolder m_scrollBy{context, prototypeObject, this, "scrollBy", scrollBy};
+  JSFunctionHolder m_postMessage{context, prototypeObject, this, "postMessage", postMessage};
 };
 
 class WindowInstance : public EventTargetInstance {
 public:
   DEFINE_OBJECT_PROPERTY(Window, 8, devicePixelRatio, colorScheme, __location__, window, history, parent,  scrollX, scrollY);
-  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Window, 4, open, scroll, scrollBy, scrollTo);
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Window, 5, open, scroll, scrollBy, scrollTo, postMessage);
 
   WindowInstance() = delete;
   explicit WindowInstance(JSWindow *window);
