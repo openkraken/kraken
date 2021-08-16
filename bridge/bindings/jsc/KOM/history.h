@@ -19,7 +19,7 @@ class JSWindow;
 
 struct HistoryItem {
   std::string href;
-  std::string state;
+  JSValueRef state;
 };
 
 class JSHistory : public HostObject {
@@ -29,19 +29,27 @@ public:
 
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
 
-  void back(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-            const JSValueRef *arguments, JSValueRef *exception);
-  void forward(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-            const JSValueRef *arguments, JSValueRef *exception);
-  void pushState(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                  const JSValueRef *arguments, JSValueRef *exception);
+  static JSValueRef back(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef *arguments, JSValueRef *exception);
+  static JSValueRef forward(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                  const JSValueRef *arguments, JSValueRef *exception);
 private:
-  void addItem(std::string href, std::string state) {
+  void addItem(std::string href, JSValueRef state) {
     HistoryItem historyItem = { href, state };
     m_previous_stack.push(historyItem);
+
+    // clear.
+    while(!m_next_stack.empty())
+    {
+      m_next_stack.pop();
+    }
   }
   std::stack<HistoryItem> m_previous_stack;
   std::stack<HistoryItem> m_next_stack;
+
+private:
+  JSFunctionHolder m_back{context, jsObject, this,"back", back};
+  JSFunctionHolder m_forward{context, jsObject, this,"forward", forward};
 };
 
 } // namespace kraken::binding::jsc

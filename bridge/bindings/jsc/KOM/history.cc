@@ -19,26 +19,26 @@ JSValueRef JSHistory::getProperty(std::string &name, JSValueRef *exception) {
   return HostObject::getProperty(name, exception);
 }
 
-void JSHistory::back(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-          const JSValueRef *arguments, JSValueRef *exception) {
-  if (!m_previous_stack.empty()) {
-    HistoryItem& item = m_previous_stack.top();
-    m_previous_stack.pop();
-    m_next_stack.push(item);
+JSValueRef JSHistory::back(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                              const JSValueRef *arguments, JSValueRef *exception) {
+  auto history = reinterpret_cast<JSHistory *>(JSObjectGetPrivate(function));
+
+  if (!history->m_previous_stack.empty()) {
+    HistoryItem& item = history->m_previous_stack.top();
+    history->m_previous_stack.pop();
+    history->m_next_stack.push(item);
   }
 }
 
-void JSHistory::forward(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                     const JSValueRef *arguments, JSValueRef *exception) {
-  if (!m_next_stack.empty()) {
-    HistoryItem& item = m_next_stack.top();
-    m_next_stack.pop();
-    m_previous_stack.push(item);
-  }
-}
+JSValueRef JSHistory::forward(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                   const JSValueRef *arguments, JSValueRef *exception) {
+  auto history = reinterpret_cast<JSHistory *>(JSObjectGetPrivate(function));
 
-void JSHistory::pushState(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                const JSValueRef *arguments, JSValueRef *exception) {
+  if (!history->m_next_stack.empty()) {
+    HistoryItem& item = history->m_next_stack.top();
+    history->m_next_stack.pop();
+    history->m_previous_stack.push(item);
+  }
 }
 
 } // namespace kraken::binding::jsc
