@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Copyright (C) 2021 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
 
@@ -8,6 +8,7 @@
 
 #include "bindings/jsc/host_object_internal.h"
 #include "bindings/jsc/js_context_internal.h"
+#include "bindings/jsc/ui_manager.h"
 #include <array>
 #include <stack>
 
@@ -34,6 +35,7 @@ public:
   static JSValueRef forward(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                   const JSValueRef *arguments, JSValueRef *exception);
 private:
+  void goTo(HistoryItem &historyItem);
   void addItem(HistoryItem &historyItem);
   std::stack<HistoryItem> m_previous_stack;
   std::stack<HistoryItem> m_next_stack;

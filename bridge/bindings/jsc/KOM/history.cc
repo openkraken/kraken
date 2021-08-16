@@ -40,17 +40,27 @@ JSValueRef JSHistory::forward(JSContextRef ctx, JSObjectRef function, JSObjectRe
     HistoryItem& item = history->m_next_stack.top();
     history->m_next_stack.pop();
     history->m_previous_stack.push(item);
+
+    history->goTo(item);
   }
 
   return nullptr;
+}
+
+void JSHistory::goTo(HistoryItem &historyItem) {
+  NativeString *moduleName = stringRefToNativeString(JSStringCreateWithUTF8CString("Navigation"));
+  NativeString *method = stringRefToNativeString(JSStringCreateWithUTF8CString("goTo"));
+  NativeString *params = stringRefToNativeString(JSStringCreateWithUTF8CString(historyItem.href.c_str()));
+
+  getDartMethod()->invokeModule(nullptr, context->getContextId(), moduleName, method, params,
+                                handleInvokeModuleUnexpectedCallback);
 }
 
 void JSHistory::addItem(HistoryItem &historyItem) {
   m_previous_stack.push(historyItem);
 
   // clear.
-  while(!m_next_stack.empty())
-  {
+  while(!m_next_stack.empty()) {
     m_next_stack.pop();
   }
 }
