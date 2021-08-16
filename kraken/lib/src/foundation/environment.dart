@@ -7,9 +7,6 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 
-// Judge is production mode.
-const bool PRODUCTION = bool.fromEnvironment('dart.vm.product');
-
 String? _krakenTemporaryPath;
 Future<String> getKrakenTemporaryPath() async {
   if (_krakenTemporaryPath == null) {
