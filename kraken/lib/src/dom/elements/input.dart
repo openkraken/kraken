@@ -225,6 +225,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
 
     // Make element listen to click event to trigger focus.
     addEvent(dom.EVENT_CLICK);
+    addEvent(dom.EVENT_DOUBLE_CLICK);
 
     AnimationController animationController = _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     animationController.addListener(_onCursorColorTick);
@@ -308,7 +309,11 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
     return CSSTextMixin.createTextSpan(obscuringCharacter * text.length, parentElement: this);
   }
 
-  Color get cursorColor => CSSColor.initial;
+  Color? cursorColor;
+
+  Color? selectionColor;
+
+  Radius? cursorRadius;
 
   Offset? _selectStartPosition;
 
@@ -317,6 +322,8 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
     super.dispatchEvent(event);
 
     if (event.type == dom.EVENT_TOUCH_START) {
+      _hideSelectionOverlayIfNeeded();
+
       dom.TouchList touches = (event as dom.TouchEvent).touches;
       if (touches.length > 1) return;
       dom.Touch touch = touches.item(0);
@@ -434,20 +441,36 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
     BuildContext context = elementManager.context!;
     final ThemeData theme = Theme.of(context);
     final TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
-    final Color selectionColor;
 
     switch (theme.platform) {
       case TargetPlatform.iOS:
+        final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
+        cursorColor = selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
+        selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
+        cursorRadius = const Radius.circular(2.0);
+        selectionControls = cupertinoTextSelectionControls;
+        break;
+
       case TargetPlatform.macOS:
         final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
+        cursorColor = selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
+        cursorRadius = const Radius.circular(2.0);
+        selectionControls = cupertinoDesktopTextSelectionControls;
         break;
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+        cursorColor = selectionTheme.cursorColor ?? theme.colorScheme.primary;
+        selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+        selectionControls = materialTextSelectionControls;
+        break;
+
       case TargetPlatform.linux:
       case TargetPlatform.windows:
+        cursorColor = selectionTheme.cursorColor ?? theme.colorScheme.primary;
         selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+        selectionControls = desktopTextSelectionControls;
         break;
     }
 
@@ -468,8 +491,8 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       forceLine: true,
       onCaretChanged: _handleCaretChanged,
       obscureText: obscureText,
-      cursorWidth: 1.0,
-      cursorRadius: Radius.zero,
+      cursorWidth: 2.0,
+      cursorRadius: cursorRadius,
       cursorOffset: Offset.zero,
       enableInteractiveSelection: true,
       textSelectionDelegate: _textSelectionDelegate,
@@ -539,6 +562,9 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
 
   void _hideSelectionOverlayIfNeeded() {
     // TODO: hide selection overlay.
+    if (_selectionOverlay != null) {
+      _selectionOverlay!.hideHandles();
+    }
   }
 
   bool get _hasInputConnection => _textInputConnection != null && _textInputConnection!.attached;
@@ -647,8 +673,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
 
   TextSelectionOverlay? _selectionOverlay;
 
-  // @TODO Add textSelectionControls for other platforms.
-  TextSelectionControls? selectionControls = cupertinoDesktopTextSelectionControls;
+  TextSelectionControls? selectionControls;
 
   final GlobalKey _editableKey = GlobalKey();
   final ClipboardStatusNotifier? _clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
@@ -922,7 +947,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
   }
 
   void _onCursorColorTick() {
-    _renderEditable!.cursorColor = cursorColor.withOpacity(_cursorBlinkOpacityController!.value);
+    _renderEditable!.cursorColor = cursorColor!.withOpacity(_cursorBlinkOpacityController!.value);
     _cursorVisibilityNotifier.value = _cursorBlinkOpacityController!.value > 0;
   }
 
