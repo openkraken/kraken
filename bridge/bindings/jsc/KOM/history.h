@@ -17,15 +17,31 @@ namespace kraken::binding::jsc {
 
 class JSWindow;
 
+struct HistoryItem {
+  std::string href;
+  std::string state;
+};
+
 class JSHistory : public HostObject {
 public:
   JSHistory(JSContext *context) : HostObject(context, JSHistoryName) {}
   ~JSHistory() override;
 
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
+
+  void back(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+            const JSValueRef *arguments, JSValueRef *exception);
+  void forward(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+            const JSValueRef *arguments, JSValueRef *exception);
+  void pushState(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                  const JSValueRef *arguments, JSValueRef *exception);
 private:
-  std::stack<std::string> m_previous_stack;
-  std::stack<std::string> m_next_stack;
+  void addItem(std::string href, std::string state) {
+    HistoryItem historyItem = { href, state };
+    m_previous_stack.push(historyItem);
+  }
+  std::stack<HistoryItem> m_previous_stack;
+  std::stack<HistoryItem> m_next_stack;
 };
 
 } // namespace kraken::binding::jsc

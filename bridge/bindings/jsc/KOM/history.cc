@@ -19,4 +19,26 @@ JSValueRef JSHistory::getProperty(std::string &name, JSValueRef *exception) {
   return HostObject::getProperty(name, exception);
 }
 
+void JSHistory::back(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+          const JSValueRef *arguments, JSValueRef *exception) {
+  if (!m_previous_stack.empty()) {
+    HistoryItem& item = m_previous_stack.top();
+    m_previous_stack.pop();
+    m_next_stack.push(item);
+  }
+}
+
+void JSHistory::forward(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                     const JSValueRef *arguments, JSValueRef *exception) {
+  if (!m_next_stack.empty()) {
+    HistoryItem& item = m_next_stack.top();
+    m_next_stack.pop();
+    m_previous_stack.push(item);
+  }
+}
+
+void JSHistory::pushState(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                const JSValueRef *arguments, JSValueRef *exception) {
+}
+
 } // namespace kraken::binding::jsc
