@@ -164,6 +164,8 @@ class Kraken extends StatefulWidget {
 
   final FocusNode focusNode = FocusNode();
 
+  final UriParser? uriParser;
+
   KrakenController? get controller {
     return KrakenController.getControllerOfName(shortHash(this));
   }
@@ -228,6 +230,7 @@ class Kraken extends StatefulWidget {
     this.devToolsService,
     // Kraken's http client interceptor.
     this.httpClientInterceptor,
+    this.uriParser,
     // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
     // Maybe got unexpected error when change to other values, use this at your own risk!
     // We will fixed this on next version released. (v0.6.0)
@@ -450,7 +453,7 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
         super(key: key);
 
   final Kraken _krakenWidget;
-  final BuildContext _context; 
+  final BuildContext _context;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -483,6 +486,7 @@ This situation often happened when you trying creating kraken when FlutterView n
       httpClientInterceptor: _krakenWidget.httpClientInterceptor,
       focusNode: _krakenWidget.focusNode,
       context: _context,
+      uriParser: _krakenWidget.uriParser
     );
 
     if (kProfileMode) {

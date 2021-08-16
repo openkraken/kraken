@@ -4,8 +4,8 @@
  */
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:kraken/foundation.dart';
+import 'http_overrides.dart';
+import 'http_client_interceptor.dart';
 
 class ProxyHttpClientRequest extends HttpClientRequest {
   final HttpClientRequest _clientRequest;
