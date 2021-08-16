@@ -7,6 +7,7 @@
 #include "bindings/qjs/qjs_patch.h"
 #include "kraken_bridge.h"
 #include "dom/element.h"
+#include "dom/elements/canvas_element.h"
 
 namespace kraken::binding::qjs {
 
@@ -114,7 +115,7 @@ JSValue nativeValueToJSValue(JSContext *context, NativeValue &value) {
     if (ptrType == JSPointerType::NativeBoundingClientRect) {
       return (new BoundingClientRect(context, static_cast<NativeBoundingClientRect *>(ptr)))->jsObject;
     } else if (ptrType == JSPointerType::NativeCanvasRenderingContext2D) {
-      // TODO: support canvasElement.
+      return (new CanvasRenderingContext2D(context, static_cast<NativeCanvasRenderingContext2D *>(ptr)))->jsObject;
     }
   }
   }

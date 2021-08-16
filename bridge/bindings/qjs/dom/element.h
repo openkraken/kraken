@@ -102,11 +102,13 @@ public:
 
   static inline JSClassID classID();
 
+protected:
+  explicit ElementInstance(Element *element, std::string tagName, bool shouldAddUICommand);
+
 private:
   DEFINE_HOST_CLASS_PROPERTY(15, nodeName, tagName, offsetLeft, offsetTop, offsetWidth, offsetHeight,
                              clientWidth, clientHeight, clientTop, clientLeft, scrollTop, scrollLeft, scrollHeight,
                              scrollWidth, children);
-  explicit ElementInstance(Element *element, std::string tagName, bool shouldAddUICommand);
   void _notifyNodeRemoved(NodeInstance *node) override;
   void _notifyChildRemoved();
   void _notifyNodeInsert(NodeInstance *insertNode) override;

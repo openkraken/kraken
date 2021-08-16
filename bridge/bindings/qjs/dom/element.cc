@@ -7,7 +7,6 @@
 #include "document.h"
 #include "dart_methods.h"
 #include "text_node.h"
-#include "bridge_qjs.h"
 #include "bindings/qjs/bom/blob.h"
 #include "foundation/bridge_callback.h"
 
@@ -18,6 +17,7 @@ std::once_flag kElementInitOnceFlag;
 void bindElement(std::unique_ptr<JSContext> &context) {
   auto *constructor = Element::instance(context.get());
   context->defineGlobalProperty("Element", constructor->classObject);
+  context->defineGlobalProperty("HTMLElement", JS_DupValue(context->ctx(), constructor->classObject));
 }
 
 OBJECT_INSTANCE_IMPL(Element);
