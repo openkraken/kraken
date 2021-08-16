@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/widget.dart';
@@ -74,6 +75,11 @@ void main() async {
   var mockedHttpServer = MockedHttpServer.getInstance();
   print('Mocked HTTP server started at: http://127.0.0.1:${mockedHttpServer.port}');
 
+  String codeInjection = '''
+    // This segment inject variables for test environment.
+    MOCKED_HTTP_SERVER_PORT = ${mockedHttpServer.port};
+  ''';
+
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
   CSSText.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
   setObjectElementFactory(customObjectElementFactory);
@@ -105,7 +111,7 @@ void main() async {
       return 'method: ' + method;
     };
 
-    krakenMap[i] = Kraken(
+    var kraken = krakenMap[i] = Kraken(
       viewportWidth: 360,
       viewportHeight: 640,
       bundleContent: 'console.log("Starting integration tests...")',
@@ -115,11 +121,11 @@ void main() async {
       gestureClient: NativeGestureClient(gestureClientID: i),
       uriParser: MyUriParser(),
     );
-    widgets.add(krakenMap[i]!);
+    widgets.add(kraken);
   }
 
   runApp(MaterialApp(
-    title: 'Kraken Intergration Tests',
+    title: 'Kraken Integration Tests',
     debugShowCheckedModeBanner: false,
     home: Scaffold(
       appBar: AppBar(
@@ -152,7 +158,7 @@ void main() async {
       for (Map spec in testPayload) {
         String filename = spec['filename'];
         String code = spec['code'];
-        evaluateTestScripts(contextId, code, url: filename);
+        evaluateTestScripts(contextId, codeInjection + code, url: filename);
       }
 
       testResults.add(executeTest(contextId));

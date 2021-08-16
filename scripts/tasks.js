@@ -281,12 +281,51 @@ task('integration-test', (done) => {
       return;
     }
 
-    if (code == 0) {
+    if (code === 0) {
       done();
     } else {
       // TODO: collect error message from stdout.
-      const err = new Error('Some error occured, please check log.');
+      const err = new Error('Some error occurred, please check log.');
       done(err);
+    }
+  });
+});
+
+task('unit-test', (done) => {
+  const childProcess = spawn('flutter', ['test'], {
+    stdio: 'pipe',
+    cwd: paths.kraken
+  });
+
+  let stdout = '';
+
+  childProcess.stderr.pipe(process.stderr);
+  childProcess.stdout.pipe(process.stdout);
+
+  childProcess.stderr.on('data', (data) => {
+    stdout += data + '';
+  });
+
+  childProcess.stdout.on('data', (data) => {
+    stdout += data + '';
+  });
+
+  childProcess.on('error', (error) => {
+    done(error);
+  });
+
+  childProcess.on('close', (code) => {
+    let dartErrorMatch = matchError(stdout);
+    if (dartErrorMatch) {
+      let error = new Error('UnExpected Flutter Assert Failed.');
+      done(error);
+      return;
+    }
+
+    if (code === 0) {
+      done();
+    } else {
+      done(new Error('Some error occurred, please check log.'));
     }
   });
 });
