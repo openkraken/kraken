@@ -29,8 +29,6 @@ class FetchModule extends BaseModule {
 
   @override
   String invoke(String method, params, InvokeModuleCallback callback) {
-
-  String invoke(String method, dynamic params, InvokeModuleCallback callback) {
     String href = moduleManager!.controller.href;
     String url = (moduleManager!.controller.uriParser!.resolve(Uri.parse(method), Uri.parse(href)));
 
