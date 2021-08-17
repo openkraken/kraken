@@ -19,9 +19,9 @@ function generateMethodsHeader(object: ClassObject, type: PropType) {
   let methodsDefine: string[] = [];
   let methodsImpl: string[] = [];
   if (object.methods.length > 0) {
-    object.methods = uniqBy(object.methods, (o) => o.name);
-    methodsDefine = object.methods.map(o => `static JSValue ${o.name}(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);`);
-    methodsImpl = object.methods.map(o => `ObjectFunction m_${o.name}{m_context, ${type == PropType.hostClass ? 'm_prototypeObject' : 'jsObject'}, "${o.name}", ${o.name}, ${o.args.length}};`)
+    let methods = uniqBy(object.methods, (o) => o.name);
+    methodsDefine = methods.map(o => `static JSValue ${o.name}(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);`);
+    methodsImpl = methods.map(o => `ObjectFunction m_${o.name}{m_context, ${type == PropType.hostClass ? 'm_prototypeObject' : 'jsObject'}, "${o.name}", ${o.name}, ${o.args.length}};`)
   }
   return {
     methodsImpl,

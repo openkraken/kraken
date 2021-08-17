@@ -12,6 +12,7 @@ namespace kraken::binding::qjs {
   : HostObject(context, "CanvasRenderingContext2D"), m_nativePtr(nativePtr) {
 }
 
+
 JSValue CanvasRenderingContext2D::callNativeMethods(const char *method, int32_t argc,
                                                NativeValue *argv) {
   if (m_nativePtr->callNativeMethods == nullptr) {
@@ -189,7 +190,7 @@ JSValue CanvasRenderingContext2D::beginPath(QjsContext *ctx, JSValue this_val, i
 
   getDartMethod()->flushUICommand();
   NativeValue arguments[] = {
-
+  
   };
 
   auto *element = static_cast<CanvasRenderingContext2D *>(JS_GetOpaque(this_val, Element::classId()));
@@ -263,7 +264,7 @@ JSValue CanvasRenderingContext2D::closePath(QjsContext *ctx, JSValue this_val, i
 
   getDartMethod()->flushUICommand();
   NativeValue arguments[] = {
-
+  
   };
 
   auto *element = static_cast<CanvasRenderingContext2D *>(JS_GetOpaque(this_val, Element::classId()));
@@ -286,50 +287,109 @@ JSValue CanvasRenderingContext2D::clip(QjsContext *ctx, JSValue this_val, int ar
   return element->callNativeMethods("clip", 1, arguments);
 }
 JSValue CanvasRenderingContext2D::drawImage(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  if (argc < 9) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'drawImage' on 'CanvasRenderingContext2D': 9 argument required, but %d present.", argc);
+  switch(argc) {
+    case 9: {
+      if (argc < 9) {
+        return JS_ThrowTypeError(ctx, "Failed to execute 'drawImage' on 'CanvasRenderingContext2D': 9 argument required, but %d present.", argc);
+      }
+      
+      if (!JS_IsNumber(argv[1])) {
+        return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 2st arguments is not Number.");
+      }
+      if (!JS_IsNumber(argv[2])) {
+        return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 3st arguments is not Number.");
+      }
+      if (!JS_IsNumber(argv[3])) {
+        return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 4st arguments is not Number.");
+      }
+      if (!JS_IsNumber(argv[4])) {
+        return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 5st arguments is not Number.");
+      }
+      if (!JS_IsNumber(argv[5])) {
+        return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 6st arguments is not Number.");
+      }
+      if (!JS_IsNumber(argv[6])) {
+        return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 7st arguments is not Number.");
+      }
+      if (!JS_IsNumber(argv[7])) {
+        return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 8st arguments is not Number.");
+      }
+      if (!JS_IsNumber(argv[8])) {
+        return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 9st arguments is not Number.");
+      }
+    
+      getDartMethod()->flushUICommand();
+      NativeValue arguments[] = {
+       jsValueToNativeValue(ctx, argv[0]),
+       jsValueToNativeValue(ctx, argv[1]),
+       jsValueToNativeValue(ctx, argv[2]),
+       jsValueToNativeValue(ctx, argv[3]),
+       jsValueToNativeValue(ctx, argv[4]),
+       jsValueToNativeValue(ctx, argv[5]),
+       jsValueToNativeValue(ctx, argv[6]),
+       jsValueToNativeValue(ctx, argv[7]),
+       jsValueToNativeValue(ctx, argv[8])
+      };
+    
+      auto *element = static_cast<CanvasRenderingContext2D *>(JS_GetOpaque(this_val, Element::classId()));
+      return element->callNativeMethods("drawImage", 9, arguments);
+    }
+    case 5: {
+      if (argc < 5) {
+        return JS_ThrowTypeError(ctx, "Failed to execute 'drawImage' on 'CanvasRenderingContext2D': 5 argument required, but %d present.", argc);
+      }
+      
+      if (!JS_IsNumber(argv[1])) {
+        return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 2st arguments is not Number.");
+      }
+      if (!JS_IsNumber(argv[2])) {
+        return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 3st arguments is not Number.");
+      }
+      if (!JS_IsNumber(argv[3])) {
+        return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 4st arguments is not Number.");
+      }
+      if (!JS_IsNumber(argv[4])) {
+        return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 5st arguments is not Number.");
+      }
+    
+      getDartMethod()->flushUICommand();
+      NativeValue arguments[] = {
+       jsValueToNativeValue(ctx, argv[0]),
+       jsValueToNativeValue(ctx, argv[1]),
+       jsValueToNativeValue(ctx, argv[2]),
+       jsValueToNativeValue(ctx, argv[3]),
+       jsValueToNativeValue(ctx, argv[4])
+      };
+    
+      auto *element = static_cast<CanvasRenderingContext2D *>(JS_GetOpaque(this_val, Element::classId()));
+      return element->callNativeMethods("drawImage", 5, arguments);
+    }
+    case 3: {
+      if (argc < 3) {
+        return JS_ThrowTypeError(ctx, "Failed to execute 'drawImage' on 'CanvasRenderingContext2D': 3 argument required, but %d present.", argc);
+      }
+      
+      if (!JS_IsNumber(argv[1])) {
+        return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 2st arguments is not Number.");
+      }
+      if (!JS_IsNumber(argv[2])) {
+        return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 3st arguments is not Number.");
+      }
+    
+      getDartMethod()->flushUICommand();
+      NativeValue arguments[] = {
+       jsValueToNativeValue(ctx, argv[0]),
+       jsValueToNativeValue(ctx, argv[1]),
+       jsValueToNativeValue(ctx, argv[2])
+      };
+    
+      auto *element = static_cast<CanvasRenderingContext2D *>(JS_GetOpaque(this_val, Element::classId()));
+      return element->callNativeMethods("drawImage", 3, arguments);
+    }
+    
+  default:
+    return JS_NULL;
   }
-
-  if (!JS_IsNumber(argv[1])) {
-    return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 2st arguments is not Number.");
-  }
-  if (!JS_IsNumber(argv[2])) {
-    return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 3st arguments is not Number.");
-  }
-  if (!JS_IsNumber(argv[3])) {
-    return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 4st arguments is not Number.");
-  }
-  if (!JS_IsNumber(argv[4])) {
-    return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 5st arguments is not Number.");
-  }
-  if (!JS_IsNumber(argv[5])) {
-    return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 6st arguments is not Number.");
-  }
-  if (!JS_IsNumber(argv[6])) {
-    return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 7st arguments is not Number.");
-  }
-  if (!JS_IsNumber(argv[7])) {
-    return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 8st arguments is not Number.");
-  }
-  if (!JS_IsNumber(argv[8])) {
-    return JS_ThrowTypeError(ctx, "Failed to execute drawImage: 9st arguments is not Number.");
-  }
-
-  getDartMethod()->flushUICommand();
-  NativeValue arguments[] = {
-   jsValueToNativeValue(ctx, argv[0]),
-   jsValueToNativeValue(ctx, argv[1]),
-   jsValueToNativeValue(ctx, argv[2]),
-   jsValueToNativeValue(ctx, argv[3]),
-   jsValueToNativeValue(ctx, argv[4]),
-   jsValueToNativeValue(ctx, argv[5]),
-   jsValueToNativeValue(ctx, argv[6]),
-   jsValueToNativeValue(ctx, argv[7]),
-   jsValueToNativeValue(ctx, argv[8])
-  };
-
-  auto *element = static_cast<CanvasRenderingContext2D *>(JS_GetOpaque(this_val, Element::classId()));
-  return element->callNativeMethods("drawImage", 9, arguments);
 }
 JSValue CanvasRenderingContext2D::ellipse(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (argc < 7) {
@@ -513,7 +573,7 @@ JSValue CanvasRenderingContext2D::restore(QjsContext *ctx, JSValue this_val, int
 
   getDartMethod()->flushUICommand();
   NativeValue arguments[] = {
-
+  
   };
 
   auto *element = static_cast<CanvasRenderingContext2D *>(JS_GetOpaque(this_val, Element::classId()));
@@ -523,7 +583,7 @@ JSValue CanvasRenderingContext2D::resetTransform(QjsContext *ctx, JSValue this_v
 
   getDartMethod()->flushUICommand();
   NativeValue arguments[] = {
-
+  
   };
 
   auto *element = static_cast<CanvasRenderingContext2D *>(JS_GetOpaque(this_val, Element::classId()));
@@ -577,7 +637,7 @@ JSValue CanvasRenderingContext2D::stroke(QjsContext *ctx, JSValue this_val, int 
 
   getDartMethod()->flushUICommand();
   NativeValue arguments[] = {
-
+  
   };
 
   auto *element = static_cast<CanvasRenderingContext2D *>(JS_GetOpaque(this_val, Element::classId()));
@@ -615,7 +675,7 @@ JSValue CanvasRenderingContext2D::save(QjsContext *ctx, JSValue this_val, int ar
 
   getDartMethod()->flushUICommand();
   NativeValue arguments[] = {
-
+  
   };
 
   auto *element = static_cast<CanvasRenderingContext2D *>(JS_GetOpaque(this_val, Element::classId()));
