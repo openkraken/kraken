@@ -55,7 +55,7 @@ private:
 
 using NativeDispatchEvent = void (*)(NativeEventTarget *nativeEventTarget, NativeString *eventType, void *nativeEvent,
                                      int32_t isCustomEvent);
-using CallNativeMethods = void (*)(NativeEventTarget *nativeEventTarget, NativeValue *returnValue, NativeString *method, int32_t argc,
+using CallNativeMethods = void (*)(void *nativePtr, NativeValue *returnValue, NativeString *method, int32_t argc,
                                            NativeValue *argv);
 
 struct NativeEventTarget {

@@ -13,7 +13,7 @@ export function analyzer(blob: Blob) {
   let code = blob.raw;
   const sourceFile = ts.createSourceFile(blob.source, blob.raw, ScriptTarget.ES2020);
   blob.objects = sourceFile.statements.map(statement => walkProgram(statement)).filter(o => o instanceof ClassObject) as ClassObject[];
-  generatorSource(blob);
+  return generatorSource(blob);
 }
 
 function getInterfaceName(statement: ts.Statement) {

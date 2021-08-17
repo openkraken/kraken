@@ -4,6 +4,7 @@ const { program } = require('commander');
 const packageJSON = require('../package.json');
 const path = require('path');
 const glob = require('glob');
+const fs = require('fs');
 const { Blob } = require('../dist/blob');
 const { analyzer } = require('../dist/analyzer');
 
@@ -30,7 +31,14 @@ let files = glob.sync("**/*.d.ts", {
 
 let blobs = files.map(file => {
   let filename = file.replace('.d.ts', '');
-  return new Blob(path.join(source, file), path.join(dist, filename), filename);
+  return new Blob(path.join(source, file), dist, filename);
 });
 
-analyzer(blobs[0]);
+for (let i = 0; i < blobs.length; i ++) {
+  let b = blobs[i];
+  let result = analyzer(b);
+  console.log(b.dist);
+  fs.writeFileSync(path.join(b.dist, b.filename) + '.h', result.header);
+  fs.writeFileSync(path.join(b.dist, b.filename) + '.cc', result.source);
+}
+
