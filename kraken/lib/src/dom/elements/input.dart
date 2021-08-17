@@ -326,6 +326,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
 
       dom.TouchList touches = (event as dom.TouchEvent).touches;
       if (touches.length > 1) return;
+
       dom.Touch touch = touches.item(0);
       _selectStartPosition = Offset(touch.clientX, touch.clientY);
 
@@ -359,8 +360,10 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       InputElement.setFocus(this);
     } else if (event.type == dom.EVENT_LONG_PRESS) {
       _renderEditable!.handleLongPress();
+      InputElement.setFocus(this);
     } else if (event.type == dom.EVENT_DOUBLE_CLICK) {
       _renderEditable!.handleDoubleTap();
+      InputElement.setFocus(this);
     }
   }
 
