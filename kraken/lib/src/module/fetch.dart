@@ -30,15 +30,9 @@ class FetchModule extends BaseModule {
   @override
   String invoke(String method, params, InvokeModuleCallback callback) {
     String href = moduleManager!.controller.href;
-    String url = (moduleManager!.controller.uriParser!.resolve(Uri.parse(method), Uri.parse(href)));
+    Uri url = moduleManager!.controller.uriParser!.resolve(Uri.parse(href), Uri.parse(method));
 
     Map<String, dynamic> options = params;
-
-    Uri? uri = Uri.tryParse(url);
-    if (uri == null) {
-      callback(error: 'Can\'t parse url.');
-      return EMPTY_STRING;
-    }
 
     _handleError(Object error, StackTrace? stackTrace) {
       print('Error while fetching for $url, message: \n$error');
@@ -48,7 +42,7 @@ class FetchModule extends BaseModule {
       callback(error: '$error\n$stackTrace');
     }
 
-    httpClient.openUrl(options['method'] ?? 'GET', uri)
+    httpClient.openUrl(options['method'] ?? 'GET', url)
       .then((HttpClientRequest request) {
         // Reset Kraken UA.
         request.headers.removeAll(HttpHeaders.userAgentHeader);

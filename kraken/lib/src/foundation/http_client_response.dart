@@ -78,7 +78,7 @@ class _HttpHeaders implements HttpHeaders {
   }
 
   @override
-  DateTime? get expires => DateTime.tryParse(_headers[HttpHeaders.expiresHeader]!);
+  DateTime? get expires => DateTime.tryParse(_headers[HttpHeaders.expiresHeader] ?? '');
 
   @override
   set expires(DateTime? _expires) {

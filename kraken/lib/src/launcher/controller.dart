@@ -607,9 +607,7 @@ class KrakenController {
   }
 
   String _href = '';
-
   String get href => _href;
-
   set href(String value) => _href = value;
 
   // reload current kraken view.
