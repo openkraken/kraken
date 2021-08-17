@@ -48,6 +48,37 @@ void main() {
       var responseSecond = await requestSecond.close();
       assert(responseSecond.headers.value('x-kraken-cache') != null);
     });
+
+    test('Negotiation cache last-modified', () async {
+      // First request to save cache.
+      var req = await httpClient.get('127.0.0.1', server.port, '/003');
+      KrakenHttpOverrides.setContextHeader(req, contextId);
+      req.headers.ifModifiedSince = HttpDate.parse('Sun, 15 Mar 2020 11:32:20 GMT');
+      var res = await req.close();
+      expect(String.fromCharCodes(await sinkStream(res)), 'CachedData');
+
+      HttpCacheController cacheController = HttpCacheController.instance(req.headers.value('origin')!);
+      var cacheObject = await cacheController.getCacheObject(req.uri);
+      await cacheObject.read();
+
+      assert(cacheObject.valid);
+    });
+
+    test('Negotiation cache eTag', () async {
+      // First request to save cache.
+      var req = await httpClient.get('127.0.0.1', server.port, '/004');
+      KrakenHttpOverrides.setContextHeader(req, contextId);
+      req.headers.set(HttpHeaders.ifNoneMatchHeader, '"foo"');
+
+      var res = await req.close();
+      expect(String.fromCharCodes(await sinkStream(res)), 'CachedData');
+
+      HttpCacheController cacheController = HttpCacheController.instance(req.headers.value('origin')!);
+      var cacheObject = await cacheController.getCacheObject(req.uri);
+      await cacheObject.read();
+
+      assert(cacheObject.valid);
+    });
   });
 }
 

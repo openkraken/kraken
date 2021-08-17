@@ -1,4 +1,4 @@
-// Orginal version: https://github.com/rknell/dart_queue
+// Original version: https://github.com/rknell/dart_queue
 import 'dart:async';
 
 class _QueuedFuture<T> {

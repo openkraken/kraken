@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:test/test.dart';
 import 'package:kraken/foundation.dart';
 import '../../mock.dart';
@@ -21,8 +24,15 @@ void main() {
       KrakenHttpOverrides.setContextHeader(request, contextId);
       request.headers.add('x-test-id', 'beforeRequest-001');
 
-      await request.close();
+      var res = await request.close();
       expect(request.headers.value('x-test-before-request'), 'modified');
+
+      expect(jsonDecode(String.fromCharCodes(await res.single)), {
+        'method': 'GET',
+        'data': {
+          'userName': '12345'
+        }
+      });
     });
 
     test('afterResponse', () async {

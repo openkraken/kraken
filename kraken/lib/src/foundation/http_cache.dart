@@ -6,8 +6,9 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 
-import 'package:kraken/foundation.dart';
+import 'package:async/async.dart';
 import 'package:path/path.dart' as path;
+import 'package:kraken/foundation.dart';
 
 import 'http_cache_object.dart';
 
@@ -103,7 +104,7 @@ class HttpCacheController {
       }
     }
 
-    if (response.statusCode == HttpStatus.ok) {
+    if (response.statusCode == HttpStatus.ok && response is! HttpClientCachedResponse) {
       // Create cache object.
       HttpCacheObject cacheObject = HttpCacheObject
           .fromResponse(
@@ -164,16 +165,29 @@ class HttpClientCachedResponse extends Stream<List<int>> implements HttpClientRe
         Function? onError, void Function()? onDone, bool? cancelOnError
       }) {
     _blobSink = cacheObject.openBlobWrite();
-    return response.listen((List<int> data) {
+
+    void _handleData(List<int> data) {
       if (onData != null) onData(data);
       _onData(data);
-    }, onError: (error, [stackTrace]) {
+    }
+
+    void _handleError(error, [stackTrace]) {
       if (onError != null) onError(error, stackTrace);
       _onError(error, stackTrace);
-    }, onDone: () {
+    }
+
+    void _handleDone() {
       if (onDone != null) onDone();
       _onDone();
-    }, cancelOnError: cancelOnError);
+    }
+
+    return _DelegatingStreamSubscription(
+      response.listen(_handleData,
+        onError: _handleError, onDone: _handleDone, cancelOnError: cancelOnError),
+      handleData: _handleData,
+      handleDone: _handleDone,
+      handleError: _handleError,
+    );
   }
 
   @override
@@ -212,5 +226,50 @@ class HttpClientCachedResponse extends Stream<List<int>> implements HttpClientRe
       print('\n$stackTrace');
     }
     cacheObject.remove();
+  }
+}
+
+class _DelegatingStreamSubscription extends DelegatingStreamSubscription<List<int>> {
+  final void Function(List<int>) _handleData;
+  final Function _handleError;
+  final void Function() _handleDone;
+
+  _DelegatingStreamSubscription(StreamSubscription<List<int>> source, {
+    required void Function(List<int>) handleData,
+    required Function handleError,
+    required void Function() handleDone,
+  }) :_handleData = handleData,
+        _handleError = handleError,
+        _handleDone = handleDone,
+        super(source);
+
+  @override
+  void onData(void Function(List<int>)? handleData) {
+    super.onData((List<int> data) {
+      if (handleData != null) {
+        handleData(data);
+      }
+      _handleData(data);
+    });
+  }
+
+  @override
+  void onError(Function? handleError) {
+    super.onError((Object error, [StackTrace? stackTrace]) {
+      if (handleError != null) {
+        handleError(error, stackTrace: stackTrace);
+      }
+      _handleError(error, stackTrace: stackTrace);
+    });
+  }
+
+  @override
+  void onDone(void Function()? handleDone) {
+    super.onDone(() {
+      if (handleDone != null) {
+        handleDone();
+      }
+      _handleDone();
+    });
   }
 }
