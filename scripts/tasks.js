@@ -292,7 +292,7 @@ task('integration-test', (done) => {
 });
 
 task('unit-test', (done) => {
-  const childProcess = spawn('flutter', ['test'], {
+  const childProcess = spawn('flutter', ['test', '--coverage'], {
     stdio: 'pipe',
     cwd: paths.kraken
   });
