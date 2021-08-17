@@ -415,6 +415,9 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
   }
 
   void deactiveTextInput() {
+    // Clear range select when text input is not active.
+    updateEditingValue(_value.copyWith(selection: TextSelection(baseOffset: 0, extentOffset: 0)));
+
     _cursorVisibilityNotifier.value = false;
     if (_textInputConnection != null && _textInputConnection!.attached) {
       _textInputConnection!.close();
@@ -675,7 +678,6 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
 
   TextSelectionControls? selectionControls;
 
-  final GlobalKey _editableKey = GlobalKey();
   final ClipboardStatusNotifier? _clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
   final LayerLink _toolbarLayerLink = LayerLink();
   final LayerLink _startHandleLayerLink = LayerLink();
