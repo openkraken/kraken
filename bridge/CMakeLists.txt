@@ -235,6 +235,18 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
       bindings/qjs/dom/style_declaration.h
       bindings/qjs/dom/elements/canvas_element.cc
       bindings/qjs/dom/elements/canvas_element.h
+      bindings/qjs/dom/elements/image_element.cc
+      bindings/qjs/dom/elements/image_element.h
+      bindings/qjs/dom/elements/input_element.cc
+      bindings/qjs/dom/elements/input_element.h
+      bindings/qjs/dom/elements/anchor_element.cc
+      bindings/qjs/dom/elements/anchor_element.h
+      bindings/qjs/dom/elements/object_element.cc
+      bindings/qjs/dom/elements/object_element.h
+      bindings/qjs/dom/elements/script_element.cc
+      bindings/qjs/dom/elements/script_element.h
+      bindings/qjs/dom/elements/svg_element.h
+      bindings/qjs/dom/elements/svg_element.cc
       bindings/qjs/bom/blob.cc
       bindings/qjs/bom/blob.h
       bindings/qjs/bom/location.h

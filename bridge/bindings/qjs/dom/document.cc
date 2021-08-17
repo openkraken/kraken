@@ -11,6 +11,14 @@
 #include "dart_methods.h"
 #include "all_collection.h"
 
+#include "elements/anchor_element.h"
+#include "elements/image_element.h"
+#include "elements/canvas_element.h"
+#include "elements/input_element.h"
+#include "elements/object_element.h"
+#include "elements/script_element.h"
+#include "elements/svg_element.h"
+
 namespace kraken::binding::qjs {
 
 void traverseNode(NodeInstance *node, TraverseHandler handler) {
@@ -26,6 +34,8 @@ void traverseNode(NodeInstance *node, TraverseHandler handler) {
 
 
 std::once_flag kDocumentInitOnceFlag;
+static std::atomic<bool> event_registered = false;
+static std::atomic<bool> document_registered = false;
 
 void bindDocument(std::unique_ptr<JSContext> &context) {
   auto *documentConstructor = Document::instance(context.get());
@@ -41,6 +51,15 @@ Document::Document(JSContext *context) : Node(context, "Document") {
     JS_NewClassID(&kDocumentClassID);
   });
   JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
+  if (!document_registered) {
+    Element::defineElement("img", ImageElement::instance(m_context));
+    Element::defineElement("a", AnchorElement::instance(m_context));
+    Element::defineElement("canvas", CanvasElement::instance(m_context));
+    Element::defineElement("input", InputElement::instance(m_context));
+    Element::defineElement("object", ObjectElement::instance(m_context));
+    Element::defineElement("script", ScriptElement::instance(m_context));
+    Element::defineElement("svg", SVGElement::instance(m_context));
+  }
 }
 
 JSClassID Document::classId() {
@@ -89,7 +108,9 @@ JSValue Document::createElement(QjsContext *ctx, JSValue this_val, int argc, JSV
   }
 
   auto document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, Document::classId()));
-  JSValue element = JS_CallConstructor(ctx, Element::instance(document->context())->classObject, argc, argv);
+  std::string tagName = jsValueToStdString(ctx, tagNameValue);
+  Element *constructor = Element::getConstructor(document->m_context, tagName);
+  JSValue element = JS_CallConstructor(ctx, constructor->classObject, argc, argv);
   return element;
 }
 

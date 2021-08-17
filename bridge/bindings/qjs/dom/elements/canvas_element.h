@@ -90,14 +90,11 @@ public:
   CanvasElement() = delete;
   explicit CanvasElement(JSContext *context);
   JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
-
   static JSValue getContext(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-
+  OBJECT_INSTANCE(CanvasElement);
 private:
   ObjectFunction m_getContext{m_context, m_prototypeObject, "getContext", getContext, 1};
 };
-
-
 class CanvasElementInstance : public ElementInstance {
 public:
   CanvasElementInstance() = delete;

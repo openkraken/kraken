@@ -68,9 +68,10 @@ public:
   static JSValue scroll(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue scrollBy(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
 
-  static void defineElement(const std::string &tagName, ElementCreator creator);
+  static void defineElement(const std::string &tagName, Element *constructor);
+  static Element* getConstructor(JSContext *context, const std::string &tagName);
 
-  static std::unordered_map<std::string, ElementCreator> elementCreatorMap;
+  static std::unordered_map<std::string, Element *> elementConstructorMap;
 
   OBJECT_INSTANCE(Element);
 

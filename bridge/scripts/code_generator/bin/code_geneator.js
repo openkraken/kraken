@@ -37,7 +37,6 @@ let blobs = files.map(file => {
 for (let i = 0; i < blobs.length; i ++) {
   let b = blobs[i];
   let result = analyzer(b);
-  console.log(b.dist);
   fs.writeFileSync(path.join(b.dist, b.filename) + '.h', result.header);
   fs.writeFileSync(path.join(b.dist, b.filename) + '.cc', result.source);
 }

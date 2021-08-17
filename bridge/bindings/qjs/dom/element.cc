@@ -104,10 +104,12 @@ JSValue Element::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val
   const char *cName = JS_ToCString(ctx, tagName);
   std::string name = std::string(cName);
 
+  if (elementConstructorMap.count(name) > 0) {
+    return JS_CallConstructor(ctx, elementConstructorMap[name]->classObject, argc, argv);
+  }
+
   ElementInstance *element;
-  if (elementCreatorMap.count(name) > 0) {
-    element = elementCreatorMap[name](this, name);
-  } else if (name == "HTML") {
+  if (name == "HTML") {
     element = new ElementInstance(this, name, false);
     element->eventTargetId = HTML_TARGET_ID;
   } else {
@@ -363,12 +365,17 @@ JSValue Element::scrollBy(QjsContext *ctx, JSValue this_val, int argc, JSValue *
   return element->callNativeMethods("scrollBy", 2, arguments);
 }
 
-std::unordered_map<std::string, ElementCreator> Element::elementCreatorMap{};
+std::unordered_map<std::string, Element*> Element::elementConstructorMap{};
 
-void Element::defineElement(const std::string &tagName, ElementCreator creator) {
-  if (elementCreatorMap.count(tagName) > 0) return;
+void Element::defineElement(const std::string &tagName, Element* constructor) {
+  if (elementConstructorMap.count(tagName) > 0) return;
 
-  elementCreatorMap[tagName] = creator;
+  elementConstructorMap[tagName] = constructor;
+}
+
+Element* Element::getConstructor(JSContext *context, const std::string &tagName) {
+  if (elementConstructorMap.count(tagName) == 0) return Element::instance(context);
+  return elementConstructorMap[tagName];
 }
 
 PROP_GETTER(ElementInstance, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {

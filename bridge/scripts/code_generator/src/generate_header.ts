@@ -67,14 +67,12 @@ public:
   ${object.name}() = delete;
   explicit ${object.name}(JSContext *context);
   JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
-
   ${methodsDefine.join('\n  ')}
-
+  OBJECT_INSTANCE(${object.name});
 private:
   ${methodsImpl.join('\n  ')}
 };`;
-  let instanceHeaders = `\n
-class ${object.name}Instance : public ElementInstance {
+  let instanceHeaders = `class ${object.name}Instance : public ElementInstance {
 public:
   ${object.name}Instance() = delete;
   explicit ${object.name}Instance(${object.name} *element);

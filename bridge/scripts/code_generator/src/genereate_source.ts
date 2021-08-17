@@ -9,8 +9,6 @@ function generateHostObjectSource(object: ClassObject) {
                                                    Native${object.name} *nativePtr)
   : HostObject(context, "${object.name}"), m_nativePtr(nativePtr) {
 }
-
-
 JSValue ${object.name}::callNativeMethods(const char *method, int32_t argc,
                                                NativeValue *argv) {
   if (m_nativePtr->callNativeMethods == nullptr) {
@@ -30,7 +28,6 @@ JSValue ${object.name}::callNativeMethods(const char *method, int32_t argc,
   JSValue returnValue = nativeValueToJSValue(m_context, nativeValue);
   return returnValue;
 }
-
 ${propSource.join('\n')}
 ${methodsSource.join('\n')}
 `;
@@ -51,7 +48,11 @@ function generatePropsSource(object: ClassObject, type: PropType) {
   return element->callNativeMethods("get${p.name[0].toUpperCase() + p.name.substring(1)}", 0, nullptr);
 }`;
       let setter = `PROP_SETTER(${object.name}${type == PropType.hostClass ? 'Instance' : ''}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  return JS_NULL;
+  auto *element = static_cast<${object.name}${type == PropType.hostClass ? 'Instance' : ''} *>(JS_GetOpaque(this_val, Element::classId()));
+  NativeValue arguments[] = {
+    jsValueToNativeValue(ctx, argv[0])
+  };
+  return element->callNativeMethods("set${p.name[0].toUpperCase() + p.name.substring(1)}", 1, arguments);
 }`;
       propSource.push(getter + '\n' + setter);
     });
@@ -121,19 +122,22 @@ function generateMethodsSource(object: ClassObject, type: PropType) {
       polymorphismMap[m.name] = true;
 
       function createMethodBody(m: FunctionDeclaration) {
-        let callArguments = [];
-        for (let i = 0; i < m.args.length; i ++) {
-          callArguments.push(` jsValueToNativeValue(ctx, argv[${i}])`);
+        let callArgumentsCode = '';
+        if (m.args.length > 0) {
+          let callArguments = [];
+          for (let i = 0; i < m.args.length; i ++) {
+            callArguments.push(` jsValueToNativeValue(ctx, argv[${i}])`);
+          }
+          callArgumentsCode = `NativeValue arguments[] = {
+  ${callArguments.join(',\n  ')}
+  };`;
         }
 
         return `${generateMethodArgumentsCheck(m, object)}
   getDartMethod()->flushUICommand();
-  NativeValue arguments[] = {
-  ${callArguments.join(',\n  ')}
-  };
-
+${callArgumentsCode}
   auto *element = static_cast<${object.name}${type == PropType.hostObject ? '' : 'Instance'} *>(JS_GetOpaque(this_val, Element::classId()));
-  return element->callNativeMethods("${m.name}", ${m.args.length}, arguments);`;
+  return element->callNativeMethods("${m.name}", ${m.args.length}, ${m.args.length > 0 ? 'arguments' : 'nullptr'});`;
       }
 
       if (polymorphism) {
@@ -176,13 +180,14 @@ function generateHostClassSource(object: ClassObject) {
   return `
 ${object.name}::${object.name}(JSContext *context) : Element(context) {}
 
+OBJECT_INSTANCE_IMPL(${object.name});
+
 JSValue ${object.name}::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   return JS_ThrowTypeError(ctx, "Illegal constructor");
 }
-
 ${propSource.join('\n')}
-
 ${methodsSource.join('\n')}
+${object.name}Instance::${object.name}Instance(${object.name} *element): ElementInstance(element, "CanvasElement", true) {}
 `;
 }
 
@@ -202,7 +207,7 @@ export function generateCppSource(blob: Blob) {
  * Author: Kraken Team.
  */
 
-#include "canvas_element.h"
+#include "${blob.filename}.h"
 #include "bridge_qjs.h"
 
 namespace kraken::binding::qjs {
