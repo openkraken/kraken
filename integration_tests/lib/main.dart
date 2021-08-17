@@ -54,10 +54,15 @@ class NativeGestureClient implements GestureClient {
 }
 
 // Test for UriParser.
-class MyUriParser extends UriParser {
+class IntegrationTestUriParser extends UriParser {
   @override
   Uri resolve(Uri base, Uri relative) {
-    return super.resolve(base, relative);
+    if (base.toString().isEmpty
+        && relative.path.startsWith('assets/')) {
+      return Uri.file(relative.path);
+    } else {
+      return super.resolve(base, relative);
+    }
   }
 }
 
@@ -117,7 +122,7 @@ void main() async {
       disableViewportHeightAssertion: true,
       javaScriptChannel: javaScriptChannel,
       gestureClient: NativeGestureClient(gestureClientID: i),
-      uriParser: MyUriParser(),
+      uriParser: IntegrationTestUriParser(),
     );
     widgets.add(kraken);
   }
