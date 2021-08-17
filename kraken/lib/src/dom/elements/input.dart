@@ -332,6 +332,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
 
       dom.TouchEvent e = event;
       if (e.touches.length == 1) {
+        InputElement.setFocus(this);
         dom.Touch touch = e.touches[0];
         final TapDownDetails details = TapDownDetails(
           globalPosition: Offset(touch.screenX, touch.screenY),
@@ -349,7 +350,6 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       if (touches.length > 1) return;
       dom.Touch touch = touches.item(0);
       Offset _selectEndPosition = Offset(touch.clientX, touch.clientY);
-
       _renderEditable!.selectPositionAt(
         from: _selectStartPosition!,
         to: _selectEndPosition,
@@ -357,13 +357,10 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       );
     } else if (event.type == dom.EVENT_CLICK) {
       _renderEditable!.handleTap();
-      InputElement.setFocus(this);
     } else if (event.type == dom.EVENT_LONG_PRESS) {
       _renderEditable!.handleLongPress();
-      InputElement.setFocus(this);
     } else if (event.type == dom.EVENT_DOUBLE_CLICK) {
       _renderEditable!.handleDoubleTap();
-      InputElement.setFocus(this);
     }
   }
 
