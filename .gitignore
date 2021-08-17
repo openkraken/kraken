@@ -66,3 +66,4 @@ Podfile.lock
 .cxx
 
 temp
+coverage

@@ -330,6 +330,16 @@ task('unit-test', (done) => {
   });
 });
 
+task('unit-test-coverage-reporter', (done) => {
+  const childProcess = spawn('npm', ['run', 'test:unit:report'], {
+    stdio: 'inherit',
+    cwd: KRAKEN_ROOT,
+  });
+  childProcess.on('exit', () => {
+    done();
+  });
+});
+
 task('sdk-clean', (done) => {
   execSync(`rm -rf ${paths.sdk}/build`, { stdio: 'inherit' });
   done();
