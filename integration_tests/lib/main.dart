@@ -56,9 +56,8 @@ class NativeGestureClient implements GestureClient {
 // Test for UriParser.
 class MyUriParser extends UriParser {
   @override
-  String resolve(Uri base, Uri relative) {
-    String uri = super.resolve(base, relative);
-    return uri;
+  Uri resolve(Uri base, Uri relative) {
+    return super.resolve(base, relative);
   }
 }
 
