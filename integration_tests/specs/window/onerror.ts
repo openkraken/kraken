@@ -1,21 +1,25 @@
-xdescribe('window onerror', () => {
-  it('window onerror default to null', () => {
-    expect(window.onerror).toEqual(null);
-  });
+const ex = new Error('CustomErrorTest');
+let onerrorTestSuccess = false;
 
-  it('window onerror works', (done) => {
-    const ex = new Error('CustomErrorTest');
-    window.onerror = function(event, sourceURL, line, column, error) {
-      expect(window.onerror).toBe(arguments.callee);
+window.onerror = function(event, sourceURL, line, column, error) {
+  try {
+    onerrorTestSuccess = window.onerror === arguments.callee || error === ex || sourceURL === location.href || event instanceof Event;
+  } catch (e) {
+    onerrorTestSuccess = false;
+  }
+};
 
-      // Reset onerror.
-      window.onerror = null;
+window.addEventListener('error', (e) => {
+  onerrorTestSuccess = e.error === ex;
+});
 
-      expect(error).toBe(ex);
-      expect(sourceURL).toEqual(location.href);
-      expect(event instanceof Event).toBeTrue();
-
-      done();
-    };
+describe('window onerror', () => {
+  it('window onerror works', () => {
+    expect(onerrorTestSuccess).toBe(true);
   });
 });
+
+setTimeout(() => {
+  throw ex;
+});
+
