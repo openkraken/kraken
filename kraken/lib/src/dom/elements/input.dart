@@ -23,6 +23,7 @@ import 'package:kraken/dom.dart' as dom;
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/gesture.dart';
 
 const String INPUT = 'INPUT';
 const String VALUE = 'value';
@@ -176,7 +177,25 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
 
   bool _autoFocus = false;
 
-  ViewportOffset offset = ViewportOffset.zero();
+  KrakenScrollable scrollableX = KrakenScrollable(axisDirection: AxisDirection.right);
+
+  ViewportOffset? get scrollOffsetX => _scrollOffsetX;
+  ViewportOffset? _scrollOffsetX = ViewportOffset.zero();
+  set scrollOffsetX(ViewportOffset? value) {
+    if (value == null) return;
+    if (value == _scrollOffsetX) return;
+    _scrollOffsetX = value;
+    _scrollOffsetX!.removeListener(_scrollXListener);
+    _scrollOffsetX!.addListener(_scrollXListener);
+    _renderInputBox?.markNeedsLayout();
+    _renderEditable?.markNeedsLayout();
+  }
+
+  void _scrollXListener() {
+    _renderInputBox?.markNeedsPaint();
+    _renderEditable?.markNeedsPaint();
+  }
+
   bool obscureText = false;
   bool autoCorrect = true;
   late EditableTextDelegate _textSelectionDelegate;
@@ -217,6 +236,8 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
     nativeInputElement.ref.getInputHeight = nativeGetInputHeight;
     nativeInputElement.ref.focus = nativeInputMethodFocus;
     nativeInputElement.ref.blur = nativeInputMethodBlur;
+
+    scrollOffsetX = scrollableX.position;
   }
 
   @override
@@ -309,13 +330,24 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
     return CSSTextMixin.createTextSpan(obscuringCharacter * text.length, parentElement: this);
   }
 
-  Color? cursorColor;
+  Color cursorColor = CSSColor.initial;
 
-  Color? selectionColor;
+  Color selectionColor = CSSColor.initial.withOpacity(0.4);
 
-  Radius? cursorRadius;
+  Radius cursorRadius = const Radius.circular(2.0);
 
   Offset? _selectStartPosition;
+
+  // Get the text size of input by layouting manually cause RenderEditable does not expose textPainter.
+  Size getTextSize() {
+    final Size textSize = (TextPainter(
+      text: _renderEditable!.text,
+      maxLines: 1,
+      textDirection: TextDirection.ltr)
+      ..layout())
+      .size;
+    return textSize;
+  }
 
   @override
   void dispatchEvent(dom.Event event) {
@@ -332,7 +364,6 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
 
       dom.TouchEvent e = event;
       if (e.touches.length == 1) {
-        InputElement.setFocus(this);
         dom.Touch touch = e.touches[0];
         final TapDownDetails details = TapDownDetails(
           globalPosition: Offset(touch.screenX, touch.screenY),
@@ -346,10 +377,28 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
     } else if (event.type == dom.EVENT_TOUCH_MOVE ||
       event.type == dom.EVENT_TOUCH_END
     ) {
+      if (event.type == dom.EVENT_TOUCH_END) {
+        InputElement.setFocus(this);
+      }
+
+      Size textSize = getTextSize();
+
       dom.TouchList touches = (event as dom.TouchEvent).touches;
       if (touches.length > 1) return;
       dom.Touch touch = touches.item(0);
       Offset _selectEndPosition = Offset(touch.clientX, touch.clientY);
+
+      // Disable text selection when text size is larger than input size.
+      if (textSize.width > _renderEditable!.size.width) {
+        if (event.type == dom.EVENT_TOUCH_END && _selectStartPosition == _selectEndPosition) {
+          _renderEditable!.selectPositionAt(
+            from: _selectStartPosition!,
+            to: _selectEndPosition,
+            cause: SelectionChangedCause.drag,
+          );
+        }
+        return;
+      }
       _renderEditable!.selectPositionAt(
         from: _selectStartPosition!,
         to: _selectEndPosition,
@@ -441,40 +490,42 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       text = _buildPasswordTextSpan(text.text!);
     }
 
-    BuildContext context = elementManager.context!;
-    final ThemeData theme = Theme.of(context);
-    final TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
+    BuildContext? context = elementManager.context;
+    if (context != null) {
+      final ThemeData theme = Theme.of(context);
+      final TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
 
-    switch (theme.platform) {
-      case TargetPlatform.iOS:
-        final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
-        cursorColor = selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
-        selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
-        cursorRadius = const Radius.circular(2.0);
-        selectionControls = cupertinoTextSelectionControls;
-        break;
+      switch (theme.platform) {
+        case TargetPlatform.iOS:
+          final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
+          cursorColor = selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
+          selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
+          cursorRadius = const Radius.circular(2.0);
+          selectionControls = cupertinoTextSelectionControls;
+          break;
 
-      case TargetPlatform.macOS:
-        final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
-        cursorColor = selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
-        selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
-        cursorRadius = const Radius.circular(2.0);
-        selectionControls = cupertinoDesktopTextSelectionControls;
-        break;
+        case TargetPlatform.macOS:
+          final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
+          cursorColor = selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
+          selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
+          cursorRadius = const Radius.circular(2.0);
+          selectionControls = cupertinoDesktopTextSelectionControls;
+          break;
 
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        cursorColor = selectionTheme.cursorColor ?? theme.colorScheme.primary;
-        selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
-        selectionControls = materialTextSelectionControls;
-        break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          cursorColor = selectionTheme.cursorColor ?? theme.colorScheme.primary;
+          selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+          selectionControls = materialTextSelectionControls;
+          break;
 
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        cursorColor = selectionTheme.cursorColor ?? theme.colorScheme.primary;
-        selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
-        selectionControls = desktopTextSelectionControls;
-        break;
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          cursorColor = selectionTheme.cursorColor ?? theme.colorScheme.primary;
+          selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+          selectionControls = desktopTextSelectionControls;
+          break;
+      }
     }
 
     _renderEditable = RenderEditable(
@@ -489,7 +540,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       textDirection: textDirection,
       selection: blurSelection, // Default to blur
       selectionColor: selectionColor,
-      offset: offset,
+      offset: scrollOffsetX!,
       readOnly: false,
       forceLine: true,
       onCaretChanged: _handleCaretChanged,
@@ -512,6 +563,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
     RenderEditable renderEditable = createRenderEditable();
 
     _renderInputBox = RenderInputBox(
+      scrollableX: scrollableX,
       child: renderEditable,
     );
     return _renderInputBox!;
@@ -949,7 +1001,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
   }
 
   void _onCursorColorTick() {
-    _renderEditable!.cursorColor = cursorColor!.withOpacity(_cursorBlinkOpacityController!.value);
+    _renderEditable!.cursorColor = cursorColor.withOpacity(_cursorBlinkOpacityController!.value);
     _cursorVisibilityNotifier.value = _cursorBlinkOpacityController!.value > 0;
   }
 
@@ -997,8 +1049,23 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
 
 class RenderInputBox extends RenderProxyBox {
   RenderInputBox({
+    required this.scrollableX,
     required RenderEditable child,
   }) : super(child);
+
+  KrakenScrollable scrollableX;
+
+  void _pointerListener(PointerEvent event) {
+    if (event is PointerDownEvent) {
+      scrollableX.handlePointerDown(event);
+    }
+  }
+
+  @override
+  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    super.handleEvent(event, entry);
+    _pointerListener(event);
+  }
 
   Offset? get _offset {
     RenderIntrinsic renderIntrinsic = (parent as RenderIntrinsic?)!;
