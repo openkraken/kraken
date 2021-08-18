@@ -58,18 +58,35 @@ function defineGlobalProperty(key: string, value: any, isEnumerable: boolean = t
 //   window.dispatchEvent(errorEvent);
 // };
 
+class ErrorEvent extends Event {
+  message?: string;
+  lineno?: number;
+  constructor(type: string, init?: ErrorEventInit) {
+    super(type);
+
+    if (init) {
+      this.message = init.message;
+      this.lineno = init.lineno;
+    }
+  }
+}
+
 // Global error handler used by JS Engine
-// // @ts-ignore
-// window.__global_onerror_handler__ = function (error) {
-//   // @ts-ignore
-//   const event = new ErrorEvent({
-//     error: error,
-//     message: error.message,
-//     lineno: error.line
-//   });
-//   // @ts-ignore
-//   window.dispatchEvent(event);
-// };
+// @ts-ignore
+window.__global_onerror_handler__ = function (error) {
+  if (window.onerror) {
+    window.onerror(error.message, error.sourceURL, error.line, error.column, error);
+  }
+
+  // @ts-ignore
+  const event = new ErrorEvent('error',{
+    error: error,
+    message: error.message,
+    lineno: error.line
+  });
+  // @ts-ignore
+  window.dispatchEvent(event);
+};
 
 // default unhandled project handler
 // window.addEventListener('unhandledrejection', (event) => {

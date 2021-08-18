@@ -21,7 +21,7 @@
 #include <forward_list>
 #include "third_party/gumbo-parser/src/gumbo.h"
 
-using JSExceptionHandler = std::function<void(int32_t contextId, const char *errmsg)>;
+using JSExceptionHandler = std::function<void(int32_t contextId, const char *errmsg, JSObjectRef error)>;
 
 class NativeString;
 

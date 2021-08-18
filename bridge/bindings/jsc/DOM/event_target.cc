@@ -421,7 +421,7 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
   }
 
   // Dispatch event listener white by 'on' prefix property.
-  if (_propertyEventHandler.count(eventType) > 0) {
+  if (_propertyEventHandler.count(eventType) > 0 && eventType != "error") {
     _dispatchEvent(_propertyEventHandler[eventType]);
   }
 

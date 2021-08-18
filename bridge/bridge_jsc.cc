@@ -59,10 +59,23 @@ ConsoleMessageHandler JSBridge::consoleMessageHandler {nullptr};
  * JSRuntime
  */
 JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : contextId(contextId) {
-  auto errorHandler = [handler, this](int32_t contextId, const char *errmsg) {
-    handler(contextId, errmsg);
-    // trigger window.onerror handler.
-    // TODO: trigger onerror event.
+  auto errorHandler = [handler, this](int32_t contextId, const char *errmsg, JSObjectRef errorObject) {
+    handler(contextId, errmsg, errorObject);
+
+    // trigger error event.
+    JSStringHolder windowKeyHolder = JSStringHolder(m_context.get(), "window");
+    JSValueRef windowValue = JSObjectGetProperty(m_context->context(), m_context->global(), windowKeyHolder.getString(), nullptr);
+    JSObjectRef windowObject = JSValueToObject(m_context->context(), windowValue, nullptr);
+    JSStringHolder onerrorKeyHolder = JSStringHolder(m_context.get(), "__global_onerror_handler__");
+    if (JSObjectHasProperty(m_context->context(), windowObject, onerrorKeyHolder.getString())) {
+      JSValueRef onerrorFuncValue = JSObjectGetProperty(m_context->context(), windowObject, onerrorKeyHolder.getString(), nullptr);
+      JSObjectRef onerrorFunc = JSValueToObject(m_context->context(), onerrorFuncValue, nullptr);
+      JSValueRef arguments[] = {
+        errorObject
+      };
+
+      JSObjectCallAsFunction(m_context->context(), onerrorFunc, m_context->global(), 1, arguments, nullptr);
+    }
   };
 
 #if ENABLE_PROFILE
@@ -212,7 +225,7 @@ JSBridge::~JSBridge() {
 }
 
 void JSBridge::reportError(const char *errmsg) {
-  m_handler(m_context->getContextId(), errmsg);
+  m_context->reportError(errmsg);
 }
 
 void JSBridge::setDisposeCallback(Task task, void *data) {

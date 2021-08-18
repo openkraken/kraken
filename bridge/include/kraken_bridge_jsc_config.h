@@ -65,7 +65,7 @@
     JSStringRef stackStr = JSValueToStringCopy(ctx_, stackRef, nullptr);                                               \
     std::string &&message = JSStringToStdString(messageStr);                                                           \
     std::string &&stack = JSStringToStdString(stackStr);                                                               \
-    handler(getContextId(), (message + '\n' + stack).c_str());                                                         \
+    handler(getContextId(), (message + '\n' + stack).c_str(), error);                                                  \
     JSStringRelease(messageKey);                                                                                       \
     JSStringRelease(stackKey);                                                                                         \
     JSStringRelease(messageStr);                                                                                       \

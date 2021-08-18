@@ -124,7 +124,11 @@ JSGlobalContextRef JSContext::context() {
 }
 
 void JSContext::reportError(const char *errmsg) {
-  _handler(contextId, errmsg);
+  JSValueRef arguments[] = {
+    JSValueMakeString(ctx_, JSStringCreateWithUTF8CString(errmsg))
+  };
+  JSObjectRef errorObject = JSObjectMakeError(ctx_, 1, arguments, nullptr);
+  _handler(contextId, errmsg, errorObject);
 }
 
 void throwJSError(JSContextRef ctx, const char *msg, JSValueRef *exception) {
