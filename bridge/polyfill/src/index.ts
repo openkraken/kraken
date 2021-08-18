@@ -61,12 +61,14 @@ function defineGlobalProperty(key: string, value: any, isEnumerable: boolean = t
 class ErrorEvent extends Event {
   message?: string;
   lineno?: number;
+  error?: Error;
   constructor(type: string, init?: ErrorEventInit) {
     super(type);
 
     if (init) {
       this.message = init.message;
       this.lineno = init.lineno;
+      this.error = init.error;
     }
   }
 }
