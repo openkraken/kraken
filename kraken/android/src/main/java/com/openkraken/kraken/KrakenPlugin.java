@@ -1,7 +1,6 @@
 package com.openkraken.kraken;
 
-import androidx.annotation.NonNull;
-
+import android.content.Context;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.MethodCall;
@@ -11,7 +10,7 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 /**
- * KrakenBundlePlugin
+ * KrakenPlugin
  */
 public class KrakenPlugin implements FlutterPlugin, MethodCallHandler {
     /// The MethodChannel that will the communication between Flutter and native Android
@@ -20,6 +19,8 @@ public class KrakenPlugin implements FlutterPlugin, MethodCallHandler {
     /// when the Flutter Engine is detached from the Activity
     public MethodChannel channel;
     private FlutterEngine flutterEngine;
+    private Context mContext;
+    private Kraken mKraken;
 
     // This static function is optional and equivalent to onAttachedToEngine. It supports the old
     // pre-Flutter-1.12 Android projects. You are encouraged to continue supporting
@@ -33,11 +34,13 @@ public class KrakenPlugin implements FlutterPlugin, MethodCallHandler {
     public static void registerWith(Registrar registrar) {
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "kraken");
         KrakenPlugin plugin = new KrakenPlugin();
+        plugin.mContext = registrar.context();
         channel.setMethodCallHandler(plugin);
     }
 
     @Override
-    public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+    public void onAttachedToEngine(FlutterPluginBinding flutterPluginBinding) {
+        mContext = flutterPluginBinding.getApplicationContext();
         channel = new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "kraken");
         flutterEngine = flutterPluginBinding.getFlutterEngine();
         channel.setMethodCallHandler(this);
@@ -49,33 +52,55 @@ public class KrakenPlugin implements FlutterPlugin, MethodCallHandler {
         }
     }
 
-    @Override
-    public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
-        Kraken kraken = Kraken.get(flutterEngine);
-        if (kraken == null) {
-          result.notImplemented();
-          return;
-        }
+    Kraken getKraken() {
+      if (mKraken != null) {
+        mKraken = Kraken.get(flutterEngine);
+      }
+      return mKraken;
+    }
 
-        if (call.method.equals("getUrl")) {
+    @Override
+    public void onMethodCall(MethodCall call, Result result) {
+        switch (call.method) {
+          case "getUrl": {
+            Kraken kraken = getKraken();
             result.success(kraken == null ? "" : kraken.getUrl());
-        } else if (call.method.equals("invokeMethod")) {
-            String method = call.argument("method");
-            Object args = call.argument("args");
-            assert method != null;
-            MethodCall callWrap = new MethodCall(method, args);
-            kraken._handleMethodCall(callWrap, result);
-        } else {
+            break;
+          }
+
+          case "invokeMethod": {
+            Kraken kraken = getKraken();
+            if (kraken != null) {
+              String method = call.argument("method");
+              Object args = call.argument("args");
+              assert method != null;
+              MethodCall callWrap = new MethodCall(method, args);
+              kraken._handleMethodCall(callWrap, result);
+            } else {
+              result.error("Kraken instance not found.", null, null);
+            }
+            break;
+          }
+
+          case "getTemporaryDirectory":
+            result.success(getTemporaryDirectory());
+            break;
+
+          default:
             result.notImplemented();
         }
     }
 
     @Override
-    public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+    public void onDetachedFromEngine(FlutterPluginBinding binding) {
         channel.setMethodCallHandler(null);
         Kraken kraken = Kraken.get(flutterEngine);
         if (kraken == null) return;
         kraken.destroy();
         flutterEngine = null;
+    }
+
+    private String getTemporaryDirectory() {
+      return mContext.getCacheDir().getPath() + "/Kraken";
     }
 }

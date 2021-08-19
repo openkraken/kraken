@@ -92,13 +92,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.1"
-  dio:
-    dependency: transitive
-    description:
-      name: dio
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "4.0.0"
   fake_async:
     dependency: transitive
     description:
@@ -135,13 +128,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  http_parser:
-    dependency: transitive
-    description:
-      name: http_parser
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "4.0.0"
   js:
     dependency: transitive
     description:
@@ -155,7 +141,7 @@ packages:
       path: "../kraken"
       relative: true
     source: path
-    version: "0.8.0-dev.1"
+    version: "0.8.2"
   matcher:
     dependency: transitive
     description:
@@ -177,24 +163,10 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.8.0"
-  path_provider:
-    dependency: transitive
-    description:
-      name: path_provider
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.0.2"
   path_provider_linux:
     dependency: transitive
     description:
       name: path_provider_linux
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.0.0"
-  path_provider_macos:
-    dependency: transitive
-    description:
-      name: path_provider_macos
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0"
