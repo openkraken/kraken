@@ -4,19 +4,19 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 
-/// [MockedHttpServer] used for mock HTTP servers.
-/// Usage: putting `RAW HTTP Response` in txt to `mocks/http/$METHOD_$PATH.txt`
-/// Example:  `mocks/http/GET_foo` content will response to request that `GET /foo`
-class MockedHttpServer {
-  static MockedHttpServer? _instance;
+/// [LocalHttpServer] used for serving local HTTP servers.
+/// Usage: putting `RAW HTTP Response` in txt to `res/$METHOD_$PATH`
+/// Example:  `res/GET_foo` content will response to request that `GET /foo`
+class LocalHttpServer {
+  static LocalHttpServer? _instance;
 
-  MockedHttpServer._() {
+  LocalHttpServer._() {
     _startServer();
   }
 
-  static MockedHttpServer getInstance() {
+  static LocalHttpServer getInstance() {
     if (_instance == null) {
-      _instance = MockedHttpServer._();
+      _instance = LocalHttpServer._();
     }
     return _instance!;
   }
@@ -25,8 +25,14 @@ class MockedHttpServer {
     return Random().nextInt(55535) + 10000;
   }
 
+  static String basePath = 'assets';
+
   final int port = _randomPort();
   ServerSocket? _server;
+
+  Uri getUri([String? path]) {
+    return Uri.http('${InternetAddress.loopbackIPv4.host}:$port', path ?? '');
+  }
 
   void _startServer() {
     ServerSocket.bind(InternetAddress.loopbackIPv4, port).then((ServerSocket server) {
@@ -58,9 +64,9 @@ class MockedHttpServer {
           String path = String.fromCharCodes(pathBuilder.takeBytes());
 
           // Example: GET_foo.txt represents `GET /foo`
-          File p = File('mocks/http/${method}_${path.substring(1)}');
+          File p = File('$basePath/${method}_${path.substring(1)}');
           if (!p.existsSync()) {
-            throw FlutterError('Reading mock http data, but file not exists: \n${p.absolute.path}');
+            throw FlutterError('Reading local http data, but file not exists: \n${p.absolute.path}');
           }
           socket.add(p.readAsBytesSync());
         });

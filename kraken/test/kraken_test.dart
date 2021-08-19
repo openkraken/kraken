@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kraken/foundation.dart';
 
 import 'foundation.dart' as foundation;
-import 'mock.dart';
+import 'local_http_server.dart';
 
 // The main entry for kraken unit test.
 // Setup all common logic.
@@ -14,9 +14,10 @@ void main() {
   // Setup environment.
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Start mock HTTP server.
-  var mockedHttpServer = MockedHttpServer.getInstance();
-  print('Mocked HTTP Server started at http://127.0.0.1:${mockedHttpServer.port}');
+  // Start local HTTP server.
+  LocalHttpServer.basePath = 'test/fixtures';
+  var httpServer = LocalHttpServer.getInstance();
+  print('Local HTTP Server started at ${httpServer.getUri()}');
 
   // Work around with path_provider.
   Directory tempDirectory = Directory('./temp');
