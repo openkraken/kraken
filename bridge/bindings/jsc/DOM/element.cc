@@ -16,6 +16,7 @@ using namespace foundation;
 void bindElement(std::unique_ptr<JSContext> &context) {
   auto element = JSElement::instance(context.get());
   JSC_GLOBAL_SET_PROPERTY(context, "Element", element->classObject);
+  JSC_GLOBAL_SET_PROPERTY(context, "HTMLElement", element->classObject);
 }
 
 std::vector<JSStringRef> &JSElementAttributes::getAttributePropertyNames() {

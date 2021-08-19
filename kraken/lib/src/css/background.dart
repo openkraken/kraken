@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/launcher.dart';
 
 // CSS Backgrounds: https://drafts.csswg.org/css-backgrounds/
 // CSS Images: https://drafts.csswg.org/css-images-3/
@@ -110,34 +111,15 @@ class CSSBackground {
       }
     }
 
-    BoxFit boxFit = BoxFit.none;
-    if (style[BACKGROUND_SIZE].isNotEmpty) {
-      switch (style[BACKGROUND_SIZE]) {
-        case COVER:
-          boxFit = BoxFit.cover;
-          break;
-        case CONTAIN:
-          boxFit = BoxFit.contain;
-          break;
-        case FILL:
-          boxFit = BoxFit.fill;
-          break;
-        case FIT_WIDTH:
-          boxFit = BoxFit.fitWidth;
-          break;
-        case FIT_HEIGTH:
-          boxFit = BoxFit.fitHeight;
-          break;
-        case SCALE_DOWN:
-          boxFit = BoxFit.scaleDown;
-          break;
-      }
+    if (contextId != null) {
+      KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
+      url = controller.uriParser!.resolve(Uri.parse(url), Uri.parse(controller.href));
     }
 
     backgroundImage = DecorationImage(
-        image: CSSUrl.parseUrl(url, contextId: contextId)!,
-        repeat: imageRepeat,
-        fit: boxFit);
+      image: CSSUrl.parseUrl(url, contextId: contextId)!,
+      repeat: imageRepeat,
+    );
 
     return backgroundImage;
   }

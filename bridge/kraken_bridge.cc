@@ -153,6 +153,12 @@ void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFi
   context->evaluateScript(code, bundleFilename, startLine);
 }
 
+void parseHTML(int32_t contextId, NativeString *code, const char *bundleFilename) {
+  assert(checkContext(contextId) && "parseHTML: contextId is not valid");
+  auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
+  context->parseHTML(code, bundleFilename);
+}
+
 void reloadJsContext(int32_t contextId) {
   assert(checkContext(contextId) && "reloadJSContext: contextId is not valid");
   auto bridgePtr = getJSContext(contextId);

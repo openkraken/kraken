@@ -6,6 +6,7 @@
  */
 import 'dart:ui';
 
+import 'package:vector_math/vector_math_64.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
@@ -117,6 +118,7 @@ class CSSStyleDeclaration {
   List<StyleChangeListener> _styleChangeListeners = [];
 
   Map<String, String> _properties = {};
+  Map<String, String> _prevProperties = {};
   Map<String, String> _animationProperties = {};
 
   Map<String, List> _transitions = {};
@@ -138,13 +140,27 @@ class CSSStyleDeclaration {
     _transitions = value;
   }
 
-  bool _shouldTransition(String property, String? prevValue, String nextValue) {
+  bool _shouldTransition(String property, String? prevValue, String nextValue, RenderBoxModel? renderBoxModel) {
     // When begin propertyValue is AUTO, skip animation and trigger style update directly.
-    if ((prevValue == null && CSSLength.isAuto(CSSInitialValues[property])) || CSSLength.isAuto(prevValue) || CSSLength.isAuto(nextValue)) {
+    if (CSSLength.isAuto(prevValue) || CSSLength.isAuto(nextValue)) {
       return false;
     }
-    return CSSTransformHandlers[property] != null &&
-      (_transitions.containsKey(property) || _transitions.containsKey(ALL));
+
+    // Transition does not work when renderBoxModel has not been layouted yet.
+    if (renderBoxModel != null && renderBoxModel.firstLayouted &&
+      CSSTransformHandlers[property] != null &&
+      (_transitions.containsKey(property) || _transitions.containsKey(ALL))) {
+      bool shouldTransition = false;
+      // Transtion will be disabled when all transition has transitionDuration as 0.
+      _transitions.forEach((String transitionKey, List transitionOptions) {
+        double duration = CSSTime.parseTime(transitionOptions[0]).toDouble();
+        if (duration != 0) {
+          shouldTransition = true;
+        }
+      });
+      return shouldTransition;
+    }
+    return false;
   }
 
   EffectTiming? _getTransitionEffectTiming(String property) {
@@ -213,7 +229,7 @@ class CSSStyleDeclaration {
     };
 
     animation.onfinish = (AnimationPlaybackEvent event) {
-      _setTransitionEndProperty(propertyName, end);
+      _setTransitionEndProperty(propertyName, begin, end);
       _propertyRunningTransition.remove(propertyName);
       CSSTransition.dispatchTransitionEvent(target, CSSTransitionEvent.end);
     };
@@ -222,8 +238,7 @@ class CSSStyleDeclaration {
     animation.play();
   }
 
-  _setTransitionEndProperty(String propertyName, value) {
-    String? prevValue = _properties[propertyName];
+  _setTransitionEndProperty(String propertyName, String? prevValue, String value) {
     if (value == prevValue) return;
     _properties[propertyName] = value;
     setRenderStyleProperty(propertyName, prevValue, value);
@@ -389,6 +404,101 @@ class CSSStyleDeclaration {
     }
   }
 
+  void _setShorthandRenderStyle(String propertyName, Size? viewportSize) {
+    Map<String, String?> longhandProperties = {};
+    switch(propertyName) {
+      case PADDING:
+        longhandProperties[PADDING_TOP] = _properties[PADDING_TOP];
+        longhandProperties[PADDING_RIGHT] = _properties[PADDING_RIGHT];
+        longhandProperties[PADDING_BOTTOM] = _properties[PADDING_BOTTOM];
+        longhandProperties[PADDING_LEFT] = _properties[PADDING_LEFT];
+        break;
+      case MARGIN:
+        longhandProperties[MARGIN_TOP] = _properties[MARGIN_TOP];
+        longhandProperties[MARGIN_RIGHT] = _properties[MARGIN_RIGHT];
+        longhandProperties[MARGIN_BOTTOM] = _properties[MARGIN_BOTTOM];
+        longhandProperties[MARGIN_LEFT] = _properties[MARGIN_LEFT];
+        break;
+      case BACKGROUND:
+        longhandProperties[BACKGROUND_COLOR] = _properties[BACKGROUND_COLOR];
+        longhandProperties[BACKGROUND_IMAGE] = _properties[BACKGROUND_IMAGE];
+        longhandProperties[BACKGROUND_REPEAT] = _properties[BACKGROUND_REPEAT];
+        longhandProperties[BACKGROUND_ATTACHMENT] = _properties[BACKGROUND_ATTACHMENT];
+        longhandProperties[BACKGROUND_POSITION_X] = _properties[BACKGROUND_POSITION_X];
+        longhandProperties[BACKGROUND_POSITION_Y] = _properties[BACKGROUND_POSITION_Y];
+        longhandProperties[BACKGROUND_SIZE] = _properties[BACKGROUND_SIZE];
+        break;
+      case BACKGROUND_POSITION:
+        longhandProperties[BACKGROUND_POSITION_X] = _properties[BACKGROUND_POSITION_X];
+        longhandProperties[BACKGROUND_POSITION_Y] = _properties[BACKGROUND_POSITION_Y];
+        break;
+      case BORDER_RADIUS:
+        longhandProperties[BORDER_TOP_LEFT_RADIUS] = _properties[BORDER_TOP_LEFT_RADIUS];
+        longhandProperties[BORDER_TOP_RIGHT_RADIUS] = _properties[BORDER_TOP_RIGHT_RADIUS];
+        longhandProperties[BORDER_BOTTOM_RIGHT_RADIUS] = _properties[BORDER_BOTTOM_RIGHT_RADIUS];
+        longhandProperties[BORDER_BOTTOM_LEFT_RADIUS] = _properties[BORDER_BOTTOM_LEFT_RADIUS];
+        break;
+      case OVERFLOW:
+        longhandProperties[OVERFLOW_X] = _properties[OVERFLOW_X];
+        longhandProperties[OVERFLOW_Y] = _properties[OVERFLOW_Y];
+        break;
+      case FONT:
+        longhandProperties[FONT_STYLE] = _properties[FONT_STYLE];
+        longhandProperties[FONT_WEIGHT] = _properties[FONT_WEIGHT];
+        longhandProperties[FONT_SIZE] = _properties[FONT_SIZE];
+        longhandProperties[LINE_HEIGHT] = _properties[LINE_HEIGHT];
+        longhandProperties[FONT_FAMILY] = _properties[FONT_FAMILY];
+        break;
+      case FLEX:
+        longhandProperties[FLEX_GROW] = _properties[FLEX_GROW];
+        longhandProperties[FLEX_SHRINK] = _properties[FLEX_SHRINK];
+        longhandProperties[FLEX_BASIS] = _properties[FLEX_BASIS];
+        break;
+      case FLEX_FLOW:
+        longhandProperties[FLEX_DIRECTION] = _properties[FLEX_DIRECTION];
+        longhandProperties[FLEX_WRAP] = _properties[FLEX_WRAP];
+        break;
+      case BORDER:
+      case BORDER_TOP:
+      case BORDER_RIGHT:
+      case BORDER_BOTTOM:
+      case BORDER_LEFT:
+      case BORDER_COLOR:
+      case BORDER_STYLE:
+      case BORDER_WIDTH:
+        longhandProperties[BORDER_TOP_COLOR] = _properties[BORDER_TOP_COLOR];
+        longhandProperties[BORDER_RIGHT_COLOR] = _properties[BORDER_RIGHT_COLOR];
+        longhandProperties[BORDER_BOTTOM_COLOR] = _properties[BORDER_BOTTOM_COLOR];
+        longhandProperties[BORDER_LEFT_COLOR] = _properties[BORDER_LEFT_COLOR];
+        longhandProperties[BORDER_TOP_STYLE] = _properties[BORDER_TOP_STYLE];
+        longhandProperties[BORDER_RIGHT_STYLE] = _properties[BORDER_RIGHT_STYLE];
+        longhandProperties[BORDER_BOTTOM_STYLE] = _properties[BORDER_BOTTOM_STYLE];
+        longhandProperties[BORDER_LEFT_STYLE] = _properties[BORDER_LEFT_STYLE];
+        longhandProperties[BORDER_TOP_WIDTH] = _properties[BORDER_TOP_WIDTH];
+        longhandProperties[BORDER_RIGHT_WIDTH] = _properties[BORDER_RIGHT_WIDTH];
+        longhandProperties[BORDER_BOTTOM_WIDTH] = _properties[BORDER_BOTTOM_WIDTH];
+        longhandProperties[BORDER_LEFT_WIDTH] = _properties[BORDER_LEFT_WIDTH];
+        break;
+      case TRANSITION:
+        longhandProperties[TRANSITION_PROPERTY] = _properties[TRANSITION_PROPERTY];
+        longhandProperties[TRANSITION_DURATION] = _properties[TRANSITION_DURATION];
+        longhandProperties[TRANSITION_TIMING_FUNCTION] = _properties[TRANSITION_TIMING_FUNCTION];
+        longhandProperties[TRANSITION_DELAY] = _properties[TRANSITION_DELAY];
+        break;
+      case TEXT_DECORATION:
+        longhandProperties[TEXT_DECORATION_LINE] = _properties[TEXT_DECORATION_LINE];
+        longhandProperties[TEXT_DECORATION_COLOR] = _properties[TEXT_DECORATION_COLOR];
+        longhandProperties[TEXT_DECORATION_STYLE] = _properties[TEXT_DECORATION_STYLE];
+        break;
+    }
+
+    if (longhandProperties.isNotEmpty) {
+      longhandProperties.forEach((String propertyName, String? value) {
+        setRenderStyle(propertyName, value, viewportSize);
+      });
+    }
+  }
+
   String _replacePattern(String string, String lowerCase, String startString, String endString, [int start = 0]) {
     int startIndex = lowerCase.indexOf(startString, start);
     if (startIndex >= 0) {
@@ -487,7 +597,7 @@ class CSSStyleDeclaration {
       rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
       fontSize = renderStyle.fontSize;
     }
-    
+
     switch (propertyName) {
       case WIDTH:
       case HEIGHT:
@@ -556,10 +666,32 @@ class CSSStyleDeclaration {
         if (!CSSTransform.isValidTransformValue(normalizedValue, viewportSize, rootFontSize, fontSize)) {
           return;
         }
+        // Transform should converted to matrix4 value to compare cause case such as
+        // `translate3d(750rpx, 0rpx, 0rpx)` and `translate3d(100vw, 0vw, 0vw)` should considered to be equal.
+        // Note this comparison cannot be done in style listener cause prevValue cannot be get in animation case.
+        if (prevValue != null) {
+          Matrix4? prevMatrix4 = CSSTransform.parseTransform(prevValue, viewportSize, rootFontSize, fontSize);
+          Matrix4? matrix4 = CSSTransform.parseTransform(normalizedValue, viewportSize, rootFontSize, fontSize);
+          if (prevMatrix4 == matrix4) {
+            return;
+          }
+        }
         break;
     }
 
+    if (prevValue != null) {
+      _prevProperties[propertyName] = prevValue;
+    }
     _properties[propertyName] = normalizedValue;
+
+    switch (propertyName) {
+      case TRANSITION_DELAY:
+      case TRANSITION_DURATION:
+      case TRANSITION_TIMING_FUNCTION:
+      case TRANSITION_PROPERTY:
+        CSSTransition.updateTransition(this);
+        break;
+    }
 
     // https://github.com/WebKit/webkit/blob/master/Source/WebCore/animation/AnimationTimeline.cpp#L257
     // Any animation found in previousAnimations but not found in newAnimations is not longer current and should be canceled.
@@ -571,11 +703,25 @@ class CSSStyleDeclaration {
       }
       _propertyRunningTransition.clear();
     }
+  }
 
-    if (_shouldTransition(propertyName, prevValue, normalizedValue)) {
-      _transition(propertyName, prevValue, normalizedValue, viewportSize, renderStyle);
+  /// Modify RenderStyle after property is set in CSS declaration.
+  void setRenderStyle(String propertyName, value, [Size? viewportSize, RenderBoxModel? renderBoxModel]) {
+    if (CSSShorthandProperty[propertyName] != null) {
+      return _setShorthandRenderStyle(propertyName, viewportSize);
+    }
+
+    String? currentValue = _properties[propertyName];
+    String? prevValue = _prevProperties[propertyName];
+
+    if (currentValue == null || currentValue == prevValue) {
+      return;
+    }
+    RenderStyle? renderStyle = renderBoxModel?.renderStyle;
+    if (_shouldTransition(propertyName, prevValue, currentValue, renderBoxModel)) {
+      _transition(propertyName, prevValue, currentValue, viewportSize, renderStyle);
     } else {
-      setRenderStyleProperty(propertyName, prevValue, normalizedValue);
+      setRenderStyleProperty(propertyName, prevValue, currentValue);
     }
   }
 
@@ -602,6 +748,10 @@ class CSSStyleDeclaration {
     for (int i = 0; i < _styleChangeListeners.length; i++) {
       StyleChangeListener listener = _styleChangeListeners[i];
       listener(property, original, present);
+      // Override previous property after property is set.
+      if (_properties[property] != null) {
+        _prevProperties[property] = _properties[property]!;
+      }
     }
   }
 
@@ -611,7 +761,7 @@ class CSSStyleDeclaration {
       setRenderStyleProperty(key, null, normalizedValue);
     });
   }
-  
+
   /// Set all style properties with em unit.
   void setEmProperties() {
     _properties.forEach((key, value) {
@@ -621,7 +771,7 @@ class CSSStyleDeclaration {
       }
     });
   }
-  
+
   /// Set all style properties with rem unit.
   void setRemProperties() {
     _properties.forEach((key, value) {

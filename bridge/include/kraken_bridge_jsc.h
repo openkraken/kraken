@@ -20,6 +20,7 @@
 #include <unordered_map>
 #include <vector>
 #include <forward_list>
+#include "third_party/gumbo-parser/src/gumbo.h"
 
 class NativeString;
 
@@ -97,6 +98,21 @@ private:
   void *owner;
   std::atomic<bool> ctxInvalid_{false};
   JSGlobalContextRef ctx_;
+};
+
+class HTMLParser {
+public:
+  HTMLParser(std::unique_ptr<JSContext> &context, const JSExceptionHandler &handler, void *owner);
+  KRAKEN_EXPORT bool parseHTML(const uint16_t *code, size_t codeLength);
+
+private:
+  std::unique_ptr<JSContext> &m_context;
+  JSExceptionHandler _handler;
+  void *owner;
+
+  void traverseHTML(GumboNode * node, ElementInstance* element);
+
+  void parseProperty(ElementInstance* element, GumboElement * gumboElement);
 };
 
 class KRAKEN_EXPORT JSFunctionHolder {

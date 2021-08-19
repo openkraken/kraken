@@ -15,6 +15,7 @@ import 'bridge/test_input.dart';
 import 'custom/custom_object_element.dart';
 import 'custom/custom_element_widget.dart';
 import 'package:kraken/gesture.dart';
+import 'package:kraken/foundation.dart';
 // import 'package:kraken_websocket/kraken_websocket.dart';
 // import 'package:kraken_animation_player/kraken_animation_player.dart';
 // import 'package:kraken_video_player/kraken_video_player.dart';
@@ -49,6 +50,14 @@ class NativeGestureClient implements GestureClient {
 
   @override
   void dragEndCallback(DragEndDetails details) {
+  }
+}
+
+class MyUriParser extends UriParser {
+  @override
+  String resolve(Uri base, Uri relative) {
+    String uri = super.resolve(base, relative);
+    return uri;
   }
 }
 
@@ -98,6 +107,7 @@ void main() async {
       disableViewportHeightAssertion: true,
       javaScriptChannel: javaScriptChannel,
       gestureClient: NativeGestureClient(gestureClientID:i),
+      uriParser: MyUriParser(),
     );
     widgets.add(krakenMap[i]!);
   }

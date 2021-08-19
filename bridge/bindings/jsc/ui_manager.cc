@@ -67,6 +67,9 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
   JSObjectRef callback = JSValueToObject(ctx, obj->m_callback, &exception);
 
   if (errmsg != nullptr) {
+    if (!obj->_context.isValid()) {
+      return;
+    }
     JSStringRef errorMsgStringRef = JSStringCreateWithCharacters(errmsg->string, errmsg->length);
     JSValueRef errArgs[] = {JSValueMakeString(ctx, errorMsgStringRef)};
     JSObjectRef errObject = JSObjectMakeError(ctx, 1, errArgs, &exception);

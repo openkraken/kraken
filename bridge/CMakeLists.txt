@@ -68,6 +68,40 @@ list(APPEND BRIDGE_SOURCE
   polyfill/dist/polyfill.cc
   )
 
+list(APPEND GUMBO_PARSER
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/attribute.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/attribute.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/char_ref.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/char_ref.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/error.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/error.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/gumbo.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/insertion_mode.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/parser.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/parser.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_buffer.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_buffer.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_piece.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_piece.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tag_enum.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tag_gperf.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tag_sizes.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tag_strings.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tag.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_piece.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_piece.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/token_type.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tokenizer_states.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tokenizer.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tokenizer.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/utf8.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/utf8.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/util.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/util.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/vector.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/vector.h
+  )
+
 list(APPEND BRIDGE_INCLUDE
   ${CMAKE_CURRENT_LIST_DIR}/foundation
   ${CMAKE_CURRENT_LIST_DIR}
@@ -106,6 +140,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   list(APPEND BRIDGE_SOURCE
     bindings/jsc/js_context_internal.h
     bindings/jsc/js_context_internal.cc
+    bindings/jsc/html_parser.h
+    bindings/jsc/html_parser.cc
     bindings/jsc/host_object_internal.cc
     bindings/jsc/host_object_internal.h
     bindings/jsc/host_class.cc
@@ -304,6 +340,9 @@ list(APPEND PUBLIC_HEADER
 
 add_library(kraken SHARED ${BRIDGE_SOURCE})
 add_library(kraken_static STATIC ${BRIDGE_SOURCE})
+
+add_library(gumbo_parse_static STATIC ${GUMBO_PARSER})
+list(APPEND BRIDGE_LINK_LIBS gumbo_parse_static)
 
 if (${IS_ANDROID})
   find_library(log-lib log)

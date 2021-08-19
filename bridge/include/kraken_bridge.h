@@ -97,6 +97,8 @@ bool checkContext(int32_t contextId, void *context);
 KRAKEN_EXPORT_C
 void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine);
 KRAKEN_EXPORT_C
+void parseHTML(int32_t contextId, NativeString *code, const char *bundleFilename);
+KRAKEN_EXPORT_C
 void reloadJsContext(int32_t contextId);
 KRAKEN_EXPORT_C
 void invokeModuleEvent(int32_t contextId, NativeString *module, const char *eventType, void *event,

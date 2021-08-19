@@ -32,6 +32,7 @@ public:
   void *owner;
   // evaluate JavaScript source codes in standard mode.
   KRAKEN_EXPORT void evaluateScript(const NativeString *script, const char *url, int startLine);
+  KRAKEN_EXPORT void parseHTML(const NativeString *script, const char *url);
   KRAKEN_EXPORT void evaluateScript(const uint16_t *script, size_t length, const char *url, int startLine);
 
   const std::unique_ptr<kraken::binding::jsc::JSContext> &getContext() const {
@@ -45,6 +46,7 @@ public:
   std::atomic<bool> event_registered = false;
 private:
   std::unique_ptr<binding::jsc::JSContext> m_context;
+  std::unique_ptr<binding::jsc::HTMLParser> m_html_parser;
   JSExceptionHandler m_handler;
   Task m_disposeCallback{nullptr};
   void *m_disposePrivateData{nullptr};
