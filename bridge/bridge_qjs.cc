@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <memory>
 #include "bridge_qjs.h"
+#include "bindings/qjs/qjs_patch.h"
 
 #include "bindings/qjs/bom/console.h"
 #include "bindings/qjs/bom/timer.h"
@@ -125,37 +126,34 @@ void JSBridge::parseHTML(const NativeString *script, const char *url) {
 }
 
 void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType, void *event, NativeString *extra) {
-//  if (!m_context->isValid()) return;
-//
-//  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
-//    KRAKEN_LOG(VERBOSE) << "[invokeModuleEvent VERBOSE]: moduleName " << moduleName << " event: " << event;
-//  }
-//
-//  JSValueRef exception = nullptr;
-//  JSObjectRef eventObjectRef = nullptr;
-//  if (event != nullptr) {
-//    std::string type = std::string(eventType);
-//    EventInstance *eventInstance = JSEvent::buildEventInstance(type, m_context.get(), event, false);
-//    eventObjectRef = eventInstance->object;
-//  }
-//
-//  for (const auto &callback : krakenModuleListenerList) {
-//    if (exception != nullptr) {
-//      m_context->handleException(exception);
-//      return;
-//    }
-//
-//    JSStringRef moduleNameStringRef = JSStringCreateWithCharacters(moduleName->string, moduleName->length);
-//    JSStringRef moduleExtraDataRef = JSStringCreateWithCharacters(extra->string, extra->length);
-//    const JSValueRef args[] = {
-//      JSValueMakeString(m_context->context(), moduleNameStringRef),
-//      eventObjectRef == nullptr ? JSValueMakeNull(m_context->context()) : eventObjectRef,
-//      JSValueMakeFromJSONString(m_context->context(), moduleExtraDataRef)
-//    };
-//    JSObjectCallAsFunction(m_context->context(), callback, m_context->global(), 3, args, &exception);
-//  }
-//
-//  m_context->handleException(exception);
+  if (!m_context->isValid()) return;
+
+  JSValue eventObject = JS_NULL;
+  if (event != nullptr) {
+    std::string type = std::string(eventType);
+    EventInstance *eventInstance = Event::buildEventInstance(type, m_context.get(), event, false);
+    eventObject = eventInstance->instanceObject;
+  }
+
+  {
+    struct list_head *el, *el1;
+    list_for_each_safe(el, el1, &m_context->module_list) {
+      auto *module = list_entry(el, ModuleLink, link);
+      JSValue callback = module->callback;
+
+      JSValue moduleNameValue = JS_NewUnicodeString(m_context->runtime(), m_context->ctx(), moduleName->string, moduleName->length);
+      std::u16string u16Extra = std::u16string(reinterpret_cast<const char16_t *>(extra->string), extra->length);
+      std::string extraString = toUTF8(u16Extra);
+
+      JSValue arguments[] = {
+        moduleNameValue,
+        eventObject,
+        JS_ParseJSON(m_context->ctx(), extraString.c_str(), extraString.size(), "")
+      };
+      JSValue returnValue = JS_Call(m_context->ctx(), callback, m_context->global(), 3, arguments);
+      m_context->handleException(&returnValue);
+    }
+  }
 }
 
 void JSBridge::evaluateScript(const NativeString *script, const char *url, int startLine) {
@@ -187,11 +185,11 @@ void JSBridge::evaluateScript(const char *script, size_t length, const char *url
 JSBridge::~JSBridge() {
   if (!m_context->isValid()) return;
 
-  for (auto &callback : krakenModuleListenerList) {
-    JS_FreeValue(m_context->ctx(), callback);
-  }
+//  for (auto &callback : krakenModuleListenerList) {
+//    JS_FreeValue(m_context->ctx(), callback);
+//  }
 
-  krakenModuleListenerList.clear();
+//  krakenModuleListenerList.clear();
 
   delete bridgeCallback;
 

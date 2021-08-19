@@ -9,6 +9,7 @@
 #include "bindings/qjs/bom/window.h"
 #include "bindings/qjs/dom/document.h"
 #include "bindings/qjs/bom/timer.h"
+#include "bindings/qjs/module_manager.h"
 
 namespace kraken::binding::qjs {
 
@@ -42,6 +43,7 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
   init_list_head(&node_list);
   init_list_head(&timer_list);
   init_list_head(&document_list);
+  init_list_head(&module_list);
 
   if (m_runtime == nullptr) {
     m_runtime = JS_NewRuntime();
@@ -93,6 +95,17 @@ JSContext::~JSContext() {
     list_for_each_safe(el, el1, &timer_list) {
       auto *callbackContext = list_entry(el, TimerCallbackContext, link);
       JS_FreeValue(m_ctx, callbackContext->callback);
+      delete callbackContext;
+    }
+  }
+
+  // Manual free moduleListener
+  {
+    struct list_head *el, *el1;
+    list_for_each_safe(el, el1, &module_list) {
+      auto *module = list_entry(el, ModuleLink, link);
+      JS_FreeValue(m_ctx, module->callback);
+      delete module;
     }
   }
 

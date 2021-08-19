@@ -25,8 +25,6 @@ public:
 
   static std::unordered_map<std::string, NativeString> pluginSourceCode;
 
-  std::deque<JSValue> krakenModuleListenerList;
-
   int32_t contextId;
   foundation::BridgeCallback *bridgeCallback;
   // the owner pointer which take JSBridge as property.

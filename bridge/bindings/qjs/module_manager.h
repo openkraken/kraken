@@ -9,6 +9,12 @@
 #include "js_context.h"
 
 namespace kraken::binding::qjs {
+
+struct ModuleLink {
+  JSValue callback;
+  list_head link;
+};
+
 void bindModuleManager(std::unique_ptr<JSContext> &context);
 }
 
