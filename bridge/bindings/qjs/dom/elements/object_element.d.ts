@@ -1,9 +1,7 @@
 interface HostObject {}
-interface HostClass {}
+interface Element {}
 
-interface ObjectElement extends HostClass {
+interface ObjectElement extends Element {
   type: string;
   data: string;
-  currentData: string;
-  currentType: string;
 }

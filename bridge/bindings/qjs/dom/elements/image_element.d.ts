@@ -1,11 +1,11 @@
 interface HostObject {}
-interface HostClass {}
+interface Element {}
 
-interface ImageElement extends HostClass {
+interface ImageElement extends Element {
   width: number;
   height: number;
-  naturalWidth: number;
-  naturalHeight: number;
+  readonly naturalWidth: number;
+  readonly naturalHeight: number;
   src: string;
   loading: string;
 }

@@ -1,5 +1,5 @@
 interface HostObject {}
-interface HostClass {}
+interface Element {}
 
-interface SVGElement extends HostClass {
+interface SVGElement extends Element {
 }

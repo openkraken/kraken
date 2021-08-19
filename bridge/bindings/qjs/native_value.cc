@@ -7,7 +7,7 @@
 #include "bindings/qjs/qjs_patch.h"
 #include "kraken_bridge.h"
 #include "dom/element.h"
-#include "dom/elements/canvas_element.h"
+#include "dom/elements/.gen/canvas_element.h"
 
 namespace kraken::binding::qjs {
 

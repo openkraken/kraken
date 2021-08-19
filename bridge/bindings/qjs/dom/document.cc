@@ -11,13 +11,13 @@
 #include "dart_methods.h"
 #include "all_collection.h"
 
-#include "elements/anchor_element.h"
-#include "elements/image_element.h"
-#include "elements/canvas_element.h"
-#include "elements/input_element.h"
-#include "elements/object_element.h"
-#include "elements/script_element.h"
-#include "elements/svg_element.h"
+#include "elements/.gen/anchor_element.h"
+#include "elements/.gen/image_element.h"
+#include "elements/.gen/canvas_element.h"
+#include "elements/.gen/input_element.h"
+#include "elements/.gen/object_element.h"
+#include "elements/.gen/script_element.h"
+#include "elements/.gen/svg_element.h"
 
 namespace kraken::binding::qjs {
 

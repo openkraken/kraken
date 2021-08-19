@@ -1,7 +1,7 @@
 interface HostObject {}
-interface HostClass {}
+interface Element {}
 
-interface InputElement extends HostClass {
+interface InputElement extends Element {
   width: number;
   height: number;
   value: string;

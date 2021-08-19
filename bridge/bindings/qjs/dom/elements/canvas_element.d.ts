@@ -1,5 +1,5 @@
 interface HostObject {}
-interface HostClass {}
+interface Element {}
 
 interface CanvasRenderingContext2D extends HostObject {
   fillStyle: string;
@@ -44,7 +44,7 @@ interface CanvasRenderingContext2D extends HostObject {
   translate(x: number, y: number): void;
 }
 
-interface CanvasElement extends HostClass {
+interface CanvasElement extends Element {
   width: string;
   height: string;
   getContext: (contextType: string) => CanvasRenderingContext2D;

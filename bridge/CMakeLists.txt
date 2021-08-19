@@ -233,20 +233,32 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
       bindings/qjs/dom/comment_node.h
       bindings/qjs/dom/style_declaration.cc
       bindings/qjs/dom/style_declaration.h
-      bindings/qjs/dom/elements/canvas_element.cc
-      bindings/qjs/dom/elements/canvas_element.h
-      bindings/qjs/dom/elements/image_element.cc
-      bindings/qjs/dom/elements/image_element.h
-      bindings/qjs/dom/elements/input_element.cc
-      bindings/qjs/dom/elements/input_element.h
-      bindings/qjs/dom/elements/anchor_element.cc
-      bindings/qjs/dom/elements/anchor_element.h
-      bindings/qjs/dom/elements/object_element.cc
-      bindings/qjs/dom/elements/object_element.h
-      bindings/qjs/dom/elements/script_element.cc
-      bindings/qjs/dom/elements/script_element.h
-      bindings/qjs/dom/elements/svg_element.h
-      bindings/qjs/dom/elements/svg_element.cc
+      bindings/qjs/dom/elements/.gen/canvas_element.cc
+      bindings/qjs/dom/elements/.gen/canvas_element.h
+      bindings/qjs/dom/elements/.gen/image_element.cc
+      bindings/qjs/dom/elements/.gen/image_element.h
+      bindings/qjs/dom/elements/.gen/input_element.cc
+      bindings/qjs/dom/elements/.gen/input_element.h
+      bindings/qjs/dom/elements/.gen/anchor_element.cc
+      bindings/qjs/dom/elements/.gen/anchor_element.h
+      bindings/qjs/dom/elements/.gen/object_element.cc
+      bindings/qjs/dom/elements/.gen/object_element.h
+      bindings/qjs/dom/elements/.gen/script_element.cc
+      bindings/qjs/dom/elements/.gen/script_element.h
+      bindings/qjs/dom/elements/.gen/svg_element.h
+      bindings/qjs/dom/elements/.gen/svg_element.cc
+      bindings/qjs/dom/events/.gen/close_event.h
+      bindings/qjs/dom/events/.gen/close_event.cc
+      bindings/qjs/dom/events/.gen/gesture_event.cc
+      bindings/qjs/dom/events/.gen/gesture_event.h
+      bindings/qjs/dom/events/.gen/input_event.cc
+      bindings/qjs/dom/events/.gen/input_event.h
+      bindings/qjs/dom/events/.gen/intersection_change.cc
+      bindings/qjs/dom/events/.gen/intersection_change.h
+      bindings/qjs/dom/events/.gen/media_error_event.cc
+      bindings/qjs/dom/events/.gen/media_error_event.h
+      bindings/qjs/dom/events/.gen/mouse_event.cc
+      bindings/qjs/dom/events/.gen/mouse_event.h
       bindings/qjs/bom/blob.cc
       bindings/qjs/bom/blob.h
       bindings/qjs/bom/location.h

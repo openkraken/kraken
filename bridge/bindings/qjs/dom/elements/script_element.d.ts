@@ -1,6 +1,6 @@
 interface HostObject {}
-interface HostClass {}
+interface Element {}
 
-interface ScriptElement extends HostClass {
+interface ScriptElement extends Element {
   src: string;
 }

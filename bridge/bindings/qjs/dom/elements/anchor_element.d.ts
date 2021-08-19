@@ -1,7 +1,7 @@
 interface HostObject {}
-interface HostClass {}
+interface Element {}
 
-interface AnchorElement extends HostClass {
+interface AnchorElement extends Element {
   href: string;
   target: string;
 }
