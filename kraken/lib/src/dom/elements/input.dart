@@ -227,7 +227,15 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
-  }) : super(targetId, nativeInputElement.ref.nativeElement, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
+  }) : super(
+    targetId,
+    nativeInputElement.ref.nativeElement,
+    elementManager,
+    tagName: INPUT,
+    defaultStyle: _defaultStyle,
+    isIntrinsicBox: true,
+    repaintSelf: true,
+  ) {
     _nativeMap[nativeInputElement.address] = this;
 
     _textSelectionDelegate = EditableTextDelegate(this);
