@@ -12,7 +12,7 @@ import 'package:kraken/painting.dart';
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#urls
 class CSSUrl {
 
-  static ImageProvider parseUrl(String rawInput, { cache = 'auto', int? contextId }) {
+  static ImageProvider? parseUrl(String rawInput, { cache = 'auto', int? contextId }) {
     // support input string enclosed in quotation marks
     if ((rawInput.startsWith('\'') && rawInput.endsWith('\'')) ||
         (rawInput.startsWith('\"') && rawInput.endsWith('\"'))) {
