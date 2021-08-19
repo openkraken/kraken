@@ -75,7 +75,6 @@ void main() async {
   defineKrakenCustomElements();
 
   // Local HTTP server.
-  LocalHttpServer.basePath = 'test/res';
   var httpServer = LocalHttpServer.getInstance();
   print('Local HTTP server started at: ${httpServer.getUri()}');
 

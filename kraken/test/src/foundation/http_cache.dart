@@ -21,16 +21,8 @@ void main() {
       KrakenHttpOverrides.setContextHeader(request, contextId);
       var response = await request.close();
       expect(response.statusCode, 200);
-      expect(response.headers.toString(), 'connection: keep-alive\n'
-          'last-modified: Sun, 15 Mar 2020 11:32:20 GMT\n'
-          'date: Mon, 16 Aug 2021 10:17:45 GMT\n'
-          'accept-ranges: bytes\n'
-          'content-length: 72\n'
-          'content-md5: TuWzX7jF+yz4BB/EHT0Zng==\n'
-          'etag: "4EE5B35FB8C5FB2CF8041FC41D3D199E"\n'
-          'content-type: application/json\n'
-          'expires: Mon, 16 Aug 2221 10:17:45 GMT\n'
-          '');
+      expect(response.headers.value(HttpHeaders.expiresHeader),
+          'Mon, 16 Aug 2221 10:17:45 GMT');
 
       var data = await sinkStream(response);
       var content = jsonDecode(String.fromCharCodes(data));
