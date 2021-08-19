@@ -5,10 +5,10 @@ import 'dart:typed_data';
 
 import 'package:test/test.dart';
 import 'package:kraken/foundation.dart';
-import '../../mock.dart';
+import '../../local_http_server.dart';
 
 void main() {
-  var server = MockedHttpServer.getInstance();
+  var server = LocalHttpServer.getInstance();
   int contextId = 1;
   setupHttpOverrides(null, contextId: contextId);
   HttpClient httpClient = HttpClient();
@@ -16,8 +16,8 @@ void main() {
   group('HttpCache', () {
 
     test('Simple http request with expires', () async {
-      var request = await httpClient.openUrl('GET', Uri.parse(
-          'http://127.0.0.1:${server.port}/001'));
+      var request = await httpClient.openUrl('GET',
+          server.getUri('200JSONWithContentLengthExpiresETagAndLastModified'));
       KrakenHttpOverrides.setContextHeader(request, contextId);
       var response = await request.close();
       expect(response.statusCode, 200);
@@ -42,8 +42,8 @@ void main() {
       });
 
       // second request
-      var requestSecond = await httpClient.openUrl('GET', Uri.parse(
-          'http://127.0.0.1:${server.port}/001'));
+      var requestSecond = await httpClient.openUrl('GET',
+          server.getUri('200JSONWithContentLengthExpiresETagAndLastModified'));
       KrakenHttpOverrides.setContextHeader(requestSecond, contextId);
       var responseSecond = await requestSecond.close();
       assert(responseSecond.headers.value('x-kraken-cache') != null);
@@ -51,7 +51,8 @@ void main() {
 
     test('Negotiation cache last-modified', () async {
       // First request to save cache.
-      var req = await httpClient.get('127.0.0.1', server.port, '/003');
+      var req = await httpClient.openUrl('GET',
+          server.getUri('200PlainTextWithContentLengthAndLastModified'));
       KrakenHttpOverrides.setContextHeader(req, contextId);
       req.headers.ifModifiedSince = HttpDate.parse('Sun, 15 Mar 2020 11:32:20 GMT');
       var res = await req.close();
@@ -66,7 +67,8 @@ void main() {
 
     test('Negotiation cache eTag', () async {
       // First request to save cache.
-      var req = await httpClient.get('127.0.0.1', server.port, '/004');
+      var req = await httpClient.openUrl('GET',
+          server.getUri('200PlainTextWithETagAndContentLength'));
       KrakenHttpOverrides.setContextHeader(req, contextId);
       req.headers.set(HttpHeaders.ifNoneMatchHeader, '"foo"');
 

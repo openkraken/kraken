@@ -19,7 +19,7 @@ import 'package:kraken_websocket/kraken_websocket.dart';
 import 'package:kraken_animation_player/kraken_animation_player.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
 import 'package:kraken_webview/kraken_webview.dart';
-import 'mock.dart';
+import 'local_http_server.dart';
 
 String? pass = (AnsiPen()..green())('[TEST PASS]');
 String? err = (AnsiPen()..red())('[TEST FAILED]');
@@ -74,13 +74,14 @@ void main() async {
   KrakenWebView.initialize();
   defineKrakenCustomElements();
 
-  // Mocked HTTP server.
-  var mockedHttpServer = MockedHttpServer.getInstance();
-  print('Mocked HTTP server started at: http://127.0.0.1:${mockedHttpServer.port}');
+  // Local HTTP server.
+  LocalHttpServer.basePath = 'test/res';
+  var httpServer = LocalHttpServer.getInstance();
+  print('Local HTTP server started at: ${httpServer.getUri()}');
 
   String codeInjection = '''
     // This segment inject variables for test environment.
-    MOCKED_HTTP_SERVER_PORT = ${mockedHttpServer.port};
+    MOCKED_HTTP_SERVER_PORT = ${httpServer.port};
   ''';
 
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.

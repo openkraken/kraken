@@ -3,22 +3,18 @@ import 'dart:io';
 
 import 'package:test/test.dart';
 import 'package:kraken/foundation.dart';
-import '../../mock.dart';
+import '../../local_http_server.dart';
 
 const int contextId = 2;
 void main() {
+  var server = LocalHttpServer.getInstance();
   group('HttpClientInterceptor', () {
     setupHttpOverrides(TestHttpClientInterceptor(), contextId: contextId);
     HttpClient httpClient = HttpClient();
 
     test('beforeRequest', () async {
-      var url = Uri(
-        scheme: 'http',
-        host: InternetAddress.loopbackIPv4.host,
-        port: MockedHttpServer.getInstance().port,
-        path: '/002',
-      );
-      var request = await httpClient.getUrl(url);
+      var request = await httpClient.openUrl('GET',
+          server.getUri('200JSONWithContentLength'));
       KrakenHttpOverrides.setContextHeader(request, contextId);
       request.headers.add('x-test-id', 'beforeRequest-001');
 
@@ -34,13 +30,8 @@ void main() {
     });
 
     test('afterResponse', () async {
-      var url = Uri(
-        scheme: 'http',
-        host: InternetAddress.loopbackIPv4.host,
-        port: MockedHttpServer.getInstance().port,
-        path: '/002',
-      );
-      var request = await httpClient.getUrl(url);
+      var request = await httpClient.openUrl('GET',
+          server.getUri('200JSONWithContentLength'));
       KrakenHttpOverrides.setContextHeader(request, contextId);
       request.headers.add('x-test-id', 'afterResponse-001');
 
@@ -49,13 +40,8 @@ void main() {
     });
 
     test('shouldInterceptRequest', () async {
-      var url = Uri(
-        scheme: 'http',
-        host: InternetAddress.loopbackIPv4.host,
-        port: MockedHttpServer.getInstance().port,
-        path: '/002',
-      );
-      var request = await httpClient.getUrl(url);
+      var request = await httpClient.openUrl('GET',
+          server.getUri('200JSONWithContentLength'));
       KrakenHttpOverrides.setContextHeader(request, contextId);
       request.headers.add('x-test-id', 'shouldInterceptRequest-001');
 
