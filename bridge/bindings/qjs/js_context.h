@@ -51,6 +51,7 @@ public:
 
   static JSClassID kHostClassClassId;
   static JSClassID kHostObjectClassId;
+  static JSClassID kHostExoticObjectClassId;
 
 private:
   int32_t contextId;

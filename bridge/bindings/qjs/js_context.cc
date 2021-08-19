@@ -16,6 +16,7 @@ static std::atomic<int32_t> context_unique_id{0};
 
 JSClassID JSContext::kHostClassClassId {0};
 JSClassID JSContext::kHostObjectClassId {0};
+JSClassID JSContext::kHostExoticObjectClassId{0};
 
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner) {
   return std::make_unique<JSContext>(contextId, handler, owner);
@@ -35,6 +36,7 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
   std::call_once(kinitJSClassIDFlag, []() {
     JS_NewClassID(&kHostClassClassId);
     JS_NewClassID(&kHostObjectClassId);
+    JS_NewClassID(&kHostExoticObjectClassId);
   });
 
   init_list_head(&node_list);

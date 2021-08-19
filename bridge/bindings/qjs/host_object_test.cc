@@ -90,4 +90,50 @@ TEST(HostObject, defineFunction) {
   EXPECT_EQ(isSampleFree, true);
 }
 
+class SampleExoticHostObject : public ExoticHostObject {
+public:
+  explicit SampleExoticHostObject(JSContext *context) : ExoticHostObject(context, "SampleObject"){};
+  ~SampleExoticHostObject() {
+    isSampleFree = true;
+  }
+
+  JSValue getProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
+                             JSValueConst receiver);
+  int setProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
+                         JSValueConst value, JSValueConst receiver, int flags);
+
+private:
+};
+
+JSValue SampleExoticHostObject::getProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSValue receiver) {
+  return JS_NewFloat64(ctx, 100.0);
+}
+int SampleExoticHostObject::setProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver,
+                                        int flags) {
+  return 0;
+}
+
+TEST(ExoticHostObject, overriteGetterSetter) {
+  bool static logCalled = false;
+  bool static errorCalled = false;
+  kraken::JSBridge::consoleMessageHandler = [](void *ctx, const std::string &message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(), "100");
+  };
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+    KRAKEN_LOG(VERBOSE) << errmsg;
+    errorCalled = true;
+  });
+  auto &context = bridge->getContext();
+  auto *sampleObject = new SampleExoticHostObject(context.get());
+  JSValue object = sampleObject->jsObject;
+  context->defineGlobalProperty("o", object);
+  const char* code = "console.log(o.abc)";
+  bridge->evaluateScript(code, strlen(code), "vm://", 0);
+  delete bridge;
+  EXPECT_EQ(logCalled, true);
+  EXPECT_EQ(errorCalled, false);
+  EXPECT_EQ(isSampleFree, true);
+}
+
 } // namespace kraken::binding::qjs
