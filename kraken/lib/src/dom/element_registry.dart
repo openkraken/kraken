@@ -91,11 +91,16 @@ void defineBuiltInElements() {
   // Edits
   defineElement(DEL, (id, nativePtr, elementManager) => DelElement(id, nativePtr.cast<NativeElement>(), elementManager));
   defineElement(INS, (id, nativePtr, elementManager) => InsElement(id, nativePtr.cast<NativeElement>(), elementManager));
-  // Metadata
+  // Head
+  defineElement(HEAD, (id, nativePtr, elementManager) => HeadElement(id, nativePtr.cast<NativeElement>(), elementManager));
+  defineElement(TITLE, (id, nativePtr, elementManager) => TitleElement(id, nativePtr.cast<NativeElement>(), elementManager));
+  defineElement(META, (id, nativePtr, elementManager) => MetaElement(id, nativePtr.cast<NativeElement>(), elementManager));
+  defineElement(LINK, (id, nativePtr, elementManager) => LinkElement(id, nativePtr.cast<NativeElement>(), elementManager));
+  defineElement(STYLE, (id, nativePtr, elementManager) => StyleElement(id, nativePtr.cast<NativeElement>(), elementManager));
+  defineElement(NOSCRIPT, (id, nativePtr, elementManager) => NoScriptElement(id, nativePtr.cast<NativeElement>(), elementManager));
   defineElement(SCRIPT, (id, nativePtr, elementManager) => ScriptElement(id, nativePtr.cast<NativeElement>(), elementManager));
   // Others
   defineElement(BODY, (id, nativePtr, elementManager) => BodyElement(id, nativePtr.cast<NativeElement>(), elementManager));
-  defineElement(HEAD, (id, nativePtr, elementManager) => HeadElement(id, nativePtr.cast<NativeElement>(), elementManager));
   defineElement(IMAGE, (id, nativePtr, elementManager) => ImageElement(id, nativePtr.cast<NativeImgElement>(), elementManager));
   defineElement(CANVAS, (id, nativePtr, elementManager) => CanvasElement(id, nativePtr.cast<NativeCanvasElement>(), elementManager));
   defineElement(OBJECT, (id, nativePtr, elementManager) => ObjectElement(id, nativePtr.cast<NativeObjectElement>(), elementManager));
