@@ -421,8 +421,30 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
   }
 
   // Dispatch event listener white by 'on' prefix property.
-  if (_propertyEventHandler.count(eventType) > 0 && eventType != "error") {
-    _dispatchEvent(_propertyEventHandler[eventType]);
+  if (_propertyEventHandler.count(eventType) > 0) {
+    if (eventType == "error") {
+      auto _dispatchErrorEvent = [&eventInstance, this, eventType](JSObjectRef &handler) {
+        JSValueRef exception = nullptr;
+        JSValueRef errorObjectValue = getObjectPropertyValue(ctx, eventType, eventInstance->object, &exception);
+        JSObjectRef errorObject = JSValueToObject(ctx, errorObjectValue, &exception);
+        JSValueRef messageValue = getObjectPropertyValue(ctx, "message", errorObject, &exception);
+        JSValueRef sourceURLValue = getObjectPropertyValue(ctx, "sourceURL", errorObject, &exception);
+        JSValueRef lineValue = getObjectPropertyValue(ctx, "line", errorObject, &exception);
+        JSValueRef columnValue = getObjectPropertyValue(ctx, "column", errorObject, &exception);
+        const JSValueRef arguments[] = {
+          messageValue,
+          sourceURLValue,
+          lineValue,
+          columnValue,
+          errorObjectValue
+        };
+        JSObjectCallAsFunction(_hostClass->ctx, handler, nullptr, 5, arguments, &exception);
+        context->handleException(exception);
+      };
+      _dispatchErrorEvent(_propertyEventHandler[eventType]);
+    } else {
+      _dispatchEvent(_propertyEventHandler[eventType]);
+    }
   }
 
   // do not dispatch event when event has been canceled
