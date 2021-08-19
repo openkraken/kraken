@@ -76,10 +76,6 @@ class ErrorEvent extends Event {
 // Global error handler used by JS Engine
 // @ts-ignore
 window.__global_onerror_handler__ = function (error) {
-  if (window.onerror) {
-    window.onerror(error.message, error.sourceURL, error.line, error.column, error);
-  }
-
   // @ts-ignore
   const event = new ErrorEvent('error',{
     error: error,
