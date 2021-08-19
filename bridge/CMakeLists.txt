@@ -13,6 +13,21 @@ else()
 endif()
 
 execute_process(
+  COMMAND bash "-c" "if [ ! -d \"node_modules\" ]; then npm install; fi"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/scripts/code_generator
+) # install code_generator deps
+
+execute_process(
+  COMMAND bash "-c" "node bin/code_generator -s ../../bindings/qjs/dom/elements -d ../../bindings/qjs/dom/elements/.gen"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/scripts/code_generator
+) # generate elements code
+
+execute_process(
+  COMMAND bash "-c" "node bin/code_generator -s ../../bindings/qjs/dom/events -d ../../bindings/qjs/dom/events/.gen"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/scripts/code_generator
+) # generate events code
+
+execute_process(
   COMMAND bash "-c" "read dart_sdk < <(type -p dart) && echo $\{dart_sdk%/*\}/cache/dart-sdk/include | xargs"
   OUTPUT_VARIABLE DART_SDK
 )
@@ -204,6 +219,7 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
       bindings/qjs/native_value.cc
       bindings/qjs/native_value.h
       bindings/qjs/host_object.h
+      bindings/qjs/host_object.cc
       bindings/qjs/host_class.h
       bindings/qjs/qjs_patch.cc
       bindings/qjs/qjs_patch.h
@@ -259,6 +275,8 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
       bindings/qjs/dom/events/.gen/media_error_event.h
       bindings/qjs/dom/events/.gen/mouse_event.cc
       bindings/qjs/dom/events/.gen/mouse_event.h
+      bindings/qjs/dom/events/touch_event.cc
+      bindings/qjs/dom/events/touch_event.h
       bindings/qjs/bom/blob.cc
       bindings/qjs/bom/blob.h
       bindings/qjs/bom/location.h

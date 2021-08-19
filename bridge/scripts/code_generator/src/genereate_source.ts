@@ -318,8 +318,20 @@ function generateHostClassSource(object: ClassObject) {
     instanceConstructorCode = `${object.name}Instance::${object.name}Instance(${object.name} *${object.type.toLowerCase()}): ${object.type}Instance(${object.type.toLowerCase()}, "${object.name}", true) {}`;
   }
 
+  let globalBindingName = '';
+  if (object.type === 'Element') {
+    globalBindingName = `HTML${object.name}`;
+  } else {
+    globalBindingName = object.name;
+  }
+
   return `
 ${object.name}::${object.name}(JSContext *context) : ${object.type}(context) {}
+
+void bind${object.name}(std::unique_ptr<JSContext> &context) {
+  auto *constructor = ${object.name}::instance(context.get());
+  context->defineGlobalProperty("${globalBindingName}", constructor->classObject);
+}
 
 OBJECT_INSTANCE_IMPL(${object.name});
 

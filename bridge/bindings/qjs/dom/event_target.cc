@@ -57,6 +57,7 @@ JSValue EventTarget::constructor(QjsContext *ctx, JSValue func_obj, JSValue this
 
 JSClassID EventTarget::classId() {
   assert_m(false, "classId is not implemented");
+  return 0;
 }
 
 JSClassID EventTarget::classId(JSValue &value) {
@@ -66,6 +67,7 @@ JSClassID EventTarget::classId(JSValue &value) {
   }
 
   assert_m(false, "can not identify value type.");
+  return 0;
 }
 
 JSValue EventTarget::addEventListener(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
@@ -300,6 +302,7 @@ EventTargetInstance::EventTargetInstance(EventTarget *eventTarget, JSClassID cla
 
 JSClassID EventTargetInstance::classId() {
   assert_m(false, "classId is not implemented");
+  return 0;
 }
 
 EventTargetInstance::~EventTargetInstance() {}

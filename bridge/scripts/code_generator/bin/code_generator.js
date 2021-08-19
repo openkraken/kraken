@@ -37,6 +37,11 @@ let blobs = files.map(file => {
 for (let i = 0; i < blobs.length; i ++) {
   let b = blobs[i];
   let result = analyzer(b);
+
+  if (!fs.existsSync(b.dist)) {
+    fs.mkdirSync(b.dist);
+  }
+
   fs.writeFileSync(path.join(b.dist, b.filename) + '.h', result.header);
   fs.writeFileSync(path.join(b.dist, b.filename) + '.cc', result.source);
 }

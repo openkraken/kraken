@@ -25,6 +25,20 @@
 #include "bindings/qjs/dom/text_node.h"
 #include "bindings/qjs/dom/comment_node.h"
 #include "bindings/qjs/dom/style_declaration.h"
+#include "bindings/qjs/dom/elements/.gen/anchor_element.h"
+#include "bindings/qjs/dom/elements/.gen/canvas_element.h"
+#include "bindings/qjs/dom/elements/.gen/image_element.h"
+#include "bindings/qjs/dom/elements/.gen/input_element.h"
+#include "bindings/qjs/dom/elements/.gen/object_element.h"
+#include "bindings/qjs/dom/elements/.gen/script_element.h"
+#include "bindings/qjs/dom/elements/.gen/svg_element.h"
+#include "bindings/qjs/dom/events/.gen/close_event.h"
+#include "bindings/qjs/dom/events/.gen/gesture_event.h"
+#include "bindings/qjs/dom/events/.gen/input_event.h"
+#include "bindings/qjs/dom/events/.gen/intersection_change.h"
+#include "bindings/qjs/dom/events/.gen/media_error_event.h"
+#include "bindings/qjs/dom/events/.gen/mouse_event.h"
+#include "bindings/qjs/dom/events/touch_event.h"
 
 
 namespace kraken {
@@ -67,28 +81,28 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindBlob(m_context);
   bindWindow(m_context);
   bindEvent(m_context);
-//  bindMouseEvent(m_context);
   bindCustomEvent(m_context);
-//  bindCloseEvent(m_context);
-//  bindGestureEvent(m_context);
-//  bindMediaErrorEvent(m_context);
-//  bindTouchEvent(m_context);
-//  bindInputEvent(m_context);
-//  bindIntersectionChangeEvent(m_context);
-//  bindMessageEvent(m_context);
   bindDocument(m_context);
   bindNode(m_context);
   bindTextNode(m_context);
   bindCommentNode(m_context);
   bindElement(m_context);
-//  bindImageElement(m_context);
-//  bindInputElement(m_context);
-//  bindSVGElement(m_context);
-//  bindWindow(m_context);
-//  bindPerformance(m_context);
+  bindAnchorElement(m_context);
+  bindCanvasElement(m_context);
+  bindImageElement(m_context);
+  bindInputElement(m_context);
+  bindObjectElement(m_context);
+  bindScriptElement(m_context);
+  bindSVGElement(m_context);
   bindCSSStyleDeclaration(m_context);
-//  bindScreen(m_context);
-//  bindBlob(m_context);
+  bindCloseEvent(m_context);
+  bindGestureEvent(m_context);
+  bindInputEvent(m_context);
+  bindIntersectionChangeEvent(m_context);
+  bindMediaErrorEvent(m_context);
+  bindMouseEvent(m_context);
+  bindTouchEvent(m_context);
+//  bindPerformance(m_context);
 
 //#if ENABLE_PROFILE
 //  nativePerformance->mark(PERF_JS_NATIVE_METHOD_INIT_END);

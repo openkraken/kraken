@@ -85,6 +85,8 @@ ${addIndent(nativeStructPropsCode.join('\n'), 2)}
   }
 
   let constructorHeader = `\n
+void bind${object.name}(std::unique_ptr<JSContext> &context);
+
 ${nativeStructCode}
 class ${object.name} : public ${object.type} {
 public:
