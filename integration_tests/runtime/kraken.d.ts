@@ -66,4 +66,4 @@ interface HTMLElement {
 /**
  * The mocked local http server origin.
  */
-declare const MOCKED_HTTP_SERVER :string;
+declare const LOCAL_HTTP_SERVER :string;

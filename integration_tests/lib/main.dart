@@ -80,7 +80,7 @@ void main() async {
 
   String codeInjection = '''
     // This segment inject variables for test environment.
-    MOCKED_HTTP_SERVER = '${httpServer.getUri().toString()}';
+    LOCAL_HTTP_SERVER = '${httpServer.getUri().toString()}';
   ''';
 
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.

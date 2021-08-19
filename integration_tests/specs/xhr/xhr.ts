@@ -15,7 +15,7 @@ describe('XMLHttpRequest', () => {
         done();
       }
     };
-    xhr.open('GET', `${MOCKED_HTTP_SERVER}/json_with_content_length_expires_etag_and_last_modified`, true);
+    xhr.open('GET', `${LOCAL_HTTP_SERVER}/json_with_content_length_expires_etag_and_last_modified`, true);
     xhr.setRequestHeader('Accept', 'application/json');
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.send();
