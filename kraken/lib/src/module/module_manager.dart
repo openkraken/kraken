@@ -4,8 +4,6 @@ import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/dom.dart';
 
-import 'navigator.dart';
-
 abstract class BaseModule {
   String get name;
   final ModuleManager? moduleManager;
