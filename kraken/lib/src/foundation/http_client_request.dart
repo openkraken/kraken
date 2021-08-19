@@ -2,10 +2,17 @@
  * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
+import 'http_cache.dart';
+import 'http_cache_object.dart';
 import 'http_overrides.dart';
 import 'http_client_interceptor.dart';
+import 'queue.dart';
+
+final _requestQueue = Queue(parallel: 10);
 
 class ProxyHttpClientRequest extends HttpClientRequest {
   final HttpClientRequest _clientRequest;
@@ -13,10 +20,6 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   ProxyHttpClientRequest(HttpClientRequest clientRequest, KrakenHttpOverrides httpOverrides)
       : _clientRequest = clientRequest,
         _httpOverrides = httpOverrides;
-
-  String? _getContextId(HttpClientRequest request) {
-    return request.headers.value(HttpHeaderContextID);
-  }
 
   @override
   Encoding get encoding => _clientRequest.encoding;
@@ -31,9 +34,12 @@ class ProxyHttpClientRequest extends HttpClientRequest {
     _clientRequest.abort(exception, stackTrace);
   }
 
+  // Saving all the data before calling real `close` to [HttpClientRequest].
+  final List<int> _data = [];
+
   @override
   void add(List<int> data) {
-    _clientRequest.add(data);
+    _data.addAll(data);
   }
 
   @override
@@ -42,8 +48,16 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   }
 
   @override
-  Future addStream(Stream<List<int>> stream) {
-    return _clientRequest.addStream(stream);
+  Future<void> addStream(Stream<List<int>> stream) {
+    // Consume stream.
+    Completer<void> completer = Completer();
+    stream.listen(
+      _data.addAll,
+      onError: completer.completeError,
+      onDone: completer.complete,
+      cancelOnError: true
+    );
+    return completer.future;
   }
 
   Future<HttpClientRequest?> _beforeRequest(HttpClientInterceptor _clientInterceptor, HttpClientRequest _clientRequest) async {
@@ -76,20 +90,81 @@ class ProxyHttpClientRequest extends HttpClientRequest {
     return null;
   }
 
+  static const String _HttpHeadersOrigin = 'origin';
+
   @override
   Future<HttpClientResponse> close() async {
-    if (_httpOverrides.shouldOverride(_clientRequest)) {
-      String? contextId = _getContextId(_clientRequest);
-      if (contextId != null) {
-        _clientRequest.headers.removeAll(HttpHeaderContextID);
-        HttpClientInterceptor _clientInterceptor = _httpOverrides.getInterceptor(contextId);
-        HttpClientRequest _request = await _beforeRequest(_clientInterceptor, _clientRequest) ?? _clientRequest;
-        HttpClientResponse _interceptedResponse = await _shouldInterceptRequest(_clientInterceptor, _request) ?? await _request.close();
-        return await _afterResponse(_clientInterceptor, _request, _interceptedResponse) ?? _interceptedResponse;
+    HttpClientRequest request = _clientRequest;
+    int? contextId = KrakenHttpOverrides.getContextHeader(_clientRequest);
+    if (contextId != null) {
+      // Set the default origin and referrer.
+      Uri referrer = getReferrer(contextId);
+      request.headers.set(HttpHeaders.refererHeader, referrer.toString());
+      String origin = getOrigin(referrer);
+      request.headers.set(_HttpHeadersOrigin, origin);
+
+      HttpClientInterceptor? clientInterceptor;
+      if (_httpOverrides.hasInterceptor(contextId)) {
+        clientInterceptor = _httpOverrides.getInterceptor(contextId);
       }
+
+      // Step 1: Handle request.
+      if (clientInterceptor != null) {
+        request = await _beforeRequest(clientInterceptor, request) ?? request;
+      }
+
+      // Step 2: Handle cache-control and expires,
+      //        if hit, no need to open request.
+      HttpCacheController cacheController = HttpCacheController.instance(origin);
+      HttpCacheObject cacheObject = await cacheController.getCacheObject(request.uri);
+      if (cacheObject.hitLocalCache(request)) {
+        HttpClientResponse? cacheResponse = await cacheObject.toHttpClientResponse();
+        if (cacheResponse != null) {
+          return cacheResponse;
+        }
+      }
+
+      // Step 3: Handle negotiate cache request header.
+      if (request.headers.ifModifiedSince == null
+          && request.headers.value(HttpHeaders.ifNoneMatchHeader) == null) {
+        // ETag has higher priority of lastModified.
+        if (cacheObject.eTag != null) {
+          request.headers.set(HttpHeaders.ifNoneMatchHeader, cacheObject.eTag!);
+        } else if (cacheObject.lastModified != null) {
+          request.headers.set(HttpHeaders.ifModifiedSinceHeader,
+              HttpDate.format(cacheObject.lastModified!));
+        }
+      }
+
+      // Send the real data to backend client.
+      _clientRequest.add(_data);
+      _data.clear();
+
+      // Step 4: Lifecycle of shouldInterceptRequest
+      HttpClientResponse? response;
+      if (clientInterceptor != null) {
+        response = await _shouldInterceptRequest(clientInterceptor, request);
+      }
+
+      // After this, response should not be null.
+      if (response == null) {
+        response = await _requestQueue.add(() async => cacheController
+            .interceptResponse(request, await request.close(), cacheObject));
+      }
+
+      // Step 5: Lifecycle of afterResponse.
+      if (clientInterceptor != null) {
+        response = await _afterResponse(clientInterceptor, request, response!) ?? response;
+      }
+
+      // Step 6: Intercept response by cache controller (handle 304).
+      return cacheController.interceptResponse(request, response!, cacheObject);
+    } else {
+      _clientRequest.add(_data);
+      _data.clear();
     }
 
-    return _clientRequest.close();
+    return _requestQueue.add(request.close);
   }
 
   @override
