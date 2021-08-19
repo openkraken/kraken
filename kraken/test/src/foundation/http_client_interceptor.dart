@@ -14,7 +14,7 @@ void main() {
 
     test('beforeRequest', () async {
       var request = await httpClient.openUrl('GET',
-          server.getUri('200JSONWithContentLength'));
+          server.getUri('json_with_content_length'));
       KrakenHttpOverrides.setContextHeader(request, contextId);
       request.headers.add('x-test-id', 'beforeRequest-001');
 
@@ -31,7 +31,7 @@ void main() {
 
     test('afterResponse', () async {
       var request = await httpClient.openUrl('GET',
-          server.getUri('200JSONWithContentLength'));
+          server.getUri('json_with_content_length'));
       KrakenHttpOverrides.setContextHeader(request, contextId);
       request.headers.add('x-test-id', 'afterResponse-001');
 
@@ -41,7 +41,7 @@ void main() {
 
     test('shouldInterceptRequest', () async {
       var request = await httpClient.openUrl('GET',
-          server.getUri('200JSONWithContentLength'));
+          server.getUri('json_with_content_length'));
       KrakenHttpOverrides.setContextHeader(request, contextId);
       request.headers.add('x-test-id', 'shouldInterceptRequest-001');
 

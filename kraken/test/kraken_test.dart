@@ -14,7 +14,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Start local HTTP server.
-  LocalHttpServer.basePath = 'test/res';
+  LocalHttpServer.basePath = 'test/fixtures';
   var httpServer = LocalHttpServer.getInstance();
   print('Local HTTP Server started at ${httpServer.getUri()}');
 

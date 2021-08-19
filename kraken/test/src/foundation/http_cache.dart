@@ -17,7 +17,7 @@ void main() {
 
     test('Simple http request with expires', () async {
       var request = await httpClient.openUrl('GET',
-          server.getUri('200JSONWithContentLengthExpiresETagAndLastModified'));
+          server.getUri('json_with_content_length_expires_etag_last_modified'));
       KrakenHttpOverrides.setContextHeader(request, contextId);
       var response = await request.close();
       expect(response.statusCode, 200);
@@ -35,7 +35,7 @@ void main() {
 
       // second request
       var requestSecond = await httpClient.openUrl('GET',
-          server.getUri('200JSONWithContentLengthExpiresETagAndLastModified'));
+          server.getUri('json_with_content_length_expires_etag_last_modified'));
       KrakenHttpOverrides.setContextHeader(requestSecond, contextId);
       var responseSecond = await requestSecond.close();
       assert(responseSecond.headers.value('x-kraken-cache') != null);
@@ -44,7 +44,7 @@ void main() {
     test('Negotiation cache last-modified', () async {
       // First request to save cache.
       var req = await httpClient.openUrl('GET',
-          server.getUri('200PlainTextWithContentLengthAndLastModified'));
+          server.getUri('plain_text_with_content_length_and_last_modified'));
       KrakenHttpOverrides.setContextHeader(req, contextId);
       req.headers.ifModifiedSince = HttpDate.parse('Sun, 15 Mar 2020 11:32:20 GMT');
       var res = await req.close();
@@ -60,7 +60,7 @@ void main() {
     test('Negotiation cache eTag', () async {
       // First request to save cache.
       var req = await httpClient.openUrl('GET',
-          server.getUri('200PlainTextWithETagAndContentLength'));
+          server.getUri('plain_text_with_etag_and_content_length'));
       KrakenHttpOverrides.setContextHeader(req, contextId);
       req.headers.set(HttpHeaders.ifNoneMatchHeader, '"foo"');
 
