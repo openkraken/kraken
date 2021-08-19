@@ -99,9 +99,11 @@ void defineBuiltInElements() {
   defineElement(STYLE, (id, nativePtr, elementManager) => StyleElement(id, nativePtr.cast<NativeElement>(), elementManager));
   defineElement(NOSCRIPT, (id, nativePtr, elementManager) => NoScriptElement(id, nativePtr.cast<NativeElement>(), elementManager));
   defineElement(SCRIPT, (id, nativePtr, elementManager) => ScriptElement(id, nativePtr.cast<NativeElement>(), elementManager));
+  // Object
+  defineElement(OBJECT, (id, nativePtr, elementManager) => ObjectElement(id, nativePtr.cast<NativeObjectElement>(), elementManager));
+  defineElement(PARAM, (id, nativePtr, elementManager) => ParamElement(id, nativePtr.cast<NativeElement>(), elementManager));
   // Others
   defineElement(BODY, (id, nativePtr, elementManager) => BodyElement(id, nativePtr.cast<NativeElement>(), elementManager));
   defineElement(IMAGE, (id, nativePtr, elementManager) => ImageElement(id, nativePtr.cast<NativeImgElement>(), elementManager));
   defineElement(CANVAS, (id, nativePtr, elementManager) => CanvasElement(id, nativePtr.cast<NativeCanvasElement>(), elementManager));
-  defineElement(OBJECT, (id, nativePtr, elementManager) => ObjectElement(id, nativePtr.cast<NativeObjectElement>(), elementManager));
 }
