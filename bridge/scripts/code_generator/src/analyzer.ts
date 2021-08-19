@@ -32,11 +32,17 @@ function getPropKind(type: ts.TypeNode): PropsDeclarationKind {
   if (type.kind === ts.SyntaxKind.StringKeyword) {
     return PropsDeclarationKind.string;
   } else if (type.kind === ts.SyntaxKind.NumberKeyword) {
-    return PropsDeclarationKind.number;
+    return PropsDeclarationKind.double;
   } else if (type.kind === ts.SyntaxKind.BooleanKeyword) {
     return PropsDeclarationKind.boolean;
   } else if (type.kind === ts.SyntaxKind.FunctionType) {
     return PropsDeclarationKind.function;
+  } else if (type.kind === ts.SyntaxKind.TypeReference) {
+    // @ts-ignore
+    let typeName = (type as ts.TypeReference).typeName;
+    if (typeName.escapedText === 'int64') {
+      return PropsDeclarationKind.int64;
+    }
   }
   return PropsDeclarationKind.object;
 }
@@ -78,11 +84,16 @@ function paramsNodeToArguments(parameter: ts.ParameterDeclaration): FunctionArgu
   return args;
 }
 
+function isParamsReadOnly(m: ts.PropertySignature): boolean {
+  if (!m.modifiers) return false;
+  return m.modifiers.some(k => k.kind === ts.SyntaxKind.ReadonlyKeyword);
+}
+
 function walkProgram(statement: ts.Statement) {
   switch(statement.kind) {
     case ts.SyntaxKind.InterfaceDeclaration: {
       let interfaceName = getInterfaceName(statement);
-      if (interfaceName === 'HostObject' || interfaceName === 'HostClass') return;
+      if (interfaceName === 'HostObject' || interfaceName === 'HostClass' || interfaceName === 'Element' || interfaceName === 'Event') return;
       let s = (statement as ts.InterfaceDeclaration);
       let obj = new ClassObject();
       if (s.heritageClauses) {
@@ -99,6 +110,7 @@ function walkProgram(statement: ts.Statement) {
             let prop = new PropsDeclaration();
             let m = (member as ts.PropertySignature);
             prop.name = getPropName(m.name);
+            prop.readonly = isParamsReadOnly(m);
 
             let propKind = m.type;
             if (propKind) {

@@ -1,6 +1,7 @@
-import {ClassObject} from "./declaration";
+import {ClassObject, PropsDeclaration, PropsDeclarationKind} from "./declaration";
 import {uniqBy} from "lodash";
 import {Blob} from "./blob";
+import {addIndent} from "./utils";
 
 function generatePropsHeader(object: ClassObject, type: PropType) {
   let propsDefine = '';
@@ -12,7 +13,7 @@ function generatePropsHeader(object: ClassObject, type: PropType) {
 
 enum PropType {
   hostObject,
-  hostClass
+  hostClass,
 }
 
 function generateMethodsHeader(object: ClassObject, type: PropType) {
@@ -61,8 +62,31 @@ function generateHostClassHeader(object: ClassObject) {
   let {methodsImpl, methodsDefine} = generateMethodsHeader(object, PropType.hostClass);
   let propsDefine = generatePropsHeader(object, PropType.hostClass);
 
+  let nativeStructCode = '';
+
+  if (object.type === 'Event') {
+    let nativeStructPropsCode = object.props.map(p => {
+      switch(p.kind) {
+        case PropsDeclarationKind.string:
+          return `NativeString *${p.name};`;
+        case PropsDeclarationKind.double:
+          return `double ${p.name};`;
+        case PropsDeclarationKind.int64:
+        case PropsDeclarationKind.boolean:
+          return `int64_t ${p.name};`;
+      }
+      return null;
+    }).filter(p => !!p);
+
+    nativeStructCode = `struct Native${object.name} {
+  NativeEvent nativeEvent;
+${addIndent(nativeStructPropsCode.join('\n'), 2)}
+};`;
+  }
+
   let constructorHeader = `\n
-class ${object.name} : public Element {
+${nativeStructCode}
+class ${object.name} : public ${object.type} {
 public:
   ${object.name}() = delete;
   explicit ${object.name}(JSContext *context);
@@ -72,10 +96,18 @@ public:
 private:
   ${methodsImpl.join('\n  ')}
 };`;
-  let instanceHeaders = `class ${object.name}Instance : public ElementInstance {
+
+  let instanceConstructorHeader = ``;
+  if (object.type === 'Event') {
+    instanceConstructorHeader = `explicit ${object.name}Instance(${object.name} *${object.type.toLowerCase()}, NativeEvent *nativeEvent, JSValue eventInit);`;
+  } else {
+    instanceConstructorHeader = `explicit ${object.name}Instance(${object.name} *${object.type.toLowerCase()});`;
+  }
+
+  let instanceHeaders = `class ${object.name}Instance : public ${object.type}Instance {
 public:
   ${object.name}Instance() = delete;
-  explicit ${object.name}Instance(${object.name} *element);
+  ${instanceConstructorHeader}
 private:
   ${propsDefine}
 };
@@ -85,7 +117,7 @@ private:
 }
 
 function generateObjectHeader(object: ClassObject) {
-  if (object.type === 'HostClass') {
+  if (object.type === 'HostClass' || object.type === 'Element' || object.type === 'Event') {
     return generateHostClassHeader(object);
   } else if (object.type === 'HostObject') {
     return generateHostObjectHeader(object);

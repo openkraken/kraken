@@ -1,6 +1,12 @@
 import {Blob} from "./blob";
-import {ClassObject, FunctionArguments, FunctionDeclaration} from "./declaration";
-import { findLastIndex, findIndex, remove } from 'lodash';
+import {
+  ClassObject,
+  FunctionArguments,
+  FunctionDeclaration,
+  PropsDeclaration,
+  PropsDeclarationKind
+} from "./declaration";
+import {addIndent} from "./utils";
 
 function generateHostObjectSource(object: ClassObject) {
   let propSource: string[] = generatePropsSource(object, PropType.hostObject);
@@ -35,25 +41,104 @@ ${methodsSource.join('\n')}
 
 enum PropType {
   hostObject,
-  hostClass
+  Element,
+  Event
+}
+
+function getPropsVars(object: ClassObject, type: PropType) {
+  let classSubFix = object.name;
+  if (type == PropType.Element || type == PropType.Event) {
+    classSubFix += 'Instance';
+  }
+
+  let instanceName = '';
+  let classId = '';
+  if (type == PropType.hostObject) {
+    instanceName = 'object';
+    classId = 'JSContext::kHostObjectClassId';
+  } else if (type == PropType.Element) {
+    instanceName = 'element';
+    classId = 'Element::classId()';
+  } else if (type == PropType.Event) {
+    instanceName = 'event';
+    classId = 'Event::kEventClassID';
+  }
+
+  return {
+    classSubFix,
+    classId,
+    instanceName
+  };
+}
+
+function generatePropsGetter(object: ClassObject, type: PropType, p: PropsDeclaration) {
+  let {
+    classId,
+    classSubFix,
+    instanceName
+  } = getPropsVars(object, type);
+
+
+  let getterCode = '';
+  if (object.type === 'Event') {
+    let qjsCallFunc = '';
+    if (p.kind === PropsDeclarationKind.double) {
+      qjsCallFunc = `JS_NewFloat64(ctx, nativeEvent->${p.name})`;
+    } else if (p.kind === PropsDeclarationKind.boolean) {
+      qjsCallFunc = `JS_NewBool(ctx, nativeEvent->${p.name} ? 1 : 0)`;
+    } else if (p.kind === PropsDeclarationKind.string) {
+      qjsCallFunc = `JS_NewUnicodeString(event->m_context->runtime(), ctx, nativeEvent->${p.name}->string, nativeEvent->${p.name}->length);`;
+    } else if (p.kind === PropsDeclarationKind.int64) {
+      qjsCallFunc = `JS_NewUint32(ctx, nativeEvent->${p.name});`
+    }
+
+    getterCode = `auto *${instanceName} = static_cast<${classSubFix} *>(JS_GetOpaque(this_val, ${classId}));
+  auto *nativeEvent = reinterpret_cast<Native${object.name} *>(event->nativeEvent);
+  return ${qjsCallFunc};`;
+  } else {
+    getterCode = `auto *${instanceName} = static_cast<${classSubFix} *>(JS_GetOpaque(this_val, ${classId}));
+  return ${instanceName}->callNativeMethods("get${p.name[0].toUpperCase() + p.name.substring(1)}", 0, nullptr);`;
+  }
+
+  let flushUICommandCode = '';
+  if (object.type === 'Element' || object.type === 'HostObject') {
+    flushUICommandCode = 'getDartMethod()->flushUICommand();'
+  }
+
+  return `PROP_GETTER(${classSubFix}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  ${flushUICommandCode}
+  ${getterCode}
+}`;
+}
+
+function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclaration) {
+  let {
+    classId,
+    classSubFix,
+    instanceName
+  } = getPropsVars(object, type);
+
+  if (p.readonly) {
+    return `PROP_SETTER(${classSubFix}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JS_NULL;
+}`;
+  }
+
+  return `PROP_SETTER(${classSubFix}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *${instanceName} = static_cast<${classSubFix} *>(JS_GetOpaque(this_val, ${classId}));
+  NativeValue arguments[] = {
+    jsValueToNativeValue(ctx, argv[0])
+  };
+  return ${instanceName}->callNativeMethods("set${p.name[0].toUpperCase() + p.name.substring(1)}", 1, arguments);
+}`;
 }
 
 function generatePropsSource(object: ClassObject, type: PropType) {
   let propSource: string[] = [];
   if (object.props.length > 0) {
     object.props.forEach(p => {
-      let getter = `PROP_GETTER(${object.name}${type == PropType.hostClass ? 'Instance' : ''}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  getDartMethod()->flushUICommand();
-  auto *element = static_cast<${object.name}${type == PropType.hostClass ? 'Instance' : ''} *>(JS_GetOpaque(this_val, Element::classId()));
-  return element->callNativeMethods("get${p.name[0].toUpperCase() + p.name.substring(1)}", 0, nullptr);
-}`;
-      let setter = `PROP_SETTER(${object.name}${type == PropType.hostClass ? 'Instance' : ''}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *element = static_cast<${object.name}${type == PropType.hostClass ? 'Instance' : ''} *>(JS_GetOpaque(this_val, Element::classId()));
-  NativeValue arguments[] = {
-    jsValueToNativeValue(ctx, argv[0])
-  };
-  return element->callNativeMethods("set${p.name[0].toUpperCase() + p.name.substring(1)}", 1, arguments);
-}`;
+      let getter = generatePropsGetter(object, type, p);
+      let setter = generatePropsSetter(object, type, p);
       propSource.push(getter + '\n' + setter);
     });
   }
@@ -87,7 +172,7 @@ function generateMethodArgumentsCheck(m: FunctionDeclaration, object: ClassObjec
   });
 
   let argsCheck: string[] = [];
-  for (let i = 0; i < requiredArgsCount; i ++) {
+  for (let i = 0; i < requiredArgsCount; i++) {
     argsCheck.push(generateArgumentsTypeCheck(i, m.args[i], m));
   }
 
@@ -96,17 +181,6 @@ function generateMethodArgumentsCheck(m: FunctionDeclaration, object: ClassObjec
   }
   ${argsCheck.join('\n  ')}
 `;
-}
-
-function addIndent(str: String, space: number) {
-  let lines = str.split('\n');
-  lines = lines.map(l => {
-    for (let i = 0; i < space; i ++) {
-      l = ' ' + l;
-    }
-    return l;
-  });
-  return lines.join('\n');
 }
 
 function generateMethodsSource(object: ClassObject, type: PropType) {
@@ -125,7 +199,7 @@ function generateMethodsSource(object: ClassObject, type: PropType) {
         let callArgumentsCode = '';
         if (m.args.length > 0) {
           let callArguments = [];
-          for (let i = 0; i < m.args.length; i ++) {
+          for (let i = 0; i < m.args.length; i++) {
             callArguments.push(` jsValueToNativeValue(ctx, argv[${i}])`);
           }
           callArgumentsCode = `NativeValue arguments[] = {
@@ -143,7 +217,7 @@ ${callArgumentsCode}
       if (polymorphism) {
         let allConditions = object.methods.filter(me => me.name === m.name);
         let caseCode = [];
-        for (let i = 0; i < allConditions.length; i ++) {
+        for (let i = 0; i < allConditions.length; i++) {
           caseCode.push(`case ${allConditions[i].args.length}: {
 ${addIndent(createMethodBody(allConditions[i]), 2)}
   }\n  `)
@@ -164,35 +238,102 @@ ${addIndent(createMethodBody(allConditions[i]), 2)}
 ${body}
 }`);
       }
-
-
-
     });
   }
 
   return methodsSource;
 }
 
+function generateEventConstructorCode(object: ClassObject) {
+  return `if (argc < 1) {
+    return JS_ThrowTypeError(ctx, "Failed to construct '${object.name}': 1 argument required, but only 0 present.");
+  }
+
+  JSValue eventTypeValue = argv[0];
+  JSValue eventInitValue = JS_NULL;
+
+  if (argc == 2) {
+    eventInitValue = argv[1];
+  }
+
+  auto *nativeEvent = new Native${object.name}();
+  nativeEvent->nativeEvent.type = jsValueToNativeString(ctx, eventTypeValue);
+
+  auto event = new ${object.name}Instance(this, reinterpret_cast<NativeEvent *>(nativeEvent), eventInitValue);
+  return event->instanceObject;`;
+}
+
+function generateEventInstanceConstructorCode(object: ClassObject) {
+  let atomCreateCode: string[] = [];
+  let atomReleaseCode: string[] = [];
+  let propWriteCode: string[] = [];
+
+  object.props.forEach(p => {
+    atomCreateCode.push(`JSAtom ${p.name}Atom = JS_NewAtom(m_ctx, "${p.name}");`)
+    atomReleaseCode.push(`JS_FreeAtom(m_ctx, ${p.name}Atom);`)
+
+    let propApplyCode = '';
+    if (p.kind === PropsDeclarationKind.boolean) {
+      propApplyCode = `ne->${p.name} = JS_ToBool(m_ctx, JS_GetProperty(m_ctx, eventInit, ${p.name}Atom)) ? 1 : 0;`;
+    } else if (p.kind === PropsDeclarationKind.int64) {
+      propApplyCode = `JS_ToUint32(m_ctx, reinterpret_cast<uint32_t *>(&ne->${p.name}), JS_GetProperty(m_ctx, eventInit, ${p.name}Atom));`
+    } else if (p.kind === PropsDeclarationKind.string) {
+      propApplyCode = addIndent(`JSValue v = JS_GetProperty(m_ctx, eventInit, ${p.name}Atom);
+  ne->${p.name} = jsValueToNativeString(m_ctx, v);`, 0);
+    } else if (p.kind === PropsDeclarationKind.double) {
+      propApplyCode = `JS_ToFloat64(m_ctx, &ne->${p.name}, JS_GetProperty(m_ctx, eventInit, ${p.name}Atom));`;
+    }
+
+    propWriteCode.push(addIndent(`if (JS_HasProperty(m_ctx, eventInit, ${p.name}Atom)) {
+  ${propApplyCode}
+}`, 4));
+  });
+
+  return `if (JS_IsObject(eventInit)) {
+${addIndent(atomCreateCode.join('\n'), 4)}
+    auto *ne = reinterpret_cast<Native${object.name} *>(nativeEvent);
+
+${propWriteCode.join('\n')}
+
+${addIndent(atomReleaseCode.join('\n'), 4)}
+  }`;
+}
+
 function generateHostClassSource(object: ClassObject) {
-  let propSource: string[] = generatePropsSource(object, PropType.hostClass);
-  let methodsSource: string[] = generateMethodsSource(object, PropType.hostClass);
+  let propSource: string[] = generatePropsSource(object, object.type === 'Event' ? PropType.Event : PropType.Element);
+  let methodsSource: string[] = generateMethodsSource(object, object.type === 'Event' ? PropType.Event : PropType.Element);
+  let constructorCode = '';
+  if (object.type === 'Element') {
+    constructorCode = 'return JS_ThrowTypeError(ctx, "Illegal constructor");';
+  } else if (object.type === 'Event') {
+    constructorCode = generateEventConstructorCode(object);
+  }
+
+  let instanceConstructorCode = '';
+  if (object.type === 'Event') {
+    instanceConstructorCode = `${object.name}Instance::${object.name}Instance(${object.name} *${object.type.toLowerCase()}, NativeEvent *nativeEvent, JSValue eventInit): ${object.type}Instance(${object.type.toLowerCase()}, nativeEvent) {
+  ${generateEventInstanceConstructorCode(object)}
+}`
+  } else {
+    instanceConstructorCode = `${object.name}Instance::${object.name}Instance(${object.name} *${object.type.toLowerCase()}): ${object.type}Instance(${object.type.toLowerCase()}, "${object.name}", true) {}`;
+  }
 
   return `
-${object.name}::${object.name}(JSContext *context) : Element(context) {}
+${object.name}::${object.name}(JSContext *context) : ${object.type}(context) {}
 
 OBJECT_INSTANCE_IMPL(${object.name});
 
 JSValue ${object.name}::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
-  return JS_ThrowTypeError(ctx, "Illegal constructor");
+  ${constructorCode}
 }
 ${propSource.join('\n')}
 ${methodsSource.join('\n')}
-${object.name}Instance::${object.name}Instance(${object.name} *element): ElementInstance(element, "CanvasElement", true) {}
+${instanceConstructorCode}
 `;
 }
 
 function generateObjectSource(object: ClassObject) {
-  if (object.type === 'HostClass') {
+  if (object.type === 'HostClass' || object.type === 'Element' || object.type === 'Event') {
     return generateHostClassSource(object);
   } else if (object.type === 'HostObject') {
     return generateHostObjectSource(object);
@@ -209,6 +350,7 @@ export function generateCppSource(blob: Blob) {
 
 #include "${blob.filename}.h"
 #include "bridge_qjs.h"
+#include "bindings/qjs/qjs_patch.h"
 
 namespace kraken::binding::qjs {
   ${sources.join('')}

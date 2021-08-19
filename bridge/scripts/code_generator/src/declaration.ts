@@ -5,8 +5,10 @@ export class FunctionArguments {
 }
 
 export enum PropsDeclarationKind {
+  none,
   string,
-  number,
+  double,
+  int64,
   boolean,
   object,
   function
@@ -15,6 +17,7 @@ export enum PropsDeclarationKind {
 export class PropsDeclaration {
   kind: PropsDeclarationKind;
   name: string;
+  readonly: boolean;
 }
 
 export class FunctionDeclaration extends PropsDeclaration {
@@ -24,9 +27,6 @@ export class FunctionDeclaration extends PropsDeclaration {
 export class ClassObject {
   name: string;
   type: string;
-  options: {
-    flushUICommand: boolean;
-  };
   props: PropsDeclaration[] = [];
   methods: FunctionDeclaration[] = [];
 }
