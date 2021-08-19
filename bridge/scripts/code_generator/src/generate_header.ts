@@ -101,7 +101,7 @@ private:
 
   let instanceConstructorHeader = ``;
   if (object.type === 'Event') {
-    instanceConstructorHeader = `explicit ${object.name}Instance(${object.name} *${object.type.toLowerCase()}, NativeEvent *nativeEvent, JSValue eventInit);`;
+    instanceConstructorHeader = `explicit ${object.name}Instance(${object.name} *${object.type.toLowerCase()}, NativeEvent *nativeEvent);`;
   } else {
     instanceConstructorHeader = `explicit ${object.name}Instance(${object.name} *${object.type.toLowerCase()});`;
   }

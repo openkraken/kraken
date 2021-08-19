@@ -26,6 +26,7 @@ JSValue Node::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, i
 
 JSClassID Node::classId() {
   assert_m(false, "classId is not implemented");
+  return 0;
 }
 
 JSClassID Node::classId(JSValue &value) {

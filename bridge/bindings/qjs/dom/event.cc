@@ -159,6 +159,10 @@ EventInstance *Event::buildEventInstance(std::string &eventType, JSContext *cont
   return eventInstance;
 }
 
+void Event::defineEvent(const std::string& eventType, EventCreator creator) {
+  m_eventCreatorMap[eventType] = creator;
+}
+
 JSValue Event::stopPropagation(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *event = static_cast<EventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
   event->m_propagationStopped = true;

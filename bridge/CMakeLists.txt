@@ -6,11 +6,11 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if(${ENABLE_PROFILE})
+if (${ENABLE_PROFILE})
   add_definitions(-DENABLE_PROFILE=1)
-else()
+else ()
   add_definitions(-DENABLE_PROFILE=0)
-endif()
+endif ()
 
 execute_process(
   COMMAND bash "-c" "if [ ! -d \"node_modules\" ]; then npm install; fi"
@@ -35,38 +35,38 @@ string(REGEX REPLACE "\n$" "" DART_SDK "${DART_SDK}")
 
 list(APPEND PUBLIC_HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
-)
+  )
 
 if (ENABLE_ASAN)
   add_compile_options(-fsanitize=address -fno-omit-frame-pointer -O1)
   add_link_options(-fsanitize=address -fno-omit-frame-pointer)
-endif()
+endif ()
 
 list(APPEND BRIDGE_SOURCE
-    kraken_bridge.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_foundation.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/dart_methods.h
-    foundation/logging.cc
-    foundation/logging.h
-    foundation/colors.h
-    foundation/ref_counted_internal.h
-    foundation/ref_counter.h
-    foundation/ref_ptr.h
-    foundation/ref_ptr_internal.h
-    foundation/ui_task_queue.h
-    foundation/ui_task_queue.cc
-    foundation/inspector_task_queue.h
-    foundation/inspector_task_queue.cc
-    foundation/task_queue.cc
-    foundation/task_queue.h
-    foundation/ui_command_buffer.cc
-    foundation/ui_command_callback_queue.cc
-    foundation/closure.h
-    foundation/bridge_callback.h
-    dart_methods.cc
-    polyfill/dist/polyfill.cc
-)
+  kraken_bridge.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_foundation.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/dart_methods.h
+  foundation/logging.cc
+  foundation/logging.h
+  foundation/colors.h
+  foundation/ref_counted_internal.h
+  foundation/ref_counter.h
+  foundation/ref_ptr.h
+  foundation/ref_ptr_internal.h
+  foundation/ui_task_queue.h
+  foundation/ui_task_queue.cc
+  foundation/inspector_task_queue.h
+  foundation/inspector_task_queue.cc
+  foundation/task_queue.cc
+  foundation/task_queue.h
+  foundation/ui_command_buffer.cc
+  foundation/ui_command_callback_queue.cc
+  foundation/closure.h
+  foundation/bridge_callback.h
+  dart_methods.cc
+  polyfill/dist/polyfill.cc
+  )
 
 list(APPEND BRIDGE_INCLUDE
   ${CMAKE_CURRENT_LIST_DIR}/foundation
@@ -84,21 +84,21 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
 
   if (${IS_ANDROID})
     list(APPEND BRIDGE_INCLUDE
-            ${CMAKE_CURRENT_SOURCE_DIR}/third_party/JavaScriptCore/include
-            )
+      ${CMAKE_CURRENT_SOURCE_DIR}/third_party/JavaScriptCore/include
+      )
     add_library(JavaScriptCore SHARED IMPORTED)
     set_target_properties(JavaScriptCore PROPERTIES IMPORTED_LOCATION
-            "${CMAKE_CURRENT_SOURCE_DIR}/third_party/JavaScriptCore/lib/android/${ANDROID_ABI}/libjsc.so"
-            )
+      "${CMAKE_CURRENT_SOURCE_DIR}/third_party/JavaScriptCore/lib/android/${ANDROID_ABI}/libjsc.so"
+      )
     list(APPEND BRIDGE_LINK_LIBS
-            JavaScriptCore
-            )
+      JavaScriptCore
+      )
   elseif (EXISTS ${DEBUG_JSC_ENGINE})
     list(APPEND BRIDGE_INCLUDE ${DEBUG_JSC_ENGINE}/Headers)
     add_library(JavaScriptCore SHARED IMPORTED)
     set_target_properties(JavaScriptCore PROPERTIES IMPORTED_LOCATION ${DEBUG_JSC_ENGINE}/JavaScriptCore)
     list(APPEND BRIDGE_LINK_LIBS JavaScriptCore)
-  else()
+  else ()
     add_compile_options(-DIS_APPLE=1)
     list(APPEND BRIDGE_LINK_LIBS "-framework JavaScriptCore")
   endif ()
@@ -182,13 +182,13 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     bindings/jsc/KOM/method_channel.h
     bridge_jsc.cc
     bridge_jsc.h
-  )
-elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
+    )
+elseif ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   add_compile_options(-DKRAKEN_QUICK_JS_ENGINE=1)
 
   execute_process(
-      COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/VERSION
-      OUTPUT_VARIABLE QUICKJS_VERSION
+    COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/VERSION
+    OUTPUT_VARIABLE QUICKJS_VERSION
   )
 
   list(APPEND QUICK_JS_SOURCE
@@ -205,96 +205,98 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs.h
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-atom.h
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-opcode.h
-  )
+    )
   add_library(quickjs SHARED ${QUICK_JS_SOURCE})
 
   list(APPEND BRIDGE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
   list(APPEND BRIDGE_LINK_LIBS quickjs)
 
   list(APPEND BRIDGE_SOURCE
-      bridge_qjs.cc
-      bridge_qjs.h
-      bindings/qjs/js_context.cc
-      bindings/qjs/js_context.h
-      bindings/qjs/native_value.cc
-      bindings/qjs/native_value.h
-      bindings/qjs/host_object.h
-      bindings/qjs/host_object.cc
-      bindings/qjs/host_class.h
-      bindings/qjs/qjs_patch.cc
-      bindings/qjs/qjs_patch.h
-      bindings/qjs/module_manager.cc
-      bindings/qjs/module_manager.h
-      bindings/qjs/kraken.cc
-      bindings/qjs/kraken.h
-      bindings/qjs/bom/console.cc
-      bindings/qjs/bom/console.h
-      bindings/qjs/bom/screen.cc
-      bindings/qjs/bom/screen.h
-      bindings/qjs/bom/timer.cc
-      bindings/qjs/bom/timer.h
-      bindings/qjs/dom/event_target.cc
-      bindings/qjs/dom/event_target.h
-      bindings/qjs/dom/event.cc
-      bindings/qjs/dom/event.h
-      bindings/qjs/dom/node.h
-      bindings/qjs/dom/node.cc
-      bindings/qjs/dom/element.cc
-      bindings/qjs/dom/element.h
-      bindings/qjs/dom/document.cc
-      bindings/qjs/dom/document.h
-      bindings/qjs/dom/text_node.cc
-      bindings/qjs/dom/text_node.h
-      bindings/qjs/dom/comment_node.cc
-      bindings/qjs/dom/comment_node.h
-      bindings/qjs/dom/style_declaration.cc
-      bindings/qjs/dom/style_declaration.h
-      bindings/qjs/dom/elements/.gen/canvas_element.cc
-      bindings/qjs/dom/elements/.gen/canvas_element.h
-      bindings/qjs/dom/elements/.gen/image_element.cc
-      bindings/qjs/dom/elements/.gen/image_element.h
-      bindings/qjs/dom/elements/.gen/input_element.cc
-      bindings/qjs/dom/elements/.gen/input_element.h
-      bindings/qjs/dom/elements/.gen/anchor_element.cc
-      bindings/qjs/dom/elements/.gen/anchor_element.h
-      bindings/qjs/dom/elements/.gen/object_element.cc
-      bindings/qjs/dom/elements/.gen/object_element.h
-      bindings/qjs/dom/elements/.gen/script_element.cc
-      bindings/qjs/dom/elements/.gen/script_element.h
-      bindings/qjs/dom/elements/.gen/svg_element.h
-      bindings/qjs/dom/elements/.gen/svg_element.cc
-      bindings/qjs/dom/events/.gen/close_event.h
-      bindings/qjs/dom/events/.gen/close_event.cc
-      bindings/qjs/dom/events/.gen/gesture_event.cc
-      bindings/qjs/dom/events/.gen/gesture_event.h
-      bindings/qjs/dom/events/.gen/input_event.cc
-      bindings/qjs/dom/events/.gen/input_event.h
-      bindings/qjs/dom/events/.gen/intersection_change.cc
-      bindings/qjs/dom/events/.gen/intersection_change.h
-      bindings/qjs/dom/events/.gen/media_error_event.cc
-      bindings/qjs/dom/events/.gen/media_error_event.h
-      bindings/qjs/dom/events/.gen/mouse_event.cc
-      bindings/qjs/dom/events/.gen/mouse_event.h
-      bindings/qjs/dom/events/touch_event.cc
-      bindings/qjs/dom/events/touch_event.h
-      bindings/qjs/bom/blob.cc
-      bindings/qjs/bom/blob.h
-      bindings/qjs/bom/location.h
-      bindings/qjs/bom/location.cc
-      bindings/qjs/bom/window.cc
-      bindings/qjs/bom/window.h
-      bindings/qjs/dom/custom_event.cc
-      bindings/qjs/dom/custom_event.h
-      bindings/qjs/dom/all_collection.cc
-      bindings/qjs/dom/all_collection.h
-  )
+    bridge_qjs.cc
+    bridge_qjs.h
+    bindings/qjs/js_context.cc
+    bindings/qjs/js_context.h
+    bindings/qjs/native_value.cc
+    bindings/qjs/native_value.h
+    bindings/qjs/host_object.h
+    bindings/qjs/host_object.cc
+    bindings/qjs/host_class.h
+    bindings/qjs/qjs_patch.cc
+    bindings/qjs/qjs_patch.h
+    bindings/qjs/module_manager.cc
+    bindings/qjs/module_manager.h
+    bindings/qjs/kraken.cc
+    bindings/qjs/kraken.h
+    bindings/qjs/bom/console.cc
+    bindings/qjs/bom/console.h
+    bindings/qjs/bom/screen.cc
+    bindings/qjs/bom/screen.h
+    bindings/qjs/bom/timer.cc
+    bindings/qjs/bom/timer.h
+    bindings/qjs/dom/event_target.cc
+    bindings/qjs/dom/event_target.h
+    bindings/qjs/dom/event.cc
+    bindings/qjs/dom/event.h
+    bindings/qjs/dom/node.h
+    bindings/qjs/dom/node.cc
+    bindings/qjs/dom/element.cc
+    bindings/qjs/dom/element.h
+    bindings/qjs/dom/document.cc
+    bindings/qjs/dom/document.h
+    bindings/qjs/dom/text_node.cc
+    bindings/qjs/dom/text_node.h
+    bindings/qjs/dom/comment_node.cc
+    bindings/qjs/dom/comment_node.h
+    bindings/qjs/dom/style_declaration.cc
+    bindings/qjs/dom/style_declaration.h
+    bindings/qjs/dom/elements/.gen/canvas_element.cc
+    bindings/qjs/dom/elements/.gen/canvas_element.h
+    bindings/qjs/dom/elements/.gen/image_element.cc
+    bindings/qjs/dom/elements/.gen/image_element.h
+    bindings/qjs/dom/elements/.gen/input_element.cc
+    bindings/qjs/dom/elements/.gen/input_element.h
+    bindings/qjs/dom/elements/.gen/anchor_element.cc
+    bindings/qjs/dom/elements/.gen/anchor_element.h
+    bindings/qjs/dom/elements/.gen/object_element.cc
+    bindings/qjs/dom/elements/.gen/object_element.h
+    bindings/qjs/dom/elements/.gen/script_element.cc
+    bindings/qjs/dom/elements/.gen/script_element.h
+    bindings/qjs/dom/elements/.gen/svg_element.h
+    bindings/qjs/dom/elements/.gen/svg_element.cc
+    bindings/qjs/dom/events/.gen/close_event.h
+    bindings/qjs/dom/events/.gen/close_event.cc
+    bindings/qjs/dom/events/.gen/gesture_event.cc
+    bindings/qjs/dom/events/.gen/gesture_event.h
+    bindings/qjs/dom/events/.gen/input_event.cc
+    bindings/qjs/dom/events/.gen/input_event.h
+    bindings/qjs/dom/events/.gen/intersection_change.cc
+    bindings/qjs/dom/events/.gen/intersection_change.h
+    bindings/qjs/dom/events/.gen/media_error_event.cc
+    bindings/qjs/dom/events/.gen/media_error_event.h
+    bindings/qjs/dom/events/.gen/mouse_event.cc
+    bindings/qjs/dom/events/.gen/mouse_event.h
+    bindings/qjs/dom/events/.gen/message_event.h
+    bindings/qjs/dom/events/.gen/message_event.cc
+    bindings/qjs/dom/events/touch_event.cc
+    bindings/qjs/dom/events/touch_event.h
+    bindings/qjs/bom/blob.cc
+    bindings/qjs/bom/blob.h
+    bindings/qjs/bom/location.h
+    bindings/qjs/bom/location.cc
+    bindings/qjs/bom/window.cc
+    bindings/qjs/bom/window.h
+    bindings/qjs/dom/custom_event.cc
+    bindings/qjs/dom/custom_event.h
+    bindings/qjs/dom/all_collection.cc
+    bindings/qjs/dom/all_collection.h
+    )
 
   # Quickjs use __builtin_frame_address() to get stack pointer, we should add follow options to get it work with -O2
   # https://stackoverflow.com/questions/14735010/how-do-you-get-gccs-builtin-frame-address-to-work-with-o2
   add_compile_options(-fno-optimize-sibling-calls -fno-omit-frame-pointer)
   target_compile_options(quickjs PUBLIC -DCONFIG_VERSION=${\"QUICKJS_VERSION\"})
 
-endif()
+endif ()
 
 list(APPEND PUBLIC_HEADER
   include/kraken_bridge.h
@@ -315,23 +317,23 @@ target_include_directories(kraken PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
 target_link_libraries(kraken PRIVATE ${BRIDGE_LINK_LIBS})
 
-if($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
+if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   if (${CMAKE_BUILD_TYPE} STREQUAL "Release" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
     ## http://ptspts.blogspot.com/2013/12/how-to-make-smaller-c-and-c-binaries.html
     ### remove dynamic_cast and exceptions
     target_compile_options(kraken PRIVATE -fno-exceptions -fvisibility=hidden)
-  else()
+  else ()
     ### remove dynamic_cast and exceptions
     target_compile_options(kraken PRIVATE -fno-exceptions)
-  endif()
-elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
+  endif ()
+elseif ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   target_compile_options(kraken PRIVATE -fno-exceptions -fvisibility=hidden -fno-rtti)
-endif()
+endif ()
 
 ### KrakenStatic
 target_include_directories(kraken_static PRIVATE
-        ${BRIDGE_INCLUDE}
-        ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
+  ${BRIDGE_INCLUDE}
+  ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
 target_link_libraries(kraken_static ${BRIDGE_LINK_LIBS})
 
 execute_process(
@@ -355,7 +357,7 @@ add_definitions(-DAPP_REV="${GIT_HEAD}") # Read from git head sha1
 if (${ENABLE_TEST})
   add_compile_definitions(IS_TEST=true)
   include(./test/test.cmake)
-endif()
+endif ()
 
 if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_jsc)
@@ -363,21 +365,21 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
 elseif ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_quickjs)
   set_target_properties(kraken_static PROPERTIES OUTPUT_NAME kraken_quickjs)
-endif()
+endif ()
 
 if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
   set_target_properties(kraken
-          PROPERTIES
-          LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
-          )
+    PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
+    )
   set_target_properties(kraken_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}")
 
   if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     set_target_properties(quickjs PROPERTIES LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}")
-  endif()
+  endif ()
 elseif (IS_ANDROID)
   # android do nothing
-endif()
+endif ()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
   set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
@@ -390,4 +392,4 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
     MACOSX_FRAMEWORK_IDENTIFIER com.openkraken.kraken_bridge
     PUBLIC_HEADER ${PUBLIC_HEADERS}
     )
-endif()
+endif ()

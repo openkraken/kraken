@@ -10,6 +10,46 @@
 
 namespace kraken::binding::qjs {
 
+
+#define EVENT_CLICK "click"
+#define EVENT_INPUT "input"
+#define EVENT_APPEAR "appear"
+#define EVENT_DISAPPEAR "disappear"
+#define EVENT_COLOR_SCHEME_CHANGE "colorschemechange"
+#define EVENT_ERROR "error"
+#define EVENT_MEDIA_ERROR "mediaerror"
+#define EVENT_TOUCH_START "touchstart"
+#define EVENT_TOUCH_MOVE "touchmove"
+#define EVENT_TOUCH_END "touchend"
+#define EVENT_TOUCH_CANCEL "touchcancel"
+#define EVENT_MESSAGE "message"
+#define EVENT_CLOSE "close"
+#define EVENT_OPEN "open"
+#define EVENT_INTERSECTION_CHANGE "intersectionchange"
+#define EVENT_CANCEL "cancel"
+#define EVENT_FINISH "finish"
+#define EVENT_TRANSITION_RUN "transitionrun"
+#define EVENT_TRANSITION_CANCEL "transitioncancel"
+#define EVENT_TRANSITION_START "transitionstart"
+#define EVENT_TRANSITION_END "transitionend"
+#define EVENT_FOCUS "focus"
+#define EVENT_LOAD "load"
+#define EVENT_UNLOAD "unload"
+#define EVENT_CHANGE "change"
+#define EVENT_CAN_PLAY "canplay"
+#define EVENT_CAN_PLAY_THROUGH "canplaythrough"
+#define EVENT_ENDED "ended"
+#define EVENT_PAUSE "pause"
+#define EVENT_PLAY "play"
+#define EVENT_SEEKED "seeked"
+#define EVENT_SEEKING "seeking"
+#define EVENT_VOLUME_CHANGE "volumechange"
+#define EVENT_SCROLL "scroll"
+#define EVENT_SWIPE "swipe"
+#define EVENT_PAN "pan"
+#define EVENT_LONG_PRESS "longpress"
+#define EVENT_SCALE "scale"
+
 void bindEvent(std::unique_ptr<JSContext> &context);
 
 class EventInstance;
@@ -26,6 +66,7 @@ public:
 
   static EventInstance *buildEventInstance(std::string &eventType, JSContext *context, void *nativeEvent,
                                            bool isCustomEvent);
+  static void defineEvent(const std::string& eventType, EventCreator creator);
 
   OBJECT_INSTANCE(Event);
 

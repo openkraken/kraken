@@ -19,6 +19,15 @@
 #include "elements/.gen/script_element.h"
 #include "elements/.gen/svg_element.h"
 
+#include "events/.gen/close_event.h"
+#include "events/.gen/gesture_event.h"
+#include "events/.gen/input_event.h"
+#include "events/.gen/intersection_change.h"
+#include "events/.gen/media_error_event.h"
+#include "events/.gen/mouse_event.h"
+#include "events/.gen/message_event.h"
+#include "events/touch_event.h"
+
 namespace kraken::binding::qjs {
 
 void traverseNode(NodeInstance *node, TraverseHandler handler) {
@@ -59,6 +68,65 @@ Document::Document(JSContext *context) : Node(context, "Document") {
     Element::defineElement("object", ObjectElement::instance(m_context));
     Element::defineElement("script", ScriptElement::instance(m_context));
     Element::defineElement("svg", SVGElement::instance(m_context));
+    document_registered = true;
+  }
+
+  if (!event_registered) {
+    event_registered = true;
+    Event::defineEvent(EVENT_INPUT, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new InputEventInstance(InputEvent::instance(context), reinterpret_cast<NativeEvent *>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_MEDIA_ERROR, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new MediaErrorEventInstance(MediaErrorEvent::instance(context),
+                                         reinterpret_cast<NativeEvent *>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_MESSAGE, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new MessageEventInstance(MessageEvent::instance(context),
+                                      reinterpret_cast<NativeEvent *>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_CLOSE, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new CloseEventInstance(CloseEvent::instance(context), reinterpret_cast<NativeEvent *>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_INTERSECTION_CHANGE, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new IntersectionChangeEventInstance(IntersectionChangeEvent::instance(context),
+                                                 reinterpret_cast<NativeEvent *>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_TOUCH_START, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent *>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_TOUCH_END, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent *>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_TOUCH_MOVE, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent *>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_TOUCH_CANCEL, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent *>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_SWIPE, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new GestureEventInstance(GestureEvent::instance(context),
+                                      reinterpret_cast<NativeEvent *>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_PAN, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new GestureEventInstance(GestureEvent::instance(context),
+                                      reinterpret_cast<NativeEvent *>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_LONG_PRESS, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new GestureEventInstance(GestureEvent::instance(context),
+                                      reinterpret_cast<NativeEvent *>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_SCALE, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new GestureEventInstance(GestureEvent::instance(context),
+                                      reinterpret_cast<NativeEvent *>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_CLICK, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new MouseEventInstance(MouseEvent::instance(context),
+                                    reinterpret_cast<NativeEvent *>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_CANCEL, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new MouseEventInstance(MouseEvent::instance(context),
+                                    reinterpret_cast<NativeEvent *>(nativeEvent));
+    });
   }
 }
 

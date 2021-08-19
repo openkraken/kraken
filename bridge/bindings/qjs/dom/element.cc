@@ -35,12 +35,6 @@ JSClassID Element::classId() {
   return kElementClassId;
 }
 
-static inline bool isNumberIndex(std::string &name) {
-  if (name.empty()) return false;
-  char f = name[0];
-  return f >= '0' && f <= '9';
-}
-
 JSAtom ElementAttributes::getAttribute(std::string &name) {
   bool numberIndex = isNumberIndex(name);
 

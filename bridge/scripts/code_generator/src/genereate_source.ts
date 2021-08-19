@@ -250,16 +250,18 @@ function generateEventConstructorCode(object: ClassObject) {
   }
 
   JSValue eventTypeValue = argv[0];
-  JSValue eventInitValue = JS_NULL;
+  JSValue eventInit = JS_NULL;
 
   if (argc == 2) {
-    eventInitValue = argv[1];
+    eventInit = argv[1];
   }
 
   auto *nativeEvent = new Native${object.name}();
   nativeEvent->nativeEvent.type = jsValueToNativeString(ctx, eventTypeValue);
 
-  auto event = new ${object.name}Instance(this, reinterpret_cast<NativeEvent *>(nativeEvent), eventInitValue);
+  ${generateEventInstanceConstructorCode(object)}
+
+  auto event = new ${object.name}Instance(this, reinterpret_cast<NativeEvent *>(nativeEvent));
   return event->instanceObject;`;
 }
 
@@ -274,14 +276,14 @@ function generateEventInstanceConstructorCode(object: ClassObject) {
 
     let propApplyCode = '';
     if (p.kind === PropsDeclarationKind.boolean) {
-      propApplyCode = `ne->${p.name} = JS_ToBool(m_ctx, JS_GetProperty(m_ctx, eventInit, ${p.name}Atom)) ? 1 : 0;`;
+      propApplyCode = `nativeEvent->${p.name} = JS_ToBool(m_ctx, JS_GetProperty(m_ctx, eventInit, ${p.name}Atom)) ? 1 : 0;`;
     } else if (p.kind === PropsDeclarationKind.int64) {
-      propApplyCode = `JS_ToUint32(m_ctx, reinterpret_cast<uint32_t *>(&ne->${p.name}), JS_GetProperty(m_ctx, eventInit, ${p.name}Atom));`
+      propApplyCode = `JS_ToUint32(m_ctx, reinterpret_cast<uint32_t *>(&nativeEvent->${p.name}), JS_GetProperty(m_ctx, eventInit, ${p.name}Atom));`
     } else if (p.kind === PropsDeclarationKind.string) {
       propApplyCode = addIndent(`JSValue v = JS_GetProperty(m_ctx, eventInit, ${p.name}Atom);
-  ne->${p.name} = jsValueToNativeString(m_ctx, v);`, 0);
+  nativeEvent->${p.name} = jsValueToNativeString(m_ctx, v);`, 0);
     } else if (p.kind === PropsDeclarationKind.double) {
-      propApplyCode = `JS_ToFloat64(m_ctx, &ne->${p.name}, JS_GetProperty(m_ctx, eventInit, ${p.name}Atom));`;
+      propApplyCode = `JS_ToFloat64(m_ctx, &nativeEvent->${p.name}, JS_GetProperty(m_ctx, eventInit, ${p.name}Atom));`;
     }
 
     propWriteCode.push(addIndent(`if (JS_HasProperty(m_ctx, eventInit, ${p.name}Atom)) {
@@ -291,7 +293,6 @@ function generateEventInstanceConstructorCode(object: ClassObject) {
 
   return `if (JS_IsObject(eventInit)) {
 ${addIndent(atomCreateCode.join('\n'), 4)}
-    auto *ne = reinterpret_cast<Native${object.name} *>(nativeEvent);
 
 ${propWriteCode.join('\n')}
 
@@ -311,9 +312,7 @@ function generateHostClassSource(object: ClassObject) {
 
   let instanceConstructorCode = '';
   if (object.type === 'Event') {
-    instanceConstructorCode = `${object.name}Instance::${object.name}Instance(${object.name} *${object.type.toLowerCase()}, NativeEvent *nativeEvent, JSValue eventInit): ${object.type}Instance(${object.type.toLowerCase()}, nativeEvent) {
-  ${generateEventInstanceConstructorCode(object)}
-}`
+    instanceConstructorCode = `${object.name}Instance::${object.name}Instance(${object.name} *${object.type.toLowerCase()}, NativeEvent *nativeEvent): ${object.type}Instance(${object.type.toLowerCase()}, nativeEvent) {}`
   } else {
     instanceConstructorCode = `${object.name}Instance::${object.name}Instance(${object.name} *${object.type.toLowerCase()}): ${object.type}Instance(${object.type.toLowerCase()}, "${object.name}", true) {}`;
   }
