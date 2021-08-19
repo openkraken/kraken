@@ -120,6 +120,10 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 //#endif
 }
 
+void JSBridge::parseHTML(const NativeString *script, const char *url) {
+  if (!m_context->isValid()) return;
+}
+
 void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType, void *event, NativeString *extra) {
 //  if (!m_context->isValid()) return;
 //

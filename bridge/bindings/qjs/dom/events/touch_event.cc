@@ -33,7 +33,7 @@ int TouchList::setProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSValue va
 }
 
 PROP_GETTER(TouchList, length)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *touchList = static_cast<TouchList *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto *touchList = static_cast<TouchList *>(JS_GetOpaque(this_val, JSContext::kHostExoticObjectClassId));
   return JS_NewUint32(ctx, touchList->_length);
 }
 PROP_SETTER(TouchList, length)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {

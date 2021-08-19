@@ -34,6 +34,7 @@ public:
   // evaluate JavaScript source codes in standard mode.
   void evaluateScript(const NativeString *script, const char *url, int startLine);
   KRAKEN_EXPORT void evaluateScript(const uint16_t *script, size_t length, const char *url, int startLine);
+  KRAKEN_EXPORT void parseHTML(const NativeString *script, const char *url);
   void evaluateScript(const char* script, size_t length, const char* url, int startLine);
 
   const std::unique_ptr<kraken::binding::qjs::JSContext> &getContext() const {
