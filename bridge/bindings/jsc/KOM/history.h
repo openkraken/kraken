@@ -34,11 +34,13 @@ public:
                              const JSValueRef *arguments, JSValueRef *exception);
   static JSValueRef forward(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                   const JSValueRef *arguments, JSValueRef *exception);
+
+  static void addItem(HistoryItem &historyItem);
+
+  static std::stack<HistoryItem> m_previous_stack;
+  static std::stack<HistoryItem> m_next_stack;
 private:
   void goTo(HistoryItem &historyItem);
-  void addItem(HistoryItem &historyItem);
-  std::stack<HistoryItem> m_previous_stack;
-  std::stack<HistoryItem> m_next_stack;
 
 private:
   JSFunctionHolder m_back{context, jsObject, this,"back", back};
