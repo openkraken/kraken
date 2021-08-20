@@ -43,7 +43,7 @@ class LocalHttpServer {
           for (int byte in chunk) {
             // space
             if (byte == 32) {
-              state ++;
+              state++;
               continue;
             }
 

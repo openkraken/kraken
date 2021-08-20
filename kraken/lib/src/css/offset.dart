@@ -1,5 +1,3 @@
-
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -20,18 +18,20 @@ class CSSOffset {
     this.length,
     this.isAuto,
   });
+
   /// length if margin value is length type
   double? length;
+
   /// Whether value is auto
   bool? isAuto;
 }
 
 mixin CSSPositionMixin on RenderStyleBase {
-
   CSSOffset? _top;
   CSSOffset? get top {
     return _top;
   }
+
   set top(CSSOffset? value) {
     if (_top == value) return;
     _top = value;
@@ -41,6 +41,7 @@ mixin CSSPositionMixin on RenderStyleBase {
   CSSOffset? get bottom {
     return _bottom;
   }
+
   set bottom(CSSOffset? value) {
     if (_bottom == value) return;
     _bottom = value;
@@ -50,6 +51,7 @@ mixin CSSPositionMixin on RenderStyleBase {
   CSSOffset? get left {
     return _left;
   }
+
   set left(CSSOffset? value) {
     if (_left == value) return;
     _left = value;
@@ -59,6 +61,7 @@ mixin CSSPositionMixin on RenderStyleBase {
   CSSOffset? get right {
     return _right;
   }
+
   set right(CSSOffset? value) {
     if (_right == value) return;
     _right = value;
@@ -68,6 +71,7 @@ mixin CSSPositionMixin on RenderStyleBase {
   int? get zIndex {
     return _zIndex;
   }
+
   set zIndex(int? value) {
     if (_zIndex == value) return;
     _zIndex = value;
@@ -83,6 +87,7 @@ mixin CSSPositionMixin on RenderStyleBase {
   CSSPositionType get position {
     return _position;
   }
+
   set position(CSSPositionType value) {
     if (_position == value) return;
     _position = value;
@@ -117,6 +122,7 @@ mixin CSSPositionMixin on RenderStyleBase {
         bottom = CSSOffset(length: value, isAuto: style[BOTTOM] == AUTO);
         break;
     }
+
     /// Should mark parent needsLayout directly cause positioned element is rendered as relayoutBoundary
     /// the parent will not be marked as markNeedsLayout
     if (shouldMarkNeedsLayout) {
@@ -149,5 +155,4 @@ mixin CSSPositionMixin on RenderStyleBase {
     }
     return CSSPositionType.static;
   }
-
 }

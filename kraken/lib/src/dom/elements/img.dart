@@ -28,10 +28,10 @@ const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
 };
 
-final Pointer<NativeFunction<GetImageWidth>> nativeGetImageWidth =  Pointer.fromFunction(ImageElement.getImageWidth, 0.0);
-final Pointer<NativeFunction<GetImageHeight>> nativeGetImageHeight =  Pointer.fromFunction(ImageElement.getImageHeight, 0.0);
-final Pointer<NativeFunction<GetImageWidth>> nativeGetImageNaturalWidth =  Pointer.fromFunction(ImageElement.getImageNaturalWidth, 0.0);
-final Pointer<NativeFunction<GetImageHeight>> nativeGetImageNaturalHeight =  Pointer.fromFunction(ImageElement.getImageNaturalHeight, 0.0);
+final Pointer<NativeFunction<GetImageWidth>> nativeGetImageWidth = Pointer.fromFunction(ImageElement.getImageWidth, 0.0);
+final Pointer<NativeFunction<GetImageHeight>> nativeGetImageHeight = Pointer.fromFunction(ImageElement.getImageHeight, 0.0);
+final Pointer<NativeFunction<GetImageWidth>> nativeGetImageNaturalWidth = Pointer.fromFunction(ImageElement.getImageNaturalWidth, 0.0);
+final Pointer<NativeFunction<GetImageHeight>> nativeGetImageNaturalHeight = Pointer.fromFunction(ImageElement.getImageNaturalHeight, 0.0);
 
 class ImageElement extends Element {
   String? _source;
@@ -88,13 +88,7 @@ class ImageElement extends Element {
   final Pointer<NativeImgElement> nativeImgElement;
 
   ImageElement(int targetId, this.nativeImgElement, ElementManager elementManager)
-      : super(
-      targetId,
-      nativeImgElement.ref.nativeElement,
-      elementManager,
-      isIntrinsicBox: true,
-      tagName: IMAGE,
-      defaultStyle: _defaultStyle) {
+      : super(targetId, nativeImgElement.ref.nativeElement, elementManager, isIntrinsicBox: true, tagName: IMAGE, defaultStyle: _defaultStyle) {
     _renderStreamListener = ImageStreamListener(_renderImageStream);
     _nativeMap[nativeImgElement.address] = this;
 
@@ -193,7 +187,6 @@ class ImageElement extends Element {
       _resetLazyLoading();
       _constructImageChild();
       _loadImage();
-
     }
   }
 
@@ -285,8 +278,7 @@ class ImageElement extends Element {
 
     RenderStyle renderStyle = renderBoxModel!.renderStyle;
     // Waiting for size computed after layout stage
-    if (style.contains(WIDTH) && renderStyle.width == null ||
-        style.contains(HEIGHT) && renderStyle.height == null) {
+    if (style.contains(WIDTH) && renderStyle.width == null || style.contains(HEIGHT) && renderStyle.height == null) {
       return _handleImageResizeAfterLayout();
     }
 
@@ -383,24 +375,14 @@ class ImageElement extends Element {
         value += 'px';
       }
 
-      _propertyWidth = CSSLength.toDisplayPortValue(
-        value,
-        viewportSize: viewportSize,
-        rootFontSize: rootFontSize,
-        fontSize: fontSize
-      );
+      _propertyWidth = CSSLength.toDisplayPortValue(value, viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize);
       _resize();
     } else if (key == HEIGHT) {
       if (value is String && _isNumberString(value)) {
         value += 'px';
       }
 
-      _propertyHeight = CSSLength.toDisplayPortValue(
-        value,
-        viewportSize: viewportSize,
-        rootFontSize: rootFontSize,
-        fontSize: fontSize
-      );
+      _propertyHeight = CSSLength.toDisplayPortValue(value, viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize);
       _resize();
     }
   }
@@ -413,8 +395,7 @@ class ImageElement extends Element {
         _removeStreamListener();
 
         Uri base = Uri.parse(elementManager.controller.href);
-        _image = CSSUrl.parseUrl(
-            elementManager.controller.uriParser!.resolve(base, Uri.parse(source)).toString(),
+        _image = CSSUrl.parseUrl(elementManager.controller.uriParser!.resolve(base, Uri.parse(source)).toString(),
             cache: properties['caching'], contextId: elementManager.contextId);
         _imageStream = _image!.resolve(ImageConfiguration.empty);
         _imageStream!.addListener(_renderStreamListener);

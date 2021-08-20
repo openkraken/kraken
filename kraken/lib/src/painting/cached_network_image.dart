@@ -1,5 +1,3 @@
-
-
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -35,8 +33,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
   }
 
   Future<Uint8List> loadFile(CachedNetworkImage key, StreamController<ImageChunkEvent> chunkEvents) async {
-    HttpCacheController cacheController = HttpCacheController.instance(
-        getOrigin(getReferrer(contextId)));
+    HttpCacheController cacheController = HttpCacheController.instance(getOrigin(getReferrer(contextId)));
 
     Uri uri = Uri.parse(url);
     HttpCacheObject? cacheObject = await cacheController.getCacheObject(uri);
@@ -53,8 +50,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
     return bytes;
   }
 
-  Future<Codec?> _loadImage(
-      CachedNetworkImage key, DecoderCallback decode, StreamController<ImageChunkEvent> chunkEvents) async {
+  Future<Codec?> _loadImage(CachedNetworkImage key, DecoderCallback decode, StreamController<ImageChunkEvent> chunkEvents) async {
     Uint8List bytes = await loadFile(key, chunkEvents);
 
     if (bytes.isNotEmpty) {
@@ -63,9 +59,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
     return null;
   }
 
-  Future<Uint8List> fetchFile(CachedNetworkImage key,
-      StreamController<ImageChunkEvent> chunkEvents,
-      HttpCacheController cacheController) async {
+  Future<Uint8List> fetchFile(CachedNetworkImage key, StreamController<ImageChunkEvent> chunkEvents, HttpCacheController cacheController) async {
     try {
       final Uri resolved = Uri.base.resolve(key.url);
       final HttpClientRequest request = await _httpClient.getUrl(resolved);
@@ -73,13 +67,9 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
         request.headers.add(name, value);
       });
       final HttpClientResponse response = await request.close();
-      if (response.statusCode != HttpStatus.ok)
-        throw NetworkImageLoadException(statusCode: response.statusCode, uri: resolved);
+      if (response.statusCode != HttpStatus.ok) throw NetworkImageLoadException(statusCode: response.statusCode, uri: resolved);
 
-      HttpCacheObject cacheObject = HttpCacheObject.fromResponse(
-          key.url,
-          response,
-          (await HttpCacheController.getCacheDirectory()).path);
+      HttpCacheObject cacheObject = HttpCacheObject.fromResponse(key.url, response, (await HttpCacheController.getCacheDirectory()).path);
       cacheController.putObject(resolved, cacheObject);
 
       HttpClientResponse _response = HttpClientCachedResponse(response, cacheObject);

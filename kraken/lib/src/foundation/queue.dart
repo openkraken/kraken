@@ -74,8 +74,7 @@ class Queue {
   }
 
   void _queueUpNext() {
-    if (_nextCycle.isNotEmpty &&
-        _activeItems.length <= parallel) {
+    if (_nextCycle.isNotEmpty && _activeItems.length <= parallel) {
       final processId = _lastProcessId;
       _activeItems.add(processId);
       final item = _nextCycle.first;

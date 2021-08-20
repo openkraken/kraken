@@ -1,5 +1,3 @@
-
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -53,11 +51,11 @@ class CSSBackground {
   static bool isValidBackgroundImageValue(String value) {
     return (value.lastIndexOf(')') == value.length - 1) &&
         (value.startsWith('url(') ||
-        value.startsWith('linear-gradient(') ||
-        value.startsWith('repeating-linear-gradient(') ||
-        value.startsWith('radial-gradient(') ||
-        value.startsWith('repeating-radial-gradient(') ||
-        value.startsWith('conic-gradient('));
+            value.startsWith('linear-gradient(') ||
+            value.startsWith('repeating-linear-gradient(') ||
+            value.startsWith('radial-gradient(') ||
+            value.startsWith('repeating-radial-gradient(') ||
+            value.startsWith('conic-gradient('));
   }
 
   static bool isValidBackgroundPositionValue(String value) {
@@ -73,7 +71,7 @@ class CSSBackground {
   static Color? getBackgroundColor(CSSStyleDeclaration style) {
     String backgroundColor = style[BACKGROUND_COLOR];
     if (backgroundColor.isNotEmpty) {
-       return CSSColor.parseColor(backgroundColor);
+      return CSSColor.parseColor(backgroundColor);
     }
     return null;
   }
@@ -88,7 +86,7 @@ class CSSBackground {
     return style[BACKGROUND_IMAGE].isNotEmpty && (attachment.isEmpty || attachment == SCROLL);
   }
 
-  static DecorationImage? getDecorationImage(CSSStyleDeclaration? style, CSSFunctionalNotation method, { int? contextId }) {
+  static DecorationImage? getDecorationImage(CSSStyleDeclaration? style, CSSFunctionalNotation method, {int? contextId}) {
     DecorationImage backgroundImage;
 
     String url = method.args.isNotEmpty ? method.args[0] : '';
@@ -162,12 +160,8 @@ class CSSBackground {
                     end = Alignment.centerLeft;
                   }
                   if (style![WIDTH].isNotEmpty) {
-                    gradientLength = CSSLength.toDisplayPortValue(
-                      style[WIDTH],
-                      viewportSize: viewportSize,
-                      rootFontSize: rootFontSize,
-                      fontSize: fontSize
-                    );
+                    gradientLength =
+                        CSSLength.toDisplayPortValue(style[WIDTH], viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize);
                   } else if (renderBoxModel.attached) {
                     gradientLength = RenderBoxModel.getLogicalContentWidth(renderBoxModel);
                   }
@@ -186,12 +180,8 @@ class CSSBackground {
                     end = Alignment.topCenter;
                   }
                   if (style![HEIGHT].isNotEmpty) {
-                    gradientLength = CSSLength.toDisplayPortValue(
-                      style[HEIGHT],
-                      viewportSize: viewportSize,
-                      rootFontSize: rootFontSize,
-                      fontSize: fontSize
-                    );
+                    gradientLength =
+                        CSSLength.toDisplayPortValue(style[HEIGHT], viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize);
                   } else if (renderBoxModel.attached) {
                     gradientLength = RenderBoxModel.getLogicalContentHeight(renderBoxModel);
                   }
@@ -211,12 +201,8 @@ class CSSBackground {
                   }
 
                   if (style![WIDTH].isNotEmpty) {
-                    gradientLength = CSSLength.toDisplayPortValue(
-                      style[WIDTH],
-                      viewportSize: viewportSize,
-                      rootFontSize: rootFontSize,
-                      fontSize: fontSize
-                    );
+                    gradientLength =
+                        CSSLength.toDisplayPortValue(style[WIDTH], viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize);
                   } else if (renderBoxModel.attached) {
                     gradientLength = RenderBoxModel.getLogicalContentWidth(renderBoxModel);
                   }
@@ -236,12 +222,8 @@ class CSSBackground {
                     end = Alignment.bottomCenter;
                   }
                   if (style![HEIGHT].isNotEmpty) {
-                    gradientLength = CSSLength.toDisplayPortValue(
-                      style[HEIGHT],
-                      viewportSize: viewportSize,
-                      rootFontSize: rootFontSize,
-                      fontSize: fontSize
-                    );
+                    gradientLength =
+                        CSSLength.toDisplayPortValue(style[HEIGHT], viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize);
                   } else if (renderBoxModel.attached) {
                     gradientLength = RenderBoxModel.getLogicalContentHeight(renderBoxModel);
                   }
@@ -325,10 +307,7 @@ class CSSBackground {
           _applyColorAndStops(renderBoxModel, start, method.args, colors, stops);
           if (colors.length >= 2) {
             gradient = CSSConicGradient(
-                center: FractionalOffset(atX!, atY!),
-                colors: colors,
-                stops: stops,
-                transform: GradientRotation(-math.pi / 2 + from!));
+                center: FractionalOffset(atX!, atY!), colors: colors, stops: stops, transform: GradientRotation(-math.pi / 2 + from!));
           }
           break;
       }
@@ -337,7 +316,8 @@ class CSSBackground {
     return gradient;
   }
 
-  static void _applyColorAndStops(RenderBoxModel renderBoxModel, int start, List<String> args, List<Color?> colors, List<double?> stops, [double? gradientLength]) {
+  static void _applyColorAndStops(RenderBoxModel renderBoxModel, int start, List<String> args, List<Color?> colors, List<double?> stops,
+      [double? gradientLength]) {
     // colors should more than one, otherwise invalid
     if (args.length - start - 1 > 0) {
       double grow = 1.0 / (args.length - start - 1);
@@ -385,12 +365,8 @@ class CSSBackground {
               stop = CSSAngle.parseAngle(strings[i])! / (math.pi * 2);
             } else if (CSSLength.isLength(strings[i])) {
               if (gradientLength != null) {
-                stop = CSSLength.toDisplayPortValue(
-                  strings[i],
-                  viewportSize: viewportSize,
-                  rootFontSize: rootFontSize,
-                  fontSize: fontSize
-                )! / gradientLength;
+                stop = CSSLength.toDisplayPortValue(strings[i], viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize)! /
+                    gradientLength;
               }
             }
             colorGradients.add(CSSColorStop(CSSColor.parseColor(strings[0]), stop));

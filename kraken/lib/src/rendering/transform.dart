@@ -16,23 +16,20 @@ mixin RenderTransformMixin on RenderBoxModelBase {
     late Offset translation;
     if (transformAlignment != Alignment.topLeft) {
       // Use boxSize instead of size to avoid Flutter cannot access size beyond parent access warning
-      translation =
-          hasSize ? transformAlignment.alongSize(boxSize!) : Offset.zero;
+      translation = hasSize ? transformAlignment.alongSize(boxSize!) : Offset.zero;
       result.translate(translation.dx, translation.dy);
     }
 
     result.multiply(renderStyle.transform!);
 
-    if (transformAlignment != Alignment.topLeft)
-      result.translate(-translation.dx, -translation.dy);
+    if (transformAlignment != Alignment.topLeft) result.translate(-translation.dx, -translation.dy);
     result.translate(-transformOffset.dx, -transformOffset.dy);
     return result;
   }
 
   TransformLayer? _transformLayer;
 
-  void paintTransform(PaintingContext context, Offset offset,
-      PaintingContextCallback callback) {
+  void paintTransform(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     if (renderStyle.transform != null) {
       final Matrix4 transform = getEffectiveTransform();
       final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
@@ -59,11 +56,9 @@ mixin RenderTransformMixin on RenderBoxModelBase {
     }
   }
 
-  bool hitTestLayoutChildren(
-      BoxHitTestResult result, RenderBox? child, Offset position) {
+  bool hitTestLayoutChildren(BoxHitTestResult result, RenderBox? child, Offset position) {
     while (child != null) {
-      final RenderLayoutParentData? childParentData =
-          child.parentData as RenderLayoutParentData?;
+      final RenderLayoutParentData? childParentData = child.parentData as RenderLayoutParentData?;
       final bool isHit = result.addWithPaintTransform(
         transform: getEffectiveTransform(),
         position: position,
@@ -84,8 +79,7 @@ mixin RenderTransformMixin on RenderBoxModelBase {
     return false;
   }
 
-  bool hitTestIntrinsicChild(
-      BoxHitTestResult result, RenderBox? child, Offset position) {
+  bool hitTestIntrinsicChild(BoxHitTestResult result, RenderBox? child, Offset position) {
     final bool isHit = result.addWithPaintTransform(
       transform: getEffectiveTransform(),
       position: position,
@@ -101,7 +95,6 @@ mixin RenderTransformMixin on RenderBoxModelBase {
     Offset transformOffset = renderStyle.transformOffset;
     Alignment transformAlignment = renderStyle.transformAlignment;
     properties.add(DiagnosticsProperty('transformOrigin', transformOffset));
-    properties
-        .add(DiagnosticsProperty('transformAlignment', transformAlignment));
+    properties.add(DiagnosticsProperty('transformAlignment', transformAlignment));
   }
 }

@@ -65,7 +65,7 @@ class ScriptElement extends Element {
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_LOAD));
         });
-      } catch(e) {
+      } catch (e) {
         // An error occurred.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_ERROR));

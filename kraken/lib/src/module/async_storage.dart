@@ -52,8 +52,7 @@ class AsyncStorageModule extends BaseModule {
   }
 
   @override
-  void dispose() {
-  }
+  void dispose() {}
 
   @override
   String invoke(String method, dynamic params, InvokeModuleCallback callback) {

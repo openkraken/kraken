@@ -46,6 +46,7 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
   }) : super(debugOwner: debugOwner, kind: kind);
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
+
   /// Configure the behavior of offsets sent to [onStart].
   ///
   /// If set to [DragStartBehavior.start], the [onStart] callback will be called
@@ -209,12 +210,7 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
     if (_initialButtons == null) {
       switch (event.buttons) {
         case kPrimaryButton:
-          if (onDown == null &&
-              onStart == null &&
-              onUpdate == null &&
-              onEnd == null &&
-              onCancel == null)
-            return false;
+          if (onDown == null && onStart == null && onUpdate == null && onEnd == null && onCancel == null) return false;
           break;
         default:
           return false;
@@ -249,8 +245,7 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
   @override
   void handleEvent(PointerEvent event) {
     assert(_state != _DragState.ready);
-    if (!event.synthesized
-        && (event is PointerDownEvent || event is PointerMoveEvent)) {
+    if (!event.synthesized && (event is PointerDownEvent || event is PointerMoveEvent)) {
       final VelocityTracker tracker = _velocityTrackers[event.pointer]!;
       tracker.addPosition(event.timeStamp, event.localPosition);
     }
@@ -278,18 +273,18 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
         final Offset movedLocally = _getDeltaForDetails(event.localDelta);
         final Matrix4? localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform!);
         _globalDistanceMoved += PointerEvent.transformDeltaViaPositions(
-          transform: localToGlobalTransform,
-          untransformedDelta: movedLocally,
-          untransformedEndPosition: event.localPosition,
-        ).distance * (_getPrimaryValueFromOffset(movedLocally)).sign;
-        if (_hasSufficientGlobalDistanceToAccept(event.kind) && _acceptDragGesture(event))
-          resolve(GestureDisposition.accepted);
+              transform: localToGlobalTransform,
+              untransformedDelta: movedLocally,
+              untransformedEndPosition: event.localPosition,
+            ).distance *
+            (_getPrimaryValueFromOffset(movedLocally)).sign;
+        if (_hasSufficientGlobalDistanceToAccept(event.kind) && _acceptDragGesture(event)) resolve(GestureDisposition.accepted);
       }
     }
     if (event is PointerUpEvent || event is PointerCancelEvent) {
       _giveUpPointer(
         event.pointer,
-        reject: event is PointerCancelEvent || _state ==_DragState.possible,
+        reject: event is PointerCancelEvent || _state == _DragState.possible,
       );
     }
   }
@@ -343,7 +338,7 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
   @override
   void didStopTrackingLastPointer(int pointer) {
     assert(_state != _DragState.ready);
-    switch(_state) {
+    switch (_state) {
       case _DragState.ready:
         break;
 
@@ -377,8 +372,7 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
       globalPosition: _initialPosition.global,
       localPosition: _initialPosition.local,
     );
-    if (onDown != null)
-      invokeCallback<void>('onDown', () => onDown!(details));
+    if (onDown != null) invokeCallback<void>('onDown', () => onDown!(details));
   }
 
   void _checkStart(Duration? timestamp) {
@@ -388,8 +382,7 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
       globalPosition: _initialPosition.global,
       localPosition: _initialPosition.local,
     );
-    if (onStart != null)
-      invokeCallback<void>('onStart', () => onStart!(details));
+    if (onStart != null) invokeCallback<void>('onStart', () => onStart!(details));
   }
 
   void _checkUpdate({
@@ -407,14 +400,12 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
       globalPosition: globalPosition,
       localPosition: localPosition,
     );
-    if (onUpdate != null)
-      invokeCallback<void>('onUpdate', () => onUpdate!(details));
+    if (onUpdate != null) invokeCallback<void>('onUpdate', () => onUpdate!(details));
   }
 
   void _checkEnd(int pointer) {
     assert(_initialButtons == kPrimaryButton);
-    if (onEnd == null)
-      return;
+    if (onEnd == null) return;
 
     final VelocityTracker tracker = _velocityTrackers[pointer]!;
 
@@ -438,8 +429,7 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
         primaryVelocity: 0.0,
       );
       debugReport = () {
-        if (estimate == null)
-          return 'Could not estimate velocity.';
+        if (estimate == null) return 'Could not estimate velocity.';
         return '$estimate; judged to not be a fling.';
       };
     }
@@ -449,8 +439,7 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
 
   void _checkCancel() {
     assert(_initialButtons == kPrimaryButton);
-    if (onCancel != null)
-      invokeCallback<void>('onCancel', onCancel!);
+    if (onCancel != null) invokeCallback<void>('onCancel', onCancel!);
   }
 
   @override
@@ -458,6 +447,7 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
     _velocityTrackers.clear();
     super.dispose();
   }
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -506,7 +496,6 @@ class ScrollVerticalDragGestureRecognizer extends CompetitiveDragGestureRecogniz
   @override
   String get debugDescription => 'scroll vertical drag';
 }
-
 
 /// Recognizes movement in the horizontal direction.
 ///

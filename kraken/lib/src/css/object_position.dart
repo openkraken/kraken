@@ -1,5 +1,3 @@
-
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -12,6 +10,7 @@ mixin CSSObjectPositionMixin on RenderStyleBase {
   Alignment get objectPosition {
     return _objectPosition;
   }
+
   set objectPosition(Alignment value) {
     if (_objectPosition == value) return;
     _objectPosition = value;
@@ -24,6 +23,7 @@ mixin CSSObjectPositionMixin on RenderStyleBase {
       renderBoxModel!.markNeedsLayout();
     }
   }
+
   Alignment _getBoxPosition(String? position) {
     // Syntax: object-position: <position>
     // position: From one to four values that define the 2D position of the element. Relative or absolute offsets can be used.
@@ -39,7 +39,6 @@ mixin CSSObjectPositionMixin on RenderStyleBase {
   }
 
   static double _getAlignmentValueFromString(String value) {
-
     // Support percentage
     if (value.endsWith('%')) {
       // 0% equal to -1.0

@@ -11,7 +11,6 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
-
 final RegExp _whiteSpaceReg = RegExp(r'\s+');
 const String WHITE_SPACE_CHAR = ' ';
 const String NEW_LINE_CHAR = '\n';
@@ -133,7 +132,7 @@ class TextNode extends Node {
 
   // Attach renderObject of current node to parent
   @override
-  void attachTo(Element parent, { RenderBox? after }) {
+  void attachTo(Element parent, {RenderBox? after}) {
     willAttachRenderer();
 
     RenderLayoutBox? parentRenderLayoutBox;
@@ -192,7 +191,8 @@ class TextNode extends Node {
     }
 
     InlineSpan text = CSSTextMixin.createTextSpan(_data!, parentElement: parentElement);
-    RenderTextBox renderTextBox = _renderTextBox = RenderTextBox(text,
+    RenderTextBox renderTextBox = _renderTextBox = RenderTextBox(
+      text,
       style: null,
     );
     return renderTextBox;

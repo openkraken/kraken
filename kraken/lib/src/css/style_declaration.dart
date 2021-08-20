@@ -1,5 +1,3 @@
-
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -18,7 +16,7 @@ const String SAFE_AREA_INSET_LEFT = '$SAFE_AREA_INSET-left';
 const String SAFE_AREA_INSET_RIGHT = '$SAFE_AREA_INSET-right';
 const String SAFE_AREA_INSET_BOTTOM = '$SAFE_AREA_INSET-bottom';
 
-typedef StyleChangeListener = void Function(String property,  String? original, String present);
+typedef StyleChangeListener = void Function(String property, String? original, String present);
 
 // https://github.com/WebKit/webkit/blob/master/Source/WebCore/css/CSSProperties.json
 
@@ -113,6 +111,7 @@ class CSSStyleDeclaration {
   Element? target;
 
   CSSStyleDeclaration(this.target);
+
   /// When some property changed, corresponding [StyleChangeListener] will be
   /// invoked in synchronous.
   final List<StyleChangeListener> _styleChangeListeners = [];
@@ -147,9 +146,10 @@ class CSSStyleDeclaration {
     }
 
     // Transition does not work when renderBoxModel has not been layouted yet.
-    if (renderBoxModel != null && renderBoxModel.firstLayouted &&
-      CSSTransformHandlers[property] != null &&
-      (_transitions.containsKey(property) || _transitions.containsKey(ALL))) {
+    if (renderBoxModel != null &&
+        renderBoxModel.firstLayouted &&
+        CSSTransformHandlers[property] != null &&
+        (_transitions.containsKey(property) || _transitions.containsKey(ALL))) {
       bool shouldTransition = false;
       // Transtion will be disabled when all transition has transitionDuration as 0.
       _transitions.forEach((String transitionKey, List transitionOptions) {
@@ -164,11 +164,9 @@ class CSSStyleDeclaration {
   }
 
   EffectTiming? _getTransitionEffectTiming(String property) {
-
     List? transitionOptions = _transitions[property] ?? _transitions[ALL];
     // [duration, function, delay]
     if (transitionOptions != null) {
-
       return EffectTiming(
         duration: CSSTime.parseTime(transitionOptions[0]).toDouble(),
         easing: transitionOptions[1],
@@ -281,7 +279,7 @@ class CSSStyleDeclaration {
     String? prevValue = EMPTY_STRING;
 
     if (_animationProperties.containsKey(propertyName)) {
-       prevValue = _animationProperties[propertyName];
+      prevValue = _animationProperties[propertyName];
       _animationProperties.remove(propertyName);
     }
 
@@ -290,7 +288,6 @@ class CSSStyleDeclaration {
 
   /// Removes a property from the CSS declaration block.
   String? removeProperty(String propertyName) {
-
     switch (propertyName) {
       case PADDING:
         CSSStyleProperty.removeShorthandPadding(this);
@@ -340,7 +337,7 @@ class CSSStyleDeclaration {
     String? prevValue = EMPTY_STRING;
 
     if (_properties.containsKey(propertyName)) {
-       prevValue = _properties[propertyName];
+      prevValue = _properties[propertyName];
       _properties.remove(propertyName);
     }
 
@@ -351,7 +348,7 @@ class CSSStyleDeclaration {
 
   void _expandShorthand(String propertyName, String normalizedValue, Size? viewportSize) {
     Map<String, String?> longhandProperties = {};
-    switch(propertyName) {
+    switch (propertyName) {
       case PADDING:
         CSSStyleProperty.setShorthandPadding(longhandProperties, normalizedValue);
         break;
@@ -406,7 +403,7 @@ class CSSStyleDeclaration {
 
   void _setShorthandRenderStyle(String propertyName, Size? viewportSize) {
     Map<String, String?> longhandProperties = {};
-    switch(propertyName) {
+    switch (propertyName) {
       case PADDING:
         longhandProperties[PADDING_TOP] = _properties[PADDING_TOP];
         longhandProperties[PADDING_RIGHT] = _properties[PADDING_RIGHT];
@@ -504,7 +501,7 @@ class CSSStyleDeclaration {
     if (startIndex >= 0) {
       int? endIndex;
       int startStringLength = startString.length;
-      startIndex  = startIndex + startStringLength;
+      startIndex = startIndex + startStringLength;
       for (int i = startIndex; i < string.length; i++) {
         if (string[i] == endString) endIndex = i;
       }
@@ -524,7 +521,7 @@ class CSSStyleDeclaration {
     // custom property names are case sensitive.
     String lowerCase = string.toLowerCase();
     lowerCase = _replacePattern(string, lowerCase, 'url(', ')');
-     // var(--my-color) will be treated as a separate custom property to var(--My-color).
+    // var(--my-color) will be treated as a separate custom property to var(--My-color).
     lowerCase = _replacePattern(string, lowerCase, 'var(', ')');
     return lowerCase;
   }
@@ -589,7 +586,6 @@ class CSSStyleDeclaration {
       return _expandShorthand(propertyName, normalizedValue, viewportSize);
     }
 
-
     double? rootFontSize;
     double? fontSize;
     if (renderStyle != null) {
@@ -610,19 +606,13 @@ class CSSStyleDeclaration {
       case MARGIN_RIGHT:
       case MARGIN_BOTTOM:
         // Validation length type
-        if (!CSSLength.isLength(normalizedValue) &&
-          !CSSLength.isAuto(normalizedValue) &&
-          !CSSLength.isPercentage(normalizedValue)
-        ) {
+        if (!CSSLength.isLength(normalizedValue) && !CSSLength.isAuto(normalizedValue) && !CSSLength.isPercentage(normalizedValue)) {
           return;
         }
         break;
       case MAX_WIDTH:
       case MAX_HEIGHT:
-        if (normalizedValue != NONE &&
-          !CSSLength.isLength(normalizedValue) &&
-          !CSSLength.isPercentage(normalizedValue)
-        ) {
+        if (normalizedValue != NONE && !CSSLength.isLength(normalizedValue) && !CSSLength.isPercentage(normalizedValue)) {
           return;
         }
         break;
@@ -632,9 +622,7 @@ class CSSStyleDeclaration {
       case PADDING_LEFT:
       case PADDING_BOTTOM:
       case PADDING_RIGHT:
-        if (!CSSLength.isLength(normalizedValue) &&
-          !CSSLength.isPercentage(normalizedValue)
-        ) {
+        if (!CSSLength.isLength(normalizedValue) && !CSSLength.isPercentage(normalizedValue)) {
           return;
         }
         break;
@@ -741,7 +729,7 @@ class CSSStyleDeclaration {
   }
 
   void removeStyleChangeListener(StyleChangeListener listener) {
-      _styleChangeListeners.remove(listener);
+    _styleChangeListeners.remove(listener);
   }
 
   void setRenderStyleProperty(String property, String? original, String present) {

@@ -96,7 +96,7 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
     } else {
       switch (axis) {
         case Axis.vertical:
-        // Vertical trag gesture recongnizer to trigger vertical scroll.
+          // Vertical trag gesture recongnizer to trigger vertical scroll.
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             ScrollVerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<ScrollVerticalDragGestureRecognizer>(
               () => ScrollVerticalDragGestureRecognizer(),
@@ -145,7 +145,7 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
   }
 
   // Used in the Arena to judge whether the vertical trag gesture can trigger the current container to scroll.
-  bool _isAcceptedVerticalDrag (AxisDirection direction) {
+  bool _isAcceptedVerticalDrag(AxisDirection direction) {
     double? pixels = (_drag as ScrollDragController).pixels;
     double? maxScrollExtent = (_drag as ScrollDragController).maxScrollExtent;
     double? minScrollExtent = (_drag as ScrollDragController).minScrollExtent;
@@ -153,7 +153,7 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
   }
 
   // Used in the Arena to judge whether the horizontal trag gesture can trigger the current container to scroll.
-  bool _isAcceptedHorizontalDrag (AxisDirection direction) {
+  bool _isAcceptedHorizontalDrag(AxisDirection direction) {
     double? pixels = (_drag as ScrollDragController).pixels;
     double? maxScrollExtent = (_drag as ScrollDragController).maxScrollExtent;
     double? minScrollExtent = (_drag as ScrollDragController).minScrollExtent;
@@ -344,6 +344,7 @@ mixin RenderOverflowMixin on RenderBox {
     if (_scrollOffsetX == null) return 0.0;
     return -_scrollOffsetX!.pixels;
   }
+
   double get _paintOffsetY {
     if (_scrollOffsetY == null) return 0.0;
     return -_scrollOffsetY!.pixels;
@@ -373,10 +374,11 @@ mixin RenderOverflowMixin on RenderBox {
     final double paintOffsetY = _paintOffsetY;
     final Offset paintOffset = Offset(paintOffsetX, paintOffsetY);
     // Overflow should not cover border
-    Rect clipRect = Offset(borderEdge.left, borderEdge.top) & Size(
-      size.width - borderEdge.right - borderEdge.left,
-      size.height - borderEdge.bottom - borderEdge.top,
-    );
+    Rect clipRect = Offset(borderEdge.left, borderEdge.top) &
+        Size(
+          size.width - borderEdge.right - borderEdge.left,
+          size.height - borderEdge.bottom - borderEdge.top,
+        );
     if (_shouldClipAtPaintOffset(paintOffset, size)) {
       // ignore: prefer_function_declarations_over_variables
       PaintingContextCallback painter = (PaintingContext context, Offset offset) {
@@ -385,11 +387,7 @@ mixin RenderOverflowMixin on RenderBox {
       if (decoration != null && decoration.borderRadius != null) {
         BorderRadius radius = decoration.borderRadius as BorderRadius;
         RRect clipRRect = RRect.fromRectAndCorners(clipRect,
-            topLeft: radius.topLeft,
-            topRight: radius.topRight,
-            bottomLeft: radius.bottomLeft,
-            bottomRight: radius.bottomRight
-        );
+            topLeft: radius.topLeft, topRight: radius.topRight, bottomLeft: radius.bottomLeft, bottomRight: radius.bottomRight);
         _oldClipRRectLayer = context.pushClipRRect(needsCompositing, offset, clipRect, clipRRect, painter, oldLayer: _oldClipRRectLayer);
       } else {
         _oldClipRectLayer = context.pushClipRect(needsCompositing, offset, clipRect, painter, oldLayer: _oldClipRectLayer);

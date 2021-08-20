@@ -1,5 +1,3 @@
-
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -10,7 +8,6 @@ import 'package:kraken/gesture.dart';
 import 'package:kraken/rendering.dart';
 
 mixin CSSSliverMixin on RenderStyleBase {
-
   Axis _sliverAxis = Axis.vertical;
   Axis get sliverAxis => _sliverAxis;
   set sliverAxis(Axis value) {

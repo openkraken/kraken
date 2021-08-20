@@ -11,5 +11,3 @@ const double kPrecisePointerSwipeSlop = kPrecisePointerHitSlop * 2.0; // Logical
 /// The distance a touch has to travel for the framework to be confident that
 /// the gesture is a swipe gesture.
 const double kSwipeSlop = kTouchSlop * 2.0; // Logical pixels
-
-

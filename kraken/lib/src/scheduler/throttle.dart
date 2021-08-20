@@ -26,11 +26,10 @@ class Throttling {
     if (!_isReady) return null;
     _stateSC.sink.add(false);
     _isReady = false;
-    _waiter
-      ..then((_) {
-        _isReady = true;
-        _stateSC.sink.add(true);
-      });
+    _waiter.then((_) {
+      _isReady = true;
+      _stateSC.sink.add(true);
+    });
     return Function.apply(func, List.empty());
   }
 

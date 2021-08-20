@@ -1,5 +1,3 @@
-
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -9,14 +7,9 @@ import 'package:kraken/rendering.dart';
 
 // CSS Content Visibility: https://www.w3.org/TR/css-contain-2/#content-visibility
 
-enum ContentVisibility {
-  auto,
-  hidden,
-  visible
-}
+enum ContentVisibility { auto, hidden, visible }
 
 mixin CSSContentVisibilityMixin on RenderStyleBase {
-
   /// Whether the child is hidden from the rest of the tree.
   ///
   /// If ContentVisibility.hidden, the child is laid out as if it was in the tree, but without
@@ -38,8 +31,7 @@ mixin CSSContentVisibilityMixin on RenderStyleBase {
 
   bool _hasIntersectionObserver = false;
 
-  void setContentVisibilityIntersectionObserver(
-    RenderBoxModel? renderBoxModel, ContentVisibility? contentVisibility) {
+  void setContentVisibilityIntersectionObserver(RenderBoxModel? renderBoxModel, ContentVisibility? contentVisibility) {
     if (contentVisibility == ContentVisibility.auto && !_hasIntersectionObserver) {
       renderBoxModel!.addIntersectionChangeListener(_handleIntersectionChange);
       // Call needs paint make sure intersection observer works immediately
@@ -49,7 +41,7 @@ mixin CSSContentVisibilityMixin on RenderStyleBase {
   }
 
   static ContentVisibility getContentVisibility(String value) {
-    switch(value) {
+    switch (value) {
       case HIDDEN:
         return ContentVisibility.hidden;
       case AUTO:
@@ -62,9 +54,7 @@ mixin CSSContentVisibilityMixin on RenderStyleBase {
 
   void _handleIntersectionChange(IntersectionObserverEntry entry) {
     assert(renderBoxModel != null);
-    contentVisibility = entry.isIntersecting
-        ? ContentVisibility.auto
-        : ContentVisibility.hidden;
+    contentVisibility = entry.isIntersecting ? ContentVisibility.auto : ContentVisibility.hidden;
   }
 
   void updateRenderContentVisibility(String value) {

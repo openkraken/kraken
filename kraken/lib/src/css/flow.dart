@@ -1,5 +1,3 @@
-
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -12,7 +10,6 @@ import 'package:kraken/css.dart';
 // CSS Box Alignment: https://drafts.csswg.org/css-align/
 
 mixin CSSFlowMixin on RenderStyleBase {
-
   TextAlign? get textAlign {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
@@ -22,6 +19,7 @@ mixin CSSFlowMixin on RenderStyleBase {
     }
     return _textAlign;
   }
+
   TextAlign? _textAlign;
   set textAlign(TextAlign? value) {
     if (_textAlign == value) return;
@@ -57,7 +55,7 @@ mixin CSSFlowMixin on RenderStyleBase {
       switch (style[TEXT_ALIGN]) {
         case 'start':
         case 'left':
-        // Use default value: start
+          // Use default value: start
           break;
         case 'end':
         case 'right':
@@ -69,13 +67,12 @@ mixin CSSFlowMixin on RenderStyleBase {
         case 'justify':
           alignment = TextAlign.justify;
           break;
-      // Like inherit, which is the same with parent element.
-      // Not impl it due to performance consideration.
-      // case 'match-parent':
+        // Like inherit, which is the same with parent element.
+        // Not impl it due to performance consideration.
+        // case 'match-parent':
       }
     }
 
     return alignment;
   }
 }
-

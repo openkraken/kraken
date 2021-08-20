@@ -1,5 +1,3 @@
-
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -23,7 +21,6 @@ enum CSSDisplay {
 }
 
 mixin CSSDisplayMixin on RenderStyleBase {
-
   CSSDisplay? _display;
   CSSDisplay? get display => _display;
   set display(CSSDisplay? value) {
@@ -33,15 +30,14 @@ mixin CSSDisplayMixin on RenderStyleBase {
       _display = value;
     }
   }
+
   /// Some layout effects require blockification or inlinification of the box type
   /// https://www.w3.org/TR/css-display-3/#transformations
   CSSDisplay? transformedDisplay;
 
   void updateDisplay(String value, Element element) {
     CSSDisplay? originalDisplay = display;
-    CSSDisplay presentDisplay = getDisplay(
-      CSSStyleDeclaration.isNullOrEmptyValue(value) ? element.defaultDisplay : value
-    );
+    CSSDisplay presentDisplay = getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(value) ? element.defaultDisplay : value);
     // Destroy renderer of element when display is changed to none.
     if (presentDisplay == CSSDisplay.none) {
       element.detach();
@@ -51,11 +47,7 @@ mixin CSSDisplayMixin on RenderStyleBase {
     transformedDisplay = getTransformedDisplay();
     if (originalDisplay != presentDisplay && renderBoxModel is RenderLayoutBox) {
       RenderLayoutBox? prevRenderLayoutBox = renderBoxModel as RenderLayoutBox?;
-      renderBoxModel = Element.createRenderLayout(
-        element,
-        prevRenderLayoutBox: prevRenderLayoutBox,
-        repaintSelf: element.repaintSelf
-      );
+      renderBoxModel = Element.createRenderLayout(element, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: element.repaintSelf);
       bool shouldReattach = element.isRendererAttached && element.parent != null && prevRenderLayoutBox != renderBoxModel;
 
       if (shouldReattach) {
@@ -73,9 +65,7 @@ mixin CSSDisplayMixin on RenderStyleBase {
 
   /// Set display and transformedDisplay when display is not set in style
   void initDisplay(CSSStyleDeclaration style, String? defaultDisplay) {
-    display = CSSDisplayMixin.getDisplay(
-      CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY]
-    );
+    display = CSSDisplayMixin.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY]);
     transformedDisplay = getTransformedDisplay();
   }
 
@@ -114,24 +104,24 @@ mixin CSSDisplayMixin on RenderStyleBase {
     } else if (renderBoxModel!.parent is! RenderBoxModel) {
       return renderStyle.display;
     } else if (renderBoxModel!.parent is RenderFlexLayout) {
-        // Display as inline-block if parent node is flex
-        display = CSSDisplay.inlineBlock;
-        RenderBoxModel parent = renderBoxModel!.parent as RenderBoxModel;
-        RenderStyle parentRenderStyle = parent.renderStyle;
+      // Display as inline-block if parent node is flex
+      display = CSSDisplay.inlineBlock;
+      RenderBoxModel parent = renderBoxModel!.parent as RenderBoxModel;
+      RenderStyle parentRenderStyle = parent.renderStyle;
 
-        CSSMargin marginLeft = renderStyle.marginLeft;
-        CSSMargin marginRight = renderStyle.marginRight;
+      CSSMargin marginLeft = renderStyle.marginLeft;
+      CSSMargin marginRight = renderStyle.marginRight;
 
-        bool isVerticalDirection = parentRenderStyle.flexDirection == FlexDirection.column ||
-          parentRenderStyle.flexDirection == FlexDirection.columnReverse;
-        // Flex item will not stretch in stretch alignment when flex wrap is set to wrap or wrap-reverse
-        bool isFlexNoWrap = parentRenderStyle.flexWrap == FlexWrap.nowrap;
-        bool isAlignItemsStretch = parentRenderStyle.alignItems == AlignItems.stretch;
+      bool isVerticalDirection =
+          parentRenderStyle.flexDirection == FlexDirection.column || parentRenderStyle.flexDirection == FlexDirection.columnReverse;
+      // Flex item will not stretch in stretch alignment when flex wrap is set to wrap or wrap-reverse
+      bool isFlexNoWrap = parentRenderStyle.flexWrap == FlexWrap.nowrap;
+      bool isAlignItemsStretch = parentRenderStyle.alignItems == AlignItems.stretch;
 
-        // Display as block if flex vertical layout children and stretch children
-        if (!marginLeft.isAuto! && !marginRight.isAuto! && isVerticalDirection && isFlexNoWrap && isAlignItemsStretch) {
-          display = CSSDisplay.block;
-        }
+      // Display as block if flex vertical layout children and stretch children
+      if (!marginLeft.isAuto! && !marginRight.isAuto! && isVerticalDirection && isFlexNoWrap && isAlignItemsStretch) {
+        display = CSSDisplay.block;
+      }
     }
 
     return display;

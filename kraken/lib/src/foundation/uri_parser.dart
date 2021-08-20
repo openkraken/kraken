@@ -5,7 +5,6 @@
 const String _defaultScheme = 'https';
 
 class UriParser {
-
   Uri resolve(Uri base, Uri relative) {
     Uri result = base.resolveUri(relative);
     if (!result.hasScheme) {

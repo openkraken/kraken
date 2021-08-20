@@ -11,7 +11,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 
 class GestureManager {
-
   static GestureManager? _instance;
   GestureManager._();
 
@@ -210,7 +209,7 @@ class GestureManager {
     }
   }
 
-  void onClick(String eventType, { PointerDownEvent? down, PointerUpEvent? up }) {
+  void onClick(String eventType, {PointerDownEvent? down, PointerUpEvent? up}) {
     if (_target != null && _target!.onClick != null) {
       if (_target!.onClick != null) {
         _target!.onClick!(eventType, up: up);
@@ -229,96 +228,45 @@ class GestureManager {
   void onPanStart(DragStartDetails details) {
     if (_target != null && _target!.onPan != null) {
       _target!.onPan!(
-        GestureEvent(
-          EVENT_PAN,
-          GestureEventInit(
-            state: EVENT_STATE_START,
-            deltaX: details.globalPosition.dx,
-            deltaY: details.globalPosition.dy
-          )
-        )
-      );
+          GestureEvent(EVENT_PAN, GestureEventInit(state: EVENT_STATE_START, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy)));
     }
   }
 
   void onPanUpdate(DragUpdateDetails details) {
     if (_target != null && _target!.onPan != null) {
       _target!.onPan!(
-          GestureEvent(
-              EVENT_PAN,
-              GestureEventInit(
-                  state: EVENT_STATE_UPDATE,
-                  deltaX: details.globalPosition.dx,
-                  deltaY: details.globalPosition.dy
-              )
-          )
-      );
+          GestureEvent(EVENT_PAN, GestureEventInit(state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy)));
     }
   }
 
   void onPanEnd(DragEndDetails details) {
     if (_target != null && _target!.onPan != null) {
-      _target!.onPan!(
-        GestureEvent(
-          EVENT_PAN,
-          GestureEventInit(
-            state: EVENT_STATE_END,
-            velocityX: details.velocity.pixelsPerSecond.dx,
-            velocityY: details.velocity.pixelsPerSecond.dy
-          )
-        )
-      );
+      _target!.onPan!(GestureEvent(EVENT_PAN,
+          GestureEventInit(state: EVENT_STATE_END, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy)));
     }
   }
 
   void onScaleStart(ScaleStartDetails details) {
     if (_target != null && _target!.onScale != null) {
-      _target!.onScale!(
-        GestureEvent(
-          EVENT_SCALE,
-          GestureEventInit( state: EVENT_STATE_START )
-        )
-      );
+      _target!.onScale!(GestureEvent(EVENT_SCALE, GestureEventInit(state: EVENT_STATE_START)));
     }
   }
 
   void onScaleUpdate(ScaleUpdateDetails details) {
     if (_target != null && _target!.onScale != null) {
-      _target!.onScale!(
-        GestureEvent(
-          EVENT_SCALE,
-          GestureEventInit(
-            state: EVENT_STATE_UPDATE,
-            rotation: details.rotation,
-            scale: details.scale
-          )
-        )
-      );
+      _target!.onScale!(GestureEvent(EVENT_SCALE, GestureEventInit(state: EVENT_STATE_UPDATE, rotation: details.rotation, scale: details.scale)));
     }
   }
 
   void onScaleEnd(ScaleEndDetails details) {
     if (_target != null && _target!.onScale != null) {
-      _target!.onScale!(
-        GestureEvent(
-          EVENT_SCALE,
-          GestureEventInit( state: EVENT_STATE_END )
-        )
-      );
+      _target!.onScale!(GestureEvent(EVENT_SCALE, GestureEventInit(state: EVENT_STATE_END)));
     }
   }
 
   void onLongPressEnd(LongPressEndDetails details) {
     if (_target != null && _target!.onLongPress != null) {
-      _target!.onLongPress!(
-        GestureEvent(
-          EVENT_LONG_PRESS,
-          GestureEventInit(
-            deltaX: details.globalPosition.dx,
-            deltaY: details.globalPosition.dy
-          )
-        )
-      );
+      _target!.onLongPress!(GestureEvent(EVENT_LONG_PRESS, GestureEventInit(deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy)));
     }
   }
 }

@@ -46,11 +46,12 @@ class NavigationModule extends BaseModule {
       Uri targetUri = Uri.parse(url);
       Uri? sourceUri = sourceUrl != null ? Uri.parse(sourceUrl) : null;
 
-      if (sourceUri == null || (targetUri.scheme != sourceUri.scheme ||
-          targetUri.host != sourceUri.host ||
-          targetUri.port != sourceUri.port ||
-          targetUri.path != sourceUri.path ||
-          targetUri.query != sourceUri.query)) {
+      if (sourceUri == null ||
+          (targetUri.scheme != sourceUri.scheme ||
+              targetUri.host != sourceUri.host ||
+              targetUri.port != sourceUri.port ||
+              targetUri.path != sourceUri.path ||
+              targetUri.query != sourceUri.query)) {
         moduleManager!.controller.view.handleNavigationAction(sourceUrl, url, KrakenNavigationType.reload);
       }
     }

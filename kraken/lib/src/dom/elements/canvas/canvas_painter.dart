@@ -8,7 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'canvas_context_2d.dart';
 
 class CanvasPainter extends CustomPainter {
-  CanvasPainter({required Listenable repaint}): super(repaint: repaint);
+  CanvasPainter({required Listenable repaint}) : super(repaint: repaint);
   CanvasRenderingContext2D? context;
 
   bool _shouldRepaint = false;
@@ -79,7 +79,6 @@ class CanvasPainter extends CustomPainter {
     _picture = _pictureRecorder!.endRecording();
 
     canvas.drawPicture(_picture!);
-
   }
 
   @override

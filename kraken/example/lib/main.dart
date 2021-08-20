@@ -40,7 +40,6 @@ class MyBrowser extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyBrowser> {
-
   OutlineInputBorder outlineBorder = OutlineInputBorder(
     borderSide: BorderSide(color: Colors.transparent, width: 0.0),
     borderRadius: const BorderRadius.all(
@@ -55,45 +54,45 @@ class _MyHomePageState extends State<MyBrowser> {
 
     Kraken? _kraken;
     AppBar appBar = AppBar(
-        backgroundColor: Colors.black87,
-        titleSpacing: 10.0,
-        title: Container(
-          height: 40.0,
-          child: TextField(
-            controller: textEditingController,
-            onSubmitted: (value) {
-              textEditingController.text = value;
-              _kraken?.loadURL(value);
-            },
-            decoration: InputDecoration(
-              hintText: 'Enter a app url',
-              hintStyle: TextStyle(color: Colors.black54, fontSize: 16.0),
-              contentPadding: const EdgeInsets.all(10.0),
-              filled: true,
-              fillColor: Colors.grey,
-              border: outlineBorder,
-              focusedBorder: outlineBorder,
-              enabledBorder: outlineBorder,
-            ),
-            style: TextStyle(color: Colors.black, fontSize: 16.0),
+      backgroundColor: Colors.black87,
+      titleSpacing: 10.0,
+      title: Container(
+        height: 40.0,
+        child: TextField(
+          controller: textEditingController,
+          onSubmitted: (value) {
+            textEditingController.text = value;
+            _kraken?.loadURL(value);
+          },
+          decoration: InputDecoration(
+            hintText: 'Enter a app url',
+            hintStyle: TextStyle(color: Colors.black54, fontSize: 16.0),
+            contentPadding: const EdgeInsets.all(10.0),
+            filled: true,
+            fillColor: Colors.grey,
+            border: outlineBorder,
+            focusedBorder: outlineBorder,
+            enabledBorder: outlineBorder,
           ),
+          style: TextStyle(color: Colors.black, fontSize: 16.0),
         ),
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-      );
+      ),
+      // Here we take the value from the MyHomePage object that was created by
+      // the App.build method, and use it to set our appbar title.
+    );
 
     final Size viewportSize = queryData.size;
     return Scaffold(
         appBar: appBar,
         body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: _kraken = Kraken(
-          viewportWidth: viewportSize.width - queryData.padding.horizontal,
-          viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
-          bundlePath: 'assets/bundle.js',
-          devToolsService: ChromeDevToolsService(),
-        ),
-    ));
+          // Center is a layout widget. It takes a single child and positions it
+          // in the middle of the parent.
+          child: _kraken = Kraken(
+            viewportWidth: viewportSize.width - queryData.padding.horizontal,
+            viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
+            bundlePath: 'assets/bundle.js',
+            devToolsService: ChromeDevToolsService(),
+          ),
+        ));
   }
 }

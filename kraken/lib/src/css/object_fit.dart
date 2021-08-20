@@ -1,5 +1,3 @@
-
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -12,6 +10,7 @@ mixin CSSObjectFitMixin on RenderStyleBase {
   BoxFit get objectFit {
     return _objectFit;
   }
+
   set objectFit(BoxFit value) {
     if (_objectFit == value) return;
     _objectFit = value;

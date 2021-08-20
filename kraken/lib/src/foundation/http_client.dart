@@ -8,7 +8,7 @@ import 'http_client_request.dart';
 import 'http_overrides.dart';
 
 class ProxyHttpClient implements HttpClient {
-  ProxyHttpClient({ required this.nativeHttpClient, required this.httpOverrides });
+  ProxyHttpClient({required this.nativeHttpClient, required this.httpOverrides});
 
   final KrakenHttpOverrides httpOverrides;
   final HttpClient nativeHttpClient;
@@ -69,7 +69,7 @@ class ProxyHttpClient implements HttpClient {
   }
 
   @override
-  set authenticateProxy( Future<bool> Function(String host, int port, String scheme, String realm)? f) {
+  set authenticateProxy(Future<bool> Function(String host, int port, String scheme, String realm)? f) {
     nativeHttpClient.authenticateProxy = f;
   }
 
@@ -162,4 +162,3 @@ class ProxyHttpClient implements HttpClient {
     return ProxyHttpClientRequest(request, httpOverrides);
   }
 }
-

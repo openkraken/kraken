@@ -51,7 +51,9 @@ class HttpCacheObject {
   bool _valid = false;
   bool get valid => _valid;
 
-  HttpCacheObject(this.url, this.cacheDirectory, {
+  HttpCacheObject(
+    this.url,
+    this.cacheDirectory, {
     this.expiredTime,
     this.eTag,
     this.contentLength,
@@ -59,7 +61,7 @@ class HttpCacheObject {
     this.lastModified,
     this.origin,
     required this.hash,
-  }) : _file = File(path.join(cacheDirectory, '$hash')),
+  })  : _file = File(path.join(cacheDirectory, '$hash')),
         _blob = HttpCacheObjectBlob(path.join(cacheDirectory, '$hash-blob'));
 
   factory HttpCacheObject.fromResponse(String url, HttpClientResponse response, String cacheDirectory) {
@@ -67,11 +69,11 @@ class HttpCacheObject {
     String? eTag = response.headers.value(HttpHeaders.etagHeader);
     int contentLength = response.headers.contentLength;
     String? lastModifiedValue = response.headers.value(HttpHeaders.lastModifiedHeader);
-    DateTime? lastModified = lastModifiedValue != null
-        ? DateTime.tryParse(lastModifiedValue)
-        : null;
+    DateTime? lastModified = lastModifiedValue != null ? DateTime.tryParse(lastModifiedValue) : null;
 
-    return HttpCacheObject(url, cacheDirectory,
+    return HttpCacheObject(
+      url,
+      cacheDirectory,
       eTag: eTag,
       expiredTime: expiredTime,
       contentLength: contentLength,
@@ -218,9 +220,11 @@ class HttpCacheObject {
     // Index bytes format:
     // | Type x 1B | Reserved x 3B | ExpiredTimeStamp x 8B |
     bytesBuilder.add([
-      NetworkType, Reserved, Reserved, Reserved,
+      NetworkType,
+      Reserved,
+      Reserved,
+      Reserved,
     ]);
-
 
     // | ExpiredTimeStamp x 8 |
     final int expiredTimeStamp = (expiredTime ?? alwaysExpired).millisecondsSinceEpoch;
@@ -284,8 +288,7 @@ class HttpCacheObject {
     return await _blob.exists();
   }
 
-  Future<HttpClientResponse?> toHttpClientResponse({
-    HttpClientResponse? originalResponse }) async {
+  Future<HttpClientResponse?> toHttpClientResponse({HttpClientResponse? originalResponse}) async {
     if (!await _exists) {
       return null;
     }
@@ -307,13 +310,8 @@ class HttpCacheObject {
 
     // Consume stream.
     Completer<Uint8List> completer = Completer<Uint8List>();
-    ByteConversionSink sink = ByteConversionSink.withCallback(
-            (bytes) => completer.complete(Uint8List.fromList(bytes)));
-    blobStream.listen(
-        sink.add,
-        onError: completer.completeError,
-        onDone: sink.close,
-        cancelOnError: true);
+    ByteConversionSink sink = ByteConversionSink.withCallback((bytes) => completer.complete(Uint8List.fromList(bytes)));
+    blobStream.listen(sink.add, onError: completer.completeError, onDone: sink.close, cancelOnError: true);
 
     return completer.future;
   }
@@ -332,8 +330,7 @@ class HttpCacheObject {
     String? remoteLastModifiedString = response.headers.value(HttpHeaders.lastModifiedHeader);
     if (remoteLastModifiedString != null) {
       DateTime? remoteLastModified = DateTime.tryParse(remoteLastModifiedString);
-      if (remoteLastModified != null
-          && (lastModified == null || !remoteLastModified.isAtSameMomentAs(lastModified!))) {
+      if (remoteLastModified != null && (lastModified == null || !remoteLastModified.isAtSameMomentAs(lastModified!))) {
         lastModified = remoteLastModified;
         indexChanged = true;
       }

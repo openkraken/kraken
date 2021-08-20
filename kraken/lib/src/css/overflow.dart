@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/animation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
@@ -10,13 +8,7 @@ import 'package:kraken/gesture.dart';
 
 // CSS Overflow: https://drafts.csswg.org/css-overflow-3/
 
-enum CSSOverflowType {
-  auto,
-  visible,
-  hidden,
-  scroll,
-  clip
-}
+enum CSSOverflowType { auto, visible, hidden, scroll, clip }
 
 List<CSSOverflowType> getOverflowTypes(CSSStyleDeclaration style) {
   CSSOverflowType overflowX = _getOverflowType(style[OVERFLOW_X]);
@@ -55,6 +47,7 @@ mixin CSSOverflowStyleMixin on RenderStyleBase {
   CSSOverflowType get overflowX {
     return _overflowX;
   }
+
   set overflowX(CSSOverflowType value) {
     if (_overflowX == value) return;
     _overflowX = value;
@@ -64,6 +57,7 @@ mixin CSSOverflowStyleMixin on RenderStyleBase {
   CSSOverflowType get overflowY {
     return _overflowY;
   }
+
   set overflowY(CSSOverflowType value) {
     if (_overflowY == value) return;
     _overflowY = value;
@@ -97,7 +91,7 @@ mixin CSSOverflowMixin on ElementBase {
     CSSOverflowType overflowY = renderStyle.overflowY;
     bool shouldRepaintSelf = false;
 
-    switch(overflowX) {
+    switch (overflowX) {
       case CSSOverflowType.hidden:
         _scrollableX = null;
         renderBoxModel.clipX = true;
@@ -126,7 +120,7 @@ mixin CSSOverflowMixin on ElementBase {
         break;
     }
 
-    switch(overflowY) {
+    switch (overflowY) {
       case CSSOverflowType.hidden:
         _scrollableY = null;
         renderBoxModel.clipY = true;
@@ -170,11 +164,7 @@ mixin CSSOverflowMixin on ElementBase {
   void _createScrollingLayoutBox(Element element) {
     CSSStyleDeclaration repaintBoundaryStyle = element.style.clone(element);
     repaintBoundaryStyle.setProperty(OVERFLOW, VISIBLE);
-    scrollingContentLayoutBox = Element.createRenderLayout(
-      element,
-      repaintSelf: true,
-      style: repaintBoundaryStyle
-    );
+    scrollingContentLayoutBox = Element.createRenderLayout(element, repaintSelf: true, style: repaintBoundaryStyle);
 
     scrollingContentLayoutBox!.isScrollingContentBox = true;
   }
@@ -196,11 +186,7 @@ mixin CSSOverflowMixin on ElementBase {
     }
     RenderObject? layoutBoxParent = renderBoxModel!.parent as RenderObject?;
     RenderObject? previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
-    RenderLayoutBox outerLayoutBox = Element.createRenderLayout(
-      element,
-      repaintSelf: true,
-      prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?
-    );
+    RenderLayoutBox outerLayoutBox = Element.createRenderLayout(element, repaintSelf: true, prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?);
 
     _createScrollingLayoutBox(element);
 
@@ -230,11 +216,7 @@ mixin CSSOverflowMixin on ElementBase {
     if (scrollingContentLayoutBox == null) return;
     RenderObject? layoutBoxParent = renderBoxModel!.parent as RenderObject?;
     RenderObject? previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
-    RenderLayoutBox newLayoutBox = Element.createRenderLayout(
-      element,
-      repaintSelf: false,
-      prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?
-    );
+    RenderLayoutBox newLayoutBox = Element.createRenderLayout(element, repaintSelf: false, prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?);
 
     _attachRenderObject(element, layoutBoxParent, previousSibling, newLayoutBox);
     element.renderBoxModel = newLayoutBox;
@@ -303,6 +285,7 @@ mixin CSSOverflowMixin on ElementBase {
     }
     return 0.0;
   }
+
   set scrollTop(double value) {
     scrollTo(y: value);
   }
@@ -313,6 +296,7 @@ mixin CSSOverflowMixin on ElementBase {
     }
     return 0.0;
   }
+
   set scrollLeft(double value) {
     scrollTo(x: value);
   }
@@ -327,7 +311,7 @@ mixin CSSOverflowMixin on ElementBase {
     return scrollContainerSize.width;
   }
 
-  void scrollBy({ num dx = 0.0, num dy = 0.0, bool? withAnimation }) {
+  void scrollBy({num dx = 0.0, num dy = 0.0, bool? withAnimation}) {
     if (dx != 0) {
       _scroll(scrollLeft + dx, Axis.horizontal, withAnimation: withAnimation);
     }
@@ -336,7 +320,7 @@ mixin CSSOverflowMixin on ElementBase {
     }
   }
 
-  void scrollTo({ num? x, num? y, bool? withAnimation }) {
+  void scrollTo({num? x, num? y, bool? withAnimation}) {
     if (x != null) {
       _scroll(x, Axis.horizontal, withAnimation: withAnimation);
     }
@@ -360,7 +344,7 @@ mixin CSSOverflowMixin on ElementBase {
     return scrollable;
   }
 
-  void _scroll(num aim, Axis direction, { bool? withAnimation = false }) {
+  void _scroll(num aim, Axis direction, {bool? withAnimation = false}) {
     KrakenScrollable? scrollable = _getScrollable(direction);
     if (scrollable != null && aim is num) {
       double distance = aim.toDouble();
@@ -371,7 +355,8 @@ mixin CSSOverflowMixin on ElementBase {
       if (!renderBox.hasSize) {
         renderBox.owner!.flushLayout();
       }
-      scrollable.position!.moveTo(distance,
+      scrollable.position!.moveTo(
+        distance,
         duration: withAnimation == true ? SCROLL_DURATION : null,
         curve: withAnimation == true ? Curves.easeOut : null,
       );

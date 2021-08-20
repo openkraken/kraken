@@ -46,7 +46,7 @@ abstract class KrakenBundle {
 
   Future<void> resolve();
 
-  static Future<KrakenBundle> getBundle(String path, { String? contentOverride, required int contextId }) async {
+  static Future<KrakenBundle> getBundle(String path, {String? contentOverride, required int contextId}) async {
     KrakenBundle bundle;
 
     if (contentOverride != null && contentOverride.isNotEmpty) {
@@ -86,8 +86,7 @@ abstract class KrakenBundle {
 }
 
 class RawBundle extends KrakenBundle {
-  RawBundle(String content, Uri url)
-      : super(url) {
+  RawBundle(String content, Uri url) : super(url) {
     this.content = content;
   }
 
@@ -99,8 +98,7 @@ class RawBundle extends KrakenBundle {
 
 class NetworkBundle extends KrakenBundle {
   int contextId;
-  NetworkBundle(Uri url, { required this.contextId })
-      : super(url);
+  NetworkBundle(Uri url, {required this.contextId}) : super(url);
 
   @override
   Future<void> resolve() async {
@@ -128,7 +126,7 @@ String _resolveStringFromData(ByteData data, String key) {
 class NetworkAssetBundle extends AssetBundle {
   /// Creates an network asset bundle that resolves asset keys as URLs relative
   /// to the given base URL.
-  NetworkAssetBundle(Uri baseUrl, { required this.contextId })
+  NetworkAssetBundle(Uri baseUrl, {required this.contextId})
       : _baseUrl = baseUrl,
         httpClient = HttpClient();
 
@@ -172,8 +170,7 @@ class NetworkAssetBundle extends AssetBundle {
 }
 
 class AssetsBundle extends KrakenBundle {
-  AssetsBundle(Uri url)
-      : super(url);
+  AssetsBundle(Uri url) : super(url);
 
   @override
   Future<void> resolve() async {

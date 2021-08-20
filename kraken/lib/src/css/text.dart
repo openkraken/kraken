@@ -1,5 +1,3 @@
-
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -17,7 +15,6 @@ const double DEFAULT_WORD_SPACING = 0.0;
 // CSS Text: https://drafts.csswg.org/css-text-3/
 // CSS Text Decoration: https://drafts.csswg.org/css-text-decor-3/
 mixin CSSTextMixin on RenderStyleBase {
-
   Color? _color = CSSColor.initial;
   Color? get color {
     // Get style from self or closest parent if specified style property is not set
@@ -40,6 +37,7 @@ mixin CSSTextMixin on RenderStyleBase {
   TextDecoration? get textDecorationLine {
     return _textDecorationLine;
   }
+
   set textDecorationLine(TextDecoration? value) {
     if (_textDecorationLine == value) return;
     _textDecorationLine = value;
@@ -51,6 +49,7 @@ mixin CSSTextMixin on RenderStyleBase {
   Color? get textDecorationColor {
     return _textDecorationColor;
   }
+
   set textDecorationColor(Color? value) {
     if (_textDecorationColor == value) return;
     _textDecorationColor = value;
@@ -62,6 +61,7 @@ mixin CSSTextMixin on RenderStyleBase {
   TextDecorationStyle? get textDecorationStyle {
     return _textDecorationStyle;
   }
+
   set textDecorationStyle(TextDecorationStyle? value) {
     if (_textDecorationStyle == value) return;
     _textDecorationStyle = value;
@@ -79,6 +79,7 @@ mixin CSSTextMixin on RenderStyleBase {
     }
     return _fontWeight;
   }
+
   set fontWeight(FontWeight? value) {
     if (_fontWeight == value) return;
     _fontWeight = value;
@@ -96,6 +97,7 @@ mixin CSSTextMixin on RenderStyleBase {
     }
     return _fontStyle;
   }
+
   set fontStyle(FontStyle? value) {
     if (_fontStyle == value) return;
     _fontStyle = value;
@@ -116,6 +118,7 @@ mixin CSSTextMixin on RenderStyleBase {
     }
     return _fontFamily;
   }
+
   set fontFamily(List<String>? value) {
     if (_fontFamily == value) return;
     _fontFamily = value;
@@ -133,6 +136,7 @@ mixin CSSTextMixin on RenderStyleBase {
     }
     return _fontSize;
   }
+
   set fontSize(double value) {
     if (_fontSize == value) return;
     _fontSize = value;
@@ -153,6 +157,7 @@ mixin CSSTextMixin on RenderStyleBase {
     }
     return _lineHeight;
   }
+
   set lineHeight(double? value) {
     if (_lineHeight == value) return;
     _lineHeight = value;
@@ -170,6 +175,7 @@ mixin CSSTextMixin on RenderStyleBase {
     }
     return _letterSpacing;
   }
+
   set letterSpacing(double? value) {
     if (_letterSpacing == value) return;
     _letterSpacing = value;
@@ -187,6 +193,7 @@ mixin CSSTextMixin on RenderStyleBase {
     }
     return _wordSpacing;
   }
+
   set wordSpacing(double? value) {
     if (_wordSpacing == value) return;
     _wordSpacing = value;
@@ -204,6 +211,7 @@ mixin CSSTextMixin on RenderStyleBase {
     }
     return _textShadow;
   }
+
   set textShadow(List<Shadow>? value) {
     if (_textShadow == value) return;
     _textShadow = value;
@@ -221,6 +229,7 @@ mixin CSSTextMixin on RenderStyleBase {
     }
     return _whiteSpace;
   }
+
   set whiteSpace(WhiteSpace? value) {
     if (_whiteSpace == value) return;
     _whiteSpace = value;
@@ -232,6 +241,7 @@ mixin CSSTextMixin on RenderStyleBase {
   TextOverflow get textOverflow {
     return _textOverflow;
   }
+
   set textOverflow(TextOverflow value) {
     if (_textOverflow == value) return;
     _textOverflow = value;
@@ -243,6 +253,7 @@ mixin CSSTextMixin on RenderStyleBase {
   int? get lineClamp {
     return _lineClamp;
   }
+
   set lineClamp(int? value) {
     if (_lineClamp == value) return;
     _lineClamp = value;
@@ -357,10 +368,8 @@ mixin CSSTextMixin on RenderStyleBase {
           }
         }
 
-      // Only need to update text when its parent has no font-size set.
-      } else if (child is RenderTextBox &&
-        (renderBoxModel == oriRenderBoxModel || renderBoxModel.renderStyle.style[FONT_SIZE].isEmpty)
-      ) {
+        // Only need to update text when its parent has no font-size set.
+      } else if (child is RenderTextBox && (renderBoxModel == oriRenderBoxModel || renderBoxModel.renderStyle.style[FONT_SIZE].isEmpty)) {
         // Need to recreate text span cause text style can not be set alone.
         RenderBoxModel parentRenderBoxModel = child.parent as RenderBoxModel;
         KrakenRenderParagraph renderParagraph = child.child as KrakenRenderParagraph;
@@ -412,28 +421,21 @@ mixin CSSTextMixin on RenderStyleBase {
   ///   foreground: The paint used to draw the text. If this is specified, color must be null.
   static TextStyle getTextStyle(CSSStyleDeclaration parentStyle, Size viewportSize, {RenderStyle? parentRenderStyle}) {
     // Text may be created when parent renderObject not created, get it from style instead
-    Color? color = parentRenderStyle != null ?
-      parentRenderStyle.color : CSSText.getTextColor(parentStyle);
-    TextDecoration? textDecorationLine = parentRenderStyle != null ?
-      parentRenderStyle.textDecorationLine : CSSText.getTextDecorationLine(parentStyle);
-    Color? textDecorationColor = parentRenderStyle != null ?
-      parentRenderStyle.textDecorationColor : CSSText.getTextDecorationColor(parentStyle);
-    TextDecorationStyle? textDecorationStyle = parentRenderStyle != null ?
-      parentRenderStyle.textDecorationStyle : CSSText.getTextDecorationStyle(parentStyle);
-    FontWeight? fontWeight = parentRenderStyle != null ?
-      parentRenderStyle.fontWeight : CSSText.getFontWeight(parentStyle);
-    FontStyle? fontStyle = parentRenderStyle != null ?
-      parentRenderStyle.fontStyle : CSSText.getFontStyle(parentStyle);
-    double? fontSize = parentRenderStyle != null ?
-      parentRenderStyle.fontSize : CSSText.getFontSize(parentStyle, viewportSize: viewportSize);
-    List<String>? fontFamily = parentRenderStyle != null ?
-      parentRenderStyle.fontFamily : CSSText.getFontFamilyFallback(parentStyle);
-    double? letterSpacing = parentRenderStyle != null ?
-      parentRenderStyle.letterSpacing : CSSText.getLetterSpacing(parentStyle, viewportSize: viewportSize);
-    double? wordSpacing = parentRenderStyle != null ?
-      parentRenderStyle.wordSpacing : CSSText.getWordSpacing(parentStyle, viewportSize: viewportSize);
-    List<Shadow>? textShadow = parentRenderStyle != null ?
-      parentRenderStyle.textShadow : CSSText.getTextShadow(parentStyle, viewportSize: viewportSize);
+    Color? color = parentRenderStyle != null ? parentRenderStyle.color : CSSText.getTextColor(parentStyle);
+    TextDecoration? textDecorationLine =
+        parentRenderStyle != null ? parentRenderStyle.textDecorationLine : CSSText.getTextDecorationLine(parentStyle);
+    Color? textDecorationColor = parentRenderStyle != null ? parentRenderStyle.textDecorationColor : CSSText.getTextDecorationColor(parentStyle);
+    TextDecorationStyle? textDecorationStyle =
+        parentRenderStyle != null ? parentRenderStyle.textDecorationStyle : CSSText.getTextDecorationStyle(parentStyle);
+    FontWeight? fontWeight = parentRenderStyle != null ? parentRenderStyle.fontWeight : CSSText.getFontWeight(parentStyle);
+    FontStyle? fontStyle = parentRenderStyle != null ? parentRenderStyle.fontStyle : CSSText.getFontStyle(parentStyle);
+    double? fontSize = parentRenderStyle != null ? parentRenderStyle.fontSize : CSSText.getFontSize(parentStyle, viewportSize: viewportSize);
+    List<String>? fontFamily = parentRenderStyle != null ? parentRenderStyle.fontFamily : CSSText.getFontFamilyFallback(parentStyle);
+    double? letterSpacing =
+        parentRenderStyle != null ? parentRenderStyle.letterSpacing : CSSText.getLetterSpacing(parentStyle, viewportSize: viewportSize);
+    double? wordSpacing = parentRenderStyle != null ? parentRenderStyle.wordSpacing : CSSText.getWordSpacing(parentStyle, viewportSize: viewportSize);
+    List<Shadow>? textShadow =
+        parentRenderStyle != null ? parentRenderStyle.textShadow : CSSText.getTextShadow(parentStyle, viewportSize: viewportSize);
 
     return TextStyle(
       color: color,
@@ -485,44 +487,19 @@ mixin CSSTextMixin on RenderStyleBase {
         fontFamily = CSSText.getFontFamilyFallback(style);
         break;
       case FONT_SIZE:
-        fontSize = CSSText.getFontSize(
-          style,
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: _fontSize
-        );
+        fontSize = CSSText.getFontSize(style, viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: _fontSize);
         break;
       case LINE_HEIGHT:
-        lineHeight = CSSText.getLineHeight(
-          style,
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-        );
+        lineHeight = CSSText.getLineHeight(style, viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize);
         break;
       case LETTER_SPACING:
-        letterSpacing = CSSText.getLetterSpacing(
-          style,
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-        );
+        letterSpacing = CSSText.getLetterSpacing(style, viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize);
         break;
       case WORD_SPACING:
-        wordSpacing = CSSText.getWordSpacing(
-          style,
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-        );
+        wordSpacing = CSSText.getWordSpacing(style, viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize);
         break;
       case TEXT_SHADOW:
-        textShadow = CSSText.getTextShadow(
-          style,
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-        );
+        textShadow = CSSText.getTextShadow(style, viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize);
         break;
       case WHITE_SPACE:
         whiteSpace = CSSText.getWhiteSpace(style);
@@ -538,7 +515,6 @@ mixin CSSTextMixin on RenderStyleBase {
 }
 
 class CSSText {
-
   static bool isValidFontStyleValue(String value) {
     return value == 'normal' || value == 'italic' || value == 'oblique';
   }
@@ -564,39 +540,16 @@ class CSSText {
     return value == 'solid' || value == 'double' || value == 'dotted' || value == 'dashed' || value == 'wavy';
   }
 
-  static double? getLineHeight(CSSStyleDeclaration style, {
-    Size? viewportSize,
-    double? rootFontSize,
-    double? fontSize
-  }) {
-    double _fontSize = getFontSize(
-      style,
-      viewportSize: viewportSize,
-      rootFontSize: rootFontSize,
-      fontSize: fontSize
-    );
-    return parseLineHeight(
-      style[LINE_HEIGHT],
-      viewportSize: viewportSize,
-      rootFontSize: rootFontSize,
-      fontSize: _fontSize
-    );
+  static double? getLineHeight(CSSStyleDeclaration style, {Size? viewportSize, double? rootFontSize, double? fontSize}) {
+    double _fontSize = getFontSize(style, viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize);
+    return parseLineHeight(style[LINE_HEIGHT], viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: _fontSize);
   }
 
-  static double? parseLineHeight(String value, {
-    Size? viewportSize,
-    double? rootFontSize,
-    required double fontSize
-  }) {
+  static double? parseLineHeight(String value, {Size? viewportSize, double? rootFontSize, required double fontSize}) {
     double? lineHeight;
     if (value.isNotEmpty) {
       if (CSSLength.isLength(value)) {
-        double lineHeightValue = CSSLength.toDisplayPortValue(
-          value, viewportSize:
-          viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-        )!;
+        double lineHeightValue = CSSLength.toDisplayPortValue(value, viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize)!;
         if (lineHeightValue > 0) {
           lineHeight = lineHeightValue;
         }
@@ -627,7 +580,7 @@ class CSSText {
   }
 
   static WhiteSpace getWhiteSpace(CSSStyleDeclaration style) {
-    switch(style[WHITE_SPACE]) {
+    switch (style[WHITE_SPACE]) {
       case 'nowrap':
         return WhiteSpace.nowrap;
       case 'pre':
@@ -649,13 +602,10 @@ class CSSText {
   }
 
   static TextOverflow getTextOverflow({CSSStyleDeclaration? style, RenderStyle? renderStyle}) {
-    CSSOverflowType overflowX = renderStyle != null ?
-      renderStyle.overflowX : getOverflowTypes(style!)[0];
+    CSSOverflowType overflowX = renderStyle != null ? renderStyle.overflowX : getOverflowTypes(style!)[0];
     // Get white space from renderStyle cause it may be inherited from parents.
-    WhiteSpace? whiteSpace = renderStyle != null ?
-      renderStyle.whiteSpace : getWhiteSpace(style!);
-    int? lineClamp = renderStyle != null ?
-      renderStyle.lineClamp : getLineClamp(style!);
+    WhiteSpace? whiteSpace = renderStyle != null ? renderStyle.whiteSpace : getWhiteSpace(style!);
+    int? lineClamp = renderStyle != null ? renderStyle.lineClamp : getLineClamp(style!);
 
     // Set line-clamp to number makes text-overflow ellipsis which takes priority over text-overflow
     if (lineClamp != null && lineClamp > 0) {
@@ -668,7 +618,7 @@ class CSSText {
 
     // Always get text overflow from style cause it is affected by white-space and overflow.
     CSSStyleDeclaration? _style = renderStyle != null ? renderStyle.style : style;
-    switch(_style![TEXT_OVERFLOW]) {
+    switch (_style![TEXT_OVERFLOW]) {
       case 'ellipsis':
         return TextOverflow.ellipsis;
       case 'fade':
@@ -678,7 +628,6 @@ class CSSText {
         return TextOverflow.clip;
     }
   }
-
 
   static Color? getTextColor(CSSStyleDeclaration style) {
     if (style.contains(COLOR)) {
@@ -799,35 +748,27 @@ class CSSText {
 
         switch (familyName) {
           case 'sans-serif':
-          // Default sans-serif font in iOS (9 and newer)and iPadOS: Helvetica
-          // Default sans-serif font in Android (4.0+): Roboto
+            // Default sans-serif font in iOS (9 and newer)and iPadOS: Helvetica
+            // Default sans-serif font in Android (4.0+): Roboto
             resolvedFamily.addAll(['Helvetica', 'Roboto', 'PingFang SC', 'PingFang TC']);
             break;
           case 'serif':
-          // Default serif font in iOS and iPadOS: Times
-          // Default serif font in Android (4.0+): Noto Serif
-            resolvedFamily.addAll([
-              'Times',
-              'Times New Roman',
-              'Noto Serif',
-              'Songti SC',
-              'Songti TC',
-              'Hiragino Mincho ProN',
-              'AppleMyungjo',
-              'Apple SD Gothic Neo'
-            ]);
+            // Default serif font in iOS and iPadOS: Times
+            // Default serif font in Android (4.0+): Noto Serif
+            resolvedFamily.addAll(
+                ['Times', 'Times New Roman', 'Noto Serif', 'Songti SC', 'Songti TC', 'Hiragino Mincho ProN', 'AppleMyungjo', 'Apple SD Gothic Neo']);
             break;
           case 'monospace':
-          // Default monospace font in iOS and iPadOS: Courier
+            // Default monospace font in iOS and iPadOS: Courier
             resolvedFamily.addAll(['Courier', 'Courier New', 'DroidSansMono', 'Monaco', 'Heiti SC', 'Heiti TC']);
             break;
           case 'cursive':
-          // Default cursive font in iOS and iPadOS: Snell Roundhand
+            // Default cursive font in iOS and iPadOS: Snell Roundhand
             resolvedFamily.addAll(['Snell Roundhand', 'Apple Chancery', 'DancingScript', 'Comic Sans MS']);
             break;
           case 'fantasy':
-          // Default fantasy font in iOS and iPadOS:
-          // Default fantasy font in MacOS: Papyrus
+            // Default fantasy font in iOS and iPadOS:
+            // Default fantasy font in MacOS: Papyrus
             resolvedFamily.addAll(['Papyrus', 'Impact']);
             break;
           default:
@@ -840,58 +781,34 @@ class CSSText {
   }
 
   static double DEFAULT_FONT_SIZE = 16.0;
-  static double getFontSize(CSSStyleDeclaration style, {
-    Size? viewportSize,
-    double? rootFontSize,
-    double? fontSize
-  }) {
+  static double getFontSize(CSSStyleDeclaration style, {Size? viewportSize, double? rootFontSize, double? fontSize}) {
     if (style.contains(FONT_SIZE)) {
-      return CSSLength.toDisplayPortValue(
-        style[FONT_SIZE],
-        viewportSize: viewportSize,
-        rootFontSize: rootFontSize,
-        fontSize: fontSize
-      ) ?? DEFAULT_FONT_SIZE;
+      return CSSLength.toDisplayPortValue(style[FONT_SIZE], viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize) ??
+          DEFAULT_FONT_SIZE;
     } else {
       return DEFAULT_FONT_SIZE;
     }
   }
 
-  static double getLetterSpacing(CSSStyleDeclaration style, {
-    Size? viewportSize,
-    double? rootFontSize,
-    double? fontSize
-  }) {
+  static double getLetterSpacing(CSSStyleDeclaration style, {Size? viewportSize, double? rootFontSize, double? fontSize}) {
     if (style.contains(LETTER_SPACING)) {
       String _letterSpacing = style[LETTER_SPACING];
       if (_letterSpacing == NORMAL) return DEFAULT_LETTER_SPACING;
 
-      return CSSLength.toDisplayPortValue(
-        _letterSpacing,
-        viewportSize: viewportSize,
-        rootFontSize: rootFontSize,
-        fontSize: fontSize
-      ) ?? DEFAULT_LETTER_SPACING;
+      return CSSLength.toDisplayPortValue(_letterSpacing, viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize) ??
+          DEFAULT_LETTER_SPACING;
     } else {
       return DEFAULT_LETTER_SPACING;
     }
   }
 
-  static double getWordSpacing(CSSStyleDeclaration style, {
-    Size? viewportSize,
-    double? rootFontSize,
-    double? fontSize
-  }) {
+  static double getWordSpacing(CSSStyleDeclaration style, {Size? viewportSize, double? rootFontSize, double? fontSize}) {
     if (style.contains(WORD_SPACING)) {
       String _wordSpacing = style[WORD_SPACING];
       if (_wordSpacing == NORMAL) return DEFAULT_WORD_SPACING;
 
-      return CSSLength.toDisplayPortValue(
-        _wordSpacing,
-        viewportSize: viewportSize,
-        rootFontSize: rootFontSize,
-        fontSize: fontSize
-      ) ?? DEFAULT_WORD_SPACING;
+      return CSSLength.toDisplayPortValue(_wordSpacing, viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize) ??
+          DEFAULT_WORD_SPACING;
     } else {
       return DEFAULT_WORD_SPACING;
     }
@@ -912,11 +829,7 @@ class CSSText {
     return null;
   }
 
-  static List<Shadow> getTextShadow(CSSStyleDeclaration style, {
-    Size? viewportSize,
-    double? rootFontSize,
-    double? fontSize
-  }) {
+  static List<Shadow> getTextShadow(CSSStyleDeclaration style, {Size? viewportSize, double? rootFontSize, double? fontSize}) {
     List<Shadow> textShadows = [];
     if (style.contains(TEXT_SHADOW)) {
       var shadows = CSSStyleProperty.getShadowValues(style[TEXT_SHADOW]);
@@ -924,24 +837,12 @@ class CSSText {
         for (var shadowDefinitions in shadows) {
           // Specifies the color of the shadow. If the color is absent, it defaults to currentColor.
           Color? color = CSSColor.parseColor(shadowDefinitions[0] ?? style.getCurrentColor());
-          double offsetX = CSSLength.toDisplayPortValue(
-            shadowDefinitions[1],
-            viewportSize: viewportSize,
-            rootFontSize: rootFontSize,
-            fontSize: fontSize
-          ) ?? 0;
-          double offsetY = CSSLength.toDisplayPortValue(
-            shadowDefinitions[2],
-            viewportSize: viewportSize,
-            rootFontSize: rootFontSize,
-            fontSize: fontSize
-          ) ?? 0;
-          double blurRadius = CSSLength.toDisplayPortValue(
-            shadowDefinitions[3],
-            viewportSize: viewportSize,
-            rootFontSize: rootFontSize,
-            fontSize: fontSize
-          ) ?? 0;
+          double offsetX =
+              CSSLength.toDisplayPortValue(shadowDefinitions[1], viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize) ?? 0;
+          double offsetY =
+              CSSLength.toDisplayPortValue(shadowDefinitions[2], viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize) ?? 0;
+          double blurRadius =
+              CSSLength.toDisplayPortValue(shadowDefinitions[3], viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize) ?? 0;
 
           if (color != null) {
             textShadows.add(Shadow(

@@ -18,9 +18,7 @@ void main() {
     ];
 
     for (var spec in resolveTests) {
-      String index = resolveTests.indexOf(spec)
-          .toString()
-          .padLeft(3, '0');
+      String index = resolveTests.indexOf(spec).toString().padLeft(3, '0');
 
       test('resolve $index', () {
         Uri base = Uri.parse(spec[0]);

@@ -1,7 +1,5 @@
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#functional-notations
 
-
-
 final _functionRegExp = RegExp(r'^[a-zA-Z_]+\(.+\)$', caseSensitive: false);
 final _functionStart = '(';
 final _functionEnd = ')';
@@ -12,7 +10,6 @@ const String FUNCTION_ARGS_SPLIT = ',';
 
 // ignore: public_member_api_docs
 class CSSFunction {
-
   static bool isFunction(String value) {
     return _functionRegExp.hasMatch(value);
   }
@@ -61,7 +58,11 @@ class CSSFunction {
         // only add the right function
         fn = fn.trim();
         if (fn.startsWith(FUNCTION_SPLIT)) {
-          fn = fn.substring(1, ).trim();
+          fn = fn
+              .substring(
+                1,
+              )
+              .trim();
         }
         notations.add(CSSFunctionalNotation(fn, argList));
       }

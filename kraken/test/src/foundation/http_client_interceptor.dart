@@ -13,8 +13,7 @@ void main() {
     HttpClient httpClient = HttpClient();
 
     test('beforeRequest', () async {
-      var request = await httpClient.openUrl('GET',
-          server.getUri('json_with_content_length'));
+      var request = await httpClient.openUrl('GET', server.getUri('json_with_content_length'));
       KrakenHttpOverrides.setContextHeader(request, contextId);
       request.headers.add('x-test-id', 'beforeRequest-001');
 
@@ -23,15 +22,12 @@ void main() {
 
       expect(jsonDecode(String.fromCharCodes(await res.single)), {
         'method': 'GET',
-        'data': {
-          'userName': '12345'
-        }
+        'data': {'userName': '12345'}
       });
     });
 
     test('afterResponse', () async {
-      var request = await httpClient.openUrl('GET',
-          server.getUri('json_with_content_length'));
+      var request = await httpClient.openUrl('GET', server.getUri('json_with_content_length'));
       KrakenHttpOverrides.setContextHeader(request, contextId);
       request.headers.add('x-test-id', 'afterResponse-001');
 
@@ -40,8 +36,7 @@ void main() {
     });
 
     test('shouldInterceptRequest', () async {
-      var request = await httpClient.openUrl('GET',
-          server.getUri('json_with_content_length'));
+      var request = await httpClient.openUrl('GET', server.getUri('json_with_content_length'));
       KrakenHttpOverrides.setContextHeader(request, contextId);
       request.headers.add('x-test-id', 'shouldInterceptRequest-001');
 
@@ -61,8 +56,7 @@ class TestHttpClientInterceptor implements HttpClientInterceptor {
   }
 
   @override
-  Future<HttpClientResponse?> afterResponse(
-      HttpClientRequest request, HttpClientResponse response) async {
+  Future<HttpClientResponse?> afterResponse(HttpClientRequest request, HttpClientResponse response) async {
     if (request.headers.value('x-test-id') == 'afterResponse-001') {
       return HttpClientStreamResponse(response, responseHeaders: {
         'x-test-after-response': 'modified',

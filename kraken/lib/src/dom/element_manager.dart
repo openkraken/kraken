@@ -29,7 +29,7 @@ const int HTML_ID = -1;
 const int WINDOW_ID = -2;
 const int DOCUMENT_ID = -3;
 
-class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver  {
+class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver {
   // Call from JS Bridge before JS side eventTarget object been Garbage collected.
   static void disposeEventTarget(int contextId, int id) {
     if (kProfileMode) {
@@ -73,7 +73,8 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   EventClient? eventClient;
 
-  ElementManager({ required this.contextId, required this.viewport, required this.controller, this.showPerformanceOverlayOverride = false, this.eventClient }) {
+  ElementManager(
+      {required this.contextId, required this.viewport, required this.controller, this.showPerformanceOverlayOverride = false, this.eventClient}) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_PROPERTY_INIT);
       PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_INIT_START);
@@ -148,8 +149,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     _eventTargets = <int, EventTarget>{};
   }
 
-  Element createElement(
-      int id, Pointer nativePtr, String type, Map<String, dynamic>? props, List<String>? events) {
+  Element createElement(int id, Pointer nativePtr, String type, Map<String, dynamic>? props, List<String>? events) {
     assert(!existsTarget(id), 'ERROR: Can not create element with same id "$id"');
 
     List<String> eventList;
@@ -335,8 +335,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     if (showPerformanceOverlayOverride != null) showPerformanceOverlay = showPerformanceOverlayOverride!;
 
     if (showPerformanceOverlay) {
-      RenderPerformanceOverlay renderPerformanceOverlay =
-          RenderPerformanceOverlay(optionsMask: 15, rasterizerThreshold: 0);
+      RenderPerformanceOverlay renderPerformanceOverlay = RenderPerformanceOverlay(optionsMask: 15, rasterizerThreshold: 0);
       RenderConstrainedBox renderConstrainedPerformanceOverlayBox = RenderConstrainedBox(
         child: renderPerformanceOverlay,
         additionalConstraints: BoxConstraints.tight(Size(
@@ -399,13 +398,13 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   @override
-  void didChangeAccessibilityFeatures() { }
+  void didChangeAccessibilityFeatures() {}
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) { }
+  void didChangeAppLifecycleState(AppLifecycleState state) {}
 
   @override
-  void didChangeLocales(List<Locale>? locale) { }
+  void didChangeLocales(List<Locale>? locale) {}
 
   WindowPadding _prevViewInsets = window.viewInsets;
 
@@ -440,13 +439,13 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   @override
-  void didChangePlatformBrightness() { }
+  void didChangePlatformBrightness() {}
 
   @override
-  void didChangeTextScaleFactor() { }
+  void didChangeTextScaleFactor() {}
 
   @override
-  void didHaveMemoryPressure() { }
+  void didHaveMemoryPressure() {}
 
   @override
   Future<bool> didPopRoute() async {

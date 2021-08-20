@@ -1,5 +1,3 @@
-
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -19,11 +17,11 @@ import 'package:kraken/css.dart';
 /// - min-height
 
 mixin CSSSizingMixin on RenderStyleBase {
-
   double? _width;
   double? get width {
     return _width;
   }
+
   set width(double? value) {
     if (_width == value) return;
     _width = value;
@@ -33,6 +31,7 @@ mixin CSSSizingMixin on RenderStyleBase {
   double? get height {
     return _height;
   }
+
   set height(double? value) {
     if (_height == value) return;
     _height = value;
@@ -42,6 +41,7 @@ mixin CSSSizingMixin on RenderStyleBase {
   double? get minWidth {
     return _minWidth;
   }
+
   set minWidth(double? value) {
     if (_minWidth == value) return;
     _minWidth = value;
@@ -51,6 +51,7 @@ mixin CSSSizingMixin on RenderStyleBase {
   double? get maxWidth {
     return _maxWidth;
   }
+
   set maxWidth(double? value) {
     if (_maxWidth == value) return;
     _maxWidth = value;
@@ -60,6 +61,7 @@ mixin CSSSizingMixin on RenderStyleBase {
   double? get minHeight {
     return _minHeight;
   }
+
   set minHeight(double? value) {
     if (_minHeight == value) return;
     _minHeight = value;
@@ -69,6 +71,7 @@ mixin CSSSizingMixin on RenderStyleBase {
   double? get maxHeight {
     return _maxHeight;
   }
+
   set maxHeight(double? value) {
     if (_maxHeight == value) return;
     _maxHeight = value;
@@ -118,7 +121,7 @@ mixin CSSSizingMixin on RenderStyleBase {
   }
 
   double? getMinWidth(double? minWidth) {
-    if (minWidth == null || minWidth < 0)  {
+    if (minWidth == null || minWidth < 0) {
       return null;
     }
     return minWidth;
@@ -136,7 +139,7 @@ mixin CSSSizingMixin on RenderStyleBase {
   }
 
   double? getMinHeight(double? minHeight) {
-    if (minHeight == null || minHeight < 0)  {
+    if (minHeight == null || minHeight < 0) {
       return null;
     }
     return minHeight;
@@ -165,23 +168,18 @@ mixin CSSSizingMixin on RenderStyleBase {
     bool isChildAlignSelfStretch = false;
     bool isChildStretchSelf = false;
     if (isFlex) {
-      isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(
-        current.renderStyle.flexDirection
-      );
+      isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(current.renderStyle.flexDirection);
       isAlignItemsStretch = renderStyle.alignItems == AlignItems.stretch;
-      isFlexNoWrap = renderStyle.flexWrap != FlexWrap.wrap &&
-        childRenderStyle.flexWrap != FlexWrap.wrapReverse;
+      isFlexNoWrap = renderStyle.flexWrap != FlexWrap.wrap && childRenderStyle.flexWrap != FlexWrap.wrapReverse;
       isChildAlignSelfStretch = childRenderStyle.alignSelf == AlignSelf.stretch;
-      isChildStretchSelf = childRenderStyle.alignSelf != AlignSelf.auto ?
-        isChildAlignSelfStretch : isAlignItemsStretch;
+      isChildStretchSelf = childRenderStyle.alignSelf != AlignSelf.auto ? isChildAlignSelfStretch : isAlignItemsStretch;
     }
 
     CSSMargin marginTop = childRenderStyle.marginTop;
     CSSMargin marginBottom = childRenderStyle.marginBottom;
 
     // Display as block if flex vertical layout children and stretch children
-    if (!marginTop.isAuto! && !marginBottom.isAuto! &&
-      isFlex && isHorizontalDirection && isFlexNoWrap && isChildStretchSelf) {
+    if (!marginTop.isAuto! && !marginBottom.isAuto! && isFlex && isHorizontalDirection && isFlexNoWrap && isChildStretchSelf) {
       isStretch = true;
     }
 
@@ -201,4 +199,3 @@ class CSSEdgeInsets {
     return EdgeInsets.fromLTRB(left, top, right, bottom);
   }
 }
-

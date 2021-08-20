@@ -108,7 +108,7 @@ class PerformanceTiming {
       dataIndex++;
     }
 
-    final Pointer<Uint64> bytes = malloc.allocate<Uint64>(sizeOf<Uint64>() *  byteLength);
+    final Pointer<Uint64> bytes = malloc.allocate<Uint64>(sizeOf<Uint64>() * byteLength);
     final Uint64List buffer = bytes.asTypedList(byteLength);
     buffer.setAll(0, data);
 

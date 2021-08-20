@@ -1,5 +1,3 @@
-
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -62,12 +60,7 @@ mixin CSSPaddingMixin on RenderStyleBase {
 
   void updatePadding(String property, double value, {bool shouldMarkNeedsLayout = true}) {
     RenderStyle renderStyle = this as RenderStyle;
-    EdgeInsets prevPadding = renderStyle.padding as EdgeInsets? ?? EdgeInsets.only(
-      top: 0.0,
-      right: 0.0,
-      bottom: 0.0,
-      left: 0.0
-    );
+    EdgeInsets prevPadding = renderStyle.padding as EdgeInsets? ?? EdgeInsets.only(top: 0.0, right: 0.0, bottom: 0.0, left: 0.0);
 
     double left = prevPadding.left;
     double top = prevPadding.top;
@@ -90,12 +83,7 @@ mixin CSSPaddingMixin on RenderStyleBase {
         break;
     }
 
-    renderStyle.padding = EdgeInsets.only(
-      left: left,
-      right: right,
-      bottom: bottom,
-      top: top
-    );
+    renderStyle.padding = EdgeInsets.only(left: left, right: right, bottom: bottom, top: top);
 
     if (shouldMarkNeedsLayout) {
       renderBoxModel!.markNeedsLayout();
@@ -111,8 +99,8 @@ mixin CSSPaddingMixin on RenderStyleBase {
 
   Size wrapPaddingSize(Size innerSize) {
     _resolve();
-    return Size(_resolvedPadding!.left + innerSize.width + _resolvedPadding!.right,
-      _resolvedPadding!.top + innerSize.height + _resolvedPadding!.bottom);
+    return Size(
+        _resolvedPadding!.left + innerSize.width + _resolvedPadding!.right, _resolvedPadding!.top + innerSize.height + _resolvedPadding!.bottom);
   }
 
   void debugPaddingProperties(DiagnosticPropertiesBuilder properties) {

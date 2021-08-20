@@ -16,7 +16,7 @@
     "start": "cd kraken/example && flutter run",
     "test": "node scripts/run_test.js",
     "lint": "cd kraken && flutter pub get && flutter analyze",
-    "format": "cd kraken && flutter format . --line-length=120",
+    "format": "cd kraken && flutter format -l 150 .",
     "ci": "npm install && npm run lint",
     "test:unit:report": "lcov-summary kraken/coverage/lcov.info"
   },

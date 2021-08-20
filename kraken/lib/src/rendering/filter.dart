@@ -15,8 +15,7 @@ mixin RenderColorFilter on RenderBox {
 
   ColorFilterLayer? _colorFilterLayer;
 
-  void paintColorFilter(PaintingContext context, Offset offset,
-      PaintingContextCallback callback) {
+  void paintColorFilter(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     if (_colorFilter != null) {
       _colorFilterLayer ??= ColorFilterLayer();
       context.pushColorFilter(offset, _colorFilter!, callback);
@@ -41,8 +40,7 @@ mixin RenderImageFilter on RenderBox {
 
   ImageFilterLayer? _imageFilterLayer;
 
-  void paintImageFilter(PaintingContext context, Offset offset,
-      PaintingContextCallback callback) {
+  void paintImageFilter(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     if (_imageFilter != null) {
       _imageFilterLayer ??= ImageFilterLayer();
       _imageFilterLayer!.imageFilter = imageFilter;

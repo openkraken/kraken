@@ -1,5 +1,3 @@
-
-
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui show Gradient;
@@ -20,7 +18,7 @@ class CSSLinearGradient extends LinearGradient with BorderGradientMixin {
     List<double>? stops,
     TileMode tileMode = TileMode.clamp,
     GradientTransform? transform,
-  }) : _angle = angle,
+  })  : _angle = angle,
         super(begin: begin, end: end, colors: colors, stops: stops, tileMode: tileMode, transform: transform);
 
   final double? _angle;
@@ -28,8 +26,8 @@ class CSSLinearGradient extends LinearGradient with BorderGradientMixin {
   @override
   Shader createShader(Rect rect, {TextDirection? textDirection}) {
     if (borderEdge != null) {
-      rect = Rect.fromLTRB(rect.left + borderEdge!.left, rect.top + borderEdge!.top, rect.right - borderEdge!.right,
-          rect.bottom - borderEdge!.bottom);
+      rect =
+          Rect.fromLTRB(rect.left + borderEdge!.left, rect.top + borderEdge!.top, rect.right - borderEdge!.right, rect.bottom - borderEdge!.bottom);
     }
     double? angle;
     if (_angle != null) {
@@ -45,8 +43,7 @@ class CSSLinearGradient extends LinearGradient with BorderGradientMixin {
     double width = rect.width;
     double height = rect.height;
     // If width/height is null, x/y can be infinite.
-    if (width == 0 || height == 0) return ui.Gradient.linear(
-        Offset(0, 0), Offset(0, 0), colors);
+    if (width == 0 || height == 0) return ui.Gradient.linear(Offset(0, 0), Offset(0, 0), colors);
 
     double length = (sin * width).abs() + (cos * height).abs();
     double x = sin * length / width;
@@ -61,8 +58,7 @@ class CSSLinearGradient extends LinearGradient with BorderGradientMixin {
       rect.left + halfWidth + x * halfWidth,
       rect.top + halfHeight - y * halfHeight,
     );
-    return ui.Gradient.linear(
-        beginOffset, endOffset, colors, _impliedStops(), tileMode, _resolveTransform(rect, textDirection));
+    return ui.Gradient.linear(beginOffset, endOffset, colors, _impliedStops(), tileMode, _resolveTransform(rect, textDirection));
   }
 }
 
@@ -84,8 +80,8 @@ class CSSRadialGradient extends RadialGradient with BorderGradientMixin {
   @override
   Shader createShader(Rect rect, {TextDirection? textDirection}) {
     if (borderEdge != null) {
-      rect = Rect.fromLTRB(rect.left + borderEdge!.left, rect.top + borderEdge!.top, rect.right - borderEdge!.right,
-          rect.bottom - borderEdge!.bottom);
+      rect =
+          Rect.fromLTRB(rect.left + borderEdge!.left, rect.top + borderEdge!.top, rect.right - borderEdge!.right, rect.bottom - borderEdge!.bottom);
     }
     Offset centerOffset = center.resolve(textDirection).withinRect(rect);
     // calculate the longest distance from center to cornor
@@ -128,18 +124,14 @@ class CSSConicGradient extends SweepGradient with BorderGradientMixin {
   ///
   /// The [colors] argument must not be null. If [stops] is non-null, it must
   /// have the same length as [colors].
-  CSSConicGradient(
-      {AlignmentGeometry center = Alignment.center,
-      required List<Color> colors,
-      List<double>? stops,
-      GradientTransform? transform})
+  CSSConicGradient({AlignmentGeometry center = Alignment.center, required List<Color> colors, List<double>? stops, GradientTransform? transform})
       : super(center: center, colors: colors, stops: stops, transform: transform);
 
   @override
   Shader createShader(Rect rect, {TextDirection? textDirection}) {
     if (borderEdge != null) {
-      rect = Rect.fromLTRB(rect.left - borderEdge!.left, rect.top - borderEdge!.top, rect.right - borderEdge!.right,
-          rect.bottom - borderEdge!.bottom);
+      rect =
+          Rect.fromLTRB(rect.left - borderEdge!.left, rect.top - borderEdge!.top, rect.right - borderEdge!.right, rect.bottom - borderEdge!.bottom);
     }
     return super.createShader(rect, textDirection: textDirection);
   }

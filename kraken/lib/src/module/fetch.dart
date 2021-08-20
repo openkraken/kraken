@@ -42,39 +42,36 @@ class FetchModule extends BaseModule {
       callback(error: '$error\n$stackTrace');
     }
 
-    httpClient.openUrl(options['method'] ?? 'GET', url)
-      .then((HttpClientRequest request) {
-        // Reset Kraken UA.
-        request.headers.removeAll(HttpHeaders.userAgentHeader);
-        request.headers.add(HttpHeaders.userAgentHeader, getKrakenInfo().userAgent);
+    httpClient.openUrl(options['method'] ?? 'GET', url).then((HttpClientRequest request) {
+      // Reset Kraken UA.
+      request.headers.removeAll(HttpHeaders.userAgentHeader);
+      request.headers.add(HttpHeaders.userAgentHeader, getKrakenInfo().userAgent);
 
-        // Set ContextID Header
-        request.headers.set(HttpHeaderContext, moduleManager!.contextId.toString());
+      // Set ContextID Header
+      request.headers.set(HttpHeaderContext, moduleManager!.contextId.toString());
 
-        var data = options['body'];
-        if (data is List<int>) {
-          request.add(data);
-        } else if (data != null) {
-          // Treat as string as default.
-          request.add(data.toString().codeUnits);
-        }
+      var data = options['body'];
+      if (data is List<int>) {
+        request.add(data);
+      } else if (data != null) {
+        // Treat as string as default.
+        request.add(data.toString().codeUnits);
+      }
 
-        return request.close();
-      })
-      .then((HttpClientResponse response) {
-        StringBuffer contentBuffer = StringBuffer();
+      return request.close();
+    }).then((HttpClientResponse response) {
+      StringBuffer contentBuffer = StringBuffer();
 
-        response
+      response
           // @TODO: Consider binary format, now callback tunnel only accept strings.
           .transform(utf8.decoder)
           .listen(contentBuffer.write)
-          ..onDone(() {
-            // @TODO: response.headers not transmitted.
-            callback(data: [EMPTY_STRING, response.statusCode, contentBuffer.toString()]);
-          })
-          ..onError(_handleError);
-      })
-      .catchError(_handleError);
+            ..onDone(() {
+              // @TODO: response.headers not transmitted.
+              callback(data: [EMPTY_STRING, response.statusCode, contentBuffer.toString()]);
+            })
+            ..onError(_handleError);
+    }).catchError(_handleError);
 
     return EMPTY_STRING;
   }

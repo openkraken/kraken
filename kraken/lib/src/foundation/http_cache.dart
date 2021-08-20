@@ -58,7 +58,7 @@ class HttpCacheController {
   // A splay tree is a good choice for data that is stored and accessed frequently.
   final SplayTreeMap<String, HttpCacheObject> _caches = SplayTreeMap();
 
-  HttpCacheController._(String origin, { int maxCachedObjects = 1000 })
+  HttpCacheController._(String origin, {int maxCachedObjects = 1000})
       : _origin = origin,
         _maxCachedObjects = maxCachedObjects;
 
@@ -83,22 +83,18 @@ class HttpCacheController {
   // Add or update the httpCacheObject to memory cache.
   void putObject(Uri uri, HttpCacheObject cacheObject) {
     if (_caches.length == _maxCachedObjects) {
-        _caches.remove(_caches.lastKey());
+      _caches.remove(_caches.lastKey());
     }
     final String key = _getCacheKey(uri);
     _caches.update(key, (value) => cacheObject, ifAbsent: () => cacheObject);
   }
 
-  Future<HttpClientResponse> interceptResponse(
-      HttpClientRequest request,
-      HttpClientResponse response,
-      HttpCacheObject cacheObject) async {
-
+  Future<HttpClientResponse> interceptResponse(HttpClientRequest request, HttpClientResponse response, HttpCacheObject cacheObject) async {
     await cacheObject.updateIndex(response);
 
     // Handle with HTTP 304
     if (response.statusCode == HttpStatus.notModified) {
-      HttpClientResponse? cachedResponse  = await cacheObject.toHttpClientResponse();
+      HttpClientResponse? cachedResponse = await cacheObject.toHttpClientResponse();
       if (cachedResponse != null) {
         return cachedResponse;
       }
@@ -106,12 +102,7 @@ class HttpCacheController {
 
     if (response.statusCode == HttpStatus.ok && response is! HttpClientCachedResponse) {
       // Create cache object.
-      HttpCacheObject cacheObject = HttpCacheObject
-          .fromResponse(
-          _getCacheKey(request.uri),
-          response,
-          (await getCacheDirectory()).path
-      );
+      HttpCacheObject cacheObject = HttpCacheObject.fromResponse(_getCacheKey(request.uri), response, (await getCacheDirectory()).path);
 
       // Cache the object.
       putObject(request.uri, cacheObject);
@@ -158,10 +149,7 @@ class HttpClientCachedResponse extends Stream<List<int>> implements HttpClientRe
   bool get isRedirect => response.isRedirect;
 
   @override
-  StreamSubscription<List<int>> listen(
-      void Function(List<int> event)? onData, {
-        Function? onError, void Function()? onDone, bool? cancelOnError
-      }) {
+  StreamSubscription<List<int>> listen(void Function(List<int> event)? onData, {Function? onError, void Function()? onDone, bool? cancelOnError}) {
     _blobSink = cacheObject.openBlobWrite();
 
     void _handleData(List<int> data) {
@@ -180,8 +168,7 @@ class HttpClientCachedResponse extends Stream<List<int>> implements HttpClientRe
     }
 
     return _DelegatingStreamSubscription(
-      response.listen(_handleData,
-        onError: _handleError, onDone: _handleDone, cancelOnError: cancelOnError),
+      response.listen(_handleData, onError: _handleError, onDone: _handleDone, cancelOnError: cancelOnError),
       handleData: _handleData,
       handleDone: _handleDone,
       handleError: _handleError,
@@ -228,11 +215,12 @@ class _DelegatingStreamSubscription extends DelegatingStreamSubscription<List<in
   final Function _handleError;
   final void Function() _handleDone;
 
-  _DelegatingStreamSubscription(StreamSubscription<List<int>> source, {
+  _DelegatingStreamSubscription(
+    StreamSubscription<List<int>> source, {
     required void Function(List<int>) handleData,
     required Function handleError,
     required void Function() handleDone,
-  }) :_handleData = handleData,
+  })  : _handleData = handleData,
         _handleError = handleError,
         _handleDone = handleDone,
         super(source);

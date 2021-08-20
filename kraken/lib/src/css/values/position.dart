@@ -1,5 +1,3 @@
-
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -30,7 +28,7 @@ class CSSPosition {
     List<String> positions = [];
     List<String> split = input.split(_splitRegExp);
     if (split.length == 1) {
-      switch(split.first) {
+      switch (split.first) {
         case TOP:
         case BOTTOM:
           positions.add(CENTER);
@@ -62,12 +60,8 @@ class CSSPosition {
       RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
       double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
       double fontSize = renderStyle.fontSize;
-      return CSSBackgroundPosition(length: CSSLength.toDisplayPortValue(
-        input,
-        viewportSize: viewportSize,
-        rootFontSize: rootFontSize,
-        fontSize: fontSize
-      ));
+      return CSSBackgroundPosition(
+          length: CSSLength.toDisplayPortValue(input, viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize));
     } else {
       if (isHorizontal) {
         switch (input) {

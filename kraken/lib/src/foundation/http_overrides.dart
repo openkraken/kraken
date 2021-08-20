@@ -9,6 +9,7 @@ import 'package:kraken/kraken.dart';
 
 // TODO: Don't use header to mark context.
 const String HttpHeaderContext = 'x-context';
+
 class KrakenHttpOverrides extends HttpOverrides {
   static KrakenHttpOverrides? _instance;
 
@@ -81,7 +82,7 @@ class KrakenHttpOverrides extends HttpOverrides {
   }
 }
 
-KrakenHttpOverrides setupHttpOverrides(HttpClientInterceptor? httpClientInterceptor, { required int contextId }) {
+KrakenHttpOverrides setupHttpOverrides(HttpClientInterceptor? httpClientInterceptor, {required int contextId}) {
   final KrakenHttpOverrides httpOverrides = KrakenHttpOverrides.instance();
 
   if (httpClientInterceptor != null) {
@@ -99,8 +100,7 @@ String getOrigin(Uri uri) {
     uri = uri.replace(scheme: 'https');
   }
 
-  if (uri.isScheme('http')
-      || uri.isScheme('https')) {
+  if (uri.isScheme('http') || uri.isScheme('https')) {
     return uri.origin;
   } else {
     return '${uri.scheme}://${uri.host}:${uri.port}';
@@ -109,8 +109,7 @@ String getOrigin(Uri uri) {
 
 // @TODO: Remove controller dependency.
 Uri getReferrer(int? contextId) {
-  KrakenController? controller = KrakenController
-      .getControllerOfJSContextId(contextId);
+  KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
   if (controller != null) {
     return controller.referrer;
   }

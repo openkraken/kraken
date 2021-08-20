@@ -45,7 +45,7 @@ class EventTarget {
   }
 
   void dispatchEvent(Event event) {
-    if(elementManager.controller.view.disposed) {
+    if (elementManager.controller.view.disposed) {
       return;
     }
     event.currentTarget = event.target = this;

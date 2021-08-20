@@ -16,8 +16,7 @@ import 'package:kraken/gesture.dart';
 
 class RenderRecyclerParentData extends RenderLayoutParentData {}
 
-class RenderRecyclerLayout extends RenderLayoutBox
-    implements RenderSliverBoxChildManager {
+class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChildManager {
   static Axis resolveAxis(CSSStyleDeclaration style) {
     String? sliverDirection = style[SLIVER_DIRECTION];
     switch (sliverDirection) {
@@ -30,13 +29,8 @@ class RenderRecyclerLayout extends RenderLayoutBox
     }
   }
 
-  RenderRecyclerLayout({
-    required RenderStyle renderStyle,
-    required ElementDelegate elementDelegate
-  }) : super(
-    renderStyle: renderStyle,
-    elementDelegate: elementDelegate
-  ) {
+  RenderRecyclerLayout({required RenderStyle renderStyle, required ElementDelegate elementDelegate})
+      : super(renderStyle: renderStyle, elementDelegate: elementDelegate) {
     _buildRenderViewport();
     super.insert(renderViewport!);
   }
@@ -171,8 +165,7 @@ class RenderRecyclerLayout extends RenderLayoutBox
   void performLayout() {
     if (kProfileMode) {
       childLayoutDuration = 0;
-      PerformanceTiming.instance()
-          .mark(PERF_SILVER_LAYOUT_START, uniqueId: hashCode);
+      PerformanceTiming.instance().mark(PERF_SILVER_LAYOUT_START, uniqueId: hashCode);
     }
 
     beforeLayout();
@@ -211,8 +204,7 @@ class RenderRecyclerLayout extends RenderLayoutBox
 
     if (kProfileMode) {
       DateTime childLayoutEnd = DateTime.now();
-      childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch -
-          childLayoutStart.microsecondsSinceEpoch);
+      childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch - childLayoutStart.microsecondsSinceEpoch);
     }
 
     size = getBoxSize(child.size);
@@ -220,10 +212,8 @@ class RenderRecyclerLayout extends RenderLayoutBox
     didLayout();
 
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_SILVER_LAYOUT_END,
-          uniqueId: hashCode,
-          startTime:
-              DateTime.now().microsecondsSinceEpoch - childLayoutDuration);
+      PerformanceTiming.instance()
+          .mark(PERF_SILVER_LAYOUT_END, uniqueId: hashCode, startTime: DateTime.now().microsecondsSinceEpoch - childLayoutDuration);
     }
   }
 
@@ -245,22 +235,16 @@ class RenderRecyclerLayout extends RenderLayoutBox
       context.paintChild(firstChild!, offset);
       if (kProfileMode) {
         DateTime childPaintEnd = DateTime.now();
-        childPaintDuration += (childPaintEnd.microsecondsSinceEpoch -
-            childPaintStart.microsecondsSinceEpoch);
+        childPaintDuration += (childPaintEnd.microsecondsSinceEpoch - childPaintStart.microsecondsSinceEpoch);
       }
     }
   }
 
   Offset getChildScrollOffset(RenderObject child, Offset offset) {
-    final RenderLayoutParentData? childParentData =
-        child.parentData as RenderLayoutParentData?;
-    bool isChildFixed = child is RenderBoxModel
-        ? child.renderStyle.position == CSSPositionType.fixed
-        : false;
+    final RenderLayoutParentData? childParentData = child.parentData as RenderLayoutParentData?;
+    bool isChildFixed = child is RenderBoxModel ? child.renderStyle.position == CSSPositionType.fixed : false;
     // Fixed elements always paint original offset
-    Offset scrollOffset = isChildFixed
-        ? childParentData!.offset
-        : childParentData!.offset + offset;
+    Offset scrollOffset = isChildFixed ? childParentData!.offset : childParentData!.offset + offset;
     return scrollOffset;
   }
 
@@ -336,8 +320,7 @@ class RenderRecyclerLayout extends RenderLayoutBox
     double? leadingScrollOffset,
     double? trailingScrollOffset,
   }) {
-    return _extrapolateMaxScrollOffset(firstIndex, lastIndex,
-        leadingScrollOffset, trailingScrollOffset, childCount)!;
+    return _extrapolateMaxScrollOffset(firstIndex, lastIndex, leadingScrollOffset, trailingScrollOffset, childCount)!;
   }
 
   static double? _extrapolateMaxScrollOffset(
@@ -352,8 +335,7 @@ class RenderRecyclerLayout extends RenderLayoutBox
     }
 
     final int reifiedCount = lastIndex! - firstIndex! + 1;
-    final double averageExtent =
-        (trailingScrollOffset! - leadingScrollOffset!) / reifiedCount;
+    final double averageExtent = (trailingScrollOffset! - leadingScrollOffset!) / reifiedCount;
     final int remainingCount = childCount - lastIndex - 1;
     return trailingScrollOffset + averageExtent * remainingCount;
   }

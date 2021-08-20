@@ -98,8 +98,7 @@ abstract class ElementsBindingObserver {
 }
 
 /// The glue between the elements layer and the Flutter engine.
-mixin ElementsBinding
-    on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, RendererBinding, SemanticsBinding {
+mixin ElementsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, RendererBinding, SemanticsBinding {
   @override
   void initInstances() {
     super.initInstances();
@@ -346,14 +345,7 @@ mixin ElementsBinding
 ///
 /// This is the glue that binds the framework to the Flutter engine.
 class ElementsFlutterBinding extends BindingBase
-    with
-        GestureBinding,
-        SchedulerBinding,
-        ServicesBinding,
-        PaintingBinding,
-        SemanticsBinding,
-        RendererBinding,
-        ElementsBinding {
+    with GestureBinding, SchedulerBinding, ServicesBinding, PaintingBinding, SemanticsBinding, RendererBinding, ElementsBinding {
   /// Returns an instance of the [ElementsBinding], creating and
   /// initializing it if necessary. If one is created, it will be a
   /// [ElementsFlutterBinding]. If one was previously initialized, then

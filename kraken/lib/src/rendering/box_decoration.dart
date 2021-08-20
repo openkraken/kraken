@@ -34,18 +34,15 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     markNeedsPaint();
   }
 
-  void paintBackground(
-      PaintingContext context, Offset offset, EdgeInsets? padding) {
+  void paintBackground(PaintingContext context, Offset offset, EdgeInsets? padding) {
     CSSBoxDecoration? decoration = renderStyle.decoration;
     DecorationPosition decorationPosition = renderStyle.decorationPosition;
     ImageConfiguration imageConfiguration = renderStyle.imageConfiguration;
 
     if (decoration == null) return;
-    _painter ??= BoxDecorationPainter(
-          decoration, padding, renderStyle, markNeedsPaint);
+    _painter ??= BoxDecorationPainter(decoration, padding, renderStyle, markNeedsPaint);
 
-    final ImageConfiguration filledConfiguration =
-        imageConfiguration.copyWith(size: size);
+    final ImageConfiguration filledConfiguration = imageConfiguration.copyWith(size: size);
     if (decorationPosition == DecorationPosition.background) {
       int? debugSaveCount;
       assert(() {
@@ -56,16 +53,12 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
       assert(() {
         if (debugSaveCount != context.canvas.getSaveCount()) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary(
-                '${decoration.runtimeType} painter had mismatching save and restore calls.'),
-            ErrorDescription(
-                'Before painting the decoration, the canvas save count was $debugSaveCount. '
+            ErrorSummary('${decoration.runtimeType} painter had mismatching save and restore calls.'),
+            ErrorDescription('Before painting the decoration, the canvas save count was $debugSaveCount. '
                 'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
                 'Every call to save() or saveLayer() must be matched by a call to restore().'),
-            DiagnosticsProperty<Decoration>('The decoration was', decoration,
-                style: DiagnosticsTreeStyle.errorProperty),
-            DiagnosticsProperty<BoxPainter>('The painter was', _painter,
-                style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<Decoration>('The decoration was', decoration, style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<BoxPainter>('The painter was', _painter, style: DiagnosticsTreeStyle.errorProperty),
           ]);
         }
         return true;
@@ -79,18 +72,15 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     }
   }
 
-  void paintDecoration(
-      PaintingContext context, Offset offset, EdgeInsets? padding) {
+  void paintDecoration(PaintingContext context, Offset offset, EdgeInsets? padding) {
     CSSBoxDecoration? decoration = renderStyle.decoration;
     DecorationPosition decorationPosition = renderStyle.decorationPosition;
     ImageConfiguration imageConfiguration = renderStyle.imageConfiguration;
 
     if (decoration == null) return;
-    _painter ??=
-        BoxDecorationPainter(decoration, padding, renderStyle, markNeedsPaint);
+    _painter ??= BoxDecorationPainter(decoration, padding, renderStyle, markNeedsPaint);
 
-    final ImageConfiguration filledConfiguration =
-        imageConfiguration.copyWith(size: size);
+    final ImageConfiguration filledConfiguration = imageConfiguration.copyWith(size: size);
     if (decorationPosition == DecorationPosition.background) {
       int? debugSaveCount;
       assert(() {
@@ -102,16 +92,12 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
       assert(() {
         if (debugSaveCount != context.canvas.getSaveCount()) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary(
-                '${decoration.runtimeType} painter had mismatching save and restore calls.'),
-            ErrorDescription(
-                'Before painting the decoration, the canvas save count was $debugSaveCount. '
+            ErrorSummary('${decoration.runtimeType} painter had mismatching save and restore calls.'),
+            ErrorDescription('Before painting the decoration, the canvas save count was $debugSaveCount. '
                 'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
                 'Every call to save() or saveLayer() must be matched by a call to restore().'),
-            DiagnosticsProperty<Decoration>('The decoration was', decoration,
-                style: DiagnosticsTreeStyle.errorProperty),
-            DiagnosticsProperty<BoxPainter>('The painter was', _painter,
-                style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<Decoration>('The decoration was', decoration, style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<BoxPainter>('The painter was', _painter, style: DiagnosticsTreeStyle.errorProperty),
           ]);
         }
         return true;
@@ -133,25 +119,13 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
   }
 
   void debugBoxDecorationProperties(DiagnosticPropertiesBuilder properties) {
-    if (renderStyle.borderEdge != null)
-      properties
-          .add(DiagnosticsProperty('borderEdge', renderStyle.borderEdge));
-    if (renderStyle.backgroundClip != null)
-      properties.add(
-          DiagnosticsProperty('backgroundClip', renderStyle.backgroundClip));
-    if (renderStyle.backgroundOrigin != null)
-      properties.add(DiagnosticsProperty(
-          'backgroundOrigin', renderStyle.backgroundOrigin));
+    if (renderStyle.borderEdge != null) properties.add(DiagnosticsProperty('borderEdge', renderStyle.borderEdge));
+    if (renderStyle.backgroundClip != null) properties.add(DiagnosticsProperty('backgroundClip', renderStyle.backgroundClip));
+    if (renderStyle.backgroundOrigin != null) properties.add(DiagnosticsProperty('backgroundOrigin', renderStyle.backgroundOrigin));
     BoxDecoration? _decoration = renderStyle.decoration;
-    if (_decoration != null && _decoration.borderRadius != null)
-      properties
-          .add(DiagnosticsProperty('borderRadius', _decoration.borderRadius));
-    if (_decoration != null && _decoration.image != null)
-      properties.add(DiagnosticsProperty('backgroundImage', _decoration.image));
-    if (_decoration != null && _decoration.boxShadow != null)
-      properties.add(DiagnosticsProperty('boxShadow', _decoration.boxShadow));
-    if (_decoration != null && _decoration.gradient != null)
-      properties.add(DiagnosticsProperty('gradient', _decoration.gradient));
+    if (_decoration != null && _decoration.borderRadius != null) properties.add(DiagnosticsProperty('borderRadius', _decoration.borderRadius));
+    if (_decoration != null && _decoration.image != null) properties.add(DiagnosticsProperty('backgroundImage', _decoration.image));
+    if (_decoration != null && _decoration.boxShadow != null) properties.add(DiagnosticsProperty('boxShadow', _decoration.boxShadow));
+    if (_decoration != null && _decoration.gradient != null) properties.add(DiagnosticsProperty('gradient', _decoration.gradient));
   }
 }
-

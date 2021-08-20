@@ -142,6 +142,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
     if (index + 1 > parentNode!.childNodes.length - 1) return null;
     return parentNode!.childNodes[index + 1];
   }
+
   // Is child renderObject attached.
   bool get isRendererAttached => renderer != null && renderer!.attached;
 
@@ -157,7 +158,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
     super.dispose();
 
     parentNode = null;
-    for (int i = 0; i < childNodes.length; i ++) {
+    for (int i = 0; i < childNodes.length; i++) {
       childNodes[i].parentNode = null;
     }
     childNodes.clear();

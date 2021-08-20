@@ -386,8 +386,7 @@ mixin ElementInspectorService {
   String? toId(Object? object, String groupName) {
     if (object == null) return null;
 
-    final Set<_InspectorReferenceData> group =
-        _groups.putIfAbsent(groupName, () => Set<_InspectorReferenceData>.identity());
+    final Set<_InspectorReferenceData> group = _groups.putIfAbsent(groupName, () => Set<_InspectorReferenceData>.identity());
     String? id = _objectToId[object];
     _InspectorReferenceData? referenceData;
     if (id == null) {
@@ -431,8 +430,7 @@ mixin ElementInspectorService {
 
     final _InspectorReferenceData? referenceData = _idToReferenceData[id];
     if (referenceData == null) throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id does not exist')]);
-    if (_groups[groupName]?.remove(referenceData) != true)
-      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id is not in group')]);
+    if (_groups[groupName]?.remove(referenceData) != true) throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id is not in group')]);
     _decrementReferenceCount(referenceData);
   }
 
@@ -481,9 +479,9 @@ mixin ElementInspectorService {
   }
 
   Map<String, Object?>? _nodeToJson(
-      DiagnosticsNode? node,
-      InspectorSerializationDelegate delegate,
-      ) {
+    DiagnosticsNode? node,
+    InspectorSerializationDelegate delegate,
+  ) {
     return node?.toJsonMap(delegate);
   }
 
@@ -530,8 +528,8 @@ mixin ElementInspectorService {
 
   List<Object> _getProperties(String? diagnosticsNodeId, String? groupName) {
     final DiagnosticsNode? node = toObject(diagnosticsNodeId) as DiagnosticsNode;
-    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getProperties(),
-        InspectorSerializationDelegate(groupName: groupName, service: this),
+    return _nodesToJson(
+        node == null ? const <DiagnosticsNode>[] : node.getProperties(), InspectorSerializationDelegate(groupName: groupName, service: this),
         parent: node);
   }
 
@@ -565,8 +563,7 @@ mixin ElementInspectorService {
 
   List<Object> _getChildrenSummaryTree(String? diagnosticsNodeId, String? groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId) as DiagnosticsNode;
-    final InspectorSerializationDelegate delegate =
-        InspectorSerializationDelegate(groupName: groupName, summaryTree: true, service: this);
+    final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(groupName: groupName, summaryTree: true, service: this);
     return _nodesToJson(_getChildrenFiltered(node, delegate), delegate, parent: node);
   }
 
@@ -612,10 +609,7 @@ mixin ElementInspectorService {
   ) {
     final List<DiagnosticsNode> children = <DiagnosticsNode>[
       for (DiagnosticsNode child in nodes)
-        if (!delegate.summaryTree || _shouldShowInSummaryTree(child))
-          child
-        else
-          ..._getChildrenFiltered(child, delegate),
+        if (!delegate.summaryTree || _shouldShowInSummaryTree(child)) child else ..._getChildrenFiltered(child, delegate),
     ];
     return children;
   }
@@ -686,7 +680,8 @@ mixin ElementInspectorService {
   Map<String, Object?>? _getSelectedRenderObject(String? previousSelectionId, String groupName) {
     final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
     final RenderObject? current = selection.current;
-    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
+    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(),
+        InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// This method is called by [WidgetBinding.performReassemble] to flush caches
@@ -870,9 +865,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
     // that also exist in the summary tree. This ensures that every time
     // you expand a node in the details tree, you expand the entire subtree
     // up until you reach the next nodes shared with the summary tree.
-    return summaryTree || subtreeDepth > 1 || service._shouldShowInSummaryTree(node)
-        ? copyWith(subtreeDepth: subtreeDepth - 1)
-        : this;
+    return summaryTree || subtreeDepth > 1 || service._shouldShowInSummaryTree(node) ? copyWith(subtreeDepth: subtreeDepth - 1) : this;
   }
 
   @override
@@ -890,9 +883,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
 
   @override
   List<DiagnosticsNode> truncateNodesList(List<DiagnosticsNode> nodes, DiagnosticsNode? owner) {
-    if (maxDescendentsTruncatableNode >= 0 &&
-        owner?.allowTruncate == true &&
-        nodes.length > maxDescendentsTruncatableNode) {
+    if (maxDescendentsTruncatableNode >= 0 && owner?.allowTruncate == true && nodes.length > maxDescendentsTruncatableNode) {
       nodes = service._truncateNodes(nodes, maxDescendentsTruncatableNode);
     }
     return nodes;

@@ -55,8 +55,7 @@ class DeviceInfoModule extends BaseModule {
   DeviceInfoModule(ModuleManager? moduleManager) : super(moduleManager);
 
   @override
-  void dispose() {
-  }
+  void dispose() {}
 
   @override
   String invoke(String method, dynamic params, InvokeModuleCallback callback) {

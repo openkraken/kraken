@@ -7,7 +7,7 @@ import 'dart:io';
 
 class _HttpHeaders implements HttpHeaders {
   final Map<String, dynamic> _headers = <String, String>{};
-  _HttpHeaders({ Map<String, String>? initialHeaders }) {
+  _HttpHeaders({Map<String, String>? initialHeaders}) {
     if (initialHeaders != null) {
       _headers.addAll(initialHeaders);
     }
@@ -120,7 +120,6 @@ class _HttpHeaders implements HttpHeaders {
     }
   }
 
-
   @override
   bool persistentConnection = false;
 
@@ -181,10 +180,7 @@ class _HttpHeaders implements HttpHeaders {
   String toString() {
     StringBuffer sb = StringBuffer();
     _headers.forEach((String name, dynamic value) {
-      sb..write(name)
-        ..write(': ')
-        ..write(value)
-        ..write('\n');
+      sb..write(name)..write(': ')..write(value)..write('\n');
     });
     return sb.toString();
   }
@@ -210,7 +206,8 @@ class HttpClientStreamResponse extends Stream<List<int>> implements HttpClientRe
   Map<String, String> responseHeaders;
   _HttpHeaders? _httpHeaders;
 
-  HttpClientStreamResponse(this.data, {
+  HttpClientStreamResponse(
+    this.data, {
     this.statusCode = HttpStatus.ok,
     this.reasonPhrase = '',
     this.responseHeaders = const {},
@@ -254,7 +251,7 @@ class HttpClientStreamResponse extends Stream<List<int>> implements HttpClientRe
   List<RedirectInfo> get redirects => [];
 
   @override
-  StreamSubscription<List<int>> listen(void Function(List<int> event)? onData, { Function? onError, void Function()? onDone, bool? cancelOnError }) {
+  StreamSubscription<List<int>> listen(void Function(List<int> event)? onData, {Function? onError, void Function()? onDone, bool? cancelOnError}) {
     return data.listen(onData, onDone: onDone, cancelOnError: cancelOnError);
   }
 }

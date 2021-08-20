@@ -14,8 +14,7 @@ typedef GestureCallback = void Function(Event);
 
 class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a tap gesture recognizer.
-  ClickGestureRecognizer({ Object? debugOwner })
-      : super(deadline: kPressTimeout , debugOwner: debugOwner);
+  ClickGestureRecognizer({Object? debugOwner}) : super(deadline: kPressTimeout, debugOwner: debugOwner);
 
   bool _sentTapDown = false;
   bool _wonArenaForPrimaryPointer = false;
@@ -45,9 +44,8 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   /// If this recognizer doesn't win the arena, [handleTapCancel] is called
   /// instead.
-  void handleTapUp( PointerDownEvent? down, PointerUpEvent? up ) {
-    if (onClick != null)
-      onClick!(EVENT_CLICK, down: down, up: up);
+  void handleTapUp(PointerDownEvent? down, PointerUpEvent? up) {
+    if (onClick != null) onClick!(EVENT_CLICK, down: down, up: up);
   }
 
   MouseEventListener? onClick;

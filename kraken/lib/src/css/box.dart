@@ -1,5 +1,3 @@
-
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -23,8 +21,10 @@ class CSSBackgroundPosition {
     this.length,
     this.percentage,
   });
+
   /// Absolute position to image container when length type is set.
   double? length;
+
   /// Relative position to image container when keyword or percentage type is set.
   double? percentage;
 }
@@ -47,20 +47,11 @@ class CSSBackgroundSize {
   static const String COVER = 'cover';
   static const String AUTO = 'auto';
 
-  static dynamic _parseLengthPercentageValue(String value, {
-    Size? viewportSize,
-    double? rootFontSize,
-    double? fontSize
-  }) {
+  static dynamic _parseLengthPercentageValue(String value, {Size? viewportSize, double? rootFontSize, double? fontSize}) {
     if (CSSLength.isLength(value)) {
-      double? length = CSSLength.toDisplayPortValue(
-        value,
-        viewportSize: viewportSize,
-        rootFontSize: rootFontSize,
-        fontSize: fontSize
-      );
+      double? length = CSSLength.toDisplayPortValue(value, viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize);
       // Negative value is invalid.
-      return length != null && length >=0 ? length : null;
+      return length != null && length >= 0 ? length : null;
     } else if (CSSLength.isPercentage(value) || value == AUTO) {
       // Percentage value should be parsed on the paint phase cause
       // it depends on the final layouted size of background's container.
@@ -69,14 +60,11 @@ class CSSBackgroundSize {
     return null;
   }
 
-  static CSSBackgroundSize _parseSizeValue(String value, {
-    Size? viewportSize,
-    double? rootFontSize,
-    double? fontSize
-  }) {
+  static CSSBackgroundSize _parseSizeValue(String value, {Size? viewportSize, double? rootFontSize, double? fontSize}) {
     List<String> values = value.split(_spaceRegExp);
     if (values.length == 1) {
-      dynamic parsedValue = _parseLengthPercentageValue(value,
+      dynamic parsedValue = _parseLengthPercentageValue(
+        value,
         viewportSize: viewportSize,
         rootFontSize: rootFontSize,
         fontSize: fontSize,
@@ -88,12 +76,14 @@ class CSSBackgroundSize {
         );
       }
     } else if (values.length == 2) {
-      dynamic parsedWidth = _parseLengthPercentageValue(values[0],
+      dynamic parsedWidth = _parseLengthPercentageValue(
+        values[0],
         viewportSize: viewportSize,
         rootFontSize: rootFontSize,
         fontSize: fontSize,
       );
-      dynamic parsedHeight = _parseLengthPercentageValue(values[1],
+      dynamic parsedHeight = _parseLengthPercentageValue(
+        values[1],
         viewportSize: viewportSize,
         rootFontSize: rootFontSize,
         fontSize: fontSize,
@@ -109,31 +99,20 @@ class CSSBackgroundSize {
       }
     }
 
-    return CSSBackgroundSize(
-      fit: BoxFit.none
-    );
+    return CSSBackgroundSize(fit: BoxFit.none);
   }
 
-  static CSSBackgroundSize parseValue(String value, {
-    Size? viewportSize,
-    double? rootFontSize,
-    double? fontSize
-  }) {
+  static CSSBackgroundSize parseValue(String value, {Size? viewportSize, double? rootFontSize, double? fontSize}) {
     switch (value) {
       case CONTAIN:
-        return CSSBackgroundSize(
-          fit: BoxFit.contain
-        );
+        return CSSBackgroundSize(fit: BoxFit.contain);
       case COVER:
-        return CSSBackgroundSize(
-          fit: BoxFit.cover
-        );
+        return CSSBackgroundSize(fit: BoxFit.cover);
       case AUTO:
-        return CSSBackgroundSize(
-          fit: BoxFit.none
-        );
+        return CSSBackgroundSize(fit: BoxFit.none);
       default:
-        return _parseSizeValue(value,
+        return _parseSizeValue(
+          value,
           viewportSize: viewportSize,
           rootFontSize: rootFontSize,
           fontSize: fontSize,
@@ -148,7 +127,6 @@ class CSSBackgroundSize {
 /// - background
 /// - border
 mixin CSSBoxMixin on RenderStyleBase {
-
   /// Background-clip
   BackgroundBoundary? get backgroundClip => _backgroundClip;
   BackgroundBoundary? _backgroundClip;
@@ -266,12 +244,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     // If has border, render padding should subtracting the edge of the border
     if (value.border != null) {
       Border border = value.border as Border;
-      borderEdge = EdgeInsets.fromLTRB(
-        border.left.width,
-        border.top.width,
-        border.right.width,
-        border.bottom.width
-      );
+      borderEdge = EdgeInsets.fromLTRB(border.left.width, border.top.width, border.right.width, border.bottom.width);
     }
 
     renderBoxModel!.markNeedsPaint();
@@ -282,8 +255,7 @@ mixin CSSBoxMixin on RenderStyleBase {
   ImageConfiguration imageConfiguration = ImageConfiguration.empty;
 
   Size wrapBorderSize(Size innerSize) {
-    return Size(borderLeft + innerSize.width + borderRight,
-      borderTop + innerSize.height + borderBottom);
+    return Size(borderLeft + innerSize.width + borderRight, borderTop + innerSize.height + borderBottom);
   }
 
   BoxConstraints deflateBorderConstraints(BoxConstraints constraints) {
@@ -293,11 +265,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     return constraints;
   }
 
-  void updateBox(String property, String present, int contextId, {
-    Size? viewportSize,
-    double? rootFontSize,
-    double? fontSize
-  }) {
+  void updateBox(String property, String present, int contextId, {Size? viewportSize, double? rootFontSize, double? fontSize}) {
     RenderStyle renderStyle = this as RenderStyle;
 
     if (property == BACKGROUND_IMAGE) {
@@ -334,9 +302,9 @@ mixin CSSBoxMixin on RenderStyleBase {
       } else if (property == BOX_SHADOW) {
         updateBoxShadow(property);
       } else if (property == COLOR) {
-       updateBackgroundColor();
-       updateBorder(property);
-       updateBoxShadow(property);
+        updateBackgroundColor();
+        updateBorder(property);
+        updateBoxShadow(property);
       }
     } else {
       CSSBoxDecoration? cssBoxDecoration = getCSSBoxDecoration();
@@ -361,8 +329,7 @@ mixin CSSBoxMixin on RenderStyleBase {
           borderRadius: prevBoxDecoration.borderRadius,
           gradient: prevBoxDecoration.gradient,
           backgroundBlendMode: prevBoxDecoration.backgroundBlendMode,
-          shape: prevBoxDecoration.shape
-      );
+          shape: prevBoxDecoration.shape);
     } else {
       decoration = CSSBoxDecoration(boxShadow: getBoxShadow());
     }
@@ -430,7 +397,6 @@ mixin CSSBoxMixin on RenderStyleBase {
     } else {
       decoration = updateBoxDecoration;
     }
-
   }
 
   static final Map _borderRadiusMapping = {
@@ -456,7 +422,8 @@ mixin CSSBoxMixin on RenderStyleBase {
     if (index != null) {
       Radius? newRadius = CSSBorderRadius.getRadius(present, renderStyle);
       BorderRadius? borderRadius = decoration!.borderRadius as BorderRadius?;
-      decoration = decoration!.clone(borderRadius: BorderRadius.only(
+      decoration = decoration!.clone(
+          borderRadius: BorderRadius.only(
         topLeft: index == 0 ? newRadius! : borderRadius?.topLeft ?? Radius.zero,
         topRight: index == 1 ? newRadius! : borderRadius?.topRight ?? Radius.zero,
         bottomRight: index == 2 ? newRadius! : borderRadius?.bottomRight ?? Radius.zero,
@@ -469,8 +436,8 @@ mixin CSSBoxMixin on RenderStyleBase {
     Border? border = decoration!.border as Border?;
     RenderStyle renderStyle = this as RenderStyle;
 
-    bool isBorderWidthChange = property == BORDER_TOP_WIDTH || property == BORDER_RIGHT_WIDTH ||
-      property == BORDER_BOTTOM_WIDTH || property == BORDER_LEFT_WIDTH;
+    bool isBorderWidthChange =
+        property == BORDER_TOP_WIDTH || property == BORDER_RIGHT_WIDTH || property == BORDER_BOTTOM_WIDTH || property == BORDER_LEFT_WIDTH;
 
     // Only border width change will affect layout
     if (isBorderWidthChange) {
@@ -478,10 +445,10 @@ mixin CSSBoxMixin on RenderStyleBase {
     }
 
     if (border != null) {
-      BorderSide? left =  border.left;
-      BorderSide? top =  border.top;
-      BorderSide? right =  border.right;
-      BorderSide? bottom =  border.bottom;
+      BorderSide? left = border.left;
+      BorderSide? top = border.top;
+      BorderSide? right = border.right;
+      BorderSide? bottom = border.bottom;
       bool updateAll = false;
 
       if (property.contains(BORDER_LEFT)) {
@@ -497,7 +464,8 @@ mixin CSSBoxMixin on RenderStyleBase {
       }
 
       if (!updateAll) {
-        decoration = decoration!.clone(border: Border(
+        decoration = decoration!.clone(
+            border: Border(
           left: left ?? BorderSide.none,
           top: top ?? BorderSide.none,
           right: right ?? BorderSide.none,
@@ -510,7 +478,8 @@ mixin CSSBoxMixin on RenderStyleBase {
     List<BorderSide>? borderSides = _getBorderSides(borderColor, borderWidth);
 
     if (borderSides != null) {
-      decoration = decoration!.clone(border: Border(
+      decoration = decoration!.clone(
+          border: Border(
         left: borderSides[0],
         top: borderSides[1],
         right: borderSides[2],
@@ -526,16 +495,11 @@ mixin CSSBoxMixin on RenderStyleBase {
     BorderSide? rightSide = CSSBorderSide.getBorderSide(renderStyle, CSSBorderSide.RIGHT, borderColor, borderWidth);
     BorderSide? bottomSide = CSSBorderSide.getBorderSide(renderStyle, CSSBorderSide.BOTTOM, borderColor, borderWidth);
 
-    bool hasBorder = leftSide != null ||
-        topSide != null ||
-        rightSide != null ||
-        bottomSide != null;
+    bool hasBorder = leftSide != null || topSide != null || rightSide != null || bottomSide != null;
 
-    return hasBorder ? [
-      leftSide ?? CSSBorderSide.none,
-      topSide ?? CSSBorderSide.none,
-      rightSide ?? CSSBorderSide.none,
-      bottomSide ?? CSSBorderSide.none] : null;
+    return hasBorder
+        ? [leftSide ?? CSSBorderSide.none, topSide ?? CSSBorderSide.none, rightSide ?? CSSBorderSide.none, bottomSide ?? CSSBorderSide.none]
+        : null;
   }
 
   List<Radius>? _getBorderRadius() {
@@ -546,17 +510,16 @@ mixin CSSBoxMixin on RenderStyleBase {
     Radius? bottomRightRadius = CSSBorderRadius.getRadius(style[BORDER_BOTTOM_RIGHT_RADIUS], renderStyle);
     Radius? bottomLeftRadius = CSSBorderRadius.getRadius(style[BORDER_BOTTOM_LEFT_RADIUS], renderStyle);
 
-    bool hasBorderRadius = topLeftRadius != null ||
-        topRightRadius != null ||
-        bottomRightRadius != null ||
-        bottomLeftRadius != null;
+    bool hasBorderRadius = topLeftRadius != null || topRightRadius != null || bottomRightRadius != null || bottomLeftRadius != null;
 
-    return hasBorderRadius ? [
-      topLeftRadius ?? CSSBorderRadius.none,
-      topRightRadius ?? CSSBorderRadius.none,
-      bottomRightRadius ?? CSSBorderRadius.none,
-      bottomLeftRadius ?? CSSBorderRadius.none
-    ] : null;
+    return hasBorderRadius
+        ? [
+            topLeftRadius ?? CSSBorderRadius.none,
+            topRightRadius ?? CSSBorderRadius.none,
+            bottomRightRadius ?? CSSBorderRadius.none,
+            bottomLeftRadius ?? CSSBorderRadius.none
+          ]
+        : null;
   }
 
   /// Shorted border property:
@@ -586,12 +549,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     List<CSSBoxShadow>? boxShadow = getBoxShadow();
     List<BorderSide>? borderSides = _getBorderSides();
 
-    if (bgColor == null &&
-        decorationImage == null &&
-        gradient == null &&
-        borderSides == null &&
-        radius == null &&
-        boxShadow == null) {
+    if (bgColor == null && decorationImage == null && gradient == null && borderSides == null && radius == null && boxShadow == null) {
       return null;
     }
 
@@ -616,13 +574,7 @@ mixin CSSBoxMixin on RenderStyleBase {
       );
     }
     return CSSBoxDecoration(
-        color: bgColor,
-        image: decorationImage,
-        border: border,
-        borderRadius: borderRadius,
-        boxShadow: boxShadow,
-        gradient: gradient
-    );
+        color: bgColor, image: decorationImage, border: border, borderRadius: borderRadius, boxShadow: boxShadow, gradient: gradient);
   }
 
   List<CSSBoxShadow>? getBoxShadow() {
@@ -646,30 +598,14 @@ mixin CSSBoxMixin on RenderStyleBase {
             colorDefinition = style.getCurrentColor();
           }
           Color? color = CSSColor.parseColor(colorDefinition);
-          double offsetX = CSSLength.toDisplayPortValue(
-            shadowDefinitions[1],
-            viewportSize: viewportSize,
-            rootFontSize: rootFontSize,
-            fontSize: fontSize
-          ) ?? 0;
-          double offsetY = CSSLength.toDisplayPortValue(
-            shadowDefinitions[2],
-            viewportSize: viewportSize,
-            rootFontSize: rootFontSize,
-            fontSize: fontSize
-          ) ?? 0;
-          double blurRadius = CSSLength.toDisplayPortValue(
-            shadowDefinitions[3],
-            viewportSize: viewportSize,
-            rootFontSize: rootFontSize,
-            fontSize: fontSize
-          ) ?? 0;
-          double spreadRadius = CSSLength.toDisplayPortValue(
-            shadowDefinitions[4],
-            viewportSize: viewportSize,
-            rootFontSize: rootFontSize,
-            fontSize: fontSize
-          ) ?? 0;
+          double offsetX =
+              CSSLength.toDisplayPortValue(shadowDefinitions[1], viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize) ?? 0;
+          double offsetY =
+              CSSLength.toDisplayPortValue(shadowDefinitions[2], viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize) ?? 0;
+          double blurRadius =
+              CSSLength.toDisplayPortValue(shadowDefinitions[3], viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize) ?? 0;
+          double spreadRadius =
+              CSSLength.toDisplayPortValue(shadowDefinitions[4], viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize) ?? 0;
           bool inset = shadowDefinitions[5] == INSET;
 
           if (color != null) {
@@ -743,12 +679,7 @@ class CSSBorderSide {
         borderWidth = 5;
         break;
       default:
-        borderWidth = CSSLength.toDisplayPortValue(
-          input,
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-        );
+        borderWidth = CSSLength.toDisplayPortValue(input, viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize);
     }
     return borderWidth;
   }
@@ -785,11 +716,7 @@ class CSSBorderSide {
     if (borderStyle == BorderStyle.none || width == 0.0) {
       return null;
     } else {
-      return BorderSide(
-        color: color!,
-        width: width!,
-        style: borderStyle!
-      );
+      return BorderSide(color: color!, width: width!, style: borderStyle!);
     }
   }
 }
@@ -807,26 +734,11 @@ class CSSBorderRadius {
       // border-top-left-radius: horizontal vertical
       List<String> values = radius.split(_spaceRegExp);
       if (values.length == 1) {
-        double? circular = CSSLength.toDisplayPortValue(
-          values[0],
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-        );
+        double? circular = CSSLength.toDisplayPortValue(values[0], viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize);
         if (circular != null) return Radius.circular(circular);
       } else if (values.length == 2) {
-        double? x = CSSLength.toDisplayPortValue(
-          values[0],
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-        );
-        double? y = CSSLength.toDisplayPortValue(
-          values[1],
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-        );
+        double? x = CSSLength.toDisplayPortValue(values[0], viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize);
+        double? y = CSSLength.toDisplayPortValue(values[1], viewportSize: viewportSize, rootFontSize: rootFontSize, fontSize: fontSize);
         if (x != null && y != null) return Radius.elliptical(x, y);
       }
     }
@@ -869,11 +781,11 @@ class CSSBoxShadow extends BoxShadow {
     _inset = inset;
   }
 
-
   bool _inset = false;
   bool get inset {
     return _inset;
   }
+
   set inset(bool value) {
     if (_inset == value) return;
     _inset = value;
@@ -893,8 +805,14 @@ class CSSBoxDecoration extends BoxDecoration {
     this.gradient,
     this.backgroundBlendMode,
     this.shape = BoxShape.rectangle,
-  }): super(color: color, image: image, border: border, borderRadius: borderRadius,
-    gradient: gradient, backgroundBlendMode: backgroundBlendMode, shape: shape);
+  }) : super(
+            color: color,
+            image: image,
+            border: border,
+            borderRadius: borderRadius,
+            gradient: gradient,
+            backgroundBlendMode: backgroundBlendMode,
+            shape: shape);
 
   @override
   final Color? color;
@@ -942,4 +860,3 @@ class CSSBoxDecoration extends BoxDecoration {
     );
   }
 }
-

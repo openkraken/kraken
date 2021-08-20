@@ -34,7 +34,6 @@ _DefaultObjectElementClient _DefaultObjectElementClientFactory(ObjectElementHost
 
 ///https://developer.mozilla.org/en-US/docs/Web/HTML/Element/object
 class ObjectElement extends Element implements ObjectElementHost {
-
   late ObjectElementClientFactory _objectElementClientFactory;
   late ObjectElementClient _objectElementClient;
 
@@ -185,18 +184,14 @@ class _DefaultObjectElementClient implements ObjectElementClient {
   }
 
   @override
-  void didAttachRenderer() {
-  }
+  void didAttachRenderer() {}
 
   @override
-  void didDetachRenderer() {
-  }
+  void didDetachRenderer() {}
 
   @override
-  void willAttachRenderer() {
-  }
+  void willAttachRenderer() {}
 
   @override
-  void willDetachRenderer() {
-  }
+  void willDetachRenderer() {}
 }
