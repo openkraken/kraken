@@ -15,7 +15,7 @@ class CSSUrl {
   static ImageProvider? parseUrl(String rawInput, { cache = 'auto', int? contextId }) {
     // support input string enclosed in quotation marks
     if ((rawInput.startsWith('\'') && rawInput.endsWith('\'')) ||
-        (rawInput.startsWith('\"') && rawInput.endsWith('\"'))) {
+        (rawInput.startsWith('"') && rawInput.endsWith('"'))) {
       rawInput = rawInput.substring(1, rawInput.length - 1);
     }
 

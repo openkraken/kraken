@@ -147,10 +147,8 @@ class ProxyHttpClientRequest extends HttpClientRequest {
       }
 
       // After this, response should not be null.
-      if (response == null) {
-        response = await _requestQueue.add(() async => cacheController
+      response ??= await _requestQueue.add(() async => cacheController
             .interceptResponse(request, await request.close(), cacheObject));
-      }
 
       // Step 5: Lifecycle of afterResponse.
       if (clientInterceptor != null) {
@@ -196,7 +194,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   }
 
   @override
-  void writeAll(Iterable objects, [String separator = ""]) {
+  void writeAll(Iterable objects, [String separator = '']) {
     _clientRequest.writeAll(objects, separator);
   }
 
@@ -206,7 +204,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   }
 
   @override
-  void writeln([Object? object = ""]) {
+  void writeln([Object? object = '']) {
     _clientRequest.writeln(object);
   }
 }

@@ -160,7 +160,7 @@ class NetworkAssetBundle extends AssetBundle {
   /// The result is not cached. The parser is run each time the resource is
   /// fetched.
   @override
-  Future<T> loadStructuredData<T>(String key, Future<T> parser(String value)) async {
+  Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) async {
     return parser(await loadString(key));
   }
 

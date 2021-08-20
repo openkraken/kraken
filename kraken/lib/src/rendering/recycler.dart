@@ -49,7 +49,7 @@ class RenderRecyclerLayout extends RenderLayoutBox
 
   // Children renderBox list of element when element is created,
   // not correspond to the real renderObject.
-  List<RenderBox> _children = List.empty(growable: true);
+  final List<RenderBox> _children = List.empty(growable: true);
 
   @override
   void add(RenderBox? child) {
@@ -101,6 +101,7 @@ class RenderRecyclerLayout extends RenderLayoutBox
     _children.clear();
   }
 
+  @override
   void move(RenderBox child, {RenderBox? after}) {
     assert(_renderSliverList != null);
     remove(child);
@@ -320,9 +321,11 @@ class RenderRecyclerLayout extends RenderLayoutBox
 
   /// Called at the beginning of layout to indicate that layout is about to
   /// occur.
+  @override
   void didStartLayout() {}
 
   /// Called at the end of layout to indicate that layout is now complete.
+  @override
   void didFinishLayout() {}
 
   @override

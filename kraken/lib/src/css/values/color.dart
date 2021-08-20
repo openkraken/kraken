@@ -197,7 +197,7 @@ class CSSColor {
     String red = color.red.toRadixString(16).padLeft(2);
     String green = color.green.toRadixString(16).padLeft(2);
     String blue = color.blue.toRadixString(16).padLeft(2);
-    return '#${red}${green}${blue}';
+    return '#$red$green$blue';
   }
 
   static Color tranformToDarkColor(Color color) {
@@ -369,14 +369,12 @@ class RgbColor {
   final num g;
   final num b;
 
-  /**
-   * Creates a [Color] using a vector describing its red, green, and blue
-   * values.
-   *
-   * The value for [r], [g], and [b] should be in the range between 0 and
-   * 255 (inclusive).  Values above this range will be assumed to be a value
-   * of 255, and values below this range will be assumed to be a value of 0.
-   */
+  /// Creates a [Color] using a vector describing its red, green, and blue
+  /// values.
+  ///
+  /// The value for [r], [g], and [b] should be in the range between 0 and
+  /// 255 (inclusive).  Values above this range will be assumed to be a value
+  /// of 255, and values below this range will be assumed to be a value of 0.
   const RgbColor(this.r, this.g, this.b);
 
   num _toLab(num value, num referenceWhiteValue) {
