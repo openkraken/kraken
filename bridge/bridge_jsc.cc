@@ -167,6 +167,19 @@ void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType
   }
 }
 
+// set url.
+void JSBridge::setHref(const char *url) {
+    if (!m_context->isValid()) return;
+
+    JSStringHolder windowKeyHolder = JSStringHolder(m_context.get(), "window");
+    JSValueRef windowValue = JSObjectGetProperty(m_context->context(), m_context->global(), windowKeyHolder.getString(), nullptr);
+    JSObjectRef windowObject = JSValueToObject(m_context->context(), windowValue, nullptr);
+
+    auto window = static_cast<WindowInstance *>(JSObjectGetPrivate(windowObject));
+    HistoryItem history = { url, nullptr };
+    window->history_->addItem(history);
+}
+
 // parse html.
 void JSBridge::parseHTML(const NativeString *script, const char *url) {
   if (!m_context->isValid()) return;

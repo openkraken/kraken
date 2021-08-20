@@ -595,7 +595,12 @@ class KrakenController {
 
   String get href => _href;
 
-  set href(String value) => _href = value;
+  set href(String value) {
+    if (value != _href) {
+      _href = value;
+      setHref(_view.contextId, value);
+    }
+  }
 
   // reload current kraken view.
   Future<void> reload() async {
@@ -687,9 +692,10 @@ class KrakenController {
       }
     } else {
       _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent, contextId: view.contextId);
-      KrakenController controller = KrakenController.getControllerOfJSContextId(view.contextId)!;
-      controller.href = url;
     }
+
+    KrakenController controller = KrakenController.getControllerOfJSContextId(view.contextId)!;
+    controller.href = url;
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_LOAD_END);

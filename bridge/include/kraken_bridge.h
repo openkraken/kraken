@@ -98,6 +98,8 @@ void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFi
 KRAKEN_EXPORT_C
 void parseHTML(int32_t contextId, NativeString *code, const char *bundleFilename);
 KRAKEN_EXPORT_C
+void setHref(int32_t contextId, const char *href);
+KRAKEN_EXPORT_C
 void reloadJsContext(int32_t contextId);
 KRAKEN_EXPORT_C
 void invokeModuleEvent(int32_t contextId, NativeString *module, const char *eventType, void *event,

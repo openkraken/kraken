@@ -17,6 +17,7 @@ WindowInstance::WindowInstance(JSWindow *window)
   // https://developer.mozilla.org/zh-CN/docs/Web/API/Window/self
   // window.self should be window in kraken.
   std::string self = "self";
+
   setProperty(self, this->object, nullptr);
 
   getDartMethod()->initWindow(window->contextId, nativeWindow);

@@ -62,9 +62,10 @@ public:
 
   NativeWindow *nativeWindow;
 
+  JSHistory *history_;
+
 private:
   JSLocation *location_;
-  JSHistory *history_;
 };
 
 using Window_Open = void (*)(NativeWindow *nativeWindow, NativeString *url);
