@@ -8,8 +8,6 @@
 
 #ifdef KRAKEN_JSC_ENGINE
 #include "bindings/jsc/js_context_internal.h"
-#elif KRAKEN_QUICK_JS_ENGINE
-#include "bindings/qjs/js_context.h"
 #endif
 
 #include <atomic>
@@ -19,6 +17,7 @@
 
 namespace kraken::foundation {
 
+#if KRAKEN_JSC_ENGINE
 /// An global standalone BridgeCallback register and collector used to register an callback which will call back from
 /// outside of bridge.
 /// This class can auto recycle callback context's memory when bridge are willing to unmount.
@@ -29,7 +28,6 @@ public:
     contextList.clear();
   }
 
-#if KRAKEN_JSC_ENGINE
   struct Context {
     Context(kraken::binding::jsc::JSContext &context, JSValueRef callback, JSValueRef *exception)
       : m_context(context), m_callback(callback) {
@@ -52,29 +50,7 @@ public:
     JSValueRef m_callback{nullptr};
     JSValueRef m_secondaryCallback{nullptr};
   };
-#elif KRAKEN_QUICK_JS_ENGINE
-  struct Context {
-    Context(kraken::binding::qjs::JSContext &context, JSValue callback)
-      : m_context(context), m_callback(callback) {
-      JS_DupValue(context.ctx(), callback);
-    };
-    Context(kraken::binding::qjs::JSContext &context, JSValue callback, JSValue secondaryCallback)
-      : m_context(context), m_callback(callback), m_secondaryCallback(secondaryCallback) {
-      JS_DupValue(context.ctx(), callback);
-      JS_DupValue(context.ctx(), secondaryCallback);
-    };
-    ~Context() {
-      JS_FreeValue(m_context.ctx(), m_callback);
-      if (!JS_IsNull(m_secondaryCallback)) {
-        JS_FreeValue(m_context.ctx(), m_secondaryCallback);
-      }
-    }
-    kraken::binding::qjs::JSContext &m_context;
-    int32_t m_func_count{0};
-    JSValue m_callback{JS_NULL};
-    JSValue m_secondaryCallback{JS_NULL};
-  };
-#endif
+
 
   // An wrapper to register an callback outside of bridge and wait for callback to bridge.
   template <typename T>
@@ -102,10 +78,12 @@ public:
     }
   }
 
+
 private:
   std::vector<std::unique_ptr<Context>> contextList;
 };
 
+#endif
 } // namespace kraken::foundation
 
 #endif // KRAKENBRIDGE_BRIDGE_CALLBACK_H

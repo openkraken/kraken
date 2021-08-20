@@ -8,7 +8,6 @@
 #include "dart_methods.h"
 #include "text_node.h"
 #include "bindings/qjs/bom/blob.h"
-#include "foundation/bridge_callback.h"
 
 namespace kraken::binding::qjs {
 

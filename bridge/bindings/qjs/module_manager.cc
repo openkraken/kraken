@@ -5,12 +5,9 @@
 
 #include "module_manager.h"
 #include "bridge_qjs.h"
-#include "foundation/bridge_callback.h"
 #include "qjs_patch.h"
 
 namespace kraken::binding::qjs {
-
-using namespace kraken::foundation;
 
 JSValue krakenModuleListener(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
   if (argc < 1) {
@@ -30,7 +27,10 @@ JSValue krakenModuleListener(QjsContext *ctx, JSValueConst this_val, int argc, J
   }
 
   auto context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
-  auto *link = new ModuleLink{JS_DupValue(ctx, callbackValue)};
+  auto *link = new ModuleContext{
+    JS_DupValue(ctx, callbackValue),
+    context
+  };
   list_add_tail(&link->link, &context->module_list);
 
   return JS_NULL;
@@ -38,44 +38,43 @@ JSValue krakenModuleListener(QjsContext *ctx, JSValueConst this_val, int argc, J
 
 void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextId, NativeString *errmsg,
                                          NativeString *json) {
-  auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
-  JSContext &_context = obj->m_context;
+  auto *moduleContext = static_cast<ModuleContext *>(callbackContext);
+  JSContext *context = moduleContext->context;
 
-  if (!checkContext(contextId, &_context)) return;
-  if (!_context.isValid()) return;
+  if (!checkContext(contextId, context)) return;
+  if (!context->isValid()) return;
 
-  if (JS_IsNull(obj->m_callback)) {
+  if (JS_IsNull(moduleContext->callback)) {
     JSValue exception =
-      JS_ThrowTypeError(_context.ctx(), "Failed to execute '__kraken_invoke_module__': callback is null.");
-    _context.handleException(&exception);
+      JS_ThrowTypeError(moduleContext->context->ctx(), "Failed to execute '__kraken_invoke_module__': callback is null.");
+    context->handleException(&exception);
     return;
   }
 
-  QjsContext *ctx = obj->m_context.ctx();
-  if (!JS_IsObject(obj->m_callback)) {
+  QjsContext *ctx = moduleContext->context->ctx();
+  if (!JS_IsObject(moduleContext->callback)) {
     return;
   }
 
-  JSValue callback = obj->m_callback;
+  JSValue callback = moduleContext->callback;
   JSValue returnValue;
   if (errmsg != nullptr) {
-    JSValue errorMessage = JS_NewUnicodeString(obj->m_context.runtime(), ctx, errmsg->string, errmsg->length);
+    JSValue errorMessage = JS_NewUnicodeString(context->runtime(), ctx, errmsg->string, errmsg->length);
     JSValue errorObject = JS_NewError(ctx);
     JS_DefinePropertyValue(ctx, errorObject, JS_NewAtom(ctx, "message"), errorMessage,
                            JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
     JSValue arguments[] = {errorObject};
-    returnValue = JS_Call(ctx, callback, obj->m_context.global(), 1, arguments);
+    returnValue = JS_Call(ctx, callback, context->global(), 1, arguments);
   } else {
     std::u16string argumentString = std::u16string(reinterpret_cast<const char16_t *>(json->string), json->length);
     std::string utf8Arguments = toUTF8(argumentString);
     JSValue jsonValue = JS_ParseJSON(ctx, utf8Arguments.c_str(), utf8Arguments.length(), "");
     JSValue arguments[] = {JS_NULL, jsonValue};
-    returnValue = JS_Call(ctx, callback, obj->m_context.global(), 2, arguments);
+    returnValue = JS_Call(ctx, callback, context->global(), 2, arguments);
   }
 
-  _context.handleException(&returnValue);
-  auto bridge = static_cast<JSBridge *>(obj->m_context.getOwner());
-  bridge->bridgeCallback->freeBridgeCallbackContext(obj);
+  context->handleException(&returnValue);
+  list_del(&moduleContext->link);
 }
 
 void handleInvokeModuleUnexpectedCallback(void *callbackContext, int32_t contextId, NativeString *errmsg,
@@ -93,6 +92,8 @@ JSValue krakenInvokeModule(QjsContext *ctx, JSValueConst this_val, int argc, JSV
   JSValue paramsValue = JS_NULL;
   JSValue callbackValue = JS_NULL;
 
+  auto *context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
+
   if (argc > 2 && !JS_IsNull(argv[2])) {
     paramsValue = JS_JSONStringify(ctx, argv[2], JS_NULL, JS_NULL);
   }
@@ -106,37 +107,30 @@ JSValue krakenInvokeModule(QjsContext *ctx, JSValueConst this_val, int argc, JSV
       ctx, "Failed to execute '__kraken_invoke_module__': dart method (invokeModule) is not registered.");
   }
 
-  std::unique_ptr<BridgeCallback::Context> callbackContext = nullptr;
-  auto context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
-
   NativeString *moduleName = jsValueToNativeString(ctx, moduleNameValue);
   NativeString *method = jsValueToNativeString(ctx, methodValue);
   NativeString *params = JS_IsNull(paramsValue) ? nullptr : jsValueToNativeString(ctx, paramsValue);
 
+  ModuleContext *moduleContext;
   if (JS_IsNull(callbackValue)) {
     auto emptyFunction = [](QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) -> JSValue {
       return JS_NULL;
     };
     JSValue callbackFunc = JS_NewCFunction(ctx, emptyFunction, "_f", 0);
-    callbackContext = std::make_unique<BridgeCallback::Context>(*context, callbackFunc);
+    moduleContext = new ModuleContext{callbackFunc};
   } else {
-    callbackContext = std::make_unique<BridgeCallback::Context>(*context, callbackValue);
+    moduleContext = new ModuleContext{
+      JS_DupValue(ctx, callbackValue)
+    };
   }
+  list_add_tail(&context->module_list, &moduleContext->link);
 
-  auto bridge = static_cast<JSBridge *>(context->getOwner());
   NativeString *result;
 
   if (!JS_IsNull(callbackValue)) {
-    result = bridge->bridgeCallback->registerCallback<NativeString *>(
-      std::move(callbackContext),
-      [moduleName, method, params](BridgeCallback::Context *bridgeContext, int32_t contextId) {
-        NativeString *response = getDartMethod()->invokeModule(bridgeContext, contextId, moduleName, method, params,
-                                                               handleInvokeModuleTransientCallback);
-        return response;
-      });
+    result = getDartMethod()->invokeModule(moduleContext, context->getContextId(), moduleName, method, params, handleInvokeModuleTransientCallback);
   } else {
-    result = getDartMethod()->invokeModule(callbackContext.get(), context->getContextId(), moduleName, method, params,
-                                           handleInvokeModuleUnexpectedCallback);
+    result = getDartMethod()->invokeModule(moduleContext, context->getContextId(), moduleName, method, params, handleInvokeModuleUnexpectedCallback);
   }
 
   if (result == nullptr) {

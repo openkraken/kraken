@@ -7,7 +7,7 @@
 #define KRAKEN_JS_QJS_BRIDGE_H_
 
 #include "include/kraken_bridge.h"
-#include "foundation/bridge_callback.h"
+#include "bindings/qjs/js_context.h"
 #include <quickjs/quickjs.h>
 
 #include <atomic>
@@ -26,7 +26,6 @@ public:
   static std::unordered_map<std::string, NativeString> pluginSourceCode;
 
   int32_t contextId;
-  foundation::BridgeCallback *bridgeCallback;
   // the owner pointer which take JSBridge as property.
   void *owner;
   // evaluate JavaScript source codes in standard mode.

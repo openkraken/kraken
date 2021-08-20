@@ -63,8 +63,6 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   double jsContextStartTime =
     std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 #endif
-  bridgeCallback = new foundation::BridgeCallback();
-
   m_context = binding::qjs::createJSContext(contextId, errorHandler, this);
 
 //#if ENABLE_PROFILE
@@ -138,7 +136,7 @@ void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType
   {
     struct list_head *el, *el1;
     list_for_each_safe(el, el1, &m_context->module_list) {
-      auto *module = list_entry(el, ModuleLink, link);
+      auto *module = list_entry(el, ModuleContext, link);
       JSValue callback = module->callback;
 
       JSValue moduleNameValue = JS_NewUnicodeString(m_context->runtime(), m_context->ctx(), moduleName->string, moduleName->length);
@@ -184,14 +182,6 @@ void JSBridge::evaluateScript(const char *script, size_t length, const char *url
 
 JSBridge::~JSBridge() {
   if (!m_context->isValid()) return;
-
-//  for (auto &callback : krakenModuleListenerList) {
-//    JS_FreeValue(m_context->ctx(), callback);
-//  }
-
-//  krakenModuleListenerList.clear();
-
-  delete bridgeCallback;
 
   if (m_disposeCallback != nullptr) {
     this->m_disposeCallback(m_disposePrivateData);

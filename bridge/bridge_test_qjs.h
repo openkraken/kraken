@@ -11,6 +11,12 @@
 
 namespace kraken {
 
+struct ImageSnapShotContext {
+  JSValue callback;
+  binding::qjs::JSContext *context;
+  list_head link;
+};
+
 class JSBridgeTest final {
 public:
   explicit JSBridgeTest() = delete;
@@ -20,6 +26,14 @@ public:
     if (!JS_IsNull(executeTestCallback)) {
       JS_FreeValue(context->ctx(), executeTestCallback);
     }
+
+    {
+      struct list_head *el, *el1;
+      list_for_each_safe(el, el1, &image_link) {
+        auto *image = list_entry(el, ImageSnapShotContext, link);
+        JS_FreeValue(context->ctx(), image->callback);
+      }
+    }
   }
 
   /// evaluete JavaScript source code with build-in test frameworks, use in test only.
@@ -27,12 +41,13 @@ public:
   void invokeExecuteTest(ExecuteCallback executeCallback);
 
   JSValue executeTestCallback{JS_NULL};
-
+  list_head image_link;
 private:
   /// the pointer of bridge, ownership belongs to JSBridge
   JSBridge *bridge_;
   /// the pointer of JSContext, overship belongs to JSContext
   const std::unique_ptr<binding::qjs::JSContext> &context;
+
 };
 
 } // namespace kraken

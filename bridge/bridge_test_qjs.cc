@@ -9,8 +9,6 @@
 
 namespace kraken {
 
-using namespace kraken::foundation;
-
 bool JSBridgeTest::evaluateTestScripts(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine) {
   if (!context->isValid()) return false;
   //  binding::jsc::updateLocation(sourceURL);
@@ -73,27 +71,25 @@ static JSValue matchImageSnapshot(QjsContext *ctx, JSValueConst this_val, int ar
   }
 
   NativeString *screenShotNativeString = kraken::binding::qjs::jsValueToNativeString(ctx, screenShotValue);
-  auto callbackContext = std::make_unique<BridgeCallback::Context>(*context, callbackValue);
+  auto bridge = static_cast<JSBridgeTest *>(static_cast<JSBridge *>(context->getOwner())->owner);
+  auto *callbackContext = new ImageSnapShotContext{
+    JS_DupValue(ctx, callbackValue),
+    context
+  };
+  list_add_tail(&callbackContext->link, &bridge->image_link);
 
   auto fn = [](void *ptr, int32_t contextId, int8_t result) {
-    auto *callbackContext = static_cast<BridgeCallback::Context *>(ptr);
-    binding::qjs::JSContext &m_context = callbackContext->m_context;
-    QjsContext *ctx = m_context.ctx();
+    auto *callbackContext = static_cast<ImageSnapShotContext *>(ptr);
+    QjsContext *ctx = callbackContext->context->ctx();
 
     JSValue arguments[] = {JS_NewBool(ctx, result != 0)};
-    JSValue returnValue = JS_Call(ctx, callbackContext->m_callback, m_context.global(), 1, arguments);
-    auto *bridge = static_cast<JSBridge *>(callbackContext->m_context.getOwner());
-    bridge->bridgeCallback->freeBridgeCallbackContext(callbackContext);
-    m_context.handleException(&returnValue);
+    JSValue returnValue = JS_Call(ctx, callbackContext->callback, callbackContext->context->global(), 1, arguments);
+    JS_FreeValue(callbackContext->context->ctx(), callbackContext->callback);
+    list_del(&callbackContext->link);
+    callbackContext->context->handleException(&returnValue);
   };
 
-  auto bridge = static_cast<JSBridge *>(context->getOwner());
-  bridge->bridgeCallback->registerCallback<void>(
-    std::move(callbackContext),
-    [&blob, &screenShotNativeString, &fn](BridgeCallback::Context *callbackContext, int32_t contextId) {
-      getDartMethod()->matchImageSnapshot(callbackContext, contextId, blob->bytes(), blob->size(),
-                                          screenShotNativeString, fn);
-    });
+  getDartMethod()->matchImageSnapshot(callbackContext, context->getContextId(), blob->bytes(), blob->size(), screenShotNativeString, fn);
   return JS_NULL;
 }
 
@@ -193,6 +189,7 @@ JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->
   QJS_GLOBAL_BINDING_FUNCTION(context, simulateInputText, "__kraken_simulate_inputtext__", 1);
 
   initKrakenTestFramework(bridge);
+  init_list_head(&image_link);
 }
 
 struct ExecuteCallbackContext {

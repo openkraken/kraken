@@ -103,7 +103,7 @@ JSContext::~JSContext() {
   {
     struct list_head *el, *el1;
     list_for_each_safe(el, el1, &module_list) {
-      auto *module = list_entry(el, ModuleLink, link);
+      auto *module = list_entry(el, ModuleContext, link);
       JS_FreeValue(m_ctx, module->callback);
       delete module;
     }

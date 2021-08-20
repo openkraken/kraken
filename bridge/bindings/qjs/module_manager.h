@@ -10,8 +10,9 @@
 
 namespace kraken::binding::qjs {
 
-struct ModuleLink {
+struct ModuleContext {
   JSValue callback;
+  JSContext *context;
   list_head link;
 };
 

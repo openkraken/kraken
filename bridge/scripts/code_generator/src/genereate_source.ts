@@ -305,7 +305,8 @@ function generateHostClassSource(object: ClassObject) {
   let methodsSource: string[] = generateMethodsSource(object, object.type === 'Event' ? PropType.Event : PropType.Element);
   let constructorCode = '';
   if (object.type === 'Element') {
-    constructorCode = 'return JS_ThrowTypeError(ctx, "Illegal constructor");';
+    constructorCode = `auto instance = new ${object.name}Instance(this);
+  return instance->instanceObject;`;
   } else if (object.type === 'Event') {
     constructorCode = generateEventConstructorCode(object);
   }
@@ -324,12 +325,18 @@ function generateHostClassSource(object: ClassObject) {
     globalBindingName = object.name;
   }
 
+  let specialBind = '';
+  if (object.name === 'ImageElement') {
+    specialBind = `context->defineGlobalProperty("Image", JS_DupValue(context->ctx(), constructor->classObject));`
+  }
+
   return `
 ${object.name}::${object.name}(JSContext *context) : ${object.type}(context) {}
 
 void bind${object.name}(std::unique_ptr<JSContext> &context) {
   auto *constructor = ${object.name}::instance(context.get());
   context->defineGlobalProperty("${globalBindingName}", constructor->classObject);
+  ${specialBind}
 }
 
 OBJECT_INSTANCE_IMPL(${object.name});
