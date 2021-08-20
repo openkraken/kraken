@@ -74,6 +74,9 @@ final DartInvokeEventListener _invokeModuleEvent =
     nativeDynamicLibrary.lookup<NativeFunction<NativeInvokeEventListener>>('invokeModuleEvent').asFunction();
 
 void invokeModuleEvent(int contextId, String moduleName, Event? event, String extra) {
+  if(KrakenController.getControllerOfJSContextId(contextId) == null) {
+    return;
+  }
   Pointer<NativeString> nativeModuleName = stringToNativeString(moduleName);
   Pointer<Void> nativeEvent = event == null ? nullptr : event.toNative().cast<Void>();
   _invokeModuleEvent(contextId, nativeModuleName, event == null ? nullptr : event.type.toNativeUtf8(), nativeEvent, stringToNativeString(extra));
@@ -84,6 +87,9 @@ typedef DartDispatchEvent = void Function(
     Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeString> eventType, Pointer<Void> nativeEvent, int isCustomEvent);
 
 void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Event event) {
+  if(KrakenController.getControllerOfJSContextId(contextId) == null) {
+    return;
+  }
   Pointer<NativeEventTarget> nativeEventTarget = nativePtr;
   DartDispatchEvent dispatchEvent = nativeEventTarget.ref.dispatchEvent.asFunction();
   Pointer<Void> nativeEvent = event.toNative().cast<Void>();
@@ -127,6 +133,9 @@ final DartParseHTML _parseHTML =
 nativeDynamicLibrary.lookup<NativeFunction<NativeParseHTML>>('parseHTML').asFunction();
 
 void evaluateScripts(int contextId, String code, String url, int line) {
+  if(KrakenController.getControllerOfJSContextId(contextId) == null) {
+    return;
+  }
   Pointer<NativeString> nativeString = stringToNativeString(code);
   Pointer<Utf8> _url = url.toNativeUtf8();
   try {
