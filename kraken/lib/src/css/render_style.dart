@@ -30,8 +30,11 @@ class RenderStyle
     CSSOverflowStyleMixin,
     CSSOpacityMixin {
 
+  @override
   RenderBoxModel? renderBoxModel;
+  @override
   late CSSStyleDeclaration style;
+  @override
   late Size viewportSize;
 
   RenderStyle({
@@ -483,7 +486,7 @@ class RenderStyle
     Matrix4? matrix4;
     for (CSSFunctionalNotation method in methods) {
       Matrix4? transform;
-      if (method.name == CSSTransform.TRANSLATE && method.args.length >= 1 && method.args.length <= 2) {
+      if (method.name == CSSTransform.TRANSLATE && method.args.isNotEmpty && method.args.length <= 2) {
         double y;
         double x;
         if (method.args.length == 2) {
@@ -516,7 +519,7 @@ class RenderStyle
         ) ?? 0;
         transform = Matrix4.identity()..translate(x, y);
 
-      } else if (method.name == CSSTransform.TRANSLATE_3D && method.args.length >= 1 && method.args.length <= 3) {
+      } else if (method.name == CSSTransform.TRANSLATE_3D && method.args.isNotEmpty && method.args.length <= 3) {
         double z;
         double y;
         double x;

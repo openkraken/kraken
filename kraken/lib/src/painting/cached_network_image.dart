@@ -48,9 +48,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
     }
 
     // Fallback to network
-    if (bytes == null) {
-      bytes = await fetchFile(key, chunkEvents, cacheController);
-    }
+    bytes ??= await fetchFile(key, chunkEvents, cacheController);
 
     return bytes;
   }
@@ -59,7 +57,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
       CachedNetworkImage key, DecoderCallback decode, StreamController<ImageChunkEvent> chunkEvents) async {
     Uint8List bytes = await loadFile(key, chunkEvents);
 
-    if (bytes.length > 0) {
+    if (bytes.isNotEmpty) {
       return decode(bytes);
     }
     return null;

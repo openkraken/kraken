@@ -154,9 +154,7 @@ class HttpCacheObject {
     return isDateTimeValid();
   }
 
-  /**
-   * Read the index file.
-   */
+  /// Read the index file.
   Future<void> read() async {
     final bool isIndexFileExist = await _file.exists();
     if (!isIndexFileExist) {
@@ -273,7 +271,7 @@ class HttpCacheObject {
       if (expiredTime != null) HttpHeaders.expiresHeader: HttpDate.format(expiredTime!),
       if (contentLength != null) HttpHeaders.contentLengthHeader: contentLength.toString(),
       if (lastModified != null) HttpHeaders.lastModifiedHeader: HttpDate.format(lastModified!),
-      if (kDebugMode) "x-kraken-cache": "From http cache",
+      if (kDebugMode) 'x-kraken-cache': 'From http cache',
     };
   }
 
@@ -370,17 +368,13 @@ class HttpCacheObjectBlob extends EventSink<List<int>> {
 
   @override
   void add(List<int> data) {
-    if (_writer == null) {
-      _writer = _file.openWrite();
-    }
+    _writer ??= _file.openWrite();
     _writer!.add(data);
   }
 
   @override
   void addError(Object error, [StackTrace? stackTrace]) {
-    if (_writer != null) {
-      _writer!.addError(error, stackTrace);
-    }
+    _writer?.addError(error, stackTrace);
     print('Error while writing to cache blob, $error');
     if (stackTrace != null) {
       print('\n$stackTrace');
@@ -389,9 +383,7 @@ class HttpCacheObjectBlob extends EventSink<List<int>> {
 
   @override
   void close() {
-    if (_writer != null) {
-      _writer!.close();
-    }
+    _writer?.close();
   }
 
   Future<bool> exists() {

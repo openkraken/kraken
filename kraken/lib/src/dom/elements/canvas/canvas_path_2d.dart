@@ -15,7 +15,7 @@ class Path2D {
     return _path;
   }
 
-  List<double> _points = [];
+  final List<double> _points = [];
 
   void _setPoint(x, y) {
     _points.add(x);
@@ -36,7 +36,7 @@ class Path2D {
   }
 
   bool _hasCurrentPoint() {
-    return _points.length > 0;
+    return _points.isNotEmpty;
   }
 
   // https://github.com/chromium/chromium/blob/99314be8152e688bafbbf9a615536bdbb289ea87/third_party/blink/renderer/modules/canvas/canvas2d/canvas_path.cc#L236
@@ -140,39 +140,37 @@ class Path2D {
     _setPoint(rect.left, rect.bottom);
   }
 
-  /**
-   * degenerateEllipse() handles a degenerated ellipse using several lines.
-   *
-   * Let's see a following example: line to ellipse to line.
-   *        _--^\
-   *       (     )
-   * -----(      )
-   *            )
-   *           /--------
-   *
-   * If radiusX becomes zero, the ellipse of the example is degenerated.
-   *         _
-   *        // P
-   *       //
-   * -----//
-   *      /
-   *     /--------
-   *
-   * To draw the above example, need to get P that is a local maximum point.
-   * Angles for P are 0.5Pi and 1.5Pi in the ellipse coordinates.
-   *
-   * If radiusY becomes zero, the result is as follows.
-   * -----__
-   *        --_
-   *          ----------
-   *            ``P
-   * Angles for P are 0 and Pi in the ellipse coordinates.
-   *
-   * To handle both cases, degenerateEllipse() lines to start angle, local maximum
-   * _points(every 0.5Pi), and end angle.
-   * NOTE: Before ellipse() calls this function, adjustEndAngle() is called, so
-   * endAngle - startAngle must be equal to or less than 2Pi.
-   */
+  /// degenerateEllipse() handles a degenerated ellipse using several lines.
+  ///
+  /// Let's see a following example: line to ellipse to line.
+  ///        _--^\
+  ///       (     )
+  /// -----(      )
+  ///            )
+  ///           /--------
+  ///
+  /// If radiusX becomes zero, the ellipse of the example is degenerated.
+  ///         _
+  ///        // P
+  ///       //
+  /// -----//
+  ///      /
+  ///     /--------
+  ///
+  /// To draw the above example, need to get P that is a local maximum point.
+  /// Angles for P are 0.5Pi and 1.5Pi in the ellipse coordinates.
+  ///
+  /// If radiusY becomes zero, the result is as follows.
+  /// -----__
+  ///        --_
+  ///          ----------
+  ///            ``P
+  /// Angles for P are 0 and Pi in the ellipse coordinates.
+  ///
+  /// To handle both cases, degenerateEllipse() lines to start angle, local maximum
+  /// _points(every 0.5Pi), and end angle.
+  /// NOTE: Before ellipse() calls this function, adjustEndAngle() is called, so
+  /// endAngle - startAngle must be equal to or less than 2Pi.
   void _addDegenerateEllipse(double x, double y, double radiusX, double radiusY, double rotation, double startAngle, double endAngle, bool anticlockwise) {
     assert((endAngle - startAngle).abs() <= _2pi);
     assert(startAngle >= 0);

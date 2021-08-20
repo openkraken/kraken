@@ -7,7 +7,7 @@ import 'dart:async';
 
 mixin TimerMixin {
   int _timerId = 1;
-  Map<int, Timer> _timerMap = {};
+  final Map<int, Timer> _timerMap = {};
 
   int setTimeout(int timeout, Function callback) {
     Duration timeoutDurationMS = Duration(milliseconds: timeout);

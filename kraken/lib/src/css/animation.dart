@@ -43,10 +43,10 @@ Curve? _parseEasing(String? function) {
       return Threshold(1);
   }
   List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(function);
-  if (methods.length > 0) {
+  if (methods.isNotEmpty) {
     CSSFunctionalNotation method = methods.first;
     if (method.name == 'steps') {
-      if (method.args.length >= 1) {
+      if (method.args.isNotEmpty) {
         var step = int.tryParse(method.args[0]);
         var isStart = false;
         if (method.args.length == 2) {
@@ -111,7 +111,7 @@ class AnimationTimeline {
   }
 
   void _addAnimation(Animation animation) {
-    if (_animations.indexOf(animation) == -1) {
+    if (!_animations.contains(animation)) {
       _animations.add(animation);
     }
 
@@ -423,9 +423,7 @@ class _Interpolation {
   var end;
   Function lerp;
   _Interpolation(this.property, this.startOffset, this.endOffset, this.easing, this.begin, this.end, this.lerp) {
-    if (easing == null) {
-      easing = Curves.linear;
-    }
+    easing ??= Curves.linear;
   }
 
   @override
@@ -461,7 +459,7 @@ class KeyframeEffect extends AnimationEffect {
     this.viewportSize,
     this.renderStyle
   ) {
-    timing = options == null ? EffectTiming() : options;
+    timing = options ?? EffectTiming();
 
     _propertySpecificKeyframeGroups = _makePropertySpecificKeyframeGroups(keyframes);
     _interpolations = _makeInterpolations(_propertySpecificKeyframeGroups, viewportSize, renderStyle);
@@ -514,9 +512,7 @@ class KeyframeEffect extends AnimationEffect {
         if (left == right) continue;
 
         List? handlers = CSSTransformHandlers[property];
-        if (handlers == null) {
-          handlers = [_defaultParse, _defaultLerp];
-        }
+        handlers ??= [_defaultParse, _defaultLerp];
         Function parseProperty = handlers[0];
 
         _Interpolation interpolation = _Interpolation(
@@ -564,7 +560,7 @@ class KeyframeEffect extends AnimationEffect {
     return propertySpecificKeyframeGroups;
   }
 
-  static double _timeEpsilon = 0.00001;
+  static final double _timeEpsilon = 0.00001;
 
   void _runIteration(double localTime) {
     if (_progress == null) {
@@ -812,10 +808,10 @@ class KeyframeEffect extends AnimationEffect {
   }
 
   // The smallest positive double value that is greater than zero.
-  static double _epsilon = 4.94065645841247E-324;
+  static final double _epsilon = 4.94065645841247E-324;
   // Permit 2-bits of quantization error. Threshold based on experimentation
   // with accuracy of fmod.
-  static double _calculationEpsilon = 2.0 * _epsilon;
+  static final double _calculationEpsilon = 2.0 * _epsilon;
 
   // 3.10.1. Calculating the transformed progress
   // https://drafts.csswg.org/web-animations-1/#calculating-the-transformed-progress
