@@ -10,6 +10,8 @@ analyzer:
     close_sinks: error
     cancel_subscriptions: error
     prefer_contains: error
+    prefer_is_empty: error
+    prefer_is_not_empty: error
     file_names: error
 
 # A list of all available lints and their documentation is published at
