@@ -49,6 +49,9 @@ abstract class KrakenBundle {
   static Future<KrakenBundle> getBundle(String path, { String? contentOverride, required int contextId }) async {
     KrakenBundle bundle;
 
+    if (kDebugMode) {
+      print('Kraken getting bundle for contextId: $contextId, path: $path');
+    }
     if (contentOverride != null && contentOverride.isNotEmpty) {
       bundle = RawBundle(contentOverride, Uri.parse(path));
     } else {

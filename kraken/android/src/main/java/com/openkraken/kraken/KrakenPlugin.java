@@ -53,7 +53,7 @@ public class KrakenPlugin implements FlutterPlugin, MethodCallHandler {
     }
 
     Kraken getKraken() {
-      if (mKraken != null) {
+      if (mKraken == null) {
         mKraken = Kraken.get(flutterEngine);
       }
       return mKraken;
