@@ -47,7 +47,7 @@ JSValueRef JSHistory::forward(JSContextRef ctx, JSObjectRef function, JSObjectRe
     m_next_stack.pop();
     m_previous_stack.push(currentItem);
 
-    history->goTo(history->m_next_stack.top());
+    history->goTo(currentItem);
   }
 
   return nullptr;
@@ -63,6 +63,8 @@ void JSHistory::goTo(HistoryItem &historyItem) {
 }
 
 void JSHistory::addItem(HistoryItem &historyItem) {
+  if (!m_previous_stack.empty() && historyItem.href == m_previous_stack.top().href) return;
+
   m_previous_stack.push(historyItem);
 
   // clear.
