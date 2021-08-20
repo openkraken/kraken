@@ -23,7 +23,7 @@ import 'package:ffi/ffi.dart';
 
 import 'element_native_methods.dart';
 
-const String STYLE = 'style';
+const String _STYLE_PROPERTY = 'style';
 
 /// Defined by W3C Standard,
 /// Most element's default width is 300 in pixel,
@@ -1233,7 +1233,7 @@ class Element extends Node
   @mustCallSuper
   void setProperty(String key, dynamic value) {
     // Each key change will emit to `setStyle`
-    if (key == STYLE) {
+    if (key == _STYLE_PROPERTY) {
       assert(value is Map<String, dynamic>);
       // @TODO: Consider `{ color: red }` to `{}`, need to remove invisible keys.
       (value as Map<String, dynamic>).forEach(setStyle);
@@ -1254,8 +1254,8 @@ class Element extends Node
   void removeProperty(String key) {
     properties.remove(key);
 
-    if (key == STYLE) {
-      setProperty(STYLE, null);
+    if (key == _STYLE_PROPERTY) {
+      setProperty(_STYLE_PROPERTY, null);
     }
   }
 
