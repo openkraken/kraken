@@ -63,8 +63,8 @@ describe('auto-margins', () => {
         }),
       ]
     );
-    BODY.appendChild(div);
-    BODY.appendChild(div_1);
+    document.body.appendChild(div);
+    document.body.appendChild(div_1);
 
     img.onload = async () => {
       await snapshot();
