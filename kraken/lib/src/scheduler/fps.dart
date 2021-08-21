@@ -17,14 +17,12 @@ class Fps {
   static Fps? _instance;
 
   static Fps get instance {
-    if (_instance == null) {
-      _instance = Fps._();
-    }
+    _instance ??= Fps._();
     return _instance!;
   }
 
   bool _started = false;
-  List<FpsCallback> _fpsCallbacks = [];
+  final List<FpsCallback> _fpsCallbacks = [];
 
   void addFpsCallback(FpsCallback fpsCallback) {
     _fpsCallbacks.add(fpsCallback);

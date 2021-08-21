@@ -66,9 +66,7 @@ class Event {
   bool _immediateBubble = true;
 
   Event(this.type, [EventInit? init]) {
-    if (init == null) {
-      init = EventInit();
-    }
+    init ??= EventInit();
 
     bubbles = init.bubbles;
     cancelable = init.cancelable;
@@ -111,6 +109,7 @@ class Event {
     };
   }
 
+  @override
   String toString() {
     return '$runtimeType(${jsonEncode(toJson())})';
   }
@@ -138,6 +137,7 @@ class MouseEvent extends Event {
   MouseEvent(String type, MouseEventInit mouseEventInit)
       : _mouseEventInit = mouseEventInit, super(type, mouseEventInit);
 
+  @override
   Pointer<NativeMouseEvent> toNative() {
     Pointer<NativeMouseEvent> nativeMouseEventPointer = malloc.allocate<NativeMouseEvent>(sizeOf<NativeMouseEvent>());
     nativeMouseEventPointer.ref.nativeEvent = super.toNative().cast<NativeEvent>();
@@ -208,6 +208,7 @@ class GestureEvent extends Event {
   GestureEvent(String type, GestureEventInit gestureEventInit)
       : _gestureEventInit = gestureEventInit, super(type, gestureEventInit);
 
+  @override
   Pointer<NativeGestureEvent> toNative() {
     Pointer<NativeGestureEvent> nativeGestureEventPointer = malloc.allocate<NativeGestureEvent>(sizeOf<NativeGestureEvent>());
     nativeGestureEventPointer.ref.nativeEvent = super.toNative().cast<NativeEvent>();
@@ -239,6 +240,7 @@ class CustomEvent extends Event {
   CustomEvent(String type, CustomEventInit customEventInit)
       : _customEventInit = customEventInit, super(type, customEventInit);
 
+  @override
   Pointer<NativeCustomEvent> toNative() {
     Pointer<NativeCustomEvent> nativeCustomEventPointer = malloc.allocate<NativeCustomEvent>(sizeOf<NativeCustomEvent>());
     nativeCustomEventPointer.ref.nativeEvent = super.toNative().cast<NativeEvent>();
@@ -255,6 +257,7 @@ class InputEvent extends Event {
   final String inputType;
   final String data;
 
+  @override
   Pointer<NativeInputEvent> toNative() {
     Pointer<NativeInputEvent> nativeInputEvent = malloc.allocate<NativeInputEvent>(sizeOf<NativeInputEvent>());
     Pointer<NativeEvent> nativeEvent = super.toNative().cast<NativeEvent>();
@@ -304,6 +307,7 @@ class MediaError extends Event {
   /// If no diagnostics are available, or no explanation can be provided, this value is an empty string ("").
   final String message;
 
+  @override
   Pointer<NativeMediaErrorEvent> toNative() {
     Pointer<NativeMediaErrorEvent> nativeMediaError = malloc.allocate<NativeMediaErrorEvent>(sizeOf<NativeMediaErrorEvent>());
     Pointer<NativeEvent> nativeEvent = super.toNative().cast<NativeEvent>();
@@ -326,6 +330,7 @@ class MessageEvent extends Event {
 
   MessageEvent(this.data, {this.origin = ''}) : super(EVENT_MESSAGE);
 
+  @override
   Pointer<NativeMessageEvent> toNative() {
     Pointer<NativeMessageEvent> messageEvent = malloc.allocate<NativeMessageEvent>(sizeOf<NativeMessageEvent>());
     Pointer<NativeEvent> nativeEvent = super.toNative().cast<NativeEvent>();
@@ -349,6 +354,7 @@ class CloseEvent extends Event {
 
   CloseEvent(this.code, this.reason, this.wasClean) : super(EVENT_CLOSE);
 
+  @override
   Pointer<NativeCloseEvent> toNative() {
     Pointer<NativeCloseEvent> closeEvent = malloc.allocate<NativeCloseEvent>(sizeOf<NativeCloseEvent>());
     Pointer<NativeEvent> nativeEvent = super.toNative().cast<NativeEvent>();
@@ -364,6 +370,7 @@ class IntersectionChangeEvent extends Event {
   IntersectionChangeEvent(this.intersectionRatio) : super(EVENT_INTERSECTION_CHANGE);
   final double intersectionRatio;
 
+  @override
   Pointer<NativeIntersectionChangeEvent> toNative() {
     Pointer<NativeIntersectionChangeEvent> intersectionChangeEvent = malloc.allocate<NativeIntersectionChangeEvent>(sizeOf<NativeIntersectionChangeEvent>());
     Pointer<NativeEvent> nativeEvent = super.toNative().cast<NativeEvent>();
@@ -386,6 +393,7 @@ class TouchEvent extends Event {
   bool ctrlKey = false;
   bool shiftKey = false;
 
+  @override
   Pointer<NativeTouchEvent> toNative() {
     Pointer<NativeTouchEvent> touchEvent = malloc.allocate<NativeTouchEvent>(sizeOf<NativeTouchEvent>());
     touchEvent.ref.nativeEvent = super.toNative().cast<NativeEvent>();
@@ -467,7 +475,7 @@ class Touch {
 
 /// reference: https://w3c.github.io/touch-events/#touchlist-interface
 class TouchList {
-  List<Touch> _items = [];
+  final List<Touch> _items = [];
   int get length => _items.length;
 
   Touch item(int index) {

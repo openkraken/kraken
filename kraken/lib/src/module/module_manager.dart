@@ -20,9 +20,9 @@ class ModuleManager {
   final int contextId;
   final KrakenController controller;
 
-  static Map<String, ModuleCreator> _creatorMap = Map();
+  static final Map<String, ModuleCreator> _creatorMap = {};
   static bool inited = false;
-  Map<String, BaseModule> _moduleMap = Map();
+  final Map<String, BaseModule> _moduleMap = {};
 
   ModuleManager(this.controller, this.contextId) {
     if (!inited) {

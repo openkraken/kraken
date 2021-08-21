@@ -80,20 +80,14 @@ class PerformanceTiming {
   static PerformanceTiming? _instance;
 
   static PerformanceTiming instance() {
-    if (_instance == null) {
-      _instance = PerformanceTiming();
-    }
+    _instance ??= PerformanceTiming();
     return _instance!;
   }
 
   void mark(String name, {int? startTime, int? uniqueId}) {
-    if (startTime == null) {
-      startTime = DateTime.now().microsecondsSinceEpoch;
-    }
+    startTime ??= DateTime.now().microsecondsSinceEpoch;
 
-    if (uniqueId == null) {
-      uniqueId = PERFORMANCE_NONE_UNIQUE_ID;
-    }
+    uniqueId ??= PERFORMANCE_NONE_UNIQUE_ID;
 
     PerformanceEntry entry = PerformanceEntry(name, startTime, uniqueId);
     entries.add(entry);

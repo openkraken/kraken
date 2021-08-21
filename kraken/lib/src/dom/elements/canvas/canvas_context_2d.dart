@@ -131,7 +131,7 @@ class CanvasRenderingContext2D {
     nativeCanvasRenderingContext2D.ref.translate = nativeTranslate;
   }
 
-  static SplayTreeMap<int, CanvasRenderingContext2D> _nativeMap = SplayTreeMap();
+  static final SplayTreeMap<int, CanvasRenderingContext2D> _nativeMap = SplayTreeMap();
 
   static CanvasRenderingContext2D getCanvasRenderContext2DOfNativePtr(Pointer<NativeCanvasRenderingContext2D> nativePtr) {
     CanvasRenderingContext2D? renderingContext = _nativeMap[nativePtr.address];
@@ -374,7 +374,7 @@ class CanvasRenderingContext2D {
 
   int get actionCount => _actions.length;
 
-  List<CanvasAction> _actions = [];
+  final List<CanvasAction> _actions = [];
 
   void addAction(CanvasAction action) {
     _actions.add(action);
@@ -490,7 +490,7 @@ class CanvasRenderingContext2D {
   }
   String get font => _font;
 
-  List _states = [];
+  final List _states = [];
   // push state on state stack
   void restore() {
     addAction((Canvas canvas, Size size) {

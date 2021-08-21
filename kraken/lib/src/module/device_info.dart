@@ -7,9 +7,7 @@ import 'package:kraken/src/module/module_manager.dart';
 DeviceInfoPlugin? _deviceInfoPlugin;
 
 void _initDeviceInfoPlugin() {
-  if (_deviceInfoPlugin == null) {
-    _deviceInfoPlugin = DeviceInfoPlugin();
-  }
+  _deviceInfoPlugin ??= DeviceInfoPlugin();
 }
 
 class DeviceInfoModule extends BaseModule {

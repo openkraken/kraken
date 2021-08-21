@@ -53,7 +53,7 @@ class AppManifest with KrakenManifest {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['name'] = name;
     data['short_name'] = shortName;
     data['version'] = version;
@@ -121,7 +121,7 @@ class Icons {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['src'] = src;
     data['sizes'] = sizes;
     data['type'] = type;
@@ -141,7 +141,7 @@ class RelatedApplications {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['platform'] = platform;
     data['url'] = url;
     return data;

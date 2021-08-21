@@ -227,6 +227,7 @@ class RenderLayoutBox extends RenderBoxModel
     _isChildrenSorted = false;
   }
 
+  @override
   void move(RenderBox child, {RenderBox? after}) {
     super.move(child, after: after);
     _isChildrenSorted = false;
@@ -498,6 +499,7 @@ class RenderBoxModel extends RenderBox
   bool _debugShouldPaintOverlay = false;
 
   late RenderStyle _renderStyle;
+  @override
   RenderStyle get renderStyle => _renderStyle;
 
   late ElementDelegate _elementDelegate;
@@ -1135,11 +1137,13 @@ class RenderBoxModel extends RenderBox
   // Box size equals to RenderBox.size to avoid flutter complain when read size property.
   Size? _boxSize;
 
+  @override
   Size? get boxSize {
     assert(_boxSize != null, 'box does not have laid out.');
     return _boxSize;
   }
 
+  @override
   set size(Size value) {
     _boxSize = value;
     super.size = value;
@@ -1473,7 +1477,7 @@ class RenderBoxModel extends RenderBox
   /// Called when its corresponding element disposed
   void dispose() {
     // Clear renderObjects in list when disposed to avoid memory leak
-    if (fixedChildren.length != 0) {
+    if (fixedChildren.isNotEmpty) {
       fixedChildren.clear();
     }
   }
