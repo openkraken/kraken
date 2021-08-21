@@ -21,7 +21,7 @@ const String TAB_CHAR = '\t';
 class TextNode extends Node {
   final Pointer<NativeTextNode> _nativePtr;
 
-  static SplayTreeMap<int, TextNode> _nativeMap = SplayTreeMap();
+  static final SplayTreeMap<int, TextNode> _nativeMap = SplayTreeMap();
 
   static TextNode getTextNodeOfNativePtr(Pointer<NativeTextNode> nativeTextNode) {
     TextNode? textNode = _nativeMap[nativeTextNode.address];

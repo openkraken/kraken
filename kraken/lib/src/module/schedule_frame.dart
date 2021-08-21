@@ -5,7 +5,7 @@ typedef VoidCallback = void Function();
 
 mixin ScheduleFrameMixin {
   int _id = 1;
-  Map<int, bool> _animationFrameCallbackMap = {};
+  final Map<int, bool> _animationFrameCallbackMap = {};
 
   int requestAnimationFrame(DoubleCallback callback) {
     int id = _id++;

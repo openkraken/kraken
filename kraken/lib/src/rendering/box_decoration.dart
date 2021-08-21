@@ -41,10 +41,8 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     ImageConfiguration imageConfiguration = renderStyle.imageConfiguration;
 
     if (decoration == null) return;
-    if (_painter == null) {
-      _painter ??= BoxDecorationPainter(
+    _painter ??= BoxDecorationPainter(
           decoration, padding, renderStyle, markNeedsPaint);
-    }
 
     final ImageConfiguration filledConfiguration =
         imageConfiguration.copyWith(size: size);

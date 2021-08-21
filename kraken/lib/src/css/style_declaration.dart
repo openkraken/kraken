@@ -115,11 +115,11 @@ class CSSStyleDeclaration {
   CSSStyleDeclaration(this.target);
   /// When some property changed, corresponding [StyleChangeListener] will be
   /// invoked in synchronous.
-  List<StyleChangeListener> _styleChangeListeners = [];
+  final List<StyleChangeListener> _styleChangeListeners = [];
 
-  Map<String, String> _properties = {};
-  Map<String, String> _prevProperties = {};
-  Map<String, String> _animationProperties = {};
+  final Map<String, String> _properties = {};
+  final Map<String, String> _prevProperties = {};
+  final Map<String, String> _animationProperties = {};
 
   Map<String, List> _transitions = {};
 
@@ -182,7 +182,7 @@ class CSSStyleDeclaration {
     return null;
   }
 
-  Map<String, Animation> _propertyRunningTransition = {};
+  final Map<String, Animation> _propertyRunningTransition = {};
 
   bool _hasRunningTransition(String property) {
     return _propertyRunningTransition.containsKey(property);
@@ -537,7 +537,7 @@ class CSSStyleDeclaration {
       List<CSSFunctionalNotation> funcs = CSSFunction.parseFunction(result);
       for (CSSFunctionalNotation func in funcs) {
         String loweredFuncName = func.name.toLowerCase();
-        if (loweredFuncName == 'env' && func.args.length > 0) {
+        if (loweredFuncName == 'env' && func.args.isNotEmpty) {
           String? defaultValue = func.args.length > 1 ? func.args[1] : null;
           switch (func.args.first) {
             case SAFE_AREA_INSET_TOP:
@@ -697,7 +697,7 @@ class CSSStyleDeclaration {
     // Any animation found in previousAnimations but not found in newAnimations is not longer current and should be canceled.
     // @HACK: There are no way to get animationList from styles(Webkit will create an new Style object when style changes, but Kraken not).
     // Therefore we should cancel all running transition to get thing works.
-    if (propertyName == TRANSITION_PROPERTY && _propertyRunningTransition.length > 0) {
+    if (propertyName == TRANSITION_PROPERTY && _propertyRunningTransition.isNotEmpty) {
       for (String property in _propertyRunningTransition.keys) {
         _propertyRunningTransition[property]!.finish();
       }

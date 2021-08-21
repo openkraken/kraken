@@ -62,3 +62,8 @@ interface HTMLMediaElement {
 interface HTMLElement {
     toBlob(devicePixcelRatio: number): Promise<Blob>;
 }
+
+/**
+ * The mocked local http server origin.
+ */
+declare const LOCAL_HTTP_SERVER :string;

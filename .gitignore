@@ -65,3 +65,5 @@ libkraken.dylib
 Podfile.lock
 .cxx
 
+temp
+coverage
