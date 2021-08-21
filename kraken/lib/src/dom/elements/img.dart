@@ -17,7 +17,7 @@ import 'dart:collection';
 
 const String IMAGE = 'IMG';
 
-final RegExp _numExp = RegExp(r"^\d+");
+final RegExp _numExp = RegExp(r'^\d+');
 
 bool _isNumberString(String str) {
   return _numExp.hasMatch(str);
@@ -56,7 +56,7 @@ class ImageElement extends Element {
   // Whether is multiframe image
   bool isMultiframe = false;
 
-  static SplayTreeMap<int, ImageElement> _nativeMap = SplayTreeMap();
+  static final SplayTreeMap<int, ImageElement> _nativeMap = SplayTreeMap();
 
   static ImageElement getImageElementOfNativePtr(Pointer<NativeImgElement> nativeImageElement) {
     ImageElement? element = _nativeMap[nativeImageElement.address];

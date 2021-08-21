@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:io';
 
 class _HttpHeaders implements HttpHeaders {
-  final Map<String, dynamic> _headers = Map<String, String>();
+  final Map<String, dynamic> _headers = <String, String>{};
   _HttpHeaders({ Map<String, String>? initialHeaders }) {
     if (initialHeaders != null) {
       _headers.addAll(initialHeaders);
@@ -191,8 +191,11 @@ class _HttpHeaders implements HttpHeaders {
 }
 
 class _HttpConnectionInfo implements HttpConnectionInfo {
+  @override
   int localPort;
+  @override
   InternetAddress remoteAddress;
+  @override
   int remotePort;
   _HttpConnectionInfo(this.localPort, this.remoteAddress, this.remotePort);
 }
@@ -200,7 +203,9 @@ class _HttpConnectionInfo implements HttpConnectionInfo {
 class HttpClientStreamResponse extends Stream<List<int>> implements HttpClientResponse {
   Stream<List<int>> data;
 
+  @override
   int statusCode;
+  @override
   String reasonPhrase;
   Map<String, String> responseHeaders;
   _HttpHeaders? _httpHeaders;

@@ -23,7 +23,7 @@ import 'native_types.dart';
 typedef DartGetUserAgent = Pointer<Utf8> Function(Pointer<NativeKrakenInfo>);
 
 class KrakenInfo {
-  Pointer<NativeKrakenInfo> _nativeKrakenInfo;
+  final Pointer<NativeKrakenInfo> _nativeKrakenInfo;
 
   KrakenInfo(Pointer<NativeKrakenInfo> info) : _nativeKrakenInfo = info;
 
@@ -74,6 +74,9 @@ final DartInvokeEventListener _invokeModuleEvent =
     nativeDynamicLibrary.lookup<NativeFunction<NativeInvokeEventListener>>('invokeModuleEvent').asFunction();
 
 void invokeModuleEvent(int contextId, String moduleName, Event? event, String extra) {
+  if(KrakenController.getControllerOfJSContextId(contextId) == null) {
+    return;
+  }
   Pointer<NativeString> nativeModuleName = stringToNativeString(moduleName);
   Pointer<Void> nativeEvent = event == null ? nullptr : event.toNative().cast<Void>();
   _invokeModuleEvent(contextId, nativeModuleName, event == null ? nullptr : event.type.toNativeUtf8(), nativeEvent, stringToNativeString(extra));
@@ -84,6 +87,9 @@ typedef DartDispatchEvent = void Function(
     Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeString> eventType, Pointer<Void> nativeEvent, int isCustomEvent);
 
 void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Event event) {
+  if(KrakenController.getControllerOfJSContextId(contextId) == null) {
+    return;
+  }
   Pointer<NativeEventTarget> nativeEventTarget = nativePtr;
   DartDispatchEvent dispatchEvent = nativeEventTarget.ref.dispatchEvent.asFunction();
   Pointer<Void> nativeEvent = event.toNative().cast<Void>();
@@ -127,6 +133,9 @@ final DartParseHTML _parseHTML =
 nativeDynamicLibrary.lookup<NativeFunction<NativeParseHTML>>('parseHTML').asFunction();
 
 void evaluateScripts(int contextId, String code, String url, int line) {
+  if(KrakenController.getControllerOfJSContextId(contextId) == null) {
+    return;
+  }
   Pointer<NativeString> nativeString = stringToNativeString(code);
   Pointer<Utf8> _url = url.toNativeUtf8();
   try {
@@ -269,22 +278,21 @@ class UICommand {
   late final List<String> args;
   late final Pointer nativePtr;
 
+  @override
   String toString() {
     return 'UICommand(type: $type, id: $id, args: $args, nativePtr: $nativePtr)';
   }
 }
 
-/**
- * struct UICommandItem {
-    int32_t type;             // offset: 0 ~ 0.5
-    int32_t id;               // offset: 0.5 ~ 1
-    int32_t args_01_length;   // offset: 1 ~ 1.5
-    int32_t args_02_length;   // offset: 1.5 ~ 2
-    const uint16_t *string_01;// offset: 2
-    const uint16_t *string_02;// offset: 3
-    void* nativePtr;          // offset: 4
-  };
- */
+// struct UICommandItem {
+//   int32_t type;             // offset: 0 ~ 0.5
+//   int32_t id;               // offset: 0.5 ~ 1
+//   int32_t args_01_length;   // offset: 1 ~ 1.5
+//   int32_t args_02_length;   // offset: 1.5 ~ 2
+//   const uint16_t *string_01;// offset: 2
+//   const uint16_t *string_02;// offset: 3
+//   void* nativePtr;          // offset: 4
+// };
 const int nativeCommandSize = 5;
 const int typeAndIdMemOffset = 0;
 const int args01And02LengthMemOffset = 1;
@@ -346,7 +354,7 @@ List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, in
       String printMsg = '${command.type}, id: ${command.id}';
       for (int i = 0; i < command.args.length; i ++) {
         printMsg += ' args[$i]: ${command.args[i]}';
-      };
+      }
       printMsg += ' nativePtr: ${command.nativePtr}';
       print(printMsg);
     }

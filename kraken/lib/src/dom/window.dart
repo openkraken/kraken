@@ -21,7 +21,7 @@ final Pointer<NativeFunction<NativeWindowScrollBy>> nativeScrollBy = Pointer.fro
 class Window extends EventTarget {
   final Pointer<NativeWindow> nativeWindowPtr;
   final Element viewportElement;
-  static SplayTreeMap<int, Window> _nativeMap = SplayTreeMap();
+  static final SplayTreeMap<int, Window> _nativeMap = SplayTreeMap();
 
   Window(int targetId, this.nativeWindowPtr, ElementManager elementManager, this.viewportElement) : super(targetId, nativeWindowPtr.ref.nativeEventTarget, elementManager) {
     window.onPlatformBrightnessChanged = () {

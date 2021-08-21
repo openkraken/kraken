@@ -162,5 +162,6 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
     properties.add(FlagProperty('sentTapDown', value: _sentTapDown, ifTrue: 'sent tap down'));
   }
 
+  @override
   String get debugDescription => 'click gesture';
 }

@@ -885,7 +885,7 @@ class CSSTransform {
         }
         break;
       case TRANSLATE:
-        if (method.args.length >= 1 && method.args.length <= 2) {
+        if (method.args.isNotEmpty && method.args.length <= 2) {
           double y;
           if (method.args.length == 2) {
             y = CSSLength.toDisplayPortValue(
@@ -911,7 +911,7 @@ class CSSTransform {
         //   0, 1, 0, 0,
         //   0, 0, 1, 0,
         //   x, y, z, 1]
-        if (method.args.length >= 1 && method.args.length <= 3) {
+        if (method.args.isNotEmpty && method.args.length <= 3) {
           double y = 0, z = 0;
           if (method.args.length == 2) {
             y = CSSLength.toDisplayPortValue(
@@ -1007,7 +1007,7 @@ class CSSTransform {
         }
         break;
       case SCALE:
-        if (method.args.length >= 1 && method.args.length <= 2) {
+        if (method.args.isNotEmpty && method.args.length <= 2) {
           double x = double.tryParse(method.args[0].trim()) ?? 1.0;
           double y = x;
           if (method.args.length == 2) {

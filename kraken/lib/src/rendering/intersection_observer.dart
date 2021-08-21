@@ -23,9 +23,7 @@ mixin RenderIntersectionObserverMixin on RenderBox {
   IntersectionChangeCallback? _onIntersectionChange;
   IntersectionObserverLayer? intersectionObserverLayer;
 
-  /**
-   * A list of event handlers
-   */
+  /// A list of event handlers
   List<IntersectionChangeCallback>? _listeners;
 
   void addIntersectionChangeListener(IntersectionChangeCallback callback) {
@@ -115,10 +113,10 @@ class IntersectionObserverLayer extends ContainerLayer {
   static final _updated = <int, IntersectionObserverLayer>{};
 
   /// 300ms delay compute layer offset
-  static Duration _updateInterval = Duration(milliseconds: 300);
+  static final Duration _updateInterval = Duration(milliseconds: 300);
 
   /// Offset to the start of the element, in local coordinates.
-  Offset _elementOffset;
+  final Offset _elementOffset;
 
   set elementSize(Size value) {
     if (value == _elementSize) return;

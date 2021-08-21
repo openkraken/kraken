@@ -15,9 +15,7 @@ class LocalHttpServer {
   }
 
   static LocalHttpServer getInstance() {
-    if (_instance == null) {
-      _instance = LocalHttpServer._();
-    }
+    _instance ??= LocalHttpServer._();
     return _instance!;
   }
 

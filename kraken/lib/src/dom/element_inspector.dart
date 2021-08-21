@@ -112,7 +112,7 @@ mixin ElementInspectorService {
   /// name "ext.flutter.inspector.name"), which takes no arguments.
   void _registerSignalServiceExtension({
     required String name,
-    required FutureOr<dynamic> callback(),
+    required FutureOr<dynamic> Function() callback,
   }) {
     registerServiceExtension(
       name: name,
@@ -130,7 +130,7 @@ mixin ElementInspectorService {
   /// references to avoid leaking memory.
   void _registerObjectGroupServiceExtension({
     required String name,
-    required FutureOr<dynamic> callback(String objectGroup),
+    required FutureOr<dynamic> Function(String objectGroup) callback,
   }) {
     registerServiceExtension(
       name: name,

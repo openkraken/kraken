@@ -38,14 +38,7 @@ class Queue {
 
   StreamController<int>? _remainingItemsController;
 
-  Stream<int> get remainingItems {
-    // Lazily create the remaining items controller so if people aren't listening to the stream, it won't create any potential memory leaks.
-    // Probably not necessary, but hey, why not?
-    _remainingItemsController ??= StreamController<int>();
-    return _remainingItemsController!.stream.asBroadcastStream();
-  }
-
-  Set<int> _activeItems = {};
+  final Set<int> _activeItems = {};
 
   Queue({this.parallel = 1});
 
@@ -95,5 +88,9 @@ class Queue {
       };
       item.execute();
     }
+  }
+
+  void dispose() {
+    _remainingItemsController?.close();
   }
 }

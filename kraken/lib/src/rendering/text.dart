@@ -68,6 +68,7 @@ class RenderTextBox extends RenderBox
     return _boxSize;
   }
 
+  @override
   set size(Size value) {
     _boxSize = value;
     super.size = value;

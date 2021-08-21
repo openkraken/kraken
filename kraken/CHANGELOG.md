@@ -1,3 +1,10 @@
+## 0.8.2+1
+
+**Bug Fixed**
+
++ Fix kraken widget layout size https://github.com/openkraken/kraken/pull/584
++ Fix input can not focus when hitting enter key https://github.com/openkraken/kraken/pull/595
+
 ## 0.8.2
 
 **Features**

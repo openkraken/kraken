@@ -644,7 +644,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       bool isLineLengthExeedContainter = whiteSpace != WhiteSpace.nowrap &&
           (runMainAxisExtent + childMainAxisExtent > mainAxisLimit);
 
-      if (runChildren.length > 0 &&
+      if (runChildren.isNotEmpty &&
           (isChildBlockLevel ||
               isPreChildBlockLevel ||
               isLineLengthExeedContainter)) {
@@ -717,7 +717,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       child = childParentData.nextSibling;
     }
 
-    if (runChildren.length > 0) {
+    if (runChildren.isNotEmpty) {
       mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
       crossAxisExtent += runCrossAxisExtent;
       runMetrics.add(_RunMetrics(
@@ -931,7 +931,7 @@ class RenderFlowLayout extends RenderLayoutBox {
               break;
             case VerticalAlign.bottom:
               childLineExtent =
-                  (lineBoxHeight != null ? lineBoxHeight : runCrossAxisExtent) -
+                  (lineBoxHeight ?? runCrossAxisExtent) -
                       childSize!.height -
                       childLeading / 2;
               break;
@@ -1013,7 +1013,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         transformedDisplay != CSSDisplay.flex;
 
     // Use margin bottom as baseline if layout has no children
-    if (lineBoxMetrics.length == 0) {
+    if (lineBoxMetrics.isEmpty) {
       if (isDisplayInline) {
         // Flex item baseline does not includes margin-bottom
         lineDistance = isParentFlowLayout
@@ -1375,7 +1375,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         ? childMarginTop + childSize!.height + childMarginBottom
         : childMarginTop + childSize!.height;
     // When baseline of children not found, use boundary of margin bottom as baseline
-    double extentAboveBaseline = childAscent != null ? childAscent : baseline;
+    double extentAboveBaseline = childAscent ?? baseline;
 
     return extentAboveBaseline;
   }
@@ -1793,6 +1793,7 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
   bool get isRepaintBoundary => true;
 
   /// Convert [RenderSelfRepaintFlowLayout] to [RenderSelfRepaintFlexLayout]
+  @override
   RenderSelfRepaintFlexLayout toFlexLayout() {
     List<RenderObject?> children = getDetachedChildrenAsList();
     RenderSelfRepaintFlexLayout selfRepaintFlexLayout = RenderSelfRepaintFlexLayout(
