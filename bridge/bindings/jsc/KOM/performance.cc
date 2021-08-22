@@ -678,10 +678,10 @@ JSValueRef JSPerformance::measure(JSContextRef ctx, JSObjectRef function, JSObje
 std::vector<NativePerformanceEntry *> JSPerformance::getFullEntries() {
   auto &bridgeEntries = nativePerformance->entries;
 #if ENABLE_PROFILE
-  if (getDartMethod()->getPerformanceEntries == nullptr) {
+  if (getDartMethod(context->getOwner())->getPerformanceEntries == nullptr) {
     return std::vector<NativePerformanceEntry *>();
   }
-  auto dartEntryList = getDartMethod()->getPerformanceEntries(context->getContextId());
+  auto dartEntryList = getDartMethod(context->getOwner())->getPerformanceEntries(context->getContextId());
   if (dartEntryList == nullptr) return std::vector<NativePerformanceEntry *>();
   auto dartEntityBytes = dartEntryList->entries;
   std::vector<NativePerformanceEntry *> dartEntries;

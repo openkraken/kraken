@@ -14,8 +14,12 @@
 #include <atomic>
 
 kraken::JSBridgeTest **bridgeTestPool {nullptr};
+std::recursive_mutex bridge_test_mutex_;
+
 
 void initTestFramework(int32_t contextId) {
+  std::lock_guard<std::recursive_mutex> guard(bridge_test_mutex_);
+
   if (bridgeTestPool == nullptr) {
       bridgeTestPool = new kraken::JSBridgeTest*[10];
   }
@@ -26,15 +30,17 @@ void initTestFramework(int32_t contextId) {
 }
 
 int8_t evaluateTestScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine) {
+  std::lock_guard<std::recursive_mutex> guard(bridge_test_mutex_);
   auto bridgeTest = bridgeTestPool[contextId];
   return bridgeTest->evaluateTestScripts(code->string, code->length, bundleFilename, startLine);
 }
 
 void executeTest(int32_t contextId, ExecuteCallback executeCallback) {
+  std::lock_guard<std::recursive_mutex> guard(bridge_test_mutex_);
   auto bridgeTest = bridgeTestPool[contextId];
   bridgeTest->invokeExecuteTest(executeCallback);
 }
 
-void registerTestEnvDartMethods(uint64_t *methodBytes, int32_t length) {
-  kraken::registerTestEnvDartMethods(methodBytes, length);
+void registerTestEnvDartMethods(int32_t isolateHash, uint64_t *methodBytes, int32_t length) {
+  kraken::registerTestEnvDartMethods(isolateHash, methodBytes, length);
 }

@@ -20,6 +20,6 @@ KRAKEN_EXPORT_C
 void executeTest(int32_t contextId, ExecuteCallback executeCallback);
 
 KRAKEN_EXPORT_C
-void registerTestEnvDartMethods(uint64_t *methodBytes, int32_t length);
+void registerTestEnvDartMethods(int32_t isolateHash, uint64_t *methodBytes, int32_t length);
 
 #endif

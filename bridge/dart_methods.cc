@@ -96,10 +96,9 @@ void registerDartMethods(int32_t isolateHash, uint64_t *methodBytes, int32_t len
 }
 
 
-void registerTestEnvDartMethods(uint64_t *methodBytes, int32_t length) {
+void registerTestEnvDartMethods(int32_t isolateHash, uint64_t *methodBytes, int32_t length) {
   size_t i = 0;
-    int32_t keyHash = 0;
-    std::shared_ptr<DartMethodPointer> methodPointer = getDartMethod(keyHash);
+  std::shared_ptr<DartMethodPointer> methodPointer = getDartMethod(isolateHash);
 
   methodPointer->onJsError = reinterpret_cast<OnJSError>(methodBytes[i++]);
   methodPointer->matchImageSnapshot = reinterpret_cast<MatchImageSnapshot>(methodBytes[i++]);
@@ -111,7 +110,8 @@ void registerTestEnvDartMethods(uint64_t *methodBytes, int32_t length) {
 }
 
 #if ENABLE_PROFILE
-void registerGetPerformanceEntries(GetPerformanceEntries getPerformanceEntries) {
+void registerGetPerformanceEntries(int32_t isolateHash, GetPerformanceEntries getPerformanceEntries) {
+  std::shared_ptr<DartMethodPointer> methodPointer = getDartMethod(isolateHash);
   methodPointer->getPerformanceEntries = getPerformanceEntries;
 }
 #endif

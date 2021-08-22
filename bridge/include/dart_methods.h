@@ -101,7 +101,7 @@ void registerDartMethods(int32_t isolateHash, uint64_t *methodBytes, int32_t len
 
 #ifdef IS_TEST
 KRAKEN_EXPORT
-void registerTestEnvDartMethods(uint64_t *methodBytes, int32_t length);
+void registerTestEnvDartMethods(int32_t isolateHash,uint64_t *methodBytes, int32_t length);
 #endif
 
 KRAKEN_EXPORT

@@ -7,6 +7,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:isolate';
 import 'dart:ui';
 import 'dart:io' show Platform;
 import 'dart:typed_data';
@@ -139,8 +140,8 @@ final List<int> _dartNativeMethods = [
   _nativeSimulateInputText.address
 ];
 
-typedef Native_RegisterTestEnvDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);
-typedef Dart_RegisterTestEnvDartMethods = void Function(Pointer<Uint64> methodBytes, int length);
+typedef Native_RegisterTestEnvDartMethods = Void Function(Int32 isolateHash, Pointer<Uint64> methodBytes, Int32 length);
+typedef Dart_RegisterTestEnvDartMethods = void Function(int isolateHash,Pointer<Uint64> methodBytes, int length);
 
 final Dart_RegisterTestEnvDartMethods _registerTestEnvDartMethods =
 nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterTestEnvDartMethods>>('registerTestEnvDartMethods').asFunction();
@@ -150,5 +151,5 @@ void registerDartTestMethodsToCpp() {
   Pointer<Uint64> bytes = malloc.allocate<Uint64>(sizeOf<Uint64>() * _dartNativeMethods.length);
   Uint64List nativeMethodList = bytes.asTypedList(_dartNativeMethods.length);
   nativeMethodList.setAll(0, _dartNativeMethods);
-  _registerTestEnvDartMethods(bytes, _dartNativeMethods.length);
+  _registerTestEnvDartMethods(Isolate.current.hashCode, bytes, _dartNativeMethods.length);
 }
