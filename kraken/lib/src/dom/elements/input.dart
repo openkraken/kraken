@@ -8,6 +8,7 @@ import 'dart:collection';
 import 'dart:ui';
 import 'dart:ffi';
 import 'dart:math' as math;
+import 'package:flutter/gestures.dart';
 import 'package:kraken/bridge.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -56,7 +57,7 @@ const Duration _kCursorBlinkWaitForStart = Duration(milliseconds: 150);
 const TextSelection blurSelection = TextSelection.collapsed(offset: -1);
 
 class EditableTextDelegate implements TextSelectionDelegate {
-  InputElement _inputElement;
+  final InputElement _inputElement;
   EditableTextDelegate(this._inputElement);
 
   TextEditingValue _textEditingValue = TextEditingValue();
@@ -118,7 +119,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
   }
 
-  static SplayTreeMap<int, InputElement> _nativeMap = SplayTreeMap();
+  static final SplayTreeMap<int, InputElement> _nativeMap = SplayTreeMap();
 
   static InputElement getInputElementOfNativePtr(Pointer<NativeInputElement> nativePtr) {
     InputElement? element = _nativeMap[nativePtr.address];
@@ -257,8 +258,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   @override
-  void setStyle(String key, value) {
-    super.setStyle(key, value);
+  void setRenderStyle(String key, value) {
+    super.setRenderStyle(key, value);
 
     if (_renderInputBox != null) {
       RenderStyle renderStyle = renderBoxModel!.renderStyle;
@@ -284,7 +285,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     _textSelectionDelegate.userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
     TextSpan? text = obscureText ? _buildPasswordTextSpan(_actualText!.text!) : _actualText;
     if (_renderEditable != null) {
-      _renderEditable!.text = _actualText!.text!.length == 0
+      _renderEditable!.text = _actualText!.text!.isEmpty
           ? placeholderTextSpan
           : text;
     }
@@ -304,12 +305,29 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void dispatchEvent(Event event) {
     super.dispatchEvent(event);
     if (event.type == EVENT_TOUCH_START) {
-      InputElement.setFocus(this);
+      TouchEvent e = (event as TouchEvent);
+      if (e.touches.length == 1) {
+        InputElement.setFocus(this);
+
+        Touch touch = e.touches[0];
+        final TapDownDetails details = TapDownDetails(
+          globalPosition: Offset(touch.screenX, touch.screenY),
+          localPosition: Offset(touch.clientX, touch.clientY),
+          kind: PointerDeviceKind.touch,
+        );
+
+        _renderEditable!.handleTapDown(details);
+      }
+
       // @TODO: selection.
     } else if (event.type == EVENT_TOUCH_MOVE) {
       // @TODO: selection.
     } else if (event.type == EVENT_TOUCH_END) {
       // @TODO: selection.
+    } else if (event.type == EVENT_CLICK) {
+      _renderEditable!.handleTap();
+    } else if (event.type == EVENT_LONG_PRESS) {
+      _renderEditable!.handleLongPress();
     }
   }
 
@@ -377,11 +395,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   int _maxLength = 9007199254740992;
 
   RenderEditable createRenderEditable() {
-    if (_actualText == null) {
-      _actualText = _buildTextSpan();
-    }
+    _actualText ??= _buildTextSpan();
     TextSpan text = _actualText!;
-    if (_actualText!.toPlainText().length == 0) {
+    if (_actualText!.toPlainText().isEmpty) {
       text = placeholderTextSpan;
     } else if (obscureText) {
       text = _buildPasswordTextSpan(text.text!);
@@ -411,6 +427,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       devicePixelRatio: window.devicePixelRatio,
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
+      ignorePointer: true,
     );
     return _renderEditable!;
   }
@@ -430,7 +447,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     switch (action) {
       case TextInputAction.done:
         _triggerChangeEvent();
-        blur();
+        InputElement.clearFocus();
         break;
       case TextInputAction.none:
         // TODO: Handle this case.
@@ -554,7 +571,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   void _handleTextChanged(String text, bool userInteraction, SelectionChangedCause? cause) {
     if (_renderEditable != null) {
-      if (text.length == 0) {
+      if (text.isEmpty) {
         _renderEditable!.text = placeholderTextSpan;
       } else if (obscureText) {
         _renderEditable!.text = _buildPasswordTextSpan(text);
@@ -858,6 +875,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     print('ShowAutocorrectionPromptRect start: $start, end: $end');
   }
 
+  @override
   void dispose() {
     super.dispose();
     _nativeMap.remove(nativeInputElement.address);

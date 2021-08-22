@@ -188,7 +188,7 @@ JSValueRef JSPerformance::clearMarks(JSContextRef ctx, JSObjectRef function, JSO
         std::string entryName = (*it)->name;
         std::string targetName = JSStringToStdString(JSValueToStringCopy(ctx, targetMark, exception));
         if (entryName == targetName) {
-          entries.erase(it);
+          entries.erase(it++);
         } else {
           it++;
         };

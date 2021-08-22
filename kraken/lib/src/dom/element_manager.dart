@@ -50,9 +50,9 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     element_registry.defineElement(type, creator);
   }
 
-  static Map<int, Pointer<NativeElement>> htmlNativePtrMap = Map();
-  static Map<int, Pointer<NativeDocument>> documentNativePtrMap = Map();
-  static Map<int, Pointer<NativeWindow>> windowNativePtrMap = Map();
+  static Map<int, Pointer<NativeElement>> htmlNativePtrMap = {};
+  static Map<int, Pointer<NativeDocument>> documentNativePtrMap = {};
+  static Map<int, Pointer<NativeWindow>> windowNativePtrMap = {};
 
   static double FOCUS_VIEWINSET_BOTTOM_OVERALL = 32;
 
@@ -247,6 +247,18 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
     if (target is Element) {
       target.setStyle(key, value);
+    } else {
+      debugPrint('Only element has style, try setting style.$key from Node(#$targetId).');
+    }
+  }
+
+  void setRenderStyle(int targetId, String key, dynamic value) {
+    assert(existsTarget(targetId), 'id: $targetId key: $key value: $value');
+    Node? target = getEventTargetByTargetId<Node>(targetId);
+    if (target == null) return;
+
+    if (target is Element) {
+      target.setRenderStyle(key, value);
     } else {
       debugPrint('Only element has style, try setting style.$key from Node(#$targetId).');
     }

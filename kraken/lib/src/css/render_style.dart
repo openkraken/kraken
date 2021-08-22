@@ -30,8 +30,11 @@ class RenderStyle
     CSSOverflowStyleMixin,
     CSSOpacityMixin {
 
+  @override
   RenderBoxModel? renderBoxModel;
+  @override
   late CSSStyleDeclaration style;
+  @override
   late Size viewportSize;
 
   RenderStyle({
@@ -474,7 +477,6 @@ class RenderStyle
   /// Returns the parsed result if percentage found, otherwise returns null
   static Matrix4? parsePercentageTransformTranslate(String transformStr, Size? size, RenderStyle renderStyle) {
     List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(transformStr);
-    final String TRANSLATE = 'translate';
     bool isPercentageExist = false;
     Size viewportSize = renderStyle.viewportSize;
     RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
@@ -484,7 +486,7 @@ class RenderStyle
     Matrix4? matrix4;
     for (CSSFunctionalNotation method in methods) {
       Matrix4? transform;
-      if (method.name == TRANSLATE && method.args.length >= 1 && method.args.length <= 2) {
+      if (method.name == CSSTransform.TRANSLATE && method.args.isNotEmpty && method.args.length <= 2) {
         double y;
         double x;
         if (method.args.length == 2) {
@@ -516,7 +518,87 @@ class RenderStyle
           fontSize: fontSize
         ) ?? 0;
         transform = Matrix4.identity()..translate(x, y);
+
+      } else if (method.name == CSSTransform.TRANSLATE_3D && method.args.isNotEmpty && method.args.length <= 3) {
+        double z;
+        double y;
+        double x;
+        if (method.args.length == 3 || method.args.length == 2) {
+          // Percentage value is invalid for translateZ.
+          if (method.args.length == 3) {
+            String translateZ = method.args[2].trim();
+            z = CSSLength.toDisplayPortValue(
+              translateZ,
+              viewportSize: viewportSize,
+              rootFontSize: rootFontSize,
+              fontSize: fontSize
+            ) ?? 0;
+          } else {
+            z = 0;
+          }
+
+          String translateY = method.args[1].trim();
+          if (CSSLength.isPercentage(translateY)) {
+            double percentage = CSSLength.parsePercentage(translateY);
+            translateY = (size!.height * percentage).toString() + 'px';
+            isPercentageExist = true;
+          }
+          y = CSSLength.toDisplayPortValue(
+            translateY,
+            viewportSize: viewportSize,
+            rootFontSize: rootFontSize,
+            fontSize: fontSize
+          ) ?? 0;
+        } else {
+          y = 0;
+          z = 0;
+        }
+        String translateX = method.args[0].trim();
+        if (CSSLength.isPercentage(translateX)) {
+          double percentage = CSSLength.parsePercentage(translateX);
+          translateX = (size!.width * percentage).toString() + 'px';
+          isPercentageExist = true;
+        }
+        x = CSSLength.toDisplayPortValue(
+          translateX,
+          viewportSize: viewportSize,
+          rootFontSize: rootFontSize,
+          fontSize: fontSize
+        ) ?? 0;
+        transform = Matrix4.identity()..translate(x, y, z);
+
+      } else if (method.name == CSSTransform.TRANSLATE_X && method.args.length == 1) {
+        String translateX = method.args[0].trim();
+        if (CSSLength.isPercentage(translateX)) {
+          double percentage = CSSLength.parsePercentage(translateX);
+          translateX = (size!.width * percentage).toString() + 'px';
+          isPercentageExist = true;
+        }
+        double x = CSSLength.toDisplayPortValue(
+          translateX,
+          viewportSize: viewportSize,
+          rootFontSize: rootFontSize,
+          fontSize: fontSize
+        ) ?? 0;
+        transform = Matrix4.identity()..translate(x);
+
+      } else if (method.name == CSSTransform.TRANSLATE_Y && method.args.length == 1) {
+        String translateY = method.args[0].trim();
+        if (CSSLength.isPercentage(translateY)) {
+          double percentage = CSSLength.parsePercentage(translateY);
+          translateY = (size!.height * percentage).toString() + 'px';
+          isPercentageExist = true;
+        }
+        double y = CSSLength.toDisplayPortValue(
+          translateY,
+          viewportSize: viewportSize,
+          rootFontSize: rootFontSize,
+          fontSize: fontSize
+        ) ?? 0;
+        double x = 0;
+        transform = Matrix4.identity()..translate(x, y);
       }
+
       if (transform != null) {
         if (matrix4 == null) {
           matrix4 = transform;
@@ -532,11 +614,20 @@ class RenderStyle
   static bool isTransformTranslatePercentage(String transformStr) {
     bool isPercentageExist = false;
     List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(transformStr);
-    final String TRANSLATE = 'translate';
     for (CSSFunctionalNotation method in methods) {
-      if (method.name == TRANSLATE && ((method.args.length == 1 && CSSLength.isPercentage(method.args[0])) ||
-        (method.args.length == 2 && (CSSLength.isPercentage(method.args[0]) || CSSLength.isPercentage(method.args[1]))))
-      ) {
+      if ((method.name == CSSTransform.TRANSLATE &&
+          ((method.args.length == 1 && CSSLength.isPercentage(method.args[0])) ||
+            (method.args.length == 2 && (CSSLength.isPercentage(method.args[0]) || CSSLength.isPercentage(method.args[1]))))) ||
+
+        (method.name == CSSTransform.TRANSLATE_3D &&
+          ((method.args.length == 1 && CSSLength.isPercentage(method.args[0])) ||
+            (method.args.length == 2 && (CSSLength.isPercentage(method.args[0]) || CSSLength.isPercentage(method.args[1]))) ||
+            (method.args.length == 3 && (CSSLength.isPercentage(method.args[0]) || CSSLength.isPercentage(method.args[1]) || CSSLength.isPercentage(method.args[2]))))) ||
+
+        (method.name == CSSTransform.TRANSLATE_X && (method.args.length == 1 && CSSLength.isPercentage(method.args[0]))) ||
+
+        (method.name == CSSTransform.TRANSLATE_Y && (method.args.length == 1 && CSSLength.isPercentage(method.args[0])))
+    ) {
         isPercentageExist = true;
       }
     }

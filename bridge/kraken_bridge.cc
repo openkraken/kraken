@@ -182,6 +182,12 @@ void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFi
   context->evaluateScript(code, bundleFilename, startLine);
 }
 
+void parseHTML(int32_t contextId, NativeString *code, const char *bundleFilename) {
+  assert(checkContext(contextId) && "parseHTML: contextId is not valid");
+  auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
+  context->parseHTML(code, bundleFilename);
+}
+
 void reloadJsContext(int32_t contextId) {
   std::lock_guard<std::recursive_mutex> guard(bridge_runtime_mutex_);
   assert(checkContext(contextId) && "reloadJSContext: contextId is not valid");

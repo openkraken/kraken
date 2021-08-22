@@ -23,7 +23,7 @@ import 'package:ffi/ffi.dart';
 
 import 'element_native_methods.dart';
 
-const String STYLE = 'style';
+const String _STYLE_PROPERTY = 'style';
 
 /// Defined by W3C Standard,
 /// Most element's default width is 300 in pixel,
@@ -53,7 +53,7 @@ mixin ElementBase on Node {
   RenderLayoutBox? _renderLayoutBox;
   RenderIntrinsic? _renderIntrinsic;
 
-  RenderBoxModel? get renderBoxModel => _renderLayoutBox ?? _renderIntrinsic ?? null;
+  RenderBoxModel? get renderBoxModel => _renderLayoutBox ?? _renderIntrinsic;
   set renderBoxModel(RenderBoxModel? value) {
     if (value == null) {
       _renderIntrinsic = null;
@@ -69,19 +69,19 @@ mixin ElementBase on Node {
 }
 
 /// Mark the renderer of element as needs layout.
-typedef void MarkRendererNeedsLayout();
+typedef MarkRendererNeedsLayout = void Function();
 /// Toggle the renderer of element between repaint boundary and non repaint boundary.
-typedef void ToggleRendererRepaintBoundary();
+typedef ToggleRendererRepaintBoundary = void Function();
 /// Detach the renderer from its owner element.
-typedef void DetachRenderer();
+typedef DetachRenderer = void Function();
 /// Do the preparation work before the renderer is attached.
-typedef RenderObject BeforeRendererAttach();
+typedef BeforeRendererAttach = RenderObject Function();
 /// Do the clean work after the renderer has attached.
-typedef void AfterRendererAttach();
+typedef AfterRendererAttach = void Function();
 /// Return the targetId of current element.
-typedef int GetTargetId();
+typedef GetTargetId = int Function();
 /// Get the font size of root element
-typedef double GetRootElementFontSize();
+typedef GetRootElementFontSize = double Function();
 
 /// Delegate methods passed to renderBoxModel for actions involved with element
 /// (eg. convert renderBoxModel to repaint boundary then attach to element).
@@ -112,9 +112,8 @@ class Element extends Node
         EventHandlerMixin,
         CSSOverflowMixin,
         CSSVisibilityMixin,
-        CSSTransitionMixin,
         CSSFilterEffectsMixin {
-  static SplayTreeMap<int, Element> _nativeMap = SplayTreeMap();
+  static final SplayTreeMap<int, Element> _nativeMap = SplayTreeMap();
 
   static Element getElementOfNativePtr(Pointer<NativeElement> nativeElement) {
     Element? element = _nativeMap[nativeElement.address];
@@ -122,7 +121,7 @@ class Element extends Node
     return element;
   }
 
-  final Map<String, dynamic> properties = Map<String, dynamic>();
+  final Map<String, dynamic> properties = <String, dynamic>{};
 
   /// Should create repaintBoundary for this element to repaint separately from parent.
   bool repaintSelf;
@@ -531,8 +530,7 @@ class Element extends Node
       case CSSPositionType.sticky:
       case CSSPositionType.relative:
       case CSSPositionType.static:
-        RenderLayoutBox? parentRenderLayoutBox = _scrollingContentLayoutBox != null ?
-        _scrollingContentLayoutBox : _renderLayoutBox;
+        RenderLayoutBox? parentRenderLayoutBox = _scrollingContentLayoutBox ?? _renderLayoutBox;
 
         if (parentRenderLayoutBox != null) {
           parentRenderLayoutBox.insert(child.renderBoxModel!, after: after);
@@ -554,6 +552,12 @@ class Element extends Node
       parent.addChildRenderObject(this, after: after);
       _afterRendererAttach();
     }
+
+    // CSS Transition works after dom has layouted, so it needs to mark
+    // the renderBoxModel as layouted on the next frame.
+    SchedulerBinding.instance!.addPostFrameCallback((timestamp) {
+      renderBoxModel?.firstLayouted = true;
+    });
   }
 
   // Detach renderObject of current node from parent
@@ -725,7 +729,7 @@ class Element extends Node
     Element rootEl = elementManager.viewportElement;
     RenderLayoutBox rootRenderLayoutBox = rootEl.scrollingContentLayoutBox!;
     List<RenderBoxModel> fixedChildren = rootRenderLayoutBox.fixedChildren;
-    if (fixedChildren.indexOf(childRenderBoxModel) == -1) {
+    if (!fixedChildren.contains(childRenderBoxModel)) {
       fixedChildren.add(childRenderBoxModel);
     }
   }
@@ -735,7 +739,7 @@ class Element extends Node
     Element rootEl = elementManager.viewportElement;
     RenderLayoutBox? rootRenderLayoutBox = rootEl.scrollingContentLayoutBox!;
     List<RenderBoxModel> fixedChildren = rootRenderLayoutBox.fixedChildren;
-    if (fixedChildren.indexOf(childRenderBoxModel) != -1) {
+    if (fixedChildren.contains(childRenderBoxModel)) {
       fixedChildren.remove(childRenderBoxModel);
     }
   }
@@ -875,13 +879,6 @@ class Element extends Node
       case TRANSFORM_ORIGIN:
         _styleTransformOriginChangedListener(property, original, present);
         break;
-      case TRANSITION_DELAY:
-      case TRANSITION_DURATION:
-      case TRANSITION_TIMING_FUNCTION:
-      case TRANSITION_PROPERTY:
-        _styleTransitionChangedListener(property, original, present);
-        break;
-
       case OBJECT_FIT:
         _styleObjectFitChangedListener(property, original, present);
         break;
@@ -995,10 +992,6 @@ class Element extends Node
     updateFilterEffects(renderBoxModel!, present);
   }
 
-  void _styleTransitionChangedListener(String property, String? original, String present) {
-    updateTransition(style);
-  }
-
   void _styleOverflowChangedListener(String property, String? original, String present) {
     updateRenderOverflow(this, _scrollListener);
   }
@@ -1110,7 +1103,15 @@ class Element extends Node
 
   void _styleBoxChangedListener(String property, String? original, String present) {
     int contextId = elementManager.contextId;
-    renderBoxModel!.renderStyle.updateBox(property, original, present, contextId);
+    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
+    double rootFontSize = _getRootElementFontSize();
+    double fontSize = selfRenderBoxModel.renderStyle.fontSize;
+    renderBoxModel!.renderStyle.updateBox(
+      property, present, contextId,
+      viewportSize: viewportSize,
+      rootFontSize: rootFontSize,
+      fontSize: fontSize,
+    );
   }
 
   void _styleBorderRadiusChangedListener(String property, String? original, String present) {
@@ -1203,40 +1204,35 @@ class Element extends Node
   // Universal style property change callback.
   @mustCallSuper
   void setStyle(String key, dynamic value) {
-    // @HACK: delay transition property at next frame to make sure transition trigger after all style had been set.
-    // https://github.com/WebKit/webkit/blob/master/Source/WebCore/style/StyleTreeResolver.cpp#L220
-    // This it not a good solution between webkit implementation which write all new style property into an RenderStyle object
-    // then trigger the animation phase.
-    if (key == TRANSITION) {
-      SchedulerBinding.instance!.addPostFrameCallback((timestamp) {
-        style.setProperty(key, value, viewportSize, renderBoxModel?.renderStyle);
-      });
-      return;
-    } else {
-      CSSDisplay originalDisplay = CSSDisplayMixin.getDisplay(style[DISPLAY] ?? defaultDisplay);
-      // @NOTE: See [CSSStyleDeclaration.setProperty], value change will trigger
-      // [StyleChangeListener] to be invoked in sync.
-      style.setProperty(key, value, viewportSize, renderBoxModel?.renderStyle);
+    CSSDisplay originalDisplay = CSSDisplayMixin.getDisplay(style[DISPLAY] ?? defaultDisplay);
+    style.setProperty(key, value, viewportSize, renderBoxModel?.renderStyle);
 
-      // When renderer and style listener is not created when original display is none,
-      // thus it needs to create renderer when style changed.
-      if (originalDisplay == CSSDisplay.none && key == DISPLAY && value != NONE) {
-        RenderBox? after;
-        Element parent = this.parent as Element;
-        if (parent.scrollingContentLayoutBox != null) {
-          after = parent.scrollingContentLayoutBox!.lastChild;
-        } else {
-          after = (parent.renderBoxModel as RenderLayoutBox).lastChild;
-        }
-        attachTo(parent, after: after);
+    // When renderer and style listener is not created when original display is none,
+    // thus it needs to create renderer when style changed.
+    if (originalDisplay == CSSDisplay.none && key == DISPLAY && value != NONE) {
+      RenderBox? after;
+      Element parent = this.parent as Element;
+      if (parent.scrollingContentLayoutBox != null) {
+        after = parent.scrollingContentLayoutBox!.lastChild;
+      } else {
+        after = (parent.renderBoxModel as RenderLayoutBox).lastChild;
       }
+      attachTo(parent, after: after);
     }
+  }
+
+  // Universal RenderStyle set callback.
+  @mustCallSuper
+  void setRenderStyle(String key, dynamic value) {
+    // @NOTE: See [CSSStyleDeclaration.setProperty], value change will trigger
+    // [StyleChangeListener] to be invoked in sync.
+    style.setRenderStyle(key, value, viewportSize, renderBoxModel);
   }
 
   @mustCallSuper
   void setProperty(String key, dynamic value) {
     // Each key change will emit to `setStyle`
-    if (key == STYLE) {
+    if (key == _STYLE_PROPERTY) {
       assert(value is Map<String, dynamic>);
       // @TODO: Consider `{ color: red }` to `{}`, need to remove invisible keys.
       (value as Map<String, dynamic>).forEach(setStyle);
@@ -1257,8 +1253,8 @@ class Element extends Node
   void removeProperty(String key) {
     properties.remove(key);
 
-    if (key == STYLE) {
-      setProperty(STYLE, null);
+    if (key == _STYLE_PROPERTY) {
+      setProperty(_STYLE_PROPERTY, null);
     }
   }
 
@@ -1318,9 +1314,7 @@ class Element extends Node
         .flushLayout();
 
     Element? element = _findContainingBlock(this);
-    if (element == null) {
-      element = elementManager.viewportElement;
-    }
+    element ??= elementManager.viewportElement;
     return renderBox.localToGlobal(Offset.zero, ancestor: element.renderBoxModel);
   }
 
@@ -1375,9 +1369,7 @@ class Element extends Node
   }
 
   Future<Uint8List> toBlob({double? devicePixelRatio}) {
-    if (devicePixelRatio == null) {
-      devicePixelRatio = window.devicePixelRatio;
-    }
+    devicePixelRatio ??= window.devicePixelRatio;
 
     Completer<Uint8List> completer = Completer();
     if (nodeName != 'HTML') {

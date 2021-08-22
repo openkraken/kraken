@@ -98,7 +98,7 @@ mixin CSSFilterEffectsMixin {
   // eg: 'grayscale(1) grayscale(0.5)' -> matrix5(grayscale(1)) · matrix5(grayscale(0.5))
   static ColorFilter? _parseColorFilters(List<CSSFunctionalNotation> functions) {
     List<double>? matrix5;
-    if (functions.length > 0) {
+    if (functions.isNotEmpty) {
       for (int i = 0; i < functions.length; i ++) {
         CSSFunctionalNotation f = functions[i];
         double amount = double.tryParse(f.args.first) ?? 1;
@@ -143,7 +143,7 @@ mixin CSSFilterEffectsMixin {
     RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
     double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
     double fontSize = renderStyle.fontSize;
-    if (functions.length > 0) {
+    if (functions.isNotEmpty) {
       for (int i = 0; i < functions.length; i ++) {
         CSSFunctionalNotation f = functions[i];
         switch (f.name.toLowerCase()) {

@@ -13,6 +13,11 @@ WindowInstance::WindowInstance(JSWindow *window)
   : EventTargetInstance(window, WINDOW_TARGET_ID), nativeWindow(new NativeWindow(nativeEventTarget)) {
   location_ = new JSLocation(context);
 
+  // https://developer.mozilla.org/zh-CN/docs/Web/API/Window/self
+  // window.self should be window in kraken.
+  std::string self = "self";
+  setProperty(self, this->object, nullptr);
+
   getDartMethod(context->getOwner())->initWindow(window->contextId, nativeWindow);
 }
 
@@ -120,6 +125,21 @@ JSValueRef JSWindow::open(JSContextRef ctx, JSObjectRef function, JSObjectRef th
   JSStringRef url = JSValueToStringCopy(ctx, urlValueRef, exception);
   auto window = reinterpret_cast<WindowInstance *>(JSObjectGetPrivate(thisObject));
   window->nativeWindow->open(window->nativeWindow, stringRefToNativeString(url));
+  return nullptr;
+}
+
+// https://developer.mozilla.org/zh-CN/docs/Web/API/Window/postMessage
+JSValueRef JSWindow::postMessage(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                          size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+  const JSValueRef messageRef = arguments[0];
+  const JSValueRef originRef = arguments[1];
+  auto content = static_cast<JSContext *>(JSObjectGetPrivate(function));
+
+  EventInstance *eventInstance = new MessageEventInstance(JSMessageEvent::instance(content), "message", messageRef, originRef);
+
+  auto window = reinterpret_cast<WindowInstance *>(JSObjectGetPrivate(thisObject));
+  window->dispatchEvent(eventInstance);
+
   return nullptr;
 }
 

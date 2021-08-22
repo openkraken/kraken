@@ -118,24 +118,32 @@ void setCustomImageProviderFactory(ImageType imageType, ImageProviderFactory cus
   }
 }
 
+int? _getContextId(param) {
+  int? contextId;
+  if (param is List && param.isNotEmpty) {
+    contextId = param[0];
+  }
+  return contextId;
+}
+
 /// default ImageProviderFactory implementation of [ImageType.cached]
-ImageProvider defaultCachedProviderFactory(String url, [dynamic param]) {
-  return CachedNetworkImage(url);
+ImageProvider defaultCachedProviderFactory(String url, [param]) {
+  int? contextId = _getContextId(param);
+  return CachedNetworkImage(url, contextId: contextId);
 }
 
 /// default ImageProviderFactory implementation of [ImageType.network]
-ImageProvider defaultNetworkProviderFactory(String url, [dynamic param]) {
-  String? contextId;
-  if (param is List) contextId = param[0]?.toString();
+ImageProvider defaultNetworkProviderFactory(String url, [param]) {
+  int? contextId = _getContextId(param);
   NetworkImage networkImage = NetworkImage(url, headers: {
     HttpHeaders.userAgentHeader: getKrakenInfo().userAgent,
-    HttpHeaderContextID: contextId!,
+    HttpHeaderContext: contextId.toString(),
   });
   return networkImage;
 }
 
 /// default ImageProviderFactory implementation of [ImageType.file]
-ImageProvider? defaultFileProviderFactory(String rawPath, [dynamic param]) {
+ImageProvider? defaultFileProviderFactory(String rawPath, [param]) {
   ImageProvider? _imageProvider;
   if (param is File) {
     _imageProvider = FileImage(param);
@@ -144,7 +152,7 @@ ImageProvider? defaultFileProviderFactory(String rawPath, [dynamic param]) {
 }
 
 /// default ImageProviderFactory implementation of [ImageType.dataUrl].
-ImageProvider? defaultDataUrlProviderFactory(String uriDataPath, [dynamic param]) {
+ImageProvider? defaultDataUrlProviderFactory(String uriDataPath, [param]) {
   ImageProvider? _imageProvider;
   if (param is Uint8List) {
     _imageProvider = MemoryImage(param);
@@ -153,12 +161,12 @@ ImageProvider? defaultDataUrlProviderFactory(String uriDataPath, [dynamic param]
 }
 
 /// default ImageProviderFactory implementation of [ImageType.blob].
-ImageProvider? defaultBlobProviderFactory(String blobPath, [dynamic param]) {
+ImageProvider? defaultBlobProviderFactory(String blobPath, [param]) {
   // @TODO: support blob file url
   return null;
 }
 
 /// default ImageProviderFactory implementation of [ImageType.assets].
-ImageProvider defaultAssetsProvider(String rawUrl, [dynamic param]) {
+ImageProvider defaultAssetsProvider(String rawUrl, [param]) {
   return AssetImage(rawUrl);
 }

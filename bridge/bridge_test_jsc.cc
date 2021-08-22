@@ -16,7 +16,6 @@ using namespace kraken::foundation;
 
 bool JSBridgeTest::evaluateTestScripts(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine) {
   if (!context->isValid()) return false;
-  binding::jsc::updateLocation(sourceURL);
   return context->evaluateJavaScript(code, codeLength, sourceURL, startLine);
 }
 

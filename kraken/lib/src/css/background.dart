@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/launcher.dart';
 
 // CSS Backgrounds: https://drafts.csswg.org/css-backgrounds/
 // CSS Images: https://drafts.csswg.org/css-images-3/
@@ -90,7 +91,7 @@ class CSSBackground {
   static DecorationImage? getDecorationImage(CSSStyleDeclaration? style, CSSFunctionalNotation method, { int? contextId }) {
     DecorationImage backgroundImage;
 
-    String url = method.args.length > 0 ? method.args[0] : '';
+    String url = method.args.isNotEmpty ? method.args[0] : '';
     if (url.isEmpty) {
       return null;
     }
@@ -110,34 +111,15 @@ class CSSBackground {
       }
     }
 
-    BoxFit boxFit = BoxFit.none;
-    if (style[BACKGROUND_SIZE].isNotEmpty) {
-      switch (style[BACKGROUND_SIZE]) {
-        case COVER:
-          boxFit = BoxFit.cover;
-          break;
-        case CONTAIN:
-          boxFit = BoxFit.contain;
-          break;
-        case FILL:
-          boxFit = BoxFit.fill;
-          break;
-        case FIT_WIDTH:
-          boxFit = BoxFit.fitWidth;
-          break;
-        case FIT_HEIGTH:
-          boxFit = BoxFit.fitHeight;
-          break;
-        case SCALE_DOWN:
-          boxFit = BoxFit.scaleDown;
-          break;
-      }
+    if (contextId != null) {
+      KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
+      url = controller.uriParser!.resolve(Uri.parse(controller.href), Uri.parse(url)).toString();
     }
 
     backgroundImage = DecorationImage(
-        image: CSSUrl.parseUrl(url, contextId: contextId)!,
-        repeat: imageRepeat,
-        fit: boxFit);
+      image: CSSUrl.parseUrl(url, contextId: contextId)!,
+      repeat: imageRepeat,
+    );
 
     return backgroundImage;
   }
@@ -292,7 +274,7 @@ class CSSBackground {
 
           if (method.args[0].contains(CSSPercentage.PERCENTAGE)) {
             List<String> positionAndRadius = method.args[0].trim().split(' ');
-            if (positionAndRadius.length >= 1) {
+            if (positionAndRadius.isNotEmpty) {
               if (CSSPercentage.isPercentage(positionAndRadius[0])) {
                 radius = CSSPercentage.parsePercentage(positionAndRadius[0])! * 0.5;
                 start = 1;
@@ -387,7 +369,7 @@ class CSSBackground {
       strings = src.split(' ');
     }
 
-    if (strings.length >= 1) {
+    if (strings.isNotEmpty) {
       double? stop = defaultStop;
       if (strings.length >= 2) {
         try {

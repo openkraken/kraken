@@ -16,7 +16,9 @@ describe('Transition events', () => {
       transitionTimingFunction: 'linear',
     });
 
-    container1.style.transform = 'translate(10px, 10px)';
+    requestAnimationFrame(() => {
+      container1.style.transform = 'translate(10px, 10px)';
+    });
   });
 
   it('basic transitionstart', (done) => {

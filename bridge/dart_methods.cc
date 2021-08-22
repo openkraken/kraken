@@ -90,6 +90,7 @@ void registerDartMethods(int32_t isolateHash, uint64_t *methodBytes, int32_t len
 #endif
 
   methodPointer->onJsError = reinterpret_cast<OnJSError>(methodBytes[i++]);
+  methodPointer->getHref = reinterpret_cast<GetHref>(methodBytes[i++]);
 
   assert_m(i == length, "Dart native methods count is not equal with C++ side method registrations.");
 }

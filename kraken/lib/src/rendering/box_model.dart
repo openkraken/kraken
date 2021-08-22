@@ -91,8 +91,11 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox,
   ///    hit-testing strategy.
   bool defaultHitTestChildren(BoxHitTestResult result, {Offset? position}) {
     // The x, y parameters have the top left of the node's box as the origin.
-    ChildType? child = lastChild;
-    while (child != null) {
+
+    // The z-index needs to be sorted, and higher-level nodes are processed first.
+    List<RenderObject?> sortedChildren = (this as RenderLayoutBox).sortedChildren;
+    for (int i = sortedChildren.length - 1; i >= 0; i--) {
+      ChildType child = sortedChildren[i] as ChildType;
       final ParentDataType childParentData = child.parentData as ParentDataType;
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset == Offset.zero
@@ -101,12 +104,12 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox,
         position: position!,
         hitTest: (BoxHitTestResult result, Offset transformed) {
           assert(transformed == position - childParentData.offset);
-          return child!.hitTest(result, position: transformed);
+          return child.hitTest(result, position: transformed);
         },
       );
       if (isHit) return true;
-      child = childParentData.previousSibling;
     }
+
     return false;
   }
 
@@ -224,6 +227,7 @@ class RenderLayoutBox extends RenderBoxModel
     _isChildrenSorted = false;
   }
 
+  @override
   void move(RenderBox child, {RenderBox? after}) {
     super.move(child, after: after);
     _isChildrenSorted = false;
@@ -495,6 +499,7 @@ class RenderBoxModel extends RenderBox
   bool _debugShouldPaintOverlay = false;
 
   late RenderStyle _renderStyle;
+  @override
   RenderStyle get renderStyle => _renderStyle;
 
   late ElementDelegate _elementDelegate;
@@ -506,6 +511,15 @@ class RenderBoxModel extends RenderBox
     if (_debugShouldPaintOverlay != value) {
       _debugShouldPaintOverlay = value;
       markNeedsPaint();
+    }
+  }
+
+  // Whether renderBoxModel has been layouted for the first time.
+  bool _firstLayouted = false;
+  bool get firstLayouted => _firstLayouted;
+  set firstLayouted(bool value) {
+    if (_firstLayouted != value) {
+      _firstLayouted = value;
     }
   }
 
@@ -619,6 +633,9 @@ class RenderBoxModel extends RenderBox
 
       // Copy renderPositionHolder
       ..renderPositionHolder = renderPositionHolder
+
+      // Copy first layouted flag
+      ..firstLayouted = firstLayouted
 
       // Copy parentData
       ..parentData = parentData;
@@ -1120,11 +1137,13 @@ class RenderBoxModel extends RenderBox
   // Box size equals to RenderBox.size to avoid flutter complain when read size property.
   Size? _boxSize;
 
+  @override
   Size? get boxSize {
     assert(_boxSize != null, 'box does not have laid out.');
     return _boxSize;
   }
 
+  @override
   set size(Size value) {
     _boxSize = value;
     super.size = value;
@@ -1458,7 +1477,7 @@ class RenderBoxModel extends RenderBox
   /// Called when its corresponding element disposed
   void dispose() {
     // Clear renderObjects in list when disposed to avoid memory leak
-    if (fixedChildren.length != 0) {
+    if (fixedChildren.isNotEmpty) {
       fixedChildren.clear();
     }
   }

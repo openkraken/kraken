@@ -11,6 +11,4 @@ describe('html', () => {
   it('parentNode is document', async () => {
     expect(document.documentElement.parentNode).toBe(document);
   });
-
-  
 });

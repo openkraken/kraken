@@ -3,10 +3,11 @@
  * Author: Kraken Team.
  */
 
-import 'package:meta/meta.dart';
 import 'dart:ffi';
+
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
+import 'package:meta/meta.dart';
 
 typedef EventHandler = void Function(Event event);
 
@@ -44,6 +45,9 @@ class EventTarget {
   }
 
   void dispatchEvent(Event event) {
+    if(elementManager.controller.view.disposed) {
+      return;
+    }
     event.currentTarget = event.target = this;
     if (event.currentTarget != null && this is Element) {
       (this as Element).eventResponder(event);

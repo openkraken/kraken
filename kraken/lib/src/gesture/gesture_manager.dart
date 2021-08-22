@@ -25,6 +25,9 @@ class GestureManager {
       _instance!.gestures[EVENT_CLICK] = ClickGestureRecognizer();
       (_instance!.gestures[EVENT_CLICK] as ClickGestureRecognizer).onClick = _instance!.onClick;
 
+      _instance!.gestures[EVENT_DOUBLE_CLICK] = DoubleTapGestureRecognizer();
+      (_instance!.gestures[EVENT_DOUBLE_CLICK] as DoubleTapGestureRecognizer).onDoubleTap = _instance!.onDoubleClick;
+
       _instance!.gestures[EVENT_SWIPE] = SwipeGestureRecognizer();
       (_instance!.gestures[EVENT_SWIPE] as SwipeGestureRecognizer).onSwipe = _instance!.onSwipe;
 
@@ -50,11 +53,11 @@ class GestureManager {
 
   RenderPointerListenerMixin? _target;
 
-  Map<int, PointerEvent> _pointerToEvent = Map();
+  final Map<int, PointerEvent> _pointerToEvent = {};
 
-  Map<int, RenderPointerListenerMixin> _pointerToTarget = Map();
+  final Map<int, RenderPointerListenerMixin> _pointerToTarget = {};
 
-  List<int> _points = [];
+  final List<int> _points = [];
 
   void addTargetToList(RenderBox target) {
     _hitTestList.add(target);
@@ -74,9 +77,12 @@ class GestureManager {
         eventHandlers = renderBox.getEventHandlers!();
       }
 
-      if (!eventHandlers.keys.isEmpty) {
+      if (eventHandlers.keys.isNotEmpty) {
         if (!events.contains(EVENT_CLICK) && eventHandlers.containsKey(EVENT_CLICK)) {
           events.add(EVENT_CLICK);
+        }
+        if (!events.contains(EVENT_DOUBLE_CLICK) && eventHandlers.containsKey(EVENT_DOUBLE_CLICK)) {
+          events.add(EVENT_DOUBLE_CLICK);
         }
         if (!events.contains(EVENT_SWIPE) && eventHandlers.containsKey(EVENT_SWIPE)) {
           events.add(EVENT_SWIPE);
@@ -192,6 +198,14 @@ class GestureManager {
         _points.remove(event.pointer);
         _pointerToEvent.remove(event.pointer);
         _pointerToTarget.remove(event.pointer);
+      }
+    }
+  }
+
+  void onDoubleClick() {
+    if (_target != null && _target!.onClick != null) {
+      if (_target!.onDoubleClick != null) {
+        _target!.onDoubleClick!(Event(EVENT_DOUBLE_CLICK));
       }
     }
   }

@@ -20,12 +20,14 @@ class RenderIntrinsic extends RenderBoxModel
       elementDelegate: elementDelegate
   );
 
+  @override
   BoxSizeType get widthSizeType {
     bool widthDefined =
         renderStyle.width != null || (renderStyle.minWidth != null);
     return widthDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
   }
 
+  @override
   BoxSizeType get heightSizeType {
     bool heightDefined =
         renderStyle.height != null || (renderStyle.minHeight != null);
@@ -46,7 +48,6 @@ class RenderIntrinsic extends RenderBoxModel
         RenderLayoutParentData parentData = RenderLayoutParentData();
         child.parentData =
             CSSPositionedLayout.getPositionParentData(child, parentData);
-        ;
       } else {
         child.parentData = RenderLayoutParentData();
       }

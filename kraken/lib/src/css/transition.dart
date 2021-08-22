@@ -43,8 +43,8 @@ enum CSSTransitionEvent {
   cancel,
 }
 
-mixin CSSTransitionMixin on Node {
-  void updateTransition(CSSStyleDeclaration style) {
+class CSSTransition {
+  static void updateTransition(CSSStyleDeclaration style) {
     Map<String, List> transitions = {};
 
     List<String> transitionProperty = CSSStyleProperty.getMultipleValues(style[TRANSITION_PROPERTY]) ?? [ALL];
@@ -59,12 +59,8 @@ mixin CSSTransitionMixin on Node {
       String delay = transitionDelay.length == 1 ? transitionDelay[0] : transitionDelay[i];
       transitions[property] = [duration, function, delay];
     }
-
     style.transitions = transitions;
   }
-}
-
-class CSSTransition {
 
   static bool isValidTransitionPropertyValue(String value) {
     return value == ALL || value == NONE || CSSTextual.isCustomIdent(value);

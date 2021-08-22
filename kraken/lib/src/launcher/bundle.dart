@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/module.dart';
+import 'package:kraken/launcher.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -40,21 +41,21 @@ abstract class KrakenBundle {
 
   bool isResolved = false;
 
+  // Bundle contentType.
+  ContentType? contentType;
+
   Future<void> resolve();
 
   static Future<KrakenBundle> getBundle(String path, { String? contentOverride, required int contextId }) async {
     KrakenBundle bundle;
-    Uri uri = Uri.parse(path);
-    if (contentOverride != null && contentOverride.isNotEmpty) {
-      bundle = RawBundle(contentOverride, uri);
-    } else {
-      // Treat empty scheme as https.
-      if (path.startsWith('//')) path = 'https' + path;
 
-      if (uri.isScheme('HTTP') || uri.isScheme('HTTPS')) {
-        bundle = NetworkBundle(uri, contextId: contextId);
+    if (contentOverride != null && contentOverride.isNotEmpty) {
+      bundle = RawBundle(contentOverride, Uri.parse(path));
+    } else {
+      if (path.startsWith('//') || path.startsWith('/') || path.startsWith('http://') || path.startsWith('https://')) {
+        bundle = NetworkBundle(Uri.parse(path), contextId: contextId);
       } else {
-        bundle = AssetsBundle(uri);
+        bundle = AssetsBundle(Uri.parse(path));
       }
     }
 
@@ -70,7 +71,13 @@ abstract class KrakenBundle {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_START);
     }
 
-    evaluateScripts(contextId, content, url.toString(), lineOffset);
+    if (contentType?.mimeType == ContentType.html.mimeType || url.toString().contains('.html')) {
+      // parse html.
+      parseHTML(contextId, content, url.toString());
+    } else {
+      // eval JavaScript.
+      evaluateScripts(contextId, content, url.toString(), lineOffset);
+    }
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_END);
@@ -97,10 +104,13 @@ class NetworkBundle extends KrakenBundle {
 
   @override
   Future<void> resolve() async {
-    NetworkAssetBundle bundle = NetworkAssetBundle(url, contextId: contextId);
+    KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
+    Uri baseUrl = Uri.parse(controller.href);
+    NetworkAssetBundle bundle = NetworkAssetBundle(controller.uriParser!.resolve(baseUrl, url), contextId: contextId);
     bundle.httpClient.userAgent = getKrakenInfo().userAgent;
     String absoluteURL = url.toString();
     ByteData bytes = await bundle.load(absoluteURL);
+    contentType = bundle.contentType;
     content = await _resolveStringFromData(bytes, absoluteURL);
     isResolved = true;
   }
@@ -125,13 +135,14 @@ class NetworkAssetBundle extends AssetBundle {
   final Uri _baseUrl;
   final int contextId;
   final HttpClient httpClient;
+  ContentType? contentType;
 
   Uri _urlFromKey(String key) => _baseUrl.resolve(key);
 
   @override
   Future<ByteData> load(String key) async {
     final HttpClientRequest request = await httpClient.getUrl(_urlFromKey(key));
-    KrakenHttpOverrides.markHttpRequest(request, contextId.toString());
+    KrakenHttpOverrides.setContextHeader(request, contextId);
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok)
       throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -139,6 +150,7 @@ class NetworkAssetBundle extends AssetBundle {
         IntProperty('HTTP status code', response.statusCode),
       ]);
     final Uint8List bytes = await consolidateHttpClientResponseBytes(response);
+    contentType = response.headers.contentType;
     return bytes.buffer.asByteData();
   }
 
@@ -148,7 +160,7 @@ class NetworkAssetBundle extends AssetBundle {
   /// The result is not cached. The parser is run each time the resource is
   /// fetched.
   @override
-  Future<T> loadStructuredData<T>(String key, Future<T> parser(String value)) async {
+  Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) async {
     return parser(await loadString(key));
   }
 

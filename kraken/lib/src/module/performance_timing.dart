@@ -45,6 +45,8 @@ final String PERF_REMOVE_NODE_START = 'remove_node_start';
 final String PERF_REMOVE_NODE_END = 'remove_node_end';
 final String PERF_SET_STYLE_START = 'set_style_start';
 final String PERF_SET_STYLE_END = 'set_style_end';
+final String PERF_SET_RENDER_STYLE_START = 'set_render_style_start';
+final String PERF_SET_RENDER_STYLE_END = 'set_render_style_end';
 final String PERF_DOM_FORCE_LAYOUT_START = 'dom_force_layout_start';
 final String PERF_DOM_FORCE_LAYOUT_END = 'dom_force_layout_end';
 final String PERF_DOM_FLUSH_UI_COMMAND_START = 'dom_flush_ui_command_start';
@@ -78,20 +80,14 @@ class PerformanceTiming {
   static PerformanceTiming? _instance;
 
   static PerformanceTiming instance() {
-    if (_instance == null) {
-      _instance = PerformanceTiming();
-    }
+    _instance ??= PerformanceTiming();
     return _instance!;
   }
 
   void mark(String name, {int? startTime, int? uniqueId}) {
-    if (startTime == null) {
-      startTime = DateTime.now().microsecondsSinceEpoch;
-    }
+    startTime ??= DateTime.now().microsecondsSinceEpoch;
 
-    if (uniqueId == null) {
-      uniqueId = PERFORMANCE_NONE_UNIQUE_ID;
-    }
+    uniqueId ??= PERFORMANCE_NONE_UNIQUE_ID;
 
     PerformanceEntry entry = PerformanceEntry(name, startTime, uniqueId);
     entries.add(entry);
