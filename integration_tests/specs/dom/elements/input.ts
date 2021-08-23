@@ -53,10 +53,10 @@ describe('Tags input', () => {
     div = createElement(
       'input',
       {
-        value: '1234567890',   
+        value: '1234567890',
         style: {
             lineHeight: '50px',
-            fontSize: '30px', 
+            fontSize: '30px',
         },
       }
     );
@@ -69,7 +69,7 @@ describe('Tags input', () => {
     input = createElement(
       'input',
       {
-        value: '1234567890',   
+        value: '1234567890',
         style: {
             lineHeight: '10px',
             fontSize: '30px'
@@ -86,7 +86,7 @@ describe('Tags input', () => {
     input = createElement(
       'input',
       {
-        value: '1234567890',   
+        value: '1234567890',
         style: {
             lineHeight: '100px',
             fontSize: '30px'
@@ -97,15 +97,15 @@ describe('Tags input', () => {
 
     await snapshot();
   });
-   
+
   it('line-height changes when height is not set', async (done) => {
     let input;
     input = createElement(
       'input',
       {
-        value: '1234567890',   
+        value: '1234567890',
         style: {
-          lineHeight: '50px', 
+          lineHeight: '50px',
         },
       }
     );
@@ -125,7 +125,7 @@ describe('Tags input', () => {
     input = createElement(
       'input',
       {
-        value: '1234567890',   
+        value: '1234567890',
         style: {
           fontSize: '30px'
         },
@@ -141,7 +141,7 @@ describe('Tags input', () => {
     input = createElement(
       'input',
       {
-        value: '1234567890',   
+        value: '1234567890',
         style: {
         },
       }
@@ -374,5 +374,15 @@ describe('Tags input', () => {
     });
 
     simulateClick(10, 10);
+  });
+
+  it('should return empty string when set value to null', () => {
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    input.value = '1234';
+    expect(input.value).toBe('1234');
+    // @ts-ignore
+    input.value = null;
+    expect(input.value).toBe('');
   });
 });
