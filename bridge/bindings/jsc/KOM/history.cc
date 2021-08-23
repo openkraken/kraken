@@ -18,6 +18,9 @@ JSHistory::~JSHistory() {
 JSValueRef JSHistory::getProperty(std::string &name, JSValueRef *exception) {
   if (name == "length") {
     return JSValueMakeNumber(context->context(), m_previous_stack.size() + m_next_stack.size());
+  } else if (name == "state") {
+    HistoryItem& history = m_previous_stack.top();
+    return JSValueMakeFromJSONString(ctx, history.state);
   }
 
   return HostObject::getProperty(name, exception);
@@ -63,7 +66,7 @@ JSValueRef JSHistory::go(JSContextRef ctx, JSObjectRef function, JSObjectRef thi
 
   auto history = reinterpret_cast<JSHistory *>(JSObjectGetPrivate(function));
 
-  if (num > 0) {
+  if (num >= 0) {
     if (m_next_stack.size() < num) {
       return nullptr;
     }
