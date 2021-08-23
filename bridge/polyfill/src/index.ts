@@ -62,6 +62,8 @@ class ErrorEvent extends Event {
   message?: string;
   lineno?: number;
   error?: Error;
+  colno?: number;
+  filename?: string;
   constructor(type: string, init?: ErrorEventInit) {
     super(type);
 
@@ -69,6 +71,9 @@ class ErrorEvent extends Event {
       this.message = init.message;
       this.lineno = init.lineno;
       this.error = init.error;
+      this.colno = init.colno;
+      // There are no api to get filename in JSC
+      this.filename = '';
     }
   }
 }
@@ -80,7 +85,8 @@ window.__global_onerror_handler__ = function (error) {
   const event = new ErrorEvent('error',{
     error: error,
     message: error.message,
-    lineno: error.line
+    lineno: error.line,
+    colno: error.column
   });
   // @ts-ignore
   window.dispatchEvent(event);
