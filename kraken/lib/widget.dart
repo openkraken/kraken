@@ -298,7 +298,7 @@ class _KrakenState extends State<Kraken> {
   void _handleFocusChange(bool focused) {
     RenderObject? _rootRenderObject = context.findRenderObject();
     List<RenderEditable> editables = _findEditables(_rootRenderObject!);
-    if (editables.length != 0) {
+    if (editables.isNotEmpty) {
       RenderEditable? focusedEditable = _findFocusedEditable(editables);
       if (focused) {
         // @TODO: need to detect hotkey to determine focus order of inputs in kraken widget.
@@ -316,7 +316,7 @@ class _KrakenState extends State<Kraken> {
   void _handleNextFocus(NextFocusIntent intent) {
     RenderObject? _rootRenderObject = context.findRenderObject();
     List<RenderEditable> editables = _findEditables(_rootRenderObject!);
-    if (editables.length != 0) {
+    if (editables.isNotEmpty) {
       RenderEditable? focusedEditable = _findFocusedEditable(editables);
       // None editable is focused, focus the first editable.
       if (focusedEditable == null) {
@@ -345,7 +345,7 @@ class _KrakenState extends State<Kraken> {
   void _handlePreviousFocus(PreviousFocusIntent intent) {
     RenderObject? _rootRenderObject = context.findRenderObject();
     List<RenderEditable> editables = _findEditables(_rootRenderObject!);
-    if (editables.length != 0) {
+    if (editables.isNotEmpty) {
       RenderEditable? focusedEditable = _findFocusedEditable(editables);
       // None editable is focused, focus the last editable.
       if (focusedEditable == null) {
@@ -374,7 +374,7 @@ class _KrakenState extends State<Kraken> {
   void _handleMoveSelectionLeftText(MoveSelectionLeftTextIntent intent) {
     RenderObject? _rootRenderObject = context.findRenderObject();
     List<RenderEditable> editables = _findEditables(_rootRenderObject!);
-    if (editables.length != 0) {
+    if (editables.isNotEmpty) {
       RenderEditable? focusedEditable = _findFocusedEditable(editables);
       focusedEditable!.moveSelectionLeft(SelectionChangedCause.keyboard);
 
@@ -388,7 +388,7 @@ class _KrakenState extends State<Kraken> {
   void _handleMoveSelectionRightText(MoveSelectionRightTextIntent intent) {
     RenderObject? _rootRenderObject = context.findRenderObject();
     List<RenderEditable> editables = _findEditables(_rootRenderObject!);
-    if (editables.length != 0) {
+    if (editables.isNotEmpty) {
       RenderEditable? focusedEditable = _findFocusedEditable(editables);
       focusedEditable!.moveSelectionRight(SelectionChangedCause.keyboard);
 
@@ -402,7 +402,7 @@ class _KrakenState extends State<Kraken> {
   void _handleMoveSelectionToEndText(MoveSelectionToEndTextIntent intent) {
     RenderObject? _rootRenderObject = context.findRenderObject();
     List<RenderEditable> editables = _findEditables(_rootRenderObject!);
-    if (editables.length != 0) {
+    if (editables.isNotEmpty) {
       RenderEditable? focusedEditable = _findFocusedEditable(editables);
       focusedEditable!.moveSelectionToEnd(SelectionChangedCause.keyboard);
 
@@ -416,7 +416,7 @@ class _KrakenState extends State<Kraken> {
   void _handleMoveSelectionToStartText(MoveSelectionToStartTextIntent intent) {
     RenderObject? _rootRenderObject = context.findRenderObject();
     List<RenderEditable> editables = _findEditables(_rootRenderObject!);
-    if (editables.length != 0) {
+    if (editables.isNotEmpty) {
       RenderEditable? focusedEditable = _findFocusedEditable(editables);
       focusedEditable!.moveSelectionToStart(SelectionChangedCause.keyboard);
 
@@ -454,7 +454,7 @@ class _KrakenState extends State<Kraken> {
 
   RenderEditable? _findFocusedEditable(List<RenderEditable> editables) {
     RenderEditable? result;
-    if (editables.length != 0) {
+    if (editables.isNotEmpty) {
       for (RenderEditable editable in editables) {
         if (editable.hasFocus) {
           result = editable;
