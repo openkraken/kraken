@@ -34,6 +34,8 @@ public:
                              const JSValueRef *arguments, JSValueRef *exception);
   static JSValueRef forward(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                   const JSValueRef *arguments, JSValueRef *exception);
+  static JSValueRef go(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                            const JSValueRef *arguments, JSValueRef *exception);
 
   static void addItem(HistoryItem &historyItem);
 
@@ -45,6 +47,7 @@ private:
 private:
   JSFunctionHolder m_back{context, jsObject, this,"back", back};
   JSFunctionHolder m_forward{context, jsObject, this,"forward", forward};
+  JSFunctionHolder m_go{context, jsObject, this,"go", go};
 };
 
 } // namespace kraken::binding::jsc

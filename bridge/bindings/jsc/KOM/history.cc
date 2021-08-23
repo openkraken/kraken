@@ -53,6 +53,43 @@ JSValueRef JSHistory::forward(JSContextRef ctx, JSObjectRef function, JSObjectRe
   return nullptr;
 }
 
+JSValueRef JSHistory::go(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                              const JSValueRef *arguments, JSValueRef *exception) {
+  JSValueRef value = arguments[0];
+  int num = 0;
+  if (JSValueIsString(ctx, value) || JSValueIsNumber(ctx, value)) {
+    num = JSValueToNumber(ctx, value, exception);
+  }
+
+  auto history = reinterpret_cast<JSHistory *>(JSObjectGetPrivate(function));
+
+  if (num > 0) {
+    if (m_next_stack.size() < num) {
+      return nullptr;
+    }
+
+    for (int i = 0; i < num; i++) {
+      HistoryItem& currentItem = m_next_stack.top();
+      m_next_stack.pop();
+      m_previous_stack.push(currentItem);
+    }
+  } else {
+    if ((m_previous_stack.size() - 1) < abs(num)) {
+      return nullptr;
+    }
+
+    for (int i = 0; i < num; i++) {
+      HistoryItem& currentItem = m_previous_stack.top();
+      m_previous_stack.pop();
+      m_next_stack.push(currentItem);
+    }
+  }
+
+  history->goTo(m_previous_stack.top());
+
+  return nullptr;
+}
+
 void JSHistory::goTo(HistoryItem &historyItem) {
   NativeString *moduleName = stringRefToNativeString(JSStringCreateWithUTF8CString("Navigation"));
   NativeString *method = stringRefToNativeString(JSStringCreateWithUTF8CString("goTo"));
