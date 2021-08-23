@@ -19,8 +19,8 @@ namespace kraken::binding::jsc {
 class JSWindow;
 
 struct HistoryItem {
-  std::string href;
-  JSValueRef state;
+  JSStringRef href;
+  JSStringRef state;
 };
 
 class JSHistory : public HostObject {
@@ -36,6 +36,10 @@ public:
                   const JSValueRef *arguments, JSValueRef *exception);
   static JSValueRef go(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                             const JSValueRef *arguments, JSValueRef *exception);
+  static JSValueRef pushState(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                       const JSValueRef *arguments, JSValueRef *exception);
+  static JSValueRef replaceState(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                              const JSValueRef *arguments, JSValueRef *exception);
 
   static void addItem(HistoryItem &historyItem);
 
@@ -48,6 +52,8 @@ private:
   JSFunctionHolder m_back{context, jsObject, this,"back", back};
   JSFunctionHolder m_forward{context, jsObject, this,"forward", forward};
   JSFunctionHolder m_go{context, jsObject, this,"go", go};
+  JSFunctionHolder m_pushState{context, jsObject, this,"pushState", pushState};
+  JSFunctionHolder m_replaceState{context, jsObject, this,"replaceState", replaceState};
 };
 
 } // namespace kraken::binding::jsc

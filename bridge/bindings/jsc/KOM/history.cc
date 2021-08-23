@@ -93,7 +93,7 @@ JSValueRef JSHistory::go(JSContextRef ctx, JSObjectRef function, JSObjectRef thi
 void JSHistory::goTo(HistoryItem &historyItem) {
   NativeString *moduleName = stringRefToNativeString(JSStringCreateWithUTF8CString("Navigation"));
   NativeString *method = stringRefToNativeString(JSStringCreateWithUTF8CString("goTo"));
-  NativeString *params = stringRefToNativeString(JSValueCreateJSONString(ctx, JSValueMakeString(ctx, JSStringCreateWithUTF8CString(historyItem.href.c_str())), 0, nullptr));
+  NativeString *params = stringRefToNativeString(JSValueCreateJSONString(ctx, JSValueMakeString(ctx, historyItem.href), 0, nullptr));
 
   getDartMethod()->invokeModule(nullptr, context->getContextId(), moduleName, method, params,
                                 handleInvokeModuleUnexpectedCallback);
@@ -108,6 +108,57 @@ void JSHistory::addItem(HistoryItem &historyItem) {
   while(!m_next_stack.empty()) {
     m_next_stack.pop();
   }
+}
+
+JSValueRef JSHistory::pushState(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                               const JSValueRef *arguments, JSValueRef *exception) {
+  if (argumentCount < 2) {
+    throwJSError(ctx,
+                 ("Failed to execute 'pushState' on 'History': 2 arguments required, but only " +
+                  std::to_string(argumentCount) + " present")
+                   .c_str(),
+                 exception);
+    return nullptr;
+  }
+
+  JSValueRef state = arguments[0];
+  // https://github.com/whatwg/html/issues/2174
+  JSValueRef title = arguments[1];
+  JSValueRef url = arguments[2];
+
+  JSStringRef jsonState = JSValueCreateJSONString(ctx, state, 0, exception);
+  JSStringRef urlRef = JSValueToStringCopy(ctx, url, exception);
+  HistoryItem history = { urlRef, jsonState };
+
+  addItem(history);
+
+  return nullptr;
+}
+
+JSValueRef JSHistory::replaceState(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                   const JSValueRef *arguments, JSValueRef *exception) {
+  if (argumentCount < 2) {
+    throwJSError(ctx,
+                 ("Failed to execute 'pushState' on 'History': 2 arguments required, but only " +
+                  std::to_string(argumentCount) + " present")
+                   .c_str(),
+                 exception);
+    return nullptr;
+  }
+
+  JSValueRef state = arguments[0];
+  // https://github.com/whatwg/html/issues/2174
+  JSValueRef title = arguments[1];
+  JSValueRef url = arguments[2];
+
+  JSStringRef jsonState = JSValueCreateJSONString(ctx, state, 0, exception);
+  JSStringRef urlRef = JSValueToStringCopy(ctx, url, exception);
+  HistoryItem history = { urlRef, jsonState };
+
+  m_previous_stack.pop();
+  m_previous_stack.push(history);
+
+  return nullptr;
 }
 
 } // namespace kraken::binding::jsc

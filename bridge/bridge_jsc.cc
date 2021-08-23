@@ -176,7 +176,7 @@ void JSBridge::setHref(const char *url) {
     JSObjectRef windowObject = JSValueToObject(m_context->context(), windowValue, nullptr);
 
     auto window = static_cast<WindowInstance *>(JSObjectGetPrivate(windowObject));
-    HistoryItem history = { url, nullptr };
+    HistoryItem history = { JSStringCreateWithUTF8CString(url), nullptr };
     window->history_->addItem(history);
 }
 
