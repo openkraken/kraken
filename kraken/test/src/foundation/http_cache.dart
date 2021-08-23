@@ -73,6 +73,36 @@ void main() {
 
       assert(cacheObject.valid);
     });
+
+    test('Global switch to disable cache', () async {
+      HttpCacheController.setEnabled(false);
+      var request = await httpClient.openUrl('GET',
+          server.getUri('json_with_content_length_expires_etag_last_modified'));
+      KrakenHttpOverrides.setContextHeader(request, contextId);
+      var response = await request.close();
+      expect(response.statusCode, 200);
+      expect(response.headers.value(HttpHeaders.expiresHeader),
+          'Mon, 16 Aug 2221 10:17:45 GMT');
+
+      var data = await sinkStream(response);
+      var content = jsonDecode(String.fromCharCodes(data));
+      expect(content, {
+        'method': 'GET',
+        'data': {
+          'userName': '12345'
+        }
+      });
+
+      // second request
+      var requestSecond = await httpClient.openUrl('GET',
+          server.getUri('json_with_content_length_expires_etag_last_modified'));
+      KrakenHttpOverrides.setContextHeader(requestSecond, contextId);
+      var responseSecond = await requestSecond.close();
+
+      // Note: This line is different.
+      assert(responseSecond.headers.value('x-kraken-cache') == null);
+      HttpCacheController.setEnabled(true);
+    });
   });
 }
 
