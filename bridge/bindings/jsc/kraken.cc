@@ -16,8 +16,6 @@ void bindKraken(std::unique_ptr<JSContext> &context) {
   JSValueProtect(context->context(), kraken);
 
   // Other properties are injected by dart.
-  JSStringRef userAgentStr = JSStringCreateWithUTF8CString(krakenInfo->getUserAgent(krakenInfo));
-  JSC_SET_STRING_PROPERTY(context, kraken, "userAgent", JSValueMakeString(context->context(), userAgentStr));
   JSC_GLOBAL_SET_PROPERTY(context, "__kraken__", kraken);
 }
 

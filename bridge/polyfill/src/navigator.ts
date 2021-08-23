@@ -7,7 +7,7 @@ export const navigator = {
   connection,
   // UA is read-only.
   get userAgent() {
-    return kraken.userAgent;
+    return kraken.invokeModule('Navigator', 'getUserAgent');
   },
   get hardwareConcurrency() {
     const logicalProcessors = kraken.invokeModule('DeviceInfo', 'getHardwareConcurrency');

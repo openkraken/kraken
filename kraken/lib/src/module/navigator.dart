@@ -1,3 +1,4 @@
+import 'package:kraken/bridge.dart';
 import 'package:kraken/src/module/module_manager.dart';
 import 'package:vibration/vibration.dart';
 
@@ -5,11 +6,10 @@ class NavigatorModule extends BaseModule {
   @override
   String get name => 'Navigator';
 
-  NavigatorModule(ModuleManager moduleManager) : super(moduleManager);
+  NavigatorModule(ModuleManager? moduleManager) : super(moduleManager);
 
   @override
-  void dispose() {
-  }
+  void dispose() {}
 
   @override
   String invoke(String method, dynamic params, callback) {
@@ -31,6 +31,8 @@ class NavigatorModule extends BaseModule {
       }
     } else if (method == 'cancelVibrate') {
       Vibration.cancel();
+    } else if (method == 'getUserAgent') {
+      return getKrakenInfo().userAgent;
     }
     return '';
   }
