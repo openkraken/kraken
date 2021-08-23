@@ -95,6 +95,8 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   @override
   Future<HttpClientResponse> close() async {
     HttpClientRequest request = _clientRequest;
+    final bool _cacheEnabled = HttpCacheController.enabled;
+
     int? contextId = KrakenHttpOverrides.getContextHeader(_clientRequest);
     if (contextId != null) {
       // Set the default origin and referrer.
@@ -115,24 +117,28 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
       // Step 2: Handle cache-control and expires,
       //        if hit, no need to open request.
-      HttpCacheController cacheController = HttpCacheController.instance(origin);
-      HttpCacheObject cacheObject = await cacheController.getCacheObject(request.uri);
-      if (cacheObject.hitLocalCache(request)) {
-        HttpClientResponse? cacheResponse = await cacheObject.toHttpClientResponse();
-        if (cacheResponse != null) {
-          return cacheResponse;
+      HttpCacheObject? cacheObject;
+      if (_cacheEnabled) {
+        HttpCacheController cacheController = HttpCacheController.instance(origin);
+        cacheObject = await cacheController.getCacheObject(request.uri);
+        if (cacheObject.hitLocalCache(request)) {
+          HttpClientResponse? cacheResponse = await cacheObject.toHttpClientResponse();
+          if (cacheResponse != null) {
+            return cacheResponse;
+          }
         }
-      }
 
-      // Step 3: Handle negotiate cache request header.
-      if (request.headers.ifModifiedSince == null
-          && request.headers.value(HttpHeaders.ifNoneMatchHeader) == null) {
-        // ETag has higher priority of lastModified.
-        if (cacheObject.eTag != null) {
-          request.headers.set(HttpHeaders.ifNoneMatchHeader, cacheObject.eTag!);
-        } else if (cacheObject.lastModified != null) {
-          request.headers.set(HttpHeaders.ifModifiedSinceHeader,
-              HttpDate.format(cacheObject.lastModified!));
+
+        // Step 3: Handle negotiate cache request header.
+        if (request.headers.ifModifiedSince == null
+            && request.headers.value(HttpHeaders.ifNoneMatchHeader) == null) {
+          // ETag has higher priority of lastModified.
+          if (cacheObject.eTag != null) {
+            request.headers.set(HttpHeaders.ifNoneMatchHeader, cacheObject.eTag!);
+          } else if (cacheObject.lastModified != null) {
+            request.headers.set(HttpHeaders.ifModifiedSinceHeader,
+                HttpDate.format(cacheObject.lastModified!));
+          }
         }
       }
 
@@ -146,17 +152,26 @@ class ProxyHttpClientRequest extends HttpClientRequest {
         response = await _shouldInterceptRequest(clientInterceptor, request);
       }
 
-      // After this, response should not be null.
-      response ??= await _requestQueue.add(() async => cacheController
-            .interceptResponse(request, await request.close(), cacheObject));
-
+      if (cacheObject != null) {
+        // After this, response should not be null.
+        response ??= await _requestQueue.add(() async =>
+            HttpCacheController
+                .instance(origin)
+                .interceptResponse(request, await request.close(), cacheObject!));
+      } else {
+        response = await request.close();
+      }
       // Step 5: Lifecycle of afterResponse.
       if (clientInterceptor != null) {
         response = await _afterResponse(clientInterceptor, request, response!) ?? response;
       }
 
-      // Step 6: Intercept response by cache controller (handle 304).
-      return cacheController.interceptResponse(request, response!, cacheObject);
+      if (cacheObject != null) {
+        // Step 6: Intercept response by cache controller (handle 304).
+        return HttpCacheController.instance(origin).interceptResponse(request, response!, cacheObject);
+      } else {
+        return response!;
+      }
     } else {
       _clientRequest.add(_data);
       _data.clear();

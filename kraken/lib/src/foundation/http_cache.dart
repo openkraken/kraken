@@ -13,6 +13,13 @@ import 'package:kraken/foundation.dart';
 import 'http_cache_object.dart';
 
 class HttpCacheController {
+  // Set the globally http cache function.
+  static bool _enabled = true;
+  static bool get enabled => _enabled;
+  static void setEnabled(bool value) {
+    _enabled = value;
+  }
+
   static final Map<String, HttpCacheController> _controllers = HashMap();
 
   static Directory? _cacheDirectory;
