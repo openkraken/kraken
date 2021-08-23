@@ -255,6 +255,6 @@ class HttpClientStreamResponse extends Stream<List<int>> implements HttpClientRe
 
   @override
   StreamSubscription<List<int>> listen(void Function(List<int> event)? onData, { Function? onError, void Function()? onDone, bool? cancelOnError }) {
-    return data.listen(onData, onDone: onDone, cancelOnError: cancelOnError);
+    return data.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 }
