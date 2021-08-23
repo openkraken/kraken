@@ -269,17 +269,24 @@ class _KrakenState extends State<Kraken> {
     _shortcutMap = <LogicalKeySet, Intent>{
       LogicalKeySet(LogicalKeyboardKey.arrowLeft): const MoveSelectionLeftTextIntent(),
       LogicalKeySet(LogicalKeyboardKey.arrowRight): const MoveSelectionRightTextIntent(),
-      LogicalKeySet(LogicalKeyboardKey.arrowDown): const MoveSelectionToEndTextIntent(),
       LogicalKeySet(LogicalKeyboardKey.arrowUp): const MoveSelectionToStartTextIntent(),
+      LogicalKeySet(LogicalKeyboardKey.arrowDown): const MoveSelectionToEndTextIntent(),
+      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const ExtendSelectionLeftTextIntent(),
       LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const ExtendSelectionRightTextIntent(),
+      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const ExtendSelectionUpTextIntent(),
+      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): const ExtendSelectionDownTextIntent(),
     };
     _actionMap = <Type, Action<Intent>>{
       NextFocusIntent: CallbackAction<NextFocusIntent>(onInvoke: _handleNextFocus),
       PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(onInvoke: _handlePreviousFocus),
       MoveSelectionLeftTextIntent: CallbackAction<MoveSelectionLeftTextIntent>(onInvoke: _handleMoveSelectionLeftText),
       MoveSelectionRightTextIntent: CallbackAction<MoveSelectionRightTextIntent>(onInvoke: _handleMoveSelectionRightText),
-      MoveSelectionToEndTextIntent: CallbackAction<MoveSelectionToEndTextIntent>(onInvoke: _handleMoveSelectionToEndText),
       MoveSelectionToStartTextIntent: CallbackAction<MoveSelectionToStartTextIntent>(onInvoke: _handleMoveSelectionToStartText),
+      MoveSelectionToEndTextIntent: CallbackAction<MoveSelectionToEndTextIntent>(onInvoke: _handleMoveSelectionToEndText),
+      ExtendSelectionLeftTextIntent: CallbackAction<ExtendSelectionLeftTextIntent>(onInvoke: _handleExtendSelectionLeftText),
+      ExtendSelectionRightTextIntent: CallbackAction<ExtendSelectionRightTextIntent>(onInvoke: _handleExtendSelectionRightText),
+      ExtendSelectionUpTextIntent: CallbackAction<ExtendSelectionUpTextIntent>(onInvoke: _handleExtendSelectionUpText),
+      ExtendSelectionDownTextIntent: CallbackAction<ExtendSelectionDownTextIntent>(onInvoke: _handleExtendSelectionDownText),
     };
     _focusNode = (context.widget as Kraken).focusNode;
   }
@@ -424,6 +431,42 @@ class _KrakenState extends State<Kraken> {
       dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
       RenderIntrinsic renderIntrisic = renderInputBox.parent as RenderIntrinsic;
       renderIntrisic.elementDelegate.scrollInputToCaret();
+    }
+  }
+
+  void _handleExtendSelectionLeftText(ExtendSelectionLeftTextIntent intent) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.isNotEmpty) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      focusedEditable!.extendSelectionLeft(SelectionChangedCause.keyboard);
+    }
+  }
+
+  void _handleExtendSelectionRightText(ExtendSelectionRightTextIntent intent) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.isNotEmpty) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      focusedEditable!.extendSelectionRight(SelectionChangedCause.keyboard);
+    }
+  }
+
+  void _handleExtendSelectionUpText(ExtendSelectionUpTextIntent intent) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.isNotEmpty) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      focusedEditable!.extendSelectionUp(SelectionChangedCause.keyboard);
+    }
+  }
+
+  void _handleExtendSelectionDownText(ExtendSelectionDownTextIntent intent) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.isNotEmpty) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      focusedEditable!.extendSelectionDown(SelectionChangedCause.keyboard);
     }
   }
 
