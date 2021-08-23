@@ -33,6 +33,7 @@ class ModuleManager {
       defineModule((ModuleManager? moduleManager) => FetchModule(moduleManager));
       defineModule((ModuleManager? moduleManager) => MethodChannelModule(moduleManager));
       defineModule((ModuleManager? moduleManager) => NavigationModule(moduleManager));
+      defineModule((ModuleManager? moduleManager) => NavigatorModule(moduleManager));
       inited = true;
     }
   }
