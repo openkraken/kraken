@@ -15,7 +15,9 @@ if (os.platform() == 'win32') {
   );
 } else {
   buildTasks.push(
+    'macos-dylib-clean',
     'build-darwin-kraken-lib',
+    'ios-framework-clean',  
     'build-ios-kraken-lib',
   );
 }
