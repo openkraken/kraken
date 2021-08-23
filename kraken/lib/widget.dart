@@ -269,8 +269,8 @@ class _KrakenState extends State<Kraken> {
     _shortcutMap = <LogicalKeySet, Intent>{
       LogicalKeySet(LogicalKeyboardKey.arrowLeft): const MoveSelectionLeftTextIntent(),
       LogicalKeySet(LogicalKeyboardKey.arrowRight): const MoveSelectionRightTextIntent(),
-      LogicalKeySet(LogicalKeyboardKey.arrowDown): const MoveSelectionDownTextIntent(),
-      LogicalKeySet(LogicalKeyboardKey.arrowUp): const MoveSelectionUpTextIntent(),
+      LogicalKeySet(LogicalKeyboardKey.arrowDown): const MoveSelectionToEndTextIntent(),
+      LogicalKeySet(LogicalKeyboardKey.arrowUp): const MoveSelectionToStartTextIntent(),
       LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const ExtendSelectionRightTextIntent(),
     };
     _actionMap = <Type, Action<Intent>>{
@@ -377,6 +377,11 @@ class _KrakenState extends State<Kraken> {
     if (editables.length != 0) {
       RenderEditable? focusedEditable = _findFocusedEditable(editables);
       focusedEditable!.moveSelectionLeft(SelectionChangedCause.keyboard);
+
+      // Scroll input box to the caret.
+      dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
+      RenderIntrinsic renderIntrisic = renderInputBox.parent as RenderIntrinsic;
+      renderIntrisic.elementDelegate.scrollInputToCaret();
     }
   }
 
@@ -386,6 +391,11 @@ class _KrakenState extends State<Kraken> {
     if (editables.length != 0) {
       RenderEditable? focusedEditable = _findFocusedEditable(editables);
       focusedEditable!.moveSelectionRight(SelectionChangedCause.keyboard);
+
+      // Scroll input box to the caret.
+      dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
+      RenderIntrinsic renderIntrisic = renderInputBox.parent as RenderIntrinsic;
+      renderIntrisic.elementDelegate.scrollInputToCaret();
     }
   }
 
@@ -395,6 +405,11 @@ class _KrakenState extends State<Kraken> {
     if (editables.length != 0) {
       RenderEditable? focusedEditable = _findFocusedEditable(editables);
       focusedEditable!.moveSelectionToEnd(SelectionChangedCause.keyboard);
+
+      // Scroll input box to the caret.
+      dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
+      RenderIntrinsic renderIntrisic = renderInputBox.parent as RenderIntrinsic;
+      renderIntrisic.elementDelegate.scrollInputToCaret();
     }
   }
 
@@ -404,6 +419,11 @@ class _KrakenState extends State<Kraken> {
     if (editables.length != 0) {
       RenderEditable? focusedEditable = _findFocusedEditable(editables);
       focusedEditable!.moveSelectionToStart(SelectionChangedCause.keyboard);
+
+      // Scroll input box to the caret.
+      dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
+      RenderIntrinsic renderIntrisic = renderInputBox.parent as RenderIntrinsic;
+      renderIntrisic.elementDelegate.scrollInputToCaret();
     }
   }
 

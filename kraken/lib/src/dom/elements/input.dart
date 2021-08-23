@@ -938,6 +938,8 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
         newCaretRect.bottom,
       );
 
+      scrollToCaret();
+
       _renderEditable!.showOnScreen(
         rect: inflatedRect,
         duration: _caretAnimationDuration,
@@ -959,6 +961,48 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       _textChangedSinceLastCaretUpdate = false;
       _showCaretOnScreen();
     }
+  }
+
+  // Make input box scroll to the offset that the caret shown.
+  void scrollToCaret() {
+    SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
+      final RevealedOffset targetOffset = _getOffsetToRevealCaret(_currentCaretRect!);
+      scrollableX.position!.animateTo(targetOffset.offset, duration: _caretAnimationDuration, curve: _caretAnimationCurve);
+    });
+  }
+
+  // Finds the closest scroll offset to the current scroll offset that fully
+  // reveals the given caret rect. If the given rect's main axis extent is too
+  // large to be fully revealed in `renderEditable`, it will be centered along
+  // the main axis.
+  //
+  // If this is a multiline EditableText (which means the Editable can only
+  // scroll vertically), the given rect's height will first be extended to match
+  // `renderEditable.preferredLineHeight`, before the target scroll offset is
+  // calculated.
+  RevealedOffset _getOffsetToRevealCaret(Rect rect) {
+    final Size editableSize = _renderEditable!.size;
+    final double additionalOffset;
+    final Offset unitOffset;
+
+    additionalOffset = rect.width >= editableSize.width
+    // Center `rect` if it's oversized.
+      ? editableSize.width / 2 - rect.center.dx
+    // Valid additional offsets range from (rect.right - size.width)
+    // to (rect.left). Pick the closest one if out of range.
+      : 0.0.clamp(rect.right - editableSize.width, rect.left);
+    unitOffset = const Offset(1, 0);
+
+    // No overscrolling when encountering tall fonts/scripts that extend past
+    // the ascent.
+    final double targetOffset = (additionalOffset + scrollableX.position!.pixels)
+      .clamp(
+      scrollableX.position!.minScrollExtent!,
+      scrollableX.position!.maxScrollExtent!,
+    );
+
+    final double offsetDelta = scrollableX.position!.pixels - targetOffset;
+    return RevealedOffset(rect: rect.shift(unitOffset * offsetDelta), offset: targetOffset);
   }
 
   void _stopCursorTimer({bool resetCharTicks = true}) {

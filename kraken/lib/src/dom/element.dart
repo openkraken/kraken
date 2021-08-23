@@ -84,6 +84,8 @@ typedef int GetTargetId();
 typedef void FocusInput();
 /// Blur the input element.
 typedef void BlurInput();
+/// Scroll the input element to the caret.
+typedef void ScrollInputToCaret();
 /// Get the font size of root element
 typedef double GetRootElementFontSize();
 
@@ -98,6 +100,7 @@ class ElementDelegate {
   GetTargetId getTargetId;
   FocusInput focusInput;
   BlurInput blurInput;
+  ScrollInputToCaret scrollInputToCaret;
   GetRootElementFontSize getRootElementFontSize;
 
   ElementDelegate(
@@ -109,6 +112,7 @@ class ElementDelegate {
     this.getTargetId,
     this.focusInput,
     this.blurInput,
+    this.scrollInputToCaret,
     this.getRootElementFontSize
   );
 }
@@ -201,6 +205,7 @@ class Element extends Node
       _getTargetId,
       _focusInput,
       _blurInput,
+      _scrollInputToCaret,
       _getRootElementFontSize
     );
   }
@@ -243,6 +248,11 @@ class Element extends Node
 
   void _blurInput() {
     InputElement.clearFocus();
+  }
+
+  void _scrollInputToCaret() {
+    InputElement inputElement = this as InputElement;
+    inputElement.scrollToCaret();
   }
 
   double _getRootElementFontSize() {
