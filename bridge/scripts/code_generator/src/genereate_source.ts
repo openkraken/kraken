@@ -313,6 +313,26 @@ ${addIndent(atomReleaseCode.join('\n'), 4)}
   }`;
 }
 
+function elementNameToTagName(name: string): string {
+  switch(name) {
+    case 'AnchorElement':
+      return 'a';
+    case 'CanvasElement':
+      return 'canvas';
+    case 'ImageElement':
+      return 'img';
+    case 'InputElement':
+      return 'input';
+    case 'ObjectElement':
+      return 'object';
+    case 'ScriptElement':
+      return 'script';
+    case 'SvgElement':
+      return 'svg';
+  }
+  return name;
+}
+
 function generateHostClassSource(object: ClassObject) {
   let propSource: string[] = generatePropsSource(object, object.type === 'Event' ? PropType.Event : PropType.Element);
   let methodsSource: string[] = generateMethodsSource(object, object.type === 'Event' ? PropType.Event : PropType.Element);
@@ -328,7 +348,7 @@ function generateHostClassSource(object: ClassObject) {
   if (object.type === 'Event') {
     instanceConstructorCode = `${object.name}Instance::${object.name}Instance(${object.name} *${object.type.toLowerCase()}, NativeEvent *nativeEvent): ${object.type}Instance(${object.type.toLowerCase()}, nativeEvent) {}`
   } else {
-    instanceConstructorCode = `${object.name}Instance::${object.name}Instance(${object.name} *${object.type.toLowerCase()}): ${object.type}Instance(${object.type.toLowerCase()}, "${object.name}", true) {}`;
+    instanceConstructorCode = `${object.name}Instance::${object.name}Instance(${object.name} *${object.type.toLowerCase()}): ${object.type}Instance(${object.type.toLowerCase()}, "${elementNameToTagName(object.name)}", true) {}`;
   }
 
   let globalBindingName = '';
