@@ -91,8 +91,7 @@ class _MyHomePageState extends State<MyBrowser> {
         child: _kraken = Kraken(
           viewportWidth: viewportSize.width - queryData.padding.horizontal,
           viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
-          // bundlePath: 'assets/bundle.js',
-          bundleURL: 'https://t.youku.com/yep/page/kraken/m/cvd3r6f068?isNeedBaseImage=1&wh_kraken=true&wh_weex=true',
+          bundlePath: 'assets/bundle.js',
           devToolsService: ChromeDevToolsService(),
         ),
     ));
