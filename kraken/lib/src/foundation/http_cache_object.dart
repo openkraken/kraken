@@ -284,8 +284,7 @@ class HttpCacheObject {
     return await _blob.exists();
   }
 
-  Future<HttpClientResponse?> toHttpClientResponse({
-    HttpClientResponse? originalResponse }) async {
+  Future<HttpClientResponse?> toHttpClientResponse() async {
     if (!await _exists) {
       return null;
     }
