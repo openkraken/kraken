@@ -124,12 +124,25 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
 }`;
   }
 
-  return `PROP_SETTER(${classSubFix}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *${instanceName} = static_cast<${classSubFix} *>(JS_GetOpaque(this_val, ${classId}));
-  NativeValue arguments[] = {
+  let setterCode = '';
+  if (object.type == 'Element') {
+    setterCode = `std::string key = "${p.name}";
+  NativeString *args_01 = stringToNativeString(key);
+  NativeString *args_02 = jsValueToNativeString(ctx, argv[0]);
+  foundation::UICommandBuffer::instance(${instanceName}->m_context->getContextId())
+    ->addCommand(${instanceName}->eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+  return JS_NULL;`;
+  } else {
+    setterCode = `NativeValue arguments[] = {
     jsValueToNativeValue(ctx, argv[0])
   };
-  return ${instanceName}->callNativeMethods("set${p.name[0].toUpperCase() + p.name.substring(1)}", 1, arguments);
+  return ${instanceName}->callNativeMethods("set${p.name[0].toUpperCase() + p.name.substring(1)}", 1, arguments);`;
+  }
+
+
+  return `PROP_SETTER(${classSubFix}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *${instanceName} = static_cast<${classSubFix} *>(JS_GetOpaque(this_val, ${classId}));
+  ${setterCode}
 }`;
 }
 

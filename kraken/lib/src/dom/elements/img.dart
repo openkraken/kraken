@@ -50,33 +50,6 @@ class ImageElement extends Element {
   // Whether is multiframe image
   bool isMultiframe = false;
 
-  // static ImageElement getImageElementOfNativePtr(Pointer<NativeImgElement> nativeImageElement) {
-  //   ImageElement? element = _nativeMap[nativeImageElement.address];
-  //   if (element == null) throw FlutterError('Can not get element from nativeElement: $nativeImageElement');
-  //   return element;
-  // }
-  //
-  // static double? getImageWidth(Pointer<NativeImgElement> nativeImageElement) {
-  //   ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-  //   return imageElement.width;
-  // }
-  //
-  // static double? getImageHeight(Pointer<NativeImgElement> nativeImageElement) {
-  //   ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-  //   return imageElement.height;
-  // }
-  //
-  // // https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/naturalWidth
-  // static double getImageNaturalWidth(Pointer<NativeImgElement> nativeImageElement) {
-  //   ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-  //   return imageElement.naturalWidth;
-  // }
-  //
-  // static double getImageNaturalHeight(Pointer<NativeImgElement> nativeImageElement) {
-  //   ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-  //   return imageElement.naturalHeight;
-  // }
-
   ImageElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
       : super(
       targetId,
@@ -86,14 +59,25 @@ class ImageElement extends Element {
       tagName: IMAGE,
       defaultStyle: _defaultStyle) {
     _renderStreamListener = ImageStreamListener(_renderImageStream);
-
-    // nativeImgElement.ref.getImageWidth = nativeGetImageWidth;
-    // nativeImgElement.ref.getImageHeight = nativeGetImageHeight;
-    // nativeImgElement.ref.getImageNaturalWidth = nativeGetImageNaturalWidth;
-    // nativeImgElement.ref.getImageNaturalHeight = nativeGetImageNaturalHeight;
   }
 
   ui.Image? get image => _imageInfo?.image;
+
+  @override
+  handleJSCall(String method, List argv) {
+    switch(method) {
+      case 'getWidth':
+        return width;
+      case 'getHeight':
+        return height;
+      case 'getNaturalWidth':
+        return naturalWidth;
+      case 'getNaturalHeight':
+        return naturalHeight;
+    }
+
+    return super.handleJSCall(method, argv);
+  }
 
   @override
   void willAttachRenderer() {

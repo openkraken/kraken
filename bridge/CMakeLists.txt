@@ -18,6 +18,11 @@ execute_process(
 ) # install code_generator deps
 
 execute_process(
+  COMMAND bash "-c" "npm run build"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/scripts/code_generator
+) # g
+
+execute_process(
   COMMAND bash "-c" "node bin/code_generator -s ../../bindings/qjs/dom/elements -d ../../bindings/qjs/dom/elements/.gen"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/scripts/code_generator
 ) # generate elements code

@@ -70,19 +70,4 @@ class AnchorElement extends Element {
       default:
     }
   }
-
-  @override
-  void removeProperty(String key) {
-    super.removeProperty(key);
-
-    switch (key) {
-      case 'href':
-        _href = null;
-        break;
-      case 'target':
-        _target = null;
-        break;
-      default:
-    }
-  }
 }
