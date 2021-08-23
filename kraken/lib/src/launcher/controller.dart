@@ -708,9 +708,6 @@ class KrakenController {
     KrakenController controller = KrakenController.getControllerOfJSContextId(view.contextId)!;
     controller.href = url;
 
-    KrakenController controller = KrakenController.getControllerOfJSContextId(view.contextId)!;
-    controller.href = url;
-
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_LOAD_END);
     }
