@@ -45,6 +45,9 @@ private:
   ObjectFunction m_getElementById{m_context, m_prototypeObject, "getElementById", getElementById, 1};
   ObjectFunction m_getElementsByTagName{m_context, m_prototypeObject, "getElementsByTagName", getElementsByTagName, 1};
   friend DocumentInstance;
+
+  bool event_registered{false};
+  bool document_registered{false};
 };
 
 class DocumentInstance : public NodeInstance {

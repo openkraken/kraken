@@ -37,6 +37,7 @@ private:
   ObjectFunction m_scrollTo{m_context, m_prototypeObject, "scrollTo", scrollTo, 2};
   ObjectFunction m_scrollBy{m_context, m_prototypeObject, "scrollBy", scrollBy, 2};
 
+  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(8, devicePixelRatio, colorScheme, __location__, window, history, parent,  scrollX, scrollY);
   friend WindowInstance;
 };
 
@@ -48,7 +49,6 @@ public:
     JS_FreeValue(m_ctx, m_location->jsObject);
   }
 private:
-  DEFINE_HOST_CLASS_PROPERTY(8, devicePixelRatio, colorScheme, __location__, window, history, parent,  scrollX, scrollY);
 
   Location *m_location{nullptr};
   friend Window;

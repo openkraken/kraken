@@ -361,8 +361,6 @@ JSValue Element::scrollBy(QjsContext *ctx, JSValue this_val, int argc, JSValue *
 std::unordered_map<std::string, Element*> Element::elementConstructorMap{};
 
 void Element::defineElement(const std::string &tagName, Element* constructor) {
-  if (elementConstructorMap.count(tagName) > 0) return;
-
   elementConstructorMap[tagName] = constructor;
 }
 

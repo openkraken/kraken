@@ -43,8 +43,6 @@ void traverseNode(NodeInstance *node, TraverseHandler handler) {
 
 
 std::once_flag kDocumentInitOnceFlag;
-static std::atomic<bool> event_registered = false;
-static std::atomic<bool> document_registered = false;
 
 void bindDocument(std::unique_ptr<JSContext> &context) {
   auto *documentConstructor = Document::instance(context.get());
