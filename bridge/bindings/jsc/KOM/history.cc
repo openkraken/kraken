@@ -102,6 +102,10 @@ void JSHistory::goTo(HistoryItem &historyItem) {
                                 handleInvokeModuleUnexpectedCallback);
 }
 
+JSStringRef JSHistory::getHref() {
+  return m_previous_stack.top().href;
+}
+
 void JSHistory::addItem(HistoryItem &historyItem) {
   if (!m_previous_stack.empty() && historyItem.href == m_previous_stack.top().href) return;
 
