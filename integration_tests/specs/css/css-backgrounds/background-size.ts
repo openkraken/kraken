@@ -357,6 +357,29 @@ describe('Background-size', () => {
     await snapshot(0.1);
   });
 
+  it('should works with background size bigger than image container', async () => {
+    let div1;
+    let div = createElement(
+     'div',
+     {
+       style: {},
+     },
+     [
+       (div1 = createElement('div', {
+         style: {
+           height: '150px',
+           width: '200px',
+           backgroundColor: '#999',
+           backgroundImage: 'url(assets/bg.jpg)',
+           backgroundRepeat: 'no-repeat',
+           backgroundSize: '250px',
+         },
+       })),
+     ]
+    );
+    append(BODY, div);
+    await snapshot(0.1);
+  });
   
   it('should not work with negative value', async () => {
     let div1;
