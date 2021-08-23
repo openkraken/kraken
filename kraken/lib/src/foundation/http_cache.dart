@@ -13,7 +13,7 @@ import 'package:kraken/foundation.dart';
 import 'http_cache_object.dart';
 
 class HttpCacheController {
-  static Map<String, HttpCacheController> _controllers = HashMap();
+  static final Map<String, HttpCacheController> _controllers = HashMap();
 
   static Directory? _cacheDirectory;
   static Future<Directory> getCacheDirectory() async {
@@ -122,9 +122,7 @@ class HttpCacheController {
   }
 }
 
-/**
- * The HttpClientResponse that hits http cache.
- */
+/// The HttpClientResponse that hits http cache.
 class HttpClientCachedResponse extends Stream<List<int>> implements HttpClientResponse {
   final HttpClientResponse response;
   final HttpCacheObject cacheObject;
@@ -208,16 +206,12 @@ class HttpClientCachedResponse extends Stream<List<int>> implements HttpClientRe
   int get statusCode => response.statusCode;
 
   void _onData(List<int> data) {
-    if (_blobSink != null) {
-      _blobSink!.add(data);
-    }
+    _blobSink?.add(data);
   }
 
   void _onDone() async {
     await cacheObject.writeIndex();
-    if (_blobSink != null) {
-      _blobSink!.close();
-    }
+    _blobSink?.close();
   }
 
   void _onError(Object error, [StackTrace? stackTrace]) {

@@ -407,8 +407,8 @@ class KrakenModuleController with TimerMixin, ScheduleFrameMixin {
 }
 
 class KrakenController {
-  static SplayTreeMap<int, KrakenController?> _controllerMap = SplayTreeMap();
-  static Map<String, int> _nameIdMap = Map();
+  static final SplayTreeMap<int, KrakenController?> _controllerMap = SplayTreeMap();
+  static final Map<String, int> _nameIdMap = {};
 
   UriParser? uriParser;
 
@@ -457,9 +457,9 @@ class KrakenController {
     _name = value;
   }
 
-  GestureClient? _gestureClient;
+  final GestureClient? _gestureClient;
 
-  EventClient? _eventClient;
+  final EventClient? _eventClient;
 
   KrakenController(
     String? name,
@@ -523,9 +523,7 @@ class KrakenController {
 
     setupHttpOverrides(httpClientInterceptor, contextId: contextId);
 
-    if (uriParser == null) {
-      uriParser = UriParser();
-    }
+    uriParser ??= UriParser();
 
     if (devToolsService != null) {
       devToolsService!.init(this);
@@ -707,6 +705,8 @@ class KrakenController {
     } else {
       _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent, contextId: view.contextId);
     }
+    KrakenController controller = KrakenController.getControllerOfJSContextId(view.contextId)!;
+    controller.href = url;
 
     KrakenController controller = KrakenController.getControllerOfJSContextId(view.contextId)!;
     controller.href = url;

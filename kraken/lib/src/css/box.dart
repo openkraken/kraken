@@ -371,9 +371,7 @@ mixin CSSBoxMixin on RenderStyleBase {
   void updateBackgroundColor([Color? color]) {
     Color? bgColor = color ?? CSSBackground.getBackgroundColor(style);
 
-    if (decoration == null) {
-      decoration = getCSSBoxDecoration();
-    }
+    decoration ??= getCSSBoxDecoration();
 
     CSSBoxDecoration? prevBoxDecoration = decoration;
 
@@ -435,7 +433,7 @@ mixin CSSBoxMixin on RenderStyleBase {
 
   }
 
-  static Map _borderRadiusMapping = {
+  static final Map _borderRadiusMapping = {
     BORDER_TOP_LEFT_RADIUS: 0,
     BORDER_TOP_RIGHT_RADIUS: 1,
     BORDER_BOTTOM_RIGHT_RADIUS: 2,
@@ -898,20 +896,28 @@ class CSSBoxDecoration extends BoxDecoration {
   }): super(color: color, image: image, border: border, borderRadius: borderRadius,
     gradient: gradient, backgroundBlendMode: backgroundBlendMode, shape: shape);
 
+  @override
   final Color? color;
 
+  @override
   final DecorationImage? image;
 
+  @override
   final BoxBorder? border;
 
+  @override
   final BorderRadiusGeometry? borderRadius;
 
+  @override
   final List<CSSBoxShadow>? boxShadow;
 
+  @override
   final Gradient? gradient;
 
+  @override
   final BlendMode? backgroundBlendMode;
 
+  @override
   final BoxShape shape;
 
   CSSBoxDecoration clone({

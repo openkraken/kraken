@@ -45,7 +45,7 @@ class CanvasElement extends Element {
   // The custom paint render object.
   RenderCustomPaint? renderCustomPaint;
 
-  static SplayTreeMap<int, CanvasElement> _nativeMap = SplayTreeMap();
+  static final SplayTreeMap<int, CanvasElement> _nativeMap = SplayTreeMap();
 
   static CanvasElement getCanvasElementOfNativePtr(Pointer<NativeCanvasElement> nativeCanvasElement) {
     CanvasElement? canvasElement = _nativeMap[nativeCanvasElement.address];
@@ -100,9 +100,7 @@ class CanvasElement extends Element {
     super.didAttachRenderer();
     double? rootFontSize = renderBoxModel!.elementDelegate.getRootElementFontSize();
     double? fontSize = renderBoxModel!.renderStyle.fontSize;
-    if (context2d == null) {
-      context2d = CanvasRenderingContext2D();
-    }
+    context2d ??= CanvasRenderingContext2D();
     context2d!.viewportSize = viewportSize;
     context2d!.rootFontSize = rootFontSize;
     context2d!.fontSize = fontSize;
@@ -121,9 +119,7 @@ class CanvasElement extends Element {
     switch (contextId) {
       case '2d':
         if (painter.context == null) {
-          if (context2d == null) {
-            context2d = CanvasRenderingContext2D();
-          }
+          context2d ??= CanvasRenderingContext2D();
           context2d!.canvas = this;
           painter.context = context2d;
         }

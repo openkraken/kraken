@@ -53,11 +53,11 @@ class GestureManager {
 
   RenderPointerListenerMixin? _target;
 
-  Map<int, PointerEvent> _pointerToEvent = Map();
+  final Map<int, PointerEvent> _pointerToEvent = {};
 
-  Map<int, RenderPointerListenerMixin> _pointerToTarget = Map();
+  final Map<int, RenderPointerListenerMixin> _pointerToTarget = {};
 
-  List<int> _points = [];
+  final List<int> _points = [];
 
   void addTargetToList(RenderBox target) {
     _hitTestList.add(target);
@@ -77,7 +77,7 @@ class GestureManager {
         eventHandlers = renderBox.getEventHandlers!();
       }
 
-      if (!eventHandlers.keys.isEmpty) {
+      if (eventHandlers.keys.isNotEmpty) {
         if (!events.contains(EVENT_CLICK) && eventHandlers.containsKey(EVENT_CLICK)) {
           events.add(EVENT_CLICK);
         }

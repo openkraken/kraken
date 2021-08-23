@@ -91,6 +91,7 @@ class RenderViewportBox extends RenderProxyBox
     GestureManager.instance().addPointer(event);
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (background != null) {
       Rect rect = Rect.fromLTWH(

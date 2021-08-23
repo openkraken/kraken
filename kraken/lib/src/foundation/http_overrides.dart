@@ -15,9 +15,7 @@ class KrakenHttpOverrides extends HttpOverrides {
   KrakenHttpOverrides._();
 
   factory KrakenHttpOverrides.instance() {
-    if (_instance == null) {
-      _instance = KrakenHttpOverrides._();
-    }
+    _instance ??= KrakenHttpOverrides._();
     return _instance!;
   }
 
@@ -34,7 +32,7 @@ class KrakenHttpOverrides extends HttpOverrides {
   }
 
   final HttpOverrides? parentHttpOverrides = HttpOverrides.current;
-  final Map<int, HttpClientInterceptor> _contextIdToHttpClientInterceptorMap = Map<int, HttpClientInterceptor>();
+  final Map<int, HttpClientInterceptor> _contextIdToHttpClientInterceptorMap = <int, HttpClientInterceptor>{};
 
   void registerKrakenContext(int contextId, HttpClientInterceptor httpClientInterceptor) {
     _contextIdToHttpClientInterceptorMap[contextId] = httpClientInterceptor;

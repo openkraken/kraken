@@ -20,9 +20,9 @@ class ModuleManager {
   final int contextId;
   final KrakenController controller;
 
-  static Map<String, ModuleCreator> _creatorMap = Map();
+  static final Map<String, ModuleCreator> _creatorMap = {};
   static bool inited = false;
-  Map<String, BaseModule> _moduleMap = Map();
+  final Map<String, BaseModule> _moduleMap = {};
 
   ModuleManager(this.controller, this.contextId) {
     if (!inited) {
@@ -33,6 +33,7 @@ class ModuleManager {
       defineModule((ModuleManager? moduleManager) => FetchModule(moduleManager));
       defineModule((ModuleManager? moduleManager) => MethodChannelModule(moduleManager));
       defineModule((ModuleManager? moduleManager) => NavigationModule(moduleManager));
+      defineModule((ModuleManager? moduleManager) => NavigatorModule(moduleManager));
       inited = true;
     }
   }

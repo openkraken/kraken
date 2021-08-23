@@ -120,7 +120,7 @@ void setCustomImageProviderFactory(ImageType imageType, ImageProviderFactory cus
 
 int? _getContextId(param) {
   int? contextId;
-  if (param is List && param.length > 0) {
+  if (param is List && param.isNotEmpty) {
     contextId = param[0];
   }
   return contextId;

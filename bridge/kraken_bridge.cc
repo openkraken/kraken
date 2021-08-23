@@ -189,15 +189,6 @@ Screen *createScreen(double width, double height) {
 
 static KrakenInfo *krakenInfo{nullptr};
 
-const char *getUserAgent(KrakenInfo *info) {
-  const char *format = "%s/%s (%s; %s/%s)";
-  int32_t length = strlen(format) + sizeof(*info);
-  char *buf = new char[length];
-  std::string result;
-  std::snprintf(&buf[0], length, format, info->app_name, info->app_version, info->system_name, info->app_name, info->app_revision);
-  return buf;
-}
-
 KrakenInfo *getKrakenInfo() {
   if (krakenInfo == nullptr) {
     krakenInfo = new KrakenInfo();
@@ -205,7 +196,6 @@ KrakenInfo *getKrakenInfo() {
     krakenInfo->app_revision = APP_REV;
     krakenInfo->app_version = APP_VERSION;
     krakenInfo->system_name = SYSTEM_NAME;
-    krakenInfo->getUserAgent = getUserAgent;
   }
 
   return krakenInfo;

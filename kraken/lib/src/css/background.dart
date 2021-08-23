@@ -91,7 +91,7 @@ class CSSBackground {
   static DecorationImage? getDecorationImage(CSSStyleDeclaration? style, CSSFunctionalNotation method, { int? contextId }) {
     DecorationImage backgroundImage;
 
-    String url = method.args.length > 0 ? method.args[0] : '';
+    String url = method.args.isNotEmpty ? method.args[0] : '';
     if (url.isEmpty) {
       return null;
     }
@@ -274,7 +274,7 @@ class CSSBackground {
 
           if (method.args[0].contains(CSSPercentage.PERCENTAGE)) {
             List<String> positionAndRadius = method.args[0].trim().split(' ');
-            if (positionAndRadius.length >= 1) {
+            if (positionAndRadius.isNotEmpty) {
               if (CSSPercentage.isPercentage(positionAndRadius[0])) {
                 radius = CSSPercentage.parsePercentage(positionAndRadius[0])! * 0.5;
                 start = 1;
@@ -369,7 +369,7 @@ class CSSBackground {
       strings = src.split(' ');
     }
 
-    if (strings.length >= 1) {
+    if (strings.isNotEmpty) {
       double? stop = defaultStop;
       if (strings.length >= 2) {
         try {

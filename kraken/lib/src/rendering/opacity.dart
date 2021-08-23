@@ -29,6 +29,5 @@ mixin RenderOpacityMixin on RenderBox {
   void debugOpacityProperties(DiagnosticPropertiesBuilder properties) {
     if (alpha != 0 && alpha != 255)
       properties.add(DiagnosticsProperty('alpha', alpha));
-    ;
   }
 }
