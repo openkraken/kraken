@@ -210,7 +210,7 @@ mixin CSSOverflowMixin on ElementBase {
     outerLayoutBox.visitChildren((child) {
       children.add(child as RenderBox);
     });
-    if (children.length != 0) {
+    if (children.isNotEmpty) {
       for (RenderBox child in children) {
         outerLayoutBox.remove(child);
         scrollingContentLayoutBox!.insert(child);
@@ -244,7 +244,7 @@ mixin CSSOverflowMixin on ElementBase {
     scrollingContentLayoutBox!.visitChildren((child) {
       children.add(child as RenderBox);
     });
-    if (children.length != 0) {
+    if (children.isNotEmpty) {
       for (RenderBox child in children) {
         scrollingContentLayoutBox!.remove(child);
         newLayoutBox.insert(child);

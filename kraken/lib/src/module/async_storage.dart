@@ -16,7 +16,7 @@ class AsyncStorageModule extends BaseModule {
   /// Because this is reading from disk, it shouldn't be awaited in
   /// performance-sensitive blocks.
   static Future<SharedPreferences> _getPrefs() {
-    if (_prefs == null) _prefs = SharedPreferences.getInstance();
+    _prefs ??= SharedPreferences.getInstance();
     return _prefs!;
   }
 
@@ -56,18 +56,18 @@ class AsyncStorageModule extends BaseModule {
   }
 
   @override
-  String invoke(String method, dynamic args, InvokeModuleCallback callback) {
+  String invoke(String method, dynamic params, InvokeModuleCallback callback) {
     switch (method) {
       case 'getItem':
-        AsyncStorageModule.getItem(args).then((String? value) {
+        AsyncStorageModule.getItem(params).then((String? value) {
           callback(data: value ?? '');
         }).catchError((e, stack) {
           callback(error: '$e\n$stack');
         });
         break;
       case 'setItem':
-        String key = args[0];
-        String value = args[1];
+        String key = params[0];
+        String value = params[1];
         AsyncStorageModule.setItem(key, value).then((bool isSuccess) {
           callback(data: isSuccess.toString());
         }).catchError((e, stack) {
@@ -75,7 +75,7 @@ class AsyncStorageModule extends BaseModule {
         });
         break;
       case 'removeItem':
-        AsyncStorageModule.removeItem(args).then((bool isSuccess) {
+        AsyncStorageModule.removeItem(params).then((bool isSuccess) {
           callback(data: isSuccess.toString());
         }).catchError((e, stack) {
           callback(error: 'Error: $e\n$stack');

@@ -56,6 +56,7 @@ class RenderPositionHolder extends RenderPreferredSize {
     return _boxSize;
   }
 
+  @override
   set size(Size value) {
     _boxSize = value;
     super.size = value;

@@ -51,8 +51,8 @@ describe('containing-block', () => {
         }),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(div1);
+    document.body.appendChild(p);
+    document.body.appendChild(div1);
 
     await snapshot();
   });
@@ -89,7 +89,7 @@ describe('containing-block', () => {
         }),
       ]
     );
-    BODY.appendChild(div1);
+    document.body.appendChild(div1);
 
     await snapshot();
   });
@@ -144,8 +144,8 @@ describe('containing-block', () => {
         }),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(div1);
+    document.body.appendChild(p);
+    document.body.appendChild(div1);
 
     await snapshot();
   });
@@ -200,8 +200,8 @@ describe('containing-block', () => {
         }),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(div1);
+    document.body.appendChild(p);
+    document.body.appendChild(div1);
 
     await snapshot();
   });
@@ -229,7 +229,7 @@ describe('containing-block', () => {
         }),
       ]
     );
-    BODY.appendChild(p);
+    document.body.appendChild(p);
 
     await snapshot(0.5);
   });
@@ -274,8 +274,8 @@ describe('containing-block', () => {
         }),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(div1);
+    document.body.appendChild(p);
+    document.body.appendChild(div1);
 
     await snapshot();
   });
@@ -326,8 +326,8 @@ describe('containing-block', () => {
         }),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(div);
+    document.body.appendChild(p);
+    document.body.appendChild(div);
 
     await snapshot(0.5);
   });
@@ -402,8 +402,8 @@ describe('containing-block', () => {
         )),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(div1);
+    document.body.appendChild(p);
+    document.body.appendChild(div1);
 
     await snapshot();
   });
@@ -430,7 +430,7 @@ describe('containing-block', () => {
         }),
       ]
     );
-    BODY.appendChild(div);
+    document.body.appendChild(div);
 
     await snapshot(0.5);
   });
@@ -503,8 +503,8 @@ describe('containing-block', () => {
         )),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(div1);
+    document.body.appendChild(p);
+    document.body.appendChild(div1);
 
     await snapshot();
   });
@@ -577,8 +577,8 @@ describe('containing-block', () => {
         )),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(div1);
+    document.body.appendChild(p);
+    document.body.appendChild(div1);
 
     await snapshot();
   });
@@ -644,8 +644,8 @@ describe('containing-block', () => {
         )),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(div);
+    document.body.appendChild(p);
+    document.body.appendChild(div);
 
     await snapshot();
   });
@@ -711,8 +711,8 @@ describe('containing-block', () => {
         )),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(div);
+    document.body.appendChild(p);
+    document.body.appendChild(div);
 
     await snapshot();
   });
@@ -778,8 +778,8 @@ describe('containing-block', () => {
         )),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(div);
+    document.body.appendChild(p);
+    document.body.appendChild(div);
 
     await snapshot();
   });
@@ -911,8 +911,8 @@ describe('containing-block', () => {
         )),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(div);
+    document.body.appendChild(p);
+    document.body.appendChild(div);
 
     await snapshot();
   });
@@ -943,7 +943,7 @@ describe('containing-block', () => {
         }),
       ]
     );
-    BODY.appendChild(div);
+    document.body.appendChild(div);
 
     await snapshot(0.5);
   });
@@ -1013,8 +1013,8 @@ describe('containing-block', () => {
         )),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(div);
+    document.body.appendChild(p);
+    document.body.appendChild(div);
 
     await snapshot();
   });
@@ -1060,8 +1060,8 @@ describe('containing-block', () => {
         }),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(div);
+    document.body.appendChild(p);
+    document.body.appendChild(div);
 
     await snapshot(0.5);
   });
@@ -1131,8 +1131,8 @@ describe('containing-block', () => {
         )),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(div);
+    document.body.appendChild(p);
+    document.body.appendChild(div);
 
     await snapshot();
   });
@@ -1202,8 +1202,8 @@ describe('containing-block', () => {
         )),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(div);
+    document.body.appendChild(p);
+    document.body.appendChild(div);
 
     await snapshot();
   });
@@ -1273,8 +1273,8 @@ describe('containing-block', () => {
         )),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(div);
+    document.body.appendChild(p);
+    document.body.appendChild(div);
 
     await snapshot();
   });
@@ -1342,8 +1342,8 @@ describe('containing-block', () => {
         )),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(div1);
+    document.body.appendChild(p);
+    document.body.appendChild(div1);
 
     await snapshot();
   });
@@ -1394,8 +1394,8 @@ describe('containing-block', () => {
         }),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(div);
+    document.body.appendChild(p);
+    document.body.appendChild(div);
 
     await snapshot();
   });
@@ -1442,8 +1442,8 @@ describe('containing-block', () => {
         })),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(div);
+    document.body.appendChild(p);
+    document.body.appendChild(div);
 
     await snapshot();
   });
@@ -1492,8 +1492,8 @@ describe('containing-block', () => {
         })),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(div);
+    document.body.appendChild(p);
+    document.body.appendChild(div);
 
     await snapshot();
   });
@@ -1536,8 +1536,8 @@ describe('containing-block', () => {
         })),
       ]
     );
-    BODY.appendChild(p);
-    BODY.appendChild(containingBlock);
+    document.body.appendChild(p);
+    document.body.appendChild(containingBlock);
 
     await snapshot();
   });
@@ -1580,7 +1580,7 @@ describe('containing-block', () => {
         })),
       ]
     );
-    BODY.appendChild(root);
+    document.body.appendChild(root);
     root.appendChild(containingBlock);
 
     await snapshot();
@@ -1623,7 +1623,7 @@ describe('containing-block', () => {
         })),
       ]
     );
-    BODY.appendChild(root);
+    document.body.appendChild(root);
     root.appendChild(containingBlock);
 
     await snapshot();

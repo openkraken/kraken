@@ -61,7 +61,7 @@ mixin CSSDisplayMixin on RenderStyleBase {
       if (shouldReattach) {
         RenderLayoutBox parentRenderObject = element.parentElement!.renderBoxModel as RenderLayoutBox;
         Element? previousSibling = element.previousSibling as Element?;
-        RenderObject? previous = previousSibling != null ? previousSibling.renderer : null;
+        RenderObject? previous = previousSibling?.renderer;
 
         parentRenderObject.remove(prevRenderLayoutBox!);
         parentRenderObject.insert(renderBoxModel!, after: previous as RenderBox?);

@@ -83,5 +83,6 @@ class CSSFunctionalNotation {
 
   CSSFunctionalNotation(this.name, this.args);
 
+  @override
   String toString() => 'CSSFunctionalNotation($name: $args)';
 }

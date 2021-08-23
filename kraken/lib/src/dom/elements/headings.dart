@@ -18,37 +18,49 @@ const String H6 = 'H6';
 const Map<String, dynamic> _h1DefaultStyle = {
   DISPLAY: BLOCK,
   FONT_WEIGHT: BOLD,
-  FONT_SIZE: '32px',  // 2em
+  FONT_SIZE: '2em',  // 32px
+  MARGIN_TOP: '0.67em',
+  MARGIN_BOTTOM: '0.67em',
 };
 
 const Map<String, dynamic> _h2DefaultStyle = {
   DISPLAY: BLOCK,
   FONT_WEIGHT: BOLD,
-  FONT_SIZE: '24px', // 1.5em
+  FONT_SIZE: '1.5em', // 24px
+  MARGIN_TOP: '0.83em',
+  MARGIN_BOTTOM: '0.83em',
 };
 
 const Map<String, dynamic> _h3DefaultStyle = {
   DISPLAY: BLOCK,
   FONT_WEIGHT: BOLD,
-  FONT_SIZE: '18.72px', // 1.33em
+  FONT_SIZE: '1.17em', // 18.72px
+  MARGIN_TOP: '1em',
+  MARGIN_BOTTOM: '1em',
 };
 
 const Map<String, dynamic> _h4DefaultStyle = {
   DISPLAY: BLOCK,
   FONT_WEIGHT: BOLD,
-  FONT_SIZE: '16px', // 1em
+  FONT_SIZE: '1em', // 16px
+  MARGIN_TOP: '1.33em',
+  MARGIN_BOTTOM: '1.33em',
 };
 
 const Map<String, dynamic> _h5DefaultStyle = {
   DISPLAY: BLOCK,
   FONT_WEIGHT: BOLD,
-  FONT_SIZE: '13.28px', // 0.83em;
+  FONT_SIZE: '0.83em', // 13.28px
+  MARGIN_TOP: '1.67em',
+  MARGIN_BOTTOM: '1.67em',
 };
 
 const Map<String, dynamic> _h6DefaultStyle = {
   DISPLAY: BLOCK,
   FONT_WEIGHT: BOLD,
-  FONT_SIZE: '10.72px', // 0.67em
+  FONT_SIZE: '0.67em', // 10.72px
+  MARGIN_TOP: '2.33em',
+  MARGIN_BOTTOM: '2.33em',
 };
 
 class H1Element extends Element {

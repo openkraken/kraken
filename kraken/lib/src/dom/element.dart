@@ -23,7 +23,7 @@ import 'package:ffi/ffi.dart';
 
 import 'element_native_methods.dart';
 
-const String STYLE = 'style';
+const String _STYLE_PROPERTY = 'style';
 
 /// Defined by W3C Standard,
 /// Most element's default width is 300 in pixel,
@@ -53,7 +53,7 @@ mixin ElementBase on Node {
   RenderLayoutBox? _renderLayoutBox;
   RenderIntrinsic? _renderIntrinsic;
 
-  RenderBoxModel? get renderBoxModel => _renderLayoutBox ?? _renderIntrinsic ?? null;
+  RenderBoxModel? get renderBoxModel => _renderLayoutBox ?? _renderIntrinsic;
   set renderBoxModel(RenderBoxModel? value) {
     if (value == null) {
       _renderIntrinsic = null;
@@ -69,25 +69,25 @@ mixin ElementBase on Node {
 }
 
 /// Mark the renderer of element as needs layout.
-typedef void MarkRendererNeedsLayout();
+typedef MarkRendererNeedsLayout = void Function();
 /// Toggle the renderer of element between repaint boundary and non repaint boundary.
-typedef void ToggleRendererRepaintBoundary();
+typedef ToggleRendererRepaintBoundary = void Function();
 /// Detach the renderer from its owner element.
-typedef void DetachRenderer();
+typedef DetachRenderer = void Function();
 /// Do the preparation work before the renderer is attached.
-typedef RenderObject BeforeRendererAttach();
+typedef BeforeRendererAttach = RenderObject Function();
 /// Do the clean work after the renderer has attached.
-typedef void AfterRendererAttach();
+typedef AfterRendererAttach = void Function();
 /// Return the targetId of current element.
-typedef int GetTargetId();
+typedef GetTargetId = int Function();
 /// Focus the input element.
-typedef void FocusInput();
+typedef FocusInput = void Function();
 /// Blur the input element.
-typedef void BlurInput();
+typedef BlurInput = void Function();
 /// Scroll the input element to the caret.
-typedef void ScrollInputToCaret();
+typedef ScrollInputToCaret = void Function();
 /// Get the font size of root element
-typedef double GetRootElementFontSize();
+typedef GetRootElementFontSize = double Function();
 
 /// Delegate methods passed to renderBoxModel for actions involved with element
 /// (eg. convert renderBoxModel to repaint boundary then attach to element).
@@ -125,7 +125,7 @@ class Element extends Node
         CSSOverflowMixin,
         CSSVisibilityMixin,
         CSSFilterEffectsMixin {
-  static SplayTreeMap<int, Element> _nativeMap = SplayTreeMap();
+  static final SplayTreeMap<int, Element> _nativeMap = SplayTreeMap();
 
   static Element getElementOfNativePtr(Pointer<NativeElement> nativeElement) {
     Element? element = _nativeMap[nativeElement.address];
@@ -133,7 +133,7 @@ class Element extends Node
     return element;
   }
 
-  final Map<String, dynamic> properties = Map<String, dynamic>();
+  final Map<String, dynamic> properties = <String, dynamic>{};
 
   /// Should create repaintBoundary for this element to repaint separately from parent.
   bool repaintSelf;
@@ -559,8 +559,7 @@ class Element extends Node
       case CSSPositionType.sticky:
       case CSSPositionType.relative:
       case CSSPositionType.static:
-        RenderLayoutBox? parentRenderLayoutBox = _scrollingContentLayoutBox != null ?
-        _scrollingContentLayoutBox : _renderLayoutBox;
+        RenderLayoutBox? parentRenderLayoutBox = _scrollingContentLayoutBox ?? _renderLayoutBox;
 
         if (parentRenderLayoutBox != null) {
           parentRenderLayoutBox.insert(child.renderBoxModel!, after: after);
@@ -759,7 +758,7 @@ class Element extends Node
     Element rootEl = elementManager.viewportElement;
     RenderLayoutBox rootRenderLayoutBox = rootEl.scrollingContentLayoutBox!;
     List<RenderBoxModel> fixedChildren = rootRenderLayoutBox.fixedChildren;
-    if (fixedChildren.indexOf(childRenderBoxModel) == -1) {
+    if (!fixedChildren.contains(childRenderBoxModel)) {
       fixedChildren.add(childRenderBoxModel);
     }
   }
@@ -769,7 +768,7 @@ class Element extends Node
     Element rootEl = elementManager.viewportElement;
     RenderLayoutBox? rootRenderLayoutBox = rootEl.scrollingContentLayoutBox!;
     List<RenderBoxModel> fixedChildren = rootRenderLayoutBox.fixedChildren;
-    if (fixedChildren.indexOf(childRenderBoxModel) != -1) {
+    if (fixedChildren.contains(childRenderBoxModel)) {
       fixedChildren.remove(childRenderBoxModel);
     }
   }
@@ -1262,7 +1261,7 @@ class Element extends Node
   @mustCallSuper
   void setProperty(String key, dynamic value) {
     // Each key change will emit to `setStyle`
-    if (key == STYLE) {
+    if (key == _STYLE_PROPERTY) {
       assert(value is Map<String, dynamic>);
       // @TODO: Consider `{ color: red }` to `{}`, need to remove invisible keys.
       (value as Map<String, dynamic>).forEach(setStyle);
@@ -1283,8 +1282,8 @@ class Element extends Node
   void removeProperty(String key) {
     properties.remove(key);
 
-    if (key == STYLE) {
-      setProperty(STYLE, null);
+    if (key == _STYLE_PROPERTY) {
+      setProperty(_STYLE_PROPERTY, null);
     }
   }
 
@@ -1344,9 +1343,7 @@ class Element extends Node
         .flushLayout();
 
     Element? element = _findContainingBlock(this);
-    if (element == null) {
-      element = elementManager.viewportElement;
-    }
+    element ??= elementManager.viewportElement;
     return renderBox.localToGlobal(Offset.zero, ancestor: element.renderBoxModel);
   }
 
@@ -1401,9 +1398,7 @@ class Element extends Node
   }
 
   Future<Uint8List> toBlob({double? devicePixelRatio}) {
-    if (devicePixelRatio == null) {
-      devicePixelRatio = window.devicePixelRatio;
-    }
+    devicePixelRatio ??= window.devicePixelRatio;
 
     Completer<Uint8List> completer = Completer();
     if (nodeName != 'HTML') {
