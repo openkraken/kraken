@@ -96,7 +96,7 @@ void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFi
 KRAKEN_EXPORT_C
 void parseHTML(int32_t contextId, NativeString *code, const char *bundleFilename);
 KRAKEN_EXPORT_C
-const char* getHref(int32_t contextId);
+NativeString* getHref(int32_t contextId);
 KRAKEN_EXPORT_C
 void setHref(int32_t contextId, const char *href);
 KRAKEN_EXPORT_C

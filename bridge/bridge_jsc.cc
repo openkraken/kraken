@@ -181,14 +181,14 @@ void JSBridge::setHref(const char *url) {
 }
 
 // get href.
-const char* JSBridge::getHref() {
+NativeString* JSBridge::getHref() {
   JSStringHolder windowKeyHolder = JSStringHolder(m_context.get(), "window");
   JSValueRef windowValue = JSObjectGetProperty(m_context->context(), m_context->global(), windowKeyHolder.getString(), nullptr);
   JSObjectRef windowObject = JSValueToObject(m_context->context(), windowValue, nullptr);
 
   auto window = static_cast<WindowInstance *>(JSObjectGetPrivate(windowObject));
-  std::string&& href = JSStringToStdString(window->history_->getHref());
-  return href.c_str();
+
+  return stringRefToNativeString(window->history_->getHref());
 }
 
 // parse html.

@@ -162,7 +162,7 @@ void setHref(int32_t contextId, const char *href) {
   context->setHref(href);
 }
 
-const char* getHref(int32_t contextId) {
+NativeString* getHref(int32_t contextId) {
   assert(checkContext(contextId) && "getHref: contextId is not valid");
   auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
   return context->getHref();
