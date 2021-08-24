@@ -336,7 +336,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       // Set focus that make it add keyboard listener
       _renderEditable!.hasFocus = true;
       activeTextInput();
-      dispatchEvent(Event('focus'));
+      dispatchEvent(Event(EVENT_FOCUS));
     }
   }
 
@@ -345,7 +345,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       // Set focus that make it remove keyboard listener
       _renderEditable!.hasFocus = false;
       deactiveTextInput();
-      dispatchEvent(Event('blur'));
+      dispatchEvent(Event(EVENT_BLUR));
+      // Trigger change event if value has changed.
+      _triggerChangeEvent();
     }
   }
 
@@ -446,7 +448,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void performAction(TextInputAction action) {
     switch (action) {
       case TextInputAction.done:
-        _triggerChangeEvent();
         InputElement.clearFocus();
         break;
       case TextInputAction.none:
