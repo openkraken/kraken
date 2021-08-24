@@ -67,6 +67,17 @@ class ObjectElement extends Element implements ObjectElementHost {
   }
 
   @override
+  handleJSCall(String method, List argv) {
+    switch(method) {
+      case 'getType':
+      case 'getData':
+        return _objectElementClient.getProperty(method);
+      default:
+        return super.handleJSCall(method, argv);
+    }
+  }
+
+  @override
   void willAttachRenderer() {
     super.willAttachRenderer();
     _objectElementClient.willAttachRenderer();

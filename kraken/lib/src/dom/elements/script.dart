@@ -16,6 +16,8 @@ class ScriptElement extends Element {
   ScriptElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: SCRIPT, defaultStyle: _defaultStyle);
 
+  String? _src;
+
   @override
   void setProperty(String key, dynamic value) {
     super.setProperty(key, value);
@@ -24,7 +26,18 @@ class ScriptElement extends Element {
     }
   }
 
+  @override
+  handleJSCall(String method, List argv) {
+    switch(method) {
+      case 'getSrc':
+        return _src ?? '';
+      default:
+        return super.handleJSCall(method, argv);
+    }
+  }
+
   void _fetchBundle(String src) async {
+    _src = src;
     if (src.isNotEmpty && isConnected) {
       try {
         KrakenBundle bundle = await KrakenBundle.getBundle(src, contextId: elementManager.contextId);

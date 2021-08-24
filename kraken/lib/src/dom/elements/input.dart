@@ -188,6 +188,51 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     _textSelectionDelegate = EditableTextDelegate(this);
   }
 
+  String _getValue() {
+    TextEditingValue value = _textSelectionDelegate._textEditingValue;
+    return value.text;
+  }
+
+  @override
+  handleJSCall(String method, List argv) {
+    switch(method) {
+      // @TODO: Apply algorithm of input element property width.
+      case 'getWidth':
+      case 'getHeight':
+        return 0.0;
+      case 'getValue':
+        return _getValue();
+      case 'getAccept':
+      case 'getAutocomplete':
+      case 'getAutofocus':
+      case 'getRequired':
+      case 'getReadonly':
+      case 'getPattern':
+      case 'getStep':
+      case 'getName':
+      case 'getMultiple':
+      case 'getChecked':
+      case 'getDisabled':
+      case 'getMin':
+      case 'getMax':
+      case 'getMinlength':
+      case 'getMaxlength':
+      case 'getSize':
+        return properties[jsMethodToKey(method)];
+      case 'getPlaceholder':
+        return placeholderText;
+      case 'getType':
+        return properties['type'] ?? 'text';
+      case 'focus':
+        focus();
+        break;
+      case 'blur':
+        blur();
+        break;
+    }
+    return super.handleJSCall(method, argv);
+  }
+
   @override
   void didAttachRenderer() {
     super.didAttachRenderer();
@@ -677,6 +722,21 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         break;
       // @TODO: more types.
     }
+  }
+  String _getType() {
+    if (textInputType == TextInputType.text) {
+      return 'text';
+    } else if (textInputType == TextInputType.number) {
+      return 'number';
+    } else if (textInputType == TextInputType.phone) {
+      return 'tel';
+    } else if (textInputType == TextInputType.emailAddress) {
+      return 'email';
+    } else if (textInputType == TextInputType.text && obscureText) {
+      return 'password';
+    }
+    // @TODO: more types.
+    return '';
   }
 
   bool _hideVirtualKeyboard = false;

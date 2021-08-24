@@ -12,7 +12,7 @@ import 'package:kraken/dom.dart';
 
 typedef EventHandler = void Function(Event event);
 
-void callNativeMethods(Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeValue> returnedValue, Pointer<NativeString> nativeMethod, int argc, Pointer<NativeValue> argv) {
+void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> returnedValue, Pointer<NativeString> nativeMethod, int argc, Pointer<NativeValue> argv) {
   String method = nativeStringToString(nativeMethod);
   List<dynamic> values = List.generate(argc, (i) {
     Pointer<NativeValue> nativeValue = argv.elementAt(i);
@@ -20,12 +20,21 @@ void callNativeMethods(Pointer<NativeEventTarget> nativeEventTarget, Pointer<Nat
     return fromNativeValue(type, nativeValue);
   });
 
-  EventTarget eventTarget = EventTarget.getEventTargetOfNativePtr(nativeEventTarget);
-  dynamic result = eventTarget.handleJSCall(method, values);
-  toNativeValue(returnedValue, result);
+  EventTarget eventTarget = EventTarget.getEventTargetOfNativePtr(nativeEventTarget.cast<NativeEventTarget>());
+  try {
+    dynamic result = eventTarget.handleJSCall(method, values);
+    toNativeValue(returnedValue, result);
+  } catch (e, stack) {
+    print('$e\n$stack');
+    toNativeValue(returnedValue, null);
+  }
 }
 
-Pointer<NativeFunction<NativeCallNativeMethods>> _nativeCallNativeMethods = Pointer.fromFunction(callNativeMethods);
+String jsMethodToKey(String method) {
+  return method[3].toLowerCase() + method.substring(4);
+}
+
+Pointer<NativeFunction<NativeCallNativeMethods>> _nativeCallNativeMethods = Pointer.fromFunction(_callNativeMethods);
 
 abstract class EventTarget {
   static SplayTreeMap<int, EventTarget> _nativeMap = SplayTreeMap();

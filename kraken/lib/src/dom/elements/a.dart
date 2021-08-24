@@ -58,6 +58,18 @@ class AnchorElement extends Element {
   }
 
   @override
+  handleJSCall(String method, List argv) {
+    switch(method) {
+      case 'getHref':
+        return _href;
+      case 'getTarget':
+        return _target;
+      default:
+        return super.handleJSCall(method, argv);
+    }
+  }
+
+  @override
   void setProperty(String key, dynamic value) {
     super.setProperty(key, value);
     switch (key) {

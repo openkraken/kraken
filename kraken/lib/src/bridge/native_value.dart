@@ -28,7 +28,8 @@ enum JSValueType {
 
 enum JSPointerType {
   NativeBoundingClientRect,
-  NativeCanvasRenderingContext2D
+  NativeCanvasRenderingContext2D,
+  NativeEventTarget
 }
 
 dynamic fromNativeValue(JSValueType type, Pointer<NativeValue> nativeValue) {
@@ -50,6 +51,10 @@ dynamic fromNativeValue(JSValueType type, Pointer<NativeValue> nativeValue) {
           return Pointer.fromAddress(nativeValue.ref.u).cast<NativeBoundingClientRect>();
         case JSPointerType.NativeCanvasRenderingContext2D:
           return Pointer.fromAddress(nativeValue.ref.u).cast<NativeCanvasRenderingContext2D>();
+        case JSPointerType.NativeEventTarget:
+          return Pointer.fromAddress(nativeValue.ref.u).cast<NativeEventTarget>();
+        default:
+          return Pointer.fromAddress(nativeValue.ref.u);
       }
     case JSValueType.TAG_JSON:
       return jsonDecode(nativeStringToString(Pointer.fromAddress(nativeValue.ref.u)));
@@ -76,6 +81,10 @@ void toNativeValue(Pointer<NativeValue> target, dynamic value) {
     target.ref.u = value.address;
     if (value is Pointer<NativeBoundingClientRect>) {
       target.ref.float64 = JSPointerType.NativeBoundingClientRect.index.toDouble();
+    } else if (value is Pointer<NativeCanvasRenderingContext2D>) {
+      target.ref.float64 = JSPointerType.NativeCanvasRenderingContext2D.index.toDouble();
+    } else if (value is Pointer<NativeEventTarget>) {
+      target.ref.float64 = JSPointerType.NativeEventTarget.index.toDouble();
     }
   } else if (value is Object) {
     String str = jsonEncode(value);
