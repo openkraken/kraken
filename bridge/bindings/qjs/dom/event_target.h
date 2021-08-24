@@ -84,8 +84,8 @@ public:
   JSValue callNativeMethods(const char* method, int32_t argc,
                                 NativeValue *argv);
 
-protected:
   NativeEventTarget nativeEventTarget{this};
+protected:
   int32_t eventTargetId;
   std::unordered_map<std::string, std::vector<JSValue>> _eventHandlers;
   std::unordered_map<std::string, JSValue> _propertyEventHandler;

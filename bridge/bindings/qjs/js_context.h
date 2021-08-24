@@ -136,7 +136,7 @@ private:
 };
 
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner);
-NativeString *jsValueToNativeString(QjsContext *ctx, JSValue &value);
+NativeString *jsValueToNativeString(QjsContext *ctx, JSValue value);
 void buildUICommandArgs(QjsContext *ctx, JSValue key, NativeString &args_01);
 NativeString *stringToNativeString(std::string &string);
 std::string jsValueToStdString(QjsContext *ctx, JSValue &value);

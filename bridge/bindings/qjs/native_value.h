@@ -20,7 +20,8 @@ enum NativeTag {
 
 enum JSPointerType {
   NativeBoundingClientRect       = 0,
-  NativeCanvasRenderingContext2D = 1
+  NativeCanvasRenderingContext2D = 1,
+  NativeEventTarget = 2
 };
 
 namespace kraken::binding::qjs {
@@ -37,9 +38,11 @@ struct NativeValue {
 
 NativeValue Native_NewNull();
 NativeValue Native_NewString(NativeString *string);
+NativeValue Native_NewCString(std::string string);
 NativeValue Native_NewFloat64(double value);
 NativeValue Native_NewBool(bool value);
 NativeValue Native_NewInt32(int32_t value);
+NativeValue Native_NewPtr(JSPointerType pointerType, void *ptr);
 NativeValue Native_NewJSON(JSContext *context, JSValue &value);
 NativeValue jsValueToNativeValue(QjsContext *ctx, JSValue &value);
 JSValue nativeValueToJSValue(JSContext *context, NativeValue &value);

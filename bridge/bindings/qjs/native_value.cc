@@ -7,6 +7,7 @@
 #include "bindings/qjs/qjs_patch.h"
 #include "kraken_bridge.h"
 #include "dom/element.h"
+#include "dom/elements/.gen/image_element.h"
 #include "dom/elements/.gen/canvas_element.h"
 
 namespace kraken::binding::qjs {
@@ -27,6 +28,11 @@ NativeValue Native_NewString(NativeString *string) {
   };
 }
 
+NativeValue Native_NewCString(std::string string) {
+  NativeString *nativeString = stringToNativeString(string);
+  return Native_NewString(nativeString);
+}
+
 NativeValue Native_NewFloat64(double value) {
   return (NativeValue){
     value,
@@ -34,6 +40,15 @@ NativeValue Native_NewFloat64(double value) {
     NativeTag::TAG_FLOAT64,
   };
 }
+
+NativeValue Native_NewPtr(JSPointerType pointerType, void *ptr) {
+  return (NativeValue){
+    static_cast<double>(pointerType),
+    .u = {.ptr = ptr},
+    NativeTag::TAG_POINTER
+  };
+}
+
 
 NativeValue Native_NewBool(bool value) {
   return (NativeValue){
@@ -74,6 +89,12 @@ NativeValue jsValueToNativeValue(QjsContext *ctx, JSValue &value) {
     NativeString *string = jsValueToNativeString(ctx, value);
     return Native_NewString(string);
   } else if (JS_IsObject(value)) {
+    auto *context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
+    if (JS_IsInstanceOf(ctx, value, ImageElement::instance(context)->classObject)) {
+      auto *imageElementInstance = static_cast<ImageElementInstance *>(JS_GetOpaque(value, Element::classId()));
+      return Native_NewPtr(JSPointerType::NativeEventTarget, &imageElementInstance->nativeEventTarget);
+    }
+
     JSValue stringifiedString = JS_JSONStringify(ctx, value, JS_UNDEFINED, JS_UNDEFINED);
     NativeString *string = jsValueToNativeString(ctx, stringifiedString);
     return Native_NewString(string);
@@ -116,11 +137,13 @@ JSValue nativeValueToJSValue(JSContext *context, NativeValue &value) {
       return (new BoundingClientRect(context, static_cast<NativeBoundingClientRect *>(ptr)))->jsObject;
     } else if (ptrType == JSPointerType::NativeCanvasRenderingContext2D) {
       return (new CanvasRenderingContext2D(context, static_cast<NativeCanvasRenderingContext2D *>(ptr)))->jsObject;
+    } else if (ptrType == JSPointerType::NativeEventTarget) {
+      auto *nativeEventTarget = static_cast<NativeEventTarget *>(ptr);
+      return JS_DupValue(context->ctx(), nativeEventTarget->instance->instanceObject);
     }
   }
   }
   return JS_NULL;
 }
-
 
 } // namespace kraken::binding::qjs

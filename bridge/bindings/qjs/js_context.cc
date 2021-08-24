@@ -205,7 +205,7 @@ void JSContext::defineGlobalProperty(const char *prop, JSValue value) {
   JS_FreeAtom(m_ctx, atom);
 }
 
-NativeString *jsValueToNativeString(QjsContext *ctx, JSValue &value) {
+NativeString *jsValueToNativeString(QjsContext *ctx, JSValue value) {
   bool isValueString = true;
   if (!JS_IsString(value)) {
     value = JS_ToString(ctx, value);
