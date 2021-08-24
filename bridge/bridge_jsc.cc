@@ -167,7 +167,7 @@ void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType
   }
 }
 
-// set url.
+// set href.
 void JSBridge::setHref(const char *url) {
     if (!m_context->isValid()) return;
 
@@ -178,6 +178,16 @@ void JSBridge::setHref(const char *url) {
     auto window = static_cast<WindowInstance *>(JSObjectGetPrivate(windowObject));
     HistoryItem history = { JSStringCreateWithUTF8CString(url), nullptr };
     window->history_->addItem(history);
+}
+
+// get href.
+const char* JSBridge::getHref() {
+  JSStringHolder windowKeyHolder = JSStringHolder(m_context.get(), "window");
+  JSValueRef windowValue = JSObjectGetProperty(m_context->context(), m_context->global(), windowKeyHolder.getString(), nullptr);
+  JSObjectRef windowObject = JSValueToObject(m_context->context(), windowValue, nullptr);
+
+  auto window = static_cast<WindowInstance *>(JSObjectGetPrivate(windowObject));
+  return JSStringToStdString(window->history_->getHref()).c_str();
 }
 
 // parse html.

@@ -103,6 +103,9 @@ void JSHistory::goTo(HistoryItem &historyItem) {
 }
 
 JSStringRef JSHistory::getHref() {
+  if (m_previous_stack.empty()) {
+    return JSStringCreateWithUTF8CString("");
+  }
   return m_previous_stack.top().href;
 }
 

@@ -175,6 +175,18 @@ void setHref(int contextId, String url) {
   _setHref(contextId, _url);
 }
 
+// register get href.
+typedef NativeGetHref = Pointer<Utf8> Function(
+    Int32 contextId);
+
+typedef DartGetHref = Pointer<Utf8> Function(int contextId);
+
+final DartGetHref _getHref = nativeDynamicLibrary.lookup<NativeFunction<NativeGetHref>>('getHref').asFunction();
+
+String getHref(int contextId) {
+  return _getHref(contextId).toDartString();
+}
+
 // Register initJsEngine
 typedef NativeInitJSContextPool = Void Function(Int32 poolSize);
 typedef DartInitJSContextPool = void Function(int poolSize);

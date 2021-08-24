@@ -604,14 +604,12 @@ class KrakenController {
     return completer.future;
   }
 
-  String _href = '';
-  String get href => _href;
+  String get href {
+    return getHref(_view.contextId);
+  }
 
   set href(String value) {
-    if (value != _href) {
-      _href = value;
-      setHref(_view.contextId, value);
-    }
+    setHref(_view.contextId, value);
   }
 
   // reload current kraken view.
