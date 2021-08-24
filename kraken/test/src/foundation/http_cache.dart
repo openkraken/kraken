@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:test/test.dart';
 import 'package:kraken/foundation.dart';
 import '../../local_http_server.dart';
@@ -24,7 +25,7 @@ void main() {
       expect(response.headers.value(HttpHeaders.expiresHeader),
           'Mon, 16 Aug 2221 10:17:45 GMT');
 
-      var data = await sinkStream(response);
+      var data = await consolidateHttpClientResponseBytes(response);
       var content = jsonDecode(String.fromCharCodes(data));
       expect(content, {
         'method': 'GET',
@@ -48,7 +49,7 @@ void main() {
       KrakenHttpOverrides.setContextHeader(req, contextId);
       req.headers.ifModifiedSince = HttpDate.parse('Sun, 15 Mar 2020 11:32:20 GMT');
       var res = await req.close();
-      expect(String.fromCharCodes(await sinkStream(res)), 'CachedData');
+      expect(String.fromCharCodes(await consolidateHttpClientResponseBytes(res)), 'CachedData');
 
       HttpCacheController cacheController = HttpCacheController.instance(req.headers.value('origin')!);
       var cacheObject = await cacheController.getCacheObject(req.uri);
@@ -65,7 +66,7 @@ void main() {
       req.headers.set(HttpHeaders.ifNoneMatchHeader, '"foo"');
 
       var res = await req.close();
-      expect(String.fromCharCodes(await sinkStream(res)), 'CachedData');
+      expect(String.fromCharCodes(await consolidateHttpClientResponseBytes(res)), 'CachedData');
 
       HttpCacheController cacheController = HttpCacheController.instance(req.headers.value('origin')!);
       var cacheObject = await cacheController.getCacheObject(req.uri);
@@ -74,16 +75,4 @@ void main() {
       assert(cacheObject.valid);
     });
   });
-}
-
-Future<Uint8List> sinkStream(Stream<List<int>> stream) {
-  var completer = Completer<Uint8List>();
-  var buffer = BytesBuilder();
-  stream
-      .listen(buffer.add)
-    ..onDone(() {
-      completer.complete(buffer.takeBytes());
-    })
-    ..onError(completer.completeError);
-  return completer.future;
 }
