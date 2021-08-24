@@ -1,6 +1,13 @@
+export enum FunctionArgumentType {
+  string,
+  number,
+  boolean,
+  union
+}
+
 export class FunctionArguments {
   name: string;
-  type: string;
+  type: FunctionArgumentType;
   required: boolean;
 }
 

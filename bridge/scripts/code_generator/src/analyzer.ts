@@ -3,6 +3,7 @@ import {Blob} from './blob';
 import {
   ClassObject,
   FunctionArguments,
+  FunctionArgumentType,
   FunctionDeclaration,
   PropsDeclaration,
   PropsDeclarationKind
@@ -65,15 +66,15 @@ function getParameterName(name: ts.BindingName) : string {
   return  '';
 }
 
-function getParameterType(type: ts.TypeNode) : string {
+function getParameterType(type: ts.TypeNode) {
   if (type.kind === ts.SyntaxKind.StringKeyword) {
-    return 'string';
+    return FunctionArgumentType.string;
   } else if (type.kind === ts.SyntaxKind.NumberKeyword) {
-    return 'number';
+    return FunctionArgumentType.number;
   } else if (type.kind === ts.SyntaxKind.BooleanKeyword) {
-    return 'boolean';
+    return FunctionArgumentType.boolean;
   }
-  return 'UnionType';
+  return FunctionArgumentType.union;
 }
 
 function paramsNodeToArguments(parameter: ts.ParameterDeclaration): FunctionArguments {

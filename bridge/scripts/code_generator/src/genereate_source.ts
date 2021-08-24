@@ -2,6 +2,7 @@ import {Blob} from "./blob";
 import {
   ClassObject,
   FunctionArguments,
+  FunctionArgumentType,
   FunctionDeclaration,
   PropsDeclaration,
   PropsDeclarationKind
@@ -159,15 +160,15 @@ function generatePropsSource(object: ClassObject, type: PropType) {
 }
 
 function generateArgumentsTypeCheck(index: number, argv: FunctionArguments, m: FunctionDeclaration) {
-  if (argv.type == 'string') {
+  if (argv.type == FunctionArgumentType.string) {
     return `if (!JS_IsString(argv[${index}])) {
     return JS_ThrowTypeError(ctx, "Failed to execute ${m.name}: ${index + 1}st arguments is not String.");
   }`;
-  } else if (argv.type === 'number') {
+  } else if (argv.type === FunctionArgumentType.number) {
     return `if (!JS_IsNumber(argv[${index}])) {
     return JS_ThrowTypeError(ctx, "Failed to execute ${m.name}: ${index + 1}st arguments is not Number.");
   }`
-  } else if (argv.type === 'boolean') {
+  } else if (argv.type === FunctionArgumentType.boolean) {
     return `if (!JS_IsBool(argv[${index}])) {
     return JS_ThrowTypeError(ctx, "Failed to execute ${m.name}: ${index + 1}st arguments is not Boolean.");
   }`
@@ -196,7 +197,26 @@ function generateMethodArgumentsCheck(m: FunctionDeclaration, object: ClassObjec
 `;
 }
 
+function generateDefaultNativeValue(m: FunctionArguments, index: number) {
+  switch(m.type) {
+    case FunctionArgumentType.boolean:
+      return `NativeValue argv${index} = Native_NewBool(false);`;
+    case FunctionArgumentType.number:
+      return `NativeValue argv${index} = Native_NewFloat64(NAN);`;
+    case FunctionArgumentType.string:
+      return `NativeValue argv${index} = Native_NewCString("")`;
+    default:
+      return '';
+  }
+}
+
 function generateMethodsSource(object: ClassObject, type: PropType) {
+  let {
+    classId,
+    classSubFix,
+    instanceName
+  } = getPropsVars(object, type);
+
   let methodsSource: string[] = [];
   if (object.methods.length > 0) {
     let methods = object.methods.slice();
@@ -205,26 +225,38 @@ function generateMethodsSource(object: ClassObject, type: PropType) {
       let polymorphism = object.methods.filter(me => me.name === m.name).length > 1;
 
       if (polymorphismMap[m.name]) return;
-
       polymorphismMap[m.name] = true;
 
       function createMethodBody(m: FunctionDeclaration) {
         let callArgumentsCode = '';
         if (m.args.length > 0) {
           let callArguments = [];
+          let optionalArguments = [];
           for (let i = 0; i < m.args.length; i++) {
-            callArguments.push(` jsValueToNativeValue(ctx, argv[${i}])`);
+            if (m.args[i].required) {
+              callArguments.push(` jsValueToNativeValue(ctx, argv[${i}])`);
+            } else {
+              optionalArguments.push(`${addIndent(generateDefaultNativeValue(m.args[i], i), 2)}
+  if (argc == ${i + 1}) {
+    argv${i} = jsValueToNativeValue(ctx, argv[${i}]);
+  }`);
+              callArguments.push(` argv${i}`);
+            }
           }
-          callArgumentsCode = `NativeValue arguments[] = {
+          callArgumentsCode = `
+${optionalArguments.join('\n  ')}
+  NativeValue arguments[] = {
   ${callArguments.join(',\n  ')}
   };`;
+
+
         }
 
         return `${generateMethodArgumentsCheck(m, object)}
   getDartMethod()->flushUICommand();
 ${callArgumentsCode}
-  auto *element = static_cast<${object.name}${type == PropType.hostObject ? '' : 'Instance'} *>(JS_GetOpaque(this_val, Element::classId()));
-  return element->callNativeMethods("${m.name}", ${m.args.length}, ${m.args.length > 0 ? 'arguments' : 'nullptr'});`;
+  auto *${instanceName} = static_cast<${classSubFix} *>(JS_GetOpaque(this_val, ${classId}));
+  return ${instanceName}->callNativeMethods("${m.name}", ${m.args.length}, ${m.args.length > 0 ? 'arguments' : 'nullptr'});`;
       }
 
       if (polymorphism) {
