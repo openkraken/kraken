@@ -39,7 +39,7 @@ void main() {
           server.getUri('json_with_content_length_expires_etag_last_modified'));
       KrakenHttpOverrides.setContextHeader(requestSecond, contextId);
       var responseSecond = await requestSecond.close();
-      assert(responseSecond.headers.value('x-kraken-cache') != null);
+      expect(responseSecond.headers.value(HttpHeadersCacheHits), HttpCacheHit);
     });
 
     test('Negotiation cache last-modified', () async {
@@ -73,6 +73,31 @@ void main() {
       await cacheObject.read();
 
       assert(cacheObject.valid);
+    });
+
+    // Solve problem that consuming response multi times,
+    // causing cache file > 2 * chunk (each chunk default to 64kb) will be truncated.
+    test('File over 128K', () async {
+      Uri uri = server.getUri('js_over_128k');
+
+      // Local request to save cache.
+      var req = await httpClient.openUrl('GET', uri);
+      KrakenHttpOverrides.setContextHeader(req, contextId);
+      var res = await req.close();
+      Uint8List bytes = await consolidateHttpClientResponseBytes(res);
+      expect(bytes.lengthInBytes, res.contentLength);
+
+      // Assert cache object.
+      HttpCacheController cacheController = HttpCacheController.instance(req.headers.value('origin')!);
+      var cacheObject = await cacheController.getCacheObject(req.uri);
+      await cacheObject.read();
+      assert(cacheObject.valid);
+
+      var response = await cacheObject.toHttpClientResponse();
+      assert(response != null);
+
+      Uint8List bytesSecond = await consolidateHttpClientResponseBytes(response!);
+      expect(bytesSecond.length, response.contentLength);
     });
   });
 }

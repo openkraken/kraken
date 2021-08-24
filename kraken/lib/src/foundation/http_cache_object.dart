@@ -13,6 +13,10 @@ import 'package:path/path.dart' as path;
 
 import 'http_client_response.dart';
 
+const String HttpHeadersCacheHits = 'cache-hits';
+const String HttpCacheHit = 'HIT';
+const String HttpCacheMiss = 'MISS';
+
 class HttpCacheObject {
   // The cached url of resource.
   String url;
@@ -112,6 +116,8 @@ class HttpCacheObject {
   static int NetworkType = 0x01;
   static int Reserved = 0x00;
 
+  // This method write bytes in [Endian.little] order.
+  // Reference: https://en.wikipedia.org/wiki/Endianness
   static void writeString(BytesBuilder bytesBuilder, String str, int size) {
     final int strLength = str.length;
     for (int i = 0; i < size; i++) {
@@ -127,30 +133,13 @@ class HttpCacheObject {
     }
   }
 
-  static List<int> fromBytes(List<int> list, int size) {
-    if (list.length % size != 0) {
-      throw ArgumentError('Wrong size');
-    }
-
-    final result = <int>[];
-    for (var i = 0; i < list.length; i += size) {
-      var value = 0;
-      for (var j = 0; j < size; j++) {
-        var byte = list[i + j];
-        final val = (byte & 0xff) << (j * 8);
-        value |= val;
-      }
-
-      result.add(value);
-    }
-
-    return result;
-  }
-
   bool isDateTimeValid() => expiredTime != null && expiredTime!.isAfter(DateTime.now());
 
   // Validate the cache-control and expires.
-  bool hitLocalCache(HttpClientRequest request) {
+  Future<bool> hitLocalCache(HttpClientRequest request) async {
+    if (!valid) {
+      await read();
+    }
     return isDateTimeValid();
   }
 
@@ -164,33 +153,30 @@ class HttpCacheObject {
 
     try {
       Uint8List bytes = await _file.readAsBytes();
+      ByteData byteData = bytes.buffer.asByteData();
       int index = 0;
 
       // Reserved units.
       index += 4;
 
       // Read expiredTime.
-      Uint8List expiredTimestamp = bytes.sublist(index, index + 8);
-      expiredTime = DateTime.fromMillisecondsSinceEpoch(fromBytes(expiredTimestamp, 8).single);
+      expiredTime = DateTime.fromMillisecondsSinceEpoch(byteData.getUint64(index, Endian.little));
       index += 8;
 
       // Read lastUsed.
-      Uint8List lastUsedTimestamp = bytes.sublist(index, index + 8);
-      lastUsed = DateTime.fromMillisecondsSinceEpoch(fromBytes(lastUsedTimestamp, 8).single);
+      lastUsed = DateTime.fromMillisecondsSinceEpoch(byteData.getUint64(index, Endian.little));
       index += 8;
 
       // Read lastModified.
-      Uint8List lastModifiedTimestamp = bytes.sublist(index, index + 8);
-      lastModified = DateTime.fromMillisecondsSinceEpoch(fromBytes(lastModifiedTimestamp, 8).single);
+      lastModified = DateTime.fromMillisecondsSinceEpoch(byteData.getUint64(index, Endian.little));
       index += 8;
 
       // Read contentLength.
-      contentLength = fromBytes(bytes.sublist(index, index + 4), 4).single;
+      contentLength = byteData.getUint32(index, Endian.little);
       index += 4;
 
       // Read url.
-      Uint8List urlLengthValue = bytes.sublist(index, index + 4);
-      int urlLength = fromBytes(urlLengthValue, 4).single;
+      int urlLength = byteData.getUint32(index, Endian.little);
       index += 4;
 
       Uint8List urlValue = bytes.sublist(index, index + urlLength);
@@ -198,7 +184,7 @@ class HttpCacheObject {
       index += urlLength;
 
       // Read eTag.
-      int eTagLength = fromBytes(bytes.sublist(index, index + 2), 2).single;
+      int eTagLength = byteData.getUint16(index, Endian.little);
       index += 2;
 
       Uint8List eTagValue = bytes.sublist(index, index + eTagLength);
@@ -220,7 +206,6 @@ class HttpCacheObject {
     bytesBuilder.add([
       NetworkType, Reserved, Reserved, Reserved,
     ]);
-
 
     // | ExpiredTimeStamp x 8 |
     final int expiredTimeStamp = (expiredTime ?? alwaysExpired).millisecondsSinceEpoch;
@@ -271,7 +256,7 @@ class HttpCacheObject {
       if (expiredTime != null) HttpHeaders.expiresHeader: HttpDate.format(expiredTime!),
       if (contentLength != null) HttpHeaders.contentLengthHeader: contentLength.toString(),
       if (lastModified != null) HttpHeaders.lastModifiedHeader: HttpDate.format(lastModified!),
-      if (kDebugMode) 'x-kraken-cache': 'From http cache',
+      HttpHeadersCacheHits: HttpCacheHit,
     };
   }
 

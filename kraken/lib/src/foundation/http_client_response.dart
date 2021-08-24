@@ -226,7 +226,7 @@ class HttpClientStreamResponse extends Stream<List<int>> implements HttpClientRe
   HttpConnectionInfo get connectionInfo => _HttpConnectionInfo(80, InternetAddress.loopbackIPv4, 80);
 
   @override
-  int get contentLength => -1;
+  int get contentLength => headers.contentLength;
 
   @override
   List<Cookie> get cookies => [];
