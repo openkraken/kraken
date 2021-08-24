@@ -237,6 +237,28 @@ describe('Tags input', () => {
     });
   });
 
+  it('event change', (done) => {
+    const VALUE = 'Input 3';
+    const input1 = document.createElement('input');
+    const input2 = document.createElement('input');
+    input1.setAttribute('value', 'Input 1');
+    input2.setAttribute('value', 'Input 2');
+    document.body.appendChild(input1);
+    document.body.appendChild(input2);
+
+    input1.addEventListener('change', function handler(event) {
+      expect(input1.value).toEqual(VALUE);      
+      done();
+    });
+
+    input1.focus();
+
+    requestAnimationFrame(() => {
+      input1.setAttribute('value', VALUE);
+      input2.focus(); 
+    });
+  });
+
   it('support inputmode=text', (done) => {
     const VALUE = 'Hello';
     const input = <input inputmode="text" />;
