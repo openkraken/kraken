@@ -204,7 +204,7 @@ function generateDefaultNativeValue(m: FunctionArguments, index: number) {
     case FunctionArgumentType.number:
       return `NativeValue argv${index} = Native_NewFloat64(NAN);`;
     case FunctionArgumentType.string:
-      return `NativeValue argv${index} = Native_NewCString("")`;
+      return `NativeValue argv${index} = Native_NewCString("");`;
     default:
       return '';
   }

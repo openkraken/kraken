@@ -82,7 +82,7 @@ class CanvasRenderingContext2D {
     _nativeMap.remove(nativeCanvasRenderingContext2D.address);
   }
 
-  Map<String, String> _rawProperties = {};
+  Map<String, dynamic> _rawProperties = {};
 
   dynamic handleJSCall(String method, List<dynamic> argv) {
     String operation = method.substring(0, 3);
@@ -112,19 +112,16 @@ class CanvasRenderingContext2D {
         lineCap = parseLineCap(argv[0]);
         break;
       case 'setLineDashOffset':
-        double? _v = double.tryParse(argv[0]);
-        if (_v != null) lineDashOffset = _v;
+        lineDashOffset = argv[0];
         break;
       case 'setLineJoin':
         lineJoin = parseLineJoin(argv[0]);
         break;
       case 'setLineWidth':
-        double? _v = double.tryParse(argv[0]);
-        if (_v != null) lineWidth = _v;
+        lineWidth = argv[0];
         break;
       case 'setMiterLimit':
-        double? _v = double.tryParse(argv[0]);
-        if (_v != null) miterLimit = _v;
+        miterLimit = argv[0];
         break;
       case 'setTextAlign':
         textAlign = parseTextAlign(argv[0]);
@@ -188,6 +185,8 @@ class CanvasRenderingContext2D {
 
         sx = argv[1];
         sy = argv[2];
+
+        print(argv);
 
         if (argv.length <= 5) {
           sWidth = argv[3];

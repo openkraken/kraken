@@ -19,12 +19,12 @@ interface CanvasRenderingContext2D extends HostObject {
   bezierCurveTo(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): void;
   clearRect(x: number, y: number, w: number, h: number): void;
   closePath(): void;
-  clip(path: string): void;
+  clip(path?: string): void;
   drawImage(image: CanvasImageSource, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void;
   drawImage(image: CanvasImageSource, dx: number, dy: number, dw: number, dh: number): void;
   drawImage(image: CanvasImageSource, dx: number, dy: number): void;
   ellipse(x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, anticlockwise?: boolean): void;
-  fill(path: string): void;
+  fill(path?: string): void;
   fillRect(x: number, y: number, w: number, h: number): void;
   fillText(text: string, x: number, y: number, maxWidth?: number): void;
   lineTo(x: number, y: number): void;

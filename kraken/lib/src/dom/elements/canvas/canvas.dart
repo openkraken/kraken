@@ -260,11 +260,11 @@ class CanvasElement extends Element {
     switch (key) {
       case WIDTH:
         // The width of the coordinate space in CSS pixels. Defaults to 300.
-        attrWidth = CSSLength.parseLength(value, viewportSize: viewportSize);
+        attrWidth = double.tryParse(value);
         break;
       case HEIGHT:
         // The height of the coordinate space in CSS pixels. Defaults to 150.
-        attrHeight = CSSLength.parseLength(value, viewportSize: viewportSize);
+        attrHeight = double.tryParse(value);
         break;
     }
   }
