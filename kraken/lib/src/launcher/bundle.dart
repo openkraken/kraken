@@ -49,6 +49,9 @@ abstract class KrakenBundle {
   static Future<KrakenBundle> getBundle(String path, { String? contentOverride, required int contextId }) async {
     KrakenBundle bundle;
 
+    if (kDebugMode) {
+      print('Kraken getting bundle for contextId: $contextId, path: $path');
+    }
     if (contentOverride != null && contentOverride.isNotEmpty) {
       bundle = RawBundle(contentOverride, Uri.parse(path));
     } else {
@@ -105,8 +108,8 @@ class NetworkBundle extends KrakenBundle {
   @override
   Future<void> resolve() async {
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
-    Uri relativeUri = Uri.parse(controller.href);
-    NetworkAssetBundle bundle = NetworkAssetBundle(Uri.parse(controller.uriParser!.resolve(url, relativeUri)), contextId: contextId);
+    Uri baseUrl = Uri.parse(controller.href);
+    NetworkAssetBundle bundle = NetworkAssetBundle(controller.uriParser!.resolve(baseUrl, url), contextId: contextId);
     bundle.httpClient.userAgent = getKrakenInfo().userAgent;
     String absoluteURL = url.toString();
     ByteData bytes = await bundle.load(absoluteURL);
@@ -142,7 +145,7 @@ class NetworkAssetBundle extends AssetBundle {
   @override
   Future<ByteData> load(String key) async {
     final HttpClientRequest request = await httpClient.getUrl(_urlFromKey(key));
-    KrakenHttpOverrides.markHttpRequest(request, contextId.toString());
+    KrakenHttpOverrides.setContextHeader(request, contextId);
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok)
       throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -160,7 +163,7 @@ class NetworkAssetBundle extends AssetBundle {
   /// The result is not cached. The parser is run each time the resource is
   /// fetched.
   @override
-  Future<T> loadStructuredData<T>(String key, Future<T> parser(String value)) async {
+  Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) async {
     return parser(await loadString(key));
   }
 

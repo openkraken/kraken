@@ -10,22 +10,20 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  path: ^1.8.0
-  meta: ^1.3.0
-  ffi: ^1.0.0
-  connectivity: ^3.0.4
-  shared_preferences: ^2.0.5
-  device_info: ^2.0.1 # Only support iOS and Android.
-  path_provider: ^2.0.1
-  dio: ^4.0.0
-  vector_math: ^2.1.0
-  characters: ^1.1.0
-  vibration: ^1.7.4-nullsafety.0
+  path: ^1.8.0 # Pure dart module.
+  meta: ^1.3.0 # Pure dart module.
+  ffi: ^1.0.0 # Pure dart module.
+  async: ^2.6.1
+  connectivity: ^3.0.6 # No AndroidX used.
+  shared_preferences: ^2.0.6 # No AndroidX used.
+  device_info: ^2.0.1 # Only support iOS and Android, no AndroidX used.
+  vector_math: ^2.1.0 # Pure dart module.
+  vibration: ^1.7.4-nullsafety.0 # No AndroidX used, but can be optional.
 
 dev_dependencies:
-  effective_dart: ^1.3.1
   flutter_test:
     sdk: flutter
+  test: ^1.16.8
 
 flutter:
   # This section identifies this Flutter project as a plugin project.

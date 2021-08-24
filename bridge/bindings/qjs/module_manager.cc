@@ -117,13 +117,16 @@ JSValue krakenInvokeModule(QjsContext *ctx, JSValueConst this_val, int argc, JSV
       return JS_NULL;
     };
     JSValue callbackFunc = JS_NewCFunction(ctx, emptyFunction, "_f", 0);
-    moduleContext = new ModuleContext{callbackFunc};
+    moduleContext = new ModuleContext{
+      callbackFunc, context
+    };
   } else {
     moduleContext = new ModuleContext{
-      JS_DupValue(ctx, callbackValue)
+      JS_DupValue(ctx, callbackValue),
+      context
     };
   }
-  list_add_tail(&context->module_list, &moduleContext->link);
+  list_add_tail(&moduleContext->link, &context->module_list);
 
   NativeString *result;
 

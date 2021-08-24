@@ -3,7 +3,7 @@ import 'module_manager.dart';
 
 Map _getResult(ConnectivityResult connectivityResult) {
   String type = _parseConnectivityResult(connectivityResult);
-  return {"isConnected": ConnectivityResult.none != connectivityResult, "type": type};
+  return {'isConnected': ConnectivityResult.none != connectivityResult, 'type': type};
 }
 
 String _parseConnectivityResult(ConnectivityResult state) {
@@ -27,9 +27,7 @@ class ConnectionModule extends BaseModule {
   static Connectivity? _connectivity;
 
   static void _initConnectivity() {
-    if (_connectivity == null) {
-      _connectivity = Connectivity();
-    }
+    _connectivity ??= Connectivity();
   }
 
   static void getConnectivity(OnConnectivityChangedCallback callback) {

@@ -9,7 +9,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 
 typedef ElementCreator = Element Function(int id, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager);
-final Map<String, ElementCreator> _elementRegistry = Map();
+final Map<String, ElementCreator> _elementRegistry = {};
 
 void defineElement(String name, ElementCreator creator) {
   if (_elementRegistry.containsKey(name)) {
@@ -91,12 +91,19 @@ void defineBuiltInElements() {
   // Edits
   defineElement(DEL, (id, nativePtr, elementManager) => DelElement(id, nativePtr, elementManager));
   defineElement(INS, (id, nativePtr, elementManager) => InsElement(id, nativePtr, elementManager));
-  // Metadata
+  // Head
+  defineElement(HEAD, (id, nativePtr, elementManager) => HeadElement(id, nativePtr, elementManager));
+  defineElement(TITLE, (id, nativePtr, elementManager) => TitleElement(id, nativePtr, elementManager));
+  defineElement(META, (id, nativePtr, elementManager) => MetaElement(id, nativePtr, elementManager));
+  defineElement(LINK, (id, nativePtr, elementManager) => LinkElement(id, nativePtr, elementManager));
+  defineElement(STYLE, (id, nativePtr, elementManager) => StyleElement(id, nativePtr, elementManager));
+  defineElement(NOSCRIPT, (id, nativePtr, elementManager) => NoScriptElement(id, nativePtr, elementManager));
   defineElement(SCRIPT, (id, nativePtr, elementManager) => ScriptElement(id, nativePtr, elementManager));
+  // Object
+  defineElement(OBJECT, (id, nativePtr, elementManager) => ObjectElement(id, nativePtr, elementManager));
+  defineElement(PARAM, (id, nativePtr, elementManager) => ParamElement(id, nativePtr, elementManager));
   // Others
   defineElement(BODY, (id, nativePtr, elementManager) => BodyElement(id, nativePtr, elementManager));
-  defineElement(HEAD, (id, nativePtr, elementManager) => HeadElement(id, nativePtr, elementManager));
   defineElement(IMAGE, (id, nativePtr, elementManager) => ImageElement(id, nativePtr, elementManager));
   defineElement(CANVAS, (id, nativePtr, elementManager) => CanvasElement(id, nativePtr, elementManager));
-  defineElement(OBJECT, (id, nativePtr, elementManager) => ObjectElement(id, nativePtr, elementManager));
 }

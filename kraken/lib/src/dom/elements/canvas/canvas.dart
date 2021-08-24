@@ -84,9 +84,7 @@ class CanvasElement extends Element {
     super.didAttachRenderer();
     double? rootFontSize = renderBoxModel!.elementDelegate.getRootElementFontSize();
     double? fontSize = renderBoxModel!.renderStyle.fontSize;
-    if (context2d == null) {
-      context2d = CanvasRenderingContext2D();
-    }
+    context2d ??= CanvasRenderingContext2D();
     context2d!.viewportSize = viewportSize;
     context2d!.rootFontSize = rootFontSize;
     context2d!.fontSize = fontSize;
@@ -105,9 +103,7 @@ class CanvasElement extends Element {
     switch (contextId) {
       case '2d':
         if (painter.context == null) {
-          if (context2d == null) {
-            context2d = CanvasRenderingContext2D();
-          }
+          context2d ??= CanvasRenderingContext2D();
           context2d!.canvas = this;
           painter.context = context2d;
         }

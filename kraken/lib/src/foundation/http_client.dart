@@ -64,17 +64,17 @@ class ProxyHttpClient implements HttpClient {
   }
 
   @override
-  set authenticate(Future<bool> f(Uri url, String scheme, String realm)?) {
+  set authenticate(Future<bool> Function(Uri url, String scheme, String realm)? f) {
     nativeHttpClient.authenticate = f;
   }
 
   @override
-  set authenticateProxy( Future<bool> f(String host, int port, String scheme, String realm)?) {
+  set authenticateProxy( Future<bool> Function(String host, int port, String scheme, String realm)? f) {
     nativeHttpClient.authenticateProxy = f;
   }
 
   @override
-  set badCertificateCallback(bool callback(X509Certificate cert, String host, int port)?) {
+  set badCertificateCallback(bool Function(X509Certificate cert, String host, int port)? callback) {
     nativeHttpClient.badCertificateCallback = callback;
   }
 
@@ -94,7 +94,7 @@ class ProxyHttpClient implements HttpClient {
   }
 
   @override
-  set findProxy(String f(Uri url)?) {
+  set findProxy(String Function(Uri url)? f) {
     nativeHttpClient.findProxy = f;
   }
 

@@ -9,6 +9,7 @@ import 'dart:ffi';
 import 'dart:collection';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
+import 'package:meta/meta.dart';
 
 typedef EventHandler = void Function(Event event);
 
@@ -80,6 +81,9 @@ abstract class EventTarget {
   }
 
   void dispatchEvent(Event event) {
+    if(elementManager.controller.view.disposed) {
+      return;
+    }
     event.currentTarget = event.target = this;
     if (event.currentTarget != null && this is Element) {
       (this as Element).eventResponder(event);

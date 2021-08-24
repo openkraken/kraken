@@ -4,7 +4,6 @@
  */
 
 import 'dart:ui' as ui show Image;
-import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -659,14 +658,14 @@ void _paintImage({
     double width = backgroundWidth! is String && CSSLength.isPercentage(backgroundWidth!) ?
       CSSLength.parsePercentage(backgroundWidth!) * outputSize.width : backgroundWidth;
     double height = width / aspectRatio;
-    destinationSize = Size(math.min(outputSize.width, width), math.min(outputSize.height, height));
+    destinationSize = Size(width, height);
 
   // Only background height is set, eg `auto 100px`.
   } else if (backgroundWidth == AUTO && backgroundHeight != null && backgroundHeight != AUTO) {
     double height = backgroundHeight! is String && CSSLength.isPercentage(backgroundHeight!) ?
       CSSLength.parsePercentage(backgroundHeight!) * outputSize.height : backgroundHeight;
     double width = height * aspectRatio;
-    destinationSize = Size(math.min(outputSize.width, width), math.min(outputSize.height, height));
+    destinationSize = Size(width, height);
 
   // Both background width and height are set, eg `100px 100px`.
   } else if (backgroundWidth != null && backgroundWidth != AUTO &&
@@ -676,7 +675,7 @@ void _paintImage({
       CSSLength.parsePercentage(backgroundWidth!) * outputSize.width : backgroundWidth;
     double height = backgroundHeight! is String && CSSLength.isPercentage(backgroundHeight!) ?
       CSSLength.parsePercentage(backgroundHeight!) * outputSize.height : backgroundHeight;
-    destinationSize = Size(math.min(outputSize.width, width), math.min(outputSize.height, height));
+    destinationSize = Size(width, height);
 
   // Keyword values are set(contain|cover|auto), eg `contain`, `auto auto`.
   } else {
@@ -778,16 +777,10 @@ void _paintImage({
     }
   }
 
-  final bool needSave = centerSlice != null || repeat != ImageRepeat.noRepeat || flipHorizontally ||
-    positionX.length != null || positionY.length != null;
+  canvas.save();
 
-  if (needSave)
-    canvas.save();
-
-  // Background-image is clipped to rect's range when image repeat or
-  // length background-position type is specified.
-  if (repeat != ImageRepeat.noRepeat || positionX.length != null || positionY.length != null)
-    canvas.clipRect(rect);
+  // Background image should never exceeds the boundary of its container.
+  canvas.clipRect(rect);
 
   if (flipHorizontally) {
     final double dx = -(rect.left + rect.width / 2.0);
@@ -822,8 +815,8 @@ void _paintImage({
         canvas.drawImageNine(image, _scaleRect(centerSlice, scale), _scaleRect(tileRect, scale), paint);
     }
   }
-  if (needSave)
-    canvas.restore();
+
+  canvas.restore();
 
   if (invertedCanvas) {
     canvas.restore();

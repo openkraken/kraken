@@ -14,9 +14,9 @@ class Document extends Node {
   }
 
   @override
-  void addEvent(String eventName) {
-    super.addEvent(eventName);
-    documentElement.addEventListener(eventName, _handleEvent);
+  void addEvent(String eventType) {
+    super.addEvent(eventType);
+    documentElement.addEventListener(eventType, _handleEvent);
   }
 
   @override

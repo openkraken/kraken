@@ -2,11 +2,12 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:kraken/css.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/foundation.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/widget.dart';
-import 'package:kraken/css.dart';
 import 'package:ansicolor/ansicolor.dart';
 import 'package:path/path.dart' as path;
 import 'bridge/from_native.dart';
@@ -20,6 +21,7 @@ import 'package:kraken/foundation.dart';
 // import 'package:kraken_animation_player/kraken_animation_player.dart';
 // import 'package:kraken_video_player/kraken_video_player.dart';
 // import 'package:kraken_webview/kraken_webview.dart';
+import 'local_http_server.dart'
 
 String? pass = (AnsiPen()..green())('[TEST PASS]');
 String? err = (AnsiPen()..red())('[TEST FAILED]');
@@ -53,11 +55,16 @@ class NativeGestureClient implements GestureClient {
   }
 }
 
-class MyUriParser extends UriParser {
+// Test for UriParser.
+class IntegrationTestUriParser extends UriParser {
   @override
-  String resolve(Uri base, Uri relative) {
-    String uri = super.resolve(base, relative);
-    return uri;
+  Uri resolve(Uri base, Uri relative) {
+    if (base.toString().isEmpty
+        && relative.path.startsWith('assets/')) {
+      return Uri.file(relative.path);
+    } else {
+      return super.resolve(base, relative);
+    }
   }
 }
 
@@ -68,6 +75,17 @@ void main() async {
   // KrakenVideoPlayer.initialize();
   // KrakenWebView.initialize();
   // defineKrakenCustomElements();
+
+  // Local HTTP server.
+  var httpServer = LocalHttpServer.getInstance();
+  print('Local HTTP server started at: ${httpServer.getUri()}');
+
+  String codeInjection = '''
+    // This segment inject variables for test environment.
+    LOCAL_HTTP_SERVER = '${httpServer.getUri().toString()}';
+  ''';
+
+
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
   CSSText.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
   // setObjectElementFactory(customObjectElementFactory);
@@ -99,21 +117,21 @@ void main() async {
       return 'method: ' + method;
     };
 
-    krakenMap[i] = Kraken(
+    var kraken = krakenMap[i] = Kraken(
       viewportWidth: 360,
       viewportHeight: 640,
       bundleContent: 'console.log("Starting integration tests...")',
       disableViewportWidthAssertion: true,
       disableViewportHeightAssertion: true,
       javaScriptChannel: javaScriptChannel,
-      gestureClient: NativeGestureClient(gestureClientID:i),
-      uriParser: MyUriParser(),
+      gestureClient: NativeGestureClient(gestureClientID: i),
+      uriParser: IntegrationTestUriParser(),
     );
-    widgets.add(krakenMap[i]!);
+    widgets.add(kraken);
   }
 
   runApp(MaterialApp(
-    title: 'Kraken Intergration Tests',
+    title: 'Kraken Integration Tests',
     debugShowCheckedModeBanner: false,
     home: Scaffold(
       appBar: AppBar(
@@ -146,7 +164,7 @@ void main() async {
       for (Map spec in testPayload) {
         String filename = spec['filename'];
         String code = spec['code'];
-        evaluateTestScripts(contextId, code, url: filename);
+        evaluateTestScripts(contextId, codeInjection + code, url: filename);
       }
 
       testResults.add(executeTest(contextId));

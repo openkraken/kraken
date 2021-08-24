@@ -67,9 +67,7 @@ class Event {
   bool _immediateBubble = true;
 
   Event(this.type, [EventInit? init]) {
-    if (init == null) {
-      init = EventInit();
-    }
+    init ??= EventInit();
 
     bubbles = init.bubbles;
     cancelable = init.cancelable;
@@ -123,6 +121,7 @@ class Event {
     };
   }
 
+  @override
   String toString() {
     return '$runtimeType(${jsonEncode(toJson())})';
   }
@@ -150,6 +149,7 @@ class MouseEvent extends Event {
   MouseEvent(String type, MouseEventInit mouseEventInit)
       : _mouseEventInit = mouseEventInit, super(type, mouseEventInit);
 
+  @override
   Pointer<RawNativeMouseEvent> toRaw([int methodLength = 0]) {
     List<int> methods = [
       doubleToUint64(clientX),
@@ -225,6 +225,7 @@ class GestureEvent extends Event {
   GestureEvent(String type, GestureEventInit gestureEventInit)
       : _gestureEventInit = gestureEventInit, super(type, gestureEventInit);
 
+  @override
   Pointer<RawNativeGestureEvent> toRaw([int methodLength = 0]) {
     List<int> methods = [
       stringToNativeString(state).address,
@@ -261,6 +262,7 @@ class CustomEvent extends Event {
   CustomEvent(String type, CustomEventInit customEventInit)
       : _customEventInit = customEventInit, super(type, customEventInit);
 
+  @override
   Pointer<RawNativeCustomEvent> toRaw([int methodLength = 0]) {
     List<int> methods = [
       stringToNativeString(detail).address
@@ -282,6 +284,7 @@ class InputEvent extends Event {
   final String inputType;
   final String data;
 
+  @override
   Pointer<RawNativeInputEvent> toRaw([int methodLength = 0]) {
     List<int> methods = [
       stringToNativeString(inputType).address,
@@ -335,6 +338,7 @@ class MediaError extends Event {
   /// If no diagnostics are available, or no explanation can be provided, this value is an empty string ("").
   final String message;
 
+  @override
   Pointer<RawNativeMediaErrorEvent> toRaw([int methodLength = 0]) {
     List<int> methods = [
       code,
@@ -361,6 +365,7 @@ class MessageEvent extends Event {
 
   MessageEvent(this.data, {this.origin = ''}) : super(EVENT_MESSAGE);
 
+  @override
   Pointer<RawNativeMessageEvent> toRaw([int methodLength = 0]) {
     List<int> methods = [
       stringToNativeString(data).address,
@@ -388,6 +393,7 @@ class CloseEvent extends Event {
 
   CloseEvent(this.code, this.reason, this.wasClean) : super(EVENT_CLOSE);
 
+  @override
   Pointer<RawNativeCloseEvent> toRaw([int methodLength = 0]) {
     List<int> methods = [
       code,
@@ -407,6 +413,7 @@ class IntersectionChangeEvent extends Event {
   IntersectionChangeEvent(this.intersectionRatio) : super(EVENT_INTERSECTION_CHANGE);
   final double intersectionRatio;
 
+  @override
   Pointer<RawNativeIntersectionChangeEvent> toRaw([int methodLength = 0]) {
     List<int> methods = [
       doubleToUint64(intersectionRatio)
@@ -433,6 +440,7 @@ class TouchEvent extends Event {
   bool ctrlKey = false;
   bool shiftKey = false;
 
+  @override
   Pointer<RawNativeTouchEvent> toRaw([int methodLength = 0]) {
     List<int> methods = [
       touches.toNative().address,
@@ -519,7 +527,7 @@ class Touch {
 
 /// reference: https://w3c.github.io/touch-events/#touchlist-interface
 class TouchList {
-  List<Touch> _items = [];
+  final List<Touch> _items = [];
   int get length => _items.length;
 
   Touch item(int index) {

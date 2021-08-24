@@ -33,13 +33,11 @@ struct KRAKEN_EXPORT NativeString {
 
 struct KrakenInfo;
 
-using GetUserAgent = const char *(*)(KrakenInfo *);
 struct KrakenInfo {
   const char *app_name{nullptr};
   const char *app_version{nullptr};
   const char *app_revision{nullptr};
   const char *system_name{nullptr};
-  GetUserAgent getUserAgent;
 };
 
 struct Screen {

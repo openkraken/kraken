@@ -7,14 +7,11 @@ import 'native_value.dart';
 // All the class which extends Struct class has a corresponding struct in C++ code.
 // All class members include variables and functions must be follow the same order with C++ struct, to keep the same memory layout cross dart and C++ code.
 
-typedef NativeGetUserAgent = Pointer<Utf8> Function(Pointer<NativeKrakenInfo>);
-
 class NativeKrakenInfo extends Struct {
   external Pointer<Utf8> app_name;
   external Pointer<Utf8> app_version;
   external Pointer<Utf8> app_revision;
   external Pointer<Utf8> system_name;
-  external Pointer<NativeFunction<NativeGetUserAgent>> getUserAgent;
 }
 
 // For memory compatibility between NativeEvent and other struct which inherit NativeEvent(exp: NativeTouchEvent, NativeGestureEvent),

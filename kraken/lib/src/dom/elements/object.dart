@@ -10,12 +10,23 @@ import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 
 const String OBJECT = 'OBJECT';
+const String PARAM = 'PARAM';
 
-const Map<String, dynamic> _defaultStyle = {
+const Map<String, dynamic> _objectStyle = {
   DISPLAY: INLINE_BLOCK,
   WIDTH: ELEMENT_DEFAULT_WIDTH,
   HEIGHT: ELEMENT_DEFAULT_HEIGHT,
 };
+
+const Map<String, dynamic> _paramStyle = {
+  DISPLAY: NONE,
+};
+
+// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/param
+class ParamElement extends Element {
+  ParamElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
+      : super(targetId, nativePtr, elementManager, tagName: PARAM, defaultStyle: _paramStyle);
+}
 
 _DefaultObjectElementClient _DefaultObjectElementClientFactory(ObjectElementHost objectElementHost) {
   return _DefaultObjectElementClient(objectElementHost);
@@ -28,7 +39,7 @@ class ObjectElement extends Element implements ObjectElementHost {
   late ObjectElementClient _objectElementClient;
 
   ObjectElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: OBJECT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
+      : super(targetId, nativePtr, elementManager, tagName: OBJECT, defaultStyle: _objectStyle, isIntrinsicBox: true) {
     initObjectClient();
     initElementClient();
     initDetachCallback(elementManager);

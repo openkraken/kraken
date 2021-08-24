@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/module.dart';
+import 'package:kraken/launcher.dart';
 
 const String WINDOW = 'WINDOW';
 
@@ -34,8 +35,9 @@ class Window extends EventTarget {
   }
 
   static void _open(ElementManager elementManager, String url) {
-    String? sourceUrl = elementManager.controller.view.rootController.bundleURL;
-    if (sourceUrl == null) return;
+    KrakenController rootController = elementManager.controller.view.rootController;
+    String? sourceUrl = rootController.bundleURL ?? rootController.bundlePath;
+
     elementManager.controller.view.handleNavigationAction(sourceUrl, url, KrakenNavigationType.navigate);
   }
 

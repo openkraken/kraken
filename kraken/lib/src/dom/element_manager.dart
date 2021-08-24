@@ -50,9 +50,9 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     element_registry.defineElement(type, creator);
   }
 
-  static Map<int, Pointer<NativeEventTarget>> htmlNativePtrMap = Map();
-  static Map<int, Pointer<NativeEventTarget>> documentNativePtrMap = Map();
-  static Map<int, Pointer<NativeEventTarget>> windowNativePtrMap = Map();
+  static Map<int, Pointer<NativeEventTarget>> htmlNativePtrMap = {};
+  static Map<int, Pointer<NativeEventTarget>> documentNativePtrMap = {};
+  static Map<int, Pointer<NativeEventTarget>> windowNativePtrMap = {};
 
   static double FOCUS_VIEWINSET_BOTTOM_OVERALL = 32;
 

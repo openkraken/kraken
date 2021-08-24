@@ -55,7 +55,7 @@ class _CustomTicker extends Ticker {
 class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollContext {
   AxisDirection? _axisDirection;
   ScrollPosition? position;
-  ScrollPhysics _physics = BouncingScrollPhysics();
+  final ScrollPhysics _physics = BouncingScrollPhysics();
   DragStartBehavior dragStartBehavior;
   _ScrollListener? scrollListener;
 

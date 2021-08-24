@@ -266,7 +266,6 @@
 				"${PODS_ROOT}/../Flutter/ephemeral/.symlinks/plugins/kraken/macos/libkraken_quickjs.dylib",
 				"${PODS_ROOT}/../Flutter/ephemeral/.symlinks/plugins/kraken/macos/libquickjs.dylib",
 				"${BUILT_PRODUCTS_DIR}/kraken/kraken.framework",
-				"${BUILT_PRODUCTS_DIR}/path_provider_macos/path_provider_macos.framework",
 				"${BUILT_PRODUCTS_DIR}/shared_preferences_macos/shared_preferences_macos.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
@@ -276,7 +275,6 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/libkraken_quickjs.dylib",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/libquickjs.dylib",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/kraken.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/path_provider_macos.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/shared_preferences_macos.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;

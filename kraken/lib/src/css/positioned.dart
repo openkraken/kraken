@@ -488,9 +488,7 @@ class CSSPositionedLayout {
             + overflowContainingBox.renderStyle.paddingLeft);
         }
       } else {
-        if (placeholderOffset == null) {
-          placeholderOffset = _getPlaceholderToParentOffset(child.renderPositionHolder!, parent);
-        }
+        placeholderOffset ??= _getPlaceholderToParentOffset(child.renderPositionHolder!, parent);
         // Use original offset in normal flow if no left and right is set.
         left = placeholderOffset.dx + childMarginLeft!;
       }

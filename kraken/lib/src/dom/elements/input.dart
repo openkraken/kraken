@@ -51,7 +51,7 @@ const Duration _kCursorBlinkWaitForStart = Duration(milliseconds: 150);
 const TextSelection blurSelection = TextSelection.collapsed(offset: -1);
 
 class EditableTextDelegate implements TextSelectionDelegate {
-  InputElement _inputElement;
+  final InputElement _inputElement;
   EditableTextDelegate(this._inputElement);
 
   TextEditingValue _textEditingValue = TextEditingValue();
@@ -112,30 +112,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       inputElement.focus();
     }
   }
-
-  // el.width
-  // static double getInputWidth(Pointer<NativeInputElement> nativeInputElement) {
-  //   // @TODO: Apply algorithm of input element property width.
-  //   return 0.0;
-  // }
-
-  // el.height
-  // static double getInputHeight(Pointer<NativeInputElement> nativeInputElement) {
-  //   // @TODO: Apply algorithm of input element property height.
-  //   return 0.0;
-  // }
-
-  // static void callMethodFocus(Pointer<NativeInputElement> nativeInputElement) {
-  //   InputElement inputElement = getInputElementOfNativePtr(nativeInputElement);
-  //   InputElement.setFocus(inputElement);
-  // }
-  //
-  // static void callMethodBlur(Pointer<NativeInputElement> nativeInputElement) {
-  //   InputElement inputElement = getInputElementOfNativePtr(nativeInputElement);
-  //   if (inputElement == InputElement.focusInputElement) {
-  //     InputElement.clearFocus();
-  //   }
-  // }
 
   static String obscuringCharacter = '•';
 
@@ -224,10 +200,10 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       case 'getType':
         return properties['type'] ?? 'text';
       case 'focus':
-        focus();
+        setFocus(this);
         break;
       case 'blur':
-        blur();
+        clearFocus();
         break;
     }
     return super.handleJSCall(method, argv);
@@ -308,7 +284,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     _textSelectionDelegate.userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
     TextSpan? text = obscureText ? _buildPasswordTextSpan(_actualText!.text!) : _actualText;
     if (_renderEditable != null) {
-      _renderEditable!.text = _actualText!.text!.length == 0
+      _renderEditable!.text = _actualText!.text!.isEmpty
           ? placeholderTextSpan
           : text;
     }
@@ -418,11 +394,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   int _maxLength = 9007199254740992;
 
   RenderEditable createRenderEditable() {
-    if (_actualText == null) {
-      _actualText = _buildTextSpan();
-    }
+    _actualText ??= _buildTextSpan();
     TextSpan text = _actualText!;
-    if (_actualText!.toPlainText().length == 0) {
+    if (_actualText!.toPlainText().isEmpty) {
       text = placeholderTextSpan;
     } else if (obscureText) {
       text = _buildPasswordTextSpan(text.text!);
@@ -596,7 +570,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   void _handleTextChanged(String text, bool userInteraction, SelectionChangedCause? cause) {
     if (_renderEditable != null) {
-      if (text.length == 0) {
+      if (text.isEmpty) {
         _renderEditable!.text = placeholderTextSpan;
       } else if (obscureText) {
         _renderEditable!.text = _buildPasswordTextSpan(text);
@@ -915,6 +889,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     print('ShowAutocorrectionPromptRect start: $start, end: $end');
   }
 
+  @override
   void dispose() {
     super.dispose();
   }
