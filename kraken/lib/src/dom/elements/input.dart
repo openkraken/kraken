@@ -597,6 +597,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
+    // Show keyboard for selection change or user gestures.
+    requestKeyboard();
+
     // TODO: show selection layer and emit selection changed event
 
     // To keep the cursor from blinking while it moves, restart the timer here.
