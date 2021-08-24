@@ -346,6 +346,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       _renderEditable!.hasFocus = false;
       deactiveTextInput();
       dispatchEvent(Event('blur'));
+      // Trigger change event if value has changed.
+      _triggerChangeEvent();
     }
   }
 
@@ -446,7 +448,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void performAction(TextInputAction action) {
     switch (action) {
       case TextInputAction.done:
-        _triggerChangeEvent();
         InputElement.clearFocus();
         break;
       case TextInputAction.none:
