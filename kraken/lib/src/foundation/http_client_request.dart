@@ -117,7 +117,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
       //        if hit, no need to open request.
       HttpCacheController cacheController = HttpCacheController.instance(origin);
       HttpCacheObject cacheObject = await cacheController.getCacheObject(request.uri);
-      if (cacheObject.hitLocalCache(request)) {
+      if (await cacheObject.hitLocalCache(request)) {
         HttpClientResponse? cacheResponse = await cacheObject.toHttpClientResponse();
         if (cacheResponse != null) {
           return cacheResponse;
