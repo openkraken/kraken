@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -95,9 +94,10 @@ void main() {
 
       var response = await cacheObject.toHttpClientResponse();
       assert(response != null);
+      expect(response!.headers.value(HttpHeadersCacheHits), HttpCacheHit);
 
-      Uint8List bytesSecond = await consolidateHttpClientResponseBytes(response!);
-      expect(bytesSecond.length, response.contentLength);
+      Uint8List bytesFromCache = await consolidateHttpClientResponseBytes(response);
+      expect(bytesFromCache.length, response.contentLength);
     });
   });
 }
