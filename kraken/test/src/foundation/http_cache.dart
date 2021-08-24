@@ -1,8 +1,8 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:test/test.dart';
 import 'package:kraken/foundation.dart';
 import '../../local_http_server.dart';
@@ -24,7 +24,7 @@ void main() {
       expect(response.headers.value(HttpHeaders.expiresHeader),
           'Mon, 16 Aug 2221 10:17:45 GMT');
 
-      var data = await sinkStream(response);
+      var data = await consolidateHttpClientResponseBytes(response);
       var content = jsonDecode(String.fromCharCodes(data));
       expect(content, {
         'method': 'GET',
@@ -38,7 +38,7 @@ void main() {
           server.getUri('json_with_content_length_expires_etag_last_modified'));
       KrakenHttpOverrides.setContextHeader(requestSecond, contextId);
       var responseSecond = await requestSecond.close();
-      assert(responseSecond.headers.value('x-kraken-cache') != null);
+      expect(responseSecond.headers.value('cache-hits'), 'HIT');
     });
 
     test('Negotiation cache last-modified', () async {
@@ -48,7 +48,7 @@ void main() {
       KrakenHttpOverrides.setContextHeader(req, contextId);
       req.headers.ifModifiedSince = HttpDate.parse('Sun, 15 Mar 2020 11:32:20 GMT');
       var res = await req.close();
-      expect(String.fromCharCodes(await sinkStream(res)), 'CachedData');
+      expect(String.fromCharCodes(await consolidateHttpClientResponseBytes(res)), 'CachedData');
 
       HttpCacheController cacheController = HttpCacheController.instance(req.headers.value('origin')!);
       var cacheObject = await cacheController.getCacheObject(req.uri);
@@ -65,7 +65,7 @@ void main() {
       req.headers.set(HttpHeaders.ifNoneMatchHeader, '"foo"');
 
       var res = await req.close();
-      expect(String.fromCharCodes(await sinkStream(res)), 'CachedData');
+      expect(String.fromCharCodes(await consolidateHttpClientResponseBytes(res)), 'CachedData');
 
       HttpCacheController cacheController = HttpCacheController.instance(req.headers.value('origin')!);
       var cacheObject = await cacheController.getCacheObject(req.uri);
@@ -84,7 +84,7 @@ void main() {
       expect(response.headers.value(HttpHeaders.expiresHeader),
           'Mon, 16 Aug 2221 10:17:45 GMT');
 
-      var data = await sinkStream(response);
+      var data = await consolidateHttpClientResponseBytes(response);
       var content = jsonDecode(String.fromCharCodes(data));
       expect(content, {
         'method': 'GET',
@@ -100,20 +100,34 @@ void main() {
       var responseSecond = await requestSecond.close();
 
       // Note: This line is different.
-      assert(responseSecond.headers.value('x-kraken-cache') == null);
+      assert(responseSecond.headers.value('cache-hits') == null);
       HttpCacheController.setEnabled(true);
     });
-  });
-}
 
-Future<Uint8List> sinkStream(Stream<List<int>> stream) {
-  var completer = Completer<Uint8List>();
-  var buffer = BytesBuilder();
-  stream
-      .listen(buffer.add)
-    ..onDone(() {
-      completer.complete(buffer.takeBytes());
-    })
-    ..onError(completer.completeError);
-  return completer.future;
+    // Solve problem that consuming response multi times,
+    // causing cache file > 2 * chunk (each chunk default to 64kb) will be truncated.
+    test('File over 128K', () async {
+      Uri uri = server.getUri('js_over_128k');
+
+      // Local request to save cache.
+      var req = await httpClient.openUrl('GET', uri);
+      KrakenHttpOverrides.setContextHeader(req, contextId);
+      var res = await req.close();
+      Uint8List bytes = await consolidateHttpClientResponseBytes(res);
+      expect(bytes.lengthInBytes, res.contentLength);
+
+      // Assert cache object.
+      HttpCacheController cacheController = HttpCacheController.instance(req.headers.value('origin')!);
+      var cacheObject = await cacheController.getCacheObject(req.uri);
+      await cacheObject.read();
+      assert(cacheObject.valid);
+
+      var response = await cacheObject.toHttpClientResponse();
+      assert(response != null);
+      expect(response!.headers.value('cache-hits'), 'HIT');
+
+      Uint8List bytesFromCache = await consolidateHttpClientResponseBytes(response);
+      expect(bytesFromCache.length, response.contentLength);
+    });
+  });
 }

@@ -2,7 +2,8 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:kraken/kraken.dart';
-import 'package:kraken/src/module/module_manager.dart';
+
+import 'module_manager.dart';
 
 typedef MethodCallCallback = Future<dynamic> Function(String method, dynamic arguments);
 const String METHOD_CHANNEL_NOT_INITIALIZED = 'MethodChannel not initialized.';
@@ -92,7 +93,8 @@ class KrakenJavaScriptChannel extends KrakenMethodChannel {
 class KrakenNativeChannel extends KrakenMethodChannel {
   // Flutter method channel used to communicate with public SDK API
   // Only works when integration wieh public SDK API
-  static final MethodChannel _nativeChannel = MethodChannel('kraken')
+
+  static final MethodChannel _nativeChannel = getKrakenMethodChannel()
     ..setMethodCallHandler((call) async {
       String method = call.method;
       KrakenController? controller = KrakenController.getControllerOfJSContextId(0);

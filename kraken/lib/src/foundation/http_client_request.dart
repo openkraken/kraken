@@ -121,7 +121,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
       if (_cacheEnabled) {
         HttpCacheController cacheController = HttpCacheController.instance(origin);
         cacheObject = await cacheController.getCacheObject(request.uri);
-        if (cacheObject.hitLocalCache(request)) {
+        if (await cacheObject.hitLocalCache(request)) {
           HttpClientResponse? cacheResponse = await cacheObject.toHttpClientResponse();
           if (cacheResponse != null) {
             return cacheResponse;
@@ -152,26 +152,41 @@ class ProxyHttpClientRequest extends HttpClientRequest {
         response = await _shouldInterceptRequest(clientInterceptor, request);
       }
 
-      if (cacheObject != null) {
-        // After this, response should not be null.
-        response ??= await _requestQueue.add(() async =>
-            HttpCacheController
-                .instance(origin)
-                .interceptResponse(request, await request.close(), cacheObject!));
-      } else {
-        response = await request.close();
+      bool hitInterceptorResponse = response != null;
+      bool hitNegotiateCache = false;
+
+      // After this, response should not be null.
+      if (!hitInterceptorResponse) {
+        // Handle 304 here.
+        final HttpClientResponse rawResponse = await _requestQueue.add(request.close);
+        response = cacheObject == null
+            ? rawResponse
+            : await HttpCacheController.instance(origin).interceptResponse(request, rawResponse, cacheObject);
+        hitNegotiateCache = rawResponse != response;
       }
+
       // Step 5: Lifecycle of afterResponse.
       if (clientInterceptor != null) {
-        response = await _afterResponse(clientInterceptor, request, response!) ?? response;
+        final HttpClientResponse? interceptorResponse = await _afterResponse(clientInterceptor, request, response);
+        if (interceptorResponse != null) {
+          hitInterceptorResponse = true;
+          response = interceptorResponse;
+        }
+      }
+
+      // Check match cache, and then return cache.
+      if (hitInterceptorResponse || hitNegotiateCache) {
+        return Future.value(response);
       }
 
       if (cacheObject != null) {
         // Step 6: Intercept response by cache controller (handle 304).
-        return HttpCacheController.instance(origin).interceptResponse(request, response!, cacheObject);
+        // Note: No need to negotiate cache here, this is final response, hit or not hit.
+        return HttpCacheController.instance(origin).interceptResponse(request, response, cacheObject);
       } else {
-        return response!;
+        return response;
       }
+
     } else {
       _clientRequest.add(_data);
       _data.clear();
@@ -181,7 +196,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   }
 
   @override
-  HttpConnectionInfo get connectionInfo => _clientRequest.connectionInfo!;
+  HttpConnectionInfo? get connectionInfo => _clientRequest.connectionInfo;
 
   @override
   List<Cookie> get cookies => _clientRequest.cookies;

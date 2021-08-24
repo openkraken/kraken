@@ -101,8 +101,16 @@ bool JSInputElement::InputElementInstance::setProperty(std::string &name, JSValu
   if (prototypePropertyMap.count(name) > 0) return false;
 
   if (propertyMap.count(name) > 0) {
-    JSStringRef stringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
-    std::string string = JSStringToStdString(stringRef);
+    JSStringRef valueString;
+    // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/html/HTMLInputElement.cpp#L1060
+    // Webkit have specific logic when value is null.
+    if (name == "value" && JSValueIsNull(ctx, value)) {
+      valueString = JSStringCreateWithUTF8CString(""); // input's fallback value is null.
+    } else {
+      valueString = JSValueToStringCopy(_hostClass->ctx, value, exception);
+    }
+
+    std::string string = JSStringToStdString(valueString);
     NativeString args_01{};
     NativeString args_02{};
     buildUICommandArgs(name, string, args_01, args_02);

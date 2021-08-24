@@ -50,6 +50,8 @@ public class Kraken {
   public void _handleMethodCall(MethodCall call, MethodChannel.Result result) {
     if (this.handler != null) {
       this.handler.onMethodCall(call, result);
+    } else {
+      result.error("No handler found.", null, null);
     }
   }
 
@@ -59,11 +61,9 @@ public class Kraken {
       public void run() {
         if (flutterEngine != null) {
           PluginRegistry pluginRegistry = flutterEngine.getPlugins();
-          if (pluginRegistry != null) {
-            KrakenPlugin krakenSDKPlugin = (KrakenPlugin) pluginRegistry.get(KrakenPlugin.class);
-            if (krakenSDKPlugin != null && krakenSDKPlugin.channel != null) {
-              krakenSDKPlugin.channel.invokeMethod(method, arguments);
-            }
+          KrakenPlugin krakenSDKPlugin = (KrakenPlugin) pluginRegistry.get(KrakenPlugin.class);
+          if (krakenSDKPlugin != null && krakenSDKPlugin.channel != null) {
+            krakenSDKPlugin.channel.invokeMethod(method, arguments);
           }
         }
       }
@@ -73,11 +73,9 @@ public class Kraken {
   public void reload() {
     if (flutterEngine != null) {
       PluginRegistry pluginRegistry = flutterEngine.getPlugins();
-      if (pluginRegistry != null) {
-        KrakenPlugin krakenSDKPlugin = (KrakenPlugin) pluginRegistry.get(KrakenPlugin.class);
-        if (krakenSDKPlugin != null) {
-          krakenSDKPlugin.reload();
-        }
+      KrakenPlugin krakenSDKPlugin = (KrakenPlugin) pluginRegistry.get(KrakenPlugin.class);
+      if (krakenSDKPlugin != null) {
+        krakenSDKPlugin.reload();
       }
     }
   }

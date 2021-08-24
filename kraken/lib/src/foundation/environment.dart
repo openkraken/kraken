@@ -3,15 +3,23 @@
  * Author: Kraken Team.
  */
 
-import 'dart:io';
-
-import 'package:path_provider/path_provider.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
 String? _krakenTemporaryPath;
 Future<String> getKrakenTemporaryPath() async {
   if (_krakenTemporaryPath == null) {
-    Directory temporaryDirectory = await getTemporaryDirectory();
-    _krakenTemporaryPath = temporaryDirectory.path + '/Kraken';
+    String? temporaryDirectory = await getKrakenMethodChannel()
+        .invokeMethod<String>('getTemporaryDirectory');
+    if (temporaryDirectory == null) {
+      throw FlutterError('Can\'t get temporary directory from native side.');
+    }
+    _krakenTemporaryPath = temporaryDirectory;
   }
   return _krakenTemporaryPath!;
+}
+
+MethodChannel _methodChannel = const MethodChannel('kraken');
+MethodChannel getKrakenMethodChannel() {
+  return _methodChannel;
 }
