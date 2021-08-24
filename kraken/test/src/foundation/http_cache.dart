@@ -38,7 +38,7 @@ void main() {
           server.getUri('json_with_content_length_expires_etag_last_modified'));
       KrakenHttpOverrides.setContextHeader(requestSecond, contextId);
       var responseSecond = await requestSecond.close();
-      expect(responseSecond.headers.value(HttpHeadersCacheHits), HttpCacheHit);
+      expect(responseSecond.headers.value('cache-hits'), 'HIT');
     });
 
     test('Negotiation cache last-modified', () async {
@@ -94,7 +94,7 @@ void main() {
 
       var response = await cacheObject.toHttpClientResponse();
       assert(response != null);
-      expect(response!.headers.value(HttpHeadersCacheHits), HttpCacheHit);
+      expect(response!.headers.value('cache-hits'), 'HIT');
 
       Uint8List bytesFromCache = await consolidateHttpClientResponseBytes(response);
       expect(bytesFromCache.length, response.contentLength);

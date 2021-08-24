@@ -12,11 +12,10 @@ import 'package:path/path.dart' as path;
 
 import 'http_client_response.dart';
 
-const String HttpHeadersCacheHits = 'cache-hits';
-const String HttpCacheHit = 'HIT';
-const String HttpCacheMiss = 'MISS';
-
 class HttpCacheObject {
+  static const _httpHeaderCacheHits = 'cache-hits';
+  static const _httpCacheHit = 'HIT';
+
   // The cached url of resource.
   String url;
 
@@ -255,7 +254,7 @@ class HttpCacheObject {
       if (expiredTime != null) HttpHeaders.expiresHeader: HttpDate.format(expiredTime!),
       if (contentLength != null) HttpHeaders.contentLengthHeader: contentLength.toString(),
       if (lastModified != null) HttpHeaders.lastModifiedHeader: HttpDate.format(lastModified!),
-      HttpHeadersCacheHits: HttpCacheHit,
+      _httpHeaderCacheHits: _httpCacheHit,
     };
   }
 
