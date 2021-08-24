@@ -187,7 +187,8 @@ const char* JSBridge::getHref() {
   JSObjectRef windowObject = JSValueToObject(m_context->context(), windowValue, nullptr);
 
   auto window = static_cast<WindowInstance *>(JSObjectGetPrivate(windowObject));
-  return JSStringToStdString(window->history_->getHref()).c_str();
+  std::string&& href = JSStringToStdString(window->history_->getHref());
+  return href.c_str();
 }
 
 // parse html.
