@@ -166,6 +166,14 @@ class Kraken extends StatelessWidget {
     return KrakenController.getControllerOfName(shortHash(this));
   }
 
+  // Set the globally http cache switch.
+  static void setHttpCacheEnabled(bool value) {
+    HttpCacheController.enabled = value;
+    if (!value) {
+      print('Kraken Http Cache is disabled.');
+    }
+  }
+
   static bool _isValidCustomElementName(localName) {
     return RegExp(r'^[a-z][.0-9_a-z]*-[\-.0-9_a-z]*$').hasMatch(localName);
   }

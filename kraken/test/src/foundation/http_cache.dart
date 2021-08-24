@@ -75,7 +75,7 @@ void main() {
     });
 
     test('Global switch to disable cache', () async {
-      HttpCacheController.setEnabled(false);
+      HttpCacheController.enabled = false;
       var request = await httpClient.openUrl('GET',
           server.getUri('json_with_content_length_expires_etag_last_modified'));
       KrakenHttpOverrides.setContextHeader(request, contextId);
@@ -101,7 +101,7 @@ void main() {
 
       // Note: This line is different.
       assert(responseSecond.headers.value('cache-hits') == null);
-      HttpCacheController.setEnabled(true);
+      HttpCacheController.enabled = true;
     });
 
     // Solve problem that consuming response multi times,
