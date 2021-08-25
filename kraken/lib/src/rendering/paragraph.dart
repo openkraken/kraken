@@ -683,7 +683,7 @@ class KrakenRenderParagraph extends RenderBox
     final bool didOverflowHeight =
         size.height < textSize.height || textDidExceedMaxLines;
     final bool didOverflowWidth = size.width < textSize.width;
-    // TODO(abarth): We're only measuring the sizes of the line boxes here. If
+    // TODO(abarth): We're only measuring the sizes of the line boxes here. If*
     // the glyphs draw outside the line boxes, we might think that there isn't
     // visual overflow when there actually is visual overflow. This can become
     // a problem if we start having horizontal overflow and introduce a clip
