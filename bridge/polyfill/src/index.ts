@@ -82,7 +82,7 @@ class ErrorEvent extends Event {
 // @ts-ignore
 window.__global_onerror_handler__ = function (error) {
   // @ts-ignore
-  const event = new ErrorEvent('error',{
+  const event = new ErrorEvent('error', {
     error: error,
     message: error.message,
     lineno: error.line,
