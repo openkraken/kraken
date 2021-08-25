@@ -14,7 +14,7 @@ public:
            + uri.Host
            + (uri.Port == "" ? "" : ":" + uri.Port)
            + (uri.Path.find("/") == 0 ? uri.Path : "/" + uri.Path)
-           + (uri.QueryString.find("?") == 0 ? uri.QueryString : "?" + uri.QueryString)
+           + (uri.QueryString.find("?") == 0 ? uri.QueryString : "?" + uri.QueryString);
   }
 
   static Uri Parse(const std::string &uri)
