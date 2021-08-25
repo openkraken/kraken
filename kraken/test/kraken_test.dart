@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kraken/foundation.dart';
 
 import 'foundation.dart' as foundation;
 import 'local_http_server.dart';
@@ -20,8 +21,12 @@ void main() {
 
   // Work around with path_provider.
   Directory tempDirectory = Directory('./temp');
-  const MethodChannel channel = MethodChannel('plugins.flutter.io/path_provider');
-  channel.setMockMethodCallHandler((MethodCall methodCall) async => tempDirectory.path);
+  getKrakenMethodChannel().setMockMethodCallHandler((MethodCall methodCall) async {
+    if (methodCall.method == 'getTemporaryDirectory') {
+      return tempDirectory.path;
+    }
+    throw FlutterError('Not implemented for method ${methodCall.method}.');
+  });
 
   // Start tests.
   foundation.main();

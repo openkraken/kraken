@@ -426,7 +426,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       // Set focus that make it add keyboard listener
       _renderEditable!.hasFocus = true;
       activeTextInput();
-      dispatchEvent(dom.Event('focus'));
+      dispatchEvent(Event(EVENT_FOCUS));
     }
   }
 
@@ -435,7 +435,9 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       // Set focus that make it remove keyboard listener
       _renderEditable!.hasFocus = false;
       deactiveTextInput();
-      dispatchEvent(dom.Event('blur'));
+      dispatchEvent(Event(EVENT_BLUR));
+      // Trigger change event if value has changed.
+      _triggerChangeEvent();
     }
   }
 
@@ -579,7 +581,6 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
   void performAction(TextInputAction action) {
     switch (action) {
       case TextInputAction.done:
-        _triggerChangeEvent();
         InputElement.clearFocus();
         break;
       case TextInputAction.none:
@@ -742,6 +743,9 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
   final LayerLink _endHandleLayerLink = LayerLink();
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
+    // Show keyboard for selection change or user gestures.
+    requestKeyboard();
+
     // TODO: show selection layer and emit selection changed event
     if (_renderEditable == null) {
       return;
