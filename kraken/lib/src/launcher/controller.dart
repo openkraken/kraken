@@ -85,9 +85,11 @@ class KrakenViewController {
   }
 
   Color? background;
-  
+
   FocusNode? focusNode;
-  
+
+  LayerLink? toolbarLayerLink;
+
   BuildContext? context;
 
   KrakenViewController(
@@ -102,6 +104,7 @@ class KrakenViewController {
     this.gestureClient,
     this.eventClient,
     this.focusNode,
+    this.toolbarLayerLink,
     this.context,
   }) {
     if (kProfileMode) {
@@ -146,6 +149,7 @@ class KrakenViewController {
       controller: rootController,
       eventClient: eventClient,
       focusNode: focusNode,
+      toolbarLayerLink: toolbarLayerLink,
       context: context,
     );
 
@@ -439,9 +443,11 @@ class KrakenController {
   }
 
   FocusNode? focusNode;
-  
+
+  LayerLink? toolbarLayerLink;
+
   BuildContext? context;
-  
+
   LoadHandler? onLoad;
 
   // Error handler when load bundle failed.
@@ -488,6 +494,7 @@ class KrakenController {
     KrakenNavigationDelegate? navigationDelegate,
     KrakenMethodChannel? methodChannel,
     this.focusNode,
+    this.toolbarLayerLink,
     this.context,
     this.onLoad,
     this.onLoadError,
@@ -518,6 +525,7 @@ class KrakenController {
         gestureClient: _gestureClient,
         eventClient: _eventClient,
         focusNode: focusNode,
+        toolbarLayerLink: toolbarLayerLink,
         context: context,
     );
 

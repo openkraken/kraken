@@ -77,14 +77,57 @@ class EditableTextDelegate implements TextSelectionDelegate {
 
   @override
   void bringIntoView(TextPosition position) {
-    // TODO: implement bringIntoView
-    print('call bringIntoView $position');
+    RenderEditable _renderEditable = _inputElement._renderEditable!;
+    KrakenScrollable _scrollableX = _inputElement._scrollableX;
+    final Rect localRect = _renderEditable.getLocalRectForCaret(position);
+    final RevealedOffset targetOffset = _inputElement._getOffsetToRevealCaret(localRect);
+    _scrollableX.position!.jumpTo(targetOffset.offset);
+    _renderEditable.showOnScreen(rect: targetOffset.rect);
+  }
+
+  /// Shows the selection toolbar at the location of the current cursor.
+  ///
+  /// Returns `false` if a toolbar couldn't be shown, such as when the toolbar
+  /// is already shown, or when no text selection currently exists.
+  bool showToolbar() {
+    TextSelectionOverlay? _selectionOverlay = _inputElement._selectionOverlay;
+    // Web is using native dom elements to enable clipboard functionality of the
+    // toolbar: copy, paste, select, cut. It might also provide additional
+    // functionality depending on the browser (such as translate). Due to this
+    // we should not show a Flutter toolbar for the editable text elements.
+    if (kIsWeb) {
+      return false;
+    }
+
+    if (_selectionOverlay == null || _selectionOverlay.toolbarIsVisible) {
+      return false;
+    }
+
+    _selectionOverlay.showToolbar();
+    return true;
   }
 
   @override
   void hideToolbar([bool hideHandles = true]) {
-    // TODO: implement hideToolbar
-    print('call hideToolbar');
+    TextSelectionOverlay? _selectionOverlay = _inputElement._selectionOverlay;
+    if (hideHandles) {
+      // Hide the handles and the toolbar.
+      _selectionOverlay?.hide();
+    } else {
+      // Hide only the toolbar but not the handles.
+      _selectionOverlay?.hideToolbar();
+    }
+  }
+
+  /// Toggles the visibility of the toolbar.
+  void toggleToolbar() {
+    TextSelectionOverlay? _selectionOverlay = _inputElement._selectionOverlay;
+    assert(_selectionOverlay != null);
+    if (_selectionOverlay!.toolbarIsVisible) {
+      hideToolbar();
+    } else {
+      showToolbar();
+    }
   }
 
   @override
@@ -177,7 +220,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
 
   bool _autoFocus = false;
 
-  KrakenScrollable scrollableX = KrakenScrollable(axisDirection: AxisDirection.right);
+  KrakenScrollable _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right);
 
   ViewportOffset? get scrollOffsetX => _scrollOffsetX;
   ViewportOffset? _scrollOffsetX = ViewportOffset.zero();
@@ -245,7 +288,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
     nativeInputElement.ref.focus = nativeInputMethodFocus;
     nativeInputElement.ref.blur = nativeInputMethodBlur;
 
-    scrollOffsetX = scrollableX.position;
+    scrollOffsetX = _scrollableX.position;
   }
 
   @override
@@ -426,7 +469,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       // Set focus that make it add keyboard listener
       _renderEditable!.hasFocus = true;
       activeTextInput();
-      dispatchEvent(Event(EVENT_FOCUS));
+      dispatchEvent(dom.Event(dom.EVENT_FOCUS));
     }
   }
 
@@ -435,7 +478,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       // Set focus that make it remove keyboard listener
       _renderEditable!.hasFocus = false;
       deactiveTextInput();
-      dispatchEvent(Event(EVENT_BLUR));
+      dispatchEvent(dom.Event(dom.EVENT_BLUR));
       // Trigger change event if value has changed.
       _triggerChangeEvent();
     }
@@ -509,7 +552,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
           cursorColor = selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
           selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
           cursorRadius = const Radius.circular(2.0);
-          selectionControls = cupertinoTextSelectionControls;
+          _selectionControls = cupertinoTextSelectionControls;
           break;
 
         case TargetPlatform.macOS:
@@ -517,21 +560,23 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
           cursorColor = selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
           selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
           cursorRadius = const Radius.circular(2.0);
-          selectionControls = cupertinoDesktopTextSelectionControls;
+          _selectionControls = cupertinoDesktopTextSelectionControls;
+//          // For test
+//          _selectionControls = materialTextSelectionControls;
           break;
 
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
           cursorColor = selectionTheme.cursorColor ?? theme.colorScheme.primary;
           selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
-          selectionControls = materialTextSelectionControls;
+          _selectionControls = materialTextSelectionControls;
           break;
 
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           cursorColor = selectionTheme.cursorColor ?? theme.colorScheme.primary;
           selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
-          selectionControls = desktopTextSelectionControls;
+          _selectionControls = desktopTextSelectionControls;
           break;
       }
     }
@@ -559,8 +604,8 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       enableInteractiveSelection: true,
       textSelectionDelegate: _textSelectionDelegate,
       devicePixelRatio: window.devicePixelRatio,
-      startHandleLayerLink: LayerLink(),
-      endHandleLayerLink: LayerLink(),
+      startHandleLayerLink: _startHandleLayerLink,
+      endHandleLayerLink: _endHandleLayerLink,
       ignorePointer: true,
     );
     return _renderEditable!;
@@ -571,7 +616,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
     RenderEditable renderEditable = createRenderEditable();
 
     _renderInputBox = RenderInputBox(
-      scrollableX: scrollableX,
+      scrollableX: _scrollableX,
       child: renderEditable,
     );
     return _renderInputBox!;
@@ -623,7 +668,6 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
   }
 
   void _hideSelectionOverlayIfNeeded() {
-    // TODO: hide selection overlay.
     if (_selectionOverlay != null) {
       _selectionOverlay!.hideHandles();
     }
@@ -735,10 +779,11 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
 
   TextSelectionOverlay? _selectionOverlay;
 
-  TextSelectionControls? selectionControls;
+  TextSelectionControls? _selectionControls;
+
+  bool _showSelectionHandles = false;
 
   final ClipboardStatusNotifier? _clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
-  final LayerLink _toolbarLayerLink = LayerLink();
   final LayerLink _startHandleLayerLink = LayerLink();
   final LayerLink _endHandleLayerLink = LayerLink();
 
@@ -751,7 +796,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       return;
     }
 
-    if (selectionControls == null) {
+    if (_selectionControls == null) {
       _selectionOverlay?.hide();
       _selectionOverlay = null;
     } else {
@@ -760,25 +805,75 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
           clipboardStatus: _clipboardStatus,
           context: elementManager.context!,
           value: _value,
-          toolbarLayerLink: _toolbarLayerLink,
+          toolbarLayerLink: elementManager.toolbarLayerLink!,
           startHandleLayerLink: _startHandleLayerLink,
           endHandleLayerLink: _endHandleLayerLink,
           renderObject: _renderEditable!,
-          selectionControls: selectionControls,
+          selectionControls: _selectionControls,
           selectionDelegate: _textSelectionDelegate,
           dragStartBehavior: DragStartBehavior.start,
+          onSelectionHandleTapped: _handleSelectionHandleTapped,
         );
       } else {
         _selectionOverlay!.update(_value);
       }
-      _selectionOverlay!.handlesVisible = true;
+      print('_showSelectionHandles---------------- $_renderEditable $_showSelectionHandles');
+      _selectionOverlay!.handlesVisible = _showSelectionHandles;
       _selectionOverlay!.showHandles();
     }
+
+    _onSelectionChanged(selection, cause);
 
     // To keep the cursor from blinking while it moves, restart the timer here.
     if (_cursorTimer != null) {
       _stopCursorTimer(resetCharTicks: false);
       _startCursorTimer();
+    }
+  }
+
+  void _onSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
+    final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
+    if (willShowSelectionHandles != _showSelectionHandles) {
+      _showSelectionHandles = willShowSelectionHandles;
+    }
+
+    BuildContext? context = elementManager.context;
+    if (context != null) {
+      switch (Theme
+        .of(context)
+        .platform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          if (cause == SelectionChangedCause.longPress) {
+            _textSelectionDelegate.bringIntoView(selection.base);
+          }
+          return;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+        // Do nothing.
+      }
+    }
+  }
+
+  bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
+    if (cause == SelectionChangedCause.keyboard)
+      return false;
+
+    if (cause == SelectionChangedCause.longPress)
+      return true;
+
+    if (_value.text.isNotEmpty)
+      return true;
+
+    return false;
+  }
+
+  /// Toggle the toolbar when a selection handle is tapped.
+  void _handleSelectionHandleTapped() {
+    if (_value.selection.isCollapsed) {
+      _textSelectionDelegate.toggleToolbar();
     }
   }
 
@@ -790,16 +885,31 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
 
   @override
   void updateEditingValue(TextEditingValue value) {
-    if (value.text != _textSelectionDelegate._textEditingValue.text) {
+     _lastKnownRemoteTextEditingValue = value;
+
+//    if (value == _value) {
+//      // This is possible, for example, when the numeric keyboard is input,
+//      // the engine will notify twice for the same value.
+//      // Track at https://github.com/flutter/flutter/issues/65811
+//      return;
+//    }
+
+    if (value.text == _value.text && value.composing == _value.composing) {
+      // `selection` is the only change.
+      _handleSelectionChanged(value.selection, SelectionChangedCause.keyboard);
+    } else {
       _hideSelectionOverlayIfNeeded();
       _showCaretOnScreen();
+      _textSelectionDelegate.hideToolbar();
+      _formatAndSetValue(value, userInteraction: true, cause: SelectionChangedCause.keyboard);
     }
-    _lastKnownRemoteTextEditingValue = value;
-    _formatAndSetValue(value, userInteraction: true);
-    // To keep the cursor from blinking while typing, we want to restart the
-    // cursor timer every time a new character is typed.
-    _stopCursorTimer(resetCharTicks: false);
-    _startCursorTimer();
+
+    if (_hasInputConnection) {
+      // To keep the cursor from blinking while typing, we want to restart the
+      // cursor timer every time a new character is typed.
+      _stopCursorTimer(resetCharTicks: false);
+      _startCursorTimer();
+    }
   }
 
   void _triggerChangeEvent() {
@@ -969,7 +1079,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
   void scrollToCaret() {
     SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
       final RevealedOffset targetOffset = _getOffsetToRevealCaret(_currentCaretRect!);
-      scrollableX.position!.animateTo(targetOffset.offset, duration: _caretAnimationDuration, curve: _caretAnimationCurve);
+      _scrollableX.position!.animateTo(targetOffset.offset, duration: _caretAnimationDuration, curve: _caretAnimationCurve);
     });
   }
 
@@ -997,13 +1107,13 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
 
     // No overscrolling when encountering tall fonts/scripts that extend past
     // the ascent.
-    final double targetOffset = (additionalOffset + scrollableX.position!.pixels)
+    final double targetOffset = (additionalOffset + _scrollableX.position!.pixels)
       .clamp(
-      scrollableX.position!.minScrollExtent!,
-      scrollableX.position!.maxScrollExtent!,
+      _scrollableX.position!.minScrollExtent!,
+      _scrollableX.position!.maxScrollExtent!,
     );
 
-    final double offsetDelta = scrollableX.position!.pixels - targetOffset;
+    final double offsetDelta = _scrollableX.position!.pixels - targetOffset;
     return RevealedOffset(rect: rect.shift(unitOffset * offsetDelta), offset: targetOffset);
   }
 

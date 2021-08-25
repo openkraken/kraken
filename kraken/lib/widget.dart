@@ -164,6 +164,8 @@ class Kraken extends StatefulWidget {
 
   final FocusNode focusNode = FocusNode();
 
+  final LayerLink toolbarLayerLink = LayerLink();
+
   final UriParser? uriParser;
 
   KrakenController? get controller {
@@ -262,6 +264,7 @@ class _KrakenState extends State<Kraken> {
   Map<LogicalKeySet, Intent>? _shortcutMap;
   Map<Type, Action<Intent>>? _actionMap;
   late FocusNode _focusNode;
+  late LayerLink _toolbarLayerLink;
 
   @override
   void initState() {
@@ -289,16 +292,20 @@ class _KrakenState extends State<Kraken> {
       ExtendSelectionDownTextIntent: CallbackAction<ExtendSelectionDownTextIntent>(onInvoke: _handleExtendSelectionDownText),
     };
     _focusNode = (context.widget as Kraken).focusNode;
+    _toolbarLayerLink = (context.widget as Kraken).toolbarLayerLink;
   }
 
   @override
   Widget build(BuildContext context) {
-    return FocusableActionDetector(
-      actions: _actionMap,
-      shortcuts: _shortcutMap,
-      focusNode: _focusNode,
-      onFocusChange: _handleFocusChange,
-      child: _KrakenRenderObjectWidget(context.widget as Kraken, context)
+    return CompositedTransformTarget(
+      link: _toolbarLayerLink,
+      child: FocusableActionDetector(
+        actions: _actionMap,
+        shortcuts: _shortcutMap,
+        focusNode: _focusNode,
+        onFocusChange: _handleFocusChange,
+        child: _KrakenRenderObjectWidget(context.widget as Kraken, context)
+      )
     );
   }
 
@@ -532,7 +539,10 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
 This situation often happened when you trying creating kraken when FlutterView not initialized.''');
     }
 
-    KrakenController controller = KrakenController(shortHash(_krakenWidget.hashCode), viewportWidth, viewportHeight,
+    KrakenController controller = KrakenController(
+      shortHash(_krakenWidget.hashCode),
+      viewportWidth,
+      viewportHeight,
       background: _krakenWidget.background,
       showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
       bundleContent: _krakenWidget.bundleContent,
@@ -548,6 +558,7 @@ This situation often happened when you trying creating kraken when FlutterView n
       devToolsService: _krakenWidget.devToolsService,
       httpClientInterceptor: _krakenWidget.httpClientInterceptor,
       focusNode: _krakenWidget.focusNode,
+      toolbarLayerLink: _krakenWidget.toolbarLayerLink,
       context: _context,
       uriParser: _krakenWidget.uriParser
     );

@@ -76,6 +76,8 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   FocusNode? focusNode;
 
+  LayerLink? toolbarLayerLink;
+
   BuildContext? context;
 
   ElementManager({
@@ -85,6 +87,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     this.showPerformanceOverlayOverride = false,
     this.eventClient,
     this.focusNode,
+    this.toolbarLayerLink,
     this.context,
   }) {
     if (kProfileMode) {
