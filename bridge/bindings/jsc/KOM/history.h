@@ -21,6 +21,7 @@ class JSWindow;
 struct HistoryItem {
   JSStringRef href;
   JSStringRef state;
+  bool needJump;
 };
 
 class JSHistory : public HostObject {

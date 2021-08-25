@@ -177,6 +177,8 @@ JSValueRef JSHistory::go(JSContextRef ctx, JSObjectRef function, JSObjectRef thi
 }
 
 void JSHistory::goTo(HistoryItem &historyItem) {
+  if (!historyItem.needJump) return;
+
   NativeString *moduleName = stringRefToNativeString(JSStringCreateWithUTF8CString("Navigation"));
   NativeString *method = stringRefToNativeString(JSStringCreateWithUTF8CString("goTo"));
   NativeString *params = stringRefToNativeString(JSValueCreateJSONString(ctx, JSValueMakeString(ctx, historyItem.href), 0, nullptr));
@@ -257,7 +259,7 @@ JSValueRef JSHistory::pushState(JSContextRef ctx, JSObjectRef function, JSObject
     uri.Protocol = currentUri.Protocol;
   }
 
-  HistoryItem history = { JSStringCreateWithUTF8CString(Uri::toString(uri).c_str()), jsonState };
+  HistoryItem history = { JSStringCreateWithUTF8CString(Uri::toString(uri).c_str()), jsonState, false };
   addItem(history);
 
   return nullptr;
@@ -301,7 +303,7 @@ JSValueRef JSHistory::replaceState(JSContextRef ctx, JSObjectRef function, JSObj
   }
 
   JSStringRef jsonState = JSValueCreateJSONString(ctx, state, 0, exception);
-  HistoryItem history = { JSStringCreateWithUTF8CString(Uri::toString(uri).c_str()), jsonState };
+  HistoryItem history = { JSStringCreateWithUTF8CString(Uri::toString(uri).c_str()), jsonState, false };
 
   m_previous_stack.pop();
   m_previous_stack.push(history);
