@@ -10,6 +10,78 @@
 
 namespace kraken::binding::jsc {
 
+struct Uri
+{
+public:
+  std::string QueryString, Path, Protocol, Host, Port;
+
+  static std::string toString(Uri& uri) {
+    return uri.Protocol + "://" + uri.Host + (uri.Port == "" ? "" : ":" + uri.Port) + uri.Path + uri.QueryString;
+  }
+
+  static Uri Parse(const std::string &uri)
+  {
+    Uri result;
+
+    typedef std::string::const_iterator iterator_t;
+
+    if (uri.length() == 0)
+      return result;
+
+    iterator_t uriEnd = uri.end();
+
+    // get query start
+    iterator_t queryStart = std::find(uri.begin(), uriEnd, '?');
+
+    // protocol
+    iterator_t protocolStart = uri.begin();
+    iterator_t protocolEnd = std::find(protocolStart, uriEnd, ':');            //"://");
+
+    if (protocolEnd != uriEnd)
+    {
+      std::string prot = &*(protocolEnd);
+      if ((prot.length() > 3) && (prot.substr(0, 3) == "://"))
+      {
+        result.Protocol = std::string(protocolStart, protocolEnd);
+        protocolEnd += 3;   //      ://
+      }
+      else
+        protocolEnd = uri.begin();  // no protocol
+    }
+    else
+      protocolEnd = uri.begin();  // no protocol
+
+    // host
+    iterator_t hostStart = protocolEnd;
+    iterator_t pathStart = std::find(hostStart, uriEnd, '/');  // get pathStart
+
+    iterator_t hostEnd = std::find(protocolEnd,
+                                   (pathStart != uriEnd) ? pathStart : queryStart,
+                                   ':');  // check for port
+
+    result.Host = std::string(hostStart, hostEnd);
+
+    // port
+    if ((hostEnd != uriEnd) && ((&*(hostEnd))[0] == ':'))  // we have a port
+    {
+      hostEnd++;
+      iterator_t portEnd = (pathStart != uriEnd) ? pathStart : queryStart;
+      result.Port = std::string(hostEnd, portEnd);
+    }
+
+    // path
+    if (pathStart != uriEnd)
+      result.Path = std::string(pathStart, queryStart);
+
+    // query
+    if (queryStart != uriEnd)
+      result.QueryString = std::string(queryStart, uri.end());
+
+    return result;
+
+  }   // Parse
+};  // uri
+
 std::stack<HistoryItem> JSHistory::m_previous_stack {};
 
 std::stack<HistoryItem> JSHistory::m_next_stack {};
@@ -158,14 +230,33 @@ JSValueRef JSHistory::pushState(JSContextRef ctx, JSObjectRef function, JSObject
   }
 
   JSValueRef state = arguments[0];
-  // https://github.com/whatwg/html/issues/2174
+  // https://github.com/whatwg/hpushStatetml/issues/2174
   JSValueRef title = arguments[1];
   JSValueRef url = arguments[2];
+  JSStringRef urlRef = JSValueToStringCopy(ctx, url, exception);
+
+  std::string strUrl = JSStringToStdString(urlRef);
+  std::string strCurrentUrl = JSStringToStdString(m_previous_stack.top().href);
+
+  Uri uri = Uri::Parse(strUrl);
+  Uri currentUri = Uri::Parse(strCurrentUrl);
+
+  if (uri.Host != "" && uri.Host != currentUri.Host) {
+    throwJSError(ctx,
+                 ("Failed to execute 'pushState' on 'History': A history state object with URL " + strUrl +
+                  " cannot be created in a document with origin " + currentUri.Host + "  and URL " + strCurrentUrl + ".").c_str(),
+                 exception);
+  }
 
   JSStringRef jsonState = JSValueCreateJSONString(ctx, state, 0, exception);
-  JSStringRef urlRef = JSValueToStringCopy(ctx, url, exception);
-  HistoryItem history = { urlRef, jsonState };
 
+  if (strUrl.find("/") == 0) {
+    uri.Host = currentUri.Host;
+    uri.Port = currentUri.Port;
+    uri.Protocol = currentUri.Protocol;
+  }
+
+  HistoryItem history = { JSStringCreateWithUTF8CString(Uri::toString(uri).c_str()), jsonState };
   addItem(history);
 
   return nullptr;
