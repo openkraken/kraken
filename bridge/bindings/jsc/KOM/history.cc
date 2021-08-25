@@ -278,10 +278,30 @@ JSValueRef JSHistory::replaceState(JSContextRef ctx, JSObjectRef function, JSObj
   // https://github.com/whatwg/html/issues/2174
   JSValueRef title = arguments[1];
   JSValueRef url = arguments[2];
+  JSStringRef urlRef = JSValueToStringCopy(ctx, url, exception);
+
+  std::string strUrl = JSStringToStdString(urlRef);
+  std::string strCurrentUrl = JSStringToStdString(m_previous_stack.top().href);
+
+  Uri uri = Uri::Parse(strUrl);
+  Uri currentUri = Uri::Parse(strCurrentUrl);
+
+  if (uri.Host != "" && uri.Host != currentUri.Host) {
+    throwJSError(ctx,
+                 ("Failed to execute 'replaceState' on 'History': A history state object with URL " + strUrl +
+                  " cannot be created in a document with origin " + currentUri.Host + "  and URL " + strCurrentUrl + ".").c_str(),
+                 exception);
+  }
+
+  if (uri.Host == "" && uri.Protocol == "") {
+    // relative path.
+    uri.Host = currentUri.Host;
+    uri.Port = currentUri.Port;
+    uri.Protocol = currentUri.Protocol;
+  }
 
   JSStringRef jsonState = JSValueCreateJSONString(ctx, state, 0, exception);
-  JSStringRef urlRef = JSValueToStringCopy(ctx, url, exception);
-  HistoryItem history = { urlRef, jsonState };
+  HistoryItem history = { JSStringCreateWithUTF8CString(Uri::toString(uri).c_str()), jsonState };
 
   m_previous_stack.pop();
   m_previous_stack.push(history);
