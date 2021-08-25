@@ -112,6 +112,7 @@ JSValue Blob::arrayBuffer(QjsContext *ctx, JSValue this_val, int argc, JSValue *
       ctx, blob->bytes(), blob->size(), [](JSRuntime *rt, void *opaque, void *ptr) {}, nullptr, false);
     JSValue arguments[] = {arrayBuffer};
     JSValue returnValue = JS_Call(ctx, promiseContext->resolveFunc, blob->context()->global(), 1, arguments);
+    JS_FreeValue(ctx, returnValue);
 
     if (JS_IsException(returnValue)) {
       blob->context()->handleException(&returnValue);
@@ -121,6 +122,7 @@ JSValue Blob::arrayBuffer(QjsContext *ctx, JSValue this_val, int argc, JSValue *
     JS_FreeValue(ctx, promiseContext->resolveFunc);
     JS_FreeValue(ctx, promiseContext->rejectFunc);
     JS_FreeValue(ctx, arrayBuffer);
+    JS_FreeValue(ctx, promiseContext->blobInstance->instanceObject);
   };
 
   getDartMethod()->setTimeout(promiseContext, blob->context()->getContextId(), callback, 0);
@@ -183,6 +185,7 @@ JSValue Blob::text(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
     JSValue arguments[] = {text};
     JSValue returnValue = JS_Call(ctx, promiseContext->resolveFunc, blob->context()->global(), 1, arguments);
 
+    JS_FreeValue(ctx, returnValue);
     if (JS_IsException(returnValue)) {
       blob->context()->handleException(&returnValue);
       return;
@@ -191,6 +194,7 @@ JSValue Blob::text(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
     JS_FreeValue(ctx, promiseContext->resolveFunc);
     JS_FreeValue(ctx, promiseContext->rejectFunc);
     JS_FreeValue(ctx, text);
+    JS_FreeValue(ctx, promiseContext->blobInstance->instanceObject);
   };
 
   getDartMethod()->setTimeout(promiseContext, blob->context()->getContextId(), callback, 0);

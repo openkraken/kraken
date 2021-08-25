@@ -301,9 +301,10 @@ JSValue Element::toBlob(QjsContext *ctx, JSValue this_val, int argc, JSValue *ar
       JSValue errorMessage = JS_NewString(ctx, error);
       JS_DefinePropertyValueStr(ctx, errorObject, "message", errorMessage,
                                 JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
-      JS_Call(ctx, toBlobPromiseContext->reject, toBlobPromiseContext->promise, 1, &errorObject);
+      JSValue ret = JS_Call(ctx, toBlobPromiseContext->reject, toBlobPromiseContext->promise, 1, &errorObject);
       JS_FreeValue(ctx, errorObject);
       JS_FreeValue(ctx, errorMessage);
+      JS_FreeValue(ctx, ret);
     }
 
     JS_FreeValue(ctx, toBlobPromiseContext->resolve);
