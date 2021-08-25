@@ -326,6 +326,8 @@ elseif ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/bom/location.cc
     bindings/qjs/bom/window.cc
     bindings/qjs/bom/window.h
+    bindings/qjs/bom/performance.cc
+    bindings/qjs/bom/performance.h
     bindings/qjs/dom/custom_event.cc
     bindings/qjs/dom/custom_event.h
     bindings/qjs/dom/all_collection.cc
