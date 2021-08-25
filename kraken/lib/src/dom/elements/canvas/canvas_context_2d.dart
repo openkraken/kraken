@@ -183,17 +183,19 @@ class CanvasRenderingContext2D {
         ImageElement imageElement = EventTarget.getEventTargetOfNativePtr(argv[0]) as ImageElement;
         double sx = 0.0, sy = 0.0, sWidth = 0.0, sHeight = 0.0, dx = 0.0, dy = 0.0, dWidth = 0.0, dHeight = 0.0;
 
-        sx = argv[1];
-        sy = argv[2];
-
-        print(argv);
-
-        if (argv.length <= 5) {
+        if (argv.length == 3) {
+          dx = argv[1];
+          dy = argv[2];
+        } else if (argv.length == 5) {
+          dx = argv[1];
+          dy = argv[2];
+          dWidth = argv[3];
+          dHeight = argv[4];
+        } else if (argv.length == 9) {
+          sx = argv[1];
+          sy = argv[2];
           sWidth = argv[3];
           sHeight = argv[4];
-        }
-
-        if (argv.length <= 9) {
           dx = argv[5];
           dy = argv[6];
           dWidth = argv[7];
