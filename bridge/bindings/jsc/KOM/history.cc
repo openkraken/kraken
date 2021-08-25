@@ -16,7 +16,7 @@ public:
   std::string QueryString, Path, Protocol, Host, Port;
 
   static std::string toString(Uri& uri) {
-    return uri.Protocol + "://" + uri.Host + (uri.Port == "" ? "" : ":" + uri.Port) + uri.Path + uri.QueryString;
+    return uri.Protocol + "://" + uri.Host + (uri.Port == "" ? "" : ":" + uri.Port) + (uri.Path.find("/") == 0 ? uri.Path : "/" + uri.Path) + uri.QueryString;
   }
 
   static Uri Parse(const std::string &uri)
@@ -250,7 +250,8 @@ JSValueRef JSHistory::pushState(JSContextRef ctx, JSObjectRef function, JSObject
 
   JSStringRef jsonState = JSValueCreateJSONString(ctx, state, 0, exception);
 
-  if (strUrl.find("/") == 0) {
+  if (uri.Host == "" && uri.Protocol == "") {
+    // relative path.
     uri.Host = currentUri.Host;
     uri.Port = currentUri.Port;
     uri.Protocol = currentUri.Protocol;
