@@ -5,6 +5,8 @@
 
 #include "history.h"
 #include "dart_methods.h"
+#include "bindings/jsc/KOM/window.h"
+#include "bindings/jsc/DOM/document.h"
 
 namespace kraken::binding::jsc {
 
@@ -36,6 +38,9 @@ JSValueRef JSHistory::back(JSContextRef ctx, JSObjectRef function, JSObjectRef t
     m_next_stack.push(currentItem);
 
     history->goTo(m_previous_stack.top());
+
+    JSStringRef &state = m_previous_stack.top().state;
+    history->dispatch(ctx, state == nullptr ? nullptr : JSValueMakeFromJSONString(ctx, state), exception);
   }
 
   return nullptr;
@@ -51,6 +56,9 @@ JSValueRef JSHistory::forward(JSContextRef ctx, JSObjectRef function, JSObjectRe
     m_previous_stack.push(currentItem);
 
     history->goTo(currentItem);
+
+    JSStringRef &state = currentItem.state;
+    history->dispatch(ctx, state == nullptr ? nullptr : JSValueMakeFromJSONString(ctx, state), exception);
   }
 
   return nullptr;
@@ -90,6 +98,9 @@ JSValueRef JSHistory::go(JSContextRef ctx, JSObjectRef function, JSObjectRef thi
 
   history->goTo(m_previous_stack.top());
 
+  JSStringRef state = m_previous_stack.top().state;
+  history->dispatch(ctx, state == nullptr ? nullptr : JSValueMakeFromJSONString(ctx, state), exception);
+
   return nullptr;
 }
 
@@ -107,6 +118,21 @@ JSStringRef JSHistory::getHref() {
     return JSStringCreateWithUTF8CString("");
   }
   return m_previous_stack.top().href;
+}
+
+void JSHistory::dispatch(JSContextRef ctx, JSValueRef state, JSValueRef *exception) {
+  JSStringHolder windowKeyHolder = JSStringHolder(context, "window");
+  JSValueRef windowValue = JSObjectGetProperty(ctx, context->global(), windowKeyHolder.getString(), nullptr);
+  JSObjectRef windowObject = JSValueToObject(context->context(), windowValue, nullptr);
+
+  auto window = static_cast<WindowInstance *>(JSObjectGetPrivate(windowObject));
+
+  JSObjectRef eventInit = JSObjectRef();
+  if (JSValueIsUndefined(ctx, state)) {
+    JSObjectSetProperty(ctx, eventInit, JSStringCreateWithUTF8CString("state"), state, kJSPropertyAttributeNone, exception);
+  }
+  EventInstance *eventInstance = new PopStateEventInstance(JSPopStateEvent::instance(context), "popstate", eventInit, exception);
+  window->dispatchEvent(eventInstance);
 }
 
 void JSHistory::addItem(HistoryItem &historyItem) {

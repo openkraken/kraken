@@ -43,6 +43,7 @@ public:
 
   static void addItem(HistoryItem &historyItem);
   static JSStringRef getHref();
+  void dispatch(JSContextRef ctx, JSValueRef state, JSValueRef *exception);
 
   static std::stack<HistoryItem> m_previous_stack;
   static std::stack<HistoryItem> m_next_stack;

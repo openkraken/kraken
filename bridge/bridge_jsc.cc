@@ -33,6 +33,7 @@
 #include "bindings/jsc/DOM/events/intersection_change_event.h"
 #include "bindings/jsc/DOM/events/media_error_event.h"
 #include "bindings/jsc/DOM/events/message_event.h"
+#include "bindings/jsc/DOM/events/popstate_event.h"
 #include "bindings/jsc/DOM/events/touch_event.h"
 #include "bindings/jsc/DOM/node.h"
 #include "bindings/jsc/DOM/style_declaration.h"
@@ -88,6 +89,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindConsole(m_context);
   bindEvent(m_context);
   bindMouseEvent(m_context);
+  bindPopStateEvent(m_context);
   bindCustomEvent(m_context);
   bindCloseEvent(m_context);
   bindGestureEvent(m_context);
@@ -174,8 +176,8 @@ void JSBridge::setHref(const char *url) {
     JSStringHolder windowKeyHolder = JSStringHolder(m_context.get(), "window");
     JSValueRef windowValue = JSObjectGetProperty(m_context->context(), m_context->global(), windowKeyHolder.getString(), nullptr);
     JSObjectRef windowObject = JSValueToObject(m_context->context(), windowValue, nullptr);
-
     auto window = static_cast<WindowInstance *>(JSObjectGetPrivate(windowObject));
+
     HistoryItem history = { JSStringCreateWithUTF8CString(url), nullptr };
     window->history_->addItem(history);
 }
