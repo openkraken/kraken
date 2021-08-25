@@ -55,6 +55,7 @@ public:
   struct list_head timer_list;
   struct list_head document_list;
   struct list_head module_list;
+  struct list_head persist_list;
 
   static JSClassID kHostClassClassId;
   static JSClassID kHostObjectClassId;

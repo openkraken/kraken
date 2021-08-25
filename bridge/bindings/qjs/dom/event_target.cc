@@ -255,6 +255,7 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
     // The third params `thisObject` to null equals global object.
     JSValue returnedValue = JS_Call(m_ctx, handler, JS_NULL, 1, &eventInstance->instanceObject);
     m_context->handleException(&returnedValue);
+    JS_FreeValue(m_ctx, returnedValue);
   };
 
   for (auto &handler : stack) {

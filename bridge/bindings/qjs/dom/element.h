@@ -90,6 +90,11 @@ private:
   friend ElementInstance;
 };
 
+struct PersistElement {
+  ElementInstance *element;
+  list_head link;
+};
+
 class ElementInstance : public NodeInstance {
 public:
   ElementInstance() = delete;
@@ -102,6 +107,8 @@ public:
   std::string getRegisteredTagName();
 
   static inline JSClassID classID();
+
+  void persist();
 
 protected:
   explicit ElementInstance(Element *element, std::string tagName, bool shouldAddUICommand);
@@ -117,6 +124,7 @@ private:
   void _didModifyAttribute(std::string &name, JSAtom oldId, JSAtom newId);
   void _beforeUpdateId(JSAtom oldId, JSAtom newId);
 
+  PersistElement m_persist_link{this};
   std::string m_tagName;
   friend Element;
   friend NodeInstance;

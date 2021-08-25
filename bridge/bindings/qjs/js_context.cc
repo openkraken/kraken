@@ -44,6 +44,7 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
   init_list_head(&timer_list);
   init_list_head(&document_list);
   init_list_head(&module_list);
+  init_list_head(&persist_list);
 
   if (m_runtime == nullptr) {
     m_runtime = JS_NewRuntime();
@@ -106,6 +107,15 @@ JSContext::~JSContext() {
       auto *module = list_entry(el, ModuleContext, link);
       JS_FreeValue(m_ctx, module->callback);
       delete module;
+    }
+  }
+
+  // Free persist nodes.
+  {
+    struct list_head *el, *el1;
+    list_for_each_safe(el, el1, &persist_list) {
+      auto *persist = list_entry(el, PersistElement, link);
+      JS_FreeValue(m_ctx, persist->element->instanceObject);
     }
   }
 
