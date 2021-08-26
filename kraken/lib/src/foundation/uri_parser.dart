@@ -8,7 +8,7 @@ class UriParser {
 
   Uri resolve(Uri base, Uri relative) {
     Uri result = base.resolveUri(relative);
-    if (!result.hasScheme) {
+    if (!result.hasScheme && result.host.isNotEmpty) {
       result = result.replace(scheme: _defaultScheme);
     }
     return result;
