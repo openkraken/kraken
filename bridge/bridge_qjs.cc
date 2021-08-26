@@ -16,6 +16,7 @@
 #include "bindings/qjs/bom/timer.h"
 #include "bindings/qjs/bom/blob.h"
 #include "bindings/qjs/bom/window.h"
+#include "bindings/qjs/bom/performance.h"
 #include "bindings/qjs/kraken.h"
 #include "bindings/qjs/module_manager.h"
 #include "bindings/qjs/dom/event_target.h"
@@ -65,12 +66,12 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 #endif
   m_context = binding::qjs::createJSContext(contextId, errorHandler, this);
 
-//#if ENABLE_PROFILE
-//  auto nativePerformance = binding::jsc::NativePerformance::instance(m_context->uniqueId);
-//  nativePerformance->mark(PERF_JS_CONTEXT_INIT_START, jsContextStartTime);
-//  nativePerformance->mark(PERF_JS_CONTEXT_INIT_END);
-//  nativePerformance->mark(PERF_JS_NATIVE_METHOD_INIT_START);
-//#endif
+#if ENABLE_PROFILE
+  auto nativePerformance = Performance::instance(m_context.get())->m_nativePerformance;
+  nativePerformance.mark(PERF_JS_CONTEXT_INIT_START, jsContextStartTime);
+  nativePerformance.mark(PERF_JS_CONTEXT_INIT_END);
+  nativePerformance.mark(PERF_JS_NATIVE_METHOD_INIT_START);
+#endif
 
   bindConsole(m_context);
   bindTimer(m_context);
@@ -101,12 +102,12 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindMediaErrorEvent(m_context);
   bindMouseEvent(m_context);
   bindTouchEvent(m_context);
-//  bindPerformance(m_context);
+  bindPerformance(m_context);
 
-//#if ENABLE_PROFILE
-//  nativePerformance->mark(PERF_JS_NATIVE_METHOD_INIT_END);
-//  nativePerformance->mark(PERF_JS_POLYFILL_INIT_START);
-//#endif
+#if ENABLE_PROFILE
+  nativePerformance.mark(PERF_JS_NATIVE_METHOD_INIT_END);
+  nativePerformance.mark(PERF_JS_POLYFILL_INIT_START);
+#endif
 
   initKrakenPolyFill(this);
 
@@ -114,9 +115,9 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
     evaluateScript(&p.second, p.first.c_str(), 0);
   }
 
-//#if ENABLE_PROFILE
-//  nativePerformance->mark(PERF_JS_POLYFILL_INIT_END);
-//#endif
+#if ENABLE_PROFILE
+  nativePerformance.mark(PERF_JS_POLYFILL_INIT_END);
+#endif
 }
 
 void JSBridge::parseHTML(const NativeString *script, const char *url) {
@@ -156,27 +157,25 @@ void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType
 
 void JSBridge::evaluateScript(const NativeString *script, const char *url, int startLine) {
   if (!m_context->isValid()) return;
-//  binding::qjs::updateLocation(url);
 
-//#if ENABLE_PROFILE
-//  auto nativePerformance = binding::jsc::NativePerformance::instance(m_context->uniqueId);
-//  nativePerformance->mark(PERF_JS_PARSE_TIME_START);
-//  std::u16string patchedCode = std::u16string(u"performance.mark('js_parse_time_end');") + std::u16string(reinterpret_cast<const char16_t *>(script->string));
-//  m_context->evaluateJavaScript(patchedCode.c_str(), patchedCode.size(), url, startLine);
-//#else
+#if ENABLE_PROFILE
+  auto nativePerformance = Performance::instance(m_context.get())->m_nativePerformance;
+  nativePerformance.mark(PERF_JS_PARSE_TIME_START);
+  std::string markCode = "performance.mark('js_parse_time_end');";
+  std::u16string patchedCode = std::u16string(u"performance.mark('js_parse_time_end');") + std::u16string(reinterpret_cast<const char16_t *>(script->string));
+  m_context->evaluateJavaScript(patchedCode.c_str(), patchedCode.size(), url, startLine);
+#else
   m_context->evaluateJavaScript(script->string, script->length, url, startLine);
-//#endif
+#endif
 }
 
 void JSBridge::evaluateScript(const uint16_t *script, size_t length, const char *url, int startLine) {
   if (!m_context->isValid()) return;
-//  binding::qjs::updateLocation(url);
   m_context->evaluateJavaScript(script, length, url, startLine);
 }
 
 void JSBridge::evaluateScript(const char *script, size_t length, const char *url, int startLine) {
   if (!m_context->isValid()) return;
-  //  binding::qjs::updateLocation(url);
   m_context->evaluateJavaScript(script, length, url, startLine);
 }
 

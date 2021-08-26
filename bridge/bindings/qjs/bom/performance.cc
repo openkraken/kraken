@@ -11,6 +11,13 @@
 
 namespace kraken::binding::qjs {
 
+OBJECT_INSTANCE_IMPL(Performance);
+
+void bindPerformance(std::unique_ptr<JSContext> &context) {
+  auto *performance = new Performance(context.get());
+  context->defineGlobalProperty("performance", performance->jsObject);
+}
+
 using namespace std::chrono;
 
 PROP_GETTER(PerformanceEntry, name)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
@@ -95,15 +102,15 @@ JSValue Performance::clearMarks(QjsContext *ctx, JSValue this_val, int argc, JSV
   auto it = std::begin(entries);
 
   while (it != entries.end()) {
-    std::string entryType = (*it)->entryType;
-    if (entryType == "mark") {
+    char* entryType = (*it)->entryType;
+    if (strcmp(entryType, "mark") == 0) {
       if (JS_IsNull(targetMark)) {
         entries.erase(it);
       } else {
         std::string entryName = (*it)->name;
         std::string targetName = jsValueToStdString(ctx, targetMark);
         if (entryName == targetName) {
-          entries.erase(it++);
+          entries.erase(it);
         } else {
           it++;
         };
@@ -126,8 +133,8 @@ JSValue Performance::clearMeasures(QjsContext *ctx, JSValue this_val, int argc, 
   auto it = std::begin(entries);
 
   while (it != entries.end()) {
-    std::string entryType = (*it)->entryType;
-    if (entryType == "measure") {
+    char* entryType = (*it)->entryType;
+    if (strcmp(entryType, "measure") == 0) {
       if (JS_IsNull(targetMark)) {
         entries.erase(it);
       } else {
@@ -159,6 +166,7 @@ JSValue Performance::getEntries(QjsContext *ctx, JSValue this_val, int argc, JSV
     auto entryType = std::string(entry->entryType);
     JSValue v = buildPerformanceEntry(entryType, performance->m_context, entry);
     JS_Call(ctx, pushMethod, returnArray, 1, &v);
+    JS_FreeValue(ctx, v);
   }
 
   JS_FreeValue(ctx, pushMethod);
@@ -245,7 +253,7 @@ JSValue Performance::measure(QjsContext *ctx, JSValue this_val, int argc, JSValu
 }
 
 PerformanceEntry::PerformanceEntry(JSContext *context, NativePerformanceEntry *nativePerformanceEntry) : HostObject(
-  context, "PerformanceEntry") {}
+  context, "PerformanceEntry"), m_nativePerformanceEntry(nativePerformanceEntry) {}
 
 PerformanceMark::PerformanceMark(JSContext *context, std::string &name, int64_t startTime)
   : PerformanceEntry(context,new NativePerformanceEntry(name,"mark", startTime, 0, PERFORMANCE_ENTRY_NONE_UNIQUE_ID)) {

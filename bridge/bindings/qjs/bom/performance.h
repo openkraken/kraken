@@ -180,6 +180,8 @@ public:
   Performance() = delete;
   explicit Performance(JSContext *context);
 
+  OBJECT_INSTANCE(Performance);
+
   static JSValue now(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue toJSON(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue clearMarks(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
@@ -195,15 +197,27 @@ public:
   void measureSummary();
 #endif
 
+  NativePerformance m_nativePerformance;
+
   DEFINE_HOST_OBJECT_PROPERTY(1, timeOrigin);
 private:
 
   void internalMeasure(const std::string &name, const std::string &startMark, const std::string &endMark);
   double internalNow();
   std::vector<NativePerformanceEntry*> getFullEntries();
-
-  NativePerformance m_nativePerformance;
   ObjectFunction m_now{m_context, jsObject, "now", now, 0};
+  ObjectFunction m_toJSON{m_context, jsObject, "toJSON", toJSON, 0};
+  ObjectFunction m_clearMarks{m_context, jsObject, "clearMarks", clearMarks, 1};
+  ObjectFunction m_clearMeasures{m_context, jsObject, "clearMeasures", clearMeasures, 1};
+  ObjectFunction m_getEntries{m_context, jsObject, "getEntries", getEntries, 0};
+  ObjectFunction m_getEntriesByName{m_context, jsObject, "getEntriesByName", getEntriesByName, 2};
+  ObjectFunction m_getEntriesByType{m_context, jsObject, "getEntriesByType", getEntriesByType, 1};
+  ObjectFunction m_mark{m_context, jsObject, "mark", mark, 1};
+  ObjectFunction m_measure{m_context, jsObject, "measure", measure, 4};
+
+#if ENABLE_PROFILE
+  ObjectFunction m___kraken_navigation_summary__{m_context, jsObject, "__kraken_navigation_summary__", __kraken_navigation_summary__, 0};
+#endif
 };
 
 }

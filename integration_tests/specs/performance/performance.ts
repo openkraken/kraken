@@ -33,5 +33,6 @@ describe('Performance', () => {
     hasEfg = entries.some(e => e.name === 'efg');
     expect(hasAbc).toBe(true);
     expect(hasEfg).toBe(false);
+    performance.clearMarks();
   });
 });

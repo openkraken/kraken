@@ -109,10 +109,6 @@ void disposeContext(int32_t contextId) {
   auto context = static_cast<kraken::JSBridge *>(contextPool[contextId]);
   delete context;
   contextPool[contextId] = nullptr;
-//#if ENABLE_PROFILE
-//  auto nativePerformance = kraken::binding::jsc::NativePerformance::instance(contextId);
-//  nativePerformance->entries.clear();
-//#endif
 }
 
 int32_t allocateNewContext(int32_t targetContextId) {
