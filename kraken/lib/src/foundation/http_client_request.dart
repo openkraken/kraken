@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
+
 import 'http_cache.dart';
 import 'http_cache_object.dart';
 import 'http_overrides.dart';
@@ -95,7 +97,6 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   @override
   Future<HttpClientResponse> close() async {
     HttpClientRequest request = _clientRequest;
-    final bool _cacheEnabled = HttpCacheController.enabled;
 
     int? contextId = KrakenHttpOverrides.getContextHeader(_clientRequest);
     if (contextId != null) {
@@ -118,7 +119,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
       // Step 2: Handle cache-control and expires,
       //        if hit, no need to open request.
       HttpCacheObject? cacheObject;
-      if (_cacheEnabled) {
+      if (HttpCacheController.mode != HttpCacheMode.NO_CACHE) {
         HttpCacheController cacheController = HttpCacheController.instance(origin);
         cacheObject = await cacheController.getCacheObject(request.uri);
         if (await cacheObject.hitLocalCache(request)) {
@@ -154,6 +155,12 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
       bool hitInterceptorResponse = response != null;
       bool hitNegotiateCache = false;
+
+      // If cache only, but no cache hit, throw error directly.
+      if (HttpCacheController.mode == HttpCacheMode.CACHE_ONLY
+          && response == null) {
+        throw FlutterError('HttpCacheMode is CACHE_ONLY, but no cache hit for $uri');
+      }
 
       // After this, response should not be null.
       if (!hitInterceptorResponse) {

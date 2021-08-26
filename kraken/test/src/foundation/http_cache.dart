@@ -74,8 +74,8 @@ void main() {
       assert(cacheObject.valid);
     });
 
-    test('Global switch to disable cache', () async {
-      HttpCacheController.enabled = false;
+    test('HttpCacheMode.NO_CACHE', () async {
+      HttpCacheController.mode = HttpCacheMode.NO_CACHE;
       var request = await httpClient.openUrl('GET',
           server.getUri('json_with_content_length_expires_etag_last_modified'));
       KrakenHttpOverrides.setContextHeader(request, contextId);
@@ -101,7 +101,24 @@ void main() {
 
       // Note: This line is different.
       assert(responseSecond.headers.value('cache-hits') == null);
-      HttpCacheController.enabled = true;
+      HttpCacheController.mode = HttpCacheMode.DEFAULT;
+    });
+
+    test('HttpCacheMode.CACHE_ONLY', () async {
+      HttpCacheController.mode = HttpCacheMode.CACHE_ONLY;
+      var request = await httpClient.openUrl('GET',
+          server.getUri('network'));
+      KrakenHttpOverrides.setContextHeader(request, contextId);
+
+      var error;
+      try {
+        await request.close();
+      } catch (_error) {
+        error = _error;
+      }
+      assert(error is FlutterError);
+
+      HttpCacheController.mode = HttpCacheMode.DEFAULT;
     });
 
     // Solve problem that consuming response multi times,
