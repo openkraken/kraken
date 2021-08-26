@@ -6,10 +6,10 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/foundation.dart';
+import 'package:meta/meta.dart';
 
 String EMPTY_STRING = '';
 
@@ -55,8 +55,8 @@ class FetchModule extends BaseModule {
   }
 
   @visibleForTesting
-  Future<HttpClientRequest> getRequest(Uri uri, String? method = 'GET', Map? headers, data) {
-    return httpClient.openUrl(method, uri)
+  Future<HttpClientRequest> getRequest(Uri uri, String? method, Map? headers, data) {
+    return httpClient.openUrl(method ?? 'GET', uri)
         .then((HttpClientRequest request) {
       // Reset Kraken UA.
       request.headers.removeAll(HttpHeaders.userAgentHeader);
