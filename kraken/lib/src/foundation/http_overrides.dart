@@ -94,16 +94,11 @@ KrakenHttpOverrides setupHttpOverrides(HttpClientInterceptor? httpClientIntercep
 
 // Returns the origin of the URI in the form scheme://host:port
 String getOrigin(Uri uri) {
-  if (uri.scheme.isEmpty) {
-    // Set https as default scheme.
-    uri = uri.replace(scheme: 'https');
-  }
-
   if (uri.isScheme('http')
       || uri.isScheme('https')) {
     return uri.origin;
   } else {
-    return '${uri.scheme}://${uri.host}:${uri.port}';
+    return uri.path;
   }
 }
 
