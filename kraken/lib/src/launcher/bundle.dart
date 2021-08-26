@@ -52,14 +52,19 @@ abstract class KrakenBundle {
     if (kDebugMode) {
       print('Kraken getting bundle for contextId: $contextId, path: $path');
     }
+
+    Uri uri = Uri.parse(path);
+    KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
+    if (controller != null) {
+      uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri);
+    }
+
     if (contentOverride != null && contentOverride.isNotEmpty) {
-      bundle = RawBundle(contentOverride, Uri.parse(path));
+      bundle = RawBundle(contentOverride, uri);
+    } else if (uri.isScheme('HTTP') || uri.isScheme('HTTPS')) {
+      bundle = NetworkBundle(uri, contextId: contextId);
     } else {
-      if (path.startsWith('//') || path.startsWith('http://') || path.startsWith('https://')) {
-        bundle = NetworkBundle(Uri.parse(path), contextId: contextId);
-      } else {
-        bundle = AssetsBundle(Uri.parse(path));
-      }
+      bundle = AssetsBundle(uri);
     }
 
     await bundle.resolve();
