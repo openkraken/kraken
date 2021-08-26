@@ -304,6 +304,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
     // Make element listen to click event to trigger focus.
     addEvent(dom.EVENT_CLICK);
     addEvent(dom.EVENT_DOUBLE_CLICK);
+    addEvent(dom.EVENT_LONG_PRESS);
 
     AnimationController animationController = _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     animationController.addListener(_onCursorColorTick);
@@ -466,8 +467,10 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       _renderEditable!.handleTap();
     } else if (event.type == dom.EVENT_LONG_PRESS) {
       _renderEditable!.handleLongPress();
+      _textSelectionDelegate.showToolbar();
     } else if (event.type == dom.EVENT_DOUBLE_CLICK) {
       _renderEditable!.handleDoubleTap();
+      _textSelectionDelegate.showToolbar();
     }
   }
 
