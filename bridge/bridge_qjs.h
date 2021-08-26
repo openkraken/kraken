@@ -33,6 +33,8 @@ public:
   KRAKEN_EXPORT void evaluateScript(const uint16_t *script, size_t length, const char *url, int startLine);
   KRAKEN_EXPORT void parseHTML(const NativeString *script, const char *url);
   void evaluateScript(const char* script, size_t length, const char* url, int startLine);
+  uint8_t *dumpByteCode(const char* script, size_t length, const char* url, size_t *byteLength);
+  void evaluateByteCode(uint8_t *bytes, size_t byteLength);
 
   const std::unique_ptr<kraken::binding::qjs::JSContext> &getContext() const {
     return m_context;

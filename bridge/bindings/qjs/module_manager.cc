@@ -104,8 +104,12 @@ JSValue krakenInvokeModule(QjsContext *ctx, JSValueConst this_val, int argc, JSV
   }
 
   if (getDartMethod()->invokeModule == nullptr) {
+#if FLUTTER_BACKEND
     return JS_ThrowTypeError(
       ctx, "Failed to execute '__kraken_invoke_module__': dart method (invokeModule) is not registered.");
+#else
+  return JS_NULL;
+#endif
   }
 
   NativeString *moduleName = jsValueToNativeString(ctx, moduleNameValue);

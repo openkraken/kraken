@@ -180,14 +180,22 @@ void JSBridge::evaluateScript(const char *script, size_t length, const char *url
   m_context->evaluateJavaScript(script, length, url, startLine);
 }
 
+uint8_t *JSBridge::dumpByteCode(const char *script, size_t length, const char *url, size_t *byteLength) {
+  if (!m_context->isValid()) return nullptr;
+  return m_context->dumpByteCode(script, length, url, byteLength);
+}
+
+void JSBridge::evaluateByteCode(uint8_t *bytes, size_t byteLength) {
+  if (!m_context->isValid()) return;
+  m_context->evaluateByteCode(bytes, byteLength);
+}
+
 JSBridge::~JSBridge() {
   if (!m_context->isValid()) return;
 
   if (m_disposeCallback != nullptr) {
     this->m_disposeCallback(m_disposePrivateData);
   }
-
-//  binding::qjs::NativePerformance::disposeInstance(m_context->uniqueId);
 }
 
 void JSBridge::reportError(const char *errmsg) {

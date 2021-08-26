@@ -134,24 +134,34 @@ JSContext::~JSContext() {
 bool JSContext::evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine) {
   std::string utf8Code = toUTF8(std::u16string(reinterpret_cast<const char16_t *>(code), codeLength));
   JSValue result = JS_Eval(m_ctx, utf8Code.c_str(), utf8Code.size(), sourceURL, JS_EVAL_TYPE_GLOBAL);
-  bool hasException = handleException(&result);
+  bool success = handleException(&result);
   JS_FreeValue(m_ctx, result);
-  return hasException;
+  return success;
 }
 
 bool JSContext::evaluateJavaScript(const char16_t *code, size_t length, const char *sourceURL, int startLine) {
   std::string utf8Code = toUTF8(std::u16string(reinterpret_cast<const char16_t *>(code), length));
   JSValue result = JS_Eval(m_ctx, utf8Code.c_str(), utf8Code.size(), sourceURL, JS_EVAL_TYPE_GLOBAL);
-  bool hasException = handleException(&result);
+  bool success = handleException(&result);
   JS_FreeValue(m_ctx, result);
-  return hasException;
+  return success;
 }
 
 bool JSContext::evaluateJavaScript(const char *code, size_t codeLength, const char *sourceURL, int startLine) {
   JSValue result = JS_Eval(m_ctx, code, codeLength, sourceURL, JS_EVAL_TYPE_GLOBAL);
-  bool hasException = handleException(&result);
+  bool success = handleException(&result);
   JS_FreeValue(m_ctx, result);
-  return hasException;
+  return success;
+}
+
+bool JSContext::evaluateByteCode(uint8_t *bytes, size_t byteLength) {
+  JSValue obj, val;
+  obj = JS_ReadObject(m_ctx, bytes, byteLength, JS_READ_OBJ_BYTECODE);
+  if (!handleException(&obj)) return false;
+  val = JS_EvalFunction(m_ctx, obj);
+  if (!handleException(&val)) return false;
+  JS_FreeValue(m_ctx, val);
+  return true;
 }
 
 bool JSContext::isValid() const {
@@ -213,6 +223,15 @@ void JSContext::defineGlobalProperty(const char *prop, JSValue value) {
   JSAtom atom = JS_NewAtom(m_ctx, prop);
   JS_SetProperty(m_ctx, globalObject, atom,  value);
   JS_FreeAtom(m_ctx, atom);
+}
+
+uint8_t *JSContext::dumpByteCode(const char *code, uint32_t codeLength, const char *sourceURL, size_t *bytecodeLength) {
+  JSValue object = JS_Eval(m_ctx, code, codeLength, sourceURL, JS_EVAL_TYPE_GLOBAL | JS_EVAL_FLAG_COMPILE_ONLY);
+  bool success = handleException(&object);
+  if (!success) return nullptr;
+  uint8_t *bytes = JS_WriteObject(m_ctx, bytecodeLength, object, JS_WRITE_OBJ_BYTECODE);
+  JS_FreeValue(m_ctx, object);
+  return bytes;
 }
 
 NativeString *jsValueToNativeString(QjsContext *ctx, JSValue value) {

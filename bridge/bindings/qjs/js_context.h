@@ -38,6 +38,7 @@ public:
   bool evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine);
   bool evaluateJavaScript(const char16_t *code, size_t length, const char *sourceURL, int startLine);
   bool evaluateJavaScript(const char *code, size_t codeLength, const char *sourceURL, int startLine);
+  bool evaluateByteCode(uint8_t *bytes, size_t byteLength);
   bool isValid() const;
   JSValue global();
   QjsContext *ctx();
@@ -47,6 +48,7 @@ public:
   bool handleException(JSValue *exc);
   void reportError(JSValueConst &error);
   void defineGlobalProperty(const char *prop, JSValueConst value);
+  uint8_t *dumpByteCode(const char* code, uint32_t codeLength, const char *sourceURL, size_t* bytecodeLength);
 
   std::chrono::time_point<std::chrono::system_clock> timeOrigin;
 

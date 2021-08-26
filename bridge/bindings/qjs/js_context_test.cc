@@ -88,6 +88,28 @@ TEST(Context, windowInheritEventTarget) {
   delete bridge;
 }
 
+TEST(Context, evaluateByteCode) {
+  bool errorHandlerExecuted = false;
+  static bool logCalled = false;
+  kraken::JSBridge::consoleMessageHandler = [](void *ctx, const std::string &message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(), "Arguments {0: 1, 1: 2, 2: 3, 3: 4, callee: ƒ (), length: 4}");
+  };
+
+  auto errorHandler = [&errorHandlerExecuted](int32_t contextId, const char *errmsg) {
+    errorHandlerExecuted = true;
+  };
+  auto bridge = new kraken::JSBridge(0, errorHandler);
+  const char* code = "function f() { console.log(arguments)} f(1,2,3,4);";
+  size_t byteLen;
+  uint8_t *bytes = bridge->dumpByteCode(code, strlen(code), "vm://", &byteLen);
+  bridge->evaluateByteCode(bytes, byteLen);
+
+  EXPECT_EQ(errorHandlerExecuted, false);
+  EXPECT_EQ(logCalled, true);
+  delete bridge;
+}
+
 TEST(jsValueToNativeString, utf8String) {
   auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {});
   JSValue str = JS_NewString(bridge->getContext()->ctx(), "helloworld");
