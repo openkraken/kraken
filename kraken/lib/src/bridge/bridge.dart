@@ -35,13 +35,10 @@ int initBridge() {
   // We should schedule addPersistentFrameCallback() to the next frame because of initBridge()
   // will be called from persistent frame callbacks and cause infinity loops.
   if (_firstView) {
-    void f() {
-      // JS pending jobs like Promise are microtask in eventloop.
-      // https://html.spec.whatwg.org/multipage/webappapis.html#microtask-queue
+    // Use dull timer to trigger promise callbacks.
+    Timer.periodic(Duration(milliseconds: 32), (timer) {
       executeJSPendingJob();
-      Timer.run(f);
-    }
-    Future.microtask(f);
+    });
 
     Future.microtask(() {
       // Port flutter's frame callback into bridge.

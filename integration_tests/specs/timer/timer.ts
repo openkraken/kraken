@@ -24,6 +24,18 @@ describe('setTimeout', () => {
       }, 50);
     });
   });
+
+  it('should execute after promise callback', (done) => {
+    let promiseExecute = false;
+    setTimeout(() => {
+      expect(promiseExecute).toBe(true);
+      done();
+    }, 0)
+
+    Promise.resolve().then(() => {
+      promiseExecute = true;
+    })
+  });
 });
 
 describe('setInterval', function() {
