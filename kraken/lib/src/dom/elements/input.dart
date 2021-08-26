@@ -236,20 +236,20 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
     _scrollOffsetX = value;
     _scrollOffsetX!.removeListener(_scrollXListener);
     _scrollOffsetX!.addListener(_scrollXListener);
-    _renderInputBox?.markNeedsLayout();
-    _renderEditable?.markNeedsLayout();
+    _renderLeadLayer?.markNeedsLayout();
   }
 
   void _scrollXListener() {
-    _renderInputBox?.markNeedsPaint();
-    _renderEditable?.markNeedsPaint();
+    _renderLeadLayer?.markNeedsPaint();
   }
 
   bool obscureText = false;
   bool autoCorrect = true;
   late EditableTextDelegate _textSelectionDelegate;
   TextSpan? _actualText;
-  RenderInputBox? _renderInputBox;
+  RenderLeaderLayer? _renderLeadLayer;
+
+  final LayerLink _toolbarLayerLink = LayerLink();
   RenderEditable? _renderEditable;
   TextInputConnection? _textInputConnection;
 
@@ -349,17 +349,17 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
   void setRenderStyle(String key, value) {
     super.setRenderStyle(key, value);
 
-    if (_renderInputBox != null) {
+    if (_renderLeadLayer != null) {
       RenderStyle renderStyle = renderBoxModel!.renderStyle;
       if (key == HEIGHT || (key == LINE_HEIGHT && renderStyle.height == null)) {
-        _renderInputBox!.markNeedsLayout();
+        _renderLeadLayer!.markNeedsLayout();
 
       // It needs to judge width in style here cause
       // width in renderStyle may be set in node attach.
       } else if (key == FONT_SIZE && style[WIDTH].isEmpty) {
         double fontSize = renderStyle.fontSize;
         renderStyle.width = fontSize * _FONT_SIZE_RATIO;
-        _renderInputBox!.markNeedsLayout();
+        _renderLeadLayer!.markNeedsLayout();
       }
     }
     // @TODO: Filter style properties that used by text span.
@@ -621,15 +621,18 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
     return _renderEditable!;
   }
 
-  RenderInputBox createRenderBox() {
+  RenderLeaderLayer createRenderBox() {
     assert(renderBoxModel is RenderIntrinsic);
     RenderEditable renderEditable = createRenderEditable();
 
-    _renderInputBox = RenderInputBox(
-      scrollableX: _scrollableX,
-      child: renderEditable,
+    _renderLeadLayer = RenderLeaderLayer(
+      link: _toolbarLayerLink,
+      child: RenderInputBox(
+        scrollableX: _scrollableX,
+        child: renderEditable,
+      )
     );
-    return _renderInputBox!;
+    return _renderLeadLayer!;
   }
 
   @override
@@ -817,7 +820,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
           clipboardStatus: _clipboardStatus,
           context: elementManager.context!,
           value: _value,
-          toolbarLayerLink: elementManager.toolbarLayerLink!,
+          toolbarLayerLink: _toolbarLayerLink,
           startHandleLayerLink: _startHandleLayerLink,
           endHandleLayerLink: _endHandleLayerLink,
           renderObject: _renderEditable!,
@@ -1245,7 +1248,8 @@ class RenderInputBox extends RenderProxyBox {
   }
 
   Offset? get _offset {
-    RenderIntrinsic renderIntrinsic = (parent as RenderIntrinsic?)!;
+    RenderLeaderLayer renderLeaderLayer = parent as RenderLeaderLayer;
+    RenderIntrinsic renderIntrinsic = (renderLeaderLayer.parent as RenderIntrinsic?)!;
     RenderStyle renderStyle = renderIntrinsic.renderStyle;
 
     double intrinsicInputHeight = (child as RenderEditable).preferredLineHeight
@@ -1284,7 +1288,8 @@ class RenderInputBox extends RenderProxyBox {
       double width = constraints.maxWidth != double.infinity ?
         constraints.maxWidth : childSize.width;
 
-      RenderIntrinsic renderIntrinsic = parent as RenderIntrinsic;
+      RenderLeaderLayer renderLeaderLayer = parent as RenderLeaderLayer;
+      RenderIntrinsic renderIntrinsic = renderLeaderLayer.parent as RenderIntrinsic;
       RenderStyle renderStyle = renderIntrinsic.renderStyle;
 
       double height;

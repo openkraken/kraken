@@ -164,8 +164,6 @@ class Kraken extends StatefulWidget {
 
   final FocusNode focusNode = FocusNode();
 
-  final LayerLink toolbarLayerLink = LayerLink();
-
   final UriParser? uriParser;
 
   KrakenController? get controller {
@@ -264,7 +262,6 @@ class _KrakenState extends State<Kraken> {
   Map<LogicalKeySet, Intent>? _shortcutMap;
   Map<Type, Action<Intent>>? _actionMap;
   late FocusNode _focusNode;
-  late LayerLink _toolbarLayerLink;
 
   @override
   void initState() {
@@ -292,20 +289,16 @@ class _KrakenState extends State<Kraken> {
       ExtendSelectionDownTextIntent: CallbackAction<ExtendSelectionDownTextIntent>(onInvoke: _handleExtendSelectionDownText),
     };
     _focusNode = (context.widget as Kraken).focusNode;
-    _toolbarLayerLink = (context.widget as Kraken).toolbarLayerLink;
   }
 
   @override
   Widget build(BuildContext context) {
-    return CompositedTransformTarget(
-      link: _toolbarLayerLink,
-      child: FocusableActionDetector(
-        actions: _actionMap,
-        shortcuts: _shortcutMap,
-        focusNode: _focusNode,
-        onFocusChange: _handleFocusChange,
-        child: _KrakenRenderObjectWidget(context.widget as Kraken, context)
-      )
+    return FocusableActionDetector(
+      actions: _actionMap,
+      shortcuts: _shortcutMap,
+      focusNode: _focusNode,
+      onFocusChange: _handleFocusChange,
+      child: _KrakenRenderObjectWidget(context.widget as Kraken, context)
     );
   }
 
@@ -394,7 +387,8 @@ class _KrakenState extends State<Kraken> {
 
       // Scroll input box to the caret.
       dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
-      RenderIntrinsic renderIntrisic = renderInputBox.parent as RenderIntrinsic;
+      RenderLeaderLayer renderLeaderLayer = renderInputBox.parent as RenderLeaderLayer;
+      RenderIntrinsic renderIntrisic = renderLeaderLayer.parent as RenderIntrinsic;
       renderIntrisic.elementDelegate.scrollInputToCaret();
     }
   }
@@ -408,7 +402,8 @@ class _KrakenState extends State<Kraken> {
 
       // Scroll input box to the caret.
       dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
-      RenderIntrinsic renderIntrisic = renderInputBox.parent as RenderIntrinsic;
+      RenderLeaderLayer renderLeaderLayer = renderInputBox.parent as RenderLeaderLayer;
+      RenderIntrinsic renderIntrisic = renderLeaderLayer.parent as RenderIntrinsic;
       renderIntrisic.elementDelegate.scrollInputToCaret();
     }
   }
@@ -422,7 +417,8 @@ class _KrakenState extends State<Kraken> {
 
       // Scroll input box to the caret.
       dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
-      RenderIntrinsic renderIntrisic = renderInputBox.parent as RenderIntrinsic;
+      RenderLeaderLayer renderLeaderLayer = renderInputBox.parent as RenderLeaderLayer;
+      RenderIntrinsic renderIntrisic = renderLeaderLayer.parent as RenderIntrinsic;
       renderIntrisic.elementDelegate.scrollInputToCaret();
     }
   }
@@ -436,7 +432,8 @@ class _KrakenState extends State<Kraken> {
 
       // Scroll input box to the caret.
       dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
-      RenderIntrinsic renderIntrisic = renderInputBox.parent as RenderIntrinsic;
+      RenderLeaderLayer renderLeaderLayer = renderInputBox.parent as RenderLeaderLayer;
+      RenderIntrinsic renderIntrisic = renderLeaderLayer.parent as RenderIntrinsic;
       renderIntrisic.elementDelegate.scrollInputToCaret();
     }
   }
@@ -479,13 +476,15 @@ class _KrakenState extends State<Kraken> {
 
   void _focusEditable(RenderEditable renderEditable) {
     dom.RenderInputBox renderInputBox = renderEditable.parent as dom.RenderInputBox;
-    RenderIntrinsic renderIntrisic = renderInputBox.parent as RenderIntrinsic;
+    RenderLeaderLayer renderLeaderLayer = renderInputBox.parent as RenderLeaderLayer;
+    RenderIntrinsic renderIntrisic = renderLeaderLayer.parent as RenderIntrinsic;
     renderIntrisic.elementDelegate.focusInput();
   }
 
   void _blurEditable(RenderEditable renderEditable) {
     dom.RenderInputBox renderInputBox = renderEditable.parent as dom.RenderInputBox;
-    RenderIntrinsic renderIntrisic = renderInputBox.parent as RenderIntrinsic;
+    RenderLeaderLayer renderLeaderLayer = renderInputBox.parent as RenderLeaderLayer;
+    RenderIntrinsic renderIntrisic = renderLeaderLayer.parent as RenderIntrinsic;
     renderIntrisic.elementDelegate.blurInput();
   }
 
@@ -558,7 +557,6 @@ This situation often happened when you trying creating kraken when FlutterView n
       devToolsService: _krakenWidget.devToolsService,
       httpClientInterceptor: _krakenWidget.httpClientInterceptor,
       focusNode: _krakenWidget.focusNode,
-      toolbarLayerLink: _krakenWidget.toolbarLayerLink,
       context: _context,
       uriParser: _krakenWidget.uriParser
     );
