@@ -502,7 +502,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
     );
 
     if (_textInputConnection == null || !_textInputConnection!.attached) {
-      final TextEditingValue localValue = _textSelectionDelegate._textEditingValue;
+      final TextEditingValue localValue = _value;
       _lastKnownRemoteTextEditingValue = localValue;
 
       _textInputConnection = TextInput.attach(this, _textInputConfiguration!);
@@ -519,6 +519,9 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
   void deactiveTextInput() {
     // Clear range select when text input is not active.
     updateEditingValue(_value.copyWith(selection: TextSelection(baseOffset: 0, extentOffset: 0)));
+
+    // Hide input handles and toolbar.
+    _textSelectionDelegate.hideToolbar();
 
     _cursorVisibilityNotifier.value = false;
     if (_textInputConnection != null && _textInputConnection!.attached) {
@@ -561,7 +564,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
           selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
           cursorRadius = const Radius.circular(2.0);
           _selectionControls = cupertinoDesktopTextSelectionControls;
-//          // For test
+          // For test
 //          _selectionControls = materialTextSelectionControls;
           break;
 
@@ -734,8 +737,10 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
     // components, so always send those events, even if we didn't think it
     // changed. Also, the user long pressing should always send a selection change
     // as well.
-    if (selectionChanged || (userInteraction &&
-        (cause == SelectionChangedCause.longPress || cause == SelectionChangedCause.keyboard))) {
+    if (selectionChanged ||
+      (userInteraction &&
+      (cause == SelectionChangedCause.longPress ||
+        cause == SelectionChangedCause.keyboard))) {
       _handleSelectionChanged(value.selection, cause);
     }
 
@@ -743,11 +748,11 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       _handleTextChanged(value.text, userInteraction, cause);
     }
 
-    endBatchEdit();
-
     if (_renderEditable != null) {
       _renderEditable!.selection = value.selection;
     }
+
+    endBatchEdit();
   }
 
   void _handleTextChanged(String text, bool userInteraction, SelectionChangedCause? cause) {
@@ -817,12 +822,10 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       } else {
         _selectionOverlay!.update(_value);
       }
-      print('_showSelectionHandles---------------- $_renderEditable $_showSelectionHandles');
+      _onSelectionChanged(selection, cause);
       _selectionOverlay!.handlesVisible = _showSelectionHandles;
       _selectionOverlay!.showHandles();
     }
-
-    _onSelectionChanged(selection, cause);
 
     // To keep the cursor from blinking while it moves, restart the timer here.
     if (_cursorTimer != null) {
@@ -887,21 +890,20 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
   void updateEditingValue(TextEditingValue value) {
      _lastKnownRemoteTextEditingValue = value;
 
-//    if (value == _value) {
-//      // This is possible, for example, when the numeric keyboard is input,
-//      // the engine will notify twice for the same value.
-//      // Track at https://github.com/flutter/flutter/issues/65811
-//      return;
-//    }
+    if (value == _value) {
+      // This is possible, for example, when the numeric keyboard is input,
+      // the engine will notify twice for the same value.
+      // Track at https://github.com/flutter/flutter/issues/65811
+      return;
+    }
 
     if (value.text == _value.text && value.composing == _value.composing) {
       // `selection` is the only change.
       _handleSelectionChanged(value.selection, SelectionChangedCause.keyboard);
     } else {
-      _hideSelectionOverlayIfNeeded();
       _showCaretOnScreen();
       _textSelectionDelegate.hideToolbar();
-      _formatAndSetValue(value, userInteraction: true, cause: SelectionChangedCause.keyboard);
+      _formatAndSetValue(value, cause: SelectionChangedCause.keyboard);
     }
 
     if (_hasInputConnection) {
@@ -1181,8 +1183,11 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
 
   @override
   void connectionClosed() {
-    // TODO: implement connectionClosed
-    print('TODO: impl connection closed.');
+    if (_hasInputConnection) {
+      _textInputConnection!.connectionClosedReceived();
+      _textInputConnection = null;
+      _lastKnownRemoteTextEditingValue = null;
+    }
   }
 
   // Abstract class method added after flutter@1.15
