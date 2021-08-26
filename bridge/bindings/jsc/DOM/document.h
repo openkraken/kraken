@@ -26,6 +26,7 @@
 #include "bindings/jsc/DOM/events/touch_event.h"
 #include "bindings/jsc/DOM/events/gesture_event.h"
 #include "bindings/jsc/DOM/custom_event.h"
+#include "bindings/jsc/DOM/events/popstate_event.h"
 
 namespace kraken::binding::jsc {
 

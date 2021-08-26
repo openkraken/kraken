@@ -39,8 +39,14 @@ JSValueRef JSHistory::back(JSContextRef ctx, JSObjectRef function, JSObjectRef t
 
     history->goTo(m_previous_stack.top());
 
-    JSStringRef &state = m_previous_stack.top().state;
-    history->dispatch(ctx, state == nullptr ? nullptr : JSValueMakeFromJSONString(ctx, state), exception);
+    JSStringRef state = m_previous_stack.top().state;
+    KRAKEN_LOG(VERBOSE) << "back";
+    if (state == nullptr) {
+      KRAKEN_LOG(VERBOSE) << "state is null.";
+    } else {
+      KRAKEN_LOG(VERBOSE) << JSStringToStdString(state);
+    }
+    history->dispatch(ctx, state, exception);
   }
 
   return nullptr;
@@ -58,7 +64,7 @@ JSValueRef JSHistory::forward(JSContextRef ctx, JSObjectRef function, JSObjectRe
     history->goTo(currentItem);
 
     JSStringRef &state = currentItem.state;
-    history->dispatch(ctx, state == nullptr ? nullptr : JSValueMakeFromJSONString(ctx, state), exception);
+    history->dispatch(ctx, state, exception);
   }
 
   return nullptr;
@@ -99,7 +105,7 @@ JSValueRef JSHistory::go(JSContextRef ctx, JSObjectRef function, JSObjectRef thi
   history->goTo(m_previous_stack.top());
 
   JSStringRef state = m_previous_stack.top().state;
-  history->dispatch(ctx, state == nullptr ? nullptr : JSValueMakeFromJSONString(ctx, state), exception);
+  history->dispatch(ctx, state, exception);
 
   return nullptr;
 }
@@ -122,22 +128,34 @@ JSStringRef JSHistory::getHref() {
   return m_previous_stack.top().href;
 }
 
-void JSHistory::dispatch(JSContextRef ctx, JSValueRef state, JSValueRef *exception) {
+void JSHistory::dispatch(JSContextRef ctx, JSStringRef state, JSValueRef *exception) {
   JSStringHolder windowKeyHolder = JSStringHolder(context, "window");
   JSValueRef windowValue = JSObjectGetProperty(ctx, context->global(), windowKeyHolder.getString(), nullptr);
   JSObjectRef windowObject = JSValueToObject(context->context(), windowValue, nullptr);
 
   auto window = static_cast<WindowInstance *>(JSObjectGetPrivate(windowObject));
 
-  JSObjectRef eventInit = JSObjectRef();
-  if (JSValueIsUndefined(ctx, state)) {
-    JSObjectSetProperty(ctx, eventInit, JSStringCreateWithUTF8CString("state"), state, kJSPropertyAttributeNone, exception);
+  std::string &&str = "popstate";
+  auto nativeEvent = new NativeEvent(stringToNativeString(str));
+  auto nativePopStateEvent = new NativePopStateEvent(nativeEvent);
+  if (state != nullptr) {
+    nativePopStateEvent->state = JSValueMakeFromJSONString(ctx, state);
   }
-  EventInstance *eventInstance = new PopStateEventInstance(JSPopStateEvent::instance(context), "popstate", eventInit, exception);
-  window->dispatchEvent(eventInstance);
+
+  std::string eventType = "popstate";
+  auto event = JSEvent::buildEventInstance(eventType, context, nativePopStateEvent, false);
+
+  window->dispatchEvent(event);
 }
 
 void JSHistory::addItem(HistoryItem &historyItem) {
+  KRAKEN_LOG(VERBOSE) << "addItem";
+  if (historyItem.state == nullptr) {
+    KRAKEN_LOG(VERBOSE) << "state is null.";
+  } else {
+    KRAKEN_LOG(VERBOSE) << JSStringToStdString(historyItem.state);
+  }
+
   if (!m_previous_stack.empty() && historyItem.href == m_previous_stack.top().href) return;
 
   m_previous_stack.push(historyItem);

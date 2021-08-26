@@ -1103,7 +1103,7 @@ struct NativePopStateEvent {
 
   NativeEvent *nativeEvent;
 
-  JSValueRef *state;
+  JSValueRef state;
 };
 
 class JSPopStateEvent : public JSEvent {

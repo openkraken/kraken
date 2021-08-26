@@ -165,6 +165,10 @@ JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {
       return new MouseEventInstance(JSMouseEvent::instance(context),
                                       reinterpret_cast<NativeMouseEvent *>(nativeEvent));
     });
+    JSEvent::defineEvent(EVENT_POP_STATE, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new PopStateEventInstance(JSPopStateEvent::instance(context),
+                                    reinterpret_cast<NativePopStateEvent *>(nativeEvent));
+    });
   }
   if (!document_registered) {
     document_registered = true;

@@ -59,7 +59,7 @@ PopStateEventInstance::PopStateEventInstance(JSPopStateEvent *jsPopStateEvent, s
 
 PopStateEventInstance::PopStateEventInstance(JSPopStateEvent *jsPopStateEvent, NativePopStateEvent *nativePopStateEvent)
   : nativePopStateEvent(nativePopStateEvent), EventInstance(jsPopStateEvent, nativePopStateEvent->nativeEvent) {
-  m_state.setValue(*nativePopStateEvent->state);
+  m_state.setValue(nativePopStateEvent->state);
 }
 
 JSValueRef PopStateEventInstance::getProperty(std::string &name, JSValueRef *exception) {
