@@ -110,12 +110,18 @@ class EditableTextDelegate implements TextSelectionDelegate {
   @override
   void hideToolbar([bool hideHandles = true]) {
     TextSelectionOverlay? _selectionOverlay = _inputElement._selectionOverlay;
+    if (_selectionOverlay == null) {
+      return;
+    }
+
     if (hideHandles) {
       // Hide the handles and the toolbar.
-      _selectionOverlay?.hide();
+      _selectionOverlay.hide();
     } else {
-      // Hide only the toolbar but not the handles.
-      _selectionOverlay?.hideToolbar();
+      if (_selectionOverlay.toolbarIsVisible) {
+        // Hide only the toolbar but not the handles.
+        _selectionOverlay.hideToolbar();
+      }
     }
   }
 
@@ -429,6 +435,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       event.type == dom.EVENT_TOUCH_END
     ) {
       if (event.type == dom.EVENT_TOUCH_END) {
+        _textSelectionDelegate.hideToolbar(false);
         InputElement.setFocus(this);
       }
 
@@ -563,9 +570,9 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
           cursorColor = selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
           selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
           cursorRadius = const Radius.circular(2.0);
-          _selectionControls = cupertinoDesktopTextSelectionControls;
+//          _selectionControls = cupertinoDesktopTextSelectionControls;
           // For test
-//          _selectionControls = materialTextSelectionControls;
+          _selectionControls = materialTextSelectionControls;
           break;
 
         case TargetPlatform.android:
