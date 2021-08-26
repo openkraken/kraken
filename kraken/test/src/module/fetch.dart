@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:kraken/module.dart';
 import 'package:test/test.dart';
 
