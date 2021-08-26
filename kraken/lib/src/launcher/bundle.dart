@@ -55,7 +55,7 @@ abstract class KrakenBundle {
     if (contentOverride != null && contentOverride.isNotEmpty) {
       bundle = RawBundle(contentOverride, Uri.parse(path));
     } else {
-      if (path.startsWith('//') || path.startsWith('/') || path.startsWith('http://') || path.startsWith('https://')) {
+      if (path.startsWith('//') || path.startsWith('http://') || path.startsWith('https://')) {
         bundle = NetworkBundle(Uri.parse(path), contextId: contextId);
       } else {
         bundle = AssetsBundle(Uri.parse(path));
