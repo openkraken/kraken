@@ -40,12 +40,6 @@ JSValueRef JSHistory::back(JSContextRef ctx, JSObjectRef function, JSObjectRef t
     history->goTo(m_previous_stack.top());
 
     JSStringRef state = m_previous_stack.top().state;
-    KRAKEN_LOG(VERBOSE) << "back";
-    if (state == nullptr) {
-      KRAKEN_LOG(VERBOSE) << "state is null.";
-    } else {
-      KRAKEN_LOG(VERBOSE) << JSStringToStdString(state);
-    }
     history->dispatch(ctx, state, exception);
   }
 
@@ -149,13 +143,6 @@ void JSHistory::dispatch(JSContextRef ctx, JSStringRef state, JSValueRef *except
 }
 
 void JSHistory::addItem(HistoryItem &historyItem) {
-  KRAKEN_LOG(VERBOSE) << "addItem";
-  if (historyItem.state == nullptr) {
-    KRAKEN_LOG(VERBOSE) << "state is null.";
-  } else {
-    KRAKEN_LOG(VERBOSE) << JSStringToStdString(historyItem.state);
-  }
-
   if (!m_previous_stack.empty() && historyItem.href == m_previous_stack.top().href) return;
 
   m_previous_stack.push(historyItem);
