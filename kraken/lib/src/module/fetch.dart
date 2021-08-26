@@ -6,6 +6,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/foundation.dart';
@@ -27,40 +28,78 @@ class FetchModule extends BaseModule {
   HttpClient? _httpClient;
   HttpClient get httpClient => _httpClient ?? (_httpClient = HttpClient());
 
+  Uri _resolveUri(String input) {
+    final Uri parsedUri = Uri.parse(input);
+
+    if (moduleManager != null) {
+      Uri base = Uri.parse(moduleManager!.controller.href);
+      UriParser uriParser = moduleManager!.controller.uriParser!;
+      return uriParser.resolve(base, parsedUri);
+    } else {
+      return parsedUri;
+    }
+  }
+
+  static const String fallbackUserAgent = 'Kraken';
+  static String? _defaultUserAgent;
+  static String _getDefaultUserAgent() {
+    if (_defaultUserAgent == null) {
+      try {
+        _defaultUserAgent = getKrakenInfo().userAgent;
+      } catch (error) {
+        // Ignore if dynamic library is missing.
+        return fallbackUserAgent;
+      }
+    }
+    return _defaultUserAgent!;
+  }
+
+  @visibleForTesting
+  Future<HttpClientRequest> getRequest(Uri uri, String? method = 'GET', Map? headers, data) {
+    return httpClient.openUrl(method, uri)
+        .then((HttpClientRequest request) {
+      // Reset Kraken UA.
+      request.headers.removeAll(HttpHeaders.userAgentHeader);
+      request.headers.add(HttpHeaders.userAgentHeader, _getDefaultUserAgent());
+
+      // Add additional headers.
+      if (headers is Map<String, dynamic>) {
+        for (MapEntry<String, dynamic> entry in headers.entries) {
+          request.headers.add(entry.key, entry.value);
+        }
+      }
+
+      // Set ContextID Header
+      if (moduleManager != null) {
+        request.headers.set(HttpHeaderContext, moduleManager!.contextId.toString());
+      }
+
+      if (data is List<int>) {
+        request.add(data);
+      } else if (data != null) {
+        // Treat as string as default.
+        request.add(data.toString().codeUnits);
+      }
+
+      return request;
+    });
+  }
+
   @override
   String invoke(String method, params, InvokeModuleCallback callback) {
-    String href = moduleManager!.controller.href;
-    Uri url = moduleManager!.controller.uriParser!.resolve(Uri.parse(href), Uri.parse(method));
-
+    Uri uri = _resolveUri(method);
     Map<String, dynamic> options = params;
 
     _handleError(Object error, StackTrace? stackTrace) {
-      print('Error while fetching for $url, message: \n$error');
+      print('Error while fetching for $uri, message: \n$error');
       if (stackTrace != null) {
         print('\n$stackTrace');
       }
       callback(error: '$error\n$stackTrace');
     }
 
-    httpClient.openUrl(options['method'] ?? 'GET', url)
-      .then((HttpClientRequest request) {
-        // Reset Kraken UA.
-        request.headers.removeAll(HttpHeaders.userAgentHeader);
-        request.headers.add(HttpHeaders.userAgentHeader, getKrakenInfo().userAgent);
-
-        // Set ContextID Header
-        request.headers.set(HttpHeaderContext, moduleManager!.contextId.toString());
-
-        var data = options['body'];
-        if (data is List<int>) {
-          request.add(data);
-        } else if (data != null) {
-          // Treat as string as default.
-          request.add(data.toString().codeUnits);
-        }
-
-        return request.close();
-      })
+    getRequest(uri, options['method'], options['headers'], options['body'])
+      .then((HttpClientRequest request) => request.close())
       .then((HttpClientResponse response) {
         StringBuffer contentBuffer = StringBuffer();
 
