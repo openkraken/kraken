@@ -1,3 +1,9 @@
+## 0.8.3+1
+
+**Bug Fixed**
+
++ Fix ios build. https://github.com/openkraken/kraken/pull/629
+
 ## 0.8.3
 
 **Bug Fixed**
