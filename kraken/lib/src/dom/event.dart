@@ -31,6 +31,7 @@ const String EVENT_TRANSITION_CANCEL = 'transitioncancel';
 const String EVENT_TRANSITION_START = 'transitionstart';
 const String EVENT_TRANSITION_END = 'transitionend';
 const String EVENT_FOCUS = 'focus';
+const String EVENT_BLUR = 'blur';
 const String EVENT_LOAD = 'load';
 const String EVENT_DOM_CONTENT_LOADED = 'DOMContentLoaded';
 const String EVENT_UNLOAD = 'unload';

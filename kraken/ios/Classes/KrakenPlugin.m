@@ -40,9 +40,16 @@ static FlutterMethodChannel *methodChannel = nil;
     Kraken* krakenInstance = [Kraken instanceByBinaryMessenger: [self.registrar messenger]];
     FlutterMethodCall* callWrap = [FlutterMethodCall methodCallWithMethodName: call.arguments[@"method"] arguments: call.arguments[@"args"]];
     [krakenInstance _handleMethodCall:callWrap result:result];
+  } else if ([@"getTemporaryDirectory" isEqualToString: call.method]) {
+    result([self getTemporaryDirectory]);
   } else {
     result(FlutterMethodNotImplemented);
   }
+}
+
+- (NSString*) getTemporaryDirectory {
+  NSArray<NSString *>* paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+  return paths.firstObject;
 }
 
 @end
