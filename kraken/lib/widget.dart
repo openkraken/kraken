@@ -294,7 +294,6 @@ class Kraken extends StatefulWidget {
 
 }
 class _KrakenState extends State<Kraken> {
-  Map<LogicalKeySet, Intent>? _shortcutMap;
   Map<Type, Action<Intent>>? _actionMap;
   final FocusNode _focusNode = FocusNode();
 
@@ -304,16 +303,28 @@ class _KrakenState extends State<Kraken> {
     _actionMap = <Type, Action<Intent>>{
       NextFocusIntent: CallbackAction<NextFocusIntent>(onInvoke: _handleNextFocus),
       PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(onInvoke: _handlePreviousFocus),
+
+      MoveSelectionRightByLineTextIntent: CallbackAction<MoveSelectionRightByLineTextIntent>(onInvoke: _handleMoveSelectionRightByLineText),
+      MoveSelectionLeftByLineTextIntent: CallbackAction<MoveSelectionLeftByLineTextIntent>(onInvoke: _handleMoveSelectionLeftByLineText),
+      MoveSelectionRightByWordTextIntent: CallbackAction<MoveSelectionRightByWordTextIntent>(onInvoke: _handleMoveSelectionRightByWordText),
+      MoveSelectionLeftByWordTextIntent: CallbackAction<MoveSelectionLeftByWordTextIntent>(onInvoke: _handleMoveSelectionLeftByWordText),
       MoveSelectionUpTextIntent: CallbackAction<MoveSelectionUpTextIntent>(onInvoke: _handleMoveSelectionUpText),
       MoveSelectionDownTextIntent: CallbackAction<MoveSelectionDownTextIntent>(onInvoke: _handleMoveSelectionDownText),
       MoveSelectionLeftTextIntent: CallbackAction<MoveSelectionLeftTextIntent>(onInvoke: _handleMoveSelectionLeftText),
       MoveSelectionRightTextIntent: CallbackAction<MoveSelectionRightTextIntent>(onInvoke: _handleMoveSelectionRightText),
       MoveSelectionToStartTextIntent: CallbackAction<MoveSelectionToStartTextIntent>(onInvoke: _handleMoveSelectionToStartText),
       MoveSelectionToEndTextIntent: CallbackAction<MoveSelectionToEndTextIntent>(onInvoke: _handleMoveSelectionToEndText),
+
       ExtendSelectionLeftTextIntent: CallbackAction<ExtendSelectionLeftTextIntent>(onInvoke: _handleExtendSelectionLeftText),
       ExtendSelectionRightTextIntent: CallbackAction<ExtendSelectionRightTextIntent>(onInvoke: _handleExtendSelectionRightText),
       ExtendSelectionUpTextIntent: CallbackAction<ExtendSelectionUpTextIntent>(onInvoke: _handleExtendSelectionUpText),
       ExtendSelectionDownTextIntent: CallbackAction<ExtendSelectionDownTextIntent>(onInvoke: _handleExtendSelectionDownText),
+      ExpandSelectionToEndTextIntent: CallbackAction<ExpandSelectionToEndTextIntent>(onInvoke: _handleExtendSelectionToEndText),
+      ExpandSelectionToStartTextIntent: CallbackAction<ExpandSelectionToStartTextIntent>(onInvoke: _handleExtendSelectionToStartText),
+      ExpandSelectionLeftByLineTextIntent: CallbackAction<ExpandSelectionLeftByLineTextIntent>(onInvoke: _handleExtendSelectionLeftByLineText),
+      ExpandSelectionRightByLineTextIntent: CallbackAction<ExpandSelectionRightByLineTextIntent>(onInvoke: _handleExtendSelectionRightByLineText),
+      ExtendSelectionLeftByWordTextIntent: CallbackAction<ExtendSelectionLeftByWordTextIntent>(onInvoke: _handleExtendSelectionLeftByWordText),
+      ExtendSelectionRightByWordTextIntent: CallbackAction<ExtendSelectionLeftByWordTextIntent>(onInvoke: _handleExtendSelectionLeftByWordText),
     };
   }
 
@@ -543,129 +554,163 @@ class _KrakenState extends State<Kraken> {
     }
   }
 
-  void _handleMoveSelectionUpText(MoveSelectionUpTextIntent intent) {
-    RenderObject? _rootRenderObject = context.findRenderObject();
-    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
-    if (editables.isNotEmpty) {
-      RenderEditable? focusedEditable = _findFocusedEditable(editables);
-      focusedEditable!.moveSelectionUp(SelectionChangedCause.keyboard);
+  void _handleMoveSelectionRightByLineText(MoveSelectionRightByLineTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
+      // Make caret visilbe while moving cursor.
+      _scrollFocusedInputToCaret(focusedEditable);
+    }
+  }
 
-      // Scroll input box to the caret.
-      dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
-      RenderLeaderLayer renderLeaderLayer = renderInputBox.parent as RenderLeaderLayer;
-      RenderIntrinsic renderIntrisic = renderLeaderLayer.parent as RenderIntrinsic;
-      renderIntrisic.elementDelegate.scrollInputToCaret();
+  void _handleMoveSelectionLeftByLineText(MoveSelectionLeftByLineTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
+      // Make caret visilbe while moving cursor.
+      _scrollFocusedInputToCaret(focusedEditable);
+    }
+  }
+
+  void _handleMoveSelectionRightByWordText(MoveSelectionRightByWordTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.moveSelectionRightByWord(SelectionChangedCause.keyboard);
+      // Make caret visilbe while moving cursor.
+      _scrollFocusedInputToCaret(focusedEditable);
+    }
+  }
+
+  void _handleMoveSelectionLeftByWordText(MoveSelectionLeftByWordTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.moveSelectionLeftByWord(SelectionChangedCause.keyboard);
+      // Make caret visilbe while moving cursor.
+      _scrollFocusedInputToCaret(focusedEditable);
+    }
+  }
+
+  void _handleMoveSelectionUpText(MoveSelectionUpTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.moveSelectionUp(SelectionChangedCause.keyboard);
+      // Make caret visilbe while moving cursor.
+      _scrollFocusedInputToCaret(focusedEditable);
     }
   }
 
   void _handleMoveSelectionDownText(MoveSelectionDownTextIntent intent) {
-    RenderObject? _rootRenderObject = context.findRenderObject();
-    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
-    if (editables.isNotEmpty) {
-      RenderEditable? focusedEditable = _findFocusedEditable(editables);
-      focusedEditable!.moveSelectionDown(SelectionChangedCause.keyboard);
-
-      // Scroll input box to the caret.
-      dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
-      RenderLeaderLayer renderLeaderLayer = renderInputBox.parent as RenderLeaderLayer;
-      RenderIntrinsic renderIntrisic = renderLeaderLayer.parent as RenderIntrinsic;
-      renderIntrisic.elementDelegate.scrollInputToCaret();
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.moveSelectionDown(SelectionChangedCause.keyboard);
+      // Make caret visilbe while moving cursor.
+      _scrollFocusedInputToCaret(focusedEditable);
     }
   }
 
   void _handleMoveSelectionLeftText(MoveSelectionLeftTextIntent intent) {
-    RenderObject? _rootRenderObject = context.findRenderObject();
-    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
-    if (editables.isNotEmpty) {
-      RenderEditable? focusedEditable = _findFocusedEditable(editables);
-      focusedEditable!.moveSelectionLeft(SelectionChangedCause.keyboard);
-
-      // Scroll input box to the caret.
-      dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
-      RenderLeaderLayer renderLeaderLayer = renderInputBox.parent as RenderLeaderLayer;
-      RenderIntrinsic renderIntrisic = renderLeaderLayer.parent as RenderIntrinsic;
-      renderIntrisic.elementDelegate.scrollInputToCaret();
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.moveSelectionLeft(SelectionChangedCause.keyboard);
+      // Make caret visilbe while moving cursor.
+      _scrollFocusedInputToCaret(focusedEditable);
     }
   }
 
   void _handleMoveSelectionRightText(MoveSelectionRightTextIntent intent) {
-    RenderObject? _rootRenderObject = context.findRenderObject();
-    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
-    if (editables.isNotEmpty) {
-      RenderEditable? focusedEditable = _findFocusedEditable(editables);
-      focusedEditable!.moveSelectionRight(SelectionChangedCause.keyboard);
-
-      // Scroll input box to the caret.
-      dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
-      RenderLeaderLayer renderLeaderLayer = renderInputBox.parent as RenderLeaderLayer;
-      RenderIntrinsic renderIntrisic = renderLeaderLayer.parent as RenderIntrinsic;
-      renderIntrisic.elementDelegate.scrollInputToCaret();
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.moveSelectionRight(SelectionChangedCause.keyboard);
+      // Make caret visilbe while moving cursor.
+      _scrollFocusedInputToCaret(focusedEditable);
     }
   }
 
   void _handleMoveSelectionToEndText(MoveSelectionToEndTextIntent intent) {
-    RenderObject? _rootRenderObject = context.findRenderObject();
-    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
-    if (editables.isNotEmpty) {
-      RenderEditable? focusedEditable = _findFocusedEditable(editables);
-      focusedEditable!.moveSelectionToEnd(SelectionChangedCause.keyboard);
-
-      // Scroll input box to the caret.
-      dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
-      RenderLeaderLayer renderLeaderLayer = renderInputBox.parent as RenderLeaderLayer;
-      RenderIntrinsic renderIntrisic = renderLeaderLayer.parent as RenderIntrinsic;
-      renderIntrisic.elementDelegate.scrollInputToCaret();
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.moveSelectionToEnd(SelectionChangedCause.keyboard);
+      // Make caret visilbe while moving cursor.
+      _scrollFocusedInputToCaret(focusedEditable);
     }
   }
 
   void _handleMoveSelectionToStartText(MoveSelectionToStartTextIntent intent) {
-    RenderObject? _rootRenderObject = context.findRenderObject();
-    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
-    if (editables.isNotEmpty) {
-      RenderEditable? focusedEditable = _findFocusedEditable(editables);
-      focusedEditable!.moveSelectionToStart(SelectionChangedCause.keyboard);
-
-      // Scroll input box to the caret.
-      dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
-      RenderLeaderLayer renderLeaderLayer = renderInputBox.parent as RenderLeaderLayer;
-      RenderIntrinsic renderIntrisic = renderLeaderLayer.parent as RenderIntrinsic;
-      renderIntrisic.elementDelegate.scrollInputToCaret();
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.moveSelectionToStart(SelectionChangedCause.keyboard);
+      // Make caret visilbe while moving cursor.
+      _scrollFocusedInputToCaret(focusedEditable);
     }
   }
 
   void _handleExtendSelectionLeftText(ExtendSelectionLeftTextIntent intent) {
-    RenderObject? _rootRenderObject = context.findRenderObject();
-    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
-    if (editables.isNotEmpty) {
-      RenderEditable? focusedEditable = _findFocusedEditable(editables);
-      focusedEditable!.extendSelectionLeft(SelectionChangedCause.keyboard);
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.extendSelectionLeft(SelectionChangedCause.keyboard);
     }
   }
 
   void _handleExtendSelectionRightText(ExtendSelectionRightTextIntent intent) {
-    RenderObject? _rootRenderObject = context.findRenderObject();
-    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
-    if (editables.isNotEmpty) {
-      RenderEditable? focusedEditable = _findFocusedEditable(editables);
-      focusedEditable!.extendSelectionRight(SelectionChangedCause.keyboard);
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.extendSelectionRight(SelectionChangedCause.keyboard);
     }
   }
 
   void _handleExtendSelectionUpText(ExtendSelectionUpTextIntent intent) {
-    RenderObject? _rootRenderObject = context.findRenderObject();
-    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
-    if (editables.isNotEmpty) {
-      RenderEditable? focusedEditable = _findFocusedEditable(editables);
-      focusedEditable!.extendSelectionUp(SelectionChangedCause.keyboard);
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.extendSelectionUp(SelectionChangedCause.keyboard);
     }
   }
 
   void _handleExtendSelectionDownText(ExtendSelectionDownTextIntent intent) {
-    RenderObject? _rootRenderObject = context.findRenderObject();
-    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
-    if (editables.isNotEmpty) {
-      RenderEditable? focusedEditable = _findFocusedEditable(editables);
-      focusedEditable!.extendSelectionDown(SelectionChangedCause.keyboard);
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.extendSelectionDown(SelectionChangedCause.keyboard);
+    }
+  }
+
+  void _handleExtendSelectionToEndText(ExpandSelectionToEndTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.expandSelectionToEnd(SelectionChangedCause.keyboard);
+    }
+  }
+
+  void _handleExtendSelectionToStartText(ExpandSelectionToStartTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.expandSelectionToStart(SelectionChangedCause.keyboard);
+    }
+  }
+
+  void _handleExtendSelectionLeftByLineText(ExpandSelectionLeftByLineTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.expandSelectionLeftByLine(SelectionChangedCause.keyboard);
+    }
+  }
+
+  void _handleExtendSelectionRightByLineText(ExpandSelectionRightByLineTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.expandSelectionRightByLine(SelectionChangedCause.keyboard);
+    }
+  }
+
+  void _handleExtendSelectionLeftByWordText(ExtendSelectionLeftByWordTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.extendSelectionLeftByWord(SelectionChangedCause.keyboard);
+    }
+  }
+
+  void _handleExtendSelectionRightByWordText(ExtendSelectionRightByWordTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.extendSelectionRightByWord(SelectionChangedCause.keyboard);
     }
   }
 
@@ -696,8 +741,12 @@ class _KrakenState extends State<Kraken> {
     return result;
   }
 
-  RenderEditable? _findFocusedEditable(List<RenderEditable> editables) {
+  RenderEditable? _findFocusedEditable([List<RenderEditable>? editables]) {
     RenderEditable? result;
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    if (editables == null) {
+      editables = _findEditables(_rootRenderObject!);
+    }
     if (editables.isNotEmpty) {
       for (RenderEditable editable in editables) {
         if (editable.hasFocus) {
@@ -706,6 +755,14 @@ class _KrakenState extends State<Kraken> {
       }
     }
     return result;
+  }
+
+  // Scroll input box to the caret.
+  void _scrollFocusedInputToCaret(RenderEditable focusedEditable) {
+    dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
+    RenderLeaderLayer renderLeaderLayer = renderInputBox.parent as RenderLeaderLayer;
+    RenderIntrinsic renderIntrisic = renderLeaderLayer.parent as RenderIntrinsic;
+    renderIntrisic.elementDelegate.scrollInputToCaret();
   }
 }
 
