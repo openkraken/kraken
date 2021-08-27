@@ -703,7 +703,6 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
 
   final Kraken _krakenWidget;
   final WidgetDelegate _widgetDelegate;
-  final BuildContext _context;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
