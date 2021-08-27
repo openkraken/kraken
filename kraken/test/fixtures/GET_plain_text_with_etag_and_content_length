@@ -1,6 +1,6 @@
 HTTP/1.1 200 OK
 Content-Type: text/plain
-eTag: "foo"
+eTag: "boo"
 Content-Length: 10
 
 CachedData
