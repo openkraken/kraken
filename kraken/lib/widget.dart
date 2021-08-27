@@ -167,7 +167,7 @@ class Kraken extends StatelessWidget {
   }
 
   // Set kraken http cache mode.
-  static void setDefaultHttpCacheMode(HttpCacheMode mode) {
+  static void setHttpCacheMode(HttpCacheMode mode) {
     HttpCacheController.mode = mode;
     if (kDebugMode) {
       print('Kraken http cache mode set to $mode.');
