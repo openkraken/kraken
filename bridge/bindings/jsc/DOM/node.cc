@@ -5,6 +5,7 @@
 
 #include "node.h"
 #include "document.h"
+#include "bindings/jsc/DOM/elements/document_fragment.h"
 
 namespace kraken::binding::jsc {
 
@@ -269,7 +270,13 @@ JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectR
     return nullptr;
   }
 
-  selfInstance->internalAppendChild(nodeInstance);
+  if (nodeInstance->hasNodeFlag(NodeInstance::NodeFlag::IsDocumentFragment)) {
+    for (auto &childNode : nodeInstance->childNodes) {
+      selfInstance->internalAppendChild(childNode);
+    }
+  } else {
+    selfInstance->internalAppendChild(nodeInstance);
+  }
 
   return nodeValueRef;
 }

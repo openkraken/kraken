@@ -9,7 +9,7 @@ namespace kraken::binding::jsc {
 
 void bindDocumentFragmentElement(std::unique_ptr<JSContext> &context) {
   auto DocumentFragmentElement = JSDocumentFragmentElement::instance(context.get());
-  JSC_GLOBAL_SET_PROPERTY(context, "DocumentFragmentElement", DocumentFragmentElement->classObject);
+  JSC_GLOBAL_SET_PROPERTY(context, "DocumentFragment", DocumentFragmentElement->classObject);
 }
 
 std::unordered_map<JSContext *, JSDocumentFragmentElement *> JSDocumentFragmentElement::instanceMap{};
@@ -22,6 +22,7 @@ JSDocumentFragmentElement::JSDocumentFragmentElement(JSContext *context) : JSEle
 JSObjectRef JSDocumentFragmentElement::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                               const JSValueRef *arguments, JSValueRef *exception) {
   auto instance = new DocumentFragmentElementInstance(this);
+  instance->setNodeFlag(DocumentFragmentElementInstance::NodeFlag::IsDocumentFragment);
   return instance->object;
 }
 
