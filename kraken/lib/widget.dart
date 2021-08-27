@@ -7,6 +7,7 @@ import 'dart:ui';
 import 'dart:ffi';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -19,6 +20,42 @@ import 'package:kraken/gesture.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/src/dom/element_registry.dart';
 import 'package:kraken/bridge.dart';
+
+/// Get context of current widget.
+typedef GetContext = BuildContext Function();
+/// Request focus of current widget.
+typedef RequestFocus = void Function();
+/// Get the target platform.
+typedef GetTargetPlatform = TargetPlatform Function();
+/// Get the cursor color according to the widget theme and platform theme.
+typedef GetCursorColor = Color Function();
+/// Get the selection color according to the widget theme and platform theme.
+typedef GetSelectionColor = Color Function();
+/// Get the cursor radius according to the target platform.
+typedef GetCursorRadius = Radius Function();
+/// Get the text selection controls according to the target platform.
+typedef GetTextSelectionControls = TextSelectionControls Function();
+
+/// Delegate methods of widget
+class WidgetDelegate {
+  GetContext getContext;
+  RequestFocus requestFocus;
+  GetTargetPlatform getTargetPlatform;
+  GetCursorColor getCursorColor;
+  GetSelectionColor getSelectionColor;
+  GetCursorRadius getCursorRadius;
+  GetTextSelectionControls getTextSelectionControls;
+
+  WidgetDelegate(
+    this.getContext,
+    this.requestFocus,
+    this.getTargetPlatform,
+    this.getCursorColor,
+    this.getSelectionColor,
+    this.getCursorRadius,
+    this.getTextSelectionControls,
+  );
+}
 
 typedef WidgetCreator = Widget Function(Map<String, dynamic>);
 class _WidgetCustomElement extends dom.Element {
@@ -162,8 +199,6 @@ class Kraken extends StatefulWidget {
 
   final HttpClientInterceptor? httpClientInterceptor;
 
-  final FocusNode focusNode = FocusNode();
-
   final UriParser? uriParser;
 
   KrakenController? get controller {
@@ -261,7 +296,7 @@ class Kraken extends StatefulWidget {
 class _KrakenState extends State<Kraken> {
   Map<LogicalKeySet, Intent>? _shortcutMap;
   Map<Type, Action<Intent>>? _actionMap;
-  late FocusNode _focusNode;
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -288,7 +323,6 @@ class _KrakenState extends State<Kraken> {
       ExtendSelectionUpTextIntent: CallbackAction<ExtendSelectionUpTextIntent>(onInvoke: _handleExtendSelectionUpText),
       ExtendSelectionDownTextIntent: CallbackAction<ExtendSelectionDownTextIntent>(onInvoke: _handleExtendSelectionDownText),
     };
-    _focusNode = (context.widget as Kraken).focusNode;
   }
 
   @override
@@ -298,8 +332,149 @@ class _KrakenState extends State<Kraken> {
       shortcuts: _shortcutMap,
       focusNode: _focusNode,
       onFocusChange: _handleFocusChange,
-      child: _KrakenRenderObjectWidget(context.widget as Kraken, context)
+      child: _KrakenRenderObjectWidget(
+        context.widget as Kraken,
+        widgetDelegate,
+        context
+      )
     );
+  }
+
+  WidgetDelegate get widgetDelegate {
+    return WidgetDelegate(
+      this._getContext,
+      this._requestFocus,
+      this._getTargetPlatform,
+      this._getCursorColor,
+      this._getSelectionColor,
+      this._getCursorRadius,
+      this._getTextSelectionControls,
+    );
+  }
+
+  BuildContext _getContext() {
+    return context;
+  }
+
+  void _requestFocus() {
+    _focusNode.requestFocus();
+  }
+
+  TargetPlatform _getTargetPlatform() {
+    final ThemeData theme = Theme.of(context);
+    return theme.platform;
+  }
+
+  Color _getCursorColor() {
+    Color cursorColor = CSSColor.initial;
+    TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
+    ThemeData theme = Theme.of(context);
+
+    switch (theme.platform) {
+      case TargetPlatform.iOS:
+        final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
+        cursorColor = selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
+        break;
+
+      case TargetPlatform.macOS:
+        final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
+        cursorColor = selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
+        break;
+
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        cursorColor = selectionTheme.cursorColor ?? theme.colorScheme.primary;
+        break;
+
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        cursorColor = selectionTheme.cursorColor ?? theme.colorScheme.primary;
+        break;
+    }
+
+    return cursorColor;
+  }
+
+  Color _getSelectionColor() {
+    Color selectionColor = CSSColor.initial.withOpacity(0.4);
+    TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
+    ThemeData theme = Theme.of(context);
+
+    switch (theme.platform) {
+      case TargetPlatform.iOS:
+        final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
+        selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
+        break;
+
+      case TargetPlatform.macOS:
+        final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
+        selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
+        break;
+
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+        break;
+
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+        break;
+    }
+
+    return selectionColor;
+  }
+
+  Radius _getCursorRadius() {
+    Radius cursorRadius = const Radius.circular(2.0);
+    TargetPlatform platform = _getTargetPlatform();
+
+    switch (platform) {
+      case TargetPlatform.iOS:
+        cursorRadius = const Radius.circular(2.0);
+        break;
+
+      case TargetPlatform.macOS:
+        cursorRadius = const Radius.circular(2.0);
+        break;
+
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        break;
+    }
+
+    return cursorRadius;
+  }
+
+  TextSelectionControls _getTextSelectionControls() {
+    TextSelectionControls _selectionControls;
+    TargetPlatform platform = _getTargetPlatform();
+
+    switch (platform) {
+      case TargetPlatform.iOS:
+        _selectionControls = cupertinoTextSelectionControls;
+        break;
+
+      case TargetPlatform.macOS:
+//        _selectionControls = cupertinoDesktopTextSelectionControls;
+        // For test
+        _selectionControls = materialTextSelectionControls;
+        break;
+
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        _selectionControls = materialTextSelectionControls;
+        break;
+
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        _selectionControls = desktopTextSelectionControls;
+        break;
+    }
+
+    return _selectionControls;
   }
 
   void _handleFocusChange(bool focused) {
@@ -516,12 +691,18 @@ class _KrakenState extends State<Kraken> {
 
 class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
-  const _KrakenRenderObjectWidget(Kraken widget, BuildContext context, {Key? key})
-      : _krakenWidget = widget,
-        _context = context,
-        super(key: key);
+  const _KrakenRenderObjectWidget(
+    Kraken widget,
+    WidgetDelegate widgetDelegate,
+    BuildContext context,
+    {Key? key}
+  ) : _krakenWidget = widget,
+      _widgetDelegate = widgetDelegate,
+      _context = context,
+      super(key: key);
 
   final Kraken _krakenWidget;
+  final WidgetDelegate _widgetDelegate;
   final BuildContext _context;
 
   @override
@@ -556,8 +737,7 @@ This situation often happened when you trying creating kraken when FlutterView n
       navigationDelegate: _krakenWidget.navigationDelegate,
       devToolsService: _krakenWidget.devToolsService,
       httpClientInterceptor: _krakenWidget.httpClientInterceptor,
-      focusNode: _krakenWidget.focusNode,
-      context: _context,
+      widgetDelegate: _widgetDelegate,
       uriParser: _krakenWidget.uriParser
     );
 

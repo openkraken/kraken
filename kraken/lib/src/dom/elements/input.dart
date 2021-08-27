@@ -9,17 +9,16 @@ import 'dart:ui';
 import 'dart:ffi';
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:kraken/bridge.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart' show FocusNode;
+import 'package:flutter/widgets.dart' show TextSelectionOverlay, TextSelectionControls, ClipboardStatusNotifier;
 import 'package:flutter/rendering.dart' hide RenderEditable;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:kraken/dom.dart' as dom;
+import 'package:kraken/widget.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 import 'package:flutter/rendering.dart';
@@ -168,10 +167,11 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
   static void setFocus(InputElement inputElement) {
     if (InputElement.focusInputElement != inputElement) {
       // Focus kraken widget to get focus from other widgets.
-      FocusNode? focusNode = inputElement.elementManager.focusNode;
-      if (focusNode != null) {
-        focusNode.requestFocus();
+      WidgetDelegate? widgetDelegate = inputElement.elementManager.widgetDelegate;
+      if (widgetDelegate != null) {
+        widgetDelegate.requestFocus();
       }
+
       clearFocus();
       InputElement.focusInputElement = inputElement;
       inputElement.focus();
@@ -554,44 +554,12 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       text = _buildPasswordTextSpan(text.text!);
     }
 
-    BuildContext? context = elementManager.context;
-    if (context != null) {
-      final ThemeData theme = Theme.of(context);
-      final TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
-
-      switch (theme.platform) {
-        case TargetPlatform.iOS:
-          final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
-          cursorColor = selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
-          selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
-          cursorRadius = const Radius.circular(2.0);
-          _selectionControls = cupertinoTextSelectionControls;
-          break;
-
-        case TargetPlatform.macOS:
-          final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
-          cursorColor = selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
-          selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
-          cursorRadius = const Radius.circular(2.0);
-//          _selectionControls = cupertinoDesktopTextSelectionControls;
-          // For test
-          _selectionControls = materialTextSelectionControls;
-          break;
-
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          cursorColor = selectionTheme.cursorColor ?? theme.colorScheme.primary;
-          selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
-          _selectionControls = materialTextSelectionControls;
-          break;
-
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          cursorColor = selectionTheme.cursorColor ?? theme.colorScheme.primary;
-          selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
-          _selectionControls = desktopTextSelectionControls;
-          break;
-      }
+    WidgetDelegate? widgetDelegate = elementManager.widgetDelegate;
+    if (widgetDelegate != null) {
+      cursorColor = widgetDelegate.getCursorColor();
+      selectionColor = widgetDelegate.getSelectionColor();
+      cursorRadius = widgetDelegate.getCursorRadius();
+      _selectionControls = widgetDelegate.getTextSelectionControls();
     }
 
     _renderEditable = RenderEditable(
@@ -809,19 +777,20 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
     // Show keyboard for selection change or user gestures.
     requestKeyboard();
 
-    // TODO: show selection layer and emit selection changed event
     if (_renderEditable == null) {
       return;
     }
 
+    WidgetDelegate? widgetDelegate = elementManager.widgetDelegate;
+
     if (_selectionControls == null) {
       _selectionOverlay?.hide();
       _selectionOverlay = null;
-    } else {
+    } else if (widgetDelegate != null) {
       if (_selectionOverlay == null) {
         _selectionOverlay = TextSelectionOverlay(
           clipboardStatus: _clipboardStatus,
-          context: elementManager.context!,
+          context: widgetDelegate.getContext(),
           value: _value,
           toolbarLayerLink: _toolbarLayerLink,
           startHandleLayerLink: _startHandleLayerLink,
@@ -853,11 +822,10 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       _showSelectionHandles = willShowSelectionHandles;
     }
 
-    BuildContext? context = elementManager.context;
-    if (context != null) {
-      switch (Theme
-        .of(context)
-        .platform) {
+    WidgetDelegate? widgetDelegate = elementManager.widgetDelegate;
+    if (widgetDelegate != null) {
+      TargetPlatform platform = widgetDelegate.getTargetPlatform();
+      switch (platform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           if (cause == SelectionChangedCause.longPress) {
@@ -871,6 +839,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
         // Do nothing.
       }
     }
+
   }
 
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {

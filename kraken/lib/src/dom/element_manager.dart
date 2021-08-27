@@ -18,6 +18,7 @@ import 'dart:ffi';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/launcher.dart';
+import 'package:kraken/widget.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/scheduler.dart';
@@ -74,9 +75,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   EventClient? eventClient;
 
-  FocusNode? focusNode;
-
-  BuildContext? context;
+  WidgetDelegate? widgetDelegate;
 
   ElementManager({
     required this.contextId,
@@ -84,8 +83,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     required this.controller,
     this.showPerformanceOverlayOverride = false,
     this.eventClient,
-    this.focusNode,
-    this.context,
+    this.widgetDelegate,
   }) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_PROPERTY_INIT);
