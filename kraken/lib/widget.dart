@@ -301,9 +301,11 @@ class _KrakenState extends State<Kraken> {
   void initState() {
     super.initState();
     _actionMap = <Type, Action<Intent>>{
+      // Action of focus.
       NextFocusIntent: CallbackAction<NextFocusIntent>(onInvoke: _handleNextFocus),
       PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(onInvoke: _handlePreviousFocus),
 
+      // Action of mouse move hotkeys.
       MoveSelectionRightByLineTextIntent: CallbackAction<MoveSelectionRightByLineTextIntent>(onInvoke: _handleMoveSelectionRightByLineText),
       MoveSelectionLeftByLineTextIntent: CallbackAction<MoveSelectionLeftByLineTextIntent>(onInvoke: _handleMoveSelectionLeftByLineText),
       MoveSelectionRightByWordTextIntent: CallbackAction<MoveSelectionRightByWordTextIntent>(onInvoke: _handleMoveSelectionRightByWordText),
@@ -315,6 +317,7 @@ class _KrakenState extends State<Kraken> {
       MoveSelectionToStartTextIntent: CallbackAction<MoveSelectionToStartTextIntent>(onInvoke: _handleMoveSelectionToStartText),
       MoveSelectionToEndTextIntent: CallbackAction<MoveSelectionToEndTextIntent>(onInvoke: _handleMoveSelectionToEndText),
 
+      // Action of selection hotkeys.
       ExtendSelectionLeftTextIntent: CallbackAction<ExtendSelectionLeftTextIntent>(onInvoke: _handleExtendSelectionLeftText),
       ExtendSelectionRightTextIntent: CallbackAction<ExtendSelectionRightTextIntent>(onInvoke: _handleExtendSelectionRightText),
       ExtendSelectionUpTextIntent: CallbackAction<ExtendSelectionUpTextIntent>(onInvoke: _handleExtendSelectionUpText),
@@ -324,7 +327,7 @@ class _KrakenState extends State<Kraken> {
       ExpandSelectionLeftByLineTextIntent: CallbackAction<ExpandSelectionLeftByLineTextIntent>(onInvoke: _handleExtendSelectionLeftByLineText),
       ExpandSelectionRightByLineTextIntent: CallbackAction<ExpandSelectionRightByLineTextIntent>(onInvoke: _handleExtendSelectionRightByLineText),
       ExtendSelectionLeftByWordTextIntent: CallbackAction<ExtendSelectionLeftByWordTextIntent>(onInvoke: _handleExtendSelectionLeftByWordText),
-      ExtendSelectionRightByWordTextIntent: CallbackAction<ExtendSelectionLeftByWordTextIntent>(onInvoke: _handleExtendSelectionLeftByWordText),
+      ExtendSelectionRightByWordTextIntent: CallbackAction<ExtendSelectionRightByWordTextIntent>(onInvoke: _handleExtendSelectionRightByWordText),
     };
   }
 
@@ -478,24 +481,25 @@ class _KrakenState extends State<Kraken> {
     return _selectionControls;
   }
 
+  // Handle focus change of focusNode.
   void _handleFocusChange(bool focused) {
     RenderObject? _rootRenderObject = context.findRenderObject();
     List<RenderEditable> editables = _findEditables(_rootRenderObject!);
     if (editables.isNotEmpty) {
       RenderEditable? focusedEditable = _findFocusedEditable(editables);
       if (focused) {
-        // @TODO: need to detect hotkey to determine focus order of inputs in kraken widget.
         if (dom.InputElement.focusInputElement == null) {
-          _focusEditable(editables[0]);
+          _focusInput(editables[0]);
         }
       } else {
         if (focusedEditable != null) {
-          _blurEditable(focusedEditable);
+          _blurInput(focusedEditable);
         }
       }
     }
   }
 
+  // Handle focus action usually by pressing the [Tab] hotkey.
   void _handleNextFocus(NextFocusIntent intent) {
     RenderObject? _rootRenderObject = context.findRenderObject();
     List<RenderEditable> editables = _findEditables(_rootRenderObject!);
@@ -504,7 +508,7 @@ class _KrakenState extends State<Kraken> {
       // None editable is focused, focus the first editable.
       if (focusedEditable == null) {
         _focusNode.requestFocus();
-        _focusEditable(editables[0]);
+        _focusInput(editables[0]);
 
       // Some editable is focused, focus the next editable, if it is the last editable,
       // then focus the next widget.
@@ -512,11 +516,11 @@ class _KrakenState extends State<Kraken> {
         int idx = editables.indexOf(focusedEditable);
         if (idx == editables.length - 1) {
           _focusNode.nextFocus();
-          _blurEditable(editables[editables.length - 1]);
+          _blurInput(editables[editables.length - 1]);
         } else {
           _focusNode.requestFocus();
-          _blurEditable(editables[idx]);
-          _focusEditable(editables[idx + 1]);
+          _blurInput(editables[idx]);
+          _focusInput(editables[idx + 1]);
         }
       }
     // None editable exists, focus the next widget.
@@ -525,6 +529,7 @@ class _KrakenState extends State<Kraken> {
     }
   }
 
+  // Handle focus action usually by pressing the [Shift]+[Tab] hotkey in the reverse direction.
   void _handlePreviousFocus(PreviousFocusIntent intent) {
     RenderObject? _rootRenderObject = context.findRenderObject();
     List<RenderEditable> editables = _findEditables(_rootRenderObject!);
@@ -533,7 +538,7 @@ class _KrakenState extends State<Kraken> {
       // None editable is focused, focus the last editable.
       if (focusedEditable == null) {
         _focusNode.requestFocus();
-        _focusEditable(editables[editables.length - 1]);
+        _focusInput(editables[editables.length - 1]);
 
         // Some editable is focused, focus the previous editable, if it is the first editable,
         // then focus the previous widget.
@@ -541,11 +546,11 @@ class _KrakenState extends State<Kraken> {
         int idx = editables.indexOf(focusedEditable);
         if (idx == 0) {
           _focusNode.previousFocus();
-          _blurEditable(editables[0]);
+          _blurInput(editables[0]);
         } else {
           _focusNode.requestFocus();
-          _blurEditable(editables[idx]);
-          _focusEditable(editables[idx - 1]);
+          _blurInput(editables[idx]);
+          _focusInput(editables[idx - 1]);
         }
       }
     // None editable exists, focus the previous widget.
@@ -714,20 +719,23 @@ class _KrakenState extends State<Kraken> {
     }
   }
 
-  void _focusEditable(RenderEditable renderEditable) {
+  // Make the input element of the RenderEditable focus.
+  void _focusInput(RenderEditable renderEditable) {
     dom.RenderInputBox renderInputBox = renderEditable.parent as dom.RenderInputBox;
     RenderLeaderLayer renderLeaderLayer = renderInputBox.parent as RenderLeaderLayer;
     RenderIntrinsic renderIntrisic = renderLeaderLayer.parent as RenderIntrinsic;
     renderIntrisic.elementDelegate.focusInput();
   }
 
-  void _blurEditable(RenderEditable renderEditable) {
+  // Make the input element of the RenderEditable blur.
+  void _blurInput(RenderEditable renderEditable) {
     dom.RenderInputBox renderInputBox = renderEditable.parent as dom.RenderInputBox;
     RenderLeaderLayer renderLeaderLayer = renderInputBox.parent as RenderLeaderLayer;
     RenderIntrinsic renderIntrisic = renderLeaderLayer.parent as RenderIntrinsic;
     renderIntrisic.elementDelegate.blurInput();
   }
 
+  // Find all the RenderEditables in the widget.
   List<RenderEditable> _findEditables(RenderObject parent) {
     List<RenderEditable> result = [];
     parent.visitChildren((RenderObject child) {
@@ -741,12 +749,12 @@ class _KrakenState extends State<Kraken> {
     return result;
   }
 
+  // Find the focused RenderEditable in the widget.
   RenderEditable? _findFocusedEditable([List<RenderEditable>? editables]) {
     RenderEditable? result;
     RenderObject? _rootRenderObject = context.findRenderObject();
-    if (editables == null) {
-      editables = _findEditables(_rootRenderObject!);
-    }
+    editables ??= _findEditables(_rootRenderObject!);
+
     if (editables.isNotEmpty) {
       for (RenderEditable editable in editables) {
         if (editable.hasFocus) {
@@ -757,7 +765,7 @@ class _KrakenState extends State<Kraken> {
     return result;
   }
 
-  // Scroll input box to the caret.
+  // Scroll the focused input box to the caret to make it visible.
   void _scrollFocusedInputToCaret(RenderEditable focusedEditable) {
     dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
     RenderLeaderLayer renderLeaderLayer = renderInputBox.parent as RenderLeaderLayer;
