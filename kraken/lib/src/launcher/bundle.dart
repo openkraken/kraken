@@ -1,17 +1,17 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:core';
-import 'dart:io';
-import 'dart:typed_data';
+ 'dart:async'
+ 'dart:convert'
+ 'dart:core'
+ 'dart:io'
+ 'dart:typed_data'
 
-import 'package:kraken/bridge.dart';
-import 'package:kraken/foundation.dart';
-import 'package:kraken/module.dart';
-import 'package:kraken/launcher.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
+ 'package:kraken/bridge.dart'
+ 'package:kraken/foundation.dart'
+ 'package:kraken/module.dart'
+ 'package:kraken/launcher.dart'
+ 'package:flutter/foundation.dart'
+ 'package:flutter/services.dart'
 
-import 'manifest.dart';
+ 'manifest.dart'
 
 const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
 const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
