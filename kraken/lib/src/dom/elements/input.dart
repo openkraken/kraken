@@ -226,7 +226,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   bool _autoFocus = false;
 
-  KrakenScrollable _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right);
+  final KrakenScrollable _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right);
 
   ViewportOffset? get scrollOffsetX => _scrollOffsetX;
   ViewportOffset? _scrollOffsetX = ViewportOffset.zero();

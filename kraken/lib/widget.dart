@@ -342,13 +342,13 @@ class _KrakenState extends State<Kraken> {
 
   WidgetDelegate get widgetDelegate {
     return WidgetDelegate(
-      this._getContext,
-      this._requestFocus,
-      this._getTargetPlatform,
-      this._getCursorColor,
-      this._getSelectionColor,
-      this._getCursorRadius,
-      this._getTextSelectionControls,
+      _getContext,
+      _requestFocus,
+      _getTargetPlatform,
+      _getCursorColor,
+      _getSelectionColor,
+      _getCursorRadius,
+      _getTextSelectionControls,
     );
   }
 
