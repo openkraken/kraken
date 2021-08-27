@@ -17,7 +17,7 @@ import 'package:flutter/widgets.dart' show TextSelectionOverlay, TextSelectionCo
 import 'package:flutter/rendering.dart' hide RenderEditable;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:kraken/dom.dart' as dom;
+import 'package:kraken/dom.dart';
 import 'package:kraken/widget.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
@@ -153,7 +153,7 @@ class EditableTextDelegate implements TextSelectionDelegate {
   }
 }
 
-class InputElement extends dom.Element implements TextInputClient, TickerProvider {
+class InputElement extends Element implements TextInputClient, TickerProvider {
   static InputElement? focusInputElement;
 
   static void clearFocus() {
@@ -271,7 +271,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
   InputElement(
     int targetId,
     this.nativeInputElement,
-    dom.ElementManager elementManager, {
+    ElementManager elementManager, {
     this.textAlign = TextAlign.left,
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
@@ -302,9 +302,9 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
     super.didAttachRenderer();
 
     // Make element listen to click event to trigger focus.
-    addEvent(dom.EVENT_CLICK);
-    addEvent(dom.EVENT_DOUBLE_CLICK);
-    addEvent(dom.EVENT_LONG_PRESS);
+    addEvent(EVENT_CLICK);
+    addEvent(EVENT_DOUBLE_CLICK);
+    addEvent(EVENT_LONG_PRESS);
 
     AnimationController animationController = _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     animationController.addListener(_onCursorColorTick);
@@ -408,21 +408,21 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
   }
 
   @override
-  void dispatchEvent(dom.Event event) {
+  void dispatchEvent(Event event) {
     super.dispatchEvent(event);
 
-    if (event.type == dom.EVENT_TOUCH_START) {
+    if (event.type == EVENT_TOUCH_START) {
       _hideSelectionOverlayIfNeeded();
 
-      dom.TouchList touches = (event as dom.TouchEvent).touches;
+      TouchList touches = (event as TouchEvent).touches;
       if (touches.length > 1) return;
 
-      dom.Touch touch = touches.item(0);
+      Touch touch = touches.item(0);
       _selectStartPosition = Offset(touch.clientX, touch.clientY);
 
-      dom.TouchEvent e = event;
+      TouchEvent e = event;
       if (e.touches.length == 1) {
-        dom.Touch touch = e.touches[0];
+        Touch touch = e.touches[0];
         final TapDownDetails details = TapDownDetails(
           globalPosition: Offset(touch.screenX, touch.screenY),
           localPosition: Offset(touch.clientX, touch.clientY),
@@ -432,24 +432,24 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
         _renderEditable!.handleTapDown(details);
       }
 
-    } else if (event.type == dom.EVENT_TOUCH_MOVE ||
-      event.type == dom.EVENT_TOUCH_END
+    } else if (event.type == EVENT_TOUCH_MOVE ||
+      event.type == EVENT_TOUCH_END
     ) {
-      if (event.type == dom.EVENT_TOUCH_END) {
+      if (event.type == EVENT_TOUCH_END) {
         _textSelectionDelegate.hideToolbar(false);
         InputElement.setFocus(this);
       }
 
       Size textSize = getTextSize();
 
-      dom.TouchList touches = (event as dom.TouchEvent).touches;
+      TouchList touches = (event as TouchEvent).touches;
       if (touches.length > 1) return;
-      dom.Touch touch = touches.item(0);
+      Touch touch = touches.item(0);
       Offset _selectEndPosition = Offset(touch.clientX, touch.clientY);
 
       // Disable text selection when text size is larger than input size.
       if (textSize.width > _renderEditable!.size.width) {
-        if (event.type == dom.EVENT_TOUCH_END && _selectStartPosition == _selectEndPosition) {
+        if (event.type == EVENT_TOUCH_END && _selectStartPosition == _selectEndPosition) {
           _renderEditable!.selectPositionAt(
             from: _selectStartPosition!,
             to: _selectEndPosition,
@@ -463,12 +463,12 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
         to: _selectEndPosition,
         cause: SelectionChangedCause.drag,
       );
-    } else if (event.type == dom.EVENT_CLICK) {
+    } else if (event.type == EVENT_CLICK) {
       _renderEditable!.handleTap();
-    } else if (event.type == dom.EVENT_LONG_PRESS) {
+    } else if (event.type == EVENT_LONG_PRESS) {
       _renderEditable!.handleLongPress();
       _textSelectionDelegate.showToolbar();
-    } else if (event.type == dom.EVENT_DOUBLE_CLICK) {
+    } else if (event.type == EVENT_DOUBLE_CLICK) {
       _renderEditable!.handleDoubleTap();
       _textSelectionDelegate.showToolbar();
     }
@@ -479,7 +479,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       // Set focus that make it add keyboard listener
       _renderEditable!.hasFocus = true;
       activeTextInput();
-      dispatchEvent(dom.Event(dom.EVENT_FOCUS));
+      dispatchEvent(Event(EVENT_FOCUS));
     }
   }
 
@@ -488,7 +488,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       // Set focus that make it remove keyboard listener
       _renderEditable!.hasFocus = false;
       deactiveTextInput();
-      dispatchEvent(dom.Event(dom.EVENT_BLUR));
+      dispatchEvent(Event(EVENT_BLUR));
       // Trigger change event if value has changed.
       _triggerChangeEvent();
     }
@@ -758,7 +758,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
       String inputData = '';
       // https://www.w3.org/TR/input-events-1/#interface-InputEvent-Attributes
       String inputType = '';
-      dom.InputEvent inputEvent = dom.InputEvent(inputData, inputType: inputType);
+      InputEvent inputEvent = InputEvent(inputData, inputType: inputType);
       dispatchEvent(inputEvent);
     }
   }
@@ -899,7 +899,7 @@ class InputElement extends dom.Element implements TextInputClient, TickerProvide
   void _triggerChangeEvent() {
     String currentValue = _textSelectionDelegate._textEditingValue.text;
     if (_inputValueAtBegin != currentValue) {
-      dom.Event changeEvent = dom.Event(dom.EVENT_CHANGE);
+      Event changeEvent = Event(EVENT_CHANGE);
       dispatchEvent(changeEvent);
     }
   }

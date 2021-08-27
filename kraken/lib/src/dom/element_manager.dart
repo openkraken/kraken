@@ -11,8 +11,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart' show
-  WidgetsBinding, WidgetsBindingObserver, RouteInformation, FocusNode, BuildContext;
+import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver, RouteInformation;
 import 'dart:ffi';
 
 import 'package:kraken/gesture.dart';
