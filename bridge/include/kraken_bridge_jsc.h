@@ -16,6 +16,7 @@
 #include <cassert>
 #include <functional>
 #include <map>
+#include <set>
 #include <unordered_map>
 #include <vector>
 #include <forward_list>
@@ -582,6 +583,15 @@ private:
 
 class NodeInstance : public EventTargetInstance {
 public:
+  enum class NodeFlag : uint32_t {
+    IsDocumentFragment = 1 << 0
+  };
+
+  mutable std::set<NodeFlag> m_nodeFlags;
+  bool hasNodeFlag(NodeFlag flag) const { return m_nodeFlags.size() != 0 && m_nodeFlags.find(flag) != m_nodeFlags.end(); }
+  void setNodeFlag(NodeFlag flag) const { m_nodeFlags.insert(flag); }
+  void removeNodeFlag(NodeFlag flag) const { m_nodeFlags.erase(flag); }
+
   NodeInstance() = delete;
   NodeInstance(JSNode *node, NodeType nodeType);
   NodeInstance(JSNode *node, NodeType nodeType, int64_t targetId);
