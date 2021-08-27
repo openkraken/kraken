@@ -301,19 +301,11 @@ class _KrakenState extends State<Kraken> {
   @override
   void initState() {
     super.initState();
-    _shortcutMap = <LogicalKeySet, Intent>{
-      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const MoveSelectionLeftTextIntent(),
-      LogicalKeySet(LogicalKeyboardKey.arrowRight): const MoveSelectionRightTextIntent(),
-      LogicalKeySet(LogicalKeyboardKey.arrowUp): const MoveSelectionToStartTextIntent(),
-      LogicalKeySet(LogicalKeyboardKey.arrowDown): const MoveSelectionToEndTextIntent(),
-      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const ExtendSelectionLeftTextIntent(),
-      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const ExtendSelectionRightTextIntent(),
-      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const ExtendSelectionUpTextIntent(),
-      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): const ExtendSelectionDownTextIntent(),
-    };
     _actionMap = <Type, Action<Intent>>{
       NextFocusIntent: CallbackAction<NextFocusIntent>(onInvoke: _handleNextFocus),
       PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(onInvoke: _handlePreviousFocus),
+      MoveSelectionUpTextIntent: CallbackAction<MoveSelectionUpTextIntent>(onInvoke: _handleMoveSelectionUpText),
+      MoveSelectionDownTextIntent: CallbackAction<MoveSelectionDownTextIntent>(onInvoke: _handleMoveSelectionDownText),
       MoveSelectionLeftTextIntent: CallbackAction<MoveSelectionLeftTextIntent>(onInvoke: _handleMoveSelectionLeftText),
       MoveSelectionRightTextIntent: CallbackAction<MoveSelectionRightTextIntent>(onInvoke: _handleMoveSelectionRightText),
       MoveSelectionToStartTextIntent: CallbackAction<MoveSelectionToStartTextIntent>(onInvoke: _handleMoveSelectionToStartText),
@@ -329,13 +321,11 @@ class _KrakenState extends State<Kraken> {
   Widget build(BuildContext context) {
     return FocusableActionDetector(
       actions: _actionMap,
-      shortcuts: _shortcutMap,
       focusNode: _focusNode,
       onFocusChange: _handleFocusChange,
       child: _KrakenRenderObjectWidget(
         context.widget as Kraken,
         widgetDelegate,
-        context
       )
     );
   }
@@ -553,6 +543,36 @@ class _KrakenState extends State<Kraken> {
     }
   }
 
+  void _handleMoveSelectionUpText(MoveSelectionUpTextIntent intent) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.isNotEmpty) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      focusedEditable!.moveSelectionUp(SelectionChangedCause.keyboard);
+
+      // Scroll input box to the caret.
+      dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
+      RenderLeaderLayer renderLeaderLayer = renderInputBox.parent as RenderLeaderLayer;
+      RenderIntrinsic renderIntrisic = renderLeaderLayer.parent as RenderIntrinsic;
+      renderIntrisic.elementDelegate.scrollInputToCaret();
+    }
+  }
+
+  void _handleMoveSelectionDownText(MoveSelectionDownTextIntent intent) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.isNotEmpty) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      focusedEditable!.moveSelectionDown(SelectionChangedCause.keyboard);
+
+      // Scroll input box to the caret.
+      dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
+      RenderLeaderLayer renderLeaderLayer = renderInputBox.parent as RenderLeaderLayer;
+      RenderIntrinsic renderIntrisic = renderLeaderLayer.parent as RenderIntrinsic;
+      renderIntrisic.elementDelegate.scrollInputToCaret();
+    }
+  }
+
   void _handleMoveSelectionLeftText(MoveSelectionLeftTextIntent intent) {
     RenderObject? _rootRenderObject = context.findRenderObject();
     List<RenderEditable> editables = _findEditables(_rootRenderObject!);
@@ -694,11 +714,9 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
   const _KrakenRenderObjectWidget(
     Kraken widget,
     WidgetDelegate widgetDelegate,
-    BuildContext context,
     {Key? key}
   ) : _krakenWidget = widget,
       _widgetDelegate = widgetDelegate,
-      _context = context,
       super(key: key);
 
   final Kraken _krakenWidget;
