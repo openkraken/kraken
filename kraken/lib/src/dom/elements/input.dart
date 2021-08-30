@@ -407,10 +407,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     return textSize;
   }
 
+  // Whether gesture is dragging.
+  bool _isDragging = false;
+
   @override
   void dispatchEvent(Event event) {
     super.dispatchEvent(event);
-
     if (event.type == EVENT_TOUCH_START) {
       _hideSelectionOverlayIfNeeded();
 
@@ -463,14 +465,18 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         to: _selectEndPosition,
         cause: SelectionChangedCause.drag,
       );
+      _isDragging = true;
     } else if (event.type == EVENT_CLICK) {
       _renderEditable!.handleTap();
-    } else if (event.type == EVENT_LONG_PRESS) {
+      _isDragging = false;
+    } else if (!_isDragging && event.type == EVENT_LONG_PRESS) {
       _renderEditable!.handleLongPress();
       _textSelectionDelegate.showToolbar();
+      _isDragging = false;
     } else if (event.type == EVENT_DOUBLE_CLICK) {
       _renderEditable!.handleDoubleTap();
       _textSelectionDelegate.showToolbar();
+      _isDragging = false;
     }
   }
 
