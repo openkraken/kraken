@@ -36,6 +36,7 @@ static void handleTimerCallback(TimerCallbackContext *callbackContext, const cha
 static void handleTransientCallback(void *ptr, int32_t contextId, const char *errmsg) {
   auto *callbackContext = static_cast<TimerCallbackContext *>(ptr);
   if (!checkContext(contextId, callbackContext->context)) return;
+  if (!callbackContext->context->isValid()) return;
 
   handleTimerCallback(callbackContext, errmsg);
 
@@ -47,7 +48,6 @@ static void handleTransientCallback(void *ptr, int32_t contextId, const char *er
 static void handlePersistentCallback(void *ptr, int32_t contextId, const char *errmsg) {
   auto *callbackContext = static_cast<TimerCallbackContext *>(ptr);
   if (!checkContext(contextId, callbackContext->context)) return;
-
   if (!callbackContext->context->isValid()) return;
 
   handleTimerCallback(callbackContext, errmsg);

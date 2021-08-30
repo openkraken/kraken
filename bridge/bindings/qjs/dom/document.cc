@@ -46,8 +46,8 @@ std::once_flag kDocumentInitOnceFlag;
 
 void bindDocument(std::unique_ptr<JSContext> &context) {
   auto *documentConstructor = Document::instance(context.get());
-  JSValue documentInstance = JS_CallConstructor(context->ctx(), documentConstructor->classObject, 0, nullptr);
   context->defineGlobalProperty("Document", documentConstructor->classObject);
+  JSValue documentInstance = JS_CallConstructor(context->ctx(), documentConstructor->classObject, 0, nullptr);
   context->defineGlobalProperty("document", documentInstance);
 }
 

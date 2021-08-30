@@ -11,6 +11,7 @@
 #include "bindings/qjs/qjs_patch.h"
 #include "element.h"
 #include "document.h"
+#include "bindings/qjs/bom/window.h"
 
 namespace kraken::binding::qjs {
 
@@ -62,7 +63,7 @@ JSClassID EventTarget::classId() {
 
 JSClassID EventTarget::classId(JSValue &value) {
   JSClassID classId = JSValueGetClassId(value);
-  if (classId == Element::classId() || Document::classId()) {
+  if (classId == Element::classId() || Document::classId() || Window::kWindowClassId) {
     return classId;
   }
 
