@@ -59,6 +59,13 @@ JSValueRef JSDocument::createEvent(JSContextRef ctx, JSObjectRef function, JSObj
   }
 }
 
+JSValueRef JSDocument::createDocumentFragment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                              size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) {
+  auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
+  std::string strDocumentFragment = "documentFragment";
+  auto element = JSElement::buildElementInstance(document->context, strDocumentFragment);
+  return element->object;
+}
 
 JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                      size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) {
@@ -186,6 +193,9 @@ JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {
     });
     JSElement::defineElement("script", [](JSContext *context) -> ElementInstance * {
       return new JSScriptElement::ScriptElementInstance(JSScriptElement::instance(context));
+    });
+    JSElement::defineElement("documentFragment", [](JSContext *context) -> ElementInstance * {
+      return new JSDocumentFragmentElement::DocumentFragmentElementInstance(JSDocumentFragmentElement::instance(context));
     });
   }
 }

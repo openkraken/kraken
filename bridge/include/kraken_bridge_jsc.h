@@ -656,6 +656,8 @@ public:
 
   static JSValueRef createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef createDocumentFragment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                                size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
   static JSValueRef createTextNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef arguments[], JSValueRef *exception);
@@ -678,6 +680,7 @@ protected:
 
   JSFunctionHolder m_createEvent{context, prototypeObject, this, "createEvent", createEvent};
   JSFunctionHolder m_createElement{context, prototypeObject, this, "createElement", createElement};
+  JSFunctionHolder m_createDocumentFragment{context, prototypeObject, this, "createDocumentFragment", createDocumentFragment};
   JSFunctionHolder m_createTextNode{context, prototypeObject, this, "createTextNode", createTextNode};
   JSFunctionHolder m_createComment{context, prototypeObject, this, "createComment", createComment};
   JSFunctionHolder m_getElementById{context, prototypeObject, this, "getElementById", getElementById};
@@ -705,7 +708,7 @@ struct NativeDocument {
 class DocumentInstance : public NodeInstance {
 public:
   DEFINE_OBJECT_PROPERTY(Document, 4, nodeName, all, cookie, documentElement);
-  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Document, 6, createElement, createTextNode, createComment, getElementById,
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Document, 7, createElement, createDocumentFragment, createTextNode, createComment, getElementById,
                                    getElementsByTagName, createEvent);
 
   static DocumentInstance *instance(JSContext *context);
