@@ -271,8 +271,8 @@ JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectR
   }
 
   if (nodeInstance->hasNodeFlag(NodeInstance::NodeFlag::IsDocumentFragment)) {
-    for (auto &childNode : nodeInstance->childNodes) {
-      selfInstance->internalAppendChild(childNode);
+    while (nodeInstance->childNodes.size()) {
+      selfInstance->internalAppendChild(nodeInstance->childNodes[0]);
     }
   } else {
     selfInstance->internalAppendChild(nodeInstance);
