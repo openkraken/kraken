@@ -1,3 +1,9 @@
+## 0.8.3+2
+
+**Bug Fixed**
+
++ Fix fetch request lost HTTP headers. https://github.com/openkraken/kraken/pull/633
+
 ## 0.8.3+1
 
 **Bug Fixed**
