@@ -885,8 +885,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     } else {
       _showCaretOnScreen();
       _textSelectionDelegate.hideToolbar();
-      _formatAndSetValue(value, cause: SelectionChangedCause.keyboard);
     }
+    _formatAndSetValue(value, cause: SelectionChangedCause.keyboard);
 
     if (_hasInputConnection) {
       // To keep the cursor from blinking while typing, we want to restart the
