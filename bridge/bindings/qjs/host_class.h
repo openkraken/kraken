@@ -89,6 +89,7 @@ public:
 
   inline HostClass* prototype() const { return m_hostClass; }
   inline JSContext* context() const { return m_context; }
+  inline std::string name() const { return m_name; }
 
 protected:
   JSContext *m_context{nullptr};

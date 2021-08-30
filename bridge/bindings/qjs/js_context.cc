@@ -40,11 +40,12 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
     JS_NewClassID(&kHostExoticObjectClassId);
   });
 
-  init_list_head(&node_list);
-  init_list_head(&timer_list);
-  init_list_head(&document_list);
-  init_list_head(&module_list);
-  init_list_head(&persist_list);
+  init_list_head(&node_job_list);
+  init_list_head(&timer_job_list);
+  init_list_head(&document_job_list);
+  init_list_head(&module_job_list);
+  init_list_head(&protected_event_target_job_list);
+  init_list_head(&promise_job_list);
 
   if (m_runtime == nullptr) {
     m_runtime = JS_NewRuntime();
@@ -76,8 +77,8 @@ JSContext::~JSContext() {
   // Manual free nodes bound by each other.
   {
     struct list_head *el, *el1;
-    list_for_each_safe(el, el1, &node_list) {
-      auto *node = list_entry(el, NodeLink, link);
+    list_for_each_safe(el, el1, &node_job_list) {
+      auto *node = list_entry(el, NodeJob, link);
       JS_FreeValue(m_ctx, node->nodeInstance->instanceObject);
     }
   }
@@ -85,15 +86,15 @@ JSContext::~JSContext() {
   // Manual free nods bound by document.
   {
     struct list_head *el, *el1;
-    list_for_each_safe(el, el1, &document_list) {
-      auto *node = list_entry(el, NodeLink, link);
+    list_for_each_safe(el, el1, &document_job_list) {
+      auto *node = list_entry(el, NodeJob, link);
       JS_FreeValue(m_ctx, node->nodeInstance->instanceObject);
     }
   }
   // Manual free timers
   {
     struct list_head *el, *el1;
-    list_for_each_safe(el, el1, &timer_list) {
+    list_for_each_safe(el, el1, &timer_job_list) {
       auto *callbackContext = list_entry(el, TimerCallbackContext, link);
       JS_FreeValue(m_ctx, callbackContext->callback);
       delete callbackContext;
@@ -103,19 +104,19 @@ JSContext::~JSContext() {
   // Manual free moduleListener
   {
     struct list_head *el, *el1;
-    list_for_each_safe(el, el1, &module_list) {
+    list_for_each_safe(el, el1, &module_job_list) {
       auto *module = list_entry(el, ModuleContext, link);
       JS_FreeValue(m_ctx, module->callback);
       delete module;
     }
   }
 
-  // Free persist nodes.
+  // Free unused protected event_targets.
   {
     struct list_head *el, *el1;
-    list_for_each_safe(el, el1, &persist_list) {
-      auto *persist = list_entry(el, PersistElement, link);
-      JS_FreeValue(m_ctx, persist->element->instanceObject);
+    list_for_each_safe(el, el1, &protected_event_target_job_list) {
+      auto *nativeEventTarget = list_entry(el, NativeEventTarget, link);
+      JS_FreeValue(m_ctx, nativeEventTarget->instance->instanceObject);
     }
   }
 

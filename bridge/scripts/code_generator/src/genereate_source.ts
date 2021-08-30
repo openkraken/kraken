@@ -376,18 +376,11 @@ function generateHostClassSource(object: ClassObject) {
     constructorCode = generateEventConstructorCode(object);
   }
 
-  let constructorInitCode = '';
-  if (object.type === 'Element' && object.name === 'ImageElement') {
-    constructorInitCode = 'persist();';
-  }
-
   let instanceConstructorCode = '';
   if (object.type === 'Event') {
     instanceConstructorCode = `${object.name}Instance::${object.name}Instance(${object.name} *${object.type.toLowerCase()}, NativeEvent *nativeEvent): ${object.type}Instance(${object.type.toLowerCase()}, nativeEvent) {}`
   } else {
-    instanceConstructorCode = `${object.name}Instance::${object.name}Instance(${object.name} *${object.type.toLowerCase()}): ${object.type}Instance(${object.type.toLowerCase()}, "${elementNameToTagName(object.name)}", true) {
-  ${constructorInitCode}
-}`;
+    instanceConstructorCode = `${object.name}Instance::${object.name}Instance(${object.name} *${object.type.toLowerCase()}): ${object.type}Instance(${object.type.toLowerCase()}, "${elementNameToTagName(object.name)}", true) {}`;
   }
 
   let globalBindingName = '';

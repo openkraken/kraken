@@ -389,7 +389,7 @@ void EventTargetInstance::finalize(JSRuntime *rt, JSValue val) {
 }
 
 void NativeEventTarget::protect(NativeEventTarget *nativeEventTarget) {
-  list_add_tail(&nativeEventTarget->link, &nativeEventTarget->instance->context()->protected_event_target_list);
+  list_add_tail(&nativeEventTarget->link, &nativeEventTarget->instance->context()->protected_event_target_job_list);
   JS_DupValue(nativeEventTarget->instance->context()->ctx(), nativeEventTarget->instance->instanceObject);
 }
 

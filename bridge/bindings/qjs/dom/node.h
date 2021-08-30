@@ -67,7 +67,7 @@ private:
   friend TextNodeInstance;
 };
 
-struct NodeLink {
+struct NodeJob {
   NodeInstance *nodeInstance;
   list_head link;
 };
@@ -102,8 +102,8 @@ public:
   NodeInstance *parentNode{nullptr};
   std::vector<NodeInstance *> childNodes;
 
-  NodeLink nodeLink{this};
-  NodeLink documentLink{this};
+  NodeJob nodeLink{this};
+  NodeJob documentLink{this};
 
   void refer();
   void unrefer();

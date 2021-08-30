@@ -108,8 +108,6 @@ public:
 
   static inline JSClassID classID();
 
-  void persist();
-
 protected:
   explicit ElementInstance(Element *element, std::string tagName, bool shouldAddUICommand);
 

@@ -702,11 +702,6 @@ JSValue ElementInstance::getProperty(QjsContext *ctx, JSValue obj, JSAtom atom, 
   return JS_DupValue(ctx, element->m_properties[atom]);
 }
 
-void ElementInstance::persist() {
-  JS_DupValue(m_ctx, instanceObject);
-  list_add_tail(&m_persist_link.link, &m_context->persist_list);
-}
-
 int ElementInstance::setProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver, int flags) {
   auto *element = static_cast<ElementInstance *>(JS_GetOpaque(obj, Element::classId()));
   const char *ckey = JS_AtomToCString(ctx, atom);

@@ -136,7 +136,7 @@ void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType
 
   {
     struct list_head *el, *el1;
-    list_for_each_safe(el, el1, &m_context->module_list) {
+    list_for_each_safe(el, el1, &m_context->module_job_list) {
       auto *module = list_entry(el, ModuleContext, link);
       JSValue callback = module->callback;
 

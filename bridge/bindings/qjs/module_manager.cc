@@ -31,7 +31,7 @@ JSValue krakenModuleListener(QjsContext *ctx, JSValueConst this_val, int argc, J
     JS_DupValue(ctx, callbackValue),
     context
   };
-  list_add_tail(&link->link, &context->module_list);
+  list_add_tail(&link->link, &context->module_job_list);
 
   return JS_NULL;
 }
@@ -131,7 +131,7 @@ JSValue krakenInvokeModule(QjsContext *ctx, JSValueConst this_val, int argc, JSV
       context
     };
   }
-  list_add_tail(&moduleContext->link, &context->module_list);
+  list_add_tail(&moduleContext->link, &context->module_job_list);
 
   NativeString *result;
 

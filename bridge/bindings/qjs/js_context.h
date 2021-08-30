@@ -53,11 +53,12 @@ public:
   std::chrono::time_point<std::chrono::system_clock> timeOrigin;
 
   int32_t uniqueId;
-  struct list_head node_list;
-  struct list_head timer_list;
-  struct list_head document_list;
-  struct list_head module_list;
-  struct list_head persist_list;
+  struct list_head node_job_list;
+  struct list_head timer_job_list;
+  struct list_head document_job_list;
+  struct list_head module_job_list;
+  struct list_head protected_event_target_job_list;
+  struct list_head promise_job_list;
 
   static JSClassID kHostClassClassId;
   static JSClassID kHostObjectClassId;

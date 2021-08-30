@@ -89,7 +89,7 @@ static JSValue setTimeout(QjsContext *ctx, JSValueConst this_val, int argc, JSVa
     JS_DupValue(ctx, callbackValue),
     context
   };
-  list_add_tail(&callbackContext->link, &context->timer_list);
+  list_add_tail(&callbackContext->link, &context->timer_job_list);
 
   auto timerId = getDartMethod()->setTimeout(callbackContext, context->getContextId(), handleTransientCallback, timeout);
 
@@ -174,7 +174,7 @@ static JSValue setInterval(QjsContext *ctx, JSValueConst this_val, int argc, JSV
     JS_DupValue(ctx, callbackValue),
     context
   };
-  list_add_tail(&callbackContext->link, &context->timer_list);
+  list_add_tail(&callbackContext->link, &context->timer_job_list);
   uint32_t timerId = getDartMethod()->setInterval(callbackContext, context->getContextId(), handlePersistentCallback, timeout);
 
   if (timerId == -1) {
@@ -214,7 +214,7 @@ static JSValue requestAnimationFrame(QjsContext *ctx, JSValueConst this_val, int
     JS_DupValue(ctx, callbackValue),
     context
   };
-  list_add_tail(&callbackContext->link, &context->timer_list);
+  list_add_tail(&callbackContext->link, &context->timer_job_list);
 
   uint32_t requestId = getDartMethod()->requestAnimationFrame(callbackContext, context->getContextId(), handleRAFTransientCallback);
 
