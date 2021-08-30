@@ -47,4 +47,3 @@ describe('Tags documentFragment', () => {
     await snapshot();
   });
 });
-  
