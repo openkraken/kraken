@@ -317,7 +317,13 @@ JSValueRef JSNode::insertBefore(JSContextRef ctx, JSObjectRef function, JSObject
     return nullptr;
   }
 
-  selfInstance->internalInsertBefore(nodeInstance, referenceInstance, exception);
+  if (nodeInstance->hasNodeFlag(NodeInstance::NodeFlag::IsDocumentFragment)) {
+    while (nodeInstance->childNodes.size()) {
+      selfInstance->internalInsertBefore(nodeInstance->childNodes[0], referenceInstance, exception);
+    }
+  } else {
+    selfInstance->internalInsertBefore(nodeInstance, referenceInstance, exception);
+  }
 
   return nullptr;
 }
