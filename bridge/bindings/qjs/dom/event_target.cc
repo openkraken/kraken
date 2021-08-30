@@ -290,6 +290,7 @@ EventTargetInstance::EventTargetInstance(EventTarget *eventTarget, JSClassID cla
   eventTarget, name, &exoticMethods, classId,
   finalize) {
   eventTargetId = globalEventTargetId++;
+  nativeEventTarget.protect(&nativeEventTarget);
 }
 
 EventTargetInstance::EventTargetInstance(EventTarget *eventTarget, JSClassID classId, std::string name) : Instance(
@@ -299,6 +300,7 @@ EventTargetInstance::EventTargetInstance(EventTarget *eventTarget, JSClassID cla
   classId,
   finalize) {
   eventTargetId = globalEventTargetId++;
+  nativeEventTarget.protect(&nativeEventTarget);
 }
 
 JSClassID EventTargetInstance::classId() {
@@ -383,6 +385,16 @@ void EventTargetInstance::finalize(JSRuntime *rt, JSValue val) {
     JS_FreeValue(eventTarget->m_ctx, eventTarget->instanceObject);
   }
   delete eventTarget;
+}
+
+void NativeEventTarget::protect(NativeEventTarget *nativeEventTarget) {
+  list_add_tail(&nativeEventTarget->link, &nativeEventTarget->instance->context()->protected_event_target_list);
+  JS_DupValue(nativeEventTarget->instance->context()->ctx(), nativeEventTarget->instance->instanceObject);
+}
+
+void NativeEventTarget::unprotect(NativeEventTarget *nativeEventTarget) {
+  list_del(&nativeEventTarget->link);
+  JS_FreeValue(nativeEventTarget->instance->context()->ctx(), nativeEventTarget->instance->instanceObject);
 }
 
 void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *nativeEventType,

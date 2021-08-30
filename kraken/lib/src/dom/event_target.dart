@@ -14,6 +14,7 @@ import 'package:meta/meta.dart';
 typedef EventHandler = void Function(Event event);
 
 void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> returnedValue, Pointer<NativeString> nativeMethod, int argc, Pointer<NativeValue> argv) {
+  print('call native method: $nativeEventTarget');
   String method = nativeStringToString(nativeMethod);
   List<dynamic> values = List.generate(argc, (i) {
     Pointer<NativeValue> nativeValue = argv.elementAt(i);
@@ -59,6 +60,8 @@ abstract class EventTarget {
 
   EventTarget(this.targetId, this.nativeEventTargetPtr, this.elementManager) {
     nativeEventTargetPtr.ref.callNativeMethods = _nativeCallNativeMethods;
+    // Since nativeMethods and EventTarget are successful created. Now we can deliver the priority of nativeEventTarget to JS garbage collector.
+    unprotectNativeEventTarget(nativeEventTargetPtr);
     _nativeMap[nativeEventTargetPtr.address] = this;
   }
 

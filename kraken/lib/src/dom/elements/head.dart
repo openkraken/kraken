@@ -46,7 +46,10 @@ class NoScriptElement extends Element {
 
 class ScriptElement extends Element {
   ScriptElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: SCRIPT, defaultStyle: _defaultStyle);
+      : super(targetId, nativePtr, elementManager, tagName: SCRIPT, defaultStyle: _defaultStyle) {
+    // Script elements have networking resources, we should protect script element util network resource fetched.
+    protectNativeEventTarget(nativePtr);
+  }
 
   @override
   void setProperty(String key, dynamic value) {
@@ -64,11 +67,13 @@ class ScriptElement extends Element {
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_LOAD));
+          unprotectNativeEventTarget(nativeEventTargetPtr);
         });
       } catch(e) {
         // An error occurred.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_ERROR));
+          unprotectNativeEventTarget(nativeEventTargetPtr);
         });
       }
       SchedulerBinding.instance!.scheduleFrame();

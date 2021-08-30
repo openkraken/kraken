@@ -59,6 +59,9 @@ class ImageElement extends Element {
       tagName: IMAGE,
       defaultStyle: _defaultStyle) {
     _renderStreamListener = ImageStreamListener(_renderImageStream);
+
+    // Image elements have networking resources, we should protect img element util network resource fetched.
+    protectNativeEventTarget(nativeEventTargetPtr);
   }
 
   ui.Image? get image => _imageInfo?.image;
@@ -188,17 +191,23 @@ class ImageElement extends Element {
     }
   }
 
+  void dispatchImageLoadEvent() {
+    dispatchEvent(Event(EVENT_LOAD));
+    // After load event triggered. We should deliver the priority of ImageElement to JS garbage collector.
+    unprotectNativeEventTarget(nativeEventTargetPtr);
+  }
+
   void _handleEventAfterImageLoaded() {
     // `load` event is a simple event.
     if (isConnected) {
       // If image in tree, make sure the image-box has been layout, using addPostFrameCallback.
       SchedulerBinding.instance!.scheduleFrame();
       SchedulerBinding.instance!.addPostFrameCallback((_) {
-        dispatchEvent(Event(EVENT_LOAD));
+        dispatchImageLoadEvent();
       });
     } else {
       // If not in tree, dispatch the event directly.
-      dispatchEvent(Event(EVENT_LOAD));
+      dispatchImageLoadEvent();
     }
   }
 

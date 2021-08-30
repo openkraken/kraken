@@ -276,11 +276,27 @@ typedef NativeCallNativeMethods = Void Function(
     Pointer<NativeString> method,
     Int32 argc,
     Pointer<NativeValue> argv);
+typedef NativeProtectEventTarget = Void Function(Pointer<NativeEventTarget> nativePtr);
+typedef NativeUnProtectEventTarget = Void Function(Pointer<NativeEventTarget> nativePtr);
+typedef DartProtectEventTarget = void Function(Pointer<NativeEventTarget> nativePtr);
+typedef DartUnProtectEventTarget = void Function(Pointer<NativeEventTarget> nativePtr);
 
 class NativeEventTarget extends Struct {
   external Pointer<Void> instance;
   external Pointer<NativeFunction<NativeDispatchEvent>> dispatchEvent;
   external Pointer<NativeFunction<NativeCallNativeMethods>> callNativeMethods;
+  external Pointer<NativeFunction<NativeProtectEventTarget>> protect;
+  external Pointer<NativeFunction<NativeUnProtectEventTarget>> unprotect;
+}
+
+void protectNativeEventTarget(Pointer<NativeEventTarget> nativeEventTarget) {
+  DartProtectEventTarget protect = nativeEventTarget.ref.protect.asFunction();
+  protect(nativeEventTarget);
+}
+
+void unprotectNativeEventTarget(Pointer<NativeEventTarget> nativeEventTarget) {
+  DartUnProtectEventTarget unprotect = nativeEventTarget.ref.unprotect.asFunction();
+  unprotect(nativeEventTarget);
 }
 
 typedef NativeCanvasGetContext = Pointer<NativeCanvasRenderingContext2D> Function(
