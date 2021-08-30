@@ -147,7 +147,7 @@ void JSHistory::addItem(HistoryItem &historyItem) {
 
   m_previous_stack.push(historyItem);
 
-  // clear.
+  // Clear.
   while(!m_next_stack.empty()) {
     m_next_stack.pop();
   }
@@ -186,7 +186,7 @@ JSValueRef JSHistory::pushState(JSContextRef ctx, JSObjectRef function, JSObject
   JSStringRef jsonState = JSValueCreateJSONString(ctx, state, 0, exception);
 
   if (uri.Host == "" && uri.Protocol == "") {
-    // relative path.
+    // Relative path.
     uri.Host = currentUri.Host;
     uri.Port = currentUri.Port;
     uri.Protocol = currentUri.Protocol;
@@ -229,7 +229,7 @@ JSValueRef JSHistory::replaceState(JSContextRef ctx, JSObjectRef function, JSObj
   }
 
   if (uri.Host == "" && uri.Protocol == "") {
-    // relative path.
+    // Relative path.
     uri.Host = currentUri.Host;
     uri.Port = currentUri.Port;
     uri.Protocol = currentUri.Protocol;

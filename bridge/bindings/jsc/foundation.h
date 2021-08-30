@@ -28,10 +28,10 @@ public:
 
     iterator_t uriEnd = uri.end();
 
-    // get query start.
+    // Get query start.
     iterator_t queryStart = std::find(uri.begin(), uriEnd, '?');
 
-    // protocol.
+    // Protocol.
     iterator_t protocolStart = uri.begin();
     // "://");.
     iterator_t protocolEnd = std::find(protocolStart, uriEnd, ':');
@@ -42,27 +42,30 @@ public:
       if ((prot.length() > 3) && (prot.substr(0, 3) == "://"))
       {
         result.Protocol = std::string(protocolStart, protocolEnd);
-        protocolEnd += 3;   //      ://
+        // ://.
+        protocolEnd += 3;
       }
       else
-        protocolEnd = uri.begin();  // no protocol
+        // No protocol
+        protocolEnd = uri.begin();
     }
     else
-      protocolEnd = uri.begin();  // no protocol
+      // No protocol
+      protocolEnd = uri.begin();
 
-    // host.
+    // Host.
     iterator_t hostStart = protocolEnd;
-    // get pathStart.
+    // Get pathStart.
     iterator_t pathStart = std::find(hostStart, uriEnd, '/');
 
-    // check for port.
+    // Check for port.
     iterator_t hostEnd = std::find(protocolEnd,
                                    (pathStart != uriEnd) ? pathStart : queryStart,
                                    ':');
 
     result.Host = std::string(hostStart, hostEnd);
 
-    // port.
+    // Port.
     if ((hostEnd != uriEnd) && ((&*(hostEnd))[0] == ':'))
     {
       hostEnd++;
@@ -70,16 +73,16 @@ public:
       result.Port = std::string(hostEnd, portEnd);
     }
 
-    // path.
+    // Path.
     if (pathStart != uriEnd)
       result.Path = std::string(pathStart, queryStart);
 
-    // query.
+    // Query.
     if (queryStart != uriEnd)
       result.QueryString = std::string(queryStart, uri.end());
 
     return result;
 
-  }   // Parse
-};  // uri
+  }
+};
 }

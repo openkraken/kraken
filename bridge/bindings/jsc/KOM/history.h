@@ -52,11 +52,11 @@ private:
   void goTo(HistoryItem &historyItem);
 
 private:
-  JSFunctionHolder m_back{context, jsObject, this,"back", back};
-  JSFunctionHolder m_forward{context, jsObject, this,"forward", forward};
+  JSFunctionHolder m_back{context, jsObject, this, "back", back};
+  JSFunctionHolder m_forward{context, jsObject, this, "forward", forward};
   JSFunctionHolder m_go{context, jsObject, this,"go", go};
-  JSFunctionHolder m_pushState{context, jsObject, this,"pushState", pushState};
-  JSFunctionHolder m_replaceState{context, jsObject, this,"replaceState", replaceState};
+  JSFunctionHolder m_pushState{context, jsObject, this, "pushState", pushState};
+  JSFunctionHolder m_replaceState{context, jsObject, this, "replaceState", replaceState};
 };
 
 } // namespace kraken::binding::jsc
