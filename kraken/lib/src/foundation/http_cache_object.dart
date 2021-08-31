@@ -193,6 +193,9 @@ class HttpCacheObject {
       print('Error while reading cache object for $url');
       print('\n$message');
       print('\n$stackTrace');
+
+      // Remove index file while invalid.
+      await remove();
     }
   }
 
@@ -239,10 +242,9 @@ class HttpCacheObject {
   }
 
   // Remove all the cached files.
-  void remove() async {
-    final File indexFile = File(path.join(cacheDirectory, '$hash'));
+  Future<void> remove() async {
     await Future.wait([
-      indexFile.delete(),
+      _file.delete(),
       _blob.remove(),
     ]);
     _valid = false;
