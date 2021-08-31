@@ -184,7 +184,7 @@ export class XMLHttpRequest extends EventTarget {
     }
 
     let ssl = false;
-    let url = new URL(this.settings.url);
+    let url = new URL(this.settings.url, location.href);
     let host;
     // Determine the server
     switch (url.protocol) {
