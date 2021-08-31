@@ -30,3 +30,4 @@ export 'src/dom/elements/input.dart';
 export 'src/dom/elements/object.dart';
 export 'src/dom/elements/head.dart';
 export 'src/dom/elements/html.dart';
+export 'src/dom/elements/document_fragment.dart';
