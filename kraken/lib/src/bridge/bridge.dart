@@ -35,11 +35,6 @@ int initBridge() {
   // We should schedule addPersistentFrameCallback() to the next frame because of initBridge()
   // will be called from persistent frame callbacks and cause infinity loops.
   if (_firstView) {
-    // Use dull timer to trigger promise callbacks.
-    Timer.periodic(Duration(milliseconds: 32), (timer) {
-      executeJSPendingJob();
-    });
-
     Future.microtask(() {
       // Port flutter's frame callback into bridge.
       SchedulerBinding.instance!.addPersistentFrameCallback((_) {

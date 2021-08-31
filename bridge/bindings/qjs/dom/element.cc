@@ -301,6 +301,8 @@ JSValue Element::toBlob(QjsContext *ctx, JSValue this_val, int argc, JSValue *ar
       JS_FreeValue(ctx, ret);
     }
 
+    promiseContext->context->drainPendingPromiseJobs();
+
     JS_FreeValue(ctx, promiseContext->resolveFunc);
     JS_FreeValue(ctx, promiseContext->rejectFunc);
     list_del(&promiseContext->link);

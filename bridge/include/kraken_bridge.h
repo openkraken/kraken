@@ -126,9 +126,6 @@ void registerContextDisposedCallbacks(int32_t contextId, Task task, void *data);
 KRAKEN_EXPORT_C
 void registerPluginSource(NativeString* code, const char *pluginName);
 
-KRAKEN_EXPORT_C
-void executeJSPendingJob();
-
 KRAKEN_EXPORT
 void setConsoleMessageHandler(ConsoleMessageHandler handler);
 

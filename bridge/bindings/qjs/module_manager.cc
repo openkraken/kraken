@@ -73,6 +73,8 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
     returnValue = JS_Call(ctx, callback, context->global(), 2, arguments);
   }
 
+  context->drainPendingPromiseJobs();
+
   context->handleException(&returnValue);
   JS_FreeValue(ctx, returnValue);
   list_del(&moduleContext->link);

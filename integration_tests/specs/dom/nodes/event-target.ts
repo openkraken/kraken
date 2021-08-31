@@ -34,7 +34,7 @@ describe('DOM EventTarget', () => {
     div.click();
   });
 
-  xit('addEventListener should work without connected into element tree', done => {
+  it('addEventListener should work without connected into element tree', done => {
     let div = createElementWithStyle('div', {});
     div.addEventListener('click', () => {
       done();

@@ -63,8 +63,6 @@ class ModuleManager {
 
     BaseModule module = _moduleMap[moduleName]!;
     String result = module.invoke(method, params, callback);
-    // Execute promise callback immediately.
-    bridge.executeJSPendingJob();
     return result;
   }
 

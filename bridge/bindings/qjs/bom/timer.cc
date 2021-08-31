@@ -30,6 +30,9 @@ static void handleTimerCallback(TimerCallbackContext *callbackContext, const cha
 
   JSValue returnValue = JS_Call(callbackContext->context->ctx(), callbackContext->callback, callbackContext->context->global(), 0, nullptr);
   callbackContext->context->handleException(&returnValue);
+
+  callbackContext->context->drainPendingPromiseJobs();
+
   JS_FreeValue(callbackContext->context->ctx(), returnValue);
 }
 
@@ -131,6 +134,8 @@ static void handleRAFTransientCallback(void *ptr, int32_t contextId, double high
 
   JSValue returnValue = JS_Call(callbackContext->context->ctx(), callbackContext->callback, callbackContext->context->global(), 1, arguments);
   callbackContext->context->handleException(&returnValue);
+
+  callbackContext->context->drainPendingPromiseJobs();
 
   list_del(&callbackContext->link);
   JS_FreeValue(callbackContext->context->ctx(), callbackContext->callback);

@@ -59,6 +59,7 @@ public:
   void *getOwner();
   bool handleException(JSValue *exc);
   void reportError(JSValueConst &error);
+  void drainPendingPromiseJobs();
   void defineGlobalProperty(const char *prop, JSValueConst value);
   uint8_t *dumpByteCode(const char* code, uint32_t codeLength, const char *sourceURL, size_t* bytecodeLength);
 

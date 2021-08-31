@@ -108,6 +108,8 @@ JSValue Blob::arrayBuffer(QjsContext *ctx, JSValue this_val, int argc, JSValue *
     JSValue returnValue = JS_Call(ctx, promiseContext->resolveFunc, blob->context()->global(), 1, arguments);
     JS_FreeValue(ctx, returnValue);
 
+    blob->context()->drainPendingPromiseJobs();
+
     if (JS_IsException(returnValue)) {
       blob->context()->handleException(&returnValue);
       return;
@@ -183,8 +185,10 @@ JSValue Blob::text(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
     JSValue text = JS_NewStringLen(ctx, reinterpret_cast<const char *>(blob->bytes()), blob->size());
     JSValue arguments[] = {text};
     JSValue returnValue = JS_Call(ctx, promiseContext->resolveFunc, blob->context()->global(), 1, arguments);
-
     JS_FreeValue(ctx, returnValue);
+
+    blob->context()->drainPendingPromiseJobs();
+
     if (JS_IsException(returnValue)) {
       blob->context()->handleException(&returnValue);
       return;

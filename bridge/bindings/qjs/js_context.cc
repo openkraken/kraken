@@ -21,7 +21,7 @@ JSClassID JSContext::kHostExoticObjectClassId{0};
 
 #define MAX_JS_CONTEXT 1024
 bool valid_contexts[MAX_JS_CONTEXT];
-std::atomic<uint32_t> running_context_list;
+std::atomic<uint32_t> running_context_list{0};
 
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner) {
   return std::make_unique<JSContext>(contextId, handler, owner);
@@ -39,6 +39,7 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
   : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false), uniqueId(context_unique_id++) {
   // @FIXME: maybe contextId will larger than MAX_JS_CONTEXT
   valid_contexts[contextId] = true;
+  if (contextId > running_context_list) running_context_list = contextId;
 
   std::call_once(kinitJSClassIDFlag, []() {
     JS_NewClassID(&kHostClassClassId);
@@ -153,6 +154,7 @@ JSContext::~JSContext() {
 bool JSContext::evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine) {
   std::string utf8Code = toUTF8(std::u16string(reinterpret_cast<const char16_t *>(code), codeLength));
   JSValue result = JS_Eval(m_ctx, utf8Code.c_str(), utf8Code.size(), sourceURL, JS_EVAL_TYPE_GLOBAL);
+  drainPendingPromiseJobs();
   bool success = handleException(&result);
   JS_FreeValue(m_ctx, result);
   return success;
@@ -161,6 +163,7 @@ bool JSContext::evaluateJavaScript(const uint16_t *code, size_t codeLength, cons
 bool JSContext::evaluateJavaScript(const char16_t *code, size_t length, const char *sourceURL, int startLine) {
   std::string utf8Code = toUTF8(std::u16string(reinterpret_cast<const char16_t *>(code), length));
   JSValue result = JS_Eval(m_ctx, utf8Code.c_str(), utf8Code.size(), sourceURL, JS_EVAL_TYPE_GLOBAL);
+  drainPendingPromiseJobs();
   bool success = handleException(&result);
   JS_FreeValue(m_ctx, result);
   return success;
@@ -168,6 +171,7 @@ bool JSContext::evaluateJavaScript(const char16_t *code, size_t length, const ch
 
 bool JSContext::evaluateJavaScript(const char *code, size_t codeLength, const char *sourceURL, int startLine) {
   JSValue result = JS_Eval(m_ctx, code, codeLength, sourceURL, JS_EVAL_TYPE_GLOBAL);
+  drainPendingPromiseJobs();
   bool success = handleException(&result);
   JS_FreeValue(m_ctx, result);
   return success;
@@ -236,6 +240,18 @@ void JSContext::reportError(JSValueConst &error) {
   JS_FreeValue(m_ctx, stackValue);
   JS_FreeCString(m_ctx, title);
   JS_FreeCString(m_ctx, stack);
+}
+
+void JSContext::drainPendingPromiseJobs() {
+  // should executing pending promise jobs.
+  QjsContext *pctx;
+  int finished = JS_ExecutePendingJob(runtime(), &pctx);
+  while (finished != 0) {
+    finished = JS_ExecutePendingJob(runtime(), &pctx);
+    if (finished == -1) {
+      break;
+    }
+  }
 }
 
 void JSContext::defineGlobalProperty(const char *prop, JSValue value) {
@@ -311,7 +327,7 @@ std::string jsAtomToStdString(QjsContext *ctx, JSAtom atom) {
 
 // An lock free context validator.
 bool isContextValid(int32_t contextId) {
-  if (contextId >= running_context_list) return false;
+  if (contextId > running_context_list) return false;
   return valid_contexts[contextId];
 }
 

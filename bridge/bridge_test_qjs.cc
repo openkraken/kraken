@@ -84,6 +84,9 @@ static JSValue matchImageSnapshot(QjsContext *ctx, JSValueConst this_val, int ar
 
     JSValue arguments[] = {JS_NewBool(ctx, result != 0)};
     JSValue returnValue = JS_Call(ctx, callbackContext->callback, callbackContext->context->global(), 1, arguments);
+    callbackContext->context->handleException(&returnValue);
+    callbackContext->context->drainPendingPromiseJobs();
+
     JS_FreeValue(callbackContext->context->ctx(), callbackContext->callback);
     list_del(&callbackContext->link);
     callbackContext->context->handleException(&returnValue);

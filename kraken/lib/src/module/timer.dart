@@ -14,10 +14,6 @@ mixin TimerMixin {
     Duration timeoutDurationMS = Duration(milliseconds: timeout);
     int id = _timerId++;
     _timerMap[id] = Timer(timeoutDurationMS, () {
-      // https://html.spec.whatwg.org/multipage/webappapis.html#task-queue
-      // Make sure promise pending jobs are executed before execute timer callbacks.
-      executeJSPendingJob();
-
       callback();
       _timerMap.remove(id);
     });
@@ -43,9 +39,6 @@ mixin TimerMixin {
     Duration timeoutDurationMS = Duration(milliseconds: timeout);
     int id = _timerId++;
     _timerMap[id] = Timer.periodic(timeoutDurationMS, (Timer timer) {
-      // https://html.spec.whatwg.org/multipage/webappapis.html#task-queue
-      // Make sure promise pending jobs are executed before execute timer callbacks.
-      executeJSPendingJob();
       callback();
     });
     return id;

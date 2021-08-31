@@ -86,3 +86,12 @@ describe('clearTimeout', () => {
     clearTimeout(timer);
   });
 });
+
+describe('Promise', () => {
+  it('should execute earlier than timer', (done) => {
+    setTimeout(() => {
+      done.fail("promise callback should be execute.");
+    }, 0);
+    new Promise((resolve) => { resolve(); }).then(() => done())
+  });
+});
