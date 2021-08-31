@@ -12,7 +12,23 @@ import 'package:kraken/foundation.dart';
 
 import 'http_cache_object.dart';
 
+enum HttpCacheMode {
+
+  /// Default cache usage mode. If the navigation type doesn't impose any specific
+  /// behavior, use cached resources when they are available and not expired,
+  /// otherwise load resources from the network.
+  DEFAULT,
+
+  /// Don't use the network, load from the cache.
+  CACHE_ONLY,
+
+  /// Don't use the cache, load from the network.
+  NO_CACHE,
+}
+
 class HttpCacheController {
+  static HttpCacheMode mode = HttpCacheMode.DEFAULT;
+
   static final Map<String, HttpCacheController> _controllers = HashMap();
 
   static Directory? _cacheDirectory;

@@ -1,4 +1,5 @@
 HTTP/1.1 200 OK
+Connection: close
 Content-Type: application/json
 Content-Length: 72
 ETag: "4EE5B35FB8C5FB2CF8041FC41D3D199E"

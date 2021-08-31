@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
+
 import 'http_cache.dart';
 import 'http_cache_object.dart';
 import 'http_overrides.dart';
@@ -95,6 +97,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   @override
   Future<HttpClientResponse> close() async {
     HttpClientRequest request = _clientRequest;
+
     int? contextId = KrakenHttpOverrides.getContextHeader(_clientRequest);
     if (contextId != null) {
       // Set the default origin and referrer.
@@ -115,24 +118,28 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
       // Step 2: Handle cache-control and expires,
       //        if hit, no need to open request.
-      HttpCacheController cacheController = HttpCacheController.instance(origin);
-      HttpCacheObject cacheObject = await cacheController.getCacheObject(request.uri);
-      if (await cacheObject.hitLocalCache(request)) {
-        HttpClientResponse? cacheResponse = await cacheObject.toHttpClientResponse();
-        if (cacheResponse != null) {
-          return cacheResponse;
+      HttpCacheObject? cacheObject;
+      if (HttpCacheController.mode != HttpCacheMode.NO_CACHE) {
+        HttpCacheController cacheController = HttpCacheController.instance(origin);
+        cacheObject = await cacheController.getCacheObject(request.uri);
+        if (await cacheObject.hitLocalCache(request)) {
+          HttpClientResponse? cacheResponse = await cacheObject.toHttpClientResponse();
+          if (cacheResponse != null) {
+            return cacheResponse;
+          }
         }
-      }
 
-      // Step 3: Handle negotiate cache request header.
-      if (request.headers.ifModifiedSince == null
-          && request.headers.value(HttpHeaders.ifNoneMatchHeader) == null) {
-        // ETag has higher priority of lastModified.
-        if (cacheObject.eTag != null) {
-          request.headers.set(HttpHeaders.ifNoneMatchHeader, cacheObject.eTag!);
-        } else if (cacheObject.lastModified != null) {
-          request.headers.set(HttpHeaders.ifModifiedSinceHeader,
-              HttpDate.format(cacheObject.lastModified!));
+
+        // Step 3: Handle negotiate cache request header.
+        if (request.headers.ifModifiedSince == null
+            && request.headers.value(HttpHeaders.ifNoneMatchHeader) == null) {
+          // ETag has higher priority of lastModified.
+          if (cacheObject.eTag != null) {
+            request.headers.set(HttpHeaders.ifNoneMatchHeader, cacheObject.eTag!);
+          } else if (cacheObject.lastModified != null) {
+            request.headers.set(HttpHeaders.ifModifiedSinceHeader,
+                HttpDate.format(cacheObject.lastModified!));
+          }
         }
       }
 
@@ -149,19 +156,25 @@ class ProxyHttpClientRequest extends HttpClientRequest {
       bool hitInterceptorResponse = response != null;
       bool hitNegotiateCache = false;
 
+      // If cache only, but no cache hit, throw error directly.
+      if (HttpCacheController.mode == HttpCacheMode.CACHE_ONLY
+          && response == null) {
+        throw FlutterError('HttpCacheMode is CACHE_ONLY, but no cache hit for $uri');
+      }
+
       // After this, response should not be null.
       if (!hitInterceptorResponse) {
         // Handle 304 here.
-        final HttpClientResponse rawResponse = await request.close();
-        response = await _requestQueue.add(() async => cacheController
-            .interceptResponse(request, rawResponse, cacheObject));
-
+        final HttpClientResponse rawResponse = await _requestQueue.add(request.close);
+        response = cacheObject == null
+            ? rawResponse
+            : await HttpCacheController.instance(origin).interceptResponse(request, rawResponse, cacheObject);
         hitNegotiateCache = rawResponse != response;
       }
 
       // Step 5: Lifecycle of afterResponse.
       if (clientInterceptor != null) {
-        final HttpClientResponse? interceptorResponse = await _afterResponse(clientInterceptor, request, response!);
+        final HttpClientResponse? interceptorResponse = await _afterResponse(clientInterceptor, request, response);
         if (interceptorResponse != null) {
           hitInterceptorResponse = true;
           response = interceptorResponse;
@@ -173,9 +186,14 @@ class ProxyHttpClientRequest extends HttpClientRequest {
         return Future.value(response);
       }
 
-      // Step 6: Intercept response by cache controller.
-      // Note: No need to negotiate cache here, this is final response, hit or not hit.
-      return cacheController.interceptResponse(request, response!, cacheObject);
+      if (cacheObject != null) {
+        // Step 6: Intercept response by cache controller (handle 304).
+        // Note: No need to negotiate cache here, this is final response, hit or not hit.
+        return HttpCacheController.instance(origin).interceptResponse(request, response, cacheObject);
+      } else {
+        return response;
+      }
+
     } else {
       _clientRequest.add(_data);
       _data.clear();
@@ -185,7 +203,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   }
 
   @override
-  HttpConnectionInfo get connectionInfo => _clientRequest.connectionInfo!;
+  HttpConnectionInfo? get connectionInfo => _clientRequest.connectionInfo;
 
   @override
   List<Cookie> get cookies => _clientRequest.cookies;

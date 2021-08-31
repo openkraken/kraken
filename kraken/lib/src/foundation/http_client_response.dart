@@ -191,30 +191,39 @@ class _HttpHeaders implements HttpHeaders {
 }
 
 class _HttpConnectionInfo implements HttpConnectionInfo {
+  static final _localHttpConnectionInfo = _HttpConnectionInfo(0, InternetAddress.anyIPv4, HttpClient.defaultHttpPort);
+
   @override
-  int localPort;
+  final int localPort;
+
   @override
-  InternetAddress remoteAddress;
+  final InternetAddress remoteAddress;
+
   @override
-  int remotePort;
-  _HttpConnectionInfo(this.localPort, this.remoteAddress, this.remotePort);
+  final int remotePort;
+
+  const _HttpConnectionInfo(this.localPort, this.remoteAddress, this.remotePort);
 }
 
 class HttpClientStreamResponse extends Stream<List<int>> implements HttpClientResponse {
-  Stream<List<int>> data;
+  // The response stream that be consumed.
+  final Stream<List<int>> _data;
 
   @override
-  int statusCode;
+  final int statusCode;
+
   @override
-  String reasonPhrase;
-  Map<String, String> responseHeaders;
+  final String reasonPhrase;
+
+  final Map<String, String> _responseHeaders;
+
   _HttpHeaders? _httpHeaders;
 
-  HttpClientStreamResponse(this.data, {
+  HttpClientStreamResponse(this._data, {
     this.statusCode = HttpStatus.ok,
     this.reasonPhrase = '',
-    this.responseHeaders = const {},
-  });
+    Map<String, String> responseHeaders = const {},
+  }) : _responseHeaders = responseHeaders;
 
   @override
   X509Certificate? get certificate => null;
@@ -223,13 +232,13 @@ class HttpClientStreamResponse extends Stream<List<int>> implements HttpClientRe
   HttpClientResponseCompressionState get compressionState => HttpClientResponseCompressionState.notCompressed;
 
   @override
-  HttpConnectionInfo get connectionInfo => _HttpConnectionInfo(80, InternetAddress.loopbackIPv4, 80);
+  HttpConnectionInfo? get connectionInfo => _HttpConnectionInfo._localHttpConnectionInfo;
 
   @override
   int get contentLength => headers.contentLength;
 
   @override
-  List<Cookie> get cookies => [];
+  List<Cookie> get cookies => const [];
 
   @override
   Future<Socket> detachSocket() async {
@@ -237,7 +246,7 @@ class HttpClientStreamResponse extends Stream<List<int>> implements HttpClientRe
   }
 
   @override
-  HttpHeaders get headers => _httpHeaders ?? (_httpHeaders = _HttpHeaders(initialHeaders: responseHeaders));
+  HttpHeaders get headers => _httpHeaders ?? (_httpHeaders = _HttpHeaders(initialHeaders: _responseHeaders));
 
   @override
   bool get isRedirect => statusCode >= 300 && statusCode < 400;
@@ -251,10 +260,10 @@ class HttpClientStreamResponse extends Stream<List<int>> implements HttpClientRe
   }
 
   @override
-  List<RedirectInfo> get redirects => [];
+  List<RedirectInfo> get redirects => const [];
 
   @override
   StreamSubscription<List<int>> listen(void Function(List<int> event)? onData, { Function? onError, void Function()? onDone, bool? cancelOnError }) {
-    return data.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+    return _data.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 }
