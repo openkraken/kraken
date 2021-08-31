@@ -28,12 +28,6 @@ JSObjectRef JSDocumentFragmentElement::instanceConstructor(JSContextRef ctx, JSO
 
 JSDocumentFragmentElement::DocumentFragmentElementInstance::DocumentFragmentElementInstance(JSDocumentFragmentElement *jsDocumentFragmentElement)
   : ElementInstance(jsDocumentFragmentElement, "documentfragment", false), nativeDocumentFragmentElement(new NativeDocumentFragmentElement(nativeElement)) {
-  std::string tagName = "documentfragment";
-  NativeString args_01{};
-  buildUICommandArgs(tagName, args_01);
-
-  foundation::UICommandBuffer::instance(context->getContextId())
-    ->addCommand(eventTargetId, UICommand::createElement, args_01, nativeDocumentFragmentElement);
 }
 
 JSDocumentFragmentElement::DocumentFragmentElementInstance::~DocumentFragmentElementInstance() {
