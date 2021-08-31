@@ -19,6 +19,10 @@ JSClassID JSContext::kHostClassClassId {0};
 JSClassID JSContext::kHostObjectClassId {0};
 JSClassID JSContext::kHostExoticObjectClassId{0};
 
+#define MAX_JS_CONTEXT 1024
+bool valid_contexts[MAX_JS_CONTEXT];
+std::atomic<uint32_t> running_context_list;
+
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner) {
   return std::make_unique<JSContext>(contextId, handler, owner);
 }
@@ -33,6 +37,8 @@ static JSRuntime *m_runtime{nullptr};
 
 JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner)
   : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false), uniqueId(context_unique_id++) {
+  // @FIXME: maybe contextId will larger than MAX_JS_CONTEXT
+  valid_contexts[contextId] = true;
 
   std::call_once(kinitJSClassIDFlag, []() {
     JS_NewClassID(&kHostClassClassId);
@@ -71,6 +77,7 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
 }
 
 JSContext::~JSContext() {
+  valid_contexts[contextId] = false;
   JS_FreeValue(m_ctx, m_window->instanceObject);
   ctxInvalid_ = true;
 
@@ -117,6 +124,17 @@ JSContext::~JSContext() {
     list_for_each_safe(el, el1, &protected_event_target_job_list) {
       auto *nativeEventTarget = list_entry(el, NativeEventTarget, link);
       JS_FreeValue(m_ctx, nativeEventTarget->instance->instanceObject);
+    }
+  }
+
+  // Free unresolved promise.
+  {
+    struct list_head *el, *el1;
+    list_for_each_safe(el, el1, &promise_job_list) {
+      auto *promiseContext = list_entry(el, PromiseContext, link);
+      JS_FreeValue(m_ctx, promiseContext->resolveFunc);
+      JS_FreeValue(m_ctx, promiseContext->rejectFunc);
+      delete promiseContext;
     }
   }
 
@@ -289,6 +307,12 @@ std::string jsAtomToStdString(QjsContext *ctx, JSAtom atom) {
   std::string str = std::string(cstr);
   JS_FreeCString(ctx, cstr);
   return str;
+}
+
+// An lock free context validator.
+bool isContextValid(int32_t contextId) {
+  if (contextId >= running_context_list) return false;
+  return valid_contexts[contextId];
 }
 
 } // namespace kraken::binding::qjs

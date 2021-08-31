@@ -87,13 +87,6 @@ PROP_SETTER(BlobInstance, size)(QjsContext *ctx, JSValue this_val, int argc, JSV
   return JS_NULL;
 }
 
-struct PromiseContext {
-  BlobInstance *blobInstance;
-  JSValue resolveFunc;
-  JSValue rejectFunc;
-  JSValue promise;
-};
-
 JSValue Blob::arrayBuffer(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   JSValue resolving_funcs[2];
   JSValue promise = JS_NewPromiseCapability(ctx, resolving_funcs);
@@ -102,10 +95,11 @@ JSValue Blob::arrayBuffer(QjsContext *ctx, JSValue this_val, int argc, JSValue *
 
   JS_DupValue(ctx, blob->instanceObject);
 
-  auto *promiseContext = new PromiseContext{blob, resolving_funcs[0], resolving_funcs[1], promise};
+  auto *promiseContext = new PromiseContext{blob, blob->m_context, resolving_funcs[0], resolving_funcs[1], promise};
   auto callback = [](void *callbackContext, int32_t contextId, const char *errmsg) {
+    if (!isContextValid(contextId)) return;
     auto *promiseContext = static_cast<PromiseContext *>(callbackContext);
-    auto *blob = promiseContext->blobInstance;
+    auto *blob = static_cast<BlobInstance *>(promiseContext->data);
     QjsContext *ctx = blob->m_ctx;
 
     JSValue arrayBuffer = JS_NewArrayBuffer(
@@ -122,8 +116,11 @@ JSValue Blob::arrayBuffer(QjsContext *ctx, JSValue this_val, int argc, JSValue *
     JS_FreeValue(ctx, promiseContext->resolveFunc);
     JS_FreeValue(ctx, promiseContext->rejectFunc);
     JS_FreeValue(ctx, arrayBuffer);
-    JS_FreeValue(ctx, promiseContext->blobInstance->instanceObject);
+    JS_FreeValue(ctx, blob->instanceObject);
+    list_del(&promiseContext->link);
+    delete promiseContext;
   };
+  list_add_tail(&promiseContext->link, &blob->m_context->promise_job_list);
 
   getDartMethod()->setTimeout(promiseContext, blob->context()->getContextId(), callback, 0);
 
@@ -175,10 +172,12 @@ JSValue Blob::text(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto blob = static_cast<BlobInstance *>(JS_GetOpaque(this_val, Blob::kBlobClassID));
   JS_DupValue(ctx, blob->instanceObject);
 
-  auto *promiseContext = new PromiseContext{blob, resolving_funcs[0], resolving_funcs[1], promise};
+  auto *promiseContext = new PromiseContext{blob, blob->m_context, resolving_funcs[0], resolving_funcs[1], promise};
   auto callback = [](void *callbackContext, int32_t contextId, const char *errmsg) {
+    if (!isContextValid(contextId)) return;
+
     auto *promiseContext = static_cast<PromiseContext *>(callbackContext);
-    auto *blob = promiseContext->blobInstance;
+    auto *blob = static_cast<BlobInstance *>(promiseContext->data);
     QjsContext *ctx = blob->m_ctx;
 
     JSValue text = JS_NewStringLen(ctx, reinterpret_cast<const char *>(blob->bytes()), blob->size());
@@ -194,8 +193,11 @@ JSValue Blob::text(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
     JS_FreeValue(ctx, promiseContext->resolveFunc);
     JS_FreeValue(ctx, promiseContext->rejectFunc);
     JS_FreeValue(ctx, text);
-    JS_FreeValue(ctx, promiseContext->blobInstance->instanceObject);
+    JS_FreeValue(ctx, blob->instanceObject);
+    list_del(&promiseContext->link);
+    delete promiseContext;
   };
+  list_add_tail(&promiseContext->link, &blob->m_context->promise_job_list);
 
   getDartMethod()->setTimeout(promiseContext, blob->context()->getContextId(), callback, 0);
 

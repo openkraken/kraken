@@ -22,12 +22,24 @@ static std::once_flag kinitJSClassIDFlag;
 JSRuntime *getGlobalJSRuntime();
 class WindowInstance;
 class DocumentInstance;
+class JSContext;
 
 static inline bool isNumberIndex(std::string &name) {
   if (name.empty()) return false;
   char f = name[0];
   return f >= '0' && f <= '9';
 }
+
+struct PromiseContext {
+  void *data;
+  JSContext *context;
+  JSValue resolveFunc;
+  JSValue rejectFunc;
+  JSValue promise;
+  list_head link;
+};
+
+bool isContextValid(int32_t contextId);
 
 class JSContext {
 public:

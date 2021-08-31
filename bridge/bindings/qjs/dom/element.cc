@@ -244,14 +244,6 @@ JSValue Element::removeAttribute(QjsContext *ctx, JSValue this_val, int argc, JS
   return JS_NULL;
 }
 
-struct ToBlobPromiseContext {
-  JSContext *context;
-  double devicePixelRatio;
-  JSValue promise;
-  JSValue resolve;
-  JSValue reject;
-};
-
 JSValue Element::toBlob(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   double devicePixelRatio = 1.0;
 
@@ -274,21 +266,23 @@ JSValue Element::toBlob(QjsContext *ctx, JSValue this_val, int argc, JSValue *ar
 
   auto blobCallback = [](void *callbackContext, int32_t contextId, const char *error, uint8_t *bytes,
                          int32_t length) {
-    auto toBlobPromiseContext = static_cast<ToBlobPromiseContext *>(callbackContext);
-    QjsContext *ctx = toBlobPromiseContext->context->ctx();
+    if (!isContextValid(contextId)) return;
+
+    auto promiseContext = static_cast<PromiseContext *>(callbackContext);
+    QjsContext *ctx = promiseContext->context->ctx();
     if (error == nullptr) {
       std::vector<uint8_t> vec(bytes, bytes + length);
       JSValue arrayBuffer = JS_NewArrayBuffer(ctx, bytes, length, nullptr, nullptr, false);
-      Blob *constructor = Blob::instance(toBlobPromiseContext->context);
+      Blob *constructor = Blob::instance(promiseContext->context);
       JSValue argumentsArray = JS_NewArray(ctx);
       JSValue pushMethod = JS_GetPropertyStr(ctx, argumentsArray, "push");
       JS_Call(ctx, pushMethod, argumentsArray, 1, &arrayBuffer);
       JSValue blobValue = JS_CallConstructor(ctx, constructor->classObject, 1, &argumentsArray);
 
       if (JS_IsException(blobValue)) {
-        toBlobPromiseContext->context->handleException(&blobValue);
+        promiseContext->context->handleException(&blobValue);
       } else {
-        JSValue ret = JS_Call(ctx, toBlobPromiseContext->resolve, toBlobPromiseContext->promise, 1, &blobValue);
+        JSValue ret = JS_Call(ctx, promiseContext->resolveFunc, promiseContext->promise, 1, &blobValue);
         JS_FreeValue(ctx, ret);
       }
 
@@ -301,25 +295,27 @@ JSValue Element::toBlob(QjsContext *ctx, JSValue this_val, int argc, JSValue *ar
       JSValue errorMessage = JS_NewString(ctx, error);
       JS_DefinePropertyValueStr(ctx, errorObject, "message", errorMessage,
                                 JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
-      JSValue ret = JS_Call(ctx, toBlobPromiseContext->reject, toBlobPromiseContext->promise, 1, &errorObject);
+      JSValue ret = JS_Call(ctx, promiseContext->rejectFunc, promiseContext->promise, 1, &errorObject);
       JS_FreeValue(ctx, errorObject);
       JS_FreeValue(ctx, errorMessage);
       JS_FreeValue(ctx, ret);
     }
 
-    JS_FreeValue(ctx, toBlobPromiseContext->resolve);
-    JS_FreeValue(ctx, toBlobPromiseContext->reject);
+    JS_FreeValue(ctx, promiseContext->resolveFunc);
+    JS_FreeValue(ctx, promiseContext->rejectFunc);
+    list_del(&promiseContext->link);
+    delete promiseContext;
   };
 
   JSValue resolving_funcs[2];
   JSValue promise = JS_NewPromiseCapability(ctx, resolving_funcs);
 
-  auto toBlobPromiseContext = new ToBlobPromiseContext{
+  auto toBlobPromiseContext = new PromiseContext{
+    nullptr,
     element->m_context,
-    devicePixelRatio,
-    promise,
     resolving_funcs[0],
-    resolving_funcs[1]
+    resolving_funcs[1],
+    promise,
   };
 
   getDartMethod()->toBlob(
@@ -327,8 +323,9 @@ JSValue Element::toBlob(QjsContext *ctx, JSValue this_val, int argc, JSValue *ar
     element->m_context->getContextId(),
     blobCallback,
     element->eventTargetId,
-    toBlobPromiseContext->devicePixelRatio
+    devicePixelRatio
   );
+  list_add_tail(&toBlobPromiseContext->link, &element->m_context->promise_job_list);
 
   return promise;
 }
