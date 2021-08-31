@@ -236,18 +236,18 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     _scrollOffsetX = value;
     _scrollOffsetX!.removeListener(_scrollXListener);
     _scrollOffsetX!.addListener(_scrollXListener);
-    _renderLeadLayer?.markNeedsLayout();
+    _renderInputLeaderLayer?.markNeedsLayout();
   }
 
   void _scrollXListener() {
-    _renderLeadLayer?.markNeedsPaint();
+    _renderInputLeaderLayer?.markNeedsPaint();
   }
 
   bool obscureText = false;
   bool autoCorrect = true;
   late EditableTextDelegate _textSelectionDelegate;
   TextSpan? _actualText;
-  RenderLeaderLayer? _renderLeadLayer;
+  RenderInputLeaderLayer? _renderInputLeaderLayer;
   RenderInputBox? _renderInputBox;
 
   final LayerLink _toolbarLayerLink = LayerLink();
@@ -351,16 +351,16 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void setRenderStyle(String key, value) {
     super.setRenderStyle(key, value);
 
-    if (_renderLeadLayer != null) {
+    if (_renderInputLeaderLayer != null) {
       RenderStyle renderStyle = renderBoxModel!.renderStyle;
       if (key == HEIGHT) {
-        _renderLeadLayer!.markNeedsLayout();
+        _renderInputLeaderLayer!.markNeedsLayout();
 
       } else if (key == LINE_HEIGHT && renderStyle.height == null) {
-        _renderLeadLayer!.markNeedsLayout();
+        _renderInputLeaderLayer!.markNeedsLayout();
         // It needs to mark _renderInputBox as needsLayout manually cause
         // line-height change will not affect constraints which will in turn
-        // make _renderInputBox jump layout stage when _renderLeadLayer performs layout.
+        // make _renderInputBox jump layout stage when _renderInputLeaderLayer performs layout.
         _renderInputBox!.markNeedsLayout();
 
       // It needs to judge width in style here cause
@@ -368,7 +368,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       } else if (key == FONT_SIZE && style[WIDTH].isEmpty) {
         double fontSize = renderStyle.fontSize;
         renderStyle.width = fontSize * _FONT_SIZE_RATIO;
-        _renderLeadLayer!.markNeedsLayout();
+        _renderInputLeaderLayer!.markNeedsLayout();
       }
     }
     // @TODO: Filter style properties that used by text span.
@@ -604,7 +604,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     return _renderEditable!;
   }
 
-  RenderLeaderLayer createRenderBox() {
+  RenderInputLeaderLayer createRenderBox() {
     assert(renderBoxModel is RenderIntrinsic);
     RenderEditable renderEditable = createRenderEditable();
 
@@ -612,11 +612,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       scrollableX: _scrollableX,
       child: renderEditable,
     );
-    _renderLeadLayer = RenderLeaderLayer(
+    _renderInputLeaderLayer = RenderInputLeaderLayer(
       link: _toolbarLayerLink,
       child: _renderInputBox,
+      editable: renderEditable,
     );
-    return _renderLeadLayer!;
+    return _renderInputLeaderLayer!;
   }
 
   @override
@@ -1211,6 +1212,43 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 }
 
+/// RenderLeaderLayer of input element used for toolbar overlay to float with.
+class RenderInputLeaderLayer extends RenderLeaderLayer {
+  RenderInputLeaderLayer({
+    required LayerLink link,
+    RenderInputBox? child,
+    this.editable,
+  }) : super(link: link, child: child);
+
+  RenderEditable? editable;
+  
+  Offset? get _offset {
+    RenderIntrinsic renderIntrinsic = parent as RenderIntrinsic;
+    RenderStyle renderStyle = renderIntrinsic.renderStyle;
+
+    double intrinsicInputHeight = editable!.preferredLineHeight
+      + renderStyle.paddingTop + renderStyle.paddingBottom
+      + renderStyle.borderTop + renderStyle.borderBottom;
+
+    // Make render editable vertically center.
+    double dy;
+    if (renderStyle.height != null) {
+      dy = (renderStyle.height! - intrinsicInputHeight) / 2;
+    } else if (renderStyle.lineHeight != null && renderStyle.lineHeight! > intrinsicInputHeight) {
+      dy = (renderStyle.lineHeight! - intrinsicInputHeight) /2;
+    } else {
+      dy = 0;
+    }
+    return Offset(0, dy);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final Offset transformedOffset = offset.translate(_offset!.dx, _offset!.dy);
+    super.paint(context, transformedOffset);
+  }
+}
+
 class RenderInputBox extends RenderProxyBox {
   RenderInputBox({
     required this.scrollableX,
@@ -1231,39 +1269,6 @@ class RenderInputBox extends RenderProxyBox {
     _pointerListener(event);
   }
 
-  Offset? get _offset {
-    RenderLeaderLayer renderLeaderLayer = parent as RenderLeaderLayer;
-    RenderIntrinsic renderIntrinsic = (renderLeaderLayer.parent as RenderIntrinsic?)!;
-    RenderStyle renderStyle = renderIntrinsic.renderStyle;
-
-    double intrinsicInputHeight = (child as RenderEditable).preferredLineHeight
-      + renderStyle.paddingTop + renderStyle.paddingBottom
-      + renderStyle.borderTop + renderStyle.borderBottom;
-
-    // Make render editable vertically center.
-    double dy;
-    if (renderStyle.height != null) {
-      dy = (renderStyle.height! - intrinsicInputHeight) / 2;
-    } else if (renderStyle.lineHeight != null && renderStyle.lineHeight! > intrinsicInputHeight) {
-      dy = (renderStyle.lineHeight! - intrinsicInputHeight) /2;
-    } else {
-      dy = 0;
-    }
-    return Offset(0, dy);
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (_offset == null) {
-      super.paint(context, offset);
-    } else {
-      final Offset transformedOffset = offset.translate(_offset!.dx, _offset!.dy);
-      if (child != null) {
-        context.paintChild(child!, transformedOffset);
-      }
-    }
-  }
-
   @override
   void performLayout() {
     if (child != null) {
@@ -1272,7 +1277,7 @@ class RenderInputBox extends RenderProxyBox {
       double width = constraints.maxWidth != double.infinity ?
         constraints.maxWidth : childSize.width;
 
-      RenderLeaderLayer renderLeaderLayer = parent as RenderLeaderLayer;
+      RenderInputLeaderLayer renderLeaderLayer = parent as RenderInputLeaderLayer;
       RenderIntrinsic renderIntrinsic = renderLeaderLayer.parent as RenderIntrinsic;
       RenderStyle renderStyle = renderIntrinsic.renderStyle;
 

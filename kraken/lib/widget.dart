@@ -722,16 +722,16 @@ class _KrakenState extends State<Kraken> {
   // Make the input element of the RenderEditable focus.
   void _focusInput(RenderEditable renderEditable) {
     dom.RenderInputBox renderInputBox = renderEditable.parent as dom.RenderInputBox;
-    RenderLeaderLayer renderLeaderLayer = renderInputBox.parent as RenderLeaderLayer;
-    RenderIntrinsic renderIntrisic = renderLeaderLayer.parent as RenderIntrinsic;
+    dom.RenderInputLeaderLayer renderInputLeaderLayer = renderInputBox.parent as dom.RenderInputLeaderLayer;
+    RenderIntrinsic renderIntrisic = renderInputLeaderLayer.parent as RenderIntrinsic;
     renderIntrisic.elementDelegate.focusInput();
   }
 
   // Make the input element of the RenderEditable blur.
   void _blurInput(RenderEditable renderEditable) {
     dom.RenderInputBox renderInputBox = renderEditable.parent as dom.RenderInputBox;
-    RenderLeaderLayer renderLeaderLayer = renderInputBox.parent as RenderLeaderLayer;
-    RenderIntrinsic renderIntrisic = renderLeaderLayer.parent as RenderIntrinsic;
+    dom.RenderInputLeaderLayer renderInputLeaderLayer = renderInputBox.parent as dom.RenderInputLeaderLayer;
+    RenderIntrinsic renderIntrisic = renderInputLeaderLayer.parent as RenderIntrinsic;
     renderIntrisic.elementDelegate.blurInput();
   }
 
@@ -768,8 +768,8 @@ class _KrakenState extends State<Kraken> {
   // Scroll the focused input box to the caret to make it visible.
   void _scrollFocusedInputToCaret(RenderEditable focusedEditable) {
     dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
-    RenderLeaderLayer renderLeaderLayer = renderInputBox.parent as RenderLeaderLayer;
-    RenderIntrinsic renderIntrisic = renderLeaderLayer.parent as RenderIntrinsic;
+    dom.RenderInputLeaderLayer renderInputLeaderLayer = renderInputBox.parent as dom.RenderInputLeaderLayer;
+    RenderIntrinsic renderIntrisic = renderInputLeaderLayer.parent as RenderIntrinsic;
     renderIntrisic.elementDelegate.scrollInputToCaret();
   }
 }
