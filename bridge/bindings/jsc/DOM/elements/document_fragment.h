@@ -13,7 +13,7 @@ namespace kraken::binding::jsc {
 
 void bindDocumentFragment(std::unique_ptr<JSContext> &context);
 
-class JSDocumentFragment : public JSElement {
+class JSDocumentFragment : public JSNode {
 public:
   static std::unordered_map<JSContext *, JSDocumentFragment *> instanceMap;
   OBJECT_INSTANCE(JSDocumentFragment)

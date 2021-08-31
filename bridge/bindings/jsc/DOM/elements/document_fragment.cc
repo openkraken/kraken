@@ -18,7 +18,7 @@ JSDocumentFragment::~JSDocumentFragment() {
   instanceMap.erase(context);
 }
 
-JSDocumentFragment::JSDocumentFragment(JSContext *context) : JSElement(context) {}
+JSDocumentFragment::JSDocumentFragment(JSContext *context) : JSNode(context) {}
 JSObjectRef JSDocumentFragment::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                               const JSValueRef *arguments, JSValueRef *exception) {
   auto instance = new DocumentFragmentInstance(this);
