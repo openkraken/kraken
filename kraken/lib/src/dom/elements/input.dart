@@ -529,6 +529,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       _lastKnownRemoteTextEditingValue = localValue;
 
       _textInputConnection = TextInput.attach(this, _textInputConfiguration!);
+      _textInputConnection!.setEditingState(localValue);
     }
 
     // FIXME: hide virtual keyword will make real keyboard could not input also
