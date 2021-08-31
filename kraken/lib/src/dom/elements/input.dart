@@ -609,13 +609,13 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     RenderEditable renderEditable = createRenderEditable();
 
     _renderInputBox = RenderInputBox(
-      scrollableX: _scrollableX,
       child: renderEditable,
     );
     _renderInputLeaderLayer = RenderInputLeaderLayer(
       link: _toolbarLayerLink,
       child: _renderInputBox,
-      editable: renderEditable,
+      scrollableX: _scrollableX,
+      renderEditable: renderEditable,
     );
     return _renderInputLeaderLayer!;
   }
@@ -1217,16 +1217,31 @@ class RenderInputLeaderLayer extends RenderLeaderLayer {
   RenderInputLeaderLayer({
     required LayerLink link,
     RenderInputBox? child,
-    this.editable,
+    required this.scrollableX,
+    this.renderEditable,
   }) : super(link: link, child: child);
 
-  RenderEditable? editable;
-  
+  RenderEditable? renderEditable;
+
+  KrakenScrollable scrollableX;
+
+  void _pointerListener(PointerEvent event) {
+    if (event is PointerDownEvent) {
+      scrollableX.handlePointerDown(event);
+    }
+  }
+
+  @override
+  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    super.handleEvent(event, entry);
+    _pointerListener(event);
+  }
+
   Offset? get _offset {
     RenderIntrinsic renderIntrinsic = parent as RenderIntrinsic;
     RenderStyle renderStyle = renderIntrinsic.renderStyle;
 
-    double intrinsicInputHeight = editable!.preferredLineHeight
+    double intrinsicInputHeight = renderEditable!.preferredLineHeight
       + renderStyle.paddingTop + renderStyle.paddingBottom
       + renderStyle.borderTop + renderStyle.borderBottom;
 
@@ -1242,6 +1257,8 @@ class RenderInputLeaderLayer extends RenderLeaderLayer {
     return Offset(0, dy);
   }
 
+  // Note paint override can not be done in RenderInputBox cause input toolbar
+  // paints relative to the perferred height of textPainter.
   @override
   void paint(PaintingContext context, Offset offset) {
     final Offset transformedOffset = offset.translate(_offset!.dx, _offset!.dy);
@@ -1251,23 +1268,8 @@ class RenderInputLeaderLayer extends RenderLeaderLayer {
 
 class RenderInputBox extends RenderProxyBox {
   RenderInputBox({
-    required this.scrollableX,
     required RenderEditable child,
   }) : super(child);
-
-  KrakenScrollable scrollableX;
-
-  void _pointerListener(PointerEvent event) {
-    if (event is PointerDownEvent) {
-      scrollableX.handlePointerDown(event);
-    }
-  }
-
-  @override
-  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
-    super.handleEvent(event, entry);
-    _pointerListener(event);
-  }
 
   @override
   void performLayout() {
