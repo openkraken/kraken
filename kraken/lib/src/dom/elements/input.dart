@@ -355,11 +355,11 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       RenderStyle renderStyle = renderBoxModel!.renderStyle;
       if (key == HEIGHT) {
         _renderLeadLayer!.markNeedsLayout();
-        
+
       } else if (key == LINE_HEIGHT && renderStyle.height == null) {
         _renderLeadLayer!.markNeedsLayout();
-        // It needs to mark _renderInputBox as needsLayout manually cause 
-        // line-height change will not affect constraints which will in turn 
+        // It needs to mark _renderInputBox as needsLayout manually cause
+        // line-height change will not affect constraints which will in turn
         // make _renderInputBox jump layout stage when _renderLeadLayer performs layout.
         _renderInputBox!.markNeedsLayout();
 
@@ -438,7 +438,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
           localPosition: Offset(touch.clientX, touch.clientY),
           kind: PointerDeviceKind.touch,
         );
-
         _renderEditable!.handleTapDown(details);
       }
 
@@ -530,7 +529,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       _lastKnownRemoteTextEditingValue = localValue;
 
       _textInputConnection = TextInput.attach(this, _textInputConfiguration!);
-      _textInputConnection!.setEditingState(localValue);
     }
 
     // FIXME: hide virtual keyword will make real keyboard could not input also
@@ -861,7 +859,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     if (cause == SelectionChangedCause.keyboard)
       return false;
 
-    if (cause == SelectionChangedCause.longPress)
+    if (cause == SelectionChangedCause.longPress || cause == SelectionChangedCause.drag)
       return true;
 
     if (_value.text.isNotEmpty)
@@ -886,7 +884,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   @override
   void updateEditingValue(TextEditingValue value) {
      _lastKnownRemoteTextEditingValue = value;
-
     if (value == _value) {
       // This is possible, for example, when the numeric keyboard is input,
       // the engine will notify twice for the same value.
