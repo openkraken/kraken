@@ -248,6 +248,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   late EditableTextDelegate _textSelectionDelegate;
   TextSpan? _actualText;
   RenderLeaderLayer? _renderLeadLayer;
+  RenderInputBox? _renderInputBox;
 
   final LayerLink _toolbarLayerLink = LayerLink();
   RenderEditable? _renderEditable;
@@ -352,8 +353,15 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
     if (_renderLeadLayer != null) {
       RenderStyle renderStyle = renderBoxModel!.renderStyle;
-      if (key == HEIGHT || (key == LINE_HEIGHT && renderStyle.height == null)) {
+      if (key == HEIGHT) {
         _renderLeadLayer!.markNeedsLayout();
+        
+      } else if (key == LINE_HEIGHT && renderStyle.height == null) {
+        _renderLeadLayer!.markNeedsLayout();
+        // It needs to mark _renderInputBox as needsLayout manually cause 
+        // line-height change will not affect constraints which will in turn 
+        // make _renderInputBox jump layout stage when _renderLeadLayer performs layout.
+        _renderInputBox!.markNeedsLayout();
 
       // It needs to judge width in style here cause
       // width in renderStyle may be set in node attach.
@@ -602,12 +610,13 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     assert(renderBoxModel is RenderIntrinsic);
     RenderEditable renderEditable = createRenderEditable();
 
+    _renderInputBox = RenderInputBox(
+      scrollableX: _scrollableX,
+      child: renderEditable,
+    );
     _renderLeadLayer = RenderLeaderLayer(
       link: _toolbarLayerLink,
-      child: RenderInputBox(
-        scrollableX: _scrollableX,
-        child: renderEditable,
-      )
+      child: _renderInputBox,
     );
     return _renderLeadLayer!;
   }
