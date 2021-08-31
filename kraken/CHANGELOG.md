@@ -1,3 +1,9 @@
+## 0.8.3+3
+
+**Bug Fixed**
+
++ Fix error when reading local path. https://github.com/openkraken/kraken/pull/635
+
 ## 0.8.3+2
 
 **Bug Fixed**
