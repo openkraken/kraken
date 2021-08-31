@@ -129,7 +129,6 @@ class ProxyHttpClientRequest extends HttpClientRequest {
           }
         }
 
-
         // Step 3: Handle negotiate cache request header.
         if (request.headers.ifModifiedSince == null
             && request.headers.value(HttpHeaders.ifNoneMatchHeader) == null) {

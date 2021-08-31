@@ -229,7 +229,7 @@ class HttpCacheObject {
 
     // The index file will not be TOO LARGE,
     // so take bytes at one time.
-    await _file.writeAsBytes(bytesBuilder.takeBytes());
+    await _file.writeAsBytes(bytesBuilder.takeBytes(), flush: true);
 
     _valid = true;
   }
@@ -364,8 +364,10 @@ class HttpCacheObjectBlob extends EventSink<List<int>> {
   }
 
   @override
-  void close() {
-    _writer?.close();
+  void close() async {
+    // Ensure buffer has been written.
+    await _writer?.flush();
+    await _writer?.close();
   }
 
   Future<bool> exists() {
