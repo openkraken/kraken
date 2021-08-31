@@ -11,11 +11,8 @@ import 'package:flutter/rendering.dart';
 const String DOCUMENT_FRAGMENT = 'DOCUMENTFRAGMENT';
 
 class DocumentFragment extends Node {
-  final Pointer<NativeNode> nativeNodePtr;
-
-  DocumentFragment(int targetId, this.nativeNodePtr, ElementManager elementManager)
+  DocumentFragment(int targetId, nativeNodePtr, ElementManager elementManager)
       : super(NodeType.COMMENT_NODE, targetId, nativeNodePtr, elementManager, '#documentfragment');
-
 
   @override
   RenderObject? get renderer => null;
