@@ -7,39 +7,38 @@
 
 namespace kraken::binding::jsc {
 
-void bindDocumentFragmentElement(std::unique_ptr<JSContext> &context) {
-  auto DocumentFragmentElement = JSDocumentFragmentElement::instance(context.get());
-  JSC_GLOBAL_SET_PROPERTY(context, "DocumentFragment", DocumentFragmentElement->classObject);
+void bindDocumentFragment(std::unique_ptr<JSContext> &context) {
+  auto DocumentFragment = JSDocumentFragment::instance(context.get());
+  JSC_GLOBAL_SET_PROPERTY(context, "DocumentFragment", DocumentFragment->classObject);
 }
 
-std::unordered_map<JSContext *, JSDocumentFragmentElement *> JSDocumentFragmentElement::instanceMap{};
+std::unordered_map<JSContext *, JSDocumentFragment *> JSDocumentFragment::instanceMap{};
 
-JSDocumentFragmentElement::~JSDocumentFragmentElement() {
+JSDocumentFragment::~JSDocumentFragment() {
   instanceMap.erase(context);
 }
 
-JSDocumentFragmentElement::JSDocumentFragmentElement(JSContext *context) : JSElement(context) {}
-JSObjectRef JSDocumentFragmentElement::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+JSDocumentFragment::JSDocumentFragment(JSContext *context) : JSElement(context) {}
+JSObjectRef JSDocumentFragment::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                               const JSValueRef *arguments, JSValueRef *exception) {
-  auto instance = new DocumentFragmentElementInstance(this);
-  instance->setNodeFlag(DocumentFragmentElementInstance::NodeFlag::IsDocumentFragment);
+  auto instance = new DocumentFragmentInstance(this);
+  instance->setNodeFlag(DocumentFragmentInstance::NodeFlag::IsDocumentFragment);
   return instance->object;
 }
 
-JSDocumentFragmentElement::DocumentFragmentElementInstance::DocumentFragmentElementInstance(JSDocumentFragmentElement *jsDocumentFragmentElement)
-  : ElementInstance(jsDocumentFragmentElement, "documentfragment", false), nativeDocumentFragmentElement(new NativeDocumentFragmentElement(nativeElement)) {
+JSDocumentFragment::DocumentFragmentInstance::DocumentFragmentInstance(JSDocumentFragment *jsDocumentFragment)
+  : NodeInstance(jsDocumentFragment, NodeType::DOCUMENT_FRAGMENT_NODE) {
+  nativeNode = new NativeNode(new NativeEventTarget(this));
   std::string tagName = "documentfragment";
   NativeString args_01{};
   buildUICommandArgs(tagName, args_01);
 
   foundation::UICommandBuffer::instance(context->getContextId())
-    ->addCommand(eventTargetId, UICommand::createElement, args_01, nativeDocumentFragmentElement);
+    ->addCommand(eventTargetId, UICommand::createDocumentFragment, args_01, nativeNode);
 }
 
-JSDocumentFragmentElement::DocumentFragmentElementInstance::~DocumentFragmentElementInstance() {
-  ::foundation::UICommandCallbackQueue::instance()->registerCallback([](void *ptr) {
-    delete reinterpret_cast<NativeDocumentFragmentElement *>(ptr);
-  }, nativeDocumentFragmentElement);
+JSDocumentFragment::DocumentFragmentInstance::~DocumentFragmentInstance() {
+  delete nativeNode;
 }
 
 } // namespace kraken::binding::jsc

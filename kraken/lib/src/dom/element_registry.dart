@@ -106,5 +106,4 @@ void defineBuiltInElements() {
   defineElement(BODY, (id, nativePtr, elementManager) => BodyElement(id, nativePtr.cast<NativeElement>(), elementManager));
   defineElement(IMAGE, (id, nativePtr, elementManager) => ImageElement(id, nativePtr.cast<NativeImgElement>(), elementManager));
   defineElement(CANVAS, (id, nativePtr, elementManager) => CanvasElement(id, nativePtr.cast<NativeCanvasElement>(), elementManager));
-  defineElement(DOCUMENT_FRAGMENT, (id, nativePtr, elementManager) => DocumentFragmentElement(id, nativePtr.cast<NativeElement>(), elementManager));
 }

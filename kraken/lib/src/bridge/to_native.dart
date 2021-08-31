@@ -241,6 +241,7 @@ enum UICommandType {
   removeProperty,
   cloneNode,
   removeEvent,
+  createDocumentFragment,
 }
 
 class UICommandItem extends Struct {
@@ -453,6 +454,9 @@ void flushUICommand() {
           case UICommandType.removeProperty:
             String key = command.args[0];
             controller.view.removeProperty(id, key);
+            break;
+          case UICommandType.createDocumentFragment:
+            controller.view.createDocumentFragment(id, nativePtr.cast<NativeNode>());
             break;
           default:
             break;

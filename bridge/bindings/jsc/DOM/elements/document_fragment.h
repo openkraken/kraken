@@ -11,42 +11,34 @@
 
 namespace kraken::binding::jsc {
 
-void bindDocumentFragmentElement(std::unique_ptr<JSContext> &context);
+void bindDocumentFragment(std::unique_ptr<JSContext> &context);
 
-struct NativeDocumentFragmentElement;
-
-class JSDocumentFragmentElement : public JSElement {
+class JSDocumentFragment : public JSElement {
 public:
-  static std::unordered_map<JSContext *, JSDocumentFragmentElement *> instanceMap;
-  OBJECT_INSTANCE(JSDocumentFragmentElement)
+  static std::unordered_map<JSContext *, JSDocumentFragment *> instanceMap;
+  OBJECT_INSTANCE(JSDocumentFragment)
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
-  class DocumentFragmentElementInstance : public ElementInstance {
+  class DocumentFragmentInstance : public NodeInstance {
   public:
 
-    DocumentFragmentElementInstance() = delete;
-    ~DocumentFragmentElementInstance();
-    explicit DocumentFragmentElementInstance(JSDocumentFragmentElement *JSDocumentFragmentElement);
+    DocumentFragmentInstance() = delete;
+    ~DocumentFragmentInstance();
+    explicit DocumentFragmentInstance(JSDocumentFragment *JSDocumentFragment);
 
-    NativeDocumentFragmentElement *nativeDocumentFragmentElement;
+    JSDocumentFragment *nativeDocumentFragment;
 
   private:
     JSStringHolder m_data{context, ""};
     JSStringHolder m_type{context, ""};
   };
 protected:
-  ~JSDocumentFragmentElement();
-  JSDocumentFragmentElement() = delete;
-  explicit JSDocumentFragmentElement(JSContext *context);
+  ~JSDocumentFragment();
+  JSDocumentFragment() = delete;
+  explicit JSDocumentFragment(JSContext *context);
 };
 
-struct NativeDocumentFragmentElement {
-  NativeDocumentFragmentElement() = delete;
-  explicit NativeDocumentFragmentElement(NativeElement *nativeElement) : nativeElement(nativeElement){};
-
-  NativeElement *nativeElement;
-};
 
 } // namespace kraken::binding::jsc
 

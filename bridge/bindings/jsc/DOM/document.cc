@@ -194,9 +194,6 @@ JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {
     JSElement::defineElement("script", [](JSContext *context) -> ElementInstance * {
       return new JSScriptElement::ScriptElementInstance(JSScriptElement::instance(context));
     });
-    JSElement::defineElement("documentFragment", [](JSContext *context) -> ElementInstance * {
-      return new JSDocumentFragmentElement::DocumentFragmentElementInstance(JSDocumentFragmentElement::instance(context));
-    });
   }
 }
 

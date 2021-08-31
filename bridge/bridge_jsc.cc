@@ -119,7 +119,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindImageElement(m_context);
   bindInputElement(m_context);
   bindSVGElement(m_context);
-  bindDocumentFragmentElement(m_context);
+  bindDocumentFragment(m_context);
   bindWindow(m_context);
   bindPerformance(m_context);
   bindCSSStyleDeclaration(m_context);

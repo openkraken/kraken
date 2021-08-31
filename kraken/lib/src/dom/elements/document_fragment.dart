@@ -6,10 +6,17 @@
 import 'dart:ffi';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
+import 'package:flutter/rendering.dart';
 
 const String DOCUMENT_FRAGMENT = 'DOCUMENTFRAGMENT';
 
-class DocumentFragmentElement extends Element {
-  DocumentFragmentElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: DOCUMENT_FRAGMENT);
+class DocumentFragment extends Node {
+  final Pointer<NativeNode> nativeNodePtr;
+
+  DocumentFragment(int targetId, this.nativeNodePtr, ElementManager elementManager)
+      : super(NodeType.COMMENT_NODE, targetId, nativeNodePtr, elementManager, '#documentfragment');
+
+
+  @override
+  RenderObject? get renderer => null;
 }
