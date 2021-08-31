@@ -456,7 +456,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       Touch touch = touches.item(0);
       Offset _selectEndPosition = Offset(touch.clientX, touch.clientY);
 
-      // Disable text selection when text size is larger than input size.
+      // Disable text selection and allow scrolling when text size is larger than input size.
       if (textSize.width > _renderEditable!.size.width) {
         if (event.type == EVENT_TOUCH_END && _selectStartPosition == _selectEndPosition) {
           _renderEditable!.selectPositionAt(
@@ -886,6 +886,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   @override
   void updateEditingValue(TextEditingValue value) {
      _lastKnownRemoteTextEditingValue = value;
+     
     if (value == _value) {
       // This is possible, for example, when the numeric keyboard is input,
       // the engine will notify twice for the same value.
@@ -900,7 +901,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       _showCaretOnScreen();
       _textSelectionDelegate.hideToolbar();
     }
-    _formatAndSetValue(value, cause: SelectionChangedCause.keyboard);
+    _formatAndSetValue(value, userInteraction: true, cause: SelectionChangedCause.keyboard);
 
     if (_hasInputConnection) {
       // To keep the cursor from blinking while typing, we want to restart the

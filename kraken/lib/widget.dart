@@ -295,6 +295,7 @@ class Kraken extends StatefulWidget {
 }
 class _KrakenState extends State<Kraken> {
   Map<Type, Action<Intent>>? _actionMap;
+
   final FocusNode _focusNode = FocusNode();
 
   @override
@@ -356,19 +357,23 @@ class _KrakenState extends State<Kraken> {
     );
   }
 
+  // Get context of current widget.
   BuildContext _getContext() {
     return context;
   }
 
+  // Request focus of current widget.
   void _requestFocus() {
     _focusNode.requestFocus();
   }
 
+  // Get the target platform.
   TargetPlatform _getTargetPlatform() {
     final ThemeData theme = Theme.of(context);
     return theme.platform;
   }
 
+  // Get the cursor color according to the widget theme and platform theme.
   Color _getCursorColor() {
     Color cursorColor = CSSColor.initial;
     TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
@@ -399,6 +404,7 @@ class _KrakenState extends State<Kraken> {
     return cursorColor;
   }
 
+  // Get the selection color according to the widget theme and platform theme.
   Color _getSelectionColor() {
     Color selectionColor = CSSColor.initial.withOpacity(0.4);
     TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
@@ -429,6 +435,7 @@ class _KrakenState extends State<Kraken> {
     return selectionColor;
   }
 
+  // Get the cursor radius according to the target platform.
   Radius _getCursorRadius() {
     Radius cursorRadius = const Radius.circular(2.0);
     TargetPlatform platform = _getTargetPlatform();
@@ -452,6 +459,7 @@ class _KrakenState extends State<Kraken> {
     return cursorRadius;
   }
 
+  // Get the text selection controls according to the target platform.
   TextSelectionControls _getTextSelectionControls() {
     TextSelectionControls _selectionControls;
     TargetPlatform platform = _getTargetPlatform();
@@ -462,9 +470,7 @@ class _KrakenState extends State<Kraken> {
         break;
 
       case TargetPlatform.macOS:
-//        _selectionControls = cupertinoDesktopTextSelectionControls;
-        // For test
-        _selectionControls = materialTextSelectionControls;
+        _selectionControls = cupertinoDesktopTextSelectionControls;
         break;
 
       case TargetPlatform.android:
@@ -523,6 +529,7 @@ class _KrakenState extends State<Kraken> {
           _focusInput(editables[idx + 1]);
         }
       }
+
     // None editable exists, focus the next widget.
     } else {
       _focusNode.nextFocus();
