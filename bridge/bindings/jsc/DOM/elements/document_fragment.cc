@@ -27,7 +27,6 @@ JSObjectRef JSDocumentFragment::instanceConstructor(JSContextRef ctx, JSObjectRe
 
 JSDocumentFragment::DocumentFragmentInstance::DocumentFragmentInstance(JSDocumentFragment *jsDocumentFragment)
   : NodeInstance(jsDocumentFragment, NodeType::DOCUMENT_FRAGMENT_NODE) {
-  nativeNode = new NativeNode(new NativeEventTarget(this));
   setNodeFlag(DocumentFragmentInstance::NodeFlag::IsDocumentFragment);
   std::string tagName = "documentfragment";
   NativeString args_01{};
@@ -37,8 +36,6 @@ JSDocumentFragment::DocumentFragmentInstance::DocumentFragmentInstance(JSDocumen
     ->addCommand(eventTargetId, UICommand::createDocumentFragment, args_01, nativeNode);
 }
 
-JSDocumentFragment::DocumentFragmentInstance::~DocumentFragmentInstance() {
-  delete nativeNode;
-}
+JSDocumentFragment::DocumentFragmentInstance::~DocumentFragmentInstance() {}
 
 } // namespace kraken::binding::jsc
