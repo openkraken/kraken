@@ -166,6 +166,14 @@ class Kraken extends StatelessWidget {
     return KrakenController.getControllerOfName(shortHash(this));
   }
 
+  // Set kraken http cache mode.
+  static void setHttpCacheMode(HttpCacheMode mode) {
+    HttpCacheController.mode = mode;
+    if (kDebugMode) {
+      print('Kraken http cache mode set to $mode.');
+    }
+  }
+
   static bool _isValidCustomElementName(localName) {
     return RegExp(r'^[a-z][.0-9_a-z]*-[\-.0-9_a-z]*$').hasMatch(localName);
   }

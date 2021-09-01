@@ -74,6 +74,53 @@ void main() {
       assert(cacheObject.valid);
     });
 
+    test('HttpCacheMode.NO_CACHE', () async {
+      HttpCacheController.mode = HttpCacheMode.NO_CACHE;
+      var request = await httpClient.openUrl('GET',
+          server.getUri('json_with_content_length_expires_etag_last_modified'));
+      KrakenHttpOverrides.setContextHeader(request, contextId);
+      var response = await request.close();
+      expect(response.statusCode, 200);
+      expect(response.headers.value(HttpHeaders.expiresHeader),
+          'Mon, 16 Aug 2221 10:17:45 GMT');
+
+      var data = await consolidateHttpClientResponseBytes(response);
+      var content = jsonDecode(String.fromCharCodes(data));
+      expect(content, {
+        'method': 'GET',
+        'data': {
+          'userName': '12345'
+        }
+      });
+
+      // second request
+      var requestSecond = await httpClient.openUrl('GET',
+          server.getUri('json_with_content_length_expires_etag_last_modified'));
+      KrakenHttpOverrides.setContextHeader(requestSecond, contextId);
+      var responseSecond = await requestSecond.close();
+
+      // Note: This line is different.
+      assert(responseSecond.headers.value('cache-hits') == null);
+      HttpCacheController.mode = HttpCacheMode.DEFAULT;
+    });
+
+    test('HttpCacheMode.CACHE_ONLY', () async {
+      HttpCacheController.mode = HttpCacheMode.CACHE_ONLY;
+      var request = await httpClient.openUrl('GET',
+          server.getUri('network'));
+      KrakenHttpOverrides.setContextHeader(request, contextId);
+
+      var error;
+      try {
+        await request.close();
+      } catch (_error) {
+        error = _error;
+      }
+      assert(error is FlutterError);
+
+      HttpCacheController.mode = HttpCacheMode.DEFAULT;
+    });
+
     // Solve problem that consuming response multi times,
     // causing cache file > 2 * chunk (each chunk default to 64kb) will be truncated.
     test('File over 128K', () async {

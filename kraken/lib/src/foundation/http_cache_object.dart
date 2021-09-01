@@ -193,6 +193,9 @@ class HttpCacheObject {
       print('Error while reading cache object for $url');
       print('\n$message');
       print('\n$stackTrace');
+
+      // Remove index file while invalid.
+      await remove();
     }
   }
 
@@ -229,7 +232,7 @@ class HttpCacheObject {
 
     // The index file will not be TOO LARGE,
     // so take bytes at one time.
-    await _file.writeAsBytes(bytesBuilder.takeBytes());
+    await _file.writeAsBytes(bytesBuilder.takeBytes(), flush: true);
 
     _valid = true;
   }
@@ -239,10 +242,9 @@ class HttpCacheObject {
   }
 
   // Remove all the cached files.
-  void remove() async {
-    final File indexFile = File(path.join(cacheDirectory, '$hash'));
+  Future<void> remove() async {
     await Future.wait([
-      indexFile.delete(),
+      _file.delete(),
       _blob.remove(),
     ]);
     _valid = false;
@@ -364,8 +366,10 @@ class HttpCacheObjectBlob extends EventSink<List<int>> {
   }
 
   @override
-  void close() {
-    _writer?.close();
+  void close() async {
+    // Ensure buffer has been written.
+    await _writer?.flush();
+    await _writer?.close();
   }
 
   Future<bool> exists() {

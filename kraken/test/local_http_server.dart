@@ -36,37 +36,58 @@ class LocalHttpServer {
     ServerSocket.bind(InternetAddress.loopbackIPv4, port).then((ServerSocket server) {
       _server = server;
       server.listen((Socket socket) {
+        List<int> data = [];
+
         socket.listen((List<int> chunk) {
-          BytesBuilder methodBuilder = BytesBuilder();
-          BytesBuilder pathBuilder = BytesBuilder();
-          int state = 0; // state 0 -> method, state 1 -> path
-          for (int byte in chunk) {
-            // space
-            if (byte == 32) {
-              state ++;
-              continue;
-            }
+          data.addAll(chunk);
 
-            // \r
-            if (byte == 13) {
-              break;
-            }
+          if (data.length >= 4) {
+            var lastFour = data.sublist(chunk.length - 4, chunk.length);
 
-            if (state == 0) {
-              methodBuilder.addByte(byte);
-            } else if (state == 1) {
-              pathBuilder.addByte(byte);
+            // Ends with \r\n\r\n or
+            // @TODO: content-length.
+            if (lastFour[0] == 13 && lastFour[1] == 10 && lastFour[2] == 13 && lastFour[3] == 10) {
+              var methodBuilder = BytesBuilder();
+              var pathBuilder = BytesBuilder();
+
+              int state = 0; // state 0 -> method, state 1 -> path
+              for (int byte in data) {
+                // space
+                if (byte == 32) {
+                  state ++;
+                  continue;
+                }
+
+                // \r
+                if (byte == 13) {
+                  break;
+                }
+
+                if (state == 0) {
+                  methodBuilder.addByte(byte);
+                } else if (state == 1) {
+                  pathBuilder.addByte(byte);
+                }
+              }
+
+              String method = String.fromCharCodes(methodBuilder.takeBytes()).toUpperCase();
+              String path = String.fromCharCodes(pathBuilder.takeBytes());
+
+              // Example: GET_foo.txt represents `GET /foo`
+              File p = File('$basePath/${method}_${path.substring(1)}');
+              if (!p.existsSync()) {
+                throw FlutterError('Reading local http data, but file not exists: \n${p.absolute.path}');
+              }
+
+              socket
+                .addStream(p.openRead())
+                .then((_) {
+                  socket.close();
+                });
             }
           }
-          String method = String.fromCharCodes(methodBuilder.takeBytes()).toUpperCase();
-          String path = String.fromCharCodes(pathBuilder.takeBytes());
-
-          // Example: GET_foo.txt represents `GET /foo`
-          File p = File('$basePath/${method}_${path.substring(1)}');
-          if (!p.existsSync()) {
-            throw FlutterError('Reading local http data, but file not exists: \n${p.absolute.path}');
-          }
-          socket.add(p.readAsBytesSync());
+        }, onError: (Object error, [StackTrace? stackTrace]) {
+          print('$error $stackTrace');
         });
       });
     });
@@ -77,3 +98,5 @@ class LocalHttpServer {
     _server = null;
   }
 }
+
+
