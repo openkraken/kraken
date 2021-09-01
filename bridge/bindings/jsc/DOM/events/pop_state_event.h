@@ -3,8 +3,8 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKENBRIDGE_POPSTATE_EVENT_H
-#define KRAKENBRIDGE_POPSTATE_EVENT_H
+#ifndef KRAKENBRIDGE_POP_STATE_EVENT_H
+#define KRAKENBRIDGE_POP_STATE_EVENT_H
 
 #include "bindings/jsc/DOM/event.h"
 #include "bindings/jsc/host_class.h"
@@ -18,4 +18,4 @@ void bindPopStateEvent(std::unique_ptr<JSContext> &context);
 
 } // namespace kraken::binding::jsc
 
-#endif // KRAKENBRIDGE_POPSTATE_EVENT_H
+#endif // KRAKENBRIDGE_POP_STATE_EVENT_H
