@@ -36,6 +36,8 @@ public:
   KRAKEN_EXPORT void evaluateScript(const NativeString *script, const char *url, int startLine);
   KRAKEN_EXPORT void parseHTML(const NativeString *script, const char *url);
   KRAKEN_EXPORT void evaluateScript(const std::u16string &script, const char *url, int startLine);
+  KRAKEN_EXPORT void setHref(const char *url);
+  KRAKEN_EXPORT NativeString* getHref();
 
   const std::unique_ptr<kraken::binding::jsc::JSContext> &getContext() const {
     return m_context;

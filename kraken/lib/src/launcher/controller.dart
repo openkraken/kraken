@@ -604,9 +604,13 @@ class KrakenController {
     return completer.future;
   }
 
-  String _href = '';
-  String get href => _href;
-  set href(String value) => _href = value;
+  String get href {
+    return getHref(_view.contextId);
+  }
+
+  set href(String value) {
+    setHref(_view.contextId, value);
+  }
 
   // reload current kraken view.
   Future<void> reload() async {

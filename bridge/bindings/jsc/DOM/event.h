@@ -49,6 +49,7 @@
 #define EVENT_PAN "pan"
 #define EVENT_LONG_PRESS "longpress"
 #define EVENT_SCALE "scale"
+#define EVENT_POP_STATE "popstate"
 
 
 namespace kraken::binding::jsc {
