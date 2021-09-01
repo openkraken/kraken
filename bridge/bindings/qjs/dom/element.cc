@@ -94,8 +94,7 @@ JSValue Element::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val
     return JS_ThrowTypeError(ctx, "Illegal constructor");
   }
 
-  const char *cName = JS_ToCString(ctx, tagName);
-  std::string name = std::string(cName);
+  std::string name = jsValueToStdString(ctx, tagName);
 
   if (elementConstructorMap.count(name) > 0) {
     return JS_CallConstructor(ctx, elementConstructorMap[name]->classObject, argc, argv);
@@ -109,8 +108,6 @@ JSValue Element::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val
     // Fallback to default Element class
     element = new ElementInstance(this, name, true);
   }
-
-  JS_FreeCString(m_ctx, cName);
 
   return element->instanceObject;
 }
@@ -548,6 +545,7 @@ JSValue ElementInstance::internalGetTextContent() {
   for (auto &node : childNodes) {
     JSValue nodeText = node->internalGetTextContent();
     JS_Call(m_ctx, pushMethod, array, 1, &nodeText);
+    JS_FreeValue(m_ctx, nodeText);
   }
 
   JSValue joinMethod = JS_GetPropertyStr(m_ctx, array, "join");

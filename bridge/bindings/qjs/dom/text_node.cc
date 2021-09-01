@@ -44,19 +44,19 @@ PROP_GETTER(TextNodeInstance, data)(QjsContext *ctx, JSValue this_val, int argc,
   auto *textNode = static_cast<TextNodeInstance *>(JS_GetOpaque(this_val, TextNode::classId()));
   return textNode->m_data;
 }
-PROP_SETTER(TextNodeInstance, data)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {return JS_NULL;}
-
-PROP_GETTER(TextNodeInstance, textContent)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(TextNodeInstance, data)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *textNode = static_cast<TextNodeInstance *>(JS_GetOpaque(this_val, TextNode::classId()));
-  return textNode->m_data;
+  textNode->internalSetTextContent(argv[0]);
+  return JS_NULL;
 }
-PROP_SETTER(TextNodeInstance, textContent)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {return JS_NULL;}
 
 PROP_GETTER(TextNodeInstance, nodeValue)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *textNode = static_cast<TextNodeInstance *>(JS_GetOpaque(this_val, TextNode::classId()));
   return textNode->m_data;
 }
 PROP_SETTER(TextNodeInstance, nodeValue)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *textNode = static_cast<TextNodeInstance *>(JS_GetOpaque(this_val, TextNode::classId()));
+  textNode->internalSetTextContent(argv[0]);
   return JS_NULL;
 }
 
@@ -80,9 +80,13 @@ TextNodeInstance::~TextNodeInstance() {
 }
 
 JSValue TextNodeInstance::internalGetTextContent() {
-  return m_data;
+  return JS_DupValue(m_ctx, m_data);
 }
 void TextNodeInstance::internalSetTextContent(JSValue content) {
+  if (!JS_IsNull(m_data)) {
+    JS_FreeValue(m_ctx, m_data);
+  }
+
   m_data = JS_DupValue(m_ctx, content);
 
   std::string key = "data";

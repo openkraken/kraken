@@ -34,7 +34,7 @@ public:
   explicit TextNodeInstance(TextNode *textNode, JSValue textData);
   ~TextNodeInstance();
 private:
-  DEFINE_HOST_CLASS_PROPERTY(4, data, textContent, nodeValue, nodeName);
+  DEFINE_HOST_CLASS_PROPERTY(3, data, nodeValue, nodeName);
   JSValue internalGetTextContent() override;
   void internalSetTextContent(JSValue content) override;
   friend TextNode;

@@ -24,7 +24,13 @@ const entryFiles = [
   './specs/dom/nodes/get-element-by-id.ts',
   './specs/dom/nodes/get-element-by-tag-name.ts',
   './specs/dom/nodes/insert-before.ts',
-  './specs/dom/nodes/node.ts'
+  './specs/dom/nodes/node.ts',
+  './specs/dom/nodes/offset.ts',
+  './specs/dom/nodes/remove-child.ts',
+  './specs/dom/nodes/replace-child.ts',
+  './specs/dom/nodes/textNode.ts',
+  './specs/dom/elements/canvas/canvas.ts',
+  './specs/dom/elements/canvas/context2d.ts'
 ];
 
 // Add global vars

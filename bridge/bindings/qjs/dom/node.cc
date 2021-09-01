@@ -232,7 +232,9 @@ JSValue Node::copyNodeValue(QjsContext *ctx, NodeInstance *node) {
     JSValue arguments[] = {
       textContent
     };
-    return JS_CallConstructor(ctx, TextNode::instance(textNode->m_context)->classObject, 1, arguments);
+    JSValue result = JS_CallConstructor(ctx, TextNode::instance(textNode->m_context)->classObject, 1, arguments);
+    JS_FreeValue(ctx, textContent);
+    return result;
   }
   return JS_NULL;
 }
