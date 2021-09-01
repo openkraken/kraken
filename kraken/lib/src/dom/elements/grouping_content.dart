@@ -33,8 +33,8 @@ const Map<String, dynamic> _preDefaultStyle = {
 
 const Map<String, dynamic> _bDefaultStyle = {
   DISPLAY: BLOCK,
-  MARGIN_TOP: '16px',
-  MARGIN_BOTTOM: '16px',
+  MARGIN_TOP: '1em',
+  MARGIN_BOTTOM: '1em',
   MARGIN_LEFT: '40px',
   MARGIN_RIGHT: '40px'
 };
@@ -46,9 +46,8 @@ const Map<String, dynamic> _ddDefaultStyle = {
 
 const Map<String, dynamic> _pDefaultStyle = {
   DISPLAY: BLOCK,
-  // TODO: setting default margin
-  // MARGIN_TOP: '16px',
-  // MARGIN_BOTTOM: '16px'
+  MARGIN_TOP: '1em',
+  MARGIN_BOTTOM: '1em'
 };
 
 class DivElement extends Element {
@@ -73,8 +72,9 @@ class BlockQuotationElement extends Element {
 
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmlparagraphelement
 class ParagraphElement extends Element {
+  static Map<String, dynamic> defaultStyle = _defaultStyle;
   ParagraphElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: PARAGRAPH, defaultStyle: _pDefaultStyle);
+      : super(targetId, nativePtr, elementManager, tagName: PARAGRAPH, defaultStyle: defaultStyle);
 }
 
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmlulistelement
