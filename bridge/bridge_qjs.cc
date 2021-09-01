@@ -7,8 +7,6 @@
 
 #include "dart_methods.h"
 #include <atomic>
-#include <cstdlib>
-#include <memory>
 #include "bridge_qjs.h"
 #include "bindings/qjs/qjs_patch.h"
 
@@ -82,7 +80,6 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindWindow(m_context);
   bindEvent(m_context);
   bindCustomEvent(m_context);
-  bindDocument(m_context);
   bindNode(m_context);
   bindTextNode(m_context);
   bindCommentNode(m_context);
@@ -102,6 +99,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindMediaErrorEvent(m_context);
   bindMouseEvent(m_context);
   bindTouchEvent(m_context);
+  bindDocument(m_context);
   bindPerformance(m_context);
 
 #if ENABLE_PROFILE

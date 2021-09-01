@@ -21,7 +21,7 @@ import 'package:kraken/foundation.dart';
 // import 'package:kraken_animation_player/kraken_animation_player.dart';
 // import 'package:kraken_video_player/kraken_video_player.dart';
 // import 'package:kraken_webview/kraken_webview.dart';
-import 'local_http_server.dart'
+import 'local_http_server.dart';
 
 String? pass = (AnsiPen()..green())('[TEST PASS]');
 String? err = (AnsiPen()..red())('[TEST FAILED]');
