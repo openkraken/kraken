@@ -108,8 +108,8 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
     return _children;
   }
 
-  Node(this.nodeType, int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager, this.nodeName)
-      : super(targetId, nativeEventTarget, elementManager);
+  Node(this.nodeType, int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager, this.nodeName, [bool protectNativeEventTarget = false])
+      : super(targetId, nativeEventTarget, elementManager, protectNativeEventTarget: protectNativeEventTarget);
 
   // If node is on the tree, the root parent is body.
   bool get isConnected {

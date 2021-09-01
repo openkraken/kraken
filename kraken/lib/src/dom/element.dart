@@ -157,12 +157,11 @@ class Element extends Node
         // Whether element allows children.
         bool isIntrinsicBox = false,
         this.repaintSelf = false,
-        // @HACK: overflow scroll needs to create an shadow element to create an scrolling renderBox for better scrolling performance.
-        // we needs to prevent this shadow element override real element in nativeMap.
-        bool isHiddenElement = false})
+        bool protectNativeEventTarget = false
+      })
       : _isIntrinsicBox = isIntrinsicBox,
         defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : INLINE,
-        super(NodeType.ELEMENT_NODE, targetId, nativeEventTarget, elementManager, tagName) {
+        super(NodeType.ELEMENT_NODE, targetId, nativeEventTarget, elementManager, tagName, protectNativeEventTarget) {
     style = CSSStyleDeclaration(this);
     _setDefaultStyle();
   }

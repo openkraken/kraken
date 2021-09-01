@@ -57,18 +57,18 @@ class ImageElement extends Element {
       elementManager,
       isIntrinsicBox: true,
       tagName: IMAGE,
-      defaultStyle: _defaultStyle) {
+      defaultStyle: _defaultStyle,
+      // Image elements have networking resources, we should protect img element util network resource fetched.
+      protectNativeEventTarget: true
+  ) {
     _renderStreamListener = ImageStreamListener(_renderImageStream);
-
-    // Image elements have networking resources, we should protect img element util network resource fetched.
-    protectNativeEventTarget(nativeEventTargetPtr);
   }
 
   ui.Image? get image => _imageInfo?.image;
 
   @override
   handleJSCall(String method, List argv) {
-    switch(method) {
+    switch (method) {
       case 'getWidth':
         return width;
       case 'getHeight':
@@ -168,7 +168,6 @@ class ImageElement extends Element {
       _resetLazyLoading();
       _constructImageChild();
       _loadImage();
-
     }
   }
 
@@ -192,6 +191,7 @@ class ImageElement extends Element {
   }
 
   void dispatchImageLoadEvent() {
+    print('trigger image load event');
     dispatchEvent(Event(EVENT_LOAD));
     // After load event triggered. We should deliver the priority of ImageElement to JS garbage collector.
     unprotectNativeEventTarget(nativeEventTargetPtr);
@@ -249,6 +249,7 @@ class ImageElement extends Element {
   // Delay image size setting to next frame to make sure image has been layouted
   // to wait for percentage size to be calculated correctly in the case of image has been cached
   bool _hasImageLayoutCallbackPending = false;
+
   void _handleImageResizeAfterLayout() {
     if (_hasImageLayoutCallbackPending) return;
     _hasImageLayoutCallbackPending = true;
@@ -365,10 +366,10 @@ class ImageElement extends Element {
       }
 
       _propertyWidth = CSSLength.toDisplayPortValue(
-        value,
-        viewportSize: viewportSize,
-        rootFontSize: rootFontSize,
-        fontSize: fontSize
+          value,
+          viewportSize: viewportSize,
+          rootFontSize: rootFontSize,
+          fontSize: fontSize
       );
       _resize();
     } else if (key == HEIGHT) {
@@ -377,10 +378,10 @@ class ImageElement extends Element {
       }
 
       _propertyHeight = CSSLength.toDisplayPortValue(
-        value,
-        viewportSize: viewportSize,
-        rootFontSize: rootFontSize,
-        fontSize: fontSize
+          value,
+          viewportSize: viewportSize,
+          rootFontSize: rootFontSize,
+          fontSize: fontSize
       );
       _resize();
     }

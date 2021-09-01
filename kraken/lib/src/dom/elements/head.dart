@@ -46,9 +46,7 @@ class NoScriptElement extends Element {
 
 class ScriptElement extends Element {
   ScriptElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: SCRIPT, defaultStyle: _defaultStyle) {
-    // Script elements have networking resources, we should protect script element util network resource fetched.
-    protectNativeEventTarget(nativePtr);
+      : super(targetId, nativePtr, elementManager, tagName: SCRIPT, defaultStyle: _defaultStyle, protectNativeEventTarget: true) {
   }
 
   @override
