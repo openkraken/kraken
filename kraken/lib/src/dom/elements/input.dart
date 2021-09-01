@@ -414,6 +414,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       .size;
     return textSize;
   }
+  
+  Size? _textSize;
 
   // Whether gesture is dragging.
   bool _isDragging = false;
@@ -440,7 +442,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         );
         _renderEditable!.handleTapDown(details);
       }
-
+      // Cache text size on touch start to be used in touch move and touch end.
+      _textSize = getTextSize();
     } else if (event.type == EVENT_TOUCH_MOVE ||
       event.type == EVENT_TOUCH_END
     ) {
@@ -449,15 +452,13 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         InputElement.setFocus(this);
       }
 
-      Size textSize = getTextSize();
-
       TouchList touches = (event as TouchEvent).touches;
       if (touches.length > 1) return;
+      
       Touch touch = touches.item(0);
       Offset _selectEndPosition = Offset(touch.clientX, touch.clientY);
-
-      // Disable text selection and allow scrolling when text size is larger than input size.
-      if (textSize.width > _renderEditable!.size.width) {
+      // Disable text selection and enable scrolling when text size is larger than input size.
+      if (_textSize!.width > _renderEditable!.size.width) {
         if (event.type == EVENT_TOUCH_END && _selectStartPosition == _selectEndPosition) {
           _renderEditable!.selectPositionAt(
             from: _selectStartPosition!,
@@ -467,6 +468,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         }
         return;
       }
+      
       _renderEditable!.selectPositionAt(
         from: _selectStartPosition!,
         to: _selectEndPosition,
