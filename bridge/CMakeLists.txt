@@ -43,7 +43,7 @@ list(APPEND PUBLIC_HEADERS
   )
 
 if (ENABLE_ASAN)
-  add_compile_options(-fsanitize=address -fno-omit-frame-pointer -O1)
+  add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
   add_link_options(-fsanitize=address -fno-omit-frame-pointer)
 endif ()
 

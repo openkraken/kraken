@@ -78,18 +78,25 @@ static JSValue matchImageSnapshot(QjsContext *ctx, JSValueConst this_val, int ar
   };
   list_add_tail(&callbackContext->link, &bridge->image_link);
 
-  auto fn = [](void *ptr, int32_t contextId, int8_t result) {
+  auto fn = [](void *ptr, int32_t contextId, int8_t result, const char* errmsg) {
     auto *callbackContext = static_cast<ImageSnapShotContext *>(ptr);
     QjsContext *ctx = callbackContext->context->ctx();
 
-    JSValue arguments[] = {JS_NewBool(ctx, result != 0)};
-    JSValue returnValue = JS_Call(ctx, callbackContext->callback, callbackContext->context->global(), 1, arguments);
-    callbackContext->context->handleException(&returnValue);
-    callbackContext->context->drainPendingPromiseJobs();
+    if (errmsg == nullptr) {
+      JSValue arguments[] = {JS_NewBool(ctx, result != 0), JS_NULL};
+      JSValue returnValue = JS_Call(ctx, callbackContext->callback, callbackContext->context->global(), 1, arguments);
+      callbackContext->context->handleException(&returnValue);
+    } else {
+      JSValue errmsgValue = JS_NewString(ctx, errmsg);
+      JSValue arguments[] = {JS_NewBool(ctx, false), errmsgValue};
+      JSValue returnValue = JS_Call(ctx, callbackContext->callback, callbackContext->context->global(), 2, arguments);
+      callbackContext->context->handleException(&returnValue);
+      JS_FreeValue(ctx, errmsgValue);
+    }
 
+    callbackContext->context->drainPendingPromiseJobs();
     JS_FreeValue(callbackContext->context->ctx(), callbackContext->callback);
     list_del(&callbackContext->link);
-    callbackContext->context->handleException(&returnValue);
   };
 
   getDartMethod()->matchImageSnapshot(callbackContext, context->getContextId(), blob->bytes(), blob->size(), screenShotNativeString, fn);
@@ -238,6 +245,7 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
 
   JSValue arguments[] = {callback};
   JS_Call(context->ctx(), executeTestCallback, executeTestCallback, 1, arguments);
+  context->drainPendingPromiseJobs();
   JS_FreeValue(context->ctx(), executeTestCallback);
   JS_FreeValue(context->ctx(), callback);
   executeTestCallback = JS_NULL;

@@ -41,7 +41,7 @@ typedef void (*InitHTML)(int32_t contextId, void *nativePtr);
 typedef void (*InitWindow)(int32_t contextId, void *nativePtr);
 typedef void (*InitDocument)(int32_t contextId, void *nativePtr);
 
-using MatchImageSnapshotCallback = void (*)(void *callbackContext, int32_t contextId, int8_t);
+using MatchImageSnapshotCallback = void (*)(void *callbackContext, int32_t contextId, int8_t, const char *errmsg);
 using MatchImageSnapshot = void (*)(void *callbackContext, int32_t contextId, uint8_t *bytes, int32_t length,
                                     NativeString *name, MatchImageSnapshotCallback callback);
 using Environment = const char *(*)();

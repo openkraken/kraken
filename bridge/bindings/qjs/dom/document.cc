@@ -232,16 +232,16 @@ JSValue Document::getElementsByTagName(QjsContext *ctx, JSValue this_val, int ar
 
   std::vector<ElementInstance *> elements;
 
-//  traverseNode(document->m_documentElement, [tagName, &elements](NodeInstance *node) {
-//    if (node->nodeType == NodeType::ELEMENT_NODE) {
-//      auto element = static_cast<ElementInstance *>(node);
-//      if (element->tagName() == tagName) {
-//        elements.emplace_back(element);
-//      }
-//    }
-//
-//    return false;
-//  });
+  traverseNode(document->m_documentElement, [tagName, &elements](NodeInstance *node) {
+    if (node->nodeType == NodeType::ELEMENT_NODE) {
+      auto element = static_cast<ElementInstance *>(node);
+      if (element->tagName() == tagName) {
+        elements.emplace_back(element);
+      }
+    }
+
+    return false;
+  });
 
   JSValue array = JS_NewArray(ctx);
   JSValue pushMethod = JS_GetPropertyStr(ctx, array, "push");
