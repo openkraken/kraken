@@ -22,13 +22,13 @@ JSDocumentFragment::JSDocumentFragment(JSContext *context) : JSNode(context) {}
 JSObjectRef JSDocumentFragment::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                               const JSValueRef *arguments, JSValueRef *exception) {
   auto instance = new DocumentFragmentInstance(this);
-  instance->setNodeFlag(DocumentFragmentInstance::NodeFlag::IsDocumentFragment);
   return instance->object;
 }
 
 JSDocumentFragment::DocumentFragmentInstance::DocumentFragmentInstance(JSDocumentFragment *jsDocumentFragment)
   : NodeInstance(jsDocumentFragment, NodeType::DOCUMENT_FRAGMENT_NODE) {
   nativeNode = new NativeNode(new NativeEventTarget(this));
+  setNodeFlag(DocumentFragmentInstance::NodeFlag::IsDocumentFragment);
   std::string tagName = "documentfragment";
   NativeString args_01{};
   buildUICommandArgs(tagName, args_01);
