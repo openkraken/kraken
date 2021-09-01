@@ -334,13 +334,15 @@ class _KrakenState extends State<Kraken> {
 
   @override
   Widget build(BuildContext context) {
-    return FocusableActionDetector(
-      actions: _actionMap,
-      focusNode: _focusNode,
-      onFocusChange: _handleFocusChange,
-      child: _KrakenRenderObjectWidget(
-        context.widget as Kraken,
-        widgetDelegate,
+    return RepaintBoundary(
+      child: FocusableActionDetector(
+        actions: _actionMap,
+        focusNode: _focusNode,
+        onFocusChange: _handleFocusChange,
+        child: _KrakenRenderObjectWidget(
+          context.widget as Kraken,
+          widgetDelegate,
+        )
       )
     );
   }
