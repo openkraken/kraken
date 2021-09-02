@@ -96,6 +96,10 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox,
     List<RenderObject?> sortedChildren = (this as RenderLayoutBox).sortedChildren;
     for (int i = sortedChildren.length - 1; i >= 0; i--) {
       ChildType child = sortedChildren[i] as ChildType;
+      // Ignore detached render object.
+      if (!child.attached) {
+        continue;
+      }
       final ParentDataType childParentData = child.parentData as ParentDataType;
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset == Offset.zero
