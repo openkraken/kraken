@@ -58,7 +58,7 @@ std::__thread_id getUIThreadId() {
   return uiThreadId;
 }
 
-void printError(int32_t contextId, const char* errmsg) {
+void printError(int32_t contextId, const char* errmsg, void *errorObject) {
   if (kraken::getDartMethod()->onJsError != nullptr) {
     kraken::getDartMethod()->onJsError(contextId, errmsg);
   }
@@ -153,6 +153,18 @@ void parseHTML(int32_t contextId, NativeString *code, const char *bundleFilename
   assert(checkContext(contextId) && "parseHTML: contextId is not valid");
   auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
   context->parseHTML(code, bundleFilename);
+}
+
+void setHref(int32_t contextId, const char *href) {
+  assert(checkContext(contextId) && "setHref: contextId is not valid");
+  auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
+  context->setHref(href);
+}
+
+NativeString* getHref(int32_t contextId) {
+  assert(checkContext(contextId) && "getHref: contextId is not valid");
+  auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
+  return context->getHref();
 }
 
 void reloadJsContext(int32_t contextId) {

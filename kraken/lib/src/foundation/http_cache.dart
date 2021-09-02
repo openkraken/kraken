@@ -12,7 +12,23 @@ import 'package:kraken/foundation.dart';
 
 import 'http_cache_object.dart';
 
+enum HttpCacheMode {
+
+  /// Default cache usage mode. If the navigation type doesn't impose any specific
+  /// behavior, use cached resources when they are available and not expired,
+  /// otherwise load resources from the network.
+  DEFAULT,
+
+  /// Don't use the network, load from the cache.
+  CACHE_ONLY,
+
+  /// Don't use the cache, load from the network.
+  NO_CACHE,
+}
+
 class HttpCacheController {
+  static HttpCacheMode mode = HttpCacheMode.DEFAULT;
+
   static final Map<String, HttpCacheController> _controllers = HashMap();
 
   static Directory? _cacheDirectory;
@@ -93,10 +109,9 @@ class HttpCacheController {
       HttpClientRequest request,
       HttpClientResponse response,
       HttpCacheObject cacheObject) async {
-
     await cacheObject.updateIndex(response);
 
-    // Handle with HTTP 304
+    // Negotiate cache with HTTP 304
     if (response.statusCode == HttpStatus.notModified) {
       HttpClientResponse? cachedResponse  = await cacheObject.toHttpClientResponse();
       if (cachedResponse != null) {
@@ -104,7 +119,7 @@ class HttpCacheController {
       }
     }
 
-    if (response.statusCode == HttpStatus.ok && response is! HttpClientCachedResponse) {
+    if (response.statusCode == HttpStatus.ok) {
       // Create cache object.
       HttpCacheObject cacheObject = HttpCacheObject
           .fromResponse(
@@ -162,7 +177,7 @@ class HttpClientCachedResponse extends Stream<List<int>> implements HttpClientRe
       void Function(List<int> event)? onData, {
         Function? onError, void Function()? onDone, bool? cancelOnError
       }) {
-    _blobSink = cacheObject.openBlobWrite();
+    _blobSink ??= cacheObject.openBlobWrite();
 
     void _handleData(List<int> data) {
       if (onData != null) onData(data);

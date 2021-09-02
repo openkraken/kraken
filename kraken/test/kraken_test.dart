@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kraken/foundation.dart';
 
 import 'foundation.dart' as foundation;
+import 'module.dart' as module;
 import 'local_http_server.dart';
 
 // The main entry for kraken unit test.
@@ -30,6 +31,7 @@ void main() {
 
   // Start tests.
   foundation.main();
+  module.main();
 
   tearDownAll(() {
     if (tempDirectory.existsSync()) {

@@ -45,11 +45,11 @@ static FlutterMethodChannel *methodChannel = nil;
   } else {
     result(FlutterMethodNotImplemented);
   }
+}
 
-  - (NSString*) getTemporaryDirectory {
-    NSArray<NSString *>* paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-    return paths.firstObject;
-  }
+- (NSString*) getTemporaryDirectory {
+  NSArray<NSString *>* paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+  return [paths.firstObject stringByAppendingString: @"/Kraken"];
 }
 
 @end

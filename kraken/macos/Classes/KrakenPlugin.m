@@ -47,7 +47,7 @@ static FlutterMethodChannel *methodChannel = nil;
 
 - (NSString*) getTemporaryDirectory {
   NSArray<NSString *>* paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-  return paths.firstObject;
+  return [paths.firstObject stringByAppendingString: @"/Kraken"];
 }
 
 @end

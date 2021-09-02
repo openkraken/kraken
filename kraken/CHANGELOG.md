@@ -1,3 +1,42 @@
+## 0.8.3+3
+
+**Bug Fixed**
+
++ Fix error when reading local path. https://github.com/openkraken/kraken/pull/635
+
+## 0.8.3+2
+
+**Bug Fixed**
+
++ Fix fetch request lost HTTP headers. https://github.com/openkraken/kraken/pull/633
+
+## 0.8.3+1
+
+**Bug Fixed**
+
++ Fix ios build. https://github.com/openkraken/kraken/pull/629
+
+## 0.8.3
+
+**Bug Fixed**
+
++ Fix crash caused by context has been released. https://github.com/openkraken/kraken/pull/605
++ Fix window.open() not working when bundleURL not exist. https://github.com/openkraken/kraken/pull/612
++ Fix location.href is empty when set onLoadError handler. https://github.com/openkraken/kraken/pull/613
++ Fix http cache should not intercept multi times. https://github.com/openkraken/kraken/pull/619
++ Fix input value when set to null. https://github.com/openkraken/kraken/pull/623
++ Fix input change event not trigger when blur. https://github.com/openkraken/kraken/pull/626
++ Fix keyboard not shown when keyboard dismissed and input gets focused again. https://github.com/openkraken/kraken/pull/627
+
+**Features**
+
++ Support window.onerror and global error event. https://github.com/openkraken/kraken/pull/601
++ Add HTML Head's tags, like `<head>`, `<link>`, `<style>`. https://github.com/openkraken/kraken/pull/603
++ Support customize `User-Agent` header. https://github.com/openkraken/kraken/pull/604
++ Remove androidx dependence. https://github.com/openkraken/kraken/pull/606
++ Add default margin for h1-h6 elements. https://github.com/openkraken/kraken/pull/607
+
+
 ## 0.8.2+1
 
 **Bug Fixed**

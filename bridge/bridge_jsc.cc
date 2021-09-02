@@ -12,7 +12,6 @@
 #include <cstdlib>
 #include <memory>
 
-#include "bindings/jsc/KOM/timer.h"
 #include "bindings/jsc/DOM/comment_node.h"
 #include "bindings/jsc/DOM/custom_event.h"
 #include "bindings/jsc/DOM/document.h"
@@ -21,16 +20,15 @@
 #include "bindings/jsc/DOM/elements/input_element.h"
 #include "bindings/jsc/DOM/elements/svg_element.h"
 #include "bindings/jsc/DOM/event.h"
-#include "bindings/jsc/DOM/custom_event.h"
-#include "bindings/jsc/DOM/events/gesture_event.h"
-#include "bindings/jsc/DOM/events/mouse_event.h"
-#include "bindings/jsc/DOM/events/input_event.h"
 #include "bindings/jsc/DOM/event_target.h"
 #include "bindings/jsc/DOM/events/close_event.h"
+#include "bindings/jsc/DOM/events/gesture_event.h"
 #include "bindings/jsc/DOM/events/input_event.h"
 #include "bindings/jsc/DOM/events/intersection_change_event.h"
 #include "bindings/jsc/DOM/events/media_error_event.h"
 #include "bindings/jsc/DOM/events/message_event.h"
+#include "bindings/jsc/DOM/events/mouse_event.h"
+#include "bindings/jsc/DOM/events/pop_state_event.h"
 #include "bindings/jsc/DOM/events/touch_event.h"
 #include "bindings/jsc/DOM/node.h"
 #include "bindings/jsc/DOM/style_declaration.h"
@@ -40,11 +38,12 @@
 #include "bindings/jsc/KOM/location.h"
 #include "bindings/jsc/KOM/performance.h"
 #include "bindings/jsc/KOM/screen.h"
+#include "bindings/jsc/KOM/timer.h"
 #include "bindings/jsc/KOM/window.h"
+#include "bindings/jsc/html_parser.h"
 #include "bindings/jsc/js_context_internal.h"
 #include "bindings/jsc/kraken.h"
 #include "bindings/jsc/ui_manager.h"
-#include "bindings/jsc/html_parser.h"
 
 namespace kraken {
 
@@ -57,10 +56,23 @@ ConsoleMessageHandler JSBridge::consoleMessageHandler {nullptr};
  * JSRuntime
  */
 JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : contextId(contextId) {
-  auto errorHandler = [handler, this](int32_t contextId, const char *errmsg) {
-    handler(contextId, errmsg);
-    // trigger window.onerror handler.
-    // TODO: trigger onerror event.
+  auto errorHandler = [handler, this](int32_t contextId, const char *errmsg, JSObjectRef errorObject) {
+    handler(contextId, errmsg, errorObject);
+
+    // trigger error event.
+    JSStringHolder windowKeyHolder = JSStringHolder(m_context.get(), "window");
+    JSValueRef windowValue = JSObjectGetProperty(m_context->context(), m_context->global(), windowKeyHolder.getString(), nullptr);
+    JSObjectRef windowObject = JSValueToObject(m_context->context(), windowValue, nullptr);
+    JSStringHolder onerrorKeyHolder = JSStringHolder(m_context.get(), "__global_onerror_handler__");
+    if (JSObjectHasProperty(m_context->context(), windowObject, onerrorKeyHolder.getString())) {
+      JSValueRef onerrorFuncValue = JSObjectGetProperty(m_context->context(), windowObject, onerrorKeyHolder.getString(), nullptr);
+      JSObjectRef onerrorFunc = JSValueToObject(m_context->context(), onerrorFuncValue, nullptr);
+      JSValueRef arguments[] = {
+        errorObject
+      };
+
+      JSObjectCallAsFunction(m_context->context(), onerrorFunc, m_context->global(), 1, arguments, nullptr);
+    }
   };
 
 #if ENABLE_PROFILE
@@ -86,6 +98,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindConsole(m_context);
   bindEvent(m_context);
   bindMouseEvent(m_context);
+  bindPopStateEvent(m_context);
   bindCustomEvent(m_context);
   bindCloseEvent(m_context);
   bindGestureEvent(m_context);
@@ -160,14 +173,38 @@ void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType
   }
 }
 
-// parse html.
+// Set href.
+void JSBridge::setHref(const char *url) {
+    if (!m_context->isValid()) return;
+
+    JSStringHolder windowKeyHolder = JSStringHolder(m_context.get(), "window");
+    JSValueRef windowValue = JSObjectGetProperty(m_context->context(), m_context->global(), windowKeyHolder.getString(), nullptr);
+    JSObjectRef windowObject = JSValueToObject(m_context->context(), windowValue, nullptr);
+    auto window = static_cast<WindowInstance *>(JSObjectGetPrivate(windowObject));
+
+    HistoryItem history = { JSStringCreateWithUTF8CString(url), nullptr, true };
+    window->history_->addItem(history);
+}
+
+// Get href.
+NativeString* JSBridge::getHref() {
+  JSStringHolder windowKeyHolder = JSStringHolder(m_context.get(), "window");
+  JSValueRef windowValue = JSObjectGetProperty(m_context->context(), m_context->global(), windowKeyHolder.getString(), nullptr);
+  JSObjectRef windowObject = JSValueToObject(m_context->context(), windowValue, nullptr);
+
+  auto window = static_cast<WindowInstance *>(JSObjectGetPrivate(windowObject));
+
+  return stringRefToNativeString(window->history_->getHref());
+}
+
+// Parse html.
 void JSBridge::parseHTML(const NativeString *script, const char *url) {
   if (!m_context->isValid()) return;
 
   m_html_parser->parseHTML(script->string, script->length);
 }
 
-// eval javascript.
+// Eval javascript.
 void JSBridge::evaluateScript(const NativeString *script, const char *url, int startLine) {
   if (!m_context->isValid()) return;
 
@@ -205,7 +242,7 @@ JSBridge::~JSBridge() {
 }
 
 void JSBridge::reportError(const char *errmsg) {
-  m_handler(m_context->getContextId(), errmsg);
+  m_context->reportError(errmsg);
 }
 
 void JSBridge::setDisposeCallback(Task task, void *data) {

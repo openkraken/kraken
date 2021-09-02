@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 
+#include "bindings/jsc/KOM/window.h"
 #include "location.h"
 #include "dart_methods.h"
 
@@ -10,9 +11,13 @@ namespace kraken::binding::jsc {
 
 JSValueRef JSLocation::getProperty(std::string &name, JSValueRef *exception) {
   if (name == "href") {
-    NativeString *nativeHref = getDartMethod()->getHref(contextId);
-    JSStringRef hrefRef = JSStringCreateWithCharacters(nativeHref->string, nativeHref->length);
-    return JSValueMakeString(context->context(), hrefRef);
+    JSStringHolder windowKeyHolder = JSStringHolder(context, "window");
+    JSValueRef windowValue = JSObjectGetProperty(ctx, context->global(), windowKeyHolder.getString(), nullptr);
+    JSObjectRef windowObject = JSValueToObject(context->context(), windowValue, nullptr);
+
+    auto window = static_cast<WindowInstance *>(JSObjectGetPrivate(windowObject));
+
+    return JSValueMakeString(context->context(), window->history_->getHref());
   }
 
   return HostObject::getProperty(name, exception);

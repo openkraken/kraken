@@ -11,7 +11,6 @@ import { asyncStorage } from './async-storage';
 import { URLSearchParams } from './url-search-params';
 import { URL } from './url';
 import { kraken } from './kraken';
-import { history } from './history';
 
 defineGlobalProperty('console', console);
 defineGlobalProperty('WebSocket', WebSocket);
@@ -27,7 +26,6 @@ defineGlobalProperty('asyncStorage', asyncStorage);
 defineGlobalProperty('URLSearchParams', URLSearchParams);
 defineGlobalProperty('URL', URL);
 defineGlobalProperty('kraken', kraken);
-defineGlobalProperty('__history__', history, false);
 
 function defineGlobalProperty(key: string, value: any, isEnumerable: boolean = true) {
   Object.defineProperty(globalThis, key, {
@@ -58,18 +56,39 @@ function defineGlobalProperty(key: string, value: any, isEnumerable: boolean = t
 //   window.dispatchEvent(errorEvent);
 // };
 
+class ErrorEvent extends Event {
+  message?: string;
+  lineno?: number;
+  error?: Error;
+  colno?: number;
+  filename?: string;
+  constructor(type: string, init?: ErrorEventInit) {
+    super(type);
+
+    if (init) {
+      this.message = init.message;
+      this.lineno = init.lineno;
+      this.error = init.error;
+      this.colno = init.colno;
+      // There are no api to get filename in JSC
+      this.filename = '';
+    }
+  }
+}
+
 // Global error handler used by JS Engine
-// // @ts-ignore
-// window.__global_onerror_handler__ = function (error) {
-//   // @ts-ignore
-//   const event = new ErrorEvent({
-//     error: error,
-//     message: error.message,
-//     lineno: error.line
-//   });
-//   // @ts-ignore
-//   window.dispatchEvent(event);
-// };
+// @ts-ignore
+window.__global_onerror_handler__ = function (error) {
+  // @ts-ignore
+  const event = new ErrorEvent('error', {
+    error: error,
+    message: error.message,
+    lineno: error.line,
+    colno: error.column
+  });
+  // @ts-ignore
+  window.dispatchEvent(event);
+};
 
 // default unhandled project handler
 // window.addEventListener('unhandledrejection', (event) => {

@@ -18,6 +18,10 @@ import 'package:kraken/src/dom/element_registry.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart' as dom;
 
+const Map<String, dynamic> _defaultStyle = {
+  DISPLAY: INLINE_BLOCK,
+};
+
 typedef WidgetCreator = Widget Function(Map<String, dynamic>);
 class _WidgetCustomElement extends dom.Element {
   late WidgetCreator _widgetCreator;
@@ -32,9 +36,7 @@ class _WidgetCustomElement extends dom.Element {
       elementManager,
       tagName: tagName,
       isIntrinsicBox: true,
-      defaultStyle: {
-        DISPLAY: INLINE_BLOCK,
-      }
+      defaultStyle: _defaultStyle
   ) {
     _widgetCreator = creator;
   }
@@ -164,6 +166,14 @@ class Kraken extends StatelessWidget {
 
   KrakenController? get controller {
     return KrakenController.getControllerOfName(shortHash(this));
+  }
+
+  // Set kraken http cache mode.
+  static void setHttpCacheMode(HttpCacheMode mode) {
+    HttpCacheController.mode = mode;
+    if (kDebugMode) {
+      print('Kraken http cache mode set to $mode.');
+    }
   }
 
   static bool _isValidCustomElementName(localName) {

@@ -22,6 +22,8 @@
 #include <forward_list>
 #include "third_party/gumbo-parser/src/gumbo.h"
 
+using JSExceptionHandler = std::function<void(int32_t contextId, const char *errmsg, JSObjectRef error)>;
+
 class NativeString;
 
 namespace kraken::binding::jsc {
@@ -62,6 +64,8 @@ struct NativeGestureEvent;
 class GestureEventInstance;
 struct NativeMouseEvent;
 class MouseEventInstance;
+struct NativePopStateEvent;
+class PopStateEventInstance;
 
 class JSContext {
 public:
@@ -1092,6 +1096,60 @@ private:
   JSValueHolder m_offsetX{context, nullptr};
   JSValueHolder m_offsetY{context, nullptr};
   NativeMouseEvent *nativeMouseEvent;
+};
+
+struct NativePopStateEvent {
+  NativePopStateEvent() = delete;
+  explicit NativePopStateEvent(NativeEvent *nativeEvent) : nativeEvent(nativeEvent){};
+
+  NativeEvent *nativeEvent;
+
+  JSValueRef state;
+};
+
+class JSPopStateEvent : public JSEvent {
+public:
+  DEFINE_OBJECT_PROPERTY(PopStateEvent, 1, state);
+
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(PopStateEvent, 1, initPopStateEvent);
+
+  static std::unordered_map<JSContext *, JSPopStateEvent *> instanceMap;
+  OBJECT_INSTANCE(JSPopStateEvent)
+
+  JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                  const JSValueRef *arguments, JSValueRef *exception) override;
+
+  JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
+
+protected:
+  JSPopStateEvent() = delete;
+  explicit JSPopStateEvent(JSContext *context);
+  ~JSPopStateEvent() override;
+
+private:
+  friend PopStateEventInstance;
+
+  JSFunctionHolder m_initPopStateEvent{context, prototypeObject, this, "initPopStateEvent", initPopStateEvent};
+
+  static JSValueRef initPopStateEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                   size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+};
+
+class PopStateEventInstance : public EventInstance {
+public:
+  PopStateEventInstance() = delete;
+  explicit PopStateEventInstance(JSPopStateEvent *jsPopStateEvent, std::string eventType, JSValueRef eventInit,
+                              JSValueRef *exception);
+  explicit PopStateEventInstance(JSPopStateEvent *jsPopStateEvent, NativePopStateEvent *nativePopStateEvent);
+  JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
+  bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
+  void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
+  ~PopStateEventInstance() override;
+
+private:
+  friend JSPopStateEvent;
+  JSValueHolder m_state{context, nullptr};
+  NativePopStateEvent *nativePopStateEvent;
 };
 
 } // namespace kraken::binding::jsc

@@ -120,7 +120,7 @@ class Element extends Node
 
   final String tagName;
 
-  final Map<String, dynamic> defaultStyle;
+  final Map<String, dynamic> _defaultStyle;
 
   /// The default display type.
   final String defaultDisplay;
@@ -153,12 +153,12 @@ class Element extends Node
 
   Element(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager,
       {required this.tagName,
-        this.defaultStyle = const <String, dynamic>{},
+        Map<String, dynamic> defaultStyle = const {},
         // Whether element allows children.
         bool isIntrinsicBox = false,
-        this.repaintSelf = false
-      })
-      : _isIntrinsicBox = isIntrinsicBox,
+        this.repaintSelf = false})
+      : _defaultStyle = defaultStyle,
+        _isIntrinsicBox = isIntrinsicBox,
         defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : INLINE,
         super(NodeType.ELEMENT_NODE, targetId, nativeEventTarget, elementManager, tagName) {
     style = CSSStyleDeclaration(this);
@@ -283,8 +283,8 @@ class Element extends Node
   }
 
   void _setDefaultStyle() {
-    if (defaultStyle.isNotEmpty) {
-      defaultStyle.forEach((property, dynamic value) {
+    if (_defaultStyle.isNotEmpty) {
+      _defaultStyle.forEach((property, dynamic value) {
         style.setProperty(property, value, viewportSize);
       });
     }
