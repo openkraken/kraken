@@ -128,7 +128,7 @@ class Element extends Node
 
   final String tagName;
 
-  final Map<String, dynamic> defaultStyle;
+  final Map<String, dynamic> _defaultStyle;
 
   /// The default display type.
   final String defaultDisplay;
@@ -163,14 +163,15 @@ class Element extends Node
 
   Element(int targetId, this.nativeElementPtr, ElementManager elementManager,
       {required this.tagName,
-        this.defaultStyle = const <String, dynamic>{},
+        Map<String, dynamic> defaultStyle = const {},
         // Whether element allows children.
         bool isIntrinsicBox = false,
         this.repaintSelf = false,
         // @HACK: overflow scroll needs to create an shadow element to create an scrolling renderBox for better scrolling performance.
         // we needs to prevent this shadow element override real element in nativeMap.
         bool isHiddenElement = false})
-      : _isIntrinsicBox = isIntrinsicBox,
+      : _defaultStyle = defaultStyle,
+        _isIntrinsicBox = isIntrinsicBox,
         defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : INLINE,
         super(NodeType.ELEMENT_NODE, targetId, nativeElementPtr.ref.nativeNode, elementManager, tagName) {
     style = CSSStyleDeclaration(this);
@@ -301,8 +302,8 @@ class Element extends Node
   }
 
   void _setDefaultStyle() {
-    if (defaultStyle.isNotEmpty) {
-      defaultStyle.forEach((property, dynamic value) {
+    if (_defaultStyle.isNotEmpty) {
+      _defaultStyle.forEach((property, dynamic value) {
         style.setProperty(property, value, viewportSize);
       });
     }
