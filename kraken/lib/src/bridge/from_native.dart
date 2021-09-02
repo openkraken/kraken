@@ -353,18 +353,6 @@ void _onJSError(int contextId, Pointer<Utf8> charStr) {
 
 final Pointer<NativeFunction<NativeJSError>> _nativeOnJsError = Pointer.fromFunction(_onJSError);
 
-Pointer<NativeString> _onGetHref(int contextId) {
-  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
-  Pointer<NativeString> nativeString = malloc.allocate<NativeString>(sizeOf<NativeString>());
-  nativeString.ref.string = _stringToUint16(controller.href);
-  nativeString.ref.length = controller.href.length;
-  return nativeString;
-}
-
-typedef NativeGetHref = Pointer<NativeString> Function(Int32 contextId);
-
-final Pointer<NativeFunction<NativeGetHref>> _nativeGetHref = Pointer.fromFunction(_onGetHref);
-
 final List<int> _dartNativeMethods = [
   _nativeInvokeModule.address,
   _nativeRequestBatchUpdate.address,
@@ -384,7 +372,6 @@ final List<int> _dartNativeMethods = [
   _nativeInitDocument.address,
   _nativeGetEntries.address,
   _nativeOnJsError.address,
-  _nativeGetHref.address,
 ];
 
 typedef NativeRegisterDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);

@@ -132,6 +132,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     bindings/jsc/KOM/blob.h
     bindings/jsc/KOM/location.cc
     bindings/jsc/KOM/location.h
+    bindings/jsc/KOM/history.cc
+    bindings/jsc/KOM/history.h
     bindings/jsc/KOM/window.cc
     bindings/jsc/KOM/window.h
     bindings/jsc/KOM/screen.cc
@@ -178,6 +180,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     bindings/jsc/DOM/events/media_error_event.h
     bindings/jsc/DOM/events/message_event.cc
     bindings/jsc/DOM/events/message_event.h
+    bindings/jsc/DOM/events/pop_state_event.cc
+    bindings/jsc/DOM/events/pop_state_event.h
     bindings/jsc/DOM/events/close_event.cc
     bindings/jsc/DOM/events/close_event.h
     bindings/jsc/DOM/events/intersection_change_event.cc

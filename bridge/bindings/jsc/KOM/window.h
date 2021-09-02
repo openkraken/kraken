@@ -8,6 +8,7 @@
 #include "bindings/jsc/DOM/event_target.h"
 #include "bindings/jsc/js_context_internal.h"
 #include "location.h"
+#include "history.h"
 
 #include <array>
 #include <memory>
@@ -60,6 +61,8 @@ public:
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
   NativeWindow *nativeWindow;
+
+  JSHistory *history_;
 
 private:
   JSLocation *location_;
