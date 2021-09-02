@@ -74,7 +74,7 @@ void main() async {
   // KrakenAnimationPlayer.initialize();
   // KrakenVideoPlayer.initialize();
   // KrakenWebView.initialize();
-  // defineKrakenCustomElements();
+  defineKrakenCustomElements();
 
   // Local HTTP server.
   var httpServer = LocalHttpServer.getInstance();
