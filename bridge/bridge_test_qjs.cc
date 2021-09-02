@@ -135,6 +135,7 @@ static JSValue simulatePointer(QjsContext *ctx, JSValueConst this_val, int argc,
   uint32_t length;
   JSValue lengthValue = JS_GetPropertyStr(ctx, inputArrayValue, "length");
   JS_ToUint32(ctx, &length, lengthValue);
+  JS_FreeValue(ctx, lengthValue);
 
   auto **mousePointerList = new MousePointer *[length];
 
@@ -158,9 +159,13 @@ static JSValue simulatePointer(QjsContext *ctx, JSValueConst this_val, int argc,
     mouse->y = y;
     mouse->change = change;
     mousePointerList[i] = mouse;
+
+    JS_FreeValue(ctx, params);
+    JS_FreeValue(ctx, xValue);
+    JS_FreeValue(ctx, yValue);
+    JS_FreeValue(ctx, changeValue);
   }
 
-//  int32_t pointer = JSValueToNumber(ctx, pointerValue, exception);
   uint32_t pointer;
   JS_ToUint32(ctx, &pointer, pointerValue);
 
