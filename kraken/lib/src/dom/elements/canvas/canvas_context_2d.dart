@@ -82,7 +82,7 @@ class CanvasRenderingContext2D {
     _nativeMap.remove(nativeCanvasRenderingContext2D.address);
   }
 
-  Map<String, dynamic> _rawProperties = {};
+  final Map<String, dynamic> _rawProperties = {};
 
   dynamic handleJSCall(String method, List<dynamic> argv) {
     String operation = method.substring(0, 3);

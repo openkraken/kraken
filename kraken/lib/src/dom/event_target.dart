@@ -37,7 +37,7 @@ String jsMethodToKey(String method) {
 Pointer<NativeFunction<NativeCallNativeMethods>> _nativeCallNativeMethods = Pointer.fromFunction(_callNativeMethods);
 
 abstract class EventTarget {
-  static SplayTreeMap<int, EventTarget> _nativeMap = SplayTreeMap();
+  static final SplayTreeMap<int, EventTarget> _nativeMap = SplayTreeMap();
   static EventTarget getEventTargetOfNativePtr(Pointer<NativeEventTarget> nativePtr) {
     EventTarget? target = _nativeMap[nativePtr.address];
     if (target == null) throw FlutterError('Can not get eventTarget of nativePtr: $nativePtr');

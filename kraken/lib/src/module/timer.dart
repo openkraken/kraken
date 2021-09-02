@@ -4,7 +4,6 @@
  */
 
 import 'dart:async';
-import 'package:kraken/bridge.dart';
 
 mixin TimerMixin {
   int _timerId = 1;

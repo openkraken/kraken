@@ -198,7 +198,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       case 'getPlaceholder':
         return placeholderText;
       case 'getType':
-        return properties['type'] ?? 'text';
+        return _getType();
       case 'focus':
         setFocus(this);
         break;

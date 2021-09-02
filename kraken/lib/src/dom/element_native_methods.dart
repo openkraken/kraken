@@ -22,6 +22,7 @@ enum ViewModuleProperty {
 }
 
 mixin ElementNativeMethods on Node {
+  @override
   dynamic handleJSCall(String method, List<dynamic> argv) {
     Element element = (this as Element);
     switch(method) {
