@@ -13,6 +13,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver, RouteInformation;
 import 'dart:ffi';
+import 'package:ffi/ffi.dart';
 
 import 'package:kraken/gesture.dart';
 import 'package:kraken/bridge.dart';
@@ -43,6 +44,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_END, uniqueId: id);
     }
+    malloc.free(eventTarget.nativeEventTargetPtr);
   }
 
   // Alias defineElement export for kraken plugin

@@ -57,28 +57,18 @@ using NativeDispatchEvent = void (*)(NativeEventTarget *nativeEventTarget, Nativ
                                      int32_t isCustomEvent);
 using CallNativeMethods = void (*)(void *nativePtr, NativeValue *returnValue, NativeString *method, int32_t argc,
                                            NativeValue *argv);
-using ProtectEventTarget = void(*)(NativeEventTarget *nativePtr);
-using UnProtectEventTarget = void(*)(NativeEventTarget *nativePtr);
 
 struct NativeEventTarget {
   NativeEventTarget() = delete;
   explicit NativeEventTarget(EventTargetInstance *_instance)
-    : instance(_instance), dispatchEvent(NativeEventTarget::dispatchEventImpl), protectEventTarget(protect), unProtectEventTarget(unprotect) {
+    : instance(_instance), dispatchEvent(NativeEventTarget::dispatchEventImpl) {
   };
 
   static void dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *eventType, void *nativeEvent,
                                 int32_t isCustomEvent);
-  // To avoid nativeEventTarget been freed by quickjs gc before dart access. We protect EventTargetInstance once by default.
-  static void protect(NativeEventTarget *nativeEventTarget);
-  static void unprotect(NativeEventTarget *nativeEventTarget);
-
   EventTargetInstance *instance{nullptr};
   NativeDispatchEvent dispatchEvent{nullptr};
   CallNativeMethods callNativeMethods{nullptr};
-  ProtectEventTarget protectEventTarget{nullptr};
-  UnProtectEventTarget unProtectEventTarget{nullptr};
-
-  list_head link;
 };
 
 class EventTargetInstance : public Instance {
@@ -94,7 +84,7 @@ public:
   JSValue callNativeMethods(const char* method, int32_t argc,
                                 NativeValue *argv);
 
-  NativeEventTarget nativeEventTarget{this};
+  NativeEventTarget *nativeEventTarget{new NativeEventTarget(this)};
 protected:
   int32_t eventTargetId;
   std::unordered_map<std::string, std::vector<JSValue>> _eventHandlers;

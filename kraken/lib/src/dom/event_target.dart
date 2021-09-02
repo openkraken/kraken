@@ -56,12 +56,8 @@ abstract class EventTarget {
   @protected
   Map<String, List<EventHandler>> eventHandlers = {};
 
-  EventTarget(this.targetId, this.nativeEventTargetPtr, this.elementManager, {bool protectNativeEventTarget = false}) {
+  EventTarget(this.targetId, this.nativeEventTargetPtr, this.elementManager) {
     nativeEventTargetPtr.ref.callNativeMethods = _nativeCallNativeMethods;
-    if (!protectNativeEventTarget) {
-      // Since nativeMethods and EventTarget are successful created. Now we can deliver the priority of nativeEventTarget to JS garbage collector.
-      unprotectNativeEventTarget(nativeEventTargetPtr);
-    }
     _nativeMap[nativeEventTargetPtr.address] = this;
   }
 

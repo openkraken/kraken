@@ -156,12 +156,11 @@ class Element extends Node
         this.defaultStyle = const <String, dynamic>{},
         // Whether element allows children.
         bool isIntrinsicBox = false,
-        this.repaintSelf = false,
-        bool protectNativeEventTarget = false
+        this.repaintSelf = false
       })
       : _isIntrinsicBox = isIntrinsicBox,
         defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : INLINE,
-        super(NodeType.ELEMENT_NODE, targetId, nativeEventTarget, elementManager, tagName, protectNativeEventTarget) {
+        super(NodeType.ELEMENT_NODE, targetId, nativeEventTarget, elementManager, tagName) {
     style = CSSStyleDeclaration(this);
     _setDefaultStyle();
   }

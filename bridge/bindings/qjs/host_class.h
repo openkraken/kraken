@@ -75,7 +75,7 @@ private:
 class Instance {
 public:
   explicit Instance(HostClass *hostClass, std::string name, JSClassExoticMethods *exotic, JSClassID classId, JSClassFinalizer finalizer)
-    : m_context(hostClass->context()), m_hostClass(hostClass), m_name(std::move(name)), m_ctx(m_context->ctx()) {
+    : m_context(hostClass->context()), m_hostClass(hostClass), m_name(std::move(name)), m_ctx(m_context->ctx()), m_contextId(hostClass->contextId()) {
     JSClassDef def{};
     def.class_name = "HostClass::instance";
     def.finalizer = finalizer;
@@ -96,6 +96,7 @@ protected:
   QjsContext *m_ctx{nullptr};
   HostClass *m_hostClass{nullptr};
   std::string m_name;
+  int64_t m_contextId{-1};
 };
 
 } // namespace kraken::binding::qjs

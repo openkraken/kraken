@@ -57,9 +57,7 @@ class ImageElement extends Element {
       elementManager,
       isIntrinsicBox: true,
       tagName: IMAGE,
-      defaultStyle: _defaultStyle,
-      // Image elements have networking resources, we should protect img element util network resource fetched.
-      protectNativeEventTarget: true
+      defaultStyle: _defaultStyle
   ) {
     _renderStreamListener = ImageStreamListener(_renderImageStream);
   }
@@ -193,8 +191,6 @@ class ImageElement extends Element {
   void dispatchImageLoadEvent() {
     print('trigger image load event');
     dispatchEvent(Event(EVENT_LOAD));
-    // After load event triggered. We should deliver the priority of ImageElement to JS garbage collector.
-    unprotectNativeEventTarget(nativeEventTargetPtr);
   }
 
   void _handleEventAfterImageLoaded() {

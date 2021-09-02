@@ -51,7 +51,6 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
   init_list_head(&timer_job_list);
   init_list_head(&document_job_list);
   init_list_head(&module_job_list);
-  init_list_head(&protected_event_target_job_list);
   init_list_head(&promise_job_list);
 
   if (m_runtime == nullptr) {
@@ -116,15 +115,6 @@ JSContext::~JSContext() {
       auto *module = list_entry(el, ModuleContext, link);
       JS_FreeValue(m_ctx, module->callback);
       delete module;
-    }
-  }
-
-  // Free unused protected event_targets.
-  {
-    struct list_head *el, *el1;
-    list_for_each_safe(el, el1, &protected_event_target_job_list) {
-      auto *nativeEventTarget = list_entry(el, NativeEventTarget, link);
-      JS_FreeValue(m_ctx, nativeEventTarget->instance->instanceObject);
     }
   }
 

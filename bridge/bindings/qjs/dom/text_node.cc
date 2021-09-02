@@ -42,7 +42,7 @@ JSClassID TextNode::classId() {
 
 PROP_GETTER(TextNodeInstance, data)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *textNode = static_cast<TextNodeInstance *>(JS_GetOpaque(this_val, TextNode::classId()));
-  return textNode->m_data;
+  return JS_DupValue(ctx, textNode->m_data);
 }
 PROP_SETTER(TextNodeInstance, data)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *textNode = static_cast<TextNodeInstance *>(JS_GetOpaque(this_val, TextNode::classId()));
@@ -52,7 +52,7 @@ PROP_SETTER(TextNodeInstance, data)(QjsContext *ctx, JSValue this_val, int argc,
 
 PROP_GETTER(TextNodeInstance, nodeValue)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *textNode = static_cast<TextNodeInstance *>(JS_GetOpaque(this_val, TextNode::classId()));
-  return textNode->m_data;
+  return JS_DupValue(ctx, textNode->m_data);
 }
 PROP_SETTER(TextNodeInstance, nodeValue)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *textNode = static_cast<TextNodeInstance *>(JS_GetOpaque(this_val, TextNode::classId()));
@@ -72,7 +72,7 @@ TextNodeInstance::TextNodeInstance(TextNode *textNode, JSValue text) : NodeInsta
     textNode->m_context)), TextNode::classId(), "TextNode"), m_data(JS_DupValue(m_ctx, text)) {
   NativeString *args_01 = jsValueToNativeString(m_ctx, m_data);
   foundation::UICommandBuffer::instance(m_context->getContextId())
-    ->addCommand(eventTargetId, UICommand::createTextNode, *args_01, &nativeEventTarget);
+    ->addCommand(eventTargetId, UICommand::createTextNode, *args_01, nativeEventTarget);
 }
 
 TextNodeInstance::~TextNodeInstance() {

@@ -60,7 +60,7 @@ CommentInstance::CommentInstance(Comment *comment) : NodeInstance(comment, NodeT
   Document::instance(
     comment->m_context)), Comment::classId(), "Comment") {
   ::foundation::UICommandBuffer::instance(m_context->getContextId())
-    ->addCommand(eventTargetId, UICommand::createComment, &nativeEventTarget);
+    ->addCommand(eventTargetId, UICommand::createComment, nativeEventTarget);
 }
 
 }

@@ -46,7 +46,7 @@ class NoScriptElement extends Element {
 
 class ScriptElement extends Element {
   ScriptElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: SCRIPT, defaultStyle: _defaultStyle, protectNativeEventTarget: true) {
+      : super(targetId, nativePtr, elementManager, tagName: SCRIPT, defaultStyle: _defaultStyle) {
   }
 
   @override
@@ -65,13 +65,11 @@ class ScriptElement extends Element {
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_LOAD));
-          unprotectNativeEventTarget(nativeEventTargetPtr);
         });
       } catch(e) {
         // An error occurred.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_ERROR));
-          unprotectNativeEventTarget(nativeEventTargetPtr);
         });
       }
       SchedulerBinding.instance!.scheduleFrame();

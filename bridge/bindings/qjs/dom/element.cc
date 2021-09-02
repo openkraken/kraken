@@ -667,7 +667,7 @@ ElementInstance::ElementInstance(Element *element, std::string tagName, bool sho
   if (shouldAddUICommand) {
     NativeString *args_01 = stringToNativeString(tagName);
     ::foundation::UICommandBuffer::instance(m_context->getContextId())
-      ->addCommand(eventTargetId, UICommand::createElement, *args_01, &nativeEventTarget);
+      ->addCommand(eventTargetId, UICommand::createElement, *args_01, nativeEventTarget);
   }
 }
 

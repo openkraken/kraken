@@ -92,7 +92,7 @@ NativeValue jsValueToNativeValue(QjsContext *ctx, JSValue &value) {
     auto *context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
     if (JS_IsInstanceOf(ctx, value, ImageElement::instance(context)->classObject)) {
       auto *imageElementInstance = static_cast<ImageElementInstance *>(JS_GetOpaque(value, Element::classId()));
-      return Native_NewPtr(JSPointerType::NativeEventTarget, &imageElementInstance->nativeEventTarget);
+      return Native_NewPtr(JSPointerType::NativeEventTarget, imageElementInstance->nativeEventTarget);
     }
 
     JSValue stringifiedString = JS_JSONStringify(ctx, value, JS_UNDEFINED, JS_UNDEFINED);
