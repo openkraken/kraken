@@ -35,6 +35,8 @@ public:
   void evaluateScript(const char* script, size_t length, const char* url, int startLine);
   uint8_t *dumpByteCode(const char* script, size_t length, const char* url, size_t *byteLength);
   void evaluateByteCode(uint8_t *bytes, size_t byteLength);
+  void setHref(const char *url);
+  NativeString* getHref();
 
   const std::unique_ptr<kraken::binding::qjs::JSContext> &getContext() const {
     return m_context;

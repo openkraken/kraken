@@ -52,8 +52,8 @@ ConsoleMessageHandler JSBridge::consoleMessageHandler {nullptr};
  * JSRuntime
  */
 JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : contextId(contextId) {
-  auto errorHandler = [handler, this](int32_t contextId, const char *errmsg) {
-    handler(contextId, errmsg);
+  auto errorHandler = [handler, this](int32_t contextId, const char *errmsg, void *data) {
+    handler(contextId, errmsg, nullptr);
     // trigger window.onerror handler.
     // TODO: trigger onerror event.
   };
@@ -196,7 +196,15 @@ JSBridge::~JSBridge() {
 }
 
 void JSBridge::reportError(const char *errmsg) {
-  m_handler(m_context->getContextId(), errmsg);
+  m_handler(m_context->getContextId(), errmsg, nullptr);
+}
+
+NativeString * JSBridge::getHref() {
+  std::string empty;
+  return stringToNativeString(empty);
+}
+
+void JSBridge::setHref(const char *url) {
 }
 
 void JSBridge::setDisposeCallback(Task task, void *data) {

@@ -47,7 +47,7 @@
 struct NativeString;
 struct UICommandItem;
 
-using JSExceptionHandler = std::function<void(int32_t contextId, const char *errmsg)>;
+using JSExceptionHandler = std::function<void(int32_t contextId, const char *errmsg, void *data)>;
 
 namespace foundation {
 

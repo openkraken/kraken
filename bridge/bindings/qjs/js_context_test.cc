@@ -7,14 +7,14 @@
 #include "bridge_qjs.h"
 
 TEST(Context, isValid) {
-  auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {});
+  auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {});
   EXPECT_EQ(bridge->getContext()->isValid(), true);
   delete bridge;
 }
 
 TEST(Context, evalWithError) {
   bool errorHandlerExecuted = false;
-  auto errorHandler = [&errorHandlerExecuted](int32_t contextId, const char *errmsg) {
+  auto errorHandler = [&errorHandlerExecuted](int32_t contextId, const char *errmsg, void* data) {
     errorHandlerExecuted = true;
     EXPECT_STREQ(errmsg, "TypeError: cannot read property 'toString' of null\n"
                          "    at <eval> (file://:1)\n");
@@ -28,7 +28,7 @@ TEST(Context, evalWithError) {
 
 TEST(Context, unrejectPromiseError) {
   bool errorHandlerExecuted = false;
-  auto errorHandler = [&errorHandlerExecuted](int32_t contextId, const char *errmsg) {
+  auto errorHandler = [&errorHandlerExecuted](int32_t contextId, const char *errmsg, void* data) {
     errorHandlerExecuted = true;
     EXPECT_STREQ(errmsg, "TypeError: cannot read property 'forceNullError' of null\n"
                          "    at <anonymous> (file://:4)\n"
@@ -56,7 +56,7 @@ TEST(Context, window) {
     EXPECT_STREQ(message.c_str(), "true");
   };
 
-  auto errorHandler = [&errorHandlerExecuted](int32_t contextId, const char *errmsg) {
+  auto errorHandler = [&errorHandlerExecuted](int32_t contextId, const char *errmsg, void* data) {
     errorHandlerExecuted = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   };
@@ -76,7 +76,7 @@ TEST(Context, windowInheritEventTarget) {
     EXPECT_STREQ(message.c_str(), "ƒ () ƒ () ƒ () true");
   };
 
-  auto errorHandler = [&errorHandlerExecuted](int32_t contextId, const char *errmsg) {
+  auto errorHandler = [&errorHandlerExecuted](int32_t contextId, const char *errmsg, void* data) {
     errorHandlerExecuted = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   };
@@ -96,7 +96,7 @@ TEST(Context, evaluateByteCode) {
     EXPECT_STREQ(message.c_str(), "Arguments {0: 1, 1: 2, 2: 3, 3: 4, callee: ƒ (), length: 4}");
   };
 
-  auto errorHandler = [&errorHandlerExecuted](int32_t contextId, const char *errmsg) {
+  auto errorHandler = [&errorHandlerExecuted](int32_t contextId, const char *errmsg, void* data) {
     errorHandlerExecuted = true;
   };
   auto bridge = new kraken::JSBridge(0, errorHandler);
@@ -111,7 +111,7 @@ TEST(Context, evaluateByteCode) {
 }
 
 TEST(jsValueToNativeString, utf8String) {
-  auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {});
+  auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {});
   JSValue str = JS_NewString(bridge->getContext()->ctx(), "helloworld");
   NativeString *nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
   EXPECT_EQ(nativeString->length, 10);
@@ -128,7 +128,7 @@ TEST(jsValueToNativeString, utf8String) {
 }
 
 TEST(jsValueToNativeString, unicodeChinese) {
-  auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {});
+  auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {});
   JSValue str = JS_NewString(bridge->getContext()->ctx(), "这是你的优乐美");
   NativeString *nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
   std::u16string expectedString = u"这是你的优乐美";
@@ -141,7 +141,7 @@ TEST(jsValueToNativeString, unicodeChinese) {
 }
 
 TEST(jsValueToNativeString, emoji) {
-  auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {});
+  auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {});
   JSValue str = JS_NewString(bridge->getContext()->ctx(), "……🤪");
   NativeString *nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
   std::u16string expectedString = u"……🤪";

@@ -53,7 +53,7 @@ TEST(HostObject, defineProperty) {
 
     EXPECT_STREQ(message.c_str(), "{f: ƒ (), foo: 1}");
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
     errorCalled = true;
   });
   auto &context = bridge->getContext();
@@ -74,7 +74,7 @@ TEST(HostObject, defineFunction) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "20");
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -120,7 +120,7 @@ TEST(ExoticHostObject, overriteGetterSetter) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "100");
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });

@@ -14,7 +14,7 @@ TEST(CustomEvent, instanceofEvent) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "true");
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });

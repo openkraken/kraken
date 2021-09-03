@@ -225,7 +225,7 @@ void JSContext::reportError(JSValueConst &error) {
     stack = JS_ToCString(m_ctx, stackValue);
   }
 
-  _handler(contextId, (std::string(title) + "\n" + std::string(stack)).c_str());
+  _handler(contextId, (std::string(title) + "\n" + std::string(stack)).c_str(), nullptr);
 
   JS_FreeValue(m_ctx, stackValue);
   JS_FreeCString(m_ctx, title);

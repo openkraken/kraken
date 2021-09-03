@@ -14,7 +14,7 @@ TEST(Node, appendChild) {
     EXPECT_STREQ(message.c_str(), "true true true");
     logCalled = true;
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void *data) {
     errorCalled = true;
   });
   auto &context = bridge->getContext();
@@ -34,7 +34,7 @@ TEST(Node, childNodes) {
     EXPECT_STREQ(message.c_str(), "true true true true");
     logCalled = true;
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
     errorCalled = true;
   });
   auto &context = bridge->getContext();
@@ -60,7 +60,7 @@ TEST(Node, textContent) {
     EXPECT_STREQ(message.c_str(), "1234helloworld");
     logCalled = true;
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
     errorCalled = true;
   });
   auto &context = bridge->getContext();
@@ -83,7 +83,7 @@ TEST(Node, ensureDetached) {
     EXPECT_STREQ(message.c_str(), "true true");
     logCalled = true;
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
     errorCalled = true;
   });
   auto &context = bridge->getContext();
@@ -106,7 +106,7 @@ TEST(Node, replaceBody) {
   kraken::JSBridge::consoleMessageHandler = [](void *ctx, const std::string &message, int logLevel) {
     logCalled = true;
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -141,7 +141,7 @@ console.log(div.style.width == div2.style.height, div.getAttribute('id') == '123
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "true true true");
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -185,7 +185,7 @@ document.body.appendChild(div2)
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "true true true");
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });

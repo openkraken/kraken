@@ -11,7 +11,7 @@
 #include "bridge_test_qjs.h"
 
 TEST(TestFramework, init) {
-  kraken::JSBridge *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+  kraken::JSBridge *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
     KRAKEN_LOG(VERBOSE) << errmsg;
   });
   kraken::JSBridgeTest *bridgeTest = new kraken::JSBridgeTest(bridge);
