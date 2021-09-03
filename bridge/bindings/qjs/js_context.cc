@@ -90,7 +90,7 @@ JSContext::~JSContext() {
     }
   }
 
-  // Manual free nods bound by document.
+  // Manual free nodes bound by document.
   {
     struct list_head *el, *el1;
     list_for_each_safe(el, el1, &document_job_list) {
