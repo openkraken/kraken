@@ -173,7 +173,7 @@ class Element extends Node
       : _isIntrinsicBox = isIntrinsicBox,
         defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : INLINE,
         super(NodeType.ELEMENT_NODE, targetId, nativeElementPtr.ref.nativeNode, elementManager, tagName) {
-    style = CSSStyleDeclaration(this);
+    style = CSSStyleDeclaration.inlineStyle(this);
 
     if (!isHiddenElement) {
       _nativeMap[nativeElementPtr.address] = this;

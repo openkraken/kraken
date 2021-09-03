@@ -112,7 +112,10 @@ RegExp _camelCaseReg = RegExp(r'-(\w)');
 class CSSStyleDeclaration {
   Element? target;
 
-  CSSStyleDeclaration(this.target);
+  CSSStyleDeclaration();
+  // ignore: prefer_initializing_formals
+  CSSStyleDeclaration.inlineStyle(Element element): target = element;
+
   /// When some property changed, corresponding [StyleChangeListener] will be
   /// invoked in synchronous.
   final List<StyleChangeListener> _styleChangeListeners = [];
@@ -123,8 +126,9 @@ class CSSStyleDeclaration {
 
   Map<String, List> _transitions = {};
 
-  CSSStyleDeclaration clone(Element target) {
-    CSSStyleDeclaration newStyle = CSSStyleDeclaration(target);
+  CSSStyleDeclaration clone(Element? target) {
+    this.target = target;
+    CSSStyleDeclaration newStyle = CSSStyleDeclaration();
     _properties.forEach((key, value) {
       newStyle._properties[key] = value;
     });
