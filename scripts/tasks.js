@@ -11,7 +11,7 @@ const del = require('del');
 const os = require('os');
 
 program
-.option('-e, --js-engine <engine>', 'The JavaScript Engine kraken used', 'quickjs')
+.option('-e, --js-engine <engine>', 'The JavaScript Engine kraken used', 'jsc')
 .option('--built-with-debug-jsc', 'Built bridge binary with debuggable JSC.')
 .parse(process.argv);
 
@@ -507,7 +507,7 @@ task('build-android-kraken-lib', (done) => {
     -DIS_ANDROID=TRUE \
     -DANDROID_ABI="${arch}" \
     ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
-    -DANDROID_PLATFORM="android-16" \
+    -DANDROID_PLATFORM="android-18" \
     -DANDROID_STL=c++_shared \
     -G "${cmakeGeneratorTemplate}" \
     -B ${paths.bridge}/cmake-build-android-${arch} -S ${paths.bridge}`,
