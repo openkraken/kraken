@@ -56,7 +56,7 @@ ConsoleMessageHandler JSBridge::consoleMessageHandler {nullptr};
  * JSRuntime
  */
 JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : contextId(contextId) {
-  auto errorHandler = [handler, this](int32_t contextId, const char *errmsg, JSObjectRef errorObject) {
+  auto errorHandler = [handler, this](int32_t contextId, const char *errmsg, void *errorObject) {
     handler(contextId, errmsg, errorObject);
 
     // trigger error event.
@@ -68,7 +68,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
       JSValueRef onerrorFuncValue = JSObjectGetProperty(m_context->context(), windowObject, onerrorKeyHolder.getString(), nullptr);
       JSObjectRef onerrorFunc = JSValueToObject(m_context->context(), onerrorFuncValue, nullptr);
       JSValueRef arguments[] = {
-        errorObject
+        static_cast<JSObjectRef>(errorObject)
       };
 
       JSObjectCallAsFunction(m_context->context(), onerrorFunc, m_context->global(), 1, arguments, nullptr);
