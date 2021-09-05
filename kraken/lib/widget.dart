@@ -180,7 +180,7 @@ class Kraken extends StatelessWidget {
     return RegExp(r'^[a-z][.0-9_a-z]*-[\-.0-9_a-z]*$').hasMatch(localName);
   }
 
-  static void defineCustomElement(String localName, WidgetCreator creator) {
+  static void defineCustomElement<T extends WidgetCreator>(String localName, T creator) {
     if (!_isValidCustomElementName(localName)) {
       throw ArgumentError('The element name "$localName" is not valid.');
     }
@@ -192,7 +192,7 @@ class Kraken extends StatelessWidget {
     });
   }
 
-  loadContent(String bundleContent) async {
+  loadContent(String bundleContent, {String aaa = ''}) async {
     await controller!.unload();
     await controller!.loadBundle(
       bundleContent: bundleContent

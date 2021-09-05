@@ -1,4 +1,4 @@
-fdescribe('Blob slice', () => {
+describe('Blob slice', () => {
   it('with empty', () => {
     let blob = new Blob([new Int8Array([1, 2, 3, 4, 5])]);
     let another = blob.slice();

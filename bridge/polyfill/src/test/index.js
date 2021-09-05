@@ -63,7 +63,7 @@ class JasmineTracker {
     kraken.methodChannel.clearMethodCallHandler();
   }
   specStarted(result) {
-    console.log('start ', result.fullName);
+    // console.log('start ', result.fullName);
   }
 }
 

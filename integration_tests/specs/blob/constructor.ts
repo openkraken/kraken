@@ -1,4 +1,4 @@
-fdescribe('Blob construct', () => {
+describe('Blob construct', () => {
   it('with string', async () => {
     let blob = new Blob(['1234']);
     expect(blob.size).toBe(4);

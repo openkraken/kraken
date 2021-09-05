@@ -11,14 +11,14 @@ const del = require('del');
 const os = require('os');
 
 program
-.option('-e, --js-engine <engine>', 'The JavaScript Engine kraken used', 'jsc')
 .option('--built-with-debug-jsc', 'Built bridge binary with debuggable JSC.')
 .parse(process.argv);
 
 const SUPPORTED_JS_ENGINES = ['jsc', 'quickjs'];
+const targetJSEngine = process.env.KRAKEN_JS_ENGINE || 'jsc';
 
-if (SUPPORTED_JS_ENGINES.indexOf(program.jsEngine) < 0) {
-  throw new Error('Unsupported js engine:' + program.jsEngine);
+if (SUPPORTED_JS_ENGINES.indexOf(targetJSEngine) < 0) {
+  throw new Error('Unsupported js engine:' + targetJSEngine);
 }
 
 const KRAKEN_ROOT = join(__dirname, '..');
@@ -183,7 +183,7 @@ task('build-darwin-kraken-lib', done => {
     buildType = 'RelWithDebInfo';
   }
 
-  let builtWithDebugJsc = program.jsEngine === 'jsc' && !!program.builtWithDebugJsc;
+  let builtWithDebugJsc = targetJSEngine === 'jsc' && !!program.builtWithDebugJsc;
 
   if (isProfile) {
     externCmakeArgs.push('-DENABLE_PROFILE=TRUE');
@@ -200,13 +200,13 @@ task('build-darwin-kraken-lib', done => {
     stdio: 'inherit',
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: program.jsEngine,
+      KRAKEN_JS_ENGINE: targetJSEngine,
       LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/macos/lib/x86_64')
     }
   });
 
   let krakenTargets = ['kraken kraken_test'];
-  if (program.jsEngine === 'quickjs') {
+  if (targetJSEngine === 'quickjs') {
     krakenTargets.push('kraken_unit_test');
   }
 
@@ -214,16 +214,16 @@ task('build-darwin-kraken-lib', done => {
     stdio: 'inherit'
   });
 
-  const binaryPath = path.join(paths.bridge, `build/macos/lib/x86_64/libkraken_${program.jsEngine}.dylib`);
+  const binaryPath = path.join(paths.bridge, `build/macos/lib/x86_64/libkraken_${targetJSEngine}.dylib`);
 
-  if (program.jsEngine === 'jsc') {
+  if (targetJSEngine === 'jsc') {
     execSync(`install_name_tool -change /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/JavaScriptCore @rpath/JavaScriptCore.framework/Versions/A/JavaScriptCore ${binaryPath}`);
   }
   if (buildMode == 'Release') {
     execSync(`dsymutil ${binaryPath}`, { stdio: 'inherit' });
     execSync(`strip -S -X -x ${binaryPath}`, { stdio: 'inherit' });
 
-    if (program.jsEngine === 'quickjs') {
+    if (targetJSEngine === 'quickjs') {
       const quickjsBinary = path.join(paths.bridge, `build/macos/lib/x86_64/libquickjs.dylib`);
       execSync(`dsymutil ${quickjsBinary}`, { stdio: 'inherit' });
       execSync(`strip -S -X -x ${quickjsBinary}`, { stdio: 'inherit' });
@@ -250,7 +250,7 @@ task('compile-polyfill', (done) => {
     cwd: paths.polyfill,
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: program.jsEngine
+      KRAKEN_JS_ENGINE: targetJSEngine
     },
     stdio: 'inherit'
   });
@@ -375,7 +375,7 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit',
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: program.jsEngine,
+      KRAKEN_JS_ENGINE: targetJSEngine,
       LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/ios/lib/x86_64')
     }
   });
@@ -395,7 +395,7 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit',
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: program.jsEngine,
+      KRAKEN_JS_ENGINE: targetJSEngine,
       LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/ios/lib/arm')
     }
   });
@@ -415,7 +415,7 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit',
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: program.jsEngine,
+      KRAKEN_JS_ENGINE: targetJSEngine,
       LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/ios/lib/arm64')
     }
   });
@@ -444,12 +444,12 @@ task(`build-ios-kraken-lib`, (done) => {
     execSync(`strip -S -X -x ${frameworkPath}/kraken_bridge`, { stdio: 'inherit', cwd: targetDynamicSDKPath });
   }
 
-  const armStaticSDKPath = path.join(paths.bridge, `build/ios/lib/arm/libkraken_${program.jsEngine}.a`);
-  const arm64StaticSDKPath = path.join(paths.bridge, `build/ios/lib/arm64/libkraken_${program.jsEngine}.a`);
-  const x64StaticSDKPath = path.join(paths.bridge, `build/ios/lib/x86_64/libkraken_${program.jsEngine}.a`);
+  const armStaticSDKPath = path.join(paths.bridge, `build/ios/lib/arm/libkraken_${targetJSEngine}.a`);
+  const arm64StaticSDKPath = path.join(paths.bridge, `build/ios/lib/arm64/libkraken_${targetJSEngine}.a`);
+  const x64StaticSDKPath = path.join(paths.bridge, `build/ios/lib/x86_64/libkraken_${targetJSEngine}.a`);
 
   const targetStaticSDKPath = `${paths.bridge}/build/ios/framework`;
-  execSync(`libtool -static -o ${targetStaticSDKPath}/libkraken_${program.jsEngine}.a ${armStaticSDKPath} ${arm64StaticSDKPath} ${x64StaticSDKPath}`);
+  execSync(`libtool -static -o ${targetStaticSDKPath}/libkraken_${targetJSEngine}.a ${armStaticSDKPath} ${arm64StaticSDKPath} ${x64StaticSDKPath}`);
   done();
 });
 
@@ -516,7 +516,7 @@ task('build-android-kraken-lib', (done) => {
         stdio: 'inherit',
         env: {
           ...process.env,
-          KRAKEN_JS_ENGINE: program.jsEngine,
+          KRAKEN_JS_ENGINE: targetJSEngine,
           LIBRARY_OUTPUT_DIR: soBinaryDirectory
         }
       });
