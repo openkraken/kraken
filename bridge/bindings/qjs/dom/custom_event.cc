@@ -43,7 +43,7 @@ JSValue CustomEvent::initCustomEvent(QjsContext *ctx, JSValue this_val, int argc
   }
 
   if (argc <= 4) {
-    eventInstance->setDetail(argv[3]);
+    eventInstance->m_detail.value(JS_DupValue(ctx, argv[3]));
   }
   return JS_NULL;
 }
@@ -69,12 +69,12 @@ JSValue CustomEvent::constructor(QjsContext *ctx, JSValue func_obj, JSValue this
 
 PROP_GETTER(CustomEventInstance, detail)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *customEventInstance = static_cast<CustomEventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
-  return customEventInstance->getDetail();
+  return customEventInstance->m_detail.value();
 }
 PROP_SETTER(CustomEventInstance, detail)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (argc == 0) return JS_NULL;
   auto *customEventInstance = static_cast<CustomEventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
-  customEventInstance->setDetail(argv[0]);
+  customEventInstance->m_detail.value(argv[0]);
   return JS_NULL;
 }
 
@@ -83,7 +83,7 @@ CustomEventInstance::CustomEventInstance(CustomEvent *jsCustomEvent, JSAtom cust
   if (!JS_IsNull(eventInit)) {
     JSAtom detailKey = JS_NewAtom(m_ctx, "detail");
     if (JS_HasProperty(m_ctx, eventInit, detailKey)) {
-      m_detail.setValue(JS_GetProperty(m_ctx, eventInit, detailKey));
+      m_detail.value(JS_GetProperty(m_ctx, eventInit, detailKey));
     }
     JS_FreeAtom(m_ctx, detailKey);
   }
@@ -94,6 +94,6 @@ CustomEventInstance::CustomEventInstance(CustomEvent *jsCustomEvent, NativeCusto
   JSValue newDetail = JS_NewUnicodeString(jsCustomEvent->context()->runtime(), jsCustomEvent->context()->ctx(),
                                           nativeCustomEvent->detail->string, nativeCustomEvent->detail->length);
   nativeCustomEvent->detail->free();
-  m_detail.setValue(newDetail);
+  m_detail.value(newDetail);
 }
 } // namespace kraken::binding::qjs

@@ -138,14 +138,15 @@ public:
   JSValueHolder() = delete;
   explicit JSValueHolder(JSContext *context, JSValue value): m_value(value), m_context(context) {};
   ~JSValueHolder() {
-    if (m_context->isValid()) {
+    JS_FreeValue(m_context->ctx(), m_value);
+  }
+  inline void value(JSValue value) {
+    if (!JS_IsNull(m_value)) {
       JS_FreeValue(m_context->ctx(), m_value);
     }
-  }
-  inline void setValue(JSValue value) {
-    m_value = value;
+    m_value = JS_DupValue(m_context->ctx(), value);
   };
-  inline JSValue value() const { return m_value; }
+  inline JSValue value() const { return JS_DupValue(m_context->ctx(), m_value); }
 private:
   JSContext *m_context{nullptr};
   JSValue m_value{JS_NULL};

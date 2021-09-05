@@ -17,6 +17,8 @@ struct NativeCustomEvent {
   NativeString *detail{nullptr};
 };
 
+class CustomEventInstance;
+
 class CustomEvent : public Event {
 public:
   CustomEvent() = delete;
@@ -30,24 +32,19 @@ public:
 
 private:
   ObjectFunction m_initCustomEvent{m_context, m_prototypeObject, "initCustomEvent", initCustomEvent, 4};
+  friend CustomEventInstance;
 };
 
 class CustomEventInstance : public EventInstance {
 public:
   explicit CustomEventInstance(CustomEvent *jsCustomEvent, JSAtom CustomEventType, JSValue eventInit);
   explicit CustomEventInstance(CustomEvent *jsCustomEvent, NativeCustomEvent* nativeCustomEvent);
-  void inline setDetail(JSValue value) {
-    m_detail.setValue(value);
-  }
-  JSValue getDetail() {
-    return m_detail.value();
-  }
-
 private:
   DEFINE_HOST_CLASS_PROPERTY(1, detail);
 
   JSValueHolder m_detail{m_context, JS_NULL};
   NativeCustomEvent* nativeCustomEvent{nullptr};
+  friend CustomEvent;
 };
 
 
