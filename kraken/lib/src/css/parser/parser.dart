@@ -3,19 +3,19 @@
  * Author: Kraken Team.
  */
 import 'package:kraken/css.dart';
-import './style_rule_parser.dart';
 
+const String _CLOSE_CURLY = '}';
 
 class CSSParser {
   static CSSRule parseRule(String text) {
     // TODO: parse other css rule
     return CSSStyleRuleParser.parse(text);
   }
-  
+
   static List<CSSRule> parseRules(String text) {
     List<CSSRule> rules = [];
-    text.split('}').forEach((rule) {
-      rules.add(parseRule(rule));
+    text.split(_CLOSE_CURLY).forEach((rule) {
+      rules.add(parseRule(rule + _CLOSE_CURLY));
     });
     return rules;
   }
