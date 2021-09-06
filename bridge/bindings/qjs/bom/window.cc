@@ -141,7 +141,7 @@ PROP_SETTER(Window, scrollY)(QjsContext *ctx, JSValue this_val, int argc, JSValu
   return JS_NULL;
 }
 
-WindowInstance::WindowInstance(Window *window) : EventTargetInstance(window, Window::kWindowClassId, "window") {
+WindowInstance::WindowInstance(Window *window) : EventTargetInstance(window, Window::kWindowClassId, "window", WINDOW_TARGET_ID) {
   if (getDartMethod()->initWindow != nullptr) {
     getDartMethod()->initWindow(context()->getContextId(), nativeEventTarget);
   }

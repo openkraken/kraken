@@ -15,7 +15,7 @@ program
 .parse(process.argv);
 
 const SUPPORTED_JS_ENGINES = ['jsc', 'quickjs'];
-const targetJSEngine = process.env.KRAKEN_JS_ENGINE || 'jsc';
+const targetJSEngine = process.env.KRAKEN_JS_ENGINE || 'quickjs';
 
 if (SUPPORTED_JS_ENGINES.indexOf(targetJSEngine) < 0) {
   throw new Error('Unsupported js engine:' + targetJSEngine);

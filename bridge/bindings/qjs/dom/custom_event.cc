@@ -95,5 +95,6 @@ CustomEventInstance::CustomEventInstance(CustomEvent *jsCustomEvent, NativeCusto
                                           nativeCustomEvent->detail->string, nativeCustomEvent->detail->length);
   nativeCustomEvent->detail->free();
   m_detail.value(newDetail);
+  JS_FreeValue(m_ctx, newDetail);
 }
 } // namespace kraken::binding::qjs

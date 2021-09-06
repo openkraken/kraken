@@ -283,6 +283,7 @@ PROP_SETTER(DocumentInstance, cookie)(QjsContext *ctx, JSValue this_val, int arg
 
 DocumentInstance::DocumentInstance(Document *document): NodeInstance(document, NodeType::DOCUMENT_NODE, this, Document::classId(), "document") {
   m_instanceMap[Document::instance(m_context)] = this;
+  eventTargetId = DOCUMENT_TARGET_ID;
 
   JSAtom htmlTagName = JS_NewAtom(m_ctx, "HTML");
   JSValue htmlTagValue = JS_AtomToValue(m_ctx, htmlTagName);

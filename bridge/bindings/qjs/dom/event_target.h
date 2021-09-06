@@ -76,6 +76,7 @@ public:
   EventTargetInstance() = delete;
   explicit EventTargetInstance(EventTarget *eventTarget, JSClassID classId, JSClassExoticMethods &exoticMethods, std::string name);
   explicit EventTargetInstance(EventTarget *eventTarget, JSClassID classId, std::string name);
+  explicit EventTargetInstance(EventTarget *eventTarget, JSClassID classId, std::string name, int64_t eventTargetId);
   ~EventTargetInstance();
 
   bool dispatchEvent(EventInstance *event);

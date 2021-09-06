@@ -302,6 +302,14 @@ EventTargetInstance::EventTargetInstance(EventTarget *eventTarget, JSClassID cla
   eventTargetId = globalEventTargetId++;
 }
 
+EventTargetInstance::EventTargetInstance(EventTarget *eventTarget, JSClassID classId, std::string name, int64_t eventTargetId) : Instance(
+  eventTarget,
+  std::move(name),
+  nullptr,
+  classId,
+  finalize), eventTargetId(eventTargetId) {
+}
+
 JSClassID EventTargetInstance::classId() {
   assert_m(false, "classId is not implemented");
   return 0;
