@@ -1,9 +1,7 @@
 import { kraken } from './kraken';
 import connection from './connection';
-import { vibrate } from './vibration';
 
 export const navigator = {
-  vibrate,
   connection,
   // UA is read-only.
   get userAgent() {
