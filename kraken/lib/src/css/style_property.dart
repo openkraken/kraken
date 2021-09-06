@@ -453,7 +453,7 @@ class CSSStyleProperty {
     ];
   }
 
-  // Current not support multiple background layer:
+  // Current not support multiple background layer.
   static List<String?>? _getBackgroundValues(String shorthandProperty) {
     // Convert 40%/10em -> 40% / 10em
     shorthandProperty = shorthandProperty.replaceAll(_slashRegExp, ' / ');

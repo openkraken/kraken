@@ -12,14 +12,18 @@ const int SEMICOLON_CODE = 59; // ;
 const int ASTERISK_CODE = 42; // *
 const int COLON_CODE = 58; // :
 const int OPEN_PARENTHESES_CODE = 40; // (
+const int CLOSE_PARENTHESES_CODE = 41; // )
+const int SINGLE_QUOTE_CODE = 39; // ';
+const int DOUBLE_QUOTE_CODE = 34; // "
+const int HYPHEN_CODE = 45; // -
 
 const int _SELECTOR = 0;
 const int _NAME = 1;
 const int _VALUE = 2;
-const int _END = 3;
+const int _FUNCTION = 3;
+const int _END = 4;
 
 const String _END_OF_COMMENT = '*/';
-const String _END_OF_PARENTHESES = ')';
 const String _EMPTY_STRING = '';
 
 class CSSStyleRuleParser {
@@ -30,16 +34,27 @@ class CSSStyleRuleParser {
     StringBuffer buffer = StringBuffer();
     int state = _SELECTOR;
     String propertyName = _EMPTY_STRING;
+    bool isString = false;
 
     for (int pos = 0, length = ruleText.length; pos < length && state != _END; pos++) {
       int c = ruleText.codeUnitAt(pos);
+
+      if (c == SINGLE_QUOTE_CODE || c == DOUBLE_QUOTE_CODE) {
+        isString = !isString;
+      }
+
+      if (isString) {
+        buffer.writeCharCode(c);
+        continue;
+      }
+
       switch (c) {
         case SPACE_CODE:
         case TAB_CODE:
         case CR_CODE:
         case FEED_CODE:
         case NEWLINE_CODE:
-          if (state == _SELECTOR || state == _VALUE) {
+          if ((state == _SELECTOR || state == _VALUE) && pos > 0) {
             // Squash 2 or more white-spaces in the row into 1 space.
             switch (ruleText.codeUnitAt(pos - 1)) {
               case SPACE_CODE:
@@ -51,6 +66,21 @@ class CSSStyleRuleParser {
               default:
                 buffer.writeCharCode(SPACE_CODE);
                 break;
+            }
+          } else if (state == _FUNCTION) {
+            buffer.writeCharCode(c);
+          }
+          break;
+        case HYPHEN_CODE:
+          if (state == _NAME) {
+            int letter = ruleText.codeUnitAt(pos + 1);
+            // Convert background-image to backgroundImage
+            // a-z: 97-122
+            if (letter > 96 && letter < 123) {
+              // Convert to upper case: A-Z: 65-90
+              letter = letter - 32;
+              buffer.writeCharCode(letter);
+              pos++;
             }
           }
           break;
@@ -74,7 +104,7 @@ class CSSStyleRuleParser {
             selectorText = buffer.toString().trim();
             buffer.clear();
             state = _NAME;
-          } else { 
+          } else {
             // Unexpected {
             state = _END;
           }
@@ -88,39 +118,42 @@ class CSSStyleRuleParser {
             buffer.writeCharCode(c);
           }
           break;
+        case CLOSE_PARENTHESES_CODE:
+          if (state == _FUNCTION) {
+            buffer.writeCharCode(c);
+            state = _VALUE;
+          } else {
+            buffer.writeCharCode(c);
+          }
+          break;
         case OPEN_PARENTHESES_CODE:
           // This is a function, find the end of the function.
           if (state == _VALUE) {
-            int index = ruleText.indexOf(_END_OF_PARENTHESES, pos);
-            if (index == -1) {
-              // Unterminated parenthesis
-              state = _END;
-            } else {
-              pos = index + 1;
-            }
-          } else {
-            // Unexpected parenthesis
-            state = _END;
+            state = _FUNCTION;
           }
+
+          // Pseudo-class selector: `th:nth-child(4)`
+          // Function value: `url()`, `rgb()`
+          buffer.writeCharCode(c); // Write (
           break;
         case SEMICOLON_CODE:
-          // `{ col;or: red; }` will parsed as {col: '', or: 'red'}
-          if (propertyName.isNotEmpty) {
-            style.setProperty(propertyName, buffer.toString().trim());
-            propertyName = _EMPTY_STRING;
+          if (state == _FUNCTION) {
+            // In data uri function
+            buffer.writeCharCode(c);
+          } else {
+            // `{ col;or: red; }` will parsed as {col: '', or: 'red'}
+            if (propertyName.isNotEmpty) {
+              String value = buffer.toString().trim();
+              if (value.isNotEmpty) style.setProperty(propertyName, value);
+              propertyName = _EMPTY_STRING;
+            }
             buffer.clear();
+            // Skip empty property declaration like `color: red; ;;`.
+            state = _NAME;
           }
-          // Skip empty property declaration like `color: red; ;;`.
-          state = _NAME;
           break;
         case CLOSE_CURLY_CODE:
-          if (state == _NAME) {
-            // `{ col}or: red }` will parsed as {col: ''}
-            propertyName = buffer.toString().trim();
-            if (propertyName.isNotEmpty) {
-              style.setProperty(propertyName, _EMPTY_STRING);
-            }
-          } if (state == _VALUE && propertyName.isNotEmpty) {
+          if (state == _VALUE && propertyName.isNotEmpty) {
             // `body { color: red }` that not end with semicolon is
             // also the end of the declaration.
             style.setProperty(propertyName, buffer.toString().trim());

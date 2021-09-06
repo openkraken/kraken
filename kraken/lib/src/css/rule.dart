@@ -9,6 +9,8 @@ abstract class CSSRule {
   CSSStyleSheet? parentStyleSheet;
   CSSRule? parentRule;
 
+  // https://drafts.csswg.org/cssom/#dom-cssrule-type
+  // The following attribute and constants are historical.
   int? type;
   static const int STYLE_RULE = 1;
   static const int CHARSET_RULE = 2;

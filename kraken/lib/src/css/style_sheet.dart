@@ -4,7 +4,6 @@
  */
 
 import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
 
 abstract class StyleSheet { }
 

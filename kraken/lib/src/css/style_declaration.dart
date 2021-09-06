@@ -593,7 +593,6 @@ class CSSStyleDeclaration {
       return _expandShorthand(propertyName, normalizedValue, viewportSize);
     }
 
-
     double? rootFontSize;
     double? fontSize;
     if (renderStyle != null) {
