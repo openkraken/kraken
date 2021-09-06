@@ -42,7 +42,7 @@ public:
 private:
   DEFINE_HOST_CLASS_PROPERTY(1, detail);
 
-  JSValueHolder m_detail{m_context, JS_NULL};
+  JSValueHolder m_detail{m_ctx, JS_NULL};
   NativeCustomEvent* nativeCustomEvent{nullptr};
   friend CustomEvent;
 };

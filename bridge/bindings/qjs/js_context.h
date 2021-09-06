@@ -136,19 +136,19 @@ public:
 class JSValueHolder {
 public:
   JSValueHolder() = delete;
-  explicit JSValueHolder(JSContext *context, JSValue value): m_value(value), m_context(context) {};
+  explicit JSValueHolder(QjsContext *ctx, JSValue value): m_value(value), m_ctx(ctx) {};
   ~JSValueHolder() {
-    JS_FreeValue(m_context->ctx(), m_value);
+    JS_FreeValue(m_ctx, m_value);
   }
   inline void value(JSValue value) {
     if (!JS_IsNull(m_value)) {
-      JS_FreeValue(m_context->ctx(), m_value);
+      JS_FreeValue(m_ctx, m_value);
     }
-    m_value = JS_DupValue(m_context->ctx(), value);
+    m_value = JS_DupValue(m_ctx, value);
   };
-  inline JSValue value() const { return JS_DupValue(m_context->ctx(), m_value); }
+  inline JSValue value() const { return JS_DupValue(m_ctx, m_value); }
 private:
-  JSContext *m_context{nullptr};
+  QjsContext *m_ctx{nullptr};
   JSValue m_value{JS_NULL};
 };
 

@@ -43,7 +43,7 @@ JSValue CustomEvent::initCustomEvent(QjsContext *ctx, JSValue this_val, int argc
   }
 
   if (argc <= 4) {
-    eventInstance->m_detail.value(JS_DupValue(ctx, argv[3]));
+    eventInstance->m_detail.value(argv[3]);
   }
   return JS_NULL;
 }
@@ -83,7 +83,9 @@ CustomEventInstance::CustomEventInstance(CustomEvent *jsCustomEvent, JSAtom cust
   if (!JS_IsNull(eventInit)) {
     JSAtom detailKey = JS_NewAtom(m_ctx, "detail");
     if (JS_HasProperty(m_ctx, eventInit, detailKey)) {
-      m_detail.value(JS_GetProperty(m_ctx, eventInit, detailKey));
+      JSValue detailValue = JS_GetProperty(m_ctx, eventInit, detailKey);
+      m_detail.value(detailValue);
+      JS_FreeValue(m_ctx, detailValue);
     }
     JS_FreeAtom(m_ctx, detailKey);
   }

@@ -1,4 +1,4 @@
-fdescribe('CustomEvent', () => {
+describe('CustomEvent', () => {
   function _listenEvent(done, event: CustomEvent) {
     expect(event.detail).toEqual('detailMessage');
     if (done) {
@@ -14,7 +14,7 @@ fdescribe('CustomEvent', () => {
     }).not.toThrow();
   });
 
-  fit('should work as expected', () => {
+  it('should work as expected', () => {
     let customEvent = new CustomEvent('customEvent', { detail: 'detailMessage' });
     expect(customEvent.detail).toEqual('detailMessage');
   });
