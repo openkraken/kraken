@@ -1,3 +1,7 @@
+## 0.7.3+3
+
+- Remove Navigator vibration API
+
 ## 0.7.3+2
 
 **Features**
