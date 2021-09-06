@@ -6,8 +6,14 @@ let methodCallHandlers: MethodCallHandler[] = [];
 
 // Like flutter platform channels
 export const methodChannel = {
-  setMethodCallHandler(handler: MethodCallHandler) {
+  addMethodCallHandler(handler: MethodCallHandler) {
     methodCallHandlers.push(handler);
+  },
+  removeMethodCallHandler(handler: MethodCallHandler) {
+    let index = methodCallHandlers.indexOf(handler);
+    if (index != -1) {
+      methodCallHandlers.splice(index, 1); 
+    }
   },
   clearMethodCallHandler() {
     methodCallHandlers.length = 0;

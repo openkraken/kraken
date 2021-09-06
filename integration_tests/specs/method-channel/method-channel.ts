@@ -1,6 +1,6 @@
 describe('MethodChannel', () => {
-  it('setMethodCallHandler multi params', async (done) => {
-    kraken.methodChannel.setMethodCallHandler((method: string, args: any[]) => {
+  it('addMethodCallHandler multi params', async (done) => {
+    kraken.methodChannel.addMethodCallHandler((method: string, args: any[]) => {
       expect(method).toBe('helloworld');
       expect(args).toEqual(['abc', 1234, null, /* undefined will be converted to */ null, [], true, false, {name: 1}]);
       done();
@@ -16,7 +16,7 @@ describe('MethodChannel', () => {
   });
 
   it('setMethodHandler', async (done) => {
-    kraken.methodChannel.setMethodCallHandler((method: string, args: any[]) => {
+    kraken.methodChannel.addMethodCallHandler((method: string, args: any[]) => {
       expect(method).toBe('helloworld');
       expect(args).toEqual(['abc']);
       done();
@@ -25,9 +25,9 @@ describe('MethodChannel', () => {
     expect(result).toBe('method: helloworld');
   });
 
-  it('setMethodCallHandler multi params with multi handler', async (done) => {
+  it('addMethodCallHandler multi params with multi handler', async (done) => {
     let handlerCount = 0;
-    kraken.methodChannel.setMethodCallHandler((method: string, args: any[]) => {
+    kraken.methodChannel.addMethodCallHandler((method: string, args: any[]) => {
       handlerCount++;
       expect(method).toBe('helloworld');
       expect(args).toEqual(['abc', 1234, null, /* undefined will be converted to */ null, [], true, false, {name: 1}]);
@@ -35,7 +35,7 @@ describe('MethodChannel', () => {
         done();
       }
     });
-    kraken.methodChannel.setMethodCallHandler((method: string, args: any[]) => {
+    kraken.methodChannel.addMethodCallHandler((method: string, args: any[]) => {
       handlerCount++;
       expect(method).toBe('helloworld');
       expect(args).toEqual(['abc', 1234, null, /* undefined will be converted to */ null, [], true, false, {name: 1}]);
