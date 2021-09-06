@@ -15,12 +15,23 @@ describe('MethodChannel', () => {
     expect(result).toBe('method: helloworld');
   });
 
-  it('setMethodHandler', async (done) => {
+  it('addMethodCallHandler', async (done) => {
     kraken.methodChannel.addMethodCallHandler((method: string, args: any[]) => {
       expect(method).toBe('helloworld');
       expect(args).toEqual(['abc']);
       done();
     });
+    let result = await kraken.methodChannel.invokeMethod('helloworld', 'abc');
+    expect(result).toBe('method: helloworld');
+  });
+
+
+  it('removeMethodCallHandler', async (done: DoneFn) => {
+    var handler = (method: string, args: any[]) => {
+      done.fail('should not execute here.');
+    };
+    kraken.methodChannel.addMethodCallHandler(handler);
+    kraken.methodChannel.removeMethodCallHandler(handler);
     let result = await kraken.methodChannel.invokeMethod('helloworld', 'abc');
     expect(result).toBe('method: helloworld');
   });
