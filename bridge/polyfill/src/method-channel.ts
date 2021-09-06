@@ -6,6 +6,10 @@ let methodCallHandlers: MethodCallHandler[] = [];
 
 // Like flutter platform channels
 export const methodChannel = {
+  setMethodCallHandler(handler: MethodCallHandler) {
+    console.warn('Deprecated API, use addMethodCallHandler instead.');
+    methodChannel.addMethodCallHandler(handler);
+  },
   addMethodCallHandler(handler: MethodCallHandler) {
     methodCallHandlers.push(handler);
   },
