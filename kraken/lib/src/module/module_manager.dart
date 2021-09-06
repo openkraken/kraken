@@ -3,7 +3,6 @@ import 'package:kraken/bridge.dart' as bridge;
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/src/module/navigator.dart';
 
 abstract class BaseModule {
   String get name;
@@ -34,7 +33,6 @@ class ModuleManager {
       defineModule((moduleManager) => FetchModule(moduleManager));
       defineModule((moduleManager) => MethodChannelModule(moduleManager));
       defineModule((moduleManager) => NavigationModule(moduleManager));
-      defineModule((moduleManager) => NavigatorModule(moduleManager));
       inited = true;
     }
   }
