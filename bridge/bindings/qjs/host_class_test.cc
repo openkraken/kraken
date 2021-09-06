@@ -13,8 +13,8 @@ namespace kraken::binding::qjs {
 class ParentClass : public HostClass {
 public:
   explicit ParentClass(JSContext *context) : HostClass(context, "ParentClass") {}
-  JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValueConst *argv) override {
-    return HostClass::constructor(ctx, func_obj, this_val, argc, argv);
+  JSValue instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValueConst *argv) override {
+    return HostClass::instanceConstructor(ctx, func_obj, this_val, argc, argv);
   }
 
   OBJECT_INSTANCE(ParentClass);
@@ -54,7 +54,7 @@ public:
     });
     JS_SetPrototype(m_ctx, m_prototypeObject, ParentClass::instance(m_context)->prototype());
   }
-  JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override {
+  JSValue instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override {
     auto *sampleClass = static_cast<SampleClass *>(JS_GetOpaque(func_obj, JSContext::kHostClassClassId));
     auto *instance = new SampleClassInstance(sampleClass);
     return instance->instanceObject;
@@ -170,7 +170,7 @@ TEST(HostClass, inherintanceInJavaScript) {
 
   const char* code = R"(
 class Demo extends SampleClass {
-  constructor(name) {
+  instanceConstructor(name) {
     super();
     this.name = name;
   }
@@ -257,7 +257,7 @@ public:
       JS_NewClassID(&exoticClassID);
     });
   }
-  JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv);
+  JSValue instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv);
 private:
   friend ExoticClassInstance;
 };
@@ -339,7 +339,7 @@ JSClassExoticMethods ExoticClassInstance::methods{
   setProperty
 };
 
-JSValue ExoticClass::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
+JSValue ExoticClass::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   return (new ExoticClassInstance(this))->instanceObject;
 }
 

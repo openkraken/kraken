@@ -134,7 +134,7 @@ JSClassID Document::classId() {
 
 OBJECT_INSTANCE_IMPL(Document);
 
-JSValue Document::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
+JSValue Document::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   auto *instance = new DocumentInstance(this);
   return instance->instanceObject;
 }

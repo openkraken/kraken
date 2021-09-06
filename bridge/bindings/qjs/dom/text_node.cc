@@ -27,7 +27,7 @@ TextNode::TextNode(JSContext *context) :  Node(context, "TextNode") {
 
 OBJECT_INSTANCE_IMPL(TextNode);
 
-JSValue TextNode::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
+JSValue TextNode::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   JSValue textContent = JS_NULL;
   if (argc == 1) {
     textContent = argv[0];

@@ -60,7 +60,7 @@ class Event : public HostClass {
 public:
   static JSClassID kEventClassID;
 
-  JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
+  JSValue instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
   Event() = delete;
   explicit Event(JSContext *context);
 

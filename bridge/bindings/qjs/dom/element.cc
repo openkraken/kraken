@@ -86,7 +86,7 @@ void ElementAttributes::copyWith(ElementAttributes *attributes) {
   }
 }
 
-JSValue Element::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
+JSValue Element::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   if (argc == 0) return JS_ThrowTypeError(ctx, "Illegal constructor");
   JSValue tagName = argv[0];
 

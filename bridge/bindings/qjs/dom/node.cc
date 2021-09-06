@@ -20,7 +20,7 @@ void bindNode(std::unique_ptr<JSContext> &context) {
 
 OBJECT_INSTANCE_IMPL(Node);
 
-JSValue Node::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
+JSValue Node::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   return JS_ThrowTypeError(ctx, "Illegal constructor");
 }
 
@@ -31,7 +31,11 @@ JSClassID Node::classId() {
 
 JSClassID Node::classId(JSValue &value) {
   JSClassID classId = JSValueGetClassId(value);
-  if (classId == Element::classId() || classId == Document::classId() || classId == TextNode::classId() || classId == Comment::classId()) {
+  if (classId == Element::classId() ||
+    classId == Document::classId() ||
+    classId == TextNode::classId() ||
+    classId == Comment::classId()
+  ) {
     return classId;
   }
 
@@ -502,6 +506,7 @@ JSValue NodeInstance::internalReplaceChild(NodeInstance *newChild, NodeInstance 
 
 void NodeInstance::setParentNode(NodeInstance *parent) {
   parentNode = parent;
+  // Make sure parentNode should be released after node.
   std::string privateKey = std::to_string((uint64_t)JS_VALUE_GET_PTR(parent->instanceObject));
   JS_DefinePropertyValueStr(m_ctx, instanceObject, privateKey.c_str(), JS_DupValue(m_ctx, parent->instanceObject), JS_PROP_NORMAL);
 }

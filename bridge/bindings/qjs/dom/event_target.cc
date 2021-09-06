@@ -31,7 +31,7 @@ EventTarget::EventTarget(JSContext *context) : HostClass(context, "EventTarget")
 
 OBJECT_INSTANCE_IMPL(EventTarget);
 
-JSValue EventTarget::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
+JSValue EventTarget::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   if (argc == 1) {
     JSValue jsOnlyEvents = argv[0];
 

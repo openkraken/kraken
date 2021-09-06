@@ -25,7 +25,7 @@ Blob::Blob(JSContext *context) : HostClass(context, "Blob") {
 
 JSClassID Blob::kBlobClassID{0};
 
-JSValue Blob::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
+JSValue Blob::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   BlobBuilder builder;
   auto constructor = static_cast<Blob *>(JS_GetOpaque(func_obj, JSContext::kHostClassClassId));
   if (argc == 0) {
@@ -124,6 +124,7 @@ JSValue Blob::arrayBuffer(QjsContext *ctx, JSValue this_val, int argc, JSValue *
   };
   list_add_tail(&promiseContext->link, &blob->m_context->promise_job_list);
 
+  // TODO: remove setTimeout
   getDartMethod()->setTimeout(promiseContext, blob->context()->getContextId(), callback, 0);
 
   return promise;

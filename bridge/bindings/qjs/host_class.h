@@ -34,7 +34,7 @@ public:
   };
   virtual ~HostClass() = default;
 
-  virtual JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValueConst *argv) {
+  virtual JSValue instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValueConst *argv) {
     return JS_NewObject(ctx);
   };
   JSValue classObject;
@@ -60,11 +60,12 @@ private:
   };
   static JSValue proxyCall(QjsContext *ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst *argv,
                            int flags) {
+    // TODO: handle flags when flags is not JS_CALL_FLAG_CONSTRUCTOR
     auto *hostClass = static_cast<HostClass *>(JS_GetOpaque(func_obj, JSContext::kHostClassClassId));
 
     JSAtom prototypeKey = JS_NewAtom(ctx, "prototype");
     JSValue proto = JS_GetProperty(ctx, this_val, prototypeKey);
-    JSValue instance = hostClass->constructor(ctx, func_obj, this_val, argc, argv);
+    JSValue instance = hostClass->instanceConstructor(ctx, func_obj, this_val, argc, argv);
     JS_SetPrototype(ctx, instance, proto);
     JS_FreeAtom(ctx, prototypeKey);
     JS_FreeValue(ctx, proto);

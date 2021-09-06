@@ -75,7 +75,7 @@ class TouchEvent : public Event {
 public:
   TouchEvent() = delete;
   explicit TouchEvent(JSContext *context);
-  JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
+  JSValue instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
 
   OBJECT_INSTANCE(TouchEvent);
 private:

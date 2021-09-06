@@ -24,7 +24,7 @@ void bindEventTarget(std::unique_ptr<JSContext> &context);
 
 class EventTarget : public HostClass {
 public:
-  JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
+  JSValue instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
   EventTarget() = delete;
   explicit EventTarget(JSContext *context, const char* name);
   EventTarget(JSContext *context);

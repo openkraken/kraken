@@ -47,7 +47,7 @@ static std::string parseJavaScriptCSSPropertyName(std::string &propertyName) {
   return result;
 }
 
-JSValue CSSStyleDeclaration::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
+JSValue CSSStyleDeclaration::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   if (argc != 1) {
     return JS_ThrowTypeError(ctx, "Illegal constructor");
   }

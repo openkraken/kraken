@@ -31,7 +31,7 @@ Comment::Comment(JSContext *context) : Node(context, "Comment") {
   JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
 }
 
-JSValue Comment::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
+JSValue Comment::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   return (new CommentInstance(this))->instanceObject;
 }
 
