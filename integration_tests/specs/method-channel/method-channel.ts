@@ -34,6 +34,7 @@ describe('MethodChannel', () => {
     kraken.methodChannel.removeMethodCallHandler(handler);
     let result = await kraken.methodChannel.invokeMethod('helloworld', 'abc');
     expect(result).toBe('method: helloworld');
+    done();
   });
 
   it('addMethodCallHandler multi params with multi handler', async (done) => {
