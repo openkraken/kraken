@@ -25,6 +25,13 @@ public:
     classObject = JS_NewObjectClass(context->ctx(), JSContext::kHostClassClassId);
     m_prototypeObject = JS_NewObject(m_ctx);
 
+    // Make constructor function inherit to Function.prototype
+    JSValue functionConstructor = JS_GetPropertyStr(m_ctx, m_context->global(), "Function");
+    JSValue functionPrototype = JS_GetPropertyStr(m_ctx, functionConstructor, "prototype");
+    JS_SetPrototype(m_ctx, classObject, functionPrototype);
+    JS_FreeValue(m_ctx, functionPrototype);
+    JS_FreeValue(m_ctx, functionConstructor);
+
     JSAtom prototypeKey = JS_NewAtom(m_ctx, "prototype");
     JS_DefinePropertyValue(m_ctx, classObject, prototypeKey, m_prototypeObject, JS_PROP_C_W_E);
     JS_FreeAtom(m_ctx, prototypeKey);
