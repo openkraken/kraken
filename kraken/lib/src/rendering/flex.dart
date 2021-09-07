@@ -2638,7 +2638,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   RenderRecyclerLayout toRenderRecyclerLayout() {
-    List<RenderBox?> children = getDetachedChildrenAsList() as List<RenderBox?>;
+    List<RenderBox> children = getDetachedChildrenAsList() as List<RenderBox>;
     RenderRecyclerLayout renderRecyclerLayout = RenderRecyclerLayout(
       renderStyle: renderStyle,
       elementDelegate: elementDelegate,

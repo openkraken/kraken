@@ -1078,13 +1078,17 @@ class Element extends Node
   }
 
   void _styleFlexItemChangedListener(String property, String? original, String present) {
+    if (parentElement == null) {
+      return;
+    }
+
     Element selfParentElement = parentElement!;
-    CSSDisplay? parentDisplayValue = selfParentElement.renderBoxModel!.renderStyle.display;
+    CSSDisplay? parentDisplayValue = selfParentElement.renderBoxModel?.renderStyle.display;
     bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex || parentDisplayValue == CSSDisplay.inlineFlex;
 
     // Flex factor change will cause flex item self and its siblings relayout.
     if (isParentFlexDisplayType) {
-      for (Element child in parent!.children) {
+      for (Element child in selfParentElement.children) {
         if (selfParentElement.renderBoxModel is RenderFlexLayout && child.renderBoxModel != null) {
           child.renderBoxModel!.renderStyle.updateFlexItem();
           child.renderBoxModel!.markNeedsLayout();

@@ -201,9 +201,8 @@ class TextNode extends Node {
   @override
   void dispose() {
     super.dispose();
-    if (isRendererAttached) {
-      detach();
-    }
+
+    detach();
 
     assert(_renderTextBox == null);
     _nativeMap.remove(_nativePtr.address);

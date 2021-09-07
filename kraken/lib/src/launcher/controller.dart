@@ -152,10 +152,7 @@ class KrakenViewController {
 
   // index value which identify javascript runtime context.
   late int _contextId;
-
-  int get contextId {
-    return _contextId;
-  }
+  int get contextId => _contextId;
 
   // should render performanceOverlay layer into the screen for performance profile.
   bool? showPerformanceOverlay;
@@ -170,9 +167,9 @@ class KrakenViewController {
 
   late RenderViewportBox viewport;
 
-  void evaluateJavaScripts(String code, [String source = 'kraken://']) {
+  void evaluateJavaScripts(String code, [String source = 'vm://']) {
     assert(!_disposed, 'Kraken have already disposed');
-    evaluateScripts(_contextId, code, source, 0);
+    evaluateScripts(_contextId, code, source);
   }
 
   // attach kraken's renderObject to an renderObject.
@@ -180,13 +177,9 @@ class KrakenViewController {
     _elementManager.attach(parent, previousSibling, showPerformanceOverlay: showPerformanceOverlay ?? false);
   }
 
-  Window? get window {
-    return getEventTargetById(WINDOW_ID) as Window?;
-  }
+  Window? get window => getEventTargetById(WINDOW_ID) as Window?;
 
-  Document? get document {
-    return getEventTargetById(DOCUMENT_ID) as Document?;
-  }
+  Document? get document => getEventTargetById(DOCUMENT_ID) as Document?;
 
   // dispose controller and recycle all resources.
   void dispose() {

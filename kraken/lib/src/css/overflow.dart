@@ -156,6 +156,12 @@ mixin CSSOverflowMixin on ElementBase {
     }
 
     renderBoxModel.scrollListener = scrollListener;
+
+    // Recycler layout not need repaintBoundary, which handle it self.
+    if (renderBoxModel is RenderRecyclerLayout) {
+      return;
+    }
+
     renderBoxModel.pointerListener = _pointerListener;
 
     if (renderBoxModel is RenderLayoutBox) {
@@ -298,21 +304,25 @@ mixin CSSOverflowMixin on ElementBase {
   }
 
   double get scrollTop {
-    if (_scrollableY != null) {
-      return _scrollableY!.position?.pixels ?? 0;
+    KrakenScrollable? scrollableY = _getScrollable(Axis.vertical);
+    if (scrollableY != null) {
+      return scrollableY.position?.pixels ?? 0;
     }
     return 0.0;
   }
+
   set scrollTop(double value) {
     scrollTo(y: value);
   }
 
   double get scrollLeft {
-    if (_scrollableX != null) {
-      return _scrollableX!.position?.pixels ?? 0;
+    KrakenScrollable? scrollableX = _getScrollable(Axis.horizontal);
+    if (scrollableX != null) {
+      return scrollableX.position?.pixels ?? 0;
     }
     return 0.0;
   }
+
   set scrollLeft(double value) {
     scrollTo(x: value);
   }

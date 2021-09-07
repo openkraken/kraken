@@ -1739,7 +1739,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       renderStyle: renderStyle,
       elementDelegate: elementDelegate,
     );
-    layout.addAll(children as List<RenderBox?>?);
+    layout.addAll(children as List<RenderBox>?);
     return copyWith(layout);
   }
 

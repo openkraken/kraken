@@ -14,8 +14,6 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
 
-class RenderRecyclerParentData extends RenderLayoutParentData {}
-
 class RenderRecyclerLayout extends RenderLayoutBox
     implements RenderSliverBoxChildManager {
   static Axis resolveAxis(CSSStyleDeclaration style) {
@@ -52,12 +50,17 @@ class RenderRecyclerLayout extends RenderLayoutBox
   final List<RenderBox> _children = List.empty(growable: true);
 
   @override
-  void add(RenderBox? child) {
+  bool get isScrollingContentBox => false;
+
+  // Add child to child list.
+  @override
+  void add(RenderBox child) {
     if (child is RenderBoxModel) {
       _children.add(child);
     }
   }
 
+  // Add child to child list with order.
   @override
   void insert(RenderBox child, {RenderBox? after}) {
     // Append to last.
@@ -80,7 +83,7 @@ class RenderRecyclerLayout extends RenderLayoutBox
   }
 
   @override
-  void addAll(List<RenderBox?>? children) {
+  void addAll(List<RenderBox>? children) {
     assert(children != null);
     children!.forEach(add);
   }
@@ -91,8 +94,12 @@ class RenderRecyclerLayout extends RenderLayoutBox
       _children.remove(child);
     }
 
-    assert(_renderSliverList != null);
-    _renderSliverList!.remove(child);
+    if (child == renderViewport) {
+      super.remove(child);
+    } else {
+      assert(_renderSliverList != null);
+      _renderSliverList!.remove(child);
+    }
   }
 
   @override
@@ -110,8 +117,10 @@ class RenderRecyclerLayout extends RenderLayoutBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! RenderRecyclerParentData) {
-      child.parentData = RenderRecyclerParentData();
+    if (child == renderViewport && child.parentData is ! RenderLayoutParentData) {
+      child.parentData = RenderLayoutParentData();
+    } else if (child.parentData is! SliverMultiBoxAdaptorParentData) {
+      child.parentData = SliverMultiBoxAdaptorParentData();
     }
   }
 
@@ -336,6 +345,9 @@ class RenderRecyclerLayout extends RenderLayoutBox
     double? leadingScrollOffset,
     double? trailingScrollOffset,
   }) {
+    if (scrollListener != null) {
+      scrollListener!(leadingScrollOffset ?? 0.0, constraints.axisDirection);
+    }
     return _extrapolateMaxScrollOffset(firstIndex, lastIndex,
         leadingScrollOffset, trailingScrollOffset, childCount)!;
   }
