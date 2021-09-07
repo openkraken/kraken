@@ -122,7 +122,6 @@ private:
   void _didModifyAttribute(std::string &name, JSAtom oldId, JSAtom newId);
   void _beforeUpdateId(JSAtom oldId, JSAtom newId);
 
-  PersistElement m_persist_link{this};
   std::string m_tagName;
   friend Element;
   friend NodeInstance;
@@ -130,13 +129,6 @@ private:
   friend DocumentInstance;
   StyleDeclarationInstance *m_style{nullptr};
   ElementAttributes *m_attributes{nullptr};
-
-  std::unordered_map<JSAtom, JSValue> m_properties;
-
-  static JSValue getProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
-                             JSValueConst receiver);
-  static int setProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
-                         JSValueConst value, JSValueConst receiver, int flags);
 
   static JSClassExoticMethods exoticMethods;
 };

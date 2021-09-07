@@ -19,10 +19,7 @@ class ErrorEvent extends Event {
   colno?: number;
   filename?: string;
   constructor(type: string, init?: ErrorEventInit) {
-    console.log('call constructor');
     super(type);
-
-    console.log('super called');
     if (init) {
       this.message = init.message;
       this.lineno = init.lineno;
@@ -97,7 +94,6 @@ window.__global_unhandled_promise_handler__ = function (promise, reason) {
 // @ts-ignore
 window.__global_onerror_handler__ = function (error) {
   try {
-    console.log(ErrorEvent);
     // @ts-ignore
     const event = new ErrorEvent('error', {
       error: error,
@@ -106,9 +102,8 @@ window.__global_onerror_handler__ = function (error) {
       filename: error.fileName,
       colno: 0
     });
-    console.log(event, 'call window dispatch event');
     // @ts-ignore
-    // window.dispatchEvent(event);
+    window.dispatchEvent(event);
   } catch (e) {
     console.log(e);
   }

@@ -56,6 +56,7 @@ public:
   void copyWith(StyleDeclarationInstance *instance);
 
 private:
+  static int hasProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom);
   static int setProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
                       JSValueConst value, JSValueConst receiver, int flags);
 

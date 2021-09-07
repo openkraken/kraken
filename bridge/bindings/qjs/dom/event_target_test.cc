@@ -24,6 +24,24 @@ TEST(EventTarget, addEventListener) {
   EXPECT_EQ(errorCalled, false);
 }
 
+TEST(EventTarget, setNoEventTargetProperties) {
+  bool static errorCalled = false;
+  bool static logCalled = false;
+  kraken::JSBridge::consoleMessageHandler = [](void *ctx, const std::string &message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(), "{name: 1}");
+  };
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+    KRAKEN_LOG(VERBOSE) << errmsg;
+    errorCalled = true;
+  });
+  auto &context = bridge->getContext();
+  const char* code = "let div = document.createElement('div'); div._a = { name: 1}; console.log(div._a); document.body.appendChild(div);";
+  bridge->evaluateScript(code, strlen(code), "vm://", 0);
+  delete bridge;
+  EXPECT_EQ(errorCalled, false);
+}
+
 TEST(EventTarget, propertyEventHandler) {
   bool static errorCalled = false;
   bool static logCalled = false;
@@ -47,3 +65,50 @@ TEST(EventTarget, propertyEventHandler) {
   EXPECT_EQ(logCalled, true);
 }
 
+TEST(EventTarget, propertyEventOnWindow) {
+  bool static errorCalled = false;
+  bool static logCalled = false;
+  kraken::JSBridge::consoleMessageHandler = [](void *ctx, const std::string &message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(), "1234");
+  };
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+    KRAKEN_LOG(VERBOSE) << errmsg;
+    errorCalled = true;
+  });
+  auto &context = bridge->getContext();
+  const char* code = "window.onclick = function() { console.log(1234); };"
+                     "window.dispatchEvent(new Event('click'));";
+  bridge->evaluateScript(code, strlen(code), "vm://", 0);
+  delete bridge;
+  EXPECT_EQ(errorCalled, false);
+  EXPECT_EQ(logCalled, true);
+}
+
+TEST(EventTarget, ClassInheritEventTarget) {
+  bool static errorCalled = false;
+  bool static logCalled = false;
+  kraken::JSBridge::consoleMessageHandler = [](void *ctx, const std::string &message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(), "1234");
+  };
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+    KRAKEN_LOG(VERBOSE) << errmsg;
+    errorCalled = true;
+  });
+  auto &context = bridge->getContext();
+  std::string code = std::string(R"(
+class Sample extends EventTarget {
+  constructor() {
+    super();
+ }
+}
+
+let s = new Sample();
+
+)");
+  bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
+  delete bridge;
+  EXPECT_EQ(errorCalled, false);
+  EXPECT_EQ(logCalled, true);
+}

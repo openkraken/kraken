@@ -35,7 +35,6 @@ public:
   OBJECT_INSTANCE(EventTarget);
 
 private:
-  std::vector<std::string> m_jsOnlyEvents;
   static JSValue addEventListener(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue removeEventListener(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue dispatchEvent(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
@@ -76,7 +75,7 @@ public:
   EventTargetInstance() = delete;
   explicit EventTargetInstance(EventTarget *eventTarget, JSClassID classId, JSClassExoticMethods &exoticMethods, std::string name);
   explicit EventTargetInstance(EventTarget *eventTarget, JSClassID classId, std::string name);
-  explicit EventTargetInstance(EventTarget *eventTarget, JSClassID classId, std::string name, int64_t eventTargetId);
+  explicit EventTargetInstance(EventTarget *eventTarget, JSClassID classId, std::string name, JSClassExoticMethods &exoticMethods, int64_t eventTargetId);
   ~EventTargetInstance();
 
   bool dispatchEvent(EventInstance *event);
@@ -88,11 +87,21 @@ public:
   NativeEventTarget *nativeEventTarget{new NativeEventTarget(this)};
 protected:
   int32_t eventTargetId;
-  std::unordered_map<std::string, std::vector<JSValue>> _eventHandlers;
-  std::unordered_map<std::string, JSValue> _propertyEventHandler;
+  std::unordered_map<JSAtom, std::vector<JSValue>> _eventHandlers;
+  std::unordered_map<JSAtom, JSValue> _propertyEventHandler;
+  std::unordered_map<JSAtom, JSValue> m_properties;
 
-  void setPropertyHandler(std::string &name, JSValue value);
-  JSValue getPropertyHandler(std::string &name);
+  static int hasProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom);
+  static JSValue getProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
+                             JSValueConst receiver);
+  static int setProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
+                         JSValueConst value, JSValueConst receiver, int flags);
+  static int deleteProperty(QjsContext *ctx, JSValueConst obj, JSAtom prop);
+
+  static JSClassExoticMethods exoticMethods;
+
+  void setPropertyHandler(JSAtom atom, JSValue value);
+  JSValue getPropertyHandler(JSAtom atom);
 private:
   bool internalDispatchEvent(EventInstance *eventInstance);
   static void finalize(JSRuntime *rt, JSValue val);

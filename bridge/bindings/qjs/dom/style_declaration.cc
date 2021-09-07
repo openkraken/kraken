@@ -173,6 +173,15 @@ void StyleDeclarationInstance::copyWith(StyleDeclarationInstance *instance) {
   }
 }
 
+int StyleDeclarationInstance::hasProperty(QjsContext *ctx, JSValue obj, JSAtom atom) {
+  auto *style = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(obj, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
+  const char* cname = JS_AtomToCString(ctx, atom);
+  std::string name = std::string(cname);
+  bool match = style->properties.count(name) >= 0;
+  JS_FreeCString(ctx, cname);
+  return match;
+}
+
 int StyleDeclarationInstance::setProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver,
                                           int flags) {
   auto *style = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(receiver, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
