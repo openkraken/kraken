@@ -12,6 +12,40 @@ import { URLSearchParams } from './url-search-params';
 import { URL } from './url';
 import { kraken } from './kraken';
 
+class ErrorEvent extends Event {
+  message?: string;
+  lineno?: number;
+  error?: Error;
+  colno?: number;
+  filename?: string;
+  constructor(type: string, init?: ErrorEventInit) {
+    console.log('call constructor');
+    super(type);
+
+    console.log('super called');
+    if (init) {
+      this.message = init.message;
+      this.lineno = init.lineno;
+      this.error = init.error;
+      this.colno = init.colno;
+      this.filename = init.filename;
+    }
+  }
+}
+
+class PromiseRejectionEvent extends Event {
+  promise: Promise<any>;
+  reason: any;
+  constructor(type: string, init?: PromiseRejectionEventInit) {
+    super(type);
+
+    if (init) {
+      this.promise = init.promise;
+      this.reason = init.reason;
+    }
+  };
+}
+
 defineGlobalProperty('console', console);
 defineGlobalProperty('WebSocket', WebSocket);
 defineGlobalProperty('Request', Request);
@@ -26,6 +60,7 @@ defineGlobalProperty('asyncStorage', asyncStorage);
 defineGlobalProperty('URLSearchParams', URLSearchParams);
 defineGlobalProperty('URL', URL);
 defineGlobalProperty('kraken', kraken);
+defineGlobalProperty('ErrorEvent', ErrorEvent);
 
 function defineGlobalProperty(key: string, value: any, isEnumerable: boolean = true) {
   Object.defineProperty(globalThis, key, {
@@ -36,61 +71,50 @@ function defineGlobalProperty(key: string, value: any, isEnumerable: boolean = t
   });
 }
 
-
-// // Unhandled global promise handler used by JS Engine.
-// // @ts-ignore
-// window.__global_unhandled_promise_handler__ = function (promise, reason) {
-//   // @ts-ignore
-//   const errorEvent = new ErrorEvent({
-//     message: reason.message,
-//     error: reason
-//   });
-//   // @ts-ignore
-//   const rejectionEvent = new PromiseRejectionEvent({
-//     promise,
-//     reason
-//   });
-//   // @ts-ignore
-//   window.dispatchEvent(rejectionEvent);
-//   // @ts-ignore
-//   window.dispatchEvent(errorEvent);
-// };
-
-class ErrorEvent extends Event {
-  message?: string;
-  lineno?: number;
-  error?: Error;
-  colno?: number;
-  filename?: string;
-  constructor(type: string, init?: ErrorEventInit) {
-    super(type);
-
-    if (init) {
-      this.message = init.message;
-      this.lineno = init.lineno;
-      this.error = init.error;
-      this.colno = init.colno;
-      // There are no api to get filename in JSC
-      this.filename = '';
-    }
-  }
-}
+// Unhandled global promise handler used by JS Engine.
+// @ts-ignore
+window.__global_unhandled_promise_handler__ = function (promise, reason) {
+  // @ts-ignore
+  const errorEvent = new ErrorEvent({
+    error: reason,
+    message: reason.message,
+    lineno: reason.lineNumber,
+    filename: reason.fileName,
+    colno: 0
+  });
+  // @ts-ignore
+  const rejectionEvent = new PromiseRejectionEvent({
+    promise,
+    reason
+  });
+  // @ts-ignore
+  window.dispatchEvent(rejectionEvent);
+  // @ts-ignore
+  window.dispatchEvent(errorEvent);
+};
 
 // Global error handler used by JS Engine
 // @ts-ignore
 window.__global_onerror_handler__ = function (error) {
-  // @ts-ignore
-  const event = new ErrorEvent('error', {
-    error: error,
-    message: error.message,
-    lineno: error.line,
-    colno: error.column
-  });
-  // @ts-ignore
-  window.dispatchEvent(event);
+  try {
+    console.log(ErrorEvent);
+    // @ts-ignore
+    const event = new ErrorEvent('error', {
+      error: error,
+      message: error.message,
+      lineno: error.lineNumber,
+      filename: error.fileName,
+      colno: 0
+    });
+    console.log(event, 'call window dispatch event');
+    // @ts-ignore
+    // window.dispatchEvent(event);
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 // default unhandled project handler
-// window.addEventListener('unhandledrejection', (event) => {
-//   console.error('Unhandled Promise Rejection: ' + event.reason);
-// });
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled Promise Rejection: ' + event.reason);
+});

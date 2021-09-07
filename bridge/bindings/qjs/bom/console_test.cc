@@ -15,7 +15,7 @@ TEST(Console, rawPrintShouldWork) {
     logExecuted = true;
     EXPECT_STREQ(message.c_str(), "1234");
   };
-  auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char *errmsg, void* data) {});
+  auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char *errmsg) {});
   const char *code = "__kraken_print__('1234', 'info')";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   EXPECT_EQ(logExecuted, true);
@@ -28,7 +28,7 @@ TEST(Console, log) {
     KRAKEN_LOG(VERBOSE) << message;
     logExecuted = true;
   };
-  auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char *errmsg, void* data) {
+  auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char *errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     exit(1);
   });

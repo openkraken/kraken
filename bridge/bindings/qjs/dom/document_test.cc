@@ -14,7 +14,7 @@ TEST(Document, createTextNode) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "<div>");
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char *errmsg, void *data) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char *errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -38,7 +38,7 @@ TEST(Document, instanceofNode) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "true true true");
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });

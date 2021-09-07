@@ -406,7 +406,7 @@ void bind${object.name}(std::unique_ptr<JSContext> &context) {
 
 OBJECT_INSTANCE_IMPL(${object.name});
 
-JSValue ${object.name}::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
+JSValue ${object.name}::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   ${constructorCode}
 }
 ${propSource.join('\n')}

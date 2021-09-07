@@ -27,12 +27,6 @@ std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionH
   return std::make_unique<JSContext>(contextId, handler, owner);
 }
 
-void promiseRejectTracker(QjsContext *ctx, JSValueConst promise, JSValueConst reason, JS_BOOL is_handled,
-                          void *opaque) {
-  auto *context = static_cast<JSContext *>(opaque);
-  context->reportError(reason);
-}
-
 static JSRuntime *m_runtime{nullptr};
 
 JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner)
@@ -195,6 +189,7 @@ bool JSContext::handleException(JSValue *exception) {
   if (JS_IsException(*exception)) {
     JSValue error = JS_GetException(m_ctx);
     reportError(error);
+    dispatchGlobalErrorEvent(error);
     JS_FreeValue(m_ctx, error);
     return false;
   }
@@ -215,7 +210,7 @@ JSRuntime *JSContext::runtime() {
   return m_runtime;
 }
 
-void JSContext::reportError(JSValueConst &error) {
+void JSContext::reportError(JSValueConst error) {
   if (!JS_IsError(m_ctx, error)) return;
 
   const char *title = JS_ToCString(m_ctx, error);
@@ -225,7 +220,17 @@ void JSContext::reportError(JSValueConst &error) {
     stack = JS_ToCString(m_ctx, stackValue);
   }
 
-  _handler(contextId, (std::string(title) + "\n" + std::string(stack)).c_str(), nullptr);
+  uint32_t messageLength = strlen(title) + 2;
+  if (stack != nullptr) {
+    messageLength += strlen(stack);
+    char message[messageLength];
+    sprintf(message, "%s\n%s", title, stack);
+    _handler(contextId, message);
+  } else {
+    char message[messageLength];
+    sprintf(message, "%s", title);
+    _handler(contextId, message);
+  }
 
   JS_FreeValue(m_ctx, stackValue);
   JS_FreeCString(m_ctx, title);
@@ -257,6 +262,24 @@ uint8_t *JSContext::dumpByteCode(const char *code, uint32_t codeLength, const ch
   uint8_t *bytes = JS_WriteObject(m_ctx, bytecodeLength, object, JS_WRITE_OBJ_BYTECODE);
   JS_FreeValue(m_ctx, object);
   return bytes;
+}
+
+void JSContext::dispatchGlobalErrorEvent(JSValueConst error) {
+  JSValue errorHandler = JS_GetPropertyStr(m_ctx, globalObject, "__global_onerror_handler__");
+  JS_Call(m_ctx, errorHandler, globalObject, 1, &error);
+  JS_FreeValue(m_ctx, errorHandler);
+}
+
+void JSContext::dispatchGlobalPromiseRejectionEvent(JSValueConst error) {
+  JSValue errorHandler = JS_GetPropertyStr(m_ctx, globalObject, "__global_unhandled_promise_handler__");
+  JS_Call(m_ctx, errorHandler, globalObject, 1, &error);
+  JS_FreeValue(m_ctx, errorHandler);
+}
+
+void JSContext::promiseRejectTracker(QjsContext *ctx, JSValue promise, JSValue reason, int is_handled, void *opaque) {
+  auto *context = static_cast<JSContext *>(opaque);
+  context->reportError(reason);
+  context->dispatchGlobalPromiseRejectionEvent(reason);
 }
 
 NativeString *jsValueToNativeString(QjsContext *ctx, JSValue value) {

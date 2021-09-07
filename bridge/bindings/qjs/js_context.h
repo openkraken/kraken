@@ -14,6 +14,7 @@
 #include "js_context_macros.h"
 
 using QjsContext = JSContext;
+using JSExceptionHandler = std::function<void(int32_t contextId, const char *message)>;
 
 namespace kraken::binding::qjs {
 
@@ -58,7 +59,6 @@ public:
   int32_t getContextId() const;
   void *getOwner();
   bool handleException(JSValue *exc);
-  void reportError(JSValueConst &error);
   void drainPendingPromiseJobs();
   void defineGlobalProperty(const char *prop, JSValueConst value);
   uint8_t *dumpByteCode(const char* code, uint32_t codeLength, const char *sourceURL, size_t* bytecodeLength);
@@ -77,6 +77,13 @@ public:
   static JSClassID kHostExoticObjectClassId;
 
 private:
+
+  static void promiseRejectTracker(QjsContext *ctx, JSValueConst promise, JSValueConst reason, JS_BOOL is_handled,
+                                   void *opaque);
+  void dispatchGlobalErrorEvent(JSValueConst error);
+  void dispatchGlobalPromiseRejectionEvent(JSValueConst error);
+  void reportError(JSValueConst error);
+
   int32_t contextId;
   JSExceptionHandler _handler;
   void *owner;
@@ -158,6 +165,7 @@ void buildUICommandArgs(QjsContext *ctx, JSValue key, NativeString &args_01);
 NativeString *stringToNativeString(std::string &string);
 std::string jsValueToStdString(QjsContext *ctx, JSValue &value);
 std::string jsAtomToStdString(QjsContext *ctx, JSAtom atom);
+void extractErrorInfo(JSValueConst error);
 
 
 } // namespace kraken::binding::qjs

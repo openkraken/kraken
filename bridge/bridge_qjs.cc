@@ -52,17 +52,11 @@ ConsoleMessageHandler JSBridge::consoleMessageHandler {nullptr};
  * JSRuntime
  */
 JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : contextId(contextId) {
-  auto errorHandler = [handler, this](int32_t contextId, const char *errmsg, void *data) {
-    handler(contextId, errmsg, nullptr);
-    // trigger window.onerror handler.
-    // TODO: trigger onerror event.
-  };
-
 #if ENABLE_PROFILE
   double jsContextStartTime =
     std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 #endif
-  m_context = binding::qjs::createJSContext(contextId, errorHandler, this);
+  m_context = binding::qjs::createJSContext(contextId, handler, this);
 
 #if ENABLE_PROFILE
   auto nativePerformance = Performance::instance(m_context.get())->m_nativePerformance;
@@ -196,7 +190,7 @@ JSBridge::~JSBridge() {
 }
 
 void JSBridge::reportError(const char *errmsg) {
-  m_handler(m_context->getContextId(), errmsg, nullptr);
+  m_handler(m_context->getContextId(), errmsg);
 }
 
 NativeString * JSBridge::getHref() {

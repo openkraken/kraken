@@ -15,7 +15,7 @@ TEST(Element, setAttribute) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "1234");
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void *data) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char *errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -37,7 +37,7 @@ TEST(Element, instanceofNode) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "true");
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -57,7 +57,7 @@ TEST(Element, instanceofEventTarget) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "true");
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });

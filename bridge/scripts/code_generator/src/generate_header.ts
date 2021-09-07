@@ -92,7 +92,7 @@ class ${object.name} : public ${object.type} {
 public:
   ${object.name}() = delete;
   explicit ${object.name}(JSContext *context);
-  JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
+  JSValue instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
   ${methodsDefine.join('\n  ')}
   OBJECT_INSTANCE(${object.name});
 private:

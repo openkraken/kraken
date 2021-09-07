@@ -13,7 +13,7 @@ TEST(EventTarget, addEventListener) {
   kraken::JSBridge::consoleMessageHandler = [](void *ctx, const std::string &message, int logLevel) {
     logCalled = true;
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -31,7 +31,7 @@ TEST(EventTarget, propertyEventHandler) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "ƒ () 1234");
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });

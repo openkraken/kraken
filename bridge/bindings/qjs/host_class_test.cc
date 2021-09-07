@@ -75,7 +75,7 @@ TEST(HostClass, newInstance) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "10");
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -98,7 +98,7 @@ TEST(HostClass, instanceOf) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "true");
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
     errorCalled = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   });
@@ -129,7 +129,7 @@ TEST(HostClass, inheritance) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "20");
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
     errorCalled = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   });
@@ -156,7 +156,7 @@ TEST(HostClass, inherintanceInJavaScript) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "ANDYCALL 10 20");
   };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
     errorCalled = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   });
@@ -170,7 +170,7 @@ TEST(HostClass, inherintanceInJavaScript) {
 
   const char* code = R"(
 class Demo extends SampleClass {
-  instanceConstructor(name) {
+  constructor(name) {
     super();
     this.name = name;
   }
@@ -190,7 +190,7 @@ console.log(demo.getName(), demo.f(), demo.foo());
 
 TEST(HostClass, multipleInstance) {
   bool static errorCalled = false;
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
     errorCalled = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   });
@@ -346,7 +346,7 @@ JSValue ExoticClass::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSVa
 TEST(HostClass, exoticClass) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -374,7 +374,7 @@ TEST(HostClass, exoticClass) {
 TEST(HostClass, setExoticClassProperty) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg, void* data) {
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });

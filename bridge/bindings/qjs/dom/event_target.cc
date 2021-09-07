@@ -265,7 +265,32 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
 
   // Dispatch event listener white by 'on' prefix property.
   if (_propertyEventHandler.count(eventType) > 0) {
-    _dispatchEvent(_propertyEventHandler[eventType]);
+    if (eventType == "error") {
+      auto _dispatchErrorEvent = [&eventInstance, this, eventType](JSValue &handler) {
+        JSValue error = JS_GetPropertyStr(m_ctx, eventInstance->instanceObject, "error");
+        JSValue messageValue = JS_GetPropertyStr(m_ctx, error, "message");
+        JSValue lineNumberValue = JS_GetPropertyStr(m_ctx, error, "lineNumber");
+        JSValue fileNameValue = JS_GetPropertyStr(m_ctx, error, "fileName");
+        JSValue columnValue = JS_NewUint32(m_ctx, 0);
+
+        JSValue args[] {
+          messageValue,
+          fileNameValue,
+          lineNumberValue,
+          columnValue,
+          error
+        };
+        JS_Call(m_ctx, handler, eventInstance->instanceObject, 5, args);
+
+        JS_FreeValue(m_ctx, messageValue);
+        JS_FreeValue(m_ctx, fileNameValue);
+        JS_FreeValue(m_ctx, lineNumberValue);
+        JS_FreeValue(m_ctx, columnValue);
+      };
+      _dispatchErrorEvent(_propertyEventHandler[eventType]);
+    } else {
+      _dispatchEvent(_propertyEventHandler[eventType]);
+    }
   }
 
   // do not dispatch event when event has been canceled
