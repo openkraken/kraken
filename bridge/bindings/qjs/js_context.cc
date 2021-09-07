@@ -266,20 +266,32 @@ uint8_t *JSContext::dumpByteCode(const char *code, uint32_t codeLength, const ch
 
 void JSContext::dispatchGlobalErrorEvent(JSValueConst error) {
   JSValue errorHandler = JS_GetPropertyStr(m_ctx, globalObject, "__global_onerror_handler__");
-  JS_Call(m_ctx, errorHandler, globalObject, 1, &error);
+  JSValue returnValue = JS_Call(m_ctx, errorHandler, globalObject, 1, &error);
+  if (JS_IsException(returnValue)) {
+    JSValue error = JS_GetException(m_ctx);
+    reportError(error);
+    JS_FreeValue(m_ctx, error);
+  }
+  JS_FreeValue(m_ctx, returnValue);
   JS_FreeValue(m_ctx, errorHandler);
 }
 
-void JSContext::dispatchGlobalPromiseRejectionEvent(JSValueConst error) {
+void JSContext::dispatchGlobalPromiseRejectionEvent(JSValueConst promise, JSValueConst error) {
   JSValue errorHandler = JS_GetPropertyStr(m_ctx, globalObject, "__global_unhandled_promise_handler__");
-  JS_Call(m_ctx, errorHandler, globalObject, 1, &error);
+  JSValue arguments[] = {
+    promise,
+    error
+  };
+  JSValue returnValue = JS_Call(m_ctx, errorHandler, globalObject, 2, arguments);
+  handleException(&returnValue);
+  JS_FreeValue(m_ctx, returnValue);
   JS_FreeValue(m_ctx, errorHandler);
 }
 
 void JSContext::promiseRejectTracker(QjsContext *ctx, JSValue promise, JSValue reason, int is_handled, void *opaque) {
   auto *context = static_cast<JSContext *>(opaque);
   context->reportError(reason);
-  context->dispatchGlobalPromiseRejectionEvent(reason);
+  context->dispatchGlobalPromiseRejectionEvent(promise, reason);
 }
 
 NativeString *jsValueToNativeString(QjsContext *ctx, JSValue value) {
@@ -318,6 +330,13 @@ NativeString *stringToNativeString(std::string &string) {
   tmp.string = reinterpret_cast<const uint16_t *>(utf16.c_str());
   tmp.length = utf16.size();
   return tmp.clone();
+}
+
+NativeString *atomToNativeString(QjsContext *ctx, JSAtom atom) {
+  JSValue stringValue = JS_AtomToString(ctx, atom);
+  NativeString *string = jsValueToNativeString(ctx, stringValue);
+  JS_FreeValue(ctx, stringValue);
+  return string;
 }
 
 JSRuntime *getGlobalJSRuntime() {

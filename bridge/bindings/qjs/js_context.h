@@ -81,7 +81,7 @@ private:
   static void promiseRejectTracker(QjsContext *ctx, JSValueConst promise, JSValueConst reason, JS_BOOL is_handled,
                                    void *opaque);
   void dispatchGlobalErrorEvent(JSValueConst error);
-  void dispatchGlobalPromiseRejectionEvent(JSValueConst error);
+  void dispatchGlobalPromiseRejectionEvent(JSValueConst promise, JSValueConst error);
   void reportError(JSValueConst error);
 
   int32_t contextId;
@@ -163,6 +163,7 @@ std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionH
 NativeString *jsValueToNativeString(QjsContext *ctx, JSValue value);
 void buildUICommandArgs(QjsContext *ctx, JSValue key, NativeString &args_01);
 NativeString *stringToNativeString(std::string &string);
+NativeString *atomToNativeString(QjsContext *ctx, JSAtom atom);
 std::string jsValueToStdString(QjsContext *ctx, JSValue &value);
 std::string jsAtomToStdString(QjsContext *ctx, JSAtom atom);
 void extractErrorInfo(JSValueConst error);

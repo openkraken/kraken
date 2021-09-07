@@ -188,6 +188,40 @@ console.log(demo.getName(), demo.f(), demo.foo());
   EXPECT_EQ(logCalled, true);
 }
 
+TEST(HostClass, haveFunctionProtoMethods) {
+  bool static errorCalled = false;
+  bool static logCalled = false;
+  kraken::JSBridge::consoleMessageHandler = [](void *ctx, const std::string &message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(), "ƒ ()");
+  };
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+    errorCalled = true;
+    KRAKEN_LOG(VERBOSE) << errmsg;
+  });
+  auto &context = bridge->getContext();
+  auto *parentObject = ParentClass::instance(context.get());
+  context->defineGlobalProperty("ParentClass", parentObject->classObject);
+
+  const char* code = R"(
+class Demo extends ParentClass {
+  constructor(name) {
+    super();
+    this.name = name;
+  }
+
+  getName() {
+    return this.name.toUpperCase();
+  }
+}
+console.log(Demo.call);
+)";
+  context->evaluateJavaScript(code, strlen(code), "vm://", 0);
+  delete bridge;
+  EXPECT_EQ(errorCalled, false);
+  EXPECT_EQ(logCalled, true);
+}
+
 TEST(HostClass, multipleInstance) {
   bool static errorCalled = false;
   auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
