@@ -17,6 +17,7 @@
 namespace kraken::binding::qjs {
 
 static std::atomic<int32_t> globalEventTargetId{0};
+std::once_flag kEventTargetInitFlag;
 
 void bindEventTarget(std::unique_ptr<JSContext> &context) {
   auto *constructor = EventTarget::instance(context.get());
@@ -25,15 +26,20 @@ void bindEventTarget(std::unique_ptr<JSContext> &context) {
   context->defineGlobalProperty("EventTarget", constructor->classObject);
 }
 
+JSClassID EventTarget::kEventTargetClassId {0};
+
 EventTarget::EventTarget(JSContext *context, const char *name) : HostClass(context, name) {
 }
 EventTarget::EventTarget(JSContext *context) : HostClass(context, "EventTarget") {
+  std::call_once(kEventTargetInitFlag, []() {
+    JS_NewClassID(&kEventTargetClassId);
+  });
 }
 
 OBJECT_INSTANCE_IMPL(EventTarget);
 
 JSValue EventTarget::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
-  auto eventTarget = new EventTargetInstance(this, EventTarget::classId(), "EventTarget");
+  auto eventTarget = new EventTargetInstance(this, kEventTargetClassId, "EventTarget");
   return eventTarget->instanceObject;
 }
 
@@ -291,10 +297,10 @@ EventTargetInstance::EventTargetInstance(EventTarget *eventTarget, JSClassID cla
   eventTargetId = globalEventTargetId++;
 }
 
-EventTargetInstance::EventTargetInstance(EventTarget *eventTarget, JSClassID classId, std::string name, JSClassExoticMethods &exoticMethods, int64_t eventTargetId) : Instance(
+EventTargetInstance::EventTargetInstance(EventTarget *eventTarget, JSClassID classId, std::string name, int64_t eventTargetId) : Instance(
   eventTarget,
   std::move(name),
-  &exoticMethods,
+  nullptr,
   classId,
   finalize), eventTargetId(eventTargetId) {
 }
@@ -318,16 +324,6 @@ EventTargetInstance::~EventTargetInstance() {
   foundation::UICommandBuffer::instance(m_contextId)
     ->addCommand(eventTargetId, UICommand::disposeEventTarget, nullptr, false);
 }
-
-JSClassExoticMethods EventTargetInstance::exoticMethods {
-  nullptr,
-  nullptr,
-  nullptr,
-  nullptr,
-  hasProperty,
-  getProperty,
-  setProperty,
-};
 
 int EventTargetInstance::hasProperty(QjsContext *ctx, JSValue obj, JSAtom atom) {
   auto *eventTarget = static_cast<EventTargetInstance *>(JS_GetOpaque(obj, JSValueGetClassId(obj)));

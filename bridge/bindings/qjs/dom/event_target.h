@@ -24,10 +24,11 @@ void bindEventTarget(std::unique_ptr<JSContext> &context);
 
 class EventTarget : public HostClass {
 public:
+  static JSClassID kEventTargetClassId;
   JSValue instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
   EventTarget() = delete;
   explicit EventTarget(JSContext *context, const char* name);
-  EventTarget(JSContext *context);
+  explicit EventTarget(JSContext *context);
 
   static JSClassID classId();
   static JSClassID classId(JSValue &value);
@@ -75,7 +76,7 @@ public:
   EventTargetInstance() = delete;
   explicit EventTargetInstance(EventTarget *eventTarget, JSClassID classId, JSClassExoticMethods &exoticMethods, std::string name);
   explicit EventTargetInstance(EventTarget *eventTarget, JSClassID classId, std::string name);
-  explicit EventTargetInstance(EventTarget *eventTarget, JSClassID classId, std::string name, JSClassExoticMethods &exoticMethods, int64_t eventTargetId);
+  explicit EventTargetInstance(EventTarget *eventTarget, JSClassID classId, std::string name, int64_t eventTargetId);
   ~EventTargetInstance();
 
   bool dispatchEvent(EventInstance *event);
@@ -97,8 +98,6 @@ protected:
   static int setProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
                          JSValueConst value, JSValueConst receiver, int flags);
   static int deleteProperty(QjsContext *ctx, JSValueConst obj, JSAtom prop);
-
-  static JSClassExoticMethods exoticMethods;
 
   void setPropertyHandler(JSAtom atom, JSValue value);
   JSValue getPropertyHandler(JSAtom atom);
