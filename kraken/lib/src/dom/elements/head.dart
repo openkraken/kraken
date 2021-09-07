@@ -44,20 +44,28 @@ class NoScriptElement extends Element {
       : super(targetId, nativePtr, elementManager, tagName: NOSCRIPT, defaultStyle: _defaultStyle);
 }
 
+const String _JAVASCRIPT_MIME = 'text/javascript';
+const String _JAVASCRIPT_MODULE = 'module';
+
 class ScriptElement extends Element {
   ScriptElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: SCRIPT, defaultStyle: _defaultStyle);
+
+  String type = _JAVASCRIPT_MIME;
 
   @override
   void setProperty(String key, dynamic value) {
     super.setProperty(key, value);
     if (key == 'src') {
       _fetchBundle(value);
+    } else if (key == 'type') {
+      type = value.toString().toLowerCase().trim();
     }
   }
 
   void _fetchBundle(String src) async {
-    if (src.isNotEmpty && isConnected) {
+    // Must
+    if (src.isNotEmpty && isConnected && (type == _JAVASCRIPT_MIME || type == _JAVASCRIPT_MODULE)) {
       try {
         KrakenBundle bundle = await KrakenBundle.getBundle(src, contextId: elementManager.contextId);
         await bundle.eval(elementManager.contextId);
@@ -76,17 +84,68 @@ class ScriptElement extends Element {
   }
 
   @override
-  void connectedCallback() {
+  void connectedCallback() async {
     super.connectedCallback();
     String? src = getProperty('src');
     if (src != null) {
       _fetchBundle(src);
+    } else if (type == _JAVASCRIPT_MIME || type == _JAVASCRIPT_MODULE){
+      // Eval script context: <script> console.log(1) </script>
+      StringBuffer buffer = StringBuffer();
+      childNodes.forEach((node) {
+        if (node is TextNode) {
+          buffer.write(node.data);
+        }
+      });
+      String script = buffer.toString();
+      if (script.isNotEmpty) {
+        int contextId = elementManager.contextId;
+        KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
+        if (controller != null) {
+          KrakenBundle bundle = await KrakenBundle.getBundle(controller.href, contentOverride: script, contextId: contextId);
+          await bundle.eval(elementManager.contextId);
+        }
+      }
     }
   }
 }
 
-// TODO
+const String _CSS_MIME = 'text/css';
+
 class StyleElement extends Element {
   StyleElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: STYLE, defaultStyle: _defaultStyle);
+  String type = _CSS_MIME;
+  CSSStyleSheet? _styleSheet;
+
+  @override
+  void setProperty(String key, dynamic value) {
+    super.setProperty(key, value);
+    if (key == 'type') {
+      type = value.toString().toLowerCase().trim();
+    }
+  }
+  @override
+  void connectedCallback() {
+    super.connectedCallback();
+    if (type == _CSS_MIME) {
+      StringBuffer buffer = StringBuffer();
+       childNodes.forEach((node) {
+        if (node is TextNode) {
+          buffer.write(node.data);
+        }
+      });
+      String style = buffer.toString();
+      _styleSheet = CSSStyleSheet(style);
+      elementManager.addStyleSheet(_styleSheet!);
+    }
+  }
+
+  @override
+  void disconnectedCallback() {
+    super.disconnectedCallback();
+    if (_styleSheet != null) {
+      elementManager.removeStyleSheet(_styleSheet!);
+    }
+  }
 }

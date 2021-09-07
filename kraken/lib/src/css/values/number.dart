@@ -1,7 +1,4 @@
-
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#numbers
-
-
 
 final RegExp _numberRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?$');
 

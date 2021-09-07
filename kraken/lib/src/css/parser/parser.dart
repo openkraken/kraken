@@ -7,15 +7,19 @@ import 'package:kraken/css.dart';
 const String _CLOSE_CURLY = '}';
 
 class CSSParser {
-  static CSSRule parseRule(String text) {
+  static CSSRule parseRule(String text, {CSSStyleSheet? parentStyleSheet}) {
     // TODO: parse other css rule
-    return CSSStyleRuleParser.parse(text);
+    CSSRule rule = CSSStyleRuleParser.parse(text);
+    rule.parentStyleSheet = parentStyleSheet;
+    return rule;
   }
 
-  static List<CSSRule> parseRules(String text) {
+  static List<CSSRule> parseRules(String text, {CSSStyleSheet? parentStyleSheet}) {
     List<CSSRule> rules = [];
-    text.split(_CLOSE_CURLY).forEach((rule) {
-      rules.add(parseRule(rule + _CLOSE_CURLY));
+    text.split(_CLOSE_CURLY).forEach((ruleText) {
+      CSSRule rule = parseRule(ruleText + _CLOSE_CURLY);
+      rule.parentStyleSheet = parentStyleSheet;
+      rules.add(rule);
     });
     return rules;
   }

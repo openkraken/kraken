@@ -29,7 +29,7 @@ const String _EMPTY_STRING = '';
 class CSSStyleRuleParser {
   static CSSStyleRule parse(String ruleText) {
     String selectorText = _EMPTY_STRING;
-    CSSStyleDeclaration style = CSSStyleDeclaration();
+    Map<String, String> style = {};
 
     StringBuffer buffer = StringBuffer();
     int state = _SELECTOR;
@@ -155,7 +155,7 @@ class CSSStyleRuleParser {
             // `{ col;or: red; }` will parsed as {col: '', or: 'red'}
             if (propertyName.isNotEmpty) {
               String value = buffer.toString().trim();
-              if (value.isNotEmpty) style.setProperty(propertyName, value);
+              if (value.isNotEmpty) style[propertyName] = value;
               propertyName = _EMPTY_STRING;
             }
             buffer.clear();
@@ -167,7 +167,7 @@ class CSSStyleRuleParser {
           if (state == _VALUE && propertyName.isNotEmpty) {
             // `body { color: red }` that not end with semicolon is
             // also the end of the declaration.
-            style.setProperty(propertyName, buffer.toString().trim());
+            style[propertyName] = buffer.toString().trim();
           }
           state = _END;
           break;

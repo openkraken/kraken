@@ -1,7 +1,5 @@
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#functional-notations
 
-
-
 final _functionRegExp = RegExp(r'^[a-zA-Z_]+\(.+\)$', caseSensitive: false);
 final _functionStart = '(';
 final _functionEnd = ')';

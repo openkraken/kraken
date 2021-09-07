@@ -1,7 +1,5 @@
 // CSS Values keywords
 
-
-
 const String INITIAL = 'initial';
 const String NORMAL = 'normal';
 const String NONE = 'none';

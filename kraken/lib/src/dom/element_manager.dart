@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver, RouteInformation;
+import 'package:kraken/css.dart';
 import 'dart:ffi';
 
 import 'package:kraken/gesture.dart';
@@ -197,6 +198,36 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     target.parentNode?.removeChild(target);
 
     _debugDOMTreeChanged();
+  }
+
+  // https://wicg.github.io/construct-stylesheets/#using-constructed-stylesheets
+  List<CSSStyleSheet> adoptedStyleSheets = [];
+  List<CSSStyleSheet> styleSheets = [];
+
+  void addStyleSheet(CSSStyleSheet sheet) {
+    styleSheets.add(sheet);
+  }
+
+  void removeStyleSheet(CSSStyleSheet sheet) {
+    styleSheets.remove(sheet);
+    // TODO: update style in the dom tree.
+  }
+
+  final RegExp _splitRegExp = RegExp(r'\s+');
+
+  void applyStyleByClassNames(CSSStyleDeclaration style, String classNames) {
+
+    for (String className in classNames.trim().split(_splitRegExp)) {
+      for (CSSStyleSheet sheet in styleSheets) {
+        List<CSSRule> rules = sheet.cssRules;
+        for (int i = 0; i < rules.length; i++) {
+          CSSRule rule = rules[i];
+          if (rule is CSSStyleRule && rule.selectorText == className) {
+            style.setStyleSheetStyle(rule.style);
+          }
+        }
+      }
+    }
   }
 
   void setProperty(int targetId, String key, dynamic value) {

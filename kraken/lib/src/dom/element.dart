@@ -24,6 +24,7 @@ import 'package:ffi/ffi.dart';
 import 'element_native_methods.dart';
 
 const String _STYLE_PROPERTY = 'style';
+const String _CLASS_NAME = 'class';
 
 /// Defined by W3C Standard,
 /// Most element's default width is 300 in pixel,
@@ -173,7 +174,7 @@ class Element extends Node
       : _isIntrinsicBox = isIntrinsicBox,
         defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : INLINE,
         super(NodeType.ELEMENT_NODE, targetId, nativeElementPtr.ref.nativeNode, elementManager, tagName) {
-    style = CSSStyleDeclaration.inlineStyle(this);
+    style = CSSStyleDeclaration.computedStyle(this);
 
     if (!isHiddenElement) {
       _nativeMap[nativeElementPtr.address] = this;
@@ -1236,6 +1237,8 @@ class Element extends Node
       assert(value is Map<String, dynamic>);
       // @TODO: Consider `{ color: red }` to `{}`, need to remove invisible keys.
       (value as Map<String, dynamic>).forEach(setStyle);
+    } else if (key == _CLASS_NAME) {
+      elementManager.applyStyleByClassNames(style, value.toString());
     } else {
       properties[key] = value;
     }

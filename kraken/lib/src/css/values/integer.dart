@@ -1,7 +1,5 @@
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#integers
 
-
-
 class CSSInteger {
 
   static int? parseInteger(String value) {

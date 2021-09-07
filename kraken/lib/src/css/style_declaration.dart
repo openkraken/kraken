@@ -114,7 +114,7 @@ class CSSStyleDeclaration {
 
   CSSStyleDeclaration();
   // ignore: prefer_initializing_formals
-  CSSStyleDeclaration.inlineStyle(Element element): target = element;
+  CSSStyleDeclaration.computedStyle(Element element): target = element;
 
   /// When some property changed, corresponding [StyleChangeListener] will be
   /// invoked in synchronous.
@@ -570,6 +570,13 @@ class CSSStyleDeclaration {
     }
 
     return result;
+  }
+
+  void setStyleSheetStyle(Map<String, String> styleSheetStyle) {
+    // TODO: should not overwrite inline style. @yuanyan
+    for (String propertyName in styleSheetStyle.keys) {
+      setProperty(propertyName, styleSheetStyle[propertyName]);
+    }
   }
 
   /// Modifies an existing CSS property or creates a new CSS property in

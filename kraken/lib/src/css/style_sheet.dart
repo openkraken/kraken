@@ -17,15 +17,16 @@ class CSSStyleSheet implements StyleSheet {
   /// A string containing the baseURL used to resolve relative URLs in the stylesheet.
   String? herf;
 
-  CSSRuleList cssRules = CSSRuleList();
+  List<CSSRule> cssRules = [];
 
-  Uri baseURL;
-
-  CSSStyleSheet({ required this.baseURL, this.disabled = false });
+  CSSStyleSheet(String text, { this.disabled = false, this.herf }) {
+    List<CSSRule> rules = CSSParser.parseRules(text, parentStyleSheet: this);
+    cssRules.addAll(rules);
+  }
   
   insertRule(String text, int index) {
     CSSRule rule = CSSParser.parseRule(text);
-    cssRules.insert(rule, index);
+    cssRules.insert(index, rule);
   }
 
   /// Removes a rule from the stylesheet object.
