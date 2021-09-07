@@ -654,7 +654,7 @@ ElementInstance::ElementInstance(Element *element, std::string tagName, bool sho
   NodeInstance(element, NodeType::ELEMENT_NODE,
                DocumentInstance::instance(
                  Document::instance(
-                   element->m_context)), Element::classId(), exoticMethods, tagName) {
+                   element->m_context)), Element::classId(), exoticMethods, "Element") {
 
   m_attributes = new ElementAttributes(m_context);
   m_style = new StyleDeclarationInstance(CSSStyleDeclaration::instance(m_context), this);

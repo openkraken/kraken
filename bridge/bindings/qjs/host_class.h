@@ -85,7 +85,7 @@ public:
   explicit Instance(HostClass *hostClass, std::string name, JSClassExoticMethods *exotic, JSClassID classId, JSClassFinalizer finalizer)
     : m_context(hostClass->context()), m_hostClass(hostClass), m_name(std::move(name)), m_ctx(m_context->ctx()), m_contextId(hostClass->contextId()) {
     JSClassDef def{};
-    def.class_name = "HostClass::instance";
+    def.class_name = m_name.c_str();
     def.finalizer = finalizer;
     def.exotic = exotic;
     int32_t success = JS_NewClass(m_context->runtime(), classId, &def);

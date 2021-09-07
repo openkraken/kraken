@@ -65,32 +65,32 @@ TEST(EventTarget, propertyEventHandler) {
   EXPECT_EQ(logCalled, true);
 }
 
-TEST(EventTarget, propertyEventOnWindow) {
-  bool static errorCalled = false;
-  bool static logCalled = false;
-  kraken::JSBridge::consoleMessageHandler = [](void *ctx, const std::string &message, int logLevel) {
-    logCalled = true;
-    EXPECT_STREQ(message.c_str(), "1234");
-  };
-  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
-    KRAKEN_LOG(VERBOSE) << errmsg;
-    errorCalled = true;
-  });
-  auto &context = bridge->getContext();
-  const char* code = "window.onclick = function() { console.log(1234); };"
-                     "window.dispatchEvent(new Event('click'));";
-  bridge->evaluateScript(code, strlen(code), "vm://", 0);
-  delete bridge;
-  EXPECT_EQ(errorCalled, false);
-  EXPECT_EQ(logCalled, true);
-}
+//TEST(EventTarget, propertyEventOnWindow) {
+//  bool static errorCalled = false;
+//  bool static logCalled = false;
+//  kraken::JSBridge::consoleMessageHandler = [](void *ctx, const std::string &message, int logLevel) {
+//    logCalled = true;
+//    EXPECT_STREQ(message.c_str(), "1234");
+//  };
+//  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+//    KRAKEN_LOG(VERBOSE) << errmsg;
+//    errorCalled = true;
+//  });
+//  auto &context = bridge->getContext();
+//  const char* code = "window.onclick = function() { console.log(1234); };"
+//                     "window.dispatchEvent(new Event('click'));";
+//  bridge->evaluateScript(code, strlen(code), "vm://", 0);
+//  delete bridge;
+//  EXPECT_EQ(errorCalled, false);
+//  EXPECT_EQ(logCalled, true);
+//}
 
 TEST(EventTarget, ClassInheritEventTarget) {
   bool static errorCalled = false;
   bool static logCalled = false;
   kraken::JSBridge::consoleMessageHandler = [](void *ctx, const std::string &message, int logLevel) {
     logCalled = true;
-    EXPECT_STREQ(message.c_str(), "1234");
+    EXPECT_STREQ(message.c_str(), "ƒ () ƒ ()");
   };
   auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
@@ -101,11 +101,11 @@ TEST(EventTarget, ClassInheritEventTarget) {
 class Sample extends EventTarget {
   constructor() {
     super();
- }
+  }
 }
 
 let s = new Sample();
-
+console.log(s.addEventListener, s.removeEventListener)
 )");
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
   delete bridge;
