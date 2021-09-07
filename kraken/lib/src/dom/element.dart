@@ -68,41 +68,43 @@ mixin ElementBase on Node {
   }
 }
 
-/// Mark the renderer of element as needs layout.
-typedef MarkRendererNeedsLayout = void Function();
-/// Toggle the renderer of element between repaint boundary and non repaint boundary.
-typedef ToggleRendererRepaintBoundary = void Function();
-/// Detach the renderer from its owner element.
-typedef DetachRenderer = void Function();
-/// Do the preparation work before the renderer is attached.
 typedef BeforeRendererAttach = RenderObject Function();
-/// Do the clean work after the renderer has attached.
-typedef AfterRendererAttach = void Function();
-/// Return the targetId of current element.
 typedef GetTargetId = int Function();
-/// Get the font size of root element
 typedef GetRootElementFontSize = double Function();
 
 /// Delegate methods passed to renderBoxModel for actions involved with element
 /// (eg. convert renderBoxModel to repaint boundary then attach to element).
 class ElementDelegate {
-  MarkRendererNeedsLayout markRendererNeedsLayout;
-  ToggleRendererRepaintBoundary toggleRendererRepaintBoundary;
-  DetachRenderer detachRenderer;
+  /// Mark the renderer of element as needs layout.
+  VoidCallback markRendererNeedsLayout;
+
+  /// Toggle the renderer of element between repaint boundary and non repaint boundary.
+  VoidCallback toggleRendererRepaintBoundary;
+
+  /// Detach the renderer from its owner element.
+  VoidCallback detachRenderer;
+
+  /// Do the preparation work before the renderer is attached.
   BeforeRendererAttach beforeRendererAttach;
-  AfterRendererAttach afterRendererAttach;
+
+  /// Do the clean work after the renderer has attached.
+  VoidCallback afterRendererAttach;
+
+  /// Return the targetId of current element.
   GetTargetId getTargetId;
+
+  /// Get the font size of root element
   GetRootElementFontSize getRootElementFontSize;
 
-  ElementDelegate(
-    this.markRendererNeedsLayout,
-    this.toggleRendererRepaintBoundary,
-    this.detachRenderer,
-    this.beforeRendererAttach,
-    this.afterRendererAttach,
-    this.getTargetId,
-    this.getRootElementFontSize
-  );
+  ElementDelegate({
+    required this.markRendererNeedsLayout,
+    required this.toggleRendererRepaintBoundary,
+    required this.detachRenderer,
+    required this.beforeRendererAttach,
+    required this.afterRendererAttach,
+    required this.getTargetId,
+    required this.getRootElementFontSize,
+  });
 }
 
 class Element extends Node
@@ -186,13 +188,13 @@ class Element extends Node
 
   ElementDelegate get elementDelegate {
     return ElementDelegate(
-      _markRendererNeedsLayout,
-      _toggleRendererRepaintBoundary,
-      _detachRenderer,
-      _beforeRendererAttach,
-      _afterRendererAttach,
-      _getTargetId,
-      _getRootElementFontSize
+      markRendererNeedsLayout: _markRendererNeedsLayout,
+      toggleRendererRepaintBoundary: _toggleRendererRepaintBoundary,
+      detachRenderer: _detachRenderer,
+      beforeRendererAttach: _beforeRendererAttach,
+      afterRendererAttach: _afterRendererAttach,
+      getTargetId: _getTargetId,
+      getRootElementFontSize: _getRootElementFontSize,
     );
   }
 
@@ -638,6 +640,9 @@ class Element extends Node
     // Only remove childNode when it has parent
     if (child.isRendererAttached) {
       child.detach();
+    } else if (renderer is RenderRecyclerLayout) {
+      int index = children.indexOf(child as Element);
+      (renderer as RenderRecyclerLayout).removeAt(index);
     }
 
     super.removeChild(child);

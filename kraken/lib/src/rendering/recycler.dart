@@ -44,13 +44,11 @@ class RenderRecyclerLayout extends RenderLayoutBox
 
   RenderViewport? renderViewport;
   RenderSliverList? _renderSliverList;
+  Axis axis = Axis.vertical;
 
   // Children renderBox list of element when element is created,
   // not correspond to the real renderObject.
   final List<RenderBox> _children = List.empty(growable: true);
-
-  @override
-  bool get isScrollingContentBox => false;
 
   // Add child to child list.
   @override
@@ -88,6 +86,12 @@ class RenderRecyclerLayout extends RenderLayoutBox
     children!.forEach(add);
   }
 
+  void removeAt(int index) {
+    if (_children.length > index && index > -1) {
+      _children.removeAt(index);
+    }
+  }
+
   @override
   void remove(RenderBox child) {
     if (child is RenderBoxModel) {
@@ -96,7 +100,7 @@ class RenderRecyclerLayout extends RenderLayoutBox
 
     if (child == renderViewport) {
       super.remove(child);
-    } else {
+    } else if (child.parent == _renderSliverList) {
       assert(_renderSliverList != null);
       _renderSliverList!.remove(child);
     }
@@ -129,15 +133,15 @@ class RenderRecyclerLayout extends RenderLayoutBox
   @protected
   RenderViewport _buildRenderViewport() {
     pointerListener = _pointerListener;
-    Axis sliverAxis = renderStyle.sliverAxis;
+    axis = renderStyle.sliverAxis;
 
-    AxisDirection axisDirection = getAxisDirection(sliverAxis);
+    AxisDirection axisDirection = getAxisDirection(axis);
     scrollable = KrakenScrollable(axisDirection: axisDirection);
 
     return renderViewport = RenderViewport(
       offset: scrollable!.position!,
       axisDirection: axisDirection,
-      crossAxisDirection: getCrossAxisDirection(sliverAxis),
+      crossAxisDirection: getCrossAxisDirection(axis),
       children: [_buildRenderSliverList()],
       cacheExtent: kReleaseMode ? null : 0.0,
     );
@@ -178,6 +182,7 @@ class RenderRecyclerLayout extends RenderLayoutBox
 
   @override
   void performLayout() {
+
     if (kProfileMode) {
       childLayoutDuration = 0;
       PerformanceTiming.instance()
@@ -284,7 +289,7 @@ class RenderRecyclerLayout extends RenderLayoutBox
   @override
   int get childCount => _children.length;
 
-  int? _currentIndex;
+  int _currentIndex = -1;
 
   @override
   void createChild(int index, {RenderBox? after}) {

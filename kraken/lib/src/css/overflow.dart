@@ -328,11 +328,23 @@ mixin CSSOverflowMixin on ElementBase {
   }
 
   get scrollHeight {
+    if (renderBoxModel is RenderRecyclerLayout) {
+      KrakenScrollable? scrollable = _getScrollable(Axis.vertical);
+      if (scrollable?.position?.maxScrollExtent != null) {
+        return scrollable!.position!.maxScrollExtent;
+      }
+    }
     Size scrollContainerSize = renderBoxModel!.scrollableSize;
     return scrollContainerSize.height;
   }
 
   get scrollWidth {
+    if (renderBoxModel is RenderRecyclerLayout) {
+      KrakenScrollable? scrollable = _getScrollable(Axis.horizontal);
+      if (scrollable?.position?.maxScrollExtent != null) {
+        return scrollable!.position!.maxScrollExtent;
+      }
+    }
     Size scrollContainerSize = renderBoxModel!.scrollableSize;
     return scrollContainerSize.width;
   }
@@ -359,7 +371,8 @@ mixin CSSOverflowMixin on ElementBase {
   KrakenScrollable? _getScrollable(Axis direction) {
     KrakenScrollable? scrollable;
     if (renderer is RenderRecyclerLayout) {
-      scrollable = (renderer as RenderRecyclerLayout).scrollable;
+      RenderRecyclerLayout recyclerLayout = renderer as RenderRecyclerLayout;
+      scrollable = direction == recyclerLayout.axis ? recyclerLayout.scrollable : null;
     } else {
       if (direction == Axis.horizontal) {
         scrollable = _scrollableX;
