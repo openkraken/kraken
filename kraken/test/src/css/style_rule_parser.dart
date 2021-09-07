@@ -55,7 +55,6 @@ void main() {
       expect(styleRule.style.getPropertyValue('color'), 'rgb(255, 255, 0)');
     });
 
-
     test('9', () {
       CSSStyleRule styleRule = CSSStyleRuleParser.parse('.foo { background : ; color: rgb(255, 255, 0)}');
       expect(styleRule.selectorText, '.foo');

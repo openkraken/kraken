@@ -35,6 +35,7 @@ class CSSStyleRuleParser {
     int state = _SELECTOR;
     String propertyName = _EMPTY_STRING;
     bool isString = false;
+    bool isCustomProperty = false;
 
     for (int pos = 0, length = ruleText.length; pos < length && state != _END; pos++) {
       int c = ruleText.codeUnitAt(pos);
@@ -72,8 +73,14 @@ class CSSStyleRuleParser {
           }
           break;
         case HYPHEN_CODE:
-          if (state == _NAME) {
+          if (state == _NAME && isCustomProperty == false) {
             int letter = ruleText.codeUnitAt(pos + 1);
+            if (letter == HYPHEN_CODE) {
+              // Ignore css custom properties: `--main-bg-color`.
+              buffer.writeCharCode(c);
+              isCustomProperty = true;
+              break;
+            }
             // Convert background-image to backgroundImage
             // a-z: 97-122
             if (letter > 96 && letter < 123) {
@@ -82,6 +89,8 @@ class CSSStyleRuleParser {
               buffer.writeCharCode(letter);
               pos++;
             }
+          } else {
+            buffer.writeCharCode(c);
           }
           break;
         case SLASH_CODE:
@@ -113,6 +122,8 @@ class CSSStyleRuleParser {
           if (state == _NAME) {
             propertyName = buffer.toString().trim();
             buffer.clear();
+            // Reset isCustomProperty flag.
+            isCustomProperty = false;
             state = _VALUE;
           } else {
             buffer.writeCharCode(c);
