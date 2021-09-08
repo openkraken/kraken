@@ -314,7 +314,7 @@ class Element extends Node
   bool _shouldConsumeScrollTicker = false;
   void _consumeScrollTicker(_) {
     if (_shouldConsumeScrollTicker && eventHandlers.containsKey(EVENT_SCROLL)) {
-      _fireScrollEvent();
+      _dispatchScrollEvent();
       _shouldConsumeScrollTicker = false;
     }
   }
@@ -332,7 +332,7 @@ class Element extends Node
   }
 
   /// https://drafts.csswg.org/cssom-view/#scrolling-events
-  void _fireScrollEvent() {
+  void _dispatchScrollEvent() {
     dispatchEvent(Event(EVENT_SCROLL));
   }
 
