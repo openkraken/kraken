@@ -320,15 +320,15 @@ class Element extends Node
   }
 
   void _scrollListener(double scrollOffset, AxisDirection axisDirection) {
+    applyStickyChildrenOffset();
+    paintFixedChildren(scrollOffset, axisDirection);
+
     if (_scrollTicker == null) {
       // Make sure scroll listener trigger most to 1 time each frame.
       SchedulerBinding.instance!.addPostFrameCallback(_consumeScrollTicker);
       SchedulerBinding.instance!.scheduleFrame();
     }
     _scrollTicker = () {
-      applyStickyChildrenOffset();
-      paintFixedChildren(scrollOffset, axisDirection);
-
       if (eventHandlers.containsKey(EVENT_SCROLL)) {
         _fireScrollEvent();
       }
