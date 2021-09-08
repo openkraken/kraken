@@ -442,7 +442,7 @@ void flushUICommand() {
           case UICommandType.setStyle:
             String key = command.args[0];
             String value = command.args[1];
-            controller.view.setStyle(id, key, value);
+            controller.view.setInlineStyle(id, key, value);
             _renderStyleCommands.add([id.toString(), key, value]);
             break;
           case UICommandType.setProperty:

@@ -311,11 +311,11 @@ class KrakenViewController {
     _elementManager.cloneNode(oldId, newId);
   }
 
-  void setStyle(int targetId, String key, String value) {
+  void setInlineStyle(int targetId, String key, String value) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_SET_STYLE_START, uniqueId: targetId);
     }
-    _elementManager.setStyle(targetId, key, value);
+    _elementManager.setInlineStyle(targetId, key, value);
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_SET_STYLE_END, uniqueId: targetId);
     }

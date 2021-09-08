@@ -129,6 +129,7 @@ class Element extends Node
 
   final String tagName;
 
+  /// The default user-agent style.
   final Map<String, dynamic> defaultStyle;
 
   /// The default display type.
@@ -139,8 +140,11 @@ class Element extends Node
 
   final Pointer<NativeElement> nativeElementPtr;
 
-  /// Style declaration from user input.
+  /// The computed style, not inline style.
   late CSSStyleDeclaration style;
+
+  /// The inline style is a map of style property name to style property value.
+  final Map<String, dynamic> _inlineStyle = {};
 
   Size get viewportSize => elementManager.viewport.viewportSize;
 
@@ -1222,6 +1226,13 @@ class Element extends Node
     }
   }
 
+  // Set inline style property.
+  void setInlineStyle(String key, dynamic value) {
+    // Current only for mark property is setting by inline style.
+    _inlineStyle[key] = value;
+    setStyle(key, value);
+  }
+
   // Universal RenderStyle set callback.
   @mustCallSuper
   void setRenderStyle(String key, dynamic value) {
@@ -1238,7 +1249,7 @@ class Element extends Node
       // @TODO: Consider `{ color: red }` to `{}`, need to remove invisible keys.
       (value as Map<String, dynamic>).forEach(setStyle);
     } else if (key == _CLASS_NAME) {
-      elementManager.applyStyleByClassNames(style, value.toString());
+      elementManager.applyStyleByClassNames(style, value.toString(), inlineStyle: _inlineStyle);
     } else {
       properties[key] = value;
     }

@@ -215,7 +215,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   final RegExp _splitRegExp = RegExp(r'\s+');
 
-  void applyStyleByClassNames(CSSStyleDeclaration style, String classNames) {
+  void applyStyleByClassNames(CSSStyleDeclaration style, String classNames, { required Map<String, dynamic> inlineStyle }) {
 
     for (String className in classNames.trim().split(_splitRegExp)) {
       for (CSSStyleSheet sheet in styleSheets) {
@@ -223,7 +223,13 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
         for (int i = 0; i < rules.length; i++) {
           CSSRule rule = rules[i];
           if (rule is CSSStyleRule && rule.selectorText == className) {
-            style.setStyleSheetStyle(rule.style);
+            var styleSheetStyle = rule.style;
+            for (String propertyName in styleSheetStyle.keys) {
+              var inlineStyleValue = inlineStyle[propertyName];
+              if (inlineStyleValue == null || inlineStyleValue == '') {
+                style.setProperty(propertyName, styleSheetStyle[propertyName]);
+              }
+            }
           }
         }
       }
@@ -271,13 +277,13 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     }
   }
 
-  void setStyle(int targetId, String key, dynamic value) {
+  void setInlineStyle(int targetId, String key, dynamic value) {
     assert(existsTarget(targetId), 'id: $targetId key: $key value: $value');
     Node? target = getEventTargetByTargetId<Node>(targetId);
     if (target == null) return;
 
     if (target is Element) {
-      target.setStyle(key, value);
+      target.setInlineStyle(key, value);
     } else {
       debugPrint('Only element has style, try setting style.$key from Node(#$targetId).');
     }
