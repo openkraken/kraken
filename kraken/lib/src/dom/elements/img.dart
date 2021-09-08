@@ -146,7 +146,8 @@ class ImageElement extends Element {
       return renderBoxModel!.clientWidth;
     }
 
-    return 0.0;
+    // Fallback to natural width, if image is not on screen.
+    return naturalWidth;
   }
 
   double? get height {
@@ -158,7 +159,8 @@ class ImageElement extends Element {
       return renderBoxModel!.clientHeight;
     }
 
-    return 0.0;
+    // Fallback to natural width, if image is not on screen.
+    return naturalHeight;
   }
 
   double get naturalWidth {
@@ -254,7 +256,6 @@ class ImageElement extends Element {
     // so use two frames to tell multiframe image from static image, note this optimization will fail
     // at multiframe image with only two frames which is not common
     isMultiframe = _frameNumber > 2;
-
     if (shouldConvertToRepaintBoundary) {
       convertToRepaintBoundary();
     } else {
@@ -280,7 +281,7 @@ class ImageElement extends Element {
 
   void _resize() {
     if (!isRendererAttached) {
-      return _handleImageResizeAfterLayout();
+      return;
     }
 
     RenderStyle renderStyle = renderBoxModel!.renderStyle;
