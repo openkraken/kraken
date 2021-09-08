@@ -99,7 +99,7 @@ protected:
                          JSValueConst value, JSValueConst receiver, int flags);
   static int deleteProperty(QjsContext *ctx, JSValueConst obj, JSAtom prop);
 
-  void setPropertyHandler(JSAtom atom, JSValue value);
+  void setPropertyHandler(const char* eventType, JSValue value);
   JSValue getPropertyHandler(JSAtom atom);
 private:
   bool internalDispatchEvent(EventInstance *eventInstance);

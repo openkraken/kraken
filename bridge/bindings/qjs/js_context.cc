@@ -46,6 +46,7 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
   init_list_head(&document_job_list);
   init_list_head(&module_job_list);
   init_list_head(&promise_job_list);
+  init_list_head(&atom_job_list);
 
   if (m_runtime == nullptr) {
     m_runtime = JS_NewRuntime();
@@ -120,6 +121,16 @@ JSContext::~JSContext() {
       JS_FreeValue(m_ctx, promiseContext->resolveFunc);
       JS_FreeValue(m_ctx, promiseContext->rejectFunc);
       delete promiseContext;
+    }
+  }
+
+  // Free unreleased atoms.
+  {
+    struct list_head *el, *el1;
+    list_for_each_safe(el, el1, &atom_job_list) {
+      auto *job = list_entry(el, AtomJob, link);
+      JS_FreeAtom(m_ctx, job->atom);
+      delete job;
     }
   }
 

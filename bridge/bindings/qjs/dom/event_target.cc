@@ -84,6 +84,8 @@ JSValue EventTarget::addEventListener(QjsContext *ctx, JSValue this_val, int arg
   // Init list.
   if (eventTargetInstance->_eventHandlers.count(eventTypeAtom) == 0) {
     JS_DupAtom(ctx, eventTypeAtom);
+    auto *atomJob = new AtomJob{eventTypeAtom};
+    list_add_tail(&atomJob->link, &eventTargetInstance->m_context->atom_job_list);
     eventTargetInstance->_eventHandlers[eventTypeAtom] = std::vector<JSValue>();
   }
 
@@ -140,7 +142,9 @@ JSValue EventTarget::removeEventListener(QjsContext *ctx, JSValue this_val, int 
   }
 
   JSAtom eventTypeAtom = JS_ValueToAtom(ctx, eventTypeValue);
+
   if (eventTargetInstance->_eventHandlers.count(eventTypeAtom) == 0) {
+    JS_FreeAtom(ctx, eventTypeAtom);
     return JS_UNDEFINED;
   }
 
@@ -218,7 +222,6 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
     eventInstance->nativeEvent->type->length);
   std::string eventType = toUTF8(u16EventType);
   JSAtom eventTypeAtom = JS_NewAtom(m_ctx, eventType.c_str());
-  auto stack = _eventHandlers[eventTypeAtom];
 
   // Dispatch event listeners writen by addEventListener
   auto _dispatchEvent = [&eventInstance, this](JSValue &handler) {
@@ -229,8 +232,12 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
     JS_FreeValue(m_ctx, returnedValue);
   };
 
-  for (auto &handler : stack) {
-    _dispatchEvent(handler);
+  if (_eventHandlers.count(eventTypeAtom) > 0) {
+    auto stack = _eventHandlers[eventTypeAtom];
+
+    for (auto &handler : stack) {
+      _dispatchEvent(handler);
+    }
   }
 
   // Dispatch event listener white by 'on' prefix property.
@@ -262,6 +269,8 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
       _dispatchEvent(_propertyEventHandler[eventTypeAtom]);
     }
   }
+
+  JS_FreeAtom(m_ctx, eventTypeAtom);
 
   // do not dispatch event when event has been canceled
   // true is prevented.
@@ -311,16 +320,6 @@ JSClassID EventTargetInstance::classId() {
 }
 
 EventTargetInstance::~EventTargetInstance() {
-  for (auto &m : m_properties) {
-    JS_FreeAtom(m_ctx, m.first);
-  }
-  for (auto &m : _eventHandlers) {
-    JS_FreeAtom(m_ctx, m.first);
-  }
-  for (auto &m : _propertyEventHandler) {
-    JS_FreeAtom(m_ctx, m.first);
-  }
-
   foundation::UICommandBuffer::instance(m_contextId)
     ->addCommand(eventTargetId, UICommand::disposeEventTarget, nullptr, false);
 }
@@ -369,7 +368,9 @@ int EventTargetInstance::setProperty(QjsContext *ctx, JSValue obj, JSAtom atom, 
   JSString *p = JS_VALUE_GET_STRING(atomString);
 
   if (!p->is_wide_char && p->u.str8[0] == 'o' && p->u.str8[1] == 'n') {
-    eventTarget->setPropertyHandler(atom, value);
+    char eventType[p->len + 1 - 2];
+    memcpy(eventType, &p->u.str8[2], p->len + 1 - 2);
+    eventTarget->setPropertyHandler(eventType, value);
   } else {
     // Increase one reference count for atom to hold this atom value until eventTarget disposed.
     JS_DupAtom(ctx, atom);
@@ -410,7 +411,11 @@ JSValue EventTargetInstance::callNativeMethods(const char *method, int32_t argc,
   return returnValue;
 }
 
-void EventTargetInstance::setPropertyHandler(JSAtom atom, JSValue value) {
+void EventTargetInstance::setPropertyHandler(const char* eventType, JSValue value) {
+  JSAtom atom = JS_NewAtom(m_ctx, eventType);
+  auto *atomJob = new AtomJob{atom};
+  list_add_tail(&atomJob->link, &m_context->atom_job_list);
+
  // We need to remove previous eventHandler when setting new eventHandler with same eventType.
   if (_propertyEventHandler.count(atom) > 0) {
     JSValue callback = _propertyEventHandler[atom];
@@ -423,11 +428,11 @@ void EventTargetInstance::setPropertyHandler(JSAtom atom, JSValue value) {
 
   // When evaluate scripts like 'element.onclick = null', we needs to remove the event handlers callbacks
   if (JS_IsNull(value)) {
+    JS_FreeAtom(m_ctx, atom);
+    list_del(&atomJob->link);
     return;
   }
 
-  // Avoid atom been freed.
-  JS_DupAtom(m_ctx, atom);
   // Create strong reference between callback and eventTargetObject.
   // So gc can mark this object and recycle it.
   JSValue newCallback = JS_DupValue(m_ctx, value);

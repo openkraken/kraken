@@ -40,6 +40,11 @@ struct PromiseContext {
   list_head link;
 };
 
+struct AtomJob {
+  JSAtom atom;
+  list_head link;
+};
+
 bool isContextValid(int32_t contextId);
 
 class JSContext {
@@ -71,6 +76,7 @@ public:
   struct list_head document_job_list;
   struct list_head module_job_list;
   struct list_head promise_job_list;
+  struct list_head atom_job_list;
 
   static JSClassID kHostClassClassId;
   static JSClassID kHostObjectClassId;
