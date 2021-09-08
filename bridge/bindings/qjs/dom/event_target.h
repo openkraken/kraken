@@ -11,6 +11,7 @@
 #include "bindings/qjs/host_object.h"
 #include "bindings/qjs/js_context.h"
 #include "bindings/qjs/native_value.h"
+#include "bindings/qjs/qjs_patch.h"
 #include <deque>
 
 namespace kraken::binding::qjs {
@@ -99,8 +100,8 @@ protected:
                          JSValueConst value, JSValueConst receiver, int flags);
   static int deleteProperty(QjsContext *ctx, JSValueConst obj, JSAtom prop);
 
-  void setPropertyHandler(const char* eventType, JSValue value);
-  JSValue getPropertyHandler(JSAtom atom);
+  void setPropertyHandler(JSString *p, JSValue value);
+  JSValue getPropertyHandler(JSString *p);
 private:
   bool internalDispatchEvent(EventInstance *eventInstance);
   static void finalize(JSRuntime *rt, JSValue val);

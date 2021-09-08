@@ -336,7 +336,7 @@ int EventTargetInstance::hasProperty(QjsContext *ctx, JSValue obj, JSAtom atom) 
   JS_FreeValue(ctx, atomString);
 
   if (!p->is_wide_char && p->u.str8[0] == 'o' && p->u.str8[1] == 'n') {
-    return !JS_IsNull(eventTarget->getPropertyHandler(atom));
+    return !JS_IsNull(eventTarget->getPropertyHandler(p));
   }
 
   return eventTarget->m_properties.count(atom) >= 0;
@@ -346,8 +346,11 @@ JSValue EventTargetInstance::getProperty(QjsContext *ctx, JSValue obj, JSAtom at
   auto *eventTarget = static_cast<EventTargetInstance *>(JS_GetOpaque(obj, JSValueGetClassId(obj)));
   JSValue prototype = JS_GetPrototype(ctx, eventTarget->instanceObject);
   if (JS_HasProperty(ctx, prototype, atom)) {
-    return JS_GetPropertyInternal(ctx, prototype, atom, eventTarget->instanceObject, 0);
+    JSValue ret = JS_GetPropertyInternal(ctx, prototype, atom, eventTarget->instanceObject, 0);
+    JS_FreeValue(ctx, prototype);
+    return ret;
   }
+  JS_FreeValue(ctx, prototype);
 
   JSValue atomString = JS_AtomToString(ctx, atom);
   JSString *p = JS_VALUE_GET_STRING(atomString);
@@ -355,7 +358,7 @@ JSValue EventTargetInstance::getProperty(QjsContext *ctx, JSValue obj, JSAtom at
   JS_FreeValue(ctx, atomString);
 
   if (!p->is_wide_char && p->u.str8[0] == 'o' && p->u.str8[1] == 'n') {
-    return eventTarget->getPropertyHandler(atom);
+    return eventTarget->getPropertyHandler(p);
   }
 
   return JS_DupValue(ctx, eventTarget->m_properties[atom]);
@@ -368,9 +371,7 @@ int EventTargetInstance::setProperty(QjsContext *ctx, JSValue obj, JSAtom atom, 
   JSString *p = JS_VALUE_GET_STRING(atomString);
 
   if (!p->is_wide_char && p->u.str8[0] == 'o' && p->u.str8[1] == 'n') {
-    char eventType[p->len + 1 - 2];
-    memcpy(eventType, &p->u.str8[2], p->len + 1 - 2);
-    eventTarget->setPropertyHandler(eventType, value);
+    eventTarget->setPropertyHandler(p, value);
   } else {
     // Increase one reference count for atom to hold this atom value until eventTarget disposed.
     JS_DupAtom(ctx, atom);
@@ -411,7 +412,9 @@ JSValue EventTargetInstance::callNativeMethods(const char *method, int32_t argc,
   return returnValue;
 }
 
-void EventTargetInstance::setPropertyHandler(const char* eventType, JSValue value) {
+void EventTargetInstance::setPropertyHandler(JSString *p, JSValue value) {
+  char eventType[p->len + 1 - 2];
+  memcpy(eventType, &p->u.str8[2], p->len + 1 - 2);
   JSAtom atom = JS_NewAtom(m_ctx, eventType);
   auto *atomJob = new AtomJob{atom};
   list_add_tail(&atomJob->link, &m_context->atom_job_list);
@@ -449,7 +452,10 @@ void EventTargetInstance::setPropertyHandler(const char* eventType, JSValue valu
   }
 }
 
-JSValue EventTargetInstance::getPropertyHandler(JSAtom atom) {
+JSValue EventTargetInstance::getPropertyHandler(JSString *p) {
+  char eventType[p->len + 1 - 2];
+  memcpy(eventType, &p->u.str8[2], p->len + 1 - 2);
+  JSAtom atom = JS_NewAtom(m_ctx, eventType);
   if (_propertyEventHandler.count(atom) == 0) {
     return JS_NULL;
   }
