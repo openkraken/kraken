@@ -323,6 +323,7 @@ class Element extends Node
     if (_scrollTicker == null) {
       // Make sure scroll listener trigger most to 1 time each frame.
       SchedulerBinding.instance!.addPostFrameCallback(_consumeScrollTicker);
+      SchedulerBinding.instance!.scheduleFrame();
     }
     _scrollTicker = () {
       applyStickyChildrenOffset();
