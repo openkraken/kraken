@@ -311,11 +311,11 @@ class Element extends Node
     }
   }
 
-  VoidCallback? _scrollTicker;
+  bool _shouldConsumeScrollTicker = false;
   void _consumeScrollTicker(_) {
-    if (_scrollTicker != null) {
-      _scrollTicker!();
-      _scrollTicker = null;
+    if (_shouldConsumeScrollTicker && eventHandlers.containsKey(EVENT_SCROLL)) {
+      _fireScrollEvent();
+      _shouldConsumeScrollTicker = false;
     }
   }
 
@@ -323,16 +323,12 @@ class Element extends Node
     applyStickyChildrenOffset();
     paintFixedChildren(scrollOffset, axisDirection);
 
-    if (_scrollTicker == null) {
+    if (!_shouldConsumeScrollTicker) {
       // Make sure scroll listener trigger most to 1 time each frame.
       SchedulerBinding.instance!.addPostFrameCallback(_consumeScrollTicker);
       SchedulerBinding.instance!.scheduleFrame();
     }
-    _scrollTicker = () {
-      if (eventHandlers.containsKey(EVENT_SCROLL)) {
-        _fireScrollEvent();
-      }
-    };
+    _shouldConsumeScrollTicker = true;
   }
 
   /// https://drafts.csswg.org/cssom-view/#scrolling-events
