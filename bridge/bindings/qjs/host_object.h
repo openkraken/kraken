@@ -18,7 +18,7 @@ public:
   HostObject(JSContext *context, std::string name)
     : m_context(context), m_name(std::move(name)), m_ctx(context->ctx()), m_contextId(context->getContextId()) {
     JSClassDef def{};
-    def.class_name = m_name.c_str();
+    def.class_name = "HostObject";
     def.finalizer = proxyFinalize;
     JS_NewClass(context->runtime(), JSContext::kHostObjectClassId, &def);
     jsObject = JS_NewObjectClass(m_ctx, JSContext::kHostObjectClassId);

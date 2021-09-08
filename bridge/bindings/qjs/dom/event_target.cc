@@ -344,9 +344,9 @@ int EventTargetInstance::hasProperty(QjsContext *ctx, JSValue obj, JSAtom atom) 
 
 JSValue EventTargetInstance::getProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSValue receiver) {
   auto *eventTarget = static_cast<EventTargetInstance *>(JS_GetOpaque(obj, JSValueGetClassId(obj)));
-  auto *prototype = static_cast<EventTarget *>(eventTarget->prototype());
-  if (JS_HasProperty(ctx, prototype->m_prototypeObject, atom)) {
-    return JS_GetPropertyInternal(ctx, prototype->m_prototypeObject, atom, eventTarget->instanceObject, 0);
+  JSValue prototype = JS_GetPrototype(ctx, eventTarget->instanceObject);
+  if (JS_HasProperty(ctx, prototype, atom)) {
+    return JS_GetPropertyInternal(ctx, prototype, atom, eventTarget->instanceObject, 0);
   }
 
   JSValue atomString = JS_AtomToString(ctx, atom);
