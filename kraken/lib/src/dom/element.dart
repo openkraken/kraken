@@ -311,14 +311,27 @@ class Element extends Node
     }
   }
 
-  // TODO: debounce scroll listener
-  void _scrollListener(double scrollOffset, AxisDirection axisDirection) {
-    applyStickyChildrenOffset();
-    paintFixedChildren(scrollOffset, axisDirection);
-
-    if (eventHandlers.containsKey(EVENT_SCROLL)) {
-      _fireScrollEvent();
+  VoidCallback? _scrollTicker;
+  void _consumeScrollTicker(_) {
+    if (_scrollTicker != null) {
+      _scrollTicker!();
+      _scrollTicker = null;
     }
+  }
+
+  void _scrollListener(double scrollOffset, AxisDirection axisDirection) {
+    if (_scrollTicker == null) {
+      // Make sure scroll listener trigger most to 1 time each frame.
+      SchedulerBinding.instance!.addPostFrameCallback(_consumeScrollTicker);
+    }
+    _scrollTicker = () {
+      applyStickyChildrenOffset();
+      paintFixedChildren(scrollOffset, axisDirection);
+
+      if (eventHandlers.containsKey(EVENT_SCROLL)) {
+        _fireScrollEvent();
+      }
+    };
   }
 
   /// https://drafts.csswg.org/cssom-view/#scrolling-events
