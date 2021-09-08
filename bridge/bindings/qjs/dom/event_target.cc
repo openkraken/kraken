@@ -373,8 +373,13 @@ int EventTargetInstance::setProperty(QjsContext *ctx, JSValue obj, JSAtom atom, 
   if (!p->is_wide_char && p->u.str8[0] == 'o' && p->u.str8[1] == 'n') {
     eventTarget->setPropertyHandler(p, value);
   } else {
-    // Increase one reference count for atom to hold this atom value until eventTarget disposed.
-    JS_DupAtom(ctx, atom);
+    if (eventTarget->m_properties.count(atom) == 0) {
+      auto *atomJob = new AtomJob{atom};
+      list_add_tail(&atomJob->link, &eventTarget->m_context->atom_job_list);
+      // Increase one reference count for atom to hold this atom value until eventTarget disposed.
+      JS_DupAtom(ctx, atom);
+    }
+
     JSValue newValue = JS_DupValue(ctx, value);
     eventTarget->m_properties[atom] = newValue;
 
