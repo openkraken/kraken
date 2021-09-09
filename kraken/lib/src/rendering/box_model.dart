@@ -255,8 +255,8 @@ class RenderLayoutBox extends RenderBoxModel
 
     // Layout positioned element
     while (child != null) {
-      final RenderLayoutParentData? childParentData =
-          child.parentData as RenderLayoutParentData?;
+      final ContainerParentDataMixin<RenderBox>? childParentData =
+          child.parentData as ContainerParentDataMixin<RenderBox>?;
       if (child is! RenderBoxModel) {
         child = childParentData!.nextSibling;
         continue;

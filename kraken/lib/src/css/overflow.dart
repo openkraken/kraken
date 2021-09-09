@@ -273,7 +273,7 @@ mixin CSSOverflowMixin on ElementBase {
     if (parent is RenderObjectWithChildMixin<RenderBox>) {
       parent.child = null;
     } else if (parent is ContainerRenderObjectMixin) {
-      ContainerBoxParentData parentData = renderObject!.parentData as ContainerBoxParentData<RenderObject>;
+      ContainerParentDataMixin parentData = renderObject!.parentData as ContainerParentDataMixin<RenderObject>;
       RenderObject? previousSibling = parentData.previousSibling;
       parent.remove(renderObject);
       return previousSibling;

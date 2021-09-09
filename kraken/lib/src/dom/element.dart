@@ -18,6 +18,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/src/css/display.dart';
 import 'package:meta/meta.dart';
 import 'package:ffi/ffi.dart';
 
@@ -96,6 +97,9 @@ class ElementDelegate {
   /// Get the font size of root element
   GetRootElementFontSize getRootElementFontSize;
 
+  // The sliver box child manager
+  RenderSliverBoxChildManager? renderSliverBoxChildManager;
+
   ElementDelegate({
     required this.markRendererNeedsLayout,
     required this.toggleRendererRepaintBoundary,
@@ -104,6 +108,7 @@ class ElementDelegate {
     required this.afterRendererAttach,
     required this.getTargetId,
     required this.getRootElementFontSize,
+    this.renderSliverBoxChildManager,
   });
 }
 
@@ -186,15 +191,18 @@ class Element extends Node
     _setDefaultStyle();
   }
 
+  RenderSliverBoxChildManager? _sliverBoxChildManager;
+
   ElementDelegate get elementDelegate {
     return ElementDelegate(
       markRendererNeedsLayout: _markRendererNeedsLayout,
       toggleRendererRepaintBoundary: _toggleRendererRepaintBoundary,
-      detachRenderer: _detachRenderer,
+      detachRenderer: detach,
       beforeRendererAttach: _beforeRendererAttach,
       afterRendererAttach: _afterRendererAttach,
       getTargetId: _getTargetId,
       getRootElementFontSize: _getRootElementFontSize,
+      renderSliverBoxChildManager: _sliverBoxChildManager,
     );
   }
 
@@ -208,10 +216,6 @@ class Element extends Node
     } else {
       convertToNonRepaintBoundary();
     }
-  }
-
-  void _detachRenderer() {
-    detach();
   }
 
   RenderObject _beforeRendererAttach() {
@@ -431,12 +435,12 @@ class Element extends Node
     if (isRendererAttached) {
       RenderObject _renderer = renderer!;
 
-      RenderBox? prev = (_renderer.parentData as ContainerBoxParentData<RenderBox>).previousSibling;
+      RenderBox? prev = (_renderer.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
       // It needs to find the previous sibling of the previous sibling if the placeholder of
       // positioned element exists and follows renderObject at the same time, eg.
       // <div style="position: relative"><div style="postion: absolute" /></div>
       if (prev == _renderBoxModel) {
-        prev = (_renderBoxModel.parentData as ContainerBoxParentData<RenderBox>).previousSibling;
+        prev = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
       }
 
       // Remove placeholder of positioned element.
@@ -560,6 +564,13 @@ class Element extends Node
   @override
   void attachTo(Element parent, {RenderBox? after}) {
     CSSDisplay display = CSSDisplayMixin.getDisplay(style[DISPLAY] ?? defaultDisplay);
+
+    if (display == CSSDisplay.sliver) {
+      _sliverBoxChildManager = ElementSliverBoxChildManager(this);
+    } else {
+      _sliverBoxChildManager = null;
+    }
+
     if (display != CSSDisplay.none) {
       _beforeRendererAttach();
       parent.addChildRenderObject(this, after: after);
@@ -650,10 +661,12 @@ class Element extends Node
     // Only remove childNode when it has parent
     if (child.isRendererAttached) {
       child.detach();
-    } else if (renderer is RenderRecyclerLayout) {
-      int index = children.indexOf(child as Element);
-      (renderer as RenderRecyclerLayout).removeAt(index);
     }
+
+    // else if (renderer is RenderRecyclerLayout && child is Element) {
+    //   int index = children.indexOf(child);
+    //   (renderer as RenderRecyclerLayout).removeAt(index);
+    // }
 
     super.removeChild(child);
     return child;
@@ -681,7 +694,7 @@ class Element extends Node
         RenderBox? afterRenderObject;
         // `referenceNode` should not be null, or `referenceIndex` can only be -1.
         if (referenceIndex != -1 && referenceNode.isRendererAttached) {
-          afterRenderObject = (referenceNode.renderer!.parentData as ContainerBoxParentData<RenderBox>).previousSibling;
+          afterRenderObject = (referenceNode.renderer!.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
         }
         child.attachTo(this, after: afterRenderObject);
       }
@@ -1734,4 +1747,112 @@ void _setPositionedChildParentData(RenderLayoutBox parentRenderLayoutBox, Elemen
   RenderLayoutParentData parentData = RenderLayoutParentData();
   RenderBoxModel childRenderBoxModel = child.renderBoxModel!;
   childRenderBoxModel.parentData = CSSPositionedLayout.getPositionParentData(childRenderBoxModel, parentData);
+}
+
+/// [RenderSliverBoxChildManager] for sliver element.
+class ElementSliverBoxChildManager implements RenderSliverBoxChildManager {
+  // The container reference element.
+  final Element _element;
+
+  // Flag to determine whether newly added children could
+  // affect the visible contents of the [RenderSliverMultiBoxAdaptor].
+  bool _didUnderflow = false;
+
+  // The current rendering object index.
+  int _currentIndex = -1;
+
+  RenderRecyclerLayout get recyclerLayout => _element.renderer as RenderRecyclerLayout;
+
+  ElementSliverBoxChildManager(Element element) : _element = element;
+
+
+  // Only count element child.
+  @override
+  int get childCount => _element.childNodes.length;
+
+  @override
+  void createChild(int index, {required RenderBox? after}) {
+    if (_didUnderflow) return;
+    if (index >= childCount) return;
+    _currentIndex = index;
+
+    if (index < 0) return;
+    if (childCount <= index) return;
+
+    Node childNode = _element.childNodes[index];
+    childNode.willAttachRenderer();
+    RenderBox? child;
+
+    if (childNode is Element) {
+      childNode.style.applyTargetProperties();
+    }
+    if (childNode is Node) {
+      child = childNode.renderer as RenderBox?;
+    } else {
+      if (!kReleaseMode)
+        throw FlutterError('Sliver unsupported type ${childNode.runtimeType} $childNode');
+    }
+
+    if (child != null) {
+      recyclerLayout
+        ..setupParentData(child)
+        ..insertIntoSliver(child, after: after);
+    }
+
+    childNode.didAttachRenderer();
+    childNode.ensureChildAttached();
+  }
+
+  @override
+  bool debugAssertChildListLocked() => true;
+
+  @override
+  void didAdoptChild(RenderBox child) {
+    final parentData = child.parentData as SliverMultiBoxAdaptorParentData;
+    parentData.index = _currentIndex;
+  }
+
+  @override
+  void removeChild(RenderBox child) {
+    if (child is RenderBoxModel) {
+      child.elementDelegate.detachRenderer();
+    } else {
+      child.detach();
+    }
+  }
+
+  @override
+  void setDidUnderflow(bool value) {
+    _didUnderflow = value;
+  }
+
+  @override
+  void didFinishLayout() {}
+
+  @override
+  void didStartLayout() {}
+
+  @override
+  double estimateMaxScrollOffset(SliverConstraints constraints, {int? firstIndex, int? lastIndex, double? leadingScrollOffset, double? trailingScrollOffset}) {
+    return _extrapolateMaxScrollOffset(firstIndex, lastIndex,
+        leadingScrollOffset, trailingScrollOffset, childCount)!;
+  }
+
+  static double? _extrapolateMaxScrollOffset(
+    int? firstIndex,
+    int? lastIndex,
+    double? leadingScrollOffset,
+    double? trailingScrollOffset,
+    int childCount,
+  ) {
+    if (lastIndex == childCount - 1) {
+      return trailingScrollOffset;
+    }
+
+    final int reifiedCount = lastIndex! - firstIndex! + 1;
+    final double averageExtent =
+        (trailingScrollOffset! - leadingScrollOffset!) / reifiedCount;
+    final int remainingCount = childCount - lastIndex - 1;
+    return trailingScrollOffset + averageExtent * remainingCount;
+  }
 }

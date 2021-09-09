@@ -14,8 +14,7 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
 
-class RenderRecyclerLayout extends RenderLayoutBox
-    implements RenderSliverBoxChildManager {
+class RenderRecyclerLayout extends RenderLayoutBox {
   static Axis resolveAxis(CSSStyleDeclaration style) {
     String? sliverDirection = style[SLIVER_DIRECTION];
     switch (sliverDirection) {
@@ -46,58 +45,22 @@ class RenderRecyclerLayout extends RenderLayoutBox
   RenderSliverList? _renderSliverList;
   Axis axis = Axis.vertical;
 
-  // Children renderBox list of element when element is created,
-  // not correspond to the real renderObject.
-  final List<RenderBox> _children = List.empty(growable: true);
-
-  // Add child to child list.
   @override
-  void add(RenderBox child) {
-    if (child is RenderBoxModel) {
-      _children.add(child);
-    }
-  }
-
-  // Add child to child list with order.
-  @override
-  void insert(RenderBox child, {RenderBox? after}) {
-    // Append to last.
-    if (after == renderViewport) {
-      return add(child);
-    }
-
-    if (child is RenderBoxModel) {
-      int? index;
-      if (after == null) {
-        index = 0;
-      } else if (after is RenderBoxModel) {
-        index = _children.indexOf(after);
-      }
-
-      if (index != null) {
-        _children.insert(index, child);
-      }
-    }
-  }
+  void add(RenderBox child) {}
 
   @override
-  void addAll(List<RenderBox>? children) {
-    assert(children != null);
-    children!.forEach(add);
-  }
+  void insert(RenderBox child, {RenderBox? after}) {}
 
-  void removeAt(int index) {
-    if (_children.length > index && index > -1) {
-      _children.removeAt(index);
-    }
+  @override
+  void addAll(List<RenderBox>? children) {}
+
+  void insertIntoSliver(RenderBox child, { RenderBox? after }) {
+    setupParentData(child);
+    _renderSliverList!.insert(child, after: after);
   }
 
   @override
   void remove(RenderBox child) {
-    if (child is RenderBoxModel) {
-      _children.remove(child);
-    }
-
     if (child == renderViewport) {
       super.remove(child);
     } else if (child.parent == _renderSliverList) {
@@ -109,14 +72,15 @@ class RenderRecyclerLayout extends RenderLayoutBox
   @override
   void removeAll() {
     _renderSliverList!.removeAll();
-    _children.clear();
   }
 
   @override
   void move(RenderBox child, {RenderBox? after}) {
     assert(_renderSliverList != null);
-    remove(child);
-    insert(child, after: after);
+    if (child.parent == _renderSliverList) {
+      remove(child);
+      insertIntoSliver(child, after: after);
+    }
   }
 
   @override
@@ -175,8 +139,13 @@ class RenderRecyclerLayout extends RenderLayoutBox
 
   @protected
   RenderSliverList _buildRenderSliverList() {
-    return _renderSliverList = RenderSliverList(childManager: this);
+    return _renderSliverList = RenderSliverList(childManager: elementDelegate.renderSliverBoxChildManager!);
   }
+
+  /// Child count should rely on element's childNodes, the real
+  /// child renderObject count is not exactly.
+  @override
+  int get childCount => elementDelegate.renderSliverBoxChildManager!.childCount;
 
   Size get _screenSize => window.physicalSize / window.devicePixelRatio;
 
@@ -276,103 +245,6 @@ class RenderRecyclerLayout extends RenderLayoutBox
         ? childParentData!.offset
         : childParentData!.offset + offset;
     return scrollOffset;
-  }
-
-  // RenderSliverBoxChildManager protocol.
-
-  /// Useful to determine whether newly added children could
-  /// affect the visible contents of this class.
-  bool _didUnderflow = false;
-
-  /// Child count should rely on element's childNodes, the real
-  /// child renderObject count is not exactly.
-  @override
-  int get childCount => _children.length;
-
-  int _currentIndex = -1;
-
-  @override
-  void createChild(int index, {RenderBox? after}) {
-    if (_didUnderflow) return;
-    if (index >= childCount) return;
-    _currentIndex = index;
-
-    if (index < 0) return;
-    if (childCount <= index) return;
-
-    RenderBox refChild = _children[index];
-    RenderBoxModel child;
-    if (refChild is RenderBoxModel) {
-      child = refChild.elementDelegate.beforeRendererAttach() as RenderBoxModel;
-      child.parentData = SliverMultiBoxAdaptorParentData();
-      _renderSliverList!.insert(child, after: after);
-      child.elementDelegate.afterRendererAttach();
-    }
-  }
-
-  @override
-  void removeChild(RenderBox child) {
-    if (child is RenderBoxModel) {
-      child.elementDelegate.detachRenderer();
-    } else {
-      child.detach();
-    }
-  }
-
-  @override
-  void didAdoptChild(RenderBox child) {
-    final parentData = child.parentData as SliverMultiBoxAdaptorParentData;
-    parentData.index = _currentIndex;
-  }
-
-  @override
-  void setDidUnderflow(bool value) {
-    _didUnderflow = value;
-  }
-
-  @override
-  bool debugAssertChildListLocked() => true;
-
-  /// Called at the beginning of layout to indicate that layout is about to
-  /// occur.
-  @override
-  void didStartLayout() {}
-
-  /// Called at the end of layout to indicate that layout is now complete.
-  @override
-  void didFinishLayout() {}
-
-  @override
-  double estimateMaxScrollOffset(
-    SliverConstraints constraints, {
-    int? firstIndex,
-    int? lastIndex,
-    double? leadingScrollOffset,
-    double? trailingScrollOffset,
-  }) {
-    if (scrollListener != null) {
-      scrollListener!(leadingScrollOffset ?? 0.0, constraints.axisDirection);
-    }
-    return _extrapolateMaxScrollOffset(firstIndex, lastIndex,
-        leadingScrollOffset, trailingScrollOffset, childCount)!;
-  }
-
-  static double? _extrapolateMaxScrollOffset(
-    int? firstIndex,
-    int? lastIndex,
-    double? leadingScrollOffset,
-    double? trailingScrollOffset,
-    int childCount,
-  ) {
-    if (lastIndex == childCount - 1) {
-      return trailingScrollOffset;
-    }
-
-    final int reifiedCount = lastIndex! - firstIndex! + 1;
-    final double averageExtent =
-        (trailingScrollOffset! - leadingScrollOffset!) / reifiedCount;
-    final int remainingCount = childCount - lastIndex - 1;
-    return trailingScrollOffset + averageExtent * remainingCount;
   }
 
   RenderFlexLayout toFlexLayout() {
