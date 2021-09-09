@@ -40,7 +40,7 @@ struct KrakenInfo {
   const char *system_name{nullptr};
 };
 
-struct Screen {
+struct NativeScreen {
   double width;
   double height;
 };
@@ -108,7 +108,7 @@ void invokeModuleEvent(int32_t contextId, NativeString *module, const char *even
 KRAKEN_EXPORT_C
 void registerDartMethods(uint64_t *methodBytes, int32_t length);
 KRAKEN_EXPORT_C
-Screen *createScreen(double width, double height);
+NativeScreen *createScreen(double width, double height);
 KRAKEN_EXPORT_C
 KrakenInfo *getKrakenInfo();
 KRAKEN_EXPORT_C

@@ -12,24 +12,11 @@
 
 namespace kraken::binding::qjs {
 
-class JSScreen : public HostObject {
+class Screen : public HostObject {
 public:
-  explicit JSScreen(JSContext *context) : HostObject(context, "Screen"){};
+  explicit Screen(JSContext *context) : HostObject(context, "Screen"){};
 private:
-  class WidthPropertyDescriptor {
-  public:
-    static JSValue getter(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-    static JSValue setter(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  };
-
-  class HeightPropertyDescriptor {
-  public:
-    static JSValue getter(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-    static JSValue setter(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  };
-
-  ObjectProperty m_width{m_context, jsObject, "width", WidthPropertyDescriptor::getter, WidthPropertyDescriptor::setter};
-  ObjectProperty m_height{m_context, jsObject, "height", HeightPropertyDescriptor::getter, HeightPropertyDescriptor::setter};
+  DEFINE_HOST_OBJECT_PROPERTY(2, width, height);
 };
 
 void bindScreen(std::unique_ptr<JSContext> &context);

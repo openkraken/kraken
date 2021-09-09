@@ -13,6 +13,7 @@
 #include "bindings/qjs/bom/console.h"
 #include "bindings/qjs/bom/timer.h"
 #include "bindings/qjs/bom/blob.h"
+#include "bindings/qjs/bom/screen.h"
 #include "bindings/qjs/bom/window.h"
 #include "bindings/qjs/bom/performance.h"
 #include "bindings/qjs/kraken.h"
@@ -68,6 +69,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 
   bindConsole(m_context);
   bindTimer(m_context);
+  bindScreen(m_context);
   bindKraken(m_context);
   bindModuleManager(m_context);
   bindEventTarget(m_context);
@@ -79,7 +81,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindTextNode(m_context);
   bindCommentNode(m_context);
   bindElement(m_context);
-//  bindCustomElementRegistry(m_context);
+  bindCustomElementRegistry(m_context);
   bindAnchorElement(m_context);
   bindCanvasElement(m_context);
   bindImageElement(m_context);

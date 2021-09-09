@@ -50,7 +50,7 @@ std::atomic<bool> inited{false};
 std::atomic<int32_t> poolIndex{0};
 int maxPoolSize = 0;
 kraken::JSBridge **contextPool;
-Screen screen;
+NativeScreen screen;
 
 std::__thread_id uiThreadId;
 
@@ -186,7 +186,7 @@ void registerDartMethods(uint64_t *methodBytes, int32_t length) {
   kraken::registerDartMethods(methodBytes, length);
 }
 
-Screen *createScreen(double width, double height) {
+NativeScreen *createScreen(double width, double height) {
   screen.width = width;
   screen.height = height;
   return &screen;

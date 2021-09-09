@@ -7,33 +7,34 @@
 
 namespace kraken::binding::qjs {
 
-void bindScreen(std::unique_ptr<JSContext> &context) {}
+void bindScreen(std::unique_ptr<JSContext> &context) {
+  auto *screen = new Screen(context.get());
+  context->defineGlobalProperty("screen", screen->jsObject);
+}
 
-JSValue JSScreen::WidthPropertyDescriptor::getter(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(Screen, width)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (getDartMethod()->getScreen == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to read screen: dart method (getScreen) is not registered.");
   }
 
   auto context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
-  Screen *screen = getDartMethod()->getScreen(context->getContextId());
+  NativeScreen *screen = getDartMethod()->getScreen(context->getContextId());
   return JS_NewFloat64(ctx, screen->width);
 }
-
-JSValue JSScreen::WidthPropertyDescriptor::setter(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(Screen, width)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_UNDEFINED;
 }
 
-JSValue JSScreen::HeightPropertyDescriptor::getter(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(Screen, height)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (getDartMethod()->getScreen == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to read screen: dart method (getScreen) is not registered.");
   }
 
   auto context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
-  Screen *screen = getDartMethod()->getScreen(context->getContextId());
+  NativeScreen *screen = getDartMethod()->getScreen(context->getContextId());
   return JS_NewFloat64(ctx, screen->height);
 }
-
-JSValue JSScreen::HeightPropertyDescriptor::setter(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(Screen, height)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_UNDEFINED;
 }
 
