@@ -19,6 +19,13 @@ void bindElement(std::unique_ptr<JSContext> &context) {
   context->defineGlobalProperty("HTMLElement", JS_DupValue(context->ctx(), constructor->classObject));
 }
 
+bool isJavaScriptExtensionElement(JSContext *context, JSValue constructor) {
+  JSValue prototype = JS_GetPrototype(context->ctx(), constructor);
+  bool match = JS_VALUE_GET_PTR(prototype) == JS_VALUE_GET_PTR(Element::instance(context)->classObject);
+  JS_FreeValue(context->ctx(), prototype);
+  return match;
+}
+
 OBJECT_INSTANCE_IMPL(Element);
 
 JSClassID Element::kElementClassId{0};
@@ -87,29 +94,39 @@ void ElementAttributes::copyWith(ElementAttributes *attributes) {
 }
 
 JSValue Element::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
-  if (argc == 0) return JS_ThrowTypeError(ctx, "Illegal constructor");
-  JSValue tagName = argv[0];
+  auto *context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
 
-  if (!JS_IsString(tagName)) {
-    return JS_ThrowTypeError(ctx, "Illegal constructor");
-  }
-
-  std::string name = jsValueToStdString(ctx, tagName);
-
-  if (elementConstructorMap.count(name) > 0) {
-    return JS_CallConstructor(ctx, elementConstructorMap[name]->classObject, argc, argv);
-  }
-
-  ElementInstance *element;
-  if (name == "HTML") {
-    element = new ElementInstance(this, name, false);
-    element->eventTargetId = HTML_TARGET_ID;
+  if (isJavaScriptExtensionElement(context, this_val)) {
+    JSValue tagNameValue = JS_GetPropertyStr(ctx, this_val, "__tagName__");
+    std::string tagName = jsValueToStdString(ctx, tagNameValue);
+    JSValue instance = (new ElementInstance(this, tagName, true))->instanceObject;
+    JS_FreeValue(ctx, tagNameValue);
+    return instance;
   } else {
-    // Fallback to default Element class
-    element = new ElementInstance(this, name, true);
-  }
+    if (argc == 0) return JS_ThrowTypeError(ctx, "Illegal constructor");
+    JSValue tagName = argv[0];
 
-  return element->instanceObject;
+    if (!JS_IsString(tagName)) {
+      return JS_ThrowTypeError(ctx, "Illegal constructor");
+    }
+
+    std::string name = jsValueToStdString(ctx, tagName);
+
+    if (elementConstructorMap.count(name) > 0) {
+      return JS_CallConstructor(ctx, elementConstructorMap[name]->classObject, argc, argv);
+    }
+
+    ElementInstance *element;
+    if (name == "HTML") {
+      element = new ElementInstance(this, name, false);
+      element->eventTargetId = HTML_TARGET_ID;
+    } else {
+      // Fallback to default Element class
+      element = new ElementInstance(this, name, true);
+    }
+
+    return element->instanceObject;
+  }
 }
 
 JSValue Element::getBoundingClientRect(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
@@ -356,14 +373,19 @@ JSValue Element::scrollBy(QjsContext *ctx, JSValue this_val, int argc, JSValue *
 }
 
 std::unordered_map<std::string, Element*> Element::elementConstructorMap{};
+std::unordered_map<std::string, JSValue> Element::customElementConstructorMap{};
 
 void Element::defineElement(const std::string &tagName, Element* constructor) {
   elementConstructorMap[tagName] = constructor;
 }
+void Element::defineElement(const std::string &tagName, QjsContext *ctx, JSValue constructorValue) {
+  customElementConstructorMap[tagName] = JS_DupValue(ctx, constructorValue);
+}
 
-Element* Element::getConstructor(JSContext *context, const std::string &tagName) {
-  if (elementConstructorMap.count(tagName) == 0) return Element::instance(context);
-  return elementConstructorMap[tagName];
+JSValue Element::getConstructor(JSContext *context, const std::string &tagName) {
+  if (elementConstructorMap.count(tagName) > 0) return elementConstructorMap[tagName]->classObject;
+  if (customElementConstructorMap.count(tagName) > 0) return customElementConstructorMap[tagName];
+  return Element::instance(context)->classObject;
 }
 
 PROP_GETTER(ElementInstance, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {

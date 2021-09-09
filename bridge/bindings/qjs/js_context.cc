@@ -134,6 +134,12 @@ JSContext::~JSContext() {
     }
   }
 
+  // Free custom element constructor
+  for (auto &e : Element::customElementConstructorMap) {
+    JS_FreeValue(m_ctx, e.second);
+  }
+  Element::customElementConstructorMap.clear();
+
   JS_RunGC(m_runtime);
   JS_FreeValue(m_ctx, globalObject);
   JS_FreeContext(m_ctx);

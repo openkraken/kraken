@@ -174,9 +174,16 @@ JSValue Document::createElement(QjsContext *ctx, JSValue this_val, int argc, JSV
   }
 
   auto document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, Document::classId()));
+  auto *context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
   std::string tagName = jsValueToStdString(ctx, tagNameValue);
-  Element *constructor = Element::getConstructor(document->m_context, tagName);
-  JSValue element = JS_CallConstructor(ctx, constructor->classObject, argc, argv);
+  JSValue constructor = Element::getConstructor(document->m_context, tagName);
+
+  // Add private property key to store tagName value.
+  if (isJavaScriptExtensionElement(context, constructor)) {
+    JS_DefinePropertyValueStr(ctx, constructor, "__tagName__", JS_DupValue(ctx, tagNameValue), JS_PROP_NORMAL);
+  }
+
+  JSValue element = JS_CallConstructor(ctx, constructor, argc, argv);
   return element;
 }
 

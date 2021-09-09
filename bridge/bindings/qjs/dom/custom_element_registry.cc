@@ -9,7 +9,9 @@
 namespace kraken::binding::qjs {
 
 void bindCustomElementRegistry(std::unique_ptr<JSContext> &context) {
-  JSValue instance = JS_CallConstructor(context->ctx(), CustomElementRegistry::instance(context.get())->classObject, 0, nullptr);
+  JSValue constructor = CustomElementRegistry::instance(context.get())->classObject;
+  context->defineGlobalProperty("CustomElementRegistry", constructor);
+  JSValue instance = JS_CallConstructor(context->ctx(), constructor, 0, nullptr);
   context->defineGlobalProperty("customElements", instance);
 };
 
@@ -30,15 +32,14 @@ CustomElementRegistry::CustomElementRegistry(JSContext *context) : HostClass(con
 
 JSClassID CustomElementRegistry::kCustomElementRegistryClassId{0};
 
-static bool checkConstructorName(const char* name) {
-  size_t len = strlen(name);
+static bool checkConstructorName(std::string name) {
   bool valid = false;
 
   // Built-in name whitelist.
-  if (strcmp(name, "video") == 0) return true;
-  if (strcmp(name, "iframe") == 0) return true;
+  if (name == "video") return true;
+  if (name == "iframe") return true;
 
-  for (size_t i = 0; i < len; i ++) {
+  for (size_t i = 0; i < name.length(); i ++) {
     if (name[i] == '-') valid = true;
   }
 
@@ -58,19 +59,20 @@ JSValue CustomElementRegistry::define(QjsContext *ctx, JSValue this_val, int arg
     return JS_ThrowTypeError(ctx, "Failed to execute 'define' on 'CustomElementRegistry': parameter 2 is not a constructor.");
   }
 
-  const char* name = JS_ToCString(ctx, nameValue);
+  const char* cname = JS_ToCString(ctx, nameValue);
+  std::string name = std::string(cname);
+  JS_FreeCString(ctx, cname);
+
   if (!checkConstructorName(name)) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'define' on 'CustomElementRegistry': \"%s\" is not a valid custom element name", name);
+    return JS_ThrowTypeError(ctx, "Failed to execute 'define' on 'CustomElementRegistry': \"%s\" is not a valid custom element name", name.c_str());
   }
 
   auto *context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
+  if (!isJavaScriptExtensionElement(context, constructorValue)) {
+    return JS_ThrowTypeError(ctx, "Failed to execute 'define' on 'CustomElementRegistry': parameter 2 is not a Element constructor.");
+  }
 
-//  if (!JS_IsInstanceOf(ctx, constructorValue, Element::instance(context)->classObject)) {
-//    return JS_ThrowTypeError(ctx, "Failed to execute 'define' on 'CustomElementRegistry': parameter 2 is not a Element constructor.");
-//  }
-
-  auto *constructor = static_cast<Element *>(JS_GetOpaque(constructorValue, Element::classId()));
-  Element::defineElement(name, constructor);
+  Element::defineElement(name, ctx, constructorValue);
 
   return JS_NULL;
 }
