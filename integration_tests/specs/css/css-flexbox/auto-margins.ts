@@ -72,4 +72,128 @@ describe('auto-margins', () => {
     };
     await snapshot();
   });
+
+  it('align-items should not work when auto margin exists in flex column direction', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          width: '300px',
+          height: '300px',
+          backgroundColor: 'green'
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            width: '100px',
+            height: '100px',
+            margin: '0 auto',
+            backgroundColor: 'yellow',
+          }
+        }),
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it('align-items should not work when auto margin exists in flex row direction', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'flex-end',
+          width: '300px',
+          height: '300px',
+          backgroundColor: 'green'
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            width: '100px',
+            height: '100px',
+            margin: 'auto 0',
+            backgroundColor: 'yellow',
+          }
+        }),
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it('justify-content should not work when auto margin exists in flex column direction', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+          width: '300px',
+          height: '300px',
+          backgroundColor: 'green'
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            width: '100px',
+            height: '100px',
+            margin: 'auto 0',
+            backgroundColor: 'yellow',
+          }
+        }),
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it('justify-content should not work when auto margin exists in flex row direction', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'flex-end',
+          width: '300px',
+          height: '300px',
+          backgroundColor: 'green'
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            width: '100px',
+            height: '100px',
+            margin: '0 auto',
+            backgroundColor: 'yellow',
+          }
+        }),
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
 });
