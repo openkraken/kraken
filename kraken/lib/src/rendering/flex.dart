@@ -2145,29 +2145,22 @@ class RenderFlexLayout extends RenderLayoutBox {
       }
 
       // Calculate margin auto children in the main axis
-      double mainAxisMarginAutoChildren = 0;
+      double mainAxisMarginAutoChildrenCount = 0;
       RenderBox? runChild = firstChild;
+
       while (runChild != null) {
         final RenderLayoutParentData childParentData =
             runChild.parentData as RenderLayoutParentData;
         if (childParentData.runIndex != i) break;
-        if (runChild is RenderBoxModel) {
-          RenderStyle childRenderStyle = runChild.renderStyle;
-          CSSMargin marginLeft = childRenderStyle.marginLeft;
-          CSSMargin marginTop = childRenderStyle.marginTop;
 
-          if ((CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) &&
-                  marginLeft.isAuto!) ||
-              (CSSFlex.isVerticalFlexDirection(renderStyle.flexDirection) &&
-                  marginTop.isAuto!)) {
-            mainAxisMarginAutoChildren++;
-          }
+        if (isChildMainAxisMarginAutoExist(runChild)) {
+          mainAxisMarginAutoChildrenCount++;
         }
         runChild = childParentData.nextSibling;
       }
 
-      // Margin auto alignment takes priority over align-self alignment
-      if (mainAxisMarginAutoChildren != 0) {
+      // Justify-content has no effect if auto margin of child exists in the main axis.
+      if (mainAxisMarginAutoChildrenCount != 0) {
         leadingSpace = 0;
         betweenSpace = 0;
       }
@@ -2186,13 +2179,6 @@ class RenderFlexLayout extends RenderLayoutBox {
               leadingSpace
           : leadingSpace + mainAxisStartPadding + mainAxisStartBorder;
 
-      // Leading between height of line box's content area and line height of line box
-      double lineBoxLeading = 0;
-      double? lineBoxHeight = _getLineHeight(this);
-      if (lineBoxHeight != null) {
-        lineBoxLeading = lineBoxHeight - runCrossAxisExtent;
-      }
-
       while (child != null) {
         final RenderLayoutParentData? childParentData =
             child.parentData as RenderLayoutParentData?;
@@ -2206,48 +2192,10 @@ class RenderFlexLayout extends RenderLayoutBox {
         if (childParentData!.runIndex != i) break;
 
         double childMainAxisMargin = flowAwareChildMainAxisMargin(child)!;
-        double childCrossAxisStartMargin =
-            flowAwareChildCrossAxisMargin(child)!;
-
         // Add start margin of main axis when setting offset
         childMainPosition += childMainAxisMargin;
-
         double? childCrossPosition;
-
         AlignSelf alignSelf = _getAlignSelf(child);
-        double crossStartAddedOffset = crossAxisStartPadding +
-            crossAxisStartBorder +
-            childCrossAxisStartMargin;
-
-        /// Align flex item by direction returned by align-items or align-self
-        double? alignFlexItem(String alignment) {
-          double flexLineHeight = _getFlexLineHeight(
-              runCrossAxisExtent, runBetweenSpace,
-              beforeSetSize: false);
-
-          switch (alignment) {
-            case 'start':
-              return crossStartAddedOffset;
-            case 'end':
-              // Length returned by _getCrossAxisExtent includes margin, so end alignment should add start margin
-              return crossAxisStartPadding +
-                  crossAxisStartBorder +
-                  flexLineHeight -
-                  _getCrossAxisExtent(child) +
-                  childCrossAxisStartMargin;
-            case 'center':
-              return childCrossPosition = crossStartAddedOffset +
-                  (flexLineHeight - _getCrossAxisExtent(child)) / 2.0;
-            case 'baseline':
-              // Distance from top to baseline of child
-              double childAscent = _getChildAscent(child!);
-              return crossStartAddedOffset +
-                  lineBoxLeading / 2 +
-                  (runBaselineExtent - childAscent);
-            default:
-              return null;
-          }
-        }
 
         if (alignSelf == AlignSelf.auto) {
           switch (renderStyle.alignItems) {
@@ -2255,27 +2203,99 @@ class RenderFlexLayout extends RenderLayoutBox {
             case AlignItems.start:
             case AlignItems.stretch:
               childCrossPosition = renderStyle.flexWrap == FlexWrap.wrapReverse
-                  ? alignFlexItem('end')
-                  : alignFlexItem('start');
+                ? _getChildCrossAxisOffset(
+                  'end',
+                  child,
+                  childCrossPosition,
+                  runBaselineExtent,
+                  runCrossAxisExtent,
+                  runBetweenSpace,
+                  crossAxisStartPadding,
+                  crossAxisStartBorder,
+                )
+                : _getChildCrossAxisOffset(
+                  'start',
+                  child,
+                  childCrossPosition,
+                  runBaselineExtent,
+                  runCrossAxisExtent,
+                  runBetweenSpace,
+                  crossAxisStartPadding,
+                  crossAxisStartBorder,
+                );
               break;
             case AlignItems.flexEnd:
             case AlignItems.end:
               childCrossPosition = renderStyle.flexWrap == FlexWrap.wrapReverse
-                  ? alignFlexItem('start')
-                  : alignFlexItem('end');
+                ? _getChildCrossAxisOffset(
+                  'start',
+                  child,
+                  childCrossPosition,
+                  runBaselineExtent,
+                  runCrossAxisExtent,
+                  runBetweenSpace,
+                  crossAxisStartPadding,
+                  crossAxisStartBorder,
+                )
+                : _getChildCrossAxisOffset(
+                  'end',
+                  child,
+                  childCrossPosition,
+                  runBaselineExtent,
+                  runCrossAxisExtent,
+                  runBetweenSpace,
+                  crossAxisStartPadding,
+                  crossAxisStartBorder,
+                );
               break;
             case AlignItems.center:
-              childCrossPosition = alignFlexItem('center');
+              childCrossPosition = _getChildCrossAxisOffset(
+                'center',
+                child,
+                childCrossPosition,
+                runBaselineExtent,
+                runCrossAxisExtent,
+                runBetweenSpace,
+                crossAxisStartPadding,
+                crossAxisStartBorder,
+              );
               break;
             case AlignItems.baseline:
               // FIXME: baseline aligne in wrap-reverse flexWrap may display different from browser in some case
               if (CSSFlex.isHorizontalFlexDirection(
                   renderStyle.flexDirection)) {
-                childCrossPosition = alignFlexItem('baseline');
+                childCrossPosition = _getChildCrossAxisOffset(
+                  'baseline',
+                  child,
+                  childCrossPosition,
+                  runBaselineExtent,
+                  runCrossAxisExtent,
+                  runBetweenSpace,
+                  crossAxisStartPadding,
+                  crossAxisStartBorder,
+                );
               } else if (renderStyle.flexWrap == FlexWrap.wrapReverse) {
-                childCrossPosition = alignFlexItem('end');
+                childCrossPosition = _getChildCrossAxisOffset(
+                  'end',
+                  child,
+                  childCrossPosition,
+                  runBaselineExtent,
+                  runCrossAxisExtent,
+                  runBetweenSpace,
+                  crossAxisStartPadding,
+                  crossAxisStartBorder,
+                );
               } else {
-                childCrossPosition = alignFlexItem('start');
+                childCrossPosition = _getChildCrossAxisOffset(
+                  'start',
+                  child,
+                  childCrossPosition,
+                  runBaselineExtent,
+                  runCrossAxisExtent,
+                  runBetweenSpace,
+                  crossAxisStartPadding,
+                  crossAxisStartBorder,
+                );
               }
               break;
             default:
@@ -2287,20 +2307,74 @@ class RenderFlexLayout extends RenderLayoutBox {
             case AlignSelf.start:
             case AlignSelf.stretch:
               childCrossPosition = renderStyle.flexWrap == FlexWrap.wrapReverse
-                  ? alignFlexItem('end')
-                  : alignFlexItem('start');
+                ? _getChildCrossAxisOffset(
+                  'end',
+                  child,
+                  childCrossPosition,
+                  runBaselineExtent,
+                  runCrossAxisExtent,
+                  runBetweenSpace,
+                  crossAxisStartPadding,
+                  crossAxisStartBorder,
+                )
+                : _getChildCrossAxisOffset(
+                  'start',
+                  child,
+                  childCrossPosition,
+                  runBaselineExtent,
+                  runCrossAxisExtent,
+                  runBetweenSpace,
+                  crossAxisStartPadding,
+                  crossAxisStartBorder,
+                );
               break;
             case AlignSelf.flexEnd:
             case AlignSelf.end:
               childCrossPosition = renderStyle.flexWrap == FlexWrap.wrapReverse
-                  ? alignFlexItem('start')
-                  : alignFlexItem('end');
+                ? _getChildCrossAxisOffset(
+                  'start',
+                  child,
+                  childCrossPosition,
+                  runBaselineExtent,
+                  runCrossAxisExtent,
+                  runBetweenSpace,
+                  crossAxisStartPadding,
+                  crossAxisStartBorder,
+                )
+                : _getChildCrossAxisOffset(
+                  'end',
+                  child,
+                  childCrossPosition,
+                  runBaselineExtent,
+                  runCrossAxisExtent,
+                  runBetweenSpace,
+                  crossAxisStartPadding,
+                  crossAxisStartBorder,
+                );
               break;
             case AlignSelf.center:
-              childCrossPosition = alignFlexItem('center');
+              childCrossPosition = _getChildCrossAxisOffset(
+                'center',
+                child,
+                childCrossPosition,
+                runBaselineExtent,
+                runCrossAxisExtent,
+                runBetweenSpace,
+                crossAxisStartPadding,
+                crossAxisStartBorder,
+              );
               break;
             case AlignSelf.baseline:
-              childCrossPosition = alignFlexItem('baseline');
+              childCrossPosition = _getChildCrossAxisOffset(
+                'baseline',
+                child,
+                childCrossPosition,
+                runBaselineExtent,
+                runCrossAxisExtent,
+                runBetweenSpace,
+                crossAxisStartPadding,
+                crossAxisStartBorder,
+              );
               break;
             default:
               break;
@@ -2331,12 +2405,12 @@ class RenderFlexLayout extends RenderLayoutBox {
             if (totalFlexGrow == 0 && marginLeft.isAuto!) {
               if (marginRight.isAuto!) {
                 childMainPosition +=
-                    (horizontalRemainingSpace / mainAxisMarginAutoChildren) / 2;
+                    (horizontalRemainingSpace / mainAxisMarginAutoChildrenCount) / 2;
                 betweenSpace =
-                    (horizontalRemainingSpace / mainAxisMarginAutoChildren) / 2;
+                    (horizontalRemainingSpace / mainAxisMarginAutoChildrenCount) / 2;
               } else {
                 childMainPosition +=
-                    horizontalRemainingSpace / mainAxisMarginAutoChildren;
+                    horizontalRemainingSpace / mainAxisMarginAutoChildrenCount;
               }
             }
 
@@ -2353,12 +2427,12 @@ class RenderFlexLayout extends RenderLayoutBox {
             if (totalFlexGrow == 0 && marginTop.isAuto!) {
               if (marginBottom.isAuto!) {
                 childMainPosition +=
-                    (verticalRemainingSpace / mainAxisMarginAutoChildren) / 2;
+                    (verticalRemainingSpace / mainAxisMarginAutoChildrenCount) / 2;
                 betweenSpace =
-                    (verticalRemainingSpace / mainAxisMarginAutoChildren) / 2;
+                    (verticalRemainingSpace / mainAxisMarginAutoChildrenCount) / 2;
               } else {
                 childMainPosition +=
-                    verticalRemainingSpace / mainAxisMarginAutoChildren;
+                    verticalRemainingSpace / mainAxisMarginAutoChildrenCount;
               }
             }
 
@@ -2401,6 +2475,97 @@ class RenderFlexLayout extends RenderLayoutBox {
       }
 
       crossAxisOffset += runCrossAxisExtent + runBetweenSpace;
+    }
+  }
+
+  // Whether margin auto of child is set in the main axis.
+  bool isChildMainAxisMarginAutoExist(RenderBox child) {
+    if (child is RenderBoxModel) {
+      RenderStyle childRenderStyle = child.renderStyle;
+      CSSMargin marginLeft = childRenderStyle.marginLeft;
+      CSSMargin marginRight = childRenderStyle.marginRight;
+      CSSMargin marginTop = childRenderStyle.marginTop;
+      CSSMargin marginBottom = childRenderStyle.marginBottom;
+      if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) && (marginLeft.isAuto! || marginRight.isAuto!) ||
+        CSSFlex.isVerticalFlexDirection(renderStyle.flexDirection) && (marginTop.isAuto! || marginBottom.isAuto!)
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Whether margin auto of child is set in the cross axis.
+  bool isChildCrossAxisMarginAutoExist(RenderBox child) {
+    if (child is RenderBoxModel) {
+      RenderStyle childRenderStyle = child.renderStyle;
+      CSSMargin marginLeft = childRenderStyle.marginLeft;
+      CSSMargin marginRight = childRenderStyle.marginRight;
+      CSSMargin marginTop = childRenderStyle.marginTop;
+      CSSMargin marginBottom = childRenderStyle.marginBottom;
+      if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) && (marginTop.isAuto! || marginBottom.isAuto!) ||
+        CSSFlex.isVerticalFlexDirection(renderStyle.flexDirection) && (marginLeft.isAuto! || marginRight.isAuto!)
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Get flex item cross axis offset by align-items/align-self.
+  double? _getChildCrossAxisOffset(
+    String alignment,
+    RenderBox child,
+    double? childCrossPosition,
+    double runBaselineExtent,
+    double runCrossAxisExtent,
+    double runBetweenSpace,
+    double crossAxisStartPadding,
+    double crossAxisStartBorder,
+  ) {
+    // Leading between height of line box's content area and line height of line box
+    double lineBoxLeading = 0;
+    double? lineBoxHeight = _getLineHeight(this);
+    if (lineBoxHeight != null) {
+      lineBoxLeading = lineBoxHeight - runCrossAxisExtent;
+    }
+
+    double flexLineHeight = _getFlexLineHeight(
+      runCrossAxisExtent,
+      runBetweenSpace,
+      beforeSetSize: false
+    );
+    double childCrossAxisStartMargin = flowAwareChildCrossAxisMargin(child)!;
+    double crossStartAddedOffset = crossAxisStartPadding +
+      crossAxisStartBorder +
+      childCrossAxisStartMargin;
+
+    // Align-items and align-self have no effect if auto margin of child exists in the cross axis.
+    if (isChildCrossAxisMarginAutoExist(child)) {
+      return crossStartAddedOffset;
+    }
+
+    switch (alignment) {
+      case 'start':
+        return crossStartAddedOffset;
+      case 'end':
+        // Length returned by _getCrossAxisExtent includes margin, so end alignment should add start margin
+        return crossAxisStartPadding +
+          crossAxisStartBorder +
+          flexLineHeight -
+          _getCrossAxisExtent(child) +
+          childCrossAxisStartMargin;
+      case 'center':
+        return childCrossPosition = crossStartAddedOffset +
+          (flexLineHeight - _getCrossAxisExtent(child)) / 2.0;
+      case 'baseline':
+        // Distance from top to baseline of child
+        double childAscent = _getChildAscent(child);
+        return crossStartAddedOffset +
+          lineBoxLeading / 2 +
+          (runBaselineExtent - childAscent);
+      default:
+        return null;
     }
   }
 
