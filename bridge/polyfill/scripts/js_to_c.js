@@ -1,7 +1,10 @@
 const minimist = require('minimist');
+const Qjsc = require('qjsc');
 const argv = minimist(process.argv.slice(2));
 const path = require('path');
 const fs = require('fs');
+
+const qjsc = new Qjsc();
 
 if (argv.help) {
   process.stdout.write(`Convert Javascript Code into Cpp source code
@@ -44,7 +47,10 @@ void initKraken${outputName}(kraken::JSBridge *bridge);
 
 const getPolyFillJavaScriptSource = (source) => {
   if (process.env.KRAKEN_JS_ENGINE === 'quickjs') {
-    return `static std::string jsCode = std::string(R"(${source})");`
+    let byteBuffer = qjsc.dumpByteCode(source, "kraken://");
+    let uint8Array = Uint8Array.from(byteBuffer);
+    return `namespace {size_t byteLength = ${uint8Array.length};
+uint8_t bytes[${uint8Array.length}] = {${uint8Array.join(',')}}; }`;
   } else {
     return `static std::u16string jsCode = std::u16string(uR"(${source})");`
   }
@@ -52,7 +58,7 @@ const getPolyFillJavaScriptSource = (source) => {
 
 const getPolyfillEvalCall = () => {
   if (process.env.KRAKEN_JS_ENGINE === 'quickjs') {
-    return 'bridge->evaluateScript(jsCode.c_str(), jsCode.length(), "internal://", 0);';
+    return 'bridge->evaluateByteCode(bytes, byteLength);';
   } else {
     return 'bridge->evaluateScript(reinterpret_cast<const uint16_t *>(jsCode.c_str()), jsCode.length(), "internal://", 0);'
   }
@@ -73,9 +79,7 @@ void initKraken${outputName}(kraken::JSBridge *bridge) {
 `;
 
 function convertJSToCpp(code, outputName) {
-  if (process.env.KRAKEN_JS_ENGINE === 'quickjs') {
-    code = code.replace(/\)\"/g, '))") + std::string(R"("');
-  } else {
+  if (process.env.KRAKEN_JS_ENGINE === 'jsc') {
     code = code.replace(/\)\"/g, '))") + std::u16string(uR"("');
   }
   return getPolyFillSource(code, outputName);
