@@ -16,7 +16,7 @@ import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
 
-typedef _ScrollListener = void Function(double scrollOffset, AxisDirection axisDirection);
+typedef ScrollListener = void Function(double scrollOffset, AxisDirection axisDirection);
 
 mixin _CustomTickerProviderStateMixin implements TickerProvider {
   Set<Ticker>? _tickers;
@@ -57,7 +57,7 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
   ScrollPosition? position;
   final ScrollPhysics _physics = BouncingScrollPhysics();
   DragStartBehavior dragStartBehavior;
-  _ScrollListener? scrollListener;
+  ScrollListener? scrollListener;
 
   KrakenScrollable({
     AxisDirection axisDirection = AxisDirection.down,
@@ -236,7 +236,7 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
 }
 
 mixin RenderOverflowMixin on RenderBox {
-  _ScrollListener? scrollListener;
+  ScrollListener? scrollListener;
   void Function(PointerEvent)? pointerListener;
 
   bool _clipX = false;
@@ -277,9 +277,11 @@ mixin RenderOverflowMixin on RenderBox {
   set scrollOffsetX(ViewportOffset? value) {
     if (value == null) return;
     if (value == _scrollOffsetX) return;
-    _scrollOffsetX = value;
-    _scrollOffsetX!.removeListener(_scrollXListener);
-    _scrollOffsetX!.addListener(_scrollXListener);
+    _scrollOffsetX?.removeListener(_scrollXListener);
+
+    _scrollOffsetX = value
+      ..removeListener(_scrollXListener)
+      ..addListener(_scrollXListener);
     markNeedsLayout();
   }
 
@@ -288,9 +290,11 @@ mixin RenderOverflowMixin on RenderBox {
   set scrollOffsetY(ViewportOffset? value) {
     if (value == null) return;
     if (value == _scrollOffsetY) return;
-    _scrollOffsetY = value;
-    _scrollOffsetY!.removeListener(_scrollYListener);
-    _scrollOffsetY!.addListener(_scrollYListener);
+    _scrollOffsetY?.removeListener(_scrollYListener);
+
+    _scrollOffsetY = value
+      ..removeListener(_scrollYListener)
+      ..addListener(_scrollYListener);
     markNeedsLayout();
   }
 

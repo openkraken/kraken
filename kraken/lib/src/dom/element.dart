@@ -16,9 +16,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/gesture.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/src/css/display.dart';
 import 'package:meta/meta.dart';
 import 'package:ffi/ffi.dart';
 
@@ -97,8 +97,12 @@ class ElementDelegate {
   /// Get the font size of root element
   GetRootElementFontSize getRootElementFontSize;
 
+  // Handle scrolling.
+  ScrollListener handleScroll;
+
   // The sliver box child manager
   RenderSliverBoxChildManager? renderSliverBoxChildManager;
+
 
   ElementDelegate({
     required this.markRendererNeedsLayout,
@@ -108,6 +112,7 @@ class ElementDelegate {
     required this.afterRendererAttach,
     required this.getTargetId,
     required this.getRootElementFontSize,
+    required this.handleScroll,
     this.renderSliverBoxChildManager,
   });
 }
@@ -202,6 +207,7 @@ class Element extends Node
       afterRendererAttach: _afterRendererAttach,
       getTargetId: _getTargetId,
       getRootElementFontSize: _getRootElementFontSize,
+      handleScroll: _handleScroll,
       renderSliverBoxChildManager: _sliverBoxChildManager,
     );
   }
@@ -323,7 +329,7 @@ class Element extends Node
     }
   }
 
-  void _scrollListener(double scrollOffset, AxisDirection axisDirection) {
+  void _handleScroll(double scrollOffset, AxisDirection axisDirection) {
     applyStickyChildrenOffset();
     paintFixedChildren(scrollOffset, axisDirection);
 
@@ -1022,7 +1028,7 @@ class Element extends Node
   }
 
   void _styleOverflowChangedListener(String property, String? original, String present) {
-    updateRenderOverflow(this, _scrollListener);
+    updateRenderOverflow(this);
   }
 
   void _stylePaddingChangedListener(String property, String? original, String present) {
@@ -1765,22 +1771,24 @@ class ElementSliverBoxChildManager implements RenderSliverBoxChildManager {
 
   ElementSliverBoxChildManager(Element element) : _element = element;
 
+  Iterable<Node> get _renderNodes => _element.childNodes.where((child) => child is Element || child is TextNode);
 
-  // Only count element child.
+  // Only count renderable child.
   @override
-  int get childCount => _element.childNodes.length;
+  int get childCount => _renderNodes.length;
 
   @override
   void createChild(int index, {required RenderBox? after}) {
     if (_didUnderflow) return;
-    if (index >= childCount) return;
+    if (index < 0) return;
+
+    Iterable<Node> renderNodes = _renderNodes;
+    if (index >= renderNodes.length) return;
     _currentIndex = index;
 
-    if (index < 0) return;
-    if (childCount <= index) return;
-
-    Node childNode = _element.childNodes[index];
+    Node childNode = renderNodes.elementAt(index);
     childNode.willAttachRenderer();
+
     RenderBox? child;
 
     if (childNode is Element) {
@@ -1793,11 +1801,11 @@ class ElementSliverBoxChildManager implements RenderSliverBoxChildManager {
         throw FlutterError('Sliver unsupported type ${childNode.runtimeType} $childNode');
     }
 
-    if (child != null) {
-      recyclerLayout
-        ..setupParentData(child)
-        ..insertIntoSliver(child, after: after);
-    }
+    assert(child != null, 'Sliver render node should own RenderBox.');
+
+    recyclerLayout
+      ..setupParentData(child!)
+      ..insertIntoSliver(child, after: after);
 
     childNode.didAttachRenderer();
     childNode.ensureChildAttached();

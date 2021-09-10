@@ -48,6 +48,9 @@ class RenderRecyclerLayout extends RenderLayoutBox {
   }
 
   @override
+  ScrollListener? get scrollListener => elementDelegate.handleScroll;
+
+  @override
   bool get isRepaintBoundary => true;
 
   @override

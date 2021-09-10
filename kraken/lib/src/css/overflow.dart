@@ -48,8 +48,6 @@ CSSOverflowType _getOverflowType(String definition) {
   }
 }
 
-typedef ScrollListener = void Function(double scrollTop, AxisDirection axisDirection);
-
 mixin CSSOverflowStyleMixin on RenderStyleBase {
   CSSOverflowType _overflowX = CSSOverflowType.visible;
   CSSOverflowType get overflowX {
@@ -87,7 +85,8 @@ mixin CSSOverflowMixin on ElementBase {
   // House content which can be scrolled.
   RenderLayoutBox? scrollingContentLayoutBox;
 
-  void updateRenderOverflow(Element element, ScrollListener scrollListener) {
+  void updateRenderOverflow(Element element) {
+    ScrollListener scrollListener = element.elementDelegate.handleScroll;
     CSSStyleDeclaration style = element.style;
     RenderBoxModel renderBoxModel = element.renderBoxModel!;
     RenderStyle renderStyle = renderBoxModel.renderStyle;
@@ -155,13 +154,12 @@ mixin CSSOverflowMixin on ElementBase {
         break;
     }
 
-    renderBoxModel.scrollListener = scrollListener;
-
     // Recycler layout not need repaintBoundary, which handle it self.
     if (renderBoxModel is RenderRecyclerLayout) {
       return;
     }
 
+    renderBoxModel.scrollListener = scrollListener;
     renderBoxModel.pointerListener = _pointerListener;
 
     if (renderBoxModel is RenderLayoutBox) {
