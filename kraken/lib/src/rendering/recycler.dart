@@ -15,35 +15,40 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
 
 class RenderRecyclerLayout extends RenderLayoutBox {
-  static Axis resolveAxis(CSSStyleDeclaration style) {
-    String? sliverDirection = style[SLIVER_DIRECTION];
-    switch (sliverDirection) {
-      case ROW:
-        return Axis.horizontal;
-
-      case COLUMN:
-      default:
-        return Axis.vertical;
-    }
-  }
+  late RenderViewport _renderViewport;
+  late RenderSliverList _renderSliverList;
+  late KrakenScrollable scrollable;
+  Axis axis = Axis.vertical;
 
   RenderRecyclerLayout({
     required RenderStyle renderStyle,
     required ElementDelegate elementDelegate
-  }) : super(
-    renderStyle: renderStyle,
-    elementDelegate: elementDelegate
-  ) {
-    _buildRenderViewport();
-    super.insert(renderViewport!);
+  }) : super(renderStyle: renderStyle, elementDelegate: elementDelegate) {
+    pointerListener = _pointerListener;
+    scrollable = KrakenScrollable(axisDirection: getAxisDirection(axis));
+    axis = renderStyle.sliverAxis;
+
+    switch (axis) {
+      case Axis.horizontal:
+        scrollOffsetX = scrollable.position;
+        break;
+      case Axis.vertical:
+        scrollOffsetY = scrollable.position;
+        break;
+    }
+
+    _renderSliverList = _buildRenderSliverList();
+    _renderViewport = RenderViewport(
+      offset: scrollable.position!,
+      axisDirection: scrollable.axisDirection!,
+      crossAxisDirection: getCrossAxisDirection(axis),
+      children: [_renderSliverList],
+    );
+    super.insert(_renderViewport);
   }
 
   @override
   bool get isRepaintBoundary => true;
-
-  RenderViewport? renderViewport;
-  RenderSliverList? _renderSliverList;
-  Axis axis = Axis.vertical;
 
   @override
   void add(RenderBox child) {}
@@ -56,27 +61,25 @@ class RenderRecyclerLayout extends RenderLayoutBox {
 
   void insertIntoSliver(RenderBox child, { RenderBox? after }) {
     setupParentData(child);
-    _renderSliverList!.insert(child, after: after);
+    _renderSliverList.insert(child, after: after);
   }
 
   @override
   void remove(RenderBox child) {
-    if (child == renderViewport) {
+    if (child == _renderViewport) {
       super.remove(child);
     } else if (child.parent == _renderSliverList) {
-      assert(_renderSliverList != null);
-      _renderSliverList!.remove(child);
+      _renderSliverList.remove(child);
     }
   }
 
   @override
   void removeAll() {
-    _renderSliverList!.removeAll();
+    _renderSliverList.removeAll();
   }
 
   @override
   void move(RenderBox child, {RenderBox? after}) {
-    assert(_renderSliverList != null);
     if (child.parent == _renderSliverList) {
       remove(child);
       insertIntoSliver(child, after: after);
@@ -85,55 +88,19 @@ class RenderRecyclerLayout extends RenderLayoutBox {
 
   @override
   void setupParentData(RenderBox child) {
-    if (child == renderViewport && child.parentData is ! RenderLayoutParentData) {
+    if (child == _renderViewport && child.parentData is ! RenderLayoutParentData) {
       child.parentData = RenderLayoutParentData();
     } else if (child.parentData is! SliverMultiBoxAdaptorParentData) {
       child.parentData = SliverMultiBoxAdaptorParentData();
     }
   }
 
-  KrakenScrollable? scrollable;
-
-  @protected
-  RenderViewport _buildRenderViewport() {
-    pointerListener = _pointerListener;
-    axis = renderStyle.sliverAxis;
-
-    AxisDirection axisDirection = getAxisDirection(axis);
-    scrollable = KrakenScrollable(axisDirection: axisDirection);
-
-    return renderViewport = RenderViewport(
-      offset: scrollable!.position!,
-      axisDirection: axisDirection,
-      crossAxisDirection: getCrossAxisDirection(axis),
-      children: [_buildRenderSliverList()],
-      cacheExtent: kReleaseMode ? null : 0.0,
-    );
-  }
+  // Expose viewport for sliver mixin.
+  RenderViewport get viewport => _renderViewport;
 
   void _pointerListener(PointerEvent event) {
     if (event is PointerDownEvent) {
-      scrollable?.handlePointerDown(event);
-    }
-  }
-
-  static AxisDirection getAxisDirection(Axis sliverAxis) {
-    switch (sliverAxis) {
-      case Axis.horizontal:
-        return AxisDirection.right;
-      case Axis.vertical:
-      default:
-        return AxisDirection.down;
-    }
-  }
-
-  static AxisDirection getCrossAxisDirection(Axis sliverAxis) {
-    switch (sliverAxis) {
-      case Axis.horizontal:
-        return AxisDirection.down;
-      case Axis.vertical:
-      default:
-        return AxisDirection.right;
+      scrollable.handlePointerDown(event);
     }
   }
 
@@ -163,7 +130,7 @@ class RenderRecyclerLayout extends RenderLayoutBox {
     // If width is given, use exact width; or expand to parent extent width.
     // If height is given, use exact height; or use 0.
     // Only layout [renderViewport] as only-child.
-    RenderBox? child = renderViewport;
+    RenderBox? child = _renderViewport;
     late BoxConstraints childConstraints;
 
     double? width = renderStyle.width;
@@ -190,7 +157,7 @@ class RenderRecyclerLayout extends RenderLayoutBox {
       childLayoutStart = DateTime.now();
     }
 
-    child!.layout(childConstraints, parentUsesSize: true);
+    child.layout(childConstraints, parentUsesSize: true);
 
     if (kProfileMode) {
       DateTime childLayoutEnd = DateTime.now();
@@ -265,5 +232,37 @@ class RenderRecyclerLayout extends RenderLayoutBox {
     );
     renderFlowLayout.addAll(children as List<RenderBox>?);
     return copyWith(renderFlowLayout);
+  }
+
+  static Axis resolveAxis(CSSStyleDeclaration style) {
+    String? sliverDirection = style[SLIVER_DIRECTION];
+    switch (sliverDirection) {
+      case ROW:
+        return Axis.horizontal;
+
+      case COLUMN:
+      default:
+        return Axis.vertical;
+    }
+  }
+
+  static AxisDirection getAxisDirection(Axis sliverAxis) {
+    switch (sliverAxis) {
+      case Axis.horizontal:
+        return AxisDirection.right;
+      case Axis.vertical:
+      default:
+        return AxisDirection.down;
+    }
+  }
+
+  static AxisDirection getCrossAxisDirection(Axis sliverAxis) {
+    switch (sliverAxis) {
+      case Axis.horizontal:
+        return AxisDirection.down;
+      case Axis.vertical:
+      default:
+        return AxisDirection.right;
+    }
   }
 }
