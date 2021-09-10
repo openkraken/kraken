@@ -669,11 +669,6 @@ class Element extends Node
       child.detach();
     }
 
-    // else if (renderer is RenderRecyclerLayout && child is Element) {
-    //   int index = children.indexOf(child);
-    //   (renderer as RenderRecyclerLayout).removeAt(index);
-    // }
-
     super.removeChild(child);
     return child;
   }
