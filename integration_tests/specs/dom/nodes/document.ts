@@ -57,7 +57,7 @@ describe('Document api', () => {
     })
     
     const ele = document.querySelector('div');
-    expect(ele?.id).toBe('id-0');
+    expect(ele?.getAttribute('id')).toBe('id-0');
   })
 
   it('document querySelectorAll length of elements', () => {
@@ -87,7 +87,7 @@ describe('Document api', () => {
     })
     
     const eles = document.querySelectorAll('div');
-    expect(eles[0].id).toBe('id-0');
+    expect(eles[0].getAttribute('id')).toBe('id-0');
   })
 
   it('document querySelectorAll cant find element', () => {
@@ -101,5 +101,18 @@ describe('Document api', () => {
     })
     
     expect(document.querySelectorAll('span').length).toBe(0);
+  })
+
+  it('document querySelector find id', () => {
+    ['red','black','green','yellow','blue'].forEach((item, index) => {
+      const div = document.createElement('div')
+      div.style.width = '100px';
+      div.style.height = '100px';
+      div.style.backgroundColor = item;
+      div.setAttribute('id', `id-${index}`);
+      document.body.appendChild(div);
+    })
+    
+    expect(document.querySelector('#id-1')?.style.backgroundColor).toBe('black');
   })
 });
