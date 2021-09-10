@@ -13,8 +13,8 @@ import 'src/foundation/uri_parser.dart' as uri_parser;
 
 import 'src/module/fetch.dart' as fetch;
 
-import 'src/css/parser.dart' as parser;
 import 'src/css/style_rule_parser.dart' as style_rule_parser;
+import 'src/css/style_sheet_parser.dart' as style_sheet_parser;
 
 // The main entry for kraken unit test.
 // Setup all common logic.
@@ -49,8 +49,8 @@ void main() {
   });
 
   group('css', () {
-    parser.main();
     style_rule_parser.main();
+    style_sheet_parser.main();
   });
 
   tearDownAll(() {

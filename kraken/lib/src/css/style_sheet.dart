@@ -23,10 +23,14 @@ class CSSStyleSheet implements StyleSheet {
     List<CSSRule> rules = CSSParser.parseRules(text, parentStyleSheet: this);
     cssRules.addAll(rules);
   }
-  
+
   insertRule(String text, int index) {
-    CSSRule rule = CSSParser.parseRule(text);
-    cssRules.insert(index, rule);
+    CSSRule? rule = CSSParser.parseRule(text);
+    if (rule != null) {
+      cssRules.insert(index, rule);
+    } else {
+      // TODO: throw error
+    }
   }
 
   /// Removes a rule from the stylesheet object.

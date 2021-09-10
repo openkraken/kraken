@@ -24,6 +24,8 @@ import 'package:kraken/scheduler.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/src/dom/element_registry.dart' as element_registry;
 
+final RegExp _splitRegExp = RegExp(r'\s+');
+
 const String UNKNOWN = 'UNKNOWN';
 
 const int HTML_ID = -1;
@@ -212,8 +214,6 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     styleSheets.remove(sheet);
     // TODO: update style in the dom tree.
   }
-
-  final RegExp _splitRegExp = RegExp(r'\s+');
 
   void applyStyleByClassNames(CSSStyleDeclaration style, String classNames, { required Map<String, dynamic> inlineStyle }) {
 

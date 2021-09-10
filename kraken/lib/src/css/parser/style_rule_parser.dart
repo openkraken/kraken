@@ -1,22 +1,5 @@
 import 'package:kraken/css.dart';
 
-const int SLASH_CODE = 47; // /
-const int NEWLINE_CODE = 10; // \n
-const int SPACE_CODE = 32; // ' '
-const int FEED_CODE = 12; // \f
-const int TAB_CODE = 9; // \t
-const int CR_CODE = 13; // \r
-const int OPEN_CURLY_CODE = 123; // {
-const int CLOSE_CURLY_CODE = 125; // }
-const int SEMICOLON_CODE = 59; // ;
-const int ASTERISK_CODE = 42; // *
-const int COLON_CODE = 58; // :
-const int OPEN_PARENTHESES_CODE = 40; // (
-const int CLOSE_PARENTHESES_CODE = 41; // )
-const int SINGLE_QUOTE_CODE = 39; // ';
-const int DOUBLE_QUOTE_CODE = 34; // "
-const int HYPHEN_CODE = 45; // -
-
 const int _SELECTOR = 0;
 const int _NAME = 1;
 const int _VALUE = 2;
@@ -27,7 +10,7 @@ const String _END_OF_COMMENT = '*/';
 const String _EMPTY_STRING = '';
 
 class CSSStyleRuleParser {
-  static CSSStyleRule parse(String ruleText) {
+  static CSSStyleRule? parse(String ruleText) {
     String selectorText = _EMPTY_STRING;
     Map<String, String> style = {};
 
@@ -111,11 +94,15 @@ class CSSStyleRuleParser {
         case OPEN_CURLY_CODE:
           if (state == _SELECTOR) {
             selectorText = buffer.toString().trim();
+            if (selectorText.isEmpty) {
+              // Invalid syntax
+              state = _END;
+            }
             buffer.clear();
             state = _NAME;
           } else {
-            // Unexpected {
-            state = _END;
+            // Unexpected { : `.foo { .foo {}; color: red}`
+            buffer.writeCharCode(c);
           }
           break;
         case COLON_CODE:
@@ -168,15 +155,22 @@ class CSSStyleRuleParser {
             // `body { color: red }` that not end with semicolon is
             // also the end of the declaration.
             style[propertyName] = buffer.toString().trim();
+            state = _END;
+          } else if (state == _NAME) {
+            // `.foo { .foo {}; color: red }`
+            buffer.writeCharCode(c);
+          } else {
+            // Unexpected } : `.fo } { color: red }`
+            state = _END;
           }
-          state = _END;
           break;
         default:
           buffer.writeCharCode(c);
-          break;
       }
     }
 
-    return CSSStyleRule(selectorText, style);
+    if (selectorText.isNotEmpty) {
+      return CSSStyleRule(selectorText, style);
+    }
   }
 }
