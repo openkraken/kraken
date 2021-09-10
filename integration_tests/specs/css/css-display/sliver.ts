@@ -78,6 +78,27 @@ describe('display sliver', () => {
     await snapshot();
   });
 
+  it('insertBefore with right order', async () => {
+    var d = document.createElement('div');
+
+    for (var i = 0; i < 100; i ++) {
+      var e = document.createElement('div');
+      e.style.background = 'red';
+      e.style.width = e.style.height = '99px';
+      e.appendChild(document.createTextNode(i + ''));
+      d.insertBefore(e, d.firstChild);
+    }
+
+    d.style.display = 'sliver';
+    d.style.width = '100px';
+    d.style.height = '150px';
+
+    document.body.appendChild(d);
+
+    // Order from 99 -> 0
+    await snapshot();
+  });
+
   it('should works with positioned element of no top and left', async () => {
     let div;
     div = createElement(
