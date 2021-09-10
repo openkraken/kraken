@@ -8,17 +8,21 @@ import 'dart:collection';
 import 'dart:ui';
 import 'dart:ffi';
 import 'dart:math' as math;
+
 import 'package:flutter/gestures.dart';
 import 'package:kraken/bridge.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show TextSelectionOverlay, TextSelectionControls, ClipboardStatusNotifier;
 import 'package:flutter/rendering.dart' hide RenderEditable;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/widget.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/gesture.dart';
 
 const String INPUT = 'INPUT';
 const String VALUE = 'value';
@@ -72,14 +76,63 @@ class EditableTextDelegate implements TextSelectionDelegate {
 
   @override
   void bringIntoView(TextPosition position) {
-    // TODO: implement bringIntoView
-    print('call bringIntoView $position');
+    RenderEditable _renderEditable = _inputElement._renderEditable!;
+    KrakenScrollable _scrollableX = _inputElement._scrollableX;
+    final Rect localRect = _renderEditable.getLocalRectForCaret(position);
+    final RevealedOffset targetOffset = _inputElement._getOffsetToRevealCaret(localRect);
+    _scrollableX.position!.jumpTo(targetOffset.offset);
+    _renderEditable.showOnScreen(rect: targetOffset.rect);
+  }
+
+  /// Shows the selection toolbar at the location of the current cursor.
+  ///
+  /// Returns `false` if a toolbar couldn't be shown, such as when the toolbar
+  /// is already shown, or when no text selection currently exists.
+  bool showToolbar() {
+    TextSelectionOverlay? _selectionOverlay = _inputElement._selectionOverlay;
+    // Web is using native dom elements to enable clipboard functionality of the
+    // toolbar: copy, paste, select, cut. It might also provide additional
+    // functionality depending on the browser (such as translate). Due to this
+    // we should not show a Flutter toolbar for the editable text elements.
+    if (kIsWeb) {
+      return false;
+    }
+
+    if (_selectionOverlay == null || _selectionOverlay.toolbarIsVisible) {
+      return false;
+    }
+
+    _selectionOverlay.showToolbar();
+    return true;
   }
 
   @override
   void hideToolbar([bool hideHandles = true]) {
-    // TODO: implement hideToolbar
-    print('call hideToolbar');
+    TextSelectionOverlay? _selectionOverlay = _inputElement._selectionOverlay;
+    if (_selectionOverlay == null) {
+      return;
+    }
+
+    if (hideHandles) {
+      // Hide the handles and the toolbar.
+      _selectionOverlay.hide();
+    } else {
+      if (_selectionOverlay.toolbarIsVisible) {
+        // Hide only the toolbar but not the handles.
+        _selectionOverlay.hideToolbar();
+      }
+    }
+  }
+
+  /// Toggles the visibility of the toolbar.
+  void toggleToolbar() {
+    TextSelectionOverlay? _selectionOverlay = _inputElement._selectionOverlay;
+    assert(_selectionOverlay != null);
+    if (_selectionOverlay!.toolbarIsVisible) {
+      hideToolbar();
+    } else {
+      showToolbar();
+    }
   }
 
   @override
@@ -113,6 +166,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   static void setFocus(InputElement inputElement) {
     if (InputElement.focusInputElement != inputElement) {
+      // Focus kraken widget to get focus from other widgets.
+      WidgetDelegate? widgetDelegate = inputElement.elementManager.widgetDelegate;
+      if (widgetDelegate != null) {
+        widgetDelegate.requestFocus();
+      }
+
       clearFocus();
       InputElement.focusInputElement = inputElement;
       inputElement.focus();
@@ -167,12 +226,31 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   bool _autoFocus = false;
 
-  ViewportOffset offset = ViewportOffset.zero();
+  final KrakenScrollable _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right);
+
+  ViewportOffset? get scrollOffsetX => _scrollOffsetX;
+  ViewportOffset? _scrollOffsetX = ViewportOffset.zero();
+  set scrollOffsetX(ViewportOffset? value) {
+    if (value == null) return;
+    if (value == _scrollOffsetX) return;
+    _scrollOffsetX = value;
+    _scrollOffsetX!.removeListener(_scrollXListener);
+    _scrollOffsetX!.addListener(_scrollXListener);
+    _renderInputLeaderLayer?.markNeedsLayout();
+  }
+
+  void _scrollXListener() {
+    _renderInputLeaderLayer?.markNeedsPaint();
+  }
+
   bool obscureText = false;
   bool autoCorrect = true;
   late EditableTextDelegate _textSelectionDelegate;
   TextSpan? _actualText;
+  RenderInputLeaderLayer? _renderInputLeaderLayer;
   RenderInputBox? _renderInputBox;
+
+  final LayerLink _toolbarLayerLink = LayerLink();
   RenderEditable? _renderEditable;
   TextInputConnection? _textInputConnection;
 
@@ -199,7 +277,15 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
-  }) : super(targetId, nativeInputElement.ref.nativeElement, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
+  }) : super(
+    targetId,
+    nativeInputElement.ref.nativeElement,
+    elementManager,
+    tagName: INPUT,
+    defaultStyle: _defaultStyle,
+    isIntrinsicBox: true,
+    repaintSelf: true,
+  ) {
     _nativeMap[nativeInputElement.address] = this;
 
     _textSelectionDelegate = EditableTextDelegate(this);
@@ -208,6 +294,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     nativeInputElement.ref.getInputHeight = nativeGetInputHeight;
     nativeInputElement.ref.focus = nativeInputMethodFocus;
     nativeInputElement.ref.blur = nativeInputMethodBlur;
+
+    scrollOffsetX = _scrollableX.position;
   }
 
   @override
@@ -216,6 +304,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
     // Make element listen to click event to trigger focus.
     addEvent(EVENT_CLICK);
+    addEvent(EVENT_DOUBLE_CLICK);
+    addEvent(EVENT_LONG_PRESS);
 
     AnimationController animationController = _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     animationController.addListener(_onCursorColorTick);
@@ -261,9 +351,16 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void setRenderStyle(String key, value) {
     super.setRenderStyle(key, value);
 
-    if (_renderInputBox != null) {
+    if (_renderInputLeaderLayer != null) {
       RenderStyle renderStyle = renderBoxModel!.renderStyle;
-      if (key == HEIGHT || (key == LINE_HEIGHT && renderStyle.height == null)) {
+      if (key == HEIGHT) {
+        _renderInputLeaderLayer!.markNeedsLayout();
+
+      } else if (key == LINE_HEIGHT && renderStyle.height == null) {
+        _renderInputLeaderLayer!.markNeedsLayout();
+        // It needs to mark _renderInputBox as needsLayout manually cause
+        // line-height change will not affect constraints which will in turn
+        // make _renderInputBox jump layout stage when _renderInputLeaderLayer performs layout.
         _renderInputBox!.markNeedsLayout();
 
       // It needs to judge width in style here cause
@@ -271,7 +368,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       } else if (key == FONT_SIZE && style[WIDTH].isEmpty) {
         double fontSize = renderStyle.fontSize;
         renderStyle.width = fontSize * _FONT_SIZE_RATIO;
-        _renderInputBox!.markNeedsLayout();
+        _renderInputLeaderLayer!.markNeedsLayout();
       }
     }
     // @TODO: Filter style properties that used by text span.
@@ -299,35 +396,96 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     return CSSTextMixin.createTextSpan(obscuringCharacter * text.length, parentElement: this);
   }
 
-  Color get cursorColor => CSSColor.initial;
+  Color cursorColor = CSSColor.initial;
+
+  Color selectionColor = CSSColor.initial.withOpacity(0.4);
+
+  Radius cursorRadius = const Radius.circular(2.0);
+
+  Offset? _selectStartPosition;
+
+  // Get the text size of input by layouting manually cause RenderEditable does not expose textPainter.
+  Size getTextSize() {
+    final Size textSize = (TextPainter(
+      text: _renderEditable!.text,
+      maxLines: 1,
+      textDirection: TextDirection.ltr)
+      ..layout())
+      .size;
+    return textSize;
+  }
+  
+  Size? _textSize;
+
+  // Whether gesture is dragging.
+  bool _isDragging = false;
 
   @override
   void dispatchEvent(Event event) {
     super.dispatchEvent(event);
     if (event.type == EVENT_TOUCH_START) {
-      TouchEvent e = (event as TouchEvent);
-      if (e.touches.length == 1) {
-        InputElement.setFocus(this);
+      _hideSelectionOverlayIfNeeded();
 
+      TouchList touches = (event as TouchEvent).touches;
+      if (touches.length > 1) return;
+
+      Touch touch = touches.item(0);
+      _selectStartPosition = Offset(touch.clientX, touch.clientY);
+
+      TouchEvent e = event;
+      if (e.touches.length == 1) {
         Touch touch = e.touches[0];
         final TapDownDetails details = TapDownDetails(
           globalPosition: Offset(touch.screenX, touch.screenY),
           localPosition: Offset(touch.clientX, touch.clientY),
           kind: PointerDeviceKind.touch,
         );
-
         _renderEditable!.handleTapDown(details);
       }
+      // Cache text size on touch start to be used in touch move and touch end.
+      _textSize = getTextSize();
+    } else if (event.type == EVENT_TOUCH_MOVE ||
+      event.type == EVENT_TOUCH_END
+    ) {
+      if (event.type == EVENT_TOUCH_END) {
+        _textSelectionDelegate.hideToolbar(false);
+        InputElement.setFocus(this);
+      }
 
-      // @TODO: selection.
-    } else if (event.type == EVENT_TOUCH_MOVE) {
-      // @TODO: selection.
-    } else if (event.type == EVENT_TOUCH_END) {
-      // @TODO: selection.
+      TouchList touches = (event as TouchEvent).touches;
+      if (touches.length > 1) return;
+      
+      Touch touch = touches.item(0);
+      Offset _selectEndPosition = Offset(touch.clientX, touch.clientY);
+      // Disable text selection and enable scrolling when text size is larger than input size.
+      if (_textSize!.width > _renderEditable!.size.width) {
+        if (event.type == EVENT_TOUCH_END && _selectStartPosition == _selectEndPosition) {
+          _renderEditable!.selectPositionAt(
+            from: _selectStartPosition!,
+            to: _selectEndPosition,
+            cause: SelectionChangedCause.drag,
+          );
+        }
+        return;
+      }
+      
+      _renderEditable!.selectPositionAt(
+        from: _selectStartPosition!,
+        to: _selectEndPosition,
+        cause: SelectionChangedCause.drag,
+      );
+      _isDragging = true;
     } else if (event.type == EVENT_CLICK) {
       _renderEditable!.handleTap();
-    } else if (event.type == EVENT_LONG_PRESS) {
+      _isDragging = false;
+    } else if (!_isDragging && event.type == EVENT_LONG_PRESS) {
       _renderEditable!.handleLongPress();
+      _textSelectionDelegate.showToolbar();
+      _isDragging = false;
+    } else if (event.type == EVENT_DOUBLE_CLICK) {
+      _renderEditable!.handleDoubleTap();
+      _textSelectionDelegate.showToolbar();
+      _isDragging = false;
     }
   }
 
@@ -369,7 +527,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     );
 
     if (_textInputConnection == null || !_textInputConnection!.attached) {
-      final TextEditingValue localValue = _textSelectionDelegate._textEditingValue;
+      final TextEditingValue localValue = _value;
       _lastKnownRemoteTextEditingValue = localValue;
 
       _textInputConnection = TextInput.attach(this, _textInputConfiguration!);
@@ -384,6 +542,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   void deactiveTextInput() {
+    // Clear range select when text input is not active.
+    updateEditingValue(_value.copyWith(selection: TextSelection(baseOffset: 0, extentOffset: 0)));
+
+    // Hide input handles and toolbar.
+    _textSelectionDelegate.hideToolbar();
+
     _cursorVisibilityNotifier.value = false;
     if (_textInputConnection != null && _textInputConnection!.attached) {
       _textInputConnection!.close();
@@ -405,6 +569,14 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       text = _buildPasswordTextSpan(text.text!);
     }
 
+    WidgetDelegate? widgetDelegate = elementManager.widgetDelegate;
+    if (widgetDelegate != null) {
+      cursorColor = widgetDelegate.getCursorColor();
+      selectionColor = widgetDelegate.getSelectionColor();
+      cursorRadius = widgetDelegate.getCursorRadius();
+      _selectionControls = widgetDelegate.getTextSelectionControls();
+    }
+
     _renderEditable = RenderEditable(
       text: text,
       cursorColor: cursorColor,
@@ -416,32 +588,39 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       textAlign: textAlign,
       textDirection: textDirection,
       selection: blurSelection, // Default to blur
-      offset: offset,
+      selectionColor: selectionColor,
+      offset: scrollOffsetX!,
       readOnly: false,
       forceLine: true,
       onCaretChanged: _handleCaretChanged,
       obscureText: obscureText,
-      cursorWidth: 1.0,
-      cursorRadius: Radius.zero,
+      cursorWidth: 2.0,
+      cursorRadius: cursorRadius,
       cursorOffset: Offset.zero,
       enableInteractiveSelection: true,
       textSelectionDelegate: _textSelectionDelegate,
       devicePixelRatio: window.devicePixelRatio,
-      startHandleLayerLink: LayerLink(),
-      endHandleLayerLink: LayerLink(),
+      startHandleLayerLink: _startHandleLayerLink,
+      endHandleLayerLink: _endHandleLayerLink,
       ignorePointer: true,
     );
     return _renderEditable!;
   }
 
-  RenderInputBox createRenderBox() {
+  RenderInputLeaderLayer createRenderBox() {
     assert(renderBoxModel is RenderIntrinsic);
     RenderEditable renderEditable = createRenderEditable();
 
     _renderInputBox = RenderInputBox(
       child: renderEditable,
     );
-    return _renderInputBox!;
+    _renderInputLeaderLayer = RenderInputLeaderLayer(
+      link: _toolbarLayerLink,
+      child: _renderInputBox,
+      scrollableX: _scrollableX,
+      renderEditable: renderEditable,
+    );
+    return _renderInputLeaderLayer!;
   }
 
   @override
@@ -490,7 +669,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   void _hideSelectionOverlayIfNeeded() {
-    // TODO: hide selection overlay.
+    if (_selectionOverlay != null) {
+      _selectionOverlay!.hideHandles();
+    }
   }
 
   bool get _hasInputConnection => _textInputConnection != null && _textInputConnection!.attached;
@@ -554,8 +735,10 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     // components, so always send those events, even if we didn't think it
     // changed. Also, the user long pressing should always send a selection change
     // as well.
-    if (selectionChanged || (userInteraction &&
-        (cause == SelectionChangedCause.longPress || cause == SelectionChangedCause.keyboard))) {
+    if (selectionChanged ||
+      (userInteraction &&
+      (cause == SelectionChangedCause.longPress ||
+        cause == SelectionChangedCause.keyboard))) {
       _handleSelectionChanged(value.selection, cause);
     }
 
@@ -563,11 +746,11 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       _handleTextChanged(value.text, userInteraction, cause);
     }
 
-    endBatchEdit();
-
     if (_renderEditable != null) {
       _renderEditable!.selection = value.selection;
     }
+
+    endBatchEdit();
   }
 
   void _handleTextChanged(String text, bool userInteraction, SelectionChangedCause? cause) {
@@ -597,16 +780,102 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
   }
 
+  TextSelectionOverlay? _selectionOverlay;
+
+  TextSelectionControls? _selectionControls;
+
+  bool _showSelectionHandles = false;
+
+  final ClipboardStatusNotifier? _clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
+  final LayerLink _startHandleLayerLink = LayerLink();
+  final LayerLink _endHandleLayerLink = LayerLink();
+
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     // Show keyboard for selection change or user gestures.
     requestKeyboard();
 
-    // TODO: show selection layer and emit selection changed event
+    if (_renderEditable == null) {
+      return;
+    }
+
+    WidgetDelegate? widgetDelegate = elementManager.widgetDelegate;
+
+    if (_selectionControls == null) {
+      _selectionOverlay?.hide();
+      _selectionOverlay = null;
+    } else if (widgetDelegate != null) {
+      if (_selectionOverlay == null) {
+        _selectionOverlay = TextSelectionOverlay(
+          clipboardStatus: _clipboardStatus,
+          context: widgetDelegate.getContext(),
+          value: _value,
+          toolbarLayerLink: _toolbarLayerLink,
+          startHandleLayerLink: _startHandleLayerLink,
+          endHandleLayerLink: _endHandleLayerLink,
+          renderObject: _renderEditable!,
+          selectionControls: _selectionControls,
+          selectionDelegate: _textSelectionDelegate,
+          dragStartBehavior: DragStartBehavior.start,
+          onSelectionHandleTapped: _handleSelectionHandleTapped,
+        );
+      } else {
+        _selectionOverlay!.update(_value);
+      }
+      _onSelectionChanged(selection, cause);
+      _selectionOverlay!.handlesVisible = _showSelectionHandles;
+      _selectionOverlay!.showHandles();
+    }
 
     // To keep the cursor from blinking while it moves, restart the timer here.
     if (_cursorTimer != null) {
       _stopCursorTimer(resetCharTicks: false);
       _startCursorTimer();
+    }
+  }
+
+  void _onSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
+    final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
+    if (willShowSelectionHandles != _showSelectionHandles) {
+      _showSelectionHandles = willShowSelectionHandles;
+    }
+
+    WidgetDelegate? widgetDelegate = elementManager.widgetDelegate;
+    if (widgetDelegate != null) {
+      TargetPlatform platform = widgetDelegate.getTargetPlatform();
+      switch (platform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          if (cause == SelectionChangedCause.longPress) {
+            _textSelectionDelegate.bringIntoView(selection.base);
+          }
+          return;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+        // Do nothing.
+      }
+    }
+
+  }
+
+  bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
+    if (cause == SelectionChangedCause.keyboard)
+      return false;
+
+    if (cause == SelectionChangedCause.longPress || cause == SelectionChangedCause.drag)
+      return true;
+
+    if (_value.text.isNotEmpty)
+      return true;
+
+    return false;
+  }
+
+  /// Toggle the toolbar when a selection handle is tapped.
+  void _handleSelectionHandleTapped() {
+    if (_value.selection.isCollapsed) {
+      _textSelectionDelegate.toggleToolbar();
     }
   }
 
@@ -618,16 +887,30 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   @override
   void updateEditingValue(TextEditingValue value) {
-    if (value.text != _textSelectionDelegate._textEditingValue.text) {
-      _hideSelectionOverlayIfNeeded();
-      _showCaretOnScreen();
+     _lastKnownRemoteTextEditingValue = value;
+     
+    if (value == _value) {
+      // This is possible, for example, when the numeric keyboard is input,
+      // the engine will notify twice for the same value.
+      // Track at https://github.com/flutter/flutter/issues/65811
+      return;
     }
-    _lastKnownRemoteTextEditingValue = value;
-    _formatAndSetValue(value, userInteraction: true);
-    // To keep the cursor from blinking while typing, we want to restart the
-    // cursor timer every time a new character is typed.
-    _stopCursorTimer(resetCharTicks: false);
-    _startCursorTimer();
+
+    if (value.text == _value.text && value.composing == _value.composing) {
+      // `selection` is the only change.
+      _handleSelectionChanged(value.selection, SelectionChangedCause.keyboard);
+    } else {
+      _showCaretOnScreen();
+      _textSelectionDelegate.hideToolbar();
+    }
+    _formatAndSetValue(value, userInteraction: true, cause: SelectionChangedCause.keyboard);
+
+    if (_hasInputConnection) {
+      // To keep the cursor from blinking while typing, we want to restart the
+      // cursor timer every time a new character is typed.
+      _stopCursorTimer(resetCharTicks: false);
+      _startCursorTimer();
+    }
   }
 
   void _triggerChangeEvent() {
@@ -768,6 +1051,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         newCaretRect.bottom,
       );
 
+      scrollToCaret();
+
       _renderEditable!.showOnScreen(
         rect: inflatedRect,
         duration: _caretAnimationDuration,
@@ -789,6 +1074,48 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       _textChangedSinceLastCaretUpdate = false;
       _showCaretOnScreen();
     }
+  }
+
+  // Make input box scroll to the offset that the caret shown.
+  void scrollToCaret() {
+    SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
+      final RevealedOffset targetOffset = _getOffsetToRevealCaret(_currentCaretRect!);
+      _scrollableX.position!.animateTo(targetOffset.offset, duration: _caretAnimationDuration, curve: _caretAnimationCurve);
+    });
+  }
+
+  // Finds the closest scroll offset to the current scroll offset that fully
+  // reveals the given caret rect. If the given rect's main axis extent is too
+  // large to be fully revealed in `renderEditable`, it will be centered along
+  // the main axis.
+  //
+  // If this is a multiline EditableText (which means the Editable can only
+  // scroll vertically), the given rect's height will first be extended to match
+  // `renderEditable.preferredLineHeight`, before the target scroll offset is
+  // calculated.
+  RevealedOffset _getOffsetToRevealCaret(Rect rect) {
+    final Size editableSize = _renderEditable!.size;
+    final double additionalOffset;
+    final Offset unitOffset;
+
+    additionalOffset = rect.width >= editableSize.width
+    // Center `rect` if it's oversized.
+      ? editableSize.width / 2 - rect.center.dx
+    // Valid additional offsets range from (rect.right - size.width)
+    // to (rect.left). Pick the closest one if out of range.
+      : 0.0.clamp(rect.right - editableSize.width, rect.left);
+    unitOffset = const Offset(1, 0);
+
+    // No overscrolling when encountering tall fonts/scripts that extend past
+    // the ascent.
+    final double targetOffset = (additionalOffset + _scrollableX.position!.pixels)
+      .clamp(
+      _scrollableX.position!.minScrollExtent!,
+      _scrollableX.position!.maxScrollExtent!,
+    );
+
+    final double offsetDelta = _scrollableX.position!.pixels - targetOffset;
+    return RevealedOffset(rect: rect.shift(unitOffset * offsetDelta), offset: targetOffset);
   }
 
   void _stopCursorTimer({bool resetCharTicks = true}) {
@@ -855,8 +1182,11 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   @override
   void connectionClosed() {
-    // TODO: implement connectionClosed
-    print('TODO: impl connection closed.');
+    if (_hasInputConnection) {
+      _textInputConnection!.connectionClosedReceived();
+      _textInputConnection = null;
+      _lastKnownRemoteTextEditingValue = null;
+    }
   }
 
   // Abstract class method added after flutter@1.15
@@ -886,16 +1216,36 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 }
 
-class RenderInputBox extends RenderProxyBox {
-  RenderInputBox({
-    required RenderEditable child,
-  }) : super(child);
+/// RenderLeaderLayer of input element used for toolbar overlay to float with.
+class RenderInputLeaderLayer extends RenderLeaderLayer {
+  RenderInputLeaderLayer({
+    required LayerLink link,
+    RenderInputBox? child,
+    required this.scrollableX,
+    this.renderEditable,
+  }) : super(link: link, child: child);
+
+  RenderEditable? renderEditable;
+
+  KrakenScrollable scrollableX;
+
+  void _pointerListener(PointerEvent event) {
+    if (event is PointerDownEvent) {
+      scrollableX.handlePointerDown(event);
+    }
+  }
+
+  @override
+  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    super.handleEvent(event, entry);
+    _pointerListener(event);
+  }
 
   Offset? get _offset {
-    RenderIntrinsic renderIntrinsic = (parent as RenderIntrinsic?)!;
+    RenderIntrinsic renderIntrinsic = parent as RenderIntrinsic;
     RenderStyle renderStyle = renderIntrinsic.renderStyle;
 
-    double intrinsicInputHeight = (child as RenderEditable).preferredLineHeight
+    double intrinsicInputHeight = renderEditable!.preferredLineHeight
       + renderStyle.paddingTop + renderStyle.paddingBottom
       + renderStyle.borderTop + renderStyle.borderBottom;
 
@@ -911,17 +1261,19 @@ class RenderInputBox extends RenderProxyBox {
     return Offset(0, dy);
   }
 
+  // Note paint override can not be done in RenderInputBox cause input toolbar
+  // paints relative to the perferred height of textPainter.
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_offset == null) {
-      super.paint(context, offset);
-    } else {
-      final Offset transformedOffset = offset.translate(_offset!.dx, _offset!.dy);
-      if (child != null) {
-        context.paintChild(child!, transformedOffset);
-      }
-    }
+    final Offset transformedOffset = offset.translate(_offset!.dx, _offset!.dy);
+    super.paint(context, transformedOffset);
   }
+}
+
+class RenderInputBox extends RenderProxyBox {
+  RenderInputBox({
+    required RenderEditable child,
+  }) : super(child);
 
   @override
   void performLayout() {
@@ -931,7 +1283,8 @@ class RenderInputBox extends RenderProxyBox {
       double width = constraints.maxWidth != double.infinity ?
         constraints.maxWidth : childSize.width;
 
-      RenderIntrinsic renderIntrinsic = parent as RenderIntrinsic;
+      RenderInputLeaderLayer renderLeaderLayer = parent as RenderInputLeaderLayer;
+      RenderIntrinsic renderIntrinsic = renderLeaderLayer.parent as RenderIntrinsic;
       RenderStyle renderStyle = renderIntrinsic.renderStyle;
 
       double height;
