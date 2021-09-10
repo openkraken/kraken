@@ -32,4 +32,31 @@ describe('Document api', () => {
     expect(document.all).not.toBeUndefined();
     expect(document.all.length).toBeGreaterThan(0);
   });
+
+  it('document querySelector cant find element', () => {
+    ['red','black','green','yellow','blue'].forEach((item, index) => {
+      const div = document.createElement('div')
+      div.style.width = '100px';
+      div.style.height = '100px';
+      div.style.backgroundColor = item;
+      div.setAttribute('id', `id-${index}`);
+      document.body.appendChild(div);
+    })
+    
+    expect(document.querySelector('span')).toBeNull();
+  })
+
+  it('document querySelector find first element', () => {
+    ['red','black','green','yellow','blue'].forEach((item, index) => {
+      const div = document.createElement('div')
+      div.style.width = '100px';
+      div.style.height = '100px';
+      div.style.backgroundColor = item;
+      div.setAttribute('id', `id-${index}`);
+      document.body.appendChild(div);
+    })
+    
+    const ele = document.querySelector('div');
+    expect(ele?.id).toBe('id-0');
+  })
 });
