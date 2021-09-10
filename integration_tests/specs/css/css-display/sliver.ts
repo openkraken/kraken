@@ -41,6 +41,33 @@ describe('display sliver', () => {
     await snapshot();
   });
 
+  it('scrollTop', async () => {
+    const container = createSliverBasicCase();
+
+    container.scrollBy(0, 200);
+    expect(container.scrollTop).toEqual(200);
+
+    container.scrollBy(0, -150);
+    expect(container.scrollTop).toEqual(50);
+  });
+
+  it('scrollHeight', async () => {
+    const container = createSliverBasicCase();
+
+    container.scrollBy(0, 200);
+    expect(container.scrollHeight).toEqual(100 * 99);
+  });
+
+  it('child contains Comment and Text', async () => {
+    const container = createSliverBasicCase();
+    const comment = document.createComment('foo');
+    container.appendChild(comment);
+    container.appendChild(document.createTextNode('hello'));
+
+    // No error occurred, pass.
+    await snapshot();
+  });
+
   it('continuous scroll works', async () => {
     const container = createSliverBasicCase();
 

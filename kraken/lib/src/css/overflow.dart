@@ -325,23 +325,21 @@ mixin CSSOverflowMixin on ElementBase {
     scrollTo(x: value);
   }
 
-  get scrollHeight {
-    if (renderBoxModel is RenderRecyclerLayout) {
-      KrakenScrollable? scrollable = _getScrollable(Axis.vertical);
-      if (scrollable?.position?.maxScrollExtent != null) {
-        return scrollable!.position!.maxScrollExtent;
-      }
+  double get scrollHeight {
+    KrakenScrollable? scrollable = _getScrollable(Axis.vertical);
+    if (scrollable?.position?.maxScrollExtent != null) {
+      // Viewport height + maxScrollExtent
+      return renderBoxModel!.clientHeight + scrollable!.position!.maxScrollExtent!;
     }
+
     Size scrollContainerSize = renderBoxModel!.scrollableSize;
     return scrollContainerSize.height;
   }
 
-  get scrollWidth {
-    if (renderBoxModel is RenderRecyclerLayout) {
-      KrakenScrollable? scrollable = _getScrollable(Axis.horizontal);
-      if (scrollable?.position?.maxScrollExtent != null) {
-        return scrollable!.position!.maxScrollExtent;
-      }
+  double get scrollWidth {
+    KrakenScrollable? scrollable = _getScrollable(Axis.horizontal);
+    if (scrollable?.position?.maxScrollExtent != null) {
+      return renderBoxModel!.clientWidth + scrollable!.position!.maxScrollExtent!;
     }
     Size scrollContainerSize = renderBoxModel!.scrollableSize;
     return scrollContainerSize.width;
