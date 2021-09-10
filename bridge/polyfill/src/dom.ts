@@ -55,7 +55,7 @@ let fetchSelector = function fetchSelector(str: string, regex: RegExp) {
   };
 };
 
-function getElementsBySelector(selector: string) {
+function getElementsBySelector(selector: string): Array<Element | null | HTMLElement> {
   let context = document;
   let temp, tempElements: Array<Element> = [], elements: Array<Element> = [];
   selector = trim(selector);
