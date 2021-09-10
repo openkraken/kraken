@@ -59,4 +59,47 @@ describe('Document api', () => {
     const ele = document.querySelector('div');
     expect(ele?.id).toBe('id-0');
   })
+
+  it('document querySelectorAll length of elements', () => {
+    const szEle = ['red','black','green','yellow','blue'];
+    szEle.forEach((item, index) => {
+      const div = document.createElement('div')
+      div.style.width = '100px';
+      div.style.height = '100px';
+      div.style.backgroundColor = item;
+      div.setAttribute('id', `id-${index}`);
+      document.body.appendChild(div);
+    })
+    
+    const eles = document.querySelectorAll('div');
+    expect(eles.length).toBe(szEle.length);
+  })
+
+  it('document querySelectorAll first element', () => {
+    const szEle = ['red','black','green','yellow','blue'];
+    szEle.forEach((item, index) => {
+      const div = document.createElement('div')
+      div.style.width = '100px';
+      div.style.height = '100px';
+      div.style.backgroundColor = item;
+      div.setAttribute('id', `id-${index}`);
+      document.body.appendChild(div);
+    })
+    
+    const eles = document.querySelectorAll('div');
+    expect(eles[0].id).toBe('id-0');
+  })
+
+  it('document querySelectorAll cant find element', () => {
+    ['red','black','green','yellow','blue'].forEach((item, index) => {
+      const div = document.createElement('div')
+      div.style.width = '100px';
+      div.style.height = '100px';
+      div.style.backgroundColor = item;
+      div.setAttribute('id', `id-${index}`);
+      document.body.appendChild(div);
+    })
+    
+    expect(document.querySelectorAll('span').length).toBe(0);
+  })
 });
