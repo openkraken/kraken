@@ -55,7 +55,7 @@ let fetchSelector = function fetchSelector(str: string, regex: RegExp) {
   };
 };
 
-let getElementsBySelector = function getElementsBySelector(selector: string) {
+function getElementsBySelector(selector: string) {
   let context = document;
   let temp, tempElements: Array<Element> = [], elements: Array<Element> = [];
   selector = trim(selector);
@@ -205,30 +205,6 @@ document.querySelectorAll = function <E extends Element = Element> (selector: st
     let rule = rules[i];
 
     // TODO: Support ' ' and '>'
-    elements = elements.concat(getElementsBySelector.call(this, rule));
-  }
-
-  return (elements as any) as NodeListOf<E>;
-};
-
-document.querySelectorAll = function <E extends Element = Element> (selector: string): NodeListOf<E> {
-  if (typeof selector !== 'string') {
-    throw new TypeError('document.querySelectorAll: Invalid selector type. ' +
-      'Expect: string. Found: ' + typeof selector + '.');
-  }
-  let elements: Array<Element> = [];
-
-  // Split `selector` into rules by `,`.
-  let rules = selector.split(',');
-  rules = trim(rules);
-
-  // Iterate through each rule.
-  // For the sake of performance, use for-loop here rather than forEach.
-  for (let i = 0, l = rules.length; i !== l; ++i) {
-    let rule = rules[i];
-
-    // TODO: Support ' ' and '>'
-
     elements = elements.concat(getElementsBySelector.call(this, rule));
   }
 
