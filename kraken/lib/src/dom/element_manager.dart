@@ -208,15 +208,20 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   void addStyleSheet(CSSStyleSheet sheet) {
     styleSheets.add(sheet);
+    recalculateDocumentStyle();
   }
 
   void removeStyleSheet(CSSStyleSheet sheet) {
     styleSheets.remove(sheet);
-    // TODO: update style in the dom tree.
+    recalculateDocumentStyle();
   }
 
-  void applyStyleByClassNames(CSSStyleDeclaration style, String classNames, { required Map<String, dynamic> inlineStyle }) {
+  void recalculateDocumentStyle() {
+    // Recalculate style for all nodes.
+    document.documentElement.recalculateStyle();
+  }
 
+  void applyStyleByClassNames(Element element, String classNames, { required Map<String, dynamic> inlineStyle }) {
     for (String className in classNames.trim().split(_splitRegExp)) {
       for (CSSStyleSheet sheet in styleSheets) {
         List<CSSRule> rules = sheet.cssRules;
@@ -226,8 +231,8 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
             var styleSheetStyle = rule.style;
             for (String propertyName in styleSheetStyle.keys) {
               var inlineStyleValue = inlineStyle[propertyName];
-              if (inlineStyleValue == null || inlineStyleValue == '') {
-                style.setProperty(propertyName, styleSheetStyle[propertyName]);
+              if (inlineStyleValue == null || inlineStyleValue.isEmpty) {
+                element.setStyle(propertyName, styleSheetStyle[propertyName]);
               }
             }
           }

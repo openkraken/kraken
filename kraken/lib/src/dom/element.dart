@@ -185,7 +185,7 @@ class Element extends Node
     }
 
     bindNativeMethods(nativeElementPtr);
-    _setDefaultStyle();
+    _applyDefaultStyle();
   }
 
   ElementDelegate get elementDelegate {
@@ -270,28 +270,24 @@ class Element extends Node
 
   @override
   void didAttachRenderer() {
-    RenderBoxModel _renderBoxModel = renderBoxModel!;
-
-    // Set display and transformedDisplay when display is not set in style.
-    _renderBoxModel.renderStyle.initDisplay(style, defaultDisplay);
+    // Set display and transformeDisplay when display is not set in style.
+    renderBoxModel!.renderStyle.initDisplay(style, defaultDisplay);
 
     // Bind pointer responder.
-    addEventResponder(_renderBoxModel);
+    addEventResponder(renderBoxModel!);
 
     if (_hasIntersectionObserverEvent(eventHandlers)) {
-      _renderBoxModel.addIntersectionChangeListener(handleIntersectionChange);
+      renderBoxModel!.addIntersectionChangeListener(handleIntersectionChange);
     }
   }
 
   @override
   void willDetachRenderer() {
-    RenderBoxModel _renderBoxModel = renderBoxModel!;
-
     // Remove all intersection change listeners.
-    _renderBoxModel.clearIntersectionChangeListeners();
+    renderBoxModel!.clearIntersectionChangeListeners();
 
     // Remove placeholder of positioned element.
-    RenderPositionHolder? renderPositionHolder = _renderBoxModel.renderPositionHolder;
+    RenderPositionHolder? renderPositionHolder = renderBoxModel!.renderPositionHolder;
     if (renderPositionHolder != null) {
       RenderLayoutBox? parent = renderPositionHolder.parent as RenderLayoutBox?;
       if (parent != null) {
@@ -303,14 +299,6 @@ class Element extends Node
   @override
   void didDetachRenderer() {
     style.removeStyleChangeListener(_onStyleChanged);
-  }
-
-  void _setDefaultStyle() {
-    if (defaultStyle.isNotEmpty) {
-      defaultStyle.forEach((property, dynamic value) {
-        style.setProperty(property, value, viewportSize);
-      });
-    }
   }
 
   // TODO: debounce scroll listener
@@ -1226,6 +1214,44 @@ class Element extends Node
     }
   }
 
+  void _applyDefaultStyle() {
+    if (defaultStyle.isNotEmpty) {
+      defaultStyle.forEach((property, dynamic value) {
+        style.setProperty(property, value, viewportSize);
+      });
+    }
+  }
+
+  void _applyInlineStyle() {
+    if (_inlineStyle.isNotEmpty) {
+      _inlineStyle.forEach((property, dynamic value) {
+        style.setProperty(property, value, viewportSize);
+      });
+    }
+  }
+
+  void _applyStyleSheetStyle() {
+    String classNames = getProperty(_CLASS_NAME).toString();
+    elementManager.applyStyleByClassNames(this, classNames, inlineStyle: _inlineStyle);
+  }
+
+  void recalculateStyle() {
+    // TODO: only update the element's style that is changed.
+
+    // Reset style.
+    style.reset();
+
+    // Apply style.
+    _applyDefaultStyle();
+    _applyInlineStyle();
+    _applyStyleSheetStyle();
+
+    // Update children style.
+    children.forEach((Element child) {
+      child.recalculateStyle();
+    });
+  }
+
   // Set inline style property.
   void setInlineStyle(String key, dynamic value) {
     // Current only for mark property is setting by inline style.
@@ -1248,19 +1274,18 @@ class Element extends Node
       assert(value is Map<String, dynamic>);
       // @TODO: Consider `{ color: red }` to `{}`, need to remove invisible keys.
       (value as Map<String, dynamic>).forEach(setStyle);
-    } else if (key == _CLASS_NAME) {
-      elementManager.applyStyleByClassNames(style, value.toString(), inlineStyle: _inlineStyle);
     } else {
       properties[key] = value;
+    }
+
+    if (key == _CLASS_NAME) {
+      _applyStyleSheetStyle();
     }
   }
 
   @mustCallSuper
   dynamic getProperty(String key) {
-    switch (key) {
-      default:
-        return properties[key];
-    }
+    return properties[key];
   }
 
   @mustCallSuper

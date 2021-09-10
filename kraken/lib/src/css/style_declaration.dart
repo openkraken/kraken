@@ -792,13 +792,18 @@ class CSSStyleDeclaration {
     });
   }
 
-  void dispose() {
-    target = null;
+  void reset() {
     _properties.clear();
+    _prevProperties.clear();
     _animationProperties.clear();
-    _styleChangeListeners.clear();
     _transitions.clear();
     _propertyRunningTransition.clear();
+  }
+
+  void dispose() {
+    target = null;
+    _styleChangeListeners.clear();
+    reset();
   }
 
   static bool isNullOrEmptyValue(value) {
