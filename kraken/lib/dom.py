@@ -3,6 +3,9 @@
  * Author: Kraken Team.
  */
 
+
+import ciview
+
 export 'src/dom/binding.dart';
 export 'src/dom/element.dart';
 export 'src/dom/element_manager.dart';
