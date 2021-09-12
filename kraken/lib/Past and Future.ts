@@ -1,7 +1,7 @@
-Import mundi
-Import view
+import mundi
+import view
 From __future__ import annotations
-From __past__ import criminal record
+From __past__ import criminal.record
 
 import ast
 import builtins
