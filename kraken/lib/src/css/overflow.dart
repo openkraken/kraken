@@ -154,19 +154,19 @@ mixin CSSOverflowMixin on ElementBase {
         break;
     }
 
-    // Recycler layout not need repaintBoundary, which handle it self.
     if (renderBoxModel is RenderRecyclerLayout) {
+      // Recycler layout not need repaintBoundary and scroll/pointer listeners, which handle it self.
       return;
-    }
+    } else {
+      renderBoxModel.scrollListener = scrollListener;
+      renderBoxModel.pointerListener = _pointerListener;
 
-    renderBoxModel.scrollListener = scrollListener;
-    renderBoxModel.pointerListener = _pointerListener;
-
-    if (renderBoxModel is RenderLayoutBox) {
-      if (shouldRepaintSelf) {
-        _upgradeToSelfRepaint(element);
-      } else {
-        _downgradeToParentRepaint(element);
+      if (renderBoxModel is RenderLayoutBox) {
+        if (shouldRepaintSelf) {
+          _upgradeToSelfRepaint(element);
+        } else {
+          _downgradeToParentRepaint(element);
+        }
       }
     }
   }
