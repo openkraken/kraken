@@ -873,7 +873,7 @@ class RenderBoxModel extends RenderBox
     return constraints;
   }
 
-  /// Content width of render box model calcaluted from style
+  /// Content width of render box model calculated from style
   static double? getLogicalContentWidth(RenderBoxModel renderBoxModel) {
     RenderBoxModel originalRenderBoxModel = renderBoxModel;
     double cropWidth = 0;
@@ -933,6 +933,11 @@ class RenderBoxModel extends RenderBox
                   width = renderStyle.width;
                   cropPaddingBorder(renderBoxModel);
                   break;
+                } else if (renderBoxModel.constraints.isTight) {
+                  // Cases like flex item with flex-grow and no width in flex row direction.
+                  width = renderBoxModel.constraints.maxWidth;
+                  cropPaddingBorder(renderBoxModel);
+                  break;
                 } else if (display == CSSDisplay.inlineBlock ||
                     display == CSSDisplay.inlineFlex ||
                     display == CSSDisplay.sliver) {
@@ -960,7 +965,7 @@ class RenderBoxModel extends RenderBox
       default:
         break;
     }
-    // Get height by intrinsic ratio for replaced elemnent if height is not defined
+    // Get height by intrinsic ratio for replaced element if height is not defined
     if (width == null && intrinsicRatio != null) {
       width = originalRenderBoxModel.renderStyle.getWidthByIntrinsicRatio() +
           cropWidth;
@@ -984,7 +989,7 @@ class RenderBoxModel extends RenderBox
     }
   }
 
-  /// Content height of render box model calcaluted from style
+  /// Content height of render box model calculated from style
   static double? getLogicalContentHeight(RenderBoxModel renderBoxModel) {
     RenderBoxModel originalRenderBoxModel = renderBoxModel;
     CSSDisplay? display = renderBoxModel.renderStyle.transformedDisplay;
@@ -1035,6 +1040,11 @@ class RenderBoxModel extends RenderBox
             height = renderStyle.height;
             cropPaddingBorder(renderBoxModel);
             break;
+          } else if (renderBoxModel.constraints.isTight) {
+            // Cases like flex item with flex-grow and no height in flex column direction.
+            height = renderBoxModel.constraints.maxHeight;
+            cropPaddingBorder(renderBoxModel);
+            break;
           }
         } else {
           break;
@@ -1042,7 +1052,7 @@ class RenderBoxModel extends RenderBox
       }
     }
 
-    // Get height by intrinsic ratio for replaced elemnent if height is not defined
+    // Get height by intrinsic ratio for replaced element if height is not defined
     if (height == null && intrinsicRatio != null) {
       height = originalRenderBoxModel.renderStyle.getHeightByIntrinsicRatio() +
           cropHeight;
