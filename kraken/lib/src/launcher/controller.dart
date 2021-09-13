@@ -653,6 +653,13 @@ class KrakenController {
     _bundleContent = value;
   }
 
+  Uint8List? _bundleByteCode;
+  Uint8List? get bundleByteCode => _bundleByteCode;
+  set bundleByteCode(Uint8List? value) {
+    if (value == null) return;
+    _bundleByteCode = value;
+  }
+
   String? _bundlePath;
 
   String? get bundlePath => _bundlePath;
@@ -675,7 +682,8 @@ class KrakenController {
   Future<void> loadBundle({
     String? bundleContent,
     String? bundlePath,
-    String? bundleURL
+    String? bundleURL,
+    Uint8List? bundleByteCode
   }) async {
     assert(!_view._disposed, 'Kraken have already disposed');
 
@@ -686,6 +694,7 @@ class KrakenController {
     _bundleContent = bundleContent ?? _bundleContent;
     _bundlePath =  bundlePath ?? _bundlePath;
     _bundleURL =  bundleURL ?? _bundleURL;
+    _bundleByteCode = bundleByteCode ?? _bundleByteCode;
 
     String? url = _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
 

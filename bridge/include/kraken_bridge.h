@@ -95,6 +95,8 @@ bool checkContext(int32_t contextId, void *context);
 KRAKEN_EXPORT_C
 void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine);
 KRAKEN_EXPORT_C
+void evaluateQuickjsByteCode(int32_t contextId, uint8_t *bytes, int32_t byteLen);
+KRAKEN_EXPORT_C
 void parseHTML(int32_t contextId, NativeString *code, const char *bundleFilename);
 KRAKEN_EXPORT_C
 NativeString* getHref(int32_t contextId);

@@ -5,6 +5,7 @@
 import 'dart:io';
 import 'dart:ui';
 import 'dart:ffi';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -135,6 +136,9 @@ class Kraken extends StatelessWidget {
   // The initial raw javascript content to load.
   final String? bundleContent;
 
+  // The initial raw bytecode to load.
+  final Uint8List? bundleByteCode;
+
   // The animationController of Flutter Route object.
   // Pass this object to KrakenWidget to make sure Kraken execute JavaScripts scripts after route transition animation completed.
   final AnimationController? animationController;
@@ -200,6 +204,14 @@ class Kraken extends StatelessWidget {
     _evalBundle(controller!, animationController);
   }
 
+  loadByteCode(Uint8List bytecode) async {
+    await controller!.unload();
+    await controller!.loadBundle(
+      bundleByteCode: bytecode
+    );
+    _evalBundle(controller!, animationController);
+  }
+
   loadURL(String bundleURL) async {
     await controller!.unload();
     await controller!.loadBundle(
@@ -227,6 +239,7 @@ class Kraken extends StatelessWidget {
     this.bundleURL,
     this.bundlePath,
     this.bundleContent,
+    this.bundleByteCode,
     this.onLoad,
     this.navigationDelegate,
     this.javaScriptChannel,

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
@@ -148,6 +149,21 @@ void evaluateScripts(int contextId, String code, String url, int line) {
     print('$e\n$stack');
   }
   freeNativeString(nativeString);
+}
+
+typedef NativeEvaluateQuickjsByteCode = Void Function(Int32 contextId, Pointer<Uint8> bytes, Int32 byteLen);
+typedef DartEvaluateQuickjsByteCode = void Function(int contextId, Pointer<Uint8> bytes, int byteLen);
+
+final DartEvaluateQuickjsByteCode _evaluateQuickjsByteCode = nativeDynamicLibrary.lookup<NativeFunction<NativeEvaluateQuickjsByteCode>>('evaluateQuickjsByteCode').asFunction();
+
+void evaluateQuickjsByteCode(int contextId, Uint8List bytes) {
+  if(KrakenController.getControllerOfJSContextId(contextId) == null) {
+    return;
+  }
+  Pointer<Uint8> byteData = malloc.allocate(sizeOf<Uint8>() * bytes.length);
+  byteData.asTypedList(bytes.length).setAll(0, bytes);
+  _evaluateQuickjsByteCode(contextId, byteData, bytes.length);
+  malloc.free(byteData);
 }
 
 void parseHTML(int contextId, String code, String url) {
