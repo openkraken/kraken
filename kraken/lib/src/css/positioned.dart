@@ -334,8 +334,20 @@ class CSSPositionedLayout {
     // Scrolling element has two repaint boundary box, the inner box has constraints of inifinity
     // so it needs to find the upper box for querying content constraints
     RenderBoxModel containerBox = parent.isScrollingContentBox ? parent.parent as RenderBoxModel : parent;
-    Size trySize = containerBox.contentConstraints!.biggest;
-    Size parentSize = trySize.isInfinite ? containerBox.contentConstraints!.smallest : trySize;
+    Size trySize = containerBox.constraints.biggest;
+    Size parentSize = trySize.isInfinite ? containerBox.constraints.smallest : trySize;
+
+    // Positioned element's size stretch start at the padding-box of its parent in cases like
+    // `height: 0; top: 0; bottom: 0`.
+    double borderLeft = parent.renderStyle.borderLeft;
+    double borderRight = parent.renderStyle.borderRight;
+    double borderTop = parent.renderStyle.borderTop;
+    double borderBottom = parent.renderStyle.borderBottom;
+    Size parentPaddingBoxSize = Size(
+      parentSize.width - borderLeft - borderRight,
+      parentSize.height - borderTop - borderBottom,
+    );
+
     BoxSizeType? widthType = _getChildWidthSizeType(child);
     BoxSizeType? heightType = _getChildHeightSizeType(child);
     RenderStyle childRenderStyle = child.renderStyle;
@@ -346,7 +358,12 @@ class CSSPositionedLayout {
         widthType != BoxSizeType.intrinsic &&
         childRenderStyle.left != null && childRenderStyle.left!.length != null &&
         childRenderStyle.right != null && childRenderStyle.right!.length != null) {
-      double constraintWidth = parentSize.width - childRenderStyle.left!.length! - childRenderStyle.right!.length!;
+      double childMarginLeft = childRenderStyle.marginLeft.length ?? 0;
+      double childMarginRight = childRenderStyle.marginRight.length ?? 0;
+      // Child width calculation should subtract its horizontal margin.
+      double constraintWidth = parentPaddingBoxSize.width -
+        childRenderStyle.left!.length! - childRenderStyle.right!.length! -
+        childMarginLeft - childMarginRight;
       double? maxWidth = childRenderStyle.maxWidth;
       double? minWidth = childRenderStyle.minWidth;
       // Constrain to min-width or max-width if width not exists
@@ -362,7 +379,12 @@ class CSSPositionedLayout {
         heightType != BoxSizeType.intrinsic &&
         childRenderStyle.top != null && childRenderStyle.top!.length != null &&
         childRenderStyle.bottom != null && childRenderStyle.bottom!.length != null) {
-      double constraintHeight = parentSize.height - childRenderStyle.top!.length! - childRenderStyle.bottom!.length!;
+      double childMarginTop = childRenderStyle.marginTop.length ?? 0;
+      double childMarginBottom = childRenderStyle.marginBottom.length ?? 0;
+      // Child height calculation should subtract its vertical margin.
+      double constraintHeight = parentPaddingBoxSize.height -
+        childRenderStyle.top!.length! - childRenderStyle.bottom!.length! -
+        childMarginTop - childMarginBottom;
       double? maxHeight = childRenderStyle.maxHeight;
       double? minHeight = childRenderStyle.minHeight;
       // Constrain to min-height or max-height if width not exists
