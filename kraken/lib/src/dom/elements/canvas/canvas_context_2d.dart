@@ -383,13 +383,13 @@ class CanvasRenderingContext2D {
   }
 
   // Perform canvas drawing.
-  void performActions(Canvas _canvas, Size _size) {
+  void performActions(Canvas canvas, Size size) {
     // HACK: Must sync transform first because each paint will saveLayer and restore that make the transform not effect
     if (!_lastMatrix.isIdentity()) {
-      _canvas.transform(_lastMatrix.storage);
+      canvas.transform(_lastMatrix.storage);
     }
     for (int i = 0; i < _actions.length; i++) {
-      _actions[i](_canvas, _size);
+      _actions[i](canvas, size);
     }
     if (_lastMatrix != _matrix) {
       _lastMatrix = _matrix.clone();
