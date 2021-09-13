@@ -1,6 +1,7 @@
 type MethodHandler = (method: string, args: any[]) => void;
 interface MethodChannel {
-    setMethodCallHandler(handler: MethodHandler): void;
+    addMethodCallHandler(handler: MethodHandler): void;
+    removeMethodCallHandler(handler: MethodHandler): void;
     invokeMethod(method: string, ...args: any[]): Promise<string>
 }
 

@@ -779,4 +779,80 @@ describe('Position absolute', () => {
        done();
     });
   });
+
+  it('should work with top bottom set and no height set', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+            "display": "flex",
+            "flexDirection": "column",
+            position: 'relative',
+            width: '300px',
+            height: '300px',
+            borderTop: '20px solid red',
+            borderBottom: '20px solid red',
+            "padding": "50px 0",
+            backgroundColor: 'green'
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            "display": "flex",
+            "flexDirection": "column",
+            "position": "absolute",
+            margin: '50px 0',
+            top: '0',
+            bottom: 0,
+            width: '300px',
+            backgroundColor: 'yellow',
+          }
+        }),
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it('should work with left right set and no width set', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+            "display": "flex",
+            "flexDirection": "column",
+            position: 'relative',
+            width: '300px',
+            height: '300px',
+            borderLeft: '20px solid red',
+            borderRight: '20px solid red',
+            "padding": "0 50px",
+            backgroundColor: 'green'
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            "display": "flex",
+            "flexDirection": "column",
+            "position": "absolute",
+            margin: '0 50px',
+            left: '0',
+            right: 0,
+            height: '300px',
+            backgroundColor: 'yellow',
+          }
+        }),
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
 });
