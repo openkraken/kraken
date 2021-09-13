@@ -102,11 +102,8 @@ class CanvasPainter extends CustomPainter {
   }
 
   void _disposeSnapshot() {
-    Image? snapshot = _snapshot;
-    if (snapshot != null) {
-      _snapshot = null;
-      snapshot.dispose();
-    }
+    _snapshot?.dispose();
+    _snapshot = null;
   }
 
   void dispose() {
