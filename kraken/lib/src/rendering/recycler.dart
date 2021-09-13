@@ -31,8 +31,10 @@ class RenderRecyclerLayout extends RenderLayoutBox {
     switch (axis) {
       case Axis.horizontal:
         scrollOffsetX = scrollable.position;
+        scrollOffsetY = null;
         break;
       case Axis.vertical:
+        scrollOffsetX = null;
         scrollOffsetY = scrollable.position;
         break;
     }

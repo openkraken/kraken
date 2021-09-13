@@ -275,26 +275,19 @@ mixin RenderOverflowMixin on RenderBox {
   ViewportOffset? get scrollOffsetX => _scrollOffsetX;
   ViewportOffset? _scrollOffsetX;
   set scrollOffsetX(ViewportOffset? value) {
-    if (value == null) return;
     if (value == _scrollOffsetX) return;
-    _scrollOffsetX?.removeListener(_scrollXListener);
-
-    _scrollOffsetX = value
-      ..removeListener(_scrollXListener)
-      ..addListener(_scrollXListener);
+    _scrollOffsetX = value;
+    _scrollOffsetX?.addListener(_scrollXListener);
     markNeedsLayout();
   }
 
   ViewportOffset? get scrollOffsetY => _scrollOffsetY;
   ViewportOffset? _scrollOffsetY;
   set scrollOffsetY(ViewportOffset? value) {
-    if (value == null) return;
     if (value == _scrollOffsetY) return;
     _scrollOffsetY?.removeListener(_scrollYListener);
-
-    _scrollOffsetY = value
-      ..removeListener(_scrollYListener)
-      ..addListener(_scrollYListener);
+    _scrollOffsetY = value;
+    _scrollOffsetY?.addListener(_scrollYListener);
     markNeedsLayout();
   }
 
