@@ -100,6 +100,15 @@ class ElementDelegate {
   // Handle scrolling.
   ScrollListener handleScroll;
 
+  /// Focus the input element.
+  VoidCallback focusInput;
+
+  /// Blur the input element.
+  VoidCallback blurInput;
+
+  /// Scroll the input element to the caret.
+  VoidCallback scrollInputToCaret;
+
   // The sliver box child manager
   RenderSliverBoxChildManager? renderSliverBoxChildManager;
 
@@ -113,6 +122,9 @@ class ElementDelegate {
     required this.getTargetId,
     required this.getRootElementFontSize,
     required this.handleScroll,
+    required this.focusInput,
+    required this.blurInput,
+    required this.scrollInputToCaret,
     this.renderSliverBoxChildManager,
   });
 }
@@ -208,6 +220,9 @@ class Element extends Node
       getTargetId: _getTargetId,
       getRootElementFontSize: _getRootElementFontSize,
       handleScroll: _handleScroll,
+      focusInput: _focusInput,
+      blurInput: _blurInput,
+      scrollInputToCaret: _scrollInputToCaret,
       renderSliverBoxChildManager: _sliverBoxChildManager,
     );
   }
@@ -237,6 +252,20 @@ class Element extends Node
 
   int _getTargetId() {
     return targetId;
+  }
+
+  void _focusInput() {
+    InputElement input = this as InputElement;
+    InputElement.setFocus(input);
+  }
+
+  void _blurInput() {
+    InputElement.clearFocus();
+  }
+
+  void _scrollInputToCaret() {
+    InputElement inputElement = this as InputElement;
+    inputElement.scrollToCaret();
   }
 
   double _getRootElementFontSize() {
