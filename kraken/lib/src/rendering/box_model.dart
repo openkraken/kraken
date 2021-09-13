@@ -617,6 +617,7 @@ class RenderBoxModel extends RenderBox
 
       // Copy overflow
       ..scrollListener = scrollListener
+      ..pointerListener = pointerListener
       ..clipX = clipX
       ..clipY = clipY
       ..enableScrollX = enableScrollX
