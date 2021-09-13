@@ -61,21 +61,21 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
   let els = temp.selectors;
   selector = temp.ruleStr;
 
-  // Get By ID
-  // ID is supposed to be unique.
+  // Get by id.
+  // Id is supposed to be unique.
   // More need to attach other selectors.
   if (id) {
     id = id.substring(1);
     return [document.getElementById(id) || null];
   }
 
-  // Get By Elements
+  // Get by Elements.
   if (els.length !== 0) {
     let temps: HTMLCollectionOf<Element> = context.getElementsByTagName(els[0]);
     tempElements = tempElements.concat(slice(temps));
   }
 
-  // Get By Class
+  // Get by class name.
   for (let i = 0, l = classes.length; i !== l; ++i) {
     let className = classes[i].substring(1);
     let temps: HTMLCollectionOf<Element> = context.getElementsByClassName(className);
@@ -99,7 +99,7 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
     }
   }
 
-  // Get By Attributes
+  // Get by Attributes.
   if (attributes.length !== 0) {
     let attrs = {};
     for (let i = 0, l = attributes.length; i !== l; ++i) {
@@ -124,17 +124,17 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
           key = key.substring(0, key.length - 1);
         }
         let tempAttr = t.getAttribute(key) || '';
-        // Case: [href*=/en]
+        // Case: [href*=/en].
         if (lastChar === '*' && tempAttr.indexOf(attrs[key + lastChar]) === -1) {
           shouldAdd = false;
           break;
         }
-        // Case: [href^=/en]
+        // Case: [href^=/en].
         else if (lastChar === '^' && tempAttr.indexOf(attrs[key + lastChar]) !== 0) {
           shouldAdd = false;
           break;
         }
-        // Case: [href$=/en]
+        // Case: [href$=/en].
         else if (lastChar === '$' &&
             (tempAttr.lastIndexOf(attrs[key + lastChar]) === -1
               ? false
@@ -144,7 +144,7 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
           shouldAdd = false;
           break;
         }
-        // Case: [href=/en]
+        // Case: [href=/en].
         else if (/[\$\*\^]/.test(lastChar) === false && tempAttr !== attrs[key]) {
           shouldAdd = false;
           break;
@@ -178,7 +178,7 @@ document.querySelectorAll = function <E extends Element = Element> (selector: st
   for (let i = 0, l = rules.length; i !== l; ++i) {
     let rule = rules[i];
 
-    // TODO: Support ' ' and '>'
+    // TODO: support ' ' and '>'.
     elements = elements.concat(getElementsBySelector.call(this, rule));
   }
 
