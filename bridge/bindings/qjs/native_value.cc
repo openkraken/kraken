@@ -76,6 +76,26 @@ NativeValue Native_NewJSON(JSContext *context, JSValue &value) {
   };
 }
 
+void call_native_function(NativeFunctionContext *functionContext, int32_t argc, NativeValue *argv, NativeValue *returnValue) {
+  auto *context = functionContext->m_context;
+  auto *arguments = new JSValue[argc];
+  for (int i = 0; i < argc; i ++) {
+    arguments[i] = nativeValueToJSValue(context, argv[i]);
+  }
+  JSValue result = JS_Call(context->ctx(), functionContext->m_callback, context->global(), argc, arguments);
+  if (context->handleException(&result)) {
+    *returnValue = jsValueToNativeValue(context->ctx(), result);
+  }
+
+  JS_FreeValue(context->ctx(), result);
+
+  for (int i = 0; i < argc; i ++) {
+    JS_FreeValue(context->ctx(), arguments[i]);
+  }
+  delete[] arguments;
+  delete functionContext;
+}
+
 NativeValue jsValueToNativeValue(QjsContext *ctx, JSValue &value) {
   if (JS_IsNull(value) || JS_IsUndefined(value)) {
     return Native_NewNull();
@@ -88,6 +108,13 @@ NativeValue jsValueToNativeValue(QjsContext *ctx, JSValue &value) {
   } else if (JS_IsString(value)) {
     NativeString *string = jsValueToNativeString(ctx, value);
     return Native_NewString(string);
+  } else if (JS_IsFunction(ctx, value)) {
+    auto *context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
+    auto *functionContext = new NativeFunctionContext{
+      context,
+      value
+    };
+    return Native_NewPtr(JSPointerType::NativeFunctionContext, functionContext);
   } else if (JS_IsObject(value)) {
     auto *context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
     if (JS_IsInstanceOf(ctx, value, ImageElement::instance(context)->classObject)) {
@@ -101,6 +128,35 @@ NativeValue jsValueToNativeValue(QjsContext *ctx, JSValue &value) {
   }
 
   return Native_NewNull();
+}
+
+NativeFunctionContext::NativeFunctionContext(JSContext *context, JSValue callback): m_context(context), m_ctx(context->ctx()), m_callback(callback), call(call_native_function) {
+  JS_DupValue(context->ctx(), callback);
+  list_add_tail(&link, &m_context->native_function_job_list);
+};
+
+NativeFunctionContext::~NativeFunctionContext() {
+  list_del(&link);
+  JS_FreeValue(m_ctx, m_callback);
+}
+
+static JSValue anonymousFunction(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic, JSValue *func_data) {
+  JSValue dataObject = func_data[0];
+  auto id = reinterpret_cast<int64_t>(JS_GetOpaque(dataObject, 1));
+  auto *eventTarget = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
+
+  JS_FreeValue(ctx, dataObject);
+
+  std::string call_params = "_anonymous_fn_" + std::to_string(id);
+
+  auto *arguments = new NativeValue[argc];
+  for (int i = 0; i < argc; i ++) {
+    arguments[i] = jsValueToNativeValue(ctx, argv[i]);
+  }
+
+  JSValue returnValue = eventTarget->callNativeMethods(call_params.c_str(), argc, arguments);
+  delete[] arguments;
+  return returnValue;
 }
 
 JSValue nativeValueToJSValue(JSContext *context, NativeValue &value) {
@@ -141,6 +197,12 @@ JSValue nativeValueToJSValue(JSContext *context, NativeValue &value) {
       auto *nativeEventTarget = static_cast<NativeEventTarget *>(ptr);
       return JS_DupValue(context->ctx(), nativeEventTarget->instance->instanceObject);
     }
+  }
+  case NativeTag::TAG_FUNCTION: {
+    int64_t functionId = value.u.int64;
+    JSValue dataObject = JS_NewObject(context->ctx());
+    JS_SetOpaque(dataObject, reinterpret_cast<void *>(functionId));
+    return JS_NewCFunctionData(context->ctx(), anonymousFunction, 4, 0, 1, &dataObject);
   }
   }
   return JS_NULL;

@@ -68,7 +68,7 @@ JSValue CustomElementRegistry::define(QjsContext *ctx, JSValue this_val, int arg
   }
 
   auto *context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
-  if (!isJavaScriptExtensionElement(context, constructorValue)) {
+  if (!isJavaScriptExtensionElementConstructor(context, constructorValue)) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'define' on 'CustomElementRegistry': parameter 2 is not a Element constructor.");
   }
 

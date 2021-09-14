@@ -20,13 +20,25 @@ void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> re
     return fromNativeValue(type, nativeValue);
   });
 
-  EventTarget eventTarget = EventTarget.getEventTargetOfNativePtr(nativeEventTarget.cast<NativeEventTarget>());
-  try {
-    dynamic result = eventTarget.handleJSCall(method, values);
-    toNativeValue(returnedValue, result);
-  } catch (e, stack) {
-    print('$e\n$stack');
-    toNativeValue(returnedValue, null);
+  if (method.startsWith('_anonymous_fn_')) {
+    int id = int.parse(method.substring('_anonymous_fn_'.length));
+    AnonymousNativeFunction fn = getAnonymousNativeFunctionFromId(id)!;
+    try {
+      dynamic result = fn(values);
+      toNativeValue(returnedValue, result);
+    } catch (e, stack) {
+      print('$e\n$stack');
+      toNativeValue(returnedValue, null);
+    }
+  } else {
+    EventTarget eventTarget = EventTarget.getEventTargetOfNativePtr(nativeEventTarget.cast<NativeEventTarget>());
+    try {
+      dynamic result = eventTarget.handleJSCall(method, values);
+      toNativeValue(returnedValue, result);
+    } catch (e, stack) {
+      print('$e\n$stack');
+      toNativeValue(returnedValue, null);
+    }
   }
 }
 

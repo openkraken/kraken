@@ -77,6 +77,7 @@ public:
   struct list_head module_job_list;
   struct list_head promise_job_list;
   struct list_head atom_job_list;
+  struct list_head native_function_job_list;
 
   static JSClassID kHostClassClassId;
   static JSClassID kHostObjectClassId;

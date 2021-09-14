@@ -1,4 +1,13 @@
-describe('custom element', () => {
+class SampleElement extends Element {
+  constructor() {
+    super();
+  }
+}
+
+// @ts-ignore
+customElements.define('sample-element', SampleElement);
+
+describe('custom widget element', () => {
   it('use flutter text', async () => {
     const text = document.createElement('flutter-text');
     text.setAttribute('value', 'Hello');
@@ -28,5 +37,36 @@ describe('custom element', () => {
     });
 
     simulateClick(20, 20);
+  });
+});
+
+describe('custom html element', () => {
+  it('works with document.createElement', async () => {
+    let sampleElement = document.createElement('sample-element');
+    let text = document.createTextNode('helloworld');
+    sampleElement.appendChild(text);
+    document.body.appendChild(sampleElement);
+    await snapshot();
+  });
+
+  it('support custom properties in dart directly', () => {
+    let sampleElement = document.createElement('sample-element');
+    let text = document.createTextNode('helloworld');
+    sampleElement.appendChild(text);
+    document.body.appendChild(sampleElement);
+
+    // @ts-ignore
+    expect(sampleElement.ping).toBe('pong');
+  });
+
+  it('support call js function but defined in dart directly', () => {
+    let sampleElement = document.createElement('sample-element');
+    let text = document.createTextNode('helloworld');
+    sampleElement.appendChild(text);
+    document.body.appendChild(sampleElement);
+
+    let arrs = [1, 2, 4, 8, 16];
+    // @ts-ignore
+    expect(sampleElement.fn.apply(sampleElement, arrs)).toEqual([2, 4, 8, 16, 32]);
   });
 });

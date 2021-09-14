@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:ffi';
 import 'package:kraken/bridge.dart';
 
@@ -23,13 +24,24 @@ enum JSValueType {
   TAG_NULL,
   TAG_FLOAT64,
   TAG_JSON,
-  TAG_POINTER
+  TAG_POINTER,
+  TAG_FUNCTION
 }
 
 enum JSPointerType {
+  NativeFunctionContext,
   NativeBoundingClientRect,
   NativeCanvasRenderingContext2D,
   NativeEventTarget
+}
+
+typedef AnonymousNativeFunction = dynamic Function(List<dynamic> args);
+
+int _functionId = 0;
+LinkedHashMap<int, AnonymousNativeFunction> _functionMap = LinkedHashMap();
+
+AnonymousNativeFunction? getAnonymousNativeFunctionFromId(int id) {
+  return _functionMap[id];
 }
 
 dynamic fromNativeValue(JSValueType type, Pointer<NativeValue> nativeValue) {
@@ -56,6 +68,9 @@ dynamic fromNativeValue(JSValueType type, Pointer<NativeValue> nativeValue) {
         default:
           return Pointer.fromAddress(nativeValue.ref.u);
       }
+    case JSValueType.TAG_FUNCTION:
+
+      break;
     case JSValueType.TAG_JSON:
       return jsonDecode(nativeStringToString(Pointer.fromAddress(nativeValue.ref.u)));
   }
@@ -86,6 +101,11 @@ void toNativeValue(Pointer<NativeValue> target, dynamic value) {
     } else if (value is Pointer<NativeEventTarget>) {
       target.ref.float64 = JSPointerType.NativeEventTarget.index.toDouble();
     }
+  } else if (value is AnonymousNativeFunction) {
+    int id = _functionId++;
+    _functionMap[id] = value;
+    target.ref.tag = JSValueType.TAG_FUNCTION.index;
+    target.ref.u = id;
   } else if (value is Object) {
     String str = jsonEncode(value);
     target.ref.tag = JSValueType.TAG_JSON.index;

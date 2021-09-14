@@ -361,7 +361,20 @@ JSValue EventTargetInstance::getProperty(QjsContext *ctx, JSValue obj, JSAtom at
     return eventTarget->getPropertyHandler(p);
   }
 
-  return JS_DupValue(ctx, eventTarget->m_properties[atom]);
+  if (eventTarget->m_properties.count(atom) > 0) {
+    return JS_DupValue(ctx, eventTarget->m_properties[atom]);
+  }
+
+  // For plugin elements, try to auto generate properties and functions from dart response.
+  if (isJavaScriptExtensionElementInstance(eventTarget->context(), eventTarget->instanceObject)) {
+    getDartMethod()->flushUICommand();
+    const char* cmethod = JS_AtomToCString(eventTarget->m_ctx, atom);
+    JSValue result = eventTarget->callNativeMethods(cmethod, 0, nullptr);
+    JS_FreeCString(eventTarget->m_ctx, cmethod);
+    return result;
+  }
+
+  return JS_NULL;
 }
 
 int EventTargetInstance::setProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver, int flags) {

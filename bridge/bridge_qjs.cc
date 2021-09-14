@@ -47,7 +47,7 @@ namespace kraken {
 
 using namespace binding::qjs;
 
-std::unordered_map<std::string, NativeString> JSBridge::pluginSourceCode {};
+std::unordered_map<std::string, NativeByteCode> JSBridge::pluginByteCode {};
 ConsoleMessageHandler JSBridge::consoleMessageHandler {nullptr};
 
 /**
@@ -107,8 +107,8 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 
   initKrakenPolyFill(this);
 
-  for (auto p : pluginSourceCode) {
-    evaluateScript(&p.second, p.first.c_str(), 0);
+  for (auto &p : pluginByteCode) {
+    evaluateByteCode(p.second.bytes, p.second.length);
   }
 
 #if ENABLE_PROFILE

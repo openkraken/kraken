@@ -19,10 +19,26 @@ void bindElement(std::unique_ptr<JSContext> &context) {
   context->defineGlobalProperty("HTMLElement", JS_DupValue(context->ctx(), constructor->classObject));
 }
 
-bool isJavaScriptExtensionElement(JSContext *context, JSValue constructor) {
-  JSValue prototype = JS_GetPrototype(context->ctx(), constructor);
-  bool match = JS_VALUE_GET_PTR(prototype) == JS_VALUE_GET_PTR(Element::instance(context)->classObject);
-  JS_FreeValue(context->ctx(), prototype);
+bool isJavaScriptExtensionElementConstructor(JSContext *context, JSValue constructor) {
+  JSValue proto;
+  JS_DupValue(context->ctx(), constructor);
+  do {
+    proto = JS_GetPrototype(context->ctx(), constructor);
+    JS_FreeValue(context->ctx(), constructor);
+    if (JS_IsNull(proto)) return false;
+    bool match = JS_VALUE_GET_PTR(proto) == JS_VALUE_GET_PTR(Element::instance(context)->classObject);
+    if (match) {
+      JS_FreeValue(context->ctx(), proto);
+      return true;
+    }
+    constructor = proto;
+  } while (true);
+}
+
+bool isJavaScriptExtensionElementInstance(JSContext *context, JSValue instance) {
+  JSValue constructor = JS_GetPropertyStr(context->ctx(), instance, "constructor");
+  bool match = isJavaScriptExtensionElementConstructor(context, constructor);
+  JS_FreeValue(context->ctx(), constructor);
   return match;
 }
 
@@ -96,7 +112,7 @@ void ElementAttributes::copyWith(ElementAttributes *attributes) {
 JSValue Element::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   auto *context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
 
-  if (isJavaScriptExtensionElement(context, this_val)) {
+  if (isJavaScriptExtensionElementConstructor(context, this_val)) {
     JSValue tagNameValue = JS_GetPropertyStr(ctx, this_val, "__tagName__");
     std::string tagName = jsValueToStdString(ctx, tagNameValue);
     JSValue instance = (new ElementInstance(this, tagName, true))->instanceObject;

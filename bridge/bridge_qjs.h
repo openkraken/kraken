@@ -23,7 +23,7 @@ public:
   JSBridge(int32_t jsContext, const JSExceptionHandler &handler);
   ~JSBridge();
 
-  static std::unordered_map<std::string, NativeString> pluginSourceCode;
+  static std::unordered_map<std::string, NativeByteCode> pluginByteCode;
 
   int32_t contextId;
   // the owner pointer which take JSBridge as property.

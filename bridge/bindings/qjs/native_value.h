@@ -15,13 +15,15 @@ enum NativeTag {
   TAG_NULL        = 3,
   TAG_FLOAT64     = 4,
   TAG_JSON        = 5,
-  TAG_POINTER     = 6
+  TAG_POINTER     = 6,
+  TAG_FUNCTION    = 7,
 };
 
 enum JSPointerType {
-  NativeBoundingClientRect       = 0,
-  NativeCanvasRenderingContext2D = 1,
-  NativeEventTarget = 2
+  NativeFunctionContext = 0,
+  NativeBoundingClientRect       = 1,
+  NativeCanvasRenderingContext2D = 2,
+  NativeEventTarget = 3
 };
 
 namespace kraken::binding::qjs {
@@ -34,6 +36,22 @@ struct NativeValue {
     void *ptr;
   } u;
   int64_t tag;
+};
+
+struct NativeFunctionContext;
+
+using CallNativeFunction = void (*)(NativeFunctionContext *functionContext, int32_t argc, NativeValue *argv, NativeValue *returnValue);
+
+static void call_native_function(NativeFunctionContext *functionContext, int32_t argc, NativeValue *argv, NativeValue *returnValue);
+
+struct NativeFunctionContext {
+  CallNativeFunction call;
+  NativeFunctionContext(JSContext *context, JSValue callback);
+  ~NativeFunctionContext();
+  JSValue m_callback{JS_NULL};
+  JSContext *m_context{nullptr};
+  QjsContext *m_ctx{nullptr};
+  list_head link;
 };
 
 NativeValue Native_NewNull();

@@ -152,12 +152,13 @@ class Element extends Node
   }
 
   Element(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager,
-      {required this.tagName,
+      {required String tagName,
         Map<String, dynamic> defaultStyle = const {},
         // Whether element allows children.
         bool isIntrinsicBox = false,
         this.repaintSelf = false})
       : _defaultStyle = defaultStyle,
+        tagName = tagName.toUpperCase(),
         _isIntrinsicBox = isIntrinsicBox,
         defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : INLINE,
         super(NodeType.ELEMENT_NODE, targetId, nativeEventTarget, elementManager, tagName) {

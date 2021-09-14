@@ -8,7 +8,6 @@ import 'dart:ffi';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 
-typedef ElementCreator = Element Function(int id, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager);
 final Map<String, ElementCreator> _elementRegistry = {};
 
 void defineElement(String name, ElementCreator creator) {

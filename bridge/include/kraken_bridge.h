@@ -31,6 +31,11 @@ struct KRAKEN_EXPORT NativeString {
   void free();
 };
 
+struct NativeByteCode {
+  uint8_t *bytes;
+  int32_t length;
+};
+
 struct KrakenInfo;
 
 struct KrakenInfo {
@@ -130,7 +135,7 @@ void clearUICommandItems(int32_t contextId);
 KRAKEN_EXPORT_C
 void registerContextDisposedCallbacks(int32_t contextId, Task task, void *data);
 KRAKEN_EXPORT_C
-void registerPluginSource(NativeString* code, const char *pluginName);
+void registerPluginByteCode(uint8_t *bytes, int32_t length, const char *pluginName);
 
 KRAKEN_EXPORT
 void setConsoleMessageHandler(ConsoleMessageHandler handler);

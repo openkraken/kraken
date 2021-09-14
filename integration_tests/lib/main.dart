@@ -14,7 +14,7 @@ import 'bridge/from_native.dart';
 import 'bridge/to_native.dart';
 import 'bridge/test_input.dart';
 import 'custom/custom_object_element.dart';
-import 'custom/custom_element_widget.dart';
+import 'custom/custom_element.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/foundation.dart';
 // import 'package:kraken_websocket/kraken_websocket.dart';

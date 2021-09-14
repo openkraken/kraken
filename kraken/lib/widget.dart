@@ -16,6 +16,7 @@ import 'package:kraken/module.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/src/dom/element_registry.dart';
+import 'package:kraken/src/dom/element_manager.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart' as dom;
 
@@ -184,16 +185,22 @@ class Kraken extends StatelessWidget {
     return RegExp(r'^[a-z][.0-9_a-z]*-[\-.0-9_a-z]*$').hasMatch(localName);
   }
 
-  static void defineCustomElement<T extends WidgetCreator>(String localName, T creator) {
+  static void defineCustomElement<T extends Function>(String localName, T creator) {
     if (!_isValidCustomElementName(localName)) {
       throw ArgumentError('The element name "$localName" is not valid.');
     }
 
     String tagName = localName.toUpperCase();
 
-    defineElement(tagName, (id, nativePtr, elementManager) {
-      return _WidgetCustomElement(id, nativePtr.cast<NativeEventTarget>(), elementManager, tagName, creator);
-    });
+    print(ElementCreator == T);
+
+    if (T == ElementCreator) {
+      defineElement(tagName, creator as ElementCreator);
+    } else if (T == WidgetCreator) {
+      defineElement(tagName, (id, nativePtr, elementManager) {
+        return _WidgetCustomElement(id, nativePtr.cast<NativeEventTarget>(), elementManager, tagName, creator as WidgetCreator);
+      });
+    }
   }
 
   loadContent(String bundleContent, {String aaa = ''}) async {

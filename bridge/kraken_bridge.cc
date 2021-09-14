@@ -251,10 +251,10 @@ void registerContextDisposedCallbacks(int32_t contextId, Task task, void *data) 
 
 }
 
-void registerPluginSource(NativeString *code, const char *pluginName) {
-  kraken::JSBridge::pluginSourceCode[pluginName] = NativeString{
-    code->string,
-    code->length
+void registerPluginByteCode(uint8_t *bytes, int32_t length, const char *pluginName) {
+  kraken::JSBridge::pluginByteCode[pluginName] = NativeByteCode{
+    bytes,
+    length
   };
 }
 

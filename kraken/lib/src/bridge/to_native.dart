@@ -235,6 +235,17 @@ int allocateNewContext([int targetContextId = -1]) {
   return _allocateNewContext(targetContextId);
 }
 
+typedef NativeRegisterPluginByteCode = Void Function(Pointer<Uint8> bytes, Int32 length, Pointer<Utf8> pluginName);
+typedef DartRegisterPluginByteCode = void Function(Pointer<Uint8> bytes, int length, Pointer<Utf8> pluginName);
+
+final DartRegisterPluginByteCode _registerPluginByteCode =
+    nativeDynamicLibrary.lookup<NativeFunction<NativeRegisterPluginByteCode>>('registerPluginByteCode').asFunction();
+
+void registerPluginByteCode(Uint8List bytecode, String name) {
+  Pointer<Uint8> bytes = malloc.allocate(sizeOf<Uint8>() * bytecode.length);
+  _registerPluginByteCode(bytes, bytecode.length, name.toNativeUtf8());
+}
+
 // Regisdster reloadJsContext
 typedef NativeReloadJSContext = Void Function(Int32 contextId);
 typedef DartReloadJSContext = void Function(int contextId);

@@ -48,7 +48,8 @@ private:
   std::unordered_map<std::string, JSAtom> m_attributes;
 };
 
-bool isJavaScriptExtensionElement(JSContext *context, JSValue constructor);
+bool isJavaScriptExtensionElementConstructor(JSContext *context, JSValue constructor);
+bool isJavaScriptExtensionElementInstance(JSContext *context, JSValue instance);
 
 class Element : public Node {
 public:
