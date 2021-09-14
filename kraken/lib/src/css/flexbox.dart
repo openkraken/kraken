@@ -280,6 +280,10 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     justifyContent = _getJustifyContent(style);
     alignItems = _getAlignItems(style);
     alignContent = _getAlignContent(style);
+
+    // Flex properties change may affect transformed display
+    // https://www.w3.org/TR/css-display-3/#transformations
+    renderBoxModel!.renderStyle.transformedDisplay = renderBoxModel!.renderStyle.getTransformedDisplay();
   }
 
   void updateFlexItem() {

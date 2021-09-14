@@ -17,13 +17,14 @@ mixin CSSObjectPositionMixin on RenderStyleBase {
     _objectPosition = value;
   }
 
-  void updateObjectPosition(String property, String value, {bool shouldMarkNeedsLayout = true}) {
+  void updateObjectPosition(String value, {bool shouldMarkNeedsLayout = true}) {
     RenderStyle renderStyle = this as RenderStyle;
     renderStyle.objectPosition = _getBoxPosition(value);
     if (shouldMarkNeedsLayout) {
       renderBoxModel!.markNeedsLayout();
     }
   }
+
   Alignment _getBoxPosition(String? position) {
     // Syntax: object-position: <position>
     // position: From one to four values that define the 2D position of the element. Relative or absolute offsets can be used.

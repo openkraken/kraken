@@ -121,9 +121,11 @@ class CSSStyleDeclaration {
   final List<StyleChangeListener> _styleChangeListeners = [];
 
   final Map<String, String> _properties = {};
+  final Map<String, String> _pendingProperties = {};
   final Map<String, String> _prevProperties = {};
   final Map<String, String> _animationProperties = {};
 
+  final Map<String, bool> _importants = {};
   Map<String, List> _transitions = {};
 
   CSSStyleDeclaration clone(Element? target) {
@@ -213,7 +215,7 @@ class CSSStyleDeclaration {
       // When begin propertyValue is AUTO, skip animation and trigger style update directly.
       if (begin == AUTO) {
         _properties[propertyName] = end;
-        setRenderStyleProperty(propertyName, begin, end);
+        _emitPropertyChanged(propertyName, begin, end);
         return;
       }
     }
@@ -245,7 +247,7 @@ class CSSStyleDeclaration {
   _setTransitionEndProperty(String propertyName, String? prevValue, String value) {
     if (value == prevValue) return;
     _properties[propertyName] = value;
-    setRenderStyleProperty(propertyName, prevValue, value);
+    _emitPropertyChanged(propertyName, prevValue, value);
   }
 
   /// Textual representation of the declaration block.
@@ -273,12 +275,8 @@ class CSSStyleDeclaration {
   /// value is a String containing the value of the property.
   /// If not set, returns the empty string.
   String getPropertyValue(String propertyName) {
-    String value = _animationProperties[propertyName] ?? _properties[propertyName] ?? EMPTY_STRING;
+    String value = _properties[propertyName] ?? _pendingProperties[propertyName] ?? EMPTY_STRING;
     return value == CURRENT_COLOR ? getCurrentColor() : value;
-  }
-
-  String getStylePropertyValue(String propertyName) {
-    return _properties[propertyName] ?? EMPTY_STRING;
   }
 
   String? removeAnimationProperty(String propertyName) {
@@ -292,7 +290,7 @@ class CSSStyleDeclaration {
     return prevValue;
   }
 
-  /// Removes a property from the CSS declaration block.
+  /// Removes a property from the CSS declaration.
   String? removeProperty(String propertyName) {
 
     switch (propertyName) {
@@ -348,12 +346,12 @@ class CSSStyleDeclaration {
       _properties.remove(propertyName);
     }
 
-    setRenderStyleProperty(propertyName, prevValue, EMPTY_STRING);
+    _emitPropertyChanged(propertyName, prevValue, EMPTY_STRING);
 
     return prevValue;
   }
 
-  void _expandShorthand(String propertyName, String normalizedValue, Size? viewportSize) {
+  void _expandShorthand(String propertyName, String normalizedValue, bool? isImportant, Size? viewportSize) {
     Map<String, String?> longhandProperties = {};
     switch(propertyName) {
       case PADDING:
@@ -403,102 +401,7 @@ class CSSStyleDeclaration {
 
     if (longhandProperties.isNotEmpty) {
       longhandProperties.forEach((String propertyName, String? value) {
-        setProperty(propertyName, value, viewportSize);
-      });
-    }
-  }
-
-  void _setShorthandRenderStyle(String propertyName, Size? viewportSize) {
-    Map<String, String?> longhandProperties = {};
-    switch(propertyName) {
-      case PADDING:
-        longhandProperties[PADDING_TOP] = _properties[PADDING_TOP];
-        longhandProperties[PADDING_RIGHT] = _properties[PADDING_RIGHT];
-        longhandProperties[PADDING_BOTTOM] = _properties[PADDING_BOTTOM];
-        longhandProperties[PADDING_LEFT] = _properties[PADDING_LEFT];
-        break;
-      case MARGIN:
-        longhandProperties[MARGIN_TOP] = _properties[MARGIN_TOP];
-        longhandProperties[MARGIN_RIGHT] = _properties[MARGIN_RIGHT];
-        longhandProperties[MARGIN_BOTTOM] = _properties[MARGIN_BOTTOM];
-        longhandProperties[MARGIN_LEFT] = _properties[MARGIN_LEFT];
-        break;
-      case BACKGROUND:
-        longhandProperties[BACKGROUND_COLOR] = _properties[BACKGROUND_COLOR];
-        longhandProperties[BACKGROUND_IMAGE] = _properties[BACKGROUND_IMAGE];
-        longhandProperties[BACKGROUND_REPEAT] = _properties[BACKGROUND_REPEAT];
-        longhandProperties[BACKGROUND_ATTACHMENT] = _properties[BACKGROUND_ATTACHMENT];
-        longhandProperties[BACKGROUND_POSITION_X] = _properties[BACKGROUND_POSITION_X];
-        longhandProperties[BACKGROUND_POSITION_Y] = _properties[BACKGROUND_POSITION_Y];
-        longhandProperties[BACKGROUND_SIZE] = _properties[BACKGROUND_SIZE];
-        break;
-      case BACKGROUND_POSITION:
-        longhandProperties[BACKGROUND_POSITION_X] = _properties[BACKGROUND_POSITION_X];
-        longhandProperties[BACKGROUND_POSITION_Y] = _properties[BACKGROUND_POSITION_Y];
-        break;
-      case BORDER_RADIUS:
-        longhandProperties[BORDER_TOP_LEFT_RADIUS] = _properties[BORDER_TOP_LEFT_RADIUS];
-        longhandProperties[BORDER_TOP_RIGHT_RADIUS] = _properties[BORDER_TOP_RIGHT_RADIUS];
-        longhandProperties[BORDER_BOTTOM_RIGHT_RADIUS] = _properties[BORDER_BOTTOM_RIGHT_RADIUS];
-        longhandProperties[BORDER_BOTTOM_LEFT_RADIUS] = _properties[BORDER_BOTTOM_LEFT_RADIUS];
-        break;
-      case OVERFLOW:
-        longhandProperties[OVERFLOW_X] = _properties[OVERFLOW_X];
-        longhandProperties[OVERFLOW_Y] = _properties[OVERFLOW_Y];
-        break;
-      case FONT:
-        longhandProperties[FONT_STYLE] = _properties[FONT_STYLE];
-        longhandProperties[FONT_WEIGHT] = _properties[FONT_WEIGHT];
-        longhandProperties[FONT_SIZE] = _properties[FONT_SIZE];
-        longhandProperties[LINE_HEIGHT] = _properties[LINE_HEIGHT];
-        longhandProperties[FONT_FAMILY] = _properties[FONT_FAMILY];
-        break;
-      case FLEX:
-        longhandProperties[FLEX_GROW] = _properties[FLEX_GROW];
-        longhandProperties[FLEX_SHRINK] = _properties[FLEX_SHRINK];
-        longhandProperties[FLEX_BASIS] = _properties[FLEX_BASIS];
-        break;
-      case FLEX_FLOW:
-        longhandProperties[FLEX_DIRECTION] = _properties[FLEX_DIRECTION];
-        longhandProperties[FLEX_WRAP] = _properties[FLEX_WRAP];
-        break;
-      case BORDER:
-      case BORDER_TOP:
-      case BORDER_RIGHT:
-      case BORDER_BOTTOM:
-      case BORDER_LEFT:
-      case BORDER_COLOR:
-      case BORDER_STYLE:
-      case BORDER_WIDTH:
-        longhandProperties[BORDER_TOP_COLOR] = _properties[BORDER_TOP_COLOR];
-        longhandProperties[BORDER_RIGHT_COLOR] = _properties[BORDER_RIGHT_COLOR];
-        longhandProperties[BORDER_BOTTOM_COLOR] = _properties[BORDER_BOTTOM_COLOR];
-        longhandProperties[BORDER_LEFT_COLOR] = _properties[BORDER_LEFT_COLOR];
-        longhandProperties[BORDER_TOP_STYLE] = _properties[BORDER_TOP_STYLE];
-        longhandProperties[BORDER_RIGHT_STYLE] = _properties[BORDER_RIGHT_STYLE];
-        longhandProperties[BORDER_BOTTOM_STYLE] = _properties[BORDER_BOTTOM_STYLE];
-        longhandProperties[BORDER_LEFT_STYLE] = _properties[BORDER_LEFT_STYLE];
-        longhandProperties[BORDER_TOP_WIDTH] = _properties[BORDER_TOP_WIDTH];
-        longhandProperties[BORDER_RIGHT_WIDTH] = _properties[BORDER_RIGHT_WIDTH];
-        longhandProperties[BORDER_BOTTOM_WIDTH] = _properties[BORDER_BOTTOM_WIDTH];
-        longhandProperties[BORDER_LEFT_WIDTH] = _properties[BORDER_LEFT_WIDTH];
-        break;
-      case TRANSITION:
-        longhandProperties[TRANSITION_PROPERTY] = _properties[TRANSITION_PROPERTY];
-        longhandProperties[TRANSITION_DURATION] = _properties[TRANSITION_DURATION];
-        longhandProperties[TRANSITION_TIMING_FUNCTION] = _properties[TRANSITION_TIMING_FUNCTION];
-        longhandProperties[TRANSITION_DELAY] = _properties[TRANSITION_DELAY];
-        break;
-      case TEXT_DECORATION:
-        longhandProperties[TEXT_DECORATION_LINE] = _properties[TEXT_DECORATION_LINE];
-        longhandProperties[TEXT_DECORATION_COLOR] = _properties[TEXT_DECORATION_COLOR];
-        longhandProperties[TEXT_DECORATION_STYLE] = _properties[TEXT_DECORATION_STYLE];
-        break;
-    }
-
-    if (longhandProperties.isNotEmpty) {
-      longhandProperties.forEach((String propertyName, String? value) {
-        setRenderStyle(propertyName, value, viewportSize);
+        setProperty(propertyName, value, isImportant, viewportSize);
       });
     }
   }
@@ -572,16 +475,9 @@ class CSSStyleDeclaration {
     return result;
   }
 
-  void setStyleSheetStyle(Map<String, String> styleSheetStyle) {
-    // TODO: should not overwrite inline style. @yuanyan
-    for (String propertyName in styleSheetStyle.keys) {
-      setProperty(propertyName, styleSheetStyle[propertyName]);
-    }
-  }
-
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
-  void setProperty(String propertyName, value, [Size? viewportSize, RenderStyle? renderStyle]) {
+  void setProperty(String propertyName, value, [bool? isImportant, Size? viewportSize]) {
     // Null or empty value means should be removed.
     if (isNullOrEmptyValue(value)) {
       removeProperty(propertyName);
@@ -597,15 +493,25 @@ class CSSStyleDeclaration {
     if (normalizedValue == prevValue) return;
 
     if (CSSShorthandProperty[propertyName] != null) {
-      return _expandShorthand(propertyName, normalizedValue, viewportSize);
+      return _expandShorthand(propertyName, normalizedValue, isImportant, viewportSize);
+    }
+
+    // If the important property is already set, we shoud ingore it.
+    if (isImportant != true && _importants[propertyName] == true) {
+      return;
+    }
+
+    // Current only from inline style will mark the property as important.
+    if (isImportant == true) {
+      _importants[propertyName] = true;
     }
 
     double? rootFontSize;
     double? fontSize;
-    if (renderStyle != null) {
-      RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
+    if (target != null) {
+      RenderBoxModel renderBoxModel = target!.renderBoxModel!;
       rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
-      fontSize = renderStyle.fontSize;
+      fontSize = target!.renderStyle!.fontSize;
     }
 
     switch (propertyName) {
@@ -692,7 +598,8 @@ class CSSStyleDeclaration {
     if (prevValue != null) {
       _prevProperties[propertyName] = prevValue;
     }
-    _properties[propertyName] = normalizedValue;
+
+    _pendingProperties[propertyName] = normalizedValue;
 
     switch (propertyName) {
       case TRANSITION_DELAY:
@@ -715,24 +622,26 @@ class CSSStyleDeclaration {
     }
   }
 
-  /// Modify RenderStyle after property is set in CSS declaration.
-  void setRenderStyle(String propertyName, value, [Size? viewportSize, RenderBoxModel? renderBoxModel]) {
-    if (CSSShorthandProperty[propertyName] != null) {
-      return _setShorthandRenderStyle(propertyName, viewportSize);
+  void flushPendingProperties() {
+    for (String propertyName in _pendingProperties.keys) {
+      _properties[propertyName] = _pendingProperties[propertyName]!;
+
+      String? currentValue = _properties[propertyName];
+      String? prevValue = _prevProperties[propertyName];
+
+      if (currentValue == null || currentValue == prevValue) {
+        return;
+      }
+      RenderBoxModel? renderBoxModel = target?.renderBoxModel;
+      RenderStyle? renderStyle = target?.renderBoxModel?.renderStyle;
+      if (_shouldTransition(propertyName, prevValue, currentValue, renderBoxModel)) {
+        _transition(propertyName, prevValue, currentValue, target?.viewportSize, renderStyle);
+      } else {
+        _emitPropertyChanged(propertyName, prevValue, currentValue);
+      }
     }
 
-    String? currentValue = _properties[propertyName];
-    String? prevValue = _prevProperties[propertyName];
-
-    if (currentValue == null || currentValue == prevValue) {
-      return;
-    }
-    RenderStyle? renderStyle = renderBoxModel?.renderStyle;
-    if (_shouldTransition(propertyName, prevValue, currentValue, renderBoxModel)) {
-      _transition(propertyName, prevValue, currentValue, viewportSize, renderStyle);
-    } else {
-      setRenderStyleProperty(propertyName, prevValue, currentValue);
-    }
+    _pendingProperties.clear();
   }
 
   /// Override [] and []= operator to get/set style properties.
@@ -751,53 +660,49 @@ class CSSStyleDeclaration {
   }
 
   void removeStyleChangeListener(StyleChangeListener listener) {
-      _styleChangeListeners.remove(listener);
+    _styleChangeListeners.remove(listener);
   }
 
-  void setRenderStyleProperty(String property, String? original, String present) {
+  void _emitPropertyChanged(String property, String? original, String present) {
     for (int i = 0; i < _styleChangeListeners.length; i++) {
       StyleChangeListener listener = _styleChangeListeners[i];
       listener(property, original, present);
-      // Override previous property after property is set.
-      if (_properties[property] != null) {
-        _prevProperties[property] = _properties[property]!;
-      }
+    }
+
+    // Override previous property after property is set.
+    if (_properties[property] != null) {
+      _prevProperties[property] = _properties[property]!;
     }
   }
 
-  void applyTargetProperties() {
-    _properties.forEach((key, value) {
-      String normalizedValue = _normalizeValue(value);
-      setRenderStyleProperty(key, null, normalizedValue);
-    });
-  }
-
   /// Set all style properties with em unit.
-  void setEmProperties() {
+  void applyEmProperties() {
     _properties.forEach((key, value) {
       if (key != FONT_SIZE && value.endsWith(CSSLength.EM)) {
         String normalizedValue = _normalizeValue(value);
-        setRenderStyleProperty(key, null, normalizedValue);
+        _emitPropertyChanged(key, null, normalizedValue);
       }
     });
   }
 
   /// Set all style properties with rem unit.
-  void setRemProperties() {
+  void applyRemProperties() {
     _properties.forEach((key, value) {
       if (key != FONT_SIZE && value.endsWith(CSSLength.REM)) {
         String normalizedValue = _normalizeValue(value);
-        setRenderStyleProperty(key, null, normalizedValue);
+        _emitPropertyChanged(key, null, normalizedValue);
       }
     });
   }
 
   void reset() {
     _properties.clear();
+    _pendingProperties.clear();
     _prevProperties.clear();
     _animationProperties.clear();
     _transitions.clear();
     _propertyRunningTransition.clear();
+    _importants.clear();
   }
 
   void dispose() {

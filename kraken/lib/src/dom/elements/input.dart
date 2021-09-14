@@ -240,6 +240,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   @override
+  void willAttachRenderer() {
+    super.willDetachRenderer();
+    style.addStyleChangeListener(_onStyleChanged);
+  }
+
+  @override
   void willDetachRenderer() {
     super.willDetachRenderer();
     InputElement.clearFocus();
@@ -257,18 +263,16 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     _renderEditable = null;
   }
 
-  @override
-  void setRenderStyle(String key, value) {
-    super.setRenderStyle(key, value);
+  void _onStyleChanged(String property, String? original, String present) {
 
     if (_renderInputBox != null) {
       RenderStyle renderStyle = renderBoxModel!.renderStyle;
-      if (key == HEIGHT || (key == LINE_HEIGHT && renderStyle.height == null)) {
+      if (property == HEIGHT || (property == LINE_HEIGHT && renderStyle.height == null)) {
         _renderInputBox!.markNeedsLayout();
 
       // It needs to judge width in style here cause
       // width in renderStyle may be set in node attach.
-      } else if (key == FONT_SIZE && style[WIDTH].isEmpty) {
+      } else if (property == FONT_SIZE && renderStyle.style[WIDTH].isEmpty) {
         double fontSize = renderStyle.fontSize;
         renderStyle.width = fontSize * _FONT_SIZE_RATIO;
         _renderInputBox!.markNeedsLayout();

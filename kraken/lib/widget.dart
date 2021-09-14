@@ -323,22 +323,20 @@ This situation often happened when you trying creating kraken when FlutterView n
     double viewportWidth = _krakenWidget.viewportWidth ?? window.physicalSize.width / window.devicePixelRatio;
     double viewportHeight = _krakenWidget.viewportHeight ?? window.physicalSize.height / window.devicePixelRatio;
 
-    Size viewportSize = Size(viewportWidth, viewportHeight);
-
     if (viewportWidthHasChanged) {
       controller.view.viewportWidth = viewportWidth;
-      controller.view.document!.documentElement.style.setProperty(WIDTH, controller.view.viewportWidth.toString() + 'px', viewportSize);
+      controller.view.document!.documentElement.renderStyle!.width = viewportWidth;
     }
 
     if (viewportHeightHasChanged) {
       controller.view.viewportHeight = viewportHeight;
-      controller.view.document!.documentElement.style.setProperty(HEIGHT, controller.view.viewportHeight.toString() + 'px', viewportSize);
+      controller.view.document!.documentElement.renderStyle!.height = viewportHeight;
     }
 
     if (viewportWidthHasChanged || viewportHeightHasChanged) {
       traverseElement(controller.view.document!.documentElement, (element) {
         if (element.isRendererAttached) {
-          element.style.applyTargetProperties();
+          element.style.flushPendingProperties();
           element.renderBoxModel?.markNeedsLayout();
         }
       });

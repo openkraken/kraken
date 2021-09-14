@@ -28,12 +28,10 @@ class HTMLElement extends Element {
       PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_PROPERTY_INIT);
     }
     elementManager.viewportElement = this;
-    // Init renderer
+    // Init renderer.
     willAttachRenderer();
-    // Init default render style value
-    style.applyTargetProperties();
     RenderStyle renderStyle = renderBoxModel!.renderStyle;
-    // Must init with viewport width
+    // Must init with viewport width.
     renderStyle.width = elementManager.viewportWidth;
     renderStyle.height = elementManager.viewportHeight;
     didAttachRenderer();

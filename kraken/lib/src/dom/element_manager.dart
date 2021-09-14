@@ -24,8 +24,6 @@ import 'package:kraken/scheduler.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/src/dom/element_registry.dart' as element_registry;
 
-final RegExp _splitRegExp = RegExp(r'\s+');
-
 const String UNKNOWN = 'UNKNOWN';
 
 const int HTML_ID = -1;
@@ -221,24 +219,8 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     document.documentElement.recalculateStyle();
   }
 
-  void applyStyleByClassNames(Element element, String classNames, { required Map<String, dynamic> inlineStyle }) {
-    for (String className in classNames.trim().split(_splitRegExp)) {
-      for (CSSStyleSheet sheet in styleSheets) {
-        List<CSSRule> rules = sheet.cssRules;
-        for (int i = 0; i < rules.length; i++) {
-          CSSRule rule = rules[i];
-          if (rule is CSSStyleRule && rule.selectorText == className) {
-            var styleSheetStyle = rule.style;
-            for (String propertyName in styleSheetStyle.keys) {
-              var inlineStyleValue = inlineStyle[propertyName];
-              if (inlineStyleValue == null || inlineStyleValue.isEmpty) {
-                element.setStyle(propertyName, styleSheetStyle[propertyName]);
-              }
-            }
-          }
-        }
-      }
-    }
+  void applyStyleByClassNames(RenderStyle renderStyle, String classNames) {
+
   }
 
   void setProperty(int targetId, String key, dynamic value) {
@@ -294,15 +276,15 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     }
   }
 
-  void setRenderStyle(int targetId, String key, dynamic value) {
-    assert(existsTarget(targetId), 'id: $targetId key: $key value: $value');
+  void flushPendingStyleProperties(int targetId) {
+    assert(existsTarget(targetId), 'id: $targetId');
     Node? target = getEventTargetByTargetId<Node>(targetId);
     if (target == null) return;
 
     if (target is Element) {
-      target.setRenderStyle(key, value);
+      target.style.flushPendingProperties();
     } else {
-      debugPrint('Only element has style, try setting style.$key from Node(#$targetId).');
+      debugPrint('Only element has style, try flushPendingStyleProperties from Node(#$targetId).');
     }
   }
 

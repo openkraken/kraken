@@ -137,7 +137,7 @@ mixin CSSTextMixin on RenderStyleBase {
     if (_fontSize == value) return;
     _fontSize = value;
     // Need update all em unit style of own element when font size changed.
-    style.setEmProperties();
+    style.applyEmProperties();
 
     // Update all the children text with specified style property not set due to style inheritance.
     _updateFontSize(renderBoxModel!, renderBoxModel!, renderBoxModel!.isDocumentRootBox);
@@ -326,7 +326,7 @@ mixin CSSTextMixin on RenderStyleBase {
           _updateNestChildrenText(child, styleProperty);
           // Need update all em unit style of child when its font size is inherited.
           if (styleProperty == FONT_SIZE) {
-            child.renderStyle.style.setEmProperties();
+            child.renderStyle.style.applyEmProperties();
           }
         }
       } else if (child is RenderTextBox) {
@@ -350,10 +350,10 @@ mixin CSSTextMixin on RenderStyleBase {
         if (isDocumentRoot || child.renderStyle.style[FONT_SIZE].isEmpty) {
           _updateFontSize(child, oriRenderBoxModel, isDocumentRoot);
           // Need update all em unit style of child when its font size is inherited.
-          child.renderStyle.style.setEmProperties();
+          child.renderStyle.style.applyEmProperties();
 
           if (isDocumentRoot) {
-            child.renderStyle.style.setRemProperties();
+            child.renderStyle.style.applyRemProperties();
           }
         }
 
