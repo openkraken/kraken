@@ -157,7 +157,7 @@ class Element extends Node
   late CSSStyleDeclaration style;
 
   /// The default user-agent style.
-  final Map<String, dynamic> defaultStyle;
+  final Map<String, dynamic> _defaultStyle;
 
   /// The inline style is a map of style property name to style property value.
   final Map<String, dynamic> inlineStyle = {};
@@ -184,14 +184,15 @@ class Element extends Node
 
   Element(int targetId, this.nativeElementPtr, ElementManager elementManager,
       {required this.tagName,
-        this.defaultStyle = const {},
+        Map<String, dynamic> defaultStyle = const {},
         // Whether element allows children.
         bool isIntrinsicBox = false,
         this.repaintSelf = false,
         // @HACK: overflow scroll needs to create an shadow element to create an scrolling renderBox for better scrolling performance.
         // we needs to prevent this shadow element override real element in nativeMap.
         bool isHiddenElement = false})
-      : _isIntrinsicBox = isIntrinsicBox,
+      : _defaultStyle = defaultStyle,
+        _isIntrinsicBox = isIntrinsicBox,
         defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : INLINE,
         super(NodeType.ELEMENT_NODE, targetId, nativeElementPtr.ref.nativeNode, elementManager, tagName) {
     
@@ -1181,8 +1182,8 @@ class Element extends Node
   }
 
   void _applyDefaultStyle() {
-    if (defaultStyle.isNotEmpty) {
-      defaultStyle.forEach((property, dynamic value) {
+    if (_defaultStyle.isNotEmpty) {
+      _defaultStyle.forEach((property, dynamic value) {
         _setStyleProperty(property, value);
       });
     }
