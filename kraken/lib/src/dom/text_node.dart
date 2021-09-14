@@ -11,7 +11,6 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
-
 final RegExp _whiteSpaceReg = RegExp(r'\s+');
 const String WHITE_SPACE_CHAR = ' ';
 const String NEW_LINE_CHAR = '\n';
