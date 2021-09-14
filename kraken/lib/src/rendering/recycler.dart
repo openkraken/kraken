@@ -4,20 +4,29 @@
  */
 
 import 'dart:ui';
-import 'package:kraken/module.dart';
-import 'package:meta/meta.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-
 import 'package:kraken/css.dart';
-import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/module.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/gesture.dart';
+import 'package:meta/meta.dart';
 
 class RenderRecyclerLayout extends RenderLayoutBox {
+  // Expose viewport for sliver mixin.
+  RenderViewport get viewport => _renderViewport;
+  // The viewport for sliver.
   late RenderViewport _renderViewport;
+
+  // The sliver list render object reference.
   late RenderSliverList _renderSliverList;
+
+  // The scrollable context to handle gestures.
   late KrakenScrollable scrollable;
+
+  // The main axis for recycler layout.
   Axis axis = Axis.vertical;
 
   RenderRecyclerLayout({
@@ -55,6 +64,7 @@ class RenderRecyclerLayout extends RenderLayoutBox {
   @override
   bool get isRepaintBoundary => true;
 
+  // Override box model methods, give the control right to sliver list.
   @override
   void add(RenderBox child) {}
 
@@ -99,9 +109,6 @@ class RenderRecyclerLayout extends RenderLayoutBox {
       child.parentData = SliverMultiBoxAdaptorParentData();
     }
   }
-
-  // Expose viewport for sliver mixin.
-  RenderViewport get viewport => _renderViewport;
 
   void _pointerListener(PointerEvent event) {
     if (event is PointerDownEvent) {
