@@ -1,27 +1,3 @@
-
-// Some utility methods.
-let slice = function slice(arr: HTMLCollectionOf<Element>): Array<Element> {
-  try { // try using .slice()
-    return Array.prototype.slice.call(arr);
-  } catch ( e ) {
-    // otherwise, manually create the array
-    let result: Array<Element> = [];
-    for (let i = 0, l = arr.length; i !== l; ++i)
-      result = result.concat(arr[i]);
-    return result;
-  }
-};
-
-function trim(str: string):string;
-function trim(str: Array<string>):Array<string>;
-function trim(str: Array<string> | string): Array<string> | string {
-  if (typeof str === 'string') {
-    return str.trim();
-  } else {
-    return str.map(item => item.trim());
-  }
-};
-
 let fetchSelector = function fetchSelector(str: string, regex: RegExp) {
   return {
     selectors: str.match(regex) || [],
@@ -32,12 +8,12 @@ let fetchSelector = function fetchSelector(str: string, regex: RegExp) {
 function getElementsBySelector(selector: string): Array<Element | null | HTMLElement> {
   let context = document;
   let temp, tempElements: Array<Element> = [], elements: Array<Element> = [];
-  selector = trim(selector);
+  selector = selector.trim();
 
   // If selector starts with *, find all elements.
   if (selector.charAt(0) === '*') {
     let temps: HTMLCollectionOf<Element> = context.getElementsByTagName('*');
-    tempElements = tempElements.concat(slice(temps));
+    tempElements = tempElements.concat(Array.prototype.slice.call(temps));
   }
 
   // IDs. e.g. #mail-title
@@ -72,14 +48,14 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
   // Get by Elements.
   if (els.length !== 0) {
     let temps: HTMLCollectionOf<Element> = context.getElementsByTagName(els[0]);
-    tempElements = tempElements.concat(slice(temps));
+    tempElements = tempElements.concat(Array.prototype.slice.call(temps));
   }
 
   // Get by class name.
   for (let i = 0, l = classes.length; i !== l; ++i) {
     let className = classes[i].substring(1);
     let temps: HTMLCollectionOf<Element> = context.getElementsByClassName(className);
-    let arrTemps: Array<Element> = slice(temps);
+    let arrTemps: Array<Element> = Array.prototype.slice.call(temps);
     // If no temp elements yet, push into tempElements directly.
     if (tempElements.length === 0) {
       tempElements = tempElements.concat(arrTemps);
@@ -105,8 +81,7 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
     for (let i = 0, l = attributes.length; i !== l; ++i) {
       let attribute = attributes[i];
       attribute = attribute.substring(1, attribute.length - 1);
-      let parts: Array<string> = attribute.split('=');
-      parts = trim(parts);
+      let parts: Array<string> = (attribute.split('=')).map(item => item.trim());
       if (parts[1]) {
         parts[1] = parts[1].substring(1, parts[1].length - 1);
       }
@@ -170,8 +145,7 @@ document.querySelectorAll = function <E extends Element = Element> (selector: st
   let elements: Array<E> = [];
 
   // Split `selector` into rules by `,`.
-  let rules: Array<string> = selector.split(',');
-  rules = trim(rules);
+  let rules: Array<string> = selector.split(',').map(item => item.trim());
 
   // Iterate through each rule.
   // For the sake of performance, use for-loop here rather than forEach.
