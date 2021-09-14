@@ -1676,8 +1676,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     return defaultHitTestChildren(result, position: position);
   }
 
-  void sortChildrenByZIndex() {
-    List<RenderObject?> children = getChildrenAsList();
+  @override
+  void sortChildrenByZIndex(List<RenderBox> children) {
     children.sort((RenderObject? prev, RenderObject? next) {
       CSSPositionType prevPosition = prev is RenderBoxModel
           ? prev.renderStyle.position
@@ -1705,18 +1705,15 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
-    if (!isChildrenSorted) {
-      sortChildrenByZIndex();
-    }
     for (int i = 0; i < sortedChildren.length; i++) {
-      RenderObject? child = sortedChildren[i];
+      RenderObject child = sortedChildren[i];
       if (child is! RenderPositionHolder) {
         late DateTime childPaintStart;
         if (kProfileMode) {
           childPaintStart = DateTime.now();
         }
         final RenderLayoutParentData childParentData =
-            child!.parentData as RenderLayoutParentData;
+            child.parentData as RenderLayoutParentData;
         context.paintChild(child, childParentData.offset + offset);
         if (kProfileMode) {
           DateTime childPaintEnd = DateTime.now();
@@ -1762,6 +1759,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       renderStyle: renderStyle,
       elementDelegate: elementDelegate,
     );
+    selfRepaintFlowLayout.sortedChildren = sortedChildren;
     return copyWith(selfRepaintFlowLayout);
   }
 

@@ -173,44 +173,28 @@ class RenderLayoutBox extends RenderBoxModel
     }
   }
 
-  // Mark this container to sort children by zIndex properties.
-  // When children have positioned elements, which needs to reorder and paint earlier than flow layout renderObjects.
-  void markNeedsSortChildren() {
-    _isChildrenSorted = false;
+  List<RenderBox> _sortedChildren = [];
+
+  List<RenderBox> get sortedChildren {
+    return _sortedChildren;
   }
 
-  bool _isChildrenSorted = false;
-
-  bool get isChildrenSorted => _isChildrenSorted;
-
-  List<RenderObject?>? _sortedChildren;
-
-  List<RenderObject?> get sortedChildren {
-    if (_sortedChildren == null) return [];
-    return _sortedChildren!;
-  }
-
-  set sortedChildren(List<RenderObject?> value) {
-    _isChildrenSorted = true;
+  set sortedChildren(List<RenderBox> value) {
     _sortedChildren = value;
   }
 
   @override
   void insert(RenderBox child, {RenderBox? after}) {
     super.insert(child, after: after);
-    _isChildrenSorted = false;
-  }
-
-  @override
-  void add(RenderBox child) {
-    super.add(child);
-    _isChildrenSorted = false;
+    sortAfterInsert(child, after: after);
   }
 
   @override
   void addAll(List<RenderBox>? children) {
     super.addAll(children);
-    _isChildrenSorted = false;
+    if (children != null) {
+      sortAfterAddAll(children);
+    }
   }
 
   @override
@@ -222,19 +206,37 @@ class RenderLayoutBox extends RenderBoxModel
       }
     }
     super.remove(child);
-    _isChildrenSorted = false;
+    sortedChildren.remove(child);
   }
 
   @override
   void removeAll() {
     super.removeAll();
-    _isChildrenSorted = false;
+    sortedChildren = [];
   }
 
   @override
   void move(RenderBox child, {RenderBox? after}) {
     super.move(child, after: after);
-    _isChildrenSorted = false;
+    sortAfterMove(child, after: after);
+  }
+
+  // Must be override in child Class.
+  void sortChildrenByZIndex(List<RenderBox> children) {}
+
+  void sortAfterAddAll(List<RenderBox> children) {
+    sortChildrenByZIndex(children);
+  }
+
+  void sortAfterInsert(RenderBox child, {RenderBox? after}) {
+    int index = after != null ? sortedChildren.indexOf(after) + 1 : 0;
+    sortedChildren.insert(index, child);
+    sortChildrenByZIndex(sortedChildren);
+  }
+
+  void sortAfterMove(RenderBox child, {RenderBox? after}) {
+    sortedChildren.remove(child);
+    sortAfterInsert(child, after: after);
   }
 
   // Get all children as a list and detach them all.

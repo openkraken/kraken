@@ -75,7 +75,7 @@ mixin CSSPositionMixin on RenderStyleBase {
     // Needs to sort children when parent paint children
     if (renderBoxModel!.parentData is RenderLayoutParentData) {
       RenderLayoutBox parent = renderBoxModel!.parent as RenderLayoutBox;
-      parent.markNeedsSortChildren();
+      parent.sortChildrenByZIndex(parent.sortedChildren);
     }
   }
 

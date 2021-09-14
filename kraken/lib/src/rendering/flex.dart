@@ -2582,8 +2582,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     return defaultHitTestChildren(result, position: position);
   }
 
-  void sortChildrenByZIndex() {
-    List<RenderObject?> children = getChildrenAsList();
+  @override
+  void sortChildrenByZIndex(List<RenderBox> children) {
     children.sort((RenderObject? prev, RenderObject? next) {
       // z-index values other than auto of flex-item create a stacking context even if position is static
       // (behaving exactly as if position were relative)
@@ -2628,11 +2628,8 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
-    if (!isChildrenSorted) {
-      sortChildrenByZIndex();
-    }
     for (int i = 0; i < sortedChildren.length; i++) {
-      RenderObject? child = sortedChildren[i];
+      RenderObject child = sortedChildren[i];
       // Don't paint placeholder of positioned element
       if (child is! RenderPositionHolder) {
         late DateTime childPaintStart;
@@ -2640,7 +2637,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           childPaintStart = DateTime.now();
         }
         final RenderLayoutParentData childParentData =
-            child!.parentData as RenderLayoutParentData;
+            child.parentData as RenderLayoutParentData;
         context.paintChild(child, childParentData.offset + offset);
         if (kProfileMode) {
           DateTime childPaintEnd = DateTime.now();
