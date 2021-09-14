@@ -96,8 +96,7 @@ mixin CSSOverflowMixin on ElementBase {
     if (renderBoxModel is RenderRecyclerLayout) {
       // Recycler layout not need repaintBoundary and scroll/pointer listeners,
       // ignoring overflowX or overflowY sets, which handle it self.
-      _scrollableX = _scrollableY = null;
-      renderBoxModel.clipX = renderBoxModel.clipY = true;
+      renderBoxModel.clipX = renderBoxModel.clipY = false;
       renderBoxModel.scrollOffsetX = renderBoxModel.axis == Axis.horizontal
           ? renderBoxModel.scrollable.position : null;
       renderBoxModel.scrollOffsetY = renderBoxModel.axis == Axis.vertical

@@ -276,6 +276,7 @@ mixin RenderOverflowMixin on RenderBox {
   ViewportOffset? _scrollOffsetX;
   set scrollOffsetX(ViewportOffset? value) {
     if (value == _scrollOffsetX) return;
+    _scrollOffsetX?.removeListener(_scrollXListener);
     _scrollOffsetX = value;
     _scrollOffsetX?.addListener(_scrollXListener);
     markNeedsLayout();
@@ -286,6 +287,7 @@ mixin RenderOverflowMixin on RenderBox {
   set scrollOffsetY(ViewportOffset? value) {
     if (value == _scrollOffsetY) return;
     _scrollOffsetY?.removeListener(_scrollYListener);
+    _scrollOffsetY?.dispose();
     _scrollOffsetY = value;
     _scrollOffsetY?.addListener(_scrollYListener);
     markNeedsLayout();
@@ -363,7 +365,6 @@ mixin RenderOverflowMixin on RenderBox {
   ClipRRectLayer? _oldClipRRectLayer;
   ClipRectLayer? _oldClipRectLayer;
 
-  // @TODO implement RenderSilver protocol to achieve high performance scroll list.
   void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, BoxDecoration? decoration, PaintingContextCallback callback) {
     if (clipX == false && clipY == false) return callback(context, offset);
     final double paintOffsetX = _paintOffsetX;
