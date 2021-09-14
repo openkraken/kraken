@@ -1,4 +1,4 @@
-let fetchSelector = function fetchSelector(str: string, regex: RegExp) {
+function fetchSelector(str: string, regex: RegExp) {
   return {
     selectors: str.match(regex) || [],
     ruleStr: str.replace(regex, ' ')
@@ -13,26 +13,26 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
   // If selector starts with *, find all elements.
   if (selector.charAt(0) === '*') {
     let temps: HTMLCollectionOf<Element> = context.getElementsByTagName('*');
-    tempElements = tempElements.concat(Array.prototype.slice.call(temps));
+    tempElements = Array.from(temps);
   }
 
-  // IDs. e.g. #mail-title
+  // Ids. e.g. #mail-title.
   temp = fetchSelector(selector, /#[\w-_]+/g);
   let id = temp.selectors ? temp.selectors[0] : null;
   selector = temp.ruleStr;
 
-  // classes. e.g. .row
+  // Classes. e.g. .row.
   temp = fetchSelector(selector, /\.[\w-_]+/g);
   let classes = temp.selectors;
   selector = temp.ruleStr;
 
-  // TODO: Now only support "equal".
-  // attributes. e.g. [rel=external]
+  // TODO: now only support "equal".
+  // Attributes. e.g. [rel=external].
   temp = fetchSelector(selector, /\[.+?\]/g);
   let attributes = temp.selectors;
   selector = temp.ruleStr;
 
-  // elements. E.g. header, div
+  // Elements. e.g. header, div.
   temp = fetchSelector(selector, /\w+/g);
   let els = temp.selectors;
   selector = temp.ruleStr;
@@ -48,26 +48,26 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
   // Get by Elements.
   if (els.length !== 0) {
     let temps: HTMLCollectionOf<Element> = context.getElementsByTagName(els[0]);
-    tempElements = tempElements.concat(Array.prototype.slice.call(temps));
+    tempElements = tempElements.concat(Array.from(temps));
   }
 
   // Get by class name.
   for (let i = 0, l = classes.length; i !== l; ++i) {
     let className = classes[i].substring(1);
     let temps: HTMLCollectionOf<Element> = context.getElementsByClassName(className);
-    let arrTemps: Array<Element> = Array.prototype.slice.call(temps);
-    // If no temp elements yet, push into tempElements directly.
+    let arrTemps: Array<Element> = Array.from(temps);
     if (tempElements.length === 0) {
+      // If no temp elements yet, push into tempElements directly.
       tempElements = tempElements.concat(arrTemps);
     }
-    // Otherwise, find intersection.
     else {
+      // Otherwise, find intersection.
       let prevs: Array<Element> = [];
       prevs = prevs.concat(tempElements);
       tempElements = [];
 
-      for (let tempI = 0, tempL = arrTemps.length; tempI !== tempL; ++tempI) {
-        let t = arrTemps[tempI];
+      for (let index = 0; index < arrTemps.length; index++) {
+        let t = arrTemps[index];
         if (prevs.indexOf(t) !== -1) {
           tempElements = tempElements.concat([t]);
         }
@@ -75,10 +75,10 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
     }
   }
 
-  // Get by Attributes.
+  // Get by attributes.
   if (attributes.length !== 0) {
     let attrs = {};
-    for (let i = 0, l = attributes.length; i !== l; ++i) {
+    for (let i = 0; i < attributes.length; i++) {
       let attribute = attributes[i];
       attribute = attribute.substring(1, attribute.length - 1);
       let parts: Array<string> = (attribute.split('=')).map(item => item.trim());
