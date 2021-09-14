@@ -970,6 +970,14 @@ class Element extends Node
     double rootFontSize = _getRootElementFontSize();
     double fontSize = renderStyle.fontSize;
     Matrix4? matrix4 = CSSTransform.parseTransform(present, viewportSize, rootFontSize, fontSize);
+
+    // Transform should converted to matrix4 value to compare cause case such as
+    // `translate3d(750rpx, 0rpx, 0rpx)` and `translate3d(100vw, 0vw, 0vw)` should considered to be equal.
+    // Note this comparison cannot be done in style listener cause prevValue cannot be get in animation case.
+    if (renderStyle.transform == matrix4) {
+      return;
+    }
+
     renderStyle.updateTransform(matrix4);
   }
 

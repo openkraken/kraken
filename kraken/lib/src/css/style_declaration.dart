@@ -6,7 +6,6 @@
  */
 import 'dart:ui';
 
-import 'package:vector_math/vector_math_64.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
@@ -122,7 +121,6 @@ class CSSStyleDeclaration {
 
   final Map<String, String> _properties = {};
   final Map<String, String> _pendingProperties = {};
-  final Map<String, String> _prevProperties = {};
   final Map<String, String> _animationProperties = {};
 
   final Map<String, bool> _importants = {};
@@ -275,7 +273,8 @@ class CSSStyleDeclaration {
   /// value is a String containing the value of the property.
   /// If not set, returns the empty string.
   String getPropertyValue(String propertyName) {
-    String value = _properties[propertyName] ?? _pendingProperties[propertyName] ?? EMPTY_STRING;
+    // Get the latest pending value first.
+    String value = _pendingProperties[propertyName] ?? _properties[propertyName] ??  EMPTY_STRING;
     return value == CURRENT_COLOR ? getCurrentColor() : value;
   }
 
@@ -506,14 +505,6 @@ class CSSStyleDeclaration {
       _importants[propertyName] = true;
     }
 
-    double? rootFontSize;
-    double? fontSize;
-    if (target != null) {
-      RenderBoxModel renderBoxModel = target!.renderBoxModel!;
-      rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
-      fontSize = target!.renderStyle!.fontSize;
-    }
-
     switch (propertyName) {
       case WIDTH:
       case HEIGHT:
@@ -579,24 +570,8 @@ class CSSStyleDeclaration {
         if (!CSSBackground.isValidBackgroundRepeatValue(normalizedValue)) return;
         break;
       case TRANSFORM:
-        if (!CSSTransform.isValidTransformValue(normalizedValue, viewportSize, rootFontSize, fontSize)) {
-          return;
-        }
-        // Transform should converted to matrix4 value to compare cause case such as
-        // `translate3d(750rpx, 0rpx, 0rpx)` and `translate3d(100vw, 0vw, 0vw)` should considered to be equal.
-        // Note this comparison cannot be done in style listener cause prevValue cannot be get in animation case.
-        if (prevValue != null) {
-          Matrix4? prevMatrix4 = CSSTransform.parseTransform(prevValue, viewportSize, rootFontSize, fontSize);
-          Matrix4? matrix4 = CSSTransform.parseTransform(normalizedValue, viewportSize, rootFontSize, fontSize);
-          if (prevMatrix4 == matrix4) {
-            return;
-          }
-        }
+        if (!CSSTransform.isValidTransformValue(normalizedValue, viewportSize)) return;
         break;
-    }
-
-    if (prevValue != null) {
-      _prevProperties[propertyName] = prevValue;
     }
 
     _pendingProperties[propertyName] = normalizedValue;
@@ -624,14 +599,16 @@ class CSSStyleDeclaration {
 
   void flushPendingProperties() {
     for (String propertyName in _pendingProperties.keys) {
-      _properties[propertyName] = _pendingProperties[propertyName]!;
-
-      String? currentValue = _properties[propertyName];
-      String? prevValue = _prevProperties[propertyName];
+      String? prevValue = _properties[propertyName];
+      String? currentValue = _pendingProperties[propertyName];
 
       if (currentValue == null || currentValue == prevValue) {
         return;
       }
+
+      // Update the prevValue to currentValue.
+      _properties[propertyName] = _pendingProperties[propertyName]!;
+
       RenderBoxModel? renderBoxModel = target?.renderBoxModel;
       RenderStyle? renderStyle = target?.renderBoxModel?.renderStyle;
       if (_shouldTransition(propertyName, prevValue, currentValue, renderBoxModel)) {
@@ -639,6 +616,7 @@ class CSSStyleDeclaration {
       } else {
         _emitPropertyChanged(propertyName, prevValue, currentValue);
       }
+
     }
 
     _pendingProperties.clear();
@@ -668,11 +646,6 @@ class CSSStyleDeclaration {
       StyleChangeListener listener = _styleChangeListeners[i];
       listener(property, original, present);
     }
-
-    // Override previous property after property is set.
-    if (_properties[property] != null) {
-      _prevProperties[property] = _properties[property]!;
-    }
   }
 
   /// Set all style properties with em unit.
@@ -698,7 +671,6 @@ class CSSStyleDeclaration {
   void reset() {
     _properties.clear();
     _pendingProperties.clear();
-    _prevProperties.clear();
     _animationProperties.clear();
     _transitions.clear();
     _propertyRunningTransition.clear();
