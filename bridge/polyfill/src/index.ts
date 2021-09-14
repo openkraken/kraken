@@ -1,5 +1,6 @@
 import 'es6-promise/dist/es6-promise.auto';
 import './dom';
+import './querySelector';
 import { console } from './console';
 import { WebSocket } from './websocket';
 import { fetch, Request, Response, Headers } from './fetch';
