@@ -123,7 +123,6 @@ class RenderRecyclerLayout extends RenderLayoutBox {
 
   @override
   void performLayout() {
-
     if (kProfileMode) {
       childLayoutDuration = 0;
       PerformanceTiming.instance()
