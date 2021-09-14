@@ -1829,7 +1829,7 @@ class ElementSliverBoxChildManager implements RenderSliverBoxChildManager {
 
     recyclerLayout
       ..setupParentData(child!)
-      ..insertIntoSliver(child, after: after);
+      ..insertSliverChild(child, after: after);
 
     childNode.didAttachRenderer();
     childNode.ensureChildAttached();

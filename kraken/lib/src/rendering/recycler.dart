@@ -74,7 +74,8 @@ class RenderRecyclerLayout extends RenderLayoutBox {
   @override
   void addAll(List<RenderBox>? children) {}
 
-  void insertIntoSliver(RenderBox child, { RenderBox? after }) {
+  // Insert render box child as sliver child.
+  void insertSliverChild(RenderBox child, { RenderBox? after }) {
     setupParentData(child);
     _renderSliverList.insert(child, after: after);
   }
@@ -97,7 +98,7 @@ class RenderRecyclerLayout extends RenderLayoutBox {
   void move(RenderBox child, {RenderBox? after}) {
     if (child.parent == _renderSliverList) {
       remove(child);
-      insertIntoSliver(child, after: after);
+      insertSliverChild(child, after: after);
     }
   }
 
