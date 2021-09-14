@@ -110,13 +110,13 @@ mixin CSSOverflowMixin on ElementBase {
         case CSSOverflowType.hidden:
           _scrollableX = null;
           renderBoxModel.clipX = true;
-          // overflow hidden can be scrolled programmatically
+          // Overflow hidden can be scrolled programmatically.
           renderBoxModel.enableScrollX = true;
           break;
         case CSSOverflowType.clip:
           _scrollableX = null;
           renderBoxModel.clipX = true;
-          // overflow clip can't scrolled programmatically
+          // Overflow clip can't scrolled programmatically.
           renderBoxModel.enableScrollX = false;
           break;
         case CSSOverflowType.auto:
@@ -139,13 +139,11 @@ mixin CSSOverflowMixin on ElementBase {
         case CSSOverflowType.hidden:
           _scrollableY = null;
           renderBoxModel.clipY = true;
-          // overflow hidden can be scrolled programmatically
           renderBoxModel.enableScrollY = true;
           break;
         case CSSOverflowType.clip:
           _scrollableY = null;
           renderBoxModel.clipY = true;
-          // overflow clip can't scrolled programmatically
           renderBoxModel.enableScrollY = false;
           break;
         case CSSOverflowType.auto:
