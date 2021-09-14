@@ -979,6 +979,12 @@ class Element extends Node
     selfRenderBoxModel.renderStyle.lineHeight = parsedLineHeight;
   }
 
+  // FIXME: only compatible with kraken plugins
+  @deprecated
+  void setStyle(String property, dynamic value) {
+    setRenderStyle(property, value);
+  }
+
   /// Set internal style value to the element.
   void setRenderStyle(String property, dynamic present) {
     RenderStyle renderStyle = renderBoxModel!.renderStyle;
