@@ -74,6 +74,11 @@ void main() async {
   KrakenWebView.initialize();
   defineKrakenCustomElements();
 
+  // FIXME: This is a workaround for testcase
+  ParagraphElement.defaultStyle = {
+    DISPLAY: BLOCK,
+  };
+
   // Local HTTP server.
   var httpServer = LocalHttpServer.getInstance();
   print('Local HTTP server started at: ${httpServer.getUri()}');

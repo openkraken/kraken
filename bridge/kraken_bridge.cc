@@ -156,6 +156,18 @@ void parseHTML(int32_t contextId, NativeString *code, const char *bundleFilename
   context->parseHTML(code, bundleFilename);
 }
 
+void setHref(int32_t contextId, const char *href) {
+  assert(checkContext(contextId) && "setHref: contextId is not valid");
+  auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
+  context->setHref(href);
+}
+
+NativeString* getHref(int32_t contextId) {
+  assert(checkContext(contextId) && "getHref: contextId is not valid");
+  auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
+  return context->getHref();
+}
+
 void reloadJsContext(int32_t contextId) {
   assert(checkContext(contextId) && "reloadJSContext: contextId is not valid");
   auto bridgePtr = getJSContext(contextId);

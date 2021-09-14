@@ -872,4 +872,115 @@ describe('flexbox flex-grow', () => {
 
     await snapshot();
   });
+
+  it('should work flex item of display block and child of no width in row direction', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'row',
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green'
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            flex: 1,
+            backgroundColor: 'yellow',
+          }
+        }, [
+          createElement('div', {
+            style: {
+              height: '200px',
+              backgroundColor: 'red'
+            }
+          })
+        ])
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it('should work child of no width in row direction', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'row',
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green'
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            display: 'flex',
+            flexDirection: 'column',
+            flex: 1,
+            backgroundColor: 'yellow',
+          }
+        }, [
+          createElement('div', {
+            style: {
+              display: 'flex',
+              flex: 1,
+              backgroundColor: 'red'
+            }
+          })
+        ])
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it('should work child of no height in column direction', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green'
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            display: 'flex',
+            flexDirection: 'row',
+            flex: 1,
+            backgroundColor: 'yellow',
+          }
+        }, [
+          createElement('div', {
+            style: {
+              display: 'flex',
+              flex: 1,
+              backgroundColor: 'red'
+            }
+          })
+        ])
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
 });
