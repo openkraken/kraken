@@ -59,9 +59,9 @@ class TextNode extends Node {
         whiteSpace == WhiteSpace.preLine ||
         whiteSpace == WhiteSpace.preWrap ||
         whiteSpace == WhiteSpace.breakSpaces) {
-      return whiteSpace == WhiteSpace.preLine ? collapseWhitespace(_d) : _d;
+      return whiteSpace == WhiteSpace.preLine ? _collapseWhitespace(_d) : _d;
     } else {
-      String collapsedData = collapseWhitespace(_d);
+      String collapsedData = _collapseWhitespace(_d);
       // TODO:
       // Remove the leading space while prev element have space too:
       //   <p><span>foo </span> bar</p>
@@ -208,9 +208,7 @@ class TextNode extends Node {
   }
 }
 
-bool isWhiteSpace(String ch) => ch == WHITE_SPACE_CHAR || ch == TAB_CHAR || ch == NEW_LINE_CHAR || ch == RETURN_CHAR;
-
 // '  a b  c   \n' => ' a b c '
-String collapseWhitespace(String string) {
+String _collapseWhitespace(String string) {
   return string.replaceAll(_whiteSpaceReg, WHITE_SPACE_CHAR);
 }
