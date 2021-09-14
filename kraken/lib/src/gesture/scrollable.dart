@@ -287,7 +287,6 @@ mixin RenderOverflowMixin on RenderBox {
   set scrollOffsetY(ViewportOffset? value) {
     if (value == _scrollOffsetY) return;
     _scrollOffsetY?.removeListener(_scrollYListener);
-    _scrollOffsetY?.dispose();
     _scrollOffsetY = value;
     _scrollOffsetY?.addListener(_scrollYListener);
     markNeedsLayout();
