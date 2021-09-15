@@ -26,6 +26,21 @@ String? getBundlePathFromEnv() {
   return Platform.environment[BUNDLE_PATH];
 }
 
+List<String> _supportedByteCodeVersions = ['1'];
+
+bool isByteCodeSupported(String mimeType, String filename) {
+  for (int i = 0; i < _supportedByteCodeVersions.length; i ++) {
+    if (mimeType.contains('application/vnd.kraken.bc' + _supportedByteCodeVersions[i])) return true;
+    if (filename.contains('kbc' + _supportedByteCodeVersions[i])) return true;
+  }
+  return false;
+}
+
+String getAcceptHeader() {
+  String krakenKbcAccept = _supportedByteCodeVersions.map((String str) => 'application/vnd.kraken.bc$str').join(',');
+  return 'text/html,application/javascript,$krakenKbcAccept';
+}
+
 abstract class KrakenBundle {
   KrakenBundle(this.url);
 
@@ -45,7 +60,7 @@ abstract class KrakenBundle {
   bool isResolved = false;
 
   // Bundle contentType.
-  ContentType? contentType = ContentType.binary;
+  ContentType contentType = ContentType.binary;
 
   Future<void> resolve();
 
@@ -90,11 +105,11 @@ abstract class KrakenBundle {
     }
 
     // For javascript code, HTML or bytecode from networks and hardware disk.
-    else if (contentType?.mimeType == ContentType.html.mimeType || url.toString().contains('.html')) {
+    else if (contentType.mimeType == ContentType.html.mimeType || url.toString().contains('.html')) {
       String code = _resolveStringFromData(rawBundle);
       // parse html.
       parseHTML(contextId, code, url.toString());
-    } else if (url.toString().contains('.qbc')) {
+    } else if (isByteCodeSupported(contentType.mimeType, url.toString())) {
       Uint8List buffer = rawBundle.buffer.asUint8List();
       evaluateQuickjsByteCode(contextId, buffer);
     } else {
@@ -162,13 +177,14 @@ class NetworkAssetBundle extends AssetBundle {
   final Uri _baseUrl;
   final int contextId;
   final HttpClient httpClient;
-  ContentType? contentType;
+  ContentType contentType = ContentType.binary;
 
   Uri _urlFromKey(String key) => _baseUrl.resolve(key);
 
   @override
   Future<ByteData> load(String key) async {
     final HttpClientRequest request = await httpClient.getUrl(_urlFromKey(key));
+    request.headers.set('Accept', getAcceptHeader());
     KrakenHttpOverrides.setContextHeader(request, contextId);
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok)
@@ -177,7 +193,7 @@ class NetworkAssetBundle extends AssetBundle {
         IntProperty('HTTP status code', response.statusCode),
       ]);
     final Uint8List bytes = await consolidateHttpClientResponseBytes(response);
-    contentType = response.headers.contentType;
+    contentType = response.headers.contentType ?? ContentType.binary;
     return bytes.buffer.asByteData();
   }
 
