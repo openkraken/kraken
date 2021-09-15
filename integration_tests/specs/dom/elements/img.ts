@@ -262,4 +262,27 @@ describe('Tags img', () => {
 
     document.body.appendChild(img);
   });
+
+  it('same image src should only trigger once event', async (done) => {
+    const imageURL = 'assets/100x100-green.png';
+    const img = document.createElement('img');
+    img.src = imageURL;
+
+    var loadCount = 0;
+    img.onload = (event) => {
+      loadCount++;
+      document.body.removeChild(img);
+      document.body.appendChild(img);
+    };
+
+    document.body.appendChild(img);
+
+    setTimeout(() => {
+      if (loadCount == 1) {
+        done();
+      } else {
+        done('load event should only trigger once.');
+      }
+    }, 100);
+  });
 });
