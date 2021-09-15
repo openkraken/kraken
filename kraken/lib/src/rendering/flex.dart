@@ -2613,9 +2613,10 @@ class RenderFlexLayout extends RenderLayoutBox {
       if ((prevPosition != CSSPositionType.static &&
         nextPosition != CSSPositionType.static) ||
         (prevPosition == CSSPositionType.static &&
-          nextPosition == CSSPositionType.static) ||
-        (prevPosition == CSSPositionType.static &&
-          nextPosition != CSSPositionType.static)) {
+          nextPosition == CSSPositionType.static)) {
+        return 0;
+      } else if (prevPosition == CSSPositionType.static &&
+          nextPosition != CSSPositionType.static) {
         return -1;
       } else {
         return 1;
