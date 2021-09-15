@@ -170,8 +170,6 @@ class Element extends Node
   /// Whether should create repaintBoundary for this element when style changed
   bool get shouldConvertToRepaintBoundary {
     // Following cases should always convert to repaint boundary for performance consideration
-    // Multiframe image
-    bool isMultiframeImage = this is ImageElement && (this as ImageElement).isMultiframe;
     // Intrinsic element such as Canvas
     bool isSetRepaintSelf = repaintSelf;
     // Scrolling box
@@ -181,8 +179,7 @@ class Element extends Node
     // Fixed element
     bool isPositionedFixed = renderBoxModel?.renderStyle.position == CSSPositionType.fixed;
 
-    return isMultiframeImage || isScrollingBox ||
-      isSetRepaintSelf || hasTransform || isPositionedFixed;
+    return isScrollingBox || isSetRepaintSelf || hasTransform || isPositionedFixed;
   }
 
   Element(int targetId, this.nativeElementPtr, ElementManager elementManager,

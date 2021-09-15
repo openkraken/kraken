@@ -89,7 +89,7 @@ class CSSBackground {
   }
 
   static DecorationImage? getDecorationImage(CSSStyleDeclaration? style, CSSFunctionalNotation method, { int? contextId }) {
-    DecorationImage backgroundImage;
+    DecorationImage? backgroundImage;
 
     String url = method.args.isNotEmpty ? method.args[0] : '';
     if (url.isEmpty) {
@@ -111,15 +111,16 @@ class CSSBackground {
       }
     }
 
-    if (contextId != null) {
-      KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
-      url = controller.uriParser!.resolve(Uri.parse(controller.href), Uri.parse(url)).toString();
+    if (contextId != null && url.isNotEmpty) {
+      KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
+      if (controller != null) {
+        Uri uri = controller.uriParser!.resolve(Uri.parse(controller.href), Uri.parse(url));
+        backgroundImage = DecorationImage(
+          image: CSSUrl.parseUrl(uri, contextId: contextId)!,
+          repeat: imageRepeat,
+        );
+      }
     }
-
-    backgroundImage = DecorationImage(
-      image: CSSUrl.parseUrl(url, contextId: contextId)!,
-      repeat: imageRepeat,
-    );
 
     return backgroundImage;
   }

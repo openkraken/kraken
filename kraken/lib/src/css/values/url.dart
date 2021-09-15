@@ -11,39 +11,31 @@ import 'package:kraken/painting.dart';
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#urls
 class CSSUrl {
-
-  static ImageProvider? parseUrl(String rawInput, { cache = 'auto', int? contextId }) {
-    // support input string enclosed in quotation marks
-    if ((rawInput.startsWith('\'') && rawInput.endsWith('\'')) ||
-        (rawInput.startsWith('"') && rawInput.endsWith('"'))) {
-      rawInput = rawInput.substring(1, rawInput.length - 1);
-    }
+  static ImageProvider? parseUrl(Uri resolvedUri, { cache = 'auto', int? contextId }) {
 
     ImageProvider? imageProvider;
-
-    if (rawInput.startsWith('//') || rawInput.startsWith('http://') || rawInput.startsWith('https://')) {
-      String url = rawInput.startsWith('//') ? 'https:' + rawInput : rawInput;
+    if (resolvedUri.isScheme('HTTP') || resolvedUri.isScheme('HTTPS')) {
       // @TODO: Caching also works after image downloaded.
       ImageType cacheType = (cache == 'store' || cache == 'auto')
           ? ImageType.cached
           : ImageType.network;
-      imageProvider = getImageProviderFactory(cacheType)(url, [contextId]);
-    } else if (rawInput.startsWith('file://')) {
-      File file = File.fromUri(Uri.parse(rawInput));
-      imageProvider = getImageProviderFactory(ImageType.file)(rawInput, file);
-    } else if (rawInput.startsWith('data:')) {
+      imageProvider = getImageProviderFactory(cacheType)(resolvedUri, [contextId]);
+    } else if (resolvedUri.isScheme('FILE')) {
+      File file = File.fromUri(resolvedUri);
+      imageProvider = getImageProviderFactory(ImageType.file)(resolvedUri, file);
+    } else if (resolvedUri.isScheme('DATA')) {
       // Data URL:  https://tools.ietf.org/html/rfc2397
       // dataurl    := "data:" [ mediatype ] [ ";base64" ] "," data
-      UriData data = UriData.parse(rawInput);
+      UriData data = UriData.fromUri(resolvedUri);
       if (data.isBase64) {
-        imageProvider = getImageProviderFactory(ImageType.dataUrl)(rawInput, data.contentAsBytes());
+        imageProvider = getImageProviderFactory(ImageType.dataUrl)(resolvedUri, data.contentAsBytes());
       }
-    } else if (rawInput.startsWith('blob:')) {
+    } else if (resolvedUri.isScheme('BLOB')) {
       // @TODO: support blob file url
-      imageProvider = getImageProviderFactory(ImageType.blob)(rawInput);
+      imageProvider = getImageProviderFactory(ImageType.blob)(resolvedUri);
     } else {
       // Fallback to asset image
-      imageProvider = getImageProviderFactory(ImageType.assets)(rawInput);
+      imageProvider = getImageProviderFactory(ImageType.assets)(resolvedUri);
     }
 
     return imageProvider;
