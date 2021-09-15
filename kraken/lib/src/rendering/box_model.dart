@@ -223,6 +223,8 @@ class RenderLayoutBox extends RenderBoxModel
 
   // Insert child in sortedChildren.
   void insertChildInSortedChildren(RenderBox child, {RenderBox? after}) {
+    List<RenderObject> children = getChildrenAsList();
+
     // No need to paint position holder.
     if (child is RenderPositionHolder) {
       return;
@@ -243,7 +245,10 @@ class RenderLayoutBox extends RenderBoxModel
     if (oriIdx > 0) {
       while(insertIdx > 0) {
         RenderObject prevSibling = sortedChildren[insertIdx - 1];
-        if (sortSiblingsByZIndex(prevSibling, child) > 0) {
+        int sortResult = sortSiblingsByZIndex(prevSibling, child);
+        if (sortResult > 0 ||
+          (sortResult == 0 && children.indexOf(prevSibling) > children.indexOf(child))
+        ) {
           insertIdx--;
         } else {
           break;
@@ -255,7 +260,10 @@ class RenderLayoutBox extends RenderBoxModel
     if (insertIdx == oriIdx && insertIdx < sortedChildren.length) {
       while(insertIdx < sortedChildren.length) {
         RenderObject nextSibling = sortedChildren[insertIdx];
-        if (sortSiblingsByZIndex(child, nextSibling) > 0) {
+        int sortResult = sortSiblingsByZIndex(child, nextSibling);
+        if (sortResult > 0 ||
+          (sortResult == 0 && children.indexOf(child) > children.indexOf(nextSibling))
+        ) {
           insertIdx++;
         } else {
           break;
