@@ -186,8 +186,11 @@ class RenderLayoutBox extends RenderBoxModel
   // No need to override [all] and [addAll] method cause they invoke [insert] method eventually.
   @override
   void insert(RenderBox child, {RenderBox? after}) {
+    // No need to paint RenderPositionHolder for positioned element.
+    if (child is! RenderPositionHolder) {
+      insertChildInSortedChildren(child, after: after);
+    }
     super.insert(child, after: after);
-    insertChildInSortedChildren(child, after: after);
   }
 
   @override
@@ -221,10 +224,25 @@ class RenderLayoutBox extends RenderBoxModel
     return -1;
   }
 
+  RenderBox? _findNonPositionHolderNextSibling(RenderBox? nextSibling) {
+    if (nextSibling != null) {
+      final RenderLayoutParentData parentData = nextSibling.parentData as RenderLayoutParentData;
+      while (nextSibling != null) {
+        nextSibling = parentData.nextSibling;
+        if (nextSibling is! RenderPositionHolder) {
+          break;
+        }
+      }
+    }
+    return nextSibling;
+  }
+
   // Insert child in sortedChildren.
   void insertChildInSortedChildren(RenderBox child, {RenderBox? after}) {
+    // Find the next non position holder renderObject to insert.
+    after = _findNonPositionHolderNextSibling(after);
     // Original index to insert into ignoring zIndex.
-    int oriIdx = after != null ? sortedChildren.indexOf(after) + 1 : 0;
+    int oriIdx = after != null ? sortedChildren.indexOf(after) + 1 : sortedChildren.length;
     // The final index to insert into considering zIndex after comparing with siblings.
     int insertIdx = oriIdx;
 
