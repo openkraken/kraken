@@ -203,6 +203,8 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
   JSElement::ElementProperty &property = propertyMap[name];
 
   switch (property) {
+  case JSElement::ElementProperty::className:
+    break;
   case JSElement::ElementProperty::nodeName:
   case JSElement::ElementProperty::tagName: {
     return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(tagName().c_str()));
@@ -322,6 +324,12 @@ bool ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRe
     auto &property = propertyMap[name];
 
     switch (property) {
+    case JSElement::ElementProperty::className: {
+      JSStringRef valueRef = JSValueToStringCopy(ctx, value, exception);
+      std::string strValue = JSStringToStdString(valueRef);
+      m_classNames.set(strValue);
+      break;
+    }
     case JSElement::ElementProperty::style:
     case JSElement::ElementProperty::attributes:
       return false;
