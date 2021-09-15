@@ -415,7 +415,6 @@ JSValueRef JSDocument::getElementsByTagName(JSContextRef ctx, JSObjectRef functi
 
 JSValueRef JSDocument::getElementsByClassName(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                             size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
-  KRAKEN_LOG(VERBOSE) << "getElementsByClassName!!!!!!!";
   if (argumentCount < 1) {
     throwJSError(ctx,
                  "Uncaught TypeError: Failed to execute 'getElementsByClassName' on 'Document': 1 argument required, "
@@ -430,7 +429,6 @@ JSValueRef JSDocument::getElementsByClassName(JSContextRef ctx, JSObjectRef func
   std::vector<ElementInstance *> elements;
 
   traverseNode(document->documentElement, [ctx, exception, className, &elements](NodeInstance *node) {
-    KRAKEN_LOG(VERBOSE) << "traverseNode！!";
     if (node->nodeType == NodeType::ELEMENT_NODE) {
       auto element = reinterpret_cast<ElementInstance *>(node);
       if(element->classNames().containsAll(className)) {
