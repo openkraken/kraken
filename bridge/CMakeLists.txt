@@ -38,9 +38,22 @@ execute_process(
 )
 string(REGEX REPLACE "\n$" "" DART_SDK "${DART_SDK}")
 
-list(APPEND PUBLIC_HEADERS
+list(APPEND KRAKEN_PUBLIC_HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
-  )
+)
+
+set(QUICKJS_PUBLIC_HEADERS
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp-opcode.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode-table.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/list.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-atom.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-opcode.h
+)
+
 
 if (ENABLE_ASAN)
   add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
@@ -251,7 +264,7 @@ elseif ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-atom.h
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-opcode.h
     )
-  add_library(quickjs SHARED ${QUICK_JS_SOURCE})
+  add_library(quickjs STATIC ${QUICK_JS_SOURCE})
 
   list(APPEND BRIDGE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
   list(APPEND BRIDGE_LINK_LIBS quickjs)
@@ -442,6 +455,16 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
     FRAMEWORK TRUE
     FRAMEWORK_VERSION C
     MACOSX_FRAMEWORK_IDENTIFIER com.openkraken.kraken_bridge
-    PUBLIC_HEADER ${PUBLIC_HEADERS}
+    PUBLIC_HEADER ${KRAKEN_PUBLIC_HEADERS}
+    )
+
+  message(${QUICKJS_PUBLIC_HEADERS})
+
+  set_target_properties(quickjs PROPERTIES
+    OUTPUT_NAME quickjs
+    FRAMEWORK TRUE
+    FRAMEWORK_VERSION C
+    MACOSX_FRAMEWORK_IDENTIFIER com.openkraken.quickjs
+    PUBLIC_HEADER ${QUICKJS_PUBLIC_HEADERS}
     )
 endif ()
