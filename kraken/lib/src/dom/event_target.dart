@@ -30,6 +30,7 @@ void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> re
       print('$e\n$stack');
       toNativeValue(returnedValue, null);
     }
+    removeAnonymousNativeFunctionFromId(id);
   } else {
     EventTarget eventTarget = EventTarget.getEventTargetOfNativePtr(nativeEventTarget.cast<NativeEventTarget>());
     try {

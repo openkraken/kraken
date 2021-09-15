@@ -44,6 +44,10 @@ AnonymousNativeFunction? getAnonymousNativeFunctionFromId(int id) {
   return _functionMap[id];
 }
 
+void removeAnonymousNativeFunctionFromId(int id) {
+  _functionMap.remove(id);
+}
+
 dynamic fromNativeValue(JSValueType type, Pointer<NativeValue> nativeValue) {
   switch(type) {
     case JSValueType.TAG_STRING:
