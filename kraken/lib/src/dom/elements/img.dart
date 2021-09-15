@@ -72,8 +72,6 @@ class ImageElement extends Element {
 
   ImageInfo? _imageInfo;
 
-  ImageStreamListener? _initImageListener;
-
   late ImageStreamListener _renderStreamListener;
 
   double? _propertyWidth;
@@ -98,7 +96,7 @@ class ImageElement extends Element {
       isIntrinsicBox: true,
       tagName: IMAGE,
       defaultStyle: _defaultStyle) {
-    _renderStreamListener = ImageStreamListener(_renderImageStream);
+    _renderStreamListener = ImageStreamListener(_renderImageStream, onChunk: _onImageChunk, onError: _onImageError);
     _nativeMap[nativeImgElement.address] = this;
 
     nativeImgElement.ref.getImageWidth = nativeGetImageWidth;
@@ -118,7 +116,7 @@ class ImageElement extends Element {
     super.didAttachRenderer();
     // Should add image box after style has applied to ensure intersection observer
     // attached to correct renderBoxModel
-    if (!_isInLazyLoading) {
+    if (!_isInLazyLoading || _renderImage == null) {
       // Image dimensions (width or height) should specified for performance when lazy-load.
       if (_shouldLazyLoading) {
         _isInLazyLoading = true;
@@ -127,6 +125,7 @@ class ImageElement extends Element {
         renderBoxModel!.addIntersectionChangeListener(_handleIntersectionChange);
       } else {
         _constructImageChild();
+        _loadImage();
       }
     }
     _resize();
@@ -165,9 +164,9 @@ class ImageElement extends Element {
     _nativeMap.remove(nativeImgElement.address);
   }
 
-  double? get width {
-    if (_renderImage != null) {
-      return _renderImage!.width;
+  double get width {
+    if (_renderImage != null && _renderImage!.width != null) {
+      return _renderImage!.width!;
     }
 
     if (renderBoxModel != null && renderBoxModel!.hasSize) {
@@ -178,32 +177,21 @@ class ImageElement extends Element {
     return naturalWidth;
   }
 
-  double? get height {
-    if (_renderImage != null) {
-      return _renderImage!.height;
+  double get height {
+    if (_renderImage != null && _renderImage!.height != null) {
+      return _renderImage!.height!;
     }
 
     if (renderBoxModel != null && renderBoxModel!.hasSize) {
       return renderBoxModel!.clientHeight;
     }
 
-    // Fallback to natural width, if image is not on screen.
+    // Fallback to natural height, if image is not on screen.
     return naturalHeight;
   }
 
-  double get naturalWidth {
-    if (_imageInfo != null) {
-      return _imageInfo!.image.width.toDouble();
-    }
-    return 0.0;
-  }
-
-  double get naturalHeight {
-    if (_imageInfo != null) {
-      return _imageInfo!.image.height.toDouble();
-    }
-    return 0.0;
-  }
+  double get naturalWidth => image?.width.toDouble() ?? 0;
+  double get naturalHeight => image?.height.toDouble() ?? 0;
 
   void _handleIntersectionChange(IntersectionObserverEntry entry) {
     // When appear
@@ -249,19 +237,19 @@ class ImageElement extends Element {
   }
 
   void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
-    _imageInfo = imageInfo;
-
-    if (synchronousCall) {
-      // `synchronousCall` happens when caches image and calling `addListener`.
-      scheduleMicrotask(_handleEventAfterImageLoaded);
-    } else {
-      _handleEventAfterImageLoaded();
-    }
-
-    // Only trigger `initImageListener` once.
-    if (_initImageListener != null) {
-      _imageStream?.removeListener(_initImageListener!);
-    }
+    //
+    //
+    // if (synchronousCall) {
+    //   // `synchronousCall` happens when caches image and calling `addListener`.
+    //   scheduleMicrotask(_handleEventAfterImageLoaded);
+    // } else {
+    //   _handleEventAfterImageLoaded();
+    // }
+    //
+    // // Only trigger `initImageListener` once.
+    // if (_initImageListener != null) {
+    //   _imageStream?.removeListener(_initImageListener!);
+    // }
   }
 
   // Multi frame image should convert to repaint boundary.
@@ -283,6 +271,21 @@ class ImageElement extends Element {
 
     _resize();
     _renderImage?.image = image;
+  }
+
+  // Mark if the same src loaded.
+  bool _loaded = false;
+
+  void _onImageChunk(ImageChunkEvent imageChunkEvent) {
+    if (!_loaded && imageChunkEvent.cumulativeBytesLoaded == imageChunkEvent.expectedTotalBytes) {
+      _handleEventAfterImageLoaded();
+      _loaded = true;
+    }
+  }
+
+  void _onImageError(Object exception, StackTrace? stackTrace) {
+    // @TODO: Native side support error event.
+    // dispatchEvent(Event(EVENT_ERROR));
   }
 
   // Delay image size setting to next frame to make sure image has been layouted
@@ -351,11 +354,6 @@ class ImageElement extends Element {
 
   void _removeStreamListener() {
     _imageStream?.removeListener(_renderStreamListener);
-
-    if (_initImageListener != null) {
-      _imageStream?.removeListener(_initImageListener!);
-      _initImageListener = null;
-    }
     _imageStream = null;
   }
 
@@ -376,6 +374,7 @@ class ImageElement extends Element {
     super.removeProperty(key);
     if (key == 'src') {
       _removeImage();
+      _loaded = false;
     } else if (key == 'loading' && _isInLazyLoading && _imageProvider == null) {
       _resetLazyLoading();
     }
@@ -383,6 +382,7 @@ class ImageElement extends Element {
 
   @override
   void setProperty(String key, dynamic value) {
+    bool propertyChanged = properties[key] != value;
     super.setProperty(key, value);
     double? rootFontSize;
     double? fontSize;
@@ -393,8 +393,9 @@ class ImageElement extends Element {
 
     // Reset frame number to zero when image needs to reload
     _frameCount = 0;
-    if (key == 'src' && !_shouldLazyLoading) {
+    if (key == 'src' && propertyChanged && !_shouldLazyLoading) {
       // Loads the image immediately.
+      _loaded = false;
       _loadImage();
     } else if (key == 'loading' && _isInLazyLoading) {
       // Should reset lazy when value change.
@@ -427,21 +428,20 @@ class ImageElement extends Element {
   }
 
   void _loadImage() {
-    if (_source != null) {
+    if (_source != null && _imageStream == null) {
       _removeStreamListener();
 
       Uri base = Uri.parse(elementManager.controller.href);
       Uri resolvedUri = elementManager.controller.uriParser!.resolve(base, Uri.parse(_source!));
 
-      ImageProvider? imageProvider = CSSUrl.parseUrl(resolvedUri,
+      ImageProvider? imageProvider = _imageProvider ?? CSSUrl.parseUrl(resolvedUri,
           cache: properties['caching'], contextId: elementManager.contextId);
 
       if (imageProvider != null) {
         _imageProvider = imageProvider;
         _imageStream = imageProvider
             .resolve(ImageConfiguration.empty)
-            ..addListener(_renderStreamListener)
-            ..addListener(_initImageListener = ImageStreamListener(_initImageInfo));
+            ..addListener(_renderStreamListener);
       }
     }
   }

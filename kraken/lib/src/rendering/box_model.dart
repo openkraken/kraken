@@ -326,10 +326,9 @@ class RenderLayoutBox extends RenderBoxModel
       // Text box always has baseline
       if (childDistance == null &&
           isChildInline &&
-          child is RenderBoxModel &&
-          child.contentSize != null) {
+          child is RenderBoxModel) {
         // Flutter only allow access size of direct children, so cannot use child.size
-        Size childSize = child.getBoxSize(child.contentSize!);
+        Size childSize = child.getBoxSize(child.contentSize);
         childDistance = childSize.height;
       }
 
@@ -1175,13 +1174,7 @@ class RenderBoxModel extends RenderBox
 
   // The contentSize of layout box
   Size? _contentSize;
-
-  Size? get contentSize {
-    if (_contentSize == null) {
-      return Size(0, 0);
-    }
-    return _contentSize;
-  }
+  Size get contentSize => _contentSize ?? Size.zero;
 
   /// Logical content width calculated from style
   double? logicalContentWidth;
@@ -1190,7 +1183,7 @@ class RenderBoxModel extends RenderBox
   double? logicalContentHeight;
 
   double get clientWidth {
-    double width = contentSize!.width;
+    double width = contentSize.width;
     if (renderStyle.padding != null) {
       width += renderStyle.padding!.horizontal;
     }
@@ -1198,7 +1191,7 @@ class RenderBoxModel extends RenderBox
   }
 
   double get clientHeight {
-    double height = contentSize!.height;
+    double height = contentSize.height;
     if (renderStyle.padding != null) {
       height += renderStyle.padding!.vertical;
     }
