@@ -129,7 +129,7 @@ mixin CSSPositionMixin on RenderStyleBase {
     position = parsePositionType(style[POSITION]);
     // Position change may affect transformed display
     // https://www.w3.org/TR/css-display-3/#transformations
-    renderStyle.transformedDisplay = renderStyle.getTransformedDisplay();
+    renderStyle.updateTransformedDisplay();
   }
 
   void updateZIndex(String present) {

@@ -7,7 +7,17 @@
 import 'dart:ui';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
+
+mixin RenderStyleBase {
+  // Follwing properties used for exposing APIs
+  // for class that extends [RenderStyleBase].
+  late ElementDelegate elementDelegate;
+  late CSSStyleDeclaration style;
+  RenderBoxModel? get renderBoxModel => elementDelegate.getRenderBoxModel();
+  Size get viewportSize => elementDelegate.getViewportSize();
+}
 
 class RenderStyle
   with
@@ -31,22 +41,19 @@ class RenderStyle
     CSSOpacityMixin {
 
   @override
-  RenderBoxModel? renderBoxModel;
+  CSSStyleDeclaration style;
   @override
-  late CSSStyleDeclaration style;
-  @override
-  late Size viewportSize;
+  ElementDelegate elementDelegate;
 
   RenderStyle({
-    this.renderBoxModel,
     required this.style,
-    required this.viewportSize
+    required this.elementDelegate,
   });
 
   /// Resolve percentage size to px base on size of its containing block
   /// https://www.w3.org/TR/css-sizing-3/#percentage-sizing
   bool resolvePercentageToContainingBlock(RenderBoxModel parent) {
-    if (!renderBoxModel!.hasSize) {
+    if (!renderBoxModel!.hasSize || renderBoxModel!.parentData is! RenderLayoutParentData) {
       return false;
     }
 
@@ -379,6 +386,8 @@ class RenderStyle
   }
 
   bool isPercentageOfSizingExist(RenderBoxModel parent) {
+    if (renderBoxModel!.parentData is! RenderLayoutParentData) return false;
+
     final RenderLayoutParentData childParentData = renderBoxModel!.parentData as RenderLayoutParentData;
     double parentActualContentHeight = parent.size.height -
       parent.renderStyle.borderTop - parent.renderStyle.borderBottom -
@@ -666,12 +675,3 @@ class RenderStyle
     return realWidth;
   }
 }
-
-mixin RenderStyleBase {
-  // Follwing properties used for exposing APIs
-  // for class that extends [RenderStyleBase].
-  RenderBoxModel? renderBoxModel;
-  late CSSStyleDeclaration style;
-  late Size viewportSize;
-}
-

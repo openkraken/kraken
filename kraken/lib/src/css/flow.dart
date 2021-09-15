@@ -46,7 +46,6 @@ mixin CSSFlowMixin on RenderStyleBase {
   }
 
   void updateFlow() {
-    CSSStyleDeclaration style = this.style;
     textAlign = _getTextAlign(style);
   }
 

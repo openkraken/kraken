@@ -490,7 +490,6 @@ class RenderBoxModel extends RenderBox
     required RenderStyle renderStyle,
     required ElementDelegate elementDelegate
   })  : super() {
-    renderStyle.renderBoxModel = this;
     _elementDelegate = elementDelegate;
     _renderStyle = renderStyle;
   }

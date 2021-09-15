@@ -168,10 +168,10 @@ mixin CSSOverflowMixin on ElementBase {
   }
 
   void _createScrollingLayoutBox(Element element) {
+    // TODO: do not need clone all style
     CSSStyleDeclaration repaintBoundaryStyle = element.style.clone(element);
     repaintBoundaryStyle.setProperty(OVERFLOW, VISIBLE);
-    scrollingContentLayoutBox = Element.createRenderLayout(
-      element,
+    scrollingContentLayoutBox = element.createRenderLayout(
       repaintSelf: true,
       style: repaintBoundaryStyle
     );
@@ -196,8 +196,7 @@ mixin CSSOverflowMixin on ElementBase {
     }
     RenderObject? layoutBoxParent = renderBoxModel!.parent as RenderObject?;
     RenderObject? previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
-    RenderLayoutBox outerLayoutBox = Element.createRenderLayout(
-      element,
+    RenderLayoutBox outerLayoutBox = element.createRenderLayout(
       repaintSelf: true,
       prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?
     );
@@ -221,8 +220,6 @@ mixin CSSOverflowMixin on ElementBase {
 
     _attachRenderObject(element, layoutBoxParent, previousSibling, outerLayoutBox);
     element.renderBoxModel = outerLayoutBox;
-    // Update renderBoxModel reference in renderStyle
-    element.renderBoxModel!.renderStyle.renderBoxModel = outerLayoutBox;
   }
 
   void _downgradeToParentRepaint(Element element) {
@@ -230,8 +227,7 @@ mixin CSSOverflowMixin on ElementBase {
     if (scrollingContentLayoutBox == null) return;
     RenderObject? layoutBoxParent = renderBoxModel!.parent as RenderObject?;
     RenderObject? previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
-    RenderLayoutBox newLayoutBox = Element.createRenderLayout(
-      element,
+    RenderLayoutBox newLayoutBox = element.createRenderLayout(
       repaintSelf: false,
       prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?
     );
@@ -253,8 +249,6 @@ mixin CSSOverflowMixin on ElementBase {
     // Remove inner scrolling box
     newLayoutBox.remove(scrollingContentLayoutBox!);
     scrollingContentLayoutBox = null;
-
-    element.renderBoxModel!.renderStyle.renderBoxModel = newLayoutBox;
 
     // If renderBoxModel should be converted to repaintBoundary caused by styles
     // such as transform or position fixed, convert to repaintBoundary at last.

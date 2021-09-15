@@ -70,7 +70,7 @@ mixin ElementBase on Node {
     }
   }
 
-  RenderStyle? get renderStyle => renderBoxModel!.renderStyle;
+  late RenderStyle renderStyle;
 }
 
 /// Mark the renderer of element as needs layout.
@@ -91,8 +91,12 @@ typedef FocusInput = void Function();
 typedef BlurInput = void Function();
 /// Scroll the input element to the caret.
 typedef ScrollInputToCaret = void Function();
-/// Get the font size of root element
+/// Get the font size of root element.
 typedef GetRootElementFontSize = double Function();
+/// Get the viewport size of current element.
+typedef GetViewportSize = Size Function();
+/// Get the render box model of current element.
+typedef GetRenderBoxModel = RenderBoxModel? Function();
 
 /// Delegate methods passed to renderBoxModel for actions involved with element
 /// (eg. convert renderBoxModel to repaint boundary then attach to element).
@@ -107,6 +111,8 @@ class ElementDelegate {
   BlurInput blurInput;
   ScrollInputToCaret scrollInputToCaret;
   GetRootElementFontSize getRootElementFontSize;
+  GetViewportSize getViewportSize;
+  GetRenderBoxModel getRenderBoxModel;
 
   ElementDelegate(
     this.markRendererNeedsLayout,
@@ -118,7 +124,9 @@ class ElementDelegate {
     this.focusInput,
     this.blurInput,
     this.scrollInputToCaret,
-    this.getRootElementFontSize
+    this.getRootElementFontSize,
+    this.getViewportSize,
+    this.getRenderBoxModel,
   );
 }
 
@@ -145,9 +153,6 @@ class Element extends Node
 
   final String tagName;
 
-  /// The default display type.
-  final String defaultDisplay;
-
   /// Is element an intrinsic box.
   final bool _isIntrinsicBox;
 
@@ -161,6 +166,8 @@ class Element extends Node
 
   /// The inline style is a map of style property name to style property value.
   final Map<String, dynamic> inlineStyle = {};
+
+  late ElementDelegate _elementDelegate;
 
   Size get viewportSize => elementManager.viewport.viewportSize;
 
@@ -193,20 +200,10 @@ class Element extends Node
         bool isHiddenElement = false})
       : _defaultStyle = defaultStyle,
         _isIntrinsicBox = isIntrinsicBox,
-        defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : INLINE,
         super(NodeType.ELEMENT_NODE, targetId, nativeElementPtr.ref.nativeNode, elementManager, tagName) {
-    
+
     style = CSSStyleDeclaration.computedStyle(this);
-    if (!isHiddenElement) {
-      _nativeMap[nativeElementPtr.address] = this;
-    }
-
-    bindNativeMethods(nativeElementPtr);
-    _applyDefaultStyle();
-  }
-
-  ElementDelegate get elementDelegate {
-    return ElementDelegate(
+    _elementDelegate = ElementDelegate(
       _markRendererNeedsLayout,
       _toggleRendererRepaintBoundary,
       _detachRenderer,
@@ -216,8 +213,27 @@ class Element extends Node
       _focusInput,
       _blurInput,
       _scrollInputToCaret,
-      _getRootElementFontSize
+      _getRootElementFontSize,
+      _getViewportSize,
+      _getRenderBoxModel,
     );
+
+    renderStyle = RenderStyle(style: style, elementDelegate: _elementDelegate);
+
+    if (!isHiddenElement) {
+      _nativeMap[nativeElementPtr.address] = this;
+    }
+
+    bindNativeMethods(nativeElementPtr);
+    _applyDefaultStyle();
+  }
+
+  Size _getViewportSize() {
+    return elementManager.viewport.viewportSize;
+  }
+
+  RenderBoxModel? _getRenderBoxModel() {
+    return renderBoxModel;
   }
 
   void _markRendererNeedsLayout() {
@@ -281,15 +297,9 @@ class Element extends Node
 
     // Content children layout, BoxModel content.
     if (_isIntrinsicBox) {
-      _renderIntrinsic = createRenderIntrinsic(
-        this,
-        repaintSelf: repaintSelf,
-      );
+      _renderIntrinsic = createRenderIntrinsic(repaintSelf: repaintSelf);
     } else {
-      _renderLayoutBox = createRenderLayout(
-        this,
-        repaintSelf: repaintSelf,
-      );
+      _renderLayoutBox = createRenderLayout(repaintSelf: repaintSelf);
     }
 
     return renderer!;
@@ -301,13 +311,11 @@ class Element extends Node
     style.addStyleChangeListener(_onStyleChanged);
     // Init default style value.
     style.flushPendingProperties();
+    renderStyle.initDisplay();
   }
 
   @override
   void didAttachRenderer() {
-    // Set display and transformeDisplay when display is not set in style.
-    renderBoxModel!.renderStyle.initDisplay(style, defaultDisplay);
-
     // Bind pointer responder.
     addEventResponder(renderBoxModel!);
 
@@ -416,7 +424,6 @@ class Element extends Node
       }
     }
     RenderBoxModel targetRenderBox = createRenderBoxModel(
-      this,
       prevRenderBoxModel: _renderBoxModel,
       repaintSelf: repaintSelf
     );
@@ -429,8 +436,6 @@ class Element extends Node
     }
 
     renderBoxModel = _renderBoxModel = targetRenderBox;
-    // Update renderBoxModel reference in renderStyle
-    _renderBoxModel.renderStyle.renderBoxModel = targetRenderBox;
   }
 
   void _updatePosition(String present) {
@@ -584,7 +589,7 @@ class Element extends Node
   // Attach renderObject of current node to parent
   @override
   void attachTo(Element parent, {RenderBox? after}) {
-    CSSDisplay display = CSSDisplayMixin.getDisplay(style[DISPLAY] ?? defaultDisplay);
+    CSSDisplay display = CSSDisplayMixin.getDisplay(style[DISPLAY]);
     if (display != CSSDisplay.none) {
       _beforeRendererAttach();
       parent.addChildRenderObject(this, after: after);
@@ -876,7 +881,7 @@ class Element extends Node
     renderStyle.updateMargin(property, presentValue);
     // Margin change in flex layout may affect transformed display
     // https://www.w3.org/TR/css-display-3/#transformations
-    renderStyle.transformedDisplay = renderStyle.getTransformedDisplay();
+    renderStyle.updateTransformedDisplay();
   }
 
   void _updateFlexItem() {
@@ -1032,6 +1037,9 @@ class Element extends Node
       case ALIGN_ITEMS:
       case JUSTIFY_CONTENT:
         renderStyle.updateFlexbox();
+        // Flex properties change may affect transformed display
+        // https://www.w3.org/TR/css-display-3/#transformations
+        renderStyle.updateTransformedDisplay();
         break;
 
       case ALIGN_SELF:
@@ -1205,7 +1213,7 @@ class Element extends Node
 
   // Set style property.
   void _setStyleProperty(String propertyName, value, [bool? isImportant]) {
-    CSSDisplay originalDisplay = CSSDisplayMixin.getDisplay(style[DISPLAY] ?? defaultDisplay);
+    CSSDisplay originalDisplay = CSSDisplayMixin.getDisplay(style[DISPLAY]);
     style.setProperty(propertyName, value, isImportant, viewportSize);
 
     // When renderer and style listener is not created when original display is none,
@@ -1241,6 +1249,7 @@ class Element extends Node
     _applyStyleSheetStyle();
 
     style.flushPendingProperties();
+    renderStyle.initDisplay();
 
     // Update children style.
     children.forEach((Element child) {
@@ -1428,44 +1437,32 @@ class Element extends Node
     }
   }
 
-  static RenderBoxModel createRenderBoxModel(
-    Element element,
-    {
+  RenderBoxModel createRenderBoxModel({
       RenderBoxModel? prevRenderBoxModel,
       bool repaintSelf = false
-    }
-  ) {
-    RenderBoxModel? renderBoxModel = prevRenderBoxModel ?? element.renderBoxModel;
+  }) {
+    RenderBoxModel? renderBoxModel = prevRenderBoxModel ?? this.renderBoxModel;
 
     if (renderBoxModel is RenderIntrinsic) {
       return createRenderIntrinsic(
-        element,
         prevRenderIntrinsic: prevRenderBoxModel as RenderIntrinsic?,
         repaintSelf: repaintSelf
       );
     } else {
       return createRenderLayout(
-        element,
         prevRenderLayoutBox: prevRenderBoxModel as RenderLayoutBox?,
         repaintSelf: repaintSelf
       );
     }
   }
 
-  static RenderLayoutBox createRenderLayout(
-    Element element,
-    {
+  RenderLayoutBox createRenderLayout({
       CSSStyleDeclaration? style,
       RenderLayoutBox? prevRenderLayoutBox,
       bool repaintSelf = false
-    }
-  ) {
-    style = style ?? element.style;
-    CSSDisplay display = CSSDisplayMixin.getDisplay(
-      CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? element.defaultDisplay : style[DISPLAY]
-    );
-    RenderStyle renderStyle = RenderStyle(style: style, viewportSize: element.viewportSize);
-    ElementDelegate elementDelegate = element.elementDelegate;
+  }) {
+    style = style ?? this.style;
+    CSSDisplay display = CSSDisplayMixin.getDisplay(style[DISPLAY]);
 
     if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
       RenderFlexLayout? flexLayout;
@@ -1474,12 +1471,12 @@ class Element extends Node
         if (repaintSelf) {
           flexLayout = RenderSelfRepaintFlexLayout(
             renderStyle: renderStyle,
-            elementDelegate: elementDelegate,
+            elementDelegate: _elementDelegate,
           );
         } else {
           flexLayout = RenderFlexLayout(
             renderStyle: renderStyle,
-            elementDelegate: elementDelegate,
+            elementDelegate: _elementDelegate,
           );
         }
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
@@ -1524,11 +1521,8 @@ class Element extends Node
         flexLayout = prevRenderLayoutBox.toFlexLayout();
       }
 
-      flexLayout!.renderStyle.updateFlexbox();
-
-      /// Set display and transformedDisplay when display is not set in style
-      flexLayout.renderStyle.initDisplay(element.style, element.defaultDisplay);
-      return flexLayout;
+      renderStyle.updateFlexbox();
+      return flexLayout!;
     } else if (display == CSSDisplay.block ||
       display == CSSDisplay.none ||
       display == CSSDisplay.inline ||
@@ -1539,12 +1533,12 @@ class Element extends Node
         if (repaintSelf) {
           flowLayout = RenderSelfRepaintFlowLayout(
             renderStyle: renderStyle,
-            elementDelegate: elementDelegate,
+            elementDelegate: _elementDelegate,
           );
         } else {
           flowLayout = RenderFlowLayout(
             renderStyle: renderStyle,
-            elementDelegate: elementDelegate,
+            elementDelegate: _elementDelegate,
           );
         }
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
@@ -1591,8 +1585,6 @@ class Element extends Node
       }
 
       flowLayout!.renderStyle.updateFlow();
-      /// Set display and transformedDisplay when display is not set in style
-      flowLayout.renderStyle.initDisplay(element.style, element.defaultDisplay);
       return flowLayout;
     } else if (display == CSSDisplay.sliver) {
       RenderRecyclerLayout? renderRecyclerLayout;
@@ -1600,7 +1592,7 @@ class Element extends Node
       if (prevRenderLayoutBox == null) {
         renderRecyclerLayout = RenderRecyclerLayout(
           renderStyle: renderStyle,
-          elementDelegate: elementDelegate,
+          elementDelegate: _elementDelegate,
         );
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
         renderRecyclerLayout = prevRenderLayoutBox.toRenderRecyclerLayout();
@@ -1610,35 +1602,28 @@ class Element extends Node
         renderRecyclerLayout = prevRenderLayoutBox;
       }
 
-      /// Set display and transformedDisplay when display is not set in style
-      renderRecyclerLayout!.renderStyle.initDisplay(element.style, element.defaultDisplay);
-      return renderRecyclerLayout;
+      return renderRecyclerLayout!;
     } else {
       throw FlutterError('Not supported display type $display');
     }
   }
 
-  static RenderIntrinsic createRenderIntrinsic(
-    Element element,
-    {
+  RenderIntrinsic createRenderIntrinsic({
       RenderIntrinsic? prevRenderIntrinsic,
       bool repaintSelf = false
-    }
-  ) {
+  }) {
     RenderIntrinsic intrinsic;
-    RenderStyle renderStyle = RenderStyle(style: element.style, viewportSize: element.viewportSize);
-    ElementDelegate elementDelegate = element.elementDelegate;
 
     if (prevRenderIntrinsic == null) {
       if (repaintSelf) {
         intrinsic = RenderSelfRepaintIntrinsic(
           renderStyle,
-          elementDelegate
+          _elementDelegate
         );
       } else {
         intrinsic = RenderIntrinsic(
           renderStyle,
-          elementDelegate
+          _elementDelegate
         );
       }
     } else {
@@ -1670,8 +1655,8 @@ Element? _findContainingBlock(Element element) {
   Element rootEl = element.elementManager.viewportElement;
 
   while (_el != null) {
-    bool isElementNonStatic = _el.renderStyle!.position != CSSPositionType.static;
-    bool hasTransform = _el.renderStyle!.transform != null;
+    bool isElementNonStatic = _el.renderStyle.position != CSSPositionType.static;
+    bool hasTransform = _el.renderStyle.transform != null;
     // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
     if (_el == rootEl || isElementNonStatic || hasTransform) {
       break;
