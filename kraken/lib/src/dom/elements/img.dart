@@ -3,17 +3,17 @@
  * Author: Kraken Team.
  */
 
+import 'dart:async';
+import 'dart:collection';
+import 'dart:ffi';
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/rendering.dart';
 import 'package:kraken/bridge.dart';
-import 'dart:async';
-import 'dart:ffi';
-import 'dart:collection';
+import 'package:kraken/css.dart';
+import 'package:kraken/dom.dart';
+import 'package:kraken/rendering.dart';
 
 const String IMAGE = 'IMG';
 
@@ -96,7 +96,7 @@ class ImageElement extends Element {
       isIntrinsicBox: true,
       tagName: IMAGE,
       defaultStyle: _defaultStyle) {
-    _renderStreamListener = ImageStreamListener(_renderImageStream, onChunk: _onImageChunk, onError: _onImageError);
+    _renderStreamListener = ImageStreamListener(_renderImageStream, onError: _onImageError);
     _nativeMap[nativeImgElement.address] = this;
 
     nativeImgElement.ref.getImageWidth = nativeGetImageWidth;
@@ -236,22 +236,6 @@ class ImageElement extends Element {
     }
   }
 
-  void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
-    //
-    //
-    // if (synchronousCall) {
-    //   // `synchronousCall` happens when caches image and calling `addListener`.
-    //   scheduleMicrotask(_handleEventAfterImageLoaded);
-    // } else {
-    //   _handleEventAfterImageLoaded();
-    // }
-    //
-    // // Only trigger `initImageListener` once.
-    // if (_initImageListener != null) {
-    //   _imageStream?.removeListener(_initImageListener!);
-    // }
-  }
-
   // Multi frame image should convert to repaint boundary.
   @override
   bool get shouldConvertToRepaintBoundary => _frameCount > 2 || super.shouldConvertToRepaintBoundary;
@@ -259,6 +243,18 @@ class ImageElement extends Element {
   void _renderImageStream(ImageInfo imageInfo, bool synchronousCall) {
     _frameCount++;
     _imageInfo = imageInfo;
+
+    // Only trigger load once.
+    if (!_loaded) {
+      _loaded = true;
+
+      if (synchronousCall) {
+        // `synchronousCall` happens when caches image and calling `addListener`.
+        scheduleMicrotask(_handleEventAfterImageLoaded);
+      } else {
+        _handleEventAfterImageLoaded();
+      }
+    }
 
     // @HACK Flutter image cache will cause image steam listener to trigger twice when page reload
     // so use two frames to tell multi frame image from static image, note this optimization will fail
@@ -276,15 +272,9 @@ class ImageElement extends Element {
   // Mark if the same src loaded.
   bool _loaded = false;
 
-  void _onImageChunk(ImageChunkEvent imageChunkEvent) {
-    if (!_loaded && imageChunkEvent.cumulativeBytesLoaded == imageChunkEvent.expectedTotalBytes) {
-      _handleEventAfterImageLoaded();
-      _loaded = true;
-    }
-  }
-
   void _onImageError(Object exception, StackTrace? stackTrace) {
     // @TODO: Native side support error event.
+    // https://github.com/openkraken/kraken/issues/686
     // dispatchEvent(Event(EVENT_ERROR));
   }
 

@@ -285,4 +285,28 @@ describe('Tags img', () => {
       }
     }, 100);
   });
+
+  it('gif can replay', async (done) => {
+    const imageURL = 'assets/sample-gif-40k.gif';
+    const img = document.createElement('img');
+    img.src = imageURL;
+
+    img.onload = async () => {
+      await snapshot(img);
+      document.body.removeChild(img);
+      
+      setTimeout(() => {
+        document.body.appendChild(img);
+        // After next frame that image has shown.
+        requestAnimationFrame(async () => {
+          // When replay, the image should be same as first frame.
+          await snapshot(img);
+          done();
+        });
+        // Delay 600ms to play gif.
+      }, 600);
+    };
+
+    document.body.appendChild(img);
+  });
 });
