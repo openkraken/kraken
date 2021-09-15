@@ -270,6 +270,7 @@ class RenderLayoutBox extends RenderBoxModel
         }
       }
     }
+
     sortedChildren.insert(insertIdx, child);
   }
 
