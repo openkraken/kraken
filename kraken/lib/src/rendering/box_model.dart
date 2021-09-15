@@ -183,18 +183,11 @@ class RenderLayoutBox extends RenderBoxModel
     _sortedChildren = value;
   }
 
+  // No need to override [all] and [addAll] method cause they invoke [insert] method eventually.
   @override
   void insert(RenderBox child, {RenderBox? after}) {
     super.insert(child, after: after);
-    sortAfterInsert(child, after: after);
-  }
-
-  @override
-  void addAll(List<RenderBox>? children) {
-    super.addAll(children);
-    if (children != null) {
-      sortAfterAddAll(children);
-    }
+    insertChildInSortedChildren(child, after: after);
   }
 
   @override
@@ -218,25 +211,46 @@ class RenderLayoutBox extends RenderBoxModel
   @override
   void move(RenderBox child, {RenderBox? after}) {
     super.move(child, after: after);
-    sortAfterMove(child, after: after);
-  }
-
-  // Must be override in child Class.
-  void sortChildrenByZIndex(List<RenderBox> children) {}
-
-  void sortAfterAddAll(List<RenderBox> children) {
-    sortChildrenByZIndex(children);
-  }
-
-  void sortAfterInsert(RenderBox child, {RenderBox? after}) {
-    int index = after != null ? sortedChildren.indexOf(after) + 1 : 0;
-    sortedChildren.insert(index, child);
-    sortChildrenByZIndex(sortedChildren);
-  }
-
-  void sortAfterMove(RenderBox child, {RenderBox? after}) {
     sortedChildren.remove(child);
-    sortAfterInsert(child, after: after);
+    insertChildInSortedChildren(child, after: after);
+  }
+
+  // Sort siblings by zIndex.
+  // Should be override in child Class according to different zIndex rule of Flow and Flex layout.
+  int sortSiblingsByZIndex(RenderObject prev, RenderObject next) { return -1; }
+
+  // Insert child in sortedChildren.
+  void insertChildInSortedChildren(RenderBox child, {RenderBox? after}) {
+    // Original index to insert at ignoring zIndex.
+    int insertIdx = after != null ? sortedChildren.indexOf(after) + 1 : 0;
+    // The final index to insert at considering zIndex.
+    int searchIdx = insertIdx;
+
+    // Compare zIndex to previous siblings first, if found sibling zIndex bigger than
+    // child, insert child at that position directly, otherwise compare zIndex to next siblings.
+    if (insertIdx > 0) {
+      while(searchIdx > 0) {
+        RenderObject prevSibling = sortedChildren[searchIdx - 1];
+        if (sortSiblingsByZIndex(prevSibling, child) > 0) {
+          searchIdx--;
+        } else {
+          break;
+        }
+      }
+    }
+
+    // If no previous siblings has zIndex bigger than child, compare zIndex to next siblings.
+    if (searchIdx == insertIdx && searchIdx < sortedChildren.length) {
+      while(searchIdx < sortedChildren.length) {
+        RenderObject nextSibling = sortedChildren[searchIdx];
+        if (sortSiblingsByZIndex(child, nextSibling) > 0) {
+          searchIdx++;
+        } else {
+          break;
+        }
+      }
+    }
+    sortedChildren.insert(searchIdx, child);
   }
 
   // Get all children as a list and detach them all.

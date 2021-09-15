@@ -1677,30 +1677,27 @@ class RenderFlowLayout extends RenderLayoutBox {
   }
 
   @override
-  void sortChildrenByZIndex(List<RenderBox> children) {
-    children.sort((RenderObject? prev, RenderObject? next) {
-      CSSPositionType prevPosition = prev is RenderBoxModel
-          ? prev.renderStyle.position
-          : CSSPositionType.static;
-      CSSPositionType nextPosition = next is RenderBoxModel
-          ? next.renderStyle.position
-          : CSSPositionType.static;
-      // Place positioned element after non positioned element
-      if (prevPosition == CSSPositionType.static &&
-          nextPosition != CSSPositionType.static) {
-        return -1;
-      }
-      if (prevPosition != CSSPositionType.static &&
-          nextPosition == CSSPositionType.static) {
-        return 1;
-      }
-      int prevZIndex =
-          prev is RenderBoxModel ? (prev.renderStyle.zIndex ?? 0) : 0;
-      int nextZIndex =
-          next is RenderBoxModel ? (next.renderStyle.zIndex ?? 0) : 0;
-      return prevZIndex - nextZIndex;
-    });
-    sortedChildren = children;
+  int sortSiblingsByZIndex(RenderObject prev, RenderObject next) {
+    CSSPositionType prevPosition = prev is RenderBoxModel
+      ? prev.renderStyle.position
+      : CSSPositionType.static;
+    CSSPositionType nextPosition = next is RenderBoxModel
+      ? next.renderStyle.position
+      : CSSPositionType.static;
+    // Place positioned element after non positioned element
+    if (prevPosition == CSSPositionType.static &&
+      nextPosition != CSSPositionType.static) {
+      return -1;
+    }
+    if (prevPosition != CSSPositionType.static &&
+      nextPosition == CSSPositionType.static) {
+      return 1;
+    }
+    int prevZIndex =
+      prev is RenderBoxModel ? (prev.renderStyle.zIndex ?? 0) : 0;
+    int nextZIndex =
+      next is RenderBoxModel ? (next.renderStyle.zIndex ?? 0) : 0;
+    return prevZIndex - nextZIndex;
   }
 
   @override
