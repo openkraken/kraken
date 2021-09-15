@@ -221,19 +221,6 @@ class RenderLayoutBox extends RenderBoxModel
     return -1;
   }
 
-  RenderBox? _findNonPositionHolderNextSibling(RenderBox? nextSibling) {
-    if (nextSibling != null) {
-      final RenderLayoutParentData parentData = nextSibling.parentData as RenderLayoutParentData;
-      while (nextSibling != null) {
-        nextSibling = parentData.nextSibling;
-        if (nextSibling is! RenderPositionHolder) {
-          break;
-        }
-      }
-    }
-    return nextSibling;
-  }
-
   // Insert child in sortedChildren.
   void insertChildInSortedChildren(RenderBox child, {RenderBox? after}) {
     // No need to paint position holder.
