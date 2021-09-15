@@ -136,18 +136,22 @@ class ImageElement extends Element {
     super.didDetachRenderer();
     style.removeStyleChangeListener(_stylePropertyChanged);
 
-    // Dispose image info.
-    _imageInfo?.dispose();
-    _imageInfo = null;
+    _resetImage();
 
     // Unlink image render box, which has been detached.
     _renderImage = null;
+  }
+
+  void _resetImage() {
+    _imageInfo = null;
 
     // @NOTE: Evict image cache, make multi frame image can replay.
     // https://github.com/flutter/flutter/issues/51775
     _imageProvider?.evict();
+    _imageProvider = null;
 
     _removeStreamListener();
+    _renderImage?.image = null;
   }
 
   @override
@@ -206,12 +210,6 @@ class ImageElement extends Element {
   void _resetLazyLoading() {
     _isInLazyLoading = false;
     renderBoxModel!.removeIntersectionChangeListener(_handleIntersectionChange);
-  }
-
-  void _removeImage() {
-    _removeStreamListener();
-    _imageProvider = null;
-    _renderImage!.image = null;
   }
 
   void _constructImageChild() {
@@ -363,7 +361,7 @@ class ImageElement extends Element {
   void removeProperty(String key) {
     super.removeProperty(key);
     if (key == 'src') {
-      _removeImage();
+      _resetImage();
       _loaded = false;
     } else if (key == 'loading' && _isInLazyLoading && _imageProvider == null) {
       _resetLazyLoading();
@@ -418,7 +416,9 @@ class ImageElement extends Element {
   }
 
   void _loadImage() {
-    if (_source != null && _imageStream == null) {
+    _resetImage();
+
+    if (_source != null) {
       _removeStreamListener();
 
       Uri base = Uri.parse(elementManager.controller.href);
