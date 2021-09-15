@@ -651,8 +651,6 @@ class Element extends Node
   @mustCallSuper
   Node appendChild(Node child) {
     super.appendChild(child);
-
-    _debugCheckNestedInline(child);
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
       if (!child.isRendererAttached) {
@@ -681,18 +679,9 @@ class Element extends Node
     return child;
   }
 
-  void _debugCheckNestedInline(Node child) {
-    // @NOTE: Make sure inline-box only have inline children, or print warning.
-    if ((child is Element) && !child.isInlineBox && isInlineContent) {
-      print('[WARN]: Can not nest non-inline element into non-inline parent element.');
-    }
-  }
-
   @override
   @mustCallSuper
   Node insertBefore(Node child, Node referenceNode) {
-    _debugCheckNestedInline(child);
-
     int referenceIndex = childNodes.indexOf(referenceNode);
     // Node.insertBefore will change element tree structure,
     // so get the referenceIndex before calling it.
@@ -780,19 +769,6 @@ class Element extends Node
     if (fixedChildren.contains(childRenderBoxModel)) {
       fixedChildren.remove(childRenderBoxModel);
     }
-  }
-
-  // Inline box including inline/inline-block/inline-flex/...
-  bool get isInlineBox {
-    CSSDisplay? displayValue = renderStyle!.display;
-    // TODO: CSSDisplay.inlineTable || CSSDisplay.inlineGrid
-    return displayValue == CSSDisplay.inline || displayValue == CSSDisplay.inlineBlock ||
-      displayValue == CSSDisplay.inlineFlex;
-  }
-
-  // Inline content means children should be inline elements.
-  bool get isInlineContent {
-    return renderStyle!.display == CSSDisplay.inline;
   }
 
   void _onStyleChanged(String property, String? original, String present) {
