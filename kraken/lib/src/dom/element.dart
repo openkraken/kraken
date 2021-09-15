@@ -1107,7 +1107,7 @@ class Element extends Node
 
       case OVERFLOW_X:
       case OVERFLOW_Y:
-        updateRenderOverflow(this);
+        updateRenderOverflow(this, _handleScroll);
         break;
 
       case BACKGROUND_COLOR:

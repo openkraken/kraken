@@ -85,8 +85,7 @@ mixin CSSOverflowMixin on ElementBase {
   // House content which can be scrolled.
   RenderLayoutBox? scrollingContentLayoutBox;
 
-  void updateRenderOverflow(Element element) {
-    ScrollListener scrollListener = element.elementDelegate.handleScroll;
+  void updateRenderOverflow(Element element, ScrollListener scrollListener) {
     CSSStyleDeclaration style = element.style;
     RenderBoxModel renderBoxModel = element.renderBoxModel!;
     RenderStyle renderStyle = renderBoxModel.renderStyle;
