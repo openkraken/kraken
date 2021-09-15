@@ -1484,6 +1484,9 @@ class RenderBoxModel extends RenderBox
     if (fixedChildren.isNotEmpty) {
       fixedChildren.clear();
     }
+
+    // Evict render decoration image cache.
+    _renderStyle.decoration?.image?.image.evict();
   }
 
   Offset getTotalScrollOffset() {

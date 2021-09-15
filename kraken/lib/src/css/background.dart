@@ -96,6 +96,9 @@ class CSSBackground {
       return null;
     }
 
+    // Method may contain quotation mark, like ['"assets/foo.png"']
+    url = _shuckOffQuotationMark(url);
+
     ImageRepeat imageRepeat = ImageRepeat.repeat;
     if (style![BACKGROUND_REPEAT].isNotEmpty) {
       switch (style[BACKGROUND_REPEAT]) {
@@ -111,16 +114,18 @@ class CSSBackground {
       }
     }
 
+    Uri uri = Uri.parse(url);
     if (contextId != null && url.isNotEmpty) {
       KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
       if (controller != null) {
-        Uri uri = controller.uriParser!.resolve(Uri.parse(controller.href), Uri.parse(url));
-        backgroundImage = DecorationImage(
-          image: CSSUrl.parseUrl(uri, contextId: contextId)!,
-          repeat: imageRepeat,
-        );
+        uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri);
       }
     }
+
+    backgroundImage = DecorationImage(
+      image: CSSUrl.parseUrl(uri, contextId: contextId)!,
+      repeat: imageRepeat,
+    );
 
     return backgroundImage;
   }
@@ -403,4 +408,14 @@ class CSSBackground {
     }
     return colorGradients;
   }
+}
+
+const String _singleQuote = '\'';
+const String _doubleQuote = '"';
+String _shuckOffQuotationMark(String input) {
+  if ((input.startsWith(_singleQuote) && input.endsWith(_singleQuote))
+      || (input.startsWith(_doubleQuote) && input.endsWith(_doubleQuote))) {
+    input = input.substring(1, input.length - 1);
+  }
+  return input;
 }
