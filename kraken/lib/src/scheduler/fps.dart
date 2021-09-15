@@ -68,7 +68,7 @@ class FpsInfo {
 
   @override
   String toString() {
-    return '$runtimeType(Max: ${fps}fps, UI: ${uiSpan.toStringAsFixed(2)}ms, GPU: ${gpuSpan.toStringAsFixed(2)}ms, TOTAL: ${totalSpan.toStringAsFixed(2)}ms)';
+    return 'Max: ${fps}fps, UI: ${uiSpan.toStringAsFixed(2)}ms, GPU: ${gpuSpan.toStringAsFixed(2)}ms, Total: ${totalSpan.toStringAsFixed(2)}ms';
   }
 }
 

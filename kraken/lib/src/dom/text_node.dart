@@ -11,7 +11,6 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
-
 final RegExp _whiteSpaceReg = RegExp(r'\s+');
 const String WHITE_SPACE_CHAR = ' ';
 const String NEW_LINE_CHAR = '\n';
@@ -60,9 +59,9 @@ class TextNode extends Node {
         whiteSpace == WhiteSpace.preLine ||
         whiteSpace == WhiteSpace.preWrap ||
         whiteSpace == WhiteSpace.breakSpaces) {
-      return whiteSpace == WhiteSpace.preLine ? collapseWhitespace(_d) : _d;
+      return whiteSpace == WhiteSpace.preLine ? _collapseWhitespace(_d) : _d;
     } else {
-      String collapsedData = collapseWhitespace(_d);
+      String collapsedData = _collapseWhitespace(_d);
       // TODO:
       // Remove the leading space while prev element have space too:
       //   <p><span>foo </span> bar</p>
@@ -201,18 +200,15 @@ class TextNode extends Node {
   @override
   void dispose() {
     super.dispose();
-    if (isRendererAttached) {
-      detach();
-    }
+
+    detach();
 
     assert(_renderTextBox == null);
     _nativeMap.remove(_nativePtr.address);
   }
 }
 
-bool isWhiteSpace(String ch) => ch == WHITE_SPACE_CHAR || ch == TAB_CHAR || ch == NEW_LINE_CHAR || ch == RETURN_CHAR;
-
 // '  a b  c   \n' => ' a b c '
-String collapseWhitespace(String string) {
+String _collapseWhitespace(String string) {
   return string.replaceAll(_whiteSpaceReg, WHITE_SPACE_CHAR);
 }
