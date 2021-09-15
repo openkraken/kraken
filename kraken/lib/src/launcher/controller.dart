@@ -11,9 +11,9 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/widget.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/gesture.dart';
@@ -86,6 +86,8 @@ class KrakenViewController {
 
   Color? background;
 
+  WidgetDelegate? widgetDelegate;
+
   KrakenViewController(
     this._viewportWidth,
     this._viewportHeight, {
@@ -97,6 +99,7 @@ class KrakenViewController {
     this.navigationDelegate,
     this.gestureClient,
     this.eventClient,
+    this.widgetDelegate,
   }) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT);
@@ -139,6 +142,7 @@ class KrakenViewController {
       showPerformanceOverlayOverride: showPerformanceOverlay,
       controller: rootController,
       eventClient: eventClient,
+      widgetDelegate: widgetDelegate,
     );
 
     if (kProfileMode) {
@@ -430,6 +434,8 @@ class KrakenController {
     return getControllerOfJSContextId(contextId);
   }
 
+  WidgetDelegate? widgetDelegate;
+
   LoadHandler? onLoad;
 
   // Error handler when load bundle failed.
@@ -475,6 +481,7 @@ class KrakenController {
     EventClient? eventClient,
     KrakenNavigationDelegate? navigationDelegate,
     KrakenMethodChannel? methodChannel,
+    this.widgetDelegate,
     this.onLoad,
     this.onLoadError,
     this.onJSError,
@@ -503,6 +510,7 @@ class KrakenController {
         navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate(),
         gestureClient: _gestureClient,
         eventClient: _eventClient,
+        widgetDelegate: widgetDelegate,
     );
 
     if (kProfileMode) {

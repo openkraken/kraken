@@ -366,4 +366,49 @@ describe('Overflow', () => {
 
     expect(clickCount).toBe(2);
   });
+
+  // @TODO simulateSwipe method fails to trigger element scroll.
+  // https://github.com/openkraken/kraken/issues/680
+  xit('scroll works with overflowY set to auto and overflowX not set', async (done) => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          overflowY: 'auto',
+        },
+      }, [
+        createElement(
+          'div',
+          {
+            style: {
+            width: '200px',
+            height: '200px',
+            backgroundColor: 'green',
+
+            },
+        }),
+        createElement(
+          'div',
+          {
+            style: {
+            width: '200px',
+            height: '200px',
+            backgroundColor: 'yellow',
+
+            },
+        }),
+      ],
+    );
+    BODY.appendChild(div);
+    await snapshot();
+    await simulateSwipe(50, 100, 50, 20, 0.1);
+
+    setTimeout(async () => {
+      await snapshot();
+      done();
+    }, 200);
+  });
 });

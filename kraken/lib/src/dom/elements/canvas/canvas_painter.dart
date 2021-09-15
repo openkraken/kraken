@@ -8,16 +8,19 @@ import 'package:flutter/rendering.dart';
 import 'canvas_context_2d.dart';
 
 class CanvasPainter extends CustomPainter {
-  CanvasPainter({required Listenable repaint}): super(repaint: repaint);
+  CanvasPainter({ required Listenable repaint }): super(repaint: repaint);
+
   CanvasRenderingContext2D? context;
 
+  final Paint _saveLayerPaint = Paint();
+  final Paint _snapshotPaint = Paint();
+
+  // Cache the last paint image.
+  Image? _snapshot;
   bool _shouldRepaint = false;
-  PictureRecorder? _pictureRecorder;
-  Picture? _picture;
-  Canvas? _canvas;
 
   bool get _shouldPainting => context != null && context!.actionCount > 0;
-  bool get _hasSnapshot => context != null && _picture != null && _picture!.approximateBytesUsed > 0;
+  bool get _hasSnapshot => context != null && _snapshot != null;
 
   // Notice: Canvas is stateless, change scaleX or scaleY will case dropping drawn content.
   /// https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-set-bitmap-dimensions
@@ -39,19 +42,17 @@ class CanvasPainter extends CustomPainter {
     }
   }
 
-  final Paint _saveLayerPaint = Paint();
-
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(Canvas canvas, Size size) async {
     if (_hasSnapshot && !_shouldPainting) {
-      return canvas.drawPicture(_picture!);
+      return canvas.drawImage(_snapshot!, Offset.zero, _snapshotPaint);
     }
 
-    _pictureRecorder = PictureRecorder();
-    _canvas = Canvas(_pictureRecorder!);
+    final PictureRecorder pictureRecorder = PictureRecorder();
+    final Canvas recordCanvas = Canvas(pictureRecorder);
 
     if (_scaleX != 1.0 || _scaleY != 1.0) {
-      _canvas!.scale(_scaleX, _scaleY);
+      recordCanvas.scale(_scaleX, _scaleY);
     }
 
     // This lets you create composite effects, for example making a group of drawing commands semi-transparent.
@@ -59,27 +60,31 @@ class CanvasPainter extends CustomPainter {
     // so where they overlap would be darker than where they do not. By using saveLayer to group them together,
     // they can be drawn with an opaque color at first,
     // and then the entire group can be made transparent using the saveLayer's paint.
-    _canvas!.saveLayer(null, _saveLayerPaint);
+    recordCanvas.saveLayer(null, _saveLayerPaint);
 
     // Paint last content
     if (_hasSnapshot) {
-      _canvas!.drawPicture(_picture!);
+      recordCanvas.drawImage(_snapshot!, Offset.zero, _snapshotPaint);
+      _disposeSnapshot();
     }
 
     // Paint new actions
     if (_shouldPainting) {
-      context!.performActions(_canvas!, size);
+      context!.performActions(recordCanvas, size);
     }
 
     // Must pair each call to save()/saveLayer() with a later matching call to restore().
-    _canvas!.restore();
+    recordCanvas.restore();
 
     // After calling this function, both the picture recorder
     // and the canvas objects are invalid and cannot be used further.
-    _picture = _pictureRecorder!.endRecording();
+    final Picture picture = pictureRecorder.endRecording();
+    canvas.drawPicture(picture);
 
-    canvas.drawPicture(_picture!);
-
+    // Must flat picture to image, or raster will accept a growing command buffer.
+    _snapshot = await picture.toImage(size.width.toInt(), size.height.toInt());
+    // Dispose the used picture.
+    picture.dispose();
   }
 
   @override
@@ -92,21 +97,16 @@ class CanvasPainter extends CustomPainter {
   }
 
   void _resetPaintingContext() {
-    _picture?.dispose();
-    _picture = null;
+    _disposeSnapshot();
     _shouldRepaint = true;
   }
 
-  void dispose() {
-    if (_pictureRecorder != null) {
-      if (_pictureRecorder!.isRecording) {
-        _pictureRecorder!.endRecording().dispose();
-      }
-      _pictureRecorder = null;
-    }
+  void _disposeSnapshot() {
+    _snapshot?.dispose();
+    _snapshot = null;
+  }
 
-    _picture?.dispose();
-    _picture = null;
-    _canvas = null;
+  void dispose() {
+    _disposeSnapshot();
   }
 }

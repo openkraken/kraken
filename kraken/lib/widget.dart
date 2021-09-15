@@ -8,17 +8,56 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/kraken.dart';
+import 'package:kraken/rendering.dart';
+import 'package:kraken/dom.dart' as dom;
 import 'package:kraken/module.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/src/dom/element_registry.dart';
 import 'package:kraken/src/dom/element_manager.dart';
 import 'package:kraken/bridge.dart';
-import 'package:kraken/dom.dart' as dom;
+
+/// Get context of current widget.
+typedef GetContext = BuildContext Function();
+/// Request focus of current widget.
+typedef RequestFocus = void Function();
+/// Get the target platform.
+typedef GetTargetPlatform = TargetPlatform Function();
+/// Get the cursor color according to the widget theme and platform theme.
+typedef GetCursorColor = Color Function();
+/// Get the selection color according to the widget theme and platform theme.
+typedef GetSelectionColor = Color Function();
+/// Get the cursor radius according to the target platform.
+typedef GetCursorRadius = Radius Function();
+/// Get the text selection controls according to the target platform.
+typedef GetTextSelectionControls = TextSelectionControls Function();
+
+/// Delegate methods of widget
+class WidgetDelegate {
+  GetContext getContext;
+  RequestFocus requestFocus;
+  GetTargetPlatform getTargetPlatform;
+  GetCursorColor getCursorColor;
+  GetSelectionColor getSelectionColor;
+  GetCursorRadius getCursorRadius;
+  GetTextSelectionControls getTextSelectionControls;
+
+  WidgetDelegate(
+    this.getContext,
+    this.requestFocus,
+    this.getTargetPlatform,
+    this.getCursorColor,
+    this.getSelectionColor,
+    this.getCursorRadius,
+    this.getTextSelectionControls,
+  );
+}
 
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
@@ -118,7 +157,7 @@ class _KrakenAdapterWidgetPropertiesState extends State<_KrakenAdapterWidget> {
   }
 }
 
-class Kraken extends StatelessWidget {
+class Kraken extends StatefulWidget {
   // The background color for viewport, default to transparent.
   final Color? background;
 
@@ -281,18 +320,511 @@ class Kraken extends StatelessWidget {
   }
 
   @override
+  _KrakenState createState() => _KrakenState();
+
+}
+class _KrakenState extends State<Kraken> {
+  Map<Type, Action<Intent>>? _actionMap;
+
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _actionMap = <Type, Action<Intent>>{
+      // Action of focus.
+      NextFocusIntent: CallbackAction<NextFocusIntent>(onInvoke: _handleNextFocus),
+      PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(onInvoke: _handlePreviousFocus),
+
+      // Action of mouse move hotkeys.
+      MoveSelectionRightByLineTextIntent: CallbackAction<MoveSelectionRightByLineTextIntent>(onInvoke: _handleMoveSelectionRightByLineText),
+      MoveSelectionLeftByLineTextIntent: CallbackAction<MoveSelectionLeftByLineTextIntent>(onInvoke: _handleMoveSelectionLeftByLineText),
+      MoveSelectionRightByWordTextIntent: CallbackAction<MoveSelectionRightByWordTextIntent>(onInvoke: _handleMoveSelectionRightByWordText),
+      MoveSelectionLeftByWordTextIntent: CallbackAction<MoveSelectionLeftByWordTextIntent>(onInvoke: _handleMoveSelectionLeftByWordText),
+      MoveSelectionUpTextIntent: CallbackAction<MoveSelectionUpTextIntent>(onInvoke: _handleMoveSelectionUpText),
+      MoveSelectionDownTextIntent: CallbackAction<MoveSelectionDownTextIntent>(onInvoke: _handleMoveSelectionDownText),
+      MoveSelectionLeftTextIntent: CallbackAction<MoveSelectionLeftTextIntent>(onInvoke: _handleMoveSelectionLeftText),
+      MoveSelectionRightTextIntent: CallbackAction<MoveSelectionRightTextIntent>(onInvoke: _handleMoveSelectionRightText),
+      MoveSelectionToStartTextIntent: CallbackAction<MoveSelectionToStartTextIntent>(onInvoke: _handleMoveSelectionToStartText),
+      MoveSelectionToEndTextIntent: CallbackAction<MoveSelectionToEndTextIntent>(onInvoke: _handleMoveSelectionToEndText),
+
+      // Action of selection hotkeys.
+      ExtendSelectionLeftTextIntent: CallbackAction<ExtendSelectionLeftTextIntent>(onInvoke: _handleExtendSelectionLeftText),
+      ExtendSelectionRightTextIntent: CallbackAction<ExtendSelectionRightTextIntent>(onInvoke: _handleExtendSelectionRightText),
+      ExtendSelectionUpTextIntent: CallbackAction<ExtendSelectionUpTextIntent>(onInvoke: _handleExtendSelectionUpText),
+      ExtendSelectionDownTextIntent: CallbackAction<ExtendSelectionDownTextIntent>(onInvoke: _handleExtendSelectionDownText),
+      ExpandSelectionToEndTextIntent: CallbackAction<ExpandSelectionToEndTextIntent>(onInvoke: _handleExtendSelectionToEndText),
+      ExpandSelectionToStartTextIntent: CallbackAction<ExpandSelectionToStartTextIntent>(onInvoke: _handleExtendSelectionToStartText),
+      ExpandSelectionLeftByLineTextIntent: CallbackAction<ExpandSelectionLeftByLineTextIntent>(onInvoke: _handleExtendSelectionLeftByLineText),
+      ExpandSelectionRightByLineTextIntent: CallbackAction<ExpandSelectionRightByLineTextIntent>(onInvoke: _handleExtendSelectionRightByLineText),
+      ExtendSelectionLeftByWordTextIntent: CallbackAction<ExtendSelectionLeftByWordTextIntent>(onInvoke: _handleExtendSelectionLeftByWordText),
+      ExtendSelectionRightByWordTextIntent: CallbackAction<ExtendSelectionRightByWordTextIntent>(onInvoke: _handleExtendSelectionRightByWordText),
+    };
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return _KrakenRenderObjectWidget(this);
+    return RepaintBoundary(
+      child: FocusableActionDetector(
+        actions: _actionMap,
+        focusNode: _focusNode,
+        onFocusChange: _handleFocusChange,
+        child: _KrakenRenderObjectWidget(
+          context.widget as Kraken,
+          widgetDelegate,
+        )
+      )
+    );
+  }
+
+  WidgetDelegate get widgetDelegate {
+    return WidgetDelegate(
+      _getContext,
+      _requestFocus,
+      _getTargetPlatform,
+      _getCursorColor,
+      _getSelectionColor,
+      _getCursorRadius,
+      _getTextSelectionControls,
+    );
+  }
+
+  // Get context of current widget.
+  BuildContext _getContext() {
+    return context;
+  }
+
+  // Request focus of current widget.
+  void _requestFocus() {
+    _focusNode.requestFocus();
+  }
+
+  // Get the target platform.
+  TargetPlatform _getTargetPlatform() {
+    final ThemeData theme = Theme.of(context);
+    return theme.platform;
+  }
+
+  // Get the cursor color according to the widget theme and platform theme.
+  Color _getCursorColor() {
+    Color cursorColor = CSSColor.initial;
+    TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
+    ThemeData theme = Theme.of(context);
+
+    switch (theme.platform) {
+      case TargetPlatform.iOS:
+        final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
+        cursorColor = selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
+        break;
+
+      case TargetPlatform.macOS:
+        final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
+        cursorColor = selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
+        break;
+
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        cursorColor = selectionTheme.cursorColor ?? theme.colorScheme.primary;
+        break;
+
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        cursorColor = selectionTheme.cursorColor ?? theme.colorScheme.primary;
+        break;
+    }
+
+    return cursorColor;
+  }
+
+  // Get the selection color according to the widget theme and platform theme.
+  Color _getSelectionColor() {
+    Color selectionColor = CSSColor.initial.withOpacity(0.4);
+    TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
+    ThemeData theme = Theme.of(context);
+
+    switch (theme.platform) {
+      case TargetPlatform.iOS:
+        final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
+        selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
+        break;
+
+      case TargetPlatform.macOS:
+        final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
+        selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
+        break;
+
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+        break;
+
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+        break;
+    }
+
+    return selectionColor;
+  }
+
+  // Get the cursor radius according to the target platform.
+  Radius _getCursorRadius() {
+    Radius cursorRadius = const Radius.circular(2.0);
+    TargetPlatform platform = _getTargetPlatform();
+
+    switch (platform) {
+      case TargetPlatform.iOS:
+        cursorRadius = const Radius.circular(2.0);
+        break;
+
+      case TargetPlatform.macOS:
+        cursorRadius = const Radius.circular(2.0);
+        break;
+
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        break;
+    }
+
+    return cursorRadius;
+  }
+
+  // Get the text selection controls according to the target platform.
+  TextSelectionControls _getTextSelectionControls() {
+    TextSelectionControls _selectionControls;
+    TargetPlatform platform = _getTargetPlatform();
+
+    switch (platform) {
+      case TargetPlatform.iOS:
+        _selectionControls = cupertinoTextSelectionControls;
+        break;
+
+      case TargetPlatform.macOS:
+        _selectionControls = cupertinoDesktopTextSelectionControls;
+        break;
+
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        _selectionControls = materialTextSelectionControls;
+        break;
+
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        _selectionControls = desktopTextSelectionControls;
+        break;
+    }
+
+    return _selectionControls;
+  }
+
+  // Handle focus change of focusNode.
+  void _handleFocusChange(bool focused) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.isNotEmpty) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      if (focused) {
+        if (dom.InputElement.focusInputElement == null) {
+          _focusInput(editables[0]);
+        }
+      } else {
+        if (focusedEditable != null) {
+          _blurInput(focusedEditable);
+        }
+      }
+    }
+  }
+
+  // Handle focus action usually by pressing the [Tab] hotkey.
+  void _handleNextFocus(NextFocusIntent intent) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.isNotEmpty) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      // None editable is focused, focus the first editable.
+      if (focusedEditable == null) {
+        _focusNode.requestFocus();
+        _focusInput(editables[0]);
+
+      // Some editable is focused, focus the next editable, if it is the last editable,
+      // then focus the next widget.
+      } else {
+        int idx = editables.indexOf(focusedEditable);
+        if (idx == editables.length - 1) {
+          _focusNode.nextFocus();
+          _blurInput(editables[editables.length - 1]);
+        } else {
+          _focusNode.requestFocus();
+          _blurInput(editables[idx]);
+          _focusInput(editables[idx + 1]);
+        }
+      }
+
+    // None editable exists, focus the next widget.
+    } else {
+      _focusNode.nextFocus();
+    }
+  }
+
+  // Handle focus action usually by pressing the [Shift]+[Tab] hotkey in the reverse direction.
+  void _handlePreviousFocus(PreviousFocusIntent intent) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
+    if (editables.isNotEmpty) {
+      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+      // None editable is focused, focus the last editable.
+      if (focusedEditable == null) {
+        _focusNode.requestFocus();
+        _focusInput(editables[editables.length - 1]);
+
+        // Some editable is focused, focus the previous editable, if it is the first editable,
+        // then focus the previous widget.
+      } else {
+        int idx = editables.indexOf(focusedEditable);
+        if (idx == 0) {
+          _focusNode.previousFocus();
+          _blurInput(editables[0]);
+        } else {
+          _focusNode.requestFocus();
+          _blurInput(editables[idx]);
+          _focusInput(editables[idx - 1]);
+        }
+      }
+    // None editable exists, focus the previous widget.
+    } else {
+      _focusNode.previousFocus();
+    }
+  }
+
+  void _handleMoveSelectionRightByLineText(MoveSelectionRightByLineTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
+      // Make caret visilbe while moving cursor.
+      _scrollFocusedInputToCaret(focusedEditable);
+    }
+  }
+
+  void _handleMoveSelectionLeftByLineText(MoveSelectionLeftByLineTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
+      // Make caret visilbe while moving cursor.
+      _scrollFocusedInputToCaret(focusedEditable);
+    }
+  }
+
+  void _handleMoveSelectionRightByWordText(MoveSelectionRightByWordTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.moveSelectionRightByWord(SelectionChangedCause.keyboard);
+      // Make caret visilbe while moving cursor.
+      _scrollFocusedInputToCaret(focusedEditable);
+    }
+  }
+
+  void _handleMoveSelectionLeftByWordText(MoveSelectionLeftByWordTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.moveSelectionLeftByWord(SelectionChangedCause.keyboard);
+      // Make caret visilbe while moving cursor.
+      _scrollFocusedInputToCaret(focusedEditable);
+    }
+  }
+
+  void _handleMoveSelectionUpText(MoveSelectionUpTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.moveSelectionUp(SelectionChangedCause.keyboard);
+      // Make caret visilbe while moving cursor.
+      _scrollFocusedInputToCaret(focusedEditable);
+    }
+  }
+
+  void _handleMoveSelectionDownText(MoveSelectionDownTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.moveSelectionDown(SelectionChangedCause.keyboard);
+      // Make caret visilbe while moving cursor.
+      _scrollFocusedInputToCaret(focusedEditable);
+    }
+  }
+
+  void _handleMoveSelectionLeftText(MoveSelectionLeftTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.moveSelectionLeft(SelectionChangedCause.keyboard);
+      // Make caret visilbe while moving cursor.
+      _scrollFocusedInputToCaret(focusedEditable);
+    }
+  }
+
+  void _handleMoveSelectionRightText(MoveSelectionRightTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.moveSelectionRight(SelectionChangedCause.keyboard);
+      // Make caret visilbe while moving cursor.
+      _scrollFocusedInputToCaret(focusedEditable);
+    }
+  }
+
+  void _handleMoveSelectionToEndText(MoveSelectionToEndTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.moveSelectionToEnd(SelectionChangedCause.keyboard);
+      // Make caret visilbe while moving cursor.
+      _scrollFocusedInputToCaret(focusedEditable);
+    }
+  }
+
+  void _handleMoveSelectionToStartText(MoveSelectionToStartTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.moveSelectionToStart(SelectionChangedCause.keyboard);
+      // Make caret visilbe while moving cursor.
+      _scrollFocusedInputToCaret(focusedEditable);
+    }
+  }
+
+  void _handleExtendSelectionLeftText(ExtendSelectionLeftTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.extendSelectionLeft(SelectionChangedCause.keyboard);
+    }
+  }
+
+  void _handleExtendSelectionRightText(ExtendSelectionRightTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.extendSelectionRight(SelectionChangedCause.keyboard);
+    }
+  }
+
+  void _handleExtendSelectionUpText(ExtendSelectionUpTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.extendSelectionUp(SelectionChangedCause.keyboard);
+    }
+  }
+
+  void _handleExtendSelectionDownText(ExtendSelectionDownTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.extendSelectionDown(SelectionChangedCause.keyboard);
+    }
+  }
+
+  void _handleExtendSelectionToEndText(ExpandSelectionToEndTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.expandSelectionToEnd(SelectionChangedCause.keyboard);
+    }
+  }
+
+  void _handleExtendSelectionToStartText(ExpandSelectionToStartTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.expandSelectionToStart(SelectionChangedCause.keyboard);
+    }
+  }
+
+  void _handleExtendSelectionLeftByLineText(ExpandSelectionLeftByLineTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.expandSelectionLeftByLine(SelectionChangedCause.keyboard);
+    }
+  }
+
+  void _handleExtendSelectionRightByLineText(ExpandSelectionRightByLineTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.expandSelectionRightByLine(SelectionChangedCause.keyboard);
+    }
+  }
+
+  void _handleExtendSelectionLeftByWordText(ExtendSelectionLeftByWordTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.extendSelectionLeftByWord(SelectionChangedCause.keyboard);
+    }
+  }
+
+  void _handleExtendSelectionRightByWordText(ExtendSelectionRightByWordTextIntent intent) {
+    RenderEditable? focusedEditable = _findFocusedEditable();
+    if (focusedEditable != null) {
+      focusedEditable.extendSelectionRightByWord(SelectionChangedCause.keyboard);
+    }
+  }
+
+  // Make the input element of the RenderEditable focus.
+  void _focusInput(RenderEditable renderEditable) {
+    dom.RenderInputBox renderInputBox = renderEditable.parent as dom.RenderInputBox;
+    dom.RenderInputLeaderLayer renderInputLeaderLayer = renderInputBox.parent as dom.RenderInputLeaderLayer;
+    RenderIntrinsic renderIntrisic = renderInputLeaderLayer.parent as RenderIntrinsic;
+    renderIntrisic.elementDelegate.focusInput();
+  }
+
+  // Make the input element of the RenderEditable blur.
+  void _blurInput(RenderEditable renderEditable) {
+    dom.RenderInputBox renderInputBox = renderEditable.parent as dom.RenderInputBox;
+    dom.RenderInputLeaderLayer renderInputLeaderLayer = renderInputBox.parent as dom.RenderInputLeaderLayer;
+    RenderIntrinsic renderIntrisic = renderInputLeaderLayer.parent as RenderIntrinsic;
+    renderIntrisic.elementDelegate.blurInput();
+  }
+
+  // Find all the RenderEditables in the widget.
+  List<RenderEditable> _findEditables(RenderObject parent) {
+    List<RenderEditable> result = [];
+    parent.visitChildren((RenderObject child) {
+      if (child is RenderEditable) {
+        result.add(child);
+      } else {
+        List<RenderEditable> children = _findEditables(child);
+        result.addAll(children);
+      }
+    });
+    return result;
+  }
+
+  // Find the focused RenderEditable in the widget.
+  RenderEditable? _findFocusedEditable([List<RenderEditable>? editables]) {
+    RenderEditable? result;
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    editables ??= _findEditables(_rootRenderObject!);
+
+    if (editables.isNotEmpty) {
+      for (RenderEditable editable in editables) {
+        if (editable.hasFocus) {
+          result = editable;
+        }
+      }
+    }
+    return result;
+  }
+
+  // Scroll the focused input box to the caret to make it visible.
+  void _scrollFocusedInputToCaret(RenderEditable focusedEditable) {
+    dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
+    dom.RenderInputLeaderLayer renderInputLeaderLayer = renderInputBox.parent as dom.RenderInputLeaderLayer;
+    RenderIntrinsic renderIntrisic = renderInputLeaderLayer.parent as RenderIntrinsic;
+    renderIntrisic.elementDelegate.scrollInputToCaret();
   }
 }
 
 class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
-  const _KrakenRenderObjectWidget(Kraken widget, {Key? key})
-      : _krakenWidget = widget,
-        super(key: key);
+  const _KrakenRenderObjectWidget(
+    Kraken widget,
+    WidgetDelegate widgetDelegate,
+    {Key? key}
+  ) : _krakenWidget = widget,
+      _widgetDelegate = widgetDelegate,
+      super(key: key);
 
   final Kraken _krakenWidget;
+  final WidgetDelegate _widgetDelegate;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -308,7 +840,10 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
 This situation often happened when you trying creating kraken when FlutterView not initialized.''');
     }
 
-    KrakenController controller = KrakenController(shortHash(_krakenWidget.hashCode), viewportWidth, viewportHeight,
+    KrakenController controller = KrakenController(
+      shortHash(_krakenWidget.hashCode),
+      viewportWidth,
+      viewportHeight,
       background: _krakenWidget.background,
       showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
       bundleContent: _krakenWidget.bundleContent,
@@ -323,6 +858,7 @@ This situation often happened when you trying creating kraken when FlutterView n
       navigationDelegate: _krakenWidget.navigationDelegate,
       devToolsService: _krakenWidget.devToolsService,
       httpClientInterceptor: _krakenWidget.httpClientInterceptor,
+      widgetDelegate: _widgetDelegate,
       uriParser: _krakenWidget.uriParser
     );
 
