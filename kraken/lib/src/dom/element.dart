@@ -401,7 +401,7 @@ class Element extends Node
 
     RenderObject? parentRenderObject = _renderBoxModel.parent as RenderObject?;
     RenderBox? previousSibling;
-    List<RenderBox>? sortedChildren;
+    List<RenderObject>? sortedChildren;
     // Remove old renderObject
     if (parentRenderObject is ContainerRenderObjectMixin) {
       ContainerParentDataMixin<RenderBox>? _parentData = _renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>?;

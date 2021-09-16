@@ -174,13 +174,13 @@ class RenderLayoutBox extends RenderBoxModel
   }
 
   // Sort children by zIndex, used for paint and hitTest.
-  List<RenderBox> _sortedChildren = [];
+  List<RenderObject> _sortedChildren = [];
 
-  List<RenderBox> get sortedChildren {
+  List<RenderObject> get sortedChildren {
     return _sortedChildren;
   }
 
-  set sortedChildren(List<RenderBox> value) {
+  set sortedChildren(List<RenderObject> value) {
     _sortedChildren = value;
   }
 
