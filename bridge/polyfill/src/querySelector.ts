@@ -20,12 +20,6 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
   temp = fetchSelector(selector, /#[\w-_]+/g);
   let id = temp.selectors ? temp.selectors[0] : null;
   selector = temp.ruleStr;
-
-  // Classes. e.g. .row.
-  temp = fetchSelector(selector, /\.[\w-_]+/g);
-  let classes = temp.selectors;
-  selector = temp.ruleStr;
-
   // TODO: now only support "equal".
   // Attributes. e.g. [rel=external].
   temp = fetchSelector(selector, /\[.+?\]/g);
@@ -35,6 +29,11 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
   // Elements. e.g. header, div.
   temp = fetchSelector(selector, /\w+/g);
   let els = temp.selectors;
+  selector = temp.ruleStr;
+
+  // Classes. e.g. .row.
+  temp = fetchSelector(selector, /\.[\w-_]+/g);
+  let classes = temp.selectors;
   selector = temp.ruleStr;
 
   // Get by id.
@@ -50,7 +49,7 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
     let temps: HTMLCollectionOf<Element> = context.getElementsByTagName(els[0]);
     tempElements = tempElements.concat(Array.from(temps));
   }
-
+  
   // Get by class name.
   for (let i = 0, l = classes.length; i !== l; ++i) {
     let className = classes[i].substring(1);
@@ -74,7 +73,7 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
       }
     }
   }
-
+  
   // Get by attributes.
   if (attributes.length !== 0) {
     let attrs = {};
@@ -90,6 +89,7 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
     let prevs:Array<Element> = [];
     prevs = prevs.concat(tempElements);
     tempElements = [];
+    
     for (let i = 0, l = prevs.length; i !== l; ++i) {
       let t = prevs[i];
       let shouldAdd = true;
