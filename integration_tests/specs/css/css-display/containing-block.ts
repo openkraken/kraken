@@ -231,7 +231,7 @@ describe('containing-block', () => {
     );
     document.body.appendChild(p);
 
-    await snapshot(0.5);
+    await snapshot(0.1);
   });
   it('007', async () => {
     let p;
@@ -945,7 +945,7 @@ describe('containing-block', () => {
     );
     document.body.appendChild(div);
 
-    await snapshot(0.5);
+    await snapshot(0.1);
   });
   it('019', async () => {
     let p;
@@ -1018,9 +1018,10 @@ describe('containing-block', () => {
 
     await snapshot();
   });
-  it('020-ref', async () => {
+  it('020-ref', async (done) => {
     let p;
     let div;
+    let img;
     p = createElement(
       'p',
       {
@@ -1051,7 +1052,7 @@ describe('containing-block', () => {
         },
       },
       [
-        createElement('img', {
+        img = createElement('img', {
           src: 'assets/blue96x96.png',
           width: '96',
           height: '96',
@@ -1063,7 +1064,10 @@ describe('containing-block', () => {
     document.body.appendChild(p);
     document.body.appendChild(div);
 
-    await snapshot(0.5);
+    img.onload = async () => {
+      await snapshot();
+      done();
+    }
   });
   it('020', async () => {
     let p;

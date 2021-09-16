@@ -696,7 +696,7 @@ describe('absolute-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('replaced-height-008', async () => {
     let p;
@@ -2332,7 +2332,7 @@ describe('absolute-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('replaced-width-003', async () => {
     let p;

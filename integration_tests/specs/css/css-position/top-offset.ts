@@ -189,7 +189,7 @@ describe('top-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(inlineBlock);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('003', async () => {
     let p;
