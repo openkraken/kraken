@@ -289,8 +289,7 @@ describe('Tags img', () => {
   it('gif can replay', async (done) => {
     const imageURL = 'assets/sample-gif-40k.gif';
     const img = document.createElement('img');
-    img.src = imageURL;
-
+    
     img.onload = async () => {
       await snapshot(img);
       document.body.removeChild(img);
@@ -308,5 +307,6 @@ describe('Tags img', () => {
     };
 
     document.body.appendChild(img);
+    img.src = imageURL;
   });
 });
