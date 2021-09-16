@@ -97,7 +97,7 @@ class CSSBackground {
     }
 
     // Method may contain quotation mark, like ['"assets/foo.png"']
-    url = _shuckOffQuotationMark(url);
+    url = _removeQuotationMark(url);
 
     ImageRepeat imageRepeat = ImageRepeat.repeat;
     if (style![BACKGROUND_REPEAT].isNotEmpty) {
@@ -412,7 +412,7 @@ class CSSBackground {
 
 const String _singleQuote = '\'';
 const String _doubleQuote = '"';
-String _shuckOffQuotationMark(String input) {
+String _removeQuotationMark(String input) {
   if ((input.startsWith(_singleQuote) && input.endsWith(_singleQuote))
       || (input.startsWith(_doubleQuote) && input.endsWith(_doubleQuote))) {
     input = input.substring(1, input.length - 1);
