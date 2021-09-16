@@ -24,10 +24,12 @@ class SampleElement extends Element {
       : super(targetId, nativeEventTarget, elementManager, tagName: 'sample-element');
 
   @override
-  handleJSCall(String method, List argv) {
-    switch(method) {
+  getProperty(String key) {
+    switch(key) {
       case 'ping':
         return 'pong';
+      case '_fake':
+        return 1234;
       case 'fn':
         return (List<dynamic> args) {
           return List.generate(args.length, (index) {
@@ -35,7 +37,7 @@ class SampleElement extends Element {
           });
         };
       default:
-        return super.handleJSCall(method, argv);
+        return super.getProperty(key);
     }
   }
 }

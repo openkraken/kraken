@@ -1,12 +1,3 @@
-class SampleElement extends Element {
-  constructor() {
-    super();
-  }
-}
-
-// @ts-ignore
-customElements.define('sample-element', SampleElement);
-
 describe('custom widget element', () => {
   it('use flutter text', async () => {
     const text = document.createElement('flutter-text');
@@ -68,5 +59,20 @@ describe('custom html element', () => {
     let arrs = [1, 2, 4, 8, 16];
     // @ts-ignore
     expect(sampleElement.fn.apply(sampleElement, arrs)).toEqual([2, 4, 8, 16, 32]);
+  });
+
+  it('property with underscore have no effect', () => {
+    let sampleElement = document.createElement('sample-element');
+    let text = document.createTextNode('helloworld');
+    sampleElement.appendChild(text);
+    document.body.appendChild(sampleElement);
+
+    // @ts-ignore
+    expect(sampleElement._fake).toBe(null);
+
+    // @ts-ignore
+    sampleElement._fake = [1,2,3,4,5];
+    // @ts-ignore
+    expect(sampleElement._fake).toEqual([1,2,3,4,5]);
   });
 });

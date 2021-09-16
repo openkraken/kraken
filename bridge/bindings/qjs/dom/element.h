@@ -48,7 +48,6 @@ private:
   std::unordered_map<std::string, JSAtom> m_attributes;
 };
 
-bool isJavaScriptExtensionElementConstructor(JSContext *context, JSValue constructor);
 bool isJavaScriptExtensionElementInstance(JSContext *context, JSValue instance);
 
 class Element : public Node {
@@ -72,11 +71,9 @@ public:
   static JSValue scrollBy(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
 
   static void defineElement(const std::string &tagName, Element *constructor);
-  static void defineElement(const std::string &tagName, QjsContext *ctx, JSValue constructor);
   static JSValue getConstructor(JSContext *context, const std::string &tagName);
 
   static std::unordered_map<std::string, Element *> elementConstructorMap;
-  static std::unordered_map<std::string, JSValue> customElementConstructorMap;
 
   OBJECT_INSTANCE(Element);
 

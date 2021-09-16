@@ -367,9 +367,15 @@ JSValue EventTargetInstance::getProperty(QjsContext *ctx, JSValue obj, JSAtom at
 
   // For plugin elements, try to auto generate properties and functions from dart response.
   if (isJavaScriptExtensionElementInstance(eventTarget->context(), eventTarget->instanceObject)) {
-    getDartMethod()->flushUICommand();
     const char* cmethod = JS_AtomToCString(eventTarget->m_ctx, atom);
+    // Property starts with underscore are taken as private property in javascript object.
+    if (cmethod[0] == '_') {
+      JS_FreeCString(eventTarget->m_ctx, cmethod);
+      return JS_NULL;
+    }
     std::string method = "_getProperty_" + std::string(cmethod);
+
+    getDartMethod()->flushUICommand();
     JSValue result = eventTarget->callNativeMethods(method.c_str(), 0, nullptr);
     JS_FreeCString(eventTarget->m_ctx, cmethod);
     return result;
@@ -400,13 +406,13 @@ int EventTargetInstance::setProperty(QjsContext *ctx, JSValue obj, JSAtom atom, 
     // Create strong reference and gc can find it.
     std::string privateKey = "_" + std::to_string(reinterpret_cast<int64_t>(JS_VALUE_GET_PTR(newValue)));
     JS_DefinePropertyValueStr(ctx, eventTarget->instanceObject, privateKey.c_str(), newValue, JS_PROP_NORMAL);
-  }
 
-  if (isJavaScriptExtensionElementInstance(eventTarget->context(), eventTarget->instanceObject)) {
-    NativeString *args_01 = atomToNativeString(ctx, atom);
-    NativeString *args_02 = jsValueToNativeString(ctx, value);
-    foundation::UICommandBuffer::instance(eventTarget->m_contextId)
-      ->addCommand(eventTarget->eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+    if (isJavaScriptExtensionElementInstance(eventTarget->context(), eventTarget->instanceObject) && !p->is_wide_char && p->u.str8[0] != '_') {
+      NativeString *args_01 = atomToNativeString(ctx, atom);
+      NativeString *args_02 = jsValueToNativeString(ctx, value);
+      foundation::UICommandBuffer::instance(eventTarget->m_contextId)
+        ->addCommand(eventTarget->eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+    }
   }
 
   JS_FreeValue(ctx, atomString);

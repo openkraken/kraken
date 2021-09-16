@@ -141,11 +141,8 @@ NativeFunctionContext::~NativeFunctionContext() {
 }
 
 static JSValue anonymousFunction(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic, JSValue *func_data) {
-  JSValue dataObject = func_data[0];
-  auto id = reinterpret_cast<int64_t>(JS_GetOpaque(dataObject, 1));
+  auto id = magic;
   auto *eventTarget = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
-
-  JS_FreeValue(ctx, dataObject);
 
   std::string call_params = "_anonymous_fn_" + std::to_string(id);
 
@@ -200,9 +197,7 @@ JSValue nativeValueToJSValue(JSContext *context, NativeValue &value) {
   }
   case NativeTag::TAG_FUNCTION: {
     int64_t functionId = value.u.int64;
-    JSValue dataObject = JS_NewObject(context->ctx());
-    JS_SetOpaque(dataObject, reinterpret_cast<void *>(functionId));
-    return JS_NewCFunctionData(context->ctx(), anonymousFunction, 4, 0, 1, &dataObject);
+    return JS_NewCFunctionData(context->ctx(), anonymousFunction, 4, functionId, 0, nullptr);
   }
   }
   return JS_NULL;

@@ -19,27 +19,20 @@ void bindElement(std::unique_ptr<JSContext> &context) {
   context->defineGlobalProperty("HTMLElement", JS_DupValue(context->ctx(), constructor->classObject));
 }
 
-bool isJavaScriptExtensionElementConstructor(JSContext *context, JSValue constructor) {
-  JSValue proto;
-  JS_DupValue(context->ctx(), constructor);
-  do {
-    proto = JS_GetPrototype(context->ctx(), constructor);
-    JS_FreeValue(context->ctx(), constructor);
-    if (JS_IsNull(proto)) return false;
-    bool match = JS_VALUE_GET_PTR(proto) == JS_VALUE_GET_PTR(Element::instance(context)->classObject);
-    if (match) {
-      JS_FreeValue(context->ctx(), proto);
-      return true;
-    }
-    constructor = proto;
-  } while (true);
-}
-
 bool isJavaScriptExtensionElementInstance(JSContext *context, JSValue instance) {
-  JSValue constructor = JS_GetPropertyStr(context->ctx(), instance, "constructor");
-  bool match = isJavaScriptExtensionElementConstructor(context, constructor);
-  JS_FreeValue(context->ctx(), constructor);
-  return match;
+  if (JS_IsInstanceOf(context->ctx(), instance, Element::instance(context)->classObject)) {
+    auto *elementInstance = static_cast<ElementInstance *>(JS_GetOpaque(instance, Element::classId()));
+    std::string tagName = elementInstance->getRegisteredTagName();
+
+    // Special case for kraken official plugins.
+    if (tagName == "video" || tagName == "iframe") return true;
+
+    for (char i : tagName) {
+      if (i == '-') return true;
+    }
+  }
+
+  return false;
 }
 
 OBJECT_INSTANCE_IMPL(Element);
@@ -110,39 +103,29 @@ void ElementAttributes::copyWith(ElementAttributes *attributes) {
 }
 
 JSValue Element::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
-  auto *context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
+  if (argc == 0) return JS_ThrowTypeError(ctx, "Illegal constructor");
+  JSValue tagName = argv[0];
 
-  if (isJavaScriptExtensionElementConstructor(context, this_val)) {
-    JSValue tagNameValue = JS_GetPropertyStr(ctx, this_val, "__tagName__");
-    std::string tagName = jsValueToStdString(ctx, tagNameValue);
-    JSValue instance = (new ElementInstance(this, tagName, true))->instanceObject;
-    JS_FreeValue(ctx, tagNameValue);
-    return instance;
-  } else {
-    if (argc == 0) return JS_ThrowTypeError(ctx, "Illegal constructor");
-    JSValue tagName = argv[0];
-
-    if (!JS_IsString(tagName)) {
-      return JS_ThrowTypeError(ctx, "Illegal constructor");
-    }
-
-    std::string name = jsValueToStdString(ctx, tagName);
-
-    if (elementConstructorMap.count(name) > 0) {
-      return JS_CallConstructor(ctx, elementConstructorMap[name]->classObject, argc, argv);
-    }
-
-    ElementInstance *element;
-    if (name == "HTML") {
-      element = new ElementInstance(this, name, false);
-      element->eventTargetId = HTML_TARGET_ID;
-    } else {
-      // Fallback to default Element class
-      element = new ElementInstance(this, name, true);
-    }
-
-    return element->instanceObject;
+  if (!JS_IsString(tagName)) {
+    return JS_ThrowTypeError(ctx, "Illegal constructor");
   }
+
+  std::string name = jsValueToStdString(ctx, tagName);
+
+  if (elementConstructorMap.count(name) > 0) {
+    return JS_CallConstructor(ctx, elementConstructorMap[name]->classObject, argc, argv);
+  }
+
+  ElementInstance *element;
+  if (name == "HTML") {
+    element = new ElementInstance(this, name, false);
+    element->eventTargetId = HTML_TARGET_ID;
+  } else {
+    // Fallback to default Element class
+    element = new ElementInstance(this, name, true);
+  }
+
+  return element->instanceObject;
 }
 
 JSValue Element::getBoundingClientRect(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
@@ -389,18 +372,13 @@ JSValue Element::scrollBy(QjsContext *ctx, JSValue this_val, int argc, JSValue *
 }
 
 std::unordered_map<std::string, Element*> Element::elementConstructorMap{};
-std::unordered_map<std::string, JSValue> Element::customElementConstructorMap{};
 
 void Element::defineElement(const std::string &tagName, Element* constructor) {
   elementConstructorMap[tagName] = constructor;
 }
-void Element::defineElement(const std::string &tagName, QjsContext *ctx, JSValue constructorValue) {
-  customElementConstructorMap[tagName] = JS_DupValue(ctx, constructorValue);
-}
 
 JSValue Element::getConstructor(JSContext *context, const std::string &tagName) {
   if (elementConstructorMap.count(tagName) > 0) return elementConstructorMap[tagName]->classObject;
-  if (customElementConstructorMap.count(tagName) > 0) return customElementConstructorMap[tagName];
   return Element::instance(context)->classObject;
 }
 

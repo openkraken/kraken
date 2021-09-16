@@ -26,7 +26,6 @@
 #include "bindings/qjs/dom/text_node.h"
 #include "bindings/qjs/dom/comment_node.h"
 #include "bindings/qjs/dom/style_declaration.h"
-#include "bindings/qjs/dom/custom_element_registry.h"
 #include "bindings/qjs/dom/elements/.gen/anchor_element.h"
 #include "bindings/qjs/dom/elements/.gen/canvas_element.h"
 #include "bindings/qjs/dom/elements/.gen/image_element.h"
@@ -81,7 +80,6 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindTextNode(m_context);
   bindCommentNode(m_context);
   bindElement(m_context);
-  bindCustomElementRegistry(m_context);
   bindAnchorElement(m_context);
   bindCanvasElement(m_context);
   bindImageElement(m_context);

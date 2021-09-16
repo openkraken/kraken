@@ -307,8 +307,6 @@ elseif ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/dom/comment_node.h
     bindings/qjs/dom/style_declaration.cc
     bindings/qjs/dom/style_declaration.h
-    bindings/qjs/dom/custom_element_registry.cc
-    bindings/qjs/dom/custom_element_registry.h
     bindings/qjs/dom/elements/.gen/canvas_element.cc
     bindings/qjs/dom/elements/.gen/canvas_element.h
     bindings/qjs/dom/elements/.gen/image_element.cc
