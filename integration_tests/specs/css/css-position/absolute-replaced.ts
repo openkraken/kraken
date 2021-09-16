@@ -872,7 +872,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('height-011-ref', async () => {
     let p;
@@ -907,7 +907,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('height-011', async () => {
     let p;
@@ -970,7 +970,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('height-012-ref', async () => {
     let p;
@@ -1128,7 +1128,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('height-014-ref', async () => {
     let p;
@@ -1284,7 +1284,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('height-017', async () => {
     let p;
@@ -1343,7 +1343,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('height-018', async () => {
     let p;
@@ -1593,7 +1593,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('height-023', async () => {
     let p;
@@ -1654,7 +1654,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('height-024', async () => {
     let p;
@@ -1715,7 +1715,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('height-025', async () => {
     let p;
@@ -1971,7 +1971,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('height-030', async () => {
     let p;
@@ -2032,7 +2032,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('height-031', async () => {
     let p;
@@ -2093,7 +2093,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('height-032', async () => {
     let p;
@@ -2408,7 +2408,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(container);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('width-001-ref', async () => {
     let p;
@@ -2768,7 +2768,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('width-006-ref', async () => {
     let p;
@@ -2877,7 +2877,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('width-008', async () => {
     let p;
@@ -2936,7 +2936,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('width-013', async () => {
     let p;
@@ -2997,7 +2997,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('width-015-ref', async () => {
     let p;
@@ -3048,7 +3048,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('width-015', async () => {
     let p;
@@ -3108,7 +3108,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('width-020-ref', async () => {
     let p;
@@ -3224,7 +3224,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('width-022-ref', async () => {
     let p;
@@ -3501,7 +3501,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('width-027-ref', async () => {
     let p;
@@ -3554,7 +3554,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('width-027', async () => {
     let p;
@@ -3616,7 +3616,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('width-029', async () => {
     let p;
@@ -3995,7 +3995,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('width-041-ref', async () => {
     let p;
@@ -4129,7 +4129,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('width-043', async () => {
     let p;
@@ -4201,7 +4201,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('width-048', async () => {
     let p;
@@ -4274,7 +4274,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('width-050', async () => {
     let p;
@@ -4419,7 +4419,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('width-057', async () => {
     let p;
