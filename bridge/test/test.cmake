@@ -44,7 +44,6 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   target_compile_options(kraken PUBLIC -DDUMP_LEAKS=1)
 
   target_compile_definitions(kraken_unit_test PUBLIC -DFLUTTER_BACKEND=0)
-  target_compile_definitions(kraken PUBLIC -DFLUTTER_BACKEND=1)
   target_compile_definitions(kraken_static PUBLIC -DFLUTTER_BACKEND=1)
   if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
     set_target_properties(kraken_unit_test
@@ -61,11 +60,6 @@ target_include_directories(kraken_test PRIVATE
   ${BRIDGE_INCLUDE}
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
 
-if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
-  set_target_properties(kraken_test PROPERTIES OUTPUT_NAME kraken_test_jsc)
-elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
-  set_target_properties(kraken_test PROPERTIES OUTPUT_NAME kraken_test_quickjs)
-endif()
 if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
   set_target_properties(kraken_test
     PROPERTIES

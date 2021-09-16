@@ -91,7 +91,7 @@ class _MyHomePageState extends State<MyBrowser> {
         child: _kraken = Kraken(
           viewportWidth: viewportSize.width - queryData.padding.horizontal,
           viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
-          bundleURL: 'http://localhost:3000/kbc',
+          bundleURL: 'assets/bundle.js',
         ),
     ));
   }

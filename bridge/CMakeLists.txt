@@ -367,6 +367,8 @@ list(APPEND PUBLIC_HEADER
 add_library(kraken SHARED ${BRIDGE_SOURCE})
 add_library(kraken_static STATIC ${BRIDGE_SOURCE})
 
+target_compile_definitions(kraken PUBLIC -DFLUTTER_BACKEND=1)
+
 add_library(gumbo_parse_static STATIC ${GUMBO_PARSER})
 list(APPEND BRIDGE_LINK_LIBS gumbo_parse_static)
 
@@ -422,14 +424,6 @@ add_definitions(-DAPP_REV="${GIT_HEAD}") # Read from git head sha1
 if (${ENABLE_TEST})
   add_compile_definitions(IS_TEST=true)
   include(./test/test.cmake)
-endif ()
-
-if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
-  set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_jsc)
-  set_target_properties(kraken_static PROPERTIES OUTPUT_NAME kraken_jsc)
-elseif ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
-  set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_quickjs)
-  set_target_properties(kraken_static PROPERTIES OUTPUT_NAME kraken_quickjs)
 endif ()
 
 if (DEFINED ENV{LIBRARY_OUTPUT_DIR})

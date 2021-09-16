@@ -214,7 +214,7 @@ task('build-darwin-kraken-lib', done => {
     stdio: 'inherit'
   });
 
-  const binaryPath = path.join(paths.bridge, `build/macos/lib/x86_64/libkraken_${targetJSEngine}.dylib`);
+  const binaryPath = path.join(paths.bridge, `build/macos/lib/x86_64/libkraken.dylib`);
 
   if (targetJSEngine === 'jsc') {
     execSync(`install_name_tool -change /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/JavaScriptCore @rpath/JavaScriptCore.framework/Versions/A/JavaScriptCore ${binaryPath}`);
@@ -417,8 +417,8 @@ task(`build-ios-kraken-lib`, (done) => {
     execSync(`strip -S -X -x ${frameworkPath}/kraken_bridge`, { stdio: 'inherit', cwd: targetDynamicSDKPath });
   }
 
-  const arm64StaticSDKPath = path.join(paths.bridge, `build/ios/lib/arm64/libkraken_${targetJSEngine}.a`);
-  const x64StaticSDKPath = path.join(paths.bridge, `build/ios/lib/x86_64/libkraken_${targetJSEngine}.a`);
+  const arm64StaticSDKPath = path.join(paths.bridge, `build/ios/lib/arm64/libkraken_static.a`);
+  const x64StaticSDKPath = path.join(paths.bridge, `build/ios/lib/x86_64/libkraken_static.a`);
 
   const targetStaticSDKPath = `${paths.bridge}/build/ios/framework`;
   execSync(`libtool -static -o ${targetStaticSDKPath}/libkraken_${targetJSEngine}.a ${arm64StaticSDKPath} ${x64StaticSDKPath}`);
