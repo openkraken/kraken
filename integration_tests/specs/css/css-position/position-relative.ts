@@ -439,7 +439,7 @@ describe('position-relative', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('005', async () => {
     let p;
