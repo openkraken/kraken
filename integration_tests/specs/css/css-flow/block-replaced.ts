@@ -460,7 +460,7 @@ describe('block-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('width-002-ref', async () => {
     let p;
