@@ -158,7 +158,7 @@ describe('Document api', () => {
     expect(document.querySelectorAll('*').length).toBe(8);
   });
 
-  it('work with query attr', () => {
+  it('querySelectorAll work with query attr', () => {
     ['red','black','green','yellow','blue'].forEach((item, index) => {
       const div = document.createElement('div')
       div.style.width = '100px';
@@ -173,7 +173,7 @@ describe('Document api', () => {
     expect(document.querySelectorAll('div[data-test="attr-1"]')?.length).toBe(1);
   });
 
-  it('work with query href of attrs with *', () => {
+  it('querySelectorAll work with query relative href of attrs with *', () => {
     const a = document.createElement('a');
     a.setAttribute('href', 'openkraken.com');
     a.text = 'openkraken.com';
@@ -187,7 +187,7 @@ describe('Document api', () => {
     expect(document.querySelectorAll('a[href*="/path"]').length).toBe(1);
   });
 
-  it('work with query href of attrs with ^', () => {
+  it('querySelectorAll work with query relative href of attrs with ^', () => {
     const a = document.createElement('a');
     a.setAttribute('href', 'openkraken.com');
     a.text = 'openkraken.com';
@@ -201,7 +201,7 @@ describe('Document api', () => {
     expect(document.querySelectorAll('a[href^="/"]').length).toBe(1);
   });
 
-  it('work with query href of attrs with ^ and complete string', () => {
+  it('querySelectorAll work with query relative href of attrs with ^ and complete string', () => {
     const a = document.createElement('a');
     a.setAttribute('href', 'openkraken.com');
     a.text = 'openkraken.com';
@@ -215,7 +215,7 @@ describe('Document api', () => {
     expect(document.querySelectorAll('a[href^="/path"]').length).toBe(1);
   });
 
-  it('work with query href of attrs with $', () => {
+  it('querySelectorAll work with query relative href of attrs with $', () => {
     const a = document.createElement('a');
     a.setAttribute('href', 'openkraken.com');
     a.text = 'openkraken.com';
@@ -229,7 +229,7 @@ describe('Document api', () => {
     expect(document.querySelectorAll('a[href$="th"]').length).toBe(1);
   });
 
-  it('work with query href of attrs with $ and complete string', () => {
+  it('querySelectorAll work with query relative href of attrs with $ and complete string', () => {
     const a = document.createElement('a');
     a.setAttribute('href', 'openkraken.com');
     a.text = 'openkraken.com';
@@ -243,7 +243,7 @@ describe('Document api', () => {
     expect(document.querySelectorAll('a[href$="/path"]').length).toBe(1);
   });
 
-  it('work with query href', () => {
+  it('querySelectorAll work with query relative href', () => {
     const a = document.createElement('a');
     a.setAttribute('href', 'openkraken.com');
     a.text = 'openkraken.com';
@@ -255,5 +255,91 @@ describe('Document api', () => {
     document.body.appendChild(path);
 
     expect(document.querySelectorAll('a[href="/path"]').length).toBe(1);
+  });
+
+
+
+  it('querySelector work with query relative href of attrs with *', () => {
+    const a = document.createElement('a');
+    a.setAttribute('href', 'openkraken.com');
+    a.text = 'openkraken.com';
+    document.body.appendChild(a);
+
+    const path = document.createElement('a');
+    path.setAttribute('href', '/path');
+    path.text = 'path';
+    document.body.appendChild(path);
+
+    expect(document.querySelector('a[href*="/path"]')?.getAttribute('href')).toBe('/path');
+  });
+
+  it('querySelector work with query relative href of attrs with ^', () => {
+    const a = document.createElement('a');
+    a.setAttribute('href', 'openkraken.com');
+    a.text = 'openkraken.com';
+    document.body.appendChild(a);
+
+    const path = document.createElement('a');
+    path.setAttribute('href', '/path');
+    path.text = 'path';
+    document.body.appendChild(path);
+
+    expect(document.querySelector('a[href^="/"]')?.getAttribute('href')).toBe('/path');
+  });
+
+  it('querySelector work with query relative href of attrs with ^ and complete string', () => {
+    const a = document.createElement('a');
+    a.setAttribute('href', 'openkraken.com');
+    a.text = 'openkraken.com';
+    document.body.appendChild(a);
+
+    const path = document.createElement('a');
+    path.setAttribute('href', '/path');
+    path.text = 'path';
+    document.body.appendChild(path);
+
+    expect(document.querySelector('a[href^="/path"]')?.getAttribute('href')).toBe('/path');
+  });
+
+  it('querySelector work with query relative href of attrs with $', () => {
+    const a = document.createElement('a');
+    a.setAttribute('href', 'openkraken.com');
+    a.text = 'openkraken.com';
+    document.body.appendChild(a);
+
+    const path = document.createElement('a');
+    path.setAttribute('href', '/path');
+    path.text = 'path';
+    document.body.appendChild(path);
+
+    expect(document.querySelector('a[href$="th"]')?.getAttribute('href')).toBe('/path');
+  });
+
+  it('querySelector work with query relative href of attrs with $ and complete string', () => {
+    const a = document.createElement('a');
+    a.setAttribute('href', 'openkraken.com');
+    a.text = 'openkraken.com';
+    document.body.appendChild(a);
+
+    const path = document.createElement('a');
+    path.setAttribute('href', '/path');
+    path.text = 'path';
+    document.body.appendChild(path);
+
+    expect(document.querySelector('a[href$="/path"]')?.getAttribute('href')).toBe('/path');
+  });
+
+  it('querySelector work with query relative href', () => {
+    const a = document.createElement('a');
+    a.setAttribute('href', 'openkraken.com');
+    a.text = 'openkraken.com';
+    document.body.appendChild(a);
+
+    const path = document.createElement('a');
+    path.setAttribute('href', '/path');
+    path.text = 'path';
+    document.body.appendChild(path);
+
+    expect(document.querySelector('a[href="/path"]')?.getAttribute('href')).toBe('/path');
   });
 });
