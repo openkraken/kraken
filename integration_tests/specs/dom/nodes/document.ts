@@ -90,7 +90,7 @@ describe('Document api', () => {
     expect(eles[0].getAttribute('id')).toBe('id-0');
   })
 
-  it('document querySelectorAll cant find element', () => {
+  it('document querySelectorAll cant find element by tag name', () => {
     ['red','black','green','yellow','blue'].forEach((item, index) => {
       const div = document.createElement('div')
       div.style.width = '100px';
@@ -103,7 +103,7 @@ describe('Document api', () => {
     expect(document.querySelectorAll('span').length).toBe(0);
   })
 
-  it('document querySelector find id', () => {
+  it('document querySelector find element by id', () => {
     ['red','black','green','yellow','blue'].forEach((item, index) => {
       const div = document.createElement('div')
       div.style.width = '100px';
@@ -114,5 +114,33 @@ describe('Document api', () => {
     })
     
     expect(document.querySelector('#id-1')?.style.backgroundColor).toBe('black');
+  })
+
+  it('document querySelector find element by className', () => {
+    ['red','black','green','yellow','blue'].forEach((item, index) => {
+      const div = document.createElement('div')
+      div.style.width = '100px';
+      div.style.height = '100px';
+      div.style.backgroundColor = item;
+      div.setAttribute('id', `id-${index}`);
+      div.className = `class-${index} cc`;
+      document.body.appendChild(div);
+    })
+    
+    expect(document.querySelector('.class-2')?.style.backgroundColor).toBe('green');
+  })
+
+  it('document querySelector find element by classNames', () => {
+    ['red','black','green','yellow','blue'].forEach((item, index) => {
+      const div = document.createElement('div')
+      div.style.width = '100px';
+      div.style.height = '100px';
+      div.style.backgroundColor = item;
+      div.setAttribute('id', `id-${index}`);
+      div.className = `class-${index} cc`;
+      document.body.appendChild(div);
+    })
+    
+    expect(document.querySelector('.class-2 cc')?.style.backgroundColor).toBe('green');
   })
 });
