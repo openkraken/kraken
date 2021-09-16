@@ -204,7 +204,8 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
 
   switch (property) {
   case JSElement::ElementProperty::className: {
-    JSValueRef classRef = (*m_attributes)->getProperty(name, exception);
+    std::string str = "class";
+    JSValueRef classRef = (*m_attributes)->getProperty(str, exception);
     return classRef;
     break;
   }
@@ -328,7 +329,8 @@ bool ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRe
 
     switch (property) {
     case JSElement::ElementProperty::className: {
-      (*m_attributes)->setProperty(name, value, exception);
+      std::string str = "class";
+      (*m_attributes)->setProperty(str, value, exception);
       break;
     }
     case JSElement::ElementProperty::style:
