@@ -1388,7 +1388,7 @@ class Element extends Node
     bool isIntersectionObserverEvent = _isIntersectionObserverEvent(eventType);
     bool hasIntersectionObserverEvent = isIntersectionObserverEvent && _hasIntersectionObserverEvent(eventHandlers);
 
-    addEventListener(eventType, eventResponder);
+    addEventListener(eventType, _eventResponder);
 
     RenderBoxModel? selfRenderBoxModel = renderBoxModel;
     if (selfRenderBoxModel != null) {
@@ -1403,7 +1403,7 @@ class Element extends Node
 
   void removeEvent(String eventType) {
     if (!eventHandlers.containsKey(eventType)) return; // Only listen once.
-    removeEventListener(eventType, eventResponder);
+    removeEventListener(eventType, _eventResponder);
 
     RenderBoxModel? selfRenderBoxModel = renderBoxModel;
     if (selfRenderBoxModel != null) {
@@ -1417,7 +1417,18 @@ class Element extends Node
     }
   }
 
-  void eventResponder(Event event) {
+  @override
+  void dispatchEvent(Event event) {
+    super.dispatchEvent(event);
+    if (event.currentTarget != null) {
+      _eventResponder(event);
+
+      // Dispatch listener for widget.
+      elementManager.eventClient?.eventListener(event);
+    }
+  }
+
+  void _eventResponder(Event event) {
     emitUIEvent(elementManager.controller.view.contextId, nativeElementPtr.ref.nativeNode.ref.nativeEventTarget, event);
   }
 

@@ -432,7 +432,7 @@ describe('containing-block', () => {
     );
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('009', async () => {
     let p;

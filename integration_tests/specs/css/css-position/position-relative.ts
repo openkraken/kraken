@@ -892,7 +892,7 @@ describe('position-relative', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('014', async () => {
     let p;

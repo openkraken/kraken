@@ -210,7 +210,7 @@ describe('flexbox flex-shrink', () => {
     );
     BODY.appendChild(constrainedFlex);
 
-    await snapshot(0.1);
+    await snapshot(0.2);
   });
 
   it('should work with intrinsic element with width and no height', async () => {
