@@ -16,6 +16,17 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
     tempElements = Array.from(temps);
   }
 
+  // Classes. e.g. .row.
+  let classes:Array<string> = [];
+  selector = selector.split(' ').map(item => {
+    if (item && item.charAt(0) === '.') {
+      temp = fetchSelector(selector, /\.[\w-_]+/g);
+      classes = classes.concat(temp.selectors)
+      return temp.ruleStr;
+    }
+    return item;
+  }).join(' ');
+  
   // Ids. e.g. #mail-title.
   temp = fetchSelector(selector, /#[\w-_]+/g);
   let id = temp.selectors ? temp.selectors[0] : null;
@@ -29,11 +40,6 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
   // Elements. e.g. header, div.
   temp = fetchSelector(selector, /\w+/g);
   let els = temp.selectors;
-  selector = temp.ruleStr;
-
-  // Classes. e.g. .row.
-  temp = fetchSelector(selector, /\.[\w-_]+/g);
-  let classes = temp.selectors;
   selector = temp.ruleStr;
 
   // Get by id.

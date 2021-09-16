@@ -130,20 +130,6 @@ describe('Document api', () => {
     expect(document.querySelector('.class-2')?.style.backgroundColor).toBe('green');
   });
 
-  it('document querySelector find element by classNames', () => {
-    ['red','black','green','yellow','blue'].forEach((item, index) => {
-      const div = document.createElement('div')
-      div.style.width = '100px';
-      div.style.height = '100px';
-      div.style.backgroundColor = item;
-      div.setAttribute('id', `id-${index}`);
-      div.className = `class-${index} cc`;
-      document.body.appendChild(div);
-    })
-    
-    expect(document.querySelector('.class-2 cc')?.style.backgroundColor).toBe('green');
-  });
-
   it('document querySelectorAll find all element', () => {
     ['red','black','green','yellow','blue'].forEach((item, index) => {
       const div = document.createElement('div')
