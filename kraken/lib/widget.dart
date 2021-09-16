@@ -231,8 +231,6 @@ class Kraken extends StatefulWidget {
 
     String tagName = localName.toUpperCase();
 
-    print(ElementCreator == T);
-
     if (T == ElementCreator) {
       defineElement(tagName, creator as ElementCreator);
     } else if (T == WidgetCreator) {

@@ -34,8 +34,14 @@ void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> re
   } else {
     EventTarget eventTarget = EventTarget.getEventTargetOfNativePtr(nativeEventTarget.cast<NativeEventTarget>());
     try {
-      dynamic result = eventTarget.handleJSCall(method, values);
-      toNativeValue(returnedValue, result);
+      if (method.startsWith('_getProperty_') && values.isEmpty) {
+        String key = method.substring('_getProperty_'.length);
+        dynamic result = (eventTarget as Element).getProperty(key);
+        toNativeValue(returnedValue, result);
+      } else {
+        dynamic result = eventTarget.handleJSCall(method, values);
+        toNativeValue(returnedValue, result);
+      }
     } catch (e, stack) {
       print('$e\n$stack');
       toNativeValue(returnedValue, null);

@@ -294,7 +294,7 @@ JSValue JS_NewUnicodeString(JSRuntime *runtime, JSContext *ctx, const uint16_t *
 JSClassID JSValueGetClassId(JSValue obj) {
   JSObject *p;
   if (JS_VALUE_GET_TAG(obj) != JS_TAG_OBJECT)
-    return NULL;
+    return -1;
   p = JS_VALUE_GET_OBJ(obj);
   return p->class_id;
 }
