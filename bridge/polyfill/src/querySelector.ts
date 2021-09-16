@@ -159,7 +159,7 @@ document.querySelectorAll = function <E extends Element = Element> (selector: st
   return (elements as any) as NodeListOf<E>;
 };
 
-document.querySelector = function querySelector(selector: string): Element | null {
+document.querySelector = function (selector: string): Element | null {
   if (typeof selector !== 'string') {
     throw new TypeError('document.querySelector: Invalid selector type. ' +
       'Expect: string. Found: ' + typeof selector + '.');
