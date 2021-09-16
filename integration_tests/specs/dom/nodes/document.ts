@@ -44,7 +44,7 @@ describe('Document api', () => {
     })
     
     expect(document.querySelector('span')).toBeNull();
-  })
+  });
 
   it('document querySelector find first element', () => {
     ['red','black','green','yellow','blue'].forEach((item, index) => {
@@ -58,7 +58,7 @@ describe('Document api', () => {
     
     const ele = document.querySelector('div');
     expect(ele?.getAttribute('id')).toBe('id-0');
-  })
+  });
 
   it('document querySelectorAll length of elements', () => {
     const szEle = ['red','black','green','yellow','blue'];
@@ -73,7 +73,7 @@ describe('Document api', () => {
     
     const eles = document.querySelectorAll('div');
     expect(eles.length).toBe(szEle.length);
-  })
+  });
 
   it('document querySelectorAll first element', () => {
     const szEle = ['red','black','green','yellow','blue'];
@@ -88,7 +88,7 @@ describe('Document api', () => {
     
     const eles = document.querySelectorAll('div');
     expect(eles[0].getAttribute('id')).toBe('id-0');
-  })
+  });
 
   it('document querySelectorAll cant find element by tag name', () => {
     ['red','black','green','yellow','blue'].forEach((item, index) => {
@@ -101,7 +101,7 @@ describe('Document api', () => {
     })
     
     expect(document.querySelectorAll('span').length).toBe(0);
-  })
+  });
 
   it('document querySelector find element by id', () => {
     ['red','black','green','yellow','blue'].forEach((item, index) => {
@@ -114,7 +114,7 @@ describe('Document api', () => {
     })
     
     expect(document.querySelector('#id-1')?.style.backgroundColor).toBe('black');
-  })
+  });
 
   it('document querySelector find element by className', () => {
     ['red','black','green','yellow','blue'].forEach((item, index) => {
@@ -128,7 +128,7 @@ describe('Document api', () => {
     })
     
     expect(document.querySelector('.class-2')?.style.backgroundColor).toBe('green');
-  })
+  });
 
   it('document querySelector find element by classNames', () => {
     ['red','black','green','yellow','blue'].forEach((item, index) => {
@@ -142,7 +142,7 @@ describe('Document api', () => {
     })
     
     expect(document.querySelector('.class-2 cc')?.style.backgroundColor).toBe('green');
-  })
+  });
 
   it('document querySelectorAll find all element', () => {
     ['red','black','green','yellow','blue'].forEach((item, index) => {
@@ -156,5 +156,20 @@ describe('Document api', () => {
     })
     
     expect(document.querySelectorAll('*').length).toBe(8);
-  })
+  });
+
+  it('work with query attr', () => {
+    ['red','black','green','yellow','blue'].forEach((item, index) => {
+      const div = document.createElement('div')
+      div.style.width = '100px';
+      div.style.height = '100px';
+      div.style.backgroundColor = item;
+    
+      div.setAttribute('id', `id-${index}`);
+      div.setAttribute('data-test', `attr-${index}`);
+      document.body.appendChild(div);
+    })
+    
+    expect(document.querySelectorAll('div[data-test="attr-1"]')?.length).toBe(1);
+  });
 });
