@@ -392,11 +392,10 @@ JSValueRef JSDocument::getElementsByTagName(JSContextRef ctx, JSObjectRef functi
   std::transform(tagName.begin(), tagName.end(), tagName.begin(), ::toupper);
 
   std::vector<ElementInstance *> elements;
-
   traverseNode(document->documentElement, [tagName, &elements](NodeInstance *node) {
     if (node->nodeType == NodeType::ELEMENT_NODE) {
       auto element = reinterpret_cast<ElementInstance *>(node);
-      if (element->tagName() == tagName) {
+      if (element->tagName() == tagName || tagName == "*") {
         elements.emplace_back(element);
       }
     }
