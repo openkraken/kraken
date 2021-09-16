@@ -203,8 +203,11 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
   JSElement::ElementProperty &property = propertyMap[name];
 
   switch (property) {
-  case JSElement::ElementProperty::className:
+  case JSElement::ElementProperty::className: {
+    JSValueRef classRef = (*m_attributes)->getProperty(name, exception);
+    return classRef;
     break;
+  }
   case JSElement::ElementProperty::nodeName:
   case JSElement::ElementProperty::tagName: {
     return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(tagName().c_str()));
@@ -325,9 +328,7 @@ bool ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRe
 
     switch (property) {
     case JSElement::ElementProperty::className: {
-      JSStringRef valueRef = JSValueToStringCopy(ctx, value, exception);
-      std::string strValue = JSStringToStdString(valueRef);
-      m_classNames.set(strValue);
+      (*m_attributes)->setProperty(name, value, exception);
       break;
     }
     case JSElement::ElementProperty::style:
@@ -762,6 +763,14 @@ void ElementInstance::setStyle(JSHostClassHolder &style) {
 
 void ElementInstance::setAttributes(JSHostObjectHolder<JSElementAttributes> &attributes) {
   m_attributes = JSHostObjectHolder<JSElementAttributes>(attributes);
+}
+
+SpaceSplitString ElementInstance::classNames() {
+  std::string str = "className";
+  JSValueRef classValueRef = getProperty(str, nullptr);
+  JSStringRef classStringRef = JSValueToStringCopy(ctx, classValueRef, nullptr);
+  std::string strClass = JSStringToStdString(classStringRef);
+  return SpaceSplitString(strClass);
 }
 
 void ElementInstance::internalSetTextContent(JSStringRef content, JSValueRef *exception) {

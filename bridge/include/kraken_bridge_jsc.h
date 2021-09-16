@@ -74,8 +74,6 @@ public:
   }
 
   void set(std::string &string) {
-    m_data = string;
-
     size_t pos = 0;
     std::string token;
     std::string s = string;
@@ -126,7 +124,6 @@ public:
   }
 
 private:
-  std::string m_data;
   std::string m_delimiter = " ";
   std::vector<std::string> m_szData;
 };
@@ -959,6 +956,7 @@ public:
   JSHostClassHolder& getStyle();
   void setStyle(JSHostClassHolder& style);
   void setAttributes(JSHostObjectHolder<JSElementAttributes>& attributes);
+  SpaceSplitString classNames();
 
   NativeElement *nativeElement{nullptr};
 
@@ -966,14 +964,9 @@ public:
 
   std::string getRegisteredTagName();
 
-  SpaceSplitString& classNames() {
-    return m_classNames;
-  }
-
 private:
   friend JSElement;
   JSStringHolder m_tagName{context, ""};
-  SpaceSplitString m_classNames;
 
   KRAKEN_EXPORT void _notifyNodeRemoved(NodeInstance *node) override;
   void _notifyChildRemoved();
