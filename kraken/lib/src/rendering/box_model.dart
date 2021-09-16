@@ -173,6 +173,7 @@ class RenderLayoutBox extends RenderBoxModel
     }
   }
 
+  // Sort children by zIndex, used for paint and hitTest.
   List<RenderBox> _sortedChildren = [];
 
   List<RenderBox> get sortedChildren {
@@ -245,9 +246,10 @@ class RenderLayoutBox extends RenderBoxModel
     if (oriIdx > 0) {
       while(insertIdx > 0) {
         RenderObject prevSibling = sortedChildren[insertIdx - 1];
-        int sortResult = sortSiblingsByZIndex(prevSibling, child);
-        if (sortResult > 0 ||
-          (sortResult == 0 && children.indexOf(prevSibling) > children.indexOf(child))
+        int priority = sortSiblingsByZIndex(prevSibling, child);
+        // Compare the siblings' render tree order if their zIndex priority are the same.
+        if (priority > 0 ||
+          (priority == 0 && children.indexOf(prevSibling) > children.indexOf(child))
         ) {
           insertIdx--;
         } else {
@@ -260,9 +262,10 @@ class RenderLayoutBox extends RenderBoxModel
     if (insertIdx == oriIdx && insertIdx < sortedChildren.length) {
       while(insertIdx < sortedChildren.length) {
         RenderObject nextSibling = sortedChildren[insertIdx];
-        int sortResult = sortSiblingsByZIndex(child, nextSibling);
-        if (sortResult > 0 ||
-          (sortResult == 0 && children.indexOf(child) > children.indexOf(nextSibling))
+        int priority = sortSiblingsByZIndex(child, nextSibling);
+        // Compare the siblings' render tree order if their zIndex priority are the same.
+        if (priority > 0 ||
+          (priority == 0 && children.indexOf(child) > children.indexOf(nextSibling))
         ) {
           insertIdx++;
         } else {
