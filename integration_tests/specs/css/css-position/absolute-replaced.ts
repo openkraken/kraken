@@ -98,7 +98,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('height-002-ref', async () => {
     let p;
@@ -279,7 +279,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('height-004-ref', async () => {
     let p;
@@ -522,7 +522,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('height-007-ref', async () => {
     let p;
@@ -715,7 +715,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('height-009', async () => {
     let p;
@@ -774,7 +774,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('height-010-ref', async () => {
     let p;
@@ -4346,7 +4346,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('width-055', async () => {
     let p;
@@ -4491,7 +4491,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('width-062', async () => {
     let p;
@@ -4564,7 +4564,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('width-064', async () => {
     let p;
@@ -4636,7 +4636,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('width-069', async () => {
     let p;
@@ -4709,7 +4709,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('width-071', async () => {
     let p;
@@ -4781,7 +4781,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('width-076', async () => {
     let p;
@@ -4854,6 +4854,6 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 });
