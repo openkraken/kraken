@@ -630,7 +630,7 @@ class CSSStyleDeclaration {
 
   /// Check a css property is valid.
   bool contains(String property) {
-    return _properties.containsKey(property) && _properties[property] != null;
+    return getPropertyValue(property).isNotEmpty;
   }
 
   void addStyleChangeListener(StyleChangeListener listener) {
