@@ -127,9 +127,11 @@ mixin CSSTextMixin on RenderStyleBase {
   double get fontSize {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
-    RenderBoxModel? renderBox = renderBoxModel!.getSelfParentWithSpecifiedStyle(FONT_SIZE);
-    if (renderBox != null) {
-      return renderBox.renderStyle._fontSize;
+    if (renderBoxModel != null) {
+      RenderBoxModel? renderBox = renderBoxModel!.getSelfParentWithSpecifiedStyle(FONT_SIZE);
+      if (renderBox != null) {
+        return renderBox.renderStyle._fontSize;
+      }
     }
     return _fontSize;
   }

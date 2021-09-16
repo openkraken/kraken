@@ -110,10 +110,12 @@ RegExp _camelCaseReg = RegExp(r'-(\w)');
 ///    object as a read-only interface.
 class CSSStyleDeclaration {
   Element? target;
+  // TODO(yuanyan): defualtStyle should be longhand properties.
+  Map<String, dynamic>? defaultStyle;
 
   CSSStyleDeclaration();
   // ignore: prefer_initializing_formals
-  CSSStyleDeclaration.computedStyle(Element element): target = element;
+  CSSStyleDeclaration.computedStyle(this.target, this.defaultStyle);
 
   /// When some property changed, corresponding [StyleChangeListener] will be
   /// invoked in synchronous.
@@ -292,6 +294,8 @@ class CSSStyleDeclaration {
   /// Removes a property from the CSS declaration.
   String? removeProperty(String propertyName) {
 
+    String? prevValue = getPropertyValue(propertyName);
+
     switch (propertyName) {
       case PADDING:
         CSSStyleProperty.removeShorthandPadding(this);
@@ -338,14 +342,22 @@ class CSSStyleDeclaration {
         break;
     }
 
-    String? prevValue = EMPTY_STRING;
-
-    if (_properties.containsKey(propertyName)) {
-       prevValue = _properties[propertyName];
-      _properties.remove(propertyName);
+    // If existed in pending properties do not need emit change event.
+    if (_pendingProperties.containsKey(propertyName)) {
+      prevValue = _pendingProperties[propertyName];
+      _pendingProperties.remove(propertyName);
     }
 
-    _emitPropertyChanged(propertyName, prevValue, EMPTY_STRING);
+    if (_properties.containsKey(propertyName)) {
+      _properties.remove(propertyName);
+
+      // Fallback to default style.
+      if (defaultStyle != null && defaultStyle!.containsKey(propertyName)) {
+        prevValue = defaultStyle![propertyName];
+      }
+
+      _emitPropertyChanged(propertyName, prevValue, EMPTY_STRING);
+    }
 
     return prevValue;
   }
@@ -598,7 +610,24 @@ class CSSStyleDeclaration {
   }
 
   void flushPendingProperties() {
-    for (String propertyName in _pendingProperties.keys) {
+    RenderBoxModel? renderBoxModel = target?.renderBoxModel;
+    if (renderBoxModel == null) {
+      return;
+    }
+
+    List<String> propertyNames = _pendingProperties.keys.toList();
+
+    // Reorder the properties for control render style init order, the last is the largest.
+    List<String> propertyOrders = [OVERFLOW_X, OVERFLOW_Y, DISPLAY];
+    for (String propertyName in propertyOrders) {
+      int index = propertyNames.indexOf(propertyName);
+      if (index > -1) {
+        propertyNames.removeAt(index);
+        propertyNames.insert(0, propertyName);
+      }
+    }
+
+    for (String propertyName in propertyNames) {
       String? prevValue = _properties[propertyName];
       String? currentValue = _pendingProperties[propertyName];
 
@@ -609,14 +638,12 @@ class CSSStyleDeclaration {
       // Update the prevValue to currentValue.
       _properties[propertyName] = _pendingProperties[propertyName]!;
 
-      RenderBoxModel? renderBoxModel = target?.renderBoxModel;
-      RenderStyle? renderStyle = target?.renderBoxModel?.renderStyle;
+      RenderStyle? renderStyle = target?.renderStyle;
       if (_shouldTransition(propertyName, prevValue, currentValue, renderBoxModel)) {
         _transition(propertyName, prevValue, currentValue, target?.viewportSize, renderStyle);
       } else {
         _emitPropertyChanged(propertyName, prevValue, currentValue);
       }
-
     }
 
     _pendingProperties.clear();

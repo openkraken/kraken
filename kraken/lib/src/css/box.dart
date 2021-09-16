@@ -411,7 +411,7 @@ mixin CSSBoxMixin on RenderStyleBase {
       }
     }
 
-    CSSBoxDecoration updateBoxDecoration = CSSBoxDecoration(
+    CSSBoxDecoration updatedBoxDecoration = CSSBoxDecoration(
       image: decorationImage,
       gradient: gradient,
       color: prevBoxDecoration.color,
@@ -423,12 +423,12 @@ mixin CSSBoxMixin on RenderStyleBase {
     );
 
     if (CSSBackground.hasScrollBackgroundImage(style)) {
-      decoration = updateBoxDecoration;
+      decoration = updatedBoxDecoration;
     } else if (CSSBackground.hasLocalBackgroundImage(style)) {
       // @FIXME: support local background image
-      decoration = updateBoxDecoration;
+      decoration = updatedBoxDecoration;
     } else {
-      decoration = updateBoxDecoration;
+      decoration = updatedBoxDecoration;
     }
 
   }

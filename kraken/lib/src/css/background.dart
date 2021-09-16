@@ -88,7 +88,7 @@ class CSSBackground {
     return style[BACKGROUND_IMAGE].isNotEmpty && (attachment.isEmpty || attachment == SCROLL);
   }
 
-  static DecorationImage? getDecorationImage(CSSStyleDeclaration? style, CSSFunctionalNotation method, { int? contextId }) {
+  static DecorationImage? getDecorationImage(CSSStyleDeclaration style, CSSFunctionalNotation method, { int? contextId }) {
     DecorationImage backgroundImage;
 
     String url = method.args.isNotEmpty ? method.args[0] : '';
@@ -96,24 +96,24 @@ class CSSBackground {
       return null;
     }
 
-    ImageRepeat imageRepeat = ImageRepeat.repeat;
-    if (style![BACKGROUND_REPEAT].isNotEmpty) {
-      switch (style[BACKGROUND_REPEAT]) {
-        case REPEAT_X:
-          imageRepeat = ImageRepeat.repeatX;
-          break;
-        case REPEAT_Y:
-          imageRepeat = ImageRepeat.repeatY;
-          break;
-        case NO_REPEAT:
-          imageRepeat = ImageRepeat.noRepeat;
-          break;
-      }
-    }
-
     if (contextId != null) {
       KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
       url = controller.uriParser!.resolve(Uri.parse(controller.href), Uri.parse(url)).toString();
+    }
+
+    ImageRepeat imageRepeat;
+    switch (style[BACKGROUND_REPEAT]) {
+      case REPEAT_X:
+        imageRepeat = ImageRepeat.repeatX;
+        break;
+      case REPEAT_Y:
+        imageRepeat = ImageRepeat.repeatY;
+        break;
+      case NO_REPEAT:
+        imageRepeat = ImageRepeat.noRepeat;
+        break;
+      default:
+        imageRepeat = ImageRepeat.repeat;
     }
 
     backgroundImage = DecorationImage(

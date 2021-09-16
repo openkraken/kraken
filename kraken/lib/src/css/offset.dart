@@ -146,8 +146,9 @@ mixin CSSPositionMixin on RenderStyleBase {
         return CSSPositionType.fixed;
       case STICKY:
         return CSSPositionType.sticky;
+      default:
+        return CSSPositionType.static;
     }
-    return CSSPositionType.static;
   }
 
 }

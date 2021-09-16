@@ -86,7 +86,7 @@ class CSSLength {
       fontSize: fontSize
     );
   }
-
+  // TODO(yuanyan): fontSize to getFontSize for performance improve
   static double? toDisplayPortValue(
     String? unitedValue,
     {

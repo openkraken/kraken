@@ -32,7 +32,6 @@ class HTMLElement extends Element {
     elementManager.viewportElement = this;
     // Init renderer.
     willAttachRenderer();
-    RenderStyle renderStyle = renderBoxModel!.renderStyle;
     // Must init with viewport width.
     renderStyle.width = elementManager.viewportWidth;
     renderStyle.height = elementManager.viewportHeight;

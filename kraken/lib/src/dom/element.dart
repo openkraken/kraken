@@ -94,12 +94,6 @@ class ElementDelegate {
   /// Detach the renderer from its owner element.
   VoidCallback detachRenderer;
 
-  /// Do the preparation work before the renderer is attached.
-  BeforeRendererAttach beforeRendererAttach;
-
-  /// Do the clean work after the renderer has attached.
-  VoidCallback afterRendererAttach;
-
   /// Return the targetId of current element.
   GetTargetId getTargetId;
 
@@ -128,8 +122,6 @@ class ElementDelegate {
     required this.markRendererNeedsLayout,
     required this.toggleRendererRepaintBoundary,
     required this.detachRenderer,
-    required this.beforeRendererAttach,
-    required this.afterRendererAttach,
     required this.getTargetId,
     required this.getRootElementFontSize,
     required this.handleScroll,
@@ -214,24 +206,28 @@ class Element extends Node
         _isIntrinsicBox = isIntrinsicBox,
         super(NodeType.ELEMENT_NODE, targetId, nativeElementPtr.ref.nativeNode, elementManager, tagName) {
 
-    style = CSSStyleDeclaration.computedStyle(this);
-    _elementDelegate = ElementDelegate(
-      markRendererNeedsLayout: _markRendererNeedsLayout,
-      toggleRendererRepaintBoundary: _toggleRendererRepaintBoundary,
-      detachRenderer: detach,
-      beforeRendererAttach: _beforeRendererAttach,
-      afterRendererAttach: _afterRendererAttach,
-      getTargetId: _getTargetId,
-      getRootElementFontSize: _getRootElementFontSize,
-      handleScroll: _handleScroll,
-      focusInput: _focusInput,
-      blurInput: _blurInput,
-      scrollInputToCaret: _scrollInputToCaret,
-      renderSliverBoxChildManager: _sliverBoxChildManager,
-      getViewportSize: _getViewportSize,
-      getRenderBoxModel: _getRenderBoxModel,
-    );
+      // Init element delegate for proxy element internal method.
+      _elementDelegate = ElementDelegate(
+        markRendererNeedsLayout: _markRendererNeedsLayout,
+        toggleRendererRepaintBoundary: _toggleRendererRepaintBoundary,
+        detachRenderer: detach,
+        getTargetId: _getTargetId,
+        getRootElementFontSize: elementManager.getRootFontSize,
+        handleScroll: _handleScroll,
+        focusInput: _focusInput,
+        blurInput: _blurInput,
+        scrollInputToCaret: _scrollInputToCaret,
+        renderSliverBoxChildManager: _sliverBoxChildManager,
+        getViewportSize: _getViewportSize,
+        getRenderBoxModel: _getRenderBoxModel,
+      );
 
+    // Init style and add change listener.
+    style = CSSStyleDeclaration.computedStyle(this, _defaultStyle);
+    style.addStyleChangeListener(_onStyleChanged);
+    _applyDefaultStyle();
+
+    // Init render style.
     renderStyle = RenderStyle(style: style, elementDelegate: _elementDelegate);
 
     if (!isHiddenElement) {
@@ -239,7 +235,6 @@ class Element extends Node
     }
 
     bindNativeMethods(nativeElementPtr);
-    _applyDefaultStyle();
   }
 
   RenderSliverBoxChildManager? _sliverBoxChildManager;
@@ -264,16 +259,6 @@ class Element extends Node
     }
   }
 
-  RenderObject _beforeRendererAttach() {
-    willAttachRenderer();
-    return renderer!;
-  }
-
-  void _afterRendererAttach() {
-    didAttachRenderer();
-    ensureChildAttached();
-  }
-
   int _getTargetId() {
     return targetId;
   }
@@ -290,12 +275,6 @@ class Element extends Node
   void _scrollInputToCaret() {
     InputElement inputElement = this as InputElement;
     inputElement.scrollToCaret();
-  }
-
-  double _getRootElementFontSize() {
-    Element rootElement = elementManager.viewportElement;
-    RenderBoxModel rootBoxModel = rootElement.renderBoxModel!;
-    return rootBoxModel.renderStyle.fontSize;
   }
 
   @override
@@ -320,20 +299,21 @@ class Element extends Node
   @override
   void willAttachRenderer() {
     createRenderer();
-    style.addStyleChangeListener(_onStyleChanged);
-    // Init default style value.
-    style.flushPendingProperties();
-    renderStyle.initDisplay();
   }
 
   @override
   void didAttachRenderer() {
+    // Flush pending style.
+    style.flushPendingProperties();
+
     // Bind pointer responder.
     addEventResponder(renderBoxModel!);
 
     if (_hasIntersectionObserverEvent(eventHandlers)) {
       renderBoxModel!.addIntersectionChangeListener(handleIntersectionChange);
     }
+
+    ensureChildAttached();
   }
 
   @override
@@ -611,25 +591,20 @@ class Element extends Node
   // Attach renderObject of current node to parent
   @override
   void attachTo(Element parent, {RenderBox? after}) {
-    CSSDisplay display = CSSDisplayMixin.getDisplay(style[DISPLAY]);
 
-    if (display == CSSDisplay.sliver) {
-      _sliverBoxChildManager = ElementSliverBoxChildManager(this);
-    } else {
-      _sliverBoxChildManager = null;
-    }
+    renderStyle.initDisplay();
 
-    if (display != CSSDisplay.none) {
-      _beforeRendererAttach();
+    if (renderStyle.display != CSSDisplay.none) {
+      willAttachRenderer();
       parent.addChildRenderObject(this, after: after);
-      _afterRendererAttach();
-    }
+      didAttachRenderer();
 
-    // CSS Transition works after dom has layouted, so it needs to mark
-    // the renderBoxModel as layouted on the next frame.
-    SchedulerBinding.instance!.addPostFrameCallback((timestamp) {
-      renderBoxModel?.firstLayouted = true;
-    });
+      // CSS Transition works after dom has layouted, so it needs to mark
+      // the renderBoxModel as layouted on the next frame.
+      SchedulerBinding.instance!.addPostFrameCallback((timestamp) {
+        renderBoxModel?.firstLayouted = true;
+      });
+    }
   }
 
   // Detach renderObject of current node from parent
@@ -674,7 +649,6 @@ class Element extends Node
           }
 
           child.attachTo(this, after: after);
-
           child.ensureChildAttached();
         }
       }
@@ -828,8 +802,7 @@ class Element extends Node
       return;
     }
 
-    RenderStyle renderStyle = renderBoxModel!.renderStyle;
-    double rootFontSize = _getRootElementFontSize();
+    double rootFontSize = elementManager.getRootFontSize();
     double fontSize = renderStyle.fontSize;
     double? presentValue = CSSLength.toDisplayPortValue(
       present,
@@ -852,8 +825,7 @@ class Element extends Node
       return;
     }
 
-    RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
-    double rootFontSize = _getRootElementFontSize();
+    double rootFontSize = elementManager.getRootFontSize();
     double fontSize = renderStyle.fontSize;
     double? presentValue = CSSLength.toDisplayPortValue(
       present,
@@ -875,8 +847,7 @@ class Element extends Node
       return;
     }
 
-    RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
-    double rootFontSize = _getRootElementFontSize();
+    double rootFontSize = elementManager.getRootFontSize();
     double fontSize = renderStyle.fontSize;
     double? presentValue = CSSLength.toDisplayPortValue(
       present,
@@ -899,7 +870,7 @@ class Element extends Node
     }
 
     RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
-    double rootFontSize = _getRootElementFontSize();
+    double rootFontSize = elementManager.getRootFontSize();
     double fontSize = renderStyle.fontSize;
     double? presentValue = CSSLength.toDisplayPortValue(
       present,
@@ -933,20 +904,18 @@ class Element extends Node
   }
 
   void _updateSliverDirection(String present) {
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-    CSSDisplay? display = selfRenderBoxModel.renderStyle.display;
+    CSSDisplay? display = renderStyle.display;
     if (display == CSSDisplay.sliver) {
       assert(renderBoxModel is RenderRecyclerLayout);
-      selfRenderBoxModel.renderStyle.updateSliver(present);
+      renderStyle.updateSliver(present);
     }
   }
 
   void _updateBox(String property, String present) {
     int contextId = elementManager.contextId;
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-    double rootFontSize = _getRootElementFontSize();
-    double fontSize = selfRenderBoxModel.renderStyle.fontSize;
-    renderBoxModel!.renderStyle.updateBox(
+    double rootFontSize = elementManager.getRootFontSize();
+    double fontSize = renderStyle.fontSize;
+    renderStyle.updateBox(
       property, present, contextId,
       viewportSize: viewportSize,
       rootFontSize: rootFontSize,
@@ -979,8 +948,7 @@ class Element extends Node
       return;
     }
 
-    RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
-    double rootFontSize = _getRootElementFontSize();
+    double rootFontSize = elementManager.getRootFontSize();
     double fontSize = renderStyle.fontSize;
     Matrix4? matrix4 = CSSTransform.parseTransform(present, viewportSize, rootFontSize, fontSize);
 
@@ -1038,10 +1006,16 @@ class Element extends Node
 
   /// Set internal style value to the element.
   void setRenderStyle(String property, dynamic present) {
-    RenderStyle renderStyle = renderBoxModel!.renderStyle;
     switch (property) {
       case DISPLAY:
         renderStyle.updateDisplay(present, this);
+        // Init sliver box child manager.
+        CSSDisplay display = renderStyle.display;
+        if (display == CSSDisplay.sliver) {
+          _sliverBoxChildManager = ElementSliverBoxChildManager(this);
+        } else {
+          _sliverBoxChildManager = null;
+        }
         break;
 
       case VERTICAL_ALIGN:
@@ -1494,7 +1468,7 @@ class Element extends Node
       bool repaintSelf = false
   }) {
     style = style ?? this.style;
-    CSSDisplay display = CSSDisplayMixin.getDisplay(style[DISPLAY]);
+    CSSDisplay display = renderStyle.display;
 
     if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
       RenderFlexLayout? flexLayout;
@@ -1616,8 +1590,8 @@ class Element extends Node
         flowLayout = prevRenderLayoutBox.toFlowLayout();
       }
 
-      flowLayout!.renderStyle.updateFlow();
-      return flowLayout;
+      renderStyle.updateFlow();
+      return flowLayout!;
     } else if (display == CSSDisplay.sliver) {
       RenderRecyclerLayout? renderRecyclerLayout;
 
