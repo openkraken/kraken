@@ -172,4 +172,88 @@ describe('Document api', () => {
     
     expect(document.querySelectorAll('div[data-test="attr-1"]')?.length).toBe(1);
   });
+
+  it('work with query href of attrs with *', () => {
+    const a = document.createElement('a');
+    a.setAttribute('href', 'openkraken.com');
+    a.text = 'openkraken.com';
+    document.body.appendChild(a);
+
+    const path = document.createElement('a');
+    path.setAttribute('href', '/path');
+    path.text = 'path';
+    document.body.appendChild(path);
+
+    expect(document.querySelectorAll('a[href*="/path"]').length).toBe(1);
+  });
+
+  it('work with query href of attrs with ^', () => {
+    const a = document.createElement('a');
+    a.setAttribute('href', 'openkraken.com');
+    a.text = 'openkraken.com';
+    document.body.appendChild(a);
+
+    const path = document.createElement('a');
+    path.setAttribute('href', '/path');
+    path.text = 'path';
+    document.body.appendChild(path);
+
+    expect(document.querySelectorAll('a[href^="/"]').length).toBe(1);
+  });
+
+  it('work with query href of attrs with ^ and complete string', () => {
+    const a = document.createElement('a');
+    a.setAttribute('href', 'openkraken.com');
+    a.text = 'openkraken.com';
+    document.body.appendChild(a);
+
+    const path = document.createElement('a');
+    path.setAttribute('href', '/path');
+    path.text = 'path';
+    document.body.appendChild(path);
+
+    expect(document.querySelectorAll('a[href^="/path"]').length).toBe(1);
+  });
+
+  it('work with query href of attrs with $', () => {
+    const a = document.createElement('a');
+    a.setAttribute('href', 'openkraken.com');
+    a.text = 'openkraken.com';
+    document.body.appendChild(a);
+
+    const path = document.createElement('a');
+    path.setAttribute('href', '/path');
+    path.text = 'path';
+    document.body.appendChild(path);
+
+    expect(document.querySelectorAll('a[href$="th"]').length).toBe(1);
+  });
+
+  it('work with query href of attrs with $ and complete string', () => {
+    const a = document.createElement('a');
+    a.setAttribute('href', 'openkraken.com');
+    a.text = 'openkraken.com';
+    document.body.appendChild(a);
+
+    const path = document.createElement('a');
+    path.setAttribute('href', '/path');
+    path.text = 'path';
+    document.body.appendChild(path);
+
+    expect(document.querySelectorAll('a[href$="/path"]').length).toBe(1);
+  });
+
+  it('work with query href', () => {
+    const a = document.createElement('a');
+    a.setAttribute('href', 'openkraken.com');
+    a.text = 'openkraken.com';
+    document.body.appendChild(a);
+
+    const path = document.createElement('a');
+    path.setAttribute('href', '/path');
+    path.text = 'path';
+    document.body.appendChild(path);
+
+    expect(document.querySelectorAll('a[href="/path"]').length).toBe(1);
+  });
 });
