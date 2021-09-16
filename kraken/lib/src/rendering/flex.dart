@@ -1080,7 +1080,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         RenderBoxModel realDisplayedBox = child.realDisplayedBox!;
         // Flutter only allow access size of direct children, so cannot use realDisplayedBox.size
         Size realDisplayedBoxSize =
-            realDisplayedBox.getBoxSize(realDisplayedBox.contentSize!);
+            realDisplayedBox.getBoxSize(realDisplayedBox.contentSize);
         double realDisplayedBoxWidth = realDisplayedBoxSize.width;
         double realDisplayedBoxHeight = realDisplayedBoxSize.height;
         childConstraints = BoxConstraints(
@@ -2058,11 +2058,11 @@ class RenderFlexLayout extends RenderLayoutBox {
     double crossAxisContentSize;
 
     if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
-      mainAxisContentSize = contentSize!.width;
-      crossAxisContentSize = contentSize!.height;
+      mainAxisContentSize = contentSize.width;
+      crossAxisContentSize = contentSize.height;
     } else {
-      mainAxisContentSize = contentSize!.height;
-      crossAxisContentSize = contentSize!.width;
+      mainAxisContentSize = contentSize.height;
+      crossAxisContentSize = contentSize.width;
     }
 
     /// Set offset of children
@@ -2560,9 +2560,10 @@ class RenderFlexLayout extends RenderLayoutBox {
   /// Get cross size of  content size
   double _getContentCrossSize() {
     if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
-      return contentSize!.height;
+      return contentSize.height;
+    } else {
+      return contentSize.width;
     }
-    return contentSize!.width;
   }
 
   double? _getLineHeight(RenderBox child) {
