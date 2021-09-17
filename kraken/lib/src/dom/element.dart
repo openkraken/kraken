@@ -1247,7 +1247,6 @@ class Element extends Node
     _applyStyleSheetStyle();
 
     style.flushPendingProperties();
-    renderStyle.initDisplay();
 
     // Update children style.
     children.forEach((Element child) {
@@ -1465,9 +1464,13 @@ class Element extends Node
     }
   }
 
+  // Create a new RenderLayoutBox for the scrolling content.
   RenderLayoutBox createScrollingContentLayout() {
+    // Create a empty renderStyle for do not share renderStyle with element.
+    RenderStyle scrollingContentRenderStyle = RenderStyle(style: style, elementDelegate: _elementDelegate);
     RenderLayoutBox scrollingContentLayoutBox = createRenderLayout(
       repaintSelf: true,
+      renderStyle: scrollingContentRenderStyle,
     );
     scrollingContentLayoutBox.isScrollingContentBox = true;
     return scrollingContentLayoutBox;
@@ -1475,9 +1478,11 @@ class Element extends Node
 
   RenderLayoutBox createRenderLayout({
       RenderLayoutBox? prevRenderLayoutBox,
+      RenderStyle? renderStyle,
       bool repaintSelf = false
   }) {
-    CSSDisplay display = renderStyle.display;
+    CSSDisplay display = this.renderStyle.display;
+    renderStyle ??= this.renderStyle;
 
     if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
       RenderFlexLayout? flexLayout;
