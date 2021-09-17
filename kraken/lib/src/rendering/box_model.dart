@@ -1378,7 +1378,7 @@ class RenderBoxModel extends RenderBox
           scrollingOffsetX != null ? offset.dx + scrollingOffsetX! : offset.dx;
       offset = Offset(offsetX, offsetY);
       paintColorFilter(context, offset, _chainPaintImageFilter);
-      }
+    }
   }
 
   void _chainPaintImageFilter(PaintingContext context, Offset offset) {

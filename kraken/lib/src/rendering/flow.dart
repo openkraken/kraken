@@ -866,12 +866,6 @@ class RenderFlowLayout extends RenderLayoutBox {
         // between element and its containing block on block-level element
         // which is not positioned and computed to 0px in other cases
         if (child is RenderBoxModel) {
-          // Ignore margin/padding/border... for scrolling content box.
-          if (child.isScrollingContentBox) {
-            child = childParentData.nextSibling;
-            childParentData.offset = Offset.zero;
-            continue;
-          }
           RenderStyle childRenderStyle = child.renderStyle;
           CSSDisplay? childTransformedDisplay =
               childRenderStyle.transformedDisplay;

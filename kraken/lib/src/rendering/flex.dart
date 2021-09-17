@@ -2190,13 +2190,6 @@ class RenderFlexLayout extends RenderLayoutBox {
           continue;
         }
 
-        // Ignore margin/padding/border... for scrlling content box.
-        if (child is RenderBoxModel && child.isScrollingContentBox) {
-          child = childParentData!.nextSibling;
-          childParentData.offset = Offset.zero;
-          continue;
-        }
-
         if (childParentData!.runIndex != i) break;
 
         double childMainAxisMargin = flowAwareChildMainAxisMargin(child)!;

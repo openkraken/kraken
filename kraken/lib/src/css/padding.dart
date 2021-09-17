@@ -62,12 +62,7 @@ mixin CSSPaddingMixin on RenderStyleBase {
 
   void updatePadding(String property, double value, {bool shouldMarkNeedsLayout = true}) {
     RenderStyle renderStyle = this as RenderStyle;
-    EdgeInsets prevPadding = renderStyle.padding as EdgeInsets? ?? EdgeInsets.only(
-      top: 0.0,
-      right: 0.0,
-      bottom: 0.0,
-      left: 0.0
-    );
+    EdgeInsets prevPadding = renderStyle.padding as EdgeInsets? ?? EdgeInsets.zero;
 
     double left = prevPadding.left;
     double top = prevPadding.top;
