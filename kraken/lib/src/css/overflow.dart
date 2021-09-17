@@ -174,17 +174,6 @@ mixin CSSOverflowMixin on ElementBase {
     }
   }
 
-  void _createScrollingLayoutBox(Element element) {
-    // TODO: do not need clone all style
-    CSSStyleDeclaration repaintBoundaryStyle = element.style.clone(element);
-    repaintBoundaryStyle.setProperty(OVERFLOW, VISIBLE);
-    scrollingContentLayoutBox = element.createRenderLayout(
-      repaintSelf: true,
-      style: repaintBoundaryStyle
-    );
-
-    scrollingContentLayoutBox!.isScrollingContentBox = true;
-  }
 
   // Create two repaintBoundary for an overflow scroll container.
   // Outer repaintBoundary avoid repaint of parent and sibling renderObjects when scrolling.
@@ -208,7 +197,7 @@ mixin CSSOverflowMixin on ElementBase {
       prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?
     );
 
-    _createScrollingLayoutBox(element);
+    scrollingContentLayoutBox = element.createScrollingContentLayout();
 
     // If outer scrolling box already has children in the case of element already attached,
     // move them into the children of inner scrolling box.

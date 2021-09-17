@@ -1366,13 +1366,19 @@ class RenderBoxModel extends RenderBox
   }
 
   void paintBoxModel(PaintingContext context, Offset offset) {
-    // Paint fixed element to fixed position by compensating scroll offset
-    double offsetY =
-        scrollingOffsetY != null ? offset.dy + scrollingOffsetY! : offset.dy;
-    double offsetX =
-        scrollingOffsetX != null ? offset.dx + scrollingOffsetX! : offset.dx;
-    offset = Offset(offsetX, offsetY);
-    paintColorFilter(context, offset, _chainPaintImageFilter);
+
+    if (isScrollingContentBox) {
+      // Scrolling content box should only size painted.
+      performPaint(context, offset);
+    } else {
+      // Paint fixed element to fixed position by compensating scroll offset
+      double offsetY =
+          scrollingOffsetY != null ? offset.dy + scrollingOffsetY! : offset.dy;
+      double offsetX =
+          scrollingOffsetX != null ? offset.dx + scrollingOffsetX! : offset.dx;
+      offset = Offset(offsetX, offsetY);
+      paintColorFilter(context, offset, _chainPaintImageFilter);
+      }
   }
 
   void _chainPaintImageFilter(PaintingContext context, Offset offset) {

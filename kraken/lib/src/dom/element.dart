@@ -1467,12 +1467,18 @@ class Element extends Node
     }
   }
 
+  RenderLayoutBox createScrollingContentLayout() {
+    RenderLayoutBox scrollingContentLayoutBox = createRenderLayout(
+      repaintSelf: true,
+    );
+    scrollingContentLayoutBox.isScrollingContentBox = true;
+    return scrollingContentLayoutBox;
+  }
+
   RenderLayoutBox createRenderLayout({
-      CSSStyleDeclaration? style,
       RenderLayoutBox? prevRenderLayoutBox,
       bool repaintSelf = false
   }) {
-    style = style ?? this.style;
     CSSDisplay display = renderStyle.display;
 
     if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
