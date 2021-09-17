@@ -77,6 +77,7 @@ mixin ElementBase on Node {
 typedef BeforeRendererAttach = RenderObject Function();
 typedef GetTargetId = int Function();
 typedef GetRootElementFontSize = double Function();
+typedef GetChildNodes = List<Node> Function();
 /// Get the viewport size of current element.
 typedef GetViewportSize = Size Function();
 /// Get the render box model of current element.
@@ -101,6 +102,7 @@ class ElementDelegate {
   GetRootElementFontSize getRootElementFontSize;
   GetViewportSize getViewportSize;
   GetRenderBoxModel getRenderBoxModel;
+  GetChildNodes getChildNodes;
 
   // Handle scrolling.
   ScrollListener handleScroll;
@@ -114,10 +116,6 @@ class ElementDelegate {
   /// Scroll the input element to the caret.
   VoidCallback scrollInputToCaret;
 
-  // The sliver box child manager
-  RenderSliverBoxChildManager? renderSliverBoxChildManager;
-
-
   ElementDelegate({
     required this.markRendererNeedsLayout,
     required this.toggleRendererRepaintBoundary,
@@ -130,7 +128,7 @@ class ElementDelegate {
     required this.scrollInputToCaret,
     required this.getViewportSize,
     required this.getRenderBoxModel,
-    this.renderSliverBoxChildManager,
+    required this.getChildNodes,
   });
 }
 
@@ -214,9 +212,9 @@ class Element extends Node
         focusInput: _focusInput,
         blurInput: _blurInput,
         scrollInputToCaret: _scrollInputToCaret,
-        renderSliverBoxChildManager: _sliverBoxChildManager,
         getViewportSize: _getViewportSize,
         getRenderBoxModel: _getRenderBoxModel,
+        getChildNodes: _getChildNodes,
       );
 
     // Init style and add change listener.
@@ -258,6 +256,10 @@ class Element extends Node
 
   int _getTargetId() {
     return targetId;
+  }
+
+  List<Node> _getChildNodes() {
+    return childNodes;
   }
 
   void _focusInput() {
@@ -1008,13 +1010,6 @@ class Element extends Node
     switch (property) {
       case DISPLAY:
         renderStyle.updateDisplay(present, this);
-        // Init sliver box child manager.
-        CSSDisplay display = renderStyle.display;
-        if (display == CSSDisplay.sliver) {
-          _sliverBoxChildManager = ElementSliverBoxChildManager(this);
-        } else {
-          _sliverBoxChildManager = null;
-        }
         break;
 
       case VERTICAL_ALIGN:
@@ -1735,115 +1730,4 @@ void _setPositionedChildParentData(RenderLayoutBox parentRenderLayoutBox, Elemen
   RenderLayoutParentData parentData = RenderLayoutParentData();
   RenderBoxModel childRenderBoxModel = child.renderBoxModel!;
   childRenderBoxModel.parentData = CSSPositionedLayout.getPositionParentData(childRenderBoxModel, parentData);
-}
-
-/// [RenderSliverBoxChildManager] for sliver element.
-class ElementSliverBoxChildManager implements RenderSliverBoxChildManager {
-  // The container reference element.
-  final Element _element;
-
-  // Flag to determine whether newly added children could
-  // affect the visible contents of the [RenderSliverMultiBoxAdaptor].
-  bool _didUnderflow = false;
-
-  // The current rendering object index.
-  int _currentIndex = -1;
-
-  RenderRecyclerLayout get recyclerLayout => _element.renderer as RenderRecyclerLayout;
-
-  ElementSliverBoxChildManager(Element element) : _element = element;
-
-  Iterable<Node> get _renderNodes => _element.childNodes.where((child) => child is Element || child is TextNode);
-
-  // Only count renderable child.
-  @override
-  int get childCount => _renderNodes.length;
-
-  @override
-  void createChild(int index, {required RenderBox? after}) {
-    if (_didUnderflow) return;
-    if (index < 0) return;
-
-    Iterable<Node> renderNodes = _renderNodes;
-    if (index >= renderNodes.length) return;
-    _currentIndex = index;
-
-    Node childNode = renderNodes.elementAt(index);
-    childNode.willAttachRenderer();
-
-    RenderBox? child;
-
-    if (childNode is Element) {
-      childNode.style.flushPendingProperties();
-    }
-
-    if (childNode is Node) {
-      child = childNode.renderer as RenderBox?;
-    } else {
-      if (!kReleaseMode)
-        throw FlutterError('Sliver unsupported type ${childNode.runtimeType} $childNode');
-    }
-
-    assert(child != null, 'Sliver render node should own RenderBox.');
-
-    recyclerLayout
-      ..setupParentData(child!)
-      ..insertSliverChild(child, after: after);
-
-    childNode.didAttachRenderer();
-    childNode.ensureChildAttached();
-  }
-
-  @override
-  bool debugAssertChildListLocked() => true;
-
-  @override
-  void didAdoptChild(RenderBox child) {
-    final parentData = child.parentData as SliverMultiBoxAdaptorParentData;
-    parentData.index = _currentIndex;
-  }
-
-  @override
-  void removeChild(RenderBox child) {
-    if (child is RenderBoxModel) {
-      child.elementDelegate.detachRenderer();
-    } else {
-      child.detach();
-    }
-  }
-
-  @override
-  void setDidUnderflow(bool value) {
-    _didUnderflow = value;
-  }
-
-  @override
-  void didFinishLayout() {}
-
-  @override
-  void didStartLayout() {}
-
-  @override
-  double estimateMaxScrollOffset(SliverConstraints constraints, {int? firstIndex, int? lastIndex, double? leadingScrollOffset, double? trailingScrollOffset}) {
-    return _extrapolateMaxScrollOffset(firstIndex, lastIndex,
-        leadingScrollOffset, trailingScrollOffset, childCount)!;
-  }
-
-  static double? _extrapolateMaxScrollOffset(
-    int? firstIndex,
-    int? lastIndex,
-    double? leadingScrollOffset,
-    double? trailingScrollOffset,
-    int childCount,
-  ) {
-    if (lastIndex == childCount - 1) {
-      return trailingScrollOffset;
-    }
-
-    final int reifiedCount = lastIndex! - firstIndex! + 1;
-    final double averageExtent =
-        (trailingScrollOffset! - leadingScrollOffset!) / reifiedCount;
-    final int remainingCount = childCount - lastIndex - 1;
-    return trailingScrollOffset + averageExtent * remainingCount;
-  }
 }

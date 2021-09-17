@@ -29,6 +29,9 @@ class RenderRecyclerLayout extends RenderLayoutBox {
   // The main axis for recycler layout.
   Axis axis = Axis.vertical;
 
+  // The sliver box child manager
+  late RenderSliverBoxChildManager _renderSliverBoxChildManager;
+
   RenderRecyclerLayout({
     required RenderStyle renderStyle,
     required ElementDelegate elementDelegate
@@ -36,6 +39,7 @@ class RenderRecyclerLayout extends RenderLayoutBox {
     pointerListener = _pointerListener;
     scrollable = KrakenScrollable(axisDirection: getAxisDirection(axis));
     axis = renderStyle.sliverAxis;
+    _renderSliverBoxChildManager = ElementSliverBoxChildManager(elementDelegate, this);
 
     switch (axis) {
       case Axis.horizontal:
@@ -119,13 +123,13 @@ class RenderRecyclerLayout extends RenderLayoutBox {
 
   @protected
   RenderSliverList _buildRenderSliverList() {
-    return _renderSliverList = RenderSliverList(childManager: elementDelegate.renderSliverBoxChildManager!);
+    return _renderSliverList = RenderSliverList(childManager: _renderSliverBoxChildManager);
   }
 
   /// Child count should rely on element's childNodes, the real
   /// child renderObject count is not exactly.
   @override
-  int get childCount => elementDelegate.renderSliverBoxChildManager!.childCount;
+  int get childCount => _renderSliverBoxChildManager.childCount;
 
   Size get _screenSize => window.physicalSize / window.devicePixelRatio;
 
@@ -276,5 +280,114 @@ class RenderRecyclerLayout extends RenderLayoutBox {
       default:
         return AxisDirection.right;
     }
+  }
+}
+
+/// [RenderSliverBoxChildManager] for sliver element.
+class ElementSliverBoxChildManager implements RenderSliverBoxChildManager {
+  final ElementDelegate _elementDelegate;
+  final RenderRecyclerLayout _recyclerLayout;
+
+  // Flag to determine whether newly added children could
+  // affect the visible contents of the [RenderSliverMultiBoxAdaptor].
+  bool _didUnderflow = false;
+
+  // The current rendering object index.
+  int _currentIndex = -1;
+
+  ElementSliverBoxChildManager(this._elementDelegate, this._recyclerLayout);
+
+  Iterable<Node> get _renderNodes => _elementDelegate.getChildNodes().where((child) => child is Element || child is TextNode);
+
+  // Only count renderable child.
+  @override
+  int get childCount => _renderNodes.length;
+
+  @override
+  void createChild(int index, {required RenderBox? after}) {
+    if (_didUnderflow) return;
+    if (index < 0) return;
+
+    Iterable<Node> renderNodes = _renderNodes;
+    if (index >= renderNodes.length) return;
+    _currentIndex = index;
+
+    Node childNode = renderNodes.elementAt(index);
+    childNode.willAttachRenderer();
+
+    RenderBox? child;
+
+    if (childNode is Element) {
+      childNode.style.flushPendingProperties();
+    }
+
+    if (childNode is Node) {
+      child = childNode.renderer as RenderBox?;
+    } else {
+      if (!kReleaseMode)
+        throw FlutterError('Sliver unsupported type ${childNode.runtimeType} $childNode');
+    }
+
+    assert(child != null, 'Sliver render node should own RenderBox.');
+
+    _recyclerLayout
+      ..setupParentData(child!)
+      ..insertSliverChild(child, after: after);
+
+    childNode.didAttachRenderer();
+    childNode.ensureChildAttached();
+  }
+
+  @override
+  bool debugAssertChildListLocked() => true;
+
+  @override
+  void didAdoptChild(RenderBox child) {
+    final parentData = child.parentData as SliverMultiBoxAdaptorParentData;
+    parentData.index = _currentIndex;
+  }
+
+  @override
+  void removeChild(RenderBox child) {
+    if (child is RenderBoxModel) {
+      child.elementDelegate.detachRenderer();
+    } else {
+      child.detach();
+    }
+  }
+
+  @override
+  void setDidUnderflow(bool value) {
+    _didUnderflow = value;
+  }
+
+  @override
+  void didFinishLayout() {}
+
+  @override
+  void didStartLayout() {}
+
+  @override
+  double estimateMaxScrollOffset(SliverConstraints constraints, {int? firstIndex, int? lastIndex, double? leadingScrollOffset, double? trailingScrollOffset}) {
+    return _extrapolateMaxScrollOffset(firstIndex, lastIndex,
+        leadingScrollOffset, trailingScrollOffset, childCount)!;
+  }
+
+  static double? _extrapolateMaxScrollOffset(
+      int? firstIndex,
+      int? lastIndex,
+      double? leadingScrollOffset,
+      double? trailingScrollOffset,
+      int childCount,
+      ) {
+    if (lastIndex == childCount - 1) {
+      return trailingScrollOffset;
+    }
+
+    final int reifiedCount = lastIndex! - firstIndex! + 1;
+    final double averageExtent =
+        (trailingScrollOffset! - leadingScrollOffset!) / reifiedCount;
+    final int remainingCount = childCount - lastIndex - 1;
+    return trailingScrollOffset + averageExtent * remainingCount;
   }
 }
