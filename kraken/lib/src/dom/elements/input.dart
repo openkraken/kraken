@@ -331,7 +331,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   @override
   void willAttachRenderer() {
-    super.willDetachRenderer();
+    super.willAttachRenderer();
     style.addStyleChangeListener(_onStyleChanged);
   }
 
@@ -418,7 +418,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       .size;
     return textSize;
   }
-  
+
   Size? _textSize;
 
   // Whether gesture is dragging.
@@ -458,7 +458,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
       TouchList touches = (event as TouchEvent).touches;
       if (touches.length > 1) return;
-      
+
       Touch touch = touches.item(0);
       Offset _selectEndPosition = Offset(touch.clientX, touch.clientY);
       // Disable text selection and enable scrolling when text size is larger than input size.
@@ -472,7 +472,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         }
         return;
       }
-      
+
       _renderEditable!.selectPositionAt(
         from: _selectStartPosition!,
         to: _selectEndPosition,
@@ -892,7 +892,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   @override
   void updateEditingValue(TextEditingValue value) {
      _lastKnownRemoteTextEditingValue = value;
-     
+
     if (value == _value) {
       // This is possible, for example, when the numeric keyboard is input,
       // the engine will notify twice for the same value.
