@@ -232,8 +232,6 @@ class Element extends Node
     bindNativeMethods(nativeElementPtr);
   }
 
-  RenderSliverBoxChildManager? _sliverBoxChildManager;
-
   Size _getViewportSize() {
     return elementManager.viewport.viewportSize;
   }
