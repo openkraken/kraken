@@ -89,35 +89,41 @@ class CSSBackground {
   }
 
   static DecorationImage? getDecorationImage(CSSStyleDeclaration style, CSSFunctionalNotation method, { int? contextId }) {
-    DecorationImage backgroundImage;
+    DecorationImage? backgroundImage;
 
     String url = method.args.isNotEmpty ? method.args[0] : '';
     if (url.isEmpty) {
       return null;
     }
 
-    if (contextId != null) {
-      KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
-      url = controller.uriParser!.resolve(Uri.parse(controller.href), Uri.parse(url)).toString();
+    // Method may contain quotation mark, like ['"assets/foo.png"']
+    url = _removeQuotationMark(url);
+
+    Uri uri = Uri.parse(url);
+    if (contextId != null && url.isNotEmpty) {
+      KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
+      if (controller != null) {
+        uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri);
+      }
     }
 
-    ImageRepeat imageRepeat;
-    switch (style[BACKGROUND_REPEAT]) {
-      case REPEAT_X:
-        imageRepeat = ImageRepeat.repeatX;
-        break;
-      case REPEAT_Y:
-        imageRepeat = ImageRepeat.repeatY;
-        break;
-      case NO_REPEAT:
-        imageRepeat = ImageRepeat.noRepeat;
-        break;
-      default:
-        imageRepeat = ImageRepeat.repeat;
+    ImageRepeat imageRepeat = ImageRepeat.repeat;
+    if (style[BACKGROUND_REPEAT].isNotEmpty) {
+      switch (style[BACKGROUND_REPEAT]) {
+        case REPEAT_X:
+          imageRepeat = ImageRepeat.repeatX;
+          break;
+        case REPEAT_Y:
+          imageRepeat = ImageRepeat.repeatY;
+          break;
+        case NO_REPEAT:
+          imageRepeat = ImageRepeat.noRepeat;
+          break;
+      }
     }
 
     backgroundImage = DecorationImage(
-      image: CSSUrl.parseUrl(url, contextId: contextId)!,
+      image: CSSUrl.parseUrl(uri, contextId: contextId)!,
       repeat: imageRepeat,
     );
 
@@ -402,4 +408,14 @@ class CSSBackground {
     }
     return colorGradients;
   }
+}
+
+const String _singleQuote = '\'';
+const String _doubleQuote = '"';
+String _removeQuotationMark(String input) {
+  if ((input.startsWith(_singleQuote) && input.endsWith(_singleQuote))
+      || (input.startsWith(_doubleQuote) && input.endsWith(_doubleQuote))) {
+    input = input.substring(1, input.length - 1);
+  }
+  return input;
 }

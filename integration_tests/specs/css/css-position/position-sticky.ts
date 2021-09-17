@@ -274,7 +274,7 @@ describe('position-sticky', () => {
       scroller.scrollTop = 100;
     });
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('flexbox-ref', async () => {
     let flexItem;

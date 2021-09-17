@@ -178,8 +178,6 @@ class Element extends Node
   /// Whether should create repaintBoundary for this element when style changed
   bool get shouldConvertToRepaintBoundary {
     // Following cases should always convert to repaint boundary for performance consideration
-    // Multiframe image
-    bool isMultiframeImage = this is ImageElement && (this as ImageElement).isMultiframe;
     // Intrinsic element such as Canvas
     bool isSetRepaintSelf = repaintSelf;
     // Scrolling box
@@ -189,8 +187,7 @@ class Element extends Node
     // Fixed element
     bool isPositionedFixed = renderBoxModel?.renderStyle.position == CSSPositionType.fixed;
 
-    return isMultiframeImage || isScrollingBox ||
-      isSetRepaintSelf || hasTransform || isPositionedFixed;
+    return isScrollingBox || isSetRepaintSelf || hasTransform || isPositionedFixed;
   }
 
   Element(int targetId, this.nativeElementPtr, ElementManager elementManager,
@@ -1363,7 +1360,7 @@ class Element extends Node
     bool isIntersectionObserverEvent = _isIntersectionObserverEvent(eventType);
     bool hasIntersectionObserverEvent = isIntersectionObserverEvent && _hasIntersectionObserverEvent(eventHandlers);
 
-    addEventListener(eventType, eventResponder);
+    addEventListener(eventType, _eventResponder);
 
     RenderBoxModel? selfRenderBoxModel = renderBoxModel;
     if (selfRenderBoxModel != null) {
@@ -1378,7 +1375,7 @@ class Element extends Node
 
   void removeEvent(String eventType) {
     if (!eventHandlers.containsKey(eventType)) return; // Only listen once.
-    removeEventListener(eventType, eventResponder);
+    removeEventListener(eventType, _eventResponder);
 
     RenderBoxModel? selfRenderBoxModel = renderBoxModel;
     if (selfRenderBoxModel != null) {
@@ -1392,7 +1389,18 @@ class Element extends Node
     }
   }
 
-  void eventResponder(Event event) {
+  @override
+  void dispatchEvent(Event event) {
+    super.dispatchEvent(event);
+    if (event.currentTarget != null) {
+      _eventResponder(event);
+
+      // Dispatch listener for widget.
+      elementManager.eventClient?.eventListener(event);
+    }
+  }
+
+  void _eventResponder(Event event) {
     emitUIEvent(elementManager.controller.view.contextId, nativeElementPtr.ref.nativeNode.ref.nativeEventTarget, event);
   }
 

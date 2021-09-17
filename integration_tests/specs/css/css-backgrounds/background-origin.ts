@@ -47,7 +47,7 @@ describe('Background-origin', () => {
       ]
     );
     append(BODY, div);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('works with padding-box', async () => {
@@ -73,7 +73,7 @@ describe('Background-origin', () => {
       ]
     );
     append(BODY, div);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('works with content-box', async () => {
@@ -99,6 +99,6 @@ describe('Background-origin', () => {
       ]
     );
     append(BODY, div);
-    await snapshot();
+    await snapshot(0.1);
   });
 });

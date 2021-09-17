@@ -42,6 +42,6 @@ describe('right-031', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 });

@@ -102,7 +102,7 @@ describe('absolute-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('replaced-height-002', async () => {
     let p;
@@ -233,7 +233,7 @@ describe('absolute-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('replaced-height-003', async () => {
     let p;
@@ -461,7 +461,7 @@ describe('absolute-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('replaced-height-006', async () => {
     let p;
@@ -582,7 +582,7 @@ describe('absolute-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
 
     await snapshot();
   });
@@ -696,7 +696,7 @@ describe('absolute-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('replaced-height-008', async () => {
     let p;
@@ -796,7 +796,7 @@ describe('absolute-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('replaced-height-009', async () => {
     let p;
@@ -1188,7 +1188,7 @@ describe('absolute-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('replaced-max-height-002', async () => {
     let p;
@@ -1297,7 +1297,7 @@ describe('absolute-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('replaced-max-height-003', async () => {
     let p;
@@ -1592,7 +1592,7 @@ describe('absolute-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('replaced-max-height-007', async () => {
     let p;
@@ -1716,7 +1716,7 @@ describe('absolute-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('replaced-max-height-008', async () => {
     let p;
@@ -1823,7 +1823,7 @@ describe('absolute-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('replaced-max-height-009', async () => {
     let p;
@@ -2204,7 +2204,7 @@ describe('absolute-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('replaced-width-002', async () => {
     let p;
@@ -2332,7 +2332,7 @@ describe('absolute-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('replaced-width-003', async () => {
     let p;
@@ -2760,7 +2760,7 @@ describe('absolute-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('replaced-width-008', async () => {
     let p;
@@ -3337,7 +3337,7 @@ describe('absolute-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('replaced-width-015', async () => {
     let p;
@@ -4338,6 +4338,6 @@ describe('absolute-non', () => {
     BODY.appendChild(p_1);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 });
