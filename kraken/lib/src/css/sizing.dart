@@ -96,7 +96,7 @@ mixin CSSSizingMixin on RenderStyleBase {
         break;
       case MIN_WIDTH:
         renderStyle.minWidth = getMinWidth(value);
-        // max-width should not exceed min-midth
+        // max-width should not exceed min-width
         double? maxWidth = renderStyle.maxWidth;
         if (maxWidth != null) {
           renderStyle.maxWidth = getMaxWidth(maxWidth, value);
@@ -108,11 +108,12 @@ mixin CSSSizingMixin on RenderStyleBase {
     }
 
     if (shouldMarkNeedsLayout) {
-      renderBoxModel!.markNeedsLayout();
+      RenderBoxModel boxModel = renderBoxModel!;
+      boxModel.markNeedsLayout();
       // Sizing may affect parent size, mark parent as needsLayout in case
       // renderBoxModel has tight constraints which will prevent parent from marking.
-      if (renderBoxModel!.parent is RenderBoxModel) {
-        (renderBoxModel!.parent as RenderBoxModel).markNeedsLayout();
+      if (boxModel.parent is RenderBoxModel) {
+        (boxModel.parent as RenderBoxModel).markNeedsLayout();
       }
     }
   }

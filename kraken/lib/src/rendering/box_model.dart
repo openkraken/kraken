@@ -874,29 +874,15 @@ class RenderBoxModel extends RenderBox
   /// Content width of render box model calculated from style
   static double? getLogicalContentWidth(RenderBoxModel renderBoxModel) {
     RenderBoxModel originalRenderBoxModel = renderBoxModel;
-    double cropWidth = 0;
-    CSSDisplay? display = renderBoxModel.renderStyle.transformedDisplay;
+    double? intrinsicRatio = renderBoxModel.intrinsicRatio;
     RenderStyle renderStyle = renderBoxModel.renderStyle;
+
+    CSSDisplay? display = renderStyle.transformedDisplay;
     double? width = renderStyle.width;
     double? minWidth = renderStyle.minWidth;
     double? maxWidth = renderStyle.maxWidth;
-    double? intrinsicRatio = renderBoxModel.intrinsicRatio;
 
-    void cropMargin(RenderBoxModel renderBoxModel) {
-      if (renderBoxModel.renderStyle.margin != null) {
-        cropWidth += renderBoxModel.renderStyle.margin!.horizontal;
-      }
-    }
-
-    void cropPaddingBorder(RenderBoxModel renderBoxModel) {
-      if (renderBoxModel.renderStyle.borderEdge != null) {
-        cropWidth += renderBoxModel.renderStyle.borderEdge!.horizontal;
-      }
-
-      if (renderBoxModel.renderStyle.padding != null) {
-        cropWidth += renderBoxModel.renderStyle.padding!.horizontal;
-      }
-    }
+    double cropWidth = 0;
 
     switch (display) {
       case CSSDisplay.block:
@@ -904,7 +890,7 @@ class RenderBoxModel extends RenderBox
       case CSSDisplay.sliver:
         // Get own width if exists else get the width of nearest ancestor width width
         if (renderStyle.width != null) {
-          cropPaddingBorder(renderBoxModel);
+          cropWidth = _getCropWidthByPaddingBorder(renderBoxModel.renderStyle, cropWidth);
         } else {
           // @TODO: flexbox stretch alignment will stretch replaced element in the cross axis
           // Block level element will spread to its parent's width except for replaced element
@@ -912,8 +898,8 @@ class RenderBoxModel extends RenderBox
             while (true) {
               if (renderBoxModel.parent != null &&
                   renderBoxModel.parent is RenderBoxModel) {
-                cropMargin(renderBoxModel);
-                cropPaddingBorder(renderBoxModel);
+                cropWidth = _getCropWidthByMargin(renderBoxModel.renderStyle, cropWidth);
+                cropWidth = _getCropWidthByPaddingBorder(renderBoxModel.renderStyle, cropWidth);
                 renderBoxModel = renderBoxModel.parent as RenderBoxModel;
               } else {
                 break;
@@ -929,12 +915,12 @@ class RenderBoxModel extends RenderBox
                 if (renderStyle.width != null) {
                   // Use style width
                   width = renderStyle.width;
-                  cropPaddingBorder(renderBoxModel);
+                  cropWidth = _getCropWidthByPaddingBorder(renderBoxModel.renderStyle, cropWidth);
                   break;
                 } else if (renderBoxModel.constraints.isTight) {
                   // Cases like flex item with flex-grow and no width in flex row direction.
                   width = renderBoxModel.constraints.maxWidth;
-                  cropPaddingBorder(renderBoxModel);
+                  cropWidth = _getCropWidthByPaddingBorder(renderBoxModel.renderStyle, cropWidth);
                   break;
                 } else if (display == CSSDisplay.inlineBlock ||
                     display == CSSDisplay.inlineFlex ||
@@ -952,7 +938,7 @@ class RenderBoxModel extends RenderBox
       case CSSDisplay.inlineFlex:
         if (renderStyle.width != null) {
           width = renderStyle.width;
-          cropPaddingBorder(renderBoxModel);
+          cropWidth = _getCropWidthByPaddingBorder(renderBoxModel.renderStyle, cropWidth);
         } else {
           width = null;
         }
@@ -1659,4 +1645,23 @@ class RenderBoxModel extends RenderBox
     debugTransformProperties(properties);
     debugOpacityProperties(properties);
   }
+}
+
+double _getCropWidthByMargin(RenderStyle renderStyle, double cropWidth) {
+  if (renderStyle.margin != null) {
+    cropWidth += renderStyle.margin!.horizontal;
+  }
+  return cropWidth;
+}
+
+double _getCropWidthByPaddingBorder(RenderStyle renderStyle, double cropWidth) {
+  if (renderStyle.borderEdge != null) {
+    cropWidth += renderStyle.borderEdge!.horizontal;
+  }
+
+  if (renderStyle.padding != null) {
+    cropWidth += renderStyle.padding!.horizontal;
+  }
+
+  return cropWidth;
 }

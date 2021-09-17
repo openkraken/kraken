@@ -78,7 +78,6 @@ mixin CSSDisplayMixin on RenderStyleBase {
   void initDisplay() {
     // Must take from style because it inited before flush pending properties.
     _display = getDisplay(style[DISPLAY]);
-    transformedDisplay = getTransformedDisplay();
   }
 
   static CSSDisplay getDisplay(String? displayString) {

@@ -300,6 +300,8 @@ class Element extends Node
 
   @override
   void didAttachRenderer() {
+    // After attach, we need to update transformedDisplay.
+    renderStyle.updateTransformedDisplay();
     // Flush pending style.
     style.flushPendingProperties();
 
