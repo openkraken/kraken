@@ -217,7 +217,7 @@ describe('min-height', () => {
     );
     BODY.appendChild(flexbox);
 
-    await snapshot(0.1);
+    await snapshot();
   });
 
   it('should work with replaced element when element height is larger than intrinsic height', async () => {
@@ -246,7 +246,7 @@ describe('min-height', () => {
     );
     BODY.appendChild(flexbox);
 
-    await snapshot(0.1);
+    await snapshot();
   });
 
   it('should work with percentage in flow layout', async () => {

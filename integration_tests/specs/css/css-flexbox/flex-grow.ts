@@ -623,7 +623,7 @@ describe('flex-grow', () => {
       ]
     );
     BODY.appendChild(div);
-    await snapshot(0.1);
+    await snapshot();
   });
 
   it('should work with flex-item content change', async (done) => {
@@ -659,7 +659,7 @@ describe('flex-grow', () => {
 
     requestAnimationFrame(async () => {
       text.data = 6000;
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
 

@@ -41,7 +41,7 @@ describe('Color currentColor', () => {
       });
     });
 
-    await snapshot(0.1);
+    await snapshot();
   });
 
 });

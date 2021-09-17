@@ -24,7 +24,7 @@ describe('block-fit', () => {
     );
     BODY.appendChild(parent);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('content-as-initial', async () => {
     let child;

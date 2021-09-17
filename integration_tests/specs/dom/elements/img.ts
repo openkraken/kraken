@@ -90,10 +90,10 @@ describe('Tags img', () => {
     let src = img.src;
     expect(src).toBe('assets/rabbit.png');
     // have to wait for asset load?
-    await sleep(0.1);
+
     await snapshot();
     img.src = 'assets/solidblue.png';
-    await sleep(0.1);
+
     await snapshot();
     src = img.src;
     expect(src).toBe('assets/solidblue.png');

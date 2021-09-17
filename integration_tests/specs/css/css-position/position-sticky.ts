@@ -120,7 +120,7 @@ describe('position-sticky', () => {
     BODY.appendChild(sticky);
     BODY.appendChild(spacer);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('child-multicolumn-ref', async () => {
     let contents;
@@ -274,7 +274,7 @@ describe('position-sticky', () => {
       scroller.scrollTop = 100;
     });
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('flexbox-ref', async () => {
     let flexItem;

@@ -7,7 +7,7 @@ describe('custom element', () => {
     await snapshot();
 
     text.setAttribute('value', 'Hi');
-    await snapshot(0.1);
+    await snapshot();
   });
 
   it('use flutter asset image', async () => {
@@ -15,7 +15,7 @@ describe('custom element', () => {
     image.setAttribute('src', 'assets/rabbit.png');
     document.body.appendChild(image);
 
-    await snapshot(0.1);
+    await snapshot();
   });
 
   it('work with click event', async (done) => {

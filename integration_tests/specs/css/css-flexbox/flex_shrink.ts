@@ -181,7 +181,7 @@ describe('flexbox flex-shrink', () => {
     );
     BODY.appendChild(constrainedFlex);
 
-    await snapshot(0.1);
+    await snapshot();
   });
 
   it('should work with intrinsic element with min-height', async () => {
@@ -239,7 +239,7 @@ describe('flexbox flex-shrink', () => {
     );
     BODY.appendChild(constrainedFlex);
 
-    await snapshot(0.1);
+    await snapshot();
   });
 
   it('should work with flex layout in the column direction with children and height is not larger than children height', async () => {
@@ -825,7 +825,7 @@ describe('flexbox flex-shrink', () => {
     );
 
     document.body.appendChild(container);
-    await snapshot(0.1);
+    await snapshot();
   });
 
   it('should work with flex item with overflow hidden', async () => {
@@ -870,7 +870,7 @@ describe('flexbox flex-shrink', () => {
     );
 
     document.body.appendChild(container);
-    await snapshot(0.1);
+    await snapshot();
   });
 
 });

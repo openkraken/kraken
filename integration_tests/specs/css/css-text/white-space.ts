@@ -85,7 +85,7 @@ describe('Text WhiteSpace', () => {
 
     requestAnimationFrame(async () => {
       cont.style.whiteSpace = 'nowrap';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });
@@ -109,7 +109,7 @@ describe('Text WhiteSpace', () => {
 
     requestAnimationFrame(async () => {
       cont.style.whiteSpace = 'normal';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });
@@ -380,7 +380,7 @@ describe('Inline level element', () => {
 
     requestAnimationFrame(async () => {
       div.style.whiteSpace = 'normal';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });
@@ -474,7 +474,7 @@ describe('Inline level element', () => {
 
     requestAnimationFrame(async () => {
       div.style.whiteSpace = 'nowrap';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });

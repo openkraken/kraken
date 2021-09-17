@@ -17,7 +17,7 @@ describe('overflow-change', () => {
 
     setTimeout(async() => {
       cont.style.overflow = 'hidden';
-      await snapshot(0.1);
+      await snapshot();
       done();
     }, 100);
 
@@ -42,7 +42,7 @@ describe('overflow-change', () => {
 
     setTimeout(async() => {
       cont.style.overflow = 'visible';
-      await snapshot(0.1);
+      await snapshot();
       done();
     }, 100);
 
@@ -72,7 +72,7 @@ describe('overflow-change', () => {
 
     requestAnimationFrame(async() => {
       cont.style.overflow = 'visible';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });
@@ -101,7 +101,7 @@ describe('overflow-change', () => {
 
     requestAnimationFrame(async() => {
       cont.style.overflow = 'visible';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });
@@ -129,7 +129,7 @@ describe('overflow-change', () => {
 
     requestAnimationFrame(async() => {
       cont.style.overflow = 'scroll';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });
@@ -164,7 +164,7 @@ describe('overflow-change', () => {
       inner3.style.position = 'relative';
       inner3.style.overflowY = 'visible';
       inner3.style.overflowY = 'scroll';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });

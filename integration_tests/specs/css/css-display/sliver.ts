@@ -1,4 +1,4 @@
-describe('display sliver', () => {
+fdescribe('display sliver', () => {
   function createSliverBasicCase() {
     var d = document.createElement('div');
 

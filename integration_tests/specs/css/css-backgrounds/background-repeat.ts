@@ -19,7 +19,7 @@ describe('background-repeat', () => {
     });
     repeat.appendChild(div1);
     document.body.appendChild(repeat);
-    await sleep(0.1);
+
     await snapshot(repeat);
   });
 
@@ -44,7 +44,7 @@ describe('background-repeat', () => {
     });
     repeat.appendChild(div1);
     document.body.appendChild(repeat);
-    await sleep(0.1);
+
     await snapshot(repeat);
   });
 
@@ -68,7 +68,7 @@ describe('background-repeat', () => {
     });
     repeat.appendChild(div2);
     append(BODY, repeat);
-    await sleep(0.1);
+
     await snapshot(repeat);
   });
 
@@ -92,7 +92,7 @@ describe('background-repeat', () => {
     });
     repeat.appendChild(div3);
     append(BODY, repeat);
-    await sleep(0.1);
+
     await snapshot(repeat);
   });
 
@@ -116,7 +116,7 @@ describe('background-repeat', () => {
     });
     repeat.appendChild(div4);
     append(BODY, repeat);
-    await sleep(0.1);
+
     await snapshot(repeat);
   });
 

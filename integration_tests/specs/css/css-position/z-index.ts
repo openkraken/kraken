@@ -335,7 +335,7 @@ describe('z-index', () => {
 
     requestAnimationFrame(async () => {
       div1.style.zIndex = 99;
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });

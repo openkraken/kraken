@@ -217,7 +217,7 @@ describe('min-width', () => {
     );
     BODY.appendChild(flexbox);
 
-    await snapshot(0.1);
+    await snapshot();
   });
 
   it('should work with replaced element when element width is larger than intrinsic width', async () => {
@@ -246,7 +246,7 @@ describe('min-width', () => {
     );
     BODY.appendChild(flexbox);
 
-    await snapshot(0.1);
+    await snapshot();
   });
 
   it('should work with percentage in flow layout', async () => {

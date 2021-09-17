@@ -276,7 +276,7 @@ describe('position-absolute', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('004', async () => {
     let p;

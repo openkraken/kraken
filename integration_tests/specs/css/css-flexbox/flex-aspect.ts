@@ -86,7 +86,7 @@ describe('flex-aspect', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await sleep(0.1);
+
     await snapshot();
   });
   it('ratio-img-column-003', async () => {
@@ -155,7 +155,7 @@ describe('flex-aspect', () => {
       ]
     );
     BODY.appendChild(flex);
-    await sleep(0.1);
+
     await snapshot();
   });
   it('ratio-img-column-005', async () => {
@@ -184,7 +184,7 @@ describe('flex-aspect', () => {
       ]
     );
     BODY.appendChild(flex);
-    await sleep(0.1);
+
     await snapshot();
   });
   xit('ratio-img-column-008', async () => {
@@ -239,7 +239,7 @@ describe('flex-aspect', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(div);
     BODY.appendChild(flex);
-    await sleep(0.1);
+
     await snapshot();
   });
   it('ratio-img-row-001', async () => {
@@ -280,7 +280,7 @@ describe('flex-aspect', () => {
     );
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
-    await sleep(0.1);
+
     await snapshot();
   });
   xit('ratio-img-row-002', async () => {
@@ -321,7 +321,7 @@ describe('flex-aspect', () => {
     );
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
-    await sleep(0.1);
+
     await snapshot();
   });
   it('ratio-img-row-003', async () => {
@@ -362,7 +362,7 @@ describe('flex-aspect', () => {
     );
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
-    await sleep(0.1);
+
     await snapshot();
   });
 });

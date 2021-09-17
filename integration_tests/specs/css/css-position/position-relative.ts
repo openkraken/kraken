@@ -30,7 +30,7 @@ describe('position-relative', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('001', async () => {
     let p;
@@ -439,7 +439,7 @@ describe('position-relative', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('005', async () => {
     let p;
@@ -892,7 +892,7 @@ describe('position-relative', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('014', async () => {
     let p;
@@ -1031,7 +1031,7 @@ describe('position-relative', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   // Some position relation case not works right
   // restrict to flutter's renderiing pipe
@@ -2270,7 +2270,7 @@ describe('position-relative', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('037', async () => {
     let p;
@@ -2359,7 +2359,7 @@ describe('position-relative', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('038', async () => {
     let p;
