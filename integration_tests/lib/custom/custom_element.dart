@@ -1,5 +1,5 @@
 import 'dart:ffi';
-
+import 'dart:async';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/widget.dart';
@@ -35,6 +35,22 @@ class SampleElement extends Element {
           return List.generate(args.length, (index) {
             return args[index] * 2;
           });
+        };
+      case 'asyncFn':
+        return (List<dynamic> args) async {
+          Completer<String> completer = Completer();
+          Timer(Duration(seconds: 1), () {
+            completer.complete('helloworld');
+          });
+          return completer.future;
+        };
+      case 'asyncFnFailed':
+        return (List<dynamic> args) async {
+          Completer<String> completer = Completer();
+          Timer(Duration(seconds: 1), () {
+            completer.completeError(AssertionError('Asset error'));
+          });
+          return completer.future;
         };
       default:
         return super.getProperty(key);

@@ -13,7 +13,7 @@ class NativeValue extends Struct {
   @Int64()
   external int u;
 
-  @Int32()
+  @Int64()
   external int tag;
 }
 
@@ -91,6 +91,7 @@ dynamic fromNativeValue(JSValueType type, Pointer<NativeValue> nativeValue) {
 }
 
 void toNativeValue(Pointer<NativeValue> target, dynamic value) {
+
   if (value == null) {
     target.ref.tag = JSValueType.TAG_NULL.index;
   } else if (value is int) {
@@ -115,15 +116,15 @@ void toNativeValue(Pointer<NativeValue> target, dynamic value) {
     } else if (value is Pointer<NativeEventTarget>) {
       target.ref.float64 = JSPointerType.NativeEventTarget.index.toDouble();
     }
-  } else if (value is AnonymousNativeFunction) {
-    int id = _functionId++;
-    _functionMap[id] = value;
-    target.ref.tag = JSValueType.TAG_FUNCTION.index;
-    target.ref.u = id;
   } else if (value is AsyncAnonymousNativeFunction) {
     int id = _functionId++;
     _asyncFunctionMap[id] = value;
     target.ref.tag = JSValueType.TAG_ASYNC_FUNCTION.index;
+    target.ref.u = id;
+  } else if (value is AnonymousNativeFunction) {
+    int id = _functionId++;
+    _functionMap[id] = value;
+    target.ref.tag = JSValueType.TAG_FUNCTION.index;
     target.ref.u = id;
   } else if (value is Object) {
     String str = jsonEncode(value);

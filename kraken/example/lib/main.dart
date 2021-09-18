@@ -1,10 +1,15 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Element;
 import 'package:kraken/kraken.dart';
+import 'package:kraken/dom.dart';
+import 'dart:ffi';
 // import 'package:kraken_websocket/kraken_websocket.dart';
 // import 'package:kraken_devtools/kraken_devtools.dart';
 import 'dart:ui';
 
 void main() {
+  Kraken.defineCustomElement<ElementCreator>('sample-element',  (int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager) {
+    return SampleElement(targetId, nativeEventTarget, elementManager);
+  });
   // KrakenWebsocket.initialize();
   runApp(MyApp());
 }

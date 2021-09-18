@@ -37,10 +37,10 @@ void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> re
     }
     removeAnonymousNativeFunctionFromId(id);
   } else if (method.startsWith('_anonymous_async_fn_')) {
-    int id = int.parse(method.substring('_anonymous_fn_'.length));
+    int id = int.parse(method.substring('_anonymous_async_fn_'.length));
     AsyncAnonymousNativeFunction fn = getAsyncAnonymousNativeFunctionFromId(id)!;
     int contextId = values[0];
-    Pointer<Void> callbackContext = values[1];
+    Pointer<Void> callbackContext = (values[1] as Pointer).cast<Void>();
     DartAsyncAnonymousFunctionCallback callback = (values[2] as Pointer).cast<NativeFunction<NativeAsyncAnonymousFunctionCallback>>().asFunction();
     Future<dynamic> p = fn(values);
     p.then((result) {
@@ -49,7 +49,7 @@ void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> re
       callback(callbackContext, nativeValue, contextId, nullptr);
       removeAsyncAnonymousNativeFunctionFromId(id);
     }).catchError((e, stack) {
-      String errorMessage = '$e\n$stack';
+      String errorMessage = '$e';
       callback(callbackContext, nullptr, contextId, errorMessage.toNativeUtf8());
       removeAsyncAnonymousNativeFunctionFromId(id);
     });

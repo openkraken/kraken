@@ -166,6 +166,8 @@ void anonymousAsyncCallback(void *callbackContext, NativeValue *nativeValue, int
   if (nativeValue != nullptr) {
     JSValue value = nativeValueToJSValue(promiseContext->context, *nativeValue);
     JSValue returnValue = JS_Call(context->ctx(), promiseContext->resolveFunc, context->global(), 1, &value);
+    context->drainPendingPromiseJobs();
+    JS_FreeValue(context->ctx(), value);
     JS_FreeValue(context->ctx(), returnValue);
   } else if (errmsg != nullptr) {
     JSValue error = JS_NewError(context->ctx());
@@ -173,6 +175,8 @@ void anonymousAsyncCallback(void *callbackContext, NativeValue *nativeValue, int
                            JS_NewString(context->ctx(), errmsg),
                            JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
     JSValue returnValue = JS_Call(context->ctx(), promiseContext->rejectFunc, context->global(), 1, &error);
+    context->drainPendingPromiseJobs();
+    JS_FreeValue(context->ctx(), error);
     JS_FreeValue(context->ctx(), returnValue);
   }
 
@@ -209,7 +213,7 @@ static JSValue anonymousAsyncFunction(QjsContext *ctx, JSValueConst this_val, in
     arguments[i] = jsValueToNativeValue(ctx, argv[i]);
   }
 
-  eventTarget->callNativeMethods(call_params.c_str(), argc, arguments);
+  eventTarget->callNativeMethods(call_params.c_str(), argc + 3, arguments);
   delete[] arguments;
 
   return promise;

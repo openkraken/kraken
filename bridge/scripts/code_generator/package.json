@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/lodash": "^4.14.172",
+    "@types/node": "^16.9.2",
     "commander": "^8.1.0",
     "glob": "^7.1.7",
     "lodash": "^4.17.21",

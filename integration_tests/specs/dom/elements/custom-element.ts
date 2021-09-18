@@ -61,6 +61,34 @@ describe('custom html element', () => {
     expect(sampleElement.fn.apply(sampleElement, arrs)).toEqual([2, 4, 8, 16, 32]);
   });
 
+  it('return promise when dart return future async function', async () => {
+    let sampleElement = document.createElement('sample-element');
+    let text = document.createTextNode('helloworld');
+    sampleElement.appendChild(text);
+    document.body.appendChild(sampleElement);
+    // @ts-ignore
+    let p = sampleElement.asyncFn();
+    expect(p instanceof Promise);
+    let result = await p;
+    expect(result).toBe('helloworld');
+  });
+
+  it('return promise error when dart async function throw error', async () => {
+    let sampleElement = document.createElement('sample-element');
+    let text = document.createTextNode('helloworld');
+    sampleElement.appendChild(text);
+    document.body.appendChild(sampleElement);
+    // @ts-ignore
+    let p = sampleElement.asyncFnFailed();
+    expect(p instanceof Promise);
+    try {
+      let result = await p;
+      throw new Error('should throw');
+    } catch(e) {
+      expect(e.message).toBe('Assertion failed: "Asset error"');
+    }
+  });
+
   it('property with underscore have no effect', () => {
     let sampleElement = document.createElement('sample-element');
     let text = document.createTextNode('helloworld');
