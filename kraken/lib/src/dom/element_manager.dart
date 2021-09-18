@@ -186,15 +186,22 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     setEventTarget(comment);
   }
 
-  void cloneNode(int oldId, int newId) {
-    Element oldTarget = getEventTargetByTargetId<Element>(oldId)!;
-    Element newTarget = getEventTargetByTargetId<Element>(newId)!;
+  void cloneNode(int originalId, int newId) {
+    EventTarget originalTarget = getEventTargetByTargetId(originalId)!;
+    EventTarget newTarget = getEventTargetByTargetId(newId)!;
 
-    newTarget.style = oldTarget.style.clone(newTarget);
-    newTarget.properties.clear();
-    oldTarget.properties.forEach((key, value) {
-      newTarget.setProperty(key, value);
-    });
+    // Current only element clone will process in dart.
+    if (originalTarget is Element) {
+      Element newElement = newTarget as Element;
+      // Copy inline style.
+      originalTarget.inlineStyle.forEach((key, value) {
+        newElement.setInlineStyle(key, value);
+      });
+      // Copy element attributes.
+      originalTarget.properties.forEach((key, value) {
+        newElement.setProperty(key, value);
+      });
+    }
   }
 
   void removeNode(int targetId) {
@@ -229,9 +236,6 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     document.documentElement.recalculateStyle();
   }
 
-  void applyStyleByClassNames(RenderStyle renderStyle, String classNames) {
-
-  }
 
   void setProperty(int targetId, String key, dynamic value) {
     assert(existsTarget(targetId), 'targetId: $targetId key: $key value: $value');

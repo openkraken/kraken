@@ -101,12 +101,6 @@ class ObjectElement extends Element implements ObjectElementHost {
     _objectElementClient.didDetachRenderer();
   }
 
-  // @override
-  // void setStyle(String key, value) {
-  //   super.setStyle(key, value);
-  //   _objectElementClient?.setStyle(key, value);
-  // }
-
   @override
   void updateChildTextureBox(TextureBox? textureBox) {
     if (textureBox != null) addChild(textureBox);
@@ -121,12 +115,6 @@ class ObjectElement extends Element implements ObjectElementHost {
   void disposeClient() {
     _objectElementClient.dispose();
   }
-
-//  @override
-//  method(String name, List args) {
-//   super.method(name, args);
-//   _objectElementClient?.method(name, args);
-//  }
 }
 
 class _DefaultObjectElementClient implements ObjectElementClient {

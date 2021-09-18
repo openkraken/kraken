@@ -186,14 +186,14 @@ JSValueRef JSNode::copyNodeValue(JSContextRef ctx, NodeInstance *node) {
 }
 
 void JSNode::traverseCloneNode(JSContextRef ctx, NodeInstance *element, NodeInstance *parentElement) {
-  for (auto iter : element->childNodes) {
-    JSValueRef newElementRef = copyNodeValue(ctx, static_cast<NodeInstance *>(iter));
+  for (auto child : element->childNodes) {
+    JSValueRef newElementRef = copyNodeValue(ctx, static_cast<NodeInstance *>(child));
     JSObjectRef newElementObjectRef = JSValueToObject(ctx, newElementRef, nullptr);
     auto newNodeInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(newElementObjectRef));
     parentElement->internalAppendChild(newNodeInstance);
     // element node needs recursive child nodes.
-    if (iter->nodeType == NodeType::ELEMENT_NODE) {
-      traverseCloneNode(ctx, static_cast<ElementInstance *>(iter), static_cast<ElementInstance *>(newNodeInstance));
+    if (child->nodeType == NodeType::ELEMENT_NODE) {
+      traverseCloneNode(ctx, static_cast<ElementInstance *>(child), static_cast<ElementInstance *>(newNodeInstance));
     }
   }
 }
