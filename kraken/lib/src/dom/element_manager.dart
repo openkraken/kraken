@@ -347,7 +347,10 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     assert(existsTarget(targetId), 'targetId: $targetId event: $eventType');
     EventTarget target = getEventTargetByTargetId<EventTarget>(targetId)!;
 
-    target.addEvent(eventType);
+    // Only element accepts event.
+    if (target is Element) {
+      target.addEvent(eventType);
+    }
   }
 
   void removeEvent(int targetId, String eventType) {

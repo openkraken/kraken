@@ -50,12 +50,32 @@ mixin CSSDisplayMixin on RenderStyleBase {
       return;
     }
 
-    if (originalDisplay != presentDisplay && renderBoxModel is RenderLayoutBox) {
+    if (originalDisplay == presentDisplay) return;
+
+    // When renderer and style listener is not created when original display is none,
+    // thus it needs to create renderer when style changed.
+    if (originalDisplay == CSSDisplay.none) {
+      RenderBox? after;
+      Element parent = element.parent as Element;
+      if (parent.scrollingContentLayoutBox != null) {
+        after = parent.scrollingContentLayoutBox!.lastChild;
+      } else {
+        after = (parent.renderBoxModel as RenderLayoutBox).lastChild;
+      }
+      // Update renderBoxModel and attach it to parent.
+      element.updateRenderBoxModel();
+      parent.addChildRenderObject(element, after: after);
+      // FIXME: avoid ensure something in display updating.
+      element.ensureChildAttached();
+    }
+    
+    if (renderBoxModel is RenderLayoutBox) {
       RenderLayoutBox? prevRenderLayoutBox = renderBoxModel as RenderLayoutBox?;
-      element.renderBoxModel = element.createRenderLayout(
-        prevRenderLayoutBox: prevRenderLayoutBox,
-        repaintSelf: element.repaintSelf
-      );
+      if (originalDisplay != CSSDisplay.none) {
+        // Don't updateRenderBoxModel twice.
+        element.updateRenderBoxModel();
+      }
+
       bool shouldReattach = element.isRendererAttached && element.parent != null && prevRenderLayoutBox != renderBoxModel;
 
       if (shouldReattach) {

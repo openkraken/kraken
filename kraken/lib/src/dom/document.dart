@@ -14,9 +14,7 @@ class Document extends Node {
     emitUIEvent(elementManager.controller.view.contextId, nativeDocumentPtr.ref.nativeNode.ref.nativeEventTarget, event);
   }
 
-  @override
   void addEvent(String eventType) {
-    super.addEvent(eventType);
     documentElement.addEventListener(eventType, _handleEvent);
   }
 

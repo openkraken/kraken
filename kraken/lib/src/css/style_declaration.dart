@@ -112,10 +112,11 @@ class CSSStyleDeclaration {
   Element? target;
   // TODO(yuanyan): defualtStyle should be longhand properties.
   Map<String, dynamic>? defaultStyle;
+  StyleChangeListener? onStyleChanged;
 
   CSSStyleDeclaration();
   // ignore: prefer_initializing_formals
-  CSSStyleDeclaration.computedStyle(this.target, this.defaultStyle);
+  CSSStyleDeclaration.computedStyle(this.target, this.defaultStyle, this.onStyleChanged);
 
   /// When some property changed, corresponding [StyleChangeListener] will be
   /// invoked in synchronous.
@@ -500,7 +501,7 @@ class CSSStyleDeclaration {
     // Illegal value like '   ' after trim is '' should do nothing.
     if (normalizedValue.isEmpty) return;
 
-    String? prevValue = _properties[propertyName];
+    String? prevValue = getPropertyValue(propertyName);
     if (normalizedValue == prevValue) return;
 
     if (CSSShorthandProperty[propertyName] != null) {
@@ -669,6 +670,10 @@ class CSSStyleDeclaration {
   }
 
   void _emitPropertyChanged(String property, String? original, String present) {
+    if (onStyleChanged != null) {
+      onStyleChanged!(property, original, present);
+    }
+
     for (int i = 0; i < _styleChangeListeners.length; i++) {
       StyleChangeListener listener = _styleChangeListeners[i];
       listener(property, original, present);

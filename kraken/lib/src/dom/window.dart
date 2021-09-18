@@ -100,10 +100,7 @@ class Window extends EventTarget {
     viewportElement.scrollBy(dx: x, dy: y, withAnimation: false);
   }
 
-  @override
   void addEvent(String eventName) {
-    super.addEvent(eventName);
-
     if (eventHandlers.containsKey(eventName)) return; // Only listen once.
 
     switch (eventName) {

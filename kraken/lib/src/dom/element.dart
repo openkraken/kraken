@@ -218,7 +218,7 @@ class Element extends Node
       );
 
     // Init style and add change listener.
-    style = CSSStyleDeclaration.computedStyle(this, _defaultStyle);
+    style = CSSStyleDeclaration.computedStyle(this, _defaultStyle, _onStyleChanged);
     _applyDefaultStyle();
 
     // Init render style.
@@ -281,20 +281,24 @@ class Element extends Node
     if (renderer != null) {
       return renderer!;
     }
+    updateRenderBoxModel();
+    return renderer!;
+  }
 
+  void updateRenderBoxModel({ bool? shouldRepaintSelf }) {
     // Content children layout, BoxModel content.
     if (_isIntrinsicBox) {
-      _renderIntrinsic = createRenderIntrinsic(repaintSelf: repaintSelf);
+      _renderIntrinsic = _createRenderIntrinsic(repaintSelf: shouldRepaintSelf ?? repaintSelf, prevRenderIntrinsic: _renderIntrinsic);
     } else {
-      _renderLayoutBox = createRenderLayout(repaintSelf: repaintSelf);
+      _renderLayoutBox = _createRenderLayout(repaintSelf: shouldRepaintSelf ?? repaintSelf, prevRenderLayoutBox: _renderLayoutBox);
     }
-
-    return renderer!;
+    // Ensure that the event responder is bound.
+    _ensureEventResponderBound();
   }
 
   @override
   void willAttachRenderer() {
-    style.addStyleChangeListener(_onStyleChanged);
+    // Init render box model.
     createRenderer();
   }
 
@@ -304,14 +308,7 @@ class Element extends Node
     renderStyle.updateTransformedDisplay();
     // Flush pending style.
     style.flushPendingProperties();
-
-    // Bind pointer responder.
-    addEventResponder(renderBoxModel!);
-
-    if (_hasIntersectionObserverEvent(eventHandlers)) {
-      renderBoxModel!.addIntersectionChangeListener(handleIntersectionChange);
-    }
-
+    // Ensure that the child is attached.
     ensureChildAttached();
   }
 
@@ -413,7 +410,7 @@ class Element extends Node
     }
   }
 
-  /// Toggle renderBoxModel between repaint boundary and non repaint boundary
+  /// Toggle renderBoxModel between repaint boundary and non repaint boundary.
   void _toggleRepaintSelf({ required bool repaintSelf }) {
     RenderBoxModel _renderBoxModel = renderBoxModel!;
     Element _parentElement = parentElement!;
@@ -436,19 +433,14 @@ class Element extends Node
         parentRenderObject.remove(_renderBoxModel);
       }
     }
-    RenderBoxModel targetRenderBox = createRenderBoxModel(
-      prevRenderBoxModel: _renderBoxModel,
-      repaintSelf: repaintSelf
-    );
-    // Append new renderObject
+
+    updateRenderBoxModel();
+
     if (parentRenderObject is ContainerRenderObjectMixin) {
-      renderBoxModel = _renderBoxModel = targetRenderBox;
       _parentElement.addChildRenderObject(this, after: previousSibling);
     } else if (parentRenderObject is RenderObjectWithChildMixin) {
-      parentRenderObject.child = targetRenderBox;
+      parentRenderObject.child = renderBoxModel;
     }
-
-    renderBoxModel = _renderBoxModel = targetRenderBox;
   }
 
   void _updatePosition(String present) {
@@ -597,6 +589,12 @@ class Element extends Node
         }
         break;
     }
+
+    // CSS Transition works after dom has layouted, so it needs to mark
+    // the renderBoxModel as layouted on the next frame.
+    SchedulerBinding.instance!.addPostFrameCallback((timestamp) {
+      renderBoxModel?.firstLayouted = true;
+    });
   }
 
   // Attach renderObject of current node to parent
@@ -609,12 +607,6 @@ class Element extends Node
       willAttachRenderer();
       parent.addChildRenderObject(this, after: after);
       didAttachRenderer();
-
-      // CSS Transition works after dom has layouted, so it needs to mark
-      // the renderBoxModel as layouted on the next frame.
-      SchedulerBinding.instance!.addPostFrameCallback((timestamp) {
-        renderBoxModel?.firstLayouted = true;
-      });
     }
   }
 
@@ -777,10 +769,6 @@ class Element extends Node
     if (fixedChildren.contains(childRenderBoxModel)) {
       fixedChildren.remove(childRenderBoxModel);
     }
-  }
-
-  void _onStyleChanged(String property, String? original, String present) {
-    setRenderStyle(property, present);
   }
 
   void _updateOffset(String property, String present) {
@@ -1212,21 +1200,11 @@ class Element extends Node
 
   // Set style property.
   void _setStyleProperty(String propertyName, value, [bool? isImportant]) {
-    CSSDisplay originalDisplay = CSSDisplayMixin.getDisplay(style[DISPLAY]);
     style.setProperty(propertyName, value, isImportant, viewportSize);
+  }
 
-    // When renderer and style listener is not created when original display is none,
-    // thus it needs to create renderer when style changed.
-    if (originalDisplay == CSSDisplay.none && propertyName == DISPLAY && value != NONE) {
-      RenderBox? after;
-      Element parent = this.parent as Element;
-      if (parent.scrollingContentLayoutBox != null) {
-        after = parent.scrollingContentLayoutBox!.lastChild;
-      } else {
-        after = (parent.renderBoxModel as RenderLayoutBox).lastChild;
-      }
-      attachTo(parent, after: after);
-    }
+  void _onStyleChanged(String property, String? original, String present) {
+    setRenderStyle(property, present);
   }
 
   // Set inline style property.
@@ -1334,7 +1312,7 @@ class Element extends Node
   }
 
   Offset getOffset(RenderBox renderBox) {
-    // need to flush layout to get correct size
+    // Need to flush layout to get correct size.
     elementManager
         .getRootRenderBox()
         .owner!
@@ -1345,27 +1323,22 @@ class Element extends Node
     return renderBox.localToGlobal(Offset.zero, ancestor: element.renderBoxModel);
   }
 
-  @override
-  void addEvent(String eventType) {
-    super.addEvent(eventType);
-
-    if (eventHandlers.containsKey(eventType)) return; // Only listen once.
-
-    // Only add listener once for all intersection related event
-    bool isIntersectionObserverEvent = _isIntersectionObserverEvent(eventType);
-    bool hasIntersectionObserverEvent = isIntersectionObserverEvent && _hasIntersectionObserverEvent(eventHandlers);
-
-    addEventListener(eventType, _eventResponder);
-
+  void _ensureEventResponderBound() {
+    // Must bind event responder on render box model whatever there is no event listener.
     RenderBoxModel? selfRenderBoxModel = renderBoxModel;
     if (selfRenderBoxModel != null) {
-      // Bind pointer responder.
+      // Make sure pointer responder bind.
       addEventResponder(selfRenderBoxModel);
-
-      if (isIntersectionObserverEvent && !hasIntersectionObserverEvent) {
+      if (_hasIntersectionObserverEvent(eventHandlers)) {
         selfRenderBoxModel.addIntersectionChangeListener(handleIntersectionChange);
       }
     }
+  }
+
+  void addEvent(String eventType) {
+    if (eventHandlers.containsKey(eventType)) return; // Only listen once.
+    addEventListener(eventType, _eventResponder);
+    _ensureEventResponderBound();
   }
 
   void removeEvent(String eventType) {
@@ -1374,8 +1347,10 @@ class Element extends Node
 
     RenderBoxModel? selfRenderBoxModel = renderBoxModel;
     if (selfRenderBoxModel != null) {
-      // Remove pointer responder.
-      removeEventResponder(selfRenderBoxModel);
+      if (eventHandlers.isEmpty) {
+        // Remove pointer responder if there is no event handler.
+        removeEventResponder(selfRenderBoxModel);
+      }
 
       // Remove listener when no intersection related event
       if (_isIntersectionObserverEvent(eventType) && !_hasIntersectionObserverEvent(eventHandlers)) {
@@ -1446,30 +1421,11 @@ class Element extends Node
     }
   }
 
-  RenderBoxModel createRenderBoxModel({
-      RenderBoxModel? prevRenderBoxModel,
-      bool repaintSelf = false
-  }) {
-    RenderBoxModel? renderBoxModel = prevRenderBoxModel ?? this.renderBoxModel;
-
-    if (renderBoxModel is RenderIntrinsic) {
-      return createRenderIntrinsic(
-        prevRenderIntrinsic: prevRenderBoxModel as RenderIntrinsic?,
-        repaintSelf: repaintSelf
-      );
-    } else {
-      return createRenderLayout(
-        prevRenderLayoutBox: prevRenderBoxModel as RenderLayoutBox?,
-        repaintSelf: repaintSelf
-      );
-    }
-  }
-
   // Create a new RenderLayoutBox for the scrolling content.
   RenderLayoutBox createScrollingContentLayout() {
     // Create a empty renderStyle for do not share renderStyle with element.
     RenderStyle scrollingContentRenderStyle = RenderStyle(style: style, elementDelegate: _elementDelegate);
-    RenderLayoutBox scrollingContentLayoutBox = createRenderLayout(
+    RenderLayoutBox scrollingContentLayoutBox = _createRenderLayout(
       repaintSelf: true,
       renderStyle: scrollingContentRenderStyle,
     );
@@ -1477,7 +1433,7 @@ class Element extends Node
     return scrollingContentLayoutBox;
   }
 
-  RenderLayoutBox createRenderLayout({
+  RenderLayoutBox _createRenderLayout({
       RenderLayoutBox? prevRenderLayoutBox,
       RenderStyle? renderStyle,
       bool repaintSelf = false
@@ -1629,9 +1585,9 @@ class Element extends Node
     }
   }
 
-  RenderIntrinsic createRenderIntrinsic({
-      RenderIntrinsic? prevRenderIntrinsic,
-      bool repaintSelf = false
+  RenderIntrinsic _createRenderIntrinsic({
+    RenderIntrinsic? prevRenderIntrinsic,
+    bool repaintSelf = false
   }) {
     RenderIntrinsic intrinsic;
 

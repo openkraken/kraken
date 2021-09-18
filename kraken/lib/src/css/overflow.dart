@@ -192,15 +192,13 @@ mixin CSSOverflowMixin on ElementBase {
     }
     RenderObject? layoutBoxParent = renderBoxModel!.parent as RenderObject?;
     RenderObject? previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
-    RenderLayoutBox outerLayoutBox = element.createRenderLayout(
-      repaintSelf: true,
-      prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?
-    );
 
+    element.updateRenderBoxModel(shouldRepaintSelf: true);
     scrollingContentLayoutBox = element.createScrollingContentLayout();
 
     // If outer scrolling box already has children in the case of element already attached,
     // move them into the children of inner scrolling box.
+    RenderLayoutBox outerLayoutBox = element.renderBoxModel as RenderLayoutBox;
     List<RenderBox> children = [];
     outerLayoutBox.visitChildren((child) {
       children.add(child as RenderBox);
@@ -215,7 +213,6 @@ mixin CSSOverflowMixin on ElementBase {
     outerLayoutBox.add(scrollingContentLayoutBox!);
 
     _attachRenderObject(element, layoutBoxParent, previousSibling, outerLayoutBox);
-    element.renderBoxModel = outerLayoutBox;
   }
 
   void _downgradeToParentRepaint(Element element) {
@@ -223,13 +220,11 @@ mixin CSSOverflowMixin on ElementBase {
     if (scrollingContentLayoutBox == null) return;
     RenderObject? layoutBoxParent = renderBoxModel!.parent as RenderObject?;
     RenderObject? previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
-    RenderLayoutBox newLayoutBox = element.createRenderLayout(
-      repaintSelf: false,
-      prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?
-    );
+
+    element.updateRenderBoxModel(shouldRepaintSelf: false);
+    RenderLayoutBox newLayoutBox = element.renderBoxModel as RenderLayoutBox;
 
     _attachRenderObject(element, layoutBoxParent, previousSibling, newLayoutBox);
-    element.renderBoxModel = newLayoutBox;
 
     // Move children of inner scrolling box to the children of outer scrolling box
     List<RenderBox> children = [];
@@ -270,8 +265,6 @@ mixin CSSOverflowMixin on ElementBase {
     if (parent is RenderObjectWithChildMixin<RenderBox>) {
       parent.child = newRenderObject as RenderBox?;
     } else if (parent is ContainerRenderObjectMixin) {
-      // Update renderBoxModel reference before move to its containing block
-      element.renderBoxModel = newRenderObject as RenderBoxModel?;
       element.parentElement!.addChildRenderObject(element, after: previousSibling as RenderBox?);
     }
   }

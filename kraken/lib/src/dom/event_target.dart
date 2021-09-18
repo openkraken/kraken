@@ -26,8 +26,6 @@ class EventTarget {
 
   EventTarget(this.targetId, this.nativeEventTargetPtr, this.elementManager);
 
-  void addEvent(String eventType) {}
-
   void addEventListener(String eventType, EventHandler eventHandler) {
     List<EventHandler>? existHandler = eventHandlers[eventType];
     if (existHandler == null) {
@@ -59,4 +57,6 @@ class EventTarget {
     elementManager.removeTarget(this);
     eventHandlers.clear();
   }
+
+  // void addEvent(String eventType) {}
 }
