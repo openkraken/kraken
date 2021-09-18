@@ -17,13 +17,15 @@ enum NativeTag {
   TAG_JSON        = 5,
   TAG_POINTER     = 6,
   TAG_FUNCTION    = 7,
+  TAG_ASYNC_FUNCTION = 8,
 };
 
 enum JSPointerType {
-  NativeFunctionContext = 0,
-  NativeBoundingClientRect       = 1,
-  NativeCanvasRenderingContext2D = 2,
-  NativeEventTarget = 3
+  AsyncContextContext = 0,
+  NativeFunctionContext = 1,
+  NativeBoundingClientRect       = 2,
+  NativeCanvasRenderingContext2D = 3,
+  NativeEventTarget = 4
 };
 
 namespace kraken::binding::qjs {

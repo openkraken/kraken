@@ -156,6 +156,65 @@ static JSValue anonymousFunction(QjsContext *ctx, JSValueConst this_val, int arg
   return returnValue;
 }
 
+void anonymousAsyncCallback(void *callbackContext, NativeValue *nativeValue, int32_t contextId, const char *errmsg) {
+  auto *promiseContext = static_cast<PromiseContext *>(callbackContext);
+  if (!promiseContext->context->isValid()) return;
+  if (promiseContext->context->getContextId() != contextId) return;
+
+  auto *context = promiseContext->context;
+
+  if (nativeValue != nullptr) {
+    JSValue value = nativeValueToJSValue(promiseContext->context, *nativeValue);
+    JSValue returnValue = JS_Call(context->ctx(), promiseContext->resolveFunc, context->global(), 1, &value);
+    JS_FreeValue(context->ctx(), returnValue);
+  } else if (errmsg != nullptr) {
+    JSValue error = JS_NewError(context->ctx());
+    JS_DefinePropertyValueStr(context->ctx(), error, "message",
+                           JS_NewString(context->ctx(), errmsg),
+                           JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
+    JSValue returnValue = JS_Call(context->ctx(), promiseContext->rejectFunc, context->global(), 1, &error);
+    JS_FreeValue(context->ctx(), returnValue);
+  }
+
+  JS_FreeValue(context->ctx(), promiseContext->resolveFunc);
+  JS_FreeValue(context->ctx(), promiseContext->rejectFunc);
+  list_del(&promiseContext->link);
+}
+
+static JSValue anonymousAsyncFunction(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic, JSValue *func_data) {
+  JSValue resolving_funcs[2];
+  JSValue promise = JS_NewPromiseCapability(ctx, resolving_funcs);
+
+  auto id = magic;
+  auto *eventTarget = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
+  auto *context = eventTarget->context();
+
+  auto *promiseContext = new PromiseContext{
+    eventTarget,
+    context,
+    resolving_funcs[0],
+    resolving_funcs[1],
+    promise
+  };
+  list_add_tail(&promiseContext->link, &context->promise_job_list);
+
+  std::string call_params = "_anonymous_async_fn_" + std::to_string(id);
+
+  auto *arguments = new NativeValue[argc + 3];
+
+  arguments[0] = Native_NewInt32(context->getContextId());
+  arguments[1] = Native_NewPtr(JSPointerType::AsyncContextContext, promiseContext);
+  arguments[2] = Native_NewPtr(JSPointerType::AsyncContextContext, reinterpret_cast<void *>(anonymousAsyncCallback));
+  for (int i = 3; i < argc + 3; i ++) {
+    arguments[i] = jsValueToNativeValue(ctx, argv[i]);
+  }
+
+  eventTarget->callNativeMethods(call_params.c_str(), argc, arguments);
+  delete[] arguments;
+
+  return promise;
+}
+
 JSValue nativeValueToJSValue(JSContext *context, NativeValue &value) {
   switch (value.tag) {
   case NativeTag::TAG_STRING: {
@@ -198,6 +257,10 @@ JSValue nativeValueToJSValue(JSContext *context, NativeValue &value) {
   case NativeTag::TAG_FUNCTION: {
     int64_t functionId = value.u.int64;
     return JS_NewCFunctionData(context->ctx(), anonymousFunction, 4, functionId, 0, nullptr);
+  }
+  case NativeTag::TAG_ASYNC_FUNCTION: {
+    int64_t functionId = value.u.int64;
+    return JS_NewCFunctionData(context->ctx(), anonymousAsyncFunction, 4, functionId, 0, nullptr);
   }
   }
   return JS_NULL;

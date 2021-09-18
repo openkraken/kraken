@@ -5,12 +5,17 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
+import 'package:ffi/ffi.dart';
 import 'dart:ffi';
 import 'dart:collection';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 
 typedef EventHandler = void Function(Event event);
+
+typedef NativeAsyncAnonymousFunctionCallback = Void Function(
+    Pointer<Void> callbackContext, Pointer<NativeValue> nativeValue, Int32 contextId, Pointer<Utf8> errmsg);
+typedef DartAsyncAnonymousFunctionCallback = void Function(Pointer<Void> callbackContext, Pointer<NativeValue> nativeValue, int contextId, Pointer<Utf8> errmsg);
 
 void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> returnedValue, Pointer<NativeString> nativeMethod, int argc, Pointer<NativeValue> argv) {
   String method = nativeStringToString(nativeMethod);
@@ -31,6 +36,25 @@ void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> re
       toNativeValue(returnedValue, null);
     }
     removeAnonymousNativeFunctionFromId(id);
+  } else if (method.startsWith('_anonymous_async_fn_')) {
+    int id = int.parse(method.substring('_anonymous_fn_'.length));
+    AsyncAnonymousNativeFunction fn = getAsyncAnonymousNativeFunctionFromId(id)!;
+    int contextId = values[0];
+    Pointer<Void> callbackContext = values[1];
+    DartAsyncAnonymousFunctionCallback callback = (values[2] as Pointer).cast<NativeFunction<NativeAsyncAnonymousFunctionCallback>>().asFunction();
+    Future<dynamic> p = fn(values);
+    p.then((result) {
+      Pointer<NativeValue> nativeValue = malloc.allocate(sizeOf<NativeValue>());
+      toNativeValue(nativeValue, result);
+      callback(callbackContext, nativeValue, contextId, nullptr);
+      removeAsyncAnonymousNativeFunctionFromId(id);
+    }).catchError((e, stack) {
+      String errorMessage = '$e\n$stack';
+      callback(callbackContext, nullptr, contextId, errorMessage.toNativeUtf8());
+      removeAsyncAnonymousNativeFunctionFromId(id);
+    });
+
+    toNativeValue(returnedValue, null);
   } else {
     EventTarget eventTarget = EventTarget.getEventTargetOfNativePtr(nativeEventTarget.cast<NativeEventTarget>());
     try {

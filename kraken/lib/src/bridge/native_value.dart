@@ -25,10 +25,12 @@ enum JSValueType {
   TAG_FLOAT64,
   TAG_JSON,
   TAG_POINTER,
-  TAG_FUNCTION
+  TAG_FUNCTION,
+  TAG_ASYNC_FUNCTION
 }
 
 enum JSPointerType {
+  AsyncFunctionContext,
   NativeFunctionContext,
   NativeBoundingClientRect,
   NativeCanvasRenderingContext2D,
@@ -36,16 +38,24 @@ enum JSPointerType {
 }
 
 typedef AnonymousNativeFunction = dynamic Function(List<dynamic> args);
+typedef AsyncAnonymousNativeFunction = Future<dynamic> Function(List<dynamic> args);
 
 int _functionId = 0;
 LinkedHashMap<int, AnonymousNativeFunction> _functionMap = LinkedHashMap();
+LinkedHashMap<int, AsyncAnonymousNativeFunction> _asyncFunctionMap = LinkedHashMap();
 
 AnonymousNativeFunction? getAnonymousNativeFunctionFromId(int id) {
   return _functionMap[id];
 }
+AsyncAnonymousNativeFunction? getAsyncAnonymousNativeFunctionFromId(int id) {
+  return _asyncFunctionMap[id];
+}
 
 void removeAnonymousNativeFunctionFromId(int id) {
   _functionMap.remove(id);
+}
+void removeAsyncAnonymousNativeFunctionFromId(int id) {
+  _asyncFunctionMap.remove(id);
 }
 
 dynamic fromNativeValue(JSValueType type, Pointer<NativeValue> nativeValue) {
@@ -73,7 +83,7 @@ dynamic fromNativeValue(JSValueType type, Pointer<NativeValue> nativeValue) {
           return Pointer.fromAddress(nativeValue.ref.u);
       }
     case JSValueType.TAG_FUNCTION:
-
+    case JSValueType.TAG_ASYNC_FUNCTION:
       break;
     case JSValueType.TAG_JSON:
       return jsonDecode(nativeStringToString(Pointer.fromAddress(nativeValue.ref.u)));
@@ -109,6 +119,11 @@ void toNativeValue(Pointer<NativeValue> target, dynamic value) {
     int id = _functionId++;
     _functionMap[id] = value;
     target.ref.tag = JSValueType.TAG_FUNCTION.index;
+    target.ref.u = id;
+  } else if (value is AsyncAnonymousNativeFunction) {
+    int id = _functionId++;
+    _asyncFunctionMap[id] = value;
+    target.ref.tag = JSValueType.TAG_ASYNC_FUNCTION.index;
     target.ref.u = id;
   } else if (value is Object) {
     String str = jsonEncode(value);
