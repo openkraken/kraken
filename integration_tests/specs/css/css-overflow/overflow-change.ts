@@ -15,13 +15,13 @@ describe('overflow-change', () => {
     );
     append(BODY, cont);
 
+    await snapshot();
+
     setTimeout(async() => {
       cont.style.overflow = 'hidden';
       await snapshot();
       done();
     }, 100);
-
-    await snapshot();
   });
 
   it('should work with overflow change from hidden to visible', async (done) => {
@@ -40,13 +40,13 @@ describe('overflow-change', () => {
     );
     append(BODY, cont);
 
+    await snapshot();
+
     setTimeout(async() => {
       cont.style.overflow = 'visible';
       await snapshot();
       done();
     }, 100);
-
-    await snapshot();
   });
 
   it('change from scroll to visible and no transform exists', async (done) => {

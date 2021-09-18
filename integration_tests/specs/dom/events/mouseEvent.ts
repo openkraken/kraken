@@ -240,9 +240,8 @@ describe('MouseEvent', () => {
     document.body.appendChild(div);
     div.addEventListener('dblclick', (e)=>{
       done();
-    })
+    });
     await simulateClick(10.0, 10.0, 0);
-
-    await simulateClick(10.0, 10.0 , 1);
+    await simulateClick(10.0, 10.0, 1);
   });
 });
