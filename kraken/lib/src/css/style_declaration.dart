@@ -508,7 +508,7 @@ class CSSStyleDeclaration {
       return _expandShorthand(propertyName, normalizedValue, isImportant, viewportSize);
     }
 
-    // If the important property is already set, we shoud ingore it.
+    // If the important property is already set, we should ignore it.
     if (isImportant != true && _importants[propertyName] == true) {
       return;
     }
@@ -518,6 +518,7 @@ class CSSStyleDeclaration {
       _importants[propertyName] = true;
     }
 
+    // Validate value.
     switch (propertyName) {
       case WIDTH:
       case HEIGHT:
