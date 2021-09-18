@@ -1009,8 +1009,9 @@ class RenderFlowLayout extends RenderLayoutBox {
     double marginBottom = !isInline ? renderStyle.marginBottom.length! : 0;
     bool isParentFlowLayout = parent is RenderFlowLayout;
     CSSDisplay? transformedDisplay = renderStyle.transformedDisplay;
-    bool isDisplayInline = transformedDisplay != CSSDisplay.block &&
-        transformedDisplay != CSSDisplay.flex;
+    bool isDisplayInline = transformedDisplay == CSSDisplay.inline ||
+        transformedDisplay == CSSDisplay.inlineBlock ||
+        transformedDisplay == CSSDisplay.inlineFlex;
 
     // Use margin bottom as baseline if layout has no children
     if (lineBoxMetrics.isEmpty) {
@@ -1046,11 +1047,11 @@ class RenderFlowLayout extends RenderLayoutBox {
             ? child.computeDistanceToLastLineBaseline()
             : child.computeDistanceToFirstLineBaseline();
       }
-      if (childBaseLineDistance != null) {
+      if (childBaseLineDistance != null && childParentData != null) {
         // Baseline of relative positioned element equals its original position
         // so it needs to subtract its vertical offset
         Offset? relativeOffset;
-        double childOffsetY = childParentData!.offset.dy - childMarginTop;
+        double childOffsetY = childParentData.offset.dy - childMarginTop;
         if (child is RenderBoxModel) {
           relativeOffset =
               CSSPositionedLayout.getRelativeOffset(child.renderStyle);

@@ -32,8 +32,10 @@ function setAttributes(dom: any, object: any) {
   }
 }
 
+// Avoid overwrited by jasmine.
+const originalTimeout = global.setTimeout;
 function sleep(second: number) {
-  return new Promise(done => setTimeout(done, second * 1000));
+  return new Promise(done => originalTimeout(done, second * 1000));
 }
 
 type ElementProps = {

@@ -40,7 +40,9 @@ mixin CSSDisplayMixin on RenderStyleBase {
   void updateDisplay(String value, Element element) {
     CSSDisplay? originalDisplay = display;
     CSSDisplay presentDisplay = getDisplay(value);
+
     display = presentDisplay;
+    transformedDisplay = getTransformedDisplay();
 
     // Destroy renderer of element when display is changed to none.
     if (presentDisplay == CSSDisplay.none) {
@@ -48,7 +50,6 @@ mixin CSSDisplayMixin on RenderStyleBase {
       return;
     }
 
-    transformedDisplay = getTransformedDisplay();
     if (originalDisplay != presentDisplay && renderBoxModel is RenderLayoutBox) {
       RenderLayoutBox? prevRenderLayoutBox = renderBoxModel as RenderLayoutBox?;
       element.renderBoxModel = element.createRenderLayout(

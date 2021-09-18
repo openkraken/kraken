@@ -219,7 +219,6 @@ class Element extends Node
 
     // Init style and add change listener.
     style = CSSStyleDeclaration.computedStyle(this, _defaultStyle);
-    style.addStyleChangeListener(_onStyleChanged);
     _applyDefaultStyle();
 
     // Init render style.
@@ -295,6 +294,7 @@ class Element extends Node
 
   @override
   void willAttachRenderer() {
+    style.addStyleChangeListener(_onStyleChanged);
     createRenderer();
   }
 
@@ -328,6 +328,18 @@ class Element extends Node
         parent.remove(renderPositionHolder);
       }
     }
+
+    // Remove fixed children from root when dispose.
+    _removeFixedChild(renderBoxModel!);
+
+    // Remove self.
+    RenderObject? parent = renderBoxModel!.parent as RenderObject?;
+    if (parent is ContainerRenderObjectMixin) {
+      parent.remove(renderBoxModel!);
+    } else if (parent is RenderProxyBox) {
+      parent.child = null;
+    }
+
   }
 
   @override
@@ -609,20 +621,9 @@ class Element extends Node
   // Detach renderObject of current node from parent
   @override
   void detach() {
-    RenderBoxModel? selfRenderBoxModel = renderBoxModel;
-    if (selfRenderBoxModel == null) return;
+    if (renderBoxModel == null) return;
 
     willDetachRenderer();
-
-    // Remove fixed children from root when dispose
-    _removeFixedChild(selfRenderBoxModel);
-
-    RenderObject? parent = selfRenderBoxModel.parent as RenderObject?;
-    if (parent is ContainerRenderObjectMixin) {
-      parent.remove(selfRenderBoxModel);
-    } else if (parent is RenderProxyBox) {
-      parent.child = null;
-    }
 
     for (Node child in childNodes) {
       child.detach();
@@ -631,7 +632,7 @@ class Element extends Node
     didDetachRenderer();
 
     // Call dispose method of renderBoxModel when it is detached from tree
-    selfRenderBoxModel.dispose();
+    renderBoxModel!.dispose();
     renderBoxModel = null;
   }
 

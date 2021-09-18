@@ -79,6 +79,6 @@ describe('Display', () => {
        div.style.display = 'none';
        await snapshot();
        done();
-    })
+    });
   });
 });
