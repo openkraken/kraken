@@ -1424,7 +1424,7 @@ class Element extends Node
   // Create a new RenderLayoutBox for the scrolling content.
   RenderLayoutBox createScrollingContentLayout() {
     // Create a empty renderStyle for do not share renderStyle with element.
-    RenderStyle scrollingContentRenderStyle = RenderStyle(style: style, elementDelegate: _elementDelegate);
+    RenderStyle scrollingContentRenderStyle = RenderStyle(style: CSSStyleDeclaration.empty, elementDelegate: _elementDelegate);
     RenderLayoutBox scrollingContentLayoutBox = _createRenderLayout(
       repaintSelf: true,
       renderStyle: scrollingContentRenderStyle,

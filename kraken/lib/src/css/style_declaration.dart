@@ -118,6 +118,9 @@ class CSSStyleDeclaration {
   // ignore: prefer_initializing_formals
   CSSStyleDeclaration.computedStyle(this.target, this.defaultStyle, this.onStyleChanged);
 
+  /// An empty style declaration.
+  static CSSStyleDeclaration empty = CSSStyleDeclaration();
+
   /// When some property changed, corresponding [StyleChangeListener] will be
   /// invoked in synchronous.
   final List<StyleChangeListener> _styleChangeListeners = [];
@@ -128,15 +131,6 @@ class CSSStyleDeclaration {
 
   final Map<String, bool> _importants = {};
   Map<String, List> _transitions = {};
-
-  CSSStyleDeclaration clone(Element? target) {
-    this.target = target;
-    CSSStyleDeclaration newStyle = CSSStyleDeclaration();
-    _properties.forEach((key, value) {
-      newStyle._properties[key] = value;
-    });
-    return newStyle;
-  }
 
   String getCurrentColor() {
     String? currentColor = _properties[COLOR];
