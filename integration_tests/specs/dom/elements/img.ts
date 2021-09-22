@@ -263,7 +263,7 @@ describe('Tags img', () => {
     document.body.appendChild(img);
   });
 
-  fit('should work with loading=lazy and position absolute 1', async (done) => {
+  it('should work with loading=lazy and position absolute 1', async (done) => {
     const imageURL = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
     const img = document.createElement('img');
     img.style.position = 'absolute';
@@ -303,7 +303,7 @@ describe('Tags img', () => {
     await snapshot();
   });
 
-  fit('should work with loading=lazy and position absolute 2', async (done) => {
+  it('should work with loading=lazy and position absolute 2', async (done) => {
     const imageURL = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
     const img = document.createElement('img');
     img.style.position = 'absolute';
