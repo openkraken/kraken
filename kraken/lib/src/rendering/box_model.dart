@@ -1576,7 +1576,9 @@ class RenderBoxModel extends RenderBox
   RenderBoxModel? getSelfParentWithSpecifiedStyle(String styleProperty) {
     RenderObject? _parent = this;
     while (_parent != null && _parent is! RenderViewportBox) {
-      if (_parent is RenderBoxModel && _parent.renderStyle.style[styleProperty].isNotEmpty) {
+      if (_parent is RenderBoxModel &&
+          !_parent.isScrollingContentBox && // FIXME: when scrolling content box not copy style could remove this code
+          _parent.renderStyle.style[styleProperty].isNotEmpty) {
         break;
       }
       if (_parent.parent != null) {
