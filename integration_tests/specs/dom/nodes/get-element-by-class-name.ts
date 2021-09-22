@@ -2,7 +2,7 @@
  * Test DOM API for
  * - document.getElementsByClassName
  */
- describe('Document getElementsByClassName', () => {
+describe('Document getElementsByClassName', () => {
   it('basic', () => {
     expect(document.getElementsByClassName('className').length).toBe(0);
   });
@@ -19,12 +19,12 @@
     const div = document.createElement('div');
     div.setAttribute('class', 'className');
     document.body.appendChild(div);
-    
+
     expect(document.getElementsByClassName('className').length).toBe(1);
   });
 
   it('work with some elements', () => {
-    ['red','black','green','yellow','blue'].forEach((item, index) => {
+    ['red', 'black', 'green', 'yellow', 'blue'].forEach((item, index) => {
       const div = document.createElement('div')
       div.style.width = '100px';
       div.style.height = '100px';
@@ -38,7 +38,7 @@
   });
 
   it('work with some elements when more than one class', () => {
-    ['red','black','green','yellow','blue'].forEach((item, index) => {
+    ['red', 'black', 'green', 'yellow', 'blue'].forEach((item, index) => {
       const div = document.createElement('div')
       div.style.width = '100px';
       div.style.height = '100px';
@@ -52,7 +52,7 @@
   });
 
   it('work with some elements when more than one class of query', () => {
-    ['red','black','green','yellow','blue'].forEach((item, index) => {
+    ['red', 'black', 'green', 'yellow', 'blue'].forEach((item, index) => {
       const div = document.createElement('div')
       div.style.width = '100px';
       div.style.height = '100px';

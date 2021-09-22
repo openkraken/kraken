@@ -17,7 +17,7 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
   }
 
   // Classes. e.g. .row.
-  let classes:Array<string> = [];
+  let classes: Array<string> = [];
   selector = selector.split(' ').map(item => {
     if (item && item.charAt(0) === '.') {
       temp = fetchSelector(selector, /\.[\w-_]+/g);
@@ -26,7 +26,7 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
     }
     return item;
   }).join(' ');
-  
+
   // Ids. e.g. #mail-title.
   temp = fetchSelector(selector, /#[\w-_]+/g);
   let id = temp.selectors ? temp.selectors[0] : null;
@@ -55,7 +55,7 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
     let temps: HTMLCollectionOf<Element> = context.getElementsByTagName(els[0]);
     tempElements = tempElements.concat(Array.from(temps));
   }
-  
+
   // Get by class name.
   for (let i = 0, l = classes.length; i !== l; ++i) {
     let className = classes[i].substring(1);
@@ -79,7 +79,7 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
       }
     }
   }
-  
+
   // Get by attributes.
   if (attributes.length !== 0) {
     let attrs = {};
@@ -92,10 +92,10 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
       }
       attrs[parts[0]] = parts[1];
     }
-    let prevs:Array<Element> = [];
+    let prevs: Array<Element> = [];
     prevs = prevs.concat(tempElements);
     tempElements = [];
-    
+
     for (let i = 0, l = prevs.length; i !== l; ++i) {
       let t = prevs[i];
       let shouldAdd = true;
@@ -117,11 +117,11 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
         }
         // Case: [href$=/en].
         else if (lastChar === '$' &&
-            (tempAttr.lastIndexOf(attrs[key + lastChar]) === -1
-              ? false
-              : tempAttr.lastIndexOf(attrs[key + lastChar]))
-            !==
-            tempAttr.length - attrs[key + lastChar].length) {
+          (tempAttr.lastIndexOf(attrs[key + lastChar]) === -1
+            ? false
+            : tempAttr.lastIndexOf(attrs[key + lastChar]))
+          !==
+          tempAttr.length - attrs[key + lastChar].length) {
           shouldAdd = false;
           break;
         }
@@ -143,7 +143,7 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
   return elements;
 };
 
-document.querySelectorAll = function <E extends Element = Element> (selector: string) : NodeListOf<E> {
+document.querySelectorAll = function <E extends Element = Element>(selector: string): NodeListOf<E> {
   if (typeof selector !== 'string') {
     throw new TypeError('document.querySelectorAll: Invalid selector type. ' +
       'Expect: string. Found: ' + typeof selector + '.');
