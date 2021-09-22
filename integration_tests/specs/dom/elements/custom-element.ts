@@ -67,10 +67,21 @@ describe('custom html element', () => {
     sampleElement.appendChild(text);
     document.body.appendChild(sampleElement);
     // @ts-ignore
-    let p = sampleElement.asyncFn();
+    let p = sampleElement.asyncFn(1);
     expect(p instanceof Promise);
     let result = await p;
-    expect(result).toBe('helloworld');
+    expect(result).toBe(1);
+    // @ts-ignore
+    let p2 = sampleElement.asyncFn('abc');
+    expect(await p2).toBe('abc');
+
+    // @ts-ignore
+    let p3 = sampleElement.asyncFn([1,2,3,4]);
+    expect(await p3).toEqual([1,2,3,4]);
+
+    // @ts-ignore
+    let p4 = sampleElement.asyncFn([{name: 1}]);
+    expect(await p4).toEqual([{name: 1}]);
   });
 
   it('return promise error when dart async function throw error', async () => {

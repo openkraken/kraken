@@ -69,11 +69,13 @@ NativeValue Native_NewInt32(int32_t value) {
 NativeValue Native_NewJSON(JSContext *context, JSValue &value) {
   JSValue stringifiedValue = JS_JSONStringify(context->ctx(), value, JS_UNDEFINED, JS_UNDEFINED);
   NativeString *string = jsValueToNativeString(context->ctx(), stringifiedValue);
-  return (NativeValue){
+  NativeValue result = (NativeValue){
       0,
       .u = {.ptr = static_cast<void *>(string)},
       NativeTag::TAG_JSON,
   };
+  JS_FreeValue(context->ctx(), stringifiedValue);
+  return result;
 }
 
 void call_native_function(NativeFunctionContext *functionContext, int32_t argc, NativeValue *argv, NativeValue *returnValue) {
@@ -102,9 +104,16 @@ NativeValue jsValueToNativeValue(QjsContext *ctx, JSValue &value) {
   } else if (JS_IsBool(value)) {
     return Native_NewBool(JS_ToBool(ctx, value));
   } else if (JS_IsNumber(value)) {
-    double v;
-    JS_ToFloat64(ctx, &v, value);
-    return Native_NewFloat64(v);
+    uint32_t tag = JS_VALUE_GET_TAG(value);
+    if (JS_TAG_IS_FLOAT64(tag)) {
+      double v;
+      JS_ToFloat64(ctx, &v, value);
+      return Native_NewFloat64(v);
+    } else {
+      uint32_t v;
+      JS_ToUint32(ctx, &v, value);
+      return Native_NewInt32(v);
+    }
   } else if (JS_IsString(value)) {
     NativeString *string = jsValueToNativeString(ctx, value);
     return Native_NewString(string);
@@ -122,9 +131,9 @@ NativeValue jsValueToNativeValue(QjsContext *ctx, JSValue &value) {
       return Native_NewPtr(JSPointerType::NativeEventTarget, imageElementInstance->nativeEventTarget);
     }
 
-    JSValue stringifiedString = JS_JSONStringify(ctx, value, JS_UNDEFINED, JS_UNDEFINED);
-    NativeString *string = jsValueToNativeString(ctx, stringifiedString);
-    return Native_NewString(string);
+//    JSValue stringifiedString = JS_JSONStringify(ctx, value, JS_UNDEFINED, JS_UNDEFINED);
+//    NativeString *string = jsValueToNativeString(ctx, stringifiedString);
+    return Native_NewJSON(context, value);
   }
 
   return Native_NewNull();
@@ -209,8 +218,8 @@ static JSValue anonymousAsyncFunction(QjsContext *ctx, JSValueConst this_val, in
   arguments[0] = Native_NewInt32(context->getContextId());
   arguments[1] = Native_NewPtr(JSPointerType::AsyncContextContext, promiseContext);
   arguments[2] = Native_NewPtr(JSPointerType::AsyncContextContext, reinterpret_cast<void *>(anonymousAsyncCallback));
-  for (int i = 3; i < argc + 3; i ++) {
-    arguments[i] = jsValueToNativeValue(ctx, argv[i]);
+  for (int i = 0; i < argc; i ++) {
+    arguments[i + 3] = jsValueToNativeValue(ctx, argv[i]);
   }
 
   eventTarget->callNativeMethods(call_params.c_str(), argc + 3, arguments);

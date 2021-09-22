@@ -37,17 +37,17 @@ class SampleElement extends Element {
           });
         };
       case 'asyncFn':
-        return (List<dynamic> args) async {
-          Completer<String> completer = Completer();
+        return (List<dynamic> argv) async {
+          Completer<dynamic> completer = Completer();
           Timer(Duration(seconds: 1), () {
-            completer.complete('helloworld');
+            completer.complete(argv[0]);
           });
           return completer.future;
         };
       case 'asyncFnFailed':
         return (List<dynamic> args) async {
           Completer<String> completer = Completer();
-          Timer(Duration(seconds: 1), () {
+          Timer(Duration(milliseconds: 100), () {
             completer.completeError(AssertionError('Asset error'));
           });
           return completer.future;

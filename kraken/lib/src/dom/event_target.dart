@@ -42,7 +42,7 @@ void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> re
     int contextId = values[0];
     Pointer<Void> callbackContext = (values[1] as Pointer).cast<Void>();
     DartAsyncAnonymousFunctionCallback callback = (values[2] as Pointer).cast<NativeFunction<NativeAsyncAnonymousFunctionCallback>>().asFunction();
-    Future<dynamic> p = fn(values);
+    Future<dynamic> p = fn(values.sublist(3));
     p.then((result) {
       Pointer<NativeValue> nativeValue = malloc.allocate(sizeOf<NativeValue>());
       toNativeValue(nativeValue, result);
