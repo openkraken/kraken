@@ -263,6 +263,85 @@ describe('Tags img', () => {
     document.body.appendChild(img);
   });
 
+  fit('should work with loading=lazy and position absolute 1', async (done) => {
+    const imageURL = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
+    const img = document.createElement('img');
+    img.style.position = 'absolute';
+    img.style.width = '100px';
+    img.style.height = '100px';
+    img.style.border = '3px solid #000';
+    img.style.objectFit = 'contain';
+    img.style.objectPosition = 'center bottom';
+    img.setAttribute('loading', 'lazy');
+    img.setAttribute(
+      'src',
+      imageURL
+    );
+
+    img.addEventListener('load', async () => {
+      await snapshot();
+      done();
+    });
+
+    let div = createElement(
+      'div',
+      {
+        style: {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'yellow'
+        },
+      }
+    );
+    document.body.appendChild(div);
+
+    div.appendChild(img);
+
+    await snapshot();
+  });
+
+  fit('should work with loading=lazy and position absolute 2', async (done) => {
+    const imageURL = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
+    const img = document.createElement('img');
+    img.style.position = 'absolute';
+    img.style.width = '50px';
+    img.style.height = '100px';
+    img.style.border = '3px solid #000';
+    img.style.objectFit = 'contain';
+    img.style.objectPosition = 'center bottom';
+    img.setAttribute('loading', 'lazy');
+    img.setAttribute(
+      'src',
+      imageURL
+    );
+
+    img.addEventListener('load', async () => {
+      await snapshot();
+      done();
+    });
+
+    let div = createElement(
+      'div',
+      {
+        style: {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'yellow'
+        },
+      }
+    );
+    document.body.appendChild(div);
+
+    div.appendChild(img);
+
+    await snapshot();
+  });
   it('same image src should only trigger once event', async (done) => {
     const imageURL = 'assets/100x100-green.png';
     const img = document.createElement('img');

@@ -82,8 +82,6 @@ class ImageElement extends Element {
   /// Number of image frame, used to identify multi frame image after loaded.
   int _frameCount = 0;
 
-  bool _isInLazyLoading = false;
-
   bool get _shouldLazyLoading => properties['loading'] == 'lazy';
 
   final Pointer<NativeImgElement> nativeImgElement;
@@ -114,12 +112,13 @@ class ImageElement extends Element {
   @override
   void didAttachRenderer() {
     super.didAttachRenderer();
+    bool _isInLazyLoading = (renderBoxModel as RenderIntrinsic).isInLazyLoading;
     // Should add image box after style has applied to ensure intersection observer
     // attached to correct renderBoxModel
     if (!_isInLazyLoading || _renderImage == null) {
       // Image dimensions (width or height) should specified for performance when lazy-load.
       if (_shouldLazyLoading) {
-        _isInLazyLoading = true;
+        (renderBoxModel as RenderIntrinsic).isInLazyLoading = true;
 
         // When detach renderer, all listeners will be cleared.
         renderBoxModel!.addIntersectionChangeListener(_handleIntersectionChange);
@@ -201,14 +200,13 @@ class ImageElement extends Element {
     // When appear
     if (entry.isIntersecting) {
       // Once appear remove the listener
-      _resetLazyLoading();
+      _removeIntersectionChangeListener();
       _constructImageChild();
       _loadImage();
     }
   }
 
-  void _resetLazyLoading() {
-    _isInLazyLoading = false;
+  void _removeIntersectionChangeListener() {
     renderBoxModel!.removeIntersectionChangeListener(_handleIntersectionChange);
   }
 
@@ -263,6 +261,7 @@ class ImageElement extends Element {
       convertToNonRepaintBoundary();
     }
 
+    (renderBoxModel as RenderIntrinsic).isInLazyLoading = false;
     _resize();
     _renderImage?.image = image;
   }
@@ -338,6 +337,15 @@ class ImageElement extends Element {
     } else {
       renderBoxModel!.intrinsicRatio = naturalHeight / naturalWidth;
     }
+
+    // Positioned image need to update the offset of its position holder when image size has changed
+    // which will in turn affect the image's offset.
+    if (renderBoxModel!.renderPositionHolder != null) {
+      RenderLayoutBox? parent = renderBoxModel!.renderPositionHolder?.parent as RenderLayoutBox;
+      // Mark parent as _needsLayout directly as RenderPositionHolder has tight constraints which will
+      // prevent the _needsLayout flag to bubble up the renderObject tree.
+      parent.markNeedsLayout();
+    }
   }
 
   void _removeStreamListener() {
@@ -359,12 +367,13 @@ class ImageElement extends Element {
 
   @override
   void removeProperty(String key) {
+    bool _isInLazyLoading = (renderBoxModel as RenderIntrinsic).isInLazyLoading;
     super.removeProperty(key);
     if (key == 'src') {
       _resetImage();
       _loaded = false;
     } else if (key == 'loading' && _isInLazyLoading && _imageProvider == null) {
-      _resetLazyLoading();
+      _removeIntersectionChangeListener();
     }
   }
 
@@ -379,6 +388,7 @@ class ImageElement extends Element {
       fontSize = renderBoxModel!.renderStyle.fontSize;
     }
 
+    bool _isInLazyLoading = renderBoxModel != null && (renderBoxModel as RenderIntrinsic).isInLazyLoading;
     // Reset frame number to zero when image needs to reload
     _frameCount = 0;
     if (key == 'src' && propertyChanged && !_shouldLazyLoading) {
@@ -386,8 +396,7 @@ class ImageElement extends Element {
       _loaded = false;
       _loadImage();
     } else if (key == 'loading' && _isInLazyLoading) {
-      // Should reset lazy when value change.
-      _resetLazyLoading();
+      _removeIntersectionChangeListener();
     } else if (key == WIDTH) {
       if (value is String && _isNumber(value)) {
         value += 'px';

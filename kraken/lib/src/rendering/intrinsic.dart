@@ -179,11 +179,20 @@ class RenderIntrinsic extends RenderBoxModel
     return marginTop + boxSize!.height + marginBottom;
   }
 
+  // Whether the renderObject of replaced element is lazy loading.
+  bool isInLazyLoading = false;
+
   /// This class mixin [RenderProxyBoxMixin], which has its' own paint method,
   /// override it to layout box model paint.
   @override
   void paint(PaintingContext context, Offset offset) {
     if (isCSSVisibilityHidden) return;
+    // Should not paint other style such as box decoration when renderObject
+    // is in lazy loading and not rendered yet.
+    if (isInLazyLoading) {
+      paintIntersectionObserver(context, offset, performPaint);
+      return;
+    }
     paintBoxModel(context, offset);
   }
 
