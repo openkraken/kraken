@@ -345,22 +345,32 @@ mixin CSSTextMixin on RenderStyleBase {
   // 1. Nested children text size due to style inheritance.
   // 2. Em unit: style of own element with em unit and nested children with no font-size set due to style inheritance.
   // 3. Rem unit: nested children with rem set.
-  void _updateChildrenFontSize(RenderBoxModel renderBoxModel, bool isRootFontSizeUpdated) {
+  void _updateChildrenFontSize(RenderBoxModel renderBoxModel, bool isRootFontSizeUpdated, {int depth = 1}) {
     renderBoxModel.visitChildren((RenderObject child) {
+
       if (child is RenderBoxModel) {
-        // Only need to update child text when style property is not set.
-        if (isRootFontSizeUpdated || child.renderStyle.style[FONT_SIZE].isEmpty) {
+        // FIXME: Update `rem` will travers all dom tree may cause performance problem.
+        if (isRootFontSizeUpdated) {
+          child.renderStyle.style.applyRemProperties();
+        } else {
+          // When child has font-size do not need update font-size.
+          // <div style="font-size: 18px">
+          //    <div>18px</div>
+          //    <div style="font-size: 20px">20px</div>
+          // </div>
+          bool isChildHasFontSize = renderBoxModel.renderStyle.style[FONT_SIZE].isNotEmpty;
+          if (isChildHasFontSize) return;
+
+          // Only need to update child text when style property is not set.
+
           // Need update all em unit style of child when its font size is inherited.
           child.renderStyle.style.applyEmProperties();
-
-          if (isRootFontSizeUpdated) {
-            child.renderStyle.style.applyRemProperties();
-          }
-          _updateChildrenFontSize(child, isRootFontSizeUpdated);
         }
 
-      // Only need to update text when its parent has no font-size set.
-      } else if (child is RenderTextBox && renderBoxModel.renderStyle.style[FONT_SIZE].isEmpty) {
+        _updateChildrenFontSize(child, isRootFontSizeUpdated, depth: depth++);
+
+        // Update direct renderTextBox and the nested text that its parent has no font-size set.
+      } else if (child is RenderTextBox) {
         // Need to recreate text span cause text style can not be set alone.
         RenderBoxModel parentRenderBoxModel = child.parent as RenderBoxModel;
         KrakenRenderParagraph renderParagraph = child.child as KrakenRenderParagraph;
@@ -453,6 +463,19 @@ mixin CSSTextMixin on RenderStyleBase {
       background: CSSText.getBackground(parentStyle),
       foreground: CSSText.getForeground(parentStyle),
     );
+  }
+
+  /// Percentage font size is set relative to parent's font size.
+  void updatePercentageFontSize(RenderStyle parentRenderStyle, String present) {
+    double parentFontSize = parentRenderStyle.fontSize;
+    double parsedFontSize = parentFontSize * CSSLength.parsePercentage(present);
+    fontSize = parsedFontSize;
+  }
+
+  /// Percentage line height is set relative to its own font size.
+  void updatePercentageLineHeight(String present) {
+    double parsedLineHeight = fontSize * CSSLength.parsePercentage(present);
+    lineHeight = parsedLineHeight;
   }
 
   void updateTextStyle(String? property) {

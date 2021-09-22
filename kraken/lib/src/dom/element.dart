@@ -951,39 +951,23 @@ class Element extends Node
   }
 
   // Update text related style
-  void _updateTextStyle(String property) {
+  void _updateTextStyle(String property, String present) {
     /// Percentage font-size should be resolved when node attached
     /// cause it needs to know its parents style
-    if (property == FONT_SIZE && CSSLength.isPercentage(style[FONT_SIZE])) {
-      _updatePercentageFontSize();
+    if (property == FONT_SIZE && CSSLength.isPercentage(present)) {
+      RenderStyle parentRenderStyle = parentElement!.renderStyle;
+      renderStyle.updatePercentageFontSize(parentRenderStyle, present);
       return;
     }
 
     /// Percentage line-height should be resolved when node attached
     /// cause it needs to know other style in its own element
-    if (property == LINE_HEIGHT && CSSLength.isPercentage(style[LINE_HEIGHT])) {
-      _updatePercentageLineHeight();
+    if (property == LINE_HEIGHT && CSSLength.isPercentage(present)) {
+      renderStyle.updatePercentageLineHeight(present);
       return;
     }
-    renderBoxModel!.renderStyle.updateTextStyle(property);
-  }
 
-  /// Percentage font size is set relative to parent's font size.
-  void _updatePercentageFontSize() {
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-    RenderStyle parentRenderStyle = parentElement!.renderBoxModel!.renderStyle;
-    double parentFontSize = parentRenderStyle.fontSize;
-    double parsedFontSize = parentFontSize * CSSLength.parsePercentage(style[FONT_SIZE]);
-    selfRenderBoxModel.renderStyle.fontSize = parsedFontSize;
-  }
-
-  /// Percentage line height is set relative to its own font size.
-  void _updatePercentageLineHeight() {
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-    RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
-    double fontSize = renderStyle.fontSize;
-    double parsedLineHeight = fontSize * CSSLength.parsePercentage(style[LINE_HEIGHT]);
-    selfRenderBoxModel.renderStyle.lineHeight = parsedLineHeight;
+    renderStyle.updateTextStyle(property);
   }
 
   // FIXME: only compatible with kraken plugins
@@ -1134,7 +1118,7 @@ class Element extends Node
     // Text Style
     switch (property) {
       case COLOR:
-        _updateTextStyle(property);
+        _updateTextStyle(property, present);
         // Color change should trigger currentColor update
         _updateBox(property, present);
         break;
@@ -1155,7 +1139,7 @@ class Element extends Node
       case OVERFLOW_X:
       case OVERFLOW_Y:
       case LINE_CLAMP:
-        _updateTextStyle(property);
+        _updateTextStyle(property, present);
         break;
     }
   }
