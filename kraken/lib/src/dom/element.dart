@@ -434,7 +434,7 @@ class Element extends Node
       }
     }
 
-    updateRenderBoxModel();
+    updateRenderBoxModel(shouldRepaintSelf: repaintSelf);
 
     if (parentRenderObject is ContainerRenderObjectMixin) {
       _parentElement.addChildRenderObject(this, after: previousSibling);
