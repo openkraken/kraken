@@ -35,6 +35,16 @@
 
   Provide native-like performance such as navigation, animation and infinite list scrolling.
 
+## Flutter version scope
+
+Only flutter stable released version are fully tested.
+
+| Kraken  | Flutter |
+| ------------- | ------------- |
+| >= 0.7.0 < 0.8.0 | 1.22.0 ~ 1.22.6 |
+| >= 0.8.0 < 0.10.0  | 2.2.0 ~ 2.2.3  |
+
+
 ## 👏 Contributing
 
 By contributing to Kraken, you agree that your contributions will be licensed under its Apache-2.0 License.
