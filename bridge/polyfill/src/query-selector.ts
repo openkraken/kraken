@@ -2,7 +2,7 @@ function fetchSelector(str: string, regex: RegExp) {
   return {
     selectors: str.match(regex) || [],
     ruleStr: str.replace(regex, ' ')
-  };
+  }
 };
 
 function getElementsBySelector(selector: string): Array<Element | null | HTMLElement> {
