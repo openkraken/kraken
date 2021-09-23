@@ -91,6 +91,9 @@ const Map<String, bool> CSSShorthandProperty = {
   TEXT_DECORATION: true,
 };
 
+// Reorder the properties for control render style init order, the last is the largest.
+List<String> _propertyOrders = [FONT_SIZE, OVERFLOW_X, OVERFLOW_Y, DISPLAY];
+
 RegExp _kebabCaseReg = RegExp(r'[A-Z]');
 RegExp _camelCaseReg = RegExp(r'-(\w)');
 
@@ -126,7 +129,7 @@ class CSSStyleDeclaration {
   final List<StyleChangeListener> _styleChangeListeners = [];
 
   final Map<String, String> _properties = {};
-  final Map<String, String> _pendingProperties = {};
+  Map<String, String> _pendingProperties = {};
   final Map<String, String> _animationProperties = {};
 
   final Map<String, bool> _importants = {};
@@ -620,10 +623,11 @@ class CSSStyleDeclaration {
     }
 
     List<String> propertyNames = _pendingProperties.keys.toList();
+    Map<String, String> pendingProperties = _pendingProperties;
+    // Reset first avoid set property in flush stage.
+    _pendingProperties = {};
 
-    // Reorder the properties for control render style init order, the last is the largest.
-    List<String> propertyOrders = [OVERFLOW_X, OVERFLOW_Y, DISPLAY];
-    for (String propertyName in propertyOrders) {
+    for (String propertyName in _propertyOrders) {
       int index = propertyNames.indexOf(propertyName);
       if (index > -1) {
         propertyNames.removeAt(index);
@@ -633,14 +637,14 @@ class CSSStyleDeclaration {
 
     for (String propertyName in propertyNames) {
       String? prevValue = _properties[propertyName];
-      String? currentValue = _pendingProperties[propertyName];
+      String? currentValue = pendingProperties[propertyName];
 
       if (currentValue == null || currentValue == prevValue) {
         return;
       }
 
       // Update the prevValue to currentValue.
-      _properties[propertyName] = _pendingProperties[propertyName]!;
+      _properties[propertyName] = pendingProperties[propertyName]!;
 
       RenderStyle? renderStyle = target?.renderStyle;
       if (_shouldTransition(propertyName, prevValue, currentValue, renderBoxModel)) {
@@ -650,7 +654,6 @@ class CSSStyleDeclaration {
       }
     }
 
-    _pendingProperties.clear();
   }
 
   /// Override [] and []= operator to get/set style properties.

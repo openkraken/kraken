@@ -345,30 +345,29 @@ mixin CSSTextMixin on RenderStyleBase {
   // 1. Nested children text size due to style inheritance.
   // 2. Em unit: style of own element with em unit and nested children with no font-size set due to style inheritance.
   // 3. Rem unit: nested children with rem set.
-  void _updateChildrenFontSize(RenderBoxModel renderBoxModel, bool isRootFontSizeUpdated, {int depth = 1, bool isParentHasFontSize = false}) {
+  void _updateChildrenFontSize(RenderBoxModel renderBoxModel, bool isRootFontSizeUpdated, {int depth = 1}) {
     renderBoxModel.visitChildren((RenderObject child) {
       if (child is RenderBoxModel) {
-        bool isChildHasFontSize = renderBoxModel.renderStyle.style[FONT_SIZE].isNotEmpty;
         // FIXME: Update `rem` will travers all dom tree may cause performance problem.
         if (isRootFontSizeUpdated) {
           child.renderStyle.style.applyRemProperties();
           // Update font-size of nested children below root element.
-          _updateChildrenFontSize(child, isRootFontSizeUpdated, depth: depth++, isParentHasFontSize: isChildHasFontSize);
+          _updateChildrenFontSize(child, isRootFontSizeUpdated, depth: depth++);
         } else {
+          // Need update all em unit style of child when its font size is inherited.
+          child.renderStyle.style.applyEmProperties();
           // When child has font-size do not need update font-size:
           // <div style="font-size: 18px">
           //    <div>18px</div>
           //    <div style="font-size: 20px">20px</div>
           // </div>
+          bool isChildHasFontSize = child.renderStyle.style[FONT_SIZE].isNotEmpty;
           if (isChildHasFontSize) return;
-
-          // Need update all em unit style of child when its font size is inherited.
-          child.renderStyle.style.applyEmProperties();
           // Only need to update child text when style property is not set.
           _updateChildrenFontSize(child, isRootFontSizeUpdated, depth: depth++);
         }
         // Update direct renderTextBox and the nested text that its parent has no font-size set.
-      } else if (!isParentHasFontSize && child is RenderTextBox) {
+      } else if (child is RenderTextBox) {
         // Need to recreate text span cause text style can not be set alone.
         RenderBoxModel parentRenderBoxModel = child.parent as RenderBoxModel;
         KrakenRenderParagraph renderParagraph = child.child as KrakenRenderParagraph;
@@ -464,19 +463,37 @@ mixin CSSTextMixin on RenderStyleBase {
   }
 
   /// Percentage font size is set relative to parent's font size.
-  void updatePercentageFontSize(RenderStyle parentRenderStyle, String present) {
+  void _updatePercentageFontSize(RenderStyle parentRenderStyle, String present) {
     double parentFontSize = parentRenderStyle.fontSize;
     double parsedFontSize = parentFontSize * CSSLength.parsePercentage(present);
     fontSize = parsedFontSize;
   }
 
   /// Percentage line height is set relative to its own font size.
-  void updatePercentageLineHeight(String present) {
+  void _updatePercentageLineHeight(String present) {
     double parsedLineHeight = fontSize * CSSLength.parsePercentage(present);
     lineHeight = parsedLineHeight;
   }
 
-  void updateTextStyle(String? property) {
+  void updateTextStyle(String property, String present, RenderStyle? parentRenderStyle) {
+    /// Percentage font-size should be resolved when node attached
+    /// cause it needs to know its parents style
+    if (property == FONT_SIZE && CSSLength.isPercentage(present)) {
+      if (parentRenderStyle != null) {
+        _updatePercentageFontSize(parentRenderStyle, present);
+      } else {
+        // Lazy process when element has a parent.
+        style.setProperty(property, present);
+      }
+      return;
+    }
+    /// Percentage line-height should be resolved when node attached
+    /// cause it needs to know other style in its own element
+    if (property == LINE_HEIGHT && CSSLength.isPercentage(present)) {
+      _updatePercentageLineHeight(present);
+      return;
+    }
+
     RenderStyle renderStyle = this as RenderStyle;
     Size viewportSize = renderStyle.viewportSize;
     RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;

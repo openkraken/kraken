@@ -954,20 +954,9 @@ class Element extends Node
   void _updateTextStyle(String property, String present) {
     /// Percentage font-size should be resolved when node attached
     /// cause it needs to know its parents style
-    if (property == FONT_SIZE && CSSLength.isPercentage(present)) {
-      RenderStyle parentRenderStyle = parentElement!.renderStyle;
-      renderStyle.updatePercentageFontSize(parentRenderStyle, present);
-      return;
-    }
 
-    /// Percentage line-height should be resolved when node attached
-    /// cause it needs to know other style in its own element
-    if (property == LINE_HEIGHT && CSSLength.isPercentage(present)) {
-      renderStyle.updatePercentageLineHeight(present);
-      return;
-    }
-
-    renderStyle.updateTextStyle(property);
+    RenderStyle? parentRenderStyle = parentElement?.renderStyle;
+    renderStyle.updateTextStyle(property, present, parentRenderStyle);
   }
 
   // FIXME: only compatible with kraken plugins
