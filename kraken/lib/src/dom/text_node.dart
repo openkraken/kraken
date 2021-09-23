@@ -124,7 +124,7 @@ class TextNode extends Node {
     } else {
       parentRenderLayoutBox = (_parentElement.renderBoxModel as RenderLayoutBox?)!;
     }
-    _setTextSizeType(parentRenderLayoutBox!.widthSizeType, parentRenderLayoutBox.heightSizeType);
+    _setTextSizeType(parentRenderLayoutBox.widthSizeType, parentRenderLayoutBox.heightSizeType);
   }
 
   void _setTextNodeProperties(CSSStyleDeclaration style) {
