@@ -398,11 +398,45 @@ JSValueRef JSDocument::getElementsByTagName(JSContextRef ctx, JSObjectRef functi
   std::transform(tagName.begin(), tagName.end(), tagName.begin(), ::toupper);
 
   std::vector<ElementInstance *> elements;
-
   traverseNode(document->documentElement, [tagName, &elements](NodeInstance *node) {
     if (node->nodeType == NodeType::ELEMENT_NODE) {
       auto element = reinterpret_cast<ElementInstance *>(node);
-      if (element->tagName() == tagName) {
+      if (element->tagName() == tagName || tagName == "*") {
+        elements.emplace_back(element);
+      }
+    }
+
+    return false;
+  });
+
+  JSValueRef elementArguments[elements.size()];
+
+  for (int i = 0; i < elements.size(); i++) {
+    elementArguments[i] = elements[i]->object;
+  }
+
+  return JSObjectMakeArray(ctx, elements.size(), elementArguments, exception);
+}
+
+JSValueRef JSDocument::getElementsByClassName(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                            size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+  if (argumentCount < 1) {
+    throwJSError(ctx,
+                 "Uncaught TypeError: Failed to execute 'getElementsByClassName' on 'Document': 1 argument required, "
+                 "but only 0 present.",
+                 exception);
+    return nullptr;
+  }
+
+  auto document = reinterpret_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
+  JSStringRef classNameStringRef = JSValueToStringCopy(ctx, arguments[0], exception);
+  std::string className = JSStringToStdString(classNameStringRef);
+  std::vector<ElementInstance *> elements;
+
+  traverseNode(document->documentElement, [ctx, exception, className, &elements](NodeInstance *node) {
+    if (node->nodeType == NodeType::ELEMENT_NODE) {
+      auto element = reinterpret_cast<ElementInstance *>(node);
+      if(element->classNames().containsAll(className)) {
         elements.emplace_back(element);
       }
     }
