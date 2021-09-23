@@ -38,6 +38,7 @@
 #include "bindings/qjs/dom/events/.gen/input_event.h"
 #include "bindings/qjs/dom/events/.gen/intersection_change.h"
 #include "bindings/qjs/dom/events/.gen/media_error_event.h"
+#include "bindings/qjs/dom/events/.gen/message_event.h"
 #include "bindings/qjs/dom/events/.gen/mouse_event.h"
 #include "bindings/qjs/dom/events/touch_event.h"
 
@@ -94,6 +95,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindIntersectionChangeEvent(m_context);
   bindMediaErrorEvent(m_context);
   bindMouseEvent(m_context);
+  bindMessageEvent(m_context);
   bindTouchEvent(m_context);
   bindDocument(m_context);
   bindPerformance(m_context);
@@ -118,12 +120,13 @@ void JSBridge::parseHTML(const NativeString *script, const char *url) {
   if (!m_context->isValid()) return;
 }
 
-void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType, void *event, NativeString *extra) {
+void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType, void *rawEvent, NativeString *extra) {
   if (!m_context->isValid()) return;
 
   JSValue eventObject = JS_NULL;
-  if (event != nullptr) {
+  if (rawEvent != nullptr) {
     std::string type = std::string(eventType);
+    auto *event = static_cast<RawEvent *>(rawEvent)->bytes;
     EventInstance *eventInstance = Event::buildEventInstance(type, m_context.get(), event, false);
     eventObject = eventInstance->instanceObject;
   }
@@ -145,7 +148,12 @@ void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType
       };
       JSValue returnValue = JS_Call(m_context->ctx(), callback, m_context->global(), 3, arguments);
       m_context->handleException(&returnValue);
+      JS_FreeValue(m_context->ctx(), returnValue);
     }
+  }
+
+  if (rawEvent != nullptr) {
+    JS_FreeValue(m_context->ctx(), eventObject);
   }
 }
 

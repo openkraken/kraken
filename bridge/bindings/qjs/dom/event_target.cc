@@ -451,7 +451,7 @@ void EventTargetInstance::setPropertyHandler(JSString *p, JSValue value) {
   auto *atomJob = new AtomJob{atom};
   list_add_tail(&atomJob->link, &m_context->atom_job_list);
 
- // We need to remove previous eventHandler when setting new eventHandler with same eventType.
+  // We need to remove previous eventHandler when setting new eventHandler with same eventType.
   if (_propertyEventHandler.count(atom) > 0) {
     JSValue callback = _propertyEventHandler[atom];
     std::string privateKey = "_" + std::to_string(reinterpret_cast<int64_t>(JS_VALUE_GET_PTR(callback)));

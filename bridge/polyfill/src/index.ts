@@ -1,7 +1,6 @@
 import 'es6-promise/dist/es6-promise.auto';
 import './dom';
 import { console } from './console';
-import { WebSocket } from './websocket';
 import { fetch, Request, Response, Headers } from './fetch';
 import { matchMedia } from './match-media';
 import { location } from './location';
@@ -44,7 +43,6 @@ class PromiseRejectionEvent extends Event {
 }
 
 defineGlobalProperty('console', console);
-defineGlobalProperty('WebSocket', WebSocket);
 defineGlobalProperty('Request', Request);
 defineGlobalProperty('Response', Response);
 defineGlobalProperty('Headers', Headers);

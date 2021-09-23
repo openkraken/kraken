@@ -320,7 +320,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   void addEvent(int targetId, String eventType) {
-    assert(existsTarget(targetId), 'targetId: $targetId event: $eventType');
+    if (!existsTarget(targetId)) return;
     EventTarget target = getEventTargetByTargetId<EventTarget>(targetId)!;
 
     target.addEvent(eventType);

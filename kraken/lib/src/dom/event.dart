@@ -114,17 +114,9 @@ class Event {
     return event.cast<Pointer>();
   }
 
-  Map toJson() {
-    Pointer<RawNativeEvent> rawEvent = toRaw().cast<RawNativeEvent>();
-    return {
-      'type': type,
-      'nativeEvent': rawEvent.address
-    };
-  }
-
   @override
   String toString() {
-    return '$runtimeType(${jsonEncode(toJson())})';
+    return 'Event($type)';
   }
 }
 

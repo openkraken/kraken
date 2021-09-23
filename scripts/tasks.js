@@ -357,7 +357,7 @@ task('sdk-clean', (done) => {
 });
 
 task(`build-ios-kraken-lib`, (done) => {
-  const buildType = buildMode == 'Release' ? 'RelWithDebInfo' : 'Debug';
+  const buildType = buildMode === 'Release' ? 'RelWithDebInfo' : 'Debug';
 
   // generate build scripts for simulator
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
@@ -376,6 +376,27 @@ task(`build-ios-kraken-lib`, (done) => {
 
   // build for simulator
   execSync(`cmake --build ${paths.bridge}/cmake-build-ios-x64 --target kraken kraken_static -- -j 12`, {
+    stdio: 'inherit'
+  });
+
+  // Generate builds scripts for ARMv7
+  execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
+     -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
+     -DPLATFORM=OS \
+     -DARCHS=armv7s \
+     ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
+     -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm -S ${paths.bridge}`, {
+    cwd: paths.bridge,
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      KRAKEN_JS_ENGINE: targetJSEngine,
+      LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/ios/lib/arm')
+    }
+  });
+
+  // Build for ARMv7
+  execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm --target kraken kraken_static -- -j 12`, {
     stdio: 'inherit'
   });
 
@@ -400,18 +421,19 @@ task(`build-ios-kraken-lib`, (done) => {
   });
 
   const arm64DynamicSDKPath = path.join(paths.bridge, 'build/ios/lib/arm64/kraken_bridge.framework/kraken_bridge');
+  const armDynamicSDKPath = path.join(paths.bridge, 'build/ios/lib/arm/kraken_bridge.framework/kraken_bridge');
   const x64DynamicSDKPath = path.join(paths.bridge, 'build/ios/lib/x86_64/kraken_bridge.framework/kraken_bridge');
 
   const targetDynamicSDKPath = `${paths.bridge}/build/ios/framework`;
   const frameworkPath = `${targetDynamicSDKPath}/kraken_bridge.framework`;
   const plistPath = path.join(paths.templates, 'kraken_bridge.plist');
   mkdirp.sync(frameworkPath);
-  execSync(`lipo -create ${x64DynamicSDKPath} ${arm64DynamicSDKPath} -output ${frameworkPath}/kraken_bridge`, {
+  execSync(`lipo -create ${x64DynamicSDKPath} ${arm64DynamicSDKPath} ${armDynamicSDKPath} -output ${frameworkPath}/kraken_bridge`, {
     stdio: 'inherit'
   });
   execSync(`cp ${plistPath} ${frameworkPath}/Info.plist`, { stdio: 'inherit' });
 
-  if (buildMode == 'Release') {
+  if (buildMode === 'Release') {
     execSync(`dsymutil ${frameworkPath}/kraken_bridge`, { stdio: 'inherit', cwd: targetDynamicSDKPath });
     execSync(`mv ${frameworkPath}/kraken_bridge.dSYM ${targetDynamicSDKPath}`)
     execSync(`strip -S -X -x ${frameworkPath}/kraken_bridge`, { stdio: 'inherit', cwd: targetDynamicSDKPath });
