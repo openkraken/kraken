@@ -181,7 +181,7 @@ class CanvasRenderingContext2D {
         break;
       case 'drawImage':
         ImageElement imageElement = EventTarget.getEventTargetOfNativePtr(argv[0]) as ImageElement;
-        double sx = 0.0, sy = 0.0, sWidth = 0.0, sHeight = 0.0, dx = 0.0, dy = 0.0, dWidth = 0.0, dHeight = 0.0;
+        num sx = 0.0, sy = 0.0, sWidth = 0.0, sHeight = 0.0, dx = 0.0, dy = 0.0, dWidth = 0.0, dHeight = 0.0;
 
         if (argv.length == 3) {
           dx = argv[1];
@@ -456,21 +456,21 @@ class CanvasRenderingContext2D {
     return path2d.path.contains(Offset(x, y));
   }
 
-  void arc(double x, double y, double radius, double startAngle, double endAngle, {bool anticlockwise = false}) {
+  void arc(num x, num y, num radius, num startAngle, num endAngle, {bool anticlockwise = false}) {
     addAction((Canvas canvas, Size size) {
-      path2d.arc(x, y, radius, startAngle, endAngle, anticlockwise: anticlockwise);
+      path2d.arc(x.toDouble(), y.toDouble(), radius.toDouble(), startAngle.toDouble(), endAngle.toDouble(), anticlockwise: anticlockwise);
     });
   }
 
-  void arcTo(double x1, double y1, double x2, double y2, double radius) {
+  void arcTo(num x1, num y1, num x2, num y2, num radius) {
     addAction((Canvas canvas, Size size) {
-      path2d.arcTo(x1, y1, x2, y2, radius);
+      path2d.arcTo(x1.toDouble(), y1.toDouble(), x2.toDouble(), y2.toDouble(), radius.toDouble());
     });
   }
 
-  void bezierCurveTo(double cp1x, double cp1y, double cp2x, double cp2y, double x, double y) {
+  void bezierCurveTo(num cp1x, num cp1y, num cp2x, num cp2y, num x, num y) {
     addAction((Canvas canvas, Size size) {
-      path2d.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+      path2d.bezierCurveTo(cp1x.toDouble(), cp1y.toDouble(), cp2x.toDouble(), cp2y.toDouble(), x.toDouble(), y.toDouble());
     });
   }
 
@@ -480,13 +480,13 @@ class CanvasRenderingContext2D {
     });
   }
 
-  void drawImage(int argumentCount, Image? img, double sx, double sy, double sWidth, double sHeight, double dx, double dy, double dWidth, double dHeight) {
+  void drawImage(int argumentCount, Image? img, num sx, num sy, num sWidth, num sHeight, num dx, num dy, num dWidth, num dHeight) {
     if (img == null) return;
 
     addAction((Canvas canvas, Size size) {
       // ctx.drawImage(image, dx, dy);
       if (argumentCount == 3) {
-        canvas.drawImage(img, Offset(dx, dy), Paint());
+        canvas.drawImage(img, Offset(dx.toDouble(), dy.toDouble()), Paint());
       } else {
         if (argumentCount == 5) {
           // ctx.drawImage(image, dx, dy, dWidth, dHeight);
@@ -497,40 +497,40 @@ class CanvasRenderingContext2D {
         }
 
         canvas.drawImageRect(img,
-            Rect.fromLTWH(sx, sy, sWidth, sHeight),
-            Rect.fromLTWH(dx, dy, dWidth, dHeight),
+            Rect.fromLTWH(sx.toDouble(), sy.toDouble(), sWidth.toDouble(), sHeight.toDouble()),
+            Rect.fromLTWH(dx.toDouble(), dy.toDouble(), dWidth.toDouble(), dHeight.toDouble()),
             Paint());
       }
     });
   }
 
-  void ellipse(double x, double y, double radiusX, double radiusY, double rotation, double startAngle, double endAngle, {bool anticlockwise = false}) {
+  void ellipse(num x, num y, num radiusX, num radiusY, num rotation, num startAngle, num endAngle, {bool anticlockwise = false}) {
     addAction((Canvas canvas, Size size) {
-      path2d.ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise: anticlockwise);
+      path2d.ellipse(x.toDouble(), y.toDouble(), radiusX.toDouble(), radiusY.toDouble(), rotation.toDouble(), startAngle.toDouble(), endAngle.toDouble(), anticlockwise: anticlockwise);
     });
   }
 
-  void lineTo(double x, double y) {
+  void lineTo(num x, num y) {
     addAction((Canvas canvas, Size size) {
-      path2d.lineTo(x, y);
+      path2d.lineTo(x.toDouble(), y.toDouble());
     });
   }
 
-  void moveTo(double x, double y) {
+  void moveTo(num x, num y) {
     addAction((Canvas canvas, Size size) {
-      path2d.moveTo(x, y);
+      path2d.moveTo(x.toDouble(), y.toDouble());
     });
   }
 
-  void quadraticCurveTo(double cpx, double cpy, double x, double y) {
+  void quadraticCurveTo(num cpx, num cpy, num x, num y) {
     addAction((Canvas canvas, Size size) {
-      path2d.quadraticCurveTo(cpx, cpy, x, y);
+      path2d.quadraticCurveTo(cpx.toDouble(), cpy.toDouble(), x.toDouble(), y.toDouble());
     });
   }
 
-  void rect(double x, double y, double w, double h) {
+  void rect(num x, num y, num w, num h) {
     addAction((Canvas canvas, Size size) {
-      path2d.rect(x, y, w, h);
+      path2d.rect(x.toDouble(), y.toDouble(), w.toDouble(), h.toDouble());
     });
   }
 
@@ -615,25 +615,25 @@ class CanvasRenderingContext2D {
     _lineDash = segments;
   }
 
-  void translate(double x, double y) {
-    _matrix.translate(x, y);
+  void translate(num x, num y) {
+    _matrix.translate(x.toDouble(), y.toDouble());
     addAction((Canvas canvas, Size size) {
-      canvas.translate(x, y);
+      canvas.translate(x.toDouble(), y.toDouble());
     });
   }
 
-  void rotate(double angle) {
-    _matrix.setRotationZ(angle);
+  void rotate(num angle) {
+    _matrix.setRotationZ(angle.toDouble());
     addAction((Canvas canvas, Size size) {
-      canvas.rotate(angle);
+      canvas.rotate(angle.toDouble());
     });
   }
 
   // transformations (default transform is the identity matrix)
-  void scale(double x, double y) {
-    _matrix.scale(x, y);
+  void scale(num x, num y) {
+    _matrix.scale(x.toDouble(), y.toDouble());
     addAction((Canvas canvas, Size size) {
-      canvas.scale(x, y);
+      canvas.scale(x.toDouble(), y.toDouble());
     });
   }
 
@@ -642,7 +642,7 @@ class CanvasRenderingContext2D {
   }
 
   // https://github.com/WebKit/WebKit/blob/a77a158d4e2086fbe712e488ed147e8a54d44d3c/Source/WebCore/html/canvas/CanvasRenderingContext2DBase.cpp#L843
-  void setTransform(double a, double b, double c, double d, double e, double f) {
+  void setTransform(num a, num b, num c, num d, num e, num f) {
     resetTransform();
     transform(a, b, c, d, e, f);
   }
@@ -656,7 +656,7 @@ class CanvasRenderingContext2D {
     });
   }
 
-  void transform(double a, double b, double c, double d, double e, double f) {
+  void transform(num a, num b, num c, num d, num e, num f) {
     // Matrix3
     // [ a c e
     //   b d f
@@ -668,16 +668,16 @@ class CanvasRenderingContext2D {
     //   e, f, 1, 0,
     //   0, 0, 0, 1 ]
     final Float64List m4storage = Float64List(16);
-    m4storage[0] = a;
-    m4storage[1] = b;
+    m4storage[0] = a.toDouble();
+    m4storage[1] = b.toDouble();
     m4storage[2] = 0.0;
     m4storage[3] = 0.0;
-    m4storage[4] = c;
-    m4storage[5] = d;
+    m4storage[4] = c.toDouble();
+    m4storage[5] = d.toDouble();
     m4storage[6] = 0.0;
     m4storage[7] = 0.0;
-    m4storage[8] = e;
-    m4storage[9] = f;
+    m4storage[8] = e.toDouble();
+    m4storage[9] = f.toDouble();
     m4storage[10] = 1.0;
     m4storage[11] = 0.0;
     m4storage[12] = 0.0;
@@ -725,8 +725,8 @@ class CanvasRenderingContext2D {
     throw UnimplementedError();
   }
 
-  void clearRect(double x, double y, double w, double h) {
-    Rect rect = Rect.fromLTWH(x, y, w, h);
+  void clearRect(num x, num y, num w, num h) {
+    Rect rect = Rect.fromLTWH(x.toDouble(), y.toDouble(), w.toDouble(), h.toDouble());
     addAction((Canvas canvas, Size size) {
       // Must saveLayer before clear avoid there is a "black" background
       Paint paint = Paint()
@@ -736,16 +736,16 @@ class CanvasRenderingContext2D {
     });
   }
 
-  void fillRect(double x, double y, double w, double h) {
-    Rect rect = Rect.fromLTWH(x, y, w, h);
+  void fillRect(num x, num y, num w, num h) {
+    Rect rect = Rect.fromLTWH(x.toDouble(), y.toDouble(), w.toDouble(), h.toDouble());
     addAction((Canvas canvas, Size size) {
       Paint paint = Paint()..color = fillStyle;
       canvas.drawRect(rect, paint);
     });
   }
 
-  void strokeRect(double x, double y, double w, double h) {
-    Rect rect = Rect.fromLTWH(x, y, w, h);
+  void strokeRect(num x, num y, num w, num h) {
+    Rect rect = Rect.fromLTWH(x.toDouble(), y.toDouble(), w.toDouble(), h.toDouble());
     addAction((Canvas canvas, Size size) {
       Paint paint = Paint()
         ..color = strokeStyle
@@ -824,35 +824,35 @@ class CanvasRenderingContext2D {
     }
   }
 
-  void fillText(String text, double x, double y, {double? maxWidth}) {
+  void fillText(String text, num x, num y, {num? maxWidth}) {
     addAction((Canvas canvas, Size size) {
       TextPainter textPainter = _getTextPainter(text, fillStyle);
       if (maxWidth != null) {
         // FIXME: should scale down to a smaller font size in order to fit the text in the specified width.
-        textPainter.layout(maxWidth: maxWidth);
+        textPainter.layout(maxWidth: maxWidth.toDouble());
       } else {
         textPainter.layout();
       }
       // Paint text start with baseline.
       double offsetToBaseline = textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
-      textPainter.paint(canvas, Offset(x, y - offsetToBaseline) - _getAlignOffset(textPainter.width));
+      textPainter.paint(canvas, Offset(x.toDouble(), y - offsetToBaseline) - _getAlignOffset(textPainter.width));
     });
   }
 
 
-  void strokeText(String text, double x, double y, {double? maxWidth}) {
+  void strokeText(String text, num x, num y, {num? maxWidth}) {
     addAction((Canvas canvas, Size size) {
       TextPainter textPainter = _getTextPainter(text, strokeStyle, shouldStrokeText: true);
       if (maxWidth != null) {
         // FIXME: should scale down to a smaller font size in order to fit the text in the specified width.
-        textPainter.layout(maxWidth: maxWidth);
+        textPainter.layout(maxWidth: maxWidth.toDouble());
       } else {
         textPainter.layout();
       }
 
       double offsetToBaseline = textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
       // Paint text start with baseline.
-      textPainter.paint(canvas, Offset(x, y - offsetToBaseline) - _getAlignOffset(textPainter.width));
+      textPainter.paint(canvas, Offset(x.toDouble(), y - offsetToBaseline) - _getAlignOffset(textPainter.width));
     });
   }
 
