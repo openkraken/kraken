@@ -369,7 +369,10 @@ class ImageElement extends Element {
 
   @override
   void removeProperty(String key) {
-    RenderIntrinsic? renderIntrinsic = renderBoxModel as RenderIntrinsic?;
+    RenderIntrinsic? renderIntrinsic;
+    if (renderBoxModel != null) {
+      renderIntrinsic = renderBoxModel as RenderIntrinsic;
+    }
     bool _isInLazyLoading = renderIntrinsic != null && renderIntrinsic.isInLazyLoading;
     super.removeProperty(key);
     if (key == 'src') {
@@ -386,12 +389,13 @@ class ImageElement extends Element {
     super.setProperty(key, value);
     double? rootFontSize;
     double? fontSize;
+    RenderIntrinsic? renderIntrinsic;
     if (renderBoxModel != null) {
       rootFontSize = renderBoxModel!.elementDelegate.getRootElementFontSize();
       fontSize = renderBoxModel!.renderStyle.fontSize;
+      renderIntrinsic = renderBoxModel as RenderIntrinsic;
     }
 
-    RenderIntrinsic? renderIntrinsic = renderBoxModel as RenderIntrinsic?;
     bool _isInLazyLoading = renderIntrinsic != null && renderIntrinsic.isInLazyLoading;
     // Reset frame number to zero when image needs to reload
     _frameCount = 0;
