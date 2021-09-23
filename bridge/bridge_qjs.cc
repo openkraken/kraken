@@ -59,6 +59,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
     std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 #endif
   m_context = binding::qjs::createJSContext(contextId, handler, this);
+  m_html_parser = std::make_unique<HTMLParser>(m_context);
 
 #if ENABLE_PROFILE
   auto nativePerformance = Performance::instance(m_context.get())->m_nativePerformance;
@@ -116,8 +117,9 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 #endif
 }
 
-void JSBridge::parseHTML(const NativeString *script, const char *url) {
+void JSBridge::parseHTML(const char* code, size_t length) {
   if (!m_context->isValid()) return;
+  m_html_parser->parseHTML(code, length);
 }
 
 void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType, void *rawEvent, NativeString *extra) {

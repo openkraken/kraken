@@ -107,6 +107,7 @@ public:
 
   std::string tagName();
   std::string getRegisteredTagName();
+  StyleDeclarationInstance *style();
 
   static inline JSClassID classID();
 

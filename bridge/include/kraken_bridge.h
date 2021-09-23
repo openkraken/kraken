@@ -102,7 +102,7 @@ void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFi
 KRAKEN_EXPORT_C
 void evaluateQuickjsByteCode(int32_t contextId, uint8_t *bytes, int32_t byteLen);
 KRAKEN_EXPORT_C
-void parseHTML(int32_t contextId, NativeString *code, const char *bundleFilename);
+void parseHTML(int32_t contextId, const char *code, int32_t length);
 KRAKEN_EXPORT_C
 NativeString* getHref(int32_t contextId);
 KRAKEN_EXPORT_C

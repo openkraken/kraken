@@ -8,6 +8,7 @@
 
 #include "include/kraken_bridge.h"
 #include "bindings/qjs/js_context.h"
+#include "bindings/qjs/html_parser.h"
 #include <quickjs/quickjs.h>
 
 #include <atomic>
@@ -30,8 +31,8 @@ public:
   void *owner;
   // evaluate JavaScript source codes in standard mode.
   void evaluateScript(const NativeString *script, const char *url, int startLine);
-  KRAKEN_EXPORT void evaluateScript(const uint16_t *script, size_t length, const char *url, int startLine);
-  KRAKEN_EXPORT void parseHTML(const NativeString *script, const char *url);
+  void evaluateScript(const uint16_t *script, size_t length, const char *url, int startLine);
+  void parseHTML(const char* code, size_t length);
   void evaluateScript(const char* script, size_t length, const char* url, int startLine);
   uint8_t *dumpByteCode(const char* script, size_t length, const char* url, size_t *byteLength);
   void evaluateByteCode(uint8_t *bytes, size_t byteLength);
@@ -50,6 +51,7 @@ public:
 
 private:
   std::unique_ptr<binding::qjs::JSContext> m_context;
+  std::unique_ptr<binding::qjs::HTMLParser> m_html_parser;
   JSExceptionHandler m_handler;
   Task m_disposeCallback{nullptr};
   void *m_disposePrivateData{nullptr};

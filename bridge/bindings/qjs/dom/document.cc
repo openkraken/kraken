@@ -337,5 +337,8 @@ void DocumentInstance::addElementById(JSAtom id, ElementInstance *element) {
   }
 }
 
+ElementInstance *DocumentInstance::documentElement() {
+  return m_documentElement;
+}
 
 }

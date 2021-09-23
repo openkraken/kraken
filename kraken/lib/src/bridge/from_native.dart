@@ -173,7 +173,9 @@ int _setTimeout(Pointer<Void> callbackContext, int contextId,
     try {
       func(callbackContext, contextId, nullptr);
     } catch (e, stack) {
-      func(callbackContext, contextId, ('Error: $e\n$stack').toNativeUtf8());
+      Pointer<Utf8> nativeErrorMessage = ('Error: $e\n$stack').toNativeUtf8();
+      func(callbackContext, contextId, nativeErrorMessage);
+      malloc.free(nativeErrorMessage);
     }
   });
 }
@@ -193,7 +195,9 @@ int _setInterval(Pointer<Void> callbackContext, int contextId,
     try {
       func(callbackContext, contextId, nullptr);
     } catch (e, stack) {
-      func(callbackContext, contextId, ('Dart Error: $e\n$stack').toNativeUtf8());
+      Pointer<Utf8> nativeErrorMessage = ('Dart Error: $e\n$stack').toNativeUtf8();
+      func(callbackContext, contextId, nativeErrorMessage);
+      malloc.free(nativeErrorMessage);
     }
   });
 }
@@ -224,7 +228,9 @@ int _requestAnimationFrame(Pointer<Void> callbackContext, int contextId,
     try {
       func(callbackContext, contextId, highResTimeStamp, nullptr);
     } catch (e, stack) {
-      func(callbackContext, contextId, highResTimeStamp, ('Error: $e\n$stack').toNativeUtf8());
+      Pointer<Utf8> nativeErrorMessage = ('Error: $e\n$stack').toNativeUtf8();
+      func(callbackContext, contextId, highResTimeStamp, nativeErrorMessage);
+      malloc.free(nativeErrorMessage);
     }
   });
 }
@@ -293,8 +299,9 @@ void _toBlob(Pointer<Void> callbackContext, int contextId,
     byteList.setAll(0, bytes);
     func(callbackContext, contextId, nullptr, bytePtr, bytes.length);
   }).catchError((error, stack) {
-    Pointer<Utf8> msg = ('$error\n$stack').toNativeUtf8();
-    func(callbackContext, contextId, msg, nullptr, 0);
+    Pointer<Utf8> nativeErrorMessage = ('$error\n$stack').toNativeUtf8();
+    func(callbackContext, contextId, nativeErrorMessage, nullptr, 0);
+    malloc.free(nativeErrorMessage);
   });
 }
 

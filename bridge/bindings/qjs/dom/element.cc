@@ -697,6 +697,10 @@ JSClassExoticMethods ElementInstance::exoticMethods{
   setProperty
 };
 
+StyleDeclarationInstance *ElementInstance::style() {
+  return m_style;
+}
+
 PROP_GETTER(BoundingClientRect, x)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *boundingClientRect = static_cast<BoundingClientRect *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->x);

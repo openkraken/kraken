@@ -108,7 +108,7 @@ abstract class KrakenBundle {
     else if (contentType.mimeType == ContentType.html.mimeType || url.toString().contains('.html')) {
       String code = _resolveStringFromData(rawBundle);
       // parse html.
-      parseHTML(contextId, code, url.toString());
+      parseHTML(contextId, code);
     } else if (isByteCodeSupported(contentType.mimeType, url.toString())) {
       Uint8List buffer = rawBundle.buffer.asUint8List();
       evaluateQuickjsByteCode(contextId, buffer);

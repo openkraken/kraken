@@ -285,6 +285,8 @@ elseif ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/module_manager.h
     bindings/qjs/kraken.cc
     bindings/qjs/kraken.h
+    bindings/qjs/html_parser.cc
+    bindings/qjs/html_parser.h
     bindings/qjs/bom/console.cc
     bindings/qjs/bom/console.h
     bindings/qjs/bom/screen.cc

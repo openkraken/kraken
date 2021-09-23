@@ -127,9 +127,9 @@ typedef DartEvaluateScripts = void Function(
 
 // Register parseHTML
 typedef NativeParseHTML = Void Function(
-    Int32 contextId, Pointer<NativeString> code, Pointer<Utf8> url);
+    Int32 contextId, Pointer<Utf8> code, Int32 length);
 typedef DartParseHTML = void Function(
-    int contextId, Pointer<NativeString> code, Pointer<Utf8> url);
+    int contextId, Pointer<Utf8> code, int length);
 
 final DartEvaluateScripts _evaluateScripts =
 nativeDynamicLibrary.lookup<NativeFunction<NativeEvaluateScripts>>('evaluateScripts').asFunction();
@@ -166,15 +166,14 @@ void evaluateQuickjsByteCode(int contextId, Uint8List bytes) {
   malloc.free(byteData);
 }
 
-void parseHTML(int contextId, String code, String url) {
-  Pointer<NativeString> nativeString = stringToNativeString(code);
-  Pointer<Utf8> _url = url.toNativeUtf8();
+void parseHTML(int contextId, String code) {
+  Pointer<Utf8> nativeCode = code.toNativeUtf8();
   try {
-    _parseHTML(contextId, nativeString, _url);
+    _parseHTML(contextId, nativeCode, code.length);
   } catch (e, stack) {
     print('$e\n$stack');
   }
-  freeNativeString(nativeString);
+  malloc.free(nativeCode);
 }
 
 
