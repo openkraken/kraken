@@ -508,10 +508,10 @@ mixin CSSTextMixin on RenderStyleBase {
         textDecorationLine = CSSText.getTextDecorationLine(style);
         break;
       case TEXT_DECORATION_STYLE:
-        textDecorationColor = CSSText.getTextDecorationColor(style);
+        textDecorationStyle = CSSText.getTextDecorationStyle(style);
         break;
       case TEXT_DECORATION_COLOR:
-        textDecorationStyle = CSSText.getTextDecorationStyle(style);
+        textDecorationColor = CSSText.getTextDecorationColor(style);
         break;
       case FONT_WEIGHT:
         fontWeight = CSSText.getFontWeight(style);
