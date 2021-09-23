@@ -202,6 +202,6 @@ describe('css-flexbox', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 });

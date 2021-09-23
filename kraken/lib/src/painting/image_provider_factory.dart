@@ -17,7 +17,7 @@ import 'package:kraken/painting.dart';
 /// This class allows user to customize Kraken's image loading.
 
 /// A factory function allow user to build an customized ImageProvider class.
-typedef ImageProviderFactory = ImageProvider? Function(String url, [dynamic param]);
+typedef ImageProviderFactory = ImageProvider? Function(Uri uri, [dynamic param]);
 
 /// defines the types of supported image source.
 enum ImageType {
@@ -127,15 +127,15 @@ int? _getContextId(param) {
 }
 
 /// default ImageProviderFactory implementation of [ImageType.cached]
-ImageProvider defaultCachedProviderFactory(String url, [param]) {
+ImageProvider defaultCachedProviderFactory(Uri uri, [param]) {
   int? contextId = _getContextId(param);
-  return CachedNetworkImage(url, contextId: contextId);
+  return CachedNetworkImage(uri.toString(), contextId: contextId);
 }
 
 /// default ImageProviderFactory implementation of [ImageType.network]
-ImageProvider defaultNetworkProviderFactory(String url, [param]) {
+ImageProvider defaultNetworkProviderFactory(Uri uri, [param]) {
   int? contextId = _getContextId(param);
-  NetworkImage networkImage = NetworkImage(url, headers: {
+  NetworkImage networkImage = NetworkImage(uri.toString(), headers: {
     HttpHeaders.userAgentHeader: getKrakenInfo().userAgent,
     HttpHeaderContext: contextId.toString(),
   });
@@ -143,7 +143,7 @@ ImageProvider defaultNetworkProviderFactory(String url, [param]) {
 }
 
 /// default ImageProviderFactory implementation of [ImageType.file]
-ImageProvider? defaultFileProviderFactory(String rawPath, [param]) {
+ImageProvider? defaultFileProviderFactory(Uri uri, [param]) {
   ImageProvider? _imageProvider;
   if (param is File) {
     _imageProvider = FileImage(param);
@@ -152,7 +152,7 @@ ImageProvider? defaultFileProviderFactory(String rawPath, [param]) {
 }
 
 /// default ImageProviderFactory implementation of [ImageType.dataUrl].
-ImageProvider? defaultDataUrlProviderFactory(String uriDataPath, [param]) {
+ImageProvider? defaultDataUrlProviderFactory(Uri uri, [param]) {
   ImageProvider? _imageProvider;
   if (param is Uint8List) {
     _imageProvider = MemoryImage(param);
@@ -161,12 +161,12 @@ ImageProvider? defaultDataUrlProviderFactory(String uriDataPath, [param]) {
 }
 
 /// default ImageProviderFactory implementation of [ImageType.blob].
-ImageProvider? defaultBlobProviderFactory(String blobPath, [param]) {
+ImageProvider? defaultBlobProviderFactory(Uri uri, [param]) {
   // @TODO: support blob file url
   return null;
 }
 
 /// default ImageProviderFactory implementation of [ImageType.assets].
-ImageProvider defaultAssetsProvider(String rawUrl, [param]) {
-  return AssetImage(rawUrl);
+ImageProvider defaultAssetsProvider(Uri uri, [param]) {
+  return AssetImage(uri.toString());
 }

@@ -136,7 +136,7 @@ nativeDynamicLibrary.lookup<NativeFunction<NativeEvaluateScripts>>('evaluateScri
 final DartParseHTML _parseHTML =
 nativeDynamicLibrary.lookup<NativeFunction<NativeParseHTML>>('parseHTML').asFunction();
 
-void evaluateScripts(int contextId, String code, String url, int line) {
+void evaluateScripts(int contextId, String code, String url, [int line = 0]) {
   if(KrakenController.getControllerOfJSContextId(contextId) == null) {
     return;
   }

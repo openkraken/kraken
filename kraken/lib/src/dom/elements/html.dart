@@ -11,18 +11,20 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
 
 const String HTML = 'HTML';
+const Map<String, dynamic> _defaultStyle = {
+  DISPLAY: BLOCK,
+  OVERFLOW: AUTO
+};
 
 class HTMLElement extends Element {
+  static Map<String, dynamic> defaultStyle = _defaultStyle;
   HTMLElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super(
       targetId,
       nativePtr,
       elementManager,
       tagName: HTML,
-      defaultStyle: {
-        DISPLAY: BLOCK,
-        OVERFLOW: AUTO
-      }
+      defaultStyle: defaultStyle
   ) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_PROPERTY_INIT);

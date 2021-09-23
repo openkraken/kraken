@@ -747,15 +747,15 @@ class RenderFlowLayout extends RenderLayoutBox {
       case Axis.horizontal:
         Size logicalSize = Size(constraintWidth, constraintHeight);
         size = getBoxSize(logicalSize);
-        mainAxisContentSize = contentSize!.width;
-        crossAxisContentSize = contentSize!.height;
+        mainAxisContentSize = contentSize.width;
+        crossAxisContentSize = contentSize.height;
         break;
       case Axis.vertical:
         Size logicalSize = Size(crossAxisExtent, mainAxisExtent);
         size = getBoxSize(logicalSize);
 
-        mainAxisContentSize = contentSize!.height;
-        crossAxisContentSize = contentSize!.width;
+        mainAxisContentSize = contentSize.height;
+        crossAxisContentSize = contentSize.width;
         break;
     }
 
@@ -1739,7 +1739,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       renderStyle: renderStyle,
       elementDelegate: elementDelegate,
     );
-    layout.addAll(children as List<RenderBox?>?);
+    layout.addAll(children as List<RenderBox>?);
     return copyWith(layout);
   }
 

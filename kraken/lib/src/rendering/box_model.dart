@@ -96,6 +96,10 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox,
     List<RenderObject?> sortedChildren = (this as RenderLayoutBox).sortedChildren;
     for (int i = sortedChildren.length - 1; i >= 0; i--) {
       ChildType child = sortedChildren[i] as ChildType;
+      // Ignore detached render object.
+      if (!child.attached) {
+        continue;
+      }
       final ParentDataType childParentData = child.parentData as ParentDataType;
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset == Offset.zero
@@ -251,8 +255,8 @@ class RenderLayoutBox extends RenderBoxModel
 
     // Layout positioned element
     while (child != null) {
-      final RenderLayoutParentData? childParentData =
-          child.parentData as RenderLayoutParentData?;
+      final ContainerParentDataMixin<RenderBox>? childParentData =
+          child.parentData as ContainerParentDataMixin<RenderBox>?;
       if (child is! RenderBoxModel) {
         child = childParentData!.nextSibling;
         continue;
@@ -322,10 +326,9 @@ class RenderLayoutBox extends RenderBoxModel
       // Text box always has baseline
       if (childDistance == null &&
           isChildInline &&
-          child is RenderBoxModel &&
-          child.contentSize != null) {
+          child is RenderBoxModel) {
         // Flutter only allow access size of direct children, so cannot use child.size
-        Size childSize = child.getBoxSize(child.contentSize!);
+        Size childSize = child.getBoxSize(child.contentSize);
         childDistance = childSize.height;
       }
 
@@ -613,6 +616,7 @@ class RenderBoxModel extends RenderBox
 
       // Copy overflow
       ..scrollListener = scrollListener
+      ..pointerListener = pointerListener
       ..clipX = clipX
       ..clipY = clipY
       ..enableScrollX = enableScrollX
@@ -868,7 +872,7 @@ class RenderBoxModel extends RenderBox
     return constraints;
   }
 
-  /// Content width of render box model calcaluted from style
+  /// Content width of render box model calculated from style
   static double? getLogicalContentWidth(RenderBoxModel renderBoxModel) {
     RenderBoxModel originalRenderBoxModel = renderBoxModel;
     double cropWidth = 0;
@@ -928,6 +932,11 @@ class RenderBoxModel extends RenderBox
                   width = renderStyle.width;
                   cropPaddingBorder(renderBoxModel);
                   break;
+                } else if (renderBoxModel.constraints.isTight) {
+                  // Cases like flex item with flex-grow and no width in flex row direction.
+                  width = renderBoxModel.constraints.maxWidth;
+                  cropPaddingBorder(renderBoxModel);
+                  break;
                 } else if (display == CSSDisplay.inlineBlock ||
                     display == CSSDisplay.inlineFlex ||
                     display == CSSDisplay.sliver) {
@@ -955,7 +964,7 @@ class RenderBoxModel extends RenderBox
       default:
         break;
     }
-    // Get height by intrinsic ratio for replaced elemnent if height is not defined
+    // Get height by intrinsic ratio for replaced element if height is not defined
     if (width == null && intrinsicRatio != null) {
       width = originalRenderBoxModel.renderStyle.getWidthByIntrinsicRatio() +
           cropWidth;
@@ -979,7 +988,7 @@ class RenderBoxModel extends RenderBox
     }
   }
 
-  /// Content height of render box model calcaluted from style
+  /// Content height of render box model calculated from style
   static double? getLogicalContentHeight(RenderBoxModel renderBoxModel) {
     RenderBoxModel originalRenderBoxModel = renderBoxModel;
     CSSDisplay? display = renderBoxModel.renderStyle.transformedDisplay;
@@ -1030,6 +1039,11 @@ class RenderBoxModel extends RenderBox
             height = renderStyle.height;
             cropPaddingBorder(renderBoxModel);
             break;
+          } else if (renderBoxModel.constraints.isTight) {
+            // Cases like flex item with flex-grow and no height in flex column direction.
+            height = renderBoxModel.constraints.maxHeight;
+            cropPaddingBorder(renderBoxModel);
+            break;
           }
         } else {
           break;
@@ -1037,7 +1051,7 @@ class RenderBoxModel extends RenderBox
       }
     }
 
-    // Get height by intrinsic ratio for replaced elemnent if height is not defined
+    // Get height by intrinsic ratio for replaced element if height is not defined
     if (height == null && intrinsicRatio != null) {
       height = originalRenderBoxModel.renderStyle.getHeightByIntrinsicRatio() +
           cropHeight;
@@ -1171,13 +1185,7 @@ class RenderBoxModel extends RenderBox
 
   // The contentSize of layout box
   Size? _contentSize;
-
-  Size? get contentSize {
-    if (_contentSize == null) {
-      return Size(0, 0);
-    }
-    return _contentSize;
-  }
+  Size get contentSize => _contentSize ?? Size.zero;
 
   /// Logical content width calculated from style
   double? logicalContentWidth;
@@ -1186,7 +1194,7 @@ class RenderBoxModel extends RenderBox
   double? logicalContentHeight;
 
   double get clientWidth {
-    double width = contentSize!.width;
+    double width = contentSize.width;
     if (renderStyle.padding != null) {
       width += renderStyle.padding!.horizontal;
     }
@@ -1194,7 +1202,7 @@ class RenderBoxModel extends RenderBox
   }
 
   double get clientHeight {
-    double height = contentSize!.height;
+    double height = contentSize.height;
     if (renderStyle.padding != null) {
       height += renderStyle.padding!.vertical;
     }
@@ -1480,6 +1488,9 @@ class RenderBoxModel extends RenderBox
     if (fixedChildren.isNotEmpty) {
       fixedChildren.clear();
     }
+
+    // Evict render decoration image cache.
+    _renderStyle.decoration?.image?.image.evict();
   }
 
   Offset getTotalScrollOffset() {

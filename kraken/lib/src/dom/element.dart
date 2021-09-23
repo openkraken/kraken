@@ -16,6 +16,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/gesture.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:meta/meta.dart';
@@ -68,41 +69,64 @@ mixin ElementBase on Node {
   }
 }
 
-/// Mark the renderer of element as needs layout.
-typedef MarkRendererNeedsLayout = void Function();
-/// Toggle the renderer of element between repaint boundary and non repaint boundary.
-typedef ToggleRendererRepaintBoundary = void Function();
-/// Detach the renderer from its owner element.
-typedef DetachRenderer = void Function();
-/// Do the preparation work before the renderer is attached.
 typedef BeforeRendererAttach = RenderObject Function();
-/// Do the clean work after the renderer has attached.
-typedef AfterRendererAttach = void Function();
-/// Return the targetId of current element.
 typedef GetTargetId = int Function();
-/// Get the font size of root element
 typedef GetRootElementFontSize = double Function();
 
 /// Delegate methods passed to renderBoxModel for actions involved with element
 /// (eg. convert renderBoxModel to repaint boundary then attach to element).
 class ElementDelegate {
-  MarkRendererNeedsLayout markRendererNeedsLayout;
-  ToggleRendererRepaintBoundary toggleRendererRepaintBoundary;
-  DetachRenderer detachRenderer;
+  /// Mark the renderer of element as needs layout.
+  VoidCallback markRendererNeedsLayout;
+
+  /// Toggle the renderer of element between repaint boundary and non repaint boundary.
+  VoidCallback toggleRendererRepaintBoundary;
+
+  /// Detach the renderer from its owner element.
+  VoidCallback detachRenderer;
+
+  /// Do the preparation work before the renderer is attached.
   BeforeRendererAttach beforeRendererAttach;
-  AfterRendererAttach afterRendererAttach;
+
+  /// Do the clean work after the renderer has attached.
+  VoidCallback afterRendererAttach;
+
+  /// Return the targetId of current element.
   GetTargetId getTargetId;
+
+  /// Get the font size of root element
   GetRootElementFontSize getRootElementFontSize;
 
-  ElementDelegate(
-    this.markRendererNeedsLayout,
-    this.toggleRendererRepaintBoundary,
-    this.detachRenderer,
-    this.beforeRendererAttach,
-    this.afterRendererAttach,
-    this.getTargetId,
-    this.getRootElementFontSize
-  );
+  // Handle scrolling.
+  ScrollListener handleScroll;
+
+  /// Focus the input element.
+  VoidCallback focusInput;
+
+  /// Blur the input element.
+  VoidCallback blurInput;
+
+  /// Scroll the input element to the caret.
+  VoidCallback scrollInputToCaret;
+
+  // The sliver box child manager
+  RenderSliverBoxChildManager? renderSliverBoxChildManager;
+
+
+  ElementDelegate({
+    required this.markRendererNeedsLayout,
+    required this.toggleRendererRepaintBoundary,
+    required this.detachRenderer,
+    required this.beforeRendererAttach,
+    required this.afterRendererAttach,
+    required this.getTargetId,
+    required this.getRootElementFontSize,
+    required this.handleScroll,
+    required this.focusInput,
+    required this.blurInput,
+    required this.scrollInputToCaret,
+    this.renderSliverBoxChildManager,
+  });
 }
 
 class Element extends Node
@@ -128,7 +152,7 @@ class Element extends Node
 
   final String tagName;
 
-  final Map<String, dynamic> defaultStyle;
+  final Map<String, dynamic> _defaultStyle;
 
   /// The default display type.
   final String defaultDisplay;
@@ -146,8 +170,6 @@ class Element extends Node
   /// Whether should create repaintBoundary for this element when style changed
   bool get shouldConvertToRepaintBoundary {
     // Following cases should always convert to repaint boundary for performance consideration
-    // Multiframe image
-    bool isMultiframeImage = this is ImageElement && (this as ImageElement).isMultiframe;
     // Intrinsic element such as Canvas
     bool isSetRepaintSelf = repaintSelf;
     // Scrolling box
@@ -157,20 +179,20 @@ class Element extends Node
     // Fixed element
     bool isPositionedFixed = renderBoxModel?.renderStyle.position == CSSPositionType.fixed;
 
-    return isMultiframeImage || isScrollingBox ||
-      isSetRepaintSelf || hasTransform || isPositionedFixed;
+    return isScrollingBox || isSetRepaintSelf || hasTransform || isPositionedFixed;
   }
 
   Element(int targetId, this.nativeElementPtr, ElementManager elementManager,
       {required this.tagName,
-        this.defaultStyle = const <String, dynamic>{},
+        Map<String, dynamic> defaultStyle = const {},
         // Whether element allows children.
         bool isIntrinsicBox = false,
         this.repaintSelf = false,
         // @HACK: overflow scroll needs to create an shadow element to create an scrolling renderBox for better scrolling performance.
         // we needs to prevent this shadow element override real element in nativeMap.
         bool isHiddenElement = false})
-      : _isIntrinsicBox = isIntrinsicBox,
+      : _defaultStyle = defaultStyle,
+        _isIntrinsicBox = isIntrinsicBox,
         defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : INLINE,
         super(NodeType.ELEMENT_NODE, targetId, nativeElementPtr.ref.nativeNode, elementManager, tagName) {
     style = CSSStyleDeclaration(this);
@@ -183,15 +205,22 @@ class Element extends Node
     _setDefaultStyle();
   }
 
+  RenderSliverBoxChildManager? _sliverBoxChildManager;
+
   ElementDelegate get elementDelegate {
     return ElementDelegate(
-      _markRendererNeedsLayout,
-      _toggleRendererRepaintBoundary,
-      _detachRenderer,
-      _beforeRendererAttach,
-      _afterRendererAttach,
-      _getTargetId,
-      _getRootElementFontSize
+      markRendererNeedsLayout: _markRendererNeedsLayout,
+      toggleRendererRepaintBoundary: _toggleRendererRepaintBoundary,
+      detachRenderer: detach,
+      beforeRendererAttach: _beforeRendererAttach,
+      afterRendererAttach: _afterRendererAttach,
+      getTargetId: _getTargetId,
+      getRootElementFontSize: _getRootElementFontSize,
+      handleScroll: _handleScroll,
+      focusInput: _focusInput,
+      blurInput: _blurInput,
+      scrollInputToCaret: _scrollInputToCaret,
+      renderSliverBoxChildManager: _sliverBoxChildManager,
     );
   }
 
@@ -207,10 +236,6 @@ class Element extends Node
     }
   }
 
-  void _detachRenderer() {
-    detach();
-  }
-
   RenderObject _beforeRendererAttach() {
     willAttachRenderer();
     return renderer!;
@@ -224,6 +249,20 @@ class Element extends Node
 
   int _getTargetId() {
     return targetId;
+  }
+
+  void _focusInput() {
+    InputElement input = this as InputElement;
+    InputElement.setFocus(input);
+  }
+
+  void _blurInput() {
+    InputElement.clearFocus();
+  }
+
+  void _scrollInputToCaret() {
+    InputElement inputElement = this as InputElement;
+    inputElement.scrollToCaret();
   }
 
   double _getRootElementFontSize() {
@@ -301,25 +340,35 @@ class Element extends Node
   }
 
   void _setDefaultStyle() {
-    if (defaultStyle.isNotEmpty) {
-      defaultStyle.forEach((property, dynamic value) {
+    if (_defaultStyle.isNotEmpty) {
+      _defaultStyle.forEach((property, dynamic value) {
         style.setProperty(property, value, viewportSize);
       });
     }
   }
 
-  // TODO: debounce scroll listener
-  void _scrollListener(double scrollOffset, AxisDirection axisDirection) {
-    applyStickyChildrenOffset();
-    paintFixedChildren(scrollOffset, axisDirection);
-
-    if (eventHandlers.containsKey(EVENT_SCROLL)) {
-      _fireScrollEvent();
+  bool _shouldConsumeScrollTicker = false;
+  void _consumeScrollTicker(_) {
+    if (_shouldConsumeScrollTicker && eventHandlers.containsKey(EVENT_SCROLL)) {
+      _dispatchScrollEvent();
+      _shouldConsumeScrollTicker = false;
     }
   }
 
+  void _handleScroll(double scrollOffset, AxisDirection axisDirection) {
+    applyStickyChildrenOffset();
+    paintFixedChildren(scrollOffset, axisDirection);
+
+    if (!_shouldConsumeScrollTicker) {
+      // Make sure scroll listener trigger most to 1 time each frame.
+      SchedulerBinding.instance!.addPostFrameCallback(_consumeScrollTicker);
+      SchedulerBinding.instance!.scheduleFrame();
+    }
+    _shouldConsumeScrollTicker = true;
+  }
+
   /// https://drafts.csswg.org/cssom-view/#scrolling-events
-  void _fireScrollEvent() {
+  void _dispatchScrollEvent() {
     dispatchEvent(Event(EVENT_SCROLL));
   }
 
@@ -418,12 +467,12 @@ class Element extends Node
     if (isRendererAttached) {
       RenderObject _renderer = renderer!;
 
-      RenderBox? prev = (_renderer.parentData as ContainerBoxParentData<RenderBox>).previousSibling;
+      RenderBox? prev = (_renderer.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
       // It needs to find the previous sibling of the previous sibling if the placeholder of
       // positioned element exists and follows renderObject at the same time, eg.
       // <div style="position: relative"><div style="postion: absolute" /></div>
       if (prev == _renderBoxModel) {
-        prev = (_renderBoxModel.parentData as ContainerBoxParentData<RenderBox>).previousSibling;
+        prev = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
       }
 
       // Remove placeholder of positioned element.
@@ -547,6 +596,13 @@ class Element extends Node
   @override
   void attachTo(Element parent, {RenderBox? after}) {
     CSSDisplay display = CSSDisplayMixin.getDisplay(style[DISPLAY] ?? defaultDisplay);
+
+    if (display == CSSDisplay.sliver) {
+      _sliverBoxChildManager = ElementSliverBoxChildManager(this);
+    } else {
+      _sliverBoxChildManager = null;
+    }
+
     if (display != CSSDisplay.none) {
       _beforeRendererAttach();
       parent.addChildRenderObject(this, after: after);
@@ -665,7 +721,7 @@ class Element extends Node
         RenderBox? afterRenderObject;
         // `referenceNode` should not be null, or `referenceIndex` can only be -1.
         if (referenceIndex != -1 && referenceNode.isRendererAttached) {
-          afterRenderObject = (referenceNode.renderer!.parentData as ContainerBoxParentData<RenderBox>).previousSibling;
+          afterRenderObject = (referenceNode.renderer!.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
         }
         child.attachTo(this, after: afterRenderObject);
       }
@@ -993,7 +1049,7 @@ class Element extends Node
   }
 
   void _styleOverflowChangedListener(String property, String? original, String present) {
-    updateRenderOverflow(this, _scrollListener);
+    updateRenderOverflow(this);
   }
 
   void _stylePaddingChangedListener(String property, String? original, String present) {
@@ -1077,13 +1133,17 @@ class Element extends Node
   }
 
   void _styleFlexItemChangedListener(String property, String? original, String present) {
+    if (parentElement == null) {
+      return;
+    }
+
     Element selfParentElement = parentElement!;
-    CSSDisplay? parentDisplayValue = selfParentElement.renderBoxModel!.renderStyle.display;
+    CSSDisplay? parentDisplayValue = selfParentElement.renderBoxModel?.renderStyle.display;
     bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex || parentDisplayValue == CSSDisplay.inlineFlex;
 
     // Flex factor change will cause flex item self and its siblings relayout.
     if (isParentFlexDisplayType) {
-      for (Element child in parent!.children) {
+      for (Element child in selfParentElement.children) {
         if (selfParentElement.renderBoxModel is RenderFlexLayout && child.renderBoxModel != null) {
           child.renderBoxModel!.renderStyle.updateFlexItem();
           child.renderBoxModel!.markNeedsLayout();
@@ -1328,7 +1388,7 @@ class Element extends Node
     bool isIntersectionObserverEvent = _isIntersectionObserverEvent(eventType);
     bool hasIntersectionObserverEvent = isIntersectionObserverEvent && _hasIntersectionObserverEvent(eventHandlers);
 
-    addEventListener(eventType, eventResponder);
+    addEventListener(eventType, _eventResponder);
 
     RenderBoxModel? selfRenderBoxModel = renderBoxModel;
     if (selfRenderBoxModel != null) {
@@ -1343,7 +1403,7 @@ class Element extends Node
 
   void removeEvent(String eventType) {
     if (!eventHandlers.containsKey(eventType)) return; // Only listen once.
-    removeEventListener(eventType, eventResponder);
+    removeEventListener(eventType, _eventResponder);
 
     RenderBoxModel? selfRenderBoxModel = renderBoxModel;
     if (selfRenderBoxModel != null) {
@@ -1357,7 +1417,18 @@ class Element extends Node
     }
   }
 
-  void eventResponder(Event event) {
+  @override
+  void dispatchEvent(Event event) {
+    super.dispatchEvent(event);
+    if (event.currentTarget != null) {
+      _eventResponder(event);
+
+      // Dispatch listener for widget.
+      elementManager.eventClient?.eventListener(event);
+    }
+  }
+
+  void _eventResponder(Event event) {
     emitUIEvent(elementManager.controller.view.contextId, nativeElementPtr.ref.nativeNode.ref.nativeEventTarget, event);
   }
 
@@ -1714,4 +1785,114 @@ void _setPositionedChildParentData(RenderLayoutBox parentRenderLayoutBox, Elemen
   RenderLayoutParentData parentData = RenderLayoutParentData();
   RenderBoxModel childRenderBoxModel = child.renderBoxModel!;
   childRenderBoxModel.parentData = CSSPositionedLayout.getPositionParentData(childRenderBoxModel, parentData);
+}
+
+/// [RenderSliverBoxChildManager] for sliver element.
+class ElementSliverBoxChildManager implements RenderSliverBoxChildManager {
+  // The container reference element.
+  final Element _element;
+
+  // Flag to determine whether newly added children could
+  // affect the visible contents of the [RenderSliverMultiBoxAdaptor].
+  bool _didUnderflow = false;
+
+  // The current rendering object index.
+  int _currentIndex = -1;
+
+  RenderRecyclerLayout get recyclerLayout => _element.renderer as RenderRecyclerLayout;
+
+  ElementSliverBoxChildManager(Element element) : _element = element;
+
+  Iterable<Node> get _renderNodes => _element.childNodes.where((child) => child is Element || child is TextNode);
+
+  // Only count renderable child.
+  @override
+  int get childCount => _renderNodes.length;
+
+  @override
+  void createChild(int index, {required RenderBox? after}) {
+    if (_didUnderflow) return;
+    if (index < 0) return;
+
+    Iterable<Node> renderNodes = _renderNodes;
+    if (index >= renderNodes.length) return;
+    _currentIndex = index;
+
+    Node childNode = renderNodes.elementAt(index);
+    childNode.willAttachRenderer();
+
+    RenderBox? child;
+
+    if (childNode is Element) {
+      childNode.style.applyTargetProperties();
+    }
+    if (childNode is Node) {
+      child = childNode.renderer as RenderBox?;
+    } else {
+      if (!kReleaseMode)
+        throw FlutterError('Sliver unsupported type ${childNode.runtimeType} $childNode');
+    }
+
+    assert(child != null, 'Sliver render node should own RenderBox.');
+
+    recyclerLayout
+      ..setupParentData(child!)
+      ..insertSliverChild(child, after: after);
+
+    childNode.didAttachRenderer();
+    childNode.ensureChildAttached();
+  }
+
+  @override
+  bool debugAssertChildListLocked() => true;
+
+  @override
+  void didAdoptChild(RenderBox child) {
+    final parentData = child.parentData as SliverMultiBoxAdaptorParentData;
+    parentData.index = _currentIndex;
+  }
+
+  @override
+  void removeChild(RenderBox child) {
+    if (child is RenderBoxModel) {
+      child.elementDelegate.detachRenderer();
+    } else {
+      child.detach();
+    }
+  }
+
+  @override
+  void setDidUnderflow(bool value) {
+    _didUnderflow = value;
+  }
+
+  @override
+  void didFinishLayout() {}
+
+  @override
+  void didStartLayout() {}
+
+  @override
+  double estimateMaxScrollOffset(SliverConstraints constraints, {int? firstIndex, int? lastIndex, double? leadingScrollOffset, double? trailingScrollOffset}) {
+    return _extrapolateMaxScrollOffset(firstIndex, lastIndex,
+        leadingScrollOffset, trailingScrollOffset, childCount)!;
+  }
+
+  static double? _extrapolateMaxScrollOffset(
+    int? firstIndex,
+    int? lastIndex,
+    double? leadingScrollOffset,
+    double? trailingScrollOffset,
+    int childCount,
+  ) {
+    if (lastIndex == childCount - 1) {
+      return trailingScrollOffset;
+    }
+
+    final int reifiedCount = lastIndex! - firstIndex! + 1;
+    final double averageExtent =
+        (trailingScrollOffset! - leadingScrollOffset!) / reifiedCount;
+    final int remainingCount = childCount - lastIndex - 1;
+    return trailingScrollOffset + averageExtent * remainingCount;
+  }
 }
