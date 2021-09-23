@@ -66,6 +66,68 @@ class MouseEventInstance;
 struct NativePopStateEvent;
 class PopStateEventInstance;
 
+class SpaceSplitString {
+public:
+  SpaceSplitString() = default;
+  SpaceSplitString(std::string& string) {
+    set(string);
+  }
+
+  void set(std::string &string) {
+    size_t pos = 0;
+    std::string token;
+    std::string s = string;
+    while ((pos = s.find(m_delimiter)) != std::string::npos) {
+      token = s.substr(0, pos);
+      m_szData.push_back(token);
+      s.erase(0, pos + m_delimiter.length());
+    }
+    m_szData.push_back(s);
+  }
+
+  bool contains(std::string& string) {
+    for (std::string s : m_szData) {
+      if (s == string) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool containsAll(std::string string) {
+    std::vector<std::string> szData;
+    size_t pos = 0;
+    std::string token;
+    std::string s = string;
+
+    while ((pos = s.find(m_delimiter)) != std::string::npos) {
+      token = s.substr(0, pos);
+      szData.push_back(token);
+      s.erase(0, pos + m_delimiter.length());
+    }
+    szData.push_back(s);
+
+    bool flag = true;
+    for(std::string str : szData) {
+      bool isContains = false;
+      for(std::string data : m_szData) {
+        if (data == str) {
+          isContains = true;
+          break;
+        }
+      }
+      flag &= isContains;
+    }
+
+    return flag;
+  }
+
+private:
+  std::string m_delimiter = " ";
+  std::vector<std::string> m_szData;
+};
+
 class JSContext {
 public:
   static std::vector<JSStaticFunction> globalFunctions;
@@ -661,6 +723,9 @@ public:
   static JSValueRef getElementsByTagName(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                          size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
+  static JSValueRef getElementsByClassName(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                         size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+
 private:
 protected:
   JSDocument() = delete;
@@ -674,6 +739,7 @@ protected:
   JSFunctionHolder m_createComment{context, prototypeObject, this, "createComment", createComment};
   JSFunctionHolder m_getElementById{context, prototypeObject, this, "getElementById", getElementById};
   JSFunctionHolder m_getElementsByTagName{context, prototypeObject, this, "getElementsByTagName", getElementsByTagName};
+  JSFunctionHolder m_getElementsByClassName{context, prototypeObject, this, "getElementsByClassName", getElementsByClassName};
 };
 
 class DocumentCookie {
@@ -697,7 +763,7 @@ struct NativeDocument {
 class DocumentInstance : public NodeInstance {
 public:
   DEFINE_OBJECT_PROPERTY(Document, 4, nodeName, all, cookie, documentElement);
-  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Document, 6, createElement, createTextNode, createComment, getElementById,
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Document, 7, createElement, createTextNode, createComment, getElementById, getElementsByClassName,
                                    getElementsByTagName, createEvent);
 
   static DocumentInstance *instance(JSContext *context);
@@ -813,9 +879,9 @@ using ElementCreator = ElementInstance *(*)(JSContext *context);
 
 class KRAKEN_EXPORT JSElement : public JSNode {
 public:
-  DEFINE_OBJECT_PROPERTY(Element, 17, style, attributes, nodeName, tagName, offsetLeft, offsetTop, offsetWidth,
+  DEFINE_OBJECT_PROPERTY(Element, 18, style, attributes, nodeName, tagName, offsetLeft, offsetTop, offsetWidth,
                          offsetHeight, clientWidth, clientHeight, clientTop, clientLeft, scrollTop, scrollLeft,
-                         scrollHeight, scrollWidth, children);
+                         scrollHeight, scrollWidth, children, className);
 
   DEFINE_PROTOTYPE_OBJECT_PROPERTY(Element, 10, getBoundingClientRect, getAttribute, setAttribute, hasAttribute,
                                    removeAttribute, toBlob, click, scroll, scrollBy, scrollTo);
@@ -890,6 +956,7 @@ public:
   JSHostClassHolder& getStyle();
   void setStyle(JSHostClassHolder& style);
   void setAttributes(JSHostObjectHolder<JSElementAttributes>& attributes);
+  SpaceSplitString classNames();
 
   NativeElement *nativeElement{nullptr};
 
