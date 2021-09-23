@@ -41,7 +41,7 @@ describe('Document api', () => {
       div.style.backgroundColor = item;
       div.setAttribute('id', `id-${index}`);
       document.body.appendChild(div);
-    })
+    });
 
     expect(document.querySelector('span')).toBeNull();
   });
@@ -54,7 +54,7 @@ describe('Document api', () => {
       div.style.backgroundColor = item;
       div.setAttribute('id', `id-${index}`);
       document.body.appendChild(div);
-    })
+    });
 
     const ele = document.querySelector('div');
     expect(ele?.getAttribute('id')).toBe('id-0');
@@ -69,7 +69,7 @@ describe('Document api', () => {
       div.style.backgroundColor = item;
       div.setAttribute('id', `id-${index}`);
       document.body.appendChild(div);
-    })
+    });
 
     const eles = document.querySelectorAll('div');
     expect(eles.length).toBe(szEle.length);
@@ -84,7 +84,7 @@ describe('Document api', () => {
       div.style.backgroundColor = item;
       div.setAttribute('id', `id-${index}`);
       document.body.appendChild(div);
-    })
+    });
 
     const eles = document.querySelectorAll('div');
     expect(eles[0].getAttribute('id')).toBe('id-0');
@@ -98,7 +98,7 @@ describe('Document api', () => {
       div.style.backgroundColor = item;
       div.setAttribute('id', `id-${index}`);
       document.body.appendChild(div);
-    })
+    });
 
     expect(document.querySelectorAll('span').length).toBe(0);
   });
@@ -111,7 +111,7 @@ describe('Document api', () => {
       div.style.backgroundColor = item;
       div.setAttribute('id', `id-${index}`);
       document.body.appendChild(div);
-    })
+    });
 
     expect(document.querySelector('#id-1')?.style.backgroundColor).toBe('black');
   });
@@ -125,7 +125,7 @@ describe('Document api', () => {
       div.setAttribute('id', `id-${index}`);
       div.className = `class-${index} cc`;
       document.body.appendChild(div);
-    })
+    });
 
     expect(document.querySelector('.class-2')?.style.backgroundColor).toBe('green');
   });
@@ -139,7 +139,7 @@ describe('Document api', () => {
       div.setAttribute('id', `id-${index}`);
       div.className = `class-${index} cc`;
       document.body.appendChild(div);
-    })
+    });
 
     expect(document.querySelectorAll('*').length).toBe(8);
   });
@@ -154,7 +154,7 @@ describe('Document api', () => {
       div.setAttribute('id', `id-${index}`);
       div.setAttribute('data-test', `attr-${index}`);
       document.body.appendChild(div);
-    })
+    });
 
     expect(document.querySelectorAll('div[data-test="attr-1"]')?.length).toBe(1);
   });

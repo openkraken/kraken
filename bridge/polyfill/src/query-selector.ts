@@ -2,8 +2,8 @@ function fetchSelector(str: string, regex: RegExp) {
   return {
     selectors: str.match(regex) || [],
     ruleStr: str.replace(regex, ' ')
-  }
-};
+  };
+}
 
 function getElementsBySelector(selector: string): Array<Element | null | HTMLElement> {
   let context = document;
@@ -141,7 +141,7 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
 
   elements = elements.concat(tempElements);
   return elements;
-};
+}
 
 document.querySelectorAll = function <E extends Element = Element>(selector: string): NodeListOf<E> {
   if (typeof selector !== 'string') {
@@ -172,4 +172,4 @@ document.querySelector = function (selector: string): Element | null {
   }
   let elements = this.querySelectorAll(selector);
   return elements.length > 0 ? elements[0] : null;
-};
+}
