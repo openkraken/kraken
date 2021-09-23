@@ -358,7 +358,7 @@ JSValue Element::scroll(QjsContext *ctx, JSValue this_val, int argc, JSValue *ar
     jsValueToNativeValue(ctx, argv[0]),
     jsValueToNativeValue(ctx, argv[1])
   };
-  return element->callNativeMethods("click", 2, arguments);
+  return element->callNativeMethods("scroll", 2, arguments);
 }
 
 JSValue Element::scrollBy(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
