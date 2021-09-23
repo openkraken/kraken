@@ -82,6 +82,14 @@ class ImageElement extends Element {
   /// Number of image frame, used to identify multi frame image after loaded.
   int _frameCount = 0;
 
+  bool get _isInLazyLoading {
+    RenderIntrinsic? renderIntrinsic;
+    if (renderBoxModel != null) {
+      renderIntrinsic = renderBoxModel as RenderIntrinsic;
+    }
+    return renderIntrinsic != null && renderIntrinsic.isInLazyLoading;
+  }
+
   bool get _shouldLazyLoading => properties['loading'] == 'lazy';
 
   final Pointer<NativeImgElement> nativeImgElement;
@@ -112,17 +120,16 @@ class ImageElement extends Element {
   @override
   void didAttachRenderer() {
     super.didAttachRenderer();
-    RenderIntrinsic renderIntrinsic = renderBoxModel as RenderIntrinsic;
-    bool _isInLazyLoading = renderIntrinsic.isInLazyLoading;
+
     // Should add image box after style has applied to ensure intersection observer
     // attached to correct renderBoxModel
     if (!_isInLazyLoading || _renderImage == null) {
       // Image dimensions (width or height) should specified for performance when lazy-load.
       if (_shouldLazyLoading) {
+        RenderIntrinsic renderIntrinsic = renderBoxModel! as RenderIntrinsic;
         renderIntrinsic.isInLazyLoading = true;
-
         // When detach renderer, all listeners will be cleared.
-        renderBoxModel!.addIntersectionChangeListener(_handleIntersectionChange);
+        renderIntrinsic.addIntersectionChangeListener(_handleIntersectionChange);
       } else {
         _constructImageChild();
         _loadImage();
@@ -262,9 +269,11 @@ class ImageElement extends Element {
       convertToNonRepaintBoundary();
     }
 
-    RenderIntrinsic renderIntrinsic = renderBoxModel as RenderIntrinsic;
-    renderIntrinsic.isInLazyLoading = false;
     _resize();
+    if (renderBoxModel != null) {
+      RenderIntrinsic renderIntrinsic = renderBoxModel! as RenderIntrinsic;
+      renderIntrinsic.isInLazyLoading = false;
+    }
     _renderImage?.image = image;
   }
 
@@ -369,11 +378,6 @@ class ImageElement extends Element {
 
   @override
   void removeProperty(String key) {
-    RenderIntrinsic? renderIntrinsic;
-    if (renderBoxModel != null) {
-      renderIntrinsic = renderBoxModel as RenderIntrinsic;
-    }
-    bool _isInLazyLoading = renderIntrinsic != null && renderIntrinsic.isInLazyLoading;
     super.removeProperty(key);
     if (key == 'src') {
       _resetImage();
@@ -389,14 +393,11 @@ class ImageElement extends Element {
     super.setProperty(key, value);
     double? rootFontSize;
     double? fontSize;
-    RenderIntrinsic? renderIntrinsic;
     if (renderBoxModel != null) {
       rootFontSize = renderBoxModel!.elementDelegate.getRootElementFontSize();
       fontSize = renderBoxModel!.renderStyle.fontSize;
-      renderIntrinsic = renderBoxModel as RenderIntrinsic;
     }
 
-    bool _isInLazyLoading = renderIntrinsic != null && renderIntrinsic.isInLazyLoading;
     // Reset frame number to zero when image needs to reload
     _frameCount = 0;
     if (key == 'src' && propertyChanged && !_shouldLazyLoading) {
