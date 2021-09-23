@@ -150,12 +150,11 @@ class CSSStyleDeclaration {
       return false;
     }
 
-    // Transition does not work when renderBoxModel has not been layouted yet.
-    if (renderBoxModel != null && renderBoxModel.firstLayouted &&
-      CSSTransformHandlers[property] != null &&
+    // Transition does not work when renderBoxModel has not been layout yet.
+    if (renderBoxModel != null && renderBoxModel.attached && CSSTransformHandlers[property] != null &&
       (_transitions.containsKey(property) || _transitions.containsKey(ALL))) {
       bool shouldTransition = false;
-      // Transtion will be disabled when all transition has transitionDuration as 0.
+      // Transition will be disabled when all transition has transitionDuration as 0.
       _transitions.forEach((String transitionKey, List transitionOptions) {
         double duration = CSSTime.parseTime(transitionOptions[0]).toDouble();
         if (duration != 0) {

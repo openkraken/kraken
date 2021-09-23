@@ -1203,8 +1203,6 @@ mixin CSSTransformMixin on RenderStyleBase {
 
     transform = matrix4;
 
-    ElementDelegate elementDelegate = renderBoxModel!.elementDelegate;
-
     if (shouldToggleRepaintBoundary) {
       elementDelegate.toggleRendererRepaintBoundary();
     }

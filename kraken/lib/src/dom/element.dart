@@ -587,12 +587,6 @@ class Element extends Node
         }
         break;
     }
-
-    // CSS Transition works after dom has layouted, so it needs to mark
-    // the renderBoxModel as layouted on the next frame.
-    SchedulerBinding.instance!.addPostFrameCallback((timestamp) {
-      renderBoxModel?.firstLayouted = true;
-    });
   }
 
   // Attach renderObject of current node to parent
