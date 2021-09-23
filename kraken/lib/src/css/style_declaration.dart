@@ -293,6 +293,7 @@ class CSSStyleDeclaration {
     }
 
     String? prevValue = getPropertyValue(propertyName);
+    String present = EMPTY_STRING;
 
     switch (propertyName) {
       case PADDING:
@@ -340,28 +341,18 @@ class CSSStyleDeclaration {
         break;
     }
 
-    String present = EMPTY_STRING;
-
-    // If existed in pending properties do not need emit change event.
-    if (_pendingProperties.containsKey(propertyName)) {
-      prevValue = _pendingProperties[propertyName];
-      _pendingProperties.remove(propertyName);
-    }
-
     // Fallback to default style.
     if (defaultStyle != null && defaultStyle!.containsKey(propertyName)) {
       present = defaultStyle![propertyName];
     }
 
-    _properties.remove(propertyName);
-
     // But if display change, need emit change event.
-    if (propertyName != DISPLAY) {
+    if (propertyName == DISPLAY) {
       present = present == EMPTY_STRING ? INLINE : present;
     }
 
-    _emitPropertyChanged(propertyName, prevValue, present);
-
+    // Update removed value by flush pending properties.
+    _pendingProperties[propertyName] = present;
     return prevValue;
   }
 
@@ -619,7 +610,7 @@ class CSSStyleDeclaration {
       }
       _propertyRunningTransition.clear();
     }
-    
+
   }
 
   void flushPendingProperties() {

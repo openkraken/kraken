@@ -418,7 +418,7 @@ class ImageElement extends Element {
   void _loadImage() {
     _resetImage();
 
-    if (_source != null) {
+    if (_source != null && _source!.isNotEmpty) {
       _removeStreamListener();
 
       Uri base = Uri.parse(elementManager.controller.href);

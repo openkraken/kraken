@@ -802,8 +802,7 @@ class CSSBorderRadius {
 
   static Radius? getRadius(String radius, RenderStyle renderStyle) {
     Size viewportSize = renderStyle.viewportSize;
-    RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
-    double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
+    double rootFontSize = renderStyle.elementDelegate.getRootElementFontSize();
     double fontSize = renderStyle.fontSize;
 
     if (radius.isNotEmpty) {
