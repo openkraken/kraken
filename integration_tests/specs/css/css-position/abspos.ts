@@ -1170,7 +1170,7 @@ describe('abspos', () => {
     );
     BODY.appendChild(p);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('026', async () => {
     let p;
