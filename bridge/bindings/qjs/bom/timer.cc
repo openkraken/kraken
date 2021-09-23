@@ -73,12 +73,12 @@ static JSValue setTimeout(QjsContext *ctx, JSValueConst this_val, int argc, JSVa
     return JS_ThrowTypeError(ctx, "Failed to execute 'setTimeout': parameter 1 (callback) must be a function.");
   }
 
-  uint32_t timeout;
+  int32_t timeout;
 
   if (argc < 2 || JS_IsUndefined(timeoutValue)) {
     timeout = 0;
   } else if (JS_IsNumber(timeoutValue)) {
-    JS_ToUint32(ctx, &timeout, timeoutValue);
+    JS_ToInt32(ctx, &timeout, timeoutValue);
   } else {
     return JS_ThrowTypeError(
       ctx, "Failed to execute 'setTimeout': parameter 2 (timeout) only can be a number or undefined.");
@@ -160,12 +160,12 @@ static JSValue setInterval(QjsContext *ctx, JSValueConst this_val, int argc, JSV
     return JS_ThrowTypeError(ctx, "Failed to execute 'setInterval': parameter 1 (callback) must be a function.");
   }
 
-  uint32_t timeout;
+  int32_t timeout;
 
   if (argc < 2 || JS_IsUndefined(timeoutValue)) {
     timeout = 0;
   } else if (JS_IsNumber(timeoutValue)) {
-    JS_ToUint32(ctx, &timeout, timeoutValue);
+    JS_ToInt32(ctx, &timeout, timeoutValue);
   } else {
     return JS_ThrowTypeError(
       ctx, "Failed to execute 'setTimeout': parameter 2 (timeout) only can be a number or undefined.");
@@ -245,8 +245,8 @@ static JSValue clearTimeout(QjsContext *ctx, JSValueConst this_val, int argc, JS
     return JS_NULL;
   }
 
-  uint32_t id;
-  JS_ToUint32(ctx, &id, timeIdValue);
+  int32_t id;
+  JS_ToInt32(ctx, &id, timeIdValue);
 
   if (getDartMethod()->clearTimeout == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'clearTimeout': dart method (clearTimeout) is not registered.");
@@ -266,8 +266,8 @@ static JSValue cancelAnimationFrame(QjsContext *ctx, JSValueConst this_val, int 
     return JS_ThrowTypeError(ctx, "Failed to execute 'cancelAnimationFrame': parameter 1 (timer) is not a timer kind.");
   }
 
-  uint32_t id;
-  JS_ToUint32(ctx, &id, requestIdValue);
+  int32_t id;
+  JS_ToInt32(ctx, &id, requestIdValue);
 
   if (getDartMethod()->cancelAnimationFrame == nullptr) {
     return JS_ThrowTypeError(

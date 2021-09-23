@@ -103,7 +103,7 @@ PROP_SETTER(Window, __location__)(QjsContext *ctx, JSValue this_val, int argc, J
 PROP_GETTER(Window, window)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, Window::classId()));
   if (window == nullptr) return JS_UNDEFINED;
-  return window->instanceObject;
+  return JS_DupValue(ctx, window->instanceObject);
 }
 PROP_SETTER(Window, window)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
@@ -111,15 +111,15 @@ PROP_SETTER(Window, window)(QjsContext *ctx, JSValue this_val, int argc, JSValue
 PROP_GETTER(Window, parent)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, Window::classId()));
   if (window == nullptr) return JS_UNDEFINED;
-  return window->instanceObject;
+  return JS_DupValue(ctx, window->instanceObject);
 }
 PROP_SETTER(Window, parent)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
 PROP_GETTER(Window, history)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
-  return JS_GetPropertyStr(ctx, context->global(), "__history__");
+  auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, Window::classId()));
+  return JS_DupValue(ctx, window->m_history->jsObject);
 }
 PROP_SETTER(Window, history)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
@@ -147,6 +147,7 @@ WindowInstance::WindowInstance(Window *window) : EventTargetInstance(window, Win
   }
   m_context->m_window = this;
   m_location = new Location(m_context);
+  m_history = new History(m_context);
 }
 
 }

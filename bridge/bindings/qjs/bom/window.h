@@ -9,6 +9,7 @@
 #include "bindings/qjs/js_context.h"
 #include "bindings/qjs/dom/event_target.h"
 #include "bindings/qjs/bom/location.h"
+#include "bindings/qjs/bom/history.h"
 
 namespace kraken::binding::qjs {
 
@@ -47,10 +48,12 @@ public:
   explicit WindowInstance(Window *window);
   ~WindowInstance() {
     JS_FreeValue(m_ctx, m_location->jsObject);
+    JS_FreeValue(m_ctx, m_history->jsObject);
   }
 private:
 
   Location *m_location{nullptr};
+  History *m_history{nullptr};
   friend Window;
   friend JSContext;
 };

@@ -110,8 +110,8 @@ NativeValue jsValueToNativeValue(QjsContext *ctx, JSValue &value) {
       JS_ToFloat64(ctx, &v, value);
       return Native_NewFloat64(v);
     } else {
-      uint32_t v;
-      JS_ToUint32(ctx, &v, value);
+      int32_t v;
+      JS_ToInt32(ctx, &v, value);
       return Native_NewInt32(v);
     }
   } else if (JS_IsString(value)) {

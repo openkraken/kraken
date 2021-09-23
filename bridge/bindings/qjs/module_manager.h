@@ -17,6 +17,8 @@ struct ModuleContext {
 };
 
 void bindModuleManager(std::unique_ptr<JSContext> &context);
+void handleInvokeModuleUnexpectedCallback(void *callbackContext, int32_t contextId, NativeString *errmsg,
+                                          NativeString *json);
 }
 
 #endif // KRAKENBRIDGE_MODULE_MANAGER_H

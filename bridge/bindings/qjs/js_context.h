@@ -78,6 +78,7 @@ public:
   struct list_head promise_job_list;
   struct list_head atom_job_list;
   struct list_head native_function_job_list;
+  struct list_head history_item_list;
 
   static JSClassID kHostClassClassId;
   static JSClassID kHostObjectClassId;
@@ -169,7 +170,7 @@ private:
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner);
 NativeString *jsValueToNativeString(QjsContext *ctx, JSValue value);
 void buildUICommandArgs(QjsContext *ctx, JSValue key, NativeString &args_01);
-NativeString *stringToNativeString(std::string &string);
+NativeString *stringToNativeString(const std::string &string);
 NativeString *atomToNativeString(QjsContext *ctx, JSAtom atom);
 std::string jsValueToStdString(QjsContext *ctx, JSValue &value);
 std::string jsAtomToStdString(QjsContext *ctx, JSAtom atom);

@@ -9,6 +9,7 @@
 #include "bindings/qjs/bom/window.h"
 #include "bindings/qjs/dom/document.h"
 #include "bindings/qjs/bom/timer.h"
+#include "bindings/qjs/bom/history.h"
 #include "bindings/qjs/module_manager.h"
 
 namespace kraken::binding::qjs {
@@ -48,6 +49,7 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
   init_list_head(&promise_job_list);
   init_list_head(&atom_job_list);
   init_list_head(&native_function_job_list);
+  init_list_head(&history_item_list);
 
   if (m_runtime == nullptr) {
     m_runtime = JS_NewRuntime();
@@ -141,6 +143,16 @@ JSContext::~JSContext() {
     list_for_each_safe(el, el1, &native_function_job_list) {
       auto *job = list_entry(el, NativeFunctionContext, link);
       delete job;
+    }
+  }
+
+  // Free history items.
+  {
+    struct list_head *el, *el1;
+    list_for_each_safe(el, el1, &history_item_list) {
+      auto *history = list_entry(el, HistoryItem, link);
+      JS_FreeValue(m_ctx, history->state);
+      JS_FreeAtom(m_ctx, history->href);
     }
   }
 
@@ -344,7 +356,7 @@ void buildUICommandArgs(QjsContext *ctx, JSValue key, NativeString &args_01) {
   args_01.length = length;
 }
 
-NativeString *stringToNativeString(std::string &string) {
+NativeString *stringToNativeString(const std::string &string) {
   std::u16string utf16;
   fromUTF8(string, utf16);
   NativeString tmp{};

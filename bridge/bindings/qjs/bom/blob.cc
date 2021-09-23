@@ -136,16 +136,16 @@ JSValue Blob::slice(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) 
   JSValue contentTypeValue = argv[2];
 
   auto *blob = static_cast<BlobInstance *>(JS_GetOpaque(this_val, Blob::kBlobClassID));
-  uint32_t start = 0;
-  uint32_t end = blob->_data.size();
+  int32_t start = 0;
+  int32_t end = blob->_data.size();
   std::string mimeType = blob->mimeType;
 
   if (argc > 0 && !JS_IsUndefined(startValue)) {
-    JS_ToUint32(ctx, &start, startValue);
+    JS_ToInt32(ctx, &start, startValue);
   }
 
   if (argc > 1 && !JS_IsUndefined(endValue)) {
-    JS_ToUint32(ctx, &end, endValue);
+    JS_ToInt32(ctx, &end, endValue);
   }
 
   if (argc > 2 && !JS_IsUndefined(contentTypeValue)) {

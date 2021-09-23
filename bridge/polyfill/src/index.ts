@@ -10,38 +10,11 @@ import { asyncStorage } from './async-storage';
 import { URLSearchParams } from './url-search-params';
 import { URL } from './url';
 import { kraken } from './kraken';
+import { ErrorEvent, PromiseRejectionEvent, PopStateEvent } from './events';
 
-class ErrorEvent extends Event {
-  message?: string;
-  lineno?: number;
-  error?: Error;
-  colno?: number;
-  filename?: string;
-  constructor(type: string, init?: ErrorEventInit) {
-    super(type);
-    if (init) {
-      this.message = init.message;
-      this.lineno = init.lineno;
-      this.error = init.error;
-      this.colno = init.colno;
-      this.filename = init.filename;
-    }
-  }
-}
-
-class PromiseRejectionEvent extends Event {
-  promise: Promise<any>;
-  reason: any;
-  constructor(type: string, init?: PromiseRejectionEventInit) {
-    super(type);
-
-    if (init) {
-      this.promise = init.promise;
-      this.reason = init.reason;
-    }
-  };
-}
-
+defineGlobalProperty('ErrorEvent', ErrorEvent);
+defineGlobalProperty('PromiseRejectionEvent', PromiseRejectionEvent);
+defineGlobalProperty('PopStateEvent', PopStateEvent);
 defineGlobalProperty('console', console);
 defineGlobalProperty('Request', Request);
 defineGlobalProperty('Response', Response);

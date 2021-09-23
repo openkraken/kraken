@@ -15,6 +15,7 @@
 #include "bindings/qjs/bom/blob.h"
 #include "bindings/qjs/bom/screen.h"
 #include "bindings/qjs/bom/window.h"
+#include "bindings/qjs/bom/history.h"
 #include "bindings/qjs/bom/performance.h"
 #include "bindings/qjs/kraken.h"
 #include "bindings/qjs/module_manager.h"

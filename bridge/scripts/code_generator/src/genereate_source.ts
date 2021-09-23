@@ -323,7 +323,7 @@ function generateEventInstanceConstructorCode(object: ClassObject) {
     if (p.kind === PropsDeclarationKind.boolean) {
       propApplyCode = `nativeEvent->${p.name} = JS_ToBool(m_ctx, JS_GetProperty(m_ctx, eventInit, ${p.name}Atom)) ? 1 : 0;`;
     } else if (p.kind === PropsDeclarationKind.int64) {
-      propApplyCode = `JS_ToUint32(m_ctx, reinterpret_cast<uint32_t *>(&nativeEvent->${p.name}), JS_GetProperty(m_ctx, eventInit, ${p.name}Atom));`
+      propApplyCode = `JS_ToInt32(m_ctx, reinterpret_cast<int32_t *>(&nativeEvent->${p.name}), JS_GetProperty(m_ctx, eventInit, ${p.name}Atom));`
     } else if (p.kind === PropsDeclarationKind.string) {
       propApplyCode = addIndent(`JSValue v = JS_GetProperty(m_ctx, eventInit, ${p.name}Atom);
   nativeEvent->${p.name} = jsValueToNativeString(m_ctx, v);`, 0);
