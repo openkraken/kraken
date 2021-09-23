@@ -446,13 +446,13 @@ class Element extends Node
   void _updatePosition(String present) {
 
     // Update position.
-    CSSPositionType prevPosition = renderBoxModel!.renderStyle.position;
+    CSSPositionType prevPosition = renderStyle.position;
     CSSPositionType currentPosition = CSSPositionMixin.parsePositionType(present);
 
     // Position not changed.
     if (prevPosition == currentPosition) return;
 
-    renderBoxModel!.renderStyle.updatePosition(present);
+    renderStyle.updatePosition(present);
 
     RenderBoxModel _renderBoxModel = renderBoxModel!;
     Element _parentElement = parentElement!;
@@ -469,7 +469,7 @@ class Element extends Node
       RenderBox? prev = (_renderer.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
       // It needs to find the previous sibling of the previous sibling if the placeholder of
       // positioned element exists and follows renderObject at the same time, eg.
-      // <div style="position: relative"><div style="postion: absolute" /></div>
+      // <div style="position: relative"><div style="position: absolute" /></div>
       if (prev == _renderBoxModel) {
         prev = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
       }
@@ -499,11 +499,9 @@ class Element extends Node
       convertToNonRepaintBoundary();
     }
 
-    _renderBoxModel = renderBoxModel!;
-
     // Add fixed children after convert to repaint boundary renderObject
     if (currentPosition == CSSPositionType.fixed) {
-      _addFixedChild(_renderBoxModel);
+      _addFixedChild(renderBoxModel!);
     }
   }
 
@@ -1397,7 +1395,7 @@ class Element extends Node
   // Create a new RenderLayoutBox for the scrolling content.
   RenderLayoutBox createScrollingContentLayout() {
     // FIXME: Create a empty renderStyle for do not share renderStyle with element. Current update here will break flexbox.
-    RenderStyle scrollingContentRenderStyle = RenderStyle(style: style, elementDelegate: _elementDelegate);
+    RenderStyle scrollingContentRenderStyle = RenderStyle(style: CSSStyleDeclaration.empty, elementDelegate: _elementDelegate);
     RenderLayoutBox scrollingContentLayoutBox = _createRenderLayout(
       repaintSelf: true,
       renderStyle: scrollingContentRenderStyle,

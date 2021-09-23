@@ -125,10 +125,10 @@ mixin CSSPositionMixin on RenderStyleBase {
   }
 
   void updatePosition(String present) {
-    RenderStyle renderStyle = this as RenderStyle;
     position = parsePositionType(style[POSITION]);
     // Position change may affect transformed display
     // https://www.w3.org/TR/css-display-3/#transformations
+    RenderStyle renderStyle = this as RenderStyle;
     renderStyle.updateTransformedDisplay();
   }
 

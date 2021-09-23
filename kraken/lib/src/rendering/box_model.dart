@@ -502,7 +502,12 @@ class RenderBoxModel extends RenderBox
 
   late RenderStyle _renderStyle;
   @override
-  RenderStyle get renderStyle => _renderStyle;
+  RenderStyle get renderStyle {
+    if (isScrollingContentBox && parent != null) {
+      return (parent as RenderBoxModel)._renderStyle;
+    }
+    return _renderStyle;
+  }
 
   late ElementDelegate _elementDelegate;
   ElementDelegate get elementDelegate => _elementDelegate;
