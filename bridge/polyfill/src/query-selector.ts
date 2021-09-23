@@ -31,7 +31,7 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
   temp = fetchSelector(selector, /#[\w-_]+/g);
   let id = temp.selectors ? temp.selectors[0] : null;
   selector = temp.ruleStr;
-  // TODO: now only support "equal".
+
   // Attributes. e.g. [rel=external].
   temp = fetchSelector(selector, /\[.+?\]/g);
   let attributes = temp.selectors;
