@@ -345,32 +345,30 @@ mixin CSSTextMixin on RenderStyleBase {
   // 1. Nested children text size due to style inheritance.
   // 2. Em unit: style of own element with em unit and nested children with no font-size set due to style inheritance.
   // 3. Rem unit: nested children with rem set.
-  void _updateChildrenFontSize(RenderBoxModel renderBoxModel, bool isRootFontSizeUpdated, {int depth = 1}) {
+  void _updateChildrenFontSize(RenderBoxModel renderBoxModel, bool isRootFontSizeUpdated, {int depth = 1, bool isParentHasFontSize = false}) {
     renderBoxModel.visitChildren((RenderObject child) {
-
       if (child is RenderBoxModel) {
+        bool isChildHasFontSize = renderBoxModel.renderStyle.style[FONT_SIZE].isNotEmpty;
         // FIXME: Update `rem` will travers all dom tree may cause performance problem.
         if (isRootFontSizeUpdated) {
           child.renderStyle.style.applyRemProperties();
+          // Update font-size of nested children below root element.
+          _updateChildrenFontSize(child, isRootFontSizeUpdated, depth: depth++, isParentHasFontSize: isChildHasFontSize);
         } else {
-          // When child has font-size do not need update font-size.
+          // When child has font-size do not need update font-size:
           // <div style="font-size: 18px">
           //    <div>18px</div>
           //    <div style="font-size: 20px">20px</div>
           // </div>
-          bool isChildHasFontSize = renderBoxModel.renderStyle.style[FONT_SIZE].isNotEmpty;
           if (isChildHasFontSize) return;
-
-          // Only need to update child text when style property is not set.
 
           // Need update all em unit style of child when its font size is inherited.
           child.renderStyle.style.applyEmProperties();
+          // Only need to update child text when style property is not set.
+          _updateChildrenFontSize(child, isRootFontSizeUpdated, depth: depth++);
         }
-
-        _updateChildrenFontSize(child, isRootFontSizeUpdated, depth: depth++);
-
         // Update direct renderTextBox and the nested text that its parent has no font-size set.
-      } else if (child is RenderTextBox) {
+      } else if (!isParentHasFontSize && child is RenderTextBox) {
         // Need to recreate text span cause text style can not be set alone.
         RenderBoxModel parentRenderBoxModel = child.parent as RenderBoxModel;
         KrakenRenderParagraph renderParagraph = child.child as KrakenRenderParagraph;

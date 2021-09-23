@@ -29,8 +29,10 @@ mixin CSSDisplayMixin on RenderStyleBase {
   set display(CSSDisplay? value) {
     if (value == null) return;
     if (_display != value) {
-      renderBoxModel!.markNeedsLayout();
       _display = value;
+      if (renderBoxModel != null) {
+        renderBoxModel!.markNeedsLayout();
+      }
     }
   }
   /// Some layout effects require blockification or inlinification of the box type
@@ -68,7 +70,7 @@ mixin CSSDisplayMixin on RenderStyleBase {
       // FIXME: avoid ensure something in display updating.
       element.ensureChildAttached();
     }
-    
+
     if (renderBoxModel is RenderLayoutBox) {
       RenderLayoutBox? prevRenderLayoutBox = renderBoxModel as RenderLayoutBox?;
       if (originalDisplay != CSSDisplay.none) {

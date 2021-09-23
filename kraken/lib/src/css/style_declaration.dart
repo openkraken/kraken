@@ -287,37 +287,40 @@ class CSSStyleDeclaration {
   }
 
   /// Removes a property from the CSS declaration.
-  String? removeProperty(String propertyName) {
+  String? removeProperty(String propertyName, [bool? isImportant]) {
+    if (isImportant == true) {
+      _importants.remove(propertyName);
+    }
 
     String? prevValue = getPropertyValue(propertyName);
 
     switch (propertyName) {
       case PADDING:
-        CSSStyleProperty.removeShorthandPadding(this);
+        CSSStyleProperty.removeShorthandPadding(this, isImportant);
         break;
       case MARGIN:
-        CSSStyleProperty.removeShorthandMargin(this);
+        CSSStyleProperty.removeShorthandMargin(this, isImportant);
         break;
       case BACKGROUND:
-        CSSStyleProperty.removeShorthandBackground(this);
+        CSSStyleProperty.removeShorthandBackground(this, isImportant);
         break;
       case BACKGROUND_POSITION:
-        CSSStyleProperty.removeShorthandBackgroundPosition(this);
+        CSSStyleProperty.removeShorthandBackgroundPosition(this, isImportant);
         break;
       case BORDER_RADIUS:
-        CSSStyleProperty.removeShorthandBorderRadius(this);
+        CSSStyleProperty.removeShorthandBorderRadius(this, isImportant);
         break;
       case OVERFLOW:
-        CSSStyleProperty.removeShorthandOverflow(this);
+        CSSStyleProperty.removeShorthandOverflow(this, isImportant);
         break;
       case FONT:
-        CSSStyleProperty.removeShorthandFont(this);
+        CSSStyleProperty.removeShorthandFont(this, isImportant);
         break;
       case FLEX:
-        CSSStyleProperty.removeShorthandFlex(this);
+        CSSStyleProperty.removeShorthandFlex(this, isImportant);
         break;
       case FLEX_FLOW:
-        CSSStyleProperty.removeShorthandFlexFlow(this);
+        CSSStyleProperty.removeShorthandFlexFlow(this, isImportant);
         break;
       case BORDER:
       case BORDER_TOP:
@@ -327,15 +330,17 @@ class CSSStyleDeclaration {
       case BORDER_COLOR:
       case BORDER_STYLE:
       case BORDER_WIDTH:
-        CSSStyleProperty.removeShorthandBorder(this, propertyName);
+        CSSStyleProperty.removeShorthandBorder(this, propertyName, isImportant);
         break;
       case TRANSITION:
-        CSSStyleProperty.removeShorthandTransition(this);
+        CSSStyleProperty.removeShorthandTransition(this, isImportant);
         break;
       case TEXT_DECORATION:
-        CSSStyleProperty.removeShorthandTextDecoration(this);
+        CSSStyleProperty.removeShorthandTextDecoration(this, isImportant);
         break;
     }
+
+    String present = EMPTY_STRING;
 
     // If existed in pending properties do not need emit change event.
     if (_pendingProperties.containsKey(propertyName)) {
@@ -343,16 +348,19 @@ class CSSStyleDeclaration {
       _pendingProperties.remove(propertyName);
     }
 
-    if (_properties.containsKey(propertyName)) {
-      _properties.remove(propertyName);
-
-      // Fallback to default style.
-      if (defaultStyle != null && defaultStyle!.containsKey(propertyName)) {
-        prevValue = defaultStyle![propertyName];
-      }
-
-      _emitPropertyChanged(propertyName, prevValue, EMPTY_STRING);
+    // Fallback to default style.
+    if (defaultStyle != null && defaultStyle!.containsKey(propertyName)) {
+      present = defaultStyle![propertyName];
     }
+
+    _properties.remove(propertyName);
+
+    // But if display change, need emit change event.
+    if (propertyName != DISPLAY) {
+      present = present == EMPTY_STRING ? INLINE : present;
+    }
+
+    _emitPropertyChanged(propertyName, prevValue, present);
 
     return prevValue;
   }
@@ -486,7 +494,7 @@ class CSSStyleDeclaration {
   void setProperty(String propertyName, value, [bool? isImportant, Size? viewportSize]) {
     // Null or empty value means should be removed.
     if (isNullOrEmptyValue(value)) {
-      removeProperty(propertyName);
+      removeProperty(propertyName, isImportant);
       return;
     }
 
@@ -498,18 +506,13 @@ class CSSStyleDeclaration {
     String? prevValue = getPropertyValue(propertyName);
     if (normalizedValue == prevValue) return;
 
-    if (CSSShorthandProperty[propertyName] != null) {
-      return _expandShorthand(propertyName, normalizedValue, isImportant, viewportSize);
-    }
-
     // If the important property is already set, we should ignore it.
     if (isImportant != true && _importants[propertyName] == true) {
       return;
     }
 
-    // Current only from inline style will mark the property as important.
-    if (isImportant == true) {
-      _importants[propertyName] = true;
+    if (CSSShorthandProperty[propertyName] != null) {
+      return _expandShorthand(propertyName, normalizedValue, isImportant, viewportSize);
     }
 
     // Validate value.
@@ -582,6 +585,19 @@ class CSSStyleDeclaration {
         break;
     }
 
+    // Current only from inline style will mark the property as important.
+    if (isImportant == true) {
+      _importants[propertyName] = true;
+    }
+
+    // Should direct update render style if display is 'none' and changed to other value.
+    if (propertyName == DISPLAY && prevValue == NONE) {
+      _emitPropertyChanged(propertyName, prevValue, normalizedValue);
+      _pendingProperties.remove(propertyName);
+      _properties[propertyName] = normalizedValue;
+      return;
+    }
+
     _pendingProperties[propertyName] = normalizedValue;
 
     switch (propertyName) {
@@ -603,6 +619,7 @@ class CSSStyleDeclaration {
       }
       _propertyRunningTransition.clear();
     }
+    
   }
 
   void flushPendingProperties() {

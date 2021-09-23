@@ -47,7 +47,7 @@ describe('Display', () => {
        div.style.display = 'block';
        await snapshot();
        done();
-    })
+    });
   });
 
   it('should works when changed from block to none', async (done) => {
