@@ -13,7 +13,7 @@ import 'package:kraken/css.dart';
 
 mixin CSSFlowMixin on RenderStyleBase {
 
-  TextAlign? get textAlign {
+  TextAlign get textAlign {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
     RenderBoxModel? renderBox = renderBoxModel!.getSelfParentWithSpecifiedStyle(TEXT_ALIGN);
@@ -22,10 +22,10 @@ mixin CSSFlowMixin on RenderStyleBase {
     }
     return _textAlign;
   }
-  TextAlign? _textAlign;
+  TextAlign _textAlign = TextAlign.start;
   set textAlign(TextAlign? value) {
     if (_textAlign == value) return;
-    _textAlign = value;
+    _textAlign = value ?? TextAlign.start;
     // Update all the children flow layout with specified style property not set due to style inheritance.
     _markFlowLayoutNeedsLayout(renderBoxModel, TEXT_ALIGN);
   }
@@ -40,6 +40,8 @@ mixin CSSFlowMixin on RenderStyleBase {
           if (child.renderStyle.style[styleProperty].isEmpty) {
             _markFlowLayoutNeedsLayout(child, styleProperty);
           }
+        } else if (child is RenderTextBox) {
+          child.textAlign = _textAlign;
         }
       });
     }

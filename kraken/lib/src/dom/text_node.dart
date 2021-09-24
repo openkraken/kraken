@@ -33,6 +33,7 @@ class TextNode extends Node {
     _nativeMap[_nativePtr.address] = this;
   }
 
+  // Must be existed after text node is attached, and all text update will after text attached.
   RenderTextBox? _renderTextBox;
 
   static const String NORMAL_SPACE = '\u0020';
@@ -96,27 +97,46 @@ class TextNode extends Node {
   }
 
   void _setTextSizeType(BoxSizeType width, BoxSizeType height) {
-    RenderTextBox? renderTextBox = _renderTextBox;
-    if (renderTextBox == null) return;
-
     // Migrate element's size type to RenderTextBox.
-    renderTextBox.widthSizeType = width;
-    renderTextBox.heightSizeType = height;
+    _renderTextBox!.widthSizeType = width;
+    _renderTextBox!.heightSizeType = height;
+  }
+
+  void _updateTextAlign() {
+    KrakenRenderParagraph renderParagraph = _renderTextBox!.child as KrakenRenderParagraph;
+    Element _parentElement = parentElement!;
+    renderParagraph.textAlign = _parentElement.renderStyle.textAlign;
+  }
+
+  void _updateLineHeight() {
+    KrakenRenderParagraph renderParagraph = _renderTextBox!.child as KrakenRenderParagraph;
+    renderParagraph.lineHeight = parentElement!.renderStyle.lineHeight;
+  }
+
+  void _updateWhiteSpace() {
+    _renderTextBox!.whiteSpace = CSSText.getWhiteSpace(parentElement!.style);
+  }
+
+  void _updateOverflow() {
+    _renderTextBox!.overflow = CSSText.getTextOverflow(style: parentElement!.style);
+  }
+
+  void _updateMaxLines() {
+    _renderTextBox!.maxLines = CSSText.getLineClamp(parentElement!.style);
   }
 
   void _updateTextStyle() {
     Element _parentElement = parentElement!;
-    RenderTextBox renderTextBox = _renderTextBox!;
 
-    // parentNode must be an element.
-    renderTextBox.style = _parentElement.style;
-    renderTextBox.text = CSSTextMixin.createTextSpan(data, parentElement: parentElement);
-    // Update paragraph line height
-    KrakenRenderParagraph renderParagraph = renderTextBox.child as KrakenRenderParagraph;
-    renderParagraph.lineHeight = (_parentElement.renderBoxModel?.renderStyle.lineHeight);
-    renderParagraph.markNeedsLayout();
+    // The parentNode must be an element.
+    _renderTextBox!.style = _parentElement.style;
+    _renderTextBox!.text = CSSTextMixin.createTextSpan(data, parentElement: parentElement);
 
-    _setTextNodeProperties(_parentElement.style);
+    _updateLineHeight();
+    _updateTextAlign();
+    _updateWhiteSpace();
+    _updateOverflow();
+    _updateMaxLines();
 
     RenderLayoutBox? parentRenderLayoutBox;
     if (_parentElement.scrollingContentLayoutBox != null) {
@@ -125,15 +145,6 @@ class TextNode extends Node {
       parentRenderLayoutBox = (_parentElement.renderBoxModel as RenderLayoutBox?)!;
     }
     _setTextSizeType(parentRenderLayoutBox.widthSizeType, parentRenderLayoutBox.heightSizeType);
-  }
-
-  void _setTextNodeProperties(CSSStyleDeclaration style) {
-    Element _parentElement = parentElement!;
-    RenderTextBox renderTextBox = _renderTextBox!;
-
-    renderTextBox.whiteSpace = CSSText.getWhiteSpace(_parentElement.style);
-    renderTextBox.overflow = CSSText.getTextOverflow(style: _parentElement.style);
-    renderTextBox.maxLines = CSSText.getLineClamp(_parentElement.style);
   }
 
   // Attach renderObject of current node to parent

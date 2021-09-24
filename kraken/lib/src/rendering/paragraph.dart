@@ -90,7 +90,13 @@ class KrakenRenderParagraph extends RenderBox
   late List<double> _lineOffset;
 
   /// The line height of paragraph
-  double? lineHeight;
+  double? _lineHeight;
+  double? get lineHeight => _lineHeight;
+  set lineHeight(double? value) {
+    if (lineHeight == value) return;
+    _lineHeight = value;
+    markNeedsLayout();
+  }
 
   /// The text to display.
   TextSpan get text => _textPainter.text as TextSpan;
@@ -130,7 +136,7 @@ class KrakenRenderParagraph extends RenderBox
   set textAlign(TextAlign value) {
     if (_textPainter.textAlign == value) return;
     _textPainter.textAlign = value;
-    markNeedsPaint();
+    markNeedsLayout();
   }
 
   /// The directionality of the text.

@@ -503,9 +503,6 @@ class RenderBoxModel extends RenderBox
   late RenderStyle _renderStyle;
   @override
   RenderStyle get renderStyle {
-    if (isScrollingContentBox && parent != null) {
-      return (parent as RenderBoxModel)._renderStyle;
-    }
     return _renderStyle;
   }
 
@@ -751,13 +748,9 @@ class RenderBoxModel extends RenderBox
     if (isScrollingContentBox) {
       BoxConstraints parentConstraints = (parent as RenderBoxModel).constraints;
       BoxConstraints constraints = BoxConstraints(
-        minWidth: parentConstraints.maxWidth != double.infinity
-            ? parentConstraints.maxWidth
-            : 0,
+        minWidth: parentConstraints.maxWidth != double.infinity ? parentConstraints.maxWidth : 0,
         maxWidth: double.infinity,
-        minHeight: parentConstraints.maxHeight != double.infinity
-            ? parentConstraints.maxHeight
-            : 0,
+        minHeight: parentConstraints.maxHeight != double.infinity ? parentConstraints.maxHeight : 0,
         maxHeight: double.infinity,
       );
       return constraints;
@@ -1142,7 +1135,6 @@ class RenderBoxModel extends RenderBox
 
   Size getBoxSize(Size contentSize) {
     Size boxSize = _contentSize = contentConstraints!.constrain(contentSize);
-
     scrollableViewportSize = Size(
         _contentSize!.width +
             renderStyle.paddingLeft +

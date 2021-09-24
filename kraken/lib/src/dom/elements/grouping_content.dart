@@ -50,6 +50,14 @@ const Map<String, dynamic> _pDefaultStyle = {
   MARGIN_BOTTOM: '1em'
 };
 
+const Map<String, dynamic> _lDefaultStyle = {
+  DISPLAY: BLOCK,
+  MARGIN_TOP: '1em',
+  MARGIN_BOTTOM: '1em',
+  PADDING_LEFT: '40px'
+};
+
+
 class DivElement extends Element {
   DivElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: DIV, defaultStyle: _defaultStyle);
@@ -72,7 +80,7 @@ class BlockQuotationElement extends Element {
 
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmlparagraphelement
 class ParagraphElement extends Element {
-  static Map<String, dynamic> defaultStyle = _defaultStyle;
+  static Map<String, dynamic> defaultStyle = _pDefaultStyle;
   ParagraphElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: PARAGRAPH, defaultStyle: defaultStyle);
 }
@@ -80,13 +88,13 @@ class ParagraphElement extends Element {
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmlulistelement
 class UListElement extends Element {
   UListElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: UL, defaultStyle: _pDefaultStyle);
+      : super(targetId, nativePtr, elementManager, tagName: UL, defaultStyle: _lDefaultStyle);
 }
 
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmlolistelement
 class OListElement extends Element {
   OListElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: OL, defaultStyle: _pDefaultStyle);
+      : super(targetId, nativePtr, elementManager, tagName: OL, defaultStyle: _lDefaultStyle);
 }
 
 class LIElement extends Element {
