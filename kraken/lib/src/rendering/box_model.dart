@@ -858,9 +858,10 @@ class RenderBoxModel extends RenderBox
 
   /// Content width of render box model calculated from style
   static double? getLogicalContentWidth(RenderBoxModel renderBoxModel) {
-    RenderBoxModel originalRenderBoxModel = renderBoxModel;
     double? intrinsicRatio = renderBoxModel.intrinsicRatio;
-    RenderStyle renderStyle = renderBoxModel.renderStyle;
+    // Use parent's real renderStyle when box is scrolling context box.
+    RenderStyle renderStyle = renderBoxModel.isScrollingContentBox ?
+      (renderBoxModel.parent as RenderBoxModel).renderStyle : renderBoxModel.renderStyle;
 
     CSSDisplay? display = renderStyle.transformedDisplay;
     double? width = renderStyle.width;
@@ -875,41 +876,45 @@ class RenderBoxModel extends RenderBox
       case CSSDisplay.sliver:
         // Get own width if exists else get the width of nearest ancestor width width
         if (renderStyle.width != null) {
-          cropWidth = _getCropWidthByPaddingBorder(renderBoxModel.renderStyle, cropWidth);
+          cropWidth = _getCropWidthByPaddingBorder(renderStyle, cropWidth);
         } else {
           // @TODO: flexbox stretch alignment will stretch replaced element in the cross axis
           // Block level element will spread to its parent's width except for replaced element
           if (renderBoxModel is! RenderIntrinsic) {
+            var currentRenderBoxModel = renderBoxModel;
+            var parentRenderBoxModel = renderBoxModel.parent;
+
             while (true) {
-              if (renderBoxModel.parent != null &&
-                  renderBoxModel.parent is RenderBoxModel) {
-                cropWidth = _getCropWidthByMargin(renderBoxModel.renderStyle, cropWidth);
-                cropWidth = _getCropWidthByPaddingBorder(renderBoxModel.renderStyle, cropWidth);
-                renderBoxModel = renderBoxModel.parent as RenderBoxModel;
+              if (parentRenderBoxModel != null &&
+                  parentRenderBoxModel is RenderBoxModel) {
+
+                cropWidth = _getCropWidthByMargin(currentRenderBoxModel._renderStyle, cropWidth);
+                cropWidth = _getCropWidthByPaddingBorder(currentRenderBoxModel._renderStyle, cropWidth);
+
+                currentRenderBoxModel = parentRenderBoxModel;
+                parentRenderBoxModel = parentRenderBoxModel.parent as RenderBoxModel;
               } else {
                 break;
               }
 
-              CSSDisplay? display =
-                  renderBoxModel.renderStyle.transformedDisplay;
-
-              RenderStyle? renderStyle = renderBoxModel.renderStyle;
+              var parentRenderStyle = parentRenderBoxModel.renderStyle;
+              CSSDisplay? parentDisplay = parentRenderStyle.transformedDisplay;
               // Set width of element according to parent display
-              if (display != CSSDisplay.inline) {
+              if (parentDisplay != CSSDisplay.inline) {
                 // Skip to find upper parent
-                if (renderStyle.width != null) {
+                if (parentRenderStyle.width != null) {
                   // Use style width
-                  width = renderStyle.width;
-                  cropWidth = _getCropWidthByPaddingBorder(renderBoxModel.renderStyle, cropWidth);
+                  width = parentRenderStyle.width;
+                  cropWidth = _getCropWidthByPaddingBorder(parentRenderStyle, cropWidth);
                   break;
-                } else if (renderBoxModel.constraints.isTight) {
+                } else if (parentRenderBoxModel.constraints.isTight) {
                   // Cases like flex item with flex-grow and no width in flex row direction.
-                  width = renderBoxModel.constraints.maxWidth;
-                  cropWidth = _getCropWidthByPaddingBorder(renderBoxModel.renderStyle, cropWidth);
+                  width = parentRenderBoxModel.constraints.maxWidth;
+                  cropWidth = _getCropWidthByPaddingBorder(parentRenderStyle, cropWidth);
                   break;
-                } else if (display == CSSDisplay.inlineBlock ||
-                    display == CSSDisplay.inlineFlex ||
-                    display == CSSDisplay.sliver) {
+                } else if (parentDisplay == CSSDisplay.inlineBlock ||
+                    parentDisplay == CSSDisplay.inlineFlex ||
+                    parentDisplay == CSSDisplay.sliver) {
                   // Collapse width to children
                   width = null;
                   break;
@@ -923,7 +928,7 @@ class RenderBoxModel extends RenderBox
       case CSSDisplay.inlineFlex:
         if (renderStyle.width != null) {
           width = renderStyle.width;
-          cropWidth = _getCropWidthByPaddingBorder(renderBoxModel.renderStyle, cropWidth);
+          cropWidth = _getCropWidthByPaddingBorder(renderStyle, cropWidth);
         } else {
           width = null;
         }
@@ -936,8 +941,7 @@ class RenderBoxModel extends RenderBox
     }
     // Get height by intrinsic ratio for replaced element if height is not defined
     if (width == null && intrinsicRatio != null) {
-      width = originalRenderBoxModel.renderStyle.getWidthByIntrinsicRatio() +
-          cropWidth;
+      width = renderStyle.getWidthByIntrinsicRatio() + cropWidth;
     }
 
     if (minWidth != null) {
@@ -960,59 +964,47 @@ class RenderBoxModel extends RenderBox
 
   /// Content height of render box model calculated from style
   static double? getLogicalContentHeight(RenderBoxModel renderBoxModel) {
-    RenderBoxModel originalRenderBoxModel = renderBoxModel;
-    CSSDisplay? display = renderBoxModel.renderStyle.transformedDisplay;
-    RenderStyle renderStyle = renderBoxModel.renderStyle;
+    // Use parent's real renderStyle when box is scrolling context box.
+    RenderStyle renderStyle = renderBoxModel.isScrollingContentBox ?
+      (renderBoxModel.parent as RenderBoxModel).renderStyle : renderBoxModel.renderStyle;
+
+    CSSDisplay? display = renderStyle.transformedDisplay;
     double? height = renderStyle.height;
     double cropHeight = 0;
-
     double? maxHeight = renderStyle.maxHeight;
     double? minHeight = renderStyle.minHeight;
     double? intrinsicRatio = renderBoxModel.intrinsicRatio;
-
-    void cropMargin(RenderBoxModel renderBoxModel) {
-      if (renderBoxModel.renderStyle.margin != null) {
-        cropHeight += renderBoxModel.renderStyle.margin!.vertical;
-      }
-    }
-
-    void cropPaddingBorder(RenderBoxModel renderBoxModel) {
-      if (renderBoxModel.renderStyle.borderEdge != null) {
-        cropHeight += renderBoxModel.renderStyle.borderEdge!.vertical;
-      }
-      if (renderBoxModel.renderStyle.padding != null) {
-        cropHeight += renderBoxModel.renderStyle.padding!.vertical;
-      }
-    }
 
     // Inline element has no height
     if (display == CSSDisplay.inline) {
       return null;
     } else if (height != null) {
-      cropPaddingBorder(renderBoxModel);
+      cropHeight = _getCropHeightByPaddingBorder(renderStyle, cropHeight);
     } else {
+      var currentRenderBoxModel = renderBoxModel;
+      var parentRenderBoxModel = renderBoxModel.parent;
+
       while (true) {
-        RenderBoxModel current;
-        if (renderBoxModel.parent != null &&
-            renderBoxModel.parent is RenderBoxModel) {
-          cropMargin(renderBoxModel);
-          cropPaddingBorder(renderBoxModel);
-          current = renderBoxModel;
-          renderBoxModel = renderBoxModel.parent as RenderBoxModel;
+        if (parentRenderBoxModel != null &&
+            parentRenderBoxModel is RenderBoxModel) {
+          cropHeight = _getCropHeightByMargin(currentRenderBoxModel._renderStyle, cropHeight);
+          cropHeight = _getCropHeightByPaddingBorder(currentRenderBoxModel._renderStyle, cropHeight);
+          currentRenderBoxModel = parentRenderBoxModel;
+          parentRenderBoxModel = parentRenderBoxModel.parent as RenderBoxModel;
         } else {
           break;
         }
 
-        RenderStyle? renderStyle = renderBoxModel.renderStyle;
-        if (CSSSizingMixin.isStretchChildHeight(renderBoxModel, current)) {
-          if (renderStyle.height != null) {
-            height = renderStyle.height;
-            cropPaddingBorder(renderBoxModel);
+        var parentRenderStyle = parentRenderBoxModel.renderStyle;
+        if (CSSSizingMixin.isStretchChildHeight(parentRenderBoxModel, currentRenderBoxModel)) {
+          if (parentRenderStyle.height != null) {
+            height = parentRenderStyle.height;
+            cropHeight = _getCropHeightByPaddingBorder(parentRenderStyle, cropHeight);
             break;
-          } else if (renderBoxModel.constraints.isTight) {
+          } else if (parentRenderBoxModel.constraints.isTight) {
             // Cases like flex item with flex-grow and no height in flex column direction.
-            height = renderBoxModel.constraints.maxHeight;
-            cropPaddingBorder(renderBoxModel);
+            height = parentRenderBoxModel.constraints.maxHeight;
+            cropHeight = _getCropHeightByPaddingBorder(parentRenderStyle, cropHeight);
             break;
           }
         } else {
@@ -1023,8 +1015,7 @@ class RenderBoxModel extends RenderBox
 
     // Get height by intrinsic ratio for replaced element if height is not defined
     if (height == null && intrinsicRatio != null) {
-      height = originalRenderBoxModel.renderStyle.getHeightByIntrinsicRatio() +
-          cropHeight;
+      height = renderStyle.getHeightByIntrinsicRatio() + cropHeight;
     }
 
     if (minHeight != null) {
@@ -1192,8 +1183,7 @@ class RenderBoxModel extends RenderBox
     logicalContentWidth = getLogicalContentWidth(this);
     logicalContentHeight = getLogicalContentHeight(this);
 
-    if (!isScrollingContentBox &&
-        (logicalContentWidth != null || logicalContentHeight != null)) {
+    if (!isScrollingContentBox && (logicalContentWidth != null || logicalContentHeight != null)) {
       double minWidth;
       double? maxWidth;
       double minHeight;
@@ -1236,10 +1226,11 @@ class RenderBoxModel extends RenderBox
       }
 
       _contentConstraints = BoxConstraints(
-          minWidth: minWidth,
-          maxWidth: maxWidth!,
-          minHeight: minHeight,
-          maxHeight: maxHeight!);
+        minWidth: minWidth,
+        maxWidth: maxWidth!,
+        minHeight: minHeight,
+        maxHeight: maxHeight!
+      );
     } else {
       _contentConstraints = boxConstraints;
     }
@@ -1646,6 +1637,13 @@ double _getCropWidthByMargin(RenderStyle renderStyle, double cropWidth) {
   return cropWidth;
 }
 
+double _getCropHeightByMargin(RenderStyle renderStyle, double cropHeight) {
+  if (renderStyle.margin != null) {
+    cropHeight += renderStyle.margin!.vertical;
+  }
+  return cropHeight;
+}
+
 double _getCropWidthByPaddingBorder(RenderStyle renderStyle, double cropWidth) {
   if (renderStyle.borderEdge != null) {
     cropWidth += renderStyle.borderEdge!.horizontal;
@@ -1656,4 +1654,16 @@ double _getCropWidthByPaddingBorder(RenderStyle renderStyle, double cropWidth) {
   }
 
   return cropWidth;
+}
+
+double _getCropHeightByPaddingBorder(RenderStyle renderStyle, double cropHeight) {
+  if (renderStyle.borderEdge != null) {
+    cropHeight += renderStyle.borderEdge!.vertical;
+  }
+
+  if (renderStyle.padding != null) {
+    cropHeight += renderStyle.padding!.vertical;
+  }
+
+  return cropHeight;
 }
