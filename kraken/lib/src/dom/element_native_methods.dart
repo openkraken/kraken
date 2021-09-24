@@ -89,17 +89,17 @@ mixin ElementNativeMethods on Node {
     }
   }
 
-  static void _setViewModuleProperty(Element element, int property, double value) {
+  static void _setViewModuleProperty(Element element, num property, num value) {
     element.flushLayout();
 
-    ViewModuleProperty kind = ViewModuleProperty.values[property];
+    ViewModuleProperty kind = ViewModuleProperty.values[property.toInt()];
 
     switch(kind) {
       case ViewModuleProperty.scrollTop:
-        element.scrollTop = value;
+        element.scrollTop = value.toDouble();
         break;
       case ViewModuleProperty.scrollLeft:
-        element.scrollLeft = value;
+        element.scrollLeft = value.toDouble();
         break;
       default:
         break;
