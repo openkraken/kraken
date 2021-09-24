@@ -21,6 +21,7 @@
 #include "bindings/jsc/DOM/elements/image_element.h"
 #include "bindings/jsc/DOM/elements/input_element.h"
 #include "bindings/jsc/DOM/elements/svg_element.h"
+#include "bindings/jsc/DOM/elements/document_fragment.h"
 #include "bindings/jsc/DOM/event.h"
 #include "bindings/jsc/DOM/event_target.h"
 #include "bindings/jsc/DOM/events/close_event.h"
@@ -118,6 +119,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindImageElement(m_context);
   bindInputElement(m_context);
   bindSVGElement(m_context);
+  bindDocumentFragment(m_context);
   bindWindow(m_context);
   bindPerformance(m_context);
   bindCSSStyleDeclaration(m_context);
