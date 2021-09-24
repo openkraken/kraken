@@ -300,6 +300,7 @@ uint8_t *JSContext::dumpByteCode(const char *code, uint32_t codeLength, const ch
 void JSContext::dispatchGlobalErrorEvent(JSValueConst error) {
   JSValue errorHandler = JS_GetPropertyStr(m_ctx, globalObject, "__global_onerror_handler__");
   JSValue returnValue = JS_Call(m_ctx, errorHandler, globalObject, 1, &error);
+  drainPendingPromiseJobs();
   if (JS_IsException(returnValue)) {
     JSValue error = JS_GetException(m_ctx);
     reportError(error);
@@ -316,6 +317,7 @@ void JSContext::dispatchGlobalPromiseRejectionEvent(JSValueConst promise, JSValu
     error
   };
   JSValue returnValue = JS_Call(m_ctx, errorHandler, globalObject, 2, arguments);
+  drainPendingPromiseJobs();
   handleException(&returnValue);
   JS_FreeValue(m_ctx, returnValue);
   JS_FreeValue(m_ctx, errorHandler);

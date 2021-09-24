@@ -85,6 +85,7 @@ void call_native_function(NativeFunctionContext *functionContext, int32_t argc, 
     arguments[i] = nativeValueToJSValue(context, argv[i]);
   }
   JSValue result = JS_Call(context->ctx(), functionContext->m_callback, context->global(), argc, arguments);
+  context->drainPendingPromiseJobs();
   if (context->handleException(&result)) {
     *returnValue = jsValueToNativeValue(context->ctx(), result);
   }

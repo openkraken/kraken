@@ -229,6 +229,7 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
     // The third params `thisObject` to null equals global object.
     JSValue returnedValue = JS_Call(m_ctx, handler, JS_NULL, 1, &eventInstance->instanceObject);
     m_context->handleException(&returnedValue);
+    m_context->drainPendingPromiseJobs();
     JS_FreeValue(m_ctx, returnedValue);
   };
 
@@ -258,6 +259,7 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
           error
         };
         JS_Call(m_ctx, handler, eventInstance->instanceObject, 5, args);
+        m_context->drainPendingPromiseJobs();
 
         JS_FreeValue(m_ctx, messageValue);
         JS_FreeValue(m_ctx, fileNameValue);
