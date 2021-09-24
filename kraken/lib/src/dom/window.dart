@@ -88,6 +88,7 @@ class Window extends EventTarget {
   @override
   dynamic handleJSCall(String method, List<dynamic> argv) {
     switch(method) {
+      case 'scroll':
       case 'scrollTo':
         return scrollTo(argv[0], argv[1]);
       case 'scrollBy':
