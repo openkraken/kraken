@@ -57,6 +57,7 @@ enum UICommand {
   removeProperty,
   cloneNode,
   removeEvent,
+  createDocumentFragment,
 };
 
 struct KRAKEN_EXPORT UICommandItem {

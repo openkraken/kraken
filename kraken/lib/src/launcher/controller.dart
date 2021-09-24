@@ -348,6 +348,16 @@ class KrakenViewController {
     }
   }
 
+  void createDocumentFragment(int targetId, Pointer<NativeNode> nativePtr) {
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_CREATE_DOCUMENT_FRAGMENT_START, uniqueId: targetId);
+    }
+    _elementManager.createDocumentFragment(targetId, nativePtr);
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_CREATE_DOCUMENT_FRAGMENT_END, uniqueId: targetId);
+    }
+  }
+
   EventTarget? getEventTargetById(int id) {
     return _elementManager.getEventTargetByTargetId<EventTarget>(id);
   }

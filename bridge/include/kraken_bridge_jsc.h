@@ -8,18 +8,20 @@
 
 // MUST READ:
 // All the struct which prefix with NativeXXX struct (exp: NativeElement) has a corresponding struct in Dart code.
-// All struct members include variables and functions must be follow the same order with Dart class, to keep the same memory layout cross dart and C++ code.
+// All struct members include variables and functions must be follow the same order with Dart class, to keep the same
+// memory layout cross dart and C++ code.
 #include "kraken_foundation.h"
+#include "third_party/gumbo-parser/src/gumbo.h"
 #include <JavaScriptCore/JavaScript.h>
+#include <cassert>
 #include <chrono>
 #include <deque>
-#include <cassert>
+#include <forward_list>
 #include <functional>
 #include <map>
+#include <set>
 #include <unordered_map>
 #include <vector>
-#include <forward_list>
-#include "third_party/gumbo-parser/src/gumbo.h"
 
 using JSExceptionHandler = std::function<void(int32_t contextId, const char *errmsg, JSObjectRef error)>;
 
@@ -69,7 +71,7 @@ class PopStateEventInstance;
 class SpaceSplitString {
 public:
   SpaceSplitString() = default;
-  SpaceSplitString(std::string& string) {
+  SpaceSplitString(std::string &string) {
     set(string);
   }
 
@@ -85,7 +87,7 @@ public:
     m_szData.push_back(s);
   }
 
-  bool contains(std::string& string) {
+  bool contains(std::string &string) {
     for (std::string s : m_szData) {
       if (s == string) {
         return true;
@@ -109,9 +111,9 @@ public:
     szData.push_back(s);
 
     bool flag = true;
-    for(std::string str : szData) {
+    for (std::string str : szData) {
       bool isContains = false;
-      for(std::string data : m_szData) {
+      for (std::string data : m_szData) {
         if (data == str) {
           isContains = true;
           break;
@@ -175,9 +177,9 @@ private:
   JSExceptionHandler _handler;
   void *owner;
 
-  void traverseHTML(GumboNode * node, ElementInstance* element);
+  void traverseHTML(GumboNode *node, ElementInstance *element);
 
-  void parseProperty(ElementInstance* element, GumboElement * gumboElement);
+  void parseProperty(ElementInstance *element, GumboElement *gumboElement);
 };
 
 class KRAKEN_EXPORT JSFunctionHolder {
@@ -186,6 +188,7 @@ public:
   KRAKEN_EXPORT explicit JSFunctionHolder(JSContext *context, JSObjectRef root, void *data, const std::string &name,
                                           JSObjectCallAsFunctionCallback callback);
   JSObjectRef function();
+
 private:
   JSObjectRef m_function{nullptr};
   KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(JSFunctionHolder);
@@ -241,12 +244,11 @@ void KRAKEN_EXPORT throwJSError(JSContextRef ctx, const char *msg, JSValueRef *e
 KRAKEN_EXPORT NativeString *stringToNativeString(std::string &string);
 KRAKEN_EXPORT NativeString *stringRefToNativeString(JSStringRef string);
 
-
 KRAKEN_EXPORT JSObjectRef makeObjectFunctionWithPrivateData(JSContext *context, void *data, const char *name,
-                                                JSObjectCallAsFunctionCallback callback);
+                                                            JSObjectCallAsFunctionCallback callback);
 
 KRAKEN_EXPORT JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFunctionCallback callback,
-                                  JSValueRef *exception);
+                                              JSValueRef *exception);
 
 KRAKEN_EXPORT std::string JSStringToStdString(JSStringRef jsString);
 
@@ -428,8 +430,8 @@ public:
   static JSValueRef stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
-  static JSValueRef initEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                    size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef initEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                              const JSValueRef arguments[], JSValueRef *exception);
 
   static JSValueRef stopImmediatePropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                              size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
@@ -502,12 +504,12 @@ public:
   static JSEventTarget *instance(JSContext *context);
   DEFINE_OBJECT_PROPERTY(EventTarget, 1, eventTargetId);
 
-  #if defined(IS_TEST)
+#if defined(IS_TEST)
   DEFINE_PROTOTYPE_OBJECT_PROPERTY(EventTarget, 4, addEventListener, removeEventListener, dispatchEvent,
                                    __kraken_clear_event_listeners__);
-  #else
+#else
   DEFINE_PROTOTYPE_OBJECT_PROPERTY(EventTarget, 3, addEventListener, removeEventListener, dispatchEvent);
-  #endif
+#endif
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -537,9 +539,10 @@ private:
   JSFunctionHolder m_removeEventListener{context, prototypeObject, nullptr, "removeEventListener", removeEventListener};
   JSFunctionHolder m_dispatchEvent{context, prototypeObject, nullptr, "dispatchEvent", dispatchEvent};
   JSFunctionHolder m_addEventListener{context, prototypeObject, nullptr, "addEventListener", addEventListener};
-  #ifdef IS_TEST
-  JSFunctionHolder m_clearListeners{context, prototypeObject, nullptr, "__kraken_clear_event_listeners__", clearListeners};
-  #endif
+#ifdef IS_TEST
+  JSFunctionHolder m_clearListeners{context, prototypeObject, nullptr, "__kraken_clear_event_listeners__",
+                                    clearListeners};
+#endif
 };
 
 class EventTargetInstance : public HostClass::Instance {
@@ -594,15 +597,15 @@ class JSNode : public JSEventTarget {
 public:
   static std::unordered_map<JSContext *, JSNode *> instanceMap;
   static JSNode *instance(JSContext *context);
-  DEFINE_OBJECT_PROPERTY(Node, 10, isConnected, ownerDocument, firstChild, lastChild, parentNode, childNodes, previousSibling,
-                         nextSibling, nodeType, textContent);
+  DEFINE_OBJECT_PROPERTY(Node, 10, isConnected, ownerDocument, firstChild, lastChild, parentNode, childNodes,
+                         previousSibling, nextSibling, nodeType, textContent);
   DEFINE_PROTOTYPE_OBJECT_PROPERTY(Node, 6, appendChild, remove, removeChild, insertBefore, replaceChild, cloneNode);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
   static JSValueRef cloneNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                const JSValueRef arguments[], JSValueRef *exception);
+                              const JSValueRef arguments[], JSValueRef *exception);
 
   static JSValueRef appendChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                 const JSValueRef arguments[], JSValueRef *exception);
@@ -640,12 +643,25 @@ protected:
 
 private:
   friend NodeInstance;
-  static void traverseCloneNode(JSContextRef ctx, NodeInstance* element, NodeInstance* parentElement);
-  static JSValueRef copyNodeValue(JSContextRef ctx, NodeInstance* element);
+  static void traverseCloneNode(JSContextRef ctx, NodeInstance *element, NodeInstance *parentElement);
+  static JSValueRef copyNodeValue(JSContextRef ctx, NodeInstance *element);
 };
 
 class NodeInstance : public EventTargetInstance {
 public:
+  enum class NodeFlag : uint32_t { IsDocumentFragment = 1 << 0 };
+
+  mutable std::set<NodeFlag> m_nodeFlags;
+  bool hasNodeFlag(NodeFlag flag) const {
+    return m_nodeFlags.size() != 0 && m_nodeFlags.find(flag) != m_nodeFlags.end();
+  }
+  void setNodeFlag(NodeFlag flag) const {
+    m_nodeFlags.insert(flag);
+  }
+  void removeNodeFlag(NodeFlag flag) const {
+    m_nodeFlags.erase(flag);
+  }
+
   NodeInstance() = delete;
   NodeInstance(JSNode *node, NodeType nodeType);
   NodeInstance(JSNode *node, NodeType nodeType, int64_t targetId);
@@ -678,7 +694,9 @@ public:
   void refer();
   void unrefer();
 
-  inline DocumentInstance *document() { return m_document; }
+  inline DocumentInstance *document() {
+    return m_document;
+  }
 
   int32_t _referenceCount{0};
   virtual void _notifyNodeRemoved(NodeInstance *node);
@@ -705,11 +723,13 @@ public:
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
-  static JSValueRef createEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef createEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                const JSValueRef arguments[], JSValueRef *exception);
 
   static JSValueRef createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef createDocumentFragment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                           size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
   static JSValueRef createTextNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef arguments[], JSValueRef *exception);
@@ -724,7 +744,7 @@ public:
                                          size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
   static JSValueRef getElementsByClassName(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                         size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+                                           size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
 private:
 protected:
@@ -732,14 +752,16 @@ protected:
   JSDocument(JSContext *context);
   ~JSDocument();
 
-
   JSFunctionHolder m_createEvent{context, prototypeObject, this, "createEvent", createEvent};
   JSFunctionHolder m_createElement{context, prototypeObject, this, "createElement", createElement};
+  JSFunctionHolder m_createDocumentFragment{context, prototypeObject, this, "createDocumentFragment",
+                                            createDocumentFragment};
   JSFunctionHolder m_createTextNode{context, prototypeObject, this, "createTextNode", createTextNode};
   JSFunctionHolder m_createComment{context, prototypeObject, this, "createComment", createComment};
   JSFunctionHolder m_getElementById{context, prototypeObject, this, "getElementById", getElementById};
   JSFunctionHolder m_getElementsByTagName{context, prototypeObject, this, "getElementsByTagName", getElementsByTagName};
-  JSFunctionHolder m_getElementsByClassName{context, prototypeObject, this, "getElementsByClassName", getElementsByClassName};
+  JSFunctionHolder m_getElementsByClassName{context, prototypeObject, this, "getElementsByClassName",
+                                            getElementsByClassName};
 };
 
 class DocumentCookie {
@@ -763,8 +785,8 @@ struct NativeDocument {
 class DocumentInstance : public NodeInstance {
 public:
   DEFINE_OBJECT_PROPERTY(Document, 4, nodeName, all, cookie, documentElement);
-  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Document, 7, createElement, createTextNode, createComment, getElementById, getElementsByClassName,
-                                   getElementsByTagName, createEvent);
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Document, 8, createElement, createDocumentFragment, createTextNode, createComment,
+                                   getElementById, getElementsByClassName, getElementsByTagName, createEvent);
 
   static DocumentInstance *instance(JSContext *context);
 
@@ -804,11 +826,11 @@ public:
   KRAKEN_EXPORT bool hasAttribute(std::string &name);
   KRAKEN_EXPORT void removeAttribute(std::string &name);
 
-  KRAKEN_EXPORT std::map<std::string, JSValueRef>& getAttributesMap();
-  KRAKEN_EXPORT void setAttributesMap(std::map<std::string, JSValueRef>& attributes);
+  KRAKEN_EXPORT std::map<std::string, JSValueRef> &getAttributesMap();
+  KRAKEN_EXPORT void setAttributesMap(std::map<std::string, JSValueRef> &attributes);
 
-  KRAKEN_EXPORT std::vector<JSValueRef>& getAttributesVector();
-  KRAKEN_EXPORT void setAttributesVector(std::vector<JSValueRef>& attributes);
+  KRAKEN_EXPORT std::vector<JSValueRef> &getAttributesVector();
+  KRAKEN_EXPORT void setAttributesVector(std::vector<JSValueRef> &attributes);
 
   KRAKEN_EXPORT JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   KRAKEN_EXPORT bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
@@ -952,10 +974,10 @@ public:
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
   std::string internalGetTextContent() override;
   void internalSetTextContent(JSStringRef content, JSValueRef *exception) override;
-  JSHostObjectHolder<JSElementAttributes>& getAttributes();
-  JSHostClassHolder& getStyle();
-  void setStyle(JSHostClassHolder& style);
-  void setAttributes(JSHostObjectHolder<JSElementAttributes>& attributes);
+  JSHostObjectHolder<JSElementAttributes> &getAttributes();
+  JSHostClassHolder &getStyle();
+  void setStyle(JSHostClassHolder &style);
+  void setAttributes(JSHostObjectHolder<JSElementAttributes> &attributes);
   SpaceSplitString classNames();
 
   NativeElement *nativeElement{nullptr};
@@ -1140,15 +1162,15 @@ private:
 
   JSFunctionHolder m_initMouseEvent{context, prototypeObject, this, "initMouseEvent", initMouseEvent};
 
-  static JSValueRef initMouseEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef initMouseEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                   const JSValueRef arguments[], JSValueRef *exception);
 };
 
 class MouseEventInstance : public EventInstance {
 public:
   MouseEventInstance() = delete;
   explicit MouseEventInstance(JSMouseEvent *jsMouseEvent, std::string MouseEventType, JSValueRef eventInit,
-                                JSValueRef *exception);
+                              JSValueRef *exception);
   explicit MouseEventInstance(JSMouseEvent *jsMouseEvent, NativeMouseEvent *nativeMouseEvent);
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
@@ -1198,14 +1220,14 @@ private:
   JSFunctionHolder m_initPopStateEvent{context, prototypeObject, this, "initPopStateEvent", initPopStateEvent};
 
   static JSValueRef initPopStateEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                   size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+                                      size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 };
 
 class PopStateEventInstance : public EventInstance {
 public:
   PopStateEventInstance() = delete;
   explicit PopStateEventInstance(JSPopStateEvent *jsPopStateEvent, std::string eventType, JSValueRef eventInit,
-                              JSValueRef *exception);
+                                 JSValueRef *exception);
   explicit PopStateEventInstance(JSPopStateEvent *jsPopStateEvent, NativePopStateEvent *nativePopStateEvent);
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
