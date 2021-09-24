@@ -588,19 +588,19 @@ class CanvasRenderingContext2D {
   StrokeJoin get lineJoin => _lineJoin;
 
   double _lineWidth = 1.0; // (default 1)
-  set lineWidth(double? value) {
+  set lineWidth(num? value) {
     if (value == null) return;
     addAction((Canvas canvas, Size size) {
-      _lineWidth = value;
+      _lineWidth = value.toDouble();
     });
   }
   double get lineWidth => _lineWidth;
 
   double _miterLimit = 10.0; // (default 10)
-  set miterLimit(double? value) {
+  set miterLimit(num? value) {
     if (value == null) return;
     addAction((Canvas canvas, Size size) {
-      _miterLimit = value;
+      _miterLimit = value.toDouble();
     });
   }
   double get miterLimit => _miterLimit;
