@@ -184,6 +184,11 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     setEventTarget(textNode);
   }
 
+  void createDocumentFragment(int id, Pointer<NativeEventTarget> nativePtr) {
+    DocumentFragment documentFragment = DocumentFragment(id, nativePtr, this);
+    setEventTarget(documentFragment);
+  }
+
   void createComment(int id, Pointer<NativeEventTarget> nativePtr) {
     EventTarget comment = Comment(id, nativePtr, this);
     setEventTarget(comment);

@@ -19,13 +19,13 @@ mixin CSSSliverMixin on RenderStyleBase {
 
       if (renderBoxModel is RenderRecyclerLayout) {
         RenderRecyclerLayout recyclerLayout = renderBoxModel as RenderRecyclerLayout;
-
         AxisDirection axisDirection = RenderRecyclerLayout.getAxisDirection(value);
+
         recyclerLayout.scrollable = KrakenScrollable(axisDirection: axisDirection);
-        RenderViewport renderViewport = recyclerLayout.renderViewport!;
-        renderViewport.axisDirection = axisDirection;
-        renderViewport.crossAxisDirection = RenderRecyclerLayout.getCrossAxisDirection(value);
-        renderViewport.offset = recyclerLayout.scrollable!.position!;
+        recyclerLayout.viewport
+          ..axisDirection = axisDirection
+          ..crossAxisDirection = RenderRecyclerLayout.getCrossAxisDirection(value)
+          ..offset = recyclerLayout.scrollable.position!;
 
         recyclerLayout.markNeedsLayout();
       }

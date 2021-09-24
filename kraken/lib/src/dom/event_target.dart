@@ -123,17 +123,8 @@ abstract class EventTarget {
   }
 
   void dispatchEvent(Event event) {
-    if(elementManager.controller.view.disposed) {
-      return;
-    }
-    event.currentTarget = event.target = this;
-    if (event.currentTarget != null && this is Element) {
-      (this as Element).eventResponder(event);
-
-      // dispatch listener of widget.
-      if ((this as Element).elementManager.eventClient != null) {
-        (this as Element).elementManager.eventClient!.eventListener(event);
-      }
+    if (!elementManager.controller.view.disposed) {
+      event.currentTarget = event.target = this;
     }
   }
 

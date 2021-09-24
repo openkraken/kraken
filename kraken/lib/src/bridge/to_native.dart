@@ -137,7 +137,7 @@ nativeDynamicLibrary.lookup<NativeFunction<NativeEvaluateScripts>>('evaluateScri
 final DartParseHTML _parseHTML =
 nativeDynamicLibrary.lookup<NativeFunction<NativeParseHTML>>('parseHTML').asFunction();
 
-void evaluateScripts(int contextId, String code, String url, int line) {
+void evaluateScripts(int contextId, String code, String url, [int line = 0]) {
   if(KrakenController.getControllerOfJSContextId(contextId) == null) {
     return;
   }
@@ -294,6 +294,7 @@ enum UICommandType {
   removeProperty,
   cloneNode,
   removeEvent,
+  createDocumentFragment,
 }
 
 class UICommandItem extends Struct {
@@ -506,6 +507,9 @@ void flushUICommand() {
           case UICommandType.removeProperty:
             String key = command.args[0];
             controller.view.removeProperty(id, key);
+            break;
+          case UICommandType.createDocumentFragment:
+            controller.view.createDocumentFragment(id, nativePtr.cast<NativeEventTarget>());
             break;
           default:
             break;

@@ -262,6 +262,10 @@ mixin CSSBoxMixin on RenderStyleBase {
 
     renderBoxModel!.boxPainter?.dispose();
     renderBoxModel!.boxPainter = null;
+
+    // Evict image cache.
+    _decoration?.image?.image.evict();
+
     _decoration = value;
     // If has border, render padding should subtracting the edge of the border
     if (value.border != null) {
@@ -430,7 +434,6 @@ mixin CSSBoxMixin on RenderStyleBase {
     } else {
       decoration = updateBoxDecoration;
     }
-
   }
 
   static final Map _borderRadiusMapping = {

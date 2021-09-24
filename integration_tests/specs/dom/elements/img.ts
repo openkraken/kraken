@@ -262,4 +262,51 @@ describe('Tags img', () => {
 
     document.body.appendChild(img);
   });
+
+  it('same image src should only trigger once event', async (done) => {
+    const imageURL = 'assets/100x100-green.png';
+    const img = document.createElement('img');
+    img.src = imageURL;
+
+    var loadCount = 0;
+    img.onload = (event) => {
+      loadCount++;
+      document.body.removeChild(img);
+      document.body.appendChild(img);
+    };
+
+    document.body.appendChild(img);
+
+    setTimeout(() => {
+      if (loadCount == 1) {
+        done();
+      } else {
+        done('load event should only trigger once.');
+      }
+    }, 100);
+  });
+
+  it('gif can replay', async (done) => {
+    const imageURL = 'assets/sample-gif-40k.gif';
+    const img = document.createElement('img');
+    
+    img.onload = async () => {
+      await snapshot(img);
+      document.body.removeChild(img);
+      
+      setTimeout(() => {
+        document.body.appendChild(img);
+        // After next frame that image has shown.
+        requestAnimationFrame(async () => {
+          // When replay, the image should be same as first frame.
+          await snapshot(img);
+          done();
+        });
+        // Delay 600ms to play gif.
+      }, 600);
+    };
+
+    document.body.appendChild(img);
+    img.src = imageURL;
+  });
 });

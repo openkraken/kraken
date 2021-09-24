@@ -1,5 +1,6 @@
 import 'es6-promise/dist/es6-promise.auto';
 import './dom';
+import './query-selector';
 import { console } from './console';
 import { fetch, Request, Response, Headers } from './fetch';
 import { matchMedia } from './match-media';

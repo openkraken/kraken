@@ -16,7 +16,7 @@ import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
 
-typedef _ScrollListener = void Function(double scrollOffset, AxisDirection axisDirection);
+typedef ScrollListener = void Function(double scrollOffset, AxisDirection axisDirection);
 
 mixin _CustomTickerProviderStateMixin implements TickerProvider {
   Set<Ticker>? _tickers;
@@ -57,7 +57,7 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
   ScrollPosition? position;
   final ScrollPhysics _physics = BouncingScrollPhysics();
   DragStartBehavior dragStartBehavior;
-  _ScrollListener? scrollListener;
+  ScrollListener? scrollListener;
 
   KrakenScrollable({
     AxisDirection axisDirection = AxisDirection.down,
@@ -236,7 +236,7 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
 }
 
 mixin RenderOverflowMixin on RenderBox {
-  _ScrollListener? scrollListener;
+  ScrollListener? scrollListener;
   void Function(PointerEvent)? pointerListener;
 
   bool _clipX = false;
@@ -275,22 +275,20 @@ mixin RenderOverflowMixin on RenderBox {
   ViewportOffset? get scrollOffsetX => _scrollOffsetX;
   ViewportOffset? _scrollOffsetX;
   set scrollOffsetX(ViewportOffset? value) {
-    if (value == null) return;
     if (value == _scrollOffsetX) return;
+    _scrollOffsetX?.removeListener(_scrollXListener);
     _scrollOffsetX = value;
-    _scrollOffsetX!.removeListener(_scrollXListener);
-    _scrollOffsetX!.addListener(_scrollXListener);
+    _scrollOffsetX?.addListener(_scrollXListener);
     markNeedsLayout();
   }
 
   ViewportOffset? get scrollOffsetY => _scrollOffsetY;
   ViewportOffset? _scrollOffsetY;
   set scrollOffsetY(ViewportOffset? value) {
-    if (value == null) return;
     if (value == _scrollOffsetY) return;
+    _scrollOffsetY?.removeListener(_scrollYListener);
     _scrollOffsetY = value;
-    _scrollOffsetY!.removeListener(_scrollYListener);
-    _scrollOffsetY!.addListener(_scrollYListener);
+    _scrollOffsetY?.addListener(_scrollYListener);
     markNeedsLayout();
   }
 
@@ -366,7 +364,6 @@ mixin RenderOverflowMixin on RenderBox {
   ClipRRectLayer? _oldClipRRectLayer;
   ClipRectLayer? _oldClipRectLayer;
 
-  // @TODO implement RenderSilver protocol to achieve high performance scroll list.
   void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, BoxDecoration? decoration, PaintingContextCallback callback) {
     if (clipX == false && clipY == false) return callback(context, offset);
     final double paintOffsetX = _paintOffsetX;

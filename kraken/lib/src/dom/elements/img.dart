@@ -3,52 +3,54 @@
  * Author: Kraken Team.
  */
 
+import 'dart:async';
+import 'dart:collection';
+import 'dart:ffi';
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/rendering.dart';
 import 'package:kraken/bridge.dart';
-import 'dart:async';
-import 'dart:ffi';
+import 'package:kraken/css.dart';
+import 'package:kraken/dom.dart';
+import 'package:kraken/rendering.dart';
 
 const String IMAGE = 'IMG';
 
 final RegExp _numExp = RegExp(r'^\d+');
 
-bool _isNumberString(String str) {
-  return _numExp.hasMatch(str);
-}
-
-// FIXME: shoud be inline default
+// FIXME: should be inline default.
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
 };
 
+// The HTMLImageElement.
 class ImageElement extends Element {
-  String? _source;
-  ImageProvider? _image;
-  RenderImage? _imageBox;
+  // The render box to draw image.
+  RenderImage? _renderImage;
+
+  // The image source url.
+  String? get _source => getProperty('src');
+
+  ImageProvider? _imageProvider;
+
   ImageStream? _imageStream;
+
   ImageInfo? _imageInfo;
-  double? _propertyWidth;
-  double? _propertyHeight;
-  ImageStreamListener? _initImageListener;
+
   late ImageStreamListener _renderStreamListener;
 
-  /// Number of image frame, used to identify gif after image loaded
-  int _frameNumber = 0;
+  double? _propertyWidth;
+  double? _propertyHeight;
+
+  ui.Image? get image => _imageInfo?.image;
+
+  /// Number of image frame, used to identify multi frame image after loaded.
+  int _frameCount = 0;
 
   bool _isInLazyLoading = false;
 
-  bool get _shouldLazyLoading {
-    return properties['loading'] == 'lazy';
-  }
-
-  // Whether is multiframe image
-  bool isMultiframe = false;
+  bool get _shouldLazyLoading => properties['loading'] == 'lazy';
 
   ImageElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
       : super(
@@ -57,12 +59,15 @@ class ImageElement extends Element {
       elementManager,
       isIntrinsicBox: true,
       tagName: IMAGE,
-      defaultStyle: _defaultStyle
-  ) {
-    _renderStreamListener = ImageStreamListener(_renderImageStream);
+      defaultStyle: _defaultStyle) {
+    _renderStreamListener = ImageStreamListener(_renderImageStream, onError: _onImageError);
   }
 
-  ui.Image? get image => _imageInfo?.image;
+  @override
+  void willAttachRenderer() {
+    super.willAttachRenderer();
+    style.addStyleChangeListener(_stylePropertyChanged);
+  }
 
   @override
   handleJSCall(String method, List argv) {
@@ -80,84 +85,90 @@ class ImageElement extends Element {
     return super.handleJSCall(method, argv);
   }
 
-  @override
-  void willAttachRenderer() {
-    super.willAttachRenderer();
-    style.addStyleChangeListener(_stylePropertyChanged);
-  }
 
   @override
   void didAttachRenderer() {
     super.didAttachRenderer();
     // Should add image box after style has applied to ensure intersection observer
     // attached to correct renderBoxModel
-    _renderImage();
+    if (!_isInLazyLoading || _renderImage == null) {
+      // Image dimensions (width or height) should specified for performance when lazy-load.
+      if (_shouldLazyLoading) {
+        _isInLazyLoading = true;
+
+        // When detach renderer, all listeners will be cleared.
+        renderBoxModel!.addIntersectionChangeListener(_handleIntersectionChange);
+      } else {
+        _constructImageChild();
+        _loadImage();
+      }
+    }
     _resize();
   }
 
   @override
-  void didDetachRenderer() {
+  void didDetachRenderer() async {
     super.didDetachRenderer();
     style.removeStyleChangeListener(_stylePropertyChanged);
+
+    _resetImage();
+
+    // Unlink image render box, which has been detached.
+    _renderImage = null;
+  }
+
+  void _resetImage() {
+    _imageInfo = null;
+
+    // @NOTE: Evict image cache, make multi frame image can replay.
+    // https://github.com/flutter/flutter/issues/51775
+    _imageProvider?.evict();
+    _imageProvider = null;
+
+    _removeStreamListener();
+    _renderImage?.image = null;
   }
 
   @override
   void dispose() {
     super.dispose();
+
+    _imageProvider?.evict();
+    _imageProvider = null;
+
     _removeStreamListener();
-    _image = null;
-    _imageBox = null;
-    _imageStream = null;
+
+    _renderImage = null;
   }
 
-  double? get width {
-    if (_imageBox != null) {
-      return _imageBox!.width;
+  double get width {
+    if (_renderImage != null && _renderImage!.width != null) {
+      return _renderImage!.width!;
     }
 
     if (renderBoxModel != null && renderBoxModel!.hasSize) {
       return renderBoxModel!.clientWidth;
     }
 
-    return 0.0;
+    // Fallback to natural width, if image is not on screen.
+    return naturalWidth;
   }
 
-  double? get height {
-    if (_imageBox != null) {
-      return _imageBox!.height;
+  double get height {
+    if (_renderImage != null && _renderImage!.height != null) {
+      return _renderImage!.height!;
     }
 
     if (renderBoxModel != null && renderBoxModel!.hasSize) {
       return renderBoxModel!.clientHeight;
     }
 
-    return 0.0;
+    // Fallback to natural height, if image is not on screen.
+    return naturalHeight;
   }
 
-  double get naturalWidth {
-    if (_imageInfo != null) {
-      return _imageInfo!.image.width.toDouble();
-    }
-    return 0.0;
-  }
-
-  double get naturalHeight {
-    if (_imageInfo != null) {
-      return _imageInfo!.image.height.toDouble();
-    }
-    return 0.0;
-  }
-
-  void _renderImage() {
-    if (_isInLazyLoading) return;
-    // Image dimensions(width/height) should specified for performance when lazy-load.
-    if (_shouldLazyLoading) {
-      _isInLazyLoading = true;
-      renderBoxModel!.addIntersectionChangeListener(_handleIntersectionChange);
-    } else {
-      _constructImageChild();
-    }
-  }
+  double get naturalWidth => image?.width.toDouble() ?? 0;
+  double get naturalHeight => image?.height.toDouble() ?? 0;
 
   void _handleIntersectionChange(IntersectionObserverEntry entry) {
     // When appear
@@ -174,17 +185,11 @@ class ImageElement extends Element {
     renderBoxModel!.removeIntersectionChangeListener(_handleIntersectionChange);
   }
 
-  void _removeImage() {
-    _removeStreamListener();
-    _image = null;
-    _imageBox!.image = null;
-  }
-
   void _constructImageChild() {
-    _imageBox = createRenderImageBox();
+    _renderImage = createRenderImageBox();
 
     if (childNodes.isEmpty) {
-      addChild(_imageBox!);
+      addChild(_renderImage!);
     }
   }
 
@@ -207,31 +212,29 @@ class ImageElement extends Element {
     }
   }
 
-  void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
-    _imageInfo = imageInfo;
-
-    if (synchronousCall) {
-      // `synchronousCall` happens when caches image and calling `addListener`.
-      scheduleMicrotask(_handleEventAfterImageLoaded);
-    } else {
-      _handleEventAfterImageLoaded();
-    }
-
-    // Only trigger `initImageListener` once.
-    if (_initImageListener != null) {
-      _imageStream?.removeListener(_initImageListener!);
-    }
-  }
+  // Multi frame image should convert to repaint boundary.
+  @override
+  bool get shouldConvertToRepaintBoundary => _frameCount > 2 || super.shouldConvertToRepaintBoundary;
 
   void _renderImageStream(ImageInfo imageInfo, bool synchronousCall) {
-    _frameNumber++;
+    _frameCount++;
     _imageInfo = imageInfo;
 
-    // @HACK Flutter image cache will cause image steam listener to trigger twice when page reload
-    // so use two frames to tell multiframe image from static image, note this optimization will fail
-    // at multiframe image with only two frames which is not common
-    isMultiframe = _frameNumber > 2;
+    // Only trigger load once.
+    if (!_loaded) {
+      _loaded = true;
 
+      if (synchronousCall) {
+        // `synchronousCall` happens when caches image and calling `addListener`.
+        scheduleMicrotask(_handleEventAfterImageLoaded);
+      } else {
+        _handleEventAfterImageLoaded();
+      }
+    }
+
+    // @HACK Flutter image cache will cause image steam listener to trigger twice when page reload
+    // so use two frames to tell multi frame image from static image, note this optimization will fail
+    // at multi frame image with only two frames which is not common.
     if (shouldConvertToRepaintBoundary) {
       convertToRepaintBoundary();
     } else {
@@ -239,7 +242,16 @@ class ImageElement extends Element {
     }
 
     _resize();
-    _imageBox?.image = _imageInfo?.image;
+    _renderImage?.image = image;
+  }
+
+  // Mark if the same src loaded.
+  bool _loaded = false;
+
+  void _onImageError(Object exception, StackTrace? stackTrace) {
+    // @TODO: Native side support error event.
+    // https://github.com/openkraken/kraken/issues/686
+    // dispatchEvent(Event(EVENT_ERROR));
   }
 
   // Delay image size setting to next frame to make sure image has been layouted
@@ -258,7 +270,7 @@ class ImageElement extends Element {
 
   void _resize() {
     if (!isRendererAttached) {
-      return _handleImageResizeAfterLayout();
+      return;
     }
 
     RenderStyle renderStyle = renderBoxModel!.renderStyle;
@@ -295,8 +307,8 @@ class ImageElement extends Element {
       width = 0.0;
     }
 
-    _imageBox?.width = width;
-    _imageBox?.height = height;
+    _renderImage?.width = width;
+    _renderImage?.height = height;
     renderBoxModel!.intrinsicWidth = naturalWidth;
     renderBoxModel!.intrinsicHeight = naturalHeight;
 
@@ -309,10 +321,6 @@ class ImageElement extends Element {
 
   void _removeStreamListener() {
     _imageStream?.removeListener(_renderStreamListener);
-
-    if (_initImageListener != null) {
-      _imageStream?.removeListener(_initImageListener!);
-    }
     _imageStream = null;
   }
 
@@ -332,14 +340,16 @@ class ImageElement extends Element {
   void removeProperty(String key) {
     super.removeProperty(key);
     if (key == 'src') {
-      _removeImage();
-    } else if (key == 'loading' && _isInLazyLoading && _image == null) {
+      _resetImage();
+      _loaded = false;
+    } else if (key == 'loading' && _isInLazyLoading && _imageProvider == null) {
       _resetLazyLoading();
     }
   }
 
   @override
   void setProperty(String key, dynamic value) {
+    bool propertyChanged = properties[key] != value;
     super.setProperty(key, value);
     double? rootFontSize;
     double? fontSize;
@@ -349,15 +359,16 @@ class ImageElement extends Element {
     }
 
     // Reset frame number to zero when image needs to reload
-    _frameNumber = 0;
-    if (key == 'src' && !_shouldLazyLoading) {
+    _frameCount = 0;
+    if (key == 'src' && propertyChanged && !_shouldLazyLoading) {
       // Loads the image immediately.
+      _loaded = false;
       _loadImage();
     } else if (key == 'loading' && _isInLazyLoading) {
       // Should reset lazy when value change.
       _resetLazyLoading();
     } else if (key == WIDTH) {
-      if (value is String && _isNumberString(value)) {
+      if (value is String && _isNumber(value)) {
         value += 'px';
       }
 
@@ -369,7 +380,7 @@ class ImageElement extends Element {
       );
       _resize();
     } else if (key == HEIGHT) {
-      if (value is String && _isNumberString(value)) {
+      if (value is String && _isNumber(value)) {
         value += 'px';
       }
 
@@ -384,21 +395,22 @@ class ImageElement extends Element {
   }
 
   void _loadImage() {
-    String? source = properties['src'];
-    if (_source == null || _source != source) {
-      _source = source;
-      if (source != null && source.isNotEmpty) {
-        _removeStreamListener();
+    _resetImage();
 
-        Uri base = Uri.parse(elementManager.controller.href);
-        _image = CSSUrl.parseUrl(
-            elementManager.controller.uriParser!.resolve(base, Uri.parse(source)).toString(),
-            cache: properties['caching'], contextId: elementManager.contextId);
-        _imageStream = _image!.resolve(ImageConfiguration.empty);
-        _imageStream!.addListener(_renderStreamListener);
+    if (_source != null) {
+      _removeStreamListener();
 
-        _initImageListener = ImageStreamListener(_initImageInfo);
-        _imageStream!.addListener(_initImageListener!);
+      Uri base = Uri.parse(elementManager.controller.href);
+      Uri resolvedUri = elementManager.controller.uriParser!.resolve(base, Uri.parse(_source!));
+
+      ImageProvider? imageProvider = _imageProvider ?? CSSUrl.parseUrl(resolvedUri,
+          cache: properties['caching'], contextId: elementManager.contextId);
+
+      if (imageProvider != null) {
+        _imageProvider = imageProvider;
+        _imageStream = imageProvider
+            .resolve(ImageConfiguration.empty)
+            ..addListener(_renderStreamListener);
       }
     }
   }
@@ -407,15 +419,9 @@ class ImageElement extends Element {
   dynamic getProperty(String key) {
     switch (key) {
       case WIDTH:
-        if (_imageBox != null) {
-          return _imageBox!.width;
-        }
-        return 0;
+        return _renderImage?.width ?? 0;
       case HEIGHT:
-        if (_imageBox != null) {
-          return _imageBox!.height;
-        }
-        return 0;
+        return _renderImage?.height ?? 0;
     }
 
     return super.getProperty(key);
@@ -424,10 +430,15 @@ class ImageElement extends Element {
   void _stylePropertyChanged(String property, String? original, String present) {
     if (property == WIDTH || property == HEIGHT) {
       _resize();
-    } else if (property == OBJECT_FIT && _imageBox != null) {
-      _imageBox!.fit = renderBoxModel!.renderStyle.objectFit;
-    } else if (property == OBJECT_POSITION && _imageBox != null) {
-      _imageBox!.alignment = renderBoxModel!.renderStyle.objectPosition;
+    } else if (property == OBJECT_FIT && _renderImage != null) {
+      _renderImage!.fit = renderBoxModel!.renderStyle.objectFit;
+    } else if (property == OBJECT_POSITION && _renderImage != null) {
+      _renderImage!.alignment = renderBoxModel!.renderStyle.objectPosition;
     }
   }
+}
+
+// Return true if the input string only contain numbers.
+bool _isNumber(String input) {
+  return _numExp.hasMatch(input);
 }

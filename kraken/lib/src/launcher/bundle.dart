@@ -52,7 +52,6 @@ abstract class KrakenBundle {
   // JS Content is String
   String? content;
   // JS line offset, default to 0.
-  List<String> assets = [];
   int lineOffset = 0;
   // Kraken bundle manifest
   AppManifest? manifest;
