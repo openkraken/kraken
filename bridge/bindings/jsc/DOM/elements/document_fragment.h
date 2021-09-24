@@ -28,10 +28,6 @@ public:
     explicit DocumentFragmentInstance(JSDocumentFragment *JSDocumentFragment);
 
     JSDocumentFragment *nativeDocumentFragment;
-
-  private:
-    JSStringHolder m_data{context, ""};
-    JSStringHolder m_type{context, ""};
   };
 protected:
   ~JSDocumentFragment();
