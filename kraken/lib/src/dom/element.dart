@@ -643,6 +643,10 @@ class Element extends Node
   @mustCallSuper
   Node appendChild(Node child) {
     super.appendChild(child);
+    // Update renderStyle tree.
+    if (child is Element) {
+      child.renderStyle.parent = renderStyle;
+    }
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
       if (!child.isRendererAttached) {
@@ -666,6 +670,10 @@ class Element extends Node
     if (child.isRendererAttached) {
       child.detach();
     }
+    // Update renderStyle tree.
+    if (child is Element) {
+      child.renderStyle.parent = null;
+    }
 
     super.removeChild(child);
     return child;
@@ -674,10 +682,15 @@ class Element extends Node
   @override
   @mustCallSuper
   Node insertBefore(Node child, Node referenceNode) {
-    int referenceIndex = childNodes.indexOf(referenceNode);
     // Node.insertBefore will change element tree structure,
     // so get the referenceIndex before calling it.
+    int referenceIndex = childNodes.indexOf(referenceNode);
     Node node = super.insertBefore(child, referenceNode);
+    // Update renderStyle tree.
+    if (child is Element) {
+      child.renderStyle.parent = renderStyle;
+    }
+
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
       if (!child.isRendererAttached) {
@@ -691,6 +704,19 @@ class Element extends Node
     }
 
     return node;
+  }
+
+  @override
+  @mustCallSuper
+  Node? replaceChild(Node newNode, Node oldNode) {
+    // Update renderStyle tree.
+    if (newNode is Element) {
+      newNode.renderStyle.parent = renderStyle;
+    }
+    if (oldNode is Element) {
+      oldNode.renderStyle.parent = null;
+    }
+    return super.replaceChild(newNode, oldNode);
   }
 
   void _addPositionedChild(Element child, CSSPositionType position) {

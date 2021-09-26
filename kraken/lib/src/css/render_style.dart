@@ -45,6 +45,8 @@ class RenderStyle
   @override
   ElementDelegate elementDelegate;
 
+  RenderStyle? parent;
+
   RenderStyle({
     required this.style,
     required this.elementDelegate,
