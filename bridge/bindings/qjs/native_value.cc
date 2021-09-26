@@ -4,11 +4,11 @@
  */
 
 #include "native_value.h"
+#include "bindings/qjs/dom/elements/image_element.h"
 #include "bindings/qjs/qjs_patch.h"
-#include "kraken_bridge.h"
 #include "dom/element.h"
-#include "dom/elements/.gen/image_element.h"
 #include "dom/elements/.gen/canvas_element.h"
+#include "kraken_bridge.h"
 
 namespace kraken::binding::qjs {
 

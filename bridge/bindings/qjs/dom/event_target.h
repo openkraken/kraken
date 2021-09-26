@@ -80,7 +80,7 @@ public:
   explicit EventTargetInstance(EventTarget *eventTarget, JSClassID classId, std::string name, int64_t eventTargetId);
   ~EventTargetInstance();
 
-  bool dispatchEvent(EventInstance *event);
+  virtual bool dispatchEvent(EventInstance *event);
   static inline JSClassID classId();
 
   JSValue callNativeMethods(const char* method, int32_t argc,
