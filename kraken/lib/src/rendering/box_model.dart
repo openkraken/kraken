@@ -897,7 +897,7 @@ class RenderBoxModel extends RenderBox
                 break;
               }
 
-              var parentRenderStyle = parentRenderBoxModel.renderStyle;
+              var parentRenderStyle = currentRenderBoxModel.renderStyle;
               CSSDisplay? parentDisplay = parentRenderStyle.transformedDisplay;
               // Set width of element according to parent display
               if (parentDisplay != CSSDisplay.inline) {
@@ -907,9 +907,9 @@ class RenderBoxModel extends RenderBox
                   width = parentRenderStyle.width;
                   cropWidth = _getCropWidthByPaddingBorder(parentRenderStyle, cropWidth);
                   break;
-                } else if (parentRenderBoxModel.constraints.isTight) {
+                } else if (currentRenderBoxModel.constraints.isTight) {
                   // Cases like flex item with flex-grow and no width in flex row direction.
-                  width = parentRenderBoxModel.constraints.maxWidth;
+                  width = currentRenderBoxModel.constraints.maxWidth;
                   cropWidth = _getCropWidthByPaddingBorder(parentRenderStyle, cropWidth);
                   break;
                 } else if (parentDisplay == CSSDisplay.inlineBlock ||
@@ -995,15 +995,15 @@ class RenderBoxModel extends RenderBox
           break;
         }
 
-        var parentRenderStyle = parentRenderBoxModel.renderStyle;
-        if (CSSSizingMixin.isStretchChildHeight(parentRenderBoxModel, currentRenderBoxModel)) {
+        var parentRenderStyle = currentRenderBoxModel.renderStyle;
+        if (CSSSizingMixin.isStretchChildHeight(currentRenderBoxModel, currentRenderBoxModel)) {
           if (parentRenderStyle.height != null) {
             height = parentRenderStyle.height;
             cropHeight = _getCropHeightByPaddingBorder(parentRenderStyle, cropHeight);
             break;
-          } else if (parentRenderBoxModel.constraints.isTight) {
+          } else if (currentRenderBoxModel.constraints.isTight) {
             // Cases like flex item with flex-grow and no height in flex column direction.
-            height = parentRenderBoxModel.constraints.maxHeight;
+            height = currentRenderBoxModel.constraints.maxHeight;
             cropHeight = _getCropHeightByPaddingBorder(parentRenderStyle, cropHeight);
             break;
           }
