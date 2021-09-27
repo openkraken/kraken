@@ -207,8 +207,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     double Function(RenderBox child, double? extent)?
         childSize, // a method to find the size in the sizing direction
   }) {
-    RenderStyle renderStyle = _renderStyle;
-    if (renderStyle.flexDirection == sizingDirection) {
+    if (_renderStyle.flexDirection == sizingDirection) {
       // INTRINSIC MAIN SIZE
       // Intrinsic main size is the smallest size the flex container can take
       // while maintaining the min/max-content contributions of its flex items.
@@ -249,7 +248,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         double? mainSize;
         late double crossSize;
         if (flex == 0) {
-          switch (renderStyle.flexDirection) {
+          switch (_renderStyle.flexDirection) {
             case FlexDirection.rowReverse:
             case FlexDirection.row:
               mainSize = child.getMaxIntrinsicWidth(double.infinity);
@@ -794,9 +793,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       flexLineBoxMetrics = runMetrics;
     }
 
-    // Use parent's real renderStyle when box is scrolling context box.
-    RenderStyle renderStyle = _renderStyle;
-
     /// Stage 1: Layout children in flow order to calculate flex lines
     _layoutByFlexLine(
       runMetrics,
@@ -831,9 +827,9 @@ class RenderFlexLayout extends RenderLayoutBox {
     double runBetweenSpace = 0.0;
 
     /// Align-content only works in when flex-wrap is no nowrap
-    if (renderStyle.flexWrap == FlexWrap.wrap ||
-        renderStyle.flexWrap == FlexWrap.wrapReverse) {
-      switch (renderStyle.alignContent) {
+    if (_renderStyle.flexWrap == FlexWrap.wrap ||
+        _renderStyle.flexWrap == FlexWrap.wrapReverse) {
+      switch (_renderStyle.alignContent) {
         case AlignContent.flexStart:
         case AlignContent.start:
           break;
@@ -1049,8 +1045,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Max length of each flex line
     double flexLineLimit = 0.0;
 
-    // Use parent's real renderStyle when box is scrolling context box.
-    RenderStyle renderStyle = _renderStyle;
     // Use scrolling container to calculate flex line limit for scrolling content box
     RenderBoxModel? containerBox = isScrollingContentBox ? parent as RenderBoxModel? : this;
 
@@ -1161,8 +1155,8 @@ class RenderFlexLayout extends RenderLayoutBox {
       bool isExceedFlexLineLimit =
           runMainAxisExtent + childMainAxisExtent > flexLineLimit;
       // calculate flex line
-      if ((renderStyle.flexWrap == FlexWrap.wrap ||
-              renderStyle.flexWrap == FlexWrap.wrapReverse) &&
+      if ((_renderStyle.flexWrap == FlexWrap.wrap ||
+              _renderStyle.flexWrap == FlexWrap.wrapReverse) &&
           runChildren.isNotEmpty &&
           isExceedFlexLineLimit) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
@@ -1195,7 +1189,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       // Baseline alignment in column direction behave the same as flex-start
       if (_isHorizontalFlexDirection &&
           (alignSelf == AlignSelf.baseline ||
-              renderStyle.alignItems == AlignItems.baseline)) {
+              _renderStyle.alignItems == AlignItems.baseline)) {
         // Distance from top to baseline of child
         double childAscent = _getChildAscent(child);
         double? lineHeight = _getLineHeight(child);
@@ -1413,8 +1407,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderPositionHolder? placeholderChild,
     Map<String, double?> containerSizeMap,
   ) {
-    // Use parent's real renderStyle when box is scrolling context box.
-    RenderStyle renderStyle = _renderStyle;
     RenderBox? child = placeholderChild ?? firstChild;
 
     // Container's width specified by style or inherited from parent
@@ -1513,7 +1505,7 @@ class RenderFlexLayout extends RenderLayoutBox {
             isStretchSelfValid &&
             (alignSelf != AlignSelf.auto
                 ? alignSelf == AlignSelf.stretch
-                : renderStyle.alignItems == AlignItems.stretch);
+                : _renderStyle.alignItems == AlignItems.stretch);
 
         // Whether child is positioned placeholder or positioned renderObject
         bool isChildPositioned = placeholderChild == null &&
@@ -1643,8 +1635,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     double maxConstraintWidth = oldConstraints.maxWidth;
     double minConstraintHeight = oldConstraints.minHeight;
     double maxConstraintHeight = oldConstraints.maxHeight;
-    // Use parent's real renderStyle when box is scrolling context box.
-    RenderStyle renderStyle = _renderStyle;
 
     if (child is RenderBoxModel) {
       RenderStyle? childRenderStyle = child.renderStyle;
@@ -1662,8 +1652,8 @@ class RenderFlexLayout extends RenderLayoutBox {
       }
       // Change cross axis constraints
       if (isStretchSelf) {
-        bool isFlexWrap = renderStyle.flexWrap == FlexWrap.wrap ||
-            renderStyle.flexWrap == FlexWrap.wrapReverse;
+        bool isFlexWrap = _renderStyle.flexWrap == FlexWrap.wrap ||
+            _renderStyle.flexWrap == FlexWrap.wrapReverse;
         final double runCrossAxisExtent = metrics.crossAxisExtent;
         if (_isHorizontalFlexDirection) {
           CSSMargin marginTop = childRenderStyle.marginTop;
@@ -1683,11 +1673,11 @@ class RenderFlexLayout extends RenderLayoutBox {
             double stretchedHeight;
             // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap
             if (!isFlexWrap && hasMaxConstraints) {
-              double verticalBorderLength = renderStyle.borderEdge != null
-                  ? renderStyle.borderEdge!.vertical
+              double verticalBorderLength = _renderStyle.borderEdge != null
+                  ? _renderStyle.borderEdge!.vertical
                   : 0;
-              double verticalPaddingLength = renderStyle.padding != null
-                  ? renderStyle.padding!.vertical
+              double verticalPaddingLength = _renderStyle.padding != null
+                  ? _renderStyle.padding!.vertical
                   : 0;
               stretchedHeight = math.min(
                   constraints.maxHeight -
@@ -1725,11 +1715,11 @@ class RenderFlexLayout extends RenderLayoutBox {
             double stretchedWidth;
             // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap
             if (!isFlexWrap && hasMaxConstraints) {
-              double horizontalBorderLength = renderStyle.borderEdge != null
-                  ? renderStyle.borderEdge!.horizontal
+              double horizontalBorderLength = _renderStyle.borderEdge != null
+                  ? _renderStyle.borderEdge!.horizontal
                   : 0;
-              double horizontalPaddingLength = renderStyle.padding != null
-                  ? renderStyle.padding!.horizontal
+              double horizontalPaddingLength = _renderStyle.padding != null
+                  ? _renderStyle.padding!.horizontal
                   : 0;
               stretchedWidth = math.min(
                   constraints.maxWidth -
@@ -1908,8 +1898,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     List<double> scrollableCrossSizeOfLines = [];
     // Total cross size of previous lines
     double preLinesCrossSize = 0;
-    // Use parent's real renderStyle when box is scrolling context box.
-    RenderStyle renderStyle = _renderStyle;
 
     for (_RunMetrics runMetric in runMetrics) {
       Map<int?, _RunChild> runChildren = runMetric.runChildren;
@@ -1980,12 +1968,16 @@ class RenderFlexLayout extends RenderLayoutBox {
       return curr > next ? curr : next;
     });
 
+    bool isScrollContainer =
+      renderStyle.overflowX != CSSOverflowType.visible ||
+        renderStyle.overflowY != CSSOverflowType.visible;
+
     // No need to add padding for scrolling content box
-    double maxScrollableMainSizeOfChildren = isScrollingContentBox
+    double maxScrollableMainSizeOfChildren = isScrollContainer
         ? maxScrollableMainSizeOfLines
         : (_isHorizontalFlexDirection
-                ? renderStyle.paddingLeft
-                : renderStyle.paddingTop) +
+                ? _renderStyle.paddingLeft
+                : _renderStyle.paddingTop) +
             maxScrollableMainSizeOfLines;
 
     // Max scrollable cross size of all lines
@@ -1994,19 +1986,19 @@ class RenderFlexLayout extends RenderLayoutBox {
       return curr > next ? curr : next;
     });
     // No need to add padding for scrolling content box
-    double maxScrollableCrossSizeOfChildren = isScrollingContentBox
+    double maxScrollableCrossSizeOfChildren = isScrollContainer
         ? maxScrollableCrossSizeOfLines
         : (_isHorizontalFlexDirection
-                ? renderStyle.paddingTop
-                : renderStyle.paddingLeft) +
+                ? _renderStyle.paddingTop
+                : _renderStyle.paddingLeft) +
             maxScrollableCrossSizeOfLines;
 
     double containerContentWidth = size.width -
-        renderStyle.borderLeft -
-        renderStyle.borderRight;
+        _renderStyle.borderLeft -
+        _renderStyle.borderRight;
     double containerContentHeight = size.height -
-        renderStyle.borderTop -
-        renderStyle.borderBottom;
+        _renderStyle.borderTop -
+        _renderStyle.borderBottom;
     double maxScrollableMainSize = math.max(
         _isHorizontalFlexDirection ? containerContentWidth : containerContentHeight,
         maxScrollableMainSizeOfChildren);
@@ -2022,15 +2014,13 @@ class RenderFlexLayout extends RenderLayoutBox {
   /// Get flex line height according to flex-wrap style
   double _getFlexLineHeight(double runCrossAxisExtent, double runBetweenSpace,
       {bool beforeSetSize = true}) {
-    // Use parent's real renderStyle when box is scrolling context box.
-    RenderStyle renderStyle = _renderStyle;
     // Flex line of align-content stretch should includes between space
-    bool isMultiLineStretch = (renderStyle.flexWrap == FlexWrap.wrap ||
-            renderStyle.flexWrap == FlexWrap.wrapReverse) &&
-        renderStyle.alignContent == AlignContent.stretch;
+    bool isMultiLineStretch = (_renderStyle.flexWrap == FlexWrap.wrap ||
+            _renderStyle.flexWrap == FlexWrap.wrapReverse) &&
+        _renderStyle.alignContent == AlignContent.stretch;
     // The height of flex line in single line equals to flex container's cross size
-    bool isSingleLine = (renderStyle.flexWrap != FlexWrap.wrap &&
-        renderStyle.flexWrap != FlexWrap.wrapReverse);
+    bool isSingleLine = (_renderStyle.flexWrap != FlexWrap.wrap &&
+        _renderStyle.flexWrap != FlexWrap.wrapReverse);
 
     if (isSingleLine) {
       // Use content size if container size is not set yet
@@ -2049,8 +2039,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     double runLeadingSpace,
     RenderPositionHolder? placeholderChild,
   ) {
-    // Use parent's real renderStyle when box is scrolling context box.
-    RenderStyle renderStyle = _renderStyle;
     RenderBox? child = placeholderChild ?? firstChild;
     // Cross axis offset of each flex line
     double crossAxisOffset = runLeadingSpace;
@@ -2094,8 +2082,8 @@ class RenderFlexLayout extends RenderLayoutBox {
       // one child and the relevant direction is null, in which case we arbitrarily decide not to
       // flip, but that doesn't have any detectable effect.
       final bool flipMainAxis =
-          !(_startIsTopLeft(renderStyle.flexDirection) ?? true);
-      switch (renderStyle.justifyContent) {
+          !(_startIsTopLeft(_renderStyle.flexDirection) ?? true);
+      switch (_renderStyle.justifyContent) {
         case JustifyContent.flexStart:
         case JustifyContent.start:
           leadingSpace = 0.0;
@@ -2204,11 +2192,11 @@ class RenderFlexLayout extends RenderLayoutBox {
           case AlignSelf.flexStart:
           case AlignSelf.start:
           case AlignSelf.stretch:
-            alignment = renderStyle.flexWrap == FlexWrap.wrapReverse ? 'end' : 'start';
+            alignment = _renderStyle.flexWrap == FlexWrap.wrapReverse ? 'end' : 'start';
             break;
           case AlignSelf.flexEnd:
           case AlignSelf.end:
-            alignment = renderStyle.flexWrap == FlexWrap.wrapReverse ? 'start' : 'end';
+            alignment = _renderStyle.flexWrap == FlexWrap.wrapReverse ? 'start' : 'end';
             break;
           case AlignSelf.center:
             alignment = 'center';
@@ -2217,15 +2205,15 @@ class RenderFlexLayout extends RenderLayoutBox {
             alignment = 'baseline';
             break;
           case AlignSelf.auto:
-            switch (renderStyle.alignItems) {
+            switch (_renderStyle.alignItems) {
               case AlignItems.flexStart:
               case AlignItems.start:
               case AlignItems.stretch:
-                alignment = renderStyle.flexWrap == FlexWrap.wrapReverse ? 'end' : 'start';
+                alignment = _renderStyle.flexWrap == FlexWrap.wrapReverse ? 'end' : 'start';
                 break;
               case AlignItems.flexEnd:
               case AlignItems.end:
-                alignment = renderStyle.flexWrap == FlexWrap.wrapReverse ? 'start' : 'end';
+                alignment = _renderStyle.flexWrap == FlexWrap.wrapReverse ? 'start' : 'end';
                 break;
               case AlignItems.center:
                 alignment = 'center';
@@ -2234,7 +2222,7 @@ class RenderFlexLayout extends RenderLayoutBox {
               // FIXME: baseline alignment in wrap-reverse flexWrap may display different from browser in some case
                 if (_isHorizontalFlexDirection) {
                   alignment = 'baseline';
-                } else if (renderStyle.flexWrap == FlexWrap.wrapReverse) {
+                } else if (_renderStyle.flexWrap == FlexWrap.wrapReverse) {
                   alignment = 'end';
                 } else {
                   alignment = 'start';
@@ -2323,7 +2311,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         if (flipMainAxis) childMainPosition -= _getMainAxisExtent(child);
 
         double crossOffset;
-        if (renderStyle.flexWrap == FlexWrap.wrapReverse) {
+        if (_renderStyle.flexWrap == FlexWrap.wrapReverse) {
           crossOffset = childCrossPosition! +
               (crossAxisContentSize -
                   crossAxisOffset -
@@ -2446,13 +2434,11 @@ class RenderFlexLayout extends RenderLayoutBox {
   /// Compute distance to baseline of flex layout
   @override
   double? computeDistanceToBaseline() {
-    // Use parent's real renderStyle when box is scrolling context box.
-    RenderStyle renderStyle = _renderStyle;
     double lineDistance = 0;
-    double marginTop = renderStyle.marginTop.length ?? 0;
-    double marginBottom = renderStyle.marginBottom.length ?? 0;
+    double marginTop = _renderStyle.marginTop.length ?? 0;
+    double marginBottom = _renderStyle.marginBottom.length ?? 0;
     bool isParentFlowLayout = parent is RenderFlowLayout;
-    CSSDisplay? transformedDisplay = renderStyle.transformedDisplay;
+    CSSDisplay? transformedDisplay = _renderStyle.transformedDisplay;
     bool isDisplayInline = transformedDisplay != CSSDisplay.block &&
         transformedDisplay != CSSDisplay.flex;
     // Use margin bottom as baseline if layout has no children
@@ -2568,11 +2554,9 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   double? _getLineHeight(RenderBox child) {
-    // Use parent's real renderStyle when box is scrolling context box.
-    RenderStyle renderStyle = _renderStyle;
     double? lineHeight;
     if (child is RenderTextBox) {
-      lineHeight = renderStyle.lineHeight;
+      lineHeight = _renderStyle.lineHeight;
     } else if (child is RenderBoxModel) {
       lineHeight = child.renderStyle.lineHeight;
     } else if (child is RenderPositionHolder) {

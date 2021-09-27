@@ -1328,8 +1328,12 @@ class RenderFlowLayout extends RenderLayoutBox {
       return curr > next ? curr : next;
     });
 
+    bool isScrollContainer =
+      renderStyle.overflowX != CSSOverflowType.visible ||
+        renderStyle.overflowY != CSSOverflowType.visible;
+
     // No need to add padding for scrolling content box
-    double maxScrollableMainSizeOfChildren = isScrollingContentBox
+    double maxScrollableMainSizeOfChildren = isScrollContainer
         ? maxScrollableMainSizeOfLines
         : _renderStyle.paddingLeft + maxScrollableMainSizeOfLines;
 
@@ -1339,7 +1343,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       return curr > next ? curr : next;
     });
     // No need to add padding for scrolling content box
-    double maxScrollableCrossSizeOfChildren = isScrollingContentBox
+    double maxScrollableCrossSizeOfChildren = isScrollContainer
         ? maxScrollableCrossSizeOfLines
         : _renderStyle.paddingTop + maxScrollableCrossSizeOfLines;
 
