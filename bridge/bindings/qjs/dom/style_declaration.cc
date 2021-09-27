@@ -161,6 +161,10 @@ JSValue StyleDeclarationInstance::internalGetPropertyValue(std::string &name) {
   name = parseJavaScriptCSSPropertyName(name);
 
   if (properties.count(name) > 0) {
+    if (JS_IsNull(properties[name])) {
+      return JS_NewString(m_ctx, "");
+    }
+
     return JS_DupValue(m_ctx, properties[name]);
   }
 

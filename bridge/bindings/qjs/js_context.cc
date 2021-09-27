@@ -331,7 +331,10 @@ void JSContext::promiseRejectTracker(QjsContext *ctx, JSValue promise, JSValue r
 
 NativeString *jsValueToNativeString(QjsContext *ctx, JSValue value) {
   bool isValueString = true;
-  if (!JS_IsString(value)) {
+  if (JS_IsNull(value)) {
+    value = JS_NewString(ctx, "");
+    isValueString = false;
+  } else if (!JS_IsString(value)) {
     value = JS_ToString(ctx, value);
     isValueString = false;
   }
