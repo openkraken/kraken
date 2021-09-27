@@ -1971,16 +1971,12 @@ class RenderFlexLayout extends RenderLayoutBox {
       return curr > next ? curr : next;
     });
 
-    RenderBoxModel container = isScrollingContentBox ? parent as RenderBoxModel : this;
-    bool isScrollContainer = renderStyle.overflowX != CSSOverflowType.visible ||
-        renderStyle.overflowY != CSSOverflowType.visible;
-
     // No need to add padding for scrolling content box
-    double maxScrollableMainSizeOfChildren = isScrollContainer
+    double maxScrollableMainSizeOfChildren = isScrollingContentBox
         ? maxScrollableMainSizeOfLines
         : (_isHorizontalFlexDirection
-                ? container.renderStyle.paddingLeft
-                : container.renderStyle.paddingTop) +
+                ? renderStyle.paddingLeft
+                : renderStyle.paddingTop) +
             maxScrollableMainSizeOfLines;
 
     // Max scrollable cross size of all lines
@@ -1989,19 +1985,19 @@ class RenderFlexLayout extends RenderLayoutBox {
       return curr > next ? curr : next;
     });
     // No need to add padding for scrolling content box
-    double maxScrollableCrossSizeOfChildren = isScrollContainer
+    double maxScrollableCrossSizeOfChildren = isScrollingContentBox
         ? maxScrollableCrossSizeOfLines
         : (_isHorizontalFlexDirection
-                ? container.renderStyle.paddingTop
-                : container.renderStyle.paddingLeft) +
+                ? renderStyle.paddingTop
+                : renderStyle.paddingLeft) +
             maxScrollableCrossSizeOfLines;
 
     double containerContentWidth = size.width -
-        container.renderStyle.borderLeft -
-        container.renderStyle.borderRight;
+        renderStyle.borderLeft -
+        renderStyle.borderRight;
     double containerContentHeight = size.height -
-        container.renderStyle.borderTop -
-        container.renderStyle.borderBottom;
+        renderStyle.borderTop -
+        renderStyle.borderBottom;
     double maxScrollableMainSize = math.max(
         _isHorizontalFlexDirection ? containerContentWidth : containerContentHeight,
         maxScrollableMainSizeOfChildren);
