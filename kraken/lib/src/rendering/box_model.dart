@@ -881,23 +881,23 @@ class RenderBoxModel extends RenderBox
           // @TODO: flexbox stretch alignment will stretch replaced element in the cross axis
           // Block level element will spread to its parent's width except for replaced element
           if (renderBoxModel is! RenderIntrinsic) {
-            var currentRenderBoxModel = renderBoxModel;
-            var parentRenderBoxModel = renderBoxModel.parent;
+            RenderBoxModel currentRenderBoxModel = renderBoxModel;
 
             while (true) {
+              var parentRenderBoxModel = currentRenderBoxModel.parent;
+
               if (parentRenderBoxModel != null &&
                   parentRenderBoxModel is RenderBoxModel) {
 
                 cropWidth = _getCropWidthByMargin(currentRenderBoxModel._renderStyle, cropWidth);
                 cropWidth = _getCropWidthByPaddingBorder(currentRenderBoxModel._renderStyle, cropWidth);
 
-                currentRenderBoxModel = parentRenderBoxModel;
-                parentRenderBoxModel = parentRenderBoxModel.parent as RenderBoxModel;
+                parentRenderBoxModel = currentRenderBoxModel.parent as RenderBoxModel;
               } else {
                 break;
               }
 
-              var parentRenderStyle = currentRenderBoxModel.renderStyle;
+              var parentRenderStyle = parentRenderBoxModel.renderStyle;
               CSSDisplay? parentDisplay = parentRenderStyle.transformedDisplay;
               // Set width of element according to parent display
               if (parentDisplay != CSSDisplay.inline) {
@@ -907,9 +907,9 @@ class RenderBoxModel extends RenderBox
                   width = parentRenderStyle.width;
                   cropWidth = _getCropWidthByPaddingBorder(parentRenderStyle, cropWidth);
                   break;
-                } else if (currentRenderBoxModel.constraints.isTight) {
+                } else if (parentRenderBoxModel.constraints.isTight) {
                   // Cases like flex item with flex-grow and no width in flex row direction.
-                  width = currentRenderBoxModel.constraints.maxWidth;
+                  width = parentRenderBoxModel.constraints.maxWidth;
                   cropWidth = _getCropWidthByPaddingBorder(parentRenderStyle, cropWidth);
                   break;
                 } else if (parentDisplay == CSSDisplay.inlineBlock ||
@@ -920,6 +920,8 @@ class RenderBoxModel extends RenderBox
                   break;
                 }
               }
+
+              currentRenderBoxModel = parentRenderBoxModel;
             }
           }
         }
@@ -981,35 +983,37 @@ class RenderBoxModel extends RenderBox
     } else if (height != null) {
       cropHeight = _getCropHeightByPaddingBorder(renderStyle, cropHeight);
     } else {
-      var currentRenderBoxModel = renderBoxModel;
-      var parentRenderBoxModel = renderBoxModel.parent;
+      RenderBoxModel currentRenderBoxModel = renderBoxModel;
 
       while (true) {
+        var parentRenderBoxModel = currentRenderBoxModel.parent;
+
         if (parentRenderBoxModel != null &&
             parentRenderBoxModel is RenderBoxModel) {
           cropHeight = _getCropHeightByMargin(currentRenderBoxModel._renderStyle, cropHeight);
           cropHeight = _getCropHeightByPaddingBorder(currentRenderBoxModel._renderStyle, cropHeight);
-          currentRenderBoxModel = parentRenderBoxModel;
-          parentRenderBoxModel = parentRenderBoxModel.parent as RenderBoxModel;
+          parentRenderBoxModel = currentRenderBoxModel.parent as RenderBoxModel;
         } else {
           break;
         }
 
-        var parentRenderStyle = currentRenderBoxModel.renderStyle;
-        if (CSSSizingMixin.isStretchChildHeight(currentRenderBoxModel, currentRenderBoxModel)) {
+        var parentRenderStyle = parentRenderBoxModel.renderStyle;
+        if (CSSSizingMixin.isStretchChildHeight(parentRenderBoxModel, currentRenderBoxModel)) {
           if (parentRenderStyle.height != null) {
             height = parentRenderStyle.height;
             cropHeight = _getCropHeightByPaddingBorder(parentRenderStyle, cropHeight);
             break;
-          } else if (currentRenderBoxModel.constraints.isTight) {
+          } else if (parentRenderBoxModel.constraints.isTight) {
             // Cases like flex item with flex-grow and no height in flex column direction.
-            height = currentRenderBoxModel.constraints.maxHeight;
+            height = parentRenderBoxModel.constraints.maxHeight;
             cropHeight = _getCropHeightByPaddingBorder(parentRenderStyle, cropHeight);
             break;
           }
         } else {
           break;
         }
+
+        currentRenderBoxModel = parentRenderBoxModel;
       }
     }
 

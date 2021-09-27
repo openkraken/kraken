@@ -157,7 +157,10 @@ mixin CSSSizingMixin on RenderStyleBase {
   // Whether current node should stretch children's height
   static bool isStretchChildHeight(RenderBoxModel current, RenderBoxModel child) {
     bool isStretch = false;
-    RenderStyle? renderStyle = current.renderStyle;
+    // Use parent's real renderStyle when box is scrolling context box.
+    RenderStyle? renderStyle = current.isScrollingContentBox ?
+      (current.parent as RenderBoxModel).renderStyle : current.renderStyle;
+
     RenderStyle childRenderStyle = child.renderStyle;
     bool isFlex = current is RenderFlexLayout;
     bool isHorizontalDirection = false;
@@ -167,7 +170,7 @@ mixin CSSSizingMixin on RenderStyleBase {
     bool isChildStretchSelf = false;
     if (isFlex) {
       isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(
-        current.renderStyle.flexDirection
+        renderStyle.flexDirection
       );
       isAlignItemsStretch = renderStyle.alignItems == AlignItems.stretch;
       isFlexNoWrap = renderStyle.flexWrap != FlexWrap.wrap &&
