@@ -50,6 +50,17 @@ private:
   bool document_registered{false};
 };
 
+class DocumentCookie {
+public:
+  DocumentCookie() = default;
+
+  std::string getCookie();
+  void setCookie(std::string &str);
+
+private:
+  std::unordered_map<std::string, std::string> cookiePairs;
+};
+
 class DocumentInstance : public NodeInstance {
 public:
   DocumentInstance() = delete;
@@ -71,6 +82,7 @@ private:
   void addElementById(JSAtom id, ElementInstance *element);
   std::unordered_map<JSAtom, std::vector<ElementInstance *>> m_elementMapById;
   ElementInstance *m_documentElement{nullptr};
+  std::unique_ptr<DocumentCookie> m_cookie;
 
   friend Document;
   friend ElementInstance;

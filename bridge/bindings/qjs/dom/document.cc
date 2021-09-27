@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 
+#include <regex>
 #include "document.h"
 #include "element.h"
 #include "text_node.h"
@@ -10,6 +11,7 @@
 #include "event.h"
 #include "dart_methods.h"
 #include "all_collection.h"
+#include "bindings/qjs/js_context.h"
 
 #include "bindings/qjs/dom/elements/image_element.h"
 #include "elements/.gen/anchor_element.h"
@@ -279,11 +281,72 @@ PROP_SETTER(DocumentInstance, all)(QjsContext *ctx, JSValue this_val, int argc, 
 }
 
 PROP_GETTER(DocumentInstance, cookie)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, Document::classId()));
+  std::string cookie = document->m_cookie->getCookie();
+  return JS_NewString(ctx, cookie.c_str());
+}
+PROP_SETTER(DocumentInstance, cookie)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, Document::classId()));
+  std::string value = jsValueToStdString(ctx, argv[0]);
+  document->m_cookie->setCookie(value);
   return JS_NULL;
 }
-PROP_SETTER(DocumentInstance, cookie)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {  return JS_NULL;}
+
+std::string DocumentCookie::getCookie() {
+  std::string result;
+  size_t i = 0;
+  for (auto &pair : cookiePairs) {
+    result += pair.first + "=" + pair.second;
+    i++;
+    if (i < cookiePairs.size()) {
+      result += "; ";
+    }
+  }
+
+  return std::move(result);
+}
+
+inline std::string trim(std::string &str) {
+  str.erase(0, str.find_first_not_of(' ')); // prefixing spaces
+  str.erase(str.find_last_not_of(' ') + 1); // surfixing spaces
+  return str;
+}
+
+void DocumentCookie::setCookie(std::string &cookieStr) {
+  trim(cookieStr);
+
+  std::string key;
+  std::string value;
+
+  const std::regex cookie_regex("^[^=]*=([^;]*)");
+
+  if (!cookieStr.find('=', 0)) {
+    key = "";
+    value = cookieStr;
+  } else {
+    size_t idx = cookieStr.find('=', 0);
+    key = cookieStr.substr(0, idx);
+
+    std::match_results<std::string::const_iterator> match_results;
+    // Only allow to set a single cookie at a time
+    // Find first cookie value if multiple cookie set
+    if (std::regex_match(cookieStr, match_results, cookie_regex)) {
+      if (match_results.size() == 2) {
+        value = match_results[1];
+
+        if (key.empty() && value.empty()) {
+          return;
+        }
+      }
+    }
+  }
+
+  cookiePairs[key] = value;
+}
+
 
 DocumentInstance::DocumentInstance(Document *document): NodeInstance(document, NodeType::DOCUMENT_NODE, this, Document::classId(), "document") {
+  m_cookie = std::make_unique<DocumentCookie>();
   m_instanceMap[Document::instance(m_context)] = this;
   eventTargetId = DOCUMENT_TARGET_ID;
 
@@ -312,7 +375,6 @@ DocumentInstance::DocumentInstance(Document *document): NodeInstance(document, N
 std::unordered_map<Document *, DocumentInstance *> DocumentInstance::m_instanceMap {};
 
 DocumentInstance::~DocumentInstance() {
-//  JS_FreeValue(m_ctx, m_documentElement->instanceObject);
 }
 void DocumentInstance::removeElementById(JSAtom id, ElementInstance *element) {
   if (m_elementMapById.count(id) > 0) {
