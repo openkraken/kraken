@@ -69,23 +69,6 @@ class ImageElement extends Element {
   }
 
   @override
-  handleJSCall(String method, List argv) {
-    switch (method) {
-      case 'getWidth':
-        return width;
-      case 'getHeight':
-        return height;
-      case 'getNaturalWidth':
-        return naturalWidth;
-      case 'getNaturalHeight':
-        return naturalHeight;
-    }
-
-    return super.handleJSCall(method, argv);
-  }
-
-
-  @override
   void didAttachRenderer() {
     super.didAttachRenderer();
     // Should add image box after style has applied to ensure intersection observer
@@ -419,6 +402,10 @@ class ImageElement extends Element {
         return _renderImage?.width ?? 0;
       case HEIGHT:
         return _renderImage?.height ?? 0;
+      case 'naturalWidth':
+        return naturalWidth;
+      case 'naturalHeight':
+        return naturalHeight;
     }
 
     return super.getProperty(key);

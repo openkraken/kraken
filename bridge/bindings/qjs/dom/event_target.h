@@ -85,6 +85,7 @@ public:
 
   JSValue callNativeMethods(const char* method, int32_t argc,
                                 NativeValue *argv);
+  JSValue getNativeProperty(const char* prop);
 
   NativeEventTarget *nativeEventTarget{new NativeEventTarget(this)};
 protected:

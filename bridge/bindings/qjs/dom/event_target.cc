@@ -375,11 +375,8 @@ JSValue EventTargetInstance::getProperty(QjsContext *ctx, JSValue obj, JSAtom at
       JS_FreeCString(eventTarget->m_ctx, cmethod);
       return JS_NULL;
     }
-    std::string method = "_getProperty_" + std::string(cmethod);
-
-    getDartMethod()->flushUICommand();
-    JSValue result = eventTarget->callNativeMethods(method.c_str(), 0, nullptr);
-    JS_FreeCString(eventTarget->m_ctx, cmethod);
+    JSValue result = eventTarget->getNativeProperty(cmethod);
+    JS_FreeCString(ctx, cmethod);
     return result;
   }
 
@@ -502,6 +499,13 @@ void EventTargetInstance::finalize(JSRuntime *rt, JSValue val) {
     JS_FreeValue(eventTarget->m_ctx, eventTarget->instanceObject);
   }
   delete eventTarget;
+}
+
+JSValue EventTargetInstance::getNativeProperty(const char *prop) {
+  std::string method = "_getProperty_" + std::string(prop);
+  getDartMethod()->flushUICommand();
+  JSValue result = callNativeMethods(method.c_str(), 0, nullptr);
+  return result;
 }
 
 void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *nativeEventType,

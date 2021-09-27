@@ -522,12 +522,18 @@ void NodeInstance::removeParentNode() {
 NodeInstance::~NodeInstance() {
 }
 void NodeInstance::refer() {
-  JS_DupValue(m_ctx, instanceObject);
-  list_add_tail(&nodeLink.link, &m_context->node_job_list);
+  if (_referenceCount == 0) {
+    JS_DupValue(m_ctx, instanceObject);
+    list_add_tail(&nodeLink.link, &m_context->node_job_list);
+  }
+  _referenceCount++;
 }
 void NodeInstance::unrefer() {
-  list_del(&nodeLink.link);
-  JS_FreeValue(m_ctx, instanceObject);
+  _referenceCount--;
+  if (_referenceCount <= 0) {
+    list_del(&nodeLink.link);
+    JS_FreeValue(m_ctx, instanceObject);
+  }
 }
 void NodeInstance::_notifyNodeRemoved(NodeInstance *node) {}
 void NodeInstance::_notifyNodeInsert(NodeInstance *node) {}

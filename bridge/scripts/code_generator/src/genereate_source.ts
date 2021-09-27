@@ -96,9 +96,12 @@ function generatePropsGetter(object: ClassObject, type: PropType, p: PropsDeclar
     getterCode = `auto *${instanceName} = static_cast<${classSubFix} *>(JS_GetOpaque(this_val, ${classId}));
   auto *nativeEvent = reinterpret_cast<Native${object.name} *>(event->nativeEvent);
   return ${qjsCallFunc};`;
-  } else {
+  } else if (object.type === 'HostObject') {
     getterCode = `auto *${instanceName} = static_cast<${classSubFix} *>(JS_GetOpaque(this_val, ${classId}));
   return ${instanceName}->callNativeMethods("get${p.name[0].toUpperCase() + p.name.substring(1)}", 0, nullptr);`;
+  } else {
+    getterCode = `auto *${instanceName} = static_cast<${classSubFix} *>(JS_GetOpaque(this_val, ${classId}));
+  return ${instanceName}->getNativeProperty("${p.name}");`;
   }
 
   let flushUICommandCode = '';
