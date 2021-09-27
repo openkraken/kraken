@@ -55,7 +55,7 @@ describe('Text LineClamp', () => {
       cont.style.lineClamp = 3;
       await snapshot();
       done();
-    }, 100);
+    }, 150);
 
     await snapshot();
   });
@@ -80,7 +80,7 @@ describe('Text LineClamp', () => {
       cont.style.lineClamp = 'none';
       await snapshot();
       done();
-    }, 100);
+    }, 150);
 
     await snapshot();
   });
