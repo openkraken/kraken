@@ -97,6 +97,8 @@ PROP_SETTER(ImageElementInstance, loading)(QjsContext *ctx, JSValue this_val, in
 }
 
 ImageElementInstance::ImageElementInstance(ImageElement *element): ElementInstance(element, "img", true) {
+  // Protect image instance util load or error event triggered.
+  refer();
 }
 
 bool ImageElementInstance::dispatchEvent(EventInstance *event) {
@@ -105,15 +107,14 @@ bool ImageElementInstance::dispatchEvent(EventInstance *event) {
   std::string eventType = toUTF8(u16EventType);
   bool result = EventTargetInstance::dispatchEvent(event);
 
+  // Free image instance after load or error event triggered.
+  if ((eventType == "load" || eventType == "error") && !freed) {
+    freed = true;
+    unrefer();
+  }
+
   return result;
 }
 
-void ImageElementInstance::protectImageInstance() {
-  JS_DupValue(m_ctx, instanceObject);
-}
-
-void ImageElementInstance::freeImageInstance() {
-  JS_FreeValue(m_ctx, instanceObject);
-}
 
 }

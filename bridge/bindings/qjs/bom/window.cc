@@ -45,8 +45,6 @@ JSValue Window::open(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv)
   return window->callNativeMethods("open", 1, arguments);
 }
 JSValue Window::scrollTo(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  JSValue x = argv[0];
-  JSValue y = argv[1];
   auto window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, Window::classId()));
   NativeValue arguments[] = {
     jsValueToNativeValue(ctx, argv[0]),

@@ -13,7 +13,6 @@ namespace kraken::binding::qjs {
 
 void bindImageElement(std::unique_ptr<JSContext> &context);
 
-
 class ImageElement : public Element {
 public:
   ImageElement() = delete;
@@ -32,6 +31,7 @@ public:
   void protectImageInstance();
   void freeImageInstance();
 private:
+  bool freed{false};
   DEFINE_HOST_CLASS_PROPERTY(6, width, height, naturalWidth, naturalHeight, src, loading)
 };
 

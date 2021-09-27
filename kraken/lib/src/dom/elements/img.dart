@@ -248,9 +248,7 @@ class ImageElement extends Element {
   bool _loaded = false;
 
   void _onImageError(Object exception, StackTrace? stackTrace) {
-    // @TODO: Native side support error event.
-    // https://github.com/openkraken/kraken/issues/686
-    // dispatchEvent(Event(EVENT_ERROR));
+    dispatchEvent(Event(EVENT_ERROR));
   }
 
   // Delay image size setting to next frame to make sure image has been layouted
