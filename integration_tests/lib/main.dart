@@ -75,6 +75,7 @@ void main() async {
   KrakenVideoPlayer.initialize();
   KrakenWebView.initialize();
   defineKrakenCustomElements();
+  setObjectElementFactory(customObjectElementFactory);
 
   // FIXME: This is a workaround for testcase
   ParagraphElement.defaultStyle = {

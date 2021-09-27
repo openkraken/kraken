@@ -79,13 +79,11 @@ class ObjectElement extends Element implements ObjectElementHost {
 
   @override
   handleJSCall(String method, List argv) {
-    switch(method) {
-      case 'getType':
-      case 'getData':
-        return _objectElementClient.getProperty(method);
-      default:
-        return super.handleJSCall(method, argv);
+    var result = _objectElementClient.handleJSCall(method, argv);
+    if (result == null) {
+      return super.handleJSCall(method, argv);
     }
+    return result;
   }
 
   @override
@@ -132,12 +130,6 @@ class ObjectElement extends Element implements ObjectElementHost {
   void disposeClient() {
     _objectElementClient.dispose();
   }
-
-//  @override
-//  method(String name, List args) {
-//   super.method(name, args);
-//   _objectElementClient?.method(name, args);
-//  }
 }
 
 class _DefaultObjectElementClient implements ObjectElementClient {
@@ -158,13 +150,10 @@ class _DefaultObjectElementClient implements ObjectElementClient {
     return null;
   }
 
-  /// @TODO extend in future
   /// called when Element js method called
   /// [name] method name
   /// [args] method params
-  @override
-  method(String name, List args) {
-    print('call DefaultObjectElementClient method name[$name] args[$args]');
+  dynamic handleJSCall(String method, List argv) {
   }
 
   @override
