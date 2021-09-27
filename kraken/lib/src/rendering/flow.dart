@@ -188,6 +188,11 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
   }
 
+  // Use parent's real renderStyle when box is scrolling context box.
+  RenderStyle get _renderStyle {
+    return isScrollingContentBox ? (parent as RenderBoxModel).renderStyle : renderStyle;
+  }
+
   double _computeIntrinsicHeightForWidth(double width) {
     assert(direction == Axis.horizontal);
     double height = 0.0;
@@ -376,7 +381,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   double? _getLineHeight(RenderBox child) {
     double? lineHeight;
     if (child is RenderTextBox) {
-      lineHeight = renderStyle.lineHeight;
+      lineHeight = _renderStyle.lineHeight;
     } else if (child is RenderBoxModel) {
       lineHeight = child.renderStyle.lineHeight;
     } else if (child is RenderPositionHolder) {
@@ -437,9 +442,9 @@ class RenderFlowLayout extends RenderLayoutBox {
       child = childParentData.nextSibling;
     }
 
-    bool isScrollContainer =
-        renderStyle.overflowX != CSSOverflowType.visible ||
-            renderStyle.overflowY != CSSOverflowType.visible;
+    bool isScrollContainer = !isScrollingContentBox &&
+      (renderStyle.overflowX != CSSOverflowType.visible ||
+      renderStyle.overflowY != CSSOverflowType.visible);
     if (isScrollContainer) {
       // Find all the sticky children when scroll container is layouted
       stickyChildren = findStickyChildren();
@@ -554,7 +559,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     lineBoxMetrics = runMetrics;
 
-    WhiteSpace? whiteSpace = renderStyle.whiteSpace;
+    WhiteSpace? whiteSpace = _renderStyle.whiteSpace;
 
     while (child != null) {
       final RenderLayoutParentData childParentData =
@@ -823,7 +828,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       // Text-align only works on inline level children
       if (runContainInlineChild) {
-        switch (renderStyle.textAlign) {
+        switch (_renderStyle.textAlign) {
           case TextAlign.left:
           case TextAlign.start:
             break;
@@ -951,13 +956,13 @@ class RenderFlowLayout extends RenderLayoutBox {
 
         Offset relativeOffset = _getOffset(
             childMainPosition +
-                renderStyle.paddingLeft +
-                renderStyle.borderLeft +
+                _renderStyle.paddingLeft +
+                _renderStyle.borderLeft +
                 childMarginLeft!,
             crossAxisOffset +
                 childLineExtent +
-                renderStyle.paddingTop +
-                renderStyle.borderTop +
+                _renderStyle.paddingTop +
+                _renderStyle.borderTop +
                 childMarginTop);
         // Apply position relative offset change.
         CSSPositionedLayout.applyRelativeOffset(relativeOffset, child);
@@ -1003,12 +1008,12 @@ class RenderFlowLayout extends RenderLayoutBox {
   @override
   double? computeDistanceToBaseline() {
     double? lineDistance;
-    bool isInline = renderStyle.transformedDisplay == CSSDisplay.inline;
+    bool isInline = _renderStyle.transformedDisplay == CSSDisplay.inline;
     // Margin does not work for inline element.
-    double marginTop = !isInline ? renderStyle.marginTop.length! : 0;
-    double marginBottom = !isInline ? renderStyle.marginBottom.length! : 0;
+    double marginTop = !isInline ? _renderStyle.marginTop.length! : 0;
+    double marginBottom = !isInline ? _renderStyle.marginBottom.length! : 0;
     bool isParentFlowLayout = parent is RenderFlowLayout;
-    CSSDisplay? transformedDisplay = renderStyle.transformedDisplay;
+    CSSDisplay? transformedDisplay = _renderStyle.transformedDisplay;
     bool isDisplayInline = transformedDisplay == CSSDisplay.inline ||
         transformedDisplay == CSSDisplay.inlineBlock ||
         transformedDisplay == CSSDisplay.inlineFlex;
@@ -1323,16 +1328,10 @@ class RenderFlowLayout extends RenderLayoutBox {
       return curr > next ? curr : next;
     });
 
-    RenderBoxModel container =
-        isScrollingContentBox ? parent as RenderBoxModel : this;
-    bool isScrollContainer =
-        renderStyle.overflowX != CSSOverflowType.visible ||
-            renderStyle.overflowY != CSSOverflowType.visible;
-
     // No need to add padding for scrolling content box
-    double maxScrollableMainSizeOfChildren = isScrollContainer
+    double maxScrollableMainSizeOfChildren = isScrollingContentBox
         ? maxScrollableMainSizeOfLines
-        : container.renderStyle.paddingLeft + maxScrollableMainSizeOfLines;
+        : _renderStyle.paddingLeft + maxScrollableMainSizeOfLines;
 
     // Max scrollable cross size of all lines
     double maxScrollableCrossSizeOfLines =
@@ -1340,19 +1339,19 @@ class RenderFlowLayout extends RenderLayoutBox {
       return curr > next ? curr : next;
     });
     // No need to add padding for scrolling content box
-    double maxScrollableCrossSizeOfChildren = isScrollContainer
+    double maxScrollableCrossSizeOfChildren = isScrollingContentBox
         ? maxScrollableCrossSizeOfLines
-        : container.renderStyle.paddingTop + maxScrollableCrossSizeOfLines;
+        : _renderStyle.paddingTop + maxScrollableCrossSizeOfLines;
 
     double maxScrollableMainSize = math.max(
         size.width -
-            container.renderStyle.borderLeft -
-            container.renderStyle.borderRight,
+            _renderStyle.borderLeft -
+            _renderStyle.borderRight,
         maxScrollableMainSizeOfChildren);
     double maxScrollableCrossSize = math.max(
         size.height -
-            container.renderStyle.borderTop -
-            container.renderStyle.borderBottom,
+            _renderStyle.borderTop -
+            _renderStyle.borderBottom,
         maxScrollableCrossSizeOfChildren);
 
     scrollableSize = Size(maxScrollableMainSize, maxScrollableCrossSize);
@@ -1408,7 +1407,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   RenderStyle? _getChildRenderStyle(RenderBox child) {
     RenderStyle? childRenderStyle;
     if (child is RenderTextBox) {
-      childRenderStyle = renderStyle;
+      childRenderStyle = _renderStyle;
     } else if (child is RenderBoxModel) {
       childRenderStyle = child.renderStyle;
     } else if (child is RenderPositionHolder) {

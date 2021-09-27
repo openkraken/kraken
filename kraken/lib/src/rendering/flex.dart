@@ -191,6 +191,15 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
   }
 
+  // Use parent's real renderStyle when box is scrolling context box.
+  RenderStyle get _renderStyle {
+    return isScrollingContentBox ? (parent as RenderBoxModel).renderStyle : renderStyle;
+  }
+
+  bool get _isHorizontalFlexDirection {
+    return CSSFlex.isHorizontalFlexDirection(_renderStyle.flexDirection);
+  }
+
   double _getIntrinsicSize({
     FlexDirection? sizingDirection,
     double?
@@ -198,7 +207,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     double Function(RenderBox child, double? extent)?
         childSize, // a method to find the size in the sizing direction
   }) {
-    RenderStyle renderStyle = _getRenderStyle();
+    RenderStyle renderStyle = _renderStyle;
     if (renderStyle.flexDirection == sizingDirection) {
       // INTRINSIC MAIN SIZE
       // Intrinsic main size is the smallest size the flex container can take
@@ -786,7 +795,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     // Use parent's real renderStyle when box is scrolling context box.
-    RenderStyle renderStyle = _getRenderStyle();
+    RenderStyle renderStyle = _renderStyle;
 
     /// Stage 1: Layout children in flow order to calculate flex lines
     _layoutByFlexLine(
@@ -1041,7 +1050,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     double flexLineLimit = 0.0;
 
     // Use parent's real renderStyle when box is scrolling context box.
-    RenderStyle renderStyle = _getRenderStyle();
+    RenderStyle renderStyle = _renderStyle;
     // Use scrolling container to calculate flex line limit for scrolling content box
     RenderBoxModel? containerBox = isScrollingContentBox ? parent as RenderBoxModel? : this;
 
@@ -1405,7 +1414,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     Map<String, double?> containerSizeMap,
   ) {
     // Use parent's real renderStyle when box is scrolling context box.
-    RenderStyle renderStyle = _getRenderStyle();
+    RenderStyle renderStyle = _renderStyle;
     RenderBox? child = placeholderChild ?? firstChild;
 
     // Container's width specified by style or inherited from parent
@@ -1635,7 +1644,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     double minConstraintHeight = oldConstraints.minHeight;
     double maxConstraintHeight = oldConstraints.maxHeight;
     // Use parent's real renderStyle when box is scrolling context box.
-    RenderStyle renderStyle = _getRenderStyle();
+    RenderStyle renderStyle = _renderStyle;
 
     if (child is RenderBoxModel) {
       RenderStyle? childRenderStyle = child.renderStyle;
@@ -1900,7 +1909,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Total cross size of previous lines
     double preLinesCrossSize = 0;
     // Use parent's real renderStyle when box is scrolling context box.
-    RenderStyle renderStyle = _getRenderStyle();
+    RenderStyle renderStyle = _renderStyle;
 
     for (_RunMetrics runMetric in runMetrics) {
       Map<int?, _RunChild> runChildren = runMetric.runChildren;
@@ -2014,7 +2023,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   double _getFlexLineHeight(double runCrossAxisExtent, double runBetweenSpace,
       {bool beforeSetSize = true}) {
     // Use parent's real renderStyle when box is scrolling context box.
-    RenderStyle renderStyle = _getRenderStyle();
+    RenderStyle renderStyle = _renderStyle;
     // Flex line of align-content stretch should includes between space
     bool isMultiLineStretch = (renderStyle.flexWrap == FlexWrap.wrap ||
             renderStyle.flexWrap == FlexWrap.wrapReverse) &&
@@ -2041,7 +2050,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderPositionHolder? placeholderChild,
   ) {
     // Use parent's real renderStyle when box is scrolling context box.
-    RenderStyle renderStyle = _getRenderStyle();
+    RenderStyle renderStyle = _renderStyle;
     RenderBox? child = placeholderChild ?? firstChild;
     // Cross axis offset of each flex line
     double crossAxisOffset = runLeadingSpace;
@@ -2438,7 +2447,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   @override
   double? computeDistanceToBaseline() {
     // Use parent's real renderStyle when box is scrolling context box.
-    RenderStyle renderStyle = _getRenderStyle();
+    RenderStyle renderStyle = _renderStyle;
     double lineDistance = 0;
     double marginTop = renderStyle.marginTop.length ?? 0;
     double marginBottom = renderStyle.marginBottom.length ?? 0;
@@ -2494,18 +2503,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     lineDistance += marginTop;
     return lineDistance;
   }
-
-  // Use parent's real renderStyle when box is scrolling context box.
-  RenderStyle _getRenderStyle() {
-    return isScrollingContentBox ? (parent as RenderBoxModel).renderStyle : renderStyle;
-  }
-
-  bool get _isHorizontalFlexDirection {
-    // Use parent's real renderStyle when box is scrolling context box.
-    RenderStyle renderStyle = _getRenderStyle();
-    return CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
-  }
-
 
   /// Get child size through boxSize to avoid flutter error when parentUsesSize is set to false
   Size? _getChildSize(RenderBox? child,
@@ -2572,7 +2569,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   double? _getLineHeight(RenderBox child) {
     // Use parent's real renderStyle when box is scrolling context box.
-    RenderStyle renderStyle = _getRenderStyle();
+    RenderStyle renderStyle = _renderStyle;
     double? lineHeight;
     if (child is RenderTextBox) {
       lineHeight = renderStyle.lineHeight;
