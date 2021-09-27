@@ -493,7 +493,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       minMainSize = math.min(contentSize, transferredSize);
     } else if (child is RenderBoxModel) {
       double? specifiedMainSize =
-        _isHorizontalFlexDirection &&
+        _isHorizontalFlexDirection
               ? RenderBoxModel.getLogicalContentWidth(child)
               : RenderBoxModel.getLogicalContentHeight(child);
       minMainSize = specifiedMainSize != null
