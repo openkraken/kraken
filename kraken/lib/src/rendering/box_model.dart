@@ -161,7 +161,20 @@ class RenderLayoutBox extends RenderBoxModel
   }) : super(
     renderStyle: renderStyle,
     elementDelegate: elementDelegate
-  );
+  ) {
+    _renderStyle = renderStyle;
+  }
+
+  @override
+  late RenderStyle _renderStyle;
+
+  @override
+  RenderStyle get renderStyle {
+    if (isScrollingContentBox && parent != null && parent is RenderLayoutBox) {
+      return (parent as RenderLayoutBox).renderStyle;
+    }
+    return _renderStyle;
+  }
 
   @override
   void markNeedsLayout() {
