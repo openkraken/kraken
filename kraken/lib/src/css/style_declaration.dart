@@ -146,6 +146,7 @@ class CSSStyleDeclaration {
 
   bool _shouldTransition(String property, String? prevValue, String nextValue, RenderBoxModel? renderBoxModel) {
     // When begin propertyValue is AUTO, skip animation and trigger style update directly.
+    prevValue ??= CSSInitialValues[property];
     if (CSSLength.isAuto(prevValue) || CSSLength.isAuto(nextValue)) {
       return false;
     }
@@ -204,16 +205,8 @@ class CSSStyleDeclaration {
 
     if (begin == null) {
       begin = CSSInitialValues[propertyName];
-
       if (begin == CURRENT_COLOR) {
         begin = getCurrentColor();
-      }
-
-      // When begin propertyValue is AUTO, skip animation and trigger style update directly.
-      if (begin == AUTO) {
-        _properties[propertyName] = end;
-        _emitPropertyChanged(propertyName, begin, end);
-        return;
       }
     }
 
@@ -634,13 +627,15 @@ class CSSStyleDeclaration {
       }
     }
 
+    Map<String, String?> prevValues = {};
     for (String propertyName in propertyNames) {
       // Update the prevValue to currentValue.
+      prevValues[propertyName] = _properties[propertyName];
       _properties[propertyName] = pendingProperties[propertyName]!;
     }
 
     for (String propertyName in propertyNames) {
-      String? prevValue = _properties[propertyName];
+      String? prevValue = prevValues[propertyName];
       String? currentValue = pendingProperties[propertyName];
       if (currentValue == null) {
         break;
