@@ -161,20 +161,7 @@ class RenderLayoutBox extends RenderBoxModel
   }) : super(
     renderStyle: renderStyle,
     elementDelegate: elementDelegate
-  ) {
-    _renderStyle = renderStyle;
-  }
-
-  @override
-  late RenderStyle _renderStyle;
-
-  @override
-  RenderStyle get renderStyle {
-    if (isScrollingContentBox && parent != null && parent is RenderLayoutBox) {
-      return (parent as RenderLayoutBox).renderStyle;
-    }
-    return _renderStyle;
-  }
+  );
 
   @override
   void markNeedsLayout() {
@@ -880,7 +867,6 @@ class RenderBoxModel extends RenderBox
     double? width = renderStyle.width;
     double? minWidth = renderStyle.minWidth;
     double? maxWidth = renderStyle.maxWidth;
-
     double cropWidth = 0;
 
     switch (display) {
@@ -910,7 +896,10 @@ class RenderBoxModel extends RenderBox
                 break;
               }
 
-              var parentRenderStyle = parentRenderBoxModel.renderStyle;
+              var parentRenderStyle =
+                parentRenderBoxModel.isScrollingContentBox ?
+                  (parentRenderBoxModel.parent as RenderBoxModel).renderStyle :
+                  parentRenderBoxModel.renderStyle;
               CSSDisplay? parentDisplay = parentRenderStyle.transformedDisplay;
               // Set width of element according to parent display
               if (parentDisplay != CSSDisplay.inline) {
@@ -1010,7 +999,11 @@ class RenderBoxModel extends RenderBox
           break;
         }
 
-        var parentRenderStyle = parentRenderBoxModel.renderStyle;
+        var parentRenderStyle =
+          parentRenderBoxModel.isScrollingContentBox ?
+            (parentRenderBoxModel.parent as RenderBoxModel).renderStyle :
+            parentRenderBoxModel.renderStyle;
+
         if (CSSSizingMixin.isStretchChildHeight(parentRenderBoxModel, currentRenderBoxModel)) {
           if (parentRenderStyle.height != null) {
             height = parentRenderStyle.height;
