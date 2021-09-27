@@ -954,15 +954,16 @@ class RenderFlowLayout extends RenderLayoutBox {
           childMarginTop = _getChildMarginTop(child);
         }
 
+        // No need to add padding and border for scrolling content box.
         Offset relativeOffset = _getOffset(
             childMainPosition +
-                _renderStyle.paddingLeft +
-                _renderStyle.borderLeft +
+                renderStyle.paddingLeft +
+                renderStyle.borderLeft +
                 childMarginLeft!,
             crossAxisOffset +
                 childLineExtent +
-                _renderStyle.paddingTop +
-                _renderStyle.borderTop +
+                renderStyle.paddingTop +
+                renderStyle.borderTop +
                 childMarginTop);
         // Apply position relative offset change.
         CSSPositionedLayout.applyRelativeOffset(relativeOffset, child);
