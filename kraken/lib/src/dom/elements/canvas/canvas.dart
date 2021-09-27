@@ -212,14 +212,22 @@ class CanvasElement extends Element {
   }
 
   @override
+  getProperty(String key) {
+    switch(key) {
+      case 'width':
+        return attrWidth;
+      case 'height':
+        return attrHeight;
+    }
+
+    return super.getProperty(key);
+  }
+
+  @override
   dynamic handleJSCall(String method, List argv) {
     switch(method) {
       case 'getContext':
         return getContext(argv[0]).nativeCanvasRenderingContext2D;
-      case 'getWidth':
-        return attrWidth;
-      case 'getHeight':
-        return attrHeight;
     }
 
     return super.handleJSCall(method, argv);
