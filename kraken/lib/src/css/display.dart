@@ -135,7 +135,7 @@ mixin CSSDisplayMixin on RenderStyleBase {
 
     // Display as inline-block when element is positioned
     if (position == CSSPositionType.absolute || position == CSSPositionType.fixed) {
-      transformedDisplay = CSSDisplay.inlineBlock;
+      return CSSDisplay.inlineBlock;
     }
 
     if (renderBoxModel != null) {
