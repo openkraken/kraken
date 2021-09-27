@@ -635,16 +635,16 @@ class CSSStyleDeclaration {
     }
 
     for (String propertyName in propertyNames) {
-      String? prevValue = _properties[propertyName];
-      String? currentValue = pendingProperties[propertyName];
-
-      if (currentValue == null || currentValue == prevValue) {
-        return;
-      }
-
       // Update the prevValue to currentValue.
       _properties[propertyName] = pendingProperties[propertyName]!;
+    }
 
+    for (String propertyName in propertyNames) {
+      String? prevValue = _properties[propertyName];
+      String? currentValue = pendingProperties[propertyName];
+      if (currentValue == null) {
+        break;
+      }
       RenderStyle? renderStyle = target?.renderStyle;
       if (_shouldTransition(propertyName, prevValue, currentValue, renderBoxModel)) {
         _transition(propertyName, prevValue, currentValue, target?.viewportSize, renderStyle);
