@@ -188,11 +188,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
   }
 
-  // Use parent's real renderStyle when box is scrolling context box.
-  RenderStyle get _renderStyle {
-    return isScrollingContentBox ? (parent as RenderBoxModel).renderStyle : renderStyle;
-  }
-
   double _computeIntrinsicHeightForWidth(double width) {
     assert(direction == Axis.horizontal);
     double height = 0.0;
@@ -381,7 +376,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   double? _getLineHeight(RenderBox child) {
     double? lineHeight;
     if (child is RenderTextBox) {
-      lineHeight = _renderStyle.lineHeight;
+      lineHeight = renderStyle.lineHeight;
     } else if (child is RenderBoxModel) {
       lineHeight = child.renderStyle.lineHeight;
     } else if (child is RenderPositionHolder) {
@@ -442,7 +437,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       child = childParentData.nextSibling;
     }
 
-    bool isScrollContainer = !isScrollingContentBox &&
+    bool isScrollContainer =
       (renderStyle.overflowX != CSSOverflowType.visible ||
       renderStyle.overflowY != CSSOverflowType.visible);
     if (isScrollContainer) {
@@ -559,7 +554,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     lineBoxMetrics = runMetrics;
 
-    WhiteSpace? whiteSpace = _renderStyle.whiteSpace;
+    WhiteSpace? whiteSpace = renderStyle.whiteSpace;
 
     while (child != null) {
       final RenderLayoutParentData childParentData =
@@ -828,7 +823,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       // Text-align only works on inline level children
       if (runContainInlineChild) {
-        switch (_renderStyle.textAlign) {
+        switch (renderStyle.textAlign) {
           case TextAlign.left:
           case TextAlign.start:
             break;
@@ -1009,12 +1004,12 @@ class RenderFlowLayout extends RenderLayoutBox {
   @override
   double? computeDistanceToBaseline() {
     double? lineDistance;
-    bool isInline = _renderStyle.transformedDisplay == CSSDisplay.inline;
+    bool isInline = renderStyle.transformedDisplay == CSSDisplay.inline;
     // Margin does not work for inline element.
-    double marginTop = !isInline ? _renderStyle.marginTop.length! : 0;
-    double marginBottom = !isInline ? _renderStyle.marginBottom.length! : 0;
+    double marginTop = !isInline ? renderStyle.marginTop.length! : 0;
+    double marginBottom = !isInline ? renderStyle.marginBottom.length! : 0;
     bool isParentFlowLayout = parent is RenderFlowLayout;
-    CSSDisplay? transformedDisplay = _renderStyle.transformedDisplay;
+    CSSDisplay? transformedDisplay = renderStyle.transformedDisplay;
     bool isDisplayInline = transformedDisplay == CSSDisplay.inline ||
         transformedDisplay == CSSDisplay.inlineBlock ||
         transformedDisplay == CSSDisplay.inlineFlex;
@@ -1329,14 +1324,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       return curr > next ? curr : next;
     });
 
-    bool isScrollContainer =
-      renderStyle.overflowX != CSSOverflowType.visible ||
-        renderStyle.overflowY != CSSOverflowType.visible;
-
-    // No need to add padding for scrolling content box
-    double maxScrollableMainSizeOfChildren = isScrollContainer
-        ? maxScrollableMainSizeOfLines
-        : _renderStyle.paddingLeft + maxScrollableMainSizeOfLines;
+    double maxScrollableMainSizeOfChildren =
+        renderStyle.paddingLeft + maxScrollableMainSizeOfLines;
 
     // Max scrollable cross size of all lines
     double maxScrollableCrossSizeOfLines =
@@ -1344,19 +1333,18 @@ class RenderFlowLayout extends RenderLayoutBox {
       return curr > next ? curr : next;
     });
     // No need to add padding for scrolling content box
-    double maxScrollableCrossSizeOfChildren = isScrollContainer
-        ? maxScrollableCrossSizeOfLines
-        : _renderStyle.paddingTop + maxScrollableCrossSizeOfLines;
+    double maxScrollableCrossSizeOfChildren =
+        renderStyle.paddingTop + maxScrollableCrossSizeOfLines;
 
     double maxScrollableMainSize = math.max(
         size.width -
-            _renderStyle.borderLeft -
-            _renderStyle.borderRight,
+            renderStyle.borderLeft -
+            renderStyle.borderRight,
         maxScrollableMainSizeOfChildren);
     double maxScrollableCrossSize = math.max(
         size.height -
-            _renderStyle.borderTop -
-            _renderStyle.borderBottom,
+            renderStyle.borderTop -
+            renderStyle.borderBottom,
         maxScrollableCrossSizeOfChildren);
 
     scrollableSize = Size(maxScrollableMainSize, maxScrollableCrossSize);
@@ -1412,7 +1400,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   RenderStyle? _getChildRenderStyle(RenderBox child) {
     RenderStyle? childRenderStyle;
     if (child is RenderTextBox) {
-      childRenderStyle = _renderStyle;
+      childRenderStyle = renderStyle;
     } else if (child is RenderBoxModel) {
       childRenderStyle = child.renderStyle;
     } else if (child is RenderPositionHolder) {

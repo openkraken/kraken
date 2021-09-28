@@ -145,10 +145,7 @@ mixin CSSDisplayMixin on RenderStyleBase {
         // Display as inline-block if parent node is flex
         transformedDisplay = CSSDisplay.inlineBlock;
         RenderBoxModel parent = renderBoxModel!.parent as RenderBoxModel;
-        var parentRenderStyle =
-          parent.isScrollingContentBox ?
-            (parent.parent as RenderBoxModel).renderStyle :
-            parent.renderStyle;
+        RenderStyle parentRenderStyle = parent.renderStyle;
 
         CSSMargin marginLeft = renderStyle.marginLeft;
         CSSMargin marginRight = renderStyle.marginRight;

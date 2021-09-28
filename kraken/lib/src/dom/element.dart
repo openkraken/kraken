@@ -899,6 +899,7 @@ class Element extends Node
     bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex || parentDisplayValue == CSSDisplay.inlineFlex;
 
     // Flex factor change will cause flex item self and its siblings relayout.
+    // FIXME: not all flex item properties change case will cause sibling relayout.
     if (isParentFlexDisplayType) {
       for (Element child in selfParentElement.children) {
         if (selfParentElement.renderBoxModel is RenderFlexLayout && child.renderBoxModel != null) {
@@ -1420,6 +1421,10 @@ class Element extends Node
       repaintSelf: true,
       renderStyle: scrollingContentRenderStyle,
     );
+
+    scrollingContentRenderStyle.overflowX = CSSOverflowType.visible;
+    scrollingContentRenderStyle.overflowY = CSSOverflowType.visible;
+    style.addStyleChangeListener(scrollingContentBoxStyleListener);
     scrollingContentLayoutBox.isScrollingContentBox = true;
     return scrollingContentLayoutBox;
   }
@@ -1489,7 +1494,6 @@ class Element extends Node
         flexLayout = prevRenderLayoutBox.toFlexLayout();
       }
 
-      renderStyle.updateFlexbox();
       return flexLayout!;
     } else if (display == CSSDisplay.block ||
       display == CSSDisplay.none ||
@@ -1552,7 +1556,6 @@ class Element extends Node
         flowLayout = prevRenderLayoutBox.toFlowLayout();
       }
 
-      renderStyle.updateFlow();
       return flowLayout!;
     } else if (display == CSSDisplay.sliver) {
       RenderRecyclerLayout? renderRecyclerLayout;

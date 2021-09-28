@@ -174,6 +174,81 @@ mixin CSSOverflowMixin on ElementBase {
     }
   }
 
+  void scrollingContentBoxStyleListener(String property, String? original, String present) {
+    RenderStyle scrollingContentRenderStyle = scrollingContentLayoutBox!.renderStyle;
+    switch (property) {
+      case DISPLAY:
+        scrollingContentRenderStyle.display = renderStyle.display;
+        scrollingContentRenderStyle.transformedDisplay = renderStyle.transformedDisplay;
+        break;
+      case LINE_HEIGHT:
+        scrollingContentRenderStyle.lineHeight = renderStyle.lineHeight;
+        break;
+      case TEXT_ALIGN:
+        scrollingContentRenderStyle.textAlign = renderStyle.textAlign;
+        break;
+      case WHITE_SPACE:
+        scrollingContentRenderStyle.whiteSpace = renderStyle.whiteSpace;
+        break;
+      case FLEX_DIRECTION:
+        scrollingContentRenderStyle.flexDirection = renderStyle.flexDirection;
+        break;
+      case FLEX_WRAP:
+        scrollingContentRenderStyle.flexWrap = renderStyle.flexWrap;
+        break;
+      case ALIGN_CONTENT:
+        scrollingContentRenderStyle.alignContent = renderStyle.alignContent;
+        break;
+      case ALIGN_ITEMS:
+        scrollingContentRenderStyle.alignItems = renderStyle.alignItems;
+        break;
+      case ALIGN_SELF:
+        scrollingContentRenderStyle.alignSelf = renderStyle.alignSelf;
+        break;
+      case JUSTIFY_CONTENT:
+        scrollingContentRenderStyle.justifyContent = renderStyle.justifyContent;
+        break;
+      case COLOR:
+        scrollingContentRenderStyle.color = renderStyle.color;
+        break;
+      case TEXT_DECORATION_LINE:
+        scrollingContentRenderStyle.textDecorationLine = renderStyle.textDecorationLine;
+        break;
+      case TEXT_DECORATION_COLOR:
+        scrollingContentRenderStyle.textDecorationColor = renderStyle.textDecorationColor;
+        break;
+      case TEXT_DECORATION_STYLE:
+        scrollingContentRenderStyle.textDecorationStyle = renderStyle.textDecorationStyle;
+        break;
+      case FONT_WEIGHT:
+        scrollingContentRenderStyle.fontWeight = renderStyle.fontWeight;
+        break;
+      case FONT_STYLE:
+        scrollingContentRenderStyle.fontStyle = renderStyle.fontStyle;
+        break;
+      case FONT_FAMILY:
+        scrollingContentRenderStyle.fontFamily = renderStyle.fontFamily;
+        break;
+      case FONT_SIZE:
+        scrollingContentRenderStyle.fontSize = renderStyle.fontSize;
+        break;
+      case LETTER_SPACING:
+        scrollingContentRenderStyle.letterSpacing = renderStyle.letterSpacing;
+        break;
+      case WORD_SPACING:
+        scrollingContentRenderStyle.wordSpacing = renderStyle.wordSpacing;
+        break;
+      case TEXT_SHADOW:
+        scrollingContentRenderStyle.textShadow = renderStyle.textShadow;
+        break;
+      case TEXT_OVERFLOW:
+        scrollingContentRenderStyle.textOverflow = renderStyle.textOverflow;
+        break;
+      case LINE_CLAMP:
+        scrollingContentRenderStyle.lineClamp = renderStyle.lineClamp;
+        break;
+    }
+  }
 
   // Create two repaintBoundary for an overflow scroll container.
   // Outer repaintBoundary avoid repaint of parent and sibling renderObjects when scrolling.
@@ -237,6 +312,9 @@ mixin CSSOverflowMixin on ElementBase {
         newLayoutBox.insert(child);
       }
     }
+
+    renderStyle.style.removeStyleChangeListener(scrollingContentBoxStyleListener);
+
     // Remove inner scrolling box
     newLayoutBox.remove(scrollingContentLayoutBox!);
     scrollingContentLayoutBox = null;

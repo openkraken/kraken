@@ -746,11 +746,21 @@ class RenderBoxModel extends RenderBox
     // Inner scrolling content box of overflow element inherits constraints from parent
     // but has indefinite max constraints to allow children overflow
     if (isScrollingContentBox) {
+      RenderStyle parentRenderStyle = (parent as RenderBoxModel).renderStyle;
+      EdgeInsets? borderEdge = parentRenderStyle.borderEdge;
+      EdgeInsetsGeometry? padding = parentRenderStyle.padding;
+      double horizontalBorderLength = borderEdge != null ? borderEdge.horizontal : 0;
+      double verticalBorderLength = borderEdge != null ? borderEdge.vertical : 0;
+      double horizontalPaddingLength = padding != null ? padding.horizontal : 0;
+      double verticalPaddingLength = padding != null ? padding.vertical : 0;
+
       BoxConstraints parentConstraints = (parent as RenderBoxModel).constraints;
       BoxConstraints constraints = BoxConstraints(
-        minWidth: parentConstraints.maxWidth != double.infinity ? parentConstraints.maxWidth : 0,
+        minWidth: parentConstraints.maxWidth != double.infinity ?
+          parentConstraints.maxWidth - horizontalBorderLength - horizontalPaddingLength : 0,
         maxWidth: double.infinity,
-        minHeight: parentConstraints.maxHeight != double.infinity ? parentConstraints.maxHeight : 0,
+        minHeight: parentConstraints.maxHeight != double.infinity ?
+          parentConstraints.maxHeight - verticalBorderLength - verticalPaddingLength : 0,
         maxHeight: double.infinity,
       );
       return constraints;
@@ -761,16 +771,16 @@ class RenderBoxModel extends RenderBox
 
     EdgeInsets? borderEdge = renderStyle.borderEdge;
     EdgeInsetsGeometry? padding = renderStyle.padding;
+
+    double horizontalBorderLength = borderEdge != null ? borderEdge.horizontal : 0;
+    double verticalBorderLength = borderEdge != null ? borderEdge.vertical : 0;
+    double horizontalPaddingLength = padding != null ? padding.horizontal : 0;
+    double verticalPaddingLength = padding != null ? padding.vertical : 0;
+
     double? minWidth = renderStyle.minWidth;
     double? maxWidth = renderStyle.maxWidth;
     double? minHeight = renderStyle.minHeight;
     double? maxHeight = renderStyle.maxHeight;
-
-    double horizontalBorderLength =
-        borderEdge != null ? borderEdge.horizontal : 0;
-    double verticalBorderLength = borderEdge != null ? borderEdge.vertical : 0;
-    double horizontalPaddingLength = padding != null ? padding.horizontal : 0;
-    double verticalPaddingLength = padding != null ? padding.vertical : 0;
 
     // Content size calculated from style
     double? logicalContentWidth = getLogicalContentWidth(this);
@@ -1004,7 +1014,7 @@ class RenderBoxModel extends RenderBox
             (parentRenderBoxModel.parent as RenderBoxModel).renderStyle :
             parentRenderBoxModel.renderStyle;
 
-        if (CSSSizingMixin.isStretchChildHeight(parentRenderBoxModel, currentRenderBoxModel)) {
+        if (CSSSizingMixin.isStretchChildHeight(parentRenderStyle, currentRenderBoxModel.renderStyle)) {
           if (parentRenderStyle.height != null) {
             height = parentRenderStyle.height;
             cropHeight = _getCropHeightByPaddingBorder(parentRenderStyle, cropHeight);
