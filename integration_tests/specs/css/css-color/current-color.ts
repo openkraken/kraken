@@ -19,7 +19,7 @@ describe('Color currentColor', () => {
     await snapshot();
   });
 
-  it(`should update currentColor value`, async () => {
+  it(`should update currentColor value`, async (done) => {
     const text1 = document.createTextNode('DIV 1');
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
@@ -42,6 +42,7 @@ describe('Color currentColor', () => {
         color: 'black',
       });
       await snapshot();
+      done();
     });
   });
 

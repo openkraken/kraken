@@ -44,7 +44,7 @@ describe('background-repeat', () => {
     });
     repeat.appendChild(div1);
     document.body.appendChild(repeat);
-    sleep(0.2);
+    await sleep(0.1);
     await snapshot(repeat);
   });
 
