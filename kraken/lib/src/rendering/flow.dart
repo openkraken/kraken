@@ -1438,9 +1438,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   /// Get the collapsed margin top with parent if it is the first child of its parent
   double _getCollapsedMarginTopWithParent(RenderBoxModel renderBoxModel, double marginTop) {
-    // Get the outer box of overflow scroll/auto element as parent
-    RenderLayoutBox parent = (renderBoxModel.parent as RenderLayoutBox).isScrollingContentBox ?
-    (renderBoxModel.parent!.parent! as RenderLayoutBox) : (renderBoxModel.parent as RenderLayoutBox);
+    RenderLayoutBox parent = renderBoxModel.parent as RenderLayoutBox;
     bool isParentOverflowVisible = parent.renderStyle.overflowX == CSSOverflowType.visible &&
         parent.renderStyle.overflowY == CSSOverflowType.visible;
     bool isParentOverflowClip = parent.renderStyle.overflowX == CSSOverflowType.clip &&
@@ -1510,7 +1508,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     // 2. Inline level elements
     // 3. Inner renderBox of element with overflow auto/scroll
     if (child.isDocumentRootBox ||
-      child.isScrollingContentBox ||
       (childTransformedDisplay != CSSDisplay.block &&
       childTransformedDisplay != CSSDisplay.flex)
     ) {
@@ -1553,9 +1550,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   /// Get the collapsed margin bottom with parent if it is the last child of its parent
   double _getCollapsedMarginBottomWithParent(RenderBoxModel renderBoxModel, double marginBottom) {
-    // Get the outer box of overflow scroll/auto element as parent
-    RenderLayoutBox parent = (renderBoxModel.parent as RenderLayoutBox).isScrollingContentBox ?
-      (renderBoxModel.parent!.parent! as RenderLayoutBox) : (renderBoxModel.parent as RenderLayoutBox);
+    RenderLayoutBox parent = renderBoxModel.parent as RenderLayoutBox;
     bool isParentOverflowVisible = parent.renderStyle.overflowX == CSSOverflowType.visible &&
       parent.renderStyle.overflowY == CSSOverflowType.visible;
     bool isParentOverflowClip = parent.renderStyle.overflowX == CSSOverflowType.clip &&
@@ -1627,7 +1622,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     // 2. Inline level elements
     // 3. Inner renderBox of element with overflow auto/scroll
     if (child.isDocumentRootBox ||
-      child.isScrollingContentBox ||
       (childTransformedDisplay != CSSDisplay.block &&
       childTransformedDisplay != CSSDisplay.flex)
     ) {

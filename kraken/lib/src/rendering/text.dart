@@ -117,12 +117,9 @@ class RenderTextBox extends RenderBox
       RenderBoxModel parentRenderBoxModel = parent as RenderBoxModel;
       BoxConstraints parentConstraints = parentRenderBoxModel.constraints;
 
-      // Scrolling content box has indefinite max constraints to allow children overflow
-      if (parentRenderBoxModel.isScrollingContentBox) {
-        maxConstraintWidth = parentConstraints.minWidth;
-      } else if (parentConstraints.maxWidth == double.infinity) {
+      if (parentConstraints.maxWidth == double.infinity) {
         final RenderLayoutParentData parentParentData = parentRenderBoxModel.parentData as RenderLayoutParentData;
-        // Width of positioned element does not contrainted by parent.
+        // Width of positioned element does not constrained by parent.
         if (parentParentData.isPositioned) {
           maxConstraintWidth = double.infinity;
         } else {
