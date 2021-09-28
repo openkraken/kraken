@@ -1374,30 +1374,32 @@ class Element extends Node
   }
 
   Future<Uint8List> toBlob({double? devicePixelRatio}) {
-    devicePixelRatio ??= window.devicePixelRatio;
-
     Completer<Uint8List> completer = Completer();
-    if (nodeName != 'HTML') {
-      convertToRepaintBoundary();
-    }
-    renderBoxModel!.owner!.flushLayout();
-
-    SchedulerBinding.instance!.addPostFrameCallback((_) async {
-      Uint8List captured;
-      RenderBoxModel? renderObject = nodeName == 'HTML' ? elementManager.viewportElement.renderBoxModel : renderBoxModel;
-      if (renderObject!.hasSize && renderObject.size == Size.zero) {
-        // Return a blob with zero length.
-        captured = Uint8List(0);
-      } else {
-        Image image = await renderObject.toImage(pixelRatio: devicePixelRatio!);
-        ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
-        captured = byteData!.buffer.asUint8List();
+    if (renderBoxModel == null) {
+      completer.complete(Uint8List(0));
+    } else {
+      if (nodeName != 'HTML') {
+        convertToRepaintBoundary();
       }
+      renderBoxModel!.owner!.flushLayout();
 
-      completer.complete(captured);
-    });
-    SchedulerBinding.instance!.scheduleFrame();
+      SchedulerBinding.instance!.addPostFrameCallback((_) async {
+        Uint8List captured;
+        RenderBoxModel? renderObject = renderBoxModel!;
+        if (renderObject.hasSize && renderObject.size == Size.zero) {
+          // Return a blob with zero length.
+          captured = Uint8List(0);
+        } else {
+          devicePixelRatio ??= window.devicePixelRatio;
+          Image image = await renderObject.toImage(pixelRatio: devicePixelRatio!);
+          ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
+          captured = byteData!.buffer.asUint8List();
+        }
 
+        completer.complete(captured);
+      });
+      SchedulerBinding.instance!.scheduleFrame();
+    }
     return completer.future;
   }
 

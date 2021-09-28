@@ -825,7 +825,7 @@ describe('flexbox flex-shrink', () => {
     );
 
     document.body.appendChild(container);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should work with flex item with overflow hidden', async () => {

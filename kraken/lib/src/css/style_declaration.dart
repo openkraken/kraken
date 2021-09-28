@@ -152,7 +152,7 @@ class CSSStyleDeclaration {
     }
 
     // Transition does not work when renderBoxModel has not been layout yet.
-    if (renderBoxModel != null && renderBoxModel.attached && CSSTransformHandlers[property] != null &&
+    if (renderBoxModel != null && renderBoxModel.hasSize && CSSTransformHandlers[property] != null &&
       (_transitions.containsKey(property) || _transitions.containsKey(ALL))) {
       bool shouldTransition = false;
       // Transition will be disabled when all transition has transitionDuration as 0.
