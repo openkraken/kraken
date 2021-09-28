@@ -419,7 +419,9 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       if (child is RenderBoxModel && childParentData.isPositioned) {
         CSSPositionedLayout.applyPositionedChildOffset(this, child);
+
         extendMaxScrollableSize(child);
+        ensureBoxSizeLargerThanScrollableSize();
       } else if (child is RenderBoxModel &&
           CSSPositionedLayout.isSticky(child)) {
         RenderBoxModel scrollContainer = child.findScrollContainer()!;
@@ -446,8 +448,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
 
     _relayoutPositionedChildren();
-
-    ensureBoxSizeLargerThanScrollableSize();
 
     didLayout();
 
