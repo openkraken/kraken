@@ -140,7 +140,7 @@ describe('block-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   xit('height-003', async () => {
     let p;
@@ -398,7 +398,7 @@ describe('block-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('width-001', async () => {
     let p;

@@ -623,7 +623,7 @@ describe('flex-grow', () => {
       ]
     );
     BODY.appendChild(div);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should work with flex-item content change', async (done) => {

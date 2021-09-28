@@ -181,7 +181,7 @@ describe('flexbox flex-shrink', () => {
     );
     BODY.appendChild(constrainedFlex);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should work with intrinsic element with min-height', async () => {
@@ -239,7 +239,7 @@ describe('flexbox flex-shrink', () => {
     );
     BODY.appendChild(constrainedFlex);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should work with flex layout in the column direction with children and height is not larger than children height', async () => {
@@ -870,7 +870,195 @@ describe('flexbox flex-shrink', () => {
     );
 
     document.body.appendChild(container);
+    await snapshot(0.1);
+  });
+
+  it('should work with child has margin when flex direction is row', async () => {
+    let div = createElement(
+        'div',
+        {
+          style: {
+              display: 'flex',
+              overflow: 'visible',
+              width: '100vw',
+          },
+      }, [
+          createElement(
+          'div',
+          {
+              style: {
+                  display: 'flex',
+                  flexDirection: 'row',
+                  boxSizing: 'border-box',
+                  overflow: 'visible'
+              },
+          }, [
+              createElement(
+              'div',
+              {
+                  style: {
+                      width: '100px',
+                      border: '2px gray solid',
+                      height: '100px',
+                      margin: '20px',
+                      boxSizing: 'border-box',
+                  },
+              }, [
+                  
+              ]),
+              createElement(
+              'div',
+              {
+                  style: {
+                      width: '100px',
+                      border: '2px gray solid',
+                      height: '100px',
+                      margin: '20px',
+                      boxSizing: 'border-box',
+                  },
+              }, [
+                  
+              ]),
+              createElement(
+              'div',
+              {
+                  style: {
+                      width: '100px',
+                      border: '2px gray solid',
+                      height: '100px',
+                      margin: '20px',
+                      boxSizing: 'border-box',
+                  },
+              }, [
+                  
+              ]),
+              createElement(
+              'div',
+              {
+                  style: {
+                      width: '100px',
+                      border: '2px gray solid',
+                      height: '100px',
+                      margin: '20px',
+                      boxSizing: 'border-box',
+                  },
+              }, [
+                  
+              ]),
+              createElement(
+              'div',
+              {
+                  style: {
+                      width: '100px',
+                      border: '2px gray solid',
+                      height: '100px',
+                      margin: '20px',
+                      boxSizing: 'border-box',
+                  },
+              }, [
+                  
+              ]),
+          ])
+      ]);
+    
+    BODY.appendChild(div);
+
     await snapshot();
   });
+
+  it('should work with child has margin when flex direction is column', async () => {
+    let div = createElement(
+        'div',
+        {
+          style: {
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'visible',
+              height: '300px',
+          },
+      }, [
+          createElement(
+          'div',
+          {
+              style: {
+                  display: 'flex',
+                  flexDirection: 'column',
+                  boxSizing: 'border-box',
+                  overflow: 'visible'
+              },
+          }, [
+              createElement(
+              'div',
+              {
+                  style: {
+                      width: '100px',
+                      border: '2px gray solid',
+                      height: '100px',
+                      margin: '20px',
+                      boxSizing: 'border-box',
+                  },
+              }, [
+                  
+              ]),
+              createElement(
+              'div',
+              {
+                  style: {
+                      width: '100px',
+                      border: '2px gray solid',
+                      height: '100px',
+                      margin: '20px',
+                      boxSizing: 'border-box',
+                  },
+              }, [
+                  
+              ]),
+              createElement(
+              'div',
+              {
+                  style: {
+                      width: '100px',
+                      border: '2px gray solid',
+                      height: '100px',
+                      margin: '20px',
+                      boxSizing: 'border-box',
+                  },
+              }, [
+                  
+              ]),
+              createElement(
+              'div',
+              {
+                  style: {
+                      width: '100px',
+                      border: '2px gray solid',
+                      height: '100px',
+                      margin: '20px',
+                      boxSizing: 'border-box',
+                  },
+              }, [
+                  
+              ]),
+              createElement(
+              'div',
+              {
+                  style: {
+                      width: '100px',
+                      border: '2px gray solid',
+                      height: '100px',
+                      margin: '20px',
+                      boxSizing: 'border-box',
+                  },
+              }, [
+                  
+              ]),
+          ])
+      ]);
+    
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
 
 });

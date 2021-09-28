@@ -276,7 +276,7 @@ describe('Baseline-rules flexbox', () => {
     );
     BODY.appendChild(test);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('flex layout nest flex layout', async () => {
@@ -403,7 +403,7 @@ describe('Baseline-rules flexbox', () => {
     );
     BODY.appendChild(test);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('flow layout nest flex layout', async () => {
@@ -528,7 +528,7 @@ describe('Baseline-rules flexbox', () => {
     );
     BODY.appendChild(test);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('flow layout nest flow layout', async () => {
@@ -653,7 +653,7 @@ describe('Baseline-rules flexbox', () => {
     );
     BODY.appendChild(test);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 });
 
