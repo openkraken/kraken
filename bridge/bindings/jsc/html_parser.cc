@@ -106,9 +106,8 @@ void HTMLParser::traverseHTML(GumboNode * node, ElementInstance* element) {
   }
 }
 
-bool HTMLParser::parseHTML(const uint16_t *code, size_t codeLength) {
+bool HTMLParser::parseHTML(JSStringRef sourceRef, ElementInstance* element) {
   // gumbo-parser parse HTML.
-  JSStringRef sourceRef = JSStringCreateWithCharacters(code, codeLength);
   std::string html = JSStringToStdString(sourceRef);
   int html_length = html.length();
   GumboOutput* htmlTree = gumbo_parse_with_options(
@@ -116,28 +115,13 @@ bool HTMLParser::parseHTML(const uint16_t *code, size_t codeLength) {
 
   const GumboVector *root_children = &htmlTree->root->v.element.children;
 
-  // find body.
-  ElementInstance* body;
-  auto document = DocumentInstance::instance(m_context.get());
-  for (int i = 0; i < document->documentElement->childNodes.size(); ++i) {
-    NodeInstance* node = document->documentElement->childNodes[i];
-    ElementInstance* element = reinterpret_cast<ElementInstance *>(node);
-
-    if (element->tagName() == "BODY") {
-      body = element;
-      break;
-    }
-  }
-
-  if (body != nullptr) {
+  if (element != nullptr) {
     for (int i = 0; i < root_children->length; ++i) {
       GumboNode* child =(GumboNode*) root_children->data[i];
       if (child->v.element.tag == GUMBO_TAG_BODY) {
-        traverseHTML(child, body);
+        traverseHTML(child, element);
       }
     }
-
-    JSStringRelease(sourceRef);
   } else {
     KRAKEN_LOG(ERROR) << "BODY is null.";
   }

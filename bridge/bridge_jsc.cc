@@ -212,7 +212,24 @@ NativeString* JSBridge::getHref() {
 void JSBridge::parseHTML(const NativeString *script, const char *url) {
   if (!m_context->isValid()) return;
 
-  m_html_parser->parseHTML(script->string, script->length);
+  // find body.
+  ElementInstance* body;
+  auto document = DocumentInstance::instance(m_context.get());
+  for (int i = 0; i < document->documentElement->childNodes.size(); ++i) {
+    NodeInstance* node = document->documentElement->childNodes[i];
+    ElementInstance* element = reinterpret_cast<ElementInstance *>(node);
+
+    if (element->tagName() == "BODY") {
+      body = element;
+      break;
+    }
+  }
+
+  JSStringRef sourceRef = JSStringCreateWithCharacters(script->string, script->length);
+
+  m_html_parser->parseHTML(sourceRef, body);
+
+  JSStringRelease(sourceRef);
 }
 
 // Eval javascript.
