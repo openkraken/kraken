@@ -1819,7 +1819,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         double childMarginBottom = child.renderStyle.marginBottom.length!;
         double childMarginLeft = child.renderStyle.marginLeft.length!;
         double childMarginRight = child.renderStyle.marginRight.length!;
-        runChildMainSize += isHorizontalFlexDirection ?
+        runChildMainSize += _isHorizontalFlexDirection ?
           childMarginLeft + childMarginRight :
           childMarginTop + childMarginBottom;
       }
