@@ -217,7 +217,7 @@ describe('max-height', () => {
     );
     BODY.appendChild(flexbox);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should work with replaced element when element height is larger than intrinsic height', async () => {

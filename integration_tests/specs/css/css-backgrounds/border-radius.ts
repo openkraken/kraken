@@ -40,7 +40,7 @@ describe('border_radius', () => {
     );
     BODY.appendChild(image);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should work with percentage of one value', async () => {

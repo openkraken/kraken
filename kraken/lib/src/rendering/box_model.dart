@@ -862,7 +862,6 @@ class RenderBoxModel extends RenderBox
       minHeight: minConstraintHeight,
       maxHeight: maxConstraintHeight,
     );
-
     return constraints;
   }
 
@@ -1013,7 +1012,6 @@ class RenderBoxModel extends RenderBox
           parentRenderBoxModel.isScrollingContentBox ?
             (parentRenderBoxModel.parent as RenderBoxModel).renderStyle :
             parentRenderBoxModel.renderStyle;
-
         if (CSSSizingMixin.isStretchChildHeight(parentRenderStyle, currentRenderBoxModel.renderStyle)) {
           if (parentRenderStyle.height != null) {
             height = parentRenderStyle.height;

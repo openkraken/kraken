@@ -157,8 +157,7 @@ mixin CSSSizingMixin on RenderStyleBase {
   // Whether current node should stretch children's height
   static bool isStretchChildHeight(RenderStyle renderStyle, RenderStyle childRenderStyle) {
     bool isStretch = false;
-    bool isFlex = renderStyle.transformedDisplay == CSSDisplay.flex ||
-      renderStyle.transformedDisplay == CSSDisplay.inlineFlex;
+    bool isFlex = renderStyle.renderBoxModel is RenderFlexLayout;
     bool isHorizontalDirection = false;
     bool isAlignItemsStretch = false;
     bool isFlexNoWrap = false;

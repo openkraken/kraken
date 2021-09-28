@@ -1151,7 +1151,7 @@ describe('align-items', () => {
     );
 
     document.body.appendChild(container);
-    await snapshot();
+    await snapshot(0.1);
   });
 });
 
