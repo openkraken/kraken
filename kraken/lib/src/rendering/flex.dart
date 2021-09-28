@@ -654,10 +654,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         CSSPositionedLayout.applyPositionedChildOffset(this, child);
 
         extendMaxScrollableSize(child);
-        // For scrolling box, the minimum width and height should not less than scrollableSize
-        if (isScrollingContentBox) {
-          ensureBoxSizeLargerThanScrollableSize();
-        }
       } else if (child is RenderBoxModel &&
           CSSPositionedLayout.isSticky(child)) {
         RenderBoxModel scrollContainer = child.findScrollContainer()!;
@@ -684,6 +680,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     _relayoutPositionedChildren();
+
+    ensureBoxSizeLargerThanScrollableSize();
 
     didLayout();
 
@@ -1036,16 +1034,13 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Max length of each flex line
     double flexLineLimit = 0.0;
 
-    // Use scrolling container to calculate flex line limit for scrolling content box
-    RenderBoxModel? containerBox = isScrollingContentBox ? parent as RenderBoxModel? : this;
-
     if (_isHorizontalFlexDirection) {
-      flexLineLimit = containerBox!.contentConstraints!.maxWidth;
+      flexLineLimit = contentConstraints!.maxWidth;
       if (flexLineLimit == double.infinity) {
-        flexLineLimit = RenderBoxModel.getMaxConstraintWidth(containerBox);
+        flexLineLimit = RenderBoxModel.getMaxConstraintWidth(this);
       }
     } else {
-      flexLineLimit = containerBox!.contentConstraints!.maxHeight;
+      flexLineLimit = contentConstraints!.maxHeight;
     }
 
     RenderBox? child = placeholderChild ?? firstChild;
@@ -1559,12 +1554,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         }
 
         if (childParentData!.runIndex != i) break;
-
-        // Skip scrolling content box
-        if (child is RenderBoxModel && child.isScrollingContentBox) {
-          child = childParentData.nextSibling;
-          continue;
-        }
 
         double flexGrow = _getFlexGrow(child);
         double flexShrink = _getFlexShrink(child);

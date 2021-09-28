@@ -420,10 +420,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && childParentData.isPositioned) {
         CSSPositionedLayout.applyPositionedChildOffset(this, child);
         extendMaxScrollableSize(child);
-        // For scrolling box, the minimum width and height should not less than scrollableSize
-        if (isScrollingContentBox) {
-          ensureBoxSizeLargerThanScrollableSize();
-        }
       } else if (child is RenderBoxModel &&
           CSSPositionedLayout.isSticky(child)) {
         RenderBoxModel scrollContainer = child.findScrollContainer()!;
@@ -450,6 +446,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
 
     _relayoutPositionedChildren();
+
+    ensureBoxSizeLargerThanScrollableSize();
 
     didLayout();
 
@@ -524,20 +522,17 @@ class RenderFlowLayout extends RenderLayoutBox {
     bool flipMainAxis = false;
     bool flipCrossAxis = false;
 
-    // Use scrolling container to calculate flex line limit for scrolling content box
-    RenderBoxModel? containerBox =
-        isScrollingContentBox ? parent as RenderBoxModel? : this;
     switch (direction) {
       case Axis.horizontal:
-        mainAxisLimit = containerBox!.contentConstraints!.maxWidth;
+        mainAxisLimit = contentConstraints!.maxWidth;
         if (mainAxisLimit == double.infinity) {
-          mainAxisLimit = RenderBoxModel.getMaxConstraintWidth(containerBox);
+          mainAxisLimit = RenderBoxModel.getMaxConstraintWidth(this);
         }
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
         break;
       case Axis.vertical:
-        mainAxisLimit = containerBox!.contentConstraints!.maxHeight;
+        mainAxisLimit = contentConstraints!.maxHeight;
         if (verticalDirection == VerticalDirection.up) flipMainAxis = true;
         if (textDirection == TextDirection.rtl) flipCrossAxis = true;
         break;

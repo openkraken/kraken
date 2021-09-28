@@ -1400,18 +1400,21 @@ class RenderBoxModel extends RenderBox
     _chainPaintOverflow(context, offset);
   }
 
+  // For scrolling box, the minimum width and height should not less than scrollableSize
   void ensureBoxSizeLargerThanScrollableSize() {
-    double newBoxWidth = size.width;
-    double newBoxHeight = size.height;
+    if (isScrollingContentBox) {
+      double newBoxWidth = size.width;
+      double newBoxHeight = size.height;
 
-    if (scrollableSize.width > newBoxWidth) {
-      newBoxWidth = scrollableSize.width;
-    }
-    if (scrollableSize.height > newBoxHeight) {
-      newBoxHeight = scrollableSize.height;
-    }
+      if (scrollableSize.width > newBoxWidth) {
+        newBoxWidth = scrollableSize.width;
+      }
+      if (scrollableSize.height > newBoxHeight) {
+        newBoxHeight = scrollableSize.height;
+      }
 
-    size = Size(newBoxWidth, newBoxHeight);
+      size = Size(newBoxWidth, newBoxHeight);
+    }
   }
 
   void _chainPaintOverflow(PaintingContext context, Offset offset) {
