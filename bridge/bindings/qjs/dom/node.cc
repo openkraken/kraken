@@ -8,6 +8,7 @@
 #include "element.h"
 #include "document.h"
 #include "text_node.h"
+#include "document_fragment.h"
 #include "comment_node.h"
 #include "bindings/qjs/qjs_patch.h"
 
@@ -34,7 +35,8 @@ JSClassID Node::classId(JSValue &value) {
   if (classId == Element::classId() ||
     classId == Document::classId() ||
     classId == TextNode::classId() ||
-    classId == Comment::classId()
+    classId == Comment::classId() ||
+    classId == DocumentFragment::classId()
   ) {
     return classId;
   }
@@ -99,7 +101,22 @@ JSValue Node::appendChild(QjsContext *ctx, JSValue this_val, int argc, JSValue *
     return JS_ThrowTypeError(ctx, "Failed to execute 'appendChild' on 'Node': The new child element contains the parent.");
   }
 
-  selfInstance->internalAppendChild(nodeInstance);
+  if (nodeInstance->hasNodeFlag(NodeInstance::NodeFlag::IsDocumentFragment)) {
+    size_t len = nodeInstance->childNodes.size();
+    for (int i = 0; i < len; i ++) {
+      selfInstance->internalAppendChild(nodeInstance->childNodes[i]);
+    }
+
+    // Clear fragment childNodes reference.
+    for (int i = 0; i < len; i ++) {
+      nodeInstance->childNodes[i]->unrefer();
+    }
+    nodeInstance->childNodes.clear();
+  } else {
+    selfInstance->ensureDetached(nodeInstance);
+    selfInstance->internalAppendChild(nodeInstance);
+  }
+
   return JS_DupValue(ctx, nodeInstance->instanceObject);
 }
 JSValue Node::remove(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
@@ -155,7 +172,23 @@ JSValue Node::insertBefore(QjsContext *ctx, JSValue this_val, int argc, JSValue 
     return JS_ThrowTypeError(ctx, "Failed to execute 'insertBefore' on 'Node': parameter 1 is not of type 'Node'");
   }
 
-  return selfInstance->internalInsertBefore(nodeInstance, referenceInstance);
+  if (nodeInstance->hasNodeFlag(NodeInstance::NodeFlag::IsDocumentFragment)) {
+    size_t len = nodeInstance->childNodes.size();
+    for (int i = 0; i < len; i ++) {
+      selfInstance->internalInsertBefore(nodeInstance->childNodes[i], referenceInstance);
+    }
+
+    // Clear fragment childNodes reference.
+    for (int i = 0; i < len; i ++) {
+      nodeInstance->childNodes[i]->unrefer();
+    }
+    nodeInstance->childNodes.clear();
+  } else {
+    selfInstance->ensureDetached(nodeInstance);
+    selfInstance->internalInsertBefore(nodeInstance, referenceInstance);
+  }
+
+  return JS_NULL;
 }
 JSValue Node::replaceChild(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (argc < 2) {
@@ -187,13 +220,29 @@ JSValue Node::replaceChild(QjsContext *ctx, JSValue this_val, int argc, JSValue 
     return JS_ThrowTypeError(ctx, "Failed to execute 'replaceChild' on 'Node': The new node is not a type of node.");
   }
 
-  return JS_DupValue(ctx, selfInstance->internalReplaceChild(newChildInstance, oldChildInstance));
+  if (newChildInstance->hasNodeFlag(NodeInstance::NodeFlag::IsDocumentFragment)) {
+    size_t len = newChildInstance->childNodes.size();
+    for (int i = 0; i < len; i ++) {
+      selfInstance->internalInsertBefore(newChildInstance->childNodes[i], oldChildInstance);
+    }
+    selfInstance->internalRemoveChild(oldChildInstance);
+    // Clear fragment childNodes reference.
+    for (int i = 0; i < len; i ++) {
+      newChildInstance->childNodes[i]->unrefer();
+    }
+    newChildInstance->childNodes.clear();
+  } else {
+    selfInstance->ensureDetached(newChildInstance);
+    selfInstance->internalReplaceChild(newChildInstance, oldChildInstance);
+  }
+  return JS_DupValue(ctx, oldChildInstance->instanceObject);
 }
 
 void Node::traverseCloneNode(QjsContext *ctx, NodeInstance *element, NodeInstance *parentElement) {
   for (auto iter : element->childNodes) {
     JSValue newNode = copyNodeValue(ctx, static_cast<NodeInstance *>(iter));
     auto newNodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(newNode, Node::classId(newNode)));
+    parentElement->ensureDetached(newNodeInstance);
     parentElement->internalAppendChild(newNodeInstance);
     // element node needs recursive child nodes.
     if (iter->nodeType == NodeType::ELEMENT_NODE) {
@@ -394,7 +443,6 @@ NodeInstance *NodeInstance::nextSibling() {
   return nullptr;
 }
 void NodeInstance::internalAppendChild(NodeInstance *node) {
-  ensureDetached(node);
   childNodes.emplace_back(node);
   node->setParentNode(this);
   node->refer();
@@ -438,7 +486,6 @@ JSValue NodeInstance::internalInsertBefore(NodeInstance *node, NodeInstance *ref
           "Uncaught TypeError: Failed to execute 'insertBefore' on 'Node': reference node is not a child of this node.");
     }
 
-    ensureDetached(node);
     auto parent = referenceNode->parentNode;
     if (parent != nullptr) {
       auto &&parentChildNodes = parent->childNodes;
@@ -471,7 +518,6 @@ JSValue NodeInstance::internalGetTextContent() {
 }
 void NodeInstance::internalSetTextContent(JSValue content) {}
 JSValue NodeInstance::internalReplaceChild(NodeInstance *newChild, NodeInstance *oldChild) {
-  ensureDetached(newChild);
   assert_m(newChild->parentNode == nullptr, "ReplaceChild Error: newChild was not detached.");
   oldChild->removeParentNode();
   oldChild->unrefer();

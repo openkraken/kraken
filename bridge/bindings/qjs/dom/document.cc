@@ -6,6 +6,7 @@
 #include <regex>
 #include "document.h"
 #include "element.h"
+#include "document_fragment.h"
 #include "text_node.h"
 #include "comment_node.h"
 #include "event.h"
@@ -192,6 +193,10 @@ JSValue Document::createTextNode(QjsContext *ctx, JSValue this_val, int argc, JS
   auto *document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, Document::classId()));
   JSValue textNode = JS_CallConstructor(ctx, TextNode::instance(document->m_context)->classObject, argc, argv);
   return textNode;
+}
+JSValue Document::createDocumentFragment(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, Document::classId()));
+  return JS_CallConstructor(ctx, DocumentFragment::instance(document->m_context)->classObject, 0, nullptr);
 }
 JSValue Document::createComment(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, Document::classId()));

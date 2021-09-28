@@ -21,6 +21,7 @@
 #include "bindings/qjs/dom/custom_event.h"
 #include "bindings/qjs/dom/document.h"
 #include "bindings/qjs/dom/element.h"
+#include "bindings/qjs/dom/document_fragment.h"
 #include "bindings/qjs/dom/elements/.gen/anchor_element.h"
 #include "bindings/qjs/dom/elements/.gen/canvas_element.h"
 #include "bindings/qjs/dom/elements/.gen/input_element.h"
@@ -79,6 +80,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindEvent(m_context);
   bindCustomEvent(m_context);
   bindNode(m_context);
+  bindDocumentFragment(m_context);
   bindTextNode(m_context);
   bindCommentNode(m_context);
   bindElement(m_context);

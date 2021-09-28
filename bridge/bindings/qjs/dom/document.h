@@ -33,6 +33,7 @@ public:
   static JSValue createEvent(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue createElement(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue createTextNode(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
+  static JSValue createDocumentFragment(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue createComment(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue getElementById(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue getElementsByTagName(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
@@ -40,6 +41,7 @@ public:
 private:
   ObjectFunction m_createEvent{m_context, m_prototypeObject, "createEvent", createEvent, 1};
   ObjectFunction m_createElement{m_context, m_prototypeObject, "createElement", createElement, 1};
+  ObjectFunction m_createDocumentFragment{m_context, m_prototypeObject, "createDocumentFragment", createDocumentFragment, 0};
   ObjectFunction m_createTextNode{m_context, m_prototypeObject, "createTextNode", createTextNode, 1};
   ObjectFunction m_createComment{m_context, m_prototypeObject, "createComment", createComment, 1};
   ObjectFunction m_getElementById{m_context, m_prototypeObject, "getElementById", getElementById, 1};

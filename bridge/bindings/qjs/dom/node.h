@@ -7,6 +7,7 @@
 #define KRAKENBRIDGE_NODE_H
 
 #include <utility>
+#include <set>
 
 #include "event_target.h"
 
@@ -74,6 +75,18 @@ struct NodeJob {
 
 class NodeInstance : public EventTargetInstance {
 public:
+  enum class NodeFlag : uint32_t { IsDocumentFragment = 1 << 0 };
+  mutable std::set<NodeFlag> m_nodeFlags;
+  bool hasNodeFlag(NodeFlag flag) const {
+    return m_nodeFlags.size() != 0 && m_nodeFlags.find(flag) != m_nodeFlags.end();
+  }
+  void setNodeFlag(NodeFlag flag) const {
+    m_nodeFlags.insert(flag);
+  }
+  void removeNodeFlag(NodeFlag flag) const {
+    m_nodeFlags.erase(flag);
+  }
+
   NodeInstance() = delete;
   explicit NodeInstance(Node *node, NodeType nodeType, DocumentInstance *document, JSClassID classId, std::string name) : EventTargetInstance(node, classId, std::move(name)),
                                                                                      m_document(document), nodeType(nodeType) {
