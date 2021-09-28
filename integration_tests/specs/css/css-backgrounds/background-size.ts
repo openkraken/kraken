@@ -20,7 +20,7 @@ describe('Background-size', () => {
      ]
     );
     append(BODY, div);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should works with cover', async () => {
@@ -44,7 +44,7 @@ describe('Background-size', () => {
      ]
     );
     append(BODY, div);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should works with auto', async () => {
@@ -68,7 +68,7 @@ describe('Background-size', () => {
      ]
     );
     append(BODY, div);
-    await snapshot();
+    await snapshot(0.1);
   });
   
   it('should works with auto of two values', async () => {
@@ -92,7 +92,7 @@ describe('Background-size', () => {
      ]
     );
     append(BODY, div);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should works with auto of first value', async () => {
@@ -116,7 +116,7 @@ describe('Background-size', () => {
      ]
     );
     append(BODY, div);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should works with auto of second value', async () => {
@@ -140,7 +140,7 @@ describe('Background-size', () => {
      ]
     );
     append(BODY, div);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should works with one value of length', async () => {
@@ -164,7 +164,7 @@ describe('Background-size', () => {
      ]
     );
     append(BODY, div);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should works with two values of length', async () => {
@@ -188,7 +188,7 @@ describe('Background-size', () => {
      ]
     );
     append(BODY, div);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should works with one value of percentage', async () => {
@@ -211,7 +211,7 @@ describe('Background-size', () => {
      ]
     );
     append(BODY, div);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should works with two values of percentage', async () => {
@@ -234,7 +234,7 @@ describe('Background-size', () => {
      ]
     );
     append(BODY, div);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should works with two values of mixed percentage and length', async () => {
@@ -258,7 +258,7 @@ describe('Background-size', () => {
      ]
     );
     append(BODY, div);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should works with length value and background-repeat of repeat', async () => {
@@ -282,7 +282,7 @@ describe('Background-size', () => {
      ]
     );
     append(BODY, div);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should works with percentage value and background-repeat of repeat', async () => {
@@ -306,7 +306,7 @@ describe('Background-size', () => {
      ]
     );
     append(BODY, div);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should works with the height of background size bigger than the height of image container', async () => {
@@ -330,7 +330,7 @@ describe('Background-size', () => {
      ]
     );
     append(BODY, div);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should works with the width of background size bigger than the width of image container', async () => {
@@ -354,7 +354,7 @@ describe('Background-size', () => {
      ]
     );
     append(BODY, div);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should works with background size bigger than image container', async () => {
@@ -378,7 +378,7 @@ describe('Background-size', () => {
      ]
     );
     append(BODY, div);
-    await snapshot();
+    await snapshot(0.1);
   });
   
   it('should not work with negative value', async () => {
@@ -402,7 +402,7 @@ describe('Background-size', () => {
      ]
     );
     append(BODY, div);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should works with background-size value change', async (done) => {
@@ -427,7 +427,7 @@ describe('Background-size', () => {
      ]
     );
     append(BODY, div);
-    await snapshot();
+    await snapshot(0.1);
 
     requestAnimationFrame(async () => {
       div1.style.backgroundSize = '80px';

@@ -22,7 +22,7 @@ describe('background image', function() {
     );
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should work with image of base64', async () => {
@@ -48,6 +48,6 @@ describe('background image', function() {
     );
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 });

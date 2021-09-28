@@ -34,14 +34,15 @@ describe('Color currentColor', () => {
       boxShadow: '10px 5px 5px currentColor',
     });
     container1.appendChild(text1);
+
+    await snapshot();
     
-    requestAnimationFrame(function(){
+    requestAnimationFrame(async () => {
       setElementStyle(container1, {
         color: 'black',
       });
+      await snapshot();
     });
-
-    await snapshot();
   });
 
 });

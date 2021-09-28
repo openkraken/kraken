@@ -19,7 +19,7 @@ describe('background-repeat', () => {
     });
     repeat.appendChild(div1);
     document.body.appendChild(repeat);
-    await sleep(0.2);
+    await sleep(0.1);
     await snapshot(repeat);
   });
 
@@ -92,7 +92,7 @@ describe('background-repeat', () => {
     });
     repeat.appendChild(div3);
     append(BODY, repeat);
-
+    await sleep(0.2);
     await snapshot(repeat);
   });
 
@@ -115,8 +115,9 @@ describe('background-repeat', () => {
       backgroundRepeat: 'repeat',
     });
     repeat.appendChild(div4);
+    await sleep(0.2);
     append(BODY, repeat);
-
+    await sleep(0.2);
     await snapshot(repeat);
   });
 

@@ -156,7 +156,7 @@ describe('flex-aspect', () => {
     );
     BODY.appendChild(flex);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('ratio-img-column-005', async () => {
     let flex;
