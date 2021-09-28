@@ -348,9 +348,15 @@ mixin CSSTextMixin on RenderStyleBase {
   void _updateChildrenFontSize(RenderBoxModel renderBoxModel, bool isRootFontSizeUpdated, {int depth = 1}) {
     renderBoxModel.visitChildren((RenderObject child) {
       if (child is RenderBoxModel) {
+        bool isChildHasFontSize = child.renderStyle.style[FONT_SIZE].isNotEmpty;
         // FIXME: Update `rem` will travers all dom tree may cause performance problem.
         if (isRootFontSizeUpdated) {
           child.renderStyle.style.applyRemProperties();
+          // Also need update all em unit style if font-size is not set cause font-size of child
+          // may depend on font-size of root due to style inheritance.
+          if (!isChildHasFontSize) {
+            child.renderStyle.style.applyEmProperties();
+          }
           // Update font-size of nested children below root element.
           _updateChildrenFontSize(child, isRootFontSizeUpdated, depth: depth++);
         } else {
@@ -361,7 +367,6 @@ mixin CSSTextMixin on RenderStyleBase {
           //    <div>18px</div>
           //    <div style="font-size: 20px">20px</div>
           // </div>
-          bool isChildHasFontSize = child.renderStyle.style[FONT_SIZE].isNotEmpty;
           if (isChildHasFontSize) return;
           // Only need to update child text when style property is not set.
           _updateChildrenFontSize(child, isRootFontSizeUpdated, depth: depth++);
