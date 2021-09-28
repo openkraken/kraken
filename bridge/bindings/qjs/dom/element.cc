@@ -50,7 +50,7 @@ JSClassID Element::classId() {
   return kElementClassId;
 }
 
-JSAtom ElementAttributes::getAttribute(std::string &name) {
+JSAtom ElementAttributes::getAttribute(const std::string &name) {
   bool numberIndex = isNumberIndex(name);
 
   if (numberIndex) {
@@ -66,13 +66,18 @@ ElementAttributes::~ElementAttributes() {
   }
 }
 
-JSValue ElementAttributes::setAttribute(std::string &name, JSAtom atom) {
+JSValue ElementAttributes::setAttribute(const std::string &name, JSAtom atom) {
   bool numberIndex = isNumberIndex(name);
 
   if (numberIndex) {
     return JS_ThrowTypeError(m_ctx,
                              "Failed to execute 'setAttribute' on 'Element': '%s' is not a valid attribute name.",
                              name.c_str());
+  }
+
+  if (name == "className") {
+    std::string classNameString = jsAtomToStdString(m_ctx, atom);
+    m_className->set(classNameString);
   }
 
   m_attributes[name] = JS_DupAtom(m_ctx, atom);
@@ -100,6 +105,10 @@ void ElementAttributes::copyWith(ElementAttributes *attributes) {
   for (auto &attr : attributes->m_attributes) {
     m_attributes[attr.first] = JS_DupAtom(m_ctx, attr.second);
   }
+}
+
+std::shared_ptr<SpaceSplitString> ElementAttributes::className() {
+  return m_className;
 }
 
 JSValue Element::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
@@ -398,6 +407,19 @@ PROP_GETTER(ElementInstance, tagName)(QjsContext *ctx, JSValue this_val, int arg
 
 PROP_SETTER(ElementInstance, tagName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
+PROP_GETTER(ElementInstance, className)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
+  JSAtom valueAtom = element->m_attributes->getAttribute("className");
+  return JS_AtomToString(ctx, valueAtom);
+}
+PROP_SETTER(ElementInstance, className)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
+  JSAtom atom = JS_ValueToAtom(ctx, argv[0]);
+  element->m_attributes->setAttribute("className", atom);
+  JS_FreeAtom(ctx, atom);
+  return JS_NULL;
+}
+
 enum class ViewModuleProperty {
   offsetTop,
   offsetLeft,
@@ -606,6 +628,61 @@ void ElementInstance::internalSetTextContent(JSValue content) {
   internalAppendChild(textNodeInstance);
   JS_FreeValue(m_ctx, textNodeValue);
 }
+
+std::shared_ptr<SpaceSplitString> ElementInstance::classNames() {
+  return m_attributes->className();
+}
+
+std::string SpaceSplitString::m_delimiter{" "};
+
+void SpaceSplitString::set(std::string &string) {
+  size_t pos = 0;
+  std::string token;
+  std::string s = string;
+  while ((pos = s.find(m_delimiter)) != std::string::npos) {
+    token = s.substr(0, pos);
+    m_szData.push_back(token);
+    s.erase(0, pos + m_delimiter.length());
+  }
+  m_szData.push_back(s);
+}
+
+bool SpaceSplitString::contains(std::string &string) {
+  for (std::string &s : m_szData) {
+    if (s == string) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool SpaceSplitString::containsAll(std::string s) {
+  std::vector<std::string> szData;
+  size_t pos = 0;
+  std::string token;
+
+  while ((pos = s.find(m_delimiter)) != std::string::npos) {
+    token = s.substr(0, pos);
+    szData.push_back(token);
+    s.erase(0, pos + m_delimiter.length());
+  }
+  szData.push_back(s);
+
+  bool flag = true;
+  for (std::string &str : szData) {
+    bool isContains = false;
+    for (std::string &data : m_szData) {
+      if (data == str) {
+        isContains = true;
+        break;
+      }
+    }
+    flag &= isContains;
+  }
+
+  return flag;
+}
+
 
 std::string ElementInstance::tagName() {
   std::string tagName = std::string(m_tagName);

@@ -6,9 +6,9 @@
 #ifndef KRAKENBRIDGE_ELEMENT_H
 #define KRAKENBRIDGE_ELEMENT_H
 
+#include "bindings/qjs/host_object.h"
 #include "node.h"
 #include "style_declaration.h"
-#include "bindings/qjs/host_object.h"
 #include <unordered_map>
 
 namespace kraken::binding::qjs {
@@ -32,20 +32,39 @@ struct NativeBoundingClientRect {
   double left;
 };
 
+class SpaceSplitString {
+public:
+  SpaceSplitString() = default;
+  explicit SpaceSplitString(std::string string) {
+    set(string);
+  }
+
+  void set(std::string &string);
+  bool contains(std::string &string);
+  bool containsAll(std::string s);
+
+private:
+  static std::string m_delimiter;
+  std::vector<std::string> m_szData;
+};
+
 class ElementAttributes : public HostObject {
 public:
   ElementAttributes() = delete;
-  explicit ElementAttributes(JSContext *context) : HostObject(context, "ElementAttributes") {}
+  explicit ElementAttributes(JSContext *context) : HostObject(context, "ElementAttributes") {
+  }
   ~ElementAttributes();
 
-  JSAtom getAttribute(std::string &name);
-  JSValue setAttribute(std::string &name, JSAtom value);
+  JSAtom getAttribute(const std::string &name);
+  JSValue setAttribute(const std::string &name, JSAtom value);
   bool hasAttribute(std::string &name);
   void removeAttribute(std::string &name);
   void copyWith(ElementAttributes *attributes);
+  std::shared_ptr<SpaceSplitString> className();
 
 private:
   std::unordered_map<std::string, JSAtom> m_attributes;
+  std::shared_ptr<SpaceSplitString> m_className{std::make_shared<SpaceSplitString>("")};
 };
 
 bool isJavaScriptExtensionElementInstance(JSContext *context, JSValue instance);
@@ -100,11 +119,11 @@ struct PersistElement {
 class ElementInstance : public NodeInstance {
 public:
   ElementInstance() = delete;
-  ~ElementInstance() override {
-  }
+  ~ElementInstance() override {}
   JSValue internalGetTextContent() override;
   void internalSetTextContent(JSValue content) override;
 
+  std::shared_ptr<SpaceSplitString> classNames();
   std::string tagName();
   std::string getRegisteredTagName();
   StyleDeclarationInstance *style();
@@ -115,9 +134,9 @@ protected:
   explicit ElementInstance(Element *element, std::string tagName, bool shouldAddUICommand);
 
 private:
-  DEFINE_HOST_CLASS_PROPERTY(15, nodeName, tagName, offsetLeft, offsetTop, offsetWidth, offsetHeight,
-                             clientWidth, clientHeight, clientTop, clientLeft, scrollTop, scrollLeft, scrollHeight,
-                             scrollWidth, children);
+  DEFINE_HOST_CLASS_PROPERTY(16, nodeName, tagName, className, offsetLeft, offsetTop, offsetWidth, offsetHeight, clientWidth,
+                             clientHeight, clientTop, clientLeft, scrollTop, scrollLeft, scrollHeight, scrollWidth,
+                             children);
   void _notifyNodeRemoved(NodeInstance *node) override;
   void _notifyChildRemoved();
   void _notifyNodeInsert(NodeInstance *insertNode) override;
@@ -139,10 +158,10 @@ private:
 class BoundingClientRect : public HostObject {
 public:
   BoundingClientRect() = delete;
-  explicit BoundingClientRect(JSContext *context, NativeBoundingClientRect *nativeBoundingClientRect) : HostObject(
-    context, "BoundingClientRect"), m_nativeBoundingClientRect(nativeBoundingClientRect) {
+  explicit BoundingClientRect(JSContext *context, NativeBoundingClientRect *nativeBoundingClientRect)
+    : HostObject(context, "BoundingClientRect"), m_nativeBoundingClientRect(nativeBoundingClientRect){
 
-  };
+                                                 };
 
   DEFINE_HOST_OBJECT_PROPERTY(8, x, y, width, height, top, right, bottom, left);
 

@@ -25,7 +25,7 @@ class WindowInstance;
 class DocumentInstance;
 class JSContext;
 
-static inline bool isNumberIndex(std::string &name) {
+static inline bool isNumberIndex(const std::string &name) {
   if (name.empty()) return false;
   char f = name[0];
   return f >= '0' && f <= '9';

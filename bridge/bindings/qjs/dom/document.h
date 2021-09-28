@@ -37,6 +37,7 @@ public:
   static JSValue createComment(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue getElementById(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue getElementsByTagName(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
+  static JSValue getElementsByClassName(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
 
 private:
   ObjectFunction m_createEvent{m_context, m_prototypeObject, "createEvent", createEvent, 1};
@@ -46,6 +47,7 @@ private:
   ObjectFunction m_createComment{m_context, m_prototypeObject, "createComment", createComment, 1};
   ObjectFunction m_getElementById{m_context, m_prototypeObject, "getElementById", getElementById, 1};
   ObjectFunction m_getElementsByTagName{m_context, m_prototypeObject, "getElementsByTagName", getElementsByTagName, 1};
+  ObjectFunction m_getElementsByClassName{m_context, m_prototypeObject, "getElementsByClassName", getElementsByClassName, 1};
   friend DocumentInstance;
 
   bool event_registered{false};

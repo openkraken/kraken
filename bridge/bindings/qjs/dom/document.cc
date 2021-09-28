@@ -244,7 +244,38 @@ JSValue Document::getElementsByTagName(QjsContext *ctx, JSValue this_val, int ar
   traverseNode(document->m_documentElement, [tagName, &elements](NodeInstance *node) {
     if (node->nodeType == NodeType::ELEMENT_NODE) {
       auto element = static_cast<ElementInstance *>(node);
-      if (element->tagName() == tagName) {
+      if (element->tagName() == tagName || tagName == "*") {
+        elements.emplace_back(element);
+      }
+    }
+
+    return false;
+  });
+
+  JSValue array = JS_NewArray(ctx);
+  JSValue pushMethod = JS_GetPropertyStr(ctx, array, "push");
+
+  for (auto & element : elements) {
+    JS_Call(ctx, pushMethod, array, 1, &element->instanceObject);
+  }
+
+  JS_FreeValue(ctx, pushMethod);
+  return array;
+}
+
+JSValue Document::getElementsByClassName(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  if (argc < 1) {
+    return JS_ThrowTypeError(ctx, "Uncaught TypeError: Failed to execute 'getElementsByClassName' on 'Document': 1 argument required, but only 0 present.");
+  }
+
+  auto *document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, Document::classId()));
+  std::string className = jsValueToStdString(ctx, argv[0]);
+
+  std::vector<ElementInstance *> elements;
+  traverseNode(document->m_documentElement, [ctx, className, &elements](NodeInstance *node) {
+    if (node->nodeType == NodeType::ELEMENT_NODE) {
+      auto element = reinterpret_cast<ElementInstance *>(node);
+      if(element->classNames()->containsAll(className)) {
         elements.emplace_back(element);
       }
     }
