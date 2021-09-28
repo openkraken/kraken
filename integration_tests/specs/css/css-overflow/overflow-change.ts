@@ -146,13 +146,12 @@ describe('overflow-change', () => {
         fontSize: '18px',
       }
     }, [
-      (inner2 = createElement('div', {
+      (createElement('div', {
         style: {
           "position": "relative"
         }
       }, [
         createText(`00000 11111 22222 33333 444444 55555 66666 77777 88888 99999`)
-
       ]))
     ]);
     BODY.appendChild(inner3);
