@@ -1,7 +1,6 @@
 const builtInWindowEvents = [
   "onclick",
   "ondblclick",
-  "onerror",
   "onload",
   "onratechange",
   "onresize",
