@@ -72,6 +72,6 @@ describe('percentage', () => {
     );
     BODY.appendChild(container);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 });

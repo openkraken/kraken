@@ -246,7 +246,7 @@ describe('max-height', () => {
     );
     BODY.appendChild(flexbox);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should work with percentage in flow layout', async () => {

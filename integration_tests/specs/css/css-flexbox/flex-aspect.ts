@@ -87,7 +87,7 @@ describe('flex-aspect', () => {
     BODY.appendChild(constrainedFlex);
 
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('ratio-img-column-003', async () => {
     let testFlexItemOverlappingGreen;

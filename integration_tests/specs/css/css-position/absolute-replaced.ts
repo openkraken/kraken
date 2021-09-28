@@ -2455,7 +2455,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('width-001', async () => {
     let p;
