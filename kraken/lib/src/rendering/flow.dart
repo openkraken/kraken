@@ -1325,27 +1325,37 @@ class RenderFlowLayout extends RenderLayoutBox {
       return curr > next ? curr : next;
     });
 
-    double maxScrollableMainSizeOfChildren =
-        renderStyle.paddingLeft + maxScrollableMainSizeOfLines;
+    RenderBoxModel container =
+        isScrollingContentBox ? parent as RenderBoxModel : this;
+    bool isScrollContainer =
+        renderStyle.overflowX != CSSOverflowType.visible ||
+        renderStyle.overflowY != CSSOverflowType.visible;
+
+    // No need to add padding for scrolling content box
+    double maxScrollableMainSizeOfChildren = isScrollContainer
+        ? maxScrollableMainSizeOfLines
+        : container.renderStyle.paddingLeft + maxScrollableMainSizeOfLines;
 
     // Max scrollable cross size of all lines
     double maxScrollableCrossSizeOfLines =
         scrollableCrossSizeOfLines.reduce((double curr, double next) {
       return curr > next ? curr : next;
     });
+
     // No need to add padding for scrolling content box
-    double maxScrollableCrossSizeOfChildren =
-        renderStyle.paddingTop + maxScrollableCrossSizeOfLines;
+    double maxScrollableCrossSizeOfChildren = isScrollContainer
+        ? maxScrollableCrossSizeOfLines
+        : container.renderStyle.paddingTop + maxScrollableCrossSizeOfLines;
 
     double maxScrollableMainSize = math.max(
         size.width -
-            renderStyle.borderLeft -
-            renderStyle.borderRight,
+            container.renderStyle.borderLeft -
+            container.renderStyle.borderRight,
         maxScrollableMainSizeOfChildren);
     double maxScrollableCrossSize = math.max(
         size.height -
-            renderStyle.borderTop -
-            renderStyle.borderBottom,
+            container.renderStyle.borderTop -
+            container.renderStyle.borderBottom,
         maxScrollableCrossSizeOfChildren);
 
     scrollableSize = Size(maxScrollableMainSize, maxScrollableCrossSize);

@@ -1554,6 +1554,12 @@ class RenderFlexLayout extends RenderLayoutBox {
 
         if (childParentData!.runIndex != i) break;
 
+        // Skip scrolling content box
+        if (child is RenderBoxModel && child.isScrollingContentBox) {
+          child = childParentData.nextSibling;
+          continue;
+        }
+
         double flexGrow = _getFlexGrow(child);
         double flexShrink = _getFlexShrink(child);
         // Whether child need to layout
@@ -1957,9 +1963,19 @@ class RenderFlexLayout extends RenderLayoutBox {
       return curr > next ? curr : next;
     });
 
-    double maxScrollableMainSizeOfChildren =
-         (_isHorizontalFlexDirection ? renderStyle.paddingLeft : renderStyle.paddingTop) +
-         maxScrollableMainSizeOfLines;
+    RenderBoxModel container =
+        isScrollingContentBox ? parent as RenderBoxModel : this;
+    bool isScrollContainer =
+        renderStyle.overflowX != CSSOverflowType.visible ||
+        renderStyle.overflowY != CSSOverflowType.visible;
+
+    // No need to add padding for scrolling content box
+    double maxScrollableMainSizeOfChildren = isScrollContainer
+        ? maxScrollableMainSizeOfLines
+        : (_isHorizontalFlexDirection
+            ? container.renderStyle.paddingLeft
+            : container.renderStyle.paddingTop) +
+        maxScrollableMainSizeOfLines;
 
     // Max scrollable cross size of all lines
     double maxScrollableCrossSizeOfLines =
@@ -1967,16 +1983,20 @@ class RenderFlexLayout extends RenderLayoutBox {
       return curr > next ? curr : next;
     });
 
-    double maxScrollableCrossSizeOfChildren =
-        (_isHorizontalFlexDirection ? renderStyle.paddingTop : renderStyle.paddingLeft) +
+    // No need to add padding for scrolling content box
+    double maxScrollableCrossSizeOfChildren = isScrollContainer
+        ? maxScrollableCrossSizeOfLines
+        : (_isHorizontalFlexDirection
+            ? container.renderStyle.paddingTop
+            : container.renderStyle.paddingLeft) +
         maxScrollableCrossSizeOfLines;
 
     double containerContentWidth = size.width -
-        renderStyle.borderLeft -
-        renderStyle.borderRight;
+        container.renderStyle.borderLeft -
+        container.renderStyle.borderRight;
     double containerContentHeight = size.height -
-        renderStyle.borderTop -
-        renderStyle.borderBottom;
+        container.renderStyle.borderTop -
+        container.renderStyle.borderBottom;
     double maxScrollableMainSize = math.max(
         _isHorizontalFlexDirection ? containerContentWidth : containerContentHeight,
         maxScrollableMainSizeOfChildren);
