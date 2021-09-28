@@ -204,14 +204,10 @@ function append(parent: HTMLElement, child: Node) {
 
 async function snapshot(target?: any, filename?: String) {
   if (target && target.toBlob) {
-    await sleep(0.1);
     await expectAsync(target.toBlob(1.0)).toMatchSnapshot(filename);
   } else {
     if (typeof target == 'number') {
       await sleep(target);
-    } else {
-      // Default sleep 0.1s
-      await sleep(0.1);
     }
     await expectAsync(document.documentElement.toBlob(1.0)).toMatchSnapshot(filename);
   }
