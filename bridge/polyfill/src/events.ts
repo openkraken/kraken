@@ -1,3 +1,42 @@
+const builtInWindowEvents = [
+  "onclick",
+  "ondblclick",
+  "onerror",
+  "onload",
+  "onratechange",
+  "onresize",
+  "onscroll",
+  "onhashchange",
+  "onmessage",
+  "onpopstate",
+  "onrejectionhandled",
+  "onunhandledrejection",
+  "ontouchcancel",
+  "ontouchend",
+  "ontouchmove",
+  "ontouchstart"
+];
+
+
+builtInWindowEvents.forEach(e => {
+  let pKey = '_' + e;
+  Object.defineProperty(window, e, {
+    get(): any {
+      return this[pKey];
+    },
+    set(value) {
+      console.log('set event listener', value);
+      if (this[pKey]) {
+        this.removeEventListener(e.substring(2), this[pKey]);
+        this[pKey] = null;
+      }
+
+      console.log('ad event', e, value);
+      this.addEventListener(e.substring(2), value);
+      this[pKey] = value;
+    }
+  });
+});
 
 //@ts-ignore
 export class ErrorEvent extends Event {
@@ -6,6 +45,7 @@ export class ErrorEvent extends Event {
   error?: Error;
   colno?: number;
   filename?: string;
+
   constructor(type: string, init?: ErrorEventInit) {
     super(type);
     if (init) {
@@ -23,6 +63,7 @@ export class ErrorEvent extends Event {
 export class PromiseRejectionEvent extends Event {
   promise: Promise<any>;
   reason: any;
+
   constructor(type: string, init?: PromiseRejectionEventInit) {
     super(type);
 
@@ -35,6 +76,7 @@ export class PromiseRejectionEvent extends Event {
 
 export class PopStateEvent extends Event {
   state: any;
+
   constructor(type: string, init: PopStateEventInit) {
     super(type);
 
