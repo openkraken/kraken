@@ -47,7 +47,7 @@ describe('Tags documentFragment', () => {
     await snapshot();
   });
 
-  it('should work with replaceChild', async () => {
+  xit('should work with replaceChild', async () => {
     const list = document.createElement('div');
     document.body.appendChild(list);
 
