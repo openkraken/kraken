@@ -400,7 +400,12 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     target_compile_options(kraken PRIVATE -fno-exceptions)
   endif ()
 elseif ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
-  target_compile_options(kraken PRIVATE -fno-exceptions -fvisibility=hidden -fno-rtti)
+  if (${CMAKE_BUILD_TYPE} STREQUAL "Release" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
+    target_compile_options(kraken PRIVATE -fno-exceptions -fvisibility=hidden -fno-rtti)
+  else ()
+    ### remove dynamic_cast and exceptions
+    target_compile_options(kraken PRIVATE -fno-exceptions -fno-rtti)
+  endif ()
 endif ()
 
 ### KrakenStatic

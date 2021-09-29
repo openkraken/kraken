@@ -54,7 +54,7 @@ endif()
 
 ### kraken_integration support library
 add_library(kraken_test SHARED ${KRAKEN_TEST_SOURCE})
-target_link_libraries(kraken_test PRIVATE ${BRIDGE_LINK_LIBS} kraken_static)
+target_link_libraries(kraken_test PRIVATE ${BRIDGE_LINK_LIBS} kraken)
 target_include_directories(kraken_test PRIVATE
   ${BRIDGE_INCLUDE}
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
