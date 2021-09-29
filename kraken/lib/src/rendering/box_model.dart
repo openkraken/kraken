@@ -865,15 +865,6 @@ class RenderBoxModel extends RenderBox
     return constraints;
   }
 
-  /// Get max constraint width before layout children,
-  /// note contentConstraints was calculated before layout children.
-  double getMaxConstraintWidth() {
-    double maxConstraintWidth = isScrollingContentBox ?
-        contentConstraints!.minWidth :
-        contentConstraints!.maxWidth;
-    return maxConstraintWidth;
-  }
-
   /// Set the size of scrollable overflow area of renderBoxModel
   void setMaxScrollableSize(double width, double height) {
     // Scrollable area includes right and bottom padding

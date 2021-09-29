@@ -522,17 +522,20 @@ class RenderFlowLayout extends RenderLayoutBox {
     bool flipMainAxis = false;
     bool flipCrossAxis = false;
 
+    // Use scrolling container to calculate flex line limit for scrolling content box
+    RenderBoxModel? containerBox =
+      isScrollingContentBox ? parent as RenderBoxModel? : this;
     switch (direction) {
       case Axis.horizontal:
-        mainAxisLimit = contentConstraints!.maxWidth;
+        mainAxisLimit = containerBox!.contentConstraints!.maxWidth;
         if (mainAxisLimit == double.infinity) {
-          mainAxisLimit = getMaxConstraintWidth();
+          mainAxisLimit = containerBox.renderStyle.getMaxConstraintWidth();
         }
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
         break;
       case Axis.vertical:
-        mainAxisLimit = contentConstraints!.maxHeight;
+        mainAxisLimit = containerBox!.contentConstraints!.maxHeight;
         if (verticalDirection == VerticalDirection.up) flipMainAxis = true;
         if (textDirection == TextDirection.rtl) flipCrossAxis = true;
         break;

@@ -115,7 +115,39 @@ class RenderTextBox extends RenderBox
     double maxConstraintWidth = double.infinity;
     if (parent is RenderBoxModel) {
       RenderBoxModel parentRenderBoxModel = parent as RenderBoxModel;
-      maxConstraintWidth = parentRenderBoxModel.getMaxConstraintWidth();
+      BoxConstraints parentConstraints = parentRenderBoxModel.constraints;
+
+      // Scrolling content box has indefinite max constraints to allow children overflow
+      if (parentRenderBoxModel.isScrollingContentBox) {
+        // Border and padding defined on the outer box of scroll box
+        RenderBoxModel outerScrollBox =
+        parentRenderBoxModel.parent as RenderBoxModel;
+        EdgeInsets? borderEdge = outerScrollBox.renderStyle.borderEdge;
+        EdgeInsetsGeometry? padding = outerScrollBox.renderStyle.padding;
+        double horizontalBorderLength =
+        borderEdge != null ? borderEdge.horizontal : 0;
+        double horizontalPaddingLength =
+        padding != null ? padding.horizontal : 0;
+
+        maxConstraintWidth = parentConstraints.minWidth -
+          horizontalPaddingLength -
+          horizontalBorderLength;
+      } else if (parentConstraints.maxWidth == double.infinity) {
+        final RenderLayoutParentData parentParentData = parentRenderBoxModel.parentData as RenderLayoutParentData;
+        // Width of positioned element does not contrainted by parent.
+        if (parentParentData.isPositioned) {
+          maxConstraintWidth = double.infinity;
+        } else {
+          maxConstraintWidth = parentRenderBoxModel.renderStyle.getMaxConstraintWidth();
+        }
+      } else {
+        EdgeInsets? borderEdge = parentRenderBoxModel.renderStyle.borderEdge;
+        EdgeInsetsGeometry? padding = parentRenderBoxModel.renderStyle.padding;
+        double horizontalBorderLength = borderEdge != null ? borderEdge.horizontal : 0;
+        double horizontalPaddingLength = padding != null ? padding.horizontal : 0;
+
+        maxConstraintWidth = parentConstraints.maxWidth - horizontalPaddingLength - horizontalBorderLength;
+      }
     }
     // Text will not overflow from container, so it can inherit
     // constraints from parents

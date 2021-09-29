@@ -1031,13 +1031,16 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Max length of each flex line
     double flexLineLimit = 0.0;
 
+    // Use scrolling container to calculate flex line limit for scrolling content box
+    RenderBoxModel? containerBox =
+      isScrollingContentBox ? parent as RenderBoxModel? : this;
     if (_isHorizontalFlexDirection) {
-      flexLineLimit = contentConstraints!.maxWidth;
+      flexLineLimit = containerBox!.contentConstraints!.maxWidth;
       if (flexLineLimit == double.infinity) {
-        flexLineLimit = getMaxConstraintWidth();
+        flexLineLimit = containerBox.renderStyle.getMaxConstraintWidth();
       }
     } else {
-      flexLineLimit = contentConstraints!.maxHeight;
+      flexLineLimit = containerBox!.contentConstraints!.maxHeight;
     }
 
     RenderBox? child = placeholderChild ?? firstChild;
