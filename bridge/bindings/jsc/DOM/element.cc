@@ -352,6 +352,10 @@ bool ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRe
                                            JSValueToNumber(_hostClass->ctx, value, exception));
       break;
     }
+    case JSElement::ElementProperty::innerHTML: {
+      HTMLParser::instance()->parseHTML(context, JSValueToStringCopy(ctx, value, exception), this);
+      break;
+    }
     default:
       break;
     }

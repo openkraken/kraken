@@ -13,7 +13,7 @@ namespace kraken::binding::jsc {
 
 HTMLParser* HTMLParser::m_instance;
 
-void HTMLParser::parseProperty(std::unique_ptr<JSContext> &context, ElementInstance *element,
+void HTMLParser::parseProperty(JSContext* context, ElementInstance *element,
                                GumboElement *gumboElement) {
   GumboVector *attributes = &gumboElement->attributes;
   for (int j = 0; j < attributes->length; ++j) {
@@ -73,7 +73,7 @@ void HTMLParser::parseProperty(std::unique_ptr<JSContext> &context, ElementInsta
   }
 }
 
-void HTMLParser::traverseHTML(std::unique_ptr<JSContext> &context, GumboNode *node,
+void HTMLParser::traverseHTML(JSContext* context, GumboNode *node,
                               ElementInstance *element) {
   const GumboVector *children = &node->v.element.children;
   for (int i = 0; i < children->length; ++i) {
@@ -81,10 +81,9 @@ void HTMLParser::traverseHTML(std::unique_ptr<JSContext> &context, GumboNode *no
 
     if (child->type == GUMBO_NODE_ELEMENT) {
       std::string tagName = gumbo_normalized_tagname(child->v.element.tag);
-      auto newElement = JSElement::buildElementInstance(context.get(), tagName);
+      auto newElement = JSElement::buildElementInstance(context, tagName);
       element->internalAppendChild(newElement);
       parseProperty(context, newElement, &child->v.element);
-
       // eval javascript when <script>//code...</script>.
       if (child->v.element.tag == GUMBO_TAG_SCRIPT && child->v.element.children.length > 0) {
         JSStringRef jsCode =
@@ -97,31 +96,32 @@ void HTMLParser::traverseHTML(std::unique_ptr<JSContext> &context, GumboNode *no
         traverseHTML(context, child, newElement);
       }
     } else if (child->type == GUMBO_NODE_TEXT) {
-      auto newTextNodeInstance = new JSTextNode::TextNodeInstance(JSTextNode::instance(context.get()),
+      auto newTextNodeInstance = new JSTextNode::TextNodeInstance(JSTextNode::instance(context),
                                                                   JSStringCreateWithUTF8CString(child->v.text.text));
       element->internalAppendChild(newTextNodeInstance);
     }
   }
 }
 
-bool HTMLParser::parseHTML(std::unique_ptr<JSContext> &context, JSStringRef sourceRef,
+bool HTMLParser::parseHTML(JSContext* context, JSStringRef sourceRef,
                            ElementInstance *element) {
   // gumbo-parser parse HTML.
   std::string html = JSStringToStdString(sourceRef);
   int html_length = html.length();
   GumboOutput *htmlTree = gumbo_parse_with_options(&kGumboDefaultOptions, html.c_str(), html_length);
 
-  const GumboVector *root_children = &htmlTree->root->v.element.children;
+  //const GumboVector *root_children = &htmlTree->root->v.element.children;
 
   if (element != nullptr) {
-    for (int i = 0; i < root_children->length; ++i) {
-      GumboNode *child = (GumboNode *)root_children->data[i];
-      if (child->v.element.tag == GUMBO_TAG_BODY) {
-        traverseHTML(context, child, element);
-      }
-    }
+    traverseHTML(context, htmlTree->root, element);
+//    for (int i = 0; i < root_children->length; ++i) {
+//      GumboNode *child = (GumboNode *)root_children->data[i];
+//      if (child->v.element.tag == GUMBO_TAG_BODY) {
+//        traverseHTML(context, child, element);
+//      }
+//    }
   } else {
-    KRAKEN_LOG(ERROR) << "BODY is null.";
+    KRAKEN_LOG(ERROR) << "element is null.";
   }
 
   return true;

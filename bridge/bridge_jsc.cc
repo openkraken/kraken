@@ -225,7 +225,7 @@ void JSBridge::parseHTML(const NativeString *script, const char *url) {
 
   JSStringRef sourceRef = JSStringCreateWithCharacters(script->string, script->length);
 
-  HTMLParser::instance()->parseHTML(m_context, sourceRef, body);
+  HTMLParser::instance()->parseHTML(m_context.get(), sourceRef, body);
 
   JSStringRelease(sourceRef);
 }
