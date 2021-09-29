@@ -123,7 +123,7 @@ class RenderTextBox extends RenderBox
         if (parentParentData.isPositioned) {
           maxConstraintWidth = double.infinity;
         } else {
-          maxConstraintWidth = RenderBoxModel.getMaxConstraintWidth(parentRenderBoxModel);
+          maxConstraintWidth = parentRenderBoxModel.renderStyle.getMaxConstraintWidth();
         }
       } else {
         EdgeInsets? borderEdge = parentRenderBoxModel.renderStyle.borderEdge;
