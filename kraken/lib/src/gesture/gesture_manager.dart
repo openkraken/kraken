@@ -68,8 +68,8 @@ class GestureManager {
   }
 
   void addPointer(PointerEvent event) {
-    // Collect the events in the hitTest.
-    List<String> events = [];
+    // Collect the events in the hitTest list.
+    Map<String, bool> hitTestEventMap = {};
     for (int i = 0; i < _hitTestList.length; i++) {
       RenderBox renderBox = _hitTestList[i];
       Map<String, List<EventHandler>> eventHandlers = {};
@@ -77,30 +77,15 @@ class GestureManager {
         eventHandlers = renderBox.getEventHandlers!();
       }
 
-      if (eventHandlers.keys.isNotEmpty) {
-        if (!events.contains(EVENT_CLICK) && eventHandlers.containsKey(EVENT_CLICK)) {
-          events.add(EVENT_CLICK);
-        }
-        if (!events.contains(EVENT_DOUBLE_CLICK) && eventHandlers.containsKey(EVENT_DOUBLE_CLICK)) {
-          events.add(EVENT_DOUBLE_CLICK);
-        }
-        if (!events.contains(EVENT_SWIPE) && eventHandlers.containsKey(EVENT_SWIPE)) {
-          events.add(EVENT_SWIPE);
-        }
-        if (!events.contains(EVENT_PAN) && eventHandlers.containsKey(EVENT_PAN)) {
-          events.add(EVENT_PAN);
-        }
-        if (!events.contains(EVENT_LONG_PRESS) && eventHandlers.containsKey(EVENT_LONG_PRESS)) {
-          events.add(EVENT_LONG_PRESS);
-        }
-        if (!events.contains(EVENT_SCALE) && eventHandlers.containsKey(EVENT_SCALE)) {
-          events.add(EVENT_SCALE);
+      // Mark event that should propagation in dom tree.
+      if (eventHandlers.isNotEmpty) {
+        for (String eventType in eventHandlers.keys) {
+          hitTestEventMap[eventType] = true;
         }
       }
     }
 
     String touchType = EVENT_TOUCH_CANCEL;
-
     if (event is PointerDownEvent) {
       touchType = EVENT_TOUCH_START;
       _pointerToEvent[event.pointer] = event;
@@ -109,7 +94,7 @@ class GestureManager {
       // Add pointer to gestures then register the gesture recognizer to the arena.
       gestures.forEach((key, gesture) {
         // Register the recognizer that needs to be monitored.
-        if (events.contains(key)) {
+        if (hitTestEventMap.containsKey(key)) {
           gesture.addPointer(event);
         }
       });
@@ -141,7 +126,7 @@ class GestureManager {
       TouchEvent e = TouchEvent(touchType);
 
       // Only dispatch event that added.
-      bool needDispatch = events.contains(touchType);
+      bool needDispatch = hitTestEventMap.containsKey(touchType);
       if (needDispatch) {
         for (int i = 0; i < _pointers.length; i++) {
           int pointer = _pointers[i];
