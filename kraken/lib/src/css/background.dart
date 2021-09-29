@@ -175,7 +175,7 @@ class CSSBackground {
                       fontSize: fontSize
                     );
                   } else if (renderBoxModel.attached) {
-                    gradientLength = RenderBoxModel.getLogicalContentWidth(renderBoxModel);
+                    gradientLength = renderBoxModel.logicalContentWidth;
                   }
                   break;
                 case TOP:
@@ -199,7 +199,7 @@ class CSSBackground {
                       fontSize: fontSize
                     );
                   } else if (renderBoxModel.attached) {
-                    gradientLength = RenderBoxModel.getLogicalContentHeight(renderBoxModel);
+                    gradientLength = renderBoxModel.logicalContentHeight;
                   }
                   break;
                 case RIGHT:
@@ -224,7 +224,7 @@ class CSSBackground {
                       fontSize: fontSize
                     );
                   } else if (renderBoxModel.attached) {
-                    gradientLength = RenderBoxModel.getLogicalContentWidth(renderBoxModel);
+                    gradientLength = renderBoxModel.logicalContentWidth;
                   }
 
                   break;
@@ -249,7 +249,7 @@ class CSSBackground {
                       fontSize: fontSize
                     );
                   } else if (renderBoxModel.attached) {
-                    gradientLength = RenderBoxModel.getLogicalContentHeight(renderBoxModel);
+                    gradientLength = renderBoxModel.logicalContentHeight;
                   }
                   break;
               }

@@ -5,6 +5,7 @@
  * Author: Kraken Team.
  */
 import 'dart:ui';
+import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
@@ -51,6 +52,179 @@ class RenderStyle
     required this.style,
     required this.elementDelegate,
   });
+
+  // Content width of render box model calculated from style.
+  double? getLogicalContentWidth() {
+    RenderStyle renderStyle = this;
+    double? intrinsicRatio = renderBoxModel!.intrinsicRatio;
+    CSSDisplay? display = renderStyle.transformedDisplay;
+    double? width = renderStyle.width;
+    double? minWidth = renderStyle.minWidth;
+    double? maxWidth = renderStyle.maxWidth;
+    double cropWidth = 0;
+
+    switch (display) {
+      case CSSDisplay.block:
+      case CSSDisplay.flex:
+      case CSSDisplay.sliver:
+      // Get own width if exists else get the width of nearest ancestor width width
+        if (renderStyle.width != null) {
+          cropWidth = _getCropWidthByPaddingBorder(renderStyle, cropWidth);
+        } else {
+          // @TODO: flexbox stretch alignment will stretch replaced element in the cross axis
+          // Block level element will spread to its parent's width except for replaced element
+          if (renderBoxModel is! RenderIntrinsic) {
+            RenderStyle currentRenderStyle = renderStyle;
+
+            while (true) {
+              RenderStyle? parentRenderStyle = renderStyle.parent;
+
+              if (parentRenderStyle != null) {
+                cropWidth = _getCropWidthByMargin(currentRenderStyle, cropWidth);
+                cropWidth = _getCropWidthByPaddingBorder(currentRenderStyle, cropWidth);
+                parentRenderStyle = currentRenderStyle.parent;
+              } else {
+                break;
+              }
+
+              CSSDisplay? parentDisplay = parentRenderStyle!.transformedDisplay;
+              RenderBoxModel parentRenderBoxModel = parentRenderStyle.renderBoxModel!;
+              // Set width of element according to parent display
+              if (parentDisplay != CSSDisplay.inline) {
+                // Skip to find upper parent
+                if (parentRenderStyle.width != null) {
+                  // Use style width
+                  width = parentRenderStyle.width;
+                  cropWidth = _getCropWidthByPaddingBorder(parentRenderStyle, cropWidth);
+                  break;
+                } else if (parentRenderBoxModel.constraints.isTight) {
+                  // Cases like flex item with flex-grow and no width in flex row direction.
+                  width = parentRenderBoxModel.constraints.maxWidth;
+                  cropWidth = _getCropWidthByPaddingBorder(parentRenderStyle, cropWidth);
+                  break;
+                } else if (parentDisplay == CSSDisplay.inlineBlock ||
+                  parentDisplay == CSSDisplay.inlineFlex ||
+                  parentDisplay == CSSDisplay.sliver) {
+                  // Collapse width to children
+                  width = null;
+                  break;
+                }
+              }
+
+              currentRenderStyle = parentRenderStyle;
+            }
+          }
+        }
+        break;
+      case CSSDisplay.inlineBlock:
+      case CSSDisplay.inlineFlex:
+        if (renderStyle.width != null) {
+          width = renderStyle.width;
+          cropWidth = _getCropWidthByPaddingBorder(renderStyle, cropWidth);
+        } else {
+          width = null;
+        }
+        break;
+      case CSSDisplay.inline:
+        width = null;
+        break;
+      default:
+        break;
+    }
+    // Get height by intrinsic ratio for replaced element if height is not defined
+    if (width == null && intrinsicRatio != null) {
+      width = renderStyle.getWidthByIntrinsicRatio() + cropWidth;
+    }
+
+    if (minWidth != null) {
+      if (width != null && width < minWidth) {
+        width = minWidth;
+      }
+    }
+    if (maxWidth != null) {
+      if (width != null && width > maxWidth) {
+        width = maxWidth;
+      }
+    }
+
+    if (width != null) {
+      return math.max(0, width - cropWidth);
+    } else {
+      return null;
+    }
+  }
+
+  // Content height of render box model calculated from style.
+  double? getLogicalContentHeight() {
+    RenderStyle renderStyle = this;
+    CSSDisplay? display = renderStyle.transformedDisplay;
+    double? height = renderStyle.height;
+    double cropHeight = 0;
+    double? maxHeight = renderStyle.maxHeight;
+    double? minHeight = renderStyle.minHeight;
+    double? intrinsicRatio = renderBoxModel!.intrinsicRatio;
+
+    // Inline element has no height
+    if (display == CSSDisplay.inline) {
+      return null;
+    } else if (height != null) {
+      cropHeight = _getCropHeightByPaddingBorder(renderStyle, cropHeight);
+    } else {
+      RenderStyle currentRenderStyle = renderStyle;
+
+      while (true) {
+        RenderStyle? parentRenderStyle = currentRenderStyle.parent;
+
+        if (parentRenderStyle != null) {
+          cropHeight = _getCropHeightByMargin(currentRenderStyle, cropHeight);
+          cropHeight = _getCropHeightByPaddingBorder(currentRenderStyle, cropHeight);
+          parentRenderStyle = currentRenderStyle.parent;
+        } else {
+          break;
+        }
+
+        RenderBoxModel parentRenderBoxModel = parentRenderStyle!.renderBoxModel!;
+        if (CSSSizingMixin.isStretchChildHeight(parentRenderStyle, currentRenderStyle)) {
+          if (parentRenderStyle.height != null) {
+            height = parentRenderStyle.height;
+            cropHeight = _getCropHeightByPaddingBorder(parentRenderStyle, cropHeight);
+            break;
+          } else if (parentRenderBoxModel.constraints.isTight) {
+            // Cases like flex item with flex-grow and no height in flex column direction.
+            height = parentRenderBoxModel.constraints.maxHeight;
+            cropHeight = _getCropHeightByPaddingBorder(parentRenderStyle, cropHeight);
+            break;
+          }
+        } else {
+          break;
+        }
+
+        currentRenderStyle = parentRenderStyle;
+      }
+    }
+
+    // Get height by intrinsic ratio for replaced element if height is not defined
+    if (height == null && intrinsicRatio != null) {
+      height = renderStyle.getHeightByIntrinsicRatio() + cropHeight;
+    }
+
+    if (minHeight != null) {
+      if (height != null && height < minHeight) {
+        height = minHeight;
+      }
+    }
+    if (maxHeight != null) {
+      if (height != null && height > maxHeight) {
+        height = maxHeight;
+      }
+    }
+
+    if (height != null) {
+      return math.max(0, height - cropHeight);
+    } else {
+      return null;
+    }
+  }
 
   /// Resolve percentage size to px base on size of its containing block
   /// https://www.w3.org/TR/css-sizing-3/#percentage-sizing
@@ -676,4 +850,42 @@ class RenderStyle
     double realWidth = realHeight! / intrinsicRatio;
     return realWidth;
   }
+}
+
+double _getCropWidthByMargin(RenderStyle renderStyle, double cropWidth) {
+  if (renderStyle.margin != null) {
+    cropWidth += renderStyle.margin!.horizontal;
+  }
+  return cropWidth;
+}
+
+double _getCropHeightByMargin(RenderStyle renderStyle, double cropHeight) {
+  if (renderStyle.margin != null) {
+    cropHeight += renderStyle.margin!.vertical;
+  }
+  return cropHeight;
+}
+
+double _getCropWidthByPaddingBorder(RenderStyle renderStyle, double cropWidth) {
+  if (renderStyle.borderEdge != null) {
+    cropWidth += renderStyle.borderEdge!.horizontal;
+  }
+
+  if (renderStyle.padding != null) {
+    cropWidth += renderStyle.padding!.horizontal;
+  }
+
+  return cropWidth;
+}
+
+double _getCropHeightByPaddingBorder(RenderStyle renderStyle, double cropHeight) {
+  if (renderStyle.borderEdge != null) {
+    cropHeight += renderStyle.borderEdge!.vertical;
+  }
+
+  if (renderStyle.padding != null) {
+    cropHeight += renderStyle.padding!.vertical;
+  }
+
+  return cropHeight;
 }
