@@ -1034,7 +1034,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     if (_isHorizontalFlexDirection) {
       flexLineLimit = contentConstraints!.maxWidth;
       if (flexLineLimit == double.infinity) {
-        flexLineLimit = renderStyle.getMaxConstraintWidth();
+        flexLineLimit = getMaxConstraintWidth();
       }
     } else {
       flexLineLimit = contentConstraints!.maxHeight;

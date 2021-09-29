@@ -526,7 +526,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       case Axis.horizontal:
         mainAxisLimit = contentConstraints!.maxWidth;
         if (mainAxisLimit == double.infinity) {
-          mainAxisLimit = renderStyle.getMaxConstraintWidth();
+          mainAxisLimit = getMaxConstraintWidth();
         }
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
