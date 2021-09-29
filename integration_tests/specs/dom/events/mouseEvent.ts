@@ -226,7 +226,7 @@ describe('MouseEvent', () => {
     document.body.appendChild(img2);
 
     img2.addEventListener('click',()=>{
-        done();
+      done();
     })
 
     img2.click();
@@ -237,10 +237,10 @@ describe('MouseEvent', () => {
     div.style.width = '100px';
     div.style.height = '100px';
     div.style.backgroundColor = 'red';
-    document.body.appendChild(div);
     div.addEventListener('dblclick', (e)=>{
       done();
     });
+    document.body.appendChild(div);
     await simulateClick(10.0, 10.0, 0);
     await sleep(0.1);
     await simulateClick(10.0, 10.0, 1);

@@ -110,7 +110,7 @@ class GestureManager {
       gestures.forEach((key, gesture) {
         // Register the recognizer that needs to be monitored.
         if (events.contains(key)) {
-          gesture.addPointer(event as PointerDownEvent);
+          gesture.addPointer(event);
         }
       });
 
@@ -140,6 +140,7 @@ class GestureManager {
 
       TouchEvent e = TouchEvent(touchType);
 
+      // Only dispatch event that added.
       bool needDispatch = events.contains(touchType);
       if (needDispatch) {
         for (int i = 0; i < _pointers.length; i++) {
