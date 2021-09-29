@@ -519,9 +519,13 @@ void flushUICommand() {
       }
     }
 
-    for (int i = 0; i < _renderStyleCommands.length; i ++) {
-      var pair = _renderStyleCommands[i];
-      controller.view.setRenderStyle(int.parse(pair[0]), pair[1], pair[2]);
+    try {
+      for (int i = 0; i < _renderStyleCommands.length; i ++) {
+        var pair = _renderStyleCommands[i];
+        controller.view.setRenderStyle(int.parse(pair[0]), pair[1], pair[2]);
+      }
+    } catch (e, stack) {
+      print('$e\n$stack');
     }
 
     _renderStyleCommands.clear();
