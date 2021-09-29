@@ -943,6 +943,9 @@ class RenderBoxModel extends RenderBox
     // Deflate padding constraints.
     boxConstraints = renderStyle.deflatePaddingConstraints(boxConstraints);
 
+    logicalContentWidth = renderStyle.getLogicalContentWidth();
+    logicalContentHeight = renderStyle.getLogicalContentHeight();
+
     if (!isScrollingContentBox && (logicalContentWidth != null || logicalContentHeight != null)) {
       double minWidth;
       double? maxWidth;
