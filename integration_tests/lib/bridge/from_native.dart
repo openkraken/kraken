@@ -60,6 +60,8 @@ void _matchImageSnapshot(Pointer<Void> callbackContext, int contextId, Pointer<U
   String filename = nativeStringToString(snapshotNamePtr);
   matchImageSnapshot(bytes.asTypedList(size), filename).then((value) {
     callback(callbackContext, contextId, value ? 1 : 0);
+  }).catchError((e, stack) {
+    print('$e\n$stack');
   });
 }
 
