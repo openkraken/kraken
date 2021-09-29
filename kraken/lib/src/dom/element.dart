@@ -314,6 +314,8 @@ class Element extends Node
 
   @override
   void willDetachRenderer() {
+    // Cancel running transition.
+    style.cancelRunningTransiton();
     // Remove all intersection change listeners.
     renderBoxModel!.clearIntersectionChangeListeners();
 

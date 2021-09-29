@@ -599,13 +599,27 @@ class CSSStyleDeclaration {
     // Any animation found in previousAnimations but not found in newAnimations is not longer current and should be canceled.
     // @HACK: There are no way to get animationList from styles(Webkit will create an new Style object when style changes, but Kraken not).
     // Therefore we should cancel all running transition to get thing works.
-    if (propertyName == TRANSITION_PROPERTY && _propertyRunningTransition.isNotEmpty) {
+    if (propertyName == TRANSITION_PROPERTY) {
+      _finishRunningTransiton();
+    }
+  }
+
+  void cancelRunningTransiton() {
+    if (_propertyRunningTransition.isNotEmpty) {
+      for (String property in _propertyRunningTransition.keys) {
+        _propertyRunningTransition[property]!.cancel();
+      }
+      _propertyRunningTransition.clear();
+    }
+  }
+
+  void _finishRunningTransiton() {
+    if (_propertyRunningTransition.isNotEmpty) {
       for (String property in _propertyRunningTransition.keys) {
         _propertyRunningTransition[property]!.finish();
       }
       _propertyRunningTransition.clear();
     }
-
   }
 
   void flushPendingProperties() {
