@@ -87,8 +87,6 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 
   m_context = binding::jsc::createJSContext(contextId, errorHandler, this);
 
-  m_html_parser = binding::jsc::createHTMLParser(m_context, errorHandler, this);
-
 #if ENABLE_PROFILE
   auto nativePerformance = binding::jsc::NativePerformance::instance(m_context->uniqueId);
   nativePerformance->mark(PERF_JS_CONTEXT_INIT_START, jsContextStartTime);
@@ -227,7 +225,7 @@ void JSBridge::parseHTML(const NativeString *script, const char *url) {
 
   JSStringRef sourceRef = JSStringCreateWithCharacters(script->string, script->length);
 
-  m_html_parser->parseHTML(sourceRef, body);
+  HTMLParser::instance()->parseHTML(m_context, sourceRef, body);
 
   JSStringRelease(sourceRef);
 }

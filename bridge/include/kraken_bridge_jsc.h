@@ -169,17 +169,19 @@ private:
 
 class HTMLParser {
 public:
-  HTMLParser(std::unique_ptr<JSContext> &context, const JSExceptionHandler &handler, void *owner);
-  KRAKEN_EXPORT bool parseHTML(const uint16_t *code, size_t codeLength);
+  bool parseHTML(std::unique_ptr<binding::jsc::JSContext> &context, JSStringRef sourceRef, ElementInstance* element);
+
+  static HTMLParser* instance() {
+    if (m_instance == nullptr) {
+      m_instance = new HTMLParser();
+    }
+    return m_instance;
+  }
 
 private:
-  std::unique_ptr<JSContext> &m_context;
-  JSExceptionHandler _handler;
-  void *owner;
-
-  void traverseHTML(GumboNode *node, ElementInstance *element);
-
-  void parseProperty(ElementInstance *element, GumboElement *gumboElement);
+  static HTMLParser* m_instance;
+  void traverseHTML(std::unique_ptr<binding::jsc::JSContext> &context, GumboNode *node, ElementInstance *element);
+  void parseProperty(std::unique_ptr<binding::jsc::JSContext> &context, ElementInstance *element, GumboElement *gumboElement);
 };
 
 class KRAKEN_EXPORT JSFunctionHolder {
