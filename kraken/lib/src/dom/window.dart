@@ -27,7 +27,7 @@ class Window extends EventTarget {
   Window(int targetId, this.nativeWindowPtr, ElementManager elementManager, this.viewportElement) : super(targetId, nativeWindowPtr.ref.nativeEventTarget, elementManager) {
     window.onPlatformBrightnessChanged = () {
       ColorSchemeChangeEvent event = ColorSchemeChangeEvent((window.platformBrightness == Brightness.light) ? 'light' : 'dart');
-      dispatchEvent(event);
+      emitUIEvent(elementManager.controller.view.contextId, nativeWindowPtr.ref.nativeEventTarget, event);
     };
 
     // Bind window methods in dart to cpp

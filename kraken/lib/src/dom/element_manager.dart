@@ -352,8 +352,11 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     assert(existsTarget(targetId), 'targetId: $targetId event: $eventType');
     EventTarget target = getEventTargetByTargetId<EventTarget>(targetId)!;
 
-    // Only element accepts event.
     if (target is Element) {
+      target.addEvent(eventType);
+    } else if (target is Document) {
+      target.addEvent(eventType);
+    } else if (target is Window) {
       target.addEvent(eventType);
     }
   }

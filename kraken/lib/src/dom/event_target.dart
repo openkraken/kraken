@@ -42,11 +42,7 @@ class EventTarget {
     currentHandlers.remove(eventHandler);
   }
 
-  void dispatchEvent(Event event) {
-    if (!elementManager.controller.view.disposed) {
-      event.currentTarget = event.target = this;
-    }
-  }
+  void dispatchEvent(Event event) { }
 
   Map<String, List<EventHandler>> getEventHandlers() {
     return eventHandlers;

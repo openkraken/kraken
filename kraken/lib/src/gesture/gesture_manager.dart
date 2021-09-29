@@ -132,11 +132,12 @@ class GestureManager {
       _pointerToEvent[event.pointer] = event;
     } else if (event is PointerUpEvent) {
       touchType = EVENT_TOUCH_END;
-    } else if (event is PointerCancelEvent) {
-      touchType = EVENT_TOUCH_CANCEL;
     }
 
-    if (_pointerToTarget[event.pointer] != null) {
+    // bool needDispatch = events.contains(touchType);
+    bool needDispatch = true;
+    if (_pointerToTarget[event.pointer] != null && needDispatch) {
+
       RenderPointerListenerMixin currentTarget = _pointerToTarget[event.pointer] as RenderPointerListenerMixin;
 
       TouchEvent e = TouchEvent(touchType);
@@ -203,26 +204,20 @@ class GestureManager {
   }
 
   void onDoubleClick() {
-    if (_target != null && _target!.onClick != null) {
-      if (_target!.onDoubleClick != null) {
-        _target!.onDoubleClick!(Event(EVENT_DOUBLE_CLICK));
-      }
+    if (_target != null && _target!.onDoubleClick != null) {
+      _target!.onDoubleClick!(Event(EVENT_DOUBLE_CLICK));
     }
   }
 
   void onClick(String eventType, { PointerDownEvent? down, PointerUpEvent? up }) {
     if (_target != null && _target!.onClick != null) {
-      if (_target!.onClick != null) {
-        _target!.onClick!(eventType, up: up);
-      }
+      _target!.onClick!(eventType, up: up);
     }
   }
 
   void onSwipe(Event event) {
     if (_target != null && _target!.onSwipe != null) {
-      if (_target!.onSwipe != null) {
-        _target!.onSwipe!(event);
-      }
+      _target!.onSwipe!(event);
     }
   }
 

@@ -1355,13 +1355,10 @@ class Element extends Node
 
   @override
   void dispatchEvent(Event event) {
-    super.dispatchEvent(event);
-    if (event.currentTarget != null) {
-      _eventResponder(event);
-
-      // Dispatch listener for widget.
-      elementManager.eventClient?.eventListener(event);
-    }
+    event.currentTarget = this;
+    _eventResponder(event);
+    // Dispatch listener for widget.
+    elementManager.eventClient?.eventListener(event);
   }
 
   void _eventResponder(Event event) {
