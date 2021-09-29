@@ -423,8 +423,8 @@ describe('containing-block', () => {
       [
         createElement('img', {
           src: 'assets/blue96x96.png',
-          width: '96',
-          height: '96',
+          width: '96px',
+          height: '96px',
           alt: 'Image download support must be enabled',
           style: {},
         }),
@@ -432,7 +432,7 @@ describe('containing-block', () => {
     );
     document.body.appendChild(div);
 
-    await snapshot(0.5);
+    await snapshot(0.1);
   });
   it('009', async () => {
     let p;

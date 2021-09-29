@@ -217,7 +217,7 @@ describe('max-width', () => {
     );
     BODY.appendChild(flexbox);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should work with replaced element when element width is larger than intrinsic width', async () => {
