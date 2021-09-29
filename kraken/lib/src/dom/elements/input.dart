@@ -295,6 +295,11 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     nativeInputElement.ref.focus = nativeInputMethodFocus;
     nativeInputElement.ref.blur = nativeInputMethodBlur;
 
+    // Add events on input element.
+    addEvent(EVENT_TOUCH_START);
+    addEvent(EVENT_TOUCH_MOVE);
+    addEvent(EVENT_TOUCH_END);
+
     scrollOffsetX = _scrollableX.position;
   }
 

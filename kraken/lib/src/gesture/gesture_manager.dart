@@ -49,9 +49,9 @@ class GestureManager {
 
   final Map<String, GestureRecognizer> gestures = <String, GestureRecognizer>{};
 
-  List<RenderBox> _hitTestList = [];
-
-  RenderPointerListenerMixin? _target;
+  final List<RenderBox> _hitTestTargetList = [];
+  // Collect the events in the hitTest list.
+  final Map<String, bool> _hitTestEventMap = {};
 
   final Map<int, PointerEvent> _pointerToEvent = {};
 
@@ -59,34 +59,33 @@ class GestureManager {
 
   final List<int> _pointers = [];
 
-  void addTargetToList(RenderBox target) {
-    _hitTestList.add(target);
-  }
+  RenderPointerListenerMixin? _target;
 
-  void clearTargetList() {
-    _hitTestList = [];
+  void addTargetToList(RenderBox target) {
+    _hitTestTargetList.add(target);
   }
 
   void addPointer(PointerEvent event) {
-    // Collect the events in the hitTest list.
-    Map<String, bool> hitTestEventMap = {};
-    for (int i = 0; i < _hitTestList.length; i++) {
-      RenderBox renderBox = _hitTestList[i];
-      Map<String, List<EventHandler>> eventHandlers = {};
-      if (renderBox is RenderPointerListenerMixin && renderBox.getEventHandlers != null) {
-        eventHandlers = renderBox.getEventHandlers!();
-      }
+    String touchType;
+    if (event is PointerDownEvent) {
+      // Reset the hitTest event map when start a new gesture.
+      _hitTestEventMap.clear();
 
-      // Mark event that should propagation in dom tree.
-      if (eventHandlers.isNotEmpty) {
-        for (String eventType in eventHandlers.keys) {
-          hitTestEventMap[eventType] = true;
+      for (int i = 0; i < _hitTestTargetList.length; i++) {
+        RenderBox renderBox = _hitTestTargetList[i];
+        Map<String, List<EventHandler>>? eventHandlers;
+        if (renderBox is RenderPointerListenerMixin && renderBox.getEventHandlers != null) {
+          eventHandlers = renderBox.getEventHandlers!();
+        }
+
+        // Mark event that should propagation in dom tree.
+        if (eventHandlers != null && eventHandlers.isNotEmpty) {
+          for (String eventType in eventHandlers.keys) {
+            _hitTestEventMap[eventType] = true;
+          }
         }
       }
-    }
 
-    String touchType = EVENT_TOUCH_CANCEL;
-    if (event is PointerDownEvent) {
       touchType = EVENT_TOUCH_START;
       _pointerToEvent[event.pointer] = event;
       _pointers.add(event.pointer);
@@ -94,93 +93,96 @@ class GestureManager {
       // Add pointer to gestures then register the gesture recognizer to the arena.
       gestures.forEach((key, gesture) {
         // Register the recognizer that needs to be monitored.
-        if (hitTestEventMap.containsKey(key)) {
+        if (_hitTestEventMap.containsKey(key)) {
           gesture.addPointer(event);
         }
       });
 
       // The target node triggered by the gesture is the bottom node of hitTest.
       // The scroll element needs to be judged by isScrollingContentBox to find the real element upwards.
-      if (_hitTestList.isNotEmpty) {
-        for (int i = 0; i < _hitTestList.length; i++) {
-          RenderBox renderBox = _hitTestList[i];
+      if (_hitTestTargetList.isNotEmpty) {
+        for (int i = 0; i < _hitTestTargetList.length; i++) {
+          RenderBox renderBox = _hitTestTargetList[i];
           if ((renderBox is RenderBoxModel && !renderBox.isScrollingContentBox) || renderBox is RenderViewportBox) {
             _pointerToTarget[event.pointer] = renderBox as RenderPointerListenerMixin;
             break;
           }
         }
       }
-
-      clearTargetList();
+      _hitTestTargetList.clear();
     } else if (event is PointerMoveEvent) {
       touchType = EVENT_TOUCH_MOVE;
       _pointerToEvent[event.pointer] = event;
     } else if (event is PointerUpEvent) {
       touchType = EVENT_TOUCH_END;
+    } else {
+      touchType = EVENT_TOUCH_CANCEL;
     }
 
-    if (_pointerToTarget[event.pointer] != null) {
+    // If the target node is not attached, the event will be ignored.
+    if (_pointerToTarget[event.pointer] == null) return;
 
+    // Only dispatch event that added.
+    bool needDispatch = _hitTestEventMap.containsKey(touchType);
+    if (needDispatch) {
+      TouchEvent e = TouchEvent(touchType);
       RenderPointerListenerMixin currentTarget = _pointerToTarget[event.pointer] as RenderPointerListenerMixin;
 
-      TouchEvent e = TouchEvent(touchType);
+      for (int i = 0; i < _pointers.length; i++) {
+        int pointer = _pointers[i];
+        PointerEvent pointerEvent = _pointerToEvent[pointer] as PointerEvent;
+        RenderPointerListenerMixin target = _pointerToTarget[pointer] as RenderPointerListenerMixin;
 
-      // Only dispatch event that added.
-      bool needDispatch = hitTestEventMap.containsKey(touchType);
-      if (needDispatch) {
-        for (int i = 0; i < _pointers.length; i++) {
-          int pointer = _pointers[i];
-          PointerEvent pointerEvent = _pointerToEvent[pointer] as PointerEvent;
-          RenderPointerListenerMixin target = _pointerToTarget[pointer] as RenderPointerListenerMixin;
+        Touch touch = Touch(
+          identifier: pointerEvent.pointer,
+          target: target.getEventTarget!(),
+          screenX: pointerEvent.position.dx,
+          screenY: pointerEvent.position.dy,
+          clientX: pointerEvent.localPosition.dx,
+          clientY: pointerEvent.localPosition.dy,
+          pageX: pointerEvent.localPosition.dx,
+          pageY: pointerEvent.localPosition.dy,
+          radiusX: pointerEvent.radiusMajor,
+          radiusY: pointerEvent.radiusMinor,
+          rotationAngle: pointerEvent.orientation,
+          force: pointerEvent.pressure,
+        );
 
-          Touch touch = Touch(
-            identifier: pointerEvent.pointer,
-            target: target.getEventTarget!(),
-            screenX: pointerEvent.position.dx,
-            screenY: pointerEvent.position.dy,
-            clientX: pointerEvent.localPosition.dx,
-            clientY: pointerEvent.localPosition.dy,
-            pageX: pointerEvent.localPosition.dx,
-            pageY: pointerEvent.localPosition.dy,
-            radiusX: pointerEvent.radiusMajor,
-            radiusY: pointerEvent.radiusMinor,
-            rotationAngle: pointerEvent.orientation,
-            force: pointerEvent.pressure,
-          );
-
-          if (pointer == event.pointer) {
-            e.changedTouches.append(touch);
-          }
-
-          if (currentTarget == target) {
-            e.targetTouches.append(touch);
-          }
-
-          e.touches.append(touch);
+        if (pointer == event.pointer) {
+          e.changedTouches.append(touch);
         }
 
-        if (touchType == EVENT_TOUCH_MOVE) {
-          _throttler.throttle(() {
-            currentTarget.dispatchEvent!(e);
-          });
-        } else {
-          currentTarget.dispatchEvent!(e);
+        if (currentTarget == target) {
+          e.targetTouches.append(touch);
         }
+
+        e.touches.append(touch);
       }
 
-      if (event is PointerUpEvent || event is PointerCancelEvent) {
-        // Multi pointer operations in the web will organize click and other gesture triggers.
-        if (_pointerToTarget.length == 1 && _pointerToTarget[event.pointer] != null) {
-          _target = _pointerToTarget[event.pointer];
-        } else {
-          _target = null;
-        }
-
-        _pointers.remove(event.pointer);
-        _pointerToEvent.remove(event.pointer);
-        _pointerToTarget.remove(event.pointer);
+      if (touchType == EVENT_TOUCH_MOVE) {
+        _throttler.throttle(() {
+          currentTarget.dispatchEvent!(e);
+        });
+      } else {
+        currentTarget.dispatchEvent!(e);
       }
     }
+
+    // End of the gesture.
+    if (event is PointerUpEvent || event is PointerCancelEvent) {
+      // Multi pointer operations in the web will organize click and other gesture triggers.
+      bool isSinglePointer = _pointerToTarget.length == 1;
+      if (isSinglePointer) {
+        _target = _pointerToTarget[event.pointer];
+      } else {
+        _target = null;
+      }
+
+      _pointers.remove(event.pointer);
+      _pointerToEvent.remove(event.pointer);
+      _pointerToTarget.remove(event.pointer);
+    }
+
   }
 
   void onDoubleClick() {
