@@ -132,18 +132,22 @@ void main() async {
     widgets.add(kraken);
   }
 
-  runApp(MaterialApp(
-    title: 'Kraken Integration Tests',
-    debugShowCheckedModeBanner: false,
-    home: Scaffold(
-      appBar: AppBar(
-        title: Text('Kraken Integration Tests')
+  runZonedGuarded(() {
+    runApp(MaterialApp(
+      title: 'Kraken Integration Tests',
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Kraken Integration Tests')
+        ),
+        body: Wrap(
+          children: widgets,
+        ),
       ),
-      body: Wrap(
-        children: widgets,
-      ),
-    ),
-  ));
+    ));
+  }, (Object error, StackTrace stack) {
+    print('$error\n$stack');
+  });
 
   testTextInput = TestTextInput();
   testTextInput.register();
