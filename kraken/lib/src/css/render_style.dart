@@ -226,6 +226,58 @@ class RenderStyle
     }
   }
 
+  /// Get max constraint width from style, use width or max-width exists if exists,
+  /// otherwise calculated from its ancestors
+  double getMaxConstraintWidth() {
+    double maxConstraintWidth = double.infinity;
+    double cropWidth = 0;
+
+    RenderStyle currentRenderStyle = this;
+
+    // Get the nearest width of ancestor with width
+    while (true) {
+      RenderStyle? parentRenderStyle = currentRenderStyle.parent;
+
+      CSSDisplay? display = currentRenderStyle.transformedDisplay;
+
+      // Flex item with flex-shrink 0 and no width/max-width will have infinity constraints
+      // even if parents have width
+      if (parentRenderStyle != null && (parentRenderStyle.display == CSSDisplay.flex ||
+        parentRenderStyle.display == CSSDisplay.inlineFlex)
+      ) {
+        if (currentRenderStyle.flexShrink == 0 &&
+          currentRenderStyle.width == null &&
+          currentRenderStyle.maxWidth == null) {
+          break;
+        }
+      }
+
+      // Get width if width exists and element is not inline
+      if (display != CSSDisplay.inline &&
+        (currentRenderStyle.width != null || currentRenderStyle.maxWidth != null)) {
+        // Get the min width between width and max-width
+        maxConstraintWidth = math.min(currentRenderStyle.width ?? double.infinity,
+          currentRenderStyle.maxWidth ?? double.infinity);
+        cropWidth = _getCropWidthByPaddingBorder(currentRenderStyle, cropWidth);
+        break;
+      }
+
+      if (parentRenderStyle != null) {
+        cropWidth = _getCropHeightByMargin(currentRenderStyle, cropWidth);
+        cropWidth = _getCropHeightByPaddingBorder(currentRenderStyle, cropWidth);
+        currentRenderStyle = parentRenderStyle;
+      } else {
+        break;
+      }
+    }
+
+    if (maxConstraintWidth != double.infinity) {
+      maxConstraintWidth = maxConstraintWidth - cropWidth;
+    }
+
+    return maxConstraintWidth;
+  }
+
   /// Resolve percentage size to px base on size of its containing block
   /// https://www.w3.org/TR/css-sizing-3/#percentage-sizing
   bool resolvePercentageToContainingBlock(RenderBoxModel parent) {
