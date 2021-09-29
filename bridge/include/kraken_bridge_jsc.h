@@ -169,7 +169,7 @@ private:
 
 class HTMLParser {
 public:
-  bool parseHTML(std::unique_ptr<binding::jsc::JSContext> &context, JSStringRef sourceRef, ElementInstance* element);
+  bool parseHTML(std::unique_ptr<JSContext> &context, JSStringRef sourceRef, ElementInstance* element);
 
   static HTMLParser* instance() {
     if (m_instance == nullptr) {
@@ -180,8 +180,8 @@ public:
 
 private:
   static HTMLParser* m_instance;
-  void traverseHTML(std::unique_ptr<binding::jsc::JSContext> &context, GumboNode *node, ElementInstance *element);
-  void parseProperty(std::unique_ptr<binding::jsc::JSContext> &context, ElementInstance *element, GumboElement *gumboElement);
+  void traverseHTML(std::unique_ptr<JSContext> &context, GumboNode *node, ElementInstance *element);
+  void parseProperty(std::unique_ptr<JSContext> &context, ElementInstance *element, GumboElement *gumboElement);
 };
 
 class KRAKEN_EXPORT JSFunctionHolder {
@@ -903,9 +903,9 @@ using ElementCreator = ElementInstance *(*)(JSContext *context);
 
 class KRAKEN_EXPORT JSElement : public JSNode {
 public:
-  DEFINE_OBJECT_PROPERTY(Element, 18, style, attributes, nodeName, tagName, offsetLeft, offsetTop, offsetWidth,
+  DEFINE_OBJECT_PROPERTY(Element, 19, style, attributes, nodeName, tagName, offsetLeft, offsetTop, offsetWidth,
                          offsetHeight, clientWidth, clientHeight, clientTop, clientLeft, scrollTop, scrollLeft,
-                         scrollHeight, scrollWidth, children, className);
+                         scrollHeight, scrollWidth, children, className, innerHTML);
 
   DEFINE_PROTOTYPE_OBJECT_PROPERTY(Element, 10, getBoundingClientRect, getAttribute, setAttribute, hasAttribute,
                                    removeAttribute, toBlob, click, scroll, scrollBy, scrollTo);

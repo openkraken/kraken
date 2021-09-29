@@ -13,7 +13,7 @@ namespace kraken::binding::jsc {
 
 HTMLParser* HTMLParser::m_instance;
 
-void HTMLParser::parseProperty(std::unique_ptr<binding::jsc::JSContext> &context, ElementInstance *element,
+void HTMLParser::parseProperty(std::unique_ptr<JSContext> &context, ElementInstance *element,
                                GumboElement *gumboElement) {
   GumboVector *attributes = &gumboElement->attributes;
   for (int j = 0; j < attributes->length; ++j) {
@@ -73,7 +73,7 @@ void HTMLParser::parseProperty(std::unique_ptr<binding::jsc::JSContext> &context
   }
 }
 
-void HTMLParser::traverseHTML(std::unique_ptr<binding::jsc::JSContext> &context, GumboNode *node,
+void HTMLParser::traverseHTML(std::unique_ptr<JSContext> &context, GumboNode *node,
                               ElementInstance *element) {
   const GumboVector *children = &node->v.element.children;
   for (int i = 0; i < children->length; ++i) {
@@ -104,7 +104,7 @@ void HTMLParser::traverseHTML(std::unique_ptr<binding::jsc::JSContext> &context,
   }
 }
 
-bool HTMLParser::parseHTML(std::unique_ptr<binding::jsc::JSContext> &context, JSStringRef sourceRef,
+bool HTMLParser::parseHTML(std::unique_ptr<JSContext> &context, JSStringRef sourceRef,
                            ElementInstance *element) {
   // gumbo-parser parse HTML.
   std::string html = JSStringToStdString(sourceRef);
