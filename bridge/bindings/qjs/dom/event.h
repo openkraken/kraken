@@ -73,6 +73,7 @@ public:
   static JSValue stopPropagation(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue stopImmediatePropagation(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue preventDefault(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
+  static JSValue initEvent(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
 
 private:
   static std::unordered_map<std::string, EventCreator> m_eventCreatorMap;
@@ -80,6 +81,7 @@ private:
   ObjectFunction m_stopPropagation{m_context, m_prototypeObject, "stopPropagation", stopPropagation, 0};
   ObjectFunction m_stopImmediatePropagation{m_context, m_prototypeObject, "immediatePropagation", stopImmediatePropagation, 0};
   ObjectFunction m_preventDefault{m_context, m_prototypeObject, "preventDefault", preventDefault, 1};
+  ObjectFunction m_initEvent{m_context, m_prototypeObject, "initEvent", initEvent, 3};
 
   friend EventInstance;
 };

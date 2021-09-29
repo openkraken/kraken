@@ -184,6 +184,38 @@ JSValue Event::preventDefault(QjsContext *ctx, JSValue this_val, int argc, JSVal
   return JS_NULL;
 }
 
+JSValue Event::initEvent(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  if (argc < 1) {
+    return JS_ThrowTypeError(ctx, "Failed to initEvent required, but only 0 present.");
+  }
+
+  JSValue typeValue = argv[0];
+  JSValue bubblesValue = JS_NULL;
+  JSValue cancelableValue = JS_NULL;
+  if (argc > 1) {
+    bubblesValue = argv[1];
+  }
+
+  if (argc > 2) {
+    cancelableValue = argv[2];
+  }
+
+  if (!JS_IsString(typeValue)) {
+    return JS_ThrowTypeError(ctx, "Failed to initEvent: type should be a string.");
+  }
+
+  auto *event = static_cast<EventInstance *>(JS_GetOpaque(this_val, Event::kEventClassID));
+  event->nativeEvent->type = jsValueToNativeString(ctx, typeValue);
+
+  if (!JS_IsNull(bubblesValue)) {
+    event->nativeEvent->bubbles = JS_IsBool(bubblesValue) ? 1 : 0;
+  }
+  if (!JS_IsNull(cancelableValue)) {
+    event->nativeEvent->cancelable = JS_IsBool(cancelableValue) ? 1 : 0;
+  }
+  return JS_NULL;
+}
+
 EventInstance * EventInstance::fromNativeEvent(Event *event, NativeEvent *nativeEvent) {
   return new EventInstance(event, nativeEvent);
 }
