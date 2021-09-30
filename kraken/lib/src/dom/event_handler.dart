@@ -49,12 +49,14 @@ mixin EventHandlerMixin on EventTarget {
       return;
     }
 
+    // When Kraken wraps the Flutter Widget, Kraken need to calculate the global coordinates relative to self.
+    Offset globalOffset = root.globalToLocal(Offset(details.globalPosition.dx, details.globalPosition.dy));
     dispatchEvent(MouseEvent(eventType,
       MouseEventInit(
         bubbles: true,
         cancelable: true,
-        clientX: details.globalPosition.dx,
-        clientY: details.globalPosition.dy,
+        clientX: globalOffset.dx,
+        clientY: globalOffset.dy,
         offsetX: details.localPosition.dx,
         offsetY: details.localPosition.dy,
       )
