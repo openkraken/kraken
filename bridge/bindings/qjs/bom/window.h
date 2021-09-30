@@ -38,7 +38,7 @@ private:
   ObjectFunction m_scrollTo{m_context, m_prototypeObject, "scrollTo", scrollTo, 2};
   ObjectFunction m_scrollBy{m_context, m_prototypeObject, "scrollBy", scrollBy, 2};
 
-  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(8, devicePixelRatio, colorScheme, __location__, window, history, parent,  scrollX, scrollY);
+  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(9, devicePixelRatio, colorScheme, __location__, location, window, history, parent,  scrollX, scrollY);
   friend WindowInstance;
 };
 
