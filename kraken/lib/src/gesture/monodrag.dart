@@ -20,7 +20,7 @@ enum _DragState {
 
 typedef GestureEventListener = void Function(GestureEvent event);
 
-typedef TouchEventListener = void Function(Touch event);
+typedef TouchEventListener = void Function(TouchEvent event);
 
 /// Widget can user EventClient to add event lisnter on view port.
 class EventClient {
