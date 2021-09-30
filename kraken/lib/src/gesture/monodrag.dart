@@ -36,11 +36,6 @@ class EventClient {
     this.onTouchEnd,
   });
 }
-//
-// /// Pass Touch to native.
-// abstract class EventClient {
-//   void eventListener(Event event);
-// }
 
 abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initialize the object.
