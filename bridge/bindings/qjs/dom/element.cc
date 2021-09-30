@@ -75,7 +75,7 @@ JSValue ElementAttributes::setAttribute(const std::string &name, JSAtom atom) {
                              name.c_str());
   }
 
-  if (name == "className") {
+  if (name == "class") {
     std::string classNameString = jsAtomToStdString(m_ctx, atom);
     m_className->set(classNameString);
   }
@@ -409,13 +409,13 @@ PROP_SETTER(ElementInstance, tagName)(QjsContext *ctx, JSValue this_val, int arg
 
 PROP_GETTER(ElementInstance, className)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
-  JSAtom valueAtom = element->m_attributes->getAttribute("className");
+  JSAtom valueAtom = element->m_attributes->getAttribute("class");
   return JS_AtomToString(ctx, valueAtom);
 }
 PROP_SETTER(ElementInstance, className)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   JSAtom atom = JS_ValueToAtom(ctx, argv[0]);
-  element->m_attributes->setAttribute("className", atom);
+  element->m_attributes->setAttribute("class", atom);
   JS_FreeAtom(ctx, atom);
   return JS_NULL;
 }
