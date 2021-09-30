@@ -109,6 +109,21 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     setEventTarget(document);
 
     element_registry.defineBuiltInElements();
+
+    // Listeners need to be registered to window in order to dispatch events on demand.
+    if (eventClient != null) {
+      if (eventClient!.onTouchStart != null) {
+        window.addEvent(EVENT_TOUCH_START);
+      }
+
+      if (eventClient!.onTouchMove != null) {
+        window.addEvent(EVENT_TOUCH_MOVE);
+      }
+
+      if (eventClient!.onTouchEnd != null) {
+        window.addEvent(EVENT_TOUCH_END);
+      }
+    }
   }
 
   void _setupObserver() {
