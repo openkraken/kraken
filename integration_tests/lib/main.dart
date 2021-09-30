@@ -104,7 +104,7 @@ void main() async {
       disableViewportWidthAssertion: true,
       disableViewportHeightAssertion: true,
       javaScriptChannel: javaScriptChannel,
-      eventClient: EventClient(
+      gestureListener: GestureListener(
         onDrag: (GestureEvent gestureEvent) {
           if (gestureEvent.state == EVENT_STATE_START) {
             var event = CustomEvent('nativegesture', CustomEventInit(detail: 'nativegesture'));

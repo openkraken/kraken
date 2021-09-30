@@ -62,7 +62,7 @@ class KrakenViewController {
   // during a kraken view's process of loading, and completing a navigation request.
   KrakenNavigationDelegate? navigationDelegate;
 
-  EventClient? eventClient;
+  GestureListener? gestureListener;
 
   double _viewportWidth;
   double get viewportWidth => _viewportWidth;
@@ -95,7 +95,7 @@ class KrakenViewController {
     int? contextId,
     required this.rootController,
     this.navigationDelegate,
-    this.eventClient,
+    this.gestureListener,
     this.widgetDelegate,
   }) {
     if (kProfileMode) {
@@ -124,7 +124,7 @@ class KrakenViewController {
     viewport = RenderViewportBox(
       background: background,
       viewportSize: Size(viewportWidth, viewportHeight),
-      eventClient: eventClient,
+      gestureListener: gestureListener,
       controller: rootController
     );
 
@@ -138,7 +138,7 @@ class KrakenViewController {
       viewport: viewport,
       showPerformanceOverlayOverride: showPerformanceOverlay,
       controller: rootController,
-      eventClient: eventClient,
+      gestureListener: gestureListener,
       widgetDelegate: widgetDelegate,
     );
 
@@ -463,7 +463,7 @@ class KrakenController {
     _name = value;
   }
 
-  final EventClient? _eventClient;
+  final GestureListener? _gestureListener;
 
   KrakenController(
     String? name,
@@ -475,7 +475,7 @@ class KrakenController {
     String? bundlePath,
     String? bundleContent,
     Color? background,
-    EventClient? eventClient,
+    GestureListener? gestureListener,
     KrakenNavigationDelegate? navigationDelegate,
     KrakenMethodChannel? methodChannel,
     this.widgetDelegate,
@@ -489,7 +489,7 @@ class KrakenController {
         _bundleURL = bundleURL,
         _bundlePath = bundlePath,
         _bundleContent = bundleContent,
-        _eventClient = eventClient {
+        _gestureListener = gestureListener {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_PROPERTY_INIT);
       PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_INIT_START);
@@ -504,7 +504,7 @@ class KrakenController {
         enableDebug: enableDebug,
         rootController: this,
         navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate(),
-        eventClient: _eventClient,
+        gestureListener: _gestureListener,
         widgetDelegate: widgetDelegate,
     );
 

@@ -1424,17 +1424,17 @@ class Element extends Node
       _eventResponder(event);
 
       // Dispatch listener for widget.
-      if (elementManager.eventClient != null) {
-        if (elementManager.eventClient?.onTouchStart != null && event.type == EVENT_TOUCH_START) {
-          elementManager.eventClient?.onTouchStart!(event as TouchEvent);
+      if (elementManager.gestureListener != null) {
+        if (elementManager.gestureListener?.onTouchStart != null && event.type == EVENT_TOUCH_START) {
+          elementManager.gestureListener?.onTouchStart!(event as TouchEvent);
         }
 
-        if (elementManager.eventClient?.onTouchMove != null && event.type == EVENT_TOUCH_MOVE) {
-          elementManager.eventClient?.onTouchMove!(event as TouchEvent);
+        if (elementManager.gestureListener?.onTouchMove != null && event.type == EVENT_TOUCH_MOVE) {
+          elementManager.gestureListener?.onTouchMove!(event as TouchEvent);
         }
 
-        if (elementManager.eventClient?.onTouchEnd != null && event.type == EVENT_TOUCH_END) {
-          elementManager.eventClient?.onTouchEnd!(event as TouchEvent);
+        if (elementManager.gestureListener?.onTouchEnd != null && event.type == EVENT_TOUCH_END) {
+          elementManager.gestureListener?.onTouchEnd!(event as TouchEvent);
         }
       }
     }

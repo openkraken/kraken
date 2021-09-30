@@ -15,12 +15,12 @@ class RenderViewportBox extends RenderProxyBox
   RenderViewportBox({
     required Size viewportSize,
     RenderBox? child,
-    this.eventClient,
+    this.gestureListener,
     this.background,
     required KrakenController controller,
   })  : _viewportSize = viewportSize,
         super(child) {
-    if (eventClient != null && eventClient!.onDrag != null) {
+    if (gestureListener != null && gestureListener!.onDrag != null) {
       _verticalDragGestureRecognizer.onUpdate = _horizontalDragRecognizer.onUpdate = onDragUpdate;
 
       _verticalDragGestureRecognizer.onStart = _horizontalDragRecognizer.onStart = onDragStart;
@@ -31,7 +31,7 @@ class RenderViewportBox extends RenderProxyBox
     this.controller = controller;
   }
 
-  EventClient? eventClient;
+  GestureListener? gestureListener;
 
   @override
   bool get isRepaintBoundary => true;
@@ -82,7 +82,7 @@ class RenderViewportBox extends RenderProxyBox
   }
 
   void onDragStart(DragStartDetails details) {
-    eventClient!.onDrag!(
+    gestureListener!.onDrag!(
         GestureEvent(
             EVENT_DRAG,
             GestureEventInit(
@@ -95,7 +95,7 @@ class RenderViewportBox extends RenderProxyBox
   }
 
   void onDragUpdate(DragUpdateDetails details) {
-    eventClient!.onDrag!(
+    gestureListener!.onDrag!(
         GestureEvent(
             EVENT_DRAG,
             GestureEventInit(
@@ -108,7 +108,7 @@ class RenderViewportBox extends RenderProxyBox
   }
 
   void onDragEnd(DragEndDetails details) {
-    eventClient!.onDrag!(
+    gestureListener!.onDrag!(
         GestureEvent(
             EVENT_DRAG,
             GestureEventInit(

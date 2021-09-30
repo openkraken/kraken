@@ -23,13 +23,13 @@ typedef GestureEventListener = void Function(GestureEvent event);
 typedef TouchEventListener = void Function(TouchEvent event);
 
 /// Widget can user EventClient to add event lisnter on view port.
-class EventClient {
+class GestureListener {
   GestureEventListener? onDrag;
   TouchEventListener? onTouchStart;
   TouchEventListener? onTouchMove;
   TouchEventListener? onTouchEnd;
 
-  EventClient({
+  GestureListener({
     this.onDrag,
     this.onTouchStart,
     this.onTouchMove,
