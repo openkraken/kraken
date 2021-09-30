@@ -1424,7 +1424,7 @@ class Element extends Node
       _eventResponder(event);
 
       // Dispatch listener for widget.
-      elementManager.eventClient?.eventListener(event);
+      elementManager.eventClient?.onTouch!(event as Touch);
     }
   }
 

@@ -18,19 +18,25 @@ enum _DragState {
   accepted,
 }
 
-/// Pass gesture to native.
-abstract class GestureClient {
-  void dragUpdateCallback(DragUpdateDetails details);
+typedef GestureEventListener = void Function(GestureEvent event);
 
-  void dragStartCallback(DragStartDetails details);
+typedef TouchEventListener = void Function(Touch event);
 
-  void dragEndCallback(DragEndDetails details);
+/// Widget can user EventClient to add event lisnter on view port.
+class EventClient {
+  GestureEventListener? onDrag;
+  TouchEventListener? onTouch;
+
+  EventClient({
+    this.onDrag,
+    this.onTouch,
+  });
 }
-
-/// Pass Touch to native.
-abstract class EventClient {
-  void eventListener(Event event);
-}
+//
+// /// Pass Touch to native.
+// abstract class EventClient {
+//   void eventListener(Event event);
+// }
 
 abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initialize the object.

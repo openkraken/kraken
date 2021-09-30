@@ -195,8 +195,6 @@ class Kraken extends StatefulWidget {
   // https://github.com/openkraken/devtools
   final DevToolsService? devToolsService;
 
-  final GestureClient? gestureClient;
-
   final EventClient? eventClient;
 
   final HttpClientInterceptor? httpClientInterceptor;
@@ -270,7 +268,6 @@ class Kraken extends StatefulWidget {
     this.navigationDelegate,
     this.javaScriptChannel,
     this.background,
-    this.gestureClient,
     this.eventClient,
     this.devToolsService,
     // Kraken's http client interceptor.
@@ -833,7 +830,6 @@ This situation often happened when you trying creating kraken when FlutterView n
       onLoadError: _krakenWidget.onLoadError,
       onJSError: _krakenWidget.onJSError,
       methodChannel: _krakenWidget.javaScriptChannel,
-      gestureClient: _krakenWidget.gestureClient,
       eventClient: _krakenWidget.eventClient,
       navigationDelegate: _krakenWidget.navigationDelegate,
       devToolsService: _krakenWidget.devToolsService,

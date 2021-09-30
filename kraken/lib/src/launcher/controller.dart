@@ -62,8 +62,6 @@ class KrakenViewController {
   // during a kraken view's process of loading, and completing a navigation request.
   KrakenNavigationDelegate? navigationDelegate;
 
-  GestureClient? gestureClient;
-
   EventClient? eventClient;
 
   double _viewportWidth;
@@ -97,7 +95,6 @@ class KrakenViewController {
     int? contextId,
     required this.rootController,
     this.navigationDelegate,
-    this.gestureClient,
     this.eventClient,
     this.widgetDelegate,
   }) {
@@ -127,7 +124,7 @@ class KrakenViewController {
     viewport = RenderViewportBox(
       background: background,
       viewportSize: Size(viewportWidth, viewportHeight),
-      gestureClient: gestureClient,
+      eventClient: eventClient,
       controller: rootController
     );
 
@@ -466,8 +463,6 @@ class KrakenController {
     _name = value;
   }
 
-  final GestureClient? _gestureClient;
-
   final EventClient? _eventClient;
 
   KrakenController(
@@ -480,7 +475,6 @@ class KrakenController {
     String? bundlePath,
     String? bundleContent,
     Color? background,
-    GestureClient? gestureClient,
     EventClient? eventClient,
     KrakenNavigationDelegate? navigationDelegate,
     KrakenMethodChannel? methodChannel,
@@ -495,7 +489,6 @@ class KrakenController {
         _bundleURL = bundleURL,
         _bundlePath = bundlePath,
         _bundleContent = bundleContent,
-        _gestureClient = gestureClient,
         _eventClient = eventClient {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_PROPERTY_INIT);
@@ -511,7 +504,6 @@ class KrakenController {
         enableDebug: enableDebug,
         rootController: this,
         navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate(),
-        gestureClient: _gestureClient,
         eventClient: _eventClient,
         widgetDelegate: widgetDelegate,
     );
