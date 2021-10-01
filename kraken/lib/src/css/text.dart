@@ -7,7 +7,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/dom.dart';
 
 final RegExp _commaRegExp = RegExp(r'\s*,\s*');
 
