@@ -469,12 +469,7 @@ mixin CSSTextMixin on RenderStyleBase {
     /// Percentage font-size should be resolved when node attached
     /// cause it needs to know its parents style
     if (property == FONT_SIZE && CSSLength.isPercentage(present)) {
-      if (renderStyle.parent != null) {
-        _updatePercentageFontSize(renderStyle.parent!, present);
-      } else {
-        // Lazy process when element has a parent.
-        style.setProperty(property, present);
-      }
+      _updatePercentageFontSize(renderStyle.parent!, present);
       return;
     }
     /// Percentage line-height should be resolved when node attached
