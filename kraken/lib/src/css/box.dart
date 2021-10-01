@@ -149,6 +149,9 @@ class CSSBackgroundSize {
 /// - border
 mixin CSSBoxMixin on RenderStyleBase {
 
+  static CSSBackgroundPosition DEFAULT_BACKGROUND_POSITION = CSSBackgroundPosition(percentage: -1);
+  static CSSBackgroundSize DEFAULT_BACKGROUND_SIZE = CSSBackgroundSize(fit: BoxFit.none);
+
   /// Background-clip
   BackgroundBoundary? get backgroundClip => _backgroundClip;
   BackgroundBoundary? _backgroundClip;
@@ -178,7 +181,7 @@ mixin CSSBoxMixin on RenderStyleBase {
 
   /// Background-position-x
   CSSBackgroundPosition get backgroundPositionX => _backgroundPositionX;
-  CSSBackgroundPosition _backgroundPositionX = CSSBackgroundPosition(percentage: -1);
+  CSSBackgroundPosition _backgroundPositionX = DEFAULT_BACKGROUND_POSITION;
   set backgroundPositionX(CSSBackgroundPosition? value) {
     if (value == null) return;
     if (value == _backgroundPositionX) return;
@@ -188,7 +191,7 @@ mixin CSSBoxMixin on RenderStyleBase {
 
   /// Background-position-y
   CSSBackgroundPosition get backgroundPositionY => _backgroundPositionY;
-  CSSBackgroundPosition _backgroundPositionY = CSSBackgroundPosition(percentage: -1);
+  CSSBackgroundPosition _backgroundPositionY = DEFAULT_BACKGROUND_POSITION;
   set backgroundPositionY(CSSBackgroundPosition? value) {
     if (value == null) return;
     if (value == _backgroundPositionY) return;
@@ -198,7 +201,7 @@ mixin CSSBoxMixin on RenderStyleBase {
 
   /// Background-size
   CSSBackgroundSize get backgroundSize => _backgroundSize;
-  CSSBackgroundSize _backgroundSize = CSSBackgroundSize(fit: BoxFit.none);
+  CSSBackgroundSize _backgroundSize = DEFAULT_BACKGROUND_SIZE;
   set backgroundSize(CSSBackgroundSize? value) {
     if (value == null) return;
     if (value == _backgroundSize) return;

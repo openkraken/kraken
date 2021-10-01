@@ -136,10 +136,8 @@ class Element extends Node
     with
         ElementBase,
         ElementNativeMethods,
-        EventHandlerMixin,
-        CSSOverflowMixin,
-        CSSVisibilityMixin,
-        CSSFilterEffectsMixin {
+        ElementEventMixin,
+        ElementOverflowMixin {
   static final SplayTreeMap<int, Element> _nativeMap = SplayTreeMap();
 
   static Element getElementOfNativePtr(Pointer<NativeElement> nativeElement) {
@@ -219,7 +217,6 @@ class Element extends Node
 
     // Init style and add change listener.
     style = CSSStyleDeclaration.computedStyle(this, _defaultStyle, _onStyleChanged);
-    _applyDefaultStyle();
 
     // Init render style.
     renderStyle = RenderStyle(style: style, elementDelegate: _elementDelegate);
@@ -304,12 +301,10 @@ class Element extends Node
 
   @override
   void didAttachRenderer() {
-    // After attach, we need to update transformedDisplay.
-    renderStyle.updateTransformedDisplay();
-    // Flush pending style.
-    style.flushPendingProperties();
     // Ensure that the child is attached.
     ensureChildAttached();
+    // Flush pending style.
+    style.flushPendingProperties();
   }
 
   @override
@@ -343,7 +338,7 @@ class Element extends Node
 
   @override
   void didDetachRenderer() {
-    style.removeStyleChangeListener(_onStyleChanged);
+    style.reset();
   }
 
   bool _shouldConsumeScrollTicker = false;
@@ -593,13 +588,18 @@ class Element extends Node
 
   // Attach renderObject of current node to parent
   @override
-  void attachTo(Element parent, {RenderBox? after}) {
+  void attachTo(Node parent, {RenderBox? after}) {
 
-    renderStyle.initDisplay();
+    _applyStyle();
 
     if (renderStyle.display != CSSDisplay.none) {
       willAttachRenderer();
-      parent.addChildRenderObject(this, after: after);
+      if (parent is Element) {
+        parent.addChildRenderObject(this, after: after);
+      } else if (parent is Document) {
+        parent.appendChild(this);
+      }
+
       didAttachRenderer();
     }
   }
@@ -912,14 +912,6 @@ class Element extends Node
     }
   }
 
-  void _updateSliverDirection(String present) {
-    CSSDisplay? display = renderStyle.display;
-    if (display == CSSDisplay.sliver) {
-      assert(renderBoxModel is RenderRecyclerLayout);
-      renderStyle.updateSliver(present);
-    }
-  }
-
   void _updateBox(String property, String present) {
     int contextId = elementManager.contextId;
     double rootFontSize = elementManager.getRootFontSize();
@@ -946,31 +938,6 @@ class Element extends Node
     selfRenderBoxModel.renderStyle.updateBorderRadius(property, present);
   }
 
-  void _updateTransform(String present) {
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-    /// Percentage transform translate should be resolved in layout stage cause it needs to know its own element's size
-    if (RenderStyle.isTransformTranslatePercentage(present)) {
-      // Mark parent needs layout to resolve percentage of child
-      if (selfRenderBoxModel.parent is RenderBoxModel) {
-        (selfRenderBoxModel.parent as RenderBoxModel).markNeedsLayout();
-      }
-      return;
-    }
-
-    double rootFontSize = elementManager.getRootFontSize();
-    double fontSize = renderStyle.fontSize;
-    Matrix4? matrix4 = CSSTransform.parseTransform(present, viewportSize, rootFontSize, fontSize);
-
-    // Transform should converted to matrix4 value to compare cause case such as
-    // `translate3d(750rpx, 0rpx, 0rpx)` and `translate3d(100vw, 0vw, 0vw)` should considered to be equal.
-    // Note this comparison cannot be done in style listener cause prevValue cannot be get in animation case.
-    if (renderStyle.transform == matrix4) {
-      return;
-    }
-
-    renderStyle.updateTransform(matrix4);
-  }
-
   // Update text related style
   void _updateTextStyle(String property, String present) {
     /// Percentage font-size should be resolved when node attached
@@ -986,15 +953,66 @@ class Element extends Node
     setRenderStyle(property, value);
   }
 
+  void _updateRenderBoxModelWithDisplay() {
+    CSSDisplay originalDisplay = renderStyle.previousDisplay;
+    CSSDisplay presentDisplay = renderStyle.display;
+
+    if (originalDisplay == presentDisplay) return;
+    // Destroy renderer of element when display is changed to none.
+    if (presentDisplay == CSSDisplay.none) {
+      detach();
+      return;
+    }
+
+    // When renderer and style listener is not created when original display is none,
+    // thus it needs to create renderer when style changed.
+    if (originalDisplay == CSSDisplay.none) {
+      RenderBox? after;
+      Element parent = this.parent as Element;
+      if (parent.scrollingContentLayoutBox != null) {
+        after = parent.scrollingContentLayoutBox!.lastChild;
+      } else {
+        after = (parent.renderBoxModel as RenderLayoutBox).lastChild;
+      }
+      // Update renderBoxModel and attach it to parent.
+      updateRenderBoxModel();
+      parent.addChildRenderObject(this, after: after);
+      // FIXME: avoid ensure something in display updating.
+      ensureChildAttached();
+    }
+
+    if (renderBoxModel is RenderLayoutBox) {
+      RenderLayoutBox? prevRenderLayoutBox = renderBoxModel as RenderLayoutBox?;
+      if (originalDisplay != CSSDisplay.none) {
+        // Don't updateRenderBoxModel twice.
+        updateRenderBoxModel();
+      }
+
+      bool shouldReattach = isRendererAttached && parent != null && prevRenderLayoutBox != renderBoxModel;
+
+      if (shouldReattach) {
+        RenderLayoutBox parentRenderObject = parentElement!.renderBoxModel as RenderLayoutBox;
+        Element? previousSibling = this.previousSibling as Element?;
+        RenderObject? previous = previousSibling?.renderer;
+
+        parentRenderObject.remove(prevRenderLayoutBox!);
+        parentRenderObject.insert(renderBoxModel!, after: previous as RenderBox?);
+      } else {
+        renderBoxModel!.markNeedsLayout();
+      }
+    }
+  }
+
   /// Set internal style value to the element.
   void setRenderStyle(String property, dynamic present) {
     switch (property) {
       case DISPLAY:
-        renderStyle.updateDisplay(present, this);
+        renderStyle.display = CSSDisplayMixin.resolveDisplay(present);
+        _updateRenderBoxModelWithDisplay();
         break;
 
       case VERTICAL_ALIGN:
-        renderStyle.updateVerticalAlign(present);
+        renderStyle.verticalAlign = CSSInlineMixin.resolveVerticalAlign(present);
         break;
 
       case POSITION:
@@ -1031,11 +1049,11 @@ class Element extends Node
         break;
 
       case SLIVER_DIRECTION:
-        _updateSliverDirection(present);
+        renderStyle.sliverDirection = CSSSliverMixin.resolveAxis(present);
         break;
 
       case TEXT_ALIGN:
-        renderStyle.updateFlow();
+        renderStyle.updateFlow(present);
         break;
 
       case PADDING_TOP:
@@ -1056,7 +1074,7 @@ class Element extends Node
 
       case OVERFLOW_X:
       case OVERFLOW_Y:
-        updateRenderOverflow(this, _handleScroll);
+        updateRenderOverflow(_handleScroll);
         break;
 
       case BACKGROUND_COLOR:
@@ -1099,29 +1117,41 @@ class Element extends Node
         break;
 
       case OPACITY:
-        renderStyle.updateOpacity(present);
+        renderStyle.opacity = CSSOpacityMixin.resolveOpacity(present);
         break;
       case VISIBILITY:
-        updateRenderVisibility(CSSVisibilityMixin.getVisibility(present));
+        renderStyle.visibility = CSSVisibilityMixin.resolveVisibility(present);
         break;
       case CONTENT_VISIBILITY:
-        renderStyle.updateRenderContentVisibility(present);
+        renderStyle.contentVisibility = CSSContentVisibilityMixin.resolveContentVisibility(present);
         break;
       case TRANSFORM:
-        _updateTransform(present);
+        /// Percentage transform translate should be resolved in layout stage cause it needs to know its own element's size
+        if (RenderStyle.isTransformTranslatePercentage(present)) {
+          // Mark parent needs layout to resolve percentage of child
+          if (renderBoxModel!.parent is RenderBoxModel) {
+            (renderBoxModel!.parent as RenderBoxModel).markNeedsLayout();
+          }
+        } else {
+          renderStyle.transform =  CSSTransform.parseTransform(
+            present,
+            viewportSize,
+            elementManager.getRootFontSize(),
+            renderStyle.fontSize
+          );
+        }
         break;
       case TRANSFORM_ORIGIN:
-        renderStyle.updateTransformOrigin(present);
+        renderStyle.transformOrigin = CSSOrigin.parseOrigin(present, renderStyle);
         break;
       case OBJECT_FIT:
-        renderStyle.updateObjectFit(present);
+        renderStyle.objectFit = CSSObjectFitMixin.resolveBoxFit(present);
         break;
       case OBJECT_POSITION:
-        renderStyle.updateObjectPosition(present);
+        renderStyle.objectPosition = CSSObjectPositionMixin.resolveObjectPosition(present);
         break;
-
       case FILTER:
-        updateFilterEffects(renderBoxModel!, present);
+        renderStyle.filter = CSSFunction.parseFunction(present);
         break;
     }
 
@@ -1172,15 +1202,15 @@ class Element extends Node
   }
 
   void _applyStyleSheetStyle() {
-    String classNames = getProperty(_CLASS_NAME).toString();
-
-    if (classNames.isNotEmpty) {
+    String? classNames = getProperty(_CLASS_NAME);
+    if (classNames != null && classNames.isNotEmpty) {
+      const String classSelectorPrefix = '.';
       for (String className in classNames.trim().split(_splitRegExp)) {
         for (CSSStyleSheet sheet in elementManager.styleSheets) {
           List<CSSRule> rules = sheet.cssRules;
           for (int i = 0; i < rules.length; i++) {
             CSSRule rule = rules[i];
-            if (rule is CSSStyleRule && rule.selectorText == className) {
+            if (rule is CSSStyleRule && rule.selectorText == (classSelectorPrefix + className)) {
               var styleSheetStyle = rule.style;
               for (String propertyName in styleSheetStyle.keys) {
                 _setStyleProperty(propertyName, styleSheetStyle[propertyName]);
@@ -1205,22 +1235,32 @@ class Element extends Node
   void setInlineStyle(String property, dynamic value) {
     // Current only for mark property is setting by inline style.
     inlineStyle[property] = value;
-    _setStyleProperty(property, value, true);
+    if (renderBoxModel != null) {
+      _setStyleProperty(property, value, true);
+    }
+  }
+
+  void _applyStyle() {
+    // Apply default style.
+    _applyDefaultStyle();
+    renderStyle.initDisplay();
+
+    _applyInlineStyle();
+    _applyStyleSheetStyle();
   }
 
   void recalculateStyle() {
     // TODO: only update the element's style that is changed.
+    // Reset renderStyle.
+    if (renderBoxModel != null) {
+      // Reset style.
+      style.reset();
+      _applyStyle();
 
-    // Reset style.
-    style.reset();
-
-    // Apply style.
-    _applyDefaultStyle();
-    _applyInlineStyle();
-    _applyStyleSheetStyle();
-
-    style.flushPendingProperties();
-
+      renderBoxModel!.renderStyle = RenderStyle(style: style, elementDelegate: _elementDelegate);
+      style.flushPendingProperties();
+      renderBoxModel!.markNeedsLayout();
+    }
     // Update children style.
     children.forEach((Element child) {
       child.recalculateStyle();
@@ -1236,10 +1276,6 @@ class Element extends Node
       (value as Map<String, dynamic>).forEach(setInlineStyle);
     } else {
       properties[key] = value;
-    }
-
-    if (key == _CLASS_NAME) {
-      _applyStyleSheetStyle();
     }
   }
 

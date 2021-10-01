@@ -24,8 +24,7 @@ mixin CSSOpacityMixin on RenderStyleBase {
   set opacity(double? value) {
     if (value == null) return;
     assert(value >= 0.0 && value <= 1.0);
-    if (_opacity == value)
-      return;
+    if (_opacity == value) return;
     _opacity = value;
     int alpha = ui.Color.getAlphaFromOpacity(_opacity);
     renderBoxModel!.alpha = alpha;
@@ -34,8 +33,7 @@ mixin CSSOpacityMixin on RenderStyleBase {
     renderBoxModel!.markNeedsPaint();
   }
 
-  void updateOpacity(String value) {
-    double? opacityValue = CSSStyleDeclaration.isNullOrEmptyValue(value) ? 1.0 : CSSLength.toDouble(value);
-    opacity = opacityValue;
+  static double? resolveOpacity(String value) {
+    return CSSStyleDeclaration.isNullOrEmptyValue(value) ? 1.0 : CSSLength.toDouble(value);
   }
 }

@@ -48,7 +48,7 @@ CSSOverflowType _getOverflowType(String definition) {
   }
 }
 
-mixin CSSOverflowStyleMixin on RenderStyleBase {
+mixin CSSOverflowMixin on RenderStyleBase {
   CSSOverflowType _overflowX = CSSOverflowType.visible;
   CSSOverflowType get overflowX {
     return _overflowX;
@@ -75,7 +75,7 @@ mixin CSSOverflowStyleMixin on RenderStyleBase {
   }
 }
 
-mixin CSSOverflowMixin on ElementBase {
+mixin ElementOverflowMixin on ElementBase {
   // The duration time for element scrolling to a significant place.
   static const SCROLL_DURATION = Duration(milliseconds: 250);
 
@@ -85,14 +85,12 @@ mixin CSSOverflowMixin on ElementBase {
   // House content which can be scrolled.
   RenderLayoutBox? scrollingContentLayoutBox;
 
-  void updateRenderOverflow(Element element, ScrollListener scrollListener) {
+  void updateRenderOverflow(ScrollListener scrollListener) {
+    Element element = this as Element;
     CSSStyleDeclaration style = element.style;
-    RenderBoxModel renderBoxModel = element.renderBoxModel!;
-    RenderStyle renderStyle = renderBoxModel.renderStyle;
-
     renderStyle.updateOverflow(style);
-
     if (renderBoxModel is RenderRecyclerLayout) {
+      RenderRecyclerLayout renderBoxModel = this.renderBoxModel as RenderRecyclerLayout;
       // Recycler layout not need repaintBoundary and scroll/pointer listeners,
       // ignoring overflowX or overflowY sets, which handle it self.
       renderBoxModel.clipX = renderBoxModel.clipY = false;
@@ -100,11 +98,11 @@ mixin CSSOverflowMixin on ElementBase {
           ? renderBoxModel.scrollable.position : null;
       renderBoxModel.scrollOffsetY = renderBoxModel.axis == Axis.vertical
           ? renderBoxModel.scrollable.position : null;
-    } else {
+    } else if (renderBoxModel != null) {
+      RenderBoxModel renderBoxModel = this.renderBoxModel!;
       CSSOverflowType overflowX = renderStyle.overflowX;
       CSSOverflowType overflowY = renderStyle.overflowY;
       bool shouldRepaintSelf = false;
-
       switch(overflowX) {
         case CSSOverflowType.hidden:
           _scrollableX = null;

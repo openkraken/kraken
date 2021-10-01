@@ -28,6 +28,8 @@ class CSSOffset {
 
 mixin CSSPositionMixin on RenderStyleBase {
 
+  static const CSSPositionType DEFAULT_POSITION_TYPE = CSSPositionType.static;
+
   CSSOffset? _top;
   CSSOffset? get top {
     return _top;
@@ -79,7 +81,7 @@ mixin CSSPositionMixin on RenderStyleBase {
     }
   }
 
-  CSSPositionType _position = CSSPositionType.static;
+  CSSPositionType _position = DEFAULT_POSITION_TYPE;
   CSSPositionType get position {
     return _position;
   }
@@ -95,7 +97,7 @@ mixin CSSPositionMixin on RenderStyleBase {
     // to bubble up in the RenderObject tree.
     if (renderBoxModel!.parentData is RenderLayoutParentData) {
       RenderStyle renderStyle = renderBoxModel!.renderStyle;
-      if (renderStyle.position != CSSPositionType.static) {
+      if (renderStyle.position != DEFAULT_POSITION_TYPE) {
         RenderBoxModel parent = renderBoxModel!.parent as RenderBoxModel;
         parent.markNeedsLayout();
       }

@@ -38,7 +38,7 @@ class RenderRecyclerLayout extends RenderLayoutBox {
   }) : super(renderStyle: renderStyle, elementDelegate: elementDelegate) {
     pointerListener = _pointerListener;
     scrollable = KrakenScrollable(axisDirection: getAxisDirection(axis));
-    axis = renderStyle.sliverAxis;
+    axis = renderStyle.sliverDirection;
     _renderSliverBoxChildManager = ElementSliverBoxChildManager(elementDelegate, this);
 
     switch (axis) {
@@ -151,7 +151,15 @@ class RenderRecyclerLayout extends RenderLayoutBox {
 
     double? width = renderStyle.width;
     double? height = renderStyle.height;
-    Axis sliverAxis = renderStyle.sliverAxis;
+    Axis sliverAxis = renderStyle.sliverDirection;
+    AxisDirection axisDirection = getAxisDirection(sliverAxis);
+
+    // TODO(yuanyan): Update scrollable only when axisDirection changed.
+    scrollable = KrakenScrollable(axisDirection: axisDirection);
+    viewport
+      ..axisDirection = axisDirection
+      ..crossAxisDirection = getCrossAxisDirection(sliverAxis)
+      ..offset = scrollable.position!;
 
     switch (sliverAxis) {
       case Axis.horizontal:

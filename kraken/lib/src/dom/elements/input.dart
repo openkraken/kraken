@@ -398,11 +398,11 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   TextSpan _buildTextSpan({ String? text }) {
-    return CSSTextMixin.createTextSpan(text ?? '', parentElement: this);
+    return CSSTextMixin.createTextSpan(text ?? '', renderStyle);
   }
 
   TextSpan _buildPasswordTextSpan(String text) {
-    return CSSTextMixin.createTextSpan(obscuringCharacter * text.length, parentElement: this);
+    return CSSTextMixin.createTextSpan(obscuringCharacter * text.length, renderStyle);
   }
 
   Color cursorColor = CSSColor.initial;

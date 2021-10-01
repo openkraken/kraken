@@ -1165,15 +1165,22 @@ class CSSOrigin {
 
 mixin CSSTransformMixin on RenderStyleBase {
 
+  static Offset DEFAULT_TRANSFORM_OFFSET = Offset(0, 0);
+  static Alignment DEFAULT_TRANSFORM_ALIGNMENT = Alignment.center;
+
   Matrix4? get transform => _transform;
   Matrix4? _transform;
   set transform(Matrix4? value) {
+    // Transform should converted to matrix4 value to compare cause case such as
+    // `translate3d(750rpx, 0rpx, 0rpx)` and `translate3d(100vw, 0vw, 0vw)` should considered to be equal.
+    // Note this comparison cannot be done in style listener cause prevValue cannot be get in animation case.
     if (_transform == value) return;
     _transform = value;
+    updateTransform(value);
   }
 
   Offset get transformOffset => _transformOffset;
-  Offset _transformOffset = Offset(0, 0);
+  Offset _transformOffset = DEFAULT_TRANSFORM_OFFSET;
   set transformOffset(Offset value) {
     if (_transformOffset == value) return;
     _transformOffset = value;
@@ -1181,7 +1188,7 @@ mixin CSSTransformMixin on RenderStyleBase {
   }
 
   Alignment get transformAlignment => _transformAlignment;
-  Alignment _transformAlignment = Alignment.center;
+  Alignment _transformAlignment = DEFAULT_TRANSFORM_ALIGNMENT;
   set transformAlignment(Alignment value) {
     if (_transformAlignment == value) return;
     _transformAlignment = value;
@@ -1211,19 +1218,22 @@ mixin CSSTransformMixin on RenderStyleBase {
     }
   }
 
-  void updateTransformOrigin(String present, [CSSOrigin? newOrigin]) {
-    RenderStyle renderStyle = this as RenderStyle;
-    CSSOrigin? transformOriginValue = newOrigin ?? CSSOrigin.parseOrigin(present, renderStyle);
-    if (transformOriginValue == null) return;
+  CSSOrigin? _transformOrigin;
+  CSSOrigin? get transformOrigin => _transformOrigin;
+  set transformOrigin(CSSOrigin? value) {
+  
+    if (_transformOrigin == value) return;
+    _transformOrigin = value;
 
+    if (value == null) return;
     Offset oldOffset = transformOffset;
-    Offset offset = transformOriginValue.offset;
+    Offset offset = value.offset;
     // Transform origin transition by offset
     if (offset.dx != oldOffset.dx || offset.dy != oldOffset.dy) {
       transformOffset = offset;
     }
 
-    Alignment alignment = transformOriginValue.alignment;
+    Alignment alignment = value.alignment;
     Alignment oldAlignment = transformAlignment;
     // Transform origin transition by alignment
     if (alignment.x != oldAlignment.x || alignment.y != oldAlignment.y) {

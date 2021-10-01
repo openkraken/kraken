@@ -468,6 +468,7 @@ class RenderLayoutBox extends RenderBoxModel
 
 mixin RenderBoxModelBase on RenderBox {
   late RenderStyle renderStyle;
+  late ElementDelegate elementDelegate;
   Size? boxSize;
 }
 
@@ -480,18 +481,12 @@ class RenderBoxModel extends RenderBox
         RenderOpacityMixin,
         RenderIntersectionObserverMixin,
         RenderContentVisibilityMixin,
-        RenderVisibilityMixin,
         RenderPointerListenerMixin,
-        RenderColorFilter,
-        RenderImageFilter,
         RenderObjectWithControllerMixin {
   RenderBoxModel({
-    required RenderStyle renderStyle,
-    required ElementDelegate elementDelegate
-  })  : super() {
-    _elementDelegate = elementDelegate;
-    _renderStyle = renderStyle;
-  }
+    required this.renderStyle,
+    required this.elementDelegate
+  }) : super();
 
   @override
   bool get alwaysNeedsCompositing => opacityAlwaysNeedsCompositing();
@@ -500,14 +495,10 @@ class RenderBoxModel extends RenderBox
 
   bool _debugShouldPaintOverlay = false;
 
-  late RenderStyle _renderStyle;
   @override
-  RenderStyle get renderStyle {
-    return _renderStyle;
-  }
-
-  late ElementDelegate _elementDelegate;
-  ElementDelegate get elementDelegate => _elementDelegate;
+  late RenderStyle renderStyle;
+  @override
+  late ElementDelegate elementDelegate;
 
   bool get debugShouldPaintOverlay => _debugShouldPaintOverlay;
 
@@ -546,6 +537,13 @@ class RenderBoxModel extends RenderBox
 
   // When RenderBoxModel is scrolling box, contentConstraints are always equal to BoxConstraints();
   bool isScrollingContentBox = false;
+
+  bool _needsRecalculateStyle = false;
+  void markNeedsRecalculateRenderStyle() {
+    if (_needsRecalculateStyle)
+      return;
+    _needsRecalculateStyle = true;
+  }
 
   BoxSizeType get widthSizeType {
     bool widthDefined = renderStyle.width != null;
@@ -1079,7 +1077,7 @@ class RenderBoxModel extends RenderBox
       childPaintDuration = 0;
       PerformanceTiming.instance().mark(PERF_PAINT_START, uniqueId: hashCode);
     }
-    if (isCSSVisibilityHidden) {
+    if (renderStyle.isVisibilityHidden) {
       if (kProfileMode) {
         PerformanceTiming.instance().mark(PERF_PAINT_END, uniqueId: hashCode);
       }
@@ -1103,6 +1101,15 @@ class RenderBoxModel extends RenderBox
     ));
   }
 
+  void paintColorFilter(PaintingContext context, Offset offset, PaintingContextCallback callback) {
+    ColorFilter? colorFilter = renderStyle.colorFilter;
+    if (colorFilter != null) {
+      context.pushColorFilter(offset, colorFilter, callback);
+    } else {
+      callback(context, offset);
+    }
+  }
+
   void paintBoxModel(PaintingContext context, Offset offset) {
 
     if (isScrollingContentBox) {
@@ -1116,6 +1123,18 @@ class RenderBoxModel extends RenderBox
           scrollingOffsetX != null ? offset.dx + scrollingOffsetX! : offset.dx;
       offset = Offset(offsetX, offsetY);
       paintColorFilter(context, offset, _chainPaintImageFilter);
+    }
+  }
+
+  ImageFilterLayer? _imageFilterLayer;
+  void paintImageFilter(PaintingContext context, Offset offset,
+      PaintingContextCallback callback) {
+    if (renderStyle.imageFilter != null) {
+      _imageFilterLayer ??= ImageFilterLayer();
+      _imageFilterLayer!.imageFilter = renderStyle.imageFilter;
+      context.pushLayer(_imageFilterLayer!, callback, offset);
+    } else {
+      callback(context, offset);
     }
   }
 
@@ -1222,7 +1241,7 @@ class RenderBoxModel extends RenderBox
     }
 
     // Evict render decoration image cache.
-    _renderStyle.decoration?.image?.image.evict();
+    renderStyle.decoration?.image?.image.evict();
   }
 
   Offset getTotalScrollOffset() {
@@ -1242,7 +1261,7 @@ class RenderBoxModel extends RenderBox
   bool hitTest(BoxHitTestResult result, {required Offset position}) {
     if (!hasSize ||
         !contentVisibilityHitTest(result, position: position) ||
-        !visibilityHitTest(result, position: position)) {
+        renderStyle.isVisibilityHidden) {
       return false;
     }
 

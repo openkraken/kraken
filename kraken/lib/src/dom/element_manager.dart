@@ -57,10 +57,9 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   static Map<int, Pointer<NativeWindow>> windowNativePtrMap = {};
 
   static double FOCUS_VIEWINSET_BOTTOM_OVERALL = 32;
-
+  // Single child renderView.
   late final RenderViewportBox viewport;
   late final Document document;
-  late final RenderBox _viewportRenderObject;
   late final Element viewportElement;
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
   bool? showPerformanceOverlayOverride;
@@ -93,9 +92,6 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     HTMLElement documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId]!, this);
     setEventTarget(documentElement);
 
-    viewport.child = viewportElement.renderBoxModel;
-    _viewportRenderObject = viewport;
-
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_INIT_END);
     }
@@ -106,8 +102,9 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     setEventTarget(window);
 
     document = Document(DOCUMENT_ID, documentNativePtrMap[contextId]!, this, documentElement);
-    document.appendChild(documentElement);
     setEventTarget(document);
+
+    documentElement.attachTo(document);
 
     element_registry.defineBuiltInElements();
   }
@@ -236,11 +233,18 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     recalculateDocumentStyle();
   }
 
+  // TODO: support class style map avoid recalculate all dom tree.
+  bool _hasRecalculateDocumentStylePending = false;
   void recalculateDocumentStyle() {
-    // Recalculate style for all nodes.
-    document.documentElement.recalculateStyle();
+    if (_hasRecalculateDocumentStylePending) return;
+    _hasRecalculateDocumentStylePending = true;
+    SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+      // Recalculate style for all nodes.
+      document.documentElement.recalculateStyle();
+      _hasRecalculateDocumentStylePending = false;
+    });
+    SchedulerBinding.instance!.scheduleFrame();
   }
-
 
   void setProperty(int targetId, String key, dynamic value) {
     assert(existsTarget(targetId), 'targetId: $targetId key: $key value: $value');
@@ -370,7 +374,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   RenderBox getRootRenderBox() {
-    return _viewportRenderObject;
+    return viewport;
   }
 
   double getRootFontSize() {
@@ -424,7 +428,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   void detach() {
-    RenderObject? parent = _viewportRenderObject.parent as RenderObject?;
+    RenderObject? parent = viewport.parent as RenderObject?;
 
     if (parent == null) return;
 

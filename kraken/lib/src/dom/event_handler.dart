@@ -7,14 +7,14 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 
-enum AppearEventState {
+enum AppearEventType {
   none,
   appear,
   disappear
 }
 
-mixin EventHandlerMixin on EventTarget {
-  AppearEventState appearEventState = AppearEventState.none;
+mixin ElementEventMixin on EventTarget {
+  AppearEventType prevAppearState = AppearEventType.none;
 
   void addEventResponder(RenderPointerListenerMixin renderBox) {
     renderBox.onClick = handleMouseEvent;
@@ -62,15 +62,15 @@ mixin EventHandlerMixin on EventTarget {
   }
 
   void handleAppear() {
-    if (appearEventState == AppearEventState.appear) return;
-    appearEventState = AppearEventState.appear;
+    if (prevAppearState == AppearEventType.appear) return;
+    prevAppearState = AppearEventType.appear;
 
     dispatchEvent(AppearEvent());
   }
 
   void handleDisappear() {
-    if (appearEventState == AppearEventState.disappear) return;
-    appearEventState = AppearEventState.disappear;
+    if (prevAppearState == AppearEventType.disappear) return;
+    prevAppearState = AppearEventType.disappear;
     dispatchEvent(DisappearEvent());
   }
 

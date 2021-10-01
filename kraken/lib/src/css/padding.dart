@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 
 mixin CSSPaddingMixin on RenderStyleBase {
+  // TODO(yuanyan): remove _resolvedPadding once we have a way to resolve.
   EdgeInsets? _resolvedPadding;
 
   void _resolve() {

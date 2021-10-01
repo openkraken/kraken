@@ -1,7 +1,5 @@
 // https://www.w3.org/TR/css-inline-3/
 
-
-
 import 'package:kraken/css.dart';
 
 /// Sets vertical alignment of an inline, inline-block
@@ -30,11 +28,7 @@ mixin CSSInlineMixin on RenderStyleBase {
     }
   }
 
-  void updateVerticalAlign(String value) {
-    verticalAlign = parseVerticalAlign(value);
-  }
-
-  static VerticalAlign parseVerticalAlign(String verticalAlign) {
+  static VerticalAlign resolveVerticalAlign(String verticalAlign) {
     switch (verticalAlign) {
       case TOP:
         return VerticalAlign.top;

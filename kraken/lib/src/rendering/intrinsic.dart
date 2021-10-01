@@ -183,7 +183,7 @@ class RenderIntrinsic extends RenderBoxModel
   /// override it to layout box model paint.
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (isCSSVisibilityHidden) return;
+    if (renderStyle.isVisibilityHidden) return;
     paintBoxModel(context, offset);
   }
 

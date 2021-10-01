@@ -5,6 +5,7 @@
 
 import 'dart:ffi';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
@@ -30,11 +31,22 @@ class HTMLElement extends Element {
       PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_PROPERTY_INIT);
     }
     elementManager.viewportElement = this;
-    // Init renderer.
-    willAttachRenderer();
     // Must init with viewport width.
     renderStyle.width = elementManager.viewportWidth;
     renderStyle.height = elementManager.viewportHeight;
-    didAttachRenderer();
+  }
+
+  @override
+  void attachTo(Node parent, {RenderBox? after}) {
+    super.attachTo(parent);
+    if (renderBoxModel != null) {
+      elementManager.viewport.child = renderBoxModel;
+    }
+  }
+
+  @override
+  void detach() {
+    super.detach();
+    elementManager.viewport.child = null;
   }
 }

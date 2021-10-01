@@ -304,7 +304,7 @@ mixin CSSTextMixin on RenderStyleBase {
         RenderBoxModel parentRenderBoxModel = child.parent as RenderBoxModel;
         KrakenRenderParagraph renderParagraph = child.child as KrakenRenderParagraph;
         String? text = renderParagraph.text.text;
-        child.text = CSSTextMixin.createTextSpan(text, parentRenderBoxModel: parentRenderBoxModel);
+        child.text = CSSTextMixin.createTextSpan(text, parentRenderBoxModel.renderStyle);
         // Update text box property which will then update paragraph and mark it needs layout.
         if (styleProperty == TEXT_OVERFLOW) {
           // Always get text overflow from style cause it is affected by white-space and overflow.
@@ -336,7 +336,7 @@ mixin CSSTextMixin on RenderStyleBase {
         RenderBoxModel parentRenderBoxModel = child.parent as RenderBoxModel;
         KrakenRenderParagraph renderParagraph = child.child as KrakenRenderParagraph;
         String? text = renderParagraph.text.text;
-        child.text = CSSTextMixin.createTextSpan(text, parentRenderBoxModel: parentRenderBoxModel);
+        child.text = CSSTextMixin.createTextSpan(text, parentRenderBoxModel.renderStyle);
       }
     });
   }
@@ -377,33 +377,18 @@ mixin CSSTextMixin on RenderStyleBase {
         RenderBoxModel parentRenderBoxModel = child.parent as RenderBoxModel;
         KrakenRenderParagraph renderParagraph = child.child as KrakenRenderParagraph;
         String? text = renderParagraph.text.text;
-        child.text = CSSTextMixin.createTextSpan(text, parentRenderBoxModel: parentRenderBoxModel);
+        child.text = CSSTextMixin.createTextSpan(text, parentRenderBoxModel.renderStyle);
       }
     });
   }
 
-  static TextSpan createTextSpan(String? text, {Element? parentElement, RenderBoxModel? parentRenderBoxModel}) {
-    TextStyle? textStyle;
+  static TextSpan createTextSpan(String? text, RenderStyle parentRenderStyle) {
+    CSSStyleDeclaration parentStyle = parentRenderStyle.style;
+    Size viewportSize = parentRenderStyle.viewportSize;
 
-    CSSStyleDeclaration parentStyle;
-    Size viewportSize;
-    if (parentElement != null) {
-      parentStyle = parentElement.style;
-      viewportSize = parentElement.viewportSize;
-      parentRenderBoxModel = parentElement.renderBoxModel;
-    } else {
-      parentStyle = parentRenderBoxModel!.renderStyle.style;
-      viewportSize = parentRenderBoxModel.renderStyle.viewportSize;
-    }
-
-    if (parentRenderBoxModel != null) {
-      textStyle = getTextStyle(parentStyle, viewportSize, parentRenderStyle: parentRenderBoxModel.renderStyle);
-    } else {
-      textStyle = getTextStyle(parentStyle, viewportSize);
-    }
     return TextSpan(
       text: text,
-      style: textStyle,
+      style: getTextStyle(parentStyle, viewportSize, parentRenderStyle: parentRenderStyle),
     );
   }
 

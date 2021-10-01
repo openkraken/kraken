@@ -47,35 +47,33 @@ mixin CSSFlowMixin on RenderStyleBase {
     }
   }
 
-  void updateFlow() {
-    textAlign = _getTextAlign(style);
+  void updateFlow(String value) {
+    textAlign = _getTextAlign(value);
   }
 
-  TextAlign _getTextAlign(CSSStyleDeclaration style) {
-    TextAlign alignment = TextAlign.start;
+  TextAlign _getTextAlign(String value) {
+    TextAlign alignment;
 
-    if (style.contains(TEXT_ALIGN)) {
-      switch (style[TEXT_ALIGN]) {
-        case 'start':
-        case 'left':
-        // Use default value: start
-          break;
-        case 'end':
-        case 'right':
-          alignment = TextAlign.end;
-          break;
-        case 'center':
-          alignment = TextAlign.center;
-          break;
-        case 'justify':
-          alignment = TextAlign.justify;
-          break;
+    switch (value) {
+      case 'end':
+      case 'right':
+        alignment = TextAlign.end;
+        break;
+      case 'center':
+        alignment = TextAlign.center;
+        break;
+      case 'justify':
+        alignment = TextAlign.justify;
+        break;
+      case 'start':
+      case 'left':
+      default:
+        alignment = TextAlign.start;
       // Like inherit, which is the same with parent element.
       // Not impl it due to performance consideration.
       // case 'match-parent':
-      }
     }
-
+    
     return alignment;
   }
 }

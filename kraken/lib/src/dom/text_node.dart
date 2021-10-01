@@ -130,7 +130,7 @@ class TextNode extends Node {
 
     // The parentNode must be an element.
     _renderTextBox!.style = _parentElement.style;
-    _renderTextBox!.text = CSSTextMixin.createTextSpan(data, parentElement: parentElement);
+    _renderTextBox!.text = CSSTextMixin.createTextSpan(data, _parentElement.renderStyle);
 
     _updateLineHeight();
     _updateTextAlign();

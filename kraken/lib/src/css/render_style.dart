@@ -18,6 +18,7 @@ mixin RenderStyleBase {
   late CSSStyleDeclaration style;
   RenderBoxModel? get renderBoxModel => elementDelegate.getRenderBoxModel();
   Size get viewportSize => elementDelegate.getViewportSize();
+  double get rootFontSize => style.target!.elementManager.getRootFontSize();
 }
 
 class RenderStyle
@@ -30,6 +31,7 @@ class RenderStyle
     CSSTextMixin,
     CSSPositionMixin,
     CSSTransformMixin,
+    CSSVisibilityMixin,
     CSSContentVisibilityMixin,
     CSSFlexboxMixin,
     CSSFlowMixin,
@@ -38,7 +40,8 @@ class RenderStyle
     CSSObjectFitMixin,
     CSSObjectPositionMixin,
     CSSSliverMixin,
-    CSSOverflowStyleMixin,
+    CSSOverflowMixin,
+    CSSFilterEffectsMixin,
     CSSOpacityMixin {
 
   @override
