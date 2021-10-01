@@ -464,12 +464,13 @@ mixin CSSTextMixin on RenderStyleBase {
     lineHeight = parsedLineHeight;
   }
 
-  void updateTextStyle(String property, String present, RenderStyle? parentRenderStyle) {
+  void updateTextStyle(String property, String present) {
+    RenderStyle renderStyle = this as RenderStyle;
     /// Percentage font-size should be resolved when node attached
     /// cause it needs to know its parents style
     if (property == FONT_SIZE && CSSLength.isPercentage(present)) {
-      if (parentRenderStyle != null) {
-        _updatePercentageFontSize(parentRenderStyle, present);
+      if (renderStyle.parent != null) {
+        _updatePercentageFontSize(renderStyle.parent!, present);
       } else {
         // Lazy process when element has a parent.
         style.setProperty(property, present);
@@ -482,11 +483,8 @@ mixin CSSTextMixin on RenderStyleBase {
       _updatePercentageLineHeight(present);
       return;
     }
-
-    RenderStyle renderStyle = this as RenderStyle;
     Size viewportSize = renderStyle.viewportSize;
-    RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
-    double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
+    double rootFontSize = renderStyle.rootFontSize;
     double _fontSize = renderStyle.fontSize;
 
     switch (property) {

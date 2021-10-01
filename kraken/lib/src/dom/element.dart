@@ -938,15 +938,6 @@ class Element extends Node
     selfRenderBoxModel.renderStyle.updateBorderRadius(property, present);
   }
 
-  // Update text related style
-  void _updateTextStyle(String property, String present) {
-    /// Percentage font-size should be resolved when node attached
-    /// cause it needs to know its parents style
-
-    RenderStyle? parentRenderStyle = parentElement?.renderStyle;
-    renderStyle.updateTextStyle(property, present, parentRenderStyle);
-  }
-
   // FIXME: only compatible with kraken plugins
   @deprecated
   void setStyle(String property, dynamic value) {
@@ -1158,7 +1149,7 @@ class Element extends Node
     // Text Style
     switch (property) {
       case COLOR:
-        _updateTextStyle(property, present);
+        renderStyle.updateTextStyle(property, present);
         // Color change should trigger currentColor update
         _updateBox(property, present);
         break;
@@ -1179,7 +1170,7 @@ class Element extends Node
       case OVERFLOW_X:
       case OVERFLOW_Y:
       case LINE_CLAMP:
-        _updateTextStyle(property, present);
+        renderStyle.updateTextStyle(property, present);
         break;
     }
   }
