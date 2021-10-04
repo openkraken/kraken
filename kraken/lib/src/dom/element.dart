@@ -86,8 +86,6 @@ typedef GetRenderBoxModel = RenderBoxModel? Function();
 /// Delegate methods passed to renderBoxModel for actions involved with element
 /// (eg. convert renderBoxModel to repaint boundary then attach to element).
 class ElementDelegate {
-  /// Mark the renderer of element as needs layout.
-  VoidCallback markRendererNeedsLayout;
 
   /// Toggle the renderer of element between repaint boundary and non repaint boundary.
   VoidCallback toggleRendererRepaintBoundary;
@@ -117,7 +115,6 @@ class ElementDelegate {
   VoidCallback scrollInputToCaret;
 
   ElementDelegate({
-    required this.markRendererNeedsLayout,
     required this.toggleRendererRepaintBoundary,
     required this.detachRenderer,
     required this.getTargetId,
@@ -201,7 +198,6 @@ class Element extends Node
 
       // Init element delegate for proxy element internal method.
       _elementDelegate = ElementDelegate(
-        markRendererNeedsLayout: _markRendererNeedsLayout,
         toggleRendererRepaintBoundary: _toggleRendererRepaintBoundary,
         detachRenderer: detach,
         getTargetId: _getTargetId,
@@ -234,10 +230,6 @@ class Element extends Node
 
   RenderBoxModel? _getRenderBoxModel() {
     return renderBoxModel;
-  }
-
-  void _markRendererNeedsLayout() {
-    renderBoxModel!.markNeedsLayout();
   }
 
   void _toggleRendererRepaintBoundary() {
@@ -1124,7 +1116,7 @@ class Element extends Node
             (renderBoxModel!.parent as RenderBoxModel).markNeedsLayout();
           }
         } else {
-          renderStyle.transform =  CSSTransform.parseTransform(
+          renderStyle.transform = CSSTransform.parseTransform(
             present,
             viewportSize,
             elementManager.getRootFontSize(),
@@ -1133,7 +1125,12 @@ class Element extends Node
         }
         break;
       case TRANSFORM_ORIGIN:
-        renderStyle.transformOrigin = CSSOrigin.parseOrigin(present, renderStyle);
+        renderStyle.transformOrigin = CSSOrigin.parseOrigin(
+          present,
+          viewportSize,
+          elementManager.getRootFontSize(),
+          renderStyle.fontSize
+        );
         break;
       case OBJECT_FIT:
         renderStyle.objectFit = CSSObjectFitMixin.resolveBoxFit(present);
