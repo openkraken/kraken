@@ -135,20 +135,24 @@ void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType
     eventObject = eventInstance->instanceObject;
   }
 
+  JSValue moduleNameValue = JS_NewUnicodeString(m_context->runtime(), m_context->ctx(), moduleName->string, moduleName->length);
+  JSValue extraObject = JS_NULL;
+  if (extra != nullptr) {
+    std::u16string u16Extra = std::u16string(reinterpret_cast<const char16_t *>(extra->string), extra->length);
+    std::string extraString = toUTF8(u16Extra);
+    extraObject = JS_ParseJSON(m_context->ctx(), extraString.c_str(), extraString.size(), "");
+  }
+
   {
     struct list_head *el, *el1;
     list_for_each_safe(el, el1, &m_context->module_job_list) {
       auto *module = list_entry(el, ModuleContext, link);
       JSValue callback = module->callback;
 
-      JSValue moduleNameValue = JS_NewUnicodeString(m_context->runtime(), m_context->ctx(), moduleName->string, moduleName->length);
-      std::u16string u16Extra = std::u16string(reinterpret_cast<const char16_t *>(extra->string), extra->length);
-      std::string extraString = toUTF8(u16Extra);
-
       JSValue arguments[] = {
         moduleNameValue,
         eventObject,
-        JS_ParseJSON(m_context->ctx(), extraString.c_str(), extraString.size(), "")
+        extraObject
       };
       JSValue returnValue = JS_Call(m_context->ctx(), callback, m_context->global(), 3, arguments);
       m_context->handleException(&returnValue);
@@ -156,8 +160,13 @@ void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType
     }
   }
 
+  JS_FreeValue(m_context->ctx(), moduleNameValue);
+
   if (rawEvent != nullptr) {
     JS_FreeValue(m_context->ctx(), eventObject);
+  }
+  if (extra != nullptr) {
+    JS_FreeValue(m_context->ctx(), extraObject);
   }
 }
 

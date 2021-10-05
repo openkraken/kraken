@@ -16,7 +16,7 @@ export const methodChannel = {
   removeMethodCallHandler(handler: MethodCallHandler) {
     let index = methodCallHandlers.indexOf(handler);
     if (index != -1) {
-      methodCallHandlers.splice(index, 1); 
+      methodCallHandlers.splice(index, 1);
     }
   },
   clearMethodCallHandler() {

@@ -24,13 +24,11 @@ builtInWindowEvents.forEach(e => {
       return this[pKey];
     },
     set(value) {
-      console.log('set event listener', value);
       if (this[pKey]) {
         this.removeEventListener(e.substring(2), this[pKey]);
         this[pKey] = null;
       }
 
-      console.log('ad event', e, value);
       this.addEventListener(e.substring(2), value);
       this[pKey] = value;
     }

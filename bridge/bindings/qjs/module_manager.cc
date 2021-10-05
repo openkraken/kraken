@@ -71,11 +71,13 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
     JSValue jsonValue = JS_ParseJSON(ctx, utf8Arguments.c_str(), utf8Arguments.length(), "");
     JSValue arguments[] = {JS_NULL, jsonValue};
     returnValue = JS_Call(ctx, callback, context->global(), 2, arguments);
+    JS_FreeValue(ctx, jsonValue);
   }
 
   context->drainPendingPromiseJobs();
 
   context->handleException(&returnValue);
+  JS_FreeValue(ctx, moduleContext->callback);
   JS_FreeValue(ctx, returnValue);
   list_del(&moduleContext->link);
 }
@@ -98,7 +100,7 @@ JSValue krakenInvokeModule(QjsContext *ctx, JSValueConst this_val, int argc, JSV
   auto *context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
 
   if (argc > 2 && !JS_IsNull(argv[2])) {
-    paramsValue = JS_JSONStringify(ctx, argv[2], JS_NULL, JS_NULL);
+    paramsValue = argv[2];
   }
 
   if (argc > 3 && JS_IsObject(argv[3])) {
@@ -116,7 +118,12 @@ JSValue krakenInvokeModule(QjsContext *ctx, JSValueConst this_val, int argc, JSV
 
   NativeString *moduleName = jsValueToNativeString(ctx, moduleNameValue);
   NativeString *method = jsValueToNativeString(ctx, methodValue);
-  NativeString *params = JS_IsNull(paramsValue) ? nullptr : jsValueToNativeString(ctx, paramsValue);
+  NativeString *params = nullptr;
+  if (!JS_IsNull(paramsValue)) {
+    JSValue stringifyedValue = JS_JSONStringify(ctx, paramsValue, JS_NULL, JS_NULL);
+    params = jsValueToNativeString(ctx, stringifyedValue);
+    JS_FreeValue(ctx, stringifyedValue);
+  }
 
   ModuleContext *moduleContext;
   if (JS_IsNull(callbackValue)) {
@@ -133,7 +140,7 @@ JSValue krakenInvokeModule(QjsContext *ctx, JSValueConst this_val, int argc, JSV
       context
     };
   }
-  list_add_tail(&moduleContext->link, &context->module_job_list);
+  list_add_tail(&moduleContext->link, &context->module_callback_job_list);
 
   NativeString *result;
 
