@@ -30,7 +30,7 @@ JSTemplateElement::TemplateElementInstance::TemplateElementInstance(JSTemplateEl
   std::string tagName = "template";
   NativeString args_01{};
   buildUICommandArgs(tagName, args_01);
-  KRAKEN_LOG(VERBOSE) << "create template element.";
+  
   foundation::UICommandBuffer::instance(context->getContextId())
     ->addCommand(eventTargetId, UICommand::createElement, args_01, nativeTemplateElement);
 }
