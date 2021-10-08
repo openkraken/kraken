@@ -40,7 +40,7 @@ public:
       NativeTemplateElement *nativeTemplateElement;
 
     private:
-      ElementInstance* m_content;
+      JSDocumentFragment::DocumentFragmentInstance* m_content;
     };
 
     protected:

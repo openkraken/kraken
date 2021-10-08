@@ -74,7 +74,7 @@ void HTMLParser::parseProperty(JSContext* context, ElementInstance *element,
 }
 
 void HTMLParser::traverseHTML(JSContext* context, GumboNode *node,
-                              ElementInstance *element) {
+                              NodeInstance *element) {
   const GumboVector *children = &node->v.element.children;
   for (int i = 0; i < children->length; ++i) {
     GumboNode *child = (GumboNode *)children->data[i];
@@ -104,7 +104,7 @@ void HTMLParser::traverseHTML(JSContext* context, GumboNode *node,
 }
 
 bool HTMLParser::parseHTML(JSContext* context, JSStringRef sourceRef,
-                           ElementInstance *element) {
+                           NodeInstance *element) {
   // Gumbo-parser parse HTML.
   std::string html = JSStringToStdString(sourceRef);
   int html_length = html.length();

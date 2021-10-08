@@ -32,7 +32,7 @@ JSTemplateElement::TemplateElementInstance::TemplateElementInstance(JSTemplateEl
   buildUICommandArgs(tagName, args_01);
 
   std::string strDocumentFragment = "documentfragment";
-  m_content = (ElementInstance *) JSElement::buildElementInstance(context, strDocumentFragment);;
+  m_content = new JSDocumentFragment::DocumentFragmentInstance(JSDocumentFragment::instance(context));
 
   foundation::UICommandBuffer::instance(context->getContextId())
     ->addCommand(eventTargetId, UICommand::createElement, args_01, nativeTemplateElement);
@@ -71,7 +71,7 @@ JSValueRef JSTemplateElement::TemplateElementInstance::getProperty(std::string &
 }
 
 JSTemplateElement::TemplateElementInstance::~TemplateElementInstance() {
-  delete m_content;
+//  delete m_content;
 }
 
 } // namespace kraken::binding::jsc
