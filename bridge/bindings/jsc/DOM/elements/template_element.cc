@@ -31,10 +31,47 @@ JSTemplateElement::TemplateElementInstance::TemplateElementInstance(JSTemplateEl
   NativeString args_01{};
   buildUICommandArgs(tagName, args_01);
 
+  std::string strDocumentFragment = "documentfragment";
+  m_content = (ElementInstance *) JSElement::buildElementInstance(context, strDocumentFragment);;
+
   foundation::UICommandBuffer::instance(context->getContextId())
     ->addCommand(eventTargetId, UICommand::createElement, args_01, nativeTemplateElement);
 }
 
-JSTemplateElement::TemplateElementInstance::~TemplateElementInstance() {}
+bool JSTemplateElement::TemplateElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+  auto propertyMap = getTemplateElementPropertyMap();
+
+  if (propertyMap.count(name) > 0) {
+    auto property = propertyMap[name];
+    switch (property) {
+    case TemplateElementProperty::content:
+      return false;
+    case TemplateElementProperty::innerHTML:
+      HTMLParser::instance()->parseHTML(context, JSValueToStringCopy(ctx, value, exception), m_content);
+    default:
+      break;
+    }
+    return true;
+  } else {
+    return ElementInstance::setProperty(name, value, exception);
+  }
+}
+
+JSValueRef JSTemplateElement::TemplateElementInstance::getProperty(std::string &name, JSValueRef *exception) {
+  auto &propertyMap = getTemplateElementPropertyMap();
+  if (propertyMap.count(name) > 0) {
+    auto &property = propertyMap[name];
+    switch (property) {
+    case TemplateElementProperty::content:
+      return m_content->object;
+    }
+  }
+
+  return ElementInstance::getProperty(name, exception);
+}
+
+JSTemplateElement::TemplateElementInstance::~TemplateElementInstance() {
+  delete m_content;
+}
 
 } // namespace kraken::binding::jsc
