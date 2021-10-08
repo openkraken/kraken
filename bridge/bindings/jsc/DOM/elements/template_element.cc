@@ -18,7 +18,7 @@ JSTemplateElement::~JSTemplateElement() {
   instanceMap.erase(context);
 }
 
-JSTemplateElement::JSTemplateElement(JSContext *context) : JSNode(context) {}
+JSTemplateElement::JSTemplateElement(JSContext *context) : JSElement(context) {}
 JSObjectRef JSTemplateElement::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                                    const JSValueRef *arguments, JSValueRef *exception) {
   auto instance = new TemplateElementInstance(this);
@@ -26,11 +26,11 @@ JSObjectRef JSTemplateElement::instanceConstructor(JSContextRef ctx, JSObjectRef
 }
 
 JSTemplateElement::TemplateElementInstance::TemplateElementInstance(JSTemplateElement *JSTemplateElement)
-  : NodeInstance(JSTemplateElement, NodeType::ELEMENT_NODE) {
+  : ElementInstance(JSTemplateElement, "template", false) , nativeTemplateElement(new NativeTemplateElement(nativeElement)) {
   std::string tagName = "template";
   NativeString args_01{};
   buildUICommandArgs(tagName, args_01);
-  
+
   foundation::UICommandBuffer::instance(context->getContextId())
     ->addCommand(eventTargetId, UICommand::createElement, args_01, nativeTemplateElement);
 }

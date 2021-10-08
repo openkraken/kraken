@@ -11,22 +11,29 @@
 
 namespace kraken::binding::jsc {
 
+struct NativeTemplateElement {
+  NativeTemplateElement() = delete;
+  NativeTemplateElement(NativeElement *nativeElement) : nativeElement(nativeElement){};
+
+  NativeElement *nativeElement;
+};
+
 void bindTemplateElement(std::unique_ptr<JSContext> &context);
 
-class JSTemplateElement : public JSNode {
+class JSTemplateElement : public JSElement {
 public:
   static std::unordered_map<JSContext *, JSTemplateElement *> instanceMap;
   OBJECT_INSTANCE(JSTemplateElement)
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
-  class TemplateElementInstance : public NodeInstance {
+  class TemplateElementInstance : public ElementInstance {
   public:
     TemplateElementInstance() = delete;
     ~TemplateElementInstance();
     explicit TemplateElementInstance(JSTemplateElement *JSTemplateElement);
 
-    JSTemplateElement *nativeTemplateElement;
+    NativeTemplateElement *nativeTemplateElement;
   };
 
 protected:
