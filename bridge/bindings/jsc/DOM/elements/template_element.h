@@ -6,9 +6,9 @@
 #ifndef KRAKENBRIDGE_TEMPLATE_ELEMENT_H
 #define KRAKENBRIDGE_TEMPLATE_ELEMENT_H
 
+#include "bindings/jsc/DOM/document_fragment.h"
 #include "bindings/jsc/DOM/element.h"
 #include "bindings/jsc/js_context_internal.h"
-#include "bindings/jsc/DOM/elements/document_fragment.h"
 
 namespace kraken::binding::jsc {
 

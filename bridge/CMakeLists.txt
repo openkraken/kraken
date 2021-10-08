@@ -160,8 +160,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     bindings/jsc/DOM/elements/svg_element.h
     bindings/jsc/DOM/elements/template_element.cc
     bindings/jsc/DOM/elements/template_element.h
-    bindings/jsc/DOM/elements/document_fragment.cc
-    bindings/jsc/DOM/elements/document_fragment.h
+    bindings/jsc/DOM/document_fragment.cc
+    bindings/jsc/DOM/document_fragment.h
     bindings/jsc/DOM/elements/script_element.cc
     bindings/jsc/DOM/elements/script_element.h
     bindings/jsc/KOM/performance.cc
