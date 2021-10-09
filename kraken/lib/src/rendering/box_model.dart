@@ -749,8 +749,8 @@ class RenderBoxModel extends RenderBox
       EdgeInsetsGeometry? padding = parentRenderStyle.padding;
       double horizontalBorderLength = borderEdge != null ? borderEdge.horizontal : 0;
       double verticalBorderLength = borderEdge != null ? borderEdge.vertical : 0;
-      double horizontalPaddingLength = padding != null ? padding.horizontal : 0;
-      double verticalPaddingLength = padding != null ? padding.vertical : 0;
+      double horizontalPaddingLength = padding.horizontal;
+      double verticalPaddingLength = padding.vertical;
 
       BoxConstraints parentConstraints = (parent as RenderBoxModel).constraints;
       BoxConstraints constraints = BoxConstraints(
@@ -895,9 +895,9 @@ class RenderBoxModel extends RenderBox
             renderStyle.paddingTop.computedValue +
             renderStyle.paddingBottom.computedValue);
 
-    if (renderStyle.padding != null) {
-      boxSize = renderStyle.wrapPaddingSize(boxSize);
-    }
+
+    boxSize = renderStyle.wrapPaddingSize(boxSize);
+    
     if (renderStyle.borderEdge != null) {
       boxSize = renderStyle.wrapBorderSize(boxSize);
     }
@@ -916,17 +916,14 @@ class RenderBoxModel extends RenderBox
 
   double get clientWidth {
     double width = contentSize.width;
-    if (renderStyle.padding != null) {
-      width += renderStyle.padding!.horizontal;
-    }
+    width += renderStyle.padding.horizontal;
     return width;
   }
 
   double get clientHeight {
     double height = contentSize.height;
-    if (renderStyle.padding != null) {
-      height += renderStyle.padding!.vertical;
-    }
+    height += renderStyle.padding.vertical;
+    
     return height;
   }
 
@@ -1155,9 +1152,7 @@ class RenderBoxModel extends RenderBox
   }
 
   void _chainPaintDecoration(PaintingContext context, Offset offset) {
-    EdgeInsets? resolvedPadding = renderStyle.padding != null
-        ? renderStyle.padding!.resolve(TextDirection.ltr)
-        : null;
+    EdgeInsets? resolvedPadding = renderStyle.padding.resolve(TextDirection.ltr);
     paintDecoration(context, offset, resolvedPadding);
     _chainPaintOverflow(context, offset);
   }
@@ -1198,9 +1193,7 @@ class RenderBoxModel extends RenderBox
   }
 
   void _chainPaintBackground(PaintingContext context, Offset offset) {
-    EdgeInsets? resolvedPadding = renderStyle.padding != null
-        ? renderStyle.padding!.resolve(TextDirection.ltr)
-        : null;
+    EdgeInsets resolvedPadding = renderStyle.padding.resolve(TextDirection.ltr);
     paintBackground(context, offset, resolvedPadding);
     _chainPaintContentVisibility(context, offset);
   }

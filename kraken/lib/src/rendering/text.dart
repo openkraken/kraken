@@ -158,16 +158,16 @@ class RenderTextBox extends RenderBox
 
   double computeDistanceToBaseline() {
     return parent is RenderFlowLayout
-        ? _renderParagraph!.computeDistanceToLastLineBaseline()
-        : _renderParagraph!.computeDistanceToFirstLineBaseline();
+        ? _renderParagraph.computeDistanceToLastLineBaseline()
+        : _renderParagraph.computeDistanceToFirstLineBaseline();
   }
 
   double computeDistanceToFirstLineBaseline() {
-    return _renderParagraph!.computeDistanceToFirstLineBaseline();
+    return _renderParagraph.computeDistanceToFirstLineBaseline();
   }
 
   double computeDistanceToLastLineBaseline() {
-    return _renderParagraph!.computeDistanceToLastLineBaseline();
+    return _renderParagraph.computeDistanceToLastLineBaseline();
   }
 
   @override

@@ -60,61 +60,8 @@ class CSSValue {
   }
 
   static void updateLength(RenderStyle renderStyle, String property, double value) {
-    switch (property) {
-      case RIGHT:
-      case TOP:
-      case BOTTOM:
-      case LEFT:
-        renderStyle.updateOffset(property, value);
-        break;
-      case MARGIN_BOTTOM:
-      case MARGIN_LEFT:
-      case MARGIN_RIGHT:
-      case MARGIN_TOP:
-        renderStyle.updateMargin(property, value);
-        break;
-      case PADDING_BOTTOM:
-      case PADDING_LEFT:
-      case PADDING_RIGHT:
-      case PADDING_TOP:
-        renderStyle.updatePadding(property, value);
-        break;
-      case BORDER_BOTTOM_WIDTH:
-      case BORDER_LEFT_WIDTH:
-      case BORDER_RIGHT_WIDTH:
-      case BORDER_TOP_WIDTH:
-        renderStyle.updateBorder(property, borderWidth: value);
-        break;
-      case BORDER_BOTTOM_LEFT_RADIUS:
-      case BORDER_BOTTOM_RIGHT_RADIUS:
-      case BORDER_TOP_LEFT_RADIUS:
-      case BORDER_TOP_RIGHT_RADIUS:
-        renderStyle.updateBorderRadius(property, value.toString() + 'px');
-        break;
-      case FLEX_BASIS:
-        renderStyle.flexBasis = value;
-        break;
-      case FONT_SIZE:
-        renderStyle.fontSize = value;
-        break;
-      case LETTER_SPACING:
-        renderStyle.letterSpacing = value;
-        break;
-      case WORD_SPACING:
-        renderStyle.wordSpacing = value;
-        break;
-      case HEIGHT:
-      case WIDTH:
-      case MAX_HEIGHT:
-      case MAX_WIDTH:
-      case MIN_HEIGHT:
-      case MIN_WIDTH:
-        renderStyle.updateSizing(property, value);
-        break;
-      case LINE_HEIGHT:
-        renderStyle.lineHeight = value;
-        break;
-    }
+    
+    
   }
 
 }

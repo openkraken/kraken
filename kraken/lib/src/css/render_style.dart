@@ -352,124 +352,31 @@ class RenderStyle
     if (parentContentHeight != null) {
       double relativeParentHeight = childParentData.isPositioned ? parentPaddingBoxHeight : parentContentBoxHeight;
     }
-    computePercentageLength(relativeParentWidth, relativeParentHeight);
-
+  
 
     /// Percentage of padding and margin refer to the logical width of containing block
     /// Update padding
     /// https://www.w3.org/TR/css-box-3/#padding-physical
-    if (CSSLength.isPercentage(style[PADDING_TOP])) {
-      updatePadding(
-        PADDING_TOP,
-        relativeParentWidth * CSSLength.parsePercentage(style[PADDING_TOP]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
 
-    if (CSSLength.isPercentage(style[PADDING_RIGHT])) {
-      updatePadding(
-        PADDING_RIGHT,
-        relativeParentWidth * CSSLength.parsePercentage(style[PADDING_RIGHT]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
 
-    if (CSSLength.isPercentage(style[PADDING_BOTTOM])) {
-      updatePadding(
-        PADDING_BOTTOM,
-        relativeParentWidth * CSSLength.parsePercentage(style[PADDING_BOTTOM]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
 
-    if (CSSLength.isPercentage(style[PADDING_LEFT])) {
-      updatePadding(
-        PADDING_LEFT,
-        relativeParentWidth * CSSLength.parsePercentage(style[PADDING_LEFT]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
+
+
+
 
     /// Update margin
     /// https://www.w3.org/TR/css-box-3/#margin-physical
-    if (CSSLength.isPercentage(style[MARGIN_TOP])) {
-      updateMargin(
-        MARGIN_TOP,
-        relativeParentWidth * CSSLength.parsePercentage(style[MARGIN_TOP]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
 
-    if (CSSLength.isPercentage(style[MARGIN_RIGHT])) {
-      updateMargin(
-        MARGIN_RIGHT,
-        relativeParentWidth * CSSLength.parsePercentage(style[MARGIN_RIGHT]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
 
-    if (CSSLength.isPercentage(style[MARGIN_BOTTOM])) {
-      updateMargin(
-        MARGIN_BOTTOM,
-        relativeParentWidth * CSSLength.parsePercentage(style[MARGIN_BOTTOM]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
 
-    if (CSSLength.isPercentage(style[MARGIN_LEFT])) {
-      updateMargin(
-        MARGIN_LEFT,
-        relativeParentWidth * CSSLength.parsePercentage(style[MARGIN_LEFT]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
 
     /// Update offset
     /// Offset of positioned element starts from the edge of padding box of containing block
-    if (CSSLength.isPercentage(style[TOP])) {
-      updateOffset(
-        TOP,
-        parentPaddingBoxHeight * CSSLength.parsePercentage(style[TOP]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
-
-    if (CSSLength.isPercentage(style[RIGHT])) {
-      updateOffset(
-        RIGHT,
-        parentPaddingBoxWidth * CSSLength.parsePercentage(style[RIGHT]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
-
-    if (CSSLength.isPercentage(style[BOTTOM])) {
-      updateOffset(
-        BOTTOM,
-        parentPaddingBoxHeight * CSSLength.parsePercentage(style[BOTTOM]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
-
-    if (CSSLength.isPercentage(style[LEFT])) {
-      updateOffset(
-        LEFT,
-        parentPaddingBoxWidth * CSSLength.parsePercentage(style[LEFT]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
-
+    /// 
+    /// parentPaddingBoxHeight
+    /// parentPaddingBoxWidth
+   
+   
     /// border-radius
     String? parsedTopLeftRadius = parsePercentageBorderRadius(style[BORDER_TOP_LEFT_RADIUS], size);
 
@@ -519,7 +426,6 @@ class RenderStyle
     }
     bool isPercentageExist = false;
     Size? size = renderBoxModel!.boxSize;
-    RenderStyle renderStyle = this;
 
     /// border-radius
     String? parsedTopLeftRadius = parsePercentageBorderRadius(style[BORDER_TOP_LEFT_RADIUS], size);
@@ -559,17 +465,6 @@ class RenderStyle
       isPercentageExist = true;
     }
 
-    /// Transform translate
-    Matrix4? transformValue = parsePercentageTransformTranslate(style[TRANSFORM], size, renderStyle);
-    if (transformValue != null) {
-      updateTransform(
-        transformValue,
-        shouldToggleRepaintBoundary: false,
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
-
     return isPercentageExist;
   }
 
@@ -579,7 +474,7 @@ class RenderStyle
     final RenderLayoutParentData childParentData = renderBoxModel!.parentData as RenderLayoutParentData;
     double parentActualContentHeight = parent.size.height -
       parent.renderStyle.borderTop - parent.renderStyle.borderBottom -
-      parent.renderStyle.paddingTop - parent.renderStyle.paddingBottom;
+      parent.renderStyle.paddingTop.computedValue - parent.renderStyle.paddingBottom.computedValue;
     double? parentLogicalContentHeight = parent.logicalContentHeight;
 
     // The percentage of height is calculated with respect to the height of the generated box's containing block.
@@ -612,8 +507,7 @@ class RenderStyle
     if (isBorderRadiusPercentage(style[BORDER_TOP_LEFT_RADIUS]) ||
       isBorderRadiusPercentage(style[BORDER_TOP_RIGHT_RADIUS]) ||
       isBorderRadiusPercentage(style[BORDER_BOTTOM_LEFT_RADIUS]) ||
-      isBorderRadiusPercentage(style[BORDER_BOTTOM_RIGHT_RADIUS]) ||
-      isTransformTranslatePercentage(style[TRANSFORM])
+      isBorderRadiusPercentage(style[BORDER_BOTTOM_RIGHT_RADIUS])
     ) {
       return true;
     }
@@ -678,7 +572,7 @@ class RenderStyle
     Size viewportSize = renderStyle.viewportSize;
     RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
     double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
-    double fontSize = renderStyle.fontSize;
+    double fontSize = renderStyle.fontSize.computedValue;
 
     Matrix4? matrix4;
     for (CSSFunctionalNotation method in methods) {
@@ -812,12 +706,12 @@ class RenderStyle
     // @TODO: move intrinsic width/height to renderStyle
     double? intrinsicWidth = renderBoxModel!.intrinsicWidth;
     double intrinsicRatio = renderBoxModel!.intrinsicRatio!;
-    double? realWidth = width ?? intrinsicWidth;
-    if (minWidth != null && realWidth! < minWidth!) {
-      realWidth = minWidth;
+    double? realWidth = width?.computedValue ?? intrinsicWidth;
+    if (minWidth != null && realWidth! < minWidth!.computedValue) {
+      realWidth = minWidth!.computedValue;
     }
-    if (maxWidth != null && realWidth! > maxWidth!) {
-      realWidth = maxWidth;
+    if (maxWidth != null && realWidth! > maxWidth!.computedValue) {
+      realWidth = maxWidth!.computedValue;
     }
     double realHeight = realWidth! * intrinsicRatio;
     return realHeight;
@@ -828,12 +722,12 @@ class RenderStyle
     // @TODO: move intrinsic width/height to renderStyle
     double? intrinsicHeight = renderBoxModel!.intrinsicHeight;
     double intrinsicRatio = renderBoxModel!.intrinsicRatio!;
-    double? realHeight = height ?? intrinsicHeight;
-    if (minHeight != null && realHeight! < minHeight!) {
-      realHeight = minHeight;
+    double? realHeight = height?.computedValue ?? intrinsicHeight;
+    if (minHeight != null && realHeight! < minHeight!.computedValue) {
+      realHeight = minHeight!.computedValue;
     }
-    if (maxHeight != null && realHeight! > maxHeight!) {
-      realHeight = maxHeight;
+    if (maxHeight != null && realHeight! > maxHeight!.computedValue) {
+      realHeight = maxHeight!.computedValue;
     }
     double realWidth = realHeight! / intrinsicRatio;
     return realWidth;
@@ -841,9 +735,7 @@ class RenderStyle
 }
 
 double _getCropWidthByMargin(RenderStyle renderStyle, double cropWidth) {
-  if (renderStyle.margin != null) {
-    cropWidth += renderStyle.margin!.horizontal;
-  }
+  cropWidth += renderStyle.margin.horizontal;
   return cropWidth;
 }
 
@@ -856,9 +748,7 @@ double _getCropWidthByPaddingBorder(RenderStyle renderStyle, double cropWidth) {
 }
 
 double _getCropHeightByMargin(RenderStyle renderStyle, double cropHeight) {
-  if (renderStyle.margin != null) {
-    cropHeight += renderStyle.margin!.vertical;
-  }
+  cropHeight += renderStyle.margin.vertical;
   return cropHeight;
 }
 

@@ -1159,8 +1159,8 @@ class RenderFlexLayout extends RenderLayoutBox {
           maxSizeAboveBaseline,
         );
         maxSizeBelowBaseline = math.max(
-          childMarginTop! +
-              childMarginBottom! +
+          childMarginTop +
+              childMarginBottom +
               childSize!.height -
               childAscent +
               childLeading / 2,
@@ -1616,7 +1616,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
           // Margin auto alignment takes priority over align-items stretch,
           // it will not stretch child in vertical direction
-          if (marginTop.isAuto! || marginBottom.isAuto!) {
+          if (marginTop.isAuto || marginBottom.isAuto) {
             minConstraintHeight = maxConstraintHeight = childSize!.height;
           } else {
             double flexLineHeight =
@@ -1630,9 +1630,7 @@ class RenderFlexLayout extends RenderLayoutBox {
               double verticalBorderLength = renderStyle.borderEdge != null
                 ? renderStyle.borderEdge!.vertical
                 : 0;
-              double verticalPaddingLength = renderStyle.padding != null
-                ? renderStyle.padding!.vertical
-                : 0;
+              double verticalPaddingLength = renderStyle.padding.vertical;
               stretchedHeight = math.min(
                 constraints.maxHeight -
                   verticalBorderLength -
@@ -1658,7 +1656,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           bool hasMaxConstraints = constraints.maxHeight != double.infinity;
           // Margin auto alignment takes priority over align-items stretch,
           // it will not stretch child in horizontal direction
-          if (marginLeft.isAuto! || marginRight.isAuto!) {
+          if (marginLeft.isAuto || marginRight.isAuto) {
             minConstraintWidth = maxConstraintWidth = childSize!.width;
           } else {
             double flexLineHeight =
@@ -1672,9 +1670,7 @@ class RenderFlexLayout extends RenderLayoutBox {
               double horizontalBorderLength = renderStyle.borderEdge != null
                 ? renderStyle.borderEdge!.horizontal
                 : 0;
-              double horizontalPaddingLength = renderStyle.padding != null
-                ? renderStyle.padding!.horizontal
-                : 0;
+              double horizontalPaddingLength = renderStyle.padding.horizontal;
               stretchedWidth = math.min(
                 constraints.maxWidth -
                   horizontalBorderLength -
@@ -1899,11 +1895,11 @@ class RenderFlexLayout extends RenderLayoutBox {
 
         scrollableMainSizeOfChildren.add(preSiblingsMainSize +
             (_isHorizontalFlexDirection
-                ? childScrollableSize.width + childMarginLeft!
-                : childScrollableSize.height + childMarginTop!));
+                ? childScrollableSize.width + childMarginLeft
+                : childScrollableSize.height + childMarginTop));
         scrollableCrossSizeOfChildren.add(_isHorizontalFlexDirection
-            ? childScrollableSize.height + childMarginTop!
-            : childScrollableSize.width + childMarginLeft!);
+            ? childScrollableSize.height + childMarginTop
+            : childScrollableSize.width + childMarginLeft);
         runChildrenList.add(child);
       }
 
@@ -2231,8 +2227,8 @@ class RenderFlexLayout extends RenderLayoutBox {
           if (_isHorizontalFlexDirection) {
             horizontalRemainingSpace = mainAxisRemainingSpace;
             verticalRemainingSpace = crossAxisRemainingSpace;
-            if (totalFlexGrow == 0 && marginLeft.isAuto!) {
-              if (marginRight.isAuto!) {
+            if (totalFlexGrow == 0 && marginLeft.isAuto) {
+              if (marginRight.isAuto) {
                 childMainPosition +=
                     (horizontalRemainingSpace / mainAxisMarginAutoChildrenCount) / 2;
                 betweenSpace =
@@ -2243,8 +2239,8 @@ class RenderFlexLayout extends RenderLayoutBox {
               }
             }
 
-            if (marginTop.isAuto!) {
-              if (marginBottom.isAuto!) {
+            if (marginTop.isAuto) {
+              if (marginBottom.isAuto) {
                 childCrossPosition = childCrossPosition! + verticalRemainingSpace / 2;
               } else {
                 childCrossPosition = childCrossPosition! + verticalRemainingSpace;
@@ -2253,8 +2249,8 @@ class RenderFlexLayout extends RenderLayoutBox {
           } else {
             horizontalRemainingSpace = crossAxisRemainingSpace;
             verticalRemainingSpace = mainAxisRemainingSpace;
-            if (totalFlexGrow == 0 && marginTop.isAuto!) {
-              if (marginBottom.isAuto!) {
+            if (totalFlexGrow == 0 && marginTop.isAuto) {
+              if (marginBottom.isAuto) {
                 childMainPosition +=
                     (verticalRemainingSpace / mainAxisMarginAutoChildrenCount) / 2;
                 betweenSpace =
@@ -2265,8 +2261,8 @@ class RenderFlexLayout extends RenderLayoutBox {
               }
             }
 
-            if (marginLeft.isAuto!) {
-              if (marginRight.isAuto!) {
+            if (marginLeft.isAuto) {
+              if (marginRight.isAuto) {
                 childCrossPosition = childCrossPosition! + horizontalRemainingSpace / 2;
               } else {
                 childCrossPosition = childCrossPosition! + horizontalRemainingSpace;
@@ -2495,8 +2491,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     Size? childSize = _getChildSize(child);
 
     double baseline = parent is RenderFlowLayout
-        ? childMarginTop! + childSize!.height + childMarginBottom!
-        : childMarginTop! + childSize!.height;
+        ? childMarginTop + childSize!.height + childMarginBottom
+        : childMarginTop + childSize!.height;
     // When baseline of children not found, use boundary of margin bottom as baseline
     double extentAboveBaseline = childAscent ?? baseline;
 

@@ -86,10 +86,13 @@ class CSSLengthValue {
           _computedValue = value! * renderStyle.logicalWidth;
         } else if (propertyName!.contains(HEIGHT)) {
           _computedValue = value! * renderStyle.logicalHeight;
-        } else if (propertyName!.contains(PADDING)) {
+        } else if (propertyName == TOP || propertyName == BOTTOM) {
+
+        } else if (propertyName == LEFT || propertyName == RIGHT) {
+
+        } else if (propertyName!.contains(PADDING) || propertyName!.contains(MARGIN)) {
           // https://www.w3.org/TR/css-box-3/#padding-physical
           // Percentage refer to logical width of containing block
-          // renderStyle.parent.getLogicalContentWidth();
           _computedValue = value! * renderStyle.logicalWidth;
         } else if (propertyName == LINE_HEIGHT) {
           // Relative to the font size of the element itself.

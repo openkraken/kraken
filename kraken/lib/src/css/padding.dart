@@ -22,7 +22,7 @@ mixin CSSPaddingMixin on RenderStyleBase {
       right: _paddingRight.computedValue,
       bottom: _paddingBottom.computedValue,
       top: _paddingTop.computedValue
-    ).resolve(TextDirection.ltr);
+    );
     assert(insets.isNonNegative);
     return _padding = insets;
   }

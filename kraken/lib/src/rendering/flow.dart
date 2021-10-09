@@ -914,7 +914,7 @@ class RenderFlowLayout extends RenderLayoutBox {
             childMainPosition +
                 renderStyle.paddingLeft.computedValue +
                 renderStyle.borderLeft +
-                childMarginLeft!,
+                childMarginLeft,
             crossAxisOffset +
                 childLineExtent +
                 renderStyle.paddingTop.computedValue +
