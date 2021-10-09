@@ -74,8 +74,6 @@ JSValueRef JSTemplateElement::TemplateElementInstance::getProperty(std::string &
   return ElementInstance::getProperty(name, exception);
 }
 
-JSTemplateElement::TemplateElementInstance::~TemplateElementInstance() {
-  delete m_content;
-}
+JSTemplateElement::TemplateElementInstance::~TemplateElementInstance() {}
 
 } // namespace kraken::binding::jsc
