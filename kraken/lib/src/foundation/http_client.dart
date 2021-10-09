@@ -2,8 +2,6 @@
  * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-library http_client;
-
 import 'dart:async';
 import 'dart:io';
 import 'http_overrides.dart';
