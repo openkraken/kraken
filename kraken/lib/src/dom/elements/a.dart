@@ -23,32 +23,29 @@ class AnchorElement extends Element {
     addEvent(EVENT_CLICK);
   }
 
+  String get pathname {
+    if (_href != null) {
+      return Uri.parse(_href!).path;
+    } else {
+      return '';
+    }
+  }
+
   @override
   void handleMouseEvent(String eventType, { PointerDownEvent? down, PointerUpEvent? up }) {
     super.handleMouseEvent(eventType, down: down, up: up);
 
     String? href = _href;
-    if (href == null) return;
-
-    Uri uri = Uri.parse(href);
-    KrakenController rootController = elementManager.controller.view.rootController;
-    String? sourceUrl = rootController.bundleURL;
-    String scheme;
-    if (!uri.hasScheme) {
-      if (sourceUrl != null) {
-        Uri sourceUri = Uri.parse(sourceUrl);
-        scheme = sourceUri.scheme;
-      } else {
-        scheme = 'http';
-      }
-    } else {
-      scheme = uri.scheme;
+    if (href != null) {
+      Uri sourceUri = Uri.parse(elementManager.controller.href);
+      Uri resolvedUri = elementManager.controller.uriParser!.resolve(sourceUri, Uri.parse(href));
+      elementManager.controller.view.handleNavigationAction(
+          sourceUri.toString(), resolvedUri.toString(), _getNavigationType(resolvedUri.scheme));
     }
-    elementManager.controller.view.handleNavigationAction(sourceUrl, href, _getNavigationType(scheme));
   }
 
   KrakenNavigationType _getNavigationType(String scheme) {
-    switch (scheme) {
+    switch (scheme.toLowerCase()) {
       case 'http':
       case 'https':
       case 'file':
@@ -58,6 +55,15 @@ class AnchorElement extends Element {
     }
 
     return KrakenNavigationType.navigate;
+  }
+
+  @override
+  getProperty(String key) {
+    switch (key) {
+      case 'pathname':
+        return pathname;
+    }
+    return super.getProperty(key);
   }
 
   @override

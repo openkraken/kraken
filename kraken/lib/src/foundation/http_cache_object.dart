@@ -143,6 +143,7 @@ class HttpCacheObject {
 
   /// Read the index file.
   Future<void> read() async {
+    if (_valid) return;
     final bool isIndexFileExist = await _file.exists();
     if (!isIndexFileExist) {
       // Index file not exist, dispose.
@@ -370,6 +371,8 @@ class HttpCacheObjectBlob extends EventSink<List<int>> {
     // Ensure buffer has been written.
     await _writer?.flush();
     await _writer?.close();
+
+    _writer = null;
   }
 
   Future<bool> exists() {
@@ -382,5 +385,6 @@ class HttpCacheObjectBlob extends EventSink<List<int>> {
 
   Future<void> remove() async {
     await _file.delete();
+    close();
   }
 }

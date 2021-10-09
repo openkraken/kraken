@@ -18,7 +18,7 @@ void main() {
     test('Simple http request with expires', () async {
       var request = await httpClient.openUrl('GET',
           server.getUri('json_with_content_length_expires_etag_last_modified'));
-      KrakenHttpOverrides.setContextHeader(request, contextId);
+      KrakenHttpOverrides.setContextHeader(request.headers, contextId);
       var response = await request.close();
       expect(response.statusCode, 200);
       expect(response.headers.value(HttpHeaders.expiresHeader),
@@ -36,7 +36,7 @@ void main() {
       // second request
       var requestSecond = await httpClient.openUrl('GET',
           server.getUri('json_with_content_length_expires_etag_last_modified'));
-      KrakenHttpOverrides.setContextHeader(requestSecond, contextId);
+      KrakenHttpOverrides.setContextHeader(requestSecond.headers, contextId);
       var responseSecond = await requestSecond.close();
       expect(responseSecond.headers.value('cache-hits'), 'HIT');
     });
@@ -45,7 +45,7 @@ void main() {
       // First request to save cache.
       var req = await httpClient.openUrl('GET',
           server.getUri('plain_text_with_content_length_and_last_modified'));
-      KrakenHttpOverrides.setContextHeader(req, contextId);
+      KrakenHttpOverrides.setContextHeader(req.headers, contextId);
       req.headers.ifModifiedSince = HttpDate.parse('Sun, 15 Mar 2020 11:32:20 GMT');
       var res = await req.close();
       expect(String.fromCharCodes(await consolidateHttpClientResponseBytes(res)), 'CachedData');
@@ -61,7 +61,7 @@ void main() {
       // First request to save cache.
       var req = await httpClient.openUrl('GET',
           server.getUri('plain_text_with_etag_and_content_length'));
-      KrakenHttpOverrides.setContextHeader(req, contextId);
+      KrakenHttpOverrides.setContextHeader(req.headers, contextId);
       req.headers.set(HttpHeaders.ifNoneMatchHeader, '"foo"');
 
       var res = await req.close();
@@ -78,7 +78,7 @@ void main() {
       HttpCacheController.mode = HttpCacheMode.NO_CACHE;
       var request = await httpClient.openUrl('GET',
           server.getUri('json_with_content_length_expires_etag_last_modified'));
-      KrakenHttpOverrides.setContextHeader(request, contextId);
+      KrakenHttpOverrides.setContextHeader(request.headers, contextId);
       var response = await request.close();
       expect(response.statusCode, 200);
       expect(response.headers.value(HttpHeaders.expiresHeader),
@@ -96,7 +96,7 @@ void main() {
       // second request
       var requestSecond = await httpClient.openUrl('GET',
           server.getUri('json_with_content_length_expires_etag_last_modified'));
-      KrakenHttpOverrides.setContextHeader(requestSecond, contextId);
+      KrakenHttpOverrides.setContextHeader(requestSecond.headers, contextId);
       var responseSecond = await requestSecond.close();
 
       // Note: This line is different.
@@ -108,7 +108,7 @@ void main() {
       HttpCacheController.mode = HttpCacheMode.CACHE_ONLY;
       var request = await httpClient.openUrl('GET',
           server.getUri('network'));
-      KrakenHttpOverrides.setContextHeader(request, contextId);
+      KrakenHttpOverrides.setContextHeader(request.headers, contextId);
 
       var error;
       try {
@@ -128,7 +128,7 @@ void main() {
 
       // Local request to save cache.
       var req = await httpClient.openUrl('GET', uri);
-      KrakenHttpOverrides.setContextHeader(req, contextId);
+      KrakenHttpOverrides.setContextHeader(req.headers, contextId);
       var res = await req.close();
       Uint8List bytes = await consolidateHttpClientResponseBytes(res);
       expect(bytes.lengthInBytes, res.contentLength);
