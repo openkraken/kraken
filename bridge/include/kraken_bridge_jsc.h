@@ -169,7 +169,7 @@ private:
 
 class HTMLParser {
 public:
-  bool parseHTML(JSContext* context, JSStringRef sourceRef, NodeInstance* element);
+  bool parseHTML(JSContext* context, JSStringRef sourceRef, NodeInstance* rootNode);
 
   static HTMLParser* instance() {
     if (m_instance == nullptr) {
@@ -180,7 +180,7 @@ public:
 
 private:
   static HTMLParser* m_instance;
-  void traverseHTML(JSContext* context, GumboNode *node, NodeInstance *element);
+  void traverseHTML(JSContext* context, GumboNode *node, NodeInstance *rootNode);
   void parseProperty(JSContext* context, ElementInstance *element, GumboElement *gumboElement);
 };
 

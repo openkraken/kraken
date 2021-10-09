@@ -74,7 +74,7 @@ void HTMLParser::parseProperty(JSContext* context, ElementInstance *element,
 }
 
 void HTMLParser::traverseHTML(JSContext* context, GumboNode *node,
-                              NodeInstance *element) {
+                              NodeInstance *rootNode) {
   const GumboVector *children = &node->v.element.children;
   for (int i = 0; i < children->length; ++i) {
     GumboNode *child = (GumboNode *)children->data[i];
@@ -82,7 +82,7 @@ void HTMLParser::traverseHTML(JSContext* context, GumboNode *node,
     if (child->type == GUMBO_NODE_ELEMENT) {
       std::string tagName = gumbo_normalized_tagname(child->v.element.tag);
       auto newElement = JSElement::buildElementInstance(context, tagName);
-      element->internalAppendChild(newElement);
+      rootNode->internalAppendChild(newElement);
       parseProperty(context, newElement, &child->v.element);
       // eval javascript when <script>//code...</script>.
       if (child->v.element.tag == GUMBO_TAG_SCRIPT && child->v.element.children.length > 0) {
@@ -98,27 +98,27 @@ void HTMLParser::traverseHTML(JSContext* context, GumboNode *node,
     } else if (child->type == GUMBO_NODE_TEXT) {
       auto newTextNodeInstance = new JSTextNode::TextNodeInstance(JSTextNode::instance(context),
                                                                   JSStringCreateWithUTF8CString(child->v.text.text));
-      element->internalAppendChild(newTextNodeInstance);
+      rootNode->internalAppendChild(newTextNodeInstance);
     }
   }
 }
 
 bool HTMLParser::parseHTML(JSContext* context, JSStringRef sourceRef,
-                           NodeInstance *element) {
+                           NodeInstance *rootNode) {
   // Gumbo-parser parse HTML.
   std::string html = JSStringToStdString(sourceRef);
   int html_length = html.length();
   GumboOutput *htmlTree = gumbo_parse_with_options(&kGumboDefaultOptions, html.c_str(), html_length);
 
-  if (element != nullptr) {
+  if (rootNode != nullptr) {
     // Remove all childNode.
-    for (auto iter : element->childNodes) {
-      element->internalRemoveChild(iter, nullptr);
+    for (auto iter : rootNode->childNodes) {
+      rootNode->internalRemoveChild(iter, nullptr);
     }
 
-    traverseHTML(context, htmlTree->root, element);
+    traverseHTML(context, htmlTree->root, rootNode);
   } else {
-    KRAKEN_LOG(ERROR) << "Element is null.";
+    KRAKEN_LOG(ERROR) << "Root node is null.";
   }
 
   return true;
