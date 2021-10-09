@@ -127,6 +127,10 @@ StyleDeclarationInstance::~StyleDeclarationInstance() {
 bool StyleDeclarationInstance::internalSetProperty(std::string &name, JSValue value) {
   name = parseJavaScriptCSSPropertyName(name);
 
+  if (properties.count(name) > 0) {
+    JS_FreeValue(m_ctx, properties[name]);
+  }
+
   JS_DupValue(m_ctx, value);
   properties[name] = value;
 
