@@ -108,6 +108,10 @@ class CSSLengthValue {
     return _computedValue!;
   }
 
+  bool get isAuto {
+    return unit == CSSLengthUnit.AUTO;
+  }
+
   void markNeedsCompute() {
     _computedValue = null;
   }

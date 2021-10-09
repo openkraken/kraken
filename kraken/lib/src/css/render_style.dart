@@ -160,10 +160,10 @@ class RenderStyle
   double? getLogicalContentHeight() {
     RenderStyle renderStyle = this;
     CSSDisplay? display = renderStyle.transformedDisplay;
-    double? height = renderStyle.height;
+    double? height = renderStyle.height?.computedValue;
     double cropHeight = 0;
-    double? maxHeight = renderStyle.maxHeight;
-    double? minHeight = renderStyle.minHeight;
+    double? maxHeight = renderStyle.maxHeight?.computedValue;
+    double? minHeight = renderStyle.minHeight?.computedValue;
     double? intrinsicRatio = renderBoxModel!.intrinsicRatio;
 
     // Inline element has no height
@@ -188,7 +188,7 @@ class RenderStyle
         RenderBoxModel parentRenderBoxModel = parentRenderStyle!.renderBoxModel!;
         if (CSSSizingMixin.isStretchChildHeight(parentRenderStyle, currentRenderStyle)) {
           if (parentRenderStyle.height != null) {
-            height = parentRenderStyle.height;
+            height = parentRenderStyle.height?.computedValue;
             cropHeight = _getCropHeightByPaddingBorder(parentRenderStyle, cropHeight);
             break;
           } else if (parentRenderBoxModel.constraints.isTight) {
@@ -258,8 +258,8 @@ class RenderStyle
       if (transformedDisplay != CSSDisplay.inline &&
         (currentRenderStyle.width != null || currentRenderStyle.maxWidth != null)) {
         // Get the min width between width and max-width
-        maxConstraintWidth = math.min(currentRenderStyle.width ?? double.infinity,
-          currentRenderStyle.maxWidth ?? double.infinity);
+        maxConstraintWidth = math.min(currentRenderStyle.width?.computedValue ?? double.infinity,
+          currentRenderStyle.maxWidth?.computedValue ?? double.infinity);
         cropWidth = _getCropWidthByPaddingBorder(currentRenderStyle, cropWidth);
         break;
       }

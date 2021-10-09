@@ -589,10 +589,10 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     if (childRenderBoxModel != null) {
-      marginHorizontal = childRenderBoxModel.renderStyle.marginLeft.length! +
-          childRenderBoxModel.renderStyle.marginRight.length!;
-      marginVertical = childRenderBoxModel.renderStyle.marginTop.length! +
-          childRenderBoxModel.renderStyle.marginBottom.length!;
+      marginHorizontal = childRenderBoxModel.renderStyle.marginLeft.computedValue +
+          childRenderBoxModel.renderStyle.marginRight.computedValue;
+      marginVertical = childRenderBoxModel.renderStyle.marginTop.computedValue +
+          childRenderBoxModel.renderStyle.marginBottom.computedValue;
     }
 
     double baseSize = _getMainSize(child,
@@ -1151,8 +1151,8 @@ class RenderFlexLayout extends RenderLayoutBox {
         double? childMarginTop = 0;
         double? childMarginBottom = 0;
         if (child is RenderBoxModel) {
-          childMarginTop = child.renderStyle.marginTop.length;
-          childMarginBottom = child.renderStyle.marginBottom.length;
+          childMarginTop = child.renderStyle.marginTop.computedValue;
+          childMarginBottom = child.renderStyle.marginBottom.computedValue;
         }
         maxSizeAboveBaseline = math.max(
           childAscent + childLeading / 2,
@@ -1413,10 +1413,10 @@ class RenderFlexLayout extends RenderLayoutBox {
         double marginVertical = 0;
         if (child is RenderBoxModel) {
           double? flexBasis = _getFlexBasis(child);
-          marginHorizontal = child.renderStyle.marginLeft.length! +
-              child.renderStyle.marginRight.length!;
-          marginVertical = child.renderStyle.marginTop.length! +
-              child.renderStyle.marginBottom.length!;
+          marginHorizontal = child.renderStyle.marginLeft.computedValue +
+              child.renderStyle.marginRight.computedValue;
+          marginVertical = child.renderStyle.marginTop.computedValue +
+              child.renderStyle.marginBottom.computedValue;
           if (flexBasis != null) {
             childSpace = flexBasis;
           }
@@ -1610,8 +1610,8 @@ class RenderFlexLayout extends RenderLayoutBox {
             renderStyle.flexWrap == FlexWrap.wrapReverse;
         final double runCrossAxisExtent = metrics.crossAxisExtent;
         if (_isHorizontalFlexDirection) {
-          CSSMargin marginTop = childRenderStyle.marginTop;
-          CSSMargin marginBottom = childRenderStyle.marginBottom;
+          CSSLengthValue marginTop = childRenderStyle.marginTop;
+          CSSLengthValue marginBottom = childRenderStyle.marginBottom;
           bool hasMaxConstraints = constraints.maxHeight != double.infinity;
 
           // Margin auto alignment takes priority over align-items stretch,
@@ -1622,7 +1622,7 @@ class RenderFlexLayout extends RenderLayoutBox {
             double flexLineHeight =
                 _getFlexLineHeight(runCrossAxisExtent, runBetweenSpace);
             // Should subtract margin when layout child.
-            double marginVertical = marginTop.length! + marginBottom.length!;
+            double marginVertical = marginTop.computedValue + marginBottom.computedValue;
             double childCrossSize = flexLineHeight - marginVertical;
             double stretchedHeight;
             // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap
@@ -1653,8 +1653,8 @@ class RenderFlexLayout extends RenderLayoutBox {
             minConstraintWidth = maxConstraintWidth = minConstraintHeight / child.intrinsicRatio!;
           }
         } else {
-          CSSMargin marginLeft = childRenderStyle.marginLeft;
-          CSSMargin marginRight = childRenderStyle.marginRight;
+          CSSLengthValue marginLeft = childRenderStyle.marginLeft;
+          CSSLengthValue marginRight = childRenderStyle.marginRight;
           bool hasMaxConstraints = constraints.maxHeight != double.infinity;
           // Margin auto alignment takes priority over align-items stretch,
           // it will not stretch child in horizontal direction
@@ -1664,7 +1664,7 @@ class RenderFlexLayout extends RenderLayoutBox {
             double flexLineHeight =
                 _getFlexLineHeight(runCrossAxisExtent, runBetweenSpace);
             // Should subtract margin when layout child
-            double marginHorizontal = marginLeft.length! + marginRight.length!;
+            double marginHorizontal = marginLeft.computedValue + marginRight.computedValue;
             double childCrossSize = flexLineHeight - marginHorizontal;
             double stretchedWidth;
             // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap
@@ -1769,10 +1769,10 @@ class RenderFlexLayout extends RenderLayoutBox {
       }
       // Should add main axis margin of child to the main axis auto size of parent.
       if (child is RenderBoxModel) {
-        double childMarginTop = child.renderStyle.marginTop.length!;
-        double childMarginBottom = child.renderStyle.marginBottom.length!;
-        double childMarginLeft = child.renderStyle.marginLeft.length!;
-        double childMarginRight = child.renderStyle.marginRight.length!;
+        double childMarginTop = child.renderStyle.marginTop.computedValue;
+        double childMarginBottom = child.renderStyle.marginBottom.computedValue;
+        double childMarginLeft = child.renderStyle.marginLeft.computedValue;
+        double childMarginRight = child.renderStyle.marginRight.computedValue;
         runChildMainSize += _isHorizontalFlexDirection ?
           childMarginLeft + childMarginRight :
           childMarginTop + childMarginBottom;
@@ -1893,8 +1893,8 @@ class RenderFlexLayout extends RenderLayoutBox {
               overflowY == CSSOverflowType.visible) {
             childScrollableSize = child.scrollableSize;
           }
-          childMarginTop = childRenderStyle.marginTop.length;
-          childMarginLeft = childRenderStyle.marginLeft.length;
+          childMarginTop = childRenderStyle.marginTop.computedValue;
+          childMarginLeft = childRenderStyle.marginLeft.computedValue;
         }
 
         scrollableMainSizeOfChildren.add(preSiblingsMainSize +
@@ -2216,10 +2216,10 @@ class RenderFlexLayout extends RenderLayoutBox {
         // between flex items and flex container
         if (child is RenderBoxModel) {
           RenderStyle childRenderStyle = child.renderStyle;
-          CSSMargin marginLeft = childRenderStyle.marginLeft;
-          CSSMargin marginRight = childRenderStyle.marginRight;
-          CSSMargin marginTop = childRenderStyle.marginTop;
-          CSSMargin marginBottom = childRenderStyle.marginBottom;
+          CSSLengthValue marginLeft = childRenderStyle.marginLeft;
+          CSSLengthValue marginRight = childRenderStyle.marginRight;
+          CSSLengthValue marginTop = childRenderStyle.marginTop;
+          CSSLengthValue marginBottom = childRenderStyle.marginBottom;
 
           double horizontalRemainingSpace;
           double verticalRemainingSpace;
@@ -2311,12 +2311,12 @@ class RenderFlexLayout extends RenderLayoutBox {
   bool isChildMainAxisMarginAutoExist(RenderBox child) {
     if (child is RenderBoxModel) {
       RenderStyle childRenderStyle = child.renderStyle;
-      CSSMargin marginLeft = childRenderStyle.marginLeft;
-      CSSMargin marginRight = childRenderStyle.marginRight;
-      CSSMargin marginTop = childRenderStyle.marginTop;
-      CSSMargin marginBottom = childRenderStyle.marginBottom;
-      if (_isHorizontalFlexDirection && (marginLeft.isAuto! || marginRight.isAuto!) ||
-        !_isHorizontalFlexDirection && (marginTop.isAuto! || marginBottom.isAuto!)
+      CSSLengthValue marginLeft = childRenderStyle.marginLeft;
+      CSSLengthValue marginRight = childRenderStyle.marginRight;
+      CSSLengthValue marginTop = childRenderStyle.marginTop;
+      CSSLengthValue marginBottom = childRenderStyle.marginBottom;
+      if (_isHorizontalFlexDirection && (marginLeft.isAuto || marginRight.isAuto) ||
+        !_isHorizontalFlexDirection && (marginTop.isAuto || marginBottom.isAuto)
       ) {
         return true;
       }
@@ -2328,12 +2328,12 @@ class RenderFlexLayout extends RenderLayoutBox {
   bool isChildCrossAxisMarginAutoExist(RenderBox child) {
     if (child is RenderBoxModel) {
       RenderStyle childRenderStyle = child.renderStyle;
-      CSSMargin marginLeft = childRenderStyle.marginLeft;
-      CSSMargin marginRight = childRenderStyle.marginRight;
-      CSSMargin marginTop = childRenderStyle.marginTop;
-      CSSMargin marginBottom = childRenderStyle.marginBottom;
-      if (_isHorizontalFlexDirection && (marginTop.isAuto! || marginBottom.isAuto!) ||
-        !_isHorizontalFlexDirection && (marginLeft.isAuto! || marginRight.isAuto!)
+      CSSLengthValue marginLeft = childRenderStyle.marginLeft;
+      CSSLengthValue marginRight = childRenderStyle.marginRight;
+      CSSLengthValue marginTop = childRenderStyle.marginTop;
+      CSSLengthValue marginBottom = childRenderStyle.marginBottom;
+      if (_isHorizontalFlexDirection && (marginTop.isAuto || marginBottom.isAuto) ||
+        !_isHorizontalFlexDirection && (marginLeft.isAuto || marginRight.isAuto)
       ) {
         return true;
       }
@@ -2402,8 +2402,8 @@ class RenderFlexLayout extends RenderLayoutBox {
   @override
   double? computeDistanceToBaseline() {
     double lineDistance = 0;
-    double marginTop = renderStyle.marginTop.length ?? 0;
-    double marginBottom = renderStyle.marginBottom.length ?? 0;
+    double marginTop = renderStyle.marginTop.computedValue;
+    double marginBottom = renderStyle.marginBottom.computedValue;
     bool isParentFlowLayout = parent is RenderFlowLayout;
     CSSDisplay? transformedDisplay = renderStyle.transformedDisplay;
     bool isDisplayInline = transformedDisplay != CSSDisplay.block &&
@@ -2429,7 +2429,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderBox child = firstRunChild.child;
 
     double childMarginTop =
-        child is RenderBoxModel ? child.renderStyle.marginTop.length! : 0;
+        child is RenderBoxModel ? child.renderStyle.marginTop.computedValue : 0;
     RenderLayoutParentData childParentData =
         child.parentData as RenderLayoutParentData;
     double? childBaseLineDistance = 0;
@@ -2488,8 +2488,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     double? childMarginTop = 0;
     double? childMarginBottom = 0;
     if (child is RenderBoxModel) {
-      childMarginTop = child.renderStyle.marginTop.length;
-      childMarginBottom = child.renderStyle.marginBottom.length;
+      childMarginTop = child.renderStyle.marginTop.computedValue;
+      childMarginBottom = child.renderStyle.marginBottom.computedValue;
     }
 
     Size? childSize = _getChildSize(child);

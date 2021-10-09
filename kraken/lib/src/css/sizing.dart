@@ -105,11 +105,11 @@ mixin CSSSizingMixin on RenderStyleBase {
         isChildAlignSelfStretch : isAlignItemsStretch;
     }
 
-    CSSMargin marginTop = childRenderStyle.marginTop;
-    CSSMargin marginBottom = childRenderStyle.marginBottom;
+    CSSLengthValue marginTop = childRenderStyle.marginTop;
+    CSSLengthValue marginBottom = childRenderStyle.marginBottom;
 
     // Display as block if flex vertical layout children and stretch children
-    if (!marginTop.isAuto! && !marginBottom.isAuto! &&
+    if (!marginTop.isAuto && !marginBottom.isAuto &&
       isFlex && isHorizontalDirection && isFlexNoWrap && isChildStretchSelf) {
       isStretch = true;
     }

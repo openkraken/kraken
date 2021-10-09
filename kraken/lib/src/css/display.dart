@@ -82,8 +82,8 @@ mixin CSSDisplayMixin on RenderStyleBase {
         RenderBoxModel parent = renderBoxModel!.parent as RenderBoxModel;
         RenderStyle parentRenderStyle = parent.renderStyle;
 
-        CSSMargin marginLeft = renderStyle.marginLeft;
-        CSSMargin marginRight = renderStyle.marginRight;
+        CSSLengthValue marginLeft = renderStyle.marginLeft;
+        CSSLengthValue marginRight = renderStyle.marginRight;
 
         bool isVerticalDirection = parentRenderStyle.flexDirection == FlexDirection.column ||
             parentRenderStyle.flexDirection == FlexDirection.columnReverse;
@@ -92,7 +92,7 @@ mixin CSSDisplayMixin on RenderStyleBase {
         bool isAlignItemsStretch = parentRenderStyle.transformedAlignItems == AlignItems.stretch;
 
         // Display as block if flex vertical layout children and stretch children
-        if (!marginLeft.isAuto! && !marginRight.isAuto! && isVerticalDirection && isFlexNoWrap && isAlignItemsStretch) {
+        if (!marginLeft.isAuto && !marginRight.isAuto && isVerticalDirection && isFlexNoWrap && isAlignItemsStretch) {
           transformedDisplay = CSSDisplay.block;
         }
       }
