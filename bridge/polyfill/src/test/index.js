@@ -61,6 +61,7 @@ class JasmineTracker {
     clearAllEventsListeners();
     resetDocumentElement();
     kraken.methodChannel.clearMethodCallHandler();
+    __kraken_run_gc__();
   }
   specStarted(result) {
     // console.log('start ', result.fullName);

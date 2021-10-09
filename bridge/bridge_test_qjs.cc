@@ -195,6 +195,13 @@ static JSValue simulateInputText(QjsContext *ctx, JSValueConst this_val, int arg
   return JS_NULL;
 };
 
+static JSValue runGC(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+  auto *context = static_cast<binding::qjs::JSContext *>(JS_GetContextOpaque(ctx));
+  JS_RunGC(context->runtime());
+  return JS_NULL;
+}
+
+
 JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->getContext()) {
   bridge->owner = this;
   QJS_GLOBAL_BINDING_FUNCTION(context, executeTest, "__kraken_execute_test__", 1);
@@ -202,6 +209,7 @@ JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->
   QJS_GLOBAL_BINDING_FUNCTION(context, environment, "__kraken_environment__", 0);
   QJS_GLOBAL_BINDING_FUNCTION(context, simulatePointer, "__kraken_simulate_pointer__", 1);
   QJS_GLOBAL_BINDING_FUNCTION(context, simulateInputText, "__kraken_simulate_inputtext__", 1);
+  QJS_GLOBAL_BINDING_FUNCTION(context, runGC, "__kraken_run_gc__", 0);
 
   initKrakenTestFramework(bridge);
   init_list_head(&image_link);
