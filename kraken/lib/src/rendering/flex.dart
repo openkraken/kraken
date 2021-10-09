@@ -332,12 +332,12 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     if (_isHorizontalFlexDirection) {
       return isEnd
-          ? childRenderBoxModel.renderStyle.marginRight.length
-          : childRenderBoxModel.renderStyle.marginLeft.length;
+          ? childRenderBoxModel.renderStyle.marginRight.computedValue
+          : childRenderBoxModel.renderStyle.marginLeft.computedValue;
     } else {
       return isEnd
-          ? childRenderBoxModel.renderStyle.marginBottom.length
-          : childRenderBoxModel.renderStyle.marginTop.length;
+          ? childRenderBoxModel.renderStyle.marginBottom.computedValue
+          : childRenderBoxModel.renderStyle.marginTop.computedValue;
     }
   }
 
@@ -352,12 +352,12 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
     if (_isHorizontalFlexDirection) {
       return isEnd
-          ? childRenderBoxModel.renderStyle.marginBottom.length
-          : childRenderBoxModel.renderStyle.marginTop.length;
+          ? childRenderBoxModel.renderStyle.marginBottom.computedValue
+          : childRenderBoxModel.renderStyle.marginTop.computedValue;
     } else {
       return isEnd
-          ? childRenderBoxModel.renderStyle.marginRight.length
-          : childRenderBoxModel.renderStyle.marginLeft.length;
+          ? childRenderBoxModel.renderStyle.marginRight.computedValue
+          : childRenderBoxModel.renderStyle.marginLeft.computedValue;
     }
   }
 
@@ -549,10 +549,10 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     if (childRenderBoxModel != null) {
-      marginHorizontal = childRenderBoxModel.renderStyle.marginLeft.length! +
-          childRenderBoxModel.renderStyle.marginRight.length!;
-      marginVertical = childRenderBoxModel.renderStyle.marginTop.length! +
-          childRenderBoxModel.renderStyle.marginBottom.length!;
+      marginHorizontal = childRenderBoxModel.renderStyle.marginLeft.computedValue +
+          childRenderBoxModel.renderStyle.marginRight.computedValue;
+      marginVertical = childRenderBoxModel.renderStyle.marginTop.computedValue +
+          childRenderBoxModel.renderStyle.marginBottom.computedValue;
     }
 
     Size? childSize = _getChildSize(child);

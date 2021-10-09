@@ -53,25 +53,25 @@ Offset _getPlaceholderToParentOffset(RenderPositionHolder placeholder, RenderBox
 Offset _getAutoMarginPositionedElementOffset(double? x, double? y, RenderBoxModel child, Size parentSize) {
   RenderStyle childRenderStyle = child.renderStyle;
 
-  CSSMargin marginLeft = childRenderStyle.marginLeft;
-  CSSMargin marginRight = childRenderStyle.marginRight;
-  CSSMargin marginTop = childRenderStyle.marginTop;
-  CSSMargin marginBottom = childRenderStyle.marginBottom;
+  CSSLengthValue marginLeft = childRenderStyle.marginLeft;
+  CSSLengthValue marginRight = childRenderStyle.marginRight;
+  CSSLengthValue marginTop = childRenderStyle.marginTop;
+  CSSLengthValue marginBottom = childRenderStyle.marginBottom;
   double? width = childRenderStyle.width?.computedValue;
   double? height = childRenderStyle.height?.computedValue;
-  CSSOffset? left = childRenderStyle.left;
-  CSSOffset? right = childRenderStyle.right;
-  CSSOffset? top = childRenderStyle.top;
-  CSSOffset? bottom = childRenderStyle.bottom;
+  CSSLengthValue? left = childRenderStyle.left;
+  CSSLengthValue? right = childRenderStyle.right;
+  CSSLengthValue? top = childRenderStyle.top;
+  CSSLengthValue? bottom = childRenderStyle.bottom;
 
   // 'left' + 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right'
   // + 'border-right-width' + 'margin-right' + 'right' = width of containing block
   if ((left != null && !left.isAuto) &&
     (right != null && !right.isAuto) &&
     (child is! RenderIntrinsic || width != null)) {
-    if (marginLeft.isAuto!) {
-      double leftValue = left.length ?? 0.0;
-      double rightValue = right.length ?? 0.0;
+    if (marginLeft.isAuto) {
+      double leftValue = left.computedValue;
+      double rightValue = right.computedValue;
       double remainingSpace = parentSize.width - child.boxSize!.width - leftValue - rightValue;
 
       if (marginRight.isAuto!) {
@@ -85,9 +85,9 @@ Offset _getAutoMarginPositionedElementOffset(double? x, double? y, RenderBoxMode
   if ((top != null && !top.isAuto) &&
     (bottom != null && !bottom.isAuto) &&
     (child is! RenderIntrinsic || height != null)) {
-    if (marginTop.isAuto!) {
-      double topValue = top.length ?? 0.0;
-      double bottomValue = bottom.length ?? 0.0;
+    if (marginTop.isAuto) {
+      double topValue = top.computedValue;
+      double bottomValue = bottom.computedValue;
       double remainingSpace = parentSize.height - child.boxSize!.height - topValue - bottomValue;
 
       if (marginBottom.isAuto!) {
