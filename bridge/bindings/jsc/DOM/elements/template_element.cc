@@ -62,8 +62,12 @@ JSValueRef JSTemplateElement::TemplateElementInstance::getProperty(std::string &
   if (propertyMap.count(name) > 0) {
     auto &property = propertyMap[name];
     switch (property) {
-    case TemplateElementProperty::content:
-      return m_content->object;
+      case TemplateElementProperty::content:
+        return m_content->object;
+      case TemplateElementProperty::innerHTML: {
+        // TODO: element tree to html.
+        return JSValueMakeString(ctx, JSStringCreateWithUTF8CString(""));
+      }
     }
   }
 
