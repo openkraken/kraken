@@ -642,7 +642,7 @@ mixin CSSBoxMixin on RenderStyleBase {
       Size viewportSize = renderStyle.viewportSize;
       RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
       double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
-      double fontSize = renderStyle.fontSize;
+      double fontSize = renderStyle.fontSize.computedValue;
 
       if (shadows != null) {
         for (var shadowDefinitions in shadows) {
@@ -731,7 +731,7 @@ class CSSBorderSide {
     Size viewportSize = renderStyle.viewportSize;
     RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
     double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
-    double fontSize = renderStyle.fontSize;
+    double fontSize = renderStyle.fontSize.computedValue;
 
     // https://drafts.csswg.org/css2/#border-width-properties
     // The interpretation of the first three values depends on the user agent.
@@ -806,7 +806,7 @@ class CSSBorderRadius {
   static Radius? getRadius(String radius, RenderStyle renderStyle) {
     Size viewportSize = renderStyle.viewportSize;
     double rootFontSize = renderStyle.elementDelegate.getRootElementFontSize();
-    double fontSize = renderStyle.fontSize;
+    double fontSize = renderStyle.fontSize.computedValue;
 
     if (radius.isNotEmpty) {
       // border-top-left-radius: horizontal vertical

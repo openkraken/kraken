@@ -149,8 +149,8 @@ class RenderRecyclerLayout extends RenderLayoutBox {
     RenderBox? child = _renderViewport;
     late BoxConstraints childConstraints;
 
-    double? width = renderStyle.width;
-    double? height = renderStyle.height;
+    double? width = renderStyle.width?.computedValue;
+    double? height = renderStyle.height?.computedValue;
     Axis sliverAxis = renderStyle.sliverDirection;
     AxisDirection axisDirection = getAxisDirection(sliverAxis);
 
@@ -203,9 +203,8 @@ class RenderRecyclerLayout extends RenderLayoutBox {
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
-    if (renderStyle.padding != null) {
-      offset += Offset(renderStyle.paddingLeft, renderStyle.paddingTop);
-    }
+
+    offset += Offset(renderStyle.paddingLeft.computedValue, renderStyle.paddingTop.computedValue);
 
     if (renderStyle.borderEdge != null) {
       offset += Offset(renderStyle.borderLeft, renderStyle.borderTop);

@@ -432,17 +432,7 @@ class Element extends Node
     }
   }
 
-  void _updatePosition(String present) {
-
-    // Update position.
-    CSSPositionType prevPosition = renderStyle.position;
-    CSSPositionType currentPosition = CSSPositionMixin.parsePositionType(present);
-
-    // Position not changed.
-    if (prevPosition == currentPosition) return;
-
-    renderStyle.updatePosition(present);
-
+  void _updateRenderBoxModelWithPosition(CSSPositionType currentPosition) {
     RenderBoxModel _renderBoxModel = renderBoxModel!;
     Element _parentElement = parentElement!;
 
@@ -743,8 +733,8 @@ class Element extends Node
       preferredSize = Size(0, 0);
     } else if (childRenderStyle.display != CSSDisplay.inline) {
       preferredSize = Size(
-        childRenderStyle.width ?? 0,
-        childRenderStyle.height ?? 0,
+        childRenderStyle.width?.computedValue ?? 0,
+        childRenderStyle.height?.computedValue ?? 0,
       );
     }
     RenderPositionHolder childPositionHolder = RenderPositionHolder(preferredSize: preferredSize);
@@ -781,153 +771,6 @@ class Element extends Node
     if (fixedChildren.contains(childRenderBoxModel)) {
       fixedChildren.remove(childRenderBoxModel);
     }
-  }
-
-  void _updateOffset(String property, String present) {
-    /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
-    if (CSSLength.isPercentage(present)) {
-      // Should mark positioned element's containing block needs layout directly
-      // cause RelayoutBoundary of positioned element will prevent the needsLayout flag
-      // to bubble up in the RenderObject tree.
-      RenderBoxModel? selfRenderBoxModel = renderBoxModel;
-      if (selfRenderBoxModel == null) return;
-
-      if (selfRenderBoxModel.parentData is RenderLayoutParentData) {
-        RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
-        if (renderStyle.position != CSSPositionType.static) {
-          RenderBoxModel? parent = selfRenderBoxModel.parent as RenderBoxModel?;
-          parent!.markNeedsLayout();
-        }
-      }
-      return;
-    }
-
-    double rootFontSize = elementManager.getRootFontSize();
-    double fontSize = renderStyle.fontSize;
-    double? presentValue = CSSLength.toDisplayPortValue(
-      present,
-      viewportSize: viewportSize,
-      rootFontSize: rootFontSize,
-      fontSize: fontSize
-    );
-    if (presentValue == null) return;
-    renderStyle.updateOffset(property, presentValue);
-  }
-
-  void _updatePadding(String property, String present) {
-    /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-    if (CSSLength.isPercentage(present)) {
-      // Mark parent needs layout to resolve percentage of child
-      if (selfRenderBoxModel.parent is RenderBoxModel) {
-        (selfRenderBoxModel.parent as RenderBoxModel).markNeedsLayout();
-      }
-      return;
-    }
-
-    double rootFontSize = elementManager.getRootFontSize();
-    double fontSize = renderStyle.fontSize;
-    double? presentValue = CSSLength.toDisplayPortValue(
-      present,
-      viewportSize: viewportSize,
-      rootFontSize: rootFontSize,
-      fontSize: fontSize
-    ) ?? 0;
-    renderStyle.updatePadding(property, presentValue);
-  }
-
-  void _updateSize(String property, String present) {
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-    /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
-    if (CSSLength.isPercentage(present)) {
-      // Mark parent needs layout to resolve percentage of child
-      if (selfRenderBoxModel.parent is RenderBoxModel) {
-        (selfRenderBoxModel.parent as RenderBoxModel).markNeedsLayout();
-      }
-      return;
-    }
-
-    double rootFontSize = elementManager.getRootFontSize();
-    double fontSize = renderStyle.fontSize;
-    double? presentValue = CSSLength.toDisplayPortValue(
-      present,
-      viewportSize: viewportSize,
-      rootFontSize: rootFontSize,
-      fontSize: fontSize
-    );
-    renderStyle.updateSizing(property, presentValue);
-  }
-
-  void _updateMargin(String property, String present) {
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-    /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
-    if (CSSLength.isPercentage(present)) {
-      // Mark parent needs layout to resolve percentage of child
-      if (selfRenderBoxModel.parent is RenderBoxModel) {
-        (selfRenderBoxModel.parent as RenderBoxModel).markNeedsLayout();
-      }
-      return;
-    }
-
-    RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
-    double rootFontSize = elementManager.getRootFontSize();
-    double fontSize = renderStyle.fontSize;
-    double? presentValue = CSSLength.toDisplayPortValue(
-      present,
-      viewportSize: viewportSize,
-      rootFontSize: rootFontSize,
-      fontSize: fontSize
-    ) ?? 0;
-    renderStyle.updateMargin(property, presentValue);
-    // Margin change in flex layout may affect transformed display
-    // https://www.w3.org/TR/css-display-3/#transformations
-    renderStyle.updateTransformedDisplay();
-  }
-
-  void _updateFlexItem() {
-    if (parentElement == null) {
-      return;
-    }
-    Element selfParentElement = parentElement!;
-    CSSDisplay? parentDisplayValue = selfParentElement.renderBoxModel?.renderStyle.display;
-    bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex || parentDisplayValue == CSSDisplay.inlineFlex;
-
-    // Flex factor change will cause flex item self and its siblings relayout.
-    // FIXME: not all flex item properties change case will cause sibling relayout.
-    if (isParentFlexDisplayType) {
-      for (Element child in selfParentElement.children) {
-        if (selfParentElement.renderBoxModel is RenderFlexLayout && child.renderBoxModel != null) {
-          child.renderBoxModel!.renderStyle.updateFlexItem();
-          child.renderBoxModel!.markNeedsLayout();
-        }
-      }
-    }
-  }
-
-  void _updateBox(String property, String present) {
-    int contextId = elementManager.contextId;
-    double rootFontSize = elementManager.getRootFontSize();
-    double fontSize = renderStyle.fontSize;
-    renderStyle.updateBox(
-      property, present, contextId,
-      viewportSize: viewportSize,
-      rootFontSize: rootFontSize,
-      fontSize: fontSize,
-    );
-  }
-
-  void _updateBorderRadius(String property, String present) {
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-    /// Percentage size should be resolved in layout stage cause it needs to know its own element's size
-    if (RenderStyle.isBorderRadiusPercentage(present)) {
-      // Mark parent needs layout to resolve percentage of child
-      if (selfRenderBoxModel.parent is RenderBoxModel) {
-        (selfRenderBoxModel.parent as RenderBoxModel).markNeedsLayout();
-      }
-      return;
-    }
-
-    selfRenderBoxModel.renderStyle.updateBorderRadius(property, present);
   }
 
   // FIXME: only compatible with kraken plugins
@@ -999,67 +842,104 @@ class Element extends Node
         break;
 
       case POSITION:
-        _updatePosition(present);
+        CSSPositionType prevPosition = renderStyle.position;
+        CSSPositionType currentPosition = CSSPositionMixin.resolvePositionType(present);
+        if (prevPosition == currentPosition) return;
+        renderStyle.position = currentPosition;
+        _updateRenderBoxModelWithPosition(currentPosition);
         break;
 
       case Z_INDEX:
-        renderStyle.updateZIndex(present);
+        renderStyle.zIndex = int.tryParse(present);
         break;
-
       case TOP:
+        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.top = lengthValue;
+        break;
       case LEFT:
+        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.left = lengthValue;
+        break;
       case BOTTOM:
+        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.bottom = lengthValue;
+        break;
       case RIGHT:
-        _updateOffset(property, present);
+        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.right = lengthValue;
         break;
-
       case FLEX_DIRECTION:
+        renderStyle.flexDirection = CSSFlexboxMixin.resolveFlexDirection(present);
+        break;
       case FLEX_WRAP:
+        renderStyle.flexWrap = CSSFlexboxMixin.resolveFlexWrap(present);
+        break;
       case ALIGN_CONTENT:
+        renderStyle.alignContent = CSSFlexboxMixin.resolveAlignContent(present);
+        break;
       case ALIGN_ITEMS:
+        renderStyle.alignItems = CSSFlexboxMixin.resolveAlignItems(present);
+        break;
       case JUSTIFY_CONTENT:
-        renderStyle.updateFlexbox();
-        // Flex properties change may affect transformed display
-        // https://www.w3.org/TR/css-display-3/#transformations
-        renderStyle.updateTransformedDisplay();
+        renderStyle.justifyContent = CSSFlexboxMixin.resolveJustifyContent(present);
         break;
-
       case ALIGN_SELF:
-      case FLEX_GROW:
-      case FLEX_SHRINK:
-      case FLEX_BASIS:
-        _updateFlexItem();
+        renderStyle.alignSelf = CSSFlexboxMixin.resolveAlignSelf(present);
         break;
-
+      case FLEX_GROW:
+        renderStyle.flexGrow = CSSFlexboxMixin.resolveFlexGrow(present);
+        break;
+      case FLEX_SHRINK:
+        renderStyle.flexShrink = CSSFlexboxMixin.resolveFlexShrink(present);
+        break;
+      case FLEX_BASIS:
+        renderStyle.flexBasis = CSSLength.parseLength(present, renderStyle, property);
+        break;
       case SLIVER_DIRECTION:
         renderStyle.sliverDirection = CSSSliverMixin.resolveAxis(present);
         break;
-
       case TEXT_ALIGN:
-        renderStyle.updateFlow(present);
+        renderStyle.textAlign = CSSTextMixin.resolveTextAlign(present);
         break;
-
       case PADDING_TOP:
+        renderStyle.paddingTop = CSSLength.parseLength(present, renderStyle, property);
+        break;
       case PADDING_RIGHT:
+        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.paddingRight = lengthValue;
+        break;
       case PADDING_BOTTOM:
+        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.paddingBottom = lengthValue;
+        break;
       case PADDING_LEFT:
-        _updatePadding(property, present);
+        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.paddingLeft = lengthValue;
         break;
-
       case WIDTH:
+        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.width = lengthValue;
+        break;
       case MIN_WIDTH:
+        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.minWidth = lengthValue;
+        break;
       case MAX_WIDTH:
+        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.maxWidth = lengthValue;
+        break;
       case HEIGHT:
+        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.height = lengthValue;
+        break;
       case MIN_HEIGHT:
+        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.minHeight = lengthValue;
+        break;
       case MAX_HEIGHT:
-        _updateSize(property, present);
+        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.maxHeight = lengthValue;
         break;
-
-      case OVERFLOW_X:
-      case OVERFLOW_Y:
-        updateRenderOverflow(_handleScroll);
-        break;
-
       case BACKGROUND_COLOR:
       case BACKGROUND_ATTACHMENT:
       case BACKGROUND_IMAGE:
@@ -1082,23 +962,54 @@ class Element extends Node
       case BORDER_RIGHT_COLOR:
       case BORDER_BOTTOM_COLOR:
       case BOX_SHADOW:
-        _updateBox(property, present);
+        // _updateBox(property, present);
+        int contextId = elementManager.contextId;
+        double rootFontSize = elementManager.getRootFontSize();
+        double fontSize = renderStyle.fontSize.computedValue;
+        renderStyle.updateBox(
+          property, present, contextId,
+          viewportSize: viewportSize,
+          rootFontSize: rootFontSize,
+          fontSize: fontSize,
+        );
         break;
 
       case BORDER_TOP_LEFT_RADIUS:
       case BORDER_TOP_RIGHT_RADIUS:
       case BORDER_BOTTOM_LEFT_RADIUS:
       case BORDER_BOTTOM_RIGHT_RADIUS:
-        _updateBorderRadius(property, present);
+        // _updateBorderRadius(property, present);
+        RenderBoxModel selfRenderBoxModel = renderBoxModel!;
+        /// Percentage size should be resolved in layout stage cause it needs to know its own element's size
+        if (RenderStyle.isBorderRadiusPercentage(present)) {
+          // Mark parent needs layout to resolve percentage of child
+          if (selfRenderBoxModel.parent is RenderBoxModel) {
+            (selfRenderBoxModel.parent as RenderBoxModel).markNeedsLayout();
+          }
+          return;
+        }
+
+        selfRenderBoxModel.renderStyle.updateBorderRadius(property, present);
         break;
 
+      // Margin change in flex layout may affect transformed display
+      // https://www.w3.org/TR/css-display-3/#transformations
       case MARGIN_LEFT:
-      case MARGIN_TOP:
-      case MARGIN_RIGHT:
-      case MARGIN_BOTTOM:
-        _updateMargin(property, present);
+        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.marginLeft = lengthValue;
         break;
-
+      case MARGIN_TOP:
+        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.marginTop = lengthValue;
+        break;
+      case MARGIN_RIGHT:
+        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.marginRight = lengthValue;
+        break;
+      case MARGIN_BOTTOM:
+        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.marginBottom = lengthValue;
+        break;
       case OPACITY:
         renderStyle.opacity = CSSOpacityMixin.resolveOpacity(present);
         break;
@@ -1109,28 +1020,10 @@ class Element extends Node
         renderStyle.contentVisibility = CSSContentVisibilityMixin.resolveContentVisibility(present);
         break;
       case TRANSFORM:
-        /// Percentage transform translate should be resolved in layout stage cause it needs to know its own element's size
-        if (RenderStyle.isTransformTranslatePercentage(present)) {
-          // Mark parent needs layout to resolve percentage of child
-          if (renderBoxModel!.parent is RenderBoxModel) {
-            (renderBoxModel!.parent as RenderBoxModel).markNeedsLayout();
-          }
-        } else {
-          renderStyle.transform = CSSTransform.parseTransform(
-            present,
-            viewportSize,
-            elementManager.getRootFontSize(),
-            renderStyle.fontSize
-          );
-        }
+        renderStyle.transform = CSSFunction.parseFunction(present);
         break;
       case TRANSFORM_ORIGIN:
-        renderStyle.transformOrigin = CSSOrigin.parseOrigin(
-          present,
-          viewportSize,
-          elementManager.getRootFontSize(),
-          renderStyle.fontSize
-        );
+        renderStyle.transformOrigin = CSSOrigin.parseOrigin(present, renderStyle, property);
         break;
       case OBJECT_FIT:
         renderStyle.objectFit = CSSObjectFitMixin.resolveBoxFit(present);
@@ -1141,33 +1034,54 @@ class Element extends Node
       case FILTER:
         renderStyle.filter = CSSFunction.parseFunction(present);
         break;
-    }
-
-    // Text Style
-    switch (property) {
+      // Text Style
       case COLOR:
-        renderStyle.updateTextStyle(property, present);
-        // Color change should trigger currentColor update
-        _updateBox(property, present);
+        renderStyle.color = CSSColor.resolveColor(present);
+        // TODO: Color change should trigger currentColor update
+        // _updateBox(property, present);
+        break;
+      case TEXT_DECORATION_LINE:
+        renderStyle.textDecorationLine = CSSText.resolveTextDecorationLine(present);
+        break;
+      case TEXT_DECORATION_STYLE:
+        renderStyle.textDecorationStyle = CSSText.resolveTextDecorationStyle(present);
+        break;
+      case TEXT_DECORATION_COLOR:
+        renderStyle.textDecorationColor = CSSColor.resolveColor(present);
+        break;
+      case FONT_WEIGHT:
+        renderStyle.fontWeight = CSSText.resolveFontWeight(present);
+        break;
+      case FONT_STYLE:
+        renderStyle.fontStyle = CSSText.resolveFontStyle(present);
+        break;
+      case FONT_FAMILY:
+        renderStyle.fontFamily = CSSText.resolveFontFamilyFallback(present);
+        break;
+      case FONT_SIZE:
+        renderStyle.fontSize = CSSLength.parseLength(present, renderStyle, property);
+        break;
+      case LINE_HEIGHT:
+        renderStyle.lineHeight = CSSLength.parseLength(present, renderStyle, property);
+        break;
+      case LETTER_SPACING:
+        renderStyle.letterSpacing = CSSText.resolveSpacing(present, renderStyle, property);
+        break;
+      case WORD_SPACING:
+        renderStyle.wordSpacing = CSSText.resolveSpacing(present, renderStyle, property);
         break;
       case TEXT_SHADOW:
-      case TEXT_DECORATION_LINE:
-      case TEXT_DECORATION_STYLE:
-      case TEXT_DECORATION_COLOR:
-      case FONT_WEIGHT:
-      case FONT_STYLE:
-      case FONT_FAMILY:
-      case FONT_SIZE:
-      case LINE_HEIGHT:
-      case LETTER_SPACING:
-      case WORD_SPACING:
+        renderStyle.textShadow = CSSText.resolveTextShadow(present, renderStyle, property);
+        break;
       case WHITE_SPACE:
+        renderStyle.whiteSpace = CSSText.resolveWhiteSpace(present);
+        break;
       case TEXT_OVERFLOW:
-      // Overflow will affect text-overflow ellipsis taking effect
-      case OVERFLOW_X:
-      case OVERFLOW_Y:
+        // Overflow will affect text-overflow ellipsis taking effect
+        renderStyle.textOverflow = CSSText.resolveTextOverflow(present);
+        break;
       case LINE_CLAMP:
-        renderStyle.updateTextStyle(property, present);
+        renderStyle.lineClamp = CSSText.parseLineClamp(present);
         break;
     }
   }

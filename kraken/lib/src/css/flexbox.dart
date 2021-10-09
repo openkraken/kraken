@@ -4,7 +4,8 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'package:flutter/rendering.dart';
+import 'dart:ui';
+
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
@@ -176,6 +177,8 @@ enum AlignSelf {
 
 mixin CSSFlexboxMixin on RenderStyleBase {
 
+  // TODO(yuanyan): mark all children needs layout when the flex layout is changed.
+
   FlexDirection get flexDirection => _flexDirection;
   FlexDirection _flexDirection = FlexDirection.row;
 
@@ -224,6 +227,18 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
+  AlignItems get transformedAlignItems {
+    if (CSSFlex.isVerticalFlexDirection(flexDirection)) {
+      TextAlign textAlign = (this as RenderStyle).textAlign;
+      if (textAlign == TextAlign.right) {
+        alignItems = AlignItems.flexEnd;
+      } else if (textAlign == TextAlign.center) {
+        alignItems = AlignItems.center;
+      }
+    }
+    return alignItems;
+  }
+
   AlignContent get alignContent => _alignContent;
   AlignContent _alignContent = AlignContent.stretch;
   set alignContent(AlignContent value) {
@@ -244,9 +259,9 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-  double? get flexBasis => _flexBasis;
-  double? _flexBasis;
-  set flexBasis(double? value) {
+  CSSLengthValue? get flexBasis => _flexBasis;
+  CSSLengthValue? _flexBasis;
+  set flexBasis(CSSLengthValue? value) {
     if (_flexBasis == value) return;
     _flexBasis = value;
     if (renderBoxModel!.parent is RenderFlexLayout) {
@@ -274,23 +289,7 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-  void updateFlexbox() {
-    flexDirection = _getFlexDirection(style);
-    flexWrap = _getFlexWrap(style);
-    justifyContent = _getJustifyContent(style);
-    alignItems = _getAlignItems(style);
-    alignContent = _getAlignContent(style);
-  }
-
-  void updateFlexItem() {
-    flexGrow = _getFlexGrow(style);
-    flexShrink = _getFlexShrink(style);
-    flexBasis = _getFlexBasis(style);
-    alignSelf = _getAlignSelf(style);
-  }
-
-  FlexDirection _getFlexDirection(CSSStyleDeclaration style) {
-    String flexDirection = style[FLEX_DIRECTION];
+  static FlexDirection resolveFlexDirection(String flexDirection) {
     switch (flexDirection) {
       case 'row-reverse':
         return FlexDirection.rowReverse;
@@ -304,8 +303,7 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-  FlexWrap _getFlexWrap(CSSStyleDeclaration style) {
-    String flexWrap = style[FLEX_WRAP];
+  static FlexWrap resolveFlexWrap(String flexWrap) {
     switch (flexWrap) {
       case 'wrap':
         return FlexWrap.wrap;
@@ -317,8 +315,7 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-  JustifyContent _getJustifyContent(CSSStyleDeclaration style) {
-    String justifyContent = style[JUSTIFY_CONTENT];
+  static JustifyContent resolveJustifyContent(String justifyContent) {
     switch (justifyContent) {
       case 'flex-end':
       case 'end':
@@ -338,17 +335,17 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-  AlignItems _getAlignItems(CSSStyleDeclaration style) {
-    String alignItems = style[ALIGN_ITEMS];
-    if (CSSFlex.isVerticalFlexDirection(flexDirection) && style.contains(TEXT_ALIGN)) {
-      String textAlign = style[TEXT_ALIGN];
-      switch (textAlign) {
-        case 'right':
-          return AlignItems.flexEnd;
-        case 'center':
-          return AlignItems.center;
-      }
-    }
+  static AlignItems resolveAlignItems(String alignItems) {
+
+    // if (CSSFlex.isVerticalFlexDirection(flexDirection)) {
+    //   String textAlign = renderStyle.textAlign;
+    //   switch (textAlign) {
+    //     case 'right':
+    //       return AlignItems.flexEnd;
+    //     case 'center':
+    //       return AlignItems.center;
+    //   }
+    // }
 
     switch (alignItems) {
       case 'flex-start':
@@ -367,8 +364,7 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-  AlignContent _getAlignContent(CSSStyleDeclaration style) {
-    String alignContent = style[ALIGN_CONTENT];
+  static AlignContent resolveAlignContent(String alignContent) {
     switch (alignContent) {
       case 'flex-start':
       case 'start':
@@ -390,8 +386,7 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-  AlignSelf _getAlignSelf(CSSStyleDeclaration style) {
-    String alignSelf = style[ALIGN_SELF];
+  static AlignSelf resolveAlignSelf(String alignSelf) {
     switch (alignSelf) {
       case 'flex-start':
       case 'start':
@@ -410,39 +405,14 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-  double _getFlexGrow(CSSStyleDeclaration style) {
-    String grow = style[FLEX_GROW];
+  static double resolveFlexGrow(String grow) {
     double? flexGrow = CSSLength.toDouble(grow);
     return flexGrow != null && flexGrow >= 0 ? flexGrow : 0.0;
   }
 
-  double _getFlexShrink(CSSStyleDeclaration style) {
-    String shrink = style[FLEX_SHRINK];
+  static double resolveFlexShrink(String shrink) {
     double? flexShrink = CSSLength.toDouble(shrink);
     return flexShrink != null && flexShrink >= 0 ? flexShrink : 1.0;
-  }
-
-  double? _getFlexBasis(CSSStyleDeclaration style) {
-    String basisStr = style[FLEX_BASIS];
-    RenderStyle renderStyle = this as RenderStyle;
-    Size viewportSize = renderStyle.viewportSize;
-    RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
-    double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
-    double fontSize = renderStyle.fontSize;
-    double? flexBasis = CSSLength.toDisplayPortValue(
-      basisStr,
-      viewportSize: viewportSize,
-      rootFontSize: rootFontSize,
-      fontSize: fontSize
-    );
-    if (basisStr.isNotEmpty && basisStr != AUTO) {
-      if (flexBasis! < 0) {
-        flexBasis = null;
-      }
-    } else {
-      flexBasis = null;
-    }
-    return flexBasis;
   }
 }
 

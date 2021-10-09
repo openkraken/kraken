@@ -30,22 +30,13 @@ mixin CSSDisplayMixin on RenderStyleBase {
     if (_display != value) {
       _previousDisplay = _display;
       _display = value;
-      updateTransformedDisplay();
       renderBoxModel?.markNeedsLayout();
     }
-  }
-  /// Some layout effects require blockification or inlinification of the box type
-  /// https://www.w3.org/TR/css-display-3/#transformations
-  CSSDisplay? transformedDisplay;
-
-  void updateTransformedDisplay() {
-    transformedDisplay = _getTransformedDisplay();
   }
 
   void initDisplay() {
     // Must take from style because it inited before flush pending properties.
     _previousDisplay = _display = resolveDisplay(style[DISPLAY]);
-    updateTransformedDisplay();
   }
 
   static CSSDisplay resolveDisplay(String? displayString) {
@@ -68,15 +59,14 @@ mixin CSSDisplayMixin on RenderStyleBase {
     }
   }
 
-  /// Element tree hierarchy can cause element display behavior to change,
-  /// for example element which is flex-item can display like inline-block or block
+  /// Some layout effects require blockification or inlinification of the box type
   /// https://www.w3.org/TR/css-display-3/#transformations
-  CSSDisplay? _getTransformedDisplay() {
+  CSSDisplay? get transformedDisplay {
     RenderStyle renderStyle = this as RenderStyle;
     CSSDisplay? transformedDisplay = renderStyle.display;
 
     // Must take from style because it inited before flush pending properties.
-    CSSPositionType position = CSSPositionMixin.parsePositionType(style[POSITION]);
+    CSSPositionType position = renderStyle.position;
 
     // Display as inline-block when element is positioned
     if (position == CSSPositionType.absolute || position == CSSPositionType.fixed) {
@@ -99,7 +89,7 @@ mixin CSSDisplayMixin on RenderStyleBase {
             parentRenderStyle.flexDirection == FlexDirection.columnReverse;
         // Flex item will not stretch in stretch alignment when flex wrap is set to wrap or wrap-reverse
         bool isFlexNoWrap = parentRenderStyle.flexWrap == FlexWrap.nowrap;
-        bool isAlignItemsStretch = parentRenderStyle.alignItems == AlignItems.stretch;
+        bool isAlignItemsStretch = parentRenderStyle.transformedAlignItems == AlignItems.stretch;
 
         // Display as block if flex vertical layout children and stretch children
         if (!marginLeft.isAuto! && !marginRight.isAuto! && isVerticalDirection && isFlexNoWrap && isAlignItemsStretch) {

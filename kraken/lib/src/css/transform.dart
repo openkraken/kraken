@@ -1,12 +1,12 @@
+// CSS Transforms: https://drafts.csswg.org/css-transforms/
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/rendering.dart';
 
-Color? _parseColor(String color, [Size? viewportSize, double? rootFontSize, double? fontSize]) {
+Color? _parseColor(String color, RenderStyle renderStyle, String property) {
   return CSSColor.parseColor(color);
 }
 
@@ -21,92 +21,21 @@ void _updateColor(Color oldColor, Color newColor, double progress, String proper
   int blue = (blueDiff * progress).toInt() + oldColor.blue;
   int green = (greenDiff * progress).toInt() + oldColor.green;
   Color color = Color.fromARGB(alpha, red, green, blue);
-  switch (property) {
-    case COLOR:
-      renderStyle.color = color;
-      break;
-    case TEXT_DECORATION_COLOR:
-      renderStyle.textDecorationColor = color;
-      break;
-    case BACKGROUND_COLOR:
-      renderStyle.updateBackgroundColor(color);
-      break;
-    case BORDER_BOTTOM_COLOR:
-    case BORDER_LEFT_COLOR:
-    case BORDER_RIGHT_COLOR:
-    case BORDER_TOP_COLOR:
-    case BORDER_COLOR:
-      renderStyle.updateBorder(property, borderColor: color);
-      break;
-  }
+
+  CSSValue.updateColor(renderStyle, property, color);
 }
 
-double? _parseLength(String _length, [Size? viewportSize, double? rootFontSize, double? fontSize]) {
-  return CSSLength.parseLength(
-    _length,
-    viewportSize: viewportSize!,
-    rootFontSize: rootFontSize,
-    fontSize: fontSize
-  );
+double? _parseLength(String length, RenderStyle renderStyle, String property) {
+  return CSSLength.parseLength(length, renderStyle, property).computedValue;
 }
 
-void _updateLength(double oldLength, double newLength, double progress, String property, RenderStyle renderStyle) {
-  double length = oldLength * (1 - progress) + newLength * progress;
-
-  switch (property) {
-    case RIGHT:
-    case TOP:
-    case BOTTOM:
-    case LEFT:
-      renderStyle.updateOffset(property, length);
-      break;
-    case MARGIN_BOTTOM:
-    case MARGIN_LEFT:
-    case MARGIN_RIGHT:
-    case MARGIN_TOP:
-      renderStyle.updateMargin(property, length);
-      break;
-    case PADDING_BOTTOM:
-    case PADDING_LEFT:
-    case PADDING_RIGHT:
-    case PADDING_TOP:
-      renderStyle.updatePadding(property, length);
-      break;
-    case BORDER_BOTTOM_WIDTH:
-    case BORDER_LEFT_WIDTH:
-    case BORDER_RIGHT_WIDTH:
-    case BORDER_TOP_WIDTH:
-      renderStyle.updateBorder(property, borderWidth: length);
-      break;
-    case BORDER_BOTTOM_LEFT_RADIUS:
-    case BORDER_BOTTOM_RIGHT_RADIUS:
-    case BORDER_TOP_LEFT_RADIUS:
-    case BORDER_TOP_RIGHT_RADIUS:
-      renderStyle.updateBorderRadius(property, length.toString() + 'px');
-      break;
-    case FLEX_BASIS:
-    case FONT_SIZE:
-      renderStyle.fontSize = length;
-      break;
-    case LETTER_SPACING:
-      renderStyle.letterSpacing = length;
-      break;
-    case WORD_SPACING:
-      renderStyle.wordSpacing = length;
-      break;
-    case HEIGHT:
-    case WIDTH:
-    case MAX_HEIGHT:
-    case MAX_WIDTH:
-    case MIN_HEIGHT:
-    case MIN_WIDTH:
-      renderStyle.updateSizing(property, length);
-      break;
-  }
+void _updateLength(double oldLengthValue, double newLengthValue, double progress, String property, RenderStyle renderStyle) {
+  double value = oldLengthValue * (1 - progress) + newLengthValue * progress;
+  CSSValue.updateLength(renderStyle, property, value);
 }
 
-FontWeight _parseFontWeight(String fontWeight, [Size? viewportSize, double? rootFontSize, double? fontSize]) {
-  return CSSText.parseFontWeight(fontWeight);
+FontWeight _parseFontWeight(String fontWeight, RenderStyle renderStyle, String property) {
+  return CSSText.resolveFontWeight(fontWeight);
 }
 
 void _updateFontWeight(FontWeight oldValue, FontWeight newValue, double progress, String property, RenderStyle renderStyle) {
@@ -118,72 +47,32 @@ void _updateFontWeight(FontWeight oldValue, FontWeight newValue, double progress
   }
 }
 
-double? _parseNumber(String number, [Size? viewportSize, double? rootFontSize, double? fontSize]) {
+double? _parseNumber(String number, RenderStyle renderStyle, String property) {
   return CSSNumber.parseNumber(number);
 }
 
 double _getNumber(double oldValue, double newValue, double progress) {
-   return oldValue * (1 - progress) + newValue * progress;
+  return oldValue * (1 - progress) + newValue * progress;
 }
 
 void _updateNumber(double oldValue, double newValue, double progress, String property, RenderStyle renderStyle) {
   double number = _getNumber(oldValue, newValue, progress);
-  switch (property) {
-    case OPACITY:
-      renderStyle.opacity = number;
-      break;
-    case Z_INDEX:
-      renderStyle.zIndex = int.parse(number.toString());
-      break;
-    case FLEX_GROW:
-      renderStyle.flexGrow = number;
-      break;
-    case FLEX_SHRINK:
-      renderStyle.flexShrink = number;
-      break;
-  }
+  CSSValue.updateNumber(renderStyle, property, number);
 }
 
-String _parseLineHeight(String lineHeight, [Size? viewportSize, double? rootFontSize, double? fontSize]) {
-  return lineHeight;
+double _parseLineHeight(String lineHeight, RenderStyle renderStyle, String property) {
+  if (CSSNumber.isNumber(lineHeight)) {
+    return CSSLengthValue(CSSNumber.parseNumber(lineHeight), CSSLengthUnit.EM, renderStyle, LINE_HEIGHT).computedValue;
+  }
+  return CSSLength.parseLength(lineHeight, renderStyle, LINE_HEIGHT).computedValue;
 }
 
-void _updateLineHeight(String oldValue, String newValue, double progress, String property, RenderStyle renderStyle) {
-  Size viewportSize = renderStyle.viewportSize;
-  RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
-  double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
-  double fontSize = renderStyle.fontSize;
-  double? lineHeight;
-
-  if (CSSLength.isLength(oldValue) && CSSLength.isLength(newValue)) {
-    double left = CSSLength.parseLength(
-      oldValue,
-      viewportSize: viewportSize,
-      rootFontSize: rootFontSize,
-      fontSize: fontSize
-    )!;
-    double right = CSSLength.parseLength(
-      newValue,
-      viewportSize: viewportSize,
-      rootFontSize: rootFontSize,
-      fontSize: fontSize
-    )!;
-    lineHeight = _getNumber(left, right, progress);
-  } else if (CSSNumber.isNumber(oldValue) && CSSNumber.isNumber(newValue)) {
-    double left = CSSNumber.parseNumber(oldValue)!;
-    double right = CSSNumber.parseNumber(newValue)!;
-    lineHeight = _getNumber(left, right, progress);
-  }
-
-  switch (property) {
-    case LINE_HEIGHT:
-      renderStyle.lineHeight = lineHeight;
-      break;
-  }
+void _updateLineHeight(double oldValue, double newValue, double progress, String property, RenderStyle renderStyle) {
+  renderStyle.lineHeight = CSSLengthValue(_getNumber(oldValue, newValue, progress), CSSLengthUnit.PX);
 }
 
-Matrix4? _parseTransform(String value, [Size? viewportSize, double? rootFontSize, double? fontSize]) {
-  return CSSTransform.parseTransform(value, viewportSize, rootFontSize, fontSize);
+Matrix4? _parseTransform(String value, RenderStyle renderStyle, String property) {
+  return CSSTransform.computeTransformMatrix(CSSFunction.parseFunction(value), renderStyle);
 }
 
 double _lerpDouble(double begin, double to, double t) {
@@ -219,7 +108,7 @@ void _updateTransform(Matrix4 begin, Matrix4 end, double t, String property, Ren
       quaternion
     );
   }
-  renderStyle.updateTransform(newMatrix4);
+  renderStyle.transformMatrix = newMatrix4;
 }
 
 const List<Function> _colorHandler = [_parseColor, _updateColor];
@@ -811,29 +700,7 @@ class CSSTransform {
     return [translate, scale, angle, m11, m12, m21, m22];
   }
 
-  static bool isValidTransformValue(String value, [Size? viewportSize, double? rootFontSize, double? fontSize]) {
-    return value == NONE || parseTransform(value, viewportSize, rootFontSize, fontSize) != null;
-  }
-
   static Matrix4 initial = Matrix4.identity();
-
-  static Matrix4? parseTransform(String value, [Size? viewportSize, double? rootFontSize, double? fontSize]) {
-    List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(value);
-
-    Matrix4? matrix4;
-    for (CSSFunctionalNotation method in methods) {
-      Matrix4? transform = _parseTransform(method, viewportSize, rootFontSize, fontSize);
-      if (transform != null) {
-        if (matrix4 == null) {
-          matrix4 = transform;
-        } else {
-          matrix4.multiply(transform);
-        }
-      }
-    }
-    return matrix4;
-  }
-
   static const String MATRIX = 'matrix';
   static const String MATRIX_3D = 'matrix3d';
   static const String TRANSLATE = 'translate';
@@ -856,7 +723,22 @@ class CSSTransform {
   static const String SKEW_Y = 'skewy';
   static const String PERSPECTIVE = 'perspective';
 
-  static Matrix4? _parseTransform(CSSFunctionalNotation method, [Size? viewportSize, double? rootFontSize, double? fontSize]) {
+  static Matrix4? computeTransformMatrix(List<CSSFunctionalNotation> transform, RenderStyle renderStyle) {
+    Matrix4? matrix4;
+    for (CSSFunctionalNotation method in transform) {
+      Matrix4? transform = _computeMatrix(method, renderStyle);
+      if (transform != null) {
+        if (matrix4 == null) {
+          matrix4 = transform;
+        } else {
+          matrix4.multiply(transform);
+        }
+      }
+    }
+    return matrix4;
+  }
+
+  static Matrix4? _computeMatrix(CSSFunctionalNotation method, RenderStyle renderStyle) {
     switch (method.name) {
       case MATRIX:
         if (method.args.length == 6) {
@@ -879,24 +761,15 @@ class CSSTransform {
         break;
       case TRANSLATE:
         if (method.args.isNotEmpty && method.args.length <= 2) {
-          double y;
+          CSSLengthValue y;
           if (method.args.length == 2) {
-            y = CSSLength.toDisplayPortValue(
-              method.args[1].trim(),
-              viewportSize: viewportSize,
-              rootFontSize: rootFontSize,
-              fontSize: fontSize
-            ) ?? 0;
+            y = CSSLength.parseLength(method.args[1].trim(), renderStyle, TRANSFORM);
           } else {
-            y = 0;
+            y = CSSLengthValue.zero;
           }
-          double x = CSSLength.toDisplayPortValue(
-            method.args[0].trim(),
-            viewportSize: viewportSize,
-            rootFontSize: rootFontSize,
-            fontSize: fontSize
-          ) ?? 0;
-          return Matrix4.identity()..translate(x, y);
+          CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSFORM);
+          x.renderStyle = y.renderStyle = renderStyle;
+          return Matrix4.identity()..translate(x.computedValue, y.computedValue);
         }
         break;
       case TRANSLATE_3D:
@@ -905,69 +778,37 @@ class CSSTransform {
         //   0, 0, 1, 0,
         //   x, y, z, 1]
         if (method.args.isNotEmpty && method.args.length <= 3) {
-          double y = 0, z = 0;
+          CSSLengthValue y = CSSLengthValue.zero, z = CSSLengthValue.zero;
           if (method.args.length == 2) {
-            y = CSSLength.toDisplayPortValue(
-              method.args[1].trim(),
-              viewportSize: viewportSize,
-              rootFontSize: rootFontSize,
-              fontSize: fontSize
-            ) ?? 0;
+            y = CSSLength.parseLength(method.args[1].trim(), renderStyle, TRANSFORM);
           }
           if (method.args.length == 3) {
-            y = CSSLength.toDisplayPortValue(
-              method.args[1].trim(),
-              viewportSize: viewportSize,
-              rootFontSize: rootFontSize,
-              fontSize: fontSize
-            ) ?? 0;
-            z = CSSLength.toDisplayPortValue(
-              method.args[2].trim(),
-              viewportSize: viewportSize,
-              rootFontSize: rootFontSize,
-              fontSize: fontSize
-            ) ?? 0;
+            y = CSSLength.parseLength(method.args[1].trim(), renderStyle, TRANSFORM);
+            z = CSSLength.parseLength(method.args[2].trim(), renderStyle, TRANSFORM);
           }
-          double x = CSSLength.toDisplayPortValue(
-            method.args[0].trim(),
-            viewportSize: viewportSize,
-            rootFontSize: rootFontSize,
-            fontSize: fontSize
-          ) ?? 0;
-          return Matrix4.identity()..translate(x, y, z);
+          CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSFORM);
+          x.renderStyle = y.renderStyle = z.renderStyle = renderStyle;
+          return Matrix4.identity()..translate(x.computedValue, y.computedValue, z.computedValue);
         }
         break;
       case TRANSLATE_X:
         if (method.args.length == 1) {
-          double x = CSSLength.toDisplayPortValue(
-            method.args[0].trim(),
-            viewportSize: viewportSize,
-            rootFontSize: rootFontSize,
-            fontSize: fontSize
-          ) ?? 0;
-          return Matrix4.identity()..translate(x);
+          CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSFORM);
+          x.renderStyle = renderStyle;
+          return Matrix4.identity()..translate(x.computedValue);
         }
         break;
       case TRANSLATE_Y:
         if (method.args.length == 1) {
-          double y = CSSLength.toDisplayPortValue(
-            method.args[0].trim(),
-            viewportSize: viewportSize,
-            rootFontSize: rootFontSize,
-            fontSize: fontSize
-          ) ?? 0;
-          return Matrix4.identity()..translate(0.0, y);
+          CSSLengthValue y = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSFORM);
+          y.renderStyle = renderStyle;
+          return Matrix4.identity()..translate(0.0, y.computedValue);
         }
         break;
       case TRANSLATE_Z:
         if (method.args.length == 1) {
-          double z = CSSLength.toDisplayPortValue(
-            method.args[0].trim(),
-            viewportSize: viewportSize,
-            rootFontSize: rootFontSize,
-            fontSize: fontSize
-          ) ?? 0;
-          return Matrix4.identity()..translate(0.0, 0.0, z);
+          CSSLengthValue z = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSFORM);
+          return Matrix4.identity()..translate(0.0, 0.0, z.computedValue);
         }
         break;
       case ROTATE:
@@ -1065,12 +906,9 @@ class CSSTransform {
         //   0, 0, 1, perspective,
         //   0, 0, 0, 1]
         if (method.args.length == 1) {
-          double p = CSSLength.toDisplayPortValue(
-            method.args[0].trim(),
-            viewportSize: viewportSize,
-            rootFontSize: rootFontSize,
-            fontSize: fontSize
-          ) ?? 0;
+          CSSLengthValue length = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSFORM);
+          length.renderStyle = renderStyle;
+          double p = length.computedValue;
           p = (-1 / p);
           return Matrix4.identity()..storage[11] = p;
         }
@@ -1085,15 +923,29 @@ mixin CSSTransformMixin on RenderStyleBase {
   static Offset DEFAULT_TRANSFORM_OFFSET = Offset(0, 0);
   static Alignment DEFAULT_TRANSFORM_ALIGNMENT = Alignment.center;
 
-  Matrix4? get transform => _transform;
-  Matrix4? _transform;
-  set transform(Matrix4? value) {
+  List<CSSFunctionalNotation>? _transform;
+  List<CSSFunctionalNotation>? get transform => _transform;
+  set transform(List<CSSFunctionalNotation>? value) {
     // Transform should converted to matrix4 value to compare cause case such as
     // `translate3d(750rpx, 0rpx, 0rpx)` and `translate3d(100vw, 0vw, 0vw)` should considered to be equal.
     // Note this comparison cannot be done in style listener cause prevValue cannot be get in animation case.
     if (_transform == value) return;
     _transform = value;
-    updateTransform(value);
+    _transformMatrix = null;
+    renderBoxModel!.markNeedsLayout();
+  }
+
+  Matrix4? _transformMatrix;
+  Matrix4? get transformMatrix {
+    if (_transformMatrix == null && _transform != null) {
+      _transformMatrix = CSSTransform.computeTransformMatrix(_transform!, this as RenderStyle);
+    }
+    return _transformMatrix;
+  }
+  set transformMatrix(Matrix4? value) {
+    if (value == null || _transformMatrix == value) return;
+    _transformMatrix = value;
+    renderBoxModel!.markNeedsLayout();
   }
 
   Offset get transformOffset => _transformOffset;
@@ -1110,29 +962,6 @@ mixin CSSTransformMixin on RenderStyleBase {
     if (_transformAlignment == value) return;
     _transformAlignment = value;
     renderBoxModel!.markNeedsPaint();
-  }
-
-  void updateTransform(
-    Matrix4? matrix4,
-    {
-      bool shouldToggleRepaintBoundary = true,
-      bool shouldMarkNeedsLayout = true
-    }
-  ) {
-    // If render box model was not created yet, then exit.
-    if (renderBoxModel == null) {
-      return;
-    }
-
-    transform = matrix4;
-
-    if (shouldToggleRepaintBoundary) {
-      elementDelegate.toggleRendererRepaintBoundary();
-    }
-
-    if (shouldMarkNeedsLayout) {
-      renderBoxModel!.markNeedsLayout();
-    }
   }
 
   CSSOrigin? _transformOrigin;

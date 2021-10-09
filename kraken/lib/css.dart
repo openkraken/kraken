@@ -9,7 +9,6 @@ export 'src/css/background.dart';
 export 'src/css/box.dart';
 export 'src/css/content_visibility.dart';
 export 'src/css/flexbox.dart';
-export 'src/css/flow.dart';
 export 'src/css/filter.dart';
 export 'src/css/opacity.dart';
 export 'src/css/overflow.dart';
@@ -38,6 +37,7 @@ export 'src/css/display.dart';
 export 'src/css/object_fit.dart';
 export 'src/css/object_position.dart';
 export 'src/css/sliver.dart';
+export 'src/css/value.dart';
 
 // CSS Values
 // ignore: directives_ordering

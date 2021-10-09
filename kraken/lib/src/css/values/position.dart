@@ -59,7 +59,7 @@ class CSSPosition {
       Size viewportSize = renderStyle.viewportSize;
       RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
       double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
-      double fontSize = renderStyle.fontSize;
+      double fontSize = renderStyle.fontSize.computedValue;
       return CSSBackgroundPosition(length: CSSLength.toDisplayPortValue(
         input,
         viewportSize: viewportSize,

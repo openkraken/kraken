@@ -379,7 +379,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   double getRootFontSize() {
     RenderBoxModel rootBoxModel = viewportElement.renderBoxModel!;
-    return rootBoxModel.renderStyle.fontSize;
+    return rootBoxModel.renderStyle.fontSize.computedValue;
   }
 
   bool showPerformanceOverlay = false;

@@ -34,7 +34,6 @@ class RenderStyle
     CSSVisibilityMixin,
     CSSContentVisibilityMixin,
     CSSFlexboxMixin,
-    CSSFlowMixin,
     CSSDisplayMixin,
     CSSInlineMixin,
     CSSObjectFitMixin,
@@ -60,13 +59,13 @@ class RenderStyle
   double? getLogicalContentWidth() {
     RenderStyle renderStyle = this;
     double? intrinsicRatio = renderBoxModel!.intrinsicRatio;
-    CSSDisplay? display = renderStyle.transformedDisplay;
-    double? width = renderStyle.width;
-    double? minWidth = renderStyle.minWidth;
-    double? maxWidth = renderStyle.maxWidth;
+    CSSDisplay? transformedDisplay = renderStyle.transformedDisplay;
+    double? width = renderStyle.width?.computedValue;
+    double? minWidth = renderStyle.minWidth?.computedValue;
+    double? maxWidth = renderStyle.maxWidth?.computedValue;
     double cropWidth = 0;
 
-    switch (display) {
+    switch (transformedDisplay) {
       case CSSDisplay.block:
       case CSSDisplay.flex:
       case CSSDisplay.sliver:
@@ -97,7 +96,7 @@ class RenderStyle
                 // Skip to find upper parent
                 if (parentRenderStyle.width != null) {
                   // Use style width
-                  width = parentRenderStyle.width;
+                  width = parentRenderStyle.width?.computedValue;
                   cropWidth = _getCropWidthByPaddingBorder(parentRenderStyle, cropWidth);
                   break;
                 } else if (parentRenderBoxModel.constraints.isTight) {
@@ -122,7 +121,7 @@ class RenderStyle
       case CSSDisplay.inlineBlock:
       case CSSDisplay.inlineFlex:
         if (renderStyle.width != null) {
-          width = renderStyle.width;
+          width = renderStyle.width?.computedValue;
           cropWidth = _getCropWidthByPaddingBorder(renderStyle, cropWidth);
         } else {
           width = null;
@@ -241,7 +240,7 @@ class RenderStyle
     while (true) {
       RenderStyle? parentRenderStyle = currentRenderStyle.parent;
 
-      CSSDisplay? display = currentRenderStyle.transformedDisplay;
+      CSSDisplay? transformedDisplay = currentRenderStyle.transformedDisplay;
 
       // Flex item with flex-shrink 0 and no width/max-width will have infinity constraints
       // even if parents have width
@@ -256,7 +255,7 @@ class RenderStyle
       }
 
       // Get width if width exists and element is not inline
-      if (display != CSSDisplay.inline &&
+      if (transformedDisplay != CSSDisplay.inline &&
         (currentRenderStyle.width != null || currentRenderStyle.maxWidth != null)) {
         // Get the min width between width and max-width
         maxConstraintWidth = math.min(currentRenderStyle.width ?? double.infinity,
@@ -281,6 +280,14 @@ class RenderStyle
     return maxConstraintWidth;
   }
 
+  double get logicalWidth {
+    return getLogicalContentWidth() ?? 0;
+  }
+
+  double get logicalHeight {
+    return getLogicalContentHeight() ?? 0;
+  }
+
   /// Resolve percentage size to px base on size of its containing block
   /// https://www.w3.org/TR/css-sizing-3/#percentage-sizing
   bool resolvePercentageToContainingBlock(RenderBoxModel parent) {
@@ -292,7 +299,7 @@ class RenderStyle
     final RenderLayoutParentData childParentData = renderBoxModel!.parentData as RenderLayoutParentData;
     double parentActualContentHeight = parent.size.height -
       parent.renderStyle.borderTop - parent.renderStyle.borderBottom -
-      parent.renderStyle.paddingTop - parent.renderStyle.paddingBottom;
+      parent.renderStyle.paddingTop.computedValue - parent.renderStyle.paddingBottom.computedValue;
     double? parentLogicalContentHeight = parent.logicalContentHeight;
 
     // The percentage of height is calculated with respect to the height of the generated box's containing block.
@@ -313,10 +320,8 @@ class RenderStyle
       parentRenderStyle.borderEdge!.horizontal : 0;
     double parentVerticalBorderWidth = parentRenderStyle.borderEdge != null ?
       parentRenderStyle.borderEdge!.vertical : 0;
-    double parentHorizontalPaddingWidth = parentRenderStyle.padding != null ?
-      parentRenderStyle.padding!.horizontal : 0;
-    double parentVerticalPaddingHeight = parentRenderStyle.padding != null ?
-      parentRenderStyle.padding!.vertical : 0;
+    double parentHorizontalPaddingWidth = parentRenderStyle.padding.horizontal;
+    double parentVerticalPaddingHeight = parentRenderStyle.padding.vertical;
 
     /// Width and height of parent padding box
     double parentPaddingBoxWidth = parentSize.width - parentHorizontalBorderWidth;
@@ -329,63 +334,26 @@ class RenderStyle
     /// Update sizing
     double relativeParentWidth = childParentData.isPositioned ? parentPaddingBoxWidth : parentContentBoxWidth;
 
-    if (CSSLength.isPercentage(style[WIDTH])) {
-      updateSizing(
-        WIDTH,
-        relativeParentWidth * CSSLength.parsePercentage(style[WIDTH]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
+    // Compute all percentage sizes.
+    // https://www.w3.org/TR/CSS2/visudet.html#percentage-widths-heights
+    // https://www.w3.org/TR/CSS2/visudet.html#percentage-heights
+    // https://www.w3.org/TR/CSS2/visudet.html#percentage-sizes
+    // https://www.w3.org/TR/CSS2/visudet.html#percentage-sizing
+    // https://www.w3.org/TR/CSS2/visudet.html#percentage-sizing-of-the-width
+    // https://www.w3.org/TR/CSS2/visudet.html#percentage-sizing-of-the-height
+    // https://www.w3.org/TR/CSS2/visudet.html#percentage-sizing-of-the-size
+    // https://www.w3.org/TR/CSS2/visudet.html#percentage-sizing-of-the-containing-block
+    // https://www.w3.org/TR/CSS2/visudet.html#percentage-sizing-of-the-content-box
+    // https://www.w3.org/TR/CSS2/visudet.html#percentage-sizing-of-the-padding-box
+    // https://www.w3.org/TR/CSS2/visudet.html#percentage-sizing-of-the-border-box
+    // https://www.w3.org/TR/CSS2/visudet.html#percentage-sizing-of-the-margin-box
 
-    if (CSSLength.isPercentage(style[MIN_WIDTH])) {
-      updateSizing(
-        MIN_WIDTH,
-        relativeParentWidth * CSSLength.parsePercentage(style[MIN_WIDTH]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
-
-    if (CSSLength.isPercentage(style[MAX_WIDTH])) {
-      updateSizing(
-        MAX_WIDTH,
-        relativeParentWidth * CSSLength.parsePercentage(style[MAX_WIDTH]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
 
     if (parentContentHeight != null) {
       double relativeParentHeight = childParentData.isPositioned ? parentPaddingBoxHeight : parentContentBoxHeight;
-
-      if (CSSLength.isPercentage(style[HEIGHT])) {
-        updateSizing(
-          HEIGHT,
-          relativeParentHeight * CSSLength.parsePercentage(style[HEIGHT]),
-          shouldMarkNeedsLayout: false
-        );
-        isPercentageExist = true;
-      }
-
-      if (CSSLength.isPercentage(style[MIN_HEIGHT])) {
-        updateSizing(
-          MIN_HEIGHT,
-          relativeParentHeight * CSSLength.parsePercentage(style[MIN_HEIGHT]),
-          shouldMarkNeedsLayout: false
-        );
-        isPercentageExist = true;
-      }
-
-      if (CSSLength.isPercentage(style[MAX_HEIGHT])) {
-        updateSizing(
-          MAX_HEIGHT,
-          relativeParentHeight * CSSLength.parsePercentage(style[MAX_HEIGHT]),
-          shouldMarkNeedsLayout: false
-        );
-        isPercentageExist = true;
-      }
     }
+    computePercentageLength(relativeParentWidth, relativeParentHeight);
+
 
     /// Percentage of padding and margin refer to the logical width of containing block
     /// Update padding
@@ -536,17 +504,6 @@ class RenderStyle
       updateBorderRadius(
         BORDER_BOTTOM_RIGHT_RADIUS,
         parsedBottomRightRadius,
-      );
-      isPercentageExist = true;
-    }
-
-    /// Transform translate
-    Matrix4? transformValue = parsePercentageTransformTranslate(style[TRANSFORM], size, renderStyle);
-    if (transformValue != null) {
-      updateTransform(
-        transformValue,
-        shouldToggleRepaintBoundary: false,
-        shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
     }
@@ -850,30 +807,6 @@ class RenderStyle
     return isPercentageExist ? matrix4 : null;
   }
 
-  /// Check whether percentage exist in transform translate
-  static bool isTransformTranslatePercentage(String transformStr) {
-    bool isPercentageExist = false;
-    List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(transformStr);
-    for (CSSFunctionalNotation method in methods) {
-      if ((method.name == CSSTransform.TRANSLATE &&
-          ((method.args.length == 1 && CSSLength.isPercentage(method.args[0])) ||
-            (method.args.length == 2 && (CSSLength.isPercentage(method.args[0]) || CSSLength.isPercentage(method.args[1]))))) ||
-
-        (method.name == CSSTransform.TRANSLATE_3D &&
-          ((method.args.length == 1 && CSSLength.isPercentage(method.args[0])) ||
-            (method.args.length == 2 && (CSSLength.isPercentage(method.args[0]) || CSSLength.isPercentage(method.args[1]))) ||
-            (method.args.length == 3 && (CSSLength.isPercentage(method.args[0]) || CSSLength.isPercentage(method.args[1]) || CSSLength.isPercentage(method.args[2]))))) ||
-
-        (method.name == CSSTransform.TRANSLATE_X && (method.args.length == 1 && CSSLength.isPercentage(method.args[0]))) ||
-
-        (method.name == CSSTransform.TRANSLATE_Y && (method.args.length == 1 && CSSLength.isPercentage(method.args[0])))
-    ) {
-        isPercentageExist = true;
-      }
-    }
-    return isPercentageExist;
-  }
-
   /// Get height of replaced element by intrinsic ratio if height is not defined
   double getHeightByIntrinsicRatio() {
     // @TODO: move intrinsic width/height to renderStyle
@@ -914,6 +847,14 @@ double _getCropWidthByMargin(RenderStyle renderStyle, double cropWidth) {
   return cropWidth;
 }
 
+double _getCropWidthByPaddingBorder(RenderStyle renderStyle, double cropWidth) {
+  if (renderStyle.borderEdge != null) {
+    cropWidth += renderStyle.borderEdge!.horizontal;
+  }
+  cropWidth += renderStyle.padding.horizontal;
+  return cropWidth;
+}
+
 double _getCropHeightByMargin(RenderStyle renderStyle, double cropHeight) {
   if (renderStyle.margin != null) {
     cropHeight += renderStyle.margin!.vertical;
@@ -921,26 +862,11 @@ double _getCropHeightByMargin(RenderStyle renderStyle, double cropHeight) {
   return cropHeight;
 }
 
-double _getCropWidthByPaddingBorder(RenderStyle renderStyle, double cropWidth) {
-  if (renderStyle.borderEdge != null) {
-    cropWidth += renderStyle.borderEdge!.horizontal;
-  }
-
-  if (renderStyle.padding != null) {
-    cropWidth += renderStyle.padding!.horizontal;
-  }
-
-  return cropWidth;
-}
-
 double _getCropHeightByPaddingBorder(RenderStyle renderStyle, double cropHeight) {
   if (renderStyle.borderEdge != null) {
     cropHeight += renderStyle.borderEdge!.vertical;
   }
 
-  if (renderStyle.padding != null) {
-    cropHeight += renderStyle.padding!.vertical;
-  }
-
+  cropHeight += renderStyle.padding.vertical;
   return cropHeight;
 }

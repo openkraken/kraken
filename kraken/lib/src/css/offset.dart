@@ -15,55 +15,48 @@ enum CSSPositionType {
   sticky,
 }
 
-class CSSOffset {
-  CSSOffset({
-    this.length,
-    this.isAuto,
-  });
-  /// length if margin value is length type
-  double? length;
-  /// Whether value is auto
-  bool? isAuto;
-}
-
 mixin CSSPositionMixin on RenderStyleBase {
 
   static const CSSPositionType DEFAULT_POSITION_TYPE = CSSPositionType.static;
 
-  CSSOffset? _top;
-  CSSOffset? get top {
+  CSSLengthValue? _top;
+  CSSLengthValue? get top {
     return _top;
   }
-  set top(CSSOffset? value) {
+  set top(CSSLengthValue? value) {
     if (_top == value) return;
     _top = value;
+    _markParentNeedsLayout();
   }
 
-  CSSOffset? _bottom;
-  CSSOffset? get bottom {
+  CSSLengthValue? _bottom;
+  CSSLengthValue? get bottom {
     return _bottom;
   }
-  set bottom(CSSOffset? value) {
+  set bottom(CSSLengthValue? value) {
     if (_bottom == value) return;
     _bottom = value;
+    _markParentNeedsLayout();
   }
 
-  CSSOffset? _left;
-  CSSOffset? get left {
+  CSSLengthValue? _left;
+  CSSLengthValue? get left {
     return _left;
   }
-  set left(CSSOffset? value) {
+  set left(CSSLengthValue? value) {
     if (_left == value) return;
     _left = value;
+    _markParentNeedsLayout();
   }
 
-  CSSOffset? _right;
-  CSSOffset? get right {
+  CSSLengthValue? _right;
+  CSSLengthValue? get right {
     return _right;
   }
-  set right(CSSOffset? value) {
+  set right(CSSLengthValue? value) {
     if (_right == value) return;
     _right = value;
+    _markParentNeedsLayout();
   }
 
   int? _zIndex;
@@ -71,7 +64,7 @@ mixin CSSPositionMixin on RenderStyleBase {
     return _zIndex;
   }
   set zIndex(int? value) {
-    if (_zIndex == value) return;
+    if (value != null || _zIndex == value) return;
     _zIndex = value;
     _markParentNeedsLayout();
     // Needs to sort children when parent paint children
@@ -89,6 +82,8 @@ mixin CSSPositionMixin on RenderStyleBase {
     if (_position == value) return;
     _position = value;
     _markParentNeedsLayout();
+    // Position change may affect transformed display
+    // https://www.w3.org/TR/css-display-3/#transformations
   }
 
   void _markParentNeedsLayout() {
@@ -104,41 +99,7 @@ mixin CSSPositionMixin on RenderStyleBase {
     }
   }
 
-  void updateOffset(String property, double value, {bool shouldMarkNeedsLayout = true}) {
-    switch (property) {
-      case TOP:
-        top = CSSOffset(length: value, isAuto: style[TOP] == AUTO);
-        break;
-      case LEFT:
-        left = CSSOffset(length: value, isAuto: style[LEFT] == AUTO);
-        break;
-      case RIGHT:
-        right = CSSOffset(length: value, isAuto: style[RIGHT] == AUTO);
-        break;
-      case BOTTOM:
-        bottom = CSSOffset(length: value, isAuto: style[BOTTOM] == AUTO);
-        break;
-    }
-    /// Should mark parent needsLayout directly cause positioned element is rendered as relayoutBoundary
-    /// the parent will not be marked as markNeedsLayout
-    if (shouldMarkNeedsLayout) {
-      _markParentNeedsLayout();
-    }
-  }
-
-  void updatePosition(String present) {
-    position = parsePositionType(style[POSITION]);
-    // Position change may affect transformed display
-    // https://www.w3.org/TR/css-display-3/#transformations
-    RenderStyle renderStyle = this as RenderStyle;
-    renderStyle.updateTransformedDisplay();
-  }
-
-  void updateZIndex(String present) {
-    zIndex = int.tryParse(present);
-  }
-
-  static CSSPositionType parsePositionType(String? input) {
+  static CSSPositionType resolvePositionType(String? input) {
     switch (input) {
       case RELATIVE:
         return CSSPositionType.relative;

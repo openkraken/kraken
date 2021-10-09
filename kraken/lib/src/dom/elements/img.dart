@@ -294,21 +294,22 @@ class ImageElement extends Element {
       return;
     }
 
-    RenderStyle renderStyle = renderBoxModel!.renderStyle;
     // Waiting for size computed after layout stage
     if (style.contains(WIDTH) && renderStyle.width == null ||
         style.contains(HEIGHT) && renderStyle.height == null) {
       return _handleImageResizeAfterLayout();
     }
 
-    double? width = renderStyle.width ?? _propertyWidth;
-    double? height = renderStyle.height ?? _propertyHeight;
+    double? width = renderStyle.width?.computedValue ?? _propertyWidth;
+    double? height = renderStyle.height?.computedValue ?? _propertyHeight;
 
     if (renderStyle.width == null && _propertyWidth != null) {
-      renderBoxModel!.renderStyle.updateSizing(WIDTH, _propertyWidth);
+      // The intrinsic width of the image in pixels. Must be an integer without a unit.
+      renderStyle.width = CSSLengthValue(_propertyWidth, CSSLengthUnit.PX);
     }
     if (renderStyle.height == null && _propertyHeight != null) {
-      renderBoxModel!.renderStyle.updateSizing(HEIGHT, _propertyHeight);
+      // The intrinsic height of the image, in pixels. Must be an integer without a unit.
+      renderStyle.height = CSSLengthValue(_propertyHeight, CSSLengthUnit.PX);
     }
 
     if (width == null && height == null) {
@@ -376,7 +377,7 @@ class ImageElement extends Element {
     double? fontSize;
     if (renderBoxModel != null) {
       rootFontSize = renderBoxModel!.elementDelegate.getRootElementFontSize();
-      fontSize = renderBoxModel!.renderStyle.fontSize;
+      fontSize = renderBoxModel!.renderStyle.fontSize.computedValue;
     }
 
     // Reset frame number to zero when image needs to reload

@@ -877,8 +877,8 @@ class CanvasRenderingContext2D {
       rootFontSize: rootFontSize,
       fontSize: fontSize
     );
-    var fontFamilyFallback = CSSText.parseFontFamilyFallback(_fontProperties[FONT_FAMILY] ?? 'sans-serif');
-    FontWeight fontWeight = CSSText.parseFontWeight(_fontProperties[FONT_WEIGHT]);
+    var fontFamilyFallback = CSSText.resolveFontFamilyFallback(_fontProperties[FONT_FAMILY]);
+    FontWeight fontWeight = CSSText.resolveFontWeight(_fontProperties[FONT_WEIGHT]);
     if (shouldStrokeText) {
       return TextStyle(
           fontSize: _fontSize,

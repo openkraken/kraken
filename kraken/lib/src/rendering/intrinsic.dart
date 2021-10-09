@@ -64,12 +64,12 @@ class RenderIntrinsic extends RenderBoxModel
 
     beforeLayout();
 
-    double? width = renderStyle.width;
-    double? height = renderStyle.height;
-    double? minWidth = renderStyle.minWidth;
-    double? minHeight = renderStyle.minHeight;
-    double? maxWidth = renderStyle.maxWidth;
-    double? maxHeight = renderStyle.maxHeight;
+    double? width = renderStyle.width?.computedValue;
+    double? height = renderStyle.height?.computedValue;
+    double? minWidth = renderStyle.minWidth?.computedValue;
+    double? minHeight = renderStyle.minHeight?.computedValue;
+    double? maxWidth = renderStyle.maxWidth?.computedValue;
+    double? maxHeight = renderStyle.maxHeight?.computedValue;
 
     if (child != null) {
       late DateTime childLayoutStart;
@@ -189,9 +189,8 @@ class RenderIntrinsic extends RenderBoxModel
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
-    if (renderStyle.padding != null) {
-      offset += Offset(renderStyle.paddingLeft, renderStyle.paddingTop);
-    }
+
+    offset += Offset(renderStyle.paddingLeft.computedValue, renderStyle.paddingTop.computedValue);
 
     if (renderStyle.borderEdge != null) {
       offset += Offset(renderStyle.borderLeft, renderStyle.borderTop);

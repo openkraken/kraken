@@ -226,6 +226,14 @@ class CSSColor {
     return color == CURRENT_COLOR || parseColor(color) != null;
   }
 
+  static Color resolveColor(String? color) {
+    if (color is String) {
+      return CSSColor.parseColor(color) ?? CSSColor.initial;
+    } else {
+      return CSSColor.initial;
+    }
+  }
+
   static Color? parseColor(String color) {
     color = color.trim().toLowerCase();
 

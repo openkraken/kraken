@@ -1,11 +1,7 @@
-
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
-import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
@@ -20,138 +16,74 @@ import 'package:kraken/css.dart';
 
 mixin CSSSizingMixin on RenderStyleBase {
 
-  double? _width;
-  double? get width {
+  CSSLengthValue? _width;
+  CSSLengthValue? get width {
     return _width;
   }
-  set width(double? value) {
-    if (_width == value) return;
+  set width(CSSLengthValue? value) {
+    if (value == null || value.value! < 0 || _width == value) return;
     _width = value;
+    _markSelfAndParentNeedsLayout();
   }
 
-  double? _height;
-  double? get height {
+  CSSLengthValue? _height;
+  CSSLengthValue? get height {
     return _height;
   }
-  set height(double? value) {
-    if (_height == value) return;
+  set height(CSSLengthValue? value) {
+    if (value == null || value.value! < 0 || _height == value) return;
     _height = value;
+    _markSelfAndParentNeedsLayout();
   }
 
-  double? _minWidth;
-  double? get minWidth {
+  CSSLengthValue? _minWidth;
+  CSSLengthValue? get minWidth {
     return _minWidth;
   }
-  set minWidth(double? value) {
-    if (_minWidth == value) return;
+  set minWidth(CSSLengthValue? value) {
+    if (value == null || value.value! < 0 || _minWidth == value) return;
     _minWidth = value;
+    _markSelfAndParentNeedsLayout();
   }
 
-  double? _maxWidth;
-  double? get maxWidth {
+  CSSLengthValue? _maxWidth;
+  CSSLengthValue? get maxWidth {
     return _maxWidth;
   }
-  set maxWidth(double? value) {
-    if (_maxWidth == value) return;
+  set maxWidth(CSSLengthValue? value) {
+    if (value == null || value.value! < 0 || _maxWidth == value) return;
     _maxWidth = value;
+    _markSelfAndParentNeedsLayout();
   }
 
-  double? _minHeight;
-  double? get minHeight {
+  CSSLengthValue? _minHeight;
+  CSSLengthValue? get minHeight {
     return _minHeight;
   }
-  set minHeight(double? value) {
-    if (_minHeight == value) return;
+  set minHeight(CSSLengthValue? value) {
+    if (value == null || value.value! < 0 || _minHeight == value) return;
     _minHeight = value;
+    _markSelfAndParentNeedsLayout();
   }
 
-  double? _maxHeight;
-  double? get maxHeight {
+  CSSLengthValue? _maxHeight;
+  CSSLengthValue? get maxHeight {
     return _maxHeight;
   }
-  set maxHeight(double? value) {
-    if (_maxHeight == value) return;
+  set maxHeight(CSSLengthValue? value) {
+    if (value == null || value.value! < 0 || _maxHeight == value) return;
     _maxHeight = value;
+    _markSelfAndParentNeedsLayout();
   }
 
-  void updateSizing(String property, double? value, {bool shouldMarkNeedsLayout = true}) {
-    RenderStyle renderStyle = this as RenderStyle;
-    switch (property) {
-      case WIDTH:
-        renderStyle.width = value != null && value >= 0 ? value.abs() : null;
-        break;
-      case HEIGHT:
-        renderStyle.height = value != null && value >= 0 ? value.abs() : null;
-        break;
-      case MIN_HEIGHT:
-        renderStyle.minHeight = getMinHeight(value);
-        // max-height should not exceed min-height
-        double? maxHeight = renderStyle.maxHeight;
-        if (maxHeight != null) {
-          renderStyle.maxHeight = getMaxHeight(maxHeight, value);
-        }
-        break;
-      case MAX_HEIGHT:
-        renderStyle.maxHeight = getMaxHeight(value, renderStyle.minHeight);
-        break;
-      case MIN_WIDTH:
-        renderStyle.minWidth = getMinWidth(value);
-        // max-width should not exceed min-width
-        double? maxWidth = renderStyle.maxWidth;
-        if (maxWidth != null) {
-          renderStyle.maxWidth = getMaxWidth(maxWidth, value);
-        }
-        break;
-      case MAX_WIDTH:
-        renderStyle.maxWidth = getMaxWidth(value, renderStyle.minWidth);
-        break;
+  void _markSelfAndParentNeedsLayout() {
+    RenderBoxModel boxModel = renderBoxModel!;
+    boxModel.markNeedsLayout();
+    // Sizing may affect parent size, mark parent as needsLayout in case
+    // renderBoxModel has tight constraints which will prevent parent from marking.
+    if (boxModel.parent is RenderBoxModel) {
+      (boxModel.parent as RenderBoxModel).markNeedsLayout();
     }
-
-    if (shouldMarkNeedsLayout) {
-      RenderBoxModel boxModel = renderBoxModel!;
-      boxModel.markNeedsLayout();
-      // Sizing may affect parent size, mark parent as needsLayout in case
-      // renderBoxModel has tight constraints which will prevent parent from marking.
-      if (boxModel.parent is RenderBoxModel) {
-        (boxModel.parent as RenderBoxModel).markNeedsLayout();
-      }
-    }
-  }
-
-  double? getMinWidth(double? minWidth) {
-    if (minWidth == null || minWidth < 0)  {
-      return null;
-    }
-    return minWidth;
-  }
-
-  double? getMaxWidth(double? maxWidth, double? minWidth) {
-    if (maxWidth == null || maxWidth < 0) {
-      return null;
-    }
-    // max-width is invalid if max-width is smaller than min-width
-    if (minWidth != null && minWidth > maxWidth) {
-      return null;
-    }
-    return maxWidth;
-  }
-
-  double? getMinHeight(double? minHeight) {
-    if (minHeight == null || minHeight < 0)  {
-      return null;
-    }
-    return minHeight;
-  }
-
-  double? getMaxHeight(double? maxHeight, double? minHeight) {
-    if (maxHeight == null || maxHeight < 0) {
-      return null;
-    }
-    // max-height is invalid if max-height is smaller than min-height
-    if (minHeight != null && minHeight > maxHeight) {
-      return null;
-    }
-    return maxHeight;
   }
 
   // Whether current node should stretch children's height
@@ -164,10 +96,8 @@ mixin CSSSizingMixin on RenderStyleBase {
     bool isChildAlignSelfStretch = false;
     bool isChildStretchSelf = false;
     if (isFlex) {
-      isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(
-        renderStyle.flexDirection
-      );
-      isAlignItemsStretch = renderStyle.alignItems == AlignItems.stretch;
+      isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
+      isAlignItemsStretch = renderStyle.transformedAlignItems == AlignItems.stretch;
       isFlexNoWrap = renderStyle.flexWrap != FlexWrap.wrap &&
         childRenderStyle.flexWrap != FlexWrap.wrapReverse;
       isChildAlignSelfStretch = childRenderStyle.alignSelf == AlignSelf.stretch;
@@ -187,17 +117,3 @@ mixin CSSSizingMixin on RenderStyleBase {
     return isStretch;
   }
 }
-
-class CSSEdgeInsets {
-  double left;
-  double top;
-  double right;
-  double bottom;
-
-  CSSEdgeInsets(this.top, this.right, this.bottom, this.left);
-
-  EdgeInsets toEdgeInsets() {
-    return EdgeInsets.fromLTRB(left, top, right, bottom);
-  }
-}
-

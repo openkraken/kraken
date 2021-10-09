@@ -99,7 +99,7 @@ class CanvasElement extends Element {
   void didAttachRenderer() {
     super.didAttachRenderer();
     double? rootFontSize = renderBoxModel!.elementDelegate.getRootElementFontSize();
-    double? fontSize = renderBoxModel!.renderStyle.fontSize;
+    double? fontSize = renderBoxModel!.renderStyle.fontSize.computedValue;
     context2d ??= CanvasRenderingContext2D();
     context2d!.viewportSize = viewportSize;
     context2d!.rootFontSize = rootFontSize;
@@ -139,8 +139,8 @@ class CanvasElement extends Element {
     double? height;
 
     RenderStyle renderStyle = renderBoxModel!.renderStyle;
-    double? styleWidth = renderStyle.width;
-    double? styleHeight = renderStyle.height;
+    double? styleWidth = renderStyle.width?.computedValue;
+    double? styleHeight = renderStyle.height?.computedValue;
 
     if (styleWidth != null) {
       width = styleWidth;
@@ -176,8 +176,8 @@ class CanvasElement extends Element {
       // @TODO: CSS object-fit for canvas.
       // To fill (default value of object-fit) the bitmap content, use scale to get the same performed.
       RenderStyle renderStyle = renderBoxModel!.renderStyle;
-      double? styleWidth = renderStyle.width;
-      double? styleHeight = renderStyle.height;
+      double? styleWidth = renderStyle.width?.computedValue;
+      double? styleHeight = renderStyle.height?.computedValue;
 
       double? scaleX;
       double? scaleY;

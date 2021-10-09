@@ -484,7 +484,7 @@ class KeyframeEffect extends AnimationEffect {
     if (renderStyle != null) {
       RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
       rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
-      fontSize = renderStyle.fontSize;
+      fontSize = renderStyle.fontSize.computedValue;
     }
 
     propertySpecificKeyframeGroups.forEach((String property, List<Keyframe> keyframes) {
@@ -520,8 +520,8 @@ class KeyframeEffect extends AnimationEffect {
           startOffset,
           endOffset,
           _parseEasing(keyframes[startIndex].easing),
-          parseProperty(left, viewportSize, rootFontSize, fontSize),
-          parseProperty(right, viewportSize, rootFontSize, fontSize),
+          parseProperty(left, renderStyle, property),
+          parseProperty(right, renderStyle, property),
           handlers[1]
         );
 

@@ -32,8 +32,8 @@ class HTMLElement extends Element {
     }
     elementManager.viewportElement = this;
     // Must init with viewport width.
-    renderStyle.width = elementManager.viewportWidth;
-    renderStyle.height = elementManager.viewportHeight;
+    renderStyle.width = CSSLengthValue(elementManager.viewportWidth, CSSLengthUnit.PX);
+    renderStyle.height = CSSLengthValue(elementManager.viewportHeight, CSSLengthUnit.PX);
   }
 
   @override

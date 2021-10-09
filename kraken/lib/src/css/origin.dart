@@ -1,7 +1,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 
-// CSS Transforms: https://drafts.csswg.org/css-transforms/
 final RegExp _spaceRegExp = RegExp(r'\s+(?![^(]*\))');
 
 class CSSOrigin {
@@ -9,7 +8,7 @@ class CSSOrigin {
   Alignment alignment;
   CSSOrigin(this.offset, this.alignment);
 
-  static CSSOrigin? parseOrigin(String origin, [Size? viewportSize, double? rootFontSize, double? fontSize]) {
+  static CSSOrigin? parseOrigin(String origin, RenderStyle renderStyle, String property) {
     if (origin.isNotEmpty) {
       List<String> originList = origin.trim().split(_spaceRegExp);
       String? x, y;
@@ -19,7 +18,7 @@ class CSSOrigin {
         x = originList[0];
         y = CSSPosition.CENTER;
         // flutter just support two value x y
-        // FIXME when flutter support three value
+        // FIXME: when flutter support three value
       } else if (originList.length == 2 || originList.length == 3) {
         x = originList[0];
         y = originList[1];
@@ -37,12 +36,7 @@ class CSSOrigin {
 
       // handle x
       if (CSSLength.isLength(x)) {
-        offsetX = CSSLength.toDisplayPortValue(
-          x,
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-        ) ?? offsetX;
+        offsetX = CSSLength.parseLength(x!, renderStyle, property).computedValue;
       } else if (CSSPercentage.isPercentage(x)) {
         alignX = CSSPercentage.parsePercentage(x!)! * 2 - 1;
       } else if (x == CSSPosition.LEFT) {
@@ -55,12 +49,7 @@ class CSSOrigin {
 
       // handle y
       if (CSSLength.isLength(y)) {
-        offsetY = CSSLength.toDisplayPortValue(
-          y,
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-        ) ?? offsetY;
+        offsetY = CSSLength.parseLength(y!, renderStyle, property).computedValue;
       } else if (CSSPercentage.isPercentage(y)) {
         alignY = CSSPercentage.parsePercentage(y!)! * 2 - 1;
       } else if (y == CSSPosition.TOP) {

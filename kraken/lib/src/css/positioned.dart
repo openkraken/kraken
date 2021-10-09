@@ -57,8 +57,8 @@ Offset _getAutoMarginPositionedElementOffset(double? x, double? y, RenderBoxMode
   CSSMargin marginRight = childRenderStyle.marginRight;
   CSSMargin marginTop = childRenderStyle.marginTop;
   CSSMargin marginBottom = childRenderStyle.marginBottom;
-  double? width = childRenderStyle.width;
-  double? height = childRenderStyle.height;
+  double? width = childRenderStyle.width?.computedValue;
+  double? height = childRenderStyle.height?.computedValue;
   CSSOffset? left = childRenderStyle.left;
   CSSOffset? right = childRenderStyle.right;
   CSSOffset? top = childRenderStyle.top;
@@ -66,8 +66,8 @@ Offset _getAutoMarginPositionedElementOffset(double? x, double? y, RenderBoxMode
 
   // 'left' + 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right'
   // + 'border-right-width' + 'margin-right' + 'right' = width of containing block
-  if ((left != null && !left.isAuto!) &&
-    (right != null && !right.isAuto!) &&
+  if ((left != null && !left.isAuto) &&
+    (right != null && !right.isAuto) &&
     (child is! RenderIntrinsic || width != null)) {
     if (marginLeft.isAuto!) {
       double leftValue = left.length ?? 0.0;
@@ -82,8 +82,8 @@ Offset _getAutoMarginPositionedElementOffset(double? x, double? y, RenderBoxMode
     }
   }
 
-  if ((top != null && !top.isAuto!) &&
-    (bottom != null && !bottom.isAuto!) &&
+  if ((top != null && !top.isAuto) &&
+    (bottom != null && !bottom.isAuto) &&
     (child is! RenderIntrinsic || height != null)) {
     if (marginTop.isAuto!) {
       double topValue = top.length ?? 0.0;
@@ -116,16 +116,16 @@ class CSSPositionedLayout {
         double? dx;
         double? dy;
 
-        if (left != null && !left.isAuto!) {
+        if (left != null && !left.isAuto) {
           dx = renderStyle.left!.length;
-        } else if (right != null && !right.isAuto!) {
+        } else if (right != null && !right.isAuto) {
           double? _dx = renderStyle.right!.length;
           if (_dx != null) dx = -_dx;
         }
 
-        if (top != null && !top.isAuto!) {
+        if (top != null && !top.isAuto) {
           dy = renderStyle.top!.length;
-        } else if (bottom != null && !bottom.isAuto!) {
+        } else if (bottom != null && !bottom.isAuto) {
           double? _dy = renderStyle.bottom!.length;
           if (_dy != null) dy = -_dy;
         }
@@ -188,7 +188,7 @@ class CSSPositionedLayout {
     if (childRenderStyle.left != null) {
       // Sticky offset to scroll container must include padding and border
       double stickyLeft = childRenderStyle.left!.length! +
-        scrollContainerRenderStyle.paddingLeft +
+        scrollContainerRenderStyle.paddingLeft.computedValue +
         scrollContainerRenderStyle.borderLeft;
       isHorizontalFixed = offsetLeftToScrollContainer < stickyLeft;
       if (isHorizontalFixed) {
@@ -203,7 +203,7 @@ class CSSPositionedLayout {
     } else if (childRenderStyle.left != null) {
       // Sticky offset to scroll container must include padding and border
       double stickyRight = childRenderStyle.right!.length! +
-        scrollContainerRenderStyle.paddingRight +
+        scrollContainerRenderStyle.paddingRight.computedValue +
         scrollContainerRenderStyle.borderRight;
       isHorizontalFixed = offsetRightToScrollContainer < stickyRight;
       if (isHorizontalFixed) {
@@ -244,7 +244,7 @@ class CSSPositionedLayout {
     if (childRenderStyle.top != null) {
       // Sticky offset to scroll container must include padding and border
       double stickyTop = childRenderStyle.top!.length! +
-        scrollContainerRenderStyle.paddingTop +
+        scrollContainerRenderStyle.paddingTop.computedValue +
         scrollContainerRenderStyle.borderTop;
       isVerticalFixed = offsetTopToScrollContainer < stickyTop;
       if (isVerticalFixed) {
@@ -259,7 +259,7 @@ class CSSPositionedLayout {
     } else if (childRenderStyle.bottom != null) {
       // Sticky offset to scroll container must include padding and border
       double stickyBottom = childRenderStyle.bottom!.length! +
-        scrollContainerRenderStyle.paddingBottom +
+        scrollContainerRenderStyle.paddingBottom.computedValue +
         scrollContainerRenderStyle.borderBottom;
       isVerticalFixed = offsetBottomToScrollContainer < stickyBottom;
       if (isVerticalFixed) {
@@ -364,8 +364,8 @@ class CSSPositionedLayout {
       double constraintWidth = parentPaddingBoxSize.width -
         childRenderStyle.left!.length! - childRenderStyle.right!.length! -
         childMarginLeft - childMarginRight;
-      double? maxWidth = childRenderStyle.maxWidth;
-      double? minWidth = childRenderStyle.minWidth;
+      double? maxWidth = childRenderStyle.maxWidth?.computedValue;
+      double? minWidth = childRenderStyle.minWidth?.computedValue;
       // Constrain to min-width or max-width if width not exists
       if (maxWidth != null) {
         constraintWidth = constraintWidth > maxWidth ? maxWidth : constraintWidth;
@@ -385,8 +385,8 @@ class CSSPositionedLayout {
       double constraintHeight = parentPaddingBoxSize.height -
         childRenderStyle.top!.length! - childRenderStyle.bottom!.length! -
         childMarginTop - childMarginBottom;
-      double? maxHeight = childRenderStyle.maxHeight;
-      double? minHeight = childRenderStyle.minHeight;
+      double? maxHeight = childRenderStyle.maxHeight?.computedValue;
+      double? minHeight = childRenderStyle.minHeight?.computedValue;
       // Constrain to min-height or max-height if width not exists
       if (maxHeight != null) {
         constraintHeight = constraintHeight > maxHeight ? maxHeight : constraintHeight;
@@ -435,8 +435,8 @@ class CSSPositionedLayout {
 
       if(overflowContainerBox.widthSizeType == BoxSizeType.specified && overflowContainerBox.heightSizeType == BoxSizeType.specified) {
         parentSize = Size(
-            overflowContainerBox.renderStyle.width!,
-            overflowContainerBox.renderStyle.height!
+            overflowContainerBox.renderStyle.width!.computedValue,
+            overflowContainerBox.renderStyle.height!.computedValue
         );
       } else {
         parentSize = parent.boxSize;
@@ -475,7 +475,7 @@ class CSSPositionedLayout {
 
         if (parent.isScrollingContentBox) {
           RenderLayoutBox overflowContainingBox = parent.parent as RenderLayoutBox;
-          top -= overflowContainingBox.renderStyle.paddingTop;
+          top -= overflowContainingBox.renderStyle.paddingTop.computedValue;
         }
       } else if (childRenderStyle.bottom != null && childRenderStyle.bottom!.length != null) {
         top = parentSize!.height - child.boxSize!.height - borderBottom - childMarginBottom! -
@@ -484,7 +484,7 @@ class CSSPositionedLayout {
         if (parent.isScrollingContentBox) {
           RenderLayoutBox overflowContainingBox = parent.parent as RenderLayoutBox;
           top -= (overflowContainingBox.renderStyle.borderTop + overflowContainingBox.renderStyle.borderBottom
-              + overflowContainingBox.renderStyle.paddingTop);
+              + overflowContainingBox.renderStyle.paddingTop.computedValue);
         }
       } else {
         placeholderOffset = _getPlaceholderToParentOffset(child.renderPositionHolder!, parent);
@@ -498,7 +498,7 @@ class CSSPositionedLayout {
 
         if (parent.isScrollingContentBox) {
           RenderLayoutBox overflowContainingBox = parent.parent as RenderLayoutBox;
-          left -= overflowContainingBox.renderStyle.paddingLeft;
+          left -= overflowContainingBox.renderStyle.paddingLeft.computedValue;
         }
       } else if (childRenderStyle.right != null && childRenderStyle.right!.length != null) {
         left = parentSize!.width - child.boxSize!.width - borderRight - childMarginRight! -
@@ -507,7 +507,7 @@ class CSSPositionedLayout {
         if (parent.isScrollingContentBox) {
           RenderLayoutBox overflowContainingBox = parent.parent as RenderLayoutBox;
           left -= (overflowContainingBox.renderStyle.borderLeft + overflowContainingBox.renderStyle.borderRight
-            + overflowContainingBox.renderStyle.paddingLeft);
+            + overflowContainingBox.renderStyle.paddingLeft.computedValue);
         }
       } else {
         placeholderOffset ??= _getPlaceholderToParentOffset(child.renderPositionHolder!, parent);

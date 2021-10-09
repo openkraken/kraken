@@ -92,10 +92,9 @@ const Map<String, bool> CSSShorthandProperty = {
 };
 
 // Reorder the properties for control render style init order, the last is the largest.
-List<String> _propertyOrders = [FONT_SIZE, OVERFLOW_X, OVERFLOW_Y, DISPLAY];
+List<String> _propertyOrders = [LINE_CLAMP, WHITE_SPACE, FONT_SIZE, COLOR, OVERFLOW_X, OVERFLOW_Y, DISPLAY];
 
 RegExp _kebabCaseReg = RegExp(r'[A-Z]');
-RegExp _camelCaseReg = RegExp(r'-(\w)');
 
 // CSS Object Model: https://drafts.csswg.org/cssom/#the-cssstyledeclaration-interface
 
@@ -246,7 +245,7 @@ class CSSStyleDeclaration {
     String css = EMPTY_STRING;
     _properties.forEach((property, value) {
       if (css.isNotEmpty) css += ' ';
-      css += '${kebabize(property)}: $value;';
+      css += '${_kebabize(property)}: $value;';
     });
     return css;
   }
@@ -566,9 +565,6 @@ class CSSStyleDeclaration {
       case BACKGROUND_REPEAT:
         if (!CSSBackground.isValidBackgroundRepeatValue(normalizedValue)) return;
         break;
-      case TRANSFORM:
-        if (!CSSTransform.isValidTransformValue(normalizedValue, viewportSize)) return;
-        break;
     }
 
     // Current only from inline style will mark the property as important.
@@ -654,9 +650,15 @@ class CSSStyleDeclaration {
       if (currentValue == null) {
         break;
       }
-      RenderStyle? renderStyle = target?.renderStyle;
+
       if (_shouldTransition(propertyName, prevValue, currentValue, renderBoxModel)) {
-        _transition(propertyName, prevValue, currentValue, target?.viewportSize, renderStyle);
+        _transition(
+          propertyName,
+          prevValue,
+          currentValue,
+          target?.viewportSize,
+          target?.renderStyle
+        );
       } else {
         _emitPropertyChanged(propertyName, prevValue, currentValue);
       }
@@ -694,26 +696,6 @@ class CSSStyleDeclaration {
     }
   }
 
-  /// Set all style properties with em unit.
-  void applyEmProperties() {
-    _properties.forEach((key, value) {
-      if (key != FONT_SIZE && value.endsWith(CSSLength.EM)) {
-        String normalizedValue = _normalizeValue(value);
-        _emitPropertyChanged(key, null, normalizedValue);
-      }
-    });
-  }
-
-  /// Set all style properties with rem unit.
-  void applyRemProperties() {
-    _properties.forEach((key, value) {
-      if (key != FONT_SIZE && value.endsWith(CSSLength.REM)) {
-        String normalizedValue = _normalizeValue(value);
-        _emitPropertyChanged(key, null, normalizedValue);
-      }
-    });
-  }
-
   void reset() {
     _properties.clear();
     _pendingProperties.clear();
@@ -738,14 +720,6 @@ class CSSStyleDeclaration {
 }
 
 // aB to a-b
-String kebabize(String str) {
+String _kebabize(String str) {
   return str.replaceAllMapped(_kebabCaseReg, (match) => '-${match[0]!.toLowerCase()}');
-}
-
-// a-b to aB
-String camelize(String str) {
-  return str.replaceAllMapped(_camelCaseReg, (match) {
-    String subStr = match[0]!.substring(1);
-    return subStr.isNotEmpty ? subStr.toUpperCase() : '';
-  });
 }

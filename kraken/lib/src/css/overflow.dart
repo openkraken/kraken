@@ -18,9 +18,9 @@ enum CSSOverflowType {
   clip
 }
 
-List<CSSOverflowType> getOverflowTypes(CSSStyleDeclaration style) {
-  CSSOverflowType overflowX = _getOverflowType(style[OVERFLOW_X]);
-  CSSOverflowType overflowY = _getOverflowType(style[OVERFLOW_Y]);
+List<CSSOverflowType> resolveOverflowTypes(String x, String y) {
+  CSSOverflowType overflowX = _getOverflowType(x);
+  CSSOverflowType overflowY = _getOverflowType(y);
 
   // Apply overflow special rules from w3c.
   if (overflowX == CSSOverflowType.visible && overflowY != CSSOverflowType.visible) {
@@ -69,7 +69,7 @@ mixin CSSOverflowMixin on RenderStyleBase {
 
   void updateOverflow(CSSStyleDeclaration style) {
     RenderStyle renderStyle = this as RenderStyle;
-    List<CSSOverflowType> overflow = getOverflowTypes(style);
+    List<CSSOverflowType> overflow = resolveOverflowTypes(style[OVERFLOW_X], style[OVERFLOW_Y]);
     renderStyle.overflowX = overflow[0];
     renderStyle.overflowY = overflow[1];
   }
@@ -177,7 +177,6 @@ mixin ElementOverflowMixin on ElementBase {
     switch (property) {
       case DISPLAY:
         scrollingContentRenderStyle.display = renderStyle.display;
-        scrollingContentRenderStyle.transformedDisplay = renderStyle.transformedDisplay;
         break;
       case LINE_HEIGHT:
         scrollingContentRenderStyle.lineHeight = renderStyle.lineHeight;

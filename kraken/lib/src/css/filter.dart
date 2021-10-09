@@ -144,11 +144,11 @@ mixin CSSFilterEffectsMixin on RenderStyleBase {
         CSSFunctionalNotation f = functions[i];
         switch (f.name.toLowerCase()) {
           case BLUR:
-            double amount = CSSLength.parseLength(
+            double amount = CSSLength.toDisplayPortValue(
               f.args.first,
               viewportSize: viewportSize,
               rootFontSize: rootFontSize,
-              fontSize: renderBoxModel!.renderStyle.fontSize
+              fontSize: renderBoxModel!.renderStyle.fontSize.computedValue
             )!;
             return ImageFilter.blur(sigmaX: amount, sigmaY: amount);
         }

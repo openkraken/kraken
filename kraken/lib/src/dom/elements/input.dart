@@ -317,8 +317,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
     // Set default width of input when width is not set in style.
     if (renderBoxModel!.renderStyle.width == null) {
-      double fontSize = renderBoxModel!.renderStyle.fontSize;
-      renderBoxModel!.renderStyle.width = fontSize * _FONT_SIZE_RATIO;
+      double fontSize = renderBoxModel!.renderStyle.fontSize.computedValue;
+      renderBoxModel!.renderStyle.width = CSSLengthValue(fontSize * _FONT_SIZE_RATIO, CSSLengthUnit.PX);
     }
 
     addChild(createRenderBox());
@@ -375,8 +375,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       // It needs to judge width in style here cause
       // width in renderStyle may be set in node attach.
       } else if (property == FONT_SIZE && renderStyle.style[WIDTH].isEmpty) {
-        double fontSize = renderStyle.fontSize;
-        renderStyle.width = fontSize * _FONT_SIZE_RATIO;
+        double fontSize = renderStyle.fontSize.computedValue;
+        renderStyle.width = CSSLengthValue(fontSize * _FONT_SIZE_RATIO, CSSLengthUnit.PX);
         _renderInputLeaderLayer!.markNeedsLayout();
       }
     }
@@ -1255,15 +1255,15 @@ class RenderInputLeaderLayer extends RenderLeaderLayer {
     RenderStyle renderStyle = renderIntrinsic.renderStyle;
 
     double intrinsicInputHeight = renderEditable!.preferredLineHeight
-      + renderStyle.paddingTop + renderStyle.paddingBottom
+      + renderStyle.paddingTop.computedValue + renderStyle.paddingBottom.computedValue
       + renderStyle.borderTop + renderStyle.borderBottom;
 
     // Make render editable vertically center.
     double dy;
     if (renderStyle.height != null) {
-      dy = (renderStyle.height! - intrinsicInputHeight) / 2;
-    } else if (renderStyle.lineHeight != null && renderStyle.lineHeight! > intrinsicInputHeight) {
-      dy = (renderStyle.lineHeight! - intrinsicInputHeight) /2;
+      dy = (renderStyle.height!.computedValue - intrinsicInputHeight) / 2;
+    } else if (renderStyle.lineHeight.computedValue > intrinsicInputHeight) {
+      dy = (renderStyle.lineHeight.computedValue - intrinsicInputHeight) /2;
     } else {
       dy = 0;
     }
@@ -1300,10 +1300,8 @@ class RenderInputBox extends RenderProxyBox {
       // Height priority: height > max(line-height, child height) > child height
       if (constraints.maxHeight != double.infinity) {
         height = constraints.maxHeight;
-      } else if (renderStyle.lineHeight != null) {
-        height = math.max(renderStyle.lineHeight!, childSize.height);
       } else {
-        height = childSize.height;
+        height = math.max(renderStyle.lineHeight.computedValue, childSize.height);
       }
 
       size = Size(width, height);

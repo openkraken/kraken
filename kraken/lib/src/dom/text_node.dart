@@ -44,7 +44,7 @@ class TextNode extends Node {
 
     if (_d == null || _d.isEmpty) return '';
 
-    WhiteSpace whiteSpace = CSSText.getWhiteSpace(parentElement!.style);
+    WhiteSpace whiteSpace = CSSText.resolveWhiteSpace(parentElement!.style[WHITE_SPACE]);
 
     /// https://drafts.csswg.org/css-text-3/#propdef-white-space
     /// The following table summarizes the behavior of the various white-space values:
@@ -84,15 +84,30 @@ class TextNode extends Node {
   set data(String? newData) {
     assert(newData != null);
     _data = newData;
-    updateTextStyle();
+    _applyTextStyle();
   }
 
   @override
   RenderObject? get renderer => _renderTextBox;
 
-  void updateTextStyle() {
+  void _applyTextStyle() {
     if (isRendererAttached) {
-      _updateTextStyle();
+      Element _parentElement = parentElement!;
+
+      // The parentNode must be an element.
+      _renderTextBox!.renderStyle = _parentElement.renderStyle;
+      _renderTextBox!.data = data;
+
+      _updateLineHeight();
+      _updateTextAlign();
+
+      RenderLayoutBox? parentRenderLayoutBox;
+      if (_parentElement.scrollingContentLayoutBox != null) {
+        parentRenderLayoutBox = _parentElement.scrollingContentLayoutBox!;
+      } else {
+        parentRenderLayoutBox = (_parentElement.renderBoxModel as RenderLayoutBox?)!;
+      }
+      _setTextSizeType(parentRenderLayoutBox.widthSizeType, parentRenderLayoutBox.heightSizeType);
     }
   }
 
@@ -110,41 +125,7 @@ class TextNode extends Node {
 
   void _updateLineHeight() {
     KrakenRenderParagraph renderParagraph = _renderTextBox!.child as KrakenRenderParagraph;
-    renderParagraph.lineHeight = parentElement!.renderStyle.lineHeight;
-  }
-
-  void _updateWhiteSpace() {
-    _renderTextBox!.whiteSpace = CSSText.getWhiteSpace(parentElement!.style);
-  }
-
-  void _updateOverflow() {
-    _renderTextBox!.overflow = CSSText.getTextOverflow(style: parentElement!.style);
-  }
-
-  void _updateMaxLines() {
-    _renderTextBox!.maxLines = CSSText.getLineClamp(parentElement!.style);
-  }
-
-  void _updateTextStyle() {
-    Element _parentElement = parentElement!;
-
-    // The parentNode must be an element.
-    _renderTextBox!.style = _parentElement.style;
-    _renderTextBox!.text = CSSTextMixin.createTextSpan(data, _parentElement.renderStyle);
-
-    _updateLineHeight();
-    _updateTextAlign();
-    _updateWhiteSpace();
-    _updateOverflow();
-    _updateMaxLines();
-
-    RenderLayoutBox? parentRenderLayoutBox;
-    if (_parentElement.scrollingContentLayoutBox != null) {
-      parentRenderLayoutBox = _parentElement.scrollingContentLayoutBox!;
-    } else {
-      parentRenderLayoutBox = (_parentElement.renderBoxModel as RenderLayoutBox?)!;
-    }
-    _setTextSizeType(parentRenderLayoutBox.widthSizeType, parentRenderLayoutBox.heightSizeType);
+    renderParagraph.lineHeight = parentElement!.renderStyle.lineHeight.computedValue;
   }
 
   // Attach renderObject of current node to parent
@@ -161,7 +142,7 @@ class TextNode extends Node {
 
     parentRenderLayoutBox.insert(_renderTextBox!, after: after);
 
-    updateTextStyle();
+    _applyTextStyle();
 
     didAttachRenderer();
   }
@@ -191,7 +172,7 @@ class TextNode extends Node {
     if (renderer != null) {
       return renderer!;
     }
-    return _renderTextBox = RenderTextBox(const TextSpan());
+    return _renderTextBox = RenderTextBox(data, renderStyle: parentElement!.renderStyle);
   }
 
   @override
