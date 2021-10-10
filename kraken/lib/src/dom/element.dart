@@ -941,57 +941,87 @@ class Element extends Node
         renderStyle.maxHeight = lengthValue;
         break;
       case BACKGROUND_COLOR:
+        renderStyle.backgroundColor = CSSColor.parseColor(present);
+        break;
       case BACKGROUND_ATTACHMENT:
+        renderStyle.backgroundAttachment = CSSBoxMixin.resolveBackgroundAttachment(present);
+        break;
       case BACKGROUND_IMAGE:
+        renderStyle.backgroundImage = CSSBackgroundImage.parseBackgroundImage(present, renderStyle, property, contextId);
+        break;
       case BACKGROUND_REPEAT:
       case BACKGROUND_POSITION_X:
+        renderStyle.backgroundPositionX = CSSPosition.parsePosition(present, renderStyle, true);
+        break;
       case BACKGROUND_POSITION_Y:
+        renderStyle.backgroundPositionY = CSSPosition.parsePosition(present, renderStyle, false);
+        break;
       case BACKGROUND_SIZE:
-      case BACKGROUND_CLIP:
-      case BACKGROUND_ORIGIN:
-      case BORDER_LEFT_WIDTH:
-      case BORDER_TOP_WIDTH:
-      case BORDER_RIGHT_WIDTH:
-      case BORDER_BOTTOM_WIDTH:
-      case BORDER_LEFT_STYLE:
-      case BORDER_TOP_STYLE:
-      case BORDER_RIGHT_STYLE:
-      case BORDER_BOTTOM_STYLE:
-      case BORDER_LEFT_COLOR:
-      case BORDER_TOP_COLOR:
-      case BORDER_RIGHT_COLOR:
-      case BORDER_BOTTOM_COLOR:
-      case BOX_SHADOW:
-        // _updateBox(property, present);
-        int contextId = elementManager.contextId;
-        double rootFontSize = elementManager.getRootFontSize();
-        double fontSize = renderStyle.fontSize.computedValue;
-        renderStyle.updateBox(
-          property, present, contextId,
+        renderStyle.backgroundSize = CSSBackgroundSize.parseValue(
+          present,
           viewportSize: viewportSize,
           rootFontSize: rootFontSize,
           fontSize: fontSize,
         );
         break;
-
-      case BORDER_TOP_LEFT_RADIUS:
-      case BORDER_TOP_RIGHT_RADIUS:
-      case BORDER_BOTTOM_LEFT_RADIUS:
-      case BORDER_BOTTOM_RIGHT_RADIUS:
-        // _updateBorderRadius(property, present);
-        RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-        /// Percentage size should be resolved in layout stage cause it needs to know its own element's size
-        if (RenderStyle.isBorderRadiusPercentage(present)) {
-          // Mark parent needs layout to resolve percentage of child
-          if (selfRenderBoxModel.parent is RenderBoxModel) {
-            (selfRenderBoxModel.parent as RenderBoxModel).markNeedsLayout();
-          }
-          return;
-        }
-
-        selfRenderBoxModel.renderStyle.updateBorderRadius(property, present);
+      case BACKGROUND_CLIP:
+        renderStyle.backgroundClip = CSSBoxMixin.resolveBackgroundClip(present);
         break;
-
+      case BACKGROUND_ORIGIN:
+        renderStyle.backgroundOrigin = CSSBoxMixin.resolveBackgroundOrigin(present);
+        break;
+      case BORDER_LEFT_WIDTH:
+        renderStyle.borderLeftWidth = CSSLength.parseLength(present, renderStyle, property);
+        break;
+      case BORDER_TOP_WIDTH:
+        renderStyle.borderTopWidth = CSSLength.parseLength(present, renderStyle, property);
+        break;
+      case BORDER_RIGHT_WIDTH:
+        renderStyle.borderRightWidth = CSSLength.parseLength(present, renderStyle, property);
+        break;
+      case BORDER_BOTTOM_WIDTH:
+        renderStyle.borderBottomWidth = CSSLength.parseLength(present, renderStyle, property);
+        break;
+      case BORDER_LEFT_STYLE:
+        renderStyle.borderLeftStyle = CSSBorderSide.resolveBorderStyle(present);
+        break;
+      case BORDER_TOP_STYLE:
+        renderStyle.borderTopStyle = CSSBorderSide.resolveBorderStyle(present);
+        break;
+      case BORDER_RIGHT_STYLE:
+        renderStyle.borderRightStyle = CSSBorderSide.resolveBorderStyle(present);
+        break;
+      case BORDER_BOTTOM_STYLE:
+        renderStyle.borderBottomStyle = CSSBorderSide.resolveBorderStyle(present);
+        break;
+      case BORDER_LEFT_COLOR:
+        renderStyle.borderLeftColor = CSSColor.parseColor(present);
+        break;
+      case BORDER_TOP_COLOR:
+        renderStyle.borderTopColor = CSSColor.parseColor(present);
+        break;
+      case BORDER_RIGHT_COLOR:
+        renderStyle.borderRightColor = CSSColor.parseColor(present);
+        break;
+      case BORDER_BOTTOM_COLOR:
+        renderStyle.borderBottomColor = CSSColor.parseColor(present);
+        break;
+      case BOX_SHADOW:
+        // _updateBox(property, present);
+        renderStyle.boxShadow = CSSBoxShadow.parseBoxShadow(present, renderStyle, property);
+        break;
+      case BORDER_TOP_LEFT_RADIUS:
+        renderStyle.borderTopLeftRadius = CSSBorderRadius.parseBorderRadius(present, renderStyle, property);
+        break;
+      case BORDER_TOP_RIGHT_RADIUS:
+        renderStyle.borderTopRightRadius = CSSBorderRadius.parseBorderRadius(present, renderStyle, property);
+        break;
+      case BORDER_BOTTOM_LEFT_RADIUS:
+        renderStyle.borderBottomLeftRadius = CSSBorderRadius.parseBorderRadius(present, renderStyle, property);
+        break;
+      case BORDER_BOTTOM_RIGHT_RADIUS:
+        renderStyle.borderBottomRightRadius = CSSBorderRadius.parseBorderRadius(present, renderStyle, property);
+        break;
       // Margin change in flex layout may affect transformed display
       // https://www.w3.org/TR/css-display-3/#transformations
       case MARGIN_LEFT:

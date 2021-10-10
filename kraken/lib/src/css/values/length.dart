@@ -82,27 +82,51 @@ class CSSLengthValue {
         _computedValue = value! * renderStyle.viewportSize.longestSide;
         break;
       case CSSLengthUnit.PERCENTAGE:
-        if (propertyName!.contains(WIDTH)) {
-          _computedValue = value! * renderStyle.logicalWidth;
-        } else if (propertyName!.contains(HEIGHT)) {
-          _computedValue = value! * renderStyle.logicalHeight;
-        } else if (propertyName == TOP || propertyName == BOTTOM) {
 
-        } else if (propertyName == LEFT || propertyName == RIGHT) {
-
-        } else if (propertyName!.contains(PADDING) || propertyName!.contains(MARGIN)) {
-          // https://www.w3.org/TR/css-box-3/#padding-physical
-          // Percentage refer to logical width of containing block
-          _computedValue = value! * renderStyle.logicalWidth;
-        } else if (propertyName == LINE_HEIGHT) {
-          // Relative to the font size of the element itself.
-          _computedValue = value! * renderStyle.fontSize.computedValue;
-        } else if (propertyName == FLEX_BASIS) {
-          // Refer to the flex container's inner main size
-
-        } else {
-          // Refer to the size of bounding box
-
+        switch (propertyName) {
+          case LINE_HEIGHT:
+            // Relative to the font size of the element itself.
+            _computedValue = value! * renderStyle.fontSize.computedValue;
+            break;
+          case WIDTH:
+          case MIN_WIDTH:
+          case MAX_WIDTH:
+            _computedValue = value! * renderStyle.logicalWidth;
+            break;
+          case HEIGHT:
+          case MIN_HEIGHT:
+          case MAX_HEIGHT:
+            _computedValue = value! * renderStyle.logicalHeight;
+            break;
+          case PADDING_TOP:
+          case PADDING_RIGHT:
+          case PADDING_BOTTOM:
+          case PADDING_LEFT:
+          case MARGIN_LEFT:
+          case MARGIN_RIGHT:
+          case MARGIN_TOP:
+          case MARGIN_BOTTOM:
+            // https://www.w3.org/TR/css-box-3/#padding-physical
+            // Percentage refer to logical width of containing block
+            _computedValue = value! * renderStyle.logicalWidth;
+            break;
+          case FLEX_BASIS:
+            // Refer to the flex container's inner main size.
+            break;
+          case TOP:
+          case BOTTOM:
+            break;
+          case LEFT:
+          case RIGHT:
+            break;
+          case BORDER_TOP_LEFT_RADIUS:
+          case BORDER_TOP_RIGHT_RADIUS:
+            // Percentages for the horizontal axis refer to the width of the box.
+            break;
+          case BORDER_BOTTOM_LEFT_RADIUS:
+          case BORDER_BOTTOM_RIGHT_RADIUS:
+            // Percentages for the vertical axis refer to the height of the box.
+            break;
         }
         break;
       default:
@@ -113,6 +137,10 @@ class CSSLengthValue {
 
   bool get isAuto {
     return unit == CSSLengthUnit.AUTO;
+  }
+
+  bool get isZero {
+    return value == 0;
   }
 
   void markNeedsCompute() {

@@ -16,7 +16,92 @@ import 'package:kraken/css.dart';
 // CSS Box Model: https://drafts.csswg.org/css-box-4/
 // CSS Backgrounds and Borders: https://drafts.csswg.org/css-backgrounds/
 
+// https://drafts.csswg.org/css-backgrounds/#typedef-attachment
+enum CSSBackgroundAttachmentType {
+  scroll,
+  fixed,
+  local,
+}
+
+enum CSSBackgroundRepeatType {
+  repeat,
+  repeatX,
+  repeatY,
+  noRepeat,
+}
+
+enum CSSBackgroundSizeType {
+  auto,
+  cover,
+  contain,
+}
+
+enum CSSBackgroundPositionType {
+  topLeft,
+  topCenter,
+  topRight,
+  centerLeft,
+  center,
+  centerRight,
+  bottomLeft,
+  bottomCenter,
+  bottomRight,
+}
+
+enum CSSBackgroundOriginType {
+  borderBox,
+  paddingBox,
+  contentBox,
+}
+
+enum CSSBackgroundClipType {
+  borderBox,
+  paddingBox,
+  contentBox,
+}
+
+enum CSSBackgroundImageType {
+  none,
+  gradient,
+  image,
+}
+
+enum CSSBorderStyleType {
+  none,
+  hidden,
+  dotted,
+  dashed,
+  solid,
+  double,
+  groove,
+  ridge,
+  inset,
+  outset,
+}
+
 final RegExp _spaceRegExp = RegExp(r'\s+');
+
+class CSSBackgroundImage {
+  Gradient? gradient;
+  DecorationImage? image;
+
+  CSSBackgroundImage(this.image, this.gradient);
+
+  static parseBackgroundImage(String present, RenderStyle renderStyle, String property, int? contextId) {
+    Gradient? gradient;
+    DecorationImage? image;
+    List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(present);
+    for (CSSFunctionalNotation method in methods) {
+      if (method.name == 'url') {
+        // image = CSSBackground.getDecorationImage(method, enderStyle, property, contextId: contextId);
+      } else {
+        // gradient = CSSBackground.getBackgroundGradient(method, renderStyle);
+      }
+    }
+
+    return CSSBackgroundImage(image, gradient);
+  }
+}
 
 class CSSBackgroundPosition {
   CSSBackgroundPosition({
@@ -156,7 +241,6 @@ mixin CSSBoxMixin on RenderStyleBase {
   BackgroundBoundary? get backgroundClip => _backgroundClip;
   BackgroundBoundary? _backgroundClip;
   set backgroundClip(BackgroundBoundary? value) {
-    if (value == null) return;
     if (value == _backgroundClip) return;
     _backgroundClip = value;
   }
@@ -165,45 +249,52 @@ mixin CSSBoxMixin on RenderStyleBase {
   BackgroundBoundary? get backgroundOrigin => _backgroundOrigin;
   BackgroundBoundary? _backgroundOrigin;
   set backgroundOrigin(BackgroundBoundary? value) {
-    if (value == null) return;
     if (value == _backgroundOrigin) return;
     _backgroundOrigin = value;
   }
 
+  Color? get backgroundColor => _backgroundColor;
+  Color? _backgroundColor;
+  set backgroundColor(Color? value) {
+    if (value == _backgroundColor) return;
+    _backgroundColor = value;
+
+    // If there has gradient, background color will not work
+    if (backgroundImage?.gradient == null) {
+      renderBoxModel!.markNeedsPaint();
+    }
+  }
+
   /// Background-image
-  String? get backgroundImage => _backgroundImage;
-  String? _backgroundImage;
-  set backgroundImage(String? value) {
-    if (value == null) return;
+  CSSBackgroundImage? get backgroundImage => _backgroundImage;
+  CSSBackgroundImage? _backgroundImage;
+  set backgroundImage(CSSBackgroundImage? value) {
     if (value == _backgroundImage) return;
     _backgroundImage = value;
   }
 
   /// Background-position-x
-  CSSBackgroundPosition get backgroundPositionX => _backgroundPositionX;
-  CSSBackgroundPosition _backgroundPositionX = DEFAULT_BACKGROUND_POSITION;
+  CSSBackgroundPosition get backgroundPositionX => _backgroundPositionX ?? DEFAULT_BACKGROUND_POSITION;
+  CSSBackgroundPosition? _backgroundPositionX;
   set backgroundPositionX(CSSBackgroundPosition? value) {
-    if (value == null) return;
     if (value == _backgroundPositionX) return;
     _backgroundPositionX = value;
     renderBoxModel!.markNeedsPaint();
   }
 
   /// Background-position-y
-  CSSBackgroundPosition get backgroundPositionY => _backgroundPositionY;
-  CSSBackgroundPosition _backgroundPositionY = DEFAULT_BACKGROUND_POSITION;
+  CSSBackgroundPosition get backgroundPositionY => _backgroundPositionY ?? DEFAULT_BACKGROUND_POSITION;
+  CSSBackgroundPosition? _backgroundPositionY;
   set backgroundPositionY(CSSBackgroundPosition? value) {
-    if (value == null) return;
     if (value == _backgroundPositionY) return;
     _backgroundPositionY = value;
     renderBoxModel!.markNeedsPaint();
   }
 
   /// Background-size
-  CSSBackgroundSize get backgroundSize => _backgroundSize;
-  CSSBackgroundSize _backgroundSize = DEFAULT_BACKGROUND_SIZE;
+  CSSBackgroundSize get backgroundSize => _backgroundSize ?? DEFAULT_BACKGROUND_SIZE;
+  CSSBackgroundSize? _backgroundSize;
   set backgroundSize(CSSBackgroundSize? value) {
-    if (value == null) return;
     if (value == _backgroundSize) return;
     _backgroundSize = value;
     renderBoxModel!.markNeedsPaint();
@@ -213,75 +304,220 @@ mixin CSSBoxMixin on RenderStyleBase {
   String? get backgroundAttachment => _backgroundAttachment;
   String? _backgroundAttachment;
   set backgroundAttachment(String? value) {
-    if (value == null) return;
     if (value == _backgroundAttachment) return;
     _backgroundAttachment = value;
   }
 
   /// BorderSize to deflate.
-  EdgeInsets? _borderEdge;
-  EdgeInsets? get borderEdge => _borderEdge;
-  set borderEdge(EdgeInsets? newValue) {
-    _borderEdge = newValue;
+  EdgeInsets get borderEdge {
+    // If has border, render padding should subtracting the edge of the border
+    return EdgeInsets.fromLTRB(
+      borderLeftWidth.computedValue,
+      borderTopWidth.computedValue,
+      borderRightWidth.computedValue,
+      borderBottomWidth.computedValue,
+    );
+  }
 
-    CSSBoxDecoration? decoration = renderBoxModel!.renderStyle.decoration;
-    if (decoration != null && decoration is CSSBoxDecoration) {
-      Gradient? gradient = decoration.gradient;
-      if (gradient is BorderGradientMixin) {
-        gradient.borderEdge = newValue;
-      }
-    }
+  /// Shorted border property:
+  ///   border：<line-width> || <line-style> || <color>
+  ///   (<line-width> = <length> | thin | medium | thick), support length now.
+  /// Seperated properties:
+  ///   borderWidth: <line-width>{1,4}
+  ///   borderStyle: none | hidden | dotted | dashed | solid | double | groove | ridge | inset | outset
+  ///     (PS. Only support solid now.)
+  ///   borderColor: <color>
+
+  /// Border-width
+  CSSLengthValue? _borderTopWidth;
+  set borderTopWidth(CSSLengthValue? value) {
+    if (value == _borderTopWidth) return;
+    _borderTopWidth = value;
+    renderBoxModel!.markNeedsLayout();
+  }
+  CSSLengthValue get borderTopWidth => _borderTopWidth ?? CSSLengthValue.zero;
+
+  CSSLengthValue? _borderRightWidth;
+  set borderRightWidth(CSSLengthValue? value) {
+    if (value == _borderRightWidth) return;
+    _borderRightWidth = value;
+    renderBoxModel!.markNeedsLayout();
+  }
+  CSSLengthValue get borderRightWidth => _borderRightWidth ?? CSSLengthValue.zero;
+
+  CSSLengthValue? _borderBottomWidth;
+  set borderBottomWidth(CSSLengthValue? value) {
+    if (value == _borderBottomWidth) return;
+    _borderBottomWidth = value;
+    renderBoxModel!.markNeedsLayout();
+  }
+  CSSLengthValue get borderBottomWidth => _borderBottomWidth ?? CSSLengthValue.zero;
+
+  CSSLengthValue? _borderLeftWidth;
+  set borderLeftWidth(CSSLengthValue? value) {
+    if (value == _borderLeftWidth) return;
+    _borderLeftWidth = value;
+    renderBoxModel!.markNeedsLayout();
+  }
+  CSSLengthValue get borderLeftWidth => _borderLeftWidth ?? CSSLengthValue.zero;
+
+  /// Border-color
+  Color? get borderTopColor => _borderTopColor;
+  Color? _borderTopColor;
+  set borderTopColor(Color? value) {
+    if (value == _borderTopColor) return;
+    _borderTopColor = value;
     renderBoxModel!.markNeedsPaint();
   }
 
-  double get borderTop {
-    if (borderEdge == null) return 0.0;
-    return borderEdge!.top;
+  Color? get borderRightColor => _borderRightColor;
+  Color? _borderRightColor;
+  set borderRightColor(Color? value) {
+    if (value == _borderRightColor) return;
+    _borderRightColor = value;
+    renderBoxModel!.markNeedsPaint();
   }
 
-  double get borderBottom {
-    if (borderEdge == null) return 0.0;
-    return borderEdge!.bottom;
+  Color? get borderBottomColor => _borderBottomColor;
+  Color? _borderBottomColor;
+  set borderBottomColor(Color? value) {
+    if (value == _borderBottomColor) return;
+    _borderBottomColor = value;
+    renderBoxModel!.markNeedsPaint();
   }
 
-  double get borderLeft {
-    if (borderEdge == null) return 0.0;
-    return borderEdge!.left;
+  Color? get borderLeftColor => _borderLeftColor;
+  Color? _borderLeftColor;
+  set borderLeftColor(Color? value) {
+    if (value == _borderLeftColor) return;
+    _borderLeftColor = value;
+    renderBoxModel!.markNeedsPaint();
   }
 
-  double get borderRight {
-    if (borderEdge == null) return 0.0;
-    return borderEdge!.right;
+  /// Border-style
+  BorderStyle? get borderTopStyle => _borderTopStyle;
+  BorderStyle? _borderTopStyle;
+  set borderTopStyle(BorderStyle? value) {
+    if (value == _borderTopStyle) return;
+    _borderTopStyle = value;
+    renderBoxModel!.markNeedsPaint();
   }
 
-  /// What decoration to paint.
-  ///
-  /// Commonly a [CSSBoxDecoration].
-  CSSBoxDecoration? get decoration => _decoration;
-  CSSBoxDecoration? _decoration;
-  set decoration(CSSBoxDecoration? value) {
-    if (value == null) return;
-    if (value == _decoration) return;
+  BorderStyle? get borderRightStyle => _borderRightStyle;
+  BorderStyle? _borderRightStyle;
+  set borderRightStyle(BorderStyle? value) {
+    if (value == _borderRightStyle) return;
+    _borderRightStyle = value;
+    renderBoxModel!.markNeedsPaint();
+  }
 
-    renderBoxModel!.boxPainter?.dispose();
-    renderBoxModel!.boxPainter = null;
+  BorderStyle? get borderBottomStyle => _borderBottomStyle;
+  BorderStyle? _borderBottomStyle;
+  set borderBottomStyle(BorderStyle? value) {
+    if (value == _borderBottomStyle) return;
+    _borderBottomStyle = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+  
+  BorderStyle? get borderLeftStyle => _borderLeftStyle;
+  BorderStyle? _borderLeftStyle;
+  set borderLeftStyle(BorderStyle? value) {
+    if (value == _borderLeftStyle) return;
+    _borderLeftStyle = value;
+    renderBoxModel!.markNeedsPaint();
+  }
 
-    // Evict image cache.
-    _decoration?.image?.image.evict();
+  CSSBorderRadius? _borderTopLeftRadius;
+  set borderTopLeftRadius(CSSBorderRadius? value) {
+    if (value == _borderTopLeftRadius) return;
+    _borderTopLeftRadius = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+  CSSBorderRadius get borderTopLeftRadius => _borderTopLeftRadius ?? CSSBorderRadius.zero;
 
-    _decoration = value;
-    // If has border, render padding should subtracting the edge of the border
-    if (value.border != null) {
-      Border border = value.border as Border;
-      borderEdge = EdgeInsets.fromLTRB(
-        border.left.width,
-        border.top.width,
-        border.right.width,
-        border.bottom.width
+  CSSBorderRadius? _borderTopRightRadius;
+  set borderTopRightRadius(CSSBorderRadius? value) {
+    if (value == _borderTopRightRadius) return;
+    _borderTopRightRadius = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+  CSSBorderRadius get borderTopRightRadius => _borderTopRightRadius ?? CSSBorderRadius.zero;
+
+  CSSBorderRadius? _borderBottomRightRadius;
+  set borderBottomRightRadius(CSSBorderRadius? value) {
+    if (value == _borderBottomRightRadius) return;
+    _borderBottomRightRadius = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+  CSSBorderRadius get borderBottomRightRadius => _borderBottomRightRadius ?? CSSBorderRadius.zero;
+
+  CSSBorderRadius? _borderBottomLeftRadius;
+  set borderBottomLeftRadius(CSSBorderRadius? value) {
+    if (value == _borderBottomLeftRadius) return;
+    _borderBottomLeftRadius = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+  CSSBorderRadius get borderBottomLeftRadius => _borderBottomLeftRadius ?? CSSBorderRadius.zero;
+
+  List<CSSBoxShadow>? _boxShadow;
+  set boxShadow(List<CSSBoxShadow>? value) {
+    if (value == _boxShadow) return;
+    _boxShadow = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+  List<CSSBoxShadow>? get boxShadow => _boxShadow;
+
+  /// What decoration to paint, should get value after layout.
+  CSSBoxDecoration? _cachedDecoration;
+  CSSBoxDecoration? get decoration {
+
+    if (_cachedDecoration != null) {
+      return _cachedDecoration;
+    }
+
+    List<Radius>? radius = _getBorderRadius();
+    List<BorderSide>? borderSides = _getBorderSides();
+    List<KrakenBoxShadow>? boxShadow = _getBoxShadow();
+
+    if (backgroundColor == null &&
+        backgroundImage == null &&
+        borderSides == null &&
+        radius == null &&
+        boxShadow == null) {
+      return null;
+    }
+
+    Border? border;
+    if (borderSides != null) {
+      // Side read inorder left top right bottom.
+      border = Border(left: borderSides[0], top: borderSides[1], right: borderSides[2], bottom: borderSides[3]);
+    }
+
+    BorderRadius? borderRadius;
+    // Flutter border radius only works when border is uniform.
+    if (radius != null && (border == null || border.isUniform)) {
+      borderRadius = BorderRadius.only(
+        topLeft: radius[0],
+        topRight: radius[1],
+        bottomRight: radius[2],
+        bottomLeft: radius[3],
       );
     }
 
-    renderBoxModel!.markNeedsPaint();
+    Color? color = backgroundColor;
+    Gradient? gradient = backgroundImage?.gradient;
+    if (gradient is BorderGradientMixin) {
+      gradient.borderEdge = border!.dimensions as EdgeInsets;
+    }
+
+    return _cachedDecoration = CSSBoxDecoration(
+      boxShadow: boxShadow,
+      color: gradient != null ? null : color,
+      image: backgroundImage?.image,
+      border: border,
+      borderRadius: borderRadius,
+      gradient: gradient,
+    );
   }
 
   DecorationPosition decorationPosition = DecorationPosition.background;
@@ -289,248 +525,20 @@ mixin CSSBoxMixin on RenderStyleBase {
   ImageConfiguration imageConfiguration = ImageConfiguration.empty;
 
   Size wrapBorderSize(Size innerSize) {
-    return Size(borderLeft + innerSize.width + borderRight,
-      borderTop + innerSize.height + borderBottom);
+    return Size(borderLeftWidth.computedValue + innerSize.width + borderRightWidth.computedValue,
+      borderTopWidth.computedValue + innerSize.height + borderBottomWidth.computedValue);
   }
 
   BoxConstraints deflateBorderConstraints(BoxConstraints constraints) {
-    if (borderEdge != null) {
-      return constraints.deflate(borderEdge!);
-    }
-    return constraints;
+    return constraints.deflate(borderEdge);
   }
 
-  void updateBox(String property, String present, int contextId, {
-    Size? viewportSize,
-    double? rootFontSize,
-    double? fontSize
-  }) {
+  List<BorderSide>? _getBorderSides() {
     RenderStyle renderStyle = this as RenderStyle;
-
-    if (property == BACKGROUND_IMAGE) {
-      backgroundImage = present;
-    } else if (property == BACKGROUND_ATTACHMENT) {
-      backgroundAttachment = present;
-    }
-
-    if (decoration != null) {
-      // Update by property
-      if (property == BACKGROUND_CLIP) {
-        renderStyle.backgroundClip = getBackgroundClip(present);
-      } else if (property == BACKGROUND_ORIGIN) {
-        renderStyle.backgroundOrigin = getBackgroundOrigin(present);
-      } else if (property == BACKGROUND_COLOR) {
-        updateBackgroundColor();
-      } else if (property == BACKGROUND_POSITION_X) {
-        backgroundPositionX = CSSPosition.parsePosition(present, renderStyle, true);
-      } else if (property == BACKGROUND_POSITION_Y) {
-        backgroundPositionY = CSSPosition.parsePosition(present, renderStyle, false);
-      } else if (property == BACKGROUND_SIZE) {
-        backgroundSize = CSSBackgroundSize.parseValue(
-          present,
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize,
-        );
-      } else if (property.startsWith(BACKGROUND)) {
-        // Including BACKGROUND_REPEAT, BACKGROUND_IMAGE,
-        //   BACKGROUND_SIZE, BACKGROUND_ORIGIN, BACKGROUND_CLIP.
-        updateBackgroundImage(property, present, contextId);
-      } else if (property.startsWith(BORDER)) {
-        updateBorder(property);
-      } else if (property == BOX_SHADOW) {
-        updateBoxShadow(property);
-      } else if (property == COLOR) {
-       updateBackgroundColor();
-       updateBorder(property);
-       updateBoxShadow(property);
-      }
-    } else {
-      CSSBoxDecoration? cssBoxDecoration = getCSSBoxDecoration();
-      if (cssBoxDecoration == null) return;
-
-      renderStyle.decoration = cssBoxDecoration;
-      renderStyle.backgroundClip = getBackgroundClip(present);
-      renderStyle.backgroundOrigin = getBackgroundOrigin(present);
-    }
-  }
-
-  void updateBoxShadow(String property) {
-    CSSBoxDecoration? prevBoxDecoration = decoration;
-
-    if (prevBoxDecoration != null) {
-      decoration = CSSBoxDecoration(
-          // Only modify boxShadow.
-          boxShadow: getBoxShadow(),
-          color: prevBoxDecoration.color,
-          image: prevBoxDecoration.image,
-          border: prevBoxDecoration.border,
-          borderRadius: prevBoxDecoration.borderRadius,
-          gradient: prevBoxDecoration.gradient,
-          backgroundBlendMode: prevBoxDecoration.backgroundBlendMode,
-          shape: prevBoxDecoration.shape
-      );
-    } else {
-      decoration = CSSBoxDecoration(boxShadow: getBoxShadow());
-    }
-  }
-
-  void updateBackgroundColor([Color? color]) {
-    Color? bgColor = color ?? CSSBackground.getBackgroundColor(style);
-
-    decoration ??= getCSSBoxDecoration();
-
-    CSSBoxDecoration? prevBoxDecoration = decoration;
-
-    // If change bg color from some color to null, which must be explicitly transparent.
-    if (bgColor != null) {
-      // If there has gradient, background color will not work
-      if (prevBoxDecoration!.gradient == null) {
-        decoration = prevBoxDecoration.clone(color: bgColor);
-      }
-    } else {
-      // Remove background color.
-      //   [CSSBoxDecoration.copyWith] can not remove some value, so instantite a new [CSSBoxDecoration].
-      decoration = CSSBoxDecoration(
-        image: prevBoxDecoration!.image,
-        border: prevBoxDecoration.border,
-        borderRadius: prevBoxDecoration.borderRadius,
-        boxShadow: prevBoxDecoration.boxShadow,
-        gradient: prevBoxDecoration.gradient,
-        backgroundBlendMode: prevBoxDecoration.backgroundBlendMode,
-        shape: prevBoxDecoration.shape,
-      );
-    }
-  }
-
-  void updateBackgroundImage(String property, String present, int contextId) {
-    CSSBoxDecoration prevBoxDecoration = decoration!;
-
-    DecorationImage? decorationImage;
-    Gradient? gradient;
-
-    List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(style[BACKGROUND_IMAGE]);
-    for (CSSFunctionalNotation method in methods) {
-      if (method.name == 'url') {
-        decorationImage = CSSBackground.getDecorationImage(style, method, contextId: contextId);
-      } else {
-        gradient = CSSBackground.getBackgroundGradient(style, renderBoxModel!, method);
-      }
-    }
-
-    CSSBoxDecoration updatedBoxDecoration = CSSBoxDecoration(
-      image: decorationImage,
-      gradient: gradient,
-      color: prevBoxDecoration.color,
-      border: prevBoxDecoration.border,
-      borderRadius: prevBoxDecoration.borderRadius,
-      boxShadow: prevBoxDecoration.boxShadow,
-      backgroundBlendMode: prevBoxDecoration.backgroundBlendMode,
-      shape: prevBoxDecoration.shape,
-    );
-
-    if (CSSBackground.hasScrollBackgroundImage(style)) {
-      decoration = updatedBoxDecoration;
-    } else if (CSSBackground.hasLocalBackgroundImage(style)) {
-      // @FIXME: support local background image
-      decoration = updatedBoxDecoration;
-    } else {
-      decoration = updatedBoxDecoration;
-    }
-  }
-
-  static final Map _borderRadiusMapping = {
-    BORDER_TOP_LEFT_RADIUS: 0,
-    BORDER_TOP_RIGHT_RADIUS: 1,
-    BORDER_BOTTOM_RIGHT_RADIUS: 2,
-    BORDER_BOTTOM_LEFT_RADIUS: 3
-  };
-
-  // Add border radius transition listener
-  void updateBorderRadius(String property, String present) {
-    if (decoration == null) {
-      CSSBoxDecoration? cssBoxDecoration = getCSSBoxDecoration();
-      if (cssBoxDecoration == null) return;
-      decoration = cssBoxDecoration;
-    }
-    if (decoration == null) return;
-
-    // topLeft topRight bottomRight bottomLeft
-    int? index = _borderRadiusMapping[property];
-    RenderStyle renderStyle = this as RenderStyle;
-
-    if (index != null) {
-      Radius? newRadius = CSSBorderRadius.getRadius(present, renderStyle);
-      BorderRadius? borderRadius = decoration!.borderRadius as BorderRadius?;
-      decoration = decoration!.clone(borderRadius: BorderRadius.only(
-        topLeft: index == 0 ? newRadius! : borderRadius?.topLeft ?? Radius.zero,
-        topRight: index == 1 ? newRadius! : borderRadius?.topRight ?? Radius.zero,
-        bottomRight: index == 2 ? newRadius! : borderRadius?.bottomRight ?? Radius.zero,
-        bottomLeft: index == 3 ? newRadius! : borderRadius?.bottomLeft ?? Radius.zero,
-      ));
-    }
-  }
-
-  void updateBorder(String property, {Color? borderColor, double? borderWidth}) {
-    Border? border = decoration!.border as Border?;
-    RenderStyle renderStyle = this as RenderStyle;
-
-    bool isBorderWidthChange = property == BORDER_TOP_WIDTH || property == BORDER_RIGHT_WIDTH ||
-      property == BORDER_BOTTOM_WIDTH || property == BORDER_LEFT_WIDTH;
-
-    // Only border width change will affect layout
-    if (isBorderWidthChange) {
-      renderBoxModel!.markNeedsLayout();
-    }
-
-    if (border != null) {
-      BorderSide? left =  border.left;
-      BorderSide? top =  border.top;
-      BorderSide? right =  border.right;
-      BorderSide? bottom =  border.bottom;
-      bool updateAll = false;
-
-      if (property.contains(BORDER_LEFT)) {
-        left = CSSBorderSide.getBorderSide(renderStyle, CSSBorderSide.LEFT, borderColor, borderWidth);
-      } else if (property.contains(BORDER_TOP)) {
-        top = CSSBorderSide.getBorderSide(renderStyle, CSSBorderSide.TOP, borderColor, borderWidth);
-      } else if (property.contains(BORDER_RIGHT)) {
-        right = CSSBorderSide.getBorderSide(renderStyle, CSSBorderSide.RIGHT, borderColor, borderWidth);
-      } else if (property.contains(BORDER_BOTTOM)) {
-        bottom = CSSBorderSide.getBorderSide(renderStyle, CSSBorderSide.BOTTOM, borderColor, borderWidth);
-      } else {
-        updateAll = true;
-      }
-
-      if (!updateAll) {
-        decoration = decoration!.clone(border: Border(
-          left: left ?? BorderSide.none,
-          top: top ?? BorderSide.none,
-          right: right ?? BorderSide.none,
-          bottom: bottom ?? BorderSide.none,
-        ));
-        return;
-      }
-    }
-    // Update all border
-    List<BorderSide>? borderSides = _getBorderSides(borderColor, borderWidth);
-
-    if (borderSides != null) {
-      decoration = decoration!.clone(border: Border(
-        left: borderSides[0],
-        top: borderSides[1],
-        right: borderSides[2],
-        bottom: borderSides[3],
-      ));
-    }
-  }
-
-  List<BorderSide>? _getBorderSides([Color? borderColor, double? borderWidth]) {
-    RenderStyle renderStyle = this as RenderStyle;
-    BorderSide? leftSide = CSSBorderSide.getBorderSide(renderStyle, CSSBorderSide.LEFT, borderColor, borderWidth);
-    BorderSide? topSide = CSSBorderSide.getBorderSide(renderStyle, CSSBorderSide.TOP, borderColor, borderWidth);
-    BorderSide? rightSide = CSSBorderSide.getBorderSide(renderStyle, CSSBorderSide.RIGHT, borderColor, borderWidth);
-    BorderSide? bottomSide = CSSBorderSide.getBorderSide(renderStyle, CSSBorderSide.BOTTOM, borderColor, borderWidth);
+    BorderSide? leftSide = CSSBorderSide.getBorderSide(renderStyle, CSSBorderSide.LEFT);
+    BorderSide? topSide = CSSBorderSide.getBorderSide(renderStyle, CSSBorderSide.TOP);
+    BorderSide? rightSide = CSSBorderSide.getBorderSide(renderStyle, CSSBorderSide.RIGHT);
+    BorderSide? bottomSide = CSSBorderSide.getBorderSide(renderStyle, CSSBorderSide.BOTTOM);
 
     bool hasBorder = leftSide != null ||
         topSide != null ||
@@ -547,153 +555,40 @@ mixin CSSBoxMixin on RenderStyleBase {
   List<Radius>? _getBorderRadius() {
     RenderStyle renderStyle = this as RenderStyle;
     // border radius add border topLeft topRight bottomLeft bottomRight
-    Radius? topLeftRadius = CSSBorderRadius.getRadius(style[BORDER_TOP_LEFT_RADIUS], renderStyle);
-    Radius? topRightRadius = CSSBorderRadius.getRadius(style[BORDER_TOP_RIGHT_RADIUS], renderStyle);
-    Radius? bottomRightRadius = CSSBorderRadius.getRadius(style[BORDER_BOTTOM_RIGHT_RADIUS], renderStyle);
-    Radius? bottomLeftRadius = CSSBorderRadius.getRadius(style[BORDER_BOTTOM_LEFT_RADIUS], renderStyle);
+    CSSBorderRadius? topLeftRadius = renderStyle.borderTopLeftRadius;
+    CSSBorderRadius? topRightRadius = renderStyle.borderTopRightRadius;
+    CSSBorderRadius? bottomRightRadius = renderStyle.borderBottomRightRadius;
+    CSSBorderRadius? bottomLeftRadius = renderStyle.borderBottomLeftRadius;
 
-    bool hasBorderRadius = topLeftRadius != null ||
-        topRightRadius != null ||
-        bottomRightRadius != null ||
-        bottomLeftRadius != null;
+    bool hasBorderRadius = topLeftRadius != CSSBorderRadius.zero ||
+        topRightRadius != CSSBorderRadius.zero ||
+        bottomRightRadius != CSSBorderRadius.zero ||
+        bottomLeftRadius != CSSBorderRadius.zero;
 
     return hasBorderRadius ? [
-      topLeftRadius ?? CSSBorderRadius.none,
-      topRightRadius ?? CSSBorderRadius.none,
-      bottomRightRadius ?? CSSBorderRadius.none,
-      bottomLeftRadius ?? CSSBorderRadius.none
+      topLeftRadius.computedRadius,
+      topRightRadius.computedRadius,
+      bottomRightRadius.computedRadius,
+      bottomLeftRadius.computedRadius
     ] : null;
   }
 
-  /// Shorted border property:
-  ///   border：<line-width> || <line-style> || <color>
-  ///   (<line-width> = <length> | thin | medium | thick), support length now.
-  /// Seperated properties:
-  ///   borderWidth: <line-width>{1,4}
-  ///   borderStyle: none | hidden | dotted | dashed | solid | double | groove | ridge | inset | outset
-  ///     (PS. Only support solid now.)
-  ///   borderColor: <color>
-  CSSBoxDecoration? getCSSBoxDecoration() {
-    // Backgroud color
-    Color? bgColor = CSSBackground.getBackgroundColor(style);
-    // Background image
-    DecorationImage? decorationImage;
-    Gradient? gradient;
-    List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(style[BACKGROUND_IMAGE]);
-    for (CSSFunctionalNotation method in methods) {
-      if (method.name == 'url') {
-        decorationImage = CSSBackground.getDecorationImage(style, method);
-      } else {
-        gradient = CSSBackground.getBackgroundGradient(style, renderBoxModel!, method);
-      }
-    }
-
-    List<Radius>? radius = _getBorderRadius();
-    List<CSSBoxShadow>? boxShadow = getBoxShadow();
-    List<BorderSide>? borderSides = _getBorderSides();
-
-    if (bgColor == null &&
-        decorationImage == null &&
-        gradient == null &&
-        borderSides == null &&
-        radius == null &&
-        boxShadow == null) {
+  List<KrakenBoxShadow>? _getBoxShadow() {
+    if (boxShadow == null) {
       return null;
     }
-
-    if (gradient != null) {
-      bgColor = null;
+    List<KrakenBoxShadow> result = [];
+    for (CSSBoxShadow shadow in boxShadow!) {
+      result.add(shadow.computedBoxShdow);
     }
-
-    Border? border;
-    if (borderSides != null) {
-      // side read inorder left top right bottom
-      border = Border(left: borderSides[0], top: borderSides[1], right: borderSides[2], bottom: borderSides[3]);
-    }
-
-    BorderRadius? borderRadius;
-    // Flutter border radius only works when border is uniform.
-    if (radius != null && (border == null || border.isUniform)) {
-      borderRadius = BorderRadius.only(
-        topLeft: radius[0],
-        topRight: radius[1],
-        bottomRight: radius[2],
-        bottomLeft: radius[3],
-      );
-    }
-    return CSSBoxDecoration(
-        color: bgColor,
-        image: decorationImage,
-        border: border,
-        borderRadius: borderRadius,
-        boxShadow: boxShadow,
-        gradient: gradient
-    );
+    return result;
   }
 
-  List<CSSBoxShadow>? getBoxShadow() {
-    List<CSSBoxShadow>? boxShadow;
-    RenderStyle renderStyle = this as RenderStyle;
-    CSSStyleDeclaration style = renderStyle.style;
-
-    if (style.contains(BOX_SHADOW)) {
-      boxShadow = [];
-      var shadows = CSSStyleProperty.getShadowValues(style[BOX_SHADOW]);
-      Size viewportSize = renderStyle.viewportSize;
-      RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
-      double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
-      double fontSize = renderStyle.fontSize.computedValue;
-
-      if (shadows != null) {
-        for (var shadowDefinitions in shadows) {
-          // Specifies the color of the shadow. If the color is absent, it defaults to currentColor.
-          String? colorDefinition = shadowDefinitions[0];
-          if (colorDefinition == CURRENT_COLOR || colorDefinition == null) {
-            colorDefinition = style.getCurrentColor();
-          }
-          Color? color = CSSColor.parseColor(colorDefinition);
-          double offsetX = CSSLength.toDisplayPortValue(
-            shadowDefinitions[1],
-            viewportSize: viewportSize,
-            rootFontSize: rootFontSize,
-            fontSize: fontSize
-          ) ?? 0;
-          double offsetY = CSSLength.toDisplayPortValue(
-            shadowDefinitions[2],
-            viewportSize: viewportSize,
-            rootFontSize: rootFontSize,
-            fontSize: fontSize
-          ) ?? 0;
-          double blurRadius = CSSLength.toDisplayPortValue(
-            shadowDefinitions[3],
-            viewportSize: viewportSize,
-            rootFontSize: rootFontSize,
-            fontSize: fontSize
-          ) ?? 0;
-          double spreadRadius = CSSLength.toDisplayPortValue(
-            shadowDefinitions[4],
-            viewportSize: viewportSize,
-            rootFontSize: rootFontSize,
-            fontSize: fontSize
-          ) ?? 0;
-          bool inset = shadowDefinitions[5] == INSET;
-
-          if (color != null) {
-            boxShadow.add(CSSBoxShadow(
-              offset: Offset(offsetX, offsetY),
-              blurRadius: blurRadius,
-              spreadRadius: spreadRadius,
-              color: color,
-              inset: inset,
-            ));
-          }
-        }
-      }
-    }
-    return boxShadow;
+  static resolveBackgroundAttachment() {
+    // TODO
   }
 
-  BackgroundBoundary getBackgroundClip(String value) {
+  static BackgroundBoundary resolveBackgroundClip(String value) {
     switch (value) {
       case 'padding-box':
         return BackgroundBoundary.paddingBox;
@@ -705,7 +600,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     }
   }
 
-  BackgroundBoundary getBackgroundOrigin(String value) {
+  static BackgroundBoundary resolveBackgroundOrigin(String value) {
     switch (value) {
       case 'border-box':
         return BackgroundBoundary.borderBox;
@@ -722,10 +617,24 @@ class CSSBorderSide {
   // border default width 3.0
   static double defaultBorderWidth = 3.0;
   static Color defaultBorderColor = CSSColor.initial;
-  static String LEFT = 'Left';
-  static String RIGHT = 'Right';
-  static String TOP = 'Top';
-  static String BOTTOM = 'Bottom';
+  static const String LEFT = 'Left';
+  static const String RIGHT = 'Right';
+  static const String TOP = 'Top';
+  static const String BOTTOM = 'Bottom';
+
+  static BorderStyle resolveBorderStyle(String input) {
+    BorderStyle borderStyle;
+    switch (input) {
+      case SOLID:
+        borderStyle = BorderStyle.solid;
+        break;
+      case NONE:
+      default:
+        borderStyle = BorderStyle.none;
+        break;
+    }
+    return borderStyle;
+  }
 
   static double? getBorderWidth(String input, RenderStyle renderStyle) {
     Size viewportSize = renderStyle.viewportSize;
@@ -767,125 +676,179 @@ class CSSBorderSide {
     return CSSLength.isLength(value) || value == THIN || value == MEDIUM || value == THICK;
   }
 
-  static double? getBorderSideWidth(RenderStyle renderStyle, String side) {
-    CSSStyleDeclaration style = renderStyle.style;
-    String property = 'border${side}Width';
-    String value = style[property];
-    return value.isEmpty ? defaultBorderWidth : getBorderWidth(value, renderStyle);
-  }
-
-  static Color? getBorderSideColor(CSSStyleDeclaration style, String side) {
-    String property = 'border${side}Color';
-    String value = style[property] ?? style[COLOR]; // Use current color first
-    return value.isEmpty ? defaultBorderColor : CSSColor.parseColor(value);
-  }
-
   static BorderSide none = BorderSide(color: defaultBorderColor, width: 0.0, style: BorderStyle.none);
 
-  static BorderSide? getBorderSide(RenderStyle renderStyle, String side, [Color? borderColor, double? borderWidth]) {
-    CSSStyleDeclaration style = renderStyle.style;
-    BorderStyle? borderStyle = CSSBorderStyle.getBorderSideStyle(style, side);
-    double? width = borderWidth ?? getBorderSideWidth(renderStyle, side);
-    Color? color = borderColor ?? getBorderSideColor(style, side);
+  static BorderSide? getBorderSide(RenderStyle renderStyle, String side) {
+    BorderStyle? borderStyle;
+    CSSLengthValue? borderWidth;
+    Color? borderColor;
+    switch (side) {
+      case LEFT:
+        borderStyle = renderStyle.borderLeftStyle;
+        borderWidth = renderStyle.borderLeftWidth;
+        borderColor = renderStyle.borderLeftColor;
+        break;
+      case RIGHT:
+        borderStyle = renderStyle.borderRightStyle;
+        borderWidth = renderStyle.borderRightWidth;
+        borderColor = renderStyle.borderRightColor;
+        break;
+      case TOP:
+        borderStyle = renderStyle.borderTopStyle;
+        borderWidth = renderStyle.borderTopWidth;
+        borderColor = renderStyle.borderTopColor;
+        break;
+      case BOTTOM:
+        borderStyle = renderStyle.borderBottomStyle;
+        borderWidth = renderStyle.borderBottomWidth;
+        borderColor = renderStyle.borderBottomColor;
+        break;
+    }
     // Flutter will print border event if width is 0.0. So we needs to set borderStyle to none to prevent this.
-    if (borderStyle == BorderStyle.none || width == 0.0) {
+    if (borderStyle == BorderStyle.none || borderWidth!.isZero) {
       return null;
+    } else if (borderColor == null) {
+      return BorderSide(
+        width: borderWidth.computedValue,
+        style: borderStyle!
+      );
     } else {
       return BorderSide(
-        color: color!,
-        width: width!,
-        style: borderStyle!
+        width: borderWidth.computedValue,
+        style: borderStyle!,
+        color: borderColor
       );
     }
   }
 }
 
 class CSSBorderRadius {
-  static Radius none = Radius.zero;
-
-  static Radius? getRadius(String radius, RenderStyle renderStyle) {
-    Size viewportSize = renderStyle.viewportSize;
-    double rootFontSize = renderStyle.elementDelegate.getRootElementFontSize();
-    double fontSize = renderStyle.fontSize.computedValue;
-
+  final CSSLengthValue x;
+  final CSSLengthValue y;
+  const CSSBorderRadius(this.x, this.y);
+  static CSSBorderRadius zero = CSSBorderRadius(CSSLengthValue.zero, CSSLengthValue.zero);
+  static CSSBorderRadius? parseBorderRadius(String radius, RenderStyle renderStyle, String propertyName) {
     if (radius.isNotEmpty) {
       // border-top-left-radius: horizontal vertical
       List<String> values = radius.split(_spaceRegExp);
       if (values.length == 1) {
-        double? circular = CSSLength.toDisplayPortValue(
-          values[0],
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-        );
-        if (circular != null) return Radius.circular(circular);
+        CSSLengthValue circular = CSSLength.parseLength(values[0], renderStyle, propertyName);
+        return CSSBorderRadius(circular, circular);
       } else if (values.length == 2) {
-        double? x = CSSLength.toDisplayPortValue(
-          values[0],
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-        );
-        double? y = CSSLength.toDisplayPortValue(
-          values[1],
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-        );
-        if (x != null && y != null) return Radius.elliptical(x, y);
+        CSSLengthValue x = CSSLength.parseLength(values[0], renderStyle, propertyName);
+        CSSLengthValue y = CSSLength.parseLength(values[1], renderStyle, propertyName);
+        return CSSBorderRadius(x, y);
       }
     }
-
     return null;
   }
-}
 
-class CSSBorderStyle {
-  static BorderStyle defaultBorderStyle = BorderStyle.none;
-  static BorderStyle? getBorderSideStyle(CSSStyleDeclaration style, String side) {
-    String property = 'border${side}Style';
-    String value = style[property];
-    return value.isEmpty ? defaultBorderStyle : getBorderStyle(value);
-  }
-
-  static BorderStyle? getBorderStyle(String input) {
-    BorderStyle? borderStyle;
-    switch (input) {
-      case SOLID:
-        borderStyle = BorderStyle.solid;
-        break;
-      case NONE:
-        borderStyle = BorderStyle.none;
-        break;
-    }
-    return borderStyle;
+  Radius get computedRadius {
+    return Radius.elliptical(x.computedValue, y.computedValue);
   }
 }
 
-// ignore: must_be_immutable
-class CSSBoxShadow extends BoxShadow {
-  CSSBoxShadow({
+class KrakenBoxShadow extends BoxShadow {
+  /// Creates a box shadow.
+  ///
+  /// By default, the shadow is solid black with zero [offset], [blurRadius],
+  /// and [spreadRadius].
+  const KrakenBoxShadow({
     Color color = const Color(0xFF000000),
     Offset offset = Offset.zero,
     double blurRadius = 0.0,
     double spreadRadius = 0.0,
-    bool inset = false,
-  }) : super(color: color, offset: offset, blurRadius: blurRadius, spreadRadius: spreadRadius) {
-    _inset = inset;
+    this.inset = false,
+  }) : super(color: color, offset: offset, blurRadius: blurRadius);
+
+  final bool inset;
+}
+
+// ignore: must_be_immutable
+class CSSBoxShadow {
+  CSSBoxShadow({
+    this.color,
+    this.offsetX,
+    this.offsetY,
+    this.blurRadius,
+    this.spreadRadius,
+    this.inset = false,
+  });
+
+  bool inset = false;
+  Color? color;
+  CSSLengthValue? offsetX;
+  CSSLengthValue? offsetY;
+  CSSLengthValue? blurRadius;
+  CSSLengthValue? spreadRadius;
+
+  KrakenBoxShadow get computedBoxShdow {
+    color ??= const Color(0xFF000000);
+    offsetX ??= CSSLengthValue.zero;
+    offsetY ??= CSSLengthValue.zero;
+    blurRadius ??= CSSLengthValue.zero;
+    spreadRadius ??= CSSLengthValue.zero;
+    return KrakenBoxShadow(
+      color: color!,
+      offset: Offset(offsetX!.computedValue, offsetY!.computedValue),
+      blurRadius: blurRadius!.computedValue,
+      spreadRadius: spreadRadius!.computedValue,
+      inset: inset,
+    );
   }
 
+  static List<CSSBoxShadow>? parseBoxShadow(String present, RenderStyle renderStyle, String propertyName) {
+    
+    var shadows = CSSStyleProperty.getShadowValues(present);
+    if (shadows != null) {
+      List<CSSBoxShadow>? boxShadow = [];
+      for (var shadowDefinitions in shadows) {
+        // Specifies the color of the shadow. If the color is absent, it defaults to currentColor.
+        String? colorDefinition = shadowDefinitions[0];
+        Color? color;
+        if (colorDefinition == CURRENT_COLOR || colorDefinition == null) {
+          color = renderStyle.color;
+        } else {
+          color = CSSColor.parseColor(colorDefinition);
+        }
+        CSSLengthValue? offsetX;
+        if (shadowDefinitions[1] != null) {
+          offsetX = CSSLength.parseLength(shadowDefinitions[1]!, renderStyle, propertyName);
+        }
 
-  bool _inset = false;
-  bool get inset {
-    return _inset;
-  }
-  set inset(bool value) {
-    if (_inset == value) return;
-    _inset = value;
-  }
+        CSSLengthValue? offsetY;
+        if (shadowDefinitions[2] != null) {
+          offsetY = CSSLength.parseLength(shadowDefinitions[2]!, renderStyle, propertyName);
+        }
 
-  @override
-  String toString() => 'BoxShadow($color, $offset, $blurRadius, $spreadRadius $inset)';
+        CSSLengthValue? blurRadius;
+        if (shadowDefinitions[3] != null) {
+          blurRadius = CSSLength.parseLength(shadowDefinitions[3]!, renderStyle, propertyName);
+        }
+
+        CSSLengthValue? spreadRadius;
+        if (shadowDefinitions[4] != null) {
+          spreadRadius = CSSLength.parseLength(shadowDefinitions[4]!, renderStyle, propertyName);
+        }
+
+        bool inset = shadowDefinitions[5] == INSET;
+
+        if (color != null) {
+          boxShadow.add(CSSBoxShadow(
+            offsetX: offsetX,
+            offsetY: offsetY,
+            blurRadius: blurRadius,
+            spreadRadius: spreadRadius,
+            color: color,
+            inset: inset,
+          ));
+        }
+      }
+      return boxShadow;
+    }
+    
+    return null;
+  }
 }
 
 class CSSBoxDecoration extends BoxDecoration {
@@ -914,7 +877,7 @@ class CSSBoxDecoration extends BoxDecoration {
   final BorderRadiusGeometry? borderRadius;
 
   @override
-  final List<CSSBoxShadow>? boxShadow;
+  final List<KrakenBoxShadow>? boxShadow;
 
   @override
   final Gradient? gradient;
@@ -930,7 +893,7 @@ class CSSBoxDecoration extends BoxDecoration {
     DecorationImage? image,
     BoxBorder? border,
     BorderRadiusGeometry? borderRadius,
-    List<CSSBoxShadow>? boxShadow,
+    List<KrakenBoxShadow>? boxShadow,
     Gradient? gradient,
     BlendMode? backgroundBlendMode,
     BoxShape? shape,

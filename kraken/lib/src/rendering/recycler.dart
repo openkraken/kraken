@@ -207,7 +207,7 @@ class RenderRecyclerLayout extends RenderLayoutBox {
     offset += Offset(renderStyle.paddingLeft.computedValue, renderStyle.paddingTop.computedValue);
 
     if (renderStyle.borderEdge != null) {
-      offset += Offset(renderStyle.borderLeft, renderStyle.borderTop);
+      offset += Offset(renderStyle.borderLeftWidth.computedValue, renderStyle.borderTopWidth.computedValue);
     }
 
     if (firstChild != null) {

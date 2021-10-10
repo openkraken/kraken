@@ -913,12 +913,12 @@ class RenderFlowLayout extends RenderLayoutBox {
         Offset relativeOffset = _getOffset(
             childMainPosition +
                 renderStyle.paddingLeft.computedValue +
-                renderStyle.borderLeft +
+                renderStyle.borderLeftWidth.computedValue +
                 childMarginLeft,
             crossAxisOffset +
                 childLineExtent +
                 renderStyle.paddingTop.computedValue +
-                renderStyle.borderTop +
+                renderStyle.borderTopWidth.computedValue +
                 childMarginTop);
         // Apply position relative offset change.
         CSSPositionedLayout.applyRelativeOffset(relativeOffset, child);
@@ -935,28 +935,6 @@ class RenderFlowLayout extends RenderLayoutBox {
         crossAxisOffset -= runBetweenSpace;
       else
         crossAxisOffset += runCrossAxisExtent + runBetweenSpace;
-    }
-
-    /// Make sure it will not trigger relayout again when in relayout stage
-    if (!needsRelayout) {
-      bool percentageOfSizingFound = _isChildrenPercentageOfSizingExist();
-      bool percentageToOwnFound = _isChildrenPercentageToOwnExist();
-      bool percentageToContainingBlockFound =
-          _resolveChildrenPercentageToContainingBlock();
-
-      /// When percentage exists in sizing styles(width/height) and styles relies on its own size,
-      /// it needs to relayout twice cause the latter relies on the size calculated in the first relayout
-      if (percentageOfSizingFound == true && percentageToOwnFound == true) {
-        /// Relayout first time to calculate percentage styles such as width/height
-        _layoutChildren(needsRelayout: true);
-        _resolveChildrenPercentageToOwn();
-
-        /// Relayout second time to calculate percentage styles such as transform: translate/border-radius
-        _layoutChildren(needsRelayout: true);
-      } else if (percentageToContainingBlockFound == true ||
-          percentageToOwnFound == true) {
-        _layoutChildren(needsRelayout: true);
-      }
     }
   }
 
@@ -1048,36 +1026,11 @@ class RenderFlowLayout extends RenderLayoutBox {
         child = childParentData.nextSibling;
         continue;
       }
-      if (child is RenderBoxModel) {
-        bool percentageExist = child.renderStyle.resolvePercentageToContainingBlock(this);
-        if (percentageExist) {
-          percentageFound = true;
-        }
-      }
       child = childParentData.nextSibling;
     }
     return percentageFound;
   }
 
-  /// Resolve all percentage size of child based on size its own
-  bool _resolveChildrenPercentageToOwn() {
-    bool percentageFound = false;
-    RenderBox? child = firstChild;
-    while (child != null) {
-      final RenderLayoutParentData childParentData =
-          child.parentData as RenderLayoutParentData;
-      // Exclude positioned child
-      if (childParentData.isPositioned) {
-        child = childParentData.nextSibling;
-        continue;
-      }
-      if (child is RenderBoxModel) {
-        percentageFound = child.renderStyle.resolvePercentageToOwn();
-      }
-      child = childParentData.nextSibling;
-    }
-    return percentageFound;
-  }
 
   /// Check whether percentage sizing styles of child exists
   bool _isChildrenPercentageOfSizingExist() {
@@ -1090,37 +1043,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       if (childParentData.isPositioned) {
         child = childParentData.nextSibling;
         continue;
-      }
-      if (child is RenderBoxModel) {
-        bool percentageExist = child.renderStyle.isPercentageOfSizingExist(this);
-        if (percentageExist) {
-          percentageFound = true;
-          break;
-        }
-      }
-      child = childParentData.nextSibling;
-    }
-    return percentageFound;
-  }
-
-  /// Check whether percentage size of child based on size its own exist
-  bool _isChildrenPercentageToOwnExist() {
-    bool percentageFound = false;
-    RenderBox? child = firstChild;
-    while (child != null) {
-      final RenderLayoutParentData childParentData =
-          child.parentData as RenderLayoutParentData;
-      // Exclude positioned child
-      if (childParentData.isPositioned) {
-        child = childParentData.nextSibling;
-        continue;
-      }
-      if (child is RenderBoxModel) {
-        bool percentageExist = child.renderStyle.isPercentageToOwnExist();
-        if (percentageExist) {
-          percentageFound = true;
-          break;
-        }
       }
       child = childParentData.nextSibling;
     }
@@ -1314,13 +1236,13 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     double maxScrollableMainSize = math.max(
         size.width -
-            container.renderStyle.borderLeft -
-            container.renderStyle.borderRight,
+            container.renderStyle.borderLeftWidth.computedValue -
+            container.renderStyle.borderRightWidth.computedValue,
         maxScrollableMainSizeOfChildren);
     double maxScrollableCrossSize = math.max(
         size.height -
-            container.renderStyle.borderTop -
-            container.renderStyle.borderBottom,
+            container.renderStyle.borderTopWidth.computedValue -
+            container.renderStyle.borderBottomWidth.computedValue,
         maxScrollableCrossSizeOfChildren);
 
     scrollableSize = Size(maxScrollableMainSize, maxScrollableCrossSize);
@@ -1425,7 +1347,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       parent.renderStyle.transformedDisplay == CSSDisplay.block &&
       (isParentOverflowVisible || isParentOverflowClip) &&
       parent.renderStyle.paddingTop == 0 &&
-      parent.renderStyle.borderTop == 0 &&
+      parent.renderStyle.borderTopWidth.computedValue == 0 &&
       parent.parent is RenderFlowLayout
     ) {
       return 0;
@@ -1436,7 +1358,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// Get the collapsed margin top with its nested first child
   double _getCollapsedMarginTopWithNestedFirstChild(RenderBoxModel renderBoxModel) {
     double paddingTop = renderBoxModel.renderStyle.paddingTop.computedValue;
-    double borderTop = renderBoxModel.renderStyle.borderTop;
+    double borderTop = renderBoxModel.renderStyle.borderTopWidth.computedValue;
     double marginTop = renderBoxModel.renderStyle.marginTop.computedValue;
     bool isOverflowVisible = renderBoxModel.renderStyle.overflowX == CSSOverflowType.visible &&
       renderBoxModel.renderStyle.overflowY == CSSOverflowType.visible;
@@ -1537,7 +1459,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       parent.renderStyle.transformedDisplay == CSSDisplay.block &&
       (isParentOverflowVisible || isParentOverflowClip) &&
       parent.renderStyle.paddingBottom == 0 &&
-      parent.renderStyle.borderBottom == 0 &&
+      parent.renderStyle.borderBottomWidth.computedValue == 0 &&
       parent.parent is RenderFlowLayout
     ) {
       return 0;
@@ -1548,7 +1470,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// Get the collapsed margin bottom with its nested last child
   double _getCollapsedMarginBottomWithNestedLastChild(RenderBoxModel renderBoxModel) {
     double paddingBottom = renderBoxModel.renderStyle.paddingBottom.computedValue;
-    double borderBottom = renderBoxModel.renderStyle.borderBottom;
+    double borderBottom = renderBoxModel.renderStyle.borderBottomWidth.computedValue;
     double marginBottom = renderBoxModel.renderStyle.marginBottom.computedValue;
     bool isOverflowVisible = renderBoxModel.renderStyle.overflowX == CSSOverflowType.visible &&
       renderBoxModel.renderStyle.overflowY == CSSOverflowType.visible;

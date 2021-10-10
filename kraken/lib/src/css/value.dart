@@ -9,10 +9,6 @@ class CSSValue {
   RenderStyle renderStyle;
   CSSValue(this.propertyName, this.renderStyle);
 
-  // updateFontRelativeLength() {
-  //   updateLength(renderStyle, propertyName, value);
-  // }
-
   static bool isFontRelativeLength(CSSLengthValue value) {
     return value.unit == CSSLengthUnit.EM;
   }
@@ -47,14 +43,14 @@ class CSSValue {
         renderStyle.textDecorationColor = color;
         break;
       case BACKGROUND_COLOR:
-        renderStyle.updateBackgroundColor(color);
+        // renderStyle.updateBackgroundColor(color);
         break;
       case BORDER_BOTTOM_COLOR:
       case BORDER_LEFT_COLOR:
       case BORDER_RIGHT_COLOR:
       case BORDER_TOP_COLOR:
       case BORDER_COLOR:
-        renderStyle.updateBorder(property, borderColor: color);
+        // renderStyle.updateBorder(property, borderColor: color);
         break;
     }
   }

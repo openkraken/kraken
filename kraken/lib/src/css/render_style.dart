@@ -290,15 +290,14 @@ class RenderStyle
 
   /// Resolve percentage size to px base on size of its containing block
   /// https://www.w3.org/TR/css-sizing-3/#percentage-sizing
-  bool resolvePercentageToContainingBlock(RenderBoxModel parent) {
+  void resolveContainingBlock(RenderBoxModel parent) {
     if (!renderBoxModel!.hasSize || renderBoxModel!.parentData is! RenderLayoutParentData) {
-      return false;
+      return;
     }
 
-    RenderStyle renderStyle = this;
     final RenderLayoutParentData childParentData = renderBoxModel!.parentData as RenderLayoutParentData;
     double parentActualContentHeight = parent.size.height -
-      parent.renderStyle.borderTop - parent.renderStyle.borderBottom -
+      parent.renderStyle.borderTopWidth.computedValue - parent.renderStyle.borderBottomWidth.computedValue -
       parent.renderStyle.paddingTop.computedValue - parent.renderStyle.paddingBottom.computedValue;
     double? parentLogicalContentHeight = parent.logicalContentHeight;
 
@@ -312,7 +311,6 @@ class RenderStyle
       parentActualContentHeight : parentLogicalContentHeight;
 
     RenderStyle parentRenderStyle = parent.renderStyle;
-    bool isPercentageExist = false;
     Size parentSize = parent.size;
     Size? size = renderBoxModel!.boxSize;
 
@@ -358,16 +356,8 @@ class RenderStyle
     /// Update padding
     /// https://www.w3.org/TR/css-box-3/#padding-physical
 
-
-
-
-
-
-
     /// Update margin
     /// https://www.w3.org/TR/css-box-3/#margin-physical
-
-
 
 
     /// Update offset
@@ -376,104 +366,18 @@ class RenderStyle
     /// parentPaddingBoxHeight
     /// parentPaddingBoxWidth
    
-   
-    /// border-radius
-    String? parsedTopLeftRadius = parsePercentageBorderRadius(style[BORDER_TOP_LEFT_RADIUS], size);
-
-    if (parsedTopLeftRadius != null) {
-      updateBorderRadius(
-        BORDER_TOP_LEFT_RADIUS,
-        parsedTopLeftRadius,
-      );
-      isPercentageExist = true;
-    }
-
-    String? parsedTopRightRadius = parsePercentageBorderRadius(style[BORDER_TOP_RIGHT_RADIUS], size);
-    if (parsedTopRightRadius != null) {
-      updateBorderRadius(
-        BORDER_TOP_RIGHT_RADIUS,
-        parsedTopRightRadius,
-      );
-      isPercentageExist = true;
-    }
-
-    String? parsedBottomLeftRadius = parsePercentageBorderRadius(style[BORDER_BOTTOM_LEFT_RADIUS], size);
-    if (parsedBottomLeftRadius != null) {
-      updateBorderRadius(
-        BORDER_BOTTOM_LEFT_RADIUS,
-        parsedBottomLeftRadius,
-      );
-      isPercentageExist = true;
-    }
-
-    String? parsedBottomRightRadius = parsePercentageBorderRadius(style[BORDER_BOTTOM_RIGHT_RADIUS], size);
-    if (parsedBottomRightRadius != null) {
-      updateBorderRadius(
-        BORDER_BOTTOM_RIGHT_RADIUS,
-        parsedBottomRightRadius,
-      );
-      isPercentageExist = true;
-    }
-
-    return isPercentageExist;
   }
 
   /// Resolve percentage size to px base on size of its own
   /// https://www.w3.org/TR/css-sizing-3/#percentage-sizing
-  bool resolvePercentageToOwn() {
-    if (!renderBoxModel!.hasSize) {
-      return false;
-    }
-    bool isPercentageExist = false;
-    Size? size = renderBoxModel!.boxSize;
 
-    /// border-radius
-    String? parsedTopLeftRadius = parsePercentageBorderRadius(style[BORDER_TOP_LEFT_RADIUS], size);
-
-    if (parsedTopLeftRadius != null) {
-      updateBorderRadius(
-        BORDER_TOP_LEFT_RADIUS,
-        parsedTopLeftRadius,
-      );
-      isPercentageExist = true;
-    }
-
-    String? parsedTopRightRadius = parsePercentageBorderRadius(style[BORDER_TOP_RIGHT_RADIUS], size);
-    if (parsedTopRightRadius != null) {
-      updateBorderRadius(
-        BORDER_TOP_RIGHT_RADIUS,
-        parsedTopRightRadius,
-      );
-      isPercentageExist = true;
-    }
-
-    String? parsedBottomLeftRadius = parsePercentageBorderRadius(style[BORDER_BOTTOM_LEFT_RADIUS], size);
-    if (parsedBottomLeftRadius != null) {
-      updateBorderRadius(
-        BORDER_BOTTOM_LEFT_RADIUS,
-        parsedBottomLeftRadius,
-      );
-      isPercentageExist = true;
-    }
-
-    String? parsedBottomRightRadius = parsePercentageBorderRadius(style[BORDER_BOTTOM_RIGHT_RADIUS], size);
-    if (parsedBottomRightRadius != null) {
-      updateBorderRadius(
-        BORDER_BOTTOM_RIGHT_RADIUS,
-        parsedBottomRightRadius,
-      );
-      isPercentageExist = true;
-    }
-
-    return isPercentageExist;
-  }
 
   bool isPercentageOfSizingExist(RenderBoxModel parent) {
     if (renderBoxModel!.parentData is! RenderLayoutParentData) return false;
 
     final RenderLayoutParentData childParentData = renderBoxModel!.parentData as RenderLayoutParentData;
     double parentActualContentHeight = parent.size.height -
-      parent.renderStyle.borderTop - parent.renderStyle.borderBottom -
+      parent.renderStyle.borderTopWidth.computedValue - parent.renderStyle.borderBottomWidth.computedValue -
       parent.renderStyle.paddingTop.computedValue - parent.renderStyle.paddingBottom.computedValue;
     double? parentLogicalContentHeight = parent.logicalContentHeight;
 
@@ -501,204 +405,6 @@ class RenderStyle
       return true;
     }
     return false;
-  }
-
-  bool isPercentageToOwnExist() {
-    if (isBorderRadiusPercentage(style[BORDER_TOP_LEFT_RADIUS]) ||
-      isBorderRadiusPercentage(style[BORDER_TOP_RIGHT_RADIUS]) ||
-      isBorderRadiusPercentage(style[BORDER_BOTTOM_LEFT_RADIUS]) ||
-      isBorderRadiusPercentage(style[BORDER_BOTTOM_RIGHT_RADIUS])
-    ) {
-      return true;
-    }
-    return false;
-  }
-
-  /// Parse percentage border radius
-  /// Returns the parsed result if percentage found, otherwise returns null
-  static String? parsePercentageBorderRadius(String radiusStr, Size? size) {
-    bool isPercentageExist = false;
-    final RegExp _spaceRegExp = RegExp(r'\s+');
-    List<String> values = radiusStr.split(_spaceRegExp);
-    String parsedRadius = '';
-    if (values.length == 1) {
-      if (CSSLength.isPercentage(values[0])) {
-        double percentage = CSSLength.parsePercentage(values[0]);
-        parsedRadius += (size!.width * percentage).toString() + 'px' + ' ' +
-          (size.height * percentage).toString() + 'px';
-        isPercentageExist = true;
-      } else {
-        parsedRadius += values[0];
-      }
-    } else if (values.length == 2) {
-      if (CSSLength.isPercentage(values[0])) {
-        double percentage = CSSLength.parsePercentage(values[0]);
-        parsedRadius += (size!.width * percentage).toString() + 'px';
-        isPercentageExist = true;
-      } else {
-        parsedRadius += values[0];
-      }
-      if (CSSLength.isPercentage(values[1])) {
-        double percentage = CSSLength.parsePercentage(values[1]);
-        parsedRadius += ' ' + (size!.height * percentage).toString() + 'px';
-        isPercentageExist = true;
-      } else {
-        parsedRadius += ' ' + values[1];
-      }
-    }
-
-    return isPercentageExist ? parsedRadius : null;
-  }
-
-  /// Check whether percentage exist in border-radius
-  static bool isBorderRadiusPercentage(String radiusStr) {
-    bool isPercentageExist = false;
-    final RegExp _spaceRegExp = RegExp(r'\s+');
-    List<String> values = radiusStr.split(_spaceRegExp);
-    if ((values.length == 1 && CSSLength.isPercentage(values[0])) ||
-      (values.length == 2 && (CSSLength.isPercentage(values[0]) || CSSLength.isPercentage(values[1])))
-    ) {
-      isPercentageExist = true;
-    }
-
-    return isPercentageExist;
-  }
-
-  /// Parse percentage transform translate value
-  /// Returns the parsed result if percentage found, otherwise returns null
-  static Matrix4? parsePercentageTransformTranslate(String transformStr, Size? size, RenderStyle renderStyle) {
-    List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(transformStr);
-    bool isPercentageExist = false;
-    Size viewportSize = renderStyle.viewportSize;
-    RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
-    double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
-    double fontSize = renderStyle.fontSize.computedValue;
-
-    Matrix4? matrix4;
-    for (CSSFunctionalNotation method in methods) {
-      Matrix4? transform;
-      if (method.name == CSSTransform.TRANSLATE && method.args.isNotEmpty && method.args.length <= 2) {
-        double y;
-        double x;
-        if (method.args.length == 2) {
-          String translateY = method.args[1].trim();
-          if (CSSLength.isPercentage(translateY)) {
-            double percentage = CSSLength.parsePercentage(translateY);
-            translateY = (size!.height * percentage).toString() + 'px';
-            isPercentageExist = true;
-          }
-          y = CSSLength.toDisplayPortValue(
-            translateY,
-            viewportSize: viewportSize,
-            rootFontSize: rootFontSize,
-            fontSize: fontSize
-          ) ?? 0;
-        } else {
-          y = 0;
-        }
-        String translateX = method.args[0].trim();
-        if (CSSLength.isPercentage(translateX)) {
-          double percentage = CSSLength.parsePercentage(translateX);
-          translateX = (size!.width * percentage).toString() + 'px';
-          isPercentageExist = true;
-        }
-        x = CSSLength.toDisplayPortValue(
-          translateX,
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-        ) ?? 0;
-        transform = Matrix4.identity()..translate(x, y);
-
-      } else if (method.name == CSSTransform.TRANSLATE_3D && method.args.isNotEmpty && method.args.length <= 3) {
-        double z;
-        double y;
-        double x;
-        if (method.args.length == 3 || method.args.length == 2) {
-          // Percentage value is invalid for translateZ.
-          if (method.args.length == 3) {
-            String translateZ = method.args[2].trim();
-            z = CSSLength.toDisplayPortValue(
-              translateZ,
-              viewportSize: viewportSize,
-              rootFontSize: rootFontSize,
-              fontSize: fontSize
-            ) ?? 0;
-          } else {
-            z = 0;
-          }
-
-          String translateY = method.args[1].trim();
-          if (CSSLength.isPercentage(translateY)) {
-            double percentage = CSSLength.parsePercentage(translateY);
-            translateY = (size!.height * percentage).toString() + 'px';
-            isPercentageExist = true;
-          }
-          y = CSSLength.toDisplayPortValue(
-            translateY,
-            viewportSize: viewportSize,
-            rootFontSize: rootFontSize,
-            fontSize: fontSize
-          ) ?? 0;
-        } else {
-          y = 0;
-          z = 0;
-        }
-        String translateX = method.args[0].trim();
-        if (CSSLength.isPercentage(translateX)) {
-          double percentage = CSSLength.parsePercentage(translateX);
-          translateX = (size!.width * percentage).toString() + 'px';
-          isPercentageExist = true;
-        }
-        x = CSSLength.toDisplayPortValue(
-          translateX,
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-        ) ?? 0;
-        transform = Matrix4.identity()..translate(x, y, z);
-
-      } else if (method.name == CSSTransform.TRANSLATE_X && method.args.length == 1) {
-        String translateX = method.args[0].trim();
-        if (CSSLength.isPercentage(translateX)) {
-          double percentage = CSSLength.parsePercentage(translateX);
-          translateX = (size!.width * percentage).toString() + 'px';
-          isPercentageExist = true;
-        }
-        double x = CSSLength.toDisplayPortValue(
-          translateX,
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-        ) ?? 0;
-        transform = Matrix4.identity()..translate(x);
-
-      } else if (method.name == CSSTransform.TRANSLATE_Y && method.args.length == 1) {
-        String translateY = method.args[0].trim();
-        if (CSSLength.isPercentage(translateY)) {
-          double percentage = CSSLength.parsePercentage(translateY);
-          translateY = (size!.height * percentage).toString() + 'px';
-          isPercentageExist = true;
-        }
-        double y = CSSLength.toDisplayPortValue(
-          translateY,
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-        ) ?? 0;
-        double x = 0;
-        transform = Matrix4.identity()..translate(x, y);
-      }
-
-      if (transform != null) {
-        if (matrix4 == null) {
-          matrix4 = transform;
-        } else {
-          matrix4.multiply(transform);
-        }
-      }
-    }
-    return isPercentageExist ? matrix4 : null;
   }
 
   /// Get height of replaced element by intrinsic ratio if height is not defined
@@ -740,9 +446,7 @@ double _getCropWidthByMargin(RenderStyle renderStyle, double cropWidth) {
 }
 
 double _getCropWidthByPaddingBorder(RenderStyle renderStyle, double cropWidth) {
-  if (renderStyle.borderEdge != null) {
-    cropWidth += renderStyle.borderEdge!.horizontal;
-  }
+  cropWidth += renderStyle.borderEdge.horizontal;
   cropWidth += renderStyle.padding.horizontal;
   return cropWidth;
 }
@@ -753,10 +457,7 @@ double _getCropHeightByMargin(RenderStyle renderStyle, double cropHeight) {
 }
 
 double _getCropHeightByPaddingBorder(RenderStyle renderStyle, double cropHeight) {
-  if (renderStyle.borderEdge != null) {
-    cropHeight += renderStyle.borderEdge!.vertical;
-  }
-
+  cropHeight += renderStyle.borderEdge.vertical;
   cropHeight += renderStyle.padding.vertical;
   return cropHeight;
 }

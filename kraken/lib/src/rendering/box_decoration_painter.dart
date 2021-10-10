@@ -75,7 +75,7 @@ class BoxDecorationPainter extends BoxPainter {
 
   void _paintShadows(Canvas canvas, Rect rect, TextDirection? textDirection) {
     if (_decoration.boxShadow == null) return;
-    for (final CSSBoxShadow boxShadow in _decoration.boxShadow!) {
+    for (final KrakenBoxShadow boxShadow in _decoration.boxShadow!) {
       if (boxShadow.inset) {
         _paintInsetBoxShadow(canvas, rect, textDirection, boxShadow);
       } else {
@@ -155,10 +155,10 @@ class BoxDecorationPainter extends BoxPainter {
     // the inset box-shadow is drawn inside the padding box edge.
     // https://drafts.csswg.org/css-backgrounds-3/#shadow-shape
     Rect paddingBoxRect = Rect.fromLTRB(
-      rect.left + renderStyle.borderLeft,
-      rect.top + renderStyle.borderTop,
-      rect.right - renderStyle.borderRight,
-      rect.bottom - renderStyle.borderBottom
+      rect.left + renderStyle.borderLeftWidth.computedValue,
+      rect.top + renderStyle.borderTopWidth.computedValue,
+      rect.right - renderStyle.borderRightWidth.computedValue,
+      rect.bottom - renderStyle.borderBottomWidth.computedValue
     );
 
     Path paddingBoxPath;
@@ -168,7 +168,7 @@ class BoxDecorationPainter extends BoxPainter {
       RRect borderBoxRRect = _decoration.borderRadius!.resolve(textDirection).toRRect(rect);
       // A borderRadius can only be given for a uniform Border in Flutter.
       // https://github.com/flutter/flutter/issues/12583
-      double uniformBorderWidth = renderStyle.borderTop;
+      double uniformBorderWidth = renderStyle.borderTopWidth.computedValue;
       RRect paddingBoxRRect = borderBoxRRect.deflate(uniformBorderWidth);
       paddingBoxPath = Path()..addRRect(paddingBoxRRect);
     }

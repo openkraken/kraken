@@ -70,14 +70,6 @@ class CSSBackground {
         CSSPercentage.isPercentage(value);
   }
 
-  static Color? getBackgroundColor(CSSStyleDeclaration style) {
-    String backgroundColor = style[BACKGROUND_COLOR];
-    if (backgroundColor.isNotEmpty) {
-       return CSSColor.parseColor(backgroundColor);
-    }
-    return null;
-  }
-
   static bool hasLocalBackgroundImage(CSSStyleDeclaration style) {
     return style[BACKGROUND_IMAGE].isNotEmpty && style[BACKGROUND_ATTACHMENT] == LOCAL;
   }

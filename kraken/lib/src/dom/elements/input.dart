@@ -1256,7 +1256,7 @@ class RenderInputLeaderLayer extends RenderLeaderLayer {
 
     double intrinsicInputHeight = renderEditable!.preferredLineHeight
       + renderStyle.paddingTop.computedValue + renderStyle.paddingBottom.computedValue
-      + renderStyle.borderTop + renderStyle.borderBottom;
+      + renderStyle.borderTopWidth.computedValue + renderStyle.borderBottomWidth.computedValue;
 
     // Make render editable vertically center.
     double dy;

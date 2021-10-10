@@ -435,8 +435,8 @@ class RenderLayoutBox extends RenderBoxModel
             maxScrollableX,
             -childRenderStyle.right!.computedValue +
                 overflowContainerBox.renderStyle.width!.computedValue -
-                overflowContainerBox.renderStyle.borderLeft -
-                overflowContainerBox.renderStyle.borderRight);
+                overflowContainerBox.renderStyle.borderLeftWidth.computedValue -
+                overflowContainerBox.renderStyle.borderRightWidth.computedValue);
       } else {
         maxScrollableX = math.max(maxScrollableX,
             -childRenderStyle.right!.computedValue + _contentSize!.width);
@@ -455,8 +455,8 @@ class RenderLayoutBox extends RenderBoxModel
             maxScrollableY,
             -childRenderStyle.bottom!.computedValue +
                 overflowContainerBox.renderStyle.height!.computedValue -
-                overflowContainerBox.renderStyle.borderTop -
-                overflowContainerBox.renderStyle.borderBottom);
+                overflowContainerBox.renderStyle.borderTopWidth.computedValue -
+                overflowContainerBox.renderStyle.borderBottomWidth.computedValue);
       } else {
         maxScrollableY = math.max(maxScrollableY,
             -childRenderStyle.bottom!.computedValue + _contentSize!.height);
@@ -795,12 +795,12 @@ class RenderBoxModel extends RenderBox
     // Constraints
     // Width should be not smaller than border and padding in horizontal direction
     // when box-sizing is border-box which is only supported.
-    double minConstraintWidth = renderStyle.borderLeft + renderStyle.borderRight +
+    double minConstraintWidth = renderStyle.borderLeftWidth.computedValue + renderStyle.borderRightWidth.computedValue +
       renderStyle.paddingLeft.computedValue + renderStyle.paddingRight.computedValue;
     double maxConstraintWidth = logicalWidth ?? double.infinity;
     // Height should be not smaller than border and padding in vertical direction
     // when box-sizing is border-box which is only supported.
-    double minConstraintHeight = renderStyle.borderTop + renderStyle.borderBottom +
+    double minConstraintHeight = renderStyle.borderTopWidth.computedValue + renderStyle.borderBottomWidth.computedValue +
       renderStyle.paddingTop.computedValue + renderStyle.paddingBottom.computedValue;
     double maxConstraintHeight = logicalHeight ?? double.infinity;
 
@@ -897,10 +897,8 @@ class RenderBoxModel extends RenderBox
 
 
     boxSize = renderStyle.wrapPaddingSize(boxSize);
-    
-    if (renderStyle.borderEdge != null) {
-      boxSize = renderStyle.wrapBorderSize(boxSize);
-    }
+    boxSize = renderStyle.wrapBorderSize(boxSize);
+
     return constraints.constrain(boxSize);
   }
 
@@ -1176,10 +1174,10 @@ class RenderBoxModel extends RenderBox
 
   void _chainPaintOverflow(PaintingContext context, Offset offset) {
     EdgeInsets borderEdge = EdgeInsets.fromLTRB(
-        renderStyle.borderLeft,
-        renderStyle.borderTop,
-        renderStyle.borderRight,
-        renderStyle.borderLeft);
+        renderStyle.borderLeftWidth.computedValue,
+        renderStyle.borderTopWidth.computedValue,
+        renderStyle.borderRightWidth.computedValue,
+        renderStyle.borderLeftWidth.computedValue);
     BoxDecoration? decoration = renderStyle.decoration;
 
     bool hasLocalAttachment = _hasLocalBackgroundImage(renderStyle);
