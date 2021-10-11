@@ -1818,6 +1818,16 @@ class RenderFlexLayout extends RenderLayoutBox {
             ? child.autoMinWidth
             : child.autoMinHeight;
       }
+      // Should add main axis margin of child to the main axis auto size of parent.
+      if (child is RenderBoxModel) {
+        double childMarginTop = child.renderStyle.marginTop.length!;
+        double childMarginBottom = child.renderStyle.marginBottom.length!;
+        double childMarginLeft = child.renderStyle.marginLeft.length!;
+        double childMarginRight = child.renderStyle.marginRight.length!;
+        runChildMainSize += isHorizontalFlexDirection ?
+          childMarginLeft + childMarginRight :
+          childMarginTop + childMarginBottom;
+      }
       runMainExtent += runChildMainSize;
     }
 

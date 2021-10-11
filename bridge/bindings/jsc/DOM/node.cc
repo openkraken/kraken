@@ -5,6 +5,7 @@
 
 #include "node.h"
 #include "document.h"
+#include "bindings/jsc/DOM/elements/document_fragment.h"
 
 namespace kraken::binding::jsc {
 
@@ -190,6 +191,7 @@ void JSNode::traverseCloneNode(JSContextRef ctx, NodeInstance *element, NodeInst
     JSValueRef newElementRef = copyNodeValue(ctx, static_cast<NodeInstance *>(iter));
     JSObjectRef newElementObjectRef = JSValueToObject(ctx, newElementRef, nullptr);
     auto newNodeInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(newElementObjectRef));
+    parentElement->ensureDetached(newNodeInstance);
     parentElement->internalAppendChild(newNodeInstance);
     // element node needs recursive child nodes.
     if (iter->nodeType == NodeType::ELEMENT_NODE) {
@@ -269,7 +271,21 @@ JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectR
     return nullptr;
   }
 
-  selfInstance->internalAppendChild(nodeInstance);
+  if (nodeInstance->hasNodeFlag(NodeInstance::NodeFlag::IsDocumentFragment)) {
+    size_t len = nodeInstance->childNodes.size();
+    for (int i = 0; i < len; i ++) {
+      selfInstance->internalAppendChild(nodeInstance->childNodes[i]);
+    }
+
+    // Clear fragment childNodes reference.
+    for (int i = 0; i < len; i ++) {
+      nodeInstance->childNodes[i]->unrefer();
+    }
+    nodeInstance->childNodes.clear();
+  } else {
+    selfInstance->ensureDetached(nodeInstance);
+    selfInstance->internalAppendChild(nodeInstance);
+  }
 
   return nodeValueRef;
 }
@@ -310,7 +326,21 @@ JSValueRef JSNode::insertBefore(JSContextRef ctx, JSObjectRef function, JSObject
     return nullptr;
   }
 
-  selfInstance->internalInsertBefore(nodeInstance, referenceInstance, exception);
+  if (nodeInstance->hasNodeFlag(NodeInstance::NodeFlag::IsDocumentFragment)) {
+    size_t len = nodeInstance->childNodes.size();
+    for (int i = 0; i < len; i ++) {
+      selfInstance->internalInsertBefore(nodeInstance->childNodes[i], referenceInstance, exception);
+    }
+
+    // Clear fragment childNodes reference.
+    for (int i = 0; i < len; i ++) {
+      nodeInstance->childNodes[i]->unrefer();
+    }
+    nodeInstance->childNodes.clear();
+  } else {
+    selfInstance->ensureDetached(nodeInstance);
+    selfInstance->internalInsertBefore(nodeInstance, referenceInstance, exception);
+  }
 
   return nullptr;
 }
@@ -360,6 +390,7 @@ JSValueRef JSNode::replaceChild(JSContextRef ctx, JSObjectRef function, JSObject
     return nullptr;
   }
 
+  selfInstance->ensureDetached(newChildInstance);
   selfInstance->internalReplaceChild(newChildInstance, oldChildInstance, exception);
 
   return nullptr;
@@ -376,8 +407,6 @@ void NodeInstance::internalInsertBefore(NodeInstance *node, NodeInstance *refere
         exception);
       return;
     }
-
-    ensureDetached(node);
     auto parent = referenceNode->parentNode;
     if (parent != nullptr) {
       auto &&parentChildNodes = parent->childNodes;
@@ -452,7 +481,6 @@ JSValueRef JSNode::removeChild(JSContextRef ctx, JSObjectRef function, JSObjectR
 }
 
 void NodeInstance::internalAppendChild(NodeInstance *node) {
-  ensureDetached(node);
   childNodes.emplace_back(node);
   node->parentNode = this;
   node->refer();
@@ -493,7 +521,6 @@ NodeInstance *NodeInstance::internalRemoveChild(NodeInstance *node, JSValueRef *
 
 NodeInstance *NodeInstance::internalReplaceChild(NodeInstance *newChild, NodeInstance *oldChild,
                                                  JSValueRef *exception) {
-  ensureDetached(newChild);
   assert_m(newChild->parentNode == nullptr, "ReplaceChild Error: newChild was not detached.");
   oldChild->parentNode = nullptr;
   oldChild->unrefer();

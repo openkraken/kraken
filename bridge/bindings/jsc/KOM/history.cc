@@ -22,7 +22,11 @@ JSValueRef JSHistory::getProperty(std::string &name, JSValueRef *exception) {
     return JSValueMakeNumber(context->context(), m_previous_stack.size() + m_next_stack.size());
   } else if (name == "state") {
     HistoryItem& history = m_previous_stack.top();
-    return JSValueMakeFromJSONString(ctx, history.state);
+    if (history.state == nullptr) {
+      return nullptr;
+    } else {
+      return JSValueMakeFromJSONString(ctx, history.state);
+    }
   }
 
   return HostObject::getProperty(name, exception);
@@ -239,9 +243,19 @@ JSValueRef JSHistory::replaceState(JSContextRef ctx, JSObjectRef function, JSObj
   HistoryItem history = { JSStringCreateWithUTF8CString(Uri::toString(uri).c_str()), jsonState, false };
 
   m_previous_stack.pop();
+  
   m_previous_stack.push(history);
 
   return nullptr;
+}
+
+void bindHistory(std::unique_ptr<JSContext> &context) {
+  JSStringHolder windowKeyHolder = JSStringHolder(context.get(), "window");
+  JSValueRef windowValue = JSObjectGetProperty(context->context(), context->global(), windowKeyHolder.getString(), nullptr);
+  JSObjectRef windowObject = JSValueToObject(context->context(), windowValue, nullptr);
+  auto window = static_cast<WindowInstance *>(JSObjectGetPrivate(windowObject));
+
+  JSC_GLOBAL_SET_PROPERTY(context, "history", window->history_->jsObject);
 }
 
 } // namespace kraken::binding::jsc
