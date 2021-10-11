@@ -80,16 +80,18 @@ class HttpCacheController {
 
   // Get the CacheObject by uri, no validation needed here.
   Future<HttpCacheObject> getCacheObject(Uri uri) async {
+    HttpCacheObject cacheObject;
+
     // L2 cache in memory.
     final String key = _getCacheKey(uri);
     if (_caches.containsKey(key)) {
-      return _caches[key]!;
+      cacheObject = _caches[key]!;
+    } else {
+      // Get cache in disk.
+      final int hash = key.hashCode;
+      final Directory cacheDirectory = await getCacheDirectory();
+      cacheObject = HttpCacheObject(key, cacheDirectory.path, hash: hash, origin: _origin);
     }
-
-    // Get cache in disk.
-    final int hash = key.hashCode;
-    final Directory cacheDirectory = await getCacheDirectory();
-    HttpCacheObject cacheObject = HttpCacheObject(key, cacheDirectory.path, hash: hash, origin: _origin);
 
     await cacheObject.read();
 
