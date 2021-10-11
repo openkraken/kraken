@@ -87,7 +87,7 @@ class ImageElement extends Element {
     if (renderBoxModel != null) {
       renderIntrinsic = renderBoxModel as RenderIntrinsic;
     }
-    return renderIntrinsic != null && renderIntrinsic.isInLazyLoading;
+    return renderIntrinsic != null && renderIntrinsic.isLazyRendering;
   }
 
   bool get _shouldLazyLoading => properties['loading'] == 'lazy';
@@ -127,7 +127,7 @@ class ImageElement extends Element {
       // Image dimensions (width or height) should specified for performance when lazy-load.
       if (_shouldLazyLoading) {
         RenderIntrinsic renderIntrinsic = renderBoxModel! as RenderIntrinsic;
-        renderIntrinsic.isInLazyLoading = true;
+        renderIntrinsic.isLazyRendering = true;
         // When detach renderer, all listeners will be cleared.
         renderIntrinsic.addIntersectionChangeListener(_handleIntersectionChange);
       } else {
@@ -272,7 +272,7 @@ class ImageElement extends Element {
     _resize();
     if (renderBoxModel != null) {
       RenderIntrinsic renderIntrinsic = renderBoxModel! as RenderIntrinsic;
-      renderIntrinsic.isInLazyLoading = false;
+      renderIntrinsic.isLazyRendering = false;
     }
     _renderImage?.image = image;
   }
