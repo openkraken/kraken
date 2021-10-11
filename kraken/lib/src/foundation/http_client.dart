@@ -175,7 +175,7 @@ HttpHeaders createHttpHeaders({ Map<String, String>? initialHeaders }) {
 }
 
 class _HttpHeaders implements HttpHeaders {
-  final Map<String, dynamic> _headers = <String, String>{};
+  final Map<String, dynamic> _headers = <String, Object>{};
   _HttpHeaders({ Map<String, String>? initialHeaders }) {
     if (initialHeaders != null) {
       _headers.addAll(initialHeaders);
@@ -343,7 +343,8 @@ class _HttpHeaders implements HttpHeaders {
 
   @override
   String? value(String name) {
-    return _headers[name];
+    Object? val = _headers[name];
+    return val?.toString();
   }
 
   @override
