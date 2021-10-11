@@ -37,10 +37,11 @@ class AnchorElement extends Element {
 
     String? href = _href;
     if (href != null) {
-      Uri sourceUri = Uri.parse(elementManager.controller.href);
-      Uri resolvedUri = elementManager.controller.uriParser!.resolve(sourceUri, Uri.parse(href));
+      String baseUrl = elementManager.controller.href;
+      Uri baseUri = Uri.parse(baseUrl);
+      Uri resolvedUri = elementManager.controller.uriParser!.resolve(baseUri, Uri.parse(href));
       elementManager.controller.view.handleNavigationAction(
-          sourceUri.toString(), resolvedUri.toString(), _getNavigationType(resolvedUri.scheme));
+          baseUrl, resolvedUri.toString(), _getNavigationType(resolvedUri.scheme));
     }
   }
 
