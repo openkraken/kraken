@@ -64,12 +64,12 @@ class ProxyHttpClient implements HttpClient {
   }
 
   @override
-  set authenticate(Future<bool> Function(Uri url, String scheme, String realm)? f) {
+  set authenticate(Future<bool> Function(Uri url, String scheme, String? realm)? f) {
     nativeHttpClient.authenticate = f;
   }
 
   @override
-  set authenticateProxy( Future<bool> Function(String host, int port, String scheme, String realm)? f) {
+  set authenticateProxy(Future<bool> Function(String host, int port, String scheme, String? realm)? f) {
     nativeHttpClient.authenticateProxy = f;
   }
 
