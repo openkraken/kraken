@@ -5,6 +5,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 
 // https://drafts.csswg.org/css-values-3/#absolute-lengths
@@ -38,17 +39,13 @@ enum CSSLengthUnit {
 class CSSLengthValue {
   final double? value;
   final CSSLengthUnit unit;
-  CSSLengthValue(this.value, this.unit, [this.renderStyle, this.propertyName, this.isHorizontal, this.isVertical]);
+  CSSLengthValue(this.value, this.unit, [this.renderStyle, this.propertyName, this.axisType]);
   static CSSLengthValue zero = CSSLengthValue(0, CSSLengthUnit.PX);
   static CSSLengthValue auto = CSSLengthValue(null, CSSLengthUnit.AUTO);
   static CSSLengthValue unknow = CSSLengthValue(null, CSSLengthUnit.UNKNOWN);
 
-  // Whether length is in horizontal direction.
-  // Used in cases when propertyName along can not determine direction, eg. 'border-radius'.
-  bool? isHorizontal;
-  // Whether length is in vertical direction.
-  // Used in cases when propertyName along can not determine direction, eg. 'border-radius'.
-  bool? isVertical;
+  // Length is applied in horizontal or vertical direction.
+  Axis? axisType;
 
   RenderStyle? renderStyle;
   String? propertyName;
@@ -172,9 +169,9 @@ class CSSLengthValue {
             // Percentages for the vertical axis refer to the height of the box.
             double? borderBoxWidth = renderStyle.borderBoxWidth ?? renderStyle.borderBoxLogicalWidth;
             double? borderBoxHeight = renderStyle.borderBoxHeight ?? renderStyle.borderBoxLogicalHeight;
-            if (isHorizontal == true && borderBoxWidth != null) {
+            if (axisType == Axis.horizontal && borderBoxWidth != null) {
               _computedValue = value! * borderBoxWidth;
-            } else if (isVertical == true && borderBoxHeight != null) {
+            } else if (axisType == Axis.vertical && borderBoxHeight != null) {
               _computedValue = value! * borderBoxHeight;
             }
           break;
@@ -274,7 +271,7 @@ class CSSLength {
     return double.tryParse(percentage.split('%')[0])! / 100;
   }
 
-  static CSSLengthValue parseLength(String text, RenderStyle? renderStyle, String? propertyName, [ bool? isHorizontal, bool? isVertical]) {
+  static CSSLengthValue parseLength(String text, RenderStyle? renderStyle, String? propertyName, [ Axis? axisType]) {
     // Only '0' is accepted with no unit.
     double? value;
     CSSLengthUnit unit = CSSLengthUnit.PX;
@@ -347,7 +344,7 @@ class CSSLength {
       return CSSLengthValue.zero;
     }
 
-    return value == null ? CSSLengthValue.unknow : CSSLengthValue(value, unit, renderStyle, propertyName, isHorizontal, isVertical);
+    return value == null ? CSSLengthValue.unknow : CSSLengthValue(value, unit, renderStyle, propertyName, axisType);
   }
 
   // TODO(yuanyan): fontSize to getFontSize for performance improve
