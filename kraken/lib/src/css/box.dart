@@ -49,9 +49,9 @@ mixin CSSBoxMixin on RenderStyleBase {
   }
 
   /// Background-image
-  CSSBackgroundImage? get backgroundImage => _backgroundImage;
-  CSSBackgroundImage? _backgroundImage;
-  set backgroundImage(CSSBackgroundImage? value) {
+  List<CSSFunctionalNotation>? get backgroundImage => _backgroundImage;
+  List<CSSFunctionalNotation>? _backgroundImage;
+  set backgroundImage(List<CSSFunctionalNotation>? value) {
     if (value == _backgroundImage) return;
     _backgroundImage = value;
   }

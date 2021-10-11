@@ -947,7 +947,8 @@ class Element extends Node
         renderStyle.backgroundAttachment = CSSBackground.resolveBackgroundAttachment(present);
         break;
       case BACKGROUND_IMAGE:
-        renderStyle.backgroundImage = CSSBackground.resolveBackgroundImage(present, renderStyle, property, elementManager.controller);
+        renderStyle.backgroundImage = CSSFunction.parseFunction(present);
+        // CSSBackground.resolveBackgroundImage(present, renderStyle, property, elementManager.controller);
         break;
       case BACKGROUND_REPEAT:
         renderStyle.backgroundRepeat = CSSBackground.resolveBackgroundRepeat(present);

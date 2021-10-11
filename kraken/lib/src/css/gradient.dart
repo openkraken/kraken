@@ -17,6 +17,7 @@ class CSSLinearGradient extends LinearGradient with BorderGradientMixin {
     Alignment end = Alignment.centerRight,
     double? angle,
     required List<Color> colors,
+    // A list of values from 0.0 to 1.0 that denote fractions along the gradient.
     List<double>? stops,
     TileMode tileMode = TileMode.clamp,
     GradientTransform? transform,
