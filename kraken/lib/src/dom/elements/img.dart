@@ -421,11 +421,8 @@ class ImageElement extends Element {
     if (_source != null) {
       _removeStreamListener();
 
-      Uri resolvedUri = Uri.parse(_source!);
-      if (!resolvedUri.hasAbsolutePath) {
-        Uri base = Uri.parse(elementManager.controller.href);
-        resolvedUri = elementManager.controller.uriParser!.resolve(base, resolvedUri);
-      }
+      Uri base = Uri.parse(elementManager.controller.href);
+      Uri resolvedUri = elementManager.controller.uriParser!.resolve(base, Uri.parse(_source!));
 
       ImageProvider? imageProvider = _imageProvider ?? CSSUrl.parseUrl(resolvedUri,
           cache: properties['caching'], contextId: elementManager.contextId);
