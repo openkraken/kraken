@@ -92,7 +92,7 @@ mixin CSSBoxMixin on RenderStyleBase {
   }
 
   /// Background-repeat
-  ImageRepeat? get backgroundRepeat => _backgroundRepeat;
+  ImageRepeat get backgroundRepeat => _backgroundRepeat ?? ImageRepeat.repeat;
   ImageRepeat? _backgroundRepeat;
   set backgroundRepeat(ImageRepeat? value) {
     if (value == _backgroundRepeat) return;
@@ -259,12 +259,7 @@ mixin CSSBoxMixin on RenderStyleBase {
   List<CSSBoxShadow>? get boxShadow => _boxShadow;
 
   /// What decoration to paint, should get value after layout.
-  CSSBoxDecoration? _cachedDecoration;
   CSSBoxDecoration? get decoration {
-
-    if (_cachedDecoration != null) {
-      return _cachedDecoration;
-    }
 
     List<Radius>? radius = _getBorderRadius();
     List<BorderSide>? borderSides = _getBorderSides();
@@ -301,14 +296,23 @@ mixin CSSBoxMixin on RenderStyleBase {
       gradient.borderEdge = border!.dimensions as EdgeInsets;
     }
 
-    return _cachedDecoration = CSSBoxDecoration(
+    return CSSBoxDecoration(
       boxShadow: boxShadow,
       color: gradient != null ? null : color,
-      image: backgroundImage?.image,
+      image: decorationImage,
       border: border,
       borderRadius: borderRadius,
       gradient: gradient,
     );
+  }
+
+  DecorationImage? get decorationImage {
+    if (backgroundImage?.image != null) {
+      return DecorationImage(
+        image: backgroundImage!.image!,
+        repeat: backgroundRepeat,
+      );
+    }
   }
 
   DecorationPosition decorationPosition = DecorationPosition.background;

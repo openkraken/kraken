@@ -947,7 +947,7 @@ class Element extends Node
         renderStyle.backgroundAttachment = CSSBackground.resolveBackgroundAttachment(present);
         break;
       case BACKGROUND_IMAGE:
-        renderStyle.backgroundImage = CSSBackground.resolveBackgroundImage(present, renderStyle, property, contextId);
+        renderStyle.backgroundImage = CSSBackground.resolveBackgroundImage(present, renderStyle, property, elementManager.controller);
         break;
       case BACKGROUND_REPEAT:
         renderStyle.backgroundRepeat = CSSBackground.resolveBackgroundRepeat(present);
@@ -1004,7 +1004,6 @@ class Element extends Node
         renderStyle.borderBottomColor = CSSColor.parseColor(present);
         break;
       case BOX_SHADOW:
-        // _updateBox(property, present);
         renderStyle.boxShadow = CSSBoxShadow.parseBoxShadow(present, renderStyle, property);
         break;
       case BORDER_TOP_LEFT_RADIUS:
@@ -1019,8 +1018,6 @@ class Element extends Node
       case BORDER_BOTTOM_RIGHT_RADIUS:
         renderStyle.borderBottomRightRadius = CSSBorderRadius.parseBorderRadius(present, renderStyle, property);
         break;
-      // Margin change in flex layout may affect transformed display
-      // https://www.w3.org/TR/css-display-3/#transformations
       case MARGIN_LEFT:
         CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
         renderStyle.marginLeft = lengthValue;
@@ -1063,9 +1060,8 @@ class Element extends Node
         break;
       // Text Style
       case COLOR:
-        renderStyle.color = CSSColor.resolveColor(present);
         // TODO: Color change should trigger currentColor update
-        // _updateBox(property, present);
+        renderStyle.color = CSSColor.resolveColor(present);
         break;
       case TEXT_DECORATION_LINE:
         renderStyle.textDecorationLine = CSSText.resolveTextDecorationLine(present);

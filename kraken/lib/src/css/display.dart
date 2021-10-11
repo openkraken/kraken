@@ -77,6 +77,9 @@ mixin CSSDisplayMixin on RenderStyleBase {
       if (renderBoxModel!.parent is! RenderBoxModel) {
         return transformedDisplay;
       } else if (renderBoxModel!.parent is RenderFlexLayout) {
+        // Margin change in flex layout may affect transformed display
+        // https://www.w3.org/TR/css-display-3/#transformations
+
         // Display as inline-block if parent node is flex
         transformedDisplay = CSSDisplay.inlineBlock;
         RenderBoxModel parent = renderBoxModel!.parent as RenderBoxModel;
