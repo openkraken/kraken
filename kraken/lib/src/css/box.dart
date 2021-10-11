@@ -209,7 +209,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     _borderBottomStyle = value;
     renderBoxModel!.markNeedsPaint();
   }
-  
+
   BorderStyle? get borderLeftStyle => _borderLeftStyle;
   BorderStyle? _borderLeftStyle;
   set borderLeftStyle(BorderStyle? value) {
