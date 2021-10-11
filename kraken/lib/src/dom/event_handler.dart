@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-import 'package:flutter/rendering.dart';
+import 'package:flutter/gestures.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 
@@ -43,20 +43,22 @@ mixin EventHandlerMixin on EventTarget {
     return this;
   }
 
-  void handleMouseEvent(String eventType, { PointerDownEvent? down, PointerUpEvent? up }) {
+  void handleMouseEvent(String eventType, TapUpDetails details) {
     RenderBoxModel? root = elementManager.viewportElement.renderBoxModel;
-    if (root == null || up == null) {
+    if (root == null) {
       return;
     }
-    Offset globalOffset = root.globalToLocal(Offset(up.position.dx, up.position.dy));
+
+    // When Kraken wraps the Flutter Widget, Kraken need to calculate the global coordinates relative to self.
+    Offset globalOffset = root.globalToLocal(Offset(details.globalPosition.dx, details.globalPosition.dy));
     dispatchEvent(MouseEvent(eventType,
       MouseEventInit(
         bubbles: true,
         cancelable: true,
         clientX: globalOffset.dx,
         clientY: globalOffset.dy,
-        offsetX: up.localPosition.dx,
-        offsetY: up.localPosition.dy,
+        offsetX: details.localPosition.dx,
+        offsetY: details.localPosition.dy,
       )
     ));
   }
