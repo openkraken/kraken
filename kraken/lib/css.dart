@@ -18,6 +18,7 @@ export 'src/css/properties.dart';
 export 'src/css/sizing.dart';
 export 'src/css/padding.dart';
 export 'src/css/margin.dart';
+export 'src/css/border.dart';
 export 'src/css/render_style.dart';
 export 'src/css/rule.dart';
 export 'src/css/style_rule.dart';

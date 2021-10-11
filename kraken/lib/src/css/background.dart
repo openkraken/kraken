@@ -23,10 +23,121 @@ import 'package:kraken/launcher.dart';
 
 final RegExp _splitRegExp = RegExp(r'\s+');
 
+// https://drafts.csswg.org/css-backgrounds/#typedef-attachment
+enum CSSBackgroundAttachmentType {
+  scroll,
+  fixed,
+  local,
+}
+
+enum CSSBackgroundRepeatType {
+  repeat,
+  repeatX,
+  repeatY,
+  noRepeat,
+}
+
+enum CSSBackgroundSizeType {
+  auto,
+  cover,
+  contain,
+}
+
+enum CSSBackgroundPositionType {
+  topLeft,
+  topCenter,
+  topRight,
+  centerLeft,
+  center,
+  centerRight,
+  bottomLeft,
+  bottomCenter,
+  bottomRight,
+}
+
+enum CSSBackgroundOriginType {
+  borderBox,
+  paddingBox,
+  contentBox,
+}
+
+enum CSSBackgroundClipType {
+  borderBox,
+  paddingBox,
+  contentBox,
+}
+
+enum CSSBackgroundImageType {
+  none,
+  gradient,
+  image,
+}
+
 class CSSColorStop {
   Color? color;
   double? stop;
   CSSColorStop(this.color, this.stop);
+}
+
+class CSSBackgroundImage {
+  Gradient? gradient;
+  DecorationImage? image;
+  CSSBackgroundImage(this.image, this.gradient);
+}
+
+class CSSBackgroundPosition {
+  CSSBackgroundPosition({
+    this.length,
+    this.percentage,
+  });
+  /// Absolute position to image container when length type is set.
+  double? length;
+  /// Relative position to image container when keyword or percentage type is set.
+  double? percentage;
+}
+
+class CSSBackgroundSize {
+  CSSBackgroundSize({
+    required this.fit,
+    this.width,
+    this.height,
+  });
+
+  // Keyword value (contain/cover/auto)
+  BoxFit fit = BoxFit.none;
+
+  // Length/percentage value
+  CSSLengthValue width;
+  CSSLengthValue height;
+
+  static const String CONTAIN = 'contain';
+  static const String COVER = 'cover';
+  static const String AUTO = 'auto';
+
+  static dynamic _parseLengthPercentageValue(String value, {
+    Size? viewportSize,
+    double? rootFontSize,
+    double? fontSize
+  }) {
+    if (CSSLength.isLength(value)) {
+      double? length = CSSLength.toDisplayPortValue(
+        value,
+        viewportSize: viewportSize,
+        rootFontSize: rootFontSize,
+        fontSize: fontSize
+      );
+      // Negative value is invalid.
+      return length != null && length >=0 ? length : null;
+    } else if (CSSLength.isPercentage(value) || value == AUTO) {
+      // Percentage value should be parsed on the paint phase cause
+      // it depends on the final layouted size of background's container.
+      return value;
+    }
+    return null;
+  }
+
+  @override
+  String toString() => 'CSSBackgroundSize(fit: $fit, width: $width, height: $height)';
 }
 
 class CSSBackground {
@@ -68,6 +179,102 @@ class CSSBackground {
         value == CSSPosition.BOTTOM ||
         CSSLength.isLength(value) ||
         CSSPercentage.isPercentage(value);
+  }
+
+
+  static resolveBackgroundAttachment() {
+    // TODO
+  }
+
+  static CSSBackgroundSize resolveBackgroundSize(String value, RenderStyle renderStyle, String propertyName) {
+    switch (value) {
+      case CONTAIN:
+        return CSSBackgroundSize(
+          fit: BoxFit.contain
+        );
+      case COVER:
+        return CSSBackgroundSize(
+          fit: BoxFit.cover
+        );
+      case AUTO:
+        return CSSBackgroundSize(
+          fit: BoxFit.none
+        );
+      default:
+        List<String> values = value.split(_splitRegExp);
+        if (values.length == 1) {
+          CSSLengthValue width = CSSLength.parseLength(values[0], renderStyle, propertyName);
+          return CSSBackgroundSize(
+            fit: BoxFit.none,
+            width: width,
+          );
+        } else if (values.length == 2) {
+          CSSLengthValue width = CSSLength.parseLength(values[0], renderStyle, propertyName);
+          CSSLengthValue height = CSSLength.parseLength(values[0], renderStyle, propertyName);
+          // Value which is neither length/percentage/auto is considered to be invalid.
+          return CSSBackgroundSize(
+            fit: BoxFit.none,
+            width: width,
+            height: height,
+          );
+        }
+        return CSSBackgroundSize(
+          fit: BoxFit.none
+        );
+    }
+  }
+
+  static resolveBackgroundImage(String present, RenderStyle renderStyle, String property, int? contextId) {
+    Gradient? gradient;
+    DecorationImage? image;
+    List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(present);
+    for (CSSFunctionalNotation method in methods) {
+      if (method.name == 'url') {
+        // image = CSSBackground.getDecorationImage(method, enderStyle, property, contextId: contextId);
+      } else {
+        // gradient = CSSBackground.getBackgroundGradient(method, renderStyle);
+      }
+    }
+
+    return CSSBackgroundImage(image, gradient);
+  }
+
+  static ImageRepeat resolveBackgroundRepeat(String value) {
+    switch (value) {
+      case REPEAT_X:
+        return ImageRepeat.repeatX;
+      case REPEAT_Y:
+        return ImageRepeat.repeatY;
+      case NO_REPEAT:
+        return ImageRepeat.noRepeat;
+      case REPEAT:
+      default:
+        return ImageRepeat.repeat;
+    }
+  }
+
+  static BackgroundBoundary resolveBackgroundClip(String value) {
+    switch (value) {
+      case 'padding-box':
+        return BackgroundBoundary.paddingBox;
+      case 'content-box':
+        return BackgroundBoundary.contentBox;
+      case 'border-box':
+      default:
+        return BackgroundBoundary.borderBox;
+    }
+  }
+
+  static BackgroundBoundary resolveBackgroundOrigin(String value) {
+    switch (value) {
+      case 'border-box':
+        return BackgroundBoundary.borderBox;
+      case 'content-box':
+        return BackgroundBoundary.contentBox;
+      case 'padding-box':
+      default:
+        return BackgroundBoundary.paddingBox;
+    }
   }
 
   static bool hasLocalBackgroundImage(CSSStyleDeclaration style) {

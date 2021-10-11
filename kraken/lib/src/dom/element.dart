@@ -944,12 +944,14 @@ class Element extends Node
         renderStyle.backgroundColor = CSSColor.parseColor(present);
         break;
       case BACKGROUND_ATTACHMENT:
-        renderStyle.backgroundAttachment = CSSBoxMixin.resolveBackgroundAttachment(present);
+        renderStyle.backgroundAttachment = CSSBackground.resolveBackgroundAttachment(present);
         break;
       case BACKGROUND_IMAGE:
-        renderStyle.backgroundImage = CSSBackgroundImage.parseBackgroundImage(present, renderStyle, property, contextId);
+        renderStyle.backgroundImage = CSSBackground.resolveBackgroundImage(present, renderStyle, property, contextId);
         break;
       case BACKGROUND_REPEAT:
+        renderStyle.backgroundRepeat = CSSBackground.resolveBackgroundRepeat(present);
+        break;
       case BACKGROUND_POSITION_X:
         renderStyle.backgroundPositionX = CSSPosition.parsePosition(present, renderStyle, true);
         break;
@@ -957,18 +959,13 @@ class Element extends Node
         renderStyle.backgroundPositionY = CSSPosition.parsePosition(present, renderStyle, false);
         break;
       case BACKGROUND_SIZE:
-        renderStyle.backgroundSize = CSSBackgroundSize.parseValue(
-          present,
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize,
-        );
+        renderStyle.backgroundSize = CSSBackground.resolveBackgroundSize(present, renderStyle, property);
         break;
       case BACKGROUND_CLIP:
-        renderStyle.backgroundClip = CSSBoxMixin.resolveBackgroundClip(present);
+        renderStyle.backgroundClip = CSSBackground.resolveBackgroundClip(present);
         break;
       case BACKGROUND_ORIGIN:
-        renderStyle.backgroundOrigin = CSSBoxMixin.resolveBackgroundOrigin(present);
+        renderStyle.backgroundOrigin = CSSBackground.resolveBackgroundOrigin(present);
         break;
       case BORDER_LEFT_WIDTH:
         renderStyle.borderLeftWidth = CSSLength.parseLength(present, renderStyle, property);
