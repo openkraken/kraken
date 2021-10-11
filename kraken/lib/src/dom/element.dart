@@ -853,20 +853,16 @@ class Element extends Node
         renderStyle.zIndex = int.tryParse(present);
         break;
       case TOP:
-        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
-        renderStyle.top = lengthValue;
+        renderStyle.top = CSSLength.parseLength(present, renderStyle, property);
         break;
       case LEFT:
-        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
-        renderStyle.left = lengthValue;
+        renderStyle.left = CSSLength.parseLength(present, renderStyle, property);
         break;
       case BOTTOM:
-        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
-        renderStyle.bottom = lengthValue;
+        renderStyle.bottom = CSSLength.parseLength(present, renderStyle, property);
         break;
       case RIGHT:
-        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
-        renderStyle.right = lengthValue;
+        renderStyle.right = CSSLength.parseLength(present, renderStyle, property);
         break;
       case FLEX_DIRECTION:
         renderStyle.flexDirection = CSSFlexboxMixin.resolveFlexDirection(present);
@@ -905,40 +901,31 @@ class Element extends Node
         renderStyle.paddingTop = CSSLength.parseLength(present, renderStyle, property);
         break;
       case PADDING_RIGHT:
-        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
-        renderStyle.paddingRight = lengthValue;
+        renderStyle.paddingRight = CSSLength.parseLength(present, renderStyle, property);
         break;
       case PADDING_BOTTOM:
-        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
-        renderStyle.paddingBottom = lengthValue;
+        renderStyle.paddingBottom = CSSLength.parseLength(present, renderStyle, property);
         break;
       case PADDING_LEFT:
-        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
-        renderStyle.paddingLeft = lengthValue;
+        renderStyle.paddingLeft = CSSLength.parseLength(present, renderStyle, property);
         break;
       case WIDTH:
-        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
-        renderStyle.width = lengthValue;
+        renderStyle.width = CSSLength.parseLength(present, renderStyle, property);
         break;
       case MIN_WIDTH:
-        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
-        renderStyle.minWidth = lengthValue;
+        renderStyle.minWidth = CSSLength.parseLength(present, renderStyle, property);
         break;
       case MAX_WIDTH:
-        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
-        renderStyle.maxWidth = lengthValue;
+        renderStyle.maxWidth = CSSLength.parseLength(present, renderStyle, property);
         break;
       case HEIGHT:
-        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
-        renderStyle.height = lengthValue;
+        renderStyle.height = CSSLength.parseLength(present, renderStyle, property);
         break;
       case MIN_HEIGHT:
-        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
-        renderStyle.minHeight = lengthValue;
+        renderStyle.minHeight = CSSLength.parseLength(present, renderStyle, property);
         break;
       case MAX_HEIGHT:
-        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
-        renderStyle.maxHeight = lengthValue;
+        renderStyle.maxHeight = CSSLength.parseLength(present, renderStyle, property);
         break;
       case BACKGROUND_COLOR:
         renderStyle.backgroundColor = CSSColor.parseColor(present);
@@ -947,8 +934,7 @@ class Element extends Node
         renderStyle.backgroundAttachment = CSSBackground.resolveBackgroundAttachment(present);
         break;
       case BACKGROUND_IMAGE:
-        renderStyle.backgroundImage = CSSFunction.parseFunction(present);
-        // CSSBackground.resolveBackgroundImage(present, renderStyle, property, elementManager.controller);
+        renderStyle.backgroundImage = CSSBackground.resolveBackgroundImage(present, renderStyle, property, elementManager.controller);
         break;
       case BACKGROUND_REPEAT:
         renderStyle.backgroundRepeat = CSSBackground.resolveBackgroundRepeat(present);
@@ -1020,20 +1006,16 @@ class Element extends Node
         renderStyle.borderBottomRightRadius = CSSBorderRadius.parseBorderRadius(present, renderStyle, property);
         break;
       case MARGIN_LEFT:
-        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
-        renderStyle.marginLeft = lengthValue;
+        renderStyle.marginLeft = CSSLength.parseLength(present, renderStyle, property);
         break;
       case MARGIN_TOP:
-        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
-        renderStyle.marginTop = lengthValue;
+        renderStyle.marginTop = CSSLength.parseLength(present, renderStyle, property);
         break;
       case MARGIN_RIGHT:
-        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
-        renderStyle.marginRight = lengthValue;
+        renderStyle.marginRight = CSSLength.parseLength(present, renderStyle, property);
         break;
       case MARGIN_BOTTOM:
-        CSSLengthValue lengthValue = CSSLength.parseLength(present, renderStyle, property);
-        renderStyle.marginBottom = lengthValue;
+        renderStyle.marginBottom = CSSLength.parseLength(present, renderStyle, property);
         break;
       case OPACITY:
         renderStyle.opacity = CSSOpacityMixin.resolveOpacity(present);

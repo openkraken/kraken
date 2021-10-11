@@ -80,9 +80,194 @@ class CSSColorStop {
 }
 
 class CSSBackgroundImage {
-  Gradient? gradient;
-  ImageProvider? image;
-  CSSBackgroundImage(this.image, this.gradient);
+  List<CSSFunctionalNotation> functions;
+  RenderStyle renderStyle;
+  KrakenController controller;
+  CSSBackgroundImage(this.functions, this.renderStyle, this.controller);
+
+  ImageProvider? get image {
+    for (CSSFunctionalNotation method in functions) {
+      if (method.name == 'url') {
+        String url = method.args.isNotEmpty ? method.args[0] : '';
+        if (url.isEmpty) {
+          continue;
+        }
+        // Method may contain quotation mark, like ['"assets/foo.png"']
+        url = _removeQuotationMark(url);
+
+        Uri uri = Uri.parse(url);
+        if (url.isNotEmpty) {
+          uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri);
+          return CSSUrl.parseUrl(uri, contextId: controller.view.contextId);
+        }
+      }
+    }
+  }
+  Gradient? get gradient {
+    List<Color> colors = [];
+    List<double> stops = [];
+    int start = 0;
+    for (CSSFunctionalNotation method in functions) {
+      switch (method.name) {
+        case 'linear-gradient':
+        case 'repeating-linear-gradient':
+          double? linearAngle;
+          Alignment begin = Alignment.topCenter;
+          Alignment end = Alignment.bottomCenter;
+          String arg0 = method.args[0].trim();
+          double? gradientLength;
+          if (arg0.startsWith('to ')) {
+            List<String> parts = arg0.split(_splitRegExp);
+            if (parts.length >= 2) {
+              switch (parts[1]) {
+                case LEFT:
+                  if (parts.length == 3) {
+                    if (parts[2] == TOP) {
+                      begin = Alignment.bottomRight;
+                      end = Alignment.topLeft;
+                    } else if (parts[2] == BOTTOM) {
+                      begin = Alignment.topRight;
+                      end = Alignment.bottomLeft;
+                    }
+                  } else {
+                    begin = Alignment.centerRight;
+                    end = Alignment.centerLeft;
+                  }
+                  gradientLength = renderStyle.paddingBoxWidth;
+                  break;
+                case TOP:
+                  if (parts.length == 3) {
+                    if (parts[2] == LEFT) {
+                      begin = Alignment.bottomRight;
+                      end = Alignment.topLeft;
+                    } else if (parts[2] == RIGHT) {
+                      begin = Alignment.bottomLeft;
+                      end = Alignment.topRight;
+                    }
+                  } else {
+                    begin = Alignment.bottomCenter;
+                    end = Alignment.topCenter;
+                  }
+                  gradientLength = renderStyle.paddingBoxHeight;
+                  break;
+                case RIGHT:
+                  if (parts.length == 3) {
+                    if (parts[2] == TOP) {
+                      begin = Alignment.bottomLeft;
+                      end = Alignment.topRight;
+                    } else if (parts[2] == BOTTOM) {
+                      begin = Alignment.topLeft;
+                      end = Alignment.bottomRight;
+                    }
+                  } else {
+                    begin = Alignment.centerLeft;
+                    end = Alignment.centerRight;
+                  }
+                  gradientLength = renderStyle.paddingBoxWidth;
+                  break;
+                case BOTTOM:
+                  if (parts.length == 3) {
+                    if (parts[2] == LEFT) {
+                      begin = Alignment.topRight;
+                      end = Alignment.bottomLeft;
+                    } else if (parts[2] == RIGHT) {
+                      begin = Alignment.topLeft;
+                      end = Alignment.bottomRight;
+                    }
+                  } else {
+                    begin = Alignment.topCenter;
+                    end = Alignment.bottomCenter;
+                  }
+                  gradientLength = renderStyle.paddingBoxHeight;
+                  break;
+              }
+            }
+            linearAngle = null;
+            start = 1;
+          } else if (CSSAngle.isAngle(arg0)) {
+            linearAngle = CSSAngle.parseAngle(arg0);
+            start = 1;
+          }
+          _applyColorAndStops(start, method.args, colors, stops, renderStyle, BACKGROUND_IMAGE, gradientLength);
+          if (colors.length >= 2) {
+            return CSSLinearGradient(
+                begin: begin,
+                end: end,
+                angle: linearAngle,
+                colors: colors,
+                stops: stops,
+                tileMode: method.name == 'linear-gradient' ? TileMode.clamp : TileMode.repeated);
+          }
+          break;
+        // @TODO just support circle radial
+        case 'radial-gradient':
+        case 'repeating-radial-gradient':
+          double? atX = 0.5;
+          double? atY = 0.5;
+          double radius = 0.5;
+
+          if (method.args[0].contains(CSSPercentage.PERCENTAGE)) {
+            List<String> positionAndRadius = method.args[0].trim().split(' ');
+            if (positionAndRadius.isNotEmpty) {
+              if (CSSPercentage.isPercentage(positionAndRadius[0])) {
+                radius = CSSPercentage.parsePercentage(positionAndRadius[0])! * 0.5;
+                start = 1;
+              }
+              if (positionAndRadius.length > 2 && positionAndRadius[1] == 'at') {
+                start = 1;
+                if (CSSPercentage.isPercentage(positionAndRadius[2])) {
+                  atX = CSSPercentage.parsePercentage(positionAndRadius[2]);
+                }
+                if (positionAndRadius.length == 4 && CSSPercentage.isPercentage(positionAndRadius[3])) {
+                  atY = CSSPercentage.parsePercentage(positionAndRadius[3]);
+                }
+              }
+            }
+          }
+          _applyColorAndStops(start, method.args, colors, stops, renderStyle, BACKGROUND_IMAGE);
+          if (colors.length >= 2) {
+            return CSSRadialGradient(
+              center: FractionalOffset(atX!, atY!),
+              radius: radius,
+              colors: colors,
+              stops: stops,
+              tileMode: method.name == 'radial-gradient' ? TileMode.clamp : TileMode.repeated,
+            );
+          }
+          break;
+        case 'conic-gradient':
+          double? from = 0.0;
+          double? atX = 0.5;
+          double? atY = 0.5;
+          if (method.args[0].contains('from ') || method.args[0].contains('at ')) {
+            List<String> fromAt = method.args[0].trim().split(' ');
+            int fromIndex = fromAt.indexOf('from');
+            int atIndex = fromAt.indexOf('at');
+            if (fromIndex != -1 && fromIndex + 1 < fromAt.length) {
+              from = CSSAngle.parseAngle(fromAt[fromIndex + 1]);
+            }
+            if (atIndex != -1) {
+              if (atIndex + 1 < fromAt.length && CSSPercentage.isPercentage(fromAt[atIndex + 1])) {
+                atX = CSSPercentage.parsePercentage(fromAt[atIndex + 1]);
+              }
+              if (atIndex + 2 < fromAt.length && CSSPercentage.isPercentage(fromAt[atIndex + 2])) {
+                atY = CSSPercentage.parsePercentage(fromAt[atIndex + 2]);
+              }
+            }
+            start = 1;
+          }
+          _applyColorAndStops(start, method.args, colors, stops, renderStyle, BACKGROUND_IMAGE);
+          if (colors.length >= 2) {
+            return CSSConicGradient(
+                center: FractionalOffset(atX!, atY!),
+                colors: colors,
+                stops: stops,
+                transform: GradientRotation(-math.pi / 2 + from!));
+          }
+          break;
+      }
+    }
+  }
 }
 
 class CSSBackgroundPosition {
@@ -205,191 +390,9 @@ class CSSBackground {
     }
   }
 
-  static resolveBackgroundImage(String present, RenderStyle renderStyle, String property, KrakenController? controller) {
-    Gradient? gradient;
-    ImageProvider? image;
-    List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(present);
-    for (CSSFunctionalNotation method in methods) {
-      if (method.name == 'url') {
-        String url = method.args.isNotEmpty ? method.args[0] : '';
-        if (url.isEmpty) {
-          continue;
-        }
-        // Method may contain quotation mark, like ['"assets/foo.png"']
-        url = _removeQuotationMark(url);
-
-        Uri uri = Uri.parse(url);
-        if (controller != null && url.isNotEmpty) {
-          uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri);
-          image = CSSUrl.parseUrl(uri, contextId: controller.view.contextId);
-        }
-      } else if (method.args.length > 1) {
-        List<Color> colors = [];
-        List<double> stops = [];
-        int start = 0;
-
-        switch (method.name) {
-          case 'linear-gradient':
-          case 'repeating-linear-gradient':
-            double? linearAngle;
-            Alignment begin = Alignment.topCenter;
-            Alignment end = Alignment.bottomCenter;
-            String arg0 = method.args[0].trim();
-            double? gradientLength;
-            if (arg0.startsWith('to ')) {
-              List<String> parts = arg0.split(_splitRegExp);
-              if (parts.length >= 2) {
-                switch (parts[1]) {
-                  case LEFT:
-                    if (parts.length == 3) {
-                      if (parts[2] == TOP) {
-                        begin = Alignment.bottomRight;
-                        end = Alignment.topLeft;
-                      } else if (parts[2] == BOTTOM) {
-                        begin = Alignment.topRight;
-                        end = Alignment.bottomLeft;
-                      }
-                    } else {
-                      begin = Alignment.centerRight;
-                      end = Alignment.centerLeft;
-                    }
-                    gradientLength = renderStyle.paddingBoxWidth;
-                    break;
-                  case TOP:
-                    if (parts.length == 3) {
-                      if (parts[2] == LEFT) {
-                        begin = Alignment.bottomRight;
-                        end = Alignment.topLeft;
-                      } else if (parts[2] == RIGHT) {
-                        begin = Alignment.bottomLeft;
-                        end = Alignment.topRight;
-                      }
-                    } else {
-                      begin = Alignment.bottomCenter;
-                      end = Alignment.topCenter;
-                    }
-                    gradientLength = renderStyle.paddingBoxHeight;
-                    break;
-                  case RIGHT:
-                    if (parts.length == 3) {
-                      if (parts[2] == TOP) {
-                        begin = Alignment.bottomLeft;
-                        end = Alignment.topRight;
-                      } else if (parts[2] == BOTTOM) {
-                        begin = Alignment.topLeft;
-                        end = Alignment.bottomRight;
-                      }
-                    } else {
-                      begin = Alignment.centerLeft;
-                      end = Alignment.centerRight;
-                    }
-                    gradientLength = renderStyle.paddingBoxWidth;
-                    break;
-                  case BOTTOM:
-                    if (parts.length == 3) {
-                      if (parts[2] == LEFT) {
-                        begin = Alignment.topRight;
-                        end = Alignment.bottomLeft;
-                      } else if (parts[2] == RIGHT) {
-                        begin = Alignment.topLeft;
-                        end = Alignment.bottomRight;
-                      }
-                    } else {
-                      begin = Alignment.topCenter;
-                      end = Alignment.bottomCenter;
-                    }
-                    gradientLength = renderStyle.paddingBoxHeight;
-                    break;
-                }
-              }
-              linearAngle = null;
-              start = 1;
-            } else if (CSSAngle.isAngle(arg0)) {
-              linearAngle = CSSAngle.parseAngle(arg0);
-              start = 1;
-            }
-            _applyColorAndStops(start, method.args, colors, stops, renderStyle, property, gradientLength);
-            if (colors.length >= 2) {
-              gradient = CSSLinearGradient(
-                  begin: begin,
-                  end: end,
-                  angle: linearAngle,
-                  colors: colors,
-                  stops: stops,
-                  tileMode: method.name == 'linear-gradient' ? TileMode.clamp : TileMode.repeated);
-            }
-            break;
-          // @TODO just support circle radial
-          case 'radial-gradient':
-          case 'repeating-radial-gradient':
-            double? atX = 0.5;
-            double? atY = 0.5;
-            double radius = 0.5;
-
-            if (method.args[0].contains(CSSPercentage.PERCENTAGE)) {
-              List<String> positionAndRadius = method.args[0].trim().split(' ');
-              if (positionAndRadius.isNotEmpty) {
-                if (CSSPercentage.isPercentage(positionAndRadius[0])) {
-                  radius = CSSPercentage.parsePercentage(positionAndRadius[0])! * 0.5;
-                  start = 1;
-                }
-                if (positionAndRadius.length > 2 && positionAndRadius[1] == 'at') {
-                  start = 1;
-                  if (CSSPercentage.isPercentage(positionAndRadius[2])) {
-                    atX = CSSPercentage.parsePercentage(positionAndRadius[2]);
-                  }
-                  if (positionAndRadius.length == 4 && CSSPercentage.isPercentage(positionAndRadius[3])) {
-                    atY = CSSPercentage.parsePercentage(positionAndRadius[3]);
-                  }
-                }
-              }
-            }
-            _applyColorAndStops(start, method.args, colors, stops, renderStyle, property);
-            if (colors.length >= 2) {
-              gradient = CSSRadialGradient(
-                center: FractionalOffset(atX!, atY!),
-                radius: radius,
-                colors: colors,
-                stops: stops,
-                tileMode: method.name == 'radial-gradient' ? TileMode.clamp : TileMode.repeated,
-              );
-            }
-            break;
-          case 'conic-gradient':
-            double? from = 0.0;
-            double? atX = 0.5;
-            double? atY = 0.5;
-            if (method.args[0].contains('from ') || method.args[0].contains('at ')) {
-              List<String> fromAt = method.args[0].trim().split(' ');
-              int fromIndex = fromAt.indexOf('from');
-              int atIndex = fromAt.indexOf('at');
-              if (fromIndex != -1 && fromIndex + 1 < fromAt.length) {
-                from = CSSAngle.parseAngle(fromAt[fromIndex + 1]);
-              }
-              if (atIndex != -1) {
-                if (atIndex + 1 < fromAt.length && CSSPercentage.isPercentage(fromAt[atIndex + 1])) {
-                  atX = CSSPercentage.parsePercentage(fromAt[atIndex + 1]);
-                }
-                if (atIndex + 2 < fromAt.length && CSSPercentage.isPercentage(fromAt[atIndex + 2])) {
-                  atY = CSSPercentage.parsePercentage(fromAt[atIndex + 2]);
-                }
-              }
-              start = 1;
-            }
-            _applyColorAndStops(start, method.args, colors, stops, renderStyle, property);
-            if (colors.length >= 2) {
-              gradient = CSSConicGradient(
-                  center: FractionalOffset(atX!, atY!),
-                  colors: colors,
-                  stops: stops,
-                  transform: GradientRotation(-math.pi / 2 + from!));
-            }
-            break;
-        }
-      }
-    }
-
-    return CSSBackgroundImage(image, gradient);
+  static resolveBackgroundImage(String present, RenderStyle renderStyle, String property, KrakenController controller) {
+    List<CSSFunctionalNotation> functions = CSSFunction.parseFunction(present);
+    return CSSBackgroundImage(functions, renderStyle, controller);
   }
 
   static ImageRepeat resolveBackgroundRepeat(String value) {

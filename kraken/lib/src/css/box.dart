@@ -7,7 +7,6 @@ import 'dart:ui';
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/painting.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
@@ -26,6 +25,7 @@ mixin CSSBoxMixin on RenderStyleBase {
   set backgroundClip(BackgroundBoundary? value) {
     if (value == _backgroundClip) return;
     _backgroundClip = value;
+    renderBoxModel!.markNeedsPaint();
   }
 
   /// Background-origin
@@ -34,6 +34,7 @@ mixin CSSBoxMixin on RenderStyleBase {
   set backgroundOrigin(BackgroundBoundary? value) {
     if (value == _backgroundOrigin) return;
     _backgroundOrigin = value;
+    renderBoxModel!.markNeedsPaint();
   }
 
   Color? get backgroundColor => _backgroundColor;
@@ -41,19 +42,16 @@ mixin CSSBoxMixin on RenderStyleBase {
   set backgroundColor(Color? value) {
     if (value == _backgroundColor) return;
     _backgroundColor = value;
-
-    // If there has gradient, background color will not work
-    if (backgroundImage?.gradient == null) {
-      renderBoxModel!.markNeedsPaint();
-    }
+    renderBoxModel!.markNeedsPaint();
   }
 
   /// Background-image
-  List<CSSFunctionalNotation>? get backgroundImage => _backgroundImage;
-  List<CSSFunctionalNotation>? _backgroundImage;
-  set backgroundImage(List<CSSFunctionalNotation>? value) {
+  CSSBackgroundImage? get backgroundImage => _backgroundImage;
+  CSSBackgroundImage? _backgroundImage;
+  set backgroundImage(CSSBackgroundImage? value) {
     if (value == _backgroundImage) return;
     _backgroundImage = value;
+    renderBoxModel!.markNeedsPaint();
   }
 
   /// Background-position-x
@@ -89,6 +87,7 @@ mixin CSSBoxMixin on RenderStyleBase {
   set backgroundAttachment(CSSBackgroundAttachmentType? value) {
     if (value == _backgroundAttachment) return;
     _backgroundAttachment = value;
+    renderBoxModel!.markNeedsPaint();
   }
 
   /// Background-repeat
@@ -97,6 +96,7 @@ mixin CSSBoxMixin on RenderStyleBase {
   set backgroundRepeat(ImageRepeat? value) {
     if (value == _backgroundRepeat) return;
     _backgroundRepeat = value;
+    renderBoxModel!.markNeedsPaint();
   }
 
   /// BorderSize to deflate.
@@ -260,11 +260,10 @@ mixin CSSBoxMixin on RenderStyleBase {
 
   /// What decoration to paint, should get value after layout.
   CSSBoxDecoration? get decoration {
-
     List<Radius>? radius = _getBorderRadius();
     List<BorderSide>? borderSides = _getBorderSides();
     List<KrakenBoxShadow>? boxShadow = _getBoxShadow();
-
+ 
     if (backgroundColor == null &&
         backgroundImage == null &&
         borderSides == null &&
@@ -290,7 +289,6 @@ mixin CSSBoxMixin on RenderStyleBase {
       );
     }
 
-    Color? color = backgroundColor;
     Gradient? gradient = backgroundImage?.gradient;
     if (gradient is BorderGradientMixin) {
       gradient.borderEdge = border!.dimensions as EdgeInsets;
@@ -298,7 +296,7 @@ mixin CSSBoxMixin on RenderStyleBase {
 
     return CSSBoxDecoration(
       boxShadow: boxShadow,
-      color: gradient != null ? null : color,
+      color: gradient != null ? null : backgroundColor, // FIXME: chrome will work with gradient and color.
       image: decorationImage,
       border: border,
       borderRadius: borderRadius,
@@ -307,9 +305,10 @@ mixin CSSBoxMixin on RenderStyleBase {
   }
 
   DecorationImage? get decorationImage {
-    if (backgroundImage?.image != null) {
+    ImageProvider? image = backgroundImage?.image;
+    if (image!= null) {
       return DecorationImage(
-        image: backgroundImage!.image!,
+        image: image,
         repeat: backgroundRepeat,
       );
     }
