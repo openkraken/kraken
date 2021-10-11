@@ -289,7 +289,6 @@ class _HttpHeaders implements HttpHeaders {
     }
   }
 
-
   @override
   bool persistentConnection = false;
 
@@ -298,7 +297,7 @@ class _HttpHeaders implements HttpHeaders {
 
   @override
   List<String> operator [](String name) {
-    String? v = _headers[name];
+    String? v = value(name);
     if (v != null) return [v];
     return [];
   }
@@ -316,7 +315,7 @@ class _HttpHeaders implements HttpHeaders {
   @override
   void forEach(void Function(String name, List<String> values) action) {
     _headers.forEach((key, value) {
-      action(key, [value]);
+      action(key, [value.toString()]);
     });
   }
 
