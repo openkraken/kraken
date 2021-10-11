@@ -280,12 +280,53 @@ class RenderStyle
     return maxConstraintWidth;
   }
 
-  double get logicalWidth {
-    return getLogicalContentWidth() ?? 0;
+  // Max constraints width calculated from renderStyle tree.
+  double get maxConstraintsWidth {
+    return getMaxConstraintWidth();
   }
 
-  double get logicalHeight {
-    return getLogicalContentHeight() ?? 0;
+  // Content width calculated from renderStyle tree.
+  double? get contentLogicalWidth {
+    return getLogicalContentWidth();
+  }
+
+  // Content height calculated from renderStyle tree.
+  double? get contentLogicalHeight {
+    return getLogicalContentHeight();
+  }
+
+  // Padding box width of renderBoxModel after it was rendered.
+  double? get paddingBoxWidth {
+    Size? size = renderBoxModel!.boxSize;
+    if (size == null) {
+      return null;
+    }
+    return size.width - borderLeftWidth.computedValue - borderRightWidth.computedValue;
+  }
+
+  // Padding box height of renderBoxModel after it was rendered.
+  double? get paddingBoxHeight {
+    Size? size = renderBoxModel!.boxSize;
+    if (size == null) {
+      return null;
+    }
+    return size.height - borderTopWidth.computedValue - borderBottomWidth.computedValue;
+  }
+
+  // Content box width of renderBoxModel after it was rendered.
+  double? get contentWidth {
+    if (paddingBoxWidth == null) {
+      return null;
+    }
+    return paddingBoxWidth! - paddingLeft.computedValue - paddingRight.computedValue;
+  }
+
+  // Content box height of renderBoxModel after it was rendered.
+  double? get contentHeight {
+    if (paddingBoxHeight == null) {
+      return null;
+    }
+    return paddingBoxHeight! - paddingTop.computedValue - paddingBottom.computedValue;
   }
 
   /// Resolve percentage size to px base on size of its containing block
@@ -350,7 +391,7 @@ class RenderStyle
     if (parentContentHeight != null) {
       double relativeParentHeight = childParentData.isPositioned ? parentPaddingBoxHeight : parentContentBoxHeight;
     }
-  
+
 
     /// Percentage of padding and margin refer to the logical width of containing block
     /// Update padding
@@ -362,10 +403,10 @@ class RenderStyle
 
     /// Update offset
     /// Offset of positioned element starts from the edge of padding box of containing block
-    /// 
+    ///
     /// parentPaddingBoxHeight
     /// parentPaddingBoxWidth
-   
+
   }
 
   /// Resolve percentage size to px base on size of its own
