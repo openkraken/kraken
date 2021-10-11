@@ -84,9 +84,9 @@ mixin CSSBoxMixin on RenderStyleBase {
   }
 
   /// Background-attachment
-  String? get backgroundAttachment => _backgroundAttachment;
-  String? _backgroundAttachment;
-  set backgroundAttachment(String? value) {
+  CSSBackgroundAttachmentType? get backgroundAttachment => _backgroundAttachment;
+  CSSBackgroundAttachmentType? _backgroundAttachment;
+  set backgroundAttachment(CSSBackgroundAttachmentType? value) {
     if (value == _backgroundAttachment) return;
     _backgroundAttachment = value;
   }

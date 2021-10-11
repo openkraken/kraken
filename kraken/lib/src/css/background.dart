@@ -107,34 +107,8 @@ class CSSBackgroundSize {
   BoxFit fit = BoxFit.none;
 
   // Length/percentage value
-  CSSLengthValue width;
-  CSSLengthValue height;
-
-  static const String CONTAIN = 'contain';
-  static const String COVER = 'cover';
-  static const String AUTO = 'auto';
-
-  static dynamic _parseLengthPercentageValue(String value, {
-    Size? viewportSize,
-    double? rootFontSize,
-    double? fontSize
-  }) {
-    if (CSSLength.isLength(value)) {
-      double? length = CSSLength.toDisplayPortValue(
-        value,
-        viewportSize: viewportSize,
-        rootFontSize: rootFontSize,
-        fontSize: fontSize
-      );
-      // Negative value is invalid.
-      return length != null && length >=0 ? length : null;
-    } else if (CSSLength.isPercentage(value) || value == AUTO) {
-      // Percentage value should be parsed on the paint phase cause
-      // it depends on the final layouted size of background's container.
-      return value;
-    }
-    return null;
-  }
+  CSSLengthValue? width;
+  CSSLengthValue? height;
 
   @override
   String toString() => 'CSSBackgroundSize(fit: $fit, width: $width, height: $height)';
@@ -181,9 +155,16 @@ class CSSBackground {
         CSSPercentage.isPercentage(value);
   }
 
-
-  static resolveBackgroundAttachment() {
-    // TODO
+  static resolveBackgroundAttachment(String value) {
+    switch (value) {
+      case LOCAL:
+        return CSSBackgroundAttachmentType.local;
+      case FIXED:
+        return CSSBackgroundAttachmentType.fixed;
+      case SCROLL:
+      default:
+        return CSSBackgroundAttachmentType.scroll;
+    }
   }
 
   static CSSBackgroundSize resolveBackgroundSize(String value, RenderStyle renderStyle, String propertyName) {

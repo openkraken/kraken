@@ -317,9 +317,9 @@ class BoxDecorationPainter extends BoxPainter {
     super.dispose();
   }
 
-  bool hasLocalBackgroundImage(RenderStyle renderStyle) {
+  bool _hasLocalBackgroundImage() {
     return renderStyle.backgroundImage != null &&
-      renderStyle.backgroundAttachment == LOCAL;
+      renderStyle.backgroundAttachment == CSSBackgroundAttachmentType.local;
   }
 
   void paintBackground(
@@ -328,7 +328,7 @@ class BoxDecorationPainter extends BoxPainter {
     Offset baseOffset = Offset(0, 0);
 
     final TextDirection? textDirection = configuration.textDirection;
-    bool hasLocalAttachment = hasLocalBackgroundImage(renderStyle);
+    bool hasLocalAttachment = _hasLocalBackgroundImage();
 
     // Rect of background color
     Rect backgroundColorRect =
@@ -449,7 +449,7 @@ class BoxDecorationPainter extends BoxPainter {
     final Rect rect = offset & configuration.size!;
     final TextDirection? textDirection = configuration.textDirection;
 
-    bool hasLocalAttachment = hasLocalBackgroundImage(renderStyle);
+    bool hasLocalAttachment = _hasLocalBackgroundImage();
     if (!hasLocalAttachment) {
       Rect backgroundClipRect = _getBackgroundClipRect(offset, configuration);
       _paintBackgroundColor(canvas, backgroundClipRect, textDirection);
