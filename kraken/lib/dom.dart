@@ -14,6 +14,7 @@ export 'src/dom/node.dart';
 export 'src/dom/text_node.dart';
 export 'src/dom/window.dart';
 export 'src/dom/document.dart';
+export 'src/dom/document_fragment.dart';
 
 // Elements
 export 'src/dom/elements/semantics_text.dart';
