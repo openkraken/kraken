@@ -282,39 +282,63 @@ class RenderStyle
 
   // Max constraints width calculated from renderStyle tree.
   double get maxConstraintsWidth {
+    // @TODO: add cache to avoid recalculate every time.
     return getMaxConstraintWidth();
   }
 
   // Content width calculated from renderStyle tree.
-  double? get contentLogicalWidth {
+  // https://www.w3.org/TR/css-box-3/#valdef-box-content-box
+  double? get contentBoxLogicalWidth {
+    // @TODO: add cache to avoid recalculate every time.
     return getLogicalContentWidth();
   }
 
   // Content height calculated from renderStyle tree.
-  double? get contentLogicalHeight {
+  // https://www.w3.org/TR/css-box-3/#valdef-box-content-box
+  double? get contentBoxLogicalHeight {
+    // @TODO: add cache to avoid recalculate every time.
     return getLogicalContentHeight();
   }
 
-  // Padding box width of renderBoxModel after it was rendered.
-  double? get paddingBoxWidth {
-    Size? size = renderBoxModel!.boxSize;
-    if (size == null) {
+  // Padding box width calculated from renderStyle tree.
+  // https://www.w3.org/TR/css-box-3/#valdef-box-padding-box
+  double? get paddingBoxLogicalWidth {
+    if (contentBoxLogicalWidth == null) {
       return null;
     }
-    return size.width - borderLeftWidth.computedValue - borderRightWidth.computedValue;
+    return contentBoxLogicalWidth! + paddingLeft.computedValue + paddingRight.computedValue;
   }
 
-  // Padding box height of renderBoxModel after it was rendered.
-  double? get paddingBoxHeight {
-    Size? size = renderBoxModel!.boxSize;
-    if (size == null) {
+  // Padding box height calculated from renderStyle tree.
+  // https://www.w3.org/TR/css-box-3/#valdef-box-padding-box
+  double? get paddingBoxLogicalHeight {
+    if (contentBoxLogicalHeight == null) {
       return null;
     }
-    return size.height - borderTopWidth.computedValue - borderBottomWidth.computedValue;
+    return contentBoxLogicalHeight! + paddingTop.computedValue + paddingBottom.computedValue;
+  }
+
+  // Border box width calculated from renderStyle tree.
+  // https://www.w3.org/TR/css-box-3/#valdef-box-border-box
+  double? get borderBoxLogicalWidth {
+    if (paddingBoxLogicalWidth == null) {
+      return null;
+    }
+    return paddingBoxLogicalWidth! + borderLeftWidth.computedValue + borderRightWidth.computedValue;
+  }
+
+  // Border box height calculated from renderStyle tree.
+  // https://www.w3.org/TR/css-box-3/#valdef-box-border-box
+  double? get borderBoxLogicalHeight {
+    if (paddingBoxLogicalHeight == null) {
+      return null;
+    }
+    return paddingBoxLogicalHeight! + borderTopWidth.computedValue + borderBottomWidth.computedValue;
   }
 
   // Content box width of renderBoxModel after it was rendered.
-  double? get contentWidth {
+  // https://www.w3.org/TR/css-box-3/#valdef-box-content-box
+  double? get contentBoxWidth {
     if (paddingBoxWidth == null) {
       return null;
     }
@@ -322,11 +346,50 @@ class RenderStyle
   }
 
   // Content box height of renderBoxModel after it was rendered.
-  double? get contentHeight {
+  // https://www.w3.org/TR/css-box-3/#valdef-box-content-box
+  double? get contentBoxHeight {
     if (paddingBoxHeight == null) {
       return null;
     }
     return paddingBoxHeight! - paddingTop.computedValue - paddingBottom.computedValue;
+  }
+
+  // Padding box width of renderBoxModel after it was rendered.
+  // https://www.w3.org/TR/css-box-3/#valdef-box-padding-box
+  double? get paddingBoxWidth {
+    if (borderBoxWidth == null) {
+      return null;
+    }
+    return borderBoxWidth! - borderLeftWidth.computedValue - borderRightWidth.computedValue;
+  }
+
+  // Padding box height of renderBoxModel after it was rendered.
+  // https://www.w3.org/TR/css-box-3/#valdef-box-padding-box
+  double? get paddingBoxHeight {
+    if (borderBoxHeight == null) {
+      return null;
+    }
+    return borderBoxHeight! - borderTopWidth.computedValue - borderBottomWidth.computedValue;
+  }
+
+  // Border box width of renderBoxModel after it was rendered.
+  // https://www.w3.org/TR/css-box-3/#valdef-box-border-box
+  double? get borderBoxWidth {
+    Size? size = renderBoxModel!.boxSize;
+    if (size == null) {
+      return null;
+    }
+    return size.width;
+  }
+
+  // Border box height of renderBoxModel after it was rendered.
+  // https://www.w3.org/TR/css-box-3/#valdef-box-border-box
+  double? get borderBoxHeight {
+    Size? size = renderBoxModel!.boxSize;
+    if (size == null) {
+      return null;
+    }
+    return size.height;
   }
 
   /// Resolve percentage size to px base on size of its containing block

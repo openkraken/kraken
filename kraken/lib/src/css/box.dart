@@ -418,7 +418,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     _borderBottomStyle = value;
     renderBoxModel!.markNeedsPaint();
   }
-  
+
   BorderStyle? get borderLeftStyle => _borderLeftStyle;
   BorderStyle? _borderLeftStyle;
   set borderLeftStyle(BorderStyle? value) {
@@ -735,8 +735,8 @@ class CSSBorderRadius {
         CSSLengthValue circular = CSSLength.parseLength(values[0], renderStyle, propertyName);
         return CSSBorderRadius(circular, circular);
       } else if (values.length == 2) {
-        CSSLengthValue x = CSSLength.parseLength(values[0], renderStyle, propertyName);
-        CSSLengthValue y = CSSLength.parseLength(values[1], renderStyle, propertyName);
+        CSSLengthValue x = CSSLength.parseLength(values[0], renderStyle, propertyName, true, false);
+        CSSLengthValue y = CSSLength.parseLength(values[1], renderStyle, propertyName, false, true);
         return CSSBorderRadius(x, y);
       }
     }
@@ -798,7 +798,7 @@ class CSSBoxShadow {
   }
 
   static List<CSSBoxShadow>? parseBoxShadow(String present, RenderStyle renderStyle, String propertyName) {
-    
+
     var shadows = CSSStyleProperty.getShadowValues(present);
     if (shadows != null) {
       List<CSSBoxShadow>? boxShadow = [];
@@ -846,7 +846,7 @@ class CSSBoxShadow {
       }
       return boxShadow;
     }
-    
+
     return null;
   }
 }

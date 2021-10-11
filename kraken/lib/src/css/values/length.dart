@@ -38,13 +38,20 @@ enum CSSLengthUnit {
 class CSSLengthValue {
   final double? value;
   final CSSLengthUnit unit;
-  CSSLengthValue(this.value, this.unit, [this.renderStyle, this.propertyName]);
+  CSSLengthValue(this.value, this.unit, [this.renderStyle, this.propertyName, this.isHorizontal, this.isVertical]);
   static CSSLengthValue zero = CSSLengthValue(0, CSSLengthUnit.PX);
   static CSSLengthValue auto = CSSLengthValue(null, CSSLengthUnit.AUTO);
   static CSSLengthValue unknow = CSSLengthValue(null, CSSLengthUnit.UNKNOWN);
 
+  // Whether length is in horizontal direction.
+  // Used in cases when propertyName along can not determine direction, eg. 'border-radius'.
+  bool? isHorizontal;
+  // Whether length is in vertical direction.
+  // Used in cases when propertyName along can not determine direction, eg. 'border-radius'.
+  bool? isVertical;
+
   RenderStyle? renderStyle;
-  String? propertyName; 
+  String? propertyName;
   double? _computedValue;
   double get computedValue {
 
@@ -63,7 +70,7 @@ class CSSLengthValue {
         }
         break;
       case CSSLengthUnit.REM:
-        // Font rem is calculated against the root element's font size. 
+        // Font rem is calculated against the root element's font size.
         _computedValue = value! * renderStyle.rootFontSize;
         break;
       case CSSLengthUnit.VH:
@@ -82,6 +89,26 @@ class CSSLengthValue {
         _computedValue = value! * renderStyle.viewportSize.longestSide;
         break;
       case CSSLengthUnit.PERCENTAGE:
+        CSSPositionType positionType = renderStyle.position;
+        bool isPositioned = positionType == CSSPositionType.absolute ||
+          positionType == CSSPositionType.fixed;
+
+        RenderStyle? parentRenderStyle = renderStyle.parent;
+        double? relativeParentWidth = isPositioned ?
+          parentRenderStyle?.paddingBoxWidth ?? parentRenderStyle?.paddingBoxLogicalWidth :
+          parentRenderStyle?.contentBoxWidth ?? parentRenderStyle?.contentBoxLogicalWidth;
+
+        // The percentage of height is calculated with respect to the height of the generated box's containing block.
+        // If the height of the containing block is not specified explicitly (i.e., it depends on content height),
+        // and this element is not absolutely positioned, the value computes to 'auto'.
+        // https://www.w3.org/TR/CSS2/visudet.html#propdef-height
+        // Note: If the parent is flex item, percentage resloves againts the resolved height
+        // no matter parent's height is set or not.
+        bool isParentFlexLayout = parentRenderStyle?.display == CSSDisplay.flex ||
+          parentRenderStyle?.display == CSSDisplay.inlineFlex;
+        double? relativeParentHeight = isPositioned || isParentFlexLayout ?
+          parentRenderStyle?.paddingBoxHeight ?? parentRenderStyle?.paddingBoxLogicalHeight :
+          parentRenderStyle?.contentBoxHeight ?? parentRenderStyle?.contentBoxLogicalHeight;
 
         switch (propertyName) {
           case LINE_HEIGHT:
@@ -91,12 +118,16 @@ class CSSLengthValue {
           case WIDTH:
           case MIN_WIDTH:
           case MAX_WIDTH:
-            _computedValue = value! * renderStyle.logicalWidth;
+            if (relativeParentWidth != null) {
+              _computedValue = value! * relativeParentWidth;
+            }
             break;
           case HEIGHT:
           case MIN_HEIGHT:
           case MAX_HEIGHT:
-            _computedValue = value! * renderStyle.logicalHeight;
+            if (relativeParentHeight != null) {
+              _computedValue = value! * relativeParentHeight;
+            }
             break;
           case PADDING_TOP:
           case PADDING_RIGHT:
@@ -108,25 +139,45 @@ class CSSLengthValue {
           case MARGIN_BOTTOM:
             // https://www.w3.org/TR/css-box-3/#padding-physical
             // Percentage refer to logical width of containing block
-            _computedValue = value! * renderStyle.logicalWidth;
+            if (relativeParentWidth != null) {
+              _computedValue = value! * relativeParentWidth;
+            }
             break;
           case FLEX_BASIS:
             // Refer to the flex container's inner main size.
             break;
           case TOP:
           case BOTTOM:
+            // Offset of positioned element starts from the edge of padding box of containing block.
+            double? parentPaddingBoxWidth = parentRenderStyle?.paddingBoxWidth ??
+              parentRenderStyle?.paddingBoxLogicalWidth;
+            if (parentPaddingBoxWidth != null) {
+              _computedValue = value! * parentPaddingBoxWidth;
+            }
             break;
           case LEFT:
           case RIGHT:
-            break;
+            // Offset of positioned element starts from the edge of padding box of containing block.
+            double? parentPaddingBoxHeight = parentRenderStyle?.paddingBoxHeight ??
+              parentRenderStyle?.paddingBoxLogicalHeight;
+            if (parentPaddingBoxHeight != null) {
+              _computedValue = value! * parentPaddingBoxHeight;
+            }
+          break;
           case BORDER_TOP_LEFT_RADIUS:
           case BORDER_TOP_RIGHT_RADIUS:
-            // Percentages for the horizontal axis refer to the width of the box.
-            break;
           case BORDER_BOTTOM_LEFT_RADIUS:
           case BORDER_BOTTOM_RIGHT_RADIUS:
+            // Percentages for the horizontal axis refer to the width of the box.
             // Percentages for the vertical axis refer to the height of the box.
-            break;
+            double? borderBoxWidth = renderStyle.borderBoxWidth ?? renderStyle.borderBoxLogicalWidth;
+            double? borderBoxHeight = renderStyle.borderBoxHeight ?? renderStyle.borderBoxLogicalHeight;
+            if (isHorizontal == true && borderBoxWidth != null) {
+              _computedValue = value! * borderBoxWidth;
+            } else if (isVertical == true && borderBoxHeight != null) {
+              _computedValue = value! * borderBoxHeight;
+            }
+          break;
         }
         break;
       default:
@@ -150,7 +201,7 @@ class CSSLengthValue {
   /// Compares two length for equality.
   @override
   bool operator ==(Object? other) {
-    return (other == null && unit == CSSLengthUnit.UNKNOWN) || 
+    return (other == null && unit == CSSLengthUnit.UNKNOWN) ||
         (other is CSSLengthValue
         && other.value == value
         && other.unit == unit);
@@ -223,7 +274,7 @@ class CSSLength {
     return double.tryParse(percentage.split('%')[0])! / 100;
   }
 
-  static CSSLengthValue parseLength(String text, RenderStyle? renderStyle, String? propertyName) {
+  static CSSLengthValue parseLength(String text, RenderStyle? renderStyle, String? propertyName, [ bool? isHorizontal, bool? isVertical]) {
     // Only '0' is accepted with no unit.
     double? value;
     CSSLengthUnit unit = CSSLengthUnit.PX;
@@ -296,7 +347,7 @@ class CSSLength {
       return CSSLengthValue.zero;
     }
 
-    return value == null ? CSSLengthValue.unknow : CSSLengthValue(value, unit, renderStyle, propertyName);
+    return value == null ? CSSLengthValue.unknow : CSSLengthValue(value, unit, renderStyle, propertyName, isHorizontal, isVertical);
   }
 
   // TODO(yuanyan): fontSize to getFontSize for performance improve
