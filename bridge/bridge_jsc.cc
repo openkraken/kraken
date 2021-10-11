@@ -121,6 +121,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindSVGElement(m_context);
   bindDocumentFragment(m_context);
   bindWindow(m_context);
+  bindHistory(m_context);
   bindPerformance(m_context);
   bindCSSStyleDeclaration(m_context);
   bindScreen(m_context);

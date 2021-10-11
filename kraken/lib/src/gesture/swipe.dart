@@ -14,6 +14,8 @@ enum _SwipeState {
   accepted,
 }
 
+typedef GestureCallback = void Function(Event);
+
 /// Determine the approriate pan slop pixels based on the [kind] of pointer.
 double computeSwipeSlop(PointerDeviceKind kind) {
   switch (kind) {

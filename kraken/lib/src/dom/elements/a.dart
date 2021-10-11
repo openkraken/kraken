@@ -8,7 +8,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/gestures.dart';
 
 const String ANCHOR = 'A';
 
@@ -24,8 +24,8 @@ class AnchorElement extends Element {
   }
 
   @override
-  void handleMouseEvent(String eventType, { PointerDownEvent? down, PointerUpEvent? up }) {
-    super.handleMouseEvent(eventType, down: down, up: up);
+  void handleMouseEvent(String eventType, TapUpDetails details) {
+    super.handleMouseEvent(eventType, details);
 
     String? href = _href;
     if (href == null) return;
