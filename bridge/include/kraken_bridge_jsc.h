@@ -893,6 +893,7 @@ public:
   bool internalSetProperty(std::string &name, JSValueRef value, JSValueRef *exception);
   void internalRemoveProperty(std::string &name, JSValueRef *exception);
   JSValueRef internalGetPropertyValue(std::string &name, JSValueRef *exception);
+  std::string toString();
 
 private:
   std::unordered_map<std::string, JSValueRef> properties;
@@ -981,12 +982,10 @@ public:
   void setStyle(JSHostClassHolder &style);
   void setAttributes(JSHostObjectHolder<JSElementAttributes> &attributes);
   SpaceSplitString classNames();
-
   NativeElement *nativeElement{nullptr};
-
   std::string tagName();
-
   std::string getRegisteredTagName();
+  std::string toString();
 
 private:
   friend JSElement;

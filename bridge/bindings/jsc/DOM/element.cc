@@ -312,8 +312,7 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
       return JSObjectMakeArray(_hostClass->ctx, arguments.size(), arguments.data(), nullptr);
     }
     case JSElement::ElementProperty::innerHTML: {
-      // TODO: element tree to html.
-      return JSValueMakeString(ctx, JSStringCreateWithUTF8CString(""));
+      return JSValueMakeString(ctx, JSStringCreateWithUTF8CString(toString().c_str()));
     }
   }
 
@@ -747,6 +746,38 @@ void ElementInstance::_beforeUpdateId(JSValueRef oldId, JSValueRef newId) {
   if (newId != nullptr) {
     document()->addElementById(newId, this);
   }
+}
+
+std::string ElementInstance::toString() {
+  std::string s = "<" + this->getRegisteredTagName();
+
+  auto attributes = *m_attributes;
+  std::map<std::string, JSValueRef> &attributesMap = attributes->getAttributesMap();
+  auto &&iter = attributesMap.begin();
+  while (iter != attributesMap.end()) {
+    s += " " + iter->first + "=\"" + JSStringToStdString(JSValueToStringCopy(ctx, iter->second, nullptr)) + "\"";
+    iter++;
+  }
+
+  auto styleDeclarationInstance = static_cast<StyleDeclarationInstance *>(*m_style);
+  s += " " + styleDeclarationInstance->toString();
+
+  s += ">";
+
+  // Children toString.
+  for (auto iter : childNodes) {
+    if (iter->nodeType == NodeType::ELEMENT_NODE) {
+      ElementInstance* element = static_cast<ElementInstance *>(iter);
+      s += element->toString();
+    } else if (iter->nodeType == NodeType::TEXT_NODE) {
+      JSTextNode::TextNodeInstance* textNode = static_cast<JSTextNode::TextNodeInstance *>(iter);
+      s += textNode->toString();
+    }
+  }
+
+  s += "</" + this->getRegisteredTagName() + ">";
+
+  return s;
 }
 
 std::string ElementInstance::getRegisteredTagName() {

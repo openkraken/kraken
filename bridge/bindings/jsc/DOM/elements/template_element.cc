@@ -65,8 +65,17 @@ JSValueRef JSTemplateElement::TemplateElementInstance::getProperty(std::string &
       case TemplateElementProperty::content:
         return m_content->object;
       case TemplateElementProperty::innerHTML: {
-        // TODO: element tree to html.
-        return JSValueMakeString(ctx, JSStringCreateWithUTF8CString(""));
+        std::string s = "";
+        for (auto iter : m_content->childNodes) {
+          if (iter->nodeType == NodeType::ELEMENT_NODE) {
+            ElementInstance* element = static_cast<ElementInstance *>(iter);
+            s += element->toString();
+          } else if (iter->nodeType == NodeType::TEXT_NODE) {
+            JSTextNode::TextNodeInstance* textNode = static_cast<JSTextNode::TextNodeInstance *>(iter);
+            s += textNode->toString();
+          }
+        }
+        return JSValueMakeString(ctx, JSStringCreateWithUTF8CString(s.c_str()));
       }
     }
   }
