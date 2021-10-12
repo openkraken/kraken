@@ -5,39 +5,47 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
 import 'http_cache.dart';
 import 'http_cache_object.dart';
-import 'http_overrides.dart';
+import 'http_client.dart';
 import 'http_client_interceptor.dart';
+import 'http_overrides.dart';
 import 'queue.dart';
 
 final _requestQueue = Queue(parallel: 10);
 
 class ProxyHttpClientRequest extends HttpClientRequest {
-  final HttpClientRequest _clientRequest;
   final KrakenHttpOverrides _httpOverrides;
-  ProxyHttpClientRequest(HttpClientRequest clientRequest, KrakenHttpOverrides httpOverrides)
-      : _clientRequest = clientRequest,
-        _httpOverrides = httpOverrides;
+  final HttpClient _nativeHttpClient;
+  final String _method;
+  final Uri _uri;
 
-  @override
-  Encoding get encoding => _clientRequest.encoding;
-
-  @override
-  set encoding(Encoding _encoding) {
-    _clientRequest.encoding = _encoding;
-  }
-
-  @override
-  void abort([Object? exception, StackTrace? stackTrace]) {
-    _clientRequest.abort(exception, stackTrace);
-  }
+  HttpClientRequest? _backendRequest;
 
   // Saving all the data before calling real `close` to [HttpClientRequest].
   final List<int> _data = [];
+  // Saving cookies.
+  final List<Cookie> _cookies = <Cookie>[];
+  // Saving request headers.
+  final HttpHeaders _httpHeaders = createHttpHeaders();
+
+  ProxyHttpClientRequest(String method, Uri uri, KrakenHttpOverrides httpOverrides, HttpClient nativeHttpClient) :
+    _method = method,
+    _uri = uri,
+    _httpOverrides = httpOverrides,
+    _nativeHttpClient = nativeHttpClient;
+
+  @override
+  Encoding get encoding => _backendRequest?.encoding ?? Encoding.getByName('utf-8')!;
+
+  @override
+  set encoding(Encoding _encoding) {
+    _backendRequest?.encoding = _encoding;
+  }
 
   @override
   void add(List<int> data) {
@@ -45,21 +53,26 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   }
 
   @override
-  void addError(error, [StackTrace? stackTrace]) {
-    _clientRequest.addError(error, stackTrace);
-  }
-
-  @override
   Future<void> addStream(Stream<List<int>> stream) {
     // Consume stream.
     Completer<void> completer = Completer();
     stream.listen(
-      _data.addAll,
-      onError: completer.completeError,
-      onDone: completer.complete,
-      cancelOnError: true
+        _data.addAll,
+        onError: completer.completeError,
+        onDone: completer.complete,
+        cancelOnError: true
     );
     return completer.future;
+  }
+
+  @override
+  void abort([Object? exception, StackTrace? stackTrace]) {
+    _backendRequest?.abort(exception, stackTrace);
+  }
+
+  @override
+  void addError(error, [StackTrace? stackTrace]) {
+    _backendRequest?.addError(error, stackTrace);
   }
 
   Future<HttpClientRequest?> _beforeRequest(HttpClientInterceptor _clientInterceptor, HttpClientRequest _clientRequest) async {
@@ -96,15 +109,15 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
   @override
   Future<HttpClientResponse> close() async {
-    HttpClientRequest request = _clientRequest;
+    int? contextId = KrakenHttpOverrides.getContextHeader(headers);
+    HttpClientRequest request = this;
 
-    int? contextId = KrakenHttpOverrides.getContextHeader(_clientRequest);
     if (contextId != null) {
       // Set the default origin and referrer.
       Uri referrer = getReferrer(contextId);
-      request.headers.set(HttpHeaders.refererHeader, referrer.toString());
+      headers.set(HttpHeaders.refererHeader, referrer.toString());
       String origin = getOrigin(referrer);
-      request.headers.set(_HttpHeadersOrigin, origin);
+      headers.set(_HttpHeadersOrigin, origin);
 
       HttpClientInterceptor? clientInterceptor;
       if (_httpOverrides.hasInterceptor(contextId)) {
@@ -122,28 +135,29 @@ class ProxyHttpClientRequest extends HttpClientRequest {
       if (HttpCacheController.mode != HttpCacheMode.NO_CACHE) {
         HttpCacheController cacheController = HttpCacheController.instance(origin);
         cacheObject = await cacheController.getCacheObject(request.uri);
-        if (await cacheObject.hitLocalCache(request)) {
+        if (cacheObject.hitLocalCache(request)) {
           HttpClientResponse? cacheResponse = await cacheObject.toHttpClientResponse();
           if (cacheResponse != null) {
+            // // Must cancel the ongoing request, make TCP connection closed.
+            // _clientRequest.abort();
             return cacheResponse;
           }
         }
 
         // Step 3: Handle negotiate cache request header.
-        if (request.headers.ifModifiedSince == null
-            && request.headers.value(HttpHeaders.ifNoneMatchHeader) == null) {
+        if (headers.ifModifiedSince == null && headers.value(HttpHeaders.ifNoneMatchHeader) == null) {
           // ETag has higher priority of lastModified.
           if (cacheObject.eTag != null) {
-            request.headers.set(HttpHeaders.ifNoneMatchHeader, cacheObject.eTag!);
+            headers.set(HttpHeaders.ifNoneMatchHeader, cacheObject.eTag!);
           } else if (cacheObject.lastModified != null) {
-            request.headers.set(HttpHeaders.ifModifiedSinceHeader,
-                HttpDate.format(cacheObject.lastModified!));
+            headers.set(HttpHeaders.ifModifiedSinceHeader, HttpDate.format(cacheObject.lastModified!));
           }
         }
       }
 
+      request = await _createBackendClientRequest();
       // Send the real data to backend client.
-      _clientRequest.add(_data);
+      request.add(_data);
       _data.clear();
 
       // Step 4: Lifecycle of shouldInterceptRequest
@@ -194,53 +208,95 @@ class ProxyHttpClientRequest extends HttpClientRequest {
       }
 
     } else {
-      _clientRequest.add(_data);
+      request = await _createBackendClientRequest();
+      request.add(_data);
       _data.clear();
     }
 
     return _requestQueue.add(request.close);
   }
 
-  @override
-  HttpConnectionInfo? get connectionInfo => _clientRequest.connectionInfo;
+  Future<HttpClientRequest> _createBackendClientRequest() async {
+    HttpClientRequest backendRequest = await _nativeHttpClient.openUrl(_method, _uri);
 
-  @override
-  List<Cookie> get cookies => _clientRequest.cookies;
+    if (_cookies.isNotEmpty) {
+      backendRequest.cookies.addAll(_cookies);
+      _cookies.clear();
+    }
 
-  @override
-  Future<HttpClientResponse> get done => _clientRequest.done;
+    _httpHeaders.forEach(backendRequest.headers.set);
+    _httpHeaders.clear();
 
-  @override
-  Future flush() {
-    return _clientRequest.flush();
+    _backendRequest = backendRequest;
+    return backendRequest;
   }
 
   @override
-  HttpHeaders get headers => _clientRequest.headers;
+  HttpConnectionInfo? get connectionInfo => _backendRequest?.connectionInfo;
 
   @override
-  String get method => _clientRequest.method;
+  List<Cookie> get cookies => _backendRequest?.cookies ?? _cookies;
 
   @override
-  Uri get uri => _clientRequest.uri;
+  Future<HttpClientResponse> get done async {
+   if (_backendRequest == null) {
+     await _createBackendClientRequest();
+   }
+   return _backendRequest!.done;
+  }
+
+  @override
+  Future flush() async {
+    if (_backendRequest == null) {
+      await _createBackendClientRequest();
+    }
+    return _backendRequest!.flush();
+  }
+
+  @override
+  HttpHeaders get headers => _backendRequest?.headers ?? _httpHeaders;
+
+  @override
+  String get method => _method;
+
+  @override
+  Uri get uri => _uri;
 
   @override
   void write(Object? obj) {
-    _clientRequest.write(obj);
+    String string = '$obj';
+    if (string.isEmpty) return;
+
+    _data.addAll(Uint8List.fromList(
+      utf8.encode(string),
+    ));
   }
 
   @override
   void writeAll(Iterable objects, [String separator = '']) {
-    _clientRequest.writeAll(objects, separator);
+    Iterator iterator = objects.iterator;
+    if (!iterator.moveNext()) return;
+    if (separator.isEmpty) {
+      do {
+        write(iterator.current);
+      } while (iterator.moveNext());
+    } else {
+      write(iterator.current);
+      while (iterator.moveNext()) {
+        write(separator);
+        write(iterator.current);
+      }
+    }
   }
 
   @override
   void writeCharCode(int charCode) {
-    _clientRequest.writeCharCode(charCode);
+    write(String.fromCharCode(charCode));
   }
 
   @override
   void writeln([Object? object = '']) {
-    _clientRequest.writeln(object);
+    write(object);
+    write('\n');
   }
 }
