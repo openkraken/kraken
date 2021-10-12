@@ -188,7 +188,7 @@ class RenderLayoutBox extends RenderBoxModel
   @override
   void insert(RenderBox child, {RenderBox? after}) {
     super.insert(child, after: after);
-    insertChildInSortedChildren(child, after: after);
+    insertChildIntoSortedChildren(child, after: after);
   }
 
   @override
@@ -213,7 +213,7 @@ class RenderLayoutBox extends RenderBoxModel
   void move(RenderBox child, {RenderBox? after}) {
     super.move(child, after: after);
     sortedChildren.remove(child);
-    insertChildInSortedChildren(child, after: after);
+    insertChildIntoSortedChildren(child, after: after);
   }
 
   // Sort siblings by zIndex.
@@ -223,7 +223,7 @@ class RenderLayoutBox extends RenderBoxModel
   }
 
   // Insert child in sortedChildren.
-  void insertChildInSortedChildren(RenderBox child, {RenderBox? after}) {
+  void insertChildIntoSortedChildren(RenderBox child, {RenderBox? after}) {
     List<RenderObject> children = getChildrenAsList();
 
     // No need to paint position holder.

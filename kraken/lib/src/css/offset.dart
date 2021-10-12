@@ -80,7 +80,7 @@ mixin CSSPositionMixin on RenderStyleBase {
       RenderBox? nextSibling = parentData.nextSibling;
 
       parent.sortedChildren.remove(renderBoxModel);
-      parent.insertChildInSortedChildren(renderBoxModel!, after: nextSibling);
+      parent.insertChildIntoSortedChildren(renderBoxModel!, after: nextSibling);
     }
   }
 
