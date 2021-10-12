@@ -11,9 +11,9 @@ const del = require('del');
 const os = require('os');
 
 program
-.option('-e, --js-engine <engine>', 'The JavaScript Engine kraken used', 'jsc')
-.option('--built-with-debug-jsc', 'Built bridge binary with debuggable JSC.')
-.parse(process.argv);
+  .option('-e, --js-engine <engine>', 'The JavaScript Engine kraken used', 'jsc')
+  .option('--built-with-debug-jsc', 'Built bridge binary with debuggable JSC.')
+  .parse(process.argv);
 
 const SUPPORTED_JS_ENGINES = ['jsc', 'quickjs'];
 
@@ -464,19 +464,19 @@ task('build-android-kraken-lib', (done) => {
   let androidHome;
 
   if (platform == 'win32') {
-    androidHome = path.join(process.env.LOCALAPPDATA, 'Android\\Sdk');
+    androidHome = process.env.ANDROID_SDK_ROOT || path.join(process.env.LOCALAPPDATA, 'Android\\Sdk');
   } else {
-    androidHome = path.join(process.env.HOME, 'Library/Android/sdk')
+    androidHome = process.env.ANDROID_SDK_ROOT || path.join(process.env.HOME, 'Library/Android/sdk')
   }
 
   const ndkDir = path.join(androidHome, 'ndk');
   const ndkVersion = '21.4.7075529';
 
   if (!fs.existsSync(path.join(ndkDir, ndkVersion))) {
-    throw new Error('Android NDK version (21.4.7075529) not installed.');
+    throw new Error(`Android NDK version (${ndkVersion}) not installed.`);
   }
 
-  const archs = ['arm64-v8a', 'armeabi-v7a'];
+  const archs = ['arm64-v8a', 'armeabi-v7a', 'x86'];
   const buildType = buildMode == 'Release' ? 'Relwithdebinfo' : 'Debug';
 
   const cmakeGeneratorTemplate = platform == 'win32' ? 'Ninja' : 'Unix Makefiles';
@@ -484,16 +484,7 @@ task('build-android-kraken-lib', (done) => {
     const soBinaryDirectory = path.join(paths.bridge, `build/android/lib/${arch}`);
     const bridgeCmakeDir = path.join(paths.bridge, 'cmake-build-android-' + arch);
     // generate project
-    execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
-    -DCMAKE_TOOLCHAIN_FILE=${path.join(androidHome, 'ndk', ndkVersion, '/build/cmake/android.toolchain.cmake')} \
-    -DANDROID_NDK=${path.join(androidHome, '/ndk/', ndkVersion)} \
-    -DIS_ANDROID=TRUE \
-    -DANDROID_ABI="${arch}" \
-    ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
-    -DANDROID_PLATFORM="android-16" \
-    -DANDROID_STL=c++_shared \
-    -G "${cmakeGeneratorTemplate}" \
-    -B ${paths.bridge}/cmake-build-android-${arch} -S ${paths.bridge}`,
+    execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} -DANDROID_USE_LEGACY_TOOLCHAIN_FILE=ON -DCMAKE_TOOLCHAIN_FILE=${path.join(androidHome, 'ndk', ndkVersion, '/build/cmake/android.toolchain.cmake')} -DANDROID_NDK=${path.join(androidHome, '/ndk/', ndkVersion)} -DIS_ANDROID=TRUE -DANDROID_ABI="${arch}" ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'} -DANDROID_PLATFORM="android-16" -DANDROID_STL=c++_shared -G "${cmakeGeneratorTemplate}" -B ${paths.bridge}/cmake-build-android-${arch} -S ${paths.bridge}`,
       {
         cwd: paths.bridge,
         stdio: 'inherit',
@@ -541,7 +532,7 @@ task('macos-dylib-clean', (done) => {
 // TODO: support patch windows symbol of quickjs engine.
 task('patch-windows-symbol-link-for-android', done => {
   const jniLibsDir = path.join(paths.kraken, 'android/jniLibs');
-  const archs = ['arm64-v8a', 'armeabi-v7a'];
+  const archs = ['arm64-v8a', 'armeabi-v7a', 'x86'];
 
   for(let arch of archs) {
     const libPath = path.join(jniLibsDir, arch);
@@ -598,3 +589,4 @@ task('run-benchmark', async (done) => {
   execSync('adb uninstall com.example.performance_tests');
   done();
 });
+

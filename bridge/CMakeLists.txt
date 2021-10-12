@@ -14,10 +14,8 @@ else()
   add_definitions(-DENABLE_PROFILE=0)
 endif()
 
-execute_process(
-  COMMAND bash "-c" "read dart_sdk < <(type -p dart) && echo $\{dart_sdk%/*\}/cache/dart-sdk/include | xargs"
-  OUTPUT_VARIABLE DART_SDK
-)
+find_program(DART_PATH dart)
+set(DART_SDK "${DART_PATH}/cache/dart-sdk/include")
 string(REGEX REPLACE "\n$" "" DART_SDK "${DART_SDK}")
 
 list(APPEND PUBLIC_HEADERS
@@ -51,42 +49,43 @@ list(APPEND BRIDGE_SOURCE
 )
 
 list(APPEND GUMBO_PAESER
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/attribute.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/attribute.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/char_ref.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/char_ref.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/error.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/error.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/gumbo.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/insertion_mode.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/parser.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/parser.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_buffer.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_buffer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_piece.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_piece.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tag_enum.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tag_gperf.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tag_sizes.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tag_strings.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tag.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_piece.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_piece.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/token_type.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tokenizer_states.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tokenizer.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tokenizer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/utf8.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/utf8.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/util.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/util.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/vector.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/vector.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/attribute.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/attribute.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/char_ref.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/char_ref.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/error.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/error.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/gumbo.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/insertion_mode.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/parser.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/parser.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/string_buffer.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/string_buffer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/string_piece.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/string_piece.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/tag_enum.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/tag_gperf.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/tag_sizes.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/tag_strings.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/tag.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/string_piece.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/string_piece.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/token_type.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/tokenizer_states.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/tokenizer.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/tokenizer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/utf8.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/utf8.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/util.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/util.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/vector.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/gumbo-parser/src/vector.h
 )
 
 list(APPEND BRIDGE_INCLUDE
   ./foundation
   ./
+  ../
   ./include
   ./polyfill/dist
   ${DART_SDK}
@@ -208,25 +207,22 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
 elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   add_compile_options(-DKRAKEN_QUICK_JS_ENGINE=1)
 
-  execute_process(
-      COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/VERSION
-      OUTPUT_VARIABLE QUICKJS_VERSION
-  )
+  file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/VERSION QUICKJS_VERSION)
 
   list(APPEND QUICK_JS_SOURCE
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.c
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp.c
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp-opcode.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode.c
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode-table.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/list.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs.c
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-atom.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-opcode.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/cutils.c
+          ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/cutils.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/libregexp.c
+          ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/libregexp.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/libregexp-opcode.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/libunicode.c
+          ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/libunicode.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/libunicode-table.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/list.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/quickjs.c
+          ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/quickjs.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/quickjs-atom.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/quickjs/quickjs-opcode.h
   )
   add_library(quickjs SHARED ${QUICK_JS_SOURCE})
 
@@ -269,11 +265,10 @@ target_include_directories(kraken_static PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
 target_link_libraries(kraken_static ${BRIDGE_LINK_LIBS} gumbo_parse_static)
 
-execute_process(
-  COMMAND grep version: ./pubspec.yaml
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../kraken
-  OUTPUT_VARIABLE APP_VER
-)
+file(READ ${PROJECT_SOURCE_DIR}/../kraken/pubspec.yaml PUBSPEC)
+string(REGEX MATCH "(version: [v0-9.+]+)" _ ${PUBSPEC})
+set(APP_VER ${CMAKE_MATCH_1})
+
 string(SUBSTRING ${APP_VER} 9 30 APP_VER)
 string(REGEX REPLACE "\n$" "" APP_VER "${APP_VER}")
 
