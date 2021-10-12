@@ -837,11 +837,14 @@ class Element extends Node
         renderStyle.display = CSSDisplayMixin.resolveDisplay(present);
         _updateRenderBoxModelWithDisplay();
         break;
-
-      case VERTICAL_ALIGN:
-        renderStyle.verticalAlign = CSSInlineMixin.resolveVerticalAlign(present);
+      case OVERFLOW_X:
+        renderStyle.overflowX = CSSOverflowMixin.resolveOverflowType(present);
+        updateRenderBoxModelWithOverflowX(_handleScroll);
         break;
-
+      case OVERFLOW_Y:
+        renderStyle.overflowY = CSSOverflowMixin.resolveOverflowType(present);
+        updateRenderBoxModelWithOverflowY(_handleScroll);
+        break;
       case POSITION:
         CSSPositionType prevPosition = renderStyle.position;
         CSSPositionType currentPosition = CSSPositionMixin.resolvePositionType(present);
@@ -849,7 +852,6 @@ class Element extends Node
         renderStyle.position = currentPosition;
         _updateRenderBoxModelWithPosition(currentPosition);
         break;
-
       case Z_INDEX:
         renderStyle.zIndex = int.tryParse(present);
         break;
@@ -1089,6 +1091,9 @@ class Element extends Node
         break;
       case LINE_CLAMP:
         renderStyle.lineClamp = CSSText.parseLineClamp(present);
+        break;
+      case VERTICAL_ALIGN:
+        renderStyle.verticalAlign = CSSInlineMixin.resolveVerticalAlign(present);
         break;
     }
   }
@@ -1367,9 +1372,6 @@ class Element extends Node
       repaintSelf: true,
       renderStyle: scrollingContentRenderStyle,
     );
-
-    scrollingContentRenderStyle.overflowX = CSSOverflowType.visible;
-    scrollingContentRenderStyle.overflowY = CSSOverflowType.visible;
     style.addStyleChangeListener(scrollingContentBoxStyleListener);
     scrollingContentLayoutBox.isScrollingContentBox = true;
     return scrollingContentLayoutBox;

@@ -18,60 +18,51 @@ enum CSSOverflowType {
   clip
 }
 
-List<CSSOverflowType> resolveOverflowTypes(String x, String y) {
-  CSSOverflowType overflowX = _getOverflowType(x);
-  CSSOverflowType overflowY = _getOverflowType(y);
-
-  // Apply overflow special rules from w3c.
-  if (overflowX == CSSOverflowType.visible && overflowY != CSSOverflowType.visible) {
-    overflowX = CSSOverflowType.auto;
-  }
-
-  if (overflowY == CSSOverflowType.visible && overflowX != CSSOverflowType.visible) {
-    overflowY = CSSOverflowType.auto;
-  }
-
-  return [overflowX, overflowY];
-}
-
-CSSOverflowType _getOverflowType(String definition) {
-  switch (definition) {
-    case HIDDEN:
-      return CSSOverflowType.hidden;
-    case SCROLL:
-      return CSSOverflowType.scroll;
-    case AUTO:
-      return CSSOverflowType.auto;
-    case VISIBLE:
-    default:
-      return CSSOverflowType.visible;
-  }
-}
-
 mixin CSSOverflowMixin on RenderStyleBase {
-  CSSOverflowType _overflowX = CSSOverflowType.visible;
+  CSSOverflowType? _overflowX;
   CSSOverflowType get overflowX {
-    return _overflowX;
+    return _overflowX ?? CSSOverflowType.visible;
   }
   set overflowX(CSSOverflowType value) {
     if (_overflowX == value) return;
     _overflowX = value;
   }
 
-  CSSOverflowType _overflowY = CSSOverflowType.visible;
+  CSSOverflowType? _overflowY;
   CSSOverflowType get overflowY {
-    return _overflowY;
+    return _overflowY ?? CSSOverflowType.visible;
   }
   set overflowY(CSSOverflowType value) {
     if (_overflowY == value) return;
     _overflowY = value;
   }
 
-  void updateOverflow(CSSStyleDeclaration style) {
-    RenderStyle renderStyle = this as RenderStyle;
-    List<CSSOverflowType> overflow = resolveOverflowTypes(style[OVERFLOW_X], style[OVERFLOW_Y]);
-    renderStyle.overflowX = overflow[0];
-    renderStyle.overflowY = overflow[1];
+  CSSOverflowType get transformedOverflowX {
+    if (overflowX == CSSOverflowType.visible && overflowY != CSSOverflowType.visible) {
+      return CSSOverflowType.auto;
+    }
+    return overflowX;
+  }
+
+  CSSOverflowType get transformedOverflowY {
+    if (overflowY == CSSOverflowType.visible && overflowX != CSSOverflowType.visible) {
+      return CSSOverflowType.auto;
+    }
+    return overflowY;
+  }
+
+  static CSSOverflowType resolveOverflowType(String definition) {
+    switch (definition) {
+      case HIDDEN:
+        return CSSOverflowType.hidden;
+      case SCROLL:
+        return CSSOverflowType.scroll;
+      case AUTO:
+        return CSSOverflowType.auto;
+      case VISIBLE:
+      default:
+        return CSSOverflowType.visible;
+    }
   }
 }
 
@@ -85,23 +76,18 @@ mixin ElementOverflowMixin on ElementBase {
   // House content which can be scrolled.
   RenderLayoutBox? scrollingContentLayoutBox;
 
-  void updateRenderOverflow(ScrollListener scrollListener) {
+  void updateRenderBoxModelWithOverflowX(ScrollListener scrollListener) {
     Element element = this as Element;
-    CSSStyleDeclaration style = element.style;
-    renderStyle.updateOverflow(style);
     if (renderBoxModel is RenderRecyclerLayout) {
       RenderRecyclerLayout renderBoxModel = this.renderBoxModel as RenderRecyclerLayout;
       // Recycler layout not need repaintBoundary and scroll/pointer listeners,
       // ignoring overflowX or overflowY sets, which handle it self.
-      renderBoxModel.clipX = renderBoxModel.clipY = false;
+      renderBoxModel.clipX = false;
       renderBoxModel.scrollOffsetX = renderBoxModel.axis == Axis.horizontal
-          ? renderBoxModel.scrollable.position : null;
-      renderBoxModel.scrollOffsetY = renderBoxModel.axis == Axis.vertical
           ? renderBoxModel.scrollable.position : null;
     } else if (renderBoxModel != null) {
       RenderBoxModel renderBoxModel = this.renderBoxModel!;
-      CSSOverflowType overflowX = renderStyle.overflowX;
-      CSSOverflowType overflowY = renderStyle.overflowY;
+      CSSOverflowType overflowX = renderStyle.transformedOverflowX;
       bool shouldRepaintSelf = false;
       switch(overflowX) {
         case CSSOverflowType.hidden:
@@ -132,6 +118,32 @@ mixin ElementOverflowMixin on ElementBase {
           break;
       }
 
+      renderBoxModel.scrollListener = scrollListener;
+      renderBoxModel.pointerListener = _pointerListener;
+
+      if (renderBoxModel is RenderLayoutBox) {
+        if (shouldRepaintSelf) {
+          _upgradeToSelfRepaint(element);
+        } else {
+          _downgradeToParentRepaint(element);
+        }
+      }
+    }
+  }
+
+  void updateRenderBoxModelWithOverflowY(ScrollListener scrollListener) {
+    Element element = this as Element;
+    if (renderBoxModel is RenderRecyclerLayout) {
+      RenderRecyclerLayout renderBoxModel = this.renderBoxModel as RenderRecyclerLayout;
+      // Recycler layout not need repaintBoundary and scroll/pointer listeners,
+      // ignoring overflowX or overflowY sets, which handle it self.
+      renderBoxModel.clipY = false;
+      renderBoxModel.scrollOffsetY = renderBoxModel.axis == Axis.vertical
+          ? renderBoxModel.scrollable.position : null;
+    } else if (renderBoxModel != null) {
+      RenderBoxModel renderBoxModel = this.renderBoxModel!;
+      CSSOverflowType overflowY = renderStyle.transformedOverflowY;
+      bool shouldRepaintSelf = false;
       switch(overflowY) {
         case CSSOverflowType.hidden:
           _scrollableY = null;
