@@ -37,9 +37,16 @@ void traverseNode(NodeInstance *node, TraverseHandler handler) {
   bool shouldExit = handler(node);
   if (shouldExit) return;
 
-  if (!node->childNodes.empty()) {
-    for (auto &n : node->childNodes) {
-      traverseNode(n, handler);
+  QjsContext *ctx = node->context()->ctx();
+  int childNodesLen = arrayGetLength(ctx, node->childNodes);
+
+  if (childNodesLen != 0) {
+    for (int i = 0; i < childNodesLen; i ++) {
+      JSValue n = JS_GetPropertyUint32(ctx, node->childNodes, i);
+      auto *nextNode = static_cast<NodeInstance *>(JS_GetOpaque(n, Node::classId(n)));
+      traverseNode(nextNode, handler);
+
+      JS_FreeValue(node->context()->ctx(), n);
     }
   }
 }
@@ -275,9 +282,9 @@ JSValue Document::getElementsByClassName(QjsContext *ctx, JSValue this_val, int 
   traverseNode(document->m_documentElement, [ctx, className, &elements](NodeInstance *node) {
     if (node->nodeType == NodeType::ELEMENT_NODE) {
       auto element = reinterpret_cast<ElementInstance *>(node);
-      if(element->classNames()->containsAll(className)) {
-        elements.emplace_back(element);
-      }
+//      if(element->classNames()->containsAll(className)) {
+//        elements.emplace_back(element);
+//      }
     }
 
     return false;
@@ -393,7 +400,7 @@ DocumentInstance::DocumentInstance(Document *document): NodeInstance(document, N
   };
   JSValue documentElementValue = JS_CallConstructor(m_ctx, Element::instance(m_context)->classObject, 1, htmlArgs);
   m_documentElement = static_cast<ElementInstance *>(JS_GetOpaque(documentElementValue, Element::classId()));
-  m_documentElement->parentNode = this;
+  m_documentElement->parentNode = JS_DupValue(m_ctx, instanceObject);
 
   JSAtom documentElementTag = JS_NewAtom(m_ctx, "documentElement");
   JS_SetProperty(m_ctx, instanceObject, documentElementTag, documentElementValue);

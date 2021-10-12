@@ -8,6 +8,7 @@
 
 #include "js_context.h"
 #include "third_party/quickjs/quickjs.h"
+#include "qjs_patch.h"
 
 namespace kraken::binding::qjs {
 
@@ -88,6 +89,7 @@ public:
     def.class_name = m_name.c_str();
     def.finalizer = finalizer;
     def.exotic = exotic;
+    def.gc_mark = proxyGCMark;
     int32_t success = JS_NewClass(m_context->runtime(), classId, &def);
     instanceObject = JS_NewObjectClass(m_ctx, classId);
     JS_SetOpaque(instanceObject, this);
@@ -99,7 +101,18 @@ public:
   inline JSContext* context() const { return m_context; }
   inline std::string name() const { return m_name; }
 
+private:
+  static void proxyGCMark(JSRuntime *rt, JSValueConst val,
+                   JS_MarkFunc *mark_func) {
+    auto *instance = static_cast<Instance *>(JS_GetOpaque(val, JSValueGetClassId(val)));
+    instance->gcMark(rt, val, mark_func);
+  }
+
 protected:
+
+  virtual void gcMark(JSRuntime *rt, JSValueConst val,
+                      JS_MarkFunc *mark_func) {};
+
   JSContext *m_context{nullptr};
   QjsContext *m_ctx{nullptr};
   HostClass *m_hostClass{nullptr};

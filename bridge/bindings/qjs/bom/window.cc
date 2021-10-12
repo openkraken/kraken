@@ -21,6 +21,7 @@ void bindWindow(std::unique_ptr<JSContext> &context) {
 
   auto *window = new WindowInstance(windowConstructor);
   JS_SetOpaque(context->global(), window);
+  context->defineGlobalProperty("__window__", window->instanceObject);
 }
 
 JSClassID Window::kWindowClassId{0};
@@ -148,8 +149,13 @@ WindowInstance::WindowInstance(Window *window) : EventTargetInstance(window, Win
     getDartMethod()->initWindow(context()->getContextId(), nativeEventTarget);
   }
   m_context->m_window = this;
-  m_location = new Location(m_context);
-  m_history = new History(m_context);
+}
+
+void WindowInstance::gcMark(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) {
+  EventTargetInstance::gcMark(rt, val, mark_func);
+
+  JS_MarkValue(rt, m_history->jsObject, mark_func);
+  JS_MarkValue(rt, m_location->jsObject, mark_func);
 }
 
 }

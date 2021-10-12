@@ -27,15 +27,20 @@ bool HTMLParser::parseHTML(const char *code, size_t codeLength) {
   const GumboVector *root_children = &htmlTree->root->v.element.children;
 
   // find body.
-  ElementInstance* body;
+  ElementInstance *body = nullptr;
   auto document = DocumentInstance::instance(Document::instance(m_context.get()));
-  for (auto node : document->documentElement()->childNodes) {
+  int32_t documentElementsChildNodesLen = arrayGetLength(m_context->ctx(), document->documentElement()->childNodes);
+  for (int i = 0; i < documentElementsChildNodesLen; i ++) {
+    JSValue n = JS_GetPropertyUint32(m_context->ctx(), document->documentElement()->childNodes, i);
+    auto *node = static_cast<NodeInstance *>(JS_GetOpaque(n, Node::classId(n)));
     auto* element = reinterpret_cast<ElementInstance *>(node);
 
     if (element->tagName() == "BODY") {
       body = element;
+      JS_FreeValue(m_context->ctx(), n);
       break;
     }
+    JS_FreeValue(m_context->ctx(), n);
   }
 
   if (body != nullptr) {

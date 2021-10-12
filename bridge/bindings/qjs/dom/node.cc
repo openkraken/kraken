@@ -102,16 +102,16 @@ JSValue Node::appendChild(QjsContext *ctx, JSValue this_val, int argc, JSValue *
   }
 
   if (nodeInstance->hasNodeFlag(NodeInstance::NodeFlag::IsDocumentFragment)) {
-    size_t len = nodeInstance->childNodes.size();
+    size_t len = arrayGetLength(ctx, nodeInstance->childNodes);
     for (int i = 0; i < len; i ++) {
-      selfInstance->internalAppendChild(nodeInstance->childNodes[i]);
+      JSValue n = JS_GetPropertyUint32(ctx, nodeInstance->childNodes, i);
+      auto *node = static_cast<NodeInstance *>(JS_GetOpaque(n, Node::classId(n)));
+      selfInstance->internalAppendChild(node);
+      JS_FreeValue(ctx, n);
     }
 
     // Clear fragment childNodes reference.
-    for (int i = 0; i < len; i ++) {
-      nodeInstance->childNodes[i]->unrefer();
-    }
-    nodeInstance->childNodes.clear();
+    JS_SetPropertyStr(ctx, nodeInstance->childNodes, "length", JS_NewUint32(ctx, 0));
   } else {
     selfInstance->ensureDetached(nodeInstance);
     selfInstance->internalAppendChild(nodeInstance);
@@ -173,16 +173,16 @@ JSValue Node::insertBefore(QjsContext *ctx, JSValue this_val, int argc, JSValue 
   }
 
   if (nodeInstance->hasNodeFlag(NodeInstance::NodeFlag::IsDocumentFragment)) {
-    size_t len = nodeInstance->childNodes.size();
+    size_t len = arrayGetLength(ctx, nodeInstance->childNodes);
     for (int i = 0; i < len; i ++) {
-      selfInstance->internalInsertBefore(nodeInstance->childNodes[i], referenceInstance);
+      JSValue n = JS_GetPropertyUint32(ctx, nodeInstance->childNodes, i);
+      auto *node = static_cast<NodeInstance *>(JS_GetOpaque(n, Node::classId(n)));
+      selfInstance->internalInsertBefore(node, referenceInstance);
+      JS_FreeValue(ctx, n);
     }
 
     // Clear fragment childNodes reference.
-    for (int i = 0; i < len; i ++) {
-      nodeInstance->childNodes[i]->unrefer();
-    }
-    nodeInstance->childNodes.clear();
+    JS_SetPropertyStr(ctx, nodeInstance->childNodes, "length", JS_NewUint32(ctx, 0));
   } else {
     selfInstance->ensureDetached(nodeInstance);
     selfInstance->internalInsertBefore(nodeInstance, referenceInstance);
@@ -210,7 +210,7 @@ JSValue Node::replaceChild(QjsContext *ctx, JSValue this_val, int argc, JSValue 
   auto newChildInstance = static_cast<NodeInstance *>(JS_GetOpaque(newChildValue, Node::classId(newChildValue)));
   auto oldChildInstance = static_cast<NodeInstance *>(JS_GetOpaque(oldChildValue, Node::classId(oldChildValue)));
 
-  if (oldChildInstance == nullptr || oldChildInstance->parentNode != selfInstance ||
+  if (oldChildInstance == nullptr || JS_VALUE_GET_PTR(oldChildInstance->parentNode) != JS_VALUE_GET_PTR(selfInstance->instanceObject) ||
       oldChildInstance->document() != selfInstance->document()) {
     return JS_ThrowTypeError(ctx,
                  "Failed to execute 'replaceChild' on 'Node': The node to be replaced is not a child of this node.");
@@ -221,16 +221,16 @@ JSValue Node::replaceChild(QjsContext *ctx, JSValue this_val, int argc, JSValue 
   }
 
   if (newChildInstance->hasNodeFlag(NodeInstance::NodeFlag::IsDocumentFragment)) {
-    size_t len = newChildInstance->childNodes.size();
+    size_t len = arrayGetLength(ctx, newChildInstance->childNodes);
     for (int i = 0; i < len; i ++) {
-      selfInstance->internalInsertBefore(newChildInstance->childNodes[i], oldChildInstance);
+      JSValue n = JS_GetPropertyUint32(ctx, newChildInstance->childNodes, i);
+      auto *node = static_cast<NodeInstance *>(JS_GetOpaque(n, Node::classId(n)));
+      selfInstance->internalInsertBefore(node, oldChildInstance);
+      JS_FreeValue(ctx, n);
     }
     selfInstance->internalRemoveChild(oldChildInstance);
     // Clear fragment childNodes reference.
-    for (int i = 0; i < len; i ++) {
-      newChildInstance->childNodes[i]->unrefer();
-    }
-    newChildInstance->childNodes.clear();
+    JS_SetPropertyStr(ctx, newChildInstance->childNodes, "length", JS_NewUint32(ctx, 0));
   } else {
     selfInstance->ensureDetached(newChildInstance);
     selfInstance->internalReplaceChild(newChildInstance, oldChildInstance);
@@ -239,16 +239,20 @@ JSValue Node::replaceChild(QjsContext *ctx, JSValue this_val, int argc, JSValue 
 }
 
 void Node::traverseCloneNode(QjsContext *ctx, NodeInstance *element, NodeInstance *parentElement) {
-  for (auto iter : element->childNodes) {
-    JSValue newNode = copyNodeValue(ctx, static_cast<NodeInstance *>(iter));
+  int32_t len = arrayGetLength(ctx, element->childNodes);
+  for (int i = 0; i < len; i ++) {
+    JSValue n = JS_GetPropertyUint32(ctx, element->childNodes, i);
+    auto *node = static_cast<NodeInstance *>(JS_GetOpaque(n, Node::classId(n)));
+    JSValue newNode = copyNodeValue(ctx, node);
     auto newNodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(newNode, Node::classId(newNode)));
     parentElement->ensureDetached(newNodeInstance);
     parentElement->internalAppendChild(newNodeInstance);
     // element node needs recursive child nodes.
-    if (iter->nodeType == NodeType::ELEMENT_NODE) {
-      traverseCloneNode(ctx, static_cast<ElementInstance *>(iter), static_cast<ElementInstance *>(newNodeInstance));
+    if (node->nodeType == NodeType::ELEMENT_NODE) {
+      traverseCloneNode(ctx, node, newNodeInstance);
     }
     JS_FreeValue(ctx, newNode);
+    JS_FreeValue(ctx, n);
   }
 }
 
@@ -311,7 +315,7 @@ PROP_SETTER(NodeInstance, ownerDocument)(QjsContext *ctx, JSValue this_val, int 
 PROP_GETTER(NodeInstance, firstChild)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, Node::classId(this_val)));
   auto *instance = nodeInstance->firstChild();
-  return instance != nullptr ? JS_DupValue(ctx, instance->instanceObject) : JS_NULL;
+  return instance != nullptr ? instance->instanceObject : JS_NULL;
 }
 PROP_SETTER(NodeInstance, firstChild)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
@@ -320,7 +324,7 @@ PROP_SETTER(NodeInstance, firstChild)(QjsContext *ctx, JSValue this_val, int arg
 PROP_GETTER(NodeInstance, lastChild)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, Node::classId(this_val)));
   auto *instance = nodeInstance->lastChild();
-  return instance != nullptr ? JS_DupValue(ctx, instance->instanceObject) : JS_NULL;
+  return instance != nullptr ? instance->instanceObject : JS_NULL;
 }
 PROP_SETTER(NodeInstance, lastChild)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
@@ -328,8 +332,7 @@ PROP_SETTER(NodeInstance, lastChild)(QjsContext *ctx, JSValue this_val, int argc
 
 PROP_GETTER(NodeInstance, parentNode)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, Node::classId(this_val)));
-  if (nodeInstance->parentNode == nullptr) return JS_NULL;
-  return JS_DupValue(ctx, nodeInstance->parentNode->instanceObject);
+  return JS_DupValue(ctx, nodeInstance->parentNode);
 }
 PROP_SETTER(NodeInstance, parentNode)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
@@ -337,12 +340,7 @@ PROP_SETTER(NodeInstance, parentNode)(QjsContext *ctx, JSValue this_val, int arg
 
 PROP_GETTER(NodeInstance, childNodes)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, Node::classId(this_val)));
-  JSValue arrayObject = JS_NewArray(ctx);
-  size_t len = nodeInstance->childNodes.size();
-  for (int i = 0; i < len; i ++) {
-    JS_SetPropertyUint32(ctx, arrayObject, i, JS_DupValue(nodeInstance->m_ctx, nodeInstance->childNodes[i]->instanceObject));
-  }
-  return arrayObject;
+  return JS_DupValue(ctx, nodeInstance->childNodes);
 }
 PROP_SETTER(NodeInstance, childNodes)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
@@ -351,7 +349,7 @@ PROP_SETTER(NodeInstance, childNodes)(QjsContext *ctx, JSValue this_val, int arg
 PROP_GETTER(NodeInstance, previousSibling)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, Node::classId(this_val)));
   auto *instance = nodeInstance->previousSibling();
-  return instance != nullptr ? JS_DupValue(ctx, instance->instanceObject) : JS_NULL;
+  return instance != nullptr ? instance->instanceObject : JS_NULL;
 }
 PROP_SETTER(NodeInstance, previousSibling)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
@@ -360,7 +358,7 @@ PROP_SETTER(NodeInstance, previousSibling)(QjsContext *ctx, JSValue this_val, in
 PROP_GETTER(NodeInstance, nextSibling)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *nodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(this_val, Node::classId(this_val)));
   auto *instance = nodeInstance->nextSibling();
-  return instance != nullptr ? JS_DupValue(ctx, instance->instanceObject): JS_NULL;
+  return instance != nullptr ? instance->instanceObject : JS_NULL;
 }
 PROP_SETTER(NodeInstance, nextSibling)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
@@ -386,11 +384,12 @@ PROP_SETTER(NodeInstance, textContent)(QjsContext *ctx, JSValue this_val, int ar
 
 bool NodeInstance::isConnected() {
   bool _isConnected = eventTargetId == HTML_TARGET_ID;
-  auto parent = parentNode;
+  auto parent = static_cast<NodeInstance *>(JS_GetOpaque(parentNode, Node::classId(parentNode)));
 
   while (parent != nullptr && !_isConnected) {
     _isConnected = parent->eventTargetId == HTML_TARGET_ID;
-    parent = parent->parentNode;
+    JSValue parentParentNode = parent->parentNode;
+    parent = static_cast<NodeInstance *>(JS_GetOpaque(parentParentNode, Node::classId(parentParentNode)));
   }
 
   return _isConnected;
@@ -403,47 +402,52 @@ DocumentInstance *NodeInstance::ownerDocument() {
   return document();
 }
 NodeInstance *NodeInstance::firstChild() {
-  if (childNodes.empty()) {
+  int32_t len = arrayGetLength(m_ctx, childNodes);
+  if (len == 0) {
     return nullptr;
   }
-  return childNodes.front();
+  JSValue result = JS_GetPropertyUint32(m_ctx, childNodes, 0);
+  return static_cast<NodeInstance *>(JS_GetOpaque(result, Node::classId(result)));
 }
 NodeInstance *NodeInstance::lastChild() {
-  if (childNodes.empty()) {
+  int32_t len = arrayGetLength(m_ctx, childNodes);
+  if (len == 0) {
     return nullptr;
   }
-  return childNodes.back();
+  JSValue result = JS_GetPropertyUint32(m_ctx, childNodes, len - 1);
+  return static_cast<NodeInstance *>(JS_GetOpaque(result, Node::classId(result)));
 }
 NodeInstance *NodeInstance::previousSibling() {
-  if (parentNode == nullptr) return nullptr;
+  if (JS_IsNull(parentNode)) return nullptr;
 
-  auto &&parentChildNodes = parentNode->childNodes;
-  auto it = std::find(parentChildNodes.begin(), parentChildNodes.end(), this);
+  auto *parent = static_cast<NodeInstance *>(JS_GetOpaque(parentNode, Node::classId(parentNode)));
+  auto parentChildNodes = parent->childNodes;
+  int32_t idx = arrayFindIdx(m_ctx, parentChildNodes, instanceObject);
+  int32_t parentChildNodeLen = arrayGetLength(m_ctx, parentChildNodes);
 
-  if (parentChildNodes.size() < 2) {
-    return nullptr;
-  }
-
-  if (it != parentChildNodes.begin()) {
-    return *(it - 1);
+  if (idx - 1 < parentChildNodeLen) {
+    JSValue result = JS_GetPropertyUint32(m_ctx, parentChildNodes, idx - 1);
+    return static_cast<NodeInstance *>(JS_GetOpaque(result, Node::classId(result)));
   }
 
   return nullptr;
 }
 NodeInstance *NodeInstance::nextSibling() {
-  if (parentNode == nullptr) return nullptr;
+  if (JS_IsNull(parentNode)) return nullptr;
+  auto *parent = static_cast<NodeInstance *>(JS_GetOpaque(parentNode, Node::classId(parentNode)));
+  auto parentChildNodes = parent->childNodes;
+  int32_t idx = arrayFindIdx(m_ctx, parentChildNodes, instanceObject);
+  int32_t parentChildNodeLen = arrayGetLength(m_ctx, parentChildNodes);
 
-  auto &&parentChildNodes = parentNode->childNodes;
-  auto it = std::find(parentChildNodes.begin(), parentChildNodes.end(), this);
-
-  if ((it + 1) != parentChildNodes.end()) {
-    return *(it + 1);
+  if (idx + 1 < parentChildNodeLen) {
+    JSValue result = JS_GetPropertyUint32(m_ctx, parentChildNodes, idx + 1);
+    return static_cast<NodeInstance *>(JS_GetOpaque(result, Node::classId(result)));
   }
 
   return nullptr;
 }
 void NodeInstance::internalAppendChild(NodeInstance *node) {
-  childNodes.emplace_back(node);
+  arrayPushValue(m_ctx, childNodes, node->instanceObject);
   node->setParentNode(this);
   node->refer();
 
@@ -459,14 +463,15 @@ void NodeInstance::internalAppendChild(NodeInstance *node) {
       ->addCommand(eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
 }
 void NodeInstance::internalRemove() {
-  if (parentNode == nullptr) return;
-  parentNode->internalRemoveChild(this);
+  if (JS_IsNull(parentNode)) return;
+  auto *parent = static_cast<NodeInstance *>(JS_GetOpaque(parentNode, Node::classId(parentNode)));
+  parent->internalRemoveChild(this);
 }
 NodeInstance *NodeInstance::internalRemoveChild(NodeInstance *node) {
-  auto it = std::find(childNodes.begin(), childNodes.end(), node);
+  int32_t idx = arrayFindIdx(m_ctx, childNodes, node->instanceObject);
 
-  if (it != childNodes.end()) {
-    childNodes.erase(it);
+  if (idx != -1) {
+    arraySpliceValue(m_ctx, childNodes, idx, 1);
     node->removeParentNode();
     node->_notifyNodeRemoved(this);
     foundation::UICommandBuffer::instance(node->m_context->getContextId())
@@ -480,22 +485,23 @@ JSValue NodeInstance::internalInsertBefore(NodeInstance *node, NodeInstance *ref
   if (referenceNode == nullptr) {
     internalAppendChild(node);
   } else {
-    if (referenceNode->parentNode != this) {
+    if (JS_VALUE_GET_PTR(referenceNode->parentNode) != JS_VALUE_GET_PTR(instanceObject)) {
       return JS_ThrowTypeError(
           m_ctx,
           "Uncaught TypeError: Failed to execute 'insertBefore' on 'Node': reference node is not a child of this node.");
     }
 
-    auto parent = referenceNode->parentNode;
+    auto parentNodeValue = referenceNode->parentNode;
+    auto *parent = static_cast<NodeInstance *>(JS_GetOpaque(parentNodeValue, Node::classId(parentNodeValue)));
     if (parent != nullptr) {
-      auto &&parentChildNodes = parent->childNodes;
-      auto it = std::find(parentChildNodes.begin(), parentChildNodes.end(), referenceNode);
+      JSValue parentChildNodes = parent->childNodes;
+      int32_t idx = arrayFindIdx(m_ctx, parentChildNodes, referenceNode->instanceObject);
 
-      if (it == parentChildNodes.end()) {
+      if (idx == -1) {
         return JS_ThrowTypeError(m_ctx, "Failed to execute 'insertBefore' on 'Node': reference node is not a child of this node.");
       }
 
-      parentChildNodes.insert(it, node);
+      arrayInsert(m_ctx, parentChildNodes, idx, node->instanceObject);
       node->setParentNode(parent);
       node->refer();
       node->_notifyNodeInsert(parent);
@@ -518,18 +524,18 @@ JSValue NodeInstance::internalGetTextContent() {
 }
 void NodeInstance::internalSetTextContent(JSValue content) {}
 JSValue NodeInstance::internalReplaceChild(NodeInstance *newChild, NodeInstance *oldChild) {
-  assert_m(newChild->parentNode == nullptr, "ReplaceChild Error: newChild was not detached.");
+  assert_m(JS_IsNull(newChild->parentNode), "ReplaceChild Error: newChild was not detached.");
   oldChild->removeParentNode();
   oldChild->unrefer();
 
-  auto childIndex = std::find(childNodes.begin(), childNodes.end(), oldChild);
-  if (childIndex == childNodes.end()) {
+  int32_t childIndex = arrayFindIdx(m_ctx, childNodes, oldChild->instanceObject);
+  if (childIndex == -1) {
     return JS_ThrowTypeError(m_ctx, "Failed to execute 'replaceChild' on 'Node': old child is not exist on childNodes.");
   }
 
   newChild->setParentNode(this);
-  childNodes.erase(childIndex);
-  childNodes.insert(childIndex, newChild);
+
+  arraySpliceValue(m_ctx, childNodes, childIndex, 1, newChild->instanceObject);
   newChild->refer();
 
   oldChild->_notifyNodeRemoved(this);
@@ -551,48 +557,60 @@ JSValue NodeInstance::internalReplaceChild(NodeInstance *newChild, NodeInstance 
 }
 
 void NodeInstance::setParentNode(NodeInstance *parent) {
-  parentNode = parent;
-  // Make sure parentNode should be released after node.
-  std::string privateKey = std::to_string((uint64_t)JS_VALUE_GET_PTR(parent->instanceObject));
-  JS_DefinePropertyValueStr(m_ctx, instanceObject, privateKey.c_str(), JS_DupValue(m_ctx, parent->instanceObject), JS_PROP_NORMAL);
+  if (!JS_IsNull(parentNode)) {
+    JS_FreeValue(m_ctx, parentNode);
+  }
+
+  parentNode = JS_DupValue(m_ctx, parent->instanceObject);
 }
 
 void NodeInstance::removeParentNode() {
-  std::string privateKey = std::to_string((uint64_t)JS_VALUE_GET_PTR(parentNode->instanceObject));
-  parentNode = nullptr;
-  JSAtom parentNodeAtom = JS_NewAtom(m_ctx, privateKey.c_str());
-  JS_DeleteProperty(m_ctx, instanceObject, parentNodeAtom, 0);
-  JS_FreeAtom(m_ctx, parentNodeAtom);
+  if (!JS_IsNull(parentNode)) {
+    JS_FreeValue(m_ctx, parentNode);
+  }
+
+  parentNode = JS_NULL;
 }
 
 NodeInstance::~NodeInstance() {
+  JS_FreeValue(m_ctx, childNodes);
 }
 void NodeInstance::refer() {
-  if (_referenceCount == 0) {
-    JS_DupValue(m_ctx, instanceObject);
-    list_add_tail(&nodeLink.link, &m_context->node_job_list);
-  }
-  _referenceCount++;
+//  if (_referenceCount == 0) {
+//    JS_DupValue(m_ctx, instanceObject);
+//    list_add_tail(&nodeLink.link, &m_context->node_job_list);
+//  }
+//  _referenceCount++;
 }
 void NodeInstance::unrefer() {
-  _referenceCount--;
-  if (_referenceCount <= 0) {
-    list_del(&nodeLink.link);
-    JS_FreeValue(m_ctx, instanceObject);
-  }
+//  _referenceCount--;
+//  if (_referenceCount <= 0) {
+//    list_del(&nodeLink.link);
+//
+//  }
+//  JS_FreeValue(m_ctx, instanceObject);
 }
 void NodeInstance::_notifyNodeRemoved(NodeInstance *node) {}
 void NodeInstance::_notifyNodeInsert(NodeInstance *node) {}
 void NodeInstance::ensureDetached(NodeInstance *node) {
-  if (node->parentNode != nullptr) {
-    auto it = std::find(node->parentNode->childNodes.begin(), node->parentNode->childNodes.end(), node);
-    if (it != node->parentNode->childNodes.end()) {
-      node->_notifyNodeRemoved(node->parentNode);
-      node->parentNode->childNodes.erase(it);
+  auto *nodeParent = static_cast<NodeInstance *>(JS_GetOpaque(node->parentNode, Node::classId(node->parentNode)));
+
+  if (nodeParent != nullptr) {
+    int32_t idx = arrayFindIdx(m_ctx, nodeParent->childNodes, node->instanceObject);
+    if (idx != -1) {
+      node->_notifyNodeRemoved(nodeParent);
+      arraySpliceValue(m_ctx, nodeParent->childNodes, idx, 1);
       node->removeParentNode();
       node->unrefer();
     }
   }
+}
+
+void NodeInstance::gcMark(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) {
+  EventTargetInstance::gcMark(rt, val, mark_func);
+
+  JS_MarkValue(rt, childNodes, mark_func);
+  JS_MarkValue(rt, parentNode, mark_func);
 }
 
 } // namespace kraken::binding::qjs

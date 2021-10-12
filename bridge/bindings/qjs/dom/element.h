@@ -119,7 +119,7 @@ struct PersistElement {
 class ElementInstance : public NodeInstance {
 public:
   ElementInstance() = delete;
-  ~ElementInstance() override {}
+  ~ElementInstance();
   JSValue internalGetTextContent() override;
   void internalSetTextContent(JSValue content) override;
 

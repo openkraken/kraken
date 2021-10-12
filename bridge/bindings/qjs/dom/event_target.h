@@ -12,7 +12,6 @@
 #include "bindings/qjs/js_context.h"
 #include "bindings/qjs/native_value.h"
 #include "bindings/qjs/qjs_patch.h"
-#include <deque>
 
 namespace kraken::binding::qjs {
 
@@ -90,9 +89,11 @@ public:
   NativeEventTarget *nativeEventTarget{new NativeEventTarget(this)};
 protected:
   int32_t eventTargetId;
-  std::unordered_map<JSAtom, std::vector<JSValue>> _eventHandlers;
-  std::unordered_map<JSAtom, JSValue> _propertyEventHandler;
-  std::unordered_map<JSAtom, JSValue> m_properties;
+  JSValue m_eventHandlers{JS_NewObject(m_ctx)};
+  JSValue m_propertyEventHandler{JS_NewObject(m_ctx)};
+  JSValue m_properties{JS_NewObject(m_ctx)};
+
+  void gcMark(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) override;
 
   static int hasProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom);
   static JSValue getProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,

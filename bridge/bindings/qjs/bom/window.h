@@ -46,14 +46,13 @@ class WindowInstance : public EventTargetInstance {
 public:
   WindowInstance() = delete;
   explicit WindowInstance(Window *window);
-  ~WindowInstance() {
-    JS_FreeValue(m_ctx, m_location->jsObject);
-    JS_FreeValue(m_ctx, m_history->jsObject);
-  }
+  ~WindowInstance() {}
 private:
 
-  Location *m_location{nullptr};
-  History *m_history{nullptr};
+  void gcMark(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) override;
+
+  Location *m_location{new Location(m_context)};
+  History *m_history{new History(m_context)};
   friend Window;
   friend JSContext;
 };

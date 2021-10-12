@@ -176,6 +176,13 @@ NativeString *atomToNativeString(QjsContext *ctx, JSAtom atom);
 std::string jsValueToStdString(QjsContext *ctx, JSValue &value);
 std::string jsAtomToStdString(QjsContext *ctx, JSAtom atom);
 void extractErrorInfo(JSValueConst error);
+void arrayPushValue(QjsContext *ctx, JSValue array, JSValue val);
+void arrayInsert(QjsContext *ctx, JSValue array, uint32_t start, JSValue targetValue);
+int32_t arrayGetLength(QjsContext *ctx, JSValue array);
+int32_t arrayFindIdx(QjsContext *ctx, JSValue array, JSValue target);
+void arraySpliceValue(QjsContext *ctx, JSValue array, uint32_t start, uint32_t deleteCount);
+void arraySpliceValue(QjsContext *ctx, JSValue array, uint32_t start, uint32_t deleteCount, JSValue replacedValue);
+JSValue objectGetKeys(QjsContext *ctx, JSValue obj);
 
 
 } // namespace kraken::binding::qjs

@@ -576,10 +576,18 @@ PROP_GETTER(ElementInstance, children)(QjsContext *ctx, JSValue this_val, int ar
   JSValue array = JS_NewArray(ctx);
   JSValue pushMethod = JS_GetPropertyStr(ctx, array, "push");
 
-  for (auto &childNode : element->childNodes) {
-    if (childNode->nodeType == NodeType::ELEMENT_NODE) {
-      JS_Call(ctx, pushMethod, array, 1, &childNode->instanceObject);
+  int32_t len = arrayGetLength(ctx, element->childNodes);
+
+  for (int i = 0; i < len; i ++) {
+    JSValue v = JS_GetPropertyUint32(ctx, element->childNodes, i);
+    auto *instance = static_cast<NodeInstance *>(JS_GetOpaque(v, Node::classId(v)));
+    if (instance->nodeType == NodeType::ELEMENT_NODE) {
+      JSValue arguments[] = {
+        v
+      };
+      JS_Call(ctx, pushMethod, array, 1, arguments);
     }
+    JS_FreeValue(ctx, v);
   }
 
   JS_FreeValue(ctx, pushMethod);
@@ -592,14 +600,23 @@ JSClassID ElementInstance::classID() {
   return Element::classId();
 }
 
+ElementInstance::~ElementInstance() {
+  KRAKEN_LOG(VERBOSE) << "Element instance released " << JS_VALUE_GET_PTR(instanceObject);
+}
+
 JSValue ElementInstance::internalGetTextContent() {
   JSValue array = JS_NewArray(m_ctx);
   JSValue pushMethod = JS_GetPropertyStr(m_ctx, array, "push");
 
-  for (auto &node : childNodes) {
+  int32_t len = arrayGetLength(m_ctx, childNodes);
+
+  for (int i = 0; i < len; i ++) {
+    JSValue n = JS_GetPropertyUint32(m_ctx, childNodes, i);
+    auto *node = static_cast<NodeInstance *>(JS_GetOpaque(n, Node::classId(n)));
     JSValue nodeText = node->internalGetTextContent();
     JS_Call(m_ctx, pushMethod, array, 1, &nodeText);
     JS_FreeValue(m_ctx, nodeText);
+    JS_FreeValue(m_ctx, n);
   }
 
   JSValue joinMethod = JS_GetPropertyStr(m_ctx, array, "join");
@@ -764,6 +781,8 @@ ElementInstance::ElementInstance(Element *element, std::string tagName, bool sho
                DocumentInstance::instance(
                  Document::instance(
                    element->m_context)), Element::classId(), exoticMethods, "Element") {
+
+  KRAKEN_LOG(VERBOSE) << "New Element " << JS_VALUE_GET_PTR(instanceObject) << " " << m_tagName;
 
   m_attributes = new ElementAttributes(m_context);
   m_style = new StyleDeclarationInstance(CSSStyleDeclaration::instance(m_context), this);

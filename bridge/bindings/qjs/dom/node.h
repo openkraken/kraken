@@ -112,8 +112,8 @@ public:
   void setParentNode(NodeInstance *parent);
   void removeParentNode();
   NodeType nodeType;
-  NodeInstance *parentNode{nullptr};
-  std::vector<NodeInstance *> childNodes;
+  JSValue parentNode{JS_NULL};
+  JSValue childNodes{JS_NewArray(m_ctx)};
 
   NodeJob nodeLink{this};
   NodeJob documentLink{this};
@@ -126,6 +126,9 @@ public:
 
   virtual void _notifyNodeRemoved(NodeInstance *node);
   virtual void _notifyNodeInsert(NodeInstance *node);
+
+protected:
+  void gcMark(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) override;
 
 private:
   DEFINE_HOST_CLASS_PROPERTY(10, isConnected, ownerDocument, firstChild, lastChild, parentNode, childNodes,
