@@ -90,9 +90,12 @@ class CSSLengthValue {
           positionType == CSSPositionType.fixed;
 
         RenderStyle? parentRenderStyle = renderStyle!.parent;
+
+        // Use logical not rendered width as base length for percentage calculation, cause
+        // its parent is not renderer yet when child is layouting.
         double? relativeParentWidth = isPositioned ?
-          parentRenderStyle?.paddingBoxWidth ?? parentRenderStyle?.paddingBoxLogicalWidth :
-          parentRenderStyle?.contentBoxWidth ?? parentRenderStyle?.contentBoxLogicalWidth;
+          parentRenderStyle?.paddingBoxLogicalWidth :
+          parentRenderStyle?.contentBoxLogicalWidth;
 
         // The percentage of height is calculated with respect to the height of the generated box's containing block.
         // If the height of the containing block is not specified explicitly (i.e., it depends on content height),
@@ -102,9 +105,12 @@ class CSSLengthValue {
         // no matter parent's height is set or not.
         bool isParentFlexLayout = parentRenderStyle?.display == CSSDisplay.flex ||
           parentRenderStyle?.display == CSSDisplay.inlineFlex;
+
+        // Use logical not rendered height as base length for percentage calculation, cause
+        // its parent is not renderer yet when child is layouting.
         double? relativeParentHeight = isPositioned || isParentFlexLayout ?
-          parentRenderStyle?.paddingBoxHeight ?? parentRenderStyle?.paddingBoxLogicalHeight :
-          parentRenderStyle?.contentBoxHeight ?? parentRenderStyle?.contentBoxLogicalHeight;
+          parentRenderStyle?.paddingBoxLogicalHeight :
+          parentRenderStyle?.contentBoxLogicalHeight;
 
         switch (propertyName) {
           case LINE_HEIGHT:
