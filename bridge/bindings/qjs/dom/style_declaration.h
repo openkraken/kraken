@@ -65,9 +65,6 @@ private:
 
   static void finalize(JSRuntime *rt, JSValue val) {
     auto *instance = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
-    if (instance->context()->isValid()) {
-      JS_FreeValue(instance->m_ctx, instance->instanceObject);
-    }
     delete instance;
   }
 

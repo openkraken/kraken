@@ -449,7 +449,6 @@ NodeInstance *NodeInstance::nextSibling() {
 void NodeInstance::internalAppendChild(NodeInstance *node) {
   arrayPushValue(m_ctx, childNodes, node->instanceObject);
   node->setParentNode(this);
-  node->refer();
 
   node->_notifyNodeInsert(this);
 
@@ -476,7 +475,6 @@ NodeInstance *NodeInstance::internalRemoveChild(NodeInstance *node) {
     node->_notifyNodeRemoved(this);
     foundation::UICommandBuffer::instance(node->m_context->getContextId())
         ->addCommand(node->eventTargetId, UICommand::removeNode, nullptr);
-    node->unrefer();
   }
 
   return node;
@@ -503,7 +501,6 @@ JSValue NodeInstance::internalInsertBefore(NodeInstance *node, NodeInstance *ref
 
       arrayInsert(m_ctx, parentChildNodes, idx, node->instanceObject);
       node->setParentNode(parent);
-      node->refer();
       node->_notifyNodeInsert(parent);
 
       std::string nodeEventTargetId = std::to_string(node->eventTargetId);
@@ -574,19 +571,12 @@ NodeInstance::~NodeInstance() {
   JS_FreeValue(m_ctx, childNodes);
 }
 void NodeInstance::refer() {
-//  if (_referenceCount == 0) {
-//    JS_DupValue(m_ctx, instanceObject);
-//    list_add_tail(&nodeLink.link, &m_context->node_job_list);
-//  }
-//  _referenceCount++;
+  JS_DupValue(m_ctx, instanceObject);
+  list_add_tail(&nodeLink.link, &m_context->node_job_list);
 }
 void NodeInstance::unrefer() {
-//  _referenceCount--;
-//  if (_referenceCount <= 0) {
-//    list_del(&nodeLink.link);
-//
-//  }
-//  JS_FreeValue(m_ctx, instanceObject);
+  list_del(&nodeLink.link);
+  JS_FreeValue(m_ctx, instanceObject);
 }
 void NodeInstance::_notifyNodeRemoved(NodeInstance *node) {}
 void NodeInstance::_notifyNodeInsert(NodeInstance *node) {}
@@ -599,7 +589,6 @@ void NodeInstance::ensureDetached(NodeInstance *node) {
       node->_notifyNodeRemoved(nodeParent);
       arraySpliceValue(m_ctx, nodeParent->childNodes, idx, 1);
       node->removeParentNode();
-      node->unrefer();
     }
   }
 }

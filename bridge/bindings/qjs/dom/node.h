@@ -138,7 +138,6 @@ private:
   friend DocumentInstance;
   friend Node;
   friend ElementInstance;
-  int32_t _referenceCount{0};
 };
 
 } // namespace kraken::binding::qjs

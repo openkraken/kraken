@@ -37,9 +37,6 @@ protected:
 private:
   static void proxyFinalize(JSRuntime *rt, JSValue val) {
     auto hostObject = static_cast<HostObject *>(JS_GetOpaque(val, JSContext::kHostObjectClassId));
-    if (hostObject->m_context->isValid()) {
-      JS_FreeValue(hostObject->m_ctx, hostObject->jsObject);
-    }
     delete hostObject;
   };
 };
@@ -97,9 +94,6 @@ protected:
 
   static void proxyFinalize(JSRuntime *rt, JSValue val) {
     auto hostObject = static_cast<ExoticHostObject *>(JS_GetOpaque(val, JSContext::kHostExoticObjectClassId));
-    if (hostObject->m_context->isValid()) {
-      JS_FreeValue(hostObject->m_ctx, hostObject->jsObject);
-    }
     delete hostObject;
   };
 };

@@ -189,6 +189,9 @@ bool EventTargetInstance::dispatchEvent(EventInstance *event) {
                                                event->nativeEvent->type->length);
   std::string eventType = toUTF8(u16EventType);
 
+  // protect this util event trigger finished.
+  JS_DupValue(m_ctx, instanceObject);
+
   // Modify the currentTarget to this.
   event->nativeEvent->currentTarget = this;
 
@@ -203,6 +206,8 @@ bool EventTargetInstance::dispatchEvent(EventInstance *event) {
       parent->dispatchEvent(event);
     }
   }
+
+  JS_FreeValue(m_ctx, instanceObject);
 
   return event->cancelled();
 }
@@ -233,6 +238,8 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
       _dispatchEvent(v);
       JS_FreeValue(m_ctx, v);
     }
+
+    JS_FreeValue(m_ctx, eventHandlers);
   }
 
   // Dispatch event listener white by 'on' prefix property.
@@ -512,9 +519,6 @@ JSValue EventTargetInstance::getPropertyHandler(JSString *p) {
 
 void EventTargetInstance::finalize(JSRuntime *rt, JSValue val) {
   auto *eventTarget = static_cast<EventTargetInstance *>(JS_GetOpaque(val, EventTarget::classId(val)));
-  if (eventTarget->context()->isValid()) {
-    JS_FreeValue(eventTarget->m_ctx, eventTarget->instanceObject);
-  }
   delete eventTarget;
 }
 

@@ -211,9 +211,6 @@ JSValue Blob::text(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
 
 void BlobInstance::finalize(JSRuntime *rt, JSValue val) {
   auto *eventTarget = static_cast<BlobInstance *>(JS_GetOpaque(val, Blob::kBlobClassID));
-  if (eventTarget->context()->isValid()) {
-    JS_FreeValue(eventTarget->m_ctx, eventTarget->instanceObject);
-  }
   delete eventTarget;
 }
 

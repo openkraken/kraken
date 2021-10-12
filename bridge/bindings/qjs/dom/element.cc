@@ -601,7 +601,6 @@ JSClassID ElementInstance::classID() {
 }
 
 ElementInstance::~ElementInstance() {
-  KRAKEN_LOG(VERBOSE) << "Element instance released " << JS_VALUE_GET_PTR(instanceObject);
 }
 
 JSValue ElementInstance::internalGetTextContent() {
@@ -782,7 +781,6 @@ ElementInstance::ElementInstance(Element *element, std::string tagName, bool sho
                  Document::instance(
                    element->m_context)), Element::classId(), exoticMethods, "Element") {
 
-  KRAKEN_LOG(VERBOSE) << "New Element " << JS_VALUE_GET_PTR(instanceObject) << " " << m_tagName;
 
   m_attributes = new ElementAttributes(m_context);
   m_style = new StyleDeclarationInstance(CSSStyleDeclaration::instance(m_context), this);
