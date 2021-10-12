@@ -52,7 +52,6 @@ class CSSLengthValue {
   double? _computedValue;
   double get computedValue {
 
-    RenderStyle renderStyle = this.renderStyle!;
     switch (unit) {
       case CSSLengthUnit.PX:
         _computedValue = value;
@@ -61,36 +60,36 @@ class CSSLengthValue {
         // Font size of the parent, in the case of typographical properties like font-size,
         // and font size of the element itself, in the case of other properties like width.
         if (propertyName == FONT_SIZE) {
-          _computedValue = value! * renderStyle.parent!.fontSize.computedValue;
+          _computedValue = value! * renderStyle!.parent!.fontSize.computedValue;
         } else {
-          _computedValue = value! * renderStyle.fontSize.computedValue;
+          _computedValue = value! * renderStyle!.fontSize.computedValue;
         }
         break;
       case CSSLengthUnit.REM:
         // Font rem is calculated against the root element's font size.
-        _computedValue = value! * renderStyle.rootFontSize;
+        _computedValue = value! * renderStyle!.rootFontSize;
         break;
       case CSSLengthUnit.VH:
-        _computedValue = value! * renderStyle.viewportSize.height;
+        _computedValue = value! * renderStyle!.viewportSize.height;
         break;
       case CSSLengthUnit.VW:
-        _computedValue = value! * renderStyle.viewportSize.width;
+        _computedValue = value! * renderStyle!.viewportSize.width;
         break;
       // 1% of viewport's smaller (vw or vh) dimension.
       // If the height of the viewport is less than its width, 1vmin will be equivalent to 1vh.
       // If the width of the viewport is less than it’s height, 1vmin is equvialent to 1vw.
       case CSSLengthUnit.VMIN:
-        _computedValue = value! * renderStyle.viewportSize.shortestSide;
+        _computedValue = value! * renderStyle!.viewportSize.shortestSide;
         break;
       case CSSLengthUnit.VMAX:
-        _computedValue = value! * renderStyle.viewportSize.longestSide;
+        _computedValue = value! * renderStyle!.viewportSize.longestSide;
         break;
       case CSSLengthUnit.PERCENTAGE:
-        CSSPositionType positionType = renderStyle.position;
+        CSSPositionType positionType = renderStyle!.position;
         bool isPositioned = positionType == CSSPositionType.absolute ||
           positionType == CSSPositionType.fixed;
 
-        RenderStyle? parentRenderStyle = renderStyle.parent;
+        RenderStyle? parentRenderStyle = renderStyle!.parent;
         double? relativeParentWidth = isPositioned ?
           parentRenderStyle?.paddingBoxWidth ?? parentRenderStyle?.paddingBoxLogicalWidth :
           parentRenderStyle?.contentBoxWidth ?? parentRenderStyle?.contentBoxLogicalWidth;
@@ -110,7 +109,7 @@ class CSSLengthValue {
         switch (propertyName) {
           case LINE_HEIGHT:
             // Relative to the font size of the element itself.
-            _computedValue = value! * renderStyle.fontSize.computedValue;
+            _computedValue = value! * renderStyle!.fontSize.computedValue;
             break;
           case WIDTH:
           case MIN_WIDTH:
@@ -167,8 +166,8 @@ class CSSLengthValue {
           case BORDER_BOTTOM_RIGHT_RADIUS:
             // Percentages for the horizontal axis refer to the width of the box.
             // Percentages for the vertical axis refer to the height of the box.
-            double? borderBoxWidth = renderStyle.borderBoxWidth ?? renderStyle.borderBoxLogicalWidth;
-            double? borderBoxHeight = renderStyle.borderBoxHeight ?? renderStyle.borderBoxLogicalHeight;
+            double? borderBoxWidth = renderStyle!.borderBoxWidth ?? renderStyle!.borderBoxLogicalWidth;
+            double? borderBoxHeight = renderStyle!.borderBoxHeight ?? renderStyle!.borderBoxLogicalHeight;
             if (axisType == Axis.horizontal && borderBoxWidth != null) {
               _computedValue = value! * borderBoxWidth;
             } else if (axisType == Axis.vertical && borderBoxHeight != null) {
