@@ -4,6 +4,7 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
@@ -75,7 +76,11 @@ mixin CSSPositionMixin on RenderStyleBase {
     // Needs to sort children when parent paint children
     if (renderBoxModel!.parentData is RenderLayoutParentData) {
       RenderLayoutBox parent = renderBoxModel!.parent as RenderLayoutBox;
-      parent.markNeedsSortChildren();
+      final RenderLayoutParentData parentData = renderBoxModel!.parentData as RenderLayoutParentData;
+      RenderBox? nextSibling = parentData.nextSibling;
+
+      parent.sortedChildren.remove(renderBoxModel);
+      parent.insertChildIntoSortedChildren(renderBoxModel!, after: nextSibling);
     }
   }
 

@@ -37,6 +37,7 @@ public:
     void internalSetTextContent(JSStringRef content, JSValueRef *exception) override;
 
     NativeTextNode *nativeTextNode {nullptr};
+    std::string toString();
 
   private:
     JSStringHolder m_data{context, ""};

@@ -470,5 +470,142 @@ describe('z-index', () => {
     div.appendChild(div3);
 
     await simulateClick(10, 10);
-  })
+  });
+
+  it('works with zIndex order in flow layout', async (done) => {
+    let div = createElement(
+      'div', {
+        style: {
+          position: 'relative',
+          width: '200px',
+          height: '400px',
+        },
+      });
+
+    let div1 = createElement(
+      'div', {
+        style: {
+            position: 'relative',
+            top: '50px',
+            width: '200px',
+            height: '100px',
+            backgroundColor: 'green',
+            zIndex: 1,
+        },
+      });
+
+    let div2 = createElement(
+      'div', {
+        style: {
+            width: '200px',
+            height: '100px',
+            backgroundColor: 'yellow',
+        },
+      });
+
+    let div3 = createElement(
+      'div', {
+        style: {
+            width: '200px',
+            height: '100px',
+            backgroundColor: 'red',
+            position: 'absolute',
+            top: '120px',
+        },
+      });
+    let div4 = createElement(
+      'div', {
+        style: {
+            position: 'relative',
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'pink',
+        },
+      });
+    
+    BODY.appendChild(div);
+    div.appendChild(div1);
+    div.appendChild(div2);
+  
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+        div.removeChild(div2);
+        div.appendChild(div3);
+        div.insertBefore(div4, div3);
+        div4.style.zIndex = 10;
+        await snapshot();
+        done();
+    });
+  });
+
+  it('works with zIndex order in flex layout', async (done) => {
+    let div = createElement(
+      'div', {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'relative',
+          width: '200px',
+          height: '400px',
+        },
+      });
+
+    let div1 = createElement(
+      'div', {
+        style: {
+            position: 'relative',
+            top: '50px',
+            width: '200px',
+            height: '100px',
+            backgroundColor: 'green',
+            zIndex: 1,
+        },
+      });
+
+    let div2 = createElement(
+      'div', {
+        style: {
+            width: '200px',
+            height: '100px',
+            backgroundColor: 'yellow',
+        },
+      });
+
+    let div3 = createElement(
+      'div', {
+        style: {
+            width: '200px',
+            height: '100px',
+            backgroundColor: 'red',
+            position: 'absolute',
+            top: '120px',
+        },
+      });
+    let div4 = createElement(
+      'div', {
+        style: {
+            position: 'relative',
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'pink',
+        },
+      });
+    
+    BODY.appendChild(div);
+    div.appendChild(div1);
+    div.appendChild(div2);
+  
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+        div.removeChild(div2);
+        div.appendChild(div3);
+        div.insertBefore(div4, div3);
+        div4.style.zIndex = 10;
+        await snapshot();
+        done();
+    });
+  });
+
 });
