@@ -18,6 +18,33 @@ enum CSSOverflowType {
   clip
 }
 
+// Styles which need to copy from outer scrolling box to inner scrolling content box.
+List<String> _scrollingContentBoxCopyStyles = [
+  DISPLAY,
+  LINE_HEIGHT,
+  TEXT_ALIGN,
+  WHITE_SPACE,
+  FLEX_DIRECTION,
+  FLEX_WRAP,
+  ALIGN_CONTENT,
+  ALIGN_ITEMS,
+  ALIGN_SELF,
+  JUSTIFY_CONTENT,
+  COLOR,
+  TEXT_DECORATION_LINE,
+  TEXT_DECORATION_COLOR,
+  TEXT_DECORATION_STYLE,
+  FONT_WEIGHT,
+  FONT_STYLE,
+  FONT_FAMILY,
+  FONT_SIZE,
+  LETTER_SPACING,
+  WORD_SPACING,
+  TEXT_SHADOW,
+  TEXT_OVERFLOW,
+  LINE_CLAMP,
+];
+
 mixin CSSOverflowMixin on RenderStyleBase {
   CSSOverflowType? _overflowX;
   CSSOverflowType get overflowX {
@@ -279,6 +306,11 @@ mixin ElementOverflowMixin on ElementBase {
 
     element.updateRenderBoxModel(shouldRepaintSelf: true);
     scrollingContentLayoutBox = element.createScrollingContentLayout();
+
+    // Manually copy already set filtered styles to the renderStyle of scrollingContentLayoutBox.
+    _scrollingContentBoxCopyStyles.forEach((String styleProperty) {
+      scrollingContentBoxStyleListener(styleProperty, null, '');
+    });
 
     // If outer scrolling box already has children in the case of element already attached,
     // move them into the children of inner scrolling box.
