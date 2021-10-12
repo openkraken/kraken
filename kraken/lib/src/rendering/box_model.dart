@@ -173,44 +173,22 @@ class RenderLayoutBox extends RenderBoxModel
     }
   }
 
-  // Mark this container to sort children by zIndex properties.
-  // When children have positioned elements, which needs to reorder and paint earlier than flow layout renderObjects.
-  void markNeedsSortChildren() {
-    _isChildrenSorted = false;
+  // Sort children by zIndex, used for paint and hitTest.
+  List<RenderObject> _sortedChildren = [];
+
+  List<RenderObject> get sortedChildren {
+    return _sortedChildren;
   }
 
-  bool _isChildrenSorted = false;
-
-  bool get isChildrenSorted => _isChildrenSorted;
-
-  List<RenderObject?>? _sortedChildren;
-
-  List<RenderObject?> get sortedChildren {
-    if (_sortedChildren == null) return [];
-    return _sortedChildren!;
-  }
-
-  set sortedChildren(List<RenderObject?> value) {
-    _isChildrenSorted = true;
+  set sortedChildren(List<RenderObject> value) {
     _sortedChildren = value;
   }
 
+  // No need to override [all] and [addAll] method cause they invoke [insert] method eventually.
   @override
   void insert(RenderBox child, {RenderBox? after}) {
     super.insert(child, after: after);
-    _isChildrenSorted = false;
-  }
-
-  @override
-  void add(RenderBox child) {
-    super.add(child);
-    _isChildrenSorted = false;
-  }
-
-  @override
-  void addAll(List<RenderBox>? children) {
-    super.addAll(children);
-    _isChildrenSorted = false;
+    insertChildIntoSortedChildren(child, after: after);
   }
 
   @override
@@ -222,19 +200,81 @@ class RenderLayoutBox extends RenderBoxModel
       }
     }
     super.remove(child);
-    _isChildrenSorted = false;
+    sortedChildren.remove(child);
   }
 
   @override
   void removeAll() {
     super.removeAll();
-    _isChildrenSorted = false;
+    sortedChildren = [];
   }
 
   @override
   void move(RenderBox child, {RenderBox? after}) {
     super.move(child, after: after);
-    _isChildrenSorted = false;
+    sortedChildren.remove(child);
+    insertChildIntoSortedChildren(child, after: after);
+  }
+
+  // Sort siblings by zIndex.
+  // Should be override in child Class according to different zIndex rule of Flow and Flex layout.
+  int sortSiblingsByZIndex(RenderObject prev, RenderObject next) {
+    return -1;
+  }
+
+  // Insert child in sortedChildren.
+  void insertChildIntoSortedChildren(RenderBox child, {RenderBox? after}) {
+    List<RenderObject> children = getChildrenAsList();
+
+    // No need to paint position holder.
+    if (child is RenderPositionHolder) {
+      return;
+    }
+    // Find the real renderBox of position holder to insert cause the position holder may be
+    // moved before its real renderBox which will cause the insert order wrong.
+    if (after is RenderPositionHolder && sortedChildren.contains(after.realDisplayedBox)) {
+      after = after.realDisplayedBox;
+    }
+
+    // Original index to insert into ignoring zIndex.
+    int oriIdx = after != null ? sortedChildren.indexOf(after) + 1 : sortedChildren.length;
+    // The final index to insert into considering zIndex after comparing with siblings.
+    int insertIdx = oriIdx;
+
+    // Compare zIndex to previous siblings first, if found sibling zIndex bigger than
+    // child, insert child at that position directly, otherwise compare zIndex to next siblings.
+    if (oriIdx > 0) {
+      while(insertIdx > 0) {
+        RenderObject prevSibling = sortedChildren[insertIdx - 1];
+        int priority = sortSiblingsByZIndex(prevSibling, child);
+        // Compare the siblings' render tree order if their zIndex priority are the same.
+        if (priority > 0 ||
+          (priority == 0 && children.indexOf(prevSibling) > children.indexOf(child))
+        ) {
+          insertIdx--;
+        } else {
+          break;
+        }
+      }
+    }
+
+    // If no previous siblings has zIndex bigger than child, compare zIndex to next siblings.
+    if (insertIdx == oriIdx && insertIdx < sortedChildren.length) {
+      while(insertIdx < sortedChildren.length) {
+        RenderObject nextSibling = sortedChildren[insertIdx];
+        int priority = sortSiblingsByZIndex(child, nextSibling);
+        // Compare the siblings' render tree order if their zIndex priority are the same.
+        if (priority > 0 ||
+          (priority == 0 && children.indexOf(child) > children.indexOf(nextSibling))
+        ) {
+          insertIdx++;
+        } else {
+          break;
+        }
+      }
+    }
+
+    sortedChildren.insert(insertIdx, child);
   }
 
   // Get all children as a list and detach them all.

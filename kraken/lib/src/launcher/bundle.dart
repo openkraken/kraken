@@ -149,7 +149,7 @@ class NetworkAssetBundle extends AssetBundle {
   @override
   Future<ByteData> load(String key) async {
     final HttpClientRequest request = await httpClient.getUrl(_urlFromKey(key));
-    KrakenHttpOverrides.setContextHeader(request, contextId);
+    KrakenHttpOverrides.setContextHeader(request.headers, contextId);
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok)
       throw FlutterError.fromParts(<DiagnosticsNode>[

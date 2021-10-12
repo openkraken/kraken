@@ -111,4 +111,8 @@ void JSTextNode::TextNodeInstance::internalSetTextContent(JSStringRef content, J
     ->addCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
 }
 
+std::string JSTextNode::TextNodeInstance::toString() {
+  return m_data.string();
+}
+
 } // namespace kraken::binding::jsc

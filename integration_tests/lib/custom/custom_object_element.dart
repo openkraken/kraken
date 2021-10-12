@@ -137,8 +137,8 @@ class CustomObjectElement implements ObjectElementClient {
   @override
   void dispose() {
     objectElementHost.updateChildTextureBox(null);
-    controller!.pause();
-    controller!.dispose();
+    controller?.pause();
+    controller?.dispose();
     controller = null;
   }
 
@@ -147,8 +147,8 @@ class CustomObjectElement implements ObjectElementClient {
 
   @override
   void didDetachRenderer() {
-    controller!.pause();
-    controller!.dispose();
+    controller?.pause();
+    controller?.dispose();
     controller = null;
   }
 
