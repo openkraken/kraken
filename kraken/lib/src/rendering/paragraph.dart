@@ -136,7 +136,6 @@ class KrakenRenderParagraph extends RenderBox
   set textAlign(TextAlign value) {
     if (_textPainter.textAlign == value) return;
     _textPainter.textAlign = value;
-    markNeedsLayout();
   }
 
   /// The directionality of the text.
@@ -184,7 +183,6 @@ class KrakenRenderParagraph extends RenderBox
     if (_overflow == value) return;
     _overflow = value;
     _textPainter.ellipsis = value == TextOverflow.ellipsis ? _kEllipsis : null;
-    markNeedsLayout();
   }
 
   /// The number of font pixels for each logical pixel.
@@ -197,7 +195,6 @@ class KrakenRenderParagraph extends RenderBox
     if (_textPainter.textScaleFactor == value) return;
     _textPainter.textScaleFactor = value;
     _overflowShader = null;
-    markNeedsLayout();
   }
 
   /// An optional maximum number of lines for the text to span, wrapping if
@@ -212,7 +209,6 @@ class KrakenRenderParagraph extends RenderBox
     if (_textPainter.maxLines == value) return;
     _textPainter.maxLines = value;
     _overflowShader = null;
-    markNeedsLayout();
   }
 
   /// Used by this paragraph's internal [TextPainter] to select a
@@ -230,7 +226,6 @@ class KrakenRenderParagraph extends RenderBox
     if (_textPainter.locale == value) return;
     _textPainter.locale = value;
     _overflowShader = null;
-    markNeedsLayout();
   }
 
   /// {@macro flutter.painting.textPainter.strutStyle}

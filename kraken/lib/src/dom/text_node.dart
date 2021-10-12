@@ -98,9 +98,6 @@ class TextNode extends Node {
       _renderTextBox!.renderStyle = _parentElement.renderStyle;
       _renderTextBox!.data = data;
 
-      _updateLineHeight();
-      _updateTextAlign();
-
       RenderLayoutBox? parentRenderLayoutBox;
       if (_parentElement.scrollingContentLayoutBox != null) {
         parentRenderLayoutBox = _parentElement.scrollingContentLayoutBox!;
@@ -115,17 +112,6 @@ class TextNode extends Node {
     // Migrate element's size type to RenderTextBox.
     _renderTextBox!.widthSizeType = width;
     _renderTextBox!.heightSizeType = height;
-  }
-
-  void _updateTextAlign() {
-    KrakenRenderParagraph renderParagraph = _renderTextBox!.child as KrakenRenderParagraph;
-    Element _parentElement = parentElement!;
-    renderParagraph.textAlign = _parentElement.renderStyle.textAlign;
-  }
-
-  void _updateLineHeight() {
-    KrakenRenderParagraph renderParagraph = _renderTextBox!.child as KrakenRenderParagraph;
-    renderParagraph.lineHeight = parentElement!.renderStyle.lineHeight.computedValue;
   }
 
   // Attach renderObject of current node to parent
