@@ -389,6 +389,11 @@ mixin RenderOverflowMixin on RenderBox {
         );
         _oldClipRRectLayer = context.pushClipRRect(needsCompositing, offset, clipRect, clipRRect, painter, oldLayer: _oldClipRRectLayer);
       } else {
+        if (_oldClipRectLayer != null && _oldClipRectLayer!.debugDisposed) {
+          _oldClipRectLayer = null;
+          return;
+        }
+
         _oldClipRectLayer = context.pushClipRect(needsCompositing, offset, clipRect, painter, oldLayer: _oldClipRectLayer);
       }
     } else {
