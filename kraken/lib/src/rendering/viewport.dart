@@ -21,11 +21,11 @@ class RenderViewportBox extends RenderProxyBox
   })  : _viewportSize = viewportSize,
         super(child) {
     if (gestureListener != null && gestureListener!.onDrag != null) {
-      _verticalDragGestureRecognizer.onUpdate = _horizontalDragRecognizer.onUpdate = onDragUpdate;
+      _verticalDragGestureRecognizer.onUpdate = _horizontalDragGestureRecognizer.onUpdate = onDragUpdate;
 
-      _verticalDragGestureRecognizer.onStart = _horizontalDragRecognizer.onStart = onDragStart;
+      _verticalDragGestureRecognizer.onStart = _horizontalDragGestureRecognizer.onStart = onDragStart;
 
-      _verticalDragGestureRecognizer.onEnd = _horizontalDragRecognizer.onEnd = onDragEnd;
+      _verticalDragGestureRecognizer.onEnd = _horizontalDragGestureRecognizer.onEnd = onDragEnd;
     }
 
     this.controller = controller;
@@ -62,7 +62,7 @@ class RenderViewportBox extends RenderProxyBox
 
   final VerticalDragGestureRecognizer _verticalDragGestureRecognizer =
       VerticalDragGestureRecognizer();
-  final HorizontalDragGestureRecognizer _horizontalDragRecognizer =
+  final HorizontalDragGestureRecognizer _horizontalDragGestureRecognizer =
       HorizontalDragGestureRecognizer();
 
   @override
