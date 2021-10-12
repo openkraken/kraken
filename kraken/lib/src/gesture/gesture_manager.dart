@@ -22,8 +22,8 @@ class GestureManager {
     if (_instance == null) {
       _instance = GestureManager._();
 
-      _instance!.gestures[EVENT_CLICK] = ClickGestureRecognizer();
-      (_instance!.gestures[EVENT_CLICK] as ClickGestureRecognizer).onClick = _instance!.onClick;
+      _instance!.gestures[EVENT_CLICK] = TapGestureRecognizer();
+      (_instance!.gestures[EVENT_CLICK] as TapGestureRecognizer).onTapUp = _instance!.onTapUp;
 
       _instance!.gestures[EVENT_DOUBLE_CLICK] = DoubleTapGestureRecognizer();
       (_instance!.gestures[EVENT_DOUBLE_CLICK] as DoubleTapGestureRecognizer).onDoubleTap = _instance!.onDoubleClick;
@@ -210,10 +210,10 @@ class GestureManager {
     }
   }
 
-  void onClick(String eventType, { PointerDownEvent? down, PointerUpEvent? up }) {
+  void onTapUp(TapUpDetails details) {
     if (_target != null && _target!.onClick != null) {
       if (_target!.onClick != null) {
-        _target!.onClick!(eventType, up: up);
+        _target!.onClick!(EVENT_CLICK, details);
       }
     }
   }

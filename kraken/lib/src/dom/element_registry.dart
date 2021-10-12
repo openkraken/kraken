@@ -68,6 +68,7 @@ void defineBuiltInElements() {
   defineElement(FIGURE, (id, nativePtr, elementManager) => FigureElement(id, nativePtr.cast<NativeElement>(), elementManager));
   defineElement(FIGCAPTION, (id, nativePtr, elementManager) => FigureCaptionElement(id, nativePtr.cast<NativeElement>(), elementManager));
   defineElement(BLOCKQUOTE, (id, nativePtr, elementManager) => BlockQuotationElement(id, nativePtr.cast<NativeElement>(), elementManager));
+  defineElement(TEMPLATE, (id, nativePtr, elementManager) => TemplateElement(id, nativePtr.cast<NativeElement>(), elementManager));
   // Sections
   defineElement(ADDRESS, (id, nativePtr, elementManager) => AddressElement(id, nativePtr.cast<NativeElement>(), elementManager));
   defineElement(ARTICLE, (id, nativePtr, elementManager) => ArticleElement(id, nativePtr.cast<NativeElement>(), elementManager));

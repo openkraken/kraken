@@ -59,6 +59,8 @@ private:
   JSFunctionHolder m_replaceState{context, jsObject, this, "replaceState", replaceState};
 };
 
+void bindHistory(std::unique_ptr<JSContext> &context);
+
 } // namespace kraken::binding::jsc
 
 #endif // KRAKENBRIDGE_HISTORY_H

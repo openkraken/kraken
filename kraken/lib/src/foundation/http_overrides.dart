@@ -19,16 +19,16 @@ class KrakenHttpOverrides extends HttpOverrides {
     return _instance!;
   }
 
-  static int? getContextHeader(HttpClientRequest request) {
-    String? intVal = request.headers.value(HttpHeaderContext);
+  static int? getContextHeader(HttpHeaders headers) {
+    String? intVal = headers.value(HttpHeaderContext);
     if (intVal == null) {
       return null;
     }
     return int.tryParse(intVal);
   }
 
-  static void setContextHeader(HttpClientRequest request, int contextId) {
-    request.headers.set(HttpHeaderContext, contextId.toString());
+  static void setContextHeader(HttpHeaders headers, int contextId) {
+    headers.set(HttpHeaderContext, contextId.toString());
   }
 
   final HttpOverrides? parentHttpOverrides = HttpOverrides.current;
@@ -64,11 +64,7 @@ class KrakenHttpOverrides extends HttpOverrides {
       nativeHttpClient = super.createHttpClient(context);
     }
 
-    HttpClient httpClient = ProxyHttpClient(
-      nativeHttpClient: nativeHttpClient,
-      httpOverrides: this,
-    );
-    return httpClient;
+    return ProxyHttpClient(nativeHttpClient, this);
   }
 
   @override

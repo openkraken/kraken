@@ -17,11 +17,12 @@
 #include "bindings/jsc/DOM/comment_node.h"
 #include "bindings/jsc/DOM/custom_event.h"
 #include "bindings/jsc/DOM/document.h"
+#include "bindings/jsc/DOM/document_fragment.h"
 #include "bindings/jsc/DOM/element.h"
 #include "bindings/jsc/DOM/elements/image_element.h"
 #include "bindings/jsc/DOM/elements/input_element.h"
 #include "bindings/jsc/DOM/elements/svg_element.h"
-#include "bindings/jsc/DOM/elements/document_fragment.h"
+#include "bindings/jsc/DOM/elements/template_element.h"
 #include "bindings/jsc/DOM/event.h"
 #include "bindings/jsc/DOM/event_target.h"
 #include "bindings/jsc/DOM/events/close_event.h"
@@ -86,8 +87,6 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 
   m_context = binding::jsc::createJSContext(contextId, errorHandler, this);
 
-  m_html_parser = binding::jsc::createHTMLParser(m_context, errorHandler, this);
-
 #if ENABLE_PROFILE
   auto nativePerformance = binding::jsc::NativePerformance::instance(m_context->uniqueId);
   nativePerformance->mark(PERF_JS_CONTEXT_INIT_START, jsContextStartTime);
@@ -119,8 +118,10 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindImageElement(m_context);
   bindInputElement(m_context);
   bindSVGElement(m_context);
+  bindTemplateElement(m_context);
   bindDocumentFragment(m_context);
   bindWindow(m_context);
+  bindHistory(m_context);
   bindPerformance(m_context);
   bindCSSStyleDeclaration(m_context);
   bindScreen(m_context);
@@ -210,7 +211,24 @@ NativeString* JSBridge::getHref() {
 void JSBridge::parseHTML(const NativeString *script, const char *url) {
   if (!m_context->isValid()) return;
 
-  m_html_parser->parseHTML(script->string, script->length);
+  // find body.
+  ElementInstance* body;
+  auto document = DocumentInstance::instance(m_context.get());
+  for (int i = 0; i < document->documentElement->childNodes.size(); ++i) {
+    NodeInstance* node = document->documentElement->childNodes[i];
+    ElementInstance* element = reinterpret_cast<ElementInstance *>(node);
+
+    if (element->tagName() == "BODY") {
+      body = element;
+      break;
+    }
+  }
+
+  JSStringRef sourceRef = JSStringCreateWithCharacters(script->string, script->length);
+
+  HTMLParser::instance()->parseHTML(m_context.get(), sourceRef, document->documentElement);
+
+  JSStringRelease(sourceRef);
 }
 
 // Eval javascript.
