@@ -70,12 +70,12 @@ class ProxyHttpClient implements HttpClient {
 
   @override
   set authenticate(Future<bool> Function(Uri url, String scheme, String? realm)? f) {
-    nativeHttpClient.authenticate = f;
+    _nativeHttpClient.authenticate = f;
   }
 
   @override
   set authenticateProxy(Future<bool> Function(String host, int port, String scheme, String? realm)? f) {
-    nativeHttpClient.authenticateProxy = f;
+    _nativeHttpClient.authenticateProxy = f;
   }
 
   @override
@@ -170,13 +170,13 @@ class ProxyHttpClient implements HttpClient {
   Future<HttpClientRequest> deleteUrl(Uri url) => _openUrl('delete', url);
 }
 
-HttpHeaders createHttpHeaders({ Map<String, String>? initialHeaders }) {
+HttpHeaders createHttpHeaders({Map<String, String>? initialHeaders}) {
   return _HttpHeaders(initialHeaders: initialHeaders);
 }
 
 class _HttpHeaders implements HttpHeaders {
   final Map<String, dynamic> _headers = <String, Object>{};
-  _HttpHeaders({ Map<String, String>? initialHeaders }) {
+  _HttpHeaders({Map<String, String>? initialHeaders}) {
     if (initialHeaders != null) {
       _headers.addAll(initialHeaders);
     }
@@ -350,7 +350,8 @@ class _HttpHeaders implements HttpHeaders {
   String toString() {
     StringBuffer sb = StringBuffer();
     _headers.forEach((String name, dynamic value) {
-      sb..write(name)
+      sb
+        ..write(name)
         ..write(': ')
         ..write(value)
         ..write('\n');
