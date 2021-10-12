@@ -156,6 +156,15 @@ JSValueRef StyleDeclarationInstance::internalGetPropertyValue(std::string &name,
   return properties[name];
 }
 
+std::string StyleDeclarationInstance::toString() {
+  std::string s = "";
+  for (auto &prop : properties) {
+    s += prop.first + ": " + JSStringToStdString(JSValueToStringCopy(ctx, prop.second, nullptr)) + ";";
+  }
+
+  return s == "" ? "" : "style=\"" + s + "\"";
+}
+
 JSValueRef CSSStyleDeclaration::setProperty(JSContextRef ctx, JSObjectRef function,
                                                                       JSObjectRef thisObject, size_t argumentCount,
                                                                       const JSValueRef *arguments,
