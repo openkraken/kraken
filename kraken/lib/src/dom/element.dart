@@ -809,12 +809,13 @@ class Element extends Node
 
     if (renderBoxModel is RenderLayoutBox) {
       RenderLayoutBox? prevRenderLayoutBox = renderBoxModel as RenderLayoutBox?;
+      bool isPreRendererAttached = isRendererAttached;
       if (originalDisplay != CSSDisplay.none) {
         // Don't updateRenderBoxModel twice.
         updateRenderBoxModel();
       }
 
-      bool shouldReattach = isRendererAttached && parent != null && prevRenderLayoutBox != renderBoxModel;
+      bool shouldReattach = isPreRendererAttached && parent != null && prevRenderLayoutBox != renderBoxModel;
 
       if (shouldReattach) {
         RenderLayoutBox parentRenderObject = parentElement!.renderBoxModel as RenderLayoutBox;
