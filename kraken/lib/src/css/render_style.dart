@@ -419,9 +419,9 @@ class RenderStyle
     Size? size = renderBoxModel!.boxSize;
 
     double parentHorizontalBorderWidth = parentRenderStyle.borderEdge != null ?
-      parentRenderStyle.borderEdge!.horizontal : 0;
+      parentRenderStyle.borderEdge.horizontal : 0;
     double parentVerticalBorderWidth = parentRenderStyle.borderEdge != null ?
-      parentRenderStyle.borderEdge!.vertical : 0;
+      parentRenderStyle.borderEdge.vertical : 0;
     double parentHorizontalPaddingWidth = parentRenderStyle.padding.horizontal;
     double parentVerticalPaddingHeight = parentRenderStyle.padding.vertical;
 

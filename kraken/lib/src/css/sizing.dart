@@ -77,6 +77,7 @@ mixin CSSSizingMixin on RenderStyleBase {
   }
 
   void _markSelfAndParentNeedsLayout() {
+    if (renderBoxModel == null) return;
     RenderBoxModel boxModel = renderBoxModel!;
     boxModel.markNeedsLayout();
     // Sizing may affect parent size, mark parent as needsLayout in case
