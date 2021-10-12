@@ -526,7 +526,6 @@ void NodeInstance::internalSetTextContent(JSValue content) {}
 JSValue NodeInstance::internalReplaceChild(NodeInstance *newChild, NodeInstance *oldChild) {
   assert_m(JS_IsNull(newChild->parentNode), "ReplaceChild Error: newChild was not detached.");
   oldChild->removeParentNode();
-  oldChild->unrefer();
 
   int32_t childIndex = arrayFindIdx(m_ctx, childNodes, oldChild->instanceObject);
   if (childIndex == -1) {
@@ -536,7 +535,6 @@ JSValue NodeInstance::internalReplaceChild(NodeInstance *newChild, NodeInstance 
   newChild->setParentNode(this);
 
   arraySpliceValue(m_ctx, childNodes, childIndex, 1, newChild->instanceObject);
-  newChild->refer();
 
   oldChild->_notifyNodeRemoved(this);
   newChild->_notifyNodeInsert(this);

@@ -438,7 +438,7 @@ void arraySpliceValue(QjsContext *ctx, JSValue array, uint32_t start, uint32_t d
   JSValue arguments[] = {
     JS_NewUint32(ctx, start),
     JS_NewUint32(ctx, deleteCount),
-    JS_DupValue(ctx, replacedValue)
+    replacedValue
   };
   JSValue result = JS_Call(ctx, spliceMethod, array, 3, arguments);
   JS_FreeValue(ctx, spliceMethod);
