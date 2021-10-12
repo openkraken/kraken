@@ -12,7 +12,7 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 
 mixin RenderStyleBase {
-  // Follwing properties used for exposing APIs
+  // Following properties used for exposing APIs
   // for class that extends [RenderStyleBase].
   late ElementDelegate elementDelegate;
   late CSSStyleDeclaration style;
