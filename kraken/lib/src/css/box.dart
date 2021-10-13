@@ -119,14 +119,18 @@ mixin CSSBoxMixin on RenderStyleBase {
   ///     (PS. Only support solid now.)
   ///   borderColor: <color>
 
-  /// Border-width
+  /// Border-width = <length> | thin | medium | thick
+  
+  // Initial value: medium
+  final CSSLengthValue _mediumWidth = CSSLengthValue(3, CSSLengthUnit.PX);
+
   CSSLengthValue? _borderTopWidth;
   set borderTopWidth(CSSLengthValue? value) {
     if (value == _borderTopWidth) return;
     _borderTopWidth = value;
     renderBoxModel!.markNeedsLayout();
   }
-  CSSLengthValue get borderTopWidth => _borderTopWidth ?? CSSLengthValue.zero;
+  CSSLengthValue get borderTopWidth => _borderTopWidth ?? _mediumWidth;
 
   CSSLengthValue? _borderRightWidth;
   set borderRightWidth(CSSLengthValue? value) {
@@ -134,7 +138,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     _borderRightWidth = value;
     renderBoxModel!.markNeedsLayout();
   }
-  CSSLengthValue get borderRightWidth => _borderRightWidth ?? CSSLengthValue.zero;
+  CSSLengthValue get borderRightWidth => _borderRightWidth ?? _mediumWidth;
 
   CSSLengthValue? _borderBottomWidth;
   set borderBottomWidth(CSSLengthValue? value) {
@@ -142,7 +146,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     _borderBottomWidth = value;
     renderBoxModel!.markNeedsLayout();
   }
-  CSSLengthValue get borderBottomWidth => _borderBottomWidth ?? CSSLengthValue.zero;
+  CSSLengthValue get borderBottomWidth => _borderBottomWidth ?? _mediumWidth;
 
   CSSLengthValue? _borderLeftWidth;
   set borderLeftWidth(CSSLengthValue? value) {
@@ -150,7 +154,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     _borderLeftWidth = value;
     renderBoxModel!.markNeedsLayout();
   }
-  CSSLengthValue get borderLeftWidth => _borderLeftWidth ?? CSSLengthValue.zero;
+  CSSLengthValue get borderLeftWidth => _borderLeftWidth ?? _mediumWidth;
 
   /// Border-color
   Color? get borderTopColor => _borderTopColor;
