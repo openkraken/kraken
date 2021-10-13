@@ -35,8 +35,8 @@ function defineGlobalProperty(key: string, value: any, isEnumerable: boolean = t
   Object.defineProperty(globalThis, key, {
     value: value,
     enumerable: isEnumerable,
-    writable: false,
-    configurable: false
+    writable: true,
+    configurable: true
   });
 }
 
