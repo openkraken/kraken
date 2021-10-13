@@ -65,6 +65,7 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
                            JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
     JSValue arguments[] = {errorObject};
     returnValue = JS_Call(ctx, callback, context->global(), 1, arguments);
+    JS_FreeValue(ctx, errorObject);
   } else {
     std::u16string argumentString = std::u16string(reinterpret_cast<const char16_t *>(json->string), json->length);
     std::string utf8Arguments = toUTF8(argumentString);
