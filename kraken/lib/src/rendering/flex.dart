@@ -2272,9 +2272,9 @@ class RenderFlexLayout extends RenderLayoutBox {
     double marginTop = renderStyle.marginTop.computedValue;
     double marginBottom = renderStyle.marginBottom.computedValue;
     bool isParentFlowLayout = parent is RenderFlowLayout;
-    CSSDisplay? transformedDisplay = renderStyle.transformedDisplay;
-    bool isDisplayInline = transformedDisplay != CSSDisplay.block &&
-        transformedDisplay != CSSDisplay.flex;
+    CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
+    bool isDisplayInline = effectiveDisplay != CSSDisplay.block &&
+        effectiveDisplay != CSSDisplay.flex;
     // Use margin bottom as baseline if layout has no children
     if (flexLineBoxMetrics.isEmpty) {
       if (isDisplayInline) {

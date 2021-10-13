@@ -348,7 +348,7 @@ class RenderLayoutBox extends RenderBoxModel
       bool isChildInline = true;
       if (child is RenderBoxModel) {
         CSSDisplay? childTransformedDisplay =
-            child.renderStyle.transformedDisplay;
+            child.renderStyle.effectiveDisplay;
         if (childTransformedDisplay == CSSDisplay.block ||
             childTransformedDisplay == CSSDisplay.flex) {
           isChildInline = false;
@@ -418,9 +418,9 @@ class RenderLayoutBox extends RenderBoxModel
       layoutHeight = math.max(specifiedHeight, contentHeight!);
     }
 
-    CSSDisplay? transformedDisplay = renderStyle.transformedDisplay;
-    bool isInlineBlock = transformedDisplay == CSSDisplay.inlineBlock;
-    bool isNotInline = transformedDisplay != CSSDisplay.inline;
+    CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
+    bool isInlineBlock = effectiveDisplay == CSSDisplay.inlineBlock;
+    bool isNotInline = effectiveDisplay != CSSDisplay.inline;
     double? width = renderStyle.width?.computedValue;
     double? height = renderStyle.height?.computedValue;
     double? minWidth = renderStyle.minWidth?.computedValue;
@@ -804,8 +804,8 @@ class RenderBoxModel extends RenderBox
       return constraints;
     }
 
-    CSSDisplay? transformedDisplay = renderStyle.transformedDisplay;
-    bool isDisplayInline = transformedDisplay == CSSDisplay.inline;
+    CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
+    bool isDisplayInline = effectiveDisplay == CSSDisplay.inline;
 
     EdgeInsets borderEdge = renderStyle.border;
     EdgeInsetsGeometry? padding = renderStyle.padding;
