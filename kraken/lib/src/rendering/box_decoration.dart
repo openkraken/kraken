@@ -119,7 +119,7 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
       if (decoration.isComplex) context.setIsComplexHint();
     }
     Offset contentOffset;
-    EdgeInsets borderEdge = renderStyle.borderEdge;
+    EdgeInsets borderEdge = renderStyle.border;
     contentOffset = offset.translate(borderEdge.left, borderEdge.top);
     super.paint(context, contentOffset);
     if (decorationPosition == DecorationPosition.foreground) {
@@ -130,7 +130,7 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
 
   void debugBoxDecorationProperties(DiagnosticPropertiesBuilder properties) {
     properties
-        .add(DiagnosticsProperty('borderEdge', renderStyle.borderEdge));
+        .add(DiagnosticsProperty('borderEdge', renderStyle.border));
     if (renderStyle.backgroundClip != null)
       properties.add(
           DiagnosticsProperty('backgroundClip', renderStyle.backgroundClip));
