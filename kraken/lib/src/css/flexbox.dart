@@ -231,9 +231,9 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     if (CSSFlex.isVerticalFlexDirection(flexDirection)) {
       TextAlign textAlign = (this as RenderStyle).textAlign;
       if (textAlign == TextAlign.right) {
-        alignItems = AlignItems.flexEnd;
+        return AlignItems.flexEnd;
       } else if (textAlign == TextAlign.center) {
-        alignItems = AlignItems.center;
+        return AlignItems.center;
       }
     }
     return alignItems;
