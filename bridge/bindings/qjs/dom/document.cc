@@ -282,9 +282,9 @@ JSValue Document::getElementsByClassName(QjsContext *ctx, JSValue this_val, int 
   traverseNode(document->m_documentElement, [ctx, className, &elements](NodeInstance *node) {
     if (node->nodeType == NodeType::ELEMENT_NODE) {
       auto element = reinterpret_cast<ElementInstance *>(node);
-//      if(element->classNames()->containsAll(className)) {
-//        elements.emplace_back(element);
-//      }
+      if(element->classNames()->containsAll(className)) {
+        elements.emplace_back(element);
+      }
     }
 
     return false;
