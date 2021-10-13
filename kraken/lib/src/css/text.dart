@@ -403,31 +403,17 @@ class CSSText {
   }
 
   static double DEFAULT_LINE_HEIGHT = 1.2;
-  static double? parseLineHeight(String value, {
-    Size? viewportSize,
-    double? rootFontSize,
-    required double fontSize
-  }) {
-    double? lineHeight;
+  static CSSLengthValue? resolveLineHeight(String value, RenderStyle renderStyle, String propertyName) {
     if (value.isNotEmpty) {
       if (CSSLength.isLength(value)) {
-        double lineHeightValue = CSSLength.toDisplayPortValue(
-          value, viewportSize:
-          viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-        )!;
-        if (lineHeightValue > 0) {
-          lineHeight = lineHeightValue;
-        }
-      } else {
+        return CSSLength.parseLength(value, renderStyle, propertyName);
+      } else if (CSSNumber.isNumber(value)){
         double? multipliedNumber = double.tryParse(value);
-        if (multipliedNumber != null && multipliedNumber > 0) {
-          lineHeight = fontSize * multipliedNumber;
+        if (multipliedNumber != null) {
+          return CSSLengthValue(multipliedNumber, CSSLengthUnit.EM, renderStyle, propertyName);
         }
       }
     }
-    return lineHeight;
   }
 
   /// In CSS2.1, text-decoration determin the type of text decoration,

@@ -1082,7 +1082,7 @@ class Element extends Node
         renderStyle.fontSize = CSSLength.parseLength(present, renderStyle, property);
         break;
       case LINE_HEIGHT:
-        renderStyle.lineHeight = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.lineHeight = CSSText.resolveLineHeight(present, renderStyle, property);
         break;
       case LETTER_SPACING:
         renderStyle.letterSpacing = CSSText.resolveSpacing(present, renderStyle, property);
