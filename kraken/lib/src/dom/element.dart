@@ -954,10 +954,10 @@ class Element extends Node
         renderStyle.backgroundRepeat = CSSBackground.resolveBackgroundRepeat(present);
         break;
       case BACKGROUND_POSITION_X:
-        renderStyle.backgroundPositionX = CSSPosition.parsePosition(present, renderStyle, true);
+        renderStyle.backgroundPositionX = CSSPosition.resolveBackgroundPosition(present, renderStyle, property, true);
         break;
       case BACKGROUND_POSITION_Y:
-        renderStyle.backgroundPositionY = CSSPosition.parsePosition(present, renderStyle, false);
+        renderStyle.backgroundPositionY = CSSPosition.resolveBackgroundPosition(present, renderStyle, property, false);
         break;
       case BACKGROUND_SIZE:
         renderStyle.backgroundSize = CSSBackground.resolveBackgroundSize(present, renderStyle, property);

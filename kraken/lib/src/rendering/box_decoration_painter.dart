@@ -706,9 +706,9 @@ void _paintImage({
   final double halfHeightDelta = (outputSize.height - destinationSize.height) / 2.0;
 
   // Use position as length type if specified in positionX/ positionY, otherwise use as percentage type.
-  final double dx = positionX.length != null ? positionX.length! :
+  final double dx = positionX.length != null ? positionX.length!.computedValue :
   halfWidthDelta + (flipHorizontally ? -positionX.percentage! : positionX.percentage!) * halfWidthDelta;
-  final double dy = positionY.length != null ? positionY.length! :
+  final double dy = positionY.length != null ? positionY.length!.computedValue :
   halfHeightDelta + positionY.percentage! * halfHeightDelta;
 
   final Offset destinationPosition = rect.topLeft.translate(dx, dy);

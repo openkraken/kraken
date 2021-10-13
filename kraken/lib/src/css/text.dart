@@ -604,18 +604,6 @@ class CSSText {
   }
 
   static CSSLengthValue DEFAULT_FONT_SIZE = CSSLengthValue(16.0, CSSLengthUnit.PX);
-  static double? parseFontSize(String value, {
-    Size? viewportSize,
-    double? rootFontSize,
-    double? fontSize
-  }) {
-    return CSSLength.toDisplayPortValue(
-      value,
-      viewportSize: viewportSize,
-      rootFontSize: rootFontSize,
-      fontSize: fontSize
-    );
-  }
 
   static CSSLengthValue resolveSpacing(String spacing, RenderStyle renderStyle, String property) {
     if (spacing == NORMAL) return CSSLengthValue.zero;

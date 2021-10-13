@@ -276,7 +276,7 @@ class CSSBackgroundPosition {
     this.percentage,
   });
   /// Absolute position to image container when length type is set.
-  double? length;
+  CSSLengthValue? length;
   /// Relative position to image container when keyword or percentage type is set.
   double? percentage;
 }
