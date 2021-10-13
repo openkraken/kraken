@@ -373,13 +373,6 @@ class ImageElement extends Element {
   void setProperty(String key, dynamic value) {
     bool propertyChanged = properties[key] != value;
     super.setProperty(key, value);
-    double? rootFontSize;
-    double? fontSize;
-    if (renderBoxModel != null) {
-      rootFontSize = renderBoxModel!.elementDelegate.getRootElementFontSize();
-      fontSize = renderBoxModel!.renderStyle.fontSize.computedValue;
-    }
-
     // Reset frame number to zero when image needs to reload
     _frameCount = 0;
     if (key == 'src' && propertyChanged && !_shouldLazyLoading) {
@@ -390,28 +383,10 @@ class ImageElement extends Element {
       // Should reset lazy when value change.
       _resetLazyLoading();
     } else if (key == WIDTH) {
-      if (value is String && _isNumber(value)) {
-        value += 'px';
-      }
-
-      _propertyWidth = CSSLength.toDisplayPortValue(
-        value,
-        viewportSize: viewportSize,
-        rootFontSize: rootFontSize,
-        fontSize: fontSize
-      );
+      _propertyWidth = CSSNumber.parseNumber(value);
       _resize();
     } else if (key == HEIGHT) {
-      if (value is String && _isNumber(value)) {
-        value += 'px';
-      }
-
-      _propertyHeight = CSSLength.toDisplayPortValue(
-        value,
-        viewportSize: viewportSize,
-        rootFontSize: rootFontSize,
-        fontSize: fontSize
-      );
+      _propertyHeight = CSSNumber.parseNumber(value);
       _resize();
     }
   }
