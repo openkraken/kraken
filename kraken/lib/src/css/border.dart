@@ -48,34 +48,28 @@ class CSSBorderSide {
     return borderStyle;
   }
 
-  static double? getBorderWidth(String input, RenderStyle renderStyle) {
-    Size viewportSize = renderStyle.viewportSize;
-    RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
-    double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
-    double fontSize = renderStyle.fontSize.computedValue;
+  static final CSSLengthValue _thinWidth = CSSLengthValue(1, CSSLengthUnit.PX);
+  static final CSSLengthValue _mediumWidth = CSSLengthValue(3, CSSLengthUnit.PX);
+  static final CSSLengthValue _thickWidth = CSSLengthValue(5, CSSLengthUnit.PX);
 
+  static CSSLengthValue? resolveBorderWidth(String input, RenderStyle renderStyle, String propertyName) {
     // https://drafts.csswg.org/css2/#border-width-properties
     // The interpretation of the first three values depends on the user agent.
     // The following relationships must hold, however:
     // thin ≤ medium ≤ thick.
-    double? borderWidth;
+    CSSLengthValue? borderWidth;
     switch (input) {
       case THIN:
-        borderWidth = 1;
+        borderWidth = _thinWidth;
         break;
       case MEDIUM:
-        borderWidth = 3;
+        borderWidth = _mediumWidth;
         break;
       case THICK:
-        borderWidth = 5;
+        borderWidth = _thickWidth;
         break;
       default:
-        borderWidth = CSSLength.toDisplayPortValue(
-          input,
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-        );
+        borderWidth = CSSLength.parseLength(input, renderStyle, propertyName);
     }
     return borderWidth;
   }

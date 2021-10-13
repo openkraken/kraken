@@ -969,16 +969,16 @@ class Element extends Node
         renderStyle.backgroundOrigin = CSSBackground.resolveBackgroundOrigin(present);
         break;
       case BORDER_LEFT_WIDTH:
-        renderStyle.borderLeftWidth = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.borderLeftWidth = CSSBorderSide.resolveBorderWidth(present, renderStyle, property);
         break;
       case BORDER_TOP_WIDTH:
-        renderStyle.borderTopWidth = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.borderTopWidth = CSSBorderSide.resolveBorderWidth(present, renderStyle, property);
         break;
       case BORDER_RIGHT_WIDTH:
-        renderStyle.borderRightWidth = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.borderRightWidth = CSSBorderSide.resolveBorderWidth(present, renderStyle, property);
         break;
       case BORDER_BOTTOM_WIDTH:
-        renderStyle.borderBottomWidth = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.borderBottomWidth = CSSBorderSide.resolveBorderWidth(present, renderStyle, property);
         break;
       case BORDER_LEFT_STYLE:
         renderStyle.borderLeftStyle = CSSBorderSide.resolveBorderStyle(present);
