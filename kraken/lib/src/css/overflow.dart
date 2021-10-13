@@ -304,7 +304,7 @@ mixin ElementOverflowMixin on ElementBase {
     RenderObject? layoutBoxParent = renderBoxModel!.parent as RenderObject?;
     RenderObject? previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
 
-    element.updateRenderBoxModel(shouldRepaintSelf: true);
+    element.createRenderBoxModel(shouldRepaintSelf: true);
     scrollingContentLayoutBox = element.createScrollingContentLayout();
 
     // Manually copy already set filtered styles to the renderStyle of scrollingContentLayoutBox.
@@ -337,7 +337,7 @@ mixin ElementOverflowMixin on ElementBase {
     RenderObject? layoutBoxParent = renderBoxModel!.parent as RenderObject?;
     RenderObject? previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
 
-    element.updateRenderBoxModel(shouldRepaintSelf: false);
+    element.createRenderBoxModel(shouldRepaintSelf: false);
     RenderLayoutBox newLayoutBox = element.renderBoxModel as RenderLayoutBox;
 
     _attachRenderObject(element, layoutBoxParent, previousSibling, newLayoutBox);

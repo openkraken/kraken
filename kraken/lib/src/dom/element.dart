@@ -270,11 +270,11 @@ class Element extends Node
     if (renderer != null) {
       return renderer!;
     }
-    updateRenderBoxModel();
+    createRenderBoxModel();
     return renderer!;
   }
 
-  void updateRenderBoxModel({ bool? shouldRepaintSelf }) {
+  void createRenderBoxModel({ bool? shouldRepaintSelf }) {
     // Content children layout, BoxModel content.
     if (_isIntrinsicBox) {
       _renderIntrinsic = _createRenderIntrinsic(repaintSelf: shouldRepaintSelf ?? repaintSelf, prevRenderIntrinsic: _renderIntrinsic);
@@ -423,7 +423,7 @@ class Element extends Node
       }
     }
 
-    updateRenderBoxModel(shouldRepaintSelf: repaintSelf);
+    createRenderBoxModel(shouldRepaintSelf: repaintSelf);
 
     if (parentRenderObject is ContainerRenderObjectMixin) {
       _parentElement.addChildRenderObject(this, after: previousSibling);
@@ -801,7 +801,7 @@ class Element extends Node
         after = (parent.renderBoxModel as RenderLayoutBox).lastChild;
       }
       // Update renderBoxModel and attach it to parent.
-      updateRenderBoxModel();
+      createRenderBoxModel();
       parent.addChildRenderObject(this, after: after);
       // FIXME: avoid ensure something in display updating.
       ensureChildAttached();
@@ -812,7 +812,7 @@ class Element extends Node
       bool isPreRendererAttached = isRendererAttached;
       if (originalDisplay != CSSDisplay.none) {
         // Don't updateRenderBoxModel twice.
-        updateRenderBoxModel();
+        createRenderBoxModel();
       }
 
       bool shouldReattach = isPreRendererAttached && parent != null && prevRenderLayoutBox != renderBoxModel;
