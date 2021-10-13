@@ -17,8 +17,6 @@ import 'package:kraken/rendering.dart';
 
 const String IMAGE = 'IMG';
 
-final RegExp _numExp = RegExp(r'^\d+');
-
 // FIXME: should be inline default.
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
