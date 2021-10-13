@@ -492,6 +492,7 @@ void EventTargetInstance::setPropertyHandler(JSString *p, JSValue value) {
   if (JS_IsNull(value)) {
     JS_FreeAtom(m_ctx, atom);
     list_del(&atomJob->link);
+    JS_DeleteProperty(m_ctx, m_propertyEventHandler, atom, 0);
     return;
   }
 
