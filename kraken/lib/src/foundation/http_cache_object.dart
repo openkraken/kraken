@@ -134,15 +134,13 @@ class HttpCacheObject {
   bool isDateTimeValid() => expiredTime != null && expiredTime!.isAfter(DateTime.now());
 
   // Validate the cache-control and expires.
-  Future<bool> hitLocalCache(HttpClientRequest request) async {
-    if (!valid) {
-      await read();
-    }
-    return isDateTimeValid();
+  bool hitLocalCache(HttpClientRequest request) {
+    return valid && isDateTimeValid();
   }
 
   /// Read the index file.
   Future<void> read() async {
+    if (_valid) return;
     final bool isIndexFileExist = await _file.exists();
     if (!isIndexFileExist) {
       // Index file not exist, dispose.
@@ -172,6 +170,12 @@ class HttpCacheObject {
       // Read contentLength.
       contentLength = byteData.getUint32(index, Endian.little);
       index += 4;
+
+      // Invalid cache blob size, mark as invalid.
+      if (await _blob.length != contentLength) {
+        _valid = false;
+        return;
+      }
 
       // Read url.
       int urlLength = byteData.getUint32(index, Endian.little);
@@ -243,10 +247,11 @@ class HttpCacheObject {
 
   // Remove all the cached files.
   Future<void> remove() async {
-    await Future.wait([
-      _file.delete(),
-      _blob.remove(),
-    ]);
+    if (await _file.exists()) {
+      await _file.delete();
+    }
+    await _blob.remove();
+
     _valid = false;
   }
 
@@ -350,6 +355,15 @@ class HttpCacheObjectBlob extends EventSink<List<int>> {
 
   HttpCacheObjectBlob(this.path) : _file = File(path);
 
+  // The length of the file.
+  Future<int> get length async {
+    if (await exists()) {
+      return await _file.length();
+    } else {
+      return 0;
+    }
+  }
+
   @override
   void add(List<int> data) {
     _writer ??= _file.openWrite();
@@ -370,6 +384,8 @@ class HttpCacheObjectBlob extends EventSink<List<int>> {
     // Ensure buffer has been written.
     await _writer?.flush();
     await _writer?.close();
+
+    _writer = null;
   }
 
   Future<bool> exists() {
@@ -381,6 +397,9 @@ class HttpCacheObjectBlob extends EventSink<List<int>> {
   }
 
   Future<void> remove() async {
-    await _file.delete();
+    if (await _file.exists()) {
+      await _file.delete();
+    }
+    close();
   }
 }

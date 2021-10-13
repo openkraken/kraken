@@ -5,7 +5,7 @@
 
 #include "node.h"
 #include "document.h"
-#include "bindings/jsc/DOM/elements/document_fragment.h"
+#include "document_fragment.h"
 
 namespace kraken::binding::jsc {
 

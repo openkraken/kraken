@@ -203,114 +203,117 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
   JSElement::ElementProperty &property = propertyMap[name];
 
   switch (property) {
-  case JSElement::ElementProperty::className: {
-    std::string str = "class";
-    JSValueRef classRef = (*m_attributes)->getProperty(str, exception);
-    return classRef;
-    break;
-  }
-  case JSElement::ElementProperty::nodeName:
-  case JSElement::ElementProperty::tagName: {
-    return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(tagName().c_str()));
-  }
-  case JSElement::ElementProperty::attributes:
-  case JSElement::ElementProperty::style: {
-    return nullptr;
-  }
-  case JSElement::ElementProperty::offsetLeft: {
-    getDartMethod()->flushUICommand();
-    assert_m(nativeElement->getViewModuleProperty != nullptr,
-             "Failed to execute getViewModuleProperty(): dart method is nullptr.");
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
-                                                nativeElement, static_cast<int64_t>(ViewModuleProperty::offsetLeft)));
-  }
-  case JSElement::ElementProperty::offsetTop: {
-    getDartMethod()->flushUICommand();
-    assert_m(nativeElement->getViewModuleProperty != nullptr,
-             "Failed to execute getViewModuleProperty(): dart method is nullptr.");
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
-                                                nativeElement, static_cast<int64_t>(ViewModuleProperty::offsetTop)));
-  }
-  case JSElement::ElementProperty::offsetWidth: {
-    getDartMethod()->flushUICommand();
-    assert_m(nativeElement->getViewModuleProperty != nullptr,
-             "Failed to execute getViewModuleProperty(): dart method is nullptr.");
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
-                                                nativeElement, static_cast<int64_t>(ViewModuleProperty::offsetWidth)));
-  }
-  case JSElement::ElementProperty::offsetHeight: {
-    getDartMethod()->flushUICommand();
-    assert_m(nativeElement->getViewModuleProperty != nullptr,
-             "Failed to execute getViewModuleProperty(): dart method is nullptr.");
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
-                                                nativeElement, static_cast<int64_t>(ViewModuleProperty::offsetHeight)));
-  }
-  case JSElement::ElementProperty::clientWidth: {
-    getDartMethod()->flushUICommand();
-    assert_m(nativeElement->getViewModuleProperty != nullptr,
-             "Failed to execute getViewModuleProperty(): dart method is nullptr.");
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
-                                                nativeElement, static_cast<int64_t>(ViewModuleProperty::clientWidth)));
-  }
-  case JSElement::ElementProperty::clientHeight: {
-    getDartMethod()->flushUICommand();
-    assert_m(nativeElement->getViewModuleProperty != nullptr,
-             "Failed to execute getViewModuleProperty(): dart method is nullptr.");
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
-                                                nativeElement, static_cast<int64_t>(ViewModuleProperty::clientHeight)));
-  }
-  case JSElement::ElementProperty::clientTop: {
-    getDartMethod()->flushUICommand();
-    assert_m(nativeElement->getViewModuleProperty != nullptr,
-             "Failed to execute getViewModuleProperty(): dart method is nullptr.");
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
-                                                nativeElement, static_cast<int64_t>(ViewModuleProperty::clientTop)));
-  }
-  case JSElement::ElementProperty::clientLeft: {
-    getDartMethod()->flushUICommand();
-    assert_m(nativeElement->getViewModuleProperty != nullptr,
-             "Failed to execute getViewModuleProperty(): dart method is nullptr.");
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
-                                                nativeElement, static_cast<int64_t>(ViewModuleProperty::clientLeft)));
-  }
-  case JSElement::ElementProperty::scrollTop: {
-    getDartMethod()->flushUICommand();
-    assert_m(nativeElement->getViewModuleProperty != nullptr,
-             "Failed to execute getViewModuleProperty(): dart method is nullptr.");
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
-                                                nativeElement, static_cast<int64_t>(ViewModuleProperty::scrollTop)));
-  }
-  case JSElement::ElementProperty::scrollLeft: {
-    getDartMethod()->flushUICommand();
-    assert_m(nativeElement->getViewModuleProperty != nullptr,
-             "Failed to execute getViewModuleProperty(): dart method is nullptr.");
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
-                                                nativeElement, static_cast<int64_t>(ViewModuleProperty::scrollLeft)));
-  }
-  case JSElement::ElementProperty::scrollHeight: {
-    getDartMethod()->flushUICommand();
-    assert_m(nativeElement->getViewModuleProperty != nullptr,
-             "Failed to execute getViewModuleProperty(): dart method is nullptr.");
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
-                                                nativeElement, static_cast<int64_t>(ViewModuleProperty::scrollHeight)));
-  }
-  case JSElement::ElementProperty::scrollWidth: {
-    getDartMethod()->flushUICommand();
-    assert_m(nativeElement->getViewModuleProperty != nullptr,
-             "Failed to execute getViewModuleProperty(): dart method is nullptr.");
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
-                                                nativeElement, static_cast<int64_t>(ViewModuleProperty::scrollWidth)));
-  }
-  case JSElement::ElementProperty::children: {
-    std::vector<JSValueRef> arguments;
-    for (auto &childNode : childNodes) {
-      if (childNode->nodeType == NodeType::ELEMENT_NODE) {
-        arguments.emplace_back(childNode->object);
-      }
+    case JSElement::ElementProperty::className: {
+      std::string str = "class";
+      JSValueRef classRef = (*m_attributes)->getProperty(str, exception);
+      return classRef;
+      break;
     }
+    case JSElement::ElementProperty::nodeName:
+    case JSElement::ElementProperty::tagName: {
+      return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(tagName().c_str()));
+    }
+    case JSElement::ElementProperty::attributes:
+    case JSElement::ElementProperty::style: {
+      return nullptr;
+    }
+    case JSElement::ElementProperty::offsetLeft: {
+      getDartMethod()->flushUICommand();
+      assert_m(nativeElement->getViewModuleProperty != nullptr,
+               "Failed to execute getViewModuleProperty(): dart method is nullptr.");
+      return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
+                                                  nativeElement, static_cast<int64_t>(ViewModuleProperty::offsetLeft)));
+    }
+    case JSElement::ElementProperty::offsetTop: {
+      getDartMethod()->flushUICommand();
+      assert_m(nativeElement->getViewModuleProperty != nullptr,
+               "Failed to execute getViewModuleProperty(): dart method is nullptr.");
+      return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
+                                                  nativeElement, static_cast<int64_t>(ViewModuleProperty::offsetTop)));
+    }
+    case JSElement::ElementProperty::offsetWidth: {
+      getDartMethod()->flushUICommand();
+      assert_m(nativeElement->getViewModuleProperty != nullptr,
+               "Failed to execute getViewModuleProperty(): dart method is nullptr.");
+      return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
+                                                  nativeElement, static_cast<int64_t>(ViewModuleProperty::offsetWidth)));
+    }
+    case JSElement::ElementProperty::offsetHeight: {
+      getDartMethod()->flushUICommand();
+      assert_m(nativeElement->getViewModuleProperty != nullptr,
+               "Failed to execute getViewModuleProperty(): dart method is nullptr.");
+      return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
+                                                  nativeElement, static_cast<int64_t>(ViewModuleProperty::offsetHeight)));
+    }
+    case JSElement::ElementProperty::clientWidth: {
+      getDartMethod()->flushUICommand();
+      assert_m(nativeElement->getViewModuleProperty != nullptr,
+               "Failed to execute getViewModuleProperty(): dart method is nullptr.");
+      return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
+                                                  nativeElement, static_cast<int64_t>(ViewModuleProperty::clientWidth)));
+    }
+    case JSElement::ElementProperty::clientHeight: {
+      getDartMethod()->flushUICommand();
+      assert_m(nativeElement->getViewModuleProperty != nullptr,
+               "Failed to execute getViewModuleProperty(): dart method is nullptr.");
+      return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
+                                                  nativeElement, static_cast<int64_t>(ViewModuleProperty::clientHeight)));
+    }
+    case JSElement::ElementProperty::clientTop: {
+      getDartMethod()->flushUICommand();
+      assert_m(nativeElement->getViewModuleProperty != nullptr,
+               "Failed to execute getViewModuleProperty(): dart method is nullptr.");
+      return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
+                                                  nativeElement, static_cast<int64_t>(ViewModuleProperty::clientTop)));
+    }
+    case JSElement::ElementProperty::clientLeft: {
+      getDartMethod()->flushUICommand();
+      assert_m(nativeElement->getViewModuleProperty != nullptr,
+               "Failed to execute getViewModuleProperty(): dart method is nullptr.");
+      return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
+                                                  nativeElement, static_cast<int64_t>(ViewModuleProperty::clientLeft)));
+    }
+    case JSElement::ElementProperty::scrollTop: {
+      getDartMethod()->flushUICommand();
+      assert_m(nativeElement->getViewModuleProperty != nullptr,
+               "Failed to execute getViewModuleProperty(): dart method is nullptr.");
+      return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
+                                                  nativeElement, static_cast<int64_t>(ViewModuleProperty::scrollTop)));
+    }
+    case JSElement::ElementProperty::scrollLeft: {
+      getDartMethod()->flushUICommand();
+      assert_m(nativeElement->getViewModuleProperty != nullptr,
+               "Failed to execute getViewModuleProperty(): dart method is nullptr.");
+      return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
+                                                  nativeElement, static_cast<int64_t>(ViewModuleProperty::scrollLeft)));
+    }
+    case JSElement::ElementProperty::scrollHeight: {
+      getDartMethod()->flushUICommand();
+      assert_m(nativeElement->getViewModuleProperty != nullptr,
+               "Failed to execute getViewModuleProperty(): dart method is nullptr.");
+      return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
+                                                  nativeElement, static_cast<int64_t>(ViewModuleProperty::scrollHeight)));
+    }
+    case JSElement::ElementProperty::scrollWidth: {
+      getDartMethod()->flushUICommand();
+      assert_m(nativeElement->getViewModuleProperty != nullptr,
+               "Failed to execute getViewModuleProperty(): dart method is nullptr.");
+      return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(
+                                                  nativeElement, static_cast<int64_t>(ViewModuleProperty::scrollWidth)));
+    }
+    case JSElement::ElementProperty::children: {
+      std::vector<JSValueRef> arguments;
+      for (auto &childNode : childNodes) {
+        if (childNode->nodeType == NodeType::ELEMENT_NODE) {
+          arguments.emplace_back(childNode->object);
+        }
+      }
 
-    return JSObjectMakeArray(_hostClass->ctx, arguments.size(), arguments.data(), nullptr);
-  }
+      return JSObjectMakeArray(_hostClass->ctx, arguments.size(), arguments.data(), nullptr);
+    }
+    case JSElement::ElementProperty::innerHTML: {
+      return JSValueMakeString(ctx, JSStringCreateWithUTF8CString(toString().c_str()));
+    }
   }
 
   return nullptr;
@@ -350,6 +353,10 @@ bool ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRe
                "Failed to execute setScrollLeft(): dart method is nullptr.");
       nativeElement->setViewModuleProperty(nativeElement, static_cast<int64_t>(ViewModuleProperty::scrollLeft),
                                            JSValueToNumber(_hostClass->ctx, value, exception));
+      break;
+    }
+    case JSElement::ElementProperty::innerHTML: {
+      HTMLParser::instance()->parseHTML(context, JSValueToStringCopy(ctx, value, exception), this);
       break;
     }
     default:
@@ -739,6 +746,38 @@ void ElementInstance::_beforeUpdateId(JSValueRef oldId, JSValueRef newId) {
   if (newId != nullptr) {
     document()->addElementById(newId, this);
   }
+}
+
+std::string ElementInstance::toString() {
+  std::string s = "<" + this->getRegisteredTagName();
+
+  auto attributes = *m_attributes;
+  std::map<std::string, JSValueRef> &attributesMap = attributes->getAttributesMap();
+  auto &&iter = attributesMap.begin();
+  while (iter != attributesMap.end()) {
+    s += " " + iter->first + "=\"" + JSStringToStdString(JSValueToStringCopy(ctx, iter->second, nullptr)) + "\"";
+    iter++;
+  }
+
+  auto styleDeclarationInstance = static_cast<StyleDeclarationInstance *>(*m_style);
+  s += " " + styleDeclarationInstance->toString();
+
+  s += ">";
+
+  // Children toString.
+  for (auto iter : childNodes) {
+    if (iter->nodeType == NodeType::ELEMENT_NODE) {
+      ElementInstance* element = static_cast<ElementInstance *>(iter);
+      s += element->toString();
+    } else if (iter->nodeType == NodeType::TEXT_NODE) {
+      JSTextNode::TextNodeInstance* textNode = static_cast<JSTextNode::TextNodeInstance *>(iter);
+      s += textNode->toString();
+    }
+  }
+
+  s += "</" + this->getRegisteredTagName() + ">";
+
+  return s;
 }
 
 std::string ElementInstance::getRegisteredTagName() {

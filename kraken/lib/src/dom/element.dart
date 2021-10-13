@@ -406,6 +406,7 @@ class Element extends Node
 
     RenderObject? parentRenderObject = _renderBoxModel.parent as RenderObject?;
     RenderBox? previousSibling;
+    List<RenderObject>? sortedChildren;
     // Remove old renderObject
     if (parentRenderObject is ContainerRenderObjectMixin) {
       ContainerParentDataMixin<RenderBox>? _parentData = _renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>?;
@@ -419,12 +420,22 @@ class Element extends Node
             previousSibling = _parentData.previousSibling;
           }
         }
+        // Cache sortedChildren cause it will be cleared when renderLayoutBox is detached from tree.
+        if (_renderBoxModel is RenderLayoutBox) {
+          sortedChildren = _renderBoxModel.sortedChildren;
+        }
         parentRenderObject.remove(_renderBoxModel);
       }
     }
 
     createRenderBoxModel(shouldRepaintSelf: repaintSelf);
 
+    // Assign sortedChildren to newly created RenderLayoutBox.
+    if (renderBoxModel is RenderLayoutBox && sortedChildren != null) {
+      (renderBoxModel as RenderLayoutBox).sortedChildren = sortedChildren;
+    }
+
+    // Append new renderObject
     if (parentRenderObject is ContainerRenderObjectMixin) {
       _parentElement.addChildRenderObject(this, after: previousSibling);
     } else if (parentRenderObject is RenderObjectWithChildMixin) {

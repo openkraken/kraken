@@ -169,17 +169,19 @@ private:
 
 class HTMLParser {
 public:
-  HTMLParser(std::unique_ptr<JSContext> &context, const JSExceptionHandler &handler, void *owner);
-  KRAKEN_EXPORT bool parseHTML(const uint16_t *code, size_t codeLength);
+  bool parseHTML(JSContext* context, JSStringRef sourceRef, NodeInstance* rootNode);
+
+  static HTMLParser* instance() {
+    if (m_instance == nullptr) {
+      m_instance = new HTMLParser();
+    }
+    return m_instance;
+  }
 
 private:
-  std::unique_ptr<JSContext> &m_context;
-  JSExceptionHandler _handler;
-  void *owner;
-
-  void traverseHTML(GumboNode *node, ElementInstance *element);
-
-  void parseProperty(ElementInstance *element, GumboElement *gumboElement);
+  static HTMLParser* m_instance;
+  void traverseHTML(JSContext* context, GumboNode *node, NodeInstance *rootNode);
+  void parseProperty(JSContext* context, ElementInstance *element, GumboElement *gumboElement);
 };
 
 class KRAKEN_EXPORT JSFunctionHolder {
@@ -891,6 +893,7 @@ public:
   bool internalSetProperty(std::string &name, JSValueRef value, JSValueRef *exception);
   void internalRemoveProperty(std::string &name, JSValueRef *exception);
   JSValueRef internalGetPropertyValue(std::string &name, JSValueRef *exception);
+  std::string toString();
 
 private:
   std::unordered_map<std::string, JSValueRef> properties;
@@ -901,9 +904,9 @@ using ElementCreator = ElementInstance *(*)(JSContext *context);
 
 class KRAKEN_EXPORT JSElement : public JSNode {
 public:
-  DEFINE_OBJECT_PROPERTY(Element, 18, style, attributes, nodeName, tagName, offsetLeft, offsetTop, offsetWidth,
+  DEFINE_OBJECT_PROPERTY(Element, 19, style, attributes, nodeName, tagName, offsetLeft, offsetTop, offsetWidth,
                          offsetHeight, clientWidth, clientHeight, clientTop, clientLeft, scrollTop, scrollLeft,
-                         scrollHeight, scrollWidth, children, className);
+                         scrollHeight, scrollWidth, children, className, innerHTML);
 
   DEFINE_PROTOTYPE_OBJECT_PROPERTY(Element, 10, getBoundingClientRect, getAttribute, setAttribute, hasAttribute,
                                    removeAttribute, toBlob, click, scroll, scrollBy, scrollTo);
@@ -979,12 +982,10 @@ public:
   void setStyle(JSHostClassHolder &style);
   void setAttributes(JSHostObjectHolder<JSElementAttributes> &attributes);
   SpaceSplitString classNames();
-
   NativeElement *nativeElement{nullptr};
-
   std::string tagName();
-
   std::string getRegisteredTagName();
+  std::string toString();
 
 private:
   friend JSElement;
