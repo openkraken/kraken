@@ -157,7 +157,7 @@ mixin CSSBoxMixin on RenderStyleBase {
   CSSLengthValue get borderLeftWidth => _borderLeftWidth ?? _mediumWidth;
 
   /// Border-color
-  Color? get borderTopColor => _borderTopColor;
+  Color get borderTopColor => _borderTopColor ?? currentColor;
   Color? _borderTopColor;
   set borderTopColor(Color? value) {
     if (value == _borderTopColor) return;
@@ -165,7 +165,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     renderBoxModel!.markNeedsPaint();
   }
 
-  Color? get borderRightColor => _borderRightColor;
+  Color get borderRightColor => _borderRightColor ?? currentColor;
   Color? _borderRightColor;
   set borderRightColor(Color? value) {
     if (value == _borderRightColor) return;
@@ -173,7 +173,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     renderBoxModel!.markNeedsPaint();
   }
 
-  Color? get borderBottomColor => _borderBottomColor;
+  Color get borderBottomColor => _borderBottomColor ?? currentColor;
   Color? _borderBottomColor;
   set borderBottomColor(Color? value) {
     if (value == _borderBottomColor) return;
@@ -181,7 +181,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     renderBoxModel!.markNeedsPaint();
   }
 
-  Color? get borderLeftColor => _borderLeftColor;
+  Color get borderLeftColor => _borderLeftColor ?? currentColor;
   Color? _borderLeftColor;
   set borderLeftColor(Color? value) {
     if (value == _borderLeftColor) return;
@@ -190,7 +190,7 @@ mixin CSSBoxMixin on RenderStyleBase {
   }
 
   /// Border-style
-  BorderStyle? get borderTopStyle => _borderTopStyle;
+  BorderStyle get borderTopStyle => _borderTopStyle ?? BorderStyle.none;
   BorderStyle? _borderTopStyle;
   set borderTopStyle(BorderStyle? value) {
     if (value == _borderTopStyle) return;
@@ -198,7 +198,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     renderBoxModel!.markNeedsPaint();
   }
 
-  BorderStyle? get borderRightStyle => _borderRightStyle;
+  BorderStyle get borderRightStyle => _borderRightStyle ?? BorderStyle.none;
   BorderStyle? _borderRightStyle;
   set borderRightStyle(BorderStyle? value) {
     if (value == _borderRightStyle) return;
@@ -206,7 +206,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     renderBoxModel!.markNeedsPaint();
   }
 
-  BorderStyle? get borderBottomStyle => _borderBottomStyle;
+  BorderStyle get borderBottomStyle => _borderBottomStyle ?? BorderStyle.none;
   BorderStyle? _borderBottomStyle;
   set borderBottomStyle(BorderStyle? value) {
     if (value == _borderBottomStyle) return;
@@ -214,7 +214,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     renderBoxModel!.markNeedsPaint();
   }
 
-  BorderStyle? get borderLeftStyle => _borderLeftStyle;
+  BorderStyle get borderLeftStyle => _borderLeftStyle ?? BorderStyle.none;
   BorderStyle? _borderLeftStyle;
   set borderLeftStyle(BorderStyle? value) {
     if (value == _borderLeftStyle) return;

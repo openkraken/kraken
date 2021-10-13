@@ -19,6 +19,7 @@ mixin RenderStyleBase {
   RenderBoxModel? get renderBoxModel => elementDelegate.getRenderBoxModel();
   Size get viewportSize => elementDelegate.getViewportSize();
   double get rootFontSize => style.target!.elementManager.getRootFontSize();
+  Color get currentColor => (this as RenderStyle).color;
 }
 
 class RenderStyle

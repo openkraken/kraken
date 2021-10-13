@@ -212,7 +212,7 @@ class CSSBoxShadow {
         String? colorDefinition = shadowDefinitions[0];
         Color? color;
         if (colorDefinition == CURRENT_COLOR || colorDefinition == null) {
-          color = renderStyle.color;
+          color = renderStyle.currentColor;
         } else {
           color = CSSColor.parseColor(colorDefinition);
         }

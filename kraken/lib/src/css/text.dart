@@ -29,18 +29,16 @@ mixin CSSTextMixin on RenderStyleBase {
   }
 
   set color(Color? value) {
-    if (value == null || _color == value) return;
+    if (_color == value) return;
     _color = value;
     // Update all the children text with specified style property not set due to style inheritance.
     renderBoxModel?.markOwnNeedsLayout();
   }
 
-  TextDecoration _textDecorationLine = TextDecoration.none;
-  TextDecoration get textDecorationLine {
-    return _textDecorationLine;
-  }
+  TextDecoration? _textDecorationLine;
+  TextDecoration get textDecorationLine => _textDecorationLine ?? TextDecoration.none;
   set textDecorationLine(TextDecoration? value) {
-    if (value == null || _textDecorationLine == value) return;
+    if (_textDecorationLine == value) return;
     _textDecorationLine = value;
     // Non inheritable style change should only update text node in direct children.
     renderBoxModel?.markOwnNeedsLayout();
@@ -51,7 +49,7 @@ mixin CSSTextMixin on RenderStyleBase {
     return _textDecorationColor;
   }
   set textDecorationColor(Color? value) {
-    if (value == null || _textDecorationColor == value) return;
+    if (_textDecorationColor == value) return;
     _textDecorationColor = value;
     // Non inheritable style change should only update text node in direct children.
     renderBoxModel?.markOwnNeedsLayout();
@@ -62,7 +60,7 @@ mixin CSSTextMixin on RenderStyleBase {
     return _textDecorationStyle;
   }
   set textDecorationStyle(TextDecorationStyle? value) {
-    if (value == null || _textDecorationStyle == value) return;
+    if (_textDecorationStyle == value) return;
     _textDecorationStyle = value;
     // Non inheritable style change should only update text node in direct children.
     renderBoxModel?.markOwnNeedsLayout();
@@ -83,7 +81,7 @@ mixin CSSTextMixin on RenderStyleBase {
     return _fontWeight ?? FontWeight.w400;
   }
   set fontWeight(FontWeight? value) {
-    if (value == null || _fontWeight == value) return;
+    if (_fontWeight == value) return;
     _fontWeight = value;
     // Update all the children text with specified style property not set due to style inheritance.
     renderBoxModel?.markOwnNeedsLayout();
@@ -146,7 +144,7 @@ mixin CSSTextMixin on RenderStyleBase {
   // 2. Em unit: style of own element with em unit and nested children with no font-size set due to style inheritance.
   // 3. Rem unit: nested children with rem set.
   set fontSize(CSSLengthValue? value) {
-    if (value == null || _fontSize == value) return;
+    if (_fontSize == value) return;
     _fontSize = value;
     // TODO(yuanyan): Need update all em and rem unit style when font size changed.
 
@@ -181,7 +179,7 @@ mixin CSSTextMixin on RenderStyleBase {
     return _lineHeight ?? CSSLengthValue(CSSText.DEFAULT_LINE_HEIGHT * fontSize.computedValue, CSSLengthUnit.PX);
   }
   set lineHeight(CSSLengthValue? value) {
-    if (value == null || _lineHeight == value) return;
+    if (_lineHeight == value) return;
     _lineHeight = value;
     // Update all the children layout and text with specified style property not set due to style inheritance.
     // _markChildrenNeedsLayoutByLineHeight(renderBoxModel!, LINE_HEIGHT);
@@ -201,7 +199,7 @@ mixin CSSTextMixin on RenderStyleBase {
     return _letterSpacing;
   }
   set letterSpacing(CSSLengthValue? value) {
-    if (value == null || _letterSpacing == value) return;
+    if (_letterSpacing == value) return;
     _letterSpacing = value;
     // Update all the children text with specified style property not set due to style inheritance.
     // _updateNestChildrenText(renderBoxModel!, LETTER_SPACING);
@@ -221,7 +219,7 @@ mixin CSSTextMixin on RenderStyleBase {
     return _wordSpacing;
   }
   set wordSpacing(CSSLengthValue? value) {
-    if (value == null || _wordSpacing == value) return;
+    if (_wordSpacing == value) return;
     _wordSpacing = value;
     // Update all the children text with specified style property not set due to style inheritance.
     // _updateNestChildrenText(renderBoxModel!, WORD_SPACING);
@@ -241,7 +239,7 @@ mixin CSSTextMixin on RenderStyleBase {
     return _textShadow;
   }
   set textShadow(List<Shadow>? value) {
-    if (value == null || _textShadow == value) return;
+    if (_textShadow == value) return;
     _textShadow = value;
     // Update all the children text with specified style property not set due to style inheritance.
     // _updateNestChildrenText(renderBoxModel!, TEXT_SHADOW);
@@ -261,7 +259,7 @@ mixin CSSTextMixin on RenderStyleBase {
     return _whiteSpace ?? WhiteSpace.normal;
   }
   set whiteSpace(WhiteSpace? value) {
-    if (value == null || _whiteSpace == value) return;
+    if (_whiteSpace == value) return;
     _whiteSpace = value;
     // Update all the children layout and text with specified style property not set due to style inheritance.
     // _markChildrenNeedsLayoutByWhiteSpace(renderBoxModel!, WHITE_SPACE);
@@ -284,7 +282,7 @@ mixin CSSTextMixin on RenderStyleBase {
     return _lineClamp;
   }
   set lineClamp(int? value) {
-    if (value == null || _lineClamp == value) return;
+    if (_lineClamp == value) return;
     _lineClamp = value;
     // Non inheritable style change should only update text node in direct children.
     renderBoxModel?.markOwnNeedsLayout();
@@ -303,7 +301,7 @@ mixin CSSTextMixin on RenderStyleBase {
     return _textAlign ?? TextAlign.start;
   }
   set textAlign(TextAlign? value) {
-    if (value == null || _textAlign == value) return;
+    if (_textAlign == value) return;
     _textAlign = value;
     // Update all the children flow layout with specified style property not set due to style inheritance.
     renderBoxModel?.markOwnNeedsLayout();
@@ -638,7 +636,7 @@ class CSSText {
         if (shadowColor != null) {
           color = CSSColor.parseColor(shadowColor);
         } else {
-          color = renderStyle.color;
+          color = renderStyle.currentColor;
         }
         double offsetX = CSSLength.parseLength(shadowDefinitions[1]!, renderStyle, property).computedValue;
         double offsetY = CSSLength.parseLength(shadowDefinitions[2]!, renderStyle, property).computedValue;
