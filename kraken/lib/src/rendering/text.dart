@@ -110,10 +110,10 @@ class RenderTextBox extends RenderBox
           maxConstraintWidth = parentRenderBoxModel.renderStyle.getMaxConstraintWidth();
         }
       } else {
-        EdgeInsets? borderEdge = parentRenderBoxModel.renderStyle.borderEdge;
+        EdgeInsets borderEdge = parentRenderBoxModel.renderStyle.borderEdge;
         EdgeInsetsGeometry? padding = parentRenderBoxModel.renderStyle.padding;
-        double horizontalBorderLength = borderEdge != null ? borderEdge.horizontal : 0;
-        double horizontalPaddingLength = padding != null ? padding.horizontal : 0;
+        double horizontalBorderLength = borderEdge.horizontal;
+        double horizontalPaddingLength = padding.horizontal;
 
         maxConstraintWidth = parentConstraints.maxWidth - horizontalPaddingLength - horizontalBorderLength;
       }

@@ -459,11 +459,11 @@ class CSSPositionedLayout {
 
     // Offset to global coordinate system of base.
     if (childParentData.isPositioned) {
-      EdgeInsets? borderEdge = parent.renderStyle.borderEdge;
-      double borderLeft = borderEdge != null ? borderEdge.left : 0;
-      double borderRight = borderEdge != null ? borderEdge.right : 0;
-      double borderTop = borderEdge != null ? borderEdge.top : 0;
-      double borderBottom = borderEdge != null ? borderEdge.bottom : 0;
+      EdgeInsets borderEdge = parent.renderStyle.borderEdge;
+      double borderLeft = borderEdge.left;
+      double borderRight = borderEdge.right;
+      double borderTop = borderEdge.top;
+      double borderBottom = borderEdge.bottom;
       RenderStyle childRenderStyle = child.renderStyle;
       Offset? placeholderOffset;
 

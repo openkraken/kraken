@@ -435,7 +435,3 @@ class ImageElement extends Element {
   }
 }
 
-// Return true if the input string only contain numbers.
-bool _isNumber(String input) {
-  return _numExp.hasMatch(input);
-}
