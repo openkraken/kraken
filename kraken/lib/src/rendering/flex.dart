@@ -667,8 +667,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     bool isScrollContainer =
-      (renderStyle.overflowX != CSSOverflowType.visible ||
-      renderStyle.overflowY != CSSOverflowType.visible);
+      (renderStyle.transformedOverflowX != CSSOverflowType.visible ||
+      renderStyle.transformedOverflowY != CSSOverflowType.visible);
     if (isScrollContainer) {
       // Find all the sticky children when scroll container is layouted
       stickyChildren = findStickyChildren();
@@ -1753,8 +1753,8 @@ class RenderFlexLayout extends RenderLayoutBox {
         double? childMarginLeft = 0;
         if (child is RenderBoxModel) {
           RenderStyle childRenderStyle = child.renderStyle;
-          CSSOverflowType overflowX = childRenderStyle.overflowX;
-          CSSOverflowType overflowY = childRenderStyle.overflowY;
+          CSSOverflowType overflowX = childRenderStyle.transformedOverflowX;
+          CSSOverflowType overflowY = childRenderStyle.transformedOverflowY;
           // Only non scroll container need to use scrollable size, otherwise use its own size
           if (overflowX == CSSOverflowType.visible &&
               overflowY == CSSOverflowType.visible) {
@@ -1802,8 +1802,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderBoxModel container =
         isScrollingContentBox ? parent as RenderBoxModel : this;
     bool isScrollContainer =
-        renderStyle.overflowX != CSSOverflowType.visible ||
-        renderStyle.overflowY != CSSOverflowType.visible;
+        renderStyle.transformedOverflowX != CSSOverflowType.visible ||
+        renderStyle.transformedOverflowY != CSSOverflowType.visible;
 
     // No need to add padding for scrolling content box
     double maxScrollableMainSizeOfChildren = isScrollContainer

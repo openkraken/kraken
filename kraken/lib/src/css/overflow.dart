@@ -72,7 +72,7 @@ mixin CSSOverflowMixin on RenderStyleBase {
   }
 
   CSSOverflowType get transformedOverflowY {
-    if (overflowY == CSSOverflowType.visible && overflowX != CSSOverflowType.visible) {
+    if (overflowY == CSSOverflowType.visible && overflowY != CSSOverflowType.visible) {
       return CSSOverflowType.auto;
     }
     return overflowY;
