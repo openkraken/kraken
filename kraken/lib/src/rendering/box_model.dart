@@ -785,10 +785,10 @@ class RenderBoxModel extends RenderBox
     // but has indefinite max constraints to allow children overflow
     if (isScrollingContentBox) {
       RenderStyle parentRenderStyle = (parent as RenderBoxModel).renderStyle;
-      EdgeInsets? borderEdge = parentRenderStyle.borderEdge;
+      EdgeInsets borderEdge = parentRenderStyle.borderEdge;
       EdgeInsetsGeometry? padding = parentRenderStyle.padding;
-      double horizontalBorderLength = borderEdge != null ? borderEdge.horizontal : 0;
-      double verticalBorderLength = borderEdge != null ? borderEdge.vertical : 0;
+      double horizontalBorderLength = borderEdge.horizontal;
+      double verticalBorderLength = borderEdge.vertical;
       double horizontalPaddingLength = padding.horizontal;
       double verticalPaddingLength = padding.vertical;
 
@@ -807,11 +807,11 @@ class RenderBoxModel extends RenderBox
     CSSDisplay? transformedDisplay = renderStyle.transformedDisplay;
     bool isDisplayInline = transformedDisplay == CSSDisplay.inline;
 
-    EdgeInsets? borderEdge = renderStyle.borderEdge;
+    EdgeInsets borderEdge = renderStyle.borderEdge;
     EdgeInsetsGeometry? padding = renderStyle.padding;
 
-    double horizontalBorderLength = borderEdge != null ? borderEdge.horizontal : 0;
-    double verticalBorderLength = borderEdge != null ? borderEdge.vertical : 0;
+    double horizontalBorderLength = borderEdge.horizontal;
+    double verticalBorderLength = borderEdge.vertical;
     double horizontalPaddingLength = padding.horizontal;
     double verticalPaddingLength = padding.vertical;
 
@@ -961,7 +961,7 @@ class RenderBoxModel extends RenderBox
   double get clientHeight {
     double height = contentSize.height;
     height += renderStyle.padding.vertical;
-    
+
     return height;
   }
 

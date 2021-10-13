@@ -7,7 +7,6 @@ import 'dart:ui';
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
 final RegExp _splitRegExp = RegExp(r'\s+');
@@ -204,7 +203,7 @@ class CSSBoxShadow {
   }
 
   static List<CSSBoxShadow>? parseBoxShadow(String present, RenderStyle renderStyle, String propertyName) {
-    
+
     var shadows = CSSStyleProperty.getShadowValues(present);
     if (shadows != null) {
       List<CSSBoxShadow>? boxShadow = [];
@@ -252,7 +251,7 @@ class CSSBoxShadow {
       }
       return boxShadow;
     }
-    
+
     return null;
   }
 }

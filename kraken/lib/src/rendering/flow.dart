@@ -1014,41 +1014,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     return lineDistance;
   }
 
-  /// Resolve all percentage size of child based on size its containing block
-  bool _resolveChildrenPercentageToContainingBlock() {
-    bool percentageFound = false;
-    RenderBox? child = firstChild;
-    while (child != null) {
-      final RenderLayoutParentData childParentData =
-          child.parentData as RenderLayoutParentData;
-      // Exclude positioned child
-      if (childParentData.isPositioned) {
-        child = childParentData.nextSibling;
-        continue;
-      }
-      child = childParentData.nextSibling;
-    }
-    return percentageFound;
-  }
-
-
-  /// Check whether percentage sizing styles of child exists
-  bool _isChildrenPercentageOfSizingExist() {
-    bool percentageFound = false;
-    RenderBox? child = firstChild;
-    while (child != null) {
-      final RenderLayoutParentData childParentData =
-          child.parentData as RenderLayoutParentData;
-      // Exclude positioned child
-      if (childParentData.isPositioned) {
-        child = childParentData.nextSibling;
-        continue;
-      }
-      child = childParentData.nextSibling;
-    }
-    return percentageFound;
-  }
-
   /// Record the main size of all lines
   void _recordRunsMainSize(_RunMetrics runMetrics, List<double> runMainSize) {
     Map<int?, RenderBox> runChildren = runMetrics.runChildren;

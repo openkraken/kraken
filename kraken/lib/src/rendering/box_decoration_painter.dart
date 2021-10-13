@@ -351,13 +351,9 @@ class BoxDecorationPainter extends BoxPainter {
     Offset offset, ImageConfiguration configuration) {
     Size? size = configuration.size;
 
-    EdgeInsets? borderEdge = renderStyle.borderEdge;
-    double borderTop = 0;
-    double borderLeft = 0;
-    if (borderEdge != null) {
-      borderTop = borderEdge.top;
-      borderLeft = borderEdge.left;
-    }
+    EdgeInsets borderEdge = renderStyle.borderEdge;
+    double borderTop = borderEdge.top;
+    double borderLeft = borderEdge.left;
 
     double paddingTop = 0;
     double paddingLeft = 0;
@@ -386,17 +382,11 @@ class BoxDecorationPainter extends BoxPainter {
 
   Rect _getBackgroundClipRect(Offset offset, ImageConfiguration configuration) {
     Size? size = configuration.size;
-    double borderTop = 0;
-    double borderBottom = 0;
-    double borderLeft = 0;
-    double borderRight = 0;
-    EdgeInsets? borderEdge = renderStyle.borderEdge;
-    if (borderEdge != null) {
-      borderTop = borderEdge.top;
-      borderBottom = borderEdge.bottom;
-      borderLeft = borderEdge.left;
-      borderRight = borderEdge.right;
-    }
+    EdgeInsets borderEdge = renderStyle.borderEdge;
+    double borderTop = borderEdge.top;
+    double borderBottom = borderEdge.bottom;
+    double borderLeft = borderEdge.left;
+    double borderRight = borderEdge.right;
 
     double paddingTop = 0;
     double paddingBottom = 0;

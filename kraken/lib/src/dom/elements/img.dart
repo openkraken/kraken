@@ -17,8 +17,6 @@ import 'package:kraken/rendering.dart';
 
 const String IMAGE = 'IMG';
 
-final RegExp _numExp = RegExp(r'^\d+');
-
 // FIXME: should be inline default.
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
@@ -435,7 +433,3 @@ class ImageElement extends Element {
   }
 }
 
-// Return true if the input string only contain numbers.
-bool _isNumber(String input) {
-  return _numExp.hasMatch(input);
-}

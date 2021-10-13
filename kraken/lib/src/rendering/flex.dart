@@ -1502,9 +1502,7 @@ class RenderFlexLayout extends RenderLayoutBox {
             double stretchedHeight;
             // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap
             if (!isFlexWrap && hasMaxConstraints) {
-              double verticalBorderLength = renderStyle.borderEdge != null
-                ? renderStyle.borderEdge.vertical
-                : 0;
+              double verticalBorderLength = renderStyle.borderEdge.vertical;
               double verticalPaddingLength = renderStyle.padding.vertical;
               stretchedHeight = math.min(
                 constraints.maxHeight -
@@ -1542,9 +1540,7 @@ class RenderFlexLayout extends RenderLayoutBox {
             double stretchedWidth;
             // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap
             if (!isFlexWrap && hasMaxConstraints) {
-              double horizontalBorderLength = renderStyle.borderEdge != null
-                ? renderStyle.borderEdge.horizontal
-                : 0;
+              double horizontalBorderLength = renderStyle.borderEdge.horizontal;
               double horizontalPaddingLength = renderStyle.padding.horizontal;
               stretchedWidth = math.min(
                 constraints.maxWidth -
