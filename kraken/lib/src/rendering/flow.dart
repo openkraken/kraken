@@ -913,12 +913,12 @@ class RenderFlowLayout extends RenderLayoutBox {
         Offset relativeOffset = _getOffset(
             childMainPosition +
                 renderStyle.paddingLeft.computedValue +
-                renderStyle.borderLeftWidth.computedValue +
+                renderStyle.effectiveBorderLeftWidth.computedValue +
                 childMarginLeft,
             crossAxisOffset +
                 childLineExtent +
                 renderStyle.paddingTop.computedValue +
-                renderStyle.borderTopWidth.computedValue +
+                renderStyle.effectiveBorderTopWidth.computedValue +
                 childMarginTop);
         // Apply position relative offset change.
         CSSPositionedLayout.applyRelativeOffset(relativeOffset, child);
@@ -1201,13 +1201,13 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     double maxScrollableMainSize = math.max(
         size.width -
-            container.renderStyle.borderLeftWidth.computedValue -
-            container.renderStyle.borderRightWidth.computedValue,
+            container.renderStyle.effectiveBorderLeftWidth.computedValue -
+            container.renderStyle.effectiveBorderRightWidth.computedValue,
         maxScrollableMainSizeOfChildren);
     double maxScrollableCrossSize = math.max(
         size.height -
-            container.renderStyle.borderTopWidth.computedValue -
-            container.renderStyle.borderBottomWidth.computedValue,
+            container.renderStyle.effectiveBorderTopWidth.computedValue -
+            container.renderStyle.effectiveBorderBottomWidth.computedValue,
         maxScrollableCrossSizeOfChildren);
 
     scrollableSize = Size(maxScrollableMainSize, maxScrollableCrossSize);
@@ -1312,7 +1312,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       parent.renderStyle.transformedDisplay == CSSDisplay.block &&
       (isParentOverflowVisible || isParentOverflowClip) &&
       parent.renderStyle.paddingTop.computedValue == 0 &&
-      parent.renderStyle.borderTopWidth.computedValue == 0 &&
+      parent.renderStyle.effectiveBorderTopWidth.computedValue == 0 &&
       parent.parent is RenderFlowLayout
     ) {
       return 0;
@@ -1323,7 +1323,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// Get the collapsed margin top with its nested first child
   double _getCollapsedMarginTopWithNestedFirstChild(RenderBoxModel renderBoxModel) {
     double paddingTop = renderBoxModel.renderStyle.paddingTop.computedValue;
-    double borderTop = renderBoxModel.renderStyle.borderTopWidth.computedValue;
+    double borderTop = renderBoxModel.renderStyle.effectiveBorderTopWidth.computedValue;
     double marginTop = renderBoxModel.renderStyle.marginTop.computedValue;
     bool isOverflowVisible = renderBoxModel.renderStyle.transformedOverflowX == CSSOverflowType.visible &&
       renderBoxModel.renderStyle.transformedOverflowY == CSSOverflowType.visible;
@@ -1424,7 +1424,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       parent.renderStyle.transformedDisplay == CSSDisplay.block &&
       (isParentOverflowVisible || isParentOverflowClip) &&
       parent.renderStyle.paddingBottom.computedValue == 0 &&
-      parent.renderStyle.borderBottomWidth.computedValue == 0 &&
+      parent.renderStyle.effectiveBorderBottomWidth.computedValue == 0 &&
       parent.parent is RenderFlowLayout
     ) {
       return 0;
@@ -1435,7 +1435,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// Get the collapsed margin bottom with its nested last child
   double _getCollapsedMarginBottomWithNestedLastChild(RenderBoxModel renderBoxModel) {
     double paddingBottom = renderBoxModel.renderStyle.paddingBottom.computedValue;
-    double borderBottom = renderBoxModel.renderStyle.borderBottomWidth.computedValue;
+    double borderBottom = renderBoxModel.renderStyle.effectiveBorderBottomWidth.computedValue;
     double marginBottom = renderBoxModel.renderStyle.marginBottom.computedValue;
     bool isOverflowVisible = renderBoxModel.renderStyle.transformedOverflowX == CSSOverflowType.visible &&
       renderBoxModel.renderStyle.transformedOverflowY == CSSOverflowType.visible;

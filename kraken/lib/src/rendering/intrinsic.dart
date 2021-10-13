@@ -192,7 +192,7 @@ class RenderIntrinsic extends RenderBoxModel
 
     offset += Offset(renderStyle.paddingLeft.computedValue, renderStyle.paddingTop.computedValue);
 
-    offset += Offset(renderStyle.borderLeftWidth.computedValue, renderStyle.borderTopWidth.computedValue);
+    offset += Offset(renderStyle.effectiveBorderLeftWidth.computedValue, renderStyle.effectiveBorderTopWidth.computedValue);
 
     if (child != null) {
       late DateTime childPaintStart;

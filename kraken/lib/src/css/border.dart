@@ -24,6 +24,142 @@ enum CSSBorderStyleType {
   outset,
 }
 
+mixin CSSBorderMixin on RenderStyleBase {
+
+  // Effective border widths. These are used to calculate the
+  // dimensions of the border box.
+  EdgeInsets get border {
+    // If has border, render padding should subtracting the edge of the border
+    return EdgeInsets.fromLTRB(
+      effectiveBorderLeftWidth.computedValue,
+      effectiveBorderTopWidth.computedValue,
+      effectiveBorderRightWidth.computedValue,
+      effectiveBorderBottomWidth.computedValue,
+    );
+  }
+
+  Size wrapBorderSize(Size innerSize) {
+    return Size(border.left + innerSize.width + border.right,
+        border.top + innerSize.height + border.bottom);
+  }
+
+  BoxConstraints deflateBorderConstraints(BoxConstraints constraints) {
+    return constraints.deflate(border);
+  }
+
+  /// Shorted border property:
+  ///   border：<line-width> || <line-style> || <color>
+  ///   (<line-width> = <length> | thin | medium | thick), support length now.
+  /// Seperated properties:
+  ///   borderWidth: <line-width>{1,4}
+  ///   borderStyle: none | hidden | dotted | dashed | solid | double | groove | ridge | inset | outset
+  ///     (PS. Only support solid now.)
+  ///   borderColor: <color>
+
+  /// Border-width = <length> | thin | medium | thick
+  
+  // Initial value: medium
+  final CSSLengthValue _mediumWidth = CSSLengthValue(3, CSSLengthUnit.PX);
+
+  CSSLengthValue? _borderTopWidth;
+  set borderTopWidth(CSSLengthValue? value) {
+    if (value == _borderTopWidth) return;
+    _borderTopWidth = value;
+    renderBoxModel!.markNeedsLayout();
+  }
+  CSSLengthValue get effectiveBorderTopWidth => borderTopStyle == BorderStyle.none ? CSSLengthValue.zero : (_borderTopWidth ?? _mediumWidth);
+
+  CSSLengthValue? _borderRightWidth;
+  set borderRightWidth(CSSLengthValue? value) {
+    if (value == _borderRightWidth) return;
+    _borderRightWidth = value;
+    renderBoxModel!.markNeedsLayout();
+  }
+  CSSLengthValue get effectiveBorderRightWidth => borderRightStyle == BorderStyle.none ? CSSLengthValue.zero : (_borderRightWidth ?? _mediumWidth);
+
+  CSSLengthValue? _borderBottomWidth;
+  set borderBottomWidth(CSSLengthValue? value) {
+    if (value == _borderBottomWidth) return;
+    _borderBottomWidth = value;
+    renderBoxModel!.markNeedsLayout();
+  }
+  CSSLengthValue get effectiveBorderBottomWidth => borderBottomStyle == BorderStyle.none ? CSSLengthValue.zero : (_borderBottomWidth ?? _mediumWidth);
+
+  CSSLengthValue? _borderLeftWidth;
+  set borderLeftWidth(CSSLengthValue? value) {
+    if (value == _borderLeftWidth) return;
+    _borderLeftWidth = value;
+    renderBoxModel!.markNeedsLayout();
+  }
+  CSSLengthValue get effectiveBorderLeftWidth => borderLeftStyle == BorderStyle.none ? CSSLengthValue.zero : (_borderLeftWidth ?? _mediumWidth);
+
+  /// Border-color
+  Color get borderTopColor => _borderTopColor ?? currentColor;
+  Color? _borderTopColor;
+  set borderTopColor(Color? value) {
+    if (value == _borderTopColor) return;
+    _borderTopColor = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+
+  Color get borderRightColor => _borderRightColor ?? currentColor;
+  Color? _borderRightColor;
+  set borderRightColor(Color? value) {
+    if (value == _borderRightColor) return;
+    _borderRightColor = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+
+  Color get borderBottomColor => _borderBottomColor ?? currentColor;
+  Color? _borderBottomColor;
+  set borderBottomColor(Color? value) {
+    if (value == _borderBottomColor) return;
+    _borderBottomColor = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+
+  Color get borderLeftColor => _borderLeftColor ?? currentColor;
+  Color? _borderLeftColor;
+  set borderLeftColor(Color? value) {
+    if (value == _borderLeftColor) return;
+    _borderLeftColor = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+
+  /// Border-style
+  BorderStyle get borderTopStyle => _borderTopStyle ?? BorderStyle.none;
+  BorderStyle? _borderTopStyle;
+  set borderTopStyle(BorderStyle? value) {
+    if (value == _borderTopStyle) return;
+    _borderTopStyle = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+
+  BorderStyle get borderRightStyle => _borderRightStyle ?? BorderStyle.none;
+  BorderStyle? _borderRightStyle;
+  set borderRightStyle(BorderStyle? value) {
+    if (value == _borderRightStyle) return;
+    _borderRightStyle = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+
+  BorderStyle get borderBottomStyle => _borderBottomStyle ?? BorderStyle.none;
+  BorderStyle? _borderBottomStyle;
+  set borderBottomStyle(BorderStyle? value) {
+    if (value == _borderBottomStyle) return;
+    _borderBottomStyle = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+
+  BorderStyle get borderLeftStyle => _borderLeftStyle ?? BorderStyle.none;
+  BorderStyle? _borderLeftStyle;
+  set borderLeftStyle(BorderStyle? value) {
+    if (value == _borderLeftStyle) return;
+    _borderLeftStyle = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+}
+
 class CSSBorderSide {
   // border default width 3.0
   static double defaultBorderWidth = 3.0;
@@ -90,38 +226,33 @@ class CSSBorderSide {
     switch (side) {
       case LEFT:
         borderStyle = renderStyle.borderLeftStyle;
-        borderWidth = renderStyle.borderLeftWidth;
+        borderWidth = renderStyle.effectiveBorderLeftWidth;
         borderColor = renderStyle.borderLeftColor;
         break;
       case RIGHT:
         borderStyle = renderStyle.borderRightStyle;
-        borderWidth = renderStyle.borderRightWidth;
+        borderWidth = renderStyle.effectiveBorderRightWidth;
         borderColor = renderStyle.borderRightColor;
         break;
       case TOP:
         borderStyle = renderStyle.borderTopStyle;
-        borderWidth = renderStyle.borderTopWidth;
+        borderWidth = renderStyle.effectiveBorderTopWidth;
         borderColor = renderStyle.borderTopColor;
         break;
       case BOTTOM:
         borderStyle = renderStyle.borderBottomStyle;
-        borderWidth = renderStyle.borderBottomWidth;
+        borderWidth = renderStyle.effectiveBorderBottomWidth;
         borderColor = renderStyle.borderBottomColor;
         break;
     }
     // Flutter will print border event if width is 0.0. So we needs to set borderStyle to none to prevent this.
     if (borderStyle == BorderStyle.none || borderWidth!.isZero) {
       return null;
-    } else if (borderColor == null) {
-      return BorderSide(
-        width: borderWidth.computedValue,
-        style: borderStyle!
-      );
     } else {
       return BorderSide(
         width: borderWidth.computedValue,
         style: borderStyle!,
-        color: borderColor
+        color: borderColor!
       );
     }
   }

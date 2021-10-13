@@ -155,10 +155,10 @@ class BoxDecorationPainter extends BoxPainter {
     // the inset box-shadow is drawn inside the padding box edge.
     // https://drafts.csswg.org/css-backgrounds-3/#shadow-shape
     Rect paddingBoxRect = Rect.fromLTRB(
-      rect.left + renderStyle.borderLeftWidth.computedValue,
-      rect.top + renderStyle.borderTopWidth.computedValue,
-      rect.right - renderStyle.borderRightWidth.computedValue,
-      rect.bottom - renderStyle.borderBottomWidth.computedValue
+      rect.left + renderStyle.effectiveBorderLeftWidth.computedValue,
+      rect.top + renderStyle.effectiveBorderTopWidth.computedValue,
+      rect.right - renderStyle.effectiveBorderRightWidth.computedValue,
+      rect.bottom - renderStyle.effectiveBorderBottomWidth.computedValue
     );
 
     Path paddingBoxPath;
@@ -168,7 +168,7 @@ class BoxDecorationPainter extends BoxPainter {
       RRect borderBoxRRect = _decoration.borderRadius!.resolve(textDirection).toRRect(rect);
       // A borderRadius can only be given for a uniform Border in Flutter.
       // https://github.com/flutter/flutter/issues/12583
-      double uniformBorderWidth = renderStyle.borderTopWidth.computedValue;
+      double uniformBorderWidth = renderStyle.effectiveBorderTopWidth.computedValue;
       RRect paddingBoxRRect = borderBoxRRect.deflate(uniformBorderWidth);
       paddingBoxPath = Path()..addRRect(paddingBoxRRect);
     }
@@ -351,7 +351,7 @@ class BoxDecorationPainter extends BoxPainter {
     Offset offset, ImageConfiguration configuration) {
     Size? size = configuration.size;
 
-    EdgeInsets borderEdge = renderStyle.borderEdge;
+    EdgeInsets borderEdge = renderStyle.border;
     double borderTop = borderEdge.top;
     double borderLeft = borderEdge.left;
 
@@ -382,7 +382,7 @@ class BoxDecorationPainter extends BoxPainter {
 
   Rect _getBackgroundClipRect(Offset offset, ImageConfiguration configuration) {
     Size? size = configuration.size;
-    EdgeInsets borderEdge = renderStyle.borderEdge;
+    EdgeInsets borderEdge = renderStyle.border;
     double borderTop = borderEdge.top;
     double borderBottom = borderEdge.bottom;
     double borderLeft = borderEdge.left;

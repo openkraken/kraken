@@ -305,18 +305,18 @@ class RenderFlexLayout extends RenderLayoutBox {
   /// Get start/end border in the main axis according to flex direction
   double flowAwareMainAxisBorder({bool isEnd = false}) {
     if (_isHorizontalFlexDirection) {
-      return isEnd ? renderStyle.borderRightWidth.computedValue : renderStyle.borderLeftWidth.computedValue;
+      return isEnd ? renderStyle.effectiveBorderRightWidth.computedValue : renderStyle.effectiveBorderLeftWidth.computedValue;
     } else {
-      return isEnd ? renderStyle.borderBottomWidth.computedValue : renderStyle.borderTopWidth.computedValue;
+      return isEnd ? renderStyle.effectiveBorderBottomWidth.computedValue : renderStyle.effectiveBorderTopWidth.computedValue;
     }
   }
 
   /// Get start/end border in the cross axis according to flex direction
   double flowAwareCrossAxisBorder({bool isEnd = false}) {
     if (_isHorizontalFlexDirection) {
-      return isEnd ? renderStyle.borderBottomWidth.computedValue : renderStyle.borderTopWidth.computedValue;
+      return isEnd ? renderStyle.effectiveBorderBottomWidth.computedValue : renderStyle.effectiveBorderTopWidth.computedValue;
     } else {
-      return isEnd ? renderStyle.borderRightWidth.computedValue : renderStyle.borderLeftWidth.computedValue;
+      return isEnd ? renderStyle.effectiveBorderRightWidth.computedValue : renderStyle.effectiveBorderLeftWidth.computedValue;
     }
   }
 
@@ -1352,10 +1352,10 @@ class RenderFlexLayout extends RenderLayoutBox {
           double paddingRight = child.renderStyle.paddingRight.computedValue;
           double paddingTop = child.renderStyle.paddingTop.computedValue;
           double paddingBottom = child.renderStyle.paddingBottom.computedValue;
-          double borderLeft = child.renderStyle.borderLeftWidth.computedValue;
-          double borderRight = child.renderStyle.borderRightWidth.computedValue;
-          double borderTop = child.renderStyle.borderTopWidth.computedValue;
-          double borderBottom = child.renderStyle.borderBottomWidth.computedValue;
+          double borderLeft = child.renderStyle.effectiveBorderLeftWidth.computedValue;
+          double borderRight = child.renderStyle.effectiveBorderRightWidth.computedValue;
+          double borderTop = child.renderStyle.effectiveBorderTopWidth.computedValue;
+          double borderBottom = child.renderStyle.effectiveBorderBottomWidth.computedValue;
 
           double? childLogicalWidth = childContentWidth != null
               ? childContentWidth +
@@ -1502,7 +1502,7 @@ class RenderFlexLayout extends RenderLayoutBox {
             double stretchedHeight;
             // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap
             if (!isFlexWrap && hasMaxConstraints) {
-              double verticalBorderLength = renderStyle.borderEdge.vertical;
+              double verticalBorderLength = renderStyle.border.vertical;
               double verticalPaddingLength = renderStyle.padding.vertical;
               stretchedHeight = math.min(
                 constraints.maxHeight -
@@ -1540,7 +1540,7 @@ class RenderFlexLayout extends RenderLayoutBox {
             double stretchedWidth;
             // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap
             if (!isFlexWrap && hasMaxConstraints) {
-              double horizontalBorderLength = renderStyle.borderEdge.horizontal;
+              double horizontalBorderLength = renderStyle.border.horizontal;
               double horizontalPaddingLength = renderStyle.padding.horizontal;
               stretchedWidth = math.min(
                 constraints.maxWidth -
@@ -1828,11 +1828,11 @@ class RenderFlexLayout extends RenderLayoutBox {
         maxScrollableCrossSizeOfLines;
 
     double containerContentWidth = size.width -
-        container.renderStyle.borderLeftWidth.computedValue -
-        container.renderStyle.borderRightWidth.computedValue;
+        container.renderStyle.effectiveBorderLeftWidth.computedValue -
+        container.renderStyle.effectiveBorderRightWidth.computedValue;
     double containerContentHeight = size.height -
-        container.renderStyle.borderTopWidth.computedValue -
-        container.renderStyle.borderBottomWidth.computedValue;
+        container.renderStyle.effectiveBorderTopWidth.computedValue -
+        container.renderStyle.effectiveBorderBottomWidth.computedValue;
     double maxScrollableMainSize = math.max(
         _isHorizontalFlexDirection ? containerContentWidth : containerContentHeight,
         maxScrollableMainSizeOfChildren);

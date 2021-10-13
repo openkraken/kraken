@@ -475,8 +475,8 @@ class RenderLayoutBox extends RenderBoxModel
             maxScrollableX,
             -childRenderStyle.right!.computedValue +
                 overflowContainerBox.renderStyle.width!.computedValue -
-                overflowContainerBox.renderStyle.borderLeftWidth.computedValue -
-                overflowContainerBox.renderStyle.borderRightWidth.computedValue);
+                overflowContainerBox.renderStyle.effectiveBorderLeftWidth.computedValue -
+                overflowContainerBox.renderStyle.effectiveBorderRightWidth.computedValue);
       } else {
         maxScrollableX = math.max(maxScrollableX,
             -childRenderStyle.right!.computedValue + _contentSize!.width);
@@ -495,8 +495,8 @@ class RenderLayoutBox extends RenderBoxModel
             maxScrollableY,
             -childRenderStyle.bottom!.computedValue +
                 overflowContainerBox.renderStyle.height!.computedValue -
-                overflowContainerBox.renderStyle.borderTopWidth.computedValue -
-                overflowContainerBox.renderStyle.borderBottomWidth.computedValue);
+                overflowContainerBox.renderStyle.effectiveBorderTopWidth.computedValue -
+                overflowContainerBox.renderStyle.effectiveBorderBottomWidth.computedValue);
       } else {
         maxScrollableY = math.max(maxScrollableY,
             -childRenderStyle.bottom!.computedValue + _contentSize!.height);
@@ -785,7 +785,7 @@ class RenderBoxModel extends RenderBox
     // but has indefinite max constraints to allow children overflow
     if (isScrollingContentBox) {
       RenderStyle parentRenderStyle = (parent as RenderBoxModel).renderStyle;
-      EdgeInsets borderEdge = parentRenderStyle.borderEdge;
+      EdgeInsets borderEdge = parentRenderStyle.border;
       EdgeInsetsGeometry? padding = parentRenderStyle.padding;
       double horizontalBorderLength = borderEdge.horizontal;
       double verticalBorderLength = borderEdge.vertical;
@@ -807,7 +807,7 @@ class RenderBoxModel extends RenderBox
     CSSDisplay? transformedDisplay = renderStyle.transformedDisplay;
     bool isDisplayInline = transformedDisplay == CSSDisplay.inline;
 
-    EdgeInsets borderEdge = renderStyle.borderEdge;
+    EdgeInsets borderEdge = renderStyle.border;
     EdgeInsetsGeometry? padding = renderStyle.padding;
 
     double horizontalBorderLength = borderEdge.horizontal;
@@ -835,12 +835,12 @@ class RenderBoxModel extends RenderBox
     // Constraints
     // Width should be not smaller than border and padding in horizontal direction
     // when box-sizing is border-box which is only supported.
-    double minConstraintWidth = renderStyle.borderLeftWidth.computedValue + renderStyle.borderRightWidth.computedValue +
+    double minConstraintWidth = renderStyle.effectiveBorderLeftWidth.computedValue + renderStyle.effectiveBorderRightWidth.computedValue +
       renderStyle.paddingLeft.computedValue + renderStyle.paddingRight.computedValue;
     double maxConstraintWidth = logicalWidth ?? double.infinity;
     // Height should be not smaller than border and padding in vertical direction
     // when box-sizing is border-box which is only supported.
-    double minConstraintHeight = renderStyle.borderTopWidth.computedValue + renderStyle.borderBottomWidth.computedValue +
+    double minConstraintHeight = renderStyle.effectiveBorderTopWidth.computedValue + renderStyle.effectiveBorderBottomWidth.computedValue +
       renderStyle.paddingTop.computedValue + renderStyle.paddingBottom.computedValue;
     double maxConstraintHeight = logicalHeight ?? double.infinity;
 
@@ -1214,10 +1214,10 @@ class RenderBoxModel extends RenderBox
 
   void _chainPaintOverflow(PaintingContext context, Offset offset) {
     EdgeInsets borderEdge = EdgeInsets.fromLTRB(
-        renderStyle.borderLeftWidth.computedValue,
-        renderStyle.borderTopWidth.computedValue,
-        renderStyle.borderRightWidth.computedValue,
-        renderStyle.borderLeftWidth.computedValue);
+        renderStyle.effectiveBorderLeftWidth.computedValue,
+        renderStyle.effectiveBorderTopWidth.computedValue,
+        renderStyle.effectiveBorderRightWidth.computedValue,
+        renderStyle.effectiveBorderLeftWidth.computedValue);
     BoxDecoration? decoration = renderStyle.decoration;
 
     bool hasLocalAttachment = _hasLocalBackgroundImage(renderStyle);

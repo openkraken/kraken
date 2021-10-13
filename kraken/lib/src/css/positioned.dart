@@ -187,7 +187,7 @@ class CSSPositionedLayout {
       // Sticky offset to scroll container must include padding and border
       double stickyLeft = childRenderStyle.left!.computedValue +
         scrollContainerRenderStyle.paddingLeft.computedValue +
-        scrollContainerRenderStyle.borderLeftWidth.computedValue;
+        scrollContainerRenderStyle.effectiveBorderLeftWidth.computedValue;
       isHorizontalFixed = offsetLeftToScrollContainer < stickyLeft;
       if (isHorizontalFixed) {
         offsetX += stickyLeft - offsetLeftToScrollContainer;
@@ -202,7 +202,7 @@ class CSSPositionedLayout {
       // Sticky offset to scroll container must include padding and border
       double stickyRight = childRenderStyle.right!.computedValue +
         scrollContainerRenderStyle.paddingRight.computedValue +
-        scrollContainerRenderStyle.borderRightWidth.computedValue;
+        scrollContainerRenderStyle.effectiveBorderRightWidth.computedValue;
       isHorizontalFixed = offsetRightToScrollContainer < stickyRight;
       if (isHorizontalFixed) {
         offsetX += offsetRightToScrollContainer - stickyRight;
@@ -243,7 +243,7 @@ class CSSPositionedLayout {
       // Sticky offset to scroll container must include padding and border
       double stickyTop = childRenderStyle.top!.computedValue +
         scrollContainerRenderStyle.paddingTop.computedValue +
-        scrollContainerRenderStyle.borderTopWidth.computedValue;
+        scrollContainerRenderStyle.effectiveBorderTopWidth.computedValue;
       isVerticalFixed = offsetTopToScrollContainer < stickyTop;
       if (isVerticalFixed) {
         offsetY += stickyTop - offsetTopToScrollContainer;
@@ -258,7 +258,7 @@ class CSSPositionedLayout {
       // Sticky offset to scroll container must include padding and border
       double stickyBottom = childRenderStyle.bottom!.computedValue +
         scrollContainerRenderStyle.paddingBottom.computedValue +
-        scrollContainerRenderStyle.borderBottomWidth.computedValue;
+        scrollContainerRenderStyle.effectiveBorderBottomWidth.computedValue;
       isVerticalFixed = offsetBottomToScrollContainer < stickyBottom;
       if (isVerticalFixed) {
         offsetY += offsetBottomToScrollContainer - stickyBottom;
@@ -337,10 +337,10 @@ class CSSPositionedLayout {
 
     // Positioned element's size stretch start at the padding-box of its parent in cases like
     // `height: 0; top: 0; bottom: 0`.
-    double borderLeft = parent.renderStyle.borderLeftWidth.computedValue;
-    double borderRight = parent.renderStyle.borderRightWidth.computedValue;
-    double borderTop = parent.renderStyle.borderTopWidth.computedValue;
-    double borderBottom = parent.renderStyle.borderBottomWidth.computedValue;
+    double borderLeft = parent.renderStyle.effectiveBorderLeftWidth.computedValue;
+    double borderRight = parent.renderStyle.effectiveBorderRightWidth.computedValue;
+    double borderTop = parent.renderStyle.effectiveBorderTopWidth.computedValue;
+    double borderBottom = parent.renderStyle.effectiveBorderBottomWidth.computedValue;
     Size parentPaddingBoxSize = Size(
       parentSize.width - borderLeft - borderRight,
       parentSize.height - borderTop - borderBottom,
@@ -459,7 +459,7 @@ class CSSPositionedLayout {
 
     // Offset to global coordinate system of base.
     if (childParentData.isPositioned) {
-      EdgeInsets borderEdge = parent.renderStyle.borderEdge;
+      EdgeInsets borderEdge = parent.renderStyle.border;
       double borderLeft = borderEdge.left;
       double borderRight = borderEdge.right;
       double borderTop = borderEdge.top;
@@ -480,7 +480,7 @@ class CSSPositionedLayout {
 
         if (parent.isScrollingContentBox) {
           RenderLayoutBox overflowContainingBox = parent.parent as RenderLayoutBox;
-          top -= (overflowContainingBox.renderStyle.borderTopWidth.computedValue + overflowContainingBox.renderStyle.borderBottomWidth.computedValue
+          top -= (overflowContainingBox.renderStyle.effectiveBorderTopWidth.computedValue + overflowContainingBox.renderStyle.effectiveBorderBottomWidth.computedValue
               + overflowContainingBox.renderStyle.paddingTop.computedValue);
         }
       } else {
@@ -502,7 +502,7 @@ class CSSPositionedLayout {
 
         if (parent.isScrollingContentBox) {
           RenderLayoutBox overflowContainingBox = parent.parent as RenderLayoutBox;
-          left -= (overflowContainingBox.renderStyle.borderLeftWidth.computedValue + overflowContainingBox.renderStyle.borderRightWidth.computedValue
+          left -= (overflowContainingBox.renderStyle.effectiveBorderLeftWidth.computedValue + overflowContainingBox.renderStyle.effectiveBorderRightWidth.computedValue
             + overflowContainingBox.renderStyle.paddingLeft.computedValue);
         }
       } else {

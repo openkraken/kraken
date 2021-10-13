@@ -99,129 +99,6 @@ mixin CSSBoxMixin on RenderStyleBase {
     renderBoxModel!.markNeedsPaint();
   }
 
-  /// BorderSize to deflate.
-  EdgeInsets get borderEdge {
-    // If has border, render padding should subtracting the edge of the border
-    return EdgeInsets.fromLTRB(
-      borderLeftWidth.computedValue,
-      borderTopWidth.computedValue,
-      borderRightWidth.computedValue,
-      borderBottomWidth.computedValue,
-    );
-  }
-
-  /// Shorted border property:
-  ///   border：<line-width> || <line-style> || <color>
-  ///   (<line-width> = <length> | thin | medium | thick), support length now.
-  /// Seperated properties:
-  ///   borderWidth: <line-width>{1,4}
-  ///   borderStyle: none | hidden | dotted | dashed | solid | double | groove | ridge | inset | outset
-  ///     (PS. Only support solid now.)
-  ///   borderColor: <color>
-
-  /// Border-width = <length> | thin | medium | thick
-  
-  // Initial value: medium
-  final CSSLengthValue _mediumWidth = CSSLengthValue(3, CSSLengthUnit.PX);
-
-  CSSLengthValue? _borderTopWidth;
-  set borderTopWidth(CSSLengthValue? value) {
-    if (value == _borderTopWidth) return;
-    _borderTopWidth = value;
-    renderBoxModel!.markNeedsLayout();
-  }
-  CSSLengthValue get borderTopWidth => _borderTopWidth ?? _mediumWidth;
-
-  CSSLengthValue? _borderRightWidth;
-  set borderRightWidth(CSSLengthValue? value) {
-    if (value == _borderRightWidth) return;
-    _borderRightWidth = value;
-    renderBoxModel!.markNeedsLayout();
-  }
-  CSSLengthValue get borderRightWidth => _borderRightWidth ?? _mediumWidth;
-
-  CSSLengthValue? _borderBottomWidth;
-  set borderBottomWidth(CSSLengthValue? value) {
-    if (value == _borderBottomWidth) return;
-    _borderBottomWidth = value;
-    renderBoxModel!.markNeedsLayout();
-  }
-  CSSLengthValue get borderBottomWidth => _borderBottomWidth ?? _mediumWidth;
-
-  CSSLengthValue? _borderLeftWidth;
-  set borderLeftWidth(CSSLengthValue? value) {
-    if (value == _borderLeftWidth) return;
-    _borderLeftWidth = value;
-    renderBoxModel!.markNeedsLayout();
-  }
-  CSSLengthValue get borderLeftWidth => _borderLeftWidth ?? _mediumWidth;
-
-  /// Border-color
-  Color get borderTopColor => _borderTopColor ?? currentColor;
-  Color? _borderTopColor;
-  set borderTopColor(Color? value) {
-    if (value == _borderTopColor) return;
-    _borderTopColor = value;
-    renderBoxModel!.markNeedsPaint();
-  }
-
-  Color get borderRightColor => _borderRightColor ?? currentColor;
-  Color? _borderRightColor;
-  set borderRightColor(Color? value) {
-    if (value == _borderRightColor) return;
-    _borderRightColor = value;
-    renderBoxModel!.markNeedsPaint();
-  }
-
-  Color get borderBottomColor => _borderBottomColor ?? currentColor;
-  Color? _borderBottomColor;
-  set borderBottomColor(Color? value) {
-    if (value == _borderBottomColor) return;
-    _borderBottomColor = value;
-    renderBoxModel!.markNeedsPaint();
-  }
-
-  Color get borderLeftColor => _borderLeftColor ?? currentColor;
-  Color? _borderLeftColor;
-  set borderLeftColor(Color? value) {
-    if (value == _borderLeftColor) return;
-    _borderLeftColor = value;
-    renderBoxModel!.markNeedsPaint();
-  }
-
-  /// Border-style
-  BorderStyle get borderTopStyle => _borderTopStyle ?? BorderStyle.none;
-  BorderStyle? _borderTopStyle;
-  set borderTopStyle(BorderStyle? value) {
-    if (value == _borderTopStyle) return;
-    _borderTopStyle = value;
-    renderBoxModel!.markNeedsPaint();
-  }
-
-  BorderStyle get borderRightStyle => _borderRightStyle ?? BorderStyle.none;
-  BorderStyle? _borderRightStyle;
-  set borderRightStyle(BorderStyle? value) {
-    if (value == _borderRightStyle) return;
-    _borderRightStyle = value;
-    renderBoxModel!.markNeedsPaint();
-  }
-
-  BorderStyle get borderBottomStyle => _borderBottomStyle ?? BorderStyle.none;
-  BorderStyle? _borderBottomStyle;
-  set borderBottomStyle(BorderStyle? value) {
-    if (value == _borderBottomStyle) return;
-    _borderBottomStyle = value;
-    renderBoxModel!.markNeedsPaint();
-  }
-
-  BorderStyle get borderLeftStyle => _borderLeftStyle ?? BorderStyle.none;
-  BorderStyle? _borderLeftStyle;
-  set borderLeftStyle(BorderStyle? value) {
-    if (value == _borderLeftStyle) return;
-    _borderLeftStyle = value;
-    renderBoxModel!.markNeedsPaint();
-  }
-
   CSSBorderRadius? _borderTopLeftRadius;
   set borderTopLeftRadius(CSSBorderRadius? value) {
     if (value == _borderTopLeftRadius) return;
@@ -319,17 +196,7 @@ mixin CSSBoxMixin on RenderStyleBase {
   }
 
   DecorationPosition decorationPosition = DecorationPosition.background;
-
   ImageConfiguration imageConfiguration = ImageConfiguration.empty;
-
-  Size wrapBorderSize(Size innerSize) {
-    return Size(borderLeftWidth.computedValue + innerSize.width + borderRightWidth.computedValue,
-      borderTopWidth.computedValue + innerSize.height + borderBottomWidth.computedValue);
-  }
-
-  BoxConstraints deflateBorderConstraints(BoxConstraints constraints) {
-    return constraints.deflate(borderEdge);
-  }
 
   List<BorderSide>? _getBorderSides() {
     RenderStyle renderStyle = this as RenderStyle;
