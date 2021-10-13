@@ -266,6 +266,7 @@ void BlobBuilder::append(JSContext &context, JSValue &value) {
           return;
         }
         buffer = JS_GetArrayBuffer(context.ctx(), &length, arrayBufferObject);
+        JS_FreeValue(context.ctx(), arrayBufferObject);
       }
 
       for (size_t i = 0; i < length; i++) {
