@@ -95,7 +95,6 @@ class KrakenRenderParagraph extends RenderBox
   set lineHeight(double? value) {
     if (lineHeight == value) return;
     _lineHeight = value;
-    markNeedsLayout();
   }
 
   /// The text to display.
