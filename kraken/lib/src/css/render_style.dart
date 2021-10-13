@@ -27,6 +27,7 @@ class RenderStyle
     RenderStyleBase,
     CSSSizingMixin,
     CSSPaddingMixin,
+    CSSBorderMixin,
     CSSMarginMixin,
     CSSBoxMixin,
     CSSTextMixin,
@@ -297,7 +298,7 @@ class RenderStyle
       renderBoxModel!.constraints.isTight
     ) {
       return renderBoxModel!.constraints.maxWidth -
-        borderLeftWidth.computedValue - borderRightWidth.computedValue -
+        effectiveBorderLeftWidth.computedValue - effectiveBorderRightWidth.computedValue -
         paddingLeft.computedValue - paddingRight.computedValue;
     }
     return getLogicalContentWidth();
@@ -313,7 +314,7 @@ class RenderStyle
       renderBoxModel!.constraints.isTight
     ) {
       return renderBoxModel!.constraints.maxHeight -
-        borderTopWidth.computedValue - borderBottomWidth.computedValue -
+        effectiveBorderTopWidth.computedValue - effectiveBorderBottomWidth.computedValue -
         paddingTop.computedValue - paddingBottom.computedValue;
     }
     return getLogicalContentHeight();
@@ -343,7 +344,7 @@ class RenderStyle
     if (paddingBoxLogicalWidth == null) {
       return null;
     }
-    return paddingBoxLogicalWidth! + borderLeftWidth.computedValue + borderRightWidth.computedValue;
+    return paddingBoxLogicalWidth! + effectiveBorderLeftWidth.computedValue + effectiveBorderRightWidth.computedValue;
   }
 
   // Border box height calculated from renderStyle tree.
@@ -352,7 +353,7 @@ class RenderStyle
     if (paddingBoxLogicalHeight == null) {
       return null;
     }
-    return paddingBoxLogicalHeight! + borderTopWidth.computedValue + borderBottomWidth.computedValue;
+    return paddingBoxLogicalHeight! + effectiveBorderTopWidth.computedValue + effectiveBorderBottomWidth.computedValue;
   }
 
   // Content box width of renderBoxModel after it was rendered.
@@ -379,7 +380,7 @@ class RenderStyle
     if (borderBoxWidth == null) {
       return null;
     }
-    return borderBoxWidth! - borderLeftWidth.computedValue - borderRightWidth.computedValue;
+    return borderBoxWidth! - effectiveBorderLeftWidth.computedValue - effectiveBorderRightWidth.computedValue;
   }
 
   // Padding box height of renderBoxModel after it was rendered.
@@ -388,7 +389,7 @@ class RenderStyle
     if (borderBoxHeight == null) {
       return null;
     }
-    return borderBoxHeight! - borderTopWidth.computedValue - borderBottomWidth.computedValue;
+    return borderBoxHeight! - effectiveBorderTopWidth.computedValue - effectiveBorderBottomWidth.computedValue;
   }
 
   // Border box width of renderBoxModel after it was rendered.
@@ -448,7 +449,7 @@ double _getCropWidthByMargin(RenderStyle renderStyle, double cropWidth) {
 }
 
 double _getCropWidthByPaddingBorder(RenderStyle renderStyle, double cropWidth) {
-  cropWidth += renderStyle.borderEdge.horizontal;
+  cropWidth += renderStyle.border.horizontal;
   cropWidth += renderStyle.padding.horizontal;
   return cropWidth;
 }
@@ -459,7 +460,7 @@ double _getCropHeightByMargin(RenderStyle renderStyle, double cropHeight) {
 }
 
 double _getCropHeightByPaddingBorder(RenderStyle renderStyle, double cropHeight) {
-  cropHeight += renderStyle.borderEdge.vertical;
+  cropHeight += renderStyle.border.vertical;
   cropHeight += renderStyle.padding.vertical;
   return cropHeight;
 }
