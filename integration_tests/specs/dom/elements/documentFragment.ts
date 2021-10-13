@@ -1,4 +1,4 @@
-xdescribe('Tags documentFragment', () => {
+describe('Tags documentFragment', () => {
   it('should work with appendChild', async () => {
     const list = document.createElement('div');
     document.body.appendChild(list);

@@ -633,11 +633,7 @@ JSValue ElementInstance::internalGetTextContent() {
 }
 
 void ElementInstance::internalSetTextContent(JSValue content) {
-  auto node = firstChild();
-  while (node != nullptr) {
-    internalRemoveChild(node);
-    node = firstChild();
-  }
+  internalClearChild();
 
   JSValue textNodeValue = JS_CallConstructor(m_ctx, TextNode::instance(m_context)->classObject, 1, &content);
   auto *textNodeInstance = static_cast<TextNodeInstance *>(JS_GetOpaque(textNodeValue, TextNode::classId()));

@@ -110,8 +110,7 @@ JSValue Node::appendChild(QjsContext *ctx, JSValue this_val, int argc, JSValue *
       JS_FreeValue(ctx, n);
     }
 
-    // Clear fragment childNodes reference.
-    JS_SetPropertyStr(ctx, nodeInstance->childNodes, "length", JS_NewUint32(ctx, 0));
+    nodeInstance->internalClearChild();
   } else {
     selfInstance->ensureDetached(nodeInstance);
     selfInstance->internalAppendChild(nodeInstance);
@@ -182,7 +181,7 @@ JSValue Node::insertBefore(QjsContext *ctx, JSValue this_val, int argc, JSValue 
     }
 
     // Clear fragment childNodes reference.
-    JS_SetPropertyStr(ctx, nodeInstance->childNodes, "length", JS_NewUint32(ctx, 0));
+    nodeInstance->internalClearChild();
   } else {
     selfInstance->ensureDetached(nodeInstance);
     selfInstance->internalInsertBefore(nodeInstance, referenceInstance);
@@ -230,7 +229,7 @@ JSValue Node::replaceChild(QjsContext *ctx, JSValue this_val, int argc, JSValue 
     }
     selfInstance->internalRemoveChild(oldChildInstance);
     // Clear fragment childNodes reference.
-    JS_SetPropertyStr(ctx, newChildInstance->childNodes, "length", JS_NewUint32(ctx, 0));
+    newChildInstance->internalClearChild();
   } else {
     selfInstance->ensureDetached(newChildInstance);
     selfInstance->internalReplaceChild(newChildInstance, oldChildInstance);
@@ -465,6 +464,21 @@ void NodeInstance::internalRemove() {
   if (JS_IsNull(parentNode)) return;
   auto *parent = static_cast<NodeInstance *>(JS_GetOpaque(parentNode, Node::classId(parentNode)));
   parent->internalRemoveChild(this);
+}
+void NodeInstance::internalClearChild() {
+  int32_t len = arrayGetLength(m_ctx, childNodes);
+
+  for (int i = 0; i < len; i ++) {
+    JSValue v = JS_GetPropertyUint32(m_ctx, childNodes, i);
+    auto *node = static_cast<NodeInstance *>(JS_GetOpaque(v, Node::classId(v)));
+    node->removeParentNode();
+    node->_notifyNodeRemoved(this);
+    foundation::UICommandBuffer::instance(node->m_context->getContextId())
+      ->addCommand(node->eventTargetId, UICommand::removeNode, nullptr);
+    JS_FreeValue(m_ctx, v);
+  }
+
+  JS_SetPropertyStr(m_ctx, childNodes, "length", JS_NewUint32(m_ctx, 0));
 }
 NodeInstance *NodeInstance::internalRemoveChild(NodeInstance *node) {
   int32_t idx = arrayFindIdx(m_ctx, childNodes, node->instanceObject);

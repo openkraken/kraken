@@ -103,6 +103,7 @@ public:
   NodeInstance *nextSibling();
   void internalAppendChild(NodeInstance *node);
   void internalRemove();
+  void internalClearChild();
   NodeInstance *internalRemoveChild(NodeInstance *node);
   JSValue internalInsertBefore(NodeInstance *node, NodeInstance *referenceNode);
   virtual JSValue internalGetTextContent();
