@@ -31,28 +31,6 @@ final Directory specsDirectory = Directory(path.join(testDirectory, '.specs'));
 const int KRAKEN_NUM = 1;
 Map<int, Kraken> krakenMap = Map();
 
-class NativeGestureClient implements GestureClient {
-  NativeGestureClient({
-    this.gestureClientID
-  });
-
-  int? gestureClientID;
-
-  @override
-  void dragUpdateCallback(DragUpdateDetails details) {
-  }
-
-  @override
-  void dragStartCallback(DragStartDetails details) {
-    var event = CustomEvent('nativegesture', CustomEventInit(detail: 'nativegesture'));
-    krakenMap[gestureClientID!]!.controller!.view.document!.documentElement.dispatchEvent(event);
-  }
-
-  @override
-  void dragEndCallback(DragEndDetails details) {
-  }
-}
-
 // Test for UriParser.
 class IntegrationTestUriParser extends UriParser {
   @override
@@ -126,7 +104,14 @@ void main() async {
       disableViewportWidthAssertion: true,
       disableViewportHeightAssertion: true,
       javaScriptChannel: javaScriptChannel,
-      gestureClient: NativeGestureClient(gestureClientID: i),
+      gestureListener: GestureListener(
+        onDrag: (GestureEvent gestureEvent) {
+          if (gestureEvent.state == EVENT_STATE_START) {
+            var event = CustomEvent('nativegesture', CustomEventInit(detail: 'nativegesture'));
+            krakenMap[i]!.controller!.view.document!.documentElement.dispatchEvent(event);
+          }
+        },
+      ),
       uriParser: IntegrationTestUriParser(),
     );
     widgets.add(kraken);
