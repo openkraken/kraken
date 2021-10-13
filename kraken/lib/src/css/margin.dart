@@ -13,50 +13,48 @@ mixin CSSMarginMixin on RenderStyleBase {
   ///
   /// If this is set to an [EdgeInsetsDirectional] object, then [textDirection]
   /// must not be null.
-  EdgeInsets? _margin;
   EdgeInsets get margin {
-    // TODO(yuanyan): cache resolved margin when not changed.
     EdgeInsets insets = EdgeInsets.only(
-      left: _marginLeft.computedValue,
-      right: _marginRight.computedValue,
-      bottom: _marginBottom.computedValue,
-      top: _marginTop.computedValue
+      left: marginLeft.computedValue,
+      right: marginRight.computedValue,
+      bottom: marginBottom.computedValue,
+      top: marginTop.computedValue
     ).resolve(TextDirection.ltr);
     assert(insets.isNonNegative);
-    return _margin = insets;
+    return insets;
   }
 
-  CSSLengthValue _marginLeft = CSSLengthValue.zero;
+  CSSLengthValue? _marginLeft;
   set marginLeft(CSSLengthValue? value) {
-    if (value == null || _marginLeft == value) return;
+    if (_marginLeft == value) return;
     _marginLeft = value;
     _markSelfAndParentNeedsLayout();
   }
-  CSSLengthValue get marginLeft => _marginLeft;
+  CSSLengthValue get marginLeft => _marginLeft ?? CSSLengthValue.zero;
 
-  CSSLengthValue _marginRight = CSSLengthValue.zero;
+  CSSLengthValue? _marginRight;
     set marginRight(CSSLengthValue? value) {
-    if (value == null || _marginRight == value) return;
+    if (_marginRight == value) return;
     _marginRight = value;
     _markSelfAndParentNeedsLayout();
   }
-  CSSLengthValue get marginRight => _marginRight;
+  CSSLengthValue get marginRight => _marginRight ?? CSSLengthValue.zero;
 
-  CSSLengthValue _marginBottom = CSSLengthValue.zero;
+  CSSLengthValue? _marginBottom;
   set marginBottom(CSSLengthValue? value) {
-    if (value == null || _marginBottom == value) return;
+    if (_marginBottom == value) return;
     _marginBottom = value;
     _markSelfAndParentNeedsLayout();
   }
-  CSSLengthValue get marginBottom => _marginBottom;
+  CSSLengthValue get marginBottom => _marginBottom ?? CSSLengthValue.zero;
 
-  CSSLengthValue _marginTop = CSSLengthValue.zero;
+  CSSLengthValue? _marginTop;
   set marginTop(CSSLengthValue? value) {
-    if (value == null || _marginTop == value) return;
+    if (_marginTop == value) return;
     _marginTop = value;
     _markSelfAndParentNeedsLayout();
   }
-  CSSLengthValue get marginTop => _marginTop;
+  CSSLengthValue get marginTop => _marginTop ?? CSSLengthValue.zero;
 
   void _markSelfAndParentNeedsLayout() {
     RenderBoxModel boxModel = renderBoxModel!;
@@ -68,6 +66,6 @@ mixin CSSMarginMixin on RenderStyleBase {
     }
   }
   void debugMarginProperties(DiagnosticPropertiesBuilder properties) {
-    if (_margin != null) properties.add(DiagnosticsProperty('margin', _margin));
+    properties.add(DiagnosticsProperty('margin', margin));
   }
 }

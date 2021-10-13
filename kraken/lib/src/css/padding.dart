@@ -14,50 +14,48 @@ mixin CSSPaddingMixin on RenderStyleBase {
   ///
   /// If this is set to an [EdgeInsetsDirectional] object, then [textDirection]
   /// must not be null.
-  EdgeInsets? _padding;
   EdgeInsets get padding {
-    // TODO(yuanyan): cache resolved padding when not changed.
     EdgeInsets insets = EdgeInsets.only(
-      left: _paddingLeft.computedValue,
-      right: _paddingRight.computedValue,
-      bottom: _paddingBottom.computedValue,
-      top: _paddingTop.computedValue
+      left: paddingLeft.computedValue,
+      right: paddingRight.computedValue,
+      bottom: paddingBottom.computedValue,
+      top: paddingTop.computedValue
     );
     assert(insets.isNonNegative);
-    return _padding = insets;
+    return insets;
   }
 
-  CSSLengthValue _paddingLeft = CSSLengthValue.zero;
+  CSSLengthValue? _paddingLeft;
   set paddingLeft(CSSLengthValue? value) {
-    if (value == null || _paddingLeft == value) return;
+    if (_paddingLeft == value) return;
     _paddingLeft = value;
     _markSelfAndParentNeedsLayout();
   }
-  CSSLengthValue get paddingLeft => _paddingLeft;
+  CSSLengthValue get paddingLeft => _paddingLeft ?? CSSLengthValue.zero;
 
-  CSSLengthValue _paddingRight = CSSLengthValue.zero;
+  CSSLengthValue? _paddingRight;
     set paddingRight(CSSLengthValue? value) {
-    if (value == null || _paddingRight == value) return;
+    if (_paddingRight == value) return;
     _paddingRight = value;
     _markSelfAndParentNeedsLayout();
   }
-  CSSLengthValue get paddingRight => _paddingRight;
+  CSSLengthValue get paddingRight => _paddingRight ?? CSSLengthValue.zero;
 
-  CSSLengthValue _paddingBottom = CSSLengthValue.zero;
+  CSSLengthValue? _paddingBottom;
   set paddingBottom(CSSLengthValue? value) {
-    if (value == null || _paddingBottom == value) return;
+    if (_paddingBottom == value) return;
     _paddingBottom = value;
     _markSelfAndParentNeedsLayout();
   }
-  CSSLengthValue get paddingBottom => _paddingBottom;
+  CSSLengthValue get paddingBottom => _paddingBottom ?? CSSLengthValue.zero;
 
-  CSSLengthValue _paddingTop = CSSLengthValue.zero;
+  CSSLengthValue? _paddingTop;
   set paddingTop(CSSLengthValue? value) {
-    if (value == null || _paddingTop == value) return;
+    if (_paddingTop == value) return;
     _paddingTop = value;
     _markSelfAndParentNeedsLayout();
   }
-  CSSLengthValue get paddingTop => _paddingTop;
+  CSSLengthValue get paddingTop => _paddingTop ?? CSSLengthValue.zero;
 
   void _markSelfAndParentNeedsLayout() {
     RenderBoxModel boxModel = renderBoxModel!;
@@ -75,12 +73,12 @@ mixin CSSPaddingMixin on RenderStyleBase {
 
   Size wrapPaddingSize(Size innerSize) {
     return Size(
-      _paddingLeft.computedValue + innerSize.width + _paddingRight.computedValue,
-      _paddingTop.computedValue + innerSize.height + _paddingBottom.computedValue
+      paddingLeft.computedValue + innerSize.width + paddingRight.computedValue,
+      paddingTop.computedValue + innerSize.height + paddingBottom.computedValue
     );
   }
 
   void debugPaddingProperties(DiagnosticPropertiesBuilder properties) {
-    if (_padding != null) properties.add(DiagnosticsProperty('padding', _padding));
+    properties.add(DiagnosticsProperty('padding', padding));
   }
 }
