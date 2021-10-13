@@ -110,7 +110,7 @@ JSValue Node::appendChild(QjsContext *ctx, JSValue this_val, int argc, JSValue *
       JS_FreeValue(ctx, n);
     }
 
-    nodeInstance->internalClearChild();
+    JS_SetPropertyStr(ctx, nodeInstance->childNodes, "length", JS_NewUint32(ctx, 0));
   } else {
     selfInstance->ensureDetached(nodeInstance);
     selfInstance->internalAppendChild(nodeInstance);
@@ -181,7 +181,7 @@ JSValue Node::insertBefore(QjsContext *ctx, JSValue this_val, int argc, JSValue 
     }
 
     // Clear fragment childNodes reference.
-    nodeInstance->internalClearChild();
+    JS_SetPropertyStr(ctx, nodeInstance->childNodes, "length", JS_NewUint32(ctx, 0));
   } else {
     selfInstance->ensureDetached(nodeInstance);
     selfInstance->internalInsertBefore(nodeInstance, referenceInstance);
@@ -229,7 +229,7 @@ JSValue Node::replaceChild(QjsContext *ctx, JSValue this_val, int argc, JSValue 
     }
     selfInstance->internalRemoveChild(oldChildInstance);
     // Clear fragment childNodes reference.
-    newChildInstance->internalClearChild();
+    JS_SetPropertyStr(ctx, newChildInstance->childNodes, "length", JS_NewUint32(ctx, 0));
   } else {
     selfInstance->ensureDetached(newChildInstance);
     selfInstance->internalReplaceChild(newChildInstance, oldChildInstance);
