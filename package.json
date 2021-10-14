@@ -12,7 +12,7 @@
     "build:android:sdk": "KRAKEN_BUILD=Release node scripts/build_android_sdk",
     "build:ios:sdk": "KRAKEN_BUILD=Release node scripts/build_ios_sdk",
     "pretest": "npm install && npm run lint && node scripts/build_darwin_dylib",
-    "benchmark": "npm install && ENABLE_PROFILE=true node scripts/run_benchmark.js",
+    "benchmark": "npm install && ENABLE_PROFILE=true KRAKEN_BUILD=Release node scripts/run_benchmark.js",
     "start": "cd kraken/example && flutter run",
     "test": "node scripts/run_test.js",
     "lint": "cd kraken && flutter pub get && flutter analyze",

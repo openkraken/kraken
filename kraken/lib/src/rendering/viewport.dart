@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/gesture.dart';
+import 'package:kraken/dom.dart';
 import 'dart:ui';
 
 class RenderViewportBox extends RenderProxyBox
@@ -14,21 +15,23 @@ class RenderViewportBox extends RenderProxyBox
   RenderViewportBox({
     required Size viewportSize,
     RenderBox? child,
-    gestureClient,
+    this.gestureListener,
     this.background,
     required KrakenController controller,
   })  : _viewportSize = viewportSize,
         super(child) {
-    if (gestureClient != null) {
-      _verticalDragGestureRecognizer.onUpdate =
-          _horizontalDragRecognizer.onUpdate = gestureClient.dragUpdateCallback;
-      _verticalDragGestureRecognizer.onStart =
-          _horizontalDragRecognizer.onStart = gestureClient.dragStartCallback;
-      _verticalDragGestureRecognizer.onEnd =
-          _horizontalDragRecognizer.onEnd = gestureClient.dragEndCallback;
+    if (gestureListener != null && gestureListener!.onDrag != null) {
+      _verticalDragGestureRecognizer.onUpdate = _horizontalDragGestureRecognizer.onUpdate = onDragUpdate;
+
+      _verticalDragGestureRecognizer.onStart = _horizontalDragGestureRecognizer.onStart = onDragStart;
+
+      _verticalDragGestureRecognizer.onEnd = _horizontalDragGestureRecognizer.onEnd = onDragEnd;
     }
+
     this.controller = controller;
   }
+
+  GestureListener? gestureListener;
 
   @override
   bool get isRepaintBoundary => true;
@@ -59,7 +62,7 @@ class RenderViewportBox extends RenderProxyBox
 
   final VerticalDragGestureRecognizer _verticalDragGestureRecognizer =
       VerticalDragGestureRecognizer();
-  final HorizontalDragGestureRecognizer _horizontalDragRecognizer =
+  final HorizontalDragGestureRecognizer _horizontalDragGestureRecognizer =
       HorizontalDragGestureRecognizer();
 
   @override
@@ -76,6 +79,45 @@ class RenderViewportBox extends RenderProxyBox
         height: height,
       ));
     }
+  }
+
+  void onDragStart(DragStartDetails details) {
+    gestureListener!.onDrag!(
+        GestureEvent(
+            EVENT_DRAG,
+            GestureEventInit(
+                state: EVENT_STATE_START,
+                deltaX: details.globalPosition.dx,
+                deltaY: details.globalPosition.dy
+            )
+        )
+    );
+  }
+
+  void onDragUpdate(DragUpdateDetails details) {
+    gestureListener!.onDrag!(
+        GestureEvent(
+            EVENT_DRAG,
+            GestureEventInit(
+                state: EVENT_STATE_UPDATE,
+                deltaX: details.globalPosition.dx,
+                deltaY: details.globalPosition.dy
+            )
+        )
+    );
+  }
+
+  void onDragEnd(DragEndDetails details) {
+    gestureListener!.onDrag!(
+        GestureEvent(
+            EVENT_DRAG,
+            GestureEventInit(
+                state: EVENT_STATE_END,
+                velocityX: details.velocity.pixelsPerSecond.dx,
+                velocityY: details.velocity.pixelsPerSecond.dy
+            )
+        )
+    );
   }
 
   @override

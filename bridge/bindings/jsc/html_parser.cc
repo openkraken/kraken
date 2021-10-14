@@ -105,10 +105,7 @@ void HTMLParser::traverseHTML(JSContext* context, GumboNode *node,
 
 bool HTMLParser::parseHTML(JSContext* context, JSStringRef sourceRef,
                            NodeInstance *rootNode) {
-  // Gumbo-parser parse HTML.
   std::string html = JSStringToStdString(sourceRef);
-  int html_length = html.length();
-  GumboOutput *htmlTree = gumbo_parse_with_options(&kGumboDefaultOptions, html.c_str(), html_length);
 
   if (rootNode != nullptr) {
     // Remove all childNode.
@@ -116,7 +113,12 @@ bool HTMLParser::parseHTML(JSContext* context, JSStringRef sourceRef,
       rootNode->internalRemoveChild(iter, nullptr);
     }
 
-    traverseHTML(context, htmlTree->root, rootNode);
+    if (trim(html) != "") {
+      // Gumbo-parser parse HTML.
+      int html_length = html.length();
+      GumboOutput *htmlTree = gumbo_parse_with_options(&kGumboDefaultOptions, html.c_str(), html_length);
+      traverseHTML(context, htmlTree->root, rootNode);
+    }
   } else {
     KRAKEN_LOG(ERROR) << "Root node is null.";
   }
