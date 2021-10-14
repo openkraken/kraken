@@ -272,7 +272,6 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   void setRenderStyle(int targetId, String key, dynamic value) {
-    assert(existsTarget(targetId), 'id: $targetId key: $key value: $value');
     Node? target = getEventTargetByTargetId<Node>(targetId);
     if (target == null) return;
 
