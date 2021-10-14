@@ -43,4 +43,12 @@ describe('innerHTML', () => {
     expect(div.innerHTML).toEqual('<div attr-key="attr-value" ></div>');
   });
 
+  it('set empty string should remove all children', async () => {
+    const div = document.createElement('div');
+    document.body.appendChild(div);
+    document.body.innerHTML = '';
+
+    expect(document.body.children.length).toEqual(0);
+  })
+
 });
