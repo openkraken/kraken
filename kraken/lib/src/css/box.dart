@@ -10,10 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 
 // CSS Box Model: https://drafts.csswg.org/css-box-4/
-// CSS Backgrounds and Borders: https://drafts.csswg.org/css-backgrounds/
-
-/// - background
-/// - border
 mixin CSSBoxMixin on RenderStyleBase {
 
   final DecorationPosition decorationPosition = DecorationPosition.background;
