@@ -367,7 +367,7 @@ class CSSBackground {
         );
       default:
         List<String> values = value.split(_splitRegExp);
-        if (values.length == 1) {
+        if (values.length == 1 && values[0].isNotEmpty) {
           CSSLengthValue width = CSSLength.parseLength(values[0], renderStyle, propertyName, Axis.horizontal);
           return CSSBackgroundSize(
             fit: BoxFit.none,
