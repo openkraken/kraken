@@ -50,11 +50,11 @@ class ObjectElement extends Element implements ObjectElementHost {
     _objectElementClient = _objectElementClientFactory(this);
   }
 
-  Future<dynamic> initElementClient() async {
+  Future initElementClient() async {
     try {
       await _objectElementClient.initElementClient(properties);
-    } catch (e) {
-      print(e);
+    } catch (error, stackTrace) {
+      print('$error\n$stackTrace');
     }
   }
 

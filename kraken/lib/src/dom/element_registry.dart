@@ -67,6 +67,7 @@ void defineBuiltInElements() {
   defineElement(FIGURE, (id, nativePtr, elementManager) => FigureElement(id, nativePtr, elementManager));
   defineElement(FIGCAPTION, (id, nativePtr, elementManager) => FigureCaptionElement(id, nativePtr, elementManager));
   defineElement(BLOCKQUOTE, (id, nativePtr, elementManager) => BlockQuotationElement(id, nativePtr, elementManager));
+  defineElement(TEMPLATE, (id, nativePtr, elementManager) => TemplateElement(id, nativePtr, elementManager));
   // Sections
   defineElement(ADDRESS, (id, nativePtr, elementManager) => AddressElement(id, nativePtr, elementManager));
   defineElement(ARTICLE, (id, nativePtr, elementManager) => ArticleElement(id, nativePtr, elementManager));

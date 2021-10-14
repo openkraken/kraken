@@ -17,7 +17,7 @@ A high-performance, web standards-compliant rendering engine.
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
   s.platform = :ios, '8.0'
-  s.vendored_frameworks = 'kraken_bridge.framework'
+  s.vendored_frameworks = 'kraken_bridge.xcframework'
   s.prepare_command = 'bash prepare.sh'
 
   # Flutter.framework does not contain a i386 slice. Only x86_64 simulators are supported.

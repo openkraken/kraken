@@ -1174,6 +1174,12 @@ class RenderFlowLayout extends RenderLayoutBox {
       if (runChild is RenderTextBox) {
         runChildMainSize = runChild.autoMinWidth;
       }
+      // Should add horizontal margin of child to the main axis auto size of parent.
+      if (runChild is RenderBoxModel) {
+        double childMarginLeft = runChild.renderStyle.marginLeft.length!;
+        double childMarginRight = runChild.renderStyle.marginRight.length!;
+        runChildMainSize += childMarginLeft + childMarginRight;
+      }
       runMainExtent += runChildMainSize;
     }
 
@@ -1676,47 +1682,41 @@ class RenderFlowLayout extends RenderLayoutBox {
     return defaultHitTestChildren(result, position: position);
   }
 
-  void sortChildrenByZIndex() {
-    List<RenderObject?> children = getChildrenAsList();
-    children.sort((RenderObject? prev, RenderObject? next) {
-      CSSPositionType prevPosition = prev is RenderBoxModel
-          ? prev.renderStyle.position
-          : CSSPositionType.static;
-      CSSPositionType nextPosition = next is RenderBoxModel
-          ? next.renderStyle.position
-          : CSSPositionType.static;
-      // Place positioned element after non positioned element
-      if (prevPosition == CSSPositionType.static &&
-          nextPosition != CSSPositionType.static) {
-        return -1;
-      }
-      if (prevPosition != CSSPositionType.static &&
-          nextPosition == CSSPositionType.static) {
-        return 1;
-      }
-      int prevZIndex =
-          prev is RenderBoxModel ? (prev.renderStyle.zIndex ?? 0) : 0;
-      int nextZIndex =
-          next is RenderBoxModel ? (next.renderStyle.zIndex ?? 0) : 0;
-      return prevZIndex - nextZIndex;
-    });
-    sortedChildren = children;
+  @override
+  int sortSiblingsByZIndex(RenderObject prev, RenderObject next) {
+    CSSPositionType prevPosition = prev is RenderBoxModel
+      ? prev.renderStyle.position
+      : CSSPositionType.static;
+    CSSPositionType nextPosition = next is RenderBoxModel
+      ? next.renderStyle.position
+      : CSSPositionType.static;
+    // Place positioned element after non positioned element
+    if (prevPosition == CSSPositionType.static &&
+      nextPosition != CSSPositionType.static) {
+      return -1;
+    }
+    if (prevPosition != CSSPositionType.static &&
+      nextPosition == CSSPositionType.static) {
+      return 1;
+    }
+    int prevZIndex =
+      prev is RenderBoxModel ? (prev.renderStyle.zIndex ?? 0) : 0;
+    int nextZIndex =
+      next is RenderBoxModel ? (next.renderStyle.zIndex ?? 0) : 0;
+    return prevZIndex - nextZIndex;
   }
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
-    if (!isChildrenSorted) {
-      sortChildrenByZIndex();
-    }
     for (int i = 0; i < sortedChildren.length; i++) {
-      RenderObject? child = sortedChildren[i];
+      RenderObject child = sortedChildren[i];
       if (child is! RenderPositionHolder) {
         late DateTime childPaintStart;
         if (kProfileMode) {
           childPaintStart = DateTime.now();
         }
         final RenderLayoutParentData childParentData =
-            child!.parentData as RenderLayoutParentData;
+            child.parentData as RenderLayoutParentData;
         context.paintChild(child, childParentData.offset + offset);
         if (kProfileMode) {
           DateTime childPaintEnd = DateTime.now();
@@ -1762,6 +1762,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       renderStyle: renderStyle,
       elementDelegate: elementDelegate,
     );
+    selfRepaintFlowLayout.sortedChildren = sortedChildren;
     return copyWith(selfRepaintFlowLayout);
   }
 

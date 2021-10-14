@@ -48,7 +48,6 @@ public:
   std::atomic<bool> event_registered = false;
 private:
   std::unique_ptr<binding::jsc::JSContext> m_context;
-  std::unique_ptr<binding::jsc::HTMLParser> m_html_parser;
   JSExceptionHandler m_handler;
   Task m_disposeCallback{nullptr};
   void *m_disposePrivateData{nullptr};

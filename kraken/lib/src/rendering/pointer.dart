@@ -11,8 +11,7 @@ import 'package:flutter/rendering.dart';
 
 typedef GestureCallback = void Function(Event);
 
-typedef MouseEventListener = void Function(String,
-    {PointerDownEvent? down, PointerUpEvent? up});
+typedef MouseEventListener = void Function(String, TapUpDetails);
 
 typedef GetEventHandlers = Map<String, List<EventHandler>> Function();
 

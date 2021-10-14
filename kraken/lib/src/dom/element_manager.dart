@@ -76,7 +76,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   final List<VoidCallback> _detachCallbacks = [];
 
-  EventClient? eventClient;
+  GestureListener? gestureListener;
 
   WidgetDelegate? widgetDelegate;
 
@@ -85,7 +85,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     required this.viewport,
     required this.controller,
     this.showPerformanceOverlayOverride = false,
-    this.eventClient,
+    this.gestureListener,
     this.widgetDelegate,
   }) {
     if (kProfileMode) {
@@ -113,6 +113,21 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     setEventTarget(document);
 
     element_registry.defineBuiltInElements();
+
+    // Listeners need to be registered to window in order to dispatch events on demand.
+    if (gestureListener != null) {
+      if (gestureListener!.onTouchStart != null) {
+        window.addEvent(EVENT_TOUCH_START);
+      }
+
+      if (gestureListener!.onTouchMove != null) {
+        window.addEvent(EVENT_TOUCH_MOVE);
+      }
+
+      if (gestureListener!.onTouchEnd != null) {
+        window.addEvent(EVENT_TOUCH_END);
+      }
+    }
   }
 
   void _setupObserver() {

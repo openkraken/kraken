@@ -402,6 +402,7 @@ class Element extends Node
 
     RenderObject? parentRenderObject = _renderBoxModel.parent as RenderObject?;
     RenderBox? previousSibling;
+    List<RenderObject>? sortedChildren;
     // Remove old renderObject
     if (parentRenderObject is ContainerRenderObjectMixin) {
       ContainerParentDataMixin<RenderBox>? _parentData = _renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>?;
@@ -415,6 +416,10 @@ class Element extends Node
             previousSibling = _parentData.previousSibling;
           }
         }
+        // Cache sortedChildren cause it will be cleared when renderLayoutBox is detached from tree.
+        if (_renderBoxModel is RenderLayoutBox) {
+          sortedChildren = _renderBoxModel.sortedChildren;
+        }
         parentRenderObject.remove(_renderBoxModel);
       }
     }
@@ -423,6 +428,12 @@ class Element extends Node
       prevRenderBoxModel: _renderBoxModel,
       repaintSelf: repaintSelf
     );
+
+    // Assign sortedChildren to newly created RenderLayoutBox.
+    if (targetRenderBox is RenderLayoutBox && sortedChildren != null) {
+      targetRenderBox.sortedChildren = sortedChildren;
+    }
+
     // Append new renderObject
     if (parentRenderObject is ContainerRenderObjectMixin) {
       renderBoxModel = _renderBoxModel = targetRenderBox;
@@ -1403,7 +1414,19 @@ class Element extends Node
       _eventResponder(event);
 
       // Dispatch listener for widget.
-      elementManager.eventClient?.eventListener(event);
+      if (elementManager.gestureListener != null) {
+        if (elementManager.gestureListener?.onTouchStart != null && event.type == EVENT_TOUCH_START) {
+          elementManager.gestureListener?.onTouchStart!(event as TouchEvent);
+        }
+
+        if (elementManager.gestureListener?.onTouchMove != null && event.type == EVENT_TOUCH_MOVE) {
+          elementManager.gestureListener?.onTouchMove!(event as TouchEvent);
+        }
+
+        if (elementManager.gestureListener?.onTouchEnd != null && event.type == EVENT_TOUCH_END) {
+          elementManager.gestureListener?.onTouchEnd!(event as TouchEvent);
+        }
+      }
     }
   }
 

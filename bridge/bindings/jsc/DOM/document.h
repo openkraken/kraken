@@ -18,7 +18,7 @@
 #include "bindings/jsc/DOM/elements/input_element.h"
 #include "bindings/jsc/DOM/elements/object_element.h"
 #include "bindings/jsc/DOM/elements/script_element.h"
-#include "bindings/jsc/DOM/elements/document_fragment.h"
+#include "bindings/jsc/DOM/elements/template_element.h"
 #include "bindings/jsc/DOM/events/close_event.h"
 #include "bindings/jsc/DOM/events/gesture_event.h"
 #include "bindings/jsc/DOM/events/input_event.h"
@@ -27,6 +27,7 @@
 #include "bindings/jsc/DOM/events/message_event.h"
 #include "bindings/jsc/DOM/events/pop_state_event.h"
 #include "bindings/jsc/DOM/events/touch_event.h"
+#include "document_fragment.h"
 
 namespace kraken::binding::jsc {
 

@@ -1818,6 +1818,16 @@ class RenderFlexLayout extends RenderLayoutBox {
             ? child.autoMinWidth
             : child.autoMinHeight;
       }
+      // Should add main axis margin of child to the main axis auto size of parent.
+      if (child is RenderBoxModel) {
+        double childMarginTop = child.renderStyle.marginTop.length!;
+        double childMarginBottom = child.renderStyle.marginBottom.length!;
+        double childMarginLeft = child.renderStyle.marginLeft.length!;
+        double childMarginRight = child.renderStyle.marginRight.length!;
+        runChildMainSize += isHorizontalFlexDirection ?
+          childMarginLeft + childMarginRight :
+          childMarginTop + childMarginBottom;
+      }
       runMainExtent += runChildMainSize;
     }
 
@@ -2583,57 +2593,52 @@ class RenderFlexLayout extends RenderLayoutBox {
     return defaultHitTestChildren(result, position: position);
   }
 
-  void sortChildrenByZIndex() {
-    List<RenderObject?> children = getChildrenAsList();
-    children.sort((RenderObject? prev, RenderObject? next) {
-      // z-index values other than auto of flex-item create a stacking context even if position is static
-      // (behaving exactly as if position were relative)
-      // https://drafts.csswg.org/css-flexbox-1/#painting
+  @override
+  int sortSiblingsByZIndex(RenderObject prev, RenderObject next) {
+    // z-index values other than auto of flex-item create a stacking context even if position is static
+    // (behaving exactly as if position were relative)
+    // https://drafts.csswg.org/css-flexbox-1/#painting
 
-      // z-index descending order is as follows:
-      // 1. element has z-index
-      // 2. element has no z-index and position is non static
-      // 3. element has no z-index and position is static
-      CSSPositionType prevPosition = prev is RenderBoxModel
-          ? prev.renderStyle.position
-          : CSSPositionType.static;
-      CSSPositionType nextPosition = next is RenderBoxModel
-          ? next.renderStyle.position
-          : CSSPositionType.static;
-      int? prevZIndex =
-          prev is RenderBoxModel ? prev.renderStyle.zIndex : null;
-      int? nextZIndex =
-          next is RenderBoxModel ? next.renderStyle.zIndex : null;
+    // z-index descending order is as follows:
+    // 1. element has z-index
+    // 2. element has no z-index and position is non static
+    // 3. element has no z-index and position is static
+    CSSPositionType prevPosition = prev is RenderBoxModel
+      ? prev.renderStyle.position
+      : CSSPositionType.static;
+    CSSPositionType nextPosition = next is RenderBoxModel
+      ? next.renderStyle.position
+      : CSSPositionType.static;
+    int? prevZIndex =
+    prev is RenderBoxModel ? prev.renderStyle.zIndex : null;
+    int? nextZIndex =
+    next is RenderBoxModel ? next.renderStyle.zIndex : null;
 
-      if (prevZIndex != null && nextZIndex != null) {
-        return prevZIndex - nextZIndex;
-      } else if (prevZIndex != null && nextZIndex == null) {
-        return 1;
-      } else if (prevZIndex == null && nextZIndex != null) {
+    if (prevZIndex != null && nextZIndex != null) {
+      return prevZIndex - nextZIndex;
+    } else if (prevZIndex != null && nextZIndex == null) {
+      return 1;
+    } else if (prevZIndex == null && nextZIndex != null) {
+      return -1;
+    } else {
+      if ((prevPosition != CSSPositionType.static &&
+        nextPosition != CSSPositionType.static) ||
+        (prevPosition == CSSPositionType.static &&
+          nextPosition == CSSPositionType.static)) {
+        return 0;
+      } else if (prevPosition == CSSPositionType.static &&
+          nextPosition != CSSPositionType.static) {
         return -1;
       } else {
-        if ((prevPosition != CSSPositionType.static &&
-                nextPosition != CSSPositionType.static) ||
-            (prevPosition == CSSPositionType.static &&
-                nextPosition == CSSPositionType.static) ||
-            (prevPosition == CSSPositionType.static &&
-                nextPosition != CSSPositionType.static)) {
-          return -1;
-        } else {
-          return 1;
-        }
+        return 1;
       }
-    });
-    sortedChildren = children;
+    }
   }
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
-    if (!isChildrenSorted) {
-      sortChildrenByZIndex();
-    }
     for (int i = 0; i < sortedChildren.length; i++) {
-      RenderObject? child = sortedChildren[i];
+      RenderObject child = sortedChildren[i];
       // Don't paint placeholder of positioned element
       if (child is! RenderPositionHolder) {
         late DateTime childPaintStart;
@@ -2641,7 +2646,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           childPaintStart = DateTime.now();
         }
         final RenderLayoutParentData childParentData =
-            child!.parentData as RenderLayoutParentData;
+            child.parentData as RenderLayoutParentData;
         context.paintChild(child, childParentData.offset + offset);
         if (kProfileMode) {
           DateTime childPaintEnd = DateTime.now();
