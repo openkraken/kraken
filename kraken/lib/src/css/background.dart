@@ -368,14 +368,14 @@ class CSSBackground {
       default:
         List<String> values = value.split(_splitRegExp);
         if (values.length == 1) {
-          CSSLengthValue width = CSSLength.parseLength(values[0], renderStyle, propertyName);
+          CSSLengthValue width = CSSLength.parseLength(values[0], renderStyle, propertyName, Axis.horizontal);
           return CSSBackgroundSize(
             fit: BoxFit.none,
             width: width,
           );
         } else if (values.length == 2) {
-          CSSLengthValue width = CSSLength.parseLength(values[0], renderStyle, propertyName);
-          CSSLengthValue height = CSSLength.parseLength(values[0], renderStyle, propertyName);
+          CSSLengthValue width = CSSLength.parseLength(values[0], renderStyle, propertyName, Axis.horizontal);
+          CSSLengthValue height = CSSLength.parseLength(values[1], renderStyle, propertyName, Axis.vertical);
           // Value which is neither length/percentage/auto is considered to be invalid.
           return CSSBackgroundSize(
             fit: BoxFit.none,

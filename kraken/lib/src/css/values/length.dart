@@ -166,6 +166,7 @@ class CSSLengthValue {
               _computedValue = value! * parentPaddingBoxHeight;
             }
           break;
+          case BACKGROUND_SIZE:
           case BORDER_TOP_LEFT_RADIUS:
           case BORDER_TOP_RIGHT_RADIUS:
           case BORDER_BOTTOM_LEFT_RADIUS:
@@ -190,6 +191,10 @@ class CSSLengthValue {
 
   bool get isAuto {
     return unit == CSSLengthUnit.AUTO;
+  }
+
+  bool get isPercentage {
+    return unit == CSSLengthUnit.PERCENTAGE;
   }
 
   bool get isZero {
@@ -276,7 +281,7 @@ class CSSLength {
     return double.tryParse(percentage.split('%')[0])! / 100;
   }
 
-  static CSSLengthValue parseLength(String text, RenderStyle? renderStyle, String? propertyName, [ Axis? axisType]) {
+  static CSSLengthValue parseLength(String text, RenderStyle? renderStyle, String? propertyName, [ Axis? axisType ]) {
     // Only '0' is accepted with no unit.
     double? value;
     CSSLengthUnit unit = CSSLengthUnit.PX;

@@ -57,7 +57,7 @@ mixin CSSBorderMixin on RenderStyleBase {
   ///   borderColor: <color>
 
   /// Border-width = <length> | thin | medium | thick
-  
+
   // Initial value: medium
   final CSSLengthValue _mediumWidth = CSSLengthValue(3, CSSLengthUnit.PX);
 
@@ -268,11 +268,11 @@ class CSSBorderRadius {
       // border-top-left-radius: horizontal vertical
       List<String> values = radius.split(_splitRegExp);
       if (values.length == 1) {
-        CSSLengthValue circular = CSSLength.parseLength(values[0], renderStyle, propertyName);
+        CSSLengthValue circular = CSSLength.parseLength(values[0], renderStyle, propertyName, Axis.horizontal);
         return CSSBorderRadius(circular, circular);
       } else if (values.length == 2) {
-        CSSLengthValue x = CSSLength.parseLength(values[0], renderStyle, propertyName);
-        CSSLengthValue y = CSSLength.parseLength(values[1], renderStyle, propertyName);
+        CSSLengthValue x = CSSLength.parseLength(values[0], renderStyle, propertyName, Axis.horizontal);
+        CSSLengthValue y = CSSLength.parseLength(values[1], renderStyle, propertyName, Axis.vertical);
         return CSSBorderRadius(x, y);
       }
     }
