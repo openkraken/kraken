@@ -98,12 +98,7 @@ class CanvasElement extends Element {
   @override
   void didAttachRenderer() {
     super.didAttachRenderer();
-    double? rootFontSize = renderBoxModel!.elementDelegate.getRootElementFontSize();
-    double? fontSize = renderBoxModel!.renderStyle.fontSize.computedValue;
     context2d ??= CanvasRenderingContext2D();
-    context2d!.viewportSize = viewportSize;
-    context2d!.rootFontSize = rootFontSize;
-    context2d!.fontSize = fontSize;
   }
 
   @override

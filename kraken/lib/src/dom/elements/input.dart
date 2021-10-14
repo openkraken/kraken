@@ -318,7 +318,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     // Set default width of input when width is not set in style.
     if (renderBoxModel!.renderStyle.width == null) {
       double fontSize = renderBoxModel!.renderStyle.fontSize.computedValue;
-      renderBoxModel!.renderStyle.width = CSSLengthValue(fontSize * _FONT_SIZE_RATIO, CSSLengthUnit.PX);
+      renderBoxModel!.renderStyle.width = CSSLengthValue(fontSize * _FONT_SIZE_RATIO, CSSLengthType.PX);
     }
 
     addChild(createRenderBox());
@@ -376,7 +376,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       // width in renderStyle may be set in node attach.
       } else if (property == FONT_SIZE && renderStyle.style[WIDTH].isEmpty) {
         double fontSize = renderStyle.fontSize.computedValue;
-        renderStyle.width = CSSLengthValue(fontSize * _FONT_SIZE_RATIO, CSSLengthUnit.PX);
+        renderStyle.width = CSSLengthValue(fontSize * _FONT_SIZE_RATIO, CSSLengthType.PX);
         _renderInputLeaderLayer!.markNeedsLayout();
       }
     }

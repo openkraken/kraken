@@ -59,7 +59,7 @@ mixin CSSBorderMixin on RenderStyleBase {
   /// Border-width = <length> | thin | medium | thick
 
   // Initial value: medium
-  final CSSLengthValue _mediumWidth = CSSLengthValue(3, CSSLengthUnit.PX);
+  final CSSLengthValue _mediumWidth = CSSLengthValue(3, CSSLengthType.PX);
 
   CSSLengthValue? _borderTopWidth;
   set borderTopWidth(CSSLengthValue? value) {
@@ -183,9 +183,9 @@ class CSSBorderSide {
     return borderStyle;
   }
 
-  static final CSSLengthValue _thinWidth = CSSLengthValue(1, CSSLengthUnit.PX);
-  static final CSSLengthValue _mediumWidth = CSSLengthValue(3, CSSLengthUnit.PX);
-  static final CSSLengthValue _thickWidth = CSSLengthValue(5, CSSLengthUnit.PX);
+  static final CSSLengthValue _thinWidth = CSSLengthValue(1, CSSLengthType.PX);
+  static final CSSLengthValue _mediumWidth = CSSLengthValue(3, CSSLengthType.PX);
+  static final CSSLengthValue _thickWidth = CSSLengthValue(5, CSSLengthType.PX);
 
   static CSSLengthValue? resolveBorderWidth(String input, RenderStyle renderStyle, String propertyName) {
     // https://drafts.csswg.org/css2/#border-width-properties

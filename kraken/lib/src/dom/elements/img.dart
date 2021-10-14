@@ -303,11 +303,11 @@ class ImageElement extends Element {
 
     if (renderStyle.width == null && _propertyWidth != null) {
       // The intrinsic width of the image in pixels. Must be an integer without a unit.
-      renderStyle.width = CSSLengthValue(_propertyWidth, CSSLengthUnit.PX);
+      renderStyle.width = CSSLengthValue(_propertyWidth, CSSLengthType.PX);
     }
     if (renderStyle.height == null && _propertyHeight != null) {
       // The intrinsic height of the image, in pixels. Must be an integer without a unit.
-      renderStyle.height = CSSLengthValue(_propertyHeight, CSSLengthUnit.PX);
+      renderStyle.height = CSSLengthValue(_propertyHeight, CSSLengthType.PX);
     }
 
     if (width == null && height == null) {

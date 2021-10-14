@@ -176,7 +176,7 @@ mixin CSSTextMixin on RenderStyleBase {
         return renderStyle.parent!.lineHeight;
       }
     }
-    return _lineHeight ?? CSSLengthValue(CSSText.DEFAULT_LINE_HEIGHT * fontSize.computedValue, CSSLengthUnit.PX);
+    return _lineHeight ?? CSSLengthValue(CSSText.DEFAULT_LINE_HEIGHT * fontSize.computedValue, CSSLengthType.PX);
   }
   set lineHeight(CSSLengthValue? value) {
     if (_lineHeight == value) return;
@@ -408,7 +408,7 @@ class CSSText {
       } else if (CSSNumber.isNumber(value)){
         double? multipliedNumber = double.tryParse(value);
         if (multipliedNumber != null) {
-          return CSSLengthValue(multipliedNumber, CSSLengthUnit.EM, renderStyle, propertyName);
+          return CSSLengthValue(multipliedNumber, CSSLengthType.EM, renderStyle, propertyName);
         }
       }
     }
@@ -601,7 +601,7 @@ class CSSText {
     return resolvedFamily;
   }
 
-  static CSSLengthValue DEFAULT_FONT_SIZE = CSSLengthValue(16.0, CSSLengthUnit.PX);
+  static CSSLengthValue DEFAULT_FONT_SIZE = CSSLengthValue(16.0, CSSLengthType.PX);
 
   static CSSLengthValue resolveSpacing(String spacing, RenderStyle renderStyle, String property) {
     if (spacing == NORMAL) return CSSLengthValue.zero;
