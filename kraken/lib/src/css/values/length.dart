@@ -304,6 +304,7 @@ class CSSLength {
       unit = CSSLengthType.VMAX;
     } else if (text.endsWith(Q)) {
       value = double.tryParse(text.split(Q)[0]);
+      if (value != null) value = value * _1Q;
     } else if (text.endsWith(PERCENTAGE)) {
       value = double.tryParse(text.split(PERCENTAGE)[0]);
       if (value != null) value = value / 100;
