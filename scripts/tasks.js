@@ -25,7 +25,6 @@ const KRAKEN_ROOT = join(__dirname, '..');
 const TARGET_PATH = join(KRAKEN_ROOT, 'targets');
 const platform = os.platform();
 const buildMode = process.env.KRAKEN_BUILD || 'Debug';
-const targetDist = join(TARGET_PATH, platform, buildMode.toLowerCase());
 const paths = {
   targets: resolveKraken('targets'),
   scripts: resolveKraken('scripts'),
@@ -213,7 +212,7 @@ task('build-darwin-kraken-lib', done => {
   const binaryPath = path.join(paths.bridge, `build/macos/lib/x86_64/libkraken_${program.jsEngine}.dylib`);
 
   execSync(`install_name_tool -change /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/JavaScriptCore @rpath/JavaScriptCore.framework/Versions/A/JavaScriptCore ${binaryPath}`);
-  if (buildMode == 'Release') {
+  if (buildMode == 'Release' || buildMode == 'RelWithDebInfo') {
     execSync(`dsymutil ${binaryPath}`, { stdio: 'inherit' });
     execSync(`strip -S -X -x ${binaryPath}`, { stdio: 'inherit' });
   }
@@ -229,7 +228,7 @@ task('compile-polyfill', (done) => {
     });
   }
 
-  let result = spawnSync('npm', ['run', buildMode === 'Release' ? 'build:release' : 'build'], {
+  let result = spawnSync('npm', ['run', (buildMode === 'Release' || buildMode === 'RelWithDebInfo') ? 'build:release' : 'build'], {
     cwd: paths.polyfill,
     env: {
       ...process.env,
@@ -346,7 +345,7 @@ task('sdk-clean', (done) => {
 });
 
 task(`build-ios-kraken-lib`, (done) => {
-  const buildType = buildMode == 'Release' ? 'RelWithDebInfo' : 'Debug';
+  const buildType = (buildMode == 'Release' || buildMode === 'RelWithDebInfo') ? 'RelWithDebInfo' : 'Debug';
 
   // generate build scripts for simulator
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
@@ -422,7 +421,7 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit'
   });
 
-  if (buildMode === 'Release') {
+  if (buildMode === 'RelWithDebInfo') {
     // Create dSYM for x86_64
     execSync(`dsymutil ${x64DynamicSDKPath}/kraken_bridge`, { stdio: 'inherit' });
 
@@ -485,7 +484,7 @@ task('build-android-kraken-lib', (done) => {
   }
 
   const archs = ['arm64-v8a', 'armeabi-v7a'];
-  const buildType = buildMode == 'Release' ? 'Relwithdebinfo' : 'Debug';
+  const buildType = (buildMode === 'Release' || buildMode == 'Relwithdebinfo') ? 'Relwithdebinfo' : 'Debug';
 
   const cmakeGeneratorTemplate = platform == 'win32' ? 'Ninja' : 'Unix Makefiles';
   archs.forEach(arch => {
