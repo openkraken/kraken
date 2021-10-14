@@ -47,6 +47,25 @@ mixin CSSBorderMixin on RenderStyleBase {
     return constraints.deflate(border);
   }
 
+  List<BorderSide>? get borderSides {
+    RenderStyle renderStyle = this as RenderStyle;
+    BorderSide? leftSide = CSSBorderSide.getBorderSide(renderStyle, CSSBorderSide.LEFT);
+    BorderSide? topSide = CSSBorderSide.getBorderSide(renderStyle, CSSBorderSide.TOP);
+    BorderSide? rightSide = CSSBorderSide.getBorderSide(renderStyle, CSSBorderSide.RIGHT);
+    BorderSide? bottomSide = CSSBorderSide.getBorderSide(renderStyle, CSSBorderSide.BOTTOM);
+
+    bool hasBorder = leftSide != null ||
+        topSide != null ||
+        rightSide != null ||
+        bottomSide != null;
+
+    return hasBorder ? [
+      leftSide ?? CSSBorderSide.none,
+      topSide ?? CSSBorderSide.none,
+      rightSide ?? CSSBorderSide.none,
+      bottomSide ?? CSSBorderSide.none] : null;
+  }
+
   /// Shorted border property:
   ///   border：<line-width> || <line-style> || <color>
   ///   (<line-width> = <length> | thin | medium | thick), support length now.

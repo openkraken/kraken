@@ -1,5 +1,3 @@
-
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -21,6 +19,16 @@ import 'package:kraken/launcher.dart';
 ///
 
 final RegExp _splitRegExp = RegExp(r'\s+');
+const String _singleQuote = '\'';
+const String _doubleQuote = '"';
+
+String _removeQuotationMark(String input) {
+  if ((input.startsWith(_singleQuote) && input.endsWith(_singleQuote))
+      || (input.startsWith(_doubleQuote) && input.endsWith(_doubleQuote))) {
+    input = input.substring(1, input.length - 1);
+  }
+  return input;
+}
 
 // https://drafts.csswg.org/css-backgrounds/#typedef-attachment
 enum CSSBackgroundAttachmentType {
@@ -70,6 +78,91 @@ enum CSSBackgroundImageType {
   none,
   gradient,
   image,
+}
+
+mixin CSSBackgroundMixin on RenderStyleBase {
+  static CSSBackgroundPosition DEFAULT_BACKGROUND_POSITION = CSSBackgroundPosition(percentage: -1);
+  static CSSBackgroundSize DEFAULT_BACKGROUND_SIZE = CSSBackgroundSize(fit: BoxFit.none);
+
+  /// Background-clip
+  BackgroundBoundary? get backgroundClip => _backgroundClip;
+  BackgroundBoundary? _backgroundClip;
+  set backgroundClip(BackgroundBoundary? value) {
+    if (value == _backgroundClip) return;
+    _backgroundClip = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+
+  /// Background-origin
+  BackgroundBoundary? get backgroundOrigin => _backgroundOrigin;
+  BackgroundBoundary? _backgroundOrigin;
+  set backgroundOrigin(BackgroundBoundary? value) {
+    if (value == _backgroundOrigin) return;
+    _backgroundOrigin = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+
+  Color? get backgroundColor => _backgroundColor;
+  Color? _backgroundColor;
+  set backgroundColor(Color? value) {
+    if (value == _backgroundColor) return;
+    _backgroundColor = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+
+  /// Background-image
+  CSSBackgroundImage? get backgroundImage => _backgroundImage;
+  CSSBackgroundImage? _backgroundImage;
+  set backgroundImage(CSSBackgroundImage? value) {
+    if (value == _backgroundImage) return;
+    _backgroundImage = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+
+  /// Background-position-x
+  CSSBackgroundPosition get backgroundPositionX => _backgroundPositionX ?? DEFAULT_BACKGROUND_POSITION;
+  CSSBackgroundPosition? _backgroundPositionX;
+  set backgroundPositionX(CSSBackgroundPosition? value) {
+    if (value == _backgroundPositionX) return;
+    _backgroundPositionX = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+
+  /// Background-position-y
+  CSSBackgroundPosition get backgroundPositionY => _backgroundPositionY ?? DEFAULT_BACKGROUND_POSITION;
+  CSSBackgroundPosition? _backgroundPositionY;
+  set backgroundPositionY(CSSBackgroundPosition? value) {
+    if (value == _backgroundPositionY) return;
+    _backgroundPositionY = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+
+  /// Background-size
+  CSSBackgroundSize get backgroundSize => _backgroundSize ?? DEFAULT_BACKGROUND_SIZE;
+  CSSBackgroundSize? _backgroundSize;
+  set backgroundSize(CSSBackgroundSize? value) {
+    if (value == _backgroundSize) return;
+    _backgroundSize = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+
+  /// Background-attachment
+  CSSBackgroundAttachmentType? get backgroundAttachment => _backgroundAttachment;
+  CSSBackgroundAttachmentType? _backgroundAttachment;
+  set backgroundAttachment(CSSBackgroundAttachmentType? value) {
+    if (value == _backgroundAttachment) return;
+    _backgroundAttachment = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+
+  /// Background-repeat
+  ImageRepeat get backgroundRepeat => _backgroundRepeat ?? ImageRepeat.repeat;
+  ImageRepeat? _backgroundRepeat;
+  set backgroundRepeat(ImageRepeat? value) {
+    if (value == _backgroundRepeat) return;
+    _backgroundRepeat = value;
+    renderBoxModel!.markNeedsPaint();
+  }
 }
 
 class CSSColorStop {
@@ -431,16 +524,6 @@ class CSSBackground {
         return BackgroundBoundary.paddingBox;
     }
   }
-}
-
-const String _singleQuote = '\'';
-const String _doubleQuote = '"';
-String _removeQuotationMark(String input) {
-  if ((input.startsWith(_singleQuote) && input.endsWith(_singleQuote))
-      || (input.startsWith(_doubleQuote) && input.endsWith(_doubleQuote))) {
-    input = input.substring(1, input.length - 1);
-  }
-  return input;
 }
 
 void _applyColorAndStops(int start, List<String> args, List<Color?> colors, List<double?> stops, RenderStyle renderStyle, String propertyName, [double? gradientLength]) {
