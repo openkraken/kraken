@@ -171,8 +171,8 @@ mixin CSSBoxMixin on RenderStyleBase {
     }
 
     Gradient? gradient = backgroundImage?.gradient;
-    if (gradient is BorderGradientMixin) {
-      gradient.borderEdge = border!.dimensions as EdgeInsets;
+    if (gradient is BorderGradientMixin && border != null) {
+      gradient.borderEdge = border.dimensions as EdgeInsets;
     }
 
     return CSSBoxDecoration(
