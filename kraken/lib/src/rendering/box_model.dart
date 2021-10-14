@@ -1255,7 +1255,7 @@ class RenderBoxModel extends RenderBox
 
   bool _hasLocalBackgroundImage(RenderStyle renderStyle) {
     return renderStyle.backgroundImage != null &&
-        renderStyle.backgroundAttachment == LOCAL;
+        renderStyle.backgroundAttachment == CSSBackgroundAttachmentType.local;
   }
 
   @override
