@@ -168,6 +168,7 @@ class CSSLengthValue {
               _computedValue = value! * parentPaddingBoxHeight;
             }
           break;
+          case BACKGROUND_SIZE:
           case BORDER_TOP_LEFT_RADIUS:
           case BORDER_TOP_RIGHT_RADIUS:
           case BORDER_BOTTOM_LEFT_RADIUS:
@@ -192,6 +193,10 @@ class CSSLengthValue {
 
   bool get isAuto {
     return unit == CSSLengthType.AUTO;
+  }
+
+  bool get isPercentage {
+    return unit == CSSLengthType.PERCENTAGE;
   }
 
   bool get isZero {
