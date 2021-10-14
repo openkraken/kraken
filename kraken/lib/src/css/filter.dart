@@ -138,57 +138,61 @@ mixin CSSFilterEffectsMixin on RenderStyleBase {
 
   // Get the image filter.
   ImageFilter? _parseImageFilters(List<CSSFunctionalNotation> functions) {
-    double rootFontSize = elementDelegate.getRootElementFontSize();
+    RenderStyle renderStyle = this as RenderStyle;
     if (functions.isNotEmpty) {
       for (int i = 0; i < functions.length; i ++) {
         CSSFunctionalNotation f = functions[i];
         switch (f.name.toLowerCase()) {
           case BLUR:
-            double amount = CSSLength.toDisplayPortValue(
-              f.args.first,
-              viewportSize: viewportSize,
-              rootFontSize: rootFontSize,
-              fontSize: renderBoxModel!.renderStyle.fontSize.computedValue
-            )!;
-            return ImageFilter.blur(sigmaX: amount, sigmaY: amount);
+            CSSLengthValue length = CSSLength.parseLength(f.args.first, renderStyle, FILTER);
+            double amount = length.computedValue;
+            ImageFilter imageFilter =  ImageFilter.blur(sigmaX: amount, sigmaY: amount);
+            // Only length is not relative value will cached the image filter.
+            if (length.unit == CSSLengthType.PX) {
+              _cachedImageFilter = imageFilter;
+            }
+            return imageFilter;
         }
       }
     }
     return null;
   }
 
-  ColorFilter? _colorFilter;
-  ColorFilter? get colorFilter => _colorFilter;
-  set colorFilter(ColorFilter? value) {
-    if (_colorFilter != value) {
-      _colorFilter = value;
-      renderBoxModel!.markNeedsPaint();
+  ColorFilter? _cachedColorFilter;
+  ColorFilter? get colorFilter {
+    if (_filter == null) {
+      return null;
+    } else if (_cachedColorFilter != null) {
+      return _cachedColorFilter;
+    } else {
+      return _cachedColorFilter = _parseColorFilters(_filter!);
     }
   }
 
-  ImageFilter? _imageFilter;
-  ImageFilter? get imageFilter => _imageFilter;
-  set imageFilter(ImageFilter? value) {
-    if (_imageFilter != value) {
-      _imageFilter = value;
-      renderBoxModel!.markNeedsPaint();
+  ImageFilter? _cachedImageFilter;
+  ImageFilter? get imageFilter {
+    if (_filter == null) {
+      return null;
+    } else if (_cachedImageFilter != null) {
+      return _cachedImageFilter;
+    } else {
+      return _cachedImageFilter = _parseImageFilters(_filter!);
     }
   }
 
+  List<CSSFunctionalNotation>? _filter;
   set filter(List<CSSFunctionalNotation> functions) {
-    ColorFilter? _colorFilter = _parseColorFilters(functions);
-    if (_colorFilter != null) {
-      colorFilter = _colorFilter;
-    }
-
-    // RenderStyle renderStyle = this;
-    ImageFilter? _imageFilter = _parseImageFilters(functions);
-    if (_imageFilter != null) {
-      imageFilter = _imageFilter;
-    }
+    _filter = functions;
+    // Clear cache when filter changed.
+    _cachedColorFilter = null;
+    _cachedImageFilter = null;
+    renderBoxModel!.markNeedsPaint();
 
     if (!kReleaseMode) {
-      if (colorFilter == null && imageFilter == null) {
+      ColorFilter? colorFilter = _parseColorFilters(functions);
+      // RenderStyle renderStyle = this;
+      ImageFilter? imageFilter = _parseImageFilters(functions);
+      if (imageFilter == null && colorFilter == null) {
         print('[WARNING] Parse CSS Filter failed or not supported: "$functions"');
         String supportedFilters = '$GRAYSCALE $SEPIA $BLUR';
         print('Kraken only support following filters: $supportedFilters');

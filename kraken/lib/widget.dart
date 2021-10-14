@@ -866,12 +866,12 @@ This situation often happened when you trying creating kraken when FlutterView n
 
     if (viewportWidthHasChanged) {
       controller.view.viewportWidth = viewportWidth;
-      controller.view.document!.documentElement.renderStyle.width = CSSLengthValue(viewportWidth, CSSLengthUnit.PX);
+      controller.view.document!.documentElement.renderStyle.width = CSSLengthValue(viewportWidth, CSSLengthType.PX);
     }
 
     if (viewportHeightHasChanged) {
       controller.view.viewportHeight = viewportHeight;
-      controller.view.document!.documentElement.renderStyle.height = CSSLengthValue(viewportHeight, CSSLengthUnit.PX);
+      controller.view.document!.documentElement.renderStyle.height = CSSLengthValue(viewportHeight, CSSLengthType.PX);
     }
 
     if (viewportWidthHasChanged || viewportHeightHasChanged) {

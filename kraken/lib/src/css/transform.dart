@@ -62,13 +62,13 @@ void _updateNumber(double oldValue, double newValue, double progress, String pro
 
 double _parseLineHeight(String lineHeight, RenderStyle renderStyle, String property) {
   if (CSSNumber.isNumber(lineHeight)) {
-    return CSSLengthValue(CSSNumber.parseNumber(lineHeight), CSSLengthUnit.EM, renderStyle, LINE_HEIGHT).computedValue;
+    return CSSLengthValue(CSSNumber.parseNumber(lineHeight), CSSLengthType.EM, renderStyle, LINE_HEIGHT).computedValue;
   }
   return CSSLength.parseLength(lineHeight, renderStyle, LINE_HEIGHT).computedValue;
 }
 
 void _updateLineHeight(double oldValue, double newValue, double progress, String property, RenderStyle renderStyle) {
-  renderStyle.lineHeight = CSSLengthValue(_getNumber(oldValue, newValue, progress), CSSLengthUnit.PX);
+  renderStyle.lineHeight = CSSLengthValue(_getNumber(oldValue, newValue, progress), CSSLengthType.PX);
 }
 
 Matrix4? _parseTransform(String value, RenderStyle renderStyle, String property) {

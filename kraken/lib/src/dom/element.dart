@@ -843,6 +843,7 @@ class Element extends Node
 
   /// Set internal style value to the element.
   void setRenderStyle(String property, dynamic present) {
+
     switch (property) {
       case DISPLAY:
         renderStyle.display = CSSDisplayMixin.resolveDisplay(present);
