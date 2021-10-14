@@ -777,8 +777,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       // Block level and inline level child can not exists at the same run,
       // so only need to loop the first child.
       if (firstChild is RenderBoxModel) {
-        CSSDisplay? childDisplay = firstChild.renderStyle.transformedDisplay;
-        runContainInlineChild = childDisplay != CSSDisplay.block && childDisplay != CSSDisplay.flex;
+        CSSDisplay? childEffectiveDisplay = firstChild.renderStyle.effectiveDisplay;
+        runContainInlineChild = childEffectiveDisplay != CSSDisplay.block && childEffectiveDisplay != CSSDisplay.flex;
       }
 
       // Text-align only works on inline level children
@@ -827,15 +827,15 @@ class RenderFlowLayout extends RenderLayoutBox {
         // which is not positioned and computed to 0px in other cases
         if (child is RenderBoxModel) {
           RenderStyle childRenderStyle = child.renderStyle;
-          CSSDisplay? childTransformedDisplay =
-              childRenderStyle.transformedDisplay;
+          CSSDisplay? childEffectiveDisplay =
+              childRenderStyle.effectiveDisplay;
           CSSLengthValue marginLeft = childRenderStyle.marginLeft;
           CSSLengthValue marginRight = childRenderStyle.marginRight;
 
           // 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right' +
           // 'border-right-width' + 'margin-right' = width of containing block
-          if (childTransformedDisplay == CSSDisplay.block ||
-              childTransformedDisplay == CSSDisplay.flex) {
+          if (childEffectiveDisplay == CSSDisplay.block ||
+              childEffectiveDisplay == CSSDisplay.flex) {
             if (marginLeft.isAuto) {
               double remainingSpace = mainAxisContentSize - childMainAxisExtent;
               if (marginRight.isAuto) {
@@ -942,15 +942,15 @@ class RenderFlowLayout extends RenderLayoutBox {
   @override
   double? computeDistanceToBaseline() {
     double? lineDistance;
-    CSSDisplay? transformedDisplay = renderStyle.transformedDisplay;
-    bool isInline = transformedDisplay == CSSDisplay.inline;
+    CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
+    bool isInline = effectiveDisplay == CSSDisplay.inline;
     // Margin does not work for inline element.
     double marginTop = !isInline ? renderStyle.marginTop.computedValue : 0;
     double marginBottom = !isInline ? renderStyle.marginBottom.computedValue : 0;
     bool isParentFlowLayout = parent is RenderFlowLayout;
-    bool isDisplayInline = transformedDisplay == CSSDisplay.inline ||
-        transformedDisplay == CSSDisplay.inlineBlock ||
-        transformedDisplay == CSSDisplay.inlineFlex;
+    bool isDisplayInline = effectiveDisplay == CSSDisplay.inline ||
+        effectiveDisplay == CSSDisplay.inlineBlock ||
+        effectiveDisplay == CSSDisplay.inlineFlex;
 
     // Use margin bottom as baseline if layout has no children
     if (lineBoxMetrics.isEmpty) {
@@ -1287,8 +1287,8 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// Get the collapsed margin top with the margin-bottom of its previous sibling
   double _getCollapsedMarginTopWithPreSibling(RenderBoxModel renderBoxModel, RenderObject preSibling, double marginTop) {
     if (preSibling is RenderBoxModel &&
-      (preSibling.renderStyle.transformedDisplay == CSSDisplay.block ||
-      preSibling.renderStyle.transformedDisplay == CSSDisplay.flex)
+      (preSibling.renderStyle.effectiveDisplay == CSSDisplay.block ||
+      preSibling.renderStyle.effectiveDisplay == CSSDisplay.flex)
     ) {
       double preSiblingMarginBottom = _getChildMarginBottom(preSibling);
       if (marginTop > 0 && preSiblingMarginBottom > 0) {
@@ -1309,7 +1309,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     // which makes the margin top of itself 0.
     // Margin collapse does not work on document root box.
     if (!parent.isDocumentRootBox &&
-      parent.renderStyle.transformedDisplay == CSSDisplay.block &&
+      parent.renderStyle.effectiveDisplay == CSSDisplay.block &&
       (isParentOverflowVisible || isParentOverflowClip) &&
       parent.renderStyle.paddingTop.computedValue == 0 &&
       parent.renderStyle.effectiveBorderTopWidth.computedValue == 0 &&
@@ -1331,7 +1331,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       renderBoxModel.renderStyle.transformedOverflowY == CSSOverflowType.clip;
 
     if (renderBoxModel is RenderLayoutBox &&
-      renderBoxModel.renderStyle.transformedDisplay == CSSDisplay.block &&
+      renderBoxModel.renderStyle.effectiveDisplay == CSSDisplay.block &&
       (isOverflowVisible || isOverflowClip) &&
       paddingTop == 0 &&
       borderTop == 0
@@ -1339,8 +1339,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       RenderObject? firstChild = renderBoxModel.firstChild != null ?
         renderBoxModel.firstChild as RenderObject : null;
       if (firstChild is RenderBoxModel &&
-        (firstChild.renderStyle.transformedDisplay == CSSDisplay.block ||
-        firstChild.renderStyle.transformedDisplay == CSSDisplay.flex)
+        (firstChild.renderStyle.effectiveDisplay == CSSDisplay.block ||
+        firstChild.renderStyle.effectiveDisplay == CSSDisplay.flex)
       ) {
         double childMarginTop = firstChild is RenderFlowLayout ?
         _getCollapsedMarginTopWithNestedFirstChild(firstChild) : firstChild.renderStyle.marginTop.computedValue;
@@ -1359,9 +1359,9 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// Get the collapsed margin top of child due to the margin collapse rule.
   /// https://www.w3.org/TR/CSS2/box.html#collapsing-margins
   double _getChildMarginTop(RenderBoxModel child) {
-    CSSDisplay? childTransformedDisplay = child.renderStyle.transformedDisplay;
+    CSSDisplay? childEffectiveDisplay = child.renderStyle.effectiveDisplay;
     // Margin is invalid for inline element.
-    if (childTransformedDisplay == CSSDisplay.inline) {
+    if (childEffectiveDisplay == CSSDisplay.inline) {
       return 0;
     }
     double originalMarginTop = child.renderStyle.marginTop.computedValue;
@@ -1370,8 +1370,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     // 2. Inline level elements
     // 3. Inner renderBox of element with overflow auto/scroll
     if (child.isDocumentRootBox ||
-      (childTransformedDisplay != CSSDisplay.block &&
-      childTransformedDisplay != CSSDisplay.flex)
+      (childEffectiveDisplay != CSSDisplay.block &&
+      childEffectiveDisplay != CSSDisplay.flex)
     ) {
       return originalMarginTop;
     }
@@ -1392,7 +1392,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     // Margin top and bottom of empty block collapse.
     // Make collapsed marign-top to the max of its top and bottom and margin-bottom as 0.
     if (child.boxSize!.height == 0 &&
-      childTransformedDisplay != CSSDisplay.flex &&
+      childEffectiveDisplay != CSSDisplay.flex &&
       (isChildOverflowVisible || isChildOverflowClip)
     ) {
       double marginBottom = child.renderStyle.marginBottom.computedValue;
@@ -1421,7 +1421,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     // which makes the margin top of itself 0.
     // Margin collapse does not work on document root box.
     if (!parent.isDocumentRootBox &&
-      parent.renderStyle.transformedDisplay == CSSDisplay.block &&
+      parent.renderStyle.effectiveDisplay == CSSDisplay.block &&
       (isParentOverflowVisible || isParentOverflowClip) &&
       parent.renderStyle.paddingBottom.computedValue == 0 &&
       parent.renderStyle.effectiveBorderBottomWidth.computedValue == 0 &&
@@ -1446,7 +1446,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       renderBoxModel.renderStyle.height == null &&
       renderBoxModel.renderStyle.minHeight == null &&
       renderBoxModel.renderStyle.maxHeight == null &&
-      renderBoxModel.renderStyle.transformedDisplay == CSSDisplay.block &&
+      renderBoxModel.renderStyle.effectiveDisplay == CSSDisplay.block &&
       (isOverflowVisible || isOverflowClip) &&
       paddingBottom == 0 &&
       borderBottom == 0
@@ -1454,7 +1454,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       RenderObject? lastChild = renderBoxModel.lastChild != null ?
         renderBoxModel.lastChild as RenderObject : null;
       if (lastChild is RenderBoxModel &&
-        lastChild.renderStyle.transformedDisplay == CSSDisplay.block) {
+        lastChild.renderStyle.effectiveDisplay == CSSDisplay.block) {
         double childMarginBottom = lastChild is RenderLayoutBox ?
         _getCollapsedMarginBottomWithNestedLastChild(lastChild) : lastChild.renderStyle.marginBottom.computedValue;
         if (marginBottom < 0 && childMarginBottom < 0) {
@@ -1473,9 +1473,9 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// Get the collapsed margin bottom of child due to the margin collapse rule.
   /// https://www.w3.org/TR/CSS2/box.html#collapsing-margins
   double _getChildMarginBottom(RenderBoxModel child) {
-    CSSDisplay? childTransformedDisplay = child.renderStyle.transformedDisplay;
+    CSSDisplay? childEffectiveDisplay = child.renderStyle.effectiveDisplay;
     // Margin is invalid for inline element.
-    if (childTransformedDisplay == CSSDisplay.inline) {
+    if (childEffectiveDisplay == CSSDisplay.inline) {
       return 0;
     }
     double originalMarginBottom = child.renderStyle.marginBottom.computedValue;
@@ -1484,8 +1484,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     // 2. Inline level elements
     // 3. Inner renderBox of element with overflow auto/scroll
     if (child.isDocumentRootBox ||
-      (childTransformedDisplay != CSSDisplay.block &&
-      childTransformedDisplay != CSSDisplay.flex)
+      (childEffectiveDisplay != CSSDisplay.block &&
+      childEffectiveDisplay != CSSDisplay.flex)
     ) {
       return originalMarginBottom;
     }
@@ -1498,7 +1498,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     // Margin top and bottom of empty block collapse.
     // Make collapsed marign-top to the max of its top and bottom and margin-bottom as 0.
     if (child.boxSize!.height == 0 &&
-      childTransformedDisplay != CSSDisplay.flex &&
+      childEffectiveDisplay != CSSDisplay.flex &&
       (isChildOverflowVisible || isChildOverflowClip)
     ) {
       return 0;

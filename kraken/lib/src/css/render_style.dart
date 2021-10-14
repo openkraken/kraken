@@ -61,13 +61,13 @@ class RenderStyle
   double? getLogicalContentWidth() {
     RenderStyle renderStyle = this;
     double? intrinsicRatio = renderBoxModel!.intrinsicRatio;
-    CSSDisplay? transformedDisplay = renderStyle.transformedDisplay;
+    CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
     double? width = renderStyle.width?.computedValue;
     double? minWidth = renderStyle.minWidth?.computedValue;
     double? maxWidth = renderStyle.maxWidth?.computedValue;
     double cropWidth = 0;
 
-    switch (transformedDisplay) {
+    switch (effectiveDisplay) {
       case CSSDisplay.block:
       case CSSDisplay.flex:
       case CSSDisplay.sliver:
@@ -91,10 +91,10 @@ class RenderStyle
                 break;
               }
 
-              CSSDisplay? parentDisplay = parentRenderStyle!.transformedDisplay;
+              CSSDisplay? parentEffectiveDisplay = parentRenderStyle!.effectiveDisplay;
               RenderBoxModel parentRenderBoxModel = parentRenderStyle.renderBoxModel!;
               // Set width of element according to parent display
-              if (parentDisplay != CSSDisplay.inline) {
+              if (parentEffectiveDisplay != CSSDisplay.inline) {
                 // Skip to find upper parent
                 if (parentRenderStyle.width != null) {
                   // Use style width
@@ -106,9 +106,9 @@ class RenderStyle
                   width = parentRenderBoxModel.constraints.maxWidth;
                   cropWidth = _getCropWidthByPaddingBorder(parentRenderStyle, cropWidth);
                   break;
-                } else if (parentDisplay == CSSDisplay.inlineBlock ||
-                  parentDisplay == CSSDisplay.inlineFlex ||
-                  parentDisplay == CSSDisplay.sliver) {
+                } else if (parentEffectiveDisplay == CSSDisplay.inlineBlock ||
+                  parentEffectiveDisplay == CSSDisplay.inlineFlex ||
+                  parentEffectiveDisplay == CSSDisplay.sliver) {
                   // Collapse width to children
                   width = null;
                   break;
@@ -161,7 +161,7 @@ class RenderStyle
   // Content height of render box model calculated from style.
   double? getLogicalContentHeight() {
     RenderStyle renderStyle = this;
-    CSSDisplay? display = renderStyle.transformedDisplay;
+    CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
     double? height = renderStyle.height?.computedValue;
     double cropHeight = 0;
     double? maxHeight = renderStyle.maxHeight?.computedValue;
@@ -169,7 +169,7 @@ class RenderStyle
     double? intrinsicRatio = renderBoxModel!.intrinsicRatio;
 
     // Inline element has no height
-    if (display == CSSDisplay.inline) {
+    if (effectiveDisplay == CSSDisplay.inline) {
       return null;
     } else if (height != null) {
       cropHeight = _getCropHeightByPaddingBorder(renderStyle, cropHeight);
@@ -241,8 +241,7 @@ class RenderStyle
     // Get the nearest width of ancestor with width
     while (true) {
       RenderStyle? parentRenderStyle = currentRenderStyle.parent;
-
-      CSSDisplay? transformedDisplay = currentRenderStyle.transformedDisplay;
+      CSSDisplay? effectiveDisplay = currentRenderStyle.effectiveDisplay;
 
       // Flex item with flex-shrink 0 and no width/max-width will have infinity constraints
       // even if parents have width
@@ -257,7 +256,7 @@ class RenderStyle
       }
 
       // Get width if width exists and element is not inline
-      if (transformedDisplay != CSSDisplay.inline &&
+      if (effectiveDisplay != CSSDisplay.inline &&
         (currentRenderStyle.width != null || currentRenderStyle.maxWidth != null)) {
         // Get the min width between width and max-width
         maxConstraintWidth = math.min(currentRenderStyle.width?.computedValue ?? double.infinity,

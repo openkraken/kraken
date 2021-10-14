@@ -87,9 +87,9 @@ class RenderIntrinsic extends RenderBoxModel
 
       setMaxScrollableSize(child!.size.width, child!.size.height);
 
-      CSSDisplay? transformedDisplay = renderStyle.transformedDisplay;
-      bool isInlineLevel = transformedDisplay == CSSDisplay.inlineBlock ||
-          transformedDisplay == CSSDisplay.inlineFlex;
+      CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
+      bool isInlineLevel = effectiveDisplay == CSSDisplay.inlineBlock ||
+          effectiveDisplay == CSSDisplay.inlineFlex;
 
       double constraintWidth = child!.size.width;
       double constraintHeight = child!.size.height;

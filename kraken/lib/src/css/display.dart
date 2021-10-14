@@ -61,7 +61,7 @@ mixin CSSDisplayMixin on RenderStyleBase {
 
   /// Some layout effects require blockification or inlinification of the box type
   /// https://www.w3.org/TR/css-display-3/#transformations
-  CSSDisplay? get transformedDisplay {
+  CSSDisplay? get effectiveDisplay {
     RenderStyle renderStyle = this as RenderStyle;
     CSSDisplay? transformedDisplay = renderStyle.display;
 
