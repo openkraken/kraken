@@ -144,6 +144,25 @@ PROP_SETTER(Window, scrollY)(QjsContext *ctx, JSValue this_val, int argc, JSValu
   return JS_NULL;
 }
 
+PROP_GETTER(Window, onerror)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, 1));
+  return JS_DupValue(ctx, window->onerror);
+}
+PROP_SETTER(Window, onerror)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, 1));
+  JSValue eventString = JS_NewString(ctx, "onerror");
+  JSString *p = JS_VALUE_GET_STRING(eventString);
+  window->setPropertyHandler(p, argv[0]);
+
+  if (!JS_IsNull(window->onerror)) {
+    JS_FreeValue(ctx, window->onerror);
+  }
+
+  window->onerror = JS_DupValue(ctx, argv[0]);
+  JS_FreeValue(ctx, eventString);
+  return JS_NULL;
+}
+
 WindowInstance::WindowInstance(Window *window) : EventTargetInstance(window, Window::kWindowClassId, "window", WINDOW_TARGET_ID) {
   if (getDartMethod()->initWindow != nullptr) {
     getDartMethod()->initWindow(context()->getContextId(), nativeEventTarget);
@@ -156,6 +175,7 @@ void WindowInstance::gcMark(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) 
 
   JS_MarkValue(rt, m_history->jsObject, mark_func);
   JS_MarkValue(rt, m_location->jsObject, mark_func);
+  JS_MarkValue(rt, onerror, mark_func);
 }
 
 }

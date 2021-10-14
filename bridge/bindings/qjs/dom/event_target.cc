@@ -262,6 +262,7 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
         JS_Call(m_ctx, handler, eventInstance->instanceObject, 5, args);
         m_context->drainPendingPromiseJobs();
 
+        JS_FreeValue(m_ctx, error);
         JS_FreeValue(m_ctx, messageValue);
         JS_FreeValue(m_ctx, fileNameValue);
         JS_FreeValue(m_ctx, lineNumberValue);
@@ -493,6 +494,12 @@ void EventTargetInstance::setPropertyHandler(JSString *p, JSValue value) {
     JS_FreeAtom(m_ctx, atom);
     list_del(&atomJob->link);
     JS_DeleteProperty(m_ctx, m_propertyEventHandler, atom, 0);
+    return;
+  }
+
+  if (!JS_IsFunction(m_ctx, value)) {
+    JS_FreeAtom(m_ctx, atom);
+    list_del(&atomJob->link);
     return;
   }
 

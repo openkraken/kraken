@@ -38,7 +38,7 @@ private:
   ObjectFunction m_scrollTo{m_context, m_prototypeObject, "scrollTo", scrollTo, 2};
   ObjectFunction m_scrollBy{m_context, m_prototypeObject, "scrollBy", scrollBy, 2};
 
-  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(9, devicePixelRatio, colorScheme, __location__, location, window, history, parent,  scrollX, scrollY);
+  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(10, devicePixelRatio, colorScheme, __location__, location, window, history, parent,  scrollX, scrollY, onerror);
   friend WindowInstance;
 };
 
@@ -46,13 +46,16 @@ class WindowInstance : public EventTargetInstance {
 public:
   WindowInstance() = delete;
   explicit WindowInstance(Window *window);
-  ~WindowInstance() {}
+  ~WindowInstance() {
+    JS_FreeValue(m_ctx, onerror);
+  }
 private:
 
   void gcMark(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) override;
 
   Location *m_location{new Location(m_context)};
   History *m_history{new History(m_context)};
+  JSValue onerror{JS_NULL};
   friend Window;
   friend JSContext;
 };

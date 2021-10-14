@@ -201,6 +201,18 @@ static JSValue runGC(QjsContext *ctx, JSValueConst this_val, int argc, JSValueCo
   return JS_NULL;
 }
 
+static JSValue triggerGlobalError(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+  auto *context = static_cast<binding::qjs::JSContext *>(JS_GetContextOpaque(ctx));
+
+  JSValue globalErrorFunc = JS_GetPropertyStr(ctx, context->global(), "triggerGlobalError");
+  JSValue exception = JS_Call(ctx, globalErrorFunc, context->global(), 0, nullptr);
+  context->handleException(&exception);
+  JS_FreeValue(ctx, globalErrorFunc);
+
+  return JS_NULL;
+}
+
+
 
 JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->getContext()) {
   bridge->owner = this;
@@ -209,6 +221,7 @@ JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->
   QJS_GLOBAL_BINDING_FUNCTION(context, environment, "__kraken_environment__", 0);
   QJS_GLOBAL_BINDING_FUNCTION(context, simulatePointer, "__kraken_simulate_pointer__", 1);
   QJS_GLOBAL_BINDING_FUNCTION(context, simulateInputText, "__kraken_simulate_inputtext__", 1);
+  QJS_GLOBAL_BINDING_FUNCTION(context, triggerGlobalError, "__kraken_trigger_global_error__", 0);
   QJS_GLOBAL_BINDING_FUNCTION(context, runGC, "__kraken_run_gc__", 0);
 
   initKrakenTestFramework(bridge);
@@ -257,7 +270,8 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
   JSValue callback = JS_NewCFunctionData(context->ctx(), done, 0, 0, 1, callbackData);
 
   JSValue arguments[] = {callback};
-  JS_Call(context->ctx(), executeTestCallback, executeTestCallback, 1, arguments);
+  JSValue result = JS_Call(context->ctx(), executeTestCallback, executeTestCallback, 1, arguments);
+  context->handleException(&result);
   context->drainPendingPromiseJobs();
   JS_FreeValue(context->ctx(), executeTestCallback);
   JS_FreeValue(context->ctx(), callback);

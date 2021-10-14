@@ -191,5 +191,8 @@ __kraken_execute_test__((done) => {
     done(result.overallStatus);
   };
 
+  // Trigger global js exception to test window.onerror.
+  __kraken_trigger_global_error__();
+
   env.execute();
 });
