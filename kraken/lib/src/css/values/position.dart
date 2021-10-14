@@ -52,7 +52,7 @@ class CSSPosition {
 
   /// Parse background-position-x/background-position-y from string to CSSBackgroundPosition type.
   static CSSBackgroundPosition resolveBackgroundPosition(String input, RenderStyle renderStyle, String propertyName, bool isHorizontal) {
-    if (CSSLength.isPercentage(input)) {
+    if (CSSPercentage.isPercentage(input)) {
       return CSSBackgroundPosition(percentage: _gatValuePercentage(input));
     } else if (CSSLength.isLength(input)) {
       return CSSBackgroundPosition(length: CSSLength.parseLength(input, renderStyle, propertyName));

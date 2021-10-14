@@ -1,5 +1,7 @@
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#percentages
 
+final _percentageRegExp = RegExp(r'^\d+\%$', caseSensitive: false);
+
 class CSSPercentage {
   static String PERCENTAGE = '%';
 
@@ -12,6 +14,6 @@ class CSSPercentage {
   }
 
   static bool isPercentage(String? percentageValue) {
-    return percentageValue != null && percentageValue.endsWith(PERCENTAGE);
+    return percentageValue != null && _percentageRegExp.hasMatch(percentageValue);
   }
 }

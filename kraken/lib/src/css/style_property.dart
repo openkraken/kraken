@@ -740,10 +740,10 @@ class CSSStyleProperty {
     }
 
     if (isLengthOrPercentage) {
-      if ((!CSSLength.isLength(topValue) && !CSSLength.isPercentage(topValue)) ||
-          (!CSSLength.isLength(rightValue) && !CSSLength.isPercentage(rightValue)) ||
-          (!CSSLength.isLength(bottomValue) && !CSSLength.isPercentage(bottomValue))||
-          (!CSSLength.isLength(leftValue) && !CSSLength.isPercentage(leftValue))) {
+      if ((!CSSLength.isLength(topValue) && !CSSPercentage.isPercentage(topValue)) ||
+          (!CSSLength.isLength(rightValue) && !CSSPercentage.isPercentage(rightValue)) ||
+          (!CSSLength.isLength(bottomValue) && !CSSPercentage.isPercentage(bottomValue))||
+          (!CSSLength.isLength(leftValue) && !CSSPercentage.isPercentage(leftValue))) {
         return null;
       }
     }

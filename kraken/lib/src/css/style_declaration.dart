@@ -515,7 +515,7 @@ class CSSStyleDeclaration {
         // Validation length type
         if (!CSSLength.isLength(normalizedValue) &&
           !CSSLength.isAuto(normalizedValue) &&
-          !CSSLength.isPercentage(normalizedValue)
+          !CSSPercentage.isPercentage(normalizedValue)
         ) {
           return;
         }
@@ -524,7 +524,7 @@ class CSSStyleDeclaration {
       case MAX_HEIGHT:
         if (normalizedValue != NONE &&
           !CSSLength.isLength(normalizedValue) &&
-          !CSSLength.isPercentage(normalizedValue)
+          !CSSPercentage.isPercentage(normalizedValue)
         ) {
           return;
         }
@@ -536,7 +536,7 @@ class CSSStyleDeclaration {
       case PADDING_BOTTOM:
       case PADDING_RIGHT:
         if (!CSSLength.isLength(normalizedValue) &&
-          !CSSLength.isPercentage(normalizedValue)
+          !CSSPercentage.isPercentage(normalizedValue)
         ) {
           return;
         }
