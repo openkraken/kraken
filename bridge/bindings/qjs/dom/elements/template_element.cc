@@ -65,6 +65,10 @@ TemplateElementInstance::TemplateElementInstance(TemplateElement *element): Elem
   m_content = static_cast<DocumentFragmentInstance *>(JS_GetOpaque(documentFragmentValue, DocumentFragment::classId()));
 }
 
+TemplateElementInstance::~TemplateElementInstance() {
+  JS_FreeValue(m_ctx, m_content->instanceObject);
+}
+
 void TemplateElementInstance::gcMark(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) {
   NodeInstance::gcMark(rt, val, mark_func);
   JS_MarkValue(rt, m_content->instanceObject, mark_func);

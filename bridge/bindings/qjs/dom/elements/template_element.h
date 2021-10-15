@@ -28,7 +28,7 @@ class TemplateElementInstance : public ElementInstance {
 public:
   TemplateElementInstance() = delete;
   explicit TemplateElementInstance(TemplateElement *element);
-
+  ~TemplateElementInstance();
 protected:
   void gcMark(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) override;
 private:
