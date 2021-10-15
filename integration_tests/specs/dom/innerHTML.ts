@@ -22,7 +22,7 @@ describe('innerHTML', () => {
 
     document.body.appendChild(div);
 
-    expect(div.innerHTML).toEqual('<div style="height: 100px;width: 100px;"></div>');
+    expect(document.body.innerHTML).toEqual('<div style="height: 100px;width: 100px;"></div>');
   });
 
   it('should work width attribute when get property', async () => {
@@ -31,7 +31,7 @@ describe('innerHTML', () => {
 
     document.body.appendChild(div);
 
-    expect(div.innerHTML).toEqual('<div attr-key="attr-value" ></div>');
+    expect(document.body.innerHTML).toEqual('<div attr-key="attr-value" ></div>');
   });
 
   it('should work width attribute when get property', async () => {
@@ -40,7 +40,7 @@ describe('innerHTML', () => {
 
     document.body.appendChild(div);
 
-    expect(div.innerHTML).toEqual('<div attr-key="attr-value" ></div>');
+    expect(document.body.innerHTML).toEqual('<div attr-key="attr-value" ></div>');
   });
 
   it('set empty string should remove all children', async () => {
