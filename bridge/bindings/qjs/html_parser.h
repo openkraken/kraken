@@ -15,11 +15,11 @@ namespace kraken::binding::qjs {
 
 class HTMLParser {
 public:
-  static bool parseHTML(const char *code, size_t codeLength, ElementInstance *rootNode);
+  static bool parseHTML(const char *code, size_t codeLength, NodeInstance *rootNode);
 
 private:
   JSContext *m_context;
-  static void traverseHTML(ElementInstance *element, GumboNode *node);
+  static void traverseHTML(NodeInstance *root, GumboNode *node);
   static void parseProperty(ElementInstance *element, GumboElement *gumboElement);
 };
 } // namespace kraken::binding::qjs

@@ -47,7 +47,7 @@ describe('outerHTML', () => {
   });
 });
 
-fdescribe('innerHTML', () => {
+describe('innerHTML', () => {
   it('should work width style when get property', async () => {
     const div = document.createElement('div');
     div.style.width = '100px';

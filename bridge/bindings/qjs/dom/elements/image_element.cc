@@ -9,7 +9,9 @@
 
 namespace kraken::binding::qjs {
 
-ImageElement::ImageElement(JSContext *context) : Element(context) {}
+ImageElement::ImageElement(JSContext *context) : Element(context) {
+  JS_SetPrototype(m_ctx, m_prototypeObject, Element::instance(m_context)->prototype());
+}
 
 void bindImageElement(std::unique_ptr<JSContext> &context) {
   auto *constructor = ImageElement::instance(context.get());

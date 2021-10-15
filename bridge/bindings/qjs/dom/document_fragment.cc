@@ -24,6 +24,7 @@ DocumentFragment::DocumentFragment(JSContext *context) : Node(context) {
   std::call_once(kDocumentFragmentFlag, []() {
     JS_NewClassID(&kDocumentFragmentID);
   });
+  JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
 }
 
 JSClassID DocumentFragment::classId() {

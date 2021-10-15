@@ -20,6 +20,7 @@
 #include "elements/.gen/input_element.h"
 #include "elements/.gen/object_element.h"
 #include "elements/.gen/script_element.h"
+#include "elements/template_element.h"
 #include "elements/.gen/svg_element.h"
 
 #include "events/.gen/close_event.h"
@@ -76,6 +77,7 @@ Document::Document(JSContext *context) : Node(context, "Document") {
     Element::defineElement("object", ObjectElement::instance(m_context));
     Element::defineElement("script", ScriptElement::instance(m_context));
     Element::defineElement("svg", SVGElement::instance(m_context));
+    Element::defineElement("template", TemplateElement::instance(m_context));
     document_registered = true;
   }
 

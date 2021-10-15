@@ -18,7 +18,7 @@ inline std::string trim(std::string &str) {
   return str;
 }
 
-bool HTMLParser::parseHTML(const char *code, size_t codeLength, ElementInstance *rootNode) {
+bool HTMLParser::parseHTML(const char *code, size_t codeLength, NodeInstance *rootNode) {
   std::string html = std::string(code, codeLength);
 
   if (rootNode != nullptr) {
@@ -36,8 +36,8 @@ bool HTMLParser::parseHTML(const char *code, size_t codeLength, ElementInstance 
 
   return true;
 }
-void HTMLParser::traverseHTML(ElementInstance *element, GumboNode *node) {
-  JSContext *context = element->context();
+void HTMLParser::traverseHTML(NodeInstance *root, GumboNode *node) {
+  JSContext *context = root->context();
   QjsContext *ctx = context->ctx();
 
   const GumboVector* children = &node->v.element.children;
@@ -55,7 +55,7 @@ void HTMLParser::traverseHTML(ElementInstance *element, GumboNode *node) {
       JSValue newElementValue = JS_CallConstructor(ctx, constructor, 1, argv);
       JS_FreeValue(ctx, tagNameValue);
       auto *newElementInstance = static_cast<ElementInstance *>(JS_GetOpaque(newElementValue, Element::classId()));
-      element->internalAppendChild(newElementInstance);
+      root->internalAppendChild(newElementInstance);
       parseProperty(newElementInstance, &child->v.element);
 
       // eval javascript when <script>//code...</script>.
@@ -79,7 +79,7 @@ void HTMLParser::traverseHTML(ElementInstance *element, GumboNode *node) {
       JS_FreeValue(ctx, textContentValue);
 
       auto *textNodeInstance = static_cast<TextNodeInstance *>(JS_GetOpaque(textNodeValue, TextNode::classId()));
-      element->internalAppendChild(textNodeInstance);
+      root->internalAppendChild(textNodeInstance);
       JS_FreeValue(ctx, textNodeValue);
     }
   }

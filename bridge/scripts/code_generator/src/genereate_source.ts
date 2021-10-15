@@ -398,8 +398,17 @@ function generateHostClassSource(object: ClassObject) {
     specialBind = `context->defineGlobalProperty("Image", JS_DupValue(context->ctx(), constructor->classObject));`
   }
 
+  let classInheritCode = '';
+  if (object.type === 'Element') {
+    classInheritCode = 'JS_SetPrototype(m_ctx, m_prototypeObject, Element::instance(m_context)->prototype());';
+  } else if (object.type === 'Event') {
+    classInheritCode = 'JS_SetPrototype(m_ctx, m_prototypeObject, Event::instance(m_context)->prototype());';
+  }
+
   return `
-${object.name}::${object.name}(JSContext *context) : ${object.type}(context) {}
+${object.name}::${object.name}(JSContext *context) : ${object.type}(context) {
+  ${classInheritCode}
+}
 
 void bind${object.name}(std::unique_ptr<JSContext> &context) {
   auto *constructor = ${object.name}::instance(context.get());
