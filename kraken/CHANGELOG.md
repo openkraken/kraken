@@ -12,7 +12,7 @@
 + Support documentFragment. https://github.com/openkraken/kraken/pull/641
 + Add default 1em margin for `<p>` https://github.com/openkraken/kraken/pull/648
 + Support document.querySelector and document.querySelectorAll. https://github.com/openkraken/kraken/pull/672
-+ Improve canvas performance when draing pictures. https://github.com/openkraken/kraken/pull/679
++ Improve canvas performance when drawing pictures. https://github.com/openkraken/kraken/pull/679
 + Use xcframework for iOS release. https://github.com/openkraken/kraken/pull/698
 + Support vue-router with History API. https://github.com/openkraken/kraken/pull/711
 + Support `<template />` and element.innerHTML API. https://github.com/openkraken/kraken/pull/713
