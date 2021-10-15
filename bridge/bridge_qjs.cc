@@ -28,6 +28,7 @@
 #include "bindings/qjs/dom/elements/.gen/object_element.h"
 #include "bindings/qjs/dom/elements/.gen/script_element.h"
 #include "bindings/qjs/dom/elements/.gen/svg_element.h"
+#include "bindings/qjs/dom/elements/template_element.h"
 #include "bindings/qjs/dom/elements/image_element.h"
 #include "bindings/qjs/dom/event.h"
 #include "bindings/qjs/dom/event_target.h"
@@ -60,7 +61,6 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
     std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 #endif
   m_context = binding::qjs::createJSContext(contextId, handler, this);
-  m_html_parser = std::make_unique<HTMLParser>(m_context);
 
 #if ENABLE_PROFILE
   auto nativePerformance = Performance::instance(m_context.get())->m_nativePerformance;
@@ -90,6 +90,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindInputElement(m_context);
   bindObjectElement(m_context);
   bindScriptElement(m_context);
+  bindTemplateElement(m_context);
   bindSVGElement(m_context);
   bindCSSStyleDeclaration(m_context);
   bindCloseEvent(m_context);
@@ -121,7 +122,12 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 
 void JSBridge::parseHTML(const char* code, size_t length) {
   if (!m_context->isValid()) return;
-  m_html_parser->parseHTML(code, length);
+  Document *Document = Document::instance(m_context.get());
+  auto document = DocumentInstance::instance(Document);
+  JSValue bodyValue = JS_GetPropertyStr(m_context->ctx(), document->instanceObject, "body");
+  auto *body = static_cast<ElementInstance *>(JS_GetOpaque(bodyValue, Element::classId()));
+  HTMLParser::parseHTML(code, length, body);
+  JS_FreeValue(m_context->ctx(), bodyValue);
 }
 
 void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType, void *rawEvent, NativeString *extra) {

@@ -79,6 +79,13 @@ TextNodeInstance::~TextNodeInstance() {
   JS_FreeValue(m_ctx, m_data);
 }
 
+std::string TextNodeInstance::toString() {
+  const char* pstring = JS_ToCString(m_ctx, m_data);
+  std::string result = std::string(pstring);
+  JS_FreeCString(m_ctx, pstring);
+  return result;
+}
+
 JSValue TextNodeInstance::internalGetTextContent() {
   return JS_DupValue(m_ctx, m_data);
 }

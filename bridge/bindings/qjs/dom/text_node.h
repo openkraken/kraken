@@ -33,6 +33,8 @@ public:
   TextNodeInstance() = delete;
   explicit TextNodeInstance(TextNode *textNode, JSValue textData);
   ~TextNodeInstance();
+
+  std::string toString();
 private:
   DEFINE_HOST_CLASS_PROPERTY(3, data, nodeValue, nodeName);
   JSValue internalGetTextContent() override;

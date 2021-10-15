@@ -6,14 +6,11 @@
 #include "html_parser.h"
 #include "dom/document.h"
 #include "dom/text_node.h"
+#include "js_context.h"
 
 #include <utility>
 
 namespace kraken::binding::qjs {
-
-HTMLParser::HTMLParser(std::unique_ptr<JSContext> &context)
-  : m_context(context) {
-}
 
 inline std::string trim(std::string &str) {
   str.erase(0, str.find_first_not_of(' ')); // prefixing spaces
@@ -21,34 +18,17 @@ inline std::string trim(std::string &str) {
   return str;
 }
 
-bool HTMLParser::parseHTML(const char *code, size_t codeLength) {
-  GumboOutput* htmlTree = gumbo_parse_with_options(&kGumboDefaultOptions, code, codeLength);
+bool HTMLParser::parseHTML(const char *code, size_t codeLength, ElementInstance *rootNode) {
+  std::string html = std::string(code, codeLength);
 
-  const GumboVector *root_children = &htmlTree->root->v.element.children;
+  if (rootNode != nullptr) {
+    rootNode->internalClearChild();
 
-  // find body.
-  ElementInstance *body = nullptr;
-  auto document = DocumentInstance::instance(Document::instance(m_context.get()));
-  int32_t documentElementsChildNodesLen = arrayGetLength(m_context->ctx(), document->documentElement()->childNodes);
-  for (int i = 0; i < documentElementsChildNodesLen; i ++) {
-    JSValue n = JS_GetPropertyUint32(m_context->ctx(), document->documentElement()->childNodes, i);
-    auto *node = static_cast<NodeInstance *>(JS_GetOpaque(n, Node::classId(n)));
-    auto* element = reinterpret_cast<ElementInstance *>(node);
-
-    if (element->tagName() == "BODY") {
-      body = element;
-      JS_FreeValue(m_context->ctx(), n);
-      break;
-    }
-    JS_FreeValue(m_context->ctx(), n);
-  }
-
-  if (body != nullptr) {
-    for (int i = 0; i < root_children->length; ++i) {
-      auto* child =(GumboNode*) root_children->data[i];
-      if (child->v.element.tag == GUMBO_TAG_BODY) {
-        traverseHTML(child, body);
-      }
+    if (!trim(html).empty()) {
+      // Gumbo-parser parse HTML.
+      size_t html_length = html.length();
+      auto *htmlTree = gumbo_parse_with_options(&kGumboDefaultOptions, html.c_str(), html_length);
+      traverseHTML(rootNode, htmlTree->root);
     }
   } else {
     KRAKEN_LOG(ERROR) << "BODY is null.";
@@ -56,21 +36,24 @@ bool HTMLParser::parseHTML(const char *code, size_t codeLength) {
 
   return true;
 }
-void HTMLParser::traverseHTML(GumboNode *node, ElementInstance *element) {
+void HTMLParser::traverseHTML(ElementInstance *element, GumboNode *node) {
+  JSContext *context = element->context();
+  QjsContext *ctx = context->ctx();
+
   const GumboVector* children = &node->v.element.children;
   for (int i = 0; i < children->length; ++i) {
     auto* child = (GumboNode*) children->data[i];
 
     if (child->type == GUMBO_NODE_ELEMENT) {
       std::string tagName = gumbo_normalized_tagname(child->v.element.tag);
-      JSValue constructor = Element::getConstructor(m_context.get(), tagName);
+      JSValue constructor = Element::getConstructor(context, tagName);
 
-      JSValue tagNameValue = JS_NewString(m_context->ctx(), tagName.c_str());
+      JSValue tagNameValue = JS_NewString(ctx, tagName.c_str());
       JSValue argv[] = {
         tagNameValue
       };
-      JSValue newElementValue = JS_CallConstructor(m_context->ctx(), constructor, 1, argv);
-      JS_FreeValue(m_context->ctx(), tagNameValue);
+      JSValue newElementValue = JS_CallConstructor(ctx, constructor, 1, argv);
+      JS_FreeValue(ctx, tagNameValue);
       auto *newElementInstance = static_cast<ElementInstance *>(JS_GetOpaque(newElementValue, Element::classId()));
       element->internalAppendChild(newElementInstance);
       parseProperty(newElementInstance, &child->v.element);
@@ -79,29 +62,32 @@ void HTMLParser::traverseHTML(GumboNode *node, ElementInstance *element) {
       if (child->v.element.children.length > 0) {
         if (child->v.element.tag == GUMBO_TAG_SCRIPT) {
           const char* code = ((GumboNode*) child->v.element.children.data[0])->v.text.text;
-          m_context->evaluateJavaScript(code, strlen(code), "vm://", 0);
+          context->evaluateJavaScript(code, strlen(code), "vm://", 0);
         } else {
-          traverseHTML(child, newElementInstance);
+          traverseHTML(newElementInstance, child);
         }
       }
 
-      JS_FreeValue(m_context->ctx(), newElementValue);
+      JS_FreeValue(ctx, newElementValue);
     } else if (child->type == GUMBO_NODE_TEXT) {
 
-      JSValue textContentValue = JS_NewString(m_context->ctx(), child->v.text.text);
+      JSValue textContentValue = JS_NewString(ctx, child->v.text.text);
       JSValue argv[] = {
         textContentValue
       };
-      JSValue textNodeValue = JS_CallConstructor(m_context->ctx(), TextNode::instance(m_context.get())->classObject, 1, argv);
-      JS_FreeValue(m_context->ctx(), textContentValue);
+      JSValue textNodeValue = JS_CallConstructor(ctx, TextNode::instance(context)->classObject, 1, argv);
+      JS_FreeValue(ctx, textContentValue);
 
       auto *textNodeInstance = static_cast<TextNodeInstance *>(JS_GetOpaque(textNodeValue, TextNode::classId()));
       element->internalAppendChild(textNodeInstance);
-      JS_FreeValue(m_context->ctx(), textNodeValue);
+      JS_FreeValue(ctx, textNodeValue);
     }
   }
 }
 void HTMLParser::parseProperty(ElementInstance *element, GumboElement *gumboElement) {
+  JSContext *context = element->context();
+  QjsContext *ctx = context->ctx();
+
   GumboVector * attributes = &gumboElement->attributes;
   for (int j = 0; j < attributes->length; ++j) {
     auto* attribute = (GumboAttribute*) attributes->data[j];
@@ -130,9 +116,9 @@ void HTMLParser::parseProperty(ElementInstance *element, GumboElement *gumboElem
           std::transform(styleValue.begin(), styleValue.end(), styleValue.begin(), ::tolower);
           trim(styleValue);
 
-          JSValue newStyleValue = JS_NewString(m_context->ctx(), styleValue.c_str());
+          JSValue newStyleValue = JS_NewString(ctx, styleValue.c_str());
           style->internalSetProperty(styleKey, newStyleValue);
-          JS_FreeValue(m_context->ctx(), newStyleValue);
+          JS_FreeValue(ctx, newStyleValue);
         }
       }
 
@@ -142,11 +128,11 @@ void HTMLParser::parseProperty(ElementInstance *element, GumboElement *gumboElem
       std::string strValue = attribute->value;
       std::transform(strValue.begin(), strValue.end(), strValue.begin(), ::tolower);
 
-      JSAtom key = JS_NewAtom(m_context->ctx(), strName.c_str());
-      JSValue value = JS_NewString(m_context->ctx(), strValue.c_str());
+      JSAtom key = JS_NewAtom(ctx, strName.c_str());
+      JSValue value = JS_NewString(ctx, strValue.c_str());
 
-      JS_SetProperty(m_context->ctx(), element->instanceObject, key, value);
-      JS_FreeAtom(m_context->ctx(), key);
+      JS_SetProperty(ctx, element->instanceObject, key, value);
+      JS_FreeAtom(ctx, key);
     }
   }
 

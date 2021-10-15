@@ -8,6 +8,7 @@
 #include "dart_methods.h"
 #include "text_node.h"
 #include "bindings/qjs/bom/blob.h"
+#include "bindings/qjs/html_parser.h"
 
 namespace kraken::binding::qjs {
 
@@ -109,6 +110,19 @@ void ElementAttributes::copyWith(ElementAttributes *attributes) {
 
 std::shared_ptr<SpaceSplitString> ElementAttributes::className() {
   return m_className;
+}
+
+std::string ElementAttributes::toString() {
+  std::string s;
+
+  for (auto &attr : m_attributes) {
+    s += attr.first + "=";
+    const char* pstr = JS_AtomToCString(m_ctx, attr.second);
+    s += "\"" + std::string(pstr) + "\"";
+    JS_FreeCString(m_ctx, pstr);
+  }
+
+  return s;
 }
 
 JSValue Element::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
@@ -596,6 +610,26 @@ PROP_GETTER(ElementInstance, children)(QjsContext *ctx, JSValue this_val, int ar
 }
 PROP_SETTER(ElementInstance, children)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) { return JS_NULL; }
 
+PROP_GETTER(ElementInstance, innerHTML)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
+  return JS_NewString(ctx, element->innerHTML().c_str());
+}
+PROP_SETTER(ElementInstance, innerHTML)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
+  const char* chtml = JS_ToCString(ctx, argv[0]);
+  HTMLParser::parseHTML(chtml, strlen(chtml), element);
+  JS_FreeCString(ctx, chtml);
+  return JS_NULL;
+}
+
+PROP_GETTER(ElementInstance, outerHTML)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
+  return JS_NewString(ctx, element->outerHTML().c_str());
+}
+PROP_SETTER(ElementInstance, outerHTML)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JS_NULL;
+}
+
 JSClassID ElementInstance::classID() {
   return Element::classId();
 }
@@ -704,6 +738,51 @@ std::string ElementInstance::tagName() {
 
 std::string ElementInstance::getRegisteredTagName() {
   return m_tagName;
+}
+
+std::string ElementInstance::outerHTML() {
+  std::string s = "<" + getRegisteredTagName();
+
+  // Read attributes
+  std::string attributes = m_attributes->toString();
+  // Read style
+  std::string style = m_style->toString();
+
+  if (!attributes.empty()) {
+    s += " " + attributes;
+  }
+  if (!style.empty()) {
+    s += " " + style;
+  }
+
+  s += ">";
+
+  std::string childHTML = innerHTML();
+  s += childHTML;
+  s += "</" + getRegisteredTagName() + ">";
+
+  return s;
+}
+
+std::string ElementInstance::innerHTML() {
+  std::string s;
+  // Children toString
+  int32_t childLen = arrayGetLength(m_ctx, childNodes);
+
+  if (childLen == 0) return s;
+
+  for (int i = 0; i < childLen; i ++) {
+    JSValue c = JS_GetPropertyUint32(m_ctx, childNodes, i);
+    auto *node = static_cast<NodeInstance *>(JS_GetOpaque(c, Node::classId(c)));
+    if (node->nodeType == NodeType::ELEMENT_NODE) {
+      s += reinterpret_cast<ElementInstance *>(node)->outerHTML();
+    } else if (node->nodeType == NodeType::TEXT_NODE) {
+      s += reinterpret_cast<TextNodeInstance *>(node)->toString();
+    }
+
+    JS_FreeValue(m_ctx, c);
+  }
+  return s;
 }
 
 void ElementInstance::_notifyNodeRemoved(NodeInstance *insertionNode) {

@@ -52,7 +52,7 @@ public:
   bool internalSetProperty(std::string &name, JSValue value);
   void internalRemoveProperty(std::string &name);
   JSValue internalGetPropertyValue(std::string &name);
-
+  std::string toString();
   void copyWith(StyleDeclarationInstance *instance);
 
 private:

@@ -175,6 +175,21 @@ JSValue StyleDeclarationInstance::internalGetPropertyValue(std::string &name) {
   return JS_NULL;
 }
 
+std::string StyleDeclarationInstance::toString() {
+  if (properties.empty()) return "";
+
+  std::string s = "style=\"";
+
+  for (auto &attr: properties) {
+    const char* pstr = JS_ToCString(m_ctx, attr.second);
+    s += attr.first + ": " + pstr + ";";
+    JS_FreeCString(m_ctx, pstr);
+  }
+
+  s += "\"";
+  return s;
+}
+
 void StyleDeclarationInstance::copyWith(StyleDeclarationInstance *instance) {
   for(auto &attr : instance->properties) {
     properties[attr.first] = JS_DupValue(m_ctx, attr.second);

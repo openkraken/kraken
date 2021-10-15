@@ -331,6 +331,8 @@ elseif ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/dom/elements/.gen/script_element.h
     bindings/qjs/dom/elements/.gen/svg_element.h
     bindings/qjs/dom/elements/.gen/svg_element.cc
+    bindings/qjs/dom/elements/template_element.cc
+    bindings/qjs/dom/elements/template_element.h
     bindings/qjs/dom/events/.gen/close_event.h
     bindings/qjs/dom/events/.gen/close_event.cc
     bindings/qjs/dom/events/.gen/gesture_event.cc

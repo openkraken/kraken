@@ -51,7 +51,6 @@ public:
 
 private:
   std::unique_ptr<binding::qjs::JSContext> m_context;
-  std::unique_ptr<binding::qjs::HTMLParser> m_html_parser;
   JSExceptionHandler m_handler;
   Task m_disposeCallback{nullptr};
   void *m_disposePrivateData{nullptr};

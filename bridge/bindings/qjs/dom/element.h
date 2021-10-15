@@ -61,6 +61,7 @@ public:
   void removeAttribute(std::string &name);
   void copyWith(ElementAttributes *attributes);
   std::shared_ptr<SpaceSplitString> className();
+  std::string toString();
 
 private:
   std::unordered_map<std::string, JSAtom> m_attributes;
@@ -126,6 +127,8 @@ public:
   std::shared_ptr<SpaceSplitString> classNames();
   std::string tagName();
   std::string getRegisteredTagName();
+  std::string outerHTML();
+  std::string innerHTML();
   StyleDeclarationInstance *style();
 
   static inline JSClassID classID();
@@ -134,9 +137,9 @@ protected:
   explicit ElementInstance(Element *element, std::string tagName, bool shouldAddUICommand);
 
 private:
-  DEFINE_HOST_CLASS_PROPERTY(16, nodeName, tagName, className, offsetLeft, offsetTop, offsetWidth, offsetHeight, clientWidth,
+  DEFINE_HOST_CLASS_PROPERTY(18, nodeName, tagName, className, offsetLeft, offsetTop, offsetWidth, offsetHeight, clientWidth,
                              clientHeight, clientTop, clientLeft, scrollTop, scrollLeft, scrollHeight, scrollWidth,
-                             children);
+                             children, innerHTML, outerHTML);
   void _notifyNodeRemoved(NodeInstance *node) override;
   void _notifyChildRemoved();
   void _notifyNodeInsert(NodeInstance *insertNode) override;
