@@ -98,19 +98,19 @@ JSValue Performance::clearMarks(QjsContext *ctx, JSValue this_val, int argc, JSV
     targetMark = argv[0];
   }
 
-  auto &entries = performance->m_nativePerformance.entries;
-  auto it = std::begin(entries);
+  auto *entries = performance->m_nativePerformance.entries;
+  auto it = std::begin(*entries);
 
-  while (it != entries.end()) {
+  while (it != entries->end()) {
     char* entryType = (*it)->entryType;
     if (strcmp(entryType, "mark") == 0) {
       if (JS_IsNull(targetMark)) {
-        entries.erase(it);
+        entries->erase(it);
       } else {
         std::string entryName = (*it)->name;
         std::string targetName = jsValueToStdString(ctx, targetMark);
         if (entryName == targetName) {
-          entries.erase(it);
+          entries->erase(it);
         } else {
           it++;
         };
@@ -129,19 +129,19 @@ JSValue Performance::clearMeasures(QjsContext *ctx, JSValue this_val, int argc, 
   }
 
   auto *performance = static_cast<Performance *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
-  auto &entries = performance->m_nativePerformance.entries;
-  auto it = std::begin(entries);
+  auto entries = performance->m_nativePerformance.entries;
+  auto it = std::begin(*entries);
 
-  while (it != entries.end()) {
+  while (it != entries->end()) {
     char* entryType = (*it)->entryType;
     if (strcmp(entryType, "measure") == 0) {
       if (JS_IsNull(targetMark)) {
-        entries.erase(it);
+        entries->erase(it);
       } else {
         std::string entryName = (*it)->name;
         std::string targetName = jsValueToStdString(ctx, targetMark);
         if (entryName == targetName) {
-          entries.erase(it);
+          entries->erase(it);
         } else {
           it++;
         }
@@ -247,7 +247,10 @@ JSValue Performance::measure(QjsContext *ctx, JSValue this_val, int argc, JSValu
   }
 
   auto *performance = static_cast<Performance *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
-  performance->internalMeasure(name, startMark, endMark);
+  JSValue exception = JS_NULL;
+  performance->internalMeasure(name, startMark, endMark, &exception);
+
+  if (!JS_IsNull(exception)) return exception;
 
   return JS_NULL;
 }
@@ -270,18 +273,78 @@ void NativePerformance::mark(const std::string &markName) {
   int64_t startTime = std::chrono::duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
   auto *nativePerformanceEntry =
     new NativePerformanceEntry{markName, "mark", startTime, 0, PERFORMANCE_ENTRY_NONE_UNIQUE_ID};
-  entries.emplace_back(nativePerformanceEntry);
+  entries->emplace_back(nativePerformanceEntry);
 }
 void NativePerformance::mark(const std::string &markName, int64_t startTime) {
   auto *nativePerformanceEntry =
     new NativePerformanceEntry{markName, "mark", startTime, 0, PERFORMANCE_ENTRY_NONE_UNIQUE_ID};
-  entries.emplace_back(nativePerformanceEntry);
+  entries->emplace_back(nativePerformanceEntry);
 }
 
 Performance::Performance(JSContext *context) : HostObject(context, "Performance") {
 }
-void Performance::internalMeasure(const std::string &name, const std::string &startMark, const std::string &endMark) {
+void Performance::internalMeasure(const std::string &name, const std::string &startMark, const std::string &endMark, JSValue *exception) {
+  auto entries = getFullEntries();
 
+  if (!startMark.empty() && !endMark.empty()) {
+    size_t startMarkCount =
+      std::count_if(entries.begin(), entries.end(),
+                    [&startMark](NativePerformanceEntry *entry) -> bool { return entry->name == startMark; });
+
+    if (startMarkCount == 0) {
+      *exception = JS_ThrowTypeError(m_ctx, "Failed to execute 'measure' on 'Performance': The mark %s does not exist.", startMark.c_str());
+      return;
+    }
+
+    size_t endMarkCount =
+      std::count_if(entries.begin(), entries.end(),
+                    [&endMark](NativePerformanceEntry *entry) -> bool { return entry->name == endMark; });
+
+    if (endMarkCount == 0) {
+      *exception = JS_ThrowTypeError(m_ctx, "Failed to execute 'measure' on 'Performance': The mark %s does not exist.", endMark.c_str());
+      return;
+    }
+
+    if (startMarkCount != endMarkCount) {
+      *exception = JS_ThrowTypeError(m_ctx, "Failed to execute 'measure' on 'Performance': The mark %s and %s does not appear the same number of times", startMark.c_str(), endMark.c_str());
+      return;
+    }
+
+    auto startIt = std::begin(entries);
+    auto endIt = std::begin(entries);
+
+    for (size_t i = 0; i < startMarkCount; i++) {
+      auto startEntry = std::find_if(startIt, entries.end(), [&startMark](NativePerformanceEntry *entry) -> bool {
+        return entry->name == startMark;
+      });
+
+      bool isStartEntryHasUniqueId = (*startEntry)->uniqueId != PERFORMANCE_ENTRY_NONE_UNIQUE_ID;
+
+      auto endEntryComparator = [&endMark, &startEntry,
+        isStartEntryHasUniqueId](NativePerformanceEntry *entry) -> bool {
+        if (isStartEntryHasUniqueId) {
+          return entry->uniqueId == (*startEntry)->uniqueId && entry->name == endMark;
+        }
+        return entry->name == endMark;
+      };
+
+      auto endEntry = std::find_if(startEntry, entries.end(), endEntryComparator);
+
+      if (endEntry == entries.end()) {
+        size_t startIndex = startEntry - entries.begin();
+        assert_m(false, ("Can not get endEntry. startIndex: " + std::to_string(startIndex) +
+                         " startMark: " + startMark + " endMark: " + endMark));
+      }
+
+      int64_t duration = (*endEntry)->startTime - (*startEntry)->startTime;
+      int64_t startTime = std::chrono::duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
+      auto *nativePerformanceEntry =
+        new NativePerformanceEntry{name, "measure", startTime, duration, PERFORMANCE_ENTRY_NONE_UNIQUE_ID};
+      m_nativePerformance.entries->emplace_back(nativePerformanceEntry);
+      startIt = ++startEntry;
+      endIt = ++endEntry;
+    }
+  }
 }
 double Performance::internalNow() {
   auto now = std::chrono::system_clock::now();
@@ -290,7 +353,7 @@ double Performance::internalNow() {
   return std::chrono::duration_cast<std::chrono::milliseconds>(reducedDuration).count();
 }
 std::vector<NativePerformanceEntry *> Performance::getFullEntries() {
-  auto &bridgeEntries = m_nativePerformance.entries;
+  auto *bridgeEntries = m_nativePerformance.entries;
 #if ENABLE_PROFILE
   if (getDartMethod()->getPerformanceEntries == nullptr) {
     return std::vector<NativePerformanceEntry *>();
@@ -312,7 +375,7 @@ std::vector<NativePerformanceEntry *> Performance::getFullEntries() {
 
   std::vector<NativePerformanceEntry *> mergedEntries;
 
-  mergedEntries.insert(mergedEntries.end(), bridgeEntries.begin(), bridgeEntries.end());
+  mergedEntries.insert(mergedEntries.end(), bridgeEntries->begin(), bridgeEntries->end());
 #if ENABLE_PROFILE
   mergedEntries.insert(mergedEntries.end(), dartEntries.begin(), dartEntries.end());
   delete[] dartEntryList->entries;
@@ -324,50 +387,50 @@ std::vector<NativePerformanceEntry *> Performance::getFullEntries() {
 
 #if ENABLE_PROFILE
 
-void Performance::measureSummary() {
-  internalMeasure(PERF_WIDGET_CREATION_COST, PERF_CONTROLLER_INIT_START, PERF_CONTROLLER_INIT_END);
-  internalMeasure(PERF_CONTROLLER_PROPERTIES_INIT_COST, PERF_CONTROLLER_INIT_START, PERF_CONTROLLER_PROPERTY_INIT);
+void Performance::measureSummary(JSValue *exception) {
+  internalMeasure(PERF_WIDGET_CREATION_COST, PERF_CONTROLLER_INIT_START, PERF_CONTROLLER_INIT_END, exception);
+  internalMeasure(PERF_CONTROLLER_PROPERTIES_INIT_COST, PERF_CONTROLLER_INIT_START, PERF_CONTROLLER_PROPERTY_INIT, exception);
   internalMeasure(PERF_VIEW_CONTROLLER_PROPERTIES_INIT_COST, PERF_VIEW_CONTROLLER_INIT_START,
-                  PERF_VIEW_CONTROLLER_PROPERTY_INIT);
-  internalMeasure(PERF_BRIDGE_INIT_COST, PERF_BRIDGE_INIT_START, PERF_BRIDGE_INIT_END);
+                  PERF_VIEW_CONTROLLER_PROPERTY_INIT, exception);
+  internalMeasure(PERF_BRIDGE_INIT_COST, PERF_BRIDGE_INIT_START, PERF_BRIDGE_INIT_END, exception);
   internalMeasure(PERF_BRIDGE_REGISTER_DART_METHOD_COST, PERF_BRIDGE_REGISTER_DART_METHOD_START,
-                  PERF_BRIDGE_REGISTER_DART_METHOD_END);
-  internalMeasure(PERF_CREATE_VIEWPORT_COST, PERF_CREATE_VIEWPORT_START, PERF_CREATE_VIEWPORT_END);
-  internalMeasure(PERF_ELEMENT_MANAGER_INIT_COST, PERF_ELEMENT_MANAGER_INIT_START, PERF_ELEMENT_MANAGER_INIT_END);
+                  PERF_BRIDGE_REGISTER_DART_METHOD_END, exception);
+  internalMeasure(PERF_CREATE_VIEWPORT_COST, PERF_CREATE_VIEWPORT_START, PERF_CREATE_VIEWPORT_END, exception);
+  internalMeasure(PERF_ELEMENT_MANAGER_INIT_COST, PERF_ELEMENT_MANAGER_INIT_START, PERF_ELEMENT_MANAGER_INIT_END, exception);
   internalMeasure(PERF_ELEMENT_MANAGER_PROPERTIES_INIT_COST, PERF_ELEMENT_MANAGER_INIT_START,
-                  PERF_ELEMENT_MANAGER_PROPERTY_INIT);
-  internalMeasure(PERF_ROOT_ELEMENT_INIT_COST, PERF_ROOT_ELEMENT_INIT_START, PERF_ROOT_ELEMENT_INIT_END);
-  internalMeasure(PERF_ROOT_ELEMENT_PROPERTIES_INIT_COST, PERF_ROOT_ELEMENT_INIT_START, PERF_ROOT_ELEMENT_PROPERTY_INIT);
-  internalMeasure(PERF_JS_CONTEXT_INIT_COST, PERF_JS_CONTEXT_INIT_START, PERF_JS_CONTEXT_INIT_END);
+                  PERF_ELEMENT_MANAGER_PROPERTY_INIT, exception);
+  internalMeasure(PERF_ROOT_ELEMENT_INIT_COST, PERF_ROOT_ELEMENT_INIT_START, PERF_ROOT_ELEMENT_INIT_END, exception);
+  internalMeasure(PERF_ROOT_ELEMENT_PROPERTIES_INIT_COST, PERF_ROOT_ELEMENT_INIT_START, PERF_ROOT_ELEMENT_PROPERTY_INIT, exception);
+  internalMeasure(PERF_JS_CONTEXT_INIT_COST, PERF_JS_CONTEXT_INIT_START, PERF_JS_CONTEXT_INIT_END, exception);
   internalMeasure(PERF_JS_HOST_CLASS_GET_PROPERTY_COST, PERF_JS_HOST_CLASS_GET_PROPERTY_START,
-                  PERF_JS_HOST_CLASS_GET_PROPERTY_END);
+                  PERF_JS_HOST_CLASS_GET_PROPERTY_END, exception);
   internalMeasure(PERF_JS_HOST_CLASS_SET_PROPERTY_COST, PERF_JS_HOST_CLASS_SET_PROPERTY_START,
-                  PERF_JS_HOST_CLASS_SET_PROPERTY_END);
-  internalMeasure(PERF_JS_HOST_CLASS_INIT_COST, PERF_JS_HOST_CLASS_INIT_START, PERF_JS_HOST_CLASS_INIT_END);
-  internalMeasure(PERF_JS_NATIVE_FUNCTION_CALL_COST, PERF_JS_NATIVE_FUNCTION_CALL_START, PERF_JS_NATIVE_FUNCTION_CALL_END);
-  internalMeasure(PERF_JS_NATIVE_METHOD_INIT_COST, PERF_JS_NATIVE_METHOD_INIT_START, PERF_JS_NATIVE_METHOD_INIT_END);
-  internalMeasure(PERF_JS_POLYFILL_INIT_COST, PERF_JS_POLYFILL_INIT_START, PERF_JS_POLYFILL_INIT_END);
-  internalMeasure(PERF_JS_BUNDLE_LOAD_COST, PERF_JS_BUNDLE_LOAD_START, PERF_JS_BUNDLE_LOAD_END);
-  internalMeasure(PERF_JS_BUNDLE_EVAL_COST, PERF_JS_BUNDLE_EVAL_START, PERF_JS_BUNDLE_EVAL_END);
-  internalMeasure(PERF_FLUSH_UI_COMMAND_COST, PERF_FLUSH_UI_COMMAND_START, PERF_FLUSH_UI_COMMAND_END);
-  internalMeasure(PERF_CREATE_ELEMENT_COST, PERF_CREATE_ELEMENT_START, PERF_CREATE_ELEMENT_END);
-  internalMeasure(PERF_CREATE_TEXT_NODE_COST, PERF_CREATE_TEXT_NODE_START, PERF_CREATE_TEXT_NODE_END);
-  internalMeasure(PERF_CREATE_COMMENT_COST, PERF_CREATE_COMMENT_START, PERF_CREATE_COMMENT_END);
-  internalMeasure(PERF_DISPOSE_EVENT_TARGET_COST, PERF_DISPOSE_EVENT_TARGET_START, PERF_DISPOSE_EVENT_TARGET_END);
-  internalMeasure(PERF_ADD_EVENT_COST, PERF_ADD_EVENT_START, PERF_ADD_EVENT_END);
-  internalMeasure(PERF_INSERT_ADJACENT_NODE_COST, PERF_INSERT_ADJACENT_NODE_START, PERF_INSERT_ADJACENT_NODE_END);
-  internalMeasure(PERF_REMOVE_NODE_COST, PERF_REMOVE_NODE_START, PERF_REMOVE_NODE_END);
-  internalMeasure(PERF_SET_STYLE_COST, PERF_SET_STYLE_START, PERF_SET_STYLE_END);
-  internalMeasure(PERF_SET_PROPERTIES_COST, PERF_SET_PROPERTIES_START, PERF_SET_PROPERTIES_END);
-  internalMeasure(PERF_REMOVE_PROPERTIES_COST, PERF_REMOVE_PROPERTIES_START, PERF_REMOVE_PROPERTIES_END);
-  internalMeasure(PERF_FLEX_LAYOUT_COST, PERF_FLEX_LAYOUT_START, PERF_FLEX_LAYOUT_END);
-  internalMeasure(PERF_FLOW_LAYOUT_COST, PERF_FLOW_LAYOUT_START, PERF_FLOW_LAYOUT_END);
-  internalMeasure(PERF_INTRINSIC_LAYOUT_COST, PERF_INTRINSIC_LAYOUT_START, PERF_INTRINSIC_LAYOUT_END);
-  internalMeasure(PERF_SILVER_LAYOUT_COST, PERF_SILVER_LAYOUT_START, PERF_SILVER_LAYOUT_END);
-  internalMeasure(PERF_PAINT_COST, PERF_PAINT_START, PERF_PAINT_END);
-  internalMeasure(PERF_DOM_FORCE_LAYOUT_COST, PERF_DOM_FORCE_LAYOUT_START, PERF_DOM_FORCE_LAYOUT_END);
-  internalMeasure(PERF_DOM_FLUSH_UI_COMMAND_COST, PERF_DOM_FLUSH_UI_COMMAND_START, PERF_DOM_FLUSH_UI_COMMAND_END);
-  internalMeasure(PERF_JS_PARSE_TIME_COST, PERF_JS_PARSE_TIME_START, PERF_JS_PARSE_TIME_END);
+                  PERF_JS_HOST_CLASS_SET_PROPERTY_END, exception);
+  internalMeasure(PERF_JS_HOST_CLASS_INIT_COST, PERF_JS_HOST_CLASS_INIT_START, PERF_JS_HOST_CLASS_INIT_END, exception);
+  internalMeasure(PERF_JS_NATIVE_FUNCTION_CALL_COST, PERF_JS_NATIVE_FUNCTION_CALL_START, PERF_JS_NATIVE_FUNCTION_CALL_END, exception);
+  internalMeasure(PERF_JS_NATIVE_METHOD_INIT_COST, PERF_JS_NATIVE_METHOD_INIT_START, PERF_JS_NATIVE_METHOD_INIT_END, exception);
+  internalMeasure(PERF_JS_POLYFILL_INIT_COST, PERF_JS_POLYFILL_INIT_START, PERF_JS_POLYFILL_INIT_END, exception);
+  internalMeasure(PERF_JS_BUNDLE_LOAD_COST, PERF_JS_BUNDLE_LOAD_START, PERF_JS_BUNDLE_LOAD_END, exception);
+  internalMeasure(PERF_JS_BUNDLE_EVAL_COST, PERF_JS_BUNDLE_EVAL_START, PERF_JS_BUNDLE_EVAL_END, exception);
+  internalMeasure(PERF_FLUSH_UI_COMMAND_COST, PERF_FLUSH_UI_COMMAND_START, PERF_FLUSH_UI_COMMAND_END, exception);
+  internalMeasure(PERF_CREATE_ELEMENT_COST, PERF_CREATE_ELEMENT_START, PERF_CREATE_ELEMENT_END, exception);
+  internalMeasure(PERF_CREATE_TEXT_NODE_COST, PERF_CREATE_TEXT_NODE_START, PERF_CREATE_TEXT_NODE_END, exception);
+  internalMeasure(PERF_CREATE_COMMENT_COST, PERF_CREATE_COMMENT_START, PERF_CREATE_COMMENT_END, exception);
+  internalMeasure(PERF_DISPOSE_EVENT_TARGET_COST, PERF_DISPOSE_EVENT_TARGET_START, PERF_DISPOSE_EVENT_TARGET_END, exception);
+  internalMeasure(PERF_ADD_EVENT_COST, PERF_ADD_EVENT_START, PERF_ADD_EVENT_END, exception);
+  internalMeasure(PERF_INSERT_ADJACENT_NODE_COST, PERF_INSERT_ADJACENT_NODE_START, PERF_INSERT_ADJACENT_NODE_END, exception);
+  internalMeasure(PERF_REMOVE_NODE_COST, PERF_REMOVE_NODE_START, PERF_REMOVE_NODE_END, exception);
+  internalMeasure(PERF_SET_STYLE_COST, PERF_SET_STYLE_START, PERF_SET_STYLE_END, exception);
+  internalMeasure(PERF_SET_PROPERTIES_COST, PERF_SET_PROPERTIES_START, PERF_SET_PROPERTIES_END, exception);
+  internalMeasure(PERF_REMOVE_PROPERTIES_COST, PERF_REMOVE_PROPERTIES_START, PERF_REMOVE_PROPERTIES_END, exception);
+  internalMeasure(PERF_FLEX_LAYOUT_COST, PERF_FLEX_LAYOUT_START, PERF_FLEX_LAYOUT_END, exception);
+  internalMeasure(PERF_FLOW_LAYOUT_COST, PERF_FLOW_LAYOUT_START, PERF_FLOW_LAYOUT_END, exception);
+  internalMeasure(PERF_INTRINSIC_LAYOUT_COST, PERF_INTRINSIC_LAYOUT_START, PERF_INTRINSIC_LAYOUT_END, exception);
+  internalMeasure(PERF_SILVER_LAYOUT_COST, PERF_SILVER_LAYOUT_START, PERF_SILVER_LAYOUT_END, exception);
+  internalMeasure(PERF_PAINT_COST, PERF_PAINT_START, PERF_PAINT_END, exception);
+  internalMeasure(PERF_DOM_FORCE_LAYOUT_COST, PERF_DOM_FORCE_LAYOUT_START, PERF_DOM_FORCE_LAYOUT_END, exception);
+  internalMeasure(PERF_DOM_FLUSH_UI_COMMAND_COST, PERF_DOM_FLUSH_UI_COMMAND_START, PERF_DOM_FLUSH_UI_COMMAND_END, exception);
+  internalMeasure(PERF_JS_PARSE_TIME_COST, PERF_JS_PARSE_TIME_START, PERF_JS_PARSE_TIME_END, exception);
 }
 
 
@@ -394,7 +457,8 @@ double getMeasureTotalDuration(const std::vector<NativePerformanceEntry *> &meas
 
 JSValue Performance::__kraken_navigation_summary__(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *performance = static_cast<Performance *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
-  performance->measureSummary();
+  JSValue exception = JS_NULL;
+  performance->measureSummary(&exception);
 
   std::vector<NativePerformanceEntry *> entries = performance->getFullEntries();
 

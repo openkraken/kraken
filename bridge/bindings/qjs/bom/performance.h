@@ -172,7 +172,7 @@ class NativePerformance {
 public:
   void mark(const std::string &markName);
   void mark(const std::string &markName, int64_t startTime);
-  std::vector<NativePerformanceEntry *> entries;
+  std::vector<NativePerformanceEntry *> *entries{new std::vector<NativePerformanceEntry *>()};
 };
 
 class Performance : public HostObject {
@@ -194,7 +194,7 @@ public:
 
 #if ENABLE_PROFILE
   static JSValue __kraken_navigation_summary__(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  void measureSummary();
+  void measureSummary(JSValue *exception);
 #endif
 
   NativePerformance m_nativePerformance;
@@ -202,7 +202,7 @@ public:
   DEFINE_HOST_OBJECT_PROPERTY(1, timeOrigin);
 private:
 
-  void internalMeasure(const std::string &name, const std::string &startMark, const std::string &endMark);
+  void internalMeasure(const std::string &name, const std::string &startMark, const std::string &endMark, JSValue *exception);
   double internalNow();
   std::vector<NativePerformanceEntry*> getFullEntries();
   ObjectFunction m_now{m_context, jsObject, "now", now, 0};

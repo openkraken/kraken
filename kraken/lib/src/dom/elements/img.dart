@@ -176,7 +176,6 @@ class ImageElement extends Element {
   }
 
   void dispatchImageLoadEvent() {
-    print('trigger image load event');
     dispatchEvent(Event(EVENT_LOAD));
   }
 
