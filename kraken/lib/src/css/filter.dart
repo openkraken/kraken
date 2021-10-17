@@ -148,7 +148,7 @@ mixin CSSFilterEffectsMixin on RenderStyleBase {
             double amount = length.computedValue;
             ImageFilter imageFilter =  ImageFilter.blur(sigmaX: amount, sigmaY: amount);
             // Only length is not relative value will cached the image filter.
-            if (length.unit == CSSLengthType.PX) {
+            if (length.type == CSSLengthType.PX) {
               _cachedImageFilter = imageFilter;
             }
             return imageFilter;

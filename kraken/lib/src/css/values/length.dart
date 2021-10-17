@@ -38,8 +38,20 @@ enum CSSLengthType {
 
 class CSSLengthValue {
   final double? value;
-  final CSSLengthType unit;
-  CSSLengthValue(this.value, this.unit, [this.renderStyle, this.propertyName, this.axisType]);
+  final CSSLengthType type;
+  CSSLengthValue(this.value, this.type, [this.renderStyle, this.propertyName, this.axisType]) {
+    if (type == CSSLengthType.REM) {
+      assert(value != null);
+      assert(renderStyle != null);
+      assert(propertyName != null);
+      renderStyle!.addRootFontRelativeLengthProperty(CSSLengthValueProperty(propertyName!, this, renderStyle!));
+    } else if (type == CSSLengthType.EM) {
+      assert(value != null);
+      assert(renderStyle != null);
+      assert(propertyName != null);
+      renderStyle!.addFontRelativeLengthProperty(CSSLengthValueProperty(propertyName!, this, renderStyle!));
+    }
+  }
   static CSSLengthValue zero = CSSLengthValue(0, CSSLengthType.PX);
   static CSSLengthValue auto = CSSLengthValue(null, CSSLengthType.AUTO);
   static CSSLengthValue initial = CSSLengthValue(null, CSSLengthType.INITIAL);
@@ -53,7 +65,7 @@ class CSSLengthValue {
   double? _computedValue;
   double get computedValue {
 
-    switch (unit) {
+    switch (type) {
       case CSSLengthType.PX:
         _computedValue = value;
         break;
@@ -191,11 +203,11 @@ class CSSLengthValue {
   }
 
   bool get isAuto {
-    return unit == CSSLengthType.AUTO;
+    return type == CSSLengthType.AUTO;
   }
 
   bool get isPercentage {
-    return unit == CSSLengthType.PERCENTAGE;
+    return type == CSSLengthType.PERCENTAGE;
   }
 
   bool get isZero {
@@ -209,17 +221,17 @@ class CSSLengthValue {
   /// Compares two length for equality.
   @override
   bool operator ==(Object? other) {
-    return (other == null && (unit == CSSLengthType.UNKNOWN || unit == CSSLengthType.INITIAL)) ||
+    return (other == null && (type == CSSLengthType.UNKNOWN || type == CSSLengthType.INITIAL)) ||
         (other is CSSLengthValue
         && other.value == value
-        && other.unit == unit);
+        && other.type == type);
   }
 
   @override
-  int get hashCode => hashValues(value, unit);
+  int get hashCode => hashValues(value, type);
 
   @override
-  String toString() => 'CSSLengthValue(value: $value, unit: $unit, computedValue: $computedValue)';
+  String toString() => 'CSSLengthValue(value: $value, unit: $type, computedValue: $computedValue)';
 }
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#lengths

@@ -10,11 +10,11 @@ class CSSValue {
   CSSValue(this.propertyName, this.renderStyle);
 
   static bool isFontRelativeLength(CSSLengthValue value) {
-    return value.unit == CSSLengthType.EM;
+    return value.type == CSSLengthType.EM;
   }
 
   static bool isRootFontRelativeLength(CSSLengthValue value) {
-    return value.unit == CSSLengthType.REM;
+    return value.type == CSSLengthType.REM;
   }
 
   static void updateNumber(RenderStyle renderStyle, String property, double number) {

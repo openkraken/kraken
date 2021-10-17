@@ -146,24 +146,40 @@ mixin CSSTextMixin on RenderStyleBase {
   set fontSize(CSSLengthValue? value) {
     if (_fontSize == value) return;
     _fontSize = value;
-    // TODO(yuanyan): Need update all em and rem unit style when font size changed.
+
+    // Update all the children's length value.
+    _updateFontRelativeLengthProperty();
+
+    if (renderBoxModel!.isDocumentRootBox) {
+      // Update all the document tree.
+      _updateRootFontRelativeLengthProperty();
+    }
 
     // Update all the children text with specified style property not set due to style inheritance.
-    // _updateChildrenFontSize(renderBoxModel!, renderBoxModel!.isDocumentRootBox);
     renderBoxModel?.markOwnNeedsLayout();
-    // TODO(yuanyan): Need update all em and rem unit style when font size changed.
-    // updateFontRelativeLengthValue();
   }
 
-  final List<CSSValue> _fontRealativeValues = [];
-  final List<CSSValue> _rootFontRealativeValues = [];
+  final List<CSSLengthValueProperty> _fontRealativeProperties = [];
+  final List<CSSLengthValueProperty> _rootFontRealativeProperties = [];
 
-  void addFontRelativeValue(CSSValue value) {
-    _fontRealativeValues.add(value);
+  void addFontRelativeLengthProperty(CSSLengthValueProperty value) {
+    _fontRealativeProperties.add(value);
   }
 
-  void addRootFontRelativeValue(CSSValue value) {
-    _rootFontRealativeValues.add(value);
+  void _updateFontRelativeLengthProperty() {
+    _fontRealativeProperties.forEach((CSSLengthValueProperty property) {
+      // TODO: property.renderStyle.setProperty(property.name, property.value);
+    });
+  }
+
+  void addRootFontRelativeLengthProperty(CSSLengthValueProperty value) {
+    _rootFontRealativeProperties.add(value);
+  }
+
+  void _updateRootFontRelativeLengthProperty() {
+    _rootFontRealativeProperties.forEach((CSSLengthValueProperty property) {
+      // TODO: property.renderStyle.setProperty(property.name, property.value);
+    });
   }
 
   CSSLengthValue? _lineHeight;
