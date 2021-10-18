@@ -642,7 +642,7 @@ void _paintImage({
   CSSLengthValue? backgroundHeight = backgroundSize.height;
 
   // Only background width is set, eg `100px`, `100px auto`.
-  if (backgroundWidth != null && !backgroundWidth.isAuto &&
+  if (backgroundWidth != null && !backgroundWidth.isAuto && backgroundWidth.computedValue > 0 &&
     (backgroundHeight == null || backgroundHeight.isAuto)
   ) {
     double width = backgroundWidth.computedValue;
@@ -651,14 +651,15 @@ void _paintImage({
 
   // Only background height is set, eg `auto 100px`.
   } else if (backgroundWidth != null && backgroundWidth.isAuto &&
-    backgroundHeight != null && !backgroundHeight.isAuto) {
+    backgroundHeight != null && !backgroundHeight.isAuto && backgroundHeight.computedValue > 0
+  ) {
     double height = backgroundHeight.computedValue;
     double width = height * aspectRatio;
     destinationSize = Size(width, height);
 
   // Both background width and height are set, eg `100px 100px`.
-  } else if (backgroundWidth != null && !backgroundWidth.isAuto &&
-    backgroundHeight != null && !backgroundHeight.isAuto
+  } else if (backgroundWidth != null && !backgroundWidth.isAuto && backgroundWidth.computedValue > 0 &&
+    backgroundHeight != null && !backgroundHeight.isAuto && backgroundHeight.computedValue > 0
   ) {
     double width = backgroundWidth.computedValue;
     double height = backgroundHeight.computedValue;
