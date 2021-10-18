@@ -20,12 +20,14 @@ enum _BorderDirection {
 /// An object that paints a [BoxDecoration] into a canvas.
 class BoxDecorationPainter extends BoxPainter {
   BoxDecorationPainter(
-    this._decoration, this.padding, this.renderStyle, VoidCallback onChanged)
+    this.padding, this.renderStyle, VoidCallback onChanged)
     : super(onChanged);
 
   EdgeInsets? padding;
   RenderStyle renderStyle;
-  final CSSBoxDecoration _decoration;
+  CSSBoxDecoration get _decoration {
+    return renderStyle.decoration!;
+  }
 
   Paint? _cachedBackgroundPaint;
   Rect? _rectForCachedBackgroundPaint;
@@ -35,6 +37,7 @@ class BoxDecorationPainter extends BoxPainter {
     _decoration.gradient != null || _rectForCachedBackgroundPaint == null);
 
     if (_cachedBackgroundPaint == null ||
+      _decoration.color !=  null ||
       (_decoration.gradient != null &&
         _rectForCachedBackgroundPaint != rect)) {
       final Paint paint = Paint();

@@ -42,7 +42,7 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
 
     if (decoration == null) return;
     _painter ??= BoxDecorationPainter(
-          decoration, padding, renderStyle, markNeedsPaint);
+          padding, renderStyle, markNeedsPaint);
 
     final ImageConfiguration filledConfiguration =
         imageConfiguration.copyWith(size: size);
@@ -84,10 +84,9 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     CSSBoxDecoration? decoration = renderStyle.decoration;
     DecorationPosition decorationPosition = renderStyle.decorationPosition;
     ImageConfiguration imageConfiguration = renderStyle.imageConfiguration;
-
     if (decoration == null) return;
     _painter ??=
-        BoxDecorationPainter(decoration, padding, renderStyle, markNeedsPaint);
+        BoxDecorationPainter(padding, renderStyle, markNeedsPaint);
 
     final ImageConfiguration filledConfiguration =
         imageConfiguration.copyWith(size: size);
