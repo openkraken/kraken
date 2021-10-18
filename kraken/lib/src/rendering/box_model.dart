@@ -734,29 +734,26 @@ class RenderBoxModel extends RenderBox
   }
 
   /// Mark children needs layout when drop child as Flutter did
+  ///
   @override
   void dropChild(RenderBox child) {
     super.dropChild(child);
     // Loop to mark all the children to needsLayout as flutter did
-    if (child is RenderBoxModel) {
-      child.markOwnNeedsLayout();
-    } else if (child is RenderTextBox) {
-      child.markOwnNeedsLayout();
-    }
+    _syncChildNeedsLayoutFlag(child);
   }
 
-  /// Mark own and its children (if exist) needs layout
-  void markOwnNeedsLayout() {
+  // @HACK: sync _needsLayout flag in Flutter to do performance opt.
+  void syncNeedsLayoutFlag() {
     needsLayout = true;
-    visitChildren(markChildNeedsLayout);
+    visitChildren(_syncChildNeedsLayoutFlag);
   }
 
   /// Mark specified renderBoxModel needs layout
-  void markChildNeedsLayout(RenderObject child) {
+  void _syncChildNeedsLayoutFlag(RenderObject child) {
     if (child is RenderBoxModel) {
-      child.markOwnNeedsLayout();
+      child.syncNeedsLayoutFlag();
     } else if (child is RenderTextBox) {
-      child.markOwnNeedsLayout();
+      child.syncNeedsLayoutFlag();
     }
   }
 
@@ -767,13 +764,7 @@ class RenderBoxModel extends RenderBox
       // which will then cause its children to be marked as needsLayout in Flutter
       if ((newConstraints.isTight && !constraints.isTight) ||
           (!newConstraints.isTight && constraints.isTight)) {
-        visitChildren((RenderObject child) {
-          if (child is RenderBoxModel) {
-            child.markOwnNeedsLayout();
-          } else if (child is RenderTextBox) {
-            child.markOwnNeedsLayout();
-          }
-        });
+        syncNeedsLayoutFlag();
       }
     }
     super.layout(newConstraints, parentUsesSize: parentUsesSize);
