@@ -374,15 +374,11 @@ class RenderFlowLayout extends RenderLayoutBox {
   }
 
   double? _getLineHeight(RenderBox child) {
-    double? lineHeight;
+    // Line-height only works for text node.
     if (child is RenderTextBox) {
-      lineHeight = renderStyle.lineHeight.computedValue;
-    } else if (child is RenderBoxModel) {
-      lineHeight = child.renderStyle.lineHeight.computedValue;
-    } else if (child is RenderPositionHolder) {
-      lineHeight = child.realDisplayedBox!.renderStyle.lineHeight.computedValue;
+      return renderStyle.lineHeight.computedValue;
     }
-    return lineHeight;
+    return null;
   }
 
   @override
@@ -1213,7 +1209,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     scrollableSize = Size(maxScrollableMainSize, maxScrollableCrossSize);
   }
 
-  // Get distance from top to baseline of child incluing margin
+  // Get distance from top to baseline of child including margin
   double _getChildAscent(RenderBox child) {
     // Distance from top to baseline of child
     double? childAscent =
@@ -1248,9 +1244,17 @@ class RenderFlowLayout extends RenderLayoutBox {
     return null;
   }
 
-  // Line-height only works for text node.
   bool _isLineHeightValid(RenderBox child) {
-    return child is RenderTextBox;
+    if (child is RenderTextBox) {
+      return true;
+    } else if (child is RenderBoxModel) {
+      CSSDisplay? childDisplay = child.renderStyle.display;
+      return childDisplay == CSSDisplay.inline ||
+        childDisplay == CSSDisplay.inlineBlock ||
+        childDisplay == CSSDisplay.inlineFlex;
+    }
+    return false;
+
   }
 
   RenderStyle? _getChildRenderStyle(RenderBox child) {
