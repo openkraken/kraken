@@ -87,7 +87,7 @@ class RenderStyle
               RenderStyle? parentRenderStyle = renderStyle.parent;
 
               if (parentRenderStyle != null) {
-                cropWidth = _getCropWidthByMargin(currentRenderStyle, cropWidth);
+                cropWidth += currentRenderStyle.margin.horizontal;
                 cropWidth = _getCropWidthByPaddingBorder(currentRenderStyle, cropWidth);
                 parentRenderStyle = currentRenderStyle.parent;
               } else {
@@ -183,7 +183,7 @@ class RenderStyle
         RenderStyle? parentRenderStyle = currentRenderStyle.parent;
 
         if (parentRenderStyle != null) {
-          cropHeight = _getCropHeightByMargin(currentRenderStyle, cropHeight);
+          cropHeight += currentRenderStyle.margin.vertical;
           cropHeight = _getCropHeightByPaddingBorder(currentRenderStyle, cropHeight);
           parentRenderStyle = currentRenderStyle.parent;
         } else {
@@ -269,8 +269,8 @@ class RenderStyle
       }
 
       if (parentRenderStyle != null) {
-        cropWidth = _getCropHeightByMargin(currentRenderStyle, cropWidth);
-        cropWidth = _getCropHeightByPaddingBorder(currentRenderStyle, cropWidth);
+        cropWidth += currentRenderStyle.margin.horizontal;
+        cropWidth = _getCropWidthByPaddingBorder(currentRenderStyle, cropWidth);
         currentRenderStyle = parentRenderStyle;
       } else {
         break;
@@ -445,20 +445,10 @@ class RenderStyle
   }
 }
 
-double _getCropWidthByMargin(RenderStyle renderStyle, double cropWidth) {
-  cropWidth += renderStyle.margin.horizontal;
-  return cropWidth;
-}
-
 double _getCropWidthByPaddingBorder(RenderStyle renderStyle, double cropWidth) {
   cropWidth += renderStyle.border.horizontal;
   cropWidth += renderStyle.padding.horizontal;
   return cropWidth;
-}
-
-double _getCropHeightByMargin(RenderStyle renderStyle, double cropHeight) {
-  cropHeight += renderStyle.margin.vertical;
-  return cropHeight;
 }
 
 double _getCropHeightByPaddingBorder(RenderStyle renderStyle, double cropHeight) {
