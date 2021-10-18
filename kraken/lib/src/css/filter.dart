@@ -181,14 +181,15 @@ mixin CSSFilterEffectsMixin on RenderStyleBase {
   }
 
   List<CSSFunctionalNotation>? _filter;
-  set filter(List<CSSFunctionalNotation> functions) {
+  List<CSSFunctionalNotation>? get filter => _filter;
+  set filter(List<CSSFunctionalNotation>? functions) {
     _filter = functions;
     // Clear cache when filter changed.
     _cachedColorFilter = null;
     _cachedImageFilter = null;
     renderBoxModel!.markNeedsPaint();
 
-    if (!kReleaseMode) {
+    if (!kReleaseMode && functions != null) {
       ColorFilter? colorFilter = _parseColorFilters(functions);
       // RenderStyle renderStyle = this;
       ImageFilter? imageFilter = _parseImageFilters(functions);

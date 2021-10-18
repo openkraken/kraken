@@ -86,6 +86,7 @@ mixin CSSBorderMixin on RenderStyleBase {
     _borderTopWidth = value;
     renderBoxModel!.markNeedsLayout();
   }
+  CSSLengthValue? get borderTopWidth => _borderTopWidth;
   CSSLengthValue get effectiveBorderTopWidth => borderTopStyle == BorderStyle.none ? CSSLengthValue.zero : (_borderTopWidth ?? _mediumWidth);
 
   CSSLengthValue? _borderRightWidth;
@@ -94,6 +95,7 @@ mixin CSSBorderMixin on RenderStyleBase {
     _borderRightWidth = value;
     renderBoxModel!.markNeedsLayout();
   }
+  CSSLengthValue? get borderRightWidth => _borderRightWidth;
   CSSLengthValue get effectiveBorderRightWidth => borderRightStyle == BorderStyle.none ? CSSLengthValue.zero : (_borderRightWidth ?? _mediumWidth);
 
   CSSLengthValue? _borderBottomWidth;
@@ -102,6 +104,7 @@ mixin CSSBorderMixin on RenderStyleBase {
     _borderBottomWidth = value;
     renderBoxModel!.markNeedsLayout();
   }
+  CSSLengthValue? get borderBottomWidth => _borderBottomWidth;
   CSSLengthValue get effectiveBorderBottomWidth => borderBottomStyle == BorderStyle.none ? CSSLengthValue.zero : (_borderBottomWidth ?? _mediumWidth);
 
   CSSLengthValue? _borderLeftWidth;
@@ -110,6 +113,7 @@ mixin CSSBorderMixin on RenderStyleBase {
     _borderLeftWidth = value;
     renderBoxModel!.markNeedsLayout();
   }
+  CSSLengthValue? get borderLeftWidth => _borderLeftWidth;
   CSSLengthValue get effectiveBorderLeftWidth => borderLeftStyle == BorderStyle.none ? CSSLengthValue.zero : (_borderLeftWidth ?? _mediumWidth);
 
   /// Border-color

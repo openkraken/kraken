@@ -60,6 +60,457 @@ class RenderStyle
     required this.elementDelegate,
   });
 
+  void setProperty(String name, dynamic value) {
+    RenderStyle renderStyle = this;
+    switch (name) {
+      case DISPLAY:
+        renderStyle.display = value;
+        break;
+      case Z_INDEX:
+        renderStyle.zIndex = value;
+        break;
+      case OVERFLOW_X:
+        renderStyle.overflowX = value;
+        break;
+      case OVERFLOW_Y:
+        renderStyle.overflowY = value;
+        break;
+      case OPACITY:
+        renderStyle.opacity = value;
+        break;
+      case VISIBILITY:
+        renderStyle.visibility = value;
+        break;
+      case CONTENT_VISIBILITY:
+        renderStyle.contentVisibility = value;
+        break;
+      case POSITION:
+        renderStyle.position = value;
+        break;
+      case TOP:
+        renderStyle.top = value;
+        break;
+      case LEFT:
+        renderStyle.left = value;
+        break;
+      case BOTTOM:
+        renderStyle.bottom = value;
+        break;
+      case RIGHT:
+        renderStyle.right = value;
+        break;
+      // Size
+      case WIDTH:
+        renderStyle.width = value;
+        break;
+      case MIN_WIDTH:
+        renderStyle.minWidth = value;
+        break;
+      case MAX_WIDTH:
+        renderStyle.maxWidth = value;
+        break;
+      case HEIGHT:
+        renderStyle.height = value;
+        break;
+      case MIN_HEIGHT:
+        renderStyle.minHeight = value;
+        break;
+      case MAX_HEIGHT:
+        renderStyle.maxHeight = value;
+        break;
+      // Flex
+      case FLEX_DIRECTION:
+        renderStyle.flexDirection = value;
+        break;
+      case FLEX_WRAP:
+        renderStyle.flexWrap = value;
+        break;
+      case ALIGN_CONTENT:
+        renderStyle.alignContent = value;
+        break;
+      case ALIGN_ITEMS:
+        renderStyle.alignItems = value;
+        break;
+      case JUSTIFY_CONTENT:
+        renderStyle.justifyContent = value;
+        break;
+      case ALIGN_SELF:
+        renderStyle.alignSelf = value;
+        break;
+      case FLEX_GROW:
+        renderStyle.flexGrow = value;
+        break;
+      case FLEX_SHRINK:
+        renderStyle.flexShrink = value;
+        break;
+      case FLEX_BASIS:
+        renderStyle.flexBasis = value;
+        break;
+      // Background
+      case BACKGROUND_COLOR:
+        renderStyle.backgroundColor = value;
+        break;
+      case BACKGROUND_ATTACHMENT:
+        renderStyle.backgroundAttachment = value;
+        break;
+      case BACKGROUND_IMAGE:
+        renderStyle.backgroundImage = value;
+        break;
+      case BACKGROUND_REPEAT:
+        renderStyle.backgroundRepeat = value;
+        break;
+      case BACKGROUND_POSITION_X:
+        renderStyle.backgroundPositionX = value;
+        break;
+      case BACKGROUND_POSITION_Y:
+        renderStyle.backgroundPositionY = value;
+        break;
+      case BACKGROUND_SIZE:
+        renderStyle.backgroundSize = value;
+        break;
+      case BACKGROUND_CLIP:
+        renderStyle.backgroundClip = value;
+        break;
+      case BACKGROUND_ORIGIN:
+        renderStyle.backgroundOrigin = value;
+        break;
+      // Padding
+      case PADDING_TOP:
+        renderStyle.paddingTop = value;
+        break;
+      case PADDING_RIGHT:
+        renderStyle.paddingRight = value;
+        break;
+      case PADDING_BOTTOM:
+        renderStyle.paddingBottom = value;
+        break;
+      case PADDING_LEFT:
+        renderStyle.paddingLeft = value;
+        break;
+      // Border
+      case BORDER_LEFT_WIDTH:
+        renderStyle.borderLeftWidth = value;
+        break;
+      case BORDER_TOP_WIDTH:
+        renderStyle.borderTopWidth = value;
+        break;
+      case BORDER_RIGHT_WIDTH:
+        renderStyle.borderRightWidth = value;
+        break;
+      case BORDER_BOTTOM_WIDTH:
+        renderStyle.borderBottomWidth = value;
+        break;
+      case BORDER_LEFT_STYLE:
+        renderStyle.borderLeftStyle = value;
+        break;
+      case BORDER_TOP_STYLE:
+        renderStyle.borderTopStyle = value;
+        break;
+      case BORDER_RIGHT_STYLE:
+        renderStyle.borderRightStyle = value;
+        break;
+      case BORDER_BOTTOM_STYLE:
+        renderStyle.borderBottomStyle = value;
+        break;
+      case BORDER_LEFT_COLOR:
+        renderStyle.borderLeftColor = value;
+        break;
+      case BORDER_TOP_COLOR:
+        renderStyle.borderTopColor = value;
+        break;
+      case BORDER_RIGHT_COLOR:
+        renderStyle.borderRightColor = value;
+        break;
+      case BORDER_BOTTOM_COLOR:
+        renderStyle.borderBottomColor = value;
+        break;
+      case BOX_SHADOW:
+        renderStyle.boxShadow = value;
+        break;
+      case BORDER_TOP_LEFT_RADIUS:
+        renderStyle.borderTopLeftRadius = value;
+        break;
+      case BORDER_TOP_RIGHT_RADIUS:
+        renderStyle.borderTopRightRadius = value;
+        break;
+      case BORDER_BOTTOM_LEFT_RADIUS:
+        renderStyle.borderBottomLeftRadius = value;
+        break;
+      case BORDER_BOTTOM_RIGHT_RADIUS:
+        renderStyle.borderBottomRightRadius = value;
+        break;
+      // Margin
+      case MARGIN_LEFT:
+        renderStyle.marginLeft = value;
+        break;
+      case MARGIN_TOP:
+        renderStyle.marginTop = value;
+        break;
+      case MARGIN_RIGHT:
+        renderStyle.marginRight = value;
+        break;
+      case MARGIN_BOTTOM:
+        renderStyle.marginBottom = value;
+        break;
+      // Text
+      case COLOR:
+        // TODO: Color change should trigger currentColor update
+        renderStyle.color = value;
+        break;
+      case TEXT_DECORATION_LINE:
+        renderStyle.textDecorationLine = value;
+        break;
+      case TEXT_DECORATION_STYLE:
+        renderStyle.textDecorationStyle = value;
+        break;
+      case TEXT_DECORATION_COLOR:
+        renderStyle.textDecorationColor = value;
+        break;
+      case FONT_WEIGHT:
+        renderStyle.fontWeight = value;
+        break;
+      case FONT_STYLE:
+        renderStyle.fontStyle = value;
+        break;
+      case FONT_FAMILY:
+        renderStyle.fontFamily = value;
+        break;
+      case FONT_SIZE:
+        renderStyle.fontSize = value;
+        break;
+      case LINE_HEIGHT:
+        renderStyle.lineHeight = value;
+        break;
+      case LETTER_SPACING:
+        renderStyle.letterSpacing = value;
+        break;
+      case WORD_SPACING:
+        renderStyle.wordSpacing = value;
+        break;
+      case TEXT_SHADOW:
+        renderStyle.textShadow = value;
+        break;
+      case WHITE_SPACE:
+        renderStyle.whiteSpace = value;
+        break;
+      case TEXT_OVERFLOW:
+        // Overflow will affect text-overflow ellipsis taking effect
+        renderStyle.textOverflow = value;
+        break;
+      case LINE_CLAMP:
+        renderStyle.lineClamp = value;
+        break;
+      case VERTICAL_ALIGN:
+        renderStyle.verticalAlign = value;
+        break;
+      case TEXT_ALIGN:
+        renderStyle.textAlign = value;
+        break;
+      // Transfrom
+      case TRANSFORM:
+        renderStyle.transform = value;
+        break;
+      case TRANSFORM_ORIGIN:
+        renderStyle.transformOrigin = value;
+        break;
+      // Others
+      case OBJECT_FIT:
+        renderStyle.objectFit = value;
+        break;
+      case OBJECT_POSITION:
+        renderStyle.objectPosition = value;
+        break;
+      case FILTER:
+        renderStyle.filter = value;
+        break;
+      case SLIVER_DIRECTION:
+        renderStyle.sliverDirection = value;
+          break;
+    }
+  }
+
+  dynamic getProperty(String name) {
+    RenderStyle renderStyle = this;
+    switch (name) {
+      case DISPLAY:
+        return renderStyle.display;
+      case Z_INDEX:
+        return renderStyle.zIndex;
+      case OVERFLOW_X:
+        return renderStyle.overflowX;
+      case OVERFLOW_Y:
+        return renderStyle.overflowY;
+      case OPACITY:
+        return renderStyle.opacity;
+      case VISIBILITY:
+        return renderStyle.visibility;
+      case CONTENT_VISIBILITY:
+        return renderStyle.contentVisibility;
+      case POSITION:
+        return renderStyle.position;
+      case TOP:
+        return renderStyle.top;
+      case LEFT:
+        return renderStyle.left;
+      case BOTTOM:
+        return renderStyle.bottom;
+      case RIGHT:
+        return renderStyle.right;
+      // Size
+      case WIDTH:
+        return renderStyle.width;
+      case MIN_WIDTH:
+        return renderStyle.minWidth;
+      case MAX_WIDTH:
+        return renderStyle.maxWidth;
+      case HEIGHT:
+        return renderStyle.height;
+      case MIN_HEIGHT:
+        return renderStyle.minHeight;
+      case MAX_HEIGHT:
+        return renderStyle.maxHeight;
+      // Flex
+      case FLEX_DIRECTION:
+        return renderStyle.flexDirection;
+      case FLEX_WRAP:
+        return renderStyle.flexWrap;
+      case ALIGN_CONTENT:
+        return renderStyle.alignContent;
+      case ALIGN_ITEMS:
+        return renderStyle.alignItems;
+      case JUSTIFY_CONTENT:
+        return renderStyle.justifyContent;
+      case ALIGN_SELF:
+        return renderStyle.alignSelf;
+      case FLEX_GROW:
+        return renderStyle.flexGrow;
+      case FLEX_SHRINK:
+        return renderStyle.flexShrink;
+      case FLEX_BASIS:
+        return renderStyle.flexBasis;
+      // Background
+      case BACKGROUND_COLOR:
+        return renderStyle.backgroundColor;
+      case BACKGROUND_ATTACHMENT:
+        return renderStyle.backgroundAttachment;
+      case BACKGROUND_IMAGE:
+        return renderStyle.backgroundImage;
+      case BACKGROUND_REPEAT:
+        return renderStyle.backgroundRepeat;
+      case BACKGROUND_POSITION_X:
+        return renderStyle.backgroundPositionX;
+      case BACKGROUND_POSITION_Y:
+        return renderStyle.backgroundPositionY;
+      case BACKGROUND_SIZE:
+        return renderStyle.backgroundSize;
+      case BACKGROUND_CLIP:
+        return renderStyle.backgroundClip;
+      case BACKGROUND_ORIGIN:
+        return renderStyle.backgroundOrigin;
+      // Padding
+      case PADDING_TOP:
+        return renderStyle.paddingTop;
+      case PADDING_RIGHT:
+        return renderStyle.paddingRight;
+      case PADDING_BOTTOM:
+        return renderStyle.paddingBottom;
+      case PADDING_LEFT:
+        return renderStyle.paddingLeft;
+      // Border
+      case BORDER_LEFT_WIDTH:
+        return renderStyle.borderLeftWidth;
+      case BORDER_TOP_WIDTH:
+        return renderStyle.borderTopWidth;
+      case BORDER_RIGHT_WIDTH:
+        return renderStyle.borderRightWidth;
+      case BORDER_BOTTOM_WIDTH:
+        return renderStyle.borderBottomWidth;
+      case BORDER_LEFT_STYLE:
+        return renderStyle.borderLeftStyle;
+      case BORDER_TOP_STYLE:
+        return renderStyle.borderTopStyle;
+      case BORDER_RIGHT_STYLE:
+        return renderStyle.borderRightStyle;
+      case BORDER_BOTTOM_STYLE:
+        return renderStyle.borderBottomStyle;
+      case BORDER_LEFT_COLOR:
+        return renderStyle.borderLeftColor;
+      case BORDER_TOP_COLOR:
+        return renderStyle.borderTopColor;
+      case BORDER_RIGHT_COLOR:
+        return renderStyle.borderRightColor;
+      case BORDER_BOTTOM_COLOR:
+        return renderStyle.borderBottomColor;
+      case BOX_SHADOW:
+        return renderStyle.boxShadow;
+      case BORDER_TOP_LEFT_RADIUS:
+        return renderStyle.borderTopLeftRadius;
+      case BORDER_TOP_RIGHT_RADIUS:
+        return renderStyle.borderTopRightRadius;
+      case BORDER_BOTTOM_LEFT_RADIUS:
+        return renderStyle.borderBottomLeftRadius;
+      case BORDER_BOTTOM_RIGHT_RADIUS:
+        return renderStyle.borderBottomRightRadius;
+      // Margin
+      case MARGIN_LEFT:
+        return renderStyle.marginLeft;
+      case MARGIN_TOP:
+        return renderStyle.marginTop;
+      case MARGIN_RIGHT:
+        return renderStyle.marginRight;
+      case MARGIN_BOTTOM:
+        return renderStyle.marginBottom;
+      // Text
+      case COLOR:
+        return renderStyle.color;
+      case TEXT_DECORATION_LINE:
+        return renderStyle.textDecorationLine;
+      case TEXT_DECORATION_STYLE:
+        return renderStyle.textDecorationStyle;
+      case TEXT_DECORATION_COLOR:
+        return renderStyle.textDecorationColor;
+      case FONT_WEIGHT:
+        return renderStyle.fontWeight;
+      case FONT_STYLE:
+        return renderStyle.fontStyle;
+      case FONT_FAMILY:
+        return renderStyle.fontFamily;
+      case FONT_SIZE:
+        return renderStyle.fontSize;
+      case LINE_HEIGHT:
+        return renderStyle.lineHeight;
+      case LETTER_SPACING:
+        return renderStyle.letterSpacing;
+      case WORD_SPACING:
+        return renderStyle.wordSpacing;
+      case TEXT_SHADOW:
+        return renderStyle.textShadow;
+      case WHITE_SPACE:
+        return renderStyle.whiteSpace;
+      case TEXT_OVERFLOW:
+        return renderStyle.textOverflow;
+      case LINE_CLAMP:
+        return renderStyle.lineClamp;
+      case VERTICAL_ALIGN:
+        return renderStyle.verticalAlign;
+      case TEXT_ALIGN:
+        return renderStyle.textAlign;
+      // Transform
+      case TRANSFORM:
+        return renderStyle.transform;
+      case TRANSFORM_ORIGIN:
+        return renderStyle.transformOrigin;
+      case SLIVER_DIRECTION:
+        return renderStyle.sliverDirection;
+      case OBJECT_FIT:
+        return renderStyle.objectFit;
+      case OBJECT_POSITION:
+        return renderStyle.objectPosition;
+      case FILTER:
+        return renderStyle.filter;
+    }
+  }
+
   // Content width of render box model calculated from style.
   double? getLogicalContentWidth() {
     RenderStyle renderStyle = this;
