@@ -35,7 +35,7 @@ describe('outerHTML', () => {
 
     expect(div.outerHTML).toEqual('<div attr-key="attr-value"></div>');
     expect(div.innerHTML).toBe('');
-    expect(document.body.innerHTML).toEqual('<div attr-key="attr-value" ></div>');
+    expect(document.body.innerHTML).toEqual('<div attr-key="attr-value"></div>');
   });
 
   it('should work width attribute when get property', async () => {
@@ -61,7 +61,7 @@ describe('innerHTML', () => {
     document.body.appendChild(div);
 
     expect(div.innerHTML).toBe('<p>helloworld</p>');
-    expect(document.body.innerHTML).toEqual('<div attr-key="attr-value" ></div>');
+    expect(document.body.innerHTML).toEqual('<div style="height: 100px;width: 100px;"><p>helloworld</p></div>');
   });
 
   it('set empty string should remove all children', async () => {
