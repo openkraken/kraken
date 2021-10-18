@@ -1,3 +1,36 @@
+## 0.8.4
+
+**Break Changes**
+
++ Navigator.vibrate API no long support as default. https://github.com/openkraken/kraken/pull/655
++ Rename `kraken.setMethodCallHandler` to `kraken.addMethodCallHandler`. https://github.com/openkraken/kraken/pull/658
++ `gestureClient` API migrated to `GestureListener` API. https://github.com/openkraken/kraken/pull/716
+
+
+**Features**
+
++ Support documentFragment. https://github.com/openkraken/kraken/pull/641
++ Add default 1em margin for `<p>` https://github.com/openkraken/kraken/pull/648
++ Support document.querySelector and document.querySelectorAll. https://github.com/openkraken/kraken/pull/672
++ Improve canvas performance when drawing pictures. https://github.com/openkraken/kraken/pull/679
++ Use xcframework for iOS release. https://github.com/openkraken/kraken/pull/698
++ Support vue-router with History API. https://github.com/openkraken/kraken/pull/711
++ Support `<template />` and element.innerHTML API. https://github.com/openkraken/kraken/pull/713
++ Support offline http cache. https://github.com/openkraken/kraken/pull/723
+
+
+**Bug Fixed**
+
++ Fix webpack hot reload. https://github.com/openkraken/kraken/issues/642
++ Fix hit test with detached child render object. https://github.com/openkraken/kraken/pull/651
++ Fix silver conflict with overflow-y. https://github.com/openkraken/kraken/pull/662
++ Fix child of flex item with flex-grow not stretch. https://github.com/openkraken/kraken/pull/665
++ Fix auto margin in flexbox. https://github.com/openkraken/kraken/pull/667
++ Fix positioned element size wrong when no width/height is set. https://github.com/openkraken/kraken/pull/671
++ Fix scroll not working when overflowY is set to auto/scroll and overflowX not set. https://github.com/openkraken/kraken/pull/681
++ Fix multi frame image can replay when loading from caches.  https://github.com/openkraken/kraken/pull/685
++ Fix main axis auto size not including margin. https://github.com/openkraken/kraken/pull/702
+
 ## 0.8.3+3
 
 **Bug Fixed**
