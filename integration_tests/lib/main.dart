@@ -18,7 +18,7 @@ import 'package:kraken/gesture.dart';
 import 'package:kraken_websocket/kraken_websocket.dart';
 import 'package:kraken_animation_player/kraken_animation_player.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
-import 'package:kraken_webview/kraken_webview.dart';
+// import 'package:kraken_webview/kraken_webview.dart';
 import 'local_http_server.dart';
 
 String? pass = (AnsiPen()..green())('[TEST PASS]');
@@ -49,7 +49,7 @@ void main() async {
   KrakenWebsocket.initialize();
   KrakenAnimationPlayer.initialize();
   KrakenVideoPlayer.initialize();
-  KrakenWebView.initialize();
+  // KrakenWebView.initialize();
   defineKrakenCustomElements();
 
   // FIXME: This is a workaround for testcase
