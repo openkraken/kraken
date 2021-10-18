@@ -841,273 +841,500 @@ class Element extends Node
     }
   }
 
-  /// Set internal style value to the element.
-  void setRenderStyle(String property, dynamic present) {
-
-    switch (property) {
+  void setRenderStyleProperty(String name, dynamic value) {
+    switch (name) {
       case DISPLAY:
-        renderStyle.display = CSSDisplayMixin.resolveDisplay(present);
-        _updateRenderBoxModelWithDisplay();
+        renderStyle.display = value;
+         _updateRenderBoxModelWithDisplay();
+        break;
+      case Z_INDEX:
+        renderStyle.zIndex = value;
         break;
       case OVERFLOW_X:
-        renderStyle.overflowX = CSSOverflowMixin.resolveOverflowType(present);
+        renderStyle.overflowX = value;
         updateRenderBoxModelWithOverflowX(_handleScroll);
         break;
       case OVERFLOW_Y:
-        renderStyle.overflowY = CSSOverflowMixin.resolveOverflowType(present);
+        renderStyle.overflowY = value;
         updateRenderBoxModelWithOverflowY(_handleScroll);
         break;
-      case POSITION:
-        CSSPositionType prevPosition = renderStyle.position;
-        CSSPositionType currentPosition = CSSPositionMixin.resolvePositionType(present);
-        if (prevPosition == currentPosition) return;
-        renderStyle.position = currentPosition;
-        _updateRenderBoxModelWithPosition(currentPosition);
-        break;
-      case Z_INDEX:
-        renderStyle.zIndex = int.tryParse(present);
-        break;
-      case TOP:
-        renderStyle.top = CSSLength.parseLength(present, renderStyle, property);
-        break;
-      case LEFT:
-        renderStyle.left = CSSLength.parseLength(present, renderStyle, property);
-        break;
-      case BOTTOM:
-        renderStyle.bottom = CSSLength.parseLength(present, renderStyle, property);
-        break;
-      case RIGHT:
-        renderStyle.right = CSSLength.parseLength(present, renderStyle, property);
-        break;
-      case FLEX_DIRECTION:
-        renderStyle.flexDirection = CSSFlexboxMixin.resolveFlexDirection(present);
-        break;
-      case FLEX_WRAP:
-        renderStyle.flexWrap = CSSFlexboxMixin.resolveFlexWrap(present);
-        break;
-      case ALIGN_CONTENT:
-        renderStyle.alignContent = CSSFlexboxMixin.resolveAlignContent(present);
-        break;
-      case ALIGN_ITEMS:
-        renderStyle.alignItems = CSSFlexboxMixin.resolveAlignItems(present);
-        break;
-      case JUSTIFY_CONTENT:
-        renderStyle.justifyContent = CSSFlexboxMixin.resolveJustifyContent(present);
-        break;
-      case ALIGN_SELF:
-        renderStyle.alignSelf = CSSFlexboxMixin.resolveAlignSelf(present);
-        break;
-      case FLEX_GROW:
-        renderStyle.flexGrow = CSSFlexboxMixin.resolveFlexGrow(present);
-        break;
-      case FLEX_SHRINK:
-        renderStyle.flexShrink = CSSFlexboxMixin.resolveFlexShrink(present);
-        break;
-      case FLEX_BASIS:
-        renderStyle.flexBasis = CSSLength.parseLength(present, renderStyle, property);
-        break;
-      case SLIVER_DIRECTION:
-        renderStyle.sliverDirection = CSSSliverMixin.resolveAxis(present);
-        break;
-      case TEXT_ALIGN:
-        renderStyle.textAlign = CSSTextMixin.resolveTextAlign(present);
-        break;
-      case PADDING_TOP:
-        renderStyle.paddingTop = CSSLength.parseLength(present, renderStyle, property);
-        break;
-      case PADDING_RIGHT:
-        renderStyle.paddingRight = CSSLength.parseLength(present, renderStyle, property);
-        break;
-      case PADDING_BOTTOM:
-        renderStyle.paddingBottom = CSSLength.parseLength(present, renderStyle, property);
-        break;
-      case PADDING_LEFT:
-        renderStyle.paddingLeft = CSSLength.parseLength(present, renderStyle, property);
-        break;
-      case WIDTH:
-        renderStyle.width = CSSLength.parseLength(present, renderStyle, property);
-        break;
-      case MIN_WIDTH:
-        renderStyle.minWidth = CSSLength.parseLength(present, renderStyle, property);
-        break;
-      case MAX_WIDTH:
-        renderStyle.maxWidth = CSSLength.parseLength(present, renderStyle, property);
-        break;
-      case HEIGHT:
-        renderStyle.height = CSSLength.parseLength(present, renderStyle, property);
-        break;
-      case MIN_HEIGHT:
-        renderStyle.minHeight = CSSLength.parseLength(present, renderStyle, property);
-        break;
-      case MAX_HEIGHT:
-        renderStyle.maxHeight = CSSLength.parseLength(present, renderStyle, property);
-        break;
-      case BACKGROUND_COLOR:
-        renderStyle.backgroundColor = CSSColor.parseColor(present);
-        break;
-      case BACKGROUND_ATTACHMENT:
-        renderStyle.backgroundAttachment = CSSBackground.resolveBackgroundAttachment(present);
-        break;
-      case BACKGROUND_IMAGE:
-        renderStyle.backgroundImage = CSSBackground.resolveBackgroundImage(present, renderStyle, property, elementManager.controller);
-        break;
-      case BACKGROUND_REPEAT:
-        renderStyle.backgroundRepeat = CSSBackground.resolveBackgroundRepeat(present);
-        break;
-      case BACKGROUND_POSITION_X:
-        renderStyle.backgroundPositionX = CSSPosition.resolveBackgroundPosition(present, renderStyle, property, true);
-        break;
-      case BACKGROUND_POSITION_Y:
-        renderStyle.backgroundPositionY = CSSPosition.resolveBackgroundPosition(present, renderStyle, property, false);
-        break;
-      case BACKGROUND_SIZE:
-        renderStyle.backgroundSize = CSSBackground.resolveBackgroundSize(present, renderStyle, property);
-        break;
-      case BACKGROUND_CLIP:
-        renderStyle.backgroundClip = CSSBackground.resolveBackgroundClip(present);
-        break;
-      case BACKGROUND_ORIGIN:
-        renderStyle.backgroundOrigin = CSSBackground.resolveBackgroundOrigin(present);
-        break;
-      case BORDER_LEFT_WIDTH:
-        renderStyle.borderLeftWidth = CSSBorderSide.resolveBorderWidth(present, renderStyle, property);
-        break;
-      case BORDER_TOP_WIDTH:
-        renderStyle.borderTopWidth = CSSBorderSide.resolveBorderWidth(present, renderStyle, property);
-        break;
-      case BORDER_RIGHT_WIDTH:
-        renderStyle.borderRightWidth = CSSBorderSide.resolveBorderWidth(present, renderStyle, property);
-        break;
-      case BORDER_BOTTOM_WIDTH:
-        renderStyle.borderBottomWidth = CSSBorderSide.resolveBorderWidth(present, renderStyle, property);
-        break;
-      case BORDER_LEFT_STYLE:
-        renderStyle.borderLeftStyle = CSSBorderSide.resolveBorderStyle(present);
-        break;
-      case BORDER_TOP_STYLE:
-        renderStyle.borderTopStyle = CSSBorderSide.resolveBorderStyle(present);
-        break;
-      case BORDER_RIGHT_STYLE:
-        renderStyle.borderRightStyle = CSSBorderSide.resolveBorderStyle(present);
-        break;
-      case BORDER_BOTTOM_STYLE:
-        renderStyle.borderBottomStyle = CSSBorderSide.resolveBorderStyle(present);
-        break;
-      case BORDER_LEFT_COLOR:
-        renderStyle.borderLeftColor = CSSColor.parseColor(present);
-        break;
-      case BORDER_TOP_COLOR:
-        renderStyle.borderTopColor = CSSColor.parseColor(present);
-        break;
-      case BORDER_RIGHT_COLOR:
-        renderStyle.borderRightColor = CSSColor.parseColor(present);
-        break;
-      case BORDER_BOTTOM_COLOR:
-        renderStyle.borderBottomColor = CSSColor.parseColor(present);
-        break;
-      case BOX_SHADOW:
-        renderStyle.boxShadow = CSSBoxShadow.parseBoxShadow(present, renderStyle, property);
-        break;
-      case BORDER_TOP_LEFT_RADIUS:
-        renderStyle.borderTopLeftRadius = CSSBorderRadius.parseBorderRadius(present, renderStyle, property);
-        break;
-      case BORDER_TOP_RIGHT_RADIUS:
-        renderStyle.borderTopRightRadius = CSSBorderRadius.parseBorderRadius(present, renderStyle, property);
-        break;
-      case BORDER_BOTTOM_LEFT_RADIUS:
-        renderStyle.borderBottomLeftRadius = CSSBorderRadius.parseBorderRadius(present, renderStyle, property);
-        break;
-      case BORDER_BOTTOM_RIGHT_RADIUS:
-        renderStyle.borderBottomRightRadius = CSSBorderRadius.parseBorderRadius(present, renderStyle, property);
-        break;
-      case MARGIN_LEFT:
-        renderStyle.marginLeft = CSSLength.parseLength(present, renderStyle, property);
-        break;
-      case MARGIN_TOP:
-        renderStyle.marginTop = CSSLength.parseLength(present, renderStyle, property);
-        break;
-      case MARGIN_RIGHT:
-        renderStyle.marginRight = CSSLength.parseLength(present, renderStyle, property);
-        break;
-      case MARGIN_BOTTOM:
-        renderStyle.marginBottom = CSSLength.parseLength(present, renderStyle, property);
-        break;
       case OPACITY:
-        renderStyle.opacity = CSSOpacityMixin.resolveOpacity(present);
+        renderStyle.opacity = value;
         break;
       case VISIBILITY:
-        renderStyle.visibility = CSSVisibilityMixin.resolveVisibility(present);
+        renderStyle.visibility = value;
         break;
       case CONTENT_VISIBILITY:
-        renderStyle.contentVisibility = CSSContentVisibilityMixin.resolveContentVisibility(present);
+        renderStyle.contentVisibility = value;
         break;
-      case TRANSFORM:
-        renderStyle.transform = CSSFunction.parseFunction(present);
+      case POSITION:
+        renderStyle.position = value;
+        _updateRenderBoxModelWithPosition(value);
         break;
-      case TRANSFORM_ORIGIN:
-        renderStyle.transformOrigin = CSSOrigin.parseOrigin(present, renderStyle, property);
+      case TOP:
+        renderStyle.top = value;
         break;
-      case OBJECT_FIT:
-        renderStyle.objectFit = CSSObjectFitMixin.resolveBoxFit(present);
+      case LEFT:
+        renderStyle.left = value;
         break;
-      case OBJECT_POSITION:
-        renderStyle.objectPosition = CSSObjectPositionMixin.resolveObjectPosition(present);
+      case BOTTOM:
+        renderStyle.bottom = value;
         break;
-      case FILTER:
-        renderStyle.filter = CSSFunction.parseFunction(present);
+      case RIGHT:
+        renderStyle.right = value;
         break;
-      // Text Style
+      // Size
+      case WIDTH:
+        renderStyle.width = value;
+        break;
+      case MIN_WIDTH:
+        renderStyle.minWidth = value;
+        break;
+      case MAX_WIDTH:
+        renderStyle.maxWidth = value;
+        break;
+      case HEIGHT:
+        renderStyle.height = value;
+        break;
+      case MIN_HEIGHT:
+        renderStyle.minHeight = value;
+        break;
+      case MAX_HEIGHT:
+        renderStyle.maxHeight = value;
+        break;
+      // Flex
+      case FLEX_DIRECTION:
+        renderStyle.flexDirection = value;
+        break;
+      case FLEX_WRAP:
+        renderStyle.flexWrap = value;
+        break;
+      case ALIGN_CONTENT:
+        renderStyle.alignContent = value;
+        break;
+      case ALIGN_ITEMS:
+        renderStyle.alignItems = value;
+        break;
+      case JUSTIFY_CONTENT:
+        renderStyle.justifyContent = value;
+        break;
+      case ALIGN_SELF:
+        renderStyle.alignSelf = value;
+        break;
+      case FLEX_GROW:
+        renderStyle.flexGrow = value;
+        break;
+      case FLEX_SHRINK:
+        renderStyle.flexShrink = value;
+        break;
+      case FLEX_BASIS:
+        renderStyle.flexBasis = value;
+        break;
+      // Background
+      case BACKGROUND_COLOR:
+        renderStyle.backgroundColor = value;
+        break;
+      case BACKGROUND_ATTACHMENT:
+        renderStyle.backgroundAttachment = value;
+        break;
+      case BACKGROUND_IMAGE:
+        renderStyle.backgroundImage = value;
+        break;
+      case BACKGROUND_REPEAT:
+        renderStyle.backgroundRepeat = value;
+        break;
+      case BACKGROUND_POSITION_X:
+        renderStyle.backgroundPositionX = value;
+        break;
+      case BACKGROUND_POSITION_Y:
+        renderStyle.backgroundPositionY = value;
+        break;
+      case BACKGROUND_SIZE:
+        renderStyle.backgroundSize = value;
+        break;
+      case BACKGROUND_CLIP:
+        renderStyle.backgroundClip = value;
+        break;
+      case BACKGROUND_ORIGIN:
+        renderStyle.backgroundOrigin = value;
+        break;
+      // Padding
+      case PADDING_TOP:
+        renderStyle.paddingTop = value;
+        break;
+      case PADDING_RIGHT:
+        renderStyle.paddingRight = value;
+        break;
+      case PADDING_BOTTOM:
+        renderStyle.paddingBottom = value;
+        break;
+      case PADDING_LEFT:
+        renderStyle.paddingLeft = value;
+        break;
+      // Border
+      case BORDER_LEFT_WIDTH:
+        renderStyle.borderLeftWidth = value;
+        break;
+      case BORDER_TOP_WIDTH:
+        renderStyle.borderTopWidth = value;
+        break;
+      case BORDER_RIGHT_WIDTH:
+        renderStyle.borderRightWidth = value;
+        break;
+      case BORDER_BOTTOM_WIDTH:
+        renderStyle.borderBottomWidth = value;
+        break;
+      case BORDER_LEFT_STYLE:
+        renderStyle.borderLeftStyle = value;
+        break;
+      case BORDER_TOP_STYLE:
+        renderStyle.borderTopStyle = value;
+        break;
+      case BORDER_RIGHT_STYLE:
+        renderStyle.borderRightStyle = value;
+        break;
+      case BORDER_BOTTOM_STYLE:
+        renderStyle.borderBottomStyle = value;
+        break;
+      case BORDER_LEFT_COLOR:
+        renderStyle.borderLeftColor = value;
+        break;
+      case BORDER_TOP_COLOR:
+        renderStyle.borderTopColor = value;
+        break;
+      case BORDER_RIGHT_COLOR:
+        renderStyle.borderRightColor = value;
+        break;
+      case BORDER_BOTTOM_COLOR:
+        renderStyle.borderBottomColor = value;
+        break;
+      case BOX_SHADOW:
+        renderStyle.boxShadow = value;
+        break;
+      case BORDER_TOP_LEFT_RADIUS:
+        renderStyle.borderTopLeftRadius = value;
+        break;
+      case BORDER_TOP_RIGHT_RADIUS:
+        renderStyle.borderTopRightRadius = value;
+        break;
+      case BORDER_BOTTOM_LEFT_RADIUS:
+        renderStyle.borderBottomLeftRadius = value;
+        break;
+      case BORDER_BOTTOM_RIGHT_RADIUS:
+        renderStyle.borderBottomRightRadius = value;
+        break;
+      // Margin
+      case MARGIN_LEFT:
+        renderStyle.marginLeft = value;
+        break;
+      case MARGIN_TOP:
+        renderStyle.marginTop = value;
+        break;
+      case MARGIN_RIGHT:
+        renderStyle.marginRight = value;
+        break;
+      case MARGIN_BOTTOM:
+        renderStyle.marginBottom = value;
+        break;
+      // Text
       case COLOR:
         // TODO: Color change should trigger currentColor update
-        renderStyle.color = CSSColor.resolveColor(present);
+        renderStyle.color = value;
         break;
       case TEXT_DECORATION_LINE:
-        renderStyle.textDecorationLine = CSSText.resolveTextDecorationLine(present);
+        renderStyle.textDecorationLine = value;
         break;
       case TEXT_DECORATION_STYLE:
-        renderStyle.textDecorationStyle = CSSText.resolveTextDecorationStyle(present);
+        renderStyle.textDecorationStyle = value;
         break;
       case TEXT_DECORATION_COLOR:
-        renderStyle.textDecorationColor = CSSColor.resolveColor(present);
+        renderStyle.textDecorationColor = value;
         break;
       case FONT_WEIGHT:
-        renderStyle.fontWeight = CSSText.resolveFontWeight(present);
+        renderStyle.fontWeight = value;
         break;
       case FONT_STYLE:
-        renderStyle.fontStyle = CSSText.resolveFontStyle(present);
+        renderStyle.fontStyle = value;
         break;
       case FONT_FAMILY:
-        renderStyle.fontFamily = CSSText.resolveFontFamilyFallback(present);
+        renderStyle.fontFamily = value;
         break;
       case FONT_SIZE:
-        renderStyle.fontSize = CSSLength.parseLength(present, renderStyle, property);
+        renderStyle.fontSize = value;
+        _updateFontRelativeLengthWithFontSize();
         break;
       case LINE_HEIGHT:
-        renderStyle.lineHeight = CSSText.resolveLineHeight(present, renderStyle, property);
+        renderStyle.lineHeight = value;
         break;
       case LETTER_SPACING:
-        renderStyle.letterSpacing = CSSText.resolveSpacing(present, renderStyle, property);
+        renderStyle.letterSpacing = value;
         break;
       case WORD_SPACING:
-        renderStyle.wordSpacing = CSSText.resolveSpacing(present, renderStyle, property);
+        renderStyle.wordSpacing = value;
         break;
       case TEXT_SHADOW:
-        renderStyle.textShadow = CSSText.resolveTextShadow(present, renderStyle, property);
+        renderStyle.textShadow = value;
         break;
       case WHITE_SPACE:
-        renderStyle.whiteSpace = CSSText.resolveWhiteSpace(present);
+        renderStyle.whiteSpace = value;
         break;
       case TEXT_OVERFLOW:
         // Overflow will affect text-overflow ellipsis taking effect
-        renderStyle.textOverflow = CSSText.resolveTextOverflow(present);
+        renderStyle.textOverflow = value;
         break;
       case LINE_CLAMP:
-        renderStyle.lineClamp = CSSText.parseLineClamp(present);
+        renderStyle.lineClamp = value;
         break;
       case VERTICAL_ALIGN:
-        renderStyle.verticalAlign = CSSInlineMixin.resolveVerticalAlign(present);
+        renderStyle.verticalAlign = value;
+        break;
+      case TEXT_ALIGN:
+        renderStyle.textAlign = value;
+        break;
+      // Transfrom
+      case TRANSFORM:
+        renderStyle.transform = value;
+        break;
+      case TRANSFORM_ORIGIN:
+        renderStyle.transformOrigin = value;
+        break;
+      // Others
+      case OBJECT_FIT:
+        renderStyle.objectFit = value;
+        break;
+      case OBJECT_POSITION:
+        renderStyle.objectPosition = value;
+        break;
+      case FILTER:
+        renderStyle.filter = value;
+        break;
+      case SLIVER_DIRECTION:
+        renderStyle.sliverDirection = value;
+          break;
+    }
+  }
+
+  /// Set internal style value to the element.
+  dynamic _resolveRenderStyleValue(String property, dynamic present) {
+    dynamic value;
+    switch (property) {
+      case DISPLAY:
+        value = CSSDisplayMixin.resolveDisplay(present);
+        break;
+      case OVERFLOW_X:
+      case OVERFLOW_Y:
+        value = CSSOverflowMixin.resolveOverflowType(present);
+        break;
+      case POSITION:
+        value = CSSPositionMixin.resolvePositionType(present);
+        break;
+      case Z_INDEX:
+        value = int.tryParse(present);
+        break;
+      case TOP:
+      case LEFT:
+      case BOTTOM:
+      case RIGHT:
+      case FLEX_BASIS:
+      case PADDING_TOP:
+      case PADDING_RIGHT:
+      case PADDING_BOTTOM:
+      case PADDING_LEFT:
+      case WIDTH:
+      case MIN_WIDTH:
+      case MAX_WIDTH:
+      case HEIGHT:
+      case MIN_HEIGHT:
+      case MAX_HEIGHT:
+      case MARGIN_LEFT:
+      case MARGIN_TOP:
+      case MARGIN_RIGHT:
+      case MARGIN_BOTTOM:
+      case FONT_SIZE:
+        value = CSSLength.parseLength(present, renderStyle, property);
+        break;
+      case FLEX_DIRECTION:
+        value = CSSFlexboxMixin.resolveFlexDirection(present);
+        break;
+      case FLEX_WRAP:
+        value = CSSFlexboxMixin.resolveFlexWrap(present);
+        break;
+      case ALIGN_CONTENT:
+        value = CSSFlexboxMixin.resolveAlignContent(present);
+        break;
+      case ALIGN_ITEMS:
+        value = CSSFlexboxMixin.resolveAlignItems(present);
+        break;
+      case JUSTIFY_CONTENT:
+        value = CSSFlexboxMixin.resolveJustifyContent(present);
+        break;
+      case ALIGN_SELF:
+        value = CSSFlexboxMixin.resolveAlignSelf(present);
+        break;
+      case FLEX_GROW:
+        value = CSSFlexboxMixin.resolveFlexGrow(present);
+        break;
+      case FLEX_SHRINK:
+        value = CSSFlexboxMixin.resolveFlexShrink(present);
+        break;
+      case SLIVER_DIRECTION:
+        value = CSSSliverMixin.resolveAxis(present);
+        break;
+      case TEXT_ALIGN:
+        value = CSSTextMixin.resolveTextAlign(present);
+        break;
+      case BACKGROUND_ATTACHMENT:
+        value =  CSSBackground.resolveBackgroundAttachment(present);
+        break;
+      case BACKGROUND_IMAGE:
+        value =  CSSBackground.resolveBackgroundImage(present, renderStyle, property, elementManager.controller);
+        break;
+      case BACKGROUND_REPEAT:
+        value =  CSSBackground.resolveBackgroundRepeat(present);
+        break;
+      case BACKGROUND_POSITION_X:
+        value =  CSSPosition.resolveBackgroundPosition(present, renderStyle, property, true);
+        break;
+      case BACKGROUND_POSITION_Y:
+        value = CSSPosition.resolveBackgroundPosition(present, renderStyle, property, false);
+        break;
+      case BACKGROUND_SIZE:
+        value = CSSBackground.resolveBackgroundSize(present, renderStyle, property);
+        break;
+      case BACKGROUND_CLIP:
+        value = CSSBackground.resolveBackgroundClip(present);
+        break;
+      case BACKGROUND_ORIGIN:
+        value = CSSBackground.resolveBackgroundOrigin(present);
+        break;
+      case BORDER_LEFT_WIDTH:
+      case BORDER_TOP_WIDTH:
+      case BORDER_RIGHT_WIDTH:
+      case BORDER_BOTTOM_WIDTH:
+        value = CSSBorderSide.resolveBorderWidth(present, renderStyle, property);
+        break;
+      case BORDER_LEFT_STYLE:
+      case BORDER_TOP_STYLE:
+      case BORDER_RIGHT_STYLE:
+      case BORDER_BOTTOM_STYLE:
+        value = CSSBorderSide.resolveBorderStyle(present);
+        break;
+      case COLOR:
+      case BACKGROUND_COLOR:
+      case TEXT_DECORATION_COLOR:
+      case BORDER_LEFT_COLOR:
+      case BORDER_TOP_COLOR:
+      case BORDER_RIGHT_COLOR:
+      case BORDER_BOTTOM_COLOR:
+        value = CSSColor.parseColor(present);
+        break;
+      case BOX_SHADOW:
+        value = CSSBoxShadow.parseBoxShadow(present, renderStyle, property);
+        break;
+      case BORDER_TOP_LEFT_RADIUS:
+      case BORDER_TOP_RIGHT_RADIUS:
+      case BORDER_BOTTOM_LEFT_RADIUS:
+      case BORDER_BOTTOM_RIGHT_RADIUS:
+        value = CSSBorderRadius.parseBorderRadius(present, renderStyle, property);
+        break;
+      case OPACITY:
+        value = CSSOpacityMixin.resolveOpacity(present);
+        break;
+      case VISIBILITY:
+        value = CSSVisibilityMixin.resolveVisibility(present);
+        break;
+      case CONTENT_VISIBILITY:
+        value = CSSContentVisibilityMixin.resolveContentVisibility(present);
+        break;
+      case TRANSFORM:
+      case FILTER:
+        value = CSSFunction.parseFunction(present);
+        break;
+      case TRANSFORM_ORIGIN:
+        value = CSSOrigin.parseOrigin(present, renderStyle, property);
+        break;
+      case OBJECT_FIT:
+        value = CSSObjectFitMixin.resolveBoxFit(present);
+        break;
+      case OBJECT_POSITION:
+        value = CSSObjectPositionMixin.resolveObjectPosition(present);
+        break;
+      case TEXT_DECORATION_LINE:
+        value = CSSText.resolveTextDecorationLine(present);
+        break;
+      case TEXT_DECORATION_STYLE:
+        value = CSSText.resolveTextDecorationStyle(present);
+        break;
+      case FONT_WEIGHT:
+        value = CSSText.resolveFontWeight(present);
+        break;
+      case FONT_STYLE:
+        value = CSSText.resolveFontStyle(present);
+        break;
+      case FONT_FAMILY:
+        value = CSSText.resolveFontFamilyFallback(present);
+        break;
+      case LINE_HEIGHT:
+        value = CSSText.resolveLineHeight(present, renderStyle, property);
+        break;
+      case LETTER_SPACING:
+        value = CSSText.resolveSpacing(present, renderStyle, property);
+        break;
+      case WORD_SPACING:
+        value = CSSText.resolveSpacing(present, renderStyle, property);
+        break;
+      case TEXT_SHADOW:
+        value = CSSText.resolveTextShadow(present, renderStyle, property);
+        break;
+      case WHITE_SPACE:
+        value = CSSText.resolveWhiteSpace(present);
+        break;
+      case TEXT_OVERFLOW:
+        // Overflow will affect text-overflow ellipsis taking effect
+        value = CSSText.resolveTextOverflow(present);
+        break;
+      case LINE_CLAMP:
+        value = CSSText.parseLineClamp(present);
+        break;
+      case VERTICAL_ALIGN:
+        value = CSSInlineMixin.resolveVerticalAlign(present);
         break;
     }
+
+    return value;
+  }
+
+  void setRenderStyle(String property, dynamic present) {
+    dynamic value = _resolveRenderStyleValue(property, present);
+    setRenderStyleProperty(property, value);
+  }
+
+  void _updateFontRelativeLengthWithFontSize() {
+    // Update all the children's length value.
+    _updateChildrenFontRelativeLength(this);
+
+    if (renderBoxModel!.isDocumentRootBox) {
+      // Update all the document tree.
+      _updateChildrenRootFontRelativeLength(this);
+    }
+  }
+
+  void _updateChildrenFontRelativeLength(Element element) {
+    RenderStyle renderStyle = element.renderStyle;
+    renderStyle.updateFontRelativeLength();
+    children.forEach((Element child) {
+      if (!child.renderStyle.hasFontSize) {
+        _updateChildrenFontRelativeLength(child);
+      }
+    });
+  }
+
+  void _updateChildrenRootFontRelativeLength(Element element) {
+    RenderStyle renderStyle = element.renderStyle;
+    renderStyle.updateRootFontRelativeLength();
+    children.forEach((Element child) {
+      _updateChildrenRootFontRelativeLength(child);
+    });
   }
 
   void _applyDefaultStyle() {

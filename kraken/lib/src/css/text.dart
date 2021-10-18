@@ -127,6 +127,8 @@ mixin CSSTextMixin on RenderStyleBase {
     renderBoxModel?.markNeedsLayout();
   }
 
+  bool get hasFontSize => _fontSize != null;
+
   CSSLengthValue? _fontSize;
   CSSLengthValue get fontSize {
     // Get style from self or closest parent if specified style property is not set
@@ -146,40 +148,30 @@ mixin CSSTextMixin on RenderStyleBase {
   set fontSize(CSSLengthValue? value) {
     if (_fontSize == value) return;
     _fontSize = value;
-
-    // Update all the children's length value.
-    _updateFontRelativeLengthProperty();
-
-    if (renderBoxModel!.isDocumentRootBox) {
-      // Update all the document tree.
-      _updateRootFontRelativeLengthProperty();
-    }
-
     // Update all the children text with specified style property not set due to style inheritance.
     renderBoxModel?.markNeedsLayout();
   }
 
-  final List<CSSLengthValueProperty> _fontRealativeProperties = [];
-  final List<CSSLengthValueProperty> _rootFontRealativeProperties = [];
+  // Current not update the dependent property relative to the font-size.
+  final Map<String, bool> _fontRealativeProperties = {};
+  final Map<String, bool> _rootFontRealativeProperties = {};
 
-  void addFontRelativeLengthProperty(CSSLengthValueProperty value) {
-    _fontRealativeProperties.add(value);
+  void addRootFontRelativeLengthProperty(String propertyName) {
+    _rootFontRealativeProperties[propertyName] = true;
   }
 
-  void _updateFontRelativeLengthProperty() {
-    _fontRealativeProperties.forEach((CSSLengthValueProperty property) {
-      // TODO: property.renderStyle.setProperty(property.name, property.value);
-    });
+  void addFontRelativeLengthProperty(String propertyName) {
+    _fontRealativeProperties[propertyName] = true;
   }
 
-  void addRootFontRelativeLengthProperty(CSSLengthValueProperty value) {
-    _rootFontRealativeProperties.add(value);
+  void updateFontRelativeLength() {
+    if (_fontRealativeProperties.isEmpty) return;
+    renderBoxModel?.markNeedsLayout();
   }
 
-  void _updateRootFontRelativeLengthProperty() {
-    _rootFontRealativeProperties.forEach((CSSLengthValueProperty property) {
-      // TODO: property.renderStyle.setProperty(property.name, property.value);
-    });
+  void updateRootFontRelativeLength() {
+    if (_rootFontRealativeProperties.isEmpty) return;
+    renderBoxModel?.markNeedsLayout();
   }
 
   CSSLengthValue? _lineHeight;

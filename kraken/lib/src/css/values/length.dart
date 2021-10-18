@@ -42,16 +42,10 @@ class CSSLengthValue {
   final double? value;
   final CSSLengthType type;
   CSSLengthValue(this.value, this.type, [this.renderStyle, this.propertyName, this.axisType]) {
-    if (type == CSSLengthType.REM) {
-      assert(value != null);
-      assert(renderStyle != null);
-      assert(propertyName != null);
-      renderStyle!.addRootFontRelativeLengthProperty(CSSLengthValueProperty(propertyName!, this, renderStyle!));
-    } else if (type == CSSLengthType.EM) {
-      assert(value != null);
-      assert(renderStyle != null);
-      assert(propertyName != null);
-      renderStyle!.addFontRelativeLengthProperty(CSSLengthValueProperty(propertyName!, this, renderStyle!));
+    if (type == CSSLengthType.EM) {
+      renderStyle!.addFontRelativeLengthProperty(propertyName!);
+    } else if (type == CSSLengthType.REM) {
+      renderStyle!.addRootFontRelativeLengthProperty(propertyName!);
     }
   }
   static CSSLengthValue zero = CSSLengthValue(0, CSSLengthType.PX);

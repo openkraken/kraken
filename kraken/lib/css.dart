@@ -23,7 +23,6 @@ export 'src/css/margin.dart';
 export 'src/css/border.dart';
 export 'src/css/gradient.dart';
 export 'src/css/render_style.dart';
-export 'src/css/length_value_property.dart';
 export 'src/css/rule.dart';
 export 'src/css/style_rule.dart';
 export 'src/css/style_declaration.dart';
