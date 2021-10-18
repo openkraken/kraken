@@ -459,10 +459,9 @@ task('build-ios-frameworks', (done) => {
     stdio: 'inherit'
   });
 
-  execSync(`cp -r ${paths.bridge}/build/ios/framework/kraken_bridge.framework ${paths.sdk}/build/ios/framework/Debug`);
-  execSync(`cp -r ${paths.bridge}/build/ios/framework/kraken_bridge.dSYM ${paths.sdk}/build/ios/framework/Debug`);
-  execSync(`cp -r ${paths.bridge}/build/ios/framework/kraken_bridge.framework ${paths.sdk}/build/ios/framework/Profile`);
-  execSync(`cp -r ${paths.bridge}/build/ios/framework/kraken_bridge.framework ${paths.sdk}/build/ios/framework/Release`);
+  execSync(`cp -r ${paths.bridge}/build/ios/framework/kraken_bridge.xcframework ${paths.sdk}/build/ios/framework/Debug`);
+  execSync(`cp -r ${paths.bridge}/build/ios/framework/kraken_bridge.xcframework ${paths.sdk}/build/ios/framework/Profile`);
+  execSync(`cp -r ${paths.bridge}/build/ios/framework/kraken_bridge.xcframework ${paths.sdk}/build/ios/framework/Release`);
 
   done();
 });
