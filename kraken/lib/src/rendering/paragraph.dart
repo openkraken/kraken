@@ -110,8 +110,6 @@ class KrakenRenderParagraph extends RenderBox
         _textPainter.text = value;
         _overflowShader = null;
         _extractPlaceholderSpans(value);
-        // Always needs layout cause it needs to create line text painters when text changed
-        markNeedsLayout();
         break;
     }
   }

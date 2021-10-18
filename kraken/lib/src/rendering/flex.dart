@@ -2388,15 +2388,11 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   double? _getLineHeight(RenderBox child) {
-    double? lineHeight;
+    // Line-height only works for text node.
     if (child is RenderTextBox) {
-      lineHeight = renderStyle.lineHeight.computedValue;
-    } else if (child is RenderBoxModel) {
-      lineHeight = child.renderStyle.lineHeight.computedValue;
-    } else if (child is RenderPositionHolder) {
-      lineHeight = child.realDisplayedBox!.renderStyle.lineHeight.computedValue;
+      return renderStyle.lineHeight.computedValue;
     }
-    return lineHeight;
+    return null;
   }
 
   @override

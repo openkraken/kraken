@@ -184,16 +184,33 @@ mixin CSSTextMixin on RenderStyleBase {
 
   CSSLengthValue? _lineHeight;
   CSSLengthValue get lineHeight {
-    // Get style from self or closest parent if specified style property is not set
-    // due to style inheritance.
-    if (_lineHeight == null) {
-      RenderStyle renderStyle = this as RenderStyle;
-      if (renderStyle.parent != null) {
-        return renderStyle.parent!.lineHeight;
+    RenderStyle renderStyle = this as RenderStyle;
+    if (_lineHeight != null) {
+      if (_lineHeight == CSSLengthValue.normal) {
+        return CSSLengthValue(renderStyle.fontSize.computedValue * 1.2, CSSLengthType.PX);
       }
+      return _lineHeight!;
     }
-    return _lineHeight ?? CSSLengthValue(CSSText.DEFAULT_LINE_HEIGHT * fontSize.computedValue, CSSLengthType.PX);
+
+    CSSLengthValue? parentLineHeight = _getParentLineHeight();
+    // Line-height normal use a default value of roughly 1.2, depending on the element's font-family.
+    return parentLineHeight == null || parentLineHeight == CSSLengthValue.normal ?
+      CSSLengthValue(renderStyle.fontSize.computedValue * 1.2, CSSLengthType.PX) :
+      parentLineHeight;
   }
+
+  CSSLengthValue? _getParentLineHeight() {
+    RenderStyle renderStyle = this as RenderStyle;
+    RenderStyle? parentRenderStyle = renderStyle.parent;
+    while (parentRenderStyle != null) {
+      if (parentRenderStyle._lineHeight != null) {
+        return parentRenderStyle._lineHeight;
+      }
+      parentRenderStyle = parentRenderStyle.parent;
+    }
+    return null;
+  }
+
   set lineHeight(CSSLengthValue? value) {
     if (_lineHeight == value) return;
     _lineHeight = value;
@@ -344,7 +361,7 @@ mixin CSSTextMixin on RenderStyleBase {
       // Not impl it due to performance consideration.
       // case 'match-parent':
     }
-    
+
     return alignment;
   }
 
@@ -416,11 +433,13 @@ class CSSText {
     return value == 'solid' || value == 'double' || value == 'dotted' || value == 'dashed' || value == 'wavy';
   }
 
-  static double DEFAULT_LINE_HEIGHT = 1.2;
+  static CSSLengthValue DEFAULT_LINE_HEIGHT = CSSLengthValue.normal;
   static CSSLengthValue? resolveLineHeight(String value, RenderStyle renderStyle, String propertyName) {
     if (value.isNotEmpty) {
       if (CSSLength.isLength(value)) {
         return CSSLength.parseLength(value, renderStyle, propertyName);
+      } else if (value == NORMAL) {
+        return CSSLengthValue.normal;
       } else if (CSSNumber.isNumber(value)){
         double? multipliedNumber = double.tryParse(value);
         if (multipliedNumber != null) {
@@ -666,8 +685,8 @@ class CSSText {
         }
       }
     }
-  
+
     return textShadows;
   }
-  
+
 }

@@ -33,6 +33,8 @@ enum CSSLengthType {
   UNKNOWN,
   // auto
   AUTO,
+  // normal
+  NORMAL,
   INITIAL,
 }
 
@@ -56,6 +58,8 @@ class CSSLengthValue {
   static CSSLengthValue auto = CSSLengthValue(null, CSSLengthType.AUTO);
   static CSSLengthValue initial = CSSLengthValue(null, CSSLengthType.INITIAL);
   static CSSLengthValue unknow = CSSLengthValue(null, CSSLengthType.UNKNOWN);
+  // Used in https://www.w3.org/TR/css-inline-3/#valdef-line-height-normal
+  static CSSLengthValue normal = CSSLengthValue(null, CSSLengthType.NORMAL);
 
   // Length is applied in horizontal or vertical direction.
   Axis? axisType;
