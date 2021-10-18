@@ -118,7 +118,7 @@ mixin CSSTextMixin on RenderStyleBase {
         return renderStyle.parent!.fontFamily;
       }
     }
-    return _fontFamily;
+    return _fontFamily ?? CSSText.DEFAULT_FONT_FAMILY_FALLBACK;
   }
   set fontFamily(List<String>? value) {
     if (_fontFamily == value) return;
