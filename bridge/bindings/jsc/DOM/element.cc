@@ -312,7 +312,11 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
       return JSObjectMakeArray(_hostClass->ctx, arguments.size(), arguments.data(), nullptr);
     }
     case JSElement::ElementProperty::innerHTML: {
-      return JSValueMakeString(ctx, JSStringCreateWithUTF8CString(toString().c_str()));
+      std::string s = "";
+      for (auto child: childNodes) {
+        s += static_cast<ElementInstance *>(child)->toString();
+      }
+      return JSValueMakeString(ctx, JSStringCreateWithUTF8CString(s.c_str()));
     }
   }
 
