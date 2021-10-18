@@ -204,9 +204,12 @@ task('build-darwin-kraken-lib', done => {
     }
   });
 
-  let krakenTargets = ['kraken kraken_test'];
+  let krakenTargets = ['kraken'];
   if (targetJSEngine === 'quickjs') {
     krakenTargets.push('kraken_unit_test');
+  }
+  if (buildMode === 'Debug') {
+    krakenTargets.push('kraken_test');
   }
 
   execSync(`cmake --build ${paths.bridge}/cmake-build-macos-x86_64 --target ${krakenTargets.join(' ')} -- -j 6`, {
