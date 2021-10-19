@@ -376,7 +376,10 @@ class RenderFlowLayout extends RenderLayoutBox {
   double? _getLineHeight(RenderBox child) {
     // Line-height only works for text node.
     if (child is RenderTextBox) {
-      return renderStyle.lineHeight.computedValue;
+      CSSLengthValue lineHeight = renderStyle.lineHeight;
+      if (lineHeight.type != CSSLengthType.NORMAL) {
+        return lineHeight.computedValue;
+      }
     }
     return null;
   }

@@ -138,7 +138,9 @@ class RenderTextBox extends RenderBox
       // https://drafts.csswg.org/css-overflow-3/#max-lines
       _renderParagraph.maxLines = renderStyle.lineClamp;
       _renderParagraph.textAlign = renderStyle.textAlign;
-      _renderParagraph.lineHeight = renderStyle.lineHeight.computedValue;
+      if (renderStyle.lineHeight.type != CSSLengthType.NORMAL) {
+        _renderParagraph.lineHeight = renderStyle.lineHeight.computedValue;
+      }
 
       child!.layout(constraints, parentUsesSize: true);
       size = child!.size;

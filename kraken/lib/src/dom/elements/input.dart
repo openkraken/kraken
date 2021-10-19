@@ -1262,7 +1262,8 @@ class RenderInputLeaderLayer extends RenderLeaderLayer {
     double dy;
     if (renderStyle.height != null) {
       dy = (renderStyle.height!.computedValue - intrinsicInputHeight) / 2;
-    } else if (renderStyle.lineHeight.computedValue > intrinsicInputHeight) {
+    } else if (renderStyle.lineHeight.type != CSSLengthType.NORMAL &&
+      renderStyle.lineHeight.computedValue > intrinsicInputHeight) {
       dy = (renderStyle.lineHeight.computedValue - intrinsicInputHeight) /2;
     } else {
       dy = 0;
@@ -1300,7 +1301,7 @@ class RenderInputBox extends RenderProxyBox {
       // Height priority: height > max(line-height, child height) > child height
       if (constraints.maxHeight != double.infinity) {
         height = constraints.maxHeight;
-      } else {
+      } else  {
         height = math.max(renderStyle.lineHeight.computedValue, childSize.height);
       }
 

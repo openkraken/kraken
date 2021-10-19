@@ -176,31 +176,28 @@ mixin CSSTextMixin on RenderStyleBase {
 
   CSSLengthValue? _lineHeight;
   CSSLengthValue get lineHeight {
-    RenderStyle renderStyle = this as RenderStyle;
-    if (_lineHeight != null) {
-      if (_lineHeight == CSSLengthValue.normal) {
-        return CSSLengthValue(renderStyle.fontSize.computedValue * 1.2, CSSLengthType.PX);
+    if (_lineHeight == null) {
+      RenderStyle renderStyle = this as RenderStyle;
+      if (renderStyle.parent != null) {
+        // Parse em type of parent's line-height in getter cause it depends on font-size of child.
+        if (renderStyle.parent!._lineHeight != null &&
+          renderStyle.parent!._lineHeight!.type == CSSLengthType.EM) {
+          double calValue = fontSize.computedValue * renderStyle.parent!._lineHeight!.computedValue;
+          return CSSLengthValue(calValue, CSSLengthType.PX);
+        } else {
+          return renderStyle.parent!.lineHeight;
+        }
       }
-      return _lineHeight!;
     }
 
-    CSSLengthValue? parentLineHeight = _getParentLineHeight();
-    // Line-height normal use a default value of roughly 1.2, depending on the element's font-family.
-    return parentLineHeight == null || parentLineHeight == CSSLengthValue.normal ?
-      CSSLengthValue(renderStyle.fontSize.computedValue * 1.2, CSSLengthType.PX) :
-      parentLineHeight;
-  }
-
-  CSSLengthValue? _getParentLineHeight() {
-    RenderStyle renderStyle = this as RenderStyle;
-    RenderStyle? parentRenderStyle = renderStyle.parent;
-    while (parentRenderStyle != null) {
-      if (parentRenderStyle._lineHeight != null) {
-        return parentRenderStyle._lineHeight;
-      }
-      parentRenderStyle = parentRenderStyle.parent;
+    // Parse em type of line-height in getter cause it depends on font-size.
+    if (_lineHeight != null &&
+      _lineHeight!.type == CSSLengthType.EM) {
+      double calValue = fontSize.computedValue * _lineHeight!.computedValue;
+      return CSSLengthValue(calValue, CSSLengthType.PX);
     }
-    return null;
+
+    return _lineHeight ?? CSSText.DEFAULT_LINE_HEIGHT;
   }
 
   set lineHeight(CSSLengthValue? value) {
