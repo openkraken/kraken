@@ -295,8 +295,6 @@ class Element extends Node
   void didAttachRenderer() {
     // Ensure that the child is attached.
     ensureChildAttached();
-    // Flush pending style.
-    style.flushPendingProperties();
   }
 
   @override
@@ -443,45 +441,48 @@ class Element extends Node
     }
   }
 
-  void _updateRenderBoxModelWithPosition(CSSPositionType currentPosition) {
+  void _updateRenderBoxModelWithPosition() {
+    // Move element according to position when it's already attached to render tree.
+    if (!isRendererAttached) {
+      return;
+    }
+
     RenderBoxModel _renderBoxModel = renderBoxModel!;
     Element _parentElement = parentElement!;
+    CSSPositionType currentPosition = renderStyle.position;
 
     // Remove fixed children before convert to non repaint boundary renderObject
     if (currentPosition != CSSPositionType.fixed) {
       _removeFixedChild(_renderBoxModel);
     }
 
-    // Move element according to position when it's already attached to render tree.
-    if (isRendererAttached) {
-      RenderObject _renderer = renderer!;
+    RenderObject _renderer = renderer!;
 
-      RenderBox? prev = (_renderer.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
-      // It needs to find the previous sibling of the previous sibling if the placeholder of
-      // positioned element exists and follows renderObject at the same time, eg.
-      // <div style="position: relative"><div style="position: absolute" /></div>
-      if (prev == _renderBoxModel) {
-        prev = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
-      }
-
-      // Remove placeholder of positioned element.
-      RenderPositionHolder? renderPositionHolder = _renderBoxModel.renderPositionHolder;
-      if (renderPositionHolder != null) {
-        ContainerRenderObjectMixin<RenderBox, ContainerParentDataMixin<RenderBox>>? parent = renderPositionHolder.parent as ContainerRenderObjectMixin<RenderBox, ContainerParentDataMixin<RenderBox>>?;
-        if (parent != null) {
-          parent.remove(renderPositionHolder);
-          _renderBoxModel.renderPositionHolder = null;
-        }
-      }
-      // Remove renderBoxModel from original parent and append to its containing block
-      RenderObject? parentRenderBoxModel = _renderBoxModel.parent as RenderBox?;
-      if (parentRenderBoxModel is ContainerRenderObjectMixin) {
-        parentRenderBoxModel.remove(_renderBoxModel);
-      } else if (parentRenderBoxModel is RenderProxyBox) {
-        parentRenderBoxModel.child = null;
-      }
-      _parentElement.addChildRenderObject(this, after: prev);
+    RenderBox? prev = (_renderer.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
+    // It needs to find the previous sibling of the previous sibling if the placeholder of
+    // positioned element exists and follows renderObject at the same time, eg.
+    // <div style="position: relative"><div style="position: absolute" /></div>
+    if (prev == _renderBoxModel) {
+      prev = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
     }
+
+    // Remove placeholder of positioned element.
+    RenderPositionHolder? renderPositionHolder = _renderBoxModel.renderPositionHolder;
+    if (renderPositionHolder != null) {
+      ContainerRenderObjectMixin<RenderBox, ContainerParentDataMixin<RenderBox>>? parent = renderPositionHolder.parent as ContainerRenderObjectMixin<RenderBox, ContainerParentDataMixin<RenderBox>>?;
+      if (parent != null) {
+        parent.remove(renderPositionHolder);
+        _renderBoxModel.renderPositionHolder = null;
+      }
+    }
+    // Remove renderBoxModel from original parent and append to its containing block
+    RenderObject? parentRenderBoxModel = _renderBoxModel.parent as RenderBox?;
+    if (parentRenderBoxModel is ContainerRenderObjectMixin) {
+      parentRenderBoxModel.remove(_renderBoxModel);
+    } else if (parentRenderBoxModel is RenderProxyBox) {
+      parentRenderBoxModel.child = null;
+    }
+    _parentElement.addChildRenderObject(this, after: prev);
 
     if (shouldConvertToRepaintBoundary) {
       convertToRepaintBoundary();
@@ -587,11 +588,16 @@ class Element extends Node
 
     if (renderStyle.display != CSSDisplay.none) {
       willAttachRenderer();
+      // Flush pending style before child attached.
+      style.flushPendingProperties();
+
       if (parent is Element) {
         parent.addChildRenderObject(this, after: after);
       } else if (parent is Document) {
         parent.appendChild(this);
       }
+      // Delay position set on node attach cause position depends on renderStyle of parent.
+      _updateRenderBoxModelWithPosition();
 
       didAttachRenderer();
     }
@@ -869,7 +875,7 @@ class Element extends Node
         break;
       case POSITION:
         renderStyle.position = value;
-        _updateRenderBoxModelWithPosition(value);
+        _updateRenderBoxModelWithPosition();
         break;
       case TOP:
         renderStyle.top = value;
