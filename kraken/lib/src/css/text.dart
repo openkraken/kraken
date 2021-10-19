@@ -585,10 +585,6 @@ class CSSText {
   static List<String>? DEFAULT_FONT_FAMILY_FALLBACK;
 
   static List<String> resolveFontFamilyFallback(String? fontFamily) {
-    // Only for internal use.
-    if (CSSText.DEFAULT_FONT_FAMILY_FALLBACK != null) {
-      return CSSText.DEFAULT_FONT_FAMILY_FALLBACK!;
-    }
     fontFamily = fontFamily ?? 'sans-serif';
     List<String> values = fontFamily.split(_commaRegExp);
     List<String> resolvedFamily = List.empty(growable: true);
@@ -636,6 +632,11 @@ class CSSText {
         default:
           resolvedFamily.add(familyName);
       }
+    }
+
+    // Only for internal use.
+    if (resolvedFamily.isEmpty && CSSText.DEFAULT_FONT_FAMILY_FALLBACK != null) {
+      return CSSText.DEFAULT_FONT_FAMILY_FALLBACK!;
     }
     return resolvedFamily;
   }
