@@ -293,9 +293,7 @@ class BoxDecorationPainter extends BoxPainter {
     if (_decoration.image == null) return;
     _imagePainter ??= BoxDecorationImagePainter._(
       _decoration.image!,
-      renderStyle.backgroundPositionX,
-      renderStyle.backgroundPositionY,
-      renderStyle.backgroundSize,
+      renderStyle,
       onChanged!
     );
     Path? clipPath;
@@ -477,16 +475,21 @@ class BoxDecorationPainter extends BoxPainter {
 class BoxDecorationImagePainter {
   BoxDecorationImagePainter._(
     this._details,
-    this._backgroundPositionX,
-    this._backgroundPositionY,
-    this._backgroundSize,
+    this._renderStyle,
     this._onChanged
   );
 
+  final RenderStyle _renderStyle;
   final DecorationImage _details;
-  final CSSBackgroundPosition _backgroundPositionX;
-  final CSSBackgroundPosition _backgroundPositionY;
-  final CSSBackgroundSize _backgroundSize;
+  CSSBackgroundPosition get _backgroundPositionX {
+    return _renderStyle.backgroundPositionX;
+  }
+  CSSBackgroundPosition get _backgroundPositionY {
+    return _renderStyle.backgroundPositionY;
+  }
+  CSSBackgroundSize get _backgroundSize {
+    return _renderStyle.backgroundSize;
+  }
   final VoidCallback _onChanged;
 
   ImageStream? _imageStream;
