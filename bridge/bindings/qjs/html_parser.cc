@@ -18,24 +18,6 @@ inline std::string trim(std::string &str) {
   return str;
 }
 
-bool HTMLParser::parseHTML(const char *code, size_t codeLength, NodeInstance *rootNode) {
-  std::string html = std::string(code, codeLength);
-
-  if (rootNode != nullptr) {
-    rootNode->internalClearChild();
-
-    if (!trim(html).empty()) {
-      // Gumbo-parser parse HTML.
-      size_t html_length = html.length();
-      auto *htmlTree = gumbo_parse_with_options(&kGumboDefaultOptions, html.c_str(), html_length);
-      traverseHTML(rootNode, htmlTree->root);
-    }
-  } else {
-    KRAKEN_LOG(ERROR) << "BODY is null.";
-  }
-
-  return true;
-}
 void HTMLParser::traverseHTML(NodeInstance *root, GumboNode *node) {
   JSContext *context = root->context();
   QjsContext *ctx = context->ctx();
@@ -83,6 +65,24 @@ void HTMLParser::traverseHTML(NodeInstance *root, GumboNode *node) {
       JS_FreeValue(ctx, textNodeValue);
     }
   }
+}
+bool HTMLParser::parseHTML(const char *code, size_t codeLength, NodeInstance *rootNode) {
+  std::string html = std::string(code, codeLength);
+
+  if (rootNode != nullptr) {
+    rootNode->internalClearChild();
+
+    if (!trim(html).empty()) {
+      // Gumbo-parser parse HTML.
+      size_t html_length = html.length();
+      auto *htmlTree = gumbo_parse_with_options(&kGumboDefaultOptions, html.c_str(), html_length);
+      traverseHTML(rootNode, htmlTree->root);
+    }
+  } else {
+    KRAKEN_LOG(ERROR) << "Root node is null.";
+  }
+
+  return true;
 }
 void HTMLParser::parseProperty(ElementInstance *element, GumboElement *gumboElement) {
   JSContext *context = element->context();
