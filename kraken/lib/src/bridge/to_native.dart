@@ -167,6 +167,9 @@ void evaluateQuickjsByteCode(int contextId, Uint8List bytes) {
 }
 
 void parseHTML(int contextId, String code) {
+  if(KrakenController.getControllerOfJSContextId(contextId) == null) {
+    return;
+  }
   Pointer<Utf8> nativeCode = code.toNativeUtf8();
   try {
     _parseHTML(contextId, nativeCode, code.length);
