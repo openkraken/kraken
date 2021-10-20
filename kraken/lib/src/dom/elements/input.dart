@@ -249,35 +249,42 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   @override
+  getProperty(String key) {
+    switch(key) {
+      // @TODO: Apply algorithm of input element property width.
+      case 'width':
+      case 'height':
+        return 0.0;
+      case 'value':
+        return _getValue();
+      case 'accept':
+      case 'autocomplete':
+      case 'autofocus':
+      case 'required':
+      case 'readonly':
+      case 'pattern':
+      case 'step':
+      case 'name':
+      case 'multiple':
+      case 'checked':
+      case 'disabled':
+      case 'min':
+      case 'max':
+      case 'minlength':
+      case 'maxlength':
+      case 'size':
+        return properties[jsMethodToKey(key)];
+      case 'placeholder':
+        return placeholderText;
+      case 'type':
+        return _getType();
+    }
+    return super.getProperty(key);
+  }
+
+  @override
   handleJSCall(String method, List argv) {
     switch(method) {
-      // @TODO: Apply algorithm of input element property width.
-      case 'getWidth':
-      case 'getHeight':
-        return 0.0;
-      case 'getValue':
-        return _getValue();
-      case 'getAccept':
-      case 'getAutocomplete':
-      case 'getAutofocus':
-      case 'getRequired':
-      case 'getReadonly':
-      case 'getPattern':
-      case 'getStep':
-      case 'getName':
-      case 'getMultiple':
-      case 'getChecked':
-      case 'getDisabled':
-      case 'getMin':
-      case 'getMax':
-      case 'getMinlength':
-      case 'getMaxlength':
-      case 'getSize':
-        return properties[jsMethodToKey(method)];
-      case 'getPlaceholder':
-        return placeholderText;
-      case 'getType':
-        return _getType();
       case 'focus':
         setFocus(this);
         break;
