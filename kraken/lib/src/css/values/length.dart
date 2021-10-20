@@ -144,6 +144,14 @@ class CSSLengthValue {
           parentRenderStyle?.contentBoxLogicalHeight;
 
         switch (propertyName) {
+          case FONT_SIZE:
+            // Relative to the parent font size.
+            if (renderStyle!.parent == null) {
+              _computedValue = value! * 16;
+            } else {
+              _computedValue = value! * renderStyle!.parent!.fontSize.computedValue;
+            }
+            break;
           case LINE_HEIGHT:
             // Relative to the font size of the element itself.
             _computedValue = value! * renderStyle!.fontSize.computedValue;
