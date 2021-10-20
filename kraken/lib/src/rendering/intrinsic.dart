@@ -68,8 +68,8 @@ class RenderIntrinsic extends RenderBoxModel
     double? height = renderStyle.height?.computedValue;
     double? minWidth = renderStyle.minWidth?.computedValue;
     double? minHeight = renderStyle.minHeight?.computedValue;
-    double? maxWidth = renderStyle.maxWidth?.computedValue;
-    double? maxHeight = renderStyle.maxHeight?.computedValue;
+    double? maxWidth = renderStyle.maxWidth == CSSLengthValue.none ? null : renderStyle.maxWidth?.computedValue;
+    double? maxHeight = renderStyle.maxHeight == CSSLengthValue.none ? null : renderStyle.maxHeight?.computedValue;
 
     if (child != null) {
       late DateTime childLayoutStart;

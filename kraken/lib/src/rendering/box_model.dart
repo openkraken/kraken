@@ -425,8 +425,8 @@ class RenderLayoutBox extends RenderBoxModel
     double? height = renderStyle.height?.computedValue;
     double? minWidth = renderStyle.minWidth?.computedValue;
     double? minHeight = renderStyle.minHeight?.computedValue;
-    double? maxWidth = renderStyle.maxWidth?.computedValue;
-    double? maxHeight = renderStyle.maxHeight?.computedValue;
+    double? maxWidth = renderStyle.maxWidth == CSSLengthValue.none ? null : renderStyle.maxWidth?.computedValue;
+    double? maxHeight = renderStyle.maxHeight == CSSLengthValue.none ? null : renderStyle.maxHeight?.computedValue;
 
     // Constrain to min-width or max-width if width not exists.
     if (isInlineBlock && maxWidth != null && width == null) {
@@ -807,9 +807,9 @@ class RenderBoxModel extends RenderBox
     double verticalPaddingLength = padding.vertical;
 
     double? minWidth = renderStyle.minWidth?.computedValue;
-    double? maxWidth = renderStyle.maxWidth?.computedValue;
+    double? maxWidth = renderStyle.maxWidth == CSSLengthValue.none ? null : renderStyle.maxWidth?.computedValue;
     double? minHeight = renderStyle.minHeight?.computedValue;
-    double? maxHeight = renderStyle.maxHeight?.computedValue;
+    double? maxHeight = renderStyle.maxHeight == CSSLengthValue.none ? null : renderStyle.maxHeight?.computedValue;
 
     // Content size calculated from style
     logicalContentWidth = renderStyle.getLogicalContentWidth();

@@ -21,7 +21,13 @@ mixin CSSSizingMixin on RenderStyleBase {
     return _width;
   }
   set width(CSSLengthValue? value) {
-    if ((value != null && value.value! < 0) || _width == value) return;
+    // Negative value is invalid, auto value is parsed at layout stage.
+    if ((value != null && ((value.value != null && value.value! < 0) || value.isAuto)) ||
+      _width == value
+    ) {
+      return;
+    }
+
     _width = value;
     _markSelfAndParentNeedsLayout();
   }
@@ -31,7 +37,12 @@ mixin CSSSizingMixin on RenderStyleBase {
     return _height;
   }
   set height(CSSLengthValue? value) {
-    if ((value != null && value.value! < 0) || _height == value) return;
+    // Negative value is invalid, auto value is parsed at layout stage.
+    if ((value != null && ((value.value != null && value.value! < 0) || value.isAuto)) ||
+      _height == value
+    ) {
+      return;
+    }
     _height = value;
     _markSelfAndParentNeedsLayout();
   }
@@ -41,7 +52,12 @@ mixin CSSSizingMixin on RenderStyleBase {
     return _minWidth;
   }
   set minWidth(CSSLengthValue? value) {
-    if ((value != null && value.value! < 0) || _minWidth == value) return;
+    // Negative value is invalid, auto value is parsed at layout stage.
+    if ((value != null && ((value.value != null && value.value! < 0) || value.isAuto)) ||
+      _minWidth == value
+    ) {
+      return;
+    }
     _minWidth = value;
     _markSelfAndParentNeedsLayout();
   }
@@ -51,7 +67,12 @@ mixin CSSSizingMixin on RenderStyleBase {
     return _maxWidth;
   }
   set maxWidth(CSSLengthValue? value) {
-    if ((value != null && value.value! < 0) || _maxWidth == value) return;
+    // Negative value is invalid, auto value is parsed at layout stage.
+    if ((value != null && ((value.value != null && value.value! < 0) || value.isAuto)) ||
+      _maxWidth == value
+    ) {
+      return;
+    }
     _maxWidth = value;
     _markSelfAndParentNeedsLayout();
   }
@@ -61,7 +82,12 @@ mixin CSSSizingMixin on RenderStyleBase {
     return _minHeight;
   }
   set minHeight(CSSLengthValue? value) {
-    if ((value != null && value.value! < 0) || _minHeight == value) return;
+    // Negative value is invalid, auto value is parsed at layout stage.
+    if ((value != null && ((value.value != null && value.value! < 0) || value.isAuto)) ||
+      _minHeight == value
+    ) {
+      return;
+    }
     _minHeight = value;
     _markSelfAndParentNeedsLayout();
   }
@@ -71,7 +97,12 @@ mixin CSSSizingMixin on RenderStyleBase {
     return _maxHeight;
   }
   set maxHeight(CSSLengthValue? value) {
-    if ((value != null && value.value! < 0) || _maxHeight == value) return;
+    // Negative value is invalid, auto value is parsed at layout stage.
+    if ((value != null && ((value.value != null && value.value! < 0) || value.isAuto)) ||
+      _maxHeight == value
+    ) {
+      return;
+    }
     _maxHeight = value;
     _markSelfAndParentNeedsLayout();
   }

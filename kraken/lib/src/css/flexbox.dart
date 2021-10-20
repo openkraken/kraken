@@ -262,7 +262,10 @@ mixin CSSFlexboxMixin on RenderStyleBase {
   CSSLengthValue? get flexBasis => _flexBasis;
   CSSLengthValue? _flexBasis;
   set flexBasis(CSSLengthValue? value) {
-    if (_flexBasis == value) return;
+    // Auto value is parsed at layout stage.
+    if ((value != null && value.isAuto) || _flexBasis == value ) {
+      return;
+    }
     _flexBasis = value;
     if (renderBoxModel!.parent is RenderFlexLayout) {
       renderBoxModel!.markNeedsLayout();

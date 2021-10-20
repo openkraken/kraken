@@ -249,7 +249,7 @@ class RenderStyle
     CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
     double? width = renderStyle.width?.computedValue;
     double? minWidth = renderStyle.minWidth?.computedValue;
-    double? maxWidth = renderStyle.maxWidth?.computedValue;
+    double? maxWidth = renderStyle.maxWidth == CSSLengthValue.none ? null : renderStyle.maxWidth?.computedValue;
     double cropWidth = 0;
 
     switch (effectiveDisplay) {
@@ -349,7 +349,7 @@ class RenderStyle
     CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
     double? height = renderStyle.height?.computedValue;
     double cropHeight = 0;
-    double? maxHeight = renderStyle.maxHeight?.computedValue;
+    double? maxHeight = renderStyle.maxHeight == CSSLengthValue.none ? null : renderStyle.maxHeight?.computedValue;
     double? minHeight = renderStyle.minHeight?.computedValue;
     double? intrinsicRatio = renderBoxModel!.intrinsicRatio;
 

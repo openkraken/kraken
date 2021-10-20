@@ -583,10 +583,11 @@ class Element extends Node
   // Attach renderObject of current node to parent
   @override
   void attachTo(Node parent, {RenderBox? after}) {
-
     _applyStyle();
+    // Get display from style directly cause renderStyle is not flushed yet.
+    CSSDisplay display = CSSDisplayMixin.resolveDisplay(style[DISPLAY]);
 
-    if (renderStyle.display != CSSDisplay.none) {
+    if (display != CSSDisplay.none) {
       willAttachRenderer();
       // Flush pending style before child attached.
       style.flushPendingProperties();
