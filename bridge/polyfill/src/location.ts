@@ -9,6 +9,7 @@ export function getUrl() : URL {
   return _url ? _url : (_url = new URL(krakenLocation.href));
 }
 
+const bindReload = krakenLocation.reload.bind(krakenLocation);
 export const location = {
   get href() {
     return getUrl().href;
@@ -46,8 +47,8 @@ export const location = {
       kraken.invokeModule('Navigation', 'goTo', assignURL);
     };
   },
-  reload() {
-    return krakenLocation.reload.call(krakenLocation);
+  get reload() {
+    return bindReload;
   },
   get replace() {
     return (replaceURL: string) => {

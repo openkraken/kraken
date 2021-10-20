@@ -1,4 +1,4 @@
-describe('outerHTML', () => {
+describe('outerHTML & innerHTML', () => {
   it('should work width element when get property', async () => {
     const div = document.createElement('div');
     div.innerHTML = "<div style=\"background-color: red;width:100px;height: 100px\"></div>";

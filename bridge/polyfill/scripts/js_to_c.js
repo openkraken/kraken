@@ -79,6 +79,7 @@ void initKraken${outputName}(kraken::JSBridge *bridge) {
 `;
 
 function convertJSToCpp(code, outputName) {
+  // JavaScript Regexp expression may break C++ string code format.
   if (process.env.KRAKEN_JS_ENGINE === 'jsc') {
     code = code.replace(/\)\"/g, '))") + std::u16string(uR"("');
   }

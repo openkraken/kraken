@@ -64,7 +64,6 @@ class JasmineTracker {
     __kraken_run_gc__();
   }
   specStarted(result) {
-    // console.log('start ', result.fullName);
   }
 }
 
@@ -162,9 +161,6 @@ global.simulateInputText = __kraken_simulate_inputtext__;
 function resetDocumentElement() {
   window.scrollTo(0, 0);
   document.head = document.createElement('head');
-  while (document.head.firstChild) {
-    document.head.firstChild.remove();
-  }
   document.body = document.createElement('body');
 }
 
