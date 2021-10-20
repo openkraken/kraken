@@ -25,7 +25,10 @@ mixin CSSPositionMixin on RenderStyleBase {
     return _top;
   }
   set top(CSSLengthValue? value) {
-    if (_top == value) return;
+    // Auto value is parsed at layout stage.
+    if ((value != null && value.isAuto) || _top == value ) {
+      return;
+    }
     _top = value;
     _markParentNeedsLayout();
   }
@@ -35,7 +38,10 @@ mixin CSSPositionMixin on RenderStyleBase {
     return _bottom;
   }
   set bottom(CSSLengthValue? value) {
-    if (_bottom == value) return;
+    // Auto value is parsed at layout stage.
+    if ((value != null && value.isAuto) || _bottom == value ) {
+      return;
+    }
     _bottom = value;
     _markParentNeedsLayout();
   }
@@ -45,7 +51,10 @@ mixin CSSPositionMixin on RenderStyleBase {
     return _left;
   }
   set left(CSSLengthValue? value) {
-    if (_left == value) return;
+    // Auto value is parsed at layout stage.
+    if ((value != null && value.isAuto) || _left == value ) {
+      return;
+    }
     _left = value;
     _markParentNeedsLayout();
   }
@@ -55,7 +64,10 @@ mixin CSSPositionMixin on RenderStyleBase {
     return _right;
   }
   set right(CSSLengthValue? value) {
-    if (_right == value) return;
+    // Auto value is parsed at layout stage.
+    if ((value != null && value.isAuto) || _right == value ) {
+      return;
+    }
     _right = value;
     _markParentNeedsLayout();
   }
