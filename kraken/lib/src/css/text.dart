@@ -680,7 +680,10 @@ class CSSText {
         }
         double offsetX = CSSLength.parseLength(shadowDefinitions[1]!, renderStyle, property).computedValue;
         double offsetY = CSSLength.parseLength(shadowDefinitions[2]!, renderStyle, property).computedValue;
-        double blurRadius =  CSSLength.parseLength(shadowDefinitions[3]!, renderStyle, property).computedValue;
+        String? blurRadiusStr = shadowDefinitions[3];
+        // Blur-radius defaults to 0 if not specified.
+        double blurRadius = blurRadiusStr != null ?
+          CSSLength.parseLength(blurRadiusStr, renderStyle, property).computedValue : 0;
         if (color != null) {
           textShadows.add(Shadow(
             offset: Offset(offsetX, offsetY),
