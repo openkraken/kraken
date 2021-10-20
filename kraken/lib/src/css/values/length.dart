@@ -33,6 +33,8 @@ enum CSSLengthType {
   UNKNOWN,
   // auto
   AUTO,
+  // none
+  NONE,
   // normal
   NORMAL,
   INITIAL,
@@ -54,6 +56,7 @@ class CSSLengthValue {
   static CSSLengthValue unknow = CSSLengthValue(null, CSSLengthType.UNKNOWN);
   // Used in https://www.w3.org/TR/css-inline-3/#valdef-line-height-normal
   static CSSLengthValue normal = CSSLengthValue(null, CSSLengthType.NORMAL);
+  static CSSLengthValue none = CSSLengthValue(null, CSSLengthType.NONE);
 
   // Length is applied in horizontal or vertical direction.
   Axis? axisType;
@@ -221,6 +224,10 @@ class CSSLengthValue {
     return type == CSSLengthType.AUTO;
   }
 
+  bool get isNone {
+    return type == CSSLengthType.NONE;
+  }
+
   bool get isPercentage {
     return type == CSSLengthType.PERCENTAGE;
   }
@@ -312,6 +319,8 @@ class CSSLength {
       return CSSLengthValue.initial;
     } else if (text == AUTO) {
       return CSSLengthValue.auto;
+    } else if (text == NONE) {
+      return CSSLengthValue.none;
     } else if (text.endsWith(REM)) {
       value = double.tryParse(text.split(REM)[0]);
       unit = CSSLengthType.REM;

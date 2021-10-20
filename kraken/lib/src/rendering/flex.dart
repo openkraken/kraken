@@ -438,9 +438,12 @@ class RenderFlexLayout extends RenderLayoutBox {
   double _getMaxMainAxisSize(RenderBox child) {
     double? maxMainSize;
     if (child is RenderBoxModel) {
+      double? maxWidth = child.renderStyle.maxWidth == CSSLengthValue.none ?
+        null : child.renderStyle.maxWidth?.computedValue;
+      double? maxHeight = child.renderStyle.maxHeight == CSSLengthValue.none ?
+        null : child.renderStyle.maxHeight?.computedValue;
       maxMainSize = _isHorizontalFlexDirection
-              ? child.renderStyle.maxWidth?.computedValue
-              : child.renderStyle.maxHeight?.computedValue;
+              ? maxWidth : maxHeight;
     }
     return maxMainSize ?? double.infinity;
   }
