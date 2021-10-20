@@ -318,7 +318,7 @@ class KrakenBoxShadow extends BoxShadow {
     double blurRadius = 0.0,
     double spreadRadius = 0.0,
     this.inset = false,
-  }) : super(color: color, offset: offset, blurRadius: blurRadius);
+  }) : super(color: color, offset: offset, blurRadius: blurRadius, spreadRadius: spreadRadius);
 
   final bool inset;
 }
@@ -341,7 +341,7 @@ class CSSBoxShadow {
   CSSLengthValue? blurRadius;
   CSSLengthValue? spreadRadius;
 
-  KrakenBoxShadow get computedBoxShdow {
+  KrakenBoxShadow get computedBoxShadow {
     color ??= const Color(0xFF000000);
     offsetX ??= CSSLengthValue.zero;
     offsetY ??= CSSLengthValue.zero;
