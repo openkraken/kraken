@@ -165,18 +165,22 @@ const child = document.createElement('div');
 child.style.width = '10px';
 child.style.height = '10px';
 child.style.backgroundColor = 'blue';
-div.setAttribute('id', 'child123');
+child.setAttribute('id', 'child123');
 div.appendChild(child);
 
 const child2 = document.createElement('div');
 child2.style.width = '10px';
 child2.style.height = '10px';
 child2.style.backgroundColor = 'yellow';
-div.setAttribute('id', 'child123');
+child2.setAttribute('id', 'child123');
 div.appendChild(child2);
 
 const div2 = div.cloneNode(true);
-document.body.appendChild(div2)
+document.body.appendChild(div2);
+
+console.log(
+  div2.firstChild.getAttribute('id') === 'child123', div2.firstChild.style.width === '10px', div2.firstChild.style.height === '10px'
+);
 )";
 
   bool static errorCalled = false;
@@ -193,5 +197,5 @@ document.body.appendChild(div2)
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
   delete bridge;
   EXPECT_EQ(errorCalled, false);
-//  EXPECT_EQ(logCalled, true);
+  EXPECT_EQ(logCalled, true);
 }

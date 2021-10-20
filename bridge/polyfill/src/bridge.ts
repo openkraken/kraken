@@ -16,9 +16,6 @@ export interface PrivateKraken {
   comment: string;
 }
 
-declare const __kraken__: PrivateKraken;
-export const privateKraken = __kraken__;
-
 declare const __kraken_invoke_module__: (module: string, method: string, params?: Object | null, fn?: (err: Error, data: any) => void) => string;
 export const krakenInvokeModule = __kraken_invoke_module__;
 

@@ -71,7 +71,7 @@ CSSStyleDeclaration::CSSStyleDeclaration(JSContext *context) : HostClass(context
 JSValue CSSStyleDeclaration::setProperty(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (argc < 2)
     return JS_ThrowTypeError(ctx,
-                             "Failed to execute 'setProperty' on 'CSSStyleDeclaration': 2 arguments required, but only 0 present.");
+                             "Failed to execute 'setProperty' on 'CSSStyleDeclaration': 2 arguments required, but only %d present.", argc);
   auto *instance = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(this_val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
   JSValue propertyNameValue = argv[0];
   JSValue propertyValue = argv[1];
@@ -175,10 +175,11 @@ JSValue StyleDeclarationInstance::internalGetPropertyValue(std::string &name) {
   return JS_NULL;
 }
 
+// TODO: add support for annotation CSS styleSheets.
 std::string StyleDeclarationInstance::toString() {
   if (properties.empty()) return "";
 
-  std::string s = "style=\"";
+  std::string s;
 
   for (auto &attr: properties) {
     const char* pstr = JS_ToCString(m_ctx, attr.second);

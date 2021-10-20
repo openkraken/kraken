@@ -1,4 +1,4 @@
-import { addKrakenModuleListener, krakenInvokeModule, privateKraken } from './bridge';
+import { addKrakenModuleListener, krakenInvokeModule } from './bridge';
 import { methodChannel, triggerMethodCallHandler } from './method-channel';
 import { dispatchConnectivityChangeEvent } from "./connection";
 
@@ -20,7 +20,6 @@ function krakenModuleListener(moduleName: string, event: Event, data: any) {
 addKrakenModuleListener(krakenModuleListener);
 
 export const kraken = {
-  ...privateKraken,
   methodChannel,
   invokeModule: krakenInvokeModule,
   addKrakenModuleListener: addKrakenModuleListener

@@ -132,8 +132,6 @@ NativeValue jsValueToNativeValue(QjsContext *ctx, JSValue &value) {
       return Native_NewPtr(JSPointerType::NativeEventTarget, imageElementInstance->nativeEventTarget);
     }
 
-//    JSValue stringifiedString = JS_JSONStringify(ctx, value, JS_UNDEFINED, JS_UNDEFINED);
-//    NativeString *string = jsValueToNativeString(ctx, stringifiedString);
     return Native_NewJSON(context, value);
   }
 
