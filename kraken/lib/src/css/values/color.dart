@@ -226,6 +226,18 @@ class CSSColor {
     return color == CURRENT_COLOR || parseColor(color) != null;
   }
 
+  static Color? resolveColor(String color, RenderStyle renderStyle, String propertyName) {
+    if (color == CURRENT_COLOR) {
+      if (propertyName == COLOR) {
+        return null;
+      }
+      // Update property that deps current color.
+      renderStyle.addColorRelativeProperty(propertyName);
+      return renderStyle.color;
+    }
+    return parseColor(color);
+  }
+
   static Color? parseColor(String color) {
     color = color.trim().toLowerCase();
 

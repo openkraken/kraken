@@ -45,9 +45,9 @@ class CSSLengthValue {
   final CSSLengthType type;
   CSSLengthValue(this.value, this.type, [this.renderStyle, this.propertyName, this.axisType]) {
     if (type == CSSLengthType.EM) {
-      renderStyle!.addFontRelativeLengthProperty(propertyName!);
+      renderStyle!.addFontRelativeProperty(propertyName!);
     } else if (type == CSSLengthType.REM) {
-      renderStyle!.addRootFontRelativeLengthProperty(propertyName!);
+      renderStyle!.addRootFontRelativeProperty(propertyName!);
     }
   }
   static CSSLengthValue zero = CSSLengthValue(0, CSSLengthType.PX);

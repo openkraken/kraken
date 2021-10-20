@@ -572,11 +572,13 @@ List<CSSColorStop> _parseColorAndStop(String src, RenderStyle renderStyle, Strin
               stop = CSSLength.parseLength(strings[i], renderStyle, propertyName).computedValue / gradientLength;
             }
           }
-          colorGradients.add(CSSColorStop(CSSColor.parseColor(strings[0]), stop));
+          Color? color = CSSColor.resolveColor(strings[0], renderStyle, propertyName);
+          colorGradients.add(CSSColorStop(color, stop));
         }
       } catch (e) {}
     } else {
-      colorGradients.add(CSSColorStop(CSSColor.parseColor(strings[0]), stop));
+      Color? color = CSSColor.resolveColor(strings[0], renderStyle, propertyName);
+      colorGradients.add(CSSColorStop(color, stop));
     }
   }
   return colorGradients;

@@ -31,8 +31,25 @@ mixin CSSTextMixin on RenderStyleBase {
   set color(Color? value) {
     if (_color == value) return;
     _color = value;
+    updateColorRelativeProperty();
     // Update all the children text with specified style property not set due to style inheritance.
-    renderBoxModel?.markNeedsLayout();
+    renderBoxModel?.markNeedsPaint();
+  }
+
+  // Current not update the dependent property relative to the color.
+  final Map<String, bool> _colorRealativeProperties = {};
+
+  void addColorRelativeProperty(String propertyName) {
+    _colorRealativeProperties[propertyName] = true;
+  }
+
+  void updateColorRelativeProperty() {
+    if (_colorRealativeProperties.isEmpty) return;
+    RenderStyle renderStyle = this as RenderStyle;
+    _colorRealativeProperties.forEach((String propertyName, _) {
+      // TODO: use css color abstraction avoid re-parse the property string.
+      renderStyle.style.target!.setRenderStyle(propertyName, renderStyle.style.getPropertyValue(propertyName));
+    });
   }
 
   TextDecoration? _textDecorationLine;
@@ -156,17 +173,17 @@ mixin CSSTextMixin on RenderStyleBase {
   final Map<String, bool> _fontRealativeProperties = {};
   final Map<String, bool> _rootFontRealativeProperties = {};
 
-  void addRootFontRelativeLengthProperty(String propertyName) {
-    _rootFontRealativeProperties[propertyName] = true;
-  }
-
-  void addFontRelativeLengthProperty(String propertyName) {
+  void addFontRelativeProperty(String propertyName) {
     _fontRealativeProperties[propertyName] = true;
   }
 
   void updateFontRelativeLength() {
     if (_fontRealativeProperties.isEmpty) return;
     renderBoxModel?.markNeedsLayout();
+  }
+
+  void addRootFontRelativeProperty(String propertyName) {
+    _rootFontRealativeProperties[propertyName] = true;
   }
 
   void updateRootFontRelativeLength() {
@@ -664,26 +681,21 @@ class CSSText {
     return null;
   }
 
-  static List<Shadow> resolveTextShadow(String value, RenderStyle renderStyle, String property) {
+  static List<Shadow> resolveTextShadow(String value, RenderStyle renderStyle, String propertyName) {
     List<Shadow> textShadows = [];
 
     var shadows = CSSStyleProperty.getShadowValues(value);
     if (shadows != null) {
       for (var shadowDefinitions in shadows) {
-        String? shadowColor = shadowDefinitions[0];
+        String shadowColor = shadowDefinitions[0] ?? CURRENT_COLOR;
         // Specifies the color of the shadow. If the color is absent, it defaults to currentColor.
-        Color? color;
-        if (shadowColor != null) {
-          color = CSSColor.parseColor(shadowColor);
-        } else {
-          color = renderStyle.currentColor;
-        }
-        double offsetX = CSSLength.parseLength(shadowDefinitions[1]!, renderStyle, property).computedValue;
-        double offsetY = CSSLength.parseLength(shadowDefinitions[2]!, renderStyle, property).computedValue;
+        Color? color = CSSColor.resolveColor(shadowColor, renderStyle, propertyName);
+        double offsetX = CSSLength.parseLength(shadowDefinitions[1]!, renderStyle, propertyName).computedValue;
+        double offsetY = CSSLength.parseLength(shadowDefinitions[2]!, renderStyle, propertyName).computedValue;
         String? blurRadiusStr = shadowDefinitions[3];
         // Blur-radius defaults to 0 if not specified.
         double blurRadius = blurRadiusStr != null ?
-          CSSLength.parseLength(blurRadiusStr, renderStyle, property).computedValue : 0;
+          CSSLength.parseLength(blurRadiusStr, renderStyle, propertyName).computedValue : 0;
         if (color != null) {
           textShadows.add(Shadow(
             offset: Offset(offsetX, offsetY),

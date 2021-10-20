@@ -1233,7 +1233,7 @@ class Element extends Node
       case BORDER_TOP_COLOR:
       case BORDER_RIGHT_COLOR:
       case BORDER_BOTTOM_COLOR:
-        value = CSSColor.parseColor(present);
+        value = CSSColor.resolveColor(present, renderStyle, property);
         break;
       case BOX_SHADOW:
         value = CSSBoxShadow.parseBoxShadow(present, renderStyle, property);

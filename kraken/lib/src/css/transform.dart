@@ -6,8 +6,8 @@ import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'package:kraken/css.dart';
 
-Color? _parseColor(String color, RenderStyle renderStyle, String property) {
-  return CSSColor.parseColor(color);
+Color? _parseColor(String color, RenderStyle renderStyle, String propertyName) {
+  return CSSColor.resolveColor(color, renderStyle, propertyName);
 }
 
 void _updateColor(Color oldColor, Color newColor, double progress, String property, RenderStyle renderStyle) {
