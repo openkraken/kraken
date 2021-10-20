@@ -77,12 +77,23 @@ class CSSLengthValue {
         // Font size of the parent, in the case of typographical properties like font-size,
         // and font size of the element itself, in the case of other properties like width.
         if (propertyName == FONT_SIZE) {
-          _computedValue = value! * renderStyle!.parent!.fontSize.computedValue;
+          // If root element set fontSize as em unit.
+          if (renderStyle!.parent == null) {
+            _computedValue = value! * 16;
+          } else {
+            _computedValue = value! * renderStyle!.parent!.fontSize.computedValue;
+          }
         } else {
           _computedValue = value! * renderStyle!.fontSize.computedValue;
         }
         break;
       case CSSLengthType.REM:
+        // If root element set fontSize as rem unit.
+        if (renderStyle!.parent == null) {
+          _computedValue = value! * 16;
+        } else {
+          _computedValue = value! * renderStyle!.parent!.fontSize.computedValue;
+        }
         // Font rem is calculated against the root element's font size.
         _computedValue = value! * renderStyle!.rootFontSize;
         break;
