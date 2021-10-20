@@ -1328,19 +1328,23 @@ class Element extends Node
   void _updateChildrenFontRelativeLength(Element element) {
     RenderStyle renderStyle = element.renderStyle;
     renderStyle.updateFontRelativeLength();
-    children.forEach((Element child) {
-      if (!child.renderStyle.hasFontSize) {
-        _updateChildrenFontRelativeLength(child);
-      }
-    });
+    if (element.children.isNotEmpty) {
+      element.children.forEach((Element child) {
+        if (!child.renderStyle.hasFontSize) {
+          _updateChildrenFontRelativeLength(child);
+        }
+      });
+    }
   }
 
   void _updateChildrenRootFontRelativeLength(Element element) {
     RenderStyle renderStyle = element.renderStyle;
     renderStyle.updateRootFontRelativeLength();
-    children.forEach((Element child) {
-      _updateChildrenRootFontRelativeLength(child);
-    });
+    if (element.children.isNotEmpty) {
+      element.children.forEach((Element child) {
+        _updateChildrenRootFontRelativeLength(child);
+      });
+    }
   }
 
   void _applyDefaultStyle() {
