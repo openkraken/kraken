@@ -42,7 +42,6 @@
 #include "bindings/qjs/dom/events/touch_event.h"
 #include "bindings/qjs/dom/style_declaration.h"
 #include "bindings/qjs/dom/text_node.h"
-#include "bindings/qjs/kraken.h"
 #include "bindings/qjs/module_manager.h"
 
 namespace kraken {
@@ -72,7 +71,6 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindConsole(m_context);
   bindTimer(m_context);
   bindScreen(m_context);
-  bindKraken(m_context);
   bindModuleManager(m_context);
   bindEventTarget(m_context);
   bindBlob(m_context);
