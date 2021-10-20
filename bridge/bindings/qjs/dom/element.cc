@@ -752,7 +752,7 @@ std::string ElementInstance::outerHTML() {
     s += " " + attributes;
   }
   if (!style.empty()) {
-    s += " style=\"" + style + "\"";
+    s += " style=\"" + style;
   }
 
   s += ">";
