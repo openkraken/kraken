@@ -192,7 +192,9 @@ class CSSStyleDeclaration {
     if (_hasRunningTransition(propertyName)) {
       Animation animation = _propertyRunningTransition[propertyName]!;
       animation.cancel();
-      CSSTransition.dispatchTransitionEvent(target, CSSTransitionEvent.cancel);
+      if (target != null) {
+        CSSTransition.dispatchTransitionEvent(target!, CSSTransitionEvent.cancel);
+      }
       // Maybe set transition twice in a same frame. should check animationProperties has contains propertyName.
       if (_animationProperties.containsKey(propertyName)) {
         begin = _animationProperties[propertyName];
@@ -225,16 +227,22 @@ class CSSStyleDeclaration {
     _propertyRunningTransition[propertyName] = animation;
 
     animation.onstart = () {
-      CSSTransition.dispatchTransitionEvent(target, CSSTransitionEvent.start);
+      if (target != null) {
+        CSSTransition.dispatchTransitionEvent(target!, CSSTransitionEvent.start);
+      }
     };
 
     animation.onfinish = (AnimationPlaybackEvent event) {
       _setTransitionEndProperty(propertyName, begin, end);
       _propertyRunningTransition.remove(propertyName);
-      CSSTransition.dispatchTransitionEvent(target, CSSTransitionEvent.end);
+      if (target != null) {
+        CSSTransition.dispatchTransitionEvent(target!, CSSTransitionEvent.end);
+      }
     };
 
-    CSSTransition.dispatchTransitionEvent(target, CSSTransitionEvent.run);
+    if (target != null) {
+      CSSTransition.dispatchTransitionEvent(target!, CSSTransitionEvent.run);
+    }
     animation.play();
   }
 
