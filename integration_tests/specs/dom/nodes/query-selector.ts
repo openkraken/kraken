@@ -467,4 +467,22 @@ describe('querySelector api', () => {
 
     expect(document.querySelector('a[href="openkraken.com"]')?.getAttribute('href')).toBe('openkraken.com');
   });
+
+  it('querySelector work with attr', () => {
+    const container = document.createElement('div')
+    container.appendChild(document.createTextNode('你好'))
+    container.setAttribute('data-id', 'one')
+    document.body.appendChild(container)
+
+    expect(document.querySelector('[data-id="one"]')?.getAttribute('data-id')).toBe('one');
+  });
+
+  it('querySelectorAll work with attr', () => {
+    const container = document.createElement('div')
+    container.appendChild(document.createTextNode('你好'))
+    container.setAttribute('data-id', 'one')
+    document.body.appendChild(container)
+
+    expect(document.querySelectorAll('[data-id="one"]')?.length).toBe(1);
+  });
 });
