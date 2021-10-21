@@ -10,11 +10,7 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
   let temp, tempElements: Array<Element> = [], elements: Array<Element> = [];
   selector = selector.trim();
 
-  // If selector starts with *, find all elements.
-  if (selector.charAt(0) === '*') {
-    let temps: HTMLCollectionOf<Element> = context.getElementsByTagName('*');
-    tempElements = Array.from(temps);
-  }
+  if (selector === '') return [];
 
   // Classes. e.g. .row.
   let classes: Array<string> = [];
@@ -50,10 +46,14 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
     return [document.getElementById(id) || null];
   }
 
-  // Get by Elements.
-  if (els.length !== 0) {
+  // If selector starts with *, find all elements.
+  if (selector.charAt(0) === '*' || els.length === 0) {
+    let temps: HTMLCollectionOf<Element> = context.getElementsByTagName('*');
+    tempElements = Array.from(temps);
+  } else {
+    // Get by Elements.
     let temps: HTMLCollectionOf<Element> = context.getElementsByTagName(els[0]);
-    tempElements = tempElements.concat(Array.from(temps));
+    tempElements = Array.from(temps);
   }
 
   // Get by class name.
@@ -64,8 +64,7 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
     if (tempElements.length === 0) {
       // If no temp elements yet, push into tempElements directly.
       tempElements = tempElements.concat(arrTemps);
-    }
-    else {
+    } else {
       // Otherwise, find intersection.
       let prevs: Array<Element> = [];
       prevs = prevs.concat(tempElements);

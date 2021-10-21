@@ -36,23 +36,27 @@ class NavigationModule extends BaseModule {
   @override
   void dispose() {}
 
+  // Navigate kraken page to target Url.
+  Future<void> goTo(String targetUrl) async {
+    String? sourceUrl = moduleManager!.controller.bundlePath ?? moduleManager!.controller.bundleURL;
+
+    Uri targetUri = Uri.parse(targetUrl);
+    Uri? sourceUri = sourceUrl != null ? Uri.parse(sourceUrl) : null;
+
+    if (sourceUri == null || (targetUri.scheme != sourceUri.scheme ||
+        targetUri.host != sourceUri.host ||
+        targetUri.port != sourceUri.port ||
+        targetUri.path != sourceUri.path ||
+        targetUri.query != sourceUri.query)) {
+      await moduleManager!.controller.view.handleNavigationAction(sourceUrl, targetUrl, KrakenNavigationType.reload);
+    }
+  }
+
   @override
   String invoke(String method, dynamic params, callback) {
     if (method == 'goTo') {
       assert(params is String, 'URL must be string.');
-      String url = params;
-      String? sourceUrl = moduleManager!.controller.bundlePath ?? moduleManager!.controller.bundleURL;
-
-      Uri targetUri = Uri.parse(url);
-      Uri? sourceUri = sourceUrl != null ? Uri.parse(sourceUrl) : null;
-
-      if (sourceUri == null || (targetUri.scheme != sourceUri.scheme ||
-          targetUri.host != sourceUri.host ||
-          targetUri.port != sourceUri.port ||
-          targetUri.path != sourceUri.path ||
-          targetUri.query != sourceUri.query)) {
-        moduleManager!.controller.view.handleNavigationAction(sourceUrl, url, KrakenNavigationType.reload);
-      }
+      goTo(params);
     }
 
     return '';

@@ -57,18 +57,13 @@ class JasmineTracker {
   }
 
   specDone(result) {
-    return new Promise((resolve, reject) => {
-      try {
-        clearAllTimer();
-        clearAllEventsListeners();
-        resetDocumentElement();
-        kraken.methodChannel.clearMethodCallHandler();
-        resolve();
-      } catch (e) {
-        console.log(e);
-        reject(e);
-      }
-    });
+    clearAllTimer();
+    clearAllEventsListeners();
+    resetDocumentElement();
+    kraken.methodChannel.clearMethodCallHandler();
+    __kraken_run_gc__();
+  }
+  specStarted(result) {
   }
 }
 
@@ -165,10 +160,8 @@ global.simulateInputText = __kraken_simulate_inputtext__;
 
 function resetDocumentElement() {
   window.scrollTo(0, 0);
+  document.head = document.createElement('head');
   document.body = document.createElement('body');
-  while (document.head.firstChild) {
-    document.head.firstChild.remove();
-  }
 }
 
 function traverseNode(node, handle) {
@@ -193,6 +186,9 @@ __kraken_execute_test__((done) => {
   jasmineTracker.onJasmineDone = (result) => {
     done(result.overallStatus);
   };
+
+  // Trigger global js exception to test window.onerror.
+  __kraken_trigger_global_error__();
 
   env.execute();
 });

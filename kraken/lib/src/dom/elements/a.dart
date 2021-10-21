@@ -16,10 +16,8 @@ class AnchorElement extends Element {
   String? _href;
   String? _target;
 
-  final Pointer<NativeAnchorElement> nativeAnchorElement;
-
-  AnchorElement(int targetId, this.nativeAnchorElement, ElementManager elementManager)
-      : super(targetId, nativeAnchorElement.ref.nativeElement, elementManager, tagName: ANCHOR) {
+  AnchorElement(int targetId, Pointer<NativeEventTarget> nativeEventTargetPtr, ElementManager elementManager)
+      : super(targetId, nativeEventTargetPtr, elementManager, tagName: ANCHOR) {
     addEvent(EVENT_CLICK);
   }
 
@@ -63,8 +61,13 @@ class AnchorElement extends Element {
     switch (key) {
       case 'pathname':
         return pathname;
+      case 'href':
+        return _href;
+      case 'target':
+        return _target;
+      default:
+        return super.getProperty(key);
     }
-    return super.getProperty(key);
   }
 
   @override
@@ -76,21 +79,6 @@ class AnchorElement extends Element {
         break;
       case 'target':
         _target = value;
-        break;
-      default:
-    }
-  }
-
-  @override
-  void removeProperty(String key) {
-    super.removeProperty(key);
-
-    switch (key) {
-      case 'href':
-        _href = null;
-        break;
-      case 'target':
-        _target = null;
         break;
       default:
     }

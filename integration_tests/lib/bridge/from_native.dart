@@ -49,8 +49,8 @@ void _onJSError(int contextId, Pointer<Utf8> charStr) {
 
 final Pointer<NativeFunction<Native_JSError>> _nativeOnJsError = Pointer.fromFunction(_onJSError);
 
-typedef Native_MatchImageSnapshotCallback = Void Function(Pointer<Void> callbackContext, Int32 contextId, Int8);
-typedef Dart_MatchImageSnapshotCallback = void Function(Pointer<Void> callbackContext, int contextId, int);
+typedef Native_MatchImageSnapshotCallback = Void Function(Pointer<Void> callbackContext, Int32 contextId, Int8, Pointer<Utf8>);
+typedef Dart_MatchImageSnapshotCallback = void Function(Pointer<Void> callbackContext, int contextId, int, Pointer<Utf8>);
 typedef Native_MatchImageSnapshot = Void Function(
     Pointer<Void> callbackContext, Int32 contextId,
     Pointer<Uint8>, Int32, Pointer<NativeString>, Pointer<NativeFunction<Native_MatchImageSnapshotCallback>>);
@@ -59,7 +59,10 @@ void _matchImageSnapshot(Pointer<Void> callbackContext, int contextId, Pointer<U
   Dart_MatchImageSnapshotCallback callback = pointer.asFunction();
   String filename = nativeStringToString(snapshotNamePtr);
   matchImageSnapshot(bytes.asTypedList(size), filename).then((value) {
-    callback(callbackContext, contextId, value ? 1 : 0);
+    callback(callbackContext, contextId, value ? 1 : 0, nullptr);
+  }).catchError((e, stack) {
+    String errmsg = '$e\n$stack';
+    callback(callbackContext, contextId, 0, errmsg.toNativeUtf8());
   });
 }
 

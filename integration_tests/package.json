@@ -8,7 +8,7 @@
     "clean": "rm -rf ./.specs && git clean -xfd ./snapshots",
     "specs": "webpack --config ./webpack.config.js",
     "prettier": "prettier --no-config --single-quote --trailing-comma=es5 --write ./specs/{.,**,**/**}/*.ts",
-    "integration": "npm run specs && node scripts/core_integration_starter",
+    "integration": "npm run clean && npm run specs && node scripts/core_integration_starter",
     "plugin_integration": "npm run specs && node scripts/plugin_integration_starter"
   },
   "devDependencies": {

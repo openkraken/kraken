@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/module.dart';
@@ -41,6 +42,7 @@ class IntegrationTestUriParser extends UriParser {
 // By CLI: `KRAKEN_ENABLE_TEST=true flutter run`
 void main() async {
   defineKrakenCustomElements();
+  setObjectElementFactory(customObjectElementFactory);
 
   // FIXME: This is a workaround for testcase
   ParagraphElement.defaultStyle = {
@@ -55,6 +57,7 @@ void main() async {
     // This segment inject variables for test environment.
     LOCAL_HTTP_SERVER = '${httpServer.getUri().toString()}';
   ''';
+
 
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
   CSSText.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
@@ -136,6 +139,11 @@ void main() async {
     }
 
     List<String> results = await Future.wait(testResults);
+
+    // Manual dispose context for memory leak check.
+    krakenMap.forEach((key, kraken) {
+      disposeContext(kraken.controller!.view.contextId);
+    });
 
     for (int i = 0; i < results.length; i ++) {
       String status = results[i];

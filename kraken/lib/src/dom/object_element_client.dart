@@ -20,7 +20,7 @@ abstract class ObjectElementHost implements EventTarget {
 abstract class ObjectElementClient {
   Future<dynamic> initElementClient(Map<String, dynamic> properties);
 
-  dynamic method(String name, List args);
+  dynamic handleJSCall(String method, List argv);
 
   void setStyle(String key, dynamic value);
 

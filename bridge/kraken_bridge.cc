@@ -8,11 +8,14 @@
 #include "foundation/logging.h"
 #include "foundation/ui_task_queue.h"
 #include "foundation/inspector_task_queue.h"
-#include "bindings/jsc/KOM/performance.h"
 
-#ifdef KRAKEN_ENABLE_JSA
-#include "bridge_jsa.h"
-#elif KRAKEN_JSC_ENGINE
+#if KRAKEN_JSC_ENGINE
+#include "bindings/jsc/KOM/performance.h"
+#elif KRAKEN_QUICK_JS_ENGINE
+#include "bridge_qjs.h"
+#endif
+
+#if KRAKEN_JSC_ENGINE
 #include "bridge_jsc.h"
 #endif
 
@@ -47,7 +50,7 @@ std::atomic<bool> inited{false};
 std::atomic<int32_t> poolIndex{0};
 int maxPoolSize = 0;
 kraken::JSBridge **contextPool;
-Screen screen;
+NativeScreen screen;
 
 std::__thread_id uiThreadId;
 
@@ -55,7 +58,7 @@ std::__thread_id getUIThreadId() {
   return uiThreadId;
 }
 
-void printError(int32_t contextId, const char* errmsg, void *errorObject) {
+void printError(int32_t contextId, const char* errmsg) {
   if (kraken::getDartMethod()->onJsError != nullptr) {
     kraken::getDartMethod()->onJsError(contextId, errmsg);
   }
@@ -106,10 +109,6 @@ void disposeContext(int32_t contextId) {
   auto context = static_cast<kraken::JSBridge *>(contextPool[contextId]);
   delete context;
   contextPool[contextId] = nullptr;
-#if ENABLE_PROFILE
-  auto nativePerformance = kraken::binding::jsc::NativePerformance::instance(contextId);
-  nativePerformance->entries.clear();
-#endif
 }
 
 int32_t allocateNewContext(int32_t targetContextId) {
@@ -150,22 +149,16 @@ void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFi
   context->evaluateScript(code, bundleFilename, startLine);
 }
 
-void parseHTML(int32_t contextId, NativeString *code, const char *bundleFilename) {
+void evaluateQuickjsByteCode(int32_t contextId, uint8_t *bytes, int32_t byteLen) {
+  assert(checkContext(contextId) && "evaluateScripts: contextId is not valid");
+  auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
+  context->evaluateByteCode(bytes, byteLen);
+}
+
+void parseHTML(int32_t contextId, const char *code, int32_t length) {
   assert(checkContext(contextId) && "parseHTML: contextId is not valid");
   auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
-  context->parseHTML(code, bundleFilename);
-}
-
-void setHref(int32_t contextId, const char *href) {
-  assert(checkContext(contextId) && "setHref: contextId is not valid");
-  auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
-  context->setHref(href);
-}
-
-NativeString* getHref(int32_t contextId) {
-  assert(checkContext(contextId) && "getHref: contextId is not valid");
-  auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
-  return context->getHref();
+  context->parseHTML(code, length);
 }
 
 void reloadJsContext(int32_t contextId) {
@@ -187,7 +180,7 @@ void registerDartMethods(uint64_t *methodBytes, int32_t length) {
   kraken::registerDartMethods(methodBytes, length);
 }
 
-Screen *createScreen(double width, double height) {
+NativeScreen *createScreen(double width, double height) {
   screen.width = width;
   screen.height = height;
   return &screen;
@@ -246,10 +239,10 @@ void registerContextDisposedCallbacks(int32_t contextId, Task task, void *data) 
 
 }
 
-void registerPluginSource(NativeString *code, const char *pluginName) {
-  kraken::JSBridge::pluginSourceCode[pluginName] = NativeString{
-    code->string,
-    code->length
+void registerPluginByteCode(uint8_t *bytes, int32_t length, const char *pluginName) {
+  kraken::JSBridge::pluginByteCode[pluginName] = NativeByteCode{
+    bytes,
+    length
   };
 }
 

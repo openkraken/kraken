@@ -4,7 +4,6 @@
  */
 
 import 'dart:async';
-import 'dart:collection';
 import 'dart:ui';
 import 'dart:ffi';
 import 'dart:math' as math;
@@ -26,11 +25,6 @@ import 'package:kraken/gesture.dart';
 
 const String INPUT = 'INPUT';
 const String VALUE = 'value';
-
-final Pointer<NativeFunction<GetInputWidth>> nativeGetInputWidth = Pointer.fromFunction(InputElement.getInputWidth, 0.0);
-final Pointer<NativeFunction<GetInputHeight>> nativeGetInputHeight = Pointer.fromFunction(InputElement.getInputHeight, 0.0);
-final Pointer<NativeFunction<InputElementMethodVoidCallback>> nativeInputMethodFocus = Pointer.fromFunction(InputElement.callMethodFocus);
-final Pointer<NativeFunction<InputElementMethodVoidCallback>> nativeInputMethodBlur = Pointer.fromFunction(InputElement.callMethodBlur);
 
 /// https://www.w3.org/TR/css-sizing-3/#intrinsic-sizes
 /// For boxes without a preferred aspect ratio:
@@ -178,41 +172,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
   }
 
-  static final SplayTreeMap<int, InputElement> _nativeMap = SplayTreeMap();
-
-  static InputElement getInputElementOfNativePtr(Pointer<NativeInputElement> nativePtr) {
-    InputElement? element = _nativeMap[nativePtr.address];
-    if (element == null) throw FlutterError('Can not get element from nativeElement: $nativePtr');
-    return element;
-  }
-
-  // el.width
-  static double getInputWidth(Pointer<NativeInputElement> nativeInputElement) {
-    // @TODO: Apply algorithm of input element property width.
-    return 0.0;
-  }
-
-  // el.height
-  static double getInputHeight(Pointer<NativeInputElement> nativeInputElement) {
-    // @TODO: Apply algorithm of input element property height.
-    return 0.0;
-  }
-
-  static void callMethodFocus(Pointer<NativeInputElement> nativeInputElement) {
-    InputElement inputElement = getInputElementOfNativePtr(nativeInputElement);
-    InputElement.setFocus(inputElement);
-  }
-
-  static void callMethodBlur(Pointer<NativeInputElement> nativeInputElement) {
-    InputElement inputElement = getInputElementOfNativePtr(nativeInputElement);
-    if (inputElement == InputElement.focusInputElement) {
-      InputElement.clearFocus();
-    }
-  }
-
   static String obscuringCharacter = '•';
 
-  final Pointer<NativeInputElement> nativeInputElement;
   Timer? _cursorTimer;
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(false);
@@ -271,31 +232,67 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   InputElement(
     int targetId,
-    this.nativeInputElement,
+    Pointer<NativeEventTarget> nativeEventTarget,
     ElementManager elementManager, {
     this.textAlign = TextAlign.left,
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
-  }) : super(
-    targetId,
-    nativeInputElement.ref.nativeElement,
-    elementManager,
-    tagName: INPUT,
-    defaultStyle: _defaultStyle,
-    isIntrinsicBox: true,
-    repaintSelf: true,
-  ) {
-    _nativeMap[nativeInputElement.address] = this;
-
+  }) : super(targetId, nativeEventTarget, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
     _textSelectionDelegate = EditableTextDelegate(this);
-
-    nativeInputElement.ref.getInputWidth = nativeGetInputWidth;
-    nativeInputElement.ref.getInputHeight = nativeGetInputHeight;
-    nativeInputElement.ref.focus = nativeInputMethodFocus;
-    nativeInputElement.ref.blur = nativeInputMethodBlur;
-
     scrollOffsetX = _scrollableX.position;
+  }
+
+  String _getValue() {
+    TextEditingValue value = _textSelectionDelegate._textEditingValue;
+    return value.text;
+  }
+
+  @override
+  getProperty(String key) {
+    switch(key) {
+      // @TODO: Apply algorithm of input element property width.
+      case 'width':
+      case 'height':
+        return 0.0;
+      case 'value':
+        return _getValue();
+      case 'accept':
+      case 'autocomplete':
+      case 'autofocus':
+      case 'required':
+      case 'readonly':
+      case 'pattern':
+      case 'step':
+      case 'name':
+      case 'multiple':
+      case 'checked':
+      case 'disabled':
+      case 'min':
+      case 'max':
+      case 'minlength':
+      case 'maxlength':
+      case 'size':
+        return properties[jsMethodToKey(key)];
+      case 'placeholder':
+        return placeholderText;
+      case 'type':
+        return _getType();
+    }
+    return super.getProperty(key);
+  }
+
+  @override
+  handleJSCall(String method, List argv) {
+    switch(method) {
+      case 'focus':
+        setFocus(this);
+        break;
+      case 'blur':
+        clearFocus();
+        break;
+    }
+    return super.handleJSCall(method, argv);
   }
 
   @override
@@ -351,7 +348,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void setRenderStyle(String key, value) {
     super.setRenderStyle(key, value);
 
-    if (_renderInputLeaderLayer != null) {
+    if (_renderInputLeaderLayer != null && isRendererAttached) {
       RenderStyle renderStyle = renderBoxModel!.renderStyle;
       if (key == HEIGHT) {
         _renderInputLeaderLayer!.markNeedsLayout();
@@ -414,7 +411,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       .size;
     return textSize;
   }
-  
+
   Size? _textSize;
 
   // Whether gesture is dragging.
@@ -454,7 +451,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
       TouchList touches = (event as TouchEvent).touches;
       if (touches.length > 1) return;
-      
+
       Touch touch = touches.item(0);
       Offset _selectEndPosition = Offset(touch.clientX, touch.clientY);
       // Disable text selection and enable scrolling when text size is larger than input size.
@@ -468,7 +465,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         }
         return;
       }
-      
+
       _renderEditable!.selectPositionAt(
         from: _selectStartPosition!,
         to: _selectEndPosition,
@@ -888,7 +885,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   @override
   void updateEditingValue(TextEditingValue value) {
      _lastKnownRemoteTextEditingValue = value;
-     
+
     if (value == _value) {
       // This is possible, for example, when the numeric keyboard is input,
       // the engine will notify twice for the same value.
@@ -984,6 +981,21 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         break;
       // @TODO: more types.
     }
+  }
+  String _getType() {
+    if (textInputType == TextInputType.text) {
+      return 'text';
+    } else if (textInputType == TextInputType.number) {
+      return 'number';
+    } else if (textInputType == TextInputType.phone) {
+      return 'tel';
+    } else if (textInputType == TextInputType.emailAddress) {
+      return 'email';
+    } else if (textInputType == TextInputType.text && obscureText) {
+      return 'password';
+    }
+    // @TODO: more types.
+    return '';
   }
 
   bool _hideVirtualKeyboard = false;
@@ -1207,12 +1219,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void showAutocorrectionPromptRect(int start, int end) {
     // TODO: implement showAutocorrectionPromptRect
     print('ShowAutocorrectionPromptRect start: $start, end: $end');
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _nativeMap.remove(nativeInputElement.address);
   }
 }
 

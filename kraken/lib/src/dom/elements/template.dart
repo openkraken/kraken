@@ -15,6 +15,6 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class TemplateElement extends Element {
-  TemplateElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  TemplateElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super( targetId, nativePtr, elementManager, tagName: TEMPLATE, defaultStyle: _defaultStyle);
 }

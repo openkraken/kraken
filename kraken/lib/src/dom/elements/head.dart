@@ -20,33 +20,34 @@ const String NOSCRIPT = 'NOSCRIPT';
 const String SCRIPT = 'SCRIPT';
 
 class HeadElement extends Element {
-  HeadElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  HeadElement(int targetId, Pointer<NativeEventTarget>   nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: HEAD, defaultStyle: _defaultStyle);
 }
 
 class LinkElement extends Element {
-  LinkElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  LinkElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: LINK, defaultStyle: _defaultStyle);
 }
 
 class MetaElement extends Element {
-  MetaElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  MetaElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: META, defaultStyle: _defaultStyle);
 }
 
 class TitleElement extends Element {
-  TitleElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  TitleElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: TITLE, defaultStyle: _defaultStyle);
 }
 
 class NoScriptElement extends Element {
-  NoScriptElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  NoScriptElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: NOSCRIPT, defaultStyle: _defaultStyle);
 }
 
 class ScriptElement extends Element {
-  ScriptElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: SCRIPT, defaultStyle: _defaultStyle);
+  ScriptElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
+      : super(targetId, nativePtr, elementManager, tagName: SCRIPT, defaultStyle: _defaultStyle) {
+  }
 
   @override
   void setProperty(String key, dynamic value) {
@@ -87,6 +88,6 @@ class ScriptElement extends Element {
 
 // TODO
 class StyleElement extends Element {
-  StyleElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  StyleElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: STYLE, defaultStyle: _defaultStyle);
 }
