@@ -47,7 +47,7 @@ describe('Align text-align', () => {
     await snapshot();
   });
 
-  it('works with inheritance', (done) => {
+  it('works with inheritance', async (done) => {
     let div1;
     let div2;
     let div = createElement('div', {
@@ -89,13 +89,12 @@ describe('Align text-align', () => {
     container.appendChild(div);
     BODY.appendChild(container);
 
-    (async () => {
+    await snapshot();
+    requestAnimationFrame(async () => {
+      container.style.textAlign = 'right';
       await snapshot();
-      requestAnimationFrame(async () => {
-        container.style.textAlign = 'right';
-        await snapshot();
-      });
-    })();
+      done();
+    });
   });
 
   it('works only with inline and inline-block', async () => {
