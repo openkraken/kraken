@@ -3,11 +3,13 @@
   "scripts": {
     "pretest": "npm install",
     "test": "flutter pub get && flutter clean && npm run clean && npm run lint && npm run integration",
+    "plugin_test": "npm run pretest && flutter pub get && flutter clean && npm run clean && npm run lint && npm run plugin_integration",
     "lint": "cd ../ && npm run lint",
     "clean": "rm -rf ./.specs && git clean -xfd ./snapshots",
     "specs": "webpack --config ./webpack.config.js",
     "prettier": "prettier --no-config --single-quote --trailing-comma=es5 --write ./specs/{.,**,**/**}/*.ts",
-    "integration": "npm run specs && node scripts/integration_starter"
+    "integration": "npm run specs && node scripts/core_integration_starter",
+    "plugin_integration": "npm run specs && node scripts/plugin_integration_starter"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
