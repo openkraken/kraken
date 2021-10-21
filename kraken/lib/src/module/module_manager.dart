@@ -74,8 +74,7 @@ class ModuleManager {
     }
 
     BaseModule module = _moduleMap[moduleName]!;
-    String result = module.invoke(method, params, callback);
-    return result;
+    return module.invoke(method, params, callback);
   }
 
   void dispose() {

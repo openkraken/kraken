@@ -17,6 +17,11 @@ typedef NativeAsyncAnonymousFunctionCallback = Void Function(
     Pointer<Void> callbackContext, Pointer<NativeValue> nativeValue, Int32 contextId, Pointer<Utf8> errmsg);
 typedef DartAsyncAnonymousFunctionCallback = void Function(Pointer<Void> callbackContext, Pointer<NativeValue> nativeValue, int contextId, Pointer<Utf8> errmsg);
 
+// We have some integrated built-in behavior starting with string prefix reuse the callNativeMethod implements.
+final String AnonymousFunctionCallPreFix = '_anonymous_fn_';
+final String AsyncAnonymousFunctionCallPreFix = '_anonymous_async_fn_';
+final String GetPropertyCallPreFix = '_getProperty_';
+
 void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> returnedValue, Pointer<NativeString> nativeMethod, int argc, Pointer<NativeValue> argv) {
   String method = nativeStringToString(nativeMethod);
   List<dynamic> values = List.generate(argc, (i) {
@@ -24,8 +29,8 @@ void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> re
     return fromNativeValue(nativeValue);
   });
 
-  if (method.startsWith('_anonymous_fn_')) {
-    int id = int.parse(method.substring('_anonymous_fn_'.length));
+  if (method.startsWith(AnonymousFunctionCallPreFix)) {
+    int id = int.parse(method.substring(AnonymousFunctionCallPreFix.length));
     AnonymousNativeFunction fn = getAnonymousNativeFunctionFromId(id)!;
     try {
       dynamic result = fn(values);
@@ -35,8 +40,8 @@ void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> re
       toNativeValue(returnedValue, null);
     }
     removeAnonymousNativeFunctionFromId(id);
-  } else if (method.startsWith('_anonymous_async_fn_')) {
-    int id = int.parse(method.substring('_anonymous_async_fn_'.length));
+  } else if (method.startsWith(AsyncAnonymousFunctionCallPreFix)) {
+    int id = int.parse(method.substring(AsyncAnonymousFunctionCallPreFix.length));
     AsyncAnonymousNativeFunction fn = getAsyncAnonymousNativeFunctionFromId(id)!;
     int contextId = values[0];
     Pointer<Void> callbackContext = (values[1] as Pointer).cast<Void>();
@@ -57,8 +62,8 @@ void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> re
   } else {
     EventTarget eventTarget = EventTarget.getEventTargetOfNativePtr(nativeEventTarget.cast<NativeEventTarget>());
     try {
-      if (method.startsWith('_getProperty_') && values.isEmpty) {
-        String key = method.substring('_getProperty_'.length);
+      if (method.startsWith(GetPropertyCallPreFix) && values.isEmpty) {
+        String key = method.substring(GetPropertyCallPreFix.length);
         dynamic result = (eventTarget as Element).getProperty(key);
         toNativeValue(returnedValue, result);
       } else {

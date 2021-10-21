@@ -18,6 +18,7 @@ namespace kraken::binding::qjs {
 
 static std::atomic<int32_t> globalEventTargetId{0};
 std::once_flag kEventTargetInitFlag;
+#define GetPropertyCallPreFix "_getProperty_"
 
 void bindEventTarget(std::unique_ptr<JSContext> &context) {
   auto *constructor = EventTarget::instance(context.get());
@@ -487,7 +488,7 @@ void EventTargetInstance::finalize(JSRuntime *rt, JSValue val) {
 }
 
 JSValue EventTargetInstance::getNativeProperty(const char *prop) {
-  std::string method = "_getProperty_" + std::string(prop);
+  std::string method = GetPropertyCallPreFix + std::string(prop);
   getDartMethod()->flushUICommand();
   JSValue result = callNativeMethods(method.c_str(), 0, nullptr);
   return result;

@@ -238,7 +238,7 @@ class Kraken extends StatefulWidget {
     }
   }
 
-  loadContent(String bundleContent, {String aaa = ''}) async {
+  loadContent(String bundleContent) async {
     await controller!.unload();
     await controller!.loadBundle(
       bundleContent: bundleContent

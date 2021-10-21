@@ -1220,11 +1220,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     // TODO: implement showAutocorrectionPromptRect
     print('ShowAutocorrectionPromptRect start: $start, end: $end');
   }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }
 
 /// RenderLeaderLayer of input element used for toolbar overlay to float with.
