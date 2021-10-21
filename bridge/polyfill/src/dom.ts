@@ -11,7 +11,6 @@ Object.defineProperty(document, 'head', {
   get() {
     return head;
   },
-  writable: false,
   enumerable: true,
   configurable: false
 });
