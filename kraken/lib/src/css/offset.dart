@@ -77,18 +77,9 @@ mixin CSSPositionMixin on RenderStyleBase {
     return _zIndex;
   }
   set zIndex(int? value) {
-    if (value != null || _zIndex == value) return;
+    if (_zIndex == value) return;
     _zIndex = value;
     _markParentNeedsLayout();
-    // Needs to sort children when parent paint children
-    if (renderBoxModel!.parentData is RenderLayoutParentData) {
-      RenderLayoutBox parent = renderBoxModel!.parent as RenderLayoutBox;
-      final RenderLayoutParentData parentData = renderBoxModel!.parentData as RenderLayoutParentData;
-      RenderBox? nextSibling = parentData.nextSibling;
-
-      parent.sortedChildren.remove(renderBoxModel);
-      parent.insertChildIntoSortedChildren(renderBoxModel!, after: nextSibling);
-    }
   }
 
   CSSPositionType _position = DEFAULT_POSITION_TYPE;

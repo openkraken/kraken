@@ -589,14 +589,14 @@ class Element extends Node
 
     if (display != CSSDisplay.none) {
       willAttachRenderer();
-      // Flush pending style before child attached.
-      style.flushPendingProperties();
 
       if (parent is Element) {
         parent.addChildRenderObject(this, after: after);
       } else if (parent is Document) {
         parent.appendChild(this);
       }
+      // Flush pending style before child attached.
+      style.flushPendingProperties();
       // Delay position set on node attach cause position depends on renderStyle of parent.
       _updateRenderBoxModelWithPosition();
 
@@ -849,6 +849,7 @@ class Element extends Node
         break;
       case Z_INDEX:
         renderStyle.zIndex = value;
+        _updateRenderBoxModelWithZIndex();
         break;
       case OVERFLOW_X:
         CSSOverflowType oldTransformedOverflowY = renderStyle.transformedOverflowY;
@@ -1054,8 +1055,8 @@ class Element extends Node
         break;
       // Text
       case COLOR:
-        // TODO: Color change should trigger currentColor update
         renderStyle.color = value;
+        _updateColorRelativePropertyWithColor(this);
         break;
       case TEXT_DECORATION_LINE:
         renderStyle.textDecorationLine = value;
@@ -1323,6 +1324,18 @@ class Element extends Node
   void setRenderStyle(String property, dynamic present) {
     dynamic value = _resolveRenderStyleValue(property, present);
     setRenderStyleProperty(property, value);
+  }
+
+  void _updateColorRelativePropertyWithColor(Element element) {
+    RenderStyle renderStyle = element.renderStyle;
+    renderStyle.updateColorRelativeProperty();
+    if (element.children.isNotEmpty) {
+      element.children.forEach((Element child) {
+        if (!child.renderStyle.hasColor) {
+          _updateColorRelativePropertyWithColor(child);
+        }
+      });
+    }
   }
 
   void _updateFontRelativeLengthWithFontSize() {
@@ -1837,8 +1850,19 @@ class Element extends Node
     }
     return intrinsic;
   }
-}
 
+  void _updateRenderBoxModelWithZIndex() {
+    // Needs to sort children when parent paint children
+    if (renderBoxModel!.parentData is RenderLayoutParentData) {
+      RenderLayoutBox parent = renderBoxModel!.parent as RenderLayoutBox;
+      final RenderLayoutParentData parentData = renderBoxModel!.parentData as RenderLayoutParentData;
+      RenderBox? nextSibling = parentData.nextSibling;
+
+      parent.sortedChildren.remove(renderBoxModel);
+      parent.insertChildIntoSortedChildren(renderBoxModel!, after: nextSibling);
+    }
+  }
+}
 
 Element? _findContainingBlock(Element element) {
   Element? _el = element.parentElement;

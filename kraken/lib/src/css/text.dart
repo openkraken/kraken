@@ -13,6 +13,8 @@ final RegExp _commaRegExp = RegExp(r'\s*,\s*');
 // CSS Box Alignment: https://drafts.csswg.org/css-align/
 mixin CSSTextMixin on RenderStyleBase {
 
+  bool get hasColor => _color != null;
+
   Color? _color;
   Color get color {
     // Get style from self or closest parent if specified style property is not set
