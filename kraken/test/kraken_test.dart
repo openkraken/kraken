@@ -7,6 +7,7 @@ import 'package:kraken/foundation.dart';
 
 import 'foundation.dart' as foundation;
 import 'module.dart' as module;
+import 'gesture.dart' as gesture;
 import 'local_http_server.dart';
 
 // The main entry for kraken unit test.
@@ -32,6 +33,7 @@ void main() {
   // Start tests.
   foundation.main();
   module.main();
+  gesture.main();
 
   tearDownAll(() {
     if (tempDirectory.existsSync()) {
