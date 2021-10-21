@@ -858,12 +858,28 @@ class Element extends Node
         renderStyle.zIndex = value;
         break;
       case OVERFLOW_X:
+        CSSOverflowType oldTransformedOverflowY = renderStyle.transformedOverflowY;
         renderStyle.overflowX = value;
         updateRenderBoxModelWithOverflowX(_handleScroll);
+
+        // Change overflowX may affect transformedOverflowY.
+        // https://drafts.csswg.org/css-overflow/#overflow-properties
+        CSSOverflowType transformedOverflowY = renderStyle.transformedOverflowY;
+        if (transformedOverflowY != oldTransformedOverflowY) {
+          updateRenderBoxModelWithOverflowY(_handleScroll);
+        }
         break;
       case OVERFLOW_Y:
+        CSSOverflowType oldTransformedOverflowX = renderStyle.transformedOverflowX;
         renderStyle.overflowY = value;
         updateRenderBoxModelWithOverflowY(_handleScroll);
+
+        // Change overflowY may affect the transformedOverflowX.
+        // https://drafts.csswg.org/css-overflow/#overflow-properties
+        CSSOverflowType transformedOverflowX = renderStyle.transformedOverflowX;
+        if (transformedOverflowX != oldTransformedOverflowX) {
+          updateRenderBoxModelWithOverflowX(_handleScroll);
+        }
         break;
       case OPACITY:
         renderStyle.opacity = value;
