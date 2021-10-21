@@ -626,6 +626,23 @@ class RenderFlexLayout extends RenderLayoutBox {
           .mark(PERF_FLEX_LAYOUT_START, uniqueId: hashCode);
     }
 
+    _doPerformLayout();
+
+    if (needsRelayout) {
+      _doPerformLayout();
+      needsRelayout = false;
+    }
+
+    if (kProfileMode) {
+      DateTime flexLayoutEndTime = DateTime.now();
+      int amendEndTime =
+          flexLayoutEndTime.microsecondsSinceEpoch - childLayoutDuration;
+      PerformanceTiming.instance().mark(PERF_FLEX_LAYOUT_END,
+          uniqueId: hashCode, startTime: amendEndTime);
+    }
+  }
+
+  void _doPerformLayout() {
     beforeLayout();
 
     RenderBox? child = firstChild;
@@ -649,7 +666,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     child = firstChild;
     while (child != null) {
       final RenderLayoutParentData childParentData =
-          child.parentData as RenderLayoutParentData;
+      child.parentData as RenderLayoutParentData;
 
       if (child is RenderBoxModel && childParentData.isPositioned) {
         CSSPositionedLayout.applyPositionedChildOffset(this, child);
@@ -657,7 +674,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         extendMaxScrollableSize(child);
         ensureBoxSizeLargerThanScrollableSize();
       } else if (child is RenderBoxModel &&
-          CSSPositionedLayout.isSticky(child)) {
+        CSSPositionedLayout.isSticky(child)) {
         RenderBoxModel scrollContainer = child.findScrollContainer()!;
         // Sticky offset depends on the layout of scroll container, delay the calculation of
         // sticky offset to the layout stage of  scroll container if its not layouted yet
@@ -670,7 +687,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     bool isScrollContainer =
-      (renderStyle.transformedOverflowX != CSSOverflowType.visible ||
+    (renderStyle.transformedOverflowX != CSSOverflowType.visible ||
       renderStyle.transformedOverflowY != CSSOverflowType.visible);
     if (isScrollContainer) {
       // Find all the sticky children when scroll container is layouted
@@ -682,14 +699,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     didLayout();
-
-    if (kProfileMode) {
-      DateTime flexLayoutEndTime = DateTime.now();
-      int amendEndTime =
-          flexLayoutEndTime.microsecondsSinceEpoch - childLayoutDuration;
-      PerformanceTiming.instance().mark(PERF_FLEX_LAYOUT_END,
-          uniqueId: hashCode, startTime: amendEndTime);
-    }
   }
 
 
@@ -710,8 +719,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   /// 2. Relayout children according to flex-grow and flex-shrink factor
   /// 3. Set flex container size according to children size
   /// 4. Align children according to justify-content, align-items and align-self properties
-  void _layoutChildren(RenderPositionHolder? placeholderChild,
-      {bool needsRelayout = false}) {
+  void _layoutChildren(RenderPositionHolder? placeholderChild) {
     /// If no child exists, stop layout.
     if (childCount == 0) {
       Size layoutSize = getLayoutSize(
@@ -750,7 +758,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       runMetrics,
       placeholderChild,
       containerSizeMap,
-      needsRelayout,
     );
 
     /// If no non positioned child exists, stop layout
@@ -855,7 +862,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     List<_RunMetrics> runMetrics,
     RenderPositionHolder? placeholderChild,
     Map<String, double?> containerSizeMap,
-    bool needsRelayout,
   ) {
     double mainAxisExtent = 0.0;
     double crossAxisExtent = 0.0;

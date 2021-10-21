@@ -7,6 +7,7 @@ import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
 
 // https://drafts.csswg.org/css-values-3/#absolute-lengths
 const _1in = 96; // 1in = 2.54cm = 96px
@@ -122,11 +123,10 @@ class CSSLengthValue {
 
         RenderStyle? parentRenderStyle = renderStyle!.parent;
 
-        // Use logical not rendered width as base length for percentage calculation, cause
-        // its parent is not renderer yet when child is layouting.
+        // Percentage relative width priority: logical width > renderer width
         double? relativeParentWidth = isPositioned ?
-          parentRenderStyle?.paddingBoxLogicalWidth :
-          parentRenderStyle?.contentBoxLogicalWidth;
+          parentRenderStyle?.paddingBoxLogicalWidth ?? parentRenderStyle?.paddingBoxWidth :
+          parentRenderStyle?.contentBoxLogicalWidth ?? parentRenderStyle?.contentBoxWidth;
 
         // The percentage of height is calculated with respect to the height of the generated box's containing block.
         // If the height of the containing block is not specified explicitly (i.e., it depends on content height),
@@ -137,11 +137,12 @@ class CSSLengthValue {
         bool isParentFlexLayout = parentRenderStyle?.display == CSSDisplay.flex ||
           parentRenderStyle?.display == CSSDisplay.inlineFlex;
 
-        // Use logical not rendered height as base length for percentage calculation, cause
-        // its parent is not renderer yet when child is layouting.
+        // Percentage relative height priority: logical height > renderer height
         double? relativeParentHeight = isPositioned || isParentFlexLayout ?
-          parentRenderStyle?.paddingBoxLogicalHeight :
-          parentRenderStyle?.contentBoxLogicalHeight;
+          parentRenderStyle?.paddingBoxLogicalHeight ?? parentRenderStyle?.paddingBoxHeight :
+          parentRenderStyle?.contentBoxLogicalHeight ?? parentRenderStyle?.contentBoxHeight;
+
+        RenderBoxModel? renderBoxModel = renderStyle!.renderBoxModel;
 
         switch (propertyName) {
           case FONT_SIZE:
@@ -161,6 +162,12 @@ class CSSLengthValue {
           case MAX_WIDTH:
             if (relativeParentWidth != null) {
               _computedValue = value! * relativeParentWidth;
+            } else {
+              // Mark parent to relayout to get renderer width of parent.
+              if (renderBoxModel != null) {
+                renderBoxModel.markParentNeedsRelayout();
+              }
+              _computedValue = 0;
             }
             break;
           case HEIGHT:
@@ -168,6 +175,12 @@ class CSSLengthValue {
           case MAX_HEIGHT:
             if (relativeParentHeight != null) {
               _computedValue = value! * relativeParentHeight;
+            } else {
+              // Mark parent to relayout to get renderer height of parent.
+              if (renderBoxModel != null) {
+                renderBoxModel.markParentNeedsRelayout();
+              }
+              _computedValue = 0;
             }
             break;
           case PADDING_TOP:
@@ -182,6 +195,12 @@ class CSSLengthValue {
             // Percentage refer to logical width of containing block
             if (relativeParentWidth != null) {
               _computedValue = value! * relativeParentWidth;
+            } else {
+              // Mark parent to relayout to get renderer height of parent.
+              if (renderBoxModel != null) {
+                renderBoxModel.markParentNeedsRelayout();
+              }
+              _computedValue = 0;
             }
             break;
           case FLEX_BASIS:
@@ -194,6 +213,12 @@ class CSSLengthValue {
               parentRenderStyle?.paddingBoxLogicalWidth;
             if (parentPaddingBoxWidth != null) {
               _computedValue = value! * parentPaddingBoxWidth;
+            } else {
+              // Mark parent to relayout to get renderer height of parent.
+              if (renderBoxModel != null) {
+                renderBoxModel.markParentNeedsRelayout();
+              }
+              _computedValue = 0;
             }
             break;
           case LEFT:
@@ -203,6 +228,12 @@ class CSSLengthValue {
               parentRenderStyle?.paddingBoxLogicalHeight;
             if (parentPaddingBoxHeight != null) {
               _computedValue = value! * parentPaddingBoxHeight;
+            } else {
+              // Mark parent to relayout to get renderer height of parent.
+              if (renderBoxModel != null) {
+                renderBoxModel.markParentNeedsRelayout();
+              }
+              _computedValue = 0;
             }
           break;
           case BACKGROUND_SIZE:
@@ -214,10 +245,26 @@ class CSSLengthValue {
             // Percentages for the vertical axis refer to the height of the box.
             double? borderBoxWidth = renderStyle!.borderBoxWidth ?? renderStyle!.borderBoxLogicalWidth;
             double? borderBoxHeight = renderStyle!.borderBoxHeight ?? renderStyle!.borderBoxLogicalHeight;
-            if (axisType == Axis.horizontal && borderBoxWidth != null) {
-              _computedValue = value! * borderBoxWidth;
-            } else if (axisType == Axis.vertical && borderBoxHeight != null) {
-              _computedValue = value! * borderBoxHeight;
+            if (axisType == Axis.horizontal) {
+              if (borderBoxWidth != null) {
+                _computedValue = value! * borderBoxWidth;
+              } else {
+                // Mark parent to relayout to get renderer height of parent.
+                if (renderBoxModel != null) {
+                  renderBoxModel.markParentNeedsRelayout();
+                }
+                _computedValue = 0;
+              }
+            } else if (axisType == Axis.vertical) {
+              if (borderBoxHeight != null) {
+                _computedValue = value! * borderBoxHeight;
+              } else {
+                // Mark parent to relayout to get renderer height of parent.
+                if (renderBoxModel != null) {
+                  renderBoxModel.markParentNeedsRelayout();
+                }
+                _computedValue = 0;
+              }
             }
           break;
         }

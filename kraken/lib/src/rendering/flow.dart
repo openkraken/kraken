@@ -389,9 +389,26 @@ class RenderFlowLayout extends RenderLayoutBox {
     if (kProfileMode) {
       childLayoutDuration = 0;
       PerformanceTiming.instance()
-          .mark(PERF_FLOW_LAYOUT_START, uniqueId: hashCode);
+        .mark(PERF_FLOW_LAYOUT_START, uniqueId: hashCode);
     }
 
+    _doPerformLayout();
+
+    if (needsRelayout) {
+      _doPerformLayout();
+      needsRelayout = false;
+    }
+
+    if (kProfileMode) {
+      DateTime flowLayoutEndTime = DateTime.now();
+      int amendEndTime =
+        flowLayoutEndTime.microsecondsSinceEpoch - childLayoutDuration;
+      PerformanceTiming.instance().mark(PERF_FLOW_LAYOUT_END,
+        uniqueId: hashCode, startTime: amendEndTime);
+    }
+  }
+
+  void _doPerformLayout() {
     beforeLayout();
 
     RenderBox? child = firstChild;
@@ -399,10 +416,10 @@ class RenderFlowLayout extends RenderLayoutBox {
     // Layout positioned element
     while (child != null) {
       final RenderLayoutParentData childParentData =
-          child.parentData as RenderLayoutParentData;
+      child.parentData as RenderLayoutParentData;
       if (childParentData.isPositioned) {
         CSSPositionedLayout.layoutPositionedChild(
-            this, child as RenderBoxModel);
+          this, child as RenderBoxModel);
       }
       child = childParentData.nextSibling;
     }
@@ -414,7 +431,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     child = firstChild;
     while (child != null) {
       final RenderLayoutParentData childParentData =
-          child.parentData as RenderLayoutParentData;
+      child.parentData as RenderLayoutParentData;
 
       if (child is RenderBoxModel && childParentData.isPositioned) {
         CSSPositionedLayout.applyPositionedChildOffset(this, child);
@@ -422,7 +439,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         extendMaxScrollableSize(child);
         ensureBoxSizeLargerThanScrollableSize();
       } else if (child is RenderBoxModel &&
-          CSSPositionedLayout.isSticky(child)) {
+        CSSPositionedLayout.isSticky(child)) {
         RenderBoxModel scrollContainer = child.findScrollContainer()!;
         // Sticky offset depends on the layout of scroll container, delay the calculation of
         // sticky offset to the layout stage of  scroll container if its not layouted yet
@@ -435,7 +452,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
 
     bool isScrollContainer =
-      (renderStyle.transformedOverflowX != CSSOverflowType.visible ||
+    (renderStyle.transformedOverflowX != CSSOverflowType.visible ||
       renderStyle.transformedOverflowY != CSSOverflowType.visible);
     if (isScrollContainer) {
       // Find all the sticky children when scroll container is layouted
@@ -447,17 +464,9 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
 
     didLayout();
-
-    if (kProfileMode) {
-      DateTime flowLayoutEndTime = DateTime.now();
-      int amendEndTime =
-          flowLayoutEndTime.microsecondsSinceEpoch - childLayoutDuration;
-      PerformanceTiming.instance().mark(PERF_FLOW_LAYOUT_END,
-          uniqueId: hashCode, startTime: amendEndTime);
-    }
   }
 
-  void _layoutChildren({bool needsRelayout = false}) {
+  void _layoutChildren() {
     RenderBox? child = firstChild;
 
     // If no child exists, stop layout.

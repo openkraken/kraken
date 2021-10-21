@@ -724,6 +724,19 @@ class RenderBoxModel extends RenderBox
   // Auto value for min-height
   double autoMinHeight = 0;
 
+  // Whether it needs relayout due to percentage calculation.
+  bool needsRelayout = false;
+
+  // Mark parent as needs relayout used in cases such as
+  // child has percentage length and parent's size can not be calculated by style
+  // thus parent needs relayout for its child calculate percentage length.
+  void markParentNeedsRelayout() {
+    RenderBoxModel? parent = this.parent as RenderBoxModel?;
+    if (parent != null) {
+      parent.needsRelayout = true;
+    }
+  }
+
   // Mirror debugNeedsLayout flag in Flutter to use in layout performance optimization
   bool needsLayout = false;
 

@@ -746,15 +746,8 @@ class Element extends Node
   void _addPositionHolder(RenderLayoutBox parentRenderLayoutBox, Element child, CSSPositionType position) {
     Size preferredSize = Size.zero;
     RenderBoxModel childRenderBoxModel = child.renderBoxModel!;
-    RenderStyle childRenderStyle = childRenderBoxModel.renderStyle;
-    if (position == CSSPositionType.sticky) {
-      preferredSize = Size(0, 0);
-    } else if (childRenderStyle.display != CSSDisplay.inline) {
-      preferredSize = Size(
-        childRenderStyle.width?.computedValue ?? 0,
-        childRenderStyle.height?.computedValue ?? 0,
-      );
-    }
+    // Position holder size will be updated on layout.
+    preferredSize = Size(0, 0);
     RenderPositionHolder childPositionHolder = RenderPositionHolder(preferredSize: preferredSize);
     childRenderBoxModel.renderPositionHolder = childPositionHolder;
     childPositionHolder.realDisplayedBox = childRenderBoxModel;
