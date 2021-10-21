@@ -154,8 +154,6 @@ PROP_SETTER(Touch, touchType)(QjsContext *ctx, JSValue this_val, int argc, JSVal
 
 TouchEvent::TouchEvent(JSContext *context) : Event(context) {}
 
-OBJECT_INSTANCE_IMPL(TouchEvent);
-
 JSValue TouchEvent::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Failed to construct 'TouchEvent': 1 argument required, but only 0 present.");

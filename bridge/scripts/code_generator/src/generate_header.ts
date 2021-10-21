@@ -67,6 +67,7 @@ function generateHostClassHeader(object: ClassObject) {
   if (object.type === 'Event') {
     let nativeStructPropsCode = object.props.map(p => {
       switch(p.kind) {
+        case PropsDeclarationKind.object:
         case PropsDeclarationKind.string:
           return `NativeString *${p.name};`;
         case PropsDeclarationKind.double:

@@ -11,8 +11,6 @@
 
 namespace kraken::binding::qjs {
 
-void updateLocation(std::string url);
-
 class Location : public HostObject {
 public:
   Location() = delete;
@@ -20,8 +18,6 @@ public:
 
   static JSValue reload(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
 private:
-  DEFINE_HOST_OBJECT_PROPERTY(1, href);
-
   ObjectFunction m_reload{m_context, jsObject, "reload", reload, 0};
 };
 

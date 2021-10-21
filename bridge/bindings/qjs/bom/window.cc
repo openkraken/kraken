@@ -11,8 +11,6 @@ namespace kraken::binding::qjs {
 
 std::once_flag kWindowInitOnceFlag;
 
-OBJECT_INSTANCE_IMPL(Window);
-
 void bindWindow(std::unique_ptr<JSContext> &context) {
   // Set globalThis and Window's prototype to EventTarget's prototype to support EventTarget methods in global.
   auto *windowConstructor = new Window(context.get());
@@ -120,14 +118,6 @@ PROP_SETTER(Window, parent)(QjsContext *ctx, JSValue this_val, int argc, JSValue
   return JS_NULL;
 }
 
-PROP_GETTER(Window, history)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, Window::classId()));
-  return JS_DupValue(ctx, window->m_history->jsObject);
-}
-PROP_SETTER(Window, history)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  return JS_NULL;
-}
-
 PROP_GETTER(Window, scrollX)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *window = static_cast<WindowInstance *>(JS_GetOpaque(this_val, 1));
   return window->callNativeMethods("scrollX", 0, nullptr);
@@ -173,7 +163,6 @@ WindowInstance::WindowInstance(Window *window) : EventTargetInstance(window, Win
 void WindowInstance::gcMark(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) {
   EventTargetInstance::gcMark(rt, val, mark_func);
 
-  JS_MarkValue(rt, m_history->jsObject, mark_func);
   JS_MarkValue(rt, m_location->jsObject, mark_func);
   JS_MarkValue(rt, onerror, mark_func);
 }

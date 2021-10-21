@@ -11,8 +11,6 @@ namespace kraken::binding::qjs {
 
 std::once_flag kCommentInitFlag;
 
-OBJECT_INSTANCE_IMPL(Comment);
-
 JSClassID Comment::kCommentClassId{0};
 
 void bindCommentNode(std::unique_ptr<JSContext> &context) {

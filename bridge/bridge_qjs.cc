@@ -12,7 +12,6 @@
 
 #include "bindings/qjs/bom/blob.h"
 #include "bindings/qjs/bom/console.h"
-#include "bindings/qjs/bom/history.h"
 #include "bindings/qjs/bom/performance.h"
 #include "bindings/qjs/bom/screen.h"
 #include "bindings/qjs/bom/timer.h"
@@ -39,6 +38,7 @@
 #include "bindings/qjs/dom/events/.gen/media_error_event.h"
 #include "bindings/qjs/dom/events/.gen/message_event.h"
 #include "bindings/qjs/dom/events/.gen/mouse_event.h"
+#include "bindings/qjs/dom/events/.gen/popstate_event.h"
 #include "bindings/qjs/dom/events/touch_event.h"
 #include "bindings/qjs/dom/style_declaration.h"
 #include "bindings/qjs/dom/text_node.h"
@@ -98,6 +98,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindMediaErrorEvent(m_context);
   bindMouseEvent(m_context);
   bindMessageEvent(m_context);
+  bindPopStateEvent(m_context);
   bindTouchEvent(m_context);
   bindDocument(m_context);
   bindPerformance(m_context);
@@ -217,14 +218,6 @@ JSBridge::~JSBridge() {
 
 void JSBridge::reportError(const char *errmsg) {
   m_handler(m_context->getContextId(), errmsg);
-}
-
-NativeString * JSBridge::getHref() {
-  std::string empty;
-  return stringToNativeString(empty);
-}
-
-void JSBridge::setHref(const char *url) {
 }
 
 void JSBridge::setDisposeCallback(Task task, void *data) {

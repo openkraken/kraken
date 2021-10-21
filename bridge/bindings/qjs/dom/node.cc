@@ -19,8 +19,6 @@ void bindNode(std::unique_ptr<JSContext> &context) {
   context->defineGlobalProperty("Node", constructor->classObject);
 }
 
-OBJECT_INSTANCE_IMPL(Node);
-
 JSValue Node::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   return JS_ThrowTypeError(ctx, "Illegal constructor");
 }

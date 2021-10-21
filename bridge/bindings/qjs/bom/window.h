@@ -9,7 +9,6 @@
 #include "bindings/qjs/js_context.h"
 #include "bindings/qjs/dom/event_target.h"
 #include "bindings/qjs/bom/location.h"
-#include "bindings/qjs/bom/history.h"
 
 namespace kraken::binding::qjs {
 
@@ -38,7 +37,7 @@ private:
   ObjectFunction m_scrollTo{m_context, m_prototypeObject, "scrollTo", scrollTo, 2};
   ObjectFunction m_scrollBy{m_context, m_prototypeObject, "scrollBy", scrollBy, 2};
 
-  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(10, devicePixelRatio, colorScheme, __location__, location, window, history, parent,  scrollX, scrollY, onerror);
+  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(9, devicePixelRatio, colorScheme, __location__, location, window, parent,  scrollX, scrollY, onerror);
   friend WindowInstance;
 };
 
@@ -54,7 +53,6 @@ private:
   void gcMark(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) override;
 
   Location *m_location{new Location(m_context)};
-  History *m_history{new History(m_context)};
   JSValue onerror{JS_NULL};
   friend Window;
   friend JSContext;

@@ -19,8 +19,6 @@ void bindTemplateElement(std::unique_ptr<JSContext> &context) {
   context->defineGlobalProperty("HTMLTemplateElement", constructor->classObject);
 }
 
-OBJECT_INSTANCE_IMPL(TemplateElement);
-
 JSValue TemplateElement::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   auto instance = new TemplateElementInstance(this);
   return instance->instanceObject;

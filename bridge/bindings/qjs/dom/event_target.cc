@@ -36,8 +36,6 @@ EventTarget::EventTarget(JSContext *context) : HostClass(context, "EventTarget")
   });
 }
 
-OBJECT_INSTANCE_IMPL(EventTarget);
-
 JSValue EventTarget::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   auto eventTarget = new EventTargetInstance(this, kEventTargetClassId, "EventTarget");
   return eventTarget->instanceObject;
@@ -287,48 +285,6 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
 
 #if IS_TEST
 JSValue EventTarget::__kraken_clear_event_listener(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-//  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val,
-//                                                                              EventTarget::classId(this_val)));
-//  if (eventTargetInstance == nullptr) {
-//    return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
-//  }
-//
-//  // Clear eventHandlers
-//  {
-//    JSValue keys = objectGetKeys(ctx, eventTargetInstance->m_eventHandlers);
-//    int32_t keyLen = arrayGetLength(ctx, keys);
-//
-//    for (int i = 0; i < keyLen; i ++) {
-//      JSValue key = JS_GetPropertyUint32(ctx, keys, i);
-//      JSAtom kAtom = JS_ValueToAtom(ctx, key);
-//      JSValue eventHandlers = JS_GetProperty(ctx, eventTargetInstance->m_eventHandlers, kAtom);
-//      JS_SetPropertyStr(ctx, eventHandlers, "length", JS_NewUint32(ctx, 0));
-//      JS_FreeValue(ctx, eventHandlers);
-//
-//      JS_DeleteProperty(ctx, eventTargetInstance->m_eventHandlers, kAtom, 0);
-//
-//      JS_FreeAtom(ctx, kAtom);
-//      JS_FreeValue(ctx, key);
-//    }
-//
-//    JS_FreeValue(ctx, keys);
-//  }
-//
-//  // Clear propertyHandlers
-//  {
-//    JSValue keys = objectGetKeys(ctx, eventTargetInstance->m_eventHandlers);
-//    int32_t keyLen = arrayGetLength(ctx, keys);
-//
-//    for (int i = 0; i < keyLen; i ++) {
-//      JSValue key = JS_GetPropertyUint32(ctx, keys, i);
-//      JSAtom kAtom = JS_ValueToAtom(ctx, key);
-//      JS_DeleteProperty(ctx, eventTargetInstance->m_propertyEventHandler, kAtom, 0);
-//      JS_FreeAtom(ctx, kAtom);
-//      JS_FreeValue(ctx, key);
-//    }
-//
-//    JS_FreeValue(ctx, keys);
-//  }
   return JS_NULL;
 }
 #endif

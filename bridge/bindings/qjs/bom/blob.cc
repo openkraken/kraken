@@ -15,8 +15,6 @@ void bindBlob(std::unique_ptr<JSContext> &context) {
   context->defineGlobalProperty("Blob", constructor->classObject);
 }
 
-OBJECT_INSTANCE_IMPL(Blob);
-
 Blob::Blob(JSContext *context) : HostClass(context, "Blob") {
   std::call_once(kBlobInitOnceFlag, []() {
     JS_NewClassID(&kBlobClassID);

@@ -69,6 +69,7 @@ public:
   uint8_t *dumpByteCode(const char* code, uint32_t codeLength, const char *sourceURL, size_t* bytecodeLength);
 
   std::chrono::time_point<std::chrono::system_clock> timeOrigin;
+  std::unordered_map<std::string, void*> constructorMap;
 
   int32_t uniqueId;
   struct list_head node_job_list;
@@ -79,7 +80,6 @@ public:
   struct list_head promise_job_list;
   struct list_head atom_job_list;
   struct list_head native_function_job_list;
-  struct list_head history_item_list;
 
   static JSClassID kHostClassClassId;
   static JSClassID kHostObjectClassId;

@@ -27,6 +27,7 @@ namespace kraken::binding::qjs {
 #define EVENT_OPEN "open"
 #define EVENT_INTERSECTION_CHANGE "intersectionchange"
 #define EVENT_CANCEL "cancel"
+#define EVENT_POPSTATE "popstate"
 #define EVENT_FINISH "finish"
 #define EVENT_TRANSITION_RUN "transitionrun"
 #define EVENT_TRANSITION_CANCEL "transitioncancel"

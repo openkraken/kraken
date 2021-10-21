@@ -16,8 +16,6 @@ void bindCustomEvent(std::unique_ptr<JSContext> &context) {
   context->defineGlobalProperty("CustomEvent", constructor->classObject);
 }
 
-OBJECT_INSTANCE_IMPL(CustomEvent);
-
 JSValue CustomEvent::initCustomEvent(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(

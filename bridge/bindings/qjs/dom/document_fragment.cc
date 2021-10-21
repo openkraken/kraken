@@ -16,8 +16,6 @@ void bindDocumentFragment(std::unique_ptr<JSContext> &context) {
 
 std::once_flag kDocumentFragmentFlag;
 
-OBJECT_INSTANCE_IMPL(DocumentFragment);
-
 JSClassID DocumentFragment::kDocumentFragmentID{0};
 
 DocumentFragment::DocumentFragment(JSContext *context) : Node(context) {

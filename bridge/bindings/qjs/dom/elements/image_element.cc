@@ -19,8 +19,6 @@ void bindImageElement(std::unique_ptr<JSContext> &context) {
   context->defineGlobalProperty("Image", JS_DupValue(context->ctx(), constructor->classObject));
 }
 
-OBJECT_INSTANCE_IMPL(ImageElement);
-
 JSValue ImageElement::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   auto instance = new ImageElementInstance(this);
   return instance->instanceObject;

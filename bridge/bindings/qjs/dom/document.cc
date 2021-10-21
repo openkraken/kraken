@@ -29,6 +29,7 @@
 #include "events/.gen/intersection_change.h"
 #include "events/.gen/media_error_event.h"
 #include "events/.gen/mouse_event.h"
+#include "events/.gen/popstate_event.h"
 #include "events/.gen/message_event.h"
 #include "events/touch_event.h"
 
@@ -137,14 +138,16 @@ Document::Document(JSContext *context) : Node(context, "Document") {
       return new MouseEventInstance(MouseEvent::instance(context),
                                     reinterpret_cast<NativeEvent *>(nativeEvent));
     });
+    Event::defineEvent(EVENT_POPSTATE, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new PopStateEventInstance(PopStateEvent::instance(context),
+                                       reinterpret_cast<NativeEvent *>(nativeEvent));
+    });
   }
 }
 
 JSClassID Document::classId() {
   return kDocumentClassID;
 }
-
-OBJECT_INSTANCE_IMPL(Document);
 
 JSValue Document::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   auto *instance = new DocumentInstance(this);
@@ -224,7 +227,10 @@ JSValue Document::getElementById(QjsContext *ctx, JSValue this_val, int argc, JS
 
   JSAtom id = JS_ValueToAtom(ctx, idValue);
 
-  if (document->m_elementMapById.count(id) == 0) return JS_NULL;
+  if (document->m_elementMapById.count(id) == 0) {
+    JS_FreeAtom(ctx, id);
+    return JS_NULL;
+  };
 
   auto targetElementList = document->m_elementMapById[id];
   JS_FreeAtom(ctx, id);

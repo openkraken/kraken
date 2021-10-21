@@ -11,8 +11,6 @@ namespace kraken::binding::qjs {
 
 std::once_flag kinitCSSStyleDeclarationFlag;
 
-OBJECT_INSTANCE_IMPL(CSSStyleDeclaration);
-
 void bindCSSStyleDeclaration(std::unique_ptr<JSContext> &context) {
   auto style = CSSStyleDeclaration::instance(context.get());
   context->defineGlobalProperty("CSSStyleDeclaration", style->classObject);

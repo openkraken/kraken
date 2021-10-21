@@ -84,18 +84,22 @@ function generatePropsGetter(object: ClassObject, type: PropType, p: PropsDeclar
   if (object.type === 'Event') {
     let qjsCallFunc = '';
     if (p.kind === PropsDeclarationKind.double) {
-      qjsCallFunc = `JS_NewFloat64(ctx, nativeEvent->${p.name})`;
+      qjsCallFunc = `return JS_NewFloat64(ctx, nativeEvent->${p.name})`;
     } else if (p.kind === PropsDeclarationKind.boolean) {
-      qjsCallFunc = `JS_NewBool(ctx, nativeEvent->${p.name} ? 1 : 0)`;
+      qjsCallFunc = `return JS_NewBool(ctx, nativeEvent->${p.name} ? 1 : 0)`;
     } else if (p.kind === PropsDeclarationKind.string) {
-      qjsCallFunc = `JS_NewUnicodeString(event->m_context->runtime(), ctx, nativeEvent->${p.name}->string, nativeEvent->${p.name}->length);`;
+      qjsCallFunc = `return JS_NewUnicodeString(event->m_context->runtime(), ctx, nativeEvent->${p.name}->string, nativeEvent->${p.name}->length);`;
     } else if (p.kind === PropsDeclarationKind.int64) {
-      qjsCallFunc = `JS_NewUint32(ctx, nativeEvent->${p.name});`
+      qjsCallFunc = `return JS_NewUint32(ctx, nativeEvent->${p.name});`
+    } else if (p.kind === PropsDeclarationKind.object) {
+      qjsCallFunc = `std::u16string u16${p.name} = std::u16string(reinterpret_cast<const char16_t *>(nativeEvent->${p.name}->string), nativeEvent->${p.name}->length);
+  std::string ${p.name} = toUTF8(u16${p.name});
+  return JS_ParseJSON(ctx, ${p.name}.c_str(), ${p.name}.size(), "");`;
     }
 
     getterCode = `auto *${instanceName} = static_cast<${classSubFix} *>(JS_GetOpaque(this_val, ${classId}));
   auto *nativeEvent = reinterpret_cast<Native${object.name} *>(event->nativeEvent);
-  return ${qjsCallFunc};`;
+  ${qjsCallFunc};`;
   } else if (object.type === 'HostObject') {
     getterCode = `auto *${instanceName} = static_cast<${classSubFix} *>(JS_GetOpaque(this_val, ${classId}));
   return ${instanceName}->callNativeMethods("get${p.name[0].toUpperCase() + p.name.substring(1)}", 0, nullptr);`;
@@ -329,9 +333,16 @@ function generateEventInstanceConstructorCode(object: ClassObject) {
       propApplyCode = `JS_ToInt32(m_ctx, reinterpret_cast<int32_t *>(&nativeEvent->${p.name}), JS_GetProperty(m_ctx, eventInit, ${p.name}Atom));`
     } else if (p.kind === PropsDeclarationKind.string) {
       propApplyCode = addIndent(`JSValue v = JS_GetProperty(m_ctx, eventInit, ${p.name}Atom);
-  nativeEvent->${p.name} = jsValueToNativeString(m_ctx, v);`, 0);
+  nativeEvent->${p.name} = jsValueToNativeString(m_ctx, v);
+  JS_FreeValue(m_ctx, v);`, 0);
     } else if (p.kind === PropsDeclarationKind.double) {
       propApplyCode = `JS_ToFloat64(m_ctx, &nativeEvent->${p.name}, JS_GetProperty(m_ctx, eventInit, ${p.name}Atom));`;
+    } else if (p.kind === PropsDeclarationKind.object) {
+      propApplyCode = addIndent(`JSValue v = JS_GetProperty(m_ctx, eventInit, ${p.name}Atom);
+  JSValue json = JS_JSONStringify(m_ctx, v, JS_NULL, JS_NULL);
+  nativeEvent->${p.name} = jsValueToNativeString(m_ctx, json);
+  JS_FreeValue(m_ctx, json);
+  JS_FreeValue(m_ctx, v);`, 0);
     }
 
     propWriteCode.push(addIndent(`if (JS_HasProperty(m_ctx, eventInit, ${p.name}Atom)) {
@@ -415,8 +426,6 @@ void bind${object.name}(std::unique_ptr<JSContext> &context) {
   context->defineGlobalProperty("${globalBindingName}", constructor->classObject);
   ${specialBind}
 }
-
-OBJECT_INSTANCE_IMPL(${object.name});
 
 JSValue ${object.name}::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   ${constructorCode}

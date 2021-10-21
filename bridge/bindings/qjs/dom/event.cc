@@ -39,7 +39,6 @@ JSValue Event::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue th
   return event->instanceObject;
 }
 
-OBJECT_INSTANCE_IMPL(Event);
 std::unordered_map<std::string, EventCreator> Event::m_eventCreatorMap{};
 
 PROP_GETTER(EventInstance, type)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {

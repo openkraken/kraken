@@ -7,16 +7,12 @@
 #define KRAKENBRIDGE_JS_CONTEXT_MACROS_H
 
 #define OBJECT_INSTANCE(NAME)                                                                                          \
-  static std::unordered_map<int32_t, NAME *> m_instanceMap;                                                        \
   static NAME *instance(JSContext *context) {                                                                          \
-    if (m_instanceMap.count(context->uniqueId) == 0) {                                                                           \
-      m_instanceMap[context->uniqueId] = new NAME(context);                                                                      \
-    }                                                                                                                  \
-    return m_instanceMap[context->uniqueId];                                                                                     \
+     if (context->constructorMap.count(#NAME) == 0) {                                                                  \
+        context->constructorMap[#NAME] = static_cast<void*>(new NAME(context));                                        \
+     }                                                                                                                 \
+     return static_cast<NAME *>(context->constructorMap[#NAME]);                                                       \
   }
-
-#define OBJECT_INSTANCE_IMPL(NAME)                                                                                     \
-  std::unordered_map<int32_t, NAME *> NAME::m_instanceMap {}
 
 #define QJS_GLOBAL_BINDING_FUNCTION(context, function, name, argc)                                                     \
   {                                                                                                                    \
@@ -89,55 +85,55 @@
 #define HOST_CLASS_PROPERTY_ITEM_18(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17)    \
   HOST_CLASS_PROPERTY_ITEM_17(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16)               \
   HOST_CLASS_PROPERTY_ITEM(_17)
-#define HOST_CLASS_PROPERTY_ITEM_19(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROPERTY_ITEM_19(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18)                                                                               \
   HOST_CLASS_PROPERTY_ITEM_18(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17)          \
   HOST_CLASS_PROPERTY_ITEM(_18)
-#define HOST_CLASS_PROPERTY_ITEM_20(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROPERTY_ITEM_20(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19)                                                                          \
   HOST_CLASS_PROPERTY_ITEM_19(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18)     \
   HOST_CLASS_PROPERTY_ITEM(_19)
-#define HOST_CLASS_PROPERTY_ITEM_21(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROPERTY_ITEM_21(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20)                                                                     \
   HOST_CLASS_PROPERTY_ITEM_20(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19)                                                                                     \
   HOST_CLASS_PROPERTY_ITEM(_20)
-#define HOST_CLASS_PROPERTY_ITEM_22(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROPERTY_ITEM_22(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21)                                                                \
   HOST_CLASS_PROPERTY_ITEM_21(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20)                                                                                \
   HOST_CLASS_PROPERTY_ITEM(_21)
-#define HOST_CLASS_PROPERTY_ITEM_23(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROPERTY_ITEM_23(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21, _22)                                                           \
   HOST_CLASS_PROPERTY_ITEM_22(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20, _21)                                                                           \
   HOST_CLASS_PROPERTY_ITEM(_22)
-#define HOST_CLASS_PROPERTY_ITEM_24(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROPERTY_ITEM_24(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21, _22, _23)                                                      \
   HOST_CLASS_PROPERTY_ITEM_23(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20, _21, _22)                                                                      \
   HOST_CLASS_PROPERTY_ITEM(_23)
-#define HOST_CLASS_PROPERTY_ITEM_25(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROPERTY_ITEM_25(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21, _22, _23, _24)                                                 \
   HOST_CLASS_PROPERTY_ITEM_24(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20, _21, _22, _23)                                                                 \
   HOST_CLASS_PROPERTY_ITEM(_24)
-#define HOST_CLASS_PROPERTY_ITEM_26(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROPERTY_ITEM_26(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21, _22, _23, _24, _25)                                            \
   HOST_CLASS_PROPERTY_ITEM_25(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20, _21, _22, _23, _24)                                                            \
   HOST_CLASS_PROPERTY_ITEM(_25)
-#define HOST_CLASS_PROPERTY_ITEM_27(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROPERTY_ITEM_27(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21, _22, _23, _24, _25, _26)                                       \
   HOST_CLASS_PROPERTY_ITEM_26(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20, _21, _22, _23, _24, _25)                                                       \
   HOST_CLASS_PROPERTY_ITEM(_26)
-#define HOST_CLASS_PROPERTY_ITEM_28(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROPERTY_ITEM_28(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21, _22, _23, _24, _25, _26, _27)                                  \
   HOST_CLASS_PROPERTY_ITEM_27(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20, _21, _22, _23, _24, _25, _26)                                                  \
   HOST_CLASS_PROPERTY_ITEM(_27)
-#define HOST_CLASS_PROPERTY_ITEM_29(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROPERTY_ITEM_29(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28)                             \
   HOST_CLASS_PROPERTY_ITEM_28(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20, _21, _22, _23, _24, _25, _26, _27)                                             \
@@ -179,55 +175,55 @@
 #define HOST_OBJECT_PROPERTY_ITEM_18(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17)    \
   HOST_OBJECT_PROPERTY_ITEM_17(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16)               \
   HOST_OBJECT_PROPERTY_ITEM(_17)
-#define HOST_OBJECT_PROPERTY_ITEM_19(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_OBJECT_PROPERTY_ITEM_19(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18)                                                                               \
   HOST_OBJECT_PROPERTY_ITEM_18(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17)          \
   HOST_OBJECT_PROPERTY_ITEM(_18)
-#define HOST_OBJECT_PROPERTY_ITEM_20(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_OBJECT_PROPERTY_ITEM_20(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19)                                                                          \
   HOST_OBJECT_PROPERTY_ITEM_19(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18)     \
   HOST_OBJECT_PROPERTY_ITEM(_19)
-#define HOST_OBJECT_PROPERTY_ITEM_21(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_OBJECT_PROPERTY_ITEM_21(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20)                                                                     \
   HOST_OBJECT_PROPERTY_ITEM_20(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19)                                                                                     \
   HOST_OBJECT_PROPERTY_ITEM(_20)
-#define HOST_OBJECT_PROPERTY_ITEM_22(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_OBJECT_PROPERTY_ITEM_22(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21)                                                                \
   HOST_OBJECT_PROPERTY_ITEM_21(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20)                                                                                \
   HOST_OBJECT_PROPERTY_ITEM(_21)
-#define HOST_OBJECT_PROPERTY_ITEM_23(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_OBJECT_PROPERTY_ITEM_23(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21, _22)                                                           \
   HOST_OBJECT_PROPERTY_ITEM_22(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20, _21)                                                                           \
   HOST_OBJECT_PROPERTY_ITEM(_22)
-#define HOST_OBJECT_PROPERTY_ITEM_24(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_OBJECT_PROPERTY_ITEM_24(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21, _22, _23)                                                      \
   HOST_OBJECT_PROPERTY_ITEM_23(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20, _21, _22)                                                                      \
   HOST_OBJECT_PROPERTY_ITEM(_23)
-#define HOST_OBJECT_PROPERTY_ITEM_25(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_OBJECT_PROPERTY_ITEM_25(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21, _22, _23, _24)                                                 \
   HOST_OBJECT_PROPERTY_ITEM_24(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20, _21, _22, _23)                                                                 \
   HOST_OBJECT_PROPERTY_ITEM(_24)
-#define HOST_OBJECT_PROPERTY_ITEM_26(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_OBJECT_PROPERTY_ITEM_26(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21, _22, _23, _24, _25)                                            \
   HOST_OBJECT_PROPERTY_ITEM_25(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20, _21, _22, _23, _24)                                                            \
   HOST_OBJECT_PROPERTY_ITEM(_25)
-#define HOST_OBJECT_PROPERTY_ITEM_27(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_OBJECT_PROPERTY_ITEM_27(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21, _22, _23, _24, _25, _26)                                       \
   HOST_OBJECT_PROPERTY_ITEM_26(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20, _21, _22, _23, _24, _25)                                                       \
   HOST_OBJECT_PROPERTY_ITEM(_26)
-#define HOST_OBJECT_PROPERTY_ITEM_28(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_OBJECT_PROPERTY_ITEM_28(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21, _22, _23, _24, _25, _26, _27)                                  \
   HOST_OBJECT_PROPERTY_ITEM_27(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20, _21, _22, _23, _24, _25, _26)                                                  \
   HOST_OBJECT_PROPERTY_ITEM(_27)
-#define HOST_OBJECT_PROPERTY_ITEM_29(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_OBJECT_PROPERTY_ITEM_29(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28)                             \
   HOST_OBJECT_PROPERTY_ITEM_28(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20, _21, _22, _23, _24, _25, _26, _27)                                             \
@@ -268,55 +264,55 @@
 #define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_18(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17)    \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_17(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16)               \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM(_17)
-#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_19(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_19(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18)                                                                               \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_18(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17)          \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM(_18)
-#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_20(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_20(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19)                                                                          \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_19(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18)     \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM(_19)
-#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_21(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_21(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20)                                                                     \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_20(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19)                                                                                     \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM(_20)
-#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_22(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_22(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21)                                                                \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_21(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20)                                                                                \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM(_21)
-#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_23(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_23(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21, _22)                                                           \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_22(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20, _21)                                                                           \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM(_22)
-#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_24(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_24(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21, _22, _23)                                                      \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_23(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20, _21, _22)                                                                      \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM(_23)
-#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_25(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_25(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21, _22, _23, _24)                                                 \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_24(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20, _21, _22, _23)                                                                 \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM(_24)
-#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_26(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_26(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21, _22, _23, _24, _25)                                            \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_25(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20, _21, _22, _23, _24)                                                            \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM(_25)
-#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_27(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_27(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21, _22, _23, _24, _25, _26)                                       \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_26(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20, _21, _22, _23, _24, _25)                                                       \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM(_26)
-#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_28(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_28(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21, _22, _23, _24, _25, _26, _27)                                  \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_27(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20, _21, _22, _23, _24, _25, _26)                                                  \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM(_27)
-#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_29(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17,    \
+#define HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_29(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, \
                                     _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28)                             \
   HOST_CLASS_PROTOTYPE_PROPERTY_ITEM_28(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18,     \
                               _19, _20, _21, _22, _23, _24, _25, _26, _27)                                             \

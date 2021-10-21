@@ -25,8 +25,6 @@ TextNode::TextNode(JSContext *context) :  Node(context, "TextNode") {
   JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
 }
 
-OBJECT_INSTANCE_IMPL(TextNode);
-
 JSValue TextNode::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   JSValue textContent = JS_NULL;
   if (argc == 1) {

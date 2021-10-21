@@ -36,8 +36,6 @@ bool isJavaScriptExtensionElementInstance(JSContext *context, JSValue instance) 
   return false;
 }
 
-OBJECT_INSTANCE_IMPL(Element);
-
 JSClassID Element::kElementClassId{0};
 
 Element::Element(JSContext *context) : Node(context, "Element") {
@@ -884,6 +882,10 @@ JSClassExoticMethods ElementInstance::exoticMethods{
 
 StyleDeclarationInstance *ElementInstance::style() {
   return m_style;
+}
+
+ElementAttributes *ElementInstance::attributes() {
+  return m_attributes;
 }
 
 PROP_GETTER(BoundingClientRect, x)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {

@@ -26,8 +26,6 @@ private:
   ObjectFunction m_foo{m_context, m_prototypeObject, "foo", foo, 0};
 };
 
-OBJECT_INSTANCE_IMPL(ParentClass);
-
 class SampleClass;
 static JSClassID kSampleClassId{0};
 
