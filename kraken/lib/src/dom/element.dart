@@ -1415,9 +1415,8 @@ class Element extends Node
   void setInlineStyle(String property, dynamic value) {
     // Current only for mark property is setting by inline style.
     inlineStyle[property] = value;
-    if (renderBoxModel != null) {
-      _setStyleProperty(property, value, true);
-    }
+
+    _setStyleProperty(property, value, true);
   }
 
   void _applyStyle() {
