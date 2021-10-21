@@ -12,6 +12,9 @@
 
 namespace kraken::binding::qjs {
 
+#define AnonymousFunctionCallPreFix "_anonymous_fn_"
+#define AsyncAnonymousFunctionCallPreFix "_anonymous_async_fn_"
+
 NativeValue Native_NewNull() {
   return (NativeValue){
     0,
@@ -152,7 +155,7 @@ static JSValue anonymousFunction(QjsContext *ctx, JSValueConst this_val, int arg
   auto id = magic;
   auto *eventTarget = static_cast<EventTargetInstance *>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
 
-  std::string call_params = "_anonymous_fn_" + std::to_string(id);
+  std::string call_params = AnonymousFunctionCallPreFix + std::to_string(id);
 
   auto *arguments = new NativeValue[argc];
   for (int i = 0; i < argc; i ++) {
@@ -210,7 +213,7 @@ static JSValue anonymousAsyncFunction(QjsContext *ctx, JSValueConst this_val, in
   };
   list_add_tail(&promiseContext->link, &context->promise_job_list);
 
-  std::string call_params = "_anonymous_async_fn_" + std::to_string(id);
+  std::string call_params = AsyncAnonymousFunctionCallPreFix + std::to_string(id);
 
   auto *arguments = new NativeValue[argc + 3];
 

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:collection';
-import 'dart:math';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
