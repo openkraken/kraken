@@ -58,7 +58,10 @@ void removeAsyncAnonymousNativeFunctionFromId(int id) {
   _asyncFunctionMap.remove(id);
 }
 
-dynamic fromNativeValue(JSValueType type, Pointer<NativeValue> nativeValue) {
+dynamic fromNativeValue(Pointer<NativeValue> nativeValue) {
+  if (nativeValue == nullptr) return null;
+
+  JSValueType type = JSValueType.values[nativeValue.ref.tag];
   switch(type) {
     case JSValueType.TAG_STRING:
       return nativeStringToString(Pointer.fromAddress(nativeValue.ref.u));

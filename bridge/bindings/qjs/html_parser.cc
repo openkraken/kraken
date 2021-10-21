@@ -128,11 +128,20 @@ void HTMLParser::parseProperty(ElementInstance *element, GumboElement *gumboElem
       std::string strValue = attribute->value;
       std::transform(strValue.begin(), strValue.end(), strValue.begin(), ::tolower);
 
-      JSAtom key = JS_NewAtom(ctx, strName.c_str());
+      JSValue key = JS_NewString(ctx, strName.c_str());
       JSValue value = JS_NewString(ctx, strValue.c_str());
 
-      JS_SetProperty(ctx, element->instanceObject, key, value);
-      JS_FreeAtom(ctx, key);
+      JSValue setAttributeFunc = JS_GetPropertyStr(ctx, element->instanceObject, "setAttribute");
+      JSValue arguments[] = {
+        key,
+        value
+      };
+
+      JS_Call(ctx, setAttributeFunc, element->instanceObject, 2, arguments);
+
+      JS_FreeValue(ctx, setAttributeFunc);
+      JS_FreeValue(ctx, key);
+      JS_FreeValue(ctx, value);
     }
   }
 

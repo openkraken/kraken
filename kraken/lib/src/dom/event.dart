@@ -2,6 +2,7 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
@@ -40,6 +41,7 @@ const String EVENT_CAN_PLAY = 'canplay';
 const String EVENT_CAN_PLAY_THROUGH = 'canplaythrough';
 const String EVENT_ENDED = 'ended';
 const String EVENT_PAUSE = 'pause';
+const String EVENT_POP_STATE = 'popstate';
 const String EVENT_PLAY = 'play';
 const String EVENT_SEEKED = 'seeked';
 const String EVENT_SEEKING = 'seeking';
@@ -128,6 +130,29 @@ class EventInit {
     this.bubbles = false,
     this.cancelable = false,
   });
+}
+
+class PopStateEvent extends Event {
+  final PopStateEventInit _popStateEventInit;
+  PopStateEvent(this._popStateEventInit) : super('popstate', _popStateEventInit);
+
+  @override
+  Pointer<RawNativeMouseEvent> toRaw([int methodLength = 0]) {
+    List<int> methods = [
+      stringToNativeString(jsonEncode(_popStateEventInit.state)).address
+    ];
+
+    Pointer<RawNativeMouseEvent> rawEvent = super.toRaw(methods.length).cast<RawNativeMouseEvent>();
+    Uint64List bytes = rawEvent.ref.bytes.asTypedList((rawEvent.ref.length + methods.length));
+    bytes.setAll(rawEvent.ref.length, methods);
+
+    return rawEvent;
+  }
+}
+
+class PopStateEventInit extends EventInit {
+  final dynamic state;
+  PopStateEventInit(this.state);
 }
 
 /// reference: https://developer.mozilla.org/zh-CN/docs/Web/API/MouseEvent

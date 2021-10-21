@@ -46,8 +46,7 @@ void _callNativeMethods(Pointer<Void> nativePtr, Pointer<NativeValue> returnedVa
   String method = nativeStringToString(nativeMethod);
   List<dynamic> values = List.generate(argc, (i) {
     Pointer<NativeValue> nativeValue = argv.elementAt(i);
-    JSValueType type = JSValueType.values[nativeValue.ref.tag];
-    return fromNativeValue(type, nativeValue);
+    return fromNativeValue(nativeValue);
   });
 
   CanvasRenderingContext2D renderingContext2D = CanvasRenderingContext2D.getCanvasRenderContext2DOfNativePtr(nativePtr.cast<NativeCanvasRenderingContext2D>());

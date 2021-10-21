@@ -289,8 +289,6 @@ elseif ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/module_manager.h
     bindings/qjs/html_parser.cc
     bindings/qjs/html_parser.h
-    bindings/qjs/bom/history.h
-    bindings/qjs/bom/history.cc
     bindings/qjs/bom/console.cc
     bindings/qjs/bom/console.h
     bindings/qjs/bom/screen.cc
@@ -337,6 +335,8 @@ elseif ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/dom/events/.gen/gesture_event.h
     bindings/qjs/dom/events/.gen/input_event.cc
     bindings/qjs/dom/events/.gen/input_event.h
+    bindings/qjs/dom/events/.gen/popstate_event.cc
+    bindings/qjs/dom/events/.gen/popstate_event.h
     bindings/qjs/dom/events/.gen/intersection_change.cc
     bindings/qjs/dom/events/.gen/intersection_change.h
     bindings/qjs/dom/events/.gen/media_error_event.cc

@@ -21,8 +21,7 @@ void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> re
   String method = nativeStringToString(nativeMethod);
   List<dynamic> values = List.generate(argc, (i) {
     Pointer<NativeValue> nativeValue = argv.elementAt(i);
-    JSValueType type = JSValueType.values[nativeValue.ref.tag];
-    return fromNativeValue(type, nativeValue);
+    return fromNativeValue(nativeValue);
   });
 
   if (method.startsWith('_anonymous_fn_')) {

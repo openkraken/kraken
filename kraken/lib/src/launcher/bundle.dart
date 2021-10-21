@@ -41,6 +41,10 @@ String getAcceptHeader() {
   return 'text/html,application/javascript,$krakenKbcAccept';
 }
 
+bool isAssetAbsolutePath(String path) {
+  return path.indexOf('assets/') == 0;
+}
+
 abstract class KrakenBundle {
   KrakenBundle(this.url);
 
@@ -72,7 +76,7 @@ abstract class KrakenBundle {
 
     Uri uri = Uri.parse(path);
     KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
-    if (controller != null) {
+    if (controller != null && !isAssetAbsolutePath(path)) {
       uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri);
     }
 

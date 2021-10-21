@@ -70,15 +70,3 @@ export class PromiseRejectionEvent extends Event {
     }
   };
 }
-
-export class PopStateEvent extends Event {
-  state: any;
-
-  constructor(type: string, init: PopStateEventInit) {
-    super(type);
-
-    if (init) {
-      this.state = init.state;
-    }
-  }
-}

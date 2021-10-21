@@ -12,7 +12,7 @@ export function getUrl() : URL {
 const bindReload = krakenLocation.reload.bind(krakenLocation);
 export const location = {
   get href() {
-    return getUrl().href;
+    return kraken.invokeModule('Location', 'getHref');
   },
   set href(url: string) {
     kraken.invokeModule('Navigation', 'goTo', url);

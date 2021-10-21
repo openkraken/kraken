@@ -359,7 +359,7 @@ class KrakenViewController {
     return _elementManager.getEventTargetByTargetId<EventTarget>(id);
   }
 
-  void handleNavigationAction(String? sourceUrl, String targetUrl, KrakenNavigationType navigationType) async {
+  Future<void> handleNavigationAction(String? sourceUrl, String targetUrl, KrakenNavigationType navigationType) async {
     KrakenNavigationAction action = KrakenNavigationAction(sourceUrl, targetUrl, navigationType);
 
     KrakenNavigationDelegate _delegate = navigationDelegate!;
@@ -370,7 +370,7 @@ class KrakenViewController {
 
       switch (action.navigationType) {
         case KrakenNavigationType.reload:
-          rootController.reloadUrl(action.target);
+          await rootController.reloadUrl(action.target);
           break;
         default:
         // Navigate and other type, do nothing.
@@ -608,11 +608,13 @@ class KrakenController {
   }
 
   String get href {
-    return getHref(_view.contextId);
+    HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
+    return historyModule.href;
   }
 
   set href(String value) {
-    setHref(_view.contextId, value);
+    HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
+    historyModule.href = value;
   }
 
   // reload current kraken view.
@@ -622,7 +624,7 @@ class KrakenController {
     }
 
     await unload();
-    await loadBundle();
+    await loadBundle(bundleURL: href);
     await evalBundle();
 
     if (devToolsService != null) {
@@ -630,7 +632,7 @@ class KrakenController {
     }
   }
 
-  void reloadUrl(String url) async {
+  Future<void> reloadUrl(String url) async {
     assert(!_view._disposed, 'Kraken have already disposed');
     _bundleURL = url;
     await reload();

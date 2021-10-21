@@ -3,6 +3,7 @@ import 'package:kraken/bridge.dart' as bridge;
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/src/module/location.dart';
 
 abstract class BaseModule {
   String get name;
@@ -14,7 +15,7 @@ abstract class BaseModule {
 
 typedef InvokeModuleCallback = void Function({String ?error, dynamic data});
 typedef NewModuleCreator = BaseModule Function(ModuleManager);
-typedef ModuleCreator = BaseModule Function(ModuleManager? moduleNamager);
+typedef ModuleCreator = BaseModule Function(ModuleManager? moduleManager);
 
 class ModuleManager {
   final int contextId;
@@ -34,8 +35,19 @@ class ModuleManager {
       defineModule((ModuleManager? moduleManager) => MethodChannelModule(moduleManager));
       defineModule((ModuleManager? moduleManager) => NavigationModule(moduleManager));
       defineModule((ModuleManager? moduleManager) => NavigatorModule(moduleManager));
+      defineModule((ModuleManager? moduleManager) => HistoryModule(moduleManager));
+      defineModule((ModuleManager? moduleManager) => LocationModule(moduleManager));
       inited = true;
     }
+
+    // Init all module instances.
+    _creatorMap.forEach((String name, ModuleCreator creator) {
+      _moduleMap[name] = creator(this);
+    });
+  }
+
+  T? getModule<T extends BaseModule>(String moduleName) {
+    return _moduleMap[moduleName] as T?;
   }
 
   static void defineModule(ModuleCreator moduleCreator) {

@@ -130,6 +130,7 @@ public:
   std::string outerHTML();
   std::string innerHTML();
   StyleDeclarationInstance *style();
+  ElementAttributes *attributes();
 
   static inline JSClassID classID();
 

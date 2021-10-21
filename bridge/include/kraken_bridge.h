@@ -23,7 +23,7 @@
 KRAKEN_EXPORT
 std::__thread_id getUIThreadId();
 
-struct KRAKEN_EXPORT NativeString {
+struct NativeString {
   const uint16_t *string;
   int32_t length;
 
@@ -104,10 +104,6 @@ KRAKEN_EXPORT_C
 void evaluateQuickjsByteCode(int32_t contextId, uint8_t *bytes, int32_t byteLen);
 KRAKEN_EXPORT_C
 void parseHTML(int32_t contextId, const char *code, int32_t length);
-KRAKEN_EXPORT_C
-NativeString* getHref(int32_t contextId);
-KRAKEN_EXPORT_C
-void setHref(int32_t contextId, const char *href);
 KRAKEN_EXPORT_C
 void reloadJsContext(int32_t contextId);
 KRAKEN_EXPORT_C
