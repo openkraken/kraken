@@ -286,7 +286,7 @@ class RenderStyle
                   width = parentRenderStyle.width?.computedValue;
                   cropWidth = _getCropWidthByPaddingBorder(parentRenderStyle, cropWidth);
                   break;
-                } else if (parentRenderBoxModel.hasSize && parentRenderBoxModel.constraints.isTight) {
+                } else if (parentRenderBoxModel.hasSize && parentRenderBoxModel.constraints.hasTightWidth) {
                   // Cases like flex item with flex-grow and no width in flex row direction.
                   width = parentRenderBoxModel.constraints.maxWidth;
                   cropWidth = _getCropWidthByPaddingBorder(parentRenderStyle, cropWidth);
@@ -378,7 +378,7 @@ class RenderStyle
             height = parentRenderStyle.height?.computedValue;
             cropHeight = _getCropHeightByPaddingBorder(parentRenderStyle, cropHeight);
             break;
-          } else if (parentRenderBoxModel.hasSize && parentRenderBoxModel.constraints.isTight) {
+          } else if (parentRenderBoxModel.hasSize && parentRenderBoxModel.constraints.hasTightHeight) {
             // Cases like flex item with flex-grow and no height in flex column direction.
             height = parentRenderBoxModel.constraints.maxHeight;
             cropHeight = _getCropHeightByPaddingBorder(parentRenderStyle, cropHeight);
@@ -476,10 +476,10 @@ class RenderStyle
   // https://www.w3.org/TR/css-box-3/#valdef-box-content-box
   // @TODO: add cache to avoid recalculate every time.
   double? get contentBoxLogicalWidth {
-    // If renderBox has tight constraints, its logical size equals max size.
+    // If renderBox has tight width, its logical size equals max size.
     if (renderBoxModel != null &&
       renderBoxModel!.hasSize &&
-      renderBoxModel!.constraints.isTight
+      renderBoxModel!.constraints.hasTightWidth
     ) {
       return renderBoxModel!.constraints.maxWidth -
         effectiveBorderLeftWidth.computedValue - effectiveBorderRightWidth.computedValue -
@@ -492,10 +492,10 @@ class RenderStyle
   // https://www.w3.org/TR/css-box-3/#valdef-box-content-box
   // @TODO: add cache to avoid recalculate every time.
   double? get contentBoxLogicalHeight {
-    // If renderBox has tight constraints, its logical size equals max size.
+    // If renderBox has tight height, its logical size equals max size.
     if (renderBoxModel != null &&
       renderBoxModel!.hasSize &&
-      renderBoxModel!.constraints.isTight
+      renderBoxModel!.constraints.hasTightHeight
     ) {
       return renderBoxModel!.constraints.maxHeight -
         effectiveBorderTopWidth.computedValue - effectiveBorderBottomWidth.computedValue -
