@@ -400,7 +400,7 @@ class RenderLayoutBox extends RenderBoxModel
     // Flex basis takes priority over main size in flex item.
     if (parent is RenderFlexLayout) {
       RenderBoxModel? parentRenderBoxModel = parent as RenderBoxModel?;
-      double? flexBasis = renderStyle.flexBasis?.computedValue;
+      double? flexBasis = renderStyle.flexBasis == CSSLengthValue.auto ? null : renderStyle.flexBasis?.computedValue;
       if (flexBasis != null) {
         if (CSSFlex.isHorizontalFlexDirection(
             parentRenderBoxModel!.renderStyle.flexDirection)) {
@@ -849,7 +849,7 @@ class RenderBoxModel extends RenderBox
     double maxConstraintHeight = logicalHeight ?? double.infinity;
 
     if (parent is RenderFlexLayout) {
-      double? flexBasis = renderStyle.flexBasis?.computedValue;
+      double? flexBasis = renderStyle.flexBasis == CSSLengthValue.auto ? null : renderStyle.flexBasis?.computedValue;
       RenderBoxModel? parentRenderBoxModel = parent as RenderBoxModel?;
       // In flex layout, flex basis takes priority over width/height if set.
       // Flex-basis cannot be smaller than its content size which happens can not be known

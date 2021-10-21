@@ -418,11 +418,10 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   double? _getFlexBasis(RenderBox child) {
-    // Flex shrink has no effect on placeholder of positioned element
-    if (child is RenderPositionHolder) {
-      return null;
+    if (child is RenderBoxModel && child.renderStyle.flexBasis != CSSLengthValue.auto) {
+      return child.renderStyle.flexBasis?.computedValue;
     }
-    return child is RenderBoxModel ? child.renderStyle.flexBasis?.computedValue : null;
+    return null;
   }
 
   AlignSelf _getAlignSelf(RenderBox child) {

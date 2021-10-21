@@ -262,8 +262,8 @@ mixin CSSFlexboxMixin on RenderStyleBase {
   CSSLengthValue? get flexBasis => _flexBasis;
   CSSLengthValue? _flexBasis;
   set flexBasis(CSSLengthValue? value) {
-    // Negative value is invalid, auto value is parsed at layout stage.
-    if ((value != null && ((value.value != null && value.value! < 0) || value.isAuto)) ||
+    // Negative value is invalid.
+    if ((value != null && ((value.value != null && value.value! < 0))) ||
       _flexBasis == value
     ) {
       return;
