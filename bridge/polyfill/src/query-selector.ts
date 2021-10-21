@@ -54,6 +54,9 @@ function getElementsBySelector(selector: string): Array<Element | null | HTMLEle
   if (els.length !== 0) {
     let temps: HTMLCollectionOf<Element> = context.getElementsByTagName(els[0]);
     tempElements = tempElements.concat(Array.from(temps));
+  } else {
+    let temps: HTMLCollectionOf<Element> = context.getElementsByTagName('*');
+    tempElements = tempElements.concat(Array.from(temps));
   }
 
   // Get by class name.
