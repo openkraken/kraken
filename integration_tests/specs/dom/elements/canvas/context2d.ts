@@ -89,15 +89,15 @@ describe('Canvas context 2d', () => {
     ctx.moveTo(x, 0);
     ctx.lineTo(x, canvas.height);
     ctx.stroke();
-    
+
     ctx.font = '30px serif';
-    
+
     ctx.textAlign = 'left';
     ctx.fillText('left-aligned', x, 40);
-    
+
     ctx.textAlign = 'center';
     ctx.fillText('center-aligned', x, 85);
-    
+
     ctx.textAlign = 'right';
     ctx.fillText('right-aligned', x, 130);
     await snapshot(canvas);
@@ -185,12 +185,12 @@ describe('Canvas context 2d', () => {
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = 'gray';
     ctx.fillRect(80, 60, 140, 30);
-    
+
     // Matrix transformation
     ctx.translate(150, 75);
     ctx.rotate(Math.PI / 2);
     ctx.translate(-150, -75);
-    
+
     // Rotated rectangle
     ctx.fillStyle = 'red';
     ctx.fillRect(80, 60, 140, 30);
@@ -207,7 +207,7 @@ describe('Canvas context 2d', () => {
     ctx.fillStyle = 'blue';
     ctx.fillRect(40, 40, 50, 20);
     ctx.fillRect(40, 90, 50, 20);
-    
+
     // Non-skewed rectangles
     ctx.resetTransform();
     ctx.fillStyle = 'red';
@@ -289,14 +289,14 @@ describe('Canvas context 2d', () => {
     ctx.moveTo(50, 20);
     ctx.quadraticCurveTo(230, 30, 50, 100);
     ctx.stroke();
-    
+
     // Start and end points
     ctx.fillStyle = 'blue';
     ctx.beginPath();
     ctx.arc(50, 20, 5, 0, 2 * Math.PI);   // Start point
     ctx.arc(50, 100, 5, 0, 2 * Math.PI);  // End point
     ctx.fill();
-    
+
     // Control point
     ctx.fillStyle = 'red';
     ctx.beginPath();
@@ -355,11 +355,11 @@ describe('Canvas context 2d', () => {
 
     const ctx1 = canvas1.getContext('2d');
     const ctx2 = canvas2.getContext('2d');
-    
+
     ctx1.rotate(45 * Math.PI / 180);
     ctx1.setTransform(1, .2, .8, 1, 0, 0);
     ctx1.fillRect(25, 25, 50, 50);
-    
+
     ctx2.scale(9, 3);
     ctx2.setTransform(1, .2, .8, 1, 0, 0);
     ctx2.beginPath();

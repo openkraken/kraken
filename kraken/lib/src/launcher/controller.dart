@@ -230,7 +230,7 @@ class KrakenViewController {
     return completer.future;
   }
 
-  Element createElement(int id, Pointer nativePtr, String tagName) {
+  Element createElement(int id, Pointer<NativeEventTarget> nativePtr, String tagName) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_ELEMENT_START, uniqueId: id);
     }
@@ -241,7 +241,7 @@ class KrakenViewController {
     return result;
   }
 
-  void createTextNode(int id, Pointer<NativeTextNode> nativePtr, String data) {
+  void createTextNode(int id, Pointer<NativeEventTarget> nativePtr, String data) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_TEXT_NODE_START, uniqueId: id);
     }
@@ -251,11 +251,11 @@ class KrakenViewController {
     }
   }
 
-  void createComment(int id, Pointer<NativeCommentNode> nativePtr, String data) {
+  void createComment(int id, Pointer<NativeEventTarget> nativePtr) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_COMMENT_START, uniqueId: id);
     }
-    _elementManager.createComment(id, nativePtr, data);
+    _elementManager.createComment(id, nativePtr);
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_COMMENT_END, uniqueId: id);
     }
@@ -345,7 +345,7 @@ class KrakenViewController {
     }
   }
 
-  void createDocumentFragment(int targetId, Pointer<NativeNode> nativePtr) {
+  void createDocumentFragment(int targetId, Pointer<NativeEventTarget> nativePtr) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_DOCUMENT_FRAGMENT_START, uniqueId: targetId);
     }
@@ -359,7 +359,7 @@ class KrakenViewController {
     return _elementManager.getEventTargetByTargetId<EventTarget>(id);
   }
 
-  void handleNavigationAction(String? sourceUrl, String targetUrl, KrakenNavigationType navigationType) async {
+  Future<void> handleNavigationAction(String? sourceUrl, String targetUrl, KrakenNavigationType navigationType) async {
     KrakenNavigationAction action = KrakenNavigationAction(sourceUrl, targetUrl, navigationType);
 
     KrakenNavigationDelegate _delegate = navigationDelegate!;
@@ -370,7 +370,7 @@ class KrakenViewController {
 
       switch (action.navigationType) {
         case KrakenNavigationType.reload:
-          rootController.reloadUrl(action.target);
+          await rootController.reloadUrl(action.target);
           break;
         default:
         // Navigate and other type, do nothing.
@@ -582,11 +582,11 @@ class KrakenController {
     // Should clear previous page cached ui commands
     clearUICommand(_view.contextId);
 
-    disposeContext(_view.contextId);
-
     // Wait for next microtask to make sure C++ native Elements are GC collected and generate disposeEventTarget command in the command queue.
     Completer completer = Completer();
     Future.microtask(() {
+      disposeContext(_view.contextId);
+
       // DisposeEventTarget command will created when js context disposed, should flush them before creating new view.
       flushUICommand();
 
@@ -608,11 +608,13 @@ class KrakenController {
   }
 
   String get href {
-    return getHref(_view.contextId);
+    HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
+    return historyModule.href;
   }
 
   set href(String value) {
-    setHref(_view.contextId, value);
+    HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
+    historyModule.href = value;
   }
 
   // reload current kraken view.
@@ -622,7 +624,7 @@ class KrakenController {
     }
 
     await unload();
-    await loadBundle();
+    await loadBundle(bundleURL: href);
     await evalBundle();
 
     if (devToolsService != null) {
@@ -630,7 +632,7 @@ class KrakenController {
     }
   }
 
-  void reloadUrl(String url) async {
+  Future<void> reloadUrl(String url) async {
     assert(!_view._disposed, 'Kraken have already disposed');
     _bundleURL = url;
     await reload();
@@ -656,6 +658,13 @@ class KrakenController {
     _bundleContent = value;
   }
 
+  Uint8List? _bundleByteCode;
+  Uint8List? get bundleByteCode => _bundleByteCode;
+  set bundleByteCode(Uint8List? value) {
+    if (value == null) return;
+    _bundleByteCode = value;
+  }
+
   String? _bundlePath;
 
   String? get bundlePath => _bundlePath;
@@ -678,7 +687,8 @@ class KrakenController {
   Future<void> loadBundle({
     String? bundleContent,
     String? bundlePath,
-    String? bundleURL
+    String? bundleURL,
+    Uint8List? bundleByteCode
   }) async {
     assert(!_view._disposed, 'Kraken have already disposed');
 
@@ -689,6 +699,7 @@ class KrakenController {
     _bundleContent = bundleContent ?? _bundleContent;
     _bundlePath =  bundlePath ?? _bundlePath;
     _bundleURL =  bundleURL ?? _bundleURL;
+    _bundleByteCode = bundleByteCode ?? _bundleByteCode;
 
     String? url = _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
 

@@ -47,6 +47,48 @@ describe('Tags documentFragment', () => {
     await snapshot();
   });
 
+  it('should work with replaceChild', async () => {
+    const list = document.createElement('div');
+    document.body.appendChild(list);
+
+    {
+      const e = document.createElement('div');
+      e.style.width = '100px';
+      e.style.height = '100px';
+      e.style.backgroundColor = 'yellow';
+      list.appendChild(e);
+    }
+
+    const e = document.createElement('div');
+    e.style.width = '100px';
+    e.style.height = '100px';
+    e.style.backgroundColor = 'green';
+    list.appendChild(e);
+
+    {
+      const e = document.createElement('div');
+      e.style.width = '100px';
+      e.style.height = '100px';
+      e.style.backgroundColor = 'red';
+      list.appendChild(e);
+    }
+
+    const fragment = new DocumentFragment();
+    const colors = ['black', 'blue', 'pink'];
+
+    colors.forEach(color => {
+      const ele = document.createElement('div');
+      ele.style.width = '100px';
+      ele.style.height = '100px';
+      ele.style.backgroundColor = color;
+      fragment.appendChild(ele);
+    });
+
+    list.replaceChild(fragment, e);
+
+    await snapshot();
+  });
+
   it('should work with createDocumentFragment', async () => {
     const list = document.createElement('div');
     document.body.appendChild(list);

@@ -18,7 +18,7 @@ const Map<String, dynamic> _defaultStyle = {
 
 class HTMLElement extends Element {
   static Map<String, dynamic> defaultStyle = _defaultStyle;
-  HTMLElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  HTMLElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(
       targetId,
       nativePtr,

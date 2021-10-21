@@ -4039,7 +4039,7 @@ getJasmineRequireObj().toBeResolvedTo = function (j$) {
 
 getJasmineRequireObj().toMatchSnapshot = function (j$) {
   const _matchSnapshotCounter = {};
-  
+
   // The md5 copy from https://github.com/jbt/tiny-hashes/tree/master/md5
   var k = [], i = 0;
   for (; i < 64;) {
@@ -4140,7 +4140,7 @@ getJasmineRequireObj().toMatchSnapshot = function (j$) {
         return actualPromise.then(blob => {
           return new Promise((resolve, reject) => {
             // @TODO: the C++ HostingObject of Blob, need to removed when jsa support constructor operation.
-            __kraken_match_image_snapshot__(blob, filename, (status) => {
+            __kraken_match_image_snapshot__(blob, filename, (status, errmsg) => {
               // @NOTE: toMatchSnapshot should resolve before spec done.
               const _currentSpec = j$.getEnv().currentRunnable();
               if (_currentSpec.id !== specId) {
@@ -4150,7 +4150,7 @@ getJasmineRequireObj().toMatchSnapshot = function (j$) {
               if (status) {
                 return resolve({ pass: true });
               } else {
-                return resolve({ pass: false, message: `Expected an screenshot is not equal with "${filename}" snapshot.` });
+                return resolve({ pass: false, message: errmsg || `Expected an screenshot is not equal with "${filename}" snapshot.` });
               }
             });
           });

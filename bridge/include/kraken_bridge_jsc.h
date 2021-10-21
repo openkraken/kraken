@@ -11,6 +11,7 @@
 // All struct members include variables and functions must be follow the same order with Dart class, to keep the same
 // memory layout cross dart and C++ code.
 #include "kraken_foundation.h"
+#include "kraken_bridge_jsc_config.h"
 #include "third_party/gumbo-parser/src/gumbo.h"
 #include <JavaScriptCore/JavaScript.h>
 #include <cassert>
@@ -22,8 +23,6 @@
 #include <set>
 #include <unordered_map>
 #include <vector>
-
-using JSExceptionHandler = std::function<void(int32_t contextId, const char *errmsg, JSObjectRef error)>;
 
 class NativeString;
 

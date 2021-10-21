@@ -14,6 +14,7 @@
 
 #if KRAKEN_JSC_ENGINE
 #include "kraken_bridge_jsc.h"
+#elif KRAKEN_QUICK_JS_ENGINE
 #endif
 
 #define KRAKEN_EXPORT_C extern "C" __attribute__((visibility("default"))) __attribute__((used))
@@ -22,12 +23,17 @@
 KRAKEN_EXPORT
 std::__thread_id getUIThreadId();
 
-struct KRAKEN_EXPORT NativeString {
+struct NativeString {
   const uint16_t *string;
   int32_t length;
 
   NativeString *clone();
   void free();
+};
+
+struct NativeByteCode {
+  uint8_t *bytes;
+  int32_t length;
 };
 
 struct KrakenInfo;
@@ -39,7 +45,7 @@ struct KrakenInfo {
   const char *system_name{nullptr};
 };
 
-struct Screen {
+struct NativeScreen {
   double width;
   double height;
 };
@@ -95,11 +101,9 @@ bool checkContext(int32_t contextId, void *context);
 KRAKEN_EXPORT_C
 void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine);
 KRAKEN_EXPORT_C
-void parseHTML(int32_t contextId, NativeString *code, const char *bundleFilename);
+void evaluateQuickjsByteCode(int32_t contextId, uint8_t *bytes, int32_t byteLen);
 KRAKEN_EXPORT_C
-NativeString* getHref(int32_t contextId);
-KRAKEN_EXPORT_C
-void setHref(int32_t contextId, const char *href);
+void parseHTML(int32_t contextId, const char *code, int32_t length);
 KRAKEN_EXPORT_C
 void reloadJsContext(int32_t contextId);
 KRAKEN_EXPORT_C
@@ -108,7 +112,7 @@ void invokeModuleEvent(int32_t contextId, NativeString *module, const char *even
 KRAKEN_EXPORT_C
 void registerDartMethods(uint64_t *methodBytes, int32_t length);
 KRAKEN_EXPORT_C
-Screen *createScreen(double width, double height);
+NativeScreen *createScreen(double width, double height);
 KRAKEN_EXPORT_C
 KrakenInfo *getKrakenInfo();
 KRAKEN_EXPORT_C
@@ -128,7 +132,7 @@ void clearUICommandItems(int32_t contextId);
 KRAKEN_EXPORT_C
 void registerContextDisposedCallbacks(int32_t contextId, Task task, void *data);
 KRAKEN_EXPORT_C
-void registerPluginSource(NativeString* code, const char *pluginName);
+void registerPluginByteCode(uint8_t *bytes, int32_t length, const char *pluginName);
 
 KRAKEN_EXPORT
 void setConsoleMessageHandler(ConsoleMessageHandler handler);

@@ -43,6 +43,18 @@ Pointer<NativeString> stringToNativeString(String string) {
   return nativeString;
 }
 
+int doubleToUint64(double value) {
+  var byteData = ByteData(8);
+  byteData.setFloat64(0, value);
+  return byteData.getUint64(0);
+}
+
+double uInt64ToDouble(int value) {
+  var byteData = ByteData(8);
+  byteData.setInt64(0, value);
+  return byteData.getFloat64(0);
+}
+
 String nativeStringToString(Pointer<NativeString> pointer) {
   return uint16ToString(pointer.ref.string, pointer.ref.length);
 }
@@ -161,7 +173,9 @@ int _setTimeout(Pointer<Void> callbackContext, int contextId,
     try {
       func(callbackContext, contextId, nullptr);
     } catch (e, stack) {
-      func(callbackContext, contextId, ('Error: $e\n$stack').toNativeUtf8());
+      Pointer<Utf8> nativeErrorMessage = ('Error: $e\n$stack').toNativeUtf8();
+      func(callbackContext, contextId, nativeErrorMessage);
+      malloc.free(nativeErrorMessage);
     }
   });
 }
@@ -181,7 +195,9 @@ int _setInterval(Pointer<Void> callbackContext, int contextId,
     try {
       func(callbackContext, contextId, nullptr);
     } catch (e, stack) {
-      func(callbackContext, contextId, ('Dart Error: $e\n$stack').toNativeUtf8());
+      Pointer<Utf8> nativeErrorMessage = ('Dart Error: $e\n$stack').toNativeUtf8();
+      func(callbackContext, contextId, nativeErrorMessage);
+      malloc.free(nativeErrorMessage);
     }
   });
 }
@@ -212,7 +228,9 @@ int _requestAnimationFrame(Pointer<Void> callbackContext, int contextId,
     try {
       func(callbackContext, contextId, highResTimeStamp, nullptr);
     } catch (e, stack) {
-      func(callbackContext, contextId, highResTimeStamp, ('Error: $e\n$stack').toNativeUtf8());
+      Pointer<Utf8> nativeErrorMessage = ('Error: $e\n$stack').toNativeUtf8();
+      func(callbackContext, contextId, highResTimeStamp, nativeErrorMessage);
+      malloc.free(nativeErrorMessage);
     }
   });
 }
@@ -281,8 +299,9 @@ void _toBlob(Pointer<Void> callbackContext, int contextId,
     byteList.setAll(0, bytes);
     func(callbackContext, contextId, nullptr, bytePtr, bytes.length);
   }).catchError((error, stack) {
-    Pointer<Utf8> msg = ('$error\n$stack').toNativeUtf8();
-    func(callbackContext, contextId, msg, nullptr, 0);
+    Pointer<Utf8> nativeErrorMessage = ('$error\n$stack').toNativeUtf8();
+    func(callbackContext, contextId, nativeErrorMessage, nullptr, 0);
+    malloc.free(nativeErrorMessage);
   });
 }
 
@@ -304,25 +323,25 @@ void _flushUICommand() {
 final Pointer<NativeFunction<NativeFlushUICommand>> _nativeFlushUICommand = Pointer.fromFunction(_flushUICommand);
 
 // HTML Element is special element which created at initialize time, so we can't use UICommandQueue to init.
-typedef NativeInitHTML = Void Function(Int32 contextId, Pointer<NativeElement> nativePtr);
-void _initHTML(int contextId, Pointer<NativeElement> nativePtr) {
+typedef NativeInitHTML = Void Function(Int32 contextId, Pointer<NativeEventTarget> nativePtr);
+void _initHTML(int contextId, Pointer<NativeEventTarget> nativePtr) {
   ElementManager.htmlNativePtrMap[contextId] = nativePtr;
 }
 final Pointer<NativeFunction<NativeInitHTML>> _nativeInitHTML = Pointer.fromFunction(_initHTML);
 
-typedef NativeInitWindow = Void Function(Int32 contextId, Pointer<NativeWindow> nativePtr);
-typedef DartInitWindow = void Function(int contextId, Pointer<NativeWindow> nativePtr);
+typedef NativeInitWindow = Void Function(Int32 contextId, Pointer<NativeEventTarget> nativePtr);
+typedef DartInitWindow = void Function(int contextId, Pointer<NativeEventTarget> nativePtr);
 
-void _initWindow(int contextId, Pointer<NativeWindow> nativePtr) {
+void _initWindow(int contextId, Pointer<NativeEventTarget> nativePtr) {
   ElementManager.windowNativePtrMap[contextId] = nativePtr;
 }
 
 final Pointer<NativeFunction<NativeInitWindow>> _nativeInitWindow = Pointer.fromFunction(_initWindow);
 
-typedef NativeInitDocument = Void Function(Int32 contextId, Pointer<NativeDocument> nativePtr);
-typedef DartInitDocument = void Function(int contextId, Pointer<NativeDocument> nativePtr);
+typedef NativeInitDocument = Void Function(Int32 contextId, Pointer<NativeEventTarget> nativePtr);
+typedef DartInitDocument = void Function(int contextId, Pointer<NativeEventTarget> nativePtr);
 
-void _initDocument(int contextId, Pointer<NativeDocument> nativePtr) {
+void _initDocument(int contextId, Pointer<NativeEventTarget> nativePtr) {
   ElementManager.documentNativePtrMap[contextId] = nativePtr;
 }
 

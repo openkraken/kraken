@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 
-import 'dart:collection';
 import 'dart:ffi';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -45,38 +44,23 @@ class CanvasElement extends Element {
   // The custom paint render object.
   RenderCustomPaint? renderCustomPaint;
 
-  static final SplayTreeMap<int, CanvasElement> _nativeMap = SplayTreeMap();
-
-  static CanvasElement getCanvasElementOfNativePtr(Pointer<NativeCanvasElement> nativeCanvasElement) {
-    CanvasElement? canvasElement = _nativeMap[nativeCanvasElement.address];
-    if (canvasElement == null) throw FlutterError('Can not get canvas element from nativeElement: $nativeCanvasElement');
-    return canvasElement;
-  }
-
   static Pointer<NativeCanvasRenderingContext2D> _getContext(
-      Pointer<NativeCanvasElement> nativeCanvasElement, Pointer<NativeString> contextId) {
-    CanvasElement canvasElement = getCanvasElementOfNativePtr(nativeCanvasElement);
+      Pointer<NativeEventTarget> nativeCanvasElement, Pointer<NativeString> contextId) {
+    CanvasElement canvasElement = EventTarget.getEventTargetOfNativePtr(nativeCanvasElement) as CanvasElement;
     canvasElement.getContext(nativeStringToString(contextId));
     return canvasElement.painter.context!.nativeCanvasRenderingContext2D;
   }
 
-  final Pointer<NativeCanvasElement> nativeCanvasElement;
-
-  CanvasElement(int targetId, this.nativeCanvasElement, ElementManager elementManager)
+  CanvasElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
       : super(
           targetId,
-          nativeCanvasElement.ref.nativeElement,
+          nativeEventTarget,
           elementManager,
           isIntrinsicBox: true,
           repaintSelf: true,
           defaultStyle: _defaultStyle,
           tagName: CANVAS,
         ) {
-    nativeCanvasElement.ref.getContext = nativeGetContext;
-
-    // Keep reference so that we can search back with nativePtr from bridge.
-    _nativeMap[nativeCanvasElement.address] = this;
-
     painter = CanvasPainter(repaint: repaintNotifier);
   }
 
@@ -228,9 +212,30 @@ class CanvasElement extends Element {
   }
 
   @override
+  getProperty(String key) {
+    switch(key) {
+      case 'width':
+        return attrWidth;
+      case 'height':
+        return attrHeight;
+    }
+
+    return super.getProperty(key);
+  }
+
+  @override
+  dynamic handleJSCall(String method, List argv) {
+    switch(method) {
+      case 'getContext':
+        return getContext(argv[0]).nativeCanvasRenderingContext2D;
+    }
+
+    return super.handleJSCall(method, argv);
+  }
+
+  @override
   void dispose() {
     super.dispose();
-    _nativeMap.remove(nativeCanvasElement.address);
     // If not getContext and element is disposed that context is not existed.
     if (painter.context != null) {
       painter.context!.dispose();

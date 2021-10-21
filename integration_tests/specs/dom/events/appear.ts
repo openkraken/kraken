@@ -25,7 +25,7 @@ describe('Appear Event', () => {
       div.removeEventListener('disappear', onDisappear);
       done();
     });
-    
+
     // Should must appear larger then 300ms means that have been appeared.
     setTimeout(() => {
       div.style.top = '-600px';
@@ -52,7 +52,7 @@ describe('Appear Event', () => {
 
     document.body.appendChild(div);
 
-    // should add eventListener after appendChild to 
+    // should add eventListener after appendChild to
     // avoid first appear event when div has appended to document.body
     div.addEventListener('appear', function onAppear() {
       div.removeEventListener('appear', onAppear);

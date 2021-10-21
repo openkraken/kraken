@@ -1,3 +1,9 @@
+## 0.9.0-rc
+
+**Features**
+
++ Migrate JavaScript engine from JSC to quickjs.
+
 ## 0.8.4
 
 **Break Changes**

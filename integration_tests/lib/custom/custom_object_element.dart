@@ -78,11 +78,7 @@ class CustomObjectElement implements ObjectElementClient {
   }
 
   @override
-  method(String name, List args) {
-    if (controller == null) {
-      return;
-    }
-
+  dynamic handleJSCall(String name, List args) {
     switch (name) {
       case 'play':
         controller!.play();

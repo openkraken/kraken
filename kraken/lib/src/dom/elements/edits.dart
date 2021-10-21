@@ -21,11 +21,11 @@ const Map<String, dynamic> _delDefaultStyle = {
 };
 
 class DelElement extends Element {
-  DelElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  DelElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: DEL, defaultStyle: _delDefaultStyle);
 }
 
 class InsElement extends Element {
-  InsElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  InsElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: INS, defaultStyle: _insDefaultStyle);
 }

@@ -45,7 +45,7 @@ JSValueRef krakenModuleListener(JSContextRef ctx, JSObjectRef function, JSObject
 void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextId, NativeString *errmsg,
                                          NativeString *json) {
   auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
-  JSContext &_context = obj->_context;
+  JSContext &_context = obj->m_context;
 
   if (!checkContext(contextId, &_context)) return;
 
@@ -53,40 +53,40 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
 
   JSValueRef exception = nullptr;
 
-  if (obj->_callback == nullptr) {
+  if (obj->m_callback == nullptr) {
     throwJSError(_context.context(), "Failed to execute '__kraken_invoke_module__': callback is null.", &exception);
     _context.handleException(exception);
     return;
   }
 
-  JSContextRef ctx = obj->_context.context();
-  if (!JSValueIsObject(ctx, obj->_callback)) {
+  JSContextRef ctx = obj->m_context.context();
+  if (!JSValueIsObject(ctx, obj->m_callback)) {
     return;
   }
 
-  JSObjectRef callback = JSValueToObject(ctx, obj->_callback, &exception);
+  JSObjectRef callback = JSValueToObject(ctx, obj->m_callback, &exception);
 
   if (errmsg != nullptr) {
-    if (!obj->_context.isValid()) {
+    if (!obj->m_context.isValid()) {
       return;
     }
     JSStringRef errorMsgStringRef = JSStringCreateWithCharacters(errmsg->string, errmsg->length);
     JSValueRef errArgs[] = {JSValueMakeString(ctx, errorMsgStringRef)};
     JSObjectRef errObject = JSObjectMakeError(ctx, 1, errArgs, &exception);
     const JSValueRef arguments[] = {errObject};
-    JSObjectCallAsFunction(ctx, callback, obj->_context.global(), 1, arguments, &exception);
+    JSObjectCallAsFunction(ctx, callback, obj->m_context.global(), 1, arguments, &exception);
   } else {
     JSStringRef argumentsString = JSStringCreateWithCharacters(json->string, json->length);
     JSValueRef jsonValue = JSValueMakeFromJSONString(ctx, argumentsString);
 
     const JSValueRef arguments[] = {JSValueMakeNull(ctx), jsonValue};
 
-    JSObjectCallAsFunction(ctx, callback, obj->_context.global(), 2, arguments, &exception);
+    JSObjectCallAsFunction(ctx, callback, obj->m_context.global(), 2, arguments, &exception);
   }
 
   _context.handleException(exception);
 
-  auto bridge = static_cast<JSBridge *>(obj->_context.getOwner());
+  auto bridge = static_cast<JSBridge *>(obj->m_context.getOwner());
   bridge->bridgeCallback->freeBridgeCallbackContext(obj);
 }
 

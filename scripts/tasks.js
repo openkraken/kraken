@@ -11,14 +11,14 @@ const del = require('del');
 const os = require('os');
 
 program
-.option('-e, --js-engine <engine>', 'The JavaScript Engine kraken used', 'jsc')
 .option('--built-with-debug-jsc', 'Built bridge binary with debuggable JSC.')
 .parse(process.argv);
 
 const SUPPORTED_JS_ENGINES = ['jsc', 'quickjs'];
+const targetJSEngine = process.env.KRAKEN_JS_ENGINE || 'quickjs';
 
-if (SUPPORTED_JS_ENGINES.indexOf(program.jsEngine) < 0) {
-  throw new Error('Unsupported js engine:' + program.jsEngine);
+if (SUPPORTED_JS_ENGINES.indexOf(targetJSEngine) < 0) {
+  throw new Error('Unsupported js engine:' + targetJSEngine);
 }
 
 const KRAKEN_ROOT = join(__dirname, '..');
@@ -176,14 +176,13 @@ function findDebugJSEngine(platform) {
 }
 
 task('build-darwin-kraken-lib', done => {
+  let externCmakeArgs = [];
   let buildType = 'Debug';
   if (process.env.KRAKEN_BUILD === 'Release') {
     buildType = 'RelWithDebInfo';
   }
 
-  let builtWithDebugJsc = program.jsEngine === 'jsc' && !!program.builtWithDebugJsc;
-
-  let externCmakeArgs = [];
+  let builtWithDebugJsc = targetJSEngine === 'jsc' && !!program.builtWithDebugJsc;
 
   if (isProfile) {
     externCmakeArgs.push('-DENABLE_PROFILE=TRUE');
@@ -200,23 +199,38 @@ task('build-darwin-kraken-lib', done => {
     stdio: 'inherit',
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: program.jsEngine,
+      KRAKEN_JS_ENGINE: targetJSEngine,
       LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/macos/lib/x86_64')
     }
   });
 
-  execSync(`cmake --build ${paths.bridge}/cmake-build-macos-x86_64 --target kraken kraken_test -- -j 12`, {
+  let krakenTargets = ['kraken'];
+  if (targetJSEngine === 'quickjs') {
+    krakenTargets.push('kraken_unit_test');
+  }
+  if (buildMode === 'Debug') {
+    krakenTargets.push('kraken_test');
+  }
+
+  execSync(`cmake --build ${paths.bridge}/cmake-build-macos-x86_64 --target ${krakenTargets.join(' ')} -- -j 6`, {
     stdio: 'inherit'
   });
 
-  const binaryPath = path.join(paths.bridge, `build/macos/lib/x86_64/libkraken_${program.jsEngine}.dylib`);
+  const binaryPath = path.join(paths.bridge, `build/macos/lib/x86_64/libkraken.dylib`);
 
-  execSync(`install_name_tool -change /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/JavaScriptCore @rpath/JavaScriptCore.framework/Versions/A/JavaScriptCore ${binaryPath}`);
+  if (targetJSEngine === 'jsc') {
+    execSync(`install_name_tool -change /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/JavaScriptCore @rpath/JavaScriptCore.framework/Versions/A/JavaScriptCore ${binaryPath}`);
+  }
   if (buildMode == 'Release' || buildMode == 'RelWithDebInfo') {
     execSync(`dsymutil ${binaryPath}`, { stdio: 'inherit' });
     execSync(`strip -S -X -x ${binaryPath}`, { stdio: 'inherit' });
   }
 
+  done();
+});
+
+task('run-bridge-unit-test', done => {
+  execSync(`${path.join(paths.bridge, 'build/macos/lib/x86_64/kraken_unit_test')}`, {stdio: 'inherit'});
   done();
 });
 
@@ -232,7 +246,7 @@ task('compile-polyfill', (done) => {
     cwd: paths.polyfill,
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: program.jsEngine
+      KRAKEN_JS_ENGINE: targetJSEngine
     },
     stdio: 'inherit'
   });
@@ -345,7 +359,7 @@ task('sdk-clean', (done) => {
 });
 
 task(`build-ios-kraken-lib`, (done) => {
-  const buildType = (buildMode == 'Release' || buildMode === 'RelWithDebInfo') ? 'RelWithDebInfo' : 'Debug';
+  const buildType = (buildMode == 'Release' || buildMode === 'RelWithDebInfo')  ? 'RelWithDebInfo' : 'Debug';
 
   // generate build scripts for simulator
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
@@ -357,7 +371,7 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit',
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: program.jsEngine,
+      KRAKEN_JS_ENGINE: targetJSEngine,
       LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/ios/lib/x86_64')
     }
   });
@@ -367,7 +381,7 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit'
   });
 
-  // geneate builds scripts for ARMV7S
+  // Generate builds scripts for ARMv7
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
     -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
     -DPLATFORM=OS \
@@ -378,12 +392,12 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit',
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: program.jsEngine,
+      KRAKEN_JS_ENGINE: targetJSEngine,
       LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/ios/lib/arm')
     }
   });
 
-  // build for ARMV7S
+  // Build for ARMv7
   execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm --target kraken kraken_static -- -j 12`, {
     stdio: 'inherit'
   });
@@ -398,7 +412,7 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit',
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: program.jsEngine,
+      KRAKEN_JS_ENGINE: targetJSEngine,
       LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/ios/lib/arm64')
     }
   });
@@ -496,7 +510,7 @@ task('build-android-kraken-lib', (done) => {
     -DIS_ANDROID=TRUE \
     -DANDROID_ABI="${arch}" \
     ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
-    -DANDROID_PLATFORM="android-16" \
+    -DANDROID_PLATFORM="android-18" \
     -DANDROID_STL=c++_shared \
     -G "${cmakeGeneratorTemplate}" \
     -B ${paths.bridge}/cmake-build-android-${arch} -S ${paths.bridge}`,
@@ -505,7 +519,7 @@ task('build-android-kraken-lib', (done) => {
         stdio: 'inherit',
         env: {
           ...process.env,
-          KRAKEN_JS_ENGINE: program.jsEngine,
+          KRAKEN_JS_ENGINE: targetJSEngine,
           LIBRARY_OUTPUT_DIR: soBinaryDirectory
         }
       });

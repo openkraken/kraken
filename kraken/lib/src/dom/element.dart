@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'dart:ui';
 import 'dart:ffi';
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -137,13 +136,6 @@ class Element extends Node
         CSSOverflowMixin,
         CSSVisibilityMixin,
         CSSFilterEffectsMixin {
-  static final SplayTreeMap<int, Element> _nativeMap = SplayTreeMap();
-
-  static Element getElementOfNativePtr(Pointer<NativeElement> nativeElement) {
-    Element? element = _nativeMap[nativeElement.address];
-    if (element == null) throw FlutterError('Can not get element from nativeElement: $nativeElement');
-    return element;
-  }
 
   final Map<String, dynamic> properties = <String, dynamic>{};
 
@@ -159,8 +151,6 @@ class Element extends Node
 
   /// Is element an intrinsic box.
   final bool _isIntrinsicBox;
-
-  final Pointer<NativeElement> nativeElementPtr;
 
   /// Style declaration from user input.
   late CSSStyleDeclaration style;
@@ -182,26 +172,18 @@ class Element extends Node
     return isScrollingBox || isSetRepaintSelf || hasTransform || isPositionedFixed;
   }
 
-  Element(int targetId, this.nativeElementPtr, ElementManager elementManager,
-      {required this.tagName,
+  Element(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager,
+      {required String tagName,
         Map<String, dynamic> defaultStyle = const {},
         // Whether element allows children.
         bool isIntrinsicBox = false,
-        this.repaintSelf = false,
-        // @HACK: overflow scroll needs to create an shadow element to create an scrolling renderBox for better scrolling performance.
-        // we needs to prevent this shadow element override real element in nativeMap.
-        bool isHiddenElement = false})
+        this.repaintSelf = false})
       : _defaultStyle = defaultStyle,
+        tagName = tagName.toUpperCase(),
         _isIntrinsicBox = isIntrinsicBox,
         defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : INLINE,
-        super(NodeType.ELEMENT_NODE, targetId, nativeElementPtr.ref.nativeNode, elementManager, tagName) {
+        super(NodeType.ELEMENT_NODE, targetId, nativeEventTarget, elementManager, tagName) {
     style = CSSStyleDeclaration(this);
-
-    if (!isHiddenElement) {
-      _nativeMap[nativeElementPtr.address] = this;
-    }
-
-    bindNativeMethods(nativeElementPtr);
     _setDefaultStyle();
   }
 
@@ -567,9 +549,6 @@ class Element extends Node
 
     style.dispose();
     properties.clear();
-
-    // Remove native reference.
-    _nativeMap.remove(nativeElementPtr.address);
   }
 
   // Used for force update layout.
@@ -1452,7 +1431,7 @@ class Element extends Node
   }
 
   void _eventResponder(Event event) {
-    emitUIEvent(elementManager.controller.view.contextId, nativeElementPtr.ref.nativeNode.ref.nativeEventTarget, event);
+    emitUIEvent(elementManager.controller.view.contextId, nativeEventTargetPtr, event);
   }
 
   void handleMethodClick() {

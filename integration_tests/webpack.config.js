@@ -1,6 +1,7 @@
 const path = require('path');
 const glob = require('glob');
 const bableTransformSnapshotPlugin = require('./scripts/babel_transform_snapshot');
+const quickjsSyntaxFixLoader = require('./scripts/quickjs_syntax_fix_loader');
 
 const context = path.join(__dirname);
 const runtimePath = path.join(context, 'runtime');
@@ -42,7 +43,7 @@ module.exports = {
       {
         test: /\.(jsx?|tsx?)$/i,
         exclude: /node_modules/,
-        use: {
+        use: [{
           loader: 'babel-loader',
           options: {
             plugins: [
@@ -58,7 +59,7 @@ module.exports = {
             presets: [
               [
                 '@babel/preset-env',
-                { 
+                {
                   targets: {
                     chrome: 76,
                   },
@@ -67,7 +68,7 @@ module.exports = {
                 }],
               [
                 '@babel/preset-typescript',
-                { 
+                {
                   isTSX: true,
                   allExtensions: true
                 }
@@ -82,7 +83,9 @@ module.exports = {
               ]
             ]
           }
-        }
+        }, {
+          loader: path.resolve('./scripts/quickjs_syntax_fix_loader'),
+        }]
       }
     ],
   },

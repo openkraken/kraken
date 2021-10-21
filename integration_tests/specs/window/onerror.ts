@@ -1,26 +1,29 @@
 const ex = new Error('CustomErrorTest');
-let onerrorTestSuccess = false;
+let propertyCallbackSuccess = false;
+let eventListenerSuccess = false;
 
 // onerror api and Error events test will conflict with jasmine error detection.
 window.onerror = function(event, sourceURL, line, column, error) {
   try {
-    onerrorTestSuccess = window.onerror === arguments.callee || error === ex || sourceURL === location.href || event instanceof Event;
+    propertyCallbackSuccess = window.onerror === arguments.callee || error === ex || sourceURL === location.href || event instanceof Event;
   } catch (e) {
-    onerrorTestSuccess = false;
+    propertyCallbackSuccess = false;
   }
 };
 
 window.addEventListener('error', (e) => {
-  onerrorTestSuccess = e.error === ex;
+  eventListenerSuccess = e.error === ex;
 });
 
 describe('window onerror', () => {
   it('window onerror works', () => {
-    expect(onerrorTestSuccess).toBe(true);
+    expect(eventListenerSuccess).toBe(true, 'event listener success');
+    expect(propertyCallbackSuccess).toBe(true, 'property callback success');
   });
 });
 
-setTimeout(() => {
+// @ts-ignore
+window.triggerGlobalError = function() {
   throw ex;
-});
+}
 

@@ -1,7 +1,6 @@
-import { addKrakenModuleListener, krakenInvokeModule, privateKraken } from './bridge';
+import { addKrakenModuleListener, krakenInvokeModule } from './bridge';
 import { methodChannel, triggerMethodCallHandler } from './method-channel';
 import { dispatchConnectivityChangeEvent } from "./connection";
-import { dispatchWebSocketEvent } from "./websocket";
 
 function krakenModuleListener(moduleName: string, event: Event, data: any) {
   switch (moduleName) {
@@ -15,17 +14,12 @@ function krakenModuleListener(moduleName: string, event: Event, data: any) {
       triggerMethodCallHandler(method, args);
       break;
     }
-    case 'WebSocket': {
-      dispatchWebSocketEvent(data, event as ErrorEvent);
-      break;
-    }
   }
 }
 
 addKrakenModuleListener(krakenModuleListener);
 
 export const kraken = {
-  ...privateKraken,
   methodChannel,
   invokeModule: krakenInvokeModule,
   addKrakenModuleListener: addKrakenModuleListener

@@ -64,31 +64,31 @@ const Map<String, dynamic> _h6DefaultStyle = {
 };
 
 class H1Element extends Element {
-  H1Element(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  H1Element(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: H1, defaultStyle: _h1DefaultStyle);
 }
 
 class H2Element extends Element {
-  H2Element(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  H2Element(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: H2, defaultStyle: _h2DefaultStyle);
 }
 
 class H3Element extends Element {
-  H3Element(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  H3Element(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: H3, defaultStyle: _h3DefaultStyle);
 }
 
 class H4Element extends Element {
-  H4Element(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  H4Element(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: H4, defaultStyle: _h4DefaultStyle);
 }
 
 class H5Element extends Element {
-  H5Element(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  H5Element(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: H5, defaultStyle: _h5DefaultStyle);
 }
 
 class H6Element extends Element {
-  H6Element(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  H6Element(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: H6, defaultStyle: _h6DefaultStyle);
 }

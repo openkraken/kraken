@@ -27,16 +27,16 @@ dependencies:
     sdk: flutter
   kraken: 0.8.0-dev.1
   image: ^3.0.2
-  kraken_video_player: ^0.4.0
-  kraken_websocket: ^0.2.0
-  kraken_animation_player: ^0.2.0
-  kraken_webview: ^0.7.0
+  kraken_video_player: 1.0.0-dev.1
+  kraken_websocket: 1.0.0-dev.1
+  kraken_animation_player: 1.0.0-dev.1
+  kraken_webview: 1.0.0-dev.1
 
 dev_dependencies:
-  test: ^1.16.8
-  ansicolor: ^2.0.1
   flutter_test:
     sdk: flutter
+  test: ^1.16.8
+  ansicolor: ^2.0.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

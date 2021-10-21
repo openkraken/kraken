@@ -3,6 +3,8 @@
  * Author: Kraken Team.
  */
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:kraken/module.dart';
 
@@ -36,6 +38,7 @@ int initBridge() {
     Future.microtask(() {
       // Port flutter's frame callback into bridge.
       SchedulerBinding.instance!.addPersistentFrameCallback((_) {
+
         assert(contextId != -1);
         flushUICommand();
         flushUICommandCallback();
