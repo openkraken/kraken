@@ -11,6 +11,7 @@ import 'package:ansicolor/ansicolor.dart';
 import 'package:path/path.dart' as path;
 import 'bridge/from_native.dart';
 import 'bridge/to_native.dart';
+import 'custom/custom_object_element.dart';
 import 'package:kraken_websocket/kraken_websocket.dart';
 import 'package:kraken_animation_player/kraken_animation_player.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
@@ -44,6 +45,7 @@ void main() async {
   KrakenAnimationPlayer.initialize();
   KrakenVideoPlayer.initialize();
   KrakenWebView.initialize();
+  setObjectElementFactory(customObjectElementFactory);
 
   // FIXME: This is a workaround for testcase
   ParagraphElement.defaultStyle = {

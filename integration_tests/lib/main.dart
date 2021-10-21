@@ -13,7 +13,7 @@ import 'package:path/path.dart' as path;
 import 'bridge/from_native.dart';
 import 'bridge/to_native.dart';
 import 'bridge/test_input.dart';
-import 'custom/custom_element_widget.dart';
+import 'custom/custom_element.dart';
 import 'package:kraken/gesture.dart';
 import 'local_http_server.dart';
 
@@ -42,7 +42,6 @@ class IntegrationTestUriParser extends UriParser {
 // By CLI: `KRAKEN_ENABLE_TEST=true flutter run`
 void main() async {
   defineKrakenCustomElements();
-  setObjectElementFactory(customObjectElementFactory);
 
   // FIXME: This is a workaround for testcase
   ParagraphElement.defaultStyle = {
