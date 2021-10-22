@@ -107,7 +107,6 @@ class ImageElement extends Element {
     _imageProvider?.evict();
     _imageProvider = null;
 
-    _removeStreamListener();
     _renderImage?.image = null;
   }
 
@@ -118,7 +117,8 @@ class ImageElement extends Element {
     _imageProvider?.evict();
     _imageProvider = null;
 
-    _removeStreamListener();
+    _imageStream?.removeListener(_renderStreamListener);
+    _imageStream = null;
 
     _renderImage = null;
   }
@@ -298,10 +298,10 @@ class ImageElement extends Element {
     }
   }
 
-  void _removeStreamListener() {
-    _imageStream?.removeListener(_renderStreamListener);
-    _imageStream = null;
-  }
+  // void _removeStreamListener() {
+  //   _imageStream?.removeListener(_renderStreamListener);
+  //   _imageStream = null;
+  // }
 
   RenderImage createRenderImageBox() {
     RenderStyle renderStyle = renderBoxModel!.renderStyle;
@@ -377,8 +377,6 @@ class ImageElement extends Element {
     _resetImage();
 
     if (_source != null) {
-      _removeStreamListener();
-
       Uri base = Uri.parse(elementManager.controller.href);
       Uri resolvedUri = elementManager.controller.uriParser!.resolve(base, Uri.parse(_source!));
 

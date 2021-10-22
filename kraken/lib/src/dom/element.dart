@@ -1452,8 +1452,10 @@ class Element extends Node
 
     SchedulerBinding.instance!.addPostFrameCallback((_) async {
       Uint8List captured;
-      RenderBoxModel? renderObject = nodeName == 'HTML' ? elementManager.viewportElement.renderBoxModel : renderBoxModel;
-      if (renderObject!.hasSize && renderObject.size == Size.zero) {
+      RenderBoxModel? renderObject = targetId == HTML_ID
+          ? elementManager.viewportElement.renderBoxModel
+          : renderBoxModel;
+      if (renderObject!.hasSize && renderObject.size.isEmpty) {
         // Return a blob with zero length.
         captured = Uint8List(0);
       } else {
