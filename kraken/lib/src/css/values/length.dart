@@ -169,11 +169,14 @@ class CSSLengthValue {
             // If the height of the containing block is not specified explicitly (i.e., it depends on content height),
             // and this element is not absolutely positioned, the value computes to 'auto'.
             // https://www.w3.org/TR/CSS2/visudet.html#propdef-height
-            // Note: If the parent is flex item, percentage resloves againts the resolved height
-            // no matter parent's height is set or not.
-            bool isParentFlexLayout = parentRenderStyle?.display == CSSDisplay.flex ||
-              parentRenderStyle?.display == CSSDisplay.inlineFlex;
-            double? parentContentHeight = isPositioned || isParentFlexLayout ?
+            // There are two exceptions when percentage height is resolved against actual render height of parent:
+            // 1. positioned element
+            // 2. parent is flex item
+
+            RenderStyle? grandParentRenderStyle = parentRenderStyle?.parent;
+            bool isGrandParentFlexLayout = grandParentRenderStyle?.display == CSSDisplay.flex ||
+              grandParentRenderStyle?.display == CSSDisplay.inlineFlex;
+            double? parentContentHeight = isPositioned || isGrandParentFlexLayout ?
               parentRenderStyle?.contentBoxHeight : parentRenderStyle?.contentBoxLogicalHeight;
 
             if (parentContentHeight != null) {
