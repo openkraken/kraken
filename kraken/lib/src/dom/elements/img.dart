@@ -302,11 +302,6 @@ class ImageElement extends Element {
     }
   }
 
-  // void _removeStreamListener() {
-  //   _imageStream?.removeListener(_renderStreamListener);
-  //   _imageStream = null;
-  // }
-
   RenderImage createRenderImageBox() {
     RenderStyle renderStyle = renderBoxModel!.renderStyle;
     BoxFit objectFit = renderStyle.objectFit;
