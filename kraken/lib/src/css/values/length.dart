@@ -128,17 +128,8 @@ class CSSLengthValue {
           parentRenderStyle?.paddingBoxLogicalWidth ?? parentRenderStyle?.paddingBoxWidth :
           parentRenderStyle?.contentBoxLogicalWidth ?? parentRenderStyle?.contentBoxWidth;
 
-        // The percentage of height is calculated with respect to the height of the generated box's containing block.
-        // If the height of the containing block is not specified explicitly (i.e., it depends on content height),
-        // and this element is not absolutely positioned, the value computes to 'auto'.
-        // https://www.w3.org/TR/CSS2/visudet.html#propdef-height
-        // Note: If the parent is flex item, percentage resloves againts the resolved height
-        // no matter parent's height is set or not.
-        bool isParentFlexLayout = parentRenderStyle?.display == CSSDisplay.flex ||
-          parentRenderStyle?.display == CSSDisplay.inlineFlex;
-
         // Percentage relative height priority: logical height > renderer height
-        double? relativeParentHeight = isPositioned || isParentFlexLayout ?
+        double? relativeParentHeight = isPositioned ?
           parentRenderStyle?.paddingBoxLogicalHeight ?? parentRenderStyle?.paddingBoxHeight :
           parentRenderStyle?.contentBoxLogicalHeight ?? parentRenderStyle?.contentBoxHeight;
 
@@ -167,19 +158,37 @@ class CSSLengthValue {
               if (renderBoxModel != null) {
                 renderBoxModel.markParentNeedsRelayout();
               }
+              // @FIXME: Should return null instead once getComputedValue allows return null.
               _computedValue = 0;
             }
             break;
           case HEIGHT:
           case MIN_HEIGHT:
           case MAX_HEIGHT:
-            if (relativeParentHeight != null) {
-              _computedValue = value! * relativeParentHeight;
-            } else {
-              // Mark parent to relayout to get renderer height of parent.
-              if (renderBoxModel != null) {
-                renderBoxModel.markParentNeedsRelayout();
+            // The percentage of height is calculated with respect to the height of the generated box's containing block.
+            // If the height of the containing block is not specified explicitly (i.e., it depends on content height),
+            // and this element is not absolutely positioned, the value computes to 'auto'.
+            // https://www.w3.org/TR/CSS2/visudet.html#propdef-height
+            // Note: If the parent is flex item, percentage resloves againts the resolved height
+            // no matter parent's height is set or not.
+            bool isParentFlexLayout = parentRenderStyle?.display == CSSDisplay.flex ||
+              parentRenderStyle?.display == CSSDisplay.inlineFlex;
+            double? parentContentHeight = isPositioned || isParentFlexLayout ?
+              parentRenderStyle?.contentBoxHeight : parentRenderStyle?.contentBoxLogicalHeight;
+
+            if (parentContentHeight != null) {
+              if (relativeParentHeight != null) {
+                _computedValue = value! * relativeParentHeight;
+              } else {
+                // Mark parent to relayout to get renderer height of parent.
+                if (renderBoxModel != null) {
+                  renderBoxModel.markParentNeedsRelayout();
+                }
+                // @FIXME: Should return null instead once getComputedValue allows return null.
+                _computedValue = 0;
               }
+            } else {
+              // @FIXME: Should return null instead once getComputedValue allows return null.
               _computedValue = 0;
             }
             break;
@@ -200,6 +209,7 @@ class CSSLengthValue {
               if (renderBoxModel != null) {
                 renderBoxModel.markParentNeedsRelayout();
               }
+              // @FIXME: Should return null instead once getComputedValue allows return null.
               _computedValue = 0;
             }
             break;
@@ -218,6 +228,7 @@ class CSSLengthValue {
               if (renderBoxModel != null) {
                 renderBoxModel.markParentNeedsRelayout();
               }
+              // @FIXME: Should return null instead once getComputedValue allows return null.
               _computedValue = 0;
             }
             break;
@@ -233,6 +244,7 @@ class CSSLengthValue {
               if (renderBoxModel != null) {
                 renderBoxModel.markParentNeedsRelayout();
               }
+              // @FIXME: Should return null instead once getComputedValue allows return null.
               _computedValue = 0;
             }
           break;
@@ -253,6 +265,7 @@ class CSSLengthValue {
                 if (renderBoxModel != null) {
                   renderBoxModel.markParentNeedsRelayout();
                 }
+                // @FIXME: Should return null instead once getComputedValue allows return null.
                 _computedValue = 0;
               }
             } else if (axisType == Axis.vertical) {
@@ -263,6 +276,7 @@ class CSSLengthValue {
                 if (renderBoxModel != null) {
                   renderBoxModel.markParentNeedsRelayout();
                 }
+                // @FIXME: Should return null instead once getComputedValue allows return null.
                 _computedValue = 0;
               }
             }
@@ -270,6 +284,7 @@ class CSSLengthValue {
         }
         break;
       default:
+        // @FIXME: Type AUTO not always resolves to 0, in cases such as `margin: auto`, `width: auto`.
         return 0;
     }
     return _computedValue!;

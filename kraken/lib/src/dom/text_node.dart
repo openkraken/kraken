@@ -98,6 +98,9 @@ class TextNode extends Node {
       _renderTextBox!.renderStyle = _parentElement.renderStyle;
       _renderTextBox!.data = data;
 
+      KrakenRenderParagraph renderParagraph = _renderTextBox!.child as KrakenRenderParagraph;
+      renderParagraph.markNeedsLayout();
+
       RenderLayoutBox? parentRenderLayoutBox;
       if (_parentElement.scrollingContentLayoutBox != null) {
         parentRenderLayoutBox = _parentElement.scrollingContentLayoutBox!;
