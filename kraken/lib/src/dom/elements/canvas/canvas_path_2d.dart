@@ -1,6 +1,12 @@
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui';
+
 import 'package:vector_math/vector_math_64.dart';
 
 // ignore: non_constant_identifier_names

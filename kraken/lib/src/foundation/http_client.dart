@@ -5,8 +5,9 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'http_overrides.dart';
+
 import 'http_client_request.dart';
+import 'http_overrides.dart';
 
 class ProxyHttpClient implements HttpClient {
   ProxyHttpClient(HttpClient nativeHttpClient, KrakenHttpOverrides httpOverrides)

@@ -1,4 +1,9 @@
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/rendering.dart';
 
 mixin RenderColorFilter on RenderBox {

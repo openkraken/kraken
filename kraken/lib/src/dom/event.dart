@@ -6,9 +6,9 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'package:kraken/dom.dart';
-import 'package:kraken/bridge.dart';
 import 'package:ffi/ffi.dart';
+import 'package:kraken/bridge.dart';
+import 'package:kraken/dom.dart';
 
 const String EVENT_CLICK = 'click';
 const String EVENT_INPUT = 'input';

@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 // Single finger drag gestures.
 // Modified from Flutter gesture/monodrag.dart.
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/foundation.dart';
 import 'package:kraken/dom.dart';
 
 typedef IsAcceptedDragCallback = bool Function(AxisDirection direction);

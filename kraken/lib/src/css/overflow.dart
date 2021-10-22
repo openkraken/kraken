@@ -1,12 +1,15 @@
-
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/rendering.dart';
-import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
+import 'package:kraken/rendering.dart';
 
 // CSS Overflow: https://drafts.csswg.org/css-overflow-3/
 
