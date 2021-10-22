@@ -31,3 +31,14 @@ Object.defineProperty(document, 'body', {
   enumerable: true,
   configurable: false
 });
+
+// @ts-ignore
+class SVGElement extends Element {
+  constructor() {
+    super();
+  }
+}
+
+Object.defineProperty(window, 'SVGElement', {
+  value: SVGElement
+});
