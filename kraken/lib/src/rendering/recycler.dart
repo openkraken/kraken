@@ -152,14 +152,6 @@ class RenderRecyclerLayout extends RenderLayoutBox {
     double? width = renderStyle.width?.computedValue;
     double? height = renderStyle.height?.computedValue;
     Axis sliverAxis = renderStyle.sliverDirection;
-    AxisDirection axisDirection = getAxisDirection(sliverAxis);
-
-    // TODO(yuanyan): Update scrollable only when axisDirection changed.
-    scrollable = KrakenScrollable(axisDirection: axisDirection);
-    viewport
-      ..axisDirection = axisDirection
-      ..crossAxisDirection = getCrossAxisDirection(sliverAxis)
-      ..offset = scrollable.position!;
 
     switch (sliverAxis) {
       case Axis.horizontal:
