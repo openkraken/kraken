@@ -172,7 +172,7 @@ class Element extends Node
     return isScrollingBox || isSetRepaintSelf || hasTransform || isPositionedFixed;
   }
 
-  Element(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager,
+  Element(int targetId, Pointer<NativeEventTarget>? nativeEventTarget, ElementManager elementManager,
       {required String tagName,
         Map<String, dynamic> defaultStyle = const {},
         // Whether element allows children.

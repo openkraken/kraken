@@ -24,7 +24,7 @@ const Map<String, dynamic> _paramStyle = {
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/param
 class ParamElement extends Element {
-  ParamElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
+  ParamElement(int targetId, Pointer<NativeEventTarget>? nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: PARAM, defaultStyle: _paramStyle);
 }
 
@@ -38,7 +38,7 @@ class ObjectElement extends Element implements ObjectElementHost {
   late ObjectElementClientFactory _objectElementClientFactory;
   late ObjectElementClient _objectElementClient;
 
-  ObjectElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
+  ObjectElement(int targetId, Pointer<NativeEventTarget>? nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: OBJECT, defaultStyle: _objectStyle, isIntrinsicBox: true) {
     initObjectClient();
     initElementClient();

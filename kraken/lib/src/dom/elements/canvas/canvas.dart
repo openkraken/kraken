@@ -51,7 +51,7 @@ class CanvasElement extends Element {
     return canvasElement.painter.context!.nativeCanvasRenderingContext2D;
   }
 
-  CanvasElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
+  CanvasElement(int targetId, Pointer<NativeEventTarget>? nativeEventTarget, ElementManager elementManager)
       : super(
           targetId,
           nativeEventTarget,

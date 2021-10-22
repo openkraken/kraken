@@ -17,7 +17,7 @@ enum NodeType {
 }
 
 class Comment extends Node {
-  Comment(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
+  Comment(int targetId, Pointer<NativeEventTarget>? nativeEventTarget, ElementManager elementManager)
       : super(NodeType.COMMENT_NODE, targetId, nativeEventTarget, elementManager, '#comment');
 
   @override
@@ -108,7 +108,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
     return _children;
   }
 
-  Node(this.nodeType, int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager, this.nodeName)
+  Node(this.nodeType, int targetId, Pointer<NativeEventTarget>? nativeEventTarget, ElementManager elementManager, this.nodeName)
       : super(targetId, nativeEventTarget, elementManager);
 
   // If node is on the tree, the root parent is body.

@@ -70,7 +70,7 @@ class _WidgetCustomElement extends dom.Element {
   late BuildOwner _buildOwner;
   late Widget _widget;
   _KrakenAdapterWidgetPropertiesState? _propertiesState;
-  _WidgetCustomElement(int targetId, Pointer<NativeEventTarget> nativePtr, dom.ElementManager elementManager, String tagName, WidgetCreator creator)
+  _WidgetCustomElement(int targetId, Pointer<NativeEventTarget>? nativePtr, dom.ElementManager elementManager, String tagName, WidgetCreator creator)
       : super(
       targetId,
       nativePtr,
@@ -179,6 +179,10 @@ class Kraken extends StatefulWidget {
   // The initial raw bytecode to load.
   final Uint8List? bundleByteCode;
 
+  // Experiment feature: use kraken ui commands to create page without initialize JavaScript Engine.
+  // Note: All JavaScript features will be unavaliable.
+  final List<UICommand>? experimentUiCommands;
+
   // The animationController of Flutter Route object.
   // Pass this object to KrakenWidget to make sure Kraken execute JavaScripts scripts after route transition animation completed.
   final AnimationController? animationController;
@@ -218,6 +222,15 @@ class Kraken extends StatefulWidget {
     }
   }
 
+  static void experimentEnableUICommandDump() {
+    kExperimentDumpUICommand = true;
+  }
+
+  List<UICommand> experimentDumpUICommand() {
+    if (controller == null) throw Exception('Kraken page not initialized.');
+    return controller!.view.uiCommands.sublist(0);
+  }
+
   static bool _isValidCustomElementName(localName) {
     return RegExp(r'^[a-z][.0-9_a-z]*-[\-.0-9_a-z]*$').hasMatch(localName);
   }
@@ -233,7 +246,7 @@ class Kraken extends StatefulWidget {
       defineElement(tagName, creator as ElementCreator);
     } else if (T == WidgetCreator) {
       defineElement(tagName, (id, nativePtr, elementManager) {
-        return _WidgetCustomElement(id, nativePtr.cast<NativeEventTarget>(), elementManager, tagName, creator as WidgetCreator);
+        return _WidgetCustomElement(id, nativePtr?.cast<NativeEventTarget>(), elementManager, tagName, creator as WidgetCreator);
       });
     }
   }
@@ -282,6 +295,7 @@ class Kraken extends StatefulWidget {
     this.bundlePath,
     this.bundleContent,
     this.bundleByteCode,
+    this.experimentUiCommands,
     this.onLoad,
     this.navigationDelegate,
     this.javaScriptChannel,
@@ -844,6 +858,7 @@ This situation often happened when you trying creating kraken when FlutterView n
       bundleContent: _krakenWidget.bundleContent,
       bundleURL: _krakenWidget.bundleURL,
       bundlePath: _krakenWidget.bundlePath,
+      experimentUiCommands: _krakenWidget.experimentUiCommands,
       onLoad: _krakenWidget.onLoad,
       onLoadError: _krakenWidget.onLoadError,
       onJSError: _krakenWidget.onJSError,
@@ -918,13 +933,17 @@ class _KrakenRenderObjectElement extends SingleChildRenderObjectElement {
 
     KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller!;
 
-    if (controller.bundleContent == null && controller.bundlePath == null && controller.bundleURL == null) {
-      return;
+    if (controller.experimentUiCommands != null) {
+      controller.view.loadUICommands(controller.experimentUiCommands!);
+    } else {
+      if (controller.bundleContent == null && controller.bundlePath == null && controller.bundleURL == null) {
+        return;
+      }
+
+      await controller.loadBundle();
+
+      _evalBundle(controller, widget._krakenWidget.animationController);
     }
-
-    await controller.loadBundle();
-
-    _evalBundle(controller, widget._krakenWidget.animationController);
   }
 
   @override

@@ -7,9 +7,10 @@ import 'dart:ffi';
 import 'dart:ui';
 
 void main() {
-  Kraken.defineCustomElement<ElementCreator>('sample-element',  (int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager) {
+  Kraken.defineCustomElement<ElementCreator>('sample-element',  (int targetId, Pointer<NativeEventTarget>? nativeEventTarget, ElementManager elementManager) {
     return SampleElement(targetId, nativeEventTarget, elementManager);
   });
+  // Kraken.experimentEnableUICommandDump();
   // KrakenWebsocket.initialize();
   runApp(MyApp());
 }
@@ -22,6 +23,22 @@ class MyApp extends StatelessWidget {
       title: 'Kraken Browser',
       // theme: ThemeData.dark(),
       home: MyBrowser(),
+    );
+  }
+}
+
+class UICommandKraken extends StatelessWidget {
+  UICommandKraken();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Render Kraken with UI Command'),
+      ),
+      body: Kraken(
+        bundleURL: 'assets/bundle.js',
+      ),
     );
   }
 }
@@ -90,6 +107,15 @@ class _MyHomePageState extends State<MyBrowser> {
     final Size viewportSize = queryData.size;
     return Scaffold(
         appBar: appBar,
+        floatingActionButton: ElevatedButton(
+          child: Text('Dump UI Command'),
+          onPressed: () {
+            // List<UICommand>? commands = _kraken?.experimentDumpUICommand();
+            // if (commands != null) {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => UICommandKraken()));
+            // }
+          },
+        ),
         body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.

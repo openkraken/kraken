@@ -31,7 +31,7 @@ const int HTML_ID = -1;
 const int WINDOW_ID = -2;
 const int DOCUMENT_ID = -3;
 
-typedef ElementCreator = Element Function(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager);
+typedef ElementCreator = Element Function(int targetId, Pointer<NativeEventTarget>? nativeEventTarget, ElementManager elementManager);
 
 class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver  {
   // Call from JS Bridge before JS side eventTarget object been Garbage collected.
@@ -47,7 +47,9 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_END, uniqueId: id);
     }
-    malloc.free(eventTarget.nativeEventTargetPtr);
+    if (eventTarget.nativeEventTargetPtr != null) {
+      malloc.free(eventTarget.nativeEventTargetPtr!);
+    }
   }
 
   // Alias defineElement export for kraken plugin
@@ -93,7 +95,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_INIT_START);
     }
 
-    HTMLElement documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId]!, this);
+    HTMLElement documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId], this);
     setEventTarget(documentElement);
 
     viewport.child = viewportElement.renderBoxModel;
@@ -105,10 +107,10 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
     _setupObserver();
 
-    Window window = Window(WINDOW_ID, windowNativePtrMap[contextId]!, this, viewportElement);
+    Window window = Window(WINDOW_ID, windowNativePtrMap[contextId], this, viewportElement);
     setEventTarget(window);
 
-    document = Document(DOCUMENT_ID, documentNativePtrMap[contextId]!, this, documentElement);
+    document = Document(DOCUMENT_ID, documentNativePtrMap[contextId], this, documentElement);
     document.appendChild(documentElement);
     setEventTarget(document);
 
@@ -178,7 +180,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   Element createElement(
-      int id, Pointer<NativeEventTarget> nativePtr, String type, Map<String, dynamic>? props, List<String>? events) {
+      int id, Pointer<NativeEventTarget>? nativePtr, String type, Map<String, dynamic>? props, List<String>? events) {
     assert(!existsTarget(id), 'ERROR: Can not create element with same id "$id"');
 
     List<String> eventList;
@@ -194,17 +196,17 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     return element;
   }
 
-  void createTextNode(int id, Pointer<NativeEventTarget> nativePtr, String data) {
+  void createTextNode(int id, Pointer<NativeEventTarget>? nativePtr, String data) {
     TextNode textNode = TextNode(id, nativePtr, data, this);
     setEventTarget(textNode);
   }
 
-  void createDocumentFragment(int id, Pointer<NativeEventTarget> nativePtr) {
+  void createDocumentFragment(int id, Pointer<NativeEventTarget>? nativePtr) {
     DocumentFragment documentFragment = DocumentFragment(id, nativePtr, this);
     setEventTarget(documentFragment);
   }
 
-  void createComment(int id, Pointer<NativeEventTarget> nativePtr) {
+  void createComment(int id, Pointer<NativeEventTarget>? nativePtr) {
     EventTarget comment = Comment(id, nativePtr, this);
     setEventTarget(comment);
   }

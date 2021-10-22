@@ -17,7 +17,7 @@ const String RETURN_CHAR = '\r';
 const String TAB_CHAR = '\t';
 
 class TextNode extends Node {
-  TextNode(int targetId, Pointer<NativeEventTarget> nativeEventTarget, this._data, ElementManager elementManager)
+  TextNode(int targetId, Pointer<NativeEventTarget>? nativeEventTarget, this._data, ElementManager elementManager)
       : super(NodeType.TEXT_NODE, targetId, nativeEventTarget, elementManager, '#text');
 
   RenderTextBox? _renderTextBox;

@@ -102,7 +102,7 @@ class Event {
       cancelable ? 1 : 0,
       timeStamp,
       defaultPrevented ? 1 : 0,
-      _target != null ? _target.nativeEventTargetPtr.address : nullptr.address,
+      _target != null ? _target.nativeEventTargetPtr!.address : nullptr.address,
       nullptr.address
     ];
 
@@ -525,7 +525,7 @@ class Touch {
   Pointer<NativeTouch> toNative() {
     Pointer<NativeTouch> nativeTouch = malloc.allocate<NativeTouch>(sizeOf<NativeTouch>());
     nativeTouch.ref.identifier = identifier;
-    nativeTouch.ref.target = target.nativeEventTargetPtr;
+    nativeTouch.ref.target = target.nativeEventTargetPtr!;
     nativeTouch.ref.clientX = clientX;
     nativeTouch.ref.clientY = clientY;
     nativeTouch.ref.screenX = screenX;

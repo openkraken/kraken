@@ -51,7 +51,7 @@ class ImageElement extends Element {
 
   bool get _shouldLazyLoading => properties['loading'] == 'lazy';
 
-  ImageElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
+  ImageElement(int targetId, Pointer<NativeEventTarget>? nativeEventTarget, ElementManager elementManager)
       : super(
       targetId,
       nativeEventTarget,

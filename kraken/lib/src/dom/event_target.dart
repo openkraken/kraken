@@ -95,7 +95,7 @@ abstract class EventTarget {
   final int targetId;
 
   // The Add
-  final Pointer<NativeEventTarget> nativeEventTargetPtr;
+  final Pointer<NativeEventTarget>? nativeEventTargetPtr;
 
   // the self reference the ElementManager
   ElementManager elementManager;
@@ -104,8 +104,10 @@ abstract class EventTarget {
   Map<String, List<EventHandler>> eventHandlers = {};
 
   EventTarget(this.targetId, this.nativeEventTargetPtr, this.elementManager) {
-    nativeEventTargetPtr.ref.callNativeMethods = _nativeCallNativeMethods;
-    _nativeMap[nativeEventTargetPtr.address] = this;
+    if (nativeEventTargetPtr != null) {
+      nativeEventTargetPtr!.ref.callNativeMethods = _nativeCallNativeMethods;
+      _nativeMap[nativeEventTargetPtr!.address] = this;
+    }
   }
 
   void addEvent(String eventType) {}
@@ -142,6 +144,6 @@ abstract class EventTarget {
   void dispose() {
     elementManager.removeTarget(this);
     eventHandlers.clear();
-    _nativeMap.remove(nativeEventTargetPtr.address);
+    if (nativeEventTargetPtr != null) _nativeMap.remove(nativeEventTargetPtr!.address);
   }
 }

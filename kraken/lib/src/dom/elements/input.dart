@@ -232,7 +232,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   InputElement(
     int targetId,
-    Pointer<NativeEventTarget> nativeEventTarget,
+    Pointer<NativeEventTarget>? nativeEventTarget,
     ElementManager elementManager, {
     this.textAlign = TextAlign.left,
     this.textDirection = TextDirection.ltr,

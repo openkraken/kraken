@@ -6,7 +6,7 @@ import 'package:kraken/bridge.dart';
 class Document extends Node {
   final HTMLElement documentElement;
 
-  Document(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager, this.documentElement)
+  Document(int targetId, Pointer<NativeEventTarget>? nativeEventTarget, ElementManager elementManager, this.documentElement)
       : super(NodeType.DOCUMENT_NODE, targetId, nativeEventTarget, elementManager, '#document');
 
   void _handleEvent(Event event) {

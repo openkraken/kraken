@@ -22,6 +22,9 @@ import 'platform.dart';
 // 5. Get a reference to the C function, and put it into a variable.
 // 6. Call the C function.
 
+// Experiment feature: enable dumpw
+bool kExperimentDumpUICommand = false;
+
 String? _krakenUserAgent;
 
 void setKrakenUserAgent(String userAgent) {
@@ -91,11 +94,11 @@ void invokeModuleEvent(int contextId, String moduleName, Event? event, String ex
 typedef DartDispatchEvent = void Function(
     Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeString> eventType, Pointer<Void> nativeEvent, int isCustomEvent);
 
-void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Event event) {
-  if(KrakenController.getControllerOfJSContextId(contextId) == null) {
+void emitUIEvent(int contextId, Pointer<NativeEventTarget>? nativeEventTarget, Event event) {
+  if(KrakenController.getControllerOfJSContextId(contextId) == null || nativeEventTarget == null) {
     return;
   }
-  Pointer<NativeEventTarget> nativeEventTarget = nativePtr;
+
   DartDispatchEvent dispatchEvent = nativeEventTarget.ref.dispatchEvent.asFunction();
   Pointer<Void> rawEvent = event.toRaw().cast<Void>();
   bool isCustomEvent = event is CustomEvent;
@@ -422,6 +425,10 @@ void flushUICommand() {
 
     List<UICommand> commands = readNativeUICommandToDart(nativeCommandItems, commandLength, controller.view.contextId);
 
+    if (kExperimentDumpUICommand) {
+      controller.view.uiCommands.addAll(commands);
+    }
+
     SchedulerBinding.instance!.scheduleFrame();
 
     if (kProfileMode) {
@@ -447,6 +454,9 @@ void flushUICommand() {
             break;
           case UICommandType.createComment:
             controller.view.createComment(id, nativePtr.cast<NativeEventTarget>());
+            break;
+          case UICommandType.createDocumentFragment:
+            controller.view.createDocumentFragment(id, nativePtr.cast<NativeEventTarget>());
             break;
           case UICommandType.disposeEventTarget:
             ElementManager.disposeEventTarget(controller.view.contextId, id);
@@ -483,9 +493,6 @@ void flushUICommand() {
           case UICommandType.removeProperty:
             String key = command.args[0];
             controller.view.removeProperty(id, key);
-            break;
-          case UICommandType.createDocumentFragment:
-            controller.view.createDocumentFragment(id, nativePtr.cast<NativeEventTarget>());
             break;
           default:
             break;

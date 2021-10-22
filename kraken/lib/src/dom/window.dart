@@ -15,7 +15,7 @@ const String WINDOW = 'WINDOW';
 class Window extends EventTarget {
   final Element viewportElement;
 
-  Window(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager, this.viewportElement) : super(targetId, nativeEventTarget, elementManager) {
+  Window(int targetId, Pointer<NativeEventTarget>? nativeEventTarget, ElementManager elementManager, this.viewportElement) : super(targetId, nativeEventTarget, elementManager) {
     window.onPlatformBrightnessChanged = () {
       ColorSchemeChangeEvent event = ColorSchemeChangeEvent((window.platformBrightness == Brightness.light) ? 'light' : 'dart');
       dispatchEvent(event);

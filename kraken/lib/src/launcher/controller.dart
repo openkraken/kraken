@@ -58,6 +58,9 @@ abstract class DevToolsService {
 class KrakenViewController {
   KrakenController rootController;
 
+  // Experiment feature: cache all ui commands to running Kraken app without JavaScript engine.
+  List<UICommand> uiCommands = [];
+
   // The methods of the KrakenNavigateDelegation help you implement custom behaviors that are triggered
   // during a kraken view's process of loading, and completing a navigation request.
   KrakenNavigationDelegate? navigationDelegate;
@@ -147,6 +150,73 @@ class KrakenViewController {
     }
   }
 
+  void loadUICommands(List<UICommand> commands) {
+    List<List<String>> _renderStyleCommands = [];
+    for (int i = 0; i < commands.length; i++) {
+      UICommand command = commands[i];
+      UICommandType commandType = command.type;
+      int id = command.id;
+
+      switch (commandType) {
+        case UICommandType.createElement:
+          createElement(id, null, command.args[0]);
+          break;
+        case UICommandType.createTextNode:
+          createTextNode(id, null, command.args[0]);
+          break;
+        case UICommandType.createComment:
+          createComment(id, null);
+          break;
+        case UICommandType.createDocumentFragment:
+          createDocumentFragment(id, null);
+          break;
+        case UICommandType.disposeEventTarget:
+          ElementManager.disposeEventTarget(contextId, id);
+          break;
+        case UICommandType.addEvent:
+          addEvent(id, command.args[0]);
+          break;
+        case UICommandType.removeEvent:
+          removeEvent(id, command.args[0]);
+          break;
+        case UICommandType.insertAdjacentNode:
+          int childId = int.parse(command.args[0]);
+          String position = command.args[1];
+          insertAdjacentNode(id, position, childId);
+          break;
+        case UICommandType.removeNode:
+          removeNode(id);
+          break;
+        case UICommandType.cloneNode:
+          int newId = int.parse(command.args[0]);
+          cloneNode(id, newId);
+          break;
+        case UICommandType.setStyle:
+          String key = command.args[0];
+          String value = command.args[1];
+          setStyle(id, key, value);
+          _renderStyleCommands.add([id.toString(), key, value]);
+          break;
+        case UICommandType.setProperty:
+          String key = command.args[0];
+          String value = command.args[1];
+          setProperty(id, key, value);
+          break;
+        case UICommandType.removeProperty:
+          String key = command.args[0];
+          removeProperty(id, key);
+          break;
+        default:
+          break;
+      }
+    }
+
+    for (int i = 0; i < _renderStyleCommands.length; i ++) {
+      var pair = _renderStyleCommands[i];
+      setRenderStyle(int.parse(pair[0]), pair[1], pair[2]);
+    }
+  }
+
   // the manager which controller all renderObjects of Kraken
   late ElementManager _elementManager;
   ElementManager get elementManager => _elementManager;
@@ -230,7 +300,7 @@ class KrakenViewController {
     return completer.future;
   }
 
-  Element createElement(int id, Pointer<NativeEventTarget> nativePtr, String tagName) {
+  Element createElement(int id, Pointer<NativeEventTarget>? nativePtr, String tagName) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_ELEMENT_START, uniqueId: id);
     }
@@ -241,7 +311,7 @@ class KrakenViewController {
     return result;
   }
 
-  void createTextNode(int id, Pointer<NativeEventTarget> nativePtr, String data) {
+  void createTextNode(int id, Pointer<NativeEventTarget>? nativePtr, String data) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_TEXT_NODE_START, uniqueId: id);
     }
@@ -251,7 +321,7 @@ class KrakenViewController {
     }
   }
 
-  void createComment(int id, Pointer<NativeEventTarget> nativePtr) {
+  void createComment(int id, Pointer<NativeEventTarget>? nativePtr) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_COMMENT_START, uniqueId: id);
     }
@@ -345,7 +415,7 @@ class KrakenViewController {
     }
   }
 
-  void createDocumentFragment(int targetId, Pointer<NativeEventTarget> nativePtr) {
+  void createDocumentFragment(int targetId, Pointer<NativeEventTarget>? nativePtr) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_DOCUMENT_FRAGMENT_START, uniqueId: targetId);
     }
@@ -474,6 +544,7 @@ class KrakenController {
     String? bundleURL,
     String? bundlePath,
     String? bundleContent,
+    List<UICommand>? experimentUiCommands,
     Color? background,
     GestureListener? gestureListener,
     KrakenNavigationDelegate? navigationDelegate,
@@ -489,6 +560,7 @@ class KrakenController {
         _bundleURL = bundleURL,
         _bundlePath = bundlePath,
         _bundleContent = bundleContent,
+        _experimentUiCommands = experimentUiCommands,
         _gestureListener = gestureListener {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_PROPERTY_INIT);
@@ -679,6 +751,13 @@ class KrakenController {
   set bundleURL(String? value) {
     if (value == null) return;
     _bundleURL = value;
+  }
+
+  List<UICommand>? _experimentUiCommands;
+  List<UICommand>? get experimentUiCommands => _experimentUiCommands;
+  set experimentUiCommands(List<UICommand>? value) {
+    if (value == null) return;
+    _experimentUiCommands = value;
   }
 
   String get origin => _bundleURL ?? _bundlePath ?? 'vm://' + name!;
