@@ -1122,8 +1122,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     // the ascent.
     final double targetOffset = (additionalOffset + _scrollableX.position!.pixels)
       .clamp(
-      _scrollableX.position!.minScrollExtent!,
-      _scrollableX.position!.maxScrollExtent!,
+      _scrollableX.position!.minScrollExtent,
+      _scrollableX.position!.maxScrollExtent,
     );
 
     final double offsetDelta = _scrollableX.position!.pixels - targetOffset;

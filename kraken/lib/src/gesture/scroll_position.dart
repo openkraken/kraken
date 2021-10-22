@@ -126,19 +126,28 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   final String? debugLabel;
 
   @override
-  double? get minScrollExtent => _minScrollExtent;
+  bool get hasContentDimensions => _minScrollExtent != null && _maxScrollExtent != null;
+
+  @override
+  double get minScrollExtent => _minScrollExtent!;
   double? _minScrollExtent;
 
   @override
-  double? get maxScrollExtent => _maxScrollExtent;
+  double get maxScrollExtent => _maxScrollExtent!;
   double? _maxScrollExtent;
+
+  @override
+  bool get hasPixels => _pixels != null;
 
   @override
   double get pixels => _pixels!;
   double? _pixels;
 
   @override
-  double? get viewportDimension => _viewportDimension;
+  bool get hasViewportDimension => _viewportDimension != null;
+
+  @override
+  double get viewportDimension => _viewportDimension!;
   double? _viewportDimension;
 
   /// Whether [viewportDimension], [minScrollExtent], [maxScrollExtent],
@@ -180,10 +189,16 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   void absorb(ScrollPosition other) {
     assert(other.context == context);
     assert(_pixels == null);
-    _minScrollExtent = other.minScrollExtent;
-    _maxScrollExtent = other.maxScrollExtent;
-    _pixels = other._pixels;
-    _viewportDimension = other.viewportDimension;
+    if (other.hasContentDimensions) {
+      _minScrollExtent = other.minScrollExtent;
+      _maxScrollExtent = other.maxScrollExtent;
+    }
+    if (other.hasPixels) {
+      _pixels = other.pixels;
+    }
+    if (other.hasViewportDimension) {
+      _viewportDimension = other.viewportDimension;
+    }
 
     assert(activity == null);
     assert(other.activity != null);
@@ -404,8 +419,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     }
 
     final Set<SemanticsAction?> actions = <SemanticsAction?>{};
-    if (pixels > minScrollExtent!) actions.add(backward);
-    if (pixels < maxScrollExtent!) actions.add(forward);
+    if (pixels > minScrollExtent) actions.add(backward);
+    if (pixels < maxScrollExtent) actions.add(forward);
 
     if (setEquals<SemanticsAction?>(actions, _semanticActions)) return;
 
@@ -474,16 +489,16 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     double? target;
     switch (alignmentPolicy) {
       case ScrollPositionAlignmentPolicy.explicit:
-        target = viewport.getOffsetToReveal(object, alignment).offset.clamp(minScrollExtent!, maxScrollExtent!);
+        target = viewport.getOffsetToReveal(object, alignment).offset.clamp(minScrollExtent, maxScrollExtent);
         break;
       case ScrollPositionAlignmentPolicy.keepVisibleAtEnd:
-        target = viewport.getOffsetToReveal(object, 1.0).offset.clamp(minScrollExtent!, maxScrollExtent!);
+        target = viewport.getOffsetToReveal(object, 1.0).offset.clamp(minScrollExtent, maxScrollExtent);
         if (target < pixels) {
           target = pixels;
         }
         break;
       case ScrollPositionAlignmentPolicy.keepVisibleAtStart:
-        target = viewport.getOffsetToReveal(object, 0.0).offset.clamp(minScrollExtent!, maxScrollExtent!);
+        target = viewport.getOffsetToReveal(object, 0.0).offset.clamp(minScrollExtent, maxScrollExtent);
         if (target > pixels) {
           target = pixels;
         }
@@ -569,7 +584,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   }) {
     assert(clamp != null);
 
-    if (clamp!) to = to.clamp(minScrollExtent!, maxScrollExtent!);
+    if (clamp!) to = to.clamp(minScrollExtent, maxScrollExtent);
 
     return super.moveTo(to, duration: duration, curve: curve);
   }
@@ -636,7 +651,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   void debugFillDescription(List<String?> description) {
     if (debugLabel != null) description.add(debugLabel);
     super.debugFillDescription(description as List<String>);
-    description.add('range: ${minScrollExtent?.toStringAsFixed(1)}..${maxScrollExtent?.toStringAsFixed(1)}');
-    description.add('viewport: ${viewportDimension?.toStringAsFixed(1)}');
+    description.add('range: ${minScrollExtent.toStringAsFixed(1)}..${maxScrollExtent.toStringAsFixed(1)}');
+    description.add('viewport: ${viewportDimension.toStringAsFixed(1)}');
   }
 }
