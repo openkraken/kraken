@@ -327,8 +327,7 @@ JSValue Element::toBlob(QjsContext *ctx, JSValue this_val, int argc, JSValue *ar
     } else {
       JSValue errorObject = JS_NewError(ctx);
       JSValue errorMessage = JS_NewString(ctx, error);
-      JS_DefinePropertyValueStr(ctx, errorObject, "message", errorMessage,
-                                JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
+      JS_SetPropertyStr(ctx, errorObject, "message", errorMessage);
       JSValue ret = JS_Call(ctx, promiseContext->rejectFunc, promiseContext->promise, 1, &errorObject);
       JS_FreeValue(ctx, errorObject);
       JS_FreeValue(ctx, errorMessage);

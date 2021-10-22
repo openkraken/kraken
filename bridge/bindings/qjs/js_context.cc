@@ -247,7 +247,8 @@ JSRuntime *JSContext::runtime() {
 void JSContext::reportError(JSValueConst error) {
   if (!JS_IsError(m_ctx, error)) return;
 
-  const char *title = JS_ToCString(m_ctx, error);
+  JSValue messageValue = JS_GetPropertyStr(m_ctx, error, "message");
+  const char *title = JS_ToCString(m_ctx, messageValue);
   const char *stack = nullptr;
   JSValue stackValue = JS_GetPropertyStr(m_ctx, error, "stack");
   if (!JS_IsUndefined(stackValue)) {
@@ -266,6 +267,7 @@ void JSContext::reportError(JSValueConst error) {
     _handler(contextId, message);
   }
 
+  JS_FreeValue(m_ctx, messageValue);
   JS_FreeValue(m_ctx, stackValue);
   JS_FreeCString(m_ctx, title);
   JS_FreeCString(m_ctx, stack);
