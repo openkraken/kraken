@@ -1441,11 +1441,11 @@ class Element extends Node
     dispatchEvent(clickEvent);
   }
 
-  Future<Uint8List> toBlob({double? devicePixelRatio}) {
+  Future<Uint8List> toBlob({ double? devicePixelRatio }) {
     devicePixelRatio ??= window.devicePixelRatio;
 
     Completer<Uint8List> completer = Completer();
-    if (nodeName != 'HTML') {
+    if (targetId != HTML_ID) {
       convertToRepaintBoundary();
     }
     renderBoxModel!.owner!.flushLayout();
