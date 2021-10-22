@@ -453,9 +453,9 @@ void flushUICommand() {
           case UICommandType.createComment:
             controller.view.createComment(id, nativePtr.cast<NativeEventTarget>());
             break;
-          // case UICommandType.disposeEventTarget:
-          //   ElementManager.disposeEventTarget(controller.view.contextId, id);
-          //   break;
+          case UICommandType.disposeEventTarget:
+            ElementManager.disposeEventTarget(controller.view.contextId, id);
+            break;
           case UICommandType.addEvent:
             controller.view.addEvent(id, command.args[0]);
             break;
