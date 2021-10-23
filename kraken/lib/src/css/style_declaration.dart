@@ -696,26 +696,6 @@ class CSSStyleDeclaration {
     }
   }
 
-  /// Set all style properties with em unit.
-  void applyEmProperties() {
-    _properties.forEach((key, value) {
-      if (key != FONT_SIZE && value.endsWith(CSSLength.EM)) {
-        String normalizedValue = _normalizeValue(value);
-        _emitPropertyChanged(key, null, normalizedValue);
-      }
-    });
-  }
-
-  /// Set all style properties with rem unit.
-  void applyRemProperties() {
-    _properties.forEach((key, value) {
-      if (key != FONT_SIZE && value.endsWith(CSSLength.REM)) {
-        String normalizedValue = _normalizeValue(value);
-        _emitPropertyChanged(key, null, normalizedValue);
-      }
-    });
-  }
-
   void reset() {
     _properties.clear();
     _pendingProperties.clear();
