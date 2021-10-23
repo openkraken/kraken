@@ -134,13 +134,6 @@ class Element extends Node
         ElementNativeMethods,
         ElementEventMixin,
         ElementOverflowMixin {
-  static final SplayTreeMap<int, Element> _nativeMap = SplayTreeMap();
-
-  static Element getElementOfNativePtr(Pointer<NativeElement> nativeElement) {
-    Element? element = _nativeMap[nativeElement.address];
-    if (element == null) throw FlutterError('Can not get element from nativeElement: $nativeElement');
-    return element;
-  }
 
   final Map<String, dynamic> properties = <String, dynamic>{};
 
