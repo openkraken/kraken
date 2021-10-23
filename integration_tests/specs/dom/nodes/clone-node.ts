@@ -147,4 +147,3 @@ describe('Clone node', () => {
     await snapshot();
   })
 });
-  

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
@@ -82,8 +83,8 @@ void invokeModuleEvent(int contextId, String moduleName, Event? event, String ex
     return;
   }
   Pointer<NativeString> nativeModuleName = stringToNativeString(moduleName);
-  Pointer<Void> nativeEvent = event == null ? nullptr : event.toNative().cast<Void>();
-  _invokeModuleEvent(contextId, nativeModuleName, event == null ? nullptr : event.type.toNativeUtf8(), nativeEvent, stringToNativeString(extra));
+  Pointer<Void> rawEvent = event == null ? nullptr : event.toRaw().cast<Void>();
+  _invokeModuleEvent(contextId, nativeModuleName, event == null ? nullptr : event.type.toNativeUtf8(), rawEvent, stringToNativeString(extra));
   freeNativeString(nativeModuleName);
 }
 
@@ -96,10 +97,10 @@ void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Event even
   }
   Pointer<NativeEventTarget> nativeEventTarget = nativePtr;
   DartDispatchEvent dispatchEvent = nativeEventTarget.ref.dispatchEvent.asFunction();
-  Pointer<Void> nativeEvent = event.toNative().cast<Void>();
+  Pointer<Void> rawEvent = event.toRaw().cast<Void>();
   bool isCustomEvent = event is CustomEvent;
   Pointer<NativeString> eventTypeString = stringToNativeString(event.type);
-  dispatchEvent(nativeEventTarget, eventTypeString, nativeEvent, isCustomEvent ? 1 : 0);
+  dispatchEvent(nativeEventTarget, eventTypeString, rawEvent, isCustomEvent ? 1 : 0);
   freeNativeString(eventTypeString);
 }
 
@@ -126,9 +127,9 @@ typedef DartEvaluateScripts = void Function(
 
 // Register parseHTML
 typedef NativeParseHTML = Void Function(
-    Int32 contextId, Pointer<NativeString> code, Pointer<Utf8> url);
+    Int32 contextId, Pointer<Utf8> code, Int32 length);
 typedef DartParseHTML = void Function(
-    int contextId, Pointer<NativeString> code, Pointer<Utf8> url);
+    int contextId, Pointer<Utf8> code, int length);
 
 final DartEvaluateScripts _evaluateScripts =
 nativeDynamicLibrary.lookup<NativeFunction<NativeEvaluateScripts>>('evaluateScripts').asFunction();
@@ -150,42 +151,32 @@ void evaluateScripts(int contextId, String code, String url, [int line = 0]) {
   freeNativeString(nativeString);
 }
 
-void parseHTML(int contextId, String code, String url) {
-  Pointer<NativeString> nativeString = stringToNativeString(code);
-  Pointer<Utf8> _url = url.toNativeUtf8();
+typedef NativeEvaluateQuickjsByteCode = Void Function(Int32 contextId, Pointer<Uint8> bytes, Int32 byteLen);
+typedef DartEvaluateQuickjsByteCode = void Function(int contextId, Pointer<Uint8> bytes, int byteLen);
+
+final DartEvaluateQuickjsByteCode _evaluateQuickjsByteCode = nativeDynamicLibrary.lookup<NativeFunction<NativeEvaluateQuickjsByteCode>>('evaluateQuickjsByteCode').asFunction();
+
+void evaluateQuickjsByteCode(int contextId, Uint8List bytes) {
+  if(KrakenController.getControllerOfJSContextId(contextId) == null) {
+    return;
+  }
+  Pointer<Uint8> byteData = malloc.allocate(sizeOf<Uint8>() * bytes.length);
+  byteData.asTypedList(bytes.length).setAll(0, bytes);
+  _evaluateQuickjsByteCode(contextId, byteData, bytes.length);
+  malloc.free(byteData);
+}
+
+void parseHTML(int contextId, String code) {
+  if(KrakenController.getControllerOfJSContextId(contextId) == null) {
+    return;
+  }
+  Pointer<Utf8> nativeCode = code.toNativeUtf8();
   try {
-    _parseHTML(contextId, nativeString, _url);
+    _parseHTML(contextId, nativeCode, code.length);
   } catch (e, stack) {
     print('$e\n$stack');
   }
-  freeNativeString(nativeString);
-}
-
-
-// register set href.
-typedef NativeSetHref = Void Function(
-    Int32 contextId, Pointer<Utf8> href);
-
-typedef DartSetHref = void Function(int contextId, Pointer<Utf8> url);
-
-final DartSetHref _setHref = nativeDynamicLibrary.lookup<NativeFunction<NativeSetHref>>('setHref').asFunction();
-
-void setHref(int contextId, String url) {
-  Pointer<Utf8> _url = url.toNativeUtf8();
-  _setHref(contextId, _url);
-}
-
-// register get href.
-typedef NativeGetHref = Pointer<NativeString> Function(
-    Int32 contextId);
-
-typedef DartGetHref = Pointer<NativeString> Function(int contextId);
-
-final DartGetHref _getHref = nativeDynamicLibrary.lookup<NativeFunction<NativeGetHref>>('getHref').asFunction();
-
-String getHref(int contextId) {
-  Pointer<NativeString> href = _getHref(contextId);
-  return nativeStringToString(href);
+  malloc.free(nativeCode);
 }
 
 // Register initJsEngine
@@ -217,6 +208,17 @@ final DartAllocateNewContext _allocateNewContext =
 
 int allocateNewContext([int targetContextId = -1]) {
   return _allocateNewContext(targetContextId);
+}
+
+typedef NativeRegisterPluginByteCode = Void Function(Pointer<Uint8> bytes, Int32 length, Pointer<Utf8> pluginName);
+typedef DartRegisterPluginByteCode = void Function(Pointer<Uint8> bytes, int length, Pointer<Utf8> pluginName);
+
+final DartRegisterPluginByteCode _registerPluginByteCode =
+    nativeDynamicLibrary.lookup<NativeFunction<NativeRegisterPluginByteCode>>('registerPluginByteCode').asFunction();
+
+void registerPluginByteCode(Uint8List bytecode, String name) {
+  Pointer<Uint8> bytes = malloc.allocate(sizeOf<Uint8>() * bytecode.length);
+  _registerPluginByteCode(bytes, bytecode.length, name.toNativeUtf8());
 }
 
 // Regisdster reloadJsContext
@@ -438,13 +440,13 @@ void flushUICommand() {
       try {
         switch (commandType) {
           case UICommandType.createElement:
-            controller.view.createElement(id, nativePtr, command.args[0]);
+            controller.view.createElement(id, nativePtr.cast<NativeEventTarget>(), command.args[0]);
             break;
           case UICommandType.createTextNode:
-            controller.view.createTextNode(id, nativePtr.cast<NativeTextNode>(), command.args[0]);
+            controller.view.createTextNode(id, nativePtr.cast<NativeEventTarget>(), command.args[0]);
             break;
           case UICommandType.createComment:
-            controller.view.createComment(id, nativePtr.cast<NativeCommentNode>(), command.args[0]);
+            controller.view.createComment(id, nativePtr.cast<NativeEventTarget>());
             break;
           case UICommandType.disposeEventTarget:
             ElementManager.disposeEventTarget(controller.view.contextId, id);
@@ -483,7 +485,7 @@ void flushUICommand() {
             controller.view.removeProperty(id, key);
             break;
           case UICommandType.createDocumentFragment:
-            controller.view.createDocumentFragment(id, nativePtr.cast<NativeNode>());
+            controller.view.createDocumentFragment(id, nativePtr.cast<NativeEventTarget>());
             break;
           default:
             break;

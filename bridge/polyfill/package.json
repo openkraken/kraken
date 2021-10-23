@@ -15,6 +15,7 @@
     "es6-promise": "^4.2.8",
     "event-emitter": "^0.3.5",
     "expect": "^25.1.0",
+    "qjsc": "^0.1.4",
     "ts-jest": "^24.3.0",
     "tslib": "^1.11.2"
   },

@@ -47,9 +47,7 @@ void HTMLParser::parseProperty(JSContext* context, ElementInstance *element,
           std::transform(styleValue.begin(), styleValue.end(), styleValue.begin(), ::tolower);
           trim(styleValue);
 
-          styleDeclarationInstance->internalSetProperty(
-            styleKey, JSValueMakeString(context->context(), JSStringCreateWithUTF8CString(styleValue.c_str())),
-            nullptr);
+          styleDeclarationInstance->internalSetProperty(styleKey, JSValueMakeString(m_context->context() ,JSStringCreateWithUTF8CString(styleValue.c_str())), nullptr);
         }
       }
     } else {
@@ -57,14 +55,14 @@ void HTMLParser::parseProperty(JSContext* context, ElementInstance *element,
       std::transform(strName.begin(), strName.end(), strName.begin(), ::tolower);
       std::string strValue = attribute->value;
       std::transform(strValue.begin(), strValue.end(), strValue.begin(), ::tolower);
-      JSValueRef valueRef = JSValueMakeString(context->context(), JSStringCreateWithUTF8CString(strValue.c_str()));
+      JSValueRef valueRef = JSValueMakeString(m_context->context(), JSStringCreateWithUTF8CString(strValue.c_str()));
 
       // Set property.
       if (!element->setProperty(strName, valueRef, nullptr)) {
         // Set attributes.
         JSStringRef attributesName = JSStringCreateWithUTF8CString("attributes");
-        JSValueRef attributesRef = JSObjectGetProperty(context->context(), element->object, attributesName, nullptr);
-        JSObjectRef attributes = JSValueToObject(context->context(), attributesRef, nullptr);
+        JSValueRef attributesRef = JSObjectGetProperty(m_context->context(), element->object, attributesName, nullptr);
+        JSObjectRef attributes = JSValueToObject(m_context->context(), attributesRef, nullptr);
         auto attributesInstance = static_cast<JSElementAttributes *>(JSObjectGetPrivate(attributes));
         attributesInstance->setProperty(strName, valueRef, nullptr);
         JSStringRelease(attributesName);

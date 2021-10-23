@@ -226,7 +226,9 @@ export class Response extends Body {
 
   // TODO support readableStream
   // readonly body: ReadableStream<Uint8Array> | null;
+  // @ts-ignore
   body: string | null;
+  // @ts-ignore
   bodyUsed: boolean;
   headers: Headers;
   ok: boolean;

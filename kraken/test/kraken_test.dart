@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kraken/foundation.dart';
+
 import 'local_http_server.dart';
 
 import 'src/foundation/http_cache.dart' as http_cache;
@@ -15,6 +16,8 @@ import 'src/module/fetch.dart' as fetch;
 
 import 'src/css/style_rule_parser.dart' as style_rule_parser;
 import 'src/css/style_sheet_parser.dart' as style_sheet_parser;
+
+import 'src/gesture/scroll_physics.dart' as scroll_physics;
 
 // The main entry for kraken unit test.
 // Setup all common logic.
@@ -51,6 +54,10 @@ void main() {
   group('css', () {
     style_rule_parser.main();
     style_sheet_parser.main();
+  });
+
+  group('gesture', () {
+    scroll_physics.main();
   });
 
   tearDownAll(() {

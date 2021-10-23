@@ -427,7 +427,7 @@ mixin ElementOverflowMixin on ElementBase {
     KrakenScrollable? scrollable = _getScrollable(Axis.vertical);
     if (scrollable?.position?.maxScrollExtent != null) {
       // Viewport height + maxScrollExtent
-      return renderBoxModel!.clientHeight + scrollable!.position!.maxScrollExtent!;
+      return renderBoxModel!.clientHeight + scrollable!.position!.maxScrollExtent;
     }
 
     Size scrollContainerSize = renderBoxModel!.scrollableSize;
@@ -437,7 +437,7 @@ mixin ElementOverflowMixin on ElementBase {
   double get scrollWidth {
     KrakenScrollable? scrollable = _getScrollable(Axis.horizontal);
     if (scrollable?.position?.maxScrollExtent != null) {
-      return renderBoxModel!.clientWidth + scrollable!.position!.maxScrollExtent!;
+      return renderBoxModel!.clientWidth + scrollable!.position!.maxScrollExtent;
     }
     Size scrollContainerSize = renderBoxModel!.scrollableSize;
     return scrollContainerSize.width;

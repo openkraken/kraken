@@ -49,8 +49,8 @@ void _onJSError(int contextId, Pointer<Utf8> charStr) {
 
 final Pointer<NativeFunction<Native_JSError>> _nativeOnJsError = Pointer.fromFunction(_onJSError);
 
-typedef Native_MatchImageSnapshotCallback = Void Function(Pointer<Void> callbackContext, Int32 contextId, Int8);
-typedef Dart_MatchImageSnapshotCallback = void Function(Pointer<Void> callbackContext, int contextId, int);
+typedef Native_MatchImageSnapshotCallback = Void Function(Pointer<Void> callbackContext, Int32 contextId, Int8, Pointer<Utf8>);
+typedef Dart_MatchImageSnapshotCallback = void Function(Pointer<Void> callbackContext, int contextId, int, Pointer<Utf8>);
 typedef Native_MatchImageSnapshot = Void Function(
     Pointer<Void> callbackContext, Int32 contextId,
     Pointer<Uint8>, Int32, Pointer<NativeString>, Pointer<NativeFunction<Native_MatchImageSnapshotCallback>>);
@@ -59,9 +59,10 @@ void _matchImageSnapshot(Pointer<Void> callbackContext, int contextId, Pointer<U
   Dart_MatchImageSnapshotCallback callback = pointer.asFunction();
   String filename = nativeStringToString(snapshotNamePtr);
   matchImageSnapshot(bytes.asTypedList(size), filename).then((value) {
-    callback(callbackContext, contextId, value ? 1 : 0);
+    callback(callbackContext, contextId, value ? 1 : 0, nullptr);
   }).catchError((e, stack) {
-    print('$e\n$stack');
+    String errmsg = '$e\n$stack';
+    callback(callbackContext, contextId, 0, errmsg.toNativeUtf8());
   });
 }
 
@@ -100,7 +101,7 @@ class MousePointer extends Struct {
 void _simulatePointer(Pointer<Pointer<MousePointer>> mousePointerList, int length, int pointer) {
   List<PointerData> data = [];
 
-  for (int i = 0; i < length; i ++) {
+  for (int i = 0; i < length; i++) {
     int contextId = mousePointerList[i].ref.contextId;
     double x = mousePointerList[i].ref.x;
     double y = mousePointerList[i].ref.y;

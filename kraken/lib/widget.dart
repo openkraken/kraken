@@ -5,6 +5,7 @@
 import 'dart:io';
 import 'dart:ui';
 import 'dart:ffi';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
@@ -19,6 +20,7 @@ import 'package:kraken/module.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/src/dom/element_registry.dart';
+import 'package:kraken/src/dom/element_manager.dart';
 import 'package:kraken/bridge.dart';
 
 /// Get context of current widget.
@@ -68,7 +70,7 @@ class _WidgetCustomElement extends dom.Element {
   late BuildOwner _buildOwner;
   late Widget _widget;
   _KrakenAdapterWidgetPropertiesState? _propertiesState;
-  _WidgetCustomElement(int targetId, Pointer<NativeElement> nativePtr, dom.ElementManager elementManager, String tagName, WidgetCreator creator)
+  _WidgetCustomElement(int targetId, Pointer<NativeEventTarget> nativePtr, dom.ElementManager elementManager, String tagName, WidgetCreator creator)
       : super(
       targetId,
       nativePtr,
@@ -174,6 +176,9 @@ class Kraken extends StatefulWidget {
   // The initial raw javascript content to load.
   final String? bundleContent;
 
+  // The initial raw bytecode to load.
+  final Uint8List? bundleByteCode;
+
   // The animationController of Flutter Route object.
   // Pass this object to KrakenWidget to make sure Kraken execute JavaScripts scripts after route transition animation completed.
   final AnimationController? animationController;
@@ -217,22 +222,34 @@ class Kraken extends StatefulWidget {
     return RegExp(r'^[a-z][.0-9_a-z]*-[\-.0-9_a-z]*$').hasMatch(localName);
   }
 
-  static void defineCustomElement(String localName, WidgetCreator creator) {
+  static void defineCustomElement<T extends Function>(String localName, T creator) {
     if (!_isValidCustomElementName(localName)) {
       throw ArgumentError('The element name "$localName" is not valid.');
     }
 
     String tagName = localName.toUpperCase();
 
-    defineElement(tagName, (id, nativePtr, elementManager) {
-      return _WidgetCustomElement(id, nativePtr.cast<NativeElement>(), elementManager, tagName, creator);
-    });
+    if (T == ElementCreator) {
+      defineElement(tagName, creator as ElementCreator);
+    } else if (T == WidgetCreator) {
+      defineElement(tagName, (id, nativePtr, elementManager) {
+        return _WidgetCustomElement(id, nativePtr.cast<NativeEventTarget>(), elementManager, tagName, creator as WidgetCreator);
+      });
+    }
   }
 
   loadContent(String bundleContent) async {
     await controller!.unload();
     await controller!.loadBundle(
       bundleContent: bundleContent
+    );
+    _evalBundle(controller!, animationController);
+  }
+
+  loadByteCode(Uint8List bytecode) async {
+    await controller!.unload();
+    await controller!.loadBundle(
+      bundleByteCode: bytecode
     );
     _evalBundle(controller!, animationController);
   }
@@ -264,6 +281,7 @@ class Kraken extends StatefulWidget {
     this.bundleURL,
     this.bundlePath,
     this.bundleContent,
+    this.bundleByteCode,
     this.onLoad,
     this.navigationDelegate,
     this.javaScriptChannel,

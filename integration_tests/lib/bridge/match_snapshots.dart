@@ -119,7 +119,12 @@ Future<bool> matchImageSnapshot(Uint8List bytes, String filename) async {
   final snap = File('$filename.png');
   if (snap.existsSync()) {
     Uint8List snapPixels = snap.readAsBytesSync();
-    bool match = matchFile(snapPixels, currentPixels);
+    bool match;
+    if (snapPixels.isEmpty || currentPixels.isEmpty) {
+      match = false;
+    } else {
+      match = matchFile(snapPixels, currentPixels);
+    }
     if (!match) {
       match = matchImage(snapPixels, currentPixels, filename);
     }

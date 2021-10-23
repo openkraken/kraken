@@ -24,7 +24,7 @@ const Map<String, dynamic> _paramStyle = {
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/param
 class ParamElement extends Element {
-  ParamElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  ParamElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: PARAM, defaultStyle: _paramStyle);
 }
 
@@ -38,8 +38,8 @@ class ObjectElement extends Element implements ObjectElementHost {
   late ObjectElementClientFactory _objectElementClientFactory;
   late ObjectElementClient _objectElementClient;
 
-  ObjectElement(int targetId, Pointer<NativeObjectElement> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr.ref.nativeElement, elementManager, tagName: OBJECT, defaultStyle: _objectStyle, isIntrinsicBox: true) {
+  ObjectElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
+      : super(targetId, nativePtr, elementManager, tagName: OBJECT, defaultStyle: _objectStyle, isIntrinsicBox: true) {
     initObjectClient();
     initElementClient();
     initDetachCallback(elementManager);
@@ -75,6 +75,15 @@ class ObjectElement extends Element implements ObjectElementHost {
       default:
         break;
     }
+  }
+
+  @override
+  handleJSCall(String method, List argv) {
+    var result = _objectElementClient.handleJSCall(method, argv);
+    if (result == null) {
+      return super.handleJSCall(method, argv);
+    }
+    return result;
   }
 
   @override
@@ -135,13 +144,11 @@ class _DefaultObjectElementClient implements ObjectElementClient {
     return null;
   }
 
-  /// @TODO extend in future
   /// called when Element js method called
   /// [name] method name
   /// [args] method params
   @override
-  method(String name, List args) {
-    print('call DefaultObjectElementClient method name[$name] args[$args]');
+  dynamic handleJSCall(String method, List argv) {
   }
 
   @override

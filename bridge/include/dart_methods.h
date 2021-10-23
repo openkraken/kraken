@@ -8,16 +8,13 @@
 
 #include "kraken_bridge.h"
 
-#ifdef ENABLE_TEST
-#include "kraken_bridge_test.h"
-#endif
 #include <memory>
 #include <thread>
 
 #define KRAKEN_EXPORT __attribute__((__visibility__("default")))
 
 struct NativeString;
-struct Screen;
+struct NativeScreen;
 
 using AsyncCallback = void (*)(void *callbackContext, int32_t contextId, const char *errmsg);
 using AsyncRAFCallback = void (*)(void *callbackContext, int32_t contextId, double result, const char *errmsg);
@@ -32,7 +29,7 @@ typedef int32_t (*SetInterval)(void *callbackContext, int32_t contextId, AsyncCa
 typedef int32_t (*RequestAnimationFrame)(void *callbackContext, int32_t contextId, AsyncRAFCallback callback);
 typedef void (*ClearTimeout)(int32_t contextId, int32_t timerId);
 typedef void (*CancelAnimationFrame)(int32_t contextId, int32_t id);
-typedef Screen *(*GetScreen)(int32_t contextId);
+typedef NativeScreen *(*GetScreen)(int32_t contextId);
 typedef double (*DevicePixelRatio)(int32_t contextId);
 typedef NativeString *(*PlatformBrightness)(int32_t contextId);
 typedef void (*ToBlob)(void *callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId,
@@ -43,7 +40,7 @@ typedef void (*InitHTML)(int32_t contextId, void *nativePtr);
 typedef void (*InitWindow)(int32_t contextId, void *nativePtr);
 typedef void (*InitDocument)(int32_t contextId, void *nativePtr);
 
-using MatchImageSnapshotCallback = void (*)(void *callbackContext, int32_t contextId, int8_t);
+using MatchImageSnapshotCallback = void (*)(void *callbackContext, int32_t contextId, int8_t, const char *errmsg);
 using MatchImageSnapshot = void (*)(void *callbackContext, int32_t contextId, uint8_t *bytes, int32_t length,
                                     NativeString *name, MatchImageSnapshotCallback callback);
 using Environment = const char *(*)();

@@ -55,7 +55,7 @@ class RenderRecyclerLayout extends RenderLayoutBox {
     _renderSliverList = _buildRenderSliverList();
     _renderViewport = RenderViewport(
       offset: scrollable.position!,
-      axisDirection: scrollable.axisDirection!,
+      axisDirection: scrollable.axisDirection,
       crossAxisDirection: getCrossAxisDirection(axis),
       children: [_renderSliverList],
     );

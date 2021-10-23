@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 
-import 'dart:collection';
 import 'dart:ffi';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
@@ -18,20 +17,8 @@ const String RETURN_CHAR = '\r';
 const String TAB_CHAR = '\t';
 
 class TextNode extends Node {
-  final Pointer<NativeTextNode> _nativePtr;
-
-  static final SplayTreeMap<int, TextNode> _nativeMap = SplayTreeMap();
-
-  static TextNode getTextNodeOfNativePtr(Pointer<NativeTextNode> nativeTextNode) {
-    TextNode? textNode = _nativeMap[nativeTextNode.address];
-    if (textNode == null) throw FlutterError('Can not get textNode from nativeTextNode: $nativeTextNode');
-    return textNode;
-  }
-
-  TextNode(int targetId, this._nativePtr, this._data, ElementManager elementManager)
-      : super(NodeType.TEXT_NODE, targetId, _nativePtr.ref.nativeNode, elementManager, '#text') {
-    _nativeMap[_nativePtr.address] = this;
-  }
+  TextNode(int targetId, Pointer<NativeEventTarget> nativeEventTarget, this._data, ElementManager elementManager)
+      : super(NodeType.TEXT_NODE, targetId, nativeEventTarget, elementManager, '#text');
 
   // Must be existed after text node is attached, and all text update will after text attached.
   RenderTextBox? _renderTextBox;
@@ -89,6 +76,10 @@ class TextNode extends Node {
 
   @override
   RenderObject? get renderer => _renderTextBox;
+
+  @override
+  handleJSCall(String method, List argv) {
+  }
 
   void _applyTextStyle() {
     if (isRendererAttached) {
@@ -171,7 +162,6 @@ class TextNode extends Node {
     detach();
 
     assert(_renderTextBox == null);
-    _nativeMap.remove(_nativePtr.address);
   }
 }
 

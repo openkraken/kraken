@@ -4,7 +4,6 @@
  */
 
 import 'dart:async';
-import 'dart:collection';
 import 'dart:ffi';
 import 'dart:ui' as ui show Image;
 
@@ -22,42 +21,8 @@ const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
 };
 
-final Pointer<NativeFunction<GetImageWidth>> nativeGetImageWidth =  Pointer.fromFunction(ImageElement.getImageWidth, 0.0);
-final Pointer<NativeFunction<GetImageHeight>> nativeGetImageHeight =  Pointer.fromFunction(ImageElement.getImageHeight, 0.0);
-final Pointer<NativeFunction<GetImageWidth>> nativeGetImageNaturalWidth =  Pointer.fromFunction(ImageElement.getImageNaturalWidth, 0.0);
-final Pointer<NativeFunction<GetImageHeight>> nativeGetImageNaturalHeight =  Pointer.fromFunction(ImageElement.getImageNaturalHeight, 0.0);
-
 // The HTMLImageElement.
 class ImageElement extends Element {
-  static final SplayTreeMap<int, ImageElement> _nativeMap = SplayTreeMap();
-
-  static ImageElement getImageElementOfNativePtr(Pointer<NativeImgElement> nativeImageElement) {
-    ImageElement? element = _nativeMap[nativeImageElement.address];
-    if (element == null) throw FlutterError('Can not get element from nativeElement: $nativeImageElement');
-    return element;
-  }
-
-  static double? getImageWidth(Pointer<NativeImgElement> nativeImageElement) {
-    ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-    return imageElement.width;
-  }
-
-  static double? getImageHeight(Pointer<NativeImgElement> nativeImageElement) {
-    ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-    return imageElement.height;
-  }
-
-  // https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/naturalWidth
-  static double getImageNaturalWidth(Pointer<NativeImgElement> nativeImageElement) {
-    ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-    return imageElement.naturalWidth;
-  }
-
-  static double getImageNaturalHeight(Pointer<NativeImgElement> nativeImageElement) {
-    ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-    return imageElement.naturalHeight;
-  }
-
   // The render box to draw image.
   RenderImage? _renderImage;
 
@@ -84,23 +49,15 @@ class ImageElement extends Element {
 
   bool get _shouldLazyLoading => properties['loading'] == 'lazy';
 
-  final Pointer<NativeImgElement> nativeImgElement;
-
-  ImageElement(int targetId, this.nativeImgElement, ElementManager elementManager)
+  ImageElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
       : super(
       targetId,
-      nativeImgElement.ref.nativeElement,
+      nativeEventTarget,
       elementManager,
       isIntrinsicBox: true,
       tagName: IMAGE,
       defaultStyle: _defaultStyle) {
     _renderStreamListener = ImageStreamListener(_renderImageStream, onError: _onImageError);
-    _nativeMap[nativeImgElement.address] = this;
-
-    nativeImgElement.ref.getImageWidth = nativeGetImageWidth;
-    nativeImgElement.ref.getImageHeight = nativeGetImageHeight;
-    nativeImgElement.ref.getImageNaturalWidth = nativeGetImageNaturalWidth;
-    nativeImgElement.ref.getImageNaturalHeight = nativeGetImageNaturalHeight;
   }
 
   @override
@@ -162,8 +119,6 @@ class ImageElement extends Element {
     _removeStreamListener();
 
     _renderImage = null;
-
-    _nativeMap.remove(nativeImgElement.address);
   }
 
   double get width {
@@ -218,17 +173,21 @@ class ImageElement extends Element {
     }
   }
 
+  void dispatchImageLoadEvent() {
+    dispatchEvent(Event(EVENT_LOAD));
+  }
+
   void _handleEventAfterImageLoaded() {
     // `load` event is a simple event.
     if (isConnected) {
       // If image in tree, make sure the image-box has been layout, using addPostFrameCallback.
       SchedulerBinding.instance!.scheduleFrame();
       SchedulerBinding.instance!.addPostFrameCallback((_) {
-        dispatchEvent(Event(EVENT_LOAD));
+        dispatchImageLoadEvent();
       });
     } else {
       // If not in tree, dispatch the event directly.
-      dispatchEvent(Event(EVENT_LOAD));
+      dispatchImageLoadEvent();
     }
   }
 
@@ -269,14 +228,13 @@ class ImageElement extends Element {
   bool _loaded = false;
 
   void _onImageError(Object exception, StackTrace? stackTrace) {
-    // @TODO: Native side support error event.
-    // https://github.com/openkraken/kraken/issues/686
-    // dispatchEvent(Event(EVENT_ERROR));
+    dispatchEvent(Event(EVENT_ERROR));
   }
 
   // Delay image size setting to next frame to make sure image has been layouted
   // to wait for percentage size to be calculated correctly in the case of image has been cached
   bool _hasImageLayoutCallbackPending = false;
+
   void _handleImageResizeAfterLayout() {
     if (_hasImageLayoutCallbackPending) return;
     _hasImageLayoutCallbackPending = true;
@@ -417,6 +375,10 @@ class ImageElement extends Element {
         return _renderImage?.width ?? 0;
       case HEIGHT:
         return _renderImage?.height ?? 0;
+      case 'naturalWidth':
+        return naturalWidth;
+      case 'naturalHeight':
+        return naturalHeight;
     }
 
     return super.getProperty(key);

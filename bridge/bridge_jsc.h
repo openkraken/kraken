@@ -3,10 +3,8 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKEN_JS_BRIDGE_H_
-#define KRAKEN_JS_BRIDGE_H_
-
-#ifndef KRAKEN_ENABLE_JSA
+#ifndef KRAKEN_JS_JSC_BRIDGE_H_
+#define KRAKEN_JS_JSC_BRIDGE_H_
 
 #include "foundation/bridge_callback.h"
 #include "include/kraken_bridge.h"
@@ -35,7 +33,7 @@ public:
   // evaluate JavaScript source codes in standard mode.
   KRAKEN_EXPORT void evaluateScript(const NativeString *script, const char *url, int startLine);
   KRAKEN_EXPORT void parseHTML(const NativeString *script, const char *url);
-  KRAKEN_EXPORT void evaluateScript(const std::u16string &script, const char *url, int startLine);
+  KRAKEN_EXPORT void evaluateScript(const uint16_t *script, size_t length, const char *url, int startLine);
   KRAKEN_EXPORT void setHref(const char *url);
   KRAKEN_EXPORT NativeString* getHref();
 
@@ -57,5 +55,4 @@ private:
 
 } // namespace kraken
 
-#endif
-#endif // KRAKEN_JS_BRIDGE_H_
+#endif // KRAKEN_JS_JSC_BRIDGE_H_

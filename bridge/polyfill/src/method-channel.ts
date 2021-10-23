@@ -7,7 +7,7 @@ let methodCallHandlers: MethodCallHandler[] = [];
 // Like flutter platform channels
 export const methodChannel = {
   setMethodCallHandler(handler: MethodCallHandler) {
-    console.warn('Deprecated API, use addMethodCallHandler instead.');
+    console.warn('kraken.methodChannel.setMethodCallHandler is a Deprecated API, use kraken.methodChannel.addMethodCallHandler instead.');
     methodChannel.addMethodCallHandler(handler);
   },
   addMethodCallHandler(handler: MethodCallHandler) {
@@ -16,7 +16,7 @@ export const methodChannel = {
   removeMethodCallHandler(handler: MethodCallHandler) {
     let index = methodCallHandlers.indexOf(handler);
     if (index != -1) {
-      methodCallHandlers.splice(index, 1); 
+      methodCallHandlers.splice(index, 1);
     }
   },
   clearMethodCallHandler() {

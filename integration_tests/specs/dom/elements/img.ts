@@ -168,7 +168,7 @@ describe('Tags img', () => {
     img.setAttribute('loading', 'lazy');
     img.src = '//gw.alicdn.com/tfs/TB1MRC_cvb2gK0jSZK9XXaEgFXa-1701-1535.png';
     img.style.width = '60px';
-    
+
     document.body.appendChild(img);
 
     img.onload = async () => {
@@ -179,7 +179,7 @@ describe('Tags img', () => {
 
   it ('lazy loading should work with scroll', (done) => {
     const img = document.createElement('img');
-    img.setAttribute('loading', 'lazy'); 
+    img.setAttribute('loading', 'lazy');
     img.style.width = '60px';
     img.style.height = '60px';
     img.style.background = 'red';
@@ -199,9 +199,11 @@ describe('Tags img', () => {
     };
     img.src = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
 
-    window.scroll(0, 2000);
+    requestAnimationFrame(() => {
+      window.scroll(0, 2000);
+    });
   })
-        
+
   it('should work with loading=lazy and transform', (done) => {
     const imageURL = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
     const img = document.createElement('img');
@@ -289,11 +291,11 @@ describe('Tags img', () => {
   it('gif can replay', async (done) => {
     const imageURL = 'assets/sample-gif-40k.gif';
     const img = document.createElement('img');
-    
+
     img.onload = async () => {
       await snapshot(img);
       document.body.removeChild(img);
-      
+
       setTimeout(() => {
         document.body.appendChild(img);
         // After next frame that image has shown.

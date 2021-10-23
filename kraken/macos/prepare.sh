@@ -4,11 +4,8 @@ read_version() {
   export VERSION=${VERSION_STR:1:$END_POS}
 }
 
-if [ -L "libkraken_jsc.dylib" ]; then
+if [ -L "libkraken.dylib" ]; then
   ROOT=$(pwd)
-  rm libkraken_jsc.dylib
-  ln -s $ROOT/../../bridge/build/macos/lib/x86_64/libkraken_jsc.dylib
-elif [ ! -e "libkraken_jsc.dylib" ]; then
-  read_version
-  curl -O https://kraken.oss-cn-hangzhou.aliyuncs.com/kraken_bridge/$VERSION/libkraken_jsc.dylib
+  rm libkraken.dylib
+  ln -s $ROOT/../../bridge/build/macos/lib/x86_64/libkraken.dylib
 fi

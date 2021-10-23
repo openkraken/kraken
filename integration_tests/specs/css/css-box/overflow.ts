@@ -112,7 +112,7 @@ describe('Overflow', () => {
     });
   });
 
-  it('overflow with flex container', async () => {
+  it('overflow with flex container', async (done) => {
     let div;
     div = createElement(
       'div',
@@ -136,6 +136,8 @@ describe('Overflow', () => {
     requestAnimationFrame(async () => {
       div.scroll(0, 20);
       await snapshot();
+
+      done();
     });
   });
 
@@ -325,45 +327,47 @@ describe('Overflow', () => {
       style: {
         width: '100px',
         height: '100px',
-        overflow: 'scroll'
+        overflow: 'scroll',
       }
     }, [
       createElement('div', {
         style: {
           width: '50px',
-          height: '50px'
+          height: '50px',
+          background: 'red'
         }
       }, []),
       box = createElement('div', {
         style: {
           width: '50px',
-          height: '50px'
+          height: '50px',
+          background: 'blue'
         }
       }, []),
       createElement('div', {
         style: {
           width: '50px',
-          height: '50px'
+          height: '50px',
+          background: 'green'
         }
       }, []),
       createElement('div', {
         style: {
           width: '50px',
-          height: '50px'
+          height: '50px',
+          background: 'yellow'
         }
       }, []),
     ]);
 
     BODY.appendChild(container);
 
-    box.addEventListener('click', () => clickCount++);
+    box.addEventListener('click', () => {
+      clickCount++;
+    });
 
     await simulateClick(20, 60);
-
-    await simulateSwipe(20, 60, 20, 0, 0.5);
-
-    await simulateClick(20, 0);
-
+    await simulateClick(20, 60);
     expect(clickCount).toBe(2);
   });
 

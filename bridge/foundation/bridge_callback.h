@@ -17,6 +17,7 @@
 
 namespace kraken::foundation {
 
+#if KRAKEN_JSC_ENGINE
 /// An global standalone BridgeCallback register and collector used to register an callback which will call back from
 /// outside of bridge.
 /// This class can auto recycle callback context's memory when bridge are willing to unmount.
@@ -29,34 +30,35 @@ public:
 
   struct Context {
     Context(kraken::binding::jsc::JSContext &context, JSValueRef callback, JSValueRef *exception)
-      : _context(context), _callback(callback) {
+      : m_context(context), m_callback(callback) {
       JSValueProtect(context.context(), callback);
     };
     Context(kraken::binding::jsc::JSContext &context, JSValueRef callback, JSValueRef secondaryCallback,
             JSValueRef *exception)
-      : _context(context), _callback(callback), _secondaryCallback(secondaryCallback) {
+      : m_context(context), m_callback(callback), m_secondaryCallback(secondaryCallback) {
       JSValueProtect(context.context(), callback);
       JSValueProtect(context.context(), secondaryCallback);
     };
     ~Context() {
-      JSValueUnprotect(_context.context(), _callback);
+      JSValueUnprotect(m_context.context(), m_callback);
 
-      if (_secondaryCallback != nullptr) {
-        JSValueUnprotect(_context.context(), _secondaryCallback);
+      if (m_secondaryCallback != nullptr) {
+        JSValueUnprotect(m_context.context(), m_secondaryCallback);
       }
     }
-    kraken::binding::jsc::JSContext &_context;
-    JSValueRef _callback{nullptr};
-    JSValueRef _secondaryCallback{nullptr};
+    kraken::binding::jsc::JSContext &m_context;
+    JSValueRef m_callback{nullptr};
+    JSValueRef m_secondaryCallback{nullptr};
   };
+
 
   // An wrapper to register an callback outside of bridge and wait for callback to bridge.
   template <typename T>
   T registerCallback(std::unique_ptr<Context> &&context, std::function<T(BridgeCallback::Context *, int32_t)> fn) {
     Context *p = context.get();
     assert(p != nullptr && "Callback context can not be nullptr");
-    auto &jsContext = context->_context;
-    int32_t contextId = context->_context.getContextId();
+    auto &jsContext = context->m_context;
+    int32_t contextId = context->m_context.getContextId();
     contextList.emplace_back(std::move(context));
     return fn(p, contextId);
   }
@@ -76,10 +78,12 @@ public:
     }
   }
 
+
 private:
   std::vector<std::unique_ptr<Context>> contextList;
 };
 
+#endif
 } // namespace kraken::foundation
 
 #endif // KRAKENBRIDGE_BRIDGE_CALLBACK_H

@@ -104,15 +104,15 @@ JSValueRef matchImageSnapshot(JSContextRef ctx, JSObjectRef function, JSObjectRe
 
   auto callbackContext = std::make_unique<BridgeCallback::Context>(*context, callbackObjectRef, exception);
 
-  auto fn = [](void *ptr, int32_t contextId, int8_t result) {
+  auto fn = [](void *ptr, int32_t contextId, int8_t result, const char* errmsg) {
     JSValueRef exception = nullptr;
     auto callbackContext = static_cast<BridgeCallback::Context *>(ptr);
-    binding::jsc::JSContext &_context = callbackContext->_context;
+    binding::jsc::JSContext &_context = callbackContext->m_context;
     JSContextRef ctx = _context.context();
-    JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackContext->_callback, &exception);
+    JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackContext->m_callback, &exception);
     const JSValueRef arguments[] = {JSValueMakeBoolean(ctx, result != 0)};
     JSObjectCallAsFunction(ctx, callbackObjectRef, _context.global(), 1, arguments, &exception);
-    auto bridge = static_cast<JSBridge *>(callbackContext->_context.getOwner());
+    auto bridge = static_cast<JSBridge *>(callbackContext->m_context.getOwner());
     bridge->bridgeCallback->freeBridgeCallbackContext(callbackContext);
     _context.handleException(exception);
   };

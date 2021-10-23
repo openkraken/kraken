@@ -53,9 +53,9 @@ class _CustomTicker extends Ticker {
 }
 
 class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollContext {
-  AxisDirection? _axisDirection;
+  late AxisDirection _axisDirection;
   ScrollPosition? position;
-  final ScrollPhysics _physics = BouncingScrollPhysics();
+  final ScrollPhysics _physics = ScrollPhysics.createScrollPhysics();
   DragStartBehavior dragStartBehavior;
   ScrollListener? scrollListener;
 
@@ -71,7 +71,7 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
   /// The axis along which the scroll view scrolls.
   ///
   /// Determined by the [axisDirection].
-  Axis get axis => axisDirectionToAxis(_axisDirection!);
+  Axis get axis => axisDirectionToAxis(_axisDirection);
 
   void handlePointerDown(PointerDownEvent event) {
     for (GestureRecognizer? recognizer in _recognizers.values) {
@@ -80,7 +80,7 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
   }
 
   @override
-  AxisDirection? get axisDirection => _axisDirection;
+  AxisDirection get axisDirection => _axisDirection;
 
   // This field is set during layout, and then reused until the next time it is set.
   Map<Type, GestureRecognizerFactory> _gestureRecognizers = const <Type, GestureRecognizerFactory>{};

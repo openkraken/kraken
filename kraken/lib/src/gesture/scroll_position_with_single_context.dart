@@ -71,7 +71,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   double _heldPreviousVelocity = 0.0;
 
   @override
-  AxisDirection? get axisDirection => context.axisDirection;
+  AxisDirection get axisDirection => context.axisDirection;
 
   @override
   double setPixels(double newPixels) {

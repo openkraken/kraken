@@ -3,8 +3,6 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKEN_ENABLE_JSA
-
 #include "bridge_jsc.h"
 #include "foundation/logging.h"
 #include "polyfill.h"
@@ -60,7 +58,7 @@ ConsoleMessageHandler JSBridge::consoleMessageHandler {nullptr};
  * JSRuntime
  */
 JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : contextId(contextId) {
-  auto errorHandler = [handler, this](int32_t contextId, const char *errmsg, JSObjectRef errorObject) {
+  auto errorHandler = [handler, this](int32_t contextId, const char *errmsg, void *errorObject) {
     handler(contextId, errmsg, errorObject);
 
     // trigger error event.
@@ -72,7 +70,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
       JSValueRef onerrorFuncValue = JSObjectGetProperty(m_context->context(), windowObject, onerrorKeyHolder.getString(), nullptr);
       JSObjectRef onerrorFunc = JSValueToObject(m_context->context(), onerrorFuncValue, nullptr);
       JSValueRef arguments[] = {
-        errorObject
+        static_cast<JSObjectRef>(errorObject)
       };
 
       JSObjectCallAsFunction(m_context->context(), onerrorFunc, m_context->global(), 1, arguments, nullptr);
@@ -140,11 +138,6 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 
 #if ENABLE_PROFILE
   nativePerformance->mark(PERF_JS_POLYFILL_INIT_END);
-#endif
-
-#ifdef KRAKEN_ENABLE_JSA
-  Object promiseHandler = m_context->global().getPropertyAsObject(*m_context, "__global_unhandled_promise_handler__");
-  m_context->setUnhandledPromiseRejectionHandler(promiseHandler);
 #endif
 }
 
@@ -245,9 +238,9 @@ void JSBridge::evaluateScript(const NativeString *script, const char *url, int s
   #endif
 }
 
-void JSBridge::evaluateScript(const std::u16string &script, const char *url, int startLine) {
+void JSBridge::evaluateScript(const uint16_t *script, size_t length, const char *url, int startLine) {
   if (!m_context->isValid()) return;
-  m_context->evaluateJavaScript(script.c_str(), script.size(), url, startLine);
+  m_context->evaluateJavaScript(script, length, url, startLine);
 }
 
 JSBridge::~JSBridge() {
@@ -284,5 +277,3 @@ JSGlobalContextRef getGlobalContextRef(int32_t contextId) {
   auto bridge = static_cast<kraken::JSBridge *>(getJSContext(contextId));
   return bridge->getContext()->context();
 };
-
-#endif

@@ -14,6 +14,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver, RouteInformation;
 import 'package:kraken/css.dart';
 import 'dart:ffi';
+import 'package:ffi/ffi.dart';
 
 import 'package:kraken/gesture.dart';
 import 'package:kraken/bridge.dart';
@@ -31,6 +32,8 @@ const int HTML_ID = -1;
 const int WINDOW_ID = -2;
 const int DOCUMENT_ID = -3;
 
+typedef ElementCreator = Element Function(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager);
+
 class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver  {
   // Call from JS Bridge before JS side eventTarget object been Garbage collected.
   static void disposeEventTarget(int contextId, int id) {
@@ -45,16 +48,17 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_END, uniqueId: id);
     }
+    malloc.free(eventTarget.nativeEventTargetPtr);
   }
 
   // Alias defineElement export for kraken plugin
-  static void defineElement(String type, element_registry.ElementCreator creator) {
+  static void defineElement(String type, ElementCreator creator) {
     element_registry.defineElement(type, creator);
   }
 
-  static Map<int, Pointer<NativeElement>> htmlNativePtrMap = {};
-  static Map<int, Pointer<NativeDocument>> documentNativePtrMap = {};
-  static Map<int, Pointer<NativeWindow>> windowNativePtrMap = {};
+  static Map<int, Pointer<NativeEventTarget>> htmlNativePtrMap = {};
+  static Map<int, Pointer<NativeEventTarget>> documentNativePtrMap = {};
+  static Map<int, Pointer<NativeEventTarget>> windowNativePtrMap = {};
 
   static double FOCUS_VIEWINSET_BOTTOM_OVERALL = 32;
   // Single child renderView.
@@ -172,7 +176,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   Element createElement(
-      int id, Pointer nativePtr, String type, Map<String, dynamic>? props, List<String>? events) {
+      int id, Pointer<NativeEventTarget> nativePtr, String type, Map<String, dynamic>? props, List<String>? events) {
     assert(!existsTarget(id), 'ERROR: Can not create element with same id "$id"');
 
     List<String> eventList;
@@ -188,18 +192,18 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     return element;
   }
 
-  void createTextNode(int id, Pointer<NativeTextNode> nativePtr, String data) {
+  void createTextNode(int id, Pointer<NativeEventTarget> nativePtr, String data) {
     TextNode textNode = TextNode(id, nativePtr, data, this);
     setEventTarget(textNode);
   }
 
-  void createDocumentFragment(int id, Pointer<NativeNode> nativePtr) {
+  void createDocumentFragment(int id, Pointer<NativeEventTarget> nativePtr) {
     DocumentFragment documentFragment = DocumentFragment(id, nativePtr, this);
     setEventTarget(documentFragment);
   }
 
-  void createComment(int id, Pointer<NativeCommentNode> nativePtr, String data) {
-    EventTarget comment = Comment(id, nativePtr, this, data);
+  void createComment(int id, Pointer<NativeEventTarget> nativePtr) {
+    EventTarget comment = Comment(id, nativePtr, this);
     setEventTarget(comment);
   }
 
@@ -368,7 +372,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   void addEvent(int targetId, String eventType) {
-    assert(existsTarget(targetId), 'targetId: $targetId event: $eventType');
+    if (!existsTarget(targetId)) return;
     EventTarget target = getEventTargetByTargetId<EventTarget>(targetId)!;
 
     if (target is Element) {

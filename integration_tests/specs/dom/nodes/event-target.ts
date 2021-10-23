@@ -34,7 +34,7 @@ describe('DOM EventTarget', () => {
     div.click();
   });
 
-  xit('addEventListener should work without connected into element tree', done => {
+  it('addEventListener should work without connected into element tree', done => {
     let div = createElementWithStyle('div', {});
     div.addEventListener('click', () => {
       done();
@@ -150,7 +150,7 @@ describe('DOM EventTarget', () => {
 
     div2.click();
     div2.click();
-    
+
     expect(count1).toBe(0);
     expect(count2).toBe(2);
   });

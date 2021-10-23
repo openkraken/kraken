@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 
-import 'dart:collection';
 import 'dart:ffi';
 import 'dart:ui';
 import 'package:kraken/bridge.dart';
@@ -13,75 +12,33 @@ import 'package:kraken/launcher.dart';
 
 const String WINDOW = 'WINDOW';
 
-final Pointer<NativeFunction<NativeWindowOpen>> nativeOpen = Pointer.fromFunction(Window._open);
-final Pointer<NativeFunction<NativeWindowScrollX>> nativeScrollX = Pointer.fromFunction(Window._scrollX, 0.0);
-final Pointer<NativeFunction<NativeWindowScrollY>> nativeScrollY = Pointer.fromFunction(Window._scrollY, 0.0);
-final Pointer<NativeFunction<NativeWindowScrollTo>> nativeScrollTo = Pointer.fromFunction(Window._scrollTo);
-final Pointer<NativeFunction<NativeWindowScrollBy>> nativeScrollBy = Pointer.fromFunction(Window._scrollBy);
-
 class Window extends EventTarget {
-  final Pointer<NativeWindow> nativeWindowPtr;
   final Element viewportElement;
-  static final SplayTreeMap<int, Window> _nativeMap = SplayTreeMap();
 
-  Window(int targetId, this.nativeWindowPtr, ElementManager elementManager, this.viewportElement) : super(targetId, nativeWindowPtr.ref.nativeEventTarget, elementManager) {
+  Window(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager, this.viewportElement) : super(targetId, nativeEventTarget, elementManager) {
     window.onPlatformBrightnessChanged = () {
       ColorSchemeChangeEvent event = ColorSchemeChangeEvent((window.platformBrightness == Brightness.light) ? 'light' : 'dart');
       emitUIEvent(elementManager.controller.view.contextId, nativeWindowPtr.ref.nativeEventTarget, event);
     };
-
-    // Bind window methods in dart to cpp
-    nativeWindowPtr.ref.open = nativeOpen;
-    nativeWindowPtr.ref.scrollX = nativeScrollX;
-    nativeWindowPtr.ref.scrollY = nativeScrollY;
-    nativeWindowPtr.ref.scrollTo = nativeScrollTo;
-    nativeWindowPtr.ref.scrollBy = nativeScrollBy;
-    // Store current native window pointer in dart
-    _nativeMap[nativeWindowPtr.address] = this;
   }
 
   void _handleColorSchemeChange(Event event) {
-    emitUIEvent(elementManager.controller.view.contextId, nativeWindowPtr.ref.nativeEventTarget, event);
+    emitUIEvent(elementManager.controller.view.contextId, nativeEventTargetPtr, event);
   }
 
   void _handleLoad(Event event) {
-    emitUIEvent(elementManager.controller.view.contextId, nativeWindowPtr.ref.nativeEventTarget, event);
+    emitUIEvent(elementManager.controller.view.contextId, nativeEventTargetPtr, event);
   }
 
   void _handleScroll(Event event) {
-    emitUIEvent(elementManager.controller.view.contextId, nativeWindowPtr.ref.nativeEventTarget, event);
+    emitUIEvent(elementManager.controller.view.contextId, nativeEventTargetPtr, event);
   }
 
-  static void _open(Pointer<NativeWindow> nativeWindowPtr, Pointer<NativeString> urlPtr) {
-    String url = nativeStringToString(urlPtr);
-
-    ElementManager elementManager = _nativeMap[nativeWindowPtr.address]!.elementManager;
+  static void _open(ElementManager elementManager, String url) {
     KrakenController rootController = elementManager.controller.view.rootController;
     String? sourceUrl = rootController.bundleURL ?? rootController.bundlePath;
 
     elementManager.controller.view.handleNavigationAction(sourceUrl, url, KrakenNavigationType.navigate);
-  }
-
-  static double _scrollX(Pointer<NativeWindow> nativeWindowPtr) {
-    Window window = _nativeMap[nativeWindowPtr.address]!;
-    return window.scrollX();
-  }
-
-  static double _scrollY(Pointer<NativeWindow> nativeWindowPtr) {
-    Window window = _nativeMap[nativeWindowPtr.address]!;
-    return window.scrollY();
-  }
-
-  static void _scrollTo(Pointer<NativeWindow> nativeWindowPtr, int x, int y) {
-    Window window = _nativeMap[nativeWindowPtr.address]!;
-    window.viewportElement.flushLayout();
-    window.scrollTo(x, y);
-  }
-
-  static void _scrollBy(Pointer<NativeWindow> nativeWindowPtr, int x, int y) {
-    Window window = _nativeMap[nativeWindowPtr.address]!;
-    window.viewportElement.flushLayout();
-    window.scrollBy(x, y);
   }
 
   double scrollX() {
@@ -93,10 +50,12 @@ class Window extends EventTarget {
   }
 
   void scrollTo(num x, num y) {
+    viewportElement.flushLayout();
     viewportElement.scrollTo(x: x, y: y, withAnimation: false);
   }
 
   void scrollBy(num x, num y) {
+    viewportElement.flushLayout();
     viewportElement.scrollBy(dx: x, dy: y, withAnimation: false);
   }
 
@@ -121,7 +80,22 @@ class Window extends EventTarget {
   @override
   void dispose() {
     super.dispose();
-    // Remove native reference.
-    _nativeMap.remove(nativeWindowPtr.address);
+  }
+
+  @override
+  dynamic handleJSCall(String method, List<dynamic> argv) {
+    switch(method) {
+      case 'scroll':
+      case 'scrollTo':
+        return scrollTo(argv[0], argv[1]);
+      case 'scrollBy':
+        return scrollBy(argv[0], argv[1]);
+      case 'scrollX':
+        return scrollX();
+      case 'scrollY':
+        return scrollY();
+      case 'open':
+        return _open(elementManager, argv[0]);
+    }
   }
 }
