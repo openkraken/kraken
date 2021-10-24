@@ -247,9 +247,9 @@ class RenderStyle
     RenderStyle renderStyle = this;
     double? intrinsicRatio = renderBoxModel!.intrinsicRatio;
     CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
-    double? width = renderStyle.width?.computedValue;
-    double? minWidth = renderStyle.minWidth?.computedValue;
-    double? maxWidth = renderStyle.maxWidth == CSSLengthValue.none ? null : renderStyle.maxWidth?.computedValue;
+    double? width = renderStyle.width.isAuto ? null : renderStyle.width.computedValue;
+    double? minWidth = renderStyle.minWidth.isAuto ? null : renderStyle.minWidth.computedValue;
+    double? maxWidth = renderStyle.maxWidth.isNone ? null : renderStyle.maxWidth.computedValue;
     double cropWidth = 0;
 
     switch (effectiveDisplay) {
@@ -257,7 +257,7 @@ class RenderStyle
       case CSSDisplay.flex:
       case CSSDisplay.sliver:
       // Get own width if exists else get the width of nearest ancestor width width
-        if (renderStyle.width != null) {
+        if (!renderStyle.width.isAuto) {
           cropWidth = _getCropWidthByPaddingBorder(renderStyle, cropWidth);
         } else {
           // @TODO: flexbox stretch alignment will stretch replaced element in the cross axis
@@ -281,9 +281,9 @@ class RenderStyle
               // Set width of element according to parent display
               if (parentEffectiveDisplay != CSSDisplay.inline) {
                 // Skip to find upper parent
-                if (parentRenderStyle.width != null) {
+                if (parentRenderStyle.width.isNotAuto) {
                   // Use style width
-                  width = parentRenderStyle.width?.computedValue;
+                  width = parentRenderStyle.width.computedValue;
                   cropWidth = _getCropWidthByPaddingBorder(parentRenderStyle, cropWidth);
                   break;
                 } else if (parentRenderBoxModel.hasSize && parentRenderBoxModel.constraints.hasTightWidth) {
@@ -307,8 +307,8 @@ class RenderStyle
         break;
       case CSSDisplay.inlineBlock:
       case CSSDisplay.inlineFlex:
-        if (renderStyle.width != null) {
-          width = renderStyle.width?.computedValue;
+        if (renderStyle.width.isNotAuto) {
+          width = renderStyle.width.computedValue;
           cropWidth = _getCropWidthByPaddingBorder(renderStyle, cropWidth);
         } else {
           width = null;
@@ -347,10 +347,10 @@ class RenderStyle
   double? getLogicalContentHeight() {
     RenderStyle renderStyle = this;
     CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
-    double? height = renderStyle.height?.computedValue;
+    double? height = renderStyle.height.isAuto ? null : renderStyle.height.computedValue;
     double cropHeight = 0;
-    double? maxHeight = renderStyle.maxHeight == CSSLengthValue.none ? null : renderStyle.maxHeight?.computedValue;
-    double? minHeight = renderStyle.minHeight?.computedValue;
+    double? maxHeight = renderStyle.maxHeight.isNone ? null : renderStyle.maxHeight.computedValue;
+    double? minHeight = renderStyle.minHeight.isAuto ? null : renderStyle.minHeight.computedValue;
     double? intrinsicRatio = renderBoxModel!.intrinsicRatio;
 
     // Inline element has no height
@@ -374,8 +374,8 @@ class RenderStyle
 
         RenderBoxModel parentRenderBoxModel = parentRenderStyle!.renderBoxModel!;
         if (CSSSizingMixin.isStretchChildHeight(parentRenderStyle, currentRenderStyle)) {
-          if (parentRenderStyle.height != null) {
-            height = parentRenderStyle.height?.computedValue;
+          if (parentRenderStyle.height.isNotAuto) {
+            height = parentRenderStyle.height.computedValue;
             cropHeight = _getCropHeightByPaddingBorder(parentRenderStyle, cropHeight);
             break;
           } else if (parentRenderBoxModel.hasSize && parentRenderBoxModel.constraints.hasTightHeight) {
@@ -434,18 +434,20 @@ class RenderStyle
         parentRenderStyle.display == CSSDisplay.inlineFlex)
       ) {
         if (currentRenderStyle.flexShrink == 0 &&
-          currentRenderStyle.width == null &&
-          currentRenderStyle.maxWidth == null) {
+          currentRenderStyle.width.isAuto &&
+          currentRenderStyle.maxWidth.isNone) {
           break;
         }
       }
 
       // Get width if width exists and element is not inline
       if (effectiveDisplay != CSSDisplay.inline &&
-        (currentRenderStyle.width != null || currentRenderStyle.maxWidth != null)) {
+        (currentRenderStyle.width.isNotAuto || currentRenderStyle.maxWidth.isNotNone)) {
         // Get the min width between width and max-width
-        maxConstraintWidth = math.min(currentRenderStyle.width?.computedValue ?? double.infinity,
-          currentRenderStyle.maxWidth?.computedValue ?? double.infinity);
+        maxConstraintWidth = math.min(
+            (currentRenderStyle.width.isAuto ? null : currentRenderStyle.width.computedValue) ?? double.infinity,
+            (currentRenderStyle.maxWidth.isNone ? null : currentRenderStyle.maxWidth.computedValue) ?? double.infinity
+        );
         cropWidth = _getCropWidthByPaddingBorder(currentRenderStyle, cropWidth);
         break;
       }
@@ -599,12 +601,12 @@ class RenderStyle
     // @TODO: move intrinsic width/height to renderStyle
     double? intrinsicWidth = renderBoxModel!.intrinsicWidth;
     double intrinsicRatio = renderBoxModel!.intrinsicRatio!;
-    double? realWidth = width?.computedValue ?? intrinsicWidth;
-    if (minWidth != null && realWidth! < minWidth!.computedValue) {
-      realWidth = minWidth!.computedValue;
+    double? realWidth = width.isAuto ? intrinsicWidth : width.computedValue;
+    if (minWidth.isNotAuto && realWidth! < minWidth.computedValue) {
+      realWidth = minWidth.computedValue;
     }
-    if (maxWidth != null && realWidth! > maxWidth!.computedValue) {
-      realWidth = maxWidth!.computedValue;
+    if (maxWidth.isNotNone && realWidth! > maxWidth.computedValue) {
+      realWidth = maxWidth.computedValue;
     }
     double realHeight = realWidth! * intrinsicRatio;
     return realHeight;
@@ -615,12 +617,13 @@ class RenderStyle
     // @TODO: move intrinsic width/height to renderStyle
     double? intrinsicHeight = renderBoxModel!.intrinsicHeight;
     double intrinsicRatio = renderBoxModel!.intrinsicRatio!;
-    double? realHeight = height?.computedValue ?? intrinsicHeight;
-    if (minHeight != null && realHeight! < minHeight!.computedValue) {
-      realHeight = minHeight!.computedValue;
+
+    double? realHeight = height.isAuto ? intrinsicHeight : height.computedValue;
+    if (!minHeight.isAuto && realHeight! < minHeight.computedValue) {
+      realHeight = minHeight.computedValue;
     }
-    if (maxHeight != null && realHeight! > maxHeight!.computedValue) {
-      realHeight = maxHeight!.computedValue;
+    if (!maxHeight.isNone && realHeight! > maxHeight.computedValue) {
+      realHeight = maxHeight.computedValue;
     }
     double realWidth = realHeight! / intrinsicRatio;
     return realWidth;

@@ -149,8 +149,8 @@ class RenderRecyclerLayout extends RenderLayoutBox {
     RenderBox? child = _renderViewport;
     late BoxConstraints childConstraints;
 
-    double? width = renderStyle.width?.computedValue;
-    double? height = renderStyle.height?.computedValue;
+    double? width = renderStyle.width.isAuto ? null : renderStyle.width.computedValue;
+    double? height = renderStyle.height.isAuto ? null : renderStyle.height.computedValue;
     Axis sliverAxis = renderStyle.sliverDirection;
 
     switch (sliverAxis) {

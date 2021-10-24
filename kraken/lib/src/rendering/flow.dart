@@ -1452,9 +1452,9 @@ class RenderFlowLayout extends RenderLayoutBox {
       renderBoxModel.renderStyle.transformedOverflowY == CSSOverflowType.clip;
 
     if (renderBoxModel is RenderLayoutBox &&
-      renderBoxModel.renderStyle.height == null &&
-      renderBoxModel.renderStyle.minHeight == null &&
-      renderBoxModel.renderStyle.maxHeight == null &&
+      renderBoxModel.renderStyle.height.isAuto &&
+      renderBoxModel.renderStyle.minHeight.isAuto &&
+      renderBoxModel.renderStyle.maxHeight.isNone &&
       renderBoxModel.renderStyle.effectiveDisplay == CSSDisplay.block &&
       (isOverflowVisible || isOverflowClip) &&
       paddingBottom == 0 &&

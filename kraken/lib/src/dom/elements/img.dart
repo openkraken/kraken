@@ -251,19 +251,18 @@ class ImageElement extends Element {
     }
 
     // Waiting for size computed after layout stage
-    if (style.contains(WIDTH) && renderStyle.width == null ||
-        style.contains(HEIGHT) && renderStyle.height == null) {
+    if (renderStyle.width.isAuto || renderStyle.height.isAuto) {
       return _handleImageResizeAfterLayout();
     }
 
-    double? width = renderStyle.width?.computedValue ?? _propertyWidth;
-    double? height = renderStyle.height?.computedValue ?? _propertyHeight;
+    double? width = renderStyle.width.isAuto ? _propertyWidth : renderStyle.width.computedValue;
+    double? height = renderStyle.height.isAuto ? _propertyHeight : renderStyle.height.computedValue;
 
-    if (renderStyle.width == null && _propertyWidth != null) {
+    if (renderStyle.width.isAuto && _propertyWidth != null) {
       // The intrinsic width of the image in pixels. Must be an integer without a unit.
       renderStyle.width = CSSLengthValue(_propertyWidth, CSSLengthType.PX);
     }
-    if (renderStyle.height == null && _propertyHeight != null) {
+    if (renderStyle.height.isAuto && _propertyHeight != null) {
       // The intrinsic height of the image, in pixels. Must be an integer without a unit.
       renderStyle.height = CSSLengthValue(_propertyHeight, CSSLengthType.PX);
     }

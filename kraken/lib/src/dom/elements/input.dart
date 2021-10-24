@@ -308,7 +308,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     animationController.addListener(_onCursorColorTick);
 
     // Set default width of input when width is not set in style.
-    if (renderBoxModel!.renderStyle.width == null) {
+    if (renderBoxModel!.renderStyle.width.isAuto) {
       double fontSize = renderBoxModel!.renderStyle.fontSize.computedValue;
       renderBoxModel!.renderStyle.width = CSSLengthValue(fontSize * _FONT_SIZE_RATIO, CSSLengthType.PX);
     }
@@ -357,7 +357,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       if (property == HEIGHT) {
         _renderInputLeaderLayer!.markNeedsLayout();
 
-      } else if (property == LINE_HEIGHT && renderStyle.height == null) {
+      } else if (property == LINE_HEIGHT && renderStyle.height.isAuto) {
         _renderInputLeaderLayer!.markNeedsLayout();
         // It needs to mark _renderInputBox as needsLayout manually cause
         // line-height change will not affect constraints which will in turn
@@ -1261,8 +1261,8 @@ class RenderInputLeaderLayer extends RenderLeaderLayer {
 
     // Make render editable vertically center.
     double dy;
-    if (renderStyle.height != null) {
-      dy = (renderStyle.height!.computedValue - intrinsicInputHeight) / 2;
+    if (renderStyle.height.isNotAuto) {
+      dy = (renderStyle.height.computedValue - intrinsicInputHeight) / 2;
     } else if (renderStyle.lineHeight.type != CSSLengthType.NORMAL &&
       renderStyle.lineHeight.computedValue > intrinsicInputHeight) {
       dy = (renderStyle.lineHeight.computedValue - intrinsicInputHeight) /2;

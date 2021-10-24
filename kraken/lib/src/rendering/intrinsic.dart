@@ -22,15 +22,13 @@ class RenderIntrinsic extends RenderBoxModel
 
   @override
   BoxSizeType get widthSizeType {
-    bool widthDefined =
-        renderStyle.width != null || (renderStyle.minWidth != null);
+    bool widthDefined = renderStyle.width.isNotAuto || renderStyle.minWidth.isNotAuto;
     return widthDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
   }
 
   @override
   BoxSizeType get heightSizeType {
-    bool heightDefined =
-        renderStyle.height != null || (renderStyle.minHeight != null);
+    bool heightDefined = renderStyle.height.isNotAuto || !renderStyle.minHeight.isNotAuto;
     return heightDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
   }
 
@@ -64,12 +62,12 @@ class RenderIntrinsic extends RenderBoxModel
 
     beforeLayout();
 
-    double? width = renderStyle.width?.computedValue;
-    double? height = renderStyle.height?.computedValue;
-    double? minWidth = renderStyle.minWidth?.computedValue;
-    double? minHeight = renderStyle.minHeight?.computedValue;
-    double? maxWidth = renderStyle.maxWidth == CSSLengthValue.none ? null : renderStyle.maxWidth?.computedValue;
-    double? maxHeight = renderStyle.maxHeight == CSSLengthValue.none ? null : renderStyle.maxHeight?.computedValue;
+    double? width = renderStyle.width.isAuto ? null : renderStyle.width.computedValue;
+    double? height = renderStyle.height.isAuto ? null : renderStyle.height.computedValue;
+    double? minWidth = renderStyle.minWidth.isAuto ? null : renderStyle.minWidth.computedValue;
+    double? maxWidth = renderStyle.maxWidth.isNone ? null : renderStyle.maxWidth.computedValue;
+    double? minHeight = renderStyle.minHeight.isAuto ? null : renderStyle.minHeight.computedValue;
+    double? maxHeight = renderStyle.maxHeight.isNone ? null : renderStyle.maxHeight.computedValue;
 
     if (child != null) {
       late DateTime childLayoutStart;

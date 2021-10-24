@@ -437,10 +437,10 @@ class RenderFlexLayout extends RenderLayoutBox {
   double _getMaxMainAxisSize(RenderBox child) {
     double? maxMainSize;
     if (child is RenderBoxModel) {
-      double? maxWidth = child.renderStyle.maxWidth == CSSLengthValue.none ?
-        null : child.renderStyle.maxWidth?.computedValue;
-      double? maxHeight = child.renderStyle.maxHeight == CSSLengthValue.none ?
-        null : child.renderStyle.maxHeight?.computedValue;
+      double? maxWidth = child.renderStyle.maxWidth.isNone ?
+        null : child.renderStyle.maxWidth.computedValue;
+      double? maxHeight = child.renderStyle.maxHeight.isNone ?
+        null : child.renderStyle.maxHeight.computedValue;
       maxMainSize = _isHorizontalFlexDirection
               ? maxWidth : maxHeight;
     }
@@ -461,12 +461,12 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderStyle? childRenderStyle = child.renderStyle;
 
     if (child is RenderBoxModel) {
-      minWidth = childRenderStyle.minWidth != null
-          ? childRenderStyle.minWidth!.computedValue
-          : child.autoMinWidth;
-      minHeight = childRenderStyle.minHeight != null
-          ? childRenderStyle.minHeight!.computedValue
-          : child.autoMinHeight;
+      minWidth = childRenderStyle.minWidth.isAuto
+          ? child.autoMinWidth
+          : childRenderStyle.minWidth.computedValue;
+      minHeight = childRenderStyle.minHeight.isAuto
+          ? child.autoMinHeight
+          : childRenderStyle.minHeight.computedValue;
     } else if (child is RenderTextBox) {
       minWidth = child.autoMinWidth;
       minHeight = child.autoMinHeight;
@@ -479,17 +479,17 @@ class RenderFlexLayout extends RenderLayoutBox {
     if (child is RenderIntrinsic &&
         child.intrinsicRatio != null &&
         _isHorizontalFlexDirection &&
-        childRenderStyle.width == null) {
-      double transferredSize = childRenderStyle.height != null
-          ? childRenderStyle.height!.computedValue * child.intrinsicRatio!
+        childRenderStyle.width.isAuto) {
+      double transferredSize = childRenderStyle.height.isNotAuto
+          ? childRenderStyle.height.computedValue * child.intrinsicRatio!
           : child.intrinsicWidth!;
       minMainSize = math.min(contentSize, transferredSize);
     } else if (child is RenderIntrinsic &&
         child.intrinsicRatio != null &&
         !_isHorizontalFlexDirection &&
-        childRenderStyle.height == null) {
-      double transferredSize = childRenderStyle.width != null
-          ? childRenderStyle.width!.computedValue / child.intrinsicRatio!
+        childRenderStyle.height.isAuto) {
+      double transferredSize = childRenderStyle.width.isNotAuto
+          ? childRenderStyle.width.computedValue / child.intrinsicRatio!
           : child.intrinsicHeight!;
       minMainSize = math.min(contentSize, transferredSize);
     } else if (child is RenderBoxModel) {
@@ -1336,8 +1336,8 @@ class RenderFlexLayout extends RenderLayoutBox {
         bool isStretchSelfValid = false;
         if (child is RenderBoxModel) {
           isStretchSelfValid = _isHorizontalFlexDirection
-                ? child.renderStyle.height == null
-                : child.renderStyle.width == null;
+                ? child.renderStyle.height.isAuto
+                : child.renderStyle.width.isAuto;
         }
 
         // Whether child should be stretched
@@ -1525,8 +1525,8 @@ class RenderFlexLayout extends RenderLayoutBox {
 
           // Replaced element in flexbox with no size in cross axis should stretch according the intrinsic ratio.
           if (child is RenderIntrinsic &&
-            child.renderStyle.width == null &&
-            child.renderStyle.minWidth == null &&
+            child.renderStyle.width.isAuto &&
+            child.renderStyle.minWidth.isAuto &&
             child.intrinsicRatio != null
           ) {
             minConstraintWidth = maxConstraintWidth = minConstraintHeight / child.intrinsicRatio!;
@@ -1563,8 +1563,8 @@ class RenderFlexLayout extends RenderLayoutBox {
 
           // Replaced element in flexbox with no size in cross axis should stretch according the intrinsic ratio.
           if (child is RenderIntrinsic &&
-            child.renderStyle.height == null &&
-            child.renderStyle.minHeight == null &&
+            child.renderStyle.height.isAuto &&
+            child.renderStyle.minHeight.isAuto &&
             child.intrinsicRatio != null
           ) {
             minConstraintHeight = maxConstraintHeight = minConstraintWidth * child.intrinsicRatio!;

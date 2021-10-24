@@ -293,8 +293,16 @@ class CSSLengthValue {
     return type == CSSLengthType.AUTO;
   }
 
+  bool get isNotAuto {
+    return type != CSSLengthType.AUTO;
+  }
+
   bool get isNone {
     return type == CSSLengthType.NONE;
+  }
+
+  bool get isNotNone {
+    return type != CSSLengthType.NONE;
   }
 
   bool get isPercentage {

@@ -55,8 +55,8 @@ Offset _getAutoMarginPositionedElementOffset(double? x, double? y, RenderBoxMode
   CSSLengthValue marginRight = childRenderStyle.marginRight;
   CSSLengthValue marginTop = childRenderStyle.marginTop;
   CSSLengthValue marginBottom = childRenderStyle.marginBottom;
-  double? width = childRenderStyle.width?.computedValue;
-  double? height = childRenderStyle.height?.computedValue;
+  CSSLengthValue width = childRenderStyle.width;
+  CSSLengthValue height = childRenderStyle.height;
   CSSLengthValue? left = childRenderStyle.left;
   CSSLengthValue? right = childRenderStyle.right;
   CSSLengthValue? top = childRenderStyle.top;
@@ -64,9 +64,9 @@ Offset _getAutoMarginPositionedElementOffset(double? x, double? y, RenderBoxMode
 
   // 'left' + 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right'
   // + 'border-right-width' + 'margin-right' + 'right' = width of containing block
-  if ((left != null && !left.isAuto) &&
-    (right != null && !right.isAuto) &&
-    (child is! RenderIntrinsic || width != null)) {
+  if ((left != null && left.isNotAuto) &&
+    (right != null && right.isNotAuto) &&
+    (child is! RenderIntrinsic || width.isNotAuto)) {
     if (marginLeft.isAuto) {
       double leftValue = left.computedValue;
       double rightValue = right.computedValue;
@@ -80,9 +80,9 @@ Offset _getAutoMarginPositionedElementOffset(double? x, double? y, RenderBoxMode
     }
   }
 
-  if ((top != null && !top.isAuto) &&
-    (bottom != null && !bottom.isAuto) &&
-    (child is! RenderIntrinsic || height != null)) {
+  if ((top != null && top.isNotAuto) &&
+    (bottom != null && bottom.isNotAuto) &&
+    (child is! RenderIntrinsic || height.isNotAuto)) {
     if (marginTop.isAuto) {
       double topValue = top.computedValue;
       double bottomValue = bottom.computedValue;
@@ -352,7 +352,7 @@ class CSSPositionedLayout {
 
     // If child has no width, calculate width by left and right.
     // Element with intrinsic size such as image will not stretch
-    if (childRenderStyle.width == null &&
+    if (childRenderStyle.width.isAuto &&
         widthType != BoxSizeType.intrinsic &&
         childRenderStyle.left != null &&
         childRenderStyle.right != null) {
@@ -362,8 +362,8 @@ class CSSPositionedLayout {
       double constraintWidth = parentPaddingBoxSize.width -
         childRenderStyle.left!.computedValue - childRenderStyle.right!.computedValue -
         childMarginLeft - childMarginRight;
-      double? maxWidth = childRenderStyle.maxWidth?.computedValue;
-      double? minWidth = childRenderStyle.minWidth?.computedValue;
+      double? maxWidth = childRenderStyle.maxWidth.isNone ? null : childRenderStyle.maxWidth.computedValue;
+      double? minWidth = childRenderStyle.minWidth.isAuto ? null : childRenderStyle.minWidth.computedValue;
       // Constrain to min-width or max-width if width not exists
       if (maxWidth != null) {
         constraintWidth = constraintWidth > maxWidth ? maxWidth : constraintWidth;
@@ -373,7 +373,7 @@ class CSSPositionedLayout {
       childConstraints = childConstraints.tighten(width: constraintWidth);
     }
     // If child has not height, should be calculate height by top and bottom
-    if (childRenderStyle.height == null &&
+    if (childRenderStyle.height.isAuto &&
         heightType != BoxSizeType.intrinsic &&
         childRenderStyle.top != null &&
         childRenderStyle.bottom != null) {
@@ -383,12 +383,14 @@ class CSSPositionedLayout {
       double constraintHeight = parentPaddingBoxSize.height -
         childRenderStyle.top!.computedValue - childRenderStyle.bottom!.computedValue -
         childMarginTop - childMarginBottom;
-      double? maxHeight = childRenderStyle.maxHeight?.computedValue;
-      double? minHeight = childRenderStyle.minHeight?.computedValue;
+      CSSLengthValue maxHeightLength = childRenderStyle.maxHeight;
+      CSSLengthValue minHeightLength = childRenderStyle.minHeight;
       // Constrain to min-height or max-height if width not exists
-      if (maxHeight != null) {
+      if (maxHeightLength.isNotNone) {
+        double maxHeight = maxHeightLength.computedValue;
         constraintHeight = constraintHeight > maxHeight ? maxHeight : constraintHeight;
-      } else if (minHeight != null) {
+      } else if (minHeightLength.isNotAuto) {
+        double minHeight = minHeightLength.computedValue;
         constraintHeight = constraintHeight < minHeight ? minHeight : constraintHeight;
       }
       childConstraints = childConstraints.tighten(height: constraintHeight);
@@ -433,8 +435,8 @@ class CSSPositionedLayout {
 
       if(overflowContainerBox.widthSizeType == BoxSizeType.specified && overflowContainerBox.heightSizeType == BoxSizeType.specified) {
         parentSize = Size(
-            overflowContainerBox.renderStyle.width!.computedValue,
-            overflowContainerBox.renderStyle.height!.computedValue
+            overflowContainerBox.renderStyle.width.computedValue,
+            overflowContainerBox.renderStyle.height.computedValue
         );
       } else {
         parentSize = parent.boxSize;

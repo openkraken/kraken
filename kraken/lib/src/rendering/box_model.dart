@@ -421,12 +421,12 @@ class RenderLayoutBox extends RenderBoxModel
     CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
     bool isInlineBlock = effectiveDisplay == CSSDisplay.inlineBlock;
     bool isNotInline = effectiveDisplay != CSSDisplay.inline;
-    double? width = renderStyle.width?.computedValue;
-    double? height = renderStyle.height?.computedValue;
-    double? minWidth = renderStyle.minWidth?.computedValue;
-    double? minHeight = renderStyle.minHeight?.computedValue;
-    double? maxWidth = renderStyle.maxWidth == CSSLengthValue.none ? null : renderStyle.maxWidth?.computedValue;
-    double? maxHeight = renderStyle.maxHeight == CSSLengthValue.none ? null : renderStyle.maxHeight?.computedValue;
+    double? width = renderStyle.width.isAuto ? null : renderStyle.width.computedValue;
+    double? height = renderStyle.height.isAuto ? null : renderStyle.height.computedValue;
+    double? minWidth = renderStyle.minWidth.isAuto ? null : renderStyle.minWidth.computedValue;
+    double? maxWidth = renderStyle.maxWidth.isNone ? null : renderStyle.maxWidth.computedValue;
+    double? minHeight = renderStyle.minHeight.isAuto ? null : renderStyle.minHeight.computedValue;
+    double? maxHeight = renderStyle.maxHeight.isNone ? null : renderStyle.maxHeight.computedValue;
 
     // Constrain to min-width or max-width if width not exists.
     if (isInlineBlock && maxWidth != null && width == null) {
@@ -474,7 +474,7 @@ class RenderLayoutBox extends RenderBoxModel
         maxScrollableX = math.max(
             maxScrollableX,
             -childRenderStyle.right!.computedValue +
-                overflowContainerBox.renderStyle.width!.computedValue -
+                overflowContainerBox.renderStyle.width.computedValue -
                 overflowContainerBox.renderStyle.effectiveBorderLeftWidth.computedValue -
                 overflowContainerBox.renderStyle.effectiveBorderRightWidth.computedValue);
       } else {
@@ -494,7 +494,7 @@ class RenderLayoutBox extends RenderBoxModel
         maxScrollableY = math.max(
             maxScrollableY,
             -childRenderStyle.bottom!.computedValue +
-                overflowContainerBox.renderStyle.height!.computedValue -
+                overflowContainerBox.renderStyle.height.computedValue -
                 overflowContainerBox.renderStyle.effectiveBorderTopWidth.computedValue -
                 overflowContainerBox.renderStyle.effectiveBorderBottomWidth.computedValue);
       } else {
@@ -586,13 +586,11 @@ class RenderBoxModel extends RenderBox
   }
 
   BoxSizeType get widthSizeType {
-    bool widthDefined = renderStyle.width != null;
-    return widthDefined ? BoxSizeType.specified : BoxSizeType.automatic;
+    return renderStyle.width.isAuto ? BoxSizeType.automatic : BoxSizeType.specified;
   }
 
   BoxSizeType get heightSizeType {
-    bool heightDefined = renderStyle.height != null;
-    return heightDefined ? BoxSizeType.specified : BoxSizeType.automatic;
+    return renderStyle.height.isAuto ? BoxSizeType.automatic: BoxSizeType.specified;
   }
 
   // Cache scroll offset of scrolling box in horizontal direction
@@ -819,10 +817,10 @@ class RenderBoxModel extends RenderBox
     double horizontalPaddingLength = padding.horizontal;
     double verticalPaddingLength = padding.vertical;
 
-    double? minWidth = renderStyle.minWidth?.computedValue;
-    double? maxWidth = renderStyle.maxWidth == CSSLengthValue.none ? null : renderStyle.maxWidth?.computedValue;
-    double? minHeight = renderStyle.minHeight?.computedValue;
-    double? maxHeight = renderStyle.maxHeight == CSSLengthValue.none ? null : renderStyle.maxHeight?.computedValue;
+    double? minWidth = renderStyle.minWidth.isAuto ? null : renderStyle.minWidth.computedValue;
+    double? maxWidth = renderStyle.maxWidth.isNone ? null : renderStyle.maxWidth.computedValue;
+    double? minHeight = renderStyle.minHeight.isAuto ? null : renderStyle.minHeight.computedValue;
+    double? maxHeight = renderStyle.maxHeight.isNone ? null : renderStyle.maxHeight.computedValue;
 
     // Content size calculated from style
     logicalContentWidth = renderStyle.getLogicalContentWidth();
@@ -1011,16 +1009,16 @@ class RenderBoxModel extends RenderBox
 
       // max and min size of intrinsc element should respect intrinsc ratio of each other
       if (intrinsicRatio != null) {
-        if (renderStyle.minWidth != null && renderStyle.minHeight == null) {
+        if (!renderStyle.minWidth.isAuto && renderStyle.minHeight.isAuto) {
           minHeight = minWidth * intrinsicRatio!;
         }
-        if (renderStyle.maxWidth != null && renderStyle.maxHeight == null) {
+        if (!renderStyle.maxWidth.isNone && renderStyle.maxHeight.isNone) {
           maxHeight = maxWidth! * intrinsicRatio!;
         }
-        if (renderStyle.minWidth == null && renderStyle.minHeight != null) {
+        if (renderStyle.minWidth.isAuto && !renderStyle.minHeight.isAuto) {
           minWidth = minHeight / intrinsicRatio!;
         }
-        if (renderStyle.maxWidth == null && renderStyle.maxHeight != null) {
+        if (renderStyle.maxWidth.isNone && !renderStyle.maxHeight.isNone) {
           maxWidth = maxHeight! / intrinsicRatio!;
         }
       }
