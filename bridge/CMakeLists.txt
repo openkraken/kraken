@@ -6,6 +6,17 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin") 
+  execute_process(
+    COMMAND bash "-c" "clang --version | xargs | awk '{print $7}' | cut -c1-5"
+    OUTPUT_VARIABLE CLANG_ARCH
+  )
+  ## Set univeral archs for Apple arm64 processors
+  if (${CLANG_ARCH} MATCHES "arm64")
+    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
+  endif()
+endif()
+
 if (${ENABLE_PROFILE})
   add_definitions(-DENABLE_PROFILE=1)
 else ()
