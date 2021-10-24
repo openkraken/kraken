@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin") 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin") 
   execute_process(
     COMMAND bash "-c" "clang --version | xargs | awk '{print $7}' | cut -c1-5"
     OUTPUT_VARIABLE CLANG_ARCH
