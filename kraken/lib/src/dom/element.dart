@@ -1147,7 +1147,7 @@ class Element extends Node
       case MARGIN_RIGHT:
       case MARGIN_BOTTOM:
       case FONT_SIZE:
-        value = CSSLength.parseLength(present, renderStyle, property);
+        value = CSSLength.resolveLength(present, renderStyle, property);
         break;
       case FLEX_DIRECTION:
         value = CSSFlexboxMixin.resolveFlexDirection(present);

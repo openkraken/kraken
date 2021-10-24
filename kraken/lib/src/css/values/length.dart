@@ -45,10 +45,12 @@ class CSSLengthValue {
   final double? value;
   final CSSLengthType type;
   CSSLengthValue(this.value, this.type, [this.renderStyle, this.propertyName, this.axisType]) {
-    if (type == CSSLengthType.EM) {
-      renderStyle!.addFontRelativeProperty(propertyName!);
-    } else if (type == CSSLengthType.REM) {
-      renderStyle!.addRootFontRelativeProperty(propertyName!);
+    if (propertyName != null) {
+      if (type == CSSLengthType.EM) {
+        renderStyle!.addFontRelativeProperty(propertyName!);
+      } else if (type == CSSLengthType.REM) {
+        renderStyle!.addRootFontRelativeProperty(propertyName!);
+      }
     }
   }
   static CSSLengthValue zero = CSSLengthValue(0, CSSLengthType.PX);
@@ -375,12 +377,20 @@ class CSSLength {
     return value != null && (value == ZERO || _lengthRegExp.hasMatch(value));
   }
 
+  static CSSLengthValue? resolveLength(String text, RenderStyle? renderStyle, String propertyName) {
+    if (text.isEmpty) {
+      // Empty string means delete value.
+      return null;
+    } else {
+      return parseLength(text, renderStyle, propertyName);
+    }
+  }
+
   static CSSLengthValue parseLength(String text, RenderStyle? renderStyle, [String? propertyName, Axis? axisType]) {
-    // Only '0' is accepted with no unit.
     double? value;
     CSSLengthType unit = CSSLengthType.PX;
-
     if (text == ZERO) {
+      // Only '0' is accepted with no unit.
       return CSSLengthValue.zero;
     } else if (text == INITIAL) {
       return CSSLengthValue.initial;
