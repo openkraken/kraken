@@ -1314,7 +1314,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     // Use parent renderStyle if renderBoxModel is scrollingContentBox cause its style is not
     // the same with its parent.
     RenderStyle parentRenderStyle = parent.isScrollingContentBox ?
-      (parent.parent as RenderBoxModel).renderStyle : renderBoxModel.renderStyle;
+      (parent.parent as RenderBoxModel).renderStyle : parent.renderStyle;
 
     bool isParentOverflowVisible = parentRenderStyle.transformedOverflowY == CSSOverflowType.visible;
     bool isParentOverflowClip = parentRenderStyle.transformedOverflowY == CSSOverflowType.clip;
@@ -1432,7 +1432,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     // Use parent renderStyle if renderBoxModel is scrollingContentBox cause its style is not
     // the same with its parent.
     RenderStyle parentRenderStyle = parent.isScrollingContentBox ?
-      (parent.parent as RenderBoxModel).renderStyle : renderBoxModel.renderStyle;
+      (parent.parent as RenderBoxModel).renderStyle : parent.renderStyle;
 
     bool isParentOverflowVisible = parentRenderStyle.transformedOverflowY == CSSOverflowType.visible;
     bool isParentOverflowClip = parentRenderStyle.transformedOverflowY == CSSOverflowType.clip;
