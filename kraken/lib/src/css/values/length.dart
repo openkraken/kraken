@@ -172,7 +172,8 @@ class CSSLengthValue {
             bool isGrandParentFlexLayout = grandParentRenderStyle?.display == CSSDisplay.flex ||
               grandParentRenderStyle?.display == CSSDisplay.inlineFlex;
             double? parentContentHeight = isPositioned || isGrandParentFlexLayout ?
-              parentRenderStyle?.contentBoxHeight : parentRenderStyle?.contentBoxLogicalHeight;
+              parentRenderStyle?.contentBoxLogicalHeight ?? parentRenderStyle?.contentBoxHeight :
+              parentRenderStyle?.contentBoxLogicalHeight;
 
             if (parentContentHeight != null) {
               if (relativeParentHeight != null) {
