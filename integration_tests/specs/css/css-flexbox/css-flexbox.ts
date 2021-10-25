@@ -60,7 +60,7 @@ describe('css-flexbox', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await snapshot(0.5);
+    await snapshot(1);
   });
   it('row-ref', async () => {
     let p;
