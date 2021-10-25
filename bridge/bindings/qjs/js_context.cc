@@ -248,7 +248,9 @@ void JSContext::reportError(JSValueConst error) {
   if (!JS_IsError(m_ctx, error)) return;
 
   JSValue messageValue = JS_GetPropertyStr(m_ctx, error, "message");
+  JSValue errorTypeValue = JS_GetPropertyStr(m_ctx, error, "name");
   const char *title = JS_ToCString(m_ctx, messageValue);
+  const char *type = JS_ToCString(m_ctx, errorTypeValue);
   const char *stack = nullptr;
   JSValue stackValue = JS_GetPropertyStr(m_ctx, error, "stack");
   if (!JS_IsUndefined(stackValue)) {
@@ -259,18 +261,20 @@ void JSContext::reportError(JSValueConst error) {
   if (stack != nullptr) {
     messageLength += strlen(stack);
     char message[messageLength];
-    sprintf(message, "%s\n%s", title, stack);
+    sprintf(message, "%s: %s\n%s", type, title, stack);
     _handler(contextId, message);
   } else {
     char message[messageLength];
-    sprintf(message, "%s", title);
+    sprintf(message, "%s: %s", type, title);
     _handler(contextId, message);
   }
 
+  JS_FreeValue(m_ctx, errorTypeValue);
   JS_FreeValue(m_ctx, messageValue);
   JS_FreeValue(m_ctx, stackValue);
   JS_FreeCString(m_ctx, title);
   JS_FreeCString(m_ctx, stack);
+  JS_FreeCString(m_ctx, type);
 }
 
 void JSContext::drainPendingPromiseJobs() {
