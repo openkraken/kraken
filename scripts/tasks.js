@@ -188,6 +188,10 @@ task('build-darwin-kraken-lib', done => {
     externCmakeArgs.push('-DENABLE_PROFILE=TRUE');
   }
 
+  if (process.env.ENABLE_ASAN === 'true') {
+    externCmakeArgs.push('-DENABLE_ASAN=true');
+  }
+
   if (builtWithDebugJsc) {
     let debugJsEngine = findDebugJSEngine(platform == 'darwin' ? 'macos' : platform);
     externCmakeArgs.push(`-DDEBUG_JSC_ENGINE=${debugJsEngine}`)
