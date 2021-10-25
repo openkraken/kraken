@@ -680,7 +680,7 @@ class RenderBoxModel extends RenderBox
   set intrinsicWidth(double? value) {
     if (_intrinsicWidth == value) return;
     _intrinsicWidth = value;
-    markNeedsLayout();
+    _markSelfAndParentNeedsLayout();
   }
 
   // Boxes which have intrinsic ratio
@@ -693,7 +693,7 @@ class RenderBoxModel extends RenderBox
   set intrinsicHeight(double? value) {
     if (_intrinsicHeight == value) return;
     _intrinsicHeight = value;
-    markNeedsLayout();
+    _markSelfAndParentNeedsLayout();
   }
 
   double? _intrinsicRatio;
@@ -705,7 +705,16 @@ class RenderBoxModel extends RenderBox
   set intrinsicRatio(double? value) {
     if (_intrinsicRatio == value) return;
     _intrinsicRatio = value;
+    _markSelfAndParentNeedsLayout();
+  }
+
+  // Sizing may affect parent size, mark parent as needsLayout in case
+  // renderBoxModel has tight constraints which will prevent parent from marking.
+  void _markSelfAndParentNeedsLayout() {
     markNeedsLayout();
+    if (parent is RenderBoxModel) {
+      (parent as RenderBoxModel).markNeedsLayout();
+    }
   }
 
   /// Whether current box is the root of the document which corresponds to HTML element in dom tree.

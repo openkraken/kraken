@@ -294,19 +294,6 @@ class ImageElement extends Element {
     } else {
       renderBoxModel!.intrinsicRatio = naturalHeight / naturalWidth;
     }
-
-    _markSelfAndParentNeedsLayout();
-  }
-
-  // Sizing may affect parent size, mark parent as needsLayout in case
-  // renderBoxModel has tight constraints which will prevent parent from marking.
-  void _markSelfAndParentNeedsLayout() {
-    if (renderBoxModel == null) return;
-    RenderBoxModel boxModel = renderBoxModel!;
-    boxModel.markNeedsLayout();
-    if (boxModel.parent is RenderBoxModel) {
-      (boxModel.parent as RenderBoxModel).markNeedsLayout();
-    }
   }
 
   void _removeStreamListener() {
