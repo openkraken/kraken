@@ -19,6 +19,8 @@ JSClassID JSContext::kHostClassClassId {0};
 JSClassID JSContext::kHostObjectClassId {0};
 JSClassID JSContext::kHostExoticObjectClassId{0};
 
+std::atomic<int32_t> runningContexts{0};
+
 #define MAX_JS_CONTEXT 1024
 bool valid_contexts[MAX_JS_CONTEXT];
 std::atomic<uint32_t> running_context_list{0};
@@ -69,6 +71,8 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
   JS_FreeAtom(m_ctx, windowKey);
   JS_SetContextOpaque(m_ctx, this);
   JS_SetHostPromiseRejectionTracker(m_runtime, promiseRejectTracker, this);
+
+  runningContexts++;
 }
 
 JSContext::~JSContext() {
@@ -157,8 +161,10 @@ JSContext::~JSContext() {
   JS_RunGC(m_runtime);
 
 #if DUMP_LEAKS
-  JS_FreeRuntime(m_runtime);
-  m_runtime = nullptr;
+  if (--runningContexts == 0) {
+    JS_FreeRuntime(m_runtime);
+    m_runtime = nullptr;
+  }
 #endif
   m_ctx = nullptr;
 }
