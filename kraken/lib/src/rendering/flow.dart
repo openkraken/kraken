@@ -1341,7 +1341,10 @@ class RenderFlowLayout extends RenderLayoutBox {
       (renderBoxModel.parent as RenderBoxModel).renderStyle : renderBoxModel.renderStyle;
     double paddingTop = renderStyle.paddingTop.computedValue;
     double borderTop = renderStyle.effectiveBorderTopWidth.computedValue;
-    double marginTop = renderStyle.marginTop.computedValue;
+
+    // Use own renderStyle of margin-top cause scrollingContentBox has margin-top of 0
+    // which is correct.
+    double marginTop = renderBoxModel.renderStyle.marginTop.computedValue;
 
     bool isOverflowVisible = renderStyle.transformedOverflowY == CSSOverflowType.visible;
     bool isOverflowClip = renderStyle.transformedOverflowY == CSSOverflowType.clip;
@@ -1457,12 +1460,14 @@ class RenderFlowLayout extends RenderLayoutBox {
     // the same with its parent.
     RenderStyle renderStyle = renderBoxModel.isScrollingContentBox ?
       (renderBoxModel.parent as RenderBoxModel).renderStyle : renderBoxModel.renderStyle;
-
     double paddingBottom = renderStyle.paddingBottom.computedValue;
     double borderBottom = renderStyle.effectiveBorderBottomWidth.computedValue;
-    double marginBottom = renderStyle.marginBottom.computedValue;
     bool isOverflowVisible = renderStyle.transformedOverflowY == CSSOverflowType.visible;
     bool isOverflowClip = renderStyle.transformedOverflowY == CSSOverflowType.clip;
+
+    // Use own renderStyle of margin-top cause scrollingContentBox has margin-bottom of 0
+    // which is correct.
+    double marginBottom = renderBoxModel.renderStyle.marginBottom.computedValue;
 
     if (renderBoxModel is RenderLayoutBox &&
       renderStyle.height.isAuto &&
