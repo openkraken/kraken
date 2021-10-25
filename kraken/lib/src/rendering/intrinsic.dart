@@ -28,7 +28,7 @@ class RenderIntrinsic extends RenderBoxModel
 
   @override
   BoxSizeType get heightSizeType {
-    bool heightDefined = renderStyle.height.isNotAuto || !renderStyle.minHeight.isNotAuto;
+    bool heightDefined = renderStyle.height.isNotAuto || renderStyle.minHeight.isNotAuto;
     return heightDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
   }
 
