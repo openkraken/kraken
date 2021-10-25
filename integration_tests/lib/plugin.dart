@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/module.dart';
@@ -12,10 +11,11 @@ import 'package:ansicolor/ansicolor.dart';
 import 'package:path/path.dart' as path;
 import 'bridge/from_native.dart';
 import 'bridge/to_native.dart';
-import 'bridge/test_input.dart';
-import 'custom/custom_element.dart';
-import 'package:kraken/gesture.dart';
-import 'local_http_server.dart';
+import 'custom/custom_object_element.dart';
+import 'package:kraken_websocket/kraken_websocket.dart';
+import 'package:kraken_animation_player/kraken_animation_player.dart';
+import 'package:kraken_video_player/kraken_video_player.dart';
+import 'package:kraken_webview/kraken_webview.dart';
 
 String? pass = (AnsiPen()..green())('[TEST PASS]');
 String? err = (AnsiPen()..red())('[TEST FAILED]');
@@ -41,27 +41,21 @@ class IntegrationTestUriParser extends UriParser {
 
 // By CLI: `KRAKEN_ENABLE_TEST=true flutter run`
 void main() async {
-  defineKrakenCustomElements();
+  KrakenWebsocket.initialize();
+  KrakenAnimationPlayer.initialize();
+  KrakenVideoPlayer.initialize();
+  KrakenWebView.initialize();
+  setObjectElementFactory(customObjectElementFactory);
 
   // FIXME: This is a workaround for testcase
   ParagraphElement.defaultStyle = {
     DISPLAY: BLOCK,
   };
 
-  // Local HTTP server.
-  var httpServer = LocalHttpServer.getInstance();
-  print('Local HTTP server started at: ${httpServer.getUri()}');
-
-  String codeInjection = '''
-    // This segment inject variables for test environment.
-    LOCAL_HTTP_SERVER = '${httpServer.getUri().toString()}';
-  ''';
-
-
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
   CSSText.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
 
-  File specs = File(path.join(testDirectory, '.specs/core.build.js'));
+  File specs = File(path.join(testDirectory, '.specs/plugin.build.js'));
 
   List<Map<String, String>> allSpecsPayload = [
     {
@@ -73,47 +67,29 @@ void main() async {
   List<Widget> widgets = [];
 
   for (int i = 0; i < KRAKEN_NUM; i ++) {
-    KrakenJavaScriptChannel javaScriptChannel = KrakenJavaScriptChannel();
-    javaScriptChannel.onMethodCall = (String method, dynamic arguments) async {
-      javaScriptChannel.invokeMethod(method, arguments);
-      return 'method: ' + method;
-    };
-
     var kraken = krakenMap[i] = Kraken(
       viewportWidth: 360,
       viewportHeight: 640,
-      bundleContent: 'console.log("Starting integration tests...")',
+      bundleContent: 'console.log("Starting Plugin tests...")',
       disableViewportWidthAssertion: true,
       disableViewportHeightAssertion: true,
-      javaScriptChannel: javaScriptChannel,
-      gestureListener: GestureListener(
-        onDrag: (GestureEvent gestureEvent) {
-          if (gestureEvent.state == EVENT_STATE_START) {
-            var event = CustomEvent('nativegesture', CustomEventInit(detail: 'nativegesture'));
-            krakenMap[i]!.controller!.view.document!.documentElement.dispatchEvent(event);
-          }
-        },
-      ),
       uriParser: IntegrationTestUriParser(),
     );
     widgets.add(kraken);
   }
 
   runApp(MaterialApp(
-    title: 'Kraken Integration Tests',
+    title: 'Kraken Plugin Tests',
     debugShowCheckedModeBanner: false,
     home: Scaffold(
       appBar: AppBar(
-        title: Text('Kraken Integration Tests')
+          title: Text('Kraken Plugin Tests')
       ),
       body: Wrap(
         children: widgets,
       ),
     ),
   ));
-
-  testTextInput = TestTextInput();
-  testTextInput.register();
 
   WidgetsBinding.instance!.addPostFrameCallback((_) async {
     registerDartTestMethodsToCpp();
@@ -132,17 +108,12 @@ void main() async {
       // Preload load test cases
       String filename = payload['filename']!;
       String code = payload['code']!;
-      evaluateTestScripts(contextId, codeInjection + code, url: filename);
+      evaluateTestScripts(contextId, code, url: filename);
 
       testResults.add(executeTest(contextId));
     }
 
     List<String> results = await Future.wait(testResults);
-
-    // Manual dispose context for memory leak check.
-    krakenMap.forEach((key, kraken) {
-      disposeContext(kraken.controller!.view.contextId);
-    });
 
     for (int i = 0; i < results.length; i ++) {
       String status = results[i];

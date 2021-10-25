@@ -8,7 +8,7 @@ function startIntegrationTest() {
   const shouldSkipBuild = /skip\-build/.test(process.argv);
   if (!shouldSkipBuild) {
     console.log('Building integration tests macOS application from "lib/main.dart"...');
-    spawnSync('flutter', ['build', 'macos', '--debug'], {
+    spawnSync('flutter', ['build', 'macos', '--debug', '--target=lib/plugin.dart'], {
       stdio: 'inherit'
     });
   }
