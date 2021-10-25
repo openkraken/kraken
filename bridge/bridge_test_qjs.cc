@@ -245,11 +245,9 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
     return;
   }
 
-  auto done = [](QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic,
-                 JSValue *func_data) -> JSValue {
+  auto done = [](QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic) -> JSValue {
     JSValue &statusValue = argv[0];
-    JSValue proxyObject = func_data[0];
-    auto *callbackContext = static_cast<ExecuteCallbackContext *>(JS_GetOpaque(proxyObject, 1));
+    auto *callbackContext = reinterpret_cast<ExecuteCallbackContext *>(magic);
 
     if (!JS_IsString(statusValue)) {
       return JS_ThrowTypeError(ctx, "failed to execute 'done': parameter 1 (status) is not a string");
@@ -258,16 +256,11 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
     NativeString *status = kraken::binding::qjs::jsValueToNativeString(ctx, statusValue);
     callbackContext->executeCallback(callbackContext->context->getContextId(), status);
     status->free();
-    JS_FreeValue(ctx, proxyObject);
+    delete callbackContext;
     return JS_NULL;
   };
   auto *callbackContext = new ExecuteCallbackContext(context.get(), executeCallback);
-  JSValue proxyObject = JS_NewObject(context->ctx());
-  JS_SetOpaque(proxyObject, callbackContext);
-  JSValue callbackData[]{
-    proxyObject
-  };
-  JSValue callback = JS_NewCFunctionData(context->ctx(), done, 0, 0, 1, callbackData);
+  JSValue callback = JS_NewCFunctionMagic(context->ctx(), done, "f", 1, JSCFunctionEnum::JS_CFUNC_generic_magic, reinterpret_cast<int64_t>(callbackContext));
 
   JSValue arguments[] = {callback};
   JSValue result = JS_Call(context->ctx(), executeTestCallback, executeTestCallback, 1, arguments);
