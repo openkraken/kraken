@@ -1,14 +1,18 @@
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 
-import 'dart:math';
 import 'dart:core';
+import 'dart:math';
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/animation.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 // https://drafts.csswg.org/web-animations/#enumdef-animationplaystate
 enum AnimationPlayState { idle, running, paused, finished }

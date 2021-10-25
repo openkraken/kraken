@@ -3,23 +3,23 @@
  * Author: Kraken Team.
  */
 
+import 'dart:async';
+import 'dart:ffi';
 import 'dart:typed_data';
 import 'dart:ui';
-import 'dart:ffi';
-import 'dart:async';
 
+import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/bridge.dart';
+import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/css.dart';
 import 'package:meta/meta.dart';
-import 'package:ffi/ffi.dart';
 
 import 'element_native_methods.dart';
 

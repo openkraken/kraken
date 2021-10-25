@@ -2,11 +2,11 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'dart:ffi';
+
+import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
-
-import 'dart:ffi';
-import 'package:kraken/bridge.dart';
 
 const String H1 = 'H1';
 const String H2 = 'H2';

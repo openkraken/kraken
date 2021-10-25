@@ -3,12 +3,12 @@
  * Author: Kraken Team.
  */
 
-import 'package:kraken/rendering.dart';
-import 'package:kraken/gesture.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/scheduler.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
+import 'package:kraken/dom.dart';
+import 'package:kraken/gesture.dart';
+import 'package:kraken/rendering.dart';
+import 'package:kraken/scheduler.dart';
 
 class GestureManager {
 

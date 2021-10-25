@@ -1,5 +1,12 @@
-import 'dart:convert';
+/*
+ * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
+
 import 'dart:collection';
+import 'dart:convert';
+
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';

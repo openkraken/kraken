@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 import 'dart:async';
 import 'dart:math' show max;
 import 'dart:ui' as ui;
