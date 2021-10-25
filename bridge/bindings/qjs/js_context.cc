@@ -257,13 +257,14 @@ void JSContext::reportError(JSValueConst error) {
     stack = JS_ToCString(m_ctx, stackValue);
   }
 
-  uint32_t messageLength = strlen(title) + 2;
+  uint32_t messageLength = strlen(type) + strlen(title);
   if (stack != nullptr) {
-    messageLength += strlen(stack);
+    messageLength += 4 + strlen(stack);
     char message[messageLength];
     sprintf(message, "%s: %s\n%s", type, title, stack);
     _handler(contextId, message);
   } else {
+    messageLength += 3;
     char message[messageLength];
     sprintf(message, "%s: %s", type, title);
     _handler(contextId, message);
