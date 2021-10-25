@@ -103,9 +103,13 @@ mixin CSSPositionMixin on RenderStyleBase {
     // to bubble up in the RenderObject tree.
     if (renderBoxModel!.parentData is RenderLayoutParentData) {
       RenderStyle renderStyle = renderBoxModel!.renderStyle;
-      if (renderStyle.position != DEFAULT_POSITION_TYPE) {
+      RenderStyle? parentRenderStyle = renderStyle.parent;
+      // The z-index CSS property sets the z-order of a positioned element and its descendants or flex items.
+      if (renderStyle.position != DEFAULT_POSITION_TYPE ||
+        parentRenderStyle?.effectiveDisplay == CSSDisplay.flex ||
+        parentRenderStyle?.effectiveDisplay == CSSDisplay.inlineFlex) {
         RenderBoxModel parent = renderBoxModel!.parent as RenderBoxModel;
-        parent.markNeedsLayout();
+        parent.markNeedsPaint();
       }
     }
   }
