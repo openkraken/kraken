@@ -235,6 +235,8 @@ class Kraken extends StatefulWidget {
       defineElement(tagName, (id, nativePtr, elementManager) {
         return _WidgetCustomElement(id, nativePtr.cast<NativeEventTarget>(), elementManager, tagName, creator as WidgetCreator);
       });
+    } else {
+      throw FlutterError('Unknown customElement creator of $T, only `ElementCreator` or `WidgetCreator` accepted.');
     }
   }
 
