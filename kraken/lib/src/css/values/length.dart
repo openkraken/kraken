@@ -92,10 +92,9 @@ class CSSLengthValue {
         if (renderStyle!.parent == null) {
           _computedValue = value! * 16;
         } else {
-          _computedValue = value! * renderStyle!.parent!.fontSize.computedValue;
+          // Font rem is calculated against the root element's font size.
+          _computedValue = value! * renderStyle!.rootFontSize;
         }
-        // Font rem is calculated against the root element's font size.
-        _computedValue = value! * renderStyle!.rootFontSize;
         break;
       case CSSLengthType.VH:
         _computedValue = value! * renderStyle!.viewportSize.height;
