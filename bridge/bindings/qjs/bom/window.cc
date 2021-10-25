@@ -154,6 +154,12 @@ PROP_SETTER(Window, onerror)(QjsContext *ctx, JSValue this_val, int argc, JSValu
 }
 
 WindowInstance::WindowInstance(Window *window) : EventTargetInstance(window, Window::kWindowClassId, "window", WINDOW_TARGET_ID) {
+  // https://developer.mozilla.org/zh-CN/docs/Web/API/Window/self
+  // window.self should be window in kraken.
+  JSAtom self = JS_NewAtom(m_ctx, "self");
+  JS_DupValue(m_ctx, instanceObject);
+  JS_SetProperty(m_ctx, instanceObject, self, instanceObject);
+
   if (getDartMethod()->initWindow != nullptr) {
     getDartMethod()->initWindow(context()->getContextId(), nativeEventTarget);
   }
