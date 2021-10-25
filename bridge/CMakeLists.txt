@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10.0)
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14)
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11)
 project(KrakenBridge)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -325,8 +325,6 @@ elseif ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/dom/elements/.gen/object_element.h
     bindings/qjs/dom/elements/.gen/script_element.cc
     bindings/qjs/dom/elements/.gen/script_element.h
-    bindings/qjs/dom/elements/.gen/svg_element.h
-    bindings/qjs/dom/elements/.gen/svg_element.cc
     bindings/qjs/dom/elements/template_element.cc
     bindings/qjs/dom/elements/template_element.h
     bindings/qjs/dom/events/.gen/close_event.h
