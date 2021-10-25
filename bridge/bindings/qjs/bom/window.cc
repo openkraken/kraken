@@ -157,7 +157,7 @@ PROP_SETTER(Window, self)(QjsContext *ctx, JSValue this_val, int argc, JSValue *
   return JS_NULL;
 }
 PROP_GETTER(Window, self)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  return JS_DupValue(ctx, JS_GetGlobalObject(ctx));
+  return JS_GetGlobalObject(ctx);
 }
 
 WindowInstance::WindowInstance(Window *window) : EventTargetInstance(window, Window::kWindowClassId, "window", WINDOW_TARGET_ID) {
