@@ -231,28 +231,9 @@ class ImageElement extends Element {
     dispatchEvent(Event(EVENT_ERROR));
   }
 
-  // Delay image size setting to next frame to make sure image has been layouted
-  // to wait for percentage size to be calculated correctly in the case of image has been cached
-  bool _hasImageLayoutCallbackPending = false;
-
-  void _handleImageResizeAfterLayout() {
-    if (_hasImageLayoutCallbackPending) return;
-    _hasImageLayoutCallbackPending = true;
-    SchedulerBinding.instance!.scheduleFrame();
-    SchedulerBinding.instance!.addPostFrameCallback((_) {
-      _hasImageLayoutCallbackPending = false;
-      _resize();
-    });
-  }
-
   void _resize() {
     if (!isRendererAttached) {
       return;
-    }
-
-    // Waiting for size computed after layout stage
-    if (!renderBoxModel!.hasSize) {
-      return _handleImageResizeAfterLayout();
     }
 
     double? width = renderStyle.width.isAuto ? _propertyWidth : renderStyle.width.computedValue;
