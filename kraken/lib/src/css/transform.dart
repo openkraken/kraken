@@ -11,8 +11,6 @@ import 'package:kraken/css.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 // CSS Transforms: https://drafts.csswg.org/css-transforms/
-final RegExp _spaceRegExp = RegExp(r'\s+(?![^(]*\))');
-
 Color? _parseColor(String color, RenderStyle renderStyle, String propertyName) {
   return CSSColor.resolveColor(color, renderStyle, propertyName);
 }
