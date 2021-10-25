@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
@@ -5,16 +10,16 @@ import 'dart:ui';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/painting.dart';
-import 'package:kraken/dom.dart';
-
-import 'package:kraken/launcher.dart';
+import 'package:flutter/services.dart';
 import 'package:kraken/bridge.dart';
+import 'package:kraken/dom.dart';
+import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/src/module/performance_timing.dart';
-import 'platform.dart';
+
 import 'native_types.dart';
+import 'platform.dart';
 
 // An native struct can be directly convert to javaScript String without any conversion cost.
 class NativeString extends Struct {

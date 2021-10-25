@@ -1,9 +1,9 @@
 import 'dart:convert';
+
 import 'package:kraken/bridge.dart' as bridge;
+import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/src/module/location.dart';
 
 abstract class BaseModule {
   String get name;

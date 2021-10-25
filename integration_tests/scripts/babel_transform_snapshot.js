@@ -14,7 +14,7 @@ module.exports = declare((api, opts) => {
         const callee = path.get('callee');
         if (callee.node.name == 'snapshot') {
           const args = callee.container.arguments;
-          const snapshotFilepath = 
+          const snapshotFilepath =
           filepath.relative(
             opts.workspacePath,
             filepath.join(

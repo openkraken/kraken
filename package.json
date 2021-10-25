@@ -15,6 +15,7 @@
     "benchmark": "npm install && ENABLE_PROFILE=true KRAKEN_BUILD=Release node scripts/run_benchmark.js",
     "start": "cd kraken/example && flutter run",
     "test": "node scripts/run_test.js",
+    "plugin_test": "node scripts/run_plugin_test.js",
     "lint": "cd kraken && flutter pub get && flutter analyze",
     "format": "cd kraken && flutter format . --line-length=120",
     "ci": "npm install && npm run lint",

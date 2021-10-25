@@ -4,6 +4,7 @@
  */
 import 'dart:typed_data';
 import 'dart:ui';
+
 import 'package:meta/meta.dart';
 
 enum ImageSmoothingQuality { low, medium, high }

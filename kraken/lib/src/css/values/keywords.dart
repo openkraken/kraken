@@ -1,7 +1,9 @@
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
 // CSS Values keywords
-
-
-
 const String INITIAL = 'initial';
 const String NORMAL = 'normal';
 const String NONE = 'none';

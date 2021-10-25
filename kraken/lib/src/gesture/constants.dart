@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 import 'package:flutter/gestures.dart';
 
 const String DIRECTION_UP = 'up';

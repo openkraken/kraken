@@ -1,12 +1,11 @@
-
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+
 import 'package:flutter/rendering.dart';
-import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
 
 // CSS Flexible Box Layout: https://drafts.csswg.org/css-flexbox-1/
 

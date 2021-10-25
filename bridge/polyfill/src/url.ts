@@ -128,6 +128,7 @@ export class URL {
     var state = stateOverride || 'scheme start',
       cursor = 0,
       buffer = '',
+      rawQuery = '',
       seenAt = false,
       seenBracket = false,
       errors = [];
@@ -229,7 +230,7 @@ export class URL {
             this._host = base._host;
             this._port = base._port;
             this._path = base._path.slice();
-            this._query = base._query;
+            rawQuery = base._query;
             this._username = base._username;
             this._password = base._password;
             break loop;
@@ -241,7 +242,7 @@ export class URL {
             this._host = base._host;
             this._port = base._port;
             this._path = base._path.slice();
-            this._query = '?';
+            rawQuery = '?';
             this._username = base._username;
             this._password = base._password;
             state = 'query';
@@ -249,7 +250,7 @@ export class URL {
             this._host = base._host;
             this._port = base._port;
             this._path = base._path.slice();
-            this._query = base._query;
+            rawQuery = base._query;
             this._fragment = '#';
             this._username = base._username;
             this._password = base._password;
@@ -329,8 +330,7 @@ export class URL {
               buffer += '%40';
             }
             seenAt = true;
-            for (var i = 0; i < buffer.length; i++) {
-              var cp = buffer[i];
+            for (let cp of buffer) {
               if ('\t' == cp || '\n' == cp || '\r' == cp) {
                 err('Invalid whitespace in authority.');
                 continue;
@@ -459,7 +459,7 @@ export class URL {
             }
             buffer = '';
             if ('?' == c) {
-              this._query = '?';
+              rawQuery = '?';
               state = 'query';
             } else if ('#' == c) {
               this._fragment = '#';
@@ -475,7 +475,7 @@ export class URL {
             this._fragment = '#';
             state = 'fragment';
           } else if (EOF != c && '\t' != c && '\n' != c && '\r' != c) {
-            this._query += percentEscapeQuery(c);
+            rawQuery += c;
           }
           break;
 
@@ -487,6 +487,11 @@ export class URL {
       }
 
       cursor++;
+    }
+    
+    // Handle unicode in query.
+    for (let char of rawQuery) {
+      this._query += percentEscapeQuery(char);
     }
   }
 

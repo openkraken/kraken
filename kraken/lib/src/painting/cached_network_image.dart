@@ -1,12 +1,17 @@
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
-import 'dart:async';
-import 'package:kraken/foundation.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:kraken/foundation.dart';
 
 class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
   const CachedNetworkImage(this.url, {this.scale = 1.0, this.headers, this.contextId});

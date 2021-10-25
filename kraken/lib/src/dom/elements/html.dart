@@ -4,6 +4,7 @@
  */
 
 import 'dart:ffi';
+
 import 'package:flutter/foundation.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';

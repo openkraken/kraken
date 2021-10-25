@@ -4,8 +4,9 @@
  */
 
 import 'dart:ui' as ui show Image;
-import 'package:flutter/rendering.dart';
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
