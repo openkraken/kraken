@@ -1,4 +1,4 @@
-xdescribe('windowisglobal', () => {
+describe('windowisglobal', () => {
   it('window equal to globalThis', () => {
     expect(window).toBe(globalThis as any);
   });
