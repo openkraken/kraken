@@ -1,4 +1,4 @@
-xdescribe('windowisglobal', () => {
+describe('windowisglobal', () => {
   it('window equal to globalThis', () => {
     expect(window).toBe(globalThis as any);
   });
@@ -35,5 +35,9 @@ xdescribe('windowisglobal', () => {
 
   it('onload should in window', () => {
     expect('onload' in window).toBe(true);
+  });
+
+  it('window.self should be self', () => {
+    expect(window.self).toBe(window);
   });
 });

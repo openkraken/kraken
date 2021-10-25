@@ -1,6 +1,7 @@
 import 'dart:async';
-import 'package:flutter/services.dart';
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:kraken/kraken.dart';
 
 import 'module_manager.dart';

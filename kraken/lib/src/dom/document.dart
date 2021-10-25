@@ -1,7 +1,13 @@
-import 'package:flutter/rendering.dart';
-import 'package:kraken/dom.dart';
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
 import 'dart:ffi';
+
+import 'package:flutter/rendering.dart';
 import 'package:kraken/bridge.dart';
+import 'package:kraken/dom.dart';
 
 class Document extends Node {
   final HTMLElement documentElement;

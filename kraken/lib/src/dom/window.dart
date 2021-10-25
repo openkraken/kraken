@@ -5,10 +5,11 @@
 
 import 'dart:ffi';
 import 'dart:ui';
+
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/module.dart';
 import 'package:kraken/launcher.dart';
+import 'package:kraken/module.dart';
 
 const String WINDOW = 'WINDOW';
 

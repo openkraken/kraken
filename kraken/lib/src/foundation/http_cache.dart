@@ -7,8 +7,8 @@ import 'dart:collection';
 import 'dart:io';
 
 import 'package:async/async.dart';
-import 'package:path/path.dart' as path;
 import 'package:kraken/foundation.dart';
+import 'package:path/path.dart' as path;
 
 import 'http_cache_object.dart';
 

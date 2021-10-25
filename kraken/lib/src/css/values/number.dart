@@ -1,5 +1,9 @@
-// CSS Values and Units: https://drafts.csswg.org/css-values-3/#numbers
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
+// CSS Values and Units: https://drafts.csswg.org/css-values-3/#numbers
 final RegExp _numberRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?$');
 
 class CSSNumber {

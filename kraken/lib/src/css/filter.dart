@@ -1,9 +1,8 @@
-
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';

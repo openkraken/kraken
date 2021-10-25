@@ -26,7 +26,6 @@
 #include "bindings/qjs/dom/elements/.gen/input_element.h"
 #include "bindings/qjs/dom/elements/.gen/object_element.h"
 #include "bindings/qjs/dom/elements/.gen/script_element.h"
-#include "bindings/qjs/dom/elements/.gen/svg_element.h"
 #include "bindings/qjs/dom/elements/template_element.h"
 #include "bindings/qjs/dom/elements/image_element.h"
 #include "bindings/qjs/dom/event.h"
@@ -89,7 +88,6 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindObjectElement(m_context);
   bindScriptElement(m_context);
   bindTemplateElement(m_context);
-  bindSVGElement(m_context);
   bindCSSStyleDeclaration(m_context);
   bindCloseEvent(m_context);
   bindGestureEvent(m_context);
