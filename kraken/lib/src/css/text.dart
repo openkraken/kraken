@@ -474,7 +474,8 @@ class CSSText {
   }
 
   static bool isValidLineHeightValue(String value) {
-    return CSSLength.isLength(value) || value == 'normal' || double.tryParse(value) != null;
+    return CSSLength.isLength(value) || CSSPercentage.isPercentage(value) ||
+      value == 'normal' || double.tryParse(value) != null;
   }
 
   static bool isValidTextTextDecorationLineValue(String value) {
@@ -488,7 +489,7 @@ class CSSText {
   static CSSLengthValue DEFAULT_LINE_HEIGHT = CSSLengthValue.normal;
   static CSSLengthValue? resolveLineHeight(String value, RenderStyle renderStyle, String propertyName) {
     if (value.isNotEmpty) {
-      if (CSSLength.isLength(value)) {
+      if (CSSLength.isLength(value) || CSSPercentage.isPercentage(value)) {
         return CSSLength.parseLength(value, renderStyle, propertyName);
       } else if (value == NORMAL) {
         return CSSLengthValue.normal;
