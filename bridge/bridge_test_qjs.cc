@@ -219,6 +219,9 @@ static JSValue triggerGlobalError(QjsContext *ctx, JSValueConst this_val, int ar
 
 JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->getContext()) {
   bridge->owner = this;
+  bridge->disposeCallback = [](JSBridge *bridge) {
+    delete static_cast<JSBridgeTest *>(bridge->owner);
+  };
   QJS_GLOBAL_BINDING_FUNCTION(context, executeTest, "__kraken_execute_test__", 1);
   QJS_GLOBAL_BINDING_FUNCTION(context, matchImageSnapshot, "__kraken_match_image_snapshot__", 3);
   QJS_GLOBAL_BINDING_FUNCTION(context, environment, "__kraken_environment__", 0);
@@ -248,9 +251,11 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
     return;
   }
 
-  auto done = [](QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic) -> JSValue {
+  auto done = [](QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic,
+                 JSValue *func_data) -> JSValue {
     JSValue &statusValue = argv[0];
-    auto *callbackContext = reinterpret_cast<ExecuteCallbackContext *>(magic);
+    JSValue proxyObject = func_data[0];
+    auto *callbackContext = static_cast<ExecuteCallbackContext *>(JS_GetOpaque(proxyObject, 1));
 
     if (!JS_IsString(statusValue)) {
       return JS_ThrowTypeError(ctx, "failed to execute 'done': parameter 1 (status) is not a string");
@@ -259,11 +264,15 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
     NativeString *status = kraken::binding::qjs::jsValueToNativeString(ctx, statusValue);
     callbackContext->executeCallback(callbackContext->context->getContextId(), status);
     status->free();
-    delete callbackContext;
     return JS_NULL;
   };
   auto *callbackContext = new ExecuteCallbackContext(context.get(), executeCallback);
-  JSValue callback = JS_NewCFunctionMagic(context->ctx(), done, "f", 1, JSCFunctionEnum::JS_CFUNC_generic_magic, reinterpret_cast<int64_t>(callbackContext));
+  executeTestProxyObject = JS_NewObject(context->ctx());
+  JS_SetOpaque(executeTestProxyObject, callbackContext);
+  JSValue callbackData[]{
+    executeTestProxyObject
+  };
+  JSValue callback = JS_NewCFunctionData(context->ctx(), done, 0, 0, 1, callbackData);
 
   JSValue arguments[] = {callback};
   JSValue result = JS_Call(context->ctx(), executeTestCallback, executeTestCallback, 1, arguments);
