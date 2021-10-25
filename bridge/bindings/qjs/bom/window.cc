@@ -153,6 +153,13 @@ PROP_SETTER(Window, onerror)(QjsContext *ctx, JSValue this_val, int argc, JSValu
   return JS_NULL;
 }
 
+PROP_SETTER(Window, self)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JS_NULL;
+}
+PROP_GETTER(Window, self)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JS_GetGlobalObject(ctx);
+}
+
 WindowInstance::WindowInstance(Window *window) : EventTargetInstance(window, Window::kWindowClassId, "window", WINDOW_TARGET_ID) {
   if (getDartMethod()->initWindow != nullptr) {
     getDartMethod()->initWindow(context()->getContextId(), nativeEventTarget);
