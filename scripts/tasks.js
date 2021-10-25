@@ -188,6 +188,10 @@ task('build-darwin-kraken-lib', done => {
     externCmakeArgs.push('-DENABLE_PROFILE=TRUE');
   }
 
+  if (process.env.ENABLE_ASAN === 'true') {
+    externCmakeArgs.push('-DENABLE_ASAN=true');
+  }
+
   if (builtWithDebugJsc) {
     let debugJsEngine = findDebugJSEngine(platform == 'darwin' ? 'macos' : platform);
     externCmakeArgs.push(`-DDEBUG_JSC_ENGINE=${debugJsEngine}`)
@@ -265,6 +269,47 @@ function matchError(errmsg) {
 
 task('integration-test', (done) => {
   const childProcess = spawn('npm', ['run', 'test'], {
+    stdio: 'pipe',
+    cwd: paths.tests
+  });
+
+  let stdout = '';
+
+  childProcess.stderr.pipe(process.stderr);
+  childProcess.stdout.pipe(process.stdout);
+
+  childProcess.stderr.on('data', (data) => {
+    stdout += data + '';
+  });
+
+  childProcess.stdout.on('data', (data) => {
+    stdout += data + '';
+  });
+
+  childProcess.on('error', (error) => {
+    done(error);
+  });
+
+  childProcess.on('close', (code) => {
+    let dartErrorMatch = matchError(stdout);
+    if (dartErrorMatch) {
+      let error = new Error('UnExpected Flutter Assert Failed.');
+      done(error);
+      return;
+    }
+
+    if (code === 0) {
+      done();
+    } else {
+      // TODO: collect error message from stdout.
+      const err = new Error('Some error occurred, please check log.');
+      done(err);
+    }
+  });
+});
+
+task('plugin-test', (done) => {
+  const childProcess = spawn('npm', ['run', 'plugin_test'], {
     stdio: 'pipe',
     cwd: paths.tests
   });

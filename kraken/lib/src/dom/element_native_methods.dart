@@ -1,9 +1,15 @@
-import 'package:flutter/foundation.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/bridge.dart';
-import 'package:kraken/rendering.dart';
-import 'package:kraken/module.dart';
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
 import 'dart:ffi';
+
+import 'package:flutter/foundation.dart';
+import 'package:kraken/bridge.dart';
+import 'package:kraken/dom.dart';
+import 'package:kraken/module.dart';
+import 'package:kraken/rendering.dart';
 
 // https://www.w3.org/TR/cssom-view-1/
 enum ViewModuleProperty {

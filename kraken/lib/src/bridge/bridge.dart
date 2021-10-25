@@ -6,11 +6,11 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:kraken/module.dart';
 
 import 'from_native.dart';
 import 'to_native.dart';
-import 'package:flutter/scheduler.dart';
 
 /// the Kraken JS Bridge Size
 int kKrakenJSBridgePoolSize = 8;

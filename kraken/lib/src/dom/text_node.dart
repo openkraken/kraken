@@ -4,11 +4,12 @@
  */
 
 import 'dart:ffi';
+
 import 'package:flutter/rendering.dart';
-import 'package:kraken/dom.dart';
 import 'package:kraken/bridge.dart';
-import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/dom.dart';
+import 'package:kraken/rendering.dart';
 
 final RegExp _whiteSpaceReg = RegExp(r'\s+');
 const String WHITE_SPACE_CHAR = ' ';

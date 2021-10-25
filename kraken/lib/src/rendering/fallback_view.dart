@@ -4,6 +4,7 @@
  */
 
 import 'dart:ui';
+
 import 'package:flutter/rendering.dart' hide Gradient;
 
 const Color _black = Color(0xBF000000);

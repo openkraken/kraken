@@ -1,4 +1,10 @@
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
 import 'package:connectivity/connectivity.dart';
+
 import 'module_manager.dart';
 
 Map _getResult(ConnectivityResult connectivityResult) {

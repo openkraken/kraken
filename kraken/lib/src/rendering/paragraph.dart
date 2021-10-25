@@ -17,10 +17,9 @@ import 'dart:ui' as ui
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/rendering.dart';
-
 import 'package:vector_math/vector_math_64.dart';
 
 const String _kEllipsis = '\u2026';

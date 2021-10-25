@@ -1,9 +1,8 @@
-
-
 /*
  * Copyright (C) 2020-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+
 
 // CSS Properties
 const String DISPLAY = 'display';

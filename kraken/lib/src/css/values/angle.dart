@@ -1,9 +1,8 @@
-
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+
 import 'dart:math' as math;
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#angles
