@@ -251,7 +251,7 @@ class ImageElement extends Element {
     }
 
     // Waiting for size computed after layout stage
-    if (renderStyle.width.isAuto || renderStyle.height.isAuto) {
+    if (!renderBoxModel!.hasSize) {
       return _handleImageResizeAfterLayout();
     }
 
