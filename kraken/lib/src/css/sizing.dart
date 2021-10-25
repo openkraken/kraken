@@ -17,15 +17,15 @@ import 'package:kraken/css.dart';
 mixin CSSSizingMixin on RenderStyleBase {
 
   // https://drafts.csswg.org/css-sizing-3/#preferred-size-properties
-  // Name:	width, height
-  // Value:	auto | <length-percentage> | min-content | max-content | fit-content(<length-percentage>)
-  // Initial:	auto
-  // Applies to:	all elements except non-replaced inlines
-  // Inherited:	no
-  // Percentages:	relative to width/height of containing block
-  // Computed value:	as specified, with <length-percentage> values computed
-  // Canonical order:	per grammar
-  // Animation type:	by computed value type, recursing into fit-content()
+  // Name: width, height
+  // Value: auto | <length-percentage> | min-content | max-content | fit-content(<length-percentage>)
+  // Initial: auto
+  // Applies to: all elements except non-replaced inlines
+  // Inherited: no
+  // Percentages: relative to width/height of containing block
+  // Computed value: as specified, with <length-percentage> values computed
+  // Canonical order: per grammar
+  // Animation type: by computed value type, recursing into fit-content()
   CSSLengthValue? _width;
   CSSLengthValue get width {
     return _width ?? CSSLengthValue.auto;
@@ -53,15 +53,15 @@ mixin CSSSizingMixin on RenderStyleBase {
   }
 
   // https://drafts.csswg.org/css-sizing-3/#min-size-properties
-  // Name:	min-width, min-height
-  // Value:	auto | <length-percentage> | min-content | max-content | fit-content(<length-percentage>)
-  // Initial:	auto
-  // Applies to:	all elements that accept width or height
-  // Inherited:	no
-  // Percentages:	relative to width/height of containing block
-  // Computed value:	as specified, with <length-percentage> values computed
-  // Canonical order:	per grammar
-  // Animatable:	by computed value, recursing into fit-content()
+  // Name: min-width, min-height
+  // Value: auto | <length-percentage> | min-content | max-content | fit-content(<length-percentage>)
+  // Initial: auto
+  // Applies to: all elements that accept width or height
+  // Inherited: no
+  // Percentages: relative to width/height of containing block
+  // Computed value: as specified, with <length-percentage> values computed
+  // Canonical order: per grammar
+  // Animatable: by computed value, recursing into fit-content()
   CSSLengthValue? _minWidth;
   CSSLengthValue get minWidth {
     return _minWidth ?? CSSLengthValue.auto;
@@ -89,15 +89,15 @@ mixin CSSSizingMixin on RenderStyleBase {
   }
 
   // https://drafts.csswg.org/css-sizing-3/#max-size-properties
-  // Name:	max-width, max-height
-  // Value:	none | <length-percentage> | min-content | max-content | fit-content(<length-percentage>)
-  // Initial:	none
-  // Applies to:	all elements that accept width or height
-  // Inherited:	no
-  // Percentages:	relative to width/height of containing block
-  // Computed value:	as specified, with <length-percentage> values computed
-  // Canonical order:	per grammar
-  // Animatable:	by computed value, recursing into fit-content()
+  // Name: max-width, max-height
+  // Value: none | <length-percentage> | min-content | max-content | fit-content(<length-percentage>)
+  // Initial: none
+  // Applies to: all elements that accept width or height
+  // Inherited: no
+  // Percentages: relative to width/height of containing block
+  // Computed value: as specified, with <length-percentage> values computed
+  // Canonical order: per grammar
+  // Animatable: by computed value, recursing into fit-content()
   CSSLengthValue? _maxWidth;
   CSSLengthValue get maxWidth {
     return _maxWidth ?? CSSLengthValue.none;

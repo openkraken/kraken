@@ -462,44 +462,44 @@ class RenderLayoutBox extends RenderBoxModel
     }
     double maxScrollableX = scrollableSize.width;
     double maxScrollableY = scrollableSize.height;
-    if (childRenderStyle.left != null && !childRenderStyle.left!.isAuto) {
+    if (childRenderStyle.left.isNotAuto) {
       maxScrollableX = math.max(maxScrollableX,
-          childRenderStyle.left!.computedValue + childScrollableSize!.width);
+          childRenderStyle.left.computedValue + childScrollableSize!.width);
     }
 
-    if (childRenderStyle.right != null && !childRenderStyle.right!.isAuto) {
+    if (childRenderStyle.right.isNotAuto) {
       if (isScrollingContentBox &&
           (parent as RenderBoxModel).widthSizeType == BoxSizeType.specified) {
         RenderBoxModel overflowContainerBox = parent as RenderBoxModel;
         maxScrollableX = math.max(
             maxScrollableX,
-            -childRenderStyle.right!.computedValue +
+            -childRenderStyle.right.computedValue +
                 overflowContainerBox.renderStyle.width.computedValue -
                 overflowContainerBox.renderStyle.effectiveBorderLeftWidth.computedValue -
                 overflowContainerBox.renderStyle.effectiveBorderRightWidth.computedValue);
       } else {
         maxScrollableX = math.max(maxScrollableX,
-            -childRenderStyle.right!.computedValue + _contentSize!.width);
+            -childRenderStyle.right.computedValue + _contentSize!.width);
       }
     }
 
-    if (childRenderStyle.top != null && !childRenderStyle.top!.isAuto) {
+    if (childRenderStyle.top.isNotAuto) {
       maxScrollableY = math.max(maxScrollableY,
-          childRenderStyle.top!.computedValue + childScrollableSize!.height);
+          childRenderStyle.top.computedValue + childScrollableSize!.height);
     }
-    if (childRenderStyle.bottom != null && !childRenderStyle.bottom!.isAuto) {
+    if (childRenderStyle.bottom.isNotAuto) {
       if (isScrollingContentBox &&
           (parent as RenderBoxModel).heightSizeType == BoxSizeType.specified) {
         RenderBoxModel overflowContainerBox = parent as RenderBoxModel;
         maxScrollableY = math.max(
             maxScrollableY,
-            -childRenderStyle.bottom!.computedValue +
+            -childRenderStyle.bottom.computedValue +
                 overflowContainerBox.renderStyle.height.computedValue -
                 overflowContainerBox.renderStyle.effectiveBorderTopWidth.computedValue -
                 overflowContainerBox.renderStyle.effectiveBorderBottomWidth.computedValue);
       } else {
         maxScrollableY = math.max(maxScrollableY,
-            -childRenderStyle.bottom!.computedValue + _contentSize!.height);
+            -childRenderStyle.bottom.computedValue + _contentSize!.height);
       }
     }
     scrollableSize = Size(maxScrollableX, maxScrollableY);

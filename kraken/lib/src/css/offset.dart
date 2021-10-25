@@ -17,13 +17,22 @@ mixin CSSPositionMixin on RenderStyleBase {
 
   static const CSSPositionType DEFAULT_POSITION_TYPE = CSSPositionType.static;
 
+  // https://drafts.csswg.org/css-position/#insets
+  // Name: top, right, bottom, left
+  // Value: auto | <length-percentage>
+  // Initial: auto
+  // Applies to: positioned elements
+  // Inherited: no
+  // Percentages: refer to size of containing block; see prose
+  // Computed value: the keyword auto or a computed <length-percentage> value
+  // Canonical order: per grammar
+  // Animation type: by computed value type
   CSSLengthValue? _top;
-  CSSLengthValue? get top {
-    return _top;
+  CSSLengthValue get top {
+    return _top ?? CSSLengthValue.auto;
   }
   set top(CSSLengthValue? value) {
-    // Auto value is parsed at layout stage.
-    if ((value != null && value.isAuto) || _top == value ) {
+    if (_top == value) {
       return;
     }
     _top = value;
@@ -31,12 +40,11 @@ mixin CSSPositionMixin on RenderStyleBase {
   }
 
   CSSLengthValue? _bottom;
-  CSSLengthValue? get bottom {
-    return _bottom;
+  CSSLengthValue get bottom {
+    return _bottom ?? CSSLengthValue.auto;
   }
   set bottom(CSSLengthValue? value) {
-    // Auto value is parsed at layout stage.
-    if ((value != null && value.isAuto) || _bottom == value ) {
+    if (_bottom == value) {
       return;
     }
     _bottom = value;
@@ -44,12 +52,11 @@ mixin CSSPositionMixin on RenderStyleBase {
   }
 
   CSSLengthValue? _left;
-  CSSLengthValue? get left {
-    return _left;
+  CSSLengthValue get left {
+    return _left ?? CSSLengthValue.auto;
   }
   set left(CSSLengthValue? value) {
-    // Auto value is parsed at layout stage.
-    if ((value != null && value.isAuto) || _left == value ) {
+    if (_left == value) {
       return;
     }
     _left = value;
@@ -57,12 +64,11 @@ mixin CSSPositionMixin on RenderStyleBase {
   }
 
   CSSLengthValue? _right;
-  CSSLengthValue? get right {
-    return _right;
+  CSSLengthValue get right {
+    return _right ?? CSSLengthValue.auto;
   }
   set right(CSSLengthValue? value) {
-    // Auto value is parsed at layout stage.
-    if ((value != null && value.isAuto) || _right == value ) {
+    if (_right == value) {
       return;
     }
     _right = value;
