@@ -3,8 +3,10 @@
  * Author: Kraken Team.
  */
 import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+
 import 'canvas_context_2d.dart';
 
 class CanvasPainter extends CustomPainter {

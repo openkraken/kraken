@@ -4,24 +4,24 @@
  */
 
 import 'dart:async';
-import 'dart:ui';
 import 'dart:ffi';
 import 'dart:math' as math;
+import 'dart:ui';
 
-import 'package:flutter/gestures.dart';
-import 'package:kraken/bridge.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart' show TextSelectionOverlay, TextSelectionControls, ClipboardStatusNotifier;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart' hide RenderEditable;
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/widget.dart';
+import 'package:flutter/widgets.dart' show TextSelectionOverlay, TextSelectionControls, ClipboardStatusNotifier;
+import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/rendering.dart';
-import 'package:flutter/rendering.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
+import 'package:kraken/rendering.dart';
+import 'package:kraken/widget.dart';
 
 const String INPUT = 'INPUT';
 const String VALUE = 'value';

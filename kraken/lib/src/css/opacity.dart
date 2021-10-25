@@ -1,10 +1,10 @@
-
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+
 import 'dart:ui' as ui;
+
 import 'package:kraken/css.dart';
 
 mixin CSSOpacityMixin on RenderStyleBase {

@@ -3,13 +3,14 @@
  * Author: Kraken Team.
  */
 
-import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
-import 'package:ffi/ffi.dart';
-import 'dart:ffi';
 import 'dart:collection';
+import 'dart:ffi';
+
+import 'package:ffi/ffi.dart';
+import 'package:flutter/foundation.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
+import 'package:meta/meta.dart';
 
 typedef EventHandler = void Function(Event event);
 

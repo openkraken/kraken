@@ -1,8 +1,12 @@
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 
 import 'package:flutter/animation.dart';
-import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/dom.dart';
 
 // CSS Transitions: https://drafts.csswg.org/css-transitions/
 const String _0s = '0s';

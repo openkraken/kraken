@@ -1,9 +1,14 @@
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
 import 'dart:ffi';
 
+import 'package:flutter/scheduler.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:kraken/launcher.dart';
 
 // Children of the <head> element all have display:none

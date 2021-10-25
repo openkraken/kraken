@@ -15,10 +15,6 @@ describe('Performance', () => {
     }, 300);
   });
 
-  it('init startTime should less than 2000', () => {
-    expect(startTime).toBeLessThan(2000);
-  });
-
   it('clearMarks', () => {
     performance.mark('abc');
     performance.mark('efg');

@@ -1,5 +1,12 @@
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
 import 'dart:ffi';
+
 import 'package:ffi/ffi.dart';
+
 import 'from_native.dart';
 import 'native_value.dart';
 

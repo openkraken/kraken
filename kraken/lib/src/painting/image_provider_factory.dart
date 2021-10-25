@@ -1,9 +1,8 @@
-
-
 /*
  * Copyright (C) 2020-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+
 
 import 'dart:io';
 import 'dart:typed_data';

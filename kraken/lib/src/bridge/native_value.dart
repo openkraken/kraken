@@ -1,10 +1,16 @@
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:ffi';
+
+import 'package:ffi/ffi.dart';
 import 'package:kraken/bridge.dart';
 
 import 'from_native.dart';
-import 'dart:convert';
-import 'package:ffi/ffi.dart';
 
 class NativeValue extends Struct {
   @Double()

@@ -2,11 +2,12 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'dart:collection';
 import 'dart:core';
+import 'dart:ffi';
 import 'dart:typed_data';
 import 'dart:ui';
-import 'dart:ffi';
-import 'dart:collection';
+
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -14,6 +15,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:vector_math/vector_math_64.dart';
+
 import 'canvas_context.dart';
 import 'canvas_path_2d.dart';
 

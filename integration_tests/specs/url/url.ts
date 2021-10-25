@@ -82,4 +82,9 @@ describe('URL', () => {
     expect(url2.toString()).toBe('https://www.example.com/');
   });
 
+  it('should handle with emoji in query', () => {
+    var url = new URL('https://www.example.com/path?wd=Hello👿World');
+    expect(url.search).toEqual('?wd=Hello%F0%9F%91%BFWorld');
+  });
+
 });

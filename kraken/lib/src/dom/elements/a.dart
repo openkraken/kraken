@@ -4,11 +4,12 @@
  */
 
 import 'dart:ffi';
+
+import 'package:flutter/gestures.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
-import 'package:flutter/gestures.dart';
 
 const String ANCHOR = 'A';
 

@@ -205,9 +205,12 @@ static JSValue triggerGlobalError(QjsContext *ctx, JSValueConst this_val, int ar
   auto *context = static_cast<binding::qjs::JSContext *>(JS_GetContextOpaque(ctx));
 
   JSValue globalErrorFunc = JS_GetPropertyStr(ctx, context->global(), "triggerGlobalError");
-  JSValue exception = JS_Call(ctx, globalErrorFunc, context->global(), 0, nullptr);
-  context->handleException(&exception);
-  JS_FreeValue(ctx, globalErrorFunc);
+
+  if (JS_IsFunction(ctx, globalErrorFunc)) {
+    JSValue exception = JS_Call(ctx, globalErrorFunc, context->global(), 0, nullptr);
+    context->handleException(&exception);
+    JS_FreeValue(ctx, globalErrorFunc);
+  }
 
   return JS_NULL;
 }

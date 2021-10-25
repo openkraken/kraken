@@ -5,26 +5,25 @@
 
 import 'dart:async';
 import 'dart:core';
+import 'dart:ffi';
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver, RouteInformation;
-import 'package:kraken/css.dart';
-import 'dart:ffi';
 import 'package:ffi/ffi.dart';
-
-import 'package:kraken/gesture.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver, RouteInformation;
 import 'package:kraken/bridge.dart';
-import 'package:kraken/launcher.dart';
-import 'package:kraken/widget.dart';
+import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/gesture.dart';
+import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
-import 'package:kraken/scheduler.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/scheduler.dart';
 import 'package:kraken/src/dom/element_registry.dart' as element_registry;
+import 'package:kraken/widget.dart';
 
 const String UNKNOWN = 'UNKNOWN';
 
