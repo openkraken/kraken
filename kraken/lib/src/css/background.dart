@@ -565,6 +565,8 @@ List<CSSColorStop> _parseColorAndStop(String src, RenderStyle renderStyle, Strin
         for (int i = 1; i < strings.length; i++) {
           if (CSSPercentage.isPercentage(strings[i])) {
             stop = CSSPercentage.parsePercentage(strings[i]);
+            // Negative percentage is invalid in gradients which will defaults to 0.
+            if (stop! < 0) stop = 0;
           } else if (CSSAngle.isAngle(strings[i])) {
             stop = CSSAngle.parseAngle(strings[i])! / (math.pi * 2);
           } else if (CSSLength.isLength(strings[i])) {

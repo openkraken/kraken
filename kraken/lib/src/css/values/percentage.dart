@@ -1,6 +1,6 @@
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#percentages
 
-final _percentageRegExp = RegExp(r'^\d+\%$', caseSensitive: false);
+final _percentageRegExp = RegExp(r'^[-]*\d+\%$', caseSensitive: false);
 
 class CSSPercentage {
   static String PERCENTAGE = '%';
