@@ -214,13 +214,18 @@ class CSSLengthValue {
           case FLEX_BASIS:
             // Refer to the flex container's inner main size.
             break;
+
+          // https://www.w3.org/TR/css-position-3/#valdef-top-percentage
+          // The inset is a percentage relative to the containing block’s size in the corresponding
+          // axis (e.g. width for left or right, height for top and bottom). For sticky positioned boxes,
+          // the inset is instead relative to the relevant scrollport’s size. Negative values are allowed.
           case TOP:
           case BOTTOM:
             // Offset of positioned element starts from the edge of padding box of containing block.
-            double? parentPaddingBoxWidth = parentRenderStyle?.paddingBoxWidth ??
-              parentRenderStyle?.paddingBoxLogicalWidth;
-            if (parentPaddingBoxWidth != null) {
-              _computedValue = value! * parentPaddingBoxWidth;
+            double? parentPaddingBoxHeight = parentRenderStyle?.paddingBoxHeight ??
+              parentRenderStyle?.paddingBoxLogicalHeight;
+            if (parentPaddingBoxHeight != null) {
+              _computedValue = value! * parentPaddingBoxHeight;
             } else {
               // Mark parent to relayout to get renderer height of parent.
               if (renderBoxModel != null) {
@@ -233,10 +238,10 @@ class CSSLengthValue {
           case LEFT:
           case RIGHT:
             // Offset of positioned element starts from the edge of padding box of containing block.
-            double? parentPaddingBoxHeight = parentRenderStyle?.paddingBoxHeight ??
-              parentRenderStyle?.paddingBoxLogicalHeight;
-            if (parentPaddingBoxHeight != null) {
-              _computedValue = value! * parentPaddingBoxHeight;
+            double? parentPaddingBoxWidth = parentRenderStyle?.paddingBoxWidth ??
+              parentRenderStyle?.paddingBoxLogicalWidth;
+            if (parentPaddingBoxWidth != null) {
+              _computedValue = value! * parentPaddingBoxWidth;
             } else {
               // Mark parent to relayout to get renderer height of parent.
               if (renderBoxModel != null) {
