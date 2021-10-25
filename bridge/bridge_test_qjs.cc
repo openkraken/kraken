@@ -104,12 +104,16 @@ static JSValue matchImageSnapshot(QjsContext *ctx, JSValueConst this_val, int ar
 }
 
 static JSValue environment(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+#if FLUTTER_BACKEND
   if (getDartMethod()->environment == nullptr) {
     return JS_ThrowTypeError(
       ctx, "Failed to execute '__kraken_environment__': dart method (environment) is not registered.");
   }
   const char *env = getDartMethod()->environment();
   return JS_ParseJSON(ctx, env, strlen(env), "");
+#else
+  return JS_NewObject(ctx);
+#endif
 }
 
 static JSValue simulatePointer(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
