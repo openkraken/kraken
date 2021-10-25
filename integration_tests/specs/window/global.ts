@@ -36,4 +36,8 @@ describe('windowisglobal', () => {
   it('onload should in window', () => {
     expect('onload' in window).toBe(true);
   });
+
+  it('window.self should be self', () => {
+    expect(window.self).toBe(window);
+  });
 });
