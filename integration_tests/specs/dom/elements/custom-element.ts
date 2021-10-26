@@ -15,7 +15,7 @@ describe('custom widget element', () => {
     image.setAttribute('src', 'assets/rabbit.png');
     document.body.appendChild(image);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('work with click event', async (done) => {
