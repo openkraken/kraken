@@ -172,8 +172,11 @@ class CSSLengthValue {
             // The percentage height of positioned element and flex item resolves against the rendered height
             // of parent, mark parent as needs relayout if rendered height is not ready yet.
             if (isPositioned || isGrandParentFlexLayout) {
-              double? relativeParentHeight =
-                parentRenderStyle?.paddingBoxLogicalHeight ?? parentRenderStyle?.paddingBoxHeight;
+              // Percentage relative height priority: logical height > renderer height
+              double? relativeParentHeight = isPositioned ?
+                parentRenderStyle?.paddingBoxLogicalHeight ?? parentRenderStyle?.paddingBoxHeight :
+                parentRenderStyle?.contentBoxLogicalHeight ?? parentRenderStyle?.contentBoxHeight;
+
               if (relativeParentHeight  != null) {
                 _computedValue = value! * relativeParentHeight;
               } else {
