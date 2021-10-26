@@ -491,7 +491,11 @@ class CSSText {
   static CSSLengthValue? resolveLineHeight(String value, RenderStyle renderStyle, String propertyName) {
     if (value.isNotEmpty) {
       if (CSSLength.isLength(value) || CSSPercentage.isPercentage(value)) {
-        return CSSLength.parseLength(value, renderStyle, propertyName);
+        CSSLengthValue lineHeight = CSSLength.parseLength(value, renderStyle, propertyName);
+        // Line-height 0 and negative value is considered invalid.
+        if (lineHeight.computedValue != double.infinity && lineHeight.computedValue > 0) {
+          return lineHeight;
+        }
       } else if (value == NORMAL) {
         return CSSLengthValue.normal;
       } else if (CSSNumber.isNumber(value)){
