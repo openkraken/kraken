@@ -256,6 +256,7 @@ class CSSLengthValue {
               _computedValue = double.infinity;
             }
           break;
+          case TRANSFORM:
           case BACKGROUND_SIZE:
           case BORDER_TOP_LEFT_RADIUS:
           case BORDER_TOP_RIGHT_RADIUS:

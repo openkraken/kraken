@@ -638,11 +638,11 @@ class CSSMatrix {
         if (method.args.isNotEmpty && method.args.length <= 2) {
           CSSLengthValue y;
           if (method.args.length == 2) {
-            y = CSSLength.parseLength(method.args[1].trim(), renderStyle, TRANSFORM);
+            y = CSSLength.parseLength(method.args[1].trim(), renderStyle, TRANSFORM, Axis.vertical);
           } else {
             y = CSSLengthValue.zero;
           }
-          CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSFORM);
+          CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSFORM, Axis.horizontal);
           x.renderStyle = y.renderStyle = renderStyle;
           return Matrix4.identity()..translate(x.computedValue, y.computedValue);
         }
@@ -668,14 +668,14 @@ class CSSMatrix {
         break;
       case TRANSLATE_X:
         if (method.args.length == 1) {
-          CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSFORM);
+          CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSFORM, Axis.horizontal);
           x.renderStyle = renderStyle;
           return Matrix4.identity()..translate(x.computedValue);
         }
         break;
       case TRANSLATE_Y:
         if (method.args.length == 1) {
-          CSSLengthValue y = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSFORM);
+          CSSLengthValue y = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSFORM, Axis.vertical);
           y.renderStyle = renderStyle;
           return Matrix4.identity()..translate(0.0, y.computedValue);
         }
