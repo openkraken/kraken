@@ -20,6 +20,9 @@ class HttpCacheObject {
   // The cached url of resource.
   String url;
 
+  // The response headers.
+  String? headers;
+
   // When the file is out-of-date
   DateTime? expiredTime;
 
@@ -55,6 +58,7 @@ class HttpCacheObject {
   bool get valid => _valid;
 
   HttpCacheObject(this.url, this.cacheDirectory, {
+    this.headers,
     this.expiredTime,
     this.eTag,
     this.contentLength,
@@ -75,6 +79,7 @@ class HttpCacheObject {
         : null;
 
     return HttpCacheObject(url, cacheDirectory,
+      headers: response.headers.toString(),
       eTag: eTag,
       expiredTime: expiredTime,
       contentLength: contentLength,
@@ -151,26 +156,35 @@ class HttpCacheObject {
     try {
       Uint8List bytes = await _file.readAsBytes();
       ByteData byteData = bytes.buffer.asByteData();
+      int byteLength = byteData.lengthInBytes;
       int index = 0;
 
       // Reserved units.
       index += 4;
 
       // Read expiredTime.
-      expiredTime = DateTime.fromMillisecondsSinceEpoch(byteData.getUint64(index, Endian.little));
-      index += 8;
+      if (index + 8 <= byteLength) {
+        expiredTime = DateTime.fromMillisecondsSinceEpoch(byteData.getUint64(index, Endian.little));
+        index += 8;
+      }
 
-      // Read lastUsed.
-      lastUsed = DateTime.fromMillisecondsSinceEpoch(byteData.getUint64(index, Endian.little));
-      index += 8;
+      if (index + 8 <= byteLength) {
+        // Read lastUsed.
+        lastUsed = DateTime.fromMillisecondsSinceEpoch(byteData.getUint64(index, Endian.little));
+        index += 8;
+      }
 
-      // Read lastModified.
-      lastModified = DateTime.fromMillisecondsSinceEpoch(byteData.getUint64(index, Endian.little));
-      index += 8;
+      if (index + 8 <= byteLength) {
+        // Read lastModified.
+        lastModified = DateTime.fromMillisecondsSinceEpoch(byteData.getUint64(index, Endian.little));
+        index += 8;
+      }
 
-      // Read contentLength.
-      contentLength = byteData.getUint32(index, Endian.little);
-      index += 4;
+      if (index + 4 <= byteLength) {
+        // Read contentLength.
+        contentLength = byteData.getUint32(index, Endian.little);
+        index += 4;
+      }
 
       // Invalid cache blob size, mark as invalid.
       if (await _blob.length != contentLength) {
@@ -178,20 +192,53 @@ class HttpCacheObject {
         return;
       }
 
-      // Read url.
-      int urlLength = byteData.getUint32(index, Endian.little);
-      index += 4;
+      int urlLength;
+      if (index + 4 <= byteLength) {
+        // Read url.
+        urlLength = byteData.getUint32(index, Endian.little);
+        index += 4;
+      } else {
+        return;
+      }
 
-      Uint8List urlValue = bytes.sublist(index, index + urlLength);
-      url = utf8.decode(urlValue);
-      index += urlLength;
+      if (index + urlLength <= byteLength) {
+        Uint8List urlValue = bytes.sublist(index, index + urlLength);
+        url = utf8.decode(urlValue);
+        index += urlLength;
+      }
 
-      // Read eTag.
-      int eTagLength = byteData.getUint16(index, Endian.little);
-      index += 2;
+      int eTagLength;
+      if (index + 2 <= byteLength) {
+        // Read eTag.
+        eTagLength = byteData.getUint16(index, Endian.little);
+        index += 2;
+      } else {
+        return;
+      }
 
-      Uint8List eTagValue = bytes.sublist(index, index + eTagLength);
-      eTag = utf8.decode(eTagValue);
+      if (index + eTagLength <= byteLength) {
+        if (eTagLength != 0) {
+          Uint8List eTagValue = bytes.sublist(index, index + eTagLength);
+          eTag = utf8.decode(eTagValue);
+        }
+        index += eTagLength;
+      }
+
+
+      int headersLength;
+      if (index + 4 <= byteLength) {
+        // Read eTag.
+        headersLength = byteData.getUint32(index, Endian.little);
+        index += 4;
+      } else {
+        return;
+      }
+
+      if (index + headersLength <= byteLength) {
+        Uint8List headersValue = bytes.sublist(index, index + headersLength);
+        headers = utf8.decode(headersValue);
+        index += headersLength;
+      }
 
       _valid = true;
     } catch (message, stackTrace) {
@@ -208,20 +255,20 @@ class HttpCacheObject {
     final BytesBuilder bytesBuilder = BytesBuilder();
 
     // Index bytes format:
-    // | Type x 1B | Reserved x 3B | ExpiredTimeStamp x 8B |
+    // | Type x 1B | Reserved x 3B |
     bytesBuilder.add([
       NetworkType, Reserved, Reserved, Reserved,
     ]);
 
-    // | ExpiredTimeStamp x 8 |
+    // | ExpiredTimeStamp x 8B |
     final int expiredTimeStamp = (expiredTime ?? alwaysExpired).millisecondsSinceEpoch;
     writeInteger(bytesBuilder, expiredTimeStamp, 8);
 
-    // | LastUsedTimeStamp x 8 |
+    // | LastUsedTimeStamp x 8B |
     final int lastUsedTimeStamp = (lastUsed ?? DateTime.now()).millisecondsSinceEpoch;
     writeInteger(bytesBuilder, lastUsedTimeStamp, 8);
 
-    // | LastModifiedTimeStamp x 8 |
+    // | LastModifiedTimeStamp x 8B |
     final int lastModifiedTimestamp = (lastModified ?? alwaysExpired).millisecondsSinceEpoch;
     writeInteger(bytesBuilder, lastModifiedTimestamp, 8);
 
@@ -232,8 +279,12 @@ class HttpCacheObject {
     writeString(bytesBuilder, url, 4);
 
     // | Length of eTag x 2B | eTag payload x N |
-    // Store url length, 4B max represents (0x)ffffffff -> 4294967295 (4GB)
+    // Store url length, 2B max represents 2^16-1 bytes.
     writeString(bytesBuilder, eTag ?? '', 2);
+
+    // | Length of shorted headers x 4B | shorted headers payload x N |
+    // Store shorted response headers, 4B.
+    writeString(bytesBuilder, headers ?? '', 4);
 
     // The index file will not be TOO LARGE,
     // so take bytes at one time.
@@ -257,13 +308,41 @@ class HttpCacheObject {
   }
 
   Map<String, String> _getResponseHeaders() {
-    return {
-      if (eTag != null) HttpHeaders.etagHeader: eTag!,
-      if (expiredTime != null) HttpHeaders.expiresHeader: HttpDate.format(expiredTime!),
-      if (contentLength != null) HttpHeaders.contentLengthHeader: contentLength.toString(),
-      if (lastModified != null) HttpHeaders.lastModifiedHeader: HttpDate.format(lastModified!),
-      _httpHeaderCacheHits: _httpCacheHit,
-    };
+    Map<String, String> responseHeaders = {};
+
+    // Read headers from cache.
+    if (headers != null) {
+      List<String> headerPairs = headers!.trim().split('\n');
+      for (String pair in headerPairs) {
+        List<String> kvTuple = pair.split(':');
+        if (kvTuple.length >= 2) {
+          String key = kvTuple.first;
+          String value;
+          if (kvTuple == 2) {
+            value = kvTuple.last;
+          } else {
+            value = kvTuple.sublist(1).join(':');
+          }
+          responseHeaders[key.trim()] = value.trim();
+        }
+      }
+    }
+
+    if (eTag != null) {
+      responseHeaders[HttpHeaders.etagHeader] = eTag!;
+    }
+    if (expiredTime != null) {
+      responseHeaders[HttpHeaders.expiresHeader] = HttpDate.format(expiredTime!);
+    }
+    if (contentLength != null) {
+      responseHeaders[HttpHeaders.contentLengthHeader] = contentLength.toString();
+    }
+    if (lastModified != null) {
+      responseHeaders[HttpHeaders.lastModifiedHeader] = HttpDate.format(lastModified!);
+    }
+    responseHeaders[_httpHeaderCacheHits] = _httpCacheHit;
+    print('$url: $responseHeaders');
+    return responseHeaders;
   }
 
   Future<bool> get _exists async {
