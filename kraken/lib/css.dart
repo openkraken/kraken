@@ -16,7 +16,6 @@ export 'src/css/opacity.dart';
 export 'src/css/overflow.dart';
 export 'src/css/positioned.dart';
 export 'src/css/inline.dart';
-export 'src/css/properties.dart';
 export 'src/css/sizing.dart';
 export 'src/css/padding.dart';
 export 'src/css/margin.dart';
@@ -43,6 +42,7 @@ export 'src/css/object_fit.dart';
 export 'src/css/object_position.dart';
 export 'src/css/sliver.dart';
 export 'src/css/value.dart';
+export 'src/css/keywords.dart';
 
 // CSS Values
 // ignore: directives_ordering
@@ -57,4 +57,3 @@ export 'src/css/values/time.dart';
 export 'src/css/values/url.dart';
 export 'src/css/values/percentage.dart';
 export 'src/css/values/textual.dart';
-export 'src/css/values/keywords.dart';

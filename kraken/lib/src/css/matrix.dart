@@ -576,27 +576,6 @@ class CSSMatrix {
   }
 
   static Matrix4 initial = Matrix4.identity();
-  static const String MATRIX = 'matrix';
-  static const String MATRIX_3D = 'matrix3d';
-  static const String TRANSLATE = 'translate';
-  static const String TRANSLATE_3D = 'translate3d';
-  static const String TRANSLATE_X = 'translatex';
-  static const String TRANSLATE_Y = 'translatey';
-  static const String TRANSLATE_Z = 'translatez';
-  static const String ROTATE = 'rotate';
-  static const String ROTATE_3D = 'rotate3d';
-  static const String ROTATE_X = 'rotatex';
-  static const String ROTATE_Y = 'rotatey';
-  static const String ROTATE_Z = 'rotatez';
-  static const String SCALE = 'scale';
-  static const String SCALE_3D = 'scale3d';
-  static const String SCALE_X = 'scalex';
-  static const String SCALE_Y = 'scaley';
-  static const String SCALE_Z = 'scalez';
-  static const String SKEW = 'skew';
-  static const String SKEW_X = 'skewx';
-  static const String SKEW_Y = 'skewy';
-  static const String PERSPECTIVE = 'perspective';
 
   static Matrix4? computeTransformMatrix(List<CSSFunctionalNotation> transform, RenderStyle renderStyle) {
     Matrix4? matrix4;
@@ -634,15 +613,25 @@ class CSSMatrix {
               args[10]!, args[11]!, args[12]!, args[13]!, args[14]!, args[15]!);
         }
         break;
+      // https://drafts.csswg.org/css-transforms-2/#individual-transforms
+      // Name: translate
+      // Value: none | <length-percentage> [ <length-percentage> <length>? ]?
+      // Initial: none
+      // Applies to: transformable elements
+      // Inherited: no
+      // Percentages: relative to the width of the reference box (for the first value) or the height (for the second value)
+      // Computed value: the keyword none or a pair of computed <length-percentage> values and an absolute length
+      // Canonical order: per grammar
+      // Animation type: by computed value, but see below for none
       case TRANSLATE:
         if (method.args.isNotEmpty && method.args.length <= 2) {
           CSSLengthValue y;
           if (method.args.length == 2) {
-            y = CSSLength.parseLength(method.args[1].trim(), renderStyle, TRANSFORM, Axis.vertical);
+            y = CSSLength.parseLength(method.args[1].trim(), renderStyle, TRANSLATE, Axis.vertical);
           } else {
             y = CSSLengthValue.zero;
           }
-          CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSFORM, Axis.horizontal);
+          CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSLATE, Axis.horizontal);
           x.renderStyle = y.renderStyle = renderStyle;
           return Matrix4.identity()..translate(x.computedValue, y.computedValue);
         }
@@ -655,37 +644,47 @@ class CSSMatrix {
         if (method.args.isNotEmpty && method.args.length <= 3) {
           CSSLengthValue y = CSSLengthValue.zero, z = CSSLengthValue.zero;
           if (method.args.length == 2) {
-            y = CSSLength.parseLength(method.args[1].trim(), renderStyle, TRANSFORM);
+            y = CSSLength.parseLength(method.args[1].trim(), renderStyle, TRANSLATE);
           }
           if (method.args.length == 3) {
-            y = CSSLength.parseLength(method.args[1].trim(), renderStyle, TRANSFORM);
-            z = CSSLength.parseLength(method.args[2].trim(), renderStyle, TRANSFORM);
+            y = CSSLength.parseLength(method.args[1].trim(), renderStyle, TRANSLATE);
+            z = CSSLength.parseLength(method.args[2].trim(), renderStyle, TRANSLATE);
           }
-          CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSFORM);
+          CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSLATE);
           x.renderStyle = y.renderStyle = z.renderStyle = renderStyle;
           return Matrix4.identity()..translate(x.computedValue, y.computedValue, z.computedValue);
         }
         break;
       case TRANSLATE_X:
         if (method.args.length == 1) {
-          CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSFORM, Axis.horizontal);
+          CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSLATE, Axis.horizontal);
           x.renderStyle = renderStyle;
           return Matrix4.identity()..translate(x.computedValue);
         }
         break;
       case TRANSLATE_Y:
         if (method.args.length == 1) {
-          CSSLengthValue y = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSFORM, Axis.vertical);
+          CSSLengthValue y = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSLATE, Axis.vertical);
           y.renderStyle = renderStyle;
           return Matrix4.identity()..translate(0.0, y.computedValue);
         }
         break;
       case TRANSLATE_Z:
         if (method.args.length == 1) {
-          CSSLengthValue z = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSFORM);
+          CSSLengthValue z = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSLATE);
           return Matrix4.identity()..translate(0.0, 0.0, z.computedValue);
         }
         break;
+      // https://drafts.csswg.org/css-transforms-2/#individual-transforms
+      // Name: rotate
+      // Value: none | <angle> | [ x | y | z | <number>{3} ] && <angle>
+      // Initial: none
+      // Applies to: transformable elements
+      // Inherited: no
+      // Percentages: n/a
+      // Computed value: the keyword none, or an <angle> with an axis consisting of a list of three <number>s
+      // Canonical order: per grammar
+      // Animation type: as SLERP, but see below for none
       case ROTATE:
       case ROTATE_Z:
         if (method.args.length == 1) {
@@ -715,6 +714,16 @@ class CSSMatrix {
           return Matrix4.rotationY(y);
         }
         break;
+      // https://drafts.csswg.org/css-transforms-2/#individual-transforms
+      // Name: scale
+      // Value: none | [ <number> | <percentage> ]{1,3}
+      // Initial: none
+      // Applies to: transformable elements
+      // Inherited: no
+      // Percentages: n/a
+      // Computed value: the keyword none, or a list of 3 <number>s
+      // Canonical order: per grammar
+      // Animation type: by computed value, but see below for none
       case SCALE:
         if (method.args.isNotEmpty && method.args.length <= 2) {
           double x = double.tryParse(method.args[0].trim()) ?? 1.0;
@@ -774,6 +783,16 @@ class CSSMatrix {
           }
         }
         break;
+      // https://drafts.csswg.org/css-transforms-2/#perspective-property
+      // Name: perspective
+      // Value: none | <length [0,∞]>
+      // Initial: none
+      // Applies to: transformable elements
+      // Inherited: no
+      // Percentages: N/A
+      // Computed value: the keyword none or an absolute length
+      // Canonical order: per grammar
+      // Animation type: by computed value
       case PERSPECTIVE:
         //  [
         //   1, 0, 0, 0,
