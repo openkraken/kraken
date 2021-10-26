@@ -26,6 +26,9 @@ public:
     if (!JS_IsNull(executeTestCallback)) {
       JS_FreeValue(context->ctx(), executeTestCallback);
     }
+    if (!JS_IsNull(executeTestProxyObject)) {
+      JS_FreeValue(context->ctx(), executeTestProxyObject);
+    }
 
     {
       struct list_head *el, *el1;
@@ -41,6 +44,7 @@ public:
   void invokeExecuteTest(ExecuteCallback executeCallback);
 
   JSValue executeTestCallback{JS_NULL};
+  JSValue executeTestProxyObject{JS_NULL};
   list_head image_link;
 private:
   /// the pointer of bridge, ownership belongs to JSBridge

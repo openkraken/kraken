@@ -104,12 +104,16 @@ static JSValue matchImageSnapshot(QjsContext *ctx, JSValueConst this_val, int ar
 }
 
 static JSValue environment(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+#if FLUTTER_BACKEND
   if (getDartMethod()->environment == nullptr) {
     return JS_ThrowTypeError(
       ctx, "Failed to execute '__kraken_environment__': dart method (environment) is not registered.");
   }
   const char *env = getDartMethod()->environment();
   return JS_ParseJSON(ctx, env, strlen(env), "");
+#else
+  return JS_NewObject(ctx);
+#endif
 }
 
 static JSValue simulatePointer(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -219,6 +223,9 @@ static JSValue triggerGlobalError(QjsContext *ctx, JSValueConst this_val, int ar
 
 JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->getContext()) {
   bridge->owner = this;
+  bridge->disposeCallback = [](JSBridge *bridge) {
+    delete static_cast<JSBridgeTest *>(bridge->owner);
+  };
   QJS_GLOBAL_BINDING_FUNCTION(context, executeTest, "__kraken_execute_test__", 1);
   QJS_GLOBAL_BINDING_FUNCTION(context, matchImageSnapshot, "__kraken_match_image_snapshot__", 3);
   QJS_GLOBAL_BINDING_FUNCTION(context, environment, "__kraken_environment__", 0);
@@ -261,14 +268,13 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
     NativeString *status = kraken::binding::qjs::jsValueToNativeString(ctx, statusValue);
     callbackContext->executeCallback(callbackContext->context->getContextId(), status);
     status->free();
-    JS_FreeValue(ctx, proxyObject);
     return JS_NULL;
   };
   auto *callbackContext = new ExecuteCallbackContext(context.get(), executeCallback);
-  JSValue proxyObject = JS_NewObject(context->ctx());
-  JS_SetOpaque(proxyObject, callbackContext);
+  executeTestProxyObject = JS_NewObject(context->ctx());
+  JS_SetOpaque(executeTestProxyObject, callbackContext);
   JSValue callbackData[]{
-    proxyObject
+    executeTestProxyObject
   };
   JSValue callback = JS_NewCFunctionData(context->ctx(), done, 0, 0, 1, callbackData);
 

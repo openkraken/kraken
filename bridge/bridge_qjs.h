@@ -17,6 +17,9 @@
 
 namespace kraken {
 
+class JSBridge;
+using JSBridgeDisposeCallback = void(*)(JSBridge *bridge);
+
 class JSBridge final {
 public:
   static ConsoleMessageHandler consoleMessageHandler;
@@ -29,6 +32,7 @@ public:
   int32_t contextId;
   // the owner pointer which take JSBridge as property.
   void *owner;
+  JSBridgeDisposeCallback disposeCallback{nullptr};
   // evaluate JavaScript source codes in standard mode.
   void evaluateScript(const NativeString *script, const char *url, int startLine);
   void evaluateScript(const uint16_t *script, size_t length, const char *url, int startLine);

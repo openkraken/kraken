@@ -207,6 +207,10 @@ void JSBridge::evaluateByteCode(uint8_t *bytes, size_t byteLength) {
 }
 
 JSBridge::~JSBridge() {
+  if (disposeCallback != nullptr) {
+    disposeCallback(this);
+  }
+
   if (!m_context->isValid()) return;
 
   if (m_disposeCallback != nullptr) {
