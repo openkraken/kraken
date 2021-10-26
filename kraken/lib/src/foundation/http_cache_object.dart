@@ -10,6 +10,7 @@ import 'dart:typed_data';
 
 import 'package:path/path.dart' as path;
 
+import 'http_client.dart';
 import 'http_client_response.dart';
 
 class HttpCacheObject {
@@ -70,7 +71,7 @@ class HttpCacheObject {
     int contentLength = response.headers.contentLength;
     String? lastModifiedValue = response.headers.value(HttpHeaders.lastModifiedHeader);
     DateTime? lastModified = lastModifiedValue != null
-        ? DateTime.tryParse(lastModifiedValue)
+        ? tryParseHttpDate(lastModifiedValue)
         : null;
 
     return HttpCacheObject(url, cacheDirectory,
@@ -320,7 +321,7 @@ class HttpCacheObject {
     // Update lastModified
     String? remoteLastModifiedString = response.headers.value(HttpHeaders.lastModifiedHeader);
     if (remoteLastModifiedString != null) {
-      DateTime? remoteLastModified = DateTime.tryParse(remoteLastModifiedString);
+      DateTime? remoteLastModified = tryParseHttpDate(remoteLastModifiedString);
       if (remoteLastModified != null
           && (lastModified == null || !remoteLastModified.isAtSameMomentAs(lastModified!))) {
         lastModified = remoteLastModified;

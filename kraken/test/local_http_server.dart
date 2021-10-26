@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
@@ -74,16 +75,17 @@ class LocalHttpServer {
               String path = String.fromCharCodes(pathBuilder.takeBytes());
 
               // Example: GET_foo.txt represents `GET /foo`
-              File p = File('$basePath/${method}_${path.substring(1)}');
-              if (!p.existsSync()) {
-                throw FlutterError('Reading local http data, but file not exists: \n${p.absolute.path}');
+              File file = File('$basePath/${method}_${path.substring(1)}');
+              if (!file.existsSync()) {
+                throw FlutterError('Reading local http data, but file not exists: \n${file.absolute.path}');
               }
 
-              socket
-                .addStream(p.openRead())
-                .then((_) {
-                  socket.close();
-                });
+              file.readAsBytes()
+                .then((Uint8List bytes) => utf8.decode(bytes))
+                .then((String input) => _format(input))
+                .then((String content) => utf8.encode(content))
+                .then(socket.add)
+                .then((_) => socket.close());
             }
           }
         }, onError: (Object error, [StackTrace? stackTrace]) {
@@ -96,6 +98,11 @@ class LocalHttpServer {
   void close() {
     _server?.close();
     _server = null;
+  }
+
+  String _format(String input) {
+    return input
+        .replaceAll(RegExp(r'CURRENT_TIME', multiLine: true), HttpDate.format(DateTime.now()));
   }
 }
 
