@@ -127,11 +127,6 @@ class CSSLengthValue {
           parentRenderStyle?.paddingBoxLogicalWidth ?? parentRenderStyle?.paddingBoxWidth :
           parentRenderStyle?.contentBoxLogicalWidth ?? parentRenderStyle?.contentBoxWidth;
 
-        // Percentage relative height priority: logical height > renderer height
-        double? relativeParentHeight = isPositioned ?
-          parentRenderStyle?.paddingBoxLogicalHeight ?? parentRenderStyle?.paddingBoxHeight :
-          parentRenderStyle?.contentBoxLogicalHeight ?? parentRenderStyle?.contentBoxHeight;
-
         RenderBoxModel? renderBoxModel = renderStyle!.renderBoxModel;
 
         switch (propertyName) {
