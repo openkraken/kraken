@@ -61,7 +61,7 @@ Map CSSInitialValues = {
   RIGHT: AUTO,
   TOP: AUTO,
   TEXT_SHADOW: '0px 0px 0px transparent',
-  TRANSFORM: 'matrix3d(${CSSTransform.initial.storage.join(',')})',
+  TRANSFORM: 'matrix3d(${CSSMatrix.initial.storage.join(',')})',
   VERTICAL_ALIGN: ZERO,
   VISIBILITY: VISIBLE,
   WORD_SPACING: NORMAL,

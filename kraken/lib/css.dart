@@ -33,6 +33,7 @@ export 'src/css/parser/style_sheet_parser.dart';
 export 'src/css/parser/parser.dart';
 export 'src/css/text.dart';
 export 'src/css/origin.dart';
+export 'src/css/matrix.dart';
 export 'src/css/transform.dart';
 export 'src/css/transition.dart';
 export 'src/css/visibility.dart';
