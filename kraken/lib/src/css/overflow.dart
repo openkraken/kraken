@@ -67,14 +67,14 @@ mixin CSSOverflowMixin on RenderStyleBase {
     _overflowY = value;
   }
 
-  CSSOverflowType get transformedOverflowX {
+  CSSOverflowType get effectiveOverflowX {
     if (overflowX == CSSOverflowType.visible && overflowY != CSSOverflowType.visible) {
       return CSSOverflowType.auto;
     }
     return overflowX;
   }
 
-  CSSOverflowType get transformedOverflowY {
+  CSSOverflowType get effectiveOverflowY {
     if (overflowY == CSSOverflowType.visible && overflowX != CSSOverflowType.visible) {
       return CSSOverflowType.auto;
     }
@@ -117,7 +117,7 @@ mixin ElementOverflowMixin on ElementBase {
           ? renderBoxModel.scrollable.position : null;
     } else if (renderBoxModel != null) {
       RenderBoxModel renderBoxModel = this.renderBoxModel!;
-      CSSOverflowType overflowX = renderStyle.transformedOverflowX;
+      CSSOverflowType overflowX = renderStyle.effectiveOverflowX;
       bool shouldRepaintSelf = false;
       switch(overflowX) {
         case CSSOverflowType.hidden:
@@ -172,7 +172,7 @@ mixin ElementOverflowMixin on ElementBase {
           ? renderBoxModel.scrollable.position : null;
     } else if (renderBoxModel != null) {
       RenderBoxModel renderBoxModel = this.renderBoxModel!;
-      CSSOverflowType overflowY = renderStyle.transformedOverflowY;
+      CSSOverflowType overflowY = renderStyle.effectiveOverflowY;
       bool shouldRepaintSelf = false;
       switch(overflowY) {
         case CSSOverflowType.hidden:

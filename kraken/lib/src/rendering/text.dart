@@ -60,7 +60,7 @@ class RenderTextBox extends RenderBox
     // Set line-clamp to number makes text-overflow ellipsis which takes priority over text-overflow
     if (renderStyle.lineClamp != null && renderStyle.lineClamp! > 0) {
       return TextOverflow.ellipsis;
-    } else if (renderStyle.transformedOverflowX != CSSOverflowType.hidden || renderStyle.whiteSpace != WhiteSpace.nowrap) {
+    } else if (renderStyle.effectiveOverflowX != CSSOverflowType.hidden || renderStyle.whiteSpace != WhiteSpace.nowrap) {
       //  To make text overflow its container you have to set overflowX hidden and white-space: nowrap.
       return TextOverflow.visible;
     } else {

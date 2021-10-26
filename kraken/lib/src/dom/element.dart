@@ -831,26 +831,26 @@ class Element extends Node
         _updateRenderBoxModelWithZIndex();
         break;
       case OVERFLOW_X:
-        CSSOverflowType oldTransformedOverflowY = renderStyle.transformedOverflowY;
+        CSSOverflowType oldEffectiveOverflowY = renderStyle.effectiveOverflowY;
         renderStyle.overflowX = value;
         updateRenderBoxModelWithOverflowX(_handleScroll);
 
-        // Change overflowX may affect transformedOverflowY.
+        // Change overflowX may affect effectiveOverflowY.
         // https://drafts.csswg.org/css-overflow/#overflow-properties
-        CSSOverflowType transformedOverflowY = renderStyle.transformedOverflowY;
-        if (transformedOverflowY != oldTransformedOverflowY) {
+        CSSOverflowType effectiveOverflowY = renderStyle.effectiveOverflowY;
+        if (effectiveOverflowY != oldEffectiveOverflowY) {
           updateRenderBoxModelWithOverflowY(_handleScroll);
         }
         break;
       case OVERFLOW_Y:
-        CSSOverflowType oldTransformedOverflowX = renderStyle.transformedOverflowX;
+        CSSOverflowType oldEffectiveOverflowX = renderStyle.effectiveOverflowX;
         renderStyle.overflowY = value;
         updateRenderBoxModelWithOverflowY(_handleScroll);
 
-        // Change overflowY may affect the transformedOverflowX.
+        // Change overflowY may affect the effectiveOverflowX.
         // https://drafts.csswg.org/css-overflow/#overflow-properties
-        CSSOverflowType transformedOverflowX = renderStyle.transformedOverflowX;
-        if (transformedOverflowX != oldTransformedOverflowX) {
+        CSSOverflowType effectiveOverflowX = renderStyle.effectiveOverflowX;
+        if (effectiveOverflowX != oldEffectiveOverflowX) {
           updateRenderBoxModelWithOverflowX(_handleScroll);
         }
         break;

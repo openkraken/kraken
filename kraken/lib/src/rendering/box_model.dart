@@ -304,8 +304,8 @@ class RenderLayoutBox extends RenderBoxModel
 
       RenderBoxModel childRenderBoxModel = child;
       RenderStyle childRenderStyle = childRenderBoxModel.renderStyle;
-      CSSOverflowType overflowX = childRenderStyle.transformedOverflowX;
-      CSSOverflowType overflowY = childRenderStyle.transformedOverflowY;
+      CSSOverflowType overflowX = childRenderStyle.effectiveOverflowX;
+      CSSOverflowType overflowY = childRenderStyle.effectiveOverflowY;
       // No need to loop scrollable container children
       if (overflowX != CSSOverflowType.visible ||
           overflowY != CSSOverflowType.visible) {
@@ -451,8 +451,8 @@ class RenderLayoutBox extends RenderBoxModel
   void extendMaxScrollableSize(RenderBoxModel child) {
     Size? childScrollableSize;
     RenderStyle childRenderStyle = child.renderStyle;
-    CSSOverflowType overflowX = childRenderStyle.transformedOverflowX;
-    CSSOverflowType overflowY = childRenderStyle.transformedOverflowY;
+    CSSOverflowType overflowX = childRenderStyle.effectiveOverflowX;
+    CSSOverflowType overflowY = childRenderStyle.effectiveOverflowY;
     // Only non scroll container need to use scrollable size, otherwise use its own size
     if (overflowX == CSSOverflowType.visible &&
         overflowY == CSSOverflowType.visible) {
