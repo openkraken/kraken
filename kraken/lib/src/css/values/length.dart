@@ -67,6 +67,10 @@ class CSSLengthValue {
   RenderStyle? renderStyle;
   String? propertyName;
   double? _computedValue;
+
+  // Note return value of double.infinity means the value is resolved as the initial value
+  // which can not be computed to a specific value, eg. percentage height is sometimes parsed
+  // to be auto due to parent height not defined.
   double get computedValue {
 
     switch (type) {
@@ -123,11 +127,6 @@ class CSSLengthValue {
           parentRenderStyle?.paddingBoxLogicalWidth ?? parentRenderStyle?.paddingBoxWidth :
           parentRenderStyle?.contentBoxLogicalWidth ?? parentRenderStyle?.contentBoxWidth;
 
-        // Percentage relative height priority: logical height > renderer height
-        double? relativeParentHeight = isPositioned ?
-          parentRenderStyle?.paddingBoxLogicalHeight ?? parentRenderStyle?.paddingBoxHeight :
-          parentRenderStyle?.contentBoxLogicalHeight ?? parentRenderStyle?.contentBoxHeight;
-
         RenderBoxModel? renderBoxModel = renderStyle!.renderBoxModel;
 
         switch (propertyName) {
@@ -153,8 +152,7 @@ class CSSLengthValue {
               if (renderBoxModel != null) {
                 renderBoxModel.markParentNeedsRelayout();
               }
-              // @FIXME: Should return null instead once getComputedValue allows return null.
-              _computedValue = 0;
+              _computedValue = double.infinity;
             }
             break;
           case HEIGHT:
@@ -167,28 +165,32 @@ class CSSLengthValue {
             // There are two exceptions when percentage height is resolved against actual render height of parent:
             // 1. positioned element
             // 2. parent is flex item
-
             RenderStyle? grandParentRenderStyle = parentRenderStyle?.parent;
             bool isGrandParentFlexLayout = grandParentRenderStyle?.display == CSSDisplay.flex ||
               grandParentRenderStyle?.display == CSSDisplay.inlineFlex;
-            double? parentContentHeight = isPositioned || isGrandParentFlexLayout ?
-              parentRenderStyle?.contentBoxLogicalHeight ?? parentRenderStyle?.contentBoxHeight :
-              parentRenderStyle?.contentBoxLogicalHeight;
 
-            if (parentContentHeight != null) {
-              if (relativeParentHeight != null) {
+            // The percentage height of positioned element and flex item resolves against the rendered height
+            // of parent, mark parent as needs relayout if rendered height is not ready yet.
+            if (isPositioned || isGrandParentFlexLayout) {
+              double? relativeParentHeight =
+                parentRenderStyle?.paddingBoxLogicalHeight ?? parentRenderStyle?.paddingBoxHeight;
+              if (relativeParentHeight  != null) {
                 _computedValue = value! * relativeParentHeight;
               } else {
                 // Mark parent to relayout to get renderer height of parent.
                 if (renderBoxModel != null) {
                   renderBoxModel.markParentNeedsRelayout();
                 }
-                // @FIXME: Should return null instead once getComputedValue allows return null.
-                _computedValue = 0;
+                _computedValue = double.infinity;
               }
             } else {
-              // @FIXME: Should return null instead once getComputedValue allows return null.
-              _computedValue = 0;
+              double? relativeParentHeight = parentRenderStyle?.contentBoxLogicalHeight;
+              if (relativeParentHeight != null) {
+                _computedValue = value! * relativeParentHeight;
+              } else {
+                // Resolves height as auto if parent has no height specified.
+                _computedValue = double.infinity;
+              }
             }
             break;
           case PADDING_TOP:
@@ -208,7 +210,6 @@ class CSSLengthValue {
               if (renderBoxModel != null) {
                 renderBoxModel.markParentNeedsRelayout();
               }
-              // @FIXME: Should return null instead once getComputedValue allows return null.
               _computedValue = 0;
             }
             break;
@@ -232,8 +233,7 @@ class CSSLengthValue {
               if (renderBoxModel != null) {
                 renderBoxModel.markParentNeedsRelayout();
               }
-              // @FIXME: Should return null instead once getComputedValue allows return null.
-              _computedValue = 0;
+              _computedValue = double.infinity;
             }
             break;
           case LEFT:
@@ -248,8 +248,7 @@ class CSSLengthValue {
               if (renderBoxModel != null) {
                 renderBoxModel.markParentNeedsRelayout();
               }
-              // @FIXME: Should return null instead once getComputedValue allows return null.
-              _computedValue = 0;
+              _computedValue = double.infinity;
             }
           break;
           case TRANSLATE:
@@ -270,7 +269,6 @@ class CSSLengthValue {
                 if (renderBoxModel != null) {
                   renderBoxModel.markParentNeedsRelayout();
                 }
-                // @FIXME: Should return null instead once getComputedValue allows return null.
                 _computedValue = 0;
               }
             } else if (axisType == Axis.vertical) {
@@ -281,7 +279,6 @@ class CSSLengthValue {
                 if (renderBoxModel != null) {
                   renderBoxModel.markParentNeedsRelayout();
                 }
-                // @FIXME: Should return null instead once getComputedValue allows return null.
                 _computedValue = 0;
               }
             }
@@ -296,6 +293,24 @@ class CSSLengthValue {
   }
 
   bool get isAuto {
+    switch (propertyName) {
+      // Length is considered as auto of following properties
+      // if it computes to double.infinity.
+      case WIDTH:
+      case MIN_WIDTH:
+      case MAX_WIDTH:
+      case HEIGHT:
+      case MIN_HEIGHT:
+      case MAX_HEIGHT:
+      case TOP:
+      case BOTTOM:
+      case LEFT:
+      case RIGHT:
+        if (computedValue == double.infinity) {
+          return true;
+        }
+        break;
+    }
     return type == CSSLengthType.AUTO;
   }
 
