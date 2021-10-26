@@ -80,6 +80,7 @@ JSValue Window::postMessage(QjsContext *ctx, JSValue this_val, int argc, JSValue
   JS_FreeValue(ctx, messageEventValue);
   JS_FreeValue(ctx, messageEventInitValue);
   JS_FreeValue(ctx, globalObjectValue);
+  return JS_NULL;
 }
 
 PROP_GETTER(Window, devicePixelRatio)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
