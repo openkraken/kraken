@@ -45697,7 +45697,6 @@ static JSMapRecord *map_add_record(JSContext *ctx, JSMapState *s,
     mr->map = s;
     mr->empty = FALSE;
     if (s->is_weak) {
-      printf("set frst weak ref");
         JSObject *p = JS_VALUE_GET_OBJ(key);
         /* Add the weak reference */
         mr->next_weak_ref = p->first_weak_ref;
