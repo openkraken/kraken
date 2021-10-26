@@ -216,7 +216,7 @@ class RenderIntrinsic extends RenderBoxModel
 
   @override
   bool hitTestChildren(BoxHitTestResult result, {Offset? position}) {
-    if (renderStyle.transform != null) {
+    if (renderStyle.transformMatrix != null) {
       return hitTestIntrinsicChild(result, child, position!);
     }
     return super.hitTestChildren(result, position: position!);

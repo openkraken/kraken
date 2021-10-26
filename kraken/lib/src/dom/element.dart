@@ -166,7 +166,7 @@ class Element extends Node
     // Scrolling box
     bool isScrollingBox = scrollingContentLayoutBox != null;
     // Transform element
-    bool hasTransform = renderBoxModel?.renderStyle.transform != null;
+    bool hasTransform = renderBoxModel?.renderStyle.transformMatrix != null;
     // Fixed element
     bool isPositionedFixed = renderBoxModel?.renderStyle.position == CSSPositionType.fixed;
 

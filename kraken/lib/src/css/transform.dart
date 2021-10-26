@@ -177,6 +177,7 @@ mixin CSSTransformMixin on RenderStyleBase {
     }
     return _transformMatrix;
   }
+  // Transform animation drived by transformMatrix.
   set transformMatrix(Matrix4? value) {
     if (value == null || _transformMatrix == value) return;
     _transformMatrix = value;
