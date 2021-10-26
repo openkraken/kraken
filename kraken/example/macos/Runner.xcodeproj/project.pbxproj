@@ -265,6 +265,8 @@
 				"${BUILT_PRODUCTS_DIR}/connectivity_macos/connectivity_macos.framework",
 				"${PODS_ROOT}/../Flutter/ephemeral/.symlinks/plugins/kraken/macos/libkraken.dylib",
 				"${BUILT_PRODUCTS_DIR}/kraken/kraken.framework",
+				"${PODS_ROOT}/../Flutter/ephemeral/.symlinks/plugins/kraken_websocket/macos/libkraken_websocket.dylib",
+				"${BUILT_PRODUCTS_DIR}/kraken_websocket/kraken_websocket.framework",
 				"${BUILT_PRODUCTS_DIR}/shared_preferences_macos/shared_preferences_macos.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
@@ -273,6 +275,8 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/connectivity_macos.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/libkraken.dylib",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/kraken.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/libkraken_websocket.dylib",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/kraken_websocket.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/shared_preferences_macos.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;

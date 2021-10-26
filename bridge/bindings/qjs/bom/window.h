@@ -25,6 +25,7 @@ public:
   static JSValue open(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue scrollTo(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   static JSValue scrollBy(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
+  static JSValue postMessage(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
 
   Window() = delete;
   explicit Window(JSContext *context);
@@ -36,6 +37,7 @@ private:
   ObjectFunction m_scroll{m_context, m_prototypeObject, "scroll", scrollTo, 2};
   ObjectFunction m_scrollTo{m_context, m_prototypeObject, "scrollTo", scrollTo, 2};
   ObjectFunction m_scrollBy{m_context, m_prototypeObject, "scrollBy", scrollBy, 2};
+  ObjectFunction m_postMessage{m_context, m_prototypeObject, "postMessage", postMessage, 3};
 
   DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(10, devicePixelRatio, colorScheme, __location__, location, window, parent,  scrollX, scrollY, onerror, self);
   friend WindowInstance;
