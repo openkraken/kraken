@@ -644,13 +644,13 @@ class CSSMatrix {
         if (method.args.isNotEmpty && method.args.length <= 3) {
           CSSLengthValue y = CSSLengthValue.zero, z = CSSLengthValue.zero;
           if (method.args.length == 2) {
-            y = CSSLength.parseLength(method.args[1].trim(), renderStyle, TRANSLATE);
+            y = CSSLength.parseLength(method.args[1].trim(), renderStyle, TRANSLATE, Axis.vertical);
           }
           if (method.args.length == 3) {
-            y = CSSLength.parseLength(method.args[1].trim(), renderStyle, TRANSLATE);
+            y = CSSLength.parseLength(method.args[1].trim(), renderStyle, TRANSLATE, Axis.vertical);
             z = CSSLength.parseLength(method.args[2].trim(), renderStyle, TRANSLATE);
           }
-          CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSLATE);
+          CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSLATE, Axis.horizontal);
           x.renderStyle = y.renderStyle = z.renderStyle = renderStyle;
           return Matrix4.identity()..translate(x.computedValue, y.computedValue, z.computedValue);
         }
