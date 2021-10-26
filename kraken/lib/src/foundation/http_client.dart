@@ -248,7 +248,7 @@ class _HttpHeaders implements HttpHeaders {
   }
 
   @override
-  DateTime? get expires => DateTime.tryParse(_headers[HttpHeaders.expiresHeader] ?? '');
+  DateTime? get expires => tryParseHttpDate(_headers[HttpHeaders.expiresHeader] ?? '');
 
   @override
   set expires(DateTime? _expires) {
@@ -357,5 +357,14 @@ class _HttpHeaders implements HttpHeaders {
         ..write('\n');
     });
     return sb.toString();
+  }
+}
+
+DateTime? tryParseHttpDate(String input) {
+  try {
+    return HttpDate.parse(input);
+  } catch (ignored) {
+    // Ignore all exceptions.
+    return null;
   }
 }
