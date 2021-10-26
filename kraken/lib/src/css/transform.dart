@@ -928,6 +928,16 @@ mixin CSSTransformMixin on RenderStyleBase {
   static Offset DEFAULT_TRANSFORM_OFFSET = Offset(0, 0);
   static Alignment DEFAULT_TRANSFORM_ALIGNMENT = Alignment.center;
 
+  // https://drafts.csswg.org/css-transforms-1/#propdef-transform
+  // Name: transform
+  // Value: none | <transform-list>
+  // Initial: none
+  // Applies to: transformable elements
+  // Inherited: no
+  // Percentages: refer to the size of reference box
+  // Computed value: as specified, but with lengths made absolute
+  // Canonical order: per grammar
+  // Animation type: transform list, see interpolation rules
   List<CSSFunctionalNotation>? _transform;
   List<CSSFunctionalNotation>? get transform => _transform;
   set transform(List<CSSFunctionalNotation>? value) {
@@ -938,6 +948,11 @@ mixin CSSTransformMixin on RenderStyleBase {
     _transform = value;
     _transformMatrix = null;
     renderBoxModel!.markNeedsLayout();
+  }
+
+  static List<CSSFunctionalNotation>? resolveTransform(String present) {
+    if (present == 'none') return null;
+    return CSSFunction.parseFunction(present);
   }
 
   Matrix4? _transformMatrix;

@@ -1087,7 +1087,7 @@ class Element extends Node
       case TEXT_ALIGN:
         renderStyle.textAlign = value;
         break;
-      // Transfrom
+      // Transform
       case TRANSFORM:
         renderStyle.transform = value;
         break;
@@ -1180,16 +1180,16 @@ class Element extends Node
         value = CSSTextMixin.resolveTextAlign(present);
         break;
       case BACKGROUND_ATTACHMENT:
-        value =  CSSBackground.resolveBackgroundAttachment(present);
+        value = CSSBackground.resolveBackgroundAttachment(present);
         break;
       case BACKGROUND_IMAGE:
-        value =  CSSBackground.resolveBackgroundImage(present, renderStyle, property, elementManager.controller);
+        value = CSSBackground.resolveBackgroundImage(present, renderStyle, property, elementManager.controller);
         break;
       case BACKGROUND_REPEAT:
-        value =  CSSBackground.resolveBackgroundRepeat(present);
+        value = CSSBackground.resolveBackgroundRepeat(present);
         break;
       case BACKGROUND_POSITION_X:
-        value =  CSSPosition.resolveBackgroundPosition(present, renderStyle, property, true);
+        value = CSSPosition.resolveBackgroundPosition(present, renderStyle, property, true);
         break;
       case BACKGROUND_POSITION_Y:
         value = CSSPosition.resolveBackgroundPosition(present, renderStyle, property, false);
@@ -1243,6 +1243,8 @@ class Element extends Node
         value = CSSContentVisibilityMixin.resolveContentVisibility(present);
         break;
       case TRANSFORM:
+        value = CSSTransformMixin.resolveTransform(present);
+        break;
       case FILTER:
         value = CSSFunction.parseFunction(present);
         break;
