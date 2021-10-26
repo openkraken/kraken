@@ -172,6 +172,7 @@ mixin CSSTransformMixin on RenderStyleBase {
   Matrix4? _transformMatrix;
   Matrix4? get transformMatrix {
     if (_transformMatrix == null && _transform != null) {
+      // Illegal transform syntax will return null.
       _transformMatrix = CSSMatrix.computeTransformMatrix(_transform!, this as RenderStyle);
     }
     return _transformMatrix;
@@ -201,7 +202,7 @@ mixin CSSTransformMixin on RenderStyleBase {
   CSSOrigin? _transformOrigin;
   CSSOrigin? get transformOrigin => _transformOrigin;
   set transformOrigin(CSSOrigin? value) {
-  
+
     if (_transformOrigin == value) return;
     _transformOrigin = value;
 

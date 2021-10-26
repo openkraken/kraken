@@ -21,7 +21,10 @@ mixin RenderTransformMixin on RenderBoxModelBase {
       result.translate(translation.dx, translation.dy);
     }
 
-    result.multiply(renderStyle.transformMatrix!);
+    Matrix4? transformMatrix = renderStyle.transformMatrix;
+    if (transformMatrix != null) {
+      result.multiply(renderStyle.transformMatrix!);
+    }
 
     if (transformAlignment != Alignment.topLeft)
       result.translate(-translation.dx, -translation.dy);
