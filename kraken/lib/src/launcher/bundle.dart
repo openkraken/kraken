@@ -193,7 +193,7 @@ class NetworkAssetBundle extends AssetBundle {
     final HttpClientRequest request = await httpClient.getUrl(_urlFromKey(key));
     request.headers.set('Accept', getAcceptHeader());
     KrakenHttpOverrides.setContextHeader(request.headers, contextId);
-    request.headers.add(HttpHeaders.acceptHeader, 'application/x-kraken');
+
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok)
       throw FlutterError.fromParts(<DiagnosticsNode>[
