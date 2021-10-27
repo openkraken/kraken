@@ -34,7 +34,17 @@ const Map<String, bool> _CSSShorthandProperty = {
 };
 
 // Reorder the properties for control render style init order, the last is the largest.
-List<String> _propertyOrders = [LINE_CLAMP, WHITE_SPACE, FONT_SIZE, COLOR, OVERFLOW_X, OVERFLOW_Y, DISPLAY];
+List<String> _propertyOrders = [
+  LINE_CLAMP,
+  WHITE_SPACE,
+  FONT_SIZE,
+  COLOR,
+  TRANSITION_DURATION,
+  TRANSITION_PROPERTY,
+  OVERFLOW_X,
+  OVERFLOW_Y,
+  DISPLAY
+];
 
 RegExp _kebabCaseReg = RegExp(r'[A-Z]');
 

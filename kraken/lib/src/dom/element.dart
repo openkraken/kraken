@@ -1344,8 +1344,8 @@ class Element extends Node
       // Reset style.
       style.reset();
       _applyStyle();
-
-      renderStyle = RenderStyle(target: this);
+      
+      _resetRenderStyle();
       style.flushPendingProperties();
       renderBoxModel!.markNeedsLayout();
     }
@@ -1353,6 +1353,13 @@ class Element extends Node
     children.forEach((Element child) {
       child.recalculateStyle();
     });
+  }
+
+  void _resetRenderStyle() {
+    RenderStyle? parentRenderStyle = renderStyle.parent;
+    renderStyle = RenderStyle(target: this);
+    renderStyle.parent = parentRenderStyle;
+    renderBoxModel!.renderStyle = renderStyle;
   }
 
   @mustCallSuper
