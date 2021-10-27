@@ -582,7 +582,7 @@ class KeyframeEffect extends AnimationEffect {
         }
 
         RenderBoxModel? renderBoxModel = target!.renderBoxModel;
-        if (renderBoxModel != null) {
+        if (renderBoxModel != null && interpolation.begin != null && interpolation.end != null) {
           interpolation.lerp(interpolation.begin, interpolation.end, scaledLocalTime, property, renderBoxModel.renderStyle);
         }
       }
