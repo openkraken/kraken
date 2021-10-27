@@ -176,5 +176,25 @@ void main() {
       Uint8List bytesFromCache = await consolidateHttpClientResponseBytes(response);
       expect(bytesFromCache.length, response.contentLength);
     });
+
+    test('Cache should contain response headers.', () async {
+      // First request to save cache.
+      var req = await httpClient.openUrl('GET',
+          server.getUri('plain_text_with_etag_and_content_length'));
+      KrakenHttpOverrides.setContextHeader(req.headers, contextId);
+      var res = await req.close();
+      expect(String.fromCharCodes(await consolidateHttpClientResponseBytes(res)), 'CachedData');
+
+      // Assert cache object.
+      HttpCacheController cacheController = HttpCacheController.instance(req.headers.value('origin')!);
+      var cacheObject = await cacheController.getCacheObject(req.uri);
+      await cacheObject.read();
+      assert(cacheObject.valid);
+
+      var response = await cacheObject.toHttpClientResponse();
+      assert(response != null);
+      expect(response!.headers.value('cache-hits'), 'HIT');
+      expect(response.headers.value('x-custom-header'), 'hello-world');
+    });
   });
 }
