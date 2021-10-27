@@ -10,6 +10,16 @@ describe('custom widget element', () => {
     await snapshot(0.1);
   });
 
+  it('should work with html tags', async () => {
+    let div = document.createElement('div');
+    div.innerHTML = `<flutter-text value="Hello" />`;
+    document.body.appendChild(div);
+    await snapshot();
+
+    div.innerHTML = `<flutter-text value="Hi"></flutter-text>`;
+    await snapshot();
+  });
+
   it('use flutter asset image', async () => {
     const image = document.createElement('flutter-asset-image');
     image.setAttribute('src', 'assets/rabbit.png');
