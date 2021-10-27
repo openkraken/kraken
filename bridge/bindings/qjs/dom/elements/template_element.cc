@@ -69,7 +69,8 @@ TemplateElementInstance::~TemplateElementInstance() {
 
 void TemplateElementInstance::gcMark(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) {
   NodeInstance::gcMark(rt, val, mark_func);
-  JS_MarkValue(rt, m_content->instanceObject, mark_func);
+  // Should check object is already inited before gc mark.
+  if (JS_IsObject(m_content->instanceObject)) JS_MarkValue(rt, m_content->instanceObject, mark_func);
 }
 
 }

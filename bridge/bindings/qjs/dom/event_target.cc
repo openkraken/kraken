@@ -496,9 +496,10 @@ JSValue EventTargetInstance::getNativeProperty(const char *prop) {
 
 void EventTargetInstance::gcMark(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) {
   // Tell gc eventTargetInstance have these properties.
-  JS_MarkValue(rt, m_eventHandlers, mark_func);
-  JS_MarkValue(rt, m_propertyEventHandler, mark_func);
-  JS_MarkValue(rt, m_properties, mark_func);
+  // Should check object is already inited before gc mark.
+  if (JS_IsObject(m_eventHandlers)) JS_MarkValue(rt, m_eventHandlers, mark_func);
+  if (JS_IsObject(m_propertyEventHandler)) JS_MarkValue(rt, m_propertyEventHandler, mark_func);
+  if (JS_IsObject(m_properties)) JS_MarkValue(rt, m_properties, mark_func);
 }
 
 void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *nativeEventType,
