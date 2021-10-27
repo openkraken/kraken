@@ -17,7 +17,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/gesture.dart';
 import 'package:kraken/rendering.dart';
 import 'package:meta/meta.dart';
 
@@ -82,52 +81,6 @@ typedef GetViewportSize = Size Function();
 /// Get the render box model of current element.
 typedef GetRenderBoxModel = RenderBoxModel? Function();
 
-/// Delegate methods passed to renderBoxModel for actions involved with element
-/// (eg. convert renderBoxModel to repaint boundary then attach to element).
-class ElementDelegate {
-
-  /// Toggle the renderer of element between repaint boundary and non repaint boundary.
-  VoidCallback toggleRendererRepaintBoundary;
-
-  /// Detach the renderer from its owner element.
-  VoidCallback detachRenderer;
-
-  /// Return the targetId of current element.
-  GetTargetId getTargetId;
-
-  /// Get the font size of root element
-  GetRootElementFontSize getRootElementFontSize;
-  GetViewportSize getViewportSize;
-  GetRenderBoxModel getRenderBoxModel;
-  GetChildNodes getChildNodes;
-
-  // Handle scrolling.
-  ScrollListener handleScroll;
-
-  /// Focus the input element.
-  VoidCallback focusInput;
-
-  /// Blur the input element.
-  VoidCallback blurInput;
-
-  /// Scroll the input element to the caret.
-  VoidCallback scrollInputToCaret;
-
-  ElementDelegate({
-    required this.toggleRendererRepaintBoundary,
-    required this.detachRenderer,
-    required this.getTargetId,
-    required this.getRootElementFontSize,
-    required this.handleScroll,
-    required this.focusInput,
-    required this.blurInput,
-    required this.scrollInputToCaret,
-    required this.getViewportSize,
-    required this.getRenderBoxModel,
-    required this.getChildNodes,
-  });
-}
-
 class Element extends Node
     with
         ElementBase,
@@ -153,8 +106,6 @@ class Element extends Node
 
   /// The inline style is a map of style property name to style property value.
   final Map<String, dynamic> inlineStyle = {};
-
-  late ElementDelegate _elementDelegate;
 
   Size get viewportSize => elementManager.viewport.viewportSize;
 
@@ -184,64 +135,11 @@ class Element extends Node
         _isIntrinsicBox = isIntrinsicBox,
         super(NodeType.ELEMENT_NODE, targetId, nativeEventTarget, elementManager, tagName) {
 
-      // Init element delegate for proxy element internal method.
-      _elementDelegate = ElementDelegate(
-        toggleRendererRepaintBoundary: _toggleRendererRepaintBoundary,
-        detachRenderer: detach,
-        getTargetId: _getTargetId,
-        getRootElementFontSize: elementManager.getRootFontSize,
-        handleScroll: _handleScroll,
-        focusInput: _focusInput,
-        blurInput: _blurInput,
-        scrollInputToCaret: _scrollInputToCaret,
-        getViewportSize: _getViewportSize,
-        getRenderBoxModel: _getRenderBoxModel,
-        getChildNodes: _getChildNodes,
-      );
-
     // Init style and add change listener.
     style = CSSStyleDeclaration.computedStyle(this, _defaultStyle, _onStyleChanged);
 
     // Init render style.
-    renderStyle = RenderStyle(style: style, elementDelegate: _elementDelegate);
-  }
-
-  Size _getViewportSize() {
-    return elementManager.viewport.viewportSize;
-  }
-
-  RenderBoxModel? _getRenderBoxModel() {
-    return renderBoxModel;
-  }
-
-  void _toggleRendererRepaintBoundary() {
-    if (shouldConvertToRepaintBoundary) {
-      convertToRepaintBoundary();
-    } else {
-      convertToNonRepaintBoundary();
-    }
-  }
-
-  int _getTargetId() {
-    return targetId;
-  }
-
-  List<Node> _getChildNodes() {
-    return childNodes;
-  }
-
-  void _focusInput() {
-    InputElement input = this as InputElement;
-    InputElement.setFocus(input);
-  }
-
-  void _blurInput() {
-    InputElement.clearFocus();
-  }
-
-  void _scrollInputToCaret() {
-    InputElement inputElement = this as InputElement;
-    inputElement.scrollToCaret();
+    renderStyle = RenderStyle(target: this);
   }
 
   @override
@@ -1423,7 +1321,7 @@ class Element extends Node
       style.reset();
       _applyStyle();
 
-      renderBoxModel!.renderStyle = RenderStyle(style: style, elementDelegate: _elementDelegate);
+      renderStyle = RenderStyle(target: this);
       style.flushPendingProperties();
       renderBoxModel!.markNeedsLayout();
     }
@@ -1632,7 +1530,7 @@ class Element extends Node
   // Create a new RenderLayoutBox for the scrolling content.
   RenderLayoutBox createScrollingContentLayout() {
     // FIXME: Create a empty renderStyle for do not share renderStyle with element. Current update here will break flexbox.
-    RenderStyle scrollingContentRenderStyle = RenderStyle(style: CSSStyleDeclaration.empty, elementDelegate: _elementDelegate);
+    RenderStyle scrollingContentRenderStyle = RenderStyle(target: this);
     RenderLayoutBox scrollingContentLayoutBox = _createRenderLayout(
       repaintSelf: true,
       renderStyle: scrollingContentRenderStyle,
@@ -1657,12 +1555,12 @@ class Element extends Node
         if (repaintSelf) {
           flexLayout = RenderSelfRepaintFlexLayout(
             renderStyle: renderStyle,
-            elementDelegate: _elementDelegate,
+            target: this,
           );
         } else {
           flexLayout = RenderFlexLayout(
             renderStyle: renderStyle,
-            elementDelegate: _elementDelegate,
+            target: this,
           );
         }
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
@@ -1718,12 +1616,12 @@ class Element extends Node
         if (repaintSelf) {
           flowLayout = RenderSelfRepaintFlowLayout(
             renderStyle: renderStyle,
-            elementDelegate: _elementDelegate,
+            target: this,
           );
         } else {
           flowLayout = RenderFlowLayout(
             renderStyle: renderStyle,
-            elementDelegate: _elementDelegate,
+            target: this,
           );
         }
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
@@ -1776,7 +1674,7 @@ class Element extends Node
       if (prevRenderLayoutBox == null) {
         renderRecyclerLayout = RenderRecyclerLayout(
           renderStyle: renderStyle,
-          elementDelegate: _elementDelegate,
+          target: this,
         );
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
         renderRecyclerLayout = prevRenderLayoutBox.toRenderRecyclerLayout();
@@ -1802,12 +1700,12 @@ class Element extends Node
       if (repaintSelf) {
         intrinsic = RenderSelfRepaintIntrinsic(
           renderStyle,
-          _elementDelegate
+          this
         );
       } else {
         intrinsic = RenderIntrinsic(
           renderStyle,
-          _elementDelegate
+          this
         );
       }
     } else {

@@ -758,7 +758,7 @@ class _KrakenState extends State<Kraken> {
     dom.RenderInputBox renderInputBox = renderEditable.parent as dom.RenderInputBox;
     dom.RenderInputLeaderLayer renderInputLeaderLayer = renderInputBox.parent as dom.RenderInputLeaderLayer;
     RenderIntrinsic renderIntrisic = renderInputLeaderLayer.parent as RenderIntrinsic;
-    renderIntrisic.elementDelegate.focusInput();
+    (renderIntrisic.target as dom.InputElement).focus();
   }
 
   // Make the input element of the RenderEditable blur.
@@ -766,7 +766,7 @@ class _KrakenState extends State<Kraken> {
     dom.RenderInputBox renderInputBox = renderEditable.parent as dom.RenderInputBox;
     dom.RenderInputLeaderLayer renderInputLeaderLayer = renderInputBox.parent as dom.RenderInputLeaderLayer;
     RenderIntrinsic renderIntrisic = renderInputLeaderLayer.parent as RenderIntrinsic;
-    renderIntrisic.elementDelegate.blurInput();
+    (renderIntrisic.target as dom.InputElement).blur();
   }
 
   // Find all the RenderEditables in the widget.
@@ -804,7 +804,7 @@ class _KrakenState extends State<Kraken> {
     dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
     dom.RenderInputLeaderLayer renderInputLeaderLayer = renderInputBox.parent as dom.RenderInputLeaderLayer;
     RenderIntrinsic renderIntrisic = renderInputLeaderLayer.parent as RenderIntrinsic;
-    renderIntrisic.elementDelegate.scrollInputToCaret();
+    (renderIntrisic.target as dom.InputElement).scrollToCaret();
   }
 }
 

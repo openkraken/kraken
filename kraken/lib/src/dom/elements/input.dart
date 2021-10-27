@@ -152,7 +152,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   static void clearFocus() {
     if (InputElement.focusInputElement != null) {
-      InputElement.focusInputElement!.blur();
+      InputElement.focusInputElement!.blurInput();
     }
 
     InputElement.focusInputElement = null;
@@ -168,7 +168,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
       clearFocus();
       InputElement.focusInputElement = inputElement;
-      inputElement.focus();
+      inputElement.focusInput();
     }
   }
 
@@ -282,14 +282,22 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     return super.getProperty(key);
   }
 
+  void focus() {
+    setFocus(this);
+  }
+
+  void blur() {
+    clearFocus();
+  }
+
   @override
   handleJSCall(String method, List argv) {
     switch(method) {
       case 'focus':
-        setFocus(this);
+        focus();
         break;
       case 'blur':
-        clearFocus();
+        blur();
         break;
     }
     return super.handleJSCall(method, argv);
@@ -366,7 +374,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
       // It needs to judge width in style here cause
       // width in renderStyle may be set in node attach.
-      } else if (property == FONT_SIZE && renderStyle.style[WIDTH].isEmpty) {
+      } else if (property == FONT_SIZE && style[WIDTH].isEmpty) {
         double fontSize = renderStyle.fontSize.computedValue;
         renderStyle.width = CSSLengthValue(fontSize * _FONT_SIZE_RATIO, CSSLengthType.PX);
         _renderInputLeaderLayer!.markNeedsLayout();
@@ -490,7 +498,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
   }
 
-  void focus() {
+  void focusInput() {
     if (isRendererAttached) {
       // Set focus that make it add keyboard listener
       _renderEditable!.hasFocus = true;
@@ -499,7 +507,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
   }
 
-  void blur() {
+  void blurInput() {
     if (isRendererAttached) {
       // Set focus that make it remove keyboard listener
       _renderEditable!.hasFocus = false;

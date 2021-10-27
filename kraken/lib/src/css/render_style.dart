@@ -14,11 +14,10 @@ import 'package:kraken/rendering.dart';
 mixin RenderStyleBase {
   // Following properties used for exposing APIs
   // for class that extends [RenderStyleBase].
-  late ElementDelegate elementDelegate;
-  late CSSStyleDeclaration style;
-  RenderBoxModel? get renderBoxModel => elementDelegate.getRenderBoxModel();
-  Size get viewportSize => elementDelegate.getViewportSize();
-  double get rootFontSize => style.target!.elementManager.getRootFontSize();
+  late Element target;
+  RenderBoxModel? get renderBoxModel => target.renderBoxModel;
+  Size get viewportSize => target.elementManager.viewport.viewportSize;
+  double get rootFontSize => target.elementManager.getRootFontSize();
   Color get currentColor => (this as RenderStyle).color;
 }
 
@@ -49,15 +48,12 @@ class RenderStyle
     CSSOpacityMixin {
 
   @override
-  CSSStyleDeclaration style;
-  @override
-  ElementDelegate elementDelegate;
+  Element target;
 
   RenderStyle? parent;
 
   RenderStyle({
-    required this.style,
-    required this.elementDelegate,
+    required this.target,
   });
 
   dynamic getProperty(String name) {

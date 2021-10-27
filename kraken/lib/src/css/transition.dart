@@ -50,7 +50,7 @@ void _updateColor(Color oldColor, Color newColor, double progress, String proper
   int green = (greenDiff * progress).toInt() + oldColor.green;
   Color color = Color.fromARGB(alpha, red, green, blue);
 
-  renderStyle.style.target!.setRenderStyleProperty(property, color);
+  renderStyle.target.setRenderStyleProperty(property, color);
 }
 
 double? _parseLength(String length, RenderStyle renderStyle, String property) {
@@ -59,7 +59,7 @@ double? _parseLength(String length, RenderStyle renderStyle, String property) {
 
 void _updateLength(double oldLengthValue, double newLengthValue, double progress, String property, RenderStyle renderStyle) {
   double value = oldLengthValue * (1 - progress) + newLengthValue * progress;
-  renderStyle.style.target!.setRenderStyleProperty(property, CSSLengthValue(value, CSSLengthType.PX));
+  renderStyle.target.setRenderStyleProperty(property, CSSLengthValue(value, CSSLengthType.PX));
 }
 
 FontWeight _parseFontWeight(String fontWeight, RenderStyle renderStyle, String property) {
@@ -85,7 +85,7 @@ double _getNumber(double oldValue, double newValue, double progress) {
 
 void _updateNumber(double oldValue, double newValue, double progress, String property, RenderStyle renderStyle) {
   double number = _getNumber(oldValue, newValue, progress);
-  renderStyle.style.target!.setRenderStyleProperty(property, number);
+  renderStyle.target.setRenderStyleProperty(property, number);
 }
 
 double _parseLineHeight(String lineHeight, RenderStyle renderStyle, String property) {

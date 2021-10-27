@@ -357,7 +357,7 @@ mixin ElementOverflowMixin on ElementBase {
       }
     }
 
-    renderStyle.style.removeStyleChangeListener(scrollingContentBoxStyleListener);
+    element.style.removeStyleChangeListener(scrollingContentBoxStyleListener);
 
     // Remove inner scrolling box
     newLayoutBox.remove(scrollingContentLayoutBox!);

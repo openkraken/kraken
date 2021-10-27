@@ -51,7 +51,7 @@ mixin CSSTextMixin on RenderStyleBase {
     RenderStyle renderStyle = this as RenderStyle;
     _colorRealativeProperties.forEach((String propertyName, _) {
       // TODO: use css color abstraction avoid re-parse the property string.
-      renderStyle.style.target!.setRenderStyle(propertyName, renderStyle.style.getPropertyValue(propertyName));
+      renderStyle.target.setRenderStyle(propertyName, renderStyle.target.style.getPropertyValue(propertyName));
     });
   }
 
@@ -337,7 +337,7 @@ mixin CSSTextMixin on RenderStyleBase {
       renderBoxModel.visitChildren((RenderObject child) {
         if (child is RenderFlowLayout) {
           // Only need to layout when the specified style property is not set.
-          if (child.renderStyle.style[styleProperty].isEmpty) {
+          if (child.renderStyle.target.style[styleProperty].isEmpty) {
             _markNestFlowLayoutNeedsLayout(child, styleProperty);
           }
         }
@@ -353,7 +353,7 @@ mixin CSSTextMixin on RenderStyleBase {
       renderBoxModel.visitChildren((RenderObject child) {
         if (child is RenderLayoutBox) {
           // Only need to layout when the specified style property is not set.
-          if (child.renderStyle.style[styleProperty].isEmpty) {
+          if (child.renderStyle.target.style[styleProperty].isEmpty) {
             _markNestChildrenTextAndLayoutNeedsLayout(child, styleProperty);
           }
         } else if (child is RenderTextBox) {
@@ -383,7 +383,7 @@ mixin CSSTextMixin on RenderStyleBase {
     renderBoxModel.visitChildren((RenderObject child) {
       if (child is RenderBoxModel) {
         // Only need to update child text when style property is not set.
-        if (child.renderStyle.style[styleProperty].isEmpty) {
+        if (child.renderStyle.target.style[styleProperty].isEmpty) {
           _markChildrenNeedsLayout(child, styleProperty);
         }
       } else if (child is RenderTextBox) {

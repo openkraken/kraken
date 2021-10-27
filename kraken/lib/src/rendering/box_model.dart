@@ -157,10 +157,10 @@ class RenderLayoutBox extends RenderBoxModel
             ContainerBoxParentData<RenderBox>> {
   RenderLayoutBox({
     required RenderStyle renderStyle,
-    required ElementDelegate elementDelegate
+    required Element target
   }) : super(
     renderStyle: renderStyle,
-    elementDelegate: elementDelegate
+    target: target
   );
 
   @override
@@ -507,8 +507,8 @@ class RenderLayoutBox extends RenderBoxModel
 }
 
 mixin RenderBoxModelBase on RenderBox {
+  late Element target;
   late RenderStyle renderStyle;
-  late ElementDelegate elementDelegate;
   Size? boxSize;
 }
 
@@ -525,7 +525,7 @@ class RenderBoxModel extends RenderBox
         RenderObjectWithControllerMixin {
   RenderBoxModel({
     required this.renderStyle,
-    required this.elementDelegate
+    required this.target
   }) : super();
 
   @override
@@ -538,7 +538,7 @@ class RenderBoxModel extends RenderBox
   @override
   late RenderStyle renderStyle;
   @override
-  late ElementDelegate elementDelegate;
+  late Element target;
 
   bool get debugShouldPaintOverlay => _debugShouldPaintOverlay;
 
@@ -1378,7 +1378,7 @@ class RenderBoxModel extends RenderBox
     RenderObject? _parent = this;
     while (_parent != null && _parent is! RenderViewportBox) {
       if (_parent is RenderBoxModel &&
-          _parent.renderStyle.style[styleProperty].isNotEmpty) {
+          _parent.renderStyle.target.style[styleProperty].isNotEmpty) {
         break;
       }
       if (_parent.parent != null) {

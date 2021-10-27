@@ -34,12 +34,12 @@ class RenderRecyclerLayout extends RenderLayoutBox {
 
   RenderRecyclerLayout({
     required RenderStyle renderStyle,
-    required ElementDelegate elementDelegate
-  }) : super(renderStyle: renderStyle, elementDelegate: elementDelegate) {
+    required Element target
+  }) : super(renderStyle: renderStyle, target: target) {
     pointerListener = _pointerListener;
     scrollable = KrakenScrollable(axisDirection: getAxisDirection(axis));
     axis = renderStyle.sliverDirection;
-    _renderSliverBoxChildManager = ElementSliverBoxChildManager(elementDelegate, this);
+    _renderSliverBoxChildManager = ElementSliverBoxChildManager(target, this);
 
     switch (axis) {
       case Axis.horizontal:
@@ -61,9 +61,6 @@ class RenderRecyclerLayout extends RenderLayoutBox {
     );
     super.insert(_renderViewport);
   }
-
-  @override
-  ScrollListener? get scrollListener => elementDelegate.handleScroll;
 
   @override
   bool get isRepaintBoundary => true;
@@ -232,7 +229,7 @@ class RenderRecyclerLayout extends RenderLayoutBox {
     RenderFlexLayout renderFlexLayout = RenderFlexLayout(
       children: children as List<RenderBox>?,
       renderStyle: renderStyle,
-      elementDelegate: elementDelegate,
+      target: target,
     );
     return copyWith(renderFlexLayout);
   }
@@ -241,7 +238,7 @@ class RenderRecyclerLayout extends RenderLayoutBox {
     List<RenderObject?> children = getDetachedChildrenAsList();
     RenderFlowLayout renderFlowLayout = RenderFlowLayout(
       renderStyle: renderStyle,
-      elementDelegate: elementDelegate,
+      target: target,
     );
     renderFlowLayout.addAll(children as List<RenderBox>?);
     return copyWith(renderFlowLayout);
@@ -282,7 +279,7 @@ class RenderRecyclerLayout extends RenderLayoutBox {
 
 /// [RenderSliverBoxChildManager] for sliver element.
 class ElementSliverBoxChildManager implements RenderSliverBoxChildManager {
-  final ElementDelegate _elementDelegate;
+  final Element _target;
   final RenderRecyclerLayout _recyclerLayout;
 
   // Flag to determine whether newly added children could
@@ -292,9 +289,9 @@ class ElementSliverBoxChildManager implements RenderSliverBoxChildManager {
   // The current rendering object index.
   int _currentIndex = -1;
 
-  ElementSliverBoxChildManager(this._elementDelegate, this._recyclerLayout);
+  ElementSliverBoxChildManager(this._target, this._recyclerLayout);
 
-  Iterable<Node> get _renderNodes => _elementDelegate.getChildNodes().where((child) => child is Element || child is TextNode);
+  Iterable<Node> get _renderNodes => _target.childNodes.where((child) => child is Element || child is TextNode);
 
   // Only count renderable child.
   @override
@@ -347,7 +344,7 @@ class ElementSliverBoxChildManager implements RenderSliverBoxChildManager {
   @override
   void removeChild(RenderBox child) {
     if (child is RenderBoxModel) {
-      child.elementDelegate.detachRenderer();
+      child.target.detach();
     } else {
       child.detach();
     }
