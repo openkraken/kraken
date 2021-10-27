@@ -3,20 +3,35 @@ import 'dart:async';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/widget.dart';
-import 'package:flutter/material.dart' show TextDirection, TextStyle, Color, Image, Text, AssetImage;
+import 'package:flutter/material.dart' show TextDirection, TextStyle, Color, Image, Text, AssetImage, Widget, BuildContext hide Element;
+
+class TextCreator extends BaseWidgetCreator {
+  @override
+  Widget build(BuildContext context, Map<String, dynamic> properties) {
+    return Text(properties['value'] ?? '', textDirection: TextDirection.ltr, style: TextStyle(color: Color.fromARGB(255, 100, 100, 100)));
+  }
+}
+
+class ImageCreator extends BaseWidgetCreator {
+  @override
+  Widget build(BuildContext context, Map<String, dynamic> properties) {
+    return Image(image: AssetImage(properties['src']));
+  }
+}
+
+class SampleElementCreator extends BaseCustomElementCreator {
+  SampleElementCreator() : super('sample-element');
+
+  @override
+  Element build(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager) {
+    return SampleElement(targetId, nativeEventTarget, elementManager);
+  }
+}
 
 void defineKrakenCustomElements() {
-  Kraken.defineCustomElement<WidgetCreator>('flutter-text', (Map<String, dynamic> properties) {
-    return Text(properties['value'] ?? '', textDirection: TextDirection.ltr, style: TextStyle(color: Color.fromARGB(255, 100, 100, 100)));
-  });
-
-  Kraken.defineCustomElement<WidgetCreator>('flutter-asset-image', (Map<String, dynamic> properties) {
-    return Image(image: AssetImage(properties['src']));
-  });
-
-  Kraken.defineCustomElement<ElementCreator>('sample-element', (int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager) {
-    return SampleElement(targetId, nativeEventTarget, elementManager);
-  });
+  Kraken.defineCustomElement(WidgetElementCreator('flutter-text', TextCreator()));
+  Kraken.defineCustomElement(WidgetElementCreator('flutter-asset-image', ImageCreator()));
+  Kraken.defineCustomElement(SampleElementCreator());
 }
 
 class SampleElement extends Element {
