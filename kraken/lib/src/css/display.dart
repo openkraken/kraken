@@ -64,6 +64,7 @@ mixin CSSDisplayMixin on RenderStyleBase {
 
         parentRenderObject.remove(prevRenderLayoutBox!);
         parentRenderObject.insert(renderBoxModel!, after: previous as RenderBox?);
+        element.renderBoxModel = renderBoxModel;
       } else {
         renderBoxModel!.markNeedsLayout();
       }
