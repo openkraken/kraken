@@ -349,8 +349,8 @@ mixin CSSTransitionMixin on RenderStyleBase {
     };
 
     animation.onfinish = (AnimationPlaybackEvent event) {
-      _setTransitionEndProperty(propertyName, begin, end);
       _propertyRunningTransition.remove(propertyName);
+      target.setRenderStyle(propertyName, end);
       // An Event fired when a CSS transition has finished playing.
       target.dispatchEvent(Event(EVENT_TRANSITION_END));
     };
@@ -358,11 +358,6 @@ mixin CSSTransitionMixin on RenderStyleBase {
     target.dispatchEvent(Event(EVENT_TRANSITION_RUN));
     
     animation.play();
-  }
-
-  _setTransitionEndProperty(String propertyName, String? prevValue, String value) {
-    if (value == prevValue) return;
-    target.setRenderStyle(propertyName, value);
   }
 
   void cancelRunningTransiton() {
