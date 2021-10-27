@@ -180,7 +180,7 @@ class Element extends Node
   @override
   void willDetachRenderer() {
     // Cancel running transition.
-    style.cancelRunningTransiton();
+    renderStyle.cancelRunningTransiton();
     // Remove all intersection change listeners.
     renderBoxModel!.clearIntersectionChangeListeners();
 
@@ -992,6 +992,19 @@ class Element extends Node
       case TRANSFORM_ORIGIN:
         renderStyle.transformOrigin = value;
         break;
+      // Transition
+      case TRANSITION_DELAY:
+        renderStyle.transitionDelay = value;
+        break; 
+      case TRANSITION_DURATION:
+        renderStyle.transitionDuration = value;
+        break;
+      case TRANSITION_TIMING_FUNCTION:
+        renderStyle.transitionTimingFunction = value;
+        break;
+      case TRANSITION_PROPERTY:
+        renderStyle.transitionProperty = value;
+        break;
       // Others
       case OBJECT_FIT:
         renderStyle.objectFit = value;
@@ -1195,6 +1208,13 @@ class Element extends Node
       case VERTICAL_ALIGN:
         value = CSSInlineMixin.resolveVerticalAlign(present);
         break;
+      // Transition
+      case TRANSITION_DELAY:
+      case TRANSITION_DURATION:
+      case TRANSITION_TIMING_FUNCTION:
+      case TRANSITION_PROPERTY:
+        value = CSSStyleProperty.getMultipleValues(present);
+        break;
     }
 
     return value;
@@ -1292,8 +1312,12 @@ class Element extends Node
     style.setProperty(propertyName, value, isImportant, viewportSize);
   }
 
-  void _onStyleChanged(String property, String? original, String present) {
-    setRenderStyle(property, present);
+  void _onStyleChanged(String propertyName, String? prevValue, String currentValue) {
+    if (renderStyle.shouldTransition(propertyName, prevValue, currentValue)) {
+      renderStyle.runTransition(propertyName, prevValue, currentValue);
+    } else {
+      setRenderStyle(propertyName, currentValue);
+    }
   }
 
   // Set inline style property.

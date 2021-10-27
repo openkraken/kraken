@@ -607,11 +607,11 @@ class CSSStyleProperty {
       String? delay;
 
       for (String part in parts) {
-        if (property == null && CSSTransition.isValidTransitionPropertyValue(part)) {
+        if (property == null && CSSTransitionMixin.isValidTransitionPropertyValue(part)) {
           property = part;
         } else if (duration == null && CSSTime.isTime(part)) {
           duration = part;
-        } else if (timingFuction == null && CSSTransition.isValidTransitionTimingFunctionValue(part)) {
+        } else if (timingFuction == null && CSSTransitionMixin.isValidTransitionTimingFunctionValue(part)) {
           timingFuction = part;
         } else if (delay == null && CSSTime.isTime(part)) {
           delay = part;

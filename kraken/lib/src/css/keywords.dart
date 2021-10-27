@@ -149,6 +149,12 @@ const String SKEW_Y = 'skewy';
 
 const String PERSPECTIVE = 'perspective';
 
+const String SAFE_AREA_INSET = 'safe-area-inset';
+const String SAFE_AREA_INSET_TOP = '$SAFE_AREA_INSET-top';
+const String SAFE_AREA_INSET_LEFT = '$SAFE_AREA_INSET-left';
+const String SAFE_AREA_INSET_RIGHT = '$SAFE_AREA_INSET-right';
+const String SAFE_AREA_INSET_BOTTOM = '$SAFE_AREA_INSET-bottom';
+
 // CSS Values keywords
 const String INITIAL = 'initial';
 const String NORMAL = 'normal';

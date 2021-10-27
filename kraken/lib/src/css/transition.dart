@@ -5,9 +5,10 @@
 
 import 'dart:ui';
 
-import 'package:flutter/animation.dart';
+import 'package:flutter/animation.dart' show Curve;
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/src/css/animation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 // CSS Transitions: https://drafts.csswg.org/css-transitions/
@@ -178,14 +179,85 @@ enum CSSTransitionEvent {
   cancel,
 }
 
-class CSSTransition {
-  static void updateTransition(CSSStyleDeclaration style) {
-    Map<String, List> transitions = {};
+mixin CSSTransitionMixin on RenderStyleBase {
 
-    List<String> transitionProperty = CSSStyleProperty.getMultipleValues(style[TRANSITION_PROPERTY]) ?? [ALL];
-    List<String> transitionDuration = CSSStyleProperty.getMultipleValues(style[TRANSITION_DURATION]) ?? [_0s];
-    List<String> transitionTimingFunction = CSSStyleProperty.getMultipleValues(style[TRANSITION_TIMING_FUNCTION]) ?? [EASE];
-    List<String> transitionDelay = CSSStyleProperty.getMultipleValues(style[TRANSITION_DELAY]) ?? [_0s];
+  // https://drafts.csswg.org/css-transitions/#transition-property-property
+  // Name: transition-property
+  // Value: none | <single-transition-property>#
+  // Initial: all
+  // Applies to: all elements
+  // Inherited: no
+  // Percentages: N/A
+  // Computed value: the keyword none else a list of identifiers
+  // Canonical order: per grammar
+  // Animation type: not animatable
+  List<String>? _transitionProperty;
+  set transitionProperty(List<String>? value) {
+    _transitionProperty = value;
+    _effectiveTransitions = null;
+    // https://github.com/WebKit/webkit/blob/master/Source/WebCore/animation/AnimationTimeline.cpp#L257
+    // Any animation found in previousAnimations but not found in newAnimations is not longer current and should be canceled.
+    // @HACK: There are no way to get animationList from styles(Webkit will create an new Style object when style changes, but Kraken not).
+    // Therefore we should cancel all running transition to get thing works.
+    finishRunningTransiton();
+  }
+  List<String> get transitionProperty => _transitionProperty ?? const [ALL];
+
+  // https://drafts.csswg.org/css-transitions/#transition-duration-property
+  // Name: transition-duration
+  // Value: <time>#
+  // Initial: 0s
+  // Applies to: all elements
+  // Inherited: no
+  // Percentages: N/A
+  // Computed value: list, each item a duration
+  // Canonical order: per grammar
+  // Animation type: not animatable
+  List<String>? _transitionDuration;
+  set transitionDuration(List<String>? value) {
+    _transitionDuration = value;
+    _effectiveTransitions = null;
+  }
+  List<String> get transitionDuration => _transitionDuration ?? const [_0s];
+
+  // https://drafts.csswg.org/css-transitions/#transition-timing-function-property
+  // Name: transition-timing-function
+  // Value: <easing-function>#
+  // Initial: ease
+  // Applies to: all elements
+  // Inherited: no
+  // Percentages: N/A
+  // Computed value: as specified
+  // Canonical order: per grammar
+  // Animation type: not animatable
+  List<String>? _transitionTimingFunction;
+  set transitionTimingFunction(List<String>? value) {
+    _transitionTimingFunction = value;
+    _effectiveTransitions = null;
+  }
+  List<String> get transitionTimingFunction => _transitionTimingFunction ?? const [EASE];
+
+  // https://drafts.csswg.org/css-transitions/#transition-delay-property
+  // Name: transition-delay
+  // Value: <time>#
+  // Initial: 0s
+  // Applies to: all elements
+  // Inherited: no
+  // Percentages: N/A
+  // Computed value: list, each item a duration
+  // Canonical order: per grammar
+  // Animation type: not animatable
+  List<String>? _transitionDelay;
+  set transitionDelay(List<String>? value) {
+    _transitionDelay = value;
+    _effectiveTransitions = null;
+  }
+  List<String> get transitionDelay => _transitionDelay ?? const [_0s];
+
+  Map<String, List>? _effectiveTransitions;
+  Map<String, List> get effectiveTransitions {
+    if (_effectiveTransitions != null) return _effectiveTransitions!;
+    Map<String, List> transitions = {};
 
     for (int i = 0; i < transitionProperty.length; i++) {
       String property = _toCamelCase(transitionProperty[i]);
@@ -194,7 +266,140 @@ class CSSTransition {
       String delay = transitionDelay.length == 1 ? transitionDelay[0] : transitionDelay[i];
       transitions[property] = [duration, function, delay];
     }
-    style.transitions = transitions;
+    return _effectiveTransitions = transitions;
+  }
+
+  bool shouldTransition(String property, String? prevValue, String nextValue) {
+    // When begin propertyValue is AUTO, skip animation and trigger style update directly.
+    prevValue ??= CSSInitialValues[property];
+    if (CSSLength.isAuto(prevValue) || CSSLength.isAuto(nextValue)) {
+      return false;
+    }
+
+    // Transition does not work when renderBoxModel has not been layout yet.
+    if (renderBoxModel != null && renderBoxModel!.hasSize && CSSTranstionHandlers[property] != null &&
+      (effectiveTransitions.containsKey(property) || effectiveTransitions.containsKey(ALL))) {
+      bool shouldTransition = false;
+      // Transition will be disabled when all transition has transitionDuration as 0.
+      effectiveTransitions.forEach((String transitionKey, List transitionOptions) {
+        double duration = CSSTime.parseTime(transitionOptions[0]).toDouble();
+        if (duration != 0) {
+          shouldTransition = true;
+        }
+      });
+      return shouldTransition;
+    }
+    return false;
+  }
+
+  final Map<String, Animation> _propertyRunningTransition = {};
+  final Map<String, String> _animationProperties = {};
+
+  bool _hasRunningTransition(String property) {
+    return _propertyRunningTransition.containsKey(property);
+  }
+
+  String? removeAnimationProperty(String propertyName) {
+    String? prevValue = EMPTY_STRING;
+
+    if (_animationProperties.containsKey(propertyName)) {
+       prevValue = _animationProperties[propertyName];
+      _animationProperties.remove(propertyName);
+    }
+
+    return prevValue;
+  }
+
+  void runTransition(String propertyName, begin, end) {
+    if (_hasRunningTransition(propertyName)) {
+      Animation animation = _propertyRunningTransition[propertyName]!;
+      animation.cancel();
+
+      // An Event fired when a CSS transition has been cancelled.
+      target.dispatchEvent(Event(EVENT_TRANSITION_CANCEL));
+      
+      // Maybe set transition twice in a same frame. should check animationProperties has contains propertyName.
+      if (_animationProperties.containsKey(propertyName)) {
+        begin = _animationProperties[propertyName];
+      }
+    }
+
+    if (begin == null) {
+      begin = CSSInitialValues[propertyName];
+      if (begin == CURRENT_COLOR) {
+        begin = currentColor;
+      }
+    }
+
+    EffectTiming? options = getTransitionEffectTiming(propertyName);
+
+    List<Keyframe> keyframes = [
+      Keyframe(propertyName, begin, 0, LINEAR),
+      Keyframe(propertyName, end, 1, LINEAR),
+    ];
+    KeyframeEffect effect = KeyframeEffect(this as RenderStyle, target, keyframes, options);
+    Animation animation = Animation(effect);
+    _propertyRunningTransition[propertyName] = animation;
+
+    animation.onstart = () {
+      // An Event fired when a CSS transition is created,
+      // when it is added to a set of running transitions,
+      // though not necessarily started.
+      target.dispatchEvent(Event(EVENT_TRANSITION_START));
+    };
+
+    animation.onfinish = (AnimationPlaybackEvent event) {
+      _setTransitionEndProperty(propertyName, begin, end);
+      _propertyRunningTransition.remove(propertyName);
+      // An Event fired when a CSS transition has finished playing.
+      target.dispatchEvent(Event(EVENT_TRANSITION_END));
+    };
+
+    target.dispatchEvent(Event(EVENT_TRANSITION_RUN));
+    
+    animation.play();
+  }
+
+  _setTransitionEndProperty(String propertyName, String? prevValue, String value) {
+    if (value == prevValue) return;
+    target.setRenderStyle(propertyName, value);
+  }
+
+  void cancelRunningTransiton() {
+    if (_propertyRunningTransition.isNotEmpty) {
+      for (String property in _propertyRunningTransition.keys) {
+        _propertyRunningTransition[property]!.cancel();
+      }
+      _propertyRunningTransition.clear();
+    }
+  }
+
+  void finishRunningTransiton() {
+    if (_propertyRunningTransition.isNotEmpty) {
+      for (String property in _propertyRunningTransition.keys) {
+        _propertyRunningTransition[property]!.finish();
+      }
+      _propertyRunningTransition.clear();
+    }
+  }
+
+  EffectTiming? getTransitionEffectTiming(String property) {
+
+    List? transitionOptions = effectiveTransitions[property] ?? effectiveTransitions[ALL];
+    // [duration, function, delay]
+    if (transitionOptions != null) {
+
+      return EffectTiming(
+        duration: CSSTime.parseTime(transitionOptions[0]).toDouble(),
+        easing: transitionOptions[1],
+        delay: CSSTime.parseTime(transitionOptions[2]).toDouble(),
+        // In order for CSS Transitions to be seeked backwards, they need to have their fill mode set to backwards
+        // such that the original CSS value applied prior to the transition is used for a negative current time.
+        fill: FillMode.backwards,
+      );
+    }
+
+    return null;
   }
 
   static bool isValidTransitionPropertyValue(String value) {
@@ -210,23 +415,6 @@ class CSSTransition {
         value == STEP_END ||
         value == STEP_START ||
         CSSFunction.isFunction(value);
-  }
-
-  static void dispatchTransitionEvent(Element target, CSSTransitionEvent status) {
-    if (status == CSSTransitionEvent.run) {
-      target.dispatchEvent(Event(EVENT_TRANSITION_RUN));
-    } else if (status == CSSTransitionEvent.cancel) {
-      // An Event fired when a CSS transition has been cancelled.
-      target.dispatchEvent(Event(EVENT_TRANSITION_CANCEL));
-    } else if (status == CSSTransitionEvent.start) {
-      // An Event fired when a CSS transition is created,
-      // when it is added to a set of running transitions,
-      // though not necessarily started.
-      target.dispatchEvent(Event(EVENT_TRANSITION_START));
-    } else if (status == CSSTransitionEvent.end) {
-      // An Event fired when a CSS transition has finished playing.
-      target.dispatchEvent(Event(EVENT_TRANSITION_END));
-    }
   }
 }
 

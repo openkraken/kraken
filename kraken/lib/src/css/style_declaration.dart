@@ -8,67 +8,10 @@ import 'dart:ui';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/src/css/animation.dart';
-
-const String SAFE_AREA_INSET = 'safe-area-inset';
-const String SAFE_AREA_INSET_TOP = '$SAFE_AREA_INSET-top';
-const String SAFE_AREA_INSET_LEFT = '$SAFE_AREA_INSET-left';
-const String SAFE_AREA_INSET_RIGHT = '$SAFE_AREA_INSET-right';
-const String SAFE_AREA_INSET_BOTTOM = '$SAFE_AREA_INSET-bottom';
 
 typedef StyleChangeListener = void Function(String property,  String? original, String present);
 
-// https://github.com/WebKit/webkit/blob/master/Source/WebCore/css/CSSProperties.json
-
-Map CSSInitialValues = {
-  BACKGROUND_COLOR: TRANSPARENT,
-  BACKGROUND_POSITION: '0% 0%',
-  BORDER_BOTTOM_COLOR: CURRENT_COLOR,
-  BORDER_LEFT_COLOR: CURRENT_COLOR,
-  BORDER_RIGHT_COLOR: CURRENT_COLOR,
-  BORDER_TOP_COLOR: CURRENT_COLOR,
-  BORDER_BOTTOM_LEFT_RADIUS: ZERO,
-  BORDER_BOTTOM_RIGHT_RADIUS: ZERO,
-  BORDER_TOP_LEFT_RADIUS: ZERO,
-  BORDER_TOP_RIGHT_RADIUS: ZERO,
-  BORDER_BOTTOM_WIDTH: '3px',
-  BORDER_RIGHT_WIDTH: '3px',
-  BORDER_LEFT_WIDTH: '3px',
-  BORDER_TOP_WIDTH: '3px',
-  // Depends on user agent.
-  COLOR: CSSColor.INITIAL_COLOR,
-  FONT_SIZE: '100%',
-  FONT_WEIGHT: '400',
-  LINE_HEIGHT: '120%',
-  LETTER_SPACING: NORMAL,
-  PADDING_BOTTOM: ZERO,
-  PADDING_LEFT: ZERO,
-  PADDING_RIGHT: ZERO,
-  PADDING_TOP: ZERO,
-  MARGIN_BOTTOM: ZERO,
-  MARGIN_LEFT: ZERO,
-  MARGIN_RIGHT: ZERO,
-  MARGIN_TOP: ZERO,
-  HEIGHT: AUTO,
-  WIDTH: AUTO,
-  MAX_HEIGHT: NONE,
-  MAX_WIDTH: NONE,
-  MIN_HEIGHT: ZERO,
-  MIN_WIDTH: ZERO,
-  OPACITY: '1.0',
-  LEFT: AUTO,
-  BOTTOM: AUTO,
-  RIGHT: AUTO,
-  TOP: AUTO,
-  TEXT_SHADOW: '0px 0px 0px transparent',
-  TRANSFORM: 'matrix3d(${CSSMatrix.initial.storage.join(',')})',
-  VERTICAL_ALIGN: ZERO,
-  VISIBILITY: VISIBLE,
-  WORD_SPACING: NORMAL,
-  Z_INDEX: AUTO
-};
-
-const Map<String, bool> CSSShorthandProperty = {
+const Map<String, bool> _CSSShorthandProperty = {
   MARGIN: true,
   PADDING: true,
   BACKGROUND: true,
@@ -128,123 +71,7 @@ class CSSStyleDeclaration {
 
   final Map<String, String> _properties = {};
   Map<String, String> _pendingProperties = {};
-  final Map<String, String> _animationProperties = {};
-
   final Map<String, bool> _importants = {};
-  Map<String, List> _transitions = {};
-
-  String getCurrentColor() {
-    String? currentColor = _properties[COLOR];
-    return currentColor ?? CSSColor.INITIAL_COLOR;
-  }
-
-  set transitions(Map<String, List> value) {
-    _transitions = value;
-  }
-
-  bool _shouldTransition(String property, String? prevValue, String nextValue, RenderBoxModel? renderBoxModel) {
-    // When begin propertyValue is AUTO, skip animation and trigger style update directly.
-    prevValue ??= CSSInitialValues[property];
-    if (CSSLength.isAuto(prevValue) || CSSLength.isAuto(nextValue)) {
-      return false;
-    }
-
-    // Transition does not work when renderBoxModel has not been layout yet.
-    if (renderBoxModel != null && renderBoxModel.hasSize && CSSTranstionHandlers[property] != null &&
-      (_transitions.containsKey(property) || _transitions.containsKey(ALL))) {
-      bool shouldTransition = false;
-      // Transition will be disabled when all transition has transitionDuration as 0.
-      _transitions.forEach((String transitionKey, List transitionOptions) {
-        double duration = CSSTime.parseTime(transitionOptions[0]).toDouble();
-        if (duration != 0) {
-          shouldTransition = true;
-        }
-      });
-      return shouldTransition;
-    }
-    return false;
-  }
-
-  EffectTiming? _getTransitionEffectTiming(String property) {
-
-    List? transitionOptions = _transitions[property] ?? _transitions[ALL];
-    // [duration, function, delay]
-    if (transitionOptions != null) {
-
-      return EffectTiming(
-        duration: CSSTime.parseTime(transitionOptions[0]).toDouble(),
-        easing: transitionOptions[1],
-        delay: CSSTime.parseTime(transitionOptions[2]).toDouble(),
-        // In order for CSS Transitions to be seeked backwards, they need to have their fill mode set to backwards
-        // such that the original CSS value applied prior to the transition is used for a negative current time.
-        fill: FillMode.backwards,
-      );
-    }
-
-    return null;
-  }
-
-  final Map<String, Animation> _propertyRunningTransition = {};
-
-  bool _hasRunningTransition(String property) {
-    return _propertyRunningTransition.containsKey(property);
-  }
-
-  void _transition(String propertyName, begin, end, Size? viewportSize, RenderStyle? renderStyle) {
-    if (_hasRunningTransition(propertyName)) {
-      Animation animation = _propertyRunningTransition[propertyName]!;
-      animation.cancel();
-      if (target != null) {
-        CSSTransition.dispatchTransitionEvent(target!, CSSTransitionEvent.cancel);
-      }
-      // Maybe set transition twice in a same frame. should check animationProperties has contains propertyName.
-      if (_animationProperties.containsKey(propertyName)) {
-        begin = _animationProperties[propertyName];
-      }
-    }
-
-    if (begin == null) {
-      begin = CSSInitialValues[propertyName];
-      if (begin == CURRENT_COLOR) {
-        begin = getCurrentColor();
-      }
-    }
-
-    EffectTiming? options = _getTransitionEffectTiming(propertyName);
-
-    List<Keyframe> keyframes = [
-      Keyframe(propertyName, begin, 0, LINEAR),
-      Keyframe(propertyName, end, 1, LINEAR),
-    ];
-    KeyframeEffect effect = KeyframeEffect(this, target, keyframes, options, viewportSize, renderStyle);
-    Animation animation = Animation(effect);
-    _propertyRunningTransition[propertyName] = animation;
-
-    animation.onstart = () {
-      if (target != null) {
-        CSSTransition.dispatchTransitionEvent(target!, CSSTransitionEvent.start);
-      }
-    };
-
-    animation.onfinish = (AnimationPlaybackEvent event) {
-      _setTransitionEndProperty(propertyName, begin, end);
-      _propertyRunningTransition.remove(propertyName);
-      if (target != null) {
-        CSSTransition.dispatchTransitionEvent(target!, CSSTransitionEvent.end);
-      }
-    };
-
-    if (target != null) {
-      CSSTransition.dispatchTransitionEvent(target!, CSSTransitionEvent.run);
-    }
-    animation.play();
-  }
-
-  _setTransitionEndProperty(String propertyName, String? prevValue, String value) {
-    if (value == prevValue) return;
-    _properties[propertyName] = value;
-    _emitPropertyChanged(propertyName, prevValue, value);
-  }
 
   /// Textual representation of the declaration block.
   /// Setting this attribute changes the style.
@@ -272,19 +99,7 @@ class CSSStyleDeclaration {
   /// If not set, returns the empty string.
   String getPropertyValue(String propertyName) {
     // Get the latest pending value first.
-    String value = _pendingProperties[propertyName] ?? _properties[propertyName] ??  EMPTY_STRING;
-    return value == CURRENT_COLOR ? getCurrentColor() : value;
-  }
-
-  String? removeAnimationProperty(String propertyName) {
-    String? prevValue = EMPTY_STRING;
-
-    if (_animationProperties.containsKey(propertyName)) {
-       prevValue = _animationProperties[propertyName];
-      _animationProperties.remove(propertyName);
-    }
-
-    return prevValue;
+    return _pendingProperties[propertyName] ?? _properties[propertyName] ?? EMPTY_STRING;
   }
 
   /// Removes a property from the CSS declaration.
@@ -503,7 +318,7 @@ class CSSStyleDeclaration {
       return;
     }
 
-    if (CSSShorthandProperty[propertyName] != null) {
+    if (_CSSShorthandProperty[propertyName] != null) {
       return _expandShorthand(propertyName, normalizedValue, isImportant, viewportSize);
     }
 
@@ -588,41 +403,6 @@ class CSSStyleDeclaration {
     }
 
     _pendingProperties[propertyName] = normalizedValue;
-
-    switch (propertyName) {
-      case TRANSITION_DELAY:
-      case TRANSITION_DURATION:
-      case TRANSITION_TIMING_FUNCTION:
-      case TRANSITION_PROPERTY:
-        CSSTransition.updateTransition(this);
-        break;
-    }
-
-    // https://github.com/WebKit/webkit/blob/master/Source/WebCore/animation/AnimationTimeline.cpp#L257
-    // Any animation found in previousAnimations but not found in newAnimations is not longer current and should be canceled.
-    // @HACK: There are no way to get animationList from styles(Webkit will create an new Style object when style changes, but Kraken not).
-    // Therefore we should cancel all running transition to get thing works.
-    if (propertyName == TRANSITION_PROPERTY) {
-      _finishRunningTransiton();
-    }
-  }
-
-  void cancelRunningTransiton() {
-    if (_propertyRunningTransition.isNotEmpty) {
-      for (String property in _propertyRunningTransition.keys) {
-        _propertyRunningTransition[property]!.cancel();
-      }
-      _propertyRunningTransition.clear();
-    }
-  }
-
-  void _finishRunningTransiton() {
-    if (_propertyRunningTransition.isNotEmpty) {
-      for (String property in _propertyRunningTransition.keys) {
-        _propertyRunningTransition[property]!.finish();
-      }
-      _propertyRunningTransition.clear();
-    }
   }
 
   void flushPendingProperties() {
@@ -657,20 +437,8 @@ class CSSStyleDeclaration {
       if (currentValue == null) {
         break;
       }
-
-      if (_shouldTransition(propertyName, prevValue, currentValue, renderBoxModel)) {
-        _transition(
-          propertyName,
-          prevValue,
-          currentValue,
-          target?.viewportSize,
-          target?.renderStyle
-        );
-      } else {
-        _emitPropertyChanged(propertyName, prevValue, currentValue);
-      }
+      _emitPropertyChanged(propertyName, prevValue, currentValue);
     }
-
   }
 
   /// Override [] and []= operator to get/set style properties.
@@ -706,9 +474,6 @@ class CSSStyleDeclaration {
   void reset() {
     _properties.clear();
     _pendingProperties.clear();
-    _animationProperties.clear();
-    _transitions.clear();
-    _propertyRunningTransition.clear();
     _importants.clear();
   }
 

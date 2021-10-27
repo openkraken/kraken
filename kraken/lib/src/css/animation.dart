@@ -8,7 +8,6 @@ import 'dart:core';
 import 'dart:math';
 
 import 'package:flutter/animation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
@@ -442,7 +441,7 @@ class _Interpolation {
 }
 
 class KeyframeEffect extends AnimationEffect {
-  CSSStyleDeclaration style;
+  RenderStyle renderStyle;
   Element? target;
   late List<_Interpolation> _interpolations;
   double? _progress;
@@ -456,21 +455,16 @@ class KeyframeEffect extends AnimationEffect {
   double _playbackRate = 1;
 
   KeyframeEffect(
-    this.style,
+    this.renderStyle,
     this.target,
     List<Keyframe> keyframes,
-    EffectTiming? options,
-    this.viewportSize,
-    this.renderStyle
+    EffectTiming? options
   ) {
     timing = options ?? EffectTiming();
 
     _propertySpecificKeyframeGroups = _makePropertySpecificKeyframeGroups(keyframes);
-    _interpolations = _makeInterpolations(_propertySpecificKeyframeGroups, viewportSize, renderStyle);
+    _interpolations = _makeInterpolations(_propertySpecificKeyframeGroups, renderStyle);
   }
-
-  Size? viewportSize;
-  RenderStyle? renderStyle;
 
   static _defaultParse(value) {
     return value;
@@ -480,7 +474,7 @@ class KeyframeEffect extends AnimationEffect {
     return progress < 0.5 ? start : end;
   }
 
-  static List<_Interpolation> _makeInterpolations(Map<String, List<Keyframe>> propertySpecificKeyframeGroups, Size? viewportSize, RenderStyle? renderStyle) {
+  static List<_Interpolation> _makeInterpolations(Map<String, List<Keyframe>> propertySpecificKeyframeGroups, RenderStyle? renderStyle) {
     List<_Interpolation> interpolations = [];
 
     propertySpecificKeyframeGroups.forEach((String property, List<Keyframe> keyframes) {
@@ -562,9 +556,9 @@ class KeyframeEffect extends AnimationEffect {
     if (_progress == null) {
       // If fill is backwards that will be null when animation finished
       _propertySpecificKeyframeGroups.forEach((String propertyName, value) {
-        style.removeAnimationProperty(propertyName);
-        String currentValue = style.getPropertyValue(propertyName);
-        style.target!.setRenderStyle(propertyName, currentValue);
+        renderStyle.removeAnimationProperty(propertyName);
+        String currentValue = renderStyle.target.style.getPropertyValue(propertyName);
+        renderStyle.target.setRenderStyle(propertyName, currentValue);
       });
     } else {
       for (int i = 0; i < _interpolations.length; i++) {

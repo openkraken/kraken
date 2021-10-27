@@ -45,7 +45,8 @@ class RenderStyle
     CSSSliverMixin,
     CSSOverflowMixin,
     CSSFilterEffectsMixin,
-    CSSOpacityMixin {
+    CSSOpacityMixin,
+    CSSTransitionMixin {
 
   @override
   Element target;
