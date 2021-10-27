@@ -316,18 +316,24 @@ class HttpCacheObject {
       for (String pair in headerPairs) {
         List<String> kvTuple = pair.split(':');
         if (kvTuple.length >= 2) {
-          String key = kvTuple.first;
+          String key = kvTuple.first.trim();
+
+          // Ignoring cache hit header.
+          if (key == _httpHeaderCacheHits) continue;
+
           String value;
           if (kvTuple == 2) {
             value = kvTuple.last;
           } else {
             value = kvTuple.sublist(1).join(':');
           }
-          responseHeaders[key.trim()] = value.trim();
+
+          responseHeaders[key] = value.trim();
         }
       }
     }
 
+    // Override cache control http headers.
     if (eTag != null) {
       responseHeaders[HttpHeaders.etagHeader] = eTag!;
     }
@@ -340,8 +346,10 @@ class HttpCacheObject {
     if (lastModified != null) {
       responseHeaders[HttpHeaders.lastModifiedHeader] = HttpDate.format(lastModified!);
     }
+
+    // Mark cache hit flag.
     responseHeaders[_httpHeaderCacheHits] = _httpCacheHit;
-    print('$url: $responseHeaders');
+
     return responseHeaders;
   }
 
