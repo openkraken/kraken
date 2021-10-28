@@ -353,10 +353,6 @@ class CSSLengthValue {
     return value == 0;
   }
 
-  void markNeedsCompute() {
-    _computedValue = null;
-  }
-
   /// Compares two length for equality.
   @override
   bool operator ==(Object? other) {

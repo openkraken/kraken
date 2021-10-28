@@ -1055,15 +1055,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         );
         runCrossAxisExtent = maxSizeAboveBaseline + maxSizeBelowBaseline;
       } else {
-            // if (CSSFlex.isVerticalFlexDirection(flexDirection)) {
-    //   String textAlign = renderStyle.textAlign;
-    //   switch (textAlign) {
-    //     case 'right':
-    //       return AlignItems.flexEnd;
-    //     case 'center':
-    //       return AlignItems.center;
-    //   }
-    // }
         runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
       }
 
