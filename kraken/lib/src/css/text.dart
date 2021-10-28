@@ -34,7 +34,6 @@ mixin CSSTextMixin on RenderStyleBase {
   set color(Color? value) {
     if (_color == value) return;
     _color = value;
-    updateColorRelativeProperty();
     // Update all the children text with specified style property not set due to style inheritance.
     _markChildrenNeedsLayout(renderBoxModel!, COLOR);
   }

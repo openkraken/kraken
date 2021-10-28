@@ -668,10 +668,8 @@ class Element extends Node
   }
 
   void _updateRenderBoxModelWithDisplay() {
-    CSSDisplay originalDisplay = renderStyle.previousDisplay;
     CSSDisplay presentDisplay = renderStyle.display;
 
-    if (originalDisplay == presentDisplay) return;
     // Destroy renderer of element when display is changed to none.
     if (presentDisplay == CSSDisplay.none) {
       detach();
@@ -680,7 +678,7 @@ class Element extends Node
 
     // When renderer and style listener is not created when original display is none,
     // thus it needs to create renderer when style changed.
-    if (originalDisplay == CSSDisplay.none) {
+    if (renderBoxModel == null) {
       RenderBox? after;
       Element parent = this.parent as Element;
       if (parent.scrollingContentLayoutBox != null) {
@@ -693,27 +691,29 @@ class Element extends Node
       parent.addChildRenderObject(this, after: after);
       // FIXME: avoid ensure something in display updating.
       ensureChildAttached();
+      return;
+    }
+
+    // Inline block/flex to block/flex do not need create new renderBoxModel.
+    if ((renderBoxModel is RenderFlowLayout &&
+        (presentDisplay == CSSDisplay.inline || presentDisplay == CSSDisplay.block || presentDisplay == CSSDisplay.inlineBlock)) ||
+        (renderBoxModel is RenderFlexLayout &&
+            (presentDisplay == CSSDisplay.flex || presentDisplay == CSSDisplay.inlineFlex))) {
+      return;
     }
 
     if (renderBoxModel is RenderLayoutBox) {
-      RenderLayoutBox? prevRenderLayoutBox = renderBoxModel as RenderLayoutBox?;
-      bool isPreRendererAttached = isRendererAttached;
-      if (originalDisplay != CSSDisplay.none) {
-        // Don't updateRenderBoxModel twice.
-        createRenderBoxModel();
-      }
-
-      bool shouldReattach = isPreRendererAttached && parent != null && prevRenderLayoutBox != renderBoxModel;
-
-      if (shouldReattach) {
-        RenderLayoutBox parentRenderObject = parentElement!.renderBoxModel as RenderLayoutBox;
+      RenderLayoutBox prevRenderLayoutBox = renderBoxModel as RenderLayoutBox;
+      RenderBox parentRenderObject = prevRenderLayoutBox.parent as RenderBox;
+      // Update layout box type from block to flex.
+      createRenderBoxModel();
+      if (parentRenderObject is RenderLayoutBox) {
         Element? previousSibling = this.previousSibling as Element?;
         RenderObject? previous = previousSibling?.renderer;
-
-        parentRenderObject.remove(prevRenderLayoutBox!);
+        parentRenderObject.remove(prevRenderLayoutBox);
         parentRenderObject.insert(renderBoxModel!, after: previous as RenderBox?);
-      } else {
-        renderBoxModel!.markNeedsLayout();
+      } else if (parentRenderObject is RenderViewportBox) {
+        parentRenderObject.child = renderBoxModel;
       }
     }
   }
@@ -995,7 +995,7 @@ class Element extends Node
       // Transition
       case TRANSITION_DELAY:
         renderStyle.transitionDelay = value;
-        break; 
+        break;
       case TRANSITION_DURATION:
         renderStyle.transitionDuration = value;
         break;
@@ -1344,7 +1344,7 @@ class Element extends Node
       // Reset style.
       style.reset();
       _applyStyle();
-      
+
       _resetRenderStyle();
       style.flushPendingProperties();
       renderBoxModel!.markNeedsLayout();
