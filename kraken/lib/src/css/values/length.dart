@@ -454,9 +454,6 @@ class CSSLength {
       value = double.tryParse(text.split(VH)[0]);
       if (value != null) value = value / 100;
       unit = CSSLengthType.VH;
-    } else if (text.endsWith(IN)) {
-      value = double.tryParse(text.split(IN)[0]);
-      if (value != null) value = value * _1in;
     } else if (text.endsWith(CM)) {
       value = double.tryParse(text.split(CM)[0]);
       if (value != null) value = value * _1cm;
@@ -477,6 +474,9 @@ class CSSLength {
       value = double.tryParse(text.split(VMAX)[0]);
       if (value != null) value = value / 100;
       unit = CSSLengthType.VMAX;
+    } else if (text.endsWith(IN)) {
+      value = double.tryParse(text.split(IN)[0]);
+      if (value != null) value = value * _1in;
     } else if (text.endsWith(Q)) {
       value = double.tryParse(text.split(Q)[0]);
       if (value != null) value = value * _1Q;
@@ -506,7 +506,7 @@ class CSSLength {
             // Using fallback value if not match user agent-defined environment variable: env(xxx, 50px).
             return parseLength(notations[0].args[1], renderStyle, propertyName, axisType);
         }
-        
+
       }
       // TODO: impl CSS Variables.
     }
