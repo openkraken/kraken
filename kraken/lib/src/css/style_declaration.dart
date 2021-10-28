@@ -267,45 +267,6 @@ class CSSStyleDeclaration {
     return lowerCase;
   }
 
-  String _normalizeValue(value) {
-    String result = _toLowerCase(value.toString().trim());
-
-    if (CSSFunction.isFunction(result)) {
-      String normalizedFunctionValue = '';
-      List<CSSFunctionalNotation> funcs = CSSFunction.parseFunction(result);
-      for (CSSFunctionalNotation func in funcs) {
-        String loweredFuncName = func.name.toLowerCase();
-        if (loweredFuncName == 'env' && func.args.isNotEmpty) {
-          String? defaultValue = func.args.length > 1 ? func.args[1] : null;
-          switch (func.args.first) {
-            case SAFE_AREA_INSET_TOP:
-              normalizedFunctionValue += '${window.viewPadding.top / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
-              break;
-            case SAFE_AREA_INSET_RIGHT:
-              normalizedFunctionValue += '${window.viewPadding.right / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
-              break;
-            case SAFE_AREA_INSET_BOTTOM:
-              normalizedFunctionValue += '${window.viewPadding.bottom / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
-              break;
-            case SAFE_AREA_INSET_LEFT:
-              normalizedFunctionValue += '${window.viewPadding.left / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
-              break;
-            default:
-              normalizedFunctionValue += '$defaultValue$FUNCTION_SPLIT';
-              break;
-          }
-        } else if (loweredFuncName == 'var') {
-          // TODO: impl CSS Variables.
-        } else {
-          normalizedFunctionValue += '${func.name}(${func.args.join(FUNCTION_ARGS_SPLIT)})$FUNCTION_SPLIT';
-        }
-      }
-      result = normalizedFunctionValue.substring(0, normalizedFunctionValue.length - 1);
-    }
-
-    return result;
-  }
-
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
   void setProperty(String propertyName, value, [bool? isImportant, Size? viewportSize]) {
@@ -315,7 +276,7 @@ class CSSStyleDeclaration {
       return;
     }
 
-    String normalizedValue = _normalizeValue(value);
+    String normalizedValue = _toLowerCase(value.toString().trim());
 
     // Illegal value like '   ' after trim is '' should do nothing.
     if (normalizedValue.isEmpty) return;

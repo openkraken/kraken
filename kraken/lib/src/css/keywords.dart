@@ -256,5 +256,27 @@ const String LOCAL = 'local';
 const String TRANSPARENT = 'transparent';
 const String CURRENT_COLOR = 'currentcolor';
 
+// Length unit
+const String PX = 'px';
+const String MM = 'mm';
+const String CM = 'cm';
+const String IN = 'in';
+const String PC = 'pc';
+const String PT = 'pt';
+const String Q = 'q';
+const String RPX = 'rpx';
+const String VW = 'vw';
+const String VH = 'vh';
+const String VMIN = 'vmin';
+const String VMAX = 'vmax';
+const String EM = 'em';
+const String REM = 'rem';
+const String CH = 'ch';
+
+// Functions
+const String ENV = 'env';
+const String VAR = 'var';
+
+const String PERCENTAGE = '%';
 const String ZERO = '0';
 const String EMPTY_STRING = '';

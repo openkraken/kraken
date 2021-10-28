@@ -373,25 +373,10 @@ class CSSLengthValue {
   String toString() => 'CSSLengthValue(value: $value, unit: $type, computedValue: $computedValue)';
 }
 
+final Map<String, CSSLengthValue> _cachedParsedLength = {};
+
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#lengths
 class CSSLength {
-  static const String PX = 'px';
-  static const String MM = 'mm';
-  static const String CM = 'cm';
-  static const String IN = 'in';
-  static const String PC = 'pc';
-  static const String PT = 'pt';
-  static const String Q = 'q';
-  static const String RPX = 'rpx';
-  static const String VW = 'vw';
-  static const String VH = 'vh';
-  static const String VMIN = 'vmin';
-  static const String VMAX = 'vmax';
-  static const String EM = 'em';
-  static const String REM = 'rem';
-  static const String CH = 'ch';
-  static const String PERCENTAGE = '%';
-  static const String AUTO = 'auto';
 
   static double? toDouble(value) {
     if (value is double) {
@@ -435,6 +420,10 @@ class CSSLength {
   }
 
   static CSSLengthValue parseLength(String text, RenderStyle? renderStyle, [String? propertyName, Axis? axisType]) {
+    if (_cachedParsedLength.containsKey(text)) {
+      return _cachedParsedLength[text]!;
+    }
+
     double? value;
     CSSLengthType unit = CSSLengthType.PX;
     if (text == ZERO) {
@@ -455,6 +444,31 @@ class CSSLength {
     } else if (text.endsWith(RPX)) {
       value = double.tryParse(text.split(RPX)[0]);
       if (value != null) value = value / 750.0 * window.physicalSize.width / window.devicePixelRatio;
+    } else if (text.endsWith(PX)) {
+      value = double.tryParse(text.split(PX)[0]);
+    } else if (text.endsWith(VW)) {
+      value = double.tryParse(text.split(VW)[0]);
+      if (value != null) value = value / 100;
+      unit = CSSLengthType.VW;
+    } else if (text.endsWith(VH)) {
+      value = double.tryParse(text.split(VH)[0]);
+      if (value != null) value = value / 100;
+      unit = CSSLengthType.VH;
+    } else if (text.endsWith(IN)) {
+      value = double.tryParse(text.split(IN)[0]);
+      if (value != null) value = value * _1in;
+    } else if (text.endsWith(CM)) {
+      value = double.tryParse(text.split(CM)[0]);
+      if (value != null) value = value * _1cm;
+    } else if (text.endsWith(MM)) {
+      value = double.tryParse(text.split(MM)[0]);
+      if (value != null) value = value * _1mm;
+    } else if (text.endsWith(PC)) {
+      value = double.tryParse(text.split(PC)[0]);
+      if (value != null) value = value * _1pc;
+    } else if (text.endsWith(PT)) {
+      value = double.tryParse(text.split(PT)[0]);
+      if (value != null) value = value * _1pt;
     } else if (text.endsWith(VMIN)) {
       value = double.tryParse(text.split(VMIN)[0]);
       if (value != null) value = value / 100;
@@ -470,48 +484,41 @@ class CSSLength {
       value = double.tryParse(text.split(PERCENTAGE)[0]);
       if (value != null) value = value / 100;
       unit = CSSLengthType.PERCENTAGE;
-    } else if (text.length > 2) {
-      switch (text.substring(text.length - 2)) {
-        case PX:
-          value = double.tryParse(text.split(PX)[0]);
-          break;
-        case VW:
-          value = double.tryParse(text.split(VW)[0]);
-          if (value != null) value = value / 100;
-          unit = CSSLengthType.VW;
-          break;
-        case VH:
-          value = double.tryParse(text.split(VH)[0]);
-          if (value != null) value = value / 100;
-          unit = CSSLengthType.VH;
-          break;
-        case IN:
-          value = double.tryParse(text.split(IN)[0]);
-          if (value != null) value = value * _1in;
-          break;
-        case CM:
-          value = double.tryParse(text.split(CM)[0]);
-          if (value != null) value = value * _1cm;
-          break;
-        case MM:
-          value = double.tryParse(text.split(MM)[0]);
-          if (value != null) value = value * _1mm;
-          break;
-        case PC:
-          value = double.tryParse(text.split(PC)[0]);
-          if (value != null) value = value * _1pc;
-          break;
-        case PT:
-          value = double.tryParse(text.split(PT)[0]);
-          if (value != null) value = value * _1pt;
-          break;
+    } else if (CSSFunction.isFunction(text)) {
+      List<CSSFunctionalNotation> notations = CSSFunction.parseFunction(text);
+      // https://drafts.csswg.org/css-env/#env-function
+      // Using Environment Variables: the env() notation
+      if (notations.length == 1 && notations[0].name == ENV && notations[0].args.length == 1) {
+        switch (notations[0].args.first) {
+          case SAFE_AREA_INSET_TOP:
+            value = window.viewPadding.top / window.devicePixelRatio;
+            break;
+          case SAFE_AREA_INSET_RIGHT:
+            value = window.viewPadding.right / window.devicePixelRatio;
+            break;
+          case SAFE_AREA_INSET_BOTTOM:
+            value = window.viewPadding.bottom / window.devicePixelRatio;
+            break;
+          case SAFE_AREA_INSET_LEFT:
+            value = window.viewPadding.left / window.devicePixelRatio;
+            break;
+          default:
+            // Using fallback value if not match user agent-defined environment variable: env(xxx, 50px).
+            return parseLength(notations[0].args[1], renderStyle, propertyName, axisType);
+        }
+        
       }
+      // TODO: impl CSS Variables.
     }
 
     if (value == 0) {
-      return CSSLengthValue.zero;
+      return _cachedParsedLength[text] = CSSLengthValue.zero;
+    } else if (value == null) {
+      return _cachedParsedLength[text] = CSSLengthValue.unknow;
+    } else if (unit == CSSLengthType.PX){
+      return _cachedParsedLength[text] = CSSLengthValue(value, unit);
+    } else {
+      return CSSLengthValue(value, unit, renderStyle, propertyName, axisType);
     }
-
-    return value == null ? CSSLengthValue.unknow : CSSLengthValue(value, unit, renderStyle, propertyName, axisType);
   }
 }
