@@ -217,6 +217,18 @@ class CSSLengthValue {
             }
             break;
           case FLEX_BASIS:
+            // Flex-basis computation is called in RenderFlexLayout which
+            // will ensure parent exists.
+            RenderStyle parentRenderStyle = renderStyle!.parent!;
+            double? mainContentSize = parentRenderStyle.flexDirection == FlexDirection.row ?
+              parentRenderStyle.contentBoxLogicalWidth :
+              parentRenderStyle.contentBoxLogicalHeight;
+            if (mainContentSize != null) {
+              _computedValue = mainContentSize * value!;
+            } else {
+              // @TODO: Not supported when parent has no logical main size.
+              _computedValue = 0;
+            }
             // Refer to the flex container's inner main size.
             break;
 
@@ -298,7 +310,11 @@ class CSSLengthValue {
   bool get isAuto {
     switch (propertyName) {
       // Length is considered as auto of following properties
-      // if it computes to double.infinity.
+      // if it computes to double.infinity in cases of percentage.
+      // The percentage of height is calculated with respect to the height of the generated box's containing block.
+      // If the height of the containing block is not specified explicitly (i.e., it depends on content height),
+      // and this element is not absolutely positioned, the value computes to 'auto'.
+      // https://www.w3.org/TR/CSS2/visudet.html#propdef-height
       case WIDTH:
       case MIN_WIDTH:
       case MAX_WIDTH:
