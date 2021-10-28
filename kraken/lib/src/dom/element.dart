@@ -460,7 +460,7 @@ class Element extends Node
   // Attach renderObject of current node to parent
   @override
   void attachTo(Node parent, {RenderBox? after}) {
-    _applyStyle();
+    _applyStyle(style);
     // Get display from style directly cause renderStyle is not flushed yet.
     CSSDisplay display = CSSDisplayMixin.resolveDisplay(style[DISPLAY]);
 
@@ -1220,8 +1220,8 @@ class Element extends Node
     return value;
   }
 
-  void setRenderStyle(String property, dynamic present) {
-    dynamic value = _resolveRenderStyleValue(property, present);
+  void setRenderStyle(String property, String present) {
+    dynamic value = present.isEmpty ? null : _resolveRenderStyleValue(property, present);
     setRenderStyleProperty(property, value);
   }
 
@@ -1269,24 +1269,24 @@ class Element extends Node
     }
   }
 
-  void _applyDefaultStyle() {
+  void _applyDefaultStyle(CSSStyleDeclaration style) {
     if (_defaultStyle.isNotEmpty) {
-      _defaultStyle.forEach((property, dynamic value) {
-        _setStyleProperty(property, value);
+      _defaultStyle.forEach((propertyName, dynamic value) {
+        style.setProperty(propertyName, value);
       });
     }
   }
 
-  void _applyInlineStyle() {
+  void _applyInlineStyle(CSSStyleDeclaration style) {
     if (inlineStyle.isNotEmpty) {
-      inlineStyle.forEach((property, dynamic value) {
+      inlineStyle.forEach((propertyName, dynamic value) {
         // Force inline style to be applied as important priority.
-        _setStyleProperty(property, value, true);
+        style.setProperty(propertyName, value, true);
       });
     }
   }
 
-  void _applyStyleSheetStyle() {
+  void _applyStyleSheetStyle(CSSStyleDeclaration style) {
     String? classNames = getProperty(_CLASS_NAME);
     if (classNames != null && classNames.isNotEmpty) {
       const String classSelectorPrefix = '.';
@@ -1298,18 +1298,13 @@ class Element extends Node
             if (rule is CSSStyleRule && rule.selectorText == (classSelectorPrefix + className)) {
               var styleSheetStyle = rule.style;
               for (String propertyName in styleSheetStyle.keys) {
-                _setStyleProperty(propertyName, styleSheetStyle[propertyName]);
+                style.setProperty(propertyName, styleSheetStyle[propertyName]);
               }
             }
           }
         }
       }
     }
-  }
-
-  // Set style property.
-  void _setStyleProperty(String propertyName, value, [bool? isImportant]) {
-    style.setProperty(propertyName, value, isImportant, viewportSize);
   }
 
   void _onStyleChanged(String propertyName, String? prevValue, String currentValue) {
@@ -1324,42 +1319,36 @@ class Element extends Node
   void setInlineStyle(String property, dynamic value) {
     // Current only for mark property is setting by inline style.
     inlineStyle[property] = value;
-
-    _setStyleProperty(property, value, true);
+    style.setProperty(property, value, true);
   }
 
-  void _applyStyle() {
+  void _applyStyle(CSSStyleDeclaration style) {
     // Apply default style.
-    _applyDefaultStyle();
+    _applyDefaultStyle(style);
     renderStyle.initDisplay();
 
-    _applyInlineStyle();
-    _applyStyleSheetStyle();
+    _applyInlineStyle(style);
+    _applyStyleSheetStyle(style);
   }
 
   void recalculateStyle() {
-    // TODO: only update the element's style that is changed.
-    // Reset renderStyle.
     if (renderBoxModel != null) {
-      // Reset style.
-      style.reset();
-      _applyStyle();
-
-      _resetRenderStyle();
-      style.flushPendingProperties();
-      renderBoxModel!.markNeedsLayout();
+      // Diff style.
+      CSSStyleDeclaration newStyle = CSSStyleDeclaration();
+      _applyStyle(newStyle);
+      Map<String, String?> diffs = style.diff(newStyle);
+      if (diffs.isNotEmpty) {
+        // Update render style.
+        diffs.forEach((String propertyName, String? value) {
+          style.setProperty(propertyName, value);
+        });
+        style.flushPendingProperties();
+      }
     }
     // Update children style.
     children.forEach((Element child) {
       child.recalculateStyle();
     });
-  }
-
-  void _resetRenderStyle() {
-    RenderStyle? parentRenderStyle = renderStyle.parent;
-    renderStyle = RenderStyle(target: this);
-    renderStyle.parent = parentRenderStyle;
-    renderBoxModel!.renderStyle = renderStyle;
   }
 
   @mustCallSuper

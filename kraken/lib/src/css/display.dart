@@ -20,14 +20,11 @@ enum CSSDisplay {
 }
 
 mixin CSSDisplayMixin on RenderStyleBase {
-  CSSDisplay _previousDisplay = CSSDisplay.inline;
-  CSSDisplay get previousDisplay => _previousDisplay;
 
-  CSSDisplay _display = CSSDisplay.inline;
-  CSSDisplay get display => _display;
+  CSSDisplay? _display;
+  CSSDisplay get display => _display ?? CSSDisplay.inline;
   set display(CSSDisplay value) {
     if (_display != value) {
-      _previousDisplay = _display;
       _display = value;
       renderBoxModel?.markNeedsLayout();
     }
@@ -35,7 +32,7 @@ mixin CSSDisplayMixin on RenderStyleBase {
 
   void initDisplay() {
     // Must take from style because it inited before flush pending properties.
-    _previousDisplay = _display = resolveDisplay(target.style[DISPLAY]);
+    _display ??= resolveDisplay(target.style[DISPLAY]);
   }
 
   static CSSDisplay resolveDisplay(String? displayString) {

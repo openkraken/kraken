@@ -3,8 +3,6 @@
  * Author: Kraken Team.
  */
 
-import 'dart:ui';
-
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
@@ -172,17 +170,12 @@ class CSSStyleDeclaration {
       present = defaultStyle![propertyName];
     }
 
-    // But if display change, need emit change event.
-    if (propertyName == DISPLAY) {
-      present = present == EMPTY_STRING ? INLINE : present;
-    }
-
     // Update removed value by flush pending properties.
     _pendingProperties[propertyName] = present;
     return prevValue;
   }
 
-  void _expandShorthand(String propertyName, String normalizedValue, bool? isImportant, Size? viewportSize) {
+  void _expandShorthand(String propertyName, String normalizedValue, bool? isImportant) {
     Map<String, String?> longhandProperties = {};
     switch(propertyName) {
       case PADDING:
@@ -232,7 +225,7 @@ class CSSStyleDeclaration {
 
     if (longhandProperties.isNotEmpty) {
       longhandProperties.forEach((String propertyName, String? value) {
-        setProperty(propertyName, value, isImportant, viewportSize);
+        setProperty(propertyName, value, isImportant);
       });
     }
   }
@@ -269,7 +262,7 @@ class CSSStyleDeclaration {
 
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
-  void setProperty(String propertyName, value, [bool? isImportant, Size? viewportSize]) {
+  void setProperty(String propertyName, value, [bool? isImportant]) {
     // Null or empty value means should be removed.
     if (isNullOrEmptyValue(value)) {
       removeProperty(propertyName, isImportant);
@@ -290,7 +283,7 @@ class CSSStyleDeclaration {
     }
 
     if (_CSSShorthandProperty[propertyName] != null) {
-      return _expandShorthand(propertyName, normalizedValue, isImportant, viewportSize);
+      return _expandShorthand(propertyName, normalizedValue, isImportant);
     }
 
     // Validate value.
@@ -365,14 +358,6 @@ class CSSStyleDeclaration {
       _importants[propertyName] = true;
     }
 
-    // Should direct update render style if display is 'none' and changed to other value.
-    if (propertyName == DISPLAY && prevValue == NONE) {
-      _emitPropertyChanged(propertyName, prevValue, normalizedValue);
-      _pendingProperties.remove(propertyName);
-      _properties[propertyName] = normalizedValue;
-      return;
-    }
-
     _pendingProperties[propertyName] = normalizedValue;
   }
 
@@ -382,11 +367,11 @@ class CSSStyleDeclaration {
       return;
     }
 
-    List<String> propertyNames = _pendingProperties.keys.toList();
     Map<String, String> pendingProperties = _pendingProperties;
     // Reset first avoid set property in flush stage.
     _pendingProperties = {};
 
+    List<String> propertyNames = pendingProperties.keys.toList();
     for (String propertyName in _propertyOrders) {
       int index = propertyNames.indexOf(propertyName);
       if (index > -1) {
@@ -404,12 +389,42 @@ class CSSStyleDeclaration {
 
     for (String propertyName in propertyNames) {
       String? prevValue = prevValues[propertyName];
-      String? currentValue = pendingProperties[propertyName];
-      if (currentValue == null) {
-        break;
-      }
+      String currentValue = pendingProperties[propertyName]!;
       _emitPropertyChanged(propertyName, prevValue, currentValue);
     }
+  }
+
+  Map<String, String?> diff(CSSStyleDeclaration other) {
+    Map<String, String?> diffs = {};
+
+    Map<String, String> properties = {}
+      ..addAll(_properties)
+      ..addAll(_pendingProperties);
+
+    for (String propertyName in properties.keys) {
+      String? prevValue = properties[propertyName];
+      String? currentValue = other._pendingProperties[propertyName];
+
+      if (isNullOrEmptyValue(prevValue) && isNullOrEmptyValue(currentValue)) {
+        continue;
+      } else if (!isNullOrEmptyValue(prevValue) && isNullOrEmptyValue(currentValue)) {
+        // Remove property.
+        diffs[propertyName] = null;
+      } else if (prevValue != currentValue) {
+        // Update property.
+        diffs[propertyName] = currentValue;
+      }
+    }
+
+    for (String propertyName in other._pendingProperties.keys) {
+      String? prevValue = properties[propertyName];
+      String? currentValue = other._pendingProperties[propertyName];
+      if (isNullOrEmptyValue(prevValue) && !isNullOrEmptyValue(currentValue)) {
+         // Add property.
+        diffs[propertyName] = currentValue;
+      }
+    }
+    return diffs;
   }
 
   /// Override [] and []= operator to get/set style properties.
@@ -455,7 +470,7 @@ class CSSStyleDeclaration {
   }
 
   static bool isNullOrEmptyValue(value) {
-    return value == null || value == '';
+    return value == null || value == EMPTY_STRING;
   }
 
   @override
