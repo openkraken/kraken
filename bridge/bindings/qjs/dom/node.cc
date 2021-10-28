@@ -608,8 +608,9 @@ void NodeInstance::ensureDetached(NodeInstance *node) {
 void NodeInstance::gcMark(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) {
   EventTargetInstance::gcMark(rt, val, mark_func);
 
-  JS_MarkValue(rt, childNodes, mark_func);
-  JS_MarkValue(rt, parentNode, mark_func);
+  // Should check object is already inited before gc mark.
+  if (JS_IsObject(childNodes)) JS_MarkValue(rt, childNodes, mark_func);
+  if (JS_IsObject(parentNode)) JS_MarkValue(rt, parentNode, mark_func);
 }
 
 } // namespace kraken::binding::qjs

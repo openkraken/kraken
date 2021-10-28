@@ -191,8 +191,9 @@ WindowInstance::WindowInstance(Window *window) : EventTargetInstance(window, Win
 void WindowInstance::gcMark(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) {
   EventTargetInstance::gcMark(rt, val, mark_func);
 
-  JS_MarkValue(rt, m_location->jsObject, mark_func);
-  JS_MarkValue(rt, onerror, mark_func);
+  // Should check object is already inited before gc mark.
+  if (JS_IsObject(m_location->jsObject)) JS_MarkValue(rt, m_location->jsObject, mark_func);
+  if (JS_IsObject(onerror)) JS_MarkValue(rt, onerror, mark_func);
 }
 
 }
