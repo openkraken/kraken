@@ -206,6 +206,8 @@ const String RIGHT = 'right';
 const String TOP = 'top';
 const String BOTTOM = 'bottom';
 
+const String CENTER = 'center';
+
 // Flex
 const String ROW = 'row';
 const String ROW_REVERSE = 'row-reverse';

@@ -16,7 +16,7 @@ class CSSOrigin {
       if (originList.length == 1) {
         // default center
         x = originList[0];
-        y = CSSPosition.CENTER;
+        y = CENTER;
         // flutter just support two value x y
         // FIXME: when flutter support three value
       } else if (originList.length == 2 || originList.length == 3) {
@@ -27,8 +27,8 @@ class CSSOrigin {
       double offsetX = 0, offsetY = 0, alignX = -1, alignY = -1;
       // y just can be left right center when x is top bottom, otherwise illegal
       // switch to right place
-      if ((x == CSSPosition.TOP || x == CSSPosition.BOTTOM) &&
-          (y == CSSPosition.LEFT || y == CSSPosition.RIGHT || y == CSSPosition.CENTER)) {
+      if ((x == TOP || x == BOTTOM) &&
+          (y == LEFT || y == RIGHT || y == CENTER)) {
         String? tmp = x;
         x = y;
         y = tmp;
@@ -39,11 +39,11 @@ class CSSOrigin {
         offsetX = CSSLength.parseLength(x!, renderStyle, property).computedValue;
       } else if (CSSPercentage.isPercentage(x)) {
         alignX = CSSPercentage.parsePercentage(x!)! * 2 - 1;
-      } else if (x == CSSPosition.LEFT) {
+      } else if (x == LEFT) {
         alignX = -1.0;
-      } else if (x == CSSPosition.RIGHT) {
+      } else if (x == RIGHT) {
         alignX = 1.0;
-      } else if (x == CSSPosition.CENTER) {
+      } else if (x == CENTER) {
         alignX = 0.0;
       }
 
@@ -52,11 +52,11 @@ class CSSOrigin {
         offsetY = CSSLength.parseLength(y!, renderStyle, property).computedValue;
       } else if (CSSPercentage.isPercentage(y)) {
         alignY = CSSPercentage.parsePercentage(y!)! * 2 - 1;
-      } else if (y == CSSPosition.TOP) {
+      } else if (y == TOP) {
         alignY = -1.0;
-      } else if (y == CSSPosition.BOTTOM) {
+      } else if (y == BOTTOM) {
         alignY = 1.0;
-      } else if (y == CSSPosition.CENTER) {
+      } else if (y == CENTER) {
         alignY = 0.0;
       }
       return CSSOrigin(Offset(offsetX, offsetY), Alignment(alignX, alignY));

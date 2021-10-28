@@ -6,7 +6,7 @@
 final _timeRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?ms|s$', caseSensitive: false);
 final _0s = '0s';
 final _0ms = '0ms';
-
+final Map<String, int?> _cachedParsedTime = {};
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#time
 class CSSTime {
   static const String MILLISECONDS = 'ms';
@@ -16,13 +16,17 @@ class CSSTime {
     return (value == _0s || value == _0ms || _timeRegExp.firstMatch(value) != null);
   }
 
-  static int parseTime(String input) {
-    double? milliseconds;
-    if (input.endsWith(MILLISECONDS)) {
-      milliseconds = double.tryParse(input.split(MILLISECONDS)[0]);
-    } else if (input.endsWith(SECOND)) {
-      milliseconds = double.tryParse(input.split(SECOND)[0])! * 1000;
+  static int? parseTime(String input) {
+    if (_cachedParsedTime.containsKey(input)) {
+      return _cachedParsedTime[input];
     }
-    return milliseconds!.toInt();
+    int? milliseconds;
+    if (input.endsWith(MILLISECONDS)) {
+      milliseconds = double.tryParse(input.split(MILLISECONDS)[0])!.toInt();
+    } else if (input.endsWith(SECOND)) {
+      milliseconds = (double.tryParse(input.split(SECOND)[0])! * 1000).toInt();
+    }
+    
+    return _cachedParsedTime[input] = milliseconds;
   }
 }

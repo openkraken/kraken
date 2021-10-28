@@ -282,8 +282,8 @@ mixin CSSTransitionMixin on RenderStyleBase {
       bool shouldTransition = false;
       // Transition will be disabled when all transition has transitionDuration as 0.
       effectiveTransitions.forEach((String transitionKey, List transitionOptions) {
-        double duration = CSSTime.parseTime(transitionOptions[0]).toDouble();
-        if (duration != 0) {
+        int? duration = CSSTime.parseTime(transitionOptions[0]);
+        if (duration != null && duration != 0) {
           shouldTransition = true;
         }
       });
@@ -385,9 +385,9 @@ mixin CSSTransitionMixin on RenderStyleBase {
     if (transitionOptions != null) {
 
       return EffectTiming(
-        duration: CSSTime.parseTime(transitionOptions[0]).toDouble(),
+        duration: CSSTime.parseTime(transitionOptions[0])!.toDouble(),
         easing: transitionOptions[1],
-        delay: CSSTime.parseTime(transitionOptions[2]).toDouble(),
+        delay: CSSTime.parseTime(transitionOptions[2])!.toDouble(),
         // In order for CSS Transitions to be seeked backwards, they need to have their fill mode set to backwards
         // such that the original CSS value applied prior to the transition is used for a negative current time.
         fill: FillMode.backwards,

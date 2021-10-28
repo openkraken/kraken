@@ -424,11 +424,11 @@ class CSSBackground {
   }
 
   static bool isValidBackgroundPositionValue(String value) {
-    return value == CSSPosition.CENTER ||
-        value == CSSPosition.LEFT ||
-        value == CSSPosition.RIGHT ||
-        value == CSSPosition.TOP ||
-        value == CSSPosition.BOTTOM ||
+    return value == CENTER ||
+        value == LEFT ||
+        value == RIGHT ||
+        value == TOP ||
+        value == BOTTOM ||
         CSSLength.isLength(value) ||
         CSSPercentage.isPercentage(value);
   }

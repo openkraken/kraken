@@ -173,6 +173,7 @@ final _colorHslRegExp =
 final _colorRgbRegExp =
     RegExp(r'^(rgba?)\(([+-]?[0-9.]+%?)[,\s]+([+-]?[0-9.]+%?)[,\s]+([+-]?[0-9.]+%?)([,\s/]+([+-]?[0-9.]+%?))?\s*\)$');
 
+final Map<String, Color> _cachedParsedColor = {};
 /// #123
 /// #123456
 /// rgb(r,g,b)
@@ -190,7 +191,7 @@ class CSSColor {
   //   Output = '0 2rpx 4rpx 0 rgba0, 0 25rpx 50rpx 0 rgba1', with color cached:
   //     'rgba0' -> Color(0x19000000), 'rgba1' -> Color(0x26000000)
   // Cache will be terminated after used once.
-  static final Map<String, Color> _cachedColor = {};
+  
 
   static String convertToHex(Color color) {
     String red = color.red.toRadixString(16).padLeft(2);
@@ -244,8 +245,8 @@ class CSSColor {
 
     if (color == TRANSPARENT) {
       return CSSColor.transparent;
-    } else if (_cachedColor.containsKey(color)) {
-      return _cachedColor[color];
+    } else if (_cachedParsedColor.containsKey(color)) {
+      return _cachedParsedColor[color];
     }
 
     Color? parsed;
@@ -300,7 +301,7 @@ class CSSColor {
     }
 
     if (parsed != null) {
-      _cachedColor[color] = parsed;
+      _cachedParsedColor[color] = parsed;
     }
 
     return parsed;
