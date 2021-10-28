@@ -312,10 +312,6 @@ describe('Transition all', () => {
         transition: 'all 1s linear',
       });
 
-      setTimeout(async () => {
-        await snapshot();
-      }, 500);
-
       // Wait for animation finished.
       setTimeout(async () => {
         await snapshot();

@@ -659,7 +659,7 @@ describe('flex-grow', () => {
 
     requestAnimationFrame(async () => {
       text.data = 6000;
-      await snapshot();
+      await snapshot(0.1);
       done();
     });
 
