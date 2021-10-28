@@ -28,7 +28,8 @@ const plugins = [
     'process.env.NODE_ENV': JSON.stringify(NODE_ENV),
     ['import \'es6-promise/dist/es6-promise.auto\'']: (process.env.PATCH_PROMISE_POLYFILL === 'true' && process.env.KRAKEN_JS_ENGINE === 'jsc') ?
       'import \'es6-promise/dist/es6-promise.auto\';' : '',
-    delimiters: ['', '']
+    delimiters: ['', ''],
+    preventAssignment: false
   }),
   bundleSize(),
 ];
@@ -46,7 +47,7 @@ module.exports = [
   },
   {
     input: 'src/test/index.js',
-    output: Object.assign({ file: 'dist/test.js' }, output),
+    output: Object.assign({ file: 'dist/test.js' }, Object.assign({ name: 'polyfillTester' }, output)),
     plugins: [
       ...plugins,
       commonjs(),
