@@ -119,4 +119,13 @@ describe('Node API', () => {
     let img = new Image();
     expect(img.ownerDocument).toBe(document);
   });
+
+
+  it('property default to undefined value', () => {
+    const node = document.createTextNode('hello_world');
+    expect(typeof node['foo']).toEqual('undefined');
+
+    node['foo'] = new Set();
+    expect(typeof node['foo']).toEqual('object');
+  });
 });
