@@ -374,14 +374,14 @@ JSValue EventTargetInstance::getProperty(QjsContext *ctx, JSValue obj, JSAtom at
     // Property starts with underscore are taken as private property in javascript object.
     if (cmethod[0] == '_') {
       JS_FreeCString(eventTarget->m_ctx, cmethod);
-      return JS_NULL;
+      return JS_UNDEFINED;
     }
     JSValue result = eventTarget->getNativeProperty(cmethod);
     JS_FreeCString(ctx, cmethod);
     return result;
   }
 
-  return JS_NULL;
+  return JS_UNDEFINED;
 }
 
 int EventTargetInstance::setProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver, int flags) {
