@@ -1339,7 +1339,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         bool isStretchSelf = placeholderChild == null &&
             isStretchSelfValid &&
             (alignSelf != AlignSelf.auto ? alignSelf == AlignSelf.stretch
-                : renderStyle.transformedAlignItems == AlignItems.stretch);
+                : renderStyle.effectiveAlignItems == AlignItems.stretch);
 
         // Whether child is positioned placeholder or positioned renderObject
         bool isChildPositioned = placeholderChild == null &&
@@ -2042,7 +2042,7 @@ class RenderFlexLayout extends RenderLayoutBox {
             alignment = 'baseline';
             break;
           case AlignSelf.auto:
-            switch (renderStyle.transformedAlignItems) {
+            switch (renderStyle.effectiveAlignItems) {
               case AlignItems.flexStart:
               case AlignItems.start:
               case AlignItems.stretch:

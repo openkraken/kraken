@@ -147,7 +147,7 @@ mixin CSSSizingMixin on RenderStyleBase {
     bool isChildStretchSelf = false;
     if (isFlex) {
       isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
-      isAlignItemsStretch = renderStyle.transformedAlignItems == AlignItems.stretch;
+      isAlignItemsStretch = renderStyle.effectiveAlignItems == AlignItems.stretch;
       isFlexNoWrap = renderStyle.flexWrap != FlexWrap.wrap &&
         childRenderStyle.flexWrap != FlexWrap.wrapReverse;
       isChildAlignSelfStretch = childRenderStyle.alignSelf == AlignSelf.stretch;

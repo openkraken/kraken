@@ -175,57 +175,49 @@ enum AlignSelf {
 
 mixin CSSFlexboxMixin on RenderStyleBase {
 
-  // TODO(yuanyan): mark all children needs layout when the flex layout is changed.
-
-  FlexDirection get flexDirection => _flexDirection;
-  FlexDirection _flexDirection = FlexDirection.row;
-
-  set flexDirection(FlexDirection value) {
-    if (_flexDirection != value) {
-      _flexDirection = value;
-      if (renderBoxModel is RenderFlexLayout) {
-        renderBoxModel!.markNeedsLayout();
-      }
+  FlexDirection? _flexDirection;
+  FlexDirection get flexDirection => _flexDirection ?? FlexDirection.row;
+  set flexDirection(FlexDirection? value) {
+    if (value == _flexDirection) return;
+    _flexDirection = value;
+    if (renderBoxModel is RenderFlexLayout) {
+      renderBoxModel!.markNeedsLayout();
     }
   }
 
-  FlexWrap get flexWrap => _flexWrap;
-  FlexWrap _flexWrap = FlexWrap.nowrap;
-
-  set flexWrap(FlexWrap value) {
-    if (_flexWrap != value) {
-      _flexWrap = value;
-      if (renderBoxModel is RenderFlexLayout) {
-        renderBoxModel!.markNeedsLayout();
-      }
+  FlexWrap? _flexWrap;
+  FlexWrap get flexWrap => _flexWrap ?? FlexWrap.nowrap;
+  set flexWrap(FlexWrap? value) {
+    if (_flexWrap == value) return;
+    _flexWrap = value;
+    if (renderBoxModel is RenderFlexLayout) {
+      renderBoxModel!.markNeedsLayout();
     }
   }
 
-  JustifyContent get justifyContent => _justifyContent;
-  JustifyContent _justifyContent = JustifyContent.flexStart;
 
-  set justifyContent(JustifyContent value) {
-    if (_justifyContent != value) {
-      _justifyContent = value;
-      if (renderBoxModel is RenderFlexLayout) {
-        renderBoxModel!.markNeedsLayout();
-      }
+  JustifyContent? _justifyContent;
+  JustifyContent get justifyContent => _justifyContent ?? JustifyContent.flexStart;
+  set justifyContent(JustifyContent? value) {
+    if (_justifyContent == value) return;
+    _justifyContent = value;
+    if (renderBoxModel is RenderFlexLayout) {
+      renderBoxModel!.markNeedsLayout();
     }
   }
 
-  AlignItems get alignItems => _alignItems;
-  AlignItems _alignItems = AlignItems.stretch;
 
-  set alignItems(AlignItems value) {
-    if (_alignItems != value) {
-      _alignItems = value;
-      if (renderBoxModel is RenderFlexLayout) {
-        renderBoxModel!.markNeedsLayout();
-      }
+  AlignItems? _alignItems;
+  AlignItems get alignItems => _alignItems ?? AlignItems.stretch;
+  set alignItems(AlignItems? value) {
+    if (_alignItems == value) return;
+    _alignItems = value;
+    if (renderBoxModel is RenderFlexLayout) {
+      renderBoxModel!.markNeedsLayout();
     }
   }
 
-  AlignItems get transformedAlignItems {
+  AlignItems get effectiveAlignItems {
     if (CSSFlex.isVerticalFlexDirection(flexDirection)) {
       TextAlign textAlign = (this as RenderStyle).textAlign;
       if (textAlign == TextAlign.right) {
@@ -237,9 +229,9 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     return alignItems;
   }
 
-  AlignContent get alignContent => _alignContent;
-  AlignContent _alignContent = AlignContent.stretch;
-  set alignContent(AlignContent value) {
+  AlignContent? _alignContent;
+  AlignContent get alignContent => _alignContent ?? AlignContent.stretch;
+  set alignContent(AlignContent? value) {
     if (_alignContent == value) return;
     _alignContent = value;
     if (renderBoxModel is RenderFlexLayout) {
@@ -247,8 +239,8 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-  AlignSelf get alignSelf => _alignSelf;
-  AlignSelf _alignSelf = AlignSelf.auto;
+  AlignSelf? _alignSelf;
+  AlignSelf get alignSelf => _alignSelf ?? AlignSelf.auto;
   set alignSelf(AlignSelf value) {
     if (_alignSelf == value) return;
     _alignSelf = value;
@@ -257,8 +249,8 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-  CSSLengthValue? get flexBasis => _flexBasis;
   CSSLengthValue? _flexBasis;
+  CSSLengthValue? get flexBasis => _flexBasis;
   set flexBasis(CSSLengthValue? value) {
     // Negative value is invalid.
     if ((value != null && ((value.value != null && value.value! < 0))) ||
@@ -272,9 +264,9 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-  double get flexGrow => _flexGrow;
-  double _flexGrow = 0.0;
-  set flexGrow(double value) {
+  double? _flexGrow;
+  double get flexGrow => _flexGrow ?? 0.0;
+  set flexGrow(double? value) {
     if (_flexGrow == value) return;
     _flexGrow = value;
     if (renderBoxModel!.parent is RenderFlexLayout) {
@@ -282,9 +274,9 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-  double get flexShrink => _flexShrink;
-  double _flexShrink = 1.0;
-  set flexShrink(double value) {
+  double? _flexShrink;
+  double get flexShrink => _flexShrink ?? 1.0;
+  set flexShrink(double? value) {
     if (_flexShrink == value) return;
     _flexShrink = value;
     if (renderBoxModel!.parent is RenderFlexLayout) {
@@ -425,5 +417,4 @@ class CSSFlex {
   static bool isVerticalFlexDirection(FlexDirection flexDirection) {
     return flexDirection == FlexDirection.columnReverse || flexDirection == FlexDirection.column;
   }
-
 }
