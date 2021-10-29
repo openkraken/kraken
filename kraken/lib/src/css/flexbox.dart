@@ -339,17 +339,6 @@ mixin CSSFlexboxMixin on RenderStyleBase {
   }
 
   static AlignItems resolveAlignItems(String alignItems) {
-
-    // if (CSSFlex.isVerticalFlexDirection(flexDirection)) {
-    //   String textAlign = renderStyle.textAlign;
-    //   switch (textAlign) {
-    //     case 'right':
-    //       return AlignItems.flexEnd;
-    //     case 'center':
-    //       return AlignItems.center;
-    //   }
-    // }
-
     switch (alignItems) {
       case 'flex-start':
       case 'start':

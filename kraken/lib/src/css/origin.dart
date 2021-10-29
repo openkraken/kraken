@@ -14,19 +14,19 @@ class CSSOrigin {
       String? x, y;
 
       if (originList.length == 1) {
-        // default center
+        // Default is center.
         x = originList[0];
         y = CENTER;
-        // flutter just support two value x y
+        // Flutter just support two value: x/y.
         // FIXME: when flutter support three value
       } else if (originList.length == 2 || originList.length == 3) {
         x = originList[0];
         y = originList[1];
       }
-      // when origin property is not null, default is not center
+      // When origin property is not null, default is not center.
       double offsetX = 0, offsetY = 0, alignX = -1, alignY = -1;
-      // y just can be left right center when x is top bottom, otherwise illegal
-      // switch to right place
+      // The y just can be left right center when x is top bottom, otherwise illegal
+      // switch to right place.
       if ((x == TOP || x == BOTTOM) &&
           (y == LEFT || y == RIGHT || y == CENTER)) {
         String? tmp = x;
@@ -34,7 +34,7 @@ class CSSOrigin {
         y = tmp;
       }
 
-      // handle x
+      // Handle x.
       if (CSSLength.isLength(x)) {
         offsetX = CSSLength.parseLength(x!, renderStyle, property).computedValue;
       } else if (CSSPercentage.isPercentage(x)) {
@@ -47,7 +47,7 @@ class CSSOrigin {
         alignX = 0.0;
       }
 
-      // handle y
+      // Handle y.
       if (CSSLength.isLength(y)) {
         offsetY = CSSLength.parseLength(y!, renderStyle, property).computedValue;
       } else if (CSSPercentage.isPercentage(y)) {

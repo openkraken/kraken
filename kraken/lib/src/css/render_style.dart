@@ -350,7 +350,7 @@ class RenderStyle
     double? minHeight = renderStyle.minHeight.isAuto ? null : renderStyle.minHeight.computedValue;
     double? intrinsicRatio = renderBoxModel!.intrinsicRatio;
 
-    // Inline element has no height
+    // Inline element has no height.
     if (effectiveDisplay == CSSDisplay.inline) {
       return null;
     } else if (height != null) {
@@ -389,7 +389,7 @@ class RenderStyle
       }
     }
 
-    // Get height by intrinsic ratio for replaced element if height is not defined
+    // Get height by intrinsic ratio for replaced element if height is not defined.
     if (height == null && intrinsicRatio != null) {
       height = renderStyle.getHeightByIntrinsicRatio() + cropHeight;
     }
