@@ -33,7 +33,7 @@ describe('custom widget element', () => {
     image.setAttribute('src', 'assets/rabbit.png');
     document.body.appendChild(image);
 
-    image.addEventListener('click', function(e){
+    image.addEventListener('click', function (e) {
       done();
     });
 
@@ -86,12 +86,12 @@ describe('custom html element', () => {
     expect(await p2).toBe('abc');
 
     // @ts-ignore
-    let p3 = sampleElement.asyncFn([1,2,3,4]);
-    expect(await p3).toEqual([1,2,3,4]);
+    let p3 = sampleElement.asyncFn([1, 2, 3, 4]);
+    expect(await p3).toEqual([1, 2, 3, 4]);
 
     // @ts-ignore
-    let p4 = sampleElement.asyncFn([{name: 1}]);
-    expect(await p4).toEqual([{name: 1}]);
+    let p4 = sampleElement.asyncFn([{ name: 1 }]);
+    expect(await p4).toEqual([{ name: 1 }]);
   });
 
   it('return promise error when dart async function throw error', async () => {
@@ -105,7 +105,7 @@ describe('custom html element', () => {
     try {
       let result = await p;
       throw new Error('should throw');
-    } catch(e) {
+    } catch (e) {
       expect(e.message).toBe('Assertion failed: "Asset error"');
     }
   });
@@ -120,8 +120,8 @@ describe('custom html element', () => {
     expect(sampleElement._fake).toBe(null);
 
     // @ts-ignore
-    sampleElement._fake = [1,2,3,4,5];
+    sampleElement._fake = [1, 2, 3, 4, 5];
     // @ts-ignore
-    expect(sampleElement._fake).toEqual([1,2,3,4,5]);
+    expect(sampleElement._fake).toEqual([1, 2, 3, 4, 5]);
   });
 });
