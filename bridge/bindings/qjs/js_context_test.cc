@@ -16,7 +16,6 @@ TEST(Context, evalWithError) {
   bool errorHandlerExecuted = false;
   auto errorHandler = [&errorHandlerExecuted](int32_t contextId, const char *errmsg) {
     errorHandlerExecuted = true;
-    KRAKEN_LOG(VERBOSE) << errmsg;
     EXPECT_STREQ(errmsg, "TypeError: cannot read property 'toString' of null\n"
                          "    at <eval> (file://:1)\n");
   };
