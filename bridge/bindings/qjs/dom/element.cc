@@ -173,7 +173,14 @@ JSValue Element::hasAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
   const char *cname = JS_ToCString(ctx, nameValue);
   std::string name = std::string(cname);
 
-  JSValue result = JS_NewBool(ctx, attributes->hasAttribute(name));
+  bool match;
+  if (name == "style") {
+    match = true;
+  } else {
+    match = attributes->hasAttribute(name);
+  }
+
+  JSValue result = JS_NewBool(ctx, match);
   JS_FreeCString(ctx, cname);
 
   return result;
@@ -201,7 +208,16 @@ JSValue Element::setAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
 
   auto *attributes = element->m_attributes;
 
-  if (attributes->hasAttribute(name)) {
+  if (name == "style") {
+    // Only string value to style property are accept.
+    if (JS_IsString(attributeValue)) {
+      std::string styleRules = jsValueToStdString(ctx, attributeValue);
+      element->m_style->internalSetStyleRules( styleRules);
+    } else {
+      // Otherwise default to reset style.
+      element->resetStyle();
+    }
+  } else if (attributes->hasAttribute(name)) {
     JSAtom oldAtom = attributes->getAttribute(name);
     JSValue exception = attributes->setAttribute(name, attributeAtom);
     if (JS_IsException(exception)) return exception;
@@ -240,10 +256,14 @@ JSValue Element::getAttribute(QjsContext *ctx, JSValue this_val, int argc, JSVal
   auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
   std::string name = jsValueToStdString(ctx, nameValue);
 
-  auto *attributes = element->m_attributes;
-
-  if (attributes->hasAttribute(name)) {
-    return JS_AtomToValue(ctx, attributes->getAttribute(name));
+  if (name == "style") {
+    std::string styleRules = element->m_style->toString();
+    return JS_NewString(ctx, styleRules.c_str());
+  } else {
+    auto *attributes = element->m_attributes;
+    if (attributes->hasAttribute(name)) {
+      return JS_AtomToValue(ctx, attributes->getAttribute(name));
+    }
   }
 
   return JS_NULL;
@@ -265,7 +285,9 @@ JSValue Element::removeAttribute(QjsContext *ctx, JSValue this_val, int argc, JS
   std::string name = jsValueToStdString(ctx, nameValue);
   auto *attributes = element->m_attributes;
 
-  if (attributes->hasAttribute(name)) {
+  if (name == "style") {
+    element->resetStyle();
+  } else if (attributes->hasAttribute(name)) {
     JSAtom id = attributes->getAttribute(name);
     element->m_attributes->removeAttribute(name);
     element->_didModifyAttribute(name, id, JS_ATOM_NULL);
@@ -628,11 +650,26 @@ PROP_SETTER(ElementInstance, outerHTML)(QjsContext *ctx, JSValue this_val, int a
   return JS_NULL;
 }
 
+PROP_GETTER(ElementInstance, style)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
+  return JS_DupValue(ctx, element->m_style->instanceObject);
+}
+PROP_SETTER(ElementInstance, style)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  auto *element = static_cast<ElementInstance *>(JS_GetOpaque(this_val, Element::classId()));
+  element->resetStyle();
+  if (JS_IsString(argv[0])) {
+    std::string styleRules = jsValueToStdString(ctx, argv[0]);
+    element->m_style->internalSetStyleRules(styleRules);
+  }
+  return JS_NULL;
+}
+
 JSClassID ElementInstance::classID() {
   return Element::classId();
 }
 
 ElementInstance::~ElementInstance() {
+  JS_FreeValue(m_ctx, m_style->instanceObject);
 }
 
 JSValue ElementInstance::internalGetTextContent() {
@@ -750,7 +787,7 @@ std::string ElementInstance::outerHTML() {
     s += " " + attributes;
   }
   if (!style.empty()) {
-    s += " style=\"" + style;
+    s += " style=\"" + style + "\"";
   }
 
   s += ">";
@@ -862,8 +899,6 @@ ElementInstance::ElementInstance(Element *element, std::string tagName, bool sho
   JSValue style = JS_CallConstructor(m_ctx, CSSStyleDeclaration::instance(m_context)->classObject, 1, arguments);
   m_style = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(style, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
 
-  JS_DefinePropertyValueStr(m_ctx, instanceObject, "style", m_style->instanceObject,
-                            JS_PROP_NORMAL | JS_PROP_ENUMERABLE);
   JS_DefinePropertyValueStr(m_ctx, instanceObject, "attributes", m_attributes->jsObject,
                             JS_PROP_NORMAL | JS_PROP_ENUMERABLE);
 
@@ -890,6 +925,24 @@ StyleDeclarationInstance *ElementInstance::style() {
 
 ElementAttributes *ElementInstance::attributes() {
   return m_attributes;
+}
+
+void ElementInstance::gcMark(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) {
+  NodeInstance::gcMark(rt, val, mark_func);
+  if (JS_IsObject(m_style->instanceObject)) JS_MarkValue(rt, m_style->instanceObject, mark_func);
+}
+
+void ElementInstance::resetStyle() {
+  JS_FreeValue(m_ctx, m_style->instanceObject);
+  JSValue arguments[] = {
+    instanceObject
+  };
+  JSValue style = JS_CallConstructor(m_ctx, CSSStyleDeclaration::instance(m_context)->classObject, 1, arguments);
+  m_style = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(style, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
+
+  NativeString *args_01 = stringToNativeString("style");
+  ::foundation::UICommandBuffer::instance(m_context->getContextId())
+    ->addCommand(eventTargetId, UICommand::removeProperty, *args_01, nullptr);
 }
 
 PROP_GETTER(BoundingClientRect, x)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {

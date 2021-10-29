@@ -21,6 +21,10 @@ template <typename CharacterType> inline CharacterType toASCIIUpper(CharacterTyp
   return character & ~(isASCIILower(character) << 5);
 }
 
+using ParseRuleCallback = void(*)(void *context, std::string &key, std::string &value);
+
+void parseRules(std::string &source, ParseRuleCallback callback, void *context);
+
 class CSSStyleDeclaration : public HostClass {
 public:
   OBJECT_INSTANCE(CSSStyleDeclaration);
@@ -49,7 +53,8 @@ public:
   explicit StyleDeclarationInstance(CSSStyleDeclaration *cssStyleDeclaration, EventTargetInstance *ownerEventTarget)
     : Instance(cssStyleDeclaration, "CSSStyleDeclaration", &m_exoticMethods, CSSStyleDeclaration::kCSSStyleDeclarationClassId, finalize), m_ownerEventTarget(ownerEventTarget) {};
   ~StyleDeclarationInstance();
-  bool internalSetProperty(std::string &name, JSValue value);
+  bool internalSetProperty(std::string &name, std::string &value);
+  void internalSetStyleRules(std::string &rules);
   void internalRemoveProperty(std::string &name);
   JSValue internalGetPropertyValue(std::string &name);
   std::string toString();
@@ -70,7 +75,7 @@ private:
 
   static JSClassExoticMethods m_exoticMethods;
 
-  std::unordered_map<std::string, JSValue> properties;
+  std::unordered_map<std::string, std::string> m_styleRules;
   const EventTargetInstance *m_ownerEventTarget;
   friend EventTargetInstance;
 };

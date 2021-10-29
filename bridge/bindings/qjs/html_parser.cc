@@ -12,12 +12,6 @@
 
 namespace kraken::binding::qjs {
 
-inline std::string trim(std::string &str) {
-  str.erase(0, str.find_first_not_of(' ')); // prefixing spaces
-  str.erase(str.find_last_not_of(' ') + 1); // surfixing spaces
-  return str;
-}
-
 void HTMLParser::traverseHTML(NodeInstance *root, GumboNode *node) {
   JSContext *context = root->context();
   QjsContext *ctx = context->ctx();
@@ -123,10 +117,7 @@ void HTMLParser::parseProperty(ElementInstance *element, GumboElement *gumboElem
           std::string styleValue = s.substr(position + 1, s.length());
           std::transform(styleValue.begin(), styleValue.end(), styleValue.begin(), ::tolower);
           trim(styleValue);
-
-          JSValue newStyleValue = JS_NewString(ctx, styleValue.c_str());
-          style->internalSetProperty(styleKey, newStyleValue);
-          JS_FreeValue(ctx, newStyleValue);
+          style->internalSetProperty(styleKey, styleValue);
         }
       }
 

@@ -12,6 +12,8 @@
 #include "bindings/qjs/js_context.h"
 #include "bindings/qjs/native_value.h"
 #include "bindings/qjs/qjs_patch.h"
+#include "style_declaration.h"
+
 
 namespace kraken::binding::qjs {
 

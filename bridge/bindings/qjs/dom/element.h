@@ -138,15 +138,18 @@ protected:
   explicit ElementInstance(Element *element, std::string tagName, bool shouldAddUICommand);
 
 private:
-  DEFINE_HOST_CLASS_PROPERTY(18, nodeName, tagName, className, offsetLeft, offsetTop, offsetWidth, offsetHeight, clientWidth,
+  DEFINE_HOST_CLASS_PROPERTY(19, nodeName, tagName, className, offsetLeft, offsetTop, offsetWidth, offsetHeight, clientWidth,
                              clientHeight, clientTop, clientLeft, scrollTop, scrollLeft, scrollHeight, scrollWidth,
-                             children, innerHTML, outerHTML);
+                             children, innerHTML, outerHTML, style);
   void _notifyNodeRemoved(NodeInstance *node) override;
   void _notifyChildRemoved();
   void _notifyNodeInsert(NodeInstance *insertNode) override;
   void _notifyChildInsert();
   void _didModifyAttribute(std::string &name, JSAtom oldId, JSAtom newId);
   void _beforeUpdateId(JSAtom oldId, JSAtom newId);
+  void resetStyle();
+
+  void gcMark(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) override;
 
   std::string m_tagName;
   friend Element;
