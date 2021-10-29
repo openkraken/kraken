@@ -541,16 +541,21 @@ task('build-android-kraken-lib', (done) => {
   }
 
   const archs = ['arm64-v8a', 'armeabi-v7a'];
+  const toolChainMap = {
+    'arm64-v8a': 'aarch64-linux-android',
+    'armeabi-v7a': 'arm-linux-androideabi'
+  };
   const buildType = (buildMode === 'Release' || buildMode == 'Relwithdebinfo') ? 'Relwithdebinfo' : 'Debug';
 
   const cmakeGeneratorTemplate = platform == 'win32' ? 'Ninja' : 'Unix Makefiles';
   archs.forEach(arch => {
     const soBinaryDirectory = path.join(paths.bridge, `build/android/lib/${arch}`);
     const bridgeCmakeDir = path.join(paths.bridge, 'cmake-build-android-' + arch);
+    const ndkDir = path.join(androidHome, 'ndk', ndkVersion);
     // generate project
     execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
-    -DCMAKE_TOOLCHAIN_FILE=${path.join(androidHome, 'ndk', ndkVersion, '/build/cmake/android.toolchain.cmake')} \
-    -DANDROID_NDK=${path.join(androidHome, '/ndk/', ndkVersion)} \
+    -DCMAKE_TOOLCHAIN_FILE=${path.join(ndkDir, '/build/cmake/android.toolchain.cmake')} \
+    -DANDROID_NDK=${ndkDir} \
     -DIS_ANDROID=TRUE \
     -DANDROID_ABI="${arch}" \
     ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
@@ -572,6 +577,10 @@ task('build-android-kraken-lib', (done) => {
     execSync(`cmake --build ${bridgeCmakeDir} --target kraken -- -j 12`, {
       stdio: 'inherit'
     });
+
+    // Copy libc++_shared.so to dist from NDK.
+    const libcppSharedPath = path.join(ndkDir, `./toolchains/llvm/prebuilt/${os.platform()}-x86_64/sysroot/usr/lib/${toolChainMap[arch]}/libc++_shared.so`);
+    execSync(`cp ${libcppSharedPath} ${soBinaryDirectory}`);
   });
 
   done();
