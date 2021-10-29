@@ -1374,13 +1374,7 @@ class Element extends Node
       return removeProperty(key);
     }
 
-    if (key == _STYLE_PROPERTY) {
-      if (value is String){
-        _setInlineStyleString(value);
-      } else {
-        print('Invalid inline style value: $value');
-      }
-    } else if (key == _CLASS_NAME) {
+    if (key == _CLASS_NAME) {
       className = value;
     } else {
       properties[key] = value;
@@ -1389,9 +1383,7 @@ class Element extends Node
 
   @mustCallSuper
   dynamic getProperty(String key) {
-    if (key == _STYLE_PROPERTY) {
-      return _getInlineStyleString();
-    } else if (key == _CLASS_NAME) {
+    if (key == _CLASS_NAME) {
       return className;
     } else {
       return properties[key];
@@ -1413,26 +1405,6 @@ class Element extends Node
     inlineStyle.forEach((String property, _) {
       _removeInlineStyleProperty(property);
     });
-    style.flushPendingProperties();
-  }
-
-  String _getInlineStyleString() {
-    List<String> stringList = [];
-    inlineStyle.forEach((String property, dynamic value) {
-      stringList.add('$property: $value;');
-    });
-    return stringList.join(_ONE_SPACE);
-  }
-
-  void _setInlineStyleString(String value) {
-    // Wrap inline style string to a style declaration.
-    String ruleText = '*{$value}';
-    CSSStyleRule? rule = CSSStyleRuleParser.parse(ruleText);
-    if (rule != null) {
-      rule.style.forEach((String property, String value) {
-        setInlineStyle(property, value);
-      });
-    }
     style.flushPendingProperties();
   }
 
