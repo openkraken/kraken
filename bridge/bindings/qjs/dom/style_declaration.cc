@@ -170,7 +170,7 @@ JSValue StyleDeclarationInstance::internalGetPropertyValue(std::string &name) {
     return JS_DupValue(m_ctx, properties[name]);
   }
 
-  return JS_NULL;
+  return JS_NewString(m_ctx, "");
 }
 
 // TODO: add support for annotation CSS styleSheets.
