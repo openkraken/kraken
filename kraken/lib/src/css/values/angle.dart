@@ -4,6 +4,7 @@
  */
 
 import 'dart:math' as math;
+import 'package:quiver/collection.dart';
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#angles
 const String _DEG = 'deg';
@@ -11,8 +12,7 @@ const String _GRAD = 'grad';
 const String _RAD = 'rad';
 const String _TURN = 'turn';
 
-final Map<String, double?> _cachedParsedAngle = {};
-
+final LinkedLruHashMap<String, double?> _cachedParsedAngle = LinkedLruHashMap(maximumSize: 100);
 class CSSAngle {
 
 

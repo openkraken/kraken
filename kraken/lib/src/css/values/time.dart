@@ -3,10 +3,13 @@
  * Author: Kraken Team.
  */
 
+import 'package:quiver/collection.dart';
+
 final _timeRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?ms|s$', caseSensitive: false);
 final _0s = '0s';
 final _0ms = '0ms';
-final Map<String, int?> _cachedParsedTime = {};
+final LinkedLruHashMap<String, int?> _cachedParsedTime = LinkedLruHashMap(maximumSize: 100);
+
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#time
 class CSSTime {
   static const String MILLISECONDS = 'ms';

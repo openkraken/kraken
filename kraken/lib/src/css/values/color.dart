@@ -6,6 +6,7 @@
 import 'dart:math';
 import 'dart:ui' show Color;
 
+import 'package:quiver/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:kraken/css.dart';
@@ -173,7 +174,7 @@ final _colorHslRegExp =
 final _colorRgbRegExp =
     RegExp(r'^(rgba?)\(([+-]?[0-9.]+%?)[,\s]+([+-]?[0-9.]+%?)[,\s]+([+-]?[0-9.]+%?)([,\s/]+([+-]?[0-9.]+%?))?\s*\)$');
 
-final Map<String, Color> _cachedParsedColor = {};
+final LinkedLruHashMap<String, Color> _cachedParsedColor = LinkedLruHashMap(maximumSize: 100);
 /// #123
 /// #123456
 /// rgb(r,g,b)

@@ -5,9 +5,10 @@
 
 import 'package:flutter/painting.dart';
 import 'package:kraken/css.dart';
+import 'package:quiver/collection.dart';
 
 final RegExp _splitRegExp = RegExp(r'\s+');
-final Map<String, List<String>> _cachedParsedPosition = {};
+final LinkedLruHashMap<String, List<String>> _cachedParsedPosition = LinkedLruHashMap(maximumSize: 100);
 
 /// CSS Values and Units: https://drafts.csswg.org/css-values-3/#position
 /// The <position> value specifies the position of a object area

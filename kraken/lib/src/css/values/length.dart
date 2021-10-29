@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
+import 'package:quiver/collection.dart';
 
 // https://drafts.csswg.org/css-values-3/#absolute-lengths
 const _1in = 96; // 1in = 2.54cm = 96px
@@ -369,7 +370,7 @@ class CSSLengthValue {
   String toString() => 'CSSLengthValue(value: $value, unit: $type, computedValue: $computedValue)';
 }
 
-final Map<String, CSSLengthValue> _cachedParsedLength = {};
+final LinkedLruHashMap<String, CSSLengthValue> _cachedParsedLength = LinkedLruHashMap(maximumSize: 500);
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#lengths
 class CSSLength {

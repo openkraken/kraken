@@ -5,8 +5,10 @@
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#percentages
 
+import 'package:quiver/collection.dart';
+
 final _percentageRegExp = RegExp(r'^[-]*\d+\%$', caseSensitive: false);
-final Map<String, double?> _cachedParsedPercentage = {};
+final LinkedLruHashMap<String, double?> _cachedParsedPercentage = LinkedLruHashMap(maximumSize: 100);
 
 class CSSPercentage {
   static String PERCENTAGE = '%';

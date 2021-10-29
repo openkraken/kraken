@@ -5,6 +5,8 @@
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#functional-notations
 
+import 'package:quiver/collection.dart';
+
 final _functionRegExp = RegExp(r'^[a-zA-Z_]+\(.+\)$', caseSensitive: false);
 final _functionStart = '(';
 final _functionEnd = ')';
@@ -13,7 +15,7 @@ final _functionNotationUrl = 'url';
 const String FUNCTION_SPLIT = ',';
 const String FUNCTION_ARGS_SPLIT = ',';
 
-final Map<String, List<CSSFunctionalNotation>> _cachedParsedFunction = {};
+final LinkedLruHashMap<String, List<CSSFunctionalNotation>> _cachedParsedFunction = LinkedLruHashMap(maximumSize: 100);
 
 // ignore: public_member_api_docs
 class CSSFunction {
