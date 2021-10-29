@@ -14,6 +14,21 @@ describe('Tags img', () => {
     document.body.appendChild(img);
   });
 
+  it('don\'t error when append child on img element', async (done) => {
+    let img = document.createElement('img');
+    img.src = 'https://gw.alicdn.com/tfs/TB1MRC_cvb2gK0jSZK9XXaEgFXa-1701-1535.png';
+    document.body.appendChild(img);
+
+    img.onload = async () => {
+      await snapshot();
+      let text = document.createTextNode('text');
+      img.appendChild(text);
+      await snapshot();
+
+      done();
+    };
+  });
+
   it('new Image', (done) => {
     const img = new Image();
     img.onload = img.onerror = (evt) => {

@@ -251,14 +251,13 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     recalculateDocumentStyle();
   }
 
-  // TODO: support class style map avoid recalculate all dom tree.
   bool _hasRecalculateDocumentStylePending = false;
   void recalculateDocumentStyle() {
     if (_hasRecalculateDocumentStylePending) return;
     _hasRecalculateDocumentStylePending = true;
     SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
       // Recalculate style for all nodes.
-      document.documentElement.recalculateStyle();
+      document.documentElement.recalculateNestedStyle();
       _hasRecalculateDocumentStylePending = false;
     });
     SchedulerBinding.instance!.scheduleFrame();

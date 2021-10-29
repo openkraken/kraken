@@ -80,6 +80,7 @@ class CSSStyleDeclaration {
   final Map<String, String> _properties = {};
   Map<String, String> _pendingProperties = {};
   final Map<String, bool> _importants = {};
+  final Map<String, dynamic> _sheetStyle = {};
 
   /// Textual representation of the declaration block.
   /// Setting this attribute changes the style.
@@ -111,42 +112,26 @@ class CSSStyleDeclaration {
   }
 
   /// Removes a property from the CSS declaration.
-  String? removeProperty(String propertyName, [bool? isImportant]) {
-    if (isImportant == true) {
-      _importants.remove(propertyName);
-    }
-
-    String? prevValue = getPropertyValue(propertyName);
-    String present = EMPTY_STRING;
-
+  void removeProperty(String propertyName, [bool? isImportant]) {
     switch (propertyName) {
       case PADDING:
-        CSSStyleProperty.removeShorthandPadding(this, isImportant);
-        break;
+        return CSSStyleProperty.removeShorthandPadding(this, isImportant);
       case MARGIN:
-        CSSStyleProperty.removeShorthandMargin(this, isImportant);
-        break;
+        return CSSStyleProperty.removeShorthandMargin(this, isImportant);
       case BACKGROUND:
-        CSSStyleProperty.removeShorthandBackground(this, isImportant);
-        break;
+        return CSSStyleProperty.removeShorthandBackground(this, isImportant);
       case BACKGROUND_POSITION:
-        CSSStyleProperty.removeShorthandBackgroundPosition(this, isImportant);
-        break;
+        return CSSStyleProperty.removeShorthandBackgroundPosition(this, isImportant);
       case BORDER_RADIUS:
-        CSSStyleProperty.removeShorthandBorderRadius(this, isImportant);
-        break;
+        return CSSStyleProperty.removeShorthandBorderRadius(this, isImportant);
       case OVERFLOW:
-        CSSStyleProperty.removeShorthandOverflow(this, isImportant);
-        break;
+        return CSSStyleProperty.removeShorthandOverflow(this, isImportant);
       case FONT:
-        CSSStyleProperty.removeShorthandFont(this, isImportant);
-        break;
+        return CSSStyleProperty.removeShorthandFont(this, isImportant);
       case FLEX:
-        CSSStyleProperty.removeShorthandFlex(this, isImportant);
-        break;
+        return CSSStyleProperty.removeShorthandFlex(this, isImportant);
       case FLEX_FLOW:
-        CSSStyleProperty.removeShorthandFlexFlow(this, isImportant);
-        break;
+        return CSSStyleProperty.removeShorthandFlexFlow(this, isImportant);
       case BORDER:
       case BORDER_TOP:
       case BORDER_RIGHT:
@@ -155,24 +140,33 @@ class CSSStyleDeclaration {
       case BORDER_COLOR:
       case BORDER_STYLE:
       case BORDER_WIDTH:
-        CSSStyleProperty.removeShorthandBorder(this, propertyName, isImportant);
-        break;
+        return CSSStyleProperty.removeShorthandBorder(this, propertyName, isImportant);
       case TRANSITION:
-        CSSStyleProperty.removeShorthandTransition(this, isImportant);
-        break;
+        return CSSStyleProperty.removeShorthandTransition(this, isImportant);
       case TEXT_DECORATION:
-        CSSStyleProperty.removeShorthandTextDecoration(this, isImportant);
-        break;
+        return CSSStyleProperty.removeShorthandTextDecoration(this, isImportant);
+
+    }
+
+    String present = EMPTY_STRING;
+    if (isImportant == true) {
+      _importants.remove(propertyName);
+      // Fallback to css style.
+      String? value = _sheetStyle[propertyName];
+      if (!isNullOrEmptyValue(value)) {
+        present = value!;
+      }
+    } else if (isImportant == false) {
+      _sheetStyle.remove(propertyName);
     }
 
     // Fallback to default style.
-    if (defaultStyle != null && defaultStyle!.containsKey(propertyName)) {
+    if (isNullOrEmptyValue(present) && defaultStyle != null && defaultStyle!.containsKey(propertyName)) {
       present = defaultStyle![propertyName];
     }
 
     // Update removed value by flush pending properties.
     _pendingProperties[propertyName] = present;
-    return prevValue;
   }
 
   void _expandShorthand(String propertyName, String normalizedValue, bool? isImportant) {
@@ -254,37 +248,17 @@ class CSSStyleDeclaration {
     // Like url("http://path") declared with quotation marks and
     // custom property names are case sensitive.
     String lowerCase = string.toLowerCase();
+    lowerCase = _replacePattern(string, lowerCase, 'env(', ')');
     lowerCase = _replacePattern(string, lowerCase, 'url(', ')');
      // var(--my-color) will be treated as a separate custom property to var(--My-color).
     lowerCase = _replacePattern(string, lowerCase, 'var(', ')');
     return lowerCase;
   }
 
-  /// Modifies an existing CSS property or creates a new CSS property in
-  /// the declaration block.
-  void setProperty(String propertyName, value, [bool? isImportant]) {
-    // Null or empty value means should be removed.
-    if (isNullOrEmptyValue(value)) {
-      removeProperty(propertyName, isImportant);
-      return;
-    }
-
-    String normalizedValue = _toLowerCase(value.toString().trim());
+  bool _isValidValue(String propertyName, String normalizedValue) {
 
     // Illegal value like '   ' after trim is '' should do nothing.
-    if (normalizedValue.isEmpty) return;
-
-    String? prevValue = getPropertyValue(propertyName);
-    if (normalizedValue == prevValue) return;
-
-    // If the important property is already set, we should ignore it.
-    if (isImportant != true && _importants[propertyName] == true) {
-      return;
-    }
-
-    if (_CSSShorthandProperty[propertyName] != null) {
-      return _expandShorthand(propertyName, normalizedValue, isImportant);
-    }
+    if (normalizedValue.isEmpty) return false;
 
     // Validate value.
     switch (propertyName) {
@@ -303,7 +277,7 @@ class CSSStyleDeclaration {
           !CSSLength.isAuto(normalizedValue) &&
           !CSSPercentage.isPercentage(normalizedValue)
         ) {
-          return;
+          return false;
         }
         break;
       case MAX_WIDTH:
@@ -312,7 +286,7 @@ class CSSStyleDeclaration {
           !CSSLength.isLength(normalizedValue) &&
           !CSSPercentage.isPercentage(normalizedValue)
         ) {
-          return;
+          return false;
         }
         break;
       case MIN_WIDTH:
@@ -324,7 +298,7 @@ class CSSStyleDeclaration {
         if (!CSSLength.isLength(normalizedValue) &&
           !CSSPercentage.isPercentage(normalizedValue)
         ) {
-          return;
+          return false;
         }
         break;
       case BORDER_BOTTOM_WIDTH:
@@ -332,7 +306,7 @@ class CSSStyleDeclaration {
       case BORDER_LEFT_WIDTH:
       case BORDER_RIGHT_WIDTH:
         if (!CSSLength.isLength(normalizedValue)) {
-          return;
+          return false;
         }
         break;
       case COLOR:
@@ -343,20 +317,52 @@ class CSSStyleDeclaration {
       case BORDER_RIGHT_COLOR:
       case TEXT_DECORATION_COLOR:
         // Validation color type
-        if (!CSSColor.isColor(normalizedValue)) return;
+        if (!CSSColor.isColor(normalizedValue)) return false;
         break;
       case BACKGROUND_IMAGE:
-        if (!CSSBackground.isValidBackgroundImageValue(normalizedValue)) return;
+        if (!CSSBackground.isValidBackgroundImageValue(normalizedValue)) return false;
         break;
       case BACKGROUND_REPEAT:
-        if (!CSSBackground.isValidBackgroundRepeatValue(normalizedValue)) return;
+        if (!CSSBackground.isValidBackgroundRepeatValue(normalizedValue)) return false;
         break;
+    }
+    return true;
+  }
+
+  /// Modifies an existing CSS property or creates a new CSS property in
+  /// the declaration block.
+  void setProperty(String propertyName, value, [bool? isImportant]) {
+    // Null or empty value means should be removed.
+    if (isNullOrEmptyValue(value)) {
+      removeProperty(propertyName, isImportant);
+      return;
+    }
+
+    String normalizedValue = _toLowerCase(value.toString().trim());
+
+    if (!_isValidValue(propertyName, normalizedValue)) return;
+
+    if (_CSSShorthandProperty[propertyName] != null) {
+      return _expandShorthand(propertyName, normalizedValue, isImportant);
+    }
+
+    // From style sheet mark the property important as false.
+    if (isImportant == false) {
+      _sheetStyle[propertyName] = value;
+    }
+
+    // If the important property is already set, we should ignore it.
+    if (isImportant != true && _importants[propertyName] == true) {
+      return;
     }
 
     // Current only from inline style will mark the property as important.
     if (isImportant == true) {
       _importants[propertyName] = true;
     }
+
+    String? prevValue = getPropertyValue(propertyName);
+    if (normalizedValue == prevValue) return;
 
     _pendingProperties[propertyName] = normalizedValue;
   }
@@ -461,6 +467,7 @@ class CSSStyleDeclaration {
     _properties.clear();
     _pendingProperties.clear();
     _importants.clear();
+    _sheetStyle.clear();
   }
 
   void dispose() {

@@ -57,6 +57,36 @@ void main() {
       assert(cacheObject.valid);
     });
 
+    // The second request that last-modified has updated, then controller should update local
+    // expire time and save new response.
+    test('Update cache last-modified', () async {
+      // First request to save cache.
+      var req = await httpClient.openUrl('GET',
+          server.getUri('plain_text_with_current_time_last_modified'));
+      KrakenHttpOverrides.setContextHeader(req.headers, contextId);
+      req.headers.ifModifiedSince = HttpDate.parse('Sun, 15 Mar 2020 11:32:20 GMT');
+      var res = await req.close();
+      expect(String.fromCharCodes(await consolidateHttpClientResponseBytes(res)), 'CachedData');
+
+      // Second request and updating cache.
+      var req2 = await httpClient.openUrl('GET',
+          server.getUri('plain_text_with_current_time_last_modified'));
+      KrakenHttpOverrides.setContextHeader(req2.headers, contextId);
+      var res2 = await req2.close();
+
+      // Must miss cache, and update cache.
+      String httpDateNow = HttpDate.format(DateTime.now());
+      expect(res2.headers.value('cache-hits'), null);
+      expect(res2.headers.value(HttpHeaders.lastModifiedHeader), httpDateNow);
+
+      // Check cache object updated.
+      HttpCacheController cacheController = HttpCacheController.instance(req.headers.value('origin')!);
+      var cacheObject = await cacheController.getCacheObject(req.uri);
+      assert(cacheObject.lastModified != null);
+      // Difference <= 1ms.
+      assert(DateTime.now().compareTo(cacheObject.lastModified!) <= 1);
+    });
+
     test('Negotiation cache eTag', () async {
       // First request to save cache.
       var req = await httpClient.openUrl('GET',
@@ -145,6 +175,26 @@ void main() {
 
       Uint8List bytesFromCache = await consolidateHttpClientResponseBytes(response);
       expect(bytesFromCache.length, response.contentLength);
+    });
+
+    test('Cache should contain response headers.', () async {
+      // First request to save cache.
+      var req = await httpClient.openUrl('GET',
+          server.getUri('plain_text_with_etag_and_content_length'));
+      KrakenHttpOverrides.setContextHeader(req.headers, contextId);
+      var res = await req.close();
+      expect(String.fromCharCodes(await consolidateHttpClientResponseBytes(res)), 'CachedData');
+
+      // Assert cache object.
+      HttpCacheController cacheController = HttpCacheController.instance(req.headers.value('origin')!);
+      var cacheObject = await cacheController.getCacheObject(req.uri);
+      await cacheObject.read();
+      assert(cacheObject.valid);
+
+      var response = await cacheObject.toHttpClientResponse();
+      assert(response != null);
+      expect(response!.headers.value('cache-hits'), 'HIT');
+      expect(response.headers.value('x-custom-header'), 'hello-world');
     });
   });
 }

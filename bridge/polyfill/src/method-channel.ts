@@ -1,4 +1,4 @@
-import { kraken } from './kraken';
+import { krakenInvokeModule } from './bridge';
 
 type MethodCallHandler = (method: string, args: any[]) => void;
 
@@ -24,7 +24,7 @@ export const methodChannel = {
   },
   invokeMethod(method: string, ...args: any[]): Promise<string> {
     return new Promise((resolve, reject) => {
-      kraken.invokeModule('MethodChannel', 'invokeMethod', [method, args], (e, data) => {
+      krakenInvokeModule('MethodChannel', 'invokeMethod', [method, args], (e, data) => {
         if (e) return reject(e);
         resolve(data);
       });

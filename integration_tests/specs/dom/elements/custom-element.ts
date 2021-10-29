@@ -10,6 +10,16 @@ describe('custom widget element', () => {
     await snapshot();
   });
 
+  it('should work with html tags', async () => {
+    let div = document.createElement('div');
+    div.innerHTML = `<flutter-text value="Hello" />`;
+    document.body.appendChild(div);
+    await snapshot();
+
+    div.innerHTML = `<flutter-text value="Hi"></flutter-text>`;
+    await snapshot();
+  });
+
   it('use flutter asset image', async () => {
     const image = document.createElement('flutter-asset-image');
     image.setAttribute('src', 'assets/rabbit.png');
@@ -107,7 +117,7 @@ describe('custom html element', () => {
     document.body.appendChild(sampleElement);
 
     // @ts-ignore
-    expect(sampleElement._fake).toBe(null);
+    expect(sampleElement._fake).toBe(undefined);
 
     // @ts-ignore
     sampleElement._fake = [1,2,3,4,5];

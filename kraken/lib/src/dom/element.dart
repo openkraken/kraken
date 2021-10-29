@@ -23,7 +23,7 @@ import 'package:meta/meta.dart';
 import 'element_native_methods.dart';
 
 final RegExp _splitRegExp = RegExp(r'\s+');
-
+const String _ONE_SPACE = ' ';
 const String _STYLE_PROPERTY = 'style';
 const String _CLASS_NAME = 'class';
 
@@ -107,7 +107,21 @@ class Element extends Node
   /// The inline style is a map of style property name to style property value.
   final Map<String, dynamic> inlineStyle = {};
 
-  Size get viewportSize => elementManager.viewport.viewportSize;
+  /// The Element.classList is a read-only property that returns a collection of the class attributes of the element.
+  final List<String> _classList = [];
+  List<String> get classList {
+    return _classList;
+  }
+
+  set className(String className) {
+    _classList.clear();
+    List<String> classList = className.split(_splitRegExp);
+    if (classList.isNotEmpty) {
+      _classList.addAll(classList);
+    }
+    recalculateStyle();
+  }
+  String get className => _classList.join(_ONE_SPACE);
 
   /// Whether should create repaintBoundary for this element when style changed
   bool get shouldConvertToRepaintBoundary {
@@ -531,7 +545,7 @@ class Element extends Node
       if (!child.isRendererAttached) {
         if (scrollingContentLayoutBox != null) {
           child.attachTo(this, after: scrollingContentLayoutBox!.lastChild);
-        } else {
+        } else if (!_isIntrinsicBox) {
           child.attachTo(this, after: _renderLayoutBox!.lastChild);
         }
       }
@@ -1286,19 +1300,18 @@ class Element extends Node
     }
   }
 
-  void _applyStyleSheetStyle(CSSStyleDeclaration style) {
-    String? classNames = getProperty(_CLASS_NAME);
-    if (classNames != null && classNames.isNotEmpty) {
+  void _applySheetStyle(CSSStyleDeclaration style) {
+    if (classList.isNotEmpty) {
       const String classSelectorPrefix = '.';
-      for (String className in classNames.trim().split(_splitRegExp)) {
+      for (String className in classList) {
         for (CSSStyleSheet sheet in elementManager.styleSheets) {
           List<CSSRule> rules = sheet.cssRules;
           for (int i = 0; i < rules.length; i++) {
             CSSRule rule = rules[i];
             if (rule is CSSStyleRule && rule.selectorText == (classSelectorPrefix + className)) {
-              var styleSheetStyle = rule.style;
-              for (String propertyName in styleSheetStyle.keys) {
-                style.setProperty(propertyName, styleSheetStyle[propertyName]);
+              var sheetStyle = rule.style;
+              for (String propertyName in sheetStyle.keys) {
+                style.setProperty(propertyName, sheetStyle[propertyName], false);
               }
             }
           }
@@ -1328,7 +1341,7 @@ class Element extends Node
     renderStyle.initDisplay();
 
     _applyInlineStyle(style);
-    _applyStyleSheetStyle(style);
+    _applySheetStyle(style);
   }
 
   void recalculateStyle() {
@@ -1345,19 +1358,30 @@ class Element extends Node
         style.flushPendingProperties();
       }
     }
+  }
+
+  void recalculateNestedStyle() {
+    recalculateStyle();
     // Update children style.
     children.forEach((Element child) {
-      child.recalculateStyle();
+      child.recalculateNestedStyle();
     });
   }
 
   @mustCallSuper
   void setProperty(String key, dynamic value) {
-    // Each key change will emit to `setStyle`
+    if (value == null || value == EMPTY_STRING) {
+      return removeProperty(key);
+    }
+
     if (key == _STYLE_PROPERTY) {
-      assert(value is Map<String, dynamic>);
-      // @TODO: Consider `{ color: red }` to `{}`, need to remove invisible keys.
-      (value as Map<String, dynamic>).forEach(setInlineStyle);
+      if (value is String){
+        _setInlineStyleString(value);
+      } else {
+        print('Invalid inline style value: $value');
+      }
+    } else if (key == _CLASS_NAME) {
+      className = value;
     } else {
       properties[key] = value;
     }
@@ -1365,16 +1389,56 @@ class Element extends Node
 
   @mustCallSuper
   dynamic getProperty(String key) {
-    return properties[key];
+    if (key == _STYLE_PROPERTY) {
+      return _getInlineStyleString();
+    } else if (key == _CLASS_NAME) {
+      return className;
+    } else {
+      return properties[key];
+    }
   }
 
   @mustCallSuper
   void removeProperty(String key) {
-    properties.remove(key);
-
     if (key == _STYLE_PROPERTY) {
-      setProperty(_STYLE_PROPERTY, null);
+      _removeInlineStyle();
+    } else if (key == _CLASS_NAME) {
+      className = EMPTY_STRING;
+    } else {
+      properties.remove(key);
     }
+  }
+
+  void _removeInlineStyle() {
+    inlineStyle.forEach((String property, _) {
+      _removeInlineStyleProperty(property);
+    });
+    style.flushPendingProperties();
+  }
+
+  String _getInlineStyleString() {
+    List<String> stringList = [];
+    inlineStyle.forEach((String property, dynamic value) {
+      stringList.add('$property: $value;');
+    });
+    return stringList.join(_ONE_SPACE);
+  }
+
+  void _setInlineStyleString(String value) {
+    // Wrap inline style string to a style declaration.
+    String ruleText = '*{$value}';
+    CSSStyleRule? rule = CSSStyleRuleParser.parse(ruleText);
+    if (rule != null) {
+      rule.style.forEach((String property, String value) {
+        setInlineStyle(property, value);
+      });
+    }
+    style.flushPendingProperties();
+  }
+
+  void _removeInlineStyleProperty(String property) {
+    inlineStyle.remove(property);
+    style.removeProperty(property, true);
   }
 
   BoundingClientRect get boundingClientRect {

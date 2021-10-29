@@ -6,7 +6,7 @@ const krakenLocation = window.__location__;
 // Lazy parse url.
 let _url: URL;
 export function getUrl() : URL {
-  return _url ? _url : (_url = new URL(krakenLocation.href));
+  return _url ? _url : (_url = new URL(location.href));
 }
 
 const bindReload = krakenLocation.reload.bind(krakenLocation);

@@ -860,7 +860,11 @@ ElementInstance::ElementInstance(Element *element, std::string tagName, bool sho
 
 
   m_attributes = new ElementAttributes(m_context);
-  m_style = new StyleDeclarationInstance(CSSStyleDeclaration::instance(m_context), this);
+  JSValue arguments[] = {
+    instanceObject
+  };
+  JSValue style = JS_CallConstructor(m_ctx, CSSStyleDeclaration::instance(m_context)->classObject, 1, arguments);
+  m_style = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(style, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
 
   JS_DefinePropertyValueStr(m_ctx, instanceObject, "style", m_style->instanceObject,
                             JS_PROP_NORMAL | JS_PROP_ENUMERABLE);

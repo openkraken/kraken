@@ -6,6 +6,7 @@
 #include "window.h"
 #include "dart_methods.h"
 #include "bindings/qjs/qjs_patch.h"
+#include "bindings/qjs/dom/events/.gen/message_event.h"
 
 namespace kraken::binding::qjs {
 
@@ -60,6 +61,26 @@ JSValue Window::scrollBy(QjsContext *ctx, JSValue this_val, int argc, JSValue *a
     jsValueToNativeValue(ctx, argv[1])
   };
   return window->callNativeMethods("scrollBy", 2, arguments);
+}
+
+JSValue Window::postMessage(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  JSValue messageValue = argv[0];
+  JSValue originValue = argv[1];
+  JSValue globalObjectValue = JS_GetGlobalObject(ctx);
+  auto *window = static_cast<WindowInstance *>(JS_GetOpaque(globalObjectValue, Window::classId()));
+
+  JSValue messageEventInitValue = JS_NewObject(ctx);
+  JS_SetPropertyStr(ctx, messageEventInitValue, "data", JS_DupValue(ctx, messageValue));
+  JS_SetPropertyStr(ctx, originValue, "origin", JS_DupValue(ctx, originValue));
+
+  JSValue messageEventValue = JS_CallConstructor(ctx, MessageEvent::instance(window->m_context)->classObject, 1, &messageEventInitValue);
+  auto *event = static_cast<MessageEventInstance *>(JS_GetOpaque(messageEventValue, Event::kEventClassID));
+  window->dispatchEvent(event);
+
+  JS_FreeValue(ctx, messageEventValue);
+  JS_FreeValue(ctx, messageEventInitValue);
+  JS_FreeValue(ctx, globalObjectValue);
+  return JS_NULL;
 }
 
 PROP_GETTER(Window, devicePixelRatio)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
@@ -170,8 +191,9 @@ WindowInstance::WindowInstance(Window *window) : EventTargetInstance(window, Win
 void WindowInstance::gcMark(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) {
   EventTargetInstance::gcMark(rt, val, mark_func);
 
-  JS_MarkValue(rt, m_location->jsObject, mark_func);
-  JS_MarkValue(rt, onerror, mark_func);
+  // Should check object is already inited before gc mark.
+  if (JS_IsObject(m_location->jsObject)) JS_MarkValue(rt, m_location->jsObject, mark_func);
+  if (JS_IsObject(onerror)) JS_MarkValue(rt, onerror, mark_func);
 }
 
 }
