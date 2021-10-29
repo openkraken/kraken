@@ -27,7 +27,15 @@ void HTMLParser::traverseHTML(NodeInstance *root, GumboNode *node) {
     auto* child = (GumboNode*) children->data[i];
 
     if (child->type == GUMBO_NODE_ELEMENT) {
-      std::string tagName = gumbo_normalized_tagname(child->v.element.tag);
+      std::string tagName;
+      if (child->v.element.tag != GUMBO_TAG_UNKNOWN) {
+        tagName = gumbo_normalized_tagname(child->v.element.tag);
+      } else {
+        GumboStringPiece piece = child->v.element.original_tag;
+        gumbo_tag_from_original_text(&piece);
+        tagName = std::string(piece.data, piece.length);
+      }
+
       JSValue constructor = Element::getConstructor(context, tagName);
 
       JSValue tagNameValue = JS_NewString(ctx, tagName.c_str());

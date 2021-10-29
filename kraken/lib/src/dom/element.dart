@@ -545,7 +545,7 @@ class Element extends Node
       if (!child.isRendererAttached) {
         if (scrollingContentLayoutBox != null) {
           child.attachTo(this, after: scrollingContentLayoutBox!.lastChild);
-        } else {
+        } else if (!_isIntrinsicBox) {
           child.attachTo(this, after: _renderLayoutBox!.lastChild);
         }
       }
