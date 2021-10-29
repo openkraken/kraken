@@ -466,38 +466,42 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit'
   });
 
-  const armDynamicSDKPath = path.join(paths.bridge, 'build/ios/lib/arm/kraken_bridge.framework');
-  const arm64DynamicSDKPath = path.join(paths.bridge, 'build/ios/lib/arm64/kraken_bridge.framework');
-  const x64DynamicSDKPath = path.join(paths.bridge, 'build/ios/lib/x86_64/kraken_bridge.framework');
+  const targetSourceFrameworks = ['kraken_bridge', 'quickjs'];
 
-  const targetDynamicSDKPath = `${paths.bridge}/build/ios/framework`;
-  const frameworkPath = `${targetDynamicSDKPath}/kraken_bridge.xcframework`;
-  mkdirp.sync(targetDynamicSDKPath);
+  targetSourceFrameworks.forEach(target => {
+    const armDynamicSDKPath = path.join(paths.bridge, `build/ios/lib/arm/${target}.framework`);
+    const arm64DynamicSDKPath = path.join(paths.bridge, `build/ios/lib/arm64/${target}.framework`);
+    const x64DynamicSDKPath = path.join(paths.bridge, `build/ios/lib/x86_64/${target}.framework`);
 
-  // merge armv7 into armv8
-  execSync(`lipo -create ${armDynamicSDKPath}/kraken_bridge ${arm64DynamicSDKPath}/kraken_bridge -output ${arm64DynamicSDKPath}/kraken_bridge`, {
-    stdio: 'inherit'
+    const targetDynamicSDKPath = `${paths.bridge}/build/ios/framework`;
+    const frameworkPath = `${targetDynamicSDKPath}/${target}.xcframework`;
+    mkdirp.sync(targetDynamicSDKPath);
+
+    // merge armv7 into armv8
+    execSync(`lipo -create ${armDynamicSDKPath}/${target} ${arm64DynamicSDKPath}/${target} -output ${arm64DynamicSDKPath}/${target}`, {
+      stdio: 'inherit'
+    });
+
+    if (buildMode === 'RelWithDebInfo') {
+      // Create dSYM for x86_64
+      execSync(`dsymutil ${x64DynamicSDKPath}/${target}`, { stdio: 'inherit' });
+
+      // Create dSYM for arm64
+      execSync(`dsymutil ${arm64DynamicSDKPath}/${target}`, { stdio: 'inherit' });
+      execSync(`xcodebuild -create-xcframework \
+        -framework ${x64DynamicSDKPath} -debug-symbols ${x64DynamicSDKPath}/${target}.dSYM \
+        -framework ${arm64DynamicSDKPath} -debug-symbols ${arm64DynamicSDKPath}/${target}.dSYM -output ${frameworkPath}`, {
+        stdio: 'inherit'
+      });
+
+    } else {
+      execSync(`xcodebuild -create-xcframework \
+        -framework ${x64DynamicSDKPath} \
+        -framework ${arm64DynamicSDKPath} -output ${frameworkPath}`, {
+        stdio: 'inherit'
+      });
+    }
   });
-
-  if (buildMode === 'RelWithDebInfo') {
-    // Create dSYM for x86_64
-    execSync(`dsymutil ${x64DynamicSDKPath}/kraken_bridge`, { stdio: 'inherit' });
-
-    // Create dSYM for arm64
-    execSync(`dsymutil ${arm64DynamicSDKPath}/kraken_bridge`, { stdio: 'inherit' });
-    execSync(`xcodebuild -create-xcframework \
-      -framework ${x64DynamicSDKPath} -debug-symbols ${x64DynamicSDKPath}/kraken_bridge.dSYM \
-      -framework ${arm64DynamicSDKPath} -debug-symbols ${arm64DynamicSDKPath}/kraken_bridge.dSYM -output ${frameworkPath}`, {
-      stdio: 'inherit'
-    });
-
-  } else {
-    execSync(`xcodebuild -create-xcframework \
-      -framework ${x64DynamicSDKPath} \
-      -framework ${arm64DynamicSDKPath} -output ${frameworkPath}`, {
-      stdio: 'inherit'
-    });
-  }
   done();
 });
 
