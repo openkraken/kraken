@@ -669,7 +669,6 @@ JSClassID ElementInstance::classID() {
 }
 
 ElementInstance::~ElementInstance() {
-  JS_FreeValue(m_ctx, m_style->instanceObject);
 }
 
 JSValue ElementInstance::internalGetTextContent() {
@@ -899,6 +898,7 @@ ElementInstance::ElementInstance(Element *element, std::string tagName, bool sho
   JSValue style = JS_CallConstructor(m_ctx, CSSStyleDeclaration::instance(m_context)->classObject, 1, arguments);
   m_style = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(style, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
 
+  JS_DefinePropertyValueStr(m_ctx, instanceObject, "__style__", m_style->instanceObject, JS_PROP_NORMAL);
   JS_DefinePropertyValueStr(m_ctx, instanceObject, "attributes", m_attributes->jsObject,
                             JS_PROP_NORMAL | JS_PROP_ENUMERABLE);
 
@@ -929,7 +929,6 @@ ElementAttributes *ElementInstance::attributes() {
 
 void ElementInstance::gcMark(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) {
   NodeInstance::gcMark(rt, val, mark_func);
-  if (JS_IsObject(m_style->instanceObject)) JS_MarkValue(rt, m_style->instanceObject, mark_func);
 }
 
 void ElementInstance::resetStyle() {
@@ -939,6 +938,7 @@ void ElementInstance::resetStyle() {
   };
   JSValue style = JS_CallConstructor(m_ctx, CSSStyleDeclaration::instance(m_context)->classObject, 1, arguments);
   m_style = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(style, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
+  JS_DefinePropertyValueStr(m_ctx, instanceObject, "__style__", m_style->instanceObject, JS_PROP_NORMAL);
 
   NativeString *args_01 = stringToNativeString("style");
   ::foundation::UICommandBuffer::instance(m_context->getContextId())
