@@ -1441,19 +1441,21 @@ class Element extends Node
     dispatchEvent(clickEvent);
   }
 
-  Future<Uint8List> toBlob({double? devicePixelRatio}) {
+  Future<Uint8List> toBlob({ double? devicePixelRatio }) {
     devicePixelRatio ??= window.devicePixelRatio;
 
     Completer<Uint8List> completer = Completer();
-    if (nodeName != 'HTML') {
+    if (targetId != HTML_ID) {
       convertToRepaintBoundary();
     }
     renderBoxModel!.owner!.flushLayout();
 
     SchedulerBinding.instance!.addPostFrameCallback((_) async {
       Uint8List captured;
-      RenderBoxModel? renderObject = nodeName == 'HTML' ? elementManager.viewportElement.renderBoxModel : renderBoxModel;
-      if (renderObject!.hasSize && renderObject.size == Size.zero) {
+      RenderBoxModel? renderObject = targetId == HTML_ID
+          ? elementManager.viewportElement.renderBoxModel
+          : renderBoxModel;
+      if (renderObject!.hasSize && renderObject.size.isEmpty) {
         // Return a blob with zero length.
         captured = Uint8List(0);
       } else {
