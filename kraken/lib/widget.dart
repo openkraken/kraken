@@ -157,6 +157,15 @@ class _KrakenAdapterWidgetPropertiesState extends State<_KrakenAdapterWidget> {
   }
 }
 
+typedef KrakenWidgetBuilder = Widget Function(BuildContext context, List<KrakenLeaf> children, Map<String, dynamic> properies);
+
+class KrakenLeaf {
+  String tagName;
+  BuildContext context;
+  KrakenWidgetBuilder builder;
+  KrakenLeaf(this.tagName, this.context, this.builder);
+}
+
 class Kraken extends StatefulWidget {
   // The background color for viewport, default to transparent.
   final Color? background;
@@ -205,6 +214,9 @@ class Kraken extends StatefulWidget {
   final HttpClientInterceptor? httpClientInterceptor;
 
   final UriParser? uriParser;
+
+  // Leaf
+  List<KrakenLeaf>? leafs;
 
   KrakenController? get controller {
     return KrakenController.getControllerOfName(shortHash(this));
@@ -291,6 +303,7 @@ class Kraken extends StatefulWidget {
     // Kraken's http client interceptor.
     this.httpClientInterceptor,
     this.uriParser,
+    this.leafs,
     // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
     // Maybe got unexpected error when change to other values, use this at your own risk!
     // We will fixed this on next version released. (v0.6.0)
