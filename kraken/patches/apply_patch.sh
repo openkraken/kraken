@@ -1,3 +1,5 @@
+## Shell scripts can apply all patch files in this directory.
+
 #!/bin/bash
 
 PWD=$(pwd)
