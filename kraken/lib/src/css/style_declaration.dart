@@ -40,8 +40,7 @@ List<String> _propertyOrders = [
   TRANSITION_DURATION,
   TRANSITION_PROPERTY,
   OVERFLOW_X,
-  OVERFLOW_Y,
-  DISPLAY
+  OVERFLOW_Y
 ];
 
 RegExp _kebabCaseReg = RegExp(r'[A-Z]');
@@ -368,8 +367,17 @@ class CSSStyleDeclaration {
   }
 
   void flushPendingProperties() {
+    // Display change from none to other value that the renderBoxModel is null.
+    if (_pendingProperties.containsKey(DISPLAY)) {
+      String? prevValue = _properties[DISPLAY];
+      String currentValue = _pendingProperties[DISPLAY]!;
+      _properties[DISPLAY] = currentValue;
+      _pendingProperties.remove(DISPLAY);
+      _emitPropertyChanged(DISPLAY, prevValue, currentValue);
+    }
+
     RenderBoxModel? renderBoxModel = target?.renderBoxModel;
-    if (renderBoxModel == null) {
+    if (_pendingProperties.isEmpty || renderBoxModel == null) {
       return;
     }
 
