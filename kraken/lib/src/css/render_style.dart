@@ -625,6 +625,12 @@ class RenderStyle
     double realWidth = realHeight! / intrinsicRatio;
     return realWidth;
   }
+
+  // Called when its corresponding element disposed.
+  void dispose() {
+    // Clear reference to its parent.
+    parent = null;
+  }
 }
 
 double _getCropWidthByPaddingBorder(RenderStyle renderStyle, double cropWidth) {
