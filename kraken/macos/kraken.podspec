@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'kraken'
-  s.version          = '0.6.3'
+  s.version          = '0.9.0'
   s.summary          = 'A high-performance, web standards-compliant rendering engine.'
   s.description      = <<-DESC
 A high-performance, web standards-compliant rendering engine.
