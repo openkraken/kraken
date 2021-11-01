@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin") 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   execute_process(
     COMMAND bash "-c" "clang --version | xargs | awk '{print $7}' | cut -c1-5"
     OUTPUT_VARIABLE CLANG_ARCH
@@ -279,7 +279,7 @@ elseif ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-atom.h
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-opcode.h
     )
-  add_library(quickjs STATIC ${QUICK_JS_SOURCE})
+  add_library(quickjs SHARED ${QUICK_JS_SOURCE})
 
   list(APPEND BRIDGE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
   list(APPEND BRIDGE_LINK_LIBS quickjs)
