@@ -117,11 +117,9 @@ void HTMLParser::parseProperty(ElementInstance *element, GumboElement *gumboElem
         std::string::size_type position = s.find(':');
         if (position != std::basic_string<char>::npos) {
           std::string styleKey = s.substr(0, position);
-          std::transform(styleKey.begin(), styleKey.end(), styleKey.begin(), ::tolower);
           trim(styleKey);
 
           std::string styleValue = s.substr(position + 1, s.length());
-          std::transform(styleValue.begin(), styleValue.end(), styleValue.begin(), ::tolower);
           trim(styleValue);
 
           JSValue newStyleValue = JS_NewString(ctx, styleValue.c_str());
@@ -132,9 +130,7 @@ void HTMLParser::parseProperty(ElementInstance *element, GumboElement *gumboElem
 
     } else {
       std::string strName = attribute->name;
-      std::transform(strName.begin(), strName.end(), strName.begin(), ::tolower);
       std::string strValue = attribute->value;
-      std::transform(strValue.begin(), strValue.end(), strValue.begin(), ::tolower);
 
       JSValue key = JS_NewString(ctx, strName.c_str());
       JSValue value = JS_NewString(ctx, strValue.c_str());
