@@ -436,6 +436,7 @@ class Element extends Node
       _parentElement.removeChild(this);
     }
 
+    renderStyle.dispose();
     style.dispose();
     properties.clear();
   }
