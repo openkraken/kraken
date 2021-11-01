@@ -475,10 +475,8 @@ class Element extends Node
   @override
   void attachTo(Node parent, {RenderBox? after}) {
     _applyStyle(style);
-    // Get display from style directly cause renderStyle is not flushed yet.
-    CSSDisplay display = CSSDisplayMixin.resolveDisplay(style[DISPLAY]);
 
-    if (display != CSSDisplay.none) {
+    if (renderStyle.display != CSSDisplay.none) {
       willAttachRenderer();
 
       if (parent is Element) {
@@ -1338,6 +1336,7 @@ class Element extends Node
   void _applyStyle(CSSStyleDeclaration style) {
     // Apply default style.
     _applyDefaultStyle(style);
+    // Init display from style directly cause renderStyle is not flushed yet.
     renderStyle.initDisplay();
 
     _applyInlineStyle(style);
