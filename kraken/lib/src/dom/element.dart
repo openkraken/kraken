@@ -465,7 +465,7 @@ class Element extends Node
       RenderBox? prev = (_renderer.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
       // It needs to find the previous sibling of the previous sibling if the placeholder of
       // positioned element exists and follows renderObject at the same time, eg.
-      // <div style="position: relative"><div style="postion: absolute" /></div>
+      // <div style="position: relative"><div style="position: absolute" /></div>
       if (prev == _renderBoxModel) {
         prev = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
       }
@@ -601,8 +601,8 @@ class Element extends Node
       _afterRendererAttach();
     }
 
-    // CSS Transition works after dom has layouted, so it needs to mark
-    // the renderBoxModel as layouted on the next frame.
+    // CSS Transition works after dom has layout, so it needs to mark
+    // the renderBoxModel as layout on the next frame.
     SchedulerBinding.instance!.addPostFrameCallback((timestamp) {
       renderBoxModel?.firstLayouted = true;
     });
