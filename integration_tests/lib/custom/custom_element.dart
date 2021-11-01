@@ -39,7 +39,7 @@ void defineKrakenCustomElements() {
 
 class SampleElement extends Element {
   SampleElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
-      : super(targetId, nativeEventTarget, elementManager, tagName: 'sample-element');
+      : super(targetId, nativeEventTarget, elementManager);
 
   @override
   getProperty(String key) {
