@@ -63,4 +63,12 @@ describe('DOM Element API', () => {
     input.value = 'helloworld';
     expect(input.value).toBe('helloworld');
   });
+
+  it('property default to undefined value', () => {
+    const el = document.createElement('div');
+    expect(typeof el['foo']).toEqual('undefined');
+
+    el['foo'] = 123;
+    expect(typeof el['foo']).toEqual('number');
+  });
 });

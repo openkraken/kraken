@@ -53,7 +53,7 @@ JSValue CSSStyleDeclaration::instanceConstructor(QjsContext *ctx, JSValue func_o
   JSValue eventTargetValue = argv[0];
 
   auto eventTargetInstance =
-    static_cast<EventTargetInstance *>(JS_GetOpaque(eventTargetValue, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
+    static_cast<EventTargetInstance *>(JS_GetOpaque(eventTargetValue, EventTarget::classId(eventTargetValue)));
   auto style = new StyleDeclarationInstance(this, eventTargetInstance);
   return style->instanceObject;
 }
@@ -153,7 +153,7 @@ void StyleDeclarationInstance::internalRemoveProperty(std::string &name) {
   properties.erase(name);
 
   NativeString *args_01 = stringToNativeString(name);
-  NativeString *args_02 = jsValueToNativeString(m_ctx, value);
+  NativeString *args_02 = jsValueToNativeString(m_ctx, JS_NULL);
 
   foundation::UICommandBuffer::instance(m_context->getContextId())
     ->addCommand(m_ownerEventTarget->eventTargetId, UICommand::setStyle, *args_01, *args_02, nullptr);
@@ -170,7 +170,7 @@ JSValue StyleDeclarationInstance::internalGetPropertyValue(std::string &name) {
     return JS_DupValue(m_ctx, properties[name]);
   }
 
-  return JS_NULL;
+  return JS_NewString(m_ctx, "");
 }
 
 // TODO: add support for annotation CSS styleSheets.
@@ -215,6 +215,16 @@ int StyleDeclarationInstance::setProperty(QjsContext *ctx, JSValue obj, JSAtom a
 }
 
 JSValue StyleDeclarationInstance::getProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSValue receiver) {
+  auto *styleInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(obj, JSValueGetClassId(obj)));
+  JSValue prototype = JS_GetPrototype(ctx, styleInstance->instanceObject);
+  if (JS_HasProperty(ctx, prototype, atom)) {
+    JSValue ret = JS_GetPropertyInternal(ctx, prototype, atom, styleInstance->instanceObject, 0);
+    JS_FreeValue(ctx, prototype);
+    return ret;
+  }
+  JS_FreeValue(ctx, prototype);
+
+
   auto *style = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(receiver, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
   const char* cname = JS_AtomToCString(ctx, atom);
   std::string name = std::string(cname);

@@ -327,8 +327,7 @@ JSValue Element::toBlob(QjsContext *ctx, JSValue this_val, int argc, JSValue *ar
     } else {
       JSValue errorObject = JS_NewError(ctx);
       JSValue errorMessage = JS_NewString(ctx, error);
-      JS_DefinePropertyValueStr(ctx, errorObject, "message", errorMessage,
-                                JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
+      JS_SetPropertyStr(ctx, errorObject, "message", errorMessage);
       JSValue ret = JS_Call(ctx, promiseContext->rejectFunc, promiseContext->promise, 1, &errorObject);
       JS_FreeValue(ctx, errorObject);
       JS_FreeValue(ctx, errorMessage);
@@ -856,7 +855,11 @@ ElementInstance::ElementInstance(Element *element, std::string tagName, bool sho
 
 
   m_attributes = new ElementAttributes(m_context);
-  m_style = new StyleDeclarationInstance(CSSStyleDeclaration::instance(m_context), this);
+  JSValue arguments[] = {
+    instanceObject
+  };
+  JSValue style = JS_CallConstructor(m_ctx, CSSStyleDeclaration::instance(m_context)->classObject, 1, arguments);
+  m_style = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(style, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
 
   JS_DefinePropertyValueStr(m_ctx, instanceObject, "style", m_style->instanceObject,
                             JS_PROP_NORMAL | JS_PROP_ENUMERABLE);
