@@ -45,10 +45,10 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
   /// {@macro flutter.gestures.gestureRecognizer.kind}
   CompetitiveDragGestureRecognizer({
     Object? debugOwner,
-    Set<PointerDeviceKind>? supportedDevices,
+    PointerDeviceKind? kind,
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
-  }) : super(debugOwner: debugOwner, supportedDevices: supportedDevices);
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
   /// Configure the behavior of offsets sent to [onStart].
@@ -479,8 +479,8 @@ class ScrollVerticalDragGestureRecognizer extends CompetitiveDragGestureRecogniz
   /// {@macro flutter.gestures.gestureRecognizer.kind}
   ScrollVerticalDragGestureRecognizer({
     Object? debugOwner,
-    Set<PointerDeviceKind>? supportedDevices,
-  }) : super(debugOwner: debugOwner, supportedDevices: supportedDevices);
+    PointerDeviceKind? kind,
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   late IsAcceptedDragCallback isAcceptedDrag;
 
@@ -522,8 +522,8 @@ class ScrollHorizontalDragGestureRecognizer extends CompetitiveDragGestureRecogn
   /// {@macro flutter.gestures.gestureRecognizer.kind}
   ScrollHorizontalDragGestureRecognizer({
     Object? debugOwner,
-    Set<PointerDeviceKind>? supportedDevices,
-  }) : super(debugOwner: debugOwner, supportedDevices: supportedDevices);
+    PointerDeviceKind? kind,
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   late IsAcceptedDragCallback isAcceptedDrag;
 
