@@ -73,7 +73,6 @@ abstract class WidgetElement extends dom.Element {
       targetId,
       nativeEventTarget,
       elementManager,
-      tagName: '',
       isIntrinsicBox: true,
       defaultStyle: _defaultStyle
   );

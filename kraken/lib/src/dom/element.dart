@@ -142,7 +142,8 @@ class Element extends Node
   /// Should create repaintBoundary for this element to repaint separately from parent.
   bool repaintSelf;
 
-  final String tagName;
+  // Default to unknown, assign by [createElement], used by inspector.
+  String tagName = UNKNOWN;
 
   final Map<String, dynamic> _defaultStyle;
 
@@ -173,16 +174,14 @@ class Element extends Node
   }
 
   Element(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager,
-      {required String tagName,
-        Map<String, dynamic> defaultStyle = const {},
+      { Map<String, dynamic> defaultStyle = const {},
         // Whether element allows children.
         bool isIntrinsicBox = false,
         this.repaintSelf = false})
       : _defaultStyle = defaultStyle,
-        tagName = tagName.toUpperCase(),
         _isIntrinsicBox = isIntrinsicBox,
         defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : INLINE,
-        super(NodeType.ELEMENT_NODE, targetId, nativeEventTarget, elementManager, tagName) {
+        super(NodeType.ELEMENT_NODE, targetId, nativeEventTarget, elementManager) {
     style = CSSStyleDeclaration(this);
     _setDefaultStyle();
   }
@@ -252,6 +251,9 @@ class Element extends Node
     RenderBoxModel rootBoxModel = rootElement.renderBoxModel!;
     return rootBoxModel.renderStyle.fontSize;
   }
+
+  @override
+  String get nodeName => tagName;
 
   @override
   RenderObject? get renderer => renderBoxModel?.renderPositionHolder ?? renderBoxModel;
@@ -359,7 +361,7 @@ class Element extends Node
   void paintFixedChildren(double scrollOffset, AxisDirection axisDirection) {
     RenderLayoutBox? _scrollingContentLayoutBox = scrollingContentLayoutBox;
     // Only root element has fixed children
-    if (tagName == 'HTML' && _scrollingContentLayoutBox != null) {
+    if (targetId == HTML_ID && _scrollingContentLayoutBox != null) {
       for (RenderBoxModel child in _scrollingContentLayoutBox.fixedChildren) {
         // Save scrolling offset for paint
         if (axisDirection == AxisDirection.down) {

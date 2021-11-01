@@ -21,10 +21,12 @@ Element createElement(int id, Pointer<NativeEventTarget> nativePtr, String name,
   ElementCreator? creator = _elementRegistry[name];
   if (creator == null) {
     print('ERROR: unexpected element type "$name"');
-    return Element(id, nativePtr, elementManager, tagName: UNKNOWN);
+    return Element(id, nativePtr, elementManager);
   }
 
   Element element = creator(id, nativePtr, elementManager);
+  // Assign tagName, used by inspector.
+  element.tagName = name;
   return element;
 }
 
