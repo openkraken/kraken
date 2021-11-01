@@ -626,9 +626,9 @@ class RenderStyle
     return realWidth;
   }
 
-  // Called when its corresponding element disposed.
-  void dispose() {
-    // Clear reference to its parent.
+  // Mark this node as detached.
+  void detach() {
+    // Clear reference to it's parent.
     parent = null;
   }
 }
