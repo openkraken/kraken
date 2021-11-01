@@ -58,6 +58,10 @@ num diffBetweenPixels(firstPixel, secondPixel, ignoreAlpha) {
 }
 
 bool matchImage(Uint8List imageA, List<int> imageB, String filename) {
+  if (imageA.length == 0 || imageB.length == 0) {
+    return false;
+  }
+  
   Image a = decodeImage(imageA.toList())!;
   Image b = decodeImage(imageB.toList())!;
   if (!haveSameSize(a, b)) {
