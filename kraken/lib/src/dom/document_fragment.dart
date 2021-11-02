@@ -10,7 +10,10 @@ const String DOCUMENT_FRAGMENT = 'DOCUMENTFRAGMENT';
 
 class DocumentFragment extends Node {
   DocumentFragment(int targetId, nativeNodePtr, ElementManager elementManager)
-      : super(NodeType.COMMENT_NODE, targetId, nativeNodePtr, elementManager, '#documentfragment');
+      : super(NodeType.COMMENT_NODE, targetId, nativeNodePtr, elementManager);
+
+  @override
+  String get nodeName => '#documentfragment';
 
   @override
   RenderObject? get renderer => null;

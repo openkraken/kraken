@@ -3,25 +3,43 @@ import 'dart:async';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/widget.dart';
-import 'package:flutter/material.dart' show TextDirection, TextStyle, Color, Image, Text, AssetImage;
+import 'package:flutter/material.dart' show TextDirection, TextStyle, Color, Image, Text, AssetImage, Widget, BuildContext hide Element;
+
+class TextWidgetElement extends WidgetElement {
+  TextWidgetElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager) :
+        super(targetId, nativeEventTarget, elementManager);
+
+  @override
+  Widget build(BuildContext context, Map<String, dynamic> properties) {
+    return Text(properties['value'] ?? '', textDirection: TextDirection.ltr, style: TextStyle(color: Color.fromARGB(255, 100, 100, 100)));
+  }
+}
+
+class ImageWidgetElement extends WidgetElement {
+  ImageWidgetElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager) :
+        super(targetId, nativeEventTarget, elementManager);
+
+  @override
+  Widget build(BuildContext context, Map<String, dynamic> properties) {
+    return Image(image: AssetImage(properties['src']));
+  }
+}
 
 void defineKrakenCustomElements() {
-  Kraken.defineCustomElement<WidgetCreator>('flutter-text', (Map<String, dynamic> properties) {
-    return Text(properties['value'] ?? '', textDirection: TextDirection.ltr, style: TextStyle(color: Color.fromARGB(255, 100, 100, 100)));
-  });
-
-  Kraken.defineCustomElement<WidgetCreator>('flutter-asset-image', (Map<String, dynamic> properties) {
-    return Image(image: AssetImage(properties['src']));
-  });
-
-  Kraken.defineCustomElement<ElementCreator>('sample-element', (int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager) {
+  Kraken.defineCustomElement('sample-element', (int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager) {
     return SampleElement(targetId, nativeEventTarget, elementManager);
+  });
+  Kraken.defineCustomElement('flutter-text', (targetId, nativeEventTarget, elementManager) {
+    return TextWidgetElement(targetId, nativeEventTarget, elementManager);
+  });
+  Kraken.defineCustomElement('flutter-asset-image', (targetId, nativeEventTarget, elementManager) {
+    return ImageWidgetElement(targetId, nativeEventTarget, elementManager);
   });
 }
 
 class SampleElement extends Element {
   SampleElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
-      : super(targetId, nativeEventTarget, elementManager, tagName: 'sample-element');
+      : super(targetId, nativeEventTarget, elementManager);
 
   @override
   getProperty(String key) {

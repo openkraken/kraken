@@ -19,7 +19,7 @@ const String TAB_CHAR = '\t';
 
 class TextNode extends Node {
   TextNode(int targetId, Pointer<NativeEventTarget> nativeEventTarget, this._data, ElementManager elementManager)
-      : super(NodeType.TEXT_NODE, targetId, nativeEventTarget, elementManager, '#text');
+      : super(NodeType.TEXT_NODE, targetId, nativeEventTarget, elementManager);
 
   RenderTextBox? _renderTextBox;
 
@@ -75,6 +75,9 @@ class TextNode extends Node {
   }
 
   @override
+  String get nodeName => '#text';
+
+  @override
   RenderObject? get renderer => _renderTextBox;
 
   void updateTextStyle() {
@@ -84,8 +87,7 @@ class TextNode extends Node {
   }
 
   @override
-  handleJSCall(String method, List argv) {
-  }
+  handleJSCall(String method, List argv) {}
 
   void _setTextSizeType(BoxSizeType width, BoxSizeType height) {
     RenderTextBox? renderTextBox = _renderTextBox;
