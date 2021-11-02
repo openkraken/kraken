@@ -75,7 +75,6 @@ class BRElement extends Element {
   BRElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(
         targetId, nativePtr, elementManager,
-        tagName: BR,
         defaultStyle: _breakDefaultStyle,
         isIntrinsicBox: true,
       );
@@ -83,98 +82,98 @@ class BRElement extends Element {
 
 class BringElement extends Element {
   BringElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: B, defaultStyle: _boldDefaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _boldDefaultStyle);
 }
 
 class AbbreviationElement extends Element {
   AbbreviationElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: ABBR, defaultStyle: _abbrDefaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _abbrDefaultStyle);
 }
 
 class EmphasisElement extends Element {
   EmphasisElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: EM, defaultStyle: _defaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
 }
 
 class CitationElement extends Element {
   CitationElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: CITE, defaultStyle: _defaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
 }
 
 class DefinitionElement extends Element {
   DefinitionElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: DFN, defaultStyle: _defaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/i
 class IdiomaticElement extends Element {
   IdiomaticElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: I, defaultStyle: _defaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
 }
 
 class CodeElement extends Element {
   CodeElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: CODE, defaultStyle: _codeDefaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _codeDefaultStyle);
 }
 
 class SampleElement extends Element {
   SampleElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: SAMP, defaultStyle: _codeDefaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _codeDefaultStyle);
 }
 
 class KeyboardElement extends Element {
   KeyboardElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: KBD, defaultStyle: _codeDefaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _codeDefaultStyle);
 }
 
 class SpanElement extends Element {
   SpanElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: SPAN);
+      : super(targetId, nativePtr, elementManager);
 }
 
 class DataElement extends Element {
   DataElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: DATA);
+      : super(targetId, nativePtr, elementManager);
 }
 
 // TODO: enclosed text is a short inline quotation
 class QuoteElement extends Element {
   QuoteElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: Q);
+      : super(targetId, nativePtr, elementManager);
 }
 
 class StrongElement extends Element {
   StrongElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: STRONG, defaultStyle: _boldDefaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _boldDefaultStyle);
 }
 
 class TimeElement extends Element {
   TimeElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: TIME, defaultStyle: _boldDefaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _boldDefaultStyle);
 }
 
 class SmallElement extends Element {
   SmallElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: SMALL, defaultStyle: _smallDefaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _smallDefaultStyle);
 }
 
 class StrikethroughElement extends Element {
   StrikethroughElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: S, defaultStyle: _sDefaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _sDefaultStyle);
 }
 
 // https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-u-element
 class UnarticulatedElement extends Element {
   UnarticulatedElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: U, defaultStyle: _uDefaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _uDefaultStyle);
 }
 
 class VariableElement extends Element {
   VariableElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: VAR, defaultStyle: _defaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
 }
 
 class MarkElement extends Element {
   MarkElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: MARK, defaultStyle: _markDefaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _markDefaultStyle);
 }

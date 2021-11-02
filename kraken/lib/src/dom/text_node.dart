@@ -19,7 +19,7 @@ const String TAB_CHAR = '\t';
 
 class TextNode extends Node {
   TextNode(int targetId, Pointer<NativeEventTarget> nativeEventTarget, this._data, ElementManager elementManager)
-      : super(NodeType.TEXT_NODE, targetId, nativeEventTarget, elementManager, '#text');
+      : super(NodeType.TEXT_NODE, targetId, nativeEventTarget, elementManager);
 
   // Must be existed after text node is attached, and all text update will after text attached.
   RenderTextBox? _renderTextBox;
@@ -76,11 +76,13 @@ class TextNode extends Node {
   }
 
   @override
+  String get nodeName => '#text';
+
+  @override
   RenderObject? get renderer => _renderTextBox;
 
   @override
-  handleJSCall(String method, List argv) {
-  }
+  handleJSCall(String method, List argv) {}
 
   void _applyTextStyle() {
     if (isRendererAttached) {
