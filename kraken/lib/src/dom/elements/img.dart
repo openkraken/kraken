@@ -55,7 +55,6 @@ class ImageElement extends Element {
       nativeEventTarget,
       elementManager,
       isIntrinsicBox: true,
-      tagName: IMAGE,
       defaultStyle: _defaultStyle) {
     _renderStreamListener = ImageStreamListener(_renderImageStream, onError: _onImageError);
   }

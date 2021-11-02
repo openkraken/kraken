@@ -60,7 +60,6 @@ class CanvasElement extends Element {
           isIntrinsicBox: true,
           repaintSelf: true,
           defaultStyle: _defaultStyle,
-          tagName: CANVAS,
         ) {
     painter = CanvasPainter(repaint: repaintNotifier);
   }

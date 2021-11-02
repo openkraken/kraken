@@ -26,27 +26,27 @@ const String SCRIPT = 'SCRIPT';
 
 class HeadElement extends Element {
   HeadElement(int targetId, Pointer<NativeEventTarget>   nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: HEAD, defaultStyle: _defaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
 }
 
 class LinkElement extends Element {
   LinkElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: LINK, defaultStyle: _defaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
 }
 
 class MetaElement extends Element {
   MetaElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: META, defaultStyle: _defaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
 }
 
 class TitleElement extends Element {
   TitleElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: TITLE, defaultStyle: _defaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
 }
 
 class NoScriptElement extends Element {
   NoScriptElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: NOSCRIPT, defaultStyle: _defaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
 }
 
 const String _JAVASCRIPT_MIME = 'text/javascript';
@@ -54,7 +54,7 @@ const String _JAVASCRIPT_MODULE = 'module';
 
 class ScriptElement extends Element {
   ScriptElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: SCRIPT, defaultStyle: _defaultStyle) {
+      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle) {
   }
 
   String type = _JAVASCRIPT_MIME;
@@ -120,7 +120,7 @@ const String _CSS_MIME = 'text/css';
 
 class StyleElement extends Element {
   StyleElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: STYLE, defaultStyle: _defaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
   String type = _CSS_MIME;
   CSSStyleSheet? _styleSheet;
 

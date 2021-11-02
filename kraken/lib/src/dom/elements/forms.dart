@@ -18,10 +18,10 @@ const Map<String, dynamic> _defaultStyle = {
 
 class LabelElement extends Element {
   LabelElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: LABEL);
+      : super(targetId, nativePtr, elementManager);
 }
 
 class ButtonElement extends Element {
   ButtonElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: BUTTON, defaultStyle: _defaultStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
 }

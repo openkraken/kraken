@@ -17,7 +17,7 @@ const Map<String, dynamic> _defaultStyle = {
 
 class BodyElement extends Element {
   BodyElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super( targetId, nativePtr, elementManager, tagName: BODY, defaultStyle: _defaultStyle);
+      : super( targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
 
   @override
   void willAttachRenderer() {

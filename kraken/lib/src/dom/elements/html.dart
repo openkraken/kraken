@@ -25,7 +25,6 @@ class HTMLElement extends Element {
       targetId,
       nativePtr,
       elementManager,
-      tagName: HTML,
       defaultStyle: defaultStyle
   ) {
     if (kProfileMode) {

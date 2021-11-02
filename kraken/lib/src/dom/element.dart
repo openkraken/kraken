@@ -94,7 +94,8 @@ class Element extends Node
   /// Should create repaintBoundary for this element to repaint separately from parent.
   bool repaintSelf;
 
-  final String tagName;
+  // Default to unknown, assign by [createElement], used by inspector.
+  String tagName = UNKNOWN;
 
   /// Is element an intrinsic box.
   final bool _isIntrinsicBox;
@@ -140,15 +141,13 @@ class Element extends Node
   }
 
   Element(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager,
-      {required String tagName,
-        Map<String, dynamic> defaultStyle = const {},
+      { Map<String, dynamic> defaultStyle = const {},
         // Whether element allows children.
         bool isIntrinsicBox = false,
         this.repaintSelf = false})
       : _defaultStyle = defaultStyle,
-        tagName = tagName.toUpperCase(),
         _isIntrinsicBox = isIntrinsicBox,
-        super(NodeType.ELEMENT_NODE, targetId, nativeEventTarget, elementManager, tagName) {
+        super(NodeType.ELEMENT_NODE, targetId, nativeEventTarget, elementManager) {
 
     // Init style and add change listener.
     style = CSSStyleDeclaration.computedStyle(this, _defaultStyle, _onStyleChanged);
@@ -156,6 +155,9 @@ class Element extends Node
     // Init render style.
     renderStyle = RenderStyle(target: this);
   }
+
+  @override
+  String get nodeName => tagName;
 
   @override
   RenderObject? get renderer => renderBoxModel?.renderPositionHolder ?? renderBoxModel;
@@ -256,7 +258,7 @@ class Element extends Node
   void paintFixedChildren(double scrollOffset, AxisDirection axisDirection) {
     RenderLayoutBox? _scrollingContentLayoutBox = scrollingContentLayoutBox;
     // Only root element has fixed children
-    if (tagName == 'HTML' && _scrollingContentLayoutBox != null) {
+    if (targetId == HTML_ID && _scrollingContentLayoutBox != null) {
       for (RenderBoxModel child in _scrollingContentLayoutBox.fixedChildren) {
         // Save scrolling offset for paint
         if (axisDirection == AxisDirection.down) {
@@ -437,7 +439,7 @@ class Element extends Node
       _parentElement.removeChild(this);
     }
 
-    renderStyle.dispose();
+    renderStyle.detach();
     style.dispose();
     properties.clear();
   }
