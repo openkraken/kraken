@@ -8,7 +8,9 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
 
-/// [RenderSliverBoxChildManager] for sliver element.
+/// An implementation of [RenderSliverBoxChildManager] for sliver,
+/// manage element to implement lifecycles for sliver list, generate
+/// renderer from existing element tree.
 class ElementSliverBoxChildManager implements RenderSliverBoxChildManager {
   final Element _target;
   late RenderSliverListLayout _sliverListLayout;
@@ -83,14 +85,21 @@ class ElementSliverBoxChildManager implements RenderSliverBoxChildManager {
   @override
   void removeChild(RenderBox child) {
     if (child is RenderBoxModel) {
-      child.renderStyle.cancelRunningTransiton();
-      child.clearIntersectionChangeListeners();
+      SliverMultiBoxAdaptorParentData parentData = child.parentData as SliverMultiBoxAdaptorParentData;
+      // The index of sliver list.
+      int index = parentData.index!;
 
-      child.detach();
-      child.dispose();
-    } else {
-      child.detach();
+      Iterable<Node> renderNodes = _renderNodes;
+      if (index < renderNodes.length) {
+        renderNodes
+            .elementAt(index)
+            .disposeRenderObject();
+        return;
+      }
     }
+
+    // Fallback operation.
+    child.detach();
   }
 
   @override

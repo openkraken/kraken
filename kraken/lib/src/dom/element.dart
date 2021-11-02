@@ -1732,8 +1732,9 @@ class Element extends Node
         ElementSliverBoxChildManager manager = ElementSliverBoxChildManager(this);
         renderSliverListLayout = RenderSliverListLayout(
           renderStyle: renderStyle,
-          target: this,
+          target: this, // @TODO: @zw to remove.
           manager: manager,
+          onScroll: _handleScroll,
         );
         manager.setupSliverLayoutLayout(renderSliverListLayout);
       } else if (prevRenderLayoutBox is RenderFlowLayout
@@ -1741,12 +1742,13 @@ class Element extends Node
         ElementSliverBoxChildManager manager = ElementSliverBoxChildManager(this);
         renderSliverListLayout = RenderSliverListLayout(
           renderStyle: renderStyle,
-          target: this,
+          target: this, // @TODO: @zw to remove.
           manager: manager,
+          onScroll: _handleScroll,
         );
         manager.setupSliverLayoutLayout(renderSliverListLayout);
-        renderSliverListLayout = prevRenderLayoutBox.copyWith(renderSliverListLayout);
         renderSliverListLayout.addAll(prevRenderLayoutBox.getDetachedChildrenAsList() as List<RenderBox>);
+        renderSliverListLayout = prevRenderLayoutBox.copyWith(renderSliverListLayout);
       } else if (prevRenderLayoutBox is RenderSliverListLayout) {
         renderSliverListLayout = prevRenderLayoutBox;
       }

@@ -26,6 +26,9 @@ class RenderSliverListLayout extends RenderLayoutBox {
   // The scrollable context to handle gestures.
   late KrakenScrollable scrollable;
 
+  // Called if scrolling pixel has moved.
+  final ScrollListener? _scrollListener;
+
   // The main axis for sliver list layout.
   Axis axis = Axis.vertical;
 
@@ -34,9 +37,11 @@ class RenderSliverListLayout extends RenderLayoutBox {
 
   RenderSliverListLayout({
     required RenderStyle renderStyle,
-    required Element target,
+    required Element target, // @TODO: @zw to remove.
     required RenderSliverBoxChildManager manager,
+    ScrollListener? onScroll,
   }) : _renderSliverBoxChildManager = manager,
+       _scrollListener = onScroll,
         super(renderStyle: renderStyle, target: target) {
     pointerListener = _pointerListener;
     scrollable = KrakenScrollable(axisDirection: getAxisDirection(axis));
@@ -62,6 +67,9 @@ class RenderSliverListLayout extends RenderLayoutBox {
     );
     super.insert(_renderViewport);
   }
+
+  @override
+  ScrollListener? get scrollListener => _scrollListener;
 
   @override
   bool get isRepaintBoundary => true;
