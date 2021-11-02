@@ -95,6 +95,9 @@ abstract class EventTarget {
   // A unique target identifier.
   final int targetId;
 
+  bool _disposed = false;
+  bool get disposed => _disposed;
+
   // The Add
   final Pointer<NativeEventTarget> nativeEventTargetPtr;
 
@@ -144,5 +147,6 @@ abstract class EventTarget {
     elementManager.removeTarget(this);
     eventHandlers.clear();
     _nativeMap.remove(nativeEventTargetPtr.address);
+    _disposed = true;
   }
 }
