@@ -330,7 +330,6 @@ JSValue Element::toBlob(QjsContext *ctx, JSValue this_val, int argc, JSValue *ar
       JS_SetPropertyStr(ctx, errorObject, "message", errorMessage);
       JSValue ret = JS_Call(ctx, promiseContext->rejectFunc, promiseContext->promise, 1, &errorObject);
       JS_FreeValue(ctx, errorObject);
-      JS_FreeValue(ctx, errorMessage);
       JS_FreeValue(ctx, ret);
     }
 
