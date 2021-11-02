@@ -311,16 +311,20 @@ describe('Tags img', () => {
       await snapshot(img);
       document.body.removeChild(img);
 
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         document.body.appendChild(img);
-        // After next frame that image has shown.
-        requestAnimationFrame(async () => {
-          // When replay, the image should be same as first frame.
-          await snapshot(img);
-          done();
+
+        let totalFrameCount = 10;
+        let frameIndex = 0;
+        requestAnimationFrame(async function f() {
+          if (frameIndex++ < totalFrameCount) {
+            await snapshot(img);
+            requestAnimationFrame(f);
+          } else {
+            done();
+          }
         });
-        // Delay 600ms to play gif.
-      }, 600);
+      });
     };
 
     document.body.appendChild(img);
