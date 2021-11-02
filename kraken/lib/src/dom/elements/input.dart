@@ -308,6 +308,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     super.didAttachRenderer();
 
     // Make element listen to click event to trigger focus.
+    addEvent(EVENT_TOUCH_START);
+    addEvent(EVENT_TOUCH_MOVE);
+    addEvent(EVENT_TOUCH_END);
     addEvent(EVENT_CLICK);
     addEvent(EVENT_DOUBLE_CLICK);
     addEvent(EVENT_LONG_PRESS);
