@@ -108,8 +108,8 @@ mixin ElementOverflowMixin on ElementBase {
 
   void updateRenderBoxModelWithOverflowX(ScrollListener scrollListener) {
     Element element = this as Element;
-    if (renderBoxModel is RenderRecyclerLayout) {
-      RenderRecyclerLayout renderBoxModel = this.renderBoxModel as RenderRecyclerLayout;
+    if (renderBoxModel is RenderSliverListLayout) {
+      RenderSliverListLayout renderBoxModel = this.renderBoxModel as RenderSliverListLayout;
       // Recycler layout not need repaintBoundary and scroll/pointer listeners,
       // ignoring overflowX or overflowY sets, which handle it self.
       renderBoxModel.clipX = false;
@@ -163,8 +163,8 @@ mixin ElementOverflowMixin on ElementBase {
 
   void updateRenderBoxModelWithOverflowY(ScrollListener scrollListener) {
     Element element = this as Element;
-    if (renderBoxModel is RenderRecyclerLayout) {
-      RenderRecyclerLayout renderBoxModel = this.renderBoxModel as RenderRecyclerLayout;
+    if (renderBoxModel is RenderSliverListLayout) {
+      RenderSliverListLayout renderBoxModel = this.renderBoxModel as RenderSliverListLayout;
       // Recycler layout not need repaintBoundary and scroll/pointer listeners,
       // ignoring overflowX or overflowY sets, which handle it self.
       renderBoxModel.clipY = false;
@@ -467,8 +467,8 @@ mixin ElementOverflowMixin on ElementBase {
 
   KrakenScrollable? _getScrollable(Axis direction) {
     KrakenScrollable? scrollable;
-    if (renderer is RenderRecyclerLayout) {
-      RenderRecyclerLayout recyclerLayout = renderer as RenderRecyclerLayout;
+    if (renderer is RenderSliverListLayout) {
+      RenderSliverListLayout recyclerLayout = renderer as RenderSliverListLayout;
       scrollable = direction == recyclerLayout.axis ? recyclerLayout.scrollable : null;
     } else {
       if (direction == Axis.horizontal) {

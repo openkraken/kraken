@@ -84,7 +84,7 @@ final DartInvokeEventListener _invokeModuleEvent =
     nativeDynamicLibrary.lookup<NativeFunction<NativeInvokeEventListener>>('invokeModuleEvent').asFunction();
 
 void invokeModuleEvent(int contextId, String moduleName, Event? event, String extra) {
-  if(KrakenController.getControllerOfJSContextId(contextId) == null) {
+  if (KrakenController.getControllerOfJSContextId(contextId) == null) {
     return;
   }
   Pointer<NativeString> nativeModuleName = stringToNativeString(moduleName);
@@ -97,7 +97,7 @@ typedef DartDispatchEvent = void Function(
     Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeString> eventType, Pointer<Void> nativeEvent, int isCustomEvent);
 
 void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Event event) {
-  if(KrakenController.getControllerOfJSContextId(contextId) == null) {
+  if (KrakenController.getControllerOfJSContextId(contextId) == null) {
     return;
   }
   Pointer<NativeEventTarget> nativeEventTarget = nativePtr;

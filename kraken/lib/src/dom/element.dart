@@ -18,6 +18,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/src/dom/sliver_manager.dart';
 import 'package:meta/meta.dart';
 
 import 'element_native_methods.dart';
@@ -421,7 +422,7 @@ class Element extends Node
     super.dispose();
 
     if (isRendererAttached) {
-      detach();
+      disposeRenderObject();
     }
 
     RenderBoxModel? _renderBoxModel = renderBoxModel;
@@ -494,20 +495,20 @@ class Element extends Node
     }
   }
 
-  // Detach renderObject of current node from parent
+  /// Release any resources held by [renderBoxModel].
   @override
-  void detach() {
+  void disposeRenderObject() {
     if (renderBoxModel == null) return;
 
     willDetachRenderer();
 
     for (Node child in childNodes) {
-      child.detach();
+      child.disposeRenderObject();
     }
 
     didDetachRenderer();
 
-    // Call dispose method of renderBoxModel when it is detached from tree
+    // Call dispose method of renderBoxModel when it is detached from tree.
     renderBoxModel!.dispose();
     renderBoxModel = null;
   }
@@ -560,7 +561,7 @@ class Element extends Node
     // Only append node types which is visible in RenderObject tree
     // Only remove childNode when it has parent
     if (child.isRendererAttached) {
-      child.detach();
+      child.disposeRenderObject();
     }
     // Update renderStyle tree.
     if (child is Element) {
@@ -685,7 +686,7 @@ class Element extends Node
 
     // Destroy renderer of element when display is changed to none.
     if (presentDisplay == CSSDisplay.none) {
-      detach();
+      disposeRenderObject();
       return;
     }
 
@@ -1657,7 +1658,7 @@ class Element extends Node
             return flexLayout;
           }
         }
-      } else if (prevRenderLayoutBox is RenderRecyclerLayout) {
+      } else if (prevRenderLayoutBox is RenderSliverListLayout) {
         flexLayout = prevRenderLayoutBox.toFlexLayout();
       }
 
@@ -1718,29 +1719,39 @@ class Element extends Node
             flowLayout = prevRenderLayoutBox.toFlowLayout();
           }
         }
-      } else if (prevRenderLayoutBox is RenderRecyclerLayout) {
+      } else if (prevRenderLayoutBox is RenderSliverListLayout) {
         // RenderRecyclerLayout --> RenderFlowLayout
         flowLayout = prevRenderLayoutBox.toFlowLayout();
       }
 
       return flowLayout!;
     } else if (display == CSSDisplay.sliver) {
-      RenderRecyclerLayout? renderRecyclerLayout;
+      late RenderSliverListLayout renderSliverListLayout;
 
       if (prevRenderLayoutBox == null) {
-        renderRecyclerLayout = RenderRecyclerLayout(
+        ElementSliverBoxChildManager manager = ElementSliverBoxChildManager(this);
+        renderSliverListLayout = RenderSliverListLayout(
           renderStyle: renderStyle,
           target: this,
+          manager: manager,
         );
-      } else if (prevRenderLayoutBox is RenderFlowLayout) {
-        renderRecyclerLayout = prevRenderLayoutBox.toRenderRecyclerLayout();
-      } else if (prevRenderLayoutBox is RenderFlexLayout) {
-        renderRecyclerLayout = prevRenderLayoutBox.toRenderRecyclerLayout();
-      } else if (prevRenderLayoutBox is RenderRecyclerLayout) {
-        renderRecyclerLayout = prevRenderLayoutBox;
+        manager.setupSliverLayoutLayout(renderSliverListLayout);
+      } else if (prevRenderLayoutBox is RenderFlowLayout
+          || prevRenderLayoutBox is RenderFlexLayout) {
+        ElementSliverBoxChildManager manager = ElementSliverBoxChildManager(this);
+        renderSliverListLayout = RenderSliverListLayout(
+          renderStyle: renderStyle,
+          target: this,
+          manager: manager,
+        );
+        manager.setupSliverLayoutLayout(renderSliverListLayout);
+        renderSliverListLayout = prevRenderLayoutBox.copyWith(renderSliverListLayout);
+        renderSliverListLayout.addAll(prevRenderLayoutBox.getDetachedChildrenAsList() as List<RenderBox>);
+      } else if (prevRenderLayoutBox is RenderSliverListLayout) {
+        renderSliverListLayout = prevRenderLayoutBox;
       }
 
-      return renderRecyclerLayout!;
+      return renderSliverListLayout;
     } else {
       throw FlutterError('Not supported display type $display');
     }

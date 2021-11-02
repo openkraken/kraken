@@ -14,7 +14,7 @@ export 'src/rendering/flow.dart';
 export 'src/rendering/intersection_observer.dart';
 export 'src/rendering/box_model.dart';
 export 'src/rendering/intrinsic.dart';
-export 'src/rendering/recycler.dart';
+export 'src/rendering/sliver_list.dart';
 export 'src/rendering/preferred_size.dart';
 export 'src/rendering/text.dart';
 export 'src/rendering/content_visibility.dart';

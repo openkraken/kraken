@@ -46,8 +46,8 @@ class HTMLElement extends Element {
   }
 
   @override
-  void detach() {
-    super.detach();
+  void disposeRenderObject() {
+    super.disposeRenderObject();
     elementManager.viewport.child = null;
   }
 }

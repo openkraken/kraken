@@ -145,10 +145,10 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   /// Attach a renderObject to parent.
   void attachTo(Element parent, {RenderBox? after}) {}
 
-  /// Detach renderObject from parent.
-  void detach() {}
+  /// Release any resources held by referenced render object.
+  void disposeRenderObject() {}
 
-  /// Dispose renderObject, but not do anything.
+  /// Release any resources held by this node.
   @override
   void dispose() {
     super.dispose();
@@ -161,23 +161,22 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   }
 
   @override
-  dynamic handleJSCall(String method, List<dynamic> argv) {
-  }
+  handleJSCall(String method, List<dynamic> argv) {}
 
   @override
-  RenderObject createRenderer() => throw FlutterError('createRenderer function is not implemented.');
-
-  @override
-  void didAttachRenderer() {}
-
-  @override
-  void didDetachRenderer() {}
+  RenderObject createRenderer() => throw FlutterError('[createRenderer] is not implemented.');
 
   @override
   void willAttachRenderer() {}
 
   @override
+  void didAttachRenderer() {}
+
+  @override
   void willDetachRenderer() {}
+
+  @override
+  void didDetachRenderer() {}
 
   @mustCallSuper
   Node appendChild(Node child) {

@@ -230,7 +230,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     Node target = getEventTargetByTargetId<Node>(targetId)!;
 
     // Should detach renderObject.
-    target.detach();
+    target.disposeRenderObject();
 
     target.parentNode?.removeChild(target);
 
@@ -450,7 +450,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     if (parent == null) return;
 
     // Detach renderObjects
-    viewportElement.detach();
+    viewportElement.disposeRenderObject();
 
     // run detachCallbacks
     for (var callback in _detachCallbacks) {

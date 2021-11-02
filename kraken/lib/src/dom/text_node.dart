@@ -130,7 +130,7 @@ class TextNode extends Node {
 
   // Detach renderObject of current node from parent
   @override
-  void detach() {
+  void disposeRenderObject() {
     willDetachRenderer();
 
     if (isRendererAttached) {
@@ -160,7 +160,7 @@ class TextNode extends Node {
   void dispose() {
     super.dispose();
 
-    detach();
+    disposeRenderObject();
 
     assert(_renderTextBox == null);
   }
