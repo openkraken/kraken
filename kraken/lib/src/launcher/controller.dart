@@ -214,6 +214,12 @@ class KrakenViewController {
 
       var node = _elementManager.getEventTargetByTargetId<EventTarget>(eventTargetId);
       if (node is Element) {
+        if (!node.isRendererAttached) {
+          String msg = 'toImage: the element is not attached to document tree.';
+          completer.completeError(Exception(msg));
+          return completer.future;
+        }
+
         node.toBlob(devicePixelRatio: devicePixelRatio).then((Uint8List bytes) {
           completer.complete(bytes);
         }).catchError((e, stack) {
