@@ -377,6 +377,8 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       target.addEvent(eventType);
     } else if (target is Window) {
       target.addEvent(eventType);
+    } else if (target is Document) {
+      target.addEvent(eventType);
     }
   }
 

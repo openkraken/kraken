@@ -23,4 +23,19 @@ class Document extends Node {
 
   @override
   handleJSCall(String method, List argv) { }
+
+  addEvent(String eventType) {
+    if (eventHandlers.containsKey(eventType)) return; // Only listen once.
+
+    switch (eventType) {
+      case EVENT_SCROLL:
+        // Fired at the Document or element when the viewport or element is scrolled, respectively.
+        return documentElement.addEventListener(eventType, dispatchEvent);
+      default:
+        // Events listened on the Window need to be proxied to the Document, because there is a RenderView on the Document, which can handle hitTest.
+        // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/VisualViewport.cpp#L61
+        documentElement.addEvent(eventType);
+        break;
+    }
+  }
 }

@@ -25,4 +25,11 @@ class BodyElement extends Element {
     RenderStyle renderStyle = renderBoxModel!.renderStyle;
     renderStyle.width = CSSLengthValue(elementManager.viewportWidth, CSSLengthType.PX);
   }
+
+  @override
+  void addEvent(String eventType) {
+    // Scroll event not working on body.
+    if (eventType == EVENT_SCROLL) return;
+    super.addEvent(eventType);
+  }
 }

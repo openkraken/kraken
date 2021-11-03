@@ -49,4 +49,11 @@ class HTMLElement extends Element {
     super.disposeRenderObject();
     elementManager.viewport.child = null;
   }
+
+  @override
+  void addEvent(String eventType) {
+    // Scroll event not working on html.
+    if (eventType == EVENT_SCROLL) return;
+    super.addEvent(eventType);
+  }
 }
