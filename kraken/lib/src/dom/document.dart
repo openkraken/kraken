@@ -15,21 +15,12 @@ class Document extends Node {
   Document(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager, this.documentElement)
       : super(NodeType.DOCUMENT_NODE, targetId, nativeEventTarget, elementManager);
 
-  void _handleEvent(Event event) {
-    emitUIEvent(elementManager.controller.view.contextId, this, event);
-  }
-
   @override
   String get nodeName => '#document';
-
-  void addEvent(String eventType) {
-    documentElement.addEventListener(eventType, _handleEvent);
-  }
 
   @override
   RenderObject? get renderer => throw FlutterError('Document did\'t have renderObject.');
 
   @override
-  handleJSCall(String method, List argv) {
-  }
+  handleJSCall(String method, List argv) { }
 }

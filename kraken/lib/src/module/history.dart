@@ -108,7 +108,7 @@ class HistoryModule extends BaseModule {
   void _dispatchPopStateEvent(dynamic state) {
     PopStateEventInit init = PopStateEventInit(state);
     PopStateEvent popStateEvent = PopStateEvent(init);
-    emitUIEvent(moduleManager!.contextId, moduleManager!.controller.view.window!, popStateEvent);
+    moduleManager!.controller.view.window!.dispatchEvent(popStateEvent);
   }
 
   void _pushState(List<dynamic> params) {

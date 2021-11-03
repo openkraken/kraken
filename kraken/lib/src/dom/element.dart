@@ -1490,13 +1490,13 @@ class Element extends Node
 
   void addEvent(String eventType) {
     if (eventHandlers.containsKey(eventType)) return; // Only listen once.
-    addEventListener(eventType, _eventResponder);
+    addEventListener(eventType, dispatchEvent);
     _ensureEventResponderBound();
   }
 
   void removeEvent(String eventType) {
     if (!eventHandlers.containsKey(eventType)) return; // Only listen once.
-    removeEventListener(eventType, _eventResponder);
+    removeEventListener(eventType, dispatchEvent);
 
     RenderBoxModel? selfRenderBoxModel = renderBoxModel;
     if (selfRenderBoxModel != null) {
@@ -1512,36 +1512,8 @@ class Element extends Node
     }
   }
 
-  @override
-  void dispatchEvent(Event event) {
-    event.currentTarget = this;
-    _eventResponder(event);
-
-    // Dispatch listener for widget.
-    if (elementManager.gestureListener != null) {
-      if (elementManager.gestureListener?.onTouchStart != null && event.type == EVENT_TOUCH_START) {
-        elementManager.gestureListener?.onTouchStart!(event as TouchEvent);
-      }
-
-      if (elementManager.gestureListener?.onTouchMove != null && event.type == EVENT_TOUCH_MOVE) {
-        elementManager.gestureListener?.onTouchMove!(event as TouchEvent);
-      }
-
-      if (elementManager.gestureListener?.onTouchEnd != null && event.type == EVENT_TOUCH_END) {
-        elementManager.gestureListener?.onTouchEnd!(event as TouchEvent);
-      }
-    }
-  }
-
-  void _eventResponder(Event event) {
-    // Don't trigger event when eventTarget already disposed.
-    if (disposed) return;
-    emitUIEvent(elementManager.controller.view.contextId, this, event);
-  }
-
   void handleMethodClick() {
     Event clickEvent = MouseEvent(EVENT_CLICK, MouseEventInit(bubbles: true, cancelable: true));
-
     // If element not in tree, click is fired and only response to itself.
     dispatchEvent(clickEvent);
   }

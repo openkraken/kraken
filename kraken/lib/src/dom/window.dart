@@ -19,20 +19,8 @@ class Window extends EventTarget {
   Window(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager, this.viewportElement) : super(targetId, nativeEventTarget, elementManager) {
     window.onPlatformBrightnessChanged = () {
       ColorSchemeChangeEvent event = ColorSchemeChangeEvent((window.platformBrightness == Brightness.light) ? 'light' : 'dart');
-      emitUIEvent(elementManager.controller.view.contextId, this, event);
+      dispatchEvent(event);
     };
-  }
-
-  void _handleColorSchemeChange(Event event) {
-    emitUIEvent(elementManager.controller.view.contextId, this, event);
-  }
-
-  void _handleLoad(Event event) {
-    emitUIEvent(elementManager.controller.view.contextId, this, event);
-  }
-
-  void _handleScroll(Event event) {
-    emitUIEvent(elementManager.controller.view.contextId, this, event);
   }
 
   static void _open(ElementManager elementManager, String url) {
@@ -65,11 +53,11 @@ class Window extends EventTarget {
 
     switch (eventName) {
       case EVENT_COLOR_SCHEME_CHANGE:
-        return addEventListener(eventName, _handleColorSchemeChange);
+        return addEventListener(eventName, dispatchEvent);
       case EVENT_LOAD:
-        return addEventListener(eventName, _handleLoad);
+        return addEventListener(eventName, dispatchEvent);
       case EVENT_SCROLL:
-        return viewportElement.addEventListener(eventName, _handleScroll);
+        return viewportElement.addEventListener(eventName, dispatchEvent);
       default:
         // Events listened on the Window need to be proxied to the Document, because there is a RenderView on the Document, which can handle hitTest.
         // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/VisualViewport.cpp#L61

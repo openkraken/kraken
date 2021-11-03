@@ -96,12 +96,10 @@ void invokeModuleEvent(int contextId, String moduleName, Event? event, String ex
 typedef DartDispatchEvent = void Function(
     Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeString> eventType, Pointer<Void> nativeEvent, int isCustomEvent);
 
-void emitUIEvent(int contextId, EventTarget eventTarget, Event event) {
+void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativeEventTarget, Event event) {
   if(KrakenController.getControllerOfJSContextId(contextId) == null) {
     return;
   }
-  if (eventTarget.disposed) return;
-  Pointer<NativeEventTarget> nativeEventTarget = eventTarget.nativeEventTargetPtr;
   DartDispatchEvent dispatchEvent = nativeEventTarget.ref.dispatchEvent.asFunction();
   Pointer<Void> rawEvent = event.toRaw().cast<Void>();
   bool isCustomEvent = event is CustomEvent;
