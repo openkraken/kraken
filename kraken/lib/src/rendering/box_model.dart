@@ -150,11 +150,11 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox,
 }
 
 class RenderLayoutBox extends RenderBoxModel
-    with
-        ContainerRenderObjectMixin<RenderBox,
-            ContainerBoxParentData<RenderBox>>,
-        RenderBoxContainerDefaultsMixin<RenderBox,
-            ContainerBoxParentData<RenderBox>> {
+  with 
+    ContainerRenderObjectMixin<RenderBox,
+    ContainerBoxParentData<RenderBox>>,
+    RenderBoxContainerDefaultsMixin<RenderBox,
+    ContainerBoxParentData<RenderBox>> {
   RenderLayoutBox({
     required RenderStyle renderStyle,
   }) : super(
@@ -510,16 +510,16 @@ mixin RenderBoxModelBase on RenderBox {
 }
 
 class RenderBoxModel extends RenderBox
-    with
-        RenderBoxModelBase,
-        RenderBoxDecorationMixin,
-        RenderTransformMixin,
-        RenderOverflowMixin,
-        RenderOpacityMixin,
-        RenderIntersectionObserverMixin,
-        RenderContentVisibilityMixin,
-        RenderPointerListenerMixin,
-        RenderObjectWithControllerMixin {
+  with
+    RenderBoxModelBase,
+    RenderBoxDecorationMixin,
+    RenderTransformMixin,
+    RenderOverflowMixin,
+    RenderOpacityMixin,
+    RenderIntersectionObserverMixin,
+    RenderContentVisibilityMixin,
+    RenderPointerListenerMixin,
+    RenderObjectWithControllerMixin {
   RenderBoxModel({
     required this.renderStyle,
   }) : super();
