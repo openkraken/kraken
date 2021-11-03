@@ -12,6 +12,7 @@
 #include <quickjs/quickjs.h>
 #include <quickjs/list.h>
 #include "js_context_macros.h"
+#include "qjs_patch.h"
 
 using QjsContext = JSContext;
 using JSExceptionHandler = std::function<void(int32_t contextId, const char *message)>;
@@ -104,6 +105,19 @@ private:
   WindowInstance *m_window{nullptr};
 };
 
+// The read object's method or properties via Proxy, we should redirect this_val from Proxy into target property of proxy object.
+static JSValue handleCallThisOnProxy(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int data_len,
+                             JSValueConst *data) {
+  JSValue f = data[0];
+  JSValue result;
+  if (JS_IsProxy(this_val)) {
+    result = JS_Call(ctx, f, JS_GetProxyTarget(this_val), argc, argv);
+  } else {
+    result = JS_Call(ctx, f, this_val, argc, argv);
+  }
+  return result;
+}
+
 class ObjectProperty {
   KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(ObjectProperty);
 
@@ -113,8 +127,15 @@ public:
                               JSCFunction getterFunction, JSCFunction setterFunction) {
     JSValue ge = JS_NewCFunction(context->ctx(), getterFunction, "get", 0);
     JSValue se = JS_NewCFunction(context->ctx(), setterFunction, "set", 1);
+
+    JSValue pge = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 0, 0, 1, &ge);
+    JSValue pse = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 1, 0, 1, &se);
+
+    JS_FreeValue(context->ctx(), ge);
+    JS_FreeValue(context->ctx(), se);
+
     JSAtom key = JS_NewAtom(context->ctx(), property);
-    JS_DefinePropertyGetSet(context->ctx(), thisObject, key, ge, se,
+    JS_DefinePropertyGetSet(context->ctx(), thisObject, key, pge, pse,
                             JS_PROP_C_W_E);
     JS_FreeAtom(context->ctx(), key);
   };
@@ -136,14 +157,17 @@ public:
   explicit ObjectFunction(JSContext *context, JSValueConst thisObject, const char *functionName,
                               JSCFunction function, int argc) {
     JSValue f = JS_NewCFunction(context->ctx(), function, functionName, argc);
+    JSValue pf = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, argc, 0, 1, &f);
     JSAtom key = JS_NewAtom(context->ctx(), functionName);
+
+    JS_FreeValue(context->ctx(), f);
 
 // We should avoid overwrite exist property functions.
 #ifdef DEBUG
     assert_m(JS_HasProperty(context->ctx(), thisObject, key) == 0, (std::string("Found exist function property: ") + std::string(functionName)).c_str());
 #endif
 
-    JS_DefinePropertyValue(context->ctx(), thisObject, key, f,
+    JS_DefinePropertyValue(context->ctx(), thisObject, key, pf,
                            JS_PROP_ENUMERABLE);
     JS_FreeAtom(context->ctx(), key);
   };
