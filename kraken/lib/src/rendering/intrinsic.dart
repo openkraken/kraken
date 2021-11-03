@@ -14,10 +14,8 @@ class RenderIntrinsic extends RenderBoxModel
     with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
   RenderIntrinsic(
       RenderStyle renderStyle,
-      Element target
   ) : super(
       renderStyle: renderStyle,
-      target: target
   );
 
   @override
@@ -209,7 +207,7 @@ class RenderIntrinsic extends RenderBoxModel
   RenderSelfRepaintIntrinsic toSelfRepaint() {
     RenderObject? childRenderObject = child;
     child = null;
-    RenderSelfRepaintIntrinsic newChild = RenderSelfRepaintIntrinsic(renderStyle, target);
+    RenderSelfRepaintIntrinsic newChild = RenderSelfRepaintIntrinsic(renderStyle);
     newChild.child = childRenderObject as RenderBox?;
     return copyWith(newChild);
   }
@@ -226,10 +224,8 @@ class RenderIntrinsic extends RenderBoxModel
 class RenderSelfRepaintIntrinsic extends RenderIntrinsic {
   RenderSelfRepaintIntrinsic(
     RenderStyle renderStyle,
-    Element target,
   ) : super(
     renderStyle,
-    target
   );
 
   @override
@@ -238,7 +234,7 @@ class RenderSelfRepaintIntrinsic extends RenderIntrinsic {
   RenderIntrinsic toParentRepaint() {
     RenderObject? childRenderObject = child;
     child = null;
-    RenderIntrinsic newChild = RenderIntrinsic(renderStyle, target);
+    RenderIntrinsic newChild = RenderIntrinsic(renderStyle);
     newChild.child = childRenderObject as RenderBox?;
     return copyWith(newChild);
   }

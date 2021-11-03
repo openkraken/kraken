@@ -1614,12 +1614,10 @@ class Element extends Node
         if (repaintSelf) {
           flexLayout = RenderSelfRepaintFlexLayout(
             renderStyle: renderStyle,
-            target: this,
           );
         } else {
           flexLayout = RenderFlexLayout(
             renderStyle: renderStyle,
-            target: this,
           );
         }
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
@@ -1675,12 +1673,10 @@ class Element extends Node
         if (repaintSelf) {
           flowLayout = RenderSelfRepaintFlowLayout(
             renderStyle: renderStyle,
-            target: this,
           );
         } else {
           flowLayout = RenderFlowLayout(
             renderStyle: renderStyle,
-            target: this,
           );
         }
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
@@ -1734,7 +1730,6 @@ class Element extends Node
         ElementSliverBoxChildManager manager = ElementSliverBoxChildManager(this);
         renderSliverListLayout = RenderSliverListLayout(
           renderStyle: renderStyle,
-          target: this, // @TODO: @zw to remove.
           manager: manager,
           onScroll: _handleScroll,
         );
@@ -1744,7 +1739,6 @@ class Element extends Node
         ElementSliverBoxChildManager manager = ElementSliverBoxChildManager(this);
         renderSliverListLayout = RenderSliverListLayout(
           renderStyle: renderStyle,
-          target: this, // @TODO: @zw to remove.
           manager: manager,
           onScroll: _handleScroll,
         );
@@ -1771,12 +1765,10 @@ class Element extends Node
       if (repaintSelf) {
         intrinsic = RenderSelfRepaintIntrinsic(
           renderStyle,
-          this
         );
       } else {
         intrinsic = RenderIntrinsic(
           renderStyle,
-          this
         );
       }
     } else {

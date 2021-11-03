@@ -157,10 +157,8 @@ class RenderLayoutBox extends RenderBoxModel
             ContainerBoxParentData<RenderBox>> {
   RenderLayoutBox({
     required RenderStyle renderStyle,
-    required Element target, // @TODO: @zw to remove.
   }) : super(
     renderStyle: renderStyle,
-    target: target
   );
 
   @override
@@ -507,7 +505,6 @@ class RenderLayoutBox extends RenderBoxModel
 }
 
 mixin RenderBoxModelBase on RenderBox {
-  late Element target;
   late RenderStyle renderStyle;
   Size? boxSize;
 }
@@ -525,7 +522,6 @@ class RenderBoxModel extends RenderBox
         RenderObjectWithControllerMixin {
   RenderBoxModel({
     required this.renderStyle,
-    required this.target, // @TODO: @zw to remove.
   }) : super();
 
   @override
