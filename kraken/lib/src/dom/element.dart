@@ -1435,7 +1435,7 @@ class Element extends Node
   void _eventResponder(Event event) {
     // Don't trigger event when eventTarget already disposed.
     if (disposed) return;
-    emitUIEvent(elementManager.controller.view.contextId, nativeEventTargetPtr, event);
+    emitUIEvent(elementManager.controller.view.contextId, this, event);
   }
 
   void handleMethodClick() {
