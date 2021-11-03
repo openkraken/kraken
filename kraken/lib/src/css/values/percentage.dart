@@ -7,7 +7,7 @@
 
 import 'package:quiver/collection.dart';
 
-final _percentageRegExp = RegExp(r'^[-]*\d+\%$', caseSensitive: false);
+final _percentageRegExp = RegExp(r'^[+-]?\d+\%$', caseSensitive: false);
 final LinkedLruHashMap<String, double?> _cachedParsedPercentage = LinkedLruHashMap(maximumSize: 100);
 
 class CSSPercentage {
