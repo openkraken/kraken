@@ -27,6 +27,11 @@ class Comment extends Node {
   @override
   RenderObject? get renderer => null;
 
+  // @TODO: Get data from bridge side.
+  String get data => '';
+
+  int get length => data.length;
+
   @override
   dynamic handleJSCall(String method, List<dynamic> argv) {}
 }
