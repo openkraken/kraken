@@ -381,6 +381,11 @@ mixin RenderOverflowMixin on RenderBox {
       PaintingContextCallback painter = (PaintingContext context, Offset offset) {
         callback(context, offset + paintOffset);
       };
+
+      // It needs to create new layer to clip children in case children has its own layer
+      // for all overflow value which is not visible (auto/scroll/hidden/clip).
+      bool _needsCompositing = true;
+
       if (decoration != null && decoration.borderRadius != null) {
         BorderRadius radius = decoration.borderRadius as BorderRadius;
         RRect clipRRect = RRect.fromRectAndCorners(clipRect,
@@ -389,9 +394,9 @@ mixin RenderOverflowMixin on RenderBox {
             bottomLeft: radius.bottomLeft,
             bottomRight: radius.bottomRight
         );
-        _oldClipRRectLayer = context.pushClipRRect(needsCompositing, offset, clipRect, clipRRect, painter, oldLayer: _oldClipRRectLayer);
+        _oldClipRRectLayer = context.pushClipRRect(_needsCompositing, offset, clipRect, clipRRect, painter, oldLayer: _oldClipRRectLayer);
       } else {
-        _oldClipRectLayer = context.pushClipRect(needsCompositing, offset, clipRect, painter, oldLayer: _oldClipRectLayer);
+        _oldClipRectLayer = context.pushClipRect(_needsCompositing, offset, clipRect, painter, oldLayer: _oldClipRectLayer);
       }
     } else {
       _oldClipRRectLayer = null;
