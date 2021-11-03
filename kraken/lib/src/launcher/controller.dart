@@ -733,15 +733,16 @@ class KrakenController {
       // trigger DOMContentLoaded event
       module.requestAnimationFrame((_) {
         Event event = Event(EVENT_DOM_CONTENT_LOADED);
-        EventTarget window = view.getEventTargetById(WINDOW_ID)!;
-        emitUIEvent(_view.contextId, window.nativeEventTargetPtr, event);
-
-        // @HACK: window.load should trigger after all image had loaded.
-        // Someone needs to fix this in the future.
-        module.requestAnimationFrame((_) {
-          Event event = Event(EVENT_LOAD);
-          emitUIEvent(_view.contextId, window.nativeEventTargetPtr, event);
-        });
+        EventTarget? window = view.getEventTargetById(WINDOW_ID);
+        if (window != null) {
+          emitUIEvent(_view.contextId, window, event);
+          // @HACK: window.load should trigger after all image had loaded.
+          // Someone needs to fix this in the future.
+          module.requestAnimationFrame((_) {
+            Event event = Event(EVENT_LOAD);
+            emitUIEvent(_view.contextId, window, event);
+          });
+        }
       });
 
       if (onLoad != null) {

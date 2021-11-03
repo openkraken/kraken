@@ -16,7 +16,7 @@ class Document extends Node {
       : super(NodeType.DOCUMENT_NODE, targetId, nativeEventTarget, elementManager);
 
   void _handleEvent(Event event) {
-    emitUIEvent(elementManager.controller.view.contextId, nativeEventTargetPtr, event);
+    emitUIEvent(elementManager.controller.view.contextId, this, event);
   }
 
   @override
