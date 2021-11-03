@@ -18,7 +18,7 @@ const _1pc = _1in / 6; // 1pc = 1/6th of 1in
 const _1pt = _1in / 72; // 1pt = 1/72th of 1in
 
 final _lengthRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?px|rpx|vw|vh|vmin|vmax|rem|em|in|cm|mm|pc|pt$', caseSensitive: false);
-final _percentageRegExp = RegExp(r'^\d+\%$', caseSensitive: false);
+final _percentageRegExp = RegExp(r'^[+-]?\d+\%$', caseSensitive: false);
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#lengths
 class CSSLength {
