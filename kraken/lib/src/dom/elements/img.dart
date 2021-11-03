@@ -172,7 +172,7 @@ class ImageElement extends Element {
     }
   }
 
-  void dispatchImageLoadEvent() {
+  void _dispatchLoadEvent() {
     dispatchEvent(Event(EVENT_LOAD));
   }
 
@@ -182,11 +182,11 @@ class ImageElement extends Element {
       // If image in tree, make sure the image-box has been layout, using addPostFrameCallback.
       SchedulerBinding.instance!.scheduleFrame();
       SchedulerBinding.instance!.addPostFrameCallback((_) {
-        dispatchImageLoadEvent();
+        _dispatchLoadEvent();
       });
     } else {
       // If not in tree, dispatch the event directly.
-      dispatchImageLoadEvent();
+      _dispatchLoadEvent();
     }
   }
 

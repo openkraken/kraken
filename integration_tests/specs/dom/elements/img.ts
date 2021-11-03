@@ -313,17 +313,15 @@ describe('Tags img', () => {
 
       requestAnimationFrame(() => {
         document.body.appendChild(img);
-
-        let totalFrameCount = 10;
-        let frameIndex = 0;
-        requestAnimationFrame(async function f() {
-          if (frameIndex++ < totalFrameCount) {
-            await snapshot(img);
-            requestAnimationFrame(f);
-          } else {
-            done();
-          }
-        });
+        setTimeout(async () => {
+          await snapshot(img);
+        }, 800);
+        
+        // This GIF duration 1.5s, so we need wait 1.5s to make sure it can replay.
+        setTimeout(async () => {
+          await snapshot(img);
+          done();
+        }, 1500);
       });
     };
 
