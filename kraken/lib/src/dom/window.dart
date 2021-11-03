@@ -19,7 +19,7 @@ class Window extends EventTarget {
   Window(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager, this.viewportElement) : super(targetId, nativeEventTarget, elementManager) {
     window.onPlatformBrightnessChanged = () {
       ColorSchemeChangeEvent event = ColorSchemeChangeEvent((window.platformBrightness == Brightness.light) ? 'light' : 'dart');
-      emitUIEvent(elementManager.controller.view.contextId, nativeEventTargetPtr, event);
+      emitUIEvent(elementManager.controller.view.contextId, this, event);
     };
   }
 
