@@ -24,15 +24,15 @@ class Window extends EventTarget {
   }
 
   void _handleColorSchemeChange(Event event) {
-    emitUIEvent(elementManager.controller.view.contextId, nativeEventTargetPtr, event);
+    emitUIEvent(elementManager.controller.view.contextId, this, event);
   }
 
   void _handleLoad(Event event) {
-    emitUIEvent(elementManager.controller.view.contextId, nativeEventTargetPtr, event);
+    emitUIEvent(elementManager.controller.view.contextId, this, event);
   }
 
   void _handleScroll(Event event) {
-    emitUIEvent(elementManager.controller.view.contextId, nativeEventTargetPtr, event);
+    emitUIEvent(elementManager.controller.view.contextId, this, event);
   }
 
   static void _open(ElementManager elementManager, String url) {
