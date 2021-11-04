@@ -311,18 +311,16 @@ describe('Tags img', () => {
       await snapshot(img);
       document.body.removeChild(img);
 
-      requestAnimationFrame(() => {
+      setTimeout(() => {
         document.body.appendChild(img);
-        setTimeout(async () => {
-          await snapshot(img);
-        }, 800);
-        
-        // This GIF duration 1.5s, so we need wait 1.5s to make sure it can replay.
-        setTimeout(async () => {
+        // After next frame that image has shown.
+        requestAnimationFrame(async () => {
+          // When replay, the image should be same as first frame.
           await snapshot(img);
           done();
-        }, 1500);
-      });
+        });
+        // Delay 200ms to play gif.
+      }, 200);
     };
 
     document.body.appendChild(img);

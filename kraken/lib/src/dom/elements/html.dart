@@ -56,4 +56,7 @@ class HTMLElement extends Element {
     if (eventType == EVENT_SCROLL) return;
     super.addEvent(eventType);
   }
+
+  @override
+  String get tagName => HTML;
 }
