@@ -13,6 +13,9 @@ const String AUTO = 'auto';
 const String VISIBLE = 'visible';
 const String HIDDEN = 'hidden';
 
+// Overflow
+const String CLIP = 'clip';
+
 // Border
 const String SOLID = 'solid';
 const String THIN = 'thin'; // A thin border.

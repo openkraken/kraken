@@ -6,40 +6,40 @@
 #ifndef KRAKENBRIDGE_DOCUMENT_H
 #define KRAKENBRIDGE_DOCUMENT_H
 
-#include "node.h"
 #include "element.h"
+#include "node.h"
 
 namespace kraken::binding::qjs {
 
-void bindDocument(std::unique_ptr<JSContext> &context);
+void bindDocument(std::unique_ptr<JSContext>& context);
 
-using TraverseHandler = std::function<bool(NodeInstance *)>;
+using TraverseHandler = std::function<bool(NodeInstance*)>;
 
-void traverseNode(NodeInstance *node, TraverseHandler handler);
+void traverseNode(NodeInstance* node, TraverseHandler handler);
 
 class Document : public Node {
-public:
+ public:
   static JSClassID kDocumentClassID;
 
   Document() = delete;
-  Document(JSContext *context);
+  Document(JSContext* context);
 
   static JSClassID classId();
 
-  JSValue instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
+  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
   OBJECT_INSTANCE(Document);
 
-  static JSValue createEvent(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  static JSValue createElement(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  static JSValue createTextNode(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  static JSValue createDocumentFragment(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  static JSValue createComment(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  static JSValue getElementById(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  static JSValue getElementsByTagName(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  static JSValue getElementsByClassName(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
+  static JSValue createEvent(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue createElement(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue createTextNode(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue createDocumentFragment(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue createComment(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getElementById(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getElementsByTagName(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getElementsByClassName(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
-private:
+ private:
   ObjectFunction m_createEvent{m_context, m_prototypeObject, "createEvent", createEvent, 1};
   ObjectFunction m_createElement{m_context, m_prototypeObject, "createElement", createElement, 1};
   ObjectFunction m_createDocumentFragment{m_context, m_prototypeObject, "createDocumentFragment", createDocumentFragment, 0};
@@ -55,37 +55,37 @@ private:
 };
 
 class DocumentCookie {
-public:
+ public:
   DocumentCookie() = default;
 
   std::string getCookie();
-  void setCookie(std::string &str);
+  void setCookie(std::string& str);
 
-private:
+ private:
   std::unordered_map<std::string, std::string> cookiePairs;
 };
 
 class DocumentInstance : public NodeInstance {
-public:
+ public:
   DocumentInstance() = delete;
-  explicit DocumentInstance(Document *document);
+  explicit DocumentInstance(Document* document);
   ~DocumentInstance();
-  static std::unordered_map<Document *, DocumentInstance *> m_instanceMap;
-  ElementInstance *documentElement();
-  static DocumentInstance *instance(Document *document) {
+  static std::unordered_map<Document*, DocumentInstance*> m_instanceMap;
+  ElementInstance* documentElement();
+  static DocumentInstance* instance(Document* document) {
     if (m_instanceMap.count(document) == 0) {
       m_instanceMap[document] = new DocumentInstance(document);
     }
     return m_instanceMap[document];
   }
 
-private:
+ private:
   DEFINE_HOST_CLASS_PROPERTY(3, nodeName, all, cookie);
 
-  void removeElementById(JSAtom id, ElementInstance *element);
-  void addElementById(JSAtom id, ElementInstance *element);
-  std::unordered_map<JSAtom, std::vector<ElementInstance *>> m_elementMapById;
-  ElementInstance *m_documentElement{nullptr};
+  void removeElementById(JSAtom id, ElementInstance* element);
+  void addElementById(JSAtom id, ElementInstance* element);
+  std::unordered_map<JSAtom, std::vector<ElementInstance*>> m_elementMapById;
+  ElementInstance* m_documentElement{nullptr};
   std::unique_ptr<DocumentCookie> m_cookie;
 
   friend Document;
@@ -93,6 +93,6 @@ private:
   friend JSContext;
 };
 
-} // namespace kraken::binding::qjs
+}  // namespace kraken::binding::qjs
 
-#endif // KRAKENBRIDGE_DOCUMENT_H
+#endif  // KRAKENBRIDGE_DOCUMENT_H

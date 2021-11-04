@@ -39,4 +39,32 @@ describe('Transform translate3d', () => {
     BODY.appendChild(div);
     await snapshot();
   });
+
+  it('should work with negative percentage', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            width: '100px',
+            height: '100px',
+            transform: 'translateY(-50%)',
+            backgroundColor: 'green',
+          }
+        })
+      ]
+    );
+
+    BODY.appendChild(div);
+    await snapshot();
+  });
 });

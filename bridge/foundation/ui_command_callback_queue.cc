@@ -7,8 +7,8 @@
 
 namespace foundation {
 
-UICommandCallbackQueue *UICommandCallbackQueue::instance() {
-  static UICommandCallbackQueue *queue = nullptr;
+UICommandCallbackQueue* UICommandCallbackQueue::instance() {
+  static UICommandCallbackQueue* queue = nullptr;
 
   if (queue == nullptr) {
     queue = new UICommandCallbackQueue();
@@ -18,15 +18,15 @@ UICommandCallbackQueue *UICommandCallbackQueue::instance() {
 }
 
 void UICommandCallbackQueue::flushCallbacks() {
-  for (auto &item : queue) {
+  for (auto& item : queue) {
     item.callback(item.data);
   }
   queue.clear();
 }
 
-void UICommandCallbackQueue::registerCallback(const Callback &callback, void *data) {
+void UICommandCallbackQueue::registerCallback(const Callback& callback, void* data) {
   CallbackItem item{callback, data};
   queue.emplace_back(item);
 }
 
-} // namespace foundation
+}  // namespace foundation

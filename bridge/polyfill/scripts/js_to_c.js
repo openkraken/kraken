@@ -46,22 +46,14 @@ void initKraken${outputName}(kraken::JSBridge *bridge);
 `;
 
 const getPolyFillJavaScriptSource = (source) => {
-  if (process.env.KRAKEN_JS_ENGINE === 'quickjs') {
-    let byteBuffer = qjsc.dumpByteCode(source, "kraken://");
-    let uint8Array = Uint8Array.from(byteBuffer);
-    return `namespace {size_t byteLength = ${uint8Array.length};
+  let byteBuffer = qjsc.dumpByteCode(source, "kraken://");
+  let uint8Array = Uint8Array.from(byteBuffer);
+  return `namespace {size_t byteLength = ${uint8Array.length};
 uint8_t bytes[${uint8Array.length}] = {${uint8Array.join(',')}}; }`;
-  } else {
-    return `static std::u16string jsCode = std::u16string(uR"(${source})");`
-  }
 };
 
 const getPolyfillEvalCall = () => {
-  if (process.env.KRAKEN_JS_ENGINE === 'quickjs') {
-    return 'bridge->evaluateByteCode(bytes, byteLength);';
-  } else {
-    return 'bridge->evaluateScript(reinterpret_cast<const uint16_t *>(jsCode.c_str()), jsCode.length(), "internal://", 0);'
-  }
+  return 'bridge->evaluateByteCode(bytes, byteLength);';
 }
 
 const getPolyFillSource = (source, outputName) => `/*
@@ -79,10 +71,6 @@ void initKraken${outputName}(kraken::JSBridge *bridge) {
 `;
 
 function convertJSToCpp(code, outputName) {
-  // JavaScript Regexp expression may break C++ string code format.
-  if (process.env.KRAKEN_JS_ENGINE === 'jsc') {
-    code = code.replace(/\)\"/g, '))") + std::u16string(uR"("');
-  }
   return getPolyFillSource(code, outputName);
 }
 

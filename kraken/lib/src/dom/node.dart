@@ -19,10 +19,18 @@ enum NodeType {
 
 class Comment extends Node {
   Comment(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
-      : super(NodeType.COMMENT_NODE, targetId, nativeEventTarget, elementManager, '#comment');
+      : super(NodeType.COMMENT_NODE, targetId, nativeEventTarget, elementManager);
+
+  @override
+  String get nodeName => '#comment';
 
   @override
   RenderObject? get renderer => null;
+
+  // @TODO: Get data from bridge side.
+  String get data => '';
+
+  int get length => data.length;
 
   @override
   dynamic handleJSCall(String method, List<dynamic> argv) {}
@@ -87,7 +95,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   List<Node> childNodes = [];
   Node? parentNode;
   NodeType nodeType;
-  String nodeName;
+  String get nodeName;
 
   /// The Node.parentNode read-only property returns the parent of the specified node in the DOM tree.
   Node? get parent => parentNode;
@@ -109,7 +117,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
     return _children;
   }
 
-  Node(this.nodeType, int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager, this.nodeName)
+  Node(this.nodeType, int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
       : super(targetId, nativeEventTarget, elementManager);
 
   // If node is on the tree, the root parent is body.

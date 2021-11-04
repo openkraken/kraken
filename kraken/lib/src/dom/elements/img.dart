@@ -57,7 +57,6 @@ class ImageElement extends Element {
       nativeEventTarget,
       elementManager,
       isIntrinsicBox: true,
-      tagName: IMAGE,
       defaultStyle: _defaultStyle) {
     _renderStreamListener = ImageStreamListener(_renderImageStream, onError: _onImageError);
   }
@@ -107,7 +106,6 @@ class ImageElement extends Element {
     _imageProvider?.evict();
     _imageProvider = null;
 
-    _removeStreamListener();
     _renderImage?.image = null;
   }
 
@@ -118,7 +116,8 @@ class ImageElement extends Element {
     _imageProvider?.evict();
     _imageProvider = null;
 
-    _removeStreamListener();
+    _imageStream?.removeListener(_renderStreamListener);
+    _imageStream = null;
 
     _renderImage = null;
   }
@@ -197,6 +196,8 @@ class ImageElement extends Element {
   @override
   bool get shouldConvertToRepaintBoundary => _frameCount > 2 || super.shouldConvertToRepaintBoundary;
 
+  bool get shouldConvertToNonRepaintBoundary => _frameCount == 1;
+
   void _renderImageStream(ImageInfo imageInfo, bool synchronousCall) {
     _frameCount++;
     _imageInfo = imageInfo;
@@ -213,17 +214,19 @@ class ImageElement extends Element {
       }
     }
 
-    // @HACK Flutter image cache will cause image steam listener to trigger twice when page reload
-    // so use two frames to tell multi frame image from static image, note this optimization will fail
-    // at multi frame image with only two frames which is not common.
-    if (shouldConvertToRepaintBoundary) {
-      convertToRepaintBoundary();
-    } else {
-      convertToNonRepaintBoundary();
-    }
+    if (isRendererAttached) {
+      // @HACK Flutter image cache will cause image steam listener to trigger twice when page reload
+      // so use two frames to tell multi frame image from static image, note this optimization will fail
+      // at multi frame image with only two frames which is not common.
+      if (shouldConvertToRepaintBoundary) {
+        convertToRepaintBoundary();
+      } else if (shouldConvertToNonRepaintBoundary) {
+        convertToNonRepaintBoundary();
+      }
 
-    _resize();
-    _renderImage?.image = image;
+      _resize();
+      _renderImage?.image = image;
+    }
   }
 
   // Mark if the same src loaded.
@@ -296,11 +299,6 @@ class ImageElement extends Element {
     } else {
       renderBoxModel!.intrinsicRatio = naturalHeight / naturalWidth;
     }
-  }
-
-  void _removeStreamListener() {
-    _imageStream?.removeListener(_renderStreamListener);
-    _imageStream = null;
   }
 
   RenderImage createRenderImageBox() {
@@ -377,8 +375,6 @@ class ImageElement extends Element {
     _resetImage();
 
     if (_source != null) {
-      _removeStreamListener();
-
       Uri base = Uri.parse(elementManager.controller.href);
       Uri resolvedUri = elementManager.controller.uriParser!.resolve(base, Uri.parse(_source!));
 

@@ -63,24 +63,21 @@ const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
 };
 
-typedef WidgetCreator = Widget Function(Map<String, dynamic>);
-class _WidgetCustomElement extends dom.Element {
-  late WidgetCreator _widgetCreator;
+abstract class WidgetElement extends dom.Element {
   late Element _renderViewElement;
   late BuildOwner _buildOwner;
   late Widget _widget;
   _KrakenAdapterWidgetPropertiesState? _propertiesState;
-  _WidgetCustomElement(int targetId, Pointer<NativeEventTarget> nativePtr, dom.ElementManager elementManager, String tagName, WidgetCreator creator)
+  WidgetElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, dom.ElementManager elementManager)
       : super(
       targetId,
-      nativePtr,
+      nativeEventTarget,
       elementManager,
-      tagName: tagName,
       isIntrinsicBox: true,
       defaultStyle: _defaultStyle
-  ) {
-    _widgetCreator = creator;
-  }
+  );
+
+  Widget build(BuildContext context, Map<String, dynamic> properties);
 
   @override
   void didAttachRenderer() {
@@ -88,7 +85,7 @@ class _WidgetCustomElement extends dom.Element {
 
     WidgetsFlutterBinding.ensureInitialized();
 
-    _propertiesState = _KrakenAdapterWidgetPropertiesState(_widgetCreator, properties);
+    _propertiesState = _KrakenAdapterWidgetPropertiesState(this, properties);
     _widget = _KrakenAdapterWidget(_propertiesState!);
     _attachWidget(_widget);
   }
@@ -142,8 +139,8 @@ class _KrakenAdapterWidget extends StatefulWidget {
 
 class _KrakenAdapterWidgetPropertiesState extends State<_KrakenAdapterWidget> {
   Map<String, dynamic> _properties;
-  final WidgetCreator _widgetCreator;
-  _KrakenAdapterWidgetPropertiesState(this._widgetCreator, this._properties);
+  final WidgetElement _element;
+  _KrakenAdapterWidgetPropertiesState(this._element, this._properties);
 
   void onAttributeChanged(Map<String, dynamic> properties) {
     setState(() {
@@ -153,7 +150,7 @@ class _KrakenAdapterWidgetPropertiesState extends State<_KrakenAdapterWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return _widgetCreator(_properties);
+    return _element.build(context, _properties);
   }
 }
 
@@ -222,20 +219,11 @@ class Kraken extends StatefulWidget {
     return RegExp(r'^[a-z][.0-9_a-z]*-[\-.0-9_a-z]*$').hasMatch(localName);
   }
 
-  static void defineCustomElement<T extends Function>(String localName, T creator) {
-    if (!_isValidCustomElementName(localName)) {
-      throw ArgumentError('The element name "$localName" is not valid.');
+  static void defineCustomElement(String tagName, ElementCreator creator) {
+    if (!_isValidCustomElementName(tagName)) {
+      throw ArgumentError('The element name "$tagName" is not valid.');
     }
-
-    String tagName = localName.toUpperCase();
-
-    if (T == ElementCreator) {
-      defineElement(tagName, creator as ElementCreator);
-    } else if (T == WidgetCreator) {
-      defineElement(tagName, (id, nativePtr, elementManager) {
-        return _WidgetCustomElement(id, nativePtr.cast<NativeEventTarget>(), elementManager, tagName, creator as WidgetCreator);
-      });
-    }
+    defineElement(tagName.toUpperCase(), creator);
   }
 
   loadContent(String bundleContent) async {

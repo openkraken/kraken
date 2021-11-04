@@ -4,19 +4,19 @@
  */
 
 #include "style_declaration.h"
-#include "kraken_bridge.h"
 #include "event_target.h"
+#include "kraken_bridge.h"
 
 namespace kraken::binding::qjs {
 
 std::once_flag kinitCSSStyleDeclarationFlag;
 
-void bindCSSStyleDeclaration(std::unique_ptr<JSContext> &context) {
+void bindCSSStyleDeclaration(std::unique_ptr<JSContext>& context) {
   auto style = CSSStyleDeclaration::instance(context.get());
   context->defineGlobalProperty("CSSStyleDeclaration", style->classObject);
 }
 
-static std::string parseJavaScriptCSSPropertyName(std::string &propertyName) {
+static std::string parseJavaScriptCSSPropertyName(std::string& propertyName) {
   static std::unordered_map<std::string, std::string> propertyCache{};
 
   if (propertyCache.count(propertyName) > 0) {
@@ -28,7 +28,8 @@ static std::string parseJavaScriptCSSPropertyName(std::string &propertyName) {
   size_t hyphen = 0;
   for (size_t i = 0; i < propertyName.size(); ++i) {
     char c = propertyName[i + hyphen];
-    if (!c) break;
+    if (!c)
+      break;
     if (c == '-') {
       hyphen++;
       buffer[i] = toASCIIUpper(propertyName[i + hyphen]);
@@ -88,25 +89,21 @@ JSValue CSSStyleDeclaration::instanceConstructor(QjsContext *ctx, JSValue func_o
 
   JSValue eventTargetValue = argv[0];
 
-  auto eventTargetInstance =
-    static_cast<EventTargetInstance *>(JS_GetOpaque(eventTargetValue, EventTarget::classId(eventTargetValue)));
+  auto eventTargetInstance = static_cast<EventTargetInstance*>(JS_GetOpaque(eventTargetValue, EventTarget::classId(eventTargetValue)));
   auto style = new StyleDeclarationInstance(this, eventTargetInstance);
   return style->instanceObject;
 }
 
 JSClassID CSSStyleDeclaration::kCSSStyleDeclarationClassId{0};
 
-CSSStyleDeclaration::CSSStyleDeclaration(JSContext *context) : HostClass(context, "CSSStyleDeclaration") {
-  std::call_once(kinitCSSStyleDeclarationFlag, []() {
-    JS_NewClassID(&kCSSStyleDeclarationClassId);
-  });
+CSSStyleDeclaration::CSSStyleDeclaration(JSContext* context) : HostClass(context, "CSSStyleDeclaration") {
+  std::call_once(kinitCSSStyleDeclarationFlag, []() { JS_NewClassID(&kCSSStyleDeclarationClassId); });
 }
 
-JSValue CSSStyleDeclaration::setProperty(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+JSValue CSSStyleDeclaration::setProperty(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 2)
-    return JS_ThrowTypeError(ctx,
-                             "Failed to execute 'setProperty' on 'CSSStyleDeclaration': 2 arguments required, but only %d present.", argc);
-  auto *instance = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(this_val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
+    return JS_ThrowTypeError(ctx, "Failed to execute 'setProperty' on 'CSSStyleDeclaration': 2 arguments required, but only %d present.", argc);
+  auto* instance = static_cast<StyleDeclarationInstance*>(JS_GetOpaque(this_val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
   JSValue propertyNameValue = argv[0];
   JSValue propertyValue = argv[1];
 
@@ -118,15 +115,14 @@ JSValue CSSStyleDeclaration::setProperty(QjsContext *ctx, JSValue this_val, int 
   return JS_UNDEFINED;
 }
 
-JSValue CSSStyleDeclaration::removeProperty(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+JSValue CSSStyleDeclaration::removeProperty(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1)
-    return JS_ThrowTypeError(ctx,
-                             "Failed to execute 'removeProperty' on 'CSSStyleDeclaration': 1 arguments required, but only 0 present.");
-  auto *instance = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(this_val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
+    return JS_ThrowTypeError(ctx, "Failed to execute 'removeProperty' on 'CSSStyleDeclaration': 1 arguments required, but only 0 present.");
+  auto* instance = static_cast<StyleDeclarationInstance*>(JS_GetOpaque(this_val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
 
   JSValue propertyNameValue = argv[0];
 
-  const char *cPropertyName = JS_ToCString(ctx, propertyNameValue);
+  const char* cPropertyName = JS_ToCString(ctx, propertyNameValue);
   std::string propertyName = std::string(cPropertyName);
 
   instance->internalRemoveProperty(propertyName);
@@ -136,13 +132,12 @@ JSValue CSSStyleDeclaration::removeProperty(QjsContext *ctx, JSValue this_val, i
   return JS_UNDEFINED;
 }
 
-JSValue CSSStyleDeclaration::getPropertyValue(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+JSValue CSSStyleDeclaration::getPropertyValue(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1)
-    return JS_ThrowTypeError(ctx,
-                             "Failed to execute 'getPropertyValue' on 'CSSStyleDeclaration': 1 arguments required, but only 0 present.");
-  auto *instance = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(this_val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
+    return JS_ThrowTypeError(ctx, "Failed to execute 'getPropertyValue' on 'CSSStyleDeclaration': 1 arguments required, but only 0 present.");
+  auto* instance = static_cast<StyleDeclarationInstance*>(JS_GetOpaque(this_val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
   JSValue propertyNameValue = argv[0];
-  const char *cPropertyName = JS_ToCString(ctx, propertyNameValue);
+  const char* cPropertyName = JS_ToCString(ctx, propertyNameValue);
   std::string propertyName = std::string(cPropertyName);
 
   JSValue returnValue = instance->internalGetPropertyValue(propertyName);
@@ -161,8 +156,7 @@ bool StyleDeclarationInstance::internalSetProperty(std::string &name, std::strin
   NativeString *args_01 = stringToNativeString(name);
   NativeString *args_02 = stringToNativeString(value);
 
-  foundation::UICommandBuffer::instance(m_context->getContextId())
-    ->addCommand(m_ownerEventTarget->eventTargetId, UICommand::setStyle, *args_01, *args_02, nullptr);
+  foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_ownerEventTarget->eventTargetId, UICommand::setStyle, *args_01, *args_02, nullptr);
 
   return true;
 }
@@ -183,14 +177,13 @@ void StyleDeclarationInstance::internalRemoveProperty(std::string &name) {
 
   m_styleRules.erase(name);
 
-  NativeString *args_01 = stringToNativeString(name);
-  NativeString *args_02 = jsValueToNativeString(m_ctx, JS_NULL);
+  NativeString* args_01 = stringToNativeString(name);
+  NativeString* args_02 = jsValueToNativeString(m_ctx, JS_NULL);
 
-  foundation::UICommandBuffer::instance(m_context->getContextId())
-    ->addCommand(m_ownerEventTarget->eventTargetId, UICommand::setStyle, *args_01, *args_02, nullptr);
+  foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_ownerEventTarget->eventTargetId, UICommand::setStyle, *args_01, *args_02, nullptr);
 }
 
-JSValue StyleDeclarationInstance::internalGetPropertyValue(std::string &name) {
+JSValue StyleDeclarationInstance::internalGetPropertyValue(std::string& name) {
   name = parseJavaScriptCSSPropertyName(name);
 
   if (m_styleRules.count(name) > 0) {
@@ -218,8 +211,8 @@ void StyleDeclarationInstance::copyWith(StyleDeclarationInstance *instance) {
   }
 }
 
-int StyleDeclarationInstance::hasProperty(QjsContext *ctx, JSValue obj, JSAtom atom) {
-  auto *style = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(obj, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
+int StyleDeclarationInstance::hasProperty(QjsContext* ctx, JSValue obj, JSAtom atom) {
+  auto* style = static_cast<StyleDeclarationInstance*>(JS_GetOpaque(obj, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
   const char* cname = JS_AtomToCString(ctx, atom);
   std::string name = std::string(cname);
   bool match = style->m_styleRules.count(name) >= 0;
@@ -236,8 +229,8 @@ int StyleDeclarationInstance::setProperty(QjsContext *ctx, JSValue obj, JSAtom a
   return success;
 }
 
-JSValue StyleDeclarationInstance::getProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSValue receiver) {
-  auto *styleInstance = static_cast<EventTargetInstance *>(JS_GetOpaque(obj, JSValueGetClassId(obj)));
+JSValue StyleDeclarationInstance::getProperty(QjsContext* ctx, JSValue obj, JSAtom atom, JSValue receiver) {
+  auto* styleInstance = static_cast<EventTargetInstance*>(JS_GetOpaque(obj, JSValueGetClassId(obj)));
   JSValue prototype = JS_GetPrototype(ctx, styleInstance->instanceObject);
   if (JS_HasProperty(ctx, prototype, atom)) {
     JSValue ret = JS_GetPropertyInternal(ctx, prototype, atom, styleInstance->instanceObject, 0);
@@ -246,8 +239,7 @@ JSValue StyleDeclarationInstance::getProperty(QjsContext *ctx, JSValue obj, JSAt
   }
   JS_FreeValue(ctx, prototype);
 
-
-  auto *style = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(receiver, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
+  auto* style = static_cast<StyleDeclarationInstance*>(JS_GetOpaque(receiver, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
   const char* cname = JS_AtomToCString(ctx, atom);
   std::string name = std::string(cname);
   JSValue result = style->internalGetPropertyValue(name);
@@ -256,13 +248,7 @@ JSValue StyleDeclarationInstance::getProperty(QjsContext *ctx, JSValue obj, JSAt
 }
 
 JSClassExoticMethods StyleDeclarationInstance::m_exoticMethods{
-  nullptr,
-  nullptr,
-  nullptr,
-  nullptr,
-  nullptr,
-  getProperty,
-  setProperty,
+    nullptr, nullptr, nullptr, nullptr, nullptr, getProperty, setProperty,
 };
 
-}
+}  // namespace kraken::binding::qjs
