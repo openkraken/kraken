@@ -9,8 +9,7 @@
 #include <functional>
 
 namespace fml {
-  using closure = std::function<void()>;
+using closure = std::function<void()>;
 }
 
-
-#endif // KRAKENBRIDGE_CLOSURE_H
+#endif  // KRAKENBRIDGE_CLOSURE_H

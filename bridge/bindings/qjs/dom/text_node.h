@@ -12,30 +12,32 @@ namespace kraken::binding::qjs {
 
 class TextNodeInstance;
 
-void bindTextNode(std::unique_ptr<JSContext> &context);
+void bindTextNode(std::unique_ptr<JSContext>& context);
 
 class TextNode : public Node {
-public:
+ public:
   static JSClassID kTextNodeClassId;
   static JSClassID classId();
   TextNode() = delete;
-  explicit TextNode(JSContext *context);
+  explicit TextNode(JSContext* context);
 
   OBJECT_INSTANCE(TextNode);
 
-  JSValue instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
-private:
+  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+
+ private:
   friend TextNodeInstance;
 };
 
 class TextNodeInstance : public NodeInstance {
-public:
+ public:
   TextNodeInstance() = delete;
-  explicit TextNodeInstance(TextNode *textNode, JSValue textData);
+  explicit TextNodeInstance(TextNode* textNode, JSValue textData);
   ~TextNodeInstance();
 
   std::string toString();
-private:
+
+ private:
   DEFINE_HOST_CLASS_PROPERTY(3, data, nodeValue, nodeName);
   JSValue internalGetTextContent() override;
   void internalSetTextContent(JSValue content) override;
@@ -45,8 +47,6 @@ private:
   JSValue m_data{JS_NULL};
 };
 
+}  // namespace kraken::binding::qjs
 
-
-}
-
-#endif //KRAKENBRIDGE_TEXT_NODE_H
+#endif  // KRAKENBRIDGE_TEXT_NODE_H

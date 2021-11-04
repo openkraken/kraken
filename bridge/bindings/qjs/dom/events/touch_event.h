@@ -10,12 +10,11 @@
 
 namespace kraken::binding::qjs {
 
-void bindTouchEvent(std::unique_ptr<JSContext> &context);
-
+void bindTouchEvent(std::unique_ptr<JSContext>& context);
 
 struct NativeTouch {
   int64_t identifier;
-  NativeEventTarget *target;
+  NativeEventTarget* target;
   double clientX;
   double clientY;
   double screenX;
@@ -32,38 +31,37 @@ struct NativeTouch {
 };
 
 class Touch : public HostObject {
-public:
+ public:
   Touch() = delete;
-  explicit Touch(JSContext *context, NativeTouch *nativePtr);
-private:
-  NativeTouch *m_nativeTouch{nullptr};
+  explicit Touch(JSContext* context, NativeTouch* nativePtr);
+
+ private:
+  NativeTouch* m_nativeTouch{nullptr};
   DEFINE_HOST_OBJECT_PROPERTY(15, identifier, target, clientX, clientY, screenX, screenY, pageX, pageY, radiusX, radiusY, rotationAngle, force, altitudeAngle, azimuthAngle, touchType)
 };
 
 class TouchList : public ExoticHostObject {
-public:
+ public:
   TouchList() = delete;
-  explicit TouchList(JSContext *context, NativeTouch **touches, int64_t length);
+  explicit TouchList(JSContext* context, NativeTouch** touches, int64_t length);
 
-  JSValue getProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
-                             JSValueConst receiver);
-  int setProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
-                         JSValueConst value, JSValueConst receiver, int flags);
+  JSValue getProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);
+  int setProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
 
-private:
+ private:
   DEFINE_HOST_OBJECT_PROPERTY(1, length)
-  NativeTouch **m_touches{nullptr};
+  NativeTouch** m_touches{nullptr};
   int64_t _length;
 };
 
 struct NativeTouchEvent {
   NativeEvent nativeEvent;
 
-  NativeTouch **touches;
+  NativeTouch** touches;
   int64_t touchLength;
-  NativeTouch **targetTouches;
+  NativeTouch** targetTouches;
   int64_t targetTouchesLength;
-  NativeTouch **changedTouches;
+  NativeTouch** changedTouches;
   int64_t changedTouchesLength;
 
   int64_t altKey;
@@ -72,23 +70,24 @@ struct NativeTouchEvent {
   int64_t shiftKey;
 };
 class TouchEvent : public Event {
-public:
+ public:
   TouchEvent() = delete;
-  explicit TouchEvent(JSContext *context);
-  JSValue instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
+  explicit TouchEvent(JSContext* context);
+  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
   OBJECT_INSTANCE(TouchEvent);
-private:
 
+ private:
 };
 class TouchEventInstance : public EventInstance {
-public:
+ public:
   TouchEventInstance() = delete;
-  explicit TouchEventInstance(TouchEvent *event, NativeEvent *nativeEvent);
-private:
+  explicit TouchEventInstance(TouchEvent* event, NativeEvent* nativeEvent);
+
+ private:
   DEFINE_HOST_CLASS_PROPERTY(7, touches, targetTouches, changedTouches, altKey, metaKey, ctrlKey, shiftKey)
 };
 
-}
+}  // namespace kraken::binding::qjs
 
-#endif //KRAKENBRIDGE_TOUCH_EVENTT_H
+#endif  // KRAKENBRIDGE_TOUCH_EVENTT_H
