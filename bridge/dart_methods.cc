@@ -4,8 +4,8 @@
  */
 
 #include "dart_methods.h"
-#include "kraken_bridge.h"
 #include <memory>
+#include "kraken_bridge.h"
 
 namespace kraken {
 
@@ -27,7 +27,7 @@ std::shared_ptr<DartMethodPointer> getDartMethod() {
   return methodPointer;
 }
 
-void registerDartMethods(uint64_t *methodBytes, int32_t length) {
+void registerDartMethods(uint64_t* methodBytes, int32_t length) {
   size_t i = 0;
 
   methodPointer->invokeModule = reinterpret_cast<InvokeModule>(methodBytes[i++]);
@@ -58,8 +58,7 @@ void registerDartMethods(uint64_t *methodBytes, int32_t length) {
   assert_m(i == length, "Dart native methods count is not equal with C++ side method registrations.");
 }
 
-
-void registerTestEnvDartMethods(uint64_t *methodBytes, int32_t length) {
+void registerTestEnvDartMethods(uint64_t* methodBytes, int32_t length) {
   size_t i = 0;
 
   methodPointer->onJsError = reinterpret_cast<OnJSError>(methodBytes[i++]);
@@ -77,4 +76,4 @@ void registerGetPerformanceEntries(GetPerformanceEntries getPerformanceEntries) 
 }
 #endif
 
-} // namespace kraken
+}  // namespace kraken

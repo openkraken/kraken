@@ -11,8 +11,6 @@
 #include <string>
 #include "include/kraken_bridge.h"
 
-namespace foundation {
+namespace foundation {}  // namespace foundation
 
-} // namespace foundation
-
-#endif // KRAKEN_FOUNDATION_LOGGING_H_
+#endif  // KRAKEN_FOUNDATION_LOGGING_H_

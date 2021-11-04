@@ -11,64 +11,62 @@
 
 namespace kraken::binding::qjs {
 
-void bindPerformance(std::unique_ptr<JSContext> &context) {
-  auto *performance = Performance::instance(context.get());
+void bindPerformance(std::unique_ptr<JSContext>& context) {
+  auto* performance = Performance::instance(context.get());
   context->defineGlobalProperty("performance", performance->jsObject);
 }
 
 using namespace std::chrono;
 
-PROP_GETTER(PerformanceEntry, name)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *entry = static_cast<PerformanceEntry *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+PROP_GETTER(PerformanceEntry, name)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* entry = static_cast<PerformanceEntry*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewString(ctx, entry->m_nativePerformanceEntry->name);
 }
-PROP_SETTER(PerformanceEntry, name)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(PerformanceEntry, name)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(PerformanceEntry, entryType)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *entry = static_cast<PerformanceEntry *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+PROP_GETTER(PerformanceEntry, entryType)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* entry = static_cast<PerformanceEntry*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewString(ctx, entry->m_nativePerformanceEntry->entryType);
 }
-PROP_SETTER(PerformanceEntry, entryType)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(PerformanceEntry, entryType)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(PerformanceEntry, startTime)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *entry = static_cast<PerformanceEntry *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+PROP_GETTER(PerformanceEntry, startTime)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* entry = static_cast<PerformanceEntry*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewUint32(ctx, entry->m_nativePerformanceEntry->startTime);
 }
-PROP_SETTER(PerformanceEntry, startTime)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(PerformanceEntry, startTime)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(PerformanceEntry, duration)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *entry = static_cast<PerformanceEntry *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+PROP_GETTER(PerformanceEntry, duration)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* entry = static_cast<PerformanceEntry*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewUint32(ctx, entry->m_nativePerformanceEntry->duration);
 }
-PROP_SETTER(PerformanceEntry, duration)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(PerformanceEntry, duration)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(Performance, timeOrigin)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *performance = static_cast<Performance *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
-  int64_t time =
-    std::chrono::duration_cast<std::chrono::milliseconds>(performance->m_context->timeOrigin.time_since_epoch()).count();
+PROP_GETTER(Performance, timeOrigin)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  int64_t time = std::chrono::duration_cast<std::chrono::milliseconds>(performance->m_context->timeOrigin.time_since_epoch()).count();
   return JS_NewUint32(ctx, time);
 }
-PROP_SETTER(Performance, timeOrigin)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(Performance, timeOrigin)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
 
-JSValue Performance::now(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *performance = static_cast<Performance *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+JSValue Performance::now(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, performance->internalNow());
 }
-JSValue Performance::toJSON(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *performance = static_cast<Performance *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+JSValue Performance::toJSON(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   double now = performance->internalNow();
-  int64_t timeOrigin =
-    std::chrono::duration_cast<std::chrono::milliseconds>(performance->m_context->timeOrigin.time_since_epoch()).count();
+  int64_t timeOrigin = std::chrono::duration_cast<std::chrono::milliseconds>(performance->m_context->timeOrigin.time_since_epoch()).count();
 
   JSValue object = JS_NewObject(ctx);
   JS_SetPropertyStr(ctx, object, "now", JS_NewFloat64(ctx, now));
@@ -76,27 +74,25 @@ JSValue Performance::toJSON(QjsContext *ctx, JSValue this_val, int argc, JSValue
   return object;
 }
 
-static JSValue buildPerformanceEntry(const std::string &entryType, JSContext *context,
-                                  NativePerformanceEntry *nativePerformanceEntry) {
+static JSValue buildPerformanceEntry(const std::string& entryType, JSContext* context, NativePerformanceEntry* nativePerformanceEntry) {
   if (entryType == "mark") {
-    auto *mark = new PerformanceMark(context, nativePerformanceEntry);
+    auto* mark = new PerformanceMark(context, nativePerformanceEntry);
     return mark->jsObject;
   } else if (entryType == "measure") {
-    auto *measure = new PerformanceMeasure(context, nativePerformanceEntry);
+    auto* measure = new PerformanceMeasure(context, nativePerformanceEntry);
     return measure->jsObject;
   }
   return JS_NULL;
 }
 
-
-JSValue Performance::clearMarks(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *performance = static_cast<Performance *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+JSValue Performance::clearMarks(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   JSValue targetMark = JS_NULL;
   if (argc == 1) {
     targetMark = argv[0];
   }
 
-  auto *entries = performance->m_nativePerformance.entries;
+  auto* entries = performance->m_nativePerformance.entries;
   auto it = std::begin(*entries);
 
   while (it != entries->end()) {
@@ -120,13 +116,13 @@ JSValue Performance::clearMarks(QjsContext *ctx, JSValue this_val, int argc, JSV
 
   return JS_NULL;
 }
-JSValue Performance::clearMeasures(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+JSValue Performance::clearMeasures(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   JSValue targetMark = JS_NULL;
   if (argc == 1) {
     targetMark = argv[0];
   }
 
-  auto *performance = static_cast<Performance *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   auto entries = performance->m_nativePerformance.entries;
   auto it = std::begin(*entries);
 
@@ -151,8 +147,8 @@ JSValue Performance::clearMeasures(QjsContext *ctx, JSValue this_val, int argc, 
 
   return JS_NULL;
 }
-JSValue Performance::getEntries(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *performance = static_cast<Performance *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+JSValue Performance::getEntries(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   auto entries = performance->getFullEntries();
 
   size_t entriesSize = entries.size();
@@ -160,7 +156,7 @@ JSValue Performance::getEntries(QjsContext *ctx, JSValue this_val, int argc, JSV
   JSValue pushMethod = JS_GetPropertyStr(ctx, returnArray, "push");
 
   for (size_t i = 0; i < entriesSize; i++) {
-    auto &entry = entries[i];
+    auto& entry = entries[i];
     auto entryType = std::string(entry->entryType);
     JSValue v = buildPerformanceEntry(entryType, performance->m_context, entry);
     JS_Call(ctx, pushMethod, returnArray, 1, &v);
@@ -170,19 +166,18 @@ JSValue Performance::getEntries(QjsContext *ctx, JSValue this_val, int argc, JSV
   JS_FreeValue(ctx, pushMethod);
   return returnArray;
 }
-JSValue Performance::getEntriesByName(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+JSValue Performance::getEntriesByName(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc == 0) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'getEntriesByName' on 'Performance': 1 argument required, but only 0 present.");
   }
 
-
   std::string targetName = jsValueToStdString(ctx, argv[0]);
-  auto *performance = static_cast<Performance *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   auto entries = performance->getFullEntries();
   JSValue targetEntriesArray = JS_NewArray(ctx);
   JSValue pushMethod = JS_GetPropertyStr(ctx, targetEntriesArray, "push");
 
-  for (auto &m_entries : entries) {
+  for (auto& m_entries : entries) {
     if (m_entries->name == targetName) {
       std::string entryType = std::string(m_entries->entryType);
       JSValue entry = buildPerformanceEntry(entryType, performance->m_context, m_entries);
@@ -193,18 +188,18 @@ JSValue Performance::getEntriesByName(QjsContext *ctx, JSValue this_val, int arg
   JS_FreeValue(ctx, pushMethod);
   return targetEntriesArray;
 }
-JSValue Performance::getEntriesByType(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+JSValue Performance::getEntriesByType(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc == 0) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'getEntriesByName' on 'Performance': 1 argument required, but only 0 present.");
   }
 
   std::string entryType = jsValueToStdString(ctx, argv[0]);
-  auto *performance = static_cast<Performance *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   auto entries = performance->getFullEntries();
   JSValue targetEntriesArray = JS_NewArray(ctx);
   JSValue pushMethod = JS_GetPropertyStr(ctx, targetEntriesArray, "push");
 
-  for (auto &m_entries : entries) {
+  for (auto& m_entries : entries) {
     if (m_entries->entryType == entryType) {
       JSValue entry = buildPerformanceEntry(entryType, performance->m_context, m_entries);
       JS_Call(ctx, pushMethod, targetEntriesArray, 1, &entry);
@@ -214,18 +209,18 @@ JSValue Performance::getEntriesByType(QjsContext *ctx, JSValue this_val, int arg
   JS_FreeValue(ctx, pushMethod);
   return targetEntriesArray;
 }
-JSValue Performance::mark(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+JSValue Performance::mark(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc != 1) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'mark' on 'Performance': 1 argument required, but only 0 present.");
   }
 
-  auto *performance = static_cast<Performance *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   std::string markName = jsValueToStdString(ctx, argv[0]);
   performance->m_nativePerformance.mark(markName);
 
   return JS_NULL;
 }
-JSValue Performance::measure(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+JSValue Performance::measure(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc == 0) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'measure' on 'Performance': 1 argument required, but only 0 present.");
   }
@@ -244,59 +239,47 @@ JSValue Performance::measure(QjsContext *ctx, JSValue this_val, int argc, JSValu
     endMark = jsValueToStdString(ctx, argv[2]);
   }
 
-  auto *performance = static_cast<Performance *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   JSValue exception = JS_NULL;
   performance->internalMeasure(name, startMark, endMark, &exception);
 
-  if (!JS_IsNull(exception)) return exception;
+  if (!JS_IsNull(exception))
+    return exception;
 
   return JS_NULL;
 }
 
-PerformanceEntry::PerformanceEntry(JSContext *context, NativePerformanceEntry *nativePerformanceEntry) : HostObject(
-  context, "PerformanceEntry"), m_nativePerformanceEntry(nativePerformanceEntry) {}
+PerformanceEntry::PerformanceEntry(JSContext* context, NativePerformanceEntry* nativePerformanceEntry) : HostObject(context, "PerformanceEntry"), m_nativePerformanceEntry(nativePerformanceEntry) {}
 
-PerformanceMark::PerformanceMark(JSContext *context, std::string &name, int64_t startTime)
-  : PerformanceEntry(context,new NativePerformanceEntry(name,"mark", startTime, 0, PERFORMANCE_ENTRY_NONE_UNIQUE_ID)) {
-}
-PerformanceMark::PerformanceMark(JSContext *context, NativePerformanceEntry *nativePerformanceEntry) : PerformanceEntry(context, nativePerformanceEntry) {
-
-}
-PerformanceMeasure::PerformanceMeasure(JSContext *context, std::string &name, int64_t startTime, int64_t duration)
-  : PerformanceEntry(context, new NativePerformanceEntry(name, "measure", startTime, duration, PERFORMANCE_ENTRY_NONE_UNIQUE_ID)) {
-}
-PerformanceMeasure::PerformanceMeasure(JSContext *context, NativePerformanceEntry *nativePerformanceEntry)
-  : PerformanceEntry(context, nativePerformanceEntry) {}
-void NativePerformance::mark(const std::string &markName) {
+PerformanceMark::PerformanceMark(JSContext* context, std::string& name, int64_t startTime)
+    : PerformanceEntry(context, new NativePerformanceEntry(name, "mark", startTime, 0, PERFORMANCE_ENTRY_NONE_UNIQUE_ID)) {}
+PerformanceMark::PerformanceMark(JSContext* context, NativePerformanceEntry* nativePerformanceEntry) : PerformanceEntry(context, nativePerformanceEntry) {}
+PerformanceMeasure::PerformanceMeasure(JSContext* context, std::string& name, int64_t startTime, int64_t duration)
+    : PerformanceEntry(context, new NativePerformanceEntry(name, "measure", startTime, duration, PERFORMANCE_ENTRY_NONE_UNIQUE_ID)) {}
+PerformanceMeasure::PerformanceMeasure(JSContext* context, NativePerformanceEntry* nativePerformanceEntry) : PerformanceEntry(context, nativePerformanceEntry) {}
+void NativePerformance::mark(const std::string& markName) {
   int64_t startTime = std::chrono::duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
-  auto *nativePerformanceEntry =
-    new NativePerformanceEntry{markName, "mark", startTime, 0, PERFORMANCE_ENTRY_NONE_UNIQUE_ID};
+  auto* nativePerformanceEntry = new NativePerformanceEntry{markName, "mark", startTime, 0, PERFORMANCE_ENTRY_NONE_UNIQUE_ID};
   entries->emplace_back(nativePerformanceEntry);
 }
-void NativePerformance::mark(const std::string &markName, int64_t startTime) {
-  auto *nativePerformanceEntry =
-    new NativePerformanceEntry{markName, "mark", startTime, 0, PERFORMANCE_ENTRY_NONE_UNIQUE_ID};
+void NativePerformance::mark(const std::string& markName, int64_t startTime) {
+  auto* nativePerformanceEntry = new NativePerformanceEntry{markName, "mark", startTime, 0, PERFORMANCE_ENTRY_NONE_UNIQUE_ID};
   entries->emplace_back(nativePerformanceEntry);
 }
 
-Performance::Performance(JSContext *context) : HostObject(context, "Performance") {
-}
-void Performance::internalMeasure(const std::string &name, const std::string &startMark, const std::string &endMark, JSValue *exception) {
+Performance::Performance(JSContext* context) : HostObject(context, "Performance") {}
+void Performance::internalMeasure(const std::string& name, const std::string& startMark, const std::string& endMark, JSValue* exception) {
   auto entries = getFullEntries();
 
   if (!startMark.empty() && !endMark.empty()) {
-    size_t startMarkCount =
-      std::count_if(entries.begin(), entries.end(),
-                    [&startMark](NativePerformanceEntry *entry) -> bool { return entry->name == startMark; });
+    size_t startMarkCount = std::count_if(entries.begin(), entries.end(), [&startMark](NativePerformanceEntry* entry) -> bool { return entry->name == startMark; });
 
     if (startMarkCount == 0) {
       *exception = JS_ThrowTypeError(m_ctx, "Failed to execute 'measure' on 'Performance': The mark %s does not exist.", startMark.c_str());
       return;
     }
 
-    size_t endMarkCount =
-      std::count_if(entries.begin(), entries.end(),
-                    [&endMark](NativePerformanceEntry *entry) -> bool { return entry->name == endMark; });
+    size_t endMarkCount = std::count_if(entries.begin(), entries.end(), [&endMark](NativePerformanceEntry* entry) -> bool { return entry->name == endMark; });
 
     if (endMarkCount == 0) {
       *exception = JS_ThrowTypeError(m_ctx, "Failed to execute 'measure' on 'Performance': The mark %s does not exist.", endMark.c_str());
@@ -312,14 +295,11 @@ void Performance::internalMeasure(const std::string &name, const std::string &st
     auto endIt = std::begin(entries);
 
     for (size_t i = 0; i < startMarkCount; i++) {
-      auto startEntry = std::find_if(startIt, entries.end(), [&startMark](NativePerformanceEntry *entry) -> bool {
-        return entry->name == startMark;
-      });
+      auto startEntry = std::find_if(startIt, entries.end(), [&startMark](NativePerformanceEntry* entry) -> bool { return entry->name == startMark; });
 
       bool isStartEntryHasUniqueId = (*startEntry)->uniqueId != PERFORMANCE_ENTRY_NONE_UNIQUE_ID;
 
-      auto endEntryComparator = [&endMark, &startEntry,
-        isStartEntryHasUniqueId](NativePerformanceEntry *entry) -> bool {
+      auto endEntryComparator = [&endMark, &startEntry, isStartEntryHasUniqueId](NativePerformanceEntry* entry) -> bool {
         if (isStartEntryHasUniqueId) {
           return entry->uniqueId == (*startEntry)->uniqueId && entry->name == endMark;
         }
@@ -330,14 +310,12 @@ void Performance::internalMeasure(const std::string &name, const std::string &st
 
       if (endEntry == entries.end()) {
         size_t startIndex = startEntry - entries.begin();
-        assert_m(false, ("Can not get endEntry. startIndex: " + std::to_string(startIndex) +
-                         " startMark: " + startMark + " endMark: " + endMark));
+        assert_m(false, ("Can not get endEntry. startIndex: " + std::to_string(startIndex) + " startMark: " + startMark + " endMark: " + endMark));
       }
 
       int64_t duration = (*endEntry)->startTime - (*startEntry)->startTime;
       int64_t startTime = std::chrono::duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
-      auto *nativePerformanceEntry =
-        new NativePerformanceEntry{name, "measure", startTime, duration, PERFORMANCE_ENTRY_NONE_UNIQUE_ID};
+      auto* nativePerformanceEntry = new NativePerformanceEntry{name, "measure", startTime, duration, PERFORMANCE_ENTRY_NONE_UNIQUE_ID};
       m_nativePerformance.entries->emplace_back(nativePerformanceEntry);
       startIt = ++startEntry;
       endIt = ++endEntry;
@@ -350,28 +328,29 @@ double Performance::internalNow() {
   auto reducedDuration = std::floor(duration / 1000us) * 1000us;
   return std::chrono::duration_cast<std::chrono::milliseconds>(reducedDuration).count();
 }
-std::vector<NativePerformanceEntry *> Performance::getFullEntries() {
-  auto *bridgeEntries = m_nativePerformance.entries;
+std::vector<NativePerformanceEntry*> Performance::getFullEntries() {
+  auto* bridgeEntries = m_nativePerformance.entries;
 #if ENABLE_PROFILE
   if (getDartMethod()->getPerformanceEntries == nullptr) {
-    return std::vector<NativePerformanceEntry *>();
+    return std::vector<NativePerformanceEntry*>();
   }
   auto dartEntryList = getDartMethod()->getPerformanceEntries(m_context->getContextId());
-  if (dartEntryList == nullptr) return std::vector<NativePerformanceEntry *>();
+  if (dartEntryList == nullptr)
+    return std::vector<NativePerformanceEntry*>();
   auto dartEntityBytes = dartEntryList->entries;
-  std::vector<NativePerformanceEntry *> dartEntries;
+  std::vector<NativePerformanceEntry*> dartEntries;
   dartEntries.reserve(dartEntryList->length);
 
   for (size_t i = 0; i < dartEntryList->length * 3; i += 3) {
-    const char *name = reinterpret_cast<const char *>(dartEntityBytes[i]);
+    const char* name = reinterpret_cast<const char*>(dartEntityBytes[i]);
     int64_t startTime = dartEntityBytes[i + 1];
     int64_t uniqueId = dartEntityBytes[i + 2];
-    auto *nativePerformanceEntry = new NativePerformanceEntry(name, "mark", startTime, 0, uniqueId);
+    auto* nativePerformanceEntry = new NativePerformanceEntry(name, "mark", startTime, 0, uniqueId);
     dartEntries.emplace_back(nativePerformanceEntry);
   }
 #endif
 
-  std::vector<NativePerformanceEntry *> mergedEntries;
+  std::vector<NativePerformanceEntry*> mergedEntries;
 
   mergedEntries.insert(mergedEntries.end(), bridgeEntries->begin(), bridgeEntries->end());
 #if ENABLE_PROFILE
@@ -385,25 +364,20 @@ std::vector<NativePerformanceEntry *> Performance::getFullEntries() {
 
 #if ENABLE_PROFILE
 
-void Performance::measureSummary(JSValue *exception) {
+void Performance::measureSummary(JSValue* exception) {
   internalMeasure(PERF_WIDGET_CREATION_COST, PERF_CONTROLLER_INIT_START, PERF_CONTROLLER_INIT_END, exception);
   internalMeasure(PERF_CONTROLLER_PROPERTIES_INIT_COST, PERF_CONTROLLER_INIT_START, PERF_CONTROLLER_PROPERTY_INIT, exception);
-  internalMeasure(PERF_VIEW_CONTROLLER_PROPERTIES_INIT_COST, PERF_VIEW_CONTROLLER_INIT_START,
-                  PERF_VIEW_CONTROLLER_PROPERTY_INIT, exception);
+  internalMeasure(PERF_VIEW_CONTROLLER_PROPERTIES_INIT_COST, PERF_VIEW_CONTROLLER_INIT_START, PERF_VIEW_CONTROLLER_PROPERTY_INIT, exception);
   internalMeasure(PERF_BRIDGE_INIT_COST, PERF_BRIDGE_INIT_START, PERF_BRIDGE_INIT_END, exception);
-  internalMeasure(PERF_BRIDGE_REGISTER_DART_METHOD_COST, PERF_BRIDGE_REGISTER_DART_METHOD_START,
-                  PERF_BRIDGE_REGISTER_DART_METHOD_END, exception);
+  internalMeasure(PERF_BRIDGE_REGISTER_DART_METHOD_COST, PERF_BRIDGE_REGISTER_DART_METHOD_START, PERF_BRIDGE_REGISTER_DART_METHOD_END, exception);
   internalMeasure(PERF_CREATE_VIEWPORT_COST, PERF_CREATE_VIEWPORT_START, PERF_CREATE_VIEWPORT_END, exception);
   internalMeasure(PERF_ELEMENT_MANAGER_INIT_COST, PERF_ELEMENT_MANAGER_INIT_START, PERF_ELEMENT_MANAGER_INIT_END, exception);
-  internalMeasure(PERF_ELEMENT_MANAGER_PROPERTIES_INIT_COST, PERF_ELEMENT_MANAGER_INIT_START,
-                  PERF_ELEMENT_MANAGER_PROPERTY_INIT, exception);
+  internalMeasure(PERF_ELEMENT_MANAGER_PROPERTIES_INIT_COST, PERF_ELEMENT_MANAGER_INIT_START, PERF_ELEMENT_MANAGER_PROPERTY_INIT, exception);
   internalMeasure(PERF_ROOT_ELEMENT_INIT_COST, PERF_ROOT_ELEMENT_INIT_START, PERF_ROOT_ELEMENT_INIT_END, exception);
   internalMeasure(PERF_ROOT_ELEMENT_PROPERTIES_INIT_COST, PERF_ROOT_ELEMENT_INIT_START, PERF_ROOT_ELEMENT_PROPERTY_INIT, exception);
   internalMeasure(PERF_JS_CONTEXT_INIT_COST, PERF_JS_CONTEXT_INIT_START, PERF_JS_CONTEXT_INIT_END, exception);
-  internalMeasure(PERF_JS_HOST_CLASS_GET_PROPERTY_COST, PERF_JS_HOST_CLASS_GET_PROPERTY_START,
-                  PERF_JS_HOST_CLASS_GET_PROPERTY_END, exception);
-  internalMeasure(PERF_JS_HOST_CLASS_SET_PROPERTY_COST, PERF_JS_HOST_CLASS_SET_PROPERTY_START,
-                  PERF_JS_HOST_CLASS_SET_PROPERTY_END, exception);
+  internalMeasure(PERF_JS_HOST_CLASS_GET_PROPERTY_COST, PERF_JS_HOST_CLASS_GET_PROPERTY_START, PERF_JS_HOST_CLASS_GET_PROPERTY_END, exception);
+  internalMeasure(PERF_JS_HOST_CLASS_SET_PROPERTY_COST, PERF_JS_HOST_CLASS_SET_PROPERTY_START, PERF_JS_HOST_CLASS_SET_PROPERTY_END, exception);
   internalMeasure(PERF_JS_HOST_CLASS_INIT_COST, PERF_JS_HOST_CLASS_INIT_START, PERF_JS_HOST_CLASS_INIT_END, exception);
   internalMeasure(PERF_JS_NATIVE_FUNCTION_CALL_COST, PERF_JS_NATIVE_FUNCTION_CALL_START, PERF_JS_NATIVE_FUNCTION_CALL_END, exception);
   internalMeasure(PERF_JS_NATIVE_METHOD_INIT_COST, PERF_JS_NATIVE_METHOD_INIT_START, PERF_JS_NATIVE_METHOD_INIT_END, exception);
@@ -431,10 +405,8 @@ void Performance::measureSummary(JSValue *exception) {
   internalMeasure(PERF_JS_PARSE_TIME_COST, PERF_JS_PARSE_TIME_START, PERF_JS_PARSE_TIME_END, exception);
 }
 
-
-std::vector<NativePerformanceEntry *> findAllMeasures(const std::vector<NativePerformanceEntry *> &entries,
-                                                      const std::string &targetName) {
-  std::vector<NativePerformanceEntry *> resultEntries;
+std::vector<NativePerformanceEntry*> findAllMeasures(const std::vector<NativePerformanceEntry*>& entries, const std::string& targetName) {
+  std::vector<NativePerformanceEntry*> resultEntries;
 
   for (auto entry : entries) {
     if (entry->name == targetName) {
@@ -445,7 +417,7 @@ std::vector<NativePerformanceEntry *> findAllMeasures(const std::vector<NativePe
   return resultEntries;
 };
 
-double getMeasureTotalDuration(const std::vector<NativePerformanceEntry *> &measures) {
+double getMeasureTotalDuration(const std::vector<NativePerformanceEntry*>& measures) {
   double duration = 0.0;
   for (auto entry : measures) {
     duration += entry->duration;
@@ -453,34 +425,34 @@ double getMeasureTotalDuration(const std::vector<NativePerformanceEntry *> &meas
   return duration / 1000;
 }
 
-JSValue Performance::__kraken_navigation_summary__(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *performance = static_cast<Performance *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+JSValue Performance::__kraken_navigation_summary__(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   JSValue exception = JS_NULL;
   performance->measureSummary(&exception);
 
-  std::vector<NativePerformanceEntry *> entries = performance->getFullEntries();
+  std::vector<NativePerformanceEntry*> entries = performance->getFullEntries();
 
   if (entries.empty()) {
     return JS_ThrowTypeError(ctx, "Failed to get navigation summary: flutter is not running in profile mode.");
   }
 
-  std::vector<NativePerformanceEntry *> measures;
-  for (auto &m_entries : entries) {
+  std::vector<NativePerformanceEntry*> measures;
+  for (auto& m_entries : entries) {
     if (std::string(m_entries->entryType) == "measure") {
       measures.emplace_back(m_entries);
     }
   }
 
-#define GET_COST_WITH_DECREASE(NAME, MACRO, DECREASE)                                                                  \
-  auto NAME##Measures = findAllMeasures(measures, MACRO);                                                              \
-  size_t NAME##Count = NAME##Measures.size();                                                                          \
-  double NAME##Cost = getMeasureTotalDuration(NAME##Measures) - (DECREASE);                                            \
+#define GET_COST_WITH_DECREASE(NAME, MACRO, DECREASE)                       \
+  auto NAME##Measures = findAllMeasures(measures, MACRO);                   \
+  size_t NAME##Count = NAME##Measures.size();                               \
+  double NAME##Cost = getMeasureTotalDuration(NAME##Measures) - (DECREASE); \
   auto NAME##Avg = NAME##Measures.empty() ? 0 : (NAME##Cost) / NAME##Measures.size();
 
-#define GET_COST(NAME, MACRO)                                                                                          \
-  auto NAME##Measures = findAllMeasures(measures, MACRO);                                                              \
-  size_t NAME##Count = NAME##Measures.size();                                                                          \
-  double NAME##Cost = getMeasureTotalDuration(NAME##Measures);                                                         \
+#define GET_COST(NAME, MACRO)                                  \
+  auto NAME##Measures = findAllMeasures(measures, MACRO);      \
+  size_t NAME##Count = NAME##Measures.size();                  \
+  double NAME##Cost = getMeasureTotalDuration(NAME##Measures); \
   auto NAME##Avg = NAME##Measures.empty() ? 0 : NAME##Cost / NAME##Measures.size();
 
   GET_COST(widgetCreation, PERF_WIDGET_CREATION_COST);
@@ -516,17 +488,14 @@ JSValue Performance::__kraken_navigation_summary__(QjsContext *ctx, JSValue this
   GET_COST(paint, PERF_PAINT_COST);
   GET_COST(domForceLayout, PERF_DOM_FORCE_LAYOUT_COST);
   GET_COST(domFlushUICommand, PERF_DOM_FLUSH_UI_COMMAND_COST);
-  GET_COST_WITH_DECREASE(jsHostClassGetProperty, PERF_JS_HOST_CLASS_GET_PROPERTY_COST,
-                         domForceLayoutCost + domFlushUICommandCost)
+  GET_COST_WITH_DECREASE(jsHostClassGetProperty, PERF_JS_HOST_CLASS_GET_PROPERTY_COST, domForceLayoutCost + domFlushUICommandCost)
   GET_COST(jsHostClassSetProperty, PERF_JS_HOST_CLASS_SET_PROPERTY_COST);
   GET_COST(jsHostClassInit, PERF_JS_HOST_CLASS_INIT_COST);
   GET_COST(jsNativeFunction, PERF_JS_NATIVE_FUNCTION_CALL_COST);
   GET_COST_WITH_DECREASE(jsBundleEval, PERF_JS_BUNDLE_EVAL_COST, domForceLayoutCost + domFlushUICommandCost);
 
-  double initBundleCost = jsBundleLoadCost + jsBundleEvalCost + flushUiCommandCost + createElementCost +
-                          createTextNodeCost + createCommentCost + disposeEventTargetCost + addEventCost +
-                          insertAdjacentNodeCost + removeNodeCost + setStyleCost + setPropertiesCost +
-                          removePropertiesCost;
+  double initBundleCost = jsBundleLoadCost + jsBundleEvalCost + flushUiCommandCost + createElementCost + createTextNodeCost + createCommentCost + disposeEventTargetCost + addEventCost +
+                          insertAdjacentNodeCost + removeNodeCost + setStyleCost + setPropertiesCost + removePropertiesCost;
   // layout and paint measure are not correct.
   double renderingCost = flexLayoutCost + flowLayoutCost + intrinsicLayoutCost + silverLayoutCost + paintCost;
   double totalCost = widgetCreationCost + initBundleCost;
@@ -625,4 +594,4 @@ Rendering: %.*fms
 
 #endif
 
-}
+}  // namespace kraken::binding::qjs
