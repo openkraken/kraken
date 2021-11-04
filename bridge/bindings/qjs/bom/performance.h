@@ -125,84 +125,82 @@
 
 namespace kraken::binding::qjs {
 
-
-void bindPerformance(std::unique_ptr<JSContext> &context);
+void bindPerformance(std::unique_ptr<JSContext>& context);
 
 struct NativePerformanceEntry {
-  NativePerformanceEntry(const std::string &name, const std::string &entryType, int64_t startTime, int64_t duration, int64_t uniqueId)
-    : startTime(startTime), duration(duration), uniqueId(uniqueId) {
+  NativePerformanceEntry(const std::string& name, const std::string& entryType, int64_t startTime, int64_t duration, int64_t uniqueId) : startTime(startTime), duration(duration), uniqueId(uniqueId) {
     this->name = new char[name.size() + 1];
     this->entryType = new char[entryType.size() + 1];
     strcpy(this->name, name.data());
     strcpy(this->entryType, entryType.data());
   };
-  char *name;
-  char *entryType;
+  char* name;
+  char* entryType;
   int64_t startTime;
   int64_t duration;
   int64_t uniqueId;
 };
 
 class PerformanceEntry : public HostObject {
-public:
+ public:
   PerformanceEntry() = delete;
-  explicit PerformanceEntry(JSContext *context, NativePerformanceEntry *m_nativePerformanceEntry);
+  explicit PerformanceEntry(JSContext* context, NativePerformanceEntry* m_nativePerformanceEntry);
 
   DEFINE_HOST_OBJECT_PROPERTY(4, name, entryType, startTime, duration)
 
-private:
-  NativePerformanceEntry *m_nativePerformanceEntry{nullptr};
+ private:
+  NativePerformanceEntry* m_nativePerformanceEntry{nullptr};
 };
 
-class PerformanceMark: public PerformanceEntry {
-public:
+class PerformanceMark : public PerformanceEntry {
+ public:
   PerformanceMark() = delete;
-  explicit PerformanceMark(JSContext *context, std::string &name, int64_t startTime);
-  explicit PerformanceMark(JSContext *context, NativePerformanceEntry *nativePerformanceEntry);
+  explicit PerformanceMark(JSContext* context, std::string& name, int64_t startTime);
+  explicit PerformanceMark(JSContext* context, NativePerformanceEntry* nativePerformanceEntry);
 };
 
 class PerformanceMeasure : public PerformanceEntry {
-public:
+ public:
   PerformanceMeasure() = delete;
-  explicit PerformanceMeasure(JSContext *context, std::string &name, int64_t startTime, int64_t duration);
-  explicit PerformanceMeasure(JSContext *context, NativePerformanceEntry *nativePerformanceEntry);
+  explicit PerformanceMeasure(JSContext* context, std::string& name, int64_t startTime, int64_t duration);
+  explicit PerformanceMeasure(JSContext* context, NativePerformanceEntry* nativePerformanceEntry);
 };
 
 class NativePerformance {
-public:
-  void mark(const std::string &markName);
-  void mark(const std::string &markName, int64_t startTime);
-  std::vector<NativePerformanceEntry *> *entries{new std::vector<NativePerformanceEntry *>()};
+ public:
+  void mark(const std::string& markName);
+  void mark(const std::string& markName, int64_t startTime);
+  std::vector<NativePerformanceEntry*>* entries{new std::vector<NativePerformanceEntry*>()};
 };
 
 class Performance : public HostObject {
-public:
+ public:
   Performance() = delete;
-  explicit Performance(JSContext *context);
+  explicit Performance(JSContext* context);
 
   OBJECT_INSTANCE(Performance);
 
-  static JSValue now(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  static JSValue toJSON(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  static JSValue clearMarks(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  static JSValue clearMeasures(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  static JSValue getEntries(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  static JSValue getEntriesByName(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  static JSValue getEntriesByType(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  static JSValue mark(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  static JSValue measure(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
+  static JSValue now(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue toJSON(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue clearMarks(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue clearMeasures(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getEntries(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getEntriesByName(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getEntriesByType(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue mark(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue measure(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
 #if ENABLE_PROFILE
-  static JSValue __kraken_navigation_summary__(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  void measureSummary(JSValue *exception);
+  static JSValue __kraken_navigation_summary__(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  void measureSummary(JSValue* exception);
 #endif
 
   NativePerformance m_nativePerformance;
 
   DEFINE_HOST_OBJECT_PROPERTY(1, timeOrigin);
-private:
 
-  void internalMeasure(const std::string &name, const std::string &startMark, const std::string &endMark, JSValue *exception);
+ private:
+  void internalMeasure(const std::string& name, const std::string& startMark, const std::string& endMark, JSValue* exception);
   double internalNow();
   std::vector<NativePerformanceEntry*> getFullEntries();
   ObjectFunction m_now{m_context, jsObject, "now", now, 0};
@@ -220,7 +218,6 @@ private:
 #endif
 };
 
-}
+}  // namespace kraken::binding::qjs
 
-
-#endif //KRAKENBRIDGE_PERFORMANCE_H
+#endif  // KRAKENBRIDGE_PERFORMANCE_H

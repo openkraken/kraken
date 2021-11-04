@@ -5,10 +5,10 @@
 
 #include "polyfill.h"
 
-#include "dart_methods.h"
 #include <atomic>
-#include "bridge_qjs.h"
 #include "bindings/qjs/qjs_patch.h"
+#include "bridge_qjs.h"
+#include "dart_methods.h"
 
 #include "bindings/qjs/bom/blob.h"
 #include "bindings/qjs/bom/console.h"
@@ -19,15 +19,15 @@
 #include "bindings/qjs/dom/comment_node.h"
 #include "bindings/qjs/dom/custom_event.h"
 #include "bindings/qjs/dom/document.h"
-#include "bindings/qjs/dom/element.h"
 #include "bindings/qjs/dom/document_fragment.h"
+#include "bindings/qjs/dom/element.h"
 #include "bindings/qjs/dom/elements/.gen/anchor_element.h"
 #include "bindings/qjs/dom/elements/.gen/canvas_element.h"
 #include "bindings/qjs/dom/elements/.gen/input_element.h"
 #include "bindings/qjs/dom/elements/.gen/object_element.h"
 #include "bindings/qjs/dom/elements/.gen/script_element.h"
-#include "bindings/qjs/dom/elements/template_element.h"
 #include "bindings/qjs/dom/elements/image_element.h"
+#include "bindings/qjs/dom/elements/template_element.h"
 #include "bindings/qjs/dom/event.h"
 #include "bindings/qjs/dom/event_target.h"
 #include "bindings/qjs/dom/events/.gen/close_event.h"
@@ -47,16 +47,15 @@ namespace kraken {
 
 using namespace binding::qjs;
 
-std::unordered_map<std::string, NativeByteCode> JSBridge::pluginByteCode {};
-ConsoleMessageHandler JSBridge::consoleMessageHandler {nullptr};
+std::unordered_map<std::string, NativeByteCode> JSBridge::pluginByteCode{};
+ConsoleMessageHandler JSBridge::consoleMessageHandler{nullptr};
 
 /**
  * JSRuntime
  */
-JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : contextId(contextId) {
+JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler& handler) : contextId(contextId) {
 #if ENABLE_PROFILE
-  double jsContextStartTime =
-    std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+  double jsContextStartTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 #endif
   m_context = binding::qjs::createJSContext(contextId, handler, this);
 
@@ -108,7 +107,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 
   initKrakenPolyFill(this);
 
-  for (auto &p : pluginByteCode) {
+  for (auto& p : pluginByteCode) {
     evaluateByteCode(p.second.bytes, p.second.length);
   }
 
@@ -118,30 +117,32 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 }
 
 void JSBridge::parseHTML(const char* code, size_t length) {
-  if (!m_context->isValid()) return;
-  Document *Document = Document::instance(m_context.get());
+  if (!m_context->isValid())
+    return;
+  Document* Document = Document::instance(m_context.get());
   auto document = DocumentInstance::instance(Document);
   JSValue bodyValue = JS_GetPropertyStr(m_context->ctx(), document->instanceObject, "body");
-  auto *body = static_cast<ElementInstance *>(JS_GetOpaque(bodyValue, Element::classId()));
+  auto* body = static_cast<ElementInstance*>(JS_GetOpaque(bodyValue, Element::classId()));
   HTMLParser::parseHTML(code, length, body);
   JS_FreeValue(m_context->ctx(), bodyValue);
 }
 
-void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType, void *rawEvent, NativeString *extra) {
-  if (!m_context->isValid()) return;
+void JSBridge::invokeModuleEvent(NativeString* moduleName, const char* eventType, void* rawEvent, NativeString* extra) {
+  if (!m_context->isValid())
+    return;
 
   JSValue eventObject = JS_NULL;
   if (rawEvent != nullptr) {
     std::string type = std::string(eventType);
-    auto *event = static_cast<RawEvent *>(rawEvent)->bytes;
-    EventInstance *eventInstance = Event::buildEventInstance(type, m_context.get(), event, false);
+    auto* event = static_cast<RawEvent*>(rawEvent)->bytes;
+    EventInstance* eventInstance = Event::buildEventInstance(type, m_context.get(), event, false);
     eventObject = eventInstance->instanceObject;
   }
 
   JSValue moduleNameValue = JS_NewUnicodeString(m_context->runtime(), m_context->ctx(), moduleName->string, moduleName->length);
   JSValue extraObject = JS_NULL;
   if (extra != nullptr) {
-    std::u16string u16Extra = std::u16string(reinterpret_cast<const char16_t *>(extra->string), extra->length);
+    std::u16string u16Extra = std::u16string(reinterpret_cast<const char16_t*>(extra->string), extra->length);
     std::string extraString = toUTF8(u16Extra);
     extraObject = JS_ParseJSON(m_context->ctx(), extraString.c_str(), extraString.size(), "");
   }
@@ -149,14 +150,10 @@ void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType
   {
     struct list_head *el, *el1;
     list_for_each_safe(el, el1, &m_context->module_job_list) {
-      auto *module = list_entry(el, ModuleContext, link);
+      auto* module = list_entry(el, ModuleContext, link);
       JSValue callback = module->callback;
 
-      JSValue arguments[] = {
-        moduleNameValue,
-        eventObject,
-        extraObject
-      };
+      JSValue arguments[] = {moduleNameValue, eventObject, extraObject};
       JSValue returnValue = JS_Call(m_context->ctx(), callback, m_context->global(), 3, arguments);
       m_context->handleException(&returnValue);
       JS_FreeValue(m_context->ctx(), returnValue);
@@ -173,36 +170,41 @@ void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType
   }
 }
 
-void JSBridge::evaluateScript(const NativeString *script, const char *url, int startLine) {
-  if (!m_context->isValid()) return;
+void JSBridge::evaluateScript(const NativeString* script, const char* url, int startLine) {
+  if (!m_context->isValid())
+    return;
 
 #if ENABLE_PROFILE
   auto nativePerformance = Performance::instance(m_context.get())->m_nativePerformance;
   nativePerformance.mark(PERF_JS_PARSE_TIME_START);
-  std::u16string patchedCode = std::u16string(u"performance.mark('js_parse_time_end');") + std::u16string(reinterpret_cast<const char16_t *>(script->string));
+  std::u16string patchedCode = std::u16string(u"performance.mark('js_parse_time_end');") + std::u16string(reinterpret_cast<const char16_t*>(script->string));
   m_context->evaluateJavaScript(patchedCode.c_str(), patchedCode.size(), url, startLine);
 #else
   m_context->evaluateJavaScript(script->string, script->length, url, startLine);
 #endif
 }
 
-void JSBridge::evaluateScript(const uint16_t *script, size_t length, const char *url, int startLine) {
-  if (!m_context->isValid()) return;
+void JSBridge::evaluateScript(const uint16_t* script, size_t length, const char* url, int startLine) {
+  if (!m_context->isValid())
+    return;
   m_context->evaluateJavaScript(script, length, url, startLine);
 }
 
-void JSBridge::evaluateScript(const char *script, size_t length, const char *url, int startLine) {
-  if (!m_context->isValid()) return;
+void JSBridge::evaluateScript(const char* script, size_t length, const char* url, int startLine) {
+  if (!m_context->isValid())
+    return;
   m_context->evaluateJavaScript(script, length, url, startLine);
 }
 
-uint8_t *JSBridge::dumpByteCode(const char *script, size_t length, const char *url, size_t *byteLength) {
-  if (!m_context->isValid()) return nullptr;
+uint8_t* JSBridge::dumpByteCode(const char* script, size_t length, const char* url, size_t* byteLength) {
+  if (!m_context->isValid())
+    return nullptr;
   return m_context->dumpByteCode(script, length, url, byteLength);
 }
 
-void JSBridge::evaluateByteCode(uint8_t *bytes, size_t byteLength) {
-  if (!m_context->isValid()) return;
+void JSBridge::evaluateByteCode(uint8_t* bytes, size_t byteLength) {
+  if (!m_context->isValid())
+    return;
   m_context->evaluateByteCode(bytes, byteLength);
 }
 
@@ -211,20 +213,21 @@ JSBridge::~JSBridge() {
     disposeCallback(this);
   }
 
-  if (!m_context->isValid()) return;
+  if (!m_context->isValid())
+    return;
 
   if (m_disposeCallback != nullptr) {
     this->m_disposeCallback(m_disposePrivateData);
   }
 }
 
-void JSBridge::reportError(const char *errmsg) {
+void JSBridge::reportError(const char* errmsg) {
   m_handler(m_context->getContextId(), errmsg);
 }
 
-void JSBridge::setDisposeCallback(Task task, void *data) {
+void JSBridge::setDisposeCallback(Task task, void* data) {
   m_disposeCallback = task;
   m_disposePrivateData = data;
 }
 
-} // namespace kraken
+}  // namespace kraken

@@ -12,8 +12,8 @@
 #include <functional>
 #include <utility>
 
-#include "ref_ptr_internal.h"
 #include "logging.h"
+#include "ref_ptr_internal.h"
 
 namespace fml {
 
@@ -61,8 +61,9 @@ namespace fml {
 // constructor or move operator=, which would cause the copy
 // constructor/operator= to be deleted, but for clarity we include explicit
 // non-templated versions of everything.)
-template <typename T> class RefPtr final {
-public:
+template <typename T>
+class RefPtr final {
+ public:
   RefPtr() : ptr_(nullptr) {}
   RefPtr(std::nullptr_t) : ptr_(nullptr) {}
 
@@ -70,81 +71,90 @@ public:
   // already been adopted). (Note that in |T::T()|, references to |this| cannot
   // be taken, since the object being constructed will not have been adopted
   // yet.)
-  template <typename U> explicit RefPtr(U *p) : ptr_(p) {
-    if (ptr_) ptr_->AddRef();
+  template <typename U>
+  explicit RefPtr(U* p) : ptr_(p) {
+    if (ptr_)
+      ptr_->AddRef();
   }
 
   // Copy constructor.
-  RefPtr(const RefPtr<T> &r) : ptr_(r.ptr_) {
-    if (ptr_) ptr_->AddRef();
+  RefPtr(const RefPtr<T>& r) : ptr_(r.ptr_) {
+    if (ptr_)
+      ptr_->AddRef();
   }
 
-  template <typename U> RefPtr(const RefPtr<U> &r) : ptr_(r.ptr_) {
-    if (ptr_) ptr_->AddRef();
+  template <typename U>
+  RefPtr(const RefPtr<U>& r) : ptr_(r.ptr_) {
+    if (ptr_)
+      ptr_->AddRef();
   }
 
   // Move constructor.
-  RefPtr(RefPtr<T> &&r) : ptr_(r.ptr_) {
-    r.ptr_ = nullptr;
-  }
+  RefPtr(RefPtr<T>&& r) : ptr_(r.ptr_) { r.ptr_ = nullptr; }
 
-  template <typename U> RefPtr(RefPtr<U> &&r) : ptr_(r.ptr_) {
+  template <typename U>
+  RefPtr(RefPtr<U>&& r) : ptr_(r.ptr_) {
     r.ptr_ = nullptr;
   }
 
   // Destructor.
   ~RefPtr() {
-    if (ptr_) ptr_->Release();
+    if (ptr_)
+      ptr_->Release();
   }
 
-  T *get() const {
-    return ptr_;
-  }
+  T* get() const { return ptr_; }
 
-  T &operator*() const {
+  T& operator*() const {
     KRAKEN_CHECK(ptr_);
     return *ptr_;
   }
 
-  T *operator->() const {
+  T* operator->() const {
     KRAKEN_CHECK(ptr_);
     return ptr_;
   }
 
   // Copy assignment.
-  RefPtr<T> &operator=(const RefPtr<T> &r) {
+  RefPtr<T>& operator=(const RefPtr<T>& r) {
     // Call |AddRef()| first so self-assignments work.
-    if (r.ptr_) r.ptr_->AddRef();
-    T *old_ptr = ptr_;
+    if (r.ptr_)
+      r.ptr_->AddRef();
+    T* old_ptr = ptr_;
     ptr_ = r.ptr_;
-    if (old_ptr) old_ptr->Release();
+    if (old_ptr)
+      old_ptr->Release();
     return *this;
   }
 
-  template <typename U> RefPtr<T> &operator=(const RefPtr<U> &r) {
+  template <typename U>
+  RefPtr<T>& operator=(const RefPtr<U>& r) {
     // Call |AddRef()| first so self-assignments work.
-    if (r.ptr_) r.ptr_->AddRef();
-    T *old_ptr = ptr_;
+    if (r.ptr_)
+      r.ptr_->AddRef();
+    T* old_ptr = ptr_;
     ptr_ = r.ptr_;
-    if (old_ptr) old_ptr->Release();
+    if (old_ptr)
+      old_ptr->Release();
     return *this;
   }
 
   // Move assignment.
   // Note: Like |std::shared_ptr|, we support self-move and move assignment is
   // equivalent to |RefPtr<T>(std::move(r)).swap(*this)|.
-  RefPtr<T> &operator=(RefPtr<T> &&r) {
+  RefPtr<T>& operator=(RefPtr<T>&& r) {
     RefPtr<T>(std::move(r)).swap(*this);
     return *this;
   }
 
-  template <typename U> RefPtr<T> &operator=(RefPtr<U> &&r) {
+  template <typename U>
+  RefPtr<T>& operator=(RefPtr<U>&& r) {
     RefPtr<T>(std::move(r)).swap(*this);
     return *this;
   }
 
-  void swap(RefPtr<T> &r) {
-    T *p = ptr_;
+  void swap(RefPtr<T>& r) {
+    T* p = ptr_;
     ptr_ = r.ptr_;
     r.ptr_ = p;
   }
@@ -152,37 +162,35 @@ public:
   // Returns a new |RefPtr<T>| with the same contents as this pointer. Useful
   // when a function takes a |RefPtr<T>&&| argument and the caller wants to
   // retain its reference (rather than moving it).
-  RefPtr<T> Clone() const {
-    return *this;
-  }
+  RefPtr<T> Clone() const { return *this; }
 
-  explicit operator bool() const {
-    return !!ptr_;
-  }
+  explicit operator bool() const { return !!ptr_; }
 
-  template <typename U> bool operator==(const RefPtr<U> &rhs) const {
+  template <typename U>
+  bool operator==(const RefPtr<U>& rhs) const {
     return ptr_ == rhs.ptr_;
   }
 
-  template <typename U> bool operator!=(const RefPtr<U> &rhs) const {
+  template <typename U>
+  bool operator!=(const RefPtr<U>& rhs) const {
     return !operator==(rhs);
   }
 
-  template <typename U> bool operator<(const RefPtr<U> &rhs) const {
+  template <typename U>
+  bool operator<(const RefPtr<U>& rhs) const {
     return ptr_ < rhs.ptr_;
   }
 
-private:
-  template <typename U> friend class RefPtr;
+ private:
+  template <typename U>
+  friend class RefPtr;
 
-  friend RefPtr<T> AdoptRef<T>(T *);
+  friend RefPtr<T> AdoptRef<T>(T*);
 
   enum AdoptTag { ADOPT };
-  RefPtr(T *ptr, AdoptTag) : ptr_(ptr) {
-    KRAKEN_CHECK(ptr_);
-  }
+  RefPtr(T* ptr, AdoptTag) : ptr_(ptr) { KRAKEN_CHECK(ptr_); }
 
-  T *ptr_;
+  T* ptr_;
 };
 
 // Adopts a newly-created |T|. Typically used in a static factory method, like:
@@ -191,7 +199,8 @@ private:
 //   RefPtr<Foo> Foo::Create() {
 //     return AdoptRef(new Foo());
 //   }
-template <typename T> inline RefPtr<T> AdoptRef(T *ptr) {
+template <typename T>
+inline RefPtr<T> AdoptRef(T* ptr) {
 #ifndef NDEBUG
   ptr->Adopt();
 #endif
@@ -205,7 +214,8 @@ template <typename T> inline RefPtr<T> AdoptRef(T *ptr) {
 //   auto foo_ref = Ref(foo);
 //
 // (|foo_ref| will be of type |RefPtr<Foo>|.)
-template <typename T> inline RefPtr<T> Ref(T *ptr) {
+template <typename T>
+inline RefPtr<T> Ref(T* ptr) {
   return RefPtr<T>(ptr);
 }
 
@@ -215,22 +225,22 @@ template <typename T> inline RefPtr<T> Ref(T *ptr) {
 //   auto my_foo = MakeRefCounted<Foo>(ctor_arg1, ctor_arg2);
 //
 // (|my_foo| will be of type |RefPtr<Foo>|.)
-template <typename T, typename... Args> RefPtr<T> MakeRefCounted(Args &&... args) {
+template <typename T, typename... Args>
+RefPtr<T> MakeRefCounted(Args&&... args) {
   return internal::MakeRefCountedHelper<T>::MakeRefCounted(std::forward<Args>(args)...);
 }
 
-} // namespace fml
+}  // namespace fml
 
 // Inject custom std::hash<> function object for |RefPtr<T>|.
 namespace std {
-template <typename T> struct hash<fml::RefPtr<T>> {
+template <typename T>
+struct hash<fml::RefPtr<T>> {
   using argument_type = fml::RefPtr<T>;
   using result_type = std::size_t;
 
-  result_type operator()(const argument_type &ptr) const {
-    return std::hash<T *>()(ptr.get());
-  }
+  result_type operator()(const argument_type& ptr) const { return std::hash<T*>()(ptr.get()); }
 };
-} // namespace std
+}  // namespace std
 
-#endif // FLUTTER_FML_MEMORY_REF_PTR_H_
+#endif  // FLUTTER_FML_MEMORY_REF_PTR_H_

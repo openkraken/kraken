@@ -12,13 +12,12 @@ namespace kraken::binding::qjs {
 
 struct ModuleContext {
   JSValue callback;
-  JSContext *context;
+  JSContext* context;
   list_head link;
 };
 
-void bindModuleManager(std::unique_ptr<JSContext> &context);
-void handleInvokeModuleUnexpectedCallback(void *callbackContext, int32_t contextId, NativeString *errmsg,
-                                          NativeString *json);
-}
+void bindModuleManager(std::unique_ptr<JSContext>& context);
+void handleInvokeModuleUnexpectedCallback(void* callbackContext, int32_t contextId, NativeString* errmsg, NativeString* json);
+}  // namespace kraken::binding::qjs
 
-#endif // KRAKENBRIDGE_MODULE_MANAGER_H
+#endif  // KRAKENBRIDGE_MODULE_MANAGER_H

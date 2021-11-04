@@ -11,12 +11,11 @@
 namespace kraken::binding::qjs {
 
 class HostObject {
-public:
+ public:
   KRAKEN_DISALLOW_COPY_AND_ASSIGN(HostObject);
 
   HostObject() = delete;
-  HostObject(JSContext *context, std::string name)
-    : m_context(context), m_name(std::move(name)), m_ctx(context->ctx()), m_contextId(context->getContextId()) {
+  HostObject(JSContext* context, std::string name) : m_context(context), m_name(std::move(name)), m_ctx(context->ctx()), m_contextId(context->getContextId()) {
     JSClassDef def{};
     def.class_name = "HostObject";
     def.finalizer = proxyFinalize;
@@ -27,37 +26,27 @@ public:
 
   JSValue jsObject{JS_NULL};
 
-protected:
+ protected:
   virtual ~HostObject() = default;
   std::string m_name;
-  JSContext *m_context;
+  JSContext* m_context;
   int32_t m_contextId;
-  QjsContext *m_ctx;
+  QjsContext* m_ctx;
 
-private:
-  static void proxyFinalize(JSRuntime *rt, JSValue val) {
-    auto hostObject = static_cast<HostObject *>(JS_GetOpaque(val, JSContext::kHostObjectClassId));
+ private:
+  static void proxyFinalize(JSRuntime* rt, JSValue val) {
+    auto hostObject = static_cast<HostObject*>(JS_GetOpaque(val, JSContext::kHostObjectClassId));
     delete hostObject;
   };
 };
 
-
 class ExoticHostObject {
-public:
+ public:
   KRAKEN_DISALLOW_COPY_AND_ASSIGN(ExoticHostObject);
 
   ExoticHostObject() = delete;
-  ExoticHostObject(JSContext *context, std::string name):
-    m_context(context), m_name(std::move(name)), m_ctx(context->ctx()), m_contextId(context->getContextId()){
-    JSClassExoticMethods *m_exoticMethods = new JSClassExoticMethods{
-      nullptr,
-      nullptr,
-      nullptr,
-      nullptr,
-      nullptr,
-      proxyGetProperty,
-      proxySetProperty
-    };
+  ExoticHostObject(JSContext* context, std::string name) : m_context(context), m_name(std::move(name)), m_ctx(context->ctx()), m_contextId(context->getContextId()) {
+    JSClassExoticMethods* m_exoticMethods = new JSClassExoticMethods{nullptr, nullptr, nullptr, nullptr, nullptr, proxyGetProperty, proxySetProperty};
     JSClassDef def{};
     def.class_name = m_name.c_str();
     def.finalizer = proxyFinalize;
@@ -69,35 +58,31 @@ public:
 
   JSValue jsObject{JS_NULL};
 
-  static JSValue proxyGetProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
-                             JSValueConst receiver) {
-    auto *object = static_cast<ExoticHostObject *>(JS_GetOpaque(obj, JSContext::kHostExoticObjectClassId));
+  static JSValue proxyGetProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver) {
+    auto* object = static_cast<ExoticHostObject*>(JS_GetOpaque(obj, JSContext::kHostExoticObjectClassId));
     return object->getProperty(ctx, obj, atom, receiver);
   };
-  static int proxySetProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
-                         JSValueConst value, JSValueConst receiver, int flags) {
-    auto *object = static_cast<ExoticHostObject *>(JS_GetOpaque(obj, JSContext::kHostExoticObjectClassId));
+  static int proxySetProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags) {
+    auto* object = static_cast<ExoticHostObject*>(JS_GetOpaque(obj, JSContext::kHostExoticObjectClassId));
     return object->setProperty(ctx, obj, atom, value, receiver, flags);
   };
 
-  virtual JSValue getProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
-                           JSValueConst receiver);
-  virtual int setProperty(QjsContext *ctx, JSValueConst obj, JSAtom atom,
-                       JSValueConst value, JSValueConst receiver, int flags);
+  virtual JSValue getProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);
+  virtual int setProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
 
-protected:
+ protected:
   virtual ~ExoticHostObject() = default;
   std::string m_name;
-  JSContext *m_context;
+  JSContext* m_context;
   int32_t m_contextId;
-  QjsContext *m_ctx;
+  QjsContext* m_ctx;
 
-  static void proxyFinalize(JSRuntime *rt, JSValue val) {
-    auto hostObject = static_cast<ExoticHostObject *>(JS_GetOpaque(val, JSContext::kHostExoticObjectClassId));
+  static void proxyFinalize(JSRuntime* rt, JSValue val) {
+    auto hostObject = static_cast<ExoticHostObject*>(JS_GetOpaque(val, JSContext::kHostExoticObjectClassId));
     delete hostObject;
   };
 };
 
-} // namespace kraken::binding::qjs
+}  // namespace kraken::binding::qjs
 
-#endif // KRAKENBRIDGE_HOST_OBJECT_H
+#endif  // KRAKENBRIDGE_HOST_OBJECT_H
