@@ -723,14 +723,14 @@ class RenderFlexLayout extends RenderLayoutBox {
   void _layoutChildren(RenderPositionHolder? placeholderChild) {
     /// If no child exists, stop layout.
     if (childCount == 0) {
-      Size contentSize = getContentSize(
+      Size layoutContentSize = getContentSize(
         logicalContentWidth: logicalContentWidth,
         logicalContentHeight: logicalContentHeight,
         contentWidth: 0,
         contentHeight: 0,
       );
-      setMaxScrollableSize(contentSize);
-      size = getBoxSize(contentSize);
+      setMaxScrollableSize(layoutContentSize);
+      size = getBoxSize(layoutContentSize);
       return;
     }
     assert(contentConstraints != null);
@@ -1591,13 +1591,13 @@ class RenderFlexLayout extends RenderLayoutBox {
         _isHorizontalFlexDirection
             ? containerSizeMap['cross']
             : maxAllocatedMainSize;
-    Size contentSize = getContentSize(
+    Size layoutContentSize = getContentSize(
       logicalContentWidth: logicalContentWidth,
       logicalContentHeight: logicalContentHeight,
       contentWidth: contentWidth!,
       contentHeight: contentHeight!,
     );
-    size = getBoxSize(contentSize);
+    size = getBoxSize(layoutContentSize);
 
     _setMaxScrollableSizeForFlex(runMetrics);
 
