@@ -6,12 +6,13 @@
 #ifndef KRAKENBRIDGE_JS_CONTEXT_H
 #define KRAKENBRIDGE_JS_CONTEXT_H
 
-#include "kraken_foundation.h"
-#include <memory>
-#include <unordered_map>
-#include <quickjs/quickjs.h>
-#include <quickjs/list.h>
 #include "js_context_macros.h"
+#include "kraken_foundation.h"
+#include "qjs_patch.h"
+#include <memory>
+#include <quickjs/list.h>
+#include <quickjs/quickjs.h>
+#include <unordered_map>
 
 using QjsContext = JSContext;
 using JSExceptionHandler = std::function<void(int32_t contextId, const char *message)>;
@@ -66,10 +67,10 @@ public:
   bool handleException(JSValue *exc);
   void drainPendingPromiseJobs();
   void defineGlobalProperty(const char *prop, JSValueConst value);
-  uint8_t *dumpByteCode(const char* code, uint32_t codeLength, const char *sourceURL, size_t* bytecodeLength);
+  uint8_t *dumpByteCode(const char *code, uint32_t codeLength, const char *sourceURL, size_t *bytecodeLength);
 
   std::chrono::time_point<std::chrono::system_clock> timeOrigin;
-  std::unordered_map<std::string, void*> constructorMap;
+  std::unordered_map<std::string, void *> constructorMap;
 
   int32_t uniqueId;
   struct list_head node_job_list;
@@ -86,7 +87,6 @@ public:
   static JSClassID kHostExoticObjectClassId;
 
 private:
-
   static void promiseRejectTracker(QjsContext *ctx, JSValueConst promise, JSValueConst reason, JS_BOOL is_handled,
                                    void *opaque);
   void dispatchGlobalErrorEvent(JSValueConst error);
@@ -104,18 +104,38 @@ private:
   WindowInstance *m_window{nullptr};
 };
 
+// The read object's method or properties via Proxy, we should redirect this_val from Proxy into target property of
+// proxy object.
+static JSValue handleCallThisOnProxy(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int data_len,
+                                     JSValueConst *data) {
+  JSValue f = data[0];
+  JSValue result;
+  if (JS_IsProxy(this_val)) {
+    result = JS_Call(ctx, f, JS_GetProxyTarget(this_val), argc, argv);
+  } else {
+    result = JS_Call(ctx, f, this_val, argc, argv);
+  }
+  return result;
+}
+
 class ObjectProperty {
   KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(ObjectProperty);
 
 public:
   ObjectProperty() = delete;
-  explicit ObjectProperty(JSContext *context, JSValueConst thisObject, const char *property,
-                              JSCFunction getterFunction, JSCFunction setterFunction) {
+  explicit ObjectProperty(JSContext *context, JSValueConst thisObject, const char *property, JSCFunction getterFunction,
+                          JSCFunction setterFunction) {
     JSValue ge = JS_NewCFunction(context->ctx(), getterFunction, "get", 0);
     JSValue se = JS_NewCFunction(context->ctx(), setterFunction, "set", 1);
+
+    JSValue pge = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 0, 0, 1, &ge);
+    JSValue pse = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 1, 0, 1, &se);
+
+    JS_FreeValue(context->ctx(), ge);
+    JS_FreeValue(context->ctx(), se);
+
     JSAtom key = JS_NewAtom(context->ctx(), property);
-    JS_DefinePropertyGetSet(context->ctx(), thisObject, key, ge, se,
-                            JS_PROP_C_W_E);
+    JS_DefinePropertyGetSet(context->ctx(), thisObject, key, pge, pse, JS_PROP_C_W_E);
     JS_FreeAtom(context->ctx(), key);
   };
   explicit ObjectProperty(JSContext *context, JSValueConst thisObject, const char *property,
@@ -123,7 +143,7 @@ public:
     JSValue get = JS_NewCFunction(context->ctx(), getterFunction, "get", 0);
     JSAtom key = JS_NewAtom(context->ctx(), property);
     JS_DefineProperty(context->ctx(), thisObject, key, JS_UNDEFINED, get, JS_UNDEFINED,
-                            JS_PROP_HAS_CONFIGURABLE | JS_PROP_ENUMERABLE | JS_PROP_HAS_GET);
+                      JS_PROP_HAS_CONFIGURABLE | JS_PROP_ENUMERABLE | JS_PROP_HAS_GET);
     JS_FreeAtom(context->ctx(), key);
   }
 };
@@ -133,18 +153,21 @@ class ObjectFunction {
 
 public:
   ObjectFunction() = delete;
-  explicit ObjectFunction(JSContext *context, JSValueConst thisObject, const char *functionName,
-                              JSCFunction function, int argc) {
+  explicit ObjectFunction(JSContext *context, JSValueConst thisObject, const char *functionName, JSCFunction function,
+                          int argc) {
     JSValue f = JS_NewCFunction(context->ctx(), function, functionName, argc);
+    JSValue pf = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, argc, 0, 1, &f);
     JSAtom key = JS_NewAtom(context->ctx(), functionName);
+
+    JS_FreeValue(context->ctx(), f);
 
 // We should avoid overwrite exist property functions.
 #ifdef DEBUG
-    assert_m(JS_HasProperty(context->ctx(), thisObject, key) == 0, (std::string("Found exist function property: ") + std::string(functionName)).c_str());
+    assert_m(JS_HasProperty(context->ctx(), thisObject, key) == 0,
+             (std::string("Found exist function property: ") + std::string(functionName)).c_str());
 #endif
 
-    JS_DefinePropertyValue(context->ctx(), thisObject, key, f,
-                           JS_PROP_ENUMERABLE);
+    JS_DefinePropertyValue(context->ctx(), thisObject, key, pf, JS_PROP_ENUMERABLE);
     JS_FreeAtom(context->ctx(), key);
   };
 };
@@ -152,7 +175,7 @@ public:
 class JSValueHolder {
 public:
   JSValueHolder() = delete;
-  explicit JSValueHolder(QjsContext *ctx, JSValue value): m_value(value), m_ctx(ctx) {};
+  explicit JSValueHolder(QjsContext *ctx, JSValue value) : m_value(value), m_ctx(ctx){};
   ~JSValueHolder() {
     JS_FreeValue(m_ctx, m_value);
   }
@@ -162,7 +185,10 @@ public:
     }
     m_value = JS_DupValue(m_ctx, value);
   };
-  inline JSValue value() const { return JS_DupValue(m_ctx, m_value); }
+  inline JSValue value() const {
+    return JS_DupValue(m_ctx, m_value);
+  }
+
 private:
   QjsContext *m_ctx{nullptr};
   JSValue m_value{JS_NULL};
@@ -183,7 +209,6 @@ int32_t arrayFindIdx(QjsContext *ctx, JSValue array, JSValue target);
 void arraySpliceValue(QjsContext *ctx, JSValue array, uint32_t start, uint32_t deleteCount);
 void arraySpliceValue(QjsContext *ctx, JSValue array, uint32_t start, uint32_t deleteCount, JSValue replacedValue);
 JSValue objectGetKeys(QjsContext *ctx, JSValue obj);
-
 
 } // namespace kraken::binding::qjs
 

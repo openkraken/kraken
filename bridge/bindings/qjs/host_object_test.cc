@@ -67,6 +67,36 @@ TEST(HostObject, defineProperty) {
   EXPECT_EQ(errorCalled, false);
 }
 
+
+TEST(ObjectProperty, worksWithProxy) {
+  bool static logCalled = false;
+  bool static errorCalled = false;
+  kraken::JSBridge::consoleMessageHandler = [](void *ctx, const std::string &message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(), "0");
+  };
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+    KRAKEN_LOG(VERBOSE) << errmsg;
+    errorCalled = true;
+  });
+  auto &context = bridge->getContext();
+  auto *sampleObject = new SampleObject(context.get());
+  JSValue object = sampleObject->jsObject;
+  context->defineGlobalProperty("o", object);
+  std::string code = std::string(R"(
+let p = new Proxy(o, {
+    get(target, key, receiver) {
+      return Reflect.get(target, key, receiver);
+    }
+});
+console.log(p.foo);
+)");
+  bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
+  delete bridge;
+  EXPECT_EQ(logCalled, true);
+  EXPECT_EQ(errorCalled, false);
+}
+
 TEST(HostObject, defineFunction) {
   bool static logCalled = false;
   bool static errorCalled = false;

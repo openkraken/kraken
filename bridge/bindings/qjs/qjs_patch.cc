@@ -14,6 +14,13 @@ typedef enum {
   JS_GC_PHASE_REMOVE_CYCLES,
 } JSGCPhaseEnum;
 
+typedef struct JSProxyData {
+  JSValue target;
+  JSValue handler;
+  uint8_t is_func;
+  uint8_t is_revoked;
+} JSProxyData;
+
 typedef enum {
   JS_GC_OBJ_TYPE_JS_OBJECT,
   JS_GC_OBJ_TYPE_FUNCTION_BYTECODE,
@@ -297,4 +304,15 @@ JSClassID JSValueGetClassId(JSValue obj) {
     return -1;
   p = JS_VALUE_GET_OBJ(obj);
   return p->class_id;
+}
+
+bool JS_IsProxy(JSValue value) {
+  if (!JS_IsObject(value)) return false;
+  JSObject *p = JS_VALUE_GET_OBJ(value);
+  return p->class_id == JS_CLASS_PROXY;
+}
+
+JSValue JS_GetProxyTarget(JSValue value) {
+  JSObject *p = JS_VALUE_GET_OBJ(value);
+  return p->u.proxy_data->target;
 }

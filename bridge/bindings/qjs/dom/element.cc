@@ -862,9 +862,9 @@ ElementInstance::ElementInstance(Element *element, std::string tagName, bool sho
   m_style = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(style, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
 
   JS_DefinePropertyValueStr(m_ctx, instanceObject, "style", m_style->instanceObject,
-                            JS_PROP_NORMAL | JS_PROP_ENUMERABLE);
+                            JS_PROP_C_W_E);
   JS_DefinePropertyValueStr(m_ctx, instanceObject, "attributes", m_attributes->jsObject,
-                            JS_PROP_NORMAL | JS_PROP_ENUMERABLE);
+                            JS_PROP_C_W_E);
 
   if (shouldAddUICommand) {
     NativeString *args_01 = stringToNativeString(tagName);
