@@ -1,5 +1,5 @@
 describe('clip', () => {
-  fit('should works with basic', async () => {
+  it('should works with basic', async () => {
     let image;
     let container = createElement('div', {
       style: {
@@ -19,7 +19,7 @@ describe('clip', () => {
     await snapshot(0.1);
   });
 
-  fit('should works with children of appear event', async () => {
+  it('should works with children of appear event', async () => {
     let image;
     let container = createElement('div', {
       style: {
