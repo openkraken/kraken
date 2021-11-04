@@ -40,4 +40,7 @@ class HTMLElement extends Element {
     renderStyle.height = elementManager.viewportHeight;
     didAttachRenderer();
   }
+
+  @override
+  String get tagName => HTML;
 }
