@@ -11,7 +11,7 @@ jobs:
     - uses: DoozyX/clang-format-lint-action@v0.13
       with:
         source: './bridge'
-        exclude: 'third_party'
+        exclude: './bridge/third_party/*'
         extensions: 'h,cc,c'
         clangFormatVersion: 12
         inplace: True
