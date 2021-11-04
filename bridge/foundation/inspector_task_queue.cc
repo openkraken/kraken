@@ -10,4 +10,4 @@ namespace foundation {
 std::mutex InspectorTaskQueue::inspector_task_creation_mutex_{};
 fml::RefPtr<InspectorTaskQueue> InspectorTaskQueue::instance_{};
 
-}
+}  // namespace foundation

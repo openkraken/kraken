@@ -58,8 +58,9 @@ namespace fml {
 //
 // For now, we only have thread-safe reference counting, since that's all we
 // need. It's easy enough to add thread-unsafe versions if necessary.
-template <typename T> class RefCountedThreadSafe : public internal::RefCountedThreadSafeBase {
-public:
+template <typename T>
+class RefCountedThreadSafe : public internal::RefCountedThreadSafeBase {
+ public:
   // Adds a reference to this object.
   // Inherited from the internal superclass:
   //   void AddRef() const;
@@ -67,7 +68,8 @@ public:
   // Releases a reference to this object. This will destroy this object once the
   // last reference is released.
   void Release() const {
-    if (internal::RefCountedThreadSafeBase::Release()) delete static_cast<const T *>(this);
+    if (internal::RefCountedThreadSafeBase::Release())
+      delete static_cast<const T*>(this);
   }
 
   // Returns true if there is exactly one reference to this object. Use of this
@@ -93,7 +95,7 @@ public:
   // Inherited from the internal superclass:
   //   void AssertHasOneRef();
 
-protected:
+ protected:
   // Constructor. Note that the object is constructed with a reference count of
   // 1, and then must be adopted (see |AdoptRef()| in ref_ptr.h).
   RefCountedThreadSafe() {}
@@ -103,16 +105,15 @@ protected:
   // ref_ptr.h).
   ~RefCountedThreadSafe() {}
 
-private:
+ private:
 #ifndef NDEBUG
-  template <typename U> friend RefPtr<U> AdoptRef(U *);
+  template <typename U>
+  friend RefPtr<U> AdoptRef(U*);
   // Marks the initial reference (assumed on construction) as adopted. This is
   // only required for Debug builds (when |NDEBUG| is not defined).
   // TODO(vtl): Should this really be private? This makes manual ref-counting
   // and also writing one's own ref pointer class impossible.
-  void Adopt() {
-    internal::RefCountedThreadSafeBase::Adopt();
-  }
+  void Adopt() { internal::RefCountedThreadSafeBase::Adopt(); }
 #endif
 
   KRAKEN_DISALLOW_COPY_AND_ASSIGN(RefCountedThreadSafe);
@@ -127,6 +128,6 @@ private:
 // |RefCountedThreadSafe|.)
 #define FML_FRIEND_MAKE_REF_COUNTED(T) friend class ::fml::internal::MakeRefCountedHelper<T>
 
-} // namespace fml
+}  // namespace fml
 
-#endif // FLUTTER_FML_MEMORY_REF_COUNTED_H_
+#endif  // FLUTTER_FML_MEMORY_REF_COUNTED_H_
