@@ -7,17 +7,16 @@
 #define KRAKENBRIDGE_HOST_CLASS_H
 
 #include "js_context.h"
-#include "third_party/quickjs/quickjs.h"
 #include "qjs_patch.h"
+#include "third_party/quickjs/quickjs.h"
 
 namespace kraken::binding::qjs {
 
 class HostClass {
-public:
+ public:
   KRAKEN_DISALLOW_COPY_AND_ASSIGN(HostClass);
 
-  HostClass(JSContext *context, std::string name)
-    : m_context(context), m_name(std::move(name)), m_ctx(context->ctx()), m_contextId(context->getContextId()) {
+  HostClass(JSContext* context, std::string name) : m_context(context), m_name(std::move(name)), m_ctx(context->ctx()), m_contextId(context->getContextId()) {
     JSClassDef def{};
     def.class_name = "HostClass";
     def.finalizer = proxyFinalize;
@@ -42,34 +41,31 @@ public:
   };
   virtual ~HostClass() = default;
 
-  virtual JSValue instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValueConst *argv) {
-    return JS_NewObject(ctx);
-  };
+  virtual JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValueConst* argv) { return JS_NewObject(ctx); };
   JSValue classObject;
 
   inline uint32_t contextId() const { return m_contextId; }
-  inline JSContext *context() const { return m_context; }
+  inline JSContext* context() const { return m_context; }
   inline JSValue prototype() const { return m_prototypeObject; };
 
-protected:
+ protected:
   JSValue m_prototypeObject{JS_NULL};
   std::string m_name;
-  JSContext *m_context;
+  JSContext* m_context;
   int32_t m_contextId;
-  QjsContext *m_ctx;
+  QjsContext* m_ctx;
 
-private:
-  static void proxyFinalize(JSRuntime *rt, JSValue val) {
-    auto hostObject = static_cast<HostClass *>(JS_GetOpaque(val, JSContext::kHostClassClassId));
+ private:
+  static void proxyFinalize(JSRuntime* rt, JSValue val) {
+    auto hostObject = static_cast<HostClass*>(JS_GetOpaque(val, JSContext::kHostClassClassId));
     if (hostObject->context()->isValid()) {
       JS_FreeValue(hostObject->m_ctx, hostObject->classObject);
     }
     delete hostObject;
   };
-  static JSValue proxyCall(QjsContext *ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst *argv,
-                           int flags) {
+  static JSValue proxyCall(QjsContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) {
     // TODO: handle flags when flags is not JS_CALL_FLAG_CONSTRUCTOR
-    auto *hostClass = static_cast<HostClass *>(JS_GetOpaque(func_obj, JSContext::kHostClassClassId));
+    auto* hostClass = static_cast<HostClass*>(JS_GetOpaque(func_obj, JSContext::kHostClassClassId));
 
     JSAtom prototypeKey = JS_NewAtom(ctx, "prototype");
     JSValue proto = JS_GetProperty(ctx, this_val, prototypeKey);
@@ -82,9 +78,9 @@ private:
 };
 
 class Instance {
-public:
-  explicit Instance(HostClass *hostClass, std::string name, JSClassExoticMethods *exotic, JSClassID classId, JSClassFinalizer finalizer)
-    : m_context(hostClass->context()), m_hostClass(hostClass), m_name(std::move(name)), m_ctx(m_context->ctx()), m_contextId(hostClass->contextId()) {
+ public:
+  explicit Instance(HostClass* hostClass, std::string name, JSClassExoticMethods* exotic, JSClassID classId, JSClassFinalizer finalizer)
+      : m_context(hostClass->context()), m_hostClass(hostClass), m_name(std::move(name)), m_ctx(m_context->ctx()), m_contextId(hostClass->contextId()) {
     JSClassDef def{};
     def.class_name = m_name.c_str();
     def.finalizer = finalizer;
@@ -101,25 +97,22 @@ public:
   inline JSContext* context() const { return m_context; }
   inline std::string name() const { return m_name; }
 
-private:
-  static void proxyGCMark(JSRuntime *rt, JSValueConst val,
-                   JS_MarkFunc *mark_func) {
-    auto *instance = static_cast<Instance *>(JS_GetOpaque(val, JSValueGetClassId(val)));
+ private:
+  static void proxyGCMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) {
+    auto* instance = static_cast<Instance*>(JS_GetOpaque(val, JSValueGetClassId(val)));
     instance->gcMark(rt, val, mark_func);
   }
 
-protected:
+ protected:
+  virtual void gcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func){};
 
-  virtual void gcMark(JSRuntime *rt, JSValueConst val,
-                      JS_MarkFunc *mark_func) {};
-
-  JSContext *m_context{nullptr};
-  QjsContext *m_ctx{nullptr};
-  HostClass *m_hostClass{nullptr};
+  JSContext* m_context{nullptr};
+  QjsContext* m_ctx{nullptr};
+  HostClass* m_hostClass{nullptr};
   std::string m_name;
   int64_t m_contextId{-1};
 };
 
-} // namespace kraken::binding::qjs
+}  // namespace kraken::binding::qjs
 
-#endif // KRAKENBRIDGE_HOST_CLASS_H
+#endif  // KRAKENBRIDGE_HOST_CLASS_H

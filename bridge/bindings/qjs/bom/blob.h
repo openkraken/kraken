@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 
-
 #ifndef KRAKENBRIDGE_BLOB_H
 #define KRAKENBRIDGE_BLOB_H
 
@@ -14,23 +13,23 @@ namespace kraken::binding::qjs {
 class BlobBuilder;
 class BlobInstance;
 
-void bindBlob(std::unique_ptr<JSContext> &context);
+void bindBlob(std::unique_ptr<JSContext>& context);
 
 class Blob : public HostClass {
-public:
+ public:
   static JSClassID kBlobClassID;
   OBJECT_INSTANCE(Blob);
 
   Blob() = delete;
-  explicit Blob(JSContext *context);
+  explicit Blob(JSContext* context);
 
-  JSValue instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
+  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
-  static JSValue arrayBuffer(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  static JSValue slice(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  static JSValue text(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
+  static JSValue arrayBuffer(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue slice(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue text(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
-private:
+ private:
   friend BlobInstance;
 
   ObjectFunction m_arrayBuffer{m_context, m_prototypeObject, "arrayBuffer", arrayBuffer, 0};
@@ -39,19 +38,19 @@ private:
 };
 
 class BlobInstance : public Instance {
-public:
+ public:
   BlobInstance() = delete;
-  explicit BlobInstance(Blob *blob): Instance(blob, "Blob", nullptr, Blob::kBlobClassID, finalize) {};
-  explicit BlobInstance(Blob *blob, std::vector<uint8_t> &&data)
-      : _size(data.size()), _data(std::move(data)), Instance(blob, "Blob", nullptr, Blob::kBlobClassID, finalize){};
-  explicit BlobInstance(Blob *blob, std::vector<uint8_t> &&data, std::string &mime)
+  explicit BlobInstance(Blob* blob) : Instance(blob, "Blob", nullptr, Blob::kBlobClassID, finalize){};
+  explicit BlobInstance(Blob* blob, std::vector<uint8_t>&& data) : _size(data.size()), _data(std::move(data)), Instance(blob, "Blob", nullptr, Blob::kBlobClassID, finalize){};
+  explicit BlobInstance(Blob* blob, std::vector<uint8_t>&& data, std::string& mime)
       : mimeType(mime), _size(data.size()), _data(std::move(data)), Instance(blob, "Blob", nullptr, Blob::kBlobClassID, finalize){};
 
   /// get an pointer of bytes data from JSBlob
-  uint8_t *bytes();
+  uint8_t* bytes();
   /// get bytes data's length
   int32_t size();
-private:
+
+ private:
   DEFINE_HOST_CLASS_PROPERTY(2, type, size);
   size_t _size;
   std::string mimeType{""};
@@ -59,21 +58,21 @@ private:
   friend BlobBuilder;
   friend Blob;
 
-  static void finalize(JSRuntime *rt, JSValue val);
+  static void finalize(JSRuntime* rt, JSValue val);
 };
 
 class BlobBuilder {
-public:
-  void append(JSContext &context, JSValue &value);
-  void append(JSContext &context, BlobInstance *blob);
+ public:
+  void append(JSContext& context, JSValue& value);
+  void append(JSContext& context, BlobInstance* blob);
 
   std::vector<uint8_t> finalize();
 
-private:
+ private:
   friend Blob;
   std::vector<uint8_t> _data;
 };
 
-}
+}  // namespace kraken::binding::qjs
 
-#endif // KRAKENBRIDGE_BLOB_H
+#endif  // KRAKENBRIDGE_BLOB_H

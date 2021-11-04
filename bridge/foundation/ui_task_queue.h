@@ -10,10 +10,10 @@
 
 namespace foundation {
 
-using Task = void(*)(void*);
+using Task = void (*)(void*);
 
 class UITaskQueue : public TaskQueue {
-public:
+ public:
   static fml::RefPtr<UITaskQueue> instance(int32_t contextId) {
     std::lock_guard<std::mutex> guard(ui_task_creation_mutex_);
     if (!instance_) {
@@ -22,13 +22,14 @@ public:
     }
     return instance_;
   };
-  int32_t registerTask(const Task &task, void *data);
-private:
+  int32_t registerTask(const Task& task, void* data);
+
+ private:
   static std::mutex ui_task_creation_mutex_;
   static fml::RefPtr<UITaskQueue> instance_;
   int m_contextId;
 };
 
-} // namespace foundation
+}  // namespace foundation
 
-#endif // KRAKENBRIDGE_UI_TASK_QUEUE_H
+#endif  // KRAKENBRIDGE_UI_TASK_QUEUE_H

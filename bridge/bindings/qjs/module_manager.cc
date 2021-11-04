@@ -9,49 +9,43 @@
 
 namespace kraken::binding::qjs {
 
-JSValue krakenModuleListener(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+JSValue krakenModuleListener(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (argc < 1) {
-    return JS_ThrowTypeError(
-      ctx, "Failed to execute '__kraken_module_listener__': 1 parameter required, but only 0 present.");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_module_listener__': 1 parameter required, but only 0 present.");
   }
 
   JSValue callbackValue = argv[0];
   if (!JS_IsObject(callbackValue)) {
-    return JS_ThrowTypeError(
-      ctx, "Failed to execute '__kraken_module_listener__': parameter 1 (callback) must be a function.");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_module_listener__': parameter 1 (callback) must be a function.");
   }
 
   if (!JS_IsFunction(ctx, callbackValue)) {
-    return JS_ThrowTypeError(
-      ctx, "Failed to execute '__kraken_module_listener__': parameter 1 (callback) must be a function.");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_module_listener__': parameter 1 (callback) must be a function.");
   }
 
-  auto context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
-  auto *link = new ModuleContext{
-    JS_DupValue(ctx, callbackValue),
-    context
-  };
+  auto context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
+  auto* link = new ModuleContext{JS_DupValue(ctx, callbackValue), context};
   list_add_tail(&link->link, &context->module_job_list);
 
   return JS_NULL;
 }
 
-void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextId, NativeString *errmsg,
-                                         NativeString *json) {
-  auto *moduleContext = static_cast<ModuleContext *>(callbackContext);
-  JSContext *context = moduleContext->context;
+void handleInvokeModuleTransientCallback(void* callbackContext, int32_t contextId, NativeString* errmsg, NativeString* json) {
+  auto* moduleContext = static_cast<ModuleContext*>(callbackContext);
+  JSContext* context = moduleContext->context;
 
-  if (!checkContext(contextId, context)) return;
-  if (!context->isValid()) return;
+  if (!checkContext(contextId, context))
+    return;
+  if (!context->isValid())
+    return;
 
   if (JS_IsNull(moduleContext->callback)) {
-    JSValue exception =
-      JS_ThrowTypeError(moduleContext->context->ctx(), "Failed to execute '__kraken_invoke_module__': callback is null.");
+    JSValue exception = JS_ThrowTypeError(moduleContext->context->ctx(), "Failed to execute '__kraken_invoke_module__': callback is null.");
     context->handleException(&exception);
     return;
   }
 
-  QjsContext *ctx = moduleContext->context->ctx();
+  QjsContext* ctx = moduleContext->context->ctx();
   if (!JS_IsObject(moduleContext->callback)) {
     return;
   }
@@ -61,13 +55,12 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
   if (errmsg != nullptr) {
     JSValue errorMessage = JS_NewUnicodeString(context->runtime(), ctx, errmsg->string, errmsg->length);
     JSValue errorObject = JS_NewError(ctx);
-    JS_DefinePropertyValue(ctx, errorObject, JS_NewAtom(ctx, "message"), errorMessage,
-                           JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
+    JS_DefinePropertyValue(ctx, errorObject, JS_NewAtom(ctx, "message"), errorMessage, JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
     JSValue arguments[] = {errorObject};
     returnValue = JS_Call(ctx, callback, context->global(), 1, arguments);
     JS_FreeValue(ctx, errorObject);
   } else {
-    std::u16string argumentString = std::u16string(reinterpret_cast<const char16_t *>(json->string), json->length);
+    std::u16string argumentString = std::u16string(reinterpret_cast<const char16_t*>(json->string), json->length);
     std::string utf8Arguments = toUTF8(argumentString);
     JSValue jsonValue = JS_ParseJSON(ctx, utf8Arguments.c_str(), utf8Arguments.length(), "");
     JSValue arguments[] = {JS_NULL, jsonValue};
@@ -83,12 +76,11 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
   list_del(&moduleContext->link);
 }
 
-void handleInvokeModuleUnexpectedCallback(void *callbackContext, int32_t contextId, NativeString *errmsg,
-                                          NativeString *json) {
+void handleInvokeModuleUnexpectedCallback(void* callbackContext, int32_t contextId, NativeString* errmsg, NativeString* json) {
   static_assert("Unexpected module callback, please check your invokeModule implementation on the dart side.");
 }
 
-JSValue krakenInvokeModule(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+JSValue krakenInvokeModule(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (argc < 2) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'kraken.invokeModule()': 2 arguments required.");
   }
@@ -98,7 +90,7 @@ JSValue krakenInvokeModule(QjsContext *ctx, JSValueConst this_val, int argc, JSV
   JSValue paramsValue = JS_NULL;
   JSValue callbackValue = JS_NULL;
 
-  auto *context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
+  auto* context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
 
   if (argc > 2 && !JS_IsNull(argv[2])) {
     paramsValue = argv[2];
@@ -110,40 +102,32 @@ JSValue krakenInvokeModule(QjsContext *ctx, JSValueConst this_val, int argc, JSV
 
   if (getDartMethod()->invokeModule == nullptr) {
 #if FLUTTER_BACKEND
-    return JS_ThrowTypeError(
-      ctx, "Failed to execute '__kraken_invoke_module__': dart method (invokeModule) is not registered.");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_invoke_module__': dart method (invokeModule) is not registered.");
 #else
-  return JS_NULL;
+    return JS_NULL;
 #endif
   }
 
-  NativeString *moduleName = jsValueToNativeString(ctx, moduleNameValue);
-  NativeString *method = jsValueToNativeString(ctx, methodValue);
-  NativeString *params = nullptr;
+  NativeString* moduleName = jsValueToNativeString(ctx, moduleNameValue);
+  NativeString* method = jsValueToNativeString(ctx, methodValue);
+  NativeString* params = nullptr;
   if (!JS_IsNull(paramsValue)) {
     JSValue stringifyedValue = JS_JSONStringify(ctx, paramsValue, JS_NULL, JS_NULL);
     params = jsValueToNativeString(ctx, stringifyedValue);
     JS_FreeValue(ctx, stringifyedValue);
   }
 
-  ModuleContext *moduleContext;
+  ModuleContext* moduleContext;
   if (JS_IsNull(callbackValue)) {
-    auto emptyFunction = [](QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) -> JSValue {
-      return JS_NULL;
-    };
+    auto emptyFunction = [](QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue { return JS_NULL; };
     JSValue callbackFunc = JS_NewCFunction(ctx, emptyFunction, "_f", 0);
-    moduleContext = new ModuleContext{
-      callbackFunc, context
-    };
+    moduleContext = new ModuleContext{callbackFunc, context};
   } else {
-    moduleContext = new ModuleContext{
-      JS_DupValue(ctx, callbackValue),
-      context
-    };
+    moduleContext = new ModuleContext{JS_DupValue(ctx, callbackValue), context};
   }
   list_add_tail(&moduleContext->link, &context->module_callback_job_list);
 
-  NativeString *result;
+  NativeString* result;
 
   if (!JS_IsNull(callbackValue)) {
     result = getDartMethod()->invokeModule(moduleContext, context->getContextId(), moduleName, method, params, handleInvokeModuleTransientCallback);
@@ -166,7 +150,7 @@ JSValue krakenInvokeModule(QjsContext *ctx, JSValueConst this_val, int argc, JSV
   return resultString;
 }
 
-JSValue flushUICommand(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+JSValue flushUICommand(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (getDartMethod()->flushUICommand == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.");
   }
@@ -174,10 +158,10 @@ JSValue flushUICommand(QjsContext *ctx, JSValueConst this_val, int argc, JSValue
   return JS_NULL;
 }
 
-void bindModuleManager(std::unique_ptr<JSContext> &context) {
+void bindModuleManager(std::unique_ptr<JSContext>& context) {
   QJS_GLOBAL_BINDING_FUNCTION(context, krakenModuleListener, "__kraken_module_listener__", 1);
   QJS_GLOBAL_BINDING_FUNCTION(context, krakenInvokeModule, "__kraken_invoke_module__", 3);
   QJS_GLOBAL_BINDING_FUNCTION(context, flushUICommand, "__kraken_flush_ui_command__", 0);
 }
 
-} // namespace kraken::binding::qjs
+}  // namespace kraken::binding::qjs

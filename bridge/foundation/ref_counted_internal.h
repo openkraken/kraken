@@ -8,15 +8,15 @@
 #define FLUTTER_FML_MEMORY_REF_COUNTED_INTERNAL_H_
 
 #include <atomic>
-#include "logging.h"
 #include "include/kraken_bridge.h"
+#include "logging.h"
 
 namespace fml {
 namespace internal {
 
 // See ref_counted.h for comments on the public methods.
 class RefCountedThreadSafeBase {
-public:
+ public:
   void AddRef() const {
 #ifndef NDEBUG
     KRAKEN_CHECK(!adoption_required_);
@@ -25,15 +25,11 @@ public:
     ref_count_.fetch_add(1u, std::memory_order_relaxed);
   }
 
-  bool HasOneRef() const {
-    return ref_count_.load(std::memory_order_acquire) == 1u;
-  }
+  bool HasOneRef() const { return ref_count_.load(std::memory_order_acquire) == 1u; }
 
-  void AssertHasOneRef() const {
-    KRAKEN_CHECK(HasOneRef());
-  }
+  void AssertHasOneRef() const { KRAKEN_CHECK(HasOneRef()); }
 
-protected:
+ protected:
   RefCountedThreadSafeBase();
   ~RefCountedThreadSafeBase();
 
@@ -73,7 +69,7 @@ protected:
   }
 #endif
 
-private:
+ private:
   mutable std::atomic_uint_fast32_t ref_count_;
 
 #ifndef NDEBUG
@@ -85,10 +81,11 @@ private:
 };
 
 inline RefCountedThreadSafeBase::RefCountedThreadSafeBase()
-  : ref_count_(1u)
+    : ref_count_(1u)
 #ifndef NDEBUG
-    ,
-    adoption_required_(true), destruction_started_(false)
+      ,
+      adoption_required_(true),
+      destruction_started_(false)
 #endif
 {
 }
@@ -101,7 +98,7 @@ inline RefCountedThreadSafeBase::~RefCountedThreadSafeBase() {
 #endif
 }
 
-} // namespace internal
-} // namespace fml
+}  // namespace internal
+}  // namespace fml
 
-#endif // FLUTTER_FML_MEMORY_REF_COUNTED_INTERNAL_H_
+#endif  // FLUTTER_FML_MEMORY_REF_COUNTED_INTERNAL_H_

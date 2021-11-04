@@ -10,36 +10,35 @@
 
 namespace kraken::binding::qjs {
 
-void bindCustomEvent(std::unique_ptr<JSContext> &context);
+void bindCustomEvent(std::unique_ptr<JSContext>& context);
 
 struct NativeCustomEvent {
   NativeEvent nativeEvent;
-  NativeString *detail{nullptr};
+  NativeString* detail{nullptr};
 };
 
 class CustomEventInstance;
 
 class CustomEvent : public Event {
-public:
+ public:
   CustomEvent() = delete;
-  explicit CustomEvent(JSContext *context) : Event(context) {
-    JS_SetPrototype(m_ctx, m_prototypeObject, Event::instance(m_context)->prototype());
-  };
-  JSValue instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
+  explicit CustomEvent(JSContext* context) : Event(context) { JS_SetPrototype(m_ctx, m_prototypeObject, Event::instance(m_context)->prototype()); };
+  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
-  static JSValue initCustomEvent(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
+  static JSValue initCustomEvent(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   OBJECT_INSTANCE(CustomEvent);
 
-private:
+ private:
   ObjectFunction m_initCustomEvent{m_context, m_prototypeObject, "initCustomEvent", initCustomEvent, 4};
   friend CustomEventInstance;
 };
 
 class CustomEventInstance : public EventInstance {
-public:
-  explicit CustomEventInstance(CustomEvent *jsCustomEvent, JSAtom CustomEventType, JSValue eventInit);
-  explicit CustomEventInstance(CustomEvent *jsCustomEvent, NativeCustomEvent* nativeCustomEvent);
-private:
+ public:
+  explicit CustomEventInstance(CustomEvent* jsCustomEvent, JSAtom CustomEventType, JSValue eventInit);
+  explicit CustomEventInstance(CustomEvent* jsCustomEvent, NativeCustomEvent* nativeCustomEvent);
+
+ private:
   DEFINE_HOST_CLASS_PROPERTY(1, detail);
 
   JSValueHolder m_detail{m_ctx, JS_NULL};
@@ -47,8 +46,6 @@ private:
   friend CustomEvent;
 };
 
+}  // namespace kraken::binding::qjs
 
-
-}
-
-#endif // KRAKENBRIDGE_CUSTOM_EVENT_H
+#endif  // KRAKENBRIDGE_CUSTOM_EVENT_H

@@ -89,6 +89,8 @@ mixin CSSOverflowMixin on RenderStyleBase {
         return CSSOverflowType.scroll;
       case AUTO:
         return CSSOverflowType.auto;
+      case CLIP:
+        return CSSOverflowType.clip;
       case VISIBLE:
       default:
         return CSSOverflowType.visible;
