@@ -10,8 +10,8 @@
 
 namespace kraken::binding::qjs {
 
-void bindConsole(std::unique_ptr<JSContext> &context);
+void bindConsole(std::unique_ptr<JSContext>& context);
 
 }
 
-#endif // KRAKENBRIDGE_CONSOLE_H
+#endif  // KRAKENBRIDGE_CONSOLE_H
