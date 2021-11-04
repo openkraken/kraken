@@ -334,7 +334,7 @@ std::string DocumentCookie::getCookie() {
   return std::move(result);
 }
 
-void DocumentCookie::setCookie(std::string &cookieStr) {
+void DocumentCookie::setCookie(std::string& cookieStr) {
   trim(cookieStr);
 
   std::string key;

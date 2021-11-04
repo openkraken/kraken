@@ -46,7 +46,7 @@ static std::string parseJavaScriptCSSPropertyName(std::string& propertyName) {
   return result;
 }
 
-void parseRules(std::string &source, ParseRuleCallback callback, void *context) {
+void parseRules(std::string& source, ParseRuleCallback callback, void* context) {
   uint32_t idx = 0;
   uint32_t start = idx;
   uint32_t end = source.length();
@@ -79,10 +79,9 @@ void parseRules(std::string &source, ParseRuleCallback callback, void *context) 
 
     idx++;
   }
-
 }
 
-JSValue CSSStyleDeclaration::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
+JSValue CSSStyleDeclaration::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
   if (argc != 1) {
     return JS_ThrowTypeError(ctx, "Illegal constructor");
   }
@@ -145,30 +144,32 @@ JSValue CSSStyleDeclaration::getPropertyValue(QjsContext* ctx, JSValue this_val,
   return returnValue;
 }
 
-StyleDeclarationInstance::~StyleDeclarationInstance() {
-}
+StyleDeclarationInstance::~StyleDeclarationInstance() {}
 
-bool StyleDeclarationInstance::internalSetProperty(std::string &name, std::string &value) {
+bool StyleDeclarationInstance::internalSetProperty(std::string& name, std::string& value) {
   name = parseJavaScriptCSSPropertyName(name);
 
   m_styleRules[name] = value;
 
-  NativeString *args_01 = stringToNativeString(name);
-  NativeString *args_02 = stringToNativeString(value);
+  NativeString* args_01 = stringToNativeString(name);
+  NativeString* args_02 = stringToNativeString(value);
 
   foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_ownerEventTarget->eventTargetId, UICommand::setStyle, *args_01, *args_02, nullptr);
 
   return true;
 }
 
-void StyleDeclarationInstance::internalSetStyleRules(std::string &rules) {
-  parseRules(rules, [](void *p, std::string &key, std::string &value) {
-    auto *style = static_cast<StyleDeclarationInstance *>(p);
-    style->internalSetProperty(key, value);
-  }, this);
+void StyleDeclarationInstance::internalSetStyleRules(std::string& rules) {
+  parseRules(
+      rules,
+      [](void* p, std::string& key, std::string& value) {
+        auto* style = static_cast<StyleDeclarationInstance*>(p);
+        style->internalSetProperty(key, value);
+      },
+      this);
 }
 
-void StyleDeclarationInstance::internalRemoveProperty(std::string &name) {
+void StyleDeclarationInstance::internalRemoveProperty(std::string& name) {
   name = parseJavaScriptCSSPropertyName(name);
 
   if (m_styleRules.count(name) == 0) {
@@ -195,18 +196,19 @@ JSValue StyleDeclarationInstance::internalGetPropertyValue(std::string& name) {
 
 // TODO: add support for annotation CSS styleSheets.
 std::string StyleDeclarationInstance::toString() {
-  if (m_styleRules.empty()) return "";
+  if (m_styleRules.empty())
+    return "";
 
   std::string s;
 
-  for (auto &attr: m_styleRules) {
+  for (auto& attr : m_styleRules) {
     s += attr.first + ": " + attr.second + ";";
   }
   return s;
 }
 
-void StyleDeclarationInstance::copyWith(StyleDeclarationInstance *instance) {
-  for(auto &attr : instance->m_styleRules) {
+void StyleDeclarationInstance::copyWith(StyleDeclarationInstance* instance) {
+  for (auto& attr : instance->m_styleRules) {
     m_styleRules[attr.first] = attr.second;
   }
 }
@@ -220,9 +222,8 @@ int StyleDeclarationInstance::hasProperty(QjsContext* ctx, JSValue obj, JSAtom a
   return match;
 }
 
-int StyleDeclarationInstance::setProperty(QjsContext *ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver,
-                                          int flags) {
-  auto *style = static_cast<StyleDeclarationInstance *>(JS_GetOpaque(receiver, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
+int StyleDeclarationInstance::setProperty(QjsContext* ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver, int flags) {
+  auto* style = static_cast<StyleDeclarationInstance*>(JS_GetOpaque(receiver, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
   std::string name = jsAtomToStdString(ctx, atom);
   std::string v = jsValueToStdString(ctx, value);
   bool success = style->internalSetProperty(name, v);

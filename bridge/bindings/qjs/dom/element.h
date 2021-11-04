@@ -162,7 +162,7 @@ class ElementInstance : public NodeInstance {
   void _beforeUpdateId(JSAtom oldId, JSAtom newId);
   void resetStyle();
 
-  void gcMark(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) override;
+  void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
   std::string m_tagName;
   friend Element;

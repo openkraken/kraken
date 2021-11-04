@@ -12,9 +12,9 @@
 
 namespace kraken::binding::qjs {
 
-void HTMLParser::traverseHTML(NodeInstance *root, GumboNode *node) {
-  JSContext *context = root->context();
-  QjsContext *ctx = context->ctx();
+void HTMLParser::traverseHTML(NodeInstance* root, GumboNode* node) {
+  JSContext* context = root->context();
+  QjsContext* ctx = context->ctx();
 
   const GumboVector* children = &node->v.element.children;
   for (int i = 0; i < children->length; ++i) {

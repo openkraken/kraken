@@ -14,7 +14,6 @@
 #include "bindings/qjs/qjs_patch.h"
 #include "style_declaration.h"
 
-
 namespace kraken::binding::qjs {
 
 class EventTargetInstance;
