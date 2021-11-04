@@ -195,6 +195,7 @@ bool EventTargetInstance::dispatchEvent(EventInstance* event) {
       JSValue globalObjectValue = JS_GetGlobalObject(m_context->ctx());
       auto* window = static_cast<WindowInstance*>(JS_GetOpaque(globalObjectValue, Window::classId()));
       window->internalDispatchEvent(event);
+      JS_FreeValue(m_ctx, globalObjectValue);
     }
   }
 
