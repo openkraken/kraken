@@ -1,0 +1,25 @@
+name: Run Code Linter
+
+on: [push]
+
+jobs:
+  reformat-bridge:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: DoozyX/clang-format-lint-action@v0.13
+      with:
+        source: './bridge'
+        exclude: 'third_party'
+        extensions: 'h,cc,c'
+        clangFormatVersion: 12
+        inplace: True
+    - uses: EndBug/add-and-commit@v4
+      with:
+        author_name: openkraken-bot
+        author_email: openkraken@list.alibaba-inc.com
+        message: 'Committing clang-format changes'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
