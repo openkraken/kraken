@@ -12,8 +12,14 @@ namespace kraken {
 bool JSBridgeTest::evaluateTestScripts(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) {
   if (!context->isValid())
     return false;
-  //  binding::jsc::updateLocation(sourceURL);
   return context->evaluateJavaScript(code, codeLength, sourceURL, startLine);
+}
+
+bool JSBridgeTest::parseTestHTML(const uint16_t* code, size_t codeLength) {
+  if (!context->isValid())
+    return false;
+  std::string utf8Code = toUTF8(std::u16string(reinterpret_cast<const char16_t*>(code), codeLength));
+  return bridge_->parseHTML(utf8Code.c_str(), utf8Code.length());
 }
 
 static JSValue executeTest(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {

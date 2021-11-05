@@ -41,6 +41,7 @@ class JSBridgeTest final {
 
   /// evaluete JavaScript source code with build-in test frameworks, use in test only.
   bool evaluateTestScripts(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine);
+  bool parseTestHTML(const uint16_t* code, size_t codeLength);
   void invokeExecuteTest(ExecuteCallback executeCallback);
 
   JSValue executeTestCallback{JS_NULL};
