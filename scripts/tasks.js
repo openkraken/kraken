@@ -410,8 +410,9 @@ task(`build-ios-kraken-lib`, (done) => {
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
     -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
     -DPLATFORM=SIMULATOR64 \
+    -DDEPLOYMENT_TARGET=9.0 \
     ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
-    -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-x64 -S ${paths.bridge}`, {
+    -DENABLE_BITCODE=TRUE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-x64 -S ${paths.bridge}`, {
     cwd: paths.bridge,
     stdio: 'inherit',
     env: {
@@ -426,12 +427,13 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit'
   });
 
-  // Generate builds scripts for ARMv7
+  // Generate builds scripts for ARMv7, ARMv7, ARM64
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
     -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
     -DPLATFORM=OS \
+    -DDEPLOYMENT_TARGET=9.0 \
     ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
-    -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm -S ${paths.bridge}`, {
+    -DENABLE_BITCODE=TRUE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm -S ${paths.bridge}`, {
     cwd: paths.bridge,
     stdio: 'inherit',
     env: {
@@ -446,58 +448,32 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit'
   });
 
-  // geneate builds scripts for ARM64
-  execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
-     -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
-     -DPLATFORM=OS64 \
-     ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
-     -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm64 -S ${paths.bridge}`, {
-    cwd: paths.bridge,
-    stdio: 'inherit',
-    env: {
-      ...process.env,
-      KRAKEN_JS_ENGINE: targetJSEngine,
-      LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/ios/lib/arm64')
-    }
-  });
-
-  // build for ARMV64
-  execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm64 --target kraken kraken_static -- -j 12`, {
-    stdio: 'inherit'
-  });
-
   const targetSourceFrameworks = ['kraken_bridge', 'quickjs'];
 
   targetSourceFrameworks.forEach(target => {
     const armDynamicSDKPath = path.join(paths.bridge, `build/ios/lib/arm/${target}.framework`);
-    const arm64DynamicSDKPath = path.join(paths.bridge, `build/ios/lib/arm64/${target}.framework`);
     const x64DynamicSDKPath = path.join(paths.bridge, `build/ios/lib/x86_64/${target}.framework`);
 
     const targetDynamicSDKPath = `${paths.bridge}/build/ios/framework`;
     const frameworkPath = `${targetDynamicSDKPath}/${target}.xcframework`;
     mkdirp.sync(targetDynamicSDKPath);
 
-    // merge armv7 into armv8
-    execSync(`lipo -create ${armDynamicSDKPath}/${target} ${arm64DynamicSDKPath}/${target} -output ${arm64DynamicSDKPath}/${target}`, {
-      stdio: 'inherit'
-    });
-
     if (buildMode === 'RelWithDebInfo') {
       // Create dSYM for x86_64
       execSync(`dsymutil ${x64DynamicSDKPath}/${target}`, { stdio: 'inherit' });
 
-      // Create dSYM for arm64
-      execSync(`dsymutil ${arm64DynamicSDKPath}/${target}`, { stdio: 'inherit' });
+      // Create dSYM for arm64,armv7
+      execSync(`dsymutil ${armDynamicSDKPath}/${target}`, { stdio: 'inherit' });
       execSync(`xcodebuild -create-xcframework \
         -framework ${x64DynamicSDKPath} -debug-symbols ${x64DynamicSDKPath}/${target}.dSYM \
-        -framework ${arm64DynamicSDKPath} -debug-symbols ${arm64DynamicSDKPath}/${target}.dSYM -output ${frameworkPath}`, {
+        -framework ${armDynamicSDKPath} -debug-symbols ${armDynamicSDKPath}/${target}.dSYM -output ${frameworkPath}`, {
         stdio: 'inherit'
       });
 
     } else {
       execSync(`xcodebuild -create-xcframework \
         -framework ${x64DynamicSDKPath} \
-        -framework ${arm64DynamicSDKPath} -output ${frameworkPath}`, {
+        -framework ${armDynamicSDKPath} -output ${frameworkPath}`, {
         stdio: 'inherit'
       });
     }
