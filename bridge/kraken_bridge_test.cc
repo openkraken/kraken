@@ -30,6 +30,11 @@ int8_t evaluateTestScripts(int32_t contextId, NativeString* code, const char* bu
   return bridgeTest->evaluateTestScripts(code->string, code->length, bundleFilename, startLine);
 }
 
+int8_t parseTestHTML(int32_t contextId, NativeString* code) {
+  auto bridgeTest = bridgeTestPool[contextId];
+  return bridgeTest->parseTestHTML(code->string, code->length);
+}
+
 void executeTest(int32_t contextId, ExecuteCallback executeCallback) {
   auto bridgeTest = bridgeTestPool[contextId];
   bridgeTest->invokeExecuteTest(executeCallback);
