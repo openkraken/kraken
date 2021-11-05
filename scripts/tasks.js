@@ -403,6 +403,27 @@ task('sdk-clean', (done) => {
   done();
 });
 
+function insertStringSlice(code, position, slice) {
+  let leftHalf = code.substring(0, position);
+  let rightHalf = code.substring(position);
+
+  return leftHalf + slice + rightHalf;
+}
+
+function patchiOSFrameworkPList(frameworkPath) {
+  const pListPath = path.join(frameworkPath, 'Info.plist');
+  let pListString = fs.readFileSync(pListPath, {encoding: 'utf-8'});
+  let versionIndex = pListString.indexOf('CFBundleVersion');
+  if (versionIndex != -1) {
+    let versionStringLast = pListString.indexOf('</string>', versionIndex) + '</string>'.length;
+
+    pListString = insertStringSlice(pListString, versionStringLast, `
+        <key>MinimumOSVersion</key>
+        <string>9.0</string>`);
+    fs.writeFileSync(pListPath, pListString);
+  }
+}
+
 task(`build-ios-kraken-lib`, (done) => {
   const buildType = (buildMode == 'Release' || buildMode === 'RelWithDebInfo')  ? 'RelWithDebInfo' : 'Debug';
 
@@ -453,6 +474,9 @@ task(`build-ios-kraken-lib`, (done) => {
   targetSourceFrameworks.forEach(target => {
     const armDynamicSDKPath = path.join(paths.bridge, `build/ios/lib/arm/${target}.framework`);
     const x64DynamicSDKPath = path.join(paths.bridge, `build/ios/lib/x86_64/${target}.framework`);
+
+    patchiOSFrameworkPList(x64DynamicSDKPath);
+    patchiOSFrameworkPList(armDynamicSDKPath);
 
     const targetDynamicSDKPath = `${paths.bridge}/build/ios/framework`;
     const frameworkPath = `${targetDynamicSDKPath}/${target}.xcframework`;
