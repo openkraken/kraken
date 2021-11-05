@@ -71,7 +71,7 @@ if (ENABLE_ASAN)
   add_link_options(-fsanitize=address -fno-omit-frame-pointer)
 endif ()
 
-if (${PLATFORM} STREQUAL "OS")
+if (DEFINED ${PLATFORM} AND ${PLATFORM} STREQUAL "OS")
   add_compile_options(-fno-aligned-allocation)
 endif()
 
