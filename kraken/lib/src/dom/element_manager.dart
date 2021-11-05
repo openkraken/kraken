@@ -317,7 +317,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   void flushPendingStyleProperties(int targetId) {
-    assert(existsTarget(targetId), 'id: $targetId');
+    if (!existsTarget(targetId)) return;
     Node? target = getEventTargetByTargetId<Node>(targetId);
     if (target == null) return;
 
