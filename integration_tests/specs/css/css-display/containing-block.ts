@@ -423,8 +423,8 @@ describe('containing-block', () => {
       [
         createElement('img', {
           src: 'assets/blue96x96.png',
-          width: '96px',
-          height: '96px',
+          width: '96',
+          height: '96',
           alt: 'Image download support must be enabled',
           style: {},
         }),
