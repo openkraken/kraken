@@ -61,7 +61,7 @@ RegExp _kebabCaseReg = RegExp(r'[A-Z]');
 ///    object as a read-only interface.
 class CSSStyleDeclaration {
   Element? target;
-  // TODO(yuanyan): defualtStyle should be longhand properties.
+  // TODO(yuanyan): defaultStyle should be longhand properties.
   Map<String, dynamic>? defaultStyle;
   StyleChangeListener? onStyleChanged;
 
