@@ -262,13 +262,21 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   }
 
   /// Ensure child and child's child render object is attached.
-  void ensureChildAttached() {}
+  void ensureChildAttached() { }
 
   @override
-  void connectedCallback() {}
+  void connectedCallback() {
+    for (var child in childNodes) {
+      child.connectedCallback();
+    }
+  }
 
   @override
-  void disconnectedCallback() {}
+  void disconnectedCallback() {
+    for (var child in childNodes) {
+      child.disconnectedCallback();
+    }
+  }
 }
 
 /// https://dom.spec.whatwg.org/#dom-node-nodetype

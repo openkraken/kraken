@@ -237,7 +237,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     _debugDOMTreeChanged();
   }
 
-  // https://wicg.github.io/construct-stylesheets/#using-constructed-stylesheets
+  // TODO: https://wicg.github.io/construct-stylesheets/#using-constructed-stylesheets
   List<CSSStyleSheet> adoptedStyleSheets = [];
   List<CSSStyleSheet> styleSheets = [];
 
@@ -251,16 +251,9 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     recalculateDocumentStyle();
   }
 
-  bool _hasRecalculateDocumentStylePending = false;
   void recalculateDocumentStyle() {
-    if (_hasRecalculateDocumentStylePending) return;
-    _hasRecalculateDocumentStylePending = true;
-    SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
-      // Recalculate style for all nodes.
-      document.documentElement.recalculateNestedStyle();
-      _hasRecalculateDocumentStylePending = false;
-    });
-    SchedulerBinding.instance!.scheduleFrame();
+    // Recalculate style for all nodes sync.
+    document.documentElement.recalculateNestedStyle();
   }
 
   void setProperty(int targetId, String key, dynamic value) {

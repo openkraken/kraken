@@ -567,7 +567,7 @@ class Element extends Node
     }
     // Update renderStyle tree.
     if (child is Element) {
-      child.renderStyle.parent = null;
+      child.renderStyle.detach();
     }
 
     super.removeChild(child);
@@ -1348,7 +1348,8 @@ class Element extends Node
   }
 
   void recalculateStyle() {
-    if (renderBoxModel != null) {
+    // TODO: current only support class selector in stylesheet
+    if (renderBoxModel != null && classList.isNotEmpty) {
       // Diff style.
       CSSStyleDeclaration newStyle = CSSStyleDeclaration();
       _applyStyle(newStyle);
