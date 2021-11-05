@@ -116,15 +116,16 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler& handler) : conte
 #endif
 }
 
-void JSBridge::parseHTML(const char* code, size_t length) {
+bool JSBridge::parseHTML(const char* code, size_t length) {
   if (!m_context->isValid())
-    return;
+    return false;
   Document* Document = Document::instance(m_context.get());
   auto document = DocumentInstance::instance(Document);
   JSValue bodyValue = JS_GetPropertyStr(m_context->ctx(), document->instanceObject, "body");
   auto* body = static_cast<ElementInstance*>(JS_GetOpaque(bodyValue, Element::classId()));
   HTMLParser::parseHTML(code, length, body);
   JS_FreeValue(m_context->ctx(), bodyValue);
+  return true;
 }
 
 void JSBridge::invokeModuleEvent(NativeString* moduleName, const char* eventType, void* rawEvent, NativeString* extra) {
