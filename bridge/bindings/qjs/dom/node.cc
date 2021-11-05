@@ -6,6 +6,7 @@
 #include "node.h"
 #include "bindings/qjs/qjs_patch.h"
 #include "comment_node.h"
+#include "document_fragment.h"
 #include "document.h"
 #include "document_fragment.h"
 #include "element.h"
@@ -53,21 +54,26 @@ JSValue Node::cloneNode(QjsContext* ctx, JSValue this_val, int argc, JSValue* ar
   bool deep = JS_ToBool(ctx, deepValue);
 
   if (selfInstance->nodeType == NodeType::ELEMENT_NODE) {
-    auto element = static_cast<ElementInstance*>(selfInstance);
-
-    JSValue rootElement = copyNodeValue(ctx, static_cast<NodeInstance*>(element));
-    auto rootNodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(rootElement, Node::classId(rootElement)));
+    JSValue newElement = copyNodeValue(ctx, selfInstance);
+    auto newElementInstance = static_cast<NodeInstance*>(JS_GetOpaque(newElement, Node::classId(newElement)));
 
     if (deep) {
-      traverseCloneNode(ctx, static_cast<ElementInstance*>(element), static_cast<ElementInstance*>(rootNodeInstance));
+      traverseCloneNode(ctx, selfInstance, newElementInstance);
     }
-    return rootNodeInstance->instanceObject;
+    return newElementInstance->instanceObject;
   } else if (selfInstance->nodeType == NodeType::TEXT_NODE) {
     auto textNode = static_cast<TextNodeInstance*>(selfInstance);
     JSValue newTextNode = copyNodeValue(ctx, static_cast<NodeInstance*>(textNode));
     return newTextNode;
-  } else {
-    return JS_NULL;
+  } else if (selfInstance->nodeType == NodeType::DOCUMENT_FRAGMENT_NODE) {
+    JSValue newFragment = JS_CallConstructor(ctx, DocumentFragment::instance(selfInstance->m_context)->classObject, 0, nullptr);
+    auto *newFragmentInstance = static_cast<NodeInstance *>(JS_GetOpaque(newFragment, Node::classId(newFragment)));
+
+    if (deep) {
+      traverseCloneNode(ctx, selfInstance, newFragmentInstance);
+    }
+
+    return newFragment;
   }
   return JS_NULL;
 }
@@ -229,15 +235,15 @@ JSValue Node::replaceChild(QjsContext* ctx, JSValue this_val, int argc, JSValue*
   return JS_DupValue(ctx, oldChildInstance->instanceObject);
 }
 
-void Node::traverseCloneNode(QjsContext* ctx, NodeInstance* element, NodeInstance* parentElement) {
-  int32_t len = arrayGetLength(ctx, element->childNodes);
+void Node::traverseCloneNode(QjsContext* ctx, NodeInstance* baseNode, NodeInstance* targetNode) {
+  int32_t len = arrayGetLength(ctx, baseNode->childNodes);
   for (int i = 0; i < len; i++) {
-    JSValue n = JS_GetPropertyUint32(ctx, element->childNodes, i);
+    JSValue n = JS_GetPropertyUint32(ctx, baseNode->childNodes, i);
     auto* node = static_cast<NodeInstance*>(JS_GetOpaque(n, Node::classId(n)));
     JSValue newNode = copyNodeValue(ctx, node);
     auto newNodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(newNode, Node::classId(newNode)));
-    parentElement->ensureDetached(newNodeInstance);
-    parentElement->internalAppendChild(newNodeInstance);
+    targetNode->ensureDetached(newNodeInstance);
+    targetNode->internalAppendChild(newNodeInstance);
     // element node needs recursive child nodes.
     if (node->nodeType == NodeType::ELEMENT_NODE) {
       traverseCloneNode(ctx, node, newNodeInstance);
