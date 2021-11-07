@@ -367,8 +367,10 @@ class CSSStyleDeclaration {
   }
 
   void flushPendingProperties() {
+    if (target == null) return;
+
     // Display change from none to other value that the renderBoxModel is null.
-    if (_pendingProperties.containsKey(DISPLAY)) {
+    if (_pendingProperties.containsKey(DISPLAY) && target!.isConnected) {
       String? prevValue = _properties[DISPLAY];
       String currentValue = _pendingProperties[DISPLAY]!;
       _properties[DISPLAY] = currentValue;
@@ -376,7 +378,7 @@ class CSSStyleDeclaration {
       _emitPropertyChanged(DISPLAY, prevValue, currentValue);
     }
 
-    RenderBoxModel? renderBoxModel = target?.renderBoxModel;
+    RenderBoxModel? renderBoxModel = target!.renderBoxModel;
     if (_pendingProperties.isEmpty || renderBoxModel == null) {
       return;
     }
