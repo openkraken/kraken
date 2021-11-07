@@ -874,6 +874,10 @@ void ElementInstance::gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func)
 }
 
 void ElementInstance::resetStyle() {
+  if (m_style != nullptr) {
+    JS_FreeValue(m_ctx, m_style->instanceObject);
+  }
+
   JSValue arguments[] = {instanceObject};
   JSValue style = JS_CallConstructor(m_ctx, CSSStyleDeclaration::instance(m_context)->classObject, 1, arguments);
   m_style = static_cast<StyleDeclarationInstance*>(JS_GetOpaque(style, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
