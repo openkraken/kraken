@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 
-import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
@@ -15,53 +14,66 @@ enum CSSPositionType {
   sticky,
 }
 
-class CSSOffset {
-  CSSOffset({
-    this.length,
-    this.isAuto,
-  });
-  /// length if margin value is length type
-  double? length;
-  /// Whether value is auto
-  bool? isAuto;
-}
-
 mixin CSSPositionMixin on RenderStyleBase {
 
-  CSSOffset? _top;
-  CSSOffset? get top {
-    return _top;
+  static const CSSPositionType DEFAULT_POSITION_TYPE = CSSPositionType.static;
+
+  // https://drafts.csswg.org/css-position/#insets
+  // Name: top, right, bottom, left
+  // Value: auto | <length-percentage>
+  // Initial: auto
+  // Applies to: positioned elements
+  // Inherited: no
+  // Percentages: refer to size of containing block; see prose
+  // Computed value: the keyword auto or a computed <length-percentage> value
+  // Canonical order: per grammar
+  // Animation type: by computed value type
+  CSSLengthValue? _top;
+  CSSLengthValue get top {
+    return _top ?? CSSLengthValue.auto;
   }
-  set top(CSSOffset? value) {
-    if (_top == value) return;
+  set top(CSSLengthValue? value) {
+    if (_top == value) {
+      return;
+    }
     _top = value;
+    _markParentNeedsLayout();
   }
 
-  CSSOffset? _bottom;
-  CSSOffset? get bottom {
-    return _bottom;
+  CSSLengthValue? _bottom;
+  CSSLengthValue get bottom {
+    return _bottom ?? CSSLengthValue.auto;
   }
-  set bottom(CSSOffset? value) {
-    if (_bottom == value) return;
+  set bottom(CSSLengthValue? value) {
+    if (_bottom == value) {
+      return;
+    }
     _bottom = value;
+    _markParentNeedsLayout();
   }
 
-  CSSOffset? _left;
-  CSSOffset? get left {
-    return _left;
+  CSSLengthValue? _left;
+  CSSLengthValue get left {
+    return _left ?? CSSLengthValue.auto;
   }
-  set left(CSSOffset? value) {
-    if (_left == value) return;
+  set left(CSSLengthValue? value) {
+    if (_left == value) {
+      return;
+    }
     _left = value;
+    _markParentNeedsLayout();
   }
 
-  CSSOffset? _right;
-  CSSOffset? get right {
-    return _right;
+  CSSLengthValue? _right;
+  CSSLengthValue get right {
+    return _right ?? CSSLengthValue.auto;
   }
-  set right(CSSOffset? value) {
-    if (_right == value) return;
+  set right(CSSLengthValue? value) {
+    if (_right == value) {
+      return;
+    }
     _right = value;
+    _markParentNeedsLayout();
   }
 
   int? _zIndex;
@@ -71,19 +83,10 @@ mixin CSSPositionMixin on RenderStyleBase {
   set zIndex(int? value) {
     if (_zIndex == value) return;
     _zIndex = value;
-    _markParentNeedsLayout();
-    // Needs to sort children when parent paint children
-    if (renderBoxModel!.parentData is RenderLayoutParentData) {
-      RenderLayoutBox parent = renderBoxModel!.parent as RenderLayoutBox;
-      final RenderLayoutParentData parentData = renderBoxModel!.parentData as RenderLayoutParentData;
-      RenderBox? nextSibling = parentData.nextSibling;
-
-      parent.sortedChildren.remove(renderBoxModel);
-      parent.insertChildIntoSortedChildren(renderBoxModel!, after: nextSibling);
-    }
+    _markParentNeedsPaint();
   }
 
-  CSSPositionType _position = CSSPositionType.static;
+  CSSPositionType _position = DEFAULT_POSITION_TYPE;
   CSSPositionType get position {
     return _position;
   }
@@ -91,6 +94,8 @@ mixin CSSPositionMixin on RenderStyleBase {
     if (_position == value) return;
     _position = value;
     _markParentNeedsLayout();
+    // Position change may affect transformed display
+    // https://www.w3.org/TR/css-display-3/#transformations
   }
 
   void _markParentNeedsLayout() {
@@ -99,48 +104,31 @@ mixin CSSPositionMixin on RenderStyleBase {
     // to bubble up in the RenderObject tree.
     if (renderBoxModel!.parentData is RenderLayoutParentData) {
       RenderStyle renderStyle = renderBoxModel!.renderStyle;
-      if (renderStyle.position != CSSPositionType.static) {
+      if (renderStyle.position != DEFAULT_POSITION_TYPE) {
         RenderBoxModel parent = renderBoxModel!.parent as RenderBoxModel;
         parent.markNeedsLayout();
       }
     }
   }
 
-  void updateOffset(String property, double value, {bool shouldMarkNeedsLayout = true}) {
-    switch (property) {
-      case TOP:
-        top = CSSOffset(length: value, isAuto: style[TOP] == AUTO);
-        break;
-      case LEFT:
-        left = CSSOffset(length: value, isAuto: style[LEFT] == AUTO);
-        break;
-      case RIGHT:
-        right = CSSOffset(length: value, isAuto: style[RIGHT] == AUTO);
-        break;
-      case BOTTOM:
-        bottom = CSSOffset(length: value, isAuto: style[BOTTOM] == AUTO);
-        break;
-    }
-    /// Should mark parent needsLayout directly cause positioned element is rendered as relayoutBoundary
-    /// the parent will not be marked as markNeedsLayout
-    if (shouldMarkNeedsLayout) {
-      _markParentNeedsLayout();
+  void _markParentNeedsPaint() {
+    // Should mark positioned element's containing block needs layout directly
+    // cause RepaintBoundary of positioned element will prevent the needsLayout flag
+    // to bubble up in the RenderObject tree.
+    if (renderBoxModel!.parentData is RenderLayoutParentData) {
+      RenderStyle renderStyle = renderBoxModel!.renderStyle;
+      RenderStyle? parentRenderStyle = renderStyle.parent;
+      // The z-index CSS property sets the z-order of a positioned element and its descendants or flex items.
+      if (renderStyle.position != DEFAULT_POSITION_TYPE ||
+        parentRenderStyle?.effectiveDisplay == CSSDisplay.flex ||
+        parentRenderStyle?.effectiveDisplay == CSSDisplay.inlineFlex) {
+        RenderBoxModel parent = renderBoxModel!.parent as RenderBoxModel;
+        parent.markNeedsPaint();
+      }
     }
   }
 
-  void updatePosition(String property, String present) {
-    RenderStyle renderStyle = this as RenderStyle;
-    position = parsePositionType(style[POSITION]);
-    // Position change may affect transformed display
-    // https://www.w3.org/TR/css-display-3/#transformations
-    renderStyle.transformedDisplay = renderStyle.getTransformedDisplay();
-  }
-
-  void updateZIndex(String property, String present) {
-    zIndex = int.tryParse(present);
-  }
-
-  static CSSPositionType parsePositionType(String? input) {
+  static CSSPositionType resolvePositionType(String? input) {
     switch (input) {
       case RELATIVE:
         return CSSPositionType.relative;
@@ -150,8 +138,9 @@ mixin CSSPositionMixin on RenderStyleBase {
         return CSSPositionType.fixed;
       case STICKY:
         return CSSPositionType.sticky;
+      default:
+        return CSSPositionType.static;
     }
-    return CSSPositionType.static;
   }
 
 }

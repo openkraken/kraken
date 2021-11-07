@@ -14,17 +14,10 @@ mixin CSSObjectFitMixin on RenderStyleBase {
   set objectFit(BoxFit value) {
     if (_objectFit == value) return;
     _objectFit = value;
+    renderBoxModel!.markNeedsLayout();
   }
 
-  void updateObjectFit(String property, String value, {bool shouldMarkNeedsLayout = true}) {
-    RenderStyle renderStyle = this as RenderStyle;
-    renderStyle.objectFit = _getBoxFit(value);
-    if (shouldMarkNeedsLayout) {
-      renderBoxModel!.markNeedsLayout();
-    }
-  }
-
-  BoxFit _getBoxFit(String fit) {
+  static BoxFit resolveBoxFit(String fit) {
     switch (fit) {
       case 'contain':
         return BoxFit.contain;

@@ -8,13 +8,12 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:meta/meta.dart';
 
-class RenderRecyclerLayout extends RenderLayoutBox {
+class RenderSliverListLayout extends RenderLayoutBox {
   // Expose viewport for sliver mixin.
   RenderViewport get viewport => _renderViewport;
   // The viewport for sliver.
@@ -26,16 +25,25 @@ class RenderRecyclerLayout extends RenderLayoutBox {
   // The scrollable context to handle gestures.
   late KrakenScrollable scrollable;
 
-  // The main axis for recycler layout.
+  // Called if scrolling pixel has moved.
+  final ScrollListener? _scrollListener;
+
+  // The main axis for sliver list layout.
   Axis axis = Axis.vertical;
 
-  RenderRecyclerLayout({
+  // The sliver box child manager
+  final RenderSliverBoxChildManager _renderSliverBoxChildManager;
+
+  RenderSliverListLayout({
     required RenderStyle renderStyle,
-    required ElementDelegate elementDelegate
-  }) : super(renderStyle: renderStyle, elementDelegate: elementDelegate) {
+    required RenderSliverBoxChildManager manager,
+    ScrollListener? onScroll,
+  }) : _renderSliverBoxChildManager = manager,
+       _scrollListener = onScroll,
+        super(renderStyle: renderStyle) {
     pointerListener = _pointerListener;
     scrollable = KrakenScrollable(axisDirection: getAxisDirection(axis));
-    axis = renderStyle.sliverAxis;
+    axis = renderStyle.sliverDirection;
 
     switch (axis) {
       case Axis.horizontal:
@@ -59,7 +67,7 @@ class RenderRecyclerLayout extends RenderLayoutBox {
   }
 
   @override
-  ScrollListener? get scrollListener => elementDelegate.handleScroll;
+  ScrollListener? get scrollListener => _scrollListener;
 
   @override
   bool get isRepaintBoundary => true;
@@ -119,13 +127,13 @@ class RenderRecyclerLayout extends RenderLayoutBox {
 
   @protected
   RenderSliverList _buildRenderSliverList() {
-    return _renderSliverList = RenderSliverList(childManager: elementDelegate.renderSliverBoxChildManager!);
+    return _renderSliverList = RenderSliverList(childManager: _renderSliverBoxChildManager);
   }
 
   /// Child count should rely on element's childNodes, the real
   /// child renderObject count is not exactly.
   @override
-  int get childCount => elementDelegate.renderSliverBoxChildManager!.childCount;
+  int get childCount => _renderSliverBoxChildManager.childCount;
 
   Size get _screenSize => window.physicalSize / window.devicePixelRatio;
 
@@ -145,9 +153,9 @@ class RenderRecyclerLayout extends RenderLayoutBox {
     RenderBox? child = _renderViewport;
     late BoxConstraints childConstraints;
 
-    double? width = renderStyle.width;
-    double? height = renderStyle.height;
-    Axis sliverAxis = renderStyle.sliverAxis;
+    double? width = renderStyle.width.isAuto ? null : renderStyle.width.computedValue;
+    double? height = renderStyle.height.isAuto ? null : renderStyle.height.computedValue;
+    Axis sliverAxis = renderStyle.sliverDirection;
 
     switch (sliverAxis) {
       case Axis.horizontal:
@@ -191,13 +199,10 @@ class RenderRecyclerLayout extends RenderLayoutBox {
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
-    if (renderStyle.padding != null) {
-      offset += Offset(renderStyle.paddingLeft, renderStyle.paddingTop);
-    }
 
-    if (renderStyle.borderEdge != null) {
-      offset += Offset(renderStyle.borderLeft, renderStyle.borderTop);
-    }
+    offset += Offset(renderStyle.paddingLeft.computedValue, renderStyle.paddingTop.computedValue);
+
+    offset += Offset(renderStyle.effectiveBorderLeftWidth.computedValue, renderStyle.effectiveBorderTopWidth.computedValue);
 
     if (firstChild != null) {
       late DateTime childPaintStart;
@@ -231,7 +236,6 @@ class RenderRecyclerLayout extends RenderLayoutBox {
     RenderFlexLayout renderFlexLayout = RenderFlexLayout(
       children: children as List<RenderBox>?,
       renderStyle: renderStyle,
-      elementDelegate: elementDelegate,
     );
     return copyWith(renderFlexLayout);
   }
@@ -240,7 +244,6 @@ class RenderRecyclerLayout extends RenderLayoutBox {
     List<RenderObject?> children = getDetachedChildrenAsList();
     RenderFlowLayout renderFlowLayout = RenderFlowLayout(
       renderStyle: renderStyle,
-      elementDelegate: elementDelegate,
     );
     renderFlowLayout.addAll(children as List<RenderBox>?);
     return copyWith(renderFlowLayout);

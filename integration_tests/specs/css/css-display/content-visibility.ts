@@ -106,7 +106,7 @@ describe('Content Visibility', () => {
       contentVisibility: 'auto',
     });
 
-    await sleep(0.1);
+
     await snapshot();
   });
 

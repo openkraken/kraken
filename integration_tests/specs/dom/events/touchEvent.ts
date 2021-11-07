@@ -8,7 +8,7 @@ describe('TouchEvent', () => {
 
     div.addEventListener('touchstart', e => {
       done();
-    })
+    });
 
     simulateSwipe(0, 0, 100, 100, 0.5);
   });
@@ -22,7 +22,7 @@ describe('TouchEvent', () => {
 
     div.addEventListener('touchend', e => {
       done();
-    })
+    });
 
     simulateSwipe(0, 0, 100, 100, 0.5);
   });
@@ -36,7 +36,7 @@ describe('TouchEvent', () => {
 
     div.addEventListener('touchmove', e => {
       done();
-    })
+    });
     simulateSwipe(0, 0, 100, 100, 0.5);
   });
 
@@ -79,7 +79,7 @@ describe('TouchEvent', () => {
       div.removeEventListener('touchend', func);
       await simulatePoinrUp(20, 20);
       done();
-    }
+    };
 
     div.addEventListener('touchend', func);
 
@@ -110,7 +110,7 @@ describe('TouchEvent', () => {
       await simulatePoinrUp(20, 20);
       div2.removeEventListener('touchend', func);
       done();
-    }
+    };
 
     div2.addEventListener('touchend', func);
 
@@ -129,7 +129,7 @@ describe('TouchEvent', () => {
       expect(e.changedTouches.length).toBe(1);
       div.removeEventListener('touchend', func);
       done();
-    }
+    };
 
     div.addEventListener('touchend', func)
 
@@ -148,7 +148,7 @@ describe('TouchEvent', () => {
       expect(e.changedTouches.length).toBe(1);
       div.removeEventListener('touchstart', func);
       done();
-    }
+    };
 
     div.addEventListener('touchstart', func)
 
@@ -167,7 +167,7 @@ describe('TouchEvent', () => {
       expect(e.changedTouches.length).toBe(1);
       div.removeEventListener('touchmove', func);
       done();
-    }
+    };
 
     div.addEventListener('touchmove', func)
 

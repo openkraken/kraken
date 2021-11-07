@@ -304,7 +304,7 @@ describe('Position absolute', () => {
     setTimeout(async () => {
       div.style.bottom = '100px';
       await snapshot();
-    }, 100);
+    }, 200);
 
     setTimeout(async () => {
       div.style.bottom = '-200px';
@@ -326,7 +326,7 @@ describe('Position absolute', () => {
     setTimeout(async () => {
       div.style.width = '100px';
       await snapshot();
-    }, 100);
+    }, 200);
 
     setTimeout(async () => {
       div.style.width = '400px';
@@ -348,7 +348,7 @@ describe('Position absolute', () => {
     setTimeout(async () => {
       div.style.height = '100px';
       await snapshot();
-    }, 100);
+    }, 200);
 
     setTimeout(async () => {
       div.style.height = '400px';
@@ -370,7 +370,7 @@ describe('Position absolute', () => {
     setTimeout(async () => {
       div.style.top = '100px';
       await snapshot();
-    }, 100);
+    }, 200);
 
     setTimeout(async () => {
       div.style.top = '-50px';
@@ -392,7 +392,7 @@ describe('Position absolute', () => {
     setTimeout(async () => {
       div.style.left = '100px';
       await snapshot();
-    }, 100);
+    }, 200);
 
     setTimeout(async () => {
       div.style.left = '-50px';
@@ -414,7 +414,7 @@ describe('Position absolute', () => {
     setTimeout(async () => {
       div.style.right = '100px';
       await snapshot();
-    }, 100);
+    }, 200);
 
     setTimeout(async () => {
       div.style.right = '-50px';

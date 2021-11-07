@@ -21,66 +21,84 @@ enum CSSOverflowType {
   clip
 }
 
-List<CSSOverflowType> getOverflowTypes(CSSStyleDeclaration style) {
-  CSSOverflowType overflowX = _getOverflowType(style[OVERFLOW_X]);
-  CSSOverflowType overflowY = _getOverflowType(style[OVERFLOW_Y]);
+// Styles which need to copy from outer scrolling box to inner scrolling content box.
+List<String> _scrollingContentBoxCopyStyles = [
+  DISPLAY,
+  LINE_HEIGHT,
+  TEXT_ALIGN,
+  WHITE_SPACE,
+  FLEX_DIRECTION,
+  FLEX_WRAP,
+  ALIGN_CONTENT,
+  ALIGN_ITEMS,
+  ALIGN_SELF,
+  JUSTIFY_CONTENT,
+  COLOR,
+  TEXT_DECORATION_LINE,
+  TEXT_DECORATION_COLOR,
+  TEXT_DECORATION_STYLE,
+  FONT_WEIGHT,
+  FONT_STYLE,
+  FONT_FAMILY,
+  FONT_SIZE,
+  LETTER_SPACING,
+  WORD_SPACING,
+  TEXT_SHADOW,
+  TEXT_OVERFLOW,
+  LINE_CLAMP,
+];
 
-  // Apply overflow special rules from w3c.
-  if (overflowX == CSSOverflowType.visible && overflowY != CSSOverflowType.visible) {
-    overflowX = CSSOverflowType.auto;
-  }
-
-  if (overflowY == CSSOverflowType.visible && overflowX != CSSOverflowType.visible) {
-    overflowY = CSSOverflowType.auto;
-  }
-
-  return [overflowX, overflowY];
-}
-
-CSSOverflowType _getOverflowType(String definition) {
-  switch (definition) {
-    case HIDDEN:
-      return CSSOverflowType.hidden;
-    case SCROLL:
-      return CSSOverflowType.scroll;
-    case AUTO:
-      return CSSOverflowType.auto;
-    case CLIP:
-      return CSSOverflowType.clip;
-    case VISIBLE:
-    default:
-      return CSSOverflowType.visible;
-  }
-}
-
-mixin CSSOverflowStyleMixin on RenderStyleBase {
-  CSSOverflowType _overflowX = CSSOverflowType.visible;
+mixin CSSOverflowMixin on RenderStyleBase {
+  CSSOverflowType? _overflowX;
   CSSOverflowType get overflowX {
-    return _overflowX;
+    return _overflowX ?? CSSOverflowType.visible;
   }
   set overflowX(CSSOverflowType value) {
     if (_overflowX == value) return;
     _overflowX = value;
   }
 
-  CSSOverflowType _overflowY = CSSOverflowType.visible;
+  CSSOverflowType? _overflowY;
   CSSOverflowType get overflowY {
-    return _overflowY;
+    return _overflowY ?? CSSOverflowType.visible;
   }
   set overflowY(CSSOverflowType value) {
     if (_overflowY == value) return;
     _overflowY = value;
   }
 
-  void updateOverflow(CSSStyleDeclaration style) {
-    RenderStyle renderStyle = this as RenderStyle;
-    List<CSSOverflowType> overflow = getOverflowTypes(style);
-    renderStyle.overflowX = overflow[0];
-    renderStyle.overflowY = overflow[1];
+  CSSOverflowType get effectiveOverflowX {
+    if (overflowX == CSSOverflowType.visible && overflowY != CSSOverflowType.visible) {
+      return CSSOverflowType.auto;
+    }
+    return overflowX;
+  }
+
+  CSSOverflowType get effectiveOverflowY {
+    if (overflowY == CSSOverflowType.visible && overflowX != CSSOverflowType.visible) {
+      return CSSOverflowType.auto;
+    }
+    return overflowY;
+  }
+
+  static CSSOverflowType resolveOverflowType(String definition) {
+    switch (definition) {
+      case HIDDEN:
+        return CSSOverflowType.hidden;
+      case SCROLL:
+        return CSSOverflowType.scroll;
+      case AUTO:
+        return CSSOverflowType.auto;
+      case CLIP:
+        return CSSOverflowType.clip;
+      case VISIBLE:
+      default:
+        return CSSOverflowType.visible;
+    }
   }
 }
 
-mixin CSSOverflowMixin on ElementBase {
+mixin ElementOverflowMixin on ElementBase {
   // The duration time for element scrolling to a significant place.
   static const SCROLL_DURATION = Duration(milliseconds: 250);
 
@@ -90,27 +108,19 @@ mixin CSSOverflowMixin on ElementBase {
   // House content which can be scrolled.
   RenderLayoutBox? scrollingContentLayoutBox;
 
-  void updateRenderOverflow(Element element) {
-    ScrollListener scrollListener = element.elementDelegate.handleScroll;
-    CSSStyleDeclaration style = element.style;
-    RenderBoxModel renderBoxModel = element.renderBoxModel!;
-    RenderStyle renderStyle = renderBoxModel.renderStyle;
-
-    renderStyle.updateOverflow(style);
-
-    if (renderBoxModel is RenderRecyclerLayout) {
+  void updateRenderBoxModelWithOverflowX(ScrollListener scrollListener) {
+    Element element = this as Element;
+    if (renderBoxModel is RenderSliverListLayout) {
+      RenderSliverListLayout renderBoxModel = this.renderBoxModel as RenderSliverListLayout;
       // Recycler layout not need repaintBoundary and scroll/pointer listeners,
       // ignoring overflowX or overflowY sets, which handle it self.
-      renderBoxModel.clipX = renderBoxModel.clipY = false;
+      renderBoxModel.clipX = false;
       renderBoxModel.scrollOffsetX = renderBoxModel.axis == Axis.horizontal
           ? renderBoxModel.scrollable.position : null;
-      renderBoxModel.scrollOffsetY = renderBoxModel.axis == Axis.vertical
-          ? renderBoxModel.scrollable.position : null;
-    } else {
-      CSSOverflowType overflowX = renderStyle.overflowX;
-      CSSOverflowType overflowY = renderStyle.overflowY;
+    } else if (renderBoxModel != null) {
+      RenderBoxModel renderBoxModel = this.renderBoxModel!;
+      CSSOverflowType overflowX = renderStyle.effectiveOverflowX;
       bool shouldRepaintSelf = false;
-
       switch(overflowX) {
         case CSSOverflowType.hidden:
           _scrollableX = null;
@@ -140,6 +150,32 @@ mixin CSSOverflowMixin on ElementBase {
           break;
       }
 
+      renderBoxModel.scrollListener = scrollListener;
+      renderBoxModel.pointerListener = _pointerListener;
+
+      if (renderBoxModel is RenderLayoutBox) {
+        if (shouldRepaintSelf) {
+          _upgradeToSelfRepaint(element);
+        } else {
+          _downgradeToParentRepaint(element);
+        }
+      }
+    }
+  }
+
+  void updateRenderBoxModelWithOverflowY(ScrollListener scrollListener) {
+    Element element = this as Element;
+    if (renderBoxModel is RenderSliverListLayout) {
+      RenderSliverListLayout renderBoxModel = this.renderBoxModel as RenderSliverListLayout;
+      // Recycler layout not need repaintBoundary and scroll/pointer listeners,
+      // ignoring overflowX or overflowY sets, which handle it self.
+      renderBoxModel.clipY = false;
+      renderBoxModel.scrollOffsetY = renderBoxModel.axis == Axis.vertical
+          ? renderBoxModel.scrollable.position : null;
+    } else if (renderBoxModel != null) {
+      RenderBoxModel renderBoxModel = this.renderBoxModel!;
+      CSSOverflowType overflowY = renderStyle.effectiveOverflowY;
+      bool shouldRepaintSelf = false;
       switch(overflowY) {
         case CSSOverflowType.hidden:
           _scrollableY = null;
@@ -180,16 +216,79 @@ mixin CSSOverflowMixin on ElementBase {
     }
   }
 
-  void _createScrollingLayoutBox(Element element) {
-    CSSStyleDeclaration repaintBoundaryStyle = element.style.clone(element);
-    repaintBoundaryStyle.setProperty(OVERFLOW, VISIBLE);
-    scrollingContentLayoutBox = Element.createRenderLayout(
-      element,
-      repaintSelf: true,
-      style: repaintBoundaryStyle
-    );
-
-    scrollingContentLayoutBox!.isScrollingContentBox = true;
+  void scrollingContentBoxStyleListener(String property, String? original, String present) {
+    RenderStyle scrollingContentRenderStyle = scrollingContentLayoutBox!.renderStyle;
+    switch (property) {
+      case DISPLAY:
+        scrollingContentRenderStyle.display = renderStyle.display;
+        break;
+      case LINE_HEIGHT:
+        scrollingContentRenderStyle.lineHeight = renderStyle.lineHeight;
+        break;
+      case TEXT_ALIGN:
+        scrollingContentRenderStyle.textAlign = renderStyle.textAlign;
+        break;
+      case WHITE_SPACE:
+        scrollingContentRenderStyle.whiteSpace = renderStyle.whiteSpace;
+        break;
+      case FLEX_DIRECTION:
+        scrollingContentRenderStyle.flexDirection = renderStyle.flexDirection;
+        break;
+      case FLEX_WRAP:
+        scrollingContentRenderStyle.flexWrap = renderStyle.flexWrap;
+        break;
+      case ALIGN_CONTENT:
+        scrollingContentRenderStyle.alignContent = renderStyle.alignContent;
+        break;
+      case ALIGN_ITEMS:
+        scrollingContentRenderStyle.alignItems = renderStyle.alignItems;
+        break;
+      case ALIGN_SELF:
+        scrollingContentRenderStyle.alignSelf = renderStyle.alignSelf;
+        break;
+      case JUSTIFY_CONTENT:
+        scrollingContentRenderStyle.justifyContent = renderStyle.justifyContent;
+        break;
+      case COLOR:
+        scrollingContentRenderStyle.color = renderStyle.color;
+        break;
+      case TEXT_DECORATION_LINE:
+        scrollingContentRenderStyle.textDecorationLine = renderStyle.textDecorationLine;
+        break;
+      case TEXT_DECORATION_COLOR:
+        scrollingContentRenderStyle.textDecorationColor = renderStyle.textDecorationColor;
+        break;
+      case TEXT_DECORATION_STYLE:
+        scrollingContentRenderStyle.textDecorationStyle = renderStyle.textDecorationStyle;
+        break;
+      case FONT_WEIGHT:
+        scrollingContentRenderStyle.fontWeight = renderStyle.fontWeight;
+        break;
+      case FONT_STYLE:
+        scrollingContentRenderStyle.fontStyle = renderStyle.fontStyle;
+        break;
+      case FONT_FAMILY:
+        scrollingContentRenderStyle.fontFamily = renderStyle.fontFamily;
+        break;
+      case FONT_SIZE:
+        scrollingContentRenderStyle.fontSize = renderStyle.fontSize;
+        break;
+      case LETTER_SPACING:
+        scrollingContentRenderStyle.letterSpacing = renderStyle.letterSpacing;
+        break;
+      case WORD_SPACING:
+        scrollingContentRenderStyle.wordSpacing = renderStyle.wordSpacing;
+        break;
+      case TEXT_SHADOW:
+        scrollingContentRenderStyle.textShadow = renderStyle.textShadow;
+        break;
+      case TEXT_OVERFLOW:
+        scrollingContentRenderStyle.textOverflow = renderStyle.textOverflow;
+        break;
+      case LINE_CLAMP:
+        scrollingContentRenderStyle.lineClamp = renderStyle.lineClamp;
+        break;
+    }
   }
 
   // Create two repaintBoundary for an overflow scroll container.
@@ -209,16 +308,18 @@ mixin CSSOverflowMixin on ElementBase {
     }
     RenderObject? layoutBoxParent = renderBoxModel!.parent as RenderObject?;
     RenderObject? previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
-    RenderLayoutBox outerLayoutBox = Element.createRenderLayout(
-      element,
-      repaintSelf: true,
-      prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?
-    );
 
-    _createScrollingLayoutBox(element);
+    element.createRenderBoxModel(shouldRepaintSelf: true);
+    scrollingContentLayoutBox = element.createScrollingContentLayout();
+
+    // Manually copy already set filtered styles to the renderStyle of scrollingContentLayoutBox.
+    _scrollingContentBoxCopyStyles.forEach((String styleProperty) {
+      scrollingContentBoxStyleListener(styleProperty, null, '');
+    });
 
     // If outer scrolling box already has children in the case of element already attached,
     // move them into the children of inner scrolling box.
+    RenderLayoutBox outerLayoutBox = element.renderBoxModel as RenderLayoutBox;
     List<RenderBox> children = [];
     outerLayoutBox.visitChildren((child) {
       children.add(child as RenderBox);
@@ -233,9 +334,6 @@ mixin CSSOverflowMixin on ElementBase {
     outerLayoutBox.add(scrollingContentLayoutBox!);
 
     _attachRenderObject(element, layoutBoxParent, previousSibling, outerLayoutBox);
-    element.renderBoxModel = outerLayoutBox;
-    // Update renderBoxModel reference in renderStyle
-    element.renderBoxModel!.renderStyle.renderBoxModel = outerLayoutBox;
   }
 
   void _downgradeToParentRepaint(Element element) {
@@ -243,14 +341,11 @@ mixin CSSOverflowMixin on ElementBase {
     if (scrollingContentLayoutBox == null) return;
     RenderObject? layoutBoxParent = renderBoxModel!.parent as RenderObject?;
     RenderObject? previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
-    RenderLayoutBox newLayoutBox = Element.createRenderLayout(
-      element,
-      repaintSelf: false,
-      prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?
-    );
+
+    element.createRenderBoxModel(shouldRepaintSelf: false);
+    RenderLayoutBox newLayoutBox = element.renderBoxModel as RenderLayoutBox;
 
     _attachRenderObject(element, layoutBoxParent, previousSibling, newLayoutBox);
-    element.renderBoxModel = newLayoutBox;
 
     // Move children of inner scrolling box to the children of outer scrolling box
     List<RenderBox> children = [];
@@ -263,11 +358,12 @@ mixin CSSOverflowMixin on ElementBase {
         newLayoutBox.insert(child);
       }
     }
+
+    element.style.removeStyleChangeListener(scrollingContentBoxStyleListener);
+
     // Remove inner scrolling box
     newLayoutBox.remove(scrollingContentLayoutBox!);
     scrollingContentLayoutBox = null;
-
-    element.renderBoxModel!.renderStyle.renderBoxModel = newLayoutBox;
 
     // If renderBoxModel should be converted to repaintBoundary caused by styles
     // such as transform or position fixed, convert to repaintBoundary at last.
@@ -293,8 +389,6 @@ mixin CSSOverflowMixin on ElementBase {
     if (parent is RenderObjectWithChildMixin<RenderBox>) {
       parent.child = newRenderObject as RenderBox?;
     } else if (parent is ContainerRenderObjectMixin) {
-      // Update renderBoxModel reference before move to its containing block
-      element.renderBoxModel = newRenderObject as RenderBoxModel?;
       element.parentElement!.addChildRenderObject(element, after: previousSibling as RenderBox?);
     }
   }
@@ -375,8 +469,8 @@ mixin CSSOverflowMixin on ElementBase {
 
   KrakenScrollable? _getScrollable(Axis direction) {
     KrakenScrollable? scrollable;
-    if (renderer is RenderRecyclerLayout) {
-      RenderRecyclerLayout recyclerLayout = renderer as RenderRecyclerLayout;
+    if (renderer is RenderSliverListLayout) {
+      RenderSliverListLayout recyclerLayout = renderer as RenderSliverListLayout;
       scrollable = direction == recyclerLayout.axis ? recyclerLayout.scrollable : null;
     } else {
       if (direction == Axis.horizontal) {

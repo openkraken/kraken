@@ -347,7 +347,7 @@ xdescribe('clip', () => {
     BODY.appendChild(wrapper_3);
     BODY.appendChild(wrapper_4);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('004', async () => {
     let inner;

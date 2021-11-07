@@ -346,7 +346,6 @@ JSValue Element::toBlob(QjsContext* ctx, JSValue this_val, int argc, JSValue* ar
       JS_SetPropertyStr(ctx, errorObject, "message", errorMessage);
       JSValue ret = JS_Call(ctx, promiseContext->rejectFunc, promiseContext->promise, 1, &errorObject);
       JS_FreeValue(ctx, errorObject);
-      JS_FreeValue(ctx, errorMessage);
       JS_FreeValue(ctx, ret);
     }
 
@@ -432,6 +431,9 @@ PROP_SETTER(ElementInstance, className)(QjsContext* ctx, JSValue this_val, int a
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   JSAtom atom = JS_ValueToAtom(ctx, argv[0]);
   element->m_attributes->setAttribute("class", atom);
+  NativeString* args_01 = stringToNativeString("class");
+  NativeString* args_02 = jsValueToNativeString(ctx, argv[0]);
+  ::foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
   JS_FreeAtom(ctx, atom);
   return JS_NULL;
 }

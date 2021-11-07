@@ -17,13 +17,16 @@ import 'package:flutter/scheduler.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/gesture.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/src/dom/sliver_manager.dart';
 import 'package:meta/meta.dart';
 
 import 'element_native_methods.dart';
 
+final RegExp _splitRegExp = RegExp(r'\s+');
+const String _ONE_SPACE = ' ';
 const String _STYLE_PROPERTY = 'style';
+const String _CLASS_NAME = 'class';
 
 /// Defined by W3C Standard,
 /// Most element's default width is 300 in pixel,
@@ -66,76 +69,25 @@ mixin ElementBase on Node {
       if (!kReleaseMode) throw FlutterError('Unknown RenderBoxModel value.');
     }
   }
+
+  late RenderStyle renderStyle;
 }
 
 typedef BeforeRendererAttach = RenderObject Function();
 typedef GetTargetId = int Function();
 typedef GetRootElementFontSize = double Function();
-
-/// Delegate methods passed to renderBoxModel for actions involved with element
-/// (eg. convert renderBoxModel to repaint boundary then attach to element).
-class ElementDelegate {
-  /// Mark the renderer of element as needs layout.
-  VoidCallback markRendererNeedsLayout;
-
-  /// Toggle the renderer of element between repaint boundary and non repaint boundary.
-  VoidCallback toggleRendererRepaintBoundary;
-
-  /// Detach the renderer from its owner element.
-  VoidCallback detachRenderer;
-
-  /// Do the preparation work before the renderer is attached.
-  BeforeRendererAttach beforeRendererAttach;
-
-  /// Do the clean work after the renderer has attached.
-  VoidCallback afterRendererAttach;
-
-  /// Return the targetId of current element.
-  GetTargetId getTargetId;
-
-  /// Get the font size of root element
-  GetRootElementFontSize getRootElementFontSize;
-
-  // Handle scrolling.
-  ScrollListener handleScroll;
-
-  /// Focus the input element.
-  VoidCallback focusInput;
-
-  /// Blur the input element.
-  VoidCallback blurInput;
-
-  /// Scroll the input element to the caret.
-  VoidCallback scrollInputToCaret;
-
-  // The sliver box child manager
-  RenderSliverBoxChildManager? renderSliverBoxChildManager;
-
-
-  ElementDelegate({
-    required this.markRendererNeedsLayout,
-    required this.toggleRendererRepaintBoundary,
-    required this.detachRenderer,
-    required this.beforeRendererAttach,
-    required this.afterRendererAttach,
-    required this.getTargetId,
-    required this.getRootElementFontSize,
-    required this.handleScroll,
-    required this.focusInput,
-    required this.blurInput,
-    required this.scrollInputToCaret,
-    this.renderSliverBoxChildManager,
-  });
-}
+typedef GetChildNodes = List<Node> Function();
+/// Get the viewport size of current element.
+typedef GetViewportSize = Size Function();
+/// Get the render box model of current element.
+typedef GetRenderBoxModel = RenderBoxModel? Function();
 
 class Element extends Node
     with
         ElementBase,
         ElementNativeMethods,
-        EventHandlerMixin,
-        CSSOverflowMixin,
-        CSSVisibilityMixin,
-        CSSFilterEffectsMixin {
+        ElementEventMixin,
+        ElementOverflowMixin {
 
   final Map<String, dynamic> properties = <String, dynamic>{};
 
@@ -145,18 +97,33 @@ class Element extends Node
   // Default to unknown, assign by [createElement], used by inspector.
   String tagName = UNKNOWN;
 
-  final Map<String, dynamic> _defaultStyle;
-
-  /// The default display type.
-  final String defaultDisplay;
-
   /// Is element an intrinsic box.
   final bool _isIntrinsicBox;
 
-  /// Style declaration from user input.
+  /// The style of the element, not inline style.
   late CSSStyleDeclaration style;
 
-  Size get viewportSize => elementManager.viewport.viewportSize;
+  /// The default user-agent style.
+  final Map<String, dynamic> _defaultStyle;
+
+  /// The inline style is a map of style property name to style property value.
+  final Map<String, dynamic> inlineStyle = {};
+
+  /// The Element.classList is a read-only property that returns a collection of the class attributes of the element.
+  final List<String> _classList = [];
+  List<String> get classList {
+    return _classList;
+  }
+
+  set className(String className) {
+    _classList.clear();
+    List<String> classList = className.split(_splitRegExp);
+    if (classList.isNotEmpty) {
+      _classList.addAll(classList);
+    }
+    recalculateStyle();
+  }
+  String get className => _classList.join(_ONE_SPACE);
 
   /// Whether should create repaintBoundary for this element when style changed
   bool get shouldConvertToRepaintBoundary {
@@ -166,7 +133,7 @@ class Element extends Node
     // Scrolling box
     bool isScrollingBox = scrollingContentLayoutBox != null;
     // Transform element
-    bool hasTransform = renderBoxModel?.renderStyle.transform != null;
+    bool hasTransform = renderBoxModel?.renderStyle.transformMatrix != null;
     // Fixed element
     bool isPositionedFixed = renderBoxModel?.renderStyle.position == CSSPositionType.fixed;
 
@@ -180,76 +147,13 @@ class Element extends Node
         this.repaintSelf = false})
       : _defaultStyle = defaultStyle,
         _isIntrinsicBox = isIntrinsicBox,
-        defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : INLINE,
         super(NodeType.ELEMENT_NODE, targetId, nativeEventTarget, elementManager) {
-    style = CSSStyleDeclaration(this);
-    _setDefaultStyle();
-  }
 
-  RenderSliverBoxChildManager? _sliverBoxChildManager;
+    // Init style and add change listener.
+    style = CSSStyleDeclaration.computedStyle(this, _defaultStyle, _onStyleChanged);
 
-  ElementDelegate get elementDelegate {
-    return ElementDelegate(
-      markRendererNeedsLayout: _markRendererNeedsLayout,
-      toggleRendererRepaintBoundary: _toggleRendererRepaintBoundary,
-      detachRenderer: detach,
-      beforeRendererAttach: _beforeRendererAttach,
-      afterRendererAttach: _afterRendererAttach,
-      getTargetId: _getTargetId,
-      getRootElementFontSize: _getRootElementFontSize,
-      handleScroll: _handleScroll,
-      focusInput: _focusInput,
-      blurInput: _blurInput,
-      scrollInputToCaret: _scrollInputToCaret,
-      renderSliverBoxChildManager: _sliverBoxChildManager,
-    );
-  }
-
-  void _markRendererNeedsLayout() {
-    renderBoxModel!.markNeedsLayout();
-  }
-
-  void _toggleRendererRepaintBoundary() {
-    if (shouldConvertToRepaintBoundary) {
-      convertToRepaintBoundary();
-    } else {
-      convertToNonRepaintBoundary();
-    }
-  }
-
-  RenderObject _beforeRendererAttach() {
-    willAttachRenderer();
-    return renderer!;
-  }
-
-  void _afterRendererAttach() {
-    style.applyTargetProperties();
-    didAttachRenderer();
-    ensureChildAttached();
-  }
-
-  int _getTargetId() {
-    return targetId;
-  }
-
-  void _focusInput() {
-    InputElement input = this as InputElement;
-    InputElement.setFocus(input);
-  }
-
-  void _blurInput() {
-    InputElement.clearFocus();
-  }
-
-  void _scrollInputToCaret() {
-    InputElement inputElement = this as InputElement;
-    inputElement.scrollToCaret();
-  }
-
-  double _getRootElementFontSize() {
-    Element rootElement = elementManager.viewportElement;
-    RenderBoxModel rootBoxModel = rootElement.renderBoxModel!;
-    return rootBoxModel.renderStyle.fontSize;
+    // Init render style.
+    renderStyle = RenderStyle(target: this);
   }
 
   @override
@@ -263,72 +167,65 @@ class Element extends Node
     if (renderer != null) {
       return renderer!;
     }
+    createRenderBoxModel();
+    return renderer!;
+  }
 
+  void createRenderBoxModel({ bool? shouldRepaintSelf }) {
     // Content children layout, BoxModel content.
     if (_isIntrinsicBox) {
-      _renderIntrinsic = createRenderIntrinsic(
-        this,
-        repaintSelf: repaintSelf,
-      );
+      _renderIntrinsic = _createRenderIntrinsic(repaintSelf: shouldRepaintSelf ?? repaintSelf, prevRenderIntrinsic: _renderIntrinsic);
     } else {
-      _renderLayoutBox = createRenderLayout(
-        this,
-        repaintSelf: repaintSelf,
-      );
+      _renderLayoutBox = _createRenderLayout(repaintSelf: shouldRepaintSelf ?? repaintSelf, prevRenderLayoutBox: _renderLayoutBox);
     }
-
-    return renderer!;
+    // Ensure that the event responder is bound.
+    _ensureEventResponderBound();
   }
 
   @override
   void willAttachRenderer() {
+    // Init render box model.
     createRenderer();
-    style.addStyleChangeListener(_onStyleChanged);
   }
 
   @override
   void didAttachRenderer() {
-    RenderBoxModel _renderBoxModel = renderBoxModel!;
-
-    // Set display and transformedDisplay when display is not set in style.
-    _renderBoxModel.renderStyle.initDisplay(style, defaultDisplay);
-
-    // Bind pointer responder.
-    addEventResponder(_renderBoxModel);
-
-    if (_hasIntersectionObserverEvent(eventHandlers)) {
-      _renderBoxModel.addIntersectionChangeListener(handleIntersectionChange);
-    }
+    // Ensure that the child is attached.
+    ensureChildAttached();
   }
 
   @override
   void willDetachRenderer() {
-    RenderBoxModel _renderBoxModel = renderBoxModel!;
-
+    // Cancel running transition.
+    renderStyle.cancelRunningTransiton();
     // Remove all intersection change listeners.
-    _renderBoxModel.clearIntersectionChangeListeners();
+    renderBoxModel!.clearIntersectionChangeListeners();
 
     // Remove placeholder of positioned element.
-    RenderPositionHolder? renderPositionHolder = _renderBoxModel.renderPositionHolder;
+    RenderPositionHolder? renderPositionHolder = renderBoxModel!.renderPositionHolder;
     if (renderPositionHolder != null) {
       RenderLayoutBox? parent = renderPositionHolder.parent as RenderLayoutBox?;
       if (parent != null) {
         parent.remove(renderPositionHolder);
       }
     }
+
+    // Remove fixed children from root when dispose.
+    _removeFixedChild(renderBoxModel!);
+
+    // Remove self.
+    RenderObject? parent = renderBoxModel!.parent as RenderObject?;
+    if (parent is ContainerRenderObjectMixin) {
+      parent.remove(renderBoxModel!);
+    } else if (parent is RenderProxyBox) {
+      parent.child = null;
+    }
+
   }
 
   @override
   void didDetachRenderer() {
-    style.removeStyleChangeListener(_onStyleChanged);
-  }
-
-  void _setDefaultStyle() {
-    if (_defaultStyle.isNotEmpty) {
-      _defaultStyle.forEach((property, dynamic value) {
-        style.setProperty(property, value, viewportSize);
-      });
-    }
+    style.reset();
   }
 
   bool _shouldConsumeScrollTicker = false;
@@ -397,7 +294,7 @@ class Element extends Node
     }
   }
 
-  /// Toggle renderBoxModel between repaint boundary and non repaint boundary
+  /// Toggle renderBoxModel between repaint boundary and non repaint boundary.
   void _toggleRepaintSelf({ required bool repaintSelf }) {
     RenderBoxModel _renderBoxModel = renderBoxModel!;
     Element _parentElement = parentElement!;
@@ -425,69 +322,64 @@ class Element extends Node
         parentRenderObject.remove(_renderBoxModel);
       }
     }
-    RenderBoxModel targetRenderBox = createRenderBoxModel(
-      this,
-      prevRenderBoxModel: _renderBoxModel,
-      repaintSelf: repaintSelf
-    );
+
+    createRenderBoxModel(shouldRepaintSelf: repaintSelf);
 
     // Assign sortedChildren to newly created RenderLayoutBox.
-    if (targetRenderBox is RenderLayoutBox && sortedChildren != null) {
-      targetRenderBox.sortedChildren = sortedChildren;
+    if (renderBoxModel is RenderLayoutBox && sortedChildren != null) {
+      (renderBoxModel as RenderLayoutBox).sortedChildren = sortedChildren;
     }
 
     // Append new renderObject
     if (parentRenderObject is ContainerRenderObjectMixin) {
-      renderBoxModel = _renderBoxModel = targetRenderBox;
       _parentElement.addChildRenderObject(this, after: previousSibling);
     } else if (parentRenderObject is RenderObjectWithChildMixin) {
-      parentRenderObject.child = targetRenderBox;
+      parentRenderObject.child = renderBoxModel;
     }
-
-    renderBoxModel = _renderBoxModel = targetRenderBox;
-    // Update renderBoxModel reference in renderStyle
-    _renderBoxModel.renderStyle.renderBoxModel = targetRenderBox;
   }
 
-  void _updatePosition(CSSPositionType prevPosition, CSSPositionType currentPosition) {
+  void _updateRenderBoxModelWithPosition() {
+    // Move element according to position when it's already attached to render tree.
+    if (!isRendererAttached) {
+      return;
+    }
+
     RenderBoxModel _renderBoxModel = renderBoxModel!;
     Element _parentElement = parentElement!;
+    CSSPositionType currentPosition = renderStyle.position;
 
     // Remove fixed children before convert to non repaint boundary renderObject
     if (currentPosition != CSSPositionType.fixed) {
       _removeFixedChild(_renderBoxModel);
     }
 
-    // Move element according to position when it's already attached to render tree.
-    if (isRendererAttached) {
-      RenderObject _renderer = renderer!;
+    RenderObject _renderer = renderer!;
 
-      RenderBox? prev = (_renderer.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
-      // It needs to find the previous sibling of the previous sibling if the placeholder of
-      // positioned element exists and follows renderObject at the same time, eg.
-      // <div style="position: relative"><div style="position: absolute" /></div>
-      if (prev == _renderBoxModel) {
-        prev = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
-      }
-
-      // Remove placeholder of positioned element.
-      RenderPositionHolder? renderPositionHolder = _renderBoxModel.renderPositionHolder;
-      if (renderPositionHolder != null) {
-        ContainerRenderObjectMixin<RenderBox, ContainerParentDataMixin<RenderBox>>? parent = renderPositionHolder.parent as ContainerRenderObjectMixin<RenderBox, ContainerParentDataMixin<RenderBox>>?;
-        if (parent != null) {
-          parent.remove(renderPositionHolder);
-          _renderBoxModel.renderPositionHolder = null;
-        }
-      }
-      // Remove renderBoxModel from original parent and append to its containing block
-      RenderObject? parentRenderBoxModel = _renderBoxModel.parent as RenderBox?;
-      if (parentRenderBoxModel is ContainerRenderObjectMixin) {
-        parentRenderBoxModel.remove(_renderBoxModel);
-      } else if (parentRenderBoxModel is RenderProxyBox) {
-        parentRenderBoxModel.child = null;
-      }
-      _parentElement.addChildRenderObject(this, after: prev);
+    RenderBox? prev = (_renderer.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
+    // It needs to find the previous sibling of the previous sibling if the placeholder of
+    // positioned element exists and follows renderObject at the same time, eg.
+    // <div style="position: relative"><div style="position: absolute" /></div>
+    if (prev == _renderBoxModel) {
+      prev = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
     }
+
+    // Remove placeholder of positioned element.
+    RenderPositionHolder? renderPositionHolder = _renderBoxModel.renderPositionHolder;
+    if (renderPositionHolder != null) {
+      ContainerRenderObjectMixin<RenderBox, ContainerParentDataMixin<RenderBox>>? parent = renderPositionHolder.parent as ContainerRenderObjectMixin<RenderBox, ContainerParentDataMixin<RenderBox>>?;
+      if (parent != null) {
+        parent.remove(renderPositionHolder);
+        _renderBoxModel.renderPositionHolder = null;
+      }
+    }
+    // Remove renderBoxModel from original parent and append to its containing block
+    RenderObject? parentRenderBoxModel = _renderBoxModel.parent as RenderBox?;
+    if (parentRenderBoxModel is ContainerRenderObjectMixin) {
+      parentRenderBoxModel.remove(_renderBoxModel);
+    } else if (parentRenderBoxModel is RenderProxyBox) {
+      parentRenderBoxModel.child = null;
+    }
+    _parentElement.addChildRenderObject(this, after: prev);
 
     if (shouldConvertToRepaintBoundary) {
       convertToRepaintBoundary();
@@ -495,11 +387,9 @@ class Element extends Node
       convertToNonRepaintBoundary();
     }
 
-    _renderBoxModel = renderBoxModel!;
-
     // Add fixed children after convert to repaint boundary renderObject
     if (currentPosition == CSSPositionType.fixed) {
-      _addFixedChild(_renderBoxModel);
+      _addFixedChild(renderBoxModel!);
     }
   }
 
@@ -534,7 +424,7 @@ class Element extends Node
     super.dispose();
 
     if (isRendererAttached) {
-      detach();
+      disposeRenderObject();
     }
 
     RenderBoxModel? _renderBoxModel = renderBoxModel;
@@ -549,6 +439,7 @@ class Element extends Node
       _parentElement.removeChild(this);
     }
 
+    renderStyle.detach();
     style.dispose();
     properties.clear();
   }
@@ -586,54 +477,41 @@ class Element extends Node
 
   // Attach renderObject of current node to parent
   @override
-  void attachTo(Element parent, {RenderBox? after}) {
-    CSSDisplay display = CSSDisplayMixin.getDisplay(style[DISPLAY] ?? defaultDisplay);
+  void attachTo(Node parent, {RenderBox? after}) {
+    _applyStyle(style);
 
-    if (display == CSSDisplay.sliver) {
-      _sliverBoxChildManager = ElementSliverBoxChildManager(this);
-    } else {
-      _sliverBoxChildManager = null;
+    if (renderStyle.display != CSSDisplay.none) {
+      willAttachRenderer();
+
+      if (parent is Element) {
+        parent.addChildRenderObject(this, after: after);
+      } else if (parent is Document) {
+        parent.appendChild(this);
+      }
+      // Flush pending style before child attached.
+      style.flushPendingProperties();
+      // Delay position set on node attach cause position depends on renderStyle of parent.
+      _updateRenderBoxModelWithPosition();
+
+      didAttachRenderer();
     }
-
-    if (display != CSSDisplay.none) {
-      _beforeRendererAttach();
-      parent.addChildRenderObject(this, after: after);
-      _afterRendererAttach();
-    }
-
-    // CSS Transition works after dom has layout, so it needs to mark
-    // the renderBoxModel as layout on the next frame.
-    SchedulerBinding.instance!.addPostFrameCallback((timestamp) {
-      renderBoxModel?.firstLayouted = true;
-    });
   }
 
-  // Detach renderObject of current node from parent
+  /// Release any resources held by [renderBoxModel].
   @override
-  void detach() {
-    RenderBoxModel? selfRenderBoxModel = renderBoxModel;
-    if (selfRenderBoxModel == null) return;
+  void disposeRenderObject() {
+    if (renderBoxModel == null) return;
 
     willDetachRenderer();
 
-    // Remove fixed children from root when dispose
-    _removeFixedChild(selfRenderBoxModel);
-
-    RenderObject? parent = selfRenderBoxModel.parent as RenderObject?;
-    if (parent is ContainerRenderObjectMixin) {
-      parent.remove(selfRenderBoxModel);
-    } else if (parent is RenderProxyBox) {
-      parent.child = null;
-    }
-
     for (Node child in childNodes) {
-      child.detach();
+      child.disposeRenderObject();
     }
 
     didDetachRenderer();
 
-    // Call dispose method of renderBoxModel when it is detached from tree
-    selfRenderBoxModel.dispose();
+    // Call dispose method of renderBoxModel when it is detached from tree.
+    renderBoxModel!.dispose();
     renderBoxModel = null;
   }
 
@@ -650,7 +528,6 @@ class Element extends Node
           }
 
           child.attachTo(this, after: after);
-
           child.ensureChildAttached();
         }
       }
@@ -661,8 +538,10 @@ class Element extends Node
   @mustCallSuper
   Node appendChild(Node child) {
     super.appendChild(child);
-
-    _debugCheckNestedInline(child);
+    // Update renderStyle tree.
+    if (child is Element) {
+      child.renderStyle.parent = renderStyle;
+    }
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
       if (!child.isRendererAttached) {
@@ -684,29 +563,29 @@ class Element extends Node
     // Only append node types which is visible in RenderObject tree
     // Only remove childNode when it has parent
     if (child.isRendererAttached) {
-      child.detach();
+      child.disposeRenderObject();
+    }
+    // Update renderStyle tree.
+    if (child is Element) {
+      child.renderStyle.detach();
     }
 
     super.removeChild(child);
     return child;
   }
 
-  void _debugCheckNestedInline(Node child) {
-    // @NOTE: Make sure inline-box only have inline children, or print warning.
-    if ((child is Element) && !child.isInlineBox && isInlineContent) {
-      print('[WARN]: Can not nest non-inline element into non-inline parent element.');
-    }
-  }
-
   @override
   @mustCallSuper
   Node insertBefore(Node child, Node referenceNode) {
-    _debugCheckNestedInline(child);
-
-    int referenceIndex = childNodes.indexOf(referenceNode);
     // Node.insertBefore will change element tree structure,
     // so get the referenceIndex before calling it.
+    int referenceIndex = childNodes.indexOf(referenceNode);
     Node node = super.insertBefore(child, referenceNode);
+    // Update renderStyle tree.
+    if (child is Element) {
+      child.renderStyle.parent = renderStyle;
+    }
+
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
       if (!child.isRendererAttached) {
@@ -720,6 +599,19 @@ class Element extends Node
     }
 
     return node;
+  }
+
+  @override
+  @mustCallSuper
+  Node? replaceChild(Node newNode, Node oldNode) {
+    // Update renderStyle tree.
+    if (newNode is Element) {
+      newNode.renderStyle.parent = renderStyle;
+    }
+    if (oldNode is Element) {
+      oldNode.renderStyle.parent = null;
+    }
+    return super.replaceChild(newNode, oldNode);
   }
 
   void _addPositionedChild(Element child, CSSPositionType position) {
@@ -747,15 +639,8 @@ class Element extends Node
   void _addPositionHolder(RenderLayoutBox parentRenderLayoutBox, Element child, CSSPositionType position) {
     Size preferredSize = Size.zero;
     RenderBoxModel childRenderBoxModel = child.renderBoxModel!;
-    RenderStyle childRenderStyle = childRenderBoxModel.renderStyle;
-    if (position == CSSPositionType.sticky) {
-      preferredSize = Size(0, 0);
-    } else if (childRenderStyle.display != CSSDisplay.inline) {
-      preferredSize = Size(
-        childRenderStyle.width ?? 0,
-        childRenderStyle.height ?? 0,
-      );
-    }
+    // Position holder size will be updated on layout.
+    preferredSize = Size(0, 0);
     RenderPositionHolder childPositionHolder = RenderPositionHolder(preferredSize: preferredSize);
     childRenderBoxModel.renderPositionHolder = childPositionHolder;
     childPositionHolder.realDisplayedBox = childRenderBoxModel;
@@ -792,476 +677,24 @@ class Element extends Node
     }
   }
 
-  // Inline box including inline/inline-block/inline-flex/...
-  bool get isInlineBox {
-    String displayValue = style[DISPLAY];
-    return displayValue.startsWith(INLINE);
+  // FIXME: only compatible with kraken plugins
+  @deprecated
+  void setStyle(String property, dynamic value) {
+    setRenderStyle(property, value);
   }
 
-  // Inline content means children should be inline elements.
-  bool get isInlineContent {
-    String displayValue = style[DISPLAY];
-    return displayValue == INLINE;
-  }
+  void _updateRenderBoxModelWithDisplay() {
+    CSSDisplay presentDisplay = renderStyle.display;
 
-  void _onStyleChanged(String property, String? original, String present) {
-    switch (property) {
-      case DISPLAY:
-        _styleDisplayChangedListener(property, original, present);
-        break;
-
-      case VERTICAL_ALIGN:
-        _styleVerticalAlignChangedListener(property, original, present);
-        break;
-
-      case POSITION:
-        _stylePositionChangedListener(property, original, present);
-        break;
-
-      case Z_INDEX:
-        _styleZIndexChangedListener(property, original, present);
-        break;
-
-      case TOP:
-      case LEFT:
-      case BOTTOM:
-      case RIGHT:
-        _styleOffsetChangedListener(property, original, present);
-        break;
-
-      case FLEX_DIRECTION:
-      case FLEX_WRAP:
-      case ALIGN_CONTENT:
-      case ALIGN_ITEMS:
-      case JUSTIFY_CONTENT:
-        _styleFlexChangedListener(property, original, present);
-        break;
-
-      case ALIGN_SELF:
-      case FLEX_GROW:
-      case FLEX_SHRINK:
-      case FLEX_BASIS:
-        _styleFlexItemChangedListener(property, original, present);
-        break;
-
-      case SLIVER_DIRECTION:
-        _styleSliverDirectionChangedListener(property, original, present);
-        break;
-
-      case TEXT_ALIGN:
-        _styleTextAlignChangedListener(property, original, present);
-        break;
-
-      case PADDING_TOP:
-      case PADDING_RIGHT:
-      case PADDING_BOTTOM:
-      case PADDING_LEFT:
-        _stylePaddingChangedListener(property, original, present);
-        break;
-
-      case WIDTH:
-      case MIN_WIDTH:
-      case MAX_WIDTH:
-      case HEIGHT:
-      case MIN_HEIGHT:
-      case MAX_HEIGHT:
-        _styleSizeChangedListener(property, original, present);
-        break;
-
-      case OVERFLOW_X:
-      case OVERFLOW_Y:
-        _styleOverflowChangedListener(property, original, present);
-        break;
-
-      case BACKGROUND_COLOR:
-      case BACKGROUND_ATTACHMENT:
-      case BACKGROUND_IMAGE:
-      case BACKGROUND_REPEAT:
-      case BACKGROUND_POSITION_X:
-      case BACKGROUND_POSITION_Y:
-      case BACKGROUND_SIZE:
-      case BACKGROUND_CLIP:
-      case BACKGROUND_ORIGIN:
-      case BORDER_LEFT_WIDTH:
-      case BORDER_TOP_WIDTH:
-      case BORDER_RIGHT_WIDTH:
-      case BORDER_BOTTOM_WIDTH:
-      case BORDER_LEFT_STYLE:
-      case BORDER_TOP_STYLE:
-      case BORDER_RIGHT_STYLE:
-      case BORDER_BOTTOM_STYLE:
-      case BORDER_LEFT_COLOR:
-      case BORDER_TOP_COLOR:
-      case BORDER_RIGHT_COLOR:
-      case BORDER_BOTTOM_COLOR:
-      case BOX_SHADOW:
-        _styleBoxChangedListener(property, original, present);
-        break;
-
-      case BORDER_TOP_LEFT_RADIUS:
-      case BORDER_TOP_RIGHT_RADIUS:
-      case BORDER_BOTTOM_LEFT_RADIUS:
-      case BORDER_BOTTOM_RIGHT_RADIUS:
-        _styleBorderRadiusChangedListener(property, original, present);
-        break;
-
-      case MARGIN_LEFT:
-      case MARGIN_TOP:
-      case MARGIN_RIGHT:
-      case MARGIN_BOTTOM:
-        _styleMarginChangedListener(property, original, present);
-        break;
-
-      case OPACITY:
-        _styleOpacityChangedListener(property, original, present);
-        break;
-      case VISIBILITY:
-        _styleVisibilityChangedListener(property, original, present);
-        break;
-      case CONTENT_VISIBILITY:
-        _styleContentVisibilityChangedListener(property, original, present);
-        break;
-      case TRANSFORM:
-        _styleTransformChangedListener(property, original, present);
-        break;
-      case TRANSFORM_ORIGIN:
-        _styleTransformOriginChangedListener(property, original, present);
-        break;
-      case OBJECT_FIT:
-        _styleObjectFitChangedListener(property, original, present);
-        break;
-      case OBJECT_POSITION:
-        _styleObjectPositionChangedListener(property, original, present);
-        break;
-
-      case FILTER:
-        _styleFilterChangedListener(property, original, present);
-        break;
-    }
-
-    // Text Style
-    switch (property) {
-      case COLOR:
-        _updateTextStyle(property);
-        // Color change should trigger currentColor update
-        _styleBoxChangedListener(property, original, present);
-        break;
-      case TEXT_SHADOW:
-      case TEXT_DECORATION_LINE:
-      case TEXT_DECORATION_STYLE:
-      case TEXT_DECORATION_COLOR:
-      case FONT_WEIGHT:
-      case FONT_STYLE:
-      case FONT_FAMILY:
-      case FONT_SIZE:
-      case LINE_HEIGHT:
-      case LETTER_SPACING:
-      case WORD_SPACING:
-      case WHITE_SPACE:
-      case TEXT_OVERFLOW:
-      // Overflow will affect text-overflow ellipsis taking effect
-      case OVERFLOW_X:
-      case OVERFLOW_Y:
-      case LINE_CLAMP:
-        _updateTextStyle(property);
-        break;
-    }
-  }
-
-  void _styleDisplayChangedListener(String property, String? original, String present) {
-    renderBoxModel!.renderStyle.updateDisplay(present, this);
-  }
-
-  void _styleVerticalAlignChangedListener(String property, String? original, String present) {
-    renderBoxModel!.renderStyle.updateVerticalAlign(present);
-  }
-
-  void _stylePositionChangedListener(String property, String? original, String present) {
-    /// Update position.
-    CSSPositionType prevPosition = renderBoxModel!.renderStyle.position;
-    CSSPositionType currentPosition = CSSPositionMixin.parsePositionType(present);
-
-    // Position changed.
-    if (prevPosition != currentPosition) {
-      renderBoxModel!.renderStyle.updatePosition(property, present);
-      _updatePosition(prevPosition, currentPosition);
-    }
-  }
-
-  void _styleZIndexChangedListener(String property, String? original, String present) {
-    renderBoxModel!.renderStyle.updateZIndex(property, present);
-  }
-
-  void _styleOffsetChangedListener(String property, String? original, String present) {
-    /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
-    if (CSSLength.isPercentage(present)) {
-      // Should mark positioned element's containing block needs layout directly
-      // cause RelayoutBoundary of positioned element will prevent the needsLayout flag
-      // to bubble up in the RenderObject tree.
-      RenderBoxModel? selfRenderBoxModel = renderBoxModel;
-      if (selfRenderBoxModel == null) return;
-
-      if (selfRenderBoxModel.parentData is RenderLayoutParentData) {
-        RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
-        if (renderStyle.position != CSSPositionType.static) {
-          RenderBoxModel? parent = selfRenderBoxModel.parent as RenderBoxModel?;
-          parent!.markNeedsLayout();
-        }
-      }
+    // Destroy renderer of element when display is changed to none.
+    if (presentDisplay == CSSDisplay.none) {
+      disposeRenderObject();
       return;
     }
-
-    RenderStyle renderStyle = renderBoxModel!.renderStyle;
-    double rootFontSize = _getRootElementFontSize();
-    double fontSize = renderStyle.fontSize;
-    double? presentValue = CSSLength.toDisplayPortValue(
-      present,
-      viewportSize: viewportSize,
-      rootFontSize: rootFontSize,
-      fontSize: fontSize
-    );
-    if (presentValue == null) return;
-    renderStyle.updateOffset(property, presentValue);
-  }
-
-  void _styleTextAlignChangedListener(String property, String? original, String present) {
-    renderBoxModel!.renderStyle.updateFlow();
-  }
-
-  void _styleObjectFitChangedListener(String property, String? original, String present) {
-    renderBoxModel!.renderStyle.updateObjectFit(property, present);
-  }
-
-  void _styleObjectPositionChangedListener(String property, String? original, String present) {
-    renderBoxModel!.renderStyle.updateObjectPosition(property, present);
-  }
-
-  void _styleFilterChangedListener(String property, String? original, String present) {
-    updateFilterEffects(renderBoxModel!, present);
-  }
-
-  void _styleOverflowChangedListener(String property, String? original, String present) {
-    updateRenderOverflow(this);
-  }
-
-  void _stylePaddingChangedListener(String property, String? original, String present) {
-    /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-    if (CSSLength.isPercentage(present)) {
-      // Mark parent needs layout to resolve percentage of child
-      if (selfRenderBoxModel.parent is RenderBoxModel) {
-        (selfRenderBoxModel.parent as RenderBoxModel).markNeedsLayout();
-      }
-      return;
-    }
-
-    RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
-    double rootFontSize = _getRootElementFontSize();
-    double fontSize = renderStyle.fontSize;
-    double? presentValue = CSSLength.toDisplayPortValue(
-      present,
-      viewportSize: viewportSize,
-      rootFontSize: rootFontSize,
-      fontSize: fontSize
-    ) ?? 0;
-    renderStyle.updatePadding(property, presentValue);
-  }
-
-  void _styleSizeChangedListener(String property, String? original, String present) {
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-    /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
-    if (CSSLength.isPercentage(present)) {
-      // Mark parent needs layout to resolve percentage of child
-      if (selfRenderBoxModel.parent is RenderBoxModel) {
-        (selfRenderBoxModel.parent as RenderBoxModel).markNeedsLayout();
-      }
-      return;
-    }
-
-    RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
-    double rootFontSize = _getRootElementFontSize();
-    double fontSize = renderStyle.fontSize;
-    double? presentValue = CSSLength.toDisplayPortValue(
-      present,
-      viewportSize: viewportSize,
-      rootFontSize: rootFontSize,
-      fontSize: fontSize
-    );
-    renderStyle.updateSizing(property, presentValue);
-  }
-
-  void _styleMarginChangedListener(String property, String? original, String present) {
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-    /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
-    if (CSSLength.isPercentage(present)) {
-      // Mark parent needs layout to resolve percentage of child
-      if (selfRenderBoxModel.parent is RenderBoxModel) {
-        (selfRenderBoxModel.parent as RenderBoxModel).markNeedsLayout();
-      }
-      return;
-    }
-
-    RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
-    double rootFontSize = _getRootElementFontSize();
-    double fontSize = renderStyle.fontSize;
-    double? presentValue = CSSLength.toDisplayPortValue(
-      present,
-      viewportSize: viewportSize,
-      rootFontSize: rootFontSize,
-      fontSize: fontSize
-    ) ?? 0;
-    renderStyle.updateMargin(property, presentValue);
-    // Margin change in flex layout may affect transformed display
-    // https://www.w3.org/TR/css-display-3/#transformations
-    renderStyle.transformedDisplay = renderStyle.getTransformedDisplay();
-  }
-
-  void _styleFlexChangedListener(String property, String? original, String present) {
-    RenderStyle renderStyle = renderBoxModel!.renderStyle;
-    renderStyle.updateFlexbox();
-    // Flex properties change may affect transformed display
-    // https://www.w3.org/TR/css-display-3/#transformations
-    renderStyle.transformedDisplay = renderStyle.getTransformedDisplay();
-  }
-
-  void _styleFlexItemChangedListener(String property, String? original, String present) {
-    if (parentElement == null) {
-      return;
-    }
-
-    Element selfParentElement = parentElement!;
-    CSSDisplay? parentDisplayValue = selfParentElement.renderBoxModel?.renderStyle.display;
-    bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex || parentDisplayValue == CSSDisplay.inlineFlex;
-
-    // Flex factor change will cause flex item self and its siblings relayout.
-    if (isParentFlexDisplayType) {
-      for (Element child in selfParentElement.children) {
-        if (selfParentElement.renderBoxModel is RenderFlexLayout && child.renderBoxModel != null) {
-          child.renderBoxModel!.renderStyle.updateFlexItem();
-          child.renderBoxModel!.markNeedsLayout();
-        }
-      }
-    }
-  }
-
-  void _styleSliverDirectionChangedListener(String property, String? original, String present) {
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-    CSSDisplay? display = selfRenderBoxModel.renderStyle.display;
-    if (display == CSSDisplay.sliver) {
-      assert(renderBoxModel is RenderRecyclerLayout);
-      selfRenderBoxModel.renderStyle.updateSliver(present);
-    }
-  }
-
-  void _styleBoxChangedListener(String property, String? original, String present) {
-    int contextId = elementManager.contextId;
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-    double rootFontSize = _getRootElementFontSize();
-    double fontSize = selfRenderBoxModel.renderStyle.fontSize;
-    renderBoxModel!.renderStyle.updateBox(
-      property, present, contextId,
-      viewportSize: viewportSize,
-      rootFontSize: rootFontSize,
-      fontSize: fontSize,
-    );
-  }
-
-  void _styleBorderRadiusChangedListener(String property, String? original, String present) {
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-    /// Percentage size should be resolved in layout stage cause it needs to know its own element's size
-    if (RenderStyle.isBorderRadiusPercentage(present)) {
-      // Mark parent needs layout to resolve percentage of child
-      if (selfRenderBoxModel.parent is RenderBoxModel) {
-        (selfRenderBoxModel.parent as RenderBoxModel).markNeedsLayout();
-      }
-      return;
-    }
-
-    selfRenderBoxModel.renderStyle.updateBorderRadius(property, present);
-  }
-
-  void _styleOpacityChangedListener(String property, String? original, String present) {
-    renderBoxModel!.renderStyle.updateOpacity(present);
-  }
-
-  void _styleVisibilityChangedListener(String property, String? original, String present) {
-    // Update visibility
-    updateRenderVisibility(CSSVisibilityMixin.getVisibility(present));
-  }
-
-  void _styleContentVisibilityChangedListener(String property, String? original, String present) {
-    // Update content visibility.
-    renderBoxModel!.renderStyle.updateRenderContentVisibility(present);
-  }
-
-  void _styleTransformChangedListener(String property, String? original, String present) {
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-    /// Percentage transform translate should be resolved in layout stage cause it needs to know its own element's size
-    if (RenderStyle.isTransformTranslatePercentage(present)) {
-      // Mark parent needs layout to resolve percentage of child
-      if (selfRenderBoxModel.parent is RenderBoxModel) {
-        (selfRenderBoxModel.parent as RenderBoxModel).markNeedsLayout();
-      }
-      return;
-    }
-
-    RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
-    double rootFontSize = _getRootElementFontSize();
-    double fontSize = renderStyle.fontSize;
-    Matrix4? matrix4 = CSSTransform.parseTransform(present, viewportSize, rootFontSize, fontSize);
-    renderStyle.updateTransform(matrix4);
-  }
-
-  void _styleTransformOriginChangedListener(String property, String? original, String present) {
-    // Update transform.
-    renderBoxModel!.renderStyle.updateTransformOrigin(present);
-  }
-
-  // Update text related style
-  void _updateTextStyle(String property) {
-    /// Percentage font-size should be resolved when node attached
-    /// cause it needs to know its parents style
-    if (property == FONT_SIZE && CSSLength.isPercentage(style[FONT_SIZE])) {
-      _updatePercentageFontSize();
-      return;
-    }
-
-    /// Percentage line-height should be resolved when node attached
-    /// cause it needs to know other style in its own element
-    if (property == LINE_HEIGHT && CSSLength.isPercentage(style[LINE_HEIGHT])) {
-      _updatePercentageLineHeight();
-      return;
-    }
-    renderBoxModel!.renderStyle.updateTextStyle(property);
-  }
-
-  /// Percentage font size is set relative to parent's font size.
-  void _updatePercentageFontSize() {
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-    RenderStyle parentRenderStyle = parentElement!.renderBoxModel!.renderStyle;
-    double parentFontSize = parentRenderStyle.fontSize;
-    double parsedFontSize = parentFontSize * CSSLength.parsePercentage(style[FONT_SIZE]);
-    selfRenderBoxModel.renderStyle.fontSize = parsedFontSize;
-  }
-
-  /// Percentage line height is set relative to its own font size.
-  void _updatePercentageLineHeight() {
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-    RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
-    double fontSize = renderStyle.fontSize;
-    double parsedLineHeight = fontSize * CSSLength.parsePercentage(style[LINE_HEIGHT]);
-    selfRenderBoxModel.renderStyle.lineHeight = parsedLineHeight;
-  }
-
-  // Universal style property change callback.
-  @mustCallSuper
-  void setStyle(String key, dynamic value) {
-    CSSDisplay originalDisplay = CSSDisplayMixin.getDisplay(style[DISPLAY] ?? defaultDisplay);
-    style.setProperty(key, value, viewportSize, renderBoxModel?.renderStyle);
 
     // When renderer and style listener is not created when original display is none,
     // thus it needs to create renderer when style changed.
-    if (originalDisplay == CSSDisplay.none && key == DISPLAY && value != NONE) {
+    if (renderBoxModel == null) {
       RenderBox? after;
       Element parent = this.parent as Element;
       if (parent.scrollingContentLayoutBox != null) {
@@ -1269,25 +702,684 @@ class Element extends Node
       } else {
         after = (parent.renderBoxModel as RenderLayoutBox).lastChild;
       }
-      attachTo(parent, after: after);
+      // Update renderBoxModel and attach it to parent.
+      createRenderBoxModel();
+      parent.addChildRenderObject(this, after: after);
+      // FIXME: avoid ensure something in display updating.
+      ensureChildAttached();
+      return;
+    }
+
+    // Inline block/flex to block/flex do not need create new renderBoxModel.
+    if ((renderBoxModel is RenderFlowLayout &&
+        (presentDisplay == CSSDisplay.inline || presentDisplay == CSSDisplay.block || presentDisplay == CSSDisplay.inlineBlock)) ||
+        (renderBoxModel is RenderFlexLayout &&
+            (presentDisplay == CSSDisplay.flex || presentDisplay == CSSDisplay.inlineFlex))) {
+      return;
+    }
+
+    if (renderBoxModel is RenderLayoutBox) {
+      RenderLayoutBox prevRenderLayoutBox = renderBoxModel as RenderLayoutBox;
+      RenderBox parentRenderObject = prevRenderLayoutBox.parent as RenderBox;
+      // Update layout box type from block to flex.
+      createRenderBoxModel();
+      if (parentRenderObject is RenderLayoutBox) {
+        Element? previousSibling = this.previousSibling as Element?;
+        RenderObject? previous = previousSibling?.renderer;
+        parentRenderObject.remove(prevRenderLayoutBox);
+        parentRenderObject.insert(renderBoxModel!, after: previous as RenderBox?);
+      } else if (parentRenderObject is RenderViewportBox) {
+        parentRenderObject.child = renderBoxModel;
+      }
     }
   }
 
-  // Universal RenderStyle set callback.
-  @mustCallSuper
-  void setRenderStyle(String key, dynamic value) {
-    // @NOTE: See [CSSStyleDeclaration.setProperty], value change will trigger
-    // [StyleChangeListener] to be invoked in sync.
-    style.setRenderStyle(key, value, viewportSize, renderBoxModel);
+  void setRenderStyleProperty(String name, dynamic value) {
+    switch (name) {
+      case DISPLAY:
+        renderStyle.display = value;
+         _updateRenderBoxModelWithDisplay();
+        break;
+      case Z_INDEX:
+        renderStyle.zIndex = value;
+        _updateRenderBoxModelWithZIndex();
+        break;
+      case OVERFLOW_X:
+        CSSOverflowType oldEffectiveOverflowY = renderStyle.effectiveOverflowY;
+        renderStyle.overflowX = value;
+        updateRenderBoxModelWithOverflowX(_handleScroll);
+
+        // Change overflowX may affect effectiveOverflowY.
+        // https://drafts.csswg.org/css-overflow/#overflow-properties
+        CSSOverflowType effectiveOverflowY = renderStyle.effectiveOverflowY;
+        if (effectiveOverflowY != oldEffectiveOverflowY) {
+          updateRenderBoxModelWithOverflowY(_handleScroll);
+        }
+        break;
+      case OVERFLOW_Y:
+        CSSOverflowType oldEffectiveOverflowX = renderStyle.effectiveOverflowX;
+        renderStyle.overflowY = value;
+        updateRenderBoxModelWithOverflowY(_handleScroll);
+
+        // Change overflowY may affect the effectiveOverflowX.
+        // https://drafts.csswg.org/css-overflow/#overflow-properties
+        CSSOverflowType effectiveOverflowX = renderStyle.effectiveOverflowX;
+        if (effectiveOverflowX != oldEffectiveOverflowX) {
+          updateRenderBoxModelWithOverflowX(_handleScroll);
+        }
+        break;
+      case OPACITY:
+        renderStyle.opacity = value;
+        break;
+      case VISIBILITY:
+        renderStyle.visibility = value;
+        break;
+      case CONTENT_VISIBILITY:
+        renderStyle.contentVisibility = value;
+        break;
+      case POSITION:
+        renderStyle.position = value;
+        _updateRenderBoxModelWithPosition();
+        break;
+      case TOP:
+        renderStyle.top = value;
+        break;
+      case LEFT:
+        renderStyle.left = value;
+        break;
+      case BOTTOM:
+        renderStyle.bottom = value;
+        break;
+      case RIGHT:
+        renderStyle.right = value;
+        break;
+      // Size
+      case WIDTH:
+        renderStyle.width = value;
+        break;
+      case MIN_WIDTH:
+        renderStyle.minWidth = value;
+        break;
+      case MAX_WIDTH:
+        renderStyle.maxWidth = value;
+        break;
+      case HEIGHT:
+        renderStyle.height = value;
+        break;
+      case MIN_HEIGHT:
+        renderStyle.minHeight = value;
+        break;
+      case MAX_HEIGHT:
+        renderStyle.maxHeight = value;
+        break;
+      // Flex
+      case FLEX_DIRECTION:
+        renderStyle.flexDirection = value;
+        break;
+      case FLEX_WRAP:
+        renderStyle.flexWrap = value;
+        break;
+      case ALIGN_CONTENT:
+        renderStyle.alignContent = value;
+        break;
+      case ALIGN_ITEMS:
+        renderStyle.alignItems = value;
+        break;
+      case JUSTIFY_CONTENT:
+        renderStyle.justifyContent = value;
+        break;
+      case ALIGN_SELF:
+        renderStyle.alignSelf = value;
+        break;
+      case FLEX_GROW:
+        renderStyle.flexGrow = value;
+        break;
+      case FLEX_SHRINK:
+        renderStyle.flexShrink = value;
+        break;
+      case FLEX_BASIS:
+        renderStyle.flexBasis = value;
+        break;
+      // Background
+      case BACKGROUND_COLOR:
+        renderStyle.backgroundColor = value;
+        break;
+      case BACKGROUND_ATTACHMENT:
+        renderStyle.backgroundAttachment = value;
+        break;
+      case BACKGROUND_IMAGE:
+        renderStyle.backgroundImage = value;
+        break;
+      case BACKGROUND_REPEAT:
+        renderStyle.backgroundRepeat = value;
+        break;
+      case BACKGROUND_POSITION_X:
+        renderStyle.backgroundPositionX = value;
+        break;
+      case BACKGROUND_POSITION_Y:
+        renderStyle.backgroundPositionY = value;
+        break;
+      case BACKGROUND_SIZE:
+        renderStyle.backgroundSize = value;
+        break;
+      case BACKGROUND_CLIP:
+        renderStyle.backgroundClip = value;
+        break;
+      case BACKGROUND_ORIGIN:
+        renderStyle.backgroundOrigin = value;
+        break;
+      // Padding
+      case PADDING_TOP:
+        renderStyle.paddingTop = value;
+        break;
+      case PADDING_RIGHT:
+        renderStyle.paddingRight = value;
+        break;
+      case PADDING_BOTTOM:
+        renderStyle.paddingBottom = value;
+        break;
+      case PADDING_LEFT:
+        renderStyle.paddingLeft = value;
+        break;
+      // Border
+      case BORDER_LEFT_WIDTH:
+        renderStyle.borderLeftWidth = value;
+        break;
+      case BORDER_TOP_WIDTH:
+        renderStyle.borderTopWidth = value;
+        break;
+      case BORDER_RIGHT_WIDTH:
+        renderStyle.borderRightWidth = value;
+        break;
+      case BORDER_BOTTOM_WIDTH:
+        renderStyle.borderBottomWidth = value;
+        break;
+      case BORDER_LEFT_STYLE:
+        renderStyle.borderLeftStyle = value;
+        break;
+      case BORDER_TOP_STYLE:
+        renderStyle.borderTopStyle = value;
+        break;
+      case BORDER_RIGHT_STYLE:
+        renderStyle.borderRightStyle = value;
+        break;
+      case BORDER_BOTTOM_STYLE:
+        renderStyle.borderBottomStyle = value;
+        break;
+      case BORDER_LEFT_COLOR:
+        renderStyle.borderLeftColor = value;
+        break;
+      case BORDER_TOP_COLOR:
+        renderStyle.borderTopColor = value;
+        break;
+      case BORDER_RIGHT_COLOR:
+        renderStyle.borderRightColor = value;
+        break;
+      case BORDER_BOTTOM_COLOR:
+        renderStyle.borderBottomColor = value;
+        break;
+      case BOX_SHADOW:
+        renderStyle.boxShadow = value;
+        break;
+      case BORDER_TOP_LEFT_RADIUS:
+        renderStyle.borderTopLeftRadius = value;
+        break;
+      case BORDER_TOP_RIGHT_RADIUS:
+        renderStyle.borderTopRightRadius = value;
+        break;
+      case BORDER_BOTTOM_LEFT_RADIUS:
+        renderStyle.borderBottomLeftRadius = value;
+        break;
+      case BORDER_BOTTOM_RIGHT_RADIUS:
+        renderStyle.borderBottomRightRadius = value;
+        break;
+      // Margin
+      case MARGIN_LEFT:
+        renderStyle.marginLeft = value;
+        break;
+      case MARGIN_TOP:
+        renderStyle.marginTop = value;
+        break;
+      case MARGIN_RIGHT:
+        renderStyle.marginRight = value;
+        break;
+      case MARGIN_BOTTOM:
+        renderStyle.marginBottom = value;
+        break;
+      // Text
+      case COLOR:
+        renderStyle.color = value;
+        _updateColorRelativePropertyWithColor(this);
+        break;
+      case TEXT_DECORATION_LINE:
+        renderStyle.textDecorationLine = value;
+        break;
+      case TEXT_DECORATION_STYLE:
+        renderStyle.textDecorationStyle = value;
+        break;
+      case TEXT_DECORATION_COLOR:
+        renderStyle.textDecorationColor = value;
+        break;
+      case FONT_WEIGHT:
+        renderStyle.fontWeight = value;
+        break;
+      case FONT_STYLE:
+        renderStyle.fontStyle = value;
+        break;
+      case FONT_FAMILY:
+        renderStyle.fontFamily = value;
+        break;
+      case FONT_SIZE:
+        renderStyle.fontSize = value;
+        _updateFontRelativeLengthWithFontSize();
+        break;
+      case LINE_HEIGHT:
+        renderStyle.lineHeight = value;
+        break;
+      case LETTER_SPACING:
+        renderStyle.letterSpacing = value;
+        break;
+      case WORD_SPACING:
+        renderStyle.wordSpacing = value;
+        break;
+      case TEXT_SHADOW:
+        renderStyle.textShadow = value;
+        break;
+      case WHITE_SPACE:
+        renderStyle.whiteSpace = value;
+        break;
+      case TEXT_OVERFLOW:
+        // Overflow will affect text-overflow ellipsis taking effect
+        renderStyle.textOverflow = value;
+        break;
+      case LINE_CLAMP:
+        renderStyle.lineClamp = value;
+        break;
+      case VERTICAL_ALIGN:
+        renderStyle.verticalAlign = value;
+        break;
+      case TEXT_ALIGN:
+        renderStyle.textAlign = value;
+        break;
+      // Transform
+      case TRANSFORM:
+        renderStyle.transform = value;
+        break;
+      case TRANSFORM_ORIGIN:
+        renderStyle.transformOrigin = value;
+        break;
+      // Transition
+      case TRANSITION_DELAY:
+        renderStyle.transitionDelay = value;
+        break;
+      case TRANSITION_DURATION:
+        renderStyle.transitionDuration = value;
+        break;
+      case TRANSITION_TIMING_FUNCTION:
+        renderStyle.transitionTimingFunction = value;
+        break;
+      case TRANSITION_PROPERTY:
+        renderStyle.transitionProperty = value;
+        break;
+      // Others
+      case OBJECT_FIT:
+        renderStyle.objectFit = value;
+        break;
+      case OBJECT_POSITION:
+        renderStyle.objectPosition = value;
+        break;
+      case FILTER:
+        renderStyle.filter = value;
+        break;
+      case SLIVER_DIRECTION:
+        renderStyle.sliverDirection = value;
+          break;
+    }
+  }
+
+  /// Set internal style value to the element.
+  dynamic _resolveRenderStyleValue(String property, dynamic present) {
+    dynamic value;
+    switch (property) {
+      case DISPLAY:
+        value = CSSDisplayMixin.resolveDisplay(present);
+        break;
+      case OVERFLOW_X:
+      case OVERFLOW_Y:
+        value = CSSOverflowMixin.resolveOverflowType(present);
+        break;
+      case POSITION:
+        value = CSSPositionMixin.resolvePositionType(present);
+        break;
+      case Z_INDEX:
+        value = int.tryParse(present);
+        break;
+      case TOP:
+      case LEFT:
+      case BOTTOM:
+      case RIGHT:
+      case FLEX_BASIS:
+      case PADDING_TOP:
+      case PADDING_RIGHT:
+      case PADDING_BOTTOM:
+      case PADDING_LEFT:
+      case WIDTH:
+      case MIN_WIDTH:
+      case MAX_WIDTH:
+      case HEIGHT:
+      case MIN_HEIGHT:
+      case MAX_HEIGHT:
+      case MARGIN_LEFT:
+      case MARGIN_TOP:
+      case MARGIN_RIGHT:
+      case MARGIN_BOTTOM:
+      case FONT_SIZE:
+        value = CSSLength.resolveLength(present, renderStyle, property);
+        break;
+      case FLEX_DIRECTION:
+        value = CSSFlexboxMixin.resolveFlexDirection(present);
+        break;
+      case FLEX_WRAP:
+        value = CSSFlexboxMixin.resolveFlexWrap(present);
+        break;
+      case ALIGN_CONTENT:
+        value = CSSFlexboxMixin.resolveAlignContent(present);
+        break;
+      case ALIGN_ITEMS:
+        value = CSSFlexboxMixin.resolveAlignItems(present);
+        break;
+      case JUSTIFY_CONTENT:
+        value = CSSFlexboxMixin.resolveJustifyContent(present);
+        break;
+      case ALIGN_SELF:
+        value = CSSFlexboxMixin.resolveAlignSelf(present);
+        break;
+      case FLEX_GROW:
+        value = CSSFlexboxMixin.resolveFlexGrow(present);
+        break;
+      case FLEX_SHRINK:
+        value = CSSFlexboxMixin.resolveFlexShrink(present);
+        break;
+      case SLIVER_DIRECTION:
+        value = CSSSliverMixin.resolveAxis(present);
+        break;
+      case TEXT_ALIGN:
+        value = CSSTextMixin.resolveTextAlign(present);
+        break;
+      case BACKGROUND_ATTACHMENT:
+        value = CSSBackground.resolveBackgroundAttachment(present);
+        break;
+      case BACKGROUND_IMAGE:
+        value = CSSBackground.resolveBackgroundImage(present, renderStyle, property, elementManager.controller);
+        break;
+      case BACKGROUND_REPEAT:
+        value = CSSBackground.resolveBackgroundRepeat(present);
+        break;
+      case BACKGROUND_POSITION_X:
+        value = CSSPosition.resolveBackgroundPosition(present, renderStyle, property, true);
+        break;
+      case BACKGROUND_POSITION_Y:
+        value = CSSPosition.resolveBackgroundPosition(present, renderStyle, property, false);
+        break;
+      case BACKGROUND_SIZE:
+        value = CSSBackground.resolveBackgroundSize(present, renderStyle, property);
+        break;
+      case BACKGROUND_CLIP:
+        value = CSSBackground.resolveBackgroundClip(present);
+        break;
+      case BACKGROUND_ORIGIN:
+        value = CSSBackground.resolveBackgroundOrigin(present);
+        break;
+      case BORDER_LEFT_WIDTH:
+      case BORDER_TOP_WIDTH:
+      case BORDER_RIGHT_WIDTH:
+      case BORDER_BOTTOM_WIDTH:
+        value = CSSBorderSide.resolveBorderWidth(present, renderStyle, property);
+        break;
+      case BORDER_LEFT_STYLE:
+      case BORDER_TOP_STYLE:
+      case BORDER_RIGHT_STYLE:
+      case BORDER_BOTTOM_STYLE:
+        value = CSSBorderSide.resolveBorderStyle(present);
+        break;
+      case COLOR:
+      case BACKGROUND_COLOR:
+      case TEXT_DECORATION_COLOR:
+      case BORDER_LEFT_COLOR:
+      case BORDER_TOP_COLOR:
+      case BORDER_RIGHT_COLOR:
+      case BORDER_BOTTOM_COLOR:
+        value = CSSColor.resolveColor(present, renderStyle, property);
+        break;
+      case BOX_SHADOW:
+        value = CSSBoxShadow.parseBoxShadow(present, renderStyle, property);
+        break;
+      case BORDER_TOP_LEFT_RADIUS:
+      case BORDER_TOP_RIGHT_RADIUS:
+      case BORDER_BOTTOM_LEFT_RADIUS:
+      case BORDER_BOTTOM_RIGHT_RADIUS:
+        value = CSSBorderRadius.parseBorderRadius(present, renderStyle, property);
+        break;
+      case OPACITY:
+        value = CSSOpacityMixin.resolveOpacity(present);
+        break;
+      case VISIBILITY:
+        value = CSSVisibilityMixin.resolveVisibility(present);
+        break;
+      case CONTENT_VISIBILITY:
+        value = CSSContentVisibilityMixin.resolveContentVisibility(present);
+        break;
+      case TRANSFORM:
+        value = CSSTransformMixin.resolveTransform(present);
+        break;
+      case FILTER:
+        value = CSSFunction.parseFunction(present);
+        break;
+      case TRANSFORM_ORIGIN:
+        value = CSSOrigin.parseOrigin(present, renderStyle, property);
+        break;
+      case OBJECT_FIT:
+        value = CSSObjectFitMixin.resolveBoxFit(present);
+        break;
+      case OBJECT_POSITION:
+        value = CSSObjectPositionMixin.resolveObjectPosition(present);
+        break;
+      case TEXT_DECORATION_LINE:
+        value = CSSText.resolveTextDecorationLine(present);
+        break;
+      case TEXT_DECORATION_STYLE:
+        value = CSSText.resolveTextDecorationStyle(present);
+        break;
+      case FONT_WEIGHT:
+        value = CSSText.resolveFontWeight(present);
+        break;
+      case FONT_STYLE:
+        value = CSSText.resolveFontStyle(present);
+        break;
+      case FONT_FAMILY:
+        value = CSSText.resolveFontFamilyFallback(present);
+        break;
+      case LINE_HEIGHT:
+        value = CSSText.resolveLineHeight(present, renderStyle, property);
+        break;
+      case LETTER_SPACING:
+        value = CSSText.resolveSpacing(present, renderStyle, property);
+        break;
+      case WORD_SPACING:
+        value = CSSText.resolveSpacing(present, renderStyle, property);
+        break;
+      case TEXT_SHADOW:
+        value = CSSText.resolveTextShadow(present, renderStyle, property);
+        break;
+      case WHITE_SPACE:
+        value = CSSText.resolveWhiteSpace(present);
+        break;
+      case TEXT_OVERFLOW:
+        // Overflow will affect text-overflow ellipsis taking effect
+        value = CSSText.resolveTextOverflow(present);
+        break;
+      case LINE_CLAMP:
+        value = CSSText.parseLineClamp(present);
+        break;
+      case VERTICAL_ALIGN:
+        value = CSSInlineMixin.resolveVerticalAlign(present);
+        break;
+      // Transition
+      case TRANSITION_DELAY:
+      case TRANSITION_DURATION:
+      case TRANSITION_TIMING_FUNCTION:
+      case TRANSITION_PROPERTY:
+        value = CSSStyleProperty.getMultipleValues(present);
+        break;
+    }
+
+    return value;
+  }
+
+  void setRenderStyle(String property, String present) {
+    dynamic value = present.isEmpty ? null : _resolveRenderStyleValue(property, present);
+    setRenderStyleProperty(property, value);
+  }
+
+  void _updateColorRelativePropertyWithColor(Element element) {
+    RenderStyle renderStyle = element.renderStyle;
+    renderStyle.updateColorRelativeProperty();
+    if (element.children.isNotEmpty) {
+      element.children.forEach((Element child) {
+        if (!child.renderStyle.hasColor) {
+          _updateColorRelativePropertyWithColor(child);
+        }
+      });
+    }
+  }
+
+  void _updateFontRelativeLengthWithFontSize() {
+    // Update all the children's length value.
+    _updateChildrenFontRelativeLength(this);
+
+    if (renderBoxModel!.isDocumentRootBox) {
+      // Update all the document tree.
+      _updateChildrenRootFontRelativeLength(this);
+    }
+  }
+
+  void _updateChildrenFontRelativeLength(Element element) {
+    RenderStyle renderStyle = element.renderStyle;
+    renderStyle.updateFontRelativeLength();
+    if (element.children.isNotEmpty) {
+      element.children.forEach((Element child) {
+        if (!child.renderStyle.hasFontSize) {
+          _updateChildrenFontRelativeLength(child);
+        }
+      });
+    }
+  }
+
+  void _updateChildrenRootFontRelativeLength(Element element) {
+    RenderStyle renderStyle = element.renderStyle;
+    renderStyle.updateRootFontRelativeLength();
+    if (element.children.isNotEmpty) {
+      element.children.forEach((Element child) {
+        _updateChildrenRootFontRelativeLength(child);
+      });
+    }
+  }
+
+  void _applyDefaultStyle(CSSStyleDeclaration style) {
+    if (_defaultStyle.isNotEmpty) {
+      _defaultStyle.forEach((propertyName, dynamic value) {
+        style.setProperty(propertyName, value);
+      });
+    }
+  }
+
+  void _applyInlineStyle(CSSStyleDeclaration style) {
+    if (inlineStyle.isNotEmpty) {
+      inlineStyle.forEach((propertyName, dynamic value) {
+        // Force inline style to be applied as important priority.
+        style.setProperty(propertyName, value, true);
+      });
+    }
+  }
+
+  void _applySheetStyle(CSSStyleDeclaration style) {
+    if (classList.isNotEmpty) {
+      const String classSelectorPrefix = '.';
+      for (String className in classList) {
+        for (CSSStyleSheet sheet in elementManager.styleSheets) {
+          List<CSSRule> rules = sheet.cssRules;
+          for (int i = 0; i < rules.length; i++) {
+            CSSRule rule = rules[i];
+            if (rule is CSSStyleRule && rule.selectorText == (classSelectorPrefix + className)) {
+              var sheetStyle = rule.style;
+              for (String propertyName in sheetStyle.keys) {
+                style.setProperty(propertyName, sheetStyle[propertyName], false);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  void _onStyleChanged(String propertyName, String? prevValue, String currentValue) {
+    if (renderStyle.shouldTransition(propertyName, prevValue, currentValue)) {
+      renderStyle.runTransition(propertyName, prevValue, currentValue);
+    } else {
+      setRenderStyle(propertyName, currentValue);
+    }
+  }
+
+  // Set inline style property.
+  void setInlineStyle(String property, dynamic value) {
+    // Current only for mark property is setting by inline style.
+    inlineStyle[property] = value;
+    style.setProperty(property, value, true);
+  }
+
+  void _applyStyle(CSSStyleDeclaration style) {
+    // Apply default style.
+    _applyDefaultStyle(style);
+    // Init display from style directly cause renderStyle is not flushed yet.
+    renderStyle.initDisplay();
+
+    _applyInlineStyle(style);
+    _applySheetStyle(style);
+  }
+
+  void recalculateStyle() {
+    // TODO: current only support class selector in stylesheet
+    if (renderBoxModel != null && classList.isNotEmpty) {
+      // Diff style.
+      CSSStyleDeclaration newStyle = CSSStyleDeclaration();
+      _applyStyle(newStyle);
+      Map<String, String?> diffs = style.diff(newStyle);
+      if (diffs.isNotEmpty) {
+        // Update render style.
+        diffs.forEach((String propertyName, String? value) {
+          style.setProperty(propertyName, value);
+        });
+        style.flushPendingProperties();
+      }
+    }
+  }
+
+  void recalculateNestedStyle() {
+    recalculateStyle();
+    // Update children style.
+    children.forEach((Element child) {
+      child.recalculateNestedStyle();
+    });
   }
 
   @mustCallSuper
   void setProperty(String key, dynamic value) {
-    // Each key change will emit to `setStyle`
-    if (key == _STYLE_PROPERTY) {
-      assert(value is Map<String, dynamic>);
-      // @TODO: Consider `{ color: red }` to `{}`, need to remove invisible keys.
-      (value as Map<String, dynamic>).forEach(setStyle);
+    if (value == null || value == EMPTY_STRING) {
+      return removeProperty(key);
+    }
+
+    if (key == _CLASS_NAME) {
+      className = value;
     } else {
       properties[key] = value;
     }
@@ -1295,19 +1387,34 @@ class Element extends Node
 
   @mustCallSuper
   dynamic getProperty(String key) {
-    switch (key) {
-      default:
-        return properties[key];
+    if (key == _CLASS_NAME) {
+      return className;
+    } else {
+      return properties[key];
     }
   }
 
   @mustCallSuper
   void removeProperty(String key) {
-    properties.remove(key);
-
     if (key == _STYLE_PROPERTY) {
-      setProperty(_STYLE_PROPERTY, null);
+      _removeInlineStyle();
+    } else if (key == _CLASS_NAME) {
+      className = EMPTY_STRING;
+    } else {
+      properties.remove(key);
     }
+  }
+
+  void _removeInlineStyle() {
+    inlineStyle.forEach((String property, _) {
+      _removeInlineStyleProperty(property);
+    });
+    style.flushPendingProperties();
+  }
+
+  void _removeInlineStyleProperty(String property) {
+    inlineStyle.remove(property);
+    style.removeProperty(property, true);
   }
 
   BoundingClientRect get boundingClientRect {
@@ -1359,7 +1466,7 @@ class Element extends Node
   }
 
   Offset getOffset(RenderBox renderBox) {
-    // need to flush layout to get correct size
+    // Need to flush layout to get correct size.
     elementManager
         .getRootRenderBox()
         .owner!
@@ -1370,37 +1477,34 @@ class Element extends Node
     return renderBox.localToGlobal(Offset.zero, ancestor: element.renderBoxModel);
   }
 
-  @override
-  void addEvent(String eventType) {
-    super.addEvent(eventType);
-
-    if (eventHandlers.containsKey(eventType)) return; // Only listen once.
-
-    // Only add listener once for all intersection related event
-    bool isIntersectionObserverEvent = _isIntersectionObserverEvent(eventType);
-    bool hasIntersectionObserverEvent = isIntersectionObserverEvent && _hasIntersectionObserverEvent(eventHandlers);
-
-    addEventListener(eventType, _eventResponder);
-
+  void _ensureEventResponderBound() {
+    // Must bind event responder on render box model whatever there is no event listener.
     RenderBoxModel? selfRenderBoxModel = renderBoxModel;
     if (selfRenderBoxModel != null) {
-      // Bind pointer responder.
+      // Make sure pointer responder bind.
       addEventResponder(selfRenderBoxModel);
-
-      if (isIntersectionObserverEvent && !hasIntersectionObserverEvent) {
+      if (_hasIntersectionObserverEvent(eventHandlers)) {
         selfRenderBoxModel.addIntersectionChangeListener(handleIntersectionChange);
       }
     }
   }
 
+  void addEvent(String eventType) {
+    if (eventHandlers.containsKey(eventType)) return; // Only listen once.
+    addEventListener(eventType, dispatchEvent);
+    _ensureEventResponderBound();
+  }
+
   void removeEvent(String eventType) {
     if (!eventHandlers.containsKey(eventType)) return; // Only listen once.
-    removeEventListener(eventType, _eventResponder);
+    removeEventListener(eventType, dispatchEvent);
 
     RenderBoxModel? selfRenderBoxModel = renderBoxModel;
     if (selfRenderBoxModel != null) {
-      // Remove pointer responder.
-      removeEventResponder(selfRenderBoxModel);
+      if (eventHandlers.isEmpty) {
+        // Remove pointer responder if there is no event handler.
+        removeEventResponder(selfRenderBoxModel);
+      }
 
       // Remove listener when no intersection related event
       if (_isIntersectionObserverEvent(eventType) && !_hasIntersectionObserverEvent(eventHandlers)) {
@@ -1409,38 +1513,8 @@ class Element extends Node
     }
   }
 
-  @override
-  void dispatchEvent(Event event) {
-    super.dispatchEvent(event);
-    if (event.currentTarget != null) {
-      _eventResponder(event);
-
-      // Dispatch listener for widget.
-      if (elementManager.gestureListener != null) {
-        if (elementManager.gestureListener?.onTouchStart != null && event.type == EVENT_TOUCH_START) {
-          elementManager.gestureListener?.onTouchStart!(event as TouchEvent);
-        }
-
-        if (elementManager.gestureListener?.onTouchMove != null && event.type == EVENT_TOUCH_MOVE) {
-          elementManager.gestureListener?.onTouchMove!(event as TouchEvent);
-        }
-
-        if (elementManager.gestureListener?.onTouchEnd != null && event.type == EVENT_TOUCH_END) {
-          elementManager.gestureListener?.onTouchEnd!(event as TouchEvent);
-        }
-      }
-    }
-  }
-
-  void _eventResponder(Event event) {
-    // Don't trigger event when eventTarget already disposed.
-    if (disposed) return;
-    emitUIEvent(elementManager.controller.view.contextId, this, event);
-  }
-
   void handleMethodClick() {
     Event clickEvent = MouseEvent(EVENT_CLICK, MouseEventInit(bubbles: true, cancelable: true));
-
     // If element not in tree, click is fired and only response to itself.
     dispatchEvent(clickEvent);
   }
@@ -1487,44 +1561,26 @@ class Element extends Node
     }
   }
 
-  static RenderBoxModel createRenderBoxModel(
-    Element element,
-    {
-      RenderBoxModel? prevRenderBoxModel,
-      bool repaintSelf = false
-    }
-  ) {
-    RenderBoxModel? renderBoxModel = prevRenderBoxModel ?? element.renderBoxModel;
-
-    if (renderBoxModel is RenderIntrinsic) {
-      return createRenderIntrinsic(
-        element,
-        prevRenderIntrinsic: prevRenderBoxModel as RenderIntrinsic?,
-        repaintSelf: repaintSelf
-      );
-    } else {
-      return createRenderLayout(
-        element,
-        prevRenderLayoutBox: prevRenderBoxModel as RenderLayoutBox?,
-        repaintSelf: repaintSelf
-      );
-    }
+  // Create a new RenderLayoutBox for the scrolling content.
+  RenderLayoutBox createScrollingContentLayout() {
+    // FIXME: Create a empty renderStyle for do not share renderStyle with element. Current update here will break flexbox.
+    RenderStyle scrollingContentRenderStyle = RenderStyle(target: this);
+    RenderLayoutBox scrollingContentLayoutBox = _createRenderLayout(
+      repaintSelf: true,
+      renderStyle: scrollingContentRenderStyle,
+    );
+    style.addStyleChangeListener(scrollingContentBoxStyleListener);
+    scrollingContentLayoutBox.isScrollingContentBox = true;
+    return scrollingContentLayoutBox;
   }
 
-  static RenderLayoutBox createRenderLayout(
-    Element element,
-    {
-      CSSStyleDeclaration? style,
+  RenderLayoutBox _createRenderLayout({
       RenderLayoutBox? prevRenderLayoutBox,
+      RenderStyle? renderStyle,
       bool repaintSelf = false
-    }
-  ) {
-    style = style ?? element.style;
-    CSSDisplay display = CSSDisplayMixin.getDisplay(
-      CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? element.defaultDisplay : style[DISPLAY]
-    );
-    RenderStyle renderStyle = RenderStyle(style: style, viewportSize: element.viewportSize);
-    ElementDelegate elementDelegate = element.elementDelegate;
+  }) {
+    CSSDisplay display = this.renderStyle.display;
+    renderStyle ??= this.renderStyle;
 
     if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
       RenderFlexLayout? flexLayout;
@@ -1533,12 +1589,10 @@ class Element extends Node
         if (repaintSelf) {
           flexLayout = RenderSelfRepaintFlexLayout(
             renderStyle: renderStyle,
-            elementDelegate: elementDelegate,
           );
         } else {
           flexLayout = RenderFlexLayout(
             renderStyle: renderStyle,
-            elementDelegate: elementDelegate,
           );
         }
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
@@ -1579,15 +1633,11 @@ class Element extends Node
             return flexLayout;
           }
         }
-      } else if (prevRenderLayoutBox is RenderRecyclerLayout) {
+      } else if (prevRenderLayoutBox is RenderSliverListLayout) {
         flexLayout = prevRenderLayoutBox.toFlexLayout();
       }
 
-      flexLayout!.renderStyle.updateFlexbox();
-
-      /// Set display and transformedDisplay when display is not set in style
-      flexLayout.renderStyle.initDisplay(element.style, element.defaultDisplay);
-      return flexLayout;
+      return flexLayout!;
     } else if (display == CSSDisplay.block ||
       display == CSSDisplay.none ||
       display == CSSDisplay.inline ||
@@ -1598,12 +1648,10 @@ class Element extends Node
         if (repaintSelf) {
           flowLayout = RenderSelfRepaintFlowLayout(
             renderStyle: renderStyle,
-            elementDelegate: elementDelegate,
           );
         } else {
           flowLayout = RenderFlowLayout(
             renderStyle: renderStyle,
-            elementDelegate: elementDelegate,
           );
         }
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
@@ -1644,60 +1692,58 @@ class Element extends Node
             flowLayout = prevRenderLayoutBox.toFlowLayout();
           }
         }
-      } else if (prevRenderLayoutBox is RenderRecyclerLayout) {
+      } else if (prevRenderLayoutBox is RenderSliverListLayout) {
         // RenderRecyclerLayout --> RenderFlowLayout
         flowLayout = prevRenderLayoutBox.toFlowLayout();
       }
 
-      flowLayout!.renderStyle.updateFlow();
-      /// Set display and transformedDisplay when display is not set in style
-      flowLayout.renderStyle.initDisplay(element.style, element.defaultDisplay);
-      return flowLayout;
+      return flowLayout!;
     } else if (display == CSSDisplay.sliver) {
-      RenderRecyclerLayout? renderRecyclerLayout;
+      late RenderSliverListLayout renderSliverListLayout;
 
       if (prevRenderLayoutBox == null) {
-        renderRecyclerLayout = RenderRecyclerLayout(
+        ElementSliverBoxChildManager manager = ElementSliverBoxChildManager(this);
+        renderSliverListLayout = RenderSliverListLayout(
           renderStyle: renderStyle,
-          elementDelegate: elementDelegate,
+          manager: manager,
+          onScroll: _handleScroll,
         );
-      } else if (prevRenderLayoutBox is RenderFlowLayout) {
-        renderRecyclerLayout = prevRenderLayoutBox.toRenderRecyclerLayout();
-      } else if (prevRenderLayoutBox is RenderFlexLayout) {
-        renderRecyclerLayout = prevRenderLayoutBox.toRenderRecyclerLayout();
-      } else if (prevRenderLayoutBox is RenderRecyclerLayout) {
-        renderRecyclerLayout = prevRenderLayoutBox;
+        manager.setupSliverLayoutLayout(renderSliverListLayout);
+      } else if (prevRenderLayoutBox is RenderFlowLayout
+          || prevRenderLayoutBox is RenderFlexLayout) {
+        ElementSliverBoxChildManager manager = ElementSliverBoxChildManager(this);
+        renderSliverListLayout = RenderSliverListLayout(
+          renderStyle: renderStyle,
+          manager: manager,
+          onScroll: _handleScroll,
+        );
+        manager.setupSliverLayoutLayout(renderSliverListLayout);
+        renderSliverListLayout.addAll(prevRenderLayoutBox.getDetachedChildrenAsList() as List<RenderBox>);
+        renderSliverListLayout = prevRenderLayoutBox.copyWith(renderSliverListLayout);
+      } else if (prevRenderLayoutBox is RenderSliverListLayout) {
+        renderSliverListLayout = prevRenderLayoutBox;
       }
 
-      /// Set display and transformedDisplay when display is not set in style
-      renderRecyclerLayout!.renderStyle.initDisplay(element.style, element.defaultDisplay);
-      return renderRecyclerLayout;
+      return renderSliverListLayout;
     } else {
       throw FlutterError('Not supported display type $display');
     }
   }
 
-  static RenderIntrinsic createRenderIntrinsic(
-    Element element,
-    {
-      RenderIntrinsic? prevRenderIntrinsic,
-      bool repaintSelf = false
-    }
-  ) {
+  RenderIntrinsic _createRenderIntrinsic({
+    RenderIntrinsic? prevRenderIntrinsic,
+    bool repaintSelf = false
+  }) {
     RenderIntrinsic intrinsic;
-    RenderStyle renderStyle = RenderStyle(style: element.style, viewportSize: element.viewportSize);
-    ElementDelegate elementDelegate = element.elementDelegate;
 
     if (prevRenderIntrinsic == null) {
       if (repaintSelf) {
         intrinsic = RenderSelfRepaintIntrinsic(
           renderStyle,
-          elementDelegate
         );
       } else {
         intrinsic = RenderIntrinsic(
           renderStyle,
-          elementDelegate
         );
       }
     } else {
@@ -1721,16 +1767,27 @@ class Element extends Node
     }
     return intrinsic;
   }
-}
 
+  void _updateRenderBoxModelWithZIndex() {
+    // Needs to sort children when parent paint children
+    if (renderBoxModel!.parentData is RenderLayoutParentData) {
+      RenderLayoutBox parent = renderBoxModel!.parent as RenderLayoutBox;
+      final RenderLayoutParentData parentData = renderBoxModel!.parentData as RenderLayoutParentData;
+      RenderBox? nextSibling = parentData.nextSibling;
+
+      parent.sortedChildren.remove(renderBoxModel);
+      parent.insertChildIntoSortedChildren(renderBoxModel!, after: nextSibling);
+    }
+  }
+}
 
 Element? _findContainingBlock(Element element) {
   Element? _el = element.parentElement;
   Element rootEl = element.elementManager.viewportElement;
 
   while (_el != null) {
-    bool isElementNonStatic = _el.style[POSITION] != STATIC && _el.style[POSITION].isNotEmpty;
-    bool hasTransform = _el.style[TRANSFORM].isNotEmpty;
+    bool isElementNonStatic = _el.renderStyle.position != CSSPositionType.static;
+    bool hasTransform = _el.renderStyle.transform != null;
     // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
     if (_el == rootEl || isElementNonStatic || hasTransform) {
       break;
@@ -1793,114 +1850,4 @@ void _setPositionedChildParentData(RenderLayoutBox parentRenderLayoutBox, Elemen
   RenderLayoutParentData parentData = RenderLayoutParentData();
   RenderBoxModel childRenderBoxModel = child.renderBoxModel!;
   childRenderBoxModel.parentData = CSSPositionedLayout.getPositionParentData(childRenderBoxModel, parentData);
-}
-
-/// [RenderSliverBoxChildManager] for sliver element.
-class ElementSliverBoxChildManager implements RenderSliverBoxChildManager {
-  // The container reference element.
-  final Element _element;
-
-  // Flag to determine whether newly added children could
-  // affect the visible contents of the [RenderSliverMultiBoxAdaptor].
-  bool _didUnderflow = false;
-
-  // The current rendering object index.
-  int _currentIndex = -1;
-
-  RenderRecyclerLayout get recyclerLayout => _element.renderer as RenderRecyclerLayout;
-
-  ElementSliverBoxChildManager(Element element) : _element = element;
-
-  Iterable<Node> get _renderNodes => _element.childNodes.where((child) => child is Element || child is TextNode);
-
-  // Only count renderable child.
-  @override
-  int get childCount => _renderNodes.length;
-
-  @override
-  void createChild(int index, {required RenderBox? after}) {
-    if (_didUnderflow) return;
-    if (index < 0) return;
-
-    Iterable<Node> renderNodes = _renderNodes;
-    if (index >= renderNodes.length) return;
-    _currentIndex = index;
-
-    Node childNode = renderNodes.elementAt(index);
-    childNode.willAttachRenderer();
-
-    RenderBox? child;
-
-    if (childNode is Element) {
-      childNode.style.applyTargetProperties();
-    }
-    if (childNode is Node) {
-      child = childNode.renderer as RenderBox?;
-    } else {
-      if (!kReleaseMode)
-        throw FlutterError('Sliver unsupported type ${childNode.runtimeType} $childNode');
-    }
-
-    assert(child != null, 'Sliver render node should own RenderBox.');
-
-    recyclerLayout
-      ..setupParentData(child!)
-      ..insertSliverChild(child, after: after);
-
-    childNode.didAttachRenderer();
-    childNode.ensureChildAttached();
-  }
-
-  @override
-  bool debugAssertChildListLocked() => true;
-
-  @override
-  void didAdoptChild(RenderBox child) {
-    final parentData = child.parentData as SliverMultiBoxAdaptorParentData;
-    parentData.index = _currentIndex;
-  }
-
-  @override
-  void removeChild(RenderBox child) {
-    if (child is RenderBoxModel) {
-      child.elementDelegate.detachRenderer();
-    } else {
-      child.detach();
-    }
-  }
-
-  @override
-  void setDidUnderflow(bool value) {
-    _didUnderflow = value;
-  }
-
-  @override
-  void didFinishLayout() {}
-
-  @override
-  void didStartLayout() {}
-
-  @override
-  double estimateMaxScrollOffset(SliverConstraints constraints, {int? firstIndex, int? lastIndex, double? leadingScrollOffset, double? trailingScrollOffset}) {
-    return _extrapolateMaxScrollOffset(firstIndex, lastIndex,
-        leadingScrollOffset, trailingScrollOffset, childCount)!;
-  }
-
-  static double? _extrapolateMaxScrollOffset(
-    int? firstIndex,
-    int? lastIndex,
-    double? leadingScrollOffset,
-    double? trailingScrollOffset,
-    int childCount,
-  ) {
-    if (lastIndex == childCount - 1) {
-      return trailingScrollOffset;
-    }
-
-    final int reifiedCount = lastIndex! - firstIndex! + 1;
-    final double averageExtent =
-        (trailingScrollOffset! - leadingScrollOffset!) / reifiedCount;
-    final int remainingCount = childCount - lastIndex - 1;
-    return trailingScrollOffset + averageExtent * remainingCount;
-  }
 }
