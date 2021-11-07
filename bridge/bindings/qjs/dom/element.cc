@@ -208,7 +208,7 @@ JSValue Element::setAttribute(QjsContext* ctx, JSValue this_val, int argc, JSVal
     // Only string value to style property are accept.
     if (JS_IsString(attributeValue)) {
       std::string styleRules = jsValueToStdString(ctx, attributeValue);
-      element->m_style->internalSetStyleRules(styleRules);
+      element->style()->internalSetStyleRules(styleRules);
     } else {
       // Otherwise default to reset style.
       element->resetStyle();
@@ -253,7 +253,7 @@ JSValue Element::getAttribute(QjsContext* ctx, JSValue this_val, int argc, JSVal
   std::string name = jsValueToStdString(ctx, nameValue);
 
   if (name == "style") {
-    std::string styleRules = element->m_style->toString();
+    std::string styleRules = element->style()->toString();
     return JS_NewString(ctx, styleRules.c_str());
   } else {
     auto* attributes = element->m_attributes;
@@ -611,7 +611,7 @@ PROP_SETTER(ElementInstance, outerHTML)(QjsContext* ctx, JSValue this_val, int a
 
 PROP_GETTER(ElementInstance, style)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return JS_DupValue(ctx, element->m_style->instanceObject);
+  return JS_DupValue(ctx, element->style()->instanceObject);
 }
 PROP_SETTER(ElementInstance, style)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
@@ -735,7 +735,7 @@ std::string ElementInstance::outerHTML() {
   // Read attributes
   std::string attributes = m_attributes->toString();
   // Read style
-  std::string style = m_style->toString();
+  std::string style = m_style != nullptr ? m_style->toString() : "";
 
   if (!attributes.empty()) {
     s += " " + attributes;
@@ -842,11 +842,6 @@ void ElementInstance::_beforeUpdateId(JSAtom oldId, JSAtom newId) {
 ElementInstance::ElementInstance(Element* element, std::string tagName, bool shouldAddUICommand)
     : m_tagName(tagName), NodeInstance(element, NodeType::ELEMENT_NODE, DocumentInstance::instance(Document::instance(element->m_context)), Element::classId(), exoticMethods, "Element") {
   m_attributes = new ElementAttributes(m_context);
-  JSValue arguments[] = {instanceObject};
-  JSValue style = JS_CallConstructor(m_ctx, CSSStyleDeclaration::instance(m_context)->classObject, 1, arguments);
-  m_style = static_cast<StyleDeclarationInstance*>(JS_GetOpaque(style, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
-
-  JS_DefinePropertyValueStr(m_ctx, instanceObject, "__style__", m_style->instanceObject, JS_PROP_C_W_E);
   JS_DefinePropertyValueStr(m_ctx, instanceObject, "attributes", m_attributes->jsObject, JS_PROP_C_W_E);
 
   if (shouldAddUICommand) {
@@ -858,6 +853,11 @@ ElementInstance::ElementInstance(Element* element, std::string tagName, bool sho
 JSClassExoticMethods ElementInstance::exoticMethods{nullptr, nullptr, nullptr, nullptr, hasProperty, getProperty, setProperty};
 
 StyleDeclarationInstance* ElementInstance::style() {
+  if (m_style == nullptr) {
+    JSValue arguments[] = {instanceObject};
+    JSValue style = JS_CallConstructor(m_ctx, CSSStyleDeclaration::instance(m_context)->classObject, 1, arguments);
+    m_style = static_cast<StyleDeclarationInstance*>(JS_GetOpaque(style, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
+  }
   return m_style;
 }
 
@@ -867,15 +867,13 @@ ElementAttributes* ElementInstance::attributes() {
 
 void ElementInstance::gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
   NodeInstance::gcMark(rt, val, mark_func);
+  if (m_style != nullptr) JS_MarkValue(rt, m_style->instanceObject, mark_func);
 }
 
 void ElementInstance::resetStyle() {
-  JS_FreeValue(m_ctx, m_style->instanceObject);
   JSValue arguments[] = {instanceObject};
   JSValue style = JS_CallConstructor(m_ctx, CSSStyleDeclaration::instance(m_context)->classObject, 1, arguments);
   m_style = static_cast<StyleDeclarationInstance*>(JS_GetOpaque(style, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
-  JS_DefinePropertyValueStr(m_ctx, instanceObject, "__style__", m_style->instanceObject, JS_PROP_NORMAL);
-
   NativeString* args_01 = stringToNativeString("style");
   ::foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(eventTargetId, UICommand::removeProperty, *args_01, nullptr);
 }

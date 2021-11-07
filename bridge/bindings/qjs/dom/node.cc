@@ -264,7 +264,7 @@ JSValue Node::copyNodeValue(QjsContext* ctx, NodeInstance* node) {
     newElement->m_attributes->copyWith(element->m_attributes);
 
     /* copy style */
-    newElement->m_style->copyWith(element->m_style);
+    newElement->style()->copyWith(element->m_style);
 
     std::string newNodeEventTargetId = std::to_string(newElement->eventTargetId);
     NativeString* args_01 = stringToNativeString(newNodeEventTargetId);
