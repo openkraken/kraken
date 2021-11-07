@@ -1406,9 +1406,10 @@ class Element extends Node
   }
 
   void _removeInlineStyle() {
-    inlineStyle.forEach((String property, _) {
-      _removeInlineStyleProperty(property);
-    });
+    List<String> inlineStyleKeys = inlineStyle.keys.toList();
+    for (String key in inlineStyleKeys) {
+      _removeInlineStyleProperty(key);
+    }
     style.flushPendingProperties();
   }
 
