@@ -869,7 +869,8 @@ ElementAttributes* ElementInstance::attributes() {
 
 void ElementInstance::gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
   NodeInstance::gcMark(rt, val, mark_func);
-  if (m_style != nullptr) JS_MarkValue(rt, m_style->instanceObject, mark_func);
+  if (m_style != nullptr)
+    JS_MarkValue(rt, m_style->instanceObject, mark_func);
 }
 
 void ElementInstance::resetStyle() {
