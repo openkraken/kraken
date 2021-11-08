@@ -491,7 +491,7 @@ class CSSPositionedLayout {
       } else {
         placeholderOffset = _getPlaceholderToParentOffset(child.renderPositionHolder!, parent);
         // Use original offset in normal flow if no top and bottom is set.
-        top = placeholderOffset.dy + childMarginTop;
+        top = placeholderOffset.dy;
       }
 
       double left;
@@ -513,7 +513,7 @@ class CSSPositionedLayout {
       } else {
         placeholderOffset ??= _getPlaceholderToParentOffset(child.renderPositionHolder!, parent);
         // Use original offset in normal flow if no left and right is set.
-        left = placeholderOffset.dx + childMarginLeft;
+        left = placeholderOffset.dx;
       }
 
       x = left;
