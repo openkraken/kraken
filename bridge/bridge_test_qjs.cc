@@ -197,7 +197,8 @@ static JSValue runGC(QjsContext* ctx, JSValueConst this_val, int argc, JSValueCo
 }
 
 static JSValue parseHTML(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-  KRAKEN_LOG(VERBOSE) << "parseHTML111" << "argc=" << argc;
+  KRAKEN_LOG(VERBOSE) << "parseHTML111"
+                      << "argc=" << argc;
   auto* context = static_cast<binding::qjs::JSContext*>(JS_GetContextOpaque(ctx));
 
   if (argc == 1) {
