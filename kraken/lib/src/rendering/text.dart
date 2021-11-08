@@ -107,7 +107,15 @@ class RenderTextBox extends RenderBox
         if (parentParentData.isPositioned) {
           maxConstraintWidth = double.infinity;
         } else {
-          maxConstraintWidth = parentRenderBoxModel.renderStyle.getMaxConstraintWidth();
+          maxConstraintWidth = parentRenderBoxModel.renderStyle.contentMaxConstraintsWidth;
+          // @FIXME: Each character in the text will be placed in a new line when remaining space of
+          // parent is 0 cause word-break behavior can not be specified in flutter.
+          // https://github.com/flutter/flutter/issues/61081
+          // This behavior is not desirable compared to the default word-break:break-word value in the browser.
+          // So we choose to not do wrapping for text in this case.
+          if (maxConstraintWidth == 0) {
+            maxConstraintWidth = double.infinity;
+          }
         }
       } else {
         EdgeInsets borderEdge = parentRenderBoxModel.renderStyle.border;
