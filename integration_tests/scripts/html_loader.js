@@ -15,7 +15,6 @@ const loader = function(source) {
   return `
     describe(${snapshotFilepath}, async (done) => {
       window.html_snapshot = async (...argv) => {
-        console.log('window.html_snapshot')
         if (argv.length === 0) {
           await snapshot(null, '${snapshotFilepath}');
         } else if (argv.length === 1) {
