@@ -51,8 +51,8 @@ class Node : public EventTarget {
   ObjectFunction m_insertBefore{m_context, m_prototypeObject, "insertBefore", insertBefore, 2};
   ObjectFunction m_replaceChild{m_context, m_prototypeObject, "replaceChild", replaceChild, 2};
 
-  static void traverseCloneNode(QjsContext* ctx, NodeInstance* element, NodeInstance* parentElement);
-  static JSValue copyNodeValue(QjsContext* ctx, NodeInstance* element);
+  static void traverseCloneNode(QjsContext* ctx, NodeInstance* baseNode, NodeInstance* targetNode);
+  static JSValue copyNodeValue(QjsContext* ctx, NodeInstance* node);
   friend ElementInstance;
   friend TextNodeInstance;
 };
