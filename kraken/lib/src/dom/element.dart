@@ -384,8 +384,6 @@ class Element extends Node
 
   @override
   void dispose() {
-    super.dispose();
-
     if (isRendererAttached) {
       disposeRenderObject();
     }
@@ -405,6 +403,8 @@ class Element extends Node
     renderStyle.detach();
     style.dispose();
     properties.clear();
+
+    super.dispose();
   }
 
   // Used for force update layout.
