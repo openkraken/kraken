@@ -284,4 +284,34 @@ describe('Position sticky', () => {
       done();
     });
   });
+
+  it('should work with margin', async() => {
+    const container1 = createElement('div', {
+      style: {
+        position: 'relative',
+        width: '100px',
+        height: '100px',
+        backgroundColor: 'lightblue'
+      }
+    });
+  
+    document.body.appendChild(container1);
+    
+    const container2 = createElement('div', {
+      style: {
+        position: 'sticky',
+        top: '100px',
+        left: '100px',
+        width: '100px',
+        height: '100px',
+        backgroundColor: 'mediumpurple',
+        marginTop: '40px',
+        marginLeft: '140px'
+      }
+    });
+  
+    document.body.appendChild(container2);
+
+    await snapshot();
+  });
 });
