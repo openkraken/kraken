@@ -1,6 +1,23 @@
 const filepath = require('path');
+var HTMLParser = require('node-html-parser');
+
+const SCRIPT = 'script';
 
 let filename = '';
+const scripts = [];
+
+const traverseParseHTML = (ele) => {
+  ele.childNodes && ele.childNodes.forEach(e => {
+    if (e.rawTagName === SCRIPT) {
+      e.childNodes.forEach(item => {
+        if (item.nodeType === 3) {
+          scripts.push(item._rawText);
+        }
+      })
+    }
+    traverseParseHTML(e);
+  });
+}
 
 const loader = function(source) {
   const opts = this.query || {};
@@ -12,6 +29,8 @@ const loader = function(source) {
     )
   );
 
+  traverseParseHTML(HTMLParser.parse(source));
+
   return `
     describe(${snapshotFilepath}, async (done) => {
       window.html_snapshot = async (...argv) => {
@@ -22,6 +41,7 @@ const loader = function(source) {
         }
       };
       __kraken_parse_html__('${source.replace(/\n/g, '').replace(/'/g, '"')}');
+      ${scripts.map(script => script)}
     });
   `;
 }

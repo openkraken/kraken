@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "core-js": "^3.8.2",
-    "lodash.flattendeep": "^4.4.0"
+    "lodash.flattendeep": "^4.4.0",
+    "node-html-parser": "^5.1.0"
   }
 }
