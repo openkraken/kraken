@@ -13,8 +13,6 @@ KRAKEN_EXPORT_C
 void initTestFramework(int32_t contextId);
 KRAKEN_EXPORT_C
 int8_t evaluateTestScripts(int32_t contextId, NativeString* code, const char* bundleFilename, int startLine);
-KRAKEN_EXPORT_C
-int8_t parseTestHTML(int32_t contextId, NativeString* code);
 
 using ExecuteCallback = void* (*)(int32_t contextId, NativeString* status);
 

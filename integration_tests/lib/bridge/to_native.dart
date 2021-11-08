@@ -37,20 +37,9 @@ typedef Dart_EvaluateTestScripts = int Function(int contextId, Pointer<NativeStr
 final Dart_EvaluateTestScripts _evaluateTestScripts =
 nativeDynamicLibrary.lookup<NativeFunction<Native_EvaluateTestScripts>>('evaluateTestScripts').asFunction();
 
-// Register parseTestHTML
-typedef Native_ParseTestHTML = Int8 Function(Int32 contextId, Pointer<NativeString>);
-typedef Dart_ParseTestHTML = int Function(int contextId, Pointer<NativeString>);
-
-final Dart_ParseTestHTML _parseTestHTML =
-nativeDynamicLibrary.lookup<NativeFunction<Native_ParseTestHTML>>('parseTestHTML').asFunction();
-
 void evaluateTestScripts(int contextId, String code, {String url = 'test://', int line = 0}) {
   Pointer<Utf8> _url = (url).toNativeUtf8();
   _evaluateTestScripts(contextId, stringToNativeString(code), _url, line);
-}
-
-void parseTestHTML(int contextId, String code) {
-  _parseTestHTML(contextId, stringToNativeString(code));
 }
 
 typedef NativeExecuteCallback = Void Function(Int32 contextId, Pointer<NativeString> status);
