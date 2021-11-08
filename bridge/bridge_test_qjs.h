@@ -6,10 +6,10 @@
 #ifndef KRAKENBRIDGE_BRIDGE_TEST_QJS_H
 #define KRAKENBRIDGE_BRIDGE_TEST_QJS_H
 
+#include "bindings/qjs/dom/document.h"
+#include "bindings/qjs/html_parser.h"
 #include "bridge_qjs.h"
 #include "kraken_bridge_test.h"
-#include "bindings/qjs/html_parser.h"
-#include "bindings/qjs/dom/document.h"
 
 namespace kraken {
 
