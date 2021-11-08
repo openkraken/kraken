@@ -55,7 +55,7 @@ class ElementSliverBoxChildManager implements RenderSliverBoxChildManager {
     }
 
     if (childNode is Node) {
-      child = childNode.renderer as RenderBox?;
+      child = childNode.renderer;
     } else {
       if (!kReleaseMode)
         throw FlutterError('Sliver unsupported type ${childNode.runtimeType} $childNode');
