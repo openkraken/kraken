@@ -709,6 +709,7 @@ class Element extends Node
       // Remove placeholder of positioned element.
       RenderPositionHolder? renderPositionHolder = prevRendeBox.renderPositionHolder;
       if (renderPositionHolder != null) {
+        prevRendeBox.renderPositionHolder = null;
         RenderLayoutBox? parent = renderPositionHolder.parent as RenderLayoutBox?;
         if (parent != null) {
           parent.remove(renderPositionHolder);

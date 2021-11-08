@@ -191,12 +191,6 @@ class RenderLayoutBox extends RenderBoxModel
 
   @override
   void remove(RenderBox child) {
-    if (child is RenderBoxModel) {
-      if (child.renderPositionHolder != null) {
-        (child.renderPositionHolder!.parent as ContainerRenderObjectMixin?)
-            ?.remove(child.renderPositionHolder!);
-      }
-    }
     super.remove(child);
     sortedChildren.remove(child);
   }
