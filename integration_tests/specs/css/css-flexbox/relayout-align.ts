@@ -224,7 +224,7 @@ describe('relayout-align', () => {
     requestAnimationFrame(async () => {
       fromStretch.style.alignItems = 'flex-end';
       toStretch.style.alignItems = 'stretch';
-      await snapshot(0.1);
+      await snapshot();
       done();
     }); 
   });

@@ -19,8 +19,9 @@ const String TAB_CHAR = '\t';
 
 class TextNode extends Node {
   TextNode(int targetId, Pointer<NativeEventTarget> nativeEventTarget, this._data, ElementManager elementManager)
-      : super(NodeType.TEXT_NODE, targetId, nativeEventTarget, elementManager, '#text');
+      : super(NodeType.TEXT_NODE, targetId, nativeEventTarget, elementManager);
 
+  // Must be existed after text node is attached, and all text update will after text attached.
   RenderTextBox? _renderTextBox;
 
   static const String NORMAL_SPACE = '\u0020';
@@ -31,7 +32,7 @@ class TextNode extends Node {
 
     if (_d == null || _d.isEmpty) return '';
 
-    WhiteSpace whiteSpace = CSSText.getWhiteSpace(parentElement!.style);
+    WhiteSpace whiteSpace = CSSText.resolveWhiteSpace(parentElement!.style[WHITE_SPACE]);
 
     /// https://drafts.csswg.org/css-text-3/#propdef-white-space
     /// The following table summarizes the behavior of the various white-space values:
@@ -71,55 +72,43 @@ class TextNode extends Node {
   set data(String? newData) {
     assert(newData != null);
     _data = newData;
-    updateTextStyle();
+    _applyTextStyle();
   }
+
+  @override
+  String get nodeName => '#text';
 
   @override
   RenderObject? get renderer => _renderTextBox;
 
-  void updateTextStyle() {
+  @override
+  handleJSCall(String method, List argv) {}
+
+  void _applyTextStyle() {
     if (isRendererAttached) {
-      _updateTextStyle();
+      Element _parentElement = parentElement!;
+
+      // The parentNode must be an element.
+      _renderTextBox!.renderStyle = _parentElement.renderStyle;
+      _renderTextBox!.data = data;
+
+      KrakenRenderParagraph renderParagraph = _renderTextBox!.child as KrakenRenderParagraph;
+      renderParagraph.markNeedsLayout();
+
+      RenderLayoutBox? parentRenderLayoutBox;
+      if (_parentElement.scrollingContentLayoutBox != null) {
+        parentRenderLayoutBox = _parentElement.scrollingContentLayoutBox!;
+      } else {
+        parentRenderLayoutBox = (_parentElement.renderBoxModel as RenderLayoutBox?)!;
+      }
+      _setTextSizeType(parentRenderLayoutBox.widthSizeType, parentRenderLayoutBox.heightSizeType);
     }
   }
 
-  @override
-  handleJSCall(String method, List argv) {
-  }
-
   void _setTextSizeType(BoxSizeType width, BoxSizeType height) {
-    RenderTextBox? renderTextBox = _renderTextBox;
-    if (renderTextBox == null) return;
-
-    // migrate element's size type to RenderTextBox
-    renderTextBox.widthSizeType = width;
-    renderTextBox.heightSizeType = height;
-  }
-
-  void _updateTextStyle() {
-    Element _parentElement = parentElement!;
-    RenderTextBox renderTextBox = _renderTextBox!;
-
-    // parentNode must be an element.
-    renderTextBox.style = _parentElement.style;
-    renderTextBox.text = CSSTextMixin.createTextSpan(data, parentElement: parentElement);
-    // Update paragraph line height
-    KrakenRenderParagraph renderParagraph = renderTextBox.child as KrakenRenderParagraph;
-    renderParagraph.lineHeight = (_parentElement.renderBoxModel?.renderStyle.lineHeight);
-    renderParagraph.markNeedsLayout();
-
-    _setTextNodeProperties(_parentElement.style);
-    RenderBoxModel? parentRenderBoxModel = _parentElement.renderBoxModel;
-    _setTextSizeType(parentRenderBoxModel!.widthSizeType, parentRenderBoxModel.heightSizeType);
-  }
-
-  void _setTextNodeProperties(CSSStyleDeclaration style) {
-    Element _parentElement = parentElement!;
-    RenderTextBox renderTextBox = _renderTextBox!;
-
-    renderTextBox.whiteSpace = CSSText.getWhiteSpace(_parentElement.style);
-    renderTextBox.overflow = CSSText.getTextOverflow(style: _parentElement.style);
-    renderTextBox.maxLines = CSSText.getLineClamp(_parentElement.style);
+    // Migrate element's size type to RenderTextBox.
+    _renderTextBox!.widthSizeType = width;
+    _renderTextBox!.heightSizeType = height;
   }
 
   // Attach renderObject of current node to parent
@@ -134,17 +123,16 @@ class TextNode extends Node {
       parentRenderLayoutBox = (parent.renderBoxModel as RenderLayoutBox?)!;
     }
 
-    RenderTextBox renderTextBox = _renderTextBox!;
+    parentRenderLayoutBox.insert(_renderTextBox!, after: after);
 
-    parentRenderLayoutBox.insert(renderTextBox, after: after);
-    _setTextSizeType(parentRenderLayoutBox.widthSizeType, parentRenderLayoutBox.heightSizeType);
+    _applyTextStyle();
 
     didAttachRenderer();
   }
 
   // Detach renderObject of current node from parent
   @override
-  void detach() {
+  void disposeRenderObject() {
     willDetachRenderer();
 
     if (isRendererAttached) {
@@ -160,20 +148,6 @@ class TextNode extends Node {
   @override
   void willAttachRenderer() {
     createRenderer();
-    Element _parentElement = parentElement!;
-    RenderTextBox renderTextBox = _renderTextBox!;
-
-    CSSStyleDeclaration parentStyle = _parentElement.style;
-    // Text node whitespace collapse relate to siblings,
-    // so text should update when appending
-    renderTextBox.text = CSSTextMixin.createTextSpan(data, parentElement: parentElement);
-    // TextNode's style is inherited from parent style
-    renderTextBox.style = parentStyle;
-    // Update paragraph line height
-    KrakenRenderParagraph renderParagraph = renderTextBox.child as KrakenRenderParagraph;
-    renderParagraph.lineHeight = (_parentElement.renderBoxModel?.renderStyle.lineHeight);
-
-    _setTextNodeProperties(_parentElement.style);
   }
 
   @override
@@ -181,19 +155,14 @@ class TextNode extends Node {
     if (renderer != null) {
       return renderer!;
     }
-
-    InlineSpan text = CSSTextMixin.createTextSpan(_data!, parentElement: parentElement);
-    RenderTextBox renderTextBox = _renderTextBox = RenderTextBox(text,
-      style: null,
-    );
-    return renderTextBox;
+    return _renderTextBox = RenderTextBox(data, renderStyle: parentElement!.renderStyle);
   }
 
   @override
   void dispose() {
     super.dispose();
 
-    detach();
+    disposeRenderObject();
 
     assert(_renderTextBox == null);
   }

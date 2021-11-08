@@ -9,3 +9,9 @@ if [ -L "libkraken.dylib" ]; then
   rm libkraken.dylib
   ln -s $ROOT/../../bridge/build/macos/lib/x86_64/libkraken.dylib
 fi
+
+if [ -L "libquickjs.dylib" ]; then
+  ROOT=$(pwd)
+  rm libquickjs.dylib
+  ln -s $ROOT/../../bridge/build/macos/lib/x86_64/libquickjs.dylib
+fi

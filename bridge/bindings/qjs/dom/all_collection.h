@@ -12,20 +12,21 @@
 namespace kraken::binding::qjs {
 
 class AllCollection : public HostObject {
-public:
-  AllCollection(JSContext *context): HostObject(context, "AllCollection") {};
+ public:
+  AllCollection(JSContext* context) : HostObject(context, "AllCollection"){};
 
-  static JSValue item(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  static JSValue add(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  static JSValue remove(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
+  static JSValue item(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue add(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue remove(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
   DEFINE_HOST_OBJECT_PROPERTY(1, length);
 
-  void internalAdd(NodeInstance *node, NodeInstance *before);
-private:
-  std::vector<NodeInstance *> m_nodes;
+  void internalAdd(NodeInstance* node, NodeInstance* before);
+
+ private:
+  std::vector<NodeInstance*> m_nodes;
 };
 
-}
+}  // namespace kraken::binding::qjs
 
-#endif //KRAKENBRIDGE_ALL_COLLECTION_H
+#endif  // KRAKENBRIDGE_ALL_COLLECTION_H

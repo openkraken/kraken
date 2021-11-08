@@ -19,10 +19,18 @@ enum NodeType {
 
 class Comment extends Node {
   Comment(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
-      : super(NodeType.COMMENT_NODE, targetId, nativeEventTarget, elementManager, '#comment');
+      : super(NodeType.COMMENT_NODE, targetId, nativeEventTarget, elementManager);
+
+  @override
+  String get nodeName => '#comment';
 
   @override
   RenderObject? get renderer => null;
+
+  // @TODO: Get data from bridge side.
+  String get data => '';
+
+  int get length => data.length;
 
   @override
   dynamic handleJSCall(String method, List<dynamic> argv) {}
@@ -87,7 +95,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   List<Node> childNodes = [];
   Node? parentNode;
   NodeType nodeType;
-  String nodeName;
+  String get nodeName;
 
   /// The Node.parentNode read-only property returns the parent of the specified node in the DOM tree.
   Node? get parent => parentNode;
@@ -109,7 +117,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
     return _children;
   }
 
-  Node(this.nodeType, int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager, this.nodeName)
+  Node(this.nodeType, int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
       : super(targetId, nativeEventTarget, elementManager);
 
   // If node is on the tree, the root parent is body.
@@ -145,10 +153,10 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   /// Attach a renderObject to parent.
   void attachTo(Element parent, {RenderBox? after}) {}
 
-  /// Detach renderObject from parent.
-  void detach() {}
+  /// Release any resources held by referenced render object.
+  void disposeRenderObject() {}
 
-  /// Dispose renderObject, but not do anything.
+  /// Release any resources held by this node.
   @override
   void dispose() {
     super.dispose();
@@ -161,23 +169,22 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   }
 
   @override
-  dynamic handleJSCall(String method, List<dynamic> argv) {
-  }
+  handleJSCall(String method, List<dynamic> argv) {}
 
   @override
-  RenderObject createRenderer() => throw FlutterError('createRenderer function is not implemented.');
-
-  @override
-  void didAttachRenderer() {}
-
-  @override
-  void didDetachRenderer() {}
+  RenderObject createRenderer() => throw FlutterError('[createRenderer] is not implemented.');
 
   @override
   void willAttachRenderer() {}
 
   @override
+  void didAttachRenderer() {}
+
+  @override
   void willDetachRenderer() {}
+
+  @override
+  void didDetachRenderer() {}
 
   @mustCallSuper
   Node appendChild(Node child) {
@@ -255,13 +262,21 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   }
 
   /// Ensure child and child's child render object is attached.
-  void ensureChildAttached() {}
+  void ensureChildAttached() { }
 
   @override
-  void connectedCallback() {}
+  void connectedCallback() {
+    for (var child in childNodes) {
+      child.connectedCallback();
+    }
+  }
 
   @override
-  void disconnectedCallback() {}
+  void disconnectedCallback() {
+    for (var child in childNodes) {
+      child.disconnectedCallback();
+    }
+  }
 }
 
 /// https://dom.spec.whatwg.org/#dom-node-nodetype

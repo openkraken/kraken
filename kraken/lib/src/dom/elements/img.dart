@@ -16,8 +16,6 @@ import 'package:kraken/rendering.dart';
 
 const String IMAGE = 'IMG';
 
-final RegExp _numExp = RegExp(r'^\d+');
-
 // FIXME: should be inline default.
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
@@ -57,7 +55,6 @@ class ImageElement extends Element {
       nativeEventTarget,
       elementManager,
       isIntrinsicBox: true,
-      tagName: IMAGE,
       defaultStyle: _defaultStyle) {
     _renderStreamListener = ImageStreamListener(_renderImageStream, onError: _onImageError);
   }
@@ -175,7 +172,7 @@ class ImageElement extends Element {
     }
   }
 
-  void dispatchImageLoadEvent() {
+  void _dispatchLoadEvent() {
     dispatchEvent(Event(EVENT_LOAD));
   }
 
@@ -185,11 +182,11 @@ class ImageElement extends Element {
       // If image in tree, make sure the image-box has been layout, using addPostFrameCallback.
       SchedulerBinding.instance!.scheduleFrame();
       SchedulerBinding.instance!.addPostFrameCallback((_) {
-        dispatchImageLoadEvent();
+        _dispatchLoadEvent();
       });
     } else {
       // If not in tree, dispatch the event directly.
-      dispatchImageLoadEvent();
+      _dispatchLoadEvent();
     }
   }
 
@@ -237,40 +234,21 @@ class ImageElement extends Element {
     dispatchEvent(Event(EVENT_ERROR));
   }
 
-  // Delay image size setting to next frame to make sure image has been layouted
-  // to wait for percentage size to be calculated correctly in the case of image has been cached
-  bool _hasImageLayoutCallbackPending = false;
-
-  void _handleImageResizeAfterLayout() {
-    if (_hasImageLayoutCallbackPending) return;
-    _hasImageLayoutCallbackPending = true;
-    SchedulerBinding.instance!.scheduleFrame();
-    SchedulerBinding.instance!.addPostFrameCallback((_) {
-      _hasImageLayoutCallbackPending = false;
-      _resize();
-    });
-  }
-
   void _resize() {
     if (!isRendererAttached) {
       return;
     }
 
-    RenderStyle renderStyle = renderBoxModel!.renderStyle;
-    // Waiting for size computed after layout stage
-    if (style.contains(WIDTH) && renderStyle.width == null ||
-        style.contains(HEIGHT) && renderStyle.height == null) {
-      return _handleImageResizeAfterLayout();
-    }
+    double? width = renderStyle.width.isAuto ? _propertyWidth : renderStyle.width.computedValue;
+    double? height = renderStyle.height.isAuto ? _propertyHeight : renderStyle.height.computedValue;
 
-    double? width = renderStyle.width ?? _propertyWidth;
-    double? height = renderStyle.height ?? _propertyHeight;
-
-    if (renderStyle.width == null && _propertyWidth != null) {
-      renderBoxModel!.renderStyle.updateSizing(WIDTH, _propertyWidth);
+    if (renderStyle.width.isAuto && _propertyWidth != null) {
+      // The intrinsic width of the image in pixels. Must be an integer without a unit.
+      renderStyle.width = CSSLengthValue(_propertyWidth, CSSLengthType.PX);
     }
-    if (renderStyle.height == null && _propertyHeight != null) {
-      renderBoxModel!.renderStyle.updateSizing(HEIGHT, _propertyHeight);
+    if (renderStyle.height.isAuto && _propertyHeight != null) {
+      // The intrinsic height of the image, in pixels. Must be an integer without a unit.
+      renderStyle.height = CSSLengthValue(_propertyHeight, CSSLengthType.PX);
     }
 
     if (width == null && height == null) {
@@ -329,13 +307,6 @@ class ImageElement extends Element {
   void setProperty(String key, dynamic value) {
     bool propertyChanged = properties[key] != value;
     super.setProperty(key, value);
-    double? rootFontSize;
-    double? fontSize;
-    if (renderBoxModel != null) {
-      rootFontSize = renderBoxModel!.elementDelegate.getRootElementFontSize();
-      fontSize = renderBoxModel!.renderStyle.fontSize;
-    }
-
     // Reset frame number to zero when image needs to reload
     _frameCount = 0;
     if (key == 'src' && propertyChanged && !_shouldLazyLoading) {
@@ -346,28 +317,10 @@ class ImageElement extends Element {
       // Should reset lazy when value change.
       _resetLazyLoading();
     } else if (key == WIDTH) {
-      if (value is String && _isNumber(value)) {
-        value += 'px';
-      }
-
-      _propertyWidth = CSSLength.toDisplayPortValue(
-          value,
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-      );
+      _propertyWidth = CSSNumber.parseNumber(value);
       _resize();
     } else if (key == HEIGHT) {
-      if (value is String && _isNumber(value)) {
-        value += 'px';
-      }
-
-      _propertyHeight = CSSLength.toDisplayPortValue(
-          value,
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-      );
+      _propertyHeight = CSSNumber.parseNumber(value);
       _resize();
     }
   }
@@ -375,7 +328,7 @@ class ImageElement extends Element {
   void _loadImage() {
     _resetImage();
 
-    if (_source != null) {
+    if (_source != null && _source!.isNotEmpty) {
       Uri base = Uri.parse(elementManager.controller.href);
       Uri resolvedUri = elementManager.controller.uriParser!.resolve(base, Uri.parse(_source!));
 
@@ -418,7 +371,3 @@ class ImageElement extends Element {
   }
 }
 
-// Return true if the input string only contain numbers.
-bool _isNumber(String input) {
-  return _numExp.hasMatch(input);
-}

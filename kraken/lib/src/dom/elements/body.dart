@@ -17,12 +17,19 @@ const Map<String, dynamic> _defaultStyle = {
 
 class BodyElement extends Element {
   BodyElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super( targetId, nativePtr, elementManager, tagName: BODY, defaultStyle: _defaultStyle);
+      : super( targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
 
   @override
   void willAttachRenderer() {
     super.willAttachRenderer();
     RenderStyle renderStyle = renderBoxModel!.renderStyle;
-    renderStyle.width = elementManager.viewportWidth;
+    renderStyle.width = CSSLengthValue(elementManager.viewportWidth, CSSLengthType.PX);
+  }
+
+  @override
+  void addEvent(String eventType) {
+    // Scroll event not working on body.
+    if (eventType == EVENT_SCROLL) return;
+    super.addEvent(eventType);
   }
 }

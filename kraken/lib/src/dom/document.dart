@@ -13,22 +13,29 @@ class Document extends Node {
   final HTMLElement documentElement;
 
   Document(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager, this.documentElement)
-      : super(NodeType.DOCUMENT_NODE, targetId, nativeEventTarget, elementManager, '#document');
-
-  void _handleEvent(Event event) {
-    emitUIEvent(elementManager.controller.view.contextId, nativeEventTargetPtr, event);
-  }
+      : super(NodeType.DOCUMENT_NODE, targetId, nativeEventTarget, elementManager);
 
   @override
-  void addEvent(String eventType) {
-    super.addEvent(eventType);
-    documentElement.addEventListener(eventType, _handleEvent);
-  }
+  String get nodeName => '#document';
 
   @override
   RenderObject? get renderer => throw FlutterError('Document did\'t have renderObject.');
 
   @override
-  handleJSCall(String method, List argv) {
+  handleJSCall(String method, List argv) { }
+
+  addEvent(String eventType) {
+    if (eventHandlers.containsKey(eventType)) return; // Only listen once.
+
+    switch (eventType) {
+      case EVENT_SCROLL:
+        // Fired at the Document or element when the viewport or element is scrolled, respectively.
+        return documentElement.addEventListener(eventType, dispatchEvent);
+      default:
+        // Events listened on the Window need to be proxied to the Document, because there is a RenderView on the Document, which can handle hitTest.
+        // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/VisualViewport.cpp#L61
+        documentElement.addEvent(eventType);
+        break;
+    }
   }
 }

@@ -12,15 +12,16 @@
 namespace kraken::binding::qjs {
 
 class Location : public HostObject {
-public:
+ public:
   Location() = delete;
-  explicit Location(JSContext *context) : HostObject(context, "Location") {}
+  explicit Location(JSContext* context) : HostObject(context, "Location") {}
 
-  static JSValue reload(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-private:
+  static JSValue reload(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+
+ private:
   ObjectFunction m_reload{m_context, jsObject, "reload", reload, 0};
 };
 
-} // namespace kraken::binding::qjs
+}  // namespace kraken::binding::qjs
 
-#endif // KRAKENBRIDGE_LOCATION_H
+#endif  // KRAKENBRIDGE_LOCATION_H

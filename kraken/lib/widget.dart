@@ -63,24 +63,21 @@ const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
 };
 
-typedef WidgetCreator = Widget Function(Map<String, dynamic>);
-class _WidgetCustomElement extends dom.Element {
-  late WidgetCreator _widgetCreator;
+abstract class WidgetElement extends dom.Element {
   late Element _renderViewElement;
   late BuildOwner _buildOwner;
   late Widget _widget;
   _KrakenAdapterWidgetPropertiesState? _propertiesState;
-  _WidgetCustomElement(int targetId, Pointer<NativeEventTarget> nativePtr, dom.ElementManager elementManager, String tagName, WidgetCreator creator)
+  WidgetElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, dom.ElementManager elementManager)
       : super(
       targetId,
-      nativePtr,
+      nativeEventTarget,
       elementManager,
-      tagName: tagName,
       isIntrinsicBox: true,
       defaultStyle: _defaultStyle
-  ) {
-    _widgetCreator = creator;
-  }
+  );
+
+  Widget build(BuildContext context, Map<String, dynamic> properties);
 
   @override
   void didAttachRenderer() {
@@ -88,7 +85,7 @@ class _WidgetCustomElement extends dom.Element {
 
     WidgetsFlutterBinding.ensureInitialized();
 
-    _propertiesState = _KrakenAdapterWidgetPropertiesState(_widgetCreator, properties);
+    _propertiesState = _KrakenAdapterWidgetPropertiesState(this, properties);
     _widget = _KrakenAdapterWidget(_propertiesState!);
     _attachWidget(_widget);
   }
@@ -142,8 +139,8 @@ class _KrakenAdapterWidget extends StatefulWidget {
 
 class _KrakenAdapterWidgetPropertiesState extends State<_KrakenAdapterWidget> {
   Map<String, dynamic> _properties;
-  final WidgetCreator _widgetCreator;
-  _KrakenAdapterWidgetPropertiesState(this._widgetCreator, this._properties);
+  final WidgetElement _element;
+  _KrakenAdapterWidgetPropertiesState(this._element, this._properties);
 
   void onAttributeChanged(Map<String, dynamic> properties) {
     setState(() {
@@ -153,7 +150,7 @@ class _KrakenAdapterWidgetPropertiesState extends State<_KrakenAdapterWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return _widgetCreator(_properties);
+    return _element.build(context, _properties);
   }
 }
 
@@ -234,20 +231,11 @@ class Kraken extends StatefulWidget {
     return RegExp(r'^[a-z][.0-9_a-z]*-[\-.0-9_a-z]*$').hasMatch(localName);
   }
 
-  static void defineCustomElement<T extends Function>(String localName, T creator) {
-    if (!_isValidCustomElementName(localName)) {
-      throw ArgumentError('The element name "$localName" is not valid.');
+  static void defineCustomElement(String tagName, ElementCreator creator) {
+    if (!_isValidCustomElementName(tagName)) {
+      throw ArgumentError('The element name "$tagName" is not valid.');
     }
-
-    String tagName = localName.toUpperCase();
-
-    if (T == ElementCreator) {
-      defineElement(tagName, creator as ElementCreator);
-    } else if (T == WidgetCreator) {
-      defineElement(tagName, (id, nativePtr, elementManager) {
-        return _WidgetCustomElement(id, nativePtr.cast<NativeEventTarget>(), elementManager, tagName, creator as WidgetCreator);
-      });
-    }
+    defineElement(tagName.toUpperCase(), creator);
   }
 
   loadContent(String bundleContent) async {
@@ -529,17 +517,18 @@ class _KrakenState extends State<Kraken> {
 
   // Handle focus change of focusNode.
   void _handleFocusChange(bool focused) {
-    RenderObject? _rootRenderObject = context.findRenderObject();
-    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
-    if (editables.isNotEmpty) {
-      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+    dom.Element rootElement = _findRootElement();
+    List<dom.Element> focusableElements = _findFocusableElements(rootElement);
+    if (focusableElements.isNotEmpty) {
+      dom.Element? focusedElement = _findFocusedElement(focusableElements);
+      // Currently only input element is focusable.
       if (focused) {
         if (dom.InputElement.focusInputElement == null) {
-          _focusInput(editables[0]);
+          (focusableElements[0] as dom.InputElement).focus();
         }
       } else {
-        if (focusedEditable != null) {
-          _blurInput(focusedEditable);
+        if (focusedElement != null) {
+          (focusedElement as dom.InputElement).blur();
         }
       }
     }
@@ -547,30 +536,30 @@ class _KrakenState extends State<Kraken> {
 
   // Handle focus action usually by pressing the [Tab] hotkey.
   void _handleNextFocus(NextFocusIntent intent) {
-    RenderObject? _rootRenderObject = context.findRenderObject();
-    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
-    if (editables.isNotEmpty) {
-      RenderEditable? focusedEditable = _findFocusedEditable(editables);
-      // None editable is focused, focus the first editable.
-      if (focusedEditable == null) {
+    dom.Element rootElement = _findRootElement();
+    List<dom.Element> focusableElements = _findFocusableElements(rootElement);
+    if (focusableElements.isNotEmpty) {
+      dom.Element? focusedElement = _findFocusedElement(focusableElements);
+      // None focusable element is focused, focus the first focusable element.
+      if (focusedElement == null) {
         _focusNode.requestFocus();
-        _focusInput(editables[0]);
+        (focusableElements[0] as dom.InputElement).focus();
 
-      // Some editable is focused, focus the next editable, if it is the last editable,
+      // Some focusable element is focused, focus the next element, if it is the last focusable element,
       // then focus the next widget.
       } else {
-        int idx = editables.indexOf(focusedEditable);
-        if (idx == editables.length - 1) {
+        int idx = focusableElements.indexOf(focusedElement);
+        if (idx == focusableElements.length - 1) {
           _focusNode.nextFocus();
-          _blurInput(editables[editables.length - 1]);
+          (focusableElements[focusableElements.length - 1] as dom.InputElement).blur();
         } else {
           _focusNode.requestFocus();
-          _blurInput(editables[idx]);
-          _focusInput(editables[idx + 1]);
+          (focusableElements[idx] as dom.InputElement).blur();
+          (focusableElements[idx + 1] as dom.InputElement).focus();
         }
       }
 
-    // None editable exists, focus the next widget.
+    // None focusable element exists, focus the next widget.
     } else {
       _focusNode.nextFocus();
     }
@@ -578,26 +567,26 @@ class _KrakenState extends State<Kraken> {
 
   // Handle focus action usually by pressing the [Shift]+[Tab] hotkey in the reverse direction.
   void _handlePreviousFocus(PreviousFocusIntent intent) {
-    RenderObject? _rootRenderObject = context.findRenderObject();
-    List<RenderEditable> editables = _findEditables(_rootRenderObject!);
-    if (editables.isNotEmpty) {
-      RenderEditable? focusedEditable = _findFocusedEditable(editables);
+    dom.Element rootElement = _findRootElement();
+    List<dom.Element> focusableElements = _findFocusableElements(rootElement);
+    if (focusableElements.isNotEmpty) {
+      dom.Element? focusedElement = _findFocusedElement(focusableElements);
       // None editable is focused, focus the last editable.
-      if (focusedEditable == null) {
+      if (focusedElement == null) {
         _focusNode.requestFocus();
-        _focusInput(editables[editables.length - 1]);
+        (focusableElements[focusableElements.length - 1] as dom.InputElement).focus();
 
         // Some editable is focused, focus the previous editable, if it is the first editable,
         // then focus the previous widget.
       } else {
-        int idx = editables.indexOf(focusedEditable);
+        int idx = focusableElements.indexOf(focusedElement);
         if (idx == 0) {
           _focusNode.previousFocus();
-          _blurInput(editables[0]);
+          (focusableElements[0] as dom.InputElement).blur();
         } else {
           _focusNode.requestFocus();
-          _blurInput(editables[idx]);
-          _focusInput(editables[idx - 1]);
+          (focusableElements[idx] as dom.InputElement).blur();
+          (focusableElements[idx - 1] as dom.InputElement).focus();
         }
       }
     // None editable exists, focus the previous widget.
@@ -607,217 +596,278 @@ class _KrakenState extends State<Kraken> {
   }
 
   void _handleMoveSelectionRightByLineText(MoveSelectionRightByLineTextIntent intent) {
-    RenderEditable? focusedEditable = _findFocusedEditable();
-    if (focusedEditable != null) {
-      focusedEditable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
-      // Make caret visilbe while moving cursor.
-      _scrollFocusedInputToCaret(focusedEditable);
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
+        // Make caret visible while moving cursor.
+        focusedElement.scrollToCaret();
+      }
     }
   }
 
   void _handleMoveSelectionLeftByLineText(MoveSelectionLeftByLineTextIntent intent) {
-    RenderEditable? focusedEditable = _findFocusedEditable();
-    if (focusedEditable != null) {
-      focusedEditable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
-      // Make caret visilbe while moving cursor.
-      _scrollFocusedInputToCaret(focusedEditable);
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
+        // Make caret visible while moving cursor.
+        focusedElement.scrollToCaret();
+      }
     }
   }
 
   void _handleMoveSelectionRightByWordText(MoveSelectionRightByWordTextIntent intent) {
-    RenderEditable? focusedEditable = _findFocusedEditable();
-    if (focusedEditable != null) {
-      focusedEditable.moveSelectionRightByWord(SelectionChangedCause.keyboard);
-      // Make caret visilbe while moving cursor.
-      _scrollFocusedInputToCaret(focusedEditable);
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.moveSelectionRightByWord(SelectionChangedCause.keyboard);
+        // Make caret visible while moving cursor.
+        focusedElement.scrollToCaret();
+      }
     }
   }
 
   void _handleMoveSelectionLeftByWordText(MoveSelectionLeftByWordTextIntent intent) {
-    RenderEditable? focusedEditable = _findFocusedEditable();
-    if (focusedEditable != null) {
-      focusedEditable.moveSelectionLeftByWord(SelectionChangedCause.keyboard);
-      // Make caret visilbe while moving cursor.
-      _scrollFocusedInputToCaret(focusedEditable);
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.moveSelectionLeftByWord(SelectionChangedCause.keyboard);
+        // Make caret visible while moving cursor.
+        focusedElement.scrollToCaret();
+      }
     }
   }
 
   void _handleMoveSelectionUpText(MoveSelectionUpTextIntent intent) {
-    RenderEditable? focusedEditable = _findFocusedEditable();
-    if (focusedEditable != null) {
-      focusedEditable.moveSelectionUp(SelectionChangedCause.keyboard);
-      // Make caret visilbe while moving cursor.
-      _scrollFocusedInputToCaret(focusedEditable);
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.moveSelectionUp(SelectionChangedCause.keyboard);
+        // Make caret visible while moving cursor.
+        focusedElement.scrollToCaret();
+      }
     }
   }
 
   void _handleMoveSelectionDownText(MoveSelectionDownTextIntent intent) {
-    RenderEditable? focusedEditable = _findFocusedEditable();
-    if (focusedEditable != null) {
-      focusedEditable.moveSelectionDown(SelectionChangedCause.keyboard);
-      // Make caret visilbe while moving cursor.
-      _scrollFocusedInputToCaret(focusedEditable);
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.moveSelectionDown(SelectionChangedCause.keyboard);
+        // Make caret visible while moving cursor.
+        focusedElement.scrollToCaret();
+      }
     }
   }
 
   void _handleMoveSelectionLeftText(MoveSelectionLeftTextIntent intent) {
-    RenderEditable? focusedEditable = _findFocusedEditable();
-    if (focusedEditable != null) {
-      focusedEditable.moveSelectionLeft(SelectionChangedCause.keyboard);
-      // Make caret visilbe while moving cursor.
-      _scrollFocusedInputToCaret(focusedEditable);
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.moveSelectionLeft(SelectionChangedCause.keyboard);
+        // Make caret visible while moving cursor.
+        focusedElement.scrollToCaret();
+      }
     }
   }
 
   void _handleMoveSelectionRightText(MoveSelectionRightTextIntent intent) {
-    RenderEditable? focusedEditable = _findFocusedEditable();
-    if (focusedEditable != null) {
-      focusedEditable.moveSelectionRight(SelectionChangedCause.keyboard);
-      // Make caret visilbe while moving cursor.
-      _scrollFocusedInputToCaret(focusedEditable);
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.moveSelectionRight(SelectionChangedCause.keyboard);
+        // Make caret visible while moving cursor.
+        focusedElement.scrollToCaret();
+      }
     }
   }
 
   void _handleMoveSelectionToEndText(MoveSelectionToEndTextIntent intent) {
-    RenderEditable? focusedEditable = _findFocusedEditable();
-    if (focusedEditable != null) {
-      focusedEditable.moveSelectionToEnd(SelectionChangedCause.keyboard);
-      // Make caret visilbe while moving cursor.
-      _scrollFocusedInputToCaret(focusedEditable);
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.moveSelectionToEnd(SelectionChangedCause.keyboard);
+        // Make caret visible while moving cursor.
+        focusedElement.scrollToCaret();
+      }
     }
   }
 
   void _handleMoveSelectionToStartText(MoveSelectionToStartTextIntent intent) {
-    RenderEditable? focusedEditable = _findFocusedEditable();
-    if (focusedEditable != null) {
-      focusedEditable.moveSelectionToStart(SelectionChangedCause.keyboard);
-      // Make caret visilbe while moving cursor.
-      _scrollFocusedInputToCaret(focusedEditable);
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.moveSelectionToStart(SelectionChangedCause.keyboard);
+        // Make caret visible while moving cursor.
+        focusedElement.scrollToCaret();
+      }
     }
   }
 
   void _handleExtendSelectionLeftText(ExtendSelectionLeftTextIntent intent) {
-    RenderEditable? focusedEditable = _findFocusedEditable();
-    if (focusedEditable != null) {
-      focusedEditable.extendSelectionLeft(SelectionChangedCause.keyboard);
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.extendSelectionLeft(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleExtendSelectionRightText(ExtendSelectionRightTextIntent intent) {
-    RenderEditable? focusedEditable = _findFocusedEditable();
-    if (focusedEditable != null) {
-      focusedEditable.extendSelectionRight(SelectionChangedCause.keyboard);
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.extendSelectionRight(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleExtendSelectionUpText(ExtendSelectionUpTextIntent intent) {
-    RenderEditable? focusedEditable = _findFocusedEditable();
-    if (focusedEditable != null) {
-      focusedEditable.extendSelectionUp(SelectionChangedCause.keyboard);
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.extendSelectionUp(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleExtendSelectionDownText(ExtendSelectionDownTextIntent intent) {
-    RenderEditable? focusedEditable = _findFocusedEditable();
-    if (focusedEditable != null) {
-      focusedEditable.extendSelectionDown(SelectionChangedCause.keyboard);
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.extendSelectionDown(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleExtendSelectionToEndText(ExpandSelectionToEndTextIntent intent) {
-    RenderEditable? focusedEditable = _findFocusedEditable();
-    if (focusedEditable != null) {
-      focusedEditable.expandSelectionToEnd(SelectionChangedCause.keyboard);
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.expandSelectionToEnd(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleExtendSelectionToStartText(ExpandSelectionToStartTextIntent intent) {
-    RenderEditable? focusedEditable = _findFocusedEditable();
-    if (focusedEditable != null) {
-      focusedEditable.expandSelectionToStart(SelectionChangedCause.keyboard);
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.expandSelectionToStart(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleExtendSelectionLeftByLineText(ExpandSelectionLeftByLineTextIntent intent) {
-    RenderEditable? focusedEditable = _findFocusedEditable();
-    if (focusedEditable != null) {
-      focusedEditable.expandSelectionLeftByLine(SelectionChangedCause.keyboard);
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.expandSelectionLeftByLine(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleExtendSelectionRightByLineText(ExpandSelectionRightByLineTextIntent intent) {
-    RenderEditable? focusedEditable = _findFocusedEditable();
-    if (focusedEditable != null) {
-      focusedEditable.expandSelectionRightByLine(SelectionChangedCause.keyboard);
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.expandSelectionRightByLine(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleExtendSelectionLeftByWordText(ExtendSelectionLeftByWordTextIntent intent) {
-    RenderEditable? focusedEditable = _findFocusedEditable();
-    if (focusedEditable != null) {
-      focusedEditable.extendSelectionLeftByWord(SelectionChangedCause.keyboard);
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.extendSelectionLeftByWord(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleExtendSelectionRightByWordText(ExtendSelectionRightByWordTextIntent intent) {
-    RenderEditable? focusedEditable = _findFocusedEditable();
-    if (focusedEditable != null) {
-      focusedEditable.extendSelectionRightByWord(SelectionChangedCause.keyboard);
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.extendSelectionRightByWord(SelectionChangedCause.keyboard);
+      }
     }
   }
 
-  // Make the input element of the RenderEditable focus.
-  void _focusInput(RenderEditable renderEditable) {
-    dom.RenderInputBox renderInputBox = renderEditable.parent as dom.RenderInputBox;
-    dom.RenderInputLeaderLayer renderInputLeaderLayer = renderInputBox.parent as dom.RenderInputLeaderLayer;
-    RenderIntrinsic renderIntrisic = renderInputLeaderLayer.parent as RenderIntrinsic;
-    renderIntrisic.elementDelegate.focusInput();
-  }
-
-  // Make the input element of the RenderEditable blur.
-  void _blurInput(RenderEditable renderEditable) {
-    dom.RenderInputBox renderInputBox = renderEditable.parent as dom.RenderInputBox;
-    dom.RenderInputLeaderLayer renderInputLeaderLayer = renderInputBox.parent as dom.RenderInputLeaderLayer;
-    RenderIntrinsic renderIntrisic = renderInputLeaderLayer.parent as RenderIntrinsic;
-    renderIntrisic.elementDelegate.blurInput();
-  }
-
-  // Find all the RenderEditables in the widget.
-  List<RenderEditable> _findEditables(RenderObject parent) {
-    List<RenderEditable> result = [];
+  // Find RenderViewportBox in the renderObject tree.
+  RenderViewportBox? _findRenderViewportBox(RenderObject parent) {
+    RenderViewportBox? result;
     parent.visitChildren((RenderObject child) {
-      if (child is RenderEditable) {
-        result.add(child);
+      if (child is RenderViewportBox) {
+        result = child;
       } else {
-        List<RenderEditable> children = _findEditables(child);
-        result.addAll(children);
+        result = _findRenderViewportBox(child);
       }
     });
     return result;
   }
 
-  // Find the focused RenderEditable in the widget.
-  RenderEditable? _findFocusedEditable([List<RenderEditable>? editables]) {
-    RenderEditable? result;
+  // Find root element of dom tree.
+  dom.Element _findRootElement() {
     RenderObject? _rootRenderObject = context.findRenderObject();
-    editables ??= _findEditables(_rootRenderObject!);
+    RenderViewportBox? renderViewportBox = _findRenderViewportBox(_rootRenderObject!);
+    KrakenController controller = (renderViewportBox as RenderObjectWithControllerMixin).controller!;
+    dom.Element documentElement = controller.view.document!.documentElement;
+    return documentElement;
+  }
 
-    if (editables.isNotEmpty) {
-      for (RenderEditable editable in editables) {
-        if (editable.hasFocus) {
-          result = editable;
+  // Find all the focusable elements in the element tree.
+  List<dom.Element> _findFocusableElements(dom.Element element) {
+    List<dom.Element> result = [];
+    traverseElement(element, (dom.Element child) {
+      // Currently only input element is focusable.
+      if (child is dom.InputElement) {
+        result.add(child);
+      }
+    });
+    return result;
+  }
+
+  // Find the focused element in the element tree.
+  dom.Element? _findFocusedElement([List<dom.Element>? focusableElements]) {
+    dom.Element? result;
+    if (focusableElements == null) {
+      dom.Element rootElement = _findRootElement();
+      focusableElements = _findFocusableElements(rootElement);
+    }
+
+    if (focusableElements.isNotEmpty) {
+      // Currently only input element is focusable.
+      for (dom.Element inputElement in focusableElements) {
+        RenderEditable? renderEditable = (inputElement as dom.InputElement).renderEditable;
+        if (renderEditable != null && renderEditable.hasFocus) {
+          result = inputElement;
+          break;
         }
       }
     }
     return result;
-  }
-
-  // Scroll the focused input box to the caret to make it visible.
-  void _scrollFocusedInputToCaret(RenderEditable focusedEditable) {
-    dom.RenderInputBox renderInputBox = focusedEditable.parent as dom.RenderInputBox;
-    dom.RenderInputLeaderLayer renderInputLeaderLayer = renderInputBox.parent as dom.RenderInputLeaderLayer;
-    RenderIntrinsic renderIntrisic = renderInputLeaderLayer.parent as RenderIntrinsic;
-    renderIntrisic.elementDelegate.scrollInputToCaret();
   }
 }
 
@@ -873,6 +923,9 @@ This situation often happened when you trying creating kraken when FlutterView n
       PerformanceTiming.instance().mark(PERF_CONTROLLER_INIT_END);
     }
 
+    // FIXME: reset href when dart hot reload that href is prev href
+    controller.href = '';
+
     return controller.view.getRootRenderObject();
   }
 
@@ -888,22 +941,20 @@ This situation often happened when you trying creating kraken when FlutterView n
     double viewportWidth = _krakenWidget.viewportWidth ?? window.physicalSize.width / window.devicePixelRatio;
     double viewportHeight = _krakenWidget.viewportHeight ?? window.physicalSize.height / window.devicePixelRatio;
 
-    Size viewportSize = Size(viewportWidth, viewportHeight);
-
     if (viewportWidthHasChanged) {
       controller.view.viewportWidth = viewportWidth;
-      controller.view.document!.documentElement.style.setProperty(WIDTH, controller.view.viewportWidth.toString() + 'px', viewportSize);
+      controller.view.document!.documentElement.renderStyle.width = CSSLengthValue(viewportWidth, CSSLengthType.PX);
     }
 
     if (viewportHeightHasChanged) {
       controller.view.viewportHeight = viewportHeight;
-      controller.view.document!.documentElement.style.setProperty(HEIGHT, controller.view.viewportHeight.toString() + 'px', viewportSize);
+      controller.view.document!.documentElement.renderStyle.height = CSSLengthValue(viewportHeight, CSSLengthType.PX);
     }
 
     if (viewportWidthHasChanged || viewportHeightHasChanged) {
       traverseElement(controller.view.document!.documentElement, (element) {
         if (element.isRendererAttached) {
-          element.style.applyTargetProperties();
+          element.style.flushPendingProperties();
           element.renderBoxModel?.markNeedsLayout();
         }
       });

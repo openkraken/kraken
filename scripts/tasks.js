@@ -466,38 +466,42 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit'
   });
 
-  const armDynamicSDKPath = path.join(paths.bridge, 'build/ios/lib/arm/kraken_bridge.framework');
-  const arm64DynamicSDKPath = path.join(paths.bridge, 'build/ios/lib/arm64/kraken_bridge.framework');
-  const x64DynamicSDKPath = path.join(paths.bridge, 'build/ios/lib/x86_64/kraken_bridge.framework');
+  const targetSourceFrameworks = ['kraken_bridge', 'quickjs'];
 
-  const targetDynamicSDKPath = `${paths.bridge}/build/ios/framework`;
-  const frameworkPath = `${targetDynamicSDKPath}/kraken_bridge.xcframework`;
-  mkdirp.sync(targetDynamicSDKPath);
+  targetSourceFrameworks.forEach(target => {
+    const armDynamicSDKPath = path.join(paths.bridge, `build/ios/lib/arm/${target}.framework`);
+    const arm64DynamicSDKPath = path.join(paths.bridge, `build/ios/lib/arm64/${target}.framework`);
+    const x64DynamicSDKPath = path.join(paths.bridge, `build/ios/lib/x86_64/${target}.framework`);
 
-  // merge armv7 into armv8
-  execSync(`lipo -create ${armDynamicSDKPath}/kraken_bridge ${arm64DynamicSDKPath}/kraken_bridge -output ${arm64DynamicSDKPath}/kraken_bridge`, {
-    stdio: 'inherit'
+    const targetDynamicSDKPath = `${paths.bridge}/build/ios/framework`;
+    const frameworkPath = `${targetDynamicSDKPath}/${target}.xcframework`;
+    mkdirp.sync(targetDynamicSDKPath);
+
+    // merge armv7 into armv8
+    execSync(`lipo -create ${armDynamicSDKPath}/${target} ${arm64DynamicSDKPath}/${target} -output ${arm64DynamicSDKPath}/${target}`, {
+      stdio: 'inherit'
+    });
+
+    if (buildMode === 'RelWithDebInfo') {
+      // Create dSYM for x86_64
+      execSync(`dsymutil ${x64DynamicSDKPath}/${target}`, { stdio: 'inherit' });
+
+      // Create dSYM for arm64
+      execSync(`dsymutil ${arm64DynamicSDKPath}/${target}`, { stdio: 'inherit' });
+      execSync(`xcodebuild -create-xcframework \
+        -framework ${x64DynamicSDKPath} -debug-symbols ${x64DynamicSDKPath}/${target}.dSYM \
+        -framework ${arm64DynamicSDKPath} -debug-symbols ${arm64DynamicSDKPath}/${target}.dSYM -output ${frameworkPath}`, {
+        stdio: 'inherit'
+      });
+
+    } else {
+      execSync(`xcodebuild -create-xcframework \
+        -framework ${x64DynamicSDKPath} \
+        -framework ${arm64DynamicSDKPath} -output ${frameworkPath}`, {
+        stdio: 'inherit'
+      });
+    }
   });
-
-  if (buildMode === 'RelWithDebInfo') {
-    // Create dSYM for x86_64
-    execSync(`dsymutil ${x64DynamicSDKPath}/kraken_bridge`, { stdio: 'inherit' });
-
-    // Create dSYM for arm64
-    execSync(`dsymutil ${arm64DynamicSDKPath}/kraken_bridge`, { stdio: 'inherit' });
-    execSync(`xcodebuild -create-xcframework \
-      -framework ${x64DynamicSDKPath} -debug-symbols ${x64DynamicSDKPath}/kraken_bridge.dSYM \
-      -framework ${arm64DynamicSDKPath} -debug-symbols ${arm64DynamicSDKPath}/kraken_bridge.dSYM -output ${frameworkPath}`, {
-      stdio: 'inherit'
-    });
-
-  } else {
-    execSync(`xcodebuild -create-xcframework \
-      -framework ${x64DynamicSDKPath} \
-      -framework ${arm64DynamicSDKPath} -output ${frameworkPath}`, {
-      stdio: 'inherit'
-    });
-  }
   done();
 });
 
@@ -541,16 +545,21 @@ task('build-android-kraken-lib', (done) => {
   }
 
   const archs = ['arm64-v8a', 'armeabi-v7a'];
+  const toolChainMap = {
+    'arm64-v8a': 'aarch64-linux-android',
+    'armeabi-v7a': 'arm-linux-androideabi'
+  };
   const buildType = (buildMode === 'Release' || buildMode == 'Relwithdebinfo') ? 'Relwithdebinfo' : 'Debug';
 
   const cmakeGeneratorTemplate = platform == 'win32' ? 'Ninja' : 'Unix Makefiles';
   archs.forEach(arch => {
     const soBinaryDirectory = path.join(paths.bridge, `build/android/lib/${arch}`);
     const bridgeCmakeDir = path.join(paths.bridge, 'cmake-build-android-' + arch);
+    const ndkDir = path.join(androidHome, 'ndk', ndkVersion);
     // generate project
     execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
-    -DCMAKE_TOOLCHAIN_FILE=${path.join(androidHome, 'ndk', ndkVersion, '/build/cmake/android.toolchain.cmake')} \
-    -DANDROID_NDK=${path.join(androidHome, '/ndk/', ndkVersion)} \
+    -DCMAKE_TOOLCHAIN_FILE=${path.join(ndkDir, '/build/cmake/android.toolchain.cmake')} \
+    -DANDROID_NDK=${ndkDir} \
     -DIS_ANDROID=TRUE \
     -DANDROID_ABI="${arch}" \
     ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
@@ -572,6 +581,10 @@ task('build-android-kraken-lib', (done) => {
     execSync(`cmake --build ${bridgeCmakeDir} --target kraken -- -j 12`, {
       stdio: 'inherit'
     });
+
+    // Copy libc++_shared.so to dist from NDK.
+    const libcppSharedPath = path.join(ndkDir, `./toolchains/llvm/prebuilt/${os.platform()}-x86_64/sysroot/usr/lib/${toolChainMap[arch]}/libc++_shared.so`);
+    execSync(`cp ${libcppSharedPath} ${soBinaryDirectory}`);
   });
 
   done();

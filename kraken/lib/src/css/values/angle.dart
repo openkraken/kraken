@@ -4,30 +4,38 @@
  */
 
 import 'dart:math' as math;
+import 'package:quiver/collection.dart';
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#angles
+const String _DEG = 'deg';
+const String _GRAD = 'grad';
+const String _RAD = 'rad';
+const String _TURN = 'turn';
+
+final LinkedLruHashMap<String, double?> _cachedParsedAngle = LinkedLruHashMap(maximumSize: 100);
 class CSSAngle {
-  static const String DEG = 'deg';
-  static const String GRAD = 'grad';
-  static const String RAD = 'rad';
-  static const String TURN = 'turn';
+
 
   /// Judge a string is an angle.
   static bool isAngle(String angle) {
-    return (angle.endsWith(DEG) || angle.endsWith(GRAD) || angle.endsWith(RAD) || angle.endsWith(TURN));
+    return (angle.endsWith(_DEG) || angle.endsWith(_GRAD) || angle.endsWith(_RAD) || angle.endsWith(_TURN));
   }
 
   static double? parseAngle(String rawAngleValue) {
-    double? angleValue;
-    if (rawAngleValue.endsWith(DEG)) {
-      angleValue = double.tryParse(rawAngleValue.split(DEG)[0])! * 2 * math.pi / 360;
-    } else if (rawAngleValue.endsWith(GRAD)) {
-      angleValue = double.tryParse(rawAngleValue.split(GRAD)[0])! * 2 * math.pi / 400;
-    } else if (rawAngleValue.endsWith(RAD)) {
-      angleValue = double.tryParse(rawAngleValue.split(RAD)[0]);
-    } else if (rawAngleValue.endsWith(TURN)) {
-      angleValue = double.tryParse(rawAngleValue.split(TURN)[0])! * 2 * math.pi;
+    if (_cachedParsedAngle.containsKey(rawAngleValue)) {
+      return _cachedParsedAngle[rawAngleValue];
     }
-    return angleValue;
+    double? angleValue;
+    if (rawAngleValue.endsWith(_DEG)) {
+      angleValue = double.tryParse(rawAngleValue.split(_DEG)[0])! * 2 * math.pi / 360;
+    } else if (rawAngleValue.endsWith(_GRAD)) {
+      angleValue = double.tryParse(rawAngleValue.split(_GRAD)[0])! * 2 * math.pi / 400;
+    } else if (rawAngleValue.endsWith(_RAD)) {
+      angleValue = double.tryParse(rawAngleValue.split(_RAD)[0]);
+    } else if (rawAngleValue.endsWith(_TURN)) {
+      angleValue = double.tryParse(rawAngleValue.split(_TURN)[0])! * 2 * math.pi;
+    }
+
+    return  _cachedParsedAngle[rawAngleValue] = angleValue;
   }
 }

@@ -13,16 +13,17 @@
 namespace kraken::binding::qjs {
 
 class Screen : public HostObject {
-public:
-  explicit Screen(JSContext *context) : HostObject(context, "Screen"){};
-private:
+ public:
+  explicit Screen(JSContext* context) : HostObject(context, "Screen"){};
+
+ private:
   DEFINE_HOST_OBJECT_PROPERTY(2, width, height);
 };
 
-void bindScreen(std::unique_ptr<JSContext> &context);
+void bindScreen(std::unique_ptr<JSContext>& context);
 
-} // namespace kraken::binding::qjs
+}  // namespace kraken::binding::qjs
 
 class screen {};
 
-#endif // KRAKENBRIDGE_SCREEN_H
+#endif  // KRAKENBRIDGE_SCREEN_H

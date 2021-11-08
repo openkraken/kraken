@@ -23,18 +23,6 @@ class Window extends EventTarget {
     };
   }
 
-  void _handleColorSchemeChange(Event event) {
-    emitUIEvent(elementManager.controller.view.contextId, nativeEventTargetPtr, event);
-  }
-
-  void _handleLoad(Event event) {
-    emitUIEvent(elementManager.controller.view.contextId, nativeEventTargetPtr, event);
-  }
-
-  void _handleScroll(Event event) {
-    emitUIEvent(elementManager.controller.view.contextId, nativeEventTargetPtr, event);
-  }
-
   static void _open(ElementManager elementManager, String url) {
     KrakenController rootController = elementManager.controller.view.rootController;
     String? sourceUrl = rootController.bundleURL ?? rootController.bundlePath;
@@ -60,23 +48,24 @@ class Window extends EventTarget {
     viewportElement.scrollBy(dx: x, dy: y, withAnimation: false);
   }
 
-  @override
-  void addEvent(String eventName) {
-    super.addEvent(eventName);
+  void addEvent(String eventType) {
+    if (eventHandlers.containsKey(eventType)) return; // Only listen once.
 
-    if (eventHandlers.containsKey(eventName)) return; // Only listen once.
-
-    switch (eventName) {
+    switch (eventType) {
       case EVENT_COLOR_SCHEME_CHANGE:
-        return addEventListener(eventName, _handleColorSchemeChange);
+        return addEventListener(eventType, dispatchEvent);
       case EVENT_LOAD:
-        return addEventListener(eventName, _handleLoad);
+        return addEventListener(eventType, dispatchEvent);
       case EVENT_SCROLL:
-        return viewportElement.addEventListener(eventName, _handleScroll);
+        // Fired at the Document or element when the viewport or element is scrolled, respectively.
+        return viewportElement.addEventListener(eventType, dispatchEvent);
+      case EVENT_RESIZE:
+        // TODO: Fired at the Window when the viewport is resized.
+        break;
       default:
         // Events listened on the Window need to be proxied to the Document, because there is a RenderView on the Document, which can handle hitTest.
         // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/VisualViewport.cpp#L61
-        viewportElement.addEvent(eventName);
+        viewportElement.addEvent(eventType);
         break;
     }
   }

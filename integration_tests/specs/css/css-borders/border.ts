@@ -15,7 +15,7 @@ describe('border', () => {
     });
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('003', async () => {
     let div;
@@ -32,7 +32,7 @@ describe('border', () => {
     });
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('005', async () => {
     let reference;
@@ -75,7 +75,7 @@ describe('border', () => {
     );
     BODY.appendChild(wrapper);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('006', async () => {
     let reference;
@@ -118,7 +118,7 @@ describe('border', () => {
     );
     BODY.appendChild(wrapper);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('008', async () => {
     let reference;
@@ -161,7 +161,7 @@ describe('border', () => {
     );
     BODY.appendChild(wrapper);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('010', async () => {
     let p;
@@ -192,7 +192,7 @@ describe('border', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
 
   it('border will not appear if border width is 0.0', async () => {
@@ -226,7 +226,7 @@ describe('border', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
 
   it('borderSide should handle hitTest', async () => {
@@ -295,7 +295,7 @@ describe('border', () => {
 
     requestAnimationFrame(async () => {
        div.style.borderWidth = '10px';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });

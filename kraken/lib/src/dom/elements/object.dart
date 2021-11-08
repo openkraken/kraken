@@ -26,7 +26,7 @@ const Map<String, dynamic> _paramStyle = {
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/param
 class ParamElement extends Element {
   ParamElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: PARAM, defaultStyle: _paramStyle);
+      : super(targetId, nativePtr, elementManager, defaultStyle: _paramStyle);
 }
 
 _DefaultObjectElementClient _DefaultObjectElementClientFactory(ObjectElementHost objectElementHost) {
@@ -40,7 +40,7 @@ class ObjectElement extends Element implements ObjectElementHost {
   late ObjectElementClient _objectElementClient;
 
   ObjectElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: OBJECT, defaultStyle: _objectStyle, isIntrinsicBox: true) {
+      : super(targetId, nativePtr, elementManager, defaultStyle: _objectStyle, isIntrinsicBox: true) {
     initObjectClient();
     initElementClient();
     initDetachCallback(elementManager);
@@ -110,12 +110,6 @@ class ObjectElement extends Element implements ObjectElementHost {
     super.didDetachRenderer();
     _objectElementClient.didDetachRenderer();
   }
-
-  // @override
-  // void setStyle(String key, value) {
-  //   super.setStyle(key, value);
-  //   _objectElementClient?.setStyle(key, value);
-  // }
 
   @override
   void updateChildTextureBox(TextureBox? textureBox) {

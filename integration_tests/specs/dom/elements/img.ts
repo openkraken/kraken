@@ -319,8 +319,8 @@ describe('Tags img', () => {
           await snapshot(img);
           done();
         });
-        // Delay 600ms to play gif.
-      }, 600);
+        // Delay 200ms to play gif.
+      }, 200);
     };
 
     document.body.appendChild(img);
