@@ -6,7 +6,6 @@
 #include "node.h"
 #include "bindings/qjs/qjs_patch.h"
 #include "comment_node.h"
-#include "document_fragment.h"
 #include "document.h"
 #include "document_fragment.h"
 #include "element.h"
@@ -67,7 +66,7 @@ JSValue Node::cloneNode(QjsContext* ctx, JSValue this_val, int argc, JSValue* ar
     return newTextNode;
   } else if (selfInstance->nodeType == NodeType::DOCUMENT_FRAGMENT_NODE) {
     JSValue newFragment = JS_CallConstructor(ctx, DocumentFragment::instance(selfInstance->m_context)->classObject, 0, nullptr);
-    auto *newFragmentInstance = static_cast<NodeInstance *>(JS_GetOpaque(newFragment, Node::classId(newFragment)));
+    auto* newFragmentInstance = static_cast<NodeInstance*>(JS_GetOpaque(newFragment, Node::classId(newFragment)));
 
     if (deep) {
       traverseCloneNode(ctx, selfInstance, newFragmentInstance);
