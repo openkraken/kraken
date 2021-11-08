@@ -50,6 +50,20 @@ module.exports = {
         use: require.resolve('stylesheet-loader'),
       },
       {
+        test: /\.(html?)$/i,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: path.resolve('./scripts/html_loader'),
+            options: {
+              workspacePath: context,
+              testPath,
+              snapshotPath,
+            }
+          }
+        ]
+      },
+      {
         test: /\.(jsx?|tsx?)$/i,
         exclude: /node_modules/,
         use: [{
@@ -95,10 +109,6 @@ module.exports = {
         }, {
           loader: path.resolve('./scripts/quickjs_syntax_fix_loader'),
         }]
-      }, {
-        test: /\.(html?)$/i,
-        exclude: /node_modules/,
-        use: path.resolve('./scripts/html_loader')
       }
     ],
   },
