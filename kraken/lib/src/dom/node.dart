@@ -25,7 +25,7 @@ class Comment extends Node {
   String get nodeName => '#comment';
 
   @override
-  RenderObject? get renderer => null;
+  RenderBox? get renderer => null;
 
   // @TODO: Get data from bridge side.
   String get data => '';
@@ -40,7 +40,7 @@ class Comment extends Node {
 /// [Node] or [Element]s, which wrap [RenderObject]s, which provide the actual
 /// rendering of the application.
 abstract class RenderObjectNode {
-  RenderObject? get renderer => throw FlutterError('This node has no render object implemented.');
+  RenderBox? get renderer => throw FlutterError('This node has no render object implemented.');
 
   /// Creates an instance of the [RenderObject] class that this
   /// [RenderObjectNode] represents, using the configuration described by this
@@ -49,7 +49,7 @@ abstract class RenderObjectNode {
   /// This method should not do anything with the children of the render object.
   /// That should instead be handled by the method that overrides
   /// [Node.attachTo] in the object rendered by this object.
-  RenderObject createRenderer();
+  RenderBox createRenderer();
 
   /// The renderObject will be / has been insert into parent. You can apply properties
   /// to renderObject.
@@ -172,7 +172,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   handleJSCall(String method, List<dynamic> argv) {}
 
   @override
-  RenderObject createRenderer() => throw FlutterError('[createRenderer] is not implemented.');
+  RenderBox createRenderer() => throw FlutterError('[createRenderer] is not implemented.');
 
   @override
   void willAttachRenderer() {}

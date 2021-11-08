@@ -160,15 +160,15 @@ class Element extends Node
   String get nodeName => tagName;
 
   @override
-  RenderObject? get renderer => renderBoxModel?.renderPositionHolder ?? renderBoxModel;
+  RenderBox? get renderer => renderBoxModel;
 
   @override
-  RenderObject createRenderer() {
-    if (renderer != null) {
-      return renderer!;
+  RenderBox createRenderer() {
+    if (renderBoxModel != null) {
+      return renderBoxModel!;
     }
     createRenderBoxModel();
-    return renderer!;
+    return renderBoxModel!;
   }
 
   void createRenderBoxModel({ bool? shouldRepaintSelf }) {
@@ -201,26 +201,11 @@ class Element extends Node
     // Remove all intersection change listeners.
     renderBoxModel!.clearIntersectionChangeListeners();
 
-    // Remove placeholder of positioned element.
-    RenderPositionHolder? renderPositionHolder = renderBoxModel!.renderPositionHolder;
-    if (renderPositionHolder != null) {
-      RenderLayoutBox? parent = renderPositionHolder.parent as RenderLayoutBox?;
-      if (parent != null) {
-        parent.remove(renderPositionHolder);
-      }
-    }
-
     // Remove fixed children from root when dispose.
     _removeFixedChild(renderBoxModel!);
 
-    // Remove self.
-    RenderObject? parent = renderBoxModel!.parent as RenderObject?;
-    if (parent is ContainerRenderObjectMixin) {
-      parent.remove(renderBoxModel!);
-    } else if (parent is RenderProxyBox) {
-      parent.child = null;
-    }
-
+    // Remove renderbox.
+    _removeRenderBoxModel(parent!.renderer, renderBoxModel);
   }
 
   @override
@@ -297,11 +282,9 @@ class Element extends Node
   /// Toggle renderBoxModel between repaint boundary and non repaint boundary.
   void _toggleRepaintSelf({ required bool repaintSelf }) {
     RenderBoxModel _renderBoxModel = renderBoxModel!;
-    Element _parentElement = parentElement!;
-
-    RenderObject? parentRenderObject = _renderBoxModel.parent as RenderObject?;
+    RenderBox? parentRenderObject = _renderBoxModel.parent as RenderBox?;
     RenderBox? previousSibling;
-    List<RenderObject>? sortedChildren;
+    List<RenderBox>? sortedChildren;
     // Remove old renderObject
     if (parentRenderObject is ContainerRenderObjectMixin) {
       ContainerParentDataMixin<RenderBox>? _parentData = _renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>?;
@@ -319,7 +302,7 @@ class Element extends Node
         if (_renderBoxModel is RenderLayoutBox) {
           sortedChildren = _renderBoxModel.sortedChildren;
         }
-        parentRenderObject.remove(_renderBoxModel);
+        (parentRenderObject as ContainerRenderObjectMixin).remove(_renderBoxModel);
       }
     }
 
@@ -330,12 +313,8 @@ class Element extends Node
       (renderBoxModel as RenderLayoutBox).sortedChildren = sortedChildren;
     }
 
-    // Append new renderObject
-    if (parentRenderObject is ContainerRenderObjectMixin) {
-      _parentElement.addChildRenderObject(this, after: previousSibling);
-    } else if (parentRenderObject is RenderObjectWithChildMixin) {
-      parentRenderObject.child = renderBoxModel;
-    }
+    // Attach new renderBox.
+    _attachRenderBoxModel(parentRenderObject, renderBoxModel);
   }
 
   void _updateRenderBoxModelWithPosition() {
@@ -353,9 +332,7 @@ class Element extends Node
       _removeFixedChild(_renderBoxModel);
     }
 
-    RenderObject _renderer = renderer!;
-
-    RenderBox? prev = (_renderer.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
+    RenderBox? prev = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
     // It needs to find the previous sibling of the previous sibling if the placeholder of
     // positioned element exists and follows renderObject at the same time, eg.
     // <div style="position: relative"><div style="position: absolute" /></div>
@@ -363,22 +340,8 @@ class Element extends Node
       prev = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
     }
 
-    // Remove placeholder of positioned element.
-    RenderPositionHolder? renderPositionHolder = _renderBoxModel.renderPositionHolder;
-    if (renderPositionHolder != null) {
-      ContainerRenderObjectMixin<RenderBox, ContainerParentDataMixin<RenderBox>>? parent = renderPositionHolder.parent as ContainerRenderObjectMixin<RenderBox, ContainerParentDataMixin<RenderBox>>?;
-      if (parent != null) {
-        parent.remove(renderPositionHolder);
-        _renderBoxModel.renderPositionHolder = null;
-      }
-    }
     // Remove renderBoxModel from original parent and append to its containing block
-    RenderObject? parentRenderBoxModel = _renderBoxModel.parent as RenderBox?;
-    if (parentRenderBoxModel is ContainerRenderObjectMixin) {
-      parentRenderBoxModel.remove(_renderBoxModel);
-    } else if (parentRenderBoxModel is RenderProxyBox) {
-      parentRenderBoxModel.child = null;
-    }
+    _removeRenderBoxModel(_renderBoxModel.parent as RenderBox?, _renderBoxModel);
     _parentElement.addChildRenderObject(this, after: prev);
 
     if (shouldConvertToRepaintBoundary) {
@@ -686,6 +649,8 @@ class Element extends Node
   void _updateRenderBoxModelWithDisplay() {
     CSSDisplay presentDisplay = renderStyle.display;
 
+    if (parent == null || !parent!.isConnected) return;
+
     // Destroy renderer of element when display is changed to none.
     if (presentDisplay == CSSDisplay.none) {
       disposeRenderObject();
@@ -695,16 +660,9 @@ class Element extends Node
     // When renderer and style listener is not created when original display is none,
     // thus it needs to create renderer when style changed.
     if (renderBoxModel == null) {
-      RenderBox? after;
-      Element parent = this.parent as Element;
-      if (parent.scrollingContentLayoutBox != null) {
-        after = parent.scrollingContentLayoutBox!.lastChild;
-      } else {
-        after = (parent.renderBoxModel as RenderLayoutBox).lastChild;
-      }
       // Update renderBoxModel and attach it to parent.
       createRenderBoxModel();
-      parent.addChildRenderObject(this, after: after);
+      _attachRenderBoxModel(parent!.renderer, renderBoxModel);
       // FIXME: avoid ensure something in display updating.
       ensureChildAttached();
       return;
@@ -719,17 +677,42 @@ class Element extends Node
     }
 
     if (renderBoxModel is RenderLayoutBox) {
-      RenderLayoutBox prevRenderLayoutBox = renderBoxModel as RenderLayoutBox;
-      RenderBox parentRenderObject = prevRenderLayoutBox.parent as RenderBox;
       // Update layout box type from block to flex.
+      _removeRenderBoxModel(parent!.renderer, renderBoxModel);
       createRenderBoxModel();
-      if (parentRenderObject is RenderLayoutBox) {
-        Element? previousSibling = this.previousSibling as Element?;
+      _attachRenderBoxModel(parent!.renderer, renderBoxModel);
+    }
+  }
+
+  void _attachRenderBoxModel(RenderBox? parentRenderBox, RenderBoxModel? currentRenderBox) {
+    if (parentRenderBox is RenderViewportBox) {
+      parentRenderBox.child = currentRenderBox;
+    } else if (parentRenderBox is RenderLayoutBox) {
+      if (currentRenderBox != null) {
+        Node? previousSibling = this.previousSibling;
         RenderObject? previous = previousSibling?.renderer;
-        parentRenderObject.remove(prevRenderLayoutBox);
-        parentRenderObject.insert(renderBoxModel!, after: previous as RenderBox?);
-      } else if (parentRenderObject is RenderViewportBox) {
-        parentRenderObject.child = renderBoxModel;
+        parentRenderBox.insert(currentRenderBox, after: previous as RenderBox?);
+      }
+    }
+  }
+
+  void _removeRenderBoxModel(RenderBox? parentRenderBox, RenderBoxModel? prevRendeBox) {
+     if (parentRenderBox is RenderViewportBox) {
+      parentRenderBox.child = null;
+    } else if (parentRenderBox is RenderLayoutBox) {
+      if (prevRendeBox != null) {
+        parentRenderBox.remove(prevRendeBox);
+      }
+    }
+
+    if (prevRendeBox != null) {
+      // Remove placeholder of positioned element.
+      RenderPositionHolder? renderPositionHolder = prevRendeBox.renderPositionHolder;
+      if (renderPositionHolder != null) {
+        RenderLayoutBox? parent = renderPositionHolder.parent as RenderLayoutBox?;
+        if (parent != null) {
+          parent.remove(renderPositionHolder);
+        }
       }
     }
   }

@@ -79,7 +79,7 @@ class TextNode extends Node {
   String get nodeName => '#text';
 
   @override
-  RenderObject? get renderer => _renderTextBox;
+  RenderBox? get renderer => _renderTextBox;
 
   @override
   handleJSCall(String method, List argv) {}
@@ -151,9 +151,9 @@ class TextNode extends Node {
   }
 
   @override
-  RenderObject createRenderer() {
-    if (renderer != null) {
-      return renderer!;
+  RenderBox createRenderer() {
+    if (_renderTextBox != null) {
+      return _renderTextBox!;
     }
     return _renderTextBox = RenderTextBox(data, renderStyle: parentElement!.renderStyle);
   }
