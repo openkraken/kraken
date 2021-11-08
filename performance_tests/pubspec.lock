@@ -141,7 +141,7 @@ packages:
       path: "../kraken"
       relative: true
     source: path
-    version: "0.8.2"
+    version: "0.9.0"
   matcher:
     dependency: transitive
     description:
@@ -308,20 +308,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0"
-  vibration:
-    dependency: transitive
-    description:
-      name: vibration
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.7.4-nullsafety.0"
-  vibration_web:
-    dependency: transitive
-    description:
-      name: vibration_web
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.6.3-nullsafety.0"
   win32:
     dependency: transitive
     description:
