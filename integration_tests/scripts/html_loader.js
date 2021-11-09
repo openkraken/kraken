@@ -45,7 +45,10 @@ const loader = function(source) {
         }
       };
       __kraken_parse_html__('${root.toString().replace(/\n/g, '')}');
-      ${scripts.join('\n')}
+      ${
+        scripts.length === 0 ?
+        'it("should work", async () => { await html_snapshot(); })' : scripts.join('\n')
+      }
     });
   `;
 }
