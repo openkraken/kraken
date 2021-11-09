@@ -36,8 +36,8 @@ const loader = function(source) {
   traverseParseHTML(root);
 
   return `
-    describe(${snapshotFilepath}, async () => {
-      window.html_snapshot = async (...argv) => {
+    describe('html-${filepath.basename(filename)}', () => {
+      html_snapshot = async (...argv) => {
         if (argv.length === 0) {
           await snapshot(null, '${snapshotFilepath}');
         } else if (argv.length === 1) {
@@ -45,7 +45,7 @@ const loader = function(source) {
         }
       };
       __kraken_parse_html__('${root.toString().replace(/\n/g, '')}');
-      ${scripts.map(script => script)}
+      ${scripts.join('\n')}
     });
   `;
 }
