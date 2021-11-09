@@ -3,7 +3,7 @@ describe('descendant-display', () => {
     let divStyle = {
       display: 'none',
     };
-    let childStyle = {
+    let divDivStyle = {
       backgroundColor: 'red',
       width: '100px',
       height: '100px',
@@ -11,18 +11,18 @@ describe('descendant-display', () => {
     let element = createElementWithStyle('div', divStyle, [
       createElementWithStyle('div', {
         ...divStyle,
-        ...childStyle,
+        ...divDivStyle,
       }),
     ]);
     append(BODY, element);
     await snapshot();
   });
 
-  fit('override-001', async () => {
+  it('override-001', async () => {
     let divStyle = {
       display: 'none',
     };
-    let childStyle = {
+    let divdivStyle = {
       backgroundColor: 'red',
       display: 'block',
       width: '100px',
@@ -31,7 +31,7 @@ describe('descendant-display', () => {
     let element = createElementWithStyle('div', divStyle, [
       createElementWithStyle('div', {
         ...divStyle,
-        ...childStyle,
+        ...divdivStyle,
       }),
     ]);
     append(BODY, element);
