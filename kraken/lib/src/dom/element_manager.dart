@@ -487,7 +487,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       bool shouldScrollByToCenter = false;
       InputElement? focusInputElement = InputElement.focusInputElement;
       if (focusInputElement != null) {
-        RenderBox? renderer = focusInputElement.renderer as RenderBox?;
+        RenderBox? renderer = focusInputElement.renderer;
         if (renderer != null && renderer.hasSize) {
           Offset focusOffset = renderer.localToGlobal(Offset.zero);
           // FOCUS_VIEWINSET_BOTTOM_OVERALL to meet border case.
