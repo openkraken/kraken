@@ -143,19 +143,19 @@ void main() async {
 
     List<String> results = await Future.wait(testResults);
 
-    // Manual dispose context for memory leak check.
-    krakenMap.forEach((key, kraken) {
-      disposeContext(kraken.controller!.view.contextId);
-    });
-
-    for (int i = 0; i < results.length; i ++) {
-      String status = results[i];
-      if (status == 'failed') {
-        exit(1);
-      }
-    }
-
-    exit(0);
+    // // Manual dispose context for memory leak check.
+    // krakenMap.forEach((key, kraken) {
+    //   disposeContext(kraken.controller!.view.contextId);
+    // });
+    //
+    // for (int i = 0; i < results.length; i ++) {
+    //   String status = results[i];
+    //   if (status == 'failed') {
+    //     exit(1);
+    //   }
+    // }
+    //
+    // exit(0);
   });
 }
 

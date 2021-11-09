@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:kraken/kraken.dart';
-import 'package:kraken_websocket/kraken_websocket.dart';
-import 'package:kraken_devtools/kraken_devtools.dart';
+// import 'package:kraken_websocket/kraken_websocket.dart';
+// import 'package:kraken_devtools/kraken_devtools.dart';
 import 'dart:ui';
 
 void main() {
-  KrakenWebsocket.initialize();
+  // KrakenWebsocket.initialize();
   runApp(MyApp());
 }
 
@@ -89,7 +89,7 @@ class _MyHomePageState extends State<MyBrowser> {
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: _kraken = Kraken(
-          devToolsService: ChromeDevToolsService(),
+          // devToolsService: ChromeDevToolsService(),
           viewportWidth: viewportSize.width - queryData.padding.horizontal,
           viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
           bundleURL: 'assets/bundle.js',

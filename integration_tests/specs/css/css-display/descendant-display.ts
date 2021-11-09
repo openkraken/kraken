@@ -18,7 +18,7 @@ describe('descendant-display', () => {
     await snapshot();
   });
 
-  it('override-001', async () => {
+  fit('override-001', async () => {
     let divStyle = {
       display: 'none',
     };
