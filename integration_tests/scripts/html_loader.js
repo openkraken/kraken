@@ -10,9 +10,12 @@ const traverseParseHTML = (ele) => {
   ele.childNodes && ele.childNodes.forEach(e => {
     if (e.rawTagName === SCRIPT) {
       e.childNodes.forEach(item => {
+        // TextNode of script element.
         if (item.nodeType === 3) {
           scripts.push(item._rawText);
         }
+        // Delete content of script element for avoid to  script repetition.
+        item._rawText = '';
       })
     }
     traverseParseHTML(e);
@@ -29,10 +32,11 @@ const loader = function(source) {
     )
   );
 
-  traverseParseHTML(HTMLParser.parse(source));
+  let root = HTMLParser.parse(source);
+  traverseParseHTML(root);
 
   return `
-    describe(${snapshotFilepath}, async (done) => {
+    describe(${snapshotFilepath}, async () => {
       window.html_snapshot = async (...argv) => {
         if (argv.length === 0) {
           await snapshot(null, '${snapshotFilepath}');
@@ -40,7 +44,7 @@ const loader = function(source) {
           await snapshot(argv[0], '${snapshotFilepath}');
         }
       };
-      __kraken_parse_html__('${source.replace(/\n/g, '').replace(/'/g, '"')}');
+      __kraken_parse_html__('${root.toString().replace(/\n/g, '')}');
       ${scripts.map(script => script)}
     });
   `;
