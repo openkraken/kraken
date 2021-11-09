@@ -127,17 +127,18 @@ class Element extends Node
 
   /// Whether should create repaintBoundary for this element when style changed
   bool get shouldConvertToRepaintBoundary {
-    // Following cases should always convert to repaint boundary for performance consideration
-    // Intrinsic element such as Canvas
+    // Following cases should always convert to repaint boundary for performance consideration.
+    // Intrinsic element such as <canvas>.
     bool isSetRepaintSelf = repaintSelf;
-    // Scrolling box
-    bool isScrollingBox = scrollingContentLayoutBox != null;
-    // Transform element
-    bool hasTransform = renderBoxModel?.renderStyle.transformMatrix != null;
-    // Fixed element
-    bool isPositionedFixed = renderBoxModel?.renderStyle.position == CSSPositionType.fixed;
+    // Overflow style.
+    bool isOverflowScroll = renderStyle.overflowX == CSSOverflowType.scroll || renderStyle.overflowX == CSSOverflowType.auto ||
+      renderStyle.overflowY == CSSOverflowType.scroll || renderStyle.overflowY == CSSOverflowType.auto;
+    // Transform style.
+    bool hasTransform = renderStyle.transformMatrix != null;
+    // Fixed position style.
+    bool isPositionedFixed = renderStyle.position == CSSPositionType.fixed;
 
-    return isScrollingBox || isSetRepaintSelf || hasTransform || isPositionedFixed;
+    return isOverflowScroll || isSetRepaintSelf || hasTransform || isPositionedFixed;
   }
 
   Element(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager,
@@ -205,7 +206,7 @@ class Element extends Node
     _removeFixedChild(renderBoxModel!);
 
     // Remove renderbox.
-    _removeRenderBoxModel(parent!.renderer, renderBoxModel);
+    _removeChildRenderBoxModel(parent!.renderer, renderBoxModel);
   }
 
   @override
@@ -241,10 +242,10 @@ class Element extends Node
   /// Normally element in scroll box will not repaint on scroll because of repaint boundary optimization
   /// So it needs to manually mark element needs paint and add scroll offset in paint stage
   void paintFixedChildren(double scrollOffset, AxisDirection axisDirection) {
-    RenderLayoutBox? _scrollingContentLayoutBox = scrollingContentLayoutBox;
     // Only root element has fixed children
-    if (targetId == HTML_ID && _scrollingContentLayoutBox != null) {
-      for (RenderBoxModel child in _scrollingContentLayoutBox.fixedChildren) {
+    if (this == elementManager.viewportElement && renderBoxModel != null) {
+      RenderBoxModel layoutBox = (renderBoxModel as RenderLayoutBox).renderScrollingContent ?? renderBoxModel!;
+      for (RenderBoxModel child in layoutBox.fixedChildren) {
         // Save scrolling offset for paint
         if (axisDirection == AxisDirection.down) {
           child.scrollingOffsetY = scrollOffset;
@@ -314,7 +315,7 @@ class Element extends Node
     }
 
     // Attach new renderBox.
-    _attachRenderBoxModel(parentRenderObject, renderBoxModel);
+    _attachChildRenderBoxModel(parentRenderObject, renderBoxModel);
   }
 
   void _updateRenderBoxModelWithPosition() {
@@ -341,7 +342,7 @@ class Element extends Node
     }
 
     // Remove renderBoxModel from original parent and append to its containing block
-    _removeRenderBoxModel(_renderBoxModel.parent as RenderBox?, _renderBoxModel);
+    _removeChildRenderBoxModel(_renderBoxModel.parent as RenderBox?, _renderBoxModel);
     _parentElement.addChildRenderObject(this, after: prev);
 
     if (shouldConvertToRepaintBoundary) {
@@ -647,7 +648,7 @@ class Element extends Node
   void _updateRenderBoxModelWithDisplay() {
     CSSDisplay presentDisplay = renderStyle.display;
 
-    if (parent == null || !parent!.isConnected) return;
+    if (parentElement == null || !parentElement!.isConnected) return;
 
     // Destroy renderer of element when display is changed to none.
     if (presentDisplay == CSSDisplay.none) {
@@ -660,7 +661,7 @@ class Element extends Node
     if (renderBoxModel == null) {
       // Update renderBoxModel and attach it to parent.
       createRenderBoxModel();
-      _attachRenderBoxModel(parent!.renderer, renderBoxModel);
+      _attachChildRenderBoxModel(parentElement!.renderBoxModel, renderBoxModel);
       // FIXME: avoid ensure something in display updating.
       ensureChildAttached();
       return;
@@ -676,41 +677,46 @@ class Element extends Node
 
     if (renderBoxModel is RenderLayoutBox) {
       // Update layout box type from block to flex.
-      _removeRenderBoxModel(parent!.renderer, renderBoxModel);
+      _removeChildRenderBoxModel(parentElement!.renderBoxModel, renderBoxModel);
       createRenderBoxModel();
-      _attachRenderBoxModel(parent!.renderer, renderBoxModel);
+      _attachChildRenderBoxModel(parentElement!.renderBoxModel, renderBoxModel);
     }
   }
 
-  void _attachRenderBoxModel(RenderBox? parentRenderBox, RenderBoxModel? currentRenderBox) {
+  void _attachChildRenderBoxModel(RenderBox? parentRenderBox, RenderBoxModel? currentRenderBox) {
     if (parentRenderBox is RenderViewportBox) {
       parentRenderBox.child = currentRenderBox;
     } else if (parentRenderBox is RenderLayoutBox) {
       if (currentRenderBox != null) {
         Node? previousSibling = this.previousSibling;
         RenderObject? previous = previousSibling?.renderer;
+        parentRenderBox = parentRenderBox.renderScrollingContent ?? parentRenderBox;
         parentRenderBox.insert(currentRenderBox, after: previous as RenderBox?);
       }
     }
   }
 
-  void _removeRenderBoxModel(RenderBox? parentRenderBox, RenderBoxModel? prevRendeBox) {
+  void _removeChildRenderBoxModel(RenderBox? parentRenderBox, RenderBoxModel? prevRendeBox) {
      if (parentRenderBox is RenderViewportBox) {
       parentRenderBox.child = null;
-    } else if (parentRenderBox is RenderLayoutBox) {
-      if (prevRendeBox != null) {
-        parentRenderBox.remove(prevRendeBox);
-      }
+    } else if (parentRenderBox is RenderLayoutBox && prevRendeBox != null) {
+      parentRenderBox = parentRenderBox.renderScrollingContent ?? parentRenderBox;
+      parentRenderBox.remove(prevRendeBox);
     }
 
     if (prevRendeBox != null) {
+      // Remove scrolling content layout box of overflow element.
+      if (prevRendeBox is RenderLayoutBox && prevRendeBox.renderScrollingContent != null) {
+        prevRendeBox.renderScrollingContent = null;
+        prevRendeBox.remove(prevRendeBox.renderScrollingContent!);
+      }
       // Remove placeholder of positioned element.
       RenderPositionHolder? renderPositionHolder = prevRendeBox.renderPositionHolder;
       if (renderPositionHolder != null) {
         prevRendeBox.renderPositionHolder = null;
-        RenderLayoutBox? parent = renderPositionHolder.parent as RenderLayoutBox?;
-        if (parent != null) {
-          parent.remove(renderPositionHolder);
+        RenderLayoutBox? parentLayoutBox = renderPositionHolder.parent as RenderLayoutBox?;
+        if (parentLayoutBox != null) {
+          parentLayoutBox.remove(renderPositionHolder);
         }
       }
     }

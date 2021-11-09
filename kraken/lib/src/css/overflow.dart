@@ -106,7 +106,17 @@ mixin ElementOverflowMixin on ElementBase {
   KrakenScrollable? _scrollableY;
 
   // House content which can be scrolled.
-  RenderLayoutBox? scrollingContentLayoutBox;
+  // TODO(yuanyan): remove this field, and use renderScrollingContent.
+  RenderLayoutBox? get scrollingContentLayoutBox {
+    if (renderBoxModel is RenderLayoutBox) {
+      return (renderBoxModel as RenderLayoutBox).renderScrollingContent;
+    }
+  }
+  set scrollingContentLayoutBox(RenderLayoutBox? layoutBox) {
+    if (renderBoxModel is RenderLayoutBox) {
+      (renderBoxModel as RenderLayoutBox).renderScrollingContent = layoutBox;
+    }
+  }
 
   void updateRenderBoxModelWithOverflowX(ScrollListener scrollListener) {
     Element element = this as Element;

@@ -161,6 +161,9 @@ class RenderLayoutBox extends RenderBoxModel
     renderStyle: renderStyle,
   );
 
+  // House content which can be scrolled.
+  RenderLayoutBox? renderScrollingContent;
+
   @override
   void markNeedsLayout() {
     super.markNeedsLayout();
