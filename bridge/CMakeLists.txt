@@ -71,6 +71,10 @@ if (ENABLE_ASAN)
   add_link_options(-fsanitize=address -fno-omit-frame-pointer)
 endif ()
 
+if (DEFINED ${PLATFORM} AND ${PLATFORM} STREQUAL "OS")
+  add_compile_options(-fno-aligned-allocation)
+endif()
+
 list(APPEND BRIDGE_SOURCE
   kraken_bridge.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
@@ -346,11 +350,9 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
     OUTPUT_NAME kraken_bridge
     FRAMEWORK TRUE
     FRAMEWORK_VERSION C
-    MACOSX_FRAMEWORK_IDENTIFIER com.openkraken.kraken_bridge
+    MACOSX_FRAMEWORK_IDENTIFIER com.openkraken.kraken-bridge
     PUBLIC_HEADER ${KRAKEN_PUBLIC_HEADERS}
     )
-
-  message(${QUICKJS_PUBLIC_HEADERS})
 
   set_target_properties(quickjs PROPERTIES
     OUTPUT_NAME quickjs

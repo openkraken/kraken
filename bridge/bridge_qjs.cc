@@ -178,7 +178,7 @@ void JSBridge::evaluateScript(const NativeString* script, const char* url, int s
 #if ENABLE_PROFILE
   auto nativePerformance = Performance::instance(m_context.get())->m_nativePerformance;
   nativePerformance.mark(PERF_JS_PARSE_TIME_START);
-  std::u16string patchedCode = std::u16string(u"performance.mark('js_parse_time_end');") + std::u16string(reinterpret_cast<const char16_t*>(script->string));
+  std::u16string patchedCode = std::u16string(u"performance.mark('js_parse_time_end');") + std::u16string(reinterpret_cast<const char16_t*>(script->string), script->length);
   m_context->evaluateJavaScript(patchedCode.c_str(), patchedCode.size(), url, startLine);
 #else
   m_context->evaluateJavaScript(script->string, script->length, url, startLine);
