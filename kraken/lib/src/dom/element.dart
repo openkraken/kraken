@@ -453,8 +453,6 @@ class Element extends Node
       }
       // Flush pending style before child attached.
       style.flushPendingProperties();
-      // Delay position set on node attach cause position depends on renderStyle of parent.
-      _updateRenderBoxModelWithPosition();
 
       didAttachRenderer();
     }
