@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken_websocket/kraken_websocket.dart';
-import 'package:kraken_devtools/kraken_devtools.dart';
 import 'dart:ui';
 
 void main() {
@@ -53,6 +52,31 @@ class _MyHomePageState extends State<MyBrowser> {
     final MediaQueryData queryData = MediaQuery.of(context);
     final TextEditingController textEditingController = TextEditingController();
 
+    /*
+    * <flutter-list-view title="This is title">
+        <div>helloworld</div>
+     </flutter-list-view>
+     * let abc = document.getElementById('abc');
+     * abc.onclick = () => {
+     *   abc.click();
+     * };
+    * */
+
+    KrakenSlot listViewSlot = KrakenSlot('flutter-list-view', context, (BuildContext context, List<KrakenSlot> children, Map<String, dynamic> properies) {
+      String title = properies['title'] ?? '';
+      return ListView(
+        children: [
+          Container(
+            height: 50,
+            child: Text('button')
+          ),
+          Container(
+            child: children[0],
+          )
+        ],
+      );
+    });
+
     Kraken? _kraken;
     AppBar appBar = AppBar(
         backgroundColor: Colors.black87,
@@ -89,10 +113,10 @@ class _MyHomePageState extends State<MyBrowser> {
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: _kraken = Kraken(
-          devToolsService: ChromeDevToolsService(),
           viewportWidth: viewportSize.width - queryData.padding.horizontal,
           viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
           bundleURL: 'assets/bundle.js',
+          slots: [listViewSlot],
         ),
     ));
   }

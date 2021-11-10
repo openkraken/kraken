@@ -19,6 +19,7 @@ import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/widget.dart';
 
+import 'package:kraken/src/dom/element_registry.dart';
 import 'bundle.dart';
 
 // Error handler when load bundle failed.
@@ -86,6 +87,8 @@ class KrakenViewController {
 
   WidgetDelegate? widgetDelegate;
 
+  List<KrakenSlot>? slots;
+
   KrakenViewController(
     this._viewportWidth,
     this._viewportHeight, {
@@ -97,6 +100,7 @@ class KrakenViewController {
     this.navigationDelegate,
     this.gestureListener,
     this.widgetDelegate,
+    this.slots
   }) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT);
@@ -141,6 +145,14 @@ class KrakenViewController {
       gestureListener: gestureListener,
       widgetDelegate: widgetDelegate,
     );
+
+    if (slots != null) {
+      for (var slot in slots!) {
+        defineElement(slot.tagName, (int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager) {
+          return WidgetElement(targetId, nativeEventTarget, elementManager, context: slot.context, widgetBuilder: slot.builder);
+        });
+      }
+    }
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_INIT_END);
@@ -478,6 +490,7 @@ class KrakenController {
     GestureListener? gestureListener,
     KrakenNavigationDelegate? navigationDelegate,
     KrakenMethodChannel? methodChannel,
+    List<KrakenSlot>? slots,
     this.widgetDelegate,
     this.onLoad,
     this.onLoadError,
@@ -506,6 +519,7 @@ class KrakenController {
         navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate(),
         gestureListener: _gestureListener,
         widgetDelegate: widgetDelegate,
+        slots: slots
     );
 
     if (kProfileMode) {

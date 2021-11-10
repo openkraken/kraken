@@ -11,10 +11,22 @@ import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 
+class ElementAdaptor {
+  void dispatchEvent(Event event) {
+
+  }
+  void setRenderStyle(String property, String present) {
+
+  }
+  RenderObject? get renderObject {
+
+  }
+}
+
 mixin RenderStyleBase {
   // Following properties used for exposing APIs
   // for class that extends [RenderStyleBase].
-  late Element target;
+  late ElementAdaptor target;
   RenderBoxModel? get renderBoxModel => target.renderBoxModel;
   Size get viewportSize => target.elementManager.viewport.viewportSize;
   double get rootFontSize => target.elementManager.getRootFontSize();

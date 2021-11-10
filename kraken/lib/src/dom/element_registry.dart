@@ -11,6 +11,7 @@ import 'package:kraken/dom.dart';
 final Map<String, ElementCreator> _elementRegistry = {};
 
 void defineElement(String name, ElementCreator creator) {
+  name = name.toUpperCase();
   if (_elementRegistry.containsKey(name)) {
     throw Exception('A element with name "$name" has already been defined.');
   }

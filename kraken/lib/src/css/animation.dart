@@ -442,7 +442,7 @@ class _Interpolation {
 
 class KeyframeEffect extends AnimationEffect {
   RenderStyle renderStyle;
-  Element? target;
+  ElementAdaptor? target;
   late List<_Interpolation> _interpolations;
   double? _progress;
   double? _activeTime;
@@ -575,7 +575,7 @@ class KeyframeEffect extends AnimationEffect {
           scaledLocalTime = 1;
         }
 
-        RenderBoxModel? renderBoxModel = target!.renderBoxModel;
+        RenderBoxModel? renderBoxModel = target!.renderObject as RenderBoxModel?;
         if (renderBoxModel != null && interpolation.begin != null && interpolation.end != null) {
           interpolation.lerp(interpolation.begin, interpolation.end, scaledLocalTime, property, renderBoxModel.renderStyle);
         }
