@@ -15,6 +15,7 @@ class RenderBr extends RenderIntrinsic {
   );
 
   // Height of BR element is only determined by its parents line-height.
+  // @TODO add cache to avoid create TextPainter to measure size on every layout.
   double get height {
     RenderBoxModel parentBox = parent as RenderBoxModel;
     final Size textSize = (TextPainter(

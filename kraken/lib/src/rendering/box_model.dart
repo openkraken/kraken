@@ -795,11 +795,12 @@ class RenderBoxModel extends RenderBox
       final RenderLayoutParentData selfParentData = parentData as RenderLayoutParentData;
       final RenderBoxModel parentBox = parent as RenderBoxModel;
       RenderBox? previousSibling = selfParentData.previousSibling;
-      // BR element has no height if it follows a inline-level element in flow layout.
+      // BR element has no height if it follows an inline-level element (including text node) in flow layout.
       if (parentBox is RenderFlowLayout &&
+        (previousSibling is RenderTextBox ||
         (previousSibling is RenderBoxModel &&
           (previousSibling.renderStyle.display != CSSDisplay.block &&
-          previousSibling.renderStyle.display != CSSDisplay.flex))
+          previousSibling.renderStyle.display != CSSDisplay.flex)))
       ) {
         height = 0;
       } else {
