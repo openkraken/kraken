@@ -1797,6 +1797,10 @@ void _setPositionedChildParentData(RenderLayoutBox parentRenderLayoutBox, Elemen
 
 /// [RenderSliverBoxChildManager] for sliver element.
 class ElementSliverBoxChildManager implements RenderSliverBoxChildManager {
+  // @TODO: Support hummer.
+  void restorePreparedChild(int index) { }
+  void stashPreparedChild(int index) { }
+
   // The container reference element.
   final Element _element;
 
