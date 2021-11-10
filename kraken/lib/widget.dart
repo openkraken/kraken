@@ -226,6 +226,7 @@ class Kraken extends StatefulWidget {
     defineElement(tagName.toUpperCase(), creator);
   }
 
+  @deprecated
   loadContent(String bundleContent) async {
     await controller!.unload();
     await controller!.loadBundle(
@@ -234,26 +235,32 @@ class Kraken extends StatefulWidget {
     _evalBundle(controller!, animationController);
   }
 
+  @deprecated
   loadByteCode(Uint8List bytecode) async {
     await controller!.unload();
     await controller!.loadBundle(
-      bundleByteCode: bytecode
+      bundleByteCode: bytecode,
     );
     _evalBundle(controller!, animationController);
   }
 
-  loadURL(String bundleURL) async {
+
+  loadURL(String bundleURL, { String? bundleContent, Uint8List? bundleByteCode }) async {
     await controller!.unload();
     await controller!.loadBundle(
-      bundleURL: bundleURL
+      bundleURL: bundleURL,
+      bundleContent: bundleContent,
+      bundleByteCode: bundleByteCode,
     );
     _evalBundle(controller!, animationController);
   }
 
-  loadPath(String bundlePath) async {
+  loadPath(String bundlePath, { String? bundleContent, Uint8List? bundleByteCode }) async {
     await controller!.unload();
     await controller!.loadBundle(
-      bundlePath: bundlePath
+      bundlePath: bundlePath,
+      bundleContent: bundleContent,
+      bundleByteCode: bundleByteCode,
     );
     _evalBundle(controller!, animationController);
   }
@@ -906,7 +913,7 @@ class _KrakenRenderObjectElement extends SingleChildRenderObjectElement {
 
     KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller!;
 
-    if (controller.bundleContent == null && controller.bundlePath == null && controller.bundleURL == null) {
+    if (controller.bundleContent == '' && controller.bundleByteCode == Uint8List(0) && controller.href == '') {
       return;
     }
 
