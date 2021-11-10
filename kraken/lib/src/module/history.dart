@@ -6,16 +6,20 @@
 
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 
 class HistoryItem {
-  HistoryItem(this.href, this.state, this.needJump);
+  HistoryItem(this.href, this.state, this.needJump, { this.bundleContent, this.bundleByteCode });
   final String href;
   final dynamic state;
   final bool needJump;
+  String? bundleContent;
+  Uint8List? bundleByteCode;
 }
 
 class HistoryModule extends BaseModule {
@@ -31,9 +35,30 @@ class HistoryModule extends BaseModule {
     if (_previousStack.isEmpty) return '';
     return _previousStack.first.href;
   }
+
   set href(String value) {
     HistoryItem history = HistoryItem(value, null, true);
     _addItem(history);
+  }
+
+  set bundleContent(String value) {
+    if (_previousStack.isEmpty) return;
+    _previousStack.first.bundleContent = value;
+  }
+
+  String get bundleContent {
+    if (_previousStack.isEmpty) return '';
+    return _previousStack.first.bundleContent!;
+  }
+
+  set bundleByteCode(Uint8List value) {
+    if (_previousStack.isEmpty) return;
+    _previousStack.first.bundleByteCode = value;
+  }
+
+  Uint8List get bundleByteCode {
+    if (_previousStack.isEmpty) return Uint8List(0);
+    return _previousStack.first.bundleByteCode!;
   }
 
   void _addItem(HistoryItem historyItem) {

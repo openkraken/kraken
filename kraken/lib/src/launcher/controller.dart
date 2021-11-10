@@ -489,13 +489,20 @@ class KrakenController {
     this.devToolsService,
     this.uriParser
   })  : _name = name,
-        _bundleURL = bundleURL,
-        _bundlePath = bundlePath,
-        _bundleContent = bundleContent,
         _gestureListener = gestureListener {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_PROPERTY_INIT);
       PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_INIT_START);
+    }
+
+    if (bundleURL != null) {
+      href = bundleURL;
+    } else if (bundlePath != null) {
+      href = bundlePath;
+    }
+
+    if (bundleContent != null) {
+      this.bundleContent = bundleContent;
     }
 
     _methodChannel = methodChannel;
@@ -620,6 +627,26 @@ class KrakenController {
     historyModule.href = value;
   }
 
+  set bundleContent(String value) {
+    HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
+    historyModule.bundleContent = value;
+  }
+
+  String get bundleContent {
+    HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
+    return historyModule.bundleContent;
+  }
+
+  set bundleByteCode(Uint8List value) {
+    HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
+    historyModule.bundleByteCode = value;
+  }
+
+  Uint8List get bundleByteCode {
+    HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
+    return historyModule.bundleByteCode;
+  }
+
   // reload current kraken view.
   Future<void> reload() async {
     if (devToolsService != null) {
@@ -653,45 +680,22 @@ class KrakenController {
     }
   }
 
-  String? _bundleContent;
-
-  String? get bundleContent => _bundleContent;
-  set bundleContent(String? value) {
-    if (value == null) return;
-    _bundleContent = value;
-  }
-
-  Uint8List? _bundleByteCode;
-  Uint8List? get bundleByteCode => _bundleByteCode;
-  set bundleByteCode(Uint8List? value) {
-    if (value == null) return;
-    _bundleByteCode = value;
-  }
-
   @deprecated
-  String? _bundlePath;
-
-  @deprecated
-  String? get bundlePath => _bundlePath;
+  String? get bundlePath => href;
 
   @deprecated
   set bundlePath(String? value) {
     if (value == null) return;
-    _bundlePath = value;
     // Set bundlePath should set the path to history module.
     href = value;
   }
 
   @deprecated
-  String? _bundleURL;
-
-  @deprecated
-  String? get bundleURL => _bundleURL;
+  String? get bundleURL => href;
 
   @deprecated
   set bundleURL(String? value) {
     if (value == null) return;
-    _bundleURL = value;
     // Set bundleURL should set the url to history module.
     href = value;
   }
@@ -711,12 +715,12 @@ class KrakenController {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_LOAD_START);
     }
 
-    _bundleContent = bundleContent ?? _bundleContent;
-    _bundlePath =  bundlePath ?? _bundlePath;
-    _bundleURL =  bundleURL ?? _bundleURL;
-    _bundleByteCode = bundleByteCode ?? _bundleByteCode;
+    this.bundlePath =  bundlePath;
+    this.bundleURL =  bundleURL;
+    this.bundleContent = bundleContent!;
+    this.bundleByteCode = bundleByteCode!;
 
-    String? url = _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
+    String? url = href ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
 
     if (url == null && methodChannel is KrakenNativeChannel) {
       url = await (methodChannel as KrakenNativeChannel).getUrl();
@@ -725,15 +729,13 @@ class KrakenController {
     url = url ?? '';
     if (onLoadError != null) {
       try {
-        _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent, contextId: view.contextId);
+        _bundle = await KrakenBundle.getBundle(url, contentOverride: this.bundleContent, contextId: view.contextId);
       } catch (e, stack) {
         onLoadError!(FlutterError(e.toString()), stack);
       }
     } else {
-      _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent, contextId: view.contextId);
+      _bundle = await KrakenBundle.getBundle(url, contentOverride: this.bundleContent, contextId: view.contextId);
     }
-    KrakenController controller = KrakenController.getControllerOfJSContextId(view.contextId)!;
-    controller.href = url;
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_LOAD_END);
