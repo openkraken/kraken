@@ -707,16 +707,16 @@ class Element extends Node
     if (prevRendeBox != null) {
       // Remove scrolling content layout box of overflow element.
       if (prevRendeBox is RenderLayoutBox && prevRendeBox.renderScrollingContent != null) {
-        prevRendeBox.renderScrollingContent = null;
         prevRendeBox.remove(prevRendeBox.renderScrollingContent!);
+        prevRendeBox.renderScrollingContent = null;
       }
       // Remove placeholder of positioned element.
       RenderPositionHolder? renderPositionHolder = prevRendeBox.renderPositionHolder;
       if (renderPositionHolder != null) {
-        prevRendeBox.renderPositionHolder = null;
         RenderLayoutBox? parentLayoutBox = renderPositionHolder.parent as RenderLayoutBox?;
         if (parentLayoutBox != null) {
           parentLayoutBox.remove(renderPositionHolder);
+          prevRendeBox.renderPositionHolder = null;
         }
       }
     }
