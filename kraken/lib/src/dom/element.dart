@@ -205,8 +205,8 @@ class Element extends Node
     // Remove fixed children from root when dispose.
     _removeFixedChild(renderBoxModel!);
 
-    // Remove renderbox.
-    _removeChildRenderBoxModel(parent!.renderer, renderBoxModel);
+    // Remove renderBox.
+    _removeRenderBoxModel(renderBoxModel!);
   }
 
   @override
@@ -342,7 +342,7 @@ class Element extends Node
     }
 
     // Remove renderBoxModel from original parent and append to its containing block
-    _removeChildRenderBoxModel(_renderBoxModel.parent as RenderBox?, _renderBoxModel);
+    _removeRenderBoxModel(_renderBoxModel);
     _parentElement.addChildRenderObject(this, after: prev);
 
     if (shouldConvertToRepaintBoundary) {
@@ -677,7 +677,7 @@ class Element extends Node
 
     if (renderBoxModel is RenderLayoutBox) {
       // Update layout box type from block to flex.
-      _removeChildRenderBoxModel(parentElement!.renderBoxModel, renderBoxModel);
+      _removeRenderBoxModel(renderBoxModel!);
       createRenderBoxModel();
       _attachChildRenderBoxModel(parentElement!.renderBoxModel, renderBoxModel);
     }
@@ -696,30 +696,29 @@ class Element extends Node
     }
   }
 
-  void _removeChildRenderBoxModel(RenderBox? parentRenderBox, RenderBoxModel? prevRendeBox) {
+  void _removeRenderBoxModel(RenderBoxModel renderBox) {
+    RenderBox? parentRenderBox = renderBox.parent as RenderBox;
      if (parentRenderBox is RenderViewportBox) {
       parentRenderBox.child = null;
-    } else if (parentRenderBox is RenderLayoutBox && prevRendeBox != null) {
-      parentRenderBox = parentRenderBox.renderScrollingContent ?? parentRenderBox;
-      parentRenderBox.remove(prevRendeBox);
+    } else if (parentRenderBox is RenderLayoutBox) {
+      parentRenderBox.remove(renderBox);
     }
 
-    if (prevRendeBox != null) {
-      // Remove scrolling content layout box of overflow element.
-      if (prevRendeBox is RenderLayoutBox && prevRendeBox.renderScrollingContent != null) {
-        prevRendeBox.remove(prevRendeBox.renderScrollingContent!);
-        prevRendeBox.renderScrollingContent = null;
-      }
-      // Remove placeholder of positioned element.
-      RenderPositionHolder? renderPositionHolder = prevRendeBox.renderPositionHolder;
-      if (renderPositionHolder != null) {
-        RenderLayoutBox? parentLayoutBox = renderPositionHolder.parent as RenderLayoutBox?;
-        if (parentLayoutBox != null) {
-          parentLayoutBox.remove(renderPositionHolder);
-          prevRendeBox.renderPositionHolder = null;
-        }
+    // Remove scrolling content layout box of overflow element.
+    if (renderBox is RenderLayoutBox && renderBox.renderScrollingContent != null) {
+      renderBox.remove(renderBox.renderScrollingContent!);
+      renderBox.renderScrollingContent = null;
+    }
+    // Remove placeholder of positioned element.
+    RenderPositionHolder? renderPositionHolder = renderBox.renderPositionHolder;
+    if (renderPositionHolder != null) {
+      RenderLayoutBox? parentLayoutBox = renderPositionHolder.parent as RenderLayoutBox?;
+      if (parentLayoutBox != null) {
+        parentLayoutBox.remove(renderPositionHolder);
+        renderBox.renderPositionHolder = null;
       }
     }
+    
   }
 
   void setRenderStyleProperty(String name, dynamic value) {
