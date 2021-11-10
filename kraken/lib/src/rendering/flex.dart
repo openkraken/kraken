@@ -883,10 +883,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderBoxModel? containerBox =
       isScrollingContentBox ? parent as RenderBoxModel? : this;
     if (_isHorizontalFlexDirection) {
-      flexLineLimit = containerBox!.contentConstraints!.maxWidth;
-      if (flexLineLimit == double.infinity) {
-        flexLineLimit = containerBox.renderStyle.getMaxConstraintWidth();
-      }
+      flexLineLimit = renderStyle.contentMaxConstraintsWidth;
     } else {
       flexLineLimit = containerBox!.contentConstraints!.maxHeight;
     }

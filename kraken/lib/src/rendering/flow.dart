@@ -500,10 +500,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       isScrollingContentBox ? parent as RenderBoxModel? : this;
     switch (direction) {
       case Axis.horizontal:
-        mainAxisLimit = containerBox!.contentConstraints!.maxWidth;
-        if (mainAxisLimit == double.infinity) {
-          mainAxisLimit = containerBox.renderStyle.getMaxConstraintWidth();
-        }
+        mainAxisLimit = renderStyle.contentMaxConstraintsWidth;
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
         break;
