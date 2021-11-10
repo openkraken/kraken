@@ -236,10 +236,10 @@ class Kraken extends StatefulWidget {
   }
 
   @deprecated
-  loadByteCode(Uint8List bytecode) async {
+  loadByteCode(Uint8List bundleByteCode) async {
     await controller!.unload();
     await controller!.loadBundle(
-      bundleByteCode: bytecode,
+      bundleByteCode: bundleByteCode,
     );
     _evalBundle(controller!, animationController);
   }

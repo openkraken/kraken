@@ -715,12 +715,15 @@ class KrakenController {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_LOAD_START);
     }
 
-    this.bundlePath =  bundlePath;
-    this.bundleURL =  bundleURL;
+    if (bundlePath != null) {
+      this.bundlePath =  bundlePath;
+    } else if (bundleURL != null) {
+      this.bundleURL =  bundleURL;
+    }
     this.bundleContent = bundleContent!;
     this.bundleByteCode = bundleByteCode!;
 
-    String? url = href ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
+    String? url = href.isEmpty ? (getBundleURLFromEnv() ?? getBundlePathFromEnv()) :  href;
 
     if (url == null && methodChannel is KrakenNativeChannel) {
       url = await (methodChannel as KrakenNativeChannel).getUrl();
