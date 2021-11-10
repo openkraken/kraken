@@ -1,4 +1,4 @@
-fdescribe('anchor element', () => {
+describe('anchor element', () => {
   it('should work with set href attribute', () => {
     let a = document.createElement('a');
     a.href = 'https://v3.vuejs.org/guide/introduction.html';
