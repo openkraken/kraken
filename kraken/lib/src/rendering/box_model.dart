@@ -150,7 +150,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox,
 }
 
 class RenderLayoutBox extends RenderBoxModel
-  with 
+  with
     ContainerRenderObjectMixin<RenderBox,
     ContainerBoxParentData<RenderBox>>,
     RenderBoxContainerDefaultsMixin<RenderBox,
@@ -786,6 +786,34 @@ class RenderBoxModel extends RenderBox
 
   /// Calculate renderBoxModel constraints
   BoxConstraints getConstraints() {
+    // HACK: current use block layout make text force line break
+    // BR element is a special element in HTML which accepts no style,
+    // it dimension is only affected by the line-height of its parent.
+    // https://www.w3.org/TR/CSS1/#br-elements
+    if (this is RenderBr) {
+      double height;
+      final RenderLayoutParentData selfParentData = parentData as RenderLayoutParentData;
+      final RenderBoxModel parentBox = parent as RenderBoxModel;
+      RenderBox? previousSibling = selfParentData.previousSibling;
+      // BR element has no height if it follows a inline-level element in flow layout.
+      if (parentBox is RenderFlowLayout &&
+        (previousSibling is RenderBoxModel &&
+          (previousSibling.renderStyle.display != CSSDisplay.block &&
+          previousSibling.renderStyle.display != CSSDisplay.flex))
+      ) {
+        height = 0;
+      } else {
+        height = (this as RenderBr).height;
+      }
+      BoxConstraints constraints = BoxConstraints(
+        minWidth: 0,
+        maxWidth: 0,
+        minHeight: height,
+        maxHeight: height,
+      );
+      return constraints;
+    }
+
     // Inner scrolling content box of overflow element inherits constraints from parent
     // but has indefinite max constraints to allow children overflow
     if (isScrollingContentBox) {

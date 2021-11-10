@@ -31,11 +31,6 @@ const String KBD = 'KBD';
 const String DFN = 'DFN';
 const String BR = 'BR';
 
-// HACK: current use block layout make text force line break
-const Map<String, dynamic> _breakDefaultStyle = {
-  DISPLAY: BLOCK,
-};
-
 const Map<String, dynamic> _uDefaultStyle = {
   TEXT_DECORATION: UNDERLINE
 };
@@ -69,16 +64,6 @@ const Map<String, dynamic> _markDefaultStyle = {
 const Map<String, dynamic> _defaultStyle = {
   FONT_STYLE: ITALIC
 };
-
-// https://html.spec.whatwg.org/multipage/text-level-semantics.html#htmlbrelement
-class BRElement extends Element {
-  BRElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(
-        targetId, nativePtr, elementManager,
-        defaultStyle: _breakDefaultStyle,
-        isIntrinsicBox: true,
-      );
-}
 
 class BringElement extends Element {
   BringElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
