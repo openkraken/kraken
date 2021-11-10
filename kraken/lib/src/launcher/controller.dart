@@ -668,23 +668,30 @@ class KrakenController {
     _bundleByteCode = value;
   }
 
+  @deprecated
   String? _bundlePath;
 
+  @deprecated
   String? get bundlePath => _bundlePath;
+
+  @deprecated
   set bundlePath(String? value) {
     _bundlePath = value;
   }
 
+  @deprecated
   String? _bundleURL;
 
+  @deprecated
   String? get bundleURL => _bundleURL;
 
+  @deprecated
   set bundleURL(String? value) {
     if (value == null) return;
     _bundleURL = value;
   }
 
-  String get origin => _bundleURL ?? _bundlePath ?? 'vm://' + name!;
+  String get origin => Uri.parse(href).origin;
 
   // preload javascript source and cache it.
   Future<void> loadBundle({
