@@ -369,8 +369,11 @@ class KrakenViewController {
       if (policy == KrakenNavigationActionPolicy.cancel) return;
 
       switch (action.navigationType) {
-        case KrakenNavigationType.reload:
+        case KrakenNavigationType.navigate:
           await rootController.reloadUrl(action.target);
+          break;
+        case KrakenNavigationType.reload:
+          await rootController.reloadUrl(action.source!);
           break;
         default:
         // Navigate and other type, do nothing.
