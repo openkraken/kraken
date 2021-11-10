@@ -96,8 +96,8 @@ class TextNode extends Node {
       renderParagraph.markNeedsLayout();
 
       RenderLayoutBox? parentRenderLayoutBox;
-      if (_parentElement.scrollingContentLayoutBox != null) {
-        parentRenderLayoutBox = _parentElement.scrollingContentLayoutBox!;
+      if (_parentElement.scrollingContentBox != null) {
+        parentRenderLayoutBox = _parentElement.scrollingContentBox!;
       } else {
         parentRenderLayoutBox = (_parentElement.renderBoxModel as RenderLayoutBox?)!;
       }
@@ -117,8 +117,8 @@ class TextNode extends Node {
     willAttachRenderer();
 
     RenderLayoutBox? parentRenderLayoutBox;
-    if (parent.scrollingContentLayoutBox != null) {
-      parentRenderLayoutBox = parent.scrollingContentLayoutBox!;
+    if (parent.scrollingContentBox != null) {
+      parentRenderLayoutBox = parent.scrollingContentBox!;
     } else {
       parentRenderLayoutBox = (parent.renderBoxModel as RenderLayoutBox?)!;
     }

@@ -333,17 +333,17 @@ class Element extends Node
       _removeFixedChild(_renderBoxModel);
     }
 
-    RenderBox? prev = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
+    RenderBox? previousSibling = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
     // It needs to find the previous sibling of the previous sibling if the placeholder of
     // positioned element exists and follows renderObject at the same time, eg.
     // <div style="position: relative"><div style="position: absolute" /></div>
-    if (prev == _renderBoxModel) {
-      prev = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
+    if (previousSibling == _renderBoxModel) {
+      previousSibling = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
     }
 
-    // Remove renderBoxModel from original parent and append to its containing block
-    _removeRenderBoxModel(_renderBoxModel);
-    _parentElement.addChildRenderObject(this, after: prev);
+    // Detach renderBoxModel from original parent and append to its containing block.
+    _detachRenderBoxModel(_renderBoxModel);
+    _parentElement.addChildElement(this, after: previousSibling);
 
     if (shouldConvertToRepaintBoundary) {
       convertToRepaintBoundary();
@@ -373,8 +373,8 @@ class Element extends Node
 
   void addChild(RenderBox child) {
     if (_renderLayoutBox != null) {
-      if (scrollingContentLayoutBox != null) {
-        scrollingContentLayoutBox!.add(child);
+      if (scrollingContentBox != null) {
+        scrollingContentBox!.add(child);
       } else {
         _renderLayoutBox!.add(child);
       }
@@ -415,9 +415,9 @@ class Element extends Node
     }
   }
 
-  void addChildRenderObject(Element child, {RenderBox? after}) {
-    CSSPositionType positionType = child.renderBoxModel!.renderStyle.position;
-    RenderLayoutBox? _scrollingContentLayoutBox = scrollingContentLayoutBox;
+  void addChildElement(Element child, {RenderBox? after}) {
+    CSSPositionType positionType = child.renderStyle.position;
+
     switch (positionType) {
       case CSSPositionType.absolute:
       case CSSPositionType.fixed:
@@ -426,7 +426,7 @@ class Element extends Node
       case CSSPositionType.sticky:
       case CSSPositionType.relative:
       case CSSPositionType.static:
-        RenderLayoutBox? parentRenderLayoutBox = _scrollingContentLayoutBox ?? _renderLayoutBox;
+        RenderLayoutBox? parentRenderLayoutBox = _renderLayoutBox?.renderScrollingContent ?? _renderLayoutBox;
 
         if (parentRenderLayoutBox != null) {
           parentRenderLayoutBox.insert(child.renderBoxModel!, after: after);
@@ -448,7 +448,7 @@ class Element extends Node
       willAttachRenderer();
 
       if (parent is Element) {
-        parent.addChildRenderObject(this, after: after);
+        parent.addChildElement(this, after: after);
       } else if (parent is Document) {
         parent.appendChild(this);
       }
@@ -483,8 +483,8 @@ class Element extends Node
       for (Node child in childNodes) {
         if (_renderLayoutBox != null && !child.isRendererAttached) {
           RenderBox? after;
-          if (scrollingContentLayoutBox != null) {
-            after = scrollingContentLayoutBox!.lastChild;
+          if (scrollingContentBox != null) {
+            after = scrollingContentBox!.lastChild;
           } else {
             after = _renderLayoutBox!.lastChild;
           }
@@ -507,8 +507,8 @@ class Element extends Node
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
       if (!child.isRendererAttached) {
-        if (scrollingContentLayoutBox != null) {
-          child.attachTo(this, after: scrollingContentLayoutBox!.lastChild);
+        if (scrollingContentBox != null) {
+          child.attachTo(this, after: scrollingContentBox!.lastChild);
         } else if (!_isIntrinsicBox) {
           child.attachTo(this, after: _renderLayoutBox!.lastChild);
         }
@@ -580,7 +580,7 @@ class Element extends Node
     Element? containingBlockElement;
     switch (position) {
       case CSSPositionType.absolute:
-        containingBlockElement = _findContainingBlock(child);
+        containingBlockElement = _findContainingBlock(child, elementManager.viewportElement);
         break;
       case CSSPositionType.fixed:
         containingBlockElement = elementManager.viewportElement;
@@ -589,8 +589,8 @@ class Element extends Node
         return;
     }
 
-    RenderLayoutBox parentRenderLayoutBox = containingBlockElement!.scrollingContentLayoutBox != null ?
-      containingBlockElement.scrollingContentLayoutBox! : containingBlockElement._renderLayoutBox!;
+    RenderLayoutBox parentRenderLayoutBox = containingBlockElement!.scrollingContentBox != null ?
+      containingBlockElement.scrollingContentBox! : containingBlockElement._renderLayoutBox!;
     RenderBoxModel childRenderBoxModel = child.renderBoxModel!;
     _setPositionedChildParentData(parentRenderLayoutBox, child);
     parentRenderLayoutBox.add(childRenderBoxModel);
@@ -621,18 +621,18 @@ class Element extends Node
 
   /// Cache fixed renderObject to root element
   void _addFixedChild(RenderBoxModel childRenderBoxModel) {
-    Element rootEl = elementManager.viewportElement;
-    RenderLayoutBox rootRenderLayoutBox = rootEl.scrollingContentLayoutBox!;
+    Element viewport = elementManager.viewportElement;
+    RenderLayoutBox rootRenderLayoutBox = viewport.scrollingContentBox!;
     List<RenderBoxModel> fixedChildren = rootRenderLayoutBox.fixedChildren;
     if (!fixedChildren.contains(childRenderBoxModel)) {
       fixedChildren.add(childRenderBoxModel);
     }
   }
 
-  /// Remove non fixed renderObject to root element
+  /// Remove non fixed renderObject from root element
   void _removeFixedChild(RenderBoxModel childRenderBoxModel) {
-    Element rootEl = elementManager.viewportElement;
-    RenderLayoutBox? rootRenderLayoutBox = rootEl.scrollingContentLayoutBox!;
+    Element viewport = elementManager.viewportElement;
+    RenderLayoutBox? rootRenderLayoutBox = viewport.scrollingContentBox!;
     List<RenderBoxModel> fixedChildren = rootRenderLayoutBox.fixedChildren;
     if (fixedChildren.contains(childRenderBoxModel)) {
       fixedChildren.remove(childRenderBoxModel);
@@ -696,13 +696,17 @@ class Element extends Node
     }
   }
 
-  void _removeRenderBoxModel(RenderBoxModel renderBox) {
+  void _detachRenderBoxModel(RenderBoxModel renderBox) {
     RenderBox? parentRenderBox = renderBox.parent as RenderBox;
      if (parentRenderBox is RenderViewportBox) {
       parentRenderBox.child = null;
     } else if (parentRenderBox is RenderLayoutBox) {
       parentRenderBox.remove(renderBox);
     }
+  }
+
+  void _removeRenderBoxModel(RenderBoxModel renderBox) {
+    _detachRenderBoxModel(renderBox);
 
     // Remove scrolling content layout box of overflow element.
     if (renderBox is RenderLayoutBox && renderBox.renderScrollingContent != null) {
@@ -718,7 +722,7 @@ class Element extends Node
         renderBox.renderPositionHolder = null;
       }
     }
-    
+
   }
 
   void setRenderStyleProperty(String name, dynamic value) {
@@ -1459,7 +1463,7 @@ class Element extends Node
         .owner!
         .flushLayout();
 
-    Element? element = _findContainingBlock(this);
+    Element? element = _findContainingBlock(this, elementManager.viewportElement);
     element ??= elementManager.viewportElement;
     return renderBox.localToGlobal(Offset.zero, ancestor: element.renderBoxModel);
   }
@@ -1556,7 +1560,6 @@ class Element extends Node
       repaintSelf: true,
       renderStyle: scrollingContentRenderStyle,
     );
-    style.addStyleChangeListener(scrollingContentBoxStyleListener);
     scrollingContentLayoutBox.isScrollingContentBox = true;
     return scrollingContentLayoutBox;
   }
@@ -1768,20 +1771,19 @@ class Element extends Node
   }
 }
 
-Element? _findContainingBlock(Element element) {
-  Element? _el = element.parentElement;
-  Element rootEl = element.elementManager.viewportElement;
+Element? _findContainingBlock(Element child, Element viewportElement) {
+  Element? parent = child.parentElement;
 
-  while (_el != null) {
-    bool isElementNonStatic = _el.renderStyle.position != CSSPositionType.static;
-    bool hasTransform = _el.renderStyle.transform != null;
+  while (parent != null) {
+    bool isNonStatic = parent.renderStyle.position != CSSPositionType.static;
+    bool hasTransform = parent.renderStyle.transform != null;
     // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
-    if (_el == rootEl || isElementNonStatic || hasTransform) {
+    if (parent == viewportElement || isNonStatic || hasTransform) {
       break;
     }
-    _el = _el.parent as Element?;
+    parent = parent.parentElement;
   }
-  return _el;
+  return parent;
 }
 
 bool _isIntersectionObserverEvent(String eventType) {
