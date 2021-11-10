@@ -637,7 +637,7 @@ class KrakenController {
 
   Future<void> reloadUrl(String url) async {
     assert(!_view._disposed, 'Kraken have already disposed');
-    _bundleURL = url;
+    bundleURL = url;
     await reload();
   }
 
@@ -676,7 +676,10 @@ class KrakenController {
 
   @deprecated
   set bundlePath(String? value) {
+    if (value == null) return;
     _bundlePath = value;
+    // Set bundlePath should set the path to history module.
+    href = value;
   }
 
   @deprecated
@@ -689,6 +692,8 @@ class KrakenController {
   set bundleURL(String? value) {
     if (value == null) return;
     _bundleURL = value;
+    // Set bundleURL should set the url to history module.
+    href = value;
   }
 
   String get origin => Uri.parse(href).origin;
