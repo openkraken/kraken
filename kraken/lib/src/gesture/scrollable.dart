@@ -363,9 +363,6 @@ mixin RenderOverflowMixin on RenderBox {
     return paintOffset < Offset.zero || !(Offset.zero & size).contains((paintOffset & childSize).bottomRight);
   }
 
-  ClipRRectLayer? _oldClipRRectLayer;
-  ClipRectLayer? _oldClipRectLayer;
-
   void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, BoxDecoration? decoration, PaintingContextCallback callback) {
     if (clipX == false && clipY == false) return callback(context, offset);
     final double paintOffsetX = _paintOffsetX;
@@ -394,13 +391,11 @@ mixin RenderOverflowMixin on RenderBox {
             bottomLeft: radius.bottomLeft,
             bottomRight: radius.bottomRight
         );
-        _oldClipRRectLayer = context.pushClipRRect(_needsCompositing, offset, clipRect, clipRRect, painter, oldLayer: _oldClipRRectLayer);
+        context.pushClipRRect(_needsCompositing, offset, clipRect, clipRRect, painter);
       } else {
-        _oldClipRectLayer = context.pushClipRect(_needsCompositing, offset, clipRect, painter, oldLayer: _oldClipRectLayer);
+        context.pushClipRect(_needsCompositing, offset, clipRect, painter);
       }
     } else {
-      _oldClipRRectLayer = null;
-      _oldClipRectLayer = null;
       callback(context, offset);
     }
   }

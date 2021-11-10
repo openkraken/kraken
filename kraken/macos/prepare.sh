@@ -4,14 +4,18 @@ read_version() {
   export VERSION=${VERSION_STR:1:$END_POS}
 }
 
+ROOT=$(pwd)
+
 if [ -L "libkraken.dylib" ]; then
-  ROOT=$(pwd)
   rm libkraken.dylib
   ln -s $ROOT/../../bridge/build/macos/lib/x86_64/libkraken.dylib
 fi
 
 if [ -L "libquickjs.dylib" ]; then
-  ROOT=$(pwd)
   rm libquickjs.dylib
   ln -s $ROOT/../../bridge/build/macos/lib/x86_64/libquickjs.dylib
 fi
+
+# apply patch for flutter 2.5.x
+cd $ROOT/../
+sh ./patches/apply_patch.sh
