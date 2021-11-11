@@ -271,6 +271,9 @@ JSValue Node::copyNodeValue(QjsContext* ctx, NodeInstance* node) {
     /* copy style */
     newElement->m_style->copyWith(element->m_style);
 
+    /* copy properties */
+    ElementInstance::copyNodeProperties(newElement, element);
+
     std::string newNodeEventTargetId = std::to_string(newElement->eventTargetId);
     NativeString* args_01 = stringToNativeString(newNodeEventTargetId);
     foundation::UICommandBuffer::instance(newElement->context()->getContextId())->addCommand(element->eventTargetId, UICommand::cloneNode, *args_01, nullptr);
