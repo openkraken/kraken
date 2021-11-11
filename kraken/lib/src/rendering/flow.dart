@@ -1619,7 +1619,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       children: children as List<RenderBox>?,
       renderStyle: renderStyle,
     );
-    selfRepaintFlowLayout.sortedChildren = sortedChildren;
     return copyWith(selfRepaintFlowLayout);
   }
 

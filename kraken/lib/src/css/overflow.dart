@@ -308,9 +308,7 @@ mixin ElementOverflowMixin on ElementBase {
     if (scrollingContentBox != null) {
       return;
     }
-    // If renderBoxModel is already repaintBoundary caused by styles such as
-    // transform or position fixed.
-    element.convertToRepaintBoundary();
+
     RenderLayoutBox renderScrollingContent = element.createScrollingContentLayout();
 
     // If outer scrolling box already has children in the case of element already attached,
@@ -359,12 +357,6 @@ mixin ElementOverflowMixin on ElementBase {
     // Remove inner scrolling box
     outerLayoutBox.remove(scrollingContentBox!);
     outerLayoutBox.renderScrollingContent = null;
-
-    // If renderBoxModel not effected by transform or position fixed,
-    // convert to non repaintBoundary at last.
-    if (!element.shouldConvertToRepaintBoundary) {
-      element.convertToNonRepaintBoundary();
-    }
   }
 
   void _pointerListener(PointerEvent event) {

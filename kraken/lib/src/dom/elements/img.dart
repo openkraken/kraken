@@ -192,9 +192,7 @@ class ImageElement extends Element {
 
   // Multi frame image should convert to repaint boundary.
   @override
-  bool get shouldConvertToRepaintBoundary => _frameCount > 2 || super.shouldConvertToRepaintBoundary;
-
-  bool get shouldConvertToNonRepaintBoundary => _frameCount == 1;
+  bool get hasRepaintBoundary => _frameCount > 2 || super.hasRepaintBoundary;
 
   void _renderImageStream(ImageInfo imageInfo, bool synchronousCall) {
     _frameCount++;
@@ -213,15 +211,6 @@ class ImageElement extends Element {
     }
 
     if (isRendererAttached) {
-      // @HACK Flutter image cache will cause image steam listener to trigger twice when page reload
-      // so use two frames to tell multi frame image from static image, note this optimization will fail
-      // at multi frame image with only two frames which is not common.
-      if (shouldConvertToRepaintBoundary) {
-        convertToRepaintBoundary();
-      } else if (shouldConvertToNonRepaintBoundary) {
-        convertToNonRepaintBoundary();
-      }
-
       _resize();
       _renderImage?.image = image;
     }

@@ -499,6 +499,16 @@ class RenderLayoutBox extends RenderBoxModel
     }
     scrollableSize = Size(maxScrollableX, maxScrollableY);
   }
+
+  @override
+  T copyWith<T extends RenderBoxModel>(T copiedRenderBoxModel) {
+    if (copiedRenderBoxModel is RenderLayoutBox) {
+      copiedRenderBoxModel.sortedChildren = sortedChildren;
+      copiedRenderBoxModel.renderScrollingContent = renderScrollingContent;
+    }
+
+    return super.copyWith(copiedRenderBoxModel);
+  }
 }
 
 mixin RenderBoxModelBase on RenderBox {
