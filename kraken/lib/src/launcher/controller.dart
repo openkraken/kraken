@@ -370,10 +370,10 @@ class KrakenViewController {
 
       switch (action.navigationType) {
         case KrakenNavigationType.navigate:
-          await rootController.reloadUrl(action.target);
+          await rootController.reload(url: action.target);
           break;
         case KrakenNavigationType.reload:
-          await rootController.reloadUrl(action.source!);
+          await rootController.reload(url: action.source!);
           break;
         default:
         // Navigate and other type, do nothing.
@@ -624,6 +624,8 @@ class KrakenController {
   set href(String value) {
     HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
     historyModule.href = value;
+    // set href should new bundle.
+    bundle = KrakenBundle.fromUrl(value);
   }
 
   set bundleContent(String? value) {
@@ -649,24 +651,20 @@ class KrakenController {
   }
 
   // reload current kraken view.
-  Future<void> reload() async {
+  Future<void> reload({ String? url }) async {
+    assert(!_view._disposed, 'Kraken have already disposed');
+
     if (devToolsService != null) {
       devToolsService!.willReload();
     }
 
     await unload();
-    await loadBundle(bundleURL: href);
+    await loadBundle(bundleURL: url ?? href);
     await evalBundle();
 
     if (devToolsService != null) {
       devToolsService!.didReload();
     }
-  }
-
-  Future<void> reloadUrl(String url) async {
-    assert(!_view._disposed, 'Kraken have already disposed');
-    href = url;
-    await reload();
   }
 
   void dispose() {
@@ -716,6 +714,7 @@ class KrakenController {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_LOAD_START);
     }
 
+    // Load bundle need push curret href to history.
     if (bundlePath != null) {
       href =  bundlePath;
     } else if (bundleURL != null) {
