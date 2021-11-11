@@ -31,10 +31,10 @@ class BRElement extends Element {
   RenderBoxModel? get renderBoxModel => _renderBr;
 
   @override
-  RenderObject? get renderer => renderBoxModel;
+  RenderBox? get renderer => renderBoxModel;
 
   @override
-  RenderObject createRenderer() {
+  RenderBox createRenderer() {
     if (renderer != null) {
       return renderer!;
     }
