@@ -54,6 +54,9 @@ abstract class KrakenBundle {
 
   // Unique resource locator.
   final String url;
+
+  Uri? uri;
+
   late ByteData rawBundle;
   // JS Content in UTF-8 bytes.
   Uint8List? byteCode;
@@ -69,15 +72,16 @@ abstract class KrakenBundle {
   // Bundle contentType.
   ContentType contentType = ContentType.binary;
 
+  @mustCallSuper
   Future<void> resolve(int contextId) async {
     if (kDebugMode) {
       print('Kraken getting bundle for contextId: $contextId, url: $url');
     }
 
-    Uri uri = Uri.parse(url);
+    uri = Uri.parse(url);
     KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
     if (controller != null && !isAssetAbsolutePath(url)) {
-      uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri);
+      uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri!);
     }
   }
 
@@ -145,6 +149,7 @@ class RawBundle extends KrakenBundle {
 
   @override
   Future<void> resolve(int contextId) async {
+    super.resolve(contextId);
     isResolved = true;
   }
 }
@@ -155,6 +160,7 @@ class NetworkBundle extends KrakenBundle {
 
   @override
   Future<void> resolve(int contextId) async {
+    super.resolve(contextId);
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
     Uri baseUrl = Uri.parse(controller.href);
     NetworkAssetBundle bundle = NetworkAssetBundle(controller.uriParser!.resolve(baseUrl, Uri.parse(url)), contextId: contextId);
@@ -229,6 +235,7 @@ class AssetsBundle extends KrakenBundle {
 
   @override
   Future<KrakenBundle> resolve(int contextId) async {
+    super.resolve(contextId);
     // JSBundle get default bundle manifest.
     manifest = AppManifest();
     String localPath = url.toString();
