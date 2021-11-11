@@ -27,6 +27,7 @@ class BRElement extends Element {
     isIntrinsicBox: true,
   );
 
+  @override
   RenderBoxModel? get renderBoxModel => _renderBr;
 
   @override
