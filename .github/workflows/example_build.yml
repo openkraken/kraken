@@ -1,0 +1,47 @@
+name: example build 
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v2
+#       设置 bridge 编译环境
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - uses: jwlawson/actions-setup-cmake@v1.9
+        with:
+          cmake-version: '3.21.4'
+          
+      - run: npm i
+      - run: npm run build:bridge:all:release
+      
+#       设置 flutter 环境
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: '12'
+      - uses: subosito/flutter-action@v1
+        with:
+          flutter-version: '2.2.3'
+      - run: flutter config --enable-macos-desktop 
+      
+      - run: |
+              cd kraken/
+              flutter pub get
+              cd example/
+              flutter build apk --release
+      - run: |
+              cd kraken/example/
+              flutter build macos --release
+      - run: |
+              cd kraken/example/
+              flutter build ios --release --no-codesign
