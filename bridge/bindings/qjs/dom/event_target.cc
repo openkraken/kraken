@@ -478,11 +478,11 @@ void EventTargetInstance::gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_f
 }
 
 void EventTargetInstance::copyNodeProperties(EventTargetInstance* newNode, EventTargetInstance* referenceNode) {
-  QjsContext *ctx = referenceNode->m_ctx;
+  QjsContext* ctx = referenceNode->m_ctx;
   JSValue propKeys = objectGetKeys(ctx, referenceNode->m_properties);
   uint32_t propKeyLen = arrayGetLength(ctx, propKeys);
 
-  for (int i = 0; i < propKeyLen; i ++) {
+  for (int i = 0; i < propKeyLen; i++) {
     JSValue k = JS_GetPropertyUint32(ctx, propKeys, i);
     JSAtom kt = JS_ValueToAtom(ctx, k);
     JSValue v = JS_GetProperty(ctx, referenceNode->m_properties, kt);
