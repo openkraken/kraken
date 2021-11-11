@@ -39,7 +39,8 @@ jobs:
 #               flutter pub get
 #               cd example/
 #               flutter build apk --release
-      - run: |
+      - name: build macos
+        run: |
               cd kraken/
               flutter pub get
               cd example/
