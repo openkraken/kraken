@@ -65,7 +65,8 @@ class ScriptElement extends Element {
   void _fetchBundle(String src) async {
     if (src.isNotEmpty && isConnected) {
       try {
-        KrakenBundle bundle = await KrakenBundle.getBundle(src, contextId: elementManager.contextId);
+        KrakenBundle bundle = KrakenBundle.fromUrl(src);
+        await bundle.resolve(elementManager.contextId);
         await bundle.eval(elementManager.contextId);
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {

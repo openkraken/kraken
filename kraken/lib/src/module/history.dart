@@ -41,24 +41,24 @@ class HistoryModule extends BaseModule {
     _addItem(history);
   }
 
-  set bundleContent(String value) {
-    if (_previousStack.isEmpty) return;
+  set bundleContent(String? value) {
+    if (_previousStack.isEmpty || value == null) return;
     _previousStack.first.bundleContent = value;
   }
 
-  String get bundleContent {
-    if (_previousStack.isEmpty) return '';
-    return _previousStack.first.bundleContent!;
+  String? get bundleContent {
+    if (_previousStack.isEmpty) return null;
+    return _previousStack.first.bundleContent;
   }
 
-  set bundleByteCode(Uint8List value) {
-    if (_previousStack.isEmpty) return;
+  set bundleByteCode(Uint8List? value) {
+    if (_previousStack.isEmpty || value == null) return;
     _previousStack.first.bundleByteCode = value;
   }
 
-  Uint8List get bundleByteCode {
+  Uint8List? get bundleByteCode {
     if (_previousStack.isEmpty) return Uint8List(0);
-    return _previousStack.first.bundleByteCode!;
+    return _previousStack.first.bundleByteCode;
   }
 
   void _addItem(HistoryItem historyItem) {

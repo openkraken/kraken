@@ -53,7 +53,7 @@ abstract class KrakenBundle {
   KrakenBundle(this.url);
 
   // Unique resource locator.
-  final Uri url;
+  final String url;
   late ByteData rawBundle;
   // JS Content in UTF-8 bytes.
   Uint8List? byteCode;
@@ -69,36 +69,37 @@ abstract class KrakenBundle {
   // Bundle contentType.
   ContentType contentType = ContentType.binary;
 
-  Future<void> resolve();
-
-  static Future<KrakenBundle> getBundle(String path, { String? contentOverride, required int contextId }) async {
-    KrakenBundle bundle;
-
+  Future<void> resolve(int contextId) async {
     if (kDebugMode) {
-      print('Kraken getting bundle for contextId: $contextId, path: $path');
+      print('Kraken getting bundle for contextId: $contextId, url: $url');
     }
 
-    Uri uri = Uri.parse(path);
+    Uri uri = Uri.parse(url);
     KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
-    if (controller != null && !isAssetAbsolutePath(path)) {
+    if (controller != null && !isAssetAbsolutePath(url)) {
       uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri);
     }
-
-    if (contentOverride != null && contentOverride.isNotEmpty) {
-      bundle = RawBundle.fromString(contentOverride, uri);
-    } else if (uri.isScheme('HTTP') || uri.isScheme('HTTPS')) {
-      bundle = NetworkBundle(uri, contextId: contextId);
-    } else {
-      bundle = AssetsBundle(uri);
-    }
-
-    await bundle.resolve();
-
-    return bundle;
   }
 
+  static KrakenBundle fromUrl(String url) {
+    return NetworkBundle(url);
+  }
+
+  static KrakenBundle fromPath(String path) {
+    return AssetsBundle(path);
+  }
+
+  static KrakenBundle fromUrlWithContent(String url, String content) {
+    return RawBundle.fromString(content, url);
+  }
+
+  static KrakenBundle fromUrlWithByteCode(String url, Uint8List bytecode) {
+    return RawBundle.fromByteCode(bytecode, url);
+  }
+
+
   Future<void> eval(int contextId) async {
-    if (!isResolved) await resolve();
+    if (!isResolved) await resolve(contextId);
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_START);
@@ -132,31 +133,31 @@ abstract class KrakenBundle {
 }
 
 class RawBundle extends KrakenBundle {
-  RawBundle.fromString(String content, Uri url)
+  RawBundle.fromString(String content, String url)
       : super(url) {
     this.content = content;
   }
 
-  RawBundle.fromByteCode(Uint8List byteCode, Uri url) : super(url) {
+  RawBundle.fromByteCode(Uint8List byteCode, String url)
+      : super(url) {
     this.byteCode = byteCode;
   }
 
   @override
-  Future<void> resolve() async {
+  Future<void> resolve(int contextId) async {
     isResolved = true;
   }
 }
 
 class NetworkBundle extends KrakenBundle {
-  int contextId;
-  NetworkBundle(Uri url, { required this.contextId })
+  NetworkBundle(String url)
       : super(url);
 
   @override
-  Future<void> resolve() async {
+  Future<void> resolve(int contextId) async {
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
     Uri baseUrl = Uri.parse(controller.href);
-    NetworkAssetBundle bundle = NetworkAssetBundle(controller.uriParser!.resolve(baseUrl, url), contextId: contextId);
+    NetworkAssetBundle bundle = NetworkAssetBundle(controller.uriParser!.resolve(baseUrl, Uri.parse(url)), contextId: contextId);
     bundle.httpClient.userAgent = getKrakenInfo().userAgent;
     String absoluteURL = url.toString();
     rawBundle = await bundle.load(absoluteURL);
@@ -223,15 +224,16 @@ class NetworkAssetBundle extends AssetBundle {
 }
 
 class AssetsBundle extends KrakenBundle {
-  AssetsBundle(Uri url)
+  AssetsBundle(String url)
       : super(url);
 
   @override
-  Future<void> resolve() async {
+  Future<KrakenBundle> resolve(int contextId) async {
     // JSBundle get default bundle manifest.
     manifest = AppManifest();
     String localPath = url.toString();
     rawBundle = await rootBundle.load(localPath);
     isResolved = true;
+    return this;
   }
 }

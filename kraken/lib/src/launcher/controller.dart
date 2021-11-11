@@ -439,6 +439,8 @@ class KrakenController {
 
   WidgetDelegate? widgetDelegate;
 
+  KrakenBundle? bundle;
+
   LoadHandler? onLoad;
 
   // Error handler when load bundle failed.
@@ -482,6 +484,7 @@ class KrakenController {
     KrakenNavigationDelegate? navigationDelegate,
     KrakenMethodChannel? methodChannel,
     this.widgetDelegate,
+    this.bundle,
     this.onLoad,
     this.onLoadError,
     this.onJSError,
@@ -493,16 +496,6 @@ class KrakenController {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_PROPERTY_INIT);
       PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_INIT_START);
-    }
-
-    if (bundleURL != null) {
-      href = bundleURL;
-    } else if (bundlePath != null) {
-      href = bundlePath;
-    }
-
-    if (bundleContent != null) {
-      this.bundleContent = bundleContent;
     }
 
     _methodChannel = methodChannel;
@@ -525,6 +518,16 @@ class KrakenController {
     final int contextId = _view.contextId;
 
     _module = KrakenModuleController(this, contextId);
+
+    if (bundleURL != null) {
+      href = bundleURL;
+    } else if (bundlePath != null) {
+      href = bundlePath;
+    }
+
+    if (bundleContent != null) {
+      this.bundleContent = bundleContent;
+    }
 
     assert(!_controllerMap.containsKey(contextId),
         'found exist contextId of KrakenController, contextId: $contextId');
@@ -554,10 +557,6 @@ class KrakenController {
   KrakenModuleController get module {
     return _module;
   }
-
-  // the bundle manager which used to download javascript source and run.
-  KrakenBundle? _bundle;
-  KrakenBundle? get bundle => _bundle;
 
   Uri get referrer {
     if (bundleURL != null) {
@@ -627,22 +626,24 @@ class KrakenController {
     historyModule.href = value;
   }
 
-  set bundleContent(String value) {
+  set bundleContent(String? value) {
+    if (value == null) return;
     HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
     historyModule.bundleContent = value;
   }
 
-  String get bundleContent {
+  String? get bundleContent {
     HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
     return historyModule.bundleContent;
   }
 
-  set bundleByteCode(Uint8List value) {
+  set bundleByteCode(Uint8List? value) {
+    if (value == null) return;
     HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
     historyModule.bundleByteCode = value;
   }
 
-  Uint8List get bundleByteCode {
+  Uint8List? get bundleByteCode {
     HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
     return historyModule.bundleByteCode;
   }
@@ -720,10 +721,14 @@ class KrakenController {
     } else if (bundleURL != null) {
       this.bundleURL =  bundleURL;
     }
-    this.bundleContent = bundleContent!;
-    this.bundleByteCode = bundleByteCode!;
 
-    String? url = href.isEmpty ? (getBundleURLFromEnv() ?? getBundlePathFromEnv()) :  href;
+    if (bundleContent != null) {
+      this.bundleContent = bundleContent;
+    } else if (bundleByteCode != null) {
+      this.bundleByteCode = bundleByteCode;
+    }
+
+    String? url = href.isEmpty ? (getBundleURLFromEnv() ?? getBundlePathFromEnv()) : href;
 
     if (url == null && methodChannel is KrakenNativeChannel) {
       url = await (methodChannel as KrakenNativeChannel).getUrl();
@@ -732,12 +737,12 @@ class KrakenController {
     url = url ?? '';
     if (onLoadError != null) {
       try {
-        _bundle = await KrakenBundle.getBundle(url, contentOverride: this.bundleContent, contextId: view.contextId);
+        await bundle?.resolve(view.contextId);
       } catch (e, stack) {
         onLoadError!(FlutterError(e.toString()), stack);
       }
     } else {
-      _bundle = await KrakenBundle.getBundle(url, contentOverride: this.bundleContent, contextId: view.contextId);
+      await bundle?.resolve(view.contextId);
     }
 
     if (kProfileMode) {
@@ -748,8 +753,8 @@ class KrakenController {
   // execute preloaded javascript source
   Future<void> evalBundle() async {
     assert(!_view._disposed, 'Kraken have already disposed');
-    if (_bundle != null) {
-      await _bundle!.eval(_view.contextId);
+    if (bundle != null) {
+      await bundle!.eval(_view.contextId);
       // trigger DOMContentLoaded event
       module.requestAnimationFrame((_) {
         Event event = Event(EVENT_DOM_CONTENT_LOADED);

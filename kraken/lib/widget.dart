@@ -164,17 +164,8 @@ class Kraken extends StatefulWidget {
   // the height of krakenWidget
   final double? viewportHeight;
 
-  // The initial URL to load.
-  final String? bundleURL;
-
-  // The initial assets path to load.
-  final String? bundlePath;
-
-  // The initial raw javascript content to load.
-  final String? bundleContent;
-
-  // The initial raw bytecode to load.
-  final Uint8List? bundleByteCode;
+  //  The initial bundle to load.
+  final KrakenBundle? bundle;
 
   // The animationController of Flutter Route object.
   // Pass this object to KrakenWidget to make sure Kraken execute JavaScripts scripts after route transition animation completed.
@@ -273,10 +264,7 @@ class Kraken extends StatefulWidget {
     Key? key,
     this.viewportWidth,
     this.viewportHeight,
-    this.bundleURL,
-    this.bundlePath,
-    this.bundleContent,
-    this.bundleByteCode,
+    this.bundle,
     this.onLoad,
     this.navigationDelegate,
     this.javaScriptChannel,
@@ -836,9 +824,7 @@ This situation often happened when you trying creating kraken when FlutterView n
       viewportHeight,
       background: _krakenWidget.background,
       showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
-      bundleContent: _krakenWidget.bundleContent,
-      bundleURL: _krakenWidget.bundleURL,
-      bundlePath: _krakenWidget.bundlePath,
+      bundle: _krakenWidget.bundle,
       onLoad: _krakenWidget.onLoad,
       onLoadError: _krakenWidget.onLoadError,
       onJSError: _krakenWidget.onJSError,
@@ -913,7 +899,7 @@ class _KrakenRenderObjectElement extends SingleChildRenderObjectElement {
 
     KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller!;
 
-    if (controller.bundleContent == '' && controller.bundleByteCode == Uint8List(0) && controller.href == '') {
+    if (controller.bundleContent == null && controller.bundleByteCode == null && controller.href.isEmpty) {
       return;
     }
 
