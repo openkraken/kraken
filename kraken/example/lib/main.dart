@@ -92,7 +92,7 @@ class _MyHomePageState extends State<MyBrowser> {
           devToolsService: ChromeDevToolsService(),
           viewportWidth: viewportSize.width - queryData.padding.horizontal,
           viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
-          bundleURL: 'assets/bundle.js',
+          bundle: KrakenBundle.fromPath('assets/bundle.js'),
         ),
     ));
   }
