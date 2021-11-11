@@ -471,6 +471,24 @@ void EventTargetInstance::gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_f
     JS_MarkValue(rt, m_properties, mark_func);
 }
 
+void EventTargetInstance::copyNodeProperties(EventTargetInstance* newNode, EventTargetInstance* referenceNode) {
+  QjsContext *ctx = referenceNode->m_ctx;
+  JSValue propKeys = objectGetKeys(ctx, referenceNode->m_properties);
+  uint32_t propKeyLen = arrayGetLength(ctx, propKeys);
+
+  for (int i = 0; i < propKeyLen; i ++) {
+    JSValue k = JS_GetPropertyUint32(ctx, propKeys, i);
+    JSAtom kt = JS_ValueToAtom(ctx, k);
+    JSValue v = JS_GetProperty(ctx, referenceNode->m_properties, kt);
+    JS_SetProperty(ctx, newNode->m_properties, kt, v);
+
+    JS_FreeAtom(ctx, kt);
+    JS_FreeValue(ctx, k);
+  }
+
+  JS_FreeValue(ctx, propKeys);
+}
+
 void NativeEventTarget::dispatchEventImpl(NativeEventTarget* nativeEventTarget, NativeString* nativeEventType, void* rawEvent, int32_t isCustomEvent) {
   assert_m(nativeEventTarget->instance != nullptr, "NativeEventTarget should have owner");
   EventTargetInstance* eventTargetInstance = nativeEventTarget->instance;
