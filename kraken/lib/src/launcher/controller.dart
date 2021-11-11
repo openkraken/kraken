@@ -559,10 +559,10 @@ class KrakenController {
   }
 
   Uri get referrer {
-    if (bundleURL != null) {
-      return Uri.parse(bundleURL!);
-    } else if (bundlePath != null) {
-      return Directory(bundlePath!).uri;
+    if (bundle is NetworkBundle) {
+      return Uri.parse(href);
+    } else if (bundle is AssetsBundle) {
+      return Directory(href).uri;
     } else {
       return fallbackBundleUri(_view.contextId);
     }
@@ -665,7 +665,7 @@ class KrakenController {
 
   Future<void> reloadUrl(String url) async {
     assert(!_view._disposed, 'Kraken have already disposed');
-    bundleURL = url;
+    href = url;
     await reload();
   }
 
@@ -717,9 +717,9 @@ class KrakenController {
     }
 
     if (bundlePath != null) {
-      this.bundlePath =  bundlePath;
+      href =  bundlePath;
     } else if (bundleURL != null) {
-      this.bundleURL =  bundleURL;
+      href =  bundleURL;
     }
 
     if (bundleContent != null) {
