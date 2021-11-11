@@ -812,19 +812,6 @@ class Element extends Node
     _updateRenderBoxModel();
   }
 
-  void _attachChildRenderBoxModel(RenderBox? parentRenderBox, RenderBoxModel? currentRenderBox) {
-    if (parentRenderBox is RenderViewportBox) {
-      parentRenderBox.child = currentRenderBox;
-    } else if (parentRenderBox is RenderLayoutBox) {
-      if (currentRenderBox != null) {
-        Node? previousSibling = this.previousSibling;
-        RenderObject? previous = previousSibling?.renderer;
-        parentRenderBox = parentRenderBox.renderScrollingContent ?? parentRenderBox;
-        parentRenderBox.insert(currentRenderBox, after: previous as RenderBox?);
-      }
-    }
-  }
-
   void _detachRenderBoxModel(RenderBoxModel renderBox) {
     if (renderBox.parent == null) return;
 
