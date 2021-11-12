@@ -13,6 +13,7 @@ import 'package:kraken/gesture.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/src/dom/sliver_manager.dart';
 
 import 'debug_overlay.dart';
 
@@ -137,7 +138,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox,
   /// This function is useful when you need random-access to the children of
   /// this render object. If you're accessing the children in order, consider
   /// walking the child list directly.
-  List<ChildType> getChildrenAsList() {
+  List<ChildType> getChildren() {
     final List<ChildType> result = <ChildType>[];
     RenderBox? child = firstChild;
     while (child != null) {
@@ -219,7 +220,7 @@ class RenderLayoutBox extends RenderBoxModel
 
   // Insert child in sortedChildren.
   void insertChildIntoSortedChildren(RenderBox child, {RenderBox? after}) {
-    List<RenderObject> children = getChildrenAsList();
+    List<RenderObject> children = getChildren();
 
     // No need to paint position holder.
     if (child is RenderPositionPlaceholder) {
@@ -273,8 +274,8 @@ class RenderLayoutBox extends RenderBoxModel
   }
 
   // Get all children as a list and detach them all.
-  List<RenderObject> getDetachedChildrenAsList() {
-    List<RenderObject> children = getChildrenAsList();
+  List<RenderBox> detachChildren() {
+    List<RenderBox> children = getChildren();
     removeAll();
     return children;
   }
@@ -508,6 +509,58 @@ class RenderLayoutBox extends RenderBoxModel
     }
 
     return super.copyWith(copiedRenderBoxModel);
+  }
+
+  /// Convert to [RenderFlexLayout]
+  RenderFlexLayout toFlexLayout() {
+    RenderFlexLayout flexLayout = RenderFlexLayout(
+      renderStyle: renderStyle,
+    );
+    copyWith(flexLayout);
+    flexLayout.addAll(detachChildren());
+    return flexLayout;
+  }
+
+  /// Convert to [RenderRepaintBoundaryFlexLayout]
+  RenderRepaintBoundaryFlexLayout toRepaintBoundaryFlexLayout() {
+    RenderRepaintBoundaryFlexLayout repaintBoundaryFlexLayout = RenderRepaintBoundaryFlexLayout(
+      renderStyle: renderStyle,
+    );
+    copyWith(repaintBoundaryFlexLayout);
+    repaintBoundaryFlexLayout.addAll(detachChildren());
+    return repaintBoundaryFlexLayout;
+  }
+
+  /// Convert to [RenderFlowLayout]
+  RenderFlowLayout toFlowLayout() {
+    RenderFlowLayout flowLayout = RenderFlowLayout(
+      renderStyle: renderStyle,
+    );
+    copyWith(flowLayout);
+    flowLayout.addAll(detachChildren());
+    return flowLayout;
+  }
+
+  /// Convert to [RenderRepaintBoundaryFlowLayout]
+  RenderRepaintBoundaryFlowLayout toRepaintBoundaryFlowLayout() {
+    RenderRepaintBoundaryFlowLayout repaintBoundaryFlowLayout = RenderRepaintBoundaryFlowLayout(
+      renderStyle: renderStyle,
+    );
+    copyWith(repaintBoundaryFlowLayout);
+    repaintBoundaryFlowLayout.addAll(detachChildren());
+    return repaintBoundaryFlowLayout;
+  }
+
+  RenderSliverListLayout toSliverLayout(RenderSliverElementChildManager manager, ScrollListener? onScroll) {
+    RenderSliverListLayout sliverListLayout = RenderSliverListLayout(
+      renderStyle: renderStyle,
+      manager: manager,
+      onScroll: onScroll,
+    );
+    manager.setupSliverListLayout(sliverListLayout);
+    copyWith(sliverListLayout);
+    sliverListLayout.addAll(detachChildren());
+    return sliverListLayout;
   }
 }
 

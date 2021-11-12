@@ -11,7 +11,7 @@ import 'package:kraken/dom.dart';
 /// An implementation of [RenderSliverBoxChildManager] for sliver,
 /// manage element to implement lifecycles for sliver list, generate
 /// renderer from existing element tree.
-class ElementSliverBoxChildManager implements RenderSliverBoxChildManager {
+class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
   final Element _target;
   late RenderSliverListLayout _sliverListLayout;
 
@@ -23,12 +23,12 @@ class ElementSliverBoxChildManager implements RenderSliverBoxChildManager {
   int _currentIndex = -1;
 
   bool _hasLayout = false;
-  void setupSliverLayoutLayout(RenderSliverListLayout layout) {
+  void setupSliverListLayout(RenderSliverListLayout layout) {
     _sliverListLayout = layout;
     _hasLayout = true;
   }
 
-  ElementSliverBoxChildManager(this._target);
+  RenderSliverElementChildManager(this._target);
 
   Iterable<Node> get _renderNodes => _target.childNodes.where((child) => child is Element || child is TextNode);
 

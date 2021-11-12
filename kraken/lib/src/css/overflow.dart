@@ -308,26 +308,21 @@ mixin ElementOverflowMixin on ElementBase {
     }
 
     Element element = this as Element;
-    RenderLayoutBox renderScrollingContent = element.createScrollingContentLayout();
-
     // If outer scrolling box already has children in the case of element already attached,
     // move them into the children of inner scrolling box.
     RenderLayoutBox outerLayoutBox = renderBoxModel as RenderLayoutBox;
-    List<RenderBox> children = [];
-    outerLayoutBox.visitChildren((child) {
-      children.add(child as RenderBox);
-    });
-    if (children.isNotEmpty) {
-      for (RenderBox child in children) {
-        outerLayoutBox.remove(child);
-        renderScrollingContent.insert(child);
-      }
-    }
+    List<RenderBox> sortedChildren = outerLayoutBox.sortedChildren;
+    List<RenderBox> children = outerLayoutBox.detachChildren();
+
+    RenderLayoutBox renderScrollingContent = element.createScrollingContentLayout();
+    renderScrollingContent.addAll(children);
+    // FIXME(yuanyan): should not need copy sortedChildren state.
+    renderScrollingContent.sortedChildren = sortedChildren;
 
     outerLayoutBox.add(renderScrollingContent);
     outerLayoutBox.renderScrollingContent = renderScrollingContent;
-
     element.style.addStyleChangeListener(scrollingContentBoxStyleListener);
+
     // Manually copy already set filtered styles to the renderStyle of scrollingContentLayoutBox.
     _scrollingContentBoxCopyStyles.forEach((String styleProperty) {
       scrollingContentBoxStyleListener(styleProperty, null, '');
@@ -339,22 +334,16 @@ mixin ElementOverflowMixin on ElementBase {
     Element element = this as Element;
 
     RenderLayoutBox outerLayoutBox = element.renderBoxModel as RenderLayoutBox;
-    // Move children of inner scrolling box to the children of outer scrolling box
-    List<RenderBox> children = [];
-    scrollingContentBox!.visitChildren((child) {
-      children.add(child as RenderBox);
-    });
-    if (children.isNotEmpty) {
-      for (RenderBox child in children) {
-        scrollingContentBox!.remove(child);
-        outerLayoutBox.insert(child);
-      }
-    }
-    element.style.removeStyleChangeListener(scrollingContentBoxStyleListener);
-
-    // Remove inner scrolling box
+    List<RenderBox> sortedChildren = scrollingContentBox!.sortedChildren;
+    List<RenderBox> children = scrollingContentBox!.detachChildren();
+    // Remove scrolling content box.
     outerLayoutBox.remove(scrollingContentBox!);
     outerLayoutBox.renderScrollingContent = null;
+    // FIXME(yuanyan): should not need copy sortedChildren state.
+    outerLayoutBox.sortedChildren = sortedChildren;
+    element.style.removeStyleChangeListener(scrollingContentBoxStyleListener);
+    // Move children of scrolling content box to the children to outer layout box.
+    outerLayoutBox.addAll(children);
   }
 
   void _pointerListener(PointerEvent event) {
