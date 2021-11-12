@@ -569,7 +569,7 @@ class Element extends Node
 
     if (renderStyle.display != CSSDisplay.none) {
       willAttachRenderer();
-      
+
       // HTML element override attachTo method to attach renderObject to viewportBox.
       if (parent is Element) {
         RenderLayoutBox? parentRenderLayoutBox = parentElement?._renderLayoutBox?.renderScrollingContent ?? parentElement?._renderLayoutBox;
@@ -727,7 +727,7 @@ class Element extends Node
       case CSSPositionType.absolute:
         // If the element has 'position: absolute', the containing block is established by the nearest ancestor with
         // a 'position' of 'absolute', 'relative' or 'fixed', in the following way:
-        //  1. In the case that the ancestor is an inline element, the containing block is the bounding box around 
+        //  1. In the case that the ancestor is an inline element, the containing block is the bounding box around
         //    the padding boxes of the first and the last inline boxes generated for that element.
         //    In CSS 2.1, if the inline element is split across multiple lines, the containing block is undefined.
         //  2. Otherwise, the containing block is formed by the padding edge of the ancestor.
@@ -822,11 +822,12 @@ class Element extends Node
   void _detachRenderBoxModel(RenderBoxModel renderBox) {
     if (renderBox.parent == null) return;
 
-    RenderBox? parentRenderBox = renderBox.parent as RenderBox;
-    if (parentRenderBox is RenderViewportBox) {
-      parentRenderBox.child = null;
-    } else if (parentRenderBox is RenderLayoutBox) {
-      parentRenderBox.remove(renderBox);
+    RenderObject? parentRenderObject = renderBox.parent as RenderObject;
+
+    if (parentRenderObject is RenderObjectWithChildMixin) {
+      parentRenderObject.child = null; // RenderViewportBox
+    } else if (parentRenderObject is ContainerRenderObjectMixin) {
+      parentRenderObject.remove(renderBox); // RenderLayoutBox or RenderSliverList
     }
   }
 
