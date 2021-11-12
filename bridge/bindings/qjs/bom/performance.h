@@ -122,7 +122,7 @@
 #endif
 
 #include "bindings/qjs/host_object.h"
-
+#include <cstring>
 namespace kraken::binding::qjs {
 
 void bindPerformance(std::unique_ptr<JSContext>& context);

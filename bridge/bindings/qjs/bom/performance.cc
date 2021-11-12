@@ -6,7 +6,7 @@
 #include "performance.h"
 #include <chrono>
 #include "dart_methods.h"
-
+#include <cmath>
 #define PERFORMANCE_ENTRY_NONE_UNIQUE_ID -1024
 
 namespace kraken::binding::qjs {

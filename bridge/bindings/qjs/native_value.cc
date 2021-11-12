@@ -9,7 +9,7 @@
 #include "dom/element.h"
 #include "dom/elements/.gen/canvas_element.h"
 #include "kraken_bridge.h"
-
+#include <cstring>
 namespace kraken::binding::qjs {
 
 #define AnonymousFunctionCallPreFix "_anonymous_fn_"

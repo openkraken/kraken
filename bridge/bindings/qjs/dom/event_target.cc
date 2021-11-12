@@ -4,7 +4,7 @@
  */
 
 #include "event_target.h"
-
+#include <cstring>
 #include <utility>
 #include "bindings/qjs/bom/window.h"
 #include "bindings/qjs/dom/text_node.h"

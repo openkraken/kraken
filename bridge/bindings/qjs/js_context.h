@@ -13,7 +13,8 @@
 #include "js_context_macros.h"
 #include "kraken_foundation.h"
 #include "qjs_patch.h"
-
+#include <mutex>
+#include <functional>
 using QjsContext = JSContext;
 using JSExceptionHandler = std::function<void(int32_t contextId, const char* message)>;
 
