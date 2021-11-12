@@ -54,7 +54,6 @@ enum UICommand {
   createElement,
   createTextNode,
   createComment,
-  disposeEventTarget,
   addEvent,
   removeNode,
   insertAdjacentNode,

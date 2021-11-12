@@ -297,7 +297,9 @@ JSClassID EventTargetInstance::classId() {
 }
 
 EventTargetInstance::~EventTargetInstance() {
-  foundation::UICommandBuffer::instance(m_contextId)->addCommand(eventTargetId, UICommand::disposeEventTarget, nullptr, false);
+  getDartMethod()->flushUICommand();
+  callNativeMethods("dispose", 0, nullptr);
+
   JS_FreeValue(m_ctx, m_properties);
   JS_FreeValue(m_ctx, m_eventHandlers);
   JS_FreeValue(m_ctx, m_propertyEventHandler);
