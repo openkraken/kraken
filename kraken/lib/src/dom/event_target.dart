@@ -147,6 +147,7 @@ abstract class EventTarget {
 
   @mustCallSuper
   void dispose() {
+    print('dispose event target $nativeEventTargetPtr');
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_START, uniqueId: targetId);
     }
