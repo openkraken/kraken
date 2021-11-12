@@ -119,7 +119,6 @@ mixin ElementOverflowMixin on ElementBase {
   }
 
   void updateRenderBoxModelWithOverflowX(ScrollListener scrollListener) {
-    Element element = this as Element;
     if (renderBoxModel is RenderSliverListLayout) {
       RenderSliverListLayout renderBoxModel = this.renderBoxModel as RenderSliverListLayout;
       // Recycler layout not need repaintBoundary and scroll/pointer listeners,
@@ -165,16 +164,15 @@ mixin ElementOverflowMixin on ElementBase {
 
       if (renderBoxModel is RenderLayoutBox) {
         if (shouldScrolling) {
-          _attachScrollingContentBox(element);
+          _attachScrollingContentBox();
         } else {
-          _detachScrollingContentBox(element);
+          _detachScrollingContentBox();
         }
       }
     }
   }
 
   void updateRenderBoxModelWithOverflowY(ScrollListener scrollListener) {
-    Element element = this as Element;
     if (renderBoxModel is RenderSliverListLayout) {
       RenderSliverListLayout renderBoxModel = this.renderBoxModel as RenderSliverListLayout;
       // Recycler layout not need repaintBoundary and scroll/pointer listeners,
@@ -218,9 +216,9 @@ mixin ElementOverflowMixin on ElementBase {
 
       if (renderBoxModel is RenderLayoutBox) {
         if (shouldScrolling) {
-          _attachScrollingContentBox(element);
+          _attachScrollingContentBox();
         } else {
-          _detachScrollingContentBox(element);
+          _detachScrollingContentBox();
         }
       }
     }
@@ -304,16 +302,17 @@ mixin ElementOverflowMixin on ElementBase {
   // Create two repaintBoundary for an overflow scroll container.
   // Outer repaintBoundary avoid repaint of parent and sibling renderObjects when scrolling.
   // Inner repaintBoundary avoid repaint of child renderObjects when scrolling.
-  void _attachScrollingContentBox(Element element) {
+  void _attachScrollingContentBox() {
     if (scrollingContentBox != null) {
       return;
     }
 
+    Element element = this as Element;
     RenderLayoutBox renderScrollingContent = element.createScrollingContentLayout();
 
     // If outer scrolling box already has children in the case of element already attached,
     // move them into the children of inner scrolling box.
-    RenderLayoutBox outerLayoutBox = element.renderBoxModel as RenderLayoutBox;
+    RenderLayoutBox outerLayoutBox = renderBoxModel as RenderLayoutBox;
     List<RenderBox> children = [];
     outerLayoutBox.visitChildren((child) {
       children.add(child as RenderBox);
@@ -330,15 +329,14 @@ mixin ElementOverflowMixin on ElementBase {
 
     element.style.addStyleChangeListener(scrollingContentBoxStyleListener);
     // Manually copy already set filtered styles to the renderStyle of scrollingContentLayoutBox.
-    if (outerLayoutBox.attached) {
-      _scrollingContentBoxCopyStyles.forEach((String styleProperty) {
-        scrollingContentBoxStyleListener(styleProperty, null, '');
-      });
-    }
+    _scrollingContentBoxCopyStyles.forEach((String styleProperty) {
+      scrollingContentBoxStyleListener(styleProperty, null, '');
+    });
   }
 
-  void _detachScrollingContentBox(Element element) {
+  void _detachScrollingContentBox() {
     if (scrollingContentBox == null) return;
+    Element element = this as Element;
 
     RenderLayoutBox outerLayoutBox = element.renderBoxModel as RenderLayoutBox;
     // Move children of inner scrolling box to the children of outer scrolling box
