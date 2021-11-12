@@ -297,8 +297,10 @@ JSClassID EventTargetInstance::classId() {
 }
 
 EventTargetInstance::~EventTargetInstance() {
+#if FLUTTER_BACKEND
   getDartMethod()->flushUICommand();
   callNativeMethods("dispose", 0, nullptr);
+#endif
 
   JS_FreeValue(m_ctx, m_properties);
   JS_FreeValue(m_ctx, m_eventHandlers);
