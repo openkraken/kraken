@@ -222,13 +222,13 @@ class RenderLayoutBox extends RenderBoxModel
     List<RenderObject> children = getChildrenAsList();
 
     // No need to paint position holder.
-    if (child is RenderPositionHolder) {
+    if (child is RenderPositionPlaceholder) {
       return;
     }
     // Find the real renderBox of position holder to insert cause the position holder may be
     // moved before its real renderBox which will cause the insert order wrong.
-    if (after is RenderPositionHolder && sortedChildren.contains(after.realDisplayedBox)) {
-      after = after.realDisplayedBox;
+    if (after is RenderPositionPlaceholder && sortedChildren.contains(after.positioned)) {
+      after = after.positioned;
     }
 
     // Original index to insert into ignoring zIndex.
@@ -534,7 +534,7 @@ class RenderBoxModel extends RenderBox
   @override
   bool get alwaysNeedsCompositing => opacityAlwaysNeedsCompositing();
 
-  RenderPositionHolder? renderPositionHolder;
+  RenderPositionPlaceholder? renderPositionPlaceholder;
 
   bool _debugShouldPaintOverlay = false;
 
@@ -629,11 +629,11 @@ class RenderBoxModel extends RenderBox
   StickyPositionType stickyStatus = StickyPositionType.relative;
 
   // Positioned holder box ref.
-  RenderPositionHolder? positionedHolder;
+  RenderPositionPlaceholder? positionedHolder;
 
   T copyWith<T extends RenderBoxModel>(T copiedRenderBoxModel) {
-    if (renderPositionHolder != null) {
-      renderPositionHolder!.realDisplayedBox = copiedRenderBoxModel;
+    if (renderPositionPlaceholder != null) {
+      renderPositionPlaceholder!.positioned = copiedRenderBoxModel;
     }
 
     return copiedRenderBoxModel
@@ -665,7 +665,7 @@ class RenderBoxModel extends RenderBox
       ..onPointerSignal = onPointerSignal
 
       // Copy renderPositionHolder
-      ..renderPositionHolder = renderPositionHolder
+      ..renderPositionPlaceholder = renderPositionPlaceholder
 
       // Copy parentData
       ..parentData = parentData;
@@ -1417,9 +1417,9 @@ class RenderBoxModel extends RenderBox
     properties.add(DiagnosticsProperty('maxScrollableSize', scrollableSize,
         missingIfNull: true));
 
-    if (renderPositionHolder != null)
+    if (renderPositionPlaceholder != null)
       properties.add(
-          DiagnosticsProperty('renderPositionHolder', renderPositionHolder));
+          DiagnosticsProperty('renderPositionHolder', renderPositionPlaceholder));
     if (intrinsicWidth != null)
       properties.add(DiagnosticsProperty('intrinsicWidth', intrinsicWidth));
     if (intrinsicHeight != null)

@@ -377,8 +377,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       lineHeight = renderStyle.lineHeight;
     } else if (child is RenderBoxModel) {
       lineHeight = child.renderStyle.lineHeight;
-    } else if (child is RenderPositionHolder) {
-      lineHeight = child.realDisplayedBox!.renderStyle.lineHeight;
+    } else if (child is RenderPositionPlaceholder) {
+      lineHeight = child.positioned!.renderStyle.lineHeight;
     }
 
     if (lineHeight != null && lineHeight.type != CSSLengthType.NORMAL) {
@@ -592,9 +592,9 @@ class RenderFlowLayout extends RenderLayoutBox {
       double childMainAxisExtent = _getMainAxisExtent(child);
       double childCrossAxisExtent = _getCrossAxisExtent(child);
 
-      if (isPositionHolder(child)) {
-        RenderPositionHolder positionHolder = child as RenderPositionHolder;
-        RenderBoxModel? childRenderBoxModel = positionHolder.realDisplayedBox;
+      if (isPositionPlaceholder(child)) {
+        RenderPositionPlaceholder positionHolder = child as RenderPositionPlaceholder;
+        RenderBoxModel? childRenderBoxModel = positionHolder.positioned;
         if (childRenderBoxModel != null) {
           RenderLayoutParentData childParentData =
               childRenderBoxModel.parentData as RenderLayoutParentData;
@@ -857,7 +857,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
         // Always align to the top of run when positioning positioned element placeholder
         // @HACK(kraken): Judge positioned holder to impl top align.
-        final double childCrossAxisOffset = isPositionHolder(child)
+        final double childCrossAxisOffset = isPositionPlaceholder(child)
             ? 0
             : _getChildCrossAxisOffset(
                 flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
@@ -1248,7 +1248,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   Size? _getChildSize(RenderBox child) {
     if (child is RenderBoxModel) {
       return child.boxSize;
-    } else if (child is RenderPositionHolder) {
+    } else if (child is RenderPositionPlaceholder) {
       return child.boxSize;
     } else if (child is RenderTextBox) {
       return child.boxSize;
@@ -1275,8 +1275,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       childRenderStyle = renderStyle;
     } else if (child is RenderBoxModel) {
       childRenderStyle = child.renderStyle;
-    } else if (child is RenderPositionHolder) {
-      childRenderStyle = child.realDisplayedBox!.renderStyle;
+    } else if (child is RenderPositionPlaceholder) {
+      childRenderStyle = child.positioned!.renderStyle;
     }
     return childRenderStyle;
   }
@@ -1580,7 +1580,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   void performPaint(PaintingContext context, Offset offset) {
     for (int i = 0; i < sortedChildren.length; i++) {
       RenderObject child = sortedChildren[i];
-      if (child is! RenderPositionHolder) {
+      if (child is! RenderPositionPlaceholder) {
         late DateTime childPaintStart;
         if (kProfileMode) {
           childPaintStart = DateTime.now();

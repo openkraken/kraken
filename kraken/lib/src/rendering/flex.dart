@@ -405,7 +405,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   double _getFlexGrow(RenderBox child) {
     // Flex shrink has no effect on placeholder of positioned element
-    if (child is RenderPositionHolder) {
+    if (child is RenderPositionPlaceholder) {
       return 0;
     }
     return child is RenderBoxModel ? child.renderStyle.flexGrow : 0.0;
@@ -413,7 +413,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   double _getFlexShrink(RenderBox child) {
     // Flex shrink has no effect on placeholder of positioned element
-    if (child is RenderPositionHolder) {
+    if (child is RenderPositionPlaceholder) {
       return 0;
     }
     return child is RenderBoxModel ? child.renderStyle.flexShrink : 0.0;
@@ -428,7 +428,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   AlignSelf _getAlignSelf(RenderBox child) {
     // Flex shrink has no effect on placeholder of positioned element
-    if (child is RenderPositionHolder) {
+    if (child is RenderPositionPlaceholder) {
       return AlignSelf.auto;
     }
     return child is RenderBoxModel
@@ -546,10 +546,10 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderBoxModel? childRenderBoxModel;
     if (child is RenderBoxModel) {
       childRenderBoxModel = child;
-    } else if (child is RenderPositionHolder) {
+    } else if (child is RenderPositionPlaceholder) {
       // Position placeholder of flex item need to layout as its original renderBox
       // so it needs to add margin to its extent
-      childRenderBoxModel = child.realDisplayedBox;
+      childRenderBoxModel = child.positioned;
     }
 
     if (childRenderBoxModel != null) {
@@ -586,10 +586,10 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderBoxModel? childRenderBoxModel;
     if (child is RenderBoxModel) {
       childRenderBoxModel = child;
-    } else if (child is RenderPositionHolder) {
+    } else if (child is RenderPositionPlaceholder) {
       // Position placeholder of flex item need to layout as its original renderBox
       // so it needs to add margin to its extent
-      childRenderBoxModel = child.realDisplayedBox;
+      childRenderBoxModel = child.positioned;
     }
 
     if (childRenderBoxModel != null) {
@@ -653,7 +653,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       // Layout placeholder of positioned element(absolute/fixed) in new layer
       if (child is RenderBoxModel && childParentData.isPositioned) {
         CSSPositionedLayout.layoutPositionedChild(this, child);
-      } else if (child is RenderPositionHolder && isPlaceholderPositioned(child)) {
+      } else if (child is RenderPositionPlaceholder && isPlaceholderPositioned(child)) {
         _layoutChildren(child);
       }
 
@@ -704,8 +704,8 @@ class RenderFlexLayout extends RenderLayoutBox {
 
 
   bool isPlaceholderPositioned(RenderObject child) {
-    if (child is RenderPositionHolder) {
-      RenderBoxModel realDisplayedBox = child.realDisplayedBox!;
+    if (child is RenderPositionPlaceholder) {
+      RenderBoxModel realDisplayedBox = child.positioned!;
       RenderLayoutParentData parentData =
           realDisplayedBox.parentData as RenderLayoutParentData;
       if (parentData.isPositioned) {
@@ -720,7 +720,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   /// 2. Relayout children according to flex-grow and flex-shrink factor
   /// 3. Set flex container size according to children size
   /// 4. Align children according to justify-content, align-items and align-self properties
-  void _layoutChildren(RenderPositionHolder? placeholderChild) {
+  void _layoutChildren(RenderPositionPlaceholder? placeholderChild) {
     /// If no child exists, stop layout.
     if (childCount == 0) {
       Size layoutSize = getLayoutSize(
@@ -861,7 +861,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   /// 1. Layout children in flow order to calculate flex lines according to its constaints and flex-wrap property
   void _layoutByFlexLine(
     List<_RunMetrics> runMetrics,
-    RenderPositionHolder? placeholderChild,
+    RenderPositionPlaceholder? placeholderChild,
     Map<String, double?> containerSizeMap,
   ) {
     double mainAxisExtent = 0.0;
@@ -913,8 +913,8 @@ class RenderFlexLayout extends RenderLayoutBox {
         childNodeId = child.hashCode;
       }
 
-      if (child is RenderPositionHolder && isPlaceholderPositioned(child)) {
-        RenderBoxModel realDisplayedBox = child.realDisplayedBox!;
+      if (child is RenderPositionPlaceholder && isPlaceholderPositioned(child)) {
+        RenderBoxModel realDisplayedBox = child.positioned!;
         // Flutter only allow access size of direct children, so cannot use realDisplayedBox.size
         Size realDisplayedBoxSize =
             realDisplayedBox.getBoxSize(realDisplayedBox.contentSize);
@@ -1234,7 +1234,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   void _relayoutByFlexFactor(
     List<_RunMetrics> runMetrics,
     double runBetweenSpace,
-    RenderPositionHolder? placeholderChild,
+    RenderPositionPlaceholder? placeholderChild,
     Map<String, double?> containerSizeMap,
   ) {
     RenderBox? child = placeholderChild ?? firstChild;
@@ -1869,7 +1869,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     List<_RunMetrics> runMetrics,
     double runBetweenSpace,
     double runLeadingSpace,
-    RenderPositionHolder? placeholderChild,
+    RenderPositionPlaceholder? placeholderChild,
   ) {
     RenderBox? child = placeholderChild ?? firstChild;
     // Cross axis offset of each flex line
@@ -2328,7 +2328,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     Size? childSize;
     if (child is RenderBoxModel) {
       childSize = child.boxSize;
-    } else if (child is RenderPositionHolder) {
+    } else if (child is RenderPositionPlaceholder) {
       childSize = child.boxSize;
     } else if (child is RenderTextBox) {
       childSize = child.boxSize;
@@ -2391,8 +2391,8 @@ class RenderFlexLayout extends RenderLayoutBox {
       lineHeight = renderStyle.lineHeight;
     } else if (child is RenderBoxModel) {
       lineHeight = child.renderStyle.lineHeight;
-    } else if (child is RenderPositionHolder) {
-      lineHeight = child.realDisplayedBox!.renderStyle.lineHeight;
+    } else if (child is RenderPositionPlaceholder) {
+      lineHeight = child.positioned!.renderStyle.lineHeight;
     }
 
     if (lineHeight != null && lineHeight.type != CSSLengthType.NORMAL) {
@@ -2453,7 +2453,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     for (int i = 0; i < sortedChildren.length; i++) {
       RenderObject child = sortedChildren[i];
       // Don't paint placeholder of positioned element
-      if (child is! RenderPositionHolder) {
+      if (child is! RenderPositionPlaceholder) {
         late DateTime childPaintStart;
         if (kProfileMode) {
           childPaintStart = DateTime.now();
