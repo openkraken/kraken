@@ -31,9 +31,6 @@ class Comment extends Node {
   String get data => '';
 
   int get length => data.length;
-
-  @override
-  dynamic handleJSCall(String method, List<dynamic> argv) {}
 }
 
 /// [RenderObjectNode] provide the renderObject related abstract life cycle for
@@ -167,9 +164,6 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
     }
     childNodes.clear();
   }
-
-  @override
-  handleJSCall(String method, List<dynamic> argv) {}
 
   @override
   RenderBox createRenderer() => throw FlutterError('[createRenderer] is not implemented.');

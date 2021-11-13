@@ -81,9 +81,6 @@ class TextNode extends Node {
   @override
   RenderBox? get renderer => _renderTextBox;
 
-  @override
-  handleJSCall(String method, List argv) {}
-
   void _applyTextStyle() {
     if (isRendererAttached) {
       Element _parentElement = parentElement!;

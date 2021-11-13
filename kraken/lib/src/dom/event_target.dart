@@ -155,12 +155,14 @@ abstract class EventTarget {
     return eventHandlers;
   }
 
+  @mustCallSuper
   dynamic handleJSCall(String method, List<dynamic> argv) {
     if (method == 'dispose') dispose();
   }
 
   @mustCallSuper
   void dispose() {
+    print('dispose event target $nativeEventTargetPtr');
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_START, uniqueId: targetId);
     }
