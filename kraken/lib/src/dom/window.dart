@@ -100,6 +100,8 @@ class Window extends EventTarget {
         return scrollY();
       case 'open':
         return _open(elementManager, argv[0]);
+      default:
+        super.handleJSCall(method, argv);
     }
   }
 }

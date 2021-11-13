@@ -31,9 +31,6 @@ class Comment extends Node {
   String get data => '';
 
   int get length => data.length;
-
-  @override
-  dynamic handleJSCall(String method, List<dynamic> argv) {}
 }
 
 /// [RenderObjectNode] provide the renderObject related abstract life cycle for
