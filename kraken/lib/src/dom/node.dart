@@ -169,10 +169,6 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   }
 
   @override
-  dynamic handleJSCall(String method, List<dynamic> argv) {
-  }
-
-  @override
   RenderObject createRenderer() => throw FlutterError('createRenderer function is not implemented.');
 
   @override

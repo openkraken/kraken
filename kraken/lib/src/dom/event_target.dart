@@ -141,6 +141,7 @@ abstract class EventTarget {
     return eventHandlers;
   }
 
+  @mustCallSuper
   dynamic handleJSCall(String method, List<dynamic> argv) {
     if (method == 'dispose') dispose();
   }
