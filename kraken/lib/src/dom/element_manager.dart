@@ -33,6 +33,14 @@ const int DOCUMENT_ID = -3;
 typedef ElementCreator = Element Function(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager);
 
 class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver  {
+  // Call from JS Bridge before JS side eventTarget object been Garbage collected.
+  static void disposeEventTarget(int contextId, int id) {
+    KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
+    EventTarget? eventTarget = controller.view.getEventTargetById(id);
+    if (eventTarget == null) return;
+    eventTarget.dispose();
+  }
+
   // Alias defineElement export for kraken plugin
   static void defineElement(String type, ElementCreator creator) {
     element_registry.defineElement(type, creator);
