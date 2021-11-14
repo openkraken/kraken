@@ -10,6 +10,7 @@ import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/module.dart';
 import 'package:meta/meta.dart';
 
 typedef EventHandler = void Function(Event event);
@@ -140,13 +141,23 @@ abstract class EventTarget {
     return eventHandlers;
   }
 
-  dynamic handleJSCall(String method, List<dynamic> argv);
+  dynamic handleJSCall(String method, List<dynamic> argv) {
+  }
 
   @mustCallSuper
   void dispose() {
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_START, uniqueId: targetId);
+    }
+
     elementManager.removeTarget(this);
     eventHandlers.clear();
     _nativeMap.remove(nativeEventTargetPtr.address);
     _disposed = true;
+    malloc.free(nativeEventTargetPtr);
+
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_END, uniqueId: targetId);
+    }
   }
 }
