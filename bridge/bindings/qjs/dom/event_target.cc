@@ -292,7 +292,9 @@ JSClassID EventTargetInstance::classId() {
 
 EventTargetInstance::~EventTargetInstance() {
   foundation::UICommandBuffer::instance(m_contextId)->addCommand(eventTargetId, UICommand::disposeEventTarget, nullptr, false);
+#if FLUTTER_BACKEND
   getDartMethod()->flushUICommand();
+#endif
   JS_FreeValue(m_ctx, m_properties);
   JS_FreeValue(m_ctx, m_eventHandlers);
   JS_FreeValue(m_ctx, m_propertyEventHandler);
