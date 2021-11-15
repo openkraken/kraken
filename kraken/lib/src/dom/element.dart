@@ -428,6 +428,7 @@ class Element extends Node
   }
 
   void _handleScroll(double scrollOffset, AxisDirection axisDirection) {
+    if (renderBoxModel == null) return;
     applyStickyChildrenOffset();
     paintFixedChildren(scrollOffset, axisDirection);
 
