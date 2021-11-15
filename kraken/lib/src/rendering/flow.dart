@@ -609,13 +609,13 @@ class RenderFlowLayout extends RenderLayoutBox {
       // https://www.w3.org/TR/css-text-3/#line-breaking
       bool isChildBlockLevel = _isChildBlockLevel(child);
       bool isPreChildBlockLevel = _isChildBlockLevel(preChild);
-      bool isLineLengthExeedContainter = whiteSpace != WhiteSpace.nowrap &&
+      bool isLineLengthExceedContainer = whiteSpace != WhiteSpace.nowrap &&
           (runMainAxisExtent + childMainAxisExtent > mainAxisLimit);
 
       if (runChildren.isNotEmpty &&
           (isChildBlockLevel ||
               isPreChildBlockLevel ||
-              isLineLengthExeedContainter)) {
+              isLineLengthExceedContainer)) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
         runMetrics.add(_RunMetrics(
@@ -1408,7 +1408,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       child.renderStyle.effectiveOverflowY == CSSOverflowType.clip;
 
     // Margin top and bottom of empty block collapse.
-    // Make collapsed marign-top to the max of its top and bottom and margin-bottom as 0.
+    // Make collapsed margin-top to the max of its top and bottom and margin-bottom as 0.
     if (child.boxSize!.height == 0 &&
       childEffectiveDisplay != CSSDisplay.flex &&
       (isChildOverflowVisible || isChildOverflowClip)

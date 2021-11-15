@@ -695,17 +695,14 @@ class Element extends Node
   // called the containing block of the element.
   // Definition of "containing block": https://www.w3.org/TR/CSS21/visudet.html#containing-block-details
   void _addToContainingBlock({RenderBox? after}) {
-    assert(parent != null);
+    assert(parentNode != null);
     CSSPositionType positionType = renderStyle.position;
-    RenderLayoutBox? containingBlockRenderBox;
     RenderBoxModel _renderBoxModel = renderBoxModel!;
-    RenderBox parentRenderBox = parent!.renderer!;
+    // HMTL element's parentNode is viewportBox.
+    RenderBox parentRenderBox = parentNode!.renderer!;
     // The containing block of an element is defined as follows:
-    switch (positionType) {
-      case CSSPositionType.relative:
-      case CSSPositionType.static:
-      case CSSPositionType.sticky:
-        // If the element's position is 'relative' or 'static',
+    if (positionType == CSSPositionType.relative || positionType == CSSPositionType.static || positionType == CSSPositionType.sticky) {
+       // If the element's position is 'relative' or 'static',
         // the containing block is formed by the content edge of the nearest block container ancestor box.
         _attachRenderBoxModel(parentRenderBox, _renderBoxModel, after: after);
 
@@ -714,8 +711,9 @@ class Element extends Node
           // so it needs to layout before original renderBox.
           _addPositionPlacecholder(parentRenderBox, _renderBoxModel, after: after);
         }
-        break;
-      case CSSPositionType.absolute:
+    } else {
+      RenderLayoutBox? containingBlockRenderBox;
+      if (positionType == CSSPositionType.absolute) {
         // If the element has 'position: absolute', the containing block is established by the nearest ancestor with
         // a 'position' of 'absolute', 'relative' or 'fixed', in the following way:
         //  1. In the case that the ancestor is an inline element, the containing block is the bounding box around
@@ -723,29 +721,34 @@ class Element extends Node
         //    In CSS 2.1, if the inline element is split across multiple lines, the containing block is undefined.
         //  2. Otherwise, the containing block is formed by the padding edge of the ancestor.
         containingBlockRenderBox = _findContainingBlock(this, elementManager.viewportElement)?._renderLayoutBox;
-        break;
-      case CSSPositionType.fixed:
+      } else if (positionType == CSSPositionType.fixed) {
         // If the element has 'position: fixed', the containing block is established by the viewport
         // in the case of continuous media or the page area in the case of paged media.
         containingBlockRenderBox = elementManager.viewportElement._renderLayoutBox;
-        break;
-    }
+      }
 
-    if (containingBlockRenderBox == null) return;
-    containingBlockRenderBox = containingBlockRenderBox.renderScrollingContent ?? containingBlockRenderBox;
+      if (containingBlockRenderBox == null) return;
 
-    // Set custom positioned parentData.
-    RenderLayoutParentData parentData = RenderLayoutParentData();
-    _renderBoxModel.parentData = CSSPositionedLayout.getPositionParentData(_renderBoxModel, parentData);
-    // Add child to containing block parent.
-    containingBlockRenderBox.add(_renderBoxModel);
-    // If containint block is same as origin parent, the palceholder must after the origin renderBox
-    // because palceholder depends the constraints in layout stage.
-    if (containingBlockRenderBox == parentRenderBox) {
-      after = _renderBoxModel;
+      // If container block is same as origin parent, the placeholder must after the origin renderBox
+      // because placeholder depends the constraints in layout stage.
+      if (containingBlockRenderBox == parentRenderBox) {
+        after = _renderBoxModel;
+      }
+
+      containingBlockRenderBox = containingBlockRenderBox.renderScrollingContent ?? containingBlockRenderBox;
+
+      if (parentRenderBox is RenderLayoutBox) {
+        parentRenderBox = parentRenderBox.renderScrollingContent ?? parentRenderBox;
+      }
+
+      // Set custom positioned parentData.
+      RenderLayoutParentData parentData = RenderLayoutParentData();
+      _renderBoxModel.parentData = CSSPositionedLayout.getPositionParentData(_renderBoxModel, parentData);
+      // Add child to containing block parent.
+      containingBlockRenderBox.add(_renderBoxModel);
+      // Add position holder to origin position parent.
+      _addPositionPlacecholder(parentRenderBox, _renderBoxModel, after: after);
     }
-    // Add position holder to origin position parent.
-    _addPositionPlacecholder(parentRenderBox, _renderBoxModel, after: after);
   }
 
   void _addPositionPlacecholder(RenderBox parentRenderBox, RenderBoxModel renderBoxModel, {RenderBox? after}) {

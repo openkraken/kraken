@@ -90,12 +90,10 @@ abstract class LifecycleCallbacks {
 
 abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCallbacks {
   List<Node> childNodes = [];
+  /// The Node.parentNode read-only property returns the parent of the specified node in the DOM tree.
   Node? parentNode;
   NodeType nodeType;
   String get nodeName;
-
-  /// The Node.parentNode read-only property returns the parent of the specified node in the DOM tree.
-  Node? get parent => parentNode;
 
   /// The Node.parentElement read-only property returns the DOM node's parent Element,
   /// or null if the node either has no parent, or its parent isn't a DOM Element.
@@ -249,7 +247,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
 
   /// Ensure node is not connected to a parent element.
   void _ensureOrphan() {
-    Node? _parent = parent;
+    Node? _parent = parentNode;
     if (_parent != null) {
       _parent.removeChild(this);
     }
