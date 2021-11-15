@@ -25,6 +25,7 @@ import 'bundle.dart';
 typedef LoadHandler = void Function(KrakenController controller);
 typedef LoadErrorHandler = void Function(FlutterError error, StackTrace stack);
 typedef JSErrorHandler = void Function(String message);
+typedef PendingCallback = void Function();
 
 typedef TraverseElementCallback = void Function(Element element);
 
@@ -630,6 +631,32 @@ class KrakenController {
     if (devToolsService != null) {
       devToolsService!.didReload();
     }
+  }
+
+  bool _paused = false;
+  bool get paused => _paused;
+
+  final List<PendingCallback> _pendingCallbacks = [];
+
+  void pushPendingCallbacks(PendingCallback callback) {
+    _pendingCallbacks.add(callback);
+  }
+  void flushPendingCallbacks() {
+    for (int i = 0; i < _pendingCallbacks.length; i ++) {
+      _pendingCallbacks[i]();
+    }
+    _pendingCallbacks.clear();
+  }
+
+  // Pause all timers and callbacks if kraken page are invisible.
+  void pause() {
+    _paused = true;
+  }
+
+  // Resume all timers and callbacks if kraken page now visible.
+  void resume() {
+    _paused = false;
+    flushPendingCallbacks();
   }
 
   Future<void> reloadUrl(String url) async {
