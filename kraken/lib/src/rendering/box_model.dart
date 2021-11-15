@@ -151,7 +151,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox,
 }
 
 class RenderLayoutBox extends RenderBoxModel
-  with 
+  with
     ContainerRenderObjectMixin<RenderBox,
     ContainerBoxParentData<RenderBox>>,
     RenderBoxContainerDefaultsMixin<RenderBox,
@@ -1323,12 +1323,6 @@ class RenderBoxModel extends RenderBox
         renderStyle.backgroundAttachment == CSSBackgroundAttachmentType.local;
   }
 
-  @override
-  void detach() {
-    disposePainter();
-    super.detach();
-  }
-
   /// Called when its corresponding element disposed
   void dispose() {
     // Clear renderObjects in list when disposed to avoid memory leak
@@ -1336,6 +1330,8 @@ class RenderBoxModel extends RenderBox
       fixedChildren.clear();
     }
 
+    // Dispose box decoration painter.
+    disposePainter();
     // Evict render decoration image cache.
     renderStyle.decoration?.image?.image.evict();
   }
