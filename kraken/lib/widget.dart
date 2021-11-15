@@ -217,11 +217,19 @@ class Kraken extends StatefulWidget {
     defineElement(tagName.toUpperCase(), creator);
   }
 
+  loadHref(KrakenBundle bundle) async {
+    await controller!.unload();
+    await controller!.loadBundle(
+        bundle: bundle
+    );
+    _evalBundle(controller!, animationController);
+  }
+
   @deprecated
   loadContent(String bundleContent) async {
     await controller!.unload();
     await controller!.loadBundle(
-      bundleContent: bundleContent
+        bundle: KrakenBundle.fromHrefWithContent('', bundleContent)
     );
     _evalBundle(controller!, animationController);
   }
@@ -230,7 +238,7 @@ class Kraken extends StatefulWidget {
   loadByteCode(Uint8List bundleByteCode) async {
     await controller!.unload();
     await controller!.loadBundle(
-      bundleByteCode: bundleByteCode,
+        bundle: KrakenBundle.fromHrefWithByteCode('', bundleByteCode)
     );
     _evalBundle(controller!, animationController);
   }
@@ -238,10 +246,18 @@ class Kraken extends StatefulWidget {
   @deprecated
   loadURL(String bundleURL, { String? bundleContent, Uint8List? bundleByteCode }) async {
     await controller!.unload();
+
+    KrakenBundle bundle;
+    if (bundleByteCode != null) {
+      bundle = KrakenBundle.fromHrefWithByteCode(bundleURL, bundleByteCode);
+    } else if (bundleContent != null) {
+      bundle = KrakenBundle.fromHrefWithContent(bundleURL, bundleContent);
+    } else {
+      bundle = KrakenBundle.fromHref(bundleURL);
+    }
+
     await controller!.loadBundle(
-      bundleURL: bundleURL,
-      bundleContent: bundleContent,
-      bundleByteCode: bundleByteCode,
+        bundle: bundle
     );
     _evalBundle(controller!, animationController);
   }
@@ -249,10 +265,18 @@ class Kraken extends StatefulWidget {
   @deprecated
   loadPath(String bundlePath, { String? bundleContent, Uint8List? bundleByteCode }) async {
     await controller!.unload();
+
+    KrakenBundle bundle;
+    if (bundleByteCode != null) {
+      bundle = KrakenBundle.fromHrefWithByteCode(bundlePath, bundleByteCode);
+    } else if (bundleContent != null) {
+      bundle = KrakenBundle.fromHrefWithContent(bundlePath, bundleContent);
+    } else {
+      bundle = KrakenBundle.fromHref(bundlePath);
+    }
+
     await controller!.loadBundle(
-      bundlePath: bundlePath,
-      bundleContent: bundleContent,
-      bundleByteCode: bundleByteCode,
+        bundle: KrakenBundle.fromHref(bundlePath)
     );
     _evalBundle(controller!, animationController);
   }

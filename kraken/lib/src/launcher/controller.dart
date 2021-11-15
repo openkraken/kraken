@@ -624,8 +624,6 @@ class KrakenController {
   set href(String value) {
     HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
     historyModule.href = value;
-    // set href should new bundle.
-    bundle = KrakenBundle.fromHref(value);
   }
 
   set bundleContent(String? value) {
@@ -659,7 +657,7 @@ class KrakenController {
     }
 
     await unload();
-    await loadBundle(bundleURL: url ?? href);
+    await loadBundle(bundle: KrakenBundle.fromHref(url ?? href));
     await evalBundle();
 
     if (devToolsService != null) {
@@ -703,10 +701,7 @@ class KrakenController {
 
   // preload javascript source and cache it.
   Future<void> loadBundle({
-    String? bundleContent,
-    String? bundlePath,
-    String? bundleURL,
-    Uint8List? bundleByteCode
+    KrakenBundle? bundle
   }) async {
     assert(!_view._disposed, 'Kraken have already disposed');
 
@@ -715,25 +710,22 @@ class KrakenController {
     }
 
     // Load bundle need push curret href to history.
-    if (bundlePath != null) {
-      href =  bundlePath;
-    } else if (bundleURL != null) {
-      href =  bundleURL;
+    if (bundle != null) {
+      String? url = bundle.uri.toString().isEmpty ? (getBundleURLFromEnv() ?? getBundlePathFromEnv()) : href;
+      if (url == null && methodChannel is KrakenNativeChannel) {
+        url = await (methodChannel as KrakenNativeChannel).getUrl();
+      }
+      href = url ?? '';
+
+      if (bundle.byteCode != null) {
+        bundleByteCode = bundle.byteCode;
+      }
+
+      if (bundle.content != null) {
+        bundleContent = bundle.content;
+      }
     }
 
-    if (bundleContent != null) {
-      this.bundleContent = bundleContent;
-    } else if (bundleByteCode != null) {
-      this.bundleByteCode = bundleByteCode;
-    }
-
-    String? url = href.isEmpty ? (getBundleURLFromEnv() ?? getBundlePathFromEnv()) : href;
-
-    if (url == null && methodChannel is KrakenNativeChannel) {
-      url = await (methodChannel as KrakenNativeChannel).getUrl();
-    }
-
-    url = url ?? '';
     if (onLoadError != null) {
       try {
         await bundle?.resolve(view.contextId);

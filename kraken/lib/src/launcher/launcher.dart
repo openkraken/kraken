@@ -5,7 +5,8 @@
 
 import 'dart:io';
 import 'dart:ui';
-
+import 'dart:async';
+import 'dart:typed_data';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
@@ -22,6 +23,7 @@ void launch({
   String? bundleURL,
   String? bundlePath,
   String? bundleContent,
+  Uint8List? bundleByteCode,
   bool? debugEnableInspector,
   Color background = _white,
   DevToolsService? devToolsService,
@@ -44,10 +46,20 @@ void launch({
 
     controller.view.attachView(RendererBinding.instance!.renderView);
 
-    await controller.loadBundle(
-        bundleURL: bundleURL,
-        bundlePath: bundlePath,
-        bundleContent: bundleContent);
+    if (bundleURL == null) {
+      await controller.loadBundle();
+    } else {
+      KrakenBundle bundle;
+      if (bundleByteCode != null) {
+        bundle = KrakenBundle.fromHrefWithByteCode(bundleURL, bundleByteCode);
+      } else if (bundleContent != null) {
+        bundle = KrakenBundle.fromHrefWithContent(bundleURL, bundleContent);
+      } else {
+        bundle = KrakenBundle.fromHref(bundleURL);
+      }
+
+      await controller.loadBundle(bundle: bundle);
+    }
 
     await controller.evalBundle();
   }
