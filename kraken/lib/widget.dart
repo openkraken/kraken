@@ -235,7 +235,7 @@ class Kraken extends StatefulWidget {
     _evalBundle(controller!, animationController);
   }
 
-
+  @deprecated
   loadURL(String bundleURL, { String? bundleContent, Uint8List? bundleByteCode }) async {
     await controller!.unload();
     await controller!.loadBundle(
@@ -246,6 +246,7 @@ class Kraken extends StatefulWidget {
     _evalBundle(controller!, animationController);
   }
 
+  @deprecated
   loadPath(String bundlePath, { String? bundleContent, Uint8List? bundleByteCode }) async {
     await controller!.unload();
     await controller!.loadBundle(
