@@ -267,6 +267,7 @@ enum UICommandType {
   createElement,
   createTextNode,
   createComment,
+  disposeEventTarget,
   addEvent,
   removeNode,
   insertAdjacentNode,
@@ -452,6 +453,9 @@ void flushUICommand() {
             break;
           case UICommandType.createComment:
             controller.view.createComment(id, nativePtr.cast<NativeEventTarget>());
+            break;
+          case UICommandType.disposeEventTarget:
+            ElementManager.disposeEventTarget(controller.view.contextId, id);
             break;
           case UICommandType.addEvent:
             controller.view.addEvent(id, command.args[0]);
