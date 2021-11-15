@@ -84,21 +84,23 @@ abstract class KrakenBundle {
     if (controller != null && !isAssetAbsolutePath(src)) {
       uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri!);
     }
+
+    isResolved = true;
   }
 
-  static KrakenBundle fromUrl(String url) {
-    return NetworkBundle(url);
+  static KrakenBundle fromHref(String href) {
+    if (isAssetAbsolutePath(href)) {
+      return AssetsBundle(href);
+    } else {
+      return NetworkBundle(href);
+    }
   }
 
-  static KrakenBundle fromPath(String path) {
-    return AssetsBundle(path);
-  }
-
-  static KrakenBundle fromUrlWithContent(String url, String content) {
+  static KrakenBundle fromHrefWithContent(String url, String content) {
     return RawBundle.fromString(content, url);
   }
 
-  static KrakenBundle fromUrlWithByteCode(String url, Uint8List bytecode) {
+  static KrakenBundle fromHrefWithByteCode(String url, Uint8List bytecode) {
     return RawBundle.fromByteCode(bytecode, url);
   }
 

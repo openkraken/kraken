@@ -625,7 +625,7 @@ class KrakenController {
     HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
     historyModule.href = value;
     // set href should new bundle.
-    bundle = KrakenBundle.fromUrl(value);
+    bundle = KrakenBundle.fromHref(value);
   }
 
   set bundleContent(String? value) {
