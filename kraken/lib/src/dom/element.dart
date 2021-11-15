@@ -708,7 +708,10 @@ class Element extends Node
         // If the element's position is 'relative' or 'static',
         // the containing block is formed by the content edge of the nearest block container ancestor box.
         _attachRenderBoxModel(parentRenderBox, _renderBoxModel, after: after);
+
         if (positionType == CSSPositionType.sticky) {
+          // Placeholder of sticky renderBox need to inherit offset from original renderBox,
+          // so it needs to layout before original renderBox.
           _addPositionPlacecholder(parentRenderBox, _renderBoxModel, after: after);
         }
         break;
@@ -736,6 +739,11 @@ class Element extends Node
     _renderBoxModel.parentData = CSSPositionedLayout.getPositionParentData(_renderBoxModel, parentData);
     // Add child to containing block parent.
     containingBlockRenderBox.add(_renderBoxModel);
+    // If containint block is same as origin parent, the palceholder must after the origin renderBox
+    // because palceholder depends the constraints in layout stage.
+    if (containingBlockRenderBox == parentRenderBox) {
+      after = _renderBoxModel;
+    }
     // Add position holder to origin position parent.
     _addPositionPlacecholder(parentRenderBox, _renderBoxModel, after: after);
   }

@@ -603,16 +603,12 @@ class RenderBoxModel extends RenderBox
     }
   }
 
-  bool _debugHasBoxLayout = false;
-
   int childPaintDuration = 0;
   int childLayoutDuration = 0;
 
   BoxConstraints? _contentConstraints;
 
   BoxConstraints? get contentConstraints {
-    assert(_debugHasBoxLayout,
-        'can not access contentConstraints, RenderBoxModel has not layout: ${toString()}');
     assert(_contentConstraints != null);
     return _contentConstraints;
   }
@@ -1032,8 +1028,7 @@ class RenderBoxModel extends RenderBox
 
   // Base layout methods to compute content constraints before content box layout.
   // Call this method before content box layout.
-  BoxConstraints? beforeLayout() {
-    _debugHasBoxLayout = true;
+  void beforeLayout() {
     BoxConstraints boxConstraints = constraints;
     // Deflate border constraints.
     boxConstraints = renderStyle.deflateBorderConstraints(boxConstraints);
@@ -1095,8 +1090,6 @@ class RenderBoxModel extends RenderBox
     } else {
       _contentConstraints = boxConstraints;
     }
-
-    return _contentConstraints;
   }
 
   /// Find scroll container
