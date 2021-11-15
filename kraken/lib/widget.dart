@@ -276,7 +276,7 @@ class Kraken extends StatefulWidget {
     }
 
     await controller!.loadBundle(
-        bundle: KrakenBundle.fromHref(bundlePath)
+        bundle: bundle
     );
     _evalBundle(controller!, animationController);
   }
