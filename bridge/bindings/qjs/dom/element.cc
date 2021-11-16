@@ -377,7 +377,6 @@ JSValue Element::profile(QjsContext* ctx, JSValue this_val, int argc, JSValue* a
 }
 #endif
 
-
 std::unordered_map<std::string, Element*> Element::elementConstructorMap{};
 
 void Element::defineElement(const std::string& tagName, Element* constructor) {
