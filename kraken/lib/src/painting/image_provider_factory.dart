@@ -10,13 +10,31 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
 import 'package:kraken/bridge.dart';
+import 'package:kraken/css.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/painting.dart';
 
 /// This class allows user to customize Kraken's image loading.
 
+class ImageProviderParams {}
+
+class CachedNetworkImageProviderParams extends ImageProviderParams {
+  int? contextId;
+  CachedNetworkImageProviderParams(this.contextId);
+}
+
+class FileImageProviderParams extends ImageProviderParams {
+  File file;
+  FileImageProviderParams(this.file);
+}
+
+class DataUrlImageProviderParams extends ImageProviderParams {
+  Uint8List bytes;
+  DataUrlImageProviderParams(this.bytes);
+}
+
 /// A factory function allow user to build an customized ImageProvider class.
-typedef ImageProviderFactory = ImageProvider? Function(Uri uri, [dynamic param]);
+typedef ImageProviderFactory = ImageProvider? Function(Uri uri, ImageProviderParams params);
 
 /// defines the types of supported image source.
 enum ImageType {
@@ -75,7 +93,35 @@ ImageProviderFactory _dataUrlProviderFactory = defaultDataUrlProviderFactory;
 ImageProviderFactory _blobProviderFactory = defaultBlobProviderFactory;
 ImageProviderFactory _assetsProviderFactory = defaultAssetsProvider;
 
-ImageProviderFactory getImageProviderFactory(ImageType imageType) {
+ImageProvider? getImageProvider(Uri resolvedUri, { int? contextId, cache = 'auto' }) {
+  ImageType imageType = CSSUrl.parseImageUrl(resolvedUri, cache: cache);
+  ImageProviderFactory factory = _getImageProviderFactory(imageType);
+
+  switch(imageType) {
+    case ImageType.cached:
+      return factory(resolvedUri, CachedNetworkImageProviderParams(contextId));
+    case ImageType.network:
+      return factory(resolvedUri, CachedNetworkImageProviderParams(contextId));
+    case ImageType.file:
+      File file = File.fromUri(resolvedUri);
+      return factory(resolvedUri, FileImageProviderParams(file));
+    case ImageType.dataUrl:
+      // Data URL:  https://tools.ietf.org/html/rfc2397
+      // dataurl    := "data:" [ mediatype ] [ ";base64" ] "," data
+      UriData data = UriData.fromUri(resolvedUri);
+      if (data.isBase64) {
+        return factory(resolvedUri, DataUrlImageProviderParams(data.contentAsBytes()));
+      }
+      return null;
+    case ImageType.blob:
+      // TODO: support blob data type
+      return null;
+    case ImageType.assets:
+      return factory(resolvedUri, ImageProviderParams());
+  }
+}
+
+ImageProviderFactory _getImageProviderFactory(ImageType imageType) {
   switch (imageType) {
     case ImageType.cached:
       return _cachedProviderFactory;
@@ -117,55 +163,37 @@ void setCustomImageProviderFactory(ImageType imageType, ImageProviderFactory cus
   }
 }
 
-int? _getContextId(param) {
-  int? contextId;
-  if (param is List && param.isNotEmpty) {
-    contextId = param[0];
-  }
-  return contextId;
-}
-
 /// default ImageProviderFactory implementation of [ImageType.cached]
-ImageProvider defaultCachedProviderFactory(Uri uri, [param]) {
-  int? contextId = _getContextId(param);
-  return CachedNetworkImage(uri.toString(), contextId: contextId);
+ImageProvider defaultCachedProviderFactory(Uri uri, ImageProviderParams params) {
+  return CachedNetworkImage(uri.toString(), contextId: (params as CachedNetworkImageProviderParams).contextId);
 }
 
 /// default ImageProviderFactory implementation of [ImageType.network]
-ImageProvider defaultNetworkProviderFactory(Uri uri, [param]) {
-  int? contextId = _getContextId(param);
+ImageProvider defaultNetworkProviderFactory(Uri uri, ImageProviderParams params) {
   NetworkImage networkImage = NetworkImage(uri.toString(), headers: {
     HttpHeaders.userAgentHeader: getKrakenInfo().userAgent,
-    HttpHeaderContext: contextId.toString(),
+    HttpHeaderContext: (params as CachedNetworkImageProviderParams).contextId.toString(),
   });
   return networkImage;
 }
 
 /// default ImageProviderFactory implementation of [ImageType.file]
-ImageProvider? defaultFileProviderFactory(Uri uri, [param]) {
-  ImageProvider? _imageProvider;
-  if (param is File) {
-    _imageProvider = FileImage(param);
-  }
-  return _imageProvider;
+ImageProvider? defaultFileProviderFactory(Uri uri, ImageProviderParams params) {
+  return FileImage((params as FileImageProviderParams).file);
 }
 
 /// default ImageProviderFactory implementation of [ImageType.dataUrl].
-ImageProvider? defaultDataUrlProviderFactory(Uri uri, [param]) {
-  ImageProvider? _imageProvider;
-  if (param is Uint8List) {
-    _imageProvider = MemoryImage(param);
-  }
-  return _imageProvider;
+ImageProvider? defaultDataUrlProviderFactory(Uri uri, ImageProviderParams params) {
+  return MemoryImage((params as DataUrlImageProviderParams).bytes);
 }
 
 /// default ImageProviderFactory implementation of [ImageType.blob].
-ImageProvider? defaultBlobProviderFactory(Uri uri, [param]) {
+ImageProvider? defaultBlobProviderFactory(Uri uri, ImageProviderParams params) {
   // @TODO: support blob file url
   return null;
 }
 
 /// default ImageProviderFactory implementation of [ImageType.assets].
-ImageProvider defaultAssetsProvider(Uri uri, [param]) {
+ImageProvider defaultAssetsProvider(Uri uri, ImageProviderParams params) {
   return AssetImage(uri.toString());
 }

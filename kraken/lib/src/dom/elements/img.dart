@@ -12,6 +12,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/painting.dart';
 import 'package:kraken/rendering.dart';
 
 const String IMAGE = 'IMG';
@@ -321,8 +322,10 @@ class ImageElement extends Element {
       Uri base = Uri.parse(elementManager.controller.href);
       Uri resolvedUri = elementManager.controller.uriParser!.resolve(base, Uri.parse(_source!));
 
-      ImageProvider? imageProvider = _imageProvider ?? CSSUrl.parseUrl(resolvedUri,
-          cache: properties['caching'], contextId: elementManager.contextId);
+      ImageProvider? imageProvider = getImageProvider(resolvedUri,
+          cache: properties['caching'],
+          contextId: elementManager.contextId
+      );
 
       if (imageProvider != null) {
         _imageProvider = imageProvider;
