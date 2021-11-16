@@ -186,6 +186,14 @@ class Element extends Node
     _setDefaultStyle();
   }
 
+  final Map<String, double> debugProfileData = {};
+  void debugAccumulateProfileData(String key, [double value = 1.0]) {
+    if (!debugProfileData.containsKey(key)) {
+      debugProfileData[key] = 0.0;
+    }
+    debugProfileData[key] = debugProfileData[key]! + value;
+  }
+
   RenderSliverBoxChildManager? _sliverBoxChildManager;
 
   ElementDelegate get elementDelegate {

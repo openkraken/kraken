@@ -369,6 +369,15 @@ JSValue Element::scrollBy(QjsContext* ctx, JSValue this_val, int argc, JSValue* 
   return element->callNativeMethods("scrollBy", 2, arguments);
 }
 
+#if IS_TEST
+JSValue Element::profile(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  getDartMethod()->flushUICommand();
+  auto element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
+  return element->callNativeMethods("profile", 0, nullptr);
+}
+#endif
+
+
 std::unordered_map<std::string, Element*> Element::elementConstructorMap{};
 
 void Element::defineElement(const std::string& tagName, Element* constructor) {

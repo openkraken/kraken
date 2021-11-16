@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:ui' as ui show Image;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/bridge.dart';
@@ -113,6 +114,10 @@ class ImageElement extends Element {
   void dispose() {
     super.dispose();
 
+    if (kDebugMode) {
+      debugAccumulateProfileData('image_dispose');
+    }
+
     _imageProvider?.evict();
     _imageProvider = null;
 
@@ -202,6 +207,10 @@ class ImageElement extends Element {
     _frameCount++;
     _imageInfo = imageInfo;
 
+    if (kDebugMode) {
+      debugAccumulateProfileData('image_raster_callback');
+    }
+
     // Only trigger load once.
     if (!_loaded) {
       _loaded = true;
@@ -255,6 +264,10 @@ class ImageElement extends Element {
       return;
     }
 
+    if (kProfileMode) {
+      debugAccumulateProfileData('image_resize');
+    }
+
     RenderStyle renderStyle = renderBoxModel!.renderStyle;
     // Waiting for size computed after layout stage
     if (style.contains(WIDTH) && renderStyle.width == null ||
@@ -305,6 +318,10 @@ class ImageElement extends Element {
     RenderStyle renderStyle = renderBoxModel!.renderStyle;
     BoxFit objectFit = renderStyle.objectFit;
     Alignment objectPosition = renderStyle.objectPosition;
+
+    if (kDebugMode) {
+      debugAccumulateProfileData('image_create_render_object');
+    }
 
     return RenderImage(
       image: _imageInfo?.image,

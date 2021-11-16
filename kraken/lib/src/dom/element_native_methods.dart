@@ -47,6 +47,14 @@ mixin ElementNativeMethods on Node {
       case 'scrollBy':
         return _scrollBy(element, argv[0], argv[1]);
     }
+
+    // Record profile data for performance test.
+    if (kDebugMode) {
+      if (method == 'profile') {
+        return element.debugProfileData;
+      }
+    }
+
     return super.handleJSCall(method, argv);
   }
 

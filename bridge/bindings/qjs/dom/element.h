@@ -94,6 +94,10 @@ class Element : public Node {
 
   OBJECT_INSTANCE(Element);
 
+#if IS_TEST
+  static JSValue profile(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+#endif
+
  private:
   ObjectFunction m_getBoundingClientRect{m_context, m_prototypeObject, "getBoundingClientRect", getBoundingClientRect, 0};
   ObjectFunction m_hasAttribute{m_context, m_prototypeObject, "hasAttribute", hasAttribute, 1};
@@ -105,6 +109,11 @@ class Element : public Node {
   ObjectFunction m_scroll{m_context, m_prototypeObject, "scroll", scroll, 2};
   ObjectFunction m_scrollTo{m_context, m_prototypeObject, "scrollTo", scroll, 2};
   ObjectFunction m_scrollBy{m_context, m_prototypeObject, "scrollBy", scrollBy, 2};
+
+#if IS_TEST
+  ObjectFunction m_profile{m_context, m_prototypeObject, "profile", profile, 0};
+#endif
+
   friend ElementInstance;
 };
 
