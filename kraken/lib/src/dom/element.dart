@@ -740,7 +740,7 @@ class Element extends Node
       RenderLayoutParentData parentData = RenderLayoutParentData();
       _renderBoxModel.parentData = CSSPositionedLayout.getPositionParentData(_renderBoxModel, parentData);
       // Add child to containing block parent.
-      _attachRenderBoxModel(containingBlockRenderBox, _renderBoxModel, after: containingBlockRenderBox.lastChild);
+      _attachRenderBoxModel(containingBlockRenderBox, _renderBoxModel, isLast: true);
       // Add position holder to origin position parent.
       _addPositionPlaceholder(parentRenderBox, _renderBoxModel, after: after);
     }
@@ -781,15 +781,22 @@ class Element extends Node
     }
   }
 
-  void _attachRenderBoxModel(RenderBox parentRenderBox, RenderBox renderBox, {RenderBox? after}) {
-    if (parentRenderBox is RenderObjectWithChildMixin) {
-      (parentRenderBox as RenderObjectWithChildMixin).child = renderBox; // RenderViewportBox
-    } else if (parentRenderBox is ContainerRenderObjectMixin) {
+  void _attachRenderBoxModel(RenderBox parentRenderBox, RenderBox renderBox, {RenderObject? after, bool isLast = false}) {
+    if (isLast) {
+      assert(after == null);
+    }
+    if (parentRenderBox is RenderObjectWithChildMixin) { // RenderViewportBox
+      (parentRenderBox as RenderObjectWithChildMixin).child = renderBox; 
+    } else if (parentRenderBox is ContainerRenderObjectMixin) { // RenderLayoutBox or RenderSliverList
       // Should attach to renderScrollingContent if it is scrollable.
       if (parentRenderBox is RenderLayoutBox) {
         parentRenderBox = parentRenderBox.renderScrollingContent ?? parentRenderBox;
       }
-      (parentRenderBox as ContainerRenderObjectMixin).insert(renderBox, after: after); // RenderLayoutBox or RenderSliverList
+      if (isLast) {
+        after = (parentRenderBox as ContainerRenderObjectMixin).lastChild;
+      }
+      (parentRenderBox as ContainerRenderObjectMixin).insert(renderBox, after: after);
+      
     }
   }
 
