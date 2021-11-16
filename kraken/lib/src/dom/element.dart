@@ -173,30 +173,30 @@ class Element extends Node
   }
 
   void _updateRenderBoxModel() {
-    RenderBoxModel _renderBoxModel;
+    RenderBoxModel nextRenderBoxModel;
     // Content children layout, BoxModel content.
     if (_isIntrinsicBox) {
-      _renderBoxModel = _createRenderIntrinsic(hasRepaintBoundary: hasRepaintBoundary, prevRenderIntrinsic: _renderIntrinsic);
+      nextRenderBoxModel = _createRenderIntrinsic(hasRepaintBoundary: hasRepaintBoundary, prevRenderIntrinsic: _renderIntrinsic);
     } else {
-      _renderBoxModel = _createRenderLayout(hasRepaintBoundary: hasRepaintBoundary, previousRenderLayoutBox: _renderLayoutBox);
+      nextRenderBoxModel = _createRenderLayout(hasRepaintBoundary: hasRepaintBoundary, previousRenderLayoutBox: _renderLayoutBox);
     }
-
-    if (_renderBoxModel != renderBoxModel && renderBoxModel != null) {
-      RenderBox? parentRenderBox = renderBoxModel!.parent as RenderBox?;
+    RenderBox? previousRenderBoxModel = renderBoxModel;
+    if (nextRenderBoxModel != previousRenderBoxModel) {
+      RenderBox? parentRenderBox;
       RenderBox? after;
-      if (parentRenderBox != null) {
-        after = (renderBoxModel!.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
+      if (previousRenderBoxModel != null) {
+        parentRenderBox = previousRenderBoxModel.parent as RenderBox?;
+        after = (previousRenderBoxModel.parentData as ContainerParentDataMixin<RenderBox>?)?.previousSibling;
+        _detachRenderBoxModel(renderBoxModel!);
+
+        if (parentRenderBox != null) {
+          _attachRenderBoxModel(parentRenderBox, nextRenderBoxModel, after: after);
+        }
       }
-      _detachRenderBoxModel(renderBoxModel!);
-      if (parentRenderBox != null) {
-        _attachRenderBoxModel(parentRenderBox, _renderBoxModel, after: after);
-      }
+      renderBoxModel = nextRenderBoxModel;
+      // Ensure that the event responder is bound.
+      _ensureEventResponderBound();
     }
-
-    renderBoxModel = _renderBoxModel;
-
-    // Ensure that the event responder is bound.
-    _ensureEventResponderBound();
   }
 
   RenderIntrinsic _createRenderIntrinsic({
@@ -700,19 +700,17 @@ class Element extends Node
     RenderBoxModel _renderBoxModel = renderBoxModel!;
     // HMTL element's parentNode is viewportBox.
     RenderBox parentRenderBox = parentNode!.renderer!;
-    if (parentRenderBox is RenderLayoutBox) {
-      parentRenderBox = parentRenderBox.renderScrollingContent ?? parentRenderBox;
-    }
+
     // The containing block of an element is defined as follows:
     if (positionType == CSSPositionType.relative || positionType == CSSPositionType.static || positionType == CSSPositionType.sticky) {
-       // If the element's position is 'relative' or 'static',
+        // If the element's position is 'relative' or 'static',
         // the containing block is formed by the content edge of the nearest block container ancestor box.
         _attachRenderBoxModel(parentRenderBox, _renderBoxModel, after: after);
 
         if (positionType == CSSPositionType.sticky) {
           // Placeholder of sticky renderBox need to inherit offset from original renderBox,
           // so it needs to layout before original renderBox.
-          _addPositionPlacecholder(parentRenderBox, _renderBoxModel, after: after);
+          _addPositionPlaceholder(parentRenderBox, _renderBoxModel, after: after);
         }
     } else {
       RenderLayoutBox? containingBlockRenderBox;
@@ -732,8 +730,6 @@ class Element extends Node
 
       if (containingBlockRenderBox == null) return;
 
-      containingBlockRenderBox = containingBlockRenderBox.renderScrollingContent ?? containingBlockRenderBox;
-
       // If container block is same as origin parent, the placeholder must after the origin renderBox
       // because placeholder depends the constraints in layout stage.
       if (containingBlockRenderBox == parentRenderBox) {
@@ -744,13 +740,13 @@ class Element extends Node
       RenderLayoutParentData parentData = RenderLayoutParentData();
       _renderBoxModel.parentData = CSSPositionedLayout.getPositionParentData(_renderBoxModel, parentData);
       // Add child to containing block parent.
-      containingBlockRenderBox.add(_renderBoxModel);
+      _attachRenderBoxModel(containingBlockRenderBox, _renderBoxModel, after: containingBlockRenderBox.lastChild);
       // Add position holder to origin position parent.
-      _addPositionPlacecholder(parentRenderBox, _renderBoxModel, after: after);
+      _addPositionPlaceholder(parentRenderBox, _renderBoxModel, after: after);
     }
   }
 
-  void _addPositionPlacecholder(RenderBox parentRenderBox, RenderBoxModel renderBoxModel, {RenderBox? after}) {
+  void _addPositionPlaceholder(RenderBox parentRenderBox, RenderBoxModel renderBoxModel, {RenderBox? after}) {
     // Position holder size will be updated on layout.
     RenderPositionPlaceholder renderPositionPlaceholder = RenderPositionPlaceholder(preferredSize: Size.zero);
     renderBoxModel.renderPositionPlaceholder = renderPositionPlaceholder;
@@ -778,12 +774,21 @@ class Element extends Node
 
     // Update renderBoxModel.
     _updateRenderBoxModel();
+    // Attach renderBoxModel to parent if change from `display: none` to other values.
+    if (renderBoxModel!.parent == null) {
+      _addToContainingBlock(after: previousSibling?.renderer);
+      ensureChildAttached();
+    }
   }
 
   void _attachRenderBoxModel(RenderBox parentRenderBox, RenderBox renderBox, {RenderBox? after}) {
     if (parentRenderBox is RenderObjectWithChildMixin) {
       (parentRenderBox as RenderObjectWithChildMixin).child = renderBox; // RenderViewportBox
     } else if (parentRenderBox is ContainerRenderObjectMixin) {
+      // Should attach to renderScrollingContent if it is scrollable.
+      if (parentRenderBox is RenderLayoutBox) {
+        parentRenderBox = parentRenderBox.renderScrollingContent ?? parentRenderBox;
+      }
       (parentRenderBox as ContainerRenderObjectMixin).insert(renderBox, after: after); // RenderLayoutBox or RenderSliverList
     }
   }
