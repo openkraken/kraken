@@ -16,7 +16,7 @@ jobs:
 #       设置 bridge 编译环境
       - uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '16'
       - uses: jwlawson/actions-setup-cmake@v1.11
         with:
           cmake-version: '3.21.x'
@@ -38,7 +38,8 @@ jobs:
 #               cd kraken/
 #               flutter pub get
 #               cd example/
-#               flutter build apk --release
+#               flutter build apk --release  # 编译不通过
+
       - name: build macos
         run: |
               cd kraken/
@@ -47,5 +48,7 @@ jobs:
               flutter build macos --release
               
 #       - run: |
-#               cd kraken/example/
+#               cd kraken/
+#               flutter pub get
+#               cd example/
 #               flutter build ios --release --no-codesign
