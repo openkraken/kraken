@@ -700,6 +700,9 @@ class Element extends Node
     RenderBoxModel _renderBoxModel = renderBoxModel!;
     // HMTL element's parentNode is viewportBox.
     RenderBox parentRenderBox = parentNode!.renderer!;
+    if (parentRenderBox is RenderLayoutBox) {
+      parentRenderBox = parentRenderBox.renderScrollingContent ?? parentRenderBox;
+    }
     // The containing block of an element is defined as follows:
     if (positionType == CSSPositionType.relative || positionType == CSSPositionType.static || positionType == CSSPositionType.sticky) {
        // If the element's position is 'relative' or 'static',
@@ -729,16 +732,12 @@ class Element extends Node
 
       if (containingBlockRenderBox == null) return;
 
+      containingBlockRenderBox = containingBlockRenderBox.renderScrollingContent ?? containingBlockRenderBox;
+
       // If container block is same as origin parent, the placeholder must after the origin renderBox
       // because placeholder depends the constraints in layout stage.
       if (containingBlockRenderBox == parentRenderBox) {
         after = _renderBoxModel;
-      }
-
-      containingBlockRenderBox = containingBlockRenderBox.renderScrollingContent ?? containingBlockRenderBox;
-
-      if (parentRenderBox is RenderLayoutBox) {
-        parentRenderBox = parentRenderBox.renderScrollingContent ?? parentRenderBox;
       }
 
       // Set custom positioned parentData.
