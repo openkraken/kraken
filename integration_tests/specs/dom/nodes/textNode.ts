@@ -67,6 +67,14 @@ describe('TextNode', () => {
     await snapshot();
   });
 
+  it('empty string of textNode set data should work', async () => {
+    const text = document.createTextNode('');
+    document.body.appendChild(text);
+    text.data = 'aaa';
+
+    await snapshot();
+  });
+
   it('empty string of textNode should not attach the render object to parent.', async () => {
     const container = document.createElement('div');
     container.style.display = 'flex';
