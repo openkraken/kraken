@@ -67,7 +67,7 @@ describe('TextNode', () => {
     await snapshot();
   });
 
-  fit('empty string of textNode should not attach the render object to parent.', async () => {
+  it('empty string of textNode should not attach the render object to parent.', async () => {
     const container = document.createElement('div');
     container.style.display = 'flex';
     container.style.justifyContent = 'space-between';
