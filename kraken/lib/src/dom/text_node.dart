@@ -70,7 +70,17 @@ class TextNode extends Node {
 
   set data(String? newData) {
     assert(newData != null);
+
+    String lastData = _data!;
     _data = newData;
+
+    // Empty string of textNode should not attach to the render tree.
+    if (lastData != '' && newData == '') {
+      detach();
+    } else if (lastData == '' && newData != '') {
+      attachTo(parentElement!);
+    }
+
     updateTextStyle();
   }
 
