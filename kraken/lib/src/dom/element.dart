@@ -698,7 +698,7 @@ class Element extends Node
     assert(parentNode != null);
     CSSPositionType positionType = renderStyle.position;
     RenderBoxModel _renderBoxModel = renderBoxModel!;
-    // HMTL element's parentNode is viewportBox.
+    // HTML element's parentNode is viewportBox.
     RenderBox parentRenderBox = parentNode!.renderer!;
 
     // The containing block of an element is defined as follows:
@@ -786,7 +786,7 @@ class Element extends Node
       assert(after == null);
     }
     if (parentRenderBox is RenderObjectWithChildMixin) { // RenderViewportBox
-      (parentRenderBox as RenderObjectWithChildMixin).child = renderBox; 
+      (parentRenderBox as RenderObjectWithChildMixin).child = renderBox;
     } else if (parentRenderBox is ContainerRenderObjectMixin) { // RenderLayoutBox or RenderSliverList
       // Should attach to renderScrollingContent if it is scrollable.
       if (parentRenderBox is RenderLayoutBox) {
@@ -796,7 +796,7 @@ class Element extends Node
         after = (parentRenderBox as ContainerRenderObjectMixin).lastChild;
       }
       (parentRenderBox as ContainerRenderObjectMixin).insert(renderBox, after: after);
-      
+
     }
   }
 

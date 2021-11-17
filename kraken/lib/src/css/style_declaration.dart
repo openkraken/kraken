@@ -367,7 +367,7 @@ class CSSStyleDeclaration {
   }
 
   void flushPendingProperties() {
-    if (target == null) return;
+    if (target?.renderer == null) return;
 
     // Display change from none to other value that the renderBoxModel is null.
     if (_pendingProperties.containsKey(DISPLAY) && target!.isConnected) {
