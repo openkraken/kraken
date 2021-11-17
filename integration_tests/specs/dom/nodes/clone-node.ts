@@ -146,4 +146,28 @@ describe('Clone node', () => {
 
     await snapshot();
   })
+
+  it('should work with documentFragment', async () => {
+    let fragment = document.createDocumentFragment();
+    let div = document.createElement('div');
+    div.style.width = '100px';
+    div.style.height = '100px';
+    div.style.backgroundColor = 'red';
+    div.id = '1234';
+    let text = document.createTextNode('helloworld');
+    fragment.appendChild(div);
+    fragment.appendChild(text);
+
+    let newFragment = fragment.cloneNode(true);
+
+    expect(newFragment.firstChild!.nodeType).toBe(div.nodeType)
+    let newDiv = newFragment.firstChild! as HTMLDivElement;
+    expect(newDiv.style.width).toBe('100px');
+    expect(newDiv.style.height).toBe('100px');
+    expect(newDiv.style.backgroundColor).toBe('red');
+    expect(newDiv.id).toBe('1234');
+
+    let newText = newFragment.lastChild as Text;
+    expect(newText.textContent).toBe('helloworld');
+  });
 });
