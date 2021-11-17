@@ -7,7 +7,7 @@
 #include "bindings/qjs/dom/text_node.h"
 #include "bindings/qjs/qjs_patch.h"
 #include "bridge_qjs.h"
-#include <cstring>
+
 namespace kraken::binding::qjs {
 
 TemplateElement::TemplateElement(JSContext* context) : Element(context) {

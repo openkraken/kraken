@@ -6,7 +6,7 @@
 #include "logging.h"
 #include <algorithm>
 #include "colors.h"
-#include <cstring>
+
 #if KRAKEN_JSC_ENGINE
 #include "bridge_jsc.h"
 #elif KRAKEN_QUICK_JS_ENGINE

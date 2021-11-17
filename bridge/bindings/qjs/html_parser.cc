@@ -7,7 +7,7 @@
 #include "dom/document.h"
 #include "dom/text_node.h"
 #include "js_context.h"
-#include <cstring>
+
 #include <utility>
 
 namespace kraken::binding::qjs {

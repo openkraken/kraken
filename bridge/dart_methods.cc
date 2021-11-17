@@ -6,13 +6,13 @@
 #include "dart_methods.h"
 #include <memory>
 #include "kraken_bridge.h"
-#include <cassert>
+
 namespace kraken {
 
 std::shared_ptr<DartMethodPointer> methodPointer = std::make_shared<DartMethodPointer>();
 
 std::shared_ptr<DartMethodPointer> getDartMethod() {
-  std::thread::id currentThread = std::this_thread::get_id();
+  std::__thread_id currentThread = std::this_thread::get_id();
 
 #ifndef NDEBUG
   // Dart methods can only invoked from Flutter UI threads. Javascript Debugger like Safari Debugger can invoke

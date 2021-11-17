@@ -455,7 +455,7 @@ export function generateCppSource(blob: Blob) {
 #include "${blob.filename}.h"
 #include "bridge_qjs.h"
 #include "bindings/qjs/qjs_patch.h"
-#include <cmath>
+
 namespace kraken::binding::qjs {
   ${sources.join('')}
 }`;

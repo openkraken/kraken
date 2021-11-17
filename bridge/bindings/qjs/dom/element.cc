@@ -9,7 +9,7 @@
 #include "dart_methods.h"
 #include "document.h"
 #include "text_node.h"
-#include <cstring>
+
 namespace kraken::binding::qjs {
 
 std::once_flag kElementInitOnceFlag;

@@ -10,8 +10,7 @@
 #include "bindings/qjs/module_manager.h"
 #include "kraken_bridge.h"
 #include "qjs_patch.h"
-#include <cassert>
-#include <cstring>
+
 namespace kraken::binding::qjs {
 
 static std::atomic<int32_t> context_unique_id{0};
