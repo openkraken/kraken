@@ -477,6 +477,10 @@ class Element extends Node
     // <div style="position: relative"><div style="position: absolute" /></div>
     if (renderPositionPlaceholder != null) {
       previousSibling = (renderPositionPlaceholder.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
+      // The placeholder's previousSibling maybe the origin renderBox.
+      if (previousSibling == _renderBoxModel) {
+        previousSibling = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
+      }
       _detachRenderBoxModel(renderPositionPlaceholder);
     } else {
       previousSibling = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
