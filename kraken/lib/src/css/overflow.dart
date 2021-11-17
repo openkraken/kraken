@@ -311,13 +311,10 @@ mixin ElementOverflowMixin on ElementBase {
     // If outer scrolling box already has children in the case of element already attached,
     // move them into the children of inner scrolling box.
     RenderLayoutBox outerLayoutBox = renderBoxModel as RenderLayoutBox;
-    List<RenderBox> sortedChildren = outerLayoutBox.sortedChildren;
     List<RenderBox> children = outerLayoutBox.detachChildren();
 
     RenderLayoutBox renderScrollingContent = element.createScrollingContentLayout();
     renderScrollingContent.addAll(children);
-    // FIXME(yuanyan): should not need copy sortedChildren state.
-    renderScrollingContent.sortedChildren = sortedChildren;
 
     outerLayoutBox.add(renderScrollingContent);
     outerLayoutBox.renderScrollingContent = renderScrollingContent;
@@ -334,13 +331,11 @@ mixin ElementOverflowMixin on ElementBase {
     Element element = this as Element;
 
     RenderLayoutBox outerLayoutBox = element.renderBoxModel as RenderLayoutBox;
-    List<RenderBox> sortedChildren = scrollingContentBox!.sortedChildren;
     List<RenderBox> children = scrollingContentBox!.detachChildren();
     // Remove scrolling content box.
     outerLayoutBox.remove(scrollingContentBox!);
     outerLayoutBox.renderScrollingContent = null;
-    // FIXME(yuanyan): should not need copy sortedChildren state.
-    outerLayoutBox.sortedChildren = sortedChildren;
+
     element.style.removeStyleChangeListener(scrollingContentBoxStyleListener);
     // Move children of scrolling content box to the children to outer layout box.
     outerLayoutBox.addAll(children);

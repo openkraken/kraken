@@ -94,9 +94,9 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox,
     // The x, y parameters have the top left of the node's box as the origin.
 
     // The z-index needs to be sorted, and higher-level nodes are processed first.
-    List<RenderObject?> sortedChildren = (this as RenderLayoutBox).sortedChildren;
-    for (int i = sortedChildren.length - 1; i >= 0; i--) {
-      ChildType child = sortedChildren[i] as ChildType;
+    List<RenderObject?> paintingOrder = (this as RenderLayoutBox).paintingOrder;
+    for (int i = paintingOrder.length - 1; i >= 0; i--) {
+      ChildType child = paintingOrder[i] as ChildType;
       // Ignore detached render object.
       if (!child.attached) {
         continue;
@@ -176,40 +176,32 @@ class RenderLayoutBox extends RenderBoxModel
   }
 
   // Sort children by zIndex, used for paint and hitTest.
-  List<RenderBox> _sortedChildren = [];
-
-  List<RenderBox> get sortedChildren {
-    return _sortedChildren;
-  }
-
-  set sortedChildren(List<RenderBox> value) {
-    _sortedChildren = value;
-  }
+  List<RenderBox> paintingOrder = [];
 
   // No need to override [all] and [addAll] method cause they invoke [insert] method eventually.
   @override
   void insert(RenderBox child, {RenderBox? after}) {
     super.insert(child, after: after);
-    insertChildIntoSortedChildren(child, after: after);
+    updatePaintingOrderWithInsert(child, after: after);
   }
 
   @override
   void remove(RenderBox child) {
     super.remove(child);
-    sortedChildren.remove(child);
+    paintingOrder.remove(child);
   }
 
   @override
   void removeAll() {
     super.removeAll();
-    sortedChildren = [];
+    paintingOrder = [];
   }
 
   @override
   void move(RenderBox child, {RenderBox? after}) {
     super.move(child, after: after);
-    sortedChildren.remove(child);
-    insertChildIntoSortedChildren(child, after: after);
+    paintingOrder.remove(child);
+    updatePaintingOrderWithInsert(child, after: after);
   }
 
   // Sort siblings by zIndex.
@@ -219,7 +211,7 @@ class RenderLayoutBox extends RenderBoxModel
   }
 
   // Insert child in sortedChildren.
-  void insertChildIntoSortedChildren(RenderBox child, {RenderBox? after}) {
+  void updatePaintingOrderWithInsert(RenderBox child, {RenderBox? after}) {
     List<RenderObject> children = getChildren();
 
     // No need to paint position holder.
@@ -228,12 +220,12 @@ class RenderLayoutBox extends RenderBoxModel
     }
     // Find the real renderBox of position holder to insert cause the position holder may be
     // moved before its real renderBox which will cause the insert order wrong.
-    if (after is RenderPositionPlaceholder && sortedChildren.contains(after.positioned)) {
+    if (after is RenderPositionPlaceholder && paintingOrder.contains(after.positioned)) {
       after = after.positioned;
     }
 
     // Original index to insert into ignoring zIndex.
-    int oriIdx = after != null ? sortedChildren.indexOf(after) + 1 : sortedChildren.length;
+    int oriIdx = after != null ? paintingOrder.indexOf(after) + 1 : paintingOrder.length;
     // The final index to insert into considering zIndex after comparing with siblings.
     int insertIdx = oriIdx;
 
@@ -241,7 +233,7 @@ class RenderLayoutBox extends RenderBoxModel
     // child, insert child at that position directly, otherwise compare zIndex to next siblings.
     if (oriIdx > 0) {
       while(insertIdx > 0) {
-        RenderObject prevSibling = sortedChildren[insertIdx - 1];
+        RenderObject prevSibling = paintingOrder[insertIdx - 1];
         int priority = sortSiblingsByZIndex(prevSibling, child);
         // Compare the siblings' render tree order if their zIndex priority are the same.
         if (priority > 0 ||
@@ -255,9 +247,9 @@ class RenderLayoutBox extends RenderBoxModel
     }
 
     // If no previous siblings has zIndex bigger than child, compare zIndex to next siblings.
-    if (insertIdx == oriIdx && insertIdx < sortedChildren.length) {
-      while(insertIdx < sortedChildren.length) {
-        RenderObject nextSibling = sortedChildren[insertIdx];
+    if (insertIdx == oriIdx && insertIdx < paintingOrder.length) {
+      while(insertIdx < paintingOrder.length) {
+        RenderObject nextSibling = paintingOrder[insertIdx];
         int priority = sortSiblingsByZIndex(child, nextSibling);
         // Compare the siblings' render tree order if their zIndex priority are the same.
         if (priority > 0 ||
@@ -270,7 +262,7 @@ class RenderLayoutBox extends RenderBoxModel
       }
     }
 
-    sortedChildren.insert(insertIdx, child);
+    paintingOrder.insert(insertIdx, child);
   }
 
   // Get all children as a list and detach them all.
@@ -504,7 +496,6 @@ class RenderLayoutBox extends RenderBoxModel
   @override
   T copyWith<T extends RenderBoxModel>(T copiedRenderBoxModel) {
     if (copiedRenderBoxModel is RenderLayoutBox) {
-      copiedRenderBoxModel.sortedChildren = sortedChildren;
       copiedRenderBoxModel.renderScrollingContent = renderScrollingContent;
     }
 

@@ -1653,8 +1653,8 @@ class Element extends Node
       final RenderLayoutParentData parentData = renderBoxModel!.parentData as RenderLayoutParentData;
       RenderBox? nextSibling = parentData.nextSibling;
 
-      parent.sortedChildren.remove(renderBoxModel);
-      parent.insertChildIntoSortedChildren(renderBoxModel!, after: nextSibling);
+      parent.paintingOrder.remove(renderBoxModel);
+      parent.updatePaintingOrderWithInsert(renderBoxModel!, after: nextSibling);
     }
   }
 }
