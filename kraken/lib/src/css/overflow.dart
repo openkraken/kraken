@@ -299,6 +299,11 @@ mixin ElementOverflowMixin on ElementBase {
     }
   }
 
+  void updateScrollingContentBox() {
+    _detachScrollingContentBox();
+    _attachScrollingContentBox();
+  }
+
   // Create two repaintBoundary for an overflow scroll container.
   // Outer repaintBoundary avoid repaint of parent and sibling renderObjects when scrolling.
   // Inner repaintBoundary avoid repaint of child renderObjects when scrolling.

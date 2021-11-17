@@ -182,7 +182,7 @@ class RenderLayoutBox extends RenderBoxModel
   @override
   void insert(RenderBox child, {RenderBox? after}) {
     super.insert(child, after: after);
-    updatePaintingOrderWithInsert(child, after: after);
+    insertPaintingOrder(child, after: after);
   }
 
   @override
@@ -201,7 +201,7 @@ class RenderLayoutBox extends RenderBoxModel
   void move(RenderBox child, {RenderBox? after}) {
     super.move(child, after: after);
     paintingOrder.remove(child);
-    updatePaintingOrderWithInsert(child, after: after);
+    insertPaintingOrder(child, after: after);
   }
 
   // Sort siblings by zIndex.
@@ -210,10 +210,8 @@ class RenderLayoutBox extends RenderBoxModel
     return -1;
   }
 
-  // Insert child in sortedChildren.
-  void updatePaintingOrderWithInsert(RenderBox child, {RenderBox? after}) {
-    List<RenderObject> children = getChildren();
-
+  // Insert child in painting order.
+  void insertPaintingOrder(RenderBox child, {RenderBox? after}) {
     // No need to paint position holder.
     if (child is RenderPositionPlaceholder) {
       return;
@@ -229,6 +227,7 @@ class RenderLayoutBox extends RenderBoxModel
     // The final index to insert into considering zIndex after comparing with siblings.
     int insertIdx = oriIdx;
 
+    List<RenderObject> children = getChildren();
     // Compare zIndex to previous siblings first, if found sibling zIndex bigger than
     // child, insert child at that position directly, otherwise compare zIndex to next siblings.
     if (oriIdx > 0) {
