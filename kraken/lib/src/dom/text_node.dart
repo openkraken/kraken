@@ -75,9 +75,9 @@ class TextNode extends Node {
     _data = newData;
 
     // Empty string of textNode should not attach to the render tree.
-    if (lastData != '' && newData == '') {
+    if (lastData.isNotEmpty && newData!.isEmpty) {
       detach();
-    } else if (lastData == '' && newData != '') {
+    } else if (lastData.isEmpty && newData!.isNotEmpty) {
       attachTo(parentElement!);
     }
 
