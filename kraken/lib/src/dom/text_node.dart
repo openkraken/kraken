@@ -137,23 +137,24 @@ class TextNode extends Node {
   // Attach renderObject of current node to parent
   @override
   void attachTo(Element parent, { RenderBox? after }) {
-    if (_data != '') {
-      willAttachRenderer();
+    // empty string of TextNode should not attach to render tree.
+    if (_data == null || _data!.isEmpty) return;
 
-      RenderLayoutBox? parentRenderLayoutBox;
-      if (parent.scrollingContentLayoutBox != null) {
-        parentRenderLayoutBox = parent.scrollingContentLayoutBox!;
-      } else {
-        parentRenderLayoutBox = (parent.renderBoxModel as RenderLayoutBox?)!;
-      }
+    willAttachRenderer();
 
-      RenderTextBox renderTextBox = _renderTextBox!;
-
-      parentRenderLayoutBox.insert(renderTextBox, after: after);
-      _setTextSizeType(parentRenderLayoutBox.widthSizeType, parentRenderLayoutBox.heightSizeType);
-
-      didAttachRenderer();
+    RenderLayoutBox? parentRenderLayoutBox;
+    if (parent.scrollingContentLayoutBox != null) {
+      parentRenderLayoutBox = parent.scrollingContentLayoutBox!;
+    } else {
+      parentRenderLayoutBox = (parent.renderBoxModel as RenderLayoutBox?)!;
     }
+
+    RenderTextBox renderTextBox = _renderTextBox!;
+
+    parentRenderLayoutBox.insert(renderTextBox, after: after);
+    _setTextSizeType(parentRenderLayoutBox.widthSizeType, parentRenderLayoutBox.heightSizeType);
+
+    didAttachRenderer();
   }
 
   // Detach renderObject of current node from parent
