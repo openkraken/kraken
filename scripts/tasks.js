@@ -528,7 +528,7 @@ task('build-ios-frameworks', (done) => {
   done();
 });
 
-task('build-linux-kraken-lib', (done) => {
+task('build-linux-arm64-kraken-lib', (done) => {
 
   const archs = ['arm64'];
   const buildType = buildMode == 'Release' ? 'Release' : 'Relwithdebinfo';

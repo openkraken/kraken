@@ -10,7 +10,7 @@ series(
   'clean',
   'compile-polyfill',
   parallel(
-    'build-linux-kraken-lib'
+    'build-linux-arm64-kraken-lib'
   ),
 )((err) => {
   if (err) {

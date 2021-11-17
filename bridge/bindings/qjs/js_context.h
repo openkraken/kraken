@@ -19,6 +19,7 @@
 #include <cstring>
 #include <atomic>
 #include <locale>
+#include <mutex>
 using QjsContext = JSContext;
 using JSExceptionHandler = std::function<void(int32_t contextId, const char* message)>;
 
