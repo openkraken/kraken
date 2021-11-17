@@ -127,21 +127,23 @@ class TextNode extends Node {
   // Attach renderObject of current node to parent
   @override
   void attachTo(Element parent, { RenderBox? after }) {
-    willAttachRenderer();
+    if (_data != '') {
+      willAttachRenderer();
 
-    RenderLayoutBox? parentRenderLayoutBox;
-    if (parent.scrollingContentLayoutBox != null) {
-      parentRenderLayoutBox = parent.scrollingContentLayoutBox!;
-    } else {
-      parentRenderLayoutBox = (parent.renderBoxModel as RenderLayoutBox?)!;
+      RenderLayoutBox? parentRenderLayoutBox;
+      if (parent.scrollingContentLayoutBox != null) {
+        parentRenderLayoutBox = parent.scrollingContentLayoutBox!;
+      } else {
+        parentRenderLayoutBox = (parent.renderBoxModel as RenderLayoutBox?)!;
+      }
+
+      RenderTextBox renderTextBox = _renderTextBox!;
+
+      parentRenderLayoutBox.insert(renderTextBox, after: after);
+      _setTextSizeType(parentRenderLayoutBox.widthSizeType, parentRenderLayoutBox.heightSizeType);
+
+      didAttachRenderer();
     }
-
-    RenderTextBox renderTextBox = _renderTextBox!;
-
-    parentRenderLayoutBox.insert(renderTextBox, after: after);
-    _setTextSizeType(parentRenderLayoutBox.widthSizeType, parentRenderLayoutBox.heightSizeType);
-
-    didAttachRenderer();
   }
 
   // Detach renderObject of current node from parent
