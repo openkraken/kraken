@@ -210,6 +210,7 @@ static JSValue parseHTML(QjsContext* ctx, JSValueConst this_val, int argc, JSVal
     auto* body = static_cast<binding::qjs::ElementInstance*>(JS_GetOpaque(bodyValue, binding::qjs::Element::classId()));
     binding::qjs::HTMLParser::parseHTML(strHTML, body);
 
+    JS_FreeValue(ctx, bodyValue);
     JS_FreeValue(ctx, html);
   }
 
