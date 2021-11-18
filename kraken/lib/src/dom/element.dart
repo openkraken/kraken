@@ -492,6 +492,7 @@ class Element extends Node
         previousSibling = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
       }
       _detachRenderBoxModel(renderPositionPlaceholder);
+      _renderBoxModel.renderPositionPlaceholder = null;
     } else {
       previousSibling = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
     }
