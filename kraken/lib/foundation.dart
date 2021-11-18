@@ -12,3 +12,4 @@ export 'src/foundation/http_client_request.dart';
 export 'src/foundation/http_client_response.dart';
 export 'src/foundation/http_overrides.dart';
 export 'src/foundation/uri_parser.dart';
+export 'src/foundation/performance_timing.dart';
