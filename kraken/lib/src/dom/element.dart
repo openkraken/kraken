@@ -1586,7 +1586,7 @@ class Element extends Node
     }
   }
 
-  void handleMethodClick() {
+  void click() {
     Event clickEvent = MouseEvent(EVENT_CLICK, MouseEventInit(bubbles: true, cancelable: true));
     // If element not in tree, click is fired and only response to itself.
     dispatchEvent(clickEvent);
