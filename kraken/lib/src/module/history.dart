@@ -22,10 +22,10 @@ class HistoryModule extends BaseModule {
   @override
   String get name => 'History';
 
-  final Queue<HistoryItem> _previousStack = Queue();
-  final Queue<HistoryItem> _nextStack = Queue();
-
   HistoryModule(ModuleManager? moduleManager) : super(moduleManager);
+
+  Queue<HistoryItem> get _previousStack => moduleManager!.controller.previousHistoryStack;
+  Queue<HistoryItem> get _nextStack => moduleManager!.controller.nextHistoryStack;
 
   String get href {
     if (_previousStack.isEmpty) return '';
