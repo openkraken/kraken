@@ -200,7 +200,7 @@ static JSValue parseHTML(QjsContext* ctx, JSValueConst this_val, int argc, JSVal
   auto* context = static_cast<binding::qjs::JSContext*>(JS_GetContextOpaque(ctx));
 
   if (argc == 1) {
-    JSValueConst html = argv[0];
+    JSValue& html = argv[0];
 
     std::string strHTML = binding::qjs::jsValueToStdString(ctx, html);
 
@@ -211,7 +211,6 @@ static JSValue parseHTML(QjsContext* ctx, JSValueConst this_val, int argc, JSVal
     binding::qjs::HTMLParser::parseHTML(strHTML, body);
 
     JS_FreeValue(ctx, bodyValue);
-    JS_FreeValue(ctx, html);
   }
 
   return JS_NULL;
