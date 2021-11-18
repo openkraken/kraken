@@ -48,7 +48,7 @@ const loader = function(source) {
       };
 
       // Use html_parse to parser html in html file.
-      const html_parse = __kraken_parse_html__('${htmlString}');
+      const html_parse = () => __kraken_parse_html__('${htmlString}');
 
       ${
         // Eval script of html.
