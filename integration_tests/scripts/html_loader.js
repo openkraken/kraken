@@ -34,20 +34,28 @@ const loader = function(source) {
 
   let root = HTMLParser.parse(source);
   traverseParseHTML(root);
+  const htmlString = root.toString().replace(/\n/g, '');
 
   return `
     describe('html-${filepath.basename(filename)}', () => {
-      html_snapshot = async (...argv) => {
+      // Use html_snapshot to snapshot in html file.
+      const html_snapshot = async (...argv) => {
         if (argv.length === 0) {
           await snapshot(null, '${snapshotFilepath}');
         } else if (argv.length === 1) {
           await snapshot(argv[0], '${snapshotFilepath}');
         }
       };
-      __kraken_parse_html__('${root.toString().replace(/\n/g, '')}');
+
+      // Use html_parse to parser html in html file.
+      const html_parse = __kraken_parse_html__('${htmlString}');
+
       ${
+        // Eval script of html.
         scripts.length === 0 ?
-        'it("should work", async () => { await html_snapshot(); })' : scripts.join('\n')
+        'it("should work", async () => {\
+          await html_snapshot();\
+        })' : scripts.join('\n')
       }
     });
   `;
