@@ -10,10 +10,12 @@
 #include <cstdint>
 #include <unordered_map>
 #include <vector>
-
+#include <cassert>
 #include <sstream>
 #include <string>
-
+#include <atomic>
+#include <locale>
+#include <functional>
 #define HTML_TARGET_ID -1
 #define WINDOW_TARGET_ID -2
 #define DOCUMENT_TARGET_ID -3

@@ -549,6 +549,9 @@ class KrakenController {
   KrakenBundle? _bundle;
   KrakenBundle? get bundle => _bundle;
 
+  final Queue<HistoryItem> previousHistoryStack = Queue();
+  final Queue<HistoryItem> nextHistoryStack = Queue();
+
   Uri get referrer {
     if (bundleURL != null) {
       return Uri.parse(bundleURL!);
@@ -601,6 +604,8 @@ class KrakenController {
           navigationDelegate: _view.navigationDelegate);
       _view.attachView(parent!, previousSibling);
 
+      _module = KrakenModuleController(this, _view.contextId);
+
       completer.complete();
     });
 
@@ -634,7 +639,7 @@ class KrakenController {
 
   Future<void> reloadUrl(String url) async {
     assert(!_view._disposed, 'Kraken have already disposed');
-    _bundleURL = url;
+    href = url;
     await reload();
   }
 
