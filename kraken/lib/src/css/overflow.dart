@@ -164,9 +164,9 @@ mixin ElementOverflowMixin on ElementBase {
 
       if (renderBoxModel is RenderLayoutBox) {
         if (shouldScrolling) {
-          _attachScrollingContentBox();
+          attachScrollingContentBox();
         } else {
-          _detachScrollingContentBox();
+          detachScrollingContentBox();
         }
       }
     }
@@ -216,9 +216,9 @@ mixin ElementOverflowMixin on ElementBase {
 
       if (renderBoxModel is RenderLayoutBox) {
         if (shouldScrolling) {
-          _attachScrollingContentBox();
+          attachScrollingContentBox();
         } else {
-          _detachScrollingContentBox();
+          detachScrollingContentBox();
         }
       }
     }
@@ -307,7 +307,7 @@ mixin ElementOverflowMixin on ElementBase {
   // Create two repaintBoundary for an overflow scroll container.
   // Outer repaintBoundary avoid repaint of parent and sibling renderObjects when scrolling.
   // Inner repaintBoundary avoid repaint of child renderObjects when scrolling.
-  void _attachScrollingContentBox() {
+  void attachScrollingContentBox() {
     if (scrollingContentBox != null) {
       return;
     }
@@ -331,7 +331,7 @@ mixin ElementOverflowMixin on ElementBase {
     });
   }
 
-  void _detachScrollingContentBox() {
+  void detachScrollingContentBox() {
     if (scrollingContentBox == null) return;
     Element element = this as Element;
 

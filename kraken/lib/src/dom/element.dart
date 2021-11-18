@@ -196,6 +196,16 @@ class Element extends Node
       renderBoxModel = nextRenderBoxModel;
       // Ensure that the event responder is bound.
       _ensureEventResponderBound();
+
+      // RenderScrollingContent also needs to be recreated if existed.
+      RenderLayoutBox? renderScrollingContent;
+      if (renderBoxModel is RenderLayoutBox) {
+        renderScrollingContent = (renderBoxModel as RenderLayoutBox).renderScrollingContent;
+        if (renderScrollingContent != null) {
+          detachScrollingContentBox();
+          attachScrollingContentBox();
+        }
+      }
     }
   }
 
@@ -483,6 +493,7 @@ class Element extends Node
         previousSibling = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
       }
       _detachRenderBoxModel(renderPositionPlaceholder);
+      _renderBoxModel.renderPositionPlaceholder = null;
     } else {
       previousSibling = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
     }
@@ -1637,8 +1648,10 @@ class Element extends Node
 
   // Create a new RenderLayoutBox for the scrolling content.
   RenderLayoutBox createScrollingContentLayout() {
-    // FIXME: Create a empty renderStyle for do not share renderStyle with element. Current update here will break flexbox.
+    // FIXME: Create an empty renderStyle for do not share renderStyle with element.
     RenderStyle scrollingContentRenderStyle = RenderStyle(target: this);
+    // Scrolling content layout need to be share the same display with its outer layout box.
+    scrollingContentRenderStyle.display = renderStyle.display;
     RenderLayoutBox scrollingContentLayoutBox = _createRenderLayout(
       hasRepaintBoundary: true,
       renderStyle: scrollingContentRenderStyle,
