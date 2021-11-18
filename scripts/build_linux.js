@@ -9,9 +9,7 @@ const chalk = require('chalk');
 series(
   'clean',
   'compile-polyfill',
-  parallel(
-    'build-linux-arm64-kraken-lib'
-  ),
+  'build-linux-kraken-lib'
 )((err) => {
   if (err) {
     console.log(err);
