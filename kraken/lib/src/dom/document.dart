@@ -30,8 +30,4 @@ class Document extends Node {
 
   @override
   RenderObject? get renderer => throw FlutterError('Document did\'t have renderObject.');
-
-  @override
-  handleJSCall(String method, List argv) {
-  }
 }

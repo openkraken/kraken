@@ -96,9 +96,6 @@ class TextNode extends Node {
     }
   }
 
-  @override
-  handleJSCall(String method, List argv) {}
-
   void _setTextSizeType(BoxSizeType width, BoxSizeType height) {
     RenderTextBox? renderTextBox = _renderTextBox;
     if (renderTextBox == null) return;
