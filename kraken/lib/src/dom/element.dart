@@ -196,16 +196,6 @@ class Element extends Node
       renderBoxModel = nextRenderBoxModel;
       // Ensure that the event responder is bound.
       _ensureEventResponderBound();
-
-      // RenderScrollingContent also needs to be recreated if existed.
-      RenderLayoutBox? renderScrollingContent;
-      if (renderBoxModel is RenderLayoutBox) {
-        renderScrollingContent = (renderBoxModel as RenderLayoutBox).renderScrollingContent;
-        if (renderScrollingContent != null) {
-          detachScrollingContentBox();
-          attachScrollingContentBox();
-        }
-      }
     }
   }
 
