@@ -8,18 +8,17 @@
 
 #include <quickjs/list.h>
 #include <quickjs/quickjs.h>
+#include <atomic>
+#include <cassert>
+#include <cmath>
+#include <cstring>
+#include <locale>
 #include <memory>
+#include <mutex>
 #include <unordered_map>
 #include "js_context_macros.h"
 #include "kraken_foundation.h"
 #include "qjs_patch.h"
-#include <cmath>
-#include <cstring>
-#include <cassert>
-#include <cstring>
-#include <atomic>
-#include <locale>
-#include <mutex>
 using QjsContext = JSContext;
 using JSExceptionHandler = std::function<void(int32_t contextId, const char* message)>;
 
