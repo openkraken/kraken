@@ -70,7 +70,17 @@ class TextNode extends Node {
 
   set data(String? newData) {
     assert(newData != null);
+
+    String lastData = _data!;
     _data = newData;
+
+    // Empty string of textNode should not attach to render tree.
+    if (isRendererAttached && lastData.isNotEmpty && newData!.isEmpty) {
+      detach();
+    } else if (!isRendererAttached && lastData.isEmpty && newData!.isNotEmpty) {
+      attachTo(parentElement!);
+    }
+
     updateTextStyle();
   }
 
@@ -127,6 +137,9 @@ class TextNode extends Node {
   // Attach renderObject of current node to parent
   @override
   void attachTo(Element parent, { RenderBox? after }) {
+    // Empty string of TextNode should not attach to render tree.
+    if (_data == null || _data!.isEmpty) return;
+
     willAttachRenderer();
 
     RenderLayoutBox? parentRenderLayoutBox;
