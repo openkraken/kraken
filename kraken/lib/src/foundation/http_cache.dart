@@ -27,7 +27,8 @@ enum HttpCacheMode {
 }
 
 class HttpCacheController {
-  static HttpCacheMode mode = HttpCacheMode.DEFAULT;
+  // Disable HTTP Cache for Windows and Linux
+  static HttpCacheMode mode = Platform.isLinux && Platform.isWindows ? HttpCacheMode.NO_CACHE : HttpCacheMode.DEFAULT;
 
   static final Map<String, HttpCacheController> _controllers = HashMap();
 
