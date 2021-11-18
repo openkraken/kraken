@@ -4,11 +4,11 @@
  */
 
 #include "kraken_bridge.h"
+#include <cassert>
 #include "dart_methods.h"
 #include "foundation/inspector_task_queue.h"
 #include "foundation/logging.h"
 #include "foundation/ui_task_queue.h"
-#include <cassert>
 #if KRAKEN_JSC_ENGINE
 #include "bindings/jsc/KOM/performance.h"
 #elif KRAKEN_QUICK_JS_ENGINE
