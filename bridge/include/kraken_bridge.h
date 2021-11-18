@@ -21,7 +21,7 @@
 #define KRAKEN_EXPORT __attribute__((__visibility__("default")))
 
 KRAKEN_EXPORT
-std::__thread_id getUIThreadId();
+std::thread::id getUIThreadId();
 
 struct NativeString {
   const uint16_t* string;

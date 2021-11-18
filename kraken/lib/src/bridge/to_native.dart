@@ -498,9 +498,14 @@ void flushUICommand() {
         print('$e\n$stack');
       }
     }
+
     // For pending style properties, we needs to flush to render style.
     for (int id in pendingStylePropertiesTargets.keys) {
-      controller.view.flushPendingStyleProperties(id);
+      try {
+        controller.view.flushPendingStyleProperties(id);
+      } catch (e, stack) {
+        print('$e\n$stack');
+      }
     }
     pendingStylePropertiesTargets.clear();
   }

@@ -133,7 +133,6 @@ class StyleElement extends Element {
   }
   @override
   void connectedCallback() {
-    super.connectedCallback();
     if (type == _CSS_MIME) {
       StringBuffer buffer = StringBuffer();
        childNodes.forEach((node) {
@@ -145,13 +144,14 @@ class StyleElement extends Element {
       _styleSheet = CSSStyleSheet(style);
       elementManager.addStyleSheet(_styleSheet!);
     }
+    super.connectedCallback();
   }
 
   @override
   void disconnectedCallback() {
-    super.disconnectedCallback();
     if (_styleSheet != null) {
       elementManager.removeStyleSheet(_styleSheet!);
     }
+    super.disconnectedCallback();
   }
 }

@@ -89,6 +89,36 @@ describe('TextNode', () => {
     await snapshot();
   });
 
+  it('empty string of textNode set data should work', async () => {
+    const text = document.createTextNode('');
+    document.body.appendChild(text);
+    text.data = 'aaa';
+
+    await snapshot();
+  });
+
+  it('empty string of textNode should not attach the render object to parent.', async () => {
+    const container = document.createElement('div');
+    container.style.display = 'flex';
+    container.style.justifyContent = 'space-between';
+    container.style.alignItems = 'center';
+
+    document.body.appendChild(container);
+
+    container.appendChild(document.createTextNode(''));
+
+    for (let i = 0; i < 3; i++) {
+      const child = document.createElement('div');
+      child.style.border = '1px solid red';
+      child.textContent = `${i}`;
+      container.appendChild(child);
+    }
+
+    container.appendChild(document.createTextNode(''));
+
+    await snapshot();
+  });
+
   it('createTextNode should not has height when the text is a empty string', async () => {
     const child = document.createElement('div');
     child.style.width = '10px';

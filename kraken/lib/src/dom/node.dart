@@ -25,22 +25,19 @@ class Comment extends Node {
   String get nodeName => '#comment';
 
   @override
-  RenderObject? get renderer => null;
+  RenderBox? get renderer => null;
 
   // @TODO: Get data from bridge side.
   String get data => '';
 
   int get length => data.length;
-
-  @override
-  dynamic handleJSCall(String method, List<dynamic> argv) {}
 }
 
 /// [RenderObjectNode] provide the renderObject related abstract life cycle for
 /// [Node] or [Element]s, which wrap [RenderObject]s, which provide the actual
 /// rendering of the application.
 abstract class RenderObjectNode {
-  RenderObject? get renderer => throw FlutterError('This node has no render object implemented.');
+  RenderBox? get renderer => throw FlutterError('This node has no render object implemented.');
 
   /// Creates an instance of the [RenderObject] class that this
   /// [RenderObjectNode] represents, using the configuration described by this
@@ -49,7 +46,7 @@ abstract class RenderObjectNode {
   /// This method should not do anything with the children of the render object.
   /// That should instead be handled by the method that overrides
   /// [Node.attachTo] in the object rendered by this object.
-  RenderObject createRenderer();
+  RenderBox createRenderer();
 
   /// The renderObject will be / has been insert into parent. You can apply properties
   /// to renderObject.
@@ -93,12 +90,10 @@ abstract class LifecycleCallbacks {
 
 abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCallbacks {
   List<Node> childNodes = [];
+  /// The Node.parentNode read-only property returns the parent of the specified node in the DOM tree.
   Node? parentNode;
   NodeType nodeType;
   String get nodeName;
-
-  /// The Node.parentNode read-only property returns the parent of the specified node in the DOM tree.
-  Node? get parent => parentNode;
 
   /// The Node.parentElement read-only property returns the DOM node's parent Element,
   /// or null if the node either has no parent, or its parent isn't a DOM Element.
@@ -169,10 +164,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   }
 
   @override
-  handleJSCall(String method, List<dynamic> argv) {}
-
-  @override
-  RenderObject createRenderer() => throw FlutterError('[createRenderer] is not implemented.');
+  RenderBox createRenderer() => throw FlutterError('[createRenderer] is not implemented.');
 
   @override
   void willAttachRenderer() {}
@@ -255,20 +247,28 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
 
   /// Ensure node is not connected to a parent element.
   void _ensureOrphan() {
-    Node? _parent = parent;
+    Node? _parent = parentNode;
     if (_parent != null) {
       _parent.removeChild(this);
     }
   }
 
   /// Ensure child and child's child render object is attached.
-  void ensureChildAttached() {}
+  void ensureChildAttached() { }
 
   @override
-  void connectedCallback() {}
+  void connectedCallback() {
+    for (var child in childNodes) {
+      child.connectedCallback();
+    }
+  }
 
   @override
-  void disconnectedCallback() {}
+  void disconnectedCallback() {
+    for (var child in childNodes) {
+      child.disconnectedCallback();
+    }
+  }
 }
 
 /// https://dom.spec.whatwg.org/#dom-node-nodetype

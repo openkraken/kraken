@@ -666,6 +666,8 @@ describe('containing-block legacy', () => {
       height: '50px',
     });
     div2.appendChild(div3);
+
+    await snapshot();
   });
 
   it('absolute positioned elements near relative ancestor', async () => {
@@ -704,6 +706,8 @@ describe('containing-block legacy', () => {
       height: '50px',
     });
     div2.appendChild(div3);
+
+    await snapshot();
   });
 
   it('absolute positioned elements near fixed ancestor', async () => {
@@ -742,5 +746,7 @@ describe('containing-block legacy', () => {
       height: '50px',
     });
     div2.appendChild(div3);
+
+    await snapshot();
   });
 });
