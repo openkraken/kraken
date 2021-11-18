@@ -104,12 +104,8 @@ class TextNode extends Node {
       KrakenRenderParagraph renderParagraph = _renderTextBox!.child as KrakenRenderParagraph;
       renderParagraph.markNeedsLayout();
 
-      RenderLayoutBox? parentRenderLayoutBox;
-      if (_parentElement.scrollingContentBox != null) {
-        parentRenderLayoutBox = _parentElement.scrollingContentBox!;
-      } else {
-        parentRenderLayoutBox = (_parentElement.renderBoxModel as RenderLayoutBox?)!;
-      }
+      RenderLayoutBox parentRenderLayoutBox = _parentElement.renderBoxModel as RenderLayoutBox;
+      parentRenderLayoutBox = parentRenderLayoutBox.renderScrollingContent ?? parentRenderLayoutBox;
       _setTextSizeType(parentRenderLayoutBox.widthSizeType, parentRenderLayoutBox.heightSizeType);
     }
   }
@@ -129,7 +125,7 @@ class TextNode extends Node {
     createRenderer();
 
     if (parent.renderBoxModel is RenderLayoutBox) {
-      RenderLayoutBox? parentRenderLayoutBox = parent.renderBoxModel as RenderLayoutBox;
+      RenderLayoutBox parentRenderLayoutBox = parent.renderBoxModel as RenderLayoutBox;
       parentRenderLayoutBox = parentRenderLayoutBox.renderScrollingContent ?? parentRenderLayoutBox;
       parentRenderLayoutBox.insert(_renderTextBox!, after: after);
       _applyTextStyle();

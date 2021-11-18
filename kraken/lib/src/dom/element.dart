@@ -374,7 +374,7 @@ class Element extends Node
     }
 
     // Update scrolling content layout type.
-    if (previousRenderLayoutBox != nextRenderLayoutBox && nextRenderLayoutBox?.renderScrollingContent != null) {
+    if (previousRenderLayoutBox != nextRenderLayoutBox && previousRenderLayoutBox?.renderScrollingContent != null) {
       updateScrollingContentBox();
     }
 
@@ -516,8 +516,9 @@ class Element extends Node
 
   void addChild(RenderBox child) {
     if (_renderLayoutBox != null) {
+      RenderLayoutBox? scrollingContentBox = _renderLayoutBox!.renderScrollingContent;
       if (scrollingContentBox != null) {
-        scrollingContentBox!.add(child);
+        scrollingContentBox.add(child);
       } else {
         _renderLayoutBox!.add(child);
       }
@@ -604,8 +605,9 @@ class Element extends Node
       for (Node child in childNodes) {
         if (_renderLayoutBox != null && !child.isRendererAttached) {
           RenderBox? after;
+          RenderLayoutBox? scrollingContentBox = _renderLayoutBox!.renderScrollingContent;
           if (scrollingContentBox != null) {
-            after = scrollingContentBox!.lastChild;
+            after = scrollingContentBox.lastChild;
           } else {
             after = _renderLayoutBox!.lastChild;
           }
@@ -627,12 +629,16 @@ class Element extends Node
     }
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
-      if (!child.isRendererAttached) {
+      if (!child.isRendererAttached && _renderLayoutBox != null) {
+        RenderBox? after;
+        RenderLayoutBox? scrollingContentBox = _renderLayoutBox!.renderScrollingContent;
         if (scrollingContentBox != null) {
-          child.attachTo(this, after: scrollingContentBox!.lastChild);
-        } else if (!_isIntrinsicBox) {
-          child.attachTo(this, after: _renderLayoutBox!.lastChild);
+          after = scrollingContentBox.lastChild;
+        } else {
+          after = _renderLayoutBox!.lastChild;
         }
+
+        child.attachTo(this, after: after);
       }
     }
 
@@ -1707,7 +1713,6 @@ void _removeRenderBoxModel(RenderBoxModel renderBox) {
   // Remove scrolling content layout box of overflow element.
   if (renderBox is RenderLayoutBox && renderBox.renderScrollingContent != null) {
     renderBox.remove(renderBox.renderScrollingContent!);
-    renderBox.renderScrollingContent = null;
   }
   // Remove placeholder of positioned element.
   RenderPositionPlaceholder? renderPositionHolder = renderBox.renderPositionPlaceholder;

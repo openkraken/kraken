@@ -163,7 +163,14 @@ class RenderLayoutBox extends RenderBoxModel
   );
 
   // House content which can be scrolled.
-  RenderLayoutBox? renderScrollingContent;
+  RenderLayoutBox? get renderScrollingContent {
+    if (firstChild is RenderLayoutBox) {
+      RenderLayoutBox _firstChild = firstChild as RenderLayoutBox;
+      if (_firstChild.isScrollingContentBox) {
+        return _firstChild;
+      }
+    }
+  }
 
   @override
   void markNeedsLayout() {
@@ -490,15 +497,6 @@ class RenderLayoutBox extends RenderBoxModel
       }
     }
     scrollableSize = Size(maxScrollableX, maxScrollableY);
-  }
-
-  @override
-  T copyWith<T extends RenderBoxModel>(T copiedRenderBoxModel) {
-    if (copiedRenderBoxModel is RenderLayoutBox) {
-      copiedRenderBoxModel.renderScrollingContent = renderScrollingContent;
-    }
-
-    return super.copyWith(copiedRenderBoxModel);
   }
 
   /// Convert to [RenderFlexLayout]
