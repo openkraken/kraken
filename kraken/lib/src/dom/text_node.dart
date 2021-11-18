@@ -69,6 +69,12 @@ class TextNode extends Node {
 
       if (nextSibling == null) {
         collapsedData = collapsedData.trimRight();
+      } else if (nextSibling is Element) {
+        //if nextSibling is block,should trimRight slef.
+        CSSDisplay? display = (nextSibling as Element).renderBoxModel?.renderStyle?.display;
+        if (display == CSSDisplay.block || display == CSSDisplay.sliver || display == CSSDisplay.flex) {
+          collapsedData = collapsedData.trimRight();
+        }
       }
 
       return collapsedData;
