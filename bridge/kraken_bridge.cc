@@ -8,7 +8,7 @@
 #include "foundation/inspector_task_queue.h"
 #include "foundation/logging.h"
 #include "foundation/ui_task_queue.h"
-
+#include <cassert>
 #if KRAKEN_JSC_ENGINE
 #include "bindings/jsc/KOM/performance.h"
 #elif KRAKEN_QUICK_JS_ENGINE
@@ -52,9 +52,9 @@ int maxPoolSize = 0;
 kraken::JSBridge** contextPool;
 NativeScreen screen;
 
-std::__thread_id uiThreadId;
+std::thread::id uiThreadId;
 
-std::__thread_id getUIThreadId() {
+std::thread::id getUIThreadId() {
   return uiThreadId;
 }
 
