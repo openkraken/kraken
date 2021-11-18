@@ -61,7 +61,7 @@ class TextNode extends Node {
         collapsedData = collapsedData.trimLeft();
       } else if (previousSibling is Element) {
         //if previousSibling is block,should trimLeft slef.
-        CSSDisplay? display = (previousSibling as Element).renderBoxModel?.renderStyle?.display;
+        CSSDisplay? display = (previousSibling as Element).renderBoxModel?.renderStyle.display;
         if (display == CSSDisplay.block || display == CSSDisplay.sliver || display == CSSDisplay.flex) {
           collapsedData = collapsedData.trimLeft();
         }
@@ -71,7 +71,7 @@ class TextNode extends Node {
         collapsedData = collapsedData.trimRight();
       } else if (nextSibling is Element) {
         //if nextSibling is block,should trimRight slef.
-        CSSDisplay? display = (nextSibling as Element).renderBoxModel?.renderStyle?.display;
+        CSSDisplay? display = (nextSibling as Element).renderBoxModel?.renderStyle.display;
         if (display == CSSDisplay.block || display == CSSDisplay.sliver || display == CSSDisplay.flex) {
           collapsedData = collapsedData.trimRight();
         }
