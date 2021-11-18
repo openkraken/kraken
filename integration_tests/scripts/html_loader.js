@@ -54,6 +54,7 @@ const loader = function(source) {
         // Eval script of html.
         scripts.length === 0 ?
         'it("should work", async () => {\
+          html_parse();\
           await html_snapshot();\
         })' : scripts.join('\n')
       }
