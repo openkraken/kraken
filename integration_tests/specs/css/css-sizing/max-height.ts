@@ -383,7 +383,7 @@ describe('max-height', () => {
 
     requestAnimationFrame(async () => {
       cont.style.maxHeight = 'none';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });

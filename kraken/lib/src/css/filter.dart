@@ -8,7 +8,6 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/rendering.dart';
 
 const String GRAYSCALE = 'grayscale';
 const String SEPIA = 'sepia';
@@ -91,7 +90,7 @@ List<double> _multiplyMatrix5(List<double>? a, List<double> b) {
 
 /// Impl W3C Filter Effects Spec:
 ///   https://www.w3.org/TR/filter-effects-1/#definitions
-mixin CSSFilterEffectsMixin {
+mixin CSSFilterEffectsMixin on RenderStyleBase {
 
   // Get the color filter.
   // eg: 'grayscale(1) grayscale(0.5)' -> matrix5(grayscale(1)) · matrix5(grayscale(0.5))
@@ -137,45 +136,64 @@ mixin CSSFilterEffectsMixin {
   }
 
   // Get the image filter.
-  static ImageFilter? _parseImageFilters(List<CSSFunctionalNotation> functions, RenderStyle renderStyle) {
-    Size viewportSize = renderStyle.viewportSize;
-    RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
-    double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
-    double fontSize = renderStyle.fontSize;
+  ImageFilter? _parseImageFilters(List<CSSFunctionalNotation> functions) {
+    RenderStyle renderStyle = this as RenderStyle;
     if (functions.isNotEmpty) {
       for (int i = 0; i < functions.length; i ++) {
         CSSFunctionalNotation f = functions[i];
         switch (f.name.toLowerCase()) {
           case BLUR:
-            double amount = CSSLength.parseLength(
-              f.args.first,
-              viewportSize: viewportSize,
-              rootFontSize: rootFontSize,
-              fontSize: fontSize
-            )!;
-            return ImageFilter.blur(sigmaX: amount, sigmaY: amount);
+            CSSLengthValue length = CSSLength.parseLength(f.args.first, renderStyle, FILTER);
+            double amount = length.computedValue;
+            ImageFilter imageFilter =  ImageFilter.blur(sigmaX: amount, sigmaY: amount);
+            // Only length is not relative value will cached the image filter.
+            if (length.type == CSSLengthType.PX) {
+              _cachedImageFilter = imageFilter;
+            }
+            return imageFilter;
         }
       }
     }
     return null;
   }
 
-  void updateFilterEffects(RenderBoxModel renderBoxModel, String filter) {
-    List<CSSFunctionalNotation> functions = CSSFunction.parseFunction(filter);
-    ColorFilter? colorFilter = _parseColorFilters(functions);
-    if (colorFilter != null) {
-      renderBoxModel.colorFilter = colorFilter;
+  ColorFilter? _cachedColorFilter;
+  ColorFilter? get colorFilter {
+    if (_filter == null) {
+      return null;
+    } else if (_cachedColorFilter != null) {
+      return _cachedColorFilter;
+    } else {
+      return _cachedColorFilter = _parseColorFilters(_filter!);
     }
+  }
 
-    RenderStyle renderStyle = renderBoxModel.renderStyle;
-    ImageFilter? imageFilter = _parseImageFilters(functions, renderStyle);
-    if (imageFilter != null) {
-      renderBoxModel.imageFilter = imageFilter;
+  ImageFilter? _cachedImageFilter;
+  ImageFilter? get imageFilter {
+    if (_filter == null) {
+      return null;
+    } else if (_cachedImageFilter != null) {
+      return _cachedImageFilter;
+    } else {
+      return _cachedImageFilter = _parseImageFilters(_filter!);
     }
+  }
 
-    if (!kReleaseMode) {
-      if (colorFilter == null && imageFilter == null) {
-        print('[WARNING] Parse CSS Filter failed or not supported: "$filter"');
+  List<CSSFunctionalNotation>? _filter;
+  List<CSSFunctionalNotation>? get filter => _filter;
+  set filter(List<CSSFunctionalNotation>? functions) {
+    _filter = functions;
+    // Clear cache when filter changed.
+    _cachedColorFilter = null;
+    _cachedImageFilter = null;
+    renderBoxModel!.markNeedsPaint();
+
+    if (!kReleaseMode && functions != null) {
+      ColorFilter? colorFilter = _parseColorFilters(functions);
+      // RenderStyle renderStyle = this;
+      ImageFilter? imageFilter = _parseImageFilters(functions);
+      if (imageFilter == null && colorFilter == null) {
+        print('[WARNING] Parse CSS Filter failed or not supported: "$functions"');
         String supportedFilters = '$GRAYSCALE $SEPIA $BLUR';
         print('Kraken only support following filters: $supportedFilters');
       }

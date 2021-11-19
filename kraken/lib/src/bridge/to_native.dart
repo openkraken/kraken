@@ -84,7 +84,7 @@ final DartInvokeEventListener _invokeModuleEvent =
     nativeDynamicLibrary.lookup<NativeFunction<NativeInvokeEventListener>>('invokeModuleEvent').asFunction();
 
 void invokeModuleEvent(int contextId, String moduleName, Event? event, String extra) {
-  if(KrakenController.getControllerOfJSContextId(contextId) == null) {
+  if (KrakenController.getControllerOfJSContextId(contextId) == null) {
     return;
   }
   Pointer<NativeString> nativeModuleName = stringToNativeString(moduleName);
@@ -96,12 +96,10 @@ void invokeModuleEvent(int contextId, String moduleName, Event? event, String ex
 typedef DartDispatchEvent = void Function(
     Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeString> eventType, Pointer<Void> nativeEvent, int isCustomEvent);
 
-void emitUIEvent(int contextId, EventTarget eventTarget, Event event) {
+void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativeEventTarget, Event event) {
   if(KrakenController.getControllerOfJSContextId(contextId) == null) {
     return;
   }
-  if (eventTarget.disposed) return;
-  Pointer<NativeEventTarget> nativeEventTarget = eventTarget.nativeEventTargetPtr;
   DartDispatchEvent dispatchEvent = nativeEventTarget.ref.dispatchEvent.asFunction();
   Pointer<Void> rawEvent = event.toRaw().cast<Void>();
   bool isCustomEvent = event is CustomEvent;
@@ -225,6 +223,16 @@ final DartRegisterPluginByteCode _registerPluginByteCode =
 void registerPluginByteCode(Uint8List bytecode, String name) {
   Pointer<Uint8> bytes = malloc.allocate(sizeOf<Uint8>() * bytecode.length);
   _registerPluginByteCode(bytes, bytecode.length, name.toNativeUtf8());
+}
+
+typedef NativeProfileModeEnabled = Int32 Function();
+typedef DartProfileModeEnabled = int Function();
+
+final DartProfileModeEnabled _profileModeEnabled =
+nativeDynamicLibrary.lookup<NativeFunction<NativeProfileModeEnabled>>('profileModeEnabled').asFunction();
+
+bool profileModeEnabled() {
+  return _profileModeEnabled() == 1 ? true : false;
 }
 
 // Regisdster reloadJsContext
@@ -434,7 +442,7 @@ void flushUICommand() {
       PerformanceTiming.instance().mark(PERF_FLUSH_UI_COMMAND_END);
     }
 
-    List<List<String>> _renderStyleCommands = [];
+    Map<int, bool> pendingStylePropertiesTargets = {};
 
     // For new ui commands, we needs to tell engine to update frames.
     for (int i = 0; i < commandLength; i++) {
@@ -478,8 +486,8 @@ void flushUICommand() {
           case UICommandType.setStyle:
             String key = command.args[0];
             String value = command.args[1];
-            controller.view.setStyle(id, key, value);
-            _renderStyleCommands.add([id.toString(), key, value]);
+            controller.view.setInlineStyle(id, key, value);
+            pendingStylePropertiesTargets[id] = true;
             break;
           case UICommandType.setProperty:
             String key = command.args[0];
@@ -501,15 +509,14 @@ void flushUICommand() {
       }
     }
 
-    try {
-      for (int i = 0; i < _renderStyleCommands.length; i ++) {
-        var pair = _renderStyleCommands[i];
-        controller.view.setRenderStyle(int.parse(pair[0]), pair[1], pair[2]);
+    // For pending style properties, we needs to flush to render style.
+    for (int id in pendingStylePropertiesTargets.keys) {
+      try {
+        controller.view.flushPendingStyleProperties(id);
+      } catch (e, stack) {
+        print('$e\n$stack');
       }
-    } catch (e, stack) {
-      print('$e\n$stack');
     }
-
-    _renderStyleCommands.clear();
+    pendingStylePropertiesTargets.clear();
   }
 }

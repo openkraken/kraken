@@ -14,6 +14,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver, RouteInformation;
 import 'package:kraken/bridge.dart';
+import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/launcher.dart';
@@ -50,10 +51,9 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   static Map<int, Pointer<NativeEventTarget>> windowNativePtrMap = {};
 
   static double FOCUS_VIEWINSET_BOTTOM_OVERALL = 32;
-
+  // Single child renderView.
   late final RenderViewportBox viewport;
   late final Document document;
-  late final RenderBox _viewportRenderObject;
   late final Element viewportElement;
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
   bool? showPerformanceOverlayOverride;
@@ -86,9 +86,6 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     HTMLElement documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId]!, this);
     setEventTarget(documentElement);
 
-    viewport.child = viewportElement.renderBoxModel;
-    _viewportRenderObject = viewport;
-
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_INIT_END);
     }
@@ -99,8 +96,9 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     setEventTarget(window);
 
     document = Document(DOCUMENT_ID, documentNativePtrMap[contextId]!, this, documentElement);
-    document.appendChild(documentElement);
     setEventTarget(document);
+
+    documentElement.attachTo(document);
 
     element_registry.defineBuiltInElements();
 
@@ -199,15 +197,22 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     setEventTarget(comment);
   }
 
-  void cloneNode(int oldId, int newId) {
-    Element oldTarget = getEventTargetByTargetId<Element>(oldId)!;
-    Element newTarget = getEventTargetByTargetId<Element>(newId)!;
+  void cloneNode(int originalId, int newId) {
+    EventTarget originalTarget = getEventTargetByTargetId(originalId)!;
+    EventTarget newTarget = getEventTargetByTargetId(newId)!;
 
-    newTarget.style = oldTarget.style.clone(newTarget);
-    newTarget.properties.clear();
-    oldTarget.properties.forEach((key, value) {
-      newTarget.setProperty(key, value);
-    });
+    // Current only element clone will process in dart.
+    if (originalTarget is Element) {
+      Element newElement = newTarget as Element;
+      // Copy inline style.
+      originalTarget.inlineStyle.forEach((key, value) {
+        newElement.setInlineStyle(key, value);
+      });
+      // Copy element attributes.
+      originalTarget.properties.forEach((key, value) {
+        newElement.setProperty(key, value);
+      });
+    }
   }
 
   void removeNode(int targetId) {
@@ -216,11 +221,30 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     Node target = getEventTargetByTargetId<Node>(targetId)!;
 
     // Should detach renderObject.
-    target.detach();
+    target.disposeRenderObject();
 
     target.parentNode?.removeChild(target);
 
     _debugDOMTreeChanged();
+  }
+
+  // TODO: https://wicg.github.io/construct-stylesheets/#using-constructed-stylesheets
+  List<CSSStyleSheet> adoptedStyleSheets = [];
+  List<CSSStyleSheet> styleSheets = [];
+
+  void addStyleSheet(CSSStyleSheet sheet) {
+    styleSheets.add(sheet);
+    recalculateDocumentStyle();
+  }
+
+  void removeStyleSheet(CSSStyleSheet sheet) {
+    styleSheets.remove(sheet);
+    recalculateDocumentStyle();
+  }
+
+  void recalculateDocumentStyle() {
+    // Recalculate style for all nodes sync.
+    document.documentElement.recalculateNestedStyle();
   }
 
   void setProperty(int targetId, String key, dynamic value) {
@@ -264,26 +288,27 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     }
   }
 
-  void setStyle(int targetId, String key, dynamic value) {
+  void setInlineStyle(int targetId, String key, dynamic value) {
     assert(existsTarget(targetId), 'id: $targetId key: $key value: $value');
     Node? target = getEventTargetByTargetId<Node>(targetId);
     if (target == null) return;
 
     if (target is Element) {
-      target.setStyle(key, value);
+      target.setInlineStyle(key, value);
     } else {
       debugPrint('Only element has style, try setting style.$key from Node(#$targetId).');
     }
   }
 
-  void setRenderStyle(int targetId, String key, dynamic value) {
+  void flushPendingStyleProperties(int targetId) {
+    if (!existsTarget(targetId)) return;
     Node? target = getEventTargetByTargetId<Node>(targetId);
     if (target == null) return;
 
     if (target is Element) {
-      target.setRenderStyle(key, value);
+      target.style.flushPendingProperties();
     } else {
-      debugPrint('Only element has style, try setting style.$key from Node(#$targetId).');
+      debugPrint('Only element has style, try flushPendingStyleProperties from Node(#$targetId).');
     }
   }
 
@@ -332,7 +357,13 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     if (!existsTarget(targetId)) return;
     EventTarget target = getEventTargetByTargetId<EventTarget>(targetId)!;
 
-    target.addEvent(eventType);
+    if (target is Element) {
+      target.addEvent(eventType);
+    } else if (target is Window) {
+      target.addEvent(eventType);
+    } else if (target is Document) {
+      target.addEvent(eventType);
+    }
   }
 
   void removeEvent(int targetId, String eventType) {
@@ -344,7 +375,12 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   RenderBox getRootRenderBox() {
-    return _viewportRenderObject;
+    return viewport;
+  }
+
+  double getRootFontSize() {
+    RenderBoxModel rootBoxModel = viewportElement.renderBoxModel!;
+    return rootBoxModel.renderStyle.fontSize.computedValue;
   }
 
   bool showPerformanceOverlay = false;
@@ -393,12 +429,12 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   void detach() {
-    RenderObject? parent = _viewportRenderObject.parent as RenderObject?;
+    RenderObject? parent = viewport.parent as RenderObject?;
 
     if (parent == null) return;
 
     // Detach renderObjects
-    viewportElement.detach();
+    viewportElement.disposeRenderObject();
 
     // run detachCallbacks
     for (var callback in _detachCallbacks) {
@@ -442,7 +478,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       bool shouldScrollByToCenter = false;
       InputElement? focusInputElement = InputElement.focusInputElement;
       if (focusInputElement != null) {
-        RenderBox? renderer = focusInputElement.renderer as RenderBox?;
+        RenderBox? renderer = focusInputElement.renderer;
         if (renderer != null && renderer.hasSize) {
           Offset focusOffset = renderer.localToGlobal(Offset.zero);
           // FOCUS_VIEWINSET_BOTTOM_OVERALL to meet border case.
