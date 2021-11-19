@@ -239,6 +239,79 @@ class RenderStyle
     }
   }
 
+  double? computeLogicalContentWidth() {
+    RenderBoxModel current = renderBoxModel!;
+    RenderStyle renderStyle = this;
+    double? logicalWidth;
+
+    CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
+    switch (effectiveDisplay) {
+      case CSSDisplay.block:
+      case CSSDisplay.flex:
+      case CSSDisplay.sliver:
+        //  Use width directly if defined.
+        if (renderStyle.width.isNotAuto) {
+          logicalWidth = renderStyle.width.computedValue;
+
+        // Use tight constraints if constraints is tight and width not exist.
+        } else if (current.hasSize && current.constraints.hasTightWidth) {
+          logicalWidth = current.constraints.maxWidth;
+
+        // Block element (except replaced element) will stretch to the content width of its parent.
+        } else if (current is! RenderIntrinsic &&
+          current.parent != null &&
+          current.parent is RenderBoxModel
+        ) {
+          RenderBoxModel parent = current.parent as RenderBoxModel;
+          logicalWidth = parent.logicalContentWidth;
+        }
+        break;
+      case CSSDisplay.inlineBlock:
+      case CSSDisplay.inlineFlex:
+        if (renderStyle.width.isNotAuto) {
+          logicalWidth = renderStyle.width.computedValue;
+        } else if (current.hasSize && current.constraints.hasTightWidth) {
+          logicalWidth = current.constraints.maxWidth;
+        }
+        break;
+      case CSSDisplay.inline:
+        break;
+      default:
+        break;
+    }
+
+    double? intrinsicRatio = current.intrinsicRatio;
+
+    // Get width by intrinsic ratio for replaced element if width is auto.
+    if (logicalWidth == null && intrinsicRatio != null) {
+      logicalWidth = renderStyle.getWidthByIntrinsicRatio();
+    }
+
+    // Constrain width by min-width and max-width.
+    if (renderStyle.minWidth.isNotAuto) {
+      double minWidth = renderStyle.minWidth.computedValue;
+      if (logicalWidth != null && logicalWidth < minWidth) {
+        logicalWidth = minWidth;
+      }
+    }
+    if (renderStyle.maxWidth.isNotNone) {
+      double maxWidth = renderStyle.maxWidth.computedValue;
+      if (logicalWidth != null && logicalWidth > maxWidth) {
+        logicalWidth = maxWidth;
+      }
+    }
+
+    double? logicalContentWidth;
+    // Subtract padding and border width to get content width.
+    if (logicalWidth != null) {
+      logicalContentWidth = logicalWidth -
+        renderStyle.border.horizontal -
+        renderStyle.padding.horizontal;
+    }
+
+    return logicalContentWidth;
+  }
+
   // Content width of render box model calculated from style.
   double? getLogicalContentWidth() {
     RenderStyle renderStyle = this;
@@ -338,6 +411,65 @@ class RenderStyle
     } else {
       return null;
     }
+  }
+
+  double? computeLogicalContentHeight() {
+    RenderBoxModel current = renderBoxModel!;
+    RenderStyle renderStyle = this;
+    double? logicalHeight;
+
+    CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
+
+    // Inline element has no height.
+    if (effectiveDisplay != CSSDisplay.inline) {
+      if (renderStyle.height.isNotAuto) {
+        logicalHeight = renderStyle.height.computedValue;
+
+      // Use tight constraints if constraints is tight and height not exist.
+      } else if (current.hasSize && current.constraints.hasTightHeight) {
+        logicalHeight = current.constraints.maxHeight;
+
+      } else {
+        if (current.parent != null && current.parent is RenderBoxModel) {
+          RenderBoxModel parent = current.parent as RenderBoxModel;
+          RenderStyle parentRenderStyle = parent.renderStyle;
+          if (CSSSizingMixin.isStretchChildHeight(parentRenderStyle, renderStyle)) {
+            logicalHeight = parent.logicalContentHeight;
+          }
+        }
+      }
+    }
+
+    double? intrinsicRatio = current.intrinsicRatio;
+
+    // Get height by intrinsic ratio for replaced element if height is auto.
+    if (logicalHeight == null && intrinsicRatio != null) {
+      logicalHeight = renderStyle.getHeightByIntrinsicRatio();
+    }
+
+    // Constrain height by min-height and max-height.
+    if (renderStyle.minHeight.isNotAuto) {
+      double minHeight = renderStyle.minHeight.computedValue;
+      if (logicalHeight != null && logicalHeight < minHeight) {
+        logicalHeight = minHeight;
+      }
+    }
+    if (renderStyle.maxHeight.isNotNone) {
+      double maxHeight = renderStyle.maxHeight.computedValue;
+      if (logicalHeight != null && logicalHeight > maxHeight) {
+        logicalHeight = maxHeight;
+      }
+    }
+
+    double? logicalContentHeight;
+    // Subtract padding and border width to get content width.
+    if (logicalHeight != null) {
+      logicalContentHeight = logicalHeight -
+        renderStyle.border.horizontal -
+        renderStyle.padding.horizontal;
+    }
+
+    return logicalContentHeight;
   }
 
   // Content height of render box model calculated from style.
