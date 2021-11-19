@@ -71,8 +71,10 @@ if (ENABLE_ASAN)
   add_link_options(-fsanitize=address -fno-omit-frame-pointer)
 endif ()
 
-if (DEFINED ${PLATFORM} AND ${PLATFORM} STREQUAL "OS")
-  add_compile_options(-fno-aligned-allocation)
+if (DEFINED PLATFORM)
+  if (${PLATFORM} STREQUAL "OS")
+    add_compile_options(-fno-aligned-allocation)
+  endif()
 endif()
 
 list(APPEND BRIDGE_SOURCE
