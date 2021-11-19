@@ -448,10 +448,11 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit'
   });
 
-  // Generate builds scripts for ARMv7, ARMv7, ARM64
+  // Generate builds scripts for ARMv7s, ARMv7
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
     -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
     -DPLATFORM=OS \
+    -DARCHS="armv7;armv7s" \
     -DDEPLOYMENT_TARGET=9.0 \
     ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
     -DENABLE_BITCODE=TRUE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm -S ${paths.bridge}`, {
@@ -464,8 +465,29 @@ task(`build-ios-kraken-lib`, (done) => {
     }
   });
 
-  // Build for ARMv7
+  // Build for ARMv7, ARMv7s
   execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm --target kraken kraken_static -- -j 12`, {
+    stdio: 'inherit'
+  });
+  
+  // Generate builds scripts for ARMv7s, ARMv7
+  execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
+    -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
+    -DPLATFORM=OS64 \
+    -DDEPLOYMENT_TARGET=9.0 \
+    ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
+    -DENABLE_BITCODE=TRUE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm64 -S ${paths.bridge}`, {
+    cwd: paths.bridge,
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      KRAKEN_JS_ENGINE: targetJSEngine,
+      LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/ios/lib/arm64')
+    }
+  });
+
+  // Build for ARM64
+  execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm64 --target kraken kraken_static -- -j 12`, {
     stdio: 'inherit'
   });
 
@@ -473,7 +495,12 @@ task(`build-ios-kraken-lib`, (done) => {
 
   targetSourceFrameworks.forEach(target => {
     const armDynamicSDKPath = path.join(paths.bridge, `build/ios/lib/arm/${target}.framework`);
+    const arm64DynamicSDKPath = path.join(paths.bridge, `build/ios/lib/arm64/${target}.framework`);
     const x64DynamicSDKPath = path.join(paths.bridge, `build/ios/lib/x86_64/${target}.framework`);
+
+    execSync(`lipo -create ${armDynamicSDKPath}/${target} ${arm64DynamicSDKPath}/${target} -output ${armDynamicSDKPath}/${target}`, {
+      stdio: 'inherit'
+    });
 
     patchiOSFrameworkPList(x64DynamicSDKPath);
     patchiOSFrameworkPList(armDynamicSDKPath);
@@ -524,6 +551,38 @@ task('build-ios-frameworks', (done) => {
   execSync(`cp -r ${paths.bridge}/build/ios/framework/kraken_bridge.xcframework ${paths.sdk}/build/ios/framework/Debug`);
   execSync(`cp -r ${paths.bridge}/build/ios/framework/kraken_bridge.xcframework ${paths.sdk}/build/ios/framework/Profile`);
   execSync(`cp -r ${paths.bridge}/build/ios/framework/kraken_bridge.xcframework ${paths.sdk}/build/ios/framework/Release`);
+
+  done();
+});
+
+task('build-linux-arm64-kraken-lib', (done) => {
+
+  const archs = ['arm64'];
+  const buildType = buildMode == 'Release' ? 'Release' : 'Relwithdebinfo';
+  const cmakeGeneratorTemplate = platform == 'win32' ? 'Ninja' : 'Unix Makefiles';
+  archs.forEach(arch => {
+    const soBinaryDirectory = path.join(paths.bridge, `build/linux/lib/${arch}`);
+    const bridgeCmakeDir = path.join(paths.bridge, 'cmake-build-linux-' + arch);
+    // generate project
+    execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
+    ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
+    -G "${cmakeGeneratorTemplate}" \
+    -B ${paths.bridge}/cmake-build-linux-${arch} -S ${paths.bridge}`,
+      {
+        cwd: paths.bridge,
+        stdio: 'inherit',
+        env: {
+          ...process.env,
+          KRAKEN_JS_ENGINE: targetJSEngine,
+          LIBRARY_OUTPUT_DIR: soBinaryDirectory
+        }
+      });
+
+    // build
+    execSync(`cmake --build ${bridgeCmakeDir} --target kraken -- -j 12`, {
+      stdio: 'inherit'
+    });
+  });
 
   done();
 });
