@@ -22,9 +22,9 @@ jobs:
           cmake-version: '3.21.x'
           
       - run: npm i
-#       - run: npm run build:bridge:android:release
+      - run: npm run build:bridge:android:release
 #       - run: npm run build:bridge:macos:release
-      - run: npm run build:bridge:ios:release  # 编译不通过
+#       - run: npm run build:bridge:ios:release  
       
 #       - run: npm run build:bridge:all:release
       
@@ -34,11 +34,11 @@ jobs:
           flutter-version: '2.2.3'
       - run: flutter config --enable-macos-desktop 
       
-#       - run: |
-#               cd kraken/
-#               flutter pub get
-#               cd example/
-#               flutter build apk --release  # 编译不通过
+      - run: |
+              cd kraken/
+              flutter pub get
+              cd example/
+              flutter build apk --release  # 编译不通过
 
 #       - name: build macos
 #         run: |
@@ -47,8 +47,8 @@ jobs:
 #               cd example/
 #               flutter build macos --release
               
-      - run: |
-              cd kraken/
-              flutter pub get
-              cd example/
-              flutter build ios --release --no-codesign
+#       - run: |
+#               cd kraken/
+#               flutter pub get
+#               cd example/
+#               flutter build ios --release --no-codesign
