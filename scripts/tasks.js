@@ -636,7 +636,7 @@ task('build-android-kraken-lib', (done) => {
     -DIS_ANDROID=TRUE \
     -DANDROID_ABI="${arch}" \
     ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
-    ${externCmakeArgs.join(' ')} 
+    ${externCmakeArgs.join(' ')} \
     -DANDROID_PLATFORM="android-18" \
     -DANDROID_STL=c++_shared \
     -G "${cmakeGeneratorTemplate}" \
