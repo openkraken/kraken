@@ -307,6 +307,9 @@ class RenderStyle
       logicalContentWidth = logicalWidth -
         renderStyle.border.horizontal -
         renderStyle.padding.horizontal;
+      // Logical width may be smaller than its border and padding width,
+      // in this case, content width will be negative which is illegal.
+      logicalContentWidth = math.max(0, logicalContentWidth);
     }
 
     return logicalContentWidth;
@@ -465,8 +468,11 @@ class RenderStyle
     // Subtract padding and border width to get content width.
     if (logicalHeight != null) {
       logicalContentHeight = logicalHeight -
-        renderStyle.border.horizontal -
-        renderStyle.padding.horizontal;
+        renderStyle.border.vertical -
+        renderStyle.padding.vertical;
+      // Logical height may be smaller than its border and padding width,
+      // in this case, content height will be negative which is illegal.
+      logicalContentHeight = math.max(0, logicalContentHeight);
     }
 
     return logicalContentHeight;
