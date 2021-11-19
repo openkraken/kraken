@@ -138,8 +138,6 @@ class ProxyHttpClientRequest extends HttpClientRequest {
         if (cacheObject.hitLocalCache(request)) {
           HttpClientResponse? cacheResponse = await cacheObject.toHttpClientResponse();
           if (cacheResponse != null) {
-            // // Must cancel the ongoing request, make TCP connection closed.
-            // _clientRequest.abort();
             return cacheResponse;
           }
         }

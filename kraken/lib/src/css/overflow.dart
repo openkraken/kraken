@@ -105,19 +105,6 @@ mixin ElementOverflowMixin on ElementBase {
   KrakenScrollable? _scrollableX;
   KrakenScrollable? _scrollableY;
 
-  // House content which can be scrolled.
-  // TODO(yuanyan): remove this field, and use renderScrollingContent.
-  RenderLayoutBox? get scrollingContentBox {
-    if (renderBoxModel is RenderLayoutBox) {
-      return (renderBoxModel as RenderLayoutBox).renderScrollingContent;
-    }
-  }
-  set scrollingContentBox(RenderLayoutBox? layoutBox) {
-    if (renderBoxModel is RenderLayoutBox) {
-      (renderBoxModel as RenderLayoutBox).renderScrollingContent = layoutBox;
-    }
-  }
-
   void updateRenderBoxModelWithOverflowX(ScrollListener scrollListener) {
     if (renderBoxModel is RenderSliverListLayout) {
       RenderSliverListLayout renderBoxModel = this.renderBoxModel as RenderSliverListLayout;
@@ -164,9 +151,9 @@ mixin ElementOverflowMixin on ElementBase {
 
       if (renderBoxModel is RenderLayoutBox) {
         if (shouldScrolling) {
-          attachScrollingContentBox();
+          _attachScrollingContentBox();
         } else {
-          detachScrollingContentBox();
+          _detachScrollingContentBox();
         }
       }
     }
@@ -216,16 +203,18 @@ mixin ElementOverflowMixin on ElementBase {
 
       if (renderBoxModel is RenderLayoutBox) {
         if (shouldScrolling) {
-          attachScrollingContentBox();
+          _attachScrollingContentBox();
         } else {
-          detachScrollingContentBox();
+          _detachScrollingContentBox();
         }
       }
     }
   }
 
   void scrollingContentBoxStyleListener(String property, String? original, String present) {
-    RenderStyle scrollingContentRenderStyle = scrollingContentBox!.renderStyle;
+    RenderLayoutBox scrollingContentBox = (renderBoxModel as RenderLayoutBox).renderScrollingContent!;
+    RenderStyle scrollingContentRenderStyle = scrollingContentBox.renderStyle;
+    
     switch (property) {
       case DISPLAY:
         scrollingContentRenderStyle.display = renderStyle.display;
@@ -299,10 +288,17 @@ mixin ElementOverflowMixin on ElementBase {
     }
   }
 
+  void updateScrollingContentBox() {
+    _detachScrollingContentBox();
+    _attachScrollingContentBox();
+  }
+
   // Create two repaintBoundary for an overflow scroll container.
   // Outer repaintBoundary avoid repaint of parent and sibling renderObjects when scrolling.
   // Inner repaintBoundary avoid repaint of child renderObjects when scrolling.
-  void attachScrollingContentBox() {
+  void _attachScrollingContentBox() {
+    RenderLayoutBox outerLayoutBox = renderBoxModel as RenderLayoutBox;
+    RenderLayoutBox? scrollingContentBox = outerLayoutBox.renderScrollingContent;
     if (scrollingContentBox != null) {
       return;
     }
@@ -310,14 +306,12 @@ mixin ElementOverflowMixin on ElementBase {
     Element element = this as Element;
     // If outer scrolling box already has children in the case of element already attached,
     // move them into the children of inner scrolling box.
-    RenderLayoutBox outerLayoutBox = renderBoxModel as RenderLayoutBox;
     List<RenderBox> children = outerLayoutBox.detachChildren();
 
     RenderLayoutBox renderScrollingContent = element.createScrollingContentLayout();
     renderScrollingContent.addAll(children);
 
     outerLayoutBox.add(renderScrollingContent);
-    outerLayoutBox.renderScrollingContent = renderScrollingContent;
     element.style.addStyleChangeListener(scrollingContentBoxStyleListener);
 
     // Manually copy already set filtered styles to the renderStyle of scrollingContentLayoutBox.
@@ -326,17 +320,16 @@ mixin ElementOverflowMixin on ElementBase {
     });
   }
 
-  void detachScrollingContentBox() {
+  void _detachScrollingContentBox() {
+    RenderLayoutBox outerLayoutBox = renderBoxModel as RenderLayoutBox;
+    RenderLayoutBox? scrollingContentBox = outerLayoutBox.renderScrollingContent;
     if (scrollingContentBox == null) return;
-    Element element = this as Element;
 
-    RenderLayoutBox outerLayoutBox = element.renderBoxModel as RenderLayoutBox;
-    List<RenderBox> children = scrollingContentBox!.detachChildren();
+    List<RenderBox> children = scrollingContentBox.detachChildren();
     // Remove scrolling content box.
-    outerLayoutBox.remove(scrollingContentBox!);
-    outerLayoutBox.renderScrollingContent = null;
+    outerLayoutBox.remove(scrollingContentBox);
 
-    element.style.removeStyleChangeListener(scrollingContentBoxStyleListener);
+    (this as Element).style.removeStyleChangeListener(scrollingContentBoxStyleListener);
     // Move children of scrolling content box to the children to outer layout box.
     outerLayoutBox.addAll(children);
   }

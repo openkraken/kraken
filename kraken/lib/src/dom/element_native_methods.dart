@@ -126,7 +126,7 @@ mixin ElementNativeMethods on Node {
 
   static void _click(Element element) {
     element.flushLayout();
-    element.handleMethodClick();
+    element.click();
   }
 
   static void _scroll(Element element, int x, int y) {

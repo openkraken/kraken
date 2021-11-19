@@ -46,7 +46,7 @@ void initKraken${outputName}(kraken::JSBridge *bridge);
 `;
 
 const getPolyFillJavaScriptSource = (source) => {
-  let byteBuffer = qjsc.dumpByteCode(source, "kraken://");
+  let byteBuffer = qjsc.compile(source, "kraken://");
   let uint8Array = Uint8Array.from(byteBuffer);
   return `namespace {size_t byteLength = ${uint8Array.length};
 uint8_t bytes[${uint8Array.length}] = {${uint8Array.join(',')}}; }`;
