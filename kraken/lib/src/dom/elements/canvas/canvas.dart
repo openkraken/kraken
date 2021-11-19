@@ -58,7 +58,7 @@ class CanvasElement extends Element {
           nativeEventTarget,
           elementManager,
           isIntrinsicBox: true,
-          repaintSelf: true,
+          isDefaultRepaintBoundary: true,
           defaultStyle: _defaultStyle,
         ) {
     painter = CanvasPainter(repaint: repaintNotifier);

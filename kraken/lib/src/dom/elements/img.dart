@@ -190,10 +190,6 @@ class ImageElement extends Element {
     }
   }
 
-  // Multi frame image should convert to repaint boundary.
-  @override
-  bool get hasRepaintBoundary => _frameCount > 2 || super.hasRepaintBoundary;
-
   void _renderImageStream(ImageInfo imageInfo, bool synchronousCall) {
     _frameCount++;
     _imageInfo = imageInfo;
@@ -211,6 +207,10 @@ class ImageElement extends Element {
     }
 
     if (isRendererAttached) {
+      // Multi frame image should convert to repaint boundary.
+      if (_frameCount > 2) {
+        forceToRepaintBoundary = true;
+      }
       _resize();
       _renderImage?.image = image;
     }
