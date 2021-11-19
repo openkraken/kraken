@@ -92,7 +92,7 @@ class _MyHomePageState extends State<MyBrowser> {
             viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
             bundleURL: 'https://kraken.oss-cn-hangzhou.aliyuncs.com/data/cvd3r6f068.js',
             onLoad: (KrakenController controller) {
-              Timer(Duration(seconds: 4), () {
+              Timer(Duration(seconds: 10), () {
                 exit(0);
               });
               controller.view.evaluateJavaScripts("""setTimeout(() => {
