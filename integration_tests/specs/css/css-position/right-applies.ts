@@ -72,7 +72,7 @@ describe('right-applies', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('to-009', async () => {
     let p;

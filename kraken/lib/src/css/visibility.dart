@@ -2,17 +2,29 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
 import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
 
 enum Visibility {
   visible,
   hidden,
 }
 
-mixin CSSVisibilityMixin on ElementBase {
-  static Visibility getVisibility(String value) {
+mixin CSSVisibilityMixin on RenderStyleBase {
+  Visibility _visibility = Visibility.visible;
+
+  void set visibility(Visibility value) {
+    if (_visibility == value) return;
+    _visibility = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+
+  Visibility get visibility => _visibility;
+
+  bool get isVisibilityHidden {
+    return _visibility == Visibility.hidden;
+  }
+
+  static Visibility resolveVisibility(String value) {
     switch(value) {
       case HIDDEN:
         return Visibility.hidden;
@@ -20,9 +32,5 @@ mixin CSSVisibilityMixin on ElementBase {
       default:
         return Visibility.visible;
     }
-  }
-
-  void updateRenderVisibility(Visibility visibility) {
-    renderBoxModel!.visibility = visibility;
   }
 }

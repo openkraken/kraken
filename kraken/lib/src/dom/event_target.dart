@@ -113,8 +113,6 @@ abstract class EventTarget {
     _nativeMap[nativeEventTargetPtr.address] = this;
   }
 
-  void addEvent(String eventType) {}
-
   void addEventListener(String eventType, EventHandler eventHandler) {
     List<EventHandler>? existHandler = eventHandlers[eventType];
     if (existHandler == null) {
@@ -132,8 +130,24 @@ abstract class EventTarget {
   }
 
   void dispatchEvent(Event event) {
-    if (!elementManager.controller.view.disposed) {
-      event.currentTarget = event.target = this;
+    if (disposed) return;
+
+    event.target = this;
+
+    emitUIEvent(elementManager.controller.view.contextId, nativeEventTargetPtr, event);
+    // Dispatch listener for widget.
+    if (elementManager.gestureListener != null) {
+      if (elementManager.gestureListener?.onTouchStart != null && event.type == EVENT_TOUCH_START) {
+        elementManager.gestureListener?.onTouchStart!(event as TouchEvent);
+      }
+
+      if (elementManager.gestureListener?.onTouchMove != null && event.type == EVENT_TOUCH_MOVE) {
+        elementManager.gestureListener?.onTouchMove!(event as TouchEvent);
+      }
+
+      if (elementManager.gestureListener?.onTouchEnd != null && event.type == EVENT_TOUCH_END) {
+        elementManager.gestureListener?.onTouchEnd!(event as TouchEvent);
+      }
     }
   }
 
@@ -161,4 +175,6 @@ abstract class EventTarget {
       PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_END, uniqueId: targetId);
     }
   }
+
+  // void addEvent(String eventType) {}
 }

@@ -94,34 +94,38 @@ class FetchModule extends BaseModule {
     Map<String, dynamic> options = params;
 
     _handleError(Object error, StackTrace? stackTrace) {
-      print('Error while fetching for $uri, message: \n$error');
+      print('Error fetch for $uri, message: \n$error');
       if (stackTrace != null) {
         print('\n$stackTrace');
       }
       callback(error: '$error\n$stackTrace');
     }
+    if (uri.host.isEmpty) {
+      // No host specified in URI.
+      _handleError('Failed to parse URL from $uri.', null);
+    } else {
+      getRequest(uri, options['method'], options['headers'], options['body'])
+        .then((HttpClientRequest request) {
+          if (_disposed) return Future.value(null);
+          return request.close();
+        })
+        .then((HttpClientResponse? response) {
+          if (response == null) return Future.value(null);
 
-    getRequest(uri, options['method'], options['headers'], options['body'])
-      .then((HttpClientRequest request) {
-        if (_disposed) return Future.value(null);
-        return request.close();
-    })
-      .then((HttpClientResponse? response) {
-        if (response == null) return Future.value(null);
+          StringBuffer contentBuffer = StringBuffer();
 
-        StringBuffer contentBuffer = StringBuffer();
-
-        response
-          // @TODO: Consider binary format, now callback tunnel only accept strings.
-          .transform(utf8.decoder)
-          .listen(contentBuffer.write)
-          ..onDone(() {
-            // @TODO: response.headers not transmitted.
-            callback(data: [EMPTY_STRING, response.statusCode, contentBuffer.toString()]);
-          })
-          ..onError(_handleError);
-      })
-      .catchError(_handleError);
+          response
+            // @TODO: Consider binary format, now callback tunnel only accept strings.
+            .transform(utf8.decoder)
+            .listen(contentBuffer.write)
+            ..onDone(() {
+              // @TODO: response.headers not transmitted.
+              callback(data: [EMPTY_STRING, response.statusCode, contentBuffer.toString()]);
+            })
+            ..onError(_handleError);
+        })
+        .catchError(_handleError);
+    }
 
     return EMPTY_STRING;
   }

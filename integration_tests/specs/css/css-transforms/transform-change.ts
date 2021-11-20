@@ -22,7 +22,7 @@ describe('transform change', () => {
 
     requestAnimationFrame(async () => {
       cont.style.transform = 'none';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });
@@ -51,7 +51,7 @@ describe('transform change', () => {
 
     requestAnimationFrame(async () => {
       cont.style.transform = 'none';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });
@@ -79,7 +79,7 @@ describe('transform change', () => {
 
     requestAnimationFrame(async () => {
       cont.style.transform = 'translate(100px, 0)';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });
@@ -108,7 +108,7 @@ describe('transform change', () => {
 
     requestAnimationFrame(async () => {
       cont.style.transform = 'translate(100px, 0)';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });

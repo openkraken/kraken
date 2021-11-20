@@ -196,10 +196,7 @@ describe('position-sticky', () => {
       scroller.scrollTop = 100;
     });
 
-    // wait for image load
-    await sleep(1);
-
-    await snapshot();
+    await snapshot(0.2);
   });
   it('child-multicolumn', async () => {
     let contents;
@@ -274,7 +271,7 @@ describe('position-sticky', () => {
       scroller.scrollTop = 100;
     });
 
-    await snapshot(0.1);
+    await snapshot(0.2);
   });
   it('flexbox-ref', async () => {
     let flexItem;
