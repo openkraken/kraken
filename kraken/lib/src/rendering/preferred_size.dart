@@ -45,13 +45,14 @@ class RenderPreferredSize extends RenderProxyBox {
 }
 
 /// A placeholder for positioned RenderBox
-class RenderPositionHolder extends RenderPreferredSize {
-  RenderPositionHolder({
+class RenderPositionPlaceholder extends RenderPreferredSize {
+  RenderPositionPlaceholder({
     required Size preferredSize,
     RenderBox? child,
   }) : super(preferredSize: preferredSize, child: child);
 
-  RenderBoxModel? realDisplayedBox;
+  // Real position of this renderBox.
+  RenderBoxModel? positioned;
 
   // Box size equals to RenderBox.size to avoid flutter complain when read size property.
   Size? _boxSize;
@@ -73,6 +74,6 @@ class RenderPositionHolder extends RenderPreferredSize {
   }
 }
 
-bool isPositionHolder(RenderBox box) {
-  return box is RenderPositionHolder;
+bool isPositionPlaceholder(RenderBox box) {
+  return box is RenderPositionPlaceholder;
 }

@@ -42,7 +42,7 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
 
     if (decoration == null) return;
     _painter ??= BoxDecorationPainter(
-          decoration, padding, renderStyle, markNeedsPaint);
+          padding, renderStyle, markNeedsPaint);
 
     final ImageConfiguration filledConfiguration =
         imageConfiguration.copyWith(size: size);
@@ -84,10 +84,9 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     CSSBoxDecoration? decoration = renderStyle.decoration;
     DecorationPosition decorationPosition = renderStyle.decorationPosition;
     ImageConfiguration imageConfiguration = renderStyle.imageConfiguration;
-
     if (decoration == null) return;
     _painter ??=
-        BoxDecorationPainter(decoration, padding, renderStyle, markNeedsPaint);
+        BoxDecorationPainter(padding, renderStyle, markNeedsPaint);
 
     final ImageConfiguration filledConfiguration =
         imageConfiguration.copyWith(size: size);
@@ -119,12 +118,8 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
       if (decoration.isComplex) context.setIsComplexHint();
     }
     Offset contentOffset;
-    EdgeInsets? borderEdge = renderStyle.borderEdge;
-    if (borderEdge == null) {
-      contentOffset = Offset(0, 0);
-    } else {
-      contentOffset = offset.translate(borderEdge.left, borderEdge.top);
-    }
+    EdgeInsets borderEdge = renderStyle.border;
+    contentOffset = offset.translate(borderEdge.left, borderEdge.top);
     super.paint(context, contentOffset);
     if (decorationPosition == DecorationPosition.foreground) {
       _painter!.paint(context.canvas, offset, filledConfiguration);
@@ -133,9 +128,8 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
   }
 
   void debugBoxDecorationProperties(DiagnosticPropertiesBuilder properties) {
-    if (renderStyle.borderEdge != null)
-      properties
-          .add(DiagnosticsProperty('borderEdge', renderStyle.borderEdge));
+    properties
+        .add(DiagnosticsProperty('borderEdge', renderStyle.border));
     if (renderStyle.backgroundClip != null)
       properties.add(
           DiagnosticsProperty('backgroundClip', renderStyle.backgroundClip));
