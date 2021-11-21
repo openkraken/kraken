@@ -48,8 +48,8 @@ class CSSStyleDeclaration : public HostClass {
 class StyleDeclarationInstance : public Instance {
  public:
   StyleDeclarationInstance() = delete;
-  explicit StyleDeclarationInstance(CSSStyleDeclaration* cssStyleDeclaration, EventTargetInstance* ownerEventTarget)
-      : Instance(cssStyleDeclaration, "CSSStyleDeclaration", &m_exoticMethods, CSSStyleDeclaration::kCSSStyleDeclarationClassId, finalize), m_ownerEventTarget(ownerEventTarget){};
+  explicit StyleDeclarationInstance(CSSStyleDeclaration* cssStyleDeclaration, int32_t ownerEventTargetId)
+      : Instance(cssStyleDeclaration, "CSSStyleDeclaration", &m_exoticMethods, CSSStyleDeclaration::kCSSStyleDeclarationClassId, finalize), m_ownerEventTargetId(ownerEventTargetId){};
   ~StyleDeclarationInstance();
   bool internalSetProperty(std::string& name, JSValue value);
   void internalRemoveProperty(std::string& name);
@@ -70,8 +70,8 @@ class StyleDeclarationInstance : public Instance {
 
   static JSClassExoticMethods m_exoticMethods;
 
-  std::unordered_map<std::string, JSValue> properties;
-  const EventTargetInstance* m_ownerEventTarget;
+  std::unordered_map<std::string, std::string> properties;
+  int32_t m_ownerEventTargetId;
   friend EventTargetInstance;
 };
 

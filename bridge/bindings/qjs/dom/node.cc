@@ -96,7 +96,7 @@ JSValue Node::appendChild(QjsContext* ctx, JSValue this_val, int argc, JSValue* 
     return JS_ThrowTypeError(ctx, "Failed to execute 'appendChild' on 'Node': first arguments should be an Node type.");
   }
 
-  if (nodeInstance->eventTargetId == HTML_TARGET_ID || nodeInstance == selfInstance) {
+  if (nodeInstance->m_eventTargetId == HTML_TARGET_ID || nodeInstance == selfInstance) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'appendChild' on 'Node': The new child element contains the parent.");
   }
 
@@ -274,9 +274,9 @@ JSValue Node::copyNodeValue(QjsContext* ctx, NodeInstance* node) {
     /* copy properties */
     ElementInstance::copyNodeProperties(newElement, element);
 
-    std::string newNodeEventTargetId = std::to_string(newElement->eventTargetId);
+    std::string newNodeEventTargetId = std::to_string(newElement->m_eventTargetId);
     NativeString* args_01 = stringToNativeString(newNodeEventTargetId);
-    foundation::UICommandBuffer::instance(newElement->context()->getContextId())->addCommand(element->eventTargetId, UICommand::cloneNode, *args_01, nullptr);
+    foundation::UICommandBuffer::instance(newElement->context()->getContextId())->addCommand(element->m_eventTargetId, UICommand::cloneNode, *args_01, nullptr);
 
     return newElement->instanceObject;
   } else if (node->nodeType == TEXT_NODE) {
@@ -377,11 +377,11 @@ PROP_SETTER(NodeInstance, textContent)(QjsContext* ctx, JSValue this_val, int ar
 }
 
 bool NodeInstance::isConnected() {
-  bool _isConnected = eventTargetId == HTML_TARGET_ID;
+  bool _isConnected = m_eventTargetId == HTML_TARGET_ID;
   auto parent = static_cast<NodeInstance*>(JS_GetOpaque(parentNode, Node::classId(parentNode)));
 
   while (parent != nullptr && !_isConnected) {
-    _isConnected = parent->eventTargetId == HTML_TARGET_ID;
+    _isConnected = parent->m_eventTargetId == HTML_TARGET_ID;
     JSValue parentParentNode = parent->parentNode;
     parent = static_cast<NodeInstance*>(JS_GetOpaque(parentParentNode, Node::classId(parentParentNode)));
   }
@@ -448,13 +448,13 @@ void NodeInstance::internalAppendChild(NodeInstance* node) {
 
   node->_notifyNodeInsert(this);
 
-  std::string nodeEventTargetId = std::to_string(node->eventTargetId);
+  std::string nodeEventTargetId = std::to_string(node->m_eventTargetId);
   std::string position = std::string("beforeend");
 
   NativeString* args_01 = stringToNativeString(nodeEventTargetId);
   NativeString* args_02 = stringToNativeString(position);
 
-  foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
+  foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
 }
 void NodeInstance::internalRemove() {
   if (JS_IsNull(parentNode))
@@ -470,7 +470,7 @@ void NodeInstance::internalClearChild() {
     auto* node = static_cast<NodeInstance*>(JS_GetOpaque(v, Node::classId(v)));
     node->removeParentNode();
     node->_notifyNodeRemoved(this);
-    foundation::UICommandBuffer::instance(node->m_context->getContextId())->addCommand(node->eventTargetId, UICommand::removeNode, nullptr);
+    foundation::UICommandBuffer::instance(node->m_context->getContextId())->addCommand(node->m_eventTargetId, UICommand::removeNode, nullptr);
     JS_FreeValue(m_ctx, v);
   }
 
@@ -483,7 +483,7 @@ NodeInstance* NodeInstance::internalRemoveChild(NodeInstance* node) {
     arraySpliceValue(m_ctx, childNodes, idx, 1);
     node->removeParentNode();
     node->_notifyNodeRemoved(this);
-    foundation::UICommandBuffer::instance(node->m_context->getContextId())->addCommand(node->eventTargetId, UICommand::removeNode, nullptr);
+    foundation::UICommandBuffer::instance(node->m_context->getContextId())->addCommand(node->m_eventTargetId, UICommand::removeNode, nullptr);
   }
 
   return node;
@@ -510,13 +510,13 @@ JSValue NodeInstance::internalInsertBefore(NodeInstance* node, NodeInstance* ref
       node->setParentNode(parent);
       node->_notifyNodeInsert(parent);
 
-      std::string nodeEventTargetId = std::to_string(node->eventTargetId);
+      std::string nodeEventTargetId = std::to_string(node->m_eventTargetId);
       std::string position = std::string("beforebegin");
 
       NativeString* args_01 = stringToNativeString(nodeEventTargetId);
       NativeString* args_02 = stringToNativeString(position);
 
-      foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(referenceNode->eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
+      foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(referenceNode->m_eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
     }
   }
 
@@ -542,15 +542,15 @@ JSValue NodeInstance::internalReplaceChild(NodeInstance* newChild, NodeInstance*
   oldChild->_notifyNodeRemoved(this);
   newChild->_notifyNodeInsert(this);
 
-  std::string newChildEventTargetId = std::to_string(newChild->eventTargetId);
+  std::string newChildEventTargetId = std::to_string(newChild->m_eventTargetId);
   std::string position = std::string("afterend");
 
   NativeString* args_01 = stringToNativeString(newChildEventTargetId);
   NativeString* args_02 = stringToNativeString(position);
 
-  foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(oldChild->eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
+  foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(oldChild->m_eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
 
-  foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(oldChild->eventTargetId, UICommand::removeNode, nullptr);
+  foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(oldChild->m_eventTargetId, UICommand::removeNode, nullptr);
 
   return oldChild->instanceObject;
 }

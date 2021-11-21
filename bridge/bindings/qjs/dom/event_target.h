@@ -75,6 +75,9 @@ class EventTargetInstance : public Instance {
 
   virtual bool dispatchEvent(EventInstance* event);
   static inline JSClassID classId();
+  inline int32_t eventTargetId() const {
+    return m_eventTargetId;
+  }
 
   JSValue callNativeMethods(const char* method, int32_t argc, NativeValue* argv);
   JSValue getNativeProperty(const char* prop);
@@ -82,7 +85,7 @@ class EventTargetInstance : public Instance {
   NativeEventTarget* nativeEventTarget{new NativeEventTarget(this)};
 
  protected:
-  int32_t eventTargetId;
+  int32_t m_eventTargetId;
   JSValue m_eventHandlers{JS_NewObject(m_ctx)};
   JSValue m_propertyEventHandler{JS_NewObject(m_ctx)};
   JSValue m_properties{JS_NewObject(m_ctx)};

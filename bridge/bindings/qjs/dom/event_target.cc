@@ -94,7 +94,7 @@ JSValue EventTarget::addEventListener(QjsContext* ctx, JSValue this_val, int arg
     NativeString args_01{};
     buildUICommandArgs(ctx, eventTypeValue, args_01);
 
-    foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetInstance->eventTargetId, UICommand::addEvent, args_01, nullptr);
+    foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetInstance->m_eventTargetId, UICommand::addEvent, args_01, nullptr);
   }
   arrayPushValue(ctx, eventHandlers, callback);
   JS_FreeAtom(ctx, eventTypeAtom);
@@ -151,7 +151,7 @@ JSValue EventTarget::removeEventListener(QjsContext* ctx, JSValue this_val, int 
     NativeString args_01{};
     buildUICommandArgs(ctx, eventTypeValue, args_01);
 
-    foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetInstance->eventTargetId, UICommand::removeEvent, args_01, nullptr);
+    foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetInstance->m_eventTargetId, UICommand::removeEvent, args_01, nullptr);
   }
 
   JS_FreeAtom(ctx, eventTypeAtom);
@@ -281,15 +281,15 @@ JSValue EventTarget::__kraken_clear_event_listener(QjsContext* ctx, JSValue this
 
 EventTargetInstance::EventTargetInstance(EventTarget* eventTarget, JSClassID classId, JSClassExoticMethods& exoticMethods, std::string name)
     : Instance(eventTarget, name, &exoticMethods, classId, finalize) {
-  eventTargetId = globalEventTargetId++;
+  m_eventTargetId = globalEventTargetId++;
 }
 
 EventTargetInstance::EventTargetInstance(EventTarget* eventTarget, JSClassID classId, std::string name) : Instance(eventTarget, std::move(name), nullptr, classId, finalize) {
-  eventTargetId = globalEventTargetId++;
+  m_eventTargetId = globalEventTargetId++;
 }
 
 EventTargetInstance::EventTargetInstance(EventTarget* eventTarget, JSClassID classId, std::string name, int64_t eventTargetId)
-    : Instance(eventTarget, std::move(name), nullptr, classId, finalize), eventTargetId(eventTargetId) {}
+    : Instance(eventTarget, std::move(name), nullptr, classId, finalize), m_eventTargetId(eventTargetId) {}
 
 JSClassID EventTargetInstance::classId() {
   assert_m(false, "classId is not implemented");
@@ -297,7 +297,7 @@ JSClassID EventTargetInstance::classId() {
 }
 
 EventTargetInstance::~EventTargetInstance() {
-  foundation::UICommandBuffer::instance(m_contextId)->addCommand(eventTargetId, UICommand::disposeEventTarget, nullptr, false);
+  foundation::UICommandBuffer::instance(m_contextId)->addCommand(m_eventTargetId, UICommand::disposeEventTarget, nullptr, false);
 #if FLUTTER_BACKEND
   getDartMethod()->flushUICommand();
 #endif
@@ -385,7 +385,7 @@ int EventTargetInstance::setProperty(QjsContext* ctx, JSValue obj, JSAtom atom, 
     if (isJavaScriptExtensionElementInstance(eventTarget->context(), eventTarget->instanceObject) && !p->is_wide_char && p->u.str8[0] != '_') {
       NativeString* args_01 = atomToNativeString(ctx, atom);
       NativeString* args_02 = jsValueToNativeString(ctx, value);
-      foundation::UICommandBuffer::instance(eventTarget->m_contextId)->addCommand(eventTarget->eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+      foundation::UICommandBuffer::instance(eventTarget->m_contextId)->addCommand(eventTarget->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
     }
   }
 
@@ -443,7 +443,7 @@ void EventTargetInstance::setPropertyHandler(JSString* p, JSValue value) {
     int32_t contextId = m_context->getContextId();
     NativeString* args_01 = atomToNativeString(m_ctx, atom);
     int32_t type = JS_IsFunction(m_ctx, value) ? UICommand::addEvent : UICommand::removeEvent;
-    foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetId, type, *args_01, nullptr);
+    foundation::UICommandBuffer::instance(contextId)->addCommand(m_eventTargetId, type, *args_01, nullptr);
   }
 }
 
