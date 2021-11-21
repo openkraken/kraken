@@ -62,16 +62,8 @@ JSValue EventTarget::addEventListener(QjsContext* ctx, JSValue this_val, int arg
   JSValue eventTypeValue = argv[0];
   JSValue callback = argv[1];
 
-  if (!JS_IsString(eventTypeValue)) {
-    return JS_ThrowTypeError(ctx, "Failed to addEventListener: eventName should be an string.");
-  }
-
-  if (!JS_IsObject(callback)) {
-    return JS_ThrowTypeError(ctx, "Failed to addEventListener: callback should be an function.");
-  }
-
-  if (!JS_IsFunction(ctx, callback)) {
-    return JS_ThrowTypeError(ctx, "Failed to addEventListener: callback should be an function.");
+  if (!JS_IsString(eventTypeValue) || !JS_IsObject(callback) || !JS_IsFunction(ctx, callback)) {
+    return JS_UNDEFINED;
   }
 
   JSAtom eventTypeAtom = JS_ValueToAtom(ctx, eventTypeValue);
@@ -116,16 +108,8 @@ JSValue EventTarget::removeEventListener(QjsContext* ctx, JSValue this_val, int 
   JSValue eventTypeValue = argv[0];
   JSValue callback = argv[1];
 
-  if (!JS_IsString(eventTypeValue)) {
+  if (!JS_IsString(eventTypeValue) || !JS_IsObject(callback) || !JS_IsObject(callback)) {
     return JS_ThrowTypeError(ctx, "Failed to removeEventListener: eventName should be an string.");
-  }
-
-  if (!JS_IsObject(callback)) {
-    return JS_ThrowTypeError(ctx, "Failed to removeEventListener: callback should be an function.");
-  }
-
-  if (!JS_IsFunction(ctx, callback)) {
-    return JS_ThrowTypeError(ctx, "Failed to removeEventListener: callback should be an function.");
   }
 
   JSAtom eventTypeAtom = JS_ValueToAtom(ctx, eventTypeValue);
@@ -489,7 +473,7 @@ void EventTargetInstance::copyNodeProperties(EventTargetInstance* newNode, Event
     JSValue k = JS_GetPropertyUint32(ctx, propKeys, i);
     JSAtom kt = JS_ValueToAtom(ctx, k);
     JSValue v = JS_GetProperty(ctx, referenceNode->m_properties, kt);
-    JS_SetProperty(ctx, newNode->m_properties, kt, v);
+    JS_SetProperty(ctx, newNode->m_properties, kt, JS_DupValue(ctx, v));
 
     JS_FreeAtom(ctx, kt);
     JS_FreeValue(ctx, k);
