@@ -111,8 +111,7 @@ JSValue CSSStyleDeclaration::getPropertyValue(QjsContext* ctx, JSValue this_val,
   return returnValue;
 }
 
-StyleDeclarationInstance::~StyleDeclarationInstance() {
-}
+StyleDeclarationInstance::~StyleDeclarationInstance() {}
 
 bool StyleDeclarationInstance::internalSetProperty(std::string& name, JSValue value) {
   name = parseJavaScriptCSSPropertyName(name);
