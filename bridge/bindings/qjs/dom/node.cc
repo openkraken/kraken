@@ -563,8 +563,7 @@ void NodeInstance::removeParentNode() {
   parentNode = JS_NULL;
 }
 
-NodeInstance::~NodeInstance() {
-}
+NodeInstance::~NodeInstance() {}
 void NodeInstance::refer() {
   JS_DupValue(m_ctx, instanceObject);
   list_add_tail(&nodeLink.link, &m_context->node_job_list);
