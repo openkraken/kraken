@@ -332,14 +332,6 @@ PROP_SETTER(NodeInstance, parentNode)(QjsContext* ctx, JSValue this_val, int arg
   return JS_NULL;
 }
 
-PROP_GETTER(NodeInstance, childNodes)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
-  return JS_DupValue(ctx, nodeInstance->childNodes);
-}
-PROP_SETTER(NodeInstance, childNodes)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
-
 PROP_GETTER(NodeInstance, previousSibling)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
   auto* instance = nodeInstance->previousSibling();
@@ -572,7 +564,6 @@ void NodeInstance::removeParentNode() {
 }
 
 NodeInstance::~NodeInstance() {
-  JS_FreeValue(m_ctx, childNodes);
 }
 void NodeInstance::refer() {
   JS_DupValue(m_ctx, instanceObject);
@@ -601,8 +592,6 @@ void NodeInstance::gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
   EventTargetInstance::gcMark(rt, val, mark_func);
 
   // Should check object is already inited before gc mark.
-  if (JS_IsObject(childNodes))
-    JS_MarkValue(rt, childNodes, mark_func);
   if (JS_IsObject(parentNode))
     JS_MarkValue(rt, parentNode, mark_func);
 }
