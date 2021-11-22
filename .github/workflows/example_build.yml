@@ -1,4 +1,4 @@
-name: example build linux
+name: example build
 
 on:
   push:
@@ -22,22 +22,34 @@ jobs:
           cmake-version: '3.21.x'
           
       - run: npm i
-      - run: npm run build:bridge:linux_arm64:release
+      # - run: npm run build:bridge:android:release
 #       - run: npm run build:bridge:macos:release
 #       - run: npm run build:bridge:ios:release  
       
-#       - run: npm run build:bridge:all:release
+      - run: npm run build:bridge:all:release
       
 #       设置 flutter 环境
       - uses: subosito/flutter-action@v1
         with:
           flutter-version: '2.2.3'
+      - run: flutter config --enable-macos-desktop 
       - run: flutter config --enable-linux-desktop 
       
       - run: |
               cd kraken/
               flutter pub get
               cd example/
-              flutter build linux --release  # 编译不通过
+              flutter build apk --release  # 编译不通过
 
-
+      - name: build macos
+        run: |
+              cd kraken/
+              flutter pub get
+              cd example/
+              flutter build macos --release
+              
+      - run: |
+              cd kraken/
+              flutter pub get
+              cd example/
+              flutter build ios --release --no-codesign
