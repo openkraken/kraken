@@ -1,4 +1,4 @@
-name: example build 
+name: example build
 
 on:
   push:
@@ -16,39 +16,40 @@ jobs:
 #       设置 bridge 编译环境
       - uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '16'
       - uses: jwlawson/actions-setup-cmake@v1.11
         with:
-          cmake-version: '3.21.x'
-          
+          cmake-version: '3.22.x'
       - run: npm i
-#       - run: npm run build:bridge:android:release
-#       - run: npm run build:bridge:macos:release
-#       - run: npm run build:bridge:ios:release  
       
-      - run: npm run build:bridge:all:release
       
 #       设置 flutter 环境
       - uses: subosito/flutter-action@v1
         with:
           flutter-version: '2.2.3'
       - run: flutter config --enable-macos-desktop 
+      - run: flutter doctor -v 
       
-#       - run: |
-#               cd kraken/
-#               flutter pub get
-#               cd example/
-#               flutter build apk --release  # 编译不通过
-
-      - name: build macos
+      - name: android app build
         run: |
+              npm run build:bridge:android:release
+              cd kraken/
+              flutter pub get
+              cd example/
+              flutter build apk --release  
+
+      - name: macos app build
+        run: |
+              npm run build:bridge:macos:release
               cd kraken/
               flutter pub get
               cd example/
               flutter build macos --release
-              
-#       - run: |
-#               cd kraken/
-#               flutter pub get
-#               cd example/
-#               flutter build ios --release --no-codesign   # 编译不通过
+
+      - name: ios app build              
+        run: |
+              npm run build:bridge:ios:release  
+              cd kraken/
+              flutter pub get
+              cd example/
+              flutter build ios --release --no-codesign
