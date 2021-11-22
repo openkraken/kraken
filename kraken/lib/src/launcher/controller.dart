@@ -214,6 +214,12 @@ class KrakenViewController {
 
       var node = _elementManager.getEventTargetByTargetId<EventTarget>(eventTargetId);
       if (node is Element) {
+        if (!node.isRendererAttached) {
+          String msg = 'toImage: the element is not attached to document tree.';
+          completer.completeError(Exception(msg));
+          return completer.future;
+        }
+
         node.toBlob(devicePixelRatio: devicePixelRatio).then((Uint8List bytes) {
           completer.complete(bytes);
         }).catchError((e, stack) {
@@ -305,24 +311,18 @@ class KrakenViewController {
     _elementManager.cloneNode(oldId, newId);
   }
 
-  void setStyle(int targetId, String key, String value) {
+  void setInlineStyle(int targetId, String key, String value) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_SET_STYLE_START, uniqueId: targetId);
     }
-    _elementManager.setStyle(targetId, key, value);
+    _elementManager.setInlineStyle(targetId, key, value);
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_SET_STYLE_END, uniqueId: targetId);
     }
   }
 
-  void setRenderStyle(int targetId, String key, String value) {
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_SET_RENDER_STYLE_START, uniqueId: targetId);
-    }
-    _elementManager.setRenderStyle(targetId, key, value);
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_SET_RENDER_STYLE_END, uniqueId: targetId);
-    }
+  void flushPendingStyleProperties(int targetId) {
+    _elementManager.flushPendingStyleProperties(targetId);
   }
 
   void setProperty(int targetId, String key, String value) {
@@ -740,12 +740,12 @@ class KrakenController {
         Event event = Event(EVENT_DOM_CONTENT_LOADED);
         EventTarget? window = view.getEventTargetById(WINDOW_ID);
         if (window != null) {
-          emitUIEvent(_view.contextId, window, event);
+          window.dispatchEvent(event);
           // @HACK: window.load should trigger after all image had loaded.
           // Someone needs to fix this in the future.
           module.requestAnimationFrame((_) {
             Event event = Event(EVENT_LOAD);
-            emitUIEvent(_view.contextId, window, event);
+            window.dispatchEvent(event);
           });
         }
       });

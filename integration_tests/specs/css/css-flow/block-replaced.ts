@@ -202,7 +202,7 @@ describe('block-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('height-004-ref', async () => {
     let p;
@@ -236,7 +236,7 @@ describe('block-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('height-004', async () => {
     let p;
@@ -290,7 +290,7 @@ describe('block-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('height-005', async () => {
     let p;
@@ -525,7 +525,7 @@ describe('block-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('width-002', async () => {
     let p;
@@ -914,6 +914,6 @@ describe('block-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot(0.1);
+    await snapshot();
   });
 });
