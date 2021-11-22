@@ -6,10 +6,9 @@
 import 'package:kraken/css.dart';
 
 /// https://drafts.csswg.org/cssom/#the-cssstylerule-interface
-class CSSStyleRule {
+class CSSStyleRule extends CSSRule {
   final String selectorText;
-  final CSSStyleDeclaration _cssStyleDeclaration;
+  final Map<String, String> style;
 
-  CSSStyleDeclaration get style => _cssStyleDeclaration;
-  CSSStyleRule(this.selectorText, this._cssStyleDeclaration);
+  CSSStyleRule(this.selectorText, this.style);
 }

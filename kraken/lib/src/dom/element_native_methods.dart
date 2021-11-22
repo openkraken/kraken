@@ -81,9 +81,9 @@ mixin ElementNativeMethods on Node {
       case ViewModuleProperty.clientHeight:
         return elementRenderBoxModel.clientHeight;
       case ViewModuleProperty.clientTop:
-        return elementRenderBoxModel.renderStyle.borderTop;
+        return elementRenderBoxModel.renderStyle.effectiveBorderTopWidth.computedValue;
       case ViewModuleProperty.clientLeft:
-        return elementRenderBoxModel.renderStyle.borderLeft;
+        return elementRenderBoxModel.renderStyle.effectiveBorderLeftWidth.computedValue;
       case ViewModuleProperty.scrollTop:
         return element.scrollTop;
       case ViewModuleProperty.scrollLeft:
@@ -126,7 +126,7 @@ mixin ElementNativeMethods on Node {
 
   static void _click(Element element) {
     element.flushLayout();
-    element.handleMethodClick();
+    element.click();
   }
 
   static void _scroll(Element element, int x, int y) {

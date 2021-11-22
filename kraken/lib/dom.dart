@@ -10,6 +10,7 @@ export 'src/dom/event_handler.dart';
 export 'src/dom/event.dart';
 export 'src/dom/event_target.dart';
 export 'src/dom/object_element_client.dart';
+export 'src/dom/bounding_client_rect.dart';
 export 'src/dom/node.dart';
 export 'src/dom/text_node.dart';
 export 'src/dom/window.dart';

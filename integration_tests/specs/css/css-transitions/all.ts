@@ -250,10 +250,6 @@ describe('Transition all', () => {
         transform: 'translate3d(200px, 0, 0)',
       });
 
-      setTimeout(async () => {
-        await snapshot();
-      }, 500);
-
       // Wait for animation finished.
       setTimeout(async () => {
         await snapshot();
@@ -277,13 +273,9 @@ describe('Transition all', () => {
 
     requestAnimationFrame(() => {
       setElementStyle(container1, {
-        transition: 'all 1s linear',
         transform: 'translate3d(200px, 0, 0)',
+        transition: 'all 1s linear',
       });
-
-      setTimeout(async () => {
-        await snapshot();
-      }, 500);
 
       // Wait for animation finished.
       setTimeout(async () => {
@@ -311,10 +303,6 @@ describe('Transition all', () => {
         transform: 'translate3d(200px, 0, 0)',
         transition: 'all 1s linear',
       });
-
-      setTimeout(async () => {
-        await snapshot();
-      }, 500);
 
       // Wait for animation finished.
       setTimeout(async () => {

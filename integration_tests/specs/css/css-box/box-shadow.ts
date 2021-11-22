@@ -130,7 +130,7 @@ describe('BoxShadow', () => {
 
     requestAnimationFrame(async () => {
       cont.style.boxShadow = 'none';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });

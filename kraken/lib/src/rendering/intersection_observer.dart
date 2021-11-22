@@ -36,7 +36,10 @@ mixin RenderIntersectionObserverMixin on RenderBox {
       _listeners = List.empty(growable: true);
       _onIntersectionChange = _dispatchChange;
     }
-    _listeners!.add(callback);
+    // Avoid same listener added twice.
+    if (!_listeners!.contains(callback)) {
+      _listeners!.add(callback);
+    }
   }
 
   void clearIntersectionChangeListeners() {
@@ -51,12 +54,7 @@ mixin RenderIntersectionObserverMixin on RenderBox {
       return;
     }
 
-    for (int i = 0; i < _listeners!.length; i += 1) {
-      if (_listeners![i] == callback) {
-        _listeners!.removeAt(i);
-        break;
-      }
-    }
+    _listeners!.remove(callback);
     if (_listeners!.isEmpty) {
       _listeners = null;
       _onIntersectionChange = null;

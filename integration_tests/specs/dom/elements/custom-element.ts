@@ -7,7 +7,7 @@ describe('custom widget element', () => {
     await snapshot();
 
     text.setAttribute('value', 'Hi');
-    await snapshot(0.1);
+    await snapshot();
   });
 
   it('should work with html tags', async () => {

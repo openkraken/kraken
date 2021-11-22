@@ -1013,7 +1013,7 @@ describe('flex', () => {
 
     requestAnimationFrame(async () => {
       item.style.flex = 'none';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });

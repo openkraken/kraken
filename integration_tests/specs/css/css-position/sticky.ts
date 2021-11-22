@@ -123,7 +123,7 @@ describe('Position sticky', () => {
     requestAnimationFrame(async () => {
       div.style.paddingTop = '20px';
       div.style.paddingLeft = '20px';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });
@@ -170,7 +170,7 @@ describe('Position sticky', () => {
     requestAnimationFrame(async () => {
       div.style.paddingTop = '20px';
       div.style.paddingLeft = '20px';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });
@@ -218,7 +218,7 @@ describe('Position sticky', () => {
     requestAnimationFrame(async () => {
       div.style.paddingTop = '20px';
       div.style.paddingLeft = '20px';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });

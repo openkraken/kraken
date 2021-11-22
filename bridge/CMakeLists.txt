@@ -65,14 +65,19 @@ set(QUICKJS_PUBLIC_HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-opcode.h
 )
 
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  add_compile_options(-fPIC)
+endif()
 
 if (ENABLE_ASAN)
   add_compile_options(-fsanitize=address -fno-omit-frame-pointer -O1)
   add_link_options(-fsanitize=address -fno-omit-frame-pointer)
 endif ()
 
-if (DEFINED ${PLATFORM} AND ${PLATFORM} STREQUAL "OS")
-  add_compile_options(-fno-aligned-allocation)
+if (DEFINED PLATFORM)
+  if (${PLATFORM} STREQUAL "OS")
+    add_compile_options(-fno-aligned-allocation)
+  endif()
 endif()
 
 list(APPEND BRIDGE_SOURCE
