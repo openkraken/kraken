@@ -403,7 +403,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
     widget.controller!.resume();
   }
 
-  // kraken widget are hidden by flutter route and invisible by users. We should pause all timer and callbacks.
+  // Pause all timer and callbacks when kraken widget has been invisible. 
   @override
   void didPushNext() {
     assert(widget.controller != null);
@@ -896,7 +896,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
 }
 
 class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
-  /// Creates a widget that visually hides its child.
+  // Creates a widget that visually hides its child.
   const _KrakenRenderObjectWidget(
     Kraken widget,
     WidgetDelegate widgetDelegate,
