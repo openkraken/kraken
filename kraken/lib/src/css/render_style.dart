@@ -264,6 +264,10 @@ class RenderStyle
         ) {
           RenderBoxModel parent = current.parent as RenderBoxModel;
           logicalWidth = parent.logicalContentWidth;
+          // Should subtract horizontal margin of own from its parent content width.
+          if (logicalWidth != null) {
+            logicalWidth -= renderStyle.margin.horizontal;
+          }
         }
         break;
       case CSSDisplay.inlineBlock:
@@ -438,6 +442,10 @@ class RenderStyle
           RenderStyle parentRenderStyle = parent.renderStyle;
           if (CSSSizingMixin.isStretchChildHeight(parentRenderStyle, renderStyle)) {
             logicalHeight = parent.logicalContentHeight;
+            // Should subtract vertical margin of own from its parent content height.
+            if (logicalHeight != null) {
+              logicalHeight -= renderStyle.margin.vertical;
+            }
           }
         }
       }
