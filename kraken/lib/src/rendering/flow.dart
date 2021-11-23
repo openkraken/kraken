@@ -377,8 +377,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       lineHeight = renderStyle.lineHeight;
     } else if (child is RenderBoxModel) {
       lineHeight = child.renderStyle.lineHeight;
-    } else if (child is RenderPositionHolder) {
-      lineHeight = child.realDisplayedBox!.renderStyle.lineHeight;
+    } else if (child is RenderPositionPlaceholder) {
+      lineHeight = child.positioned!.renderStyle.lineHeight;
     }
 
     if (lineHeight != null && lineHeight.type != CSSLengthType.NORMAL) {
@@ -500,10 +500,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       isScrollingContentBox ? parent as RenderBoxModel? : this;
     switch (direction) {
       case Axis.horizontal:
-        mainAxisLimit = containerBox!.contentConstraints!.maxWidth;
-        if (mainAxisLimit == double.infinity) {
-          mainAxisLimit = containerBox.renderStyle.getMaxConstraintWidth();
-        }
+        mainAxisLimit = renderStyle.contentMaxConstraintsWidth;
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
         break;
@@ -595,9 +592,9 @@ class RenderFlowLayout extends RenderLayoutBox {
       double childMainAxisExtent = _getMainAxisExtent(child);
       double childCrossAxisExtent = _getCrossAxisExtent(child);
 
-      if (isPositionHolder(child)) {
-        RenderPositionHolder positionHolder = child as RenderPositionHolder;
-        RenderBoxModel? childRenderBoxModel = positionHolder.realDisplayedBox;
+      if (isPositionPlaceholder(child)) {
+        RenderPositionPlaceholder positionHolder = child as RenderPositionPlaceholder;
+        RenderBoxModel? childRenderBoxModel = positionHolder.positioned;
         if (childRenderBoxModel != null) {
           RenderLayoutParentData childParentData =
               childRenderBoxModel.parentData as RenderLayoutParentData;
@@ -612,13 +609,13 @@ class RenderFlowLayout extends RenderLayoutBox {
       // https://www.w3.org/TR/css-text-3/#line-breaking
       bool isChildBlockLevel = _isChildBlockLevel(child);
       bool isPreChildBlockLevel = _isChildBlockLevel(preChild);
-      bool isLineLengthExeedContainter = whiteSpace != WhiteSpace.nowrap &&
+      bool isLineLengthExceedContainer = whiteSpace != WhiteSpace.nowrap &&
           (runMainAxisExtent + childMainAxisExtent > mainAxisLimit);
 
       if (runChildren.isNotEmpty &&
           (isChildBlockLevel ||
               isPreChildBlockLevel ||
-              isLineLengthExeedContainter)) {
+              isLineLengthExceedContainer)) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
         runMetrics.add(_RunMetrics(
@@ -860,7 +857,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
         // Always align to the top of run when positioning positioned element placeholder
         // @HACK(kraken): Judge positioned holder to impl top align.
-        final double childCrossAxisOffset = isPositionHolder(child)
+        final double childCrossAxisOffset = isPositionPlaceholder(child)
             ? 0
             : _getChildCrossAxisOffset(
                 flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
@@ -1251,7 +1248,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   Size? _getChildSize(RenderBox child) {
     if (child is RenderBoxModel) {
       return child.boxSize;
-    } else if (child is RenderPositionHolder) {
+    } else if (child is RenderPositionPlaceholder) {
       return child.boxSize;
     } else if (child is RenderTextBox) {
       return child.boxSize;
@@ -1278,8 +1275,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       childRenderStyle = renderStyle;
     } else if (child is RenderBoxModel) {
       childRenderStyle = child.renderStyle;
-    } else if (child is RenderPositionHolder) {
-      childRenderStyle = child.realDisplayedBox!.renderStyle;
+    } else if (child is RenderPositionPlaceholder) {
+      childRenderStyle = child.positioned!.renderStyle;
     }
     return childRenderStyle;
   }
@@ -1411,7 +1408,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       child.renderStyle.effectiveOverflowY == CSSOverflowType.clip;
 
     // Margin top and bottom of empty block collapse.
-    // Make collapsed marign-top to the max of its top and bottom and margin-bottom as 0.
+    // Make collapsed margin-top to the max of its top and bottom and margin-bottom as 0.
     if (child.boxSize!.height == 0 &&
       childEffectiveDisplay != CSSDisplay.flex &&
       (isChildOverflowVisible || isChildOverflowClip)
@@ -1581,9 +1578,9 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
-    for (int i = 0; i < sortedChildren.length; i++) {
-      RenderObject child = sortedChildren[i];
-      if (child is! RenderPositionHolder) {
+    for (int i = 0; i < paintingOrder.length; i++) {
+      RenderObject child = paintingOrder[i];
+      if (child is! RenderPositionPlaceholder) {
         late DateTime childPaintStart;
         if (kProfileMode) {
           childPaintStart = DateTime.now();
@@ -1604,42 +1601,11 @@ class RenderFlowLayout extends RenderLayoutBox {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
   }
-
-  /// Convert [RenderFlowLayout] to [RenderFlexLayout]
-  RenderFlexLayout toFlexLayout() {
-    List<RenderObject?> children = getDetachedChildrenAsList();
-    RenderFlexLayout flexLayout = RenderFlexLayout(
-      children: children as List<RenderBox>,
-      renderStyle: renderStyle,
-    );
-    return copyWith(flexLayout);
-  }
-
-  /// Convert [RenderFlowLayout] to [RenderSelfRepaintFlowLayout]
-  RenderSelfRepaintFlowLayout toSelfRepaint() {
-    List<RenderObject?> children = getDetachedChildrenAsList();
-    RenderSelfRepaintFlowLayout selfRepaintFlowLayout = RenderSelfRepaintFlowLayout(
-      children: children as List<RenderBox>?,
-      renderStyle: renderStyle,
-    );
-    selfRepaintFlowLayout.sortedChildren = sortedChildren;
-    return copyWith(selfRepaintFlowLayout);
-  }
-
-  /// Convert [RenderFlowLayout] to [RenderSelfRepaintFlexLayout]
-  RenderSelfRepaintFlexLayout toSelfRepaintFlexLayout() {
-    List<RenderObject?> children = getDetachedChildrenAsList();
-    RenderSelfRepaintFlexLayout selfRepaintFlexLayout = RenderSelfRepaintFlexLayout(
-      children: children as List<RenderBox>,
-      renderStyle: renderStyle,
-    );
-    return copyWith(selfRepaintFlexLayout);
-  }
 }
 
 // Render flex layout with self repaint boundary.
-class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
-  RenderSelfRepaintFlowLayout({
+class RenderRepaintBoundaryFlowLayout extends RenderFlowLayout {
+  RenderRepaintBoundaryFlowLayout({
     List<RenderBox>? children,
     required RenderStyle renderStyle,
   }) : super(
@@ -1649,35 +1615,4 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
 
   @override
   bool get isRepaintBoundary => true;
-
-  /// Convert [RenderSelfRepaintFlowLayout] to [RenderSelfRepaintFlexLayout]
-  @override
-  RenderSelfRepaintFlexLayout toFlexLayout() {
-    List<RenderObject?> children = getDetachedChildrenAsList();
-    RenderSelfRepaintFlexLayout selfRepaintFlexLayout = RenderSelfRepaintFlexLayout(
-      children: children as List<RenderBox>,
-      renderStyle: renderStyle,
-    );
-    return copyWith(selfRepaintFlexLayout);
-  }
-
-  /// Convert [RenderSelfRepaintFlowLayout] to [RenderFlowLayout]
-  RenderFlowLayout toParentRepaint() {
-    List<RenderObject?> children = getDetachedChildrenAsList();
-    RenderFlowLayout renderFlowLayout = RenderFlowLayout(
-      children: children as List<RenderBox>,
-      renderStyle: renderStyle,
-    );
-    return copyWith(renderFlowLayout);
-  }
-
-  /// Convert [RenderSelfRepaintFlowLayout] to [RenderFlowLayout]
-  RenderFlexLayout toParentRepaintFlexLayout() {
-    List<RenderObject?> children = getDetachedChildrenAsList();
-    RenderFlexLayout renderFlexLayout = RenderFlexLayout(
-      children: children as List<RenderBox>,
-      renderStyle: renderStyle,
-    );
-    return copyWith(renderFlexLayout);
-  }
 }

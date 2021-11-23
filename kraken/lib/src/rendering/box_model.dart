@@ -13,6 +13,7 @@ import 'package:kraken/gesture.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/src/dom/sliver_manager.dart';
 
 import 'debug_overlay.dart';
 
@@ -93,9 +94,9 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox,
     // The x, y parameters have the top left of the node's box as the origin.
 
     // The z-index needs to be sorted, and higher-level nodes are processed first.
-    List<RenderObject?> sortedChildren = (this as RenderLayoutBox).sortedChildren;
-    for (int i = sortedChildren.length - 1; i >= 0; i--) {
-      ChildType child = sortedChildren[i] as ChildType;
+    List<RenderObject?> paintingOrder = (this as RenderLayoutBox).paintingOrder;
+    for (int i = paintingOrder.length - 1; i >= 0; i--) {
+      ChildType child = paintingOrder[i] as ChildType;
       // Ignore detached render object.
       if (!child.attached) {
         continue;
@@ -137,7 +138,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox,
   /// This function is useful when you need random-access to the children of
   /// this render object. If you're accessing the children in order, consider
   /// walking the child list directly.
-  List<ChildType> getChildrenAsList() {
+  List<ChildType> getChildren() {
     final List<ChildType> result = <ChildType>[];
     RenderBox? child = firstChild;
     while (child != null) {
@@ -161,6 +162,16 @@ class RenderLayoutBox extends RenderBoxModel
     renderStyle: renderStyle,
   );
 
+  // House content which can be scrolled.
+  RenderLayoutBox? get renderScrollingContent {
+    if (firstChild is RenderLayoutBox) {
+      RenderLayoutBox _firstChild = firstChild as RenderLayoutBox;
+      if (_firstChild.isScrollingContentBox) {
+        return _firstChild;
+      }
+    }
+  }
+
   @override
   void markNeedsLayout() {
     super.markNeedsLayout();
@@ -172,46 +183,32 @@ class RenderLayoutBox extends RenderBoxModel
   }
 
   // Sort children by zIndex, used for paint and hitTest.
-  List<RenderObject> _sortedChildren = [];
-
-  List<RenderObject> get sortedChildren {
-    return _sortedChildren;
-  }
-
-  set sortedChildren(List<RenderObject> value) {
-    _sortedChildren = value;
-  }
+  List<RenderBox> paintingOrder = [];
 
   // No need to override [all] and [addAll] method cause they invoke [insert] method eventually.
   @override
   void insert(RenderBox child, {RenderBox? after}) {
     super.insert(child, after: after);
-    insertChildIntoSortedChildren(child, after: after);
+    insertPaintingOrder(child, after: after);
   }
 
   @override
   void remove(RenderBox child) {
-    if (child is RenderBoxModel) {
-      if (child.renderPositionHolder != null) {
-        (child.renderPositionHolder!.parent as ContainerRenderObjectMixin?)
-            ?.remove(child.renderPositionHolder!);
-      }
-    }
     super.remove(child);
-    sortedChildren.remove(child);
+    paintingOrder.remove(child);
   }
 
   @override
   void removeAll() {
     super.removeAll();
-    sortedChildren = [];
+    paintingOrder = [];
   }
 
   @override
   void move(RenderBox child, {RenderBox? after}) {
     super.move(child, after: after);
-    sortedChildren.remove(child);
-    insertChildIntoSortedChildren(child, after: after);
+    paintingOrder.remove(child);
+    insertPaintingOrder(child, after: after);
   }
 
   // Sort siblings by zIndex.
@@ -220,30 +217,29 @@ class RenderLayoutBox extends RenderBoxModel
     return -1;
   }
 
-  // Insert child in sortedChildren.
-  void insertChildIntoSortedChildren(RenderBox child, {RenderBox? after}) {
-    List<RenderObject> children = getChildrenAsList();
-
+  // Insert child in painting order.
+  void insertPaintingOrder(RenderBox child, {RenderBox? after}) {
     // No need to paint position holder.
-    if (child is RenderPositionHolder) {
+    if (child is RenderPositionPlaceholder) {
       return;
     }
     // Find the real renderBox of position holder to insert cause the position holder may be
     // moved before its real renderBox which will cause the insert order wrong.
-    if (after is RenderPositionHolder && sortedChildren.contains(after.realDisplayedBox)) {
-      after = after.realDisplayedBox;
+    if (after is RenderPositionPlaceholder && paintingOrder.contains(after.positioned)) {
+      after = after.positioned;
     }
 
     // Original index to insert into ignoring zIndex.
-    int oriIdx = after != null ? sortedChildren.indexOf(after) + 1 : sortedChildren.length;
+    int oriIdx = after != null ? paintingOrder.indexOf(after) + 1 : paintingOrder.length;
     // The final index to insert into considering zIndex after comparing with siblings.
     int insertIdx = oriIdx;
 
+    List<RenderObject> children = getChildren();
     // Compare zIndex to previous siblings first, if found sibling zIndex bigger than
     // child, insert child at that position directly, otherwise compare zIndex to next siblings.
     if (oriIdx > 0) {
       while(insertIdx > 0) {
-        RenderObject prevSibling = sortedChildren[insertIdx - 1];
+        RenderObject prevSibling = paintingOrder[insertIdx - 1];
         int priority = sortSiblingsByZIndex(prevSibling, child);
         // Compare the siblings' render tree order if their zIndex priority are the same.
         if (priority > 0 ||
@@ -257,9 +253,9 @@ class RenderLayoutBox extends RenderBoxModel
     }
 
     // If no previous siblings has zIndex bigger than child, compare zIndex to next siblings.
-    if (insertIdx == oriIdx && insertIdx < sortedChildren.length) {
-      while(insertIdx < sortedChildren.length) {
-        RenderObject nextSibling = sortedChildren[insertIdx];
+    if (insertIdx == oriIdx && insertIdx < paintingOrder.length) {
+      while(insertIdx < paintingOrder.length) {
+        RenderObject nextSibling = paintingOrder[insertIdx];
         int priority = sortSiblingsByZIndex(child, nextSibling);
         // Compare the siblings' render tree order if their zIndex priority are the same.
         if (priority > 0 ||
@@ -272,12 +268,12 @@ class RenderLayoutBox extends RenderBoxModel
       }
     }
 
-    sortedChildren.insert(insertIdx, child);
+    paintingOrder.insert(insertIdx, child);
   }
 
   // Get all children as a list and detach them all.
-  List<RenderObject> getDetachedChildrenAsList() {
-    List<RenderObject> children = getChildrenAsList();
+  List<RenderBox> detachChildren() {
+    List<RenderBox> children = getChildren();
     removeAll();
     return children;
   }
@@ -502,6 +498,58 @@ class RenderLayoutBox extends RenderBoxModel
     }
     scrollableSize = Size(maxScrollableX, maxScrollableY);
   }
+
+  /// Convert to [RenderFlexLayout]
+  RenderFlexLayout toFlexLayout() {
+    RenderFlexLayout flexLayout = RenderFlexLayout(
+      renderStyle: renderStyle,
+    );
+    copyWith(flexLayout);
+    flexLayout.addAll(detachChildren());
+    return flexLayout;
+  }
+
+  /// Convert to [RenderRepaintBoundaryFlexLayout]
+  RenderRepaintBoundaryFlexLayout toRepaintBoundaryFlexLayout() {
+    RenderRepaintBoundaryFlexLayout repaintBoundaryFlexLayout = RenderRepaintBoundaryFlexLayout(
+      renderStyle: renderStyle,
+    );
+    copyWith(repaintBoundaryFlexLayout);
+    repaintBoundaryFlexLayout.addAll(detachChildren());
+    return repaintBoundaryFlexLayout;
+  }
+
+  /// Convert to [RenderFlowLayout]
+  RenderFlowLayout toFlowLayout() {
+    RenderFlowLayout flowLayout = RenderFlowLayout(
+      renderStyle: renderStyle,
+    );
+    copyWith(flowLayout);
+    flowLayout.addAll(detachChildren());
+    return flowLayout;
+  }
+
+  /// Convert to [RenderRepaintBoundaryFlowLayout]
+  RenderRepaintBoundaryFlowLayout toRepaintBoundaryFlowLayout() {
+    RenderRepaintBoundaryFlowLayout repaintBoundaryFlowLayout = RenderRepaintBoundaryFlowLayout(
+      renderStyle: renderStyle,
+    );
+    copyWith(repaintBoundaryFlowLayout);
+    repaintBoundaryFlowLayout.addAll(detachChildren());
+    return repaintBoundaryFlowLayout;
+  }
+
+  RenderSliverListLayout toSliverLayout(RenderSliverElementChildManager manager, ScrollListener? onScroll) {
+    RenderSliverListLayout sliverListLayout = RenderSliverListLayout(
+      renderStyle: renderStyle,
+      manager: manager,
+      onScroll: onScroll,
+    );
+    manager.setupSliverListLayout(sliverListLayout);
+    copyWith(sliverListLayout);
+    sliverListLayout.addAll(detachChildren());
+    return sliverListLayout;
+  }
 }
 
 mixin RenderBoxModelBase on RenderBox {
@@ -527,7 +575,7 @@ class RenderBoxModel extends RenderBox
   @override
   bool get alwaysNeedsCompositing => opacityAlwaysNeedsCompositing();
 
-  RenderPositionHolder? renderPositionHolder;
+  RenderPositionPlaceholder? renderPositionPlaceholder;
 
   bool _debugShouldPaintOverlay = false;
 
@@ -543,16 +591,12 @@ class RenderBoxModel extends RenderBox
     }
   }
 
-  bool _debugHasBoxLayout = false;
-
   int childPaintDuration = 0;
   int childLayoutDuration = 0;
 
   BoxConstraints? _contentConstraints;
 
   BoxConstraints? get contentConstraints {
-    assert(_debugHasBoxLayout,
-        'can not access contentConstraints, RenderBoxModel has not layout: ${toString()}');
     assert(_contentConstraints != null);
     return _contentConstraints;
   }
@@ -622,11 +666,11 @@ class RenderBoxModel extends RenderBox
   StickyPositionType stickyStatus = StickyPositionType.relative;
 
   // Positioned holder box ref.
-  RenderPositionHolder? positionedHolder;
+  RenderPositionPlaceholder? positionedHolder;
 
   T copyWith<T extends RenderBoxModel>(T copiedRenderBoxModel) {
-    if (renderPositionHolder != null) {
-      renderPositionHolder!.realDisplayedBox = copiedRenderBoxModel;
+    if (renderPositionPlaceholder != null) {
+      renderPositionPlaceholder!.positioned = copiedRenderBoxModel;
     }
 
     return copiedRenderBoxModel
@@ -658,7 +702,7 @@ class RenderBoxModel extends RenderBox
       ..onPointerSignal = onPointerSignal
 
       // Copy renderPositionHolder
-      ..renderPositionHolder = renderPositionHolder
+      ..renderPositionPlaceholder = renderPositionPlaceholder
 
       // Copy parentData
       ..parentData = parentData;
@@ -1001,8 +1045,7 @@ class RenderBoxModel extends RenderBox
 
   // Base layout methods to compute content constraints before content box layout.
   // Call this method before content box layout.
-  BoxConstraints? beforeLayout() {
-    _debugHasBoxLayout = true;
+  void beforeLayout() {
     BoxConstraints boxConstraints = constraints;
     // Deflate border constraints.
     boxConstraints = renderStyle.deflateBorderConstraints(boxConstraints);
@@ -1064,8 +1107,6 @@ class RenderBoxModel extends RenderBox
     } else {
       _contentConstraints = boxConstraints;
     }
-
-    return _contentConstraints;
   }
 
   /// Find scroll container
@@ -1292,12 +1333,6 @@ class RenderBoxModel extends RenderBox
         renderStyle.backgroundAttachment == CSSBackgroundAttachmentType.local;
   }
 
-  @override
-  void detach() {
-    disposePainter();
-    super.detach();
-  }
-
   /// Called when its corresponding element disposed
   void dispose() {
     // Clear renderObjects in list when disposed to avoid memory leak
@@ -1305,6 +1340,8 @@ class RenderBoxModel extends RenderBox
       fixedChildren.clear();
     }
 
+    // Dispose box decoration painter.
+    disposePainter();
     // Evict render decoration image cache.
     renderStyle.decoration?.image?.image.evict();
   }
@@ -1439,9 +1476,9 @@ class RenderBoxModel extends RenderBox
     properties.add(DiagnosticsProperty('maxScrollableSize', scrollableSize,
         missingIfNull: true));
 
-    if (renderPositionHolder != null)
+    if (renderPositionPlaceholder != null)
       properties.add(
-          DiagnosticsProperty('renderPositionHolder', renderPositionHolder));
+          DiagnosticsProperty('renderPositionHolder', renderPositionPlaceholder));
     if (intrinsicWidth != null)
       properties.add(DiagnosticsProperty('intrinsicWidth', intrinsicWidth));
     if (intrinsicHeight != null)
