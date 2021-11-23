@@ -916,8 +916,8 @@ class RenderFlowLayout extends RenderLayoutBox {
         RenderBoxModel? childRenderBoxModel;
         if (child is RenderBoxModel) {
           childRenderBoxModel = child;
-        } else if (child is RenderPositionHolder) {
-          childRenderBoxModel = child.realDisplayedBox;
+        } else if (child is RenderPositionPlaceholder) {
+          childRenderBoxModel = child.positioned;
         }
 
         if (childRenderBoxModel is RenderBoxModel) {
