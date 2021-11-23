@@ -105,6 +105,11 @@ mixin ElementOverflowMixin on ElementBase {
   KrakenScrollable? _scrollableX;
   KrakenScrollable? _scrollableY;
 
+  void disposeScrollable() {
+    _scrollableX = null;
+    _scrollableY = null;
+  }
+
   void updateRenderBoxModelWithOverflowX(ScrollListener scrollListener) {
     if (renderBoxModel is RenderSliverListLayout) {
       RenderSliverListLayout renderBoxModel = this.renderBoxModel as RenderSliverListLayout;
@@ -147,7 +152,7 @@ mixin ElementOverflowMixin on ElementBase {
       }
 
       renderBoxModel.scrollListener = scrollListener;
-      renderBoxModel.pointerListener = _pointerListener;
+      renderBoxModel.scrollablePointerListener = _scrollPointerListener;
 
       if (renderBoxModel is RenderLayoutBox) {
         if (shouldScrolling) {
@@ -199,7 +204,7 @@ mixin ElementOverflowMixin on ElementBase {
       }
 
       renderBoxModel.scrollListener = scrollListener;
-      renderBoxModel.pointerListener = _pointerListener;
+      renderBoxModel.scrollablePointerListener = _scrollPointerListener;
 
       if (renderBoxModel is RenderLayoutBox) {
         if (shouldScrolling) {
@@ -214,7 +219,7 @@ mixin ElementOverflowMixin on ElementBase {
   void scrollingContentBoxStyleListener(String property, String? original, String present) {
     RenderLayoutBox scrollingContentBox = (renderBoxModel as RenderLayoutBox).renderScrollingContent!;
     RenderStyle scrollingContentRenderStyle = scrollingContentBox.renderStyle;
-    
+
     switch (property) {
       case DISPLAY:
         scrollingContentRenderStyle.display = renderStyle.display;
@@ -334,7 +339,7 @@ mixin ElementOverflowMixin on ElementBase {
     outerLayoutBox.addAll(children);
   }
 
-  void _pointerListener(PointerEvent event) {
+  void _scrollPointerListener(PointerEvent event) {
     if (event is PointerDownEvent) {
       if (_scrollableX != null) {
         _scrollableX!.handlePointerDown(event);

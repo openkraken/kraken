@@ -176,6 +176,13 @@ class RenderFlowLayout extends RenderLayoutBox {
   List<_RunMetrics> lineBoxMetrics = <_RunMetrics>[];
 
   @override
+  void dispose() {
+    super.dispose();
+
+    lineBoxMetrics.clear();
+  }
+
+  @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderLayoutParentData) {
       child.parentData = RenderLayoutParentData();

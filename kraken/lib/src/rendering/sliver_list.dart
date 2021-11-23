@@ -42,7 +42,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
   }) : _renderSliverBoxChildManager = manager,
        _scrollListener = onScroll,
         super(renderStyle: renderStyle) {
-    pointerListener = _pointerListener;
+    scrollablePointerListener = _scrollablePointerListener;
     scrollable = KrakenScrollable(axisDirection: getAxisDirection(axis));
     axis = renderStyle.sliverDirection;
 
@@ -121,7 +121,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
     }
   }
 
-  void _pointerListener(PointerEvent event) {
+  void _scrollablePointerListener(PointerEvent event) {
     if (event is PointerDownEvent) {
       scrollable.handlePointerDown(event);
     }
