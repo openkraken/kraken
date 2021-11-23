@@ -3,8 +3,9 @@
  * Author: Kraken Team.
  */
 
-
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#functional-notations
+
+import 'package:quiver/collection.dart';
 
 final _functionRegExp = RegExp(r'^[a-zA-Z_]+\(.+\)$', caseSensitive: false);
 final _functionStart = '(';
@@ -14,6 +15,8 @@ final _functionNotationUrl = 'url';
 const String FUNCTION_SPLIT = ',';
 const String FUNCTION_ARGS_SPLIT = ',';
 
+final LinkedLruHashMap<String, List<CSSFunctionalNotation>> _cachedParsedFunction = LinkedLruHashMap(maximumSize: 100);
+
 // ignore: public_member_api_docs
 class CSSFunction {
 
@@ -22,6 +25,9 @@ class CSSFunction {
   }
 
   static List<CSSFunctionalNotation> parseFunction(String value) {
+    if (_cachedParsedFunction.containsKey(value)) {
+      return _cachedParsedFunction[value]!;
+    }
     var start = 0;
     var left = value.indexOf(_functionStart, start);
     List<CSSFunctionalNotation> notations = [];
@@ -76,7 +82,7 @@ class CSSFunction {
       left = value.indexOf(_functionStart, start);
     }
 
-    return notations;
+    return _cachedParsedFunction[value] = notations;
   }
 }
 

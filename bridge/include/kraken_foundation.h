@@ -6,14 +6,16 @@
 #ifndef KRAKENBRIDGE_FOUNDATION_H
 #define KRAKENBRIDGE_FOUNDATION_H
 
+#include <atomic>
+#include <cassert>
 #include <codecvt>
 #include <cstdint>
-#include <unordered_map>
-#include <vector>
-
+#include <functional>
+#include <locale>
 #include <sstream>
 #include <string>
-
+#include <unordered_map>
+#include <vector>
 #define HTML_TARGET_ID -1
 #define WINDOW_TARGET_ID -2
 #define DOCUMENT_TARGET_ID -3

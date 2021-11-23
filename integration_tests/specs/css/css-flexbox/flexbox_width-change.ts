@@ -64,12 +64,13 @@ describe('flexbox_width-change', () => {
     BODY.appendChild(log);
     BODY.appendChild(container);
 
+    await snapshot();
+
     requestAnimationFrame(async () => {
       container.style.width = '200px';
       await snapshot();
       done();
     });
 
-    await snapshot();
   });
 });

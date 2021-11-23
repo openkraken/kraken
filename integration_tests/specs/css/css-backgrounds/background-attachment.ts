@@ -41,7 +41,7 @@ describe('background-attachment', () => {
     await sleep(1);
     await snapshot();
     container.scrollTo(0, 100);
-    await snapshot(0.1);
+    await snapshot();
   });
 
   it('scroll', async () => {
