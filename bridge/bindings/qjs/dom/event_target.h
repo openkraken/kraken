@@ -88,6 +88,7 @@ class EventTargetInstance : public Instance {
   JSValue m_properties{JS_NewObject(m_ctx)};
 
   void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
+  static void copyNodeProperties(EventTargetInstance* newNode, EventTargetInstance* referenceNode);
 
   static int hasProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom);
   static JSValue getProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);

@@ -99,4 +99,49 @@ describe('Display inline-block', () => {
 
     await snapshot();
   });
+
+  it('text not wrap when inline-block width exceeds its container', async() => {
+    const container = createElement('div', {
+      style: {
+        "display": "inline-block",
+        "padding": "10px 300px",
+        backgroundColor: 'yellow'
+      }
+    }, [
+        createText('11111'),
+    ]);
+  
+    document.body.appendChild(container);
+    await snapshot();
+  });
+  
+  it('element wrap when inline-block width exceeds its container', async() => {
+    const container = createElement('div', {
+      style: {
+        "display": "inline-block",
+        "padding": "10px 300px",
+        backgroundColor: 'green'
+      }
+    }, [
+      createElement('div', {
+        style: {
+            display: 'inline-block',
+            width: '50px',
+            height: '50px',
+            backgroundColor: 'yellow'
+        }
+      }),
+      createElement('div', {
+        style: {
+            display: 'inline-block',
+            width: '50px',
+            height: '50px',
+            backgroundColor: 'red'
+        }
+      })
+    ]);
+  
+    document.body.appendChild(container);
+    await snapshot();
+  });
 });
