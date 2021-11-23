@@ -495,8 +495,9 @@ class RenderFlexLayout extends RenderLayoutBox {
           : child.intrinsicHeight!;
       minMainSize = math.min(contentSize, transferredSize);
     } else if (child is RenderBoxModel) {
-      double? specifiedMainSize =
-        _isHorizontalFlexDirection ? child.logicalContentWidth : child.logicalContentHeight;
+      double? specifiedMainSize = _isHorizontalFlexDirection
+          ? child.renderStyle.logicalContentWidth
+          : child.renderStyle.logicalContentHeight;
       minMainSize = specifiedMainSize != null
           ? math.min(contentSize, specifiedMainSize)
           : contentSize;
@@ -724,8 +725,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     /// If no child exists, stop layout.
     if (childCount == 0) {
       Size layoutSize = getLayoutSize(
-        logicalContentWidth: logicalContentWidth,
-        logicalContentHeight: logicalContentHeight,
         contentWidth: 0,
         contentHeight: 0,
       );
@@ -760,6 +759,9 @@ class RenderFlexLayout extends RenderLayoutBox {
       placeholderChild,
       containerSizeMap,
     );
+
+    double? logicalContentWidth = renderStyle.logicalContentWidth;
+    double? logicalContentHeight = renderStyle.logicalContentHeight;
 
     /// If no non positioned child exists, stop layout
     if (runMetrics.isEmpty) {
@@ -1238,6 +1240,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     Map<String, double?> containerSizeMap,
   ) {
     RenderBox? child = placeholderChild ?? firstChild;
+    double? logicalContentWidth = renderStyle.logicalContentWidth;
+    double? logicalContentHeight = renderStyle.logicalContentHeight;
 
     // Container's width specified by style or inherited from parent
     double? containerWidth = 0;
@@ -1302,7 +1306,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       // Flexbox with no size on main axis should adapt the main axis size with children.
       double initialFreeSpace = mainSizeType != BoxSizeType.automatic ?
-        maxMainSize! - totalSpace : 0;
+        maxMainSize - totalSpace : 0;
 
       bool isFlexGrow = initialFreeSpace > 0 && totalFlexGrow > 0;
       bool isFlexShrink = initialFreeSpace < 0 && totalFlexShrink > 0;
@@ -1344,8 +1348,8 @@ class RenderFlexLayout extends RenderLayoutBox {
 
         if (child is RenderBoxModel && child.hasSize) {
           Size? childSize = _getChildSize(child);
-          double? childContentWidth = child.logicalContentWidth;
-          double? childContentHeight = child.logicalContentHeight;
+          double? childContentWidth = child.renderStyle.logicalContentWidth;
+          double? childContentHeight = child.renderStyle.logicalContentHeight;
           double paddingLeft = child.renderStyle.paddingLeft.computedValue;
           double paddingRight = child.renderStyle.paddingRight.computedValue;
           double paddingTop = child.renderStyle.paddingTop.computedValue;
@@ -1596,8 +1600,6 @@ class RenderFlexLayout extends RenderLayoutBox {
             ? containerSizeMap['cross']
             : maxAllocatedMainSize;
     Size layoutSize = getLayoutSize(
-      logicalContentWidth: logicalContentWidth,
-      logicalContentHeight: logicalContentHeight,
       contentWidth: contentWidth,
       contentHeight: contentHeight,
     );

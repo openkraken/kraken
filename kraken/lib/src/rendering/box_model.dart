@@ -380,8 +380,6 @@ class RenderLayoutBox extends RenderBoxModel
 
   /// Common layout size (including flow and flexbox layout) calculation logic
   Size getLayoutSize({
-    double? logicalContentWidth,
-    double? logicalContentHeight,
     double? contentWidth,
     double? contentHeight,
   }) {
@@ -389,8 +387,8 @@ class RenderLayoutBox extends RenderBoxModel
     double? layoutHeight = contentHeight;
 
     // Size which is specified by sizing styles
-    double? specifiedWidth = logicalContentWidth;
-    double? specifiedHeight = logicalContentHeight;
+    double? specifiedWidth = renderStyle.logicalContentWidth;
+    double? specifiedHeight = renderStyle.logicalContentHeight;
     // Flex basis takes priority over main size in flex item.
     if (parent is RenderFlexLayout) {
       RenderBoxModel? parentRenderBoxModel = parent as RenderBoxModel?;
@@ -872,15 +870,15 @@ class RenderBoxModel extends RenderBox
     // Content size calculated from style
 //    logicalContentWidth = renderStyle.getLogicalContentWidth();
 //    logicalContentHeight = renderStyle.getLogicalContentHeight();
-    logicalContentWidth = renderStyle.computeLogicalContentWidth();
-    logicalContentHeight = renderStyle.computeLogicalContentHeight();
+    renderStyle.logicalContentWidth = renderStyle.computeLogicalContentWidth();
+    renderStyle.logicalContentHeight = renderStyle.computeLogicalContentHeight();
 
     // Box size calculated from style
-    double? logicalWidth = logicalContentWidth != null
-        ? logicalContentWidth! + horizontalPaddingLength + horizontalBorderLength
+    double? logicalWidth = renderStyle.logicalContentWidth != null
+        ? renderStyle.logicalContentWidth! + horizontalPaddingLength + horizontalBorderLength
         : null;
-    double? logicalHeight = logicalContentHeight != null
-        ? logicalContentHeight! + verticalPaddingLength + verticalBorderLength
+    double? logicalHeight = renderStyle.logicalContentHeight != null
+        ? renderStyle.logicalContentHeight! + verticalPaddingLength + verticalBorderLength
         : null;
 
     // Constraints
@@ -997,12 +995,6 @@ class RenderBoxModel extends RenderBox
   Size? _contentSize;
   Size get contentSize => _contentSize ?? Size.zero;
 
-  /// Logical content width calculated from style
-  double? logicalContentWidth;
-
-  /// Logical content height calculated from style
-  double? logicalContentHeight;
-
   double get clientWidth {
     double width = contentSize.width;
     width += renderStyle.padding.horizontal;
@@ -1031,11 +1023,14 @@ class RenderBoxModel extends RenderBox
 //    logicalContentWidth = renderStyle.computeLogicalContentWidth();
 //    logicalContentHeight = renderStyle.computeLogicalContentHeight();
 
+    double? logicalContentWidth = renderStyle.logicalContentWidth;
+    double? logicalContentHeight = renderStyle.logicalContentHeight;
+
     if (!isScrollingContentBox && (logicalContentWidth != null || logicalContentHeight != null)) {
       double minWidth;
-      double? maxWidth;
+      double maxWidth;
       double minHeight;
-      double? maxHeight;
+      double maxHeight;
 
       if (boxConstraints.hasTightWidth) {
         minWidth = maxWidth = boxConstraints.maxWidth;
@@ -1063,21 +1058,21 @@ class RenderBoxModel extends RenderBox
           minHeight = minWidth * intrinsicRatio!;
         }
         if (!renderStyle.maxWidth.isNone && renderStyle.maxHeight.isNone) {
-          maxHeight = maxWidth! * intrinsicRatio!;
+          maxHeight = maxWidth * intrinsicRatio!;
         }
         if (renderStyle.minWidth.isAuto && !renderStyle.minHeight.isAuto) {
           minWidth = minHeight / intrinsicRatio!;
         }
         if (renderStyle.maxWidth.isNone && !renderStyle.maxHeight.isNone) {
-          maxWidth = maxHeight! / intrinsicRatio!;
+          maxWidth = maxHeight / intrinsicRatio!;
         }
       }
 
       _contentConstraints = BoxConstraints(
         minWidth: minWidth,
-        maxWidth: maxWidth!,
+        maxWidth: maxWidth,
         minHeight: minHeight,
-        maxHeight: maxHeight!
+        maxHeight: maxHeight
       );
     } else {
       _contentConstraints = boxConstraints;

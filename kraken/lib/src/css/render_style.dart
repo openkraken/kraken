@@ -57,6 +57,12 @@ class RenderStyle
     required this.target,
   });
 
+  // Content width which is calculated from render style.
+  double? logicalContentWidth;
+
+  // Content height which is calculated from render style.
+  double? logicalContentHeight;
+
   dynamic getProperty(String name) {
     RenderStyle renderStyle = this;
     switch (name) {
@@ -259,11 +265,10 @@ class RenderStyle
 
         // Block element (except replaced element) will stretch to the content width of its parent.
         } else if (current is! RenderIntrinsic &&
-          current.parent != null &&
-          current.parent is RenderBoxModel
+          renderStyle.parent != null
         ) {
-          RenderBoxModel parent = current.parent as RenderBoxModel;
-          logicalWidth = parent.logicalContentWidth;
+          RenderStyle parentRenderStyle = renderStyle.parent!;
+          logicalWidth = parentRenderStyle.logicalContentWidth;
           // Should subtract horizontal margin of own from its parent content width.
           if (logicalWidth != null) {
             logicalWidth -= renderStyle.margin.horizontal;
@@ -437,11 +442,11 @@ class RenderStyle
         logicalHeight = current.constraints.maxHeight;
 
       } else {
-        if (current.parent != null && current.parent is RenderBoxModel) {
+        if (current.parent != null && renderStyle.parent != null) {
           RenderBoxModel parent = current.parent as RenderBoxModel;
           RenderStyle parentRenderStyle = parent.renderStyle;
           if (CSSSizingMixin.isStretchChildHeight(parentRenderStyle, renderStyle)) {
-            logicalHeight = parent.logicalContentHeight;
+            logicalHeight = parentRenderStyle.logicalContentHeight;
             // Should subtract vertical margin of own from its parent content height.
             if (logicalHeight != null) {
               logicalHeight -= renderStyle.margin.vertical;

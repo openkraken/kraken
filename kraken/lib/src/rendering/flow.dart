@@ -475,8 +475,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     // If no child exists, stop layout.
     if (childCount == 0) {
       Size layoutSize = getLayoutSize(
-        logicalContentWidth: logicalContentWidth,
-        logicalContentHeight: logicalContentHeight,
         contentWidth: 0,
         contentHeight: 0,
       );
@@ -699,8 +697,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     final int runCount = runMetrics.length;
 
     Size layoutSize = getLayoutSize(
-      logicalContentWidth: logicalContentWidth,
-      logicalContentHeight: logicalContentHeight,
       contentWidth: mainAxisExtent,
       contentHeight: crossAxisExtent,
     );
