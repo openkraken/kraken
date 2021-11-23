@@ -60,10 +60,10 @@ const loader = function(source) {
       }
     });
   `;
-}
+};
 
 loader.pitch = (f) => {
   filename = f;
-}
+};
 
 module.exports = loader;
