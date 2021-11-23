@@ -13,7 +13,6 @@ import 'bridge/from_native.dart';
 import 'bridge/to_native.dart';
 import 'custom/custom_object_element.dart';
 import 'package:kraken_websocket/kraken_websocket.dart';
-import 'package:kraken_animation_player/kraken_animation_player.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
 import 'package:kraken_webview/kraken_webview.dart';
 
@@ -21,7 +20,8 @@ String? pass = (AnsiPen()..green())('[TEST PASS]');
 String? err = (AnsiPen()..red())('[TEST FAILED]');
 
 final String __dirname = path.dirname(Platform.script.path);
-final String testDirectory = Platform.environment['KRAKEN_TEST_DIR'] ?? __dirname;
+final String testDirectory =
+    Platform.environment['KRAKEN_TEST_DIR'] ?? __dirname;
 
 const int KRAKEN_NUM = 1;
 Map<int, Kraken> krakenMap = Map();
@@ -30,8 +30,7 @@ Map<int, Kraken> krakenMap = Map();
 class IntegrationTestUriParser extends UriParser {
   @override
   Uri resolve(Uri base, Uri relative) {
-    if (base.toString().isEmpty
-        && relative.path.startsWith('assets/')) {
+    if (base.toString().isEmpty && relative.path.startsWith('assets/')) {
       return Uri.file(relative.path);
     } else {
       return super.resolve(base, relative);
@@ -42,7 +41,6 @@ class IntegrationTestUriParser extends UriParser {
 // By CLI: `KRAKEN_ENABLE_TEST=true flutter run`
 void main() async {
   KrakenWebsocket.initialize();
-  KrakenAnimationPlayer.initialize();
   KrakenVideoPlayer.initialize();
   KrakenWebView.initialize();
   setObjectElementFactory(customObjectElementFactory);
@@ -66,7 +64,7 @@ void main() async {
   ];
   List<Widget> widgets = [];
 
-  for (int i = 0; i < KRAKEN_NUM; i ++) {
+  for (int i = 0; i < KRAKEN_NUM; i++) {
     var kraken = krakenMap[i] = Kraken(
       viewportWidth: 360,
       viewportHeight: 640,
@@ -82,9 +80,7 @@ void main() async {
     title: 'Kraken Plugin Tests',
     debugShowCheckedModeBanner: false,
     home: Scaffold(
-      appBar: AppBar(
-          title: Text('Kraken Plugin Tests')
-      ),
+      appBar: AppBar(title: Text('Kraken Plugin Tests')),
       body: Wrap(
         children: widgets,
       ),
@@ -96,7 +92,7 @@ void main() async {
 
     List<Future<String>> testResults = [];
 
-    for (int i = 0; i < widgets.length; i ++) {
+    for (int i = 0; i < widgets.length; i++) {
       int contextId = i;
       initTestFramework(contextId);
       addJSErrorListener(contextId, (String err) {
@@ -115,7 +111,7 @@ void main() async {
 
     List<String> results = await Future.wait(testResults);
 
-    for (int i = 0; i < results.length; i ++) {
+    for (int i = 0; i < results.length; i++) {
       String status = results[i];
       if (status == 'failed') {
         exit(1);
@@ -125,4 +121,3 @@ void main() async {
     exit(0);
   });
 }
-

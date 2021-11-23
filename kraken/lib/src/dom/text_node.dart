@@ -71,18 +71,27 @@ class TextNode extends Node {
 
   set data(String? newData) {
     assert(newData != null);
+
+    String oldData = _data!;
+    if (oldData == newData) return;
+
     _data = newData;
-    _applyTextStyle();
+
+    // Empty string of textNode should not attach to render tree.
+    if (oldData.isNotEmpty && newData!.isEmpty) {
+      detach();
+    } else if (oldData.isEmpty && newData!.isNotEmpty) {
+      attachTo(parentElement!);
+    } else {
+      _applyTextStyle();
+    }
   }
 
   @override
   String get nodeName => '#text';
 
   @override
-  RenderObject? get renderer => _renderTextBox;
-
-  @override
-  handleJSCall(String method, List argv) {}
+  RenderBox? get renderer => _renderTextBox;
 
   void _applyTextStyle() {
     if (isRendererAttached) {
@@ -95,12 +104,8 @@ class TextNode extends Node {
       KrakenRenderParagraph renderParagraph = _renderTextBox!.child as KrakenRenderParagraph;
       renderParagraph.markNeedsLayout();
 
-      RenderLayoutBox? parentRenderLayoutBox;
-      if (_parentElement.scrollingContentLayoutBox != null) {
-        parentRenderLayoutBox = _parentElement.scrollingContentLayoutBox!;
-      } else {
-        parentRenderLayoutBox = (_parentElement.renderBoxModel as RenderLayoutBox?)!;
-      }
+      RenderLayoutBox parentRenderLayoutBox = _parentElement.renderBoxModel as RenderLayoutBox;
+      parentRenderLayoutBox = parentRenderLayoutBox.renderScrollingContent ?? parentRenderLayoutBox;
       _setTextSizeType(parentRenderLayoutBox.widthSizeType, parentRenderLayoutBox.heightSizeType);
     }
   }
@@ -114,46 +119,39 @@ class TextNode extends Node {
   // Attach renderObject of current node to parent
   @override
   void attachTo(Element parent, { RenderBox? after }) {
-    willAttachRenderer();
+    // Empty string of TextNode should not attach to render tree.
+    if (_data == null || _data!.isEmpty) return;
 
-    RenderLayoutBox? parentRenderLayoutBox;
-    if (parent.scrollingContentLayoutBox != null) {
-      parentRenderLayoutBox = parent.scrollingContentLayoutBox!;
-    } else {
-      parentRenderLayoutBox = (parent.renderBoxModel as RenderLayoutBox?)!;
+    createRenderer();
+
+    if (parent.renderBoxModel is RenderLayoutBox) {
+      RenderLayoutBox parentRenderLayoutBox = parent.renderBoxModel as RenderLayoutBox;
+      parentRenderLayoutBox = parentRenderLayoutBox.renderScrollingContent ?? parentRenderLayoutBox;
+      parentRenderLayoutBox.insert(_renderTextBox!, after: after);
+      _applyTextStyle();
     }
-
-    parentRenderLayoutBox.insert(_renderTextBox!, after: after);
-
-    _applyTextStyle();
-
-    didAttachRenderer();
   }
 
   // Detach renderObject of current node from parent
-  @override
-  void disposeRenderObject() {
-    willDetachRenderer();
-
+  void detach() {
     if (isRendererAttached) {
       RenderTextBox renderTextBox = _renderTextBox!;
       ContainerRenderObjectMixin parent = renderTextBox.parent as ContainerRenderObjectMixin;
       parent.remove(renderTextBox);
     }
+  }
 
-    didDetachRenderer();
+  // Detach renderObject of current node from parent
+  @override
+  void disposeRenderObject() {
+    detach();
     _renderTextBox = null;
   }
 
   @override
-  void willAttachRenderer() {
-    createRenderer();
-  }
-
-  @override
-  RenderObject createRenderer() {
-    if (renderer != null) {
-      return renderer!;
+  RenderBox createRenderer() {
+    if (_renderTextBox != null) {
+      return _renderTextBox!;
     }
     return _renderTextBox = RenderTextBox(data, renderStyle: parentElement!.renderStyle);
   }

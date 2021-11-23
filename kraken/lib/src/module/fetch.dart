@@ -17,12 +17,15 @@ class FetchModule extends BaseModule {
   @override
   String get name => 'Fetch';
 
+  bool _disposed = false;
+
   FetchModule(ModuleManager? moduleManager) : super(moduleManager);
 
   @override
   void dispose() {
     _httpClient?.close(force: true);
     _httpClient = null;
+    _disposed = true;
   }
 
   HttpClient? _httpClient;
@@ -97,14 +100,18 @@ class FetchModule extends BaseModule {
       }
       callback(error: '$error\n$stackTrace');
     }
-
     if (uri.host.isEmpty) {
       // No host specified in URI.
       _handleError('Failed to parse URL from $uri.', null);
     } else {
       getRequest(uri, options['method'], options['headers'], options['body'])
-        .then((HttpClientRequest request) => request.close())
-        .then((HttpClientResponse response) {
+        .then((HttpClientRequest request) {
+          if (_disposed) return Future.value(null);
+          return request.close();
+        })
+        .then((HttpClientResponse? response) {
+          if (response == null) return Future.value(null);
+
           StringBuffer contentBuffer = StringBuffer();
 
           response
