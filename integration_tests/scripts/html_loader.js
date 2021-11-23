@@ -1,5 +1,5 @@
 const path = require('path');
-var HTMLParser = require('node-html-parser');
+const HTMLParser = require('node-html-parser');
 
 const SCRIPT = 'script';
 
