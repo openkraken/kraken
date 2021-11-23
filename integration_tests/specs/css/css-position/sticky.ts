@@ -285,6 +285,62 @@ describe('Position sticky', () => {
     });
   });
 
+  it('should work with overflow hidden element', async() => {
+    const container1 = createElement('div', {
+      style: {
+        position: 'sticky',
+        overflow: 'hidden',
+        top: '100px',
+        width: '100px',
+        height: '50px',
+        backgroundColor: '#666'
+      }
+    }, [
+      createText('sticky')
+    ]);
+
+    document.body.appendChild(container1);
+    
+    const container2 = createElement('div', {
+      style: {
+        width: '100px',
+        height: '200px',
+        backgroundColor: 'yellow',
+      }
+    });
+
+    document.body.appendChild(container2);
+
+    await snapshot();
+  });
+
+  it('should work with sticky element in overflow hidden container', async() => {
+    const container = createElement('div', {
+      style: {
+        overflow: 'hidden',
+        width: '100px',
+        height: '200px',
+        marginTop: '50px',
+        backgroundColor: 'green',
+      }
+    }, [
+      createElement('div', {
+        style: {
+          position: 'sticky',
+          top: '100px',
+          height: '50px',
+          backgroundColor: '#666'
+        }
+      }, [
+        createText('sticky')
+      ])
+    ]);
+
+    document.body.appendChild(container);
+
+    await snapshot();
+  });
+
   it('should work with margin', async() => {
     const container1 = createElement('div', {
       style: {
@@ -294,9 +350,9 @@ describe('Position sticky', () => {
         backgroundColor: 'lightblue'
       }
     });
-  
+
     document.body.appendChild(container1);
-    
+
     const container2 = createElement('div', {
       style: {
         position: 'sticky',
@@ -309,9 +365,10 @@ describe('Position sticky', () => {
         marginLeft: '140px'
       }
     });
-  
+
     document.body.appendChild(container2);
 
     await snapshot();
   });
+
 });

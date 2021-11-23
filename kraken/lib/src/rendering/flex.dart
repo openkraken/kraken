@@ -728,21 +728,14 @@ class RenderFlexLayout extends RenderLayoutBox {
   void _layoutChildren(RenderPositionPlaceholder? placeholderChild) {
     /// If no child exists, stop layout.
     if (childCount == 0) {
-      Size layoutSize = getLayoutSize(
+      Size layoutContentSize = getContentSize(
         logicalContentWidth: logicalContentWidth,
         logicalContentHeight: logicalContentHeight,
         contentWidth: 0,
         contentHeight: 0,
       );
-      double constraintWidth = layoutSize.width;
-      double constraintHeight = layoutSize.height;
-
-      setMaxScrollableSize(constraintWidth, constraintHeight);
-
-      size = getBoxSize(Size(
-        constraintWidth,
-        constraintHeight,
-      ));
+      setMaxScrollableSize(layoutContentSize);
+      size = getBoxSize(layoutContentSize);
       return;
     }
     assert(contentConstraints != null);
@@ -768,12 +761,12 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     /// If no non positioned child exists, stop layout
     if (runMetrics.isEmpty) {
-      Size preferredSize = Size(
+      Size contentSize = Size(
         logicalContentWidth ?? 0,
         logicalContentHeight ?? 0,
       );
-      setMaxScrollableSize(preferredSize.width, preferredSize.height);
-      size = getBoxSize(preferredSize);
+      setMaxScrollableSize(contentSize);
+      size = getBoxSize(contentSize);
       return;
     }
 
@@ -1600,17 +1593,13 @@ class RenderFlexLayout extends RenderLayoutBox {
         _isHorizontalFlexDirection
             ? containerSizeMap['cross']
             : maxAllocatedMainSize;
-    Size layoutSize = getLayoutSize(
+    Size layoutContentSize = getContentSize(
       logicalContentWidth: logicalContentWidth,
       logicalContentHeight: logicalContentHeight,
-      contentWidth: contentWidth,
-      contentHeight: contentHeight,
+      contentWidth: contentWidth!,
+      contentHeight: contentHeight!,
     );
-    double constraintWidth = layoutSize.width;
-    double constraintHeight = layoutSize.height;
-
-    Size contentSize = Size(constraintWidth, constraintHeight);
-    size = getBoxSize(contentSize);
+    size = getBoxSize(layoutContentSize);
 
     _setMaxScrollableSizeForFlex(runMetrics);
 
