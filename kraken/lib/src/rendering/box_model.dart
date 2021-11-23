@@ -300,16 +300,17 @@ class RenderLayoutBox extends RenderBoxModel
       RenderStyle childRenderStyle = childRenderBoxModel.renderStyle;
       CSSOverflowType overflowX = childRenderStyle.effectiveOverflowX;
       CSSOverflowType overflowY = childRenderStyle.effectiveOverflowY;
+
+      if (CSSPositionedLayout.isSticky(childRenderBoxModel)) {
+        stickyChildren.add(child);
+      }
+
       // No need to loop scrollable container children
       if (overflowX != CSSOverflowType.visible ||
           overflowY != CSSOverflowType.visible) {
         child = childParentData!.nextSibling;
         continue;
       }
-      if (CSSPositionedLayout.isSticky(childRenderBoxModel)) {
-        stickyChildren.add(child);
-      }
-
       if (child is RenderLayoutBox) {
         List<RenderBoxModel> mergedChildren = child.findStickyChildren();
         for (RenderBoxModel child in mergedChildren) {
