@@ -378,7 +378,7 @@ describe('max-width', () => {
 
     requestAnimationFrame(async () => {
       cont.style.maxWidth = 'none';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });

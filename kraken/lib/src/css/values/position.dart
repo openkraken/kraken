@@ -5,9 +5,10 @@
 
 import 'package:flutter/painting.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/rendering.dart';
+import 'package:quiver/collection.dart';
 
 final RegExp _splitRegExp = RegExp(r'\s+');
+final LinkedLruHashMap<String, List<String>> _cachedParsedPosition = LinkedLruHashMap(maximumSize: 100);
 
 /// CSS Values and Units: https://drafts.csswg.org/css-values-3/#position
 /// The <position> value specifies the position of a object area
@@ -15,17 +16,14 @@ final RegExp _splitRegExp = RegExp(r'\s+');
 /// positioning area). It is interpreted as specified for background-position.
 /// [CSS3-BACKGROUND]
 class CSSPosition {
-  static const String LEFT = 'left';
-  static const String RIGHT = 'right';
-  static const String TOP = 'top';
-  static const String BOTTOM = 'bottom';
-  static const String CENTER = 'center';
-
   // [0, 1]
   static Alignment initial = Alignment.topLeft; // default value.
 
   /// Parse background-position shorthand to background-position-x and background-position-y list.
   static List<String> parsePositionShorthand(String input) {
+    if (_cachedParsedPosition.containsKey(input)) {
+      return _cachedParsedPosition[input]!;
+    }
     List<String> positions = [];
     List<String> split = input.split(_splitRegExp);
     if (split.length == 1) {
@@ -49,24 +47,15 @@ class CSSPosition {
       positions.add(split.first);
       positions.add(split.last);
     }
-    return positions;
+    return _cachedParsedPosition[input] = positions;
   }
 
   /// Parse background-position-x/background-position-y from string to CSSBackgroundPosition type.
-  static CSSBackgroundPosition parsePosition(String input, RenderStyle renderStyle, bool isHorizontal) {
-    if (CSSLength.isPercentage(input)) {
+  static CSSBackgroundPosition resolveBackgroundPosition(String input, RenderStyle renderStyle, String propertyName, bool isHorizontal) {
+    if (CSSPercentage.isPercentage(input)) {
       return CSSBackgroundPosition(percentage: _gatValuePercentage(input));
     } else if (CSSLength.isLength(input)) {
-      Size viewportSize = renderStyle.viewportSize;
-      RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
-      double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
-      double fontSize = renderStyle.fontSize;
-      return CSSBackgroundPosition(length: CSSLength.toDisplayPortValue(
-        input,
-        viewportSize: viewportSize,
-        rootFontSize: rootFontSize,
-        fontSize: fontSize
-      ));
+      return CSSBackgroundPosition(length: CSSLength.parseLength(input, renderStyle, propertyName));
     } else {
       if (isHorizontal) {
         switch (input) {

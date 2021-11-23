@@ -9,6 +9,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/kraken.dart';
 import 'package:kraken/launcher.dart';
 
 // Children of the <head> element all have display:none
@@ -49,21 +50,29 @@ class NoScriptElement extends Element {
       : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
 }
 
+const String _JAVASCRIPT_MIME = 'text/javascript';
+const String _JAVASCRIPT_MODULE = 'module';
+
 class ScriptElement extends Element {
   ScriptElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle) {
   }
+
+  String type = _JAVASCRIPT_MIME;
 
   @override
   void setProperty(String key, dynamic value) {
     super.setProperty(key, value);
     if (key == 'src') {
       _fetchBundle(value);
+    } else if (key == 'type') {
+      type = value.toString().toLowerCase().trim();
     }
   }
 
   void _fetchBundle(String src) async {
-    if (src.isNotEmpty && isConnected) {
+    // Must
+    if (src.isNotEmpty && isConnected && (type == _JAVASCRIPT_MIME || type == _JAVASCRIPT_MODULE)) {
       try {
         KrakenBundle bundle = KrakenBundle.fromHref(src);
         await bundle.resolve(elementManager.contextId);
@@ -83,17 +92,69 @@ class ScriptElement extends Element {
   }
 
   @override
-  void connectedCallback() {
+  void connectedCallback() async {
     super.connectedCallback();
     String? src = getProperty('src');
     if (src != null) {
       _fetchBundle(src);
+    } else if (type == _JAVASCRIPT_MIME || type == _JAVASCRIPT_MODULE){
+      // Eval script context: <script> console.log(1) </script>
+      StringBuffer buffer = StringBuffer();
+      childNodes.forEach((node) {
+        if (node is TextNode) {
+          buffer.write(node.data);
+        }
+      });
+      String script = buffer.toString();
+      if (script.isNotEmpty) {
+        int contextId = elementManager.contextId;
+        KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
+        if (controller != null) {
+          Kraken bundle = KrakenBundle.fromHref(controller.href),
+          KrakenBundle bundle = await KrakenBundle.getBundle(controller.href, contentOverride: script, contextId: contextId);
+          await bundle.eval(elementManager.contextId);
+        }
+      }
     }
   }
 }
 
-// TODO
+const String _CSS_MIME = 'text/css';
+
 class StyleElement extends Element {
   StyleElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  String type = _CSS_MIME;
+  CSSStyleSheet? _styleSheet;
+
+  @override
+  void setProperty(String key, dynamic value) {
+    super.setProperty(key, value);
+    if (key == 'type') {
+      type = value.toString().toLowerCase().trim();
+    }
+  }
+  @override
+  void connectedCallback() {
+    if (type == _CSS_MIME) {
+      StringBuffer buffer = StringBuffer();
+       childNodes.forEach((node) {
+        if (node is TextNode) {
+          buffer.write(node.data);
+        }
+      });
+      String style = buffer.toString();
+      _styleSheet = CSSStyleSheet(style);
+      elementManager.addStyleSheet(_styleSheet!);
+    }
+    super.connectedCallback();
+  }
+
+  @override
+  void disconnectedCallback() {
+    if (_styleSheet != null) {
+      elementManager.removeStyleSheet(_styleSheet!);
+    }
+    super.disconnectedCallback();
+  }
 }

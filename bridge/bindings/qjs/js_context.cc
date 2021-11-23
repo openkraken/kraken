@@ -150,7 +150,6 @@ JSContext::~JSContext() {
     }
   }
 
-  JS_RunGC(m_runtime);
   JS_FreeValue(m_ctx, globalObject);
   JS_FreeContext(m_ctx);
   JS_RunGC(m_runtime);

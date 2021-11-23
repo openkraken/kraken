@@ -26,10 +26,10 @@ class HistoryModule extends BaseModule {
   @override
   String get name => 'History';
 
-  final Queue<HistoryItem> _previousStack = Queue();
-  final Queue<HistoryItem> _nextStack = Queue();
-
   HistoryModule(ModuleManager? moduleManager) : super(moduleManager);
+
+  Queue<HistoryItem> get _previousStack => moduleManager!.controller.previousHistoryStack;
+  Queue<HistoryItem> get _nextStack => moduleManager!.controller.nextHistoryStack;
 
   String get href {
     if (_previousStack.isEmpty) return '';
@@ -133,7 +133,7 @@ class HistoryModule extends BaseModule {
   void _dispatchPopStateEvent(dynamic state) {
     PopStateEventInit init = PopStateEventInit(state);
     PopStateEvent popStateEvent = PopStateEvent(init);
-    emitUIEvent(moduleManager!.contextId, moduleManager!.controller.view.window!, popStateEvent);
+    moduleManager!.controller.view.window!.dispatchEvent(popStateEvent);
   }
 
   void _pushState(List<dynamic> params) {

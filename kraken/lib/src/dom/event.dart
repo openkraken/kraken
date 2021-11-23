@@ -53,6 +53,7 @@ const String EVENT_SCALE = 'scale';
 const String EVENT_LONG_PRESS = 'longpress';
 const String EVENT_DOUBLE_CLICK = 'dblclick';
 const String EVENT_DRAG = 'drag';
+const String EVENT_RESIZE = 'resize';
 
 const String EVENT_STATE_START = 'start';
 const String EVENT_STATE_UPDATE = 'update';
