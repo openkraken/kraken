@@ -242,6 +242,14 @@ void registerPluginByteCode(uint8_t* bytes, int32_t length, const char* pluginNa
   kraken::JSBridge::pluginByteCode[pluginName] = NativeByteCode{bytes, length};
 }
 
+int32_t profileModeEnabled() {
+#if ENABLE_PROFILE
+  return 1;
+#else
+  return 0;
+#endif
+}
+
 NativeString* NativeString::clone() {
   NativeString* newNativeString = new NativeString();
   uint16_t* newString = new uint16_t[length];

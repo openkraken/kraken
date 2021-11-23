@@ -89,9 +89,6 @@ class Element extends Node
 
   final Map<String, dynamic> properties = <String, dynamic>{};
 
-  /// Should create repaintBoundary for this element to repaint separately from parent.
-  bool repaintSelf;
-
   // Default to unknown, assign by [createElement], used by inspector.
   String tagName = UNKNOWN;
 
@@ -123,11 +120,13 @@ class Element extends Node
   }
   String get className => _classList.join(_ONE_SPACE);
 
-  /// Whether should create repaintBoundary for this element when style changed
-  bool get hasRepaintBoundary {
+  final bool _isDefaultRepaintBoundary;
+  /// Whether should as a repaintBoundary for this element when style changed
+  bool get isRepaintBoundary {
     // Following cases should always convert to repaint boundary for performance consideration.
     // Intrinsic element such as <canvas>.
-    bool isSetRepaintSelf = repaintSelf;
+    if (_isDefaultRepaintBoundary || _forceToRepaintBoundary) return true;
+
     // Overflow style.
     bool hasOverflowScroll = renderStyle.overflowX == CSSOverflowType.scroll || renderStyle.overflowX == CSSOverflowType.auto ||
       renderStyle.overflowY == CSSOverflowType.scroll || renderStyle.overflowY == CSSOverflowType.auto;
@@ -136,18 +135,26 @@ class Element extends Node
     // Fixed position style.
     bool hasPositionedFixed = renderStyle.position == CSSPositionType.fixed;
 
-    return _forceHasRepaintBoundary || hasOverflowScroll || isSetRepaintSelf || hasTransform || hasPositionedFixed;
+    return hasOverflowScroll || hasTransform || hasPositionedFixed;
   }
 
-  bool _forceHasRepaintBoundary = false;
+  bool _forceToRepaintBoundary = false;
+  set forceToRepaintBoundary(bool value) {
+    if (_forceToRepaintBoundary == value) {
+      return;
+    }
+    _forceToRepaintBoundary = value;
+    _updateRenderBoxModel();
+  }
 
   Element(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager,
       { Map<String, dynamic> defaultStyle = const {},
         // Whether element allows children.
         bool isIntrinsicBox = false,
-        this.repaintSelf = false})
+        bool isDefaultRepaintBoundary = false})
       : _defaultStyle = defaultStyle,
         _isIntrinsicBox = isIntrinsicBox,
+        _isDefaultRepaintBoundary = isDefaultRepaintBoundary,
         super(NodeType.ELEMENT_NODE, targetId, nativeEventTarget, elementManager) {
 
     // Init style and add change listener.
@@ -175,9 +182,9 @@ class Element extends Node
   void _updateRenderBoxModel() {
     RenderBoxModel nextRenderBoxModel;
     if (_isIntrinsicBox) {
-      nextRenderBoxModel = _createRenderIntrinsic(hasRepaintBoundary: hasRepaintBoundary, previousIntrinsic: _renderIntrinsic);
+      nextRenderBoxModel = _createRenderIntrinsic(isRepaintBoundary: isRepaintBoundary, previousIntrinsic: _renderIntrinsic);
     } else {
-      nextRenderBoxModel = _createRenderLayout(hasRepaintBoundary: hasRepaintBoundary, previousRenderLayoutBox: _renderLayoutBox);
+      nextRenderBoxModel = _createRenderLayout(isRepaintBoundary: isRepaintBoundary, previousRenderLayoutBox: _renderLayoutBox);
     }
 
     RenderBox? previousRenderBoxModel = renderBoxModel;
@@ -201,12 +208,12 @@ class Element extends Node
 
   RenderIntrinsic _createRenderIntrinsic({
     RenderIntrinsic? previousIntrinsic,
-    bool hasRepaintBoundary = false
+    bool isRepaintBoundary = false
   }) {
     RenderIntrinsic nextIntrinsic;
 
     if (previousIntrinsic == null) {
-      if (hasRepaintBoundary) {
+      if (isRepaintBoundary) {
         nextIntrinsic = RenderRepaintBoundaryIntrinsic(
           renderStyle,
         );
@@ -217,7 +224,7 @@ class Element extends Node
       }
     } else {
       if (previousIntrinsic is RenderRepaintBoundaryIntrinsic) {
-        if (hasRepaintBoundary) {
+        if (isRepaintBoundary) {
           // RenderRepaintBoundaryIntrinsic --> RenderRepaintBoundaryIntrinsic
           nextIntrinsic = previousIntrinsic;
         } else {
@@ -225,7 +232,7 @@ class Element extends Node
           nextIntrinsic = previousIntrinsic.toIntrinsic();
         }
       } else {
-        if (hasRepaintBoundary) {
+        if (isRepaintBoundary) {
           // RenderIntrinsic --> RenderRepaintBoundaryIntrinsic
           nextIntrinsic = previousIntrinsic.toRepaintBoundaryIntrinsic();
         } else {
@@ -241,7 +248,7 @@ class Element extends Node
   RenderLayoutBox _createRenderLayout({
       RenderLayoutBox? previousRenderLayoutBox,
       RenderStyle? renderStyle,
-      bool hasRepaintBoundary = false
+      bool isRepaintBoundary = false
   }) {
     renderStyle = renderStyle ?? this.renderStyle;
     CSSDisplay display = this.renderStyle.display;
@@ -250,7 +257,7 @@ class Element extends Node
     if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
 
       if (previousRenderLayoutBox == null) {
-        if (hasRepaintBoundary) {
+        if (isRepaintBoundary) {
           nextRenderLayoutBox = RenderRepaintBoundaryFlexLayout(
             renderStyle: renderStyle,
           );
@@ -261,7 +268,7 @@ class Element extends Node
         }
       } else if (previousRenderLayoutBox is RenderFlowLayout) {
         if (previousRenderLayoutBox is RenderRepaintBoundaryFlowLayout) {
-          if (hasRepaintBoundary) {
+          if (isRepaintBoundary) {
             // RenderRepaintBoundaryFlowLayout --> RenderRepaintBoundaryFlexLayout
             nextRenderLayoutBox = previousRenderLayoutBox.toRepaintBoundaryFlexLayout();
           } else {
@@ -269,7 +276,7 @@ class Element extends Node
             nextRenderLayoutBox = previousRenderLayoutBox.toFlexLayout();
           }
         } else {
-          if (hasRepaintBoundary) {
+          if (isRepaintBoundary) {
             // RenderFlowLayout --> RenderRepaintBoundaryFlexLayout
             nextRenderLayoutBox = previousRenderLayoutBox.toRepaintBoundaryFlexLayout();
           } else {
@@ -279,7 +286,7 @@ class Element extends Node
         }
       } else if (previousRenderLayoutBox is RenderFlexLayout) {
         if (previousRenderLayoutBox is RenderRepaintBoundaryFlexLayout) {
-          if (hasRepaintBoundary) {
+          if (isRepaintBoundary) {
             // RenderRepaintBoundaryFlexLayout --> RenderRepaintBoundaryFlexLayout
             nextRenderLayoutBox = previousRenderLayoutBox;
           } else {
@@ -287,7 +294,7 @@ class Element extends Node
             nextRenderLayoutBox = previousRenderLayoutBox.toFlexLayout();
           }
         } else {
-          if (hasRepaintBoundary) {
+          if (isRepaintBoundary) {
             // RenderFlexLayout --> RenderRepaintBoundaryFlexLayout
             nextRenderLayoutBox = previousRenderLayoutBox.toRepaintBoundaryFlexLayout();
           } else {
@@ -306,7 +313,7 @@ class Element extends Node
       display == CSSDisplay.inlineBlock) {
 
       if (previousRenderLayoutBox == null) {
-        if (hasRepaintBoundary) {
+        if (isRepaintBoundary) {
           nextRenderLayoutBox = RenderRepaintBoundaryFlowLayout(
             renderStyle: renderStyle,
           );
@@ -317,7 +324,7 @@ class Element extends Node
         }
       } else if (previousRenderLayoutBox is RenderFlowLayout) {
         if (previousRenderLayoutBox is RenderRepaintBoundaryFlowLayout) {
-          if (hasRepaintBoundary) {
+          if (isRepaintBoundary) {
             // RenderRepaintBoundaryFlowLayout --> RenderRepaintBoundaryFlowLayout
             nextRenderLayoutBox = previousRenderLayoutBox;
           } else {
@@ -325,7 +332,7 @@ class Element extends Node
             nextRenderLayoutBox = previousRenderLayoutBox.toFlowLayout();
           }
         } else {
-          if (hasRepaintBoundary) {
+          if (isRepaintBoundary) {
             // RenderFlowLayout --> RenderRepaintBoundaryFlowLayout
             nextRenderLayoutBox = previousRenderLayoutBox.toRepaintBoundaryFlowLayout();
           } else {
@@ -335,7 +342,7 @@ class Element extends Node
         }
       } else if (previousRenderLayoutBox is RenderFlexLayout) {
         if (previousRenderLayoutBox is RenderRepaintBoundaryFlexLayout) {
-          if (hasRepaintBoundary) {
+          if (isRepaintBoundary) {
             // RenderRepaintBoundaryFlexLayout --> RenderRepaintBoundaryFlowLayout
             nextRenderLayoutBox = previousRenderLayoutBox.toRepaintBoundaryFlowLayout();
           } else {
@@ -343,7 +350,7 @@ class Element extends Node
             nextRenderLayoutBox = previousRenderLayoutBox.toFlowLayout();
           }
         } else {
-          if (hasRepaintBoundary) {
+          if (isRepaintBoundary) {
             // RenderFlexLayout --> RenderRepaintBoundaryFlowLayout
             nextRenderLayoutBox = previousRenderLayoutBox.toRepaintBoundaryFlowLayout();
           } else {
@@ -1602,8 +1609,7 @@ class Element extends Node
     devicePixelRatio ??= window.devicePixelRatio;
 
     Completer<Uint8List> completer = Completer();
-    _forceHasRepaintBoundary = true;
-    _updateRenderBoxModel();
+    forceToRepaintBoundary = true;
     renderBoxModel!.owner!.flushLayout();
 
     SchedulerBinding.instance!.addPostFrameCallback((_) async {
@@ -1621,8 +1627,7 @@ class Element extends Node
       }
 
       completer.complete(captured);
-      _forceHasRepaintBoundary = false;
-      _updateRenderBoxModel();
+      forceToRepaintBoundary = false;
       renderBoxModel!.owner!.flushLayout();
     });
     SchedulerBinding.instance!.scheduleFrame();
@@ -1649,7 +1654,7 @@ class Element extends Node
     // Scrolling content layout need to be share the same display with its outer layout box.
     scrollingContentRenderStyle.display = renderStyle.display;
     RenderLayoutBox scrollingContentLayoutBox = _createRenderLayout(
-      hasRepaintBoundary: true,
+      isRepaintBoundary: true,
       renderStyle: scrollingContentRenderStyle,
     );
     scrollingContentLayoutBox.isScrollingContentBox = true;
