@@ -335,7 +335,7 @@ class CSSLengthValue {
   }
 
   bool get isNotAuto {
-    return type != CSSLengthType.AUTO;
+    return !isAuto;
   }
 
   bool get isNone {
