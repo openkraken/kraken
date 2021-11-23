@@ -21,9 +21,6 @@ class Document extends Node {
   @override
   RenderBox? get renderer => elementManager.viewport;
 
-  @override
-  handleJSCall(String method, List argv) { }
-
   addEvent(String eventType) {
     if (eventHandlers.containsKey(eventType)) return; // Only listen once.
 

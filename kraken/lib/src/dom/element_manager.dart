@@ -9,7 +9,6 @@ import 'dart:ffi';
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -36,18 +35,10 @@ typedef ElementCreator = Element Function(int targetId, Pointer<NativeEventTarge
 class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver  {
   // Call from JS Bridge before JS side eventTarget object been Garbage collected.
   static void disposeEventTarget(int contextId, int id) {
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_START, uniqueId: id);
-    }
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
     EventTarget? eventTarget = controller.view.getEventTargetById(id);
     if (eventTarget == null) return;
     eventTarget.dispose();
-
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_END, uniqueId: id);
-    }
-    malloc.free(eventTarget.nativeEventTargetPtr);
   }
 
   // Alias defineElement export for kraken plugin

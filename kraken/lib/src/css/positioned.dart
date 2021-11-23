@@ -31,7 +31,7 @@ BoxSizeType? _getChildHeightSizeType(RenderBox child) {
 
 // RenderPositionHolder may be affected by overflow: scroller offset.
 // We need to reset these offset to keep positioned elements render at their original position.
-Offset? _getRenderPositionHolderScrollOffset(RenderPositionHolder holder, RenderObject root) {
+Offset? _getRenderPositionHolderScrollOffset(RenderPositionPlaceholder holder, RenderObject root) {
   RenderBoxModel? parent = holder.parent as RenderBoxModel?;
   while (parent != null && parent != root) {
     if (parent.clipX || parent.clipY) {
@@ -43,7 +43,7 @@ Offset? _getRenderPositionHolderScrollOffset(RenderPositionHolder holder, Render
 }
 
 // Get the offset of the RenderPlaceholder of positioned element to its parent RenderBoxModel.
-Offset _getPlaceholderToParentOffset(RenderPositionHolder placeholder, RenderBoxModel parent) {
+Offset _getPlaceholderToParentOffset(RenderPositionPlaceholder placeholder, RenderBoxModel parent) {
   Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(placeholder, parent) ?? Offset.zero;
   Offset placeholderOffset = placeholder.localToGlobal(positionHolderScrollOffset, ancestor: parent);
   return placeholderOffset;
@@ -287,7 +287,7 @@ class CSSPositionedLayout {
   /// the offsets are automatically calculated in reference to the nearest scrollport.
   /// https://www.w3.org/TR/css-position-3/#stickypos-insets
   static void applyStickyChildOffset(RenderBoxModel scrollContainer, RenderBoxModel child) {
-    RenderPositionHolder childRenderPositionHolder = child.renderPositionHolder!;
+    RenderPositionPlaceholder childRenderPositionHolder = child.renderPositionPlaceholder!;
     RenderLayoutParentData childPlaceHolderParentData = childRenderPositionHolder.parentData as RenderLayoutParentData;
     // Original offset of sticky child in relative status
     Offset childOriginalOffset = childPlaceHolderParentData.offset;
@@ -489,7 +489,7 @@ class CSSPositionedLayout {
               + overflowContainingBox.renderStyle.paddingTop.computedValue);
         }
       } else {
-        placeholderOffset = _getPlaceholderToParentOffset(child.renderPositionHolder!, parent);
+        placeholderOffset = _getPlaceholderToParentOffset(child.renderPositionPlaceholder!, parent);
         // Use original offset in normal flow if no top and bottom is set.
         top = placeholderOffset.dy;
       }
@@ -511,7 +511,7 @@ class CSSPositionedLayout {
             + overflowContainingBox.renderStyle.paddingLeft.computedValue);
         }
       } else {
-        placeholderOffset ??= _getPlaceholderToParentOffset(child.renderPositionHolder!, parent);
+        placeholderOffset ??= _getPlaceholderToParentOffset(child.renderPositionPlaceholder!, parent);
         // Use original offset in normal flow if no left and right is set.
         left = placeholderOffset.dx;
       }

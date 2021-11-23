@@ -150,7 +150,6 @@ JSContext::~JSContext() {
     }
   }
 
-  JS_RunGC(m_runtime);
   JS_FreeValue(m_ctx, globalObject);
   JS_FreeContext(m_ctx);
   JS_RunGC(m_runtime);
@@ -465,7 +464,7 @@ JSValue objectGetKeys(QjsContext* ctx, JSValue obj) {
   JSValue object = JS_GetPropertyStr(ctx, globalObject, "Object");
   JSValue keysFunc = JS_GetPropertyStr(ctx, object, "keys");
 
-  JSValue result = JS_Call(ctx, keysFunc, obj, 0, nullptr);
+  JSValue result = JS_Call(ctx, keysFunc, obj, 1, &obj);
 
   JS_FreeValue(ctx, keysFunc);
   JS_FreeValue(ctx, object);
