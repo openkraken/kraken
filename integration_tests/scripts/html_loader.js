@@ -1,4 +1,4 @@
-const filepath = require('path');
+const path = require('path');
 var HTMLParser = require('node-html-parser');
 
 const SCRIPT = 'script';
@@ -24,11 +24,11 @@ const traverseParseHTML = (ele) => {
 
 const loader = function(source) {
   const opts = this.query || {};
-  const snapshotFilepath = filepath.relative(
+  const snapshotFilepath = path.relative(
     opts.workspacePath,
-    filepath.join(
+    path.join(
       opts.snapshotPath,
-      filepath.relative(opts.testPath, filename),
+      path.relative(opts.testPath, filename),
     )
   );
 
@@ -37,7 +37,7 @@ const loader = function(source) {
   const htmlString = root.toString().replace(/\n/g, '');
 
   return `
-    describe('html-${filepath.basename(filename)}', () => {
+    describe('html-${path.basename(filename)}', () => {
       // Use html_snapshot to snapshot in html file.
       const html_snapshot = async (...argv) => {
         if (argv.length === 0) {
