@@ -405,8 +405,8 @@ class KrakenModuleController with TimerMixin, ScheduleFrameMixin {
   }
 
   void dispose() {
-    clearTimer();
-    clearAnimationFrame();
+    disposeTimer();
+    disposeScheduleFrame();
     _moduleManager.dispose();
   }
 }
@@ -641,6 +641,7 @@ class KrakenController {
   void pushPendingCallbacks(PendingCallback callback) {
     _pendingCallbacks.add(callback);
   }
+
   void flushPendingCallbacks() {
     for (int i = 0; i < _pendingCallbacks.length; i ++) {
       _pendingCallbacks[i]();
@@ -651,12 +652,14 @@ class KrakenController {
   // Pause all timers and callbacks if kraken page are invisible.
   void pause() {
     _paused = true;
+    module.pauseInterval();
   }
 
   // Resume all timers and callbacks if kraken page now visible.
   void resume() {
     _paused = false;
     flushPendingCallbacks();
+    module.resumeInterval();
   }
 
   Future<void> reloadUrl(String url) async {
