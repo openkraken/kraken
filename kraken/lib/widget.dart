@@ -396,7 +396,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
     }
   }
 
-  // kraken widget now visible by flutter route and users can continue interact this pages. We should resume call timer and callbacks.
+  // Resume call timer and callbacks when kraken widget change to visible.
   @override
   void didPopNext() {
     assert(widget.controller != null);
