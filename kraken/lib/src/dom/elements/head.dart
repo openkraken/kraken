@@ -110,8 +110,8 @@ class ScriptElement extends Element {
         int contextId = elementManager.contextId;
         KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
         if (controller != null) {
-          Kraken bundle = KrakenBundle.fromHref(controller.href),
-          KrakenBundle bundle = await KrakenBundle.getBundle(controller.href, contentOverride: script, contextId: contextId);
+          KrakenBundle bundle = KrakenBundle.fromHrefWithContent(controller.href, script);
+          bundle.resolve(contextId);
           await bundle.eval(elementManager.contextId);
         }
       }

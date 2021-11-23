@@ -558,6 +558,9 @@ class KrakenController {
     return _module;
   }
 
+  final Queue<HistoryItem> previousHistoryStack = Queue();
+  final Queue<HistoryItem> nextHistoryStack = Queue();
+
   Uri get referrer {
     if (bundle is NetworkBundle) {
       return Uri.parse(href);
