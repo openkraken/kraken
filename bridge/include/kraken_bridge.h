@@ -21,7 +21,7 @@
 #define KRAKEN_EXPORT __attribute__((__visibility__("default")))
 
 KRAKEN_EXPORT
-std::__thread_id getUIThreadId();
+std::thread::id getUIThreadId();
 
 struct NativeString {
   const uint16_t* string;
@@ -134,6 +134,8 @@ KRAKEN_EXPORT_C
 void registerContextDisposedCallbacks(int32_t contextId, Task task, void* data);
 KRAKEN_EXPORT_C
 void registerPluginByteCode(uint8_t* bytes, int32_t length, const char* pluginName);
+KRAKEN_EXPORT_C
+int32_t profileModeEnabled();
 
 KRAKEN_EXPORT
 void setConsoleMessageHandler(ConsoleMessageHandler handler);

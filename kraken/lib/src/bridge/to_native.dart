@@ -225,6 +225,16 @@ void registerPluginByteCode(Uint8List bytecode, String name) {
   _registerPluginByteCode(bytes, bytecode.length, name.toNativeUtf8());
 }
 
+typedef NativeProfileModeEnabled = Int32 Function();
+typedef DartProfileModeEnabled = int Function();
+
+final DartProfileModeEnabled _profileModeEnabled =
+nativeDynamicLibrary.lookup<NativeFunction<NativeProfileModeEnabled>>('profileModeEnabled').asFunction();
+
+bool profileModeEnabled() {
+  return _profileModeEnabled() == 1 ? true : false;
+}
+
 // Regisdster reloadJsContext
 typedef NativeReloadJSContext = Void Function(Int32 contextId);
 typedef DartReloadJSContext = void Function(int contextId);
@@ -498,9 +508,14 @@ void flushUICommand() {
         print('$e\n$stack');
       }
     }
+
     // For pending style properties, we needs to flush to render style.
     for (int id in pendingStylePropertiesTargets.keys) {
-      controller.view.flushPendingStyleProperties(id);
+      try {
+        controller.view.flushPendingStyleProperties(id);
+      } catch (e, stack) {
+        print('$e\n$stack');
+      }
     }
     pendingStylePropertiesTargets.clear();
   }

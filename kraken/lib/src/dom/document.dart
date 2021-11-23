@@ -19,10 +19,7 @@ class Document extends Node {
   String get nodeName => '#document';
 
   @override
-  RenderObject? get renderer => throw FlutterError('Document did\'t have renderObject.');
-
-  @override
-  handleJSCall(String method, List argv) { }
+  RenderBox? get renderer => elementManager.viewport;
 
   addEvent(String eventType) {
     if (eventHandlers.containsKey(eventType)) return; // Only listen once.

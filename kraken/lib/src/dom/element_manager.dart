@@ -9,7 +9,6 @@ import 'dart:ffi';
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -36,18 +35,10 @@ typedef ElementCreator = Element Function(int targetId, Pointer<NativeEventTarge
 class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver  {
   // Call from JS Bridge before JS side eventTarget object been Garbage collected.
   static void disposeEventTarget(int contextId, int id) {
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_START, uniqueId: id);
-    }
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
     EventTarget? eventTarget = controller.view.getEventTargetById(id);
     if (eventTarget == null) return;
     eventTarget.dispose();
-
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_END, uniqueId: id);
-    }
-    malloc.free(eventTarget.nativeEventTargetPtr);
   }
 
   // Alias defineElement export for kraken plugin
@@ -237,7 +228,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     _debugDOMTreeChanged();
   }
 
-  // https://wicg.github.io/construct-stylesheets/#using-constructed-stylesheets
+  // TODO: https://wicg.github.io/construct-stylesheets/#using-constructed-stylesheets
   List<CSSStyleSheet> adoptedStyleSheets = [];
   List<CSSStyleSheet> styleSheets = [];
 
@@ -251,16 +242,9 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     recalculateDocumentStyle();
   }
 
-  bool _hasRecalculateDocumentStylePending = false;
   void recalculateDocumentStyle() {
-    if (_hasRecalculateDocumentStylePending) return;
-    _hasRecalculateDocumentStylePending = true;
-    SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
-      // Recalculate style for all nodes.
-      document.documentElement.recalculateNestedStyle();
-      _hasRecalculateDocumentStylePending = false;
-    });
-    SchedulerBinding.instance!.scheduleFrame();
+    // Recalculate style for all nodes sync.
+    document.documentElement.recalculateNestedStyle();
   }
 
   void setProperty(int targetId, String key, dynamic value) {
@@ -317,7 +301,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   void flushPendingStyleProperties(int targetId) {
-    assert(existsTarget(targetId), 'id: $targetId');
+    if (!existsTarget(targetId)) return;
     Node? target = getEventTargetByTargetId<Node>(targetId);
     if (target == null) return;
 
@@ -494,7 +478,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       bool shouldScrollByToCenter = false;
       InputElement? focusInputElement = InputElement.focusInputElement;
       if (focusInputElement != null) {
-        RenderBox? renderer = focusInputElement.renderer as RenderBox?;
+        RenderBox? renderer = focusInputElement.renderer;
         if (renderer != null && renderer.hasSize) {
           Offset focusOffset = renderer.localToGlobal(Offset.zero);
           // FOCUS_VIEWINSET_BOTTOM_OVERALL to meet border case.

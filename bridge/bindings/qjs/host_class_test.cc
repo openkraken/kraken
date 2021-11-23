@@ -149,7 +149,7 @@ TEST(HostClass, inherintanceInJavaScript) {
   bool static logCalled = false;
   kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
-    EXPECT_STREQ(message.c_str(), "ANDYCALL 10 20");
+    EXPECT_STREQ(message.c_str(), "TEST 10 20");
   };
   auto* bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
     errorCalled = true;
@@ -174,7 +174,7 @@ class Demo extends SampleClass {
     return this.name.toUpperCase();
   }
 }
-let demo = new Demo('andycall');
+let demo = new Demo('test');
 console.log(demo.getName(), demo.f(), demo.foo());
 )";
   context->evaluateJavaScript(code, strlen(code), "vm://", 0);

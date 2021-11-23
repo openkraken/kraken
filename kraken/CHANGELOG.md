@@ -1,8 +1,32 @@
-## 0.9.0-rc
+## 0.9.0
+
+**Big News**
+
+The QuickJS engine is now landed on kraken and we decided to replace our original JavaScriptCore implementation, which can provide low latency page init time and memory usage.
+
+**Break Changes**
+
++ `Kraken.defineCustomElement` API had been redesigned, now you can define both element and widget with the same API. https://github.com/openkraken/kraken/pull/792
+
 
 **Features**
 
-+ Migrate JavaScript engine from JSC to quickjs.
++ Migrate JavaScript Engine from JavaScriptCore to QuickJS.
++ Support query attributes on element from `document.querySelector` and `document.querySelectorAll`. https://github.com/openkraken/kraken/pull/747
++ Auto detect physical device type and use different scroll animation behavior. `BouncingScrollPhysics` on iOS and `ClampingScrollPhysics` on Android. https://github.com/openkraken/kraken/pull/750
++ Add empty SVGElement tags but not svg rendering, to let vue app works. https://github.com/openkraken/kraken/pull/757
++ Add Apple silicon support. https://github.com/openkraken/kraken/pull/767
++ Add Webpack HMR support. https://github.com/openkraken/kraken/pull/785
+
+
+**Bug Fixed**
+
++ Fix async error when update src property on image element. https://github.com/openkraken/kraken/pull/759
++ Fix http-cache not updating when `last-modified` headers on HTTP request changed. https://github.com/openkraken/kraken/pull/784
++ Fix HTML tags can not use custom tags. https://github.com/openkraken/kraken/pull/790
++ Fix rendering error when append child on image elemnet. https://github.com/openkraken/kraken/pull/791
++ Fix translate negative percentage not working. https://github.com/openkraken/kraken/pull/832
+
 
 ## 0.8.4
 
