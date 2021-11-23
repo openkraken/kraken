@@ -188,9 +188,7 @@ int _setTimeout(Pointer<Void> callbackContext, int contextId,
 
     // Pause if kraken page paused.
     if (controller.paused) {
-      controller.pushPendingCallbacks(() {
-        _runCallback();
-      });
+      controller.pushPendingCallbacks(_runCallback);
     } else {
       _runCallback();
     }
@@ -221,9 +219,7 @@ int _setInterval(Pointer<Void> callbackContext, int contextId,
 
     // Pause if kraken page paused.
     if (controller.paused) {
-      controller.pushPendingCallbacks(() {
-        _runCallbacks();
-      });
+      controller.pushPendingCallbacks(_runCallbacks);
     } else {
       _runCallbacks();
     }
@@ -265,9 +261,7 @@ int _requestAnimationFrame(Pointer<Void> callbackContext, int contextId,
 
     // Pause if kraken page paused.
     if (controller.paused) {
-      controller.pushPendingCallbacks(() {
-        _runCallback();
-      });
+      controller.pushPendingCallbacks(_runCallback);
     } else {
       _runCallback();
     }
