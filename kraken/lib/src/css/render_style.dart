@@ -258,20 +258,22 @@ class RenderStyle
         //  Use width directly if defined.
         if (renderStyle.width.isNotAuto) {
           logicalWidth = renderStyle.width.computedValue;
-
-        // Use tight constraints if constraints is tight and width not exist.
-        } else if (current.hasSize && current.constraints.hasTightWidth) {
-          logicalWidth = current.constraints.maxWidth;
-
-        // Block element (except replaced element) will stretch to the content width of its parent.
-        } else if (current is! RenderIntrinsic &&
-          renderStyle.parent != null
-        ) {
+        } else if (renderStyle.parent != null) {
           RenderStyle parentRenderStyle = renderStyle.parent!;
-          logicalWidth = parentRenderStyle.logicalContentWidth;
-          // Should subtract horizontal margin of own from its parent content width.
-          if (logicalWidth != null) {
-            logicalWidth -= renderStyle.margin.horizontal;
+          RenderBoxModel parent = parentRenderStyle.renderBoxModel!;
+
+          // Use parent's tight constraints if constraints is tight and width not exist.
+          if (parent.hasSize && parent.constraints.hasTightWidth) {
+            logicalWidth = parent.constraints.maxWidth;
+
+          // Block element (except replaced element) will stretch to the content width of its parent in flow layout.
+          // Replaced element also stretch in flex layout if align-items is stretch.
+          } else if (current is! RenderIntrinsic || parent is RenderFlexLayout) {
+            logicalWidth = parentRenderStyle.logicalContentWidth;
+            // Should subtract horizontal margin of own from its parent content width.
+            if (logicalWidth != null) {
+              logicalWidth -= renderStyle.margin.horizontal;
+            }
           }
         }
         break;
@@ -437,15 +439,15 @@ class RenderStyle
       if (renderStyle.height.isNotAuto) {
         logicalHeight = renderStyle.height.computedValue;
 
-      // Use tight constraints if constraints is tight and height not exist.
-      } else if (current.hasSize && current.constraints.hasTightHeight) {
-        logicalHeight = current.constraints.maxHeight;
-
       } else {
-        if (current.parent != null && renderStyle.parent != null) {
-          RenderBoxModel parent = current.parent as RenderBoxModel;
-          RenderStyle parentRenderStyle = parent.renderStyle;
-          if (CSSSizingMixin.isStretchChildHeight(parentRenderStyle, renderStyle)) {
+        if (renderStyle.parent != null) {
+          RenderStyle parentRenderStyle = renderStyle.parent!;
+          RenderBoxModel parent = parentRenderStyle.renderBoxModel!;
+
+          // Use parent's tight constraints if constraints is tight and height not exist.
+          if (parent.hasSize && parent.constraints.hasTightHeight) {
+            logicalHeight = parent.constraints.maxHeight;
+          } else if (CSSSizingMixin.isStretchChildHeight(parentRenderStyle, renderStyle)) {
             logicalHeight = parentRenderStyle.logicalContentHeight;
             // Should subtract vertical margin of own from its parent content height.
             if (logicalHeight != null) {

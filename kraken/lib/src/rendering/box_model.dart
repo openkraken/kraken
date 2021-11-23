@@ -868,8 +868,8 @@ class RenderBoxModel extends RenderBox
     double? maxHeight = renderStyle.maxHeight.isNone ? null : renderStyle.maxHeight.computedValue;
 
     // Content size calculated from style
-//    logicalContentWidth = renderStyle.getLogicalContentWidth();
-//    logicalContentHeight = renderStyle.getLogicalContentHeight();
+//    renderStyle.logicalContentWidth = renderStyle.getLogicalContentWidth();
+//    renderStyle.logicalContentHeight = renderStyle.getLogicalContentHeight();
     renderStyle.logicalContentWidth = renderStyle.computeLogicalContentWidth();
     renderStyle.logicalContentHeight = renderStyle.computeLogicalContentHeight();
 
@@ -1018,10 +1018,10 @@ class RenderBoxModel extends RenderBox
     // Deflate padding constraints.
     boxConstraints = renderStyle.deflatePaddingConstraints(boxConstraints);
 
-//    logicalContentWidth = renderStyle.getLogicalContentWidth();
-//    logicalContentHeight = renderStyle.getLogicalContentHeight();
-//    logicalContentWidth = renderStyle.computeLogicalContentWidth();
-//    logicalContentHeight = renderStyle.computeLogicalContentHeight();
+//    renderStyle.logicalContentWidth = renderStyle.getLogicalContentWidth();
+//    renderStyle.logicalContentHeight = renderStyle.getLogicalContentHeight();
+//    renderStyle.logicalContentWidth = renderStyle.computeLogicalContentWidth();
+//    renderStyle.logicalContentHeight = renderStyle.computeLogicalContentHeight();
 
     double? logicalContentWidth = renderStyle.logicalContentWidth;
     double? logicalContentHeight = renderStyle.logicalContentHeight;
