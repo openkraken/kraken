@@ -40,14 +40,17 @@ class HTMLElement extends Element {
   void attachTo(Node parent, {RenderBox? after}) {
     super.attachTo(parent);
     if (renderBoxModel != null) {
-      elementManager.viewport.child = renderBoxModel;
+      elementManager.viewport.child = renderBoxModel!;
     }
   }
 
   @override
   void disposeRenderObject() {
     super.disposeRenderObject();
-    elementManager.viewport.child = null;
+    if (renderBoxModel != null) {
+      elementManager.viewport.child = null;
+      elementManager.viewport.dropChild(renderBoxModel!);
+    }
   }
 
   @override

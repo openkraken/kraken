@@ -11,6 +11,7 @@ import 'package:kraken/css.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/src/dom/sliver_manager.dart';
 import 'package:meta/meta.dart';
 
 class RenderSliverListLayout extends RenderLayoutBox {
@@ -36,7 +37,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
 
   RenderSliverListLayout({
     required RenderStyle renderStyle,
-    required RenderSliverBoxChildManager manager,
+    required RenderSliverElementChildManager manager,
     ScrollListener? onScroll,
   }) : _renderSliverBoxChildManager = manager,
        _scrollListener = onScroll,
@@ -63,6 +64,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
       crossAxisDirection: getCrossAxisDirection(axis),
       children: [_renderSliverList],
     );
+    manager.setupSliverListLayout(this);
     super.insert(_renderViewport);
   }
 
@@ -229,24 +231,6 @@ class RenderSliverListLayout extends RenderLayoutBox {
         ? childParentData!.offset
         : childParentData!.offset + offset;
     return scrollOffset;
-  }
-
-  RenderFlexLayout toFlexLayout() {
-    List<RenderObject?> children = getDetachedChildrenAsList();
-    RenderFlexLayout renderFlexLayout = RenderFlexLayout(
-      children: children as List<RenderBox>?,
-      renderStyle: renderStyle,
-    );
-    return copyWith(renderFlexLayout);
-  }
-
-  RenderFlowLayout toFlowLayout() {
-    List<RenderObject?> children = getDetachedChildrenAsList();
-    RenderFlowLayout renderFlowLayout = RenderFlowLayout(
-      renderStyle: renderStyle,
-    );
-    renderFlowLayout.addAll(children as List<RenderBox>?);
-    return copyWith(renderFlowLayout);
   }
 
   static Axis resolveAxis(CSSStyleDeclaration style) {

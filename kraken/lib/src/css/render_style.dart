@@ -412,10 +412,18 @@ class RenderStyle
     }
   }
 
-  /// Get max constraint width from style, use width or max-width exists if exists,
-  /// otherwise calculated from its ancestors
-  double getMaxConstraintWidth() {
-    double maxConstraintWidth = double.infinity;
+  // Max constraints width of content, used in calculating the remaining space for line wrapping
+  // in the stage of layout.
+  double get contentMaxConstraintsWidth {
+    // If renderBoxModel definite content constraints, use it as max constrains width of content.
+    BoxConstraints? contentConstraints = renderBoxModel!.contentConstraints;
+    if (contentConstraints != null && contentConstraints.maxWidth != double.infinity) {
+      return contentConstraints.maxWidth;
+    }
+
+    // If renderBoxModel has no logical content width (eg display is inline-block/inline-flex and
+    // has no width), find its ancestors with logical width set to calculate the remaining space.
+    double contentMaxConstraintsWidth = double.infinity;
     double cropWidth = 0;
 
     RenderStyle currentRenderStyle = this;
@@ -441,9 +449,9 @@ class RenderStyle
       if (effectiveDisplay != CSSDisplay.inline &&
         (currentRenderStyle.width.isNotAuto || currentRenderStyle.maxWidth.isNotNone)) {
         // Get the min width between width and max-width
-        maxConstraintWidth = math.min(
-            (currentRenderStyle.width.isAuto ? null : currentRenderStyle.width.computedValue) ?? double.infinity,
-            (currentRenderStyle.maxWidth.isNone ? null : currentRenderStyle.maxWidth.computedValue) ?? double.infinity
+        contentMaxConstraintsWidth = math.min(
+          (currentRenderStyle.width.isAuto ? null : currentRenderStyle.width.computedValue) ?? double.infinity,
+          (currentRenderStyle.maxWidth.isNone ? null : currentRenderStyle.maxWidth.computedValue) ?? double.infinity
         );
         cropWidth = _getCropWidthByPaddingBorder(currentRenderStyle, cropWidth);
         break;
@@ -458,17 +466,21 @@ class RenderStyle
       }
     }
 
-    if (maxConstraintWidth != double.infinity) {
-      maxConstraintWidth = maxConstraintWidth - cropWidth;
+    if (contentMaxConstraintsWidth != double.infinity) {
+      contentMaxConstraintsWidth = contentMaxConstraintsWidth - cropWidth;
     }
 
-    return maxConstraintWidth;
-  }
+    // Set contentMaxConstraintsWidth to 0 when it is negative in the case of
+    // renderBoxModel's width exceeds its ancestors.
+    // <div style="width: 300px;">
+    //   <div style="display: inline-block; padding: 0 200px;">
+    //   </div>
+    // </div>
+    if (contentMaxConstraintsWidth < 0) {
+      contentMaxConstraintsWidth = 0;
+    }
 
-  // Max constraints width calculated from renderStyle tree.
-  // @TODO: add cache to avoid recalculate every time.
-  double get maxConstraintsWidth {
-    return getMaxConstraintWidth();
+    return contentMaxConstraintsWidth;
   }
 
   // Content width calculated from renderStyle tree.
