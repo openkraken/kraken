@@ -444,14 +444,16 @@ class RenderStyle
           RenderStyle parentRenderStyle = renderStyle.parent!;
           RenderBoxModel parent = parentRenderStyle.renderBoxModel!;
 
-          // Use parent's tight constraints if constraints is tight and height not exist.
-          if (parent.hasSize && parent.constraints.hasTightHeight) {
-            logicalHeight = parent.constraints.maxHeight;
-          } else if (CSSSizingMixin.isStretchChildHeight(parentRenderStyle, renderStyle)) {
-            logicalHeight = parentRenderStyle.logicalContentHeight;
-            // Should subtract vertical margin of own from its parent content height.
-            if (logicalHeight != null) {
-              logicalHeight -= renderStyle.margin.vertical;
+          if (renderStyle.isHeightStretch) {
+            // Use parent's tight constraints if constraints is tight and height not exist.
+            if (parent.hasSize && parent.constraints.hasTightHeight) {
+              logicalHeight = parent.constraints.maxHeight;
+            } else {
+              logicalHeight = parentRenderStyle.logicalContentHeight;
+              // Should subtract vertical margin of own from its parent content height.
+              if (logicalHeight != null) {
+                logicalHeight -= renderStyle.margin.vertical;
+              }
             }
           }
         }
@@ -523,7 +525,7 @@ class RenderStyle
         }
 
         RenderBoxModel parentRenderBoxModel = parentRenderStyle!.renderBoxModel!;
-        if (CSSSizingMixin.isStretchChildHeight(parentRenderStyle, currentRenderStyle)) {
+        if (currentRenderStyle.isHeightStretch) {
           if (parentRenderStyle.height.isNotAuto) {
             height = parentRenderStyle.height.computedValue;
             cropHeight = _getCropHeightByPaddingBorder(parentRenderStyle, cropHeight);
@@ -563,6 +565,41 @@ class RenderStyle
     } else {
       return null;
     }
+  }
+
+  // Whether height is stretched to fill its parent's content height.
+  bool get isHeightStretch {
+    RenderStyle renderStyle = this;
+    if (renderStyle.parent == null) {
+      return false;
+    }
+    bool isStretch = false;
+    RenderStyle parentRenderStyle = renderStyle.parent!;
+
+    bool isParentFlex = parentRenderStyle.display == CSSDisplay.flex ||
+      parentRenderStyle.display == CSSDisplay.inlineFlex;
+    bool isHorizontalDirection = false;
+    bool isFlexNoWrap = false;
+    bool isChildStretchSelf = false;
+    if (isParentFlex) {
+      isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(parentRenderStyle.flexDirection);
+      isFlexNoWrap = parentRenderStyle.flexWrap != FlexWrap.wrap &&
+        parentRenderStyle.flexWrap != FlexWrap.wrapReverse;
+      isChildStretchSelf = renderStyle.alignSelf != AlignSelf.auto
+        ? renderStyle.alignSelf == AlignSelf.stretch
+        : parentRenderStyle.effectiveAlignItems == AlignItems.stretch;
+    }
+
+    CSSLengthValue marginTop = renderStyle.marginTop;
+    CSSLengthValue marginBottom = renderStyle.marginBottom;
+
+    // Display as block if flex vertical layout children and stretch children
+    if (marginTop.isNotAuto && marginBottom.isNotAuto &&
+      isParentFlex && isHorizontalDirection && isFlexNoWrap && isChildStretchSelf) {
+      isStretch = true;
+    }
+
+    return isStretch;
   }
 
   // Max constraints width of content, used in calculating the remaining space for line wrapping

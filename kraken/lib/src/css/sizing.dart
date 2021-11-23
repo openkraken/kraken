@@ -136,34 +136,4 @@ mixin CSSSizingMixin on RenderStyleBase {
     }
   }
 
-  // Whether current node should stretch children's height
-  static bool isStretchChildHeight(RenderStyle renderStyle, RenderStyle childRenderStyle) {
-    bool isStretch = false;
-    bool isFlex = renderStyle.renderBoxModel is RenderFlexLayout;
-    bool isHorizontalDirection = false;
-    bool isAlignItemsStretch = false;
-    bool isFlexNoWrap = false;
-    bool isChildAlignSelfStretch = false;
-    bool isChildStretchSelf = false;
-    if (isFlex) {
-      isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
-      isAlignItemsStretch = renderStyle.effectiveAlignItems == AlignItems.stretch;
-      isFlexNoWrap = renderStyle.flexWrap != FlexWrap.wrap &&
-        childRenderStyle.flexWrap != FlexWrap.wrapReverse;
-      isChildAlignSelfStretch = childRenderStyle.alignSelf == AlignSelf.stretch;
-      isChildStretchSelf = childRenderStyle.alignSelf != AlignSelf.auto ?
-        isChildAlignSelfStretch : isAlignItemsStretch;
-    }
-
-    CSSLengthValue marginTop = childRenderStyle.marginTop;
-    CSSLengthValue marginBottom = childRenderStyle.marginBottom;
-
-    // Display as block if flex vertical layout children and stretch children
-    if (!marginTop.isAuto && !marginBottom.isAuto &&
-      isFlex && isHorizontalDirection && isFlexNoWrap && isChildStretchSelf) {
-      isStretch = true;
-    }
-
-    return isStretch;
-  }
 }
