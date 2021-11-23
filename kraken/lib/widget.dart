@@ -987,7 +987,8 @@ class _KrakenRenderObjectElement extends SingleChildRenderObjectElement {
 
     KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller!;
 
-    if (controller.bundleContent == null && controller.bundleByteCode == null && controller.href.isEmpty) {
+
+    if (controller.bundle == null || (controller.bundle?.content == null && controller.bundle?.byteCode == null && controller.bundle?.src == null)) {
       return;
     }
 
