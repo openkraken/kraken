@@ -245,6 +245,19 @@ class RenderStyle
     }
   }
 
+  // Find ancestor render style with display of not inline.
+  RenderStyle? _findAncestoreWithNoDisplayInline() {
+    RenderStyle renderStyle = this;
+    RenderStyle? parentRenderStyle = renderStyle.parent;
+    while(parentRenderStyle != null) {
+      if (parentRenderStyle.effectiveDisplay != CSSDisplay.inline) {
+        break;
+      }
+      parentRenderStyle = parentRenderStyle.parent;
+    }
+    return parentRenderStyle;
+  }
+
   double? computeLogicalContentWidth() {
     RenderBoxModel current = renderBoxModel!;
     RenderStyle renderStyle = this;
@@ -269,10 +282,14 @@ class RenderStyle
           // Block element (except replaced element) will stretch to the content width of its parent in flow layout.
           // Replaced element also stretch in flex layout if align-items is stretch.
           } else if (current is! RenderIntrinsic || parent is RenderFlexLayout) {
-            logicalWidth = parentRenderStyle.logicalContentWidth;
-            // Should subtract horizontal margin of own from its parent content width.
-            if (logicalWidth != null) {
-              logicalWidth -= renderStyle.margin.horizontal;
+            RenderStyle? targetParentRenderStyle = _findAncestoreWithNoDisplayInline();
+            // Should ignore renderStyle of display inline when searching for ancestors to stretch width.
+            if (targetParentRenderStyle != null) {
+              logicalWidth = targetParentRenderStyle.logicalContentWidth;
+              // Should subtract horizontal margin of own from its parent content width.
+              if (logicalWidth != null) {
+                logicalWidth -= renderStyle.margin.horizontal;
+              }
             }
           }
         }
