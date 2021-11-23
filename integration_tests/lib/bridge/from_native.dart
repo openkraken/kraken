@@ -101,7 +101,7 @@ class MousePointer extends Struct {
 void _simulatePointer(Pointer<Pointer<MousePointer>> mousePointerList, int length, int pointer) {
   List<PointerData> data = [];
 
-  for (int i = 0; i < length; i ++) {
+  for (int i = 0; i < length; i++) {
     int contextId = mousePointerList[i].ref.contextId;
     double x = mousePointerList[i].ref.x;
     double y = mousePointerList[i].ref.y;

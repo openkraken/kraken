@@ -16,5 +16,5 @@ class DocumentFragment extends Node {
   String get nodeName => '#documentfragment';
 
   @override
-  RenderObject? get renderer => null;
+  RenderBox? get renderer => null;
 }

@@ -24,7 +24,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('001', async () => {
     let p;
@@ -52,7 +52,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('003', async () => {
     let p;
@@ -79,7 +79,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('005-ref', async () => {
     let p;
@@ -105,7 +105,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('005', async () => {
     let p;
@@ -132,7 +132,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('006', async () => {
     let p;
@@ -159,7 +159,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('008', async () => {
     let p;
@@ -186,7 +186,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('010', async () => {
     let p;
@@ -212,7 +212,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('016-ref', async () => {
     let p;
@@ -246,7 +246,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('016', async () => {
     let p;
@@ -285,7 +285,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('018-ref', async () => {
     let p;
@@ -319,7 +319,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('018', async () => {
     let p;
@@ -358,7 +358,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('applies-to-001-ref', async () => {
     let p;
@@ -382,7 +382,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('applies-to-008', async () => {
     let div;
@@ -401,7 +401,7 @@ describe('border-bottom', () => {
     );
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('applies-to-009', async () => {
     let div;
@@ -426,7 +426,7 @@ describe('border-bottom', () => {
     );
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('applies-to-012', async () => {
     let p;
@@ -487,7 +487,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-001-ref', async () => {
     let p;
@@ -523,7 +523,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-001', async () => {
     let p;
@@ -566,7 +566,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-002', async () => {
     let p;
@@ -609,7 +609,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-003-ref', async () => {
     let p;
@@ -646,7 +646,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div_1);
 
     await sleep(0.5);
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-003', async () => {
     let p;
@@ -689,7 +689,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-004-ref', async () => {
     let p;
@@ -768,7 +768,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-005-ref', async () => {
     let div;
@@ -838,11 +838,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
-
-    await snapshot(0.1);
-
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-006-ref', async () => {
     let p;
@@ -924,7 +920,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-007', async () => {
     let p;
@@ -953,7 +949,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-008', async () => {
     let p;
@@ -982,7 +978,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-009-ref', async () => {
     let p;
@@ -1061,7 +1057,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-010-ref', async () => {
     let p;
@@ -1097,7 +1093,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-010', async () => {
     let p;
@@ -1140,7 +1136,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-011-ref', async () => {
     let p;
@@ -1219,7 +1215,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-012-ref', async () => {
     let p;
@@ -1298,7 +1294,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-013', async () => {
     let p;
@@ -1327,7 +1323,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-014-ref', async () => {
     let p;
@@ -1406,7 +1402,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-015-ref', async () => {
     let p;
@@ -1485,7 +1481,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-016-ref', async () => {
     let p;
@@ -1564,7 +1560,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-017-ref', async () => {
     let p;
@@ -1643,7 +1639,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-018', async () => {
     let p;
@@ -1672,7 +1668,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-019-ref', async () => {
     let p;
@@ -1751,7 +1747,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-020-ref', async () => {
     let p;
@@ -1830,7 +1826,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-021-ref', async () => {
     let p;
@@ -1909,7 +1905,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-022-ref', async () => {
     let p;
@@ -1988,7 +1984,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-023', async () => {
     let p;
@@ -2017,7 +2013,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-024', async () => {
     let p;
@@ -2046,7 +2042,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-025', async () => {
     let p;
@@ -2089,7 +2085,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-026-ref', async () => {
     let p;
@@ -2168,7 +2164,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-027-ref', async () => {
     let p;
@@ -2247,7 +2243,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-028-ref', async () => {
     let p;
@@ -2326,7 +2322,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-030', async () => {
     let p;
@@ -2373,7 +2369,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(test);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-031', async () => {
     let p;
@@ -2402,7 +2398,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-032-ref', async () => {
     let p;
@@ -2481,7 +2477,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-033', async () => {
     let p;
@@ -2524,7 +2520,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-034-ref', async () => {
     let p;
@@ -2603,7 +2599,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-035', async () => {
     let p;
@@ -2646,7 +2642,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-036', async () => {
     let p;
@@ -2675,7 +2671,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-037-ref', async () => {
     let p;
@@ -2756,7 +2752,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-038-ref', async () => {
     let p;
@@ -2835,7 +2831,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-039-ref', async () => {
     let p;
@@ -2914,7 +2910,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-040', async () => {
     let p;
@@ -2957,7 +2953,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-041', async () => {
     let p;
@@ -2986,7 +2982,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-042-ref', async () => {
     let p;
@@ -3065,7 +3061,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-043', async () => {
     let p;
@@ -3108,7 +3104,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-044-ref', async () => {
     let p;
@@ -3187,7 +3183,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-045', async () => {
     let p;
@@ -3230,7 +3226,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-046', async () => {
     let p;
@@ -3259,7 +3255,7 @@ describe('border-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-047', async () => {
     let p;
@@ -3302,7 +3298,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-048', async () => {
     let p;
@@ -3345,7 +3341,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-049-ref', async () => {
     let p;
@@ -3385,7 +3381,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-049', async () => {
     let p;
@@ -3428,7 +3424,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-050', async () => {
     let p;
@@ -3471,7 +3467,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-051', async () => {
     let p;
@@ -3514,7 +3510,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-052-ref', async () => {
     let p;
@@ -3554,7 +3550,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-053', async () => {
     let p;
@@ -3597,7 +3593,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-054-ref', async () => {
     let p;
@@ -3638,7 +3634,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-054', async () => {
     let p;
@@ -3682,7 +3678,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-063-ref', async () => {
     let p;
@@ -3718,7 +3714,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot(0.1);
+    await snapshot(0.2);
   });
   it('color-063', async () => {
     let p;
@@ -3761,7 +3757,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-064', async () => {
     let p;
@@ -3804,7 +3800,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-070-ref', async () => {
     let p;
@@ -3844,7 +3840,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-070', async () => {
     let p;
@@ -3887,7 +3883,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-071', async () => {
     let p;
@@ -3930,10 +3926,10 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-072', async () => {
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-073-ref', async () => {
     let p;
@@ -3973,7 +3969,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-073', async () => {
     let p;
@@ -4016,7 +4012,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-074', async () => {
     let p;
@@ -4059,7 +4055,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-075-ref', async () => {
     let p;
@@ -4099,7 +4095,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-075', async () => {
     let p;
@@ -4142,7 +4138,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-076', async () => {
     let p;
@@ -4185,7 +4181,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-077', async () => {
     let p;
@@ -4228,7 +4224,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-078', async () => {
     let p;
@@ -4271,7 +4267,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-079', async () => {
     let p;
@@ -4314,7 +4310,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-080', async () => {
     let p;
@@ -4357,7 +4353,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-081', async () => {
     let p;
@@ -4400,7 +4396,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-082', async () => {
     let p;
@@ -4443,7 +4439,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-083-ref', async () => {
     let p;
@@ -4522,7 +4518,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-084', async () => {
     let p;
@@ -4565,7 +4561,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-085', async () => {
     let p;
@@ -4608,7 +4604,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-086', async () => {
     let p;
@@ -4651,7 +4647,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-087', async () => {
     let p;
@@ -4694,7 +4690,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-088', async () => {
     let p;
@@ -4737,7 +4733,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-089', async () => {
     let p;
@@ -4780,7 +4776,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-090-ref', async () => {
     let p;
@@ -4820,7 +4816,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-090', async () => {
     let p;
@@ -4863,7 +4859,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-093-ref', async () => {
     let p;
@@ -4903,7 +4899,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-093', async () => {
     let p;
@@ -4946,7 +4942,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-094', async () => {
     let p;
@@ -4989,7 +4985,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-095-ref', async () => {
     let p;
@@ -5029,7 +5025,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-095', async () => {
     let p;
@@ -5072,7 +5068,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-096', async () => {
     let p;
@@ -5115,7 +5111,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-097', async () => {
     let p;
@@ -5158,7 +5154,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-098', async () => {
     let p;
@@ -5201,7 +5197,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-099', async () => {
     let p;
@@ -5244,7 +5240,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-100-ref', async () => {
     let p;
@@ -5280,9 +5276,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot(0.1);
-
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-100', async () => {
     let p;
@@ -5325,7 +5319,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-101', async () => {
     let p;
@@ -5368,7 +5362,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-102', async () => {
     let p;
@@ -5411,7 +5405,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-103-ref', async () => {
     let p;
@@ -5447,7 +5441,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot(0.1);
+    await snapshot(0.2);
   });
   it('color-103', async () => {
     let p;
@@ -5490,7 +5484,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-105', async () => {
     let p;
@@ -5533,7 +5527,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-106', async () => {
     let p;
@@ -5576,7 +5570,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-107', async () => {
     let p;
@@ -5619,7 +5613,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-108', async () => {
     let p;
@@ -5662,7 +5656,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-109', async () => {
     let p;
@@ -5705,7 +5699,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-110-ref', async () => {
     let p;
@@ -5745,7 +5739,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-110', async () => {
     let p;
@@ -5788,7 +5782,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-111', async () => {
     let p;
@@ -5831,7 +5825,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   it('color-112', async () => {
     let p;
@@ -5874,7 +5868,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-113-ref', async () => {
     let p;
@@ -5914,7 +5908,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-113', async () => {
     let p;
@@ -5956,7 +5950,7 @@ describe('border-bottom', () => {
     BODY.appendChild(test);
     BODY.appendChild(reference);
 
-    await snapshot(0.1);
+    await snapshot();
   });
   xit('color-115-ref', async () => {
     let p;
@@ -5996,6 +5990,6 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot(0.1);
+    await snapshot();
   });
 });

@@ -181,18 +181,21 @@ bool EventTargetInstance::dispatchEvent(EventInstance* event) {
   // protect this util event trigger finished.
   JS_DupValue(m_ctx, instanceObject);
 
-  // Modify the currentTarget to this.
-  event->nativeEvent->currentTarget = this;
-
   internalDispatchEvent(event);
 
   // Bubble event to root event target.
   if (event->nativeEvent->bubbles == 1 && !event->propagationStopped()) {
-    auto node = reinterpret_cast<NodeInstance*>(event->nativeEvent->currentTarget);
+    auto node = reinterpret_cast<NodeInstance*>(this);
     auto* parent = static_cast<NodeInstance*>(JS_GetOpaque(node->parentNode, Node::classId(node->parentNode)));
 
     if (parent != nullptr) {
       parent->dispatchEvent(event);
+    } else {
+      // Window does not inherit from Node, so it is not in the Node tree and needs to continue passing to the Window when it bubbles to Document.
+      JSValue globalObjectValue = JS_GetGlobalObject(m_context->ctx());
+      auto* window = static_cast<WindowInstance*>(JS_GetOpaque(globalObjectValue, Window::classId()));
+      window->internalDispatchEvent(event);
+      JS_FreeValue(m_ctx, globalObjectValue);
     }
   }
 
@@ -205,6 +208,9 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
   std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(eventInstance->nativeEvent->type->string), eventInstance->nativeEvent->type->length);
   std::string eventType = toUTF8(u16EventType);
   JSAtom eventTypeAtom = JS_NewAtom(m_ctx, eventType.c_str());
+
+  // Modify the currentTarget to this.
+  eventInstance->nativeEvent->currentTarget = this;
 
   // Dispatch event listeners writen by addEventListener
   auto _dispatchEvent = [&eventInstance, this](JSValue& handler) {
@@ -292,6 +298,9 @@ JSClassID EventTargetInstance::classId() {
 
 EventTargetInstance::~EventTargetInstance() {
   foundation::UICommandBuffer::instance(m_contextId)->addCommand(eventTargetId, UICommand::disposeEventTarget, nullptr, false);
+#if FLUTTER_BACKEND
+  getDartMethod()->flushUICommand();
+#endif
   JS_FreeValue(m_ctx, m_properties);
   JS_FreeValue(m_ctx, m_eventHandlers);
   JS_FreeValue(m_ctx, m_propertyEventHandler);
