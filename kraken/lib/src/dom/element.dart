@@ -390,7 +390,9 @@ class Element extends Node
   @override
   void willAttachRenderer() {
     // Init render box model.
-    createRenderer();
+    if (renderStyle.display != CSSDisplay.none) {
+      createRenderer();
+    }
   }
 
   @override
@@ -570,9 +572,9 @@ class Element extends Node
   void attachTo(Node parent, {RenderBox? after}) {
     _applyStyle(style);
 
-    if (renderStyle.display != CSSDisplay.none) {
-      willAttachRenderer();
+    willAttachRenderer();
 
+    if (renderer != null) {
       // HTML element override attachTo method to attach renderObject to viewportBox.
       if (parent is Element) {
         RenderLayoutBox? parentRenderLayoutBox = parentElement?._renderLayoutBox?.renderScrollingContent ?? parentElement?._renderLayoutBox;
@@ -1705,9 +1707,9 @@ void _detachRenderBoxModel(RenderBox renderBox) {
   RenderObject? parentRenderObject = renderBox.parent as RenderObject;
 
   if (parentRenderObject is RenderObjectWithChildMixin) {
-    parentRenderObject.child = null; // RenderViewportBox
+    parentRenderObject.child = null; // Case for single child, eg. RenderViewportBox
   } else if (parentRenderObject is ContainerRenderObjectMixin) {
-    parentRenderObject.remove(renderBox); // RenderLayoutBox or RenderSliverList
+    parentRenderObject.remove(renderBox); // Case for multi children, eg. RenderLayoutBox or RenderSliverList
   }
 }
 

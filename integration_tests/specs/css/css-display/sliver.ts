@@ -168,4 +168,11 @@ describe('display sliver', () => {
 
     await snapshot(); // Not throws error is ok.
   });
+
+  it('sliver child is display none', async () => {
+    var container = createSliverBasicCase();
+    
+    container.children[2].style.display = 'none';
+    await snapshot(); // Not throws error is ok.
+  });
 });

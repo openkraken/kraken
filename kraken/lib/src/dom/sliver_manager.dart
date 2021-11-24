@@ -30,7 +30,7 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
 
   RenderSliverElementChildManager(this._target);
 
-  Iterable<Node> get _renderNodes => _target.childNodes.where((child) => child is Element || (child is TextNode && child.renderer != null));
+  Iterable<Node> get _renderNodes => _target.childNodes.where((child) => child is Element || child is TextNode);
 
   // Only count renderable child.
   @override
@@ -61,14 +61,19 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
         throw FlutterError('Sliver unsupported type ${childNode.runtimeType} $childNode');
     }
 
-    assert(child != null, 'Sliver render node should own RenderBox.');
+    // If renderer is not created, use an empty to occupy the position, but not do layout or paint.
+    child ??= _createEmptyRenderObject();
 
     if (_hasLayout) {
-      _sliverListLayout.insertSliverChild(child!, after: after);
+      _sliverListLayout.insertSliverChild(child, after: after);
     }
 
     childNode.didAttachRenderer();
     childNode.ensureChildAttached();
+  }
+
+  RenderBox _createEmptyRenderObject() {
+    return _RenderSliverItemProxy();
   }
 
   @override
@@ -135,3 +140,6 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
     return trailingScrollOffset + averageExtent * remainingCount;
   }
 }
+
+/// Used for the placeholder for empty sliver item.
+class _RenderSliverItemProxy extends RenderProxyBox {}
