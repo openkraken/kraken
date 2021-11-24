@@ -65,7 +65,6 @@ const Map<String, dynamic> _defaultStyle = {
 
 abstract class WidgetElement extends dom.Element {
   late Element _renderViewElement;
-  late BuildOwner _buildOwner;
   late Widget _widget;
   _KrakenAdapterWidgetPropertiesState? _propertiesState;
   WidgetElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, dom.ElementManager elementManager)
@@ -106,25 +105,22 @@ abstract class WidgetElement extends dom.Element {
     }
   }
 
-  void _handleBuildScheduled() {
-    // Register drawFrame callback same with [WidgetsBinding.drawFrame]
-    SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
-      _buildOwner.buildScope(_renderViewElement);
-      // ignore: invalid_use_of_protected_member
-      RendererBinding.instance!.drawFrame();
-      _buildOwner.finalizeTree();
-    });
-    SchedulerBinding.instance!.ensureVisualUpdate();
-  }
+  // void _handleBuildScheduled() {
+  //   // Register drawFrame callback same with [WidgetsBinding.drawFrame]
+  //   SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+  //     _buildOwner.buildScope(_renderViewElement);
+  //     // ignore: invalid_use_of_protected_member
+  //     RendererBinding.instance!.drawFrame();
+  //     _buildOwner.finalizeTree();
+  //   });
+  //   SchedulerBinding.instance!.ensureVisualUpdate();
+  // }
 
   void _attachWidget(Widget widget) {
-    // A new buildOwner difference with flutter's buildOwner
-    _buildOwner = BuildOwner(focusManager: WidgetsBinding.instance!.buildOwner!.focusManager);
-    _buildOwner.onBuildScheduled = _handleBuildScheduled;
     _renderViewElement = RenderObjectToWidgetAdapter<RenderBox>(
         child: widget,
         container: renderBoxModel as RenderObjectWithChildMixin<RenderBox>,
-      ).attachToRenderTree(_buildOwner);
+      ).attachToRenderTree(elementManager.controller.buildOwner!);
   }
 }
 
@@ -203,6 +199,8 @@ class Kraken extends StatefulWidget {
 
   final UriParser? uriParser;
 
+  BuildOwner? buildOwner;
+
   KrakenController? get controller {
     return KrakenController.getControllerOfName(shortHash(this));
   }
@@ -279,6 +277,7 @@ class Kraken extends StatefulWidget {
     // Kraken's http client interceptor.
     this.httpClientInterceptor,
     this.uriParser,
+    this.buildOwner,
     // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
     // Maybe got unexpected error when change to other values, use this at your own risk!
     // We will fixed this on next version released. (v0.6.0)
@@ -903,7 +902,8 @@ This situation often happened when you trying creating kraken when FlutterView n
       devToolsService: _krakenWidget.devToolsService,
       httpClientInterceptor: _krakenWidget.httpClientInterceptor,
       widgetDelegate: _widgetDelegate,
-      uriParser: _krakenWidget.uriParser
+      uriParser: _krakenWidget.uriParser,
+      buildOwner: _krakenWidget.buildOwner,
     );
 
     if (kProfileMode) {

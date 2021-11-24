@@ -19,6 +19,9 @@ import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/widget.dart';
 
+import 'package:flutter/material.dart' show BuildOwner;
+
+
 import 'bundle.dart';
 
 // Error handler when load bundle failed.
@@ -415,6 +418,7 @@ class KrakenController {
   static final Map<String, int> _nameIdMap = {};
 
   UriParser? uriParser;
+  BuildOwner? buildOwner;
 
   static KrakenController? getControllerOfJSContextId(int? contextId) {
     if (!_controllerMap.containsKey(contextId)) {
@@ -484,7 +488,8 @@ class KrakenController {
     this.onJSError,
     this.httpClientInterceptor,
     this.devToolsService,
-    this.uriParser
+    this.uriParser,
+    this.buildOwner
   })  : _name = name,
         _bundleURL = bundleURL,
         _bundlePath = bundlePath,
