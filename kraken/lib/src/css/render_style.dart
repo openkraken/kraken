@@ -685,7 +685,8 @@ class RenderStyle
 
   // Content width calculated from renderStyle tree.
   // https://www.w3.org/TR/css-box-3/#valdef-box-content-box
-  double? _contentBoxLogicalWidth;
+  // Use double.infinity refers to the value is not computed yet.
+  double? _contentBoxLogicalWidth = double.infinity;
   double? get contentBoxLogicalWidth {
     // If renderBox has tight width, its logical size equals max size.
 //    if (renderBoxModel != null &&
@@ -696,13 +697,19 @@ class RenderStyle
 //        effectiveBorderLeftWidth.computedValue - effectiveBorderRightWidth.computedValue -
 //        paddingLeft.computedValue - paddingRight.computedValue;
 //    }
+    // Compute logical width directly if renderBoxModel is not layouted yet,
+    // eg compute percentage length before layout.
+    if (_contentBoxLogicalWidth == double.infinity) {
+      computeContentBoxLogicalWidth();
+    }
     return _contentBoxLogicalWidth;
 //    return getLogicalContentWidth();
   }
 
   // Content height calculated from renderStyle tree.
   // https://www.w3.org/TR/css-box-3/#valdef-box-content-box
-  double? _contentBoxLogicalHeight;
+  // Use double.infinity refers to the value is not computed yet.
+  double? _contentBoxLogicalHeight = double.infinity;
   double? get contentBoxLogicalHeight {
     // If renderBox has tight height, its logical size equals max size.
 //    if (renderBoxModel != null &&
@@ -713,6 +720,11 @@ class RenderStyle
 //        effectiveBorderTopWidth.computedValue - effectiveBorderBottomWidth.computedValue -
 //        paddingTop.computedValue - paddingBottom.computedValue;
 //    }
+    // Compute logical height directly if renderBoxModel is not layouted yet,
+    // eg compute percentage length before layout.
+    if (_contentBoxLogicalHeight == double.infinity) {
+      computeContentBoxLogicalHeight();
+    }
     return _contentBoxLogicalHeight;
 //    return getLogicalContentHeight();
   }
