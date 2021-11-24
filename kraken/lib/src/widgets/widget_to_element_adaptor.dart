@@ -13,6 +13,8 @@ import 'package:kraken/dom.dart' as dom;
 import 'package:kraken/css.dart';
 import 'package:kraken/bridge.dart';
 
+import 'element_to_widget_adaptor.dart';
+
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
 };
@@ -209,7 +211,7 @@ abstract class WidgetElement extends dom.Element {
     super.appendChild(child);
 
     if (_state != null) {
-      _state!.onChildrenChanged(children);
+      _state!.onChildrenChanged(childNodes);
     }
 
     return child;
@@ -249,9 +251,9 @@ class _KrakenAdapterWidget extends StatefulWidget {
 class _KrakenAdapterWidgetState extends State<_KrakenAdapterWidget> {
   Map<String, dynamic> _properties;
   final WidgetElement _element;
-  List<dom.Element> _children;
+  List<dom.Node> _childNodes;
 
-  _KrakenAdapterWidgetState(this._element, this._properties, this._children);
+  _KrakenAdapterWidgetState(this._element, this._properties, this._childNodes);
 
   void onAttributeChanged(Map<String, dynamic> properties) {
     setState(() {
@@ -259,21 +261,28 @@ class _KrakenAdapterWidgetState extends State<_KrakenAdapterWidget> {
     });
   }
 
-  void onChildrenChanged(List<dom.Element> children) {
+  void onChildrenChanged(List<dom.Node> childNodes) {
     setState(() {
-      _children = children;
+      _childNodes = childNodes;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     List<Widget> list = [];
-    _children.forEach((element) {
-      KrakenRenderObjectToWidgetAdapter adaptor = KrakenRenderObjectToWidgetAdapter(
-        container: _element.renderBoxModel as RenderObjectWithChildMixin<RenderBox>
-      );
+    _childNodes.forEach((dom.Node node) {
+      if (node is dom.Element) {
+        node.createRenderer();
+        RenderObject? object = node.renderer;
+        list.add(KrakenLeafRenderObjectWidget(object!));
+      } else if (node is dom.TextNode) {
+        node.createRenderer();
+        RenderObject? object = node.renderer;
+        list.add(KrakenLeafRenderObjectWidget(object!));
+      }
 
-      list.add(adaptor);
+      // element.createRenderer();
+
     });
 
     return _element.build(context, _properties, list);

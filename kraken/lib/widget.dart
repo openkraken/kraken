@@ -4,4 +4,4 @@
  */
 
 export 'src/widgets/kraken.dart';
-export 'src/widgets/widget_element_adaptor.dart';
+export 'src/widgets/widget_to_element_adaptor.dart';
