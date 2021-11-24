@@ -289,7 +289,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   void setInlineStyle(int targetId, String key, dynamic value) {
-    if (!existsTarget(targetId)) return;
+    assert(existsTarget(targetId), 'id: $targetId key: $key value: $value');
     Node? target = getEventTargetByTargetId<Node>(targetId);
     if (target == null) return;
 

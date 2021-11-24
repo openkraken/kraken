@@ -48,14 +48,16 @@ class CSSStyleDeclaration : public HostClass {
 class StyleDeclarationInstance : public Instance {
  public:
   StyleDeclarationInstance() = delete;
-  explicit StyleDeclarationInstance(CSSStyleDeclaration* cssStyleDeclaration, int32_t ownerEventTargetId)
-      : Instance(cssStyleDeclaration, "CSSStyleDeclaration", &m_exoticMethods, CSSStyleDeclaration::kCSSStyleDeclarationClassId, finalize), m_ownerEventTargetId(ownerEventTargetId){};
+  explicit StyleDeclarationInstance(CSSStyleDeclaration* cssStyleDeclaration, EventTargetInstance* ownerEventTarget)
+      : Instance(cssStyleDeclaration, "CSSStyleDeclaration", &m_exoticMethods, CSSStyleDeclaration::kCSSStyleDeclarationClassId, finalize), ownerEventTarget(ownerEventTarget){};
   ~StyleDeclarationInstance();
   bool internalSetProperty(std::string& name, JSValue value);
   void internalRemoveProperty(std::string& name);
   JSValue internalGetPropertyValue(std::string& name);
   std::string toString();
   void copyWith(StyleDeclarationInstance* instance);
+
+  const EventTargetInstance* ownerEventTarget;
 
  private:
   static int hasProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom);
@@ -71,7 +73,6 @@ class StyleDeclarationInstance : public Instance {
   static JSClassExoticMethods m_exoticMethods;
 
   std::unordered_map<std::string, std::string> properties;
-  int32_t m_ownerEventTargetId;
   friend EventTargetInstance;
 };
 

@@ -54,7 +54,7 @@ JSValue CSSStyleDeclaration::instanceConstructor(QjsContext* ctx, JSValue func_o
   JSValue eventTargetValue = argv[0];
 
   auto eventTargetInstance = static_cast<EventTargetInstance*>(JS_GetOpaque(eventTargetValue, EventTarget::classId(eventTargetValue)));
-  auto style = new StyleDeclarationInstance(this, eventTargetInstance->eventTargetId());
+  auto style = new StyleDeclarationInstance(this, eventTargetInstance);
   return style->instanceObject;
 }
 
@@ -118,10 +118,11 @@ bool StyleDeclarationInstance::internalSetProperty(std::string& name, JSValue va
 
   properties[name] = jsValueToStdString(m_ctx, value);
 
-  NativeString* args_01 = stringToNativeString(name);
-  NativeString* args_02 = jsValueToNativeString(m_ctx, value);
-
-  foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_ownerEventTargetId, UICommand::setStyle, *args_01, *args_02, nullptr);
+  if (ownerEventTarget != nullptr) {
+    NativeString* args_01 = stringToNativeString(name);
+    NativeString* args_02 = jsValueToNativeString(m_ctx, value);
+    foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(ownerEventTarget->eventTargetId(), UICommand::setStyle, *args_01, *args_02, nullptr);
+  }
 
   return true;
 }
@@ -135,10 +136,11 @@ void StyleDeclarationInstance::internalRemoveProperty(std::string& name) {
 
   properties.erase(name);
 
-  NativeString* args_01 = stringToNativeString(name);
-  NativeString* args_02 = jsValueToNativeString(m_ctx, JS_NULL);
-
-  foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_ownerEventTargetId, UICommand::setStyle, *args_01, *args_02, nullptr);
+  if (ownerEventTarget != nullptr) {
+    NativeString* args_01 = stringToNativeString(name);
+    NativeString* args_02 = jsValueToNativeString(m_ctx, JS_NULL);
+    foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(ownerEventTarget->eventTargetId(), UICommand::setStyle, *args_01, *args_02, nullptr);
+  }
 }
 
 JSValue StyleDeclarationInstance::internalGetPropertyValue(std::string& name) {
