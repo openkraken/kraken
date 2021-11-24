@@ -152,7 +152,7 @@ mixin ElementOverflowMixin on ElementBase {
       }
 
       renderBoxModel.scrollListener = scrollListener;
-      renderBoxModel.scrollablePointerListener = _scrollPointerListener;
+      renderBoxModel.scrollablePointerListener = _scrollablePointerListener;
 
       if (renderBoxModel is RenderLayoutBox) {
         if (shouldScrolling) {
@@ -204,7 +204,7 @@ mixin ElementOverflowMixin on ElementBase {
       }
 
       renderBoxModel.scrollListener = scrollListener;
-      renderBoxModel.scrollablePointerListener = _scrollPointerListener;
+      renderBoxModel.scrollablePointerListener = _scrollablePointerListener;
 
       if (renderBoxModel is RenderLayoutBox) {
         if (shouldScrolling) {
@@ -339,7 +339,7 @@ mixin ElementOverflowMixin on ElementBase {
     outerLayoutBox.addAll(children);
   }
 
-  void _scrollPointerListener(PointerEvent event) {
+  void _scrollablePointerListener(PointerEvent event) {
     if (event is PointerDownEvent) {
       if (_scrollableX != null) {
         _scrollableX!.handlePointerDown(event);
