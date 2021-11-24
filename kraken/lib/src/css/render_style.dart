@@ -57,12 +57,6 @@ class RenderStyle
     required this.target,
   });
 
-  // Content width which is calculated from render style.
-  double? logicalContentWidth;
-
-  // Content height which is calculated from render style.
-  double? logicalContentHeight;
-
   dynamic getProperty(String name) {
     RenderStyle renderStyle = this;
     switch (name) {
@@ -258,7 +252,7 @@ class RenderStyle
     return parentRenderStyle;
   }
 
-  double? computeLogicalContentWidth() {
+  void computeContentBoxLogicalWidth() {
     RenderBoxModel current = renderBoxModel!;
     RenderStyle renderStyle = this;
     double? logicalWidth;
@@ -285,7 +279,7 @@ class RenderStyle
             RenderStyle? targetParentRenderStyle = _findAncestoreWithNoDisplayInline();
             // Should ignore renderStyle of display inline when searching for ancestors to stretch width.
             if (targetParentRenderStyle != null) {
-              logicalWidth = targetParentRenderStyle.logicalContentWidth;
+              logicalWidth = targetParentRenderStyle.contentBoxLogicalWidth;
               // Should subtract horizontal margin of own from its parent content width.
               if (logicalWidth != null) {
                 logicalWidth -= renderStyle.margin.horizontal;
@@ -340,7 +334,7 @@ class RenderStyle
       logicalContentWidth = math.max(0, logicalContentWidth);
     }
 
-    return logicalContentWidth;
+    _contentBoxLogicalWidth = logicalContentWidth;
   }
 
   // Content width of render box model calculated from style.
@@ -444,7 +438,7 @@ class RenderStyle
     }
   }
 
-  double? computeLogicalContentHeight() {
+  void computeContentBoxLogicalHeight() {
     RenderBoxModel current = renderBoxModel!;
     RenderStyle renderStyle = this;
     double? logicalHeight;
@@ -466,7 +460,7 @@ class RenderStyle
             if (parent.hasSize && parent.constraints.hasTightHeight) {
               logicalHeight = parent.constraints.maxHeight;
             } else {
-              logicalHeight = parentRenderStyle.logicalContentHeight;
+              logicalHeight = parentRenderStyle.contentBoxLogicalHeight;
               // Should subtract vertical margin of own from its parent content height.
               if (logicalHeight != null) {
                 logicalHeight -= renderStyle.margin.vertical;
@@ -476,7 +470,6 @@ class RenderStyle
         }
       }
     }
-
     double? intrinsicRatio = current.intrinsicRatio;
 
     // Get height by intrinsic ratio for replaced element if height is auto.
@@ -509,7 +502,7 @@ class RenderStyle
       logicalContentHeight = math.max(0, logicalContentHeight);
     }
 
-    return logicalContentHeight;
+    _contentBoxLogicalHeight = logicalContentHeight;
   }
 
   // Content height of render box model calculated from style.
@@ -692,34 +685,36 @@ class RenderStyle
 
   // Content width calculated from renderStyle tree.
   // https://www.w3.org/TR/css-box-3/#valdef-box-content-box
-  // @TODO: add cache to avoid recalculate every time.
+  double? _contentBoxLogicalWidth;
   double? get contentBoxLogicalWidth {
     // If renderBox has tight width, its logical size equals max size.
-    if (renderBoxModel != null &&
-      renderBoxModel!.hasSize &&
-      renderBoxModel!.constraints.hasTightWidth
-    ) {
-      return renderBoxModel!.constraints.maxWidth -
-        effectiveBorderLeftWidth.computedValue - effectiveBorderRightWidth.computedValue -
-        paddingLeft.computedValue - paddingRight.computedValue;
-    }
-    return getLogicalContentWidth();
+//    if (renderBoxModel != null &&
+//      renderBoxModel!.hasSize &&
+//      renderBoxModel!.constraints.hasTightWidth
+//    ) {
+//      return renderBoxModel!.constraints.maxWidth -
+//        effectiveBorderLeftWidth.computedValue - effectiveBorderRightWidth.computedValue -
+//        paddingLeft.computedValue - paddingRight.computedValue;
+//    }
+    return _contentBoxLogicalWidth;
+//    return getLogicalContentWidth();
   }
 
   // Content height calculated from renderStyle tree.
   // https://www.w3.org/TR/css-box-3/#valdef-box-content-box
-  // @TODO: add cache to avoid recalculate every time.
+  double? _contentBoxLogicalHeight;
   double? get contentBoxLogicalHeight {
     // If renderBox has tight height, its logical size equals max size.
-    if (renderBoxModel != null &&
-      renderBoxModel!.hasSize &&
-      renderBoxModel!.constraints.hasTightHeight
-    ) {
-      return renderBoxModel!.constraints.maxHeight -
-        effectiveBorderTopWidth.computedValue - effectiveBorderBottomWidth.computedValue -
-        paddingTop.computedValue - paddingBottom.computedValue;
-    }
-    return getLogicalContentHeight();
+//    if (renderBoxModel != null &&
+//      renderBoxModel!.hasSize &&
+//      renderBoxModel!.constraints.hasTightHeight
+//    ) {
+//      return renderBoxModel!.constraints.maxHeight -
+//        effectiveBorderTopWidth.computedValue - effectiveBorderBottomWidth.computedValue -
+//        paddingTop.computedValue - paddingBottom.computedValue;
+//    }
+    return _contentBoxLogicalHeight;
+//    return getLogicalContentHeight();
   }
 
   // Padding box width calculated from renderStyle tree.
