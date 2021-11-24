@@ -245,6 +245,7 @@ class _KrakenAdapterWidget extends StatefulWidget {
   }
 }
 
+
 class _KrakenAdapterWidgetState extends State<_KrakenAdapterWidget> {
   Map<String, dynamic> _properties;
   final WidgetElement _element;
@@ -269,8 +270,7 @@ class _KrakenAdapterWidgetState extends State<_KrakenAdapterWidget> {
     List<Widget> list = [];
     _children.forEach((element) {
       KrakenRenderObjectToWidgetAdapter adaptor = KrakenRenderObjectToWidgetAdapter(
-          child: widget,
-          container: _element.renderBoxModel as RenderObjectWithChildMixin<RenderBox>
+        container: _element.renderBoxModel as RenderObjectWithChildMixin<RenderBox>
       );
 
       list.add(adaptor);
