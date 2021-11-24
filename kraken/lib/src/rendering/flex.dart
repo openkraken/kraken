@@ -197,6 +197,15 @@ class RenderFlexLayout extends RenderLayoutBox {
     return CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+
+    flexLineBoxMetrics.clear();
+    childrenIntrinsicMainSizes.clear();
+    childrenOldConstraints.clear();
+  }
+
   double _getIntrinsicSize({
     FlexDirection? sizingDirection,
     double?

@@ -412,6 +412,9 @@ class Element extends Node
 
     // Remove renderBox.
     _removeRenderBoxModel(renderBoxModel!);
+
+    // Remove pointer listener
+    removeEventResponder(renderBoxModel!);
   }
 
   @override
@@ -555,6 +558,7 @@ class Element extends Node
     renderStyle.detach();
     style.dispose();
     properties.clear();
+    disposeScrollable();
 
     super.dispose();
   }
@@ -1703,8 +1707,8 @@ bool _hasIntersectionObserverEvent(Map eventHandlers) {
 void _detachRenderBoxModel(RenderBox renderBox) {
   if (renderBox.parent == null) return;
 
+  // Remove reference from parent
   RenderObject? parentRenderObject = renderBox.parent as RenderObject;
-
   if (parentRenderObject is RenderObjectWithChildMixin) {
     parentRenderObject.child = null; // RenderViewportBox
   } else if (parentRenderObject is ContainerRenderObjectMixin) {
