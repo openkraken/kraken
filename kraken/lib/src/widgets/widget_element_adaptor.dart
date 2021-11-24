@@ -215,6 +215,17 @@ abstract class WidgetElement extends dom.Element {
     return child;
   }
 
+  @override
+  dom.Node removeChild(dom.Node child) {
+    super.removeChild(child);
+
+    if (_state != null) {
+      _state!.onChildrenChanged(children);
+    }
+
+    return child;
+  }
+
   void _attachWidget(Widget widget) {
     RenderObjectElement rootWidgetElement = elementManager.controller.rootKrakenElement;
     KrakenRenderObjectToWidgetAdapter adaptor = KrakenRenderObjectToWidgetAdapter(
@@ -264,7 +275,7 @@ class _KrakenAdapterWidgetState extends State<_KrakenAdapterWidget> {
 
       list.add(adaptor);
     });
-    
+
     return _element.build(context, _properties, list);
   }
 }
