@@ -165,7 +165,7 @@ class KrakenRenderObjectToWidgetElement<T extends RenderObject> extends RenderOb
 
 abstract class WidgetElement extends dom.Element {
   late Widget _widget;
-  _KrakenAdapterWidgetPropertiesState? _propertiesState;
+  _KrakenAdapterWidgetState? _state;
   WidgetElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, dom.ElementManager elementManager)
       : super(
       targetId,
@@ -183,24 +183,24 @@ abstract class WidgetElement extends dom.Element {
 
     WidgetsFlutterBinding.ensureInitialized();
 
-    _propertiesState = _KrakenAdapterWidgetPropertiesState(this, properties, children);
-    _widget = _KrakenAdapterWidget(_propertiesState!);
+    _state = _KrakenAdapterWidgetState(this, properties, children);
+    _widget = _KrakenAdapterWidget(_state!);
     _attachWidget(_widget);
   }
 
   @override
   void removeProperty(String key) {
     super.removeProperty(key);
-    if (_propertiesState != null) {
-      _propertiesState!.onAttributeChanged(properties);
+    if (_state != null) {
+      _state!.onAttributeChanged(properties);
     }
   }
 
   @override
   void setProperty(String key, dynamic value) {
     super.setProperty(key, value);
-    if (_propertiesState != null) {
-      _propertiesState!.onAttributeChanged(properties);
+    if (_state != null) {
+      _state!.onAttributeChanged(properties);
     }
   }
 
@@ -208,8 +208,8 @@ abstract class WidgetElement extends dom.Element {
   dom.Node appendChild(dom.Node child) {
     super.appendChild(child);
 
-    if (_propertiesState != null) {
-      _propertiesState!.onChildrenChanged(children);
+    if (_state != null) {
+      _state!.onChildrenChanged(children);
     }
 
     return child;
@@ -226,7 +226,7 @@ abstract class WidgetElement extends dom.Element {
 }
 
 class _KrakenAdapterWidget extends StatefulWidget {
-  final _KrakenAdapterWidgetPropertiesState _state;
+  final _KrakenAdapterWidgetState _state;
   _KrakenAdapterWidget(this._state);
   @override
   State<StatefulWidget> createState() {
@@ -234,12 +234,12 @@ class _KrakenAdapterWidget extends StatefulWidget {
   }
 }
 
-class _KrakenAdapterWidgetPropertiesState extends State<_KrakenAdapterWidget> {
+class _KrakenAdapterWidgetState extends State<_KrakenAdapterWidget> {
   Map<String, dynamic> _properties;
   final WidgetElement _element;
   List<dom.Element> _children;
 
-  _KrakenAdapterWidgetPropertiesState(this._element, this._properties, this._children);
+  _KrakenAdapterWidgetState(this._element, this._properties, this._children);
 
   void onAttributeChanged(Map<String, dynamic> properties) {
     setState(() {
@@ -255,6 +255,7 @@ class _KrakenAdapterWidgetPropertiesState extends State<_KrakenAdapterWidget> {
 
   @override
   Widget build(BuildContext context) {
+
     return _element.build(context, _properties, []);
   }
 }
