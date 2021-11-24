@@ -48,14 +48,15 @@ class CSSStyleDeclaration : public HostClass {
 class StyleDeclarationInstance : public Instance {
  public:
   StyleDeclarationInstance() = delete;
-  explicit StyleDeclarationInstance(CSSStyleDeclaration* cssStyleDeclaration, EventTargetInstance* ownerEventTarget)
-      : Instance(cssStyleDeclaration, "CSSStyleDeclaration", &m_exoticMethods, CSSStyleDeclaration::kCSSStyleDeclarationClassId, finalize), ownerEventTarget(ownerEventTarget){};
+  explicit StyleDeclarationInstance(CSSStyleDeclaration* cssStyleDeclaration, EventTargetInstance* ownerEventTarget);
   ~StyleDeclarationInstance();
   bool internalSetProperty(std::string& name, JSValue value);
   void internalRemoveProperty(std::string& name);
   JSValue internalGetPropertyValue(std::string& name);
   std::string toString();
   void copyWith(StyleDeclarationInstance* instance);
+
+  void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
   const EventTargetInstance* ownerEventTarget;
 

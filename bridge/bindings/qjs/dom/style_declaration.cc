@@ -111,6 +111,10 @@ JSValue CSSStyleDeclaration::getPropertyValue(QjsContext* ctx, JSValue this_val,
   return returnValue;
 }
 
+StyleDeclarationInstance::StyleDeclarationInstance(CSSStyleDeclaration* cssStyleDeclaration, EventTargetInstance* ownerEventTarget)
+    : Instance(cssStyleDeclaration, "CSSStyleDeclaration", &m_exoticMethods, CSSStyleDeclaration::kCSSStyleDeclarationClassId, finalize), ownerEventTarget(ownerEventTarget) {
+  JS_DupValue(m_ctx, ownerEventTarget->instanceObject);
+}
 StyleDeclarationInstance::~StyleDeclarationInstance() {}
 
 bool StyleDeclarationInstance::internalSetProperty(std::string& name, JSValue value) {
@@ -213,5 +217,11 @@ JSValue StyleDeclarationInstance::getProperty(QjsContext* ctx, JSValue obj, JSAt
 JSClassExoticMethods StyleDeclarationInstance::m_exoticMethods{
     nullptr, nullptr, nullptr, nullptr, nullptr, getProperty, setProperty,
 };
+
+void StyleDeclarationInstance::gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
+  Instance::gcMark(rt, val, mark_func);
+  // We should tel gc style relies on element
+  JS_MarkValue(rt, ownerEventTarget->instanceObject, mark_func);
+}
 
 }  // namespace kraken::binding::qjs

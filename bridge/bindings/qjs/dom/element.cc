@@ -593,10 +593,7 @@ JSClassID ElementInstance::classID() {
   return Element::classId();
 }
 
-ElementInstance::~ElementInstance() {
-  // Should reset weak reference between style and element.
-  m_style->ownerEventTarget = nullptr;
-}
+ElementInstance::~ElementInstance() {}
 
 JSValue ElementInstance::internalGetTextContent() {
   JSValue array = JS_NewArray(m_ctx);
