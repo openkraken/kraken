@@ -58,10 +58,10 @@ describe('Position fixed', () => {
     );
 
     BODY.appendChild(container);
-    await snapshot(0.1);
+    await snapshot();
 
     container.scroll(0, 200);
-    await snapshot(0.1);
+    await snapshot();
 
   });
 
@@ -96,10 +96,10 @@ describe('Position fixed', () => {
     );
 
     BODY.appendChild(container);
-    await snapshot(0.1);
+    await snapshot();
 
     window.scroll(0, 200);
-    await snapshot(0.1);
+    await snapshot();
 
   });
   // FIXME: Current scroll in horizontal axis is not work in viewport
@@ -139,7 +139,7 @@ describe('Position fixed', () => {
     await snapshot(0.5);
 
     window.scroll(100, 200);
-    await snapshot(0.1);
+    await snapshot();
   });
 
   it('hitTest with position fixed elements', async () => {
@@ -186,7 +186,7 @@ describe('Position fixed', () => {
 
     await simulateClick(10, 10);
 
-    await sleep(0.1);
+
     expect(clickCount).toBe(2);
 
   });
@@ -258,10 +258,10 @@ describe('Position fixed', () => {
       ]
     );
     append(BODY, cont);
-    await snapshot(0.1);
+    await snapshot();
 
     cont.style.position = 'static';
-    await snapshot(0.1);
+    await snapshot();
   });
 
   it('change from fixed to static and no transform exists', async () => {
@@ -282,9 +282,9 @@ describe('Position fixed', () => {
       ]
     );
     append(BODY, cont);
-    await snapshot(0.1);
+    await snapshot();
 
     cont.style.position = 'static';
-    await snapshot(0.1);
+    await snapshot();
   });
 });

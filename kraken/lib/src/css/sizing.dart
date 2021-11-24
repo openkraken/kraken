@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 
-import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
@@ -18,155 +17,137 @@ import 'package:kraken/rendering.dart';
 
 mixin CSSSizingMixin on RenderStyleBase {
 
-  double? _width;
-  double? get width {
-    return _width;
+  // https://drafts.csswg.org/css-sizing-3/#preferred-size-properties
+  // Name: width, height
+  // Value: auto | <length-percentage> | min-content | max-content | fit-content(<length-percentage>)
+  // Initial: auto
+  // Applies to: all elements except non-replaced inlines
+  // Inherited: no
+  // Percentages: relative to width/height of containing block
+  // Computed value: as specified, with <length-percentage> values computed
+  // Canonical order: per grammar
+  // Animation type: by computed value type, recursing into fit-content()
+  CSSLengthValue? _width;
+  CSSLengthValue get width {
+    return _width ?? CSSLengthValue.auto;
   }
-  set width(double? value) {
-    if (_width == value) return;
+  set width(CSSLengthValue? value) {
+    // Negative value is invalid, auto value is parsed at layout stage.
+    if ((value != null && value.value != null && value.value! < 0) || width == value) {
+      return;
+    }
     _width = value;
+    _markSelfAndParentNeedsLayout();
   }
 
-  double? _height;
-  double? get height {
-    return _height;
+  CSSLengthValue? _height;
+  CSSLengthValue get height {
+    return _height ?? CSSLengthValue.auto;
   }
-  set height(double? value) {
-    if (_height == value) return;
+  set height(CSSLengthValue? value) {
+    // Negative value is invalid, auto value is parsed at layout stage.
+    if ((value != null && value.value != null && value.value! < 0) || height == value) {
+      return;
+    }
     _height = value;
+    _markSelfAndParentNeedsLayout();
   }
 
-  double? _minWidth;
-  double? get minWidth {
-    return _minWidth;
+  // https://drafts.csswg.org/css-sizing-3/#min-size-properties
+  // Name: min-width, min-height
+  // Value: auto | <length-percentage> | min-content | max-content | fit-content(<length-percentage>)
+  // Initial: auto
+  // Applies to: all elements that accept width or height
+  // Inherited: no
+  // Percentages: relative to width/height of containing block
+  // Computed value: as specified, with <length-percentage> values computed
+  // Canonical order: per grammar
+  // Animatable: by computed value, recursing into fit-content()
+  CSSLengthValue? _minWidth;
+  CSSLengthValue get minWidth {
+    return _minWidth ?? CSSLengthValue.auto;
   }
-  set minWidth(double? value) {
-    if (_minWidth == value) return;
+  set minWidth(CSSLengthValue? value) {
+    // Negative value is invalid, auto value is parsed at layout stage.
+    if ((value != null && value.value != null && value.value! < 0) || minWidth == value) {
+      return;
+    }
     _minWidth = value;
+    _markSelfAndParentNeedsLayout();
   }
 
-  double? _maxWidth;
-  double? get maxWidth {
-    return _maxWidth;
+  CSSLengthValue? _minHeight;
+  CSSLengthValue get minHeight {
+    return _minHeight ?? CSSLengthValue.auto;
   }
-  set maxWidth(double? value) {
-    if (_maxWidth == value) return;
-    _maxWidth = value;
-  }
-
-  double? _minHeight;
-  double? get minHeight {
-    return _minHeight;
-  }
-  set minHeight(double? value) {
-    if (_minHeight == value) return;
+  set minHeight(CSSLengthValue? value) {
+    // Negative value is invalid, auto value is parsed at layout stage.
+    if ((value != null && value.value != null && value.value! < 0) || minHeight == value) {
+      return;
+    }
     _minHeight = value;
+    _markSelfAndParentNeedsLayout();
   }
 
-  double? _maxHeight;
-  double? get maxHeight {
-    return _maxHeight;
+  // https://drafts.csswg.org/css-sizing-3/#max-size-properties
+  // Name: max-width, max-height
+  // Value: none | <length-percentage> | min-content | max-content | fit-content(<length-percentage>)
+  // Initial: none
+  // Applies to: all elements that accept width or height
+  // Inherited: no
+  // Percentages: relative to width/height of containing block
+  // Computed value: as specified, with <length-percentage> values computed
+  // Canonical order: per grammar
+  // Animatable: by computed value, recursing into fit-content()
+  CSSLengthValue? _maxWidth;
+  CSSLengthValue get maxWidth {
+    return _maxWidth ?? CSSLengthValue.none;
   }
-  set maxHeight(double? value) {
-    if (_maxHeight == value) return;
+  set maxWidth(CSSLengthValue? value) {
+    // Negative value is invalid, auto value is parsed at layout stage.
+    if ((value != null && value.value != null && value.value! < 0) || maxWidth == value) {
+      return;
+    }
+    _maxWidth = value;
+    _markSelfAndParentNeedsLayout();
+  }
+
+  CSSLengthValue? _maxHeight;
+  CSSLengthValue get maxHeight {
+    return _maxHeight ?? CSSLengthValue.none;
+  }
+  set maxHeight(CSSLengthValue? value) {
+    // Negative value is invalid, auto value is parsed at layout stage.
+    if ((value != null && value.value != null && value.value! < 0) || maxHeight == value) {
+      return;
+    }
     _maxHeight = value;
+    _markSelfAndParentNeedsLayout();
   }
 
-  void updateSizing(String property, double? value, {bool shouldMarkNeedsLayout = true}) {
-    RenderStyle renderStyle = this as RenderStyle;
-    switch (property) {
-      case WIDTH:
-        renderStyle.width = value != null && value >= 0 ? value.abs() : null;
-        break;
-      case HEIGHT:
-        renderStyle.height = value != null && value >= 0 ? value.abs() : null;
-        break;
-      case MIN_HEIGHT:
-        renderStyle.minHeight = getMinHeight(value);
-        // max-height should not exceed min-height
-        double? maxHeight = renderStyle.maxHeight;
-        if (maxHeight != null) {
-          renderStyle.maxHeight = getMaxHeight(maxHeight, value);
-        }
-        break;
-      case MAX_HEIGHT:
-        renderStyle.maxHeight = getMaxHeight(value, renderStyle.minHeight);
-        break;
-      case MIN_WIDTH:
-        renderStyle.minWidth = getMinWidth(value);
-        // max-width should not exceed min-midth
-        double? maxWidth = renderStyle.maxWidth;
-        if (maxWidth != null) {
-          renderStyle.maxWidth = getMaxWidth(maxWidth, value);
-        }
-        break;
-      case MAX_WIDTH:
-        renderStyle.maxWidth = getMaxWidth(value, renderStyle.minWidth);
-        break;
+  void _markSelfAndParentNeedsLayout() {
+    if (renderBoxModel == null) return;
+    RenderBoxModel boxModel = renderBoxModel!;
+    boxModel.markNeedsLayout();
+    // Sizing may affect parent size, mark parent as needsLayout in case
+    // renderBoxModel has tight constraints which will prevent parent from marking.
+    if (boxModel.parent is RenderBoxModel) {
+      (boxModel.parent as RenderBoxModel).markNeedsLayout();
     }
-
-    if (shouldMarkNeedsLayout) {
-      renderBoxModel!.markNeedsLayout();
-      // Sizing may affect parent size, mark parent as needsLayout in case
-      // renderBoxModel has tight constraints which will prevent parent from marking.
-      if (renderBoxModel!.parent is RenderBoxModel) {
-        (renderBoxModel!.parent as RenderBoxModel).markNeedsLayout();
-      }
-    }
-  }
-
-  double? getMinWidth(double? minWidth) {
-    if (minWidth == null || minWidth < 0)  {
-      return null;
-    }
-    return minWidth;
-  }
-
-  double? getMaxWidth(double? maxWidth, double? minWidth) {
-    if (maxWidth == null || maxWidth < 0) {
-      return null;
-    }
-    // max-width is invalid if max-width is smaller than min-width
-    if (minWidth != null && minWidth > maxWidth) {
-      return null;
-    }
-    return maxWidth;
-  }
-
-  double? getMinHeight(double? minHeight) {
-    if (minHeight == null || minHeight < 0)  {
-      return null;
-    }
-    return minHeight;
-  }
-
-  double? getMaxHeight(double? maxHeight, double? minHeight) {
-    if (maxHeight == null || maxHeight < 0) {
-      return null;
-    }
-    // max-height is invalid if max-height is smaller than min-height
-    if (minHeight != null && minHeight > maxHeight) {
-      return null;
-    }
-    return maxHeight;
   }
 
   // Whether current node should stretch children's height
-  static bool isStretchChildHeight(RenderBoxModel current, RenderBoxModel child) {
+  static bool isStretchChildHeight(RenderStyle renderStyle, RenderStyle childRenderStyle) {
     bool isStretch = false;
-    RenderStyle? renderStyle = current.renderStyle;
-    RenderStyle childRenderStyle = child.renderStyle;
-    bool isFlex = current is RenderFlexLayout;
+    bool isFlex = renderStyle.renderBoxModel is RenderFlexLayout;
     bool isHorizontalDirection = false;
     bool isAlignItemsStretch = false;
     bool isFlexNoWrap = false;
     bool isChildAlignSelfStretch = false;
     bool isChildStretchSelf = false;
     if (isFlex) {
-      isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(
-        current.renderStyle.flexDirection
-      );
-      isAlignItemsStretch = renderStyle.alignItems == AlignItems.stretch;
+      isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
+      isAlignItemsStretch = renderStyle.effectiveAlignItems == AlignItems.stretch;
       isFlexNoWrap = renderStyle.flexWrap != FlexWrap.wrap &&
         childRenderStyle.flexWrap != FlexWrap.wrapReverse;
       isChildAlignSelfStretch = childRenderStyle.alignSelf == AlignSelf.stretch;
@@ -174,11 +155,11 @@ mixin CSSSizingMixin on RenderStyleBase {
         isChildAlignSelfStretch : isAlignItemsStretch;
     }
 
-    CSSMargin marginTop = childRenderStyle.marginTop;
-    CSSMargin marginBottom = childRenderStyle.marginBottom;
+    CSSLengthValue marginTop = childRenderStyle.marginTop;
+    CSSLengthValue marginBottom = childRenderStyle.marginBottom;
 
     // Display as block if flex vertical layout children and stretch children
-    if (!marginTop.isAuto! && !marginBottom.isAuto! &&
+    if (!marginTop.isAuto && !marginBottom.isAuto &&
       isFlex && isHorizontalDirection && isFlexNoWrap && isChildStretchSelf) {
       isStretch = true;
     }
@@ -186,17 +167,3 @@ mixin CSSSizingMixin on RenderStyleBase {
     return isStretch;
   }
 }
-
-class CSSEdgeInsets {
-  double left;
-  double top;
-  double right;
-  double bottom;
-
-  CSSEdgeInsets(this.top, this.right, this.bottom, this.left);
-
-  EdgeInsets toEdgeInsets() {
-    return EdgeInsets.fromLTRB(left, top, right, bottom);
-  }
-}
-

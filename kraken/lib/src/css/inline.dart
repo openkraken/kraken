@@ -34,11 +34,7 @@ mixin CSSInlineMixin on RenderStyleBase {
     }
   }
 
-  void updateVerticalAlign(String value) {
-    verticalAlign = parseVerticalAlign(value);
-  }
-
-  static VerticalAlign parseVerticalAlign(String verticalAlign) {
+  static VerticalAlign resolveVerticalAlign(String verticalAlign) {
     switch (verticalAlign) {
       case TOP:
         return VerticalAlign.top;

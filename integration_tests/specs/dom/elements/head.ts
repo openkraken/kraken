@@ -10,7 +10,7 @@ describe('head', () => {
     const link = <link rel="stylesheet" href="style.css" />;
     const meta = <meta charset="utf-8" />;
     const div = <div>PASS if only this text.</div>;
-    
+
     document.body.appendChild(title);
     document.body.appendChild(style);
     document.body.appendChild(link);

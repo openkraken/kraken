@@ -66,11 +66,12 @@ describe('auto-margins', () => {
     document.body.appendChild(div);
     document.body.appendChild(div_1);
 
+    await snapshot();
+
     img.onload = async () => {
       await snapshot();
       done();
     };
-    await snapshot();
   });
 
   it('align-items should not work when auto margin exists in flex column direction', async () => {

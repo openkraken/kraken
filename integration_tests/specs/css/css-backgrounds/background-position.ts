@@ -72,8 +72,7 @@ describe('Background-position', () => {
     position.appendChild(position3);
 
     append(BODY, position);
-    await sleep(1);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('right', async () => {
@@ -99,8 +98,7 @@ describe('Background-position', () => {
     position.appendChild(position4);
 
     append(BODY, position);
-    await sleep(1);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('bottom', async () => {
@@ -124,8 +122,7 @@ describe('Background-position', () => {
     });
     position.appendChild(position5);
     append(BODY, position);
-    await sleep(1);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('right center', async () => {
@@ -148,8 +145,7 @@ describe('Background-position', () => {
     });
     append(position, div);
     append(BODY, position);
-    await sleep(1);
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('should works with length type', async () => {
