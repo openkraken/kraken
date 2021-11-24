@@ -17,7 +17,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
-      # 设置 bridge 编译环境
+      # Set up the bridge compilation environment
       - uses: actions/setup-node@v2
         with:
           node-version: ${{ env.nodeVersion }}
@@ -27,7 +27,7 @@ jobs:
       - run: npm i
       - run: npm run build:bridge:android:release
 
-      # 设置 flutter 环境
+      # Install Flutter SDK
       - uses: subosito/flutter-action@v1
         with:
           flutter-version: ${{ env.flutterVersion }}
