@@ -168,10 +168,10 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-atom.h
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-opcode.h
     )
-  add_library(quickjs SHARED ${QUICK_JS_SOURCE})
+  add_library(quick SHARED ${QUICK_JS_SOURCE})
 
   list(APPEND BRIDGE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
-  list(APPEND BRIDGE_LINK_LIBS quickjs)
+  list(APPEND BRIDGE_LINK_LIBS quick)
 
   list(APPEND BRIDGE_SOURCE
     bridge_qjs.cc
@@ -262,7 +262,7 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   # Quickjs use __builtin_frame_address() to get stack pointer, we should add follow options to get it work with -O2
   # https://stackoverflow.com/questions/14735010/how-do-you-get-gccs-builtin-frame-address-to-work-with-o2
   add_compile_options(-fno-optimize-sibling-calls -fno-omit-frame-pointer)
-  target_compile_options(quickjs PUBLIC -DCONFIG_VERSION=${\"QUICKJS_VERSION\"})
+  target_compile_options(quick PUBLIC -DCONFIG_VERSION=${\"QUICKJS_VERSION\"})
 
 endif ()
 
@@ -336,7 +336,7 @@ if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
   set_target_properties(kraken_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}")
 
   if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
-    set_target_properties(quickjs PROPERTIES LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}")
+    set_target_properties(quick PROPERTIES LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}")
   endif ()
 elseif (IS_ANDROID)
   # android do nothing
@@ -354,8 +354,8 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
     PUBLIC_HEADER ${KRAKEN_PUBLIC_HEADERS}
     )
 
-  set_target_properties(quickjs PROPERTIES
-    OUTPUT_NAME quickjs
+  set_target_properties(quick PROPERTIES
+    OUTPUT_NAME quick
     FRAMEWORK TRUE
     FRAMEWORK_VERSION C
     MACOSX_FRAMEWORK_IDENTIFIER com.openkraken.quickjs
