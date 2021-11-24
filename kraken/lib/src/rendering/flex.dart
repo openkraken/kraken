@@ -336,6 +336,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderBoxModel? childRenderBoxModel;
     if (child is RenderBoxModel) {
       childRenderBoxModel = child;
+    } else if (child is RenderPositionPlaceholder) {
+      childRenderBoxModel = child.positioned;
     }
     if (childRenderBoxModel == null) {
       return 0;
@@ -357,7 +359,10 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderBoxModel? childRenderBoxModel;
     if (child is RenderBoxModel) {
       childRenderBoxModel = child;
+    } else if (child is RenderPositionPlaceholder) {
+      childRenderBoxModel = child.positioned;
     }
+
     if (childRenderBoxModel == null) {
       return 0;
     }
