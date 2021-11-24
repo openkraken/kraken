@@ -255,7 +255,16 @@ class _KrakenAdapterWidgetState extends State<_KrakenAdapterWidget> {
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> list = [];
+    _children.forEach((element) {
+      KrakenRenderObjectToWidgetAdapter adaptor = KrakenRenderObjectToWidgetAdapter(
+          child: widget,
+          container: _element.renderBoxModel as RenderObjectWithChildMixin<RenderBox>
+      );
 
-    return _element.build(context, _properties, []);
+      list.add(adaptor);
+    });
+    
+    return _element.build(context, _properties, list);
   }
 }
