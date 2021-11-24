@@ -105,8 +105,6 @@ class Kraken extends StatefulWidget {
 
   final UriParser? uriParser;
 
-  final BuildOwner? buildOwner;
-
   KrakenController? get controller {
     return KrakenController.getControllerOfName(shortHash(this));
   }
@@ -183,7 +181,6 @@ class Kraken extends StatefulWidget {
     // Kraken's http client interceptor.
     this.httpClientInterceptor,
     this.uriParser,
-    this.buildOwner,
     // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
     // Maybe got unexpected error when change to other values, use this at your own risk!
     // We will fixed this on next version released. (v0.6.0)
@@ -809,7 +806,6 @@ This situation often happened when you trying creating kraken when FlutterView n
       httpClientInterceptor: _krakenWidget.httpClientInterceptor,
       widgetDelegate: _widgetDelegate,
       uriParser: _krakenWidget.uriParser,
-      buildOwner: _krakenWidget.buildOwner,
     );
 
     if (kProfileMode) {
@@ -875,6 +871,10 @@ class _KrakenRenderObjectElement extends SingleChildRenderObjectElement {
 
     KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller!;
 
+    // We should make sure every flutter elements created under kraken can be walk up to the root.
+    // So we bind _KrakenRenderObjectElement into KrakenController, and widgetElements created by controller can follow this to the root.
+    controller.rootKrakenElement = this;
+
     if (controller.bundleContent == null && controller.bundlePath == null && controller.bundleURL == null) {
       return;
     }
@@ -883,6 +883,14 @@ class _KrakenRenderObjectElement extends SingleChildRenderObjectElement {
 
     _evalBundle(controller, widget._krakenWidget.animationController);
   }
+
+  // RenderObjects created by kraken are manager by kraken itself. There are no needs to operate renderObjects on _KrakenRenderObjectElement.
+  @override
+  void insertRenderObjectChild(RenderObject child, Object? slot) {}
+  @override
+  void moveRenderObjectChild(RenderObject child, Object? oldSlot, Object? newSlot) {}
+  @override
+  void removeRenderObjectChild(RenderObject child, Object? slot) {}
 
   @override
   _KrakenRenderObjectWidget get widget => super.widget as _KrakenRenderObjectWidget;

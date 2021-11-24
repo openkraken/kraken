@@ -9,6 +9,7 @@ import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/widgets.dart' show RenderObjectElement;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/bridge.dart';
@@ -18,8 +19,6 @@ import 'package:kraken/gesture.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/widget.dart';
-
-import 'package:flutter/material.dart' show BuildOwner;
 
 
 import 'bundle.dart';
@@ -419,7 +418,7 @@ class KrakenController {
 
   UriParser? uriParser;
 
-  final BuildOwner? buildOwner;
+  late RenderObjectElement rootKrakenElement;
 
   static KrakenController? getControllerOfJSContextId(int? contextId) {
     if (!_controllerMap.containsKey(contextId)) {
@@ -490,7 +489,6 @@ class KrakenController {
     this.httpClientInterceptor,
     this.devToolsService,
     this.uriParser,
-    this.buildOwner
   })  : _name = name,
         _bundleURL = bundleURL,
         _bundlePath = bundlePath,
