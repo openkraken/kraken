@@ -338,7 +338,6 @@ class RenderStyle
 
   // Compute the content box height from render style.
   void computeContentBoxLogicalHeight() {
-    RenderBoxModel current = renderBoxModel!;
     RenderStyle renderStyle = this;
     double? logicalHeight;
 
@@ -702,7 +701,7 @@ class RenderStyle
     return null;
   }
 
-  /// Get height of replaced element by intrinsic ratio if height is not defined
+  // Get height of replaced element by intrinsic ratio if height is not defined
   double getHeightByIntrinsicRatio() {
     double? realWidth = width.isAuto ? intrinsicWidth : width.computedValue;
     if (minWidth.isNotAuto && realWidth! < minWidth.computedValue) {
@@ -715,7 +714,7 @@ class RenderStyle
     return realHeight;
   }
 
-  /// Get width of replaced element by intrinsic ratio if width is not defined
+  // Get width of replaced element by intrinsic ratio if width is not defined
   double getWidthByIntrinsicRatio() {
     double? realHeight = height.isAuto ? intrinsicHeight : height.computedValue;
     if (!minHeight.isAuto && realHeight! < minHeight.computedValue) {
