@@ -197,6 +197,15 @@ class RenderFlexLayout extends RenderLayoutBox {
     return CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+
+    flexLineBoxMetrics.clear();
+    childrenIntrinsicMainSizes.clear();
+    childrenOldConstraints.clear();
+  }
+
   double _getIntrinsicSize({
     FlexDirection? sizingDirection,
     double?
@@ -327,6 +336,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderBoxModel? childRenderBoxModel;
     if (child is RenderBoxModel) {
       childRenderBoxModel = child;
+    } else if (child is RenderPositionPlaceholder) {
+      childRenderBoxModel = child.positioned;
     }
     if (childRenderBoxModel == null) {
       return 0;
@@ -348,7 +359,10 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderBoxModel? childRenderBoxModel;
     if (child is RenderBoxModel) {
       childRenderBoxModel = child;
+    } else if (child is RenderPositionPlaceholder) {
+      childRenderBoxModel = child.positioned;
     }
+
     if (childRenderBoxModel == null) {
       return 0;
     }

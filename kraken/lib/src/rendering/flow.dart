@@ -176,6 +176,13 @@ class RenderFlowLayout extends RenderLayoutBox {
   List<_RunMetrics> lineBoxMetrics = <_RunMetrics>[];
 
   @override
+  void dispose() {
+    super.dispose();
+
+    lineBoxMetrics.clear();
+  }
+
+  @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderLayoutParentData) {
       child.parentData = RenderLayoutParentData();
@@ -899,9 +906,17 @@ class RenderFlowLayout extends RenderLayoutBox {
 
         double? childMarginLeft = 0;
         double? childMarginTop = 0;
+
+        RenderBoxModel? childRenderBoxModel;
         if (child is RenderBoxModel) {
-          childMarginLeft = child.renderStyle.marginLeft.computedValue;
-          childMarginTop = _getChildMarginTop(child);
+          childRenderBoxModel = child;
+        } else if (child is RenderPositionPlaceholder) {
+          childRenderBoxModel = child.positioned;
+        }
+
+        if (childRenderBoxModel is RenderBoxModel) {
+          childMarginLeft = childRenderBoxModel.renderStyle.marginLeft.computedValue;
+          childMarginTop = _getChildMarginTop(childRenderBoxModel);
         }
 
         // No need to add padding and border for scrolling content box.

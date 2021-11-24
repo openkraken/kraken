@@ -173,6 +173,14 @@ class RenderLayoutBox extends RenderBoxModel
   }
 
   @override
+  void dispose() {
+    super.dispose();
+
+    paintingOrder.clear();
+    stickyChildren.clear();
+  }
+
+  @override
   void markNeedsLayout() {
     super.markNeedsLayout();
 
@@ -699,7 +707,7 @@ class RenderBoxModel extends RenderBox
 
       // Copy overflow
       ..scrollListener = scrollListener
-      ..pointerListener = pointerListener
+      ..scrollablePointerListener = scrollablePointerListener
       ..clipX = clipX
       ..clipY = clipY
       ..enableScrollX = enableScrollX
@@ -1254,17 +1262,32 @@ class RenderBoxModel extends RenderBox
         renderStyle.backgroundAttachment == CSSBackgroundAttachmentType.local;
   }
 
+  void _detachAllChildren() {
+    if (this is RenderObjectWithChildMixin) {
+      (this as RenderObjectWithChildMixin).child = null;
+    } else if (this is ContainerRenderObjectMixin) {
+      (this as ContainerRenderObjectMixin).removeAll();
+    }
+  }
+
   /// Called when its corresponding element disposed
+  @mustCallSuper
   void dispose() {
     // Clear renderObjects in list when disposed to avoid memory leak
     if (fixedChildren.isNotEmpty) {
       fixedChildren.clear();
     }
 
+    // Dispose scroll behavior
+    disposeScrollable();
+
     // Dispose box decoration painter.
     disposePainter();
     // Evict render decoration image cache.
     renderStyle.decoration?.image?.image.evict();
+
+    // Remove reference from childs
+    _detachAllChildren();
   }
 
   Offset getTotalScrollOffset() {
@@ -1378,8 +1401,8 @@ class RenderBoxModel extends RenderBox
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     super.handleEvent(event, entry);
-    if (pointerListener != null) {
-      pointerListener!(event);
+    if (scrollablePointerListener != null) {
+      scrollablePointerListener!(event);
     }
   }
 
