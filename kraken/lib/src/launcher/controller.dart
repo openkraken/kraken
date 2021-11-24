@@ -418,7 +418,8 @@ class KrakenController {
   static final Map<String, int> _nameIdMap = {};
 
   UriParser? uriParser;
-  BuildOwner? buildOwner;
+
+  final BuildOwner? buildOwner;
 
   static KrakenController? getControllerOfJSContextId(int? contextId) {
     if (!_controllerMap.containsKey(contextId)) {

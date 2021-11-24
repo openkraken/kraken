@@ -199,7 +199,7 @@ class Kraken extends StatefulWidget {
 
   final UriParser? uriParser;
 
-  BuildOwner? buildOwner;
+  final BuildOwner? buildOwner;
 
   KrakenController? get controller {
     return KrakenController.getControllerOfName(shortHash(this));
