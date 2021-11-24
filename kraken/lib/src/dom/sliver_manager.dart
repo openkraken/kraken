@@ -61,7 +61,7 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
         throw FlutterError('Sliver unsupported type ${childNode.runtimeType} $childNode');
     }
 
-    // If renderer is not created, use an empty to occupy the position, but not do layout or paint.
+    // If renderer is not created, use an empty RenderBox to occupy the position, but not do layout or paint.
     child ??= _createEmptyRenderObject();
 
     if (_hasLayout) {
