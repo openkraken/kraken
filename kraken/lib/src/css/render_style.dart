@@ -239,19 +239,6 @@ class RenderStyle
     }
   }
 
-  // Find ancestor render style with display of not inline.
-  RenderStyle? _findAncestoreWithNoDisplayInline() {
-    RenderStyle renderStyle = this;
-    RenderStyle? parentRenderStyle = renderStyle.parent;
-    while(parentRenderStyle != null) {
-      if (parentRenderStyle.effectiveDisplay != CSSDisplay.inline) {
-        break;
-      }
-      parentRenderStyle = parentRenderStyle.parent;
-    }
-    return parentRenderStyle;
-  }
-
   // Compute the content box width from render style.
   void computeContentBoxLogicalWidth() {
     RenderBoxModel current = renderBoxModel!;
@@ -277,10 +264,10 @@ class RenderStyle
           // Block element (except replaced element) will stretch to the content width of its parent in flow layout.
           // Replaced element also stretch in flex layout if align-items is stretch.
           } else if (current is! RenderIntrinsic || parent is RenderFlexLayout) {
-            RenderStyle? targetParentRenderStyle = _findAncestoreWithNoDisplayInline();
+            RenderStyle? ancestorRenderStyle = _findAncestorWithNoDisplayInline();
             // Should ignore renderStyle of display inline when searching for ancestors to stretch width.
-            if (targetParentRenderStyle != null) {
-              logicalWidth = targetParentRenderStyle.contentBoxLogicalWidth;
+            if (ancestorRenderStyle != null) {
+              logicalWidth = ancestorRenderStyle.contentBoxLogicalWidth;
               // Should subtract horizontal margin of own from its parent content width.
               if (logicalWidth != null) {
                 logicalWidth -= renderStyle.margin.horizontal;
@@ -437,8 +424,8 @@ class RenderStyle
     return isStretch;
   }
 
-  // Max constraints width of content, used in calculating the remaining space for line wrapping
-  // in the stage of layout.
+
+  // Max width to constrain its children, used in deciding the line wrapping timing of layout.
   double get contentMaxConstraintsWidth {
     // If renderBoxModel definite content constraints, use it as max constrains width of content.
     BoxConstraints? contentConstraints = renderBoxModel!.contentConstraints;
@@ -446,63 +433,28 @@ class RenderStyle
       return contentConstraints.maxWidth;
     }
 
-    // If renderBoxModel has no logical content width (eg display is inline-block/inline-flex and
-    // has no width), find its ancestors with logical width set to calculate the remaining space.
     double contentMaxConstraintsWidth = double.infinity;
-    double cropWidth = 0;
+    RenderStyle renderStyle = this;
+    double? borderBoxLogicalWidth;
+    RenderStyle? ancestorRenderStyle = _findAncestorWithContentBoxLogicalWidth();
 
-    RenderStyle currentRenderStyle = this;
-
-    // Get the nearest width of ancestor with width
-    while (true) {
-      RenderStyle? parentRenderStyle = currentRenderStyle.parent;
-      CSSDisplay? effectiveDisplay = currentRenderStyle.effectiveDisplay;
-
-      // Flex item with flex-shrink 0 and no width/max-width will have infinity constraints
-      // even if parents have width
-      if (parentRenderStyle != null && (parentRenderStyle.display == CSSDisplay.flex ||
-        parentRenderStyle.display == CSSDisplay.inlineFlex)
-      ) {
-        if (currentRenderStyle.flexShrink == 0 &&
-          currentRenderStyle.width.isAuto &&
-          currentRenderStyle.maxWidth.isNone) {
-          break;
-        }
-      }
-
-      // Get width if width exists and element is not inline
-      if (effectiveDisplay != CSSDisplay.inline &&
-        (currentRenderStyle.width.isNotAuto || currentRenderStyle.maxWidth.isNotNone)) {
-        // Get the min width between width and max-width
-        contentMaxConstraintsWidth = math.min(
-          (currentRenderStyle.width.isAuto ? null : currentRenderStyle.width.computedValue) ?? double.infinity,
-          (currentRenderStyle.maxWidth.isNone ? null : currentRenderStyle.maxWidth.computedValue) ?? double.infinity
-        );
-        cropWidth = _getCropWidthByPaddingBorder(currentRenderStyle, cropWidth);
-        break;
-      }
-
-      if (parentRenderStyle != null) {
-        cropWidth += currentRenderStyle.margin.horizontal;
-        cropWidth = _getCropWidthByPaddingBorder(currentRenderStyle, cropWidth);
-        currentRenderStyle = parentRenderStyle;
-      } else {
-        break;
-      }
+    // If renderBoxModel has no logical width (eg. display is inline-block/inline-flex and
+    // has no width), the child width is constrained by its closest ancestor who has definite logical content box width.
+    if (ancestorRenderStyle != null) {
+      borderBoxLogicalWidth = ancestorRenderStyle.contentBoxLogicalWidth;
     }
 
-    if (contentMaxConstraintsWidth != double.infinity) {
-      contentMaxConstraintsWidth = contentMaxConstraintsWidth - cropWidth;
-    }
-
-    // Set contentMaxConstraintsWidth to 0 when it is negative in the case of
-    // renderBoxModel's width exceeds its ancestors.
-    // <div style="width: 300px;">
-    //   <div style="display: inline-block; padding: 0 200px;">
-    //   </div>
-    // </div>
-    if (contentMaxConstraintsWidth < 0) {
-      contentMaxConstraintsWidth = 0;
+    if (borderBoxLogicalWidth != null) {
+      contentMaxConstraintsWidth = borderBoxLogicalWidth -
+        renderStyle.border.horizontal -
+        renderStyle.padding.horizontal;
+      // Logical width may be smaller than its border and padding width,
+      // in this case, content width will be negative which is illegal.
+      // <div style="width: 300px;">
+      //   <div style="display: inline-block; padding: 0 200px;">
+      //   </div>
+      // </div>
+      contentMaxConstraintsWidth = math.max(0, contentMaxConstraintsWidth);
     }
 
     return contentMaxConstraintsWidth;
@@ -579,26 +531,22 @@ class RenderStyle
       + effectiveBorderBottomWidth.computedValue;
   }
 
-  // Content box width of renderBoxModel after it was rendered.
-  // https://www.w3.org/TR/css-box-3/#valdef-box-content-box
-  double? get contentBoxWidth {
-    if (paddingBoxWidth == null) {
-      return null;
+  // Border box width of renderBoxModel after it was rendered.
+  // https://www.w3.org/TR/css-box-3/#valdef-box-border-box
+  double? get borderBoxWidth {
+    if (renderBoxModel!.hasSize && renderBoxModel!.boxSize != null) {
+      return renderBoxModel!.boxSize!.width;
     }
-    return paddingBoxWidth!
-      - paddingLeft.computedValue
-      - paddingRight.computedValue;
+    return null;
   }
 
-  // Content box height of renderBoxModel after it was rendered.
-  // https://www.w3.org/TR/css-box-3/#valdef-box-content-box
-  double? get contentBoxHeight {
-    if (paddingBoxHeight == null) {
-      return null;
+  // Border box height of renderBoxModel after it was rendered.
+  // https://www.w3.org/TR/css-box-3/#valdef-box-border-box
+  double? get borderBoxHeight {
+    if (renderBoxModel!.hasSize && renderBoxModel!.boxSize != null) {
+      return renderBoxModel!.boxSize!.height;
     }
-    return paddingBoxHeight!
-      - paddingTop.computedValue
-      - paddingBottom.computedValue;
+    return null;
   }
 
   // Padding box width of renderBoxModel after it was rendered.
@@ -623,42 +571,46 @@ class RenderStyle
       - effectiveBorderBottomWidth.computedValue;
   }
 
-  // Border box width of renderBoxModel after it was rendered.
-  // https://www.w3.org/TR/css-box-3/#valdef-box-border-box
-  double? get borderBoxWidth {
-    if (renderBoxModel!.hasSize && renderBoxModel!.boxSize != null) {
-      return renderBoxModel!.boxSize!.width;
-    }
-    return null;
-  }
-
-  // Border box height of renderBoxModel after it was rendered.
-  // https://www.w3.org/TR/css-box-3/#valdef-box-border-box
-  double? get borderBoxHeight {
-    if (renderBoxModel!.hasSize && renderBoxModel!.boxSize != null) {
-      return renderBoxModel!.boxSize!.height;
-    }
-    return null;
-  }
-
-  // Content box width of renderBoxModel calculated from tight width constraints.
-  double? get contentBoxConstraintsWidth {
-    if (paddingBoxConstraintsWidth == null) {
+  // Content box width of renderBoxModel after it was rendered.
+  // https://www.w3.org/TR/css-box-3/#valdef-box-content-box
+  double? get contentBoxWidth {
+    if (paddingBoxWidth == null) {
       return null;
     }
-    return paddingBoxConstraintsWidth!
+    return paddingBoxWidth!
       - paddingLeft.computedValue
       - paddingRight.computedValue;
   }
 
-  // Content box height of renderBoxModel calculated from tight height constraints.
-  double? get contentBoxConstraintsHeight {
-    if (paddingBoxConstraintsHeight == null) {
+  // Content box height of renderBoxModel after it was rendered.
+  // https://www.w3.org/TR/css-box-3/#valdef-box-content-box
+  double? get contentBoxHeight {
+    if (paddingBoxHeight == null) {
       return null;
     }
-    return paddingBoxConstraintsHeight!
+    return paddingBoxHeight!
       - paddingTop.computedValue
       - paddingBottom.computedValue;
+  }
+
+  // Border box width of renderBoxModel calculated from tight width constraints.
+  double? get borderBoxConstraintsWidth {
+    if (renderBoxModel!.hasSize &&
+      renderBoxModel!.constraints.hasTightWidth
+    ) {
+      return renderBoxModel!.constraints.maxWidth;
+    }
+    return null;
+  }
+
+  // Border box height of renderBoxModel calculated from tight height constraints.
+  double? get borderBoxConstraintsHeight {
+    if (renderBoxModel!.hasSize &&
+      renderBoxModel!.constraints.hasTightHeight
+    ) {
+      return renderBoxModel!.constraints.maxHeight;
+    }
+    return null;
   }
 
   // Padding box width of renderBoxModel calculated from tight width constraints.
@@ -681,24 +633,24 @@ class RenderStyle
       - effectiveBorderBottomWidth.computedValue;
   }
 
-  // Border box width of renderBoxModel calculated from tight width constraints.
-  double? get borderBoxConstraintsWidth {
-    if (renderBoxModel!.hasSize &&
-      renderBoxModel!.constraints.hasTightWidth
-    ) {
-      return renderBoxModel!.constraints.maxWidth;
+  // Content box width of renderBoxModel calculated from tight width constraints.
+  double? get contentBoxConstraintsWidth {
+    if (paddingBoxConstraintsWidth == null) {
+      return null;
     }
-    return null;
+    return paddingBoxConstraintsWidth!
+      - paddingLeft.computedValue
+      - paddingRight.computedValue;
   }
 
-  // Border box height of renderBoxModel calculated from tight height constraints.
-  double? get borderBoxConstraintsHeight {
-    if (renderBoxModel!.hasSize &&
-      renderBoxModel!.constraints.hasTightHeight
-    ) {
-      return renderBoxModel!.constraints.maxHeight;
+  // Content box height of renderBoxModel calculated from tight height constraints.
+  double? get contentBoxConstraintsHeight {
+    if (paddingBoxConstraintsHeight == null) {
+      return null;
     }
-    return null;
+    return paddingBoxConstraintsHeight!
+      - paddingTop.computedValue
+      - paddingBottom.computedValue;
   }
 
   // Get height of replaced element by intrinsic ratio if height is not defined
@@ -732,11 +684,44 @@ class RenderStyle
     // Clear reference to it's parent.
     parent = null;
   }
-}
 
-double _getCropWidthByPaddingBorder(RenderStyle renderStyle, double cropWidth) {
-  cropWidth += renderStyle.border.horizontal;
-  cropWidth += renderStyle.padding.horizontal;
-  return cropWidth;
+  // Find ancestor render style with display of not inline.
+  RenderStyle? _findAncestorWithNoDisplayInline() {
+    RenderStyle renderStyle = this;
+    RenderStyle? parentRenderStyle = renderStyle.parent;
+    while(parentRenderStyle != null) {
+      if (parentRenderStyle.effectiveDisplay != CSSDisplay.inline) {
+        break;
+      }
+      parentRenderStyle = parentRenderStyle.parent;
+    }
+    return parentRenderStyle;
+  }
+
+  // Find ancestor render style with definite content box logical width.
+  RenderStyle? _findAncestorWithContentBoxLogicalWidth() {
+    RenderStyle renderStyle = this;
+    RenderStyle? parentRenderStyle = renderStyle.parent;
+
+    while(parentRenderStyle != null) {
+      RenderStyle? grandParentRenderStyle = parentRenderStyle.parent;
+      // Flex item with flex-shrink 0 and no width/max-width will have infinity constraints
+      // even if parents have width.
+      if (grandParentRenderStyle != null) {
+        bool isGrandParentFlex = grandParentRenderStyle.display == CSSDisplay.flex ||
+          grandParentRenderStyle.display == CSSDisplay.inlineFlex;
+        if (isGrandParentFlex && parentRenderStyle.flexShrink == 0) {
+          return null;
+        }
+      }
+
+      if (parentRenderStyle.contentBoxLogicalWidth != null) {
+        break;
+      }
+
+      parentRenderStyle = grandParentRenderStyle;
+    }
+    return parentRenderStyle;
+  }
 }
 
