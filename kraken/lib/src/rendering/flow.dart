@@ -474,20 +474,14 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     // If no child exists, stop layout.
     if (childCount == 0) {
-      Size layoutSize = getLayoutSize(
+      Size layoutContentSize = getContentSize(
         logicalContentWidth: logicalContentWidth,
         logicalContentHeight: logicalContentHeight,
         contentWidth: 0,
         contentHeight: 0,
       );
-      double constraintWidth = layoutSize.width;
-      double constraintHeight = layoutSize.height;
-
-      setMaxScrollableSize(constraintWidth, constraintHeight);
-      size = getBoxSize(Size(
-        constraintWidth,
-        constraintHeight,
-      ));
+      setMaxScrollableSize(layoutContentSize);
+      size = getBoxSize(layoutContentSize);
       return;
     }
 
@@ -698,14 +692,12 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     final int runCount = runMetrics.length;
 
-    Size layoutSize = getLayoutSize(
+    Size layoutContentSize = getContentSize(
       logicalContentWidth: logicalContentWidth,
       logicalContentHeight: logicalContentHeight,
       contentWidth: mainAxisExtent,
       contentHeight: crossAxisExtent,
     );
-    double constraintWidth = layoutSize.width;
-    double constraintHeight = layoutSize.height;
 
     // Main and cross content size of flow layout
     double mainAxisContentSize = 0.0;
@@ -713,8 +705,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     switch (direction) {
       case Axis.horizontal:
-        Size logicalSize = Size(constraintWidth, constraintHeight);
-        size = getBoxSize(logicalSize);
+        size = getBoxSize(layoutContentSize);
         mainAxisContentSize = contentSize.width;
         crossAxisContentSize = contentSize.height;
         break;
