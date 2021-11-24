@@ -735,8 +735,3 @@ double _getCropWidthByPaddingBorder(RenderStyle renderStyle, double cropWidth) {
   return cropWidth;
 }
 
-double _getCropHeightByPaddingBorder(RenderStyle renderStyle, double cropHeight) {
-  cropHeight += renderStyle.border.vertical;
-  cropHeight += renderStyle.padding.vertical;
-  return cropHeight;
-}
