@@ -125,6 +125,39 @@ mixin CSSSizingMixin on RenderStyleBase {
     _markSelfAndParentNeedsLayout();
   }
 
+  // Intrinsic width of replaced element.
+  double? _intrinsicWidth;
+  double? get intrinsicWidth {
+    return _intrinsicWidth;
+  }
+  set intrinsicWidth(double? value) {
+    if (_intrinsicWidth == value) return;
+    _intrinsicWidth = value;
+    _markSelfAndParentNeedsLayout();
+  }
+
+  // Intrinsic height of replaced element.
+  double? _intrinsicHeight;
+  double? get intrinsicHeight {
+    return _intrinsicHeight;
+  }
+  set intrinsicHeight(double? value) {
+    if (_intrinsicHeight == value) return;
+    _intrinsicHeight = value;
+    _markSelfAndParentNeedsLayout();
+  }
+
+  // Aspect ratio of replaced element.
+  double? _intrinsicRatio;
+  double? get intrinsicRatio {
+    return _intrinsicRatio;
+  }
+  set intrinsicRatio(double? value) {
+    if (_intrinsicRatio == value) return;
+    _intrinsicRatio = value;
+    _markSelfAndParentNeedsLayout();
+  }
+
   void _markSelfAndParentNeedsLayout() {
     if (renderBoxModel == null) return;
     RenderBoxModel boxModel = renderBoxModel!;

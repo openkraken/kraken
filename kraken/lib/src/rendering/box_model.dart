@@ -626,18 +626,6 @@ class RenderBoxModel extends RenderBox
     return _contentConstraints;
   }
 
-  /// Used when setting percentage line-height style, it needs to be calculated when node attached
-  /// where it needs to know the font-size of its own element
-  bool _shouldLazyCalLineHeight = false;
-
-  bool get shouldLazyCalLineHeight => _shouldLazyCalLineHeight;
-
-  set shouldLazyCalLineHeight(bool value) {
-    if (_shouldLazyCalLineHeight != value) {
-      _shouldLazyCalLineHeight = value;
-    }
-  }
-
   // When RenderBoxModel is scrolling box, contentConstraints are always equal to BoxConstraints();
   bool isScrollingContentBox = false;
 
@@ -731,53 +719,6 @@ class RenderBoxModel extends RenderBox
 
       // Copy parentData
       ..parentData = parentData;
-  }
-
-  // Boxes which have intrinsic ratio
-  double? _intrinsicWidth;
-
-  double? get intrinsicWidth {
-    return _intrinsicWidth;
-  }
-
-  set intrinsicWidth(double? value) {
-    if (_intrinsicWidth == value) return;
-    _intrinsicWidth = value;
-    _markSelfAndParentNeedsLayout();
-  }
-
-  // Boxes which have intrinsic ratio
-  double? _intrinsicHeight;
-
-  double? get intrinsicHeight {
-    return _intrinsicHeight;
-  }
-
-  set intrinsicHeight(double? value) {
-    if (_intrinsicHeight == value) return;
-    _intrinsicHeight = value;
-    _markSelfAndParentNeedsLayout();
-  }
-
-  double? _intrinsicRatio;
-
-  double? get intrinsicRatio {
-    return _intrinsicRatio;
-  }
-
-  set intrinsicRatio(double? value) {
-    if (_intrinsicRatio == value) return;
-    _intrinsicRatio = value;
-    _markSelfAndParentNeedsLayout();
-  }
-
-  // Sizing may affect parent size, mark parent as needsLayout in case
-  // renderBoxModel has tight constraints which will prevent parent from marking.
-  void _markSelfAndParentNeedsLayout() {
-    markNeedsLayout();
-    if (parent is RenderBoxModel) {
-      (parent as RenderBoxModel).markNeedsLayout();
-    }
   }
 
   /// Whether current box is the root of the document which corresponds to HTML element in dom tree.
@@ -1423,12 +1364,12 @@ class RenderBoxModel extends RenderBox
     if (renderPositionPlaceholder != null)
       properties.add(
           DiagnosticsProperty('renderPositionHolder', renderPositionPlaceholder));
-    if (intrinsicWidth != null)
-      properties.add(DiagnosticsProperty('intrinsicWidth', intrinsicWidth));
-    if (intrinsicHeight != null)
-      properties.add(DiagnosticsProperty('intrinsicHeight', intrinsicHeight));
-    if (intrinsicRatio != null)
-      properties.add(DiagnosticsProperty('intrinsicRatio', intrinsicRatio));
+    if (renderStyle.intrinsicWidth != null)
+      properties.add(DiagnosticsProperty('intrinsicWidth', renderStyle.intrinsicWidth));
+    if (renderStyle.intrinsicHeight != null)
+      properties.add(DiagnosticsProperty('intrinsicHeight', renderStyle.intrinsicHeight));
+    if (renderStyle.intrinsicRatio != null)
+      properties.add(DiagnosticsProperty('intrinsicRatio', renderStyle.intrinsicRatio));
 
     debugBoxDecorationProperties(properties);
     debugVisibilityProperties(properties);

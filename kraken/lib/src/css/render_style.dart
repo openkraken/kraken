@@ -303,8 +303,6 @@ class RenderStyle
         break;
     }
 
-    double? intrinsicRatio = current.intrinsicRatio;
-
     // Get width by intrinsic ratio for replaced element if width is auto.
     if (logicalWidth == null && intrinsicRatio != null) {
       logicalWidth = renderStyle.getWidthByIntrinsicRatio();
@@ -371,7 +369,6 @@ class RenderStyle
         }
       }
     }
-    double? intrinsicRatio = current.intrinsicRatio;
 
     // Get height by intrinsic ratio for replaced element if height is auto.
     if (logicalHeight == null && intrinsicRatio != null) {
@@ -545,7 +542,9 @@ class RenderStyle
     if (contentBoxLogicalWidth == null) {
       return null;
     }
-    return contentBoxLogicalWidth! + paddingLeft.computedValue + paddingRight.computedValue;
+    return contentBoxLogicalWidth!
+      + paddingLeft.computedValue
+      + paddingRight.computedValue;
   }
 
   // Padding box height calculated from renderStyle tree.
@@ -554,7 +553,9 @@ class RenderStyle
     if (contentBoxLogicalHeight == null) {
       return null;
     }
-    return contentBoxLogicalHeight! + paddingTop.computedValue + paddingBottom.computedValue;
+    return contentBoxLogicalHeight!
+      + paddingTop.computedValue
+      + paddingBottom.computedValue;
   }
 
   // Border box width calculated from renderStyle tree.
@@ -563,7 +564,9 @@ class RenderStyle
     if (paddingBoxLogicalWidth == null) {
       return null;
     }
-    return paddingBoxLogicalWidth! + effectiveBorderLeftWidth.computedValue + effectiveBorderRightWidth.computedValue;
+    return paddingBoxLogicalWidth!
+      + effectiveBorderLeftWidth.computedValue
+      + effectiveBorderRightWidth.computedValue;
   }
 
   // Border box height calculated from renderStyle tree.
@@ -572,7 +575,9 @@ class RenderStyle
     if (paddingBoxLogicalHeight == null) {
       return null;
     }
-    return paddingBoxLogicalHeight! + effectiveBorderTopWidth.computedValue + effectiveBorderBottomWidth.computedValue;
+    return paddingBoxLogicalHeight!
+      + effectiveBorderTopWidth.computedValue
+      + effectiveBorderBottomWidth.computedValue;
   }
 
   // Content box width of renderBoxModel after it was rendered.
@@ -581,7 +586,9 @@ class RenderStyle
     if (paddingBoxWidth == null) {
       return null;
     }
-    return paddingBoxWidth! - paddingLeft.computedValue - paddingRight.computedValue;
+    return paddingBoxWidth!
+      - paddingLeft.computedValue
+      - paddingRight.computedValue;
   }
 
   // Content box height of renderBoxModel after it was rendered.
@@ -590,7 +597,9 @@ class RenderStyle
     if (paddingBoxHeight == null) {
       return null;
     }
-    return paddingBoxHeight! - paddingTop.computedValue - paddingBottom.computedValue;
+    return paddingBoxHeight!
+      - paddingTop.computedValue
+      - paddingBottom.computedValue;
   }
 
   // Padding box width of renderBoxModel after it was rendered.
@@ -599,7 +608,9 @@ class RenderStyle
     if (borderBoxWidth == null) {
       return null;
     }
-    return borderBoxWidth! - effectiveBorderLeftWidth.computedValue - effectiveBorderRightWidth.computedValue;
+    return borderBoxWidth!
+      - effectiveBorderLeftWidth.computedValue
+      - effectiveBorderRightWidth.computedValue;
   }
 
   // Padding box height of renderBoxModel after it was rendered.
@@ -608,7 +619,9 @@ class RenderStyle
     if (borderBoxHeight == null) {
       return null;
     }
-    return borderBoxHeight! - effectiveBorderTopWidth.computedValue - effectiveBorderBottomWidth.computedValue;
+    return borderBoxHeight!
+      - effectiveBorderTopWidth.computedValue
+      - effectiveBorderBottomWidth.computedValue;
   }
 
   // Border box width of renderBoxModel after it was rendered.
@@ -691,9 +704,6 @@ class RenderStyle
 
   /// Get height of replaced element by intrinsic ratio if height is not defined
   double getHeightByIntrinsicRatio() {
-    // @TODO: move intrinsic width/height to renderStyle
-    double? intrinsicWidth = renderBoxModel!.intrinsicWidth;
-    double intrinsicRatio = renderBoxModel!.intrinsicRatio!;
     double? realWidth = width.isAuto ? intrinsicWidth : width.computedValue;
     if (minWidth.isNotAuto && realWidth! < minWidth.computedValue) {
       realWidth = minWidth.computedValue;
@@ -701,16 +711,12 @@ class RenderStyle
     if (maxWidth.isNotNone && realWidth! > maxWidth.computedValue) {
       realWidth = maxWidth.computedValue;
     }
-    double realHeight = realWidth! * intrinsicRatio;
+    double realHeight = realWidth! * intrinsicRatio!;
     return realHeight;
   }
 
   /// Get width of replaced element by intrinsic ratio if width is not defined
   double getWidthByIntrinsicRatio() {
-    // @TODO: move intrinsic width/height to renderStyle
-    double? intrinsicHeight = renderBoxModel!.intrinsicHeight;
-    double intrinsicRatio = renderBoxModel!.intrinsicRatio!;
-
     double? realHeight = height.isAuto ? intrinsicHeight : height.computedValue;
     if (!minHeight.isAuto && realHeight! < minHeight.computedValue) {
       realHeight = minHeight.computedValue;
@@ -718,7 +724,7 @@ class RenderStyle
     if (!maxHeight.isNone && realHeight! > maxHeight.computedValue) {
       realHeight = maxHeight.computedValue;
     }
-    double realWidth = realHeight! / intrinsicRatio;
+    double realWidth = realHeight! / intrinsicRatio!;
     return realWidth;
   }
 

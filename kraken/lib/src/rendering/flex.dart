@@ -493,20 +493,20 @@ class RenderFlexLayout extends RenderLayoutBox {
         : minHeight;
 
     if (child is RenderIntrinsic &&
-        child.intrinsicRatio != null &&
+        childRenderStyle.intrinsicRatio != null &&
         _isHorizontalFlexDirection &&
         childRenderStyle.width.isAuto) {
       double transferredSize = childRenderStyle.height.isNotAuto
-          ? childRenderStyle.height.computedValue * child.intrinsicRatio!
-          : child.intrinsicWidth!;
+          ? childRenderStyle.height.computedValue * childRenderStyle.intrinsicRatio!
+          : childRenderStyle.intrinsicWidth!;
       minMainSize = math.min(contentSize, transferredSize);
     } else if (child is RenderIntrinsic &&
-        child.intrinsicRatio != null &&
+        childRenderStyle.intrinsicRatio != null &&
         !_isHorizontalFlexDirection &&
         childRenderStyle.height.isAuto) {
       double transferredSize = childRenderStyle.width.isNotAuto
-          ? childRenderStyle.width.computedValue / child.intrinsicRatio!
-          : child.intrinsicHeight!;
+          ? childRenderStyle.width.computedValue / childRenderStyle.intrinsicRatio!
+          : childRenderStyle.intrinsicHeight!;
       minMainSize = math.min(contentSize, transferredSize);
     } else if (child is RenderBoxModel) {
       double? specifiedMainSize = _isHorizontalFlexDirection
@@ -1528,9 +1528,9 @@ class RenderFlexLayout extends RenderLayoutBox {
           if (child is RenderIntrinsic &&
             child.renderStyle.width.isAuto &&
             child.renderStyle.minWidth.isAuto &&
-            child.intrinsicRatio != null
+            child.renderStyle.intrinsicRatio != null
           ) {
-            minConstraintWidth = maxConstraintWidth = minConstraintHeight / child.intrinsicRatio!;
+            minConstraintWidth = maxConstraintWidth = minConstraintHeight / child.renderStyle.intrinsicRatio!;
           }
         } else {
           CSSLengthValue marginLeft = childRenderStyle.marginLeft;
@@ -1566,9 +1566,9 @@ class RenderFlexLayout extends RenderLayoutBox {
           if (child is RenderIntrinsic &&
             child.renderStyle.height.isAuto &&
             child.renderStyle.minHeight.isAuto &&
-            child.intrinsicRatio != null
+            child.renderStyle.intrinsicRatio != null
           ) {
-            minConstraintHeight = maxConstraintHeight = minConstraintWidth * child.intrinsicRatio!;
+            minConstraintHeight = maxConstraintHeight = minConstraintWidth * child.renderStyle.intrinsicRatio!;
           }
         }
       }
