@@ -153,4 +153,19 @@ describe('display sliver', () => {
     await snapshot();
   });
 
+  it('sliver child is text or comment', async () => {
+    var comment = document.createComment('HelloWorld');
+    var text = document.createTextNode('HelloWorld');
+    // Empty text node has different logic in backend.
+    var emptyText = document.createTextNode('');
+
+    var container = createSliverBasicCase();
+    
+    container.insertBefore(emptyText, container.firstChild);
+    container.insertBefore(text, container.firstChild);
+    container.insertBefore(comment, container.firstChild);
+    expect(container.childNodes.length).toEqual(103);
+
+    await snapshot(); // Not throws error is ok.
+  });
 });

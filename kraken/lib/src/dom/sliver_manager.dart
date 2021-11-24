@@ -30,7 +30,7 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
 
   RenderSliverElementChildManager(this._target);
 
-  Iterable<Node> get _renderNodes => _target.childNodes.where((child) => child is Element || child is TextNode);
+  Iterable<Node> get _renderNodes => _target.childNodes.where((child) => child is Element || (child is TextNode && child.renderer != null));
 
   // Only count renderable child.
   @override
@@ -64,9 +64,7 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
     assert(child != null, 'Sliver render node should own RenderBox.');
 
     if (_hasLayout) {
-      _sliverListLayout
-        ..setupParentData(child!)
-        ..insertSliverChild(child, after: after);
+      _sliverListLayout.insertSliverChild(child!, after: after);
     }
 
     childNode.didAttachRenderer();
@@ -98,8 +96,8 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
       }
     }
 
-    // Fallback operation.
-    child.detach();
+    // Fallback operation, remove child from sliver list.
+    _sliverListLayout.remove(child);
   }
 
   @override

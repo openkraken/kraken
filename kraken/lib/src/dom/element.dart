@@ -17,7 +17,6 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/src/dom/sliver_manager.dart';
 import 'package:meta/meta.dart';
 
 import 'element_native_methods.dart';
