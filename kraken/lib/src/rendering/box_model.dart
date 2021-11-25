@@ -214,33 +214,30 @@ class RenderLayoutBox extends RenderBoxModel
       return _paintingOrder!;
     }
 
-    final List<RenderBox> order = <RenderBox>[];
-
-    // No child.
-    if (firstChild == null) {
-      return _paintingOrder = order;
-    }
-
-    // Only one child.
-    if (firstChild == lastChild) {
+    if (childCount == 0) {
+      // No child.
+      return _paintingOrder = const [];
+    } else if (childCount == 1) {
+      // Only one child.
+      final List<RenderBox> order = <RenderBox>[];
       order.add(firstChild!);
       return _paintingOrder = order;
+    } else {
+      // Sort by zIndex.
+      List<RenderBox> children = getChildren();
+      if (_childrenNeedsSort) {
+        children.sort((RenderBox left, RenderBox right) {
+          int leftZIndex = left is RenderBoxModel ? left.renderStyle.effectiveZIndex : 0;
+          int rightZIndex = right is RenderBoxModel ? right.renderStyle.effectiveZIndex : 0;
+          if (leftZIndex == rightZIndex) {
+            return -1;
+          } else {
+            return leftZIndex - rightZIndex;
+          }
+        });
+      }
+      return _paintingOrder = children;
     }
-
-    // Sort by zIndex.
-    List<RenderBox> children = getChildren();
-    if (_childrenNeedsSort) {
-      children.sort((RenderBox left, RenderBox right) {
-        int leftZIndex = left is RenderBoxModel ? left.renderStyle.effectiveZIndex : 0;
-        int rightZIndex = right is RenderBoxModel ? right.renderStyle.effectiveZIndex : 0;
-        if (leftZIndex == rightZIndex) {
-          return -1;
-        } else {
-          return leftZIndex - rightZIndex;
-        }
-      });
-    }
-    return _paintingOrder = children;
   }
 
   bool _childrenNeedsSort = false;
