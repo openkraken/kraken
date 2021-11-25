@@ -102,9 +102,9 @@ class RenderTextBox extends RenderBox
       if (parentRenderBoxModel.isScrollingContentBox) {
         maxConstraintWidth = parentConstraints.minWidth;
       } else if (parentConstraints.maxWidth == double.infinity) {
-        final RenderLayoutParentData parentParentData = parentRenderBoxModel.parentData as RenderLayoutParentData;
+        final ParentData? parentParentData = parentRenderBoxModel.parentData;
         // Width of positioned element does not constrained by parent.
-        if (parentParentData.isPositioned) {
+        if (parentParentData is RenderLayoutParentData && parentParentData.isPositioned) {
           maxConstraintWidth = double.infinity;
         } else {
           maxConstraintWidth = parentRenderBoxModel.renderStyle.contentMaxConstraintsWidth;

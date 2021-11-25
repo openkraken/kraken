@@ -1,21 +1,35 @@
 import 'package:flutter/widgets.dart';
+import 'package:kraken/dom.dart' as dom;
 
-class KrakenLeafRenderObjectWidget extends RenderObjectWidget {
-  final RenderObject _renderObject;
+class KrakenElementToWidgetAdaptor extends RenderObjectWidget {
+  final dom.Node _krakenNode;
 
-  KrakenLeafRenderObjectWidget(this._renderObject);
+  KrakenElementToWidgetAdaptor(this._krakenNode);
 
   @override
   RenderObjectElement createElement() {
-    return KrakenLeafRenderObjectElement(this);
+    return KrakenElementToFlutterElementAdaptor(this);
   }
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _renderObject;
+    return _krakenNode.renderer!;
   }
 }
 
-class KrakenLeafRenderObjectElement extends RenderObjectElement {
-  KrakenLeafRenderObjectElement(RenderObjectWidget widget) : super(widget);
+class KrakenElementToFlutterElementAdaptor extends RenderObjectElement {
+  KrakenElementToFlutterElementAdaptor(RenderObjectWidget widget) : super(widget);
+
+  @override
+  KrakenElementToWidgetAdaptor get widget => super.widget as KrakenElementToWidgetAdaptor;
+
+  @override
+  void mount(Element? parent, Object? newSlot) {
+    widget._krakenNode.createRenderer();
+    super.mount(parent, newSlot);
+    widget._krakenNode.ensureChildAttached();
+    if (widget._krakenNode is dom.Element) {
+      (widget._krakenNode as dom.Element).style.flushPendingProperties();
+    }
+  }
 }

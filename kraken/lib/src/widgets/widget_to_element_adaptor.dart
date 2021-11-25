@@ -17,6 +17,7 @@ import 'element_to_widget_adaptor.dart';
 
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
+  POSITION: RELATIVE
 };
 
 class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWidget {
@@ -264,17 +265,8 @@ class _KrakenAdapterWidgetState extends State<_KrakenAdapterWidget> {
   }
 
   List<Widget> convertNodeListToWidgetList(List<dom.Node> childNodes) {
-    List<Widget> children = [];
-    childNodes.forEach((dom.Node node) {
-      if (node is dom.Element) {
-        node.createRenderer();
-        RenderObject? object = node.renderer;
-        children.add(KrakenLeafRenderObjectWidget(object!));
-      } else if (node is dom.TextNode) {
-        node.createRenderer();
-        RenderObject? object = node.renderer;
-        children.add(KrakenLeafRenderObjectWidget(object!));
-      }
+    List<Widget> children = List.generate(childNodes.length, (index) {
+      return KrakenElementToWidgetAdaptor(childNodes[index]);
     });
 
     return children;
