@@ -140,12 +140,9 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox,
   /// walking the child list directly.
   List<ChildType> getChildren() {
     final List<ChildType> result = <ChildType>[];
-    RenderBox? child = firstChild;
-    while (child != null) {
-      final ParentDataType childParentData = child.parentData as ParentDataType;
+    visitChildren((child) {
       result.add(child as ChildType);
-      child = childParentData.nextSibling;
-    }
+    });
     return result;
   }
 }
@@ -162,7 +159,7 @@ class RenderLayoutBox extends RenderBoxModel
     renderStyle: renderStyle,
   );
 
-  // House content which can be scrolled.
+  // Host content which can be scrolled.
   RenderLayoutBox? get renderScrollingContent {
     if (firstChild is RenderLayoutBox) {
       RenderLayoutBox _firstChild = firstChild as RenderLayoutBox;
@@ -202,7 +199,7 @@ class RenderLayoutBox extends RenderBoxModel
     super.markNeedsLayout();
 
     // FlexItem layout must trigger flex container to layout.
-    if (parent != null && parent is RenderFlexLayout) {
+    if (parent is RenderFlexLayout) {
       markParentNeedsLayout();
     }
   }
