@@ -52,7 +52,7 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
 
   /// Inflate this widget and actually set the resulting [RenderObject] as the
   /// child of [container].
-  KrakenRenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, RenderObjectElement rootElement) {
+  KrakenRenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, RenderObjectElement parentElement) {
     KrakenRenderObjectToWidgetElement<T>? element;
     owner.lockState(() {
       element = createElement();
@@ -60,7 +60,7 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
     });
     owner.buildScope(element!, () {
       // TODO: needs to set parent KrakenRenderObjectToWidgetElement after appendChild on widgetElement supported.
-      element!.mount(rootElement, null);
+      element!.mount(parentElement, null);
     });
     return element!;
   }
@@ -188,7 +188,20 @@ abstract class WidgetElement extends dom.Element {
 
     _state = _KrakenAdapterWidgetState(this, properties, childNodes);
     _widget = _KrakenAdapterWidget(_state!);
-    _attachWidget(_widget);
+    WidgetElement? ancestorWidgetElement;
+    dom.Node? ancestor = parentNode;
+    while (ancestor != null) {
+      if (ancestor is WidgetElement) {
+        ancestorWidgetElement = ancestor;
+      }
+      ancestor = ancestor.parentNode;
+    }
+
+    if (ancestorWidgetElement != null) {
+      _attachWidget(_widget, ancestorRenderObjectElement: KrakenElementToFlutterElementAdaptor(ancestorWidgetElement as RenderObjectWidget));
+    } else {
+      _attachWidget(_widget);
+    }
   }
 
   @override
@@ -229,13 +242,13 @@ abstract class WidgetElement extends dom.Element {
     return child;
   }
 
-  void _attachWidget(Widget widget) {
+  void _attachWidget(Widget widget, { RenderObjectElement? ancestorRenderObjectElement }) {
     RenderObjectElement rootWidgetElement = elementManager.controller.rootKrakenElement;
     KrakenRenderObjectToWidgetAdapter adaptor = KrakenRenderObjectToWidgetAdapter(
       child: widget,
       container: renderBoxModel as RenderObjectWithChildMixin<RenderBox>
     );
-    adaptor.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement);
+    adaptor.attachToRenderTree(rootWidgetElement.owner!, ancestorRenderObjectElement ?? rootWidgetElement);
   }
 }
 
