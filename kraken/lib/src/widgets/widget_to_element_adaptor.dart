@@ -280,9 +280,6 @@ class _KrakenAdapterWidgetState extends State<_KrakenAdapterWidget> {
         RenderObject? object = node.renderer;
         list.add(KrakenLeafRenderObjectWidget(object!));
       }
-
-      // element.createRenderer();
-
     });
 
     return _element.build(context, _properties, list);
