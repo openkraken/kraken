@@ -235,7 +235,7 @@ abstract class WidgetElement extends dom.Element {
     super.removeChild(child);
 
     if (_state != null) {
-      _state!.onChildrenChanged(children);
+      _state!.onChildrenChanged(childNodes);
     }
 
     return child;
