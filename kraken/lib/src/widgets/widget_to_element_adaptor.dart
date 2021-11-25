@@ -59,7 +59,6 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
       assert(element != null);
     });
     owner.buildScope(element!, () {
-      // TODO: needs to set parent KrakenRenderObjectToWidgetElement after appendChild on widgetElement supported.
       element!.mount(parentElement, null);
     });
     return element!;
