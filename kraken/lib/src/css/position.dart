@@ -89,6 +89,10 @@ mixin CSSPositionMixin on RenderStyleBase {
   }
 
   int get effectiveZIndex {
+    if (_zIndex == null) {
+      return 0;
+    }
+
     // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Positioning/Understanding_z_index/The_stacking_context#the_stacking_context
     if (
       // Element with a position value absolute, relative, fixed or sticky.
@@ -101,9 +105,10 @@ mixin CSSPositionMixin on RenderStyleBase {
       // Element with a transform value.
       (this as RenderStyle).transform != null
     ) {
-      return _zIndex ?? 0;
+      return _zIndex!;
+    } else {
+      return 0;
     }
-    return 0;
   }
 
   CSSPositionType _position = DEFAULT_POSITION_TYPE;
