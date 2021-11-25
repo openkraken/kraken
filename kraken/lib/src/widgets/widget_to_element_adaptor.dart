@@ -185,7 +185,7 @@ abstract class WidgetElement extends dom.Element {
 
     WidgetsFlutterBinding.ensureInitialized();
 
-    _state = _KrakenAdapterWidgetState(this, properties, children);
+    _state = _KrakenAdapterWidgetState(this, properties, childNodes);
     _widget = _KrakenAdapterWidget(_state!);
     _attachWidget(_widget);
   }
@@ -251,9 +251,11 @@ class _KrakenAdapterWidget extends StatefulWidget {
 class _KrakenAdapterWidgetState extends State<_KrakenAdapterWidget> {
   Map<String, dynamic> _properties;
   final WidgetElement _element;
-  List<dom.Node> _childNodes;
+  late List<Widget> _childNodes;
 
-  _KrakenAdapterWidgetState(this._element, this._properties, this._childNodes);
+  _KrakenAdapterWidgetState(this._element, this._properties, List<dom.Node> childNodes) {
+    _childNodes = convertNodeListToWidgetList(childNodes);
+  }
 
   void onAttributeChanged(Map<String, dynamic> properties) {
     setState(() {
@@ -261,27 +263,31 @@ class _KrakenAdapterWidgetState extends State<_KrakenAdapterWidget> {
     });
   }
 
+  List<Widget> convertNodeListToWidgetList(List<dom.Node> childNodes) {
+    List<Widget> children = [];
+    childNodes.forEach((dom.Node node) {
+      if (node is dom.Element) {
+        node.createRenderer();
+        RenderObject? object = node.renderer;
+        children.add(KrakenLeafRenderObjectWidget(object!));
+      } else if (node is dom.TextNode) {
+        node.createRenderer();
+        RenderObject? object = node.renderer;
+        children.add(KrakenLeafRenderObjectWidget(object!));
+      }
+    });
+
+    return children;
+  }
+
   void onChildrenChanged(List<dom.Node> childNodes) {
     setState(() {
-      _childNodes = childNodes;
+      _childNodes = convertNodeListToWidgetList(childNodes);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> list = [];
-    _childNodes.forEach((dom.Node node) {
-      if (node is dom.Element) {
-        node.createRenderer();
-        RenderObject? object = node.renderer;
-        list.add(KrakenLeafRenderObjectWidget(object!));
-      } else if (node is dom.TextNode) {
-        node.createRenderer();
-        RenderObject? object = node.renderer;
-        list.add(KrakenLeafRenderObjectWidget(object!));
-      }
-    });
-
-    return _element.build(context, _properties, list);
+    return _element.build(context, _properties, _childNodes);
   }
 }
