@@ -88,7 +88,7 @@ class ImageElement extends Element {
     super.didDetachRenderer();
     style.removeStyleChangeListener(_stylePropertyChanged);
 
-    _stopListeningToStream(keepStreamAlive: true);
+    _stopListeningStream(keepStreamAlive: true);
   }
 
   ImageStreamListener? _imageStreamListener;
@@ -114,7 +114,7 @@ class ImageElement extends Element {
   @override
   void dispose() {
     super.dispose();
-    _stopListeningToStream();
+    _stopListeningStream();
     _completerHandle?.dispose();
     _replaceImage(info: null);
     _imageProvider = null;
@@ -256,10 +256,10 @@ class ImageElement extends Element {
   void removeProperty(String key) {
     super.removeProperty(key);
     if (key == 'src') {
-      _stopListeningToStream(keepStreamAlive: true);
+      _stopListeningStream(keepStreamAlive: true);
     } else if (key == 'loading' && _isInLazyLoading && _imageProvider == null) {
       _resetLazyLoading();
-      _stopListeningToStream(keepStreamAlive: true);
+      _stopListeningStream(keepStreamAlive: true);
     }
   }
 
@@ -269,8 +269,8 @@ class ImageElement extends Element {
   /// If the listener from this state is the last listener on the stream, the
   /// stream will be disposed. To keep the stream alive, set `keepStreamAlive`
   /// to true, which create [ImageStreamCompleterHandle] to keep the completer
-  /// alive and is compatible with the [TickerMode] being off.
-  void _stopListeningToStream({bool keepStreamAlive = false}) {
+  /// alive.
+  void _stopListeningStream({bool keepStreamAlive = false}) {
     if (!_isListeningToStream)
       return;
 
