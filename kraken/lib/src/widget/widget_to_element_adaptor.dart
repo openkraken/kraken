@@ -202,7 +202,21 @@ abstract class WidgetElement extends dom.Element {
   void didDetachRenderer() {
     super.didDetachRenderer();
 
-    _detachWidget(_widget);
+    // Find ancestor of custom element.
+    WidgetElement? ancestorWidgetElement;
+    dom.Node? ancestor = parentNode;
+    while (ancestor != null) {
+      if (ancestor is WidgetElement) {
+        ancestorWidgetElement = ancestor;
+      }
+      ancestor = ancestor.parentNode;
+    }
+
+    if (ancestorWidgetElement != null) {
+      _detachWidget(_widget, ancestorRenderObjectElement: KrakenElementToFlutterElementAdaptor(ancestorWidgetElement as RenderObjectWidget));
+    } else {
+      _detachWidget(_widget);
+    }
   }
 
   @override
