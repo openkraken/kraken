@@ -141,7 +141,9 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox,
   List<ChildType> getChildren() {
     final List<ChildType> result = <ChildType>[];
     visitChildren((child) {
-      result.add(child as ChildType);
+      if (child is! RenderPositionPlaceholder) {
+        result.add(child as ChildType);
+      }
     });
     return result;
   }
@@ -224,12 +226,16 @@ class RenderLayoutBox extends RenderBoxModel
       List<RenderBox> children = getChildren();
       if (_childrenNeedsSort) {
         children.sort((RenderBox left, RenderBox right) {
-          int leftZIndex = left is RenderBoxModel ? left.renderStyle.effectiveZIndex : 0;
-          int rightZIndex = right is RenderBoxModel ? right.renderStyle.effectiveZIndex : 0;
-          if (leftZIndex == rightZIndex) {
-            return -1;
+          bool isLeftNeedsStacking = left is RenderBoxModel && left.needsStacking;
+          bool isRightNeedsStacking = right is RenderBoxModel && right.needsStacking;
+          if (!isLeftNeedsStacking && isRightNeedsStacking) {
+            return 0 <= (right.renderStyle.zIndex ?? 0) ? -1 : 1;
+          } else if (isLeftNeedsStacking && !isRightNeedsStacking) {
+            return (left.renderStyle.zIndex ?? 0) <= 0 ? 1: -1;
+          } else if (isLeftNeedsStacking && isRightNeedsStacking) {
+            return (left.renderStyle.zIndex ?? 0) <= (right.renderStyle.zIndex ?? 0) ? -1: 1;
           } else {
-            return leftZIndex - rightZIndex;
+            return -1;
           }
         });
       }
@@ -240,10 +246,6 @@ class RenderLayoutBox extends RenderBoxModel
   bool _childrenNeedsSort = false;
   void markChildrenNeedsSort() {
     _childrenNeedsSort = true;
-    _paintingOrder = null;
-  }
-
-  void markSortedChildrenInvalid() {
     _paintingOrder = null;
   }
 
@@ -551,7 +553,7 @@ class RenderLayoutBox extends RenderBoxModel
     super.dispose();
 
     stickyChildren.clear();
-    _paintingOrder = null;                                                                                                                                                      
+    _paintingOrder = null;
   }
 
 }
@@ -671,6 +673,25 @@ class RenderBoxModel extends RenderBox
 
   // Positioned holder box ref.
   RenderPositionPlaceholder? positionedHolder;
+
+  // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Positioning/Understanding_z_index/The_stacking_context#the_stacking_context
+  bool get needsStacking {
+    return
+      // Element with a position value absolute, relative, fixed or sticky.
+      renderStyle.position != CSSPositionType.static ||
+      // Element that is a child of a flex container with z-index value other than auto.
+      (
+        (renderStyle.parent!.display == CSSDisplay.flex ||
+        renderStyle.parent!.display == CSSDisplay.inlineFlex) &&
+        renderStyle.zIndex != null
+      ) ||
+      // Element with a opacity value less than 1.
+      renderStyle.opacity < 1.0 ||
+      // Element with a transform value.
+      renderStyle.transform != null ||
+      // Element with a filter value.
+      renderStyle.filter != null;
+  }
 
   T copyWith<T extends RenderBoxModel>(T copiedRenderBoxModel) {
     if (renderPositionPlaceholder != null) {

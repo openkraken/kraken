@@ -28,9 +28,9 @@ mixin CSSDisplayMixin on RenderStyleBase {
       _display = value;
       
       // Display effect the stacking context.
-      RenderBoxModel? parentRenderer = (this as RenderStyle).parent?.renderBoxModel;
-      if (parentRenderer is RenderLayoutBox) {
-        parentRenderer.markSortedChildrenInvalid();
+      if ((_display == CSSDisplay.flex || _display == CSSDisplay.inlineFlex)
+        && renderBoxModel is RenderLayoutBox) {
+        (renderBoxModel as RenderLayoutBox).markChildrenNeedsSort();
       }
 
       renderBoxModel?.markNeedsLayout();
