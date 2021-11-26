@@ -175,18 +175,17 @@ abstract class WidgetElement extends dom.Element {
       elementManager,
       isIntrinsicBox: true,
       defaultStyle: _defaultStyle
-  );
+  ) {
+    WidgetsFlutterBinding.ensureInitialized();
+    _state = _KrakenAdapterWidgetState(this, properties, childNodes);
+    _widget = _KrakenAdapterWidget(_state!);
+  }
 
   Widget build(BuildContext context, Map<String, dynamic> properties, List<Widget> children);
 
   @override
   void didAttachRenderer() {
     super.didAttachRenderer();
-
-    WidgetsFlutterBinding.ensureInitialized();
-
-    _state = _KrakenAdapterWidgetState(this, properties, childNodes);
-    _widget = _KrakenAdapterWidget(_state!);
 
     // Find ancestor of custom element.
     WidgetElement? ancestorWidgetElement;
