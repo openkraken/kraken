@@ -65,7 +65,7 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler& handler, void*
   JS_DefinePropertyGetSet(m_ctx, globalObject, windowKey, windowGetter, JS_UNDEFINED, JS_PROP_HAS_GET | JS_PROP_ENUMERABLE);
   JS_FreeAtom(m_ctx, windowKey);
   JS_SetContextOpaque(m_ctx, this);
-  JS_SetHostPromiseRejectionTracker(m_runtime, promiseRejectTracker, this);
+  JS_SetHostPromiseRejectionTracker(m_runtime, promiseRejectTracker, nullptr);
 
   runningContexts++;
 }
@@ -327,7 +327,7 @@ void JSContext::dispatchGlobalPromiseRejectionEvent(JSValueConst promise, JSValu
 }
 
 void JSContext::promiseRejectTracker(QjsContext* ctx, JSValue promise, JSValue reason, int is_handled, void* opaque) {
-  auto* context = static_cast<JSContext*>(opaque);
+  auto *context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
   context->reportError(reason);
   context->dispatchGlobalPromiseRejectionEvent(promise, reason);
 }
