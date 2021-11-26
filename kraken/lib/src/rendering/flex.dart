@@ -197,6 +197,15 @@ class RenderFlexLayout extends RenderLayoutBox {
     return CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+
+    flexLineBoxMetrics.clear();
+    childrenIntrinsicMainSizes.clear();
+    childrenOldConstraints.clear();
+  }
+
   double _getIntrinsicSize({
     FlexDirection? sizingDirection,
     double?
@@ -327,6 +336,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderBoxModel? childRenderBoxModel;
     if (child is RenderBoxModel) {
       childRenderBoxModel = child;
+    } else if (child is RenderPositionPlaceholder) {
+      childRenderBoxModel = child.positioned;
     }
     if (childRenderBoxModel == null) {
       return 0;
@@ -348,7 +359,10 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderBoxModel? childRenderBoxModel;
     if (child is RenderBoxModel) {
       childRenderBoxModel = child;
+    } else if (child is RenderPositionPlaceholder) {
+      childRenderBoxModel = child.positioned;
     }
+
     if (childRenderBoxModel == null) {
       return 0;
     }
@@ -723,21 +737,14 @@ class RenderFlexLayout extends RenderLayoutBox {
   void _layoutChildren(RenderPositionPlaceholder? placeholderChild) {
     /// If no child exists, stop layout.
     if (childCount == 0) {
-      Size layoutSize = getLayoutSize(
+      Size layoutContentSize = getContentSize(
         logicalContentWidth: logicalContentWidth,
         logicalContentHeight: logicalContentHeight,
         contentWidth: 0,
         contentHeight: 0,
       );
-      double constraintWidth = layoutSize.width;
-      double constraintHeight = layoutSize.height;
-
-      setMaxScrollableSize(constraintWidth, constraintHeight);
-
-      size = getBoxSize(Size(
-        constraintWidth,
-        constraintHeight,
-      ));
+      setMaxScrollableSize(layoutContentSize);
+      size = getBoxSize(layoutContentSize);
       return;
     }
     assert(contentConstraints != null);
@@ -763,12 +770,12 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     /// If no non positioned child exists, stop layout
     if (runMetrics.isEmpty) {
-      Size preferredSize = Size(
+      Size contentSize = Size(
         logicalContentWidth ?? 0,
         logicalContentHeight ?? 0,
       );
-      setMaxScrollableSize(preferredSize.width, preferredSize.height);
-      size = getBoxSize(preferredSize);
+      setMaxScrollableSize(contentSize);
+      size = getBoxSize(contentSize);
       return;
     }
 
@@ -1595,17 +1602,13 @@ class RenderFlexLayout extends RenderLayoutBox {
         _isHorizontalFlexDirection
             ? containerSizeMap['cross']
             : maxAllocatedMainSize;
-    Size layoutSize = getLayoutSize(
+    Size layoutContentSize = getContentSize(
       logicalContentWidth: logicalContentWidth,
       logicalContentHeight: logicalContentHeight,
-      contentWidth: contentWidth,
-      contentHeight: contentHeight,
+      contentWidth: contentWidth!,
+      contentHeight: contentHeight!,
     );
-    double constraintWidth = layoutSize.width;
-    double constraintHeight = layoutSize.height;
-
-    Size contentSize = Size(constraintWidth, constraintHeight);
-    size = getBoxSize(contentSize);
+    size = getBoxSize(layoutContentSize);
 
     _setMaxScrollableSizeForFlex(runMetrics);
 
@@ -2407,51 +2410,9 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   @override
-  int sortSiblingsByZIndex(RenderObject prev, RenderObject next) {
-    // z-index values other than auto of flex-item create a stacking context even if position is static
-    // (behaving exactly as if position were relative)
-    // https://drafts.csswg.org/css-flexbox-1/#painting
-
-    // z-index descending order is as follows:
-    // 1. element has z-index
-    // 2. element has no z-index and position is non static
-    // 3. element has no z-index and position is static
-    CSSPositionType prevPosition = prev is RenderBoxModel
-      ? prev.renderStyle.position
-      : CSSPositionType.static;
-    CSSPositionType nextPosition = next is RenderBoxModel
-      ? next.renderStyle.position
-      : CSSPositionType.static;
-    int? prevZIndex =
-    prev is RenderBoxModel ? prev.renderStyle.zIndex : null;
-    int? nextZIndex =
-    next is RenderBoxModel ? next.renderStyle.zIndex : null;
-
-    if (prevZIndex != null && nextZIndex != null) {
-      return prevZIndex - nextZIndex;
-    } else if (prevZIndex != null && nextZIndex == null) {
-      return 1;
-    } else if (prevZIndex == null && nextZIndex != null) {
-      return -1;
-    } else {
-      if ((prevPosition != CSSPositionType.static &&
-        nextPosition != CSSPositionType.static) ||
-        (prevPosition == CSSPositionType.static &&
-          nextPosition == CSSPositionType.static)) {
-        return 0;
-      } else if (prevPosition == CSSPositionType.static &&
-          nextPosition != CSSPositionType.static) {
-        return -1;
-      } else {
-        return 1;
-      }
-    }
-  }
-
-  @override
   void performPaint(PaintingContext context, Offset offset) {
-    for (int i = 0; i < sortedChildren.length; i++) {
-      RenderObject child = sortedChildren[i];
+    for (int i = 0; i < paintingOrder.length; i++) {
+      RenderObject child = paintingOrder[i];
       // Don't paint placeholder of positioned element
       if (child is! RenderPositionPlaceholder) {
         late DateTime childPaintStart;

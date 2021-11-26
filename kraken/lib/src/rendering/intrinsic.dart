@@ -81,7 +81,7 @@ class RenderIntrinsic extends RenderBoxModel
             childLayoutStart.microsecondsSinceEpoch;
       }
 
-      setMaxScrollableSize(child!.size.width, child!.size.height);
+      setMaxScrollableSize(child!.size);
 
       CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
       bool isInlineLevel = effectiveDisplay == CSSDisplay.inlineBlock ||
@@ -204,10 +204,10 @@ class RenderIntrinsic extends RenderBoxModel
     }
   }
 
-  RenderSelfRepaintIntrinsic toSelfRepaint() {
+  RenderRepaintBoundaryIntrinsic toRepaintBoundaryIntrinsic() {
     RenderObject? childRenderObject = child;
     child = null;
-    RenderSelfRepaintIntrinsic newChild = RenderSelfRepaintIntrinsic(renderStyle);
+    RenderRepaintBoundaryIntrinsic newChild = RenderRepaintBoundaryIntrinsic(renderStyle);
     newChild.child = childRenderObject as RenderBox?;
     return copyWith(newChild);
   }
@@ -221,8 +221,8 @@ class RenderIntrinsic extends RenderBoxModel
   }
 }
 
-class RenderSelfRepaintIntrinsic extends RenderIntrinsic {
-  RenderSelfRepaintIntrinsic(
+class RenderRepaintBoundaryIntrinsic extends RenderIntrinsic {
+  RenderRepaintBoundaryIntrinsic(
     RenderStyle renderStyle,
   ) : super(
     renderStyle,
@@ -231,7 +231,7 @@ class RenderSelfRepaintIntrinsic extends RenderIntrinsic {
   @override
   bool get isRepaintBoundary => true;
 
-  RenderIntrinsic toParentRepaint() {
+  RenderIntrinsic toIntrinsic() {
     RenderObject? childRenderObject = child;
     child = null;
     RenderIntrinsic newChild = RenderIntrinsic(renderStyle);

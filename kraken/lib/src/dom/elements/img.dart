@@ -192,10 +192,6 @@ class ImageElement extends Element {
     }
   }
 
-  // Multi frame image should convert to repaint boundary.
-  @override
-  bool get hasRepaintBoundary => _frameCount > 2 || super.hasRepaintBoundary;
-
   void _onImageError(Object exception, StackTrace? stackTrace) {
     dispatchEvent(Event(EVENT_ERROR));
   }
@@ -358,14 +354,12 @@ class ImageElement extends Element {
       _handleEventAfterImageLoaded();
     }
 
-
-    print(image?.debugDisposed);
-    try {
-      _attachImage();
-    } catch (e, stack) {
-      print('$e\n$stack');
+    // Multi frame image should convert to repaint boundary.
+    if (_frameCount > 2) {
+      forceToRepaintBoundary = true;
     }
-    print(3);
+
+    _attachImage();
     _resize();
   }
 
