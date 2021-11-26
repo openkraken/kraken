@@ -910,17 +910,9 @@ class RenderFlowLayout extends RenderLayoutBox {
 
         double? childMarginLeft = 0;
         double? childMarginTop = 0;
-
-        RenderBoxModel? childRenderBoxModel;
         if (child is RenderBoxModel) {
-          childRenderBoxModel = child;
-        } else if (child is RenderPositionPlaceholder) {
-          childRenderBoxModel = child.positioned;
-        }
-
-        if (childRenderBoxModel is RenderBoxModel) {
-          childMarginLeft = childRenderBoxModel.renderStyle.marginLeft.computedValue;
-          childMarginTop = _getChildMarginTop(childRenderBoxModel);
+          childMarginLeft = child.renderStyle.marginLeft.computedValue;
+          childMarginTop = _getChildMarginTop(child);
         }
 
         // No need to add padding and border for scrolling content box.
