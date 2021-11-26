@@ -9,7 +9,6 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
 import 'package:kraken/bridge.dart';
-import 'package:kraken/css.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/painting.dart';
 
@@ -105,9 +104,25 @@ ImageProviderFactory _dataUrlProviderFactory = defaultDataUrlProviderFactory;
 ImageProviderFactory _blobProviderFactory = defaultBlobProviderFactory;
 ImageProviderFactory _assetsProviderFactory = defaultAssetsProvider;
 
+ImageType parseImageUrl(Uri resolvedUri, { cache = 'auto' }) {
+  if (resolvedUri.isScheme('HTTP') || resolvedUri.isScheme('HTTPS')) {
+    return (cache == 'store' || cache == 'auto')
+        ? ImageType.cached
+        : ImageType.network;
+  } else if (resolvedUri.isScheme('FILE')) {
+    return ImageType.file;
+  } else if (resolvedUri.isScheme('DATA')) {
+    return ImageType.dataUrl;
+  } else if (resolvedUri.isScheme('BLOB')) {
+    return ImageType.blob;
+  } else {
+    return ImageType.assets;
+  }
+}
+
 ImageProvider? getImageProvider(Uri resolvedUri,
     {int? contextId, cache = 'auto', int? cachedWidth, int? cachedHeight}) {
-  ImageType imageType = CSSUrl.parseImageUrl(resolvedUri, cache: cache);
+  ImageType imageType = parseImageUrl(resolvedUri, cache: cache);
   ImageProviderFactory factory = _getImageProviderFactory(imageType);
 
   switch (imageType) {
