@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 
-
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -16,25 +15,38 @@ import 'package:kraken/painting.dart';
 
 /// This class allows user to customize Kraken's image loading.
 
-class ImageProviderParams {}
+class ImageProviderParams {
+  int? cachedWidth;
+  int? cachedHeight;
+
+  ImageProviderParams({this.cachedWidth, this.cachedHeight});
+}
 
 class CachedNetworkImageProviderParams extends ImageProviderParams {
   int? contextId;
-  CachedNetworkImageProviderParams(this.contextId);
+
+  CachedNetworkImageProviderParams(this.contextId,
+      {int? cachedWidth, int? cachedHeight})
+      : super(cachedWidth: cachedWidth, cachedHeight: cachedHeight);
 }
 
 class FileImageProviderParams extends ImageProviderParams {
   File file;
-  FileImageProviderParams(this.file);
+
+  FileImageProviderParams(this.file, {int? cachedWidth, int? cachedHeight})
+      : super(cachedWidth: cachedWidth, cachedHeight: cachedHeight);
 }
 
 class DataUrlImageProviderParams extends ImageProviderParams {
   Uint8List bytes;
-  DataUrlImageProviderParams(this.bytes);
+
+  DataUrlImageProviderParams(this.bytes, {int? cachedWidth, int? cachedHeight})
+      : super(cachedWidth: cachedWidth, cachedHeight: cachedHeight);
 }
 
 /// A factory function allow user to build an customized ImageProvider class.
-typedef ImageProviderFactory = ImageProvider? Function(Uri uri, ImageProviderParams params);
+typedef ImageProviderFactory = ImageProvider? Function(
+    Uri uri, ImageProviderParams params);
 
 /// defines the types of supported image source.
 enum ImageType {
@@ -93,31 +105,47 @@ ImageProviderFactory _dataUrlProviderFactory = defaultDataUrlProviderFactory;
 ImageProviderFactory _blobProviderFactory = defaultBlobProviderFactory;
 ImageProviderFactory _assetsProviderFactory = defaultAssetsProvider;
 
-ImageProvider? getImageProvider(Uri resolvedUri, { int? contextId, cache = 'auto' }) {
+ImageProvider? getImageProvider(Uri resolvedUri,
+    {int? contextId, cache = 'auto', int? cachedWidth, int? cachedHeight}) {
   ImageType imageType = CSSUrl.parseImageUrl(resolvedUri, cache: cache);
   ImageProviderFactory factory = _getImageProviderFactory(imageType);
 
-  switch(imageType) {
+  switch (imageType) {
     case ImageType.cached:
-      return factory(resolvedUri, CachedNetworkImageProviderParams(contextId));
+      return factory(
+          resolvedUri,
+          CachedNetworkImageProviderParams(contextId,
+              cachedWidth: cachedWidth, cachedHeight: cachedHeight));
     case ImageType.network:
-      return factory(resolvedUri, CachedNetworkImageProviderParams(contextId));
+      return factory(
+          resolvedUri,
+          CachedNetworkImageProviderParams(contextId,
+              cachedWidth: cachedWidth, cachedHeight: cachedHeight));
     case ImageType.file:
       File file = File.fromUri(resolvedUri);
-      return factory(resolvedUri, FileImageProviderParams(file));
+      return factory(
+          resolvedUri,
+          FileImageProviderParams(file,
+              cachedWidth: cachedWidth, cachedHeight: cachedHeight));
     case ImageType.dataUrl:
-      // Data URL:  https://tools.ietf.org/html/rfc2397
-      // dataurl    := "data:" [ mediatype ] [ ";base64" ] "," data
+    // Data URL:  https://tools.ietf.org/html/rfc2397
+    // dataurl    := "data:" [ mediatype ] [ ";base64" ] "," data
       UriData data = UriData.fromUri(resolvedUri);
       if (data.isBase64) {
-        return factory(resolvedUri, DataUrlImageProviderParams(data.contentAsBytes()));
+        return factory(
+            resolvedUri,
+            DataUrlImageProviderParams(data.contentAsBytes(),
+                cachedWidth: cachedWidth, cachedHeight: cachedHeight));
       }
       return null;
     case ImageType.blob:
-      // TODO: support blob data type
+    // TODO: support blob data type
       return null;
     case ImageType.assets:
-      return factory(resolvedUri, ImageProviderParams());
+      return factory(
+          resolvedUri,
+          ImageProviderParams(
+              cachedWidth: cachedWidth, cachedHeight: cachedHeight));
   }
 }
 
@@ -165,26 +193,34 @@ void setCustomImageProviderFactory(ImageType imageType, ImageProviderFactory cus
 
 /// default ImageProviderFactory implementation of [ImageType.cached]
 ImageProvider defaultCachedProviderFactory(Uri uri, ImageProviderParams params) {
-  return CachedNetworkImage(uri.toString(), contextId: (params as CachedNetworkImageProviderParams).contextId);
+  return ResizeImage.resizeIfNeeded(
+      params.cachedWidth,
+      params.cachedHeight,
+      CachedNetworkImage(uri.toString(),
+          contextId: (params as CachedNetworkImageProviderParams).contextId));
 }
 
 /// default ImageProviderFactory implementation of [ImageType.network]
 ImageProvider defaultNetworkProviderFactory(Uri uri, ImageProviderParams params) {
   NetworkImage networkImage = NetworkImage(uri.toString(), headers: {
     HttpHeaders.userAgentHeader: getKrakenInfo().userAgent,
-    HttpHeaderContext: (params as CachedNetworkImageProviderParams).contextId.toString(),
+    HttpHeaderContext:
+    (params as CachedNetworkImageProviderParams).contextId.toString(),
   });
-  return networkImage;
+  return ResizeImage.resizeIfNeeded(
+      params.cachedWidth, params.cachedHeight, networkImage);
 }
 
 /// default ImageProviderFactory implementation of [ImageType.file]
 ImageProvider? defaultFileProviderFactory(Uri uri, ImageProviderParams params) {
-  return FileImage((params as FileImageProviderParams).file);
+  return ResizeImage.resizeIfNeeded(
+      params.cachedWidth, params.cachedHeight, FileImage((params as FileImageProviderParams).file));
 }
 
 /// default ImageProviderFactory implementation of [ImageType.dataUrl].
 ImageProvider? defaultDataUrlProviderFactory(Uri uri, ImageProviderParams params) {
-  return MemoryImage((params as DataUrlImageProviderParams).bytes);
+  return ResizeImage.resizeIfNeeded(
+      params.cachedWidth, params.cachedHeight, MemoryImage((params as DataUrlImageProviderParams).bytes));
 }
 
 /// default ImageProviderFactory implementation of [ImageType.blob].
@@ -195,5 +231,5 @@ ImageProvider? defaultBlobProviderFactory(Uri uri, ImageProviderParams params) {
 
 /// default ImageProviderFactory implementation of [ImageType.assets].
 ImageProvider defaultAssetsProvider(Uri uri, ImageProviderParams params) {
-  return AssetImage(uri.toString());
+  return ResizeImage.resizeIfNeeded(params.cachedWidth, params.cachedHeight, AssetImage(uri.toString()));
 }

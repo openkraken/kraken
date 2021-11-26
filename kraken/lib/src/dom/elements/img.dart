@@ -5,7 +5,7 @@
 
 import 'dart:async';
 import 'dart:ffi';
-import 'dart:ui' as ui show Image;
+import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -26,22 +26,18 @@ const Map<String, dynamic> _defaultStyle = {
 class ImageElement extends Element {
   // The render box to draw image.
   RenderImage? _renderImage;
-
-  // The image source url.
-  String? get _source => getProperty('src');
-
+  bool _isListeningToStream = false;
   ImageProvider? _imageProvider;
 
   ImageStream? _imageStream;
 
   ImageInfo? _imageInfo;
 
-  late ImageStreamListener _renderStreamListener;
-
   double? _propertyWidth;
   double? _propertyHeight;
 
   ui.Image? get image => _imageInfo?.image;
+  bool get renderImageAttached => _renderImage?.image != null;
 
   /// Number of image frame, used to identify multi frame image after loaded.
   int _frameCount = 0;
@@ -49,6 +45,7 @@ class ImageElement extends Element {
   bool _isInLazyLoading = false;
 
   bool get _shouldLazyLoading => properties['loading'] == 'lazy';
+  ImageStreamCompleterHandle? _completerHandle;
 
   ImageElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
       : super(
@@ -57,7 +54,6 @@ class ImageElement extends Element {
       elementManager,
       isIntrinsicBox: true,
       defaultStyle: _defaultStyle) {
-    _renderStreamListener = ImageStreamListener(_renderImageStream, onError: _onImageError);
   }
 
   @override
@@ -80,10 +76,11 @@ class ImageElement extends Element {
         renderBoxModel!.addIntersectionChangeListener(_handleIntersectionChange);
       } else {
         _constructImageChild();
-        _loadImage();
+        _attachImage();
+        _resolveImage();
+        _listenToStream();
       }
     }
-    _resize();
   }
 
   @override
@@ -91,34 +88,38 @@ class ImageElement extends Element {
     super.didDetachRenderer();
     style.removeStyleChangeListener(_stylePropertyChanged);
 
-    _resetImage();
-
-    // Unlink image render box, which has been detached.
-    _renderImage = null;
+    _stopListeningToStream(keepStreamAlive: true);
   }
 
-  void _resetImage() {
-    _imageInfo = null;
+  ImageStreamListener? _imageStreamListener;
+  ImageStreamListener _getListener({bool recreateListener = false}) {
+    if(_imageStreamListener == null || recreateListener) {
+      _imageStreamListener = ImageStreamListener(
+        _handleImageFrame,
+        onError: _onImageError
+      );
+    }
+    return _imageStreamListener!;
+  }
 
-    // @NOTE: Evict image cache, make multi frame image can replay.
-    // https://github.com/flutter/flutter/issues/51775
-    _imageProvider?.evict();
-    _imageProvider = null;
+  void _listenToStream() {
+    if (_isListeningToStream)
+      return;
 
-    _renderImage?.image = null;
+    _imageStream!.addListener(_getListener());
+    _completerHandle?.dispose();
+    _completerHandle = null;
+
+    _isListeningToStream = true;
   }
 
   @override
   void dispose() {
     super.dispose();
-
-    _imageProvider?.evict();
+    _stopListeningToStream();
+    _completerHandle?.dispose();
+    _replaceImage(info: null);
     _imageProvider = null;
-
-    _imageStream?.removeListener(_renderStreamListener);
-    _imageStream = null;
-
-    _renderImage = null;
   }
 
   double get width {
@@ -156,7 +157,7 @@ class ImageElement extends Element {
       // Once appear remove the listener
       _resetLazyLoading();
       _constructImageChild();
-      _loadImage();
+      _resolveImage();
     }
   }
 
@@ -194,31 +195,6 @@ class ImageElement extends Element {
   // Multi frame image should convert to repaint boundary.
   @override
   bool get hasRepaintBoundary => _frameCount > 2 || super.hasRepaintBoundary;
-
-  void _renderImageStream(ImageInfo imageInfo, bool synchronousCall) {
-    _frameCount++;
-    _imageInfo = imageInfo;
-
-    // Only trigger load once.
-    if (!_loaded) {
-      _loaded = true;
-
-      if (synchronousCall) {
-        // `synchronousCall` happens when caches image and calling `addListener`.
-        scheduleMicrotask(_handleEventAfterImageLoaded);
-      } else {
-        _handleEventAfterImageLoaded();
-      }
-    }
-
-    if (isRendererAttached) {
-      _resize();
-      _renderImage?.image = image;
-    }
-  }
-
-  // Mark if the same src loaded.
-  bool _loaded = false;
 
   void _onImageError(Object exception, StackTrace? stackTrace) {
     dispatchEvent(Event(EVENT_ERROR));
@@ -286,11 +262,135 @@ class ImageElement extends Element {
   void removeProperty(String key) {
     super.removeProperty(key);
     if (key == 'src') {
-      _resetImage();
-      _loaded = false;
+      _stopListeningToStream(keepStreamAlive: true);
     } else if (key == 'loading' && _isInLazyLoading && _imageProvider == null) {
       _resetLazyLoading();
+      _stopListeningToStream(keepStreamAlive: true);
     }
+  }
+
+  /// Stops listening to the image stream, if this state object has attached a
+  /// listener.
+  ///
+  /// If the listener from this state is the last listener on the stream, the
+  /// stream will be disposed. To keep the stream alive, set `keepStreamAlive`
+  /// to true, which create [ImageStreamCompleterHandle] to keep the completer
+  /// alive and is compatible with the [TickerMode] being off.
+  void _stopListeningToStream({bool keepStreamAlive = false}) {
+    if (!_isListeningToStream)
+      return;
+
+    if (keepStreamAlive && _completerHandle == null && _imageStream?.completer != null) {
+      _completerHandle = _imageStream!.completer!.keepAlive();
+    }
+
+    _imageStream!.removeListener(_getListener());
+    _isListeningToStream = false;
+  }
+
+  Uri? _resolveSrc() {
+    String? src = properties['src'];
+    if (src != null && src.isNotEmpty) {
+      Uri base = Uri.parse(elementManager.controller.href);
+      return elementManager.controller.uriParser!.resolve(base, Uri.parse(src));
+    }
+    return null;
+  }
+
+  void _updateSourceStream(ImageStream newStream) {
+    if (_imageStream?.key == newStream.key) return;
+
+    if (_isListeningToStream) {
+      _imageStream!.removeListener(_getListener());
+    }
+
+    _frameCount = 0;
+    _imageStream = newStream;
+
+    if (_isListeningToStream) {
+      _imageStream!.addListener(_getListener());
+    }
+  }
+
+  void _resolveImage() {
+    final Uri? resolvedUri = _resolveSrc();
+    if (resolvedUri == null) return;
+
+    double? width = null;
+    double? height = null;
+
+    if (isRendererAttached) {
+      width = renderStyle.width.isAuto ? _propertyWidth : renderStyle.width.computedValue;
+      height = renderStyle.height.isAuto ? _propertyHeight : renderStyle.height.computedValue;
+    } else {
+      width = _propertyWidth;
+      height = _propertyHeight;
+    }
+
+    int? cachedWidth = width != null ? (width * ui.window.devicePixelRatio).toInt() : null;
+    int? cachedHeight = height != null ? (height * ui.window.devicePixelRatio).toInt() : null;
+
+    ImageProvider? provider = _imageProvider = getImageProvider(resolvedUri, cachedWidth: cachedWidth, cachedHeight: cachedHeight);
+    if (provider == null) return;
+    final ImageStream newStream = provider.resolve(ImageConfiguration.empty);
+    _updateSourceStream(newStream);
+  }
+
+  void _replaceImage({required ImageInfo? info}) {
+    _imageInfo = info;
+  }
+
+  void _attachImage() {
+    assert(isRendererAttached);
+    assert(_renderImage != null);
+    if (_imageInfo == null) return;
+    _renderImage!.image = image;
+  }
+
+  void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
+    _replaceImage(info: imageInfo);
+    _frameCount++;
+
+    if (synchronousCall) {
+      // `synchronousCall` happens when caches image and calling `addListener`.
+      scheduleMicrotask(_handleEventAfterImageLoaded);
+    } else {
+      _handleEventAfterImageLoaded();
+    }
+
+
+    print(image?.debugDisposed);
+    try {
+      _attachImage();
+    } catch (e, stack) {
+      print('$e\n$stack');
+    }
+    print(3);
+    _resize();
+  }
+
+  // Prefetches an image into the image cache.
+  void _precacheImage() {
+    final ImageConfiguration config = ImageConfiguration.empty;
+    final Uri? resolvedUri = _resolveSrc();
+    if (resolvedUri == null) return;
+    final ImageProvider? provider = _imageProvider = getImageProvider(resolvedUri);
+    if (provider == null) return;
+    _frameCount = 0;
+    final ImageStream stream = provider.resolve(config);
+    ImageStreamListener? listener;
+    listener = ImageStreamListener(
+      (ImageInfo? image, bool sync) {
+        // Give callers until at least the end of the frame to subscribe to the
+        // image stream.
+        // See ImageCache._liveImages
+        SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+          stream.removeListener(listener!);
+        });
+      },
+      onError: _onImageError
+    );
+    stream.addListener(listener);
   }
 
   @override
@@ -298,42 +398,18 @@ class ImageElement extends Element {
     bool propertyChanged = properties[key] != value;
     super.setProperty(key, value);
     // Reset frame number to zero when image needs to reload
-    _frameCount = 0;
     if (key == 'src' && propertyChanged && !_shouldLazyLoading) {
-      // Loads the image immediately.
-      _loaded = false;
-      _loadImage();
-    } else if (key == 'loading' && _isInLazyLoading) {
-      // Should reset lazy when value change.
+      _precacheImage();
+    } else if (key == 'loading' && propertyChanged && _isInLazyLoading) {
       _resetLazyLoading();
     } else if (key == WIDTH) {
       _propertyWidth = CSSNumber.parseNumber(value);
-      _resize();
+      _resolveImage();
     } else if (key == HEIGHT) {
-      _propertyHeight = CSSNumber.parseNumber(value);
-      _resize();
+      _propertyWidth = CSSNumber.parseNumber(value);
+      _resolveImage();
     }
-  }
 
-  void _loadImage() {
-    _resetImage();
-
-    if (_source != null && _source!.isNotEmpty) {
-      Uri base = Uri.parse(elementManager.controller.href);
-      Uri resolvedUri = elementManager.controller.uriParser!.resolve(base, Uri.parse(_source!));
-
-      ImageProvider? imageProvider = getImageProvider(resolvedUri,
-          cache: properties['caching'],
-          contextId: elementManager.contextId
-      );
-
-      if (imageProvider != null) {
-        _imageProvider = imageProvider;
-        _imageStream = imageProvider
-            .resolve(ImageConfiguration.empty)
-            ..addListener(_renderStreamListener);
-      }
-    }
   }
 
   @override
@@ -354,7 +430,7 @@ class ImageElement extends Element {
 
   void _stylePropertyChanged(String property, String? original, String present) {
     if (property == WIDTH || property == HEIGHT) {
-      _resize();
+      _resolveImage();
     } else if (property == OBJECT_FIT && _renderImage != null) {
       _renderImage!.fit = renderBoxModel!.renderStyle.objectFit;
     } else if (property == OBJECT_POSITION && _renderImage != null) {
