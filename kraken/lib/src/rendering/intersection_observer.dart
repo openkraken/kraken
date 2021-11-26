@@ -144,6 +144,9 @@ class IntersectionObserverLayer extends ContainerLayer {
   /// entries for non-visible ones are actively removed.
   IntersectionObserverEntry? _lastIntersectionInfo;
 
+  /// Cache of layer transform to root layer.
+  static final Map<int, Matrix4> _layerTransformCache = {};
+
   /// Converts a [Rect] in local coordinates of the specified [Layer] to a new
   /// [Rect] in global coordinates.
   Rect _localRectToGlobal(Layer layer, Rect localRect) {
@@ -165,7 +168,15 @@ class IntersectionObserverLayer extends ContainerLayer {
     if (layerChain.isNotEmpty) {
       var parent = layerChain.first;
       for (final child in layerChain) {
-        (parent as ContainerLayer).applyTransform(child, transform);
+        Matrix4? cachedTransform = _layerTransformCache[child.hashCode];
+        // Get the transform of parent layer to root layer directly if exists.
+        if (cachedTransform != null) {
+          transform = cachedTransform;
+        } else {
+          (parent as ContainerLayer).applyTransform(child, transform);
+          // Cache the transform of parent layer to root layer.
+          _layerTransformCache[child.hashCode] = transform.clone();
+        }
         parent = child;
       }
     }
@@ -314,6 +325,7 @@ class IntersectionObserverLayer extends ContainerLayer {
       layer._fireCallback(info);
     }
     _updated.clear();
+    _layerTransformCache.clear();
   }
 }
 
