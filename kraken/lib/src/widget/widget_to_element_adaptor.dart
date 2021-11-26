@@ -187,6 +187,8 @@ abstract class WidgetElement extends dom.Element {
 
     _state = _KrakenAdapterWidgetState(this, properties, childNodes);
     _widget = _KrakenAdapterWidget(_state!);
+
+    // Find ancestor of custom element.
     WidgetElement? ancestorWidgetElement;
     dom.Node? ancestor = parentNode;
     while (ancestor != null) {
@@ -253,7 +255,9 @@ abstract class WidgetElement extends dom.Element {
 
 class _KrakenAdapterWidget extends StatefulWidget {
   final _KrakenAdapterWidgetState _state;
+  
   _KrakenAdapterWidget(this._state);
+
   @override
   State<StatefulWidget> createState() {
     return _state;
