@@ -255,7 +255,7 @@ abstract class WidgetElement extends dom.Element {
 
 class _KrakenAdapterWidget extends StatefulWidget {
   final _KrakenAdapterWidgetState _state;
-  
+
   _KrakenAdapterWidget(this._state);
 
   @override
@@ -282,7 +282,12 @@ class _KrakenAdapterWidgetState extends State<_KrakenAdapterWidget> {
 
   List<Widget> convertNodeListToWidgetList(List<dom.Node> childNodes) {
     List<Widget> children = List.generate(childNodes.length, (index) {
-      return KrakenElementToWidgetAdaptor(childNodes[index]);
+      if (childNodes[index] is WidgetElement) {
+        _KrakenAdapterWidgetState state = (childNodes[index] as WidgetElement)._state!;
+        return state._element.build(context, state._properties, state._childNodes);
+      } else {
+        return KrakenElementToWidgetAdaptor(childNodes[index]);
+      }
     });
 
     return children;
