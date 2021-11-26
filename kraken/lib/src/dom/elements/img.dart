@@ -37,7 +37,6 @@ class ImageElement extends Element {
   double? _propertyHeight;
 
   ui.Image? get image => _imageInfo?.image;
-  bool get renderImageAttached => _renderImage?.image != null;
 
   /// Number of image frame, used to identify multi frame image after loaded.
   int _frameCount = 0;
@@ -92,13 +91,11 @@ class ImageElement extends Element {
   }
 
   ImageStreamListener? _imageStreamListener;
-  ImageStreamListener _getListener({bool recreateListener = false}) {
-    if(_imageStreamListener == null || recreateListener) {
-      _imageStreamListener = ImageStreamListener(
-        _handleImageFrame,
-        onError: _onImageError
-      );
-    }
+  ImageStreamListener _getListener() {
+    _imageStreamListener ??= ImageStreamListener(
+      _handleImageFrame,
+      onError: _onImageError
+    );
     return _imageStreamListener!;
   }
 
