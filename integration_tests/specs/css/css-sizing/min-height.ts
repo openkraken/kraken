@@ -28,7 +28,7 @@ describe('min-height', () => {
     await snapshot();
   });
 
-  fit("should work with padding exist and height not exist", async () => {
+  it("should work with padding exist and height not exist", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
