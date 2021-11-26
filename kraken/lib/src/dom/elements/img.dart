@@ -42,6 +42,7 @@ class ImageElement extends Element {
   int _frameCount = 0;
 
   bool _isInLazyLoading = false;
+  bool _imageLoaded = false;
 
   bool get _shouldLazyLoading => properties['loading'] == 'lazy';
   ImageStreamCompleterHandle? _completerHandle;
@@ -344,11 +345,14 @@ class ImageElement extends Element {
     _replaceImage(info: imageInfo);
     _frameCount++;
 
-    if (synchronousCall) {
-      // `synchronousCall` happens when caches image and calling `addListener`.
-      scheduleMicrotask(_handleEventAfterImageLoaded);
-    } else {
-      _handleEventAfterImageLoaded();
+    if (!_imageLoaded) {
+      _imageLoaded = true;
+      if (synchronousCall) {
+        // `synchronousCall` happens when caches image and calling `addListener`.
+        scheduleMicrotask(_handleEventAfterImageLoaded);
+      } else {
+        _handleEventAfterImageLoaded();
+      }
     }
 
     // Multi frame image should convert to repaint boundary.
