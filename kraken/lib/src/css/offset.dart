@@ -75,8 +75,7 @@ mixin CSSPositionMixin on RenderStyleBase {
     _right = value;
     _markParentNeedsLayout();
   }
-  // The z-index property specifies the stack order of an element.
-  // Only works on positioned elements(position: absolute/relative/fixed).
+
   int? _zIndex;
   int? get zIndex {
     return _zIndex;
@@ -84,31 +83,7 @@ mixin CSSPositionMixin on RenderStyleBase {
   set zIndex(int? value) {
     if (_zIndex == value) return;
     _zIndex = value;
-    _markNeedsSort();
     _markParentNeedsPaint();
-  }
-
-  int get effectiveZIndex {
-    if (_zIndex == null) {
-      return 0;
-    }
-
-    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Positioning/Understanding_z_index/The_stacking_context#the_stacking_context
-    if (
-      // Element with a position value absolute, relative, fixed or sticky.
-      _position != CSSPositionType.static ||
-      // Element that is a child of a flex container.
-      (this as RenderStyle).parent!.display == CSSDisplay.flex ||
-      (this as RenderStyle).parent!.display == CSSDisplay.inlineFlex ||
-      // Element with a opacity value less than 1.
-      (this as RenderStyle).opacity < 1.0 ||
-      // Element with a transform value.
-      (this as RenderStyle).transform != null
-    ) {
-      return _zIndex!;
-    } else {
-      return 0;
-    }
   }
 
   CSSPositionType _position = DEFAULT_POSITION_TYPE;
@@ -121,13 +96,6 @@ mixin CSSPositionMixin on RenderStyleBase {
     _markParentNeedsLayout();
     // Position change may affect transformed display
     // https://www.w3.org/TR/css-display-3/#transformations
-  }
-
-  void _markNeedsSort() {
-    if (renderBoxModel!.parentData is RenderLayoutParentData) {
-      RenderLayoutBox parent = renderBoxModel!.parent as RenderLayoutBox;
-      parent.markChildrenNeedsSort();
-    }
   }
 
   void _markParentNeedsLayout() {
