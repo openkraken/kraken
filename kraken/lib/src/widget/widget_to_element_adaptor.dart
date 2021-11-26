@@ -50,16 +50,31 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
   @override
   void updateRenderObject(BuildContext context, RenderObject renderObject) { }
 
+  Element? _element;
+
   /// Inflate this widget and actually set the resulting [RenderObject] as the
   /// child of [container].
   KrakenRenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, RenderObjectElement parentElement) {
+    owner.lockState(() {
+      _element = createElement();
+      assert(_element != null);
+    });
+    owner.buildScope(_element!, () {
+      if (_element != null) {
+        _element?.mount(parentElement, null);
+      }
+    });
+    return _element! as KrakenRenderObjectToWidgetElement<T>;
+  }
+
+  KrakenRenderObjectToWidgetElement<T> detachToRenderTree(BuildOwner owner, RenderObjectElement parentElement) {
     KrakenRenderObjectToWidgetElement<T>? element;
     owner.lockState(() {
       element = createElement();
       assert(element != null);
     });
     owner.buildScope(element!, () {
-      element!.mount(parentElement, null);
+      element!.unmount();
     });
     return element!;
   }
@@ -184,6 +199,13 @@ abstract class WidgetElement extends dom.Element {
   Widget build(BuildContext context, Map<String, dynamic> properties, List<Widget> children);
 
   @override
+  void didDetachRenderer() {
+    super.didDetachRenderer();
+
+    _detachWidget(_widget);
+  }
+
+  @override
   void didAttachRenderer() {
     super.didAttachRenderer();
 
@@ -249,6 +271,16 @@ abstract class WidgetElement extends dom.Element {
       container: renderBoxModel as RenderObjectWithChildMixin<RenderBox>
     );
     adaptor.attachToRenderTree(rootWidgetElement.owner!, ancestorRenderObjectElement ?? rootWidgetElement);
+  }
+
+  void _detachWidget(Widget widget, { RenderObjectElement? ancestorRenderObjectElement }) {
+    RenderObjectElement rootWidgetElement = elementManager.controller.rootKrakenElement;
+    KrakenRenderObjectToWidgetAdapter adaptor = KrakenRenderObjectToWidgetAdapter(
+        child: widget,
+        container: renderBoxModel as RenderObjectWithChildMixin<RenderBox>
+    );
+
+    adaptor.detachToRenderTree(rootWidgetElement.owner!, ancestorRenderObjectElement ?? rootWidgetElement);
   }
 }
 
