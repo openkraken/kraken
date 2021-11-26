@@ -327,7 +327,7 @@ void JSContext::dispatchGlobalPromiseRejectionEvent(JSValueConst promise, JSValu
 }
 
 void JSContext::promiseRejectTracker(QjsContext* ctx, JSValue promise, JSValue reason, int is_handled, void* opaque) {
-  auto *context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
+  auto* context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
   context->reportError(reason);
   context->dispatchGlobalPromiseRejectionEvent(promise, reason);
 }
