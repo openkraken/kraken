@@ -408,7 +408,7 @@ class ImageElement extends Element {
       _propertyWidth = CSSNumber.parseNumber(value);
       _resolveImage(_resolvedUri);
     } else if (key == HEIGHT) {
-      _propertyWidth = CSSNumber.parseNumber(value);
+      _propertyHeight = CSSNumber.parseNumber(value);
       _resolveImage(_resolvedUri);
     }
 
