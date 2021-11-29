@@ -50,6 +50,8 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
   @override
   void updateRenderObject(BuildContext context, RenderObject renderObject) { }
 
+  Element? get element => _element;
+
   Element? _element;
 
   /// Inflate this widget and actually set the resulting [RenderObject] as the
@@ -69,7 +71,9 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
 
   KrakenRenderObjectToWidgetElement<T> detachFromRenderTree(BuildOwner owner) {
     owner.buildScope(_element!, () {
-      _element!.unmount();
+      if (_element != null) {
+        _element?.unmount();
+      }
     });
     return _element as KrakenRenderObjectToWidgetElement<T>;
   }
@@ -204,21 +208,17 @@ abstract class WidgetElement extends dom.Element {
   void didAttachRenderer() {
     super.didAttachRenderer();
 
-    // Find ancestor of custom element.
-    WidgetElement? ancestorWidgetElement;
-    dom.Node? ancestor = parentNode;
-    while (ancestor != null) {
-      if (ancestor is WidgetElement) {
-        ancestorWidgetElement = ancestor;
-      }
-      ancestor = ancestor.parentNode;
-    }
+    // if (ancestorWidgetElement != null) {
+    //   KrakenRenderObjectToWidgetAdapter adaptor = KrakenRenderObjectToWidgetAdapter(
+    //       child: ancestorWidgetElement._widget,
+    //       container: ancestorWidgetElement.renderBoxModel as RenderObjectWithChildMixin<RenderBox>
+    //   );
+    //   _attachWidget(_widget, ancestorRenderObjectElement: KrakenElementToFlutterElementAdaptor(adaptor.element.widget));
+    // } else {
+    //
+    // }
 
-    if (ancestorWidgetElement != null) {
-      _attachWidget(_widget, ancestorRenderObjectElement: KrakenElementToFlutterElementAdaptor(ancestorWidgetElement._widget as RenderObjectWidget));
-    } else {
-      _attachWidget(_widget);
-    }
+    _attachWidget(_widget);
   }
 
   @override
@@ -259,23 +259,42 @@ abstract class WidgetElement extends dom.Element {
     return child;
   }
 
-  void _attachWidget(Widget widget, { RenderObjectElement? ancestorRenderObjectElement }) {
-    RenderObjectElement rootWidgetElement = elementManager.controller.rootKrakenElement;
-    KrakenRenderObjectToWidgetAdapter adaptor = KrakenRenderObjectToWidgetAdapter(
-      child: widget,
-      container: renderBoxModel as RenderObjectWithChildMixin<RenderBox>
-    );
-    adaptor.attachToRenderTree(rootWidgetElement.owner!, ancestorRenderObjectElement ?? rootWidgetElement);
-  }
+  KrakenRenderObjectToWidgetAdapter? _adaptor;
 
-  void _detachWidget(Widget widget) {
+  void _attachWidget(Widget widget) {
+    // Find ancestor of custom element.
+    WidgetElement? ancestorWidgetElement;
+    dom.Node? ancestor = parentNode;
+    while (ancestor != null) {
+      if (ancestor is WidgetElement) {
+        ancestorWidgetElement = ancestor;
+      }
+      ancestor = ancestor.parentNode;
+    }
+
     RenderObjectElement rootWidgetElement = elementManager.controller.rootKrakenElement;
-    KrakenRenderObjectToWidgetAdapter adaptor = KrakenRenderObjectToWidgetAdapter(
+    _adaptor = KrakenRenderObjectToWidgetAdapter(
         child: widget,
         container: renderBoxModel as RenderObjectWithChildMixin<RenderBox>
     );
 
-    adaptor.detachFromRenderTree(rootWidgetElement.owner!);
+    if (ancestorWidgetElement != null) {
+      // KrakenRenderObjectToWidgetAdapter ancestorAdaptor = KrakenRenderObjectToWidgetAdapter(
+      //     child: ancestorWidgetElement._widget,
+      //     container: ancestorWidgetElement.renderBoxModel as RenderObjectWithChildMixin<RenderBox>
+      // );
+
+      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, ancestorWidgetElement._adaptor?.element! as RenderObjectElement);
+    } else {
+      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement);
+    }
+  }
+
+  void _detachWidget(Widget widget) {
+    RenderObjectElement rootWidgetElement = elementManager.controller.rootKrakenElement;
+    if (_adaptor != null) {
+      _adaptor?.detachFromRenderTree(rootWidgetElement.owner!);
+    }
   }
 }
 
