@@ -67,7 +67,7 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
     return _element! as KrakenRenderObjectToWidgetElement<T>;
   }
 
-  KrakenRenderObjectToWidgetElement<T> detachToRenderTree(BuildOwner owner, RenderObjectElement parentElement) {
+  KrakenRenderObjectToWidgetElement<T> detachFromRenderTree(BuildOwner owner, RenderObjectElement parentElement) {
     KrakenRenderObjectToWidgetElement<T>? element;
     owner.lockState(() {
       element = createElement();
@@ -294,7 +294,7 @@ abstract class WidgetElement extends dom.Element {
         container: renderBoxModel as RenderObjectWithChildMixin<RenderBox>
     );
 
-    adaptor.detachToRenderTree(rootWidgetElement.owner!, ancestorRenderObjectElement ?? rootWidgetElement);
+    adaptor.detachFromRenderTree(rootWidgetElement.owner!, ancestorRenderObjectElement ?? rootWidgetElement);
   }
 }
 
