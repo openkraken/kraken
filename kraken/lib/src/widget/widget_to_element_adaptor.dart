@@ -67,7 +67,7 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
     return _element! as KrakenRenderObjectToWidgetElement<T>;
   }
 
-  KrakenRenderObjectToWidgetElement<T> detachFromRenderTree(BuildOwner owner, RenderObjectElement parentElement) {
+  KrakenRenderObjectToWidgetElement<T> detachFromRenderTree(BuildOwner owner) {
     owner.buildScope(_element!, () {
       _element!.unmount();
     });
@@ -197,21 +197,7 @@ abstract class WidgetElement extends dom.Element {
   void didDetachRenderer() {
     super.didDetachRenderer();
 
-    // Find ancestor of custom element.
-    WidgetElement? ancestorWidgetElement;
-    dom.Node? ancestor = parentNode;
-    while (ancestor != null) {
-      if (ancestor is WidgetElement) {
-        ancestorWidgetElement = ancestor;
-      }
-      ancestor = ancestor.parentNode;
-    }
-
-    if (ancestorWidgetElement != null) {
-      _detachWidget(_widget, ancestorRenderObjectElement: KrakenElementToFlutterElementAdaptor(ancestorWidgetElement as RenderObjectWidget));
-    } else {
-      _detachWidget(_widget);
-    }
+    _detachWidget(_widget);
   }
 
   @override
@@ -229,7 +215,7 @@ abstract class WidgetElement extends dom.Element {
     }
 
     if (ancestorWidgetElement != null) {
-      _attachWidget(_widget, ancestorRenderObjectElement: KrakenElementToFlutterElementAdaptor(ancestorWidgetElement as RenderObjectWidget));
+      _attachWidget(_widget, ancestorRenderObjectElement: KrakenElementToFlutterElementAdaptor(ancestorWidgetElement._widget as RenderObjectWidget));
     } else {
       _attachWidget(_widget);
     }
@@ -282,14 +268,14 @@ abstract class WidgetElement extends dom.Element {
     adaptor.attachToRenderTree(rootWidgetElement.owner!, ancestorRenderObjectElement ?? rootWidgetElement);
   }
 
-  void _detachWidget(Widget widget, { RenderObjectElement? ancestorRenderObjectElement }) {
+  void _detachWidget(Widget widget) {
     RenderObjectElement rootWidgetElement = elementManager.controller.rootKrakenElement;
     KrakenRenderObjectToWidgetAdapter adaptor = KrakenRenderObjectToWidgetAdapter(
         child: widget,
         container: renderBoxModel as RenderObjectWithChildMixin<RenderBox>
     );
 
-    adaptor.detachFromRenderTree(rootWidgetElement.owner!, ancestorRenderObjectElement ?? rootWidgetElement);
+    adaptor.detachFromRenderTree(rootWidgetElement.owner!);
   }
 }
 
