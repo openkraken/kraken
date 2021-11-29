@@ -8,6 +8,8 @@
  * - Element.prototype.removeAttribute
  * - Element.prototype.click
  * - Element.prototype.toBlob
+ * - Element.prototype.firstElementChild
+ * - Element.prototype.lastElementChild
  */
 describe('DOM Element API', () => {
   it('should work', () => {
@@ -70,5 +72,33 @@ describe('DOM Element API', () => {
 
     el['foo'] = 123;
     expect(typeof el['foo']).toEqual('number');
+  });
+
+  it('should work with firstElementChild', () => {
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+
+    el.appendChild(document.createTextNode('text'));
+    el.appendChild(document.createComment('comment'));
+    for (let i = 0; i < 20; i ++) {
+      el.appendChild(document.createElement('span'));
+    }
+
+    var target = el.firstElementChild;
+    expect(target.tagName).toEqual('DIV');
+  });
+
+  it('should work with lastElementChild', () => {
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+
+    for (let i = 0; i < 20; i ++) {
+      el.appendChild(document.createElement('span'));
+    }
+    el.appendChild(document.createTextNode('text'));
+    el.appendChild(document.createComment('comment'));
+
+    var target = el.lastElementChild;
+    expect(target.tagName).toEqual('DIV');
   });
 });

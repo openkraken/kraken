@@ -544,6 +544,47 @@ PROP_SETTER(ElementInstance, scrollWidth)(QjsContext* ctx, JSValue this_val, int
   return JS_NULL;
 }
 
+// Definition for firstElementChild
+PROP_GETTER(ElementInstance, firstElementChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
+  int32_t len = arrayGetLength(ctx, element->childNodes);
+  
+  for (int i = 0; i < len; i++) {
+    JSValue v = JS_GetPropertyUint32(ctx, element->childNodes, i);
+    auto* instance = static_cast<NodeInstance*>(JS_GetOpaque(v, Node::classId(v)));
+    if (instance->nodeType == NodeType::ELEMENT_NODE) {
+      return instance->instanceObject;
+    }
+    JS_FreeValue(ctx, v);
+  }
+
+  return JS_NULL;
+}
+PROP_SETTER(ElementInstance, firstElementChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  return JS_NULL;
+}
+
+// Definition for lastElementChild
+PROP_GETTER(ElementInstance, lastElementChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
+  int32_t len = arrayGetLength(ctx, element->childNodes);
+  
+  for (int i = len - 1; i >= 0; i--) {
+    JSValue v = JS_GetPropertyUint32(ctx, element->childNodes, i);
+    auto* instance = static_cast<NodeInstance*>(JS_GetOpaque(v, Node::classId(v)));
+    if (instance->nodeType == NodeType::ELEMENT_NODE) {
+      return instance->instanceObject;
+    }
+    JS_FreeValue(ctx, v);
+  }
+
+  return JS_NULL;
+}
+PROP_SETTER(ElementInstance, lastElementChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  return JS_NULL;
+}
+
+
 PROP_GETTER(ElementInstance, children)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   JSValue array = JS_NewArray(ctx);
