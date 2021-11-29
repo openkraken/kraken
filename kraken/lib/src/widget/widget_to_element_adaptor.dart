@@ -68,15 +68,10 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
   }
 
   KrakenRenderObjectToWidgetElement<T> detachFromRenderTree(BuildOwner owner, RenderObjectElement parentElement) {
-    KrakenRenderObjectToWidgetElement<T>? element;
-    owner.lockState(() {
-      element = createElement();
-      assert(element != null);
+    owner.buildScope(_element!, () {
+      _element!.unmount();
     });
-    owner.buildScope(element!, () {
-      element!.unmount();
-    });
-    return element!;
+    return _element as KrakenRenderObjectToWidgetElement<T>;
   }
 
   @override
