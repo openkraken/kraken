@@ -200,7 +200,7 @@ describe('display sliver', () => {
     await simulateClick(50, 20); // Will trigger done.
   });
 
-  it('sliver child with none-static position not throw errors', () => {
+  it('sliver child with none-static position not throw errors', async () => {
     var container = createSliverBasicCase();
     var firstChild = container.firstChild; // should be element.
     firstChild.style.position = 'relative';
