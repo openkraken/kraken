@@ -169,82 +169,111 @@ class RenderLayoutBox extends RenderBoxModel
     }
   }
 
-  // No need to override [all] and [addAll] method cause they invoke [insert] method eventually.
   @override
-  void insert(RenderBox child, {RenderBox? after}) {
-    super.insert(child, after: after);
-    _paintingOrder = null;
-  }
+  void dispose() {
+    super.dispose();
 
-  @override
-  void remove(RenderBox child) {
-    super.remove(child);
-    _paintingOrder = null;
-  }
-
-  @override
-  void removeAll() {
-    super.removeAll();
-    _paintingOrder = null;
-  }
-
-  @override
-  void move(RenderBox child, {RenderBox? after}) {
-    super.move(child, after: after);
-    _paintingOrder = null;
+    paintingOrder.clear();
+    stickyChildren.clear();
   }
 
   @override
   void markNeedsLayout() {
     super.markNeedsLayout();
 
-    // FlexItem layout must trigger flex container to layout.
+    // FlexItem layout must trigger flex container to relayout.
     if (parent is RenderFlexLayout) {
       markParentNeedsLayout();
     }
   }
 
   // Sort children by zIndex, used for paint and hitTest.
-  List<RenderBox>? _paintingOrder;
-  List<RenderBox> get paintingOrder {
-    if (_paintingOrder != null) {
-      return _paintingOrder!;
+  List<RenderBox> paintingOrder = [];
+
+  // No need to override [all] and [addAll] method cause they invoke [insert] method eventually.
+  @override
+  void insert(RenderBox child, {RenderBox? after}) {
+    super.insert(child, after: after);
+    insertPaintingOrder(child, after: after);
+  }
+
+  @override
+  void remove(RenderBox child) {
+    super.remove(child);
+    paintingOrder.remove(child);
+  }
+
+  @override
+  void removeAll() {
+    super.removeAll();
+    paintingOrder = [];
+  }
+
+  @override
+  void move(RenderBox child, {RenderBox? after}) {
+    super.move(child, after: after);
+    paintingOrder.remove(child);
+    insertPaintingOrder(child, after: after);
+  }
+
+  // Sort siblings by zIndex.
+  // Should be override in child Class according to different zIndex rule of Flow and Flex layout.
+  int sortSiblingsByZIndex(RenderObject prev, RenderObject next) {
+    return -1;
+  }
+
+  // Insert child in painting order.
+  void insertPaintingOrder(RenderBox child, {RenderBox? after}) {
+    // No need to paint position holder.
+    if (child is RenderPositionPlaceholder) {
+      return;
+    }
+    // Find the real renderBox of position holder to insert cause the position holder may be
+    // moved before its real renderBox which will cause the insert order wrong.
+    if (after is RenderPositionPlaceholder && paintingOrder.contains(after.positioned)) {
+      after = after.positioned;
     }
 
-    if (childCount == 0) {
-      // No child.
-      return _paintingOrder = const [];
-    } else if (childCount == 1) {
-      // Only one child.
-      final List<RenderBox> order = <RenderBox>[];
-      order.add(firstChild!);
-      return _paintingOrder = order;
-    } else {
-      // Sort by zIndex.
-      List<RenderBox> children = getChildren();
-      if (_childrenNeedsSort) {
-        children.sort((RenderBox left, RenderBox right) {
-          int leftZIndex = left is RenderBoxModel ? left.renderStyle.effectiveZIndex : 0;
-          int rightZIndex = right is RenderBoxModel ? right.renderStyle.effectiveZIndex : 0;
-          if (leftZIndex == rightZIndex) {
-            return -1;
-          } else {
-            return leftZIndex - rightZIndex;
-          }
-        });
+    // Original index to insert into ignoring zIndex.
+    int oriIdx = after != null ? paintingOrder.indexOf(after) + 1 : paintingOrder.length;
+    // The final index to insert into considering zIndex after comparing with siblings.
+    int insertIdx = oriIdx;
+
+    List<RenderObject> children = getChildren();
+    // Compare zIndex to previous siblings first, if found sibling zIndex bigger than
+    // child, insert child at that position directly, otherwise compare zIndex to next siblings.
+    if (oriIdx > 0) {
+      while(insertIdx > 0) {
+        RenderObject prevSibling = paintingOrder[insertIdx - 1];
+        int priority = sortSiblingsByZIndex(prevSibling, child);
+        // Compare the siblings' render tree order if their zIndex priority are the same.
+        if (priority > 0 ||
+          (priority == 0 && children.indexOf(prevSibling) > children.indexOf(child))
+        ) {
+          insertIdx--;
+        } else {
+          break;
+        }
       }
-      return _paintingOrder = children;
     }
-  }
 
-  bool _childrenNeedsSort = false;
-  void markChildrenNeedsSort() {
-    _childrenNeedsSort = true;
-    _paintingOrder = null;
-  }
+    // If no previous siblings has zIndex bigger than child, compare zIndex to next siblings.
+    if (insertIdx == oriIdx && insertIdx < paintingOrder.length) {
+      while(insertIdx < paintingOrder.length) {
+        RenderObject nextSibling = paintingOrder[insertIdx];
+        int priority = sortSiblingsByZIndex(child, nextSibling);
+        // Compare the siblings' render tree order if their zIndex priority are the same.
+        if (priority > 0 ||
+          (priority == 0 && children.indexOf(child) > children.indexOf(nextSibling))
+        ) {
+          insertIdx++;
+        } else {
+          break;
+        }
+      }
+    }
 
-  void markSortedChildrenInvalid() {
-    _paintingOrder = null;
+    paintingOrder.insert(insertIdx, child);
   }
 
   // Get all children as a list and detach them all.
@@ -545,15 +574,6 @@ class RenderLayoutBox extends RenderBoxModel
     sliverListLayout.addAll(detachChildren());
     return sliverListLayout;
   }
-
-  @override
-  void dispose() {
-    super.dispose();
-
-    stickyChildren.clear();
-    _paintingOrder = null;
-  }
-
 }
 
 mixin RenderBoxModelBase on RenderBox {
