@@ -76,14 +76,18 @@ class ImageElement extends Element {
         // When detach renderer, all listeners will be cleared.
         renderBoxModel!.addIntersectionChangeListener(_handleIntersectionChange);
       } else {
-        _constructImageChild();
-        // Try to attach image if image had cached.
-        _attachImage();
-        _resizeImage();
-        _resolveImage(_resolvedUri);
-        _listenToStream();
+        _loadImage();
       }
     }
+  }
+
+  void _loadImage() {
+    _constructImage();
+    // Try to attach image if image had cached.
+    _attachImage();
+    _resizeImage();
+    _resolveImage(_resolvedUri);
+    _listenToStream();
   }
 
   @override
@@ -157,12 +161,7 @@ class ImageElement extends Element {
     if (entry.isIntersecting) {
       // Once appear remove the listener
       _resetLazyLoading();
-      _constructImageChild();
-      // Try to attach image if image had cached.
-      _attachImage();
-      _resizeImage();
-      _resolveImage(_resolvedUri);
-      _listenToStream();
+      _loadImage();
     }
   }
 
@@ -171,12 +170,9 @@ class ImageElement extends Element {
     renderBoxModel!.removeIntersectionChangeListener(_handleIntersectionChange);
   }
 
-  void _constructImageChild() {
-    _renderImage = createRenderImageBox();
-
-    if (childNodes.isEmpty) {
-      addChild(_renderImage!);
-    }
+  void _constructImage() {
+    RenderImage image = _renderImage = _createRenderImageBox();
+    addChild(image);
   }
 
   void _dispatchLoadEvent() {
@@ -246,7 +242,7 @@ class ImageElement extends Element {
     }
   }
 
-  RenderImage createRenderImageBox() {
+  RenderImage _createRenderImageBox() {
     RenderStyle renderStyle = renderBoxModel!.renderStyle;
     BoxFit objectFit = renderStyle.objectFit;
     Alignment objectPosition = renderStyle.objectPosition;
