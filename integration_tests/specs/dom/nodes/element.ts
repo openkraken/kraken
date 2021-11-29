@@ -85,7 +85,7 @@ describe('DOM Element API', () => {
     }
 
     var target = el.firstElementChild;
-    expect(target.tagName).toEqual('DIV');
+    expect(target.tagName).toEqual('SPAN');
   });
 
   it('should work with lastElementChild', () => {
@@ -99,6 +99,6 @@ describe('DOM Element API', () => {
     el.appendChild(document.createComment('comment'));
 
     var target = el.lastElementChild;
-    expect(target.tagName).toEqual('DIV');
+    expect(target.tagName).toEqual('SPAN');
   });
 });
