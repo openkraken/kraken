@@ -131,6 +131,7 @@ class StyleElement extends Element {
       type = value.toString().toLowerCase().trim();
     }
   }
+
   @override
   void connectedCallback() {
     if (type == _CSS_MIME) {

@@ -217,7 +217,10 @@ mixin ElementOverflowMixin on ElementBase {
   }
 
   void scrollingContentBoxStyleListener(String property, String? original, String present) {
-    RenderLayoutBox scrollingContentBox = (renderBoxModel as RenderLayoutBox).renderScrollingContent!;
+    RenderLayoutBox? scrollingContentBox = (renderBoxModel as RenderLayoutBox).renderScrollingContent;
+    // Sliver content has no multi scroll content box.
+    if (scrollingContentBox == null) return;
+
     RenderStyle scrollingContentRenderStyle = scrollingContentBox.renderStyle;
 
     switch (property) {
