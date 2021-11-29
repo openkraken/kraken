@@ -32,6 +32,7 @@ class ImageElement extends Element {
   ImageStream? _imageStream;
 
   ImageInfo? _imageInfo;
+  Uri? _resolvedUri;
 
   double? _propertyWidth;
   double? _propertyHeight;
@@ -76,8 +77,10 @@ class ImageElement extends Element {
         renderBoxModel!.addIntersectionChangeListener(_handleIntersectionChange);
       } else {
         _constructImageChild();
+        // Try to attach image if image had cached.
         _attachImage();
-        _resolveImage();
+        _resizeImage();
+        _resolveImage(_resolvedUri);
         _listenToStream();
       }
     }
@@ -104,7 +107,7 @@ class ImageElement extends Element {
     if (_isListeningToStream)
       return;
 
-    _imageStream!.addListener(_getListener());
+    _imageStream?.addListener(_getListener());
     _completerHandle?.dispose();
     _completerHandle = null;
 
@@ -155,7 +158,11 @@ class ImageElement extends Element {
       // Once appear remove the listener
       _resetLazyLoading();
       _constructImageChild();
-      _resolveImage();
+      // Try to attach image if image had cached.
+      _attachImage();
+      _resizeImage();
+      _resolveImage(_resolvedUri);
+      _listenToStream();
     }
   }
 
@@ -194,10 +201,8 @@ class ImageElement extends Element {
     dispatchEvent(Event(EVENT_ERROR));
   }
 
-  void _resize() {
-    if (!isRendererAttached) {
-      return;
-    }
+  void _resizeImage() {
+    assert(isRendererAttached);
 
     double? width = renderStyle.width.isAuto ? _propertyWidth : renderStyle.width.computedValue;
     double? height = renderStyle.height.isAuto ? _propertyHeight : renderStyle.height.computedValue;
@@ -228,6 +233,7 @@ class ImageElement extends Element {
       width = 0.0;
     }
 
+    // Try to update image size if image already resolved.
     _renderImage?.width = width;
     _renderImage?.height = height;
     renderBoxModel!.intrinsicWidth = naturalWidth;
@@ -306,8 +312,7 @@ class ImageElement extends Element {
     }
   }
 
-  void _resolveImage() {
-    final Uri? resolvedUri = _resolveSrc();
+  void _resolveImage(Uri? resolvedUri) {
     if (resolvedUri == null) return;
 
     double? width = null;
@@ -321,8 +326,8 @@ class ImageElement extends Element {
       height = _propertyHeight;
     }
 
-    int? cachedWidth = width != null ? (width * ui.window.devicePixelRatio).toInt() : null;
-    int? cachedHeight = height != null ? (height * ui.window.devicePixelRatio).toInt() : null;
+    int? cachedWidth = (width != null && width > 0) ? (width * ui.window.devicePixelRatio).toInt() : null;
+    int? cachedHeight = (height != null && height > 0) ? (height * ui.window.devicePixelRatio).toInt() : null;
 
     ImageProvider? provider = _imageProvider = getImageProvider(resolvedUri, cachedWidth: cachedWidth, cachedHeight: cachedHeight);
     if (provider == null) return;
@@ -361,7 +366,7 @@ class ImageElement extends Element {
     }
 
     _attachImage();
-    _resize();
+    _resizeImage();
   }
 
   // Prefetches an image into the image cache.
@@ -393,16 +398,22 @@ class ImageElement extends Element {
     bool propertyChanged = properties[key] != value;
     super.setProperty(key, value);
     // Reset frame number to zero when image needs to reload
-    if (key == 'src' && propertyChanged && !_shouldLazyLoading) {
-      _precacheImage();
+    if (key == 'src' && propertyChanged) {
+      // Update image source if image already attached.
+      if (isRendererAttached) {
+        final Uri? resolvedUri = _resolveSrc();
+        _resolveImage(resolvedUri);
+      } else {
+        _precacheImage();
+      }
     } else if (key == 'loading' && propertyChanged && _isInLazyLoading) {
       _resetLazyLoading();
     } else if (key == WIDTH) {
       _propertyWidth = CSSNumber.parseNumber(value);
-      _resolveImage();
+      _resolveImage(_resolvedUri);
     } else if (key == HEIGHT) {
       _propertyWidth = CSSNumber.parseNumber(value);
-      _resolveImage();
+      _resolveImage(_resolvedUri);
     }
 
   }
@@ -425,7 +436,10 @@ class ImageElement extends Element {
 
   void _stylePropertyChanged(String property, String? original, String present) {
     if (property == WIDTH || property == HEIGHT) {
-      _resolveImage();
+      // Resize renderBox
+      if (isRendererAttached) _resizeImage();
+      // Resize image
+      _resolveImage(_resolvedUri);
     } else if (property == OBJECT_FIT && _renderImage != null) {
       _renderImage!.fit = renderBoxModel!.renderStyle.objectFit;
     } else if (property == OBJECT_POSITION && _renderImage != null) {
