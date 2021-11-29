@@ -623,6 +623,10 @@ task('build-android-kraken-lib', (done) => {
     externCmakeArgs.push('-DENABLE_ASAN=true');
   }
 
+  const soFileNames = [
+    'libkraken',
+    'libquickjs'
+  ];
 
   const cmakeGeneratorTemplate = platform == 'win32' ? 'Ninja' : 'Unix Makefiles';
   archs.forEach(arch => {
@@ -655,6 +659,18 @@ task('build-android-kraken-lib', (done) => {
     execSync(`cmake --build ${bridgeCmakeDir} --target kraken -- -j 12`, {
       stdio: 'inherit'
     });
+
+    // Strip release binary in release mode.
+    if (buildMode === 'Release' || buildMode === 'RelWithDebInfo') {
+      const strip = path.join(ndkDir, `./toolchains/llvm/prebuilt/${os.platform()}-x86_64/${toolChainMap[arch]}/bin/strip`);
+      const objcopy = path.join(ndkDir, `./toolchains/llvm/prebuilt/${os.platform()}-x86_64/${toolChainMap[arch]}/bin/objcopy`);
+
+      for (let soFileName of soFileNames) {
+        const soBinaryFile = path.join(soBinaryDirectory, soFileName + '.so');
+        execSync(`${objcopy} --only-keep-debug "${soBinaryFile}" "${soBinaryDirectory}/${soFileName}.debug"`);
+        execSync(`${strip} --strip-debug --strip-unneeded "${soBinaryFile}"`)
+      }
+    }
 
     // Copy libc++_shared.so to dist from NDK.
     const libcppSharedPath = path.join(ndkDir, `./toolchains/llvm/prebuilt/${os.platform()}-x86_64/sysroot/usr/lib/${toolChainMap[arch]}/libc++_shared.so`);
