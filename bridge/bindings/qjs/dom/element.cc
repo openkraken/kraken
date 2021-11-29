@@ -584,7 +584,6 @@ PROP_SETTER(ElementInstance, lastElementChild)(QjsContext* ctx, JSValue this_val
   return JS_NULL;
 }
 
-
 PROP_GETTER(ElementInstance, children)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   JSValue array = JS_NewArray(ctx);
