@@ -370,9 +370,6 @@ class CSSStyleDeclaration {
     Element? _target = target;
     // If style target element not exists, no need to do flush operation.
     if (_target == null) return;
-    // If target's renderer has created, but not adopted by a parent,
-    // in most cases it's a sliver child orphan, should not flush styles.
-    if (_target.renderer?.parent == null) return;
     // If target's parent element has no renderer attached, no need to flush.
     if (_target.parentNode?.isRendererAttached == false) return;
 

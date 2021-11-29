@@ -199,4 +199,17 @@ describe('display sliver', () => {
 
     await simulateClick(50, 20); // Will trigger done.
   });
+
+  it('sliver child with none-static position not throw errors', () => {
+    var container = createSliverBasicCase();
+    var firstChild = container.firstChild; // should be element.
+    firstChild.style.position = 'relative';
+    
+    var innerChild = document.createElement('div');
+    innerChild.appendChild(document.createTextNode('helloworld'));
+    innerChild.style.position = 'relative';
+    innerChild.style.top = innerChild.style.left = '15px';
+    firstChild?.appendChild(innerChild);
+    await snapshot();
+  });
 });
