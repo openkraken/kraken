@@ -501,7 +501,6 @@ class Element extends Node
 
     // Detach renderBoxModel from original parent.
     _detachRenderBoxModel(_renderBoxModel);
-
     _updateRenderBoxModel();
     _addToContainingBlock(after: previousSibling);
 

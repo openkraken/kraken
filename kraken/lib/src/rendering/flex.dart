@@ -920,19 +920,23 @@ class RenderFlexLayout extends RenderLayoutBox {
         childNodeId = child.hashCode;
       }
 
-      if (child is RenderPositionPlaceholder && isPlaceholderPositioned(child)) {
-        RenderBoxModel realDisplayedBox = child.positioned!;
-        // Flutter only allow access size of direct children, so cannot use realDisplayedBox.size
-        Size realDisplayedBoxSize =
-            realDisplayedBox.getBoxSize(realDisplayedBox.contentSize);
-        double realDisplayedBoxWidth = realDisplayedBoxSize.width;
-        double realDisplayedBoxHeight = realDisplayedBoxSize.height;
-        childConstraints = BoxConstraints(
-          minWidth: realDisplayedBoxWidth,
-          maxWidth: realDisplayedBoxWidth,
-          minHeight: realDisplayedBoxHeight,
-          maxHeight: realDisplayedBoxHeight,
-        );
+      if (isPlaceholderPositioned(child)) {
+        RenderBoxModel realDisplayedBox = (child as RenderPositionPlaceholder).positioned!;
+        if (realDisplayedBox.hasSize) {
+          // Flutter only allow access size of direct children, so cannot use realDisplayedBox.size
+          Size realDisplayedBoxSize =
+          realDisplayedBox.getBoxSize(realDisplayedBox.contentSize);
+          double realDisplayedBoxWidth = realDisplayedBoxSize.width;
+          double realDisplayedBoxHeight = realDisplayedBoxSize.height;
+          childConstraints = BoxConstraints(
+            minWidth: realDisplayedBoxWidth,
+            maxWidth: realDisplayedBoxWidth,
+            minHeight: realDisplayedBoxHeight,
+            maxHeight: realDisplayedBoxHeight,
+          );
+        } else {
+          childConstraints = BoxConstraints();
+        }
       } else if (child is RenderBoxModel) {
         childConstraints = child.getConstraints();
       } else if (child is RenderTextBox) {

@@ -551,7 +551,7 @@ class RenderLayoutBox extends RenderBoxModel
     super.dispose();
 
     stickyChildren.clear();
-    _paintingOrder = null;                                                                                                                                                      
+    _paintingOrder = null;
   }
 
 }
