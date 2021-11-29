@@ -231,7 +231,7 @@ class RenderLayoutBox extends RenderBoxModel
           if (!isLeftNeedsStacking && isRightNeedsStacking) {
             return 0 <= (right.renderStyle.zIndex ?? 0) ? -1 : 1;
           } else if (isLeftNeedsStacking && !isRightNeedsStacking) {
-            return (left.renderStyle.zIndex ?? 0) <= 0 ? -1 : 1;
+            return (left.renderStyle.zIndex ?? 0) < 0 ? -1 : 1;
           } else if (isLeftNeedsStacking && isRightNeedsStacking) {
             return (left.renderStyle.zIndex ?? 0) <= (right.renderStyle.zIndex ?? 0) ? -1 : 1;
           } else {
