@@ -208,16 +208,6 @@ abstract class WidgetElement extends dom.Element {
   void didAttachRenderer() {
     super.didAttachRenderer();
 
-    // if (ancestorWidgetElement != null) {
-    //   KrakenRenderObjectToWidgetAdapter adaptor = KrakenRenderObjectToWidgetAdapter(
-    //       child: ancestorWidgetElement._widget,
-    //       container: ancestorWidgetElement.renderBoxModel as RenderObjectWithChildMixin<RenderBox>
-    //   );
-    //   _attachWidget(_widget, ancestorRenderObjectElement: KrakenElementToFlutterElementAdaptor(adaptor.element.widget));
-    // } else {
-    //
-    // }
-
     _attachWidget(_widget);
   }
 
@@ -279,11 +269,6 @@ abstract class WidgetElement extends dom.Element {
     );
 
     if (ancestorWidgetElement != null) {
-      // KrakenRenderObjectToWidgetAdapter ancestorAdaptor = KrakenRenderObjectToWidgetAdapter(
-      //     child: ancestorWidgetElement._widget,
-      //     container: ancestorWidgetElement.renderBoxModel as RenderObjectWithChildMixin<RenderBox>
-      // );
-
       _adaptor?.attachToRenderTree(rootWidgetElement.owner!, ancestorWidgetElement._adaptor?.element! as RenderObjectElement);
     } else {
       _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement);
