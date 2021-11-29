@@ -284,7 +284,7 @@ class ImageElement extends Element {
       _completerHandle = _imageStream!.completer!.keepAlive();
     }
 
-    _imageStream!.removeListener(_getListener());
+    _imageStream?.removeListener(_getListener());
     _isListeningToStream = false;
   }
 
@@ -301,7 +301,7 @@ class ImageElement extends Element {
     if (_imageStream?.key == newStream.key) return;
 
     if (_isListeningToStream) {
-      _imageStream!.removeListener(_getListener());
+      _imageStream?.removeListener(_getListener());
     }
 
     _frameCount = 0;
@@ -372,7 +372,7 @@ class ImageElement extends Element {
   // Prefetches an image into the image cache.
   void _precacheImage() {
     final ImageConfiguration config = ImageConfiguration.empty;
-    final Uri? resolvedUri = _resolveSrc();
+    final Uri? resolvedUri = _resolvedUri = _resolveSrc();
     if (resolvedUri == null) return;
     final ImageProvider? provider = _imageProvider = getImageProvider(resolvedUri);
     if (provider == null) return;
@@ -401,7 +401,7 @@ class ImageElement extends Element {
     if (key == 'src' && propertyChanged) {
       // Update image source if image already attached.
       if (isRendererAttached) {
-        final Uri? resolvedUri = _resolveSrc();
+        final Uri? resolvedUri = _resolvedUri =  _resolveSrc();
         _resolveImage(resolvedUri);
       } else {
         _precacheImage();
