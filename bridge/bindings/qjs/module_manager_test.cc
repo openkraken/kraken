@@ -16,9 +16,9 @@ TEST(ModuleManager, shouldThrowErrorWhenBadJSON) {
     EXPECT_STREQ(errmsg,
                  "TypeError: circular reference\n"
                  "    at __kraken_invoke_module__ (native)\n"
-                 "    at <anonymous> (internal://)\n"
+                 "    at <anonymous> (internal://:616)\n"
                  "    at Promise (native)\n"
-                 "    at invokeMethod (internal://)\n"
+                 "    at invokeMethod (internal://:617)\n"
                  "    at <eval> (vm://:12)\n");
     errorCalled = true;
   });
