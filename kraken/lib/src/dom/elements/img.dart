@@ -376,7 +376,19 @@ class ImageElement extends Element {
     final ImageStream stream = provider.resolve(config);
     ImageStreamListener? listener;
     listener = ImageStreamListener(
-      (ImageInfo? image, bool sync) {
+      (ImageInfo? imageInfo, bool sync) {
+        _replaceImage(info: imageInfo);
+        _frameCount++;
+
+        if (!_imageLoaded) {
+          _imageLoaded = true;
+          if (sync) {
+            // `synchronousCall` happens when caches image and calling `addListener`.
+            scheduleMicrotask(_handleEventAfterImageLoaded);
+          } else {
+            _handleEventAfterImageLoaded();
+          }
+        }
         // Give callers until at least the end of the frame to subscribe to the
         // image stream.
         // See ImageCache._liveImages
