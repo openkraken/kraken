@@ -370,17 +370,19 @@ class CSSStyleDeclaration {
     Element? _target = target;
     // If style target element not exists, no need to do flush operation.
     if (_target == null) return;
-    // If target has no renderer attached, skip flush.
-    if (!_target.isRendererAttached) return;
 
     // Display change from none to other value that the renderBoxModel is null.
-    if (_pendingProperties.containsKey(DISPLAY) && _target.isConnected) {
+    if (_pendingProperties.containsKey(DISPLAY) && _target.isConnected &&
+        _target.parentElement?.renderStyle.display != CSSDisplay.sliver) {
       String? prevValue = _properties[DISPLAY];
       String currentValue = _pendingProperties[DISPLAY]!;
       _properties[DISPLAY] = currentValue;
       _pendingProperties.remove(DISPLAY);
       _emitPropertyChanged(DISPLAY, prevValue, currentValue);
     }
+
+    // If target has no renderer attached, no need to flush.
+    if (!_target.isRendererAttached) return;
 
     RenderBoxModel? renderBoxModel = _target.renderBoxModel;
     if (_pendingProperties.isEmpty || renderBoxModel == null) {

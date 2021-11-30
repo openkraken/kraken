@@ -64,4 +64,7 @@ class HTMLElement extends Element {
 
   @override
   String get tagName => HTML;
+
+  @override
+  bool get isRendererAttached => true;
 }

@@ -188,10 +188,10 @@ class Element extends Node
 
     RenderBox? previousRenderBoxModel = renderBoxModel;
     if (nextRenderBoxModel != previousRenderBoxModel) {
-      RenderBox? parentRenderBox;
+      RenderObject? parentRenderObject;
       RenderBox? after;
       if (previousRenderBoxModel != null) {
-        parentRenderBox = previousRenderBoxModel.parent as RenderBox?;
+        parentRenderObject = previousRenderBoxModel.parent as RenderObject?;
 
         if (previousRenderBoxModel.parentData is ContainerParentDataMixin<RenderBox>) {
           after = (previousRenderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
@@ -199,8 +199,8 @@ class Element extends Node
 
         _detachRenderBoxModel(previousRenderBoxModel);
 
-        if (parentRenderBox != null) {
-          _attachRenderBoxModel(parentRenderBox, nextRenderBoxModel, after: after);
+        if (parentRenderObject != null) {
+          _attachRenderBoxModel(parentRenderObject, nextRenderBoxModel, after: after);
         }
       }
       renderBoxModel = nextRenderBoxModel;
@@ -579,7 +579,10 @@ class Element extends Node
   void attachTo(Node parent, {RenderBox? after}) {
     _applyStyle(style);
 
-    willAttachRenderer();
+    // @NOTE: Sliver should not create renderer here.
+    if (parentElement?.renderStyle.display != CSSDisplay.sliver) {
+      willAttachRenderer();
+    }
 
     if (renderer != null) {
       // HTML element override attachTo method to attach renderObject to viewportBox.
@@ -802,28 +805,27 @@ class Element extends Node
     // Update renderBoxModel.
     _updateRenderBoxModel();
     // Attach renderBoxModel to parent if change from `display: none` to other values.
-    if (renderBoxModel!.parent == null) {
+    if (!isRendererAttached && parentElement != null && parentElement!.isRendererAttached) {
       _addToContainingBlock(after: previousSibling?.renderer);
       ensureChildAttached();
     }
   }
 
-  void _attachRenderBoxModel(RenderBox parentRenderBox, RenderBox renderBox, {RenderObject? after, bool isLast = false}) {
+  void _attachRenderBoxModel(RenderObject parentRenderObject, RenderBox renderBox, {RenderObject? after, bool isLast = false}) {
     if (isLast) {
       assert(after == null);
     }
-    if (parentRenderBox is RenderObjectWithChildMixin) { // RenderViewportBox
-      (parentRenderBox as RenderObjectWithChildMixin).child = renderBox;
-    } else if (parentRenderBox is ContainerRenderObjectMixin) { // RenderLayoutBox or RenderSliverList
+    if (parentRenderObject is RenderObjectWithChildMixin) { // RenderViewportBox
+      parentRenderObject.child = renderBox;
+    } else if (parentRenderObject is ContainerRenderObjectMixin) { // RenderLayoutBox or RenderSliverList
       // Should attach to renderScrollingContent if it is scrollable.
-      if (parentRenderBox is RenderLayoutBox) {
-        parentRenderBox = parentRenderBox.renderScrollingContent ?? parentRenderBox;
+      if (parentRenderObject is RenderLayoutBox) {
+        parentRenderObject = parentRenderObject.renderScrollingContent ?? parentRenderObject;
       }
       if (isLast) {
-        after = (parentRenderBox as ContainerRenderObjectMixin).lastChild;
+        after = parentRenderObject.lastChild;
       }
-      (parentRenderBox as ContainerRenderObjectMixin).insert(renderBox, after: after);
-
+      parentRenderObject.insert(renderBox, after: after);
     }
   }
 
@@ -1708,7 +1710,7 @@ bool _hasIntersectionObserverEvent(Map eventHandlers) {
       eventHandlers.containsKey('intersectionchange');
 }
 
-void _detachRenderBoxModel(RenderBox renderBox) {
+void _detachRenderBoxModel(RenderObject renderBox) {
   if (renderBox.parent == null) return;
 
   // Remove reference from parent
