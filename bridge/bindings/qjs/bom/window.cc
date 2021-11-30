@@ -103,7 +103,7 @@ PROP_GETTER(Window, __location__)(QjsContext* ctx, JSValue this_val, int argc, J
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
   if (window == nullptr)
     return JS_UNDEFINED;
-  return JS_DupValue(ctx, window->m_location->jsObject);
+  return JS_DupValue(ctx, window->m_location.value());
 }
 PROP_SETTER(Window, __location__)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
@@ -183,8 +183,6 @@ void WindowInstance::gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) 
   EventTargetInstance::gcMark(rt, val, mark_func);
 
   // Should check object is already inited before gc mark.
-  if (JS_IsObject(m_location->jsObject))
-    JS_MarkValue(rt, m_location->jsObject, mark_func);
   if (JS_IsObject(onerror))
     JS_MarkValue(rt, onerror, mark_func);
 }
