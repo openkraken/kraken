@@ -75,7 +75,8 @@ mixin CSSPositionMixin on RenderStyleBase {
     _right = value;
     _markParentNeedsLayout();
   }
-
+  // The z-index property specifies the stack order of an element.
+  // Only works on positioned elements(position: absolute/relative/fixed).
   int? _zIndex;
   int? get zIndex {
     return _zIndex;
@@ -83,6 +84,7 @@ mixin CSSPositionMixin on RenderStyleBase {
   set zIndex(int? value) {
     if (_zIndex == value) return;
     _zIndex = value;
+    _markNeedsSort();
     _markParentNeedsPaint();
   }
 
@@ -93,9 +95,19 @@ mixin CSSPositionMixin on RenderStyleBase {
   set position(CSSPositionType value) {
     if (_position == value) return;
     _position = value;
+    
+    // Position effect the stacking context.
+    _markNeedsSort();
     _markParentNeedsLayout();
     // Position change may affect transformed display
     // https://www.w3.org/TR/css-display-3/#transformations
+  }
+
+  void _markNeedsSort() {
+    if (renderBoxModel!.parentData is RenderLayoutParentData) {
+      RenderLayoutBox parent = renderBoxModel!.parent as RenderLayoutBox;
+      parent.markChildrenNeedsSort();
+    }
   }
 
   void _markParentNeedsLayout() {

@@ -134,7 +134,7 @@ class ElementInstance : public NodeInstance {
   explicit ElementInstance(Element* element, std::string tagName, bool shouldAddUICommand);
 
  private:
-  DEFINE_HOST_CLASS_PROPERTY(18,
+  DEFINE_HOST_CLASS_PROPERTY(20,
                              nodeName,
                              tagName,
                              className,
@@ -150,6 +150,8 @@ class ElementInstance : public NodeInstance {
                              scrollLeft,
                              scrollHeight,
                              scrollWidth,
+                             firstElementChild,
+                             lastElementChild,
                              children,
                              innerHTML,
                              outerHTML);

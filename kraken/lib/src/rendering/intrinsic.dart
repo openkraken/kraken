@@ -81,7 +81,7 @@ class RenderIntrinsic extends RenderBoxModel
             childLayoutStart.microsecondsSinceEpoch;
       }
 
-      setMaxScrollableSize(child!.size.width, child!.size.height);
+      setMaxScrollableSize(child!.size);
 
       CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
       bool isInlineLevel = effectiveDisplay == CSSDisplay.inlineBlock ||

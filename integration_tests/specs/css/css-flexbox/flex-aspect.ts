@@ -42,7 +42,7 @@ describe('flex-aspect', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('ratio-img-column-002', async () => {
     let referenceOverlappedRed;

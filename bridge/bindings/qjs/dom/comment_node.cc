@@ -53,7 +53,7 @@ PROP_SETTER(CommentInstance, length)(QjsContext* ctx, JSValue this_val, int argc
 }
 
 CommentInstance::CommentInstance(Comment* comment) : NodeInstance(comment, NodeType::COMMENT_NODE, DocumentInstance::instance(Document::instance(comment->m_context)), Comment::classId(), "Comment") {
-  ::foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(eventTargetId, UICommand::createComment, nativeEventTarget);
+  ::foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_eventTargetId, UICommand::createComment, nativeEventTarget);
 }
 
 }  // namespace kraken::binding::qjs
