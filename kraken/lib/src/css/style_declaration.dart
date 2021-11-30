@@ -370,8 +370,8 @@ class CSSStyleDeclaration {
     Element? _target = target;
     // If style target element not exists, no need to do flush operation.
     if (_target == null) return;
-    // If target's parent element has no renderer attached, no need to flush.
-    if (_target.parentNode?.renderer == null) return;
+    // If target has no renderer attached, skip flush.
+    if (!_target.isRendererAttached) return;
 
     // Display change from none to other value that the renderBoxModel is null.
     if (_pendingProperties.containsKey(DISPLAY) && _target.isConnected) {

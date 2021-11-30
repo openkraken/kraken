@@ -192,7 +192,11 @@ class Element extends Node
       RenderBox? after;
       if (previousRenderBoxModel != null) {
         parentRenderBox = previousRenderBoxModel.parent as RenderBox?;
-        after = (previousRenderBoxModel.parentData as ContainerParentDataMixin<RenderBox>?)?.previousSibling;
+
+        if (previousRenderBoxModel.parentData is ContainerParentDataMixin<RenderBox>) {
+          after = (previousRenderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
+        }
+
         _detachRenderBoxModel(previousRenderBoxModel);
 
         if (parentRenderBox != null) {
