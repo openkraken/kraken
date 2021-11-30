@@ -288,7 +288,7 @@ describe('Position fixed', () => {
     await snapshot();
   });
 
-  it('insert fixed element before fixed element', async () => {
+  it('insert before position fixed element', async () => {
     let child1 = createElement('div', {
       style: {
         position: 'fixed',
