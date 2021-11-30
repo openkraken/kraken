@@ -309,7 +309,7 @@ class ImageElement extends Element {
     }
   }
 
-  void _resolveImage(Uri? resolvedUri) {
+  void _resolveImage(Uri? resolvedUri, { bool propertyChanged = false }) {
     if (resolvedUri == null) return;
 
     double? width = null;
@@ -327,7 +327,12 @@ class ImageElement extends Element {
     int? cachedHeight = (height != null && height > 0) ? (height * ui.window.devicePixelRatio).toInt() : null;
 
     ImageProvider? provider = _imageProvider;
-    if (_imageProvider == null) {
+    if (propertyChanged) {
+      // When propertyChanges, we should release previous cached images for better memory usage.
+      if (provider != null) {
+        provider.evict();
+      }
+
       provider = _imageProvider = getImageProvider(resolvedUri, cachedWidth: cachedWidth, cachedHeight: cachedHeight);
     }
     if (provider == null) return;
@@ -414,7 +419,7 @@ class ImageElement extends Element {
       // Update image source if image already attached.
       if (isRendererAttached) {
         final Uri? resolvedUri = _resolvedUri =  _resolveSrc();
-        _resolveImage(resolvedUri);
+        _resolveImage(resolvedUri, propertyChanged: true);
       } else {
         _precacheImage();
       }
@@ -422,10 +427,10 @@ class ImageElement extends Element {
       _resetLazyLoading();
     } else if (key == WIDTH) {
       _propertyWidth = CSSNumber.parseNumber(value);
-      _resolveImage(_resolvedUri);
+      _resolveImage(_resolvedUri, propertyChanged: true);
     } else if (key == HEIGHT) {
       _propertyHeight = CSSNumber.parseNumber(value);
-      _resolveImage(_resolvedUri);
+      _resolveImage(_resolvedUri, propertyChanged: true);
     }
 
   }
@@ -451,7 +456,7 @@ class ImageElement extends Element {
       // Resize renderBox
       if (isRendererAttached) _resizeImage();
       // Resize image
-      _resolveImage(_resolvedUri);
+      _resolveImage(_resolvedUri, propertyChanged: true);
     } else if (property == OBJECT_FIT && _renderImage != null) {
       _renderImage!.fit = renderBoxModel!.renderStyle.objectFit;
     } else if (property == OBJECT_POSITION && _renderImage != null) {
