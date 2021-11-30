@@ -81,6 +81,7 @@ final int PERFORMANCE_NONE_UNIQUE_ID = -1024;
 
 class PerformanceTiming {
   static PerformanceTiming? _instance;
+  static final bool _enabled = profileModeEnabled();
 
   static PerformanceTiming instance() {
     _instance ??= PerformanceTiming();
@@ -88,6 +89,7 @@ class PerformanceTiming {
   }
 
   void mark(String name, {int? startTime, int? uniqueId}) {
+    if (!_enabled) return;
     startTime ??= DateTime.now().microsecondsSinceEpoch;
 
     uniqueId ??= PERFORMANCE_NONE_UNIQUE_ID;

@@ -375,7 +375,7 @@ void DocumentCookie::setCookie(std::string& cookieStr) {
 DocumentInstance::DocumentInstance(Document* document) : NodeInstance(document, NodeType::DOCUMENT_NODE, this, Document::classId(), "document") {
   m_cookie = std::make_unique<DocumentCookie>();
   m_instanceMap[Document::instance(m_context)] = this;
-  eventTargetId = DOCUMENT_TARGET_ID;
+  m_eventTargetId = DOCUMENT_TARGET_ID;
 
   JSAtom htmlTagName = JS_NewAtom(m_ctx, "HTML");
   JSValue htmlTagValue = JS_AtomToValue(m_ctx, htmlTagName);

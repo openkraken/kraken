@@ -14,23 +14,19 @@ class RenderIntrinsic extends RenderBoxModel
     with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
   RenderIntrinsic(
       RenderStyle renderStyle,
-      ElementDelegate elementDelegate
   ) : super(
       renderStyle: renderStyle,
-      elementDelegate: elementDelegate
   );
 
   @override
   BoxSizeType get widthSizeType {
-    bool widthDefined =
-        renderStyle.width != null || (renderStyle.minWidth != null);
+    bool widthDefined = renderStyle.width.isNotAuto || renderStyle.minWidth.isNotAuto;
     return widthDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
   }
 
   @override
   BoxSizeType get heightSizeType {
-    bool heightDefined =
-        renderStyle.height != null || (renderStyle.minHeight != null);
+    bool heightDefined = renderStyle.height.isNotAuto || renderStyle.minHeight.isNotAuto;
     return heightDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
   }
 
@@ -64,12 +60,12 @@ class RenderIntrinsic extends RenderBoxModel
 
     beforeLayout();
 
-    double? width = renderStyle.width;
-    double? height = renderStyle.height;
-    double? minWidth = renderStyle.minWidth;
-    double? minHeight = renderStyle.minHeight;
-    double? maxWidth = renderStyle.maxWidth;
-    double? maxHeight = renderStyle.maxHeight;
+    double? width = renderStyle.width.isAuto ? null : renderStyle.width.computedValue;
+    double? height = renderStyle.height.isAuto ? null : renderStyle.height.computedValue;
+    double? minWidth = renderStyle.minWidth.isAuto ? null : renderStyle.minWidth.computedValue;
+    double? maxWidth = renderStyle.maxWidth.isNone ? null : renderStyle.maxWidth.computedValue;
+    double? minHeight = renderStyle.minHeight.isAuto ? null : renderStyle.minHeight.computedValue;
+    double? maxHeight = renderStyle.maxHeight.isNone ? null : renderStyle.maxHeight.computedValue;
 
     if (child != null) {
       late DateTime childLayoutStart;
@@ -85,11 +81,11 @@ class RenderIntrinsic extends RenderBoxModel
             childLayoutStart.microsecondsSinceEpoch;
       }
 
-      setMaxScrollableSize(child!.size.width, child!.size.height);
+      setMaxScrollableSize(child!.size);
 
-      CSSDisplay? transformedDisplay = renderStyle.transformedDisplay;
-      bool isInlineLevel = transformedDisplay == CSSDisplay.inlineBlock ||
-          transformedDisplay == CSSDisplay.inlineFlex;
+      CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
+      bool isInlineLevel = effectiveDisplay == CSSDisplay.inlineBlock ||
+          effectiveDisplay == CSSDisplay.inlineFlex;
 
       double constraintWidth = child!.size.width;
       double constraintHeight = child!.size.height;
@@ -172,8 +168,8 @@ class RenderIntrinsic extends RenderBoxModel
   /// Compute distance to baseline of replaced element
   @override
   double computeDistanceToBaseline() {
-    double marginTop = renderStyle.marginTop.length ?? 0;
-    double marginBottom = renderStyle.marginBottom.length ?? 0;
+    double marginTop = renderStyle.marginTop.computedValue;
+    double marginBottom = renderStyle.marginBottom.computedValue;
 
     // Use margin-bottom as baseline if layout has no children
     return marginTop + boxSize!.height + marginBottom;
@@ -183,19 +179,16 @@ class RenderIntrinsic extends RenderBoxModel
   /// override it to layout box model paint.
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (isCSSVisibilityHidden) return;
+    if (renderStyle.isVisibilityHidden) return;
     paintBoxModel(context, offset);
   }
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
-    if (renderStyle.padding != null) {
-      offset += Offset(renderStyle.paddingLeft, renderStyle.paddingTop);
-    }
 
-    if (renderStyle.borderEdge != null) {
-      offset += Offset(renderStyle.borderLeft, renderStyle.borderTop);
-    }
+    offset += Offset(renderStyle.paddingLeft.computedValue, renderStyle.paddingTop.computedValue);
+
+    offset += Offset(renderStyle.effectiveBorderLeftWidth.computedValue, renderStyle.effectiveBorderTopWidth.computedValue);
 
     if (child != null) {
       late DateTime childPaintStart;
@@ -211,39 +204,37 @@ class RenderIntrinsic extends RenderBoxModel
     }
   }
 
-  RenderSelfRepaintIntrinsic toSelfRepaint() {
+  RenderRepaintBoundaryIntrinsic toRepaintBoundaryIntrinsic() {
     RenderObject? childRenderObject = child;
     child = null;
-    RenderSelfRepaintIntrinsic newChild = RenderSelfRepaintIntrinsic(renderStyle, elementDelegate);
+    RenderRepaintBoundaryIntrinsic newChild = RenderRepaintBoundaryIntrinsic(renderStyle);
     newChild.child = childRenderObject as RenderBox?;
     return copyWith(newChild);
   }
 
   @override
   bool hitTestChildren(BoxHitTestResult result, {Offset? position}) {
-    if (renderStyle.transform != null) {
+    if (renderStyle.transformMatrix != null) {
       return hitTestIntrinsicChild(result, child, position!);
     }
     return super.hitTestChildren(result, position: position!);
   }
 }
 
-class RenderSelfRepaintIntrinsic extends RenderIntrinsic {
-  RenderSelfRepaintIntrinsic(
+class RenderRepaintBoundaryIntrinsic extends RenderIntrinsic {
+  RenderRepaintBoundaryIntrinsic(
     RenderStyle renderStyle,
-    ElementDelegate elementDelegate,
   ) : super(
     renderStyle,
-    elementDelegate
   );
 
   @override
   bool get isRepaintBoundary => true;
 
-  RenderIntrinsic toParentRepaint() {
+  RenderIntrinsic toIntrinsic() {
     RenderObject? childRenderObject = child;
     child = null;
-    RenderIntrinsic newChild = RenderIntrinsic(renderStyle, elementDelegate);
+    RenderIntrinsic newChild = RenderIntrinsic(renderStyle);
     newChild.child = childRenderObject as RenderBox?;
     return copyWith(newChild);
   }

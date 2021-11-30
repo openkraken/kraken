@@ -10,6 +10,7 @@ import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/module.dart';
 import 'package:meta/meta.dart';
 
 typedef EventHandler = void Function(Event event);
@@ -112,8 +113,6 @@ abstract class EventTarget {
     _nativeMap[nativeEventTargetPtr.address] = this;
   }
 
-  void addEvent(String eventType) {}
-
   void addEventListener(String eventType, EventHandler eventHandler) {
     List<EventHandler>? existHandler = eventHandlers[eventType];
     if (existHandler == null) {
@@ -131,8 +130,24 @@ abstract class EventTarget {
   }
 
   void dispatchEvent(Event event) {
-    if (!elementManager.controller.view.disposed) {
-      event.currentTarget = event.target = this;
+    if (disposed) return;
+
+    event.target = this;
+
+    emitUIEvent(elementManager.controller.view.contextId, nativeEventTargetPtr, event);
+    // Dispatch listener for widget.
+    if (elementManager.gestureListener != null) {
+      if (elementManager.gestureListener?.onTouchStart != null && event.type == EVENT_TOUCH_START) {
+        elementManager.gestureListener?.onTouchStart!(event as TouchEvent);
+      }
+
+      if (elementManager.gestureListener?.onTouchMove != null && event.type == EVENT_TOUCH_MOVE) {
+        elementManager.gestureListener?.onTouchMove!(event as TouchEvent);
+      }
+
+      if (elementManager.gestureListener?.onTouchEnd != null && event.type == EVENT_TOUCH_END) {
+        elementManager.gestureListener?.onTouchEnd!(event as TouchEvent);
+      }
     }
   }
 
@@ -140,13 +155,26 @@ abstract class EventTarget {
     return eventHandlers;
   }
 
-  dynamic handleJSCall(String method, List<dynamic> argv);
+  @mustCallSuper
+  dynamic handleJSCall(String method, List<dynamic> argv) {
+  }
 
   @mustCallSuper
   void dispose() {
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_START, uniqueId: targetId);
+    }
+
     elementManager.removeTarget(this);
     eventHandlers.clear();
     _nativeMap.remove(nativeEventTargetPtr.address);
     _disposed = true;
+    malloc.free(nativeEventTargetPtr);
+
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_END, uniqueId: targetId);
+    }
   }
+
+  // void addEvent(String eventType) {}
 }

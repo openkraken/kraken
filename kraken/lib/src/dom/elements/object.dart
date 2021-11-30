@@ -111,12 +111,6 @@ class ObjectElement extends Element implements ObjectElementHost {
     _objectElementClient.didDetachRenderer();
   }
 
-  // @override
-  // void setStyle(String key, value) {
-  //   super.setStyle(key, value);
-  //   _objectElementClient?.setStyle(key, value);
-  // }
-
   @override
   void updateChildTextureBox(TextureBox? textureBox) {
     if (textureBox != null) addChild(textureBox);

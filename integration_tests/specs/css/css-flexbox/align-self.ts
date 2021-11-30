@@ -1691,7 +1691,7 @@ describe('align-self', () => {
 
     requestAnimationFrame(async () => {
       foo.style.alignSelf = 'flex-end';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });

@@ -6,6 +6,7 @@
 import 'dart:ui' as ui;
 
 import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
 
 mixin CSSOpacityMixin on RenderStyleBase {
 
@@ -24,18 +25,24 @@ mixin CSSOpacityMixin on RenderStyleBase {
   set opacity(double? value) {
     if (value == null) return;
     assert(value >= 0.0 && value <= 1.0);
-    if (_opacity == value)
-      return;
+    if (_opacity == value) return;
+
     _opacity = value;
     int alpha = ui.Color.getAlphaFromOpacity(_opacity);
     renderBoxModel!.alpha = alpha;
     if (alpha != 0 && alpha != 255)
       renderBoxModel!.markNeedsCompositingBitsUpdate();
+
+    // Opacity effect the stacking context.
+    RenderBoxModel? parentRenderer = (this as RenderStyle).parent?.renderBoxModel;
+    if (parentRenderer is RenderLayoutBox) {
+      parentRenderer.markChildrenNeedsSort();
+    }
+
     renderBoxModel!.markNeedsPaint();
   }
 
-  void updateOpacity(String value) {
-    double? opacityValue = CSSStyleDeclaration.isNullOrEmptyValue(value) ? 1.0 : CSSLength.toDouble(value);
-    opacity = opacityValue;
+  static double? resolveOpacity(String value) {
+    return CSSStyleDeclaration.isNullOrEmptyValue(value) ? 1.0 : CSSLength.toDouble(value);
   }
 }

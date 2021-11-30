@@ -153,4 +153,50 @@ describe('display sliver', () => {
     await snapshot();
   });
 
+  it('sliver child is text or comment', async () => {
+    var comment = document.createComment('HelloWorld');
+    var text = document.createTextNode('HelloWorld');
+    // Empty text node has different logic in backend.
+    var emptyText = document.createTextNode('');
+
+    var container = createSliverBasicCase();
+    
+    container.insertBefore(emptyText, container.firstChild);
+    container.insertBefore(text, container.firstChild);
+    container.insertBefore(comment, container.firstChild);
+    expect(container.childNodes.length).toEqual(103);
+
+    await snapshot(); // Not throws error is ok.
+  });
+
+  it('sliver child is display none', async () => {
+    var container = createSliverBasicCase();
+    
+    container.children[2].style.display = 'none';
+    await snapshot(); // Not throws error is ok.
+  });
+
+  it('sliver child should handle with hist test', async (done) => {
+    var d = document.createElement('div');
+    d.style.display = 'sliver';
+    for (var i = 0; i < 100; i ++) {
+      var e = document.createElement('div');
+      e.style.background = 'red';
+      e.style.width = e.style.height = '99px';
+      e.appendChild(document.createTextNode(i + ''));
+      e.onclick = ((i) => (evt) => {
+        if (i === 30) done();
+      })(i);
+      d.appendChild(e);
+    }
+
+    d.style.width = '100px';
+    d.style.height = '150px';
+
+    document.body.appendChild(d);
+
+    d.scrollBy(0, 30 * 100); // Move to the 30.
+
+    await simulateClick(50, 20); // Will trigger done.
+  });
 });

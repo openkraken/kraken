@@ -90,7 +90,6 @@ describe('Align text-align', () => {
     BODY.appendChild(container);
 
     await snapshot();
-
     requestAnimationFrame(async () => {
       container.style.textAlign = 'right';
       await snapshot();

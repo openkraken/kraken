@@ -8,12 +8,17 @@
 
 #include <quickjs/list.h>
 #include <quickjs/quickjs.h>
+#include <atomic>
+#include <cassert>
+#include <cmath>
+#include <cstring>
+#include <locale>
 #include <memory>
+#include <mutex>
 #include <unordered_map>
 #include "js_context_macros.h"
 #include "kraken_foundation.h"
 #include "qjs_patch.h"
-
 using QjsContext = JSContext;
 using JSExceptionHandler = std::function<void(int32_t contextId, const char* message)>;
 
@@ -141,6 +146,9 @@ class ObjectProperty {
     JSAtom key = JS_NewAtom(context->ctx(), property);
     JS_DefineProperty(context->ctx(), thisObject, key, JS_UNDEFINED, get, JS_UNDEFINED, JS_PROP_HAS_CONFIGURABLE | JS_PROP_ENUMERABLE | JS_PROP_HAS_GET);
     JS_FreeAtom(context->ctx(), key);
+  }
+  explicit ObjectProperty(JSContext* context, JSValueConst thisObject, const char* property, JSValue value) {
+    JS_DefinePropertyValueStr(context->ctx(), thisObject, property, value, JS_PROP_ENUMERABLE);
   }
 };
 
