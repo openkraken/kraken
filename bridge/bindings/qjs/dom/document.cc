@@ -164,7 +164,7 @@ JSValue Document::createElement(QjsContext* ctx, JSValue this_val, int argc, JSV
   auto document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   auto* context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
   std::string tagName = jsValueToStdString(ctx, tagNameValue);
-  JSValue constructor = static_cast<Document *>(document->prototype())->getElementConstructor(document->m_context, tagName);
+  JSValue constructor = static_cast<Document*>(document->prototype())->getElementConstructor(document->m_context, tagName);
 
   JSValue element = JS_CallConstructor(ctx, constructor, argc, argv);
   return element;

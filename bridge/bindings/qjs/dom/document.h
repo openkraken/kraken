@@ -43,7 +43,6 @@ class Document : public Node {
   bool isCustomElement(const std::string& tagName);
 
  private:
-
   void defineElement(const std::string& tagName, Element* constructor);
 
   ObjectFunction m_createEvent{m_context, m_prototypeObject, "createEvent", createEvent, 1};

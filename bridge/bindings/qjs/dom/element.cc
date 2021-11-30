@@ -130,10 +130,10 @@ JSValue Element::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue 
     return JS_ThrowTypeError(ctx, "Illegal constructor");
   }
 
-  auto *context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
+  auto* context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
   std::string name = jsValueToStdString(ctx, tagName);
 
-  auto *Document = Document::instance(context);
+  auto* Document = Document::instance(context);
   if (Document->isCustomElement(name)) {
     return JS_CallConstructor(ctx, Document->getElementConstructor(context, name), argc, argv);
   }

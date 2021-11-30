@@ -52,23 +52,20 @@ TEST(Document, instanceofNode) {
 }
 
 TEST(Document, createElementShouldWorkWithMultipleContext) {
-  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
-  };
+  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {};
 
-  kraken::JSBridge *bridge1;
+  kraken::JSBridge* bridge1;
 
   const char* code = "(() => { let img = document.createElement('img'); document.body.appendChild(img);  })();";
 
   {
-    auto* bridge = bridge1 = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
-    });
+    auto* bridge = bridge1 = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {});
     auto& context = bridge->getContext();
     bridge->evaluateScript(code, strlen(code), "vm://", 0);
   }
 
   {
-    auto* bridge = new kraken::JSBridge(1, [](int32_t contextId, const char* errmsg) {
-    });
+    auto* bridge = new kraken::JSBridge(1, [](int32_t contextId, const char* errmsg) {});
     auto& context = bridge->getContext();
     const char* code = "(() => { let img = document.createElement('img'); document.body.appendChild(img);  })();";
     bridge->evaluateScript(code, strlen(code), "vm://", 0);
