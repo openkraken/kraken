@@ -340,6 +340,7 @@ function generateEventInstanceConstructorCode(object: ClassObject) {
     } else if (p.kind === PropsDeclarationKind.object) {
       propApplyCode = addIndent(`JSValue v = JS_GetProperty(m_ctx, eventInit, ${p.name}Atom);
   JSValue json = JS_JSONStringify(m_ctx, v, JS_NULL, JS_NULL);
+  if (JS_IsException(json)) return json;
   nativeEvent->${p.name} = jsValueToNativeString(m_ctx, json);
   JS_FreeValue(m_ctx, json);
   JS_FreeValue(m_ctx, v);`, 0);
