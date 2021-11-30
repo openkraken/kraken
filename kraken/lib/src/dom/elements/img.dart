@@ -26,7 +26,6 @@ const Map<String, dynamic> _defaultStyle = {
 class ImageElement extends Element {
   // The render box to draw image.
   RenderImage? _renderImage;
-  bool _isListeningToStream = false;
   ImageProvider? _imageProvider;
 
   ImageStream? _imageStream;
@@ -42,8 +41,9 @@ class ImageElement extends Element {
   /// Number of image frame, used to identify multi frame image after loaded.
   int _frameCount = 0;
 
+  bool _isListeningStream = false;
   bool _isInLazyLoading = false;
-  bool _imageLoaded = false;
+  bool _isImageLoaded = false;
 
   bool get _shouldLazyLoading => properties['loading'] == 'lazy';
   ImageStreamCompleterHandle? _completerHandle;
@@ -83,7 +83,7 @@ class ImageElement extends Element {
 
   void _loadImage() {
     _constructImage();
-    // Try to attach image if image had cached.
+    // Try to attach image if image is cached.
     _attachImage();
     _resizeImage();
     _resolveImage(_resolvedUri);
@@ -108,14 +108,14 @@ class ImageElement extends Element {
   }
 
   void _listenToStream() {
-    if (_isListeningToStream)
+    if (_isListeningStream)
       return;
 
     _imageStream?.addListener(_getListener());
     _completerHandle?.dispose();
     _completerHandle = null;
 
-    _isListeningToStream = true;
+    _isListeningStream = true;
   }
 
   @override
@@ -274,7 +274,7 @@ class ImageElement extends Element {
   /// to true, which create [ImageStreamCompleterHandle] to keep the completer
   /// alive.
   void _stopListeningStream({bool keepStreamAlive = false}) {
-    if (!_isListeningToStream)
+    if (!_isListeningStream)
       return;
 
     if (keepStreamAlive && _completerHandle == null && _imageStream?.completer != null) {
@@ -282,7 +282,7 @@ class ImageElement extends Element {
     }
 
     _imageStream?.removeListener(_getListener());
-    _isListeningToStream = false;
+    _isListeningStream = false;
   }
 
   Uri? _resolveSrc() {
@@ -297,14 +297,14 @@ class ImageElement extends Element {
   void _updateSourceStream(ImageStream newStream) {
     if (_imageStream?.key == newStream.key) return;
 
-    if (_isListeningToStream) {
+    if (_isListeningStream) {
       _imageStream?.removeListener(_getListener());
     }
 
     _frameCount = 0;
     _imageStream = newStream;
 
-    if (_isListeningToStream) {
+    if (_isListeningStream) {
       _imageStream!.addListener(_getListener());
     }
   }
@@ -355,8 +355,8 @@ class ImageElement extends Element {
     _replaceImage(info: imageInfo);
     _frameCount++;
 
-    if (!_imageLoaded) {
-      _imageLoaded = true;
+    if (!_isImageLoaded) {
+      _isImageLoaded = true;
       if (synchronousCall) {
         // `synchronousCall` happens when caches image and calling `addListener`.
         scheduleMicrotask(_handleEventAfterImageLoaded);
@@ -389,8 +389,8 @@ class ImageElement extends Element {
         _replaceImage(info: imageInfo);
         _frameCount++;
 
-        if (!_imageLoaded && !_shouldLazyLoading) {
-          _imageLoaded = true;
+        if (!_isImageLoaded && !_shouldLazyLoading) {
+          _isImageLoaded = true;
           if (sync) {
             // `synchronousCall` happens when caches image and calling `addListener`.
             scheduleMicrotask(_handleEventAfterImageLoaded);
