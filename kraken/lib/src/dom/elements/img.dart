@@ -124,6 +124,7 @@ class ImageElement extends Element {
     _stopListeningStream();
     _completerHandle?.dispose();
     _replaceImage(info: null);
+    _imageProvider?.evict();
     _imageProvider = null;
   }
 
@@ -325,7 +326,10 @@ class ImageElement extends Element {
     int? cachedWidth = (width != null && width > 0) ? (width * ui.window.devicePixelRatio).toInt() : null;
     int? cachedHeight = (height != null && height > 0) ? (height * ui.window.devicePixelRatio).toInt() : null;
 
-    ImageProvider? provider = _imageProvider = getImageProvider(resolvedUri, cachedWidth: cachedWidth, cachedHeight: cachedHeight);
+    ImageProvider? provider = _imageProvider;
+    if (_imageProvider == null) {
+      provider = _imageProvider = getImageProvider(resolvedUri, cachedWidth: cachedWidth, cachedHeight: cachedHeight);
+    }
     if (provider == null) return;
     final ImageStream newStream = provider.resolve(ImageConfiguration.empty);
     _updateSourceStream(newStream);
