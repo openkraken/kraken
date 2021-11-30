@@ -276,12 +276,10 @@ abstract class WidgetElement extends dom.Element {
         container: renderBoxModel as RenderObjectWithChildMixin<RenderBox>
     );
 
-    bool isBuilding = elementManager.controller.isBuilding;
-
     if (ancestorWidgetElement != null) {
-      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, ancestorWidgetElement._adaptor?.element! as RenderObjectElement, isBuilding);
+      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, ancestorWidgetElement._adaptor?.element! as RenderObjectElement, false);
     } else {
-      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement, isBuilding);
+      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement, true);
     }
   }
 
