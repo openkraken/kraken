@@ -56,16 +56,25 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
 
   /// Inflate this widget and actually set the resulting [RenderObject] as the
   /// child of [container].
-  KrakenRenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, RenderObjectElement parentElement) {
+  KrakenRenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, RenderObjectElement parentElement, bool needBuild) {
     owner.lockState(() {
       _element = createElement();
       assert(_element != null);
     });
-    owner.buildScope(_element!, () {
+
+    // if renderview is building,skip the buildScope phase.
+    if (!needBuild) {
       if (_element != null) {
         _element?.mount(parentElement, null);
       }
-    });
+    } else {
+      owner.buildScope(_element!, () {
+        if (_element != null) {
+          _element?.mount(parentElement, null);
+        }
+      });
+    }
+
     return _element! as KrakenRenderObjectToWidgetElement<T>;
   }
 
@@ -162,7 +171,8 @@ class KrakenRenderObjectToWidgetElement<T extends RenderObject> extends RenderOb
 
   @override
   void insertRenderObjectChild(RenderObject child, Object? slot) {
-    assert(slot == _rootChildSlot);
+    // assert(slot == _rootChildSlot);
+    print('child $child parent: ${child.parent}');
     assert(renderObject.debugValidateChild(child));
     renderObject.child = child as T;
   }
@@ -268,10 +278,12 @@ abstract class WidgetElement extends dom.Element {
         container: renderBoxModel as RenderObjectWithChildMixin<RenderBox>
     );
 
+    bool isBuilding = elementManager.controller.isBuilding;
+
     if (ancestorWidgetElement != null) {
-      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, ancestorWidgetElement._adaptor?.element! as RenderObjectElement);
+      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, ancestorWidgetElement._adaptor?.element! as RenderObjectElement, isBuilding);
     } else {
-      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement);
+      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement, isBuilding);
     }
   }
 

@@ -420,6 +420,8 @@ class KrakenController {
 
   late RenderObjectElement rootKrakenElement;
 
+  bool isBuilding = false;
+
   static KrakenController? getControllerOfJSContextId(int? contextId) {
     if (!_controllerMap.containsKey(contextId)) {
       return null;

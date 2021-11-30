@@ -8,7 +8,7 @@ class KrakenElementToWidgetAdaptor extends RenderObjectWidget {
 
   @override
   RenderObjectElement createElement() {
-    return KrakenElementToFlutterElementAdaptor(this);
+    return KrakenElementToFlutterElementAdaptor(this, this._krakenNode);
   }
 
   @override
@@ -18,7 +18,9 @@ class KrakenElementToWidgetAdaptor extends RenderObjectWidget {
 }
 
 class KrakenElementToFlutterElementAdaptor extends RenderObjectElement {
-  KrakenElementToFlutterElementAdaptor(RenderObjectWidget widget) : super(widget);
+  KrakenElementToFlutterElementAdaptor(RenderObjectWidget widget, this._krakenNode) : super(widget);
+
+  final dom.Node _krakenNode;
 
   @override
   KrakenElementToWidgetAdaptor get widget => super.widget as KrakenElementToWidgetAdaptor;
@@ -27,9 +29,14 @@ class KrakenElementToFlutterElementAdaptor extends RenderObjectElement {
   void mount(Element? parent, Object? newSlot) {
     widget._krakenNode.createRenderer();
     super.mount(parent, newSlot);
+
+    _krakenNode.elementManager.controller.isBuilding = true;
     widget._krakenNode.ensureChildAttached();
+
     if (widget._krakenNode is dom.Element) {
       (widget._krakenNode as dom.Element).style.flushPendingProperties();
     }
+
+    _krakenNode.elementManager.controller.isBuilding = false;
   }
 }
