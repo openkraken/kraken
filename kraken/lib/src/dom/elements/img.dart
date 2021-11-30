@@ -43,7 +43,9 @@ class ImageElement extends Element {
 
   bool _isListeningStream = false;
   bool _isInLazyLoading = false;
-  bool _isImageLoaded = false;
+  // https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-complete-dev
+  // A boolean value which indicates whether or not the image has completely loaded.
+  bool complete = false;
 
   bool get _shouldLazyLoading => properties['loading'] == 'lazy';
   ImageStreamCompleterHandle? _completerHandle;
@@ -355,8 +357,8 @@ class ImageElement extends Element {
     _replaceImage(info: imageInfo);
     _frameCount++;
 
-    if (!_isImageLoaded) {
-      _isImageLoaded = true;
+    if (!complete) {
+      complete = true;
       if (synchronousCall) {
         // `synchronousCall` happens when caches image and calling `addListener`.
         scheduleMicrotask(_handleEventAfterImageLoaded);
@@ -389,8 +391,8 @@ class ImageElement extends Element {
         _replaceImage(info: imageInfo);
         _frameCount++;
 
-        if (!_isImageLoaded && !_shouldLazyLoading) {
-          _isImageLoaded = true;
+        if (!complete && !_shouldLazyLoading) {
+          complete = true;
           if (sync) {
             // `synchronousCall` happens when caches image and calling `addListener`.
             scheduleMicrotask(_handleEventAfterImageLoaded);
