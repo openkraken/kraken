@@ -26,6 +26,7 @@ mixin CSSDisplayMixin on RenderStyleBase {
   set display(CSSDisplay value) {
     if (_display != value) {
       _display = value;
+
       renderBoxModel?.markNeedsLayout();
     }
   }
