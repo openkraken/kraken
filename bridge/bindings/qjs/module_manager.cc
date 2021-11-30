@@ -105,7 +105,8 @@ JSValue krakenInvokeModule(QjsContext* ctx, JSValueConst this_val, int argc, JSV
   NativeString* params = nullptr;
   if (!JS_IsNull(paramsValue)) {
     JSValue stringifyedValue = JS_JSONStringify(ctx, paramsValue, JS_NULL, JS_NULL);
-    if (JS_IsException(stringifyedValue)) return stringifyedValue;
+    if (JS_IsException(stringifyedValue))
+      return stringifyedValue;
     params = jsValueToNativeString(ctx, stringifyedValue);
     JS_FreeValue(ctx, stringifyedValue);
   }

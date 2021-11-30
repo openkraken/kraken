@@ -1,11 +1,11 @@
 /*
-* Copyright (C) 2021 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2021 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
-#include "host_object.h"
 #include <gtest/gtest.h>
 #include "bridge_qjs.h"
+#include "host_object.h"
 #include "js_context.h"
 
 namespace kraken::binding::qjs {
@@ -13,7 +13,8 @@ namespace kraken::binding::qjs {
 TEST(ModuleManager, shouldThrowErrorWhenBadJSON) {
   bool static errorCalled = false;
   auto* bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
-    EXPECT_STREQ(errmsg, "TypeError: circular reference\n"
+    EXPECT_STREQ(errmsg,
+                 "TypeError: circular reference\n"
                  "    at __kraken_invoke_module__ (native)\n"
                  "    at <anonymous> (internal://)\n"
                  "    at Promise (native)\n"
@@ -21,8 +22,7 @@ TEST(ModuleManager, shouldThrowErrorWhenBadJSON) {
                  "    at <eval> (vm://:12)\n");
     errorCalled = true;
   });
-  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
-  };
+  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {};
 
   auto& context = bridge->getContext();
 
@@ -43,6 +43,5 @@ kraken.methodChannel.invokeMethod('abc', 'fn', object);
   delete bridge;
   EXPECT_EQ(errorCalled, true);
 }
-
 
 }  // namespace kraken::binding::qjs
