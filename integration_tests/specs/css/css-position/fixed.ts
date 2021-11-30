@@ -287,39 +287,4 @@ describe('Position fixed', () => {
     cont.style.position = 'static';
     await snapshot();
   });
-
-  it('insert before position fixed element', async () => {
-    let child1 = createElement('div', {
-      style: {
-        position: 'fixed',
-        top: '100px',
-        width: '100px',
-        height: '100px',
-        background: 'red'
-      }
-    });
-    let child2;
-    const container = createElement('div', {
-      style: {
-        width: '200px',
-        height: '200px',
-        background: 'yellow'
-      }
-    }, [
-      (child2 = createElement('div', {
-        style: {
-          position: 'fixed',
-          width: '100px',
-          height: '100px',
-          background: 'green'
-        }
-      }))
-    ]);
-    
-    document.body.appendChild(container);
-
-    container.insertBefore(child1, child2);
-
-    await snapshot();
-  });
 });
