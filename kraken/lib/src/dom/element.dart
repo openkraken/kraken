@@ -693,7 +693,17 @@ class Element extends Node
         RenderBox? afterRenderObject;
         // `referenceNode` should not be null, or `referenceIndex` can only be -1.
         if (referenceIndex != -1 && referenceNode.isRendererAttached) {
-          afterRenderObject = (referenceNode.renderer!.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
+          RenderBox renderer = referenceNode.renderer!;
+          // Renderer of referenceNode may not moved to a difference place compared to its original place
+          // in the dom tree due to position absolute/fixed.
+          // Use the renderPositionPlaceholder to get the same place as dom tree in this case.
+          if (renderer is RenderBoxModel) {
+            RenderBox? renderPositionPlaceholder = renderer.renderPositionPlaceholder;
+            if (renderPositionPlaceholder != null) {
+              renderer = renderPositionPlaceholder;
+            }
+          }
+          afterRenderObject = (renderer.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
         }
         child.attachTo(this, after: afterRenderObject);
       }
