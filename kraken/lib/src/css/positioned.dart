@@ -31,13 +31,16 @@ BoxSizeType? _getChildHeightSizeType(RenderBox child) {
 
 // RenderPositionHolder may be affected by overflow: scroller offset.
 // We need to reset these offset to keep positioned elements render at their original position.
+// @NOTE: Attention that renderObjects in tree may not all subtype of RenderBoxModel, use `is` to identify.
 Offset? _getRenderPositionHolderScrollOffset(RenderPositionPlaceholder holder, RenderObject root) {
-  RenderBoxModel? parent = holder.parent as RenderBoxModel?;
-  while (parent != null && parent != root) {
-    if (parent.clipX || parent.clipY) {
-      return Offset(parent.scrollLeft, parent.scrollTop);
+  AbstractNode? current = holder.parent;
+  while (current != null && current != root) {
+    if (current is RenderBoxModel) {
+      if (current.clipX || current.clipY) {
+        return Offset(current.scrollLeft, current.scrollTop);
+      }
     }
-    parent = parent.parent as RenderBoxModel?;
+    current = current.parent;
   }
   return null;
 }

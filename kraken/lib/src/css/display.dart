@@ -14,7 +14,7 @@ enum CSSDisplay {
   flex,
   inlineFlex,
 
-  sliver, // @TODO temp name.
+  sliver,
 
   none
 }

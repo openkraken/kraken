@@ -49,11 +49,6 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
     childNode.willAttachRenderer();
 
     RenderBox? child;
-
-    if (childNode is Element) {
-      childNode.style.flushPendingProperties();
-    }
-
     if (childNode is Node) {
       child = childNode.renderer;
     } else {
@@ -68,8 +63,11 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
       _sliverListLayout.insertSliverChild(child, after: after);
     }
 
+    if (childNode is Element) {
+      childNode.style.flushPendingProperties();
+    }
+
     childNode.didAttachRenderer();
-    childNode.ensureChildAttached();
   }
 
   RenderBox _createEmptyRenderObject() {

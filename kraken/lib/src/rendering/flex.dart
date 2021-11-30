@@ -667,7 +667,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       // Layout placeholder of positioned element(absolute/fixed) in new layer
       if (child is RenderBoxModel && childParentData.isPositioned) {
         CSSPositionedLayout.layoutPositionedChild(this, child);
-      } else if (child is RenderPositionPlaceholder && isPlaceholderPositioned(child)) {
+      } else if (child is RenderPositionPlaceholder && _isPlaceholderPositioned(child)) {
         _layoutChildren(child);
       }
 
@@ -714,19 +714,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     didLayout();
-  }
-
-
-  bool isPlaceholderPositioned(RenderObject child) {
-    if (child is RenderPositionPlaceholder) {
-      RenderBoxModel realDisplayedBox = child.positioned!;
-      RenderLayoutParentData parentData =
-          realDisplayedBox.parentData as RenderLayoutParentData;
-      if (parentData.isPositioned) {
-        return true;
-      }
-    }
-    return false;
   }
 
   /// There are 4 stages when layouting children
@@ -906,7 +893,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       // Exclude positioned placeholder renderObject when layout non placeholder object
       // and positioned renderObject
       if (placeholderChild == null &&
-          (isPlaceholderPositioned(child) || childParentData!.isPositioned)) {
+          (_isPlaceholderPositioned(child) || childParentData!.isPositioned)) {
         child = childParentData!.nextSibling;
         continue;
       }
@@ -920,19 +907,22 @@ class RenderFlexLayout extends RenderLayoutBox {
         childNodeId = child.hashCode;
       }
 
-      if (child is RenderPositionPlaceholder && isPlaceholderPositioned(child)) {
-        RenderBoxModel realDisplayedBox = child.positioned!;
-        // Flutter only allow access size of direct children, so cannot use realDisplayedBox.size
-        Size realDisplayedBoxSize =
-            realDisplayedBox.getBoxSize(realDisplayedBox.contentSize);
-        double realDisplayedBoxWidth = realDisplayedBoxSize.width;
-        double realDisplayedBoxHeight = realDisplayedBoxSize.height;
-        childConstraints = BoxConstraints(
-          minWidth: realDisplayedBoxWidth,
-          maxWidth: realDisplayedBoxWidth,
-          minHeight: realDisplayedBoxHeight,
-          maxHeight: realDisplayedBoxHeight,
-        );
+      if (_isPlaceholderPositioned(child)) {
+        RenderBoxModel positionedBox = (child as RenderPositionPlaceholder).positioned!;
+        if (positionedBox.hasSize) {
+          // Flutter only allow access size of direct children, so cannot use realDisplayedBox.size
+          Size realDisplayedBoxSize = positionedBox.getBoxSize(positionedBox.contentSize);
+          double realDisplayedBoxWidth = realDisplayedBoxSize.width;
+          double realDisplayedBoxHeight = realDisplayedBoxSize.height;
+          childConstraints = BoxConstraints(
+            minWidth: realDisplayedBoxWidth,
+            maxWidth: realDisplayedBoxWidth,
+            minHeight: realDisplayedBoxHeight,
+            maxHeight: realDisplayedBoxHeight,
+          );
+        } else {
+          childConstraints = BoxConstraints();
+        }
       } else if (child is RenderBoxModel) {
         childConstraints = child.getConstraints();
       } else if (child is RenderTextBox) {
@@ -1345,7 +1335,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
         // Whether child is positioned placeholder or positioned renderObject
         bool isChildPositioned = placeholderChild == null &&
-            (isPlaceholderPositioned(child) || childParentData!.isPositioned);
+            (_isPlaceholderPositioned(child) || childParentData!.isPositioned);
         // Whether child cross size should be changed based on cross axis alignment change
         bool isCrossSizeChanged = false;
 
@@ -2008,7 +1998,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         // Exclude positioned placeholder renderObject when layout non placeholder object
         // and positioned renderObject
         if (placeholderChild == null &&
-            (isPlaceholderPositioned(child) || childParentData!.isPositioned)) {
+            (_isPlaceholderPositioned(child) || childParentData!.isPositioned)) {
           child = childParentData!.nextSibling;
           continue;
         }
@@ -2453,6 +2443,17 @@ class RenderFlexLayout extends RenderLayoutBox {
         DiagnosticsProperty<AlignItems>('alignItems', renderStyle.alignItems));
     properties
         .add(DiagnosticsProperty<FlexWrap>('flexWrap', renderStyle.flexWrap));
+  }
+
+  static bool _isPlaceholderPositioned(RenderObject child) {
+    if (child is RenderPositionPlaceholder) {
+      RenderBoxModel realDisplayedBox = child.positioned!;
+      RenderLayoutParentData parentData = realDisplayedBox.parentData as RenderLayoutParentData;
+      if (parentData.isPositioned) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 
