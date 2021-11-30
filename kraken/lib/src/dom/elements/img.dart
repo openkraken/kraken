@@ -384,7 +384,7 @@ class ImageElement extends Element {
         _replaceImage(info: imageInfo);
         _frameCount++;
 
-        if (!_imageLoaded) {
+        if (!_imageLoaded && !_shouldLazyLoading) {
           _imageLoaded = true;
           if (sync) {
             // `synchronousCall` happens when caches image and calling `addListener`.
