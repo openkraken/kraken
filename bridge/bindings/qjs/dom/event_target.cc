@@ -285,9 +285,6 @@ EventTargetInstance::~EventTargetInstance() {
 #if FLUTTER_BACKEND
   getDartMethod()->flushUICommand();
 #endif
-  JS_FreeValue(m_ctx, m_properties);
-  JS_FreeValue(m_ctx, m_eventHandlers);
-  JS_FreeValue(m_ctx, m_propertyEventHandler);
 }
 
 int EventTargetInstance::hasProperty(QjsContext* ctx, JSValue obj, JSAtom atom) {
