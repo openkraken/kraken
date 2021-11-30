@@ -176,6 +176,13 @@ class RenderFlowLayout extends RenderLayoutBox {
   List<_RunMetrics> lineBoxMetrics = <_RunMetrics>[];
 
   @override
+  void dispose() {
+    super.dispose();
+
+    lineBoxMetrics.clear();
+  }
+
+  @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderLayoutParentData) {
       child.parentData = RenderLayoutParentData();
@@ -474,20 +481,14 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     // If no child exists, stop layout.
     if (childCount == 0) {
-      Size layoutSize = getLayoutSize(
+      Size layoutContentSize = getContentSize(
         logicalContentWidth: logicalContentWidth,
         logicalContentHeight: logicalContentHeight,
         contentWidth: 0,
         contentHeight: 0,
       );
-      double constraintWidth = layoutSize.width;
-      double constraintHeight = layoutSize.height;
-
-      setMaxScrollableSize(constraintWidth, constraintHeight);
-      size = getBoxSize(Size(
-        constraintWidth,
-        constraintHeight,
-      ));
+      setMaxScrollableSize(layoutContentSize);
+      size = getBoxSize(layoutContentSize);
       return;
     }
 
@@ -698,14 +699,12 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     final int runCount = runMetrics.length;
 
-    Size layoutSize = getLayoutSize(
+    Size layoutContentSize = getContentSize(
       logicalContentWidth: logicalContentWidth,
       logicalContentHeight: logicalContentHeight,
       contentWidth: mainAxisExtent,
       contentHeight: crossAxisExtent,
     );
-    double constraintWidth = layoutSize.width;
-    double constraintHeight = layoutSize.height;
 
     // Main and cross content size of flow layout
     double mainAxisContentSize = 0.0;
@@ -713,8 +712,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     switch (direction) {
       case Axis.horizontal:
-        Size logicalSize = Size(constraintWidth, constraintHeight);
-        size = getBoxSize(logicalSize);
+        size = getBoxSize(layoutContentSize);
         mainAxisContentSize = contentSize.width;
         crossAxisContentSize = contentSize.height;
         break;
@@ -912,9 +910,17 @@ class RenderFlowLayout extends RenderLayoutBox {
 
         double? childMarginLeft = 0;
         double? childMarginTop = 0;
+
+        RenderBoxModel? childRenderBoxModel;
         if (child is RenderBoxModel) {
-          childMarginLeft = child.renderStyle.marginLeft.computedValue;
-          childMarginTop = _getChildMarginTop(child);
+          childRenderBoxModel = child;
+        } else if (child is RenderPositionPlaceholder) {
+          childRenderBoxModel = child.positioned;
+        }
+
+        if (childRenderBoxModel is RenderBoxModel) {
+          childMarginLeft = childRenderBoxModel.renderStyle.marginLeft.computedValue;
+          childMarginTop = _getChildMarginTop(childRenderBoxModel);
         }
 
         // No need to add padding and border for scrolling content box.
@@ -1550,30 +1556,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   @override
   bool hitTestChildren(BoxHitTestResult result, {Offset? position}) {
     return defaultHitTestChildren(result, position: position);
-  }
-
-  @override
-  int sortSiblingsByZIndex(RenderObject prev, RenderObject next) {
-    CSSPositionType prevPosition = prev is RenderBoxModel
-      ? prev.renderStyle.position
-      : CSSPositionType.static;
-    CSSPositionType nextPosition = next is RenderBoxModel
-      ? next.renderStyle.position
-      : CSSPositionType.static;
-    // Place positioned element after non positioned element
-    if (prevPosition == CSSPositionType.static &&
-      nextPosition != CSSPositionType.static) {
-      return -1;
-    }
-    if (prevPosition != CSSPositionType.static &&
-      nextPosition == CSSPositionType.static) {
-      return 1;
-    }
-    int prevZIndex =
-      prev is RenderBoxModel ? (prev.renderStyle.zIndex ?? 0) : 0;
-    int nextZIndex =
-      next is RenderBoxModel ? (next.renderStyle.zIndex ?? 0) : 0;
-    return prevZIndex - nextZIndex;
   }
 
   @override

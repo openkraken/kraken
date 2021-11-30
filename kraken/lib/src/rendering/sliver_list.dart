@@ -42,7 +42,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
   }) : _renderSliverBoxChildManager = manager,
        _scrollListener = onScroll,
         super(renderStyle: renderStyle) {
-    pointerListener = _pointerListener;
+    scrollablePointerListener = _scrollablePointerListener;
     scrollable = KrakenScrollable(axisDirection: getAxisDirection(axis));
     axis = renderStyle.sliverDirection;
 
@@ -121,7 +121,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
     }
   }
 
-  void _pointerListener(PointerEvent event) {
+  void _scrollablePointerListener(PointerEvent event) {
     if (event is PointerDownEvent) {
       scrollable.handlePointerDown(event);
     }
@@ -218,6 +218,32 @@ class RenderSliverListLayout extends RenderLayoutBox {
             childPaintStart.microsecondsSinceEpoch);
       }
     }
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    // The x, y parameters have the top left of the node's box as the origin.
+    // Get the sliver content scrolling offset.
+    final Offset currentOffset = Offset(scrollLeft, scrollTop);
+
+    // The z-index needs to be sorted, and higher-level nodes are processed first.
+    for (int i = paintingOrder.length - 1; i >= 0; i--) {
+      RenderBox child = paintingOrder[i];
+      // Ignore detached render object.
+      if (!child.attached) continue;
+
+      final ContainerBoxParentData childParentData = child.parentData as ContainerBoxParentData;
+      final bool isHit = result.addWithPaintOffset(
+        offset: childParentData.offset + currentOffset,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset transformed) {
+          return child.hitTest(result, position: transformed);
+        },
+      );
+      if (isHit) return true;
+    }
+
+    return false;
   }
 
   Offset getChildScrollOffset(RenderObject child, Offset offset) {
