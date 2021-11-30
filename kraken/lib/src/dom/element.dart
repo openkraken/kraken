@@ -431,9 +431,14 @@ class Element extends Node
     }
   }
 
+  /// https://drafts.csswg.org/cssom-view/#scrolling-events
+  void _dispatchScrollEvent() {
+    dispatchEvent(Event(EVENT_SCROLL));
+  }
+
   void _handleScroll(double scrollOffset, AxisDirection axisDirection) {
-    applyStickyChildrenOffset();
-    paintFixedChildren(scrollOffset, axisDirection);
+    _applyStickyChildrenOffset();
+    _applyFixedChildrenOffset(scrollOffset, axisDirection);
 
     if (!_shouldConsumeScrollTicker) {
       // Make sure scroll listener trigger most to 1 time each frame.
@@ -443,14 +448,9 @@ class Element extends Node
     _shouldConsumeScrollTicker = true;
   }
 
-  /// https://drafts.csswg.org/cssom-view/#scrolling-events
-  void _dispatchScrollEvent() {
-    dispatchEvent(Event(EVENT_SCROLL));
-  }
-
   /// Normally element in scroll box will not repaint on scroll because of repaint boundary optimization
   /// So it needs to manually mark element needs paint and add scroll offset in paint stage
-  void paintFixedChildren(double scrollOffset, AxisDirection axisDirection) {
+  void _applyFixedChildrenOffset(double scrollOffset, AxisDirection axisDirection) {
     // Only root element has fixed children
     if (this == elementManager.viewportElement && renderBoxModel != null) {
       RenderBoxModel layoutBox = (renderBoxModel as RenderLayoutBox).renderScrollingContent ?? renderBoxModel!;
@@ -466,7 +466,7 @@ class Element extends Node
   }
 
   // Calculate sticky status according to scroll offset and scroll direction
-  void applyStickyChildrenOffset() {
+  void _applyStickyChildrenOffset() {
     RenderLayoutBox? scrollContainer = (renderBoxModel as RenderLayoutBox?)!;
     for (RenderBoxModel stickyChild in scrollContainer.stickyChildren) {
       CSSPositionedLayout.applyStickyChildOffset(scrollContainer, stickyChild);
@@ -842,7 +842,6 @@ class Element extends Node
         break;
       case Z_INDEX:
         renderStyle.zIndex = value;
-        _updateRenderBoxModelWithZIndex();
         break;
       case OVERFLOW_X:
         CSSOverflowType oldEffectiveOverflowY = renderStyle.effectiveOverflowY;
@@ -1674,18 +1673,6 @@ class Element extends Node
     );
     scrollingContentLayoutBox.isScrollingContentBox = true;
     return scrollingContentLayoutBox;
-  }
-
-  void _updateRenderBoxModelWithZIndex() {
-    // Needs to sort children when parent paint children
-    if (renderBoxModel!.parentData is RenderLayoutParentData) {
-      RenderLayoutBox parent = renderBoxModel!.parent as RenderLayoutBox;
-      final RenderLayoutParentData parentData = renderBoxModel!.parentData as RenderLayoutParentData;
-      RenderBox? nextSibling = parentData.nextSibling;
-
-      parent.paintingOrder.remove(renderBoxModel);
-      parent.insertPaintingOrder(renderBoxModel!, after: nextSibling);
-    }
   }
 }
 
