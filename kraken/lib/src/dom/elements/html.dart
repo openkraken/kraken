@@ -41,6 +41,8 @@ class HTMLElement extends Element {
     super.attachTo(parent);
     if (renderBoxModel != null) {
       elementManager.viewport.child = renderBoxModel!;
+      // Flush pending style immediately.
+      style.flushPendingProperties();
     }
   }
 
