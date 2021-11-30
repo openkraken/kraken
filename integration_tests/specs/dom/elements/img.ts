@@ -157,6 +157,8 @@ describe('Tags img', () => {
     var imageURL = 'https://img.alicdn.com/tfs/TB1RRzFeKL2gK0jSZFmXXc7iXXa-200-200.png?network';
     var img = document.createElement('img');
     img.onload = function() {
+      expect(img.naturalWidth).toEqual(200);
+      expect(img.naturalHeight).toEqual(200);
       done();
     };
     img.src = imageURL;
@@ -170,6 +172,9 @@ describe('Tags img', () => {
 
     expect(img.width).toEqual(20);
     expect(img.height).toEqual(20);
+    // Image has not been loaded.
+    expect(img.naturalWidth).toEqual(0);
+    expect(img.naturalHeight).toEqual(0);
   });
 
   it('should work with loading=lazy', (done) => {

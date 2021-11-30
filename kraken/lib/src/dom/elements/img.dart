@@ -156,8 +156,20 @@ class ImageElement extends Element {
     return naturalHeight;
   }
 
-  double get naturalWidth => image?.width.toDouble() ?? 0;
-  double get naturalHeight => image?.height.toDouble() ?? 0;
+  double get naturalWidth {
+    ImageProvider? imageProvider = _imageProvider;
+    if (imageProvider is KrakenResizeImage) {
+      return imageProvider.naturalWidth.toDouble();
+    }
+    return image?.width.toDouble() ?? 0;
+  }
+  double get naturalHeight {
+    ImageProvider? imageProvider = _imageProvider;
+    if (imageProvider is KrakenResizeImage) {
+      return imageProvider.naturalHeight.toDouble();
+    }
+    return image?.height.toDouble() ?? 0;
+  }
 
   void _handleIntersectionChange(IntersectionObserverEntry entry) {
     // When appear

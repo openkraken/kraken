@@ -4,6 +4,7 @@
  */
 
 import 'dart:io';
+import 'dart:ui';
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
@@ -104,7 +105,7 @@ ImageProviderFactory _dataUrlProviderFactory = defaultDataUrlProviderFactory;
 ImageProviderFactory _blobProviderFactory = defaultBlobProviderFactory;
 ImageProviderFactory _assetsProviderFactory = defaultAssetsProvider;
 
-ImageType parseImageUrl(Uri resolvedUri, { cache = 'auto' }) {
+ImageType parseImageUrl(Uri resolvedUri, {cache = 'auto'}) {
   if (resolvedUri.isScheme('HTTP') || resolvedUri.isScheme('HTTPS')) {
     return (cache == 'store' || cache == 'auto')
         ? ImageType.cached
@@ -143,8 +144,8 @@ ImageProvider? getImageProvider(Uri resolvedUri,
           FileImageProviderParams(file,
               cachedWidth: cachedWidth, cachedHeight: cachedHeight));
     case ImageType.dataUrl:
-    // Data URL:  https://tools.ietf.org/html/rfc2397
-    // dataurl    := "data:" [ mediatype ] [ ";base64" ] "," data
+      // Data URL:  https://tools.ietf.org/html/rfc2397
+      // dataurl    := "data:" [ mediatype ] [ ";base64" ] "," data
       UriData data = UriData.fromUri(resolvedUri);
       if (data.isBase64) {
         return factory(
@@ -154,7 +155,7 @@ ImageProvider? getImageProvider(Uri resolvedUri,
       }
       return null;
     case ImageType.blob:
-    // TODO: support blob data type
+      // TODO: support blob data type
       return null;
     case ImageType.assets:
       return factory(
@@ -182,7 +183,8 @@ ImageProviderFactory _getImageProviderFactory(ImageType imageType) {
   }
 }
 
-void setCustomImageProviderFactory(ImageType imageType, ImageProviderFactory customImageProviderFactory) {
+void setCustomImageProviderFactory(
+    ImageType imageType, ImageProviderFactory customImageProviderFactory) {
   switch (imageType) {
     case ImageType.cached:
       _cachedProviderFactory = customImageProviderFactory;
@@ -206,9 +208,86 @@ void setCustomImageProviderFactory(ImageType imageType, ImageProviderFactory cus
   }
 }
 
+class KrakenResizeImage extends ResizeImage {
+  KrakenResizeImage(
+    ImageProvider<Object> imageProvider, {
+    int? width,
+    int? height,
+  }) : super(imageProvider, width: width, height: height);
+
+  static ImageProvider<Object> resizeIfNeeded(
+      int? cacheWidth, int? cacheHeight, ImageProvider<Object> provider) {
+    if (cacheWidth != null || cacheHeight != null) {
+      return KrakenResizeImage(provider,
+          width: cacheWidth, height: cacheHeight);
+    }
+    return provider;
+  }
+
+  int naturalWidth = 0;
+  int naturalHeight = 0;
+
+  @override
+  void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream,
+      key, ImageErrorListener handleError) {
+    // This is an unusual edge case where someone has told us that they found
+    // the image we want before getting to this method. We should avoid calling
+    // load again, but still update the image cache with LRU information.
+    if (stream.completer != null) {
+      final ImageStreamCompleter? completer =
+          PaintingBinding.instance!.imageCache!.putIfAbsent(
+        key,
+        () => stream.completer!,
+        onError: handleError,
+      );
+      assert(identical(completer, stream.completer));
+      return;
+    }
+    final ImageStreamCompleter? completer =
+        PaintingBinding.instance!.imageCache!.putIfAbsent(
+      key,
+      () => load(key, instantiateImageCodec),
+      onError: handleError,
+    );
+    if (completer != null) {
+      stream.setCompleter(completer);
+    }
+  }
+
+  Future<Codec> instantiateImageCodec(
+    Uint8List bytes, {
+    int? cacheWidth,
+    int? cacheHeight,
+    bool allowUpscaling = false,
+  }) async {
+    assert(cacheWidth == null || cacheWidth > 0);
+    assert(cacheHeight == null || cacheHeight > 0);
+
+    final ImmutableBuffer buffer = await ImmutableBuffer.fromUint8List(bytes);
+    final ImageDescriptor descriptor = await ImageDescriptor.encoded(buffer);
+    if (!allowUpscaling) {
+      if (cacheWidth != null && cacheWidth > descriptor.width) {
+        cacheWidth = descriptor.width;
+      }
+      if (cacheHeight != null && cacheHeight > descriptor.height) {
+        cacheHeight = descriptor.height;
+      }
+    }
+
+    naturalWidth = descriptor.width;
+    naturalHeight = descriptor.height;
+
+    return descriptor.instantiateCodec(
+      targetWidth: cacheWidth,
+      targetHeight: cacheHeight,
+    );
+  }
+}
+
 /// default ImageProviderFactory implementation of [ImageType.cached]
-ImageProvider defaultCachedProviderFactory(Uri uri, ImageProviderParams params) {
-  return ResizeImage.resizeIfNeeded(
+ImageProvider defaultCachedProviderFactory(
+    Uri uri, ImageProviderParams params) {
+  return KrakenResizeImage.resizeIfNeeded(
       params.cachedWidth,
       params.cachedHeight,
       CachedNetworkImage(uri.toString(),
@@ -216,26 +295,30 @@ ImageProvider defaultCachedProviderFactory(Uri uri, ImageProviderParams params) 
 }
 
 /// default ImageProviderFactory implementation of [ImageType.network]
-ImageProvider defaultNetworkProviderFactory(Uri uri, ImageProviderParams params) {
+ImageProvider defaultNetworkProviderFactory(
+    Uri uri, ImageProviderParams params) {
   NetworkImage networkImage = NetworkImage(uri.toString(), headers: {
     HttpHeaders.userAgentHeader: getKrakenInfo().userAgent,
     HttpHeaderContext:
-    (params as CachedNetworkImageProviderParams).contextId.toString(),
+        (params as CachedNetworkImageProviderParams).contextId.toString(),
   });
-  return ResizeImage.resizeIfNeeded(
+  return KrakenResizeImage.resizeIfNeeded(
       params.cachedWidth, params.cachedHeight, networkImage);
 }
 
 /// default ImageProviderFactory implementation of [ImageType.file]
 ImageProvider? defaultFileProviderFactory(Uri uri, ImageProviderParams params) {
-  return ResizeImage.resizeIfNeeded(
-      params.cachedWidth, params.cachedHeight, FileImage((params as FileImageProviderParams).file));
+  return KrakenResizeImage.resizeIfNeeded(params.cachedWidth,
+      params.cachedHeight, FileImage((params as FileImageProviderParams).file));
 }
 
 /// default ImageProviderFactory implementation of [ImageType.dataUrl].
-ImageProvider? defaultDataUrlProviderFactory(Uri uri, ImageProviderParams params) {
-  return ResizeImage.resizeIfNeeded(
-      params.cachedWidth, params.cachedHeight, MemoryImage((params as DataUrlImageProviderParams).bytes));
+ImageProvider? defaultDataUrlProviderFactory(
+    Uri uri, ImageProviderParams params) {
+  return KrakenResizeImage.resizeIfNeeded(
+      params.cachedWidth,
+      params.cachedHeight,
+      MemoryImage((params as DataUrlImageProviderParams).bytes));
 }
 
 /// default ImageProviderFactory implementation of [ImageType.blob].
@@ -246,5 +329,6 @@ ImageProvider? defaultBlobProviderFactory(Uri uri, ImageProviderParams params) {
 
 /// default ImageProviderFactory implementation of [ImageType.assets].
 ImageProvider defaultAssetsProvider(Uri uri, ImageProviderParams params) {
-  return ResizeImage.resizeIfNeeded(params.cachedWidth, params.cachedHeight, AssetImage(uri.toString()));
+  return KrakenResizeImage.resizeIfNeeded(
+      params.cachedWidth, params.cachedHeight, AssetImage(uri.toString()));
 }
