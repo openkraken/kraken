@@ -171,8 +171,6 @@ class KrakenRenderObjectToWidgetElement<T extends RenderObject> extends RenderOb
 
   @override
   void insertRenderObjectChild(RenderObject child, Object? slot) {
-    // assert(slot == _rootChildSlot);
-    print('child $child parent: ${child.parent}');
     assert(renderObject.debugValidateChild(child));
     renderObject.child = child as T;
   }
