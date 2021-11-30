@@ -68,13 +68,13 @@ Document::Document(JSContext* context) : Node(context, "Document") {
   std::call_once(kDocumentInitOnceFlag, []() { JS_NewClassID(&kDocumentClassID); });
   JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
   if (!document_registered) {
-    Element::defineElement("img", ImageElement::instance(m_context));
-    Element::defineElement("a", AnchorElement::instance(m_context));
-    Element::defineElement("canvas", CanvasElement::instance(m_context));
-    Element::defineElement("input", InputElement::instance(m_context));
-    Element::defineElement("object", ObjectElement::instance(m_context));
-    Element::defineElement("script", ScriptElement::instance(m_context));
-    Element::defineElement("template", TemplateElement::instance(m_context));
+    defineElement("img", ImageElement::instance(m_context));
+    defineElement("a", AnchorElement::instance(m_context));
+    defineElement("canvas", CanvasElement::instance(m_context));
+    defineElement("input", InputElement::instance(m_context));
+    defineElement("object", ObjectElement::instance(m_context));
+    defineElement("script", ScriptElement::instance(m_context));
+    defineElement("template", TemplateElement::instance(m_context));
     document_registered = true;
   }
 
@@ -164,7 +164,7 @@ JSValue Document::createElement(QjsContext* ctx, JSValue this_val, int argc, JSV
   auto document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   auto* context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
   std::string tagName = jsValueToStdString(ctx, tagNameValue);
-  JSValue constructor = Element::getConstructor(document->m_context, tagName);
+  JSValue constructor = static_cast<Document *>(document->prototype())->getElementConstructor(document->m_context, tagName);
 
   JSValue element = JS_CallConstructor(ctx, constructor, argc, argv);
   return element;
@@ -284,6 +284,20 @@ JSValue Document::getElementsByClassName(QjsContext* ctx, JSValue this_val, int 
 
   JS_FreeValue(ctx, pushMethod);
   return array;
+}
+
+void Document::defineElement(const std::string& tagName, Element* constructor) {
+  elementConstructorMap[tagName] = constructor;
+}
+
+JSValue Document::getElementConstructor(JSContext* context, const std::string& tagName) {
+  if (elementConstructorMap.count(tagName) > 0)
+    return elementConstructorMap[tagName]->classObject;
+  return Element::instance(context)->classObject;
+}
+
+bool Document::isCustomElement(const std::string& tagName) {
+  return elementConstructorMap.count(tagName) > 0;
 }
 
 PROP_GETTER(DocumentInstance, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {

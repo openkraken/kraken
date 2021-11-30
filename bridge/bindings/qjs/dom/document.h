@@ -39,7 +39,13 @@ class Document : public Node {
   static JSValue getElementsByTagName(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   static JSValue getElementsByClassName(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
+  JSValue getElementConstructor(JSContext* context, const std::string& tagName);
+  bool isCustomElement(const std::string& tagName);
+
  private:
+
+  void defineElement(const std::string& tagName, Element* constructor);
+
   ObjectFunction m_createEvent{m_context, m_prototypeObject, "createEvent", createEvent, 1};
   ObjectFunction m_createElement{m_context, m_prototypeObject, "createElement", createElement, 1};
   ObjectFunction m_createDocumentFragment{m_context, m_prototypeObject, "createDocumentFragment", createDocumentFragment, 0};
@@ -52,6 +58,7 @@ class Document : public Node {
 
   bool event_registered{false};
   bool document_registered{false};
+  std::unordered_map<std::string, Element*> elementConstructorMap;
 };
 
 class DocumentCookie {

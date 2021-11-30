@@ -36,7 +36,8 @@ void HTMLParser::traverseHTML(NodeInstance* root, GumboNode* node) {
         tagName = std::string(piece.data, piece.length);
       }
 
-      JSValue constructor = Element::getConstructor(context, tagName);
+      auto *Document = Document::instance(context);
+      JSValue constructor = Document->getElementConstructor(context, tagName);
 
       JSValue tagNameValue = JS_NewString(ctx, tagName.c_str());
       JSValue argv[] = {tagNameValue};

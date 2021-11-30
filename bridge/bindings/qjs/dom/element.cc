@@ -130,10 +130,12 @@ JSValue Element::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue 
     return JS_ThrowTypeError(ctx, "Illegal constructor");
   }
 
+  auto *context = static_cast<JSContext *>(JS_GetContextOpaque(ctx));
   std::string name = jsValueToStdString(ctx, tagName);
 
-  if (elementConstructorMap.count(name) > 0) {
-    return JS_CallConstructor(ctx, elementConstructorMap[name]->classObject, argc, argv);
+  auto *Document = Document::instance(context);
+  if (Document->isCustomElement(name)) {
+    return JS_CallConstructor(ctx, Document->getElementConstructor(context, name), argc, argv);
   }
 
   ElementInstance* element;
@@ -366,18 +368,6 @@ JSValue Element::scrollBy(QjsContext* ctx, JSValue this_val, int argc, JSValue* 
   auto element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue arguments[] = {jsValueToNativeValue(ctx, argv[0]), jsValueToNativeValue(ctx, argv[1])};
   return element->callNativeMethods("scrollBy", 2, arguments);
-}
-
-std::unordered_map<std::string, Element*> Element::elementConstructorMap{};
-
-void Element::defineElement(const std::string& tagName, Element* constructor) {
-  elementConstructorMap[tagName] = constructor;
-}
-
-JSValue Element::getConstructor(JSContext* context, const std::string& tagName) {
-  if (elementConstructorMap.count(tagName) > 0)
-    return elementConstructorMap[tagName]->classObject;
-  return Element::instance(context)->classObject;
 }
 
 PROP_GETTER(ElementInstance, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {

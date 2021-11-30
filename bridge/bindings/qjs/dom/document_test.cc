@@ -50,3 +50,32 @@ TEST(Document, instanceofNode) {
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);
 }
+
+TEST(Document, createElementShouldWorkWithMultipleContext) {
+  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  };
+
+  kraken::JSBridge *bridge1;
+
+  const char* code = "(() => { let img = document.createElement('img'); document.body.appendChild(img);  })();";
+
+  {
+    auto* bridge = bridge1 = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+    });
+    auto& context = bridge->getContext();
+    bridge->evaluateScript(code, strlen(code), "vm://", 0);
+  }
+
+  {
+    auto* bridge = new kraken::JSBridge(1, [](int32_t contextId, const char* errmsg) {
+    });
+    auto& context = bridge->getContext();
+    const char* code = "(() => { let img = document.createElement('img'); document.body.appendChild(img);  })();";
+    bridge->evaluateScript(code, strlen(code), "vm://", 0);
+    delete bridge;
+  }
+
+  bridge1->evaluateScript(code, strlen(code), "vm://", 0);
+
+  delete bridge1;
+}
