@@ -481,11 +481,6 @@ class Element extends Node
     RenderBoxModel _renderBoxModel = renderBoxModel!;
     CSSPositionType currentPosition = renderStyle.position;
 
-    // If renderer itself not attached, no need to re-attach it.
-    if (!_renderBoxModel.attached) {
-      return;
-    }
-
     // Remove fixed children before convert to non repaint boundary renderObject
     if (currentPosition != CSSPositionType.fixed) {
       _removeFixedChild(_renderBoxModel, elementManager.viewportElement._renderLayoutBox!);
