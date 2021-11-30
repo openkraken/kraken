@@ -8,6 +8,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
 
 const String GRAYSCALE = 'grayscale';
 const String SEPIA = 'sepia';
@@ -186,6 +187,13 @@ mixin CSSFilterEffectsMixin on RenderStyleBase {
     // Clear cache when filter changed.
     _cachedColorFilter = null;
     _cachedImageFilter = null;
+
+    // Filter effect the stacking context.
+    RenderBoxModel? parentRenderer = (this as RenderStyle).parent?.renderBoxModel;
+    if (parentRenderer is RenderLayoutBox) {
+      parentRenderer.markChildrenNeedsSort();
+    }
+
     renderBoxModel!.markNeedsPaint();
 
     if (!kReleaseMode && functions != null) {

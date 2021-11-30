@@ -5,6 +5,7 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 // CSS Transforms: https://drafts.csswg.org/css-transforms/
@@ -32,6 +33,13 @@ mixin CSSTransformMixin on RenderStyleBase {
     if (_transform == value) return;
     _transform = value;
     _transformMatrix = null;
+
+    // Transform effect the stacking context.
+    RenderBoxModel? parentRenderer = (this as RenderStyle).parent?.renderBoxModel;
+    if (parentRenderer is RenderLayoutBox) {
+      parentRenderer.markChildrenNeedsSort();
+    }
+
     renderBoxModel!.markNeedsLayout();
   }
 

@@ -17,7 +17,6 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/src/dom/sliver_manager.dart';
 import 'package:meta/meta.dart';
 
 import 'element_native_methods.dart';
@@ -391,7 +390,9 @@ class Element extends Node
   @override
   void willAttachRenderer() {
     // Init render box model.
-    createRenderer();
+    if (renderStyle.display != CSSDisplay.none) {
+      createRenderer();
+    }
   }
 
   @override
@@ -412,6 +413,9 @@ class Element extends Node
 
     // Remove renderBox.
     _removeRenderBoxModel(renderBoxModel!);
+
+    // Remove pointer listener
+    removeEventResponder(renderBoxModel!);
   }
 
   @override
@@ -427,10 +431,15 @@ class Element extends Node
     }
   }
 
+  /// https://drafts.csswg.org/cssom-view/#scrolling-events
+  void _dispatchScrollEvent() {
+    dispatchEvent(Event(EVENT_SCROLL));
+  }
+
   void _handleScroll(double scrollOffset, AxisDirection axisDirection) {
     if (renderBoxModel == null) return;
-    applyStickyChildrenOffset();
-    paintFixedChildren(scrollOffset, axisDirection);
+    _applyStickyChildrenOffset();
+    _applyFixedChildrenOffset(scrollOffset, axisDirection);
 
     if (!_shouldConsumeScrollTicker) {
       // Make sure scroll listener trigger most to 1 time each frame.
@@ -440,14 +449,9 @@ class Element extends Node
     _shouldConsumeScrollTicker = true;
   }
 
-  /// https://drafts.csswg.org/cssom-view/#scrolling-events
-  void _dispatchScrollEvent() {
-    dispatchEvent(Event(EVENT_SCROLL));
-  }
-
   /// Normally element in scroll box will not repaint on scroll because of repaint boundary optimization
   /// So it needs to manually mark element needs paint and add scroll offset in paint stage
-  void paintFixedChildren(double scrollOffset, AxisDirection axisDirection) {
+  void _applyFixedChildrenOffset(double scrollOffset, AxisDirection axisDirection) {
     // Only root element has fixed children
     if (this == elementManager.viewportElement && renderBoxModel != null) {
       RenderBoxModel layoutBox = (renderBoxModel as RenderLayoutBox).renderScrollingContent ?? renderBoxModel!;
@@ -463,7 +467,7 @@ class Element extends Node
   }
 
   // Calculate sticky status according to scroll offset and scroll direction
-  void applyStickyChildrenOffset() {
+  void _applyStickyChildrenOffset() {
     RenderLayoutBox? scrollContainer = (renderBoxModel as RenderLayoutBox?)!;
     for (RenderBoxModel stickyChild in scrollContainer.stickyChildren) {
       CSSPositionedLayout.applyStickyChildOffset(scrollContainer, stickyChild);
@@ -556,6 +560,7 @@ class Element extends Node
     renderStyle.detach();
     style.dispose();
     properties.clear();
+    disposeScrollable();
 
     super.dispose();
   }
@@ -572,9 +577,9 @@ class Element extends Node
   void attachTo(Node parent, {RenderBox? after}) {
     _applyStyle(style);
 
-    if (renderStyle.display != CSSDisplay.none) {
-      willAttachRenderer();
+    willAttachRenderer();
 
+    if (renderer != null) {
       // HTML element override attachTo method to attach renderObject to viewportBox.
       if (parent is Element) {
         RenderLayoutBox? parentRenderLayoutBox = parentElement?._renderLayoutBox?.renderScrollingContent ?? parentElement?._renderLayoutBox;
@@ -828,7 +833,6 @@ class Element extends Node
         break;
       case Z_INDEX:
         renderStyle.zIndex = value;
-        _updateRenderBoxModelWithZIndex();
         break;
       case OVERFLOW_X:
         CSSOverflowType oldEffectiveOverflowY = renderStyle.effectiveOverflowY;
@@ -1661,18 +1665,6 @@ class Element extends Node
     scrollingContentLayoutBox.isScrollingContentBox = true;
     return scrollingContentLayoutBox;
   }
-
-  void _updateRenderBoxModelWithZIndex() {
-    // Needs to sort children when parent paint children
-    if (renderBoxModel!.parentData is RenderLayoutParentData) {
-      RenderLayoutBox parent = renderBoxModel!.parent as RenderLayoutBox;
-      final RenderLayoutParentData parentData = renderBoxModel!.parentData as RenderLayoutParentData;
-      RenderBox? nextSibling = parentData.nextSibling;
-
-      parent.paintingOrder.remove(renderBoxModel);
-      parent.insertPaintingOrder(renderBoxModel!, after: nextSibling);
-    }
-  }
 }
 
 // https://www.w3.org/TR/css-position-3/#def-cb
@@ -1704,12 +1696,12 @@ bool _hasIntersectionObserverEvent(Map eventHandlers) {
 void _detachRenderBoxModel(RenderBox renderBox) {
   if (renderBox.parent == null) return;
 
+  // Remove reference from parent
   RenderObject? parentRenderObject = renderBox.parent as RenderObject;
-
   if (parentRenderObject is RenderObjectWithChildMixin) {
-    parentRenderObject.child = null; // RenderViewportBox
+    parentRenderObject.child = null; // Case for single child, eg. RenderViewportBox
   } else if (parentRenderObject is ContainerRenderObjectMixin) {
-    parentRenderObject.remove(renderBox); // RenderLayoutBox or RenderSliverList
+    parentRenderObject.remove(renderBox); // Case for multi children, eg. RenderLayoutBox or RenderSliverList
   }
 }
 

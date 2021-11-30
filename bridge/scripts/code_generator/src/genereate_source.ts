@@ -138,7 +138,7 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
   NativeString *args_01 = stringToNativeString(key);
   NativeString *args_02 = jsValueToNativeString(ctx, argv[0]);
   foundation::UICommandBuffer::instance(${instanceName}->m_context->getContextId())
-    ->addCommand(${instanceName}->eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+    ->addCommand(${instanceName}->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
   return JS_NULL;`;
   } else {
     setterCode = `NativeValue arguments[] = {

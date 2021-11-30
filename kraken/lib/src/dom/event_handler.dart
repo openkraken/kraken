@@ -37,6 +37,7 @@ mixin ElementEventMixin on EventTarget {
     renderBox.onLongPress = null;
     renderBox.getEventTarget = null;
     renderBox.dispatchEvent = null;
+    renderBox.getEventHandlers = null;
   }
 
   EventTarget getEventTarget() {

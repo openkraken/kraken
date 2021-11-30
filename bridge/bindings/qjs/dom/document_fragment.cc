@@ -34,6 +34,6 @@ JSValue DocumentFragment::instanceConstructor(QjsContext* ctx, JSValue func_obj,
 DocumentFragmentInstance::DocumentFragmentInstance(DocumentFragment* fragment)
     : NodeInstance(fragment, NodeType::DOCUMENT_FRAGMENT_NODE, DocumentInstance::instance(Document::instance(fragment->context())), DocumentFragment::classId(), "DocumentFragment") {
   setNodeFlag(DocumentFragmentInstance::NodeFlag::IsDocumentFragment);
-  foundation::UICommandBuffer::instance(m_contextId)->addCommand(eventTargetId, UICommand::createDocumentFragment, nativeEventTarget);
+  foundation::UICommandBuffer::instance(m_contextId)->addCommand(m_eventTargetId, UICommand::createDocumentFragment, nativeEventTarget);
 }
 }  // namespace kraken::binding::qjs
