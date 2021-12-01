@@ -32,7 +32,7 @@ mixin CSSContentVisibilityMixin on AbstractRenderStyle {
     if (value == null) return;
     if (value == _contentVisibility) return;
     _contentVisibility = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   static ContentVisibility resolveContentVisibility(String value) {

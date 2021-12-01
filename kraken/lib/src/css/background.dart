@@ -91,7 +91,7 @@ mixin CSSBackgroundMixin on AbstractRenderStyle {
   set backgroundClip(BackgroundBoundary? value) {
     if (value == _backgroundClip) return;
     _backgroundClip = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   /// Background-origin
@@ -100,7 +100,7 @@ mixin CSSBackgroundMixin on AbstractRenderStyle {
   set backgroundOrigin(BackgroundBoundary? value) {
     if (value == _backgroundOrigin) return;
     _backgroundOrigin = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   @override
@@ -109,7 +109,7 @@ mixin CSSBackgroundMixin on AbstractRenderStyle {
   set backgroundColor(Color? value) {
     if (value == _backgroundColor) return;
     _backgroundColor = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   /// Background-image
@@ -119,7 +119,7 @@ mixin CSSBackgroundMixin on AbstractRenderStyle {
   set backgroundImage(CSSBackgroundImage? value) {
     if (value == _backgroundImage) return;
     _backgroundImage = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   /// Background-position-x
@@ -129,7 +129,7 @@ mixin CSSBackgroundMixin on AbstractRenderStyle {
   set backgroundPositionX(CSSBackgroundPosition? value) {
     if (value == _backgroundPositionX) return;
     _backgroundPositionX = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   /// Background-position-y
@@ -139,7 +139,7 @@ mixin CSSBackgroundMixin on AbstractRenderStyle {
   set backgroundPositionY(CSSBackgroundPosition? value) {
     if (value == _backgroundPositionY) return;
     _backgroundPositionY = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   /// Background-size
@@ -148,7 +148,7 @@ mixin CSSBackgroundMixin on AbstractRenderStyle {
   set backgroundSize(CSSBackgroundSize? value) {
     if (value == _backgroundSize) return;
     _backgroundSize = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   /// Background-attachment
@@ -157,7 +157,7 @@ mixin CSSBackgroundMixin on AbstractRenderStyle {
   set backgroundAttachment(CSSBackgroundAttachmentType? value) {
     if (value == _backgroundAttachment) return;
     _backgroundAttachment = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   /// Background-repeat
@@ -167,7 +167,7 @@ mixin CSSBackgroundMixin on AbstractRenderStyle {
   set backgroundRepeat(ImageRepeat? value) {
     if (value == _backgroundRepeat) return;
     _backgroundRepeat = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 }
 

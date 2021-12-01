@@ -31,8 +31,9 @@ mixin CSSOpacityMixin on AbstractRenderStyle {
     _opacity = value;
     int alpha = ui.Color.getAlphaFromOpacity(_opacity);
     renderBoxModel!.alpha = alpha;
-    if (alpha != 0 && alpha != 255)
-      renderBoxModel!.markNeedsCompositingBitsUpdate();
+    if (alpha != 0 && alpha != 255) {
+      renderBoxModel?.markNeedsCompositingBitsUpdate();
+    }
 
     // Opacity effect the stacking context.
     RenderBoxModel? parentRenderer = parent?.renderBoxModel;
@@ -40,7 +41,7 @@ mixin CSSOpacityMixin on AbstractRenderStyle {
       parentRenderer.markChildrenNeedsSort();
     }
 
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   static double? resolveOpacity(String value) {

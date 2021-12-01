@@ -5,7 +5,7 @@ mixin CSSBoxShadowMixin on AbstractRenderStyle {
   set boxShadow(List<CSSBoxShadow>? value) {
     if (value == _boxShadow) return;
     _boxShadow = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
   List<CSSBoxShadow>? get boxShadow => _boxShadow;
 

@@ -30,8 +30,8 @@ mixin CSSInlineMixin on AbstractRenderStyle {
   VerticalAlign _verticalAlign = VerticalAlign.baseline;
   set verticalAlign(VerticalAlign value) {
     if (_verticalAlign != value) {
-      renderBoxModel!.markNeedsLayout();
       _verticalAlign = value;
+      renderBoxModel?.markNeedsLayout();
     }
   }
 

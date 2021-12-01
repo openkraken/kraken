@@ -40,7 +40,7 @@ mixin CSSTransformMixin on AbstractRenderStyle {
       parentRenderer.markChildrenNeedsSort();
     }
 
-    renderBoxModel!.markNeedsLayout();
+    renderBoxModel?.markNeedsLayout();
   }
 
   static List<CSSFunctionalNotation>? resolveTransform(String present) {
@@ -60,7 +60,7 @@ mixin CSSTransformMixin on AbstractRenderStyle {
   set transformMatrix(Matrix4? value) {
     if (value == null || _transformMatrix == value) return;
     _transformMatrix = value;
-    renderBoxModel!.markNeedsLayout();
+    renderBoxModel?.markNeedsLayout();
   }
 
   Offset get transformOffset => _transformOffset;
@@ -68,7 +68,7 @@ mixin CSSTransformMixin on AbstractRenderStyle {
   set transformOffset(Offset value) {
     if (_transformOffset == value) return;
     _transformOffset = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   Alignment get transformAlignment => _transformAlignment;
@@ -76,7 +76,7 @@ mixin CSSTransformMixin on AbstractRenderStyle {
   set transformAlignment(Alignment value) {
     if (_transformAlignment == value) return;
     _transformAlignment = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   CSSOrigin? _transformOrigin;

@@ -15,7 +15,7 @@ mixin CSSVisibilityMixin on AbstractRenderStyle {
   void set visibility(Visibility value) {
     if (_visibility == value) return;
     _visibility = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   @override

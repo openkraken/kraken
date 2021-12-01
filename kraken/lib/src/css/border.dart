@@ -85,7 +85,7 @@ mixin CSSBorderMixin on AbstractRenderStyle {
   set borderTopWidth(CSSLengthValue? value) {
     if (value == _borderTopWidth) return;
     _borderTopWidth = value;
-    renderBoxModel!.markNeedsLayout();
+    renderBoxModel?.markNeedsLayout();
   }
   @override
   CSSLengthValue? get borderTopWidth => _borderTopWidth;
@@ -97,7 +97,7 @@ mixin CSSBorderMixin on AbstractRenderStyle {
   set borderRightWidth(CSSLengthValue? value) {
     if (value == _borderRightWidth) return;
     _borderRightWidth = value;
-    renderBoxModel!.markNeedsLayout();
+    renderBoxModel?.markNeedsLayout();
   }
 
   @override
@@ -110,7 +110,7 @@ mixin CSSBorderMixin on AbstractRenderStyle {
   set borderBottomWidth(CSSLengthValue? value) {
     if (value == _borderBottomWidth) return;
     _borderBottomWidth = value;
-    renderBoxModel!.markNeedsLayout();
+    renderBoxModel?.markNeedsLayout();
   }
 
   @override
@@ -123,7 +123,7 @@ mixin CSSBorderMixin on AbstractRenderStyle {
   set borderLeftWidth(CSSLengthValue? value) {
     if (value == _borderLeftWidth) return;
     _borderLeftWidth = value;
-    renderBoxModel!.markNeedsLayout();
+    renderBoxModel?.markNeedsLayout();
   }
 
   @override
@@ -139,7 +139,7 @@ mixin CSSBorderMixin on AbstractRenderStyle {
   set borderTopColor(Color? value) {
     if (value == _borderTopColor) return;
     _borderTopColor = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   @override
@@ -148,7 +148,7 @@ mixin CSSBorderMixin on AbstractRenderStyle {
   set borderRightColor(Color? value) {
     if (value == _borderRightColor) return;
     _borderRightColor = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   @override
@@ -157,7 +157,7 @@ mixin CSSBorderMixin on AbstractRenderStyle {
   set borderBottomColor(Color? value) {
     if (value == _borderBottomColor) return;
     _borderBottomColor = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   @override
@@ -166,7 +166,7 @@ mixin CSSBorderMixin on AbstractRenderStyle {
   set borderLeftColor(Color? value) {
     if (value == _borderLeftColor) return;
     _borderLeftColor = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   /// Border-style
@@ -176,7 +176,7 @@ mixin CSSBorderMixin on AbstractRenderStyle {
   set borderTopStyle(BorderStyle? value) {
     if (value == _borderTopStyle) return;
     _borderTopStyle = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   @override
@@ -185,7 +185,7 @@ mixin CSSBorderMixin on AbstractRenderStyle {
   set borderRightStyle(BorderStyle? value) {
     if (value == _borderRightStyle) return;
     _borderRightStyle = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   @override
@@ -194,7 +194,7 @@ mixin CSSBorderMixin on AbstractRenderStyle {
   set borderBottomStyle(BorderStyle? value) {
     if (value == _borderBottomStyle) return;
     _borderBottomStyle = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   BorderStyle? _borderLeftStyle;
@@ -205,7 +205,7 @@ mixin CSSBorderMixin on AbstractRenderStyle {
   set borderLeftStyle(BorderStyle? value) {
     if (value == _borderLeftStyle) return;
     _borderLeftStyle = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 }
 

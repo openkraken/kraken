@@ -7,7 +7,7 @@ mixin CSSBorderRadiusMixin on AbstractRenderStyle {
   set borderTopLeftRadius(CSSBorderRadius? value) {
     if (value == _borderTopLeftRadius) return;
     _borderTopLeftRadius = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
   @override
   CSSBorderRadius get borderTopLeftRadius => _borderTopLeftRadius ?? CSSBorderRadius.zero;
@@ -16,7 +16,7 @@ mixin CSSBorderRadiusMixin on AbstractRenderStyle {
   set borderTopRightRadius(CSSBorderRadius? value) {
     if (value == _borderTopRightRadius) return;
     _borderTopRightRadius = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
   @override
   CSSBorderRadius get borderTopRightRadius => _borderTopRightRadius ?? CSSBorderRadius.zero;
@@ -25,7 +25,7 @@ mixin CSSBorderRadiusMixin on AbstractRenderStyle {
   set borderBottomRightRadius(CSSBorderRadius? value) {
     if (value == _borderBottomRightRadius) return;
     _borderBottomRightRadius = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
   @override
   CSSBorderRadius get borderBottomRightRadius => _borderBottomRightRadius ?? CSSBorderRadius.zero;
@@ -34,7 +34,7 @@ mixin CSSBorderRadiusMixin on AbstractRenderStyle {
   set borderBottomLeftRadius(CSSBorderRadius? value) {
     if (value == _borderBottomLeftRadius) return;
     _borderBottomLeftRadius = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
   @override
   CSSBorderRadius get borderBottomLeftRadius => _borderBottomLeftRadius ?? CSSBorderRadius.zero;

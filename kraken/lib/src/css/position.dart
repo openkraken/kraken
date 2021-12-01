@@ -102,7 +102,7 @@ mixin CSSPositionMixin on AbstractRenderStyle {
   }
 
   void _markNeedsSort() {
-    if (renderBoxModel!.parentData is RenderLayoutParentData) {
+    if (renderBoxModel?.parentData is RenderLayoutParentData) {
       RenderLayoutBox parent = renderBoxModel!.parent as RenderLayoutBox;
       parent.markChildrenNeedsSort();
     }
@@ -112,7 +112,7 @@ mixin CSSPositionMixin on AbstractRenderStyle {
     // Should mark positioned element's containing block needs layout directly
     // cause RelayoutBoundary of positioned element will prevent the needsLayout flag
     // to bubble up in the RenderObject tree.
-    if (renderBoxModel!.parentData is RenderLayoutParentData) {
+    if (renderBoxModel?.parentData is RenderLayoutParentData) {
       RenderStyle renderStyle = renderBoxModel!.renderStyle;
       if (renderStyle.position != DEFAULT_POSITION_TYPE) {
         RenderBoxModel parent = renderBoxModel!.parent as RenderBoxModel;

@@ -248,7 +248,7 @@ mixin CSSFlexboxMixin on AbstractRenderStyle {
   set alignSelf(AlignSelf value) {
     if (_alignSelf == value) return;
     _alignSelf = value;
-    if (renderBoxModel!.parent is RenderFlexLayout) {
+    if (renderBoxModel?.parent is RenderFlexLayout) {
       renderBoxModel!.markNeedsLayout();
     }
   }
@@ -264,7 +264,7 @@ mixin CSSFlexboxMixin on AbstractRenderStyle {
       return;
     }
     _flexBasis = value;
-    if (renderBoxModel!.parent is RenderFlexLayout) {
+    if (renderBoxModel?.parent is RenderFlexLayout) {
       renderBoxModel!.markNeedsLayout();
     }
   }
@@ -275,7 +275,7 @@ mixin CSSFlexboxMixin on AbstractRenderStyle {
   set flexGrow(double? value) {
     if (_flexGrow == value) return;
     _flexGrow = value;
-    if (renderBoxModel!.parent is RenderFlexLayout) {
+    if (renderBoxModel?.parent is RenderFlexLayout) {
       renderBoxModel!.markNeedsLayout();
     }
   }
@@ -286,7 +286,7 @@ mixin CSSFlexboxMixin on AbstractRenderStyle {
   set flexShrink(double? value) {
     if (_flexShrink == value) return;
     _flexShrink = value;
-    if (renderBoxModel!.parent is RenderFlexLayout) {
+    if (renderBoxModel?.parent is RenderFlexLayout) {
       renderBoxModel!.markNeedsLayout();
     }
   }

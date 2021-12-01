@@ -198,7 +198,7 @@ mixin CSSFilterEffectsMixin on AbstractRenderStyle {
       parentRenderer.markChildrenNeedsSort();
     }
 
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
 
     if (!kReleaseMode && functions != null) {
       ColorFilter? colorFilter = _parseColorFilters(functions);
