@@ -48,20 +48,18 @@ List<String> _scrollingContentBoxCopyStyles = [
   LINE_CLAMP,
 ];
 
-mixin CSSOverflowMixin on RenderStyleBase {
+mixin CSSOverflowMixin on AbstractRenderStyle {
+  @override
+  CSSOverflowType get overflowX => _overflowX ?? CSSOverflowType.visible;
   CSSOverflowType? _overflowX;
-  CSSOverflowType get overflowX {
-    return _overflowX ?? CSSOverflowType.visible;
-  }
   set overflowX(CSSOverflowType value) {
     if (_overflowX == value) return;
     _overflowX = value;
   }
 
+  @override
+  CSSOverflowType get overflowY => _overflowY ?? CSSOverflowType.visible;
   CSSOverflowType? _overflowY;
-  CSSOverflowType get overflowY {
-    return _overflowY ?? CSSOverflowType.visible;
-  }
   set overflowY(CSSOverflowType value) {
     if (_overflowY == value) return;
     _overflowY = value;

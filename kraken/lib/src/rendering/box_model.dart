@@ -895,8 +895,8 @@ class RenderBoxModel extends RenderBox
     double? maxHeight = renderStyle.maxHeight.isNone ? null : renderStyle.maxHeight.computedValue;
 
     // Content size calculated from style
-    logicalContentWidth = renderStyle.getLogicalContentWidth();
-    logicalContentHeight = renderStyle.getLogicalContentHeight();
+    logicalContentWidth = renderStyle.logicalContentWidth;
+    logicalContentHeight = renderStyle.logicalContentHeight;
 
     // Box size calculated from style
     double? logicalWidth = logicalContentWidth != null
@@ -1041,8 +1041,8 @@ class RenderBoxModel extends RenderBox
     // Deflate padding constraints.
     boxConstraints = renderStyle.deflatePaddingConstraints(boxConstraints);
 
-    logicalContentWidth = renderStyle.getLogicalContentWidth();
-    logicalContentHeight = renderStyle.getLogicalContentHeight();
+    logicalContentWidth = renderStyle.logicalContentWidth;
+    logicalContentHeight = renderStyle.logicalContentHeight;
 
     if (!isScrollingContentBox && (logicalContentWidth != null || logicalContentHeight != null)) {
       double minWidth;

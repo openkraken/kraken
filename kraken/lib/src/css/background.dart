@@ -81,7 +81,7 @@ enum CSSBackgroundImageType {
   image,
 }
 
-mixin CSSBackgroundMixin on RenderStyleBase {
+mixin CSSBackgroundMixin on AbstractRenderStyle {
   static CSSBackgroundPosition DEFAULT_BACKGROUND_POSITION = CSSBackgroundPosition(percentage: -1);
   static CSSBackgroundSize DEFAULT_BACKGROUND_SIZE = CSSBackgroundSize(fit: BoxFit.none);
 
@@ -103,6 +103,7 @@ mixin CSSBackgroundMixin on RenderStyleBase {
     renderBoxModel!.markNeedsPaint();
   }
 
+  @override
   Color? get backgroundColor => _backgroundColor;
   Color? _backgroundColor;
   set backgroundColor(Color? value) {
@@ -112,6 +113,7 @@ mixin CSSBackgroundMixin on RenderStyleBase {
   }
 
   /// Background-image
+  @override
   CSSBackgroundImage? get backgroundImage => _backgroundImage;
   CSSBackgroundImage? _backgroundImage;
   set backgroundImage(CSSBackgroundImage? value) {
@@ -121,6 +123,7 @@ mixin CSSBackgroundMixin on RenderStyleBase {
   }
 
   /// Background-position-x
+  @override
   CSSBackgroundPosition get backgroundPositionX => _backgroundPositionX ?? DEFAULT_BACKGROUND_POSITION;
   CSSBackgroundPosition? _backgroundPositionX;
   set backgroundPositionX(CSSBackgroundPosition? value) {
@@ -130,6 +133,7 @@ mixin CSSBackgroundMixin on RenderStyleBase {
   }
 
   /// Background-position-y
+  @override
   CSSBackgroundPosition get backgroundPositionY => _backgroundPositionY ?? DEFAULT_BACKGROUND_POSITION;
   CSSBackgroundPosition? _backgroundPositionY;
   set backgroundPositionY(CSSBackgroundPosition? value) {
@@ -157,6 +161,7 @@ mixin CSSBackgroundMixin on RenderStyleBase {
   }
 
   /// Background-repeat
+  @override
   ImageRepeat get backgroundRepeat => _backgroundRepeat ?? ImageRepeat.repeat;
   ImageRepeat? _backgroundRepeat;
   set backgroundRepeat(ImageRepeat? value) {

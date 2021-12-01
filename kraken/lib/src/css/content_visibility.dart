@@ -13,7 +13,7 @@ enum ContentVisibility {
   visible
 }
 
-mixin CSSContentVisibilityMixin on RenderStyleBase {
+mixin CSSContentVisibilityMixin on AbstractRenderStyle {
 
   /// Whether the child is hidden from the rest of the tree.
   ///
@@ -25,8 +25,9 @@ mixin CSSContentVisibilityMixin on RenderStyleBase {
   ///
   /// If ContentVisibility.auto, the framework will compute the intersection bounds and not to paint when child renderObject
   /// are no longer intersection with this renderObject.
-  ContentVisibility? _contentVisibility;
+  @override
   ContentVisibility? get contentVisibility => _contentVisibility;
+  ContentVisibility? _contentVisibility;
   set contentVisibility(ContentVisibility? value) {
     if (value == null) return;
     if (value == _contentVisibility) return;

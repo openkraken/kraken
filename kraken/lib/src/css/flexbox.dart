@@ -173,10 +173,11 @@ enum AlignSelf {
   baseline
 }
 
-mixin CSSFlexboxMixin on RenderStyleBase {
+mixin CSSFlexboxMixin on AbstractRenderStyle {
 
-  FlexDirection? _flexDirection;
+  @override
   FlexDirection get flexDirection => _flexDirection ?? FlexDirection.row;
+  FlexDirection? _flexDirection;
   set flexDirection(FlexDirection? value) {
     if (value == _flexDirection) return;
     _flexDirection = value;
@@ -185,8 +186,9 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-  FlexWrap? _flexWrap;
+  @override
   FlexWrap get flexWrap => _flexWrap ?? FlexWrap.nowrap;
+  FlexWrap? _flexWrap;
   set flexWrap(FlexWrap? value) {
     if (_flexWrap == value) return;
     _flexWrap = value;
@@ -195,9 +197,9 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-
-  JustifyContent? _justifyContent;
+  @override
   JustifyContent get justifyContent => _justifyContent ?? JustifyContent.flexStart;
+  JustifyContent? _justifyContent;
   set justifyContent(JustifyContent? value) {
     if (_justifyContent == value) return;
     _justifyContent = value;
@@ -207,8 +209,9 @@ mixin CSSFlexboxMixin on RenderStyleBase {
   }
 
 
-  AlignItems? _alignItems;
+  @override
   AlignItems get alignItems => _alignItems ?? AlignItems.stretch;
+  AlignItems? _alignItems;
   set alignItems(AlignItems? value) {
     if (_alignItems == value) return;
     _alignItems = value;
@@ -219,7 +222,6 @@ mixin CSSFlexboxMixin on RenderStyleBase {
 
   AlignItems get effectiveAlignItems {
     if (CSSFlex.isVerticalFlexDirection(flexDirection)) {
-      TextAlign textAlign = (this as RenderStyle).textAlign;
       if (textAlign == TextAlign.right) {
         return AlignItems.flexEnd;
       } else if (textAlign == TextAlign.center) {
@@ -229,8 +231,9 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     return alignItems;
   }
 
-  AlignContent? _alignContent;
+  @override
   AlignContent get alignContent => _alignContent ?? AlignContent.stretch;
+  AlignContent? _alignContent;
   set alignContent(AlignContent? value) {
     if (_alignContent == value) return;
     _alignContent = value;
@@ -239,8 +242,9 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-  AlignSelf? _alignSelf;
+  @override
   AlignSelf get alignSelf => _alignSelf ?? AlignSelf.auto;
+  AlignSelf? _alignSelf;
   set alignSelf(AlignSelf value) {
     if (_alignSelf == value) return;
     _alignSelf = value;
@@ -249,8 +253,9 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-  CSSLengthValue? _flexBasis;
+  @override
   CSSLengthValue? get flexBasis => _flexBasis;
+  CSSLengthValue? _flexBasis;
   set flexBasis(CSSLengthValue? value) {
     // Negative value is invalid.
     if ((value != null && ((value.value != null && value.value! < 0))) ||
@@ -264,8 +269,9 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-  double? _flexGrow;
+  @override
   double get flexGrow => _flexGrow ?? 0.0;
+  double? _flexGrow;
   set flexGrow(double? value) {
     if (_flexGrow == value) return;
     _flexGrow = value;
@@ -274,8 +280,9 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-  double? _flexShrink;
+  @override
   double get flexShrink => _flexShrink ?? 1.0;
+  double? _flexShrink;
   set flexShrink(double? value) {
     if (_flexShrink == value) return;
     _flexShrink = value;

@@ -65,7 +65,7 @@ class CSSLengthValue {
   // Length is applied in horizontal or vertical direction.
   Axis? axisType;
 
-  RenderStyle? renderStyle;
+  AbstractRenderStyle? renderStyle;
   String? propertyName;
   double? _computedValue;
 
@@ -121,7 +121,7 @@ class CSSLengthValue {
         bool isPositioned = positionType == CSSPositionType.absolute ||
           positionType == CSSPositionType.fixed;
 
-        RenderStyle? parentRenderStyle = renderStyle!.parent;
+        AbstractRenderStyle? parentRenderStyle = renderStyle!.parent;
 
         // Percentage relative width priority: logical width > renderer width
         double? relativeParentWidth = isPositioned ?
@@ -166,7 +166,7 @@ class CSSLengthValue {
             // There are two exceptions when percentage height is resolved against actual render height of parent:
             // 1. positioned element
             // 2. parent is flex item
-            RenderStyle? grandParentRenderStyle = parentRenderStyle?.parent;
+            AbstractRenderStyle? grandParentRenderStyle = parentRenderStyle?.parent;
             bool isGrandParentFlexLayout = grandParentRenderStyle?.display == CSSDisplay.flex ||
               grandParentRenderStyle?.display == CSSDisplay.inlineFlex;
 
@@ -220,7 +220,7 @@ class CSSLengthValue {
           case FLEX_BASIS:
             // Flex-basis computation is called in RenderFlexLayout which
             // will ensure parent exists.
-            RenderStyle parentRenderStyle = renderStyle!.parent!;
+            AbstractRenderStyle parentRenderStyle = renderStyle!.parent!;
             double? mainContentSize = parentRenderStyle.flexDirection == FlexDirection.row ?
               parentRenderStyle.contentBoxLogicalWidth :
               parentRenderStyle.contentBoxLogicalHeight;
@@ -416,7 +416,7 @@ class CSSLength {
     }
   }
 
-  static CSSLengthValue parseLength(String text, RenderStyle? renderStyle, [String? propertyName, Axis? axisType]) {
+  static CSSLengthValue parseLength(String text, AbstractRenderStyle? renderStyle, [String? propertyName, Axis? axisType]) {
     if (_cachedParsedLength.containsKey(text)) {
       return _cachedParsedLength[text]!;
     }

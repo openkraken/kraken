@@ -9,7 +9,7 @@ import 'package:kraken/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 // CSS Transforms: https://drafts.csswg.org/css-transforms/
-mixin CSSTransformMixin on RenderStyleBase {
+mixin CSSTransformMixin on AbstractRenderStyle {
 
   static Offset DEFAULT_TRANSFORM_OFFSET = Offset(0, 0);
   static Alignment DEFAULT_TRANSFORM_ALIGNMENT = Alignment.center;
@@ -35,7 +35,7 @@ mixin CSSTransformMixin on RenderStyleBase {
     _transformMatrix = null;
 
     // Transform effect the stacking context.
-    RenderBoxModel? parentRenderer = (this as RenderStyle).parent?.renderBoxModel;
+    RenderBoxModel? parentRenderer = parent?.renderBoxModel;
     if (parentRenderer is RenderLayoutBox) {
       parentRenderer.markChildrenNeedsSort();
     }
@@ -52,7 +52,7 @@ mixin CSSTransformMixin on RenderStyleBase {
   Matrix4? get transformMatrix {
     if (_transformMatrix == null && _transform != null) {
       // Illegal transform syntax will return null.
-      _transformMatrix = CSSMatrix.computeTransformMatrix(_transform!, this as RenderStyle);
+      _transformMatrix = CSSMatrix.computeTransformMatrix(_transform!, this);
     }
     return _transformMatrix;
   }

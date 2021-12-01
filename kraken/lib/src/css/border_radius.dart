@@ -2,13 +2,14 @@ import 'dart:ui';
 
 import 'package:kraken/css.dart';
 
-mixin CSSBorderRadiusMixin on RenderStyleBase {
+mixin CSSBorderRadiusMixin on AbstractRenderStyle {
   CSSBorderRadius? _borderTopLeftRadius;
   set borderTopLeftRadius(CSSBorderRadius? value) {
     if (value == _borderTopLeftRadius) return;
     _borderTopLeftRadius = value;
     renderBoxModel!.markNeedsPaint();
   }
+  @override
   CSSBorderRadius get borderTopLeftRadius => _borderTopLeftRadius ?? CSSBorderRadius.zero;
 
   CSSBorderRadius? _borderTopRightRadius;
@@ -17,6 +18,7 @@ mixin CSSBorderRadiusMixin on RenderStyleBase {
     _borderTopRightRadius = value;
     renderBoxModel!.markNeedsPaint();
   }
+  @override
   CSSBorderRadius get borderTopRightRadius => _borderTopRightRadius ?? CSSBorderRadius.zero;
 
   CSSBorderRadius? _borderBottomRightRadius;
@@ -25,6 +27,7 @@ mixin CSSBorderRadiusMixin on RenderStyleBase {
     _borderBottomRightRadius = value;
     renderBoxModel!.markNeedsPaint();
   }
+  @override
   CSSBorderRadius get borderBottomRightRadius => _borderBottomRightRadius ?? CSSBorderRadius.zero;
 
   CSSBorderRadius? _borderBottomLeftRadius;
@@ -33,8 +36,10 @@ mixin CSSBorderRadiusMixin on RenderStyleBase {
     _borderBottomLeftRadius = value;
     renderBoxModel!.markNeedsPaint();
   }
+  @override
   CSSBorderRadius get borderBottomLeftRadius => _borderBottomLeftRadius ?? CSSBorderRadius.zero;
 
+  @override
   List<Radius>? get borderRadius {
     bool hasBorderRadius = borderTopLeftRadius != CSSBorderRadius.zero ||
         borderTopRightRadius != CSSBorderRadius.zero ||
