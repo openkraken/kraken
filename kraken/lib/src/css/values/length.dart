@@ -19,6 +19,7 @@ const _1pc = _1in / 6; // 1pc = 1/6th of 1in
 const _1pt = _1in / 72; // 1pt = 1/72th of 1in
 
 final _lengthRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?(px|rpx|vw|vh|vmin|vmax|rem|em|in|cm|mm|pc|pt)$', caseSensitive: false);
+final _negativeZeroRegExp = RegExp(r'^-(0+)?(\.0+)?(px|rpx|vw|vh|vmin|vmax|rem|em|in|cm|mm|pc|pt)$', caseSensitive: false);
 final _nonNegativeLengthRegExp = RegExp(r'^[+]?(\d+)?(\.\d+)?(px|rpx|vw|vh|vmin|vmax|rem|em|in|cm|mm|pc|pt)$', caseSensitive: false);
 
 enum CSSLengthType {
@@ -405,11 +406,18 @@ class CSSLength {
   }
 
   static bool isLength(String? value) {
-    return value != null && (value == ZERO || _lengthRegExp.hasMatch(value));
+    return value != null && (
+      value == ZERO
+      || _lengthRegExp.hasMatch(value)
+    );
   }
 
   static bool isNonNegativeLength(String? value) {
-    return value != null && (value == ZERO || _nonNegativeLengthRegExp.hasMatch(value));
+    return value != null && (
+      value == ZERO
+      || _negativeZeroRegExp.hasMatch(value) // Negative zero is considered to be equal to zero.
+      || _nonNegativeLengthRegExp.hasMatch(value)
+    );
   }
 
   static CSSLengthValue? resolveLength(String text, RenderStyle? renderStyle, String propertyName) {
