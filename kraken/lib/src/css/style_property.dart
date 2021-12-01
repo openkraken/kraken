@@ -84,7 +84,7 @@ class CSSStyleProperty {
   }
 
   static void setShorthandMargin(Map<String, String?> properties, String shorthandValue) {
-    List<String?>? values = _getEdgeValues(shorthandValue, isLengthOrPercentage: true);
+    List<String?>? values = _getEdgeValues(shorthandValue);
     if (values == null) return;
 
     properties[MARGIN_TOP] = values[0];
