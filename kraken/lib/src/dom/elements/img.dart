@@ -342,11 +342,6 @@ class ImageElement extends Element {
 
     ImageProvider? provider = _imageProvider;
     if (propertyChanged) {
-      // When propertyChanges, we should release previous cached images for better memory usage.
-      if (provider != null) {
-        provider.evict();
-      }
-
       provider = _imageProvider = getImageProvider(resolvedUri, cachedWidth: cachedWidth, cachedHeight: cachedHeight);
     }
     if (provider == null) return;
