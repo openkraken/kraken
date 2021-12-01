@@ -108,9 +108,9 @@ JSValue krakenInvokeModule(QjsContext* ctx, JSValueConst this_val, int argc, JSV
 #endif
   }
 
-  NativeString* moduleName = jsValueToNativeString(ctx, moduleNameValue);
-  NativeString* method = jsValueToNativeString(ctx, methodValue);
-  NativeString* params = nullptr;
+  std::unique_ptr<NativeString> moduleName = jsValueToNativeString(ctx, moduleNameValue);
+  std::unique_ptr<NativeString> method = jsValueToNativeString(ctx, methodValue);
+  std::unique_ptr<NativeString> params;
   if (!JS_IsNull(paramsValue)) {
     JSValue stringifyedValue = JS_JSONStringify(ctx, paramsValue, JS_NULL, JS_NULL);
     params = jsValueToNativeString(ctx, stringifyedValue);
@@ -130,9 +130,15 @@ JSValue krakenInvokeModule(QjsContext* ctx, JSValueConst this_val, int argc, JSV
   NativeString* result;
 
   if (!JS_IsNull(callbackValue)) {
-    result = getDartMethod()->invokeModule(moduleContext, context->getContextId(), moduleName, method, params, handleInvokeModuleTransientCallback);
+    result = getDartMethod()->invokeModule(moduleContext, context->getContextId(), moduleName.get(), method.get(), params.get(), handleInvokeModuleTransientCallback);
   } else {
-    result = getDartMethod()->invokeModule(moduleContext, context->getContextId(), moduleName, method, params, handleInvokeModuleUnexpectedCallback);
+    result = getDartMethod()->invokeModule(moduleContext, context->getContextId(), moduleName.get(), method.get(), params.get(), handleInvokeModuleUnexpectedCallback);
+  }
+
+  moduleName->free();
+  method->free();
+  if (params != nullptr) {
+    params->free();
   }
 
   if (result == nullptr) {
@@ -141,11 +147,6 @@ JSValue krakenInvokeModule(QjsContext* ctx, JSValueConst this_val, int argc, JSV
 
   JSValue resultString = JS_NewUnicodeString(context->runtime(), ctx, result->string, result->length);
   result->free();
-  moduleName->free();
-  method->free();
-  if (params != nullptr) {
-    params->free();
-  }
 
   return resultString;
 }

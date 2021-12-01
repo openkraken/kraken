@@ -233,30 +233,30 @@ uint16_t* JS_ToUnicode(JSContext* ctx, JSValueConst value, uint32_t* length) {
   if (JS_VALUE_GET_TAG(value) != JS_TAG_STRING) {
     value = JS_ToString(ctx, value);
     if (JS_IsException(value))
-      return NULL;
+      return nullptr;
   } else {
     value = JS_DupValue(ctx, value);
   }
 
+  uint16_t* buffer;
   JSString* string = JS_VALUE_GET_STRING(value);
 
   if (!string->is_wide_char) {
     uint8_t* p = string->u.str8;
     uint32_t len = *length = string->len;
-    auto* newBuf = (uint16_t*)malloc(sizeof(uint16_t) * len * 2);
+    buffer = (uint16_t*)malloc(sizeof(uint16_t) * len * 2);
     for (size_t i = 0; i < len; i++) {
-      newBuf[i] = p[i];
-      newBuf[i + 1] = 0x00;
+      buffer[i] = p[i];
+      buffer[i + 1] = 0x00;
     }
-    JS_FreeValue(ctx, value);
-    return newBuf;
   } else {
     *length = string->len;
+    buffer = (uint16_t*)malloc(sizeof(uint16_t) * string->len);
+    memcpy(buffer, string->u.str16, sizeof(uint16_t) * string->len);
   }
 
   JS_FreeValue(ctx, value);
-
-  return string->u.str16;
+  return buffer;
 }
 
 static JSString* js_alloc_string_rt(JSRuntime* rt, int max_len, int is_wide_char) {

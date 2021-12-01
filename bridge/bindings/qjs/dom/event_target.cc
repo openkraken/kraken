@@ -367,8 +367,8 @@ int EventTargetInstance::setProperty(QjsContext* ctx, JSValue obj, JSAtom atom, 
     JS_SetProperty(ctx, eventTarget->m_properties, atom, JS_DupValue(ctx, value));
 
     if (isJavaScriptExtensionElementInstance(eventTarget->context(), eventTarget->instanceObject) && !p->is_wide_char && p->u.str8[0] != '_') {
-      NativeString* args_01 = atomToNativeString(ctx, atom);
-      NativeString* args_02 = jsValueToNativeString(ctx, value);
+      std::unique_ptr<NativeString> args_01 = atomToNativeString(ctx, atom);
+      std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, value);
       foundation::UICommandBuffer::instance(eventTarget->m_contextId)->addCommand(eventTarget->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
     }
   }
@@ -390,7 +390,7 @@ JSValue EventTargetInstance::callNativeMethods(const char* method, int32_t argc,
   std::u16string methodString;
   fromUTF8(method, methodString);
 
-  NativeString m{reinterpret_cast<const uint16_t*>(methodString.c_str()), static_cast<int32_t>(methodString.size())};
+  NativeString m{reinterpret_cast<const uint16_t*>(methodString.c_str()), static_cast<uint32_t>(methodString.size())};
 
   NativeValue nativeValue{};
   nativeEventTarget->callNativeMethods(nativeEventTarget, &nativeValue, &m, argc, argv);
@@ -425,7 +425,7 @@ void EventTargetInstance::setPropertyHandler(JSString* p, JSValue value) {
   int32_t eventHandlerLen = arrayGetLength(m_ctx, m_eventHandlers);
   if (eventHandlerLen == 0) {
     int32_t contextId = m_context->getContextId();
-    NativeString* args_01 = atomToNativeString(m_ctx, atom);
+    std::unique_ptr<NativeString> args_01 = atomToNativeString(m_ctx, atom);
     int32_t type = JS_IsFunction(m_ctx, value) ? UICommand::addEvent : UICommand::removeEvent;
     foundation::UICommandBuffer::instance(contextId)->addCommand(m_eventTargetId, type, *args_01, nullptr);
   }
