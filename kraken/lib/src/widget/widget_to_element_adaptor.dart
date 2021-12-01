@@ -50,11 +50,9 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
   @override
   void updateRenderObject(BuildContext context, RenderObject renderObject) { }
 
-  Element? get element => _element;
+  bool mounted = false;
 
   Element? _element;
-
-  bool mounted = false;
 
   /// Inflate this widget and actually set the resulting [RenderObject] as the
   /// child of [container].
