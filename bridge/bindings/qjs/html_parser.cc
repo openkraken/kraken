@@ -81,6 +81,8 @@ bool HTMLParser::parseHTML(const char* code, size_t codeLength, NodeInstance* ro
       size_t html_length = html.length();
       auto* htmlTree = gumbo_parse_with_options(&kGumboDefaultOptions, html.c_str(), html_length);
       traverseHTML(rootNode, htmlTree->root);
+      // Free gumbo parse nodes.
+      gumbo_destroy_output(&kGumboDefaultOptions, htmlTree);
     }
   } else {
     KRAKEN_LOG(ERROR) << "Root node is null.";
