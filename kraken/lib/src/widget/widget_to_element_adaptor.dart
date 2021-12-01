@@ -92,6 +92,7 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
   KrakenRenderObjectToWidgetElement<T> detachFromRenderTree(BuildOwner owner) {
     owner.buildScope(_element!, () {
       if (_element != null) {
+        print('unmount!!!');
         _element?.unmount();
       }
     });
@@ -289,15 +290,8 @@ abstract class WidgetElement extends dom.Element {
     );
 
     if (ancestorWidgetElement != null) {
-      if (parentNode is WidgetElement) {
-        // WidgetElement
-        _adaptor?.attachToRenderTree(rootWidgetElement.owner!, ancestorWidgetElement._adaptor?.element! as RenderObjectElement, true);
-      } else {
-        // KrakenElement  (parentNode?.widget! as KrakenElementToWidgetAdaptor).element!
-        _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement, false);
-      }
+      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement, false);
     } else {
-      // WidgetElement first
       _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement, true);
     }
   }
