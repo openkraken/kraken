@@ -1,0 +1,121 @@
+name: example build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  nodeVersion: "16"
+  cmakeVersion: "3.22.x"
+  flutterVersion: "2.2.3"
+
+jobs:
+  build_android-app_in_macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      # Set up the bridge compilation environment
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.nodeVersion }}
+      - uses: jwlawson/actions-setup-cmake@v1.11
+        with:
+          cmake-version: ${{ env.cmakeVersion }}
+      - run: npm i
+      - run: npm run build:bridge:android:release
+
+      # Install Flutter SDK
+      - uses: subosito/flutter-action@v1
+        with:
+          flutter-version: ${{ env.flutterVersion }}
+      - run: flutter doctor -v
+
+      - name: android app build
+        run: |
+          cd kraken/
+          flutter pub get
+          cd example/
+          flutter build apk --release
+
+  build_ios-app_in_macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.nodeVersion }}
+      - uses: jwlawson/actions-setup-cmake@v1.11
+        with:
+          cmake-version: ${{ env.cmakeVersion }}
+      - run: npm i
+      - run: npm run build:bridge:ios:release
+
+      - uses: subosito/flutter-action@v1
+        with:
+          flutter-version: ${{ env.flutterVersion }}
+      - run: flutter doctor -v
+
+      - name: ios app build
+        run: |
+          cd kraken/
+          flutter pub get
+          cd example/
+          flutter build ios --release --no-codesign
+
+  build_macos-app_in_macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.nodeVersion }}
+      - uses: jwlawson/actions-setup-cmake@v1.11
+        with:
+          cmake-version: ${{ env.cmakeVersion }}
+      - run: npm i
+      - run: npm run build:bridge:macos:release
+
+      - uses: subosito/flutter-action@v1
+        with:
+          flutter-version: ${{ env.flutterVersion }}
+      - run: flutter config --enable-macos-desktop
+      - run: flutter doctor -v
+
+      - name: macos app build
+        run: |
+          cd kraken/
+          flutter pub get
+          cd example/
+          flutter build macos --release
+
+  build_linux-app_in_ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.nodeVersion }}
+      - uses: jwlawson/actions-setup-cmake@v1.11
+        with:
+          cmake-version: ${{ env.cmakeVersion }}
+
+      - run: npm i
+      - run: npm run build:bridge:linux:release
+
+      - uses: subosito/flutter-action@v1
+        with:
+          flutter-version: ${{ env.flutterVersion }}
+      - run: flutter config --enable-linux-desktop
+      - run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build pkg-config libgtk-3-dev -y
+      - run: flutter doctor -v
+      - name: linux app build
+        run: |
+          cd kraken/
+          flutter pub get
+          cd example/
+          flutter build linux --release
