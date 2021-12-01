@@ -54,23 +54,34 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
 
   Element? _element;
 
+  bool mounted = false;
+
   /// Inflate this widget and actually set the resulting [RenderObject] as the
   /// child of [container].
   KrakenRenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, RenderObjectElement parentElement, bool needBuild) {
     owner.lockState(() {
       _element = createElement();
+      mounted = false;
       assert(_element != null);
     });
 
     // If renderview is building,skip the buildScope phase.
     if (!needBuild) {
       if (_element != null) {
-        _element?.mount(parentElement, null);
+        if (!mounted) {
+          _element?.mount(parentElement, null);
+        }
+
+        mounted = true;
       }
     } else {
       owner.buildScope(_element!, () {
         if (_element != null) {
-          _element?.mount(parentElement, null);
+          if (!mounted) {
+            _element?.mount(parentElement, null);
+          }
+
+          mounted = true;
         }
       });
     }
@@ -190,6 +201,7 @@ class KrakenRenderObjectToWidgetElement<T extends RenderObject> extends RenderOb
 abstract class WidgetElement extends dom.Element {
   late Widget _widget;
   _KrakenAdapterWidgetState? _state;
+
   WidgetElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, dom.ElementManager elementManager)
       : super(
       targetId,
@@ -277,8 +289,15 @@ abstract class WidgetElement extends dom.Element {
     );
 
     if (ancestorWidgetElement != null) {
-      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, ancestorWidgetElement._adaptor?.element! as RenderObjectElement, false);
+      if (parentNode is WidgetElement) {
+        // WidgetElement
+        _adaptor?.attachToRenderTree(rootWidgetElement.owner!, ancestorWidgetElement._adaptor?.element! as RenderObjectElement, true);
+      } else {
+        // KrakenElement  (parentNode?.widget! as KrakenElementToWidgetAdaptor).element!
+        _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement, false);
+      }
     } else {
+      // WidgetElement first
       _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement, true);
     }
   }
