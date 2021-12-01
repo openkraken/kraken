@@ -89,16 +89,6 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
     return _element! as KrakenRenderObjectToWidgetElement<T>;
   }
 
-  KrakenRenderObjectToWidgetElement<T> detachFromRenderTree(BuildOwner owner) {
-    owner.buildScope(_element!, () {
-      if (_element != null) {
-        print('unmount!!!');
-        _element?.unmount();
-      }
-    });
-    return _element as KrakenRenderObjectToWidgetElement<T>;
-  }
-
   @override
   String toStringShort() => debugShortDescription ?? super.toStringShort();
 }
@@ -221,8 +211,6 @@ abstract class WidgetElement extends dom.Element {
   @override
   void didDetachRenderer() {
     super.didDetachRenderer();
-
-    _detachWidget(_widget);
   }
 
   @override
@@ -293,13 +281,6 @@ abstract class WidgetElement extends dom.Element {
       _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement, false);
     } else {
       _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement, true);
-    }
-  }
-
-  void _detachWidget(Widget widget) {
-    RenderObjectElement rootWidgetElement = elementManager.controller.rootKrakenElement;
-    if (_adaptor != null) {
-      _adaptor?.detachFromRenderTree(rootWidgetElement.owner!);
     }
   }
 }
