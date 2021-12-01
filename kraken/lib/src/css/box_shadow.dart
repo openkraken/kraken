@@ -1,6 +1,6 @@
 import 'package:kraken/css.dart';
 
-mixin CSSBoxShadowMixin on AbstractRenderStyle {
+mixin CSSBoxShadowMixin on RenderStyleBase {
   List<CSSBoxShadow>? _boxShadow;
   set boxShadow(List<CSSBoxShadow>? value) {
     if (value == _boxShadow) return;

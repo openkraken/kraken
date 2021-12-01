@@ -6,7 +6,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 
-mixin CSSObjectPositionMixin on AbstractRenderStyle {
+mixin CSSObjectPositionMixin on RenderStyleBase {
   @override
   Alignment get objectPosition => _objectPosition;
   Alignment _objectPosition = Alignment.center;

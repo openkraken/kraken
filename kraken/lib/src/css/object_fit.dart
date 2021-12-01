@@ -6,7 +6,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 
-mixin CSSObjectFitMixin on AbstractRenderStyle {
+mixin CSSObjectFitMixin on RenderStyleBase {
 
   @override
   BoxFit get objectFit => _objectFit;

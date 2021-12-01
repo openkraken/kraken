@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:kraken/css.dart';
 
-mixin CSSBorderRadiusMixin on AbstractRenderStyle {
+mixin CSSBorderRadiusMixin on RenderStyleBase {
   CSSBorderRadius? _borderTopLeftRadius;
   set borderTopLeftRadius(CSSBorderRadius? value) {
     if (value == _borderTopLeftRadius) return;

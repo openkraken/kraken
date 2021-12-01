@@ -14,7 +14,7 @@ enum CSSPositionType {
   sticky,
 }
 
-mixin CSSPositionMixin on AbstractRenderStyle {
+mixin CSSPositionMixin on RenderStyleBase {
 
   static const CSSPositionType DEFAULT_POSITION_TYPE = CSSPositionType.static;
 

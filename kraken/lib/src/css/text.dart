@@ -12,7 +12,7 @@ final RegExp _commaRegExp = RegExp(r'\s*,\s*');
 // CSS Text: https://drafts.csswg.org/css-text-3/
 // CSS Text Decoration: https://drafts.csswg.org/css-text-decor-3/
 // CSS Box Alignment: https://drafts.csswg.org/css-align/
-mixin CSSTextMixin on AbstractRenderStyle {
+mixin CSSTextMixin on RenderStyleBase {
   bool get hasColor => _color != null;
 
   @override

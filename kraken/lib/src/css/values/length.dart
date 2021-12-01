@@ -65,7 +65,7 @@ class CSSLengthValue {
   // Length is applied in horizontal or vertical direction.
   Axis? axisType;
 
-  AbstractRenderStyle? renderStyle;
+  RenderStyleBase? renderStyle;
   String? propertyName;
   double? _computedValue;
 
@@ -121,7 +121,7 @@ class CSSLengthValue {
         bool isPositioned = positionType == CSSPositionType.absolute ||
           positionType == CSSPositionType.fixed;
 
-        AbstractRenderStyle? parentRenderStyle = renderStyle!.parent;
+        RenderStyleBase? parentRenderStyle = renderStyle!.parent;
 
         // Percentage relative width priority: logical width > renderer width
         double? relativeParentWidth = isPositioned ?
@@ -166,7 +166,7 @@ class CSSLengthValue {
             // There are two exceptions when percentage height is resolved against actual render height of parent:
             // 1. positioned element
             // 2. parent is flex item
-            AbstractRenderStyle? grandParentRenderStyle = parentRenderStyle?.parent;
+            RenderStyleBase? grandParentRenderStyle = parentRenderStyle?.parent;
             bool isGrandParentFlexLayout = grandParentRenderStyle?.display == CSSDisplay.flex ||
               grandParentRenderStyle?.display == CSSDisplay.inlineFlex;
 
@@ -220,7 +220,7 @@ class CSSLengthValue {
           case FLEX_BASIS:
             // Flex-basis computation is called in RenderFlexLayout which
             // will ensure parent exists.
-            AbstractRenderStyle parentRenderStyle = renderStyle!.parent!;
+            RenderStyleBase parentRenderStyle = renderStyle!.parent!;
             double? mainContentSize = parentRenderStyle.flexDirection == FlexDirection.row ?
               parentRenderStyle.contentBoxLogicalWidth :
               parentRenderStyle.contentBoxLogicalHeight;
@@ -416,7 +416,7 @@ class CSSLength {
     }
   }
 
-  static CSSLengthValue parseLength(String text, AbstractRenderStyle? renderStyle, [String? propertyName, Axis? axisType]) {
+  static CSSLengthValue parseLength(String text, RenderStyleBase? renderStyle, [String? propertyName, Axis? axisType]) {
     if (_cachedParsedLength.containsKey(text)) {
       return _cachedParsedLength[text]!;
     }

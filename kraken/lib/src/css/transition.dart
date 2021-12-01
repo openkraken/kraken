@@ -179,7 +179,7 @@ enum CSSTransitionEvent {
   cancel,
 }
 
-mixin CSSTransitionMixin on AbstractRenderStyle {
+mixin CSSTransitionMixin on RenderStyleBase {
 
   // https://drafts.csswg.org/css-transitions/#transition-property-property
   // Name: transition-property

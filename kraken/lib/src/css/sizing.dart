@@ -15,7 +15,7 @@ import 'package:kraken/rendering.dart';
 /// - min-width
 /// - min-height
 
-mixin CSSSizingMixin on AbstractRenderStyle {
+mixin CSSSizingMixin on RenderStyleBase {
 
   // https://drafts.csswg.org/css-sizing-3/#preferred-size-properties
   // Name: width, height

@@ -19,7 +19,7 @@ enum CSSDisplay {
   none
 }
 
-mixin CSSDisplayMixin on AbstractRenderStyle {
+mixin CSSDisplayMixin on RenderStyleBase {
 
   CSSDisplay? _display;
 

@@ -24,7 +24,7 @@ enum VerticalAlign {
   ///  middle,
 }
 
-mixin CSSInlineMixin on AbstractRenderStyle {
+mixin CSSInlineMixin on RenderStyleBase {
   @override
   VerticalAlign get verticalAlign => _verticalAlign;
   VerticalAlign _verticalAlign = VerticalAlign.baseline;

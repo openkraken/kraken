@@ -173,7 +173,7 @@ enum AlignSelf {
   baseline
 }
 
-mixin CSSFlexboxMixin on AbstractRenderStyle {
+mixin CSSFlexboxMixin on RenderStyleBase {
 
   @override
   FlexDirection get flexDirection => _flexDirection ?? FlexDirection.row;

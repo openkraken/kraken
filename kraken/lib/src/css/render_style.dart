@@ -13,10 +13,10 @@ import 'package:kraken/rendering.dart';
 
 /// The abstract class for render-style, declare the
 /// getter interface for all available CSS rule.
-abstract class AbstractRenderStyle {
+abstract class RenderStyleBase {
   // Common
   Element get target;
-  AbstractRenderStyle? get parent;
+  RenderStyleBase? get parent;
   getProperty(String key);
 
   // Geometry
@@ -161,7 +161,7 @@ abstract class AbstractRenderStyle {
 }
 
 class RenderStyle
-  extends AbstractRenderStyle
+  extends RenderStyleBase
   with
     CSSSizingMixin,
     CSSPaddingMixin,
