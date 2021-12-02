@@ -34,6 +34,15 @@ const loader = function(source) {
 
   let root = HTMLParser.parse(source);
   traverseParseHTML(root);
+  
+  // Set attr of HTML can let the case use fit. For example: <html fit> xxx </html>
+  let isFit = false;
+  root.childNodes && root.childNodes.forEach(ele => {
+    if (ele.rawAttrs && ele.rawAttrs.indexOf('fit') >= 0) {
+      isFit = true;
+    }
+  })
+
   const htmlString = root.toString().replace(/\n/g, '');
 
   return `
@@ -50,7 +59,7 @@ const loader = function(source) {
       // Use html_parse to parser html in html file.
       const html_parse = () => __kraken_parse_html__('${htmlString}');
 
-      it("should work", async () => {\
+      ${isFit ? 'fit' : 'it'}("should work", async () => {\
         html_parse();\
         ${scripts.length === 0 ? 'await html_snapshot();' : scripts.join('\n')}
       })
