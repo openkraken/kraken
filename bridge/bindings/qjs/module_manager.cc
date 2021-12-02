@@ -105,6 +105,7 @@ JSValue krakenInvokeModule(QjsContext* ctx, JSValueConst this_val, int argc, JSV
   NativeString* params = nullptr;
   if (!JS_IsNull(paramsValue)) {
     JSValue stringifyedValue = JS_JSONStringify(ctx, paramsValue, JS_NULL, JS_NULL);
+    // JS_JSONStringify may return JS_EXCEPTION if object is not valid. Return JS_EXCEPTION and let quickjs to handle it.
     if (JS_IsException(stringifyedValue))
       return stringifyedValue;
     params = jsValueToNativeString(ctx, stringifyedValue);
