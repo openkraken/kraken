@@ -162,7 +162,7 @@ JSValue TouchEvent::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSVal
   }
 
   auto* nativeEvent = new NativeTouchEvent();
-  nativeEvent->nativeEvent.type = jsValueToNativeString(ctx, eventTypeValue);
+  nativeEvent->nativeEvent.type = jsValueToNativeString(ctx, eventTypeValue).release();
 
   if (JS_IsObject(eventInit)) {
     JSAtom touchesAtom = JS_NewAtom(m_ctx, "touches");
