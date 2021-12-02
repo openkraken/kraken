@@ -67,7 +67,7 @@ mixin ElementBase on Node {
     }
   }
 
-  late RenderStyle renderStyle;
+  late CSSRenderStyle renderStyle;
 }
 
 typedef BeforeRendererAttach = RenderObject Function();
@@ -160,7 +160,7 @@ class Element extends Node
     style = CSSStyleDeclaration.computedStyle(this, _defaultStyle, _onStyleChanged);
 
     // Init render style.
-    renderStyle = RenderStyle(target: this);
+    renderStyle = CSSRenderStyle(target: this);
   }
 
   @override
@@ -250,7 +250,7 @@ class Element extends Node
   // Create renderLayoutBox if type changed and copy children if there has previous renderLayoutBox.
   RenderLayoutBox _createRenderLayout({
       RenderLayoutBox? previousRenderLayoutBox,
-      RenderStyle? renderStyle,
+      CSSRenderStyle? renderStyle,
       bool isRepaintBoundary = false
   }) {
     renderStyle = renderStyle ?? this.renderStyle;
@@ -408,7 +408,7 @@ class Element extends Node
   @override
   void willDetachRenderer() {
     // Cancel running transition.
-    renderStyle.cancelRunningTransiton();
+    renderStyle.cancelRunningTransition();
     // Remove all intersection change listeners.
     renderBoxModel!.clearIntersectionChangeListeners();
 
@@ -1347,8 +1347,7 @@ class Element extends Node
   }
 
   void _updateColorRelativePropertyWithColor(Element element) {
-    RenderStyle renderStyle = element.renderStyle;
-    renderStyle.updateColorRelativeProperty();
+    element.renderStyle.updateColorRelativeProperty();
     if (element.children.isNotEmpty) {
       element.children.forEach((Element child) {
         if (!child.renderStyle.hasColor) {
@@ -1369,8 +1368,7 @@ class Element extends Node
   }
 
   void _updateChildrenFontRelativeLength(Element element) {
-    RenderStyle renderStyle = element.renderStyle;
-    renderStyle.updateFontRelativeLength();
+    element.renderStyle.updateFontRelativeLength();
     if (element.children.isNotEmpty) {
       element.children.forEach((Element child) {
         if (!child.renderStyle.hasFontSize) {
@@ -1381,8 +1379,7 @@ class Element extends Node
   }
 
   void _updateChildrenRootFontRelativeLength(Element element) {
-    RenderStyle renderStyle = element.renderStyle;
-    renderStyle.updateRootFontRelativeLength();
+    element.renderStyle.updateRootFontRelativeLength();
     if (element.children.isNotEmpty) {
       element.children.forEach((Element child) {
         _updateChildrenRootFontRelativeLength(child);
@@ -1669,7 +1666,7 @@ class Element extends Node
   // Create a new RenderLayoutBox for the scrolling content.
   RenderLayoutBox createScrollingContentLayout() {
     // FIXME: Create an empty renderStyle for do not share renderStyle with element.
-    RenderStyle scrollingContentRenderStyle = RenderStyle(target: this);
+    CSSRenderStyle scrollingContentRenderStyle = CSSRenderStyle(target: this);
     // Scrolling content layout need to be share the same display with its outer layout box.
     scrollingContentRenderStyle.display = renderStyle.display;
     RenderLayoutBox scrollingContentLayoutBox = _createRenderLayout(

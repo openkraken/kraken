@@ -140,8 +140,8 @@ JSValue Document::createEvent(QjsContext* ctx, JSValue this_val, int argc, JSVal
   JS_FreeCString(ctx, c_eventType);
   std::string eventType = std::string(c_eventType);
   if (eventType == "Event") {
-    NativeString* nativeEventType = jsValueToNativeString(ctx, eventTypeValue);
-    auto nativeEvent = new NativeEvent{nativeEventType};
+    std::unique_ptr<NativeString> nativeEventType = jsValueToNativeString(ctx, eventTypeValue);
+    auto nativeEvent = new NativeEvent{nativeEventType.release()};
 
     auto document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
     auto e = Event::buildEventInstance(eventType, document->context(), nativeEvent, false);

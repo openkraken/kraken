@@ -9,12 +9,13 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
-mixin CSSMarginMixin on RenderStyleBase {
+mixin CSSMarginMixin on RenderStyle {
 
   /// The amount to margin the child in each dimension.
   ///
   /// If this is set to an [EdgeInsetsDirectional] object, then [textDirection]
   /// must not be null.
+  @override
   EdgeInsets get margin {
     EdgeInsets insets = EdgeInsets.only(
       left: marginLeft.computedValue,
@@ -22,7 +23,6 @@ mixin CSSMarginMixin on RenderStyleBase {
       bottom: marginBottom.computedValue,
       top: marginTop.computedValue
     ).resolve(TextDirection.ltr);
-    assert(insets.isNonNegative);
     return insets;
   }
 
@@ -32,6 +32,8 @@ mixin CSSMarginMixin on RenderStyleBase {
     _marginLeft = value;
     _markSelfAndParentNeedsLayout();
   }
+
+  @override
   CSSLengthValue get marginLeft => _marginLeft ?? CSSLengthValue.zero;
 
   CSSLengthValue? _marginRight;
@@ -40,6 +42,8 @@ mixin CSSMarginMixin on RenderStyleBase {
     _marginRight = value;
     _markSelfAndParentNeedsLayout();
   }
+
+  @override
   CSSLengthValue get marginRight => _marginRight ?? CSSLengthValue.zero;
 
   CSSLengthValue? _marginBottom;
@@ -48,6 +52,8 @@ mixin CSSMarginMixin on RenderStyleBase {
     _marginBottom = value;
     _markSelfAndParentNeedsLayout();
   }
+
+  @override
   CSSLengthValue get marginBottom => _marginBottom ?? CSSLengthValue.zero;
 
   CSSLengthValue? _marginTop;
@@ -56,6 +62,8 @@ mixin CSSMarginMixin on RenderStyleBase {
     _marginTop = value;
     _markSelfAndParentNeedsLayout();
   }
+
+  @override
   CSSLengthValue get marginTop => _marginTop ?? CSSLengthValue.zero;
 
   void _markSelfAndParentNeedsLayout() {

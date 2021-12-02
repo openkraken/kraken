@@ -21,6 +21,7 @@ TEST(JS_ToUnicode, asciiWords) {
   JS_FreeValue(ctx, value);
   JS_FreeContext(ctx);
   JS_FreeRuntime(runtime);
+  delete buffer;
 }
 
 TEST(JS_ToUnicode, chineseWords) {

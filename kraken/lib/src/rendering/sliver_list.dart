@@ -36,7 +36,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
   final RenderSliverBoxChildManager _renderSliverBoxChildManager;
 
   RenderSliverListLayout({
-    required RenderStyle renderStyle,
+    required CSSRenderStyle renderStyle,
     required RenderSliverElementChildManager manager,
     ScrollListener? onScroll,
   }) : _renderSliverBoxChildManager = manager,
