@@ -50,14 +50,10 @@ const loader = function(source) {
       // Use html_parse to parser html in html file.
       const html_parse = () => __kraken_parse_html__('${htmlString}');
 
-      ${
-        // Eval script of html.
-        scripts.length === 0 ?
-        'it("should work", async () => {\
-          html_parse();\
-          await html_snapshot();\
-        })' : scripts.join('\n')
-      }
+      it("should work", async () => {\
+        html_parse();\
+        ${scripts.length === 0 ? 'await html_snapshot();' : scripts.join('\n')}
+      })
     });
   `;
 };
