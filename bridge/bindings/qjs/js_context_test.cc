@@ -51,6 +51,35 @@ TEST(Context, unrejectPromiseError) {
   delete bridge;
 }
 
+TEST(Context, unrejectPromiseErrorWithMultipleContext) {
+  bool errorHandlerExecuted = false;
+  int32_t errorCalledCount = 0;
+  auto errorHandler = [&errorHandlerExecuted, &errorCalledCount](int32_t contextId, const char* errmsg) {
+    errorHandlerExecuted = true;
+    errorCalledCount++;
+    EXPECT_STREQ(errmsg,
+                 "TypeError: cannot read property 'forceNullError' of null\n"
+                 "    at <anonymous> (file://:4)\n"
+                 "    at Promise (native)\n"
+                 "    at <eval> (file://:6)\n");
+  };
+  auto bridge2 = new kraken::JSBridge(0, errorHandler);
+  auto bridge = new kraken::JSBridge(0, errorHandler);
+  const char* code =
+      " var p = new Promise(function (resolve, reject) {\n"
+      "        var nullObject = null;\n"
+      "        // Raise a TypeError: Cannot read property 'forceNullError' of null\n"
+      "        var x = nullObject.forceNullError();\n"
+      "        resolve();\n"
+      "    });\n"
+      "\n";
+  bridge->evaluateScript(code, strlen(code), "file://", 0);
+  bridge2->evaluateScript(code, strlen(code), "file://", 0);
+  EXPECT_EQ(errorHandlerExecuted, true);
+  EXPECT_EQ(errorCalledCount, 2);
+  delete bridge;
+}
+
 TEST(Context, window) {
   bool errorHandlerExecuted = false;
   static bool logCalled = false;

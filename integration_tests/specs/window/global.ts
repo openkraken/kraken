@@ -1,4 +1,4 @@
-describe('windowisglobal', () => {
+describe('window', () => {
   it('window equal to globalThis', () => {
     expect(window).toBe(globalThis as any);
   });
@@ -7,6 +7,7 @@ describe('windowisglobal', () => {
     // @ts-ignore
     expect(typeof window.kraken).toBe('object');
   });
+
   it('equal to this', () => {
     function f() {
       // @ts-ignore

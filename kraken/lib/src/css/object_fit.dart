@@ -6,15 +6,15 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 
-mixin CSSObjectFitMixin on RenderStyleBase {
+mixin CSSObjectFitMixin on RenderStyle {
+
+  @override
+  BoxFit get objectFit => _objectFit;
   BoxFit _objectFit = BoxFit.fill;
-  BoxFit get objectFit {
-    return _objectFit;
-  }
   set objectFit(BoxFit value) {
     if (_objectFit == value) return;
     _objectFit = value;
-    renderBoxModel!.markNeedsLayout();
+    renderBoxModel?.markNeedsLayout();
   }
 
   static BoxFit resolveBoxFit(String fit) {

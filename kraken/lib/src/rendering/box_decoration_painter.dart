@@ -25,10 +25,8 @@ class BoxDecorationPainter extends BoxPainter {
     : super(onChanged);
 
   EdgeInsets? padding;
-  RenderStyle renderStyle;
-  CSSBoxDecoration get _decoration {
-    return renderStyle.decoration!;
-  }
+  CSSRenderStyle renderStyle;
+  CSSBoxDecoration get _decoration => renderStyle.decoration!;
 
   Paint? _cachedBackgroundPaint;
   Rect? _rectForCachedBackgroundPaint;
@@ -480,7 +478,7 @@ class BoxDecorationImagePainter {
     this._onChanged
   );
 
-  final RenderStyle _renderStyle;
+  final CSSRenderStyle _renderStyle;
   final DecorationImage _details;
   CSSBackgroundPosition get _backgroundPositionX {
     return _renderStyle.backgroundPositionX;

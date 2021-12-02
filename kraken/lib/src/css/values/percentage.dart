@@ -8,6 +8,7 @@
 import 'package:quiver/collection.dart';
 
 final _percentageRegExp = RegExp(r'^[+-]?\d+[\.]?\d*\%$', caseSensitive: false);
+final _nonNegativePercentageRegExp = RegExp(r'^[+]?\d+[\.]?\d*\%$', caseSensitive: false);
 final LinkedLruHashMap<String, double?> _cachedParsedPercentage = LinkedLruHashMap(maximumSize: 100);
 
 class CSSPercentage {
@@ -26,5 +27,9 @@ class CSSPercentage {
 
   static bool isPercentage(String? percentageValue) {
     return percentageValue != null && _percentageRegExp.hasMatch(percentageValue);
+  }
+
+  static bool isNonNegativePercentage(String? percentageValue) {
+    return percentageValue != null && _nonNegativePercentageRegExp.hasMatch(percentageValue);
   }
 }

@@ -130,10 +130,12 @@ JSValue Element::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue 
     return JS_ThrowTypeError(ctx, "Illegal constructor");
   }
 
+  auto* context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
   std::string name = jsValueToStdString(ctx, tagName);
 
-  if (elementConstructorMap.count(name) > 0) {
-    return JS_CallConstructor(ctx, elementConstructorMap[name]->classObject, argc, argv);
+  auto* Document = Document::instance(context);
+  if (Document->isCustomElement(name)) {
+    return JS_CallConstructor(ctx, Document->getElementConstructor(context, name), argc, argv);
   }
 
   ElementInstance* element;
@@ -368,18 +370,6 @@ JSValue Element::scrollBy(QjsContext* ctx, JSValue this_val, int argc, JSValue* 
   return element->callNativeMethods("scrollBy", 2, arguments);
 }
 
-std::unordered_map<std::string, Element*> Element::elementConstructorMap{};
-
-void Element::defineElement(const std::string& tagName, Element* constructor) {
-  elementConstructorMap[tagName] = constructor;
-}
-
-JSValue Element::getConstructor(JSContext* context, const std::string& tagName) {
-  if (elementConstructorMap.count(tagName) > 0)
-    return elementConstructorMap[tagName]->classObject;
-  return Element::instance(context)->classObject;
-}
-
 PROP_GETTER(ElementInstance, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   std::string tagName = element->tagName();
@@ -541,6 +531,46 @@ PROP_GETTER(ElementInstance, scrollWidth)(QjsContext* ctx, JSValue this_val, int
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
 PROP_SETTER(ElementInstance, scrollWidth)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  return JS_NULL;
+}
+
+// Definition for firstElementChild
+PROP_GETTER(ElementInstance, firstElementChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
+  int32_t len = arrayGetLength(ctx, element->childNodes);
+
+  for (int i = 0; i < len; i++) {
+    JSValue v = JS_GetPropertyUint32(ctx, element->childNodes, i);
+    auto* instance = static_cast<NodeInstance*>(JS_GetOpaque(v, Node::classId(v)));
+    if (instance->nodeType == NodeType::ELEMENT_NODE) {
+      return instance->instanceObject;
+    }
+    JS_FreeValue(ctx, v);
+  }
+
+  return JS_NULL;
+}
+PROP_SETTER(ElementInstance, firstElementChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  return JS_NULL;
+}
+
+// Definition for lastElementChild
+PROP_GETTER(ElementInstance, lastElementChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
+  int32_t len = arrayGetLength(ctx, element->childNodes);
+
+  for (int i = len - 1; i >= 0; i--) {
+    JSValue v = JS_GetPropertyUint32(ctx, element->childNodes, i);
+    auto* instance = static_cast<NodeInstance*>(JS_GetOpaque(v, Node::classId(v)));
+    if (instance->nodeType == NodeType::ELEMENT_NODE) {
+      return instance->instanceObject;
+    }
+    JS_FreeValue(ctx, v);
+  }
+
+  return JS_NULL;
+}
+PROP_SETTER(ElementInstance, lastElementChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
 
