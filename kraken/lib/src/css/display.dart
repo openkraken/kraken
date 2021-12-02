@@ -19,9 +19,11 @@ enum CSSDisplay {
   none
 }
 
-mixin CSSDisplayMixin on RenderStyleBase {
+mixin CSSDisplayMixin on RenderStyle {
 
   CSSDisplay? _display;
+
+  @override
   CSSDisplay get display => _display ?? CSSDisplay.inline;
   set display(CSSDisplay value) {
     if (_display != value) {
@@ -58,13 +60,11 @@ mixin CSSDisplayMixin on RenderStyleBase {
 
   /// Some layout effects require blockification or inlinification of the box type
   /// https://www.w3.org/TR/css-display-3/#transformations
-  CSSDisplay? get effectiveDisplay {
-    RenderStyle renderStyle = this as RenderStyle;
-    CSSDisplay? transformedDisplay = renderStyle.display;
+  @override
+  CSSDisplay get effectiveDisplay {
+    CSSDisplay transformedDisplay = display;
 
-    // Must take from style because it inited before flush pending properties.
-    CSSPositionType position = renderStyle.position;
-
+    // Must take `position` from style because it inited before flush pending properties.
     // Display as inline-block when element is positioned
     if (position == CSSPositionType.absolute || position == CSSPositionType.fixed) {
       return CSSDisplay.inlineBlock;
@@ -81,9 +81,6 @@ mixin CSSDisplayMixin on RenderStyleBase {
         transformedDisplay = CSSDisplay.inlineBlock;
         RenderBoxModel parent = renderBoxModel!.parent as RenderBoxModel;
         RenderStyle parentRenderStyle = parent.renderStyle;
-
-        CSSLengthValue marginLeft = renderStyle.marginLeft;
-        CSSLengthValue marginRight = renderStyle.marginRight;
 
         bool isVerticalDirection = parentRenderStyle.flexDirection == FlexDirection.column ||
             parentRenderStyle.flexDirection == FlexDirection.columnReverse;

@@ -15,7 +15,7 @@ import 'package:kraken/rendering.dart';
 /// - min-width
 /// - min-height
 
-mixin CSSSizingMixin on RenderStyleBase {
+mixin CSSSizingMixin on RenderStyle {
 
   // https://drafts.csswg.org/css-sizing-3/#preferred-size-properties
   // Name: width, height
@@ -28,9 +28,10 @@ mixin CSSSizingMixin on RenderStyleBase {
   // Canonical order: per grammar
   // Animation type: by computed value type, recursing into fit-content()
   CSSLengthValue? _width;
-  CSSLengthValue get width {
-    return _width ?? CSSLengthValue.auto;
-  }
+
+  @override
+  CSSLengthValue get width =>  _width ?? CSSLengthValue.auto;
+
   set width(CSSLengthValue? value) {
     // Negative value is invalid, auto value is parsed at layout stage.
     if ((value != null && value.value != null && value.value! < 0) || width == value) {
@@ -41,9 +42,10 @@ mixin CSSSizingMixin on RenderStyleBase {
   }
 
   CSSLengthValue? _height;
-  CSSLengthValue get height {
-    return _height ?? CSSLengthValue.auto;
-  }
+
+  @override
+  CSSLengthValue get height => _height ?? CSSLengthValue.auto;
+
   set height(CSSLengthValue? value) {
     // Negative value is invalid, auto value is parsed at layout stage.
     if ((value != null && value.value != null && value.value! < 0) || height == value) {
@@ -64,9 +66,10 @@ mixin CSSSizingMixin on RenderStyleBase {
   // Canonical order: per grammar
   // Animatable: by computed value, recursing into fit-content()
   CSSLengthValue? _minWidth;
-  CSSLengthValue get minWidth {
-    return _minWidth ?? CSSLengthValue.auto;
-  }
+
+  @override
+  CSSLengthValue get minWidth =>  _minWidth ?? CSSLengthValue.auto;
+
   set minWidth(CSSLengthValue? value) {
     // Negative value is invalid, auto value is parsed at layout stage.
     if ((value != null && value.value != null && value.value! < 0) || minWidth == value) {
@@ -77,9 +80,10 @@ mixin CSSSizingMixin on RenderStyleBase {
   }
 
   CSSLengthValue? _minHeight;
-  CSSLengthValue get minHeight {
-    return _minHeight ?? CSSLengthValue.auto;
-  }
+
+  @override
+  CSSLengthValue get minHeight => _minHeight ?? CSSLengthValue.auto;
+
   set minHeight(CSSLengthValue? value) {
     // Negative value is invalid, auto value is parsed at layout stage.
     if ((value != null && value.value != null && value.value! < 0) || minHeight == value) {
@@ -100,9 +104,10 @@ mixin CSSSizingMixin on RenderStyleBase {
   // Canonical order: per grammar
   // Animatable: by computed value, recursing into fit-content()
   CSSLengthValue? _maxWidth;
-  CSSLengthValue get maxWidth {
-    return _maxWidth ?? CSSLengthValue.none;
-  }
+
+  @override
+  CSSLengthValue get maxWidth => _maxWidth ?? CSSLengthValue.none;
+
   set maxWidth(CSSLengthValue? value) {
     // Negative value is invalid, auto value is parsed at layout stage.
     if ((value != null && value.value != null && value.value! < 0) || maxWidth == value) {
@@ -113,9 +118,12 @@ mixin CSSSizingMixin on RenderStyleBase {
   }
 
   CSSLengthValue? _maxHeight;
+
+  @override
   CSSLengthValue get maxHeight {
     return _maxHeight ?? CSSLengthValue.none;
   }
+
   set maxHeight(CSSLengthValue? value) {
     // Negative value is invalid, auto value is parsed at layout stage.
     if ((value != null && value.value != null && value.value! < 0) || maxHeight == value) {

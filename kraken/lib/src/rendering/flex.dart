@@ -158,10 +158,8 @@ class RenderFlexLayout extends RenderLayoutBox {
   /// start of the main axis and the center of the cross axis.
   RenderFlexLayout({
     List<RenderBox>? children,
-    required RenderStyle renderStyle,
-  }) : super(
-    renderStyle: renderStyle,
-  ) {
+    required CSSRenderStyle renderStyle,
+  }) : super(renderStyle: renderStyle) {
     addAll(children);
   }
 
@@ -2461,7 +2459,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 class RenderRepaintBoundaryFlexLayout extends RenderFlexLayout {
   RenderRepaintBoundaryFlexLayout({
     List<RenderBox>? children,
-    required RenderStyle renderStyle,
+    required CSSRenderStyle renderStyle,
   }) : super(
     children: children,
     renderStyle: renderStyle,
