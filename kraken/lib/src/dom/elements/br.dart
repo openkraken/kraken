@@ -25,7 +25,13 @@ class BRElement extends Element {
     targetId, nativePtr, elementManager,
     defaultStyle: _breakDefaultStyle,
     isIntrinsicBox: true,
-  );
+  ) {
+    // Init style and add change listener.
+    style = CSSStyleDeclaration.computedStyle(this, _breakDefaultStyle, _onStyleChanged);
+  }
+
+  // Do nothing in style change listener cause styles take no effect on BR element.
+  StyleChangeListener? _onStyleChanged;
 
   @override
   RenderBoxModel? get renderBoxModel => _renderBr;

@@ -1409,10 +1409,6 @@ class Element extends Node
   }
 
   void _onStyleChanged(String propertyName, String? prevValue, String currentValue) {
-    // Styles take no affect on BR element, refuse to set style on BR element.
-    if (this is BRElement) {
-      return;
-    }
     if (renderStyle.shouldTransition(propertyName, prevValue, currentValue)) {
       renderStyle.runTransition(propertyName, prevValue, currentValue);
     } else {
