@@ -474,7 +474,7 @@ class CSSText {
   }
 
   static bool isValidLineHeightValue(String value) {
-    return CSSLength.isLength(value) || CSSPercentage.isPercentage(value) ||
+    return CSSLength.isNonNegativeLength(value) || CSSPercentage.isNonNegativePercentage(value) ||
       value == 'normal' || double.tryParse(value) != null;
   }
 
@@ -489,7 +489,7 @@ class CSSText {
   static CSSLengthValue DEFAULT_LINE_HEIGHT = CSSLengthValue.normal;
   static CSSLengthValue? resolveLineHeight(String value, RenderStyle renderStyle, String propertyName) {
     if (value.isNotEmpty) {
-      if (CSSLength.isLength(value) || CSSPercentage.isPercentage(value)) {
+      if (CSSLength.isNonNegativeLength(value) || CSSPercentage.isNonNegativePercentage(value)) {
         CSSLengthValue lineHeight = CSSLength.parseLength(value, renderStyle, propertyName);
         // Line-height 0 and negative value is considered invalid.
         if (lineHeight.computedValue != double.infinity && lineHeight.computedValue > 0) {

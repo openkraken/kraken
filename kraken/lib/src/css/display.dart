@@ -14,7 +14,7 @@ enum CSSDisplay {
   flex,
   inlineFlex,
 
-  sliver, // @TODO temp name.
+  sliver,
 
   none
 }
@@ -26,6 +26,7 @@ mixin CSSDisplayMixin on RenderStyleBase {
   set display(CSSDisplay value) {
     if (_display != value) {
       _display = value;
+
       renderBoxModel?.markNeedsLayout();
     }
   }

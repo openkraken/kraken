@@ -49,11 +49,6 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
     childNode.willAttachRenderer();
 
     RenderBox? child;
-
-    if (childNode is Element) {
-      childNode.style.flushPendingProperties();
-    }
-
     if (childNode is Node) {
       child = childNode.renderer;
     } else {
@@ -61,16 +56,22 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
         throw FlutterError('Sliver unsupported type ${childNode.runtimeType} $childNode');
     }
 
-    assert(child != null, 'Sliver render node should own RenderBox.');
+    // If renderer is not created, use an empty RenderBox to occupy the position, but not do layout or paint.
+    child ??= _createEmptyRenderObject();
 
     if (_hasLayout) {
-      _sliverListLayout
-        ..setupParentData(child!)
-        ..insertSliverChild(child, after: after);
+      _sliverListLayout.insertSliverChild(child, after: after);
+    }
+
+    if (childNode is Element) {
+      childNode.style.flushPendingProperties();
     }
 
     childNode.didAttachRenderer();
-    childNode.ensureChildAttached();
+  }
+
+  RenderBox _createEmptyRenderObject() {
+    return _RenderSliverItemProxy();
   }
 
   @override
@@ -98,8 +99,8 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
       }
     }
 
-    // Fallback operation.
-    child.detach();
+    // Fallback operation, remove child from sliver list.
+    _sliverListLayout.remove(child);
   }
 
   @override
@@ -137,3 +138,6 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
     return trailingScrollOffset + averageExtent * remainingCount;
   }
 }
+
+/// Used for the placeholder for empty sliver item.
+class _RenderSliverItemProxy extends RenderProxyBox {}

@@ -138,7 +138,7 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
   NativeString *args_01 = stringToNativeString(key);
   NativeString *args_02 = jsValueToNativeString(ctx, argv[0]);
   foundation::UICommandBuffer::instance(${instanceName}->m_context->getContextId())
-    ->addCommand(${instanceName}->eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+    ->addCommand(${instanceName}->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
   return JS_NULL;`;
   } else {
     setterCode = `NativeValue arguments[] = {
@@ -340,6 +340,7 @@ function generateEventInstanceConstructorCode(object: ClassObject) {
     } else if (p.kind === PropsDeclarationKind.object) {
       propApplyCode = addIndent(`JSValue v = JS_GetProperty(m_ctx, eventInit, ${p.name}Atom);
   JSValue json = JS_JSONStringify(m_ctx, v, JS_NULL, JS_NULL);
+  if (JS_IsException(json)) return json;
   nativeEvent->${p.name} = jsValueToNativeString(m_ctx, json);
   JS_FreeValue(m_ctx, json);
   JS_FreeValue(m_ctx, v);`, 0);
