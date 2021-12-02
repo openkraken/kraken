@@ -275,8 +275,20 @@ abstract class WidgetElement extends dom.Element {
         container: renderBoxModel as RenderObjectWithChildMixin<RenderBox>
     );
 
-    if (ancestorWidgetElement != null) {
-      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement, false);
+    Element? element;
+
+    if (parentNode is WidgetElement) {
+      KrakenRenderObjectToWidgetAdapter adaptor = KrakenRenderObjectToWidgetAdapter(
+          child: (parentNode as WidgetElement)._widget,
+          container: (parentNode as WidgetElement).renderBoxModel as RenderObjectWithChildMixin<RenderBox>
+      );
+      element = adaptor._element!;
+    } else {
+      element = elementManager.getFlutterElementByTargetId((parentNode as dom.Element).targetId);
+    }
+
+    if (ancestorWidgetElement != null && element != null) {
+      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, element as RenderObjectElement, false);
     } else {
       _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement, true);
     }

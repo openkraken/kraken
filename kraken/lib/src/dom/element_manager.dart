@@ -12,7 +12,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver, RouteInformation;
+import 'package:flutter/widgets.dart' as widgets;
 import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
@@ -32,7 +32,7 @@ const int DOCUMENT_ID = -3;
 
 typedef ElementCreator = Element Function(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager);
 
-class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver  {
+class ElementManager implements widgets.WidgetsBindingObserver, ElementsBindingObserver  {
   // Call from JS Bridge before JS side eventTarget object been Garbage collected.
   static void disposeEventTarget(int contextId, int id) {
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
@@ -56,6 +56,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   late final Document document;
   late final Element viewportElement;
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
+  Map<int, widgets.Element> _flutterElements = <int, widgets.Element>{};
   bool? showPerformanceOverlayOverride;
   KrakenController controller;
 
@@ -121,16 +122,16 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   void _setupObserver() {
     if (ElementsBinding.instance != null) {
       ElementsBinding.instance!.addObserver(this);
-    } else if (WidgetsBinding.instance != null) {
-      WidgetsBinding.instance!.addObserver(this);
+    } else if (widgets.WidgetsBinding.instance != null) {
+      widgets.WidgetsBinding.instance!.addObserver(this);
     }
   }
 
   void _teardownObserver() {
     if (ElementsBinding.instance != null) {
       ElementsBinding.instance!.removeObserver(this);
-    } else if (WidgetsBinding.instance != null) {
-      WidgetsBinding.instance!.removeObserver(this);
+    } else if (widgets.WidgetsBinding.instance != null) {
+      widgets.WidgetsBinding.instance!.removeObserver(this);
     }
   }
 
@@ -142,6 +143,14 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       return null;
   }
 
+  widgets.Element? getFlutterElementByTargetId(int targetId) {
+    if (_flutterElements.containsKey(targetId)) {
+      return _flutterElements[targetId];
+    } else {
+      return null;
+    }
+  }
+
   bool existsTarget(int id) {
     return _eventTargets.containsKey(id);
   }
@@ -149,6 +158,10 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   void removeTarget(EventTarget target) {
     if (_eventTargets.containsKey(target.targetId)) {
       _eventTargets.remove(target.targetId);
+    }
+
+    if (_flutterElements.containsKey(target.targetId)) {
+      _flutterElements.remove(target.targetId);
     }
   }
 
@@ -158,6 +171,10 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   void setEventTarget(EventTarget target) {
     _eventTargets[target.targetId] = target;
+  }
+
+  void setFlutterElement(int targetId, widgets.Element element) {
+    _flutterElements[targetId] = element;
   }
 
   void clearTargets() {
@@ -518,7 +535,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   @override
-  Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
+  Future<bool> didPushRouteInformation(widgets.RouteInformation routeInformation) async {
     return false;
   }
 }
