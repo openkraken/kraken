@@ -439,7 +439,7 @@ task(`build-ios-kraken-lib`, (done) => {
     -DDEPLOYMENT_TARGET=9.0 \
     ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
     ${externCmakeArgs.join(' ')} \
-    -DENABLE_BITCODE=TRUE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-x64 -S ${paths.bridge}`, {
+    -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-x64 -S ${paths.bridge}`, {
     cwd: paths.bridge,
     stdio: 'inherit',
     env: {
@@ -462,7 +462,7 @@ task(`build-ios-kraken-lib`, (done) => {
     -DDEPLOYMENT_TARGET=9.0 \
     ${externCmakeArgs.join(' ')} \
     ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
-    -DENABLE_BITCODE=TRUE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm -S ${paths.bridge}`, {
+    -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm -S ${paths.bridge}`, {
     cwd: paths.bridge,
     stdio: 'inherit',
     env: {
@@ -484,7 +484,7 @@ task(`build-ios-kraken-lib`, (done) => {
     -DDEPLOYMENT_TARGET=9.0 \
     ${externCmakeArgs.join(' ')} \
     ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
-    -DENABLE_BITCODE=TRUE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm64 -S ${paths.bridge}`, {
+    -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm64 -S ${paths.bridge}`, {
     cwd: paths.bridge,
     stdio: 'inherit',
     env: {
@@ -517,12 +517,12 @@ task(`build-ios-kraken-lib`, (done) => {
     const frameworkPath = `${targetDynamicSDKPath}/${target}.xcframework`;
     mkdirp.sync(targetDynamicSDKPath);
 
-    if (buildMode === 'RelWithDebInfo') {
-      // Create dSYM for x86_64
-      execSync(`dsymutil ${x64DynamicSDKPath}/${target}`, { stdio: 'inherit' });
+    // Create dSYM for x86_64
+    execSync(`dsymutil ${x64DynamicSDKPath}/${target} --out ${x64DynamicSDKPath}/../${target}.dSYM`, { stdio: 'inherit' });
+    // Create dSYM for arm64,armv7
+    execSync(`dsymutil ${armDynamicSDKPath}/${target} --out ${armDynamicSDKPath}/../${target}.dSYM`, { stdio: 'inherit' });
 
-      // Create dSYM for arm64,armv7
-      execSync(`dsymutil ${armDynamicSDKPath}/${target}`, { stdio: 'inherit' });
+    if (buildMode === 'RelWithDebInfo') {
       execSync(`xcodebuild -create-xcframework \
         -framework ${x64DynamicSDKPath} -debug-symbols ${x64DynamicSDKPath}/${target}.dSYM \
         -framework ${armDynamicSDKPath} -debug-symbols ${armDynamicSDKPath}/${target}.dSYM -output ${frameworkPath}`, {
@@ -623,6 +623,11 @@ task('build-android-kraken-lib', (done) => {
     externCmakeArgs.push('-DENABLE_ASAN=true');
   }
 
+  const soFileNames = [
+    'libkraken',
+    'libquickjs',
+    'libc++_shared'
+  ];
 
   const cmakeGeneratorTemplate = platform == 'win32' ? 'Ninja' : 'Unix Makefiles';
   archs.forEach(arch => {
@@ -659,6 +664,18 @@ task('build-android-kraken-lib', (done) => {
     // Copy libc++_shared.so to dist from NDK.
     const libcppSharedPath = path.join(ndkDir, `./toolchains/llvm/prebuilt/${os.platform()}-x86_64/sysroot/usr/lib/${toolChainMap[arch]}/libc++_shared.so`);
     execSync(`cp ${libcppSharedPath} ${soBinaryDirectory}`);
+
+    // Strip release binary in release mode.
+    if (buildMode === 'Release' || buildMode === 'RelWithDebInfo') {
+      const strip = path.join(ndkDir, `./toolchains/llvm/prebuilt/${os.platform()}-x86_64/${toolChainMap[arch]}/bin/strip`);
+      const objcopy = path.join(ndkDir, `./toolchains/llvm/prebuilt/${os.platform()}-x86_64/${toolChainMap[arch]}/bin/objcopy`);
+
+      for (let soFileName of soFileNames) {
+        const soBinaryFile = path.join(soBinaryDirectory, soFileName + '.so');
+        execSync(`${objcopy} --only-keep-debug "${soBinaryFile}" "${soBinaryDirectory}/${soFileName}.debug"`);
+        execSync(`${strip} --strip-debug --strip-unneeded "${soBinaryFile}"`)
+      }
+    }
   });
 
   done();
