@@ -135,6 +135,7 @@ mixin CSSSizingMixin on RenderStyle {
 
   // Intrinsic width of replaced element.
   double? _intrinsicWidth;
+  @override
   double? get intrinsicWidth {
     return _intrinsicWidth;
   }
@@ -146,6 +147,7 @@ mixin CSSSizingMixin on RenderStyle {
 
   // Intrinsic height of replaced element.
   double? _intrinsicHeight;
+  @override
   double? get intrinsicHeight {
     return _intrinsicHeight;
   }
@@ -157,6 +159,7 @@ mixin CSSSizingMixin on RenderStyle {
 
   // Aspect ratio of replaced element.
   double? _intrinsicRatio;
+  @override
   double? get intrinsicRatio {
     return _intrinsicRatio;
   }

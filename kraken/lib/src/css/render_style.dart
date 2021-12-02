@@ -93,6 +93,8 @@ abstract class RenderStyle {
   // BoxModel
   double? get borderBoxLogicalWidth;
   double? get borderBoxLogicalHeight;
+  double? get borderBoxConstraintsWidth;
+  double? get borderBoxConstraintsHeight;
   double? get borderBoxWidth;
   double? get borderBoxHeight;
   double? get paddingBoxLogicalWidth;
@@ -540,6 +542,7 @@ class CSSRenderStyle
   }
 
   // Whether height is stretched to fill its parent's content height.
+  @override
   bool get isHeightStretch {
     RenderStyle renderStyle = this;
     if (renderStyle.parent == null) {
@@ -576,6 +579,7 @@ class CSSRenderStyle
 
 
   // Max width to constrain its children, used in deciding the line wrapping timing of layout.
+  @override
   double get contentMaxConstraintsWidth {
     // If renderBoxModel definite content constraints, use it as max constrains width of content.
     BoxConstraints? contentConstraints = renderBoxModel!.contentConstraints;
@@ -614,6 +618,7 @@ class CSSRenderStyle
   // https://www.w3.org/TR/css-box-3/#valdef-box-content-box
   // Use double.infinity refers to the value is not computed yet.
   double? _contentBoxLogicalWidth = double.infinity;
+  @override
   double? get contentBoxLogicalWidth {
     // If renderBox has tight width, its logical size equals max size.
     // Compute logical width directly in case as renderBoxModel is not layouted yet,
@@ -628,6 +633,7 @@ class CSSRenderStyle
   // https://www.w3.org/TR/css-box-3/#valdef-box-content-box
   // Use double.infinity refers to the value is not computed yet.
   double? _contentBoxLogicalHeight = double.infinity;
+  @override
   double? get contentBoxLogicalHeight {
     // Compute logical height directly in case as renderBoxModel is not layouted yet,
     // eg. compute percentage length before layout.
@@ -687,6 +693,7 @@ class CSSRenderStyle
 
   // Border box width of renderBoxModel after it was rendered.
   // https://www.w3.org/TR/css-box-3/#valdef-box-border-box
+  @override
   double? get borderBoxWidth {
     if (renderBoxModel!.hasSize && renderBoxModel!.boxSize != null) {
       return renderBoxModel!.boxSize!.width;
@@ -696,6 +703,7 @@ class CSSRenderStyle
 
   // Border box height of renderBoxModel after it was rendered.
   // https://www.w3.org/TR/css-box-3/#valdef-box-border-box
+  @override
   double? get borderBoxHeight {
     if (renderBoxModel!.hasSize && renderBoxModel!.boxSize != null) {
       return renderBoxModel!.boxSize!.height;
@@ -729,6 +737,7 @@ class CSSRenderStyle
 
   // Content box width of renderBoxModel after it was rendered.
   // https://www.w3.org/TR/css-box-3/#valdef-box-content-box
+  @override
   double? get contentBoxWidth {
     if (paddingBoxWidth == null) {
       return null;
@@ -740,6 +749,7 @@ class CSSRenderStyle
 
   // Content box height of renderBoxModel after it was rendered.
   // https://www.w3.org/TR/css-box-3/#valdef-box-content-box
+  @override
   double? get contentBoxHeight {
     if (paddingBoxHeight == null) {
       return null;
@@ -750,6 +760,7 @@ class CSSRenderStyle
   }
 
   // Border box width of renderBoxModel calculated from tight width constraints.
+  @override
   double? get borderBoxConstraintsWidth {
     if (renderBoxModel!.hasSize &&
       renderBoxModel!.constraints.hasTightWidth
@@ -760,6 +771,7 @@ class CSSRenderStyle
   }
 
   // Border box height of renderBoxModel calculated from tight height constraints.
+  @override
   double? get borderBoxConstraintsHeight {
     if (renderBoxModel!.hasSize &&
       renderBoxModel!.constraints.hasTightHeight
@@ -770,6 +782,7 @@ class CSSRenderStyle
   }
 
   // Padding box width of renderBoxModel calculated from tight width constraints.
+  @override
   double? get paddingBoxConstraintsWidth {
     if (borderBoxConstraintsWidth == null) {
       return null;
@@ -780,6 +793,7 @@ class CSSRenderStyle
   }
 
   // Padding box height of renderBoxModel calculated from tight height constraints.
+  @override
   double? get paddingBoxConstraintsHeight {
     if (borderBoxConstraintsHeight == null) {
       return null;
@@ -790,6 +804,7 @@ class CSSRenderStyle
   }
 
   // Content box width of renderBoxModel calculated from tight width constraints.
+  @override
   double? get contentBoxConstraintsWidth {
     if (paddingBoxConstraintsWidth == null) {
       return null;
@@ -800,6 +815,7 @@ class CSSRenderStyle
   }
 
   // Content box height of renderBoxModel calculated from tight height constraints.
+  @override
   double? get contentBoxConstraintsHeight {
     if (paddingBoxConstraintsHeight == null) {
       return null;
@@ -810,6 +826,7 @@ class CSSRenderStyle
   }
 
   // Get height of replaced element by intrinsic ratio if height is not defined
+  @override
   double getHeightByIntrinsicRatio() {
     double? realWidth = width.isAuto ? intrinsicWidth : width.computedValue;
     if (minWidth.isNotAuto && realWidth! < minWidth.computedValue) {
@@ -823,6 +840,7 @@ class CSSRenderStyle
   }
 
   // Get width of replaced element by intrinsic ratio if width is not defined
+  @override
   double getWidthByIntrinsicRatio() {
     double? realHeight = height.isAuto ? intrinsicHeight : height.computedValue;
     if (!minHeight.isAuto && realHeight! < minHeight.computedValue) {
