@@ -52,11 +52,9 @@ class CanvasElement extends Element {
     return canvasElement.painter.context!.nativeCanvasRenderingContext2D;
   }
 
-  CanvasElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
+  CanvasElement(EventTargetContext context)
       : super(
-          targetId,
-          nativeEventTarget,
-          elementManager,
+          context,
           isIntrinsicBox: true,
           isDefaultRepaintBoundary: true,
           defaultStyle: _defaultStyle,

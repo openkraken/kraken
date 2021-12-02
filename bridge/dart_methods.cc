@@ -43,7 +43,6 @@ void registerDartMethods(uint64_t* methodBytes, int32_t length) {
   methodPointer->platformBrightness = reinterpret_cast<PlatformBrightness>(methodBytes[i++]);
   methodPointer->toBlob = reinterpret_cast<ToBlob>(methodBytes[i++]);
   methodPointer->flushUICommand = reinterpret_cast<FlushUICommand>(methodBytes[i++]);
-  methodPointer->initHTML = reinterpret_cast<InitHTML>(methodBytes[i++]);
   methodPointer->initWindow = reinterpret_cast<InitWindow>(methodBytes[i++]);
   methodPointer->initDocument = reinterpret_cast<InitDocument>(methodBytes[i++]);
 

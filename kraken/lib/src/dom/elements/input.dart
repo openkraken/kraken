@@ -161,7 +161,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   static void setFocus(InputElement inputElement) {
     if (InputElement.focusInputElement != inputElement) {
       // Focus kraken widget to get focus from other widgets.
-      WidgetDelegate? widgetDelegate = inputElement.elementManager.widgetDelegate;
+      WidgetDelegate? widgetDelegate = inputElement.ownerDocument.widgetDelegate;
       if (widgetDelegate != null) {
         widgetDelegate.requestFocus();
       }
@@ -230,15 +230,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   TextInputConfiguration? _textInputConfiguration;
 
-  InputElement(
-    int targetId,
-    Pointer<NativeEventTarget> nativeEventTarget,
-    ElementManager elementManager, {
+  InputElement(EventTargetContext context, {
     this.textAlign = TextAlign.left,
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
-  }) : super(targetId, nativeEventTarget, elementManager, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
+  }) : super(context, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
     _textSelectionDelegate = EditableTextDelegate(this);
     scrollOffsetX = _scrollableX.position;
   }
@@ -581,7 +578,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       text = _buildPasswordTextSpan(text.text!);
     }
 
-    WidgetDelegate? widgetDelegate = elementManager.widgetDelegate;
+    WidgetDelegate? widgetDelegate = ownerDocument.widgetDelegate;
     if (widgetDelegate != null) {
       cursorColor = widgetDelegate.getCursorColor();
       selectionColor = widgetDelegate.getSelectionColor();
@@ -810,7 +807,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       return;
     }
 
-    WidgetDelegate? widgetDelegate = elementManager.widgetDelegate;
+    WidgetDelegate? widgetDelegate = ownerDocument.widgetDelegate;
 
     if (_selectionControls == null) {
       _selectionOverlay?.hide();
@@ -851,7 +848,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       _showSelectionHandles = willShowSelectionHandles;
     }
 
-    WidgetDelegate? widgetDelegate = elementManager.widgetDelegate;
+    WidgetDelegate? widgetDelegate = ownerDocument.widgetDelegate;
     if (widgetDelegate != null) {
       TargetPlatform platform = widgetDelegate.getTargetPlatform();
       switch (platform) {

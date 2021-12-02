@@ -16,8 +16,8 @@ mixin RenderStyleBase {
   // for class that extends [RenderStyleBase].
   late Element target;
   RenderBoxModel? get renderBoxModel => target.renderBoxModel;
-  Size get viewportSize => target.elementManager.viewport.viewportSize;
-  double get rootFontSize => target.elementManager.getRootFontSize();
+  Size get viewportSize => target.ownerDocument.viewport.viewportSize;
+  double get rootFontSize => target.ownerDocument.getRootFontSize();
   Color get currentColor => (this as RenderStyle).color;
 }
 

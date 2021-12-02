@@ -26,8 +26,8 @@ class AnchorElement extends Element {
 
   String? _target;
 
-  AnchorElement(int targetId, Pointer<NativeEventTarget> nativeEventTargetPtr, ElementManager elementManager)
-      : super(targetId, nativeEventTargetPtr, elementManager) {
+  AnchorElement(EventTargetContext context)
+      : super(context) {
     addEvent(EVENT_CLICK);
   }
 
@@ -106,10 +106,10 @@ class AnchorElement extends Element {
 
     String? href = _href;
     if (href.isNotEmpty) {
-      String baseUrl = elementManager.controller.href;
+      String baseUrl = ownerDocument.controller.href;
       Uri baseUri = Uri.parse(baseUrl);
-      Uri resolvedUri = elementManager.controller.uriParser!.resolve(baseUri, Uri.parse(href));
-      elementManager.controller.view.handleNavigationAction(
+      Uri resolvedUri = ownerDocument.controller.uriParser!.resolve(baseUri, Uri.parse(href));
+      ownerDocument.controller.view.handleNavigationAction(
           baseUrl, resolvedUri.toString(), _getNavigationType(resolvedUri.scheme));
     }
   }

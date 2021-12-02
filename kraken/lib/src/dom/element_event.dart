@@ -13,7 +13,7 @@ enum AppearEventType {
   disappear
 }
 
-mixin ElementEventMixin on EventTarget {
+mixin ElementEventMixin on ElementBase {
   AppearEventType prevAppearState = AppearEventType.none;
 
   void addEventResponder(RenderPointerListenerMixin renderBox) {
@@ -45,7 +45,7 @@ mixin ElementEventMixin on EventTarget {
   }
 
   void handleMouseEvent(String eventType, TapUpDetails details) {
-    RenderBoxModel? root = elementManager.viewportElement.renderBoxModel;
+    RenderBoxModel? root = ownerDocument.documentElement!.renderBoxModel;
     if (root == null) {
       return;
     }

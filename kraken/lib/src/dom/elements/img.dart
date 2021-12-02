@@ -49,11 +49,9 @@ class ImageElement extends Element {
 
   bool get _shouldLazyLoading => properties['loading'] == 'lazy';
 
-  ImageElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
+  ImageElement(EventTargetContext context)
       : super(
-      targetId,
-      nativeEventTarget,
-      elementManager,
+      context,
       isIntrinsicBox: true,
       defaultStyle: _defaultStyle) {
     _renderStreamListener = ImageStreamListener(_renderImageStream, onError: _onImageError);
@@ -318,11 +316,11 @@ class ImageElement extends Element {
     _resetImage();
 
     if (_source != null && _source!.isNotEmpty) {
-      Uri base = Uri.parse(elementManager.controller.href);
-      Uri resolvedUri = elementManager.controller.uriParser!.resolve(base, Uri.parse(_source!));
+      Uri base = Uri.parse(ownerDocument.controller.href);
+      Uri resolvedUri = ownerDocument.controller.uriParser!.resolve(base, Uri.parse(_source!));
 
       ImageProvider? imageProvider = _imageProvider ?? CSSUrl.parseUrl(resolvedUri,
-          cache: properties['caching'], contextId: elementManager.contextId);
+          cache: properties['caching'], contextId: ownerDocument.contextId);
 
       if (imageProvider != null) {
         _imageProvider = imageProvider;

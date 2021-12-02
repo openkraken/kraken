@@ -1,3 +1,13 @@
+let html = document.createElement('html');
+document.appendChild(html);
+Object.defineProperty(document, 'documentElement', {
+  get() {
+    return document.children[0];
+  },
+  enumerable: true,
+  configurable: false
+});
+
 let head = document.createElement('head');
 document.documentElement.appendChild(head);
 Object.defineProperty(document, 'head', {

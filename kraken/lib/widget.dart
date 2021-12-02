@@ -4,7 +4,6 @@
  */
 import 'dart:io';
 import 'dart:ui';
-import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -20,8 +19,6 @@ import 'package:kraken/module.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/src/dom/element_registry.dart';
-import 'package:kraken/src/dom/element_manager.dart';
-import 'package:kraken/bridge.dart';
 
 /// Get context of current widget.
 typedef GetContext = BuildContext Function();
@@ -68,11 +65,9 @@ abstract class WidgetElement extends dom.Element {
   late BuildOwner _buildOwner;
   late Widget _widget;
   _KrakenAdapterWidgetPropertiesState? _propertiesState;
-  WidgetElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, dom.ElementManager elementManager)
+  WidgetElement(dom.EventTargetContext context)
       : super(
-      targetId,
-      nativeEventTarget,
-      elementManager,
+      context,
       isIntrinsicBox: true,
       defaultStyle: _defaultStyle
   );
@@ -820,7 +815,7 @@ class _KrakenState extends State<Kraken> {
     RenderObject? _rootRenderObject = context.findRenderObject();
     RenderViewportBox? renderViewportBox = _findRenderViewportBox(_rootRenderObject!);
     KrakenController controller = (renderViewportBox as RenderObjectWithControllerMixin).controller!;
-    dom.Element documentElement = controller.view.document!.documentElement;
+    dom.Element documentElement = controller.view.document!.documentElement!;
     return documentElement;
   }
 
@@ -928,18 +923,20 @@ This situation often happened when you trying creating kraken when FlutterView n
     double viewportWidth = _krakenWidget.viewportWidth ?? window.physicalSize.width / window.devicePixelRatio;
     double viewportHeight = _krakenWidget.viewportHeight ?? window.physicalSize.height / window.devicePixelRatio;
 
+    if (controller.view.document!.documentElement == null) return;
+
     if (viewportWidthHasChanged) {
       controller.view.viewportWidth = viewportWidth;
-      controller.view.document!.documentElement.renderStyle.width = CSSLengthValue(viewportWidth, CSSLengthType.PX);
+      controller.view.document!.documentElement!.renderStyle.width = CSSLengthValue(viewportWidth, CSSLengthType.PX);
     }
 
     if (viewportHeightHasChanged) {
       controller.view.viewportHeight = viewportHeight;
-      controller.view.document!.documentElement.renderStyle.height = CSSLengthValue(viewportHeight, CSSLengthType.PX);
+      controller.view.document!.documentElement!.renderStyle.height = CSSLengthValue(viewportHeight, CSSLengthType.PX);
     }
 
     if (viewportWidthHasChanged || viewportHeightHasChanged) {
-      traverseElement(controller.view.document!.documentElement, (element) {
+      traverseElement(controller.view.document!.documentElement!, (element) {
         if (element.isRendererAttached) {
           element.style.flushPendingProperties();
           element.renderBoxModel?.markNeedsLayout();

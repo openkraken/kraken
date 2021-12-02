@@ -2,11 +2,7 @@
  * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
-import 'dart:ffi';
-
 import 'package:flutter/scheduler.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/launcher.dart';
@@ -25,36 +21,36 @@ const String NOSCRIPT = 'NOSCRIPT';
 const String SCRIPT = 'SCRIPT';
 
 class HeadElement extends Element {
-  HeadElement(int targetId, Pointer<NativeEventTarget>   nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  HeadElement(EventTargetContext context)
+      : super(context, defaultStyle: _defaultStyle);
 }
 
 class LinkElement extends Element {
-  LinkElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  LinkElement(EventTargetContext context)
+      : super(context, defaultStyle: _defaultStyle);
 }
 
 class MetaElement extends Element {
-  MetaElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  MetaElement(EventTargetContext context)
+      : super(context, defaultStyle: _defaultStyle);
 }
 
 class TitleElement extends Element {
-  TitleElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  TitleElement(EventTargetContext context)
+      : super(context, defaultStyle: _defaultStyle);
 }
 
 class NoScriptElement extends Element {
-  NoScriptElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  NoScriptElement(EventTargetContext context)
+      : super(context, defaultStyle: _defaultStyle);
 }
 
 const String _JAVASCRIPT_MIME = 'text/javascript';
 const String _JAVASCRIPT_MODULE = 'module';
 
 class ScriptElement extends Element {
-  ScriptElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle) {
+  ScriptElement(EventTargetContext context)
+      : super(context, defaultStyle: _defaultStyle) {
   }
 
   String type = _JAVASCRIPT_MIME;
@@ -73,8 +69,8 @@ class ScriptElement extends Element {
     // Must
     if (src.isNotEmpty && isConnected && (type == _JAVASCRIPT_MIME || type == _JAVASCRIPT_MODULE)) {
       try {
-        KrakenBundle bundle = await KrakenBundle.getBundle(src, contextId: elementManager.contextId);
-        await bundle.eval(elementManager.contextId);
+        KrakenBundle bundle = await KrakenBundle.getBundle(src, contextId: ownerDocument.contextId);
+        await bundle.eval(ownerDocument.contextId);
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_LOAD));
@@ -105,11 +101,11 @@ class ScriptElement extends Element {
       });
       String script = buffer.toString();
       if (script.isNotEmpty) {
-        int contextId = elementManager.contextId;
+        int contextId = ownerDocument.contextId;
         KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
         if (controller != null) {
           KrakenBundle bundle = await KrakenBundle.getBundle(controller.href, contentOverride: script, contextId: contextId);
-          await bundle.eval(elementManager.contextId);
+          await bundle.eval(ownerDocument.contextId);
         }
       }
     }
@@ -119,8 +115,8 @@ class ScriptElement extends Element {
 const String _CSS_MIME = 'text/css';
 
 class StyleElement extends Element {
-  StyleElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  StyleElement(EventTargetContext context)
+      : super(context, defaultStyle: _defaultStyle);
   String type = _CSS_MIME;
   CSSStyleSheet? _styleSheet;
 
@@ -143,7 +139,7 @@ class StyleElement extends Element {
       });
       String style = buffer.toString();
       _styleSheet = CSSStyleSheet(style);
-      elementManager.addStyleSheet(_styleSheet!);
+      ownerDocument.addStyleSheet(_styleSheet!);
     }
     super.connectedCallback();
   }
@@ -151,7 +147,7 @@ class StyleElement extends Element {
   @override
   void disconnectedCallback() {
     if (_styleSheet != null) {
-      elementManager.removeStyleSheet(_styleSheet!);
+      ownerDocument.removeStyleSheet(_styleSheet!);
     }
     super.disconnectedCallback();
   }

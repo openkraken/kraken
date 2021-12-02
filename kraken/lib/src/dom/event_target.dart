@@ -85,6 +85,12 @@ String jsMethodToKey(String method) {
 
 Pointer<NativeFunction<NativeCallNativeMethods>> _nativeCallNativeMethods = Pointer.fromFunction(_callNativeMethods);
 
+class EventTargetContext {
+  final int contextId;
+  final Pointer<NativeEventTarget> pointer;
+  const EventTargetContext(this.contextId, this.pointer);
+}
+
 abstract class EventTarget {
   static final SplayTreeMap<int, EventTarget> _nativeMap = SplayTreeMap();
   static EventTarget getEventTargetOfNativePtr(Pointer<NativeEventTarget> nativePtr) {
@@ -93,24 +99,22 @@ abstract class EventTarget {
     return target;
   }
 
-  // A unique target identifier.
-  final int targetId;
+  final int contextId;
 
   bool _disposed = false;
   bool get disposed => _disposed;
 
   // The Add
-  final Pointer<NativeEventTarget> nativeEventTargetPtr;
-
-  // the self reference the ElementManager
-  ElementManager elementManager;
+  final Pointer<NativeEventTarget> pointer;
 
   @protected
   Map<String, List<EventHandler>> eventHandlers = {};
 
-  EventTarget(this.targetId, this.nativeEventTargetPtr, this.elementManager) {
-    nativeEventTargetPtr.ref.callNativeMethods = _nativeCallNativeMethods;
-    _nativeMap[nativeEventTargetPtr.address] = this;
+  EventTarget(EventTargetContext context)
+      : contextId = context.contextId,
+        pointer = context.pointer {
+    pointer.ref.callNativeMethods = _nativeCallNativeMethods;
+    _nativeMap[pointer.address] = this;
   }
 
   void addEventListener(String eventType, EventHandler eventHandler) {
@@ -129,26 +133,11 @@ abstract class EventTarget {
     currentHandlers.remove(eventHandler);
   }
 
+  @mustCallSuper
   void dispatchEvent(Event event) {
     if (disposed) return;
-
     event.target = this;
-
-    emitUIEvent(elementManager.controller.view.contextId, nativeEventTargetPtr, event);
-    // Dispatch listener for widget.
-    if (elementManager.gestureListener != null) {
-      if (elementManager.gestureListener?.onTouchStart != null && event.type == EVENT_TOUCH_START) {
-        elementManager.gestureListener?.onTouchStart!(event as TouchEvent);
-      }
-
-      if (elementManager.gestureListener?.onTouchMove != null && event.type == EVENT_TOUCH_MOVE) {
-        elementManager.gestureListener?.onTouchMove!(event as TouchEvent);
-      }
-
-      if (elementManager.gestureListener?.onTouchEnd != null && event.type == EVENT_TOUCH_END) {
-        elementManager.gestureListener?.onTouchEnd!(event as TouchEvent);
-      }
-    }
+    emitUIEvent(contextId, pointer, event);
   }
 
   Map<String, List<EventHandler>> getEventHandlers() {
@@ -156,25 +145,21 @@ abstract class EventTarget {
   }
 
   @mustCallSuper
-  dynamic handleJSCall(String method, List<dynamic> argv) {
-  }
+  dynamic handleJSCall(String method, List<dynamic> argv) {}
 
   @mustCallSuper
   void dispose() {
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_START, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_START, uniqueId: hashCode);
     }
 
-    elementManager.removeTarget(this);
     eventHandlers.clear();
-    _nativeMap.remove(nativeEventTargetPtr.address);
+    _nativeMap.remove(pointer.address);
     _disposed = true;
-    malloc.free(nativeEventTargetPtr);
+    malloc.free(pointer);
 
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_END, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_END, uniqueId: hashCode);
     }
   }
-
-  // void addEvent(String eventType) {}
 }
