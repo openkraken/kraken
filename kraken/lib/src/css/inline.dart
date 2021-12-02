@@ -24,21 +24,18 @@ enum VerticalAlign {
   ///  middle,
 }
 
-mixin CSSInlineMixin on RenderStyleBase {
-  VerticalAlign _verticalAlign = VerticalAlign.baseline;
+mixin CSSInlineMixin on RenderStyle {
+  @override
   VerticalAlign get verticalAlign => _verticalAlign;
+  VerticalAlign _verticalAlign = VerticalAlign.baseline;
   set verticalAlign(VerticalAlign value) {
     if (_verticalAlign != value) {
-      renderBoxModel!.markNeedsLayout();
       _verticalAlign = value;
+      renderBoxModel?.markNeedsLayout();
     }
   }
 
-  void updateVerticalAlign(String value) {
-    verticalAlign = parseVerticalAlign(value);
-  }
-
-  static VerticalAlign parseVerticalAlign(String verticalAlign) {
+  static VerticalAlign resolveVerticalAlign(String verticalAlign) {
     switch (verticalAlign) {
       case TOP:
         return VerticalAlign.top;

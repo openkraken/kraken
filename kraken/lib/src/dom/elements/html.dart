@@ -6,6 +6,7 @@
 import 'dart:ffi';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
@@ -30,17 +31,40 @@ class HTMLElement extends Element {
       PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_PROPERTY_INIT);
     }
     elementManager.viewportElement = this;
-    // Init renderer
-    willAttachRenderer();
-    // Init default render style value
-    style.applyTargetProperties();
-    RenderStyle renderStyle = renderBoxModel!.renderStyle;
-    // Must init with viewport width
-    renderStyle.width = elementManager.viewportWidth;
-    renderStyle.height = elementManager.viewportHeight;
-    didAttachRenderer();
+    // Must init with viewport width.
+    renderStyle.width = CSSLengthValue(elementManager.viewportWidth, CSSLengthType.PX);
+    renderStyle.height = CSSLengthValue(elementManager.viewportHeight, CSSLengthType.PX);
+  }
+
+  @override
+  void attachTo(Node parent, {RenderBox? after}) {
+    super.attachTo(parent);
+    if (renderBoxModel != null) {
+      elementManager.viewport.child = renderBoxModel!;
+      // Flush pending style immediately.
+      style.flushPendingProperties();
+    }
+  }
+
+  @override
+  void disposeRenderObject() {
+    super.disposeRenderObject();
+    if (renderBoxModel != null) {
+      elementManager.viewport.child = null;
+      elementManager.viewport.dropChild(renderBoxModel!);
+    }
+  }
+
+  @override
+  void addEvent(String eventType) {
+    // Scroll event not working on html.
+    if (eventType == EVENT_SCROLL) return;
+    super.addEvent(eventType);
   }
 
   @override
   String get tagName => HTML;
+
+  @override
+  bool get isRendererAttached => true;
 }

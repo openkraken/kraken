@@ -399,7 +399,7 @@ describe('Height', () => {
 
     requestAnimationFrame(async () => {
       text.data = 'three';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });
@@ -446,7 +446,7 @@ describe('Height', () => {
 
     requestAnimationFrame(async () => {
       text.data = 'three';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });
@@ -494,7 +494,7 @@ describe('Height', () => {
 
     requestAnimationFrame(async () => {
       text.data = 'three';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });
@@ -543,7 +543,7 @@ describe('Height', () => {
 
     requestAnimationFrame(async () => {
       text.data = 'three';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });

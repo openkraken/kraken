@@ -10,7 +10,6 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/launcher.dart';
-import 'package:kraken/painting.dart';
 import 'package:kraken/rendering.dart';
 
 // CSS Backgrounds: https://drafts.csswg.org/css-backgrounds/
@@ -21,6 +20,156 @@ import 'package:kraken/rendering.dart';
 ///
 
 final RegExp _splitRegExp = RegExp(r'\s+');
+const String _singleQuote = '\'';
+const String _doubleQuote = '"';
+
+String _removeQuotationMark(String input) {
+  if ((input.startsWith(_singleQuote) && input.endsWith(_singleQuote))
+      || (input.startsWith(_doubleQuote) && input.endsWith(_doubleQuote))) {
+    input = input.substring(1, input.length - 1);
+  }
+  return input;
+}
+
+// https://drafts.csswg.org/css-backgrounds/#typedef-attachment
+enum CSSBackgroundAttachmentType {
+  scroll,
+  fixed,
+  local,
+}
+
+enum CSSBackgroundRepeatType {
+  repeat,
+  repeatX,
+  repeatY,
+  noRepeat,
+}
+
+enum CSSBackgroundSizeType {
+  auto,
+  cover,
+  contain,
+}
+
+enum CSSBackgroundPositionType {
+  topLeft,
+  topCenter,
+  topRight,
+  centerLeft,
+  center,
+  centerRight,
+  bottomLeft,
+  bottomCenter,
+  bottomRight,
+}
+
+enum CSSBackgroundOriginType {
+  borderBox,
+  paddingBox,
+  contentBox,
+}
+
+enum CSSBackgroundClipType {
+  borderBox,
+  paddingBox,
+  contentBox,
+}
+
+enum CSSBackgroundImageType {
+  none,
+  gradient,
+  image,
+}
+
+mixin CSSBackgroundMixin on RenderStyle {
+  static CSSBackgroundPosition DEFAULT_BACKGROUND_POSITION = CSSBackgroundPosition(percentage: -1);
+  static CSSBackgroundSize DEFAULT_BACKGROUND_SIZE = CSSBackgroundSize(fit: BoxFit.none);
+
+  /// Background-clip
+  BackgroundBoundary? get backgroundClip => _backgroundClip;
+  BackgroundBoundary? _backgroundClip;
+  set backgroundClip(BackgroundBoundary? value) {
+    if (value == _backgroundClip) return;
+    _backgroundClip = value;
+    renderBoxModel?.markNeedsPaint();
+  }
+
+  /// Background-origin
+  BackgroundBoundary? get backgroundOrigin => _backgroundOrigin;
+  BackgroundBoundary? _backgroundOrigin;
+  set backgroundOrigin(BackgroundBoundary? value) {
+    if (value == _backgroundOrigin) return;
+    _backgroundOrigin = value;
+    renderBoxModel?.markNeedsPaint();
+  }
+
+  @override
+  Color? get backgroundColor => _backgroundColor;
+  Color? _backgroundColor;
+  set backgroundColor(Color? value) {
+    if (value == _backgroundColor) return;
+    _backgroundColor = value;
+    renderBoxModel?.markNeedsPaint();
+  }
+
+  /// Background-image
+  @override
+  CSSBackgroundImage? get backgroundImage => _backgroundImage;
+  CSSBackgroundImage? _backgroundImage;
+  set backgroundImage(CSSBackgroundImage? value) {
+    if (value == _backgroundImage) return;
+    _backgroundImage = value;
+    renderBoxModel?.markNeedsPaint();
+  }
+
+  /// Background-position-x
+  @override
+  CSSBackgroundPosition get backgroundPositionX => _backgroundPositionX ?? DEFAULT_BACKGROUND_POSITION;
+  CSSBackgroundPosition? _backgroundPositionX;
+  set backgroundPositionX(CSSBackgroundPosition? value) {
+    if (value == _backgroundPositionX) return;
+    _backgroundPositionX = value;
+    renderBoxModel?.markNeedsPaint();
+  }
+
+  /// Background-position-y
+  @override
+  CSSBackgroundPosition get backgroundPositionY => _backgroundPositionY ?? DEFAULT_BACKGROUND_POSITION;
+  CSSBackgroundPosition? _backgroundPositionY;
+  set backgroundPositionY(CSSBackgroundPosition? value) {
+    if (value == _backgroundPositionY) return;
+    _backgroundPositionY = value;
+    renderBoxModel?.markNeedsPaint();
+  }
+
+  /// Background-size
+  CSSBackgroundSize get backgroundSize => _backgroundSize ?? DEFAULT_BACKGROUND_SIZE;
+  CSSBackgroundSize? _backgroundSize;
+  set backgroundSize(CSSBackgroundSize? value) {
+    if (value == _backgroundSize) return;
+    _backgroundSize = value;
+    renderBoxModel?.markNeedsPaint();
+  }
+
+  /// Background-attachment
+  CSSBackgroundAttachmentType? get backgroundAttachment => _backgroundAttachment;
+  CSSBackgroundAttachmentType? _backgroundAttachment;
+  set backgroundAttachment(CSSBackgroundAttachmentType? value) {
+    if (value == _backgroundAttachment) return;
+    _backgroundAttachment = value;
+    renderBoxModel?.markNeedsPaint();
+  }
+
+  /// Background-repeat
+  @override
+  ImageRepeat get backgroundRepeat => _backgroundRepeat ?? ImageRepeat.repeat;
+  ImageRepeat? _backgroundRepeat;
+  set backgroundRepeat(ImageRepeat? value) {
+    if (value == _backgroundRepeat) return;
+    _backgroundRepeat = value;
+    renderBoxModel?.markNeedsPaint();
+  }
+}
 
 class CSSColorStop {
   Color? color;
@@ -28,119 +177,35 @@ class CSSColorStop {
   CSSColorStop(this.color, this.stop);
 }
 
-class CSSBackground {
-  static bool isValidBackgroundRepeatValue(String value) {
-    return value == REPEAT || value == NO_REPEAT || value == REPEAT_X || value == REPEAT_Y;
-  }
+class CSSBackgroundImage {
+  List<CSSFunctionalNotation> functions;
+  RenderStyle renderStyle;
+  KrakenController controller;
+  CSSBackgroundImage(this.functions, this.renderStyle, this.controller);
 
-  static bool isValidBackgroundSizeValue(String value) {
-    return value == AUTO ||
-        value == CONTAIN ||
-        value == COVER ||
-        value == FIT_WIDTH ||
-        value == FIT_HEIGTH ||
-        value == SCALE_DOWN ||
-        value == FILL ||
-        CSSLength.isLength(value) ||
-        CSSPercentage.isPercentage(value);
-  }
+  ImageProvider? get image {
+    for (CSSFunctionalNotation method in functions) {
+      if (method.name == 'url') {
+        String url = method.args.isNotEmpty ? method.args[0] : '';
+        if (url.isEmpty) {
+          continue;
+        }
+        // Method may contain quotation mark, like ['"assets/foo.png"']
+        url = _removeQuotationMark(url);
 
-  static bool isValidBackgroundAttachmentValue(String value) {
-    return value == SCROLL || value == LOCAL;
-  }
-
-  static bool isValidBackgroundImageValue(String value) {
-    return (value.lastIndexOf(')') == value.length - 1) &&
-        (value.startsWith('url(') ||
-        value.startsWith('linear-gradient(') ||
-        value.startsWith('repeating-linear-gradient(') ||
-        value.startsWith('radial-gradient(') ||
-        value.startsWith('repeating-radial-gradient(') ||
-        value.startsWith('conic-gradient('));
-  }
-
-  static bool isValidBackgroundPositionValue(String value) {
-    return value == CSSPosition.CENTER ||
-        value == CSSPosition.LEFT ||
-        value == CSSPosition.RIGHT ||
-        value == CSSPosition.TOP ||
-        value == CSSPosition.BOTTOM ||
-        CSSLength.isLength(value) ||
-        CSSPercentage.isPercentage(value);
-  }
-
-  static Color? getBackgroundColor(CSSStyleDeclaration style) {
-    String backgroundColor = style[BACKGROUND_COLOR];
-    if (backgroundColor.isNotEmpty) {
-       return CSSColor.parseColor(backgroundColor);
-    }
-    return null;
-  }
-
-  static bool hasLocalBackgroundImage(CSSStyleDeclaration style) {
-    return style[BACKGROUND_IMAGE].isNotEmpty && style[BACKGROUND_ATTACHMENT] == LOCAL;
-  }
-
-  static bool hasScrollBackgroundImage(CSSStyleDeclaration style) {
-    String attachment = style[BACKGROUND_ATTACHMENT];
-    // Default is `scroll` attachment
-    return style[BACKGROUND_IMAGE].isNotEmpty && (attachment.isEmpty || attachment == SCROLL);
-  }
-
-  static DecorationImage? getDecorationImage(CSSStyleDeclaration? style, CSSFunctionalNotation method, { int? contextId }) {
-    DecorationImage? backgroundImage;
-
-    String url = method.args.isNotEmpty ? method.args[0] : '';
-    if (url.isEmpty) {
-      return null;
-    }
-
-    // Method may contain quotation mark, like ['"assets/foo.png"']
-    url = _removeQuotationMark(url);
-
-    ImageRepeat imageRepeat = ImageRepeat.repeat;
-    if (style![BACKGROUND_REPEAT].isNotEmpty) {
-      switch (style[BACKGROUND_REPEAT]) {
-        case REPEAT_X:
-          imageRepeat = ImageRepeat.repeatX;
-          break;
-        case REPEAT_Y:
-          imageRepeat = ImageRepeat.repeatY;
-          break;
-        case NO_REPEAT:
-          imageRepeat = ImageRepeat.noRepeat;
-          break;
+        Uri uri = Uri.parse(url);
+        if (url.isNotEmpty) {
+          uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri);
+          return CSSUrl.parseUrl(uri, contextId: controller.view.contextId);
+        }
       }
     }
-
-    Uri uri = Uri.parse(url);
-    if (contextId != null && url.isNotEmpty) {
-      KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
-      if (controller != null) {
-        uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri);
-      }
-    }
-
-    backgroundImage = DecorationImage(
-      image: CSSUrl.parseUrl(uri, contextId: contextId)!,
-      repeat: imageRepeat,
-    );
-
-    return backgroundImage;
   }
-
-  static Gradient? getBackgroundGradient(CSSStyleDeclaration? style, RenderBoxModel renderBoxModel, CSSFunctionalNotation method) {
-    Gradient? gradient;
-
-    if (method.args.length > 1) {
-      List<Color> colors = [];
-      List<double> stops = [];
-      int start = 0;
-      RenderStyle renderStyle = renderBoxModel.renderStyle;
-      Size viewportSize = renderStyle.viewportSize;
-      double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
-      double fontSize = renderStyle.fontSize;
-
+  Gradient? get gradient {
+    List<Color> colors = [];
+    List<double> stops = [];
+    int start = 0;
+    for (CSSFunctionalNotation method in functions) {
       switch (method.name) {
         case 'linear-gradient':
         case 'repeating-linear-gradient':
@@ -166,16 +231,7 @@ class CSSBackground {
                     begin = Alignment.centerRight;
                     end = Alignment.centerLeft;
                   }
-                  if (style![WIDTH].isNotEmpty) {
-                    gradientLength = CSSLength.toDisplayPortValue(
-                      style[WIDTH],
-                      viewportSize: viewportSize,
-                      rootFontSize: rootFontSize,
-                      fontSize: fontSize
-                    );
-                  } else if (renderBoxModel.attached) {
-                    gradientLength = RenderBoxModel.getLogicalContentWidth(renderBoxModel);
-                  }
+                  gradientLength = renderStyle.paddingBoxWidth;
                   break;
                 case TOP:
                   if (parts.length == 3) {
@@ -190,16 +246,7 @@ class CSSBackground {
                     begin = Alignment.bottomCenter;
                     end = Alignment.topCenter;
                   }
-                  if (style![HEIGHT].isNotEmpty) {
-                    gradientLength = CSSLength.toDisplayPortValue(
-                      style[HEIGHT],
-                      viewportSize: viewportSize,
-                      rootFontSize: rootFontSize,
-                      fontSize: fontSize
-                    );
-                  } else if (renderBoxModel.attached) {
-                    gradientLength = RenderBoxModel.getLogicalContentHeight(renderBoxModel);
-                  }
+                  gradientLength = renderStyle.paddingBoxHeight;
                   break;
                 case RIGHT:
                   if (parts.length == 3) {
@@ -214,18 +261,7 @@ class CSSBackground {
                     begin = Alignment.centerLeft;
                     end = Alignment.centerRight;
                   }
-
-                  if (style![WIDTH].isNotEmpty) {
-                    gradientLength = CSSLength.toDisplayPortValue(
-                      style[WIDTH],
-                      viewportSize: viewportSize,
-                      rootFontSize: rootFontSize,
-                      fontSize: fontSize
-                    );
-                  } else if (renderBoxModel.attached) {
-                    gradientLength = RenderBoxModel.getLogicalContentWidth(renderBoxModel);
-                  }
-
+                  gradientLength = renderStyle.paddingBoxWidth;
                   break;
                 case BOTTOM:
                   if (parts.length == 3) {
@@ -240,16 +276,7 @@ class CSSBackground {
                     begin = Alignment.topCenter;
                     end = Alignment.bottomCenter;
                   }
-                  if (style![HEIGHT].isNotEmpty) {
-                    gradientLength = CSSLength.toDisplayPortValue(
-                      style[HEIGHT],
-                      viewportSize: viewportSize,
-                      rootFontSize: rootFontSize,
-                      fontSize: fontSize
-                    );
-                  } else if (renderBoxModel.attached) {
-                    gradientLength = RenderBoxModel.getLogicalContentHeight(renderBoxModel);
-                  }
+                  gradientLength = renderStyle.paddingBoxHeight;
                   break;
               }
             }
@@ -259,9 +286,9 @@ class CSSBackground {
             linearAngle = CSSAngle.parseAngle(arg0);
             start = 1;
           }
-          _applyColorAndStops(renderBoxModel, start, method.args, colors, stops, gradientLength);
+          _applyColorAndStops(start, method.args, colors, stops, renderStyle, BACKGROUND_IMAGE, gradientLength);
           if (colors.length >= 2) {
-            gradient = CSSLinearGradient(
+            return CSSLinearGradient(
                 begin: begin,
                 end: end,
                 angle: linearAngle,
@@ -295,9 +322,9 @@ class CSSBackground {
               }
             }
           }
-          _applyColorAndStops(renderBoxModel, start, method.args, colors, stops);
+          _applyColorAndStops(start, method.args, colors, stops, renderStyle, BACKGROUND_IMAGE);
           if (colors.length >= 2) {
-            gradient = CSSRadialGradient(
+            return CSSRadialGradient(
               center: FractionalOffset(atX!, atY!),
               radius: radius,
               colors: colors,
@@ -327,9 +354,9 @@ class CSSBackground {
             }
             start = 1;
           }
-          _applyColorAndStops(renderBoxModel, start, method.args, colors, stops);
+          _applyColorAndStops(start, method.args, colors, stops, renderStyle, BACKGROUND_IMAGE);
           if (colors.length >= 2) {
-            gradient = CSSConicGradient(
+            return CSSConicGradient(
                 center: FractionalOffset(atX!, atY!),
                 colors: colors,
                 stops: stops,
@@ -338,83 +365,229 @@ class CSSBackground {
           break;
       }
     }
-
-    return gradient;
-  }
-
-  static void _applyColorAndStops(RenderBoxModel renderBoxModel, int start, List<String> args, List<Color?> colors, List<double?> stops, [double? gradientLength]) {
-    // colors should more than one, otherwise invalid
-    if (args.length - start - 1 > 0) {
-      double grow = 1.0 / (args.length - start - 1);
-      for (int i = start; i < args.length; i++) {
-        List<CSSColorStop> colorGradients = _parseColorAndStop(renderBoxModel, args[i].trim(), (i - start) * grow, gradientLength);
-        for (var colorStop in colorGradients) {
-          colors.add(colorStop.color);
-          stops.add(colorStop.stop);
-        }
-      }
-    }
-  }
-
-  static List<CSSColorStop> _parseColorAndStop(RenderBoxModel renderBoxModel, String src, [double? defaultStop, double? gradientLength]) {
-    List<String> strings = [];
-    List<CSSColorStop> colorGradients = [];
-    // rgba may contain space, color should handle special
-    if (src.startsWith('rgba(')) {
-      int indexOfRgbaEnd = src.indexOf(')');
-      if (indexOfRgbaEnd == -1) {
-        // rgba parse error
-        return colorGradients;
-      }
-      strings.add(src.substring(0, indexOfRgbaEnd + 1));
-      if (indexOfRgbaEnd + 1 < src.length) {
-        strings.addAll(src.substring(indexOfRgbaEnd + 1).trim().split(' '));
-      }
-    } else {
-      strings = src.split(' ');
-    }
-
-    if (strings.isNotEmpty) {
-      double? stop = defaultStop;
-      if (strings.length >= 2) {
-        try {
-          RenderStyle renderStyle = renderBoxModel.renderStyle;
-          Size viewportSize = renderStyle.viewportSize;
-          double rootFontSize = renderBoxModel.elementDelegate.getRootElementFontSize();
-          double fontSize = renderStyle.fontSize;
-
-          for (int i = 1; i < strings.length; i++) {
-            if (CSSPercentage.isPercentage(strings[i])) {
-              stop = CSSPercentage.parsePercentage(strings[i]);
-            } else if (CSSAngle.isAngle(strings[i])) {
-              stop = CSSAngle.parseAngle(strings[i])! / (math.pi * 2);
-            } else if (CSSLength.isLength(strings[i])) {
-              if (gradientLength != null) {
-                stop = CSSLength.toDisplayPortValue(
-                  strings[i],
-                  viewportSize: viewportSize,
-                  rootFontSize: rootFontSize,
-                  fontSize: fontSize
-                )! / gradientLength;
-              }
-            }
-            colorGradients.add(CSSColorStop(CSSColor.parseColor(strings[0]), stop));
-          }
-        } catch (e) {}
-      } else {
-        colorGradients.add(CSSColorStop(CSSColor.parseColor(strings[0]), stop));
-      }
-    }
-    return colorGradients;
   }
 }
 
-const String _singleQuote = '\'';
-const String _doubleQuote = '"';
-String _removeQuotationMark(String input) {
-  if ((input.startsWith(_singleQuote) && input.endsWith(_singleQuote))
-      || (input.startsWith(_doubleQuote) && input.endsWith(_doubleQuote))) {
-    input = input.substring(1, input.length - 1);
+class CSSBackgroundPosition {
+  CSSBackgroundPosition({
+    this.length,
+    this.percentage,
+  });
+  /// Absolute position to image container when length type is set.
+  CSSLengthValue? length;
+  /// Relative position to image container when keyword or percentage type is set.
+  double? percentage;
+}
+
+class CSSBackgroundSize {
+  CSSBackgroundSize({
+    required this.fit,
+    this.width,
+    this.height,
+  });
+
+  // Keyword value (contain/cover/auto)
+  BoxFit fit = BoxFit.none;
+
+  // Length/percentage value
+  CSSLengthValue? width;
+  CSSLengthValue? height;
+
+  @override
+  String toString() => 'CSSBackgroundSize(fit: $fit, width: $width, height: $height)';
+}
+
+class CSSBackground {
+  static bool isValidBackgroundRepeatValue(String value) {
+    return value == REPEAT || value == NO_REPEAT || value == REPEAT_X || value == REPEAT_Y;
   }
-  return input;
+
+  static bool isValidBackgroundSizeValue(String value) {
+    return value == AUTO ||
+        value == CONTAIN ||
+        value == COVER ||
+        value == FIT_WIDTH ||
+        value == FIT_HEIGTH ||
+        value == SCALE_DOWN ||
+        value == FILL ||
+        CSSLength.isNonNegativeLength(value) ||
+        CSSPercentage.isNonNegativePercentage(value);
+  }
+
+  static bool isValidBackgroundAttachmentValue(String value) {
+    return value == SCROLL || value == LOCAL;
+  }
+
+  static bool isValidBackgroundImageValue(String value) {
+    return (value.lastIndexOf(')') == value.length - 1) &&
+        (value.startsWith('url(') ||
+        value.startsWith('linear-gradient(') ||
+        value.startsWith('repeating-linear-gradient(') ||
+        value.startsWith('radial-gradient(') ||
+        value.startsWith('repeating-radial-gradient(') ||
+        value.startsWith('conic-gradient('));
+  }
+
+  static bool isValidBackgroundPositionValue(String value) {
+    return value == CENTER ||
+        value == LEFT ||
+        value == RIGHT ||
+        value == TOP ||
+        value == BOTTOM ||
+        CSSLength.isLength(value) ||
+        CSSPercentage.isPercentage(value);
+  }
+
+  static resolveBackgroundAttachment(String value) {
+    switch (value) {
+      case LOCAL:
+        return CSSBackgroundAttachmentType.local;
+      case FIXED:
+        return CSSBackgroundAttachmentType.fixed;
+      case SCROLL:
+      default:
+        return CSSBackgroundAttachmentType.scroll;
+    }
+  }
+
+  static CSSBackgroundSize resolveBackgroundSize(String value, RenderStyle renderStyle, String propertyName) {
+    switch (value) {
+      case CONTAIN:
+        return CSSBackgroundSize(
+          fit: BoxFit.contain
+        );
+      case COVER:
+        return CSSBackgroundSize(
+          fit: BoxFit.cover
+        );
+      case AUTO:
+        return CSSBackgroundSize(
+          fit: BoxFit.none
+        );
+      default:
+        List<String> values = value.split(_splitRegExp);
+        if (values.length == 1 && values[0].isNotEmpty) {
+          CSSLengthValue width = CSSLength.parseLength(values[0], renderStyle, propertyName, Axis.horizontal);
+          return CSSBackgroundSize(
+            fit: BoxFit.none,
+            width: width,
+          );
+        } else if (values.length == 2) {
+          CSSLengthValue width = CSSLength.parseLength(values[0], renderStyle, propertyName, Axis.horizontal);
+          CSSLengthValue height = CSSLength.parseLength(values[1], renderStyle, propertyName, Axis.vertical);
+          // Value which is neither length/percentage/auto is considered to be invalid.
+          return CSSBackgroundSize(
+            fit: BoxFit.none,
+            width: width,
+            height: height,
+          );
+        }
+        return CSSBackgroundSize(
+          fit: BoxFit.none
+        );
+    }
+  }
+
+  static resolveBackgroundImage(String present, RenderStyle renderStyle, String property, KrakenController controller) {
+    List<CSSFunctionalNotation> functions = CSSFunction.parseFunction(present);
+    return CSSBackgroundImage(functions, renderStyle, controller);
+  }
+
+  static ImageRepeat resolveBackgroundRepeat(String value) {
+    switch (value) {
+      case REPEAT_X:
+        return ImageRepeat.repeatX;
+      case REPEAT_Y:
+        return ImageRepeat.repeatY;
+      case NO_REPEAT:
+        return ImageRepeat.noRepeat;
+      case REPEAT:
+      default:
+        return ImageRepeat.repeat;
+    }
+  }
+
+  static BackgroundBoundary resolveBackgroundClip(String value) {
+    switch (value) {
+      case 'padding-box':
+        return BackgroundBoundary.paddingBox;
+      case 'content-box':
+        return BackgroundBoundary.contentBox;
+      case 'border-box':
+      default:
+        return BackgroundBoundary.borderBox;
+    }
+  }
+
+  static BackgroundBoundary resolveBackgroundOrigin(String value) {
+    switch (value) {
+      case 'border-box':
+        return BackgroundBoundary.borderBox;
+      case 'content-box':
+        return BackgroundBoundary.contentBox;
+      case 'padding-box':
+      default:
+        return BackgroundBoundary.paddingBox;
+    }
+  }
+}
+
+void _applyColorAndStops(int start, List<String> args, List<Color?> colors, List<double?> stops, RenderStyle renderStyle, String propertyName, [double? gradientLength]) {
+  // colors should more than one, otherwise invalid
+  if (args.length - start - 1 > 0) {
+    double grow = 1.0 / (args.length - start - 1);
+    for (int i = start; i < args.length; i++) {
+      List<CSSColorStop> colorGradients = _parseColorAndStop(args[i].trim(), renderStyle, propertyName, (i - start) * grow, gradientLength);
+      for (var colorStop in colorGradients) {
+        colors.add(colorStop.color);
+        stops.add(colorStop.stop);
+      }
+    }
+  }
+}
+
+List<CSSColorStop> _parseColorAndStop(String src, RenderStyle renderStyle, String propertyName, [double? defaultStop, double? gradientLength]) {
+  List<String> strings = [];
+  List<CSSColorStop> colorGradients = [];
+  // rgba may contain space, color should handle special
+  if (src.startsWith('rgba(')) {
+    int indexOfRgbaEnd = src.indexOf(')');
+    if (indexOfRgbaEnd == -1) {
+      // rgba parse error
+      return colorGradients;
+    }
+    strings.add(src.substring(0, indexOfRgbaEnd + 1));
+    if (indexOfRgbaEnd + 1 < src.length) {
+      strings.addAll(src.substring(indexOfRgbaEnd + 1).trim().split(' '));
+    }
+  } else {
+    strings = src.split(' ');
+  }
+
+  if (strings.isNotEmpty) {
+    double? stop = defaultStop;
+    if (strings.length >= 2) {
+      try {
+        for (int i = 1; i < strings.length; i++) {
+          if (CSSPercentage.isPercentage(strings[i])) {
+            stop = CSSPercentage.parsePercentage(strings[i]);
+            // Negative percentage is invalid in gradients which will defaults to 0.
+            if (stop! < 0) stop = 0;
+          } else if (CSSAngle.isAngle(strings[i])) {
+            stop = CSSAngle.parseAngle(strings[i])! / (math.pi * 2);
+          } else if (CSSLength.isLength(strings[i])) {
+            if (gradientLength != null) {
+              stop = CSSLength.parseLength(strings[i], renderStyle, propertyName).computedValue / gradientLength;
+            }
+          }
+          Color? color = CSSColor.resolveColor(strings[0], renderStyle, propertyName);
+          colorGradients.add(CSSColorStop(color, stop));
+        }
+      } catch (e) {}
+    } else {
+      Color? color = CSSColor.resolveColor(strings[0], renderStyle, propertyName);
+      colorGradients.add(CSSColorStop(color, stop));
+    }
+  }
+  return colorGradients;
 }

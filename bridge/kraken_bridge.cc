@@ -4,11 +4,11 @@
  */
 
 #include "kraken_bridge.h"
+#include <cassert>
 #include "dart_methods.h"
 #include "foundation/inspector_task_queue.h"
 #include "foundation/logging.h"
 #include "foundation/ui_task_queue.h"
-
 #if KRAKEN_JSC_ENGINE
 #include "bindings/jsc/KOM/performance.h"
 #elif KRAKEN_QUICK_JS_ENGINE
@@ -52,9 +52,9 @@ int maxPoolSize = 0;
 kraken::JSBridge** contextPool;
 NativeScreen screen;
 
-std::__thread_id uiThreadId;
+std::thread::id uiThreadId;
 
-std::__thread_id getUIThreadId() {
+std::thread::id getUIThreadId() {
   return uiThreadId;
 }
 
@@ -242,14 +242,19 @@ void registerPluginByteCode(uint8_t* bytes, int32_t length, const char* pluginNa
   kraken::JSBridge::pluginByteCode[pluginName] = NativeByteCode{bytes, length};
 }
 
+int32_t profileModeEnabled() {
+#if ENABLE_PROFILE
+  return 1;
+#else
+  return 0;
+#endif
+}
+
 NativeString* NativeString::clone() {
-  NativeString* newNativeString = new NativeString();
-  uint16_t* newString = new uint16_t[length];
+  auto* newNativeString = new NativeString();
+  auto* newString = new uint16_t[length];
 
-  for (size_t i = 0; i < length; i++) {
-    newString[i] = string[i];
-  }
-
+  memcpy(newString, string, length * sizeof(uint16_t));
   newNativeString->string = newString;
   newNativeString->length = length;
   return newNativeString;
@@ -257,5 +262,4 @@ NativeString* NativeString::clone() {
 
 void NativeString::free() {
   delete[] string;
-  delete this;
 }

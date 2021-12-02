@@ -21,7 +21,10 @@ mixin RenderTransformMixin on RenderBoxModelBase {
       result.translate(translation.dx, translation.dy);
     }
 
-    result.multiply(renderStyle.transform!);
+    Matrix4? transformMatrix = renderStyle.transformMatrix;
+    if (transformMatrix != null) {
+      result.multiply(renderStyle.transformMatrix!);
+    }
 
     if (transformAlignment != Alignment.topLeft)
       result.translate(-translation.dx, -translation.dy);
@@ -33,7 +36,7 @@ mixin RenderTransformMixin on RenderBoxModelBase {
 
   void paintTransform(PaintingContext context, Offset offset,
       PaintingContextCallback callback) {
-    if (renderStyle.transform != null) {
+    if (renderStyle.transformMatrix != null) {
       final Matrix4 transform = getEffectiveTransform();
       final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
       if (childOffset == null) {
@@ -54,7 +57,7 @@ mixin RenderTransformMixin on RenderBoxModelBase {
   }
 
   void applyEffectiveTransform(RenderBox child, Matrix4 transform) {
-    if (renderStyle.transform != null) {
+    if (renderStyle.transformMatrix != null) {
       transform.multiply(getEffectiveTransform());
     }
   }

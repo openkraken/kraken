@@ -32,7 +32,7 @@ JSValue Event::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue th
   JSValue eventTypeValue = argv[0];
   std::string eventType = jsValueToStdString(ctx, eventTypeValue);
 
-  auto* nativeEvent = new NativeEvent{stringToNativeString(eventType)};
+  auto* nativeEvent = new NativeEvent{stringToNativeString(eventType).release()};
   auto* event = Event::buildEventInstance(eventType, m_context, nativeEvent, false);
   return event->instanceObject;
 }
@@ -200,7 +200,7 @@ JSValue Event::initEvent(QjsContext* ctx, JSValue this_val, int argc, JSValue* a
   }
 
   auto* event = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
-  event->nativeEvent->type = jsValueToNativeString(ctx, typeValue);
+  event->nativeEvent->type = jsValueToNativeString(ctx, typeValue).release();
 
   if (!JS_IsNull(bubblesValue)) {
     event->nativeEvent->bubbles = JS_IsBool(bubblesValue) ? 1 : 0;
@@ -218,7 +218,7 @@ EventInstance* EventInstance::fromNativeEvent(Event* event, NativeEvent* nativeE
 EventInstance::EventInstance(Event* event, NativeEvent* nativeEvent) : nativeEvent(nativeEvent), Instance(event, "Event", nullptr, Event::kEventClassID, finalizer) {}
 EventInstance::EventInstance(Event* jsEvent, JSAtom eventType, JSValue eventInit) : Instance(jsEvent, "Event", nullptr, Event::kEventClassID, finalizer) {
   JSValue v = JS_AtomToValue(m_ctx, eventType);
-  nativeEvent = new NativeEvent{jsValueToNativeString(m_ctx, v)};
+  nativeEvent = new NativeEvent{jsValueToNativeString(m_ctx, v).release()};
   JS_FreeValue(m_ctx, v);
 
   auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());

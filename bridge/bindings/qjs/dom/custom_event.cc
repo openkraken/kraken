@@ -27,7 +27,7 @@ JSValue CustomEvent::initCustomEvent(QjsContext* ctx, JSValue this_val, int argc
   }
 
   JSValue typeValue = argv[0];
-  eventInstance->nativeEvent->type = jsValueToNativeString(ctx, typeValue);
+  eventInstance->nativeEvent->type = jsValueToNativeString(ctx, typeValue).release();
 
   if (argc <= 2) {
     bool canBubble = JS_ToBool(ctx, argv[1]);

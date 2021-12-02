@@ -22,7 +22,13 @@ class BodyElement extends Element {
   @override
   void willAttachRenderer() {
     super.willAttachRenderer();
-    RenderStyle renderStyle = renderBoxModel!.renderStyle;
-    renderStyle.width = elementManager.viewportWidth;
+    renderBoxModel!.renderStyle.width = CSSLengthValue(elementManager.viewportWidth, CSSLengthType.PX);
+  }
+
+  @override
+  void addEvent(String eventType) {
+    // Scroll event not working on body.
+    if (eventType == EVENT_SCROLL) return;
+    super.addEvent(eventType);
   }
 }

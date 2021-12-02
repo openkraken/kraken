@@ -111,8 +111,9 @@ class NodeInstance : public EventTargetInstance {
   void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
  private:
-  DEFINE_HOST_CLASS_PROPERTY(10, isConnected, ownerDocument, firstChild, lastChild, parentNode, childNodes, previousSibling, nextSibling, nodeType, textContent);
+  DEFINE_HOST_CLASS_PROPERTY(9, isConnected, ownerDocument, firstChild, lastChild, parentNode, previousSibling, nextSibling, nodeType, textContent);
   DocumentInstance* m_document{nullptr};
+  ObjectProperty m_childNodes{m_context, instanceObject, "childNodes", childNodes};
   void ensureDetached(NodeInstance* node);
   friend DocumentInstance;
   friend Node;

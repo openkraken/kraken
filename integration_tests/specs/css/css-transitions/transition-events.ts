@@ -63,7 +63,7 @@ describe('Transition events', () => {
       done();
     });
     requestAnimationFrame(async () => {
-      await sleep(0.1);
+  
       await snapshot();
       setElementStyle(container1, {
         transform: 'translate(10px,20px)',

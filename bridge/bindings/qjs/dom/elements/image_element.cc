@@ -31,9 +31,9 @@ PROP_GETTER(ImageElementInstance, width)(QjsContext* ctx, JSValue this_val, int 
 PROP_SETTER(ImageElementInstance, width)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   std::string key = "width";
-  NativeString* args_01 = stringToNativeString(key);
-  NativeString* args_02 = jsValueToNativeString(ctx, argv[0]);
-  foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+  std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
+  std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
+  foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
   return JS_NULL;
 }
 PROP_GETTER(ImageElementInstance, height)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -44,9 +44,9 @@ PROP_GETTER(ImageElementInstance, height)(QjsContext* ctx, JSValue this_val, int
 PROP_SETTER(ImageElementInstance, height)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   std::string key = "height";
-  NativeString* args_01 = stringToNativeString(key);
-  NativeString* args_02 = jsValueToNativeString(ctx, argv[0]);
-  foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+  std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
+  std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
+  foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
   return JS_NULL;
 }
 PROP_GETTER(ImageElementInstance, naturalWidth)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -73,9 +73,9 @@ PROP_GETTER(ImageElementInstance, src)(QjsContext* ctx, JSValue this_val, int ar
 PROP_SETTER(ImageElementInstance, src)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   std::string key = "src";
-  NativeString* args_01 = stringToNativeString(key);
-  NativeString* args_02 = jsValueToNativeString(ctx, argv[0]);
-  foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+  std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
+  std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
+  foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
   return JS_NULL;
 }
 PROP_GETTER(ImageElementInstance, loading)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -86,9 +86,9 @@ PROP_GETTER(ImageElementInstance, loading)(QjsContext* ctx, JSValue this_val, in
 PROP_SETTER(ImageElementInstance, loading)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   std::string key = "loading";
-  NativeString* args_01 = stringToNativeString(key);
-  NativeString* args_02 = jsValueToNativeString(ctx, argv[0]);
-  foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+  std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
+  std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
+  foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
   return JS_NULL;
 }
 
