@@ -37,7 +37,7 @@ mixin CSSTransformMixin on RenderStyleBase {
     // Transform effect the stacking context.
     RenderBoxModel? parentRenderer = (this as RenderStyle).parent?.renderBoxModel;
     if (parentRenderer is RenderLayoutBox) {
-      parentRenderer.markSortedChildrenInvalid();
+      parentRenderer.markChildrenNeedsSort();
     }
 
     renderBoxModel!.markNeedsLayout();
