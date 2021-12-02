@@ -46,7 +46,7 @@ String getAcceptHeader() {
 }
 
 bool isAssetAbsolutePath(String path) {
-  return path.indexOf('assets/') == 0;
+  return path.startsWith('assets://');
 }
 
 abstract class KrakenBundle {
