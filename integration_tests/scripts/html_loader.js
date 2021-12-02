@@ -35,7 +35,7 @@ const loader = function(source) {
   let root = HTMLParser.parse(source);
   traverseParseHTML(root);
   
-  // Set attr of HTML can let the case use fit. For example: <html fit> xxx </html>
+  // Set attr of HTML can let the case use fit. For example: <html fit> xxx </html>.
   let isFit = false;
   root.childNodes && root.childNodes.forEach(ele => {
     if (ele.rawAttrs && ele.rawAttrs.indexOf('fit') >= 0) {
