@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
-mixin CSSMarginMixin on RenderStyleBase {
+mixin CSSMarginMixin on RenderStyle {
 
   /// The amount to margin the child in each dimension.
   ///

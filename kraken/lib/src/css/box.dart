@@ -11,7 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 
 // CSS Box Model: https://drafts.csswg.org/css-box-4/
-mixin CSSBoxMixin on RenderStyleBase {
+mixin CSSBoxMixin on RenderStyle {
 
   final DecorationPosition decorationPosition = DecorationPosition.background;
   final ImageConfiguration imageConfiguration = ImageConfiguration.empty;

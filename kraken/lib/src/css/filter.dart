@@ -91,7 +91,7 @@ List<double> _multiplyMatrix5(List<double>? a, List<double> b) {
 
 /// Impl W3C Filter Effects Spec:
 ///   https://www.w3.org/TR/filter-effects-1/#definitions
-mixin CSSFilterEffectsMixin on RenderStyleBase {
+mixin CSSFilterEffectsMixin on RenderStyle {
 
   // Get the color filter.
   // eg: 'grayscale(1) grayscale(0.5)' -> matrix5(grayscale(1)) · matrix5(grayscale(0.5))

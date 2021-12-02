@@ -6,7 +6,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 
-mixin CSSSliverMixin on RenderStyleBase {
+mixin CSSSliverMixin on RenderStyle {
 
   @override
   Axis get sliverDirection => _sliverDirection;

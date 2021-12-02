@@ -577,7 +577,7 @@ class CSSMatrix {
 
   static Matrix4 initial = Matrix4.identity();
 
-  static Matrix4? computeTransformMatrix(List<CSSFunctionalNotation> transform, RenderStyleBase renderStyle) {
+  static Matrix4? computeTransformMatrix(List<CSSFunctionalNotation> transform, RenderStyle renderStyle) {
     Matrix4? matrix4;
     for (CSSFunctionalNotation method in transform) {
       Matrix4? transform = _computeMatrix(method, renderStyle);
@@ -592,7 +592,7 @@ class CSSMatrix {
     return matrix4;
   }
 
-  static Matrix4? _computeMatrix(CSSFunctionalNotation method, RenderStyleBase renderStyle) {
+  static Matrix4? _computeMatrix(CSSFunctionalNotation method, RenderStyle renderStyle) {
     switch (method.name) {
       case MATRIX:
         if (method.args.length == 6) {

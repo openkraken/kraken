@@ -173,7 +173,7 @@ enum AlignSelf {
   baseline
 }
 
-mixin CSSFlexboxMixin on RenderStyleBase {
+mixin CSSFlexboxMixin on RenderStyle {
 
   @override
   FlexDirection get flexDirection => _flexDirection ?? FlexDirection.row;
@@ -220,6 +220,7 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
+  @override
   AlignItems get effectiveAlignItems {
     if (CSSFlex.isVerticalFlexDirection(flexDirection)) {
       if (textAlign == TextAlign.right) {

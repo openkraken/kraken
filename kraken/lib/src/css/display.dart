@@ -19,7 +19,7 @@ enum CSSDisplay {
   none
 }
 
-mixin CSSDisplayMixin on RenderStyleBase {
+mixin CSSDisplayMixin on RenderStyle {
 
   CSSDisplay? _display;
 
@@ -60,8 +60,9 @@ mixin CSSDisplayMixin on RenderStyleBase {
 
   /// Some layout effects require blockification or inlinification of the box type
   /// https://www.w3.org/TR/css-display-3/#transformations
-  CSSDisplay? get effectiveDisplay {
-    CSSDisplay? transformedDisplay = display;
+  @override
+  CSSDisplay get effectiveDisplay {
+    CSSDisplay transformedDisplay = display;
 
     // Must take `position` from style because it inited before flush pending properties.
     // Display as inline-block when element is positioned

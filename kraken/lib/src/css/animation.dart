@@ -441,7 +441,7 @@ class _Interpolation {
 }
 
 class KeyframeEffect extends AnimationEffect {
-  RenderStyleBase renderStyle;
+  RenderStyle renderStyle;
   Element? target;
   late List<_Interpolation> _interpolations;
   double? _progress;
@@ -474,7 +474,7 @@ class KeyframeEffect extends AnimationEffect {
     return progress < 0.5 ? start : end;
   }
 
-  static List<_Interpolation> _makeInterpolations(Map<String, List<Keyframe>> propertySpecificKeyframeGroups, RenderStyleBase? renderStyle) {
+  static List<_Interpolation> _makeInterpolations(Map<String, List<Keyframe>> propertySpecificKeyframeGroups, RenderStyle? renderStyle) {
     List<_Interpolation> interpolations = [];
 
     propertySpecificKeyframeGroups.forEach((String property, List<Keyframe> keyframes) {

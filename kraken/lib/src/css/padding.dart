@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
-mixin CSSPaddingMixin on RenderStyleBase {
+mixin CSSPaddingMixin on RenderStyle {
   /// The amount to pad the child in each dimension.
   ///
   /// If this is set to an [EdgeInsetsDirectional] object, then [textDirection]

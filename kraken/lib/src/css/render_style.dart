@@ -13,10 +13,10 @@ import 'package:kraken/rendering.dart';
 
 /// The abstract class for render-style, declare the
 /// getter interface for all available CSS rule.
-abstract class RenderStyleBase {
+abstract class RenderStyle {
   // Common
   Element get target;
-  RenderStyleBase? get parent;
+  RenderStyle? get parent;
   getProperty(String key);
 
   // Geometry
@@ -107,15 +107,19 @@ abstract class RenderStyleBase {
   double? get contentBoxHeight;
   CSSPositionType get position;
   CSSDisplay get display;
+  CSSDisplay get effectiveDisplay;
   Alignment get objectPosition;
   CSSOverflowType get overflowX;
   CSSOverflowType get overflowY;
+  CSSOverflowType get effectiveOverflowX;
+  CSSOverflowType get effectiveOverflowY;
 
   // Flex
   FlexDirection get flexDirection;
   FlexWrap get flexWrap;
   JustifyContent get justifyContent;
   AlignItems get alignItems;
+  AlignItems get effectiveAlignItems;
   AlignContent get alignContent;
   AlignSelf get alignSelf;
   CSSLengthValue? get flexBasis;
@@ -149,7 +153,10 @@ abstract class RenderStyleBase {
 
   void addFontRelativeProperty(String propertyName);
   void addRootFontRelativeProperty(String propertyName);
+  void addColorRelativeProperty(String propertyName);
   String? removeAnimationProperty(String propertyName);
+  double getWidthByIntrinsicRatio();
+  double getHeightByIntrinsicRatio();
 
   // Following properties used for exposing APIs
   // for class that extends [AbstractRenderStyle].
@@ -160,8 +167,8 @@ abstract class RenderStyleBase {
   double get rootFontSize => target.elementManager.getRootFontSize();
 }
 
-class RenderStyle
-  extends RenderStyleBase
+class CSSRenderStyle
+  extends RenderStyle
   with
     CSSSizingMixin,
     CSSPaddingMixin,
@@ -186,13 +193,13 @@ class RenderStyle
     CSSFilterEffectsMixin,
     CSSOpacityMixin,
     CSSTransitionMixin {
-  RenderStyle({ required this.target });
+  CSSRenderStyle({ required this.target });
 
   @override
   Element target;
 
   @override
-  RenderStyle? parent;
+  CSSRenderStyle? parent;
 
   @override
   getProperty(String name) {
@@ -758,6 +765,7 @@ class RenderStyle
   }
 
   /// Get height of replaced element by intrinsic ratio if height is not defined
+  @override
   double getHeightByIntrinsicRatio() {
     // @TODO: move intrinsic width/height to renderStyle
     double? intrinsicWidth = renderBoxModel!.intrinsicWidth;
@@ -774,6 +782,7 @@ class RenderStyle
   }
 
   /// Get width of replaced element by intrinsic ratio if width is not defined
+  @override
   double getWidthByIntrinsicRatio() {
     // @TODO: move intrinsic width/height to renderStyle
     double? intrinsicHeight = renderBoxModel!.intrinsicHeight;

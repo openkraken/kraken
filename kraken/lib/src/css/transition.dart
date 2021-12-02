@@ -58,7 +58,7 @@ double? _parseLength(String length, RenderStyle renderStyle, String property) {
   return CSSLength.parseLength(length, renderStyle, property).computedValue;
 }
 
-void _updateLength(double oldLengthValue, double newLengthValue, double progress, String property, RenderStyle renderStyle) {
+void _updateLength(double oldLengthValue, double newLengthValue, double progress, String property, CSSRenderStyle renderStyle) {
   double value = oldLengthValue * (1 - progress) + newLengthValue * progress;
   renderStyle.target.setRenderStyleProperty(property, CSSLengthValue(value, CSSLengthType.PX));
 }
@@ -67,7 +67,7 @@ FontWeight _parseFontWeight(String fontWeight, RenderStyle renderStyle, String p
   return CSSText.resolveFontWeight(fontWeight);
 }
 
-void _updateFontWeight(FontWeight oldValue, FontWeight newValue, double progress, String property, RenderStyle renderStyle) {
+void _updateFontWeight(FontWeight oldValue, FontWeight newValue, double progress, String property, CSSRenderStyle renderStyle) {
   FontWeight? fontWeight = FontWeight.lerp(oldValue, newValue, progress);
   switch (property) {
     case FONT_WEIGHT:
@@ -96,7 +96,7 @@ double _parseLineHeight(String lineHeight, RenderStyle renderStyle, String prope
   return CSSLength.parseLength(lineHeight, renderStyle, LINE_HEIGHT).computedValue;
 }
 
-void _updateLineHeight(double oldValue, double newValue, double progress, String property, RenderStyle renderStyle) {
+void _updateLineHeight(double oldValue, double newValue, double progress, String property, CSSRenderStyle renderStyle) {
   renderStyle.lineHeight = CSSLengthValue(_getNumber(oldValue, newValue, progress), CSSLengthType.PX);
 }
 
@@ -104,7 +104,7 @@ Matrix4? _parseTransform(String value, RenderStyle renderStyle, String property)
   return CSSMatrix.computeTransformMatrix(CSSFunction.parseFunction(value), renderStyle);
 }
 
-void _updateTransform(Matrix4 begin, Matrix4 end, double t, String property, RenderStyle renderStyle) {
+void _updateTransform(Matrix4 begin, Matrix4 end, double t, String property, CSSRenderStyle renderStyle) {
   Matrix4 newMatrix4 = CSSMatrix.lerpMatrix(begin, end, t);
   renderStyle.transformMatrix = newMatrix4;
 }
@@ -179,7 +179,7 @@ enum CSSTransitionEvent {
   cancel,
 }
 
-mixin CSSTransitionMixin on RenderStyleBase {
+mixin CSSTransitionMixin on RenderStyle {
 
   // https://drafts.csswg.org/css-transitions/#transition-property-property
   // Name: transition-property

@@ -8,7 +8,7 @@ import 'dart:ui' as ui;
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
-mixin CSSOpacityMixin on RenderStyleBase {
+mixin CSSOpacityMixin on RenderStyle {
 
   /// The fraction to scale the child's alpha value.
   ///

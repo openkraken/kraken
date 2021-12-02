@@ -9,7 +9,7 @@ import 'package:kraken/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 // CSS Transforms: https://drafts.csswg.org/css-transforms/
-mixin CSSTransformMixin on RenderStyleBase {
+mixin CSSTransformMixin on RenderStyle {
 
   static Offset DEFAULT_TRANSFORM_OFFSET = Offset(0, 0);
   static Alignment DEFAULT_TRANSFORM_ALIGNMENT = Alignment.center;

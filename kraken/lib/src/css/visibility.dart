@@ -9,7 +9,7 @@ enum Visibility {
   hidden,
 }
 
-mixin CSSVisibilityMixin on RenderStyleBase {
+mixin CSSVisibilityMixin on RenderStyle {
   Visibility _visibility = Visibility.visible;
 
   void set visibility(Visibility value) {

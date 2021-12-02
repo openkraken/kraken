@@ -81,7 +81,7 @@ enum CSSBackgroundImageType {
   image,
 }
 
-mixin CSSBackgroundMixin on RenderStyleBase {
+mixin CSSBackgroundMixin on RenderStyle {
   static CSSBackgroundPosition DEFAULT_BACKGROUND_POSITION = CSSBackgroundPosition(percentage: -1);
   static CSSBackgroundSize DEFAULT_BACKGROUND_SIZE = CSSBackgroundSize(fit: BoxFit.none);
 

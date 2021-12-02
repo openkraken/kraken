@@ -155,11 +155,7 @@ class RenderLayoutBox extends RenderBoxModel
     ContainerBoxParentData<RenderBox>>,
     RenderBoxContainerDefaultsMixin<RenderBox,
     ContainerBoxParentData<RenderBox>> {
-  RenderLayoutBox({
-    required RenderStyle renderStyle,
-  }) : super(
-    renderStyle: renderStyle,
-  );
+  RenderLayoutBox({required CSSRenderStyle renderStyle}) : super(renderStyle: renderStyle);
 
   // Host content which can be scrolled.
   RenderLayoutBox? get renderScrollingContent {
@@ -559,7 +555,7 @@ class RenderLayoutBox extends RenderBoxModel
 }
 
 mixin RenderBoxModelBase on RenderBox {
-  late RenderStyle renderStyle;
+  late CSSRenderStyle renderStyle;
   Size? boxSize;
 }
 
@@ -586,7 +582,7 @@ class RenderBoxModel extends RenderBox
   bool _debugShouldPaintOverlay = false;
 
   @override
-  late RenderStyle renderStyle;
+  late CSSRenderStyle renderStyle;
 
   bool get debugShouldPaintOverlay => _debugShouldPaintOverlay;
 
@@ -1324,7 +1320,7 @@ class RenderBoxModel extends RenderBox
     return null;
   }
 
-  bool _hasLocalBackgroundImage(RenderStyle renderStyle) {
+  bool _hasLocalBackgroundImage(CSSRenderStyle renderStyle) {
     return renderStyle.backgroundImage != null &&
         renderStyle.backgroundAttachment == CSSBackgroundAttachmentType.local;
   }

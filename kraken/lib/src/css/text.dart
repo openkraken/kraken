@@ -12,7 +12,7 @@ final RegExp _commaRegExp = RegExp(r'\s*,\s*');
 // CSS Text: https://drafts.csswg.org/css-text-3/
 // CSS Text Decoration: https://drafts.csswg.org/css-text-decor-3/
 // CSS Box Alignment: https://drafts.csswg.org/css-align/
-mixin CSSTextMixin on RenderStyleBase {
+mixin CSSTextMixin on RenderStyle {
   bool get hasColor => _color != null;
 
   @override
@@ -42,6 +42,7 @@ mixin CSSTextMixin on RenderStyleBase {
   // Current not update the dependent property relative to the color.
   final Map<String, bool> _colorRelativeProperties = {};
 
+  @override
   void addColorRelativeProperty(String propertyName) {
     _colorRelativeProperties[propertyName] = true;
   }
@@ -412,7 +413,7 @@ mixin CSSTextMixin on RenderStyleBase {
     return alignment;
   }
 
-  static TextSpan createTextSpan(String? text, RenderStyle renderStyle) {
+  static TextSpan createTextSpan(String? text, CSSRenderStyle renderStyle) {
     /// Creates a new TextStyle object.
     ///   color: The color to use when painting the text. If this is specified, foreground must be null.
     ///   decoration: The decorations to paint near the text (e.g., an underline).

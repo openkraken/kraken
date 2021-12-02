@@ -13,7 +13,7 @@ enum ContentVisibility {
   visible
 }
 
-mixin CSSContentVisibilityMixin on RenderStyleBase {
+mixin CSSContentVisibilityMixin on RenderStyle {
 
   /// Whether the child is hidden from the rest of the tree.
   ///

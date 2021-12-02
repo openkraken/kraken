@@ -24,7 +24,7 @@ enum CSSBorderStyleType {
   outset,
 }
 
-mixin CSSBorderMixin on RenderStyleBase {
+mixin CSSBorderMixin on RenderStyle {
 
   // Effective border widths. These are used to calculate the
   // dimensions of the border box.
@@ -268,7 +268,7 @@ class CSSBorderSide {
 
   static BorderSide none = BorderSide(color: defaultBorderColor, width: 0.0, style: BorderStyle.none);
 
-  static BorderSide? _getBorderSide(RenderStyleBase renderStyle, String side) {
+  static BorderSide? _getBorderSide(RenderStyle renderStyle, String side) {
     BorderStyle? borderStyle;
     CSSLengthValue? borderWidth;
     Color? borderColor;
