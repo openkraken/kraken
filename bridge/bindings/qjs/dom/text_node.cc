@@ -65,7 +65,7 @@ PROP_SETTER(TextNodeInstance, nodeName)(QjsContext* ctx, JSValue this_val, int a
 
 TextNodeInstance::TextNodeInstance(TextNode* textNode, JSValue text)
     : NodeInstance(textNode, NodeType::TEXT_NODE, DocumentInstance::instance(Document::instance(textNode->m_context)), TextNode::classId(), "TextNode"), m_data(JS_DupValue(m_ctx, text)) {
-  NativeString* args_01 = jsValueToNativeString(m_ctx, m_data);
+  std::unique_ptr<NativeString> args_01 = jsValueToNativeString(m_ctx, m_data);
   foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_eventTargetId, UICommand::createTextNode, *args_01, nativeEventTarget);
 }
 
@@ -91,8 +91,8 @@ void TextNodeInstance::internalSetTextContent(JSValue content) {
   m_data = JS_DupValue(m_ctx, content);
 
   std::string key = "data";
-  NativeString* args_01 = stringToNativeString(key);
-  NativeString* args_02 = jsValueToNativeString(m_ctx, content);
+  std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
+  std::unique_ptr<NativeString> args_02 = jsValueToNativeString(m_ctx, content);
   foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
 }
 }  // namespace kraken::binding::qjs

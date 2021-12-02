@@ -37,10 +37,8 @@ class _RunMetrics {
 class RenderFlowLayout extends RenderLayoutBox {
   RenderFlowLayout({
     List<RenderBox>? children,
-    required RenderStyle renderStyle,
-  }) : super(
-    renderStyle: renderStyle,
-  ) {
+    required CSSRenderStyle renderStyle,
+  }) : super(renderStyle: renderStyle) {
     addAll(children);
   }
 
@@ -1589,7 +1587,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 class RenderRepaintBoundaryFlowLayout extends RenderFlowLayout {
   RenderRepaintBoundaryFlowLayout({
     List<RenderBox>? children,
-    required RenderStyle renderStyle,
+    required CSSRenderStyle renderStyle,
   }) : super(
     children: children,
     renderStyle: renderStyle,

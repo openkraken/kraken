@@ -193,19 +193,33 @@ class JSValueHolder {
 };
 
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler& handler, void* owner);
-NativeString* jsValueToNativeString(QjsContext* ctx, JSValue value);
+
+// Convert to string and return a full copy of NativeString from JSValue.
+std::unique_ptr<NativeString> jsValueToNativeString(QjsContext* ctx, JSValue value);
+
 void buildUICommandArgs(QjsContext* ctx, JSValue key, NativeString& args_01);
-NativeString* stringToNativeString(const std::string& string);
-NativeString* atomToNativeString(QjsContext* ctx, JSAtom atom);
+
+// Encode utf-8 to utf-16, and return a full copy of NativeString.
+std::unique_ptr<NativeString> stringToNativeString(const std::string& string);
+
+// Return a full copy of NativeString form JSAtom.
+std::unique_ptr<NativeString> atomToNativeString(QjsContext* ctx, JSAtom atom);
+
+// Convert to string and return a full copy of std::string from JSValue.
 std::string jsValueToStdString(QjsContext* ctx, JSValue& value);
+
+// Return a full copy of std::string form JSAtom.
 std::string jsAtomToStdString(QjsContext* ctx, JSAtom atom);
-void extractErrorInfo(JSValueConst error);
+
+// JS array operation utilities.
 void arrayPushValue(QjsContext* ctx, JSValue array, JSValue val);
 void arrayInsert(QjsContext* ctx, JSValue array, uint32_t start, JSValue targetValue);
 int32_t arrayGetLength(QjsContext* ctx, JSValue array);
 int32_t arrayFindIdx(QjsContext* ctx, JSValue array, JSValue target);
 void arraySpliceValue(QjsContext* ctx, JSValue array, uint32_t start, uint32_t deleteCount);
 void arraySpliceValue(QjsContext* ctx, JSValue array, uint32_t start, uint32_t deleteCount, JSValue replacedValue);
+
+// JS object operation utilities.
 JSValue objectGetKeys(QjsContext* ctx, JSValue obj);
 
 }  // namespace kraken::binding::qjs

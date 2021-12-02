@@ -14,7 +14,7 @@ enum CSSPositionType {
   sticky,
 }
 
-mixin CSSPositionMixin on RenderStyleBase {
+mixin CSSPositionMixin on RenderStyle {
 
   static const CSSPositionType DEFAULT_POSITION_TYPE = CSSPositionType.static;
 
@@ -28,10 +28,9 @@ mixin CSSPositionMixin on RenderStyleBase {
   // Computed value: the keyword auto or a computed <length-percentage> value
   // Canonical order: per grammar
   // Animation type: by computed value type
+  @override
+  CSSLengthValue get top => _top ?? CSSLengthValue.auto;
   CSSLengthValue? _top;
-  CSSLengthValue get top {
-    return _top ?? CSSLengthValue.auto;
-  }
   set top(CSSLengthValue? value) {
     if (_top == value) {
       return;
@@ -40,10 +39,9 @@ mixin CSSPositionMixin on RenderStyleBase {
     _markParentNeedsLayout();
   }
 
+  @override
+  CSSLengthValue get bottom => _bottom ?? CSSLengthValue.auto;
   CSSLengthValue? _bottom;
-  CSSLengthValue get bottom {
-    return _bottom ?? CSSLengthValue.auto;
-  }
   set bottom(CSSLengthValue? value) {
     if (_bottom == value) {
       return;
@@ -52,10 +50,9 @@ mixin CSSPositionMixin on RenderStyleBase {
     _markParentNeedsLayout();
   }
 
+  @override
+  CSSLengthValue get left => _left ?? CSSLengthValue.auto;
   CSSLengthValue? _left;
-  CSSLengthValue get left {
-    return _left ?? CSSLengthValue.auto;
-  }
   set left(CSSLengthValue? value) {
     if (_left == value) {
       return;
@@ -64,10 +61,9 @@ mixin CSSPositionMixin on RenderStyleBase {
     _markParentNeedsLayout();
   }
 
+  @override
+  CSSLengthValue get right => _right ?? CSSLengthValue.auto;
   CSSLengthValue? _right;
-  CSSLengthValue get right {
-    return _right ?? CSSLengthValue.auto;
-  }
   set right(CSSLengthValue? value) {
     if (_right == value) {
       return;
@@ -78,9 +74,10 @@ mixin CSSPositionMixin on RenderStyleBase {
   // The z-index property specifies the stack order of an element.
   // Only works on positioned elements(position: absolute/relative/fixed).
   int? _zIndex;
-  int? get zIndex {
-    return _zIndex;
-  }
+
+  @override
+  int? get zIndex => _zIndex;
+
   set zIndex(int? value) {
     if (_zIndex == value) return;
     _zIndex = value;
@@ -89,13 +86,14 @@ mixin CSSPositionMixin on RenderStyleBase {
   }
 
   CSSPositionType _position = DEFAULT_POSITION_TYPE;
-  CSSPositionType get position {
-    return _position;
-  }
+
+  @override
+  CSSPositionType get position => _position;
+
   set position(CSSPositionType value) {
     if (_position == value) return;
     _position = value;
-    
+
     // Position effect the stacking context.
     _markNeedsSort();
     _markParentNeedsLayout();
@@ -104,7 +102,7 @@ mixin CSSPositionMixin on RenderStyleBase {
   }
 
   void _markNeedsSort() {
-    if (renderBoxModel!.parentData is RenderLayoutParentData) {
+    if (renderBoxModel?.parentData is RenderLayoutParentData) {
       RenderLayoutBox parent = renderBoxModel!.parent as RenderLayoutBox;
       parent.markChildrenNeedsSort();
     }
@@ -114,7 +112,7 @@ mixin CSSPositionMixin on RenderStyleBase {
     // Should mark positioned element's containing block needs layout directly
     // cause RelayoutBoundary of positioned element will prevent the needsLayout flag
     // to bubble up in the RenderObject tree.
-    if (renderBoxModel!.parentData is RenderLayoutParentData) {
+    if (renderBoxModel?.parentData is RenderLayoutParentData) {
       RenderStyle renderStyle = renderBoxModel!.renderStyle;
       if (renderStyle.position != DEFAULT_POSITION_TYPE) {
         RenderBoxModel parent = renderBoxModel!.parent as RenderBoxModel;
@@ -154,5 +152,4 @@ mixin CSSPositionMixin on RenderStyleBase {
         return CSSPositionType.static;
     }
   }
-
 }

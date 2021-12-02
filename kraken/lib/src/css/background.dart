@@ -81,7 +81,7 @@ enum CSSBackgroundImageType {
   image,
 }
 
-mixin CSSBackgroundMixin on RenderStyleBase {
+mixin CSSBackgroundMixin on RenderStyle {
   static CSSBackgroundPosition DEFAULT_BACKGROUND_POSITION = CSSBackgroundPosition(percentage: -1);
   static CSSBackgroundSize DEFAULT_BACKGROUND_SIZE = CSSBackgroundSize(fit: BoxFit.none);
 
@@ -91,7 +91,7 @@ mixin CSSBackgroundMixin on RenderStyleBase {
   set backgroundClip(BackgroundBoundary? value) {
     if (value == _backgroundClip) return;
     _backgroundClip = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   /// Background-origin
@@ -100,42 +100,46 @@ mixin CSSBackgroundMixin on RenderStyleBase {
   set backgroundOrigin(BackgroundBoundary? value) {
     if (value == _backgroundOrigin) return;
     _backgroundOrigin = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
+  @override
   Color? get backgroundColor => _backgroundColor;
   Color? _backgroundColor;
   set backgroundColor(Color? value) {
     if (value == _backgroundColor) return;
     _backgroundColor = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   /// Background-image
+  @override
   CSSBackgroundImage? get backgroundImage => _backgroundImage;
   CSSBackgroundImage? _backgroundImage;
   set backgroundImage(CSSBackgroundImage? value) {
     if (value == _backgroundImage) return;
     _backgroundImage = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   /// Background-position-x
+  @override
   CSSBackgroundPosition get backgroundPositionX => _backgroundPositionX ?? DEFAULT_BACKGROUND_POSITION;
   CSSBackgroundPosition? _backgroundPositionX;
   set backgroundPositionX(CSSBackgroundPosition? value) {
     if (value == _backgroundPositionX) return;
     _backgroundPositionX = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   /// Background-position-y
+  @override
   CSSBackgroundPosition get backgroundPositionY => _backgroundPositionY ?? DEFAULT_BACKGROUND_POSITION;
   CSSBackgroundPosition? _backgroundPositionY;
   set backgroundPositionY(CSSBackgroundPosition? value) {
     if (value == _backgroundPositionY) return;
     _backgroundPositionY = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   /// Background-size
@@ -144,7 +148,7 @@ mixin CSSBackgroundMixin on RenderStyleBase {
   set backgroundSize(CSSBackgroundSize? value) {
     if (value == _backgroundSize) return;
     _backgroundSize = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   /// Background-attachment
@@ -153,16 +157,17 @@ mixin CSSBackgroundMixin on RenderStyleBase {
   set backgroundAttachment(CSSBackgroundAttachmentType? value) {
     if (value == _backgroundAttachment) return;
     _backgroundAttachment = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   /// Background-repeat
+  @override
   ImageRepeat get backgroundRepeat => _backgroundRepeat ?? ImageRepeat.repeat;
   ImageRepeat? _backgroundRepeat;
   set backgroundRepeat(ImageRepeat? value) {
     if (value == _backgroundRepeat) return;
     _backgroundRepeat = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 }
 
@@ -405,8 +410,8 @@ class CSSBackground {
         value == FIT_HEIGTH ||
         value == SCALE_DOWN ||
         value == FILL ||
-        CSSLength.isLength(value) ||
-        CSSPercentage.isPercentage(value);
+        CSSLength.isNonNegativeLength(value) ||
+        CSSPercentage.isNonNegativePercentage(value);
   }
 
   static bool isValidBackgroundAttachmentValue(String value) {
