@@ -22,8 +22,7 @@ class BodyElement extends Element {
   @override
   void willAttachRenderer() {
     super.willAttachRenderer();
-    RenderStyle renderStyle = renderBoxModel!.renderStyle;
-    renderStyle.width = CSSLengthValue(elementManager.viewportWidth, CSSLengthType.PX);
+    renderBoxModel!.renderStyle.width = CSSLengthValue(elementManager.viewportWidth, CSSLengthType.PX);
   }
 
   @override

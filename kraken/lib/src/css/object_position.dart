@@ -6,15 +6,14 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 
-mixin CSSObjectPositionMixin on RenderStyleBase {
+mixin CSSObjectPositionMixin on RenderStyle {
+  @override
+  Alignment get objectPosition => _objectPosition;
   Alignment _objectPosition = Alignment.center;
-  Alignment get objectPosition {
-    return _objectPosition;
-  }
   set objectPosition(Alignment value) {
     if (_objectPosition == value) return;
     _objectPosition = value;
-    renderBoxModel!.markNeedsLayout();
+    renderBoxModel?.markNeedsLayout();
   }
 
   static Alignment resolveObjectPosition(String? position) {

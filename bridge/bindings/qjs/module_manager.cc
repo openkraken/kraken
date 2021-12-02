@@ -100,21 +100,24 @@ JSValue krakenInvokeModule(QjsContext* ctx, JSValueConst this_val, int argc, JSV
     callbackValue = argv[3];
   }
 
+  NativeString* moduleName = jsValueToNativeString(ctx, moduleNameValue);
+  NativeString* method = jsValueToNativeString(ctx, methodValue);
+  NativeString* params = nullptr;
+  if (!JS_IsNull(paramsValue)) {
+    JSValue stringifyedValue = JS_JSONStringify(ctx, paramsValue, JS_NULL, JS_NULL);
+    // JS_JSONStringify may return JS_EXCEPTION if object is not valid. Return JS_EXCEPTION and let quickjs to handle it.
+    if (JS_IsException(stringifyedValue))
+      return stringifyedValue;
+    params = jsValueToNativeString(ctx, stringifyedValue);
+    JS_FreeValue(ctx, stringifyedValue);
+  }
+
   if (getDartMethod()->invokeModule == nullptr) {
 #if FLUTTER_BACKEND
     return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_invoke_module__': dart method (invokeModule) is not registered.");
 #else
     return JS_NULL;
 #endif
-  }
-
-  NativeString* moduleName = jsValueToNativeString(ctx, moduleNameValue);
-  NativeString* method = jsValueToNativeString(ctx, methodValue);
-  NativeString* params = nullptr;
-  if (!JS_IsNull(paramsValue)) {
-    JSValue stringifyedValue = JS_JSONStringify(ctx, paramsValue, JS_NULL, JS_NULL);
-    params = jsValueToNativeString(ctx, stringifyedValue);
-    JS_FreeValue(ctx, stringifyedValue);
   }
 
   ModuleContext* moduleContext;

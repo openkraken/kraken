@@ -87,11 +87,6 @@ class Element : public Node {
   static JSValue scroll(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   static JSValue scrollBy(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
-  static void defineElement(const std::string& tagName, Element* constructor);
-  static JSValue getConstructor(JSContext* context, const std::string& tagName);
-
-  static std::unordered_map<std::string, Element*> elementConstructorMap;
-
   OBJECT_INSTANCE(Element);
 
  private:
@@ -134,7 +129,7 @@ class ElementInstance : public NodeInstance {
   explicit ElementInstance(Element* element, std::string tagName, bool shouldAddUICommand);
 
  private:
-  DEFINE_HOST_CLASS_PROPERTY(18,
+  DEFINE_HOST_CLASS_PROPERTY(20,
                              nodeName,
                              tagName,
                              className,
@@ -150,6 +145,8 @@ class ElementInstance : public NodeInstance {
                              scrollLeft,
                              scrollHeight,
                              scrollWidth,
+                             firstElementChild,
+                             lastElementChild,
                              children,
                              innerHTML,
                              outerHTML);

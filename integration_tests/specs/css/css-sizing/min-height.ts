@@ -28,6 +28,21 @@ describe('min-height', () => {
     await snapshot();
   });
 
+  it("should work with padding exist and height not exist", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        width: '300px',
+        padding: '20px',
+        minHeight: '100px',
+        display: 'inline-block',
+      }
+    });
+    BODY.appendChild(containingBlock);
+
+    await snapshot();
+  });
+
   it("should work with display block when it has no children and height not exist", async () => {
     let containingBlock = createElement('div', {
       style: {
