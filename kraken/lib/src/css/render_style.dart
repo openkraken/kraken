@@ -11,19 +11,171 @@ import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 
-mixin RenderStyleBase {
+/// The abstract class for render-style, declare the
+/// getter interface for all available CSS rule.
+abstract class RenderStyle {
+  // Common
+  Element get target;
+  RenderStyle? get parent;
+  getProperty(String key);
+
+  // Geometry
+  CSSLengthValue get top;
+  CSSLengthValue get right;
+  CSSLengthValue get bottom;
+  CSSLengthValue get left;
+  int? get zIndex;
+  CSSLengthValue get width;
+  CSSLengthValue get height;
+  CSSLengthValue get minWidth;
+  CSSLengthValue get minHeight;
+  CSSLengthValue get maxWidth;
+  CSSLengthValue get maxHeight;
+  EdgeInsets get margin;
+  CSSLengthValue get marginLeft;
+  CSSLengthValue get marginRight;
+  CSSLengthValue get marginTop;
+  CSSLengthValue get marginBottom;
+  EdgeInsets get padding;
+  CSSLengthValue get paddingLeft;
+  CSSLengthValue get paddingRight;
+  CSSLengthValue get paddingBottom;
+  CSSLengthValue get paddingTop;
+
+  // Border
+  EdgeInsets get border;
+  CSSLengthValue? get borderTopWidth;
+  CSSLengthValue? get borderRightWidth;
+  CSSLengthValue? get borderBottomWidth;
+  CSSLengthValue? get borderLeftWidth;
+  BorderStyle get borderLeftStyle;
+  BorderStyle get borderRightStyle;
+  BorderStyle get borderTopStyle;
+  BorderStyle get borderBottomStyle;
+  CSSLengthValue get effectiveBorderLeftWidth;
+  CSSLengthValue get effectiveBorderRightWidth;
+  CSSLengthValue get effectiveBorderTopWidth;
+  CSSLengthValue get effectiveBorderBottomWidth;
+  double get contentMaxConstraintsWidth;
+  Color get borderLeftColor;
+  Color get borderRightColor;
+  Color get borderTopColor;
+  Color get borderBottomColor;
+  List<Radius>? get borderRadius;
+  CSSBorderRadius get borderTopLeftRadius;
+  CSSBorderRadius get borderTopRightRadius;
+  CSSBorderRadius get borderBottomRightRadius;
+  CSSBorderRadius get borderBottomLeftRadius;
+  List<BorderSide>? get borderSides;
+  List<KrakenBoxShadow>? get shadows;
+
+  // Decorations
+  Color? get backgroundColor;
+  CSSBackgroundImage? get backgroundImage;
+  ImageRepeat get backgroundRepeat;
+  CSSBackgroundPosition get backgroundPositionX;
+  CSSBackgroundPosition get backgroundPositionY;
+
+  // Text
+  CSSLengthValue get fontSize;
+  FontWeight get fontWeight;
+  FontStyle get fontStyle;
+  List<String>? get fontFamily;
+  List<Shadow>? get textShadow;
+  WhiteSpace get whiteSpace;
+  TextOverflow get textOverflow;
+  TextAlign get textAlign;
+  int? get lineClamp;
+  CSSLengthValue get lineHeight;
+  CSSLengthValue? get letterSpacing;
+  CSSLengthValue? get wordSpacing;
+
+  // BoxModel
+  double? get borderBoxLogicalWidth;
+  double? get borderBoxLogicalHeight;
+  double? get borderBoxWidth;
+  double? get borderBoxHeight;
+  double? get paddingBoxLogicalWidth;
+  double? get paddingBoxLogicalHeight;
+  double? get paddingBoxConstraintsWidth;
+  double? get paddingBoxConstraintsHeight;
+  double? get paddingBoxWidth;
+  double? get paddingBoxHeight;
+  double? get contentBoxLogicalWidth;
+  double? get contentBoxLogicalHeight;
+  double? get contentBoxConstraintsWidth;
+  double? get contentBoxConstraintsHeight;
+  double? get contentBoxWidth;
+  double? get contentBoxHeight;
+  CSSPositionType get position;
+  CSSDisplay get display;
+  CSSDisplay get effectiveDisplay;
+  Alignment get objectPosition;
+  CSSOverflowType get overflowX;
+  CSSOverflowType get overflowY;
+  CSSOverflowType get effectiveOverflowX;
+  CSSOverflowType get effectiveOverflowY;
+  double? get intrinsicRatio;
+  double? get intrinsicWidth;
+  double? get intrinsicHeight;
+
+  // Flex
+  FlexDirection get flexDirection;
+  FlexWrap get flexWrap;
+  JustifyContent get justifyContent;
+  AlignItems get alignItems;
+  AlignItems get effectiveAlignItems;
+  AlignContent get alignContent;
+  AlignSelf get alignSelf;
+  CSSLengthValue? get flexBasis;
+  double get flexGrow;
+  double get flexShrink;
+
+  // Color
+  Color get color;
+  Color get currentColor;
+
+  // Filter
+  ColorFilter? get colorFilter;
+  ImageFilter? get imageFilter;
+  List<CSSFunctionalNotation>? get filter;
+
+  // Misc
+  double get opacity;
+  Visibility get visibility;
+  ContentVisibility? get contentVisibility;
+  VerticalAlign get verticalAlign;
+  BoxFit get objectFit;
+  bool get isHeightStretch;
+
+  // Transition
+  List<String> get transitionProperty;
+  List<String> get transitionDuration;
+  List<String> get transitionTimingFunction;
+  List<String> get transitionDelay;
+
+  // Sliver
+  Axis get sliverDirection;
+
+  void addFontRelativeProperty(String propertyName);
+  void addRootFontRelativeProperty(String propertyName);
+  void addColorRelativeProperty(String propertyName);
+  String? removeAnimationProperty(String propertyName);
+  double getWidthByIntrinsicRatio();
+  double getHeightByIntrinsicRatio();
+
   // Following properties used for exposing APIs
-  // for class that extends [RenderStyleBase].
-  late Element target;
+  // for class that extends [AbstractRenderStyle].
   RenderBoxModel? get renderBoxModel => target.renderBoxModel;
+
   Size get viewportSize => target.elementManager.viewport.viewportSize;
+
   double get rootFontSize => target.elementManager.getRootFontSize();
-  Color get currentColor => (this as RenderStyle).color;
 }
 
-class RenderStyle
+class CSSRenderStyle
+  extends RenderStyle
   with
-    RenderStyleBase,
     CSSSizingMixin,
     CSSPaddingMixin,
     CSSBorderMixin,
@@ -47,195 +199,193 @@ class RenderStyle
     CSSFilterEffectsMixin,
     CSSOpacityMixin,
     CSSTransitionMixin {
+  CSSRenderStyle({ required this.target });
 
   @override
   Element target;
 
-  RenderStyle? parent;
+  @override
+  CSSRenderStyle? parent;
 
-  RenderStyle({
-    required this.target,
-  });
-
-  dynamic getProperty(String name) {
-    RenderStyle renderStyle = this;
+  @override
+  getProperty(String name) {
     switch (name) {
       case DISPLAY:
-        return renderStyle.display;
+        return display;
       case Z_INDEX:
-        return renderStyle.zIndex;
+        return zIndex;
       case OVERFLOW_X:
-        return renderStyle.overflowX;
+        return overflowX;
       case OVERFLOW_Y:
-        return renderStyle.overflowY;
+        return overflowY;
       case OPACITY:
-        return renderStyle.opacity;
+        return opacity;
       case VISIBILITY:
-        return renderStyle.visibility;
+        return visibility;
       case CONTENT_VISIBILITY:
-        return renderStyle.contentVisibility;
+        return contentVisibility;
       case POSITION:
-        return renderStyle.position;
+        return position;
       case TOP:
-        return renderStyle.top;
+        return top;
       case LEFT:
-        return renderStyle.left;
+        return left;
       case BOTTOM:
-        return renderStyle.bottom;
+        return bottom;
       case RIGHT:
-        return renderStyle.right;
+        return right;
       // Size
       case WIDTH:
-        return renderStyle.width;
+        return width;
       case MIN_WIDTH:
-        return renderStyle.minWidth;
+        return minWidth;
       case MAX_WIDTH:
-        return renderStyle.maxWidth;
+        return maxWidth;
       case HEIGHT:
-        return renderStyle.height;
+        return height;
       case MIN_HEIGHT:
-        return renderStyle.minHeight;
+        return minHeight;
       case MAX_HEIGHT:
-        return renderStyle.maxHeight;
+        return maxHeight;
       // Flex
       case FLEX_DIRECTION:
-        return renderStyle.flexDirection;
+        return flexDirection;
       case FLEX_WRAP:
-        return renderStyle.flexWrap;
+        return flexWrap;
       case ALIGN_CONTENT:
-        return renderStyle.alignContent;
+        return alignContent;
       case ALIGN_ITEMS:
-        return renderStyle.alignItems;
+        return alignItems;
       case JUSTIFY_CONTENT:
-        return renderStyle.justifyContent;
+        return justifyContent;
       case ALIGN_SELF:
-        return renderStyle.alignSelf;
+        return alignSelf;
       case FLEX_GROW:
-        return renderStyle.flexGrow;
+        return flexGrow;
       case FLEX_SHRINK:
-        return renderStyle.flexShrink;
+        return flexShrink;
       case FLEX_BASIS:
-        return renderStyle.flexBasis;
+        return flexBasis;
       // Background
       case BACKGROUND_COLOR:
-        return renderStyle.backgroundColor;
+        return backgroundColor;
       case BACKGROUND_ATTACHMENT:
-        return renderStyle.backgroundAttachment;
+        return backgroundAttachment;
       case BACKGROUND_IMAGE:
-        return renderStyle.backgroundImage;
+        return backgroundImage;
       case BACKGROUND_REPEAT:
-        return renderStyle.backgroundRepeat;
+        return backgroundRepeat;
       case BACKGROUND_POSITION_X:
-        return renderStyle.backgroundPositionX;
+        return backgroundPositionX;
       case BACKGROUND_POSITION_Y:
-        return renderStyle.backgroundPositionY;
+        return backgroundPositionY;
       case BACKGROUND_SIZE:
-        return renderStyle.backgroundSize;
+        return backgroundSize;
       case BACKGROUND_CLIP:
-        return renderStyle.backgroundClip;
+        return backgroundClip;
       case BACKGROUND_ORIGIN:
-        return renderStyle.backgroundOrigin;
+        return backgroundOrigin;
       // Padding
       case PADDING_TOP:
-        return renderStyle.paddingTop;
+        return paddingTop;
       case PADDING_RIGHT:
-        return renderStyle.paddingRight;
+        return paddingRight;
       case PADDING_BOTTOM:
-        return renderStyle.paddingBottom;
+        return paddingBottom;
       case PADDING_LEFT:
-        return renderStyle.paddingLeft;
+        return paddingLeft;
       // Border
       case BORDER_LEFT_WIDTH:
-        return renderStyle.borderLeftWidth;
+        return borderLeftWidth;
       case BORDER_TOP_WIDTH:
-        return renderStyle.borderTopWidth;
+        return borderTopWidth;
       case BORDER_RIGHT_WIDTH:
-        return renderStyle.borderRightWidth;
+        return borderRightWidth;
       case BORDER_BOTTOM_WIDTH:
-        return renderStyle.borderBottomWidth;
+        return borderBottomWidth;
       case BORDER_LEFT_STYLE:
-        return renderStyle.borderLeftStyle;
+        return borderLeftStyle;
       case BORDER_TOP_STYLE:
-        return renderStyle.borderTopStyle;
+        return borderTopStyle;
       case BORDER_RIGHT_STYLE:
-        return renderStyle.borderRightStyle;
+        return borderRightStyle;
       case BORDER_BOTTOM_STYLE:
-        return renderStyle.borderBottomStyle;
+        return borderBottomStyle;
       case BORDER_LEFT_COLOR:
-        return renderStyle.borderLeftColor;
+        return borderLeftColor;
       case BORDER_TOP_COLOR:
-        return renderStyle.borderTopColor;
+        return borderTopColor;
       case BORDER_RIGHT_COLOR:
-        return renderStyle.borderRightColor;
+        return borderRightColor;
       case BORDER_BOTTOM_COLOR:
-        return renderStyle.borderBottomColor;
+        return borderBottomColor;
       case BOX_SHADOW:
-        return renderStyle.boxShadow;
+        return boxShadow;
       case BORDER_TOP_LEFT_RADIUS:
-        return renderStyle.borderTopLeftRadius;
+        return borderTopLeftRadius;
       case BORDER_TOP_RIGHT_RADIUS:
-        return renderStyle.borderTopRightRadius;
+        return borderTopRightRadius;
       case BORDER_BOTTOM_LEFT_RADIUS:
-        return renderStyle.borderBottomLeftRadius;
+        return borderBottomLeftRadius;
       case BORDER_BOTTOM_RIGHT_RADIUS:
-        return renderStyle.borderBottomRightRadius;
+        return borderBottomRightRadius;
       // Margin
       case MARGIN_LEFT:
-        return renderStyle.marginLeft;
+        return marginLeft;
       case MARGIN_TOP:
-        return renderStyle.marginTop;
+        return marginTop;
       case MARGIN_RIGHT:
-        return renderStyle.marginRight;
+        return marginRight;
       case MARGIN_BOTTOM:
-        return renderStyle.marginBottom;
+        return marginBottom;
       // Text
       case COLOR:
-        return renderStyle.color;
+        return color;
       case TEXT_DECORATION_LINE:
-        return renderStyle.textDecorationLine;
+        return textDecorationLine;
       case TEXT_DECORATION_STYLE:
-        return renderStyle.textDecorationStyle;
+        return textDecorationStyle;
       case TEXT_DECORATION_COLOR:
-        return renderStyle.textDecorationColor;
+        return textDecorationColor;
       case FONT_WEIGHT:
-        return renderStyle.fontWeight;
+        return fontWeight;
       case FONT_STYLE:
-        return renderStyle.fontStyle;
+        return fontStyle;
       case FONT_FAMILY:
-        return renderStyle.fontFamily;
+        return fontFamily;
       case FONT_SIZE:
-        return renderStyle.fontSize;
+        return fontSize;
       case LINE_HEIGHT:
-        return renderStyle.lineHeight;
+        return lineHeight;
       case LETTER_SPACING:
-        return renderStyle.letterSpacing;
+        return letterSpacing;
       case WORD_SPACING:
-        return renderStyle.wordSpacing;
+        return wordSpacing;
       case TEXT_SHADOW:
-        return renderStyle.textShadow;
+        return textShadow;
       case WHITE_SPACE:
-        return renderStyle.whiteSpace;
+        return whiteSpace;
       case TEXT_OVERFLOW:
-        return renderStyle.textOverflow;
+        return textOverflow;
       case LINE_CLAMP:
-        return renderStyle.lineClamp;
+        return lineClamp;
       case VERTICAL_ALIGN:
-        return renderStyle.verticalAlign;
+        return verticalAlign;
       case TEXT_ALIGN:
-        return renderStyle.textAlign;
+        return textAlign;
       // Transform
       case TRANSFORM:
-        return renderStyle.transform;
+        return transform;
       case TRANSFORM_ORIGIN:
-        return renderStyle.transformOrigin;
+        return transformOrigin;
       case SLIVER_DIRECTION:
-        return renderStyle.sliverDirection;
+        return sliverDirection;
       case OBJECT_FIT:
-        return renderStyle.objectFit;
+        return objectFit;
       case OBJECT_POSITION:
-        return renderStyle.objectPosition;
+        return objectPosition;
       case FILTER:
-        return renderStyle.filter;
+        return filter;
     }
   }
 
@@ -489,6 +639,7 @@ class RenderStyle
 
   // Padding box width calculated from renderStyle tree.
   // https://www.w3.org/TR/css-box-3/#valdef-box-padding-box
+  @override
   double? get paddingBoxLogicalWidth {
     if (contentBoxLogicalWidth == null) {
       return null;
@@ -500,6 +651,7 @@ class RenderStyle
 
   // Padding box height calculated from renderStyle tree.
   // https://www.w3.org/TR/css-box-3/#valdef-box-padding-box
+  @override
   double? get paddingBoxLogicalHeight {
     if (contentBoxLogicalHeight == null) {
       return null;
@@ -511,6 +663,7 @@ class RenderStyle
 
   // Border box width calculated from renderStyle tree.
   // https://www.w3.org/TR/css-box-3/#valdef-box-border-box
+  @override
   double? get borderBoxLogicalWidth {
     if (paddingBoxLogicalWidth == null) {
       return null;
@@ -522,6 +675,7 @@ class RenderStyle
 
   // Border box height calculated from renderStyle tree.
   // https://www.w3.org/TR/css-box-3/#valdef-box-border-box
+  @override
   double? get borderBoxLogicalHeight {
     if (paddingBoxLogicalHeight == null) {
       return null;
@@ -551,6 +705,7 @@ class RenderStyle
 
   // Padding box width of renderBoxModel after it was rendered.
   // https://www.w3.org/TR/css-box-3/#valdef-box-padding-box
+  @override
   double? get paddingBoxWidth {
     if (borderBoxWidth == null) {
       return null;
@@ -562,6 +717,7 @@ class RenderStyle
 
   // Padding box height of renderBoxModel after it was rendered.
   // https://www.w3.org/TR/css-box-3/#valdef-box-padding-box
+  @override
   double? get paddingBoxHeight {
     if (borderBoxHeight == null) {
       return null;

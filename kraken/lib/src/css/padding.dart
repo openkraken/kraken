@@ -9,11 +9,12 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
-mixin CSSPaddingMixin on RenderStyleBase {
+mixin CSSPaddingMixin on RenderStyle {
   /// The amount to pad the child in each dimension.
   ///
   /// If this is set to an [EdgeInsetsDirectional] object, then [textDirection]
   /// must not be null.
+  @override
   EdgeInsets get padding {
     EdgeInsets insets = EdgeInsets.only(
       left: paddingLeft.computedValue,
@@ -31,6 +32,8 @@ mixin CSSPaddingMixin on RenderStyleBase {
     _paddingLeft = value;
     _markSelfAndParentNeedsLayout();
   }
+
+  @override
   CSSLengthValue get paddingLeft => _paddingLeft ?? CSSLengthValue.zero;
 
   CSSLengthValue? _paddingRight;
@@ -39,6 +42,8 @@ mixin CSSPaddingMixin on RenderStyleBase {
     _paddingRight = value;
     _markSelfAndParentNeedsLayout();
   }
+
+  @override
   CSSLengthValue get paddingRight => _paddingRight ?? CSSLengthValue.zero;
 
   CSSLengthValue? _paddingBottom;
@@ -47,6 +52,8 @@ mixin CSSPaddingMixin on RenderStyleBase {
     _paddingBottom = value;
     _markSelfAndParentNeedsLayout();
   }
+
+  @override
   CSSLengthValue get paddingBottom => _paddingBottom ?? CSSLengthValue.zero;
 
   CSSLengthValue? _paddingTop;
@@ -55,6 +62,8 @@ mixin CSSPaddingMixin on RenderStyleBase {
     _paddingTop = value;
     _markSelfAndParentNeedsLayout();
   }
+
+  @override
   CSSLengthValue get paddingTop => _paddingTop ?? CSSLengthValue.zero;
 
   void _markSelfAndParentNeedsLayout() {
