@@ -22,6 +22,8 @@ const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
 const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
 const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 
+const String ASSETS_PROROCOL = 'assets://';
+
 String? getBundleURLFromEnv() {
   return Platform.environment[BUNDLE_URL];
 }
@@ -46,7 +48,7 @@ String getAcceptHeader() {
 }
 
 bool isAssetAbsolutePath(String path) {
-  return path.startsWith('assets://');
+  return path.startsWith(ASSETS_PROROCOL);
 }
 
 abstract class KrakenBundle {
@@ -88,11 +90,11 @@ abstract class KrakenBundle {
     isResolved = true;
   }
 
-  static KrakenBundle fromHref(String href) {
-    if (isAssetAbsolutePath(href)) {
-      return AssetsBundle(href);
+  static KrakenBundle fromHref(String url) {
+    if (isAssetAbsolutePath(url)) {
+      return AssetsBundle(url);
     } else {
-      return NetworkBundle(href);
+      return NetworkBundle(url);
     }
   }
 
@@ -241,8 +243,11 @@ class AssetsBundle extends KrakenBundle {
     super.resolve(contextId);
     // JSBundle get default bundle manifest.
     manifest = AppManifest();
-    String localPath = src;
-    rawBundle = await rootBundle.load(localPath);
+    if (isAssetAbsolutePath(src)) {
+      String localPath = src.substring(ASSETS_PROROCOL.length);
+      rawBundle = await rootBundle.load(localPath);
+    }
+
     isResolved = true;
     return this;
   }
