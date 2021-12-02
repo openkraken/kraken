@@ -405,8 +405,8 @@ class CSSBackground {
         value == FIT_HEIGTH ||
         value == SCALE_DOWN ||
         value == FILL ||
-        CSSLength.isLength(value) ||
-        CSSPercentage.isPercentage(value);
+        CSSLength.isNonNegativeLength(value) ||
+        CSSPercentage.isNonNegativePercentage(value);
   }
 
   static bool isValidBackgroundAttachmentValue(String value) {

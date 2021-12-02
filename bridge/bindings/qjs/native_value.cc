@@ -63,6 +63,9 @@ NativeValue Native_NewInt32(int32_t value) {
 
 NativeValue Native_NewJSON(JSContext* context, JSValue& value) {
   JSValue stringifiedValue = JS_JSONStringify(context->ctx(), value, JS_UNDEFINED, JS_UNDEFINED);
+  if (JS_IsException(stringifiedValue))
+    return Native_NewNull();
+
   // NativeString owned by NativeValue will be freed by users.
   NativeString* string = jsValueToNativeString(context->ctx(), stringifiedValue).release();
   NativeValue result = (NativeValue){

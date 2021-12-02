@@ -22,7 +22,6 @@ mixin CSSMarginMixin on RenderStyleBase {
       bottom: marginBottom.computedValue,
       top: marginTop.computedValue
     ).resolve(TextDirection.ltr);
-    assert(insets.isNonNegative);
     return insets;
   }
 

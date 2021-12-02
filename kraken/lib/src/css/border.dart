@@ -237,7 +237,7 @@ class CSSBorderSide {
   }
 
   static bool isValidBorderWidthValue(String value) {
-    return CSSLength.isLength(value) || value == THIN || value == MEDIUM || value == THICK;
+    return CSSLength.isNonNegativeLength(value) || value == THIN || value == MEDIUM || value == THICK;
   }
 
   static BorderSide none = BorderSide(color: defaultBorderColor, width: 0.0, style: BorderStyle.none);
