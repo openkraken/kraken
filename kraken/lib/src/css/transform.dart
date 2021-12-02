@@ -9,7 +9,7 @@ import 'package:kraken/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 // CSS Transforms: https://drafts.csswg.org/css-transforms/
-mixin CSSTransformMixin on RenderStyleBase {
+mixin CSSTransformMixin on RenderStyle {
 
   static Offset DEFAULT_TRANSFORM_OFFSET = Offset(0, 0);
   static Alignment DEFAULT_TRANSFORM_ALIGNMENT = Alignment.center;
@@ -35,12 +35,12 @@ mixin CSSTransformMixin on RenderStyleBase {
     _transformMatrix = null;
 
     // Transform effect the stacking context.
-    RenderBoxModel? parentRenderer = (this as RenderStyle).parent?.renderBoxModel;
+    RenderBoxModel? parentRenderer = parent?.renderBoxModel;
     if (parentRenderer is RenderLayoutBox) {
       parentRenderer.markChildrenNeedsSort();
     }
 
-    renderBoxModel!.markNeedsLayout();
+    renderBoxModel?.markNeedsLayout();
   }
 
   static List<CSSFunctionalNotation>? resolveTransform(String present) {
@@ -52,7 +52,7 @@ mixin CSSTransformMixin on RenderStyleBase {
   Matrix4? get transformMatrix {
     if (_transformMatrix == null && _transform != null) {
       // Illegal transform syntax will return null.
-      _transformMatrix = CSSMatrix.computeTransformMatrix(_transform!, this as RenderStyle);
+      _transformMatrix = CSSMatrix.computeTransformMatrix(_transform!, this);
     }
     return _transformMatrix;
   }
@@ -60,7 +60,7 @@ mixin CSSTransformMixin on RenderStyleBase {
   set transformMatrix(Matrix4? value) {
     if (value == null || _transformMatrix == value) return;
     _transformMatrix = value;
-    renderBoxModel!.markNeedsLayout();
+    renderBoxModel?.markNeedsLayout();
   }
 
   Offset get transformOffset => _transformOffset;
@@ -68,7 +68,7 @@ mixin CSSTransformMixin on RenderStyleBase {
   set transformOffset(Offset value) {
     if (_transformOffset == value) return;
     _transformOffset = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   Alignment get transformAlignment => _transformAlignment;
@@ -76,7 +76,7 @@ mixin CSSTransformMixin on RenderStyleBase {
   set transformAlignment(Alignment value) {
     if (_transformAlignment == value) return;
     _transformAlignment = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
   CSSOrigin? _transformOrigin;

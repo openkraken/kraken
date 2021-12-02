@@ -11,21 +11,16 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 
 // CSS Box Model: https://drafts.csswg.org/css-box-4/
-mixin CSSBoxMixin on RenderStyleBase {
+mixin CSSBoxMixin on RenderStyle {
 
   final DecorationPosition decorationPosition = DecorationPosition.background;
   final ImageConfiguration imageConfiguration = ImageConfiguration.empty;
 
   /// What decoration to paint, should get value after layout.
   CSSBoxDecoration? get decoration {
-    RenderStyle renderStyle = this as RenderStyle;
-    List<Radius>? radius = renderStyle.borderRadius;
-    List<BorderSide>? borderSides = renderStyle.borderSides;
-    List<KrakenBoxShadow>? shadows = renderStyle.shadows;
-    var backgroundColor = renderStyle.backgroundColor;
-    var backgroundImage = renderStyle.backgroundImage;
-    var backgroundRepeat = renderStyle.backgroundRepeat;
- 
+    List<Radius>? radius = this.borderRadius;
+    List<BorderSide>? borderSides = this.borderSides;
+
     if (backgroundColor == null &&
         backgroundImage == null &&
         borderSides == null &&
