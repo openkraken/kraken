@@ -24,7 +24,7 @@ const Map<String, dynamic> _defaultStyle = {
 // The HTMLImageElement.
 class ImageElement extends Element {
   // The render box to draw image.
-  RenderImage? _renderImage;
+  KrakenRenderImage? _renderImage;
 
   // The image source url.
   String? get _source => getProperty('src');
@@ -257,8 +257,6 @@ class ImageElement extends Element {
       width = 0.0;
     }
 
-    _renderImage?.width = width;
-    _renderImage?.height = height;
     renderBoxModel!.intrinsicWidth = naturalWidth;
     renderBoxModel!.intrinsicHeight = naturalHeight;
 
@@ -269,12 +267,12 @@ class ImageElement extends Element {
     }
   }
 
-  RenderImage createRenderImageBox() {
+  KrakenRenderImage createRenderImageBox() {
     RenderStyle renderStyle = renderBoxModel!.renderStyle;
     BoxFit objectFit = renderStyle.objectFit;
     Alignment objectPosition = renderStyle.objectPosition;
 
-    return RenderImage(
+    return KrakenRenderImage(
       image: _imageInfo?.image,
       fit: objectFit,
       alignment: objectPosition,
