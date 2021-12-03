@@ -684,12 +684,6 @@ class RenderBoxModel extends RenderBox
       // Copy render style
       ..renderStyle = renderStyle
 
-      // Copy intrinsic info
-      // @TODO: Delete after intrinsic info is moved to renderStyle.
-      ..intrinsicWidth = intrinsicWidth
-      ..intrinsicHeight = intrinsicHeight
-      ..intrinsicRatio = intrinsicRatio
-
       // Copy box decoration
       ..boxPainter = boxPainter
 
