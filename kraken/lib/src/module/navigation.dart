@@ -43,9 +43,7 @@ class NavigationModule extends BaseModule {
     Uri targetUri = Uri.parse(targetUrl);
     Uri sourceUri = Uri.parse(sourceUrl);
 
-    if (targetUri != sourceUri) {
-      await moduleManager!.controller.view.handleNavigationAction(sourceUrl, targetUrl, KrakenNavigationType.reload);
-    }
+    await moduleManager!.controller.view.handleNavigationAction(sourceUrl, targetUrl, targetUri == sourceUri ? KrakenNavigationType.reload : KrakenNavigationType.navigate);
   }
 
   @override

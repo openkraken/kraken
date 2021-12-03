@@ -476,9 +476,6 @@ class KrakenController {
     double viewportHeight, {
     bool showPerformanceOverlay = false,
     enableDebug = false,
-    String? bundleURL,
-    String? bundlePath,
-    String? bundleContent,
     Color? background,
     GestureListener? gestureListener,
     KrakenNavigationDelegate? navigationDelegate,
@@ -519,14 +516,9 @@ class KrakenController {
 
     _module = KrakenModuleController(this, contextId);
 
-    if (bundleURL != null) {
-      href = bundleURL;
-    } else if (bundlePath != null) {
-      href = bundlePath;
-    }
-
-    if (bundleContent != null) {
-      this.bundleContent = bundleContent;
+    if (bundle != null) {
+      HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
+      historyModule.bundle = bundle!;
     }
 
     assert(!_controllerMap.containsKey(contextId),
@@ -627,30 +619,12 @@ class KrakenController {
   }
 
   set href(String value) {
-    HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
-    historyModule.href = value;
+    _addHistory(KrakenBundle.fromUrl(value));
   }
 
-  set bundleContent(String? value) {
-    if (value == null) return;
+  _addHistory(KrakenBundle bundle) {
     HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
-    historyModule.bundleContent = value;
-  }
-
-  String? get bundleContent {
-    HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
-    return historyModule.bundleContent;
-  }
-
-  set bundleByteCode(Uint8List? value) {
-    if (value == null) return;
-    HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
-    historyModule.bundleByteCode = value;
-  }
-
-  Uint8List? get bundleByteCode {
-    HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
-    return historyModule.bundleByteCode;
+    historyModule.bundle = bundle;
   }
 
   // reload current kraken view.
@@ -720,15 +694,8 @@ class KrakenController {
       if (url == null && methodChannel is KrakenNativeChannel) {
         url = await (methodChannel as KrakenNativeChannel).getUrl();
       }
-      href = url ?? '';
-
-      if (bundle.bytecode != null) {
-        bundleByteCode = bundle.bytecode;
-      }
-
-      if (bundle.content != null) {
-        bundleContent = bundle.content;
-      }
+      _addHistory(bundle);
+      this.bundle = bundle;
     }
 
     if (onLoadError != null) {

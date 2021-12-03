@@ -14,12 +14,10 @@ import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 
 class HistoryItem {
-  HistoryItem(this.href, this.state, this.needJump, { this.bundleContent, this.bundleByteCode });
-  final String href;
+  HistoryItem(this.bundle, this.state, this.needJump);
+  final KrakenBundle bundle;
   final dynamic state;
   final bool needJump;
-  String? bundleContent;
-  Uint8List? bundleByteCode;
 }
 
 class HistoryModule extends BaseModule {
@@ -33,36 +31,16 @@ class HistoryModule extends BaseModule {
 
   String get href {
     if (_previousStack.isEmpty) return '';
-    return _previousStack.first.href;
+    return _previousStack.first.bundle.src;
   }
 
-  set href(String value) {
-    HistoryItem history = HistoryItem(value, null, true);
+  set bundle(KrakenBundle bundle) {
+    HistoryItem history = HistoryItem(bundle, null, true);
     _addItem(history);
   }
 
-  set bundleContent(String? value) {
-    if (_previousStack.isEmpty || value == null) return;
-    _previousStack.first.bundleContent = value;
-  }
-
-  String? get bundleContent {
-    if (_previousStack.isEmpty) return null;
-    return _previousStack.first.bundleContent;
-  }
-
-  set bundleByteCode(Uint8List? value) {
-    if (_previousStack.isEmpty || value == null) return;
-    _previousStack.first.bundleByteCode = value;
-  }
-
-  Uint8List? get bundleByteCode {
-    if (_previousStack.isEmpty) return Uint8List(0);
-    return _previousStack.first.bundleByteCode;
-  }
-
   void _addItem(HistoryItem historyItem) {
-    if (_previousStack.isNotEmpty && historyItem.href == _previousStack.first.href) return;
+    if (_previousStack.isNotEmpty && historyItem.bundle.src == _previousStack.first.bundle.src) return;
 
     _previousStack.addFirst(historyItem);
 
@@ -79,7 +57,7 @@ class HistoryModule extends BaseModule {
       _previousStack.removeFirst();
       _nextStack.addFirst(currentItem);
 
-      await _goTo(_previousStack.first.href);
+      await _goTo(_previousStack.first.bundle.src);
 
       dynamic state = _previousStack.first.state;
       _dispatchPopStateEvent(state);
@@ -92,7 +70,7 @@ class HistoryModule extends BaseModule {
       _nextStack.removeFirst();
       _previousStack.addFirst(currentItem);
 
-      _goTo(currentItem.href);
+      _goTo(currentItem.bundle.src);
       _dispatchPopStateEvent(currentItem.state);
     }
   }
@@ -121,7 +99,7 @@ class HistoryModule extends BaseModule {
       }
     }
 
-    _goTo(_previousStack.first.href);
+    _goTo(_previousStack.first.bundle.src);
     _dispatchPopStateEvent(_previousStack.first.state);
   }
 
@@ -144,7 +122,7 @@ class HistoryModule extends BaseModule {
     if (params[2] != null) {
       url = params[2];
 
-      String currentUrl = _previousStack.first.href;
+      String currentUrl = _previousStack.first.bundle.src;
       Uri currentUri = Uri.parse(currentUrl);
 
       Uri uri = Uri.parse(url!);
@@ -156,7 +134,8 @@ class HistoryModule extends BaseModule {
         return;
       }
 
-      HistoryItem history = HistoryItem(uri.toString(), state, false);
+      KrakenBundle bundle = KrakenBundle.fromUrl(uri.toString());
+      HistoryItem history = HistoryItem(bundle, state, false);
       _addItem(history);
     }
   }
@@ -169,7 +148,7 @@ class HistoryModule extends BaseModule {
     if (params[2] != null) {
       url = params[2];
 
-      String currentUrl = _previousStack.first.href;
+      String currentUrl = _previousStack.first.bundle.src;
       Uri currentUri = Uri.parse(currentUrl);
 
       Uri uri = Uri.parse(url!);
@@ -181,7 +160,8 @@ class HistoryModule extends BaseModule {
         return;
       }
 
-      HistoryItem history = HistoryItem(uri.toString(), state, false);
+      KrakenBundle bundle = KrakenBundle.fromUrl(uri.toString());
+      HistoryItem history = HistoryItem(bundle, state, false);
 
       _previousStack.removeFirst();
       _previousStack.addFirst(history);
