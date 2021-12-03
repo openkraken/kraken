@@ -161,7 +161,14 @@ global.simulateInputText = __kraken_simulate_inputtext__;
 function resetDocumentElement() {
   window.scrollTo(0, 0);
   document.removeChild(document.documentElement);
-  document.appendChild(document.createElement('html'));
+  let html = document.createElement('html');
+  document.appendChild(html);
+
+  let head = document.createElement('head');
+  document.documentElement.appendChild(head);
+
+  let body = document.createElement('body');
+  document.documentElement.appendChild(body);
 }
 
 function traverseNode(node, handle) {
