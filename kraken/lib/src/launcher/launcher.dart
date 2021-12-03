@@ -6,7 +6,6 @@
 import 'dart:io';
 import 'dart:ui';
 import 'dart:async';
-import 'dart:typed_data';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
