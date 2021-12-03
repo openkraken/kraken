@@ -7,7 +7,6 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
