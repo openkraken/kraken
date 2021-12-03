@@ -323,7 +323,7 @@ class ImageElement extends Element {
     }
   }
 
-  void _resolveImage(Uri? resolvedUri, { bool propertyChanged = false }) {
+  void _resolveImage(Uri? resolvedUri, { bool updateImageProvider = false }) {
     if (resolvedUri == null) return;
 
     double? width = null;
@@ -341,7 +341,7 @@ class ImageElement extends Element {
     int? cachedHeight = (height != null && height > 0) ? (height * ui.window.devicePixelRatio).toInt() : null;
 
     ImageProvider? provider = _imageProvider;
-    if (propertyChanged) {
+    if (updateImageProvider || provider == null) {
       provider = _imageProvider = getImageProvider(resolvedUri, cachedWidth: cachedWidth, cachedHeight: cachedHeight);
     }
     if (provider == null) return;
@@ -407,12 +407,7 @@ class ImageElement extends Element {
             _handleEventAfterImageLoaded();
           }
         }
-        // Give callers until at least the end of the frame to subscribe to the
-        // image stream.
-        // See ImageCache._liveImages
-        SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
-          stream.removeListener(listener!);
-        });
+        stream.removeListener(listener!);
       },
       onError: _onImageError
     );
@@ -425,10 +420,10 @@ class ImageElement extends Element {
     super.setProperty(key, value);
     // Reset frame number to zero when image needs to reload
     if (key == 'src' && propertyChanged) {
+      final Uri? resolvedUri = _resolvedUri =  _resolveSrc();
       // Update image source if image already attached.
       if (isRendererAttached) {
-        final Uri? resolvedUri = _resolvedUri =  _resolveSrc();
-        _resolveImage(resolvedUri, propertyChanged: true);
+        _resolveImage(resolvedUri, updateImageProvider: true);
       } else {
         _precacheImage();
       }
@@ -436,10 +431,10 @@ class ImageElement extends Element {
       _resetLazyLoading();
     } else if (key == WIDTH) {
       _propertyWidth = CSSNumber.parseNumber(value);
-      _resolveImage(_resolvedUri, propertyChanged: true);
+      _resolveImage(_resolvedUri, updateImageProvider: true);
     } else if (key == HEIGHT) {
       _propertyHeight = CSSNumber.parseNumber(value);
-      _resolveImage(_resolvedUri, propertyChanged: true);
+      _resolveImage(_resolvedUri, updateImageProvider: true);
     }
 
   }
@@ -465,7 +460,7 @@ class ImageElement extends Element {
       // Resize renderBox
       if (isRendererAttached) _resizeImage();
       // Resize image
-      _resolveImage(_resolvedUri, propertyChanged: true);
+      _resolveImage(_resolvedUri, updateImageProvider: true);
     } else if (property == OBJECT_FIT && _renderImage != null) {
       _renderImage!.fit = renderBoxModel!.renderStyle.objectFit;
     } else if (property == OBJECT_POSITION && _renderImage != null) {
