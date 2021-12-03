@@ -90,11 +90,11 @@ abstract class KrakenBundle {
     isResolved = true;
   }
 
-  static KrakenBundle fromUrl(String url) {
+  static KrakenBundle fromUrl(String url, { Map<String, String>? additionalHttpHeaders }) {
     if (isAssetAbsolutePath(url)) {
       return AssetsBundle(url);
     } else {
-      return NetworkBundle(url);
+      return NetworkBundle(url, additionalHttpHeaders: additionalHttpHeaders);
     }
   }
 
@@ -160,15 +160,17 @@ class RawBundle extends KrakenBundle {
 }
 
 class NetworkBundle extends KrakenBundle {
-  NetworkBundle(String url)
+  NetworkBundle(String url, { this.additionalHttpHeaders })
       : super(url);
+
+  Map<String, String>? additionalHttpHeaders = {};
 
   @override
   Future<void> resolve(int contextId) async {
     super.resolve(contextId);
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
     Uri baseUrl = Uri.parse(controller.href);
-    NetworkAssetBundle bundle = NetworkAssetBundle(controller.uriParser!.resolve(baseUrl, Uri.parse(src)), contextId: contextId);
+    NetworkAssetBundle bundle = NetworkAssetBundle(controller.uriParser!.resolve(baseUrl, Uri.parse(src)), contextId: contextId, additionalHttpHeaders: additionalHttpHeaders);
     bundle.httpClient.userAgent = getKrakenInfo().userAgent;
     String absoluteURL = src;
     rawBundle = await bundle.load(absoluteURL);
@@ -189,13 +191,14 @@ String _resolveStringFromData(ByteData data) {
 class NetworkAssetBundle extends AssetBundle {
   /// Creates an network asset bundle that resolves asset keys as URLs relative
   /// to the given base URL.
-  NetworkAssetBundle(Uri baseUrl, { required this.contextId })
+  NetworkAssetBundle(Uri baseUrl, { required this.contextId, this.additionalHttpHeaders })
       : _baseUrl = baseUrl,
         httpClient = HttpClient();
 
   final Uri _baseUrl;
   final int contextId;
   final HttpClient httpClient;
+  final Map<String, String>? additionalHttpHeaders;
   ContentType contentType = ContentType.binary;
 
   Uri _urlFromKey(String key) => _baseUrl.resolve(key);
@@ -204,6 +207,11 @@ class NetworkAssetBundle extends AssetBundle {
   Future<ByteData> load(String key) async {
     final HttpClientRequest request = await httpClient.getUrl(_urlFromKey(key));
     request.headers.set('Accept', getAcceptHeader());
+    if (additionalHttpHeaders != null) {
+      additionalHttpHeaders?.forEach((key, value) {
+        request.headers.set(key, value);
+      });
+    }
     KrakenHttpOverrides.setContextHeader(request.headers, contextId);
 
     final HttpClientResponse response = await request.close();
