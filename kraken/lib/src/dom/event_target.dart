@@ -2,7 +2,6 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
 import 'dart:collection';
 import 'dart:ffi';
 
@@ -156,7 +155,6 @@ abstract class EventTarget {
     eventHandlers.clear();
     _nativeMap.remove(pointer.address);
     _disposed = true;
-    malloc.free(pointer);
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_END, uniqueId: hashCode);

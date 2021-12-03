@@ -46,17 +46,24 @@ class Document extends Node {
     return _documentElement;
   }
   set documentElement(Element? element) {
+    if (_documentElement == element) {
+      return;
+    }
+
+    if (element != null) {
+      element.attachTo(this);
+      // Should scrollable.
+      element.setRenderStyleProperty(OVERFLOW_X, CSSOverflowType.scroll);
+      element.setRenderStyleProperty(OVERFLOW_Y, CSSOverflowType.scroll);
+      // Init with viewport size.
+      element.renderStyle.width = CSSLengthValue(viewportWidth, CSSLengthType.PX);
+      element.renderStyle.height = CSSLengthValue(viewportHeight, CSSLengthType.PX);
+    } else {
+      // Detach document element.
+      viewport.child = null;
+    }
+
     _documentElement = element;
-    viewport.child = element?.renderer;
-
-    // Flush pending style immediately.
-    element?.style.flushPendingProperties();
-
-    // Must scrollable.
-    element?.setRenderStyleProperty(OVERFLOW_X, CSSOverflowType.scroll);
-    element?.setRenderStyleProperty(OVERFLOW_Y, CSSOverflowType.scroll);
-    // Must init with viewport height.
-    element?.renderStyle.height = CSSLengthValue(viewportHeight, CSSLengthType.PX);
   }
 
   double getRootFontSize() {

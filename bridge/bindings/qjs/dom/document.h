@@ -77,7 +77,6 @@ class DocumentInstance : public NodeInstance {
   explicit DocumentInstance(Document* document);
   ~DocumentInstance();
   static std::unordered_map<Document*, DocumentInstance*> m_instanceMap;
-  ElementInstance* documentElement();
   static DocumentInstance* instance(Document* document) {
     if (m_instanceMap.count(document) == 0) {
       m_instanceMap[document] = new DocumentInstance(document);
@@ -86,10 +85,11 @@ class DocumentInstance : public NodeInstance {
   }
 
  private:
-  DEFINE_HOST_CLASS_PROPERTY(3, nodeName, all, cookie);
+  DEFINE_HOST_CLASS_PROPERTY(7, nodeName, documentElement, body, head, children, all, cookie);
 
   void removeElementById(JSAtom id, ElementInstance* element);
   void addElementById(JSAtom id, ElementInstance* element);
+  ElementInstance *getDocumentElement();
   std::unordered_map<JSAtom, std::vector<ElementInstance*>> m_elementMapById;
   ElementInstance* m_documentElement{nullptr};
   std::unique_ptr<DocumentCookie> m_cookie;

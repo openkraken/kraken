@@ -573,13 +573,8 @@ class Element extends Node
     }
 
     if (renderer != null) {
-      // HTML element override attachTo method to attach renderObject to viewportBox.
-      if (parent is Element) {
-        RenderLayoutBox? parentRenderLayoutBox = parentElement?._renderLayoutBox?.renderScrollingContent ?? parentElement?._renderLayoutBox;
-        parentRenderLayoutBox!.insert(renderBoxModel!, after: after);
-      } else if (parent is Document) {
-        parent.appendChild(this);
-      }
+      _attachRenderBoxModel(parent.renderer!, renderer!, after: after);
+
       // Flush pending style before child attached.
       style.flushPendingProperties();
 

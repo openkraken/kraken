@@ -103,6 +103,7 @@ void defineBuiltInElements() {
   defineElement(OBJECT, (context) => ObjectElement(context));
   defineElement(PARAM, (context) => ParamElement(context));
   // Others
+  defineElement(HTML, (context) => HTMLElement(context));
   defineElement(BODY, (context) => BodyElement(context));
   defineElement(IMAGE, (context) => ImageElement(context));
   defineElement(CANVAS, (context) => CanvasElement(context));

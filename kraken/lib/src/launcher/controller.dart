@@ -109,16 +109,12 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     this.gestureListener,
     this.widgetDelegate,
   }) {
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT);
-    }
-
     if (enableDebug) {
       debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
       debugPaintSizeEnabled = true;
     }
-
     if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT);
       PerformanceTiming.instance().mark(PERF_BRIDGE_INIT_START);
     }
 
@@ -126,9 +122,6 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_BRIDGE_INIT_END);
-    }
-
-    if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_VIEWPORT_START);
     }
 
@@ -149,15 +142,15 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     element_registry.defineBuiltInElements();
 
     document = Document(
-      EventTargetContext(_contextId, documentNativePtrMap[contextId]!),
+      EventTargetContext(_contextId, documentNativePtrMap[_contextId]!),
       viewport: viewport,
       controller: rootController,
       gestureListener: gestureListener,
       widgetDelegate: widgetDelegate,
     );
     _setEventTarget(DOCUMENT_ID, document);
-    
-    window = Window(EventTargetContext(_contextId, windowNativePtrMap[contextId]!), document);
+
+    window = Window(EventTargetContext(_contextId, windowNativePtrMap[_contextId]!), document);
     _setEventTarget(WINDOW_ID ,window);
 
     // Listeners need to be registered to window in order to dispatch events on demand.
@@ -206,7 +199,7 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
   void attachView(RenderObject parent, [RenderObject? previousSibling]) {
     document.attach(parent, previousSibling, showPerformanceOverlay: showPerformanceOverlay ?? false);
   }
-  
+
   late Document document;
   late Window window;
 
@@ -436,7 +429,7 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_INSERT_ADJACENT_NODE_START, uniqueId: targetId);
     }
-  
+
     assert(_existsTarget(targetId), 'targetId: $targetId position: $position newTargetId: $newTargetId');
     assert(_existsTarget(newTargetId), 'newTargetId: $newTargetId position: $position');
 

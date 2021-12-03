@@ -395,6 +395,7 @@ PROP_GETTER(ElementInstance, className)(QjsContext* ctx, JSValue this_val, int a
   JSAtom valueAtom = element->m_attributes->getAttribute("class");
   return JS_AtomToString(ctx, valueAtom);
 }
+
 PROP_SETTER(ElementInstance, className)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   JSAtom atom = JS_ValueToAtom(ctx, argv[0]);
@@ -530,6 +531,7 @@ PROP_GETTER(ElementInstance, scrollWidth)(QjsContext* ctx, JSValue this_val, int
   NativeValue args[] = {Native_NewInt32(static_cast<int32_t>(ViewModuleProperty::scrollWidth))};
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
+
 PROP_SETTER(ElementInstance, scrollWidth)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
@@ -550,6 +552,7 @@ PROP_GETTER(ElementInstance, firstElementChild)(QjsContext* ctx, JSValue this_va
 
   return JS_NULL;
 }
+
 PROP_SETTER(ElementInstance, firstElementChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
@@ -850,7 +853,7 @@ ElementInstance::ElementInstance(Element* element, std::string tagName, bool sho
     ::foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_eventTargetId, UICommand::createElement, *args_01, nativeEventTarget);
   }
 }
-
+ 
 JSClassExoticMethods ElementInstance::exoticMethods{nullptr, nullptr, nullptr, nullptr, hasProperty, getProperty, setProperty};
 
 StyleDeclarationInstance* ElementInstance::style() {

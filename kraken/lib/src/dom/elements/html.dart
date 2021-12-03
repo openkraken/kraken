@@ -2,10 +2,8 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'package:flutter/foundation.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/kraken.dart';
 
 const String HTML = 'HTML';
 const Map<String, dynamic> _defaultStyle = {
@@ -23,10 +21,4 @@ class HTMLElement extends Element {
     if (eventType == EVENT_SCROLL) return;
     super.addEvent(eventType);
   }
-
-  @override
-  String get tagName => HTML;
-
-  @override
-  bool get isRendererAttached => true;
 }

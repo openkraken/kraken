@@ -815,7 +815,7 @@ class _KrakenState extends State<Kraken> {
     RenderObject? _rootRenderObject = context.findRenderObject();
     RenderViewportBox? renderViewportBox = _findRenderViewportBox(_rootRenderObject!);
     KrakenController controller = (renderViewportBox as RenderObjectWithControllerMixin).controller!;
-    dom.Element documentElement = controller.view.document!.documentElement!;
+    dom.Element documentElement = controller.view.document.documentElement!;
     return documentElement;
   }
 
@@ -923,20 +923,20 @@ This situation often happened when you trying creating kraken when FlutterView n
     double viewportWidth = _krakenWidget.viewportWidth ?? window.physicalSize.width / window.devicePixelRatio;
     double viewportHeight = _krakenWidget.viewportHeight ?? window.physicalSize.height / window.devicePixelRatio;
 
-    if (controller.view.document!.documentElement == null) return;
+    if (controller.view.document.documentElement == null) return;
 
     if (viewportWidthHasChanged) {
       controller.view.viewportWidth = viewportWidth;
-      controller.view.document!.documentElement!.renderStyle.width = CSSLengthValue(viewportWidth, CSSLengthType.PX);
+      controller.view.document.documentElement!.renderStyle.width = CSSLengthValue(viewportWidth, CSSLengthType.PX);
     }
 
     if (viewportHeightHasChanged) {
       controller.view.viewportHeight = viewportHeight;
-      controller.view.document!.documentElement!.renderStyle.height = CSSLengthValue(viewportHeight, CSSLengthType.PX);
+      controller.view.document.documentElement!.renderStyle.height = CSSLengthValue(viewportHeight, CSSLengthType.PX);
     }
 
     if (viewportWidthHasChanged || viewportHeightHasChanged) {
-      traverseElement(controller.view.document!.documentElement!, (element) {
+      traverseElement(controller.view.document.documentElement!, (element) {
         if (element.isRendererAttached) {
           element.style.flushPendingProperties();
           element.renderBoxModel?.markNeedsLayout();

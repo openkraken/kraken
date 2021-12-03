@@ -15,10 +15,6 @@ import 'package:kraken/rendering.dart';
 // CSS Backgrounds: https://drafts.csswg.org/css-backgrounds/
 // CSS Images: https://drafts.csswg.org/css-images-3/
 
-/// The [CSSBackgroundMixin] mixin used to handle background shorthand and compute
-/// to single value of background
-///
-
 final RegExp _splitRegExp = RegExp(r'\s+');
 const String _singleQuote = '\'';
 const String _doubleQuote = '"';
@@ -81,6 +77,8 @@ enum CSSBackgroundImageType {
   image,
 }
 
+/// The [CSSBackgroundMixin] mixin used to handle background shorthand and compute
+/// to single value of background.
 mixin CSSBackgroundMixin on RenderStyle {
   static CSSBackgroundPosition DEFAULT_BACKGROUND_POSITION = CSSBackgroundPosition(percentage: -1);
   static CSSBackgroundSize DEFAULT_BACKGROUND_SIZE = CSSBackgroundSize(fit: BoxFit.none);

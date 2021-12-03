@@ -96,7 +96,7 @@ JSValue Node::appendChild(QjsContext* ctx, JSValue this_val, int argc, JSValue* 
     return JS_ThrowTypeError(ctx, "Failed to execute 'appendChild' on 'Node': first arguments should be an Node type.");
   }
 
-  if (nodeInstance->m_eventTargetId == HTML_TARGET_ID || nodeInstance == selfInstance) {
+  if (nodeInstance == selfInstance) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'appendChild' on 'Node': The new child element contains the parent.");
   }
 
