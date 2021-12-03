@@ -98,11 +98,11 @@ abstract class KrakenBundle {
     }
   }
 
-  static KrakenBundle fromHrefWithContent(String url, String content) {
+  static KrakenBundle fromWithContent(String content, { String url = '' }) {
     return RawBundle.fromString(content, url);
   }
 
-  static KrakenBundle fromHrefWithByteCode(String url, Uint8List bytecode) {
+  static KrakenBundle fromByteCode(Uint8List bytecode, { String url = '' }) {
     return RawBundle.fromByteCode(bytecode, url);
   }
 

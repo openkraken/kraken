@@ -229,7 +229,7 @@ class Kraken extends StatefulWidget {
   loadContent(String bundleContent) async {
     await controller!.unload();
     await controller!.loadBundle(
-        bundle: KrakenBundle.fromHrefWithContent('', bundleContent)
+        bundle: KrakenBundle.fromWithContent(bundleContent)
     );
     _evalBundle(controller!, animationController);
   }
@@ -238,7 +238,7 @@ class Kraken extends StatefulWidget {
   loadByteCode(Uint8List bundleByteCode) async {
     await controller!.unload();
     await controller!.loadBundle(
-        bundle: KrakenBundle.fromHrefWithByteCode('', bundleByteCode)
+        bundle: KrakenBundle.fromByteCode(bundleByteCode)
     );
     _evalBundle(controller!, animationController);
   }
@@ -249,9 +249,9 @@ class Kraken extends StatefulWidget {
 
     KrakenBundle bundle;
     if (bundleByteCode != null) {
-      bundle = KrakenBundle.fromHrefWithByteCode(bundleURL, bundleByteCode);
+      bundle = KrakenBundle.fromByteCode(bundleByteCode, url: bundleURL);
     } else if (bundleContent != null) {
-      bundle = KrakenBundle.fromHrefWithContent(bundleURL, bundleContent);
+      bundle = KrakenBundle.fromWithContent(bundleContent, url: bundleURL);
     } else {
       bundle = KrakenBundle.fromUrl(bundleURL);
     }
@@ -268,9 +268,9 @@ class Kraken extends StatefulWidget {
 
     KrakenBundle bundle;
     if (bundleByteCode != null) {
-      bundle = KrakenBundle.fromHrefWithByteCode(bundlePath, bundleByteCode);
+      bundle = KrakenBundle.fromByteCode(bundleByteCode, url: bundlePath);
     } else if (bundleContent != null) {
-      bundle = KrakenBundle.fromHrefWithContent(bundlePath, bundleContent);
+      bundle = KrakenBundle.fromWithContent(bundleContent, url: bundlePath);
     } else {
       bundle = KrakenBundle.fromUrl(bundlePath);
     }
