@@ -722,8 +722,8 @@ class KrakenController {
       }
       href = url ?? '';
 
-      if (bundle.byteCode != null) {
-        bundleByteCode = bundle.byteCode;
+      if (bundle.bytecode != null) {
+        bundleByteCode = bundle.bytecode;
       }
 
       if (bundle.content != null) {

@@ -62,7 +62,7 @@ abstract class KrakenBundle {
 
   late ByteData rawBundle;
   // JS Content in UTF-8 bytes.
-  Uint8List? byteCode;
+  Uint8List? bytecode;
   // JS Content is String
   String? content;
   // JS line offset, default to 0.
@@ -117,8 +117,8 @@ abstract class KrakenBundle {
     // For raw javascript code or bytecode from API directly.
     if (content != null) {
       evaluateScripts(contextId, content!, src, lineOffset);
-    } else if (byteCode != null) {
-      evaluateQuickjsByteCode(contextId, byteCode!);
+    } else if (bytecode != null) {
+      evaluateQuickjsByteCode(contextId, bytecode!);
     }
 
     // For javascript code, HTML or bytecode from networks and hardware disk.
@@ -147,9 +147,9 @@ class RawBundle extends KrakenBundle {
     this.content = content;
   }
 
-  RawBundle.fromBytecode(Uint8List byteCode, String url)
+  RawBundle.fromBytecode(Uint8List bytecode, String url)
       : super(url) {
-    this.byteCode = byteCode;
+    this.bytecode = bytecode;
   }
 
   @override
