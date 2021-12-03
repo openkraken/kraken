@@ -255,8 +255,6 @@ class AssetsBundle extends KrakenBundle {
       String localPath = src.substring(ASSETS_PROROCOL.length);
       rawBundle = await rootBundle.load(localPath);
     }
-
-    isResolved = true;
     return this;
   }
 }
