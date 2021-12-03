@@ -257,6 +257,8 @@ class ImageElement extends Element {
       width = 0.0;
     }
 
+    _renderImage?.width = width;
+    _renderImage?.height = height;
     renderBoxModel!.intrinsicWidth = naturalWidth;
     renderBoxModel!.intrinsicHeight = naturalHeight;
 
