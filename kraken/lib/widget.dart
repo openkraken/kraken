@@ -217,7 +217,7 @@ class Kraken extends StatefulWidget {
     defineElement(tagName.toUpperCase(), creator);
   }
 
-  loadHref(KrakenBundle bundle) async {
+  loadBundle(KrakenBundle bundle) async {
     await controller!.unload();
     await controller!.loadBundle(
         bundle: bundle
@@ -229,7 +229,7 @@ class Kraken extends StatefulWidget {
   loadContent(String bundleContent) async {
     await controller!.unload();
     await controller!.loadBundle(
-        bundle: KrakenBundle.fromWithContent(bundleContent)
+        bundle: KrakenBundle.fromContent(bundleContent)
     );
     _evalBundle(controller!, animationController);
   }
@@ -251,7 +251,7 @@ class Kraken extends StatefulWidget {
     if (bundleByteCode != null) {
       bundle = KrakenBundle.fromByteCode(bundleByteCode, url: bundleURL);
     } else if (bundleContent != null) {
-      bundle = KrakenBundle.fromWithContent(bundleContent, url: bundleURL);
+      bundle = KrakenBundle.fromContent(bundleContent, url: bundleURL);
     } else {
       bundle = KrakenBundle.fromUrl(bundleURL);
     }
@@ -270,7 +270,7 @@ class Kraken extends StatefulWidget {
     if (bundleByteCode != null) {
       bundle = KrakenBundle.fromByteCode(bundleByteCode, url: bundlePath);
     } else if (bundleContent != null) {
-      bundle = KrakenBundle.fromWithContent(bundleContent, url: bundlePath);
+      bundle = KrakenBundle.fromContent(bundleContent, url: bundlePath);
     } else {
       bundle = KrakenBundle.fromUrl(bundlePath);
     }

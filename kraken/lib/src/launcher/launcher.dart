@@ -53,7 +53,7 @@ void launch({
       if (bundleByteCode != null) {
         bundle = KrakenBundle.fromByteCode(bundleByteCode, url: bundleURL);
       } else if (bundleContent != null) {
-        bundle = KrakenBundle.fromWithContent(bundleContent, url: bundleURL);
+        bundle = KrakenBundle.fromContent(bundleContent, url: bundleURL);
       } else {
         bundle = KrakenBundle.fromUrl(bundleURL);
       }

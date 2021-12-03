@@ -98,7 +98,7 @@ abstract class KrakenBundle {
     }
   }
 
-  static KrakenBundle fromWithContent(String content, { String url = '' }) {
+  static KrakenBundle fromContent(String content, { String url = '' }) {
     return RawBundle.fromString(content, url);
   }
 
