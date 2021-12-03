@@ -20,7 +20,7 @@ typedef ConnectedCallback = void Function();
 const _white = Color(0xFFFFFFFF);
 
 void launch({
-  required KrakenBundle bundle,
+  KrakenBundle? bundle,
   bool? debugEnableInspector,
   Color background = _white,
   DevToolsService? devToolsService,
