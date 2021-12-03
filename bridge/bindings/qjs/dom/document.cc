@@ -25,7 +25,6 @@
 #include "events/.gen/close_event.h"
 #include "events/.gen/gesture_event.h"
 #include "events/.gen/input_event.h"
-#include "events/.gen/intersection_change.h"
 #include "events/.gen/media_error_event.h"
 #include "events/.gen/message_event.h"
 #include "events/.gen/mouse_event.h"
@@ -89,9 +88,6 @@ Document::Document(JSContext* context) : Node(context, "Document") {
                        [](JSContext* context, void* nativeEvent) -> EventInstance* { return new MessageEventInstance(MessageEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
     Event::defineEvent(EVENT_CLOSE,
                        [](JSContext* context, void* nativeEvent) -> EventInstance* { return new CloseEventInstance(CloseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_INTERSECTION_CHANGE, [](JSContext* context, void* nativeEvent) -> EventInstance* {
-      return new IntersectionChangeEventInstance(IntersectionChangeEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
-    });
     Event::defineEvent(EVENT_TOUCH_START,
                        [](JSContext* context, void* nativeEvent) -> EventInstance* { return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
     Event::defineEvent(EVENT_TOUCH_END,

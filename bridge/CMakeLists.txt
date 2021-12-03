@@ -237,8 +237,6 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/dom/events/.gen/input_event.h
     bindings/qjs/dom/events/.gen/popstate_event.cc
     bindings/qjs/dom/events/.gen/popstate_event.h
-    bindings/qjs/dom/events/.gen/intersection_change.cc
-    bindings/qjs/dom/events/.gen/intersection_change.h
     bindings/qjs/dom/events/.gen/media_error_event.cc
     bindings/qjs/dom/events/.gen/media_error_event.h
     bindings/qjs/dom/events/.gen/mouse_event.cc

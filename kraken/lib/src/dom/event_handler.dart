@@ -78,7 +78,6 @@ mixin ElementEventMixin on EventTarget {
   }
 
   void handleIntersectionChange(IntersectionObserverEntry entry) {
-    dispatchEvent(IntersectionChangeEvent(entry.intersectionRatio));
     if (entry.intersectionRatio > 0) {
       handleAppear();
     } else {

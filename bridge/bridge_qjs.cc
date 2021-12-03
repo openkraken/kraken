@@ -33,7 +33,6 @@
 #include "bindings/qjs/dom/events/.gen/close_event.h"
 #include "bindings/qjs/dom/events/.gen/gesture_event.h"
 #include "bindings/qjs/dom/events/.gen/input_event.h"
-#include "bindings/qjs/dom/events/.gen/intersection_change.h"
 #include "bindings/qjs/dom/events/.gen/media_error_event.h"
 #include "bindings/qjs/dom/events/.gen/message_event.h"
 #include "bindings/qjs/dom/events/.gen/mouse_event.h"
@@ -91,7 +90,6 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler& handler) : conte
   bindCloseEvent(m_context);
   bindGestureEvent(m_context);
   bindInputEvent(m_context);
-  bindIntersectionChangeEvent(m_context);
   bindMediaErrorEvent(m_context);
   bindMouseEvent(m_context);
   bindMessageEvent(m_context);

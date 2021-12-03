@@ -428,24 +428,6 @@ class CloseEvent extends Event {
   }
 }
 
-class IntersectionChangeEvent extends Event {
-  IntersectionChangeEvent(this.intersectionRatio) : super(EVENT_INTERSECTION_CHANGE);
-  final double intersectionRatio;
-
-  @override
-  Pointer<RawNativeIntersectionChangeEvent> toRaw([int methodLength = 0]) {
-    List<int> methods = [
-      doubleToUint64(intersectionRatio)
-    ];
-
-    Pointer<RawNativeIntersectionChangeEvent> rawEvent = super.toRaw(methods.length).cast<RawNativeIntersectionChangeEvent>();
-    Uint64List bytes = rawEvent.ref.bytes.asTypedList((rawEvent.ref.length + methods.length));
-    bytes.setAll(rawEvent.ref.length, methods);
-
-    return rawEvent;
-  }
-}
-
 /// reference: https://w3c.github.io/touch-events/#touchevent-interface
 class TouchEvent extends Event {
   TouchEvent(String type) : super(type, EventInit(bubbles: true, cancelable: true));
