@@ -20,10 +20,7 @@ typedef ConnectedCallback = void Function();
 const _white = Color(0xFFFFFFFF);
 
 void launch({
-  String? bundleURL,
-  String? bundlePath,
-  String? bundleContent,
-  Uint8List? bundleByteCode,
+  required KrakenBundle bundle,
   bool? debugEnableInspector,
   Color background = _white,
   DevToolsService? devToolsService,
@@ -46,20 +43,7 @@ void launch({
 
     controller.view.attachView(RendererBinding.instance!.renderView);
 
-    if (bundleURL == null) {
-      await controller.loadBundle();
-    } else {
-      KrakenBundle bundle;
-      if (bundleByteCode != null) {
-        bundle = KrakenBundle.fromBytecode(bundleByteCode, url: bundleURL);
-      } else if (bundleContent != null) {
-        bundle = KrakenBundle.fromContent(bundleContent, url: bundleURL);
-      } else {
-        bundle = KrakenBundle.fromUrl(bundleURL);
-      }
-
-      await controller.loadBundle(bundle: bundle);
-    }
+    await controller.loadBundle(bundle: bundle);
 
     await controller.evalBundle();
   }
