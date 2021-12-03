@@ -224,6 +224,8 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     // FIXME: for break circle reference
     viewport.controller = null;
 
+    debugDOMTreeChanged = null;
+
     _teardownObserver();
 
     detachView();
@@ -412,11 +414,12 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     Node target = _getEventTargetById<Node>(targetId)!;
     target.parentNode?.removeChild(target);
 
+    _debugDOMTreeChanged();
+
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_REMOVE_NODE_END, uniqueId: targetId);
     }
   }
-
 
   /// <!-- beforebegin -->
   /// <p>
@@ -456,14 +459,15 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
             targetParentNode.childNodes[targetParentNode.childNodes.indexOf(target) + 1],
           );
         }
-
         break;
     }
+
+    _debugDOMTreeChanged();
+
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_INSERT_ADJACENT_NODE_END, uniqueId: targetId);
     }
   }
-
 
   void setProperty(int targetId, String key, dynamic value) {
     if (kProfileMode) {
@@ -547,6 +551,15 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
       target.style.flushPendingProperties();
     } else {
       debugPrint('Only element has style, try flushPendingStyleProperties from Node(#$targetId).');
+    }
+  }
+
+  // Hooks for DevTools.
+  VoidCallback? debugDOMTreeChanged;
+  void _debugDOMTreeChanged() {
+    VoidCallback? f = debugDOMTreeChanged;
+    if (f != null) {
+      f();
     }
   }
 
@@ -673,7 +686,6 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     // TODO: implement didPushRouteInformation
     return false;
   }
-
 }
 
 // An controller designed to control kraken's functional modules.

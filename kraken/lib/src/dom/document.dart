@@ -216,16 +216,6 @@ class Document extends Node {
   @override
   void dispose() {
     documentElement?.dispose();
-    debugDOMTreeChanged = null;
     super.dispose();
-  }
-
-  // Hooks for DevTools.
-  VoidCallback? debugDOMTreeChanged;
-  void _debugDOMTreeChanged() {
-    VoidCallback? f = debugDOMTreeChanged;
-    if (f != null) {
-      f();
-    }
   }
 }
