@@ -8,7 +8,7 @@ describe('Tags img', () => {
     img.style.width = '60px';
     img.setAttribute(
       'src',
-      '//gw.alicdn.com/tfs/TB1MRC_cvb2gK0jSZK9XXaEgFXa-1701-1535.png'
+      'assets/100x100-green.png'
     );
 
     document.body.appendChild(img);
@@ -181,7 +181,7 @@ describe('Tags img', () => {
     const img = document.createElement('img');
     // Make image loading=lazy.
     img.setAttribute('loading', 'lazy');
-    img.src = '//gw.alicdn.com/tfs/TB1MRC_cvb2gK0jSZK9XXaEgFXa-1701-1535.png';
+    img.src = 'assets/100x100-green.png';
     img.style.width = '60px';
 
     document.body.appendChild(img);
