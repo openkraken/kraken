@@ -55,7 +55,7 @@ void launch({
       } else if (bundleContent != null) {
         bundle = KrakenBundle.fromHrefWithContent(bundleURL, bundleContent);
       } else {
-        bundle = KrakenBundle.fromHref(bundleURL);
+        bundle = KrakenBundle.fromUrl(bundleURL);
       }
 
       await controller.loadBundle(bundle: bundle);

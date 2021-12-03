@@ -662,7 +662,7 @@ class KrakenController {
     }
 
     await unload();
-    await loadBundle(bundle: KrakenBundle.fromHref(url ?? href));
+    await loadBundle(bundle: KrakenBundle.fromUrl(url ?? href));
     await evalBundle();
 
     if (devToolsService != null) {

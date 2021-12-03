@@ -253,7 +253,7 @@ class Kraken extends StatefulWidget {
     } else if (bundleContent != null) {
       bundle = KrakenBundle.fromHrefWithContent(bundleURL, bundleContent);
     } else {
-      bundle = KrakenBundle.fromHref(bundleURL);
+      bundle = KrakenBundle.fromUrl(bundleURL);
     }
 
     await controller!.loadBundle(
@@ -272,7 +272,7 @@ class Kraken extends StatefulWidget {
     } else if (bundleContent != null) {
       bundle = KrakenBundle.fromHrefWithContent(bundlePath, bundleContent);
     } else {
-      bundle = KrakenBundle.fromHref(bundlePath);
+      bundle = KrakenBundle.fromUrl(bundlePath);
     }
 
     await controller!.loadBundle(

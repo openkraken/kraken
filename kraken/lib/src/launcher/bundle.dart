@@ -90,7 +90,7 @@ abstract class KrakenBundle {
     isResolved = true;
   }
 
-  static KrakenBundle fromHref(String url) {
+  static KrakenBundle fromUrl(String url) {
     if (isAssetAbsolutePath(url)) {
       return AssetsBundle(url);
     } else {

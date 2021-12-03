@@ -74,7 +74,7 @@ class ScriptElement extends Element {
     // Must
     if (src.isNotEmpty && isConnected && (type == _JAVASCRIPT_MIME || type == _JAVASCRIPT_MODULE)) {
       try {
-        KrakenBundle bundle = KrakenBundle.fromHref(src);
+        KrakenBundle bundle = KrakenBundle.fromUrl(src);
         await bundle.resolve(elementManager.contextId);
         await bundle.eval(elementManager.contextId);
         // Successful load.
