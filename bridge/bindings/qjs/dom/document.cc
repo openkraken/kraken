@@ -315,7 +315,7 @@ PROP_SETTER(DocumentInstance, nodeName)(QjsContext* ctx, JSValue this_val, int a
 // document.documentElement
 PROP_GETTER(DocumentInstance, documentElement)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
-  ElementInstance *documentElement = document->getDocumentElement();
+  ElementInstance* documentElement = document->getDocumentElement();
   return documentElement == nullptr ? JS_NULL : documentElement->instanceObject;
 }
 
@@ -326,7 +326,7 @@ PROP_SETTER(DocumentInstance, documentElement)(QjsContext* ctx, JSValue this_val
 // document.head
 PROP_GETTER(DocumentInstance, head)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
-  ElementInstance *documentElement = document->getDocumentElement();
+  ElementInstance* documentElement = document->getDocumentElement();
   int32_t len = arrayGetLength(ctx, documentElement->childNodes);
   JSValue head = JS_NULL;
 
@@ -354,7 +354,7 @@ PROP_SETTER(DocumentInstance, head)(QjsContext* ctx, JSValue this_val, int argc,
 // document.body: https://html.spec.whatwg.org/multipage/dom.html#dom-document-body-dev
 PROP_GETTER(DocumentInstance, body)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
-  ElementInstance *documentElement = document->getDocumentElement();
+  ElementInstance* documentElement = document->getDocumentElement();
   JSValue body = JS_NULL;
 
   int32_t len = arrayGetLength(ctx, documentElement->childNodes);
@@ -532,7 +532,7 @@ void DocumentInstance::addElementById(JSAtom id, ElementInstance* element) {
   }
 }
 
-ElementInstance *DocumentInstance::getDocumentElement() {
+ElementInstance* DocumentInstance::getDocumentElement() {
   int32_t len = arrayGetLength(m_ctx, childNodes);
 
   for (int i = 0; i < len; i++) {

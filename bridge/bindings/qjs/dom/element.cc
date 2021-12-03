@@ -853,7 +853,7 @@ ElementInstance::ElementInstance(Element* element, std::string tagName, bool sho
     ::foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_eventTargetId, UICommand::createElement, *args_01, nativeEventTarget);
   }
 }
- 
+
 JSClassExoticMethods ElementInstance::exoticMethods{nullptr, nullptr, nullptr, nullptr, hasProperty, getProperty, setProperty};
 
 StyleDeclarationInstance* ElementInstance::style() {
