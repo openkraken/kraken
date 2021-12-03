@@ -238,7 +238,7 @@ class Kraken extends StatefulWidget {
   loadByteCode(Uint8List bundleByteCode) async {
     await controller!.unload();
     await controller!.loadBundle(
-        bundle: KrakenBundle.fromByteCode(bundleByteCode)
+        bundle: KrakenBundle.fromBytecode(bundleByteCode)
     );
     _evalBundle(controller!, animationController);
   }
@@ -249,7 +249,7 @@ class Kraken extends StatefulWidget {
 
     KrakenBundle bundle;
     if (bundleByteCode != null) {
-      bundle = KrakenBundle.fromByteCode(bundleByteCode, url: bundleURL);
+      bundle = KrakenBundle.fromBytecode(bundleByteCode, url: bundleURL);
     } else if (bundleContent != null) {
       bundle = KrakenBundle.fromContent(bundleContent, url: bundleURL);
     } else {
@@ -268,7 +268,7 @@ class Kraken extends StatefulWidget {
 
     KrakenBundle bundle;
     if (bundleByteCode != null) {
-      bundle = KrakenBundle.fromByteCode(bundleByteCode, url: bundlePath);
+      bundle = KrakenBundle.fromBytecode(bundleByteCode, url: bundlePath);
     } else if (bundleContent != null) {
       bundle = KrakenBundle.fromContent(bundleContent, url: bundlePath);
     } else {

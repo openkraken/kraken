@@ -102,8 +102,8 @@ abstract class KrakenBundle {
     return RawBundle.fromString(content, url);
   }
 
-  static KrakenBundle fromByteCode(Uint8List bytecode, { String url = '' }) {
-    return RawBundle.fromByteCode(bytecode, url);
+  static KrakenBundle fromBytecode(Uint8List bytecode, { String url = '' }) {
+    return RawBundle.fromBytecode(bytecode, url);
   }
 
 
@@ -147,7 +147,7 @@ class RawBundle extends KrakenBundle {
     this.content = content;
   }
 
-  RawBundle.fromByteCode(Uint8List byteCode, String url)
+  RawBundle.fromBytecode(Uint8List byteCode, String url)
       : super(url) {
     this.byteCode = byteCode;
   }
