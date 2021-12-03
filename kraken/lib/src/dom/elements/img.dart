@@ -357,7 +357,7 @@ class ImageElement extends Element {
     assert(isRendererAttached);
     assert(_renderImage != null);
     if (_imageInfo == null) return;
-    _renderImage!.image = image;
+    _renderImage!.image = image?.clone();
   }
 
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
