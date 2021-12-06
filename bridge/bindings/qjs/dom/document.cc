@@ -408,7 +408,8 @@ PROP_SETTER(DocumentInstance, body)(QjsContext* ctx, JSValue this_val, int argc,
           documentElement->internalReplaceChild(newElementInstance, oldElementInstance);
         }
       }
-      result = newBody;
+      JS_FreeValue(ctx, oldBody);
+      result = JS_DupValue(ctx, newBody);
     } else {
       result = JS_ThrowTypeError(ctx, "The new body element must be a 'BODY' element");
     }
