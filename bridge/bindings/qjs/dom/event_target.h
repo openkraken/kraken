@@ -84,9 +84,9 @@ class EventTargetInstance : public Instance {
 
  protected:
   int32_t m_eventTargetId;
-  JSValue m_eventHandlers{JS_NewObject(m_ctx)};
-  JSValue m_propertyEventHandler{JS_NewObject(m_ctx)};
-  JSValue m_properties{JS_NewObject(m_ctx)};
+  ObjectProperty m_eventHandlers{m_context, instanceObject, "__eventHandlers", JS_NewObject(m_ctx)};
+  ObjectProperty m_propertyEventHandler{m_context, instanceObject, "__propertyEventHandler", JS_NewObject(m_ctx)};
+  ObjectProperty m_properties{m_context, instanceObject, "__properties", JS_NewObject(m_ctx)};
 
   void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
   static void copyNodeProperties(EventTargetInstance* newNode, EventTargetInstance* referenceNode);
