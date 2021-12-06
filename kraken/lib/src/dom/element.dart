@@ -17,6 +17,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/widget.dart';
 import 'package:meta/meta.dart';
 
 import 'element_native_methods.dart';
@@ -647,7 +648,7 @@ class Element extends Node
     }
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
-      if (!child.isRendererAttached && _renderLayoutBox != null) {
+      if (!child.isRendererAttached && _renderLayoutBox != null && !(this is WidgetElement)) {
         RenderBox? after;
         RenderLayoutBox? scrollingContentBox = _renderLayoutBox!.renderScrollingContent;
         if (scrollingContentBox != null) {
