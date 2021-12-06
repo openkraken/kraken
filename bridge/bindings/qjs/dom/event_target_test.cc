@@ -119,12 +119,8 @@ TEST(EventTarget, shouldPendingEventAtGCPhase) {
 
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
-    logCalled = true;
-  };
-  auto* bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
-    errorCalled = true;
-  });
+  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { logCalled = true; };
+  auto* bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) { errorCalled = true; });
   auto& context = bridge->getContext();
   std::string code = std::string(R"(
 {
@@ -135,9 +131,9 @@ let div = document.createElement('div');
 
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
 
-  static auto *window = static_cast<WindowInstance*>(JS_GetOpaque(context->global(), 1));
+  static auto* window = static_cast<WindowInstance*>(JS_GetOpaque(context->global(), 1));
 
-  registerEventTargetDisposedCallback(context->uniqueId, [](EventTargetInstance *eventTargetInstance) {
+  registerEventTargetDisposedCallback(context->uniqueId, [](EventTargetInstance* eventTargetInstance) {
     // Check to not crash when trigger click on disposed eventTarget
     dispatchEvent(eventTargetInstance, "click");
 
