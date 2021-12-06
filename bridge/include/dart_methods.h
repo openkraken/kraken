@@ -20,7 +20,7 @@ using AsyncCallback = void (*)(void* callbackContext, int32_t contextId, const c
 using AsyncRAFCallback = void (*)(void* callbackContext, int32_t contextId, double result, const char* errmsg);
 using AsyncModuleCallback = void (*)(void* callbackContext, int32_t contextId, NativeString* errmsg, NativeString* json);
 using AsyncBlobCallback = void (*)(void* callbackContext, int32_t contextId, const char* error, uint8_t* bytes, int32_t length);
-using AsyncMicrotaskCallback = void (*)(void *callbackContext);
+using AsyncMicrotaskCallback = void (*)(void* callbackContext);
 typedef NativeString* (*InvokeModule)(void* callbackContext, int32_t contextId, NativeString* moduleName, NativeString* method, NativeString* params, AsyncModuleCallback callback);
 typedef void (*RequestBatchUpdate)(int32_t contextId);
 typedef void (*ReloadApp)(int32_t contextId);
@@ -28,7 +28,7 @@ typedef int32_t (*SetTimeout)(void* callbackContext, int32_t contextId, AsyncCal
 typedef int32_t (*SetInterval)(void* callbackContext, int32_t contextId, AsyncCallback callback, int32_t timeout);
 typedef int32_t (*RequestAnimationFrame)(void* callbackContext, int32_t contextId, AsyncRAFCallback callback);
 typedef void (*ClearTimeout)(int32_t contextId, int32_t timerId);
-typedef void (*ScheduleMicrotask)(void *callbackContext, AsyncMicrotaskCallback callback);
+typedef void (*ScheduleMicrotask)(void* callbackContext, AsyncMicrotaskCallback callback);
 typedef void (*CancelAnimationFrame)(int32_t contextId, int32_t id);
 typedef NativeScreen* (*GetScreen)(int32_t contextId);
 typedef double (*DevicePixelRatio)(int32_t contextId);
