@@ -149,7 +149,7 @@ JSValue EventTarget::removeEventListener(QjsContext* ctx, JSValue this_val, int 
 
 JSValue EventTarget::dispatchEvent(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc != 1) {
-    return JS_ThrowTypeError(ctx, "Failed to TEST_dispatchEvent: first arguments should be an event object");
+    return JS_ThrowTypeError(ctx, "Failed to dispatchEvent: first arguments should be an event object");
   }
 
   auto* eventTargetInstance = static_cast<EventTargetInstance*>(JS_GetOpaque(this_val, EventTarget::classId(this_val)));
