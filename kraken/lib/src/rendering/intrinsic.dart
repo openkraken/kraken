@@ -12,11 +12,7 @@ import 'package:kraken/rendering.dart';
 
 class RenderIntrinsic extends RenderBoxModel
     with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
-  RenderIntrinsic(
-      RenderStyle renderStyle,
-  ) : super(
-      renderStyle: renderStyle,
-  );
+  RenderIntrinsic(CSSRenderStyle renderStyle) : super(renderStyle: renderStyle);
 
   @override
   BoxSizeType get widthSizeType {
@@ -81,7 +77,7 @@ class RenderIntrinsic extends RenderBoxModel
             childLayoutStart.microsecondsSinceEpoch;
       }
 
-      setMaxScrollableSize(child!.size.width, child!.size.height);
+      setMaxScrollableSize(child!.size);
 
       CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
       bool isInlineLevel = effectiveDisplay == CSSDisplay.inlineBlock ||
@@ -222,11 +218,7 @@ class RenderIntrinsic extends RenderBoxModel
 }
 
 class RenderRepaintBoundaryIntrinsic extends RenderIntrinsic {
-  RenderRepaintBoundaryIntrinsic(
-    RenderStyle renderStyle,
-  ) : super(
-    renderStyle,
-  );
+  RenderRepaintBoundaryIntrinsic(CSSRenderStyle renderStyle) : super(renderStyle);
 
   @override
   bool get isRepaintBoundary => true;

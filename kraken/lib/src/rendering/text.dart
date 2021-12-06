@@ -27,7 +27,7 @@ class RenderTextBox extends RenderBox
 
   late String data;
   late KrakenRenderParagraph _renderParagraph;
-  RenderStyle renderStyle;
+  CSSRenderStyle renderStyle;
 
   BoxSizeType? widthSizeType;
   BoxSizeType? heightSizeType;

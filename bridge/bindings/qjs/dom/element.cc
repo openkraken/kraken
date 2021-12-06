@@ -130,16 +130,18 @@ JSValue Element::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue 
     return JS_ThrowTypeError(ctx, "Illegal constructor");
   }
 
+  auto* context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
   std::string name = jsValueToStdString(ctx, tagName);
 
-  if (elementConstructorMap.count(name) > 0) {
-    return JS_CallConstructor(ctx, elementConstructorMap[name]->classObject, argc, argv);
+  auto* Document = Document::instance(context);
+  if (Document->isCustomElement(name)) {
+    return JS_CallConstructor(ctx, Document->getElementConstructor(context, name), argc, argv);
   }
 
   ElementInstance* element;
   if (name == "HTML") {
     element = new ElementInstance(this, name, false);
-    element->eventTargetId = HTML_TARGET_ID;
+    element->m_eventTargetId = HTML_TARGET_ID;
   } else {
     // Fallback to default Element class
     element = new ElementInstance(this, name, true);
@@ -211,10 +213,10 @@ JSValue Element::setAttribute(QjsContext* ctx, JSValue this_val, int argc, JSVal
     element->_didModifyAttribute(name, JS_ATOM_NULL, attributeAtom);
   }
 
-  NativeString* args_01 = stringToNativeString(name);
-  NativeString* args_02 = jsValueToNativeString(ctx, attributeString);
+  std::unique_ptr<NativeString> args_01 = stringToNativeString(name);
+  std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, attributeString);
 
-  ::foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+  ::foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
 
   JS_FreeValue(ctx, attributeString);
   JS_FreeAtom(ctx, attributeAtom);
@@ -265,8 +267,8 @@ JSValue Element::removeAttribute(QjsContext* ctx, JSValue this_val, int argc, JS
     element->m_attributes->removeAttribute(name);
     element->_didModifyAttribute(name, id, JS_ATOM_NULL);
 
-    NativeString* args_01 = stringToNativeString(name);
-    ::foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->eventTargetId, UICommand::removeProperty, *args_01, nullptr);
+    std::unique_ptr<NativeString> args_01 = stringToNativeString(name);
+    ::foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->m_eventTargetId, UICommand::removeProperty, *args_01, nullptr);
   }
 
   return JS_NULL;
@@ -342,7 +344,7 @@ JSValue Element::toBlob(QjsContext* ctx, JSValue this_val, int argc, JSValue* ar
       nullptr, element->m_context, resolving_funcs[0], resolving_funcs[1], promise,
   };
 
-  getDartMethod()->toBlob(static_cast<void*>(toBlobPromiseContext), element->m_context->getContextId(), blobCallback, element->eventTargetId, devicePixelRatio);
+  getDartMethod()->toBlob(static_cast<void*>(toBlobPromiseContext), element->m_context->getContextId(), blobCallback, element->m_eventTargetId, devicePixelRatio);
   list_add_tail(&toBlobPromiseContext->link, &element->m_context->promise_job_list);
 
   return promise;
@@ -366,18 +368,6 @@ JSValue Element::scrollBy(QjsContext* ctx, JSValue this_val, int argc, JSValue* 
   auto element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue arguments[] = {jsValueToNativeValue(ctx, argv[0]), jsValueToNativeValue(ctx, argv[1])};
   return element->callNativeMethods("scrollBy", 2, arguments);
-}
-
-std::unordered_map<std::string, Element*> Element::elementConstructorMap{};
-
-void Element::defineElement(const std::string& tagName, Element* constructor) {
-  elementConstructorMap[tagName] = constructor;
-}
-
-JSValue Element::getConstructor(JSContext* context, const std::string& tagName) {
-  if (elementConstructorMap.count(tagName) > 0)
-    return elementConstructorMap[tagName]->classObject;
-  return Element::instance(context)->classObject;
 }
 
 PROP_GETTER(ElementInstance, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -409,9 +399,9 @@ PROP_SETTER(ElementInstance, className)(QjsContext* ctx, JSValue this_val, int a
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   JSAtom atom = JS_ValueToAtom(ctx, argv[0]);
   element->m_attributes->setAttribute("class", atom);
-  NativeString* args_01 = stringToNativeString("class");
-  NativeString* args_02 = jsValueToNativeString(ctx, argv[0]);
-  ::foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+  std::unique_ptr<NativeString> args_01 = stringToNativeString("class");
+  std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
+  ::foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
   JS_FreeAtom(ctx, atom);
   return JS_NULL;
 }
@@ -541,6 +531,46 @@ PROP_GETTER(ElementInstance, scrollWidth)(QjsContext* ctx, JSValue this_val, int
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
 PROP_SETTER(ElementInstance, scrollWidth)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  return JS_NULL;
+}
+
+// Definition for firstElementChild
+PROP_GETTER(ElementInstance, firstElementChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
+  int32_t len = arrayGetLength(ctx, element->childNodes);
+
+  for (int i = 0; i < len; i++) {
+    JSValue v = JS_GetPropertyUint32(ctx, element->childNodes, i);
+    auto* instance = static_cast<NodeInstance*>(JS_GetOpaque(v, Node::classId(v)));
+    if (instance->nodeType == NodeType::ELEMENT_NODE) {
+      return instance->instanceObject;
+    }
+    JS_FreeValue(ctx, v);
+  }
+
+  return JS_NULL;
+}
+PROP_SETTER(ElementInstance, firstElementChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  return JS_NULL;
+}
+
+// Definition for lastElementChild
+PROP_GETTER(ElementInstance, lastElementChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
+  int32_t len = arrayGetLength(ctx, element->childNodes);
+
+  for (int i = len - 1; i >= 0; i--) {
+    JSValue v = JS_GetPropertyUint32(ctx, element->childNodes, i);
+    auto* instance = static_cast<NodeInstance*>(JS_GetOpaque(v, Node::classId(v)));
+    if (instance->nodeType == NodeType::ELEMENT_NODE) {
+      return instance->instanceObject;
+    }
+    JS_FreeValue(ctx, v);
+  }
+
+  return JS_NULL;
+}
+PROP_SETTER(ElementInstance, lastElementChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
 
@@ -816,8 +846,8 @@ ElementInstance::ElementInstance(Element* element, std::string tagName, bool sho
   JS_DefinePropertyValueStr(m_ctx, instanceObject, "attributes", m_attributes->jsObject, JS_PROP_C_W_E);
 
   if (shouldAddUICommand) {
-    NativeString* args_01 = stringToNativeString(tagName);
-    ::foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(eventTargetId, UICommand::createElement, *args_01, nativeEventTarget);
+    std::unique_ptr<NativeString> args_01 = stringToNativeString(tagName);
+    ::foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_eventTargetId, UICommand::createElement, *args_01, nativeEventTarget);
   }
 }
 

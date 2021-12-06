@@ -111,26 +111,22 @@ JSValue CSSStyleDeclaration::getPropertyValue(QjsContext* ctx, JSValue this_val,
   return returnValue;
 }
 
-StyleDeclarationInstance::~StyleDeclarationInstance() {
-  for (auto& prop : properties) {
-    JS_FreeValue(m_ctx, prop.second);
-  }
+StyleDeclarationInstance::StyleDeclarationInstance(CSSStyleDeclaration* cssStyleDeclaration, EventTargetInstance* ownerEventTarget)
+    : Instance(cssStyleDeclaration, "CSSStyleDeclaration", &m_exoticMethods, CSSStyleDeclaration::kCSSStyleDeclarationClassId, finalize), ownerEventTarget(ownerEventTarget) {
+  JS_DupValue(m_ctx, ownerEventTarget->instanceObject);
 }
+StyleDeclarationInstance::~StyleDeclarationInstance() {}
 
 bool StyleDeclarationInstance::internalSetProperty(std::string& name, JSValue value) {
   name = parseJavaScriptCSSPropertyName(name);
 
-  if (properties.count(name) > 0) {
-    JS_FreeValue(m_ctx, properties[name]);
+  properties[name] = jsValueToStdString(m_ctx, value);
+
+  if (ownerEventTarget != nullptr) {
+    std::unique_ptr<NativeString> args_01 = stringToNativeString(name);
+    std::unique_ptr<NativeString> args_02 = jsValueToNativeString(m_ctx, value);
+    foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(ownerEventTarget->eventTargetId(), UICommand::setStyle, *args_01, *args_02, nullptr);
   }
-
-  JS_DupValue(m_ctx, value);
-  properties[name] = value;
-
-  NativeString* args_01 = stringToNativeString(name);
-  NativeString* args_02 = jsValueToNativeString(m_ctx, value);
-
-  foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_ownerEventTarget->eventTargetId, UICommand::setStyle, *args_01, *args_02, nullptr);
 
   return true;
 }
@@ -142,25 +138,20 @@ void StyleDeclarationInstance::internalRemoveProperty(std::string& name) {
     return;
   }
 
-  JSValue value = properties[name];
-  JS_FreeValue(m_ctx, value);
   properties.erase(name);
 
-  NativeString* args_01 = stringToNativeString(name);
-  NativeString* args_02 = jsValueToNativeString(m_ctx, JS_NULL);
-
-  foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_ownerEventTarget->eventTargetId, UICommand::setStyle, *args_01, *args_02, nullptr);
+  if (ownerEventTarget != nullptr) {
+    std::unique_ptr<NativeString> args_01 = stringToNativeString(name);
+    std::unique_ptr<NativeString> args_02 = jsValueToNativeString(m_ctx, JS_NULL);
+    foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(ownerEventTarget->eventTargetId(), UICommand::setStyle, *args_01, *args_02, nullptr);
+  }
 }
 
 JSValue StyleDeclarationInstance::internalGetPropertyValue(std::string& name) {
   name = parseJavaScriptCSSPropertyName(name);
 
   if (properties.count(name) > 0) {
-    if (JS_IsNull(properties[name])) {
-      return JS_NewString(m_ctx, "");
-    }
-
-    return JS_DupValue(m_ctx, properties[name]);
+    return JS_NewString(m_ctx, properties[name].c_str());
   }
 
   return JS_NewString(m_ctx, "");
@@ -174,9 +165,7 @@ std::string StyleDeclarationInstance::toString() {
   std::string s;
 
   for (auto& attr : properties) {
-    const char* pstr = JS_ToCString(m_ctx, attr.second);
-    s += attr.first + ": " + pstr + ";";
-    JS_FreeCString(m_ctx, pstr);
+    s += attr.first + ": " + attr.second + ";";
   }
 
   s += "\"";
@@ -185,7 +174,7 @@ std::string StyleDeclarationInstance::toString() {
 
 void StyleDeclarationInstance::copyWith(StyleDeclarationInstance* instance) {
   for (auto& attr : instance->properties) {
-    properties[attr.first] = JS_DupValue(m_ctx, attr.second);
+    properties[attr.first] = attr.second;
   }
 }
 
@@ -228,5 +217,11 @@ JSValue StyleDeclarationInstance::getProperty(QjsContext* ctx, JSValue obj, JSAt
 JSClassExoticMethods StyleDeclarationInstance::m_exoticMethods{
     nullptr, nullptr, nullptr, nullptr, nullptr, getProperty, setProperty,
 };
+
+void StyleDeclarationInstance::gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
+  Instance::gcMark(rt, val, mark_func);
+  // We should tel gc style relies on element
+  JS_MarkValue(rt, ownerEventTarget->instanceObject, mark_func);
+}
 
 }  // namespace kraken::binding::qjs

@@ -58,7 +58,7 @@ double? _parseLength(String length, RenderStyle renderStyle, String property) {
   return CSSLength.parseLength(length, renderStyle, property).computedValue;
 }
 
-void _updateLength(double oldLengthValue, double newLengthValue, double progress, String property, RenderStyle renderStyle) {
+void _updateLength(double oldLengthValue, double newLengthValue, double progress, String property, CSSRenderStyle renderStyle) {
   double value = oldLengthValue * (1 - progress) + newLengthValue * progress;
   renderStyle.target.setRenderStyleProperty(property, CSSLengthValue(value, CSSLengthType.PX));
 }
@@ -67,7 +67,7 @@ FontWeight _parseFontWeight(String fontWeight, RenderStyle renderStyle, String p
   return CSSText.resolveFontWeight(fontWeight);
 }
 
-void _updateFontWeight(FontWeight oldValue, FontWeight newValue, double progress, String property, RenderStyle renderStyle) {
+void _updateFontWeight(FontWeight oldValue, FontWeight newValue, double progress, String property, CSSRenderStyle renderStyle) {
   FontWeight? fontWeight = FontWeight.lerp(oldValue, newValue, progress);
   switch (property) {
     case FONT_WEIGHT:
@@ -96,7 +96,7 @@ double _parseLineHeight(String lineHeight, RenderStyle renderStyle, String prope
   return CSSLength.parseLength(lineHeight, renderStyle, LINE_HEIGHT).computedValue;
 }
 
-void _updateLineHeight(double oldValue, double newValue, double progress, String property, RenderStyle renderStyle) {
+void _updateLineHeight(double oldValue, double newValue, double progress, String property, CSSRenderStyle renderStyle) {
   renderStyle.lineHeight = CSSLengthValue(_getNumber(oldValue, newValue, progress), CSSLengthType.PX);
 }
 
@@ -104,7 +104,7 @@ Matrix4? _parseTransform(String value, RenderStyle renderStyle, String property)
   return CSSMatrix.computeTransformMatrix(CSSFunction.parseFunction(value), renderStyle);
 }
 
-void _updateTransform(Matrix4 begin, Matrix4 end, double t, String property, RenderStyle renderStyle) {
+void _updateTransform(Matrix4 begin, Matrix4 end, double t, String property, CSSRenderStyle renderStyle) {
   Matrix4 newMatrix4 = CSSMatrix.lerpMatrix(begin, end, t);
   renderStyle.transformMatrix = newMatrix4;
 }
@@ -179,7 +179,7 @@ enum CSSTransitionEvent {
   cancel,
 }
 
-mixin CSSTransitionMixin on RenderStyleBase {
+mixin CSSTransitionMixin on RenderStyle {
 
   // https://drafts.csswg.org/css-transitions/#transition-property-property
   // Name: transition-property
@@ -199,8 +199,9 @@ mixin CSSTransitionMixin on RenderStyleBase {
     // Any animation found in previousAnimations but not found in newAnimations is not longer current and should be canceled.
     // @HACK: There are no way to get animationList from styles(Webkit will create an new Style object when style changes, but Kraken not).
     // Therefore we should cancel all running transition to get thing works.
-    finishRunningTransiton();
+    finishRunningTransition();
   }
+  @override
   List<String> get transitionProperty => _transitionProperty ?? const [ALL];
 
   // https://drafts.csswg.org/css-transitions/#transition-duration-property
@@ -218,6 +219,7 @@ mixin CSSTransitionMixin on RenderStyleBase {
     _transitionDuration = value;
     _effectiveTransitions = null;
   }
+  @override
   List<String> get transitionDuration => _transitionDuration ?? const [_0s];
 
   // https://drafts.csswg.org/css-transitions/#transition-timing-function-property
@@ -235,6 +237,7 @@ mixin CSSTransitionMixin on RenderStyleBase {
     _transitionTimingFunction = value;
     _effectiveTransitions = null;
   }
+  @override
   List<String> get transitionTimingFunction => _transitionTimingFunction ?? const [EASE];
 
   // https://drafts.csswg.org/css-transitions/#transition-delay-property
@@ -252,6 +255,7 @@ mixin CSSTransitionMixin on RenderStyleBase {
     _transitionDelay = value;
     _effectiveTransitions = null;
   }
+  @override
   List<String> get transitionDelay => _transitionDelay ?? const [_0s];
 
   Map<String, List>? _effectiveTransitions;
@@ -299,6 +303,7 @@ mixin CSSTransitionMixin on RenderStyleBase {
     return _propertyRunningTransition.containsKey(property);
   }
 
+  @override
   String? removeAnimationProperty(String propertyName) {
     String? prevValue = EMPTY_STRING;
 
@@ -317,7 +322,7 @@ mixin CSSTransitionMixin on RenderStyleBase {
 
       // An Event fired when a CSS transition has been cancelled.
       target.dispatchEvent(Event(EVENT_TRANSITION_CANCEL));
-      
+
       // Maybe set transition twice in a same frame. should check animationProperties has contains propertyName.
       if (_animationProperties.containsKey(propertyName)) {
         begin = _animationProperties[propertyName];
@@ -337,7 +342,7 @@ mixin CSSTransitionMixin on RenderStyleBase {
       Keyframe(propertyName, begin, 0, LINEAR),
       Keyframe(propertyName, end, 1, LINEAR),
     ];
-    KeyframeEffect effect = KeyframeEffect(this as RenderStyle, target, keyframes, options);
+    KeyframeEffect effect = KeyframeEffect(this, target, keyframes, options);
     Animation animation = Animation(effect);
     _propertyRunningTransition[propertyName] = animation;
 
@@ -356,11 +361,11 @@ mixin CSSTransitionMixin on RenderStyleBase {
     };
 
     target.dispatchEvent(Event(EVENT_TRANSITION_RUN));
-    
+
     animation.play();
   }
 
-  void cancelRunningTransiton() {
+  void cancelRunningTransition() {
     if (_propertyRunningTransition.isNotEmpty) {
       for (String property in _propertyRunningTransition.keys) {
         _propertyRunningTransition[property]!.cancel();
@@ -369,7 +374,7 @@ mixin CSSTransitionMixin on RenderStyleBase {
     }
   }
 
-  void finishRunningTransiton() {
+  void finishRunningTransition() {
     if (_propertyRunningTransition.isNotEmpty) {
       for (String property in _propertyRunningTransition.keys) {
         _propertyRunningTransition[property]!.finish();

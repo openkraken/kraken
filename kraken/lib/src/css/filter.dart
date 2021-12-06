@@ -8,6 +8,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
 
 const String GRAYSCALE = 'grayscale';
 const String SEPIA = 'sepia';
@@ -90,7 +91,7 @@ List<double> _multiplyMatrix5(List<double>? a, List<double> b) {
 
 /// Impl W3C Filter Effects Spec:
 ///   https://www.w3.org/TR/filter-effects-1/#definitions
-mixin CSSFilterEffectsMixin on RenderStyleBase {
+mixin CSSFilterEffectsMixin on RenderStyle {
 
   // Get the color filter.
   // eg: 'grayscale(1) grayscale(0.5)' -> matrix5(grayscale(1)) · matrix5(grayscale(0.5))
@@ -137,13 +138,12 @@ mixin CSSFilterEffectsMixin on RenderStyleBase {
 
   // Get the image filter.
   ImageFilter? _parseImageFilters(List<CSSFunctionalNotation> functions) {
-    RenderStyle renderStyle = this as RenderStyle;
     if (functions.isNotEmpty) {
       for (int i = 0; i < functions.length; i ++) {
         CSSFunctionalNotation f = functions[i];
         switch (f.name.toLowerCase()) {
           case BLUR:
-            CSSLengthValue length = CSSLength.parseLength(f.args.first, renderStyle, FILTER);
+            CSSLengthValue length = CSSLength.parseLength(f.args.first, this, FILTER);
             double amount = length.computedValue;
             ImageFilter imageFilter =  ImageFilter.blur(sigmaX: amount, sigmaY: amount);
             // Only length is not relative value will cached the image filter.
@@ -158,6 +158,8 @@ mixin CSSFilterEffectsMixin on RenderStyleBase {
   }
 
   ColorFilter? _cachedColorFilter;
+
+  @override
   ColorFilter? get colorFilter {
     if (_filter == null) {
       return null;
@@ -169,6 +171,8 @@ mixin CSSFilterEffectsMixin on RenderStyleBase {
   }
 
   ImageFilter? _cachedImageFilter;
+
+  @override
   ImageFilter? get imageFilter {
     if (_filter == null) {
       return null;
@@ -179,14 +183,22 @@ mixin CSSFilterEffectsMixin on RenderStyleBase {
     }
   }
 
-  List<CSSFunctionalNotation>? _filter;
+  @override
   List<CSSFunctionalNotation>? get filter => _filter;
+  List<CSSFunctionalNotation>? _filter;
   set filter(List<CSSFunctionalNotation>? functions) {
     _filter = functions;
     // Clear cache when filter changed.
     _cachedColorFilter = null;
     _cachedImageFilter = null;
-    renderBoxModel!.markNeedsPaint();
+
+    // Filter effect the stacking context.
+    RenderBoxModel? parentRenderer = parent?.renderBoxModel;
+    if (parentRenderer is RenderLayoutBox) {
+      parentRenderer.markChildrenNeedsSort();
+    }
+
+    renderBoxModel?.markNeedsPaint();
 
     if (!kReleaseMode && functions != null) {
       ColorFilter? colorFilter = _parseColorFilters(functions);

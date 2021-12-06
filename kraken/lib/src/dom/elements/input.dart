@@ -364,7 +364,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void _onStyleChanged(String property, String? original, String present) {
 
     if (_renderInputLeaderLayer != null && isRendererAttached) {
-      RenderStyle renderStyle = renderBoxModel!.renderStyle;
+      CSSRenderStyle renderStyle = renderBoxModel!.renderStyle;
       if (property == HEIGHT) {
         _renderInputLeaderLayer!.markNeedsLayout();
 
