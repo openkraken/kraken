@@ -40,6 +40,9 @@ class ImageElement extends Element {
   double? _propertyWidth;
   double? _propertyHeight;
 
+  double? _styleWidth;
+  double? _styleHeight;
+
   ui.Image? get image => _imageInfo?.image;
 
   /// Number of image frame, used to identify multi frame image after loaded.
@@ -121,29 +124,33 @@ class ImageElement extends Element {
   }
 
   double get width {
-    if (_renderImage != null && _renderImage!.width != null) {
-      return _renderImage!.width!;
+    double? width = _styleWidth ?? _propertyWidth;
+
+    if (width == null) {
+      width = naturalWidth;
+      double? height = _styleHeight ?? _propertyHeight;
+
+      if (height != null && naturalHeight != 0) {
+        width = height * naturalWidth / naturalHeight;
+      }
     }
 
-    if (renderBoxModel != null && renderBoxModel!.hasSize) {
-      return renderBoxModel!.clientWidth;
-    }
-
-    // Fallback to natural width, if image is not on screen.
-    return naturalWidth;
+    return width;
   }
 
   double get height {
-    if (_renderImage != null && _renderImage!.height != null) {
-      return _renderImage!.height!;
+    double? height = _styleHeight ?? _propertyHeight;
+
+    if (height == null) {
+      height = naturalHeight;
+      double? width = _styleWidth ?? _propertyWidth;
+
+      if (width != null && naturalWidth != 0) {
+        height = width * naturalHeight / naturalWidth;
+      }
     }
 
-    if (renderBoxModel != null && renderBoxModel!.hasSize) {
-      return renderBoxModel!.clientHeight;
-    }
-
-    // Fallback to natural height, if image is not on screen.
-    return naturalHeight;
+    return height;
   }
 
   double get naturalWidth => image?.width.toDouble() ?? 0;
@@ -228,37 +235,15 @@ class ImageElement extends Element {
       return;
     }
 
-    double? width = renderStyle.width.isAuto ? _propertyWidth : renderStyle.width.computedValue;
-    double? height = renderStyle.height.isAuto ? _propertyHeight : renderStyle.height.computedValue;
-
-    if (renderStyle.width.isAuto && _propertyWidth != null) {
+    if (_styleWidth == null && _propertyWidth != null) {
       // The intrinsic width of the image in pixels. Must be an integer without a unit.
       renderStyle.width = CSSLengthValue(_propertyWidth, CSSLengthType.PX);
     }
-    if (renderStyle.height.isAuto && _propertyHeight != null) {
+    if (_styleHeight == null && _propertyHeight != null) {
       // The intrinsic height of the image, in pixels. Must be an integer without a unit.
       renderStyle.height = CSSLengthValue(_propertyHeight, CSSLengthType.PX);
     }
 
-    if (width == null && height == null) {
-      width = naturalWidth;
-      height = naturalHeight;
-    } else if (width != null && height == null && naturalWidth != 0) {
-      height = width * naturalHeight / naturalWidth;
-    } else if (width == null && height != null && naturalHeight != 0) {
-      width = height * naturalWidth / naturalHeight;
-    }
-
-    if (height == null || !height.isFinite) {
-      height = 0.0;
-    }
-
-    if (width == null || !width.isFinite) {
-      width = 0.0;
-    }
-
-    _renderImage?.width = width;
-    _renderImage?.height = height;
     renderStyle.intrinsicWidth = naturalWidth;
     renderStyle.intrinsicHeight = naturalHeight;
 
@@ -337,12 +322,12 @@ class ImageElement extends Element {
   dynamic getProperty(String key) {
     switch (key) {
       case WIDTH:
-        return _renderImage?.width ?? 0;
+        return width;
       case HEIGHT:
-        return _renderImage?.height ?? 0;
-      case 'naturalWidth':
+        return height;
+      case NATURAL_WIDTH:
         return naturalWidth;
-      case 'naturalHeight':
+      case NATURAL_HEIGHT:
         return naturalHeight;
     }
 
@@ -350,7 +335,13 @@ class ImageElement extends Element {
   }
 
   void _stylePropertyChanged(String property, String? original, String present) {
-    if (property == WIDTH || property == HEIGHT) {
+    if (property == WIDTH) {
+      _styleWidth = renderStyle.width.value == null && renderStyle.width.isNotAuto
+        ? null : renderStyle.width.computedValue;
+      _resize();
+    } else if (property == HEIGHT) {
+      _styleHeight = renderStyle.height.value == null && renderStyle.height.isNotAuto
+        ? null : renderStyle.height.computedValue;
       _resize();
     } else if (property == OBJECT_FIT && _renderImage != null) {
       _renderImage!.fit = renderBoxModel!.renderStyle.objectFit;
