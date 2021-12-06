@@ -548,7 +548,7 @@ PROP_SETTER(ElementInstance, scrollWidth)(QjsContext* ctx, JSValue this_val, int
 PROP_GETTER(ElementInstance, firstElementChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
 
-  for (auto &childNode : element->childNodes) {
+  for (auto& childNode : element->childNodes) {
     if (childNode->nodeType == NodeType::ELEMENT_NODE) {
       return JS_DupValue(ctx, childNode->instanceObject);
     }
@@ -565,7 +565,7 @@ PROP_GETTER(ElementInstance, lastElementChild)(QjsContext* ctx, JSValue this_val
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
 
   for (size_t i = element->childNodes.size() - 1; i >= 0; i--) {
-    auto *instance = element->childNodes[i];
+    auto* instance = element->childNodes[i];
     if (instance->nodeType == NodeType::ELEMENT_NODE) {
       return JS_DupValue(ctx, instance->instanceObject);
     }
@@ -582,7 +582,7 @@ PROP_GETTER(ElementInstance, children)(QjsContext* ctx, JSValue this_val, int ar
   JSValue array = JS_NewArray(ctx);
   JSValue pushMethod = JS_GetPropertyStr(ctx, array, "push");
 
-  for (auto & childNode : element->childNodes) {
+  for (auto& childNode : element->childNodes) {
     if (childNode->nodeType == NodeType::ELEMENT_NODE) {
       JSValue arguments[] = {childNode->instanceObject};
       JS_Call(ctx, pushMethod, array, 1, arguments);
@@ -627,9 +627,9 @@ JSValue ElementInstance::internalGetTextContent() {
   JSValue array = JS_NewArray(m_ctx);
   JSValue pushMethod = JS_GetPropertyStr(m_ctx, array, "push");
 
-//  int32_t len = arrayGetLength(m_ctx, childNodes);
+  //  int32_t len = arrayGetLength(m_ctx, childNodes);
 
-  for (auto &node : childNodes) {
+  for (auto& node : childNodes) {
     JSValue nodeText = node->internalGetTextContent();
     JS_Call(m_ctx, pushMethod, array, 1, &nodeText);
     JS_FreeValue(m_ctx, nodeText);
@@ -751,7 +751,7 @@ std::string ElementInstance::innerHTML() {
   if (childNodes.empty())
     return s;
 
-  for (auto &node : childNodes) {
+  for (auto& node : childNodes) {
     if (node->nodeType == NodeType::ELEMENT_NODE) {
       s += reinterpret_cast<ElementInstance*>(node)->outerHTML();
     } else if (node->nodeType == NodeType::TEXT_NODE) {

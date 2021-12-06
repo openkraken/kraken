@@ -10,8 +10,8 @@
 #include "document_fragment.h"
 #include "element.h"
 #include "kraken_bridge.h"
-#include "text_node.h"
 #include "node_list.h"
+#include "text_node.h"
 
 namespace kraken::binding::qjs {
 
@@ -102,7 +102,7 @@ JSValue Node::appendChild(QjsContext* ctx, JSValue this_val, int argc, JSValue* 
   }
 
   if (nodeInstance->hasNodeFlag(NodeInstance::NodeFlag::IsDocumentFragment)) {
-    for (auto &childNode : nodeInstance->childNodes) {
+    for (auto& childNode : nodeInstance->childNodes) {
       selfInstance->internalAppendChild(childNode);
     }
     nodeInstance->childNodes.clear();
@@ -167,7 +167,7 @@ JSValue Node::insertBefore(QjsContext* ctx, JSValue this_val, int argc, JSValue*
   }
 
   if (nodeInstance->hasNodeFlag(NodeInstance::NodeFlag::IsDocumentFragment)) {
-    for (auto &childNode : nodeInstance->childNodes) {
+    for (auto& childNode : nodeInstance->childNodes) {
       selfInstance->internalInsertBefore(childNode, referenceInstance);
     }
     nodeInstance->childNodes.clear();
@@ -207,7 +207,7 @@ JSValue Node::replaceChild(QjsContext* ctx, JSValue this_val, int argc, JSValue*
   }
 
   if (newChildInstance->hasNodeFlag(NodeInstance::NodeFlag::IsDocumentFragment)) {
-    for (auto &childNode : newChildInstance->childNodes) {
+    for (auto& childNode : newChildInstance->childNodes) {
       selfInstance->internalInsertBefore(childNode, oldChildInstance);
     }
     selfInstance->internalRemoveChild(oldChildInstance);
@@ -350,8 +350,8 @@ PROP_SETTER(NodeInstance, textContent)(QjsContext* ctx, JSValue this_val, int ar
 }
 
 PROP_GETTER(NodeInstance, childNodes)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto *nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
-  auto *nodeList = new NodeList(nodeInstance->m_context, nodeInstance);
+  auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
+  auto* nodeList = new NodeList(nodeInstance->m_context, nodeInstance);
   return nodeList->jsObject;
 }
 PROP_SETTER(NodeInstance, childNodes)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -360,7 +360,7 @@ PROP_SETTER(NodeInstance, childNodes)(QjsContext* ctx, JSValue this_val, int arg
 
 bool NodeInstance::isConnected() {
   bool _isConnected = m_eventTargetId == HTML_TARGET_ID;
-  NodeInstance *parent = parentNode;
+  NodeInstance* parent = parentNode;
   while (parent != nullptr && !_isConnected) {
     _isConnected = parent->m_eventTargetId == HTML_TARGET_ID;
     parent = parent->parentNode;
@@ -382,8 +382,9 @@ NodeInstance* NodeInstance::lastChild() {
   return childNodes.empty() ? nullptr : childNodes[childNodes.size() - 1];
 }
 NodeInstance* NodeInstance::previousSibling() {
-  if (parentNode == nullptr) return nullptr;
-  auto &parentChildNodes = parentNode->childNodes;
+  if (parentNode == nullptr)
+    return nullptr;
+  auto& parentChildNodes = parentNode->childNodes;
   auto idx = std::find(parentChildNodes.begin(), parentChildNodes.end(), this);
 
   if (idx == parentChildNodes.begin() || idx == parentChildNodes.end()) {
@@ -393,9 +394,10 @@ NodeInstance* NodeInstance::previousSibling() {
   return *(idx - 1);
 }
 NodeInstance* NodeInstance::nextSibling() {
-  if (parentNode == nullptr) return nullptr;
+  if (parentNode == nullptr)
+    return nullptr;
 
-  auto &parentChildNodes = parentNode->childNodes;
+  auto& parentChildNodes = parentNode->childNodes;
   auto idx = std::find(parentChildNodes.begin(), parentChildNodes.end(), this);
 
   if (idx == parentChildNodes.end() || (idx + 1) == parentChildNodes.end()) {
@@ -419,11 +421,12 @@ void NodeInstance::internalAppendChild(NodeInstance* node) {
   foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
 }
 void NodeInstance::internalRemove() {
-  if (parentNode == nullptr) return;
+  if (parentNode == nullptr)
+    return;
   parentNode->internalRemoveChild(this);
 }
 void NodeInstance::internalClearChild() {
-  for (auto &childNode : childNodes) {
+  for (auto& childNode : childNodes) {
     childNode->parentNode = nullptr;
     childNode->_notifyNodeRemoved(this);
     foundation::UICommandBuffer::instance(childNode->m_context->getContextId())->addCommand(childNode->m_eventTargetId, UICommand::removeNode, nullptr);
@@ -519,7 +522,7 @@ void NodeInstance::unrefer() {
 void NodeInstance::_notifyNodeRemoved(NodeInstance* node) {}
 void NodeInstance::_notifyNodeInsert(NodeInstance* node) {}
 void NodeInstance::ensureDetached(NodeInstance* node) {
-  auto *parent = node->parentNode;
+  auto* parent = node->parentNode;
   if (parent != nullptr) {
     auto idx = std::find(parent->childNodes.begin(), parent->childNodes.end(), node);
     if (idx != parent->childNodes.end()) {
@@ -532,7 +535,7 @@ void NodeInstance::ensureDetached(NodeInstance* node) {
 
 void NodeInstance::gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
   EventTargetInstance::gcMark(rt, val, mark_func);
-  for (auto &childNode : childNodes) {
+  for (auto& childNode : childNodes) {
     JS_MarkValue(rt, childNode->instanceObject, mark_func);
   }
 }

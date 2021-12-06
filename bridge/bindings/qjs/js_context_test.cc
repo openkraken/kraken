@@ -7,9 +7,7 @@
 #include "gtest/gtest.h"
 
 TEST(Context, isValid) {
-  auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
-    KRAKEN_LOG(VERBOSE) << errmsg;
-  });
+  auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) { KRAKEN_LOG(VERBOSE) << errmsg; });
   EXPECT_EQ(bridge->getContext()->isValid(), true);
   std::string code = "console.log(document)";
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);

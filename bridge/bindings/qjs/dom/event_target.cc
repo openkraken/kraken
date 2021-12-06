@@ -170,7 +170,7 @@ bool EventTargetInstance::dispatchEvent(EventInstance* event) {
   // Bubble event to root event target.
   if (event->nativeEvent->bubbles == 1 && !event->propagationStopped()) {
     auto node = reinterpret_cast<NodeInstance*>(this);
-    auto *parent = node->parentNode;
+    auto* parent = node->parentNode;
 
     if (parent != nullptr) {
       parent->dispatchEvent(event);

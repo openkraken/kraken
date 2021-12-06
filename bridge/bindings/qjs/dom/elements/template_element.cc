@@ -36,7 +36,7 @@ PROP_GETTER(TemplateElementInstance, innerHTML)(QjsContext* ctx, JSValue this_va
   auto* element = static_cast<TemplateElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
 
   std::string s = "";
-  for (auto &node : element->m_content->childNodes) {
+  for (auto& node : element->m_content->childNodes) {
     if (node->nodeType == NodeType::ELEMENT_NODE) {
       s += reinterpret_cast<ElementInstance*>(node)->outerHTML();
     } else if (node->nodeType == NodeType::TEXT_NODE) {

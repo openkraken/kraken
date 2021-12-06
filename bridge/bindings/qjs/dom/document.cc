@@ -40,7 +40,7 @@ void traverseNode(NodeInstance* node, TraverseHandler handler) {
     return;
 
   if (node != nullptr && !node->childNodes.empty()) {
-    for (auto &nextNode : node->childNodes) {
+    for (auto& nextNode : node->childNodes) {
       traverseNode(nextNode, handler);
     }
   }
@@ -370,19 +370,19 @@ DocumentInstance::DocumentInstance(Document* document) : NodeInstance(document, 
   m_instanceMap[Document::instance(m_context)] = this;
   m_eventTargetId = DOCUMENT_TARGET_ID;
 
-//  JSAtom htmlTagName = JS_NewAtom(m_ctx, "HTML");
-//  JSValue htmlTagValue = JS_AtomToValue(m_ctx, htmlTagName);
-//  JSValue htmlArgs[] = {htmlTagValue};
-//  JSValue documentElementValue = JS_CallConstructor(m_ctx, Element::instance(m_context)->classObject, 1, htmlArgs);
-//  m_documentElement = static_cast<ElementInstance*>(JS_GetOpaque(documentElementValue, Element::classId()));
-//  m_documentElement->parentNode = this;
-//
-//  JSAtom documentElementTag = JS_NewAtom(m_ctx, "documentElement");
-//  JS_SetProperty(m_ctx, instanceObject, documentElementTag, documentElementValue);
-//
-//  JS_FreeAtom(m_ctx, documentElementTag);
-//  JS_FreeAtom(m_ctx, htmlTagName);
-//  JS_FreeValue(m_ctx, htmlTagValue);
+  //  JSAtom htmlTagName = JS_NewAtom(m_ctx, "HTML");
+  //  JSValue htmlTagValue = JS_AtomToValue(m_ctx, htmlTagName);
+  //  JSValue htmlArgs[] = {htmlTagValue};
+  //  JSValue documentElementValue = JS_CallConstructor(m_ctx, Element::instance(m_context)->classObject, 1, htmlArgs);
+  //  m_documentElement = static_cast<ElementInstance*>(JS_GetOpaque(documentElementValue, Element::classId()));
+  //  m_documentElement->parentNode = this;
+  //
+  //  JSAtom documentElementTag = JS_NewAtom(m_ctx, "documentElement");
+  //  JS_SetProperty(m_ctx, instanceObject, documentElementTag, documentElementValue);
+  //
+  //  JS_FreeAtom(m_ctx, documentElementTag);
+  //  JS_FreeAtom(m_ctx, htmlTagName);
+  //  JS_FreeValue(m_ctx, htmlTagValue);
 
 #if FLUTTER_BACKEND
   getDartMethod()->initHTML(m_context->getContextId(), m_documentElement->nativeEventTarget);

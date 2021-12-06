@@ -92,8 +92,8 @@ class NodeInstance : public EventTargetInstance {
   JSValue internalReplaceChild(NodeInstance* newChild, NodeInstance* oldChild);
 
   NodeType nodeType;
-  NodeInstance *parentNode{nullptr};
-  std::vector<NodeInstance *> childNodes;
+  NodeInstance* parentNode{nullptr};
+  std::vector<NodeInstance*> childNodes;
 
   NodeJob nodeLink{this};
   NodeJob documentLink{this};
