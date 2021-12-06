@@ -83,7 +83,7 @@ void main() async {
     var kraken = krakenMap[i] = Kraken(
       viewportWidth: 360,
       viewportHeight: 640,
-      bundle: KrakenBundle.fromWithContent('console.log("Starting integration tests...")'),
+      bundle: KrakenBundle.fromContent('console.log("Starting integration tests...")'),
       disableViewportWidthAssertion: true,
       disableViewportHeightAssertion: true,
       javaScriptChannel: javaScriptChannel,
