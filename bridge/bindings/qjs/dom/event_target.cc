@@ -14,6 +14,10 @@
 #include "event.h"
 #include "kraken_bridge.h"
 
+#if UNIT_TEST_ENV
+#include "unit_test_util.h"
+#endif
+
 namespace kraken::binding::qjs {
 
 static std::atomic<int32_t> globalEventTargetId{0};
@@ -284,6 +288,11 @@ EventTargetInstance::~EventTargetInstance() {
   foundation::UICommandBuffer::instance(m_contextId)->addCommand(m_eventTargetId, UICommand::disposeEventTarget, nullptr, false);
 #if FLUTTER_BACKEND
   getDartMethod()->flushUICommand();
+#elif UNIT_TEST_ENV
+  // Callback to unit test specs for special case.
+  if (getUnitTestEnv(m_context->uniqueId)->onEventTargetDisposed != nullptr) {
+    getUnitTestEnv(m_context->uniqueId)->onEventTargetDisposed(this);
+  }
 #endif
   JS_FreeValue(m_ctx, m_properties);
   JS_FreeValue(m_ctx, m_eventHandlers);
