@@ -486,7 +486,7 @@ void NativeEventTarget::dispatchEventImpl(NativeEventTarget* nativeEventTarget, 
   assert_m(nativeEventTarget->instance != nullptr, "NativeEventTarget should have owner");
   EventTargetInstance* eventTargetInstance = nativeEventTarget->instance;
 
-  auto *runtime = getGlobalJSRuntime();
+  auto* runtime = getGlobalJSRuntime();
   // We should avoid trigger event if eventTarget are no long live on heap.
   if (!JS_IsLiveObject(runtime, eventTargetInstance->instanceObject)) {
     return;
@@ -497,14 +497,11 @@ void NativeEventTarget::dispatchEventImpl(NativeEventTarget* nativeEventTarget, 
   if (gcPhase != JSGCPhaseEnum::JS_GC_PHASE_NONE) {
 #if FLUTTER_BACKEND
     // We store all params and data into pendingEvents and dispatch them in the next frame.Nativ
-    auto *newPendingEvents = new PendingEvent{
-      nativeEventTarget,
-      nativeEventType->clone(), /* nativeEventType will be freed by dart after dispatchEventImpl() called., Should keep an clone instead of a ptr. */
-      rawEvent,
-      isCustomEvent
-    };
-    getDartMethod()->scheduleMicrotask(newPendingEvents, [](void *ptr) {
-      auto *pendingEvent = static_cast<PendingEvent*>(ptr);
+    auto* newPendingEvents =
+        new PendingEvent{nativeEventTarget, nativeEventType->clone(), /* nativeEventType will be freed by dart after dispatchEventImpl() called., Should keep an clone instead of a ptr. */
+                         rawEvent, isCustomEvent};
+    getDartMethod()->scheduleMicrotask(newPendingEvents, [](void* ptr) {
+      auto* pendingEvent = static_cast<PendingEvent*>(ptr);
       NativeEventTarget::dispatchEventImpl(pendingEvent->nativeEventTarget, pendingEvent->nativeEventType, pendingEvent->rawEvent, pendingEvent->isCustomEvent);
       delete pendingEvent;
     });
