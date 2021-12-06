@@ -147,9 +147,14 @@ class ObjectProperty {
     JS_DefineProperty(context->ctx(), thisObject, key, JS_UNDEFINED, get, JS_UNDEFINED, JS_PROP_HAS_CONFIGURABLE | JS_PROP_ENUMERABLE | JS_PROP_HAS_GET);
     JS_FreeAtom(context->ctx(), key);
   }
-  explicit ObjectProperty(JSContext* context, JSValueConst thisObject, const char* property, JSValue value) {
+  explicit ObjectProperty(JSContext* context, JSValueConst thisObject, const char* property, JSValue value) : m_value(value) {
     JS_DefinePropertyValueStr(context->ctx(), thisObject, property, value, JS_PROP_ENUMERABLE);
   }
+
+  JSValue value() { return m_value; }
+
+ private:
+  JSValue m_value{JS_NULL};
 };
 
 class ObjectFunction {
