@@ -137,12 +137,12 @@ let div = document.createElement('div');
 
   static auto *window = static_cast<WindowInstance*>(JS_GetOpaque(context->global(), 1));
 
-  registerEventTargetDisposedCallback(context->uniqueId, [](EventTargetInstance *eventTargetInstance) {
+  TEST_registerEventTargetDisposedCallback(context->uniqueId, [](EventTargetInstance* eventTargetInstance) {
     // Check to not crash when trigger click on disposed eventTarget
-    dispatchEvent(eventTargetInstance, "click");
+    TEST_dispatchEvent(eventTargetInstance, "click");
 
     // Check to not crash when trigger event on any eventTarget.
-    dispatchEvent(window, "click");
+    TEST_dispatchEvent(window, "click");
   });
 
   // Run gc to trigger eventTarget been disposed by GC.

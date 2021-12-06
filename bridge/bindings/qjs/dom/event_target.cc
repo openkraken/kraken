@@ -149,7 +149,7 @@ JSValue EventTarget::removeEventListener(QjsContext* ctx, JSValue this_val, int 
 
 JSValue EventTarget::dispatchEvent(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc != 1) {
-    return JS_ThrowTypeError(ctx, "Failed to dispatchEvent: first arguments should be an event object");
+    return JS_ThrowTypeError(ctx, "Failed to TEST_dispatchEvent: first arguments should be an event object");
   }
 
   auto* eventTargetInstance = static_cast<EventTargetInstance*>(JS_GetOpaque(this_val, EventTarget::classId(this_val)));
@@ -290,8 +290,8 @@ EventTargetInstance::~EventTargetInstance() {
   getDartMethod()->flushUICommand();
 #elif UNIT_TEST_ENV
   // Callback to unit test specs for special case.
-  if (getUnitTestEnv(m_context->uniqueId)->onEventTargetDisposed != nullptr) {
-    getUnitTestEnv(m_context->uniqueId)->onEventTargetDisposed(this);
+  if (TEST_getEnv(m_context->uniqueId)->onEventTargetDisposed != nullptr) {
+    TEST_getEnv(m_context->uniqueId)->onEventTargetDisposed(this);
   }
 #endif
   JS_FreeValue(m_ctx, m_properties);
@@ -504,16 +504,19 @@ void NativeEventTarget::dispatchEventImpl(NativeEventTarget* nativeEventTarget, 
   // It's no safe to allocate new js object at GC phase. We should waiting for GC to finish his tasks and resume all pending callbacks.
   JSGCPhaseEnum gcPhase = JS_GetGCPhase(runtime);
   if (gcPhase != JSGCPhaseEnum::JS_GC_PHASE_NONE) {
-#if FLUTTER_BACKEND
     // We store all params and data into pendingEvents and dispatch them in the next frame.Nativ
     auto* newPendingEvents =
-        new PendingEvent{nativeEventTarget, nativeEventType->clone(), /* nativeEventType will be freed by dart after dispatchEventImpl() called., Should keep an clone instead of a ptr. */
-                         rawEvent, isCustomEvent};
-    getDartMethod()->scheduleMicrotask(newPendingEvents, [](void* ptr) {
+      new PendingEvent{nativeEventTarget, nativeEventType->clone(), /* nativeEventType will be freed by dart after dispatchEventImpl() called., Should keep an clone instead of a ptr. */
+                       rawEvent, isCustomEvent};
+    auto callback = [](void* ptr) {
       auto* pendingEvent = static_cast<PendingEvent*>(ptr);
       NativeEventTarget::dispatchEventImpl(pendingEvent->nativeEventTarget, pendingEvent->nativeEventType, pendingEvent->rawEvent, pendingEvent->isCustomEvent);
       delete pendingEvent;
-    });
+    };
+#if FLUTTER_BACKEND
+    getDartMethod()->scheduleMicrotask(newPendingEvents, callback);
+#elif UNIT_TEST_ENV
+    TEST_schedulePendingJob(newPendingEvents, callback);
 #endif
     return;
   }
