@@ -7,14 +7,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  execute_process(
-    COMMAND bash "-c" "clang --version | xargs | awk '{print $7}' | cut -c1-5"
-    OUTPUT_VARIABLE CLANG_ARCH
-  )
-  ## Set univeral archs for Apple arm64 processors
-  if (${CLANG_ARCH} MATCHES "arm64")
-    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
-  endif()
+#  execute_process(
+#    COMMAND bash "-c" "clang --version | xargs | awk '{print $7}' | cut -c1-5"
+#    OUTPUT_VARIABLE CLANG_ARCH
+#  )
+#  ## Set univeral archs for Apple arm64 processors
+#  if (${CLANG_ARCH} MATCHES "arm64")
+#    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
+#  endif()
 endif()
 
 if (${ENABLE_PROFILE})
@@ -203,6 +203,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/dom/event.h
     bindings/qjs/dom/node.h
     bindings/qjs/dom/node.cc
+    bindings/qjs/dom/node_list.cc
+    bindings/qjs/dom/node_list.h
     bindings/qjs/dom/element.cc
     bindings/qjs/dom/element.h
     bindings/qjs/dom/document.cc
@@ -261,9 +263,6 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/dom/all_collection.h
     )
 
-  # Quickjs use __builtin_frame_address() to get stack pointer, we should add follow options to get it work with -O2
-  # https://stackoverflow.com/questions/14735010/how-do-you-get-gccs-builtin-frame-address-to-work-with-o2
-  add_compile_options(-fno-optimize-sibling-calls -fno-omit-frame-pointer)
   target_compile_options(quickjs PUBLIC -DCONFIG_VERSION=${\"QUICKJS_VERSION\"})
 
 endif ()

@@ -36,17 +36,12 @@ PROP_GETTER(TemplateElementInstance, innerHTML)(QjsContext* ctx, JSValue this_va
   auto* element = static_cast<TemplateElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
 
   std::string s = "";
-  int32_t childLen = arrayGetLength(ctx, element->m_content->childNodes);
-  for (int i = 0; i < childLen; i++) {
-    JSValue v = JS_GetPropertyUint32(ctx, element->m_content->childNodes, i);
-    auto* node = static_cast<NodeInstance*>(JS_GetOpaque(v, Node::classId(v)));
+  for (auto &node : element->m_content->childNodes) {
     if (node->nodeType == NodeType::ELEMENT_NODE) {
       s += reinterpret_cast<ElementInstance*>(node)->outerHTML();
     } else if (node->nodeType == NodeType::TEXT_NODE) {
       s += reinterpret_cast<TextNodeInstance*>(node)->toString();
     }
-
-    JS_FreeValue(ctx, v);
   }
   return JS_NewString(ctx, s.c_str());
 }

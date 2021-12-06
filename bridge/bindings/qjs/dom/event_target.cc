@@ -170,7 +170,7 @@ bool EventTargetInstance::dispatchEvent(EventInstance* event) {
   // Bubble event to root event target.
   if (event->nativeEvent->bubbles == 1 && !event->propagationStopped()) {
     auto node = reinterpret_cast<NodeInstance*>(this);
-    auto* parent = static_cast<NodeInstance*>(JS_GetOpaque(node->parentNode, Node::classId(node->parentNode)));
+    auto *parent = node->parentNode;
 
     if (parent != nullptr) {
       parent->dispatchEvent(event);

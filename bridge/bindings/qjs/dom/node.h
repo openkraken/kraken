@@ -91,11 +91,9 @@ class NodeInstance : public EventTargetInstance {
   virtual void internalSetTextContent(JSValue content);
   JSValue internalReplaceChild(NodeInstance* newChild, NodeInstance* oldChild);
 
-  void setParentNode(NodeInstance* parent);
-  void removeParentNode();
   NodeType nodeType;
-  JSValue parentNode{JS_NULL};
-  JSValue childNodes{JS_NewArray(m_ctx)};
+  NodeInstance *parentNode{nullptr};
+  std::vector<NodeInstance *> childNodes;
 
   NodeJob nodeLink{this};
   NodeJob documentLink{this};
@@ -111,9 +109,8 @@ class NodeInstance : public EventTargetInstance {
   void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
  private:
-  DEFINE_HOST_CLASS_PROPERTY(9, isConnected, ownerDocument, firstChild, lastChild, parentNode, previousSibling, nextSibling, nodeType, textContent);
+  DEFINE_HOST_CLASS_PROPERTY(10, isConnected, ownerDocument, firstChild, lastChild, parentNode, previousSibling, nextSibling, nodeType, textContent, childNodes);
   DocumentInstance* m_document{nullptr};
-  ObjectProperty m_childNodes{m_context, instanceObject, "childNodes", childNodes};
   void ensureDetached(NodeInstance* node);
   friend DocumentInstance;
   friend Node;
