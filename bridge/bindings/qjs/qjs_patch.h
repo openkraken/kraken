@@ -9,6 +9,12 @@
 #include <quickjs/list.h>
 #include <quickjs/quickjs.h>
 
+typedef enum {
+  JS_GC_PHASE_NONE,
+  JS_GC_PHASE_DECREF,
+  JS_GC_PHASE_REMOVE_CYCLES,
+} JSGCPhaseEnum;
+
 struct JSString {
   JSRefCountHeader header; /* must come first, 32-bit */
   uint32_t len : 31;
@@ -104,6 +110,7 @@ JSValue JS_NewUnicodeString(JSRuntime* runtime, JSContext* ctx, const uint16_t* 
 JSClassID JSValueGetClassId(JSValue);
 bool JS_IsProxy(JSValue value);
 JSValue JS_GetProxyTarget(JSValue value);
+JSGCPhaseEnum JS_GetGCPhase(JSRuntime* runtime);
 
 #ifdef __cplusplus
 }

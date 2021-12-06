@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
@@ -219,6 +220,19 @@ void _clearTimeout(int contextId, int timerId) {
   return controller.module.clearTimeout(timerId);
 }
 
+typedef NativeScheduleMicrotaskCallback = Void Function(Pointer<Void> callbackContext);
+typedef DartScheduleMicrotaskCallback = void Function(Pointer<Void> callbackContext);
+typedef NativeScheduleMicrotask = Void Function(Pointer<Void> callbackContext, Pointer<NativeFunction<NativeScheduleMicrotaskCallback>> callback);
+
+final Pointer<NativeFunction<NativeScheduleMicrotask>> _nativeScheduleMicrotask = Pointer.fromFunction(_scheduleMicrotask);
+
+void _scheduleMicrotask(Pointer<Void> callbackContext, Pointer<NativeFunction<NativeScheduleMicrotaskCallback>> nativeCallback) {
+  DartScheduleMicrotaskCallback callback = nativeCallback.asFunction();
+  Future.microtask(() {
+    callback(callbackContext);
+  });
+}
+
 final Pointer<NativeFunction<NativeClearTimeout>> _nativeClearTimeout = Pointer.fromFunction(_clearTimeout);
 
 // Register requestAnimationFrame
@@ -384,6 +398,7 @@ final List<int> _dartNativeMethods = [
   _nativeSetTimeout.address,
   _nativeSetInterval.address,
   _nativeClearTimeout.address,
+  _nativeScheduleMicrotask.address,
   _nativeRequestAnimationFrame.address,
   _nativeCancelAnimationFrame.address,
   _nativeGetScreen.address,

@@ -20,6 +20,13 @@ class NativeEventTarget;
 class CSSStyleDeclaration;
 class StyleDeclarationInstance;
 
+struct PendingEvent {
+  NativeEventTarget* nativeEventTarget;
+  NativeString* nativeEventType;
+  void* rawEvent;
+  int32_t isCustomEvent;
+};
+
 void bindEventTarget(std::unique_ptr<JSContext>& context);
 
 class EventTarget : public HostClass {
@@ -63,6 +70,7 @@ struct NativeEventTarget {
   EventTargetInstance* instance{nullptr};
   NativeDispatchEvent dispatchEvent{nullptr};
   CallNativeMethods callNativeMethods{nullptr};
+  friend EventTargetInstance;
 };
 
 class EventTargetInstance : public Instance {
@@ -104,6 +112,7 @@ class EventTargetInstance : public Instance {
   static void finalize(JSRuntime* rt, JSValue val);
   friend EventTarget;
   friend StyleDeclarationInstance;
+  friend NativeEventTarget;
 };
 
 }  // namespace kraken::binding::qjs
