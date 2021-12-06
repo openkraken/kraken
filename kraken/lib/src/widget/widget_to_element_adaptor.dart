@@ -5,6 +5,7 @@
 
 import 'dart:ffi';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -36,7 +37,7 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
   final Widget? child;
 
   /// The [RenderObject] that is the parent of the [Element] created by this widget.
-  final RenderObjectWithChildMixin<T> container;
+  final ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>> container;
 
   /// A short description of this widget used by debugging aids.
   final String? debugShortDescription;
@@ -45,7 +46,7 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
   KrakenRenderObjectToWidgetElement<T> createElement() => KrakenRenderObjectToWidgetElement<T>(this);
 
   @override
-  RenderObjectWithChildMixin<T> createRenderObject(BuildContext context) => container;
+  ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>> createRenderObject(BuildContext context) => container;
 
   @override
   void updateRenderObject(BuildContext context, RenderObject renderObject) { }
@@ -167,12 +168,12 @@ class KrakenRenderObjectToWidgetElement<T extends RenderObject> extends RenderOb
   }
 
   @override
-  RenderObjectWithChildMixin<T> get renderObject => super.renderObject as RenderObjectWithChildMixin<T>;
+  ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>> get renderObject => super.renderObject as ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>;
 
   @override
   void insertRenderObjectChild(RenderObject child, Object? slot) {
     assert(renderObject.debugValidateChild(child));
-    renderObject.child = child as T;
+    renderObject.add(child as RenderBox);
   }
 
   @override
@@ -182,8 +183,7 @@ class KrakenRenderObjectToWidgetElement<T extends RenderObject> extends RenderOb
 
   @override
   void removeRenderObjectChild(RenderObject child, Object? slot) {
-    assert(renderObject.child == child);
-    renderObject.child = null;
+    renderObject.remove(child as RenderBox);
   }
 }
 
@@ -196,7 +196,7 @@ abstract class WidgetElement extends dom.Element {
       targetId,
       nativeEventTarget,
       elementManager,
-      isIntrinsicBox: true,
+      // isIntrinsicBox: true,
       defaultStyle: _defaultStyle
   ) {
     WidgetsFlutterBinding.ensureInitialized();
@@ -272,7 +272,8 @@ abstract class WidgetElement extends dom.Element {
     RenderObjectElement rootWidgetElement = elementManager.controller.rootKrakenElement;
     _adaptor = KrakenRenderObjectToWidgetAdapter(
         child: widget,
-        container: renderBoxModel as RenderObjectWithChildMixin<RenderBox>
+        container: renderBoxModel as ContainerRenderObjectMixin<RenderBox,
+            ContainerBoxParentData<RenderBox>>
     );
 
     Element? element;
@@ -280,7 +281,7 @@ abstract class WidgetElement extends dom.Element {
     if (parentNode is WidgetElement) {
       KrakenRenderObjectToWidgetAdapter adaptor = KrakenRenderObjectToWidgetAdapter(
           child: (parentNode as WidgetElement)._widget,
-          container: (parentNode as WidgetElement).renderBoxModel as RenderObjectWithChildMixin<RenderBox>
+          container: (parentNode as WidgetElement).renderBoxModel as ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>
       );
       element = adaptor._element!;
     } else {
@@ -288,7 +289,7 @@ abstract class WidgetElement extends dom.Element {
     }
 
     if (ancestorWidgetElement != null && element != null) {
-      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, element as RenderObjectElement, false);
+      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement, false);
     } else {
       _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement, true);
     }

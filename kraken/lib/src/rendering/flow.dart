@@ -545,7 +545,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       } else if (child is RenderTextBox) {
         childConstraints = child.getConstraints();
       } else {
-        childConstraints = BoxConstraints();
+        // Custom element.
+        childConstraints = constraints;
       }
 
       // Whether child need to layout
@@ -632,8 +633,12 @@ class RenderFlowLayout extends RenderLayoutBox {
       runMainAxisExtent += childMainAxisExtent;
 
       /// Calculate baseline extent of layout box
-      RenderStyle childRenderStyle = _getChildRenderStyle(child)!;
-      VerticalAlign verticalAlign = childRenderStyle.verticalAlign;
+      RenderStyle? childRenderStyle = _getChildRenderStyle(child);
+      VerticalAlign verticalAlign = VerticalAlign.baseline;
+      if (childRenderStyle != null) {
+        verticalAlign = childRenderStyle.verticalAlign;
+      }
+
 
       bool isLineHeightValid = _isLineHeightValid(child);
 
@@ -1274,7 +1279,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   }
 
   RenderStyle? _getChildRenderStyle(RenderBox child) {
-    RenderStyle? childRenderStyle;
+    RenderStyle? childRenderStyle = null;
     if (child is RenderTextBox) {
       childRenderStyle = renderStyle;
     } else if (child is RenderBoxModel) {
