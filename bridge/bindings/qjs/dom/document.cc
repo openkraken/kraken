@@ -330,7 +330,7 @@ PROP_GETTER(DocumentInstance, head)(QjsContext* ctx, JSValue this_val, int argc,
   int32_t len = arrayGetLength(ctx, documentElement->childNodes);
   JSValue head = JS_NULL;
   if (documentElement != nullptr) {
-      for (int i = 0; i < len; i++) {
+    for (int i = 0; i < len; i++) {
       JSValue v = JS_GetPropertyUint32(ctx, documentElement->childNodes, i);
       auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(v, Node::classId(v)));
       if (nodeInstance->nodeType == NodeType::ELEMENT_NODE) {
