@@ -36,6 +36,7 @@ void registerDartMethods(uint64_t* methodBytes, int32_t length) {
   methodPointer->setTimeout = reinterpret_cast<SetTimeout>(methodBytes[i++]);
   methodPointer->setInterval = reinterpret_cast<SetInterval>(methodBytes[i++]);
   methodPointer->clearTimeout = reinterpret_cast<ClearTimeout>(methodBytes[i++]);
+  methodPointer->scheduleMicrotask = reinterpret_cast<ScheduleMicrotask>(methodBytes[i++]);
   methodPointer->requestAnimationFrame = reinterpret_cast<RequestAnimationFrame>(methodBytes[i++]);
   methodPointer->cancelAnimationFrame = reinterpret_cast<CancelAnimationFrame>(methodBytes[i++]);
   methodPointer->getScreen = reinterpret_cast<GetScreen>(methodBytes[i++]);
