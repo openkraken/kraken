@@ -6,6 +6,8 @@
 #ifndef KRAKENBRIDGE_BRIDGE_TEST_QJS_H
 #define KRAKENBRIDGE_BRIDGE_TEST_QJS_H
 
+#include "bindings/qjs/dom/document.h"
+#include "bindings/qjs/html_parser.h"
 #include "bridge_qjs.h"
 #include "kraken_bridge_test.h"
 
@@ -41,6 +43,7 @@ class JSBridgeTest final {
 
   /// evaluete JavaScript source code with build-in test frameworks, use in test only.
   bool evaluateTestScripts(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine);
+  bool parseTestHTML(const uint16_t* code, size_t codeLength);
   void invokeExecuteTest(ExecuteCallback executeCallback);
 
   JSValue executeTestCallback{JS_NULL};

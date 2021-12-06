@@ -70,9 +70,8 @@ void HTMLParser::traverseHTML(NodeInstance* root, GumboNode* node) {
     }
   }
 }
-bool HTMLParser::parseHTML(const char* code, size_t codeLength, NodeInstance* rootNode) {
-  std::string html = std::string(code, codeLength);
 
+bool HTMLParser::parseHTML(std::string html, NodeInstance* rootNode) {
   if (rootNode != nullptr) {
     rootNode->internalClearChild();
 
@@ -90,6 +89,12 @@ bool HTMLParser::parseHTML(const char* code, size_t codeLength, NodeInstance* ro
 
   return true;
 }
+
+bool HTMLParser::parseHTML(const char* code, size_t codeLength, NodeInstance* rootNode) {
+  std::string html = std::string(code, codeLength);
+  return parseHTML(html, rootNode);
+}
+
 void HTMLParser::parseProperty(ElementInstance* element, GumboElement* gumboElement) {
   JSContext* context = element->context();
   QjsContext* ctx = context->ctx();

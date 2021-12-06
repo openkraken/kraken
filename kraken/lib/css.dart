@@ -54,6 +54,5 @@ export 'src/css/values/number.dart';
 export 'src/css/values/integer.dart';
 export 'src/css/values/position.dart';
 export 'src/css/values/time.dart';
-export 'src/css/values/url.dart';
 export 'src/css/values/percentage.dart';
 export 'src/css/values/textual.dart';

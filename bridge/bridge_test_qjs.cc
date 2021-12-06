@@ -12,8 +12,14 @@ namespace kraken {
 bool JSBridgeTest::evaluateTestScripts(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) {
   if (!context->isValid())
     return false;
-  //  binding::jsc::updateLocation(sourceURL);
   return context->evaluateJavaScript(code, codeLength, sourceURL, startLine);
+}
+
+bool JSBridgeTest::parseTestHTML(const uint16_t* code, size_t codeLength) {
+  if (!context->isValid())
+    return false;
+  std::string utf8Code = toUTF8(std::u16string(reinterpret_cast<const char16_t*>(code), codeLength));
+  return bridge_->parseHTML(utf8Code.c_str(), utf8Code.length());
 }
 
 static JSValue executeTest(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
@@ -190,6 +196,26 @@ static JSValue runGC(QjsContext* ctx, JSValueConst this_val, int argc, JSValueCo
   return JS_NULL;
 }
 
+static JSValue parseHTML(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+  auto* context = static_cast<binding::qjs::JSContext*>(JS_GetContextOpaque(ctx));
+
+  if (argc == 1) {
+    JSValue& html = argv[0];
+
+    std::string strHTML = binding::qjs::jsValueToStdString(ctx, html);
+
+    binding::qjs::Document* Document = binding::qjs::Document::instance(context);
+    auto document = binding::qjs::DocumentInstance::instance(Document);
+    JSValue bodyValue = JS_GetPropertyStr(context->ctx(), document->instanceObject, "body");
+    auto* body = static_cast<binding::qjs::ElementInstance*>(JS_GetOpaque(bodyValue, binding::qjs::Element::classId()));
+    binding::qjs::HTMLParser::parseHTML(strHTML, body);
+
+    JS_FreeValue(ctx, bodyValue);
+  }
+
+  return JS_NULL;
+}
+
 static JSValue triggerGlobalError(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   auto* context = static_cast<binding::qjs::JSContext*>(JS_GetContextOpaque(ctx));
 
@@ -214,6 +240,7 @@ JSBridgeTest::JSBridgeTest(JSBridge* bridge) : bridge_(bridge), context(bridge->
   QJS_GLOBAL_BINDING_FUNCTION(context, simulateInputText, "__kraken_simulate_inputtext__", 1);
   QJS_GLOBAL_BINDING_FUNCTION(context, triggerGlobalError, "__kraken_trigger_global_error__", 0);
   QJS_GLOBAL_BINDING_FUNCTION(context, runGC, "__kraken_run_gc__", 0);
+  QJS_GLOBAL_BINDING_FUNCTION(context, parseHTML, "__kraken_parse_html__", 1);
 
   initKrakenTestFramework(bridge);
   init_list_head(&image_link);
