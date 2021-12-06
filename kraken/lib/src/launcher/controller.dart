@@ -25,8 +25,8 @@ import 'package:kraken/src/dom/element_registry.dart' as element_registry;
 
 import 'bundle.dart';
 
-const int WINDOW_ID = -2;
-const int DOCUMENT_ID = -3;
+const int WINDOW_ID = -1;
+const int DOCUMENT_ID = -2;
 
 // Error handler when load bundle failed.
 typedef LoadHandler = void Function(KrakenController controller);

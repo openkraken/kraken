@@ -329,21 +329,23 @@ PROP_GETTER(DocumentInstance, head)(QjsContext* ctx, JSValue this_val, int argc,
   ElementInstance* documentElement = document->getDocumentElement();
   int32_t len = arrayGetLength(ctx, documentElement->childNodes);
   JSValue head = JS_NULL;
-
-  for (int i = 0; i < len; i++) {
-    JSValue v = JS_GetPropertyUint32(ctx, documentElement->childNodes, i);
-    auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(v, Node::classId(v)));
-    if (nodeInstance->nodeType == NodeType::ELEMENT_NODE) {
-      auto* elementInstance = static_cast<ElementInstance*>(nodeInstance);
-      if (elementInstance->tagName() == "HEAD") {
-        head = elementInstance->instanceObject;
-        break;
+  if (documentElement != nullptr) {
+      for (int i = 0; i < len; i++) {
+      JSValue v = JS_GetPropertyUint32(ctx, documentElement->childNodes, i);
+      auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(v, Node::classId(v)));
+      if (nodeInstance->nodeType == NodeType::ELEMENT_NODE) {
+        auto* elementInstance = static_cast<ElementInstance*>(nodeInstance);
+        if (elementInstance->tagName() == "HEAD") {
+          head = elementInstance->instanceObject;
+          break;
+        }
       }
+      JS_FreeValue(ctx, v);
     }
-    JS_FreeValue(ctx, v);
+
+    JS_FreeValue(ctx, documentElement->instanceObject);
   }
 
-  JS_FreeValue(ctx, documentElement->instanceObject);
   return head;
 }
 
@@ -357,37 +359,65 @@ PROP_GETTER(DocumentInstance, body)(QjsContext* ctx, JSValue this_val, int argc,
   ElementInstance* documentElement = document->getDocumentElement();
   JSValue body = JS_NULL;
 
-  int32_t len = arrayGetLength(ctx, documentElement->childNodes);
-  // The body element of a document is the first of the html documentElement's children that
-  // is either a body element or a frameset element, or null if there is no such element.
-  for (int i = 0; i < len; i++) {
-    JSValue v = JS_GetPropertyUint32(ctx, documentElement->childNodes, i);
-    auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(v, Node::classId(v)));
-    if (nodeInstance->nodeType == NodeType::ELEMENT_NODE) {
-      auto* elementInstance = static_cast<ElementInstance*>(nodeInstance);
-      if (elementInstance->tagName() == "BODY") {
-        body = elementInstance->instanceObject;
-        break;
+  if (documentElement != nullptr) {
+    int32_t len = arrayGetLength(ctx, documentElement->childNodes);
+    // The body element of a document is the first of the html documentElement's children that
+    // is either a body element or a frameset element, or null if there is no such element.
+    for (int i = 0; i < len; i++) {
+      JSValue v = JS_GetPropertyUint32(ctx, documentElement->childNodes, i);
+      auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(v, Node::classId(v)));
+      if (nodeInstance->nodeType == NodeType::ELEMENT_NODE) {
+        auto* elementInstance = static_cast<ElementInstance*>(nodeInstance);
+        if (elementInstance->tagName() == "BODY") {
+          body = elementInstance->instanceObject;
+          break;
+        }
       }
+      JS_FreeValue(ctx, v);
     }
-    JS_FreeValue(ctx, v);
+    JS_FreeValue(ctx, documentElement->instanceObject);
   }
-
-  JS_FreeValue(ctx, documentElement->instanceObject);
   return body;
 }
 
 // The body property is settable, setting a new body on a document will effectively remove all
 // the current children of the existing <body> element.
 PROP_SETTER(DocumentInstance, body)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  // TODO: Implement body setter
-  // On setting, the following algorithm must be run:
-  // 1. If the new value is not a body or frameset element, then throw a "HierarchyRequestError" DOMException.
-  // 2. Otherwise, if the new value is the same as the body element, return.
-  // 3. Otherwise, if the body element is not null, then replace the body element with the new value within the body element's parent and return.
-  // 4. Otherwise, if there is no document element, throw a "HierarchyRequestError" DOMException.
-  // 5. Otherwise, the body element is null, but there's a document element. Append the new value to the document element.
-  return JS_NULL;
+  auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
+  ElementInstance* documentElement = document->getDocumentElement();
+  // If there is no document element, throw a Exception.
+  if (documentElement == nullptr) {
+    return JS_ThrowInternalError(ctx, "No document element exists");
+  }
+  JSValue result = JS_NULL;
+  JSValue newBody = argv[0];
+  // If the body element is not null, then replace the body element with the new value within the body element's parent and return.
+  if (JS_IsInstanceOf(ctx, newBody, Element::instance(document->m_context)->classObject)) {
+    auto* newElementInstance = static_cast<ElementInstance*>(JS_GetOpaque(newBody, Element::classId()));
+    // If the new value is not a body element, then throw a Exception.
+    if (newElementInstance->tagName() == "BODY") {
+      JSValue oldBody = JS_GetPropertyStr(ctx, documentElement->instanceObject, "body");
+      if (JS_VALUE_GET_PTR(oldBody) != JS_VALUE_GET_PTR(newBody)) {
+        // If the new value is the same as the body element.
+        if (JS_IsNull(oldBody)) {
+          // The old body element is null, but there's a document element. Append the new value to the document element.
+          documentElement->internalAppendChild(newElementInstance);
+        } else {
+          // Otherwise, replace the body element with the new value within the body element's parent.
+          auto* oldElementInstance = static_cast<ElementInstance*>(JS_GetOpaque(oldBody, Element::classId()));
+          documentElement->internalReplaceChild(newElementInstance, oldElementInstance);
+        }
+      }
+      result = newBody;
+    } else {
+      result = JS_ThrowTypeError(ctx, "The new body element must be a 'BODY' element");
+    }
+  } else {
+    result = JS_ThrowTypeError(ctx, "The 1st argument provided is either null, or an invalid HTMLElement");
+  }
+
+  JS_FreeValue(ctx, documentElement->instanceObject);
+  return result;
 }
 
 // document.children
