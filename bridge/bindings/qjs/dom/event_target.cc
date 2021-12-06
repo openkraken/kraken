@@ -506,8 +506,8 @@ void NativeEventTarget::dispatchEventImpl(NativeEventTarget* nativeEventTarget, 
   if (gcPhase != JSGCPhaseEnum::JS_GC_PHASE_NONE) {
     // We store all params and data into pendingEvents and dispatch them in the next frame.Nativ
     auto* newPendingEvents =
-      new PendingEvent{nativeEventTarget, nativeEventType->clone(), /* nativeEventType will be freed by dart after dispatchEventImpl() called., Should keep an clone instead of a ptr. */
-                       rawEvent, isCustomEvent};
+        new PendingEvent{nativeEventTarget, nativeEventType->clone(), /* nativeEventType will be freed by dart after dispatchEventImpl() called., Should keep an clone instead of a ptr. */
+                         rawEvent, isCustomEvent};
     auto callback = [](void* ptr) {
       auto* pendingEvent = static_cast<PendingEvent*>(ptr);
       NativeEventTarget::dispatchEventImpl(pendingEvent->nativeEventTarget, pendingEvent->nativeEventType, pendingEvent->rawEvent, pendingEvent->isCustomEvent);

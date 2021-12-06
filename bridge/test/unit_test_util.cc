@@ -34,12 +34,12 @@ void TEST_dispatchEvent(kraken::binding::qjs::EventTargetInstance* eventTarget, 
 
 std::unordered_map<void*, TEST_PendingJobCallback> callbacks;
 
-void TEST_schedulePendingJob(void *ptr, TEST_PendingJobCallback callback) {
+void TEST_schedulePendingJob(void* ptr, TEST_PendingJobCallback callback) {
   callbacks[ptr] = callback;
 }
 
 void TEST_flushPendingJob() {
-  for (auto &entry : callbacks) {
+  for (auto& entry : callbacks) {
     entry.second(entry.first);
   }
   callbacks.clear();
