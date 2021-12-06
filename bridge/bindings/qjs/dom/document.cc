@@ -396,7 +396,7 @@ PROP_SETTER(DocumentInstance, body)(QjsContext* ctx, JSValue this_val, int argc,
     auto* newElementInstance = static_cast<ElementInstance*>(JS_GetOpaque(newBody, Element::classId()));
     // If the new value is not a body element, then throw a Exception.
     if (newElementInstance->tagName() == "BODY") {
-      JSValue oldBody = JS_GetPropertyStr(ctx, documentElement->instanceObject, "body");
+      JSValue oldBody = JS_GetPropertyStr(ctx, document->instanceObject, "body");
       if (JS_VALUE_GET_PTR(oldBody) != JS_VALUE_GET_PTR(newBody)) {
         // If the new value is the same as the body element.
         if (JS_IsNull(oldBody)) {
