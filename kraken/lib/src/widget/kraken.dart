@@ -4,7 +4,6 @@
  */
 import 'dart:io';
 import 'dart:ui';
-import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -12,7 +11,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart' as dom;
@@ -21,7 +19,6 @@ import 'package:kraken/gesture.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/src/dom/element_registry.dart';
 import 'package:kraken/src/dom/element_manager.dart';
-import 'package:kraken/bridge.dart';
 
 /// Get context of current widget.
 typedef GetContext = BuildContext Function();

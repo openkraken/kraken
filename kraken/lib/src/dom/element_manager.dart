@@ -58,7 +58,7 @@ class ElementManager implements widgets.WidgetsBindingObserver, ElementsBindingO
   late final Document document;
   late final Element viewportElement;
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
-  Map<int, widgets.Element> _flutterElements = <int, widgets.Element>{};
+  final Map<int, widgets.Element> _flutterElements = <int, widgets.Element>{};
   bool? showPerformanceOverlayOverride;
   KrakenController controller;
 
