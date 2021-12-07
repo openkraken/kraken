@@ -332,9 +332,9 @@ describe('Tags img', () => {
 
     const colors = ['red', 'yellow', 'black', 'blue', 'green'];
     const images = [
-      'https://img.alicdn.com/imgextra/i1/O1CN01OPE9Pw1yFUVfLc82O_!!6000000006549-2-tps-325-289.png',
-      'https://img.alicdn.com/imgextra/i4/O1CN01Edx8Jk1ELTLfISD7H_!!6000000000335-2-tps-1000-1000.png',
-      'https://img.alicdn.com/imgextra/i3/O1CN01KgGBlg1Y2xfB9wnnJ_!!6000000003002-2-tps-325-289.png',
+      'assets/100x100-green.png',
+      'assets/200x200-green.png',
+      'assets/60x60-gg-rr.png',
     ];
 
     let loadedCount = 0;
@@ -350,7 +350,7 @@ describe('Tags img', () => {
       const img = document.createElement('img');
       img.src = images[i % images.length];
       div.appendChild(img);
-      img.style.width = '100px';
+      img.style.width = '80px';
       img.onload = async () => {
         loadedCount++;
         if (loadedCount == imgCount) {
