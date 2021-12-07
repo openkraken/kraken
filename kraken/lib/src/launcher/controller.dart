@@ -369,8 +369,11 @@ class KrakenViewController {
       if (policy == KrakenNavigationActionPolicy.cancel) return;
 
       switch (action.navigationType) {
+        case KrakenNavigationType.navigate:
+          await rootController.reload(url: action.target);
+          break;
         case KrakenNavigationType.reload:
-          await rootController.reloadUrl(action.target);
+          await rootController.reload(url: action.source!);
           break;
         default:
         // Navigate and other type, do nothing.
@@ -436,6 +439,8 @@ class KrakenController {
 
   WidgetDelegate? widgetDelegate;
 
+  KrakenBundle? bundle;
+
   LoadHandler? onLoad;
 
   // Error handler when load bundle failed.
@@ -471,14 +476,12 @@ class KrakenController {
     double viewportHeight, {
     bool showPerformanceOverlay = false,
     enableDebug = false,
-    String? bundleURL,
-    String? bundlePath,
-    String? bundleContent,
     Color? background,
     GestureListener? gestureListener,
     KrakenNavigationDelegate? navigationDelegate,
     KrakenMethodChannel? methodChannel,
     this.widgetDelegate,
+    this.bundle,
     this.onLoad,
     this.onLoadError,
     this.onJSError,
@@ -486,9 +489,6 @@ class KrakenController {
     this.devToolsService,
     this.uriParser
   })  : _name = name,
-        _bundleURL = bundleURL,
-        _bundlePath = bundlePath,
-        _bundleContent = bundleContent,
         _gestureListener = gestureListener {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_PROPERTY_INIT);
@@ -515,6 +515,11 @@ class KrakenController {
     final int contextId = _view.contextId;
 
     _module = KrakenModuleController(this, contextId);
+
+    if (bundle != null) {
+      HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
+      historyModule.bundle = bundle!;
+    }
 
     assert(!_controllerMap.containsKey(contextId),
         'found exist contextId of KrakenController, contextId: $contextId');
@@ -545,18 +550,14 @@ class KrakenController {
     return _module;
   }
 
-  // the bundle manager which used to download javascript source and run.
-  KrakenBundle? _bundle;
-  KrakenBundle? get bundle => _bundle;
-
   final Queue<HistoryItem> previousHistoryStack = Queue();
   final Queue<HistoryItem> nextHistoryStack = Queue();
 
   Uri get referrer {
-    if (bundleURL != null) {
-      return Uri.parse(bundleURL!);
-    } else if (bundlePath != null) {
-      return Directory(bundlePath!).uri;
+    if (bundle is NetworkBundle) {
+      return Uri.parse(href);
+    } else if (bundle is AssetsBundle) {
+      return Directory(href).uri;
     } else {
       return fallbackBundleUri(_view.contextId);
     }
@@ -618,29 +619,29 @@ class KrakenController {
   }
 
   set href(String value) {
+    _addHistory(KrakenBundle.fromUrl(value));
+  }
+
+  _addHistory(KrakenBundle bundle) {
     HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
-    historyModule.href = value;
+    historyModule.bundle = bundle;
   }
 
   // reload current kraken view.
-  Future<void> reload() async {
+  Future<void> reload({ String? url }) async {
+    assert(!_view._disposed, 'Kraken have already disposed');
+
     if (devToolsService != null) {
       devToolsService!.willReload();
     }
 
     await unload();
-    await loadBundle(bundleURL: href);
+    await loadBundle(bundle: KrakenBundle.fromUrl(url ?? href));
     await evalBundle();
 
     if (devToolsService != null) {
       devToolsService!.didReload();
     }
-  }
-
-  Future<void> reloadUrl(String url) async {
-    assert(!_view._disposed, 'Kraken have already disposed');
-    href = url;
-    await reload();
   }
 
   void dispose() {
@@ -655,45 +656,31 @@ class KrakenController {
     }
   }
 
-  String? _bundleContent;
+  @deprecated
+  String? get bundlePath => href;
 
-  String? get bundleContent => _bundleContent;
-  set bundleContent(String? value) {
-    if (value == null) return;
-    _bundleContent = value;
-  }
-
-  Uint8List? _bundleByteCode;
-  Uint8List? get bundleByteCode => _bundleByteCode;
-  set bundleByteCode(Uint8List? value) {
-    if (value == null) return;
-    _bundleByteCode = value;
-  }
-
-  String? _bundlePath;
-
-  String? get bundlePath => _bundlePath;
+  @deprecated
   set bundlePath(String? value) {
-    _bundlePath = value;
+    if (value == null) return;
+    // Set bundlePath should set the path to history module.
+    href = value;
   }
 
-  String? _bundleURL;
+  @deprecated
+  String? get bundleURL => href;
 
-  String? get bundleURL => _bundleURL;
-
+  @deprecated
   set bundleURL(String? value) {
     if (value == null) return;
-    _bundleURL = value;
+    // Set bundleURL should set the url to history module.
+    href = value;
   }
 
-  String get origin => _bundleURL ?? _bundlePath ?? 'vm://' + name!;
+  String get origin => Uri.parse(href).origin;
 
   // preload javascript source and cache it.
   Future<void> loadBundle({
-    String? bundleContent,
-    String? bundlePath,
-    String? bundleURL,
-    Uint8List? bundleByteCode
+    KrakenBundle? bundle
   }) async {
     assert(!_view._disposed, 'Kraken have already disposed');
 
@@ -701,29 +688,25 @@ class KrakenController {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_LOAD_START);
     }
 
-    _bundleContent = bundleContent ?? _bundleContent;
-    _bundlePath =  bundlePath ?? _bundlePath;
-    _bundleURL =  bundleURL ?? _bundleURL;
-    _bundleByteCode = bundleByteCode ?? _bundleByteCode;
-
-    String? url = _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
-
-    if (url == null && methodChannel is KrakenNativeChannel) {
-      url = await (methodChannel as KrakenNativeChannel).getUrl();
+    // Load bundle need push curret href to history.
+    if (bundle != null) {
+      String? url = bundle.uri.toString().isEmpty ? (getBundleURLFromEnv() ?? getBundlePathFromEnv()) : href;
+      if (url == null && methodChannel is KrakenNativeChannel) {
+        url = await (methodChannel as KrakenNativeChannel).getUrl();
+      }
+      _addHistory(bundle);
+      this.bundle = bundle;
     }
 
-    url = url ?? '';
     if (onLoadError != null) {
       try {
-        _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent, contextId: view.contextId);
+        await bundle?.resolve(view.contextId);
       } catch (e, stack) {
         onLoadError!(FlutterError(e.toString()), stack);
       }
     } else {
-      _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent, contextId: view.contextId);
+      await bundle?.resolve(view.contextId);
     }
-    KrakenController controller = KrakenController.getControllerOfJSContextId(view.contextId)!;
-    controller.href = url;
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_LOAD_END);
@@ -733,8 +716,8 @@ class KrakenController {
   // execute preloaded javascript source
   Future<void> evalBundle() async {
     assert(!_view._disposed, 'Kraken have already disposed');
-    if (_bundle != null) {
-      await _bundle!.eval(_view.contextId);
+    if (bundle != null) {
+      await bundle!.eval(_view.contextId);
       // trigger DOMContentLoaded event
       module.requestAnimationFrame((_) {
         Event event = Event(EVENT_DOM_CONTENT_LOADED);
