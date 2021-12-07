@@ -51,8 +51,6 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
   @override
   void updateRenderObject(BuildContext context, RenderObject renderObject) { }
 
-  bool mounted = false;
-
   Element? _element;
 
   /// Inflate this widget and actually set the resulting [RenderObject] as the
@@ -60,27 +58,18 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
   KrakenRenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, RenderObjectElement parentElement, bool needBuild) {
     owner.lockState(() {
       _element = createElement();
-      mounted = false;
       assert(_element != null);
     });
 
     // If renderview is building,skip the buildScope phase.
     if (!needBuild) {
       if (_element != null) {
-        if (!mounted) {
-          _element?.mount(parentElement, null);
-        }
-
-        mounted = true;
+        _element?.mount(parentElement, null);
       }
     } else {
       owner.buildScope(_element!, () {
         if (_element != null) {
-          if (!mounted) {
-            _element?.mount(parentElement, null);
-          }
-
-          mounted = true;
+          _element?.mount(parentElement, null);
         }
       });
     }
@@ -289,7 +278,7 @@ abstract class WidgetElement extends dom.Element {
     }
 
     if (ancestorWidgetElement != null && element != null) {
-      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement, false);
+      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, element as RenderObjectElement, false);
     } else {
       _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement, true);
     }
