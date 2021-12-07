@@ -314,19 +314,8 @@ class ImageElement extends Element {
   void _resolveImage(Uri? resolvedUri, { bool updateImageProvider = false }) {
     if (resolvedUri == null) return;
 
-    double? width = null;
-    double? height = null;
-
-    if (isRendererAttached) {
-      width = renderStyle.width.isAuto ? _propertyWidth : renderStyle.width.computedValue;
-      height = renderStyle.height.isAuto ? _propertyHeight : renderStyle.height.computedValue;
-    } else {
-      width = _propertyWidth;
-      height = _propertyHeight;
-    }
-
-    int? cachedWidth = (width != null && width > 0) ? (width * ui.window.devicePixelRatio).toInt() : null;
-    int? cachedHeight = (height != null && height > 0) ? (height * ui.window.devicePixelRatio).toInt() : null;
+    int? cachedWidth = width > 0 ? (width * ui.window.devicePixelRatio).toInt() : null;
+    int? cachedHeight = height > 0 ? (height * ui.window.devicePixelRatio).toInt() : null;
 
     ImageProvider? provider = _imageProvider;
     if (updateImageProvider || provider == null) {
@@ -452,8 +441,6 @@ class ImageElement extends Element {
         _styleHeight = renderStyle.height.value == null && renderStyle.height.isNotAuto
           ? null : renderStyle.height.computedValue;
       }
-      // Resize renderBox
-      if (isRendererAttached) _resizeImage();
       // Resize image
       _resolveImage(_resolvedUri, updateImageProvider: true);
     } else if (property == OBJECT_FIT && _renderImage != null) {
