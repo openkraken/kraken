@@ -51,30 +51,30 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
   @override
   void updateRenderObject(BuildContext context, RenderObject renderObject) { }
 
-  Element? _element;
-
   /// Inflate this widget and actually set the resulting [RenderObject] as the
   /// child of [container].
   KrakenRenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, RenderObjectElement parentElement, bool needBuild) {
+    Element? element;
+
     owner.lockState(() {
-      _element = createElement();
-      assert(_element != null);
+      element = createElement();
+      assert(element != null);
     });
 
     // If renderview is building,skip the buildScope phase.
     if (!needBuild) {
-      if (_element != null) {
-        _element?.mount(parentElement, null);
+      if (element != null) {
+        element?.mount(parentElement, null);
       }
     } else {
-      owner.buildScope(_element!, () {
-        if (_element != null) {
-          _element?.mount(parentElement, null);
+      owner.buildScope(element!, () {
+        if (element != null) {
+          element?.mount(parentElement, null);
         }
       });
     }
 
-    return _element! as KrakenRenderObjectToWidgetElement<T>;
+    return element! as KrakenRenderObjectToWidgetElement<T>;
   }
 
   @override
@@ -248,37 +248,23 @@ abstract class WidgetElement extends dom.Element {
   KrakenRenderObjectToWidgetAdapter? _adaptor;
 
   void _attachWidget(Widget widget) {
-    // Find ancestor of custom element.
-    WidgetElement? ancestorWidgetElement;
-    dom.Node? ancestor = parentNode;
-    while (ancestor != null) {
-      if (ancestor is WidgetElement) {
-        ancestorWidgetElement = ancestor;
-      }
-      ancestor = ancestor.parentNode;
-    }
-
     RenderObjectElement rootWidgetElement = elementManager.controller.rootKrakenElement;
+
     _adaptor = KrakenRenderObjectToWidgetAdapter(
         child: widget,
         container: renderBoxModel as ContainerRenderObjectMixin<RenderBox,
             ContainerBoxParentData<RenderBox>>
     );
 
-    Element? element;
-
+    Element? parentElement;
     if (parentNode is WidgetElement) {
-      KrakenRenderObjectToWidgetAdapter adaptor = KrakenRenderObjectToWidgetAdapter(
-          child: (parentNode as WidgetElement)._widget,
-          container: (parentNode as WidgetElement).renderBoxModel as ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>
-      );
-      element = adaptor._element!;
+      parentElement = ((parentNode as WidgetElement)._widget as _KrakenAdapterWidget).createElement();
     } else {
-      element = elementManager.getFlutterElementByTargetId((parentNode as dom.Element).targetId);
+      parentElement = elementManager.getFlutterElementByTargetId((parentNode as dom.Element).targetId);
     }
 
-    if (ancestorWidgetElement != null && element != null) {
-      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, element as RenderObjectElement, false);
+    if (parentElement != null) {
+      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, parentElement as RenderObjectElement, false);
     } else {
       _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement, true);
     }

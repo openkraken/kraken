@@ -42,4 +42,7 @@ class KrakenElementToFlutterElementAdaptor extends RenderObjectElement {
     super.unmount();
     (widget._krakenNode as dom.Element).disposeRenderObject();
   }
+
+  @override
+  void insertRenderObjectChild(RenderObject child, Object? slot) {}
 }
