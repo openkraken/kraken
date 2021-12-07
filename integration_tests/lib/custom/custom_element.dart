@@ -10,7 +10,7 @@ class TextWidgetElement extends WidgetElement {
         super(targetId, nativeEventTarget, elementManager);
 
   @override
-  Widget build(BuildContext context, Map<String, dynamic> properties) {
+  Widget build(BuildContext context, Map<String, dynamic> properties, List<Widget> children) {
     return Text(properties['value'] ?? '', textDirection: TextDirection.ltr, style: TextStyle(color: Color.fromARGB(255, 100, 100, 100)));
   }
 }
@@ -20,7 +20,7 @@ class ImageWidgetElement extends WidgetElement {
         super(targetId, nativeEventTarget, elementManager);
 
   @override
-  Widget build(BuildContext context, Map<String, dynamic> properties) {
+  Widget build(BuildContext context, Map<String, dynamic> properties, List<Widget> children) {
     return Image(image: AssetImage(properties['src']));
   }
 }
