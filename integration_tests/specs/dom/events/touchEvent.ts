@@ -77,7 +77,7 @@ describe('TouchEvent', () => {
     const func = async (e: TouchEvent) => {
       expect(e.touches.length).toBe(2);
       div.removeEventListener('touchend', func);
-      await simulatePoinrUp(20, 20);
+      await simulatePointUp(20, 20);
       done();
     };
 
@@ -107,7 +107,7 @@ describe('TouchEvent', () => {
 
     const func = async (e: TouchEvent) => {
       expect(e.targetTouches.length).toBe(1);
-      await simulatePoinrUp(20, 20);
+      await simulatePointUp(20, 20);
       div2.removeEventListener('touchend', func);
       done();
     };

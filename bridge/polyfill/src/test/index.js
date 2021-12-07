@@ -169,6 +169,8 @@ function resetDocumentElement() {
 
   let body = document.createElement('body');
   document.documentElement.appendChild(body);
+
+  document.documentElement.style.backgroundColor = 'white';
 }
 
 function traverseNode(node, handle) {
