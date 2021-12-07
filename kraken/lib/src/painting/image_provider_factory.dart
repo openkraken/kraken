@@ -277,7 +277,7 @@ class KrakenResizeImage extends ResizeImage {
     }
 
     // Cache the image's original size for element.naturalWidth and element.naturalHeight API.
-    dynamic key = await imageProvider.obtainKey(ImageConfiguration.empty);
+    dynamic key = await obtainKey(ImageConfiguration.empty);
     _imageNaturalSize[key] = Size(descriptor.width.toDouble(), descriptor.height.toDouble());
 
     return descriptor.instantiateCodec(
