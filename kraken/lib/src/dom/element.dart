@@ -648,7 +648,7 @@ class Element extends Node
     }
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
-      if (!child.isRendererAttached && _renderLayoutBox != null && !(this is WidgetElement)) {
+      if (!child.isRendererAttached && _renderLayoutBox != null && this is! WidgetElement) {
         RenderBox? after;
         RenderLayoutBox? scrollingContentBox = _renderLayoutBox!.renderScrollingContent;
         if (scrollingContentBox != null) {
