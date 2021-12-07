@@ -355,8 +355,6 @@ class RenderLayoutBox extends RenderBoxModel
 
   /// Common layout content size (including flow and flexbox layout) calculation logic
   Size getContentSize({
-    double? logicalContentWidth,
-    double? logicalContentHeight,
     required double contentWidth,
     required double contentHeight,
   }) {
@@ -364,8 +362,8 @@ class RenderLayoutBox extends RenderBoxModel
     double finalContentHeight = contentHeight;
 
     // Size which is specified by sizing styles
-    double? specifiedContentWidth = logicalContentWidth;
-    double? specifiedContentHeight = logicalContentHeight;
+    double? specifiedContentWidth = renderStyle.contentBoxLogicalWidth;
+    double? specifiedContentHeight = renderStyle.contentBoxLogicalHeight;
     // Flex basis takes priority over main size in flex item.
     if (parent is RenderFlexLayout) {
       RenderBoxModel? parentRenderBoxModel = parent as RenderBoxModel?;
@@ -603,18 +601,6 @@ class RenderBoxModel extends RenderBox
     return _contentConstraints;
   }
 
-  /// Used when setting percentage line-height style, it needs to be calculated when node attached
-  /// where it needs to know the font-size of its own element
-  bool _shouldLazyCalLineHeight = false;
-
-  bool get shouldLazyCalLineHeight => _shouldLazyCalLineHeight;
-
-  set shouldLazyCalLineHeight(bool value) {
-    if (_shouldLazyCalLineHeight != value) {
-      _shouldLazyCalLineHeight = value;
-    }
-  }
-
   // When RenderBoxModel is scrolling box, contentConstraints are always equal to BoxConstraints();
   bool isScrollingContentBox = false;
 
@@ -729,53 +715,6 @@ class RenderBoxModel extends RenderBox
       ..parentData = parentData;
   }
 
-  // Boxes which have intrinsic ratio
-  double? _intrinsicWidth;
-
-  double? get intrinsicWidth {
-    return _intrinsicWidth;
-  }
-
-  set intrinsicWidth(double? value) {
-    if (_intrinsicWidth == value) return;
-    _intrinsicWidth = value;
-    _markSelfAndParentNeedsLayout();
-  }
-
-  // Boxes which have intrinsic ratio
-  double? _intrinsicHeight;
-
-  double? get intrinsicHeight {
-    return _intrinsicHeight;
-  }
-
-  set intrinsicHeight(double? value) {
-    if (_intrinsicHeight == value) return;
-    _intrinsicHeight = value;
-    _markSelfAndParentNeedsLayout();
-  }
-
-  double? _intrinsicRatio;
-
-  double? get intrinsicRatio {
-    return _intrinsicRatio;
-  }
-
-  set intrinsicRatio(double? value) {
-    if (_intrinsicRatio == value) return;
-    _intrinsicRatio = value;
-    _markSelfAndParentNeedsLayout();
-  }
-
-  // Sizing may affect parent size, mark parent as needsLayout in case
-  // renderBoxModel has tight constraints which will prevent parent from marking.
-  void _markSelfAndParentNeedsLayout() {
-    markNeedsLayout();
-    if (parent is RenderBoxModel) {
-      (parent as RenderBoxModel).markNeedsLayout();
-    }
-  }
-
   /// Whether current box is the root of the document which corresponds to HTML element in dom tree.
   bool get isDocumentRootBox {
     // Get the outer box of overflow scroll box
@@ -849,7 +788,8 @@ class RenderBoxModel extends RenderBox
     super.layout(newConstraints, parentUsesSize: parentUsesSize);
   }
 
-  /// Calculate renderBoxModel constraints
+  // Calculate constraints of renderBoxModel on layout stage and
+  // only needed to be excuted once on every layout.
   BoxConstraints getConstraints() {
     // Inner scrolling content box of overflow element inherits constraints from parent
     // but has indefinite max constraints to allow children overflow
@@ -877,42 +817,29 @@ class RenderBoxModel extends RenderBox
     CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
     bool isDisplayInline = effectiveDisplay == CSSDisplay.inline;
 
-    EdgeInsets borderEdge = renderStyle.border;
-    EdgeInsetsGeometry? padding = renderStyle.padding;
-
-    double horizontalBorderLength = borderEdge.horizontal;
-    double verticalBorderLength = borderEdge.vertical;
-    double horizontalPaddingLength = padding.horizontal;
-    double verticalPaddingLength = padding.vertical;
-
     double? minWidth = renderStyle.minWidth.isAuto ? null : renderStyle.minWidth.computedValue;
     double? maxWidth = renderStyle.maxWidth.isNone ? null : renderStyle.maxWidth.computedValue;
     double? minHeight = renderStyle.minHeight.isAuto ? null : renderStyle.minHeight.computedValue;
     double? maxHeight = renderStyle.maxHeight.isNone ? null : renderStyle.maxHeight.computedValue;
 
-    // Content size calculated from style
-    logicalContentWidth = renderStyle.logicalContentWidth;
-    logicalContentHeight = renderStyle.logicalContentHeight;
+    // Need to calculated logic content size on every layout.
+    renderStyle.computeContentBoxLogicalWidth();
+    renderStyle.computeContentBoxLogicalHeight();
 
-    // Box size calculated from style
-    double? logicalWidth = logicalContentWidth != null
-        ? logicalContentWidth! + horizontalPaddingLength + horizontalBorderLength
-        : null;
-    double? logicalHeight = logicalContentHeight != null
-        ? logicalContentHeight! + verticalPaddingLength + verticalBorderLength
-        : null;
-
-    // Constraints
     // Width should be not smaller than border and padding in horizontal direction
     // when box-sizing is border-box which is only supported.
-    double minConstraintWidth = renderStyle.effectiveBorderLeftWidth.computedValue + renderStyle.effectiveBorderRightWidth.computedValue +
-      renderStyle.paddingLeft.computedValue + renderStyle.paddingRight.computedValue;
-    double maxConstraintWidth = logicalWidth ?? double.infinity;
+    double minConstraintWidth = renderStyle.effectiveBorderLeftWidth.computedValue
+      + renderStyle.effectiveBorderRightWidth.computedValue
+      + renderStyle.paddingLeft.computedValue
+      + renderStyle.paddingRight.computedValue;
+    double maxConstraintWidth = renderStyle.borderBoxLogicalWidth ?? double.infinity;
     // Height should be not smaller than border and padding in vertical direction
     // when box-sizing is border-box which is only supported.
-    double minConstraintHeight = renderStyle.effectiveBorderTopWidth.computedValue + renderStyle.effectiveBorderBottomWidth.computedValue +
-      renderStyle.paddingTop.computedValue + renderStyle.paddingBottom.computedValue;
-    double maxConstraintHeight = logicalHeight ?? double.infinity;
+    double minConstraintHeight = renderStyle.effectiveBorderTopWidth.computedValue
+      + renderStyle.effectiveBorderBottomWidth.computedValue
+      + renderStyle.paddingTop.computedValue
+      + renderStyle.paddingBottom.computedValue;
+    double maxConstraintHeight = renderStyle.borderBoxLogicalHeight ?? double.infinity;
 
     if (parent is RenderFlexLayout) {
       double? flexBasis = renderStyle.flexBasis == CSSLengthValue.auto ? null : renderStyle.flexBasis?.computedValue;
@@ -1008,12 +935,6 @@ class RenderBoxModel extends RenderBox
   Size? _contentSize;
   Size get contentSize => _contentSize ?? Size.zero;
 
-  /// Logical content width calculated from style
-  double? logicalContentWidth;
-
-  /// Logical content height calculated from style
-  double? logicalContentHeight;
-
   double get clientWidth {
     double width = contentSize.width;
     width += renderStyle.padding.horizontal;
@@ -1030,67 +951,22 @@ class RenderBoxModel extends RenderBox
   // Base layout methods to compute content constraints before content box layout.
   // Call this method before content box layout.
   void beforeLayout() {
-    BoxConstraints boxConstraints = constraints;
-    // Deflate border constraints.
-    boxConstraints = renderStyle.deflateBorderConstraints(boxConstraints);
-
-    // Deflate padding constraints.
-    boxConstraints = renderStyle.deflatePaddingConstraints(boxConstraints);
-
-    logicalContentWidth = renderStyle.logicalContentWidth;
-    logicalContentHeight = renderStyle.logicalContentHeight;
-
-    if (!isScrollingContentBox && (logicalContentWidth != null || logicalContentHeight != null)) {
-      double minWidth;
-      double? maxWidth;
-      double minHeight;
-      double? maxHeight;
-
-      if (boxConstraints.hasTightWidth) {
-        minWidth = maxWidth = boxConstraints.maxWidth;
-      } else if (logicalContentWidth != null) {
-        minWidth = 0.0;
-        maxWidth = logicalContentWidth;
-      } else {
-        minWidth = boxConstraints.minWidth;
-        maxWidth = boxConstraints.maxWidth;
-      }
-
-      if (boxConstraints.hasTightHeight) {
-        minHeight = maxHeight = boxConstraints.maxHeight;
-      } else if (logicalContentHeight != null) {
-        minHeight = 0.0;
-        maxHeight = logicalContentHeight;
-      } else {
-        minHeight = boxConstraints.minHeight;
-        maxHeight = boxConstraints.maxHeight;
-      }
-
-      // max and min size of intrinsc element should respect intrinsc ratio of each other
-      if (intrinsicRatio != null) {
-        if (!renderStyle.minWidth.isAuto && renderStyle.minHeight.isAuto) {
-          minHeight = minWidth * intrinsicRatio!;
-        }
-        if (!renderStyle.maxWidth.isNone && renderStyle.maxHeight.isNone) {
-          maxHeight = maxWidth! * intrinsicRatio!;
-        }
-        if (renderStyle.minWidth.isAuto && !renderStyle.minHeight.isAuto) {
-          minWidth = minHeight / intrinsicRatio!;
-        }
-        if (renderStyle.maxWidth.isNone && !renderStyle.maxHeight.isNone) {
-          maxWidth = maxHeight! / intrinsicRatio!;
-        }
-      }
-
-      _contentConstraints = BoxConstraints(
-        minWidth: minWidth,
-        maxWidth: maxWidth!,
-        minHeight: minHeight,
-        maxHeight: maxHeight!
-      );
+    BoxConstraints contentConstraints;
+    // @FIXME: Normally constraints is calculated in getConstraints by parent RenderLayoutBox in Kraken,
+    // except in sliver layout, constraints is calculated by [RenderSliverList] which kraken can not control,
+    // so it needs to invoke getConstraints here for sliver container's direct child.
+    if (parent is RenderSliverList) {
+      contentConstraints = getConstraints();
     } else {
-      _contentConstraints = boxConstraints;
+      // Constraints is already calculated in parent layout.
+      contentConstraints = constraints;
     }
+
+    // Deflate border constraints.
+    contentConstraints = renderStyle.deflateBorderConstraints(contentConstraints);
+    // Deflate padding constraints.
+    contentConstraints = renderStyle.deflatePaddingConstraints(contentConstraints);
+    _contentConstraints = contentConstraints;
   }
 
   /// Find scroll container
@@ -1486,12 +1362,12 @@ class RenderBoxModel extends RenderBox
     if (renderPositionPlaceholder != null)
       properties.add(
           DiagnosticsProperty('renderPositionHolder', renderPositionPlaceholder));
-    if (intrinsicWidth != null)
-      properties.add(DiagnosticsProperty('intrinsicWidth', intrinsicWidth));
-    if (intrinsicHeight != null)
-      properties.add(DiagnosticsProperty('intrinsicHeight', intrinsicHeight));
-    if (intrinsicRatio != null)
-      properties.add(DiagnosticsProperty('intrinsicRatio', intrinsicRatio));
+    if (renderStyle.intrinsicWidth != null)
+      properties.add(DiagnosticsProperty('intrinsicWidth', renderStyle.intrinsicWidth));
+    if (renderStyle.intrinsicHeight != null)
+      properties.add(DiagnosticsProperty('intrinsicHeight', renderStyle.intrinsicHeight));
+    if (renderStyle.intrinsicRatio != null)
+      properties.add(DiagnosticsProperty('intrinsicRatio', renderStyle.intrinsicRatio));
 
     debugBoxDecorationProperties(properties);
     debugVisibilityProperties(properties);

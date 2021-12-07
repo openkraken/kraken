@@ -247,13 +247,13 @@ class ImageElement extends Element {
     // Try to update image size if image already resolved.
     _renderImage?.width = width;
     _renderImage?.height = height;
-    renderBoxModel!.intrinsicWidth = naturalWidth;
-    renderBoxModel!.intrinsicHeight = naturalHeight;
+    renderStyle.intrinsicWidth = naturalWidth;
+    renderStyle.intrinsicHeight = naturalHeight;
 
     if (naturalWidth == 0.0 || naturalHeight == 0.0) {
-      renderBoxModel!.intrinsicRatio = null;
+      renderStyle.intrinsicRatio = null;
     } else {
-      renderBoxModel!.intrinsicRatio = naturalHeight / naturalWidth;
+      renderStyle.intrinsicRatio = naturalHeight / naturalWidth;
     }
   }
 
