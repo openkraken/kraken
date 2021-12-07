@@ -5,6 +5,7 @@
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/kraken.dart';
 import 'package:kraken/launcher.dart';
 
 // Children of the <head> element all have display:none
@@ -69,7 +70,8 @@ class ScriptElement extends Element {
     // Must
     if (src.isNotEmpty && isConnected && (type == _JAVASCRIPT_MIME || type == _JAVASCRIPT_MODULE)) {
       try {
-        KrakenBundle bundle = await KrakenBundle.getBundle(src, contextId: ownerDocument.contextId);
+        KrakenBundle bundle = KrakenBundle.fromUrl(src);
+        await bundle.resolve(ownerDocument.contextId);
         await bundle.eval(ownerDocument.contextId);
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
@@ -104,7 +106,8 @@ class ScriptElement extends Element {
         int contextId = ownerDocument.contextId;
         KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
         if (controller != null) {
-          KrakenBundle bundle = await KrakenBundle.getBundle(controller.href, contentOverride: script, contextId: contextId);
+          KrakenBundle bundle = KrakenBundle.fromContent(script, url: controller.href);
+          bundle.resolve(contextId);
           await bundle.eval(ownerDocument.contextId);
         }
       }

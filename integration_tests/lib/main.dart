@@ -6,6 +6,7 @@ import 'package:kraken/css.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
+import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/widget.dart';
 import 'package:ansicolor/ansicolor.dart';
@@ -82,7 +83,7 @@ void main() async {
     var kraken = krakenMap[i] = Kraken(
       viewportWidth: 360,
       viewportHeight: 640,
-      bundleContent: 'console.log("Starting integration tests...")',
+      bundle: KrakenBundle.fromContent('console.log("Starting integration tests...")'),
       disableViewportWidthAssertion: true,
       disableViewportHeightAssertion: true,
       javaScriptChannel: javaScriptChannel,
