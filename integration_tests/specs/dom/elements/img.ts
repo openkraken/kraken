@@ -323,4 +323,43 @@ describe('Tags img', () => {
     document.body.appendChild(img);
     img.src = imageURL;
   });
+
+  it('can get natualSize from repeat image url', async (done) => {
+    const flutterContainer = document.createElement('div');
+    flutterContainer.style.height = '100vh';
+    flutterContainer.style.display = 'block';
+    document.body.appendChild(flutterContainer);
+
+    const colors = ['red', 'yellow', 'black', 'blue', 'green'];
+    const images = [
+      'https://img.alicdn.com/imgextra/i1/O1CN01OPE9Pw1yFUVfLc82O_!!6000000006549-2-tps-325-289.png',
+      'https://img.alicdn.com/imgextra/i4/O1CN01Edx8Jk1ELTLfISD7H_!!6000000000335-2-tps-1000-1000.png',
+      'https://img.alicdn.com/imgextra/i3/O1CN01KgGBlg1Y2xfB9wnnJ_!!6000000003002-2-tps-325-289.png',
+    ];
+
+    let loadedCount = 0;
+    let imgCount = 10;
+
+    for (let i = 0; i < imgCount; i++) {
+      const div = document.createElement('div');
+      div.style.width = '100px';
+      div.style.height = '100px';
+      div.style.border = `3px solid ${colors[i % colors.length]}`
+      div.appendChild(document.createTextNode(i));
+
+      const img = document.createElement('img');
+      img.src = images[i % images.length];
+      div.appendChild(img);
+      img.style.width = '100px';
+      img.onload = async () => {
+        loadedCount++;
+        if (loadedCount == imgCount) {
+          await snapshot();
+          done();
+        }
+      };
+
+      flutterContainer.appendChild(div);
+    }
+  });
 });
