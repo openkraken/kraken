@@ -12,8 +12,14 @@ namespace kraken {
 bool JSBridgeTest::evaluateTestScripts(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) {
   if (!context->isValid())
     return false;
-  //  binding::jsc::updateLocation(sourceURL);
   return context->evaluateJavaScript(code, codeLength, sourceURL, startLine);
+}
+
+bool JSBridgeTest::parseTestHTML(const uint16_t* code, size_t codeLength) {
+  if (!context->isValid())
+    return false;
+  std::string utf8Code = toUTF8(std::u16string(reinterpret_cast<const char16_t*>(code), codeLength));
+  return bridge_->parseHTML(utf8Code.c_str(), utf8Code.length());
 }
 
 static JSValue executeTest(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
@@ -64,7 +70,7 @@ static JSValue matchImageSnapshot(QjsContext* ctx, JSValueConst this_val, int ar
     return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_match_image_snapshot__': dart method (matchImageSnapshot) is not registered.");
   }
 
-  NativeString* screenShotNativeString = kraken::binding::qjs::jsValueToNativeString(ctx, screenShotValue);
+  std::unique_ptr<NativeString> screenShotNativeString = kraken::binding::qjs::jsValueToNativeString(ctx, screenShotValue);
   auto bridge = static_cast<JSBridgeTest*>(static_cast<JSBridge*>(context->getOwner())->owner);
   auto* callbackContext = new ImageSnapShotContext{JS_DupValue(ctx, callbackValue), context};
   list_add_tail(&callbackContext->link, &bridge->image_link);
@@ -90,7 +96,7 @@ static JSValue matchImageSnapshot(QjsContext* ctx, JSValueConst this_val, int ar
     list_del(&callbackContext->link);
   };
 
-  getDartMethod()->matchImageSnapshot(callbackContext, context->getContextId(), blob->bytes(), blob->size(), screenShotNativeString, fn);
+  getDartMethod()->matchImageSnapshot(callbackContext, context->getContextId(), blob->bytes(), blob->size(), screenShotNativeString.get(), fn);
   return JS_NULL;
 }
 
@@ -178,8 +184,8 @@ static JSValue simulateInputText(QjsContext* ctx, JSValueConst this_val, int arg
     return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_keypress__': first arguments should be a string");
   }
 
-  NativeString* nativeString = kraken::binding::qjs::jsValueToNativeString(ctx, charStringValue);
-  getDartMethod()->simulateInputText(nativeString);
+  std::unique_ptr<NativeString> nativeString = kraken::binding::qjs::jsValueToNativeString(ctx, charStringValue);
+  getDartMethod()->simulateInputText(nativeString.get());
   nativeString->free();
   return JS_NULL;
 };
@@ -187,6 +193,26 @@ static JSValue simulateInputText(QjsContext* ctx, JSValueConst this_val, int arg
 static JSValue runGC(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   auto* context = static_cast<binding::qjs::JSContext*>(JS_GetContextOpaque(ctx));
   JS_RunGC(context->runtime());
+  return JS_NULL;
+}
+
+static JSValue parseHTML(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+  auto* context = static_cast<binding::qjs::JSContext*>(JS_GetContextOpaque(ctx));
+
+  if (argc == 1) {
+    JSValue& html = argv[0];
+
+    std::string strHTML = binding::qjs::jsValueToStdString(ctx, html);
+
+    binding::qjs::Document* Document = binding::qjs::Document::instance(context);
+    auto document = binding::qjs::DocumentInstance::instance(Document);
+    JSValue bodyValue = JS_GetPropertyStr(context->ctx(), document->instanceObject, "body");
+    auto* body = static_cast<binding::qjs::ElementInstance*>(JS_GetOpaque(bodyValue, binding::qjs::Element::classId()));
+    binding::qjs::HTMLParser::parseHTML(strHTML, body);
+
+    JS_FreeValue(ctx, bodyValue);
+  }
+
   return JS_NULL;
 }
 
@@ -214,6 +240,7 @@ JSBridgeTest::JSBridgeTest(JSBridge* bridge) : bridge_(bridge), context(bridge->
   QJS_GLOBAL_BINDING_FUNCTION(context, simulateInputText, "__kraken_simulate_inputtext__", 1);
   QJS_GLOBAL_BINDING_FUNCTION(context, triggerGlobalError, "__kraken_trigger_global_error__", 0);
   QJS_GLOBAL_BINDING_FUNCTION(context, runGC, "__kraken_run_gc__", 0);
+  QJS_GLOBAL_BINDING_FUNCTION(context, parseHTML, "__kraken_parse_html__", 1);
 
   initKrakenTestFramework(bridge);
   init_list_head(&image_link);
@@ -244,9 +271,8 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
       return JS_ThrowTypeError(ctx, "failed to execute 'done': parameter 1 (status) is not a string");
     }
 
-    NativeString* status = kraken::binding::qjs::jsValueToNativeString(ctx, statusValue);
-    callbackContext->executeCallback(callbackContext->context->getContextId(), status);
-    status->free();
+    std::unique_ptr<NativeString> status = kraken::binding::qjs::jsValueToNativeString(ctx, statusValue);
+    callbackContext->executeCallback(callbackContext->context->getContextId(), status.get());
     return JS_NULL;
   };
   auto* callbackContext = new ExecuteCallbackContext(context.get(), executeCallback);
