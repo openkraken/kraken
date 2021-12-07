@@ -16,6 +16,7 @@ namespace kraken::binding::qjs {
 class HTMLParser {
  public:
   static bool parseHTML(const char* code, size_t codeLength, NodeInstance* rootNode);
+  static bool parseHTML(std::string html, NodeInstance* rootNode);
 
  private:
   JSContext* m_context;

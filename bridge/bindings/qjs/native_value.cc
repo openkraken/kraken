@@ -28,8 +28,9 @@ NativeValue Native_NewString(NativeString* string) {
 }
 
 NativeValue Native_NewCString(std::string string) {
-  NativeString* nativeString = stringToNativeString(string);
-  return Native_NewString(nativeString);
+  std::unique_ptr<NativeString> nativeString = stringToNativeString(string);
+  // NativeString owned by NativeValue will be freed by users.
+  return Native_NewString(nativeString.release());
 }
 
 NativeValue Native_NewFloat64(double value) {
@@ -62,7 +63,11 @@ NativeValue Native_NewInt32(int32_t value) {
 
 NativeValue Native_NewJSON(JSContext* context, JSValue& value) {
   JSValue stringifiedValue = JS_JSONStringify(context->ctx(), value, JS_UNDEFINED, JS_UNDEFINED);
-  NativeString* string = jsValueToNativeString(context->ctx(), stringifiedValue);
+  if (JS_IsException(stringifiedValue))
+    return Native_NewNull();
+
+  // NativeString owned by NativeValue will be freed by users.
+  NativeString* string = jsValueToNativeString(context->ctx(), stringifiedValue).release();
   NativeValue result = (NativeValue){
       0,
       .u = {.ptr = static_cast<void*>(string)},
@@ -110,7 +115,8 @@ NativeValue jsValueToNativeValue(QjsContext* ctx, JSValue& value) {
       return Native_NewInt32(v);
     }
   } else if (JS_IsString(value)) {
-    NativeString* string = jsValueToNativeString(ctx, value);
+    // NativeString owned by NativeValue will be freed by users.
+    NativeString* string = jsValueToNativeString(ctx, value).release();
     return Native_NewString(string);
   } else if (JS_IsFunction(ctx, value)) {
     auto* context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));

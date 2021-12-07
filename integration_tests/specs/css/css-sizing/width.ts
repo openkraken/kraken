@@ -228,6 +228,33 @@ describe('Width', function() {
     await snapshot();
   });
 
+  it('should work with percentage with decimal point', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            height: '100px',
+            width: '50.00%',
+            backgroundColor: 'yellow',
+          }
+        }),
+      ]
+    );
+
+    BODY.appendChild(div);
+    await snapshot();
+  });
+
   it('should work with percentage and multiple children in flow layout', async () => {
     let div;
     let foo;

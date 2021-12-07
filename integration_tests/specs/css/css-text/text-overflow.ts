@@ -160,4 +160,44 @@ describe('Text Overflow', () => {
 
     await snapshot();
   });
+
+  it('should works with ellipsis of one line and lineHeight exists',() => {
+    const cont = createElementWithStyle(
+      'div',
+      {
+        width: '80px',
+        backgroundColor: '#f40',
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+        textOverflow: 'ellipsis',
+      },
+      [
+        createText('text with ellipsis in one lines'),
+      ]
+    );
+
+    append(BODY, cont);
+
+    return snapshot();
+  });
+
+  it('should works with ellipsis of two line and lineHeight exists',() => {
+    const cont = createElementWithStyle(
+      'div',
+      {
+        width: '80px',
+        backgroundColor: '#f40',
+        overflow: 'hidden',
+        lineClamp: 2,
+        textOverflow: 'ellipsis',
+      },
+      [
+        createText('text with ellipsis in two lines'),
+      ]
+    );
+
+    append(BODY, cont);
+
+    return snapshot();
+  });
 });

@@ -48,25 +48,24 @@ List<String> _scrollingContentBoxCopyStyles = [
   LINE_CLAMP,
 ];
 
-mixin CSSOverflowMixin on RenderStyleBase {
+mixin CSSOverflowMixin on RenderStyle {
+  @override
+  CSSOverflowType get overflowX => _overflowX ?? CSSOverflowType.visible;
   CSSOverflowType? _overflowX;
-  CSSOverflowType get overflowX {
-    return _overflowX ?? CSSOverflowType.visible;
-  }
   set overflowX(CSSOverflowType value) {
     if (_overflowX == value) return;
     _overflowX = value;
   }
 
+  @override
+  CSSOverflowType get overflowY => _overflowY ?? CSSOverflowType.visible;
   CSSOverflowType? _overflowY;
-  CSSOverflowType get overflowY {
-    return _overflowY ?? CSSOverflowType.visible;
-  }
   set overflowY(CSSOverflowType value) {
     if (_overflowY == value) return;
     _overflowY = value;
   }
 
+  @override
   CSSOverflowType get effectiveOverflowX {
     if (overflowX == CSSOverflowType.visible && overflowY != CSSOverflowType.visible) {
       return CSSOverflowType.auto;
@@ -74,6 +73,7 @@ mixin CSSOverflowMixin on RenderStyleBase {
     return overflowX;
   }
 
+  @override
   CSSOverflowType get effectiveOverflowY {
     if (overflowY == CSSOverflowType.visible && overflowX != CSSOverflowType.visible) {
       return CSSOverflowType.auto;
@@ -104,6 +104,11 @@ mixin ElementOverflowMixin on ElementBase {
 
   KrakenScrollable? _scrollableX;
   KrakenScrollable? _scrollableY;
+
+  void disposeScrollable() {
+    _scrollableX = null;
+    _scrollableY = null;
+  }
 
   void updateRenderBoxModelWithOverflowX(ScrollListener scrollListener) {
     if (renderBoxModel is RenderSliverListLayout) {
@@ -147,7 +152,7 @@ mixin ElementOverflowMixin on ElementBase {
       }
 
       renderBoxModel.scrollListener = scrollListener;
-      renderBoxModel.pointerListener = _pointerListener;
+      renderBoxModel.scrollablePointerListener = _scrollablePointerListener;
 
       if (renderBoxModel is RenderLayoutBox) {
         if (shouldScrolling) {
@@ -199,7 +204,7 @@ mixin ElementOverflowMixin on ElementBase {
       }
 
       renderBoxModel.scrollListener = scrollListener;
-      renderBoxModel.pointerListener = _pointerListener;
+      renderBoxModel.scrollablePointerListener = _scrollablePointerListener;
 
       if (renderBoxModel is RenderLayoutBox) {
         if (shouldScrolling) {
@@ -212,9 +217,12 @@ mixin ElementOverflowMixin on ElementBase {
   }
 
   void scrollingContentBoxStyleListener(String property, String? original, String present) {
-    RenderLayoutBox scrollingContentBox = (renderBoxModel as RenderLayoutBox).renderScrollingContent!;
-    RenderStyle scrollingContentRenderStyle = scrollingContentBox.renderStyle;
-    
+    RenderLayoutBox? scrollingContentBox = (renderBoxModel as RenderLayoutBox).renderScrollingContent;
+    // Sliver content has no multi scroll content box.
+    if (scrollingContentBox == null) return;
+
+    CSSRenderStyle scrollingContentRenderStyle = scrollingContentBox.renderStyle;
+
     switch (property) {
       case DISPLAY:
         scrollingContentRenderStyle.display = renderStyle.display;
@@ -334,7 +342,7 @@ mixin ElementOverflowMixin on ElementBase {
     outerLayoutBox.addAll(children);
   }
 
-  void _pointerListener(PointerEvent event) {
+  void _scrollablePointerListener(PointerEvent event) {
     if (event is PointerDownEvent) {
       if (_scrollableX != null) {
         _scrollableX!.handlePointerDown(event);

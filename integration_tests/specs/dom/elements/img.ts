@@ -8,7 +8,7 @@ describe('Tags img', () => {
     img.style.width = '60px';
     img.setAttribute(
       'src',
-      '//gw.alicdn.com/tfs/TB1MRC_cvb2gK0jSZK9XXaEgFXa-1701-1535.png'
+      'assets/100x100-green.png'
     );
 
     document.body.appendChild(img);
@@ -158,7 +158,7 @@ describe('Tags img', () => {
     var img = document.createElement('img');
     img.onload = function() {
       expect(img.naturalWidth).toEqual(200);
-      expect(img.naturalWidth).toEqual(200);
+      expect(img.naturalHeight).toEqual(200);
       done();
     };
     img.src = imageURL;
@@ -174,14 +174,14 @@ describe('Tags img', () => {
     expect(img.height).toEqual(20);
     // Image has not been loaded.
     expect(img.naturalWidth).toEqual(0);
-    expect(img.naturalWidth).toEqual(0);
+    expect(img.naturalHeight).toEqual(0);
   });
 
   it('should work with loading=lazy', (done) => {
     const img = document.createElement('img');
     // Make image loading=lazy.
     img.setAttribute('loading', 'lazy');
-    img.src = '//gw.alicdn.com/tfs/TB1MRC_cvb2gK0jSZK9XXaEgFXa-1701-1535.png';
+    img.src = 'assets/100x100-green.png';
     img.style.width = '60px';
 
     document.body.appendChild(img);
@@ -303,7 +303,7 @@ describe('Tags img', () => {
     }, 100);
   });
 
-  it('gif can replay', async (done) => {
+  it('gif can not replay by remove nodes', async (done) => {
     const imageURL = 'assets/sample-gif-40k.gif';
     const img = document.createElement('img');
 
@@ -311,14 +311,11 @@ describe('Tags img', () => {
       await snapshot(img);
       document.body.removeChild(img);
 
-      setTimeout(() => {
+      setTimeout(async () => {
+        // When img re-append to document, to Gif image will continue to play.
         document.body.appendChild(img);
-        // After next frame that image has shown.
-        requestAnimationFrame(async () => {
-          // When replay, the image should be same as first frame.
-          await snapshot(img);
-          done();
-        });
+        await snapshot(img);
+        done();
         // Delay 200ms to play gif.
       }, 200);
     };

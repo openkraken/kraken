@@ -51,6 +51,35 @@ TEST(Context, unrejectPromiseError) {
   delete bridge;
 }
 
+TEST(Context, unrejectPromiseErrorWithMultipleContext) {
+  bool errorHandlerExecuted = false;
+  int32_t errorCalledCount = 0;
+  auto errorHandler = [&errorHandlerExecuted, &errorCalledCount](int32_t contextId, const char* errmsg) {
+    errorHandlerExecuted = true;
+    errorCalledCount++;
+    EXPECT_STREQ(errmsg,
+                 "TypeError: cannot read property 'forceNullError' of null\n"
+                 "    at <anonymous> (file://:4)\n"
+                 "    at Promise (native)\n"
+                 "    at <eval> (file://:6)\n");
+  };
+  auto bridge2 = new kraken::JSBridge(0, errorHandler);
+  auto bridge = new kraken::JSBridge(0, errorHandler);
+  const char* code =
+      " var p = new Promise(function (resolve, reject) {\n"
+      "        var nullObject = null;\n"
+      "        // Raise a TypeError: Cannot read property 'forceNullError' of null\n"
+      "        var x = nullObject.forceNullError();\n"
+      "        resolve();\n"
+      "    });\n"
+      "\n";
+  bridge->evaluateScript(code, strlen(code), "file://", 0);
+  bridge2->evaluateScript(code, strlen(code), "file://", 0);
+  EXPECT_EQ(errorHandlerExecuted, true);
+  EXPECT_EQ(errorCalledCount, 2);
+  delete bridge;
+}
+
 TEST(Context, window) {
   bool errorHandlerExecuted = false;
   static bool logCalled = false;
@@ -114,7 +143,7 @@ TEST(Context, evaluateByteCode) {
 TEST(jsValueToNativeString, utf8String) {
   auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {});
   JSValue str = JS_NewString(bridge->getContext()->ctx(), "helloworld");
-  NativeString* nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
+  std::unique_ptr<NativeString> nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
   EXPECT_EQ(nativeString->length, 10);
   uint8_t expectedString[10] = {104, 101, 108, 108, 111, 119, 111, 114, 108, 100};
   for (int i = 0; i < 10; i++) {
@@ -127,7 +156,7 @@ TEST(jsValueToNativeString, utf8String) {
 TEST(jsValueToNativeString, unicodeChinese) {
   auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {});
   JSValue str = JS_NewString(bridge->getContext()->ctx(), "这是你的优乐美");
-  NativeString* nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
+  std::unique_ptr<NativeString> nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
   std::u16string expectedString = u"这是你的优乐美";
   EXPECT_EQ(nativeString->length, expectedString.size());
   for (int i = 0; i < nativeString->length; i++) {
@@ -140,7 +169,7 @@ TEST(jsValueToNativeString, unicodeChinese) {
 TEST(jsValueToNativeString, emoji) {
   auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {});
   JSValue str = JS_NewString(bridge->getContext()->ctx(), "……🤪");
-  NativeString* nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
+  std::unique_ptr<NativeString> nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
   std::u16string expectedString = u"……🤪";
   EXPECT_EQ(nativeString->length, expectedString.length());
   for (int i = 0; i < nativeString->length; i++) {

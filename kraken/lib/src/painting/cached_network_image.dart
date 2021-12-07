@@ -13,7 +13,30 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:kraken/foundation.dart';
 
-class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
+class CachedNetworkImageKey {
+  CachedNetworkImageKey({
+    required this.url,
+    required this.scale
+  });
+
+  final String url;
+
+  final double scale;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is CachedNetworkImageKey
+        && other.url == url
+        && other.scale == scale;
+  }
+
+  @override
+  int get hashCode => hashValues(url, scale);
+}
+
+class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
   const CachedNetworkImage(this.url, {this.scale = 1.0, this.headers, this.contextId});
 
   final String url;
@@ -39,14 +62,14 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
     return client;
   }
 
-  Future<Uint8List> loadFile(CachedNetworkImage key, StreamController<ImageChunkEvent> chunkEvents) async {
+  Future<Uint8List> loadFile(CachedNetworkImageKey key, StreamController<ImageChunkEvent> chunkEvents) async {
     HttpCacheController cacheController = HttpCacheController.instance(
         getOrigin(getReferrer(contextId)));
 
     Uri uri = Uri.parse(url);
-    HttpCacheObject? cacheObject = await cacheController.getCacheObject(uri);
     Uint8List? bytes;
     try {
+      HttpCacheObject? cacheObject = await cacheController.getCacheObject(uri);
       bytes = await cacheObject.toBinaryContent();
     } catch (error, stackTrace) {
       print('Error while reading cache, $error\n$stackTrace');
@@ -59,7 +82,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
   }
 
   Future<Codec?> _loadImage(
-      CachedNetworkImage key, DecoderCallback decode, StreamController<ImageChunkEvent> chunkEvents) async {
+      CachedNetworkImageKey key, DecoderCallback decode, StreamController<ImageChunkEvent> chunkEvents) async {
     Uint8List bytes = await loadFile(key, chunkEvents);
 
     if (bytes.isNotEmpty) {
@@ -68,7 +91,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
     return null;
   }
 
-  Future<Uint8List> fetchFile(CachedNetworkImage key,
+  Future<Uint8List> fetchFile(CachedNetworkImageKey key,
       StreamController<ImageChunkEvent> chunkEvents,
       HttpCacheController cacheController) async {
     try {
@@ -107,12 +130,15 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
   }
 
   @override
-  Future<CachedNetworkImage> obtainKey(ImageConfiguration configuration) {
-    return SynchronousFuture<CachedNetworkImage>(this);
+  Future<CachedNetworkImageKey> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<CachedNetworkImageKey>(CachedNetworkImageKey(
+      url: url,
+      scale: scale
+    ));
   }
 
   @override
-  ImageStreamCompleter load(CachedNetworkImage key, DecoderCallback decode) {
+  ImageStreamCompleter load(CachedNetworkImageKey key, DecoderCallback decode) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
@@ -125,7 +151,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
         informationCollector: () {
           return <DiagnosticsNode>[
             DiagnosticsProperty<ImageProvider>('Image provider', this),
-            DiagnosticsProperty<CachedNetworkImage>('Image key', key),
+            DiagnosticsProperty<CachedNetworkImageKey>('Image key', key),
           ];
         });
   }

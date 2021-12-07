@@ -35,7 +35,7 @@ typedef Native_EvaluateTestScripts = Int8 Function(Int32 contextId, Pointer<Nati
 typedef Dart_EvaluateTestScripts = int Function(int contextId, Pointer<NativeString>, Pointer<Utf8>, int);
 
 final Dart_EvaluateTestScripts _evaluateTestScripts =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_EvaluateTestScripts>>('evaluateTestScripts').asFunction();
+nativeDynamicLibrary.lookup<NativeFunction<Native_EvaluateTestScripts>>('evaluateTestScripts').asFunction();
 
 void evaluateTestScripts(int contextId, String code, {String url = 'test://', int line = 0}) {
   Pointer<Utf8> _url = (url).toNativeUtf8();
