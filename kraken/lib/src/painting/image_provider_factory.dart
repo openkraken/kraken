@@ -12,6 +12,7 @@ import 'package:flutter/painting.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/painting.dart';
+import 'package:quiver/collection.dart';
 
 /// This class allows user to customize Kraken's image loading.
 
@@ -215,6 +216,11 @@ class KrakenResizeImage extends ResizeImage {
     int? height,
   }) : super(imageProvider, width: width, height: height);
 
+  static final LinkedLruHashMap<dynamic, Size> _imageNaturalSize = LinkedLruHashMap(maximumSize: 100);
+  static Size? getImageNaturalSize(dynamic key) {
+    return _imageNaturalSize[key];
+  }
+
   static ImageProvider<Object> resizeIfNeeded(
       int? cacheWidth, int? cacheHeight, ImageProvider<Object> provider) {
     if (cacheWidth != null || cacheHeight != null) {
@@ -224,12 +230,8 @@ class KrakenResizeImage extends ResizeImage {
     return provider;
   }
 
-  int naturalWidth = 0;
-  int naturalHeight = 0;
-
   @override
-  void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream,
-      key, ImageErrorListener handleError) {
+  void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream, key, ImageErrorListener handleError) {
     // This is an unusual edge case where someone has told us that they found
     // the image we want before getting to this method. We should avoid calling
     // load again, but still update the image cache with LRU information.
@@ -274,13 +276,23 @@ class KrakenResizeImage extends ResizeImage {
       }
     }
 
-    naturalWidth = descriptor.width;
-    naturalHeight = descriptor.height;
+    // Cache the image's original size for element.naturalWidth and element.naturalHeight API.
+    dynamic key = await obtainKey(ImageConfiguration.empty);
+    _imageNaturalSize[key] = Size(descriptor.width.toDouble(), descriptor.height.toDouble());
 
     return descriptor.instantiateCodec(
       targetWidth: cacheWidth,
       targetHeight: cacheHeight,
     );
+  }
+
+  @override
+  Future<bool> evict({ImageCache? cache, ImageConfiguration configuration = ImageConfiguration.empty}) async {
+    Future<bool> result = super.evict(cache: cache, configuration: configuration);
+    // Clear _imageNaturalSize when imageProvider evicted.
+    final key = await obtainKey(configuration);
+    _imageNaturalSize.remove(key);
+    return result;
   }
 }
 
