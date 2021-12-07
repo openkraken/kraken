@@ -15,6 +15,8 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 
 const String IMAGE = 'IMG';
+const String NATURAL_WIDTH = 'naturalWidth';
+const String NATURAL_HEIGHT = 'naturalHeight';
 
 // FIXME: should be inline default.
 const Map<String, dynamic> _defaultStyle = {

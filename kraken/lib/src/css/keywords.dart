@@ -19,8 +19,6 @@ const String MIN_HEIGHT = 'minHeight';
 const String MAX_HEIGHT = 'maxHeight';
 const String MIN_WIDTH = 'minWidth';
 const String MAX_WIDTH = 'maxWidth';
-const String NATURAL_WIDTH = 'naturalWidth';
-const String NATURAL_HEIGHT = 'naturalHeight';
 
 const String OVERFLOW = 'overflow';
 const String OVERFLOW_X = 'overflowX';
