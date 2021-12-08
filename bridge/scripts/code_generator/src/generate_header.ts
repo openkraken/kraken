@@ -6,7 +6,7 @@ import {addIndent} from "./utils";
 function generatePropsHeader(object: ClassObject, type: PropType) {
   let propsDefine = '';
   if (object.props.length > 0) {
-    propsDefine = `${type == PropType.hostObject ? 'DEFINE_HOST_OBJECT_PROPERTY' : 'DEFINE_HOST_CLASS_PROPERTY'}(${object.props.length}, ${object.props.map(o => o.name).join(', ')})`;
+    propsDefine = `${type == PropType.hostObject ? 'DEFINE_HOST_OBJECT_PROPERTY' : 'DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY'}(${object.props.length}, ${object.props.map(o => o.name).join(', ')})`;
   }
   return propsDefine;
 }
@@ -88,6 +88,8 @@ ${addIndent(nativeStructPropsCode.join('\n'), 2)}
   let constructorHeader = `\n
 void bind${object.name}(std::unique_ptr<JSContext> &context);
 
+class ${object.name}Instance;
+
 ${nativeStructCode}
 class ${object.name} : public ${object.type} {
 public:
@@ -97,7 +99,9 @@ public:
   ${methodsDefine.join('\n  ')}
   OBJECT_INSTANCE(${object.name});
 private:
+  ${propsDefine}
   ${methodsImpl.join('\n  ')}
+  friend ${object.name}Instance;
 };`;
 
   let instanceConstructorHeader = ``;
@@ -112,7 +116,7 @@ public:
   ${object.name}Instance() = delete;
   ${instanceConstructorHeader}
 private:
-  ${propsDefine}
+  friend ${object.name};
 };
 `;
 

@@ -31,6 +31,7 @@ class Blob : public HostClass {
 
  private:
   friend BlobInstance;
+  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(2, type, size);
 
   ObjectFunction m_arrayBuffer{m_context, m_prototypeObject, "arrayBuffer", arrayBuffer, 0};
   ObjectFunction m_slice{m_context, m_prototypeObject, "slice", slice, 3};
@@ -51,7 +52,6 @@ class BlobInstance : public Instance {
   int32_t size();
 
  private:
-  DEFINE_HOST_CLASS_PROPERTY(2, type, size);
   size_t _size;
   std::string mimeType{""};
   std::vector<uint8_t> _data;

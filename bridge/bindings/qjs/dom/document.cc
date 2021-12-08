@@ -300,14 +300,14 @@ bool Document::isCustomElement(const std::string& tagName) {
   return elementConstructorMap.count(tagName) > 0;
 }
 
-PROP_GETTER(DocumentInstance, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER(Document, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewString(ctx, "#document");
 }
-PROP_SETTER(DocumentInstance, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER(Document, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(DocumentInstance, all)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER(Document, all)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   auto all = new AllCollection(document->m_context);
 
@@ -318,16 +318,16 @@ PROP_GETTER(DocumentInstance, all)(QjsContext* ctx, JSValue this_val, int argc, 
 
   return all->jsObject;
 }
-PROP_SETTER(DocumentInstance, all)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER(Document, all)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(DocumentInstance, cookie)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER(Document, cookie)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   std::string cookie = document->m_cookie->getCookie();
   return JS_NewString(ctx, cookie.c_str());
 }
-PROP_SETTER(DocumentInstance, cookie)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER(Document, cookie)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   std::string value = jsValueToStdString(ctx, argv[0]);
   document->m_cookie->setCookie(value);

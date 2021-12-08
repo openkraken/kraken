@@ -23,15 +23,15 @@ JSValue TemplateElement::instanceConstructor(QjsContext* ctx, JSValue func_obj, 
   auto instance = new TemplateElementInstance(this);
   return instance->instanceObject;
 }
-PROP_GETTER(TemplateElementInstance, content)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER(TemplateElement, content)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<TemplateElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   return JS_DupValue(ctx, element->m_content->instanceObject);
 }
-PROP_SETTER(TemplateElementInstance, content)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER(TemplateElement, content)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
-PROP_GETTER(TemplateElementInstance, innerHTML)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER(TemplateElement, innerHTML)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<TemplateElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
 
@@ -50,7 +50,7 @@ PROP_GETTER(TemplateElementInstance, innerHTML)(QjsContext* ctx, JSValue this_va
   }
   return JS_NewString(ctx, s.c_str());
 }
-PROP_SETTER(TemplateElementInstance, innerHTML)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER(TemplateElement, innerHTML)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<TemplateElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   const char* codeString = JS_ToCString(ctx, argv[0]);
   size_t len = strlen(codeString);

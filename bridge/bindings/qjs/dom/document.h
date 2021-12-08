@@ -43,6 +43,8 @@ class Document : public Node {
   bool isCustomElement(const std::string& tagName);
 
  private:
+  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(3, nodeName, all, cookie);
+
   void defineElement(const std::string& tagName, Element* constructor);
 
   ObjectFunction m_createEvent{m_context, m_prototypeObject, "createEvent", createEvent, 1};
@@ -86,7 +88,6 @@ class DocumentInstance : public NodeInstance {
   }
 
  private:
-  DEFINE_HOST_CLASS_PROPERTY(3, nodeName, all, cookie);
 
   void removeElementById(JSAtom id, ElementInstance* element);
   void addElementById(JSAtom id, ElementInstance* element);

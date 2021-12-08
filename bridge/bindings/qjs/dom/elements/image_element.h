@@ -12,6 +12,7 @@ namespace kraken::binding::qjs {
 
 void bindImageElement(std::unique_ptr<JSContext>& context);
 
+class ImageElementInstance;
 class ImageElement : public Element {
  public:
   ImageElement() = delete;
@@ -19,9 +20,11 @@ class ImageElement : public Element {
   JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
   OBJECT_INSTANCE(ImageElement);
-
  private:
+  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(6, width, height, naturalWidth, naturalHeight, src, loading)
+  friend ImageElementInstance;
 };
+
 class ImageElementInstance : public ElementInstance {
  public:
   ImageElementInstance() = delete;
@@ -30,7 +33,7 @@ class ImageElementInstance : public ElementInstance {
 
  private:
   bool freed{false};
-  DEFINE_HOST_CLASS_PROPERTY(6, width, height, naturalWidth, naturalHeight, src, loading)
+  friend ImageElement;
 };
 
 }  // namespace kraken::binding::qjs

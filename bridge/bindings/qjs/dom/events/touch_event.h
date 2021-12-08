@@ -69,6 +69,7 @@ struct NativeTouchEvent {
   int64_t ctrlKey;
   int64_t shiftKey;
 };
+class TouchEventInstance;
 class TouchEvent : public Event {
  public:
   TouchEvent() = delete;
@@ -76,16 +77,18 @@ class TouchEvent : public Event {
   JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
   OBJECT_INSTANCE(TouchEvent);
-
  private:
+  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(7, touches, targetTouches, changedTouches, altKey, metaKey, ctrlKey, shiftKey)
+  friend TouchEventInstance;
 };
+
 class TouchEventInstance : public EventInstance {
  public:
   TouchEventInstance() = delete;
   explicit TouchEventInstance(TouchEvent* event, NativeEvent* nativeEvent);
 
  private:
-  DEFINE_HOST_CLASS_PROPERTY(7, touches, targetTouches, changedTouches, altKey, metaKey, ctrlKey, shiftKey)
+  friend TouchEvent;
 };
 
 }  // namespace kraken::binding::qjs

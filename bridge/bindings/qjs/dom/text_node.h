@@ -26,6 +26,7 @@ class TextNode : public Node {
   JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
  private:
+  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(3, data, nodeValue, nodeName);
   friend TextNodeInstance;
 };
 
@@ -38,7 +39,6 @@ class TextNodeInstance : public NodeInstance {
   std::string toString();
 
  private:
-  DEFINE_HOST_CLASS_PROPERTY(3, data, nodeValue, nodeName);
   JSValue internalGetTextContent() override;
   void internalSetTextContent(JSValue content) override;
   friend TextNode;

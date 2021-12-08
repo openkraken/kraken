@@ -31,24 +31,24 @@ JSValue Comment::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue 
   return (new CommentInstance(this))->instanceObject;
 }
 
-PROP_GETTER(CommentInstance, data)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER(Comment, data)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewString(ctx, "");
 }
-PROP_SETTER(CommentInstance, data)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER(Comment, data)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(CommentInstance, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER(Comment, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewString(ctx, "#comment");
 }
-PROP_SETTER(CommentInstance, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER(Comment, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(CommentInstance, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER(Comment, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewUint32(ctx, 0);
 }
-PROP_SETTER(CommentInstance, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER(Comment, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
 
