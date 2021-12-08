@@ -450,7 +450,6 @@ class ImageElement extends Element {
       case NATURAL_HEIGHT:
         return naturalHeight;
     }
-
     return super.getProperty(key);
   }
 
