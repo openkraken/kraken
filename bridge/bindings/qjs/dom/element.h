@@ -90,6 +90,28 @@ class Element : public Node {
   OBJECT_INSTANCE(Element);
 
  private:
+  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(20,
+                                       nodeName,
+                                       tagName,
+                                       className,
+                                       offsetLeft,
+                                       offsetTop,
+                                       offsetWidth,
+                                       offsetHeight,
+                                       clientWidth,
+                                       clientHeight,
+                                       clientTop,
+                                       clientLeft,
+                                       scrollTop,
+                                       scrollLeft,
+                                       scrollHeight,
+                                       scrollWidth,
+                                       firstElementChild,
+                                       lastElementChild,
+                                       children,
+                                       innerHTML,
+                                       outerHTML);
+
   ObjectFunction m_getBoundingClientRect{m_context, m_prototypeObject, "getBoundingClientRect", getBoundingClientRect, 0};
   ObjectFunction m_hasAttribute{m_context, m_prototypeObject, "hasAttribute", hasAttribute, 1};
   ObjectFunction m_setAttribute{m_context, m_prototypeObject, "setAttribute", setAttribute, 2};
@@ -129,27 +151,6 @@ class ElementInstance : public NodeInstance {
   explicit ElementInstance(Element* element, std::string tagName, bool shouldAddUICommand);
 
  private:
-  DEFINE_HOST_CLASS_PROPERTY(20,
-                             nodeName,
-                             tagName,
-                             className,
-                             offsetLeft,
-                             offsetTop,
-                             offsetWidth,
-                             offsetHeight,
-                             clientWidth,
-                             clientHeight,
-                             clientTop,
-                             clientLeft,
-                             scrollTop,
-                             scrollLeft,
-                             scrollHeight,
-                             scrollWidth,
-                             firstElementChild,
-                             lastElementChild,
-                             children,
-                             innerHTML,
-                             outerHTML);
   void _notifyNodeRemoved(NodeInstance* node) override;
   void _notifyChildRemoved();
   void _notifyNodeInsert(NodeInstance* insertNode) override;

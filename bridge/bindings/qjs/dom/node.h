@@ -44,6 +44,8 @@ class Node : public EventTarget {
   static JSValue replaceChild(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
  private:
+  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(9, isConnected, ownerDocument, firstChild, lastChild, parentNode, previousSibling, nextSibling, nodeType, textContent);
+
   ObjectFunction m_cloneNode{m_context, m_prototypeObject, "cloneNode", cloneNode, 1};
   ObjectFunction m_appendChild{m_context, m_prototypeObject, "appendChild", appendChild, 1};
   ObjectFunction m_remove{m_context, m_prototypeObject, "remove", remove, 0};
@@ -111,7 +113,6 @@ class NodeInstance : public EventTargetInstance {
   void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
  private:
-  DEFINE_HOST_CLASS_PROPERTY(9, isConnected, ownerDocument, firstChild, lastChild, parentNode, previousSibling, nextSibling, nodeType, textContent);
   DocumentInstance* m_document{nullptr};
   ObjectProperty m_childNodes{m_context, instanceObject, "childNodes", childNodes};
   void ensureDetached(NodeInstance* node);
