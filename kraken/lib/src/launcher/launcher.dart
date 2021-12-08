@@ -5,7 +5,7 @@
 
 import 'dart:io';
 import 'dart:ui';
-
+import 'dart:async';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
@@ -19,9 +19,7 @@ typedef ConnectedCallback = void Function();
 const _white = Color(0xFFFFFFFF);
 
 void launch({
-  String? bundleURL,
-  String? bundlePath,
-  String? bundleContent,
+  KrakenBundle? bundle,
   bool? debugEnableInspector,
   Color background = _white,
   DevToolsService? devToolsService,
@@ -44,10 +42,7 @@ void launch({
 
     controller.view.attachView(RendererBinding.instance!.renderView);
 
-    await controller.loadBundle(
-        bundleURL: bundleURL,
-        bundlePath: bundlePath,
-        bundleContent: bundleContent);
+    await controller.loadBundle(bundle: bundle);
 
     await controller.evalBundle();
   }

@@ -125,13 +125,35 @@ class CSSLengthValue {
           positionType == CSSPositionType.fixed;
 
         RenderStyle? parentRenderStyle = renderStyle!.parent;
-
-        // Percentage relative width priority: logical width > renderer width
-        double? relativeParentWidth = isPositioned ?
-          parentRenderStyle?.paddingBoxLogicalWidth ?? parentRenderStyle?.paddingBoxWidth :
-          parentRenderStyle?.contentBoxLogicalWidth ?? parentRenderStyle?.contentBoxWidth;
-
         RenderBoxModel? renderBoxModel = renderStyle!.renderBoxModel;
+
+        // Constraints is calculated before layout, the layouted size is identical to the tight constraints
+        // if constraints is tight, so it's safe to use the tight constraints as the parent size to resolve
+        // the child percentage length to save one extra layout to wait for parent layout complete.
+
+        // Percentage relative width priority: tight constraints width > renderer width > logical width
+        double? parentPaddingBoxWidth = parentRenderStyle?.paddingBoxConstraintsWidth
+          ?? parentRenderStyle?.paddingBoxWidth
+          ?? parentRenderStyle?.paddingBoxLogicalWidth;
+        double? parentContentBoxWidth = parentRenderStyle?.contentBoxConstraintsWidth
+          ?? parentRenderStyle?.contentBoxWidth
+          ?? parentRenderStyle?.contentBoxLogicalWidth;
+        // Percentage relative height priority: tight constraints height > renderer height > logical height
+        double? parentPaddingBoxHeight = parentRenderStyle?.paddingBoxConstraintsHeight
+          ?? parentRenderStyle?.paddingBoxHeight
+          ?? parentRenderStyle?.paddingBoxLogicalHeight;
+        double? parentContentBoxHeight = parentRenderStyle?.contentBoxConstraintsHeight
+          ?? parentRenderStyle?.contentBoxHeight
+          ?? parentRenderStyle?.contentBoxLogicalHeight;
+
+        // Positioned element is positioned relative to the padding box of its containing block
+        // while the others relative to the content box.
+        double? relativeParentWidth = isPositioned
+          ? parentPaddingBoxWidth
+          : parentContentBoxWidth;
+        double? relativeParentHeight = isPositioned
+          ? parentPaddingBoxHeight
+          : parentContentBoxHeight;
 
         switch (propertyName) {
           case FONT_SIZE:
@@ -176,11 +198,6 @@ class CSSLengthValue {
             // The percentage height of positioned element and flex item resolves against the rendered height
             // of parent, mark parent as needs relayout if rendered height is not ready yet.
             if (isPositioned || isGrandParentFlexLayout) {
-              // Percentage relative height priority: logical height > renderer height
-              double? relativeParentHeight = isPositioned ?
-                parentRenderStyle?.paddingBoxLogicalHeight ?? parentRenderStyle?.paddingBoxHeight :
-                parentRenderStyle?.contentBoxLogicalHeight ?? parentRenderStyle?.contentBoxHeight;
-
               if (relativeParentHeight  != null) {
                 _computedValue = value! * relativeParentHeight;
               } else {
@@ -243,8 +260,6 @@ class CSSLengthValue {
           case TOP:
           case BOTTOM:
             // Offset of positioned element starts from the edge of padding box of containing block.
-            double? parentPaddingBoxHeight = parentRenderStyle?.paddingBoxHeight ??
-              parentRenderStyle?.paddingBoxLogicalHeight;
             if (parentPaddingBoxHeight != null) {
               _computedValue = value! * parentPaddingBoxHeight;
             } else {
@@ -258,8 +273,6 @@ class CSSLengthValue {
           case LEFT:
           case RIGHT:
             // Offset of positioned element starts from the edge of padding box of containing block.
-            double? parentPaddingBoxWidth = parentRenderStyle?.paddingBoxWidth ??
-              parentRenderStyle?.paddingBoxLogicalWidth;
             if (parentPaddingBoxWidth != null) {
               _computedValue = value! * parentPaddingBoxWidth;
             } else {
@@ -338,7 +351,7 @@ class CSSLengthValue {
   }
 
   bool get isNotAuto {
-    return type != CSSLengthType.AUTO;
+    return !isAuto;
   }
 
   bool get isNone {

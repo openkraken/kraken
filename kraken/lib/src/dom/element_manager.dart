@@ -9,6 +9,7 @@ import 'dart:ffi';
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -39,6 +40,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     EventTarget? eventTarget = controller.view.getEventTargetById(id);
     if (eventTarget == null) return;
     eventTarget.dispose();
+    malloc.free(eventTarget.nativeEventTargetPtr);
   }
 
   // Alias defineElement export for kraken plugin

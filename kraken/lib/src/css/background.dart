@@ -8,6 +8,7 @@ import 'dart:ui';
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/painting.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/rendering.dart';
@@ -196,7 +197,7 @@ class CSSBackgroundImage {
         Uri uri = Uri.parse(url);
         if (url.isNotEmpty) {
           uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri);
-          return CSSUrl.parseUrl(uri, contextId: controller.view.contextId);
+          return getImageProvider(uri, contextId: controller.view.contextId);
         }
       }
     }

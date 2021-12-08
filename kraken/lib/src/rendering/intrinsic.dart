@@ -62,6 +62,7 @@ class RenderIntrinsic extends RenderBoxModel
     double? maxWidth = renderStyle.maxWidth.isNone ? null : renderStyle.maxWidth.computedValue;
     double? minHeight = renderStyle.minHeight.isAuto ? null : renderStyle.minHeight.computedValue;
     double? maxHeight = renderStyle.maxHeight.isNone ? null : renderStyle.maxHeight.computedValue;
+    double? intrinsicRatio = renderStyle.intrinsicRatio;
 
     if (child != null) {
       late DateTime childLayoutStart;
@@ -93,7 +94,7 @@ class RenderIntrinsic extends RenderBoxModel
 
         // max-height should respect intrinsic ratio with max-width
         if (intrinsicRatio != null && maxHeight == null) {
-          constraintHeight = constraintWidth * intrinsicRatio!;
+          constraintHeight = constraintWidth * intrinsicRatio;
         }
       } else if (isInlineLevel && minWidth != null && width == null) {
         constraintWidth =
@@ -101,7 +102,7 @@ class RenderIntrinsic extends RenderBoxModel
 
         // max-height should respect intrinsic ratio with max-width
         if (intrinsicRatio != null && minHeight == null) {
-          constraintHeight = constraintWidth * intrinsicRatio!;
+          constraintHeight = constraintWidth * intrinsicRatio;
         }
       }
 
@@ -112,7 +113,7 @@ class RenderIntrinsic extends RenderBoxModel
 
         // max-width should respect intrinsic ratio with max-height
         if (intrinsicRatio != null && maxWidth == null) {
-          constraintWidth = constraintHeight / intrinsicRatio!;
+          constraintWidth = constraintHeight / intrinsicRatio;
         }
       } else if (isInlineLevel && minHeight != null && height == null) {
         constraintHeight =
@@ -120,7 +121,7 @@ class RenderIntrinsic extends RenderBoxModel
 
         // max-width should respect intrinsic ratio with max-height
         if (intrinsicRatio != null && minWidth == null) {
-          constraintWidth = constraintHeight / intrinsicRatio!;
+          constraintWidth = constraintHeight / intrinsicRatio;
         }
       }
 

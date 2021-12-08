@@ -169,7 +169,6 @@ abstract class EventTarget {
     eventHandlers.clear();
     _nativeMap.remove(nativeEventTargetPtr.address);
     _disposed = true;
-    malloc.free(nativeEventTargetPtr);
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_END, uniqueId: targetId);

@@ -38,14 +38,12 @@ class NavigationModule extends BaseModule {
 
   // Navigate kraken page to target Url.
   Future<void> goTo(String targetUrl) async {
-    String? sourceUrl = moduleManager!.controller.bundlePath ?? moduleManager!.controller.bundleURL;
+    String? sourceUrl = moduleManager!.controller.href;
 
     Uri targetUri = Uri.parse(targetUrl);
-    Uri? sourceUri = sourceUrl != null ? Uri.parse(sourceUrl) : null;
+    Uri sourceUri = Uri.parse(sourceUrl);
 
-    if (sourceUri == null || targetUri != sourceUri) {
-      await moduleManager!.controller.view.handleNavigationAction(sourceUrl, targetUrl, KrakenNavigationType.reload);
-    }
+    await moduleManager!.controller.view.handleNavigationAction(sourceUrl, targetUrl, targetUri == sourceUri ? KrakenNavigationType.reload : KrakenNavigationType.navigate);
   }
 
   @override

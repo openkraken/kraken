@@ -69,18 +69,18 @@ JSValue EventTarget::addEventListener(QjsContext* ctx, JSValue this_val, int arg
   JSAtom eventTypeAtom = JS_ValueToAtom(ctx, eventTypeValue);
 
   // Init list.
-  if (!JS_HasProperty(ctx, eventTargetInstance->m_eventHandlers, eventTypeAtom)) {
+  if (!JS_HasProperty(ctx, eventTargetInstance->m_eventHandlers.value(), eventTypeAtom)) {
     JS_DupAtom(ctx, eventTypeAtom);
     auto* atomJob = new AtomJob{eventTypeAtom};
     list_add_tail(&atomJob->link, &eventTargetInstance->m_context->atom_job_list);
-    JS_SetProperty(ctx, eventTargetInstance->m_eventHandlers, eventTypeAtom, JS_NewArray(ctx));
+    JS_SetProperty(ctx, eventTargetInstance->m_eventHandlers.value(), eventTypeAtom, JS_NewArray(ctx));
   }
 
-  JSValue eventHandlers = JS_GetProperty(ctx, eventTargetInstance->m_eventHandlers, eventTypeAtom);
+  JSValue eventHandlers = JS_GetProperty(ctx, eventTargetInstance->m_eventHandlers.value(), eventTypeAtom);
   int32_t eventHandlerLen = arrayGetLength(ctx, eventHandlers);
 
   // Dart needs to be notified for the first registration event.
-  if (eventHandlerLen == 0 || JS_HasProperty(ctx, eventTargetInstance->m_propertyEventHandler, eventTypeAtom)) {
+  if (eventHandlerLen == 0 || JS_HasProperty(ctx, eventTargetInstance->m_propertyEventHandler.value(), eventTypeAtom)) {
     int32_t contextId = eventTargetInstance->prototype()->contextId();
 
     NativeString args_01{};
@@ -114,12 +114,12 @@ JSValue EventTarget::removeEventListener(QjsContext* ctx, JSValue this_val, int 
 
   JSAtom eventTypeAtom = JS_ValueToAtom(ctx, eventTypeValue);
 
-  if (!JS_HasProperty(ctx, eventTargetInstance->m_eventHandlers, eventTypeAtom)) {
+  if (!JS_HasProperty(ctx, eventTargetInstance->m_eventHandlers.value(), eventTypeAtom)) {
     JS_FreeAtom(ctx, eventTypeAtom);
     return JS_UNDEFINED;
   }
 
-  JSValue eventHandlers = JS_GetProperty(ctx, eventTargetInstance->m_eventHandlers, eventTypeAtom);
+  JSValue eventHandlers = JS_GetProperty(ctx, eventTargetInstance->m_eventHandlers.value(), eventTypeAtom);
   int32_t targetIdx = arrayFindIdx(ctx, eventHandlers, callback);
 
   if (targetIdx != -1) {
@@ -128,7 +128,7 @@ JSValue EventTarget::removeEventListener(QjsContext* ctx, JSValue this_val, int 
 
   int32_t eventHandlersLen = arrayGetLength(ctx, eventHandlers);
 
-  if (eventHandlersLen && JS_HasProperty(ctx, eventTargetInstance->m_propertyEventHandler, eventTypeAtom)) {
+  if (eventHandlersLen && JS_HasProperty(ctx, eventTargetInstance->m_propertyEventHandler.value(), eventTypeAtom)) {
     // Dart needs to be notified for handles is empty.
     int32_t contextId = eventTargetInstance->prototype()->contextId();
 
@@ -207,8 +207,8 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
     JS_FreeValue(m_ctx, returnedValue);
   };
 
-  if (JS_HasProperty(m_ctx, m_eventHandlers, eventTypeAtom)) {
-    JSValue eventHandlers = JS_GetProperty(m_ctx, m_eventHandlers, eventTypeAtom);
+  if (JS_HasProperty(m_ctx, m_eventHandlers.value(), eventTypeAtom)) {
+    JSValue eventHandlers = JS_GetProperty(m_ctx, m_eventHandlers.value(), eventTypeAtom);
     int32_t len = arrayGetLength(m_ctx, eventHandlers);
 
     for (int i = 0; i < len; i++) {
@@ -221,7 +221,7 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
   }
 
   // Dispatch event listener white by 'on' prefix property.
-  if (JS_HasProperty(m_ctx, m_propertyEventHandler, eventTypeAtom)) {
+  if (JS_HasProperty(m_ctx, m_propertyEventHandler.value(), eventTypeAtom)) {
     if (eventType == "error") {
       auto _dispatchErrorEvent = [&eventInstance, this, eventType](JSValue& handler) {
         JSValue error = JS_GetPropertyStr(m_ctx, eventInstance->instanceObject, "error");
@@ -240,11 +240,11 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
         JS_FreeValue(m_ctx, lineNumberValue);
         JS_FreeValue(m_ctx, columnValue);
       };
-      JSValue v = JS_GetProperty(m_ctx, m_propertyEventHandler, eventTypeAtom);
+      JSValue v = JS_GetProperty(m_ctx, m_propertyEventHandler.value(), eventTypeAtom);
       _dispatchErrorEvent(v);
       JS_FreeValue(m_ctx, v);
     } else {
-      JSValue v = JS_GetProperty(m_ctx, m_propertyEventHandler, eventTypeAtom);
+      JSValue v = JS_GetProperty(m_ctx, m_propertyEventHandler.value(), eventTypeAtom);
       _dispatchEvent(v);
       JS_FreeValue(m_ctx, v);
     }
@@ -285,9 +285,6 @@ EventTargetInstance::~EventTargetInstance() {
 #if FLUTTER_BACKEND
   getDartMethod()->flushUICommand();
 #endif
-  JS_FreeValue(m_ctx, m_properties);
-  JS_FreeValue(m_ctx, m_eventHandlers);
-  JS_FreeValue(m_ctx, m_propertyEventHandler);
 }
 
 int EventTargetInstance::hasProperty(QjsContext* ctx, JSValue obj, JSAtom atom) {
@@ -306,7 +303,7 @@ int EventTargetInstance::hasProperty(QjsContext* ctx, JSValue obj, JSAtom atom) 
     return !JS_IsNull(eventTarget->getPropertyHandler(p));
   }
 
-  return JS_HasProperty(ctx, eventTarget->m_properties, atom);
+  return JS_HasProperty(ctx, eventTarget->m_properties.value(), atom);
 }
 
 JSValue EventTargetInstance::getProperty(QjsContext* ctx, JSValue obj, JSAtom atom, JSValue receiver) {
@@ -328,8 +325,8 @@ JSValue EventTargetInstance::getProperty(QjsContext* ctx, JSValue obj, JSAtom at
     return eventTarget->getPropertyHandler(p);
   }
 
-  if (JS_HasProperty(ctx, eventTarget->m_properties, atom)) {
-    return JS_GetProperty(ctx, eventTarget->m_properties, atom);
+  if (JS_HasProperty(ctx, eventTarget->m_properties.value(), atom)) {
+    return JS_GetProperty(ctx, eventTarget->m_properties.value(), atom);
   }
 
   // For plugin elements, try to auto generate properties and functions from dart response.
@@ -357,14 +354,14 @@ int EventTargetInstance::setProperty(QjsContext* ctx, JSValue obj, JSAtom atom, 
   if (!p->is_wide_char && p->u.str8[0] == 'o' && p->u.str8[1] == 'n') {
     eventTarget->setPropertyHandler(p, value);
   } else {
-    if (!JS_HasProperty(ctx, eventTarget->m_properties, atom)) {
+    if (!JS_HasProperty(ctx, eventTarget->m_properties.value(), atom)) {
       auto* atomJob = new AtomJob{atom};
       list_add_tail(&atomJob->link, &eventTarget->m_context->atom_job_list);
       // Increase one reference count for atom to hold this atom value until eventTarget disposed.
       JS_DupAtom(ctx, atom);
     }
 
-    JS_SetProperty(ctx, eventTarget->m_properties, atom, JS_DupValue(ctx, value));
+    JS_SetProperty(ctx, eventTarget->m_properties.value(), atom, JS_DupValue(ctx, value));
 
     if (isJavaScriptExtensionElementInstance(eventTarget->context(), eventTarget->instanceObject) && !p->is_wide_char && p->u.str8[0] != '_') {
       std::unique_ptr<NativeString> args_01 = atomToNativeString(ctx, atom);
@@ -409,7 +406,7 @@ void EventTargetInstance::setPropertyHandler(JSString* p, JSValue value) {
   if (JS_IsNull(value)) {
     JS_FreeAtom(m_ctx, atom);
     list_del(&atomJob->link);
-    JS_DeleteProperty(m_ctx, m_propertyEventHandler, atom, 0);
+    JS_DeleteProperty(m_ctx, m_propertyEventHandler.value(), atom, 0);
     return;
   }
 
@@ -420,9 +417,8 @@ void EventTargetInstance::setPropertyHandler(JSString* p, JSValue value) {
   }
 
   JSValue newCallback = JS_DupValue(m_ctx, value);
-  JS_SetProperty(m_ctx, m_propertyEventHandler, atom, newCallback);
-
-  int32_t eventHandlerLen = arrayGetLength(m_ctx, m_eventHandlers);
+  JS_SetProperty(m_ctx, m_propertyEventHandler.value(), atom, newCallback);
+  int32_t eventHandlerLen = arrayGetLength(m_ctx, m_eventHandlers.value());
   if (eventHandlerLen == 0) {
     int32_t contextId = m_context->getContextId();
     std::unique_ptr<NativeString> args_01 = atomToNativeString(m_ctx, atom);
@@ -435,10 +431,10 @@ JSValue EventTargetInstance::getPropertyHandler(JSString* p) {
   char eventType[p->len + 1 - 2];
   memcpy(eventType, &p->u.str8[2], p->len + 1 - 2);
   JSAtom atom = JS_NewAtom(m_ctx, eventType);
-  if (!JS_HasProperty(m_ctx, m_propertyEventHandler, atom)) {
+  if (!JS_HasProperty(m_ctx, m_propertyEventHandler.value(), atom)) {
     return JS_NULL;
   }
-  return JS_GetProperty(m_ctx, m_propertyEventHandler, atom);
+  return JS_GetProperty(m_ctx, m_propertyEventHandler.value(), atom);
 }
 
 void EventTargetInstance::finalize(JSRuntime* rt, JSValue val) {
@@ -453,27 +449,18 @@ JSValue EventTargetInstance::getNativeProperty(const char* prop) {
   return result;
 }
 
-void EventTargetInstance::gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
-  // Tell gc eventTargetInstance have these properties.
-  // Should check object is already inited before gc mark.
-  if (JS_IsObject(m_eventHandlers))
-    JS_MarkValue(rt, m_eventHandlers, mark_func);
-  if (JS_IsObject(m_propertyEventHandler))
-    JS_MarkValue(rt, m_propertyEventHandler, mark_func);
-  if (JS_IsObject(m_properties))
-    JS_MarkValue(rt, m_properties, mark_func);
-}
+void EventTargetInstance::gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {}
 
 void EventTargetInstance::copyNodeProperties(EventTargetInstance* newNode, EventTargetInstance* referenceNode) {
   QjsContext* ctx = referenceNode->m_ctx;
-  JSValue propKeys = objectGetKeys(ctx, referenceNode->m_properties);
+  JSValue propKeys = objectGetKeys(ctx, referenceNode->m_properties.value());
   uint32_t propKeyLen = arrayGetLength(ctx, propKeys);
 
   for (int i = 0; i < propKeyLen; i++) {
     JSValue k = JS_GetPropertyUint32(ctx, propKeys, i);
     JSAtom kt = JS_ValueToAtom(ctx, k);
-    JSValue v = JS_GetProperty(ctx, referenceNode->m_properties, kt);
-    JS_SetProperty(ctx, newNode->m_properties, kt, JS_DupValue(ctx, v));
+    JSValue v = JS_GetProperty(ctx, referenceNode->m_properties.value(), kt);
+    JS_SetProperty(ctx, newNode->m_properties.value(), kt, JS_DupValue(ctx, v));
 
     JS_FreeAtom(ctx, kt);
     JS_FreeValue(ctx, k);
