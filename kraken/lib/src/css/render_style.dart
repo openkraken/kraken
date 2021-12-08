@@ -164,7 +164,7 @@ abstract class RenderStyle {
 
   Size get viewportSize => target.ownerDocument.viewport.viewportSize;
 
-  double get rootFontSize => target.ownerDocument.getRootFontSize();
+  double get rootFontSize => target.ownerDocument.documentElement!.renderStyle.fontSize.computedValue;
 }
 
 class CSSRenderStyle

@@ -2,9 +2,6 @@
  * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'dart:ui' as ui;
-import 'dart:math' as math;
-
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
@@ -12,16 +9,14 @@ import 'package:kraken/gesture.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/src/dom/element_registry.dart' as element_registry;
-import 'package:kraken/src/scheduler/fps.dart';
 import 'package:kraken/widget.dart';
 
 class Document extends Node {
 
-  RenderViewportBox viewport;
+  final RenderViewportBox viewport;
   KrakenController controller;
   GestureListener? gestureListener;
   WidgetDelegate? widgetDelegate;
-  bool showPerformanceOverlay = false;
 
   Document(EventTargetContext? context,
   {
@@ -38,9 +33,6 @@ class Document extends Node {
   @override
   RenderBox? get renderer => viewport;
 
-  double get viewportWidth => viewport.viewportSize.width;
-  double get viewportHeight => viewport.viewportSize.height;
-
   Element? _documentElement;
   Element? get documentElement {
     return _documentElement;
@@ -56,19 +48,14 @@ class Document extends Node {
       element.setRenderStyleProperty(OVERFLOW_X, CSSOverflowType.scroll);
       element.setRenderStyleProperty(OVERFLOW_Y, CSSOverflowType.scroll);
       // Init with viewport size.
-      element.renderStyle.width = CSSLengthValue(viewportWidth, CSSLengthType.PX);
-      element.renderStyle.height = CSSLengthValue(viewportHeight, CSSLengthType.PX);
+      element.renderStyle.width = CSSLengthValue(viewport.viewportSize.width, CSSLengthType.PX);
+      element.renderStyle.height = CSSLengthValue(viewport.viewportSize.height, CSSLengthType.PX);
     } else {
       // Detach document element.
       viewport.child = null;
     }
 
     _documentElement = element;
-  }
-
-  double getRootFontSize() {
-    RenderBoxModel rootBoxModel = documentElement!.renderBoxModel!;
-    return rootBoxModel.renderStyle.fontSize.computedValue;
   }
 
   @override
@@ -148,7 +135,8 @@ class Document extends Node {
 
   // TODO: https://wicg.github.io/construct-stylesheets/#using-constructed-stylesheets
   List<CSSStyleSheet> adoptedStyleSheets = [];
-  List<CSSStyleSheet> styleSheets = [];
+  // The styleSheets attribute is readonly attribute.
+  final List<CSSStyleSheet> styleSheets = [];
 
   void addStyleSheet(CSSStyleSheet sheet) {
     styleSheets.add(sheet);
@@ -165,56 +153,12 @@ class Document extends Node {
     documentElement?.recalculateNestedStyle();
   }
 
-  RenderBox buildRenderBox({bool showPerformanceOverlay = false}) {
-    this.showPerformanceOverlay = showPerformanceOverlay;
-
-    RenderBox renderBox = viewport;
-
-    if (showPerformanceOverlay) {
-      RenderPerformanceOverlay renderPerformanceOverlay =
-          RenderPerformanceOverlay(optionsMask: 15, rasterizerThreshold: 0);
-      RenderConstrainedBox renderConstrainedPerformanceOverlayBox = RenderConstrainedBox(
-        child: renderPerformanceOverlay,
-        additionalConstraints: BoxConstraints.tight(Size(
-          math.min(350.0, ui.window.physicalSize.width),
-          math.min(150.0, ui.window.physicalSize.height),
-        )),
-      );
-      RenderFpsOverlay renderFpsOverlayBox = RenderFpsOverlay();
-
-      renderBox = RenderStack(
-        children: [
-          renderBox,
-          renderConstrainedPerformanceOverlayBox,
-          renderFpsOverlayBox,
-        ],
-        textDirection: TextDirection.ltr,
-      );
-    }
-
-    return renderBox;
-  }
-
-  void attach(RenderObject parent, RenderObject? previousSibling, {bool showPerformanceOverlay = false}) {
-    RenderObject root = buildRenderBox(showPerformanceOverlay: showPerformanceOverlay);
-
-    if (parent is ContainerRenderObjectMixin) {
-      parent.insert(root, after: previousSibling);
-    } else if (parent is RenderObjectWithChildMixin) {
-      parent.child = root;
-    }
-  }
-
-  void detach() {
-    RenderObject? parent = viewport.parent as RenderObject?;
-    if (parent == null) return;
-
-    // Detach renderObject.
-    documentElement?.disposeRenderObject();
-  }
-
   @override
   void dispose() {
+    gestureListener = null;
+    widgetDelegate = null;
+    styleSheets.clear();
+    adoptedStyleSheets.clear();
     documentElement?.dispose();
     super.dispose();
   }

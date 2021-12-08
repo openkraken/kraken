@@ -101,7 +101,6 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     this._viewportWidth,
     this._viewportHeight, {
     this.background,
-    this.showPerformanceOverlay,
     this.enableDebug = false,
     int? contextId,
     required this.rootController,
@@ -177,9 +176,6 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
   late int _contextId;
   int get contextId => _contextId;
 
-  // Should render performanceOverlay layer into the screen for performance profile.
-  bool? showPerformanceOverlay;
-
   // Enable print debug message when rendering.
   bool enableDebug;
 
@@ -189,19 +185,13 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
   bool get disposed => _disposed;
 
   late RenderViewportBox viewport;
+  late Document document;
+  late Window window;
 
   void evaluateJavaScripts(String code, [String source = 'vm://']) {
     assert(!_disposed, 'Kraken have already disposed');
     evaluateScripts(_contextId, code, source);
   }
-
-  // Attach kraken's renderObject to an renderObject.
-  void attachView(RenderObject parent, [RenderObject? previousSibling]) {
-    document.attach(parent, previousSibling, showPerformanceOverlay: showPerformanceOverlay ?? false);
-  }
-
-  late Document document;
-  late Window window;
 
   void _setupObserver() {
     if (ElementsBinding.instance != null) {
@@ -219,6 +209,15 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     }
   }
 
+  // Attach kraken's renderObject to an renderObject.
+  void attachTo(RenderObject parent, [RenderObject? previousSibling]) {
+    if (parent is ContainerRenderObjectMixin) {
+      parent.insert(document.renderer!, after: previousSibling);
+    } else if (parent is RenderObjectWithChildMixin) {
+      parent.child = document.renderer;
+    }
+  }
+
   // Dispose controller and recycle all resources.
   void dispose() {
     // FIXME: for break circle reference
@@ -227,8 +226,6 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     debugDOMTreeChanged = null;
 
     _teardownObserver();
-
-    detachView();
 
     // Should clear previous page cached ui commands
     clearUICommand(_contextId);
@@ -600,11 +597,6 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     target.dispose();
   }
 
-  // detach renderObject from parent but keep everything in active.
-  void detachView() {
-    document.detach();
-  }
-
   RenderObject getRootRenderObject() {
     return viewport;
   }
@@ -794,7 +786,6 @@ class KrakenController {
 
     _view = KrakenViewController(viewportWidth, viewportHeight,
         background: background,
-        showPerformanceOverlay: showPerformanceOverlay,
         enableDebug: enableDebug,
         rootController: this,
         navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate(),
@@ -868,14 +859,8 @@ class KrakenController {
 
   Future<void> unload() async {
     assert(!_view._disposed, 'Kraken have already disposed');
-    RenderObject root = _view.getRootRenderObject();
-    RenderObject? parent = root.parent as RenderObject?;
-    RenderObject? previousSibling;
-    if (parent is ContainerRenderObjectMixin) {
-      previousSibling = (root.parentData as ContainerParentDataMixin).previousSibling;
-    }
     _module.dispose();
-    _view.detachView();
+    _view.dispose();
 
     // Should clear previous page cached ui commands
     clearUICommand(_view.contextId);
@@ -892,12 +877,10 @@ class KrakenController {
 
       _view = KrakenViewController(view.viewportWidth, view.viewportHeight,
           background: _view.background,
-          showPerformanceOverlay: _view.showPerformanceOverlay,
           enableDebug: _view.enableDebug,
           contextId: _view.contextId,
           rootController: this,
           navigationDelegate: _view.navigationDelegate);
-      _view.attachView(parent!, previousSibling);
 
       _module = KrakenModuleController(this, _view.contextId);
 
