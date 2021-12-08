@@ -47,7 +47,7 @@ class ImageElement extends Element {
   bool get _shouldLazyLoading => properties['loading'] == 'lazy';
   ImageStreamCompleterHandle? _completerHandle;
 
-  ImageElement(EventTargetContext context)
+  ImageElement(EventTargetContext? context)
       : super(
       context,
       isIntrinsicBox: true,

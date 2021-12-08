@@ -68,7 +68,7 @@ const Map<String, dynamic> _defaultStyle = {
 
 // https://html.spec.whatwg.org/multipage/text-level-semantics.html#htmlbrelement
 class BRElement extends Element {
-  BRElement(EventTargetContext context)
+  BRElement(EventTargetContext? context)
       : super(
         context,
         defaultStyle: _breakDefaultStyle,
@@ -77,99 +77,99 @@ class BRElement extends Element {
 }
 
 class BringElement extends Element {
-  BringElement(EventTargetContext context)
+  BringElement(EventTargetContext? context)
       : super(context, defaultStyle: _boldDefaultStyle);
 }
 
 class AbbreviationElement extends Element {
-  AbbreviationElement(EventTargetContext context)
+  AbbreviationElement(EventTargetContext? context)
       : super(context, defaultStyle: _abbrDefaultStyle);
 }
 
 class EmphasisElement extends Element {
-  EmphasisElement(EventTargetContext context)
+  EmphasisElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class CitationElement extends Element {
-  CitationElement(EventTargetContext context)
+  CitationElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class DefinitionElement extends Element {
-  DefinitionElement(EventTargetContext context)
+  DefinitionElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/i
 class IdiomaticElement extends Element {
-  IdiomaticElement(EventTargetContext context)
+  IdiomaticElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class CodeElement extends Element {
-  CodeElement(EventTargetContext context)
+  CodeElement(EventTargetContext? context)
       : super(context, defaultStyle: _codeDefaultStyle);
 }
 
 class SampleElement extends Element {
-  SampleElement(EventTargetContext context)
+  SampleElement(EventTargetContext? context)
       : super(context, defaultStyle: _codeDefaultStyle);
 }
 
 class KeyboardElement extends Element {
-  KeyboardElement(EventTargetContext context)
+  KeyboardElement(EventTargetContext? context)
       : super(context, defaultStyle: _codeDefaultStyle);
 }
 
 class SpanElement extends Element {
-  SpanElement(EventTargetContext context)
+  SpanElement(EventTargetContext? context)
       : super(context);
 }
 
 class DataElement extends Element {
-  DataElement(EventTargetContext context)
+  DataElement(EventTargetContext? context)
       : super(context);
 }
 
 // TODO: enclosed text is a short inline quotation
 class QuoteElement extends Element {
-  QuoteElement(EventTargetContext context)
+  QuoteElement(EventTargetContext? context)
       : super(context);
 }
 
 class StrongElement extends Element {
-  StrongElement(EventTargetContext context)
+  StrongElement(EventTargetContext? context)
       : super(context, defaultStyle: _boldDefaultStyle);
 }
 
 class TimeElement extends Element {
-  TimeElement(EventTargetContext context)
+  TimeElement(EventTargetContext? context)
       : super(context, defaultStyle: _boldDefaultStyle);
 }
 
 class SmallElement extends Element {
-  SmallElement(EventTargetContext context)
+  SmallElement(EventTargetContext? context)
       : super(context, defaultStyle: _smallDefaultStyle);
 }
 
 class StrikethroughElement extends Element {
-  StrikethroughElement(EventTargetContext context)
+  StrikethroughElement(EventTargetContext? context)
       : super(context, defaultStyle: _sDefaultStyle);
 }
 
 // https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-u-element
 class UnarticulatedElement extends Element {
-  UnarticulatedElement(EventTargetContext context)
+  UnarticulatedElement(EventTargetContext? context)
       : super(context, defaultStyle: _uDefaultStyle);
 }
 
 class VariableElement extends Element {
-  VariableElement(EventTargetContext context)
+  VariableElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class MarkElement extends Element {
-  MarkElement(EventTargetContext context)
+  MarkElement(EventTargetContext? context)
       : super(context, defaultStyle: _markDefaultStyle);
 }

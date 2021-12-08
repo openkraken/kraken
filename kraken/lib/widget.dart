@@ -65,7 +65,7 @@ abstract class WidgetElement extends dom.Element {
   late BuildOwner _buildOwner;
   late Widget _widget;
   _KrakenAdapterWidgetPropertiesState? _propertiesState;
-  WidgetElement(dom.EventTargetContext context)
+  WidgetElement(dom.EventTargetContext? context)
       : super(
       context,
       isIntrinsicBox: true,

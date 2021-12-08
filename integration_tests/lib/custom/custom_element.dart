@@ -4,7 +4,7 @@ import 'package:kraken/widget.dart';
 import 'package:flutter/material.dart' show TextDirection, TextStyle, Color, Image, Text, AssetImage, Widget, BuildContext hide Element;
 
 class TextWidgetElement extends WidgetElement {
-  TextWidgetElement(EventTargetContext context) :
+  TextWidgetElement(EventTargetContext? context) :
         super(context);
 
   @override
@@ -14,7 +14,7 @@ class TextWidgetElement extends WidgetElement {
 }
 
 class ImageWidgetElement extends WidgetElement {
-  ImageWidgetElement(EventTargetContext context) :
+  ImageWidgetElement(EventTargetContext? context) :
         super(context);
 
   @override
@@ -24,19 +24,19 @@ class ImageWidgetElement extends WidgetElement {
 }
 
 void defineKrakenCustomElements() {
-  Kraken.defineCustomElement('sample-element', (EventTargetContext context) {
+  Kraken.defineCustomElement('sample-element', (EventTargetContext? context) {
     return SampleElement(context);
   });
-  Kraken.defineCustomElement('flutter-text', (EventTargetContext context) {
+  Kraken.defineCustomElement('flutter-text', (EventTargetContext? context) {
     return TextWidgetElement(context);
   });
-  Kraken.defineCustomElement('flutter-asset-image', (EventTargetContext context) {
+  Kraken.defineCustomElement('flutter-asset-image', (EventTargetContext? context) {
     return ImageWidgetElement(context);
   });
 }
 
 class SampleElement extends Element {
-  SampleElement(EventTargetContext context)
+  SampleElement(EventTargetContext? context)
       : super(context);
 
   @override

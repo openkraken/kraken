@@ -21,7 +21,7 @@ const Map<String, dynamic> _paramStyle = {
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/param
 class ParamElement extends Element {
-  ParamElement(EventTargetContext context)
+  ParamElement(EventTargetContext? context)
       : super(context, defaultStyle: _paramStyle);
 }
 
@@ -35,7 +35,7 @@ class ObjectElement extends Element implements ObjectElementHost {
   late ObjectElementClientFactory _objectElementClientFactory;
   late ObjectElementClient _objectElementClient;
 
-  ObjectElement(EventTargetContext context)
+  ObjectElement(EventTargetContext? context)
       : super(context, defaultStyle: _objectStyle, isIntrinsicBox: true) {
     initObjectClient();
     initElementClient();

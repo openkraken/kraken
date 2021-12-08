@@ -146,7 +146,7 @@ class Element extends Node
   }
 
   Element(
-    EventTargetContext context,
+    EventTargetContext? context,
     {
       Map<String, dynamic> defaultStyle = const {},
       // Whether element allows children.

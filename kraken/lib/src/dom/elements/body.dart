@@ -12,7 +12,7 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class BodyElement extends Element {
-  BodyElement(EventTargetContext context)
+  BodyElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 
   @override

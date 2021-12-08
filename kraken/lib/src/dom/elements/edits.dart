@@ -18,11 +18,11 @@ const Map<String, dynamic> _delDefaultStyle = {
 };
 
 class DelElement extends Element {
-  DelElement(EventTargetContext context)
+  DelElement(EventTargetContext? context)
       : super(context, defaultStyle: _delDefaultStyle);
 }
 
 class InsElement extends Element {
-  InsElement(EventTargetContext context)
+  InsElement(EventTargetContext? context)
       : super(context, defaultStyle: _insDefaultStyle);
 }

@@ -12,6 +12,6 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class TemplateElement extends Element {
-  TemplateElement(EventTargetContext context)
+  TemplateElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }

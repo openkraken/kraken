@@ -23,7 +23,7 @@ class Document extends Node {
   WidgetDelegate? widgetDelegate;
   bool showPerformanceOverlay = false;
 
-  Document(EventTargetContext context,
+  Document(EventTargetContext? context,
   {
     required this.viewport,
     required this.controller,
@@ -122,25 +122,25 @@ class Document extends Node {
     }
   }
 
-  Element createElement(EventTargetContext context, String type) {
-    Element element = element_registry.createElement(context, type);
+  Element createElement(String type, EventTargetContext? context) {
+    Element element = element_registry.createElement(type, context);
     element.ownerDocument = this;
     return element;
   }
 
-  TextNode createTextNode(EventTargetContext context, String data) {
-    TextNode textNode = TextNode(context, data);
+  TextNode createTextNode(String data, EventTargetContext? context) {
+    TextNode textNode = TextNode(data, context);
     textNode.ownerDocument = this;
     return textNode;
   }
 
-  DocumentFragment createDocumentFragment(EventTargetContext context) {
+  DocumentFragment createDocumentFragment(EventTargetContext? context) {
     DocumentFragment documentFragment = DocumentFragment(context);
     documentFragment.ownerDocument = this;
     return documentFragment;
   }
 
-  Comment createComment(EventTargetContext context) {
+  Comment createComment(EventTargetContext? context) {
     Comment comment = Comment(context);
     comment.ownerDocument = this;
     return comment;

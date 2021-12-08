@@ -61,7 +61,7 @@ void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> re
 
     toNativeValue(returnedValue, null);
   } else {
-    EventTarget eventTarget = EventTarget.getEventTargetOfNativePtr(nativeEventTarget.cast<NativeEventTarget>());
+    EventTarget eventTarget = EventTarget.getEventTargetByPointer(nativeEventTarget.cast<NativeEventTarget>());
     try {
       if (method.startsWith(GetPropertyCallPreFix) && values.isEmpty) {
         String key = method.substring(GetPropertyCallPreFix.length);
@@ -92,28 +92,30 @@ class EventTargetContext {
 
 abstract class EventTarget {
   static final SplayTreeMap<int, EventTarget> _nativeMap = SplayTreeMap();
-  static EventTarget getEventTargetOfNativePtr(Pointer<NativeEventTarget> nativePtr) {
-    EventTarget? target = _nativeMap[nativePtr.address];
-    if (target == null) throw FlutterError('Can not get eventTarget of nativePtr: $nativePtr');
+  static EventTarget getEventTargetByPointer(Pointer<NativeEventTarget> pointer) {
+    EventTarget? target = _nativeMap[pointer.address];
+    if (target == null) throw FlutterError('Can not get eventTarget by pointer: $pointer');
     return target;
   }
 
-  final int contextId;
+  // JS side context id.
+  int? contextId;
+  // JS side EventTarget object pointer.
+  Pointer<NativeEventTarget>? pointer;
 
   bool _disposed = false;
   bool get disposed => _disposed;
 
-  // The Add
-  final Pointer<NativeEventTarget> pointer;
-
   @protected
   Map<String, List<EventHandler>> eventHandlers = {};
 
-  EventTarget(EventTargetContext context)
-      : contextId = context.contextId,
-        pointer = context.pointer {
-    pointer.ref.callNativeMethods = _nativeCallNativeMethods;
-    _nativeMap[pointer.address] = this;
+  EventTarget(EventTargetContext? context) {
+    if (context != null) {
+      contextId = context.contextId;
+      pointer = context.pointer;
+      pointer!.ref.callNativeMethods = _nativeCallNativeMethods;
+      _nativeMap[pointer!.address] = this;
+    }
   }
 
   void addEventListener(String eventType, EventHandler eventHandler) {
@@ -136,7 +138,9 @@ abstract class EventTarget {
   void dispatchEvent(Event event) {
     if (disposed) return;
     event.target = this;
-    emitUIEvent(contextId, pointer, event);
+    if (contextId != null && pointer != null) {
+      emitUIEvent(contextId!, pointer!, event);
+    }
   }
 
   Map<String, List<EventHandler>> getEventHandlers() {
@@ -152,9 +156,12 @@ abstract class EventTarget {
       PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_START, uniqueId: hashCode);
     }
 
-    eventHandlers.clear();
-    _nativeMap.remove(pointer.address);
     _disposed = true;
+    eventHandlers.clear();
+
+    if (pointer != null) {
+      _nativeMap.remove(pointer!.address);
+    }
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_END, uniqueId: hashCode);

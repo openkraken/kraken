@@ -61,31 +61,31 @@ const Map<String, dynamic> _h6DefaultStyle = {
 };
 
 class H1Element extends Element {
-  H1Element(EventTargetContext context)
+  H1Element(EventTargetContext? context)
       : super(context, defaultStyle: _h1DefaultStyle);
 }
 
 class H2Element extends Element {
-  H2Element(EventTargetContext context)
+  H2Element(EventTargetContext? context)
       : super(context, defaultStyle: _h2DefaultStyle);
 }
 
 class H3Element extends Element {
-  H3Element(EventTargetContext context)
+  H3Element(EventTargetContext? context)
       : super(context, defaultStyle: _h3DefaultStyle);
 }
 
 class H4Element extends Element {
-  H4Element(EventTargetContext context)
+  H4Element(EventTargetContext? context)
       : super(context, defaultStyle: _h4DefaultStyle);
 }
 
 class H5Element extends Element {
-  H5Element(EventTargetContext context)
+  H5Element(EventTargetContext? context)
       : super(context, defaultStyle: _h5DefaultStyle);
 }
 
 class H6Element extends Element {
-  H6Element(EventTargetContext context)
+  H6Element(EventTargetContext? context)
       : super(context, defaultStyle: _h6DefaultStyle);
 }

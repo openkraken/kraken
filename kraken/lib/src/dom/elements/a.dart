@@ -22,7 +22,7 @@ class AnchorElement extends Element {
 
   String? _target;
 
-  AnchorElement(EventTargetContext context)
+  AnchorElement(EventTargetContext? context)
       : super(context) {
     addEvent(EVENT_CLICK);
   }

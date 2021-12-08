@@ -14,7 +14,7 @@ const String RETURN_CHAR = '\r';
 const String TAB_CHAR = '\t';
 
 class TextNode extends Node {
-  TextNode(EventTargetContext context, this._data)
+  TextNode(this._data, EventTargetContext? context)
       : super(NodeType.TEXT_NODE, context);
 
   // Must be existed after text node is attached, and all text update will after text attached.

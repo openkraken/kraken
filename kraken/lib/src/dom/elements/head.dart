@@ -22,27 +22,27 @@ const String NOSCRIPT = 'NOSCRIPT';
 const String SCRIPT = 'SCRIPT';
 
 class HeadElement extends Element {
-  HeadElement(EventTargetContext context)
+  HeadElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class LinkElement extends Element {
-  LinkElement(EventTargetContext context)
+  LinkElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class MetaElement extends Element {
-  MetaElement(EventTargetContext context)
+  MetaElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class TitleElement extends Element {
-  TitleElement(EventTargetContext context)
+  TitleElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class NoScriptElement extends Element {
-  NoScriptElement(EventTargetContext context)
+  NoScriptElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }
 
@@ -50,7 +50,7 @@ const String _JAVASCRIPT_MIME = 'text/javascript';
 const String _JAVASCRIPT_MODULE = 'module';
 
 class ScriptElement extends Element {
-  ScriptElement(EventTargetContext context)
+  ScriptElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle) {
   }
 
@@ -67,12 +67,14 @@ class ScriptElement extends Element {
   }
 
   void _fetchBundle(String src) async {
+    int? contextId = ownerDocument.contextId;
+    if (contextId == null) return;
     // Must
     if (src.isNotEmpty && isConnected && (type == _JAVASCRIPT_MIME || type == _JAVASCRIPT_MODULE)) {
       try {
         KrakenBundle bundle = KrakenBundle.fromUrl(src);
-        await bundle.resolve(ownerDocument.contextId);
-        await bundle.eval(ownerDocument.contextId);
+        await bundle.resolve(contextId);
+        await bundle.eval(contextId);
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_LOAD));
@@ -90,6 +92,8 @@ class ScriptElement extends Element {
   @override
   void connectedCallback() async {
     super.connectedCallback();
+    int? contextId = ownerDocument.contextId;
+    if (contextId == null) return;
     String? src = getProperty('src');
     if (src != null) {
       _fetchBundle(src);
@@ -103,12 +107,11 @@ class ScriptElement extends Element {
       });
       String script = buffer.toString();
       if (script.isNotEmpty) {
-        int contextId = ownerDocument.contextId;
         KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
         if (controller != null) {
           KrakenBundle bundle = KrakenBundle.fromContent(script, url: controller.href);
           bundle.resolve(contextId);
-          await bundle.eval(ownerDocument.contextId);
+          await bundle.eval(contextId);
         }
       }
     }
@@ -118,7 +121,7 @@ class ScriptElement extends Element {
 const String _CSS_MIME = 'text/css';
 
 class StyleElement extends Element {
-  StyleElement(EventTargetContext context)
+  StyleElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
   String type = _CSS_MIME;
   CSSStyleSheet? _styleSheet;

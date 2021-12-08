@@ -312,7 +312,7 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
       PerformanceTiming.instance().mark(PERF_CREATE_ELEMENT_START, uniqueId: targetId);
     }
     assert(!_existsTarget(targetId), 'ERROR: Can not create element with same id "$targetId"');
-    Element element = document.createElement(EventTargetContext(_contextId, nativePtr), tagName.toUpperCase());
+    Element element = document.createElement(tagName.toUpperCase(), EventTargetContext(_contextId, nativePtr));
     _setEventTarget(targetId, element);
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_ELEMENT_END, uniqueId: targetId);
@@ -323,7 +323,7 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_TEXT_NODE_START, uniqueId: targetId);
     }
-    TextNode textNode = document.createTextNode(EventTargetContext(_contextId, nativePtr), data);
+    TextNode textNode = document.createTextNode(data, EventTargetContext(_contextId, nativePtr));
     _setEventTarget(targetId, textNode);
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_TEXT_NODE_END, uniqueId: targetId);

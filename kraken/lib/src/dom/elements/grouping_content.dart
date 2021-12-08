@@ -57,68 +57,68 @@ const Map<String, dynamic> _lDefaultStyle = {
 
 
 class DivElement extends Element {
-  DivElement(EventTargetContext context)
+  DivElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class FigureElement extends Element {
-  FigureElement(EventTargetContext context)
+  FigureElement(EventTargetContext? context)
       : super(context, defaultStyle: _bDefaultStyle);
 }
 
 class FigureCaptionElement extends Element {
-  FigureCaptionElement(EventTargetContext context)
+  FigureCaptionElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class BlockQuotationElement extends Element {
-  BlockQuotationElement(EventTargetContext context)
+  BlockQuotationElement(EventTargetContext? context)
       : super(context, defaultStyle: _bDefaultStyle);
 }
 
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmlparagraphelement
 class ParagraphElement extends Element {
   static Map<String, dynamic> defaultStyle = _pDefaultStyle;
-  ParagraphElement(EventTargetContext context)
+  ParagraphElement(EventTargetContext? context)
       : super(context, defaultStyle: defaultStyle);
 }
 
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmlulistelement
 class UListElement extends Element {
-  UListElement(EventTargetContext context)
+  UListElement(EventTargetContext? context)
       : super(context, defaultStyle: _lDefaultStyle);
 }
 
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmlolistelement
 class OListElement extends Element {
-  OListElement(EventTargetContext context)
+  OListElement(EventTargetContext? context)
       : super(context, defaultStyle: _lDefaultStyle);
 }
 
 class LIElement extends Element {
-  LIElement(EventTargetContext context)
+  LIElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }
 
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmlpreelement
 class PreElement extends Element {
-  PreElement(EventTargetContext context)
+  PreElement(EventTargetContext? context)
       : super(context, defaultStyle: _preDefaultStyle);
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dd
 class DDElement extends Element {
-  DDElement(EventTargetContext context)
+  DDElement(EventTargetContext? context)
       : super(context, defaultStyle: _ddDefaultStyle);
 }
 
 class DTElement extends Element {
-  DTElement(EventTargetContext context)
+  DTElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }
 
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmldlistelement
 class DListElement extends Element {
-  DListElement(EventTargetContext context)
+  DListElement(EventTargetContext? context)
       : super(context, defaultStyle: _pDefaultStyle);
 }

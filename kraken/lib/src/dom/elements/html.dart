@@ -12,7 +12,7 @@ const Map<String, dynamic> _defaultStyle = {
 
 class HTMLElement extends Element {
   static Map<String, dynamic> defaultStyle = _defaultStyle;
-  HTMLElement(EventTargetContext context)
+  HTMLElement(EventTargetContext? context)
       : super(context, defaultStyle: defaultStyle);
 
   @override

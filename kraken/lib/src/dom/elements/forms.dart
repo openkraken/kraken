@@ -13,11 +13,11 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class LabelElement extends Element {
-  LabelElement(EventTargetContext context)
+  LabelElement(EventTargetContext? context)
       : super(context);
 }
 
 class ButtonElement extends Element {
-  ButtonElement(EventTargetContext context)
+  ButtonElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }

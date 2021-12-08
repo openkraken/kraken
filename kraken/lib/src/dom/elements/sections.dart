@@ -26,41 +26,41 @@ const Map<String, dynamic> _addressDefaultStyle = {
 };
 
 class AddressElement extends Element {
-  AddressElement(EventTargetContext context)
+  AddressElement(EventTargetContext? context)
       : super(context, defaultStyle: _addressDefaultStyle);
 }
 
 class ArticleElement extends Element {
-  ArticleElement(EventTargetContext context)
+  ArticleElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class AsideElement extends Element {
-  AsideElement(EventTargetContext context)
+  AsideElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class FooterElement extends Element {
-  FooterElement(EventTargetContext context)
+  FooterElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class HeaderElement extends Element {
-  HeaderElement(EventTargetContext context)
+  HeaderElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class MainElement extends Element {
-  MainElement(EventTargetContext context)
+  MainElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class NavElement extends Element {
-  NavElement(EventTargetContext context)
+  NavElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class SectionElement extends Element {
-  SectionElement(EventTargetContext context)
+  SectionElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 }
