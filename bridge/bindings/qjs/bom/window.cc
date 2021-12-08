@@ -35,7 +35,6 @@ JSClassID Window::classId() {
 }
 
 JSValue Window::open(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  JSValue url = argv[0];
   auto window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, Window::classId()));
   NativeValue arguments[] = {jsValueToNativeValue(ctx, argv[0])};
   return window->callNativeMethods("open", 1, arguments);
@@ -46,8 +45,6 @@ JSValue Window::scrollTo(QjsContext* ctx, JSValue this_val, int argc, JSValue* a
   return window->callNativeMethods("scroll", 2, arguments);
 }
 JSValue Window::scrollBy(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  JSValue x = argv[0];
-  JSValue y = argv[1];
   auto window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, Window::classId()));
   NativeValue arguments[] = {jsValueToNativeValue(ctx, argv[0]), jsValueToNativeValue(ctx, argv[1])};
   return window->callNativeMethods("scrollBy", 2, arguments);
@@ -103,7 +100,7 @@ PROP_GETTER(Window, __location__)(QjsContext* ctx, JSValue this_val, int argc, J
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
   if (window == nullptr)
     return JS_UNDEFINED;
-  return JS_DupValue(ctx, window->m_location->jsObject);
+  return JS_DupValue(ctx, window->m_location.value());
 }
 PROP_SETTER(Window, __location__)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
@@ -183,8 +180,6 @@ void WindowInstance::gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) 
   EventTargetInstance::gcMark(rt, val, mark_func);
 
   // Should check object is already inited before gc mark.
-  if (JS_IsObject(m_location->jsObject))
-    JS_MarkValue(rt, m_location->jsObject, mark_func);
   if (JS_IsObject(onerror))
     JS_MarkValue(rt, onerror, mark_func);
 }
