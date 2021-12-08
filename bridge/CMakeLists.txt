@@ -330,6 +330,11 @@ if (${ENABLE_TEST})
   include(./test/test.cmake)
 endif ()
 
+if (${ENABLE_BENCHMARK})
+  add_compile_definitions(IS_BENCHMARK=true)
+  include(./benchmark/benchmark.cmake)
+endif()
+
 if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
   set_target_properties(kraken
     PROPERTIES
