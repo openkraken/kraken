@@ -44,15 +44,15 @@ class Node : public EventTarget {
   static JSValue replaceChild(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
  private:
-//  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(1, textContent);
-//  DEFINE_HOST_CLASS_PROTOTYPE_GETTER_PROPERTY(8, isConnected, ownerDocument, firstChild, lastChild, parentNode, previousSibling, nextSibling, nodeType);
+  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(1, textContent);
+  DEFINE_HOST_CLASS_PROTOTYPE_GETTER_PROPERTY(8, isConnected, ownerDocument, firstChild, lastChild, parentNode, previousSibling, nextSibling, nodeType);
 
-//  ObjectFunction m_cloneNode{m_context, m_prototypeObject, "cloneNode", cloneNode, 1};
-//  ObjectFunction m_appendChild{m_context, m_prototypeObject, "appendChild", appendChild, 1};
-//  ObjectFunction m_remove{m_context, m_prototypeObject, "remove", remove, 0};
-//  ObjectFunction m_removeChild{m_context, m_prototypeObject, "removeChild", removeChild, 1};
-//  ObjectFunction m_insertBefore{m_context, m_prototypeObject, "insertBefore", insertBefore, 2};
-//  ObjectFunction m_replaceChild{m_context, m_prototypeObject, "replaceChild", replaceChild, 2};
+  ObjectFunction m_cloneNode{m_context, m_prototypeObject, "cloneNode", cloneNode, 1};
+  ObjectFunction m_appendChild{m_context, m_prototypeObject, "appendChild", appendChild, 1};
+  ObjectFunction m_remove{m_context, m_prototypeObject, "remove", remove, 0};
+  ObjectFunction m_removeChild{m_context, m_prototypeObject, "removeChild", removeChild, 1};
+  ObjectFunction m_insertBefore{m_context, m_prototypeObject, "insertBefore", insertBefore, 2};
+  ObjectFunction m_replaceChild{m_context, m_prototypeObject, "replaceChild", replaceChild, 2};
 
   static void traverseCloneNode(QjsContext* ctx, NodeInstance* baseNode, NodeInstance* targetNode);
   static JSValue copyNodeValue(QjsContext* ctx, NodeInstance* node);

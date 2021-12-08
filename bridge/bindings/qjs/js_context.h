@@ -123,20 +123,10 @@ static JSValue handleCallThisOnProxy(QjsContext* ctx, JSValueConst this_val, int
   return result;
 }
 
-// A magic key prefix, used to get the setter function through the property.
-#define OBJECT_PROPERTY_SETTER_MAGIC_KEY "_set_"
-
 class ObjectProperty {
   KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(ObjectProperty);
  public:
   ObjectProperty() = delete;
-
-  // Setter function are defined with magic key prefix. Use this function to convert your property to key that prepend with magic prefix.
-  static JSAtom getSetterProperty(QjsContext* ctx, JSAtom property) {
-    std::string setterKey = OBJECT_PROPERTY_SETTER_MAGIC_KEY + jsAtomToStdString(ctx, property);
-    JSAtom setterKeyAtom = JS_NewAtom(ctx, setterKey.c_str());
-    return setterKeyAtom;
-  }
 
   // Define a property on object with a getter and setter function.
   explicit ObjectProperty(JSContext* context, JSValueConst thisObject, const std::string& property, JSCFunction getterFunction, JSCFunction setterFunction) {
@@ -145,17 +135,17 @@ class ObjectProperty {
     JSAtom propertyKeyAtom = JS_NewAtom(context->ctx(), property.c_str());
     JSValue getter = JS_NewCFunction(context->ctx(), getterFunction, "getter", 0);
     JSValue getterProxy = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 0, 0, 1, &getter);
-    JS_DefinePropertyGetSet(context->ctx(), thisObject, propertyKeyAtom, getterProxy, JS_UNDEFINED, JS_PROP_NORMAL);
+
+    // Getter on jsObject works well with all conditions.
+    // We create an getter function and define to jsObject directly.
+    JSValue setter = JS_NewCFunction(context->ctx(), setterFunction, property.c_str(), 0);
+    JSValue setterProxy = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 1, 0, 1, &setter);
+
+    // Define getter and setter property.
+    JS_DefinePropertyGetSet(context->ctx(), thisObject, propertyKeyAtom, getterProxy, setterProxy, JS_PROP_NORMAL);
+
     JS_FreeAtom(context->ctx(), propertyKeyAtom);
     JS_FreeValue(context->ctx(), getter);
-
-    // Setter on jsObject are a bit different than getter.
-    // If we define a setter on object's prototype, we needs to reset this_object when we call setterFunction to make sure this are correct by JS.
-    // But QuickJS C API don't let us to do that. So we define invisible setter function on jsObject with magic key prefix.
-    std::string setterProperty = OBJECT_PROPERTY_SETTER_MAGIC_KEY + property;
-    JSValue setter = JS_NewCFunction(context->ctx(), setterFunction, setterProperty.c_str(), 0);
-    JSValue setterProxy = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 1, 0, 1, &setter);
-    JS_DefinePropertyValueStr(context->ctx(), thisObject, setterProperty.c_str(), setterProxy, JS_PROP_NORMAL);
     JS_FreeValue(context->ctx(), setter);
   };
 
