@@ -347,6 +347,24 @@ JSValue EventTargetInstance::getProperty(QjsContext* ctx, JSValue obj, JSAtom at
 
 int EventTargetInstance::setProperty(QjsContext* ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver, int flags) {
   auto* eventTarget = static_cast<EventTargetInstance*>(JS_GetOpaque(obj, JSValueGetClassId(obj)));
+  JSValue prototype = JS_GetPrototype(ctx, eventTarget->instanceObject);
+  JSAtom setterProperty = ObjectProperty::getSetterProperty(ctx, atom);
+
+  // Check there are setter functions on prototype.
+  if (JS_HasProperty(ctx, prototype, setterProperty)) {
+    JSValue setterFunc = JS_GetProperty(ctx, prototype, setterProperty);
+    assert_m(JS_IsFunction(ctx, setterFunc), "Setter on prototype should be an function.");
+    JSValue ret = JS_Call(ctx, setterFunc, eventTarget->instanceObject, 1, &value);
+    if (JS_IsException(ret)) return -1;
+    JS_FreeValue(ctx, ret);
+    JS_FreeValue(ctx, setterFunc);
+    JS_FreeValue(ctx, prototype);
+    JS_FreeAtom(ctx, setterProperty);
+    return 1;
+  }
+
+  JS_FreeAtom(ctx, setterProperty);
+  JS_FreeValue(ctx, prototype);
 
   JSValue atomString = JS_AtomToString(ctx, atom);
   JSString* p = JS_VALUE_GET_STRING(atomString);

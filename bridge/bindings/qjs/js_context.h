@@ -30,6 +30,7 @@ JSRuntime* getGlobalJSRuntime();
 class WindowInstance;
 class DocumentInstance;
 class JSContext;
+std::string jsAtomToStdString(QjsContext* ctx, JSAtom atom);
 
 static inline bool isNumberIndex(const std::string& name) {
   if (name.empty())
@@ -122,31 +123,42 @@ static JSValue handleCallThisOnProxy(QjsContext* ctx, JSValueConst this_val, int
   return result;
 }
 
+// A magic key prefix, used to get the setter function through the property.
+#define OBJECT_PROPERTY_SETTER_MAGIC_KEY "_set_"
+
 class ObjectProperty {
   KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(ObjectProperty);
-
  public:
   ObjectProperty() = delete;
-  explicit ObjectProperty(JSContext* context, JSValueConst thisObject, const char* property, JSCFunction getterFunction, JSCFunction setterFunction) {
-    JSValue ge = JS_NewCFunction(context->ctx(), getterFunction, "get", 0);
-    JSValue se = JS_NewCFunction(context->ctx(), setterFunction, "set", 1);
 
-    JSValue pge = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 0, 0, 1, &ge);
-    JSValue pse = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 1, 0, 1, &se);
-
-    JS_FreeValue(context->ctx(), ge);
-    JS_FreeValue(context->ctx(), se);
-
-    JSAtom key = JS_NewAtom(context->ctx(), property);
-    JS_DefinePropertyGetSet(context->ctx(), thisObject, key, pge, pse, JS_PROP_C_W_E);
-    JS_FreeAtom(context->ctx(), key);
-  };
-  explicit ObjectProperty(JSContext* context, JSValueConst thisObject, const char* property, JSCFunction getterFunction) {
-    JSValue get = JS_NewCFunction(context->ctx(), getterFunction, "get", 0);
-    JSAtom key = JS_NewAtom(context->ctx(), property);
-    JS_DefineProperty(context->ctx(), thisObject, key, JS_UNDEFINED, get, JS_UNDEFINED, JS_PROP_HAS_CONFIGURABLE | JS_PROP_ENUMERABLE | JS_PROP_HAS_GET);
-    JS_FreeAtom(context->ctx(), key);
+  // Setter function are defined with magic key prefix. Use this function to convert your property to key that prepend with magic prefix.
+  static JSAtom getSetterProperty(QjsContext* ctx, JSAtom property) {
+    std::string setterKey = OBJECT_PROPERTY_SETTER_MAGIC_KEY + jsAtomToStdString(ctx, property);
+    JSAtom setterKeyAtom = JS_NewAtom(ctx, setterKey.c_str());
+    return setterKeyAtom;
   }
+
+  // Define a property on object with a getter and setter function.
+  explicit ObjectProperty(JSContext* context, JSValueConst thisObject, const std::string& property, JSCFunction getterFunction, JSCFunction setterFunction) {
+    // Getter on jsObject works well with all conditions.
+    // We create an getter function and define to jsObject directly.
+    JSAtom propertyKeyAtom = JS_NewAtom(context->ctx(), property.c_str());
+    JSValue getter = JS_NewCFunction(context->ctx(), getterFunction, "getter", 0);
+    JSValue getterProxy = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 0, 0, 1, &getter);
+    JS_DefinePropertyGetSet(context->ctx(), thisObject, propertyKeyAtom, getterProxy, JS_UNDEFINED, JS_PROP_NORMAL);
+    JS_FreeAtom(context->ctx(), propertyKeyAtom);
+    JS_FreeValue(context->ctx(), getter);
+
+    // Setter on jsObject are a bit different than getter.
+    // If we define a setter on object's prototype, we needs to reset this_object when we call setterFunction to make sure this are correct by JS.
+    // But QuickJS C API don't let us to do that. So we define invisible setter function on jsObject with magic key prefix.
+    std::string setterProperty = OBJECT_PROPERTY_SETTER_MAGIC_KEY + property;
+    JSValue setter = JS_NewCFunction(context->ctx(), setterFunction, setterProperty.c_str(), 0);
+    JSValue setterProxy = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 1, 0, 1, &setter);
+    JS_DefinePropertyValueStr(context->ctx(), thisObject, setterProperty.c_str(), setterProxy, JS_PROP_NORMAL);
+    JS_FreeValue(context->ctx(), setter);
+  };
+  // Define an property on object with a JSValue.
   explicit ObjectProperty(JSContext* context, JSValueConst thisObject, const char* property, JSValue value) : m_value(value) {
     JS_DefinePropertyValueStr(context->ctx(), thisObject, property, value, JS_PROP_ENUMERABLE);
   }
