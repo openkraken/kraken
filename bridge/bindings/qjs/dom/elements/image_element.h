@@ -20,6 +20,7 @@ class ImageElement : public Element {
   JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
   OBJECT_INSTANCE(ImageElement);
+
  private:
   DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(6, width, height, naturalWidth, naturalHeight, src, loading)
   friend ImageElementInstance;

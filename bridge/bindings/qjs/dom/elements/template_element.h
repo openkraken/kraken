@@ -21,6 +21,7 @@ class TemplateElement : public Element {
   JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
   OBJECT_INSTANCE(TemplateElement);
+
  private:
   DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(2, content, innerHTML)
   friend TemplateElementInstance;
