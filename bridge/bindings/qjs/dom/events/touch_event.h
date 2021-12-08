@@ -77,6 +77,7 @@ class TouchEvent : public Event {
   JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
   OBJECT_INSTANCE(TouchEvent);
+
  private:
   DEFINE_HOST_CLASS_PROTOTYPE_GETTER_PROPERTY(7, touches, targetTouches, changedTouches, altKey, metaKey, ctrlKey, shiftKey)
   friend TouchEventInstance;

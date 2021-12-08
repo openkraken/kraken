@@ -36,7 +36,6 @@ class CommentInstance : public NodeInstance {
   explicit CommentInstance(Comment* comment);
 
  private:
-
   friend Comment;
 };
 
