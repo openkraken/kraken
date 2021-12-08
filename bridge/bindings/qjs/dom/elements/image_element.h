@@ -23,7 +23,7 @@ class ImageElement : public Element {
 
  private:
   DEFINE_HOST_CLASS_PROTOTYPE_GETTER_PROPERTY(2, naturalWidth, naturalHeight)
-  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(4, width, height,  src, loading)
+  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(4, width, height, src, loading)
   friend ImageElementInstance;
 };
 

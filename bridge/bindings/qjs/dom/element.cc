@@ -382,7 +382,6 @@ PROP_GETTER(Element, tagName)(QjsContext* ctx, JSValue this_val, int argc, JSVal
   return JS_NewString(ctx, tagName.c_str());
 }
 
-
 PROP_GETTER(Element, className)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   JSAtom valueAtom = element->m_attributes->getAttribute("class");

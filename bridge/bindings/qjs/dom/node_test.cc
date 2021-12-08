@@ -83,9 +83,9 @@ TEST(Node, setTextContent) {
   auto* bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) { errorCalled = true; });
   auto& context = bridge->getContext();
   const char* code =
-    "let div = document.createElement('div');"
-    "div.textContent = '1234';"
-    "console.log(div.textContent);";
+      "let div = document.createElement('div');"
+      "div.textContent = '1234';"
+      "console.log(div.textContent);";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   delete bridge;
   EXPECT_EQ(errorCalled, false);
