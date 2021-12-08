@@ -43,7 +43,8 @@ class Document : public Node {
   bool isCustomElement(const std::string& tagName);
 
  private:
-  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(3, nodeName, all, cookie);
+  DEFINE_HOST_CLASS_PROTOTYPE_GETTER_PROPERTY(2, nodeName, all)
+  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(1, cookie);
 
   void defineElement(const std::string& tagName, Element* constructor);
 

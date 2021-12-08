@@ -54,16 +54,10 @@ PROP_GETTER(ImageElement, naturalWidth)(QjsContext* ctx, JSValue this_val, int a
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   return element->getNativeProperty("naturalWidth");
 }
-PROP_SETTER(ImageElement, naturalWidth)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 PROP_GETTER(ImageElement, naturalHeight)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   return element->getNativeProperty("naturalHeight");
-}
-PROP_SETTER(ImageElement, naturalHeight)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
 }
 PROP_GETTER(ImageElement, src)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();

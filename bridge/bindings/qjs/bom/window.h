@@ -39,7 +39,8 @@ class Window : public EventTarget {
   ObjectFunction m_scrollBy{m_context, m_prototypeObject, "scrollBy", scrollBy, 2};
   ObjectFunction m_postMessage{m_context, m_prototypeObject, "postMessage", postMessage, 3};
 
-  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(10, devicePixelRatio, colorScheme, __location__, location, window, parent, scrollX, scrollY, onerror, self);
+  DEFINE_HOST_CLASS_PROTOTYPE_GETTER_PROPERTY(9, devicePixelRatio, colorScheme, __location__, location, window, parent, scrollX, scrollY, self)
+  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(1, onerror);
   friend WindowInstance;
 };
 

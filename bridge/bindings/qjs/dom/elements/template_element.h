@@ -22,7 +22,8 @@ class TemplateElement : public Element {
 
   OBJECT_INSTANCE(TemplateElement);
  private:
-  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(2, content, innerHTML)
+  DEFINE_HOST_CLASS_PROTOTYPE_GETTER_PROPERTY(1, content)
+  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(1, innerHTML)
   friend TemplateElementInstance;
 };
 class TemplateElementInstance : public ElementInstance {

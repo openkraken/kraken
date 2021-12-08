@@ -303,9 +303,6 @@ bool Document::isCustomElement(const std::string& tagName) {
 PROP_GETTER(Document, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewString(ctx, "#document");
 }
-PROP_SETTER(Document, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
 PROP_GETTER(Document, all)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
@@ -317,9 +314,6 @@ PROP_GETTER(Document, all)(QjsContext* ctx, JSValue this_val, int argc, JSValue*
   });
 
   return all->jsObject;
-}
-PROP_SETTER(Document, all)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
 }
 
 PROP_GETTER(Document, cookie)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {

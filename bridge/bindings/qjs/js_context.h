@@ -158,6 +158,18 @@ class ObjectProperty {
     JS_DefinePropertyValueStr(context->ctx(), thisObject, setterProperty.c_str(), setterProxy, JS_PROP_NORMAL);
     JS_FreeValue(context->ctx(), setter);
   };
+
+  explicit ObjectProperty(JSContext* context, JSValueConst thisObject, const std::string& property, JSCFunction getterFunction) {
+    // Getter on jsObject works well with all conditions.
+    // We create an getter function and define to jsObject directly.
+    JSAtom propertyKeyAtom = JS_NewAtom(context->ctx(), property.c_str());
+    JSValue getter = JS_NewCFunction(context->ctx(), getterFunction, "getter", 0);
+    JSValue getterProxy = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 0, 0, 1, &getter);
+    JS_DefinePropertyGetSet(context->ctx(), thisObject, propertyKeyAtom, getterProxy, JS_UNDEFINED, JS_PROP_NORMAL);
+    JS_FreeAtom(context->ctx(), propertyKeyAtom);
+    JS_FreeValue(context->ctx(), getter);
+  };
+
   // Define an property on object with a JSValue.
   explicit ObjectProperty(JSContext* context, JSValueConst thisObject, const char* property, JSValue value) : m_value(value) {
     JS_DefinePropertyValueStr(context->ctx(), thisObject, property, value, JS_PROP_ENUMERABLE);

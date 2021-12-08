@@ -59,9 +59,6 @@ PROP_SETTER(TextNode, nodeValue)(QjsContext* ctx, JSValue this_val, int argc, JS
 PROP_GETTER(TextNode, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewString(ctx, "#text");
 }
-PROP_SETTER(TextNode, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
 TextNodeInstance::TextNodeInstance(TextNode* textNode, JSValue text)
     : NodeInstance(textNode, NodeType::TEXT_NODE, DocumentInstance::instance(Document::instance(textNode->m_context)), TextNode::classId(), "TextNode"), m_data(JS_DupValue(m_ctx, text)) {

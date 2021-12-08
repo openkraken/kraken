@@ -294,16 +294,10 @@ PROP_GETTER(Node, isConnected)(QjsContext* ctx, JSValue this_val, int argc, JSVa
   auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
   return JS_NewBool(ctx, nodeInstance->isConnected());
 }
-PROP_SETTER(Node, isConnected)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
 PROP_GETTER(Node, ownerDocument)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
   return JS_DupValue(ctx, nodeInstance->m_document->instanceObject);
-}
-PROP_SETTER(Node, ownerDocument)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
 }
 
 PROP_GETTER(Node, firstChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -311,25 +305,16 @@ PROP_GETTER(Node, firstChild)(QjsContext* ctx, JSValue this_val, int argc, JSVal
   auto* instance = nodeInstance->firstChild();
   return instance != nullptr ? instance->instanceObject : JS_NULL;
 }
-PROP_SETTER(Node, firstChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
 PROP_GETTER(Node, lastChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
   auto* instance = nodeInstance->lastChild();
   return instance != nullptr ? instance->instanceObject : JS_NULL;
 }
-PROP_SETTER(Node, lastChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
 PROP_GETTER(Node, parentNode)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
   return JS_DupValue(ctx, nodeInstance->parentNode);
-}
-PROP_SETTER(Node, parentNode)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
 }
 
 PROP_GETTER(Node, previousSibling)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -337,25 +322,16 @@ PROP_GETTER(Node, previousSibling)(QjsContext* ctx, JSValue this_val, int argc, 
   auto* instance = nodeInstance->previousSibling();
   return instance != nullptr ? instance->instanceObject : JS_NULL;
 }
-PROP_SETTER(Node, previousSibling)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
 PROP_GETTER(Node, nextSibling)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
   auto* instance = nodeInstance->nextSibling();
   return instance != nullptr ? instance->instanceObject : JS_NULL;
 }
-PROP_SETTER(Node, nextSibling)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
 PROP_GETTER(Node, nodeType)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
   return JS_NewUint32(ctx, nodeInstance->nodeType);
-}
-PROP_SETTER(Node, nodeType)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
 }
 
 PROP_GETTER(Node, textContent)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {

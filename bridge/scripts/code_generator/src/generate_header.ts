@@ -6,7 +6,25 @@ import {addIndent} from "./utils";
 function generatePropsHeader(object: ClassObject, type: PropType) {
   let propsDefine = '';
   if (object.props.length > 0) {
-    propsDefine = `${type == PropType.hostObject ? 'DEFINE_HOST_OBJECT_PROPERTY' : 'DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY'}(${object.props.length}, ${object.props.map(o => o.name).join(', ')})`;
+    let readonlyProps: PropsDeclaration[] = [];
+    let writeableProps: PropsDeclaration[] = [];
+
+    object.props.forEach(p => {
+      if (p.readonly) {
+        readonlyProps.push(p);
+      } else {
+        writeableProps.push(p);
+      }
+    });
+
+    if (type == PropType.hostObject) {
+      propsDefine = `DEFINE_HOST_OBJECT_PROPERTY(${object.props.length}, ${object.props.map(o => o.name).join(', ')})`;
+    } else {
+      propsDefine = `
+${readonlyProps.length > 0 ? `DEFINE_HOST_CLASS_PROTOTYPE_GETTER_PROPERTY(${readonlyProps.length}, ${readonlyProps.map(o => o.name).join(', ')})` : ''}
+${writeableProps.length > 0 ? `DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(${writeableProps.length}, ${writeableProps.map(o => o.name).join(', ')})` : ''}
+      `;
+    }
   }
   return propsDefine;
 }

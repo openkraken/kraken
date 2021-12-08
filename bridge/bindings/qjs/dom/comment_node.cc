@@ -34,22 +34,13 @@ JSValue Comment::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue 
 PROP_GETTER(Comment, data)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewString(ctx, "");
 }
-PROP_SETTER(Comment, data)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
 PROP_GETTER(Comment, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewString(ctx, "#comment");
 }
-PROP_SETTER(Comment, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
 PROP_GETTER(Comment, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewUint32(ctx, 0);
-}
-PROP_SETTER(Comment, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
 }
 
 CommentInstance::CommentInstance(Comment* comment) : NodeInstance(comment, NodeType::COMMENT_NODE, DocumentInstance::instance(Document::instance(comment->m_context)), Comment::classId(), "Comment") {

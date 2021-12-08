@@ -90,27 +90,28 @@ class Element : public Node {
   OBJECT_INSTANCE(Element);
 
  private:
-  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(20,
-                                       nodeName,
-                                       tagName,
+  DEFINE_HOST_CLASS_PROTOTYPE_GETTER_PROPERTY(15,
+                                              nodeName,
+                                              tagName,
+                                              offsetLeft,
+                                              offsetTop,
+                                              offsetWidth,
+                                              offsetHeight,
+                                              clientWidth,
+                                              clientHeight,
+                                              clientTop,
+                                              clientLeft,
+                                              scrollHeight,
+                                              scrollWidth,
+                                              firstElementChild,
+                                              lastElementChild,
+                                              children);
+  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(5,
                                        className,
-                                       offsetLeft,
-                                       offsetTop,
-                                       offsetWidth,
-                                       offsetHeight,
-                                       clientWidth,
-                                       clientHeight,
-                                       clientTop,
-                                       clientLeft,
-                                       scrollTop,
-                                       scrollLeft,
-                                       scrollHeight,
-                                       scrollWidth,
-                                       firstElementChild,
-                                       lastElementChild,
-                                       children,
                                        innerHTML,
-                                       outerHTML);
+                                       outerHTML,
+                                       scrollTop,
+                                       scrollLeft);
 
   ObjectFunction m_getBoundingClientRect{m_context, m_prototypeObject, "getBoundingClientRect", getBoundingClientRect, 0};
   ObjectFunction m_hasAttribute{m_context, m_prototypeObject, "hasAttribute", hasAttribute, 1};

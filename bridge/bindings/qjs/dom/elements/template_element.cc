@@ -28,9 +28,6 @@ PROP_GETTER(TemplateElement, content)(QjsContext* ctx, JSValue this_val, int arg
   auto* element = static_cast<TemplateElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   return JS_DupValue(ctx, element->m_content->instanceObject);
 }
-PROP_SETTER(TemplateElement, content)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 PROP_GETTER(TemplateElement, innerHTML)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<TemplateElementInstance*>(JS_GetOpaque(this_val, Element::classId()));

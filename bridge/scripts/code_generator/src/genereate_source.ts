@@ -131,9 +131,7 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
   } = getPropsVars(object, type);
 
   if (p.readonly) {
-    return `PROP_SETTER(${className}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  return JS_NULL;
-}`;
+    return '';
   }
 
   let setterCode = '';

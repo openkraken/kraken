@@ -26,7 +26,7 @@ class Comment : public Node {
   JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
  private:
-  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(3, data, nodeName, length)
+  DEFINE_HOST_CLASS_PROTOTYPE_GETTER_PROPERTY(3, data, nodeName, length)
   friend CommentInstance;
 };
 
