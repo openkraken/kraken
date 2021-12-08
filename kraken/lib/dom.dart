@@ -13,6 +13,7 @@ export 'src/dom/node.dart';
 export 'src/dom/text_node.dart';
 export 'src/dom/window.dart';
 export 'src/dom/document.dart';
+export 'src/dom/comment.dart';
 export 'src/dom/document_fragment.dart';
 export 'src/dom/sliver_manager.dart';
 export 'src/dom/element_registry.dart';

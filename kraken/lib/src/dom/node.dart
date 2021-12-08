@@ -15,22 +15,6 @@ enum NodeType {
   DOCUMENT_FRAGMENT_NODE,
 }
 
-class Comment extends Node {
-  Comment(EventTargetContext? context)
-      : super(NodeType.COMMENT_NODE, context);
-
-  @override
-  String get nodeName => '#comment';
-
-  @override
-  RenderBox? get renderer => null;
-
-  // @TODO: Get data from bridge side.
-  String get data => '';
-
-  int get length => data.length;
-}
-
 /// [RenderObjectNode] provide the renderObject related abstract life cycle for
 /// [Node] or [Element]s, which wrap [RenderObject]s, which provide the actual
 /// rendering of the application.
@@ -122,7 +106,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
     while (parent.parentNode != null) {
       parent = parent.parentNode!;
     }
-    return this == ownerDocument || parent == ownerDocument;
+    return parent == ownerDocument;
   }
 
   Node get firstChild => childNodes.first;
