@@ -5,6 +5,7 @@
 
 import 'dart:ffi';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
@@ -33,6 +34,48 @@ class HeadElement extends Element {
 class LinkElement extends Element {
   LinkElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+
+  String? rel;
+
+  @override
+  void setProperty(String key, dynamic value) {
+    super.setProperty(key, value);
+    if (key == 'href') {
+      _fetchBundle(value);
+    } else if (key == 'rel') {
+      rel = value.toString().toLowerCase().trim();
+    }
+  }
+
+  void _fetchBundle(String url) async {
+    if (url.isNotEmpty && rel == 'stylesheet' && isConnected) {
+      try {
+        KrakenBundle bundle = KrakenBundle.fromUrl(url);
+        await bundle.resolve(elementManager.contextId);
+        await bundle.eval(elementManager.contextId);
+
+        // Successful load.
+        SchedulerBinding.instance!.addPostFrameCallback((_) {
+          dispatchEvent(Event(EVENT_LOAD));
+        });
+      } catch(e) {
+        // An error occurred.
+        SchedulerBinding.instance!.addPostFrameCallback((_) {
+          dispatchEvent(Event(EVENT_ERROR));
+        });
+      }
+      SchedulerBinding.instance!.scheduleFrame();
+    }
+  }
+
+  @override
+  void connectedCallback() async {
+    super.connectedCallback();
+    String? url = getProperty('href');
+    if (url != null) {
+      _fetchBundle(url);
+    }
+  }
 }
 
 class MetaElement extends Element {
@@ -50,7 +93,9 @@ class NoScriptElement extends Element {
       : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
 }
 
-const String _JAVASCRIPT_MIME = 'text/javascript';
+const String _MIME_TEXT_JAVASCRIPT = 'text/javascript';
+const String _MIME_APPLICATION_JAVASCRIPT = 'application/javascript';
+const String _MIME_X_APPLICATION_JAVASCRIPT = 'application/x-javascript';
 const String _JAVASCRIPT_MODULE = 'module';
 
 class ScriptElement extends Element {
@@ -58,7 +103,7 @@ class ScriptElement extends Element {
       : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle) {
   }
 
-  String type = _JAVASCRIPT_MIME;
+  String type = _MIME_TEXT_JAVASCRIPT;
 
   @override
   void setProperty(String key, dynamic value) {
@@ -72,7 +117,12 @@ class ScriptElement extends Element {
 
   void _fetchBundle(String src) async {
     // Must
-    if (src.isNotEmpty && isConnected && (type == _JAVASCRIPT_MIME || type == _JAVASCRIPT_MODULE)) {
+    if (src.isNotEmpty && isConnected && (
+        type == _MIME_TEXT_JAVASCRIPT
+          || type == _MIME_APPLICATION_JAVASCRIPT
+          || type == _MIME_X_APPLICATION_JAVASCRIPT
+          || type == _JAVASCRIPT_MODULE
+    )) {
       try {
         KrakenBundle bundle = KrakenBundle.fromUrl(src);
         await bundle.resolve(elementManager.contextId);
@@ -97,7 +147,7 @@ class ScriptElement extends Element {
     String? src = getProperty('src');
     if (src != null) {
       _fetchBundle(src);
-    } else if (type == _JAVASCRIPT_MIME || type == _JAVASCRIPT_MODULE){
+    } else if (type == _MIME_TEXT_JAVASCRIPT || type == _JAVASCRIPT_MODULE){
       // Eval script context: <script> console.log(1) </script>
       StringBuffer buffer = StringBuffer();
       childNodes.forEach((node) {

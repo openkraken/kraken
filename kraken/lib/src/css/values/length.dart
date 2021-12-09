@@ -530,9 +530,19 @@ class CSSLength {
             // Using fallback value if not match user agent-defined environment variable: env(xxx, 50px).
             return parseLength(notations[0].args[1], renderStyle, propertyName, axisType);
         }
-
+      } else if (notations.length == 1 && notations[0].name == VAR) {
+        // Impl CSS Variables.
+        CSSFunctionalNotation notation = notations.first;
+        if (notation.args.isNotEmpty) {
+          String? variable = renderStyle?.getCSSVariable(notation.args.first);
+          if (variable != null) {
+            return parseLength(variable, renderStyle, propertyName, axisType);
+          } else if (notation.args.length > 1) {
+            // Fallback to default value.
+            return parseLength(notation.args.last, renderStyle, propertyName, axisType);
+          }
+        }
       }
-      // TODO: impl CSS Variables.
     }
 
     if (value == 0) {

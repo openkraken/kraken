@@ -266,7 +266,8 @@ class CSSStyleDeclaration {
         // Validation length type
         if (!CSSLength.isNonNegativeLength(normalizedValue) &&
           !CSSLength.isAuto(normalizedValue) &&
-          !CSSPercentage.isNonNegativePercentage(normalizedValue)
+          !CSSPercentage.isNonNegativePercentage(normalizedValue) &&
+          !CSSFunction.isFunction(normalizedValue)
         ) {
           return false;
         }

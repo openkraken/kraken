@@ -42,6 +42,7 @@ export 'src/css/object_fit.dart';
 export 'src/css/object_position.dart';
 export 'src/css/sliver.dart';
 export 'src/css/value.dart';
+export 'src/css/variable.dart';
 export 'src/css/keywords.dart';
 
 // CSS Values

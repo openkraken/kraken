@@ -1139,6 +1139,11 @@ class Element extends Node
       case SLIVER_DIRECTION:
         renderStyle.sliverDirection = value;
           break;
+      default:
+        // Set CSS Variable.
+        if (CSSVariableMixin.isVariable(name)) {
+          renderStyle.setCSSVariable(name, value);
+        }
     }
   }
 
@@ -1336,6 +1341,10 @@ class Element extends Node
       case TRANSITION_PROPERTY:
         value = CSSStyleProperty.getMultipleValues(present);
         break;
+    }
+
+    if (CSSVariableMixin.isVariable(property)) {
+      value = present;
     }
 
     return value;

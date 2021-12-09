@@ -14,6 +14,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
+import 'package:kraken/css.dart';
 
 import 'manifest.dart';
 
@@ -23,6 +24,7 @@ const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
 const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 
 const String ASSETS_PROROCOL = 'assets://';
+final ContentType css = ContentType('text', 'css', charset: 'utf-8');
 
 String? getBundleURLFromEnv() {
   return Platform.environment[BUNDLE_URL];
@@ -126,6 +128,9 @@ abstract class KrakenBundle {
       String code = _resolveStringFromData(rawBundle);
       // parse html.
       parseHTML(contextId, code);
+    } else if (contentType.mimeType == css.mimeType || src.contains('.css')) {
+      KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
+      controller?.view.elementManager.addStyleSheet(CSSStyleSheet(_resolveStringFromData(rawBundle)));
     } else if (isByteCodeSupported(contentType.mimeType, src)) {
       Uint8List buffer = rawBundle.buffer.asUint8List();
       evaluateQuickjsByteCode(contextId, buffer);

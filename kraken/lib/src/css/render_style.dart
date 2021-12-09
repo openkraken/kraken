@@ -19,6 +19,10 @@ abstract class RenderStyle {
   RenderStyle? get parent;
   getProperty(String key);
 
+  // CSSVariable
+  String? getCSSVariable(String key);
+  void setCSSVariable(String key, String value);
+
   // Geometry
   CSSLengthValue get top;
   CSSLengthValue get right;
@@ -200,7 +204,8 @@ class CSSRenderStyle
     CSSOverflowMixin,
     CSSFilterEffectsMixin,
     CSSOpacityMixin,
-    CSSTransitionMixin {
+    CSSTransitionMixin,
+    CSSVariableMixin {
   CSSRenderStyle({ required this.target });
 
   @override
