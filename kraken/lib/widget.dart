@@ -955,15 +955,6 @@ This situation often happened when you trying creating kraken when FlutterView n
       controller.view.viewportHeight = viewportHeight;
       controller.view.document!.documentElement.renderStyle.height = CSSLengthValue(viewportHeight, CSSLengthType.PX);
     }
-
-    if (viewportWidthHasChanged || viewportHeightHasChanged) {
-      traverseElement(controller.view.document!.documentElement, (element) {
-        if (element.isRendererAttached) {
-          element.style.flushPendingProperties();
-          element.renderBoxModel?.markNeedsLayout();
-        }
-      });
-    }
   }
 
   @override
