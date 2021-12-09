@@ -44,8 +44,16 @@ class Node : public EventTarget {
   static JSValue replaceChild(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
  private:
-  DEFINE_PROTOTYPE_PROPERTY(1, textContent);
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(8, isConnected, ownerDocument, firstChild, lastChild, parentNode, previousSibling, nextSibling, nodeType);
+  DEFINE_PROTOTYPE_PROPERTY(textContent);
+
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(isConnected)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(ownerDocument)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(firstChild)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(lastChild)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(parentNode)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(previousSibling)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(nextSibling)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(nodeType)
 
   ObjectFunction m_cloneNode{m_context, m_prototypeObject, "cloneNode", cloneNode, 1};
   ObjectFunction m_appendChild{m_context, m_prototypeObject, "appendChild", appendChild, 1};
@@ -115,7 +123,7 @@ class NodeInstance : public EventTargetInstance {
 
  private:
   DocumentInstance* m_document{nullptr};
-  ObjectProperty m_childNodes{m_context, instanceObject, "childNodes", childNodes};
+  ObjectProperty m_childNodes{m_context, jsObject, "childNodes", childNodes};
   void ensureDetached(NodeInstance* node);
   friend DocumentInstance;
   friend Node;

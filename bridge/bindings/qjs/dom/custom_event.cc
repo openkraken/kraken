@@ -13,7 +13,7 @@ namespace kraken::binding::qjs {
 
 void bindCustomEvent(std::unique_ptr<JSContext>& context) {
   auto* constructor = CustomEvent::instance(context.get());
-  context->defineGlobalProperty("CustomEvent", constructor->classObject);
+  context->defineGlobalProperty("CustomEvent", constructor->jsObject);
 }
 
 JSValue CustomEvent::initCustomEvent(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -61,7 +61,7 @@ JSValue CustomEvent::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSVa
   auto* customEvent = new CustomEventInstance(CustomEvent::instance(context()), typeAtom, customEventInit);
   JS_FreeAtom(m_ctx, typeAtom);
 
-  return customEvent->instanceObject;
+  return customEvent->jsObject;
 }
 
 PROP_GETTER_IMPL(CustomEvent, detail)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {

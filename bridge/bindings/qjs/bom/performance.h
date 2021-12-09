@@ -146,7 +146,10 @@ class PerformanceEntry : public HostObject {
   PerformanceEntry() = delete;
   explicit PerformanceEntry(JSContext* context, NativePerformanceEntry* m_nativePerformanceEntry);
 
-  DEFINE_HOST_OBJECT_PROPERTY(4, name, entryType, startTime, duration)
+  DEFINE_READONLY_PROPERTY(name);
+  DEFINE_READONLY_PROPERTY(entryType);
+  DEFINE_READONLY_PROPERTY(startTime);
+  DEFINE_READONLY_PROPERTY(duration);
 
  private:
   NativePerformanceEntry* m_nativePerformanceEntry{nullptr};
@@ -197,7 +200,7 @@ class Performance : public HostObject {
 
   NativePerformance m_nativePerformance;
 
-  DEFINE_HOST_OBJECT_PROPERTY(1, timeOrigin);
+  DEFINE_READONLY_PROPERTY(timeOrigin);
 
  private:
   void internalMeasure(const std::string& name, const std::string& startMark, const std::string& endMark, JSValue* exception);

@@ -39,8 +39,17 @@ class Window : public EventTarget {
   ObjectFunction m_scrollBy{m_context, m_prototypeObject, "scrollBy", scrollBy, 2};
   ObjectFunction m_postMessage{m_context, m_prototypeObject, "postMessage", postMessage, 3};
 
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(9, devicePixelRatio, colorScheme, __location__, location, window, parent, scrollX, scrollY, self)
-  DEFINE_PROTOTYPE_PROPERTY(1, onerror);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(devicePixelRatio)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(colorScheme)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(__location__)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(location)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(window)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(parent)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(scrollX)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(scrollY)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(self)
+
+  DEFINE_PROTOTYPE_PROPERTY(onerror);
   friend WindowInstance;
 };
 
@@ -53,8 +62,8 @@ class WindowInstance : public EventTargetInstance {
  private:
   void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
-  ObjectProperty m_location{m_context, instanceObject, "m_location", (new Location(m_context))->jsObject};
-  ObjectProperty m_onerror{m_context, instanceObject, "m_onerror", JS_NULL};
+  ObjectProperty m_location{m_context, jsObject, "m_location", (new Location(m_context))->jsObject};
+  ObjectProperty m_onerror{m_context, jsObject, "m_onerror", JS_NULL};
   JSValue onerror{JS_NULL};
   friend Window;
   friend JSContext;

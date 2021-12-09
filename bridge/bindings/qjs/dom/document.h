@@ -43,8 +43,14 @@ class Document : public Node {
   bool isCustomElement(const std::string& tagName);
 
  private:
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(5, nodeName, all, documentElement, children, head)
-  DEFINE_PROTOTYPE_PROPERTY(2, cookie, body);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(nodeName)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(all)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(documentElement)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(children)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(head)
+
+  DEFINE_PROTOTYPE_PROPERTY(cookie);
+  DEFINE_PROTOTYPE_PROPERTY(body);
 
   void defineElement(const std::string& tagName, Element* constructor);
 

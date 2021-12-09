@@ -21,9 +21,6 @@ PROP_GETTER_IMPL(Screen, width)(QjsContext* ctx, JSValue this_val, int argc, JSV
   NativeScreen* screen = getDartMethod()->getScreen(context->getContextId());
   return JS_NewFloat64(ctx, screen->width);
 }
-PROP_SETTER_IMPL(Screen, width)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_UNDEFINED;
-}
 
 PROP_GETTER_IMPL(Screen, height)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (getDartMethod()->getScreen == nullptr) {
@@ -33,9 +30,6 @@ PROP_GETTER_IMPL(Screen, height)(QjsContext* ctx, JSValue this_val, int argc, JS
   auto context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
   NativeScreen* screen = getDartMethod()->getScreen(context->getContextId());
   return JS_NewFloat64(ctx, screen->height);
-}
-PROP_SETTER_IMPL(Screen, height)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_UNDEFINED;
 }
 
 }  // namespace kraken::binding::qjs

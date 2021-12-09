@@ -90,23 +90,27 @@ class Element : public Node {
   OBJECT_INSTANCE(Element);
 
  private:
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(15,
-                                     nodeName,
-                                     tagName,
-                                     offsetLeft,
-                                     offsetTop,
-                                     offsetWidth,
-                                     offsetHeight,
-                                     clientWidth,
-                                     clientHeight,
-                                     clientTop,
-                                     clientLeft,
-                                     scrollHeight,
-                                     scrollWidth,
-                                     firstElementChild,
-                                     lastElementChild,
-                                     children);
-  DEFINE_PROTOTYPE_PROPERTY(5, className, innerHTML, outerHTML, scrollTop, scrollLeft);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(nodeName);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(tagName);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(offsetLeft);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(offsetTop);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(offsetWidth);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(offsetHeight);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(clientWidth);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(clientHeight);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(clientTop);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(clientLeft);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(scrollHeight);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(scrollWidth);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(firstElementChild);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(lastElementChild);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(children);
+
+  DEFINE_PROTOTYPE_PROPERTY(className);
+  DEFINE_PROTOTYPE_PROPERTY(innerHTML);
+  DEFINE_PROTOTYPE_PROPERTY(outerHTML);
+  DEFINE_PROTOTYPE_PROPERTY(scrollTop);
+  DEFINE_PROTOTYPE_PROPERTY(scrollLeft);
 
   ObjectFunction m_getBoundingClientRect{m_context, m_prototypeObject, "getBoundingClientRect", getBoundingClientRect, 0};
   ObjectFunction m_hasAttribute{m_context, m_prototypeObject, "hasAttribute", hasAttribute, 1};
@@ -171,12 +175,18 @@ class BoundingClientRect : public HostObject {
   explicit BoundingClientRect(JSContext* context, NativeBoundingClientRect* nativeBoundingClientRect)
       : HostObject(context, "BoundingClientRect"),
         m_nativeBoundingClientRect(nativeBoundingClientRect){
-
         };
 
-  DEFINE_HOST_OBJECT_PROPERTY(8, x, y, width, height, top, right, bottom, left);
-
  private:
+  DEFINE_READONLY_PROPERTY(x);
+  DEFINE_READONLY_PROPERTY(y);
+  DEFINE_READONLY_PROPERTY(width);
+  DEFINE_READONLY_PROPERTY(height);
+  DEFINE_READONLY_PROPERTY(top);
+  DEFINE_READONLY_PROPERTY(right);
+  DEFINE_READONLY_PROPERTY(bottom);
+  DEFINE_READONLY_PROPERTY(left);
+
   NativeBoundingClientRect* m_nativeBoundingClientRect{nullptr};
 };
 

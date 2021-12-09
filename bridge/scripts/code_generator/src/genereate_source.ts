@@ -316,7 +316,7 @@ function generateEventConstructorCode(object: ClassObject) {
   ${generateEventInstanceConstructorCode(object)}
 
   auto event = new ${object.name}Instance(this, reinterpret_cast<NativeEvent *>(nativeEvent));
-  return event->instanceObject;`;
+  return event->jsObject;`;
 }
 
 function generateEventInstanceConstructorCode(object: ClassObject) {
@@ -388,7 +388,7 @@ function generateHostClassSource(object: ClassObject) {
   let constructorCode = '';
   if (object.type === 'Element') {
     constructorCode = `auto instance = new ${object.name}Instance(this);
-  return instance->instanceObject;`;
+  return instance->jsObject;`;
   } else if (object.type === 'Event') {
     constructorCode = generateEventConstructorCode(object);
   }
@@ -409,7 +409,7 @@ function generateHostClassSource(object: ClassObject) {
 
   let specialBind = '';
   if (object.name === 'ImageElement') {
-    specialBind = `context->defineGlobalProperty("Image", JS_DupValue(context->ctx(), constructor->classObject));`
+    specialBind = `context->defineGlobalProperty("Image", JS_DupValue(context->ctx(), constructor->jsObject));`
   }
 
   let classInheritCode = '';
@@ -426,7 +426,7 @@ ${object.name}::${object.name}(JSContext *context) : ${object.type}(context) {
 
 void bind${object.name}(std::unique_ptr<JSContext> &context) {
   auto *constructor = ${object.name}::instance(context.get());
-  context->defineGlobalProperty("${globalBindingName}", constructor->classObject);
+  context->defineGlobalProperty("${globalBindingName}", constructor->jsObject);
   ${specialBind}
 }
 

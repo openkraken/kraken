@@ -15,13 +15,13 @@ ImageElement::ImageElement(JSContext* context) : Element(context) {
 
 void bindImageElement(std::unique_ptr<JSContext>& context) {
   auto* constructor = ImageElement::instance(context.get());
-  context->defineGlobalProperty("HTMLImageElement", constructor->classObject);
-  context->defineGlobalProperty("Image", JS_DupValue(context->ctx(), constructor->classObject));
+  context->defineGlobalProperty("HTMLImageElement", constructor->jsObject);
+  context->defineGlobalProperty("Image", JS_DupValue(context->ctx(), constructor->jsObject));
 }
 
 JSValue ImageElement::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
   auto instance = new ImageElementInstance(this);
-  return instance->instanceObject;
+  return instance->jsObject;
 }
 PROP_GETTER_IMPL(ImageElement, width)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();

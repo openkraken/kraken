@@ -16,11 +16,11 @@ void bindWindow(std::unique_ptr<JSContext>& context) {
   // Set globalThis and Window's prototype to EventTarget's prototype to support EventTarget methods in global.
   auto* windowConstructor = new Window(context.get());
   JS_SetPrototype(context->ctx(), context->global(), windowConstructor->prototype());
-  context->defineGlobalProperty("Window", windowConstructor->classObject);
+  context->defineGlobalProperty("Window", windowConstructor->jsObject);
 
   auto* window = new WindowInstance(windowConstructor);
   JS_SetOpaque(context->global(), window);
-  context->defineGlobalProperty("__window__", window->instanceObject);
+  context->defineGlobalProperty("__window__", window->jsObject);
 }
 
 JSClassID Window::kWindowClassId{0};
@@ -60,7 +60,7 @@ JSValue Window::postMessage(QjsContext* ctx, JSValue this_val, int argc, JSValue
   JS_SetPropertyStr(ctx, messageEventInitValue, "data", JS_DupValue(ctx, messageValue));
   JS_SetPropertyStr(ctx, originValue, "origin", JS_DupValue(ctx, originValue));
 
-  JSValue messageEventValue = JS_CallConstructor(ctx, MessageEvent::instance(window->m_context)->classObject, 1, &messageEventInitValue);
+  JSValue messageEventValue = JS_CallConstructor(ctx, MessageEvent::instance(window->m_context)->jsObject, 1, &messageEventInitValue);
   auto* event = static_cast<MessageEventInstance*>(JS_GetOpaque(messageEventValue, Event::kEventClassID));
   window->dispatchEvent(event);
 

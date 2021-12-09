@@ -15,7 +15,7 @@ JSClassID Comment::kCommentClassId{0};
 
 void bindCommentNode(std::unique_ptr<JSContext>& context) {
   auto* constructor = Comment::instance(context.get());
-  context->defineGlobalProperty("Comment", constructor->classObject);
+  context->defineGlobalProperty("Comment", constructor->jsObject);
 }
 
 JSClassID Comment::classId() {
@@ -28,7 +28,7 @@ Comment::Comment(JSContext* context) : Node(context, "Comment") {
 }
 
 JSValue Comment::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
-  return (new CommentInstance(this))->instanceObject;
+  return (new CommentInstance(this))->jsObject;
 }
 
 PROP_GETTER_IMPL(Comment, data)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {

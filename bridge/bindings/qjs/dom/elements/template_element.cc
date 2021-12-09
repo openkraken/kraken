@@ -16,12 +16,12 @@ TemplateElement::TemplateElement(JSContext* context) : Element(context) {
 
 void bindTemplateElement(std::unique_ptr<JSContext>& context) {
   auto* constructor = TemplateElement::instance(context.get());
-  context->defineGlobalProperty("HTMLTemplateElement", constructor->classObject);
+  context->defineGlobalProperty("HTMLTemplateElement", constructor->jsObject);
 }
 
 JSValue TemplateElement::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
   auto instance = new TemplateElementInstance(this);
-  return instance->instanceObject;
+  return instance->jsObject;
 }
 
 DocumentFragmentInstance* TemplateElementInstance::content() const {

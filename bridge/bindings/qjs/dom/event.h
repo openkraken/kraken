@@ -76,7 +76,16 @@ class Event : public HostClass {
 
  private:
   static std::unordered_map<std::string, EventCreator> m_eventCreatorMap;
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(10, type, bubbles, cancelable, timestamp, defaultPrevented, target, srcElement, currentTarget, returnValue, cancelBubble)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(type)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(bubbles)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(cancelable)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(timestamp)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(defaultPrevented)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(target)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(srcElement)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(currentTarget)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(returnValue)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(cancelBubble)
 
   ObjectFunction m_stopPropagation{m_context, m_prototypeObject, "stopPropagation", stopPropagation, 0};
   ObjectFunction m_stopImmediatePropagation{m_context, m_prototypeObject, "immediatePropagation", stopImmediatePropagation, 0};

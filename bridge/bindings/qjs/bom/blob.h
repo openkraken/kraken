@@ -31,7 +31,8 @@ class Blob : public HostClass {
 
  private:
   friend BlobInstance;
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(2, type, size);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(type);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(size);
 
   ObjectFunction m_arrayBuffer{m_context, m_prototypeObject, "arrayBuffer", arrayBuffer, 0};
   ObjectFunction m_slice{m_context, m_prototypeObject, "slice", slice, 3};

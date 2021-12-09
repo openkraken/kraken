@@ -13,7 +13,7 @@ std::once_flag kTextNodeInitFlag;
 
 void bindTextNode(std::unique_ptr<JSContext>& context) {
   auto* constructor = TextNode::instance(context.get());
-  context->defineGlobalProperty("Text", constructor->classObject);
+  context->defineGlobalProperty("Text", constructor->jsObject);
 }
 
 JSClassID TextNode::kTextNodeClassId{0};
@@ -29,7 +29,7 @@ JSValue TextNode::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue
     textContent = argv[0];
   }
 
-  return (new TextNodeInstance(this, textContent))->instanceObject;
+  return (new TextNodeInstance(this, textContent))->jsObject;
 }
 
 JSClassID TextNode::classId() {

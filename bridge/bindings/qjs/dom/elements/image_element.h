@@ -22,8 +22,13 @@ class ImageElement : public Element {
   OBJECT_INSTANCE(ImageElement);
 
  private:
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(2, naturalWidth, naturalHeight)
-  DEFINE_PROTOTYPE_PROPERTY(4, width, height, src, loading)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(naturalWidth);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(naturalHeight);
+
+  DEFINE_PROTOTYPE_PROPERTY(width);
+  DEFINE_PROTOTYPE_PROPERTY(height);
+  DEFINE_PROTOTYPE_PROPERTY(src);
+  DEFINE_PROTOTYPE_PROPERTY(loading);
   friend ImageElementInstance;
 };
 

@@ -26,8 +26,10 @@ class TextNode : public Node {
   JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
  private:
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(1, nodeName)
-  DEFINE_PROTOTYPE_PROPERTY(2, data, nodeValue);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(nodeName);
+
+  DEFINE_PROTOTYPE_PROPERTY(data);
+  DEFINE_PROTOTYPE_PROPERTY(nodeValue);
   friend TextNodeInstance;
 };
 

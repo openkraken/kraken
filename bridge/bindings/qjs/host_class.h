@@ -46,27 +46,27 @@ class HostClass {
     def.finalizer = proxyFinalize;
     def.call = proxyCall;
     JS_NewClass(context->runtime(), JSContext::kHostClassClassId, &def);
-    classObject = JS_NewObjectClass(context->ctx(), JSContext::kHostClassClassId);
+    jsObject = JS_NewObjectClass(context->ctx(), JSContext::kHostClassClassId);
     m_prototypeObject = JS_NewObject(m_ctx);
 
     // Make constructor function inherit to Function.prototype
     JSValue functionConstructor = JS_GetPropertyStr(m_ctx, m_context->global(), "Function");
     JSValue functionPrototype = JS_GetPropertyStr(m_ctx, functionConstructor, "prototype");
-    JS_SetPrototype(m_ctx, classObject, functionPrototype);
+    JS_SetPrototype(m_ctx, jsObject, functionPrototype);
     JS_FreeValue(m_ctx, functionPrototype);
     JS_FreeValue(m_ctx, functionConstructor);
 
     JSAtom prototypeKey = JS_NewAtom(m_ctx, "prototype");
-    JS_DefinePropertyValue(m_ctx, classObject, prototypeKey, m_prototypeObject, JS_PROP_C_W_E);
+    JS_DefinePropertyValue(m_ctx, jsObject, prototypeKey, m_prototypeObject, JS_PROP_C_W_E);
     JS_FreeAtom(m_ctx, prototypeKey);
 
-    JS_SetConstructorBit(m_ctx, classObject, true);
-    JS_SetOpaque(classObject, this);
+    JS_SetConstructorBit(m_ctx, jsObject, true);
+    JS_SetOpaque(jsObject, this);
   };
   virtual ~HostClass() = default;
 
   virtual JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValueConst* argv) { return JS_NewObject(ctx); };
-  JSValue classObject;
+  JSValue jsObject;
 
   inline uint32_t contextId() const { return m_contextId; }
   inline JSContext* context() const { return m_context; }
@@ -84,7 +84,7 @@ class HostClass {
   static void proxyFinalize(JSRuntime* rt, JSValue val) {
     auto hostObject = static_cast<HostClass*>(JS_GetOpaque(val, JSContext::kHostClassClassId));
     if (hostObject->context()->isValid()) {
-      JS_FreeValue(hostObject->m_ctx, hostObject->classObject);
+      JS_FreeValue(hostObject->m_ctx, hostObject->jsObject);
     }
     delete hostObject;
   };
@@ -113,10 +113,10 @@ class Instance {
     def.exotic = exotic;
     def.gc_mark = proxyGCMark;
     int32_t success = JS_NewClass(m_context->runtime(), classId, &def);
-    instanceObject = JS_NewObjectProtoClass(m_ctx, hostClass->m_prototypeObject, classId);
-    JS_SetOpaque(instanceObject, this);
+    jsObject = JS_NewObjectProtoClass(m_ctx, hostClass->m_prototypeObject, classId);
+    JS_SetOpaque(jsObject, this);
   };
-  JSValue instanceObject;
+  JSValue jsObject;
   virtual ~Instance() = default;
 
   inline HostClass* prototype() const { return m_hostClass; }

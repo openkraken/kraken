@@ -15,7 +15,7 @@ std::once_flag kEventInitOnceFlag;
 
 void bindEvent(std::unique_ptr<JSContext>& context) {
   auto* constructor = Event::instance(context.get());
-  context->defineGlobalProperty("Event", constructor->classObject);
+  context->defineGlobalProperty("Event", constructor->jsObject);
 }
 
 JSClassID Event::kEventClassID{0};
@@ -34,7 +34,7 @@ JSValue Event::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue th
 
   auto* nativeEvent = new NativeEvent{stringToNativeString(eventType).release()};
   auto* event = Event::buildEventInstance(eventType, m_context, nativeEvent, false);
-  return event->instanceObject;
+  return event->jsObject;
 }
 
 std::unordered_map<std::string, EventCreator> Event::m_eventCreatorMap{};
@@ -68,7 +68,7 @@ PROP_GETTER_IMPL(Event, target)(QjsContext* ctx, JSValue this_val, int argc, JSV
   auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
   if (eventInstance->nativeEvent->target != nullptr) {
     auto instance = reinterpret_cast<EventTargetInstance*>(eventInstance->nativeEvent->target);
-    return JS_DupValue(ctx, instance->instanceObject);
+    return JS_DupValue(ctx, instance->jsObject);
   }
   return JS_NULL;
 }
@@ -77,7 +77,7 @@ PROP_GETTER_IMPL(Event, srcElement)(QjsContext* ctx, JSValue this_val, int argc,
   auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
   if (eventInstance->nativeEvent->target != nullptr) {
     auto instance = reinterpret_cast<EventTargetInstance*>(eventInstance->nativeEvent->target);
-    return JS_DupValue(ctx, instance->instanceObject);
+    return JS_DupValue(ctx, instance->jsObject);
   }
   return JS_NULL;
 }
@@ -86,7 +86,7 @@ PROP_GETTER_IMPL(Event, currentTarget)(QjsContext* ctx, JSValue this_val, int ar
   auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
   if (eventInstance->nativeEvent->currentTarget != nullptr) {
     auto instance = reinterpret_cast<EventTargetInstance*>(eventInstance->nativeEvent->currentTarget);
-    return JS_DupValue(ctx, instance->instanceObject);
+    return JS_DupValue(ctx, instance->jsObject);
   }
   return JS_NULL;
 }
@@ -203,7 +203,7 @@ EventInstance::EventInstance(Event* jsEvent, JSAtom eventType, JSValue eventInit
 void EventInstance::finalizer(JSRuntime* rt, JSValue val) {
   auto* event = static_cast<EventInstance*>(JS_GetOpaque(val, Event::kEventClassID));
   if (event->context()->isValid()) {
-    JS_FreeValue(event->m_ctx, event->instanceObject);
+    JS_FreeValue(event->m_ctx, event->jsObject);
   }
   delete event;
 }
