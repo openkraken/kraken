@@ -226,9 +226,8 @@ class RenderLayoutBox extends RenderBoxModel
           // this logic after Kraken has implemented stacking context tree.
           if(left is RenderBoxModel && left.renderStyle.position == CSSPositionType.fixed &&
             right is RenderBoxModel && right.renderStyle.position == CSSPositionType.fixed) {
-            // Child element who has higher depth always paint after parent element who has lower depth
-            // in the renderObject tree.
-            return left.renderPositionPlaceholder!.depth - right.renderPositionPlaceholder!.depth;
+            // Child element always paint after parent element in the renderObject tree.
+            return right.renderStyle.isAncestorForChild(left.renderStyle) ? 1 : -1;
           }
 
           bool isLeftNeedsStacking = left is RenderBoxModel && left.needsStacking;
