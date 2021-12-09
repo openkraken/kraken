@@ -139,7 +139,7 @@ class ObjectProperty {
 
     // Getter on jsObject works well with all conditions.
     // We create an getter function and define to jsObject directly.
-    JSValue setter = JS_NewCFunction(context->ctx(), setterFunction, property.c_str(), 0);
+    JSValue setter = JS_NewCFunction(context->ctx(), setterFunction, "setter", 0);
     JSValue setterProxy = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 1, 0, 1, &setter);
 
     // Define getter and setter property.
@@ -166,7 +166,7 @@ class ObjectProperty {
     JS_DefinePropertyValueStr(context->ctx(), thisObject, property, value, JS_PROP_ENUMERABLE);
   }
 
-  JSValue value() { return m_value; }
+  JSValue value() const { return m_value; }
 
  private:
   JSValue m_value{JS_NULL};

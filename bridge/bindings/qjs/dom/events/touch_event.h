@@ -79,7 +79,7 @@ class TouchEvent : public Event {
   OBJECT_INSTANCE(TouchEvent);
 
  private:
-  DEFINE_HOST_CLASS_PROTOTYPE_GETTER_PROPERTY(7, touches, targetTouches, changedTouches, altKey, metaKey, ctrlKey, shiftKey)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(7, touches, targetTouches, changedTouches, altKey, metaKey, ctrlKey, shiftKey)
   friend TouchEventInstance;
 };
 

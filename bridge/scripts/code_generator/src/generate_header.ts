@@ -21,8 +21,8 @@ function generatePropsHeader(object: ClassObject, type: PropType) {
       propsDefine = `DEFINE_HOST_OBJECT_PROPERTY(${object.props.length}, ${object.props.map(o => o.name).join(', ')})`;
     } else {
       propsDefine = `
-${readonlyProps.length > 0 ? `DEFINE_HOST_CLASS_PROTOTYPE_GETTER_PROPERTY(${readonlyProps.length}, ${readonlyProps.map(o => o.name).join(', ')})` : ''}
-${writeableProps.length > 0 ? `DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(${writeableProps.length}, ${writeableProps.map(o => o.name).join(', ')})` : ''}
+${readonlyProps.length > 0 ? `DEFINE_PROTOTYPE_READONLY_PROPERTY(${readonlyProps.length}, ${readonlyProps.map(o => o.name).join(', ')})` : ''}
+${writeableProps.length > 0 ? `DEFINE_PROTOTYPE_PROPERTY(${writeableProps.length}, ${writeableProps.map(o => o.name).join(', ')})` : ''}
       `;
     }
   }

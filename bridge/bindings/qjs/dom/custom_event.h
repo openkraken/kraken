@@ -29,7 +29,7 @@ class CustomEvent : public Event {
   OBJECT_INSTANCE(CustomEvent);
 
  private:
-  DEFINE_HOST_CLASS_PROTOTYPE_GETTER_PROPERTY(1, detail);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(1, detail);
   ObjectFunction m_initCustomEvent{m_context, m_prototypeObject, "initCustomEvent", initCustomEvent, 4};
   friend CustomEventInstance;
 };

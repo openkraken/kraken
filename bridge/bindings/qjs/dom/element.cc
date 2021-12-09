@@ -4,6 +4,7 @@
  */
 
 #include "element.h"
+#include "elements/template_element.h"
 #include "bindings/qjs/bom/blob.h"
 #include "bindings/qjs/html_parser.h"
 #include "dart_methods.h"
@@ -559,7 +560,14 @@ PROP_GETTER(Element, innerHTML)(QjsContext* ctx, JSValue this_val, int argc, JSV
 PROP_SETTER(Element, innerHTML)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   const char* chtml = JS_ToCString(ctx, argv[0]);
-  HTMLParser::parseHTML(chtml, strlen(chtml), element);
+
+  if (element->hasNodeFlag(NodeInstance::NodeFlag::IsTemplateElement)) {
+    auto *templateElement = static_cast<TemplateElementInstance*>(element);
+    HTMLParser::parseHTML(chtml, strlen(chtml), templateElement->content());
+  } else {
+    HTMLParser::parseHTML(chtml, strlen(chtml), element);
+  }
+
   JS_FreeCString(ctx, chtml);
   return JS_NULL;
 }
@@ -704,14 +712,21 @@ std::string ElementInstance::outerHTML() {
 
 std::string ElementInstance::innerHTML() {
   std::string s;
+
+  // If Element is TemplateElement, the innerHTML content is the content of documentFragment.
+  NodeInstance *parent = this;
+  if (hasNodeFlag(NodeInstance::NodeFlag::IsTemplateElement)) {
+    parent = static_cast<TemplateElementInstance*>(this)->content();
+  }
+
   // Children toString
-  int32_t childLen = arrayGetLength(m_ctx, childNodes);
+  int32_t childLen = arrayGetLength(m_ctx, parent->childNodes);
 
   if (childLen == 0)
     return s;
 
   for (int i = 0; i < childLen; i++) {
-    JSValue c = JS_GetPropertyUint32(m_ctx, childNodes, i);
+    JSValue c = JS_GetPropertyUint32(m_ctx, parent->childNodes, i);
     auto* node = static_cast<NodeInstance*>(JS_GetOpaque(c, Node::classId(c)));
     if (node->nodeType == NodeType::ELEMENT_NODE) {
       s += reinterpret_cast<ElementInstance*>(node)->outerHTML();

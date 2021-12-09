@@ -44,8 +44,8 @@ class Node : public EventTarget {
   static JSValue replaceChild(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
  private:
-  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(1, textContent);
-  DEFINE_HOST_CLASS_PROTOTYPE_GETTER_PROPERTY(8, isConnected, ownerDocument, firstChild, lastChild, parentNode, previousSibling, nextSibling, nodeType);
+  DEFINE_PROTOTYPE_PROPERTY(1, textContent);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(8, isConnected, ownerDocument, firstChild, lastChild, parentNode, previousSibling, nextSibling, nodeType);
 
   ObjectFunction m_cloneNode{m_context, m_prototypeObject, "cloneNode", cloneNode, 1};
   ObjectFunction m_appendChild{m_context, m_prototypeObject, "appendChild", appendChild, 1};
@@ -67,7 +67,7 @@ struct NodeJob {
 
 class NodeInstance : public EventTargetInstance {
  public:
-  enum class NodeFlag : uint32_t { IsDocumentFragment = 1 << 0 };
+  enum class NodeFlag : uint32_t { IsDocumentFragment = 1 << 0, IsTemplateElement = 1 << 1 };
   mutable std::set<NodeFlag> m_nodeFlags;
   bool hasNodeFlag(NodeFlag flag) const { return m_nodeFlags.size() != 0 && m_nodeFlags.find(flag) != m_nodeFlags.end(); }
   void setNodeFlag(NodeFlag flag) const { m_nodeFlags.insert(flag); }
