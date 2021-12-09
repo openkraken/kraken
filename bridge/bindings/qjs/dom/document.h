@@ -43,8 +43,8 @@ class Document : public Node {
   bool isCustomElement(const std::string& tagName);
 
  private:
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(3, nodeName, all, documentElement)
-  DEFINE_PROTOTYPE_PROPERTY(6, cookie, body, head, children, all, cookie);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(5, nodeName, all, documentElement, children, head)
+  DEFINE_PROTOTYPE_PROPERTY(2, cookie, body);
 
   void defineElement(const std::string& tagName, Element* constructor);
 
@@ -88,8 +88,6 @@ class DocumentInstance : public NodeInstance {
   }
 
  private:
-  DEFINE_HOST_CLASS_PROPERTY(3, nodeName, all, cookie);
-
   void removeElementById(JSAtom id, ElementInstance* element);
   void addElementById(JSAtom id, ElementInstance* element);
   ElementInstance* getDocumentElement();

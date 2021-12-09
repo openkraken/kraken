@@ -116,7 +116,7 @@ function generatePropsGetter(object: ClassObject, type: PropType, p: PropsDeclar
     flushUICommandCode = 'getDartMethod()->flushUICommand();'
   }
 
-  return `PROP_GETTER(${className}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return `GETTER_PROP_IMPL(${className}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   ${flushUICommandCode}
   ${getterCode}
 }`;
@@ -150,7 +150,7 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
   }
 
 
-  return `PROP_SETTER(${className}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return `SETTER_PROP_IMPL(${className}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *${instanceName} = static_cast<${classSubFix} *>(JS_GetOpaque(this_val, ${classId}));
   ${setterCode}
 }`;
