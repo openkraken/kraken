@@ -13,6 +13,8 @@ import 'package:kraken/painting.dart';
 import 'package:kraken/rendering.dart';
 
 const String IMAGE = 'IMG';
+const String NATURAL_WIDTH = 'naturalWidth';
+const String NATURAL_HEIGHT = 'naturalHeight';
 
 // FIXME: should be inline default.
 const Map<String, dynamic> _defaultStyle = {
@@ -22,18 +24,24 @@ const Map<String, dynamic> _defaultStyle = {
 // The HTMLImageElement.
 class ImageElement extends Element {
   // The render box to draw image.
-  RenderImage? _renderImage;
-  ImageProvider? _imageProvider;
+  KrakenRenderImage? _renderImage;
 
-  ImageStream? _imageStream;
+  ImageProvider? _cachedImageProvider;
+  dynamic _imageProviderKey;
 
-  ImageInfo? _imageInfo;
+  ImageStream? _cachedImageStream;
+  ImageInfo? _cachedImageInfo;
   Uri? _resolvedUri;
 
+  // Width and height set through property.
   double? _propertyWidth;
   double? _propertyHeight;
 
-  ui.Image? get image => _imageInfo?.image;
+  // Width and height set through style.
+  double? _styleWidth;
+  double? _styleHeight;
+
+  ui.Image? get image => _cachedImageInfo?.image;
 
   /// Number of image frame, used to identify multi frame image after loaded.
   int _frameCount = 0;
@@ -108,7 +116,7 @@ class ImageElement extends Element {
     if (_isListeningStream)
       return;
 
-    _imageStream?.addListener(_getListener());
+    _cachedImageStream?.addListener(_getListener());
     _completerHandle?.dispose();
     _completerHandle = null;
 
@@ -121,47 +129,58 @@ class ImageElement extends Element {
     _stopListeningStream();
     _completerHandle?.dispose();
     _replaceImage(info: null);
-    _imageProvider?.evict();
-    _imageProvider = null;
+    _cachedImageProvider?.evict();
+    _cachedImageProvider = null;
+    _imageProviderKey = null;
   }
 
   double get width {
-    if (_renderImage != null && _renderImage!.width != null) {
-      return _renderImage!.width!;
+    double? width = _styleWidth ?? _propertyWidth;
+
+    if (width == null) {
+      width = naturalWidth;
+      double? height = _styleHeight ?? _propertyHeight;
+
+      if (height != null && naturalHeight != 0) {
+        width = height * naturalWidth / naturalHeight;
+      }
     }
 
-    if (renderBoxModel != null && renderBoxModel!.hasSize) {
-      return renderBoxModel!.clientWidth;
-    }
-
-    // Fallback to natural width, if image is not on screen.
-    return naturalWidth;
+    return width;
   }
 
   double get height {
-    if (_renderImage != null && _renderImage!.height != null) {
-      return _renderImage!.height!;
+    double? height = _styleHeight ?? _propertyHeight;
+
+    if (height == null) {
+      height = naturalHeight;
+      double? width = _styleWidth ?? _propertyWidth;
+
+      if (width != null && naturalWidth != 0) {
+        height = width * naturalHeight / naturalWidth;
+      }
     }
 
-    if (renderBoxModel != null && renderBoxModel!.hasSize) {
-      return renderBoxModel!.clientHeight;
-    }
-
-    // Fallback to natural height, if image is not on screen.
-    return naturalHeight;
+    return height;
   }
 
   double get naturalWidth {
-    ImageProvider? imageProvider = _imageProvider;
+    ImageProvider? imageProvider = _cachedImageProvider;
     if (imageProvider is KrakenResizeImage) {
-      return imageProvider.naturalWidth.toDouble();
+      Size? size = KrakenResizeImage.getImageNaturalSize(_imageProviderKey);
+      if (size != null) {
+        return size.width;
+      }
     }
     return image?.width.toDouble() ?? 0;
   }
   double get naturalHeight {
-    ImageProvider? imageProvider = _imageProvider;
+    ImageProvider? imageProvider = _cachedImageProvider;
     if (imageProvider is KrakenResizeImage) {
-      return imageProvider.naturalHeight.toDouble();
+      Size? size = KrakenResizeImage.getImageNaturalSize(_imageProviderKey);
+      if (size != null) {
+        return size.height;
+      }
     }
     return image?.height.toDouble() ?? 0;
   }
@@ -210,55 +229,32 @@ class ImageElement extends Element {
   void _resizeImage() {
     assert(isRendererAttached);
 
-    double? width = renderStyle.width.isAuto ? _propertyWidth : renderStyle.width.computedValue;
-    double? height = renderStyle.height.isAuto ? _propertyHeight : renderStyle.height.computedValue;
-
-    if (renderStyle.width.isAuto && _propertyWidth != null) {
+    if (_styleWidth == null && _propertyWidth != null) {
       // The intrinsic width of the image in pixels. Must be an integer without a unit.
       renderStyle.width = CSSLengthValue(_propertyWidth, CSSLengthType.PX);
     }
-    if (renderStyle.height.isAuto && _propertyHeight != null) {
+    if (_styleHeight == null && _propertyHeight != null) {
       // The intrinsic height of the image, in pixels. Must be an integer without a unit.
       renderStyle.height = CSSLengthValue(_propertyHeight, CSSLengthType.PX);
     }
 
-    if (width == null && height == null) {
-      width = naturalWidth;
-      height = naturalHeight;
-    } else if (width != null && height == null && naturalWidth != 0) {
-      height = width * naturalHeight / naturalWidth;
-    } else if (width == null && height != null && naturalHeight != 0) {
-      width = height * naturalWidth / naturalHeight;
-    }
-
-    if (height == null || !height.isFinite) {
-      height = 0.0;
-    }
-
-    if (width == null || !width.isFinite) {
-      width = 0.0;
-    }
-
-    // Try to update image size if image already resolved.
-    _renderImage?.width = width;
-    _renderImage?.height = height;
-    renderBoxModel!.intrinsicWidth = naturalWidth;
-    renderBoxModel!.intrinsicHeight = naturalHeight;
+    renderStyle.intrinsicWidth = naturalWidth;
+    renderStyle.intrinsicHeight = naturalHeight;
 
     if (naturalWidth == 0.0 || naturalHeight == 0.0) {
-      renderBoxModel!.intrinsicRatio = null;
+      renderStyle.intrinsicRatio = null;
     } else {
-      renderBoxModel!.intrinsicRatio = naturalHeight / naturalWidth;
+      renderStyle.intrinsicRatio = naturalHeight / naturalWidth;
     }
   }
 
-  RenderImage _createRenderImageBox() {
+  KrakenRenderImage _createRenderImageBox() {
     RenderStyle renderStyle = renderBoxModel!.renderStyle;
     BoxFit objectFit = renderStyle.objectFit;
     Alignment objectPosition = renderStyle.objectPosition;
 
-    return RenderImage(
-      image: _imageInfo?.image,
+    return KrakenRenderImage(
+      image: _cachedImageInfo?.image,
       fit: objectFit,
       alignment: objectPosition,
     );
@@ -269,7 +265,7 @@ class ImageElement extends Element {
     super.removeProperty(key);
     if (key == 'src') {
       _stopListeningStream(keepStreamAlive: true);
-    } else if (key == 'loading' && _isInLazyLoading && _imageProvider == null) {
+    } else if (key == 'loading' && _isInLazyLoading && _cachedImageProvider == null) {
       _resetLazyLoading();
       _stopListeningStream(keepStreamAlive: true);
     }
@@ -286,11 +282,11 @@ class ImageElement extends Element {
     if (!_isListeningStream)
       return;
 
-    if (keepStreamAlive && _completerHandle == null && _imageStream?.completer != null) {
-      _completerHandle = _imageStream!.completer!.keepAlive();
+    if (keepStreamAlive && _completerHandle == null && _cachedImageStream?.completer != null) {
+      _completerHandle = _cachedImageStream!.completer!.keepAlive();
     }
 
-    _imageStream?.removeListener(_getListener());
+    _cachedImageStream?.removeListener(_getListener());
     _isListeningStream = false;
   }
 
@@ -304,57 +300,58 @@ class ImageElement extends Element {
   }
 
   void _updateSourceStream(ImageStream newStream) {
-    if (_imageStream?.key == newStream.key) return;
+    if (_cachedImageStream?.key == newStream.key) return;
 
     if (_isListeningStream) {
-      _imageStream?.removeListener(_getListener());
+      _cachedImageStream?.removeListener(_getListener());
     }
 
     _frameCount = 0;
-    _imageStream = newStream;
+    _cachedImageStream = newStream;
 
     if (_isListeningStream) {
-      _imageStream!.addListener(_getListener());
+      _cachedImageStream!.addListener(_getListener());
     }
   }
 
-  void _resolveImage(Uri? resolvedUri, { bool updateImageProvider = false }) {
+  // Obtain image resource from resolvedUri, and create an ImageStream that loads the image streams.
+  // If imageElement has propertySize or width,height properties on renderStyle,
+  // The image will be encoded into a small size for better rasterization performance.
+  void _resolveImage(Uri? resolvedUri, { bool updateImageProvider = false }) async {
     if (resolvedUri == null) return;
 
-    double? width = null;
-    double? height = null;
+    // Try to make sure that this image can be encoded into a smaller size.
+    int? cachedWidth = width > 0 ? (width * ui.window.devicePixelRatio).toInt() : null;
+    int? cachedHeight = height > 0 ? (height * ui.window.devicePixelRatio).toInt() : null;
 
-    if (isRendererAttached) {
-      width = renderStyle.width.isAuto ? _propertyWidth : renderStyle.width.computedValue;
-      height = renderStyle.height.isAuto ? _propertyHeight : renderStyle.height.computedValue;
-    } else {
-      width = _propertyWidth;
-      height = _propertyHeight;
-    }
-
-    int? cachedWidth = (width != null && width > 0) ? (width * ui.window.devicePixelRatio).toInt() : null;
-    int? cachedHeight = (height != null && height > 0) ? (height * ui.window.devicePixelRatio).toInt() : null;
-
-    ImageProvider? provider = _imageProvider;
+    ImageProvider? provider = _cachedImageProvider;
     if (updateImageProvider || provider == null) {
-      provider = _imageProvider = getImageProvider(resolvedUri, cachedWidth: cachedWidth, cachedHeight: cachedHeight);
+      // When cachedWidth or cachedHeight is not null, KrakenResizeImage will be returned.
+      provider = _cachedImageProvider = getImageProvider(resolvedUri, cachedWidth: cachedWidth, cachedHeight: cachedHeight);
     }
     if (provider == null) return;
+
+    // Cached the key of imageProvider to read naturalSize of the image.
+    _imageProviderKey = await provider.obtainKey(ImageConfiguration.empty);
     final ImageStream newStream = provider.resolve(ImageConfiguration.empty);
     _updateSourceStream(newStream);
   }
 
   void _replaceImage({required ImageInfo? info}) {
-    _imageInfo = info;
+    _cachedImageInfo = info;
   }
 
+  // Attach image to renderImage box.
   void _attachImage() {
     assert(isRendererAttached);
     assert(_renderImage != null);
-    if (_imageInfo == null) return;
+    if (_cachedImageInfo == null) return;
     _renderImage!.image = image?.clone();
   }
 
+
+  // Callback when image are loaded, encoded and available to use.
+  // This callback may fire multiple times when image have multiple frames (such as an animated GIF).
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
     _replaceImage(info: imageInfo);
     _frameCount++;
@@ -369,7 +366,7 @@ class ImageElement extends Element {
       }
     }
 
-    // Multi frame image should convert to repaint boundary.
+    // Multi frame image should wrap a repaint boundary for better composite performance.
     if (_frameCount > 2) {
       forceToRepaintBoundary = true;
     }
@@ -378,13 +375,15 @@ class ImageElement extends Element {
     _resizeImage();
   }
 
-  // Prefetches an image into the image cache.
-  void _precacheImage() {
+  // Prefetches an image into the image cache. When the imageElement is attached to the renderTree, the imageProvider can directly
+  // obtain the cached imageStream from imageCache instead of obtaining resources from I/O.
+  void _precacheImage() async {
     final ImageConfiguration config = ImageConfiguration.empty;
     final Uri? resolvedUri = _resolvedUri = _resolveSrc();
     if (resolvedUri == null) return;
-    final ImageProvider? provider = _imageProvider = getImageProvider(resolvedUri);
+    final ImageProvider? provider = _cachedImageProvider = getImageProvider(resolvedUri);
     if (provider == null) return;
+    _imageProviderKey = await provider.obtainKey(ImageConfiguration.empty);
     _frameCount = 0;
     final ImageStream stream = provider.resolve(config);
     ImageStreamListener? listener;
@@ -437,22 +436,26 @@ class ImageElement extends Element {
   dynamic getProperty(String key) {
     switch (key) {
       case WIDTH:
-        return _renderImage?.width ?? 0;
+        return width;
       case HEIGHT:
-        return _renderImage?.height ?? 0;
-      case 'naturalWidth':
+        return height;
+      case NATURAL_WIDTH:
         return naturalWidth;
-      case 'naturalHeight':
+      case NATURAL_HEIGHT:
         return naturalHeight;
     }
-
     return super.getProperty(key);
   }
 
   void _stylePropertyChanged(String property, String? original, String present) {
     if (property == WIDTH || property == HEIGHT) {
-      // Resize renderBox
-      if (isRendererAttached) _resizeImage();
+      if (property == WIDTH) {
+        _styleWidth = renderStyle.width.value == null && renderStyle.width.isNotAuto
+          ? null : renderStyle.width.computedValue;
+      } else if (property == HEIGHT) {
+        _styleHeight = renderStyle.height.value == null && renderStyle.height.isNotAuto
+          ? null : renderStyle.height.computedValue;
+      }
       // Resize image
       _resolveImage(_resolvedUri, updateImageProvider: true);
     } else if (property == OBJECT_FIT && _renderImage != null) {
