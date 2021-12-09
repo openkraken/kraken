@@ -323,4 +323,72 @@ describe('Tags img', () => {
     document.body.appendChild(img);
     img.src = imageURL;
   });
+
+  it('width property change should work when width of style is not set', async (done) => {
+    let img = createElement('img', {
+      src: 'assets/300x150-green.png',
+      width: 100,
+      height: 100,
+    });
+    BODY.appendChild(img);
+ 
+    requestAnimationFrame(async () => {
+      img.width = 200;
+      await snapshot(0.1);
+      done();
+    });
+  });
+
+  it('width property should not work when width of style is auto', async () => {
+    let img = createElement('img', {
+      src: 'assets/300x150-green.png',
+      width: 100,
+      height: 100,
+      style: {
+          width: 'auto'
+      }
+    });
+    BODY.appendChild(img);
+ 
+    await snapshot(0.1);
+  });
+
+  it('can get natualSize from repeat image url', async (done) => {
+    const flutterContainer = document.createElement('div');
+    flutterContainer.style.height = '100vh';
+    flutterContainer.style.display = 'block';
+    document.body.appendChild(flutterContainer);
+
+    const colors = ['red', 'yellow', 'black', 'blue', 'green'];
+    const images = [
+      'assets/100x100-green.png',
+      'assets/200x200-green.png',
+      'assets/60x60-gg-rr.png',
+    ];
+
+    let loadedCount = 0;
+    let imgCount = 10;
+
+    for (let i = 0; i < imgCount; i++) {
+      const div = document.createElement('div');
+      div.style.width = '100px';
+      div.style.height = '100px';
+      div.style.border = `3px solid ${colors[i % colors.length]}`
+      div.appendChild(document.createTextNode(i));
+
+      const img = document.createElement('img');
+      img.src = images[i % images.length];
+      div.appendChild(img);
+      img.style.width = '80px';
+      img.onload = async () => {
+        loadedCount++;
+        if (loadedCount == imgCount) {
+          await snapshot();
+          done();
+        }
+      };
+
+      flutterContainer.appendChild(div);
+    }
+  });
 });

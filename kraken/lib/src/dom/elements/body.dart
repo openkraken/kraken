@@ -20,12 +20,6 @@ class BodyElement extends Element {
       : super( targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
 
   @override
-  void willAttachRenderer() {
-    super.willAttachRenderer();
-    renderBoxModel!.renderStyle.width = CSSLengthValue(elementManager.viewportWidth, CSSLengthType.PX);
-  }
-
-  @override
   void addEvent(String eventType) {
     // Scroll event not working on body.
     if (eventType == EVENT_SCROLL) return;
