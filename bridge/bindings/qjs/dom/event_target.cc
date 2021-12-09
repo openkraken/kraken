@@ -357,7 +357,8 @@ int EventTargetInstance::setProperty(QjsContext* ctx, JSValue obj, JSAtom atom, 
     JSValue setterFunc = descriptor.setter;
     assert_m(JS_IsFunction(ctx, setterFunc), "Setter on prototype should be an function.");
     JSValue ret = JS_Call(ctx, setterFunc, eventTarget->instanceObject, 1, &value);
-    if (JS_IsException(ret)) return -1;
+    if (JS_IsException(ret))
+      return -1;
 
     JS_FreeValue(ctx, ret);
     JS_FreeValue(ctx, descriptor.setter);

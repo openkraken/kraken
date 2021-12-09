@@ -125,6 +125,7 @@ static JSValue handleCallThisOnProxy(QjsContext* ctx, JSValueConst this_val, int
 
 class ObjectProperty {
   KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(ObjectProperty);
+
  public:
   ObjectProperty() = delete;
 

@@ -106,12 +106,7 @@ class Element : public Node {
                                               firstElementChild,
                                               lastElementChild,
                                               children);
-  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(5,
-                                       className,
-                                       innerHTML,
-                                       outerHTML,
-                                       scrollTop,
-                                       scrollLeft);
+  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(5, className, innerHTML, outerHTML, scrollTop, scrollLeft);
 
   ObjectFunction m_getBoundingClientRect{m_context, m_prototypeObject, "getBoundingClientRect", getBoundingClientRect, 0};
   ObjectFunction m_hasAttribute{m_context, m_prototypeObject, "hasAttribute", hasAttribute, 1};

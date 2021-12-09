@@ -80,7 +80,6 @@ PROP_GETTER(Window, devicePixelRatio)(QjsContext* ctx, JSValue this_val, int arg
   return JS_NewFloat64(ctx, devicePixelRatio);
 }
 
-
 PROP_GETTER(Window, colorScheme)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (getDartMethod()->platformBrightness == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to read colorScheme: dart method (platformBrightness) not register.");
@@ -91,14 +90,12 @@ PROP_GETTER(Window, colorScheme)(QjsContext* ctx, JSValue this_val, int argc, JS
   return JS_NewUnicodeString(context->runtime(), ctx, code->string, code->length);
 }
 
-
 PROP_GETTER(Window, __location__)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
   if (window == nullptr)
     return JS_UNDEFINED;
   return JS_DupValue(ctx, window->m_location.value());
 }
-
 
 PROP_GETTER(Window, location)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
