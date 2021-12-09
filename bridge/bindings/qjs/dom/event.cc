@@ -100,17 +100,6 @@ PROP_GETTER(Event, cancelBubble)(QjsContext* ctx, JSValue this_val, int argc, JS
   auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
   return JS_NewBool(ctx, eventInstance->cancelled());
 }
-PROP_SETTER(Event, cancelBubble)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  if (argc == 0)
-    return JS_NULL;
-
-  auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
-  bool v = JS_ToBool(ctx, argv[0]);
-  if (v) {
-    eventInstance->cancelled(v);
-  }
-  return JS_NULL;
-}
 
 EventInstance* Event::buildEventInstance(std::string& eventType, JSContext* context, void* nativeEvent, bool isCustomEvent) {
   EventInstance* eventInstance;

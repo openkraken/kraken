@@ -68,13 +68,6 @@ PROP_GETTER(CustomEvent, detail)(QjsContext* ctx, JSValue this_val, int argc, JS
   auto* customEventInstance = static_cast<CustomEventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
   return customEventInstance->m_detail.value();
 }
-PROP_SETTER(CustomEvent, detail)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  if (argc == 0)
-    return JS_NULL;
-  auto* customEventInstance = static_cast<CustomEventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
-  customEventInstance->m_detail.value(argv[0]);
-  return JS_NULL;
-}
 
 CustomEventInstance::CustomEventInstance(CustomEvent* jsCustomEvent, JSAtom customEventType, JSValue eventInit) : EventInstance(jsCustomEvent, customEventType, eventInit) {
   if (!JS_IsNull(eventInit)) {
