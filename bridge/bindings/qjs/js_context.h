@@ -143,7 +143,7 @@ class ObjectProperty {
     JSValue setterProxy = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 1, 0, 1, &setter);
 
     // Define getter and setter property.
-    JS_DefinePropertyGetSet(context->ctx(), thisObject, propertyKeyAtom, getterProxy, setterProxy, JS_PROP_NORMAL);
+    JS_DefinePropertyGetSet(context->ctx(), thisObject, propertyKeyAtom, getterProxy, setterProxy, JS_PROP_NORMAL | JS_PROP_ENUMERABLE);
 
     JS_FreeAtom(context->ctx(), propertyKeyAtom);
     JS_FreeValue(context->ctx(), getter);
@@ -156,7 +156,7 @@ class ObjectProperty {
     JSAtom propertyKeyAtom = JS_NewAtom(context->ctx(), property.c_str());
     JSValue getter = JS_NewCFunction(context->ctx(), getterFunction, "getter", 0);
     JSValue getterProxy = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 0, 0, 1, &getter);
-    JS_DefinePropertyGetSet(context->ctx(), thisObject, propertyKeyAtom, getterProxy, JS_UNDEFINED, JS_PROP_NORMAL);
+    JS_DefinePropertyGetSet(context->ctx(), thisObject, propertyKeyAtom, getterProxy, JS_UNDEFINED, JS_PROP_NORMAL | JS_PROP_ENUMERABLE);
     JS_FreeAtom(context->ctx(), propertyKeyAtom);
     JS_FreeValue(context->ctx(), getter);
   };
