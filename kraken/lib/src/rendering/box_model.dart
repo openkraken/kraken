@@ -224,7 +224,7 @@ class RenderLayoutBox extends RenderBoxModel
         children.sort((RenderBox left, RenderBox right) {
           // @FIXME: Add patch to handle nested fixed element paint priority, need to remove
           // this logic after Kraken has implemented stacking context tree.
-          if(left is RenderBoxModel && left.renderStyle.position == CSSPositionType.fixed &&
+          if (left is RenderBoxModel && left.renderStyle.position == CSSPositionType.fixed &&
             right is RenderBoxModel && right.renderStyle.position == CSSPositionType.fixed) {
             // Child element always paint after parent element in the renderObject tree.
             return right.renderStyle.isAncestorForChild(left.renderStyle) ? 1 : -1;
