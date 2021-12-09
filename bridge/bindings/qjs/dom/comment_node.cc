@@ -31,15 +31,15 @@ JSValue Comment::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue 
   return (new CommentInstance(this))->instanceObject;
 }
 
-GETTER_PROP_IMPL(Comment, data)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Comment, data)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewString(ctx, "");
 }
 
-GETTER_PROP_IMPL(Comment, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Comment, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewString(ctx, "#comment");
 }
 
-GETTER_PROP_IMPL(Comment, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Comment, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewUint32(ctx, 0);
 }
 

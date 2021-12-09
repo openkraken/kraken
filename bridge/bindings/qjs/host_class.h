@@ -12,11 +12,35 @@
 
 namespace kraken::binding::qjs {
 
+class Instance;
+
 class HostClass {
  public:
   KRAKEN_DISALLOW_COPY_AND_ASSIGN(HostClass);
 
   HostClass(JSContext* context, std::string name) : m_context(context), m_name(std::move(name)), m_ctx(context->ctx()), m_contextId(context->getContextId()) {
+    /// JavaScript object in QuickJS are created by template, in QuickJS, these template is called JSClassDef.
+    /// JSClassDef define this JSObject's base behavior like className, property getter and setter, and advanced feature such as run a callback when JSObject had been freed by QuickJS garbage collector.
+    /// Every JSClassDef must have a unique ID, called JSClassID, you can obtain this ID from JS_NewClassID() API.
+    /// If your wants to create JSObjects defined by your own template, please follow this steps:
+    /// 1. Use JS_NewClassID() to allocate new id for your template.
+    /// 2. Create JSClassDef and set up your customized behavior about your JSObject.
+    /// 3. Use JS_NewClass() to initialize your template and you can use your unique JSClassID to create JSObjects.
+    /// 4. Use JS_NewObjectClass() to create your JSObjects.
+    /// Example:
+    ///  JSClassID sampleId;
+    ///  JS_NewClassID(&sampleId);
+    ///
+    ///  JSClassDef def{};
+    ///  def.class_name = "SampleClass";
+    ///  def.finalizer = [](JSRuntime* rt, JSValue val) {
+    ///    // Do something when jsObject been freed by GC
+    ///  };
+    ///  def.call = [](QjsContext * ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {
+    ///    // Do something when jsObject been called as function or called as constructor.
+    ///  };
+    ///  JS_NewClass(runtime, sampleId, &def);
+    ///  JSValue jsObject = JS_NewObjectClass(ctx, sampleId);
     JSClassDef def{};
     def.class_name = "HostClass";
     def.finalizer = proxyFinalize;
@@ -56,6 +80,7 @@ class HostClass {
   QjsContext* m_ctx;
 
  private:
+  friend Instance;
   static void proxyFinalize(JSRuntime* rt, JSValue val) {
     auto hostObject = static_cast<HostClass*>(JS_GetOpaque(val, JSContext::kHostClassClassId));
     if (hostObject->context()->isValid()) {
@@ -64,16 +89,17 @@ class HostClass {
     delete hostObject;
   };
   static JSValue proxyCall(QjsContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) {
-    // TODO: handle flags when flags is not JS_CALL_FLAG_CONSTRUCTOR
-    auto* hostClass = static_cast<HostClass*>(JS_GetOpaque(func_obj, JSContext::kHostClassClassId));
+    // This jsObject is called as a constructor.
+    if ((flags & JS_CALL_FLAG_CONSTRUCTOR) != 0) {
+      auto* hostClass = static_cast<HostClass*>(JS_GetOpaque(func_obj, JSContext::kHostClassClassId));
+      JSValue instance = hostClass->instanceConstructor(ctx, func_obj, this_val, argc, argv);
+      JSValue proto = JS_GetPropertyStr(ctx, this_val, "prototype");
+      JS_SetPrototype(ctx, instance, proto);
+      JS_FreeValue(ctx, proto);
+      return instance;
+    }
 
-    JSAtom prototypeKey = JS_NewAtom(ctx, "prototype");
-    JSValue proto = JS_GetProperty(ctx, this_val, prototypeKey);
-    JSValue instance = hostClass->instanceConstructor(ctx, func_obj, this_val, argc, argv);
-    JS_SetPrototype(ctx, instance, proto);
-    JS_FreeAtom(ctx, prototypeKey);
-    JS_FreeValue(ctx, proto);
-    return instance;
+    return this_val;
   }
 };
 
@@ -87,7 +113,7 @@ class Instance {
     def.exotic = exotic;
     def.gc_mark = proxyGCMark;
     int32_t success = JS_NewClass(m_context->runtime(), classId, &def);
-    instanceObject = JS_NewObjectClass(m_ctx, classId);
+    instanceObject = JS_NewObjectProtoClass(m_ctx, hostClass->m_prototypeObject, classId);
     JS_SetOpaque(instanceObject, this);
   };
   JSValue instanceObject;
@@ -111,6 +137,8 @@ class Instance {
   HostClass* m_hostClass{nullptr};
   std::string m_name;
   int64_t m_contextId{-1};
+
+  friend HostClass;
 };
 
 }  // namespace kraken::binding::qjs

@@ -36,27 +36,27 @@ JSClassID TextNode::classId() {
   return kTextNodeClassId;
 }
 
-GETTER_PROP_IMPL(TextNode, data)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(TextNode, data)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* textNode = static_cast<TextNodeInstance*>(JS_GetOpaque(this_val, TextNode::classId()));
   return JS_NewString(ctx, textNode->m_data.c_str());
 }
-SETTER_PROP_IMPL(TextNode, data)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER_IMPL(TextNode, data)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* textNode = static_cast<TextNodeInstance*>(JS_GetOpaque(this_val, TextNode::classId()));
   textNode->internalSetTextContent(argv[0]);
   return JS_NULL;
 }
 
-GETTER_PROP_IMPL(TextNode, nodeValue)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(TextNode, nodeValue)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* textNode = static_cast<TextNodeInstance*>(JS_GetOpaque(this_val, TextNode::classId()));
   return JS_NewString(ctx, textNode->m_data.c_str());
 }
-SETTER_PROP_IMPL(TextNode, nodeValue)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER_IMPL(TextNode, nodeValue)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* textNode = static_cast<TextNodeInstance*>(JS_GetOpaque(this_val, TextNode::classId()));
   textNode->internalSetTextContent(argv[0]);
   return JS_NULL;
 }
 
-GETTER_PROP_IMPL(TextNode, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(TextNode, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewString(ctx, "#text");
 }
 

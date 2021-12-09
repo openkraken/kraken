@@ -68,12 +68,12 @@ JSValue Blob::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue thi
   return blob->instanceObject;
 }
 
-GETTER_PROP_IMPL(Blob, type)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Blob, type)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* blobInstance = static_cast<BlobInstance*>(JS_GetOpaque(this_val, Blob::kBlobClassID));
   return JS_NewString(blobInstance->m_ctx, blobInstance->mimeType.empty() ? "" : blobInstance->mimeType.c_str());
 }
 
-GETTER_PROP_IMPL(Blob, size)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Blob, size)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* blobInstance = static_cast<BlobInstance*>(JS_GetOpaque(this_val, Blob::kBlobClassID));
   return JS_NewFloat64(blobInstance->m_ctx, blobInstance->_size);
 }
@@ -148,7 +148,6 @@ JSValue Blob::slice(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) 
 
   if (start == 0 && end == blob->_data.size()) {
     auto newBlob = new BlobInstance(reinterpret_cast<Blob*>(blob->m_hostClass), std::move(blob->_data), mimeType);
-    JS_SetPrototype(blob->m_ctx, newBlob->instanceObject, blob->m_hostClass->prototype());
     return newBlob->instanceObject;
   }
   std::vector<uint8_t> newData;
@@ -156,7 +155,6 @@ JSValue Blob::slice(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) 
   newData.insert(newData.begin(), blob->_data.begin() + start, blob->_data.end() - (blob->_data.size() - end));
 
   auto newBlob = new BlobInstance(reinterpret_cast<Blob*>(blob->m_hostClass), std::move(newData), mimeType);
-  JS_SetPrototype(blob->m_ctx, newBlob->instanceObject, blob->m_hostClass->prototype());
   return newBlob->instanceObject;
 }
 

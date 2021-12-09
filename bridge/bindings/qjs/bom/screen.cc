@@ -12,7 +12,7 @@ void bindScreen(std::unique_ptr<JSContext>& context) {
   context->defineGlobalProperty("screen", screen->jsObject);
 }
 
-GETTER_PROP_IMPL(Screen, width)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Screen, width)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (getDartMethod()->getScreen == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to read screen: dart method (getScreen) is not registered.");
   }
@@ -21,11 +21,11 @@ GETTER_PROP_IMPL(Screen, width)(QjsContext* ctx, JSValue this_val, int argc, JSV
   NativeScreen* screen = getDartMethod()->getScreen(context->getContextId());
   return JS_NewFloat64(ctx, screen->width);
 }
-SETTER_PROP_IMPL(Screen, width)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER_IMPL(Screen, width)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_UNDEFINED;
 }
 
-GETTER_PROP_IMPL(Screen, height)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Screen, height)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (getDartMethod()->getScreen == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to read screen: dart method (getScreen) is not registered.");
   }
@@ -34,7 +34,7 @@ GETTER_PROP_IMPL(Screen, height)(QjsContext* ctx, JSValue this_val, int argc, JS
   NativeScreen* screen = getDartMethod()->getScreen(context->getContextId());
   return JS_NewFloat64(ctx, screen->height);
 }
-SETTER_PROP_IMPL(Screen, height)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER_IMPL(Screen, height)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_UNDEFINED;
 }
 

@@ -30,120 +30,120 @@ int TouchList::setProperty(QjsContext* ctx, JSValue obj, JSAtom atom, JSValue va
   return 0;
 }
 
-GETTER_PROP_IMPL(TouchList, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(TouchList, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* touchList = static_cast<TouchList*>(JS_GetOpaque(this_val, JSContext::kHostExoticObjectClassId));
   return JS_NewUint32(ctx, touchList->_length);
 }
-SETTER_PROP_IMPL(TouchList, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER_IMPL(TouchList, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
 
 Touch::Touch(JSContext* context, NativeTouch* nativeTouch) : HostObject(context, "Touch"), m_nativeTouch(nativeTouch) {}
 
-GETTER_PROP_IMPL(Touch, identifier)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Touch, identifier)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewUint32(ctx, object->m_nativeTouch->identifier);
 }
-SETTER_PROP_IMPL(Touch, identifier)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER_IMPL(Touch, identifier)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
-GETTER_PROP_IMPL(Touch, target)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Touch, target)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   auto* eventTarget = object->m_nativeTouch->target;
   return JS_DupValue(ctx, eventTarget->instance->instanceObject);
 }
-SETTER_PROP_IMPL(Touch, target)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER_IMPL(Touch, target)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
-GETTER_PROP_IMPL(Touch, clientX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Touch, clientX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->clientX);
 }
-SETTER_PROP_IMPL(Touch, clientX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER_IMPL(Touch, clientX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
-GETTER_PROP_IMPL(Touch, clientY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Touch, clientY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->clientY);
 }
-SETTER_PROP_IMPL(Touch, clientY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER_IMPL(Touch, clientY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
-GETTER_PROP_IMPL(Touch, screenX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Touch, screenX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->screenX);
 }
-SETTER_PROP_IMPL(Touch, screenX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER_IMPL(Touch, screenX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
-GETTER_PROP_IMPL(Touch, screenY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Touch, screenY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->screenY);
 }
-SETTER_PROP_IMPL(Touch, screenY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER_IMPL(Touch, screenY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
-GETTER_PROP_IMPL(Touch, pageX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Touch, pageX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->pageX);
 }
-SETTER_PROP_IMPL(Touch, pageX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER_IMPL(Touch, pageX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
-GETTER_PROP_IMPL(Touch, pageY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Touch, pageY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->pageY);
 }
-SETTER_PROP_IMPL(Touch, pageY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER_IMPL(Touch, pageY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
-GETTER_PROP_IMPL(Touch, radiusX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Touch, radiusX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->radiusX);
 }
-SETTER_PROP_IMPL(Touch, radiusX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER_IMPL(Touch, radiusX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
-GETTER_PROP_IMPL(Touch, radiusY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Touch, radiusY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->radiusY);
 }
-SETTER_PROP_IMPL(Touch, radiusY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER_IMPL(Touch, radiusY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
-GETTER_PROP_IMPL(Touch, rotationAngle)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Touch, rotationAngle)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->rotationAngle);
 }
-SETTER_PROP_IMPL(Touch, rotationAngle)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER_IMPL(Touch, rotationAngle)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
-GETTER_PROP_IMPL(Touch, force)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Touch, force)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->force);
 }
-SETTER_PROP_IMPL(Touch, force)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER_IMPL(Touch, force)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
-GETTER_PROP_IMPL(Touch, altitudeAngle)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Touch, altitudeAngle)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->altitudeAngle);
 }
-SETTER_PROP_IMPL(Touch, altitudeAngle)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER_IMPL(Touch, altitudeAngle)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
-GETTER_PROP_IMPL(Touch, azimuthAngle)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Touch, azimuthAngle)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->azimuthAngle);
 }
-SETTER_PROP_IMPL(Touch, azimuthAngle)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER_IMPL(Touch, azimuthAngle)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
-GETTER_PROP_IMPL(Touch, touchType)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(Touch, touchType)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewUint32(ctx, object->m_nativeTouch->touchType);
 }
-SETTER_PROP_IMPL(Touch, touchType)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER_IMPL(Touch, touchType)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
 
@@ -250,46 +250,46 @@ JSValue TouchEvent::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSVal
   auto event = new TouchEventInstance(this, reinterpret_cast<NativeEvent*>(nativeEvent));
   return event->instanceObject;
 }
-GETTER_PROP_IMPL(TouchEvent, touches)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(TouchEvent, touches)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* event = static_cast<TouchEventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
   auto* nativeEvent = reinterpret_cast<NativeTouchEvent*>(event->nativeEvent);
   auto* touchList = new TouchList(event->m_context, nativeEvent->touches, nativeEvent->touchLength);
   return touchList->jsObject;
 }
 
-GETTER_PROP_IMPL(TouchEvent, targetTouches)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(TouchEvent, targetTouches)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* event = static_cast<TouchEventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
   auto* nativeEvent = reinterpret_cast<NativeTouchEvent*>(event->nativeEvent);
   auto* targetTouchList = new TouchList(event->m_context, nativeEvent->targetTouches, nativeEvent->targetTouchesLength);
   return targetTouchList->jsObject;
 }
 
-GETTER_PROP_IMPL(TouchEvent, changedTouches)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(TouchEvent, changedTouches)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* event = static_cast<TouchEventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
   auto* nativeEvent = reinterpret_cast<NativeTouchEvent*>(event->nativeEvent);
   auto* changedTouchList = new TouchList(event->m_context, nativeEvent->changedTouches, nativeEvent->changedTouchesLength);
   return changedTouchList->jsObject;
 }
 
-GETTER_PROP_IMPL(TouchEvent, altKey)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(TouchEvent, altKey)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* event = static_cast<TouchEventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
   auto* nativeEvent = reinterpret_cast<NativeTouchEvent*>(event->nativeEvent);
   return JS_NewBool(ctx, nativeEvent->altKey ? 1 : 0);
 }
 
-GETTER_PROP_IMPL(TouchEvent, metaKey)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(TouchEvent, metaKey)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* event = static_cast<TouchEventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
   auto* nativeEvent = reinterpret_cast<NativeTouchEvent*>(event->nativeEvent);
   return JS_NewBool(ctx, nativeEvent->metaKey ? 1 : 0);
 }
 
-GETTER_PROP_IMPL(TouchEvent, ctrlKey)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(TouchEvent, ctrlKey)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* event = static_cast<TouchEventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
   auto* nativeEvent = reinterpret_cast<NativeTouchEvent*>(event->nativeEvent);
   return JS_NewBool(ctx, nativeEvent->ctrlKey ? 1 : 0);
 }
 
-GETTER_PROP_IMPL(TouchEvent, shiftKey)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(TouchEvent, shiftKey)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* event = static_cast<TouchEventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
   auto* nativeEvent = reinterpret_cast<NativeTouchEvent*>(event->nativeEvent);
   return JS_NewBool(ctx, nativeEvent->shiftKey ? 1 : 0);

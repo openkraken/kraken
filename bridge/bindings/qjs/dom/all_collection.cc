@@ -71,11 +71,11 @@ void AllCollection::internalAdd(NodeInstance* node, NodeInstance* before) {
   }
 }
 
-GETTER_PROP_IMPL(AllCollection, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_GETTER_IMPL(AllCollection, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* collection = static_cast<AllCollection*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewUint32(ctx, collection->m_nodes.size());
 }
-SETTER_PROP_IMPL(AllCollection, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+PROP_SETTER_IMPL(AllCollection, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
 
