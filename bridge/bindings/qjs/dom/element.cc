@@ -4,11 +4,11 @@
  */
 
 #include "element.h"
-#include "elements/template_element.h"
 #include "bindings/qjs/bom/blob.h"
 #include "bindings/qjs/html_parser.h"
 #include "dart_methods.h"
 #include "document.h"
+#include "elements/template_element.h"
 #include "text_node.h"
 
 namespace kraken::binding::qjs {
@@ -562,7 +562,7 @@ PROP_SETTER(Element, innerHTML)(QjsContext* ctx, JSValue this_val, int argc, JSV
   const char* chtml = JS_ToCString(ctx, argv[0]);
 
   if (element->hasNodeFlag(NodeInstance::NodeFlag::IsTemplateElement)) {
-    auto *templateElement = static_cast<TemplateElementInstance*>(element);
+    auto* templateElement = static_cast<TemplateElementInstance*>(element);
     HTMLParser::parseHTML(chtml, strlen(chtml), templateElement->content());
   } else {
     HTMLParser::parseHTML(chtml, strlen(chtml), element);
@@ -714,7 +714,7 @@ std::string ElementInstance::innerHTML() {
   std::string s;
 
   // If Element is TemplateElement, the innerHTML content is the content of documentFragment.
-  NodeInstance *parent = this;
+  NodeInstance* parent = this;
   if (hasNodeFlag(NodeInstance::NodeFlag::IsTemplateElement)) {
     parent = static_cast<TemplateElementInstance*>(this)->content();
   }

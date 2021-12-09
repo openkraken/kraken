@@ -212,7 +212,6 @@ console.log(
   EXPECT_EQ(logCalled, true);
 }
 
-
 TEST(Node, aaa) {
   std::string code = R"(
     const t = document.createElement('template')

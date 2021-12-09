@@ -91,21 +91,21 @@ class Element : public Node {
 
  private:
   DEFINE_PROTOTYPE_READONLY_PROPERTY(15,
-                                              nodeName,
-                                              tagName,
-                                              offsetLeft,
-                                              offsetTop,
-                                              offsetWidth,
-                                              offsetHeight,
-                                              clientWidth,
-                                              clientHeight,
-                                              clientTop,
-                                              clientLeft,
-                                              scrollHeight,
-                                              scrollWidth,
-                                              firstElementChild,
-                                              lastElementChild,
-                                              children);
+                                     nodeName,
+                                     tagName,
+                                     offsetLeft,
+                                     offsetTop,
+                                     offsetWidth,
+                                     offsetHeight,
+                                     clientWidth,
+                                     clientHeight,
+                                     clientTop,
+                                     clientLeft,
+                                     scrollHeight,
+                                     scrollWidth,
+                                     firstElementChild,
+                                     lastElementChild,
+                                     children);
   DEFINE_PROTOTYPE_PROPERTY(5, className, innerHTML, outerHTML, scrollTop, scrollLeft);
 
   ObjectFunction m_getBoundingClientRect{m_context, m_prototypeObject, "getBoundingClientRect", getBoundingClientRect, 0};

@@ -23,21 +23,22 @@ class TemplateElement : public Element {
   OBJECT_INSTANCE(TemplateElement);
 
  private:
-  DEFINE_HOST_CLASS_PROTOTYPE_GETTER_PROPERTY(1, content)
-  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(1, innerHTML)
   friend TemplateElementInstance;
 };
+
 class TemplateElementInstance : public ElementInstance {
  public:
   TemplateElementInstance() = delete;
   explicit TemplateElementInstance(TemplateElement* element);
   ~TemplateElementInstance();
 
+  DocumentFragmentInstance* content() const;
+
  protected:
   void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
  private:
-  DocumentFragmentInstance* m_content{nullptr};
+  ObjectProperty m_content{m_context, instanceObject, "content", JS_CallConstructor(m_ctx, DocumentFragment::instance(m_context)->classObject, 0, nullptr)};
   friend TemplateElement;
 };
 
