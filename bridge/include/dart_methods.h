@@ -34,7 +34,6 @@ typedef NativeString* (*PlatformBrightness)(int32_t contextId);
 typedef void (*ToBlob)(void* callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId, double devicePixelRatio);
 typedef void (*OnJSError)(int32_t contextId, const char*);
 typedef void (*FlushUICommand)();
-typedef void (*InitHTML)(int32_t contextId, void* nativePtr);
 typedef void (*InitWindow)(int32_t contextId, void* nativePtr);
 typedef void (*InitDocument)(int32_t contextId, void* nativePtr);
 
@@ -83,7 +82,6 @@ struct DartMethodPointer {
 #if ENABLE_PROFILE
   GetPerformanceEntries getPerformanceEntries{nullptr};
 #endif
-  InitHTML initHTML{nullptr};
   InitWindow initWindow{nullptr};
   InitDocument initDocument{nullptr};
 };

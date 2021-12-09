@@ -2,8 +2,6 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
-
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:async';
@@ -110,7 +108,7 @@ class HistoryModule extends BaseModule {
   void _dispatchPopStateEvent(dynamic state) {
     PopStateEventInit init = PopStateEventInit(state);
     PopStateEvent popStateEvent = PopStateEvent(init);
-    moduleManager!.controller.view.window!.dispatchEvent(popStateEvent);
+    moduleManager!.controller.view.window.dispatchEvent(popStateEvent);
   }
 
   void _pushState(List<dynamic> params) {

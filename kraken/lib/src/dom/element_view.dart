@@ -27,7 +27,7 @@ enum ViewModuleProperty {
   scrollWidth
 }
 
-mixin ElementNativeMethods on Node {
+mixin ElementViewMixin on ElementBase {
   @override
   dynamic handleJSCall(String method, List<dynamic> argv) {
     Element element = (this as Element);

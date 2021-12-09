@@ -2,9 +2,6 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'dart:ffi';
-
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 
@@ -64,31 +61,31 @@ const Map<String, dynamic> _h6DefaultStyle = {
 };
 
 class H1Element extends Element {
-  H1Element(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _h1DefaultStyle);
+  H1Element(EventTargetContext? context)
+      : super(context, defaultStyle: _h1DefaultStyle);
 }
 
 class H2Element extends Element {
-  H2Element(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _h2DefaultStyle);
+  H2Element(EventTargetContext? context)
+      : super(context, defaultStyle: _h2DefaultStyle);
 }
 
 class H3Element extends Element {
-  H3Element(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _h3DefaultStyle);
+  H3Element(EventTargetContext? context)
+      : super(context, defaultStyle: _h3DefaultStyle);
 }
 
 class H4Element extends Element {
-  H4Element(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _h4DefaultStyle);
+  H4Element(EventTargetContext? context)
+      : super(context, defaultStyle: _h4DefaultStyle);
 }
 
 class H5Element extends Element {
-  H5Element(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _h5DefaultStyle);
+  H5Element(EventTargetContext? context)
+      : super(context, defaultStyle: _h5DefaultStyle);
 }
 
 class H6Element extends Element {
-  H6Element(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _h6DefaultStyle);
+  H6Element(EventTargetContext? context)
+      : super(context, defaultStyle: _h6DefaultStyle);
 }

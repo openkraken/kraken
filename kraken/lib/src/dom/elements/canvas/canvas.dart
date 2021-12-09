@@ -47,16 +47,14 @@ class CanvasElement extends Element {
 
   static Pointer<NativeCanvasRenderingContext2D> _getContext(
       Pointer<NativeEventTarget> nativeCanvasElement, Pointer<NativeString> contextId) {
-    CanvasElement canvasElement = EventTarget.getEventTargetOfNativePtr(nativeCanvasElement) as CanvasElement;
+    CanvasElement canvasElement = EventTarget.getEventTargetByPointer(nativeCanvasElement) as CanvasElement;
     canvasElement.getContext(nativeStringToString(contextId));
     return canvasElement.painter.context!.nativeCanvasRenderingContext2D;
   }
 
-  CanvasElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
+  CanvasElement(EventTargetContext? context)
       : super(
-          targetId,
-          nativeEventTarget,
-          elementManager,
+          context,
           isIntrinsicBox: true,
           isDefaultRepaintBoundary: true,
           defaultStyle: _defaultStyle,
