@@ -173,9 +173,7 @@ class BoundingClientRect : public HostObject {
  public:
   BoundingClientRect() = delete;
   explicit BoundingClientRect(JSContext* context, NativeBoundingClientRect* nativeBoundingClientRect)
-      : HostObject(context, "BoundingClientRect"),
-        m_nativeBoundingClientRect(nativeBoundingClientRect){
-        };
+      : HostObject(context, "BoundingClientRect"), m_nativeBoundingClientRect(nativeBoundingClientRect){};
 
  private:
   DEFINE_READONLY_PROPERTY(x);

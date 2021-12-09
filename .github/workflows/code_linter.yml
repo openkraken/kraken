@@ -2,8 +2,6 @@ name: Run Code Linter
 
 on:
   push:
-    branches:
-      - main
 
 jobs:
   reformat-bridge:

@@ -88,17 +88,10 @@ TEST(Element, stringifyBoundingClientRect) {
   auto& context = bridge->getContext();
 
   NativeBoundingClientRect nativeRect{
-    10.0,
-    20.0,
-    30.0,
-    40.0,
-    10.0,
-    20.0,
-    30.0,
-    40.0,
+      10.0, 20.0, 30.0, 40.0, 10.0, 20.0, 30.0, 40.0,
   };
 
-  auto *clientRect = new BoundingClientRect(context.get(), &nativeRect);
+  auto* clientRect = new BoundingClientRect(context.get(), &nativeRect);
   context->defineGlobalProperty("boundingClient", clientRect->jsObject);
 
   const char* code = "console.log(JSON.stringify(boundingClient))";
@@ -106,5 +99,4 @@ TEST(Element, stringifyBoundingClientRect) {
   delete bridge;
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);
-
 }

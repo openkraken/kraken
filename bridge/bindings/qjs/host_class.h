@@ -20,9 +20,9 @@ class HostClass {
 
   HostClass(JSContext* context, std::string name) : m_context(context), m_name(std::move(name)), m_ctx(context->ctx()), m_contextId(context->getContextId()) {
     /// JavaScript object in QuickJS are created by template, in QuickJS, these template is called JSClassDef.
-    /// JSClassDef define this JSObject's base behavior like className, property getter and setter, and advanced feature such as run a callback when JSObject had been freed by QuickJS garbage collector.
-    /// Every JSClassDef must have a unique ID, called JSClassID, you can obtain this ID from JS_NewClassID() API.
-    /// If your wants to create JSObjects defined by your own template, please follow this steps:
+    /// JSClassDef define this JSObject's base behavior like className, property getter and setter, and advanced feature such as run a callback when JSObject had been freed by QuickJS garbage
+    /// collector. Every JSClassDef must have a unique ID, called JSClassID, you can obtain this ID from JS_NewClassID() API. If your wants to create JSObjects defined by your own template, please
+    /// follow this steps:
     /// 1. Use JS_NewClassID() to allocate new id for your template.
     /// 2. Create JSClassDef and set up your customized behavior about your JSObject.
     /// 3. Use JS_NewClass() to initialize your template and you can use your unique JSClassID to create JSObjects.

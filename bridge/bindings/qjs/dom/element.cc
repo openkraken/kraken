@@ -17,7 +17,7 @@ std::once_flag kElementInitOnceFlag;
 
 void bindElement(std::unique_ptr<JSContext>& context) {
   auto* constructor = Element::instance(context.get());
-//  auto* domRectConstructor = BoundingClientRect
+  //  auto* domRectConstructor = BoundingClientRect
   context->defineGlobalProperty("Element", constructor->jsObject);
   context->defineGlobalProperty("HTMLElement", JS_DupValue(context->ctx(), constructor->jsObject));
 }

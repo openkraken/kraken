@@ -16,8 +16,7 @@ TEST(MouseEvent, init) {
   };
   auto* bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) { errorCalled = true; });
   auto& context = bridge->getContext();
-  const char* code =
-    "let mouseEvent = new MouseEvent('click', {clientX: 10, clientY: 20}); console.log(mouseEvent.clientX);";
+  const char* code = "let mouseEvent = new MouseEvent('click', {clientX: 10, clientY: 20}); console.log(mouseEvent.clientX);";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   delete bridge;
   EXPECT_EQ(errorCalled, false);
