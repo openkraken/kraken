@@ -9,7 +9,7 @@ import 'package:kraken/rendering.dart';
 
 class RenderBr extends RenderIntrinsic {
   RenderBr(
-    RenderStyle renderStyle,
+    CSSRenderStyle renderStyle,
   ) : super(
     renderStyle,
   );

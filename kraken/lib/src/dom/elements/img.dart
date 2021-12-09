@@ -2,14 +2,11 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
 import 'dart:async';
-import 'dart:ffi';
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/painting.dart';
@@ -58,11 +55,9 @@ class ImageElement extends Element {
   bool get _shouldLazyLoading => properties['loading'] == 'lazy';
   ImageStreamCompleterHandle? _completerHandle;
 
-  ImageElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
+  ImageElement(EventTargetContext? context)
       : super(
-      targetId,
-      nativeEventTarget,
-      elementManager,
+      context,
       isIntrinsicBox: true,
       defaultStyle: _defaultStyle) {
   }
@@ -298,8 +293,8 @@ class ImageElement extends Element {
   Uri? _resolveSrc() {
     String? src = properties['src'];
     if (src != null && src.isNotEmpty) {
-      Uri base = Uri.parse(elementManager.controller.href);
-      return elementManager.controller.uriParser!.resolve(base, Uri.parse(src));
+      Uri base = Uri.parse(ownerDocument.controller.href);
+      return ownerDocument.controller.uriParser!.resolve(base, Uri.parse(src));
     }
     return null;
   }
@@ -435,7 +430,6 @@ class ImageElement extends Element {
       _propertyHeight = CSSNumber.parseNumber(value);
       _resolveImage(_resolvedUri, updateImageProvider: true);
     }
-
   }
 
   @override

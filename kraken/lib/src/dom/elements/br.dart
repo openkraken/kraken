@@ -20,9 +20,9 @@ const Map<String, dynamic> _breakDefaultStyle = {
 class BRElement extends Element {
   RenderBr? _renderBr;
 
-  BRElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
+  BRElement(EventTargetContext? context)
     : super(
-    targetId, nativePtr, elementManager,
+    context,
     defaultStyle: _breakDefaultStyle,
     isIntrinsicBox: true,
   ) {

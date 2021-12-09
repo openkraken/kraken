@@ -16,9 +16,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#define HTML_TARGET_ID -1
-#define WINDOW_TARGET_ID -2
-#define DOCUMENT_TARGET_ID -3
+#define WINDOW_TARGET_ID -1
+#define DOCUMENT_TARGET_ID -2
 
 #define assert_m(exp, msg) assert(((void)msg, exp))
 
