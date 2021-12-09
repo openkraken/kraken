@@ -45,7 +45,7 @@ class TextNodeInstance : public NodeInstance {
   friend TextNode;
   friend Node;
 
-  JSValue m_data{JS_NULL};
+  std::string m_data;
 };
 
 }  // namespace kraken::binding::qjs

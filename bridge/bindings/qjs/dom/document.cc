@@ -320,14 +320,12 @@ GETTER_PROP_IMPL(Document, all)(QjsContext* ctx, JSValue this_val, int argc, JSV
   return all->jsObject;
 }
 
-
 // document.documentElement
 GETTER_PROP_IMPL(Document, documentElement)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   ElementInstance* documentElement = document->getDocumentElement();
   return documentElement == nullptr ? JS_NULL : documentElement->instanceObject;
 }
-
 
 // document.head
 GETTER_PROP_IMPL(Document, head)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {

@@ -38,7 +38,7 @@ JSClassID TextNode::classId() {
 
 GETTER_PROP_IMPL(TextNode, data)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* textNode = static_cast<TextNodeInstance*>(JS_GetOpaque(this_val, TextNode::classId()));
-  return JS_DupValue(ctx, textNode->m_data);
+  return JS_NewString(ctx, textNode->m_data.c_str());
 }
 SETTER_PROP_IMPL(TextNode, data)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* textNode = static_cast<TextNodeInstance*>(JS_GetOpaque(this_val, TextNode::classId()));
@@ -48,7 +48,7 @@ SETTER_PROP_IMPL(TextNode, data)(QjsContext* ctx, JSValue this_val, int argc, JS
 
 GETTER_PROP_IMPL(TextNode, nodeValue)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* textNode = static_cast<TextNodeInstance*>(JS_GetOpaque(this_val, TextNode::classId()));
-  return JS_DupValue(ctx, textNode->m_data);
+  return JS_NewString(ctx, textNode->m_data.c_str());
 }
 SETTER_PROP_IMPL(TextNode, nodeValue)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* textNode = static_cast<TextNodeInstance*>(JS_GetOpaque(this_val, TextNode::classId()));
@@ -61,32 +61,23 @@ GETTER_PROP_IMPL(TextNode, nodeName)(QjsContext* ctx, JSValue this_val, int argc
 }
 
 TextNodeInstance::TextNodeInstance(TextNode* textNode, JSValue text)
-    : NodeInstance(textNode, NodeType::TEXT_NODE, DocumentInstance::instance(Document::instance(textNode->m_context)), TextNode::classId(), "TextNode"), m_data(JS_DupValue(m_ctx, text)) {
-  std::unique_ptr<NativeString> args_01 = jsValueToNativeString(m_ctx, m_data);
+    : NodeInstance(textNode, NodeType::TEXT_NODE, DocumentInstance::instance(Document::instance(textNode->m_context)), TextNode::classId(), "TextNode") {
+  m_data = jsValueToStdString(m_ctx, text);
+  std::unique_ptr<NativeString> args_01 = stringToNativeString(m_data);
   foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_eventTargetId, UICommand::createTextNode, *args_01, nativeEventTarget);
 }
 
-TextNodeInstance::~TextNodeInstance() {
-  if (!JS_IsLiveObject(m_context->runtime(), m_data))
-    JS_FreeValue(m_ctx, m_data);
-}
+TextNodeInstance::~TextNodeInstance() {}
 
 std::string TextNodeInstance::toString() {
-  const char* pstring = JS_ToCString(m_ctx, m_data);
-  std::string result = std::string(pstring);
-  JS_FreeCString(m_ctx, pstring);
-  return result;
+  return m_data;
 }
 
 JSValue TextNodeInstance::internalGetTextContent() {
-  return JS_DupValue(m_ctx, m_data);
+  return JS_NewString(m_ctx, m_data.c_str());
 }
 void TextNodeInstance::internalSetTextContent(JSValue content) {
-  if (!JS_IsNull(m_data)) {
-    JS_FreeValue(m_ctx, m_data);
-  }
-
-  m_data = JS_DupValue(m_ctx, content);
+  m_data = jsValueToStdString(m_ctx, content);
 
   std::string key = "data";
   std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
