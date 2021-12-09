@@ -43,8 +43,8 @@ class Document : public Node {
   bool isCustomElement(const std::string& tagName);
 
  private:
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(2, nodeName, all)
-  DEFINE_PROTOTYPE_PROPERTY(1, cookie);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(3, nodeName, all, documentElement)
+  DEFINE_PROTOTYPE_PROPERTY(6, cookie, body, head, children, all, cookie);
 
   void defineElement(const std::string& tagName, Element* constructor);
 
@@ -80,7 +80,6 @@ class DocumentInstance : public NodeInstance {
   explicit DocumentInstance(Document* document);
   ~DocumentInstance();
   static std::unordered_map<Document*, DocumentInstance*> m_instanceMap;
-  ElementInstance* documentElement();
   static DocumentInstance* instance(Document* document) {
     if (m_instanceMap.count(document) == 0) {
       m_instanceMap[document] = new DocumentInstance(document);
@@ -89,8 +88,11 @@ class DocumentInstance : public NodeInstance {
   }
 
  private:
+  DEFINE_HOST_CLASS_PROPERTY(3, nodeName, all, cookie);
+
   void removeElementById(JSAtom id, ElementInstance* element);
   void addElementById(JSAtom id, ElementInstance* element);
+  ElementInstance* getDocumentElement();
   std::unordered_map<JSAtom, std::vector<ElementInstance*>> m_elementMapById;
   ElementInstance* m_documentElement{nullptr};
   std::unique_ptr<DocumentCookie> m_cookie;

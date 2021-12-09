@@ -139,15 +139,7 @@ JSValue Element::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue 
     return JS_CallConstructor(ctx, Document->getElementConstructor(context, name), argc, argv);
   }
 
-  ElementInstance* element;
-  if (name == "HTML") {
-    element = new ElementInstance(this, name, false);
-    element->m_eventTargetId = HTML_TARGET_ID;
-  } else {
-    // Fallback to default Element class
-    element = new ElementInstance(this, name, true);
-  }
-
+  auto* element = new ElementInstance(this, name, true);
   return element->instanceObject;
 }
 
