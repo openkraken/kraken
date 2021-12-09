@@ -67,7 +67,7 @@ TextNodeInstance::TextNodeInstance(TextNode* textNode, JSValue text)
 }
 
 TextNodeInstance::~TextNodeInstance() {
-  JS_FreeValue(m_ctx, m_data);
+  if (!JS_IsLiveObject(m_context->runtime(), m_data)) JS_FreeValue(m_ctx, m_data);
 }
 
 std::string TextNodeInstance::toString() {
