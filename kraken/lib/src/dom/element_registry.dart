@@ -33,7 +33,7 @@ void defineBuiltInElements() {
   if (_isDefined) return;
   _isDefined = true;
   // Inline text
-  defineElement(BR, (context) => BRElement(context));
+  defineElement(BR, (context) => BreakElement(context));
   defineElement(B, (context) => BringElement(context));
   defineElement(ABBR, (context) => AbbreviationElement(context));
   defineElement(EM, (context) => EmphasisElement(context));
