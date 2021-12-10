@@ -39,16 +39,10 @@ class EventTarget : public HostClass {
   static JSValue addEventListener(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   static JSValue removeEventListener(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   static JSValue dispatchEvent(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-#if IS_TEST
-  static JSValue __kraken_clear_event_listener(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-#endif
 
-  ObjectFunction m_addEventListener{m_context, m_prototypeObject, "addEventListener", addEventListener, 3};
-  ObjectFunction m_removeEventListener{m_context, m_prototypeObject, "removeEventListener", removeEventListener, 2};
-  ObjectFunction m_dispatchEvent{m_context, m_prototypeObject, "dispatchEvent", dispatchEvent, 1};
-#if IS_TEST
-  ObjectFunction m_kraken_clear_event_listener_{m_context, m_prototypeObject, "__kraken_clear_event_listeners__", __kraken_clear_event_listener, 0};
-#endif
+  DEFINE_PROTOTYPE_FUNCTION(addEventListener, 3);
+  DEFINE_PROTOTYPE_FUNCTION(removeEventListener, 2);
+  DEFINE_PROTOTYPE_FUNCTION(dispatchEvent, 1);
   friend EventTargetInstance;
 };
 

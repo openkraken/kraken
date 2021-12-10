@@ -29,8 +29,10 @@ class CustomEvent : public Event {
   OBJECT_INSTANCE(CustomEvent);
 
  private:
+  //
   DEFINE_PROTOTYPE_READONLY_PROPERTY(detail);
-  ObjectFunction m_initCustomEvent{m_context, m_prototypeObject, "initCustomEvent", initCustomEvent, 4};
+
+  DEFINE_PROTOTYPE_FUNCTION(initCustomEvent, 4);
   friend CustomEventInstance;
 };
 

@@ -12,18 +12,18 @@ function generatePropsHeader(object: ClassObject, type: PropType) {
         let p = object.props[i];
 
         if (p.readonly) {
-          propsDefine += `DEFINE_READONLY_PROPERTY(${p.name})\n`;
+          propsDefine += `DEFINE_READONLY_PROPERTY(${p.name});\n`;
         } else {
-          propsDefine += `DEFINE_PROPERTY(${p.name})\n`;
+          propsDefine += `DEFINE_PROPERTY(${p.name});\n`;
         }
       }
     } else {
       for (let i = 0; i < object.props.length; i ++) {
         let p = object.props[i];
         if (p.readonly) {
-          propsDefine += `DEFINE_PROTOTYPE_READONLY_PROPERTY(${p.name})\n`;
+          propsDefine += `DEFINE_PROTOTYPE_READONLY_PROPERTY(${p.name});\n`;
         } else {
-          propsDefine += `DEFINE_PROTOTYPE_PROPERTY(${p.name})\n`;
+          propsDefine += `DEFINE_PROTOTYPE_PROPERTY(${p.name});\n`;
         }
       }
     }
@@ -42,7 +42,12 @@ function generateMethodsHeader(object: ClassObject, type: PropType) {
   if (object.methods.length > 0) {
     let methods = uniqBy(object.methods, (o) => o.name);
     methodsDefine = methods.map(o => `static JSValue ${o.name}(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);`);
-    methodsImpl = methods.map(o => `ObjectFunction m_${o.name}{m_context, ${type == PropType.hostClass ? 'm_prototypeObject' : 'jsObject'}, "${o.name}", ${o.name}, ${o.args.length}};`)
+
+    if (type == PropType.hostClass) {
+      methodsImpl = methods.map(o => `DEFINE_PROTOTYPE_FUNCTION(${o.name}, ${o.args.length});`)
+    } else {
+      methodsImpl = methods.map(o => `DEFINE_FUNCTION(${o.name}, ${o.args.length});`)
+    }
   }
   return {
     methodsImpl,

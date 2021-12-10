@@ -58,7 +58,6 @@ class JasmineTracker {
 
   specDone(result) {
     clearAllTimer();
-    clearAllEventsListeners();
     resetDocumentElement();
     kraken.methodChannel.clearMethodCallHandler();
     __kraken_run_gc__();
@@ -182,13 +181,6 @@ function traverseNode(node, handle) {
       traverseNode(node.childNodes[i], handle);
     }
   }
-}
-
-function clearAllEventsListeners() {
-  window.__kraken_clear_event_listeners__();
-  traverseNode(document.body, (node) => {
-    node.__kraken_clear_event_listeners__();
-  });
 }
 
 __kraken_execute_test__((done) => {

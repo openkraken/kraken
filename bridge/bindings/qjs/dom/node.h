@@ -46,21 +46,21 @@ class Node : public EventTarget {
  private:
   DEFINE_PROTOTYPE_PROPERTY(textContent);
 
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(isConnected)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(ownerDocument)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(firstChild)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(lastChild)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(parentNode)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(previousSibling)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(nextSibling)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(nodeType)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(isConnected);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(ownerDocument);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(firstChild);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(lastChild);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(parentNode);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(previousSibling);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(nextSibling);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(nodeType);
 
-  ObjectFunction m_cloneNode{m_context, m_prototypeObject, "cloneNode", cloneNode, 1};
-  ObjectFunction m_appendChild{m_context, m_prototypeObject, "appendChild", appendChild, 1};
-  ObjectFunction m_remove{m_context, m_prototypeObject, "remove", remove, 0};
-  ObjectFunction m_removeChild{m_context, m_prototypeObject, "removeChild", removeChild, 1};
-  ObjectFunction m_insertBefore{m_context, m_prototypeObject, "insertBefore", insertBefore, 2};
-  ObjectFunction m_replaceChild{m_context, m_prototypeObject, "replaceChild", replaceChild, 2};
+  DEFINE_PROTOTYPE_FUNCTION(cloneNode, 1);
+  DEFINE_PROTOTYPE_FUNCTION(appendChild, 1);
+  DEFINE_PROTOTYPE_FUNCTION(remove, 0);
+  DEFINE_PROTOTYPE_FUNCTION(removeChild, 1);
+  DEFINE_PROTOTYPE_FUNCTION(insertBefore, 2);
+  DEFINE_PROTOTYPE_FUNCTION(replaceChild, 2);
 
   static void traverseCloneNode(QjsContext* ctx, NodeInstance* baseNode, NodeInstance* targetNode);
   static JSValue copyNodeValue(QjsContext* ctx, NodeInstance* node);

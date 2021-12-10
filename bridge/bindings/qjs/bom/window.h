@@ -33,23 +33,25 @@ class Window : public EventTarget {
   OBJECT_INSTANCE(Window);
 
  private:
-  ObjectFunction m_open{m_context, m_prototypeObject, "open", open, 1};
-  ObjectFunction m_scroll{m_context, m_prototypeObject, "scroll", scrollTo, 2};
-  ObjectFunction m_scrollTo{m_context, m_prototypeObject, "scrollTo", scrollTo, 2};
-  ObjectFunction m_scrollBy{m_context, m_prototypeObject, "scrollBy", scrollBy, 2};
-  ObjectFunction m_postMessage{m_context, m_prototypeObject, "postMessage", postMessage, 3};
-
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(devicePixelRatio)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(colorScheme)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(__location__)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(location)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(window)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(parent)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(scrollX)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(scrollY)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(self)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(devicePixelRatio);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(colorScheme);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(__location__);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(location);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(window);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(parent);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(scrollX);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(scrollY);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(self);
 
   DEFINE_PROTOTYPE_PROPERTY(onerror);
+
+  DEFINE_PROTOTYPE_FUNCTION(open, 1);
+  // ScrollTo is same as scroll which reuse scroll functions. Macro expand is not support here.
+  ObjectFunction m_scroll{m_context, m_prototypeObject, "scroll", scrollTo, 2};
+  DEFINE_PROTOTYPE_FUNCTION(scrollTo, 2);
+  DEFINE_PROTOTYPE_FUNCTION(scrollBy, 2);
+  DEFINE_PROTOTYPE_FUNCTION(postMessage, 3);
+
   friend WindowInstance;
 };
 

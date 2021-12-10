@@ -26,9 +26,9 @@ class Comment : public Node {
   JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
  private:
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(data)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(nodeName)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(length)
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(data);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(nodeName);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(length);
 
   friend CommentInstance;
 };

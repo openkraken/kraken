@@ -257,12 +257,6 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
   return eventInstance->cancelled();
 }
 
-#if IS_TEST
-JSValue EventTarget::__kraken_clear_event_listener(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
-#endif
-
 EventTargetInstance::EventTargetInstance(EventTarget* eventTarget, JSClassID classId, JSClassExoticMethods& exoticMethods, std::string name)
     : Instance(eventTarget, name, &exoticMethods, classId, finalize) {
   m_eventTargetId = globalEventTargetId++;

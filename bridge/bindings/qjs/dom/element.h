@@ -112,16 +112,17 @@ class Element : public Node {
   DEFINE_PROTOTYPE_PROPERTY(scrollTop);
   DEFINE_PROTOTYPE_PROPERTY(scrollLeft);
 
-  ObjectFunction m_getBoundingClientRect{m_context, m_prototypeObject, "getBoundingClientRect", getBoundingClientRect, 0};
-  ObjectFunction m_hasAttribute{m_context, m_prototypeObject, "hasAttribute", hasAttribute, 1};
-  ObjectFunction m_setAttribute{m_context, m_prototypeObject, "setAttribute", setAttribute, 2};
-  ObjectFunction m_getAttribute{m_context, m_prototypeObject, "getAttribute", getAttribute, 2};
-  ObjectFunction m_removeAttribute{m_context, m_prototypeObject, "removeAttribute", removeAttribute, 1};
-  ObjectFunction m_toBlob{m_context, m_prototypeObject, "toBlob", toBlob, 0};
-  ObjectFunction m_click{m_context, m_prototypeObject, "click", click, 0};
-  ObjectFunction m_scroll{m_context, m_prototypeObject, "scroll", scroll, 2};
+  DEFINE_PROTOTYPE_FUNCTION(getBoundingClientRect, 0);
+  DEFINE_PROTOTYPE_FUNCTION(hasAttribute, 1);
+  DEFINE_PROTOTYPE_FUNCTION(setAttribute, 2);
+  DEFINE_PROTOTYPE_FUNCTION(getAttribute, 2);
+  DEFINE_PROTOTYPE_FUNCTION(removeAttribute, 1);
+  DEFINE_PROTOTYPE_FUNCTION(toBlob, 0);
+  DEFINE_PROTOTYPE_FUNCTION(click, 2);
+  DEFINE_PROTOTYPE_FUNCTION(scroll, 2);
+  // ScrollTo is same as scroll which reuse scroll functions. Macro expand is not support here.
   ObjectFunction m_scrollTo{m_context, m_prototypeObject, "scrollTo", scroll, 2};
-  ObjectFunction m_scrollBy{m_context, m_prototypeObject, "scrollBy", scrollBy, 2};
+  DEFINE_PROTOTYPE_FUNCTION(scrollBy, 2);
   friend ElementInstance;
 };
 

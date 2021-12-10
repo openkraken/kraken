@@ -76,21 +76,22 @@ class Event : public HostClass {
 
  private:
   static std::unordered_map<std::string, EventCreator> m_eventCreatorMap;
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(type)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(bubbles)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(cancelable)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(timestamp)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(defaultPrevented)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(target)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(srcElement)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(currentTarget)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(returnValue)
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(cancelBubble)
 
-  ObjectFunction m_stopPropagation{m_context, m_prototypeObject, "stopPropagation", stopPropagation, 0};
-  ObjectFunction m_stopImmediatePropagation{m_context, m_prototypeObject, "immediatePropagation", stopImmediatePropagation, 0};
-  ObjectFunction m_preventDefault{m_context, m_prototypeObject, "preventDefault", preventDefault, 1};
-  ObjectFunction m_initEvent{m_context, m_prototypeObject, "initEvent", initEvent, 3};
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(type);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(bubbles);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(cancelable);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(timestamp);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(defaultPrevented);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(target);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(srcElement);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(currentTarget);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(returnValue);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(cancelBubble);
+
+  DEFINE_PROTOTYPE_FUNCTION(stopPropagation, 0);
+  DEFINE_PROTOTYPE_FUNCTION(stopImmediatePropagation, 0);
+  DEFINE_PROTOTYPE_FUNCTION(preventDefault, 1);
+  DEFINE_PROTOTYPE_FUNCTION(initEvent, 3);
 
   friend EventInstance;
 };

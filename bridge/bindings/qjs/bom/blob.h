@@ -34,9 +34,9 @@ class Blob : public HostClass {
   DEFINE_PROTOTYPE_READONLY_PROPERTY(type);
   DEFINE_PROTOTYPE_READONLY_PROPERTY(size);
 
-  ObjectFunction m_arrayBuffer{m_context, m_prototypeObject, "arrayBuffer", arrayBuffer, 0};
-  ObjectFunction m_slice{m_context, m_prototypeObject, "slice", slice, 3};
-  ObjectFunction m_text{m_context, m_prototypeObject, "text", text, 0};
+  DEFINE_PROTOTYPE_FUNCTION(arrayBuffer, 0);
+  DEFINE_PROTOTYPE_FUNCTION(slice, 3);
+  DEFINE_PROTOTYPE_FUNCTION(text, 0);
 };
 
 class BlobInstance : public Instance {
