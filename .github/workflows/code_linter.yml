@@ -1,7 +1,6 @@
 name: Run Code Linter
 
-on:
-  push:
+on: [push]
 
 jobs:
   reformat-bridge:

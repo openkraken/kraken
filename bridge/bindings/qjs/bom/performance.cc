@@ -18,27 +18,27 @@ void bindPerformance(std::unique_ptr<JSContext>& context) {
 
 using namespace std::chrono;
 
-PROP_GETTER_IMPL(PerformanceEntry, name)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(PerformanceEntry, name)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* entry = static_cast<PerformanceEntry*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewString(ctx, entry->m_nativePerformanceEntry->name);
 }
 
-PROP_GETTER_IMPL(PerformanceEntry, entryType)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(PerformanceEntry, entryType)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* entry = static_cast<PerformanceEntry*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewString(ctx, entry->m_nativePerformanceEntry->entryType);
 }
 
-PROP_GETTER_IMPL(PerformanceEntry, startTime)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(PerformanceEntry, startTime)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* entry = static_cast<PerformanceEntry*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewUint32(ctx, entry->m_nativePerformanceEntry->startTime);
 }
 
-PROP_GETTER_IMPL(PerformanceEntry, duration)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(PerformanceEntry, duration)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* entry = static_cast<PerformanceEntry*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   return JS_NewUint32(ctx, entry->m_nativePerformanceEntry->duration);
 }
 
-PROP_GETTER_IMPL(Performance, timeOrigin)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Performance, timeOrigin)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
   int64_t time = std::chrono::duration_cast<std::chrono::milliseconds>(performance->m_context->timeOrigin.time_since_epoch()).count();
   return JS_NewUint32(ctx, time);

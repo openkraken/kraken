@@ -304,11 +304,11 @@ bool Document::isCustomElement(const std::string& tagName) {
   return elementConstructorMap.count(tagName) > 0;
 }
 
-PROP_GETTER_IMPL(Document, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Document, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewString(ctx, "#document");
 }
 
-PROP_GETTER_IMPL(Document, all)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Document, all)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   auto all = new AllCollection(document->m_context);
 
@@ -321,14 +321,14 @@ PROP_GETTER_IMPL(Document, all)(QjsContext* ctx, JSValue this_val, int argc, JSV
 }
 
 // document.documentElement
-PROP_GETTER_IMPL(Document, documentElement)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Document, documentElement)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   ElementInstance* documentElement = document->getDocumentElement();
   return documentElement == nullptr ? JS_NULL : documentElement->jsObject;
 }
 
 // document.head
-PROP_GETTER_IMPL(Document, head)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Document, head)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   ElementInstance* documentElement = document->getDocumentElement();
   int32_t len = arrayGetLength(ctx, documentElement->childNodes);
@@ -354,7 +354,7 @@ PROP_GETTER_IMPL(Document, head)(QjsContext* ctx, JSValue this_val, int argc, JS
 }
 
 // document.body: https://html.spec.whatwg.org/multipage/dom.html#dom-document-body-dev
-PROP_GETTER_IMPL(Document, body)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Document, body)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   ElementInstance* documentElement = document->getDocumentElement();
   JSValue body = JS_NULL;
@@ -382,7 +382,7 @@ PROP_GETTER_IMPL(Document, body)(QjsContext* ctx, JSValue this_val, int argc, JS
 
 // The body property is settable, setting a new body on a document will effectively remove all
 // the current children of the existing <body> element.
-PROP_SETTER_IMPL(Document, body)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_SETTER(Document, body)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   ElementInstance* documentElement = document->getDocumentElement();
   // If there is no document element, throw a Exception.
@@ -422,7 +422,7 @@ PROP_SETTER_IMPL(Document, body)(QjsContext* ctx, JSValue this_val, int argc, JS
 }
 
 // document.children
-PROP_GETTER_IMPL(Document, children)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Document, children)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   JSValue array = JS_NewArray(ctx);
   JSValue pushMethod = JS_GetPropertyStr(ctx, array, "push");
@@ -442,12 +442,12 @@ PROP_GETTER_IMPL(Document, children)(QjsContext* ctx, JSValue this_val, int argc
   return array;
 }
 
-PROP_GETTER_IMPL(Document, cookie)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Document, cookie)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   std::string cookie = document->m_cookie->getCookie();
   return JS_NewString(ctx, cookie.c_str());
 }
-PROP_SETTER_IMPL(Document, cookie)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_SETTER(Document, cookie)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   std::string value = jsValueToStdString(ctx, argv[0]);
   document->m_cookie->setCookie(value);

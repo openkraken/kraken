@@ -68,12 +68,12 @@ JSValue Blob::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue thi
   return blob->jsObject;
 }
 
-PROP_GETTER_IMPL(Blob, type)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Blob, type)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* blobInstance = static_cast<BlobInstance*>(JS_GetOpaque(this_val, Blob::kBlobClassID));
   return JS_NewString(blobInstance->m_ctx, blobInstance->mimeType.empty() ? "" : blobInstance->mimeType.c_str());
 }
 
-PROP_GETTER_IMPL(Blob, size)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Blob, size)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* blobInstance = static_cast<BlobInstance*>(JS_GetOpaque(this_val, Blob::kBlobClassID));
   return JS_NewFloat64(blobInstance->m_ctx, blobInstance->_size);
 }

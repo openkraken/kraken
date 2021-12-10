@@ -20,8 +20,8 @@
     context->defineGlobalProperty(name, f);                            \
   }
 
-#define PROP_GETTER_IMPL(Constructor, Property) JSValue Constructor::Property##PropertyDescriptor::getter
-#define PROP_SETTER_IMPL(Constructor, Property) JSValue Constructor::Property##PropertyDescriptor::setter
+#define IMPL_PROPERTY_GETTER(Constructor, Property) JSValue Constructor::Property##PropertyDescriptor::getter
+#define IMPL_PROPERTY_SETTER(Constructor, Property) JSValue Constructor::Property##PropertyDescriptor::setter
 
 #define DEFINE_PROTOTYPE_READONLY_PROPERTY(PROPERTY)                                             \
   class PROPERTY##PropertyDescriptor {                                                           \

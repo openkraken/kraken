@@ -23,12 +23,12 @@ JSValue ImageElement::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSV
   auto instance = new ImageElementInstance(this);
   return instance->jsObject;
 }
-PROP_GETTER_IMPL(ImageElement, width)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(ImageElement, width)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   return element->getNativeProperty("width");
 }
-PROP_SETTER_IMPL(ImageElement, width)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_SETTER(ImageElement, width)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   std::string key = "width";
   std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
@@ -36,12 +36,12 @@ PROP_SETTER_IMPL(ImageElement, width)(QjsContext* ctx, JSValue this_val, int arg
   foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
   return JS_NULL;
 }
-PROP_GETTER_IMPL(ImageElement, height)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(ImageElement, height)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   return element->getNativeProperty("height");
 }
-PROP_SETTER_IMPL(ImageElement, height)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_SETTER(ImageElement, height)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   std::string key = "height";
   std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
@@ -49,22 +49,22 @@ PROP_SETTER_IMPL(ImageElement, height)(QjsContext* ctx, JSValue this_val, int ar
   foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
   return JS_NULL;
 }
-PROP_GETTER_IMPL(ImageElement, naturalWidth)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(ImageElement, naturalWidth)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   return element->getNativeProperty("naturalWidth");
 }
-PROP_GETTER_IMPL(ImageElement, naturalHeight)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(ImageElement, naturalHeight)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   return element->getNativeProperty("naturalHeight");
 }
-PROP_GETTER_IMPL(ImageElement, src)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(ImageElement, src)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   return element->getNativeProperty("src");
 }
-PROP_SETTER_IMPL(ImageElement, src)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_SETTER(ImageElement, src)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   std::string key = "src";
   std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
@@ -72,12 +72,12 @@ PROP_SETTER_IMPL(ImageElement, src)(QjsContext* ctx, JSValue this_val, int argc,
   foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
   return JS_NULL;
 }
-PROP_GETTER_IMPL(ImageElement, loading)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(ImageElement, loading)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   return element->getNativeProperty("loading");
 }
-PROP_SETTER_IMPL(ImageElement, loading)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_SETTER(ImageElement, loading)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   std::string key = "loading";
   std::unique_ptr<NativeString> args_01 = stringToNativeString(key);

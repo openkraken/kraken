@@ -64,7 +64,7 @@ JSValue CustomEvent::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSVa
   return customEvent->jsObject;
 }
 
-PROP_GETTER_IMPL(CustomEvent, detail)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(CustomEvent, detail)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* customEventInstance = static_cast<CustomEventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
   return customEventInstance->m_detail.value();
 }
