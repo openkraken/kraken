@@ -17,10 +17,10 @@ const Map<String, dynamic> _breakDefaultStyle = {
 };
 
 // https://html.spec.whatwg.org/multipage/text-level-semantics.html#htmlbrelement
-class BreakElement extends Element {
+class BRElement extends Element {
   RenderBr? _renderBr;
 
-  BreakElement(EventTargetContext? context)
+  BRElement(EventTargetContext? context)
     : super(
     context,
     defaultStyle: _breakDefaultStyle,
@@ -37,14 +37,7 @@ class BreakElement extends Element {
   RenderBoxModel? get renderBoxModel => _renderBr;
 
   @override
-  RenderBox? get renderer => renderBoxModel;
-
-  @override
   RenderBox createRenderer() {
-    if (renderer != null) {
-      return renderer!;
-    }
-    _renderBr = RenderBr(renderStyle);
-    return renderer!;
+    return _renderBr ??= RenderBr(renderStyle);
   }
 }
