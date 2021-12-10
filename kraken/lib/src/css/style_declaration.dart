@@ -224,6 +224,7 @@ class CSSStyleDeclaration {
           CSSStyleProperty.setShorthandTextDecoration(longhandProperties, normalizedValue);
           break;
       }
+      _cachedExpandedShortHand[cacheKey] = longhandProperties;
     }
 
     if (longhandProperties.isNotEmpty) {
