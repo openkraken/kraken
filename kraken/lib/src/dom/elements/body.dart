@@ -2,10 +2,6 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
-import 'dart:ffi';
-
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 
@@ -16,14 +12,8 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class BodyElement extends Element {
-  BodyElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super( targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
-
-  @override
-  void willAttachRenderer() {
-    super.willAttachRenderer();
-    renderBoxModel!.renderStyle.width = CSSLengthValue(elementManager.viewportWidth, CSSLengthType.PX);
-  }
+  BodyElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
 
   @override
   void addEvent(String eventType) {

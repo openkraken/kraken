@@ -181,7 +181,7 @@ class CanvasRenderingContext2D {
         closePath();
         break;
       case 'drawImage':
-        ImageElement imageElement = EventTarget.getEventTargetOfNativePtr(argv[0]) as ImageElement;
+        ImageElement imageElement = EventTarget.getEventTargetByPointer(argv[0]) as ImageElement;
         num sx = 0.0, sy = 0.0, sWidth = 0.0, sHeight = 0.0, dx = 0.0, dy = 0.0, dWidth = 0.0, dHeight = 0.0;
 
         if (argv.length == 3) {

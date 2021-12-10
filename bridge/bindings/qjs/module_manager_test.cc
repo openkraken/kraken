@@ -13,13 +13,8 @@ namespace kraken::binding::qjs {
 TEST(ModuleManager, shouldThrowErrorWhenBadJSON) {
   bool static errorCalled = false;
   auto* bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
-    EXPECT_STREQ(errmsg,
-                 "TypeError: circular reference\n"
-                 "    at __kraken_invoke_module__ (native)\n"
-                 "    at <anonymous> (internal://:616)\n"
-                 "    at Promise (native)\n"
-                 "    at invokeMethod (internal://:617)\n"
-                 "    at <eval> (vm://:12)\n");
+    std::string stdErrorMsg = std::string(errmsg);
+    EXPECT_EQ(stdErrorMsg.find("TypeError: circular reference") != std::string::npos, true);
     errorCalled = true;
   });
   kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {};

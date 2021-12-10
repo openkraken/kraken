@@ -91,7 +91,7 @@ void main() async {
         onDrag: (GestureEvent gestureEvent) {
           if (gestureEvent.state == EVENT_STATE_START) {
             var event = CustomEvent('nativegesture', CustomEventInit(detail: 'nativegesture'));
-            krakenMap[i]!.controller!.view.document!.documentElement.dispatchEvent(event);
+            krakenMap[i]!.controller!.view.document.documentElement?.dispatchEvent(event);
           }
         },
       ),
