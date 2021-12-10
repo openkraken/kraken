@@ -218,7 +218,7 @@ class Performance : public HostObject {
   DEFINE_FUNCTION(measure, 4);
 
 #if ENABLE_PROFILE
-  DEFINE_FUNCTION(__kraken_navigation_summary__, 0)
+  DEFINE_FUNCTION(__kraken_navigation_summary__, 0);
 #endif
 };
 
