@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
@@ -49,8 +48,8 @@ class LinkElement extends Element {
     if (url.isNotEmpty && rel == _REL_STYLESHEET && isConnected) {
       try {
         KrakenBundle bundle = KrakenBundle.fromUrl(url);
-        await bundle.resolve(context.contextId);
-        await bundle.eval(context.contextId);
+        await bundle.resolve(contextId);
+        await bundle.eval(contextId);
 
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
