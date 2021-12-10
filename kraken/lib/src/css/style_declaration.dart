@@ -46,7 +46,7 @@ List<String> _propertyOrders = [
 
 RegExp _kebabCaseReg = RegExp(r'[A-Z]');
 
-final LinkedLruHashMap<String, Map<String, String?>> _cachedExpandShortHand = LinkedLruHashMap(maximumSize: 500);
+final LinkedLruHashMap<String, Map<String, String?>> _cachedExpandedShortHand = LinkedLruHashMap(maximumSize: 500);
 
 // CSS Object Model: https://drafts.csswg.org/cssom/#the-cssstyledeclaration-interface
 
@@ -174,8 +174,8 @@ class CSSStyleDeclaration {
   void _expandShorthand(String propertyName, String normalizedValue, bool? isImportant) {
     Map<String, String?> longhandProperties;
     String cacheKey = '$propertyName:$normalizedValue';
-    if (_cachedExpandShortHand.containsKey(cacheKey)) {
-      longhandProperties = _cachedExpandShortHand[cacheKey]!;
+    if (_cachedExpandedShortHand.containsKey(cacheKey)) {
+      longhandProperties = _cachedExpandedShortHand[cacheKey]!;
     } else {
       longhandProperties = {};
 
