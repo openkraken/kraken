@@ -2,8 +2,10 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/rendering.dart';
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element#inline_text_semantics
 const String SPAN = 'SPAN';
@@ -60,6 +62,27 @@ const Map<String, dynamic> _markDefaultStyle = {
 const Map<String, dynamic> _defaultStyle = {
   FONT_STYLE: ITALIC
 };
+
+// https://html.spec.whatwg.org/multipage/text-level-semantics.html#htmlbrelement
+class BRElement extends Element {
+  RenderLineBreak? _renderLineBreak;
+
+  BRElement(EventTargetContext? context)
+      : super(context, isIntrinsicBox: true);
+
+  @override
+  RenderBoxModel? get renderBoxModel => _renderLineBreak;
+
+  @override
+  void setRenderStyle(String property, String present) {
+    // Noop
+  }
+
+  @override
+  RenderBox createRenderer() {
+    return _renderLineBreak ??= RenderLineBreak(renderStyle);
+  }
+}
 
 class BringElement extends Element {
   BringElement(EventTargetContext? context)

@@ -34,4 +34,3 @@ export 'src/dom/elements/object.dart';
 export 'src/dom/elements/head.dart';
 export 'src/dom/elements/html.dart';
 export 'src/dom/elements/template.dart';
-export 'src/dom/elements/br.dart';

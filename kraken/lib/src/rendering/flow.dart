@@ -1266,7 +1266,6 @@ class RenderFlowLayout extends RenderLayoutBox {
         childDisplay == CSSDisplay.inlineFlex;
     }
     return false;
-
   }
 
   RenderStyle? _getChildRenderStyle(RenderBox child) {
@@ -1282,8 +1281,11 @@ class RenderFlowLayout extends RenderLayoutBox {
   }
 
   bool _isChildBlockLevel(RenderBox? child) {
-    if (child != null && child is! RenderTextBox) {
-      RenderStyle? childRenderStyle = _getChildRenderStyle(child);
+    if (child is RenderLineBreak) {
+      // FIXME: current make a block box make a line break works
+      return true;
+    } else if (child is RenderBoxModel || child is RenderPositionPlaceholder) {
+      RenderStyle? childRenderStyle = _getChildRenderStyle(child!);
       if (childRenderStyle != null) {
         CSSDisplay? childDisplay = childRenderStyle.display;
         return childDisplay == CSSDisplay.block ||

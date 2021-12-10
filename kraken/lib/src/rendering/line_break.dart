@@ -17,9 +17,8 @@ class RenderLineBreak extends RenderIntrinsic {
   // Height of BR element is only determined by its parents line-height.
   // @TODO add cache to avoid create TextPainter to measure size on every layout.
   double get height {
-    RenderBoxModel parentBox = parent as RenderBoxModel;
     final Size textSize = (TextPainter(
-      text: CSSTextMixin.createTextSpan(' ', parentBox.renderStyle),
+      text: CSSTextMixin.createTextSpan(' ', renderStyle.parent!),
       maxLines: 1,
       textDirection: TextDirection.ltr)
       ..layout())
