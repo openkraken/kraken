@@ -29,7 +29,6 @@ class CustomEvent : public Event {
   OBJECT_INSTANCE(CustomEvent);
 
  private:
-  //
   DEFINE_PROTOTYPE_READONLY_PROPERTY(detail);
 
   DEFINE_PROTOTYPE_FUNCTION(initCustomEvent, 4);
