@@ -3,13 +3,10 @@
  * Author: Kraken Team.
  */
 
-import 'dart:ffi';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/kraken.dart';
 
 // HACK: current use block layout make text force line break
 const Map<String, dynamic> _breakDefaultStyle = {
