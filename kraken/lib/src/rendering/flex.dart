@@ -1457,7 +1457,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     bool isStretchSelf = false,
   }) {
     // BR element constraints is not affected by flex properties.
-    if (child is RenderBr) {
+    if (child is RenderLineBreak) {
       return child.getConstraints();
     }
     BoxConstraints oldConstraints = child.constraints;

@@ -15,7 +15,7 @@ const Map<String, dynamic> _breakDefaultStyle = {
 
 // https://html.spec.whatwg.org/multipage/text-level-semantics.html#htmlbrelement
 class BRElement extends Element {
-  RenderBr? _renderBr;
+  RenderLineBreak? _renderLineBreak;
 
   BRElement(EventTargetContext? context)
     : super(
@@ -31,10 +31,10 @@ class BRElement extends Element {
   StyleChangeListener? _onStyleChanged;
 
   @override
-  RenderBoxModel? get renderBoxModel => _renderBr;
+  RenderBoxModel? get renderBoxModel => _renderLineBreak;
 
   @override
   RenderBox createRenderer() {
-    return _renderBr ??= RenderBr(renderStyle);
+    return _renderLineBreak ??= RenderLineBreak(renderStyle);
   }
 }
