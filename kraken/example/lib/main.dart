@@ -63,7 +63,7 @@ class _MyHomePageState extends State<MyBrowser> {
             controller: textEditingController,
             onSubmitted: (value) {
               textEditingController.text = value;
-              _kraken?.loadURL(value);
+              _kraken?.loadBundle(KrakenBundle.fromUrl(value));
             },
             decoration: InputDecoration(
               hintText: 'Enter a app url',
@@ -92,7 +92,7 @@ class _MyHomePageState extends State<MyBrowser> {
           devToolsService: ChromeDevToolsService(),
           viewportWidth: viewportSize.width - queryData.padding.horizontal,
           viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
-          bundleURL: 'assets/bundle.js',
+          bundle: KrakenBundle.fromUrl('assets://assets/bundle.js'),
         ),
     ));
   }

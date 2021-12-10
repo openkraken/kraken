@@ -39,7 +39,12 @@ class Document : public Node {
   static JSValue getElementsByTagName(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   static JSValue getElementsByClassName(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
+  JSValue getElementConstructor(JSContext* context, const std::string& tagName);
+  bool isCustomElement(const std::string& tagName);
+
  private:
+  void defineElement(const std::string& tagName, Element* constructor);
+
   ObjectFunction m_createEvent{m_context, m_prototypeObject, "createEvent", createEvent, 1};
   ObjectFunction m_createElement{m_context, m_prototypeObject, "createElement", createElement, 1};
   ObjectFunction m_createDocumentFragment{m_context, m_prototypeObject, "createDocumentFragment", createDocumentFragment, 0};
@@ -52,6 +57,7 @@ class Document : public Node {
 
   bool event_registered{false};
   bool document_registered{false};
+  std::unordered_map<std::string, Element*> elementConstructorMap;
 };
 
 class DocumentCookie {
@@ -71,7 +77,6 @@ class DocumentInstance : public NodeInstance {
   explicit DocumentInstance(Document* document);
   ~DocumentInstance();
   static std::unordered_map<Document*, DocumentInstance*> m_instanceMap;
-  ElementInstance* documentElement();
   static DocumentInstance* instance(Document* document) {
     if (m_instanceMap.count(document) == 0) {
       m_instanceMap[document] = new DocumentInstance(document);
@@ -80,10 +85,11 @@ class DocumentInstance : public NodeInstance {
   }
 
  private:
-  DEFINE_HOST_CLASS_PROPERTY(3, nodeName, all, cookie);
+  DEFINE_HOST_CLASS_PROPERTY(7, nodeName, documentElement, body, head, children, all, cookie);
 
   void removeElementById(JSAtom id, ElementInstance* element);
   void addElementById(JSAtom id, ElementInstance* element);
+  ElementInstance* getDocumentElement();
   std::unordered_map<JSAtom, std::vector<ElementInstance*>> m_elementMapById;
   ElementInstance* m_documentElement{nullptr};
   std::unique_ptr<DocumentCookie> m_cookie;

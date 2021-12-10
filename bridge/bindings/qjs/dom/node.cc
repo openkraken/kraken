@@ -76,6 +76,7 @@ JSValue Node::cloneNode(QjsContext* ctx, JSValue this_val, int argc, JSValue* ar
   }
   return JS_NULL;
 }
+
 JSValue Node::appendChild(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc != 1) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'appendChild' on 'Node': first argument is required.");
@@ -96,7 +97,7 @@ JSValue Node::appendChild(QjsContext* ctx, JSValue this_val, int argc, JSValue* 
     return JS_ThrowTypeError(ctx, "Failed to execute 'appendChild' on 'Node': first arguments should be an Node type.");
   }
 
-  if (nodeInstance->m_eventTargetId == HTML_TARGET_ID || nodeInstance == selfInstance) {
+  if (nodeInstance == selfInstance) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'appendChild' on 'Node': The new child element contains the parent.");
   }
 
@@ -143,6 +144,7 @@ JSValue Node::removeChild(QjsContext* ctx, JSValue this_val, int argc, JSValue* 
   auto removedNode = selfInstance->internalRemoveChild(nodeInstance);
   return JS_DupValue(ctx, removedNode->instanceObject);
 }
+
 JSValue Node::insertBefore(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 2) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'insertBefore' on 'Node': 2 arguments is required.");
@@ -188,6 +190,7 @@ JSValue Node::insertBefore(QjsContext* ctx, JSValue this_val, int argc, JSValue*
 
   return JS_NULL;
 }
+
 JSValue Node::replaceChild(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 2) {
     return JS_ThrowTypeError(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 2 arguments required");
@@ -275,7 +278,7 @@ JSValue Node::copyNodeValue(QjsContext* ctx, NodeInstance* node) {
     ElementInstance::copyNodeProperties(newElement, element);
 
     std::string newNodeEventTargetId = std::to_string(newElement->m_eventTargetId);
-    NativeString* args_01 = stringToNativeString(newNodeEventTargetId);
+    std::unique_ptr<NativeString> args_01 = stringToNativeString(newNodeEventTargetId);
     foundation::UICommandBuffer::instance(newElement->context()->getContextId())->addCommand(element->m_eventTargetId, UICommand::cloneNode, *args_01, nullptr);
 
     return newElement->instanceObject;
@@ -369,11 +372,11 @@ PROP_SETTER(NodeInstance, textContent)(QjsContext* ctx, JSValue this_val, int ar
 }
 
 bool NodeInstance::isConnected() {
-  bool _isConnected = m_eventTargetId == HTML_TARGET_ID;
+  bool _isConnected = this == document();
   auto parent = static_cast<NodeInstance*>(JS_GetOpaque(parentNode, Node::classId(parentNode)));
 
   while (parent != nullptr && !_isConnected) {
-    _isConnected = parent->m_eventTargetId == HTML_TARGET_ID;
+    _isConnected = parent == document();
     JSValue parentParentNode = parent->parentNode;
     parent = static_cast<NodeInstance*>(JS_GetOpaque(parentParentNode, Node::classId(parentParentNode)));
   }
@@ -443,8 +446,8 @@ void NodeInstance::internalAppendChild(NodeInstance* node) {
   std::string nodeEventTargetId = std::to_string(node->m_eventTargetId);
   std::string position = std::string("beforeend");
 
-  NativeString* args_01 = stringToNativeString(nodeEventTargetId);
-  NativeString* args_02 = stringToNativeString(position);
+  std::unique_ptr<NativeString> args_01 = stringToNativeString(nodeEventTargetId);
+  std::unique_ptr<NativeString> args_02 = stringToNativeString(position);
 
   foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
 }
@@ -505,8 +508,8 @@ JSValue NodeInstance::internalInsertBefore(NodeInstance* node, NodeInstance* ref
       std::string nodeEventTargetId = std::to_string(node->m_eventTargetId);
       std::string position = std::string("beforebegin");
 
-      NativeString* args_01 = stringToNativeString(nodeEventTargetId);
-      NativeString* args_02 = stringToNativeString(position);
+      std::unique_ptr<NativeString> args_01 = stringToNativeString(nodeEventTargetId);
+      std::unique_ptr<NativeString> args_02 = stringToNativeString(position);
 
       foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(referenceNode->m_eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
     }
@@ -537,8 +540,8 @@ JSValue NodeInstance::internalReplaceChild(NodeInstance* newChild, NodeInstance*
   std::string newChildEventTargetId = std::to_string(newChild->m_eventTargetId);
   std::string position = std::string("afterend");
 
-  NativeString* args_01 = stringToNativeString(newChildEventTargetId);
-  NativeString* args_02 = stringToNativeString(position);
+  std::unique_ptr<NativeString> args_01 = stringToNativeString(newChildEventTargetId);
+  std::unique_ptr<NativeString> args_02 = stringToNativeString(position);
 
   foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(oldChild->m_eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
 

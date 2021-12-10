@@ -25,7 +25,7 @@ std::thread::id getUIThreadId();
 
 struct NativeString {
   const uint16_t* string;
-  int32_t length;
+  uint32_t length;
 
   NativeString* clone();
   void free();

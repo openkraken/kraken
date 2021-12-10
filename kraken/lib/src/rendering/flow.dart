@@ -37,10 +37,8 @@ class _RunMetrics {
 class RenderFlowLayout extends RenderLayoutBox {
   RenderFlowLayout({
     List<RenderBox>? children,
-    required RenderStyle renderStyle,
-  }) : super(
-    renderStyle: renderStyle,
-  ) {
+    required CSSRenderStyle renderStyle,
+  }) : super(renderStyle: renderStyle) {
     addAll(children);
   }
 
@@ -482,8 +480,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     // If no child exists, stop layout.
     if (childCount == 0) {
       Size layoutContentSize = getContentSize(
-        logicalContentWidth: logicalContentWidth,
-        logicalContentHeight: logicalContentHeight,
         contentWidth: 0,
         contentHeight: 0,
       );
@@ -700,8 +696,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     final int runCount = runMetrics.length;
 
     Size layoutContentSize = getContentSize(
-      logicalContentWidth: logicalContentWidth,
-      logicalContentHeight: logicalContentHeight,
       contentWidth: mainAxisExtent,
       contentHeight: crossAxisExtent,
     );
@@ -1589,7 +1583,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 class RenderRepaintBoundaryFlowLayout extends RenderFlowLayout {
   RenderRepaintBoundaryFlowLayout({
     List<RenderBox>? children,
-    required RenderStyle renderStyle,
+    required CSSRenderStyle renderStyle,
   }) : super(
     children: children,
     renderStyle: renderStyle,

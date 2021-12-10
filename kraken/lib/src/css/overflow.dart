@@ -48,25 +48,24 @@ List<String> _scrollingContentBoxCopyStyles = [
   LINE_CLAMP,
 ];
 
-mixin CSSOverflowMixin on RenderStyleBase {
+mixin CSSOverflowMixin on RenderStyle {
+  @override
+  CSSOverflowType get overflowX => _overflowX ?? CSSOverflowType.visible;
   CSSOverflowType? _overflowX;
-  CSSOverflowType get overflowX {
-    return _overflowX ?? CSSOverflowType.visible;
-  }
   set overflowX(CSSOverflowType value) {
     if (_overflowX == value) return;
     _overflowX = value;
   }
 
+  @override
+  CSSOverflowType get overflowY => _overflowY ?? CSSOverflowType.visible;
   CSSOverflowType? _overflowY;
-  CSSOverflowType get overflowY {
-    return _overflowY ?? CSSOverflowType.visible;
-  }
   set overflowY(CSSOverflowType value) {
     if (_overflowY == value) return;
     _overflowY = value;
   }
 
+  @override
   CSSOverflowType get effectiveOverflowX {
     if (overflowX == CSSOverflowType.visible && overflowY != CSSOverflowType.visible) {
       return CSSOverflowType.auto;
@@ -74,6 +73,7 @@ mixin CSSOverflowMixin on RenderStyleBase {
     return overflowX;
   }
 
+  @override
   CSSOverflowType get effectiveOverflowY {
     if (overflowY == CSSOverflowType.visible && overflowX != CSSOverflowType.visible) {
       return CSSOverflowType.auto;
@@ -217,8 +217,11 @@ mixin ElementOverflowMixin on ElementBase {
   }
 
   void scrollingContentBoxStyleListener(String property, String? original, String present) {
-    RenderLayoutBox scrollingContentBox = (renderBoxModel as RenderLayoutBox).renderScrollingContent!;
-    RenderStyle scrollingContentRenderStyle = scrollingContentBox.renderStyle;
+    RenderLayoutBox? scrollingContentBox = (renderBoxModel as RenderLayoutBox).renderScrollingContent;
+    // Sliver content has no multi scroll content box.
+    if (scrollingContentBox == null) return;
+
+    CSSRenderStyle scrollingContentRenderStyle = scrollingContentBox.renderStyle;
 
     switch (property) {
       case DISPLAY:

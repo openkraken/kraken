@@ -27,7 +27,7 @@ JSValue ${object.name}::callNativeMethods(const char *method, int32_t argc,
 
   NativeString m{
     reinterpret_cast<const uint16_t *>(methodString.c_str()),
-    static_cast<int32_t>(methodString.size())
+    static_cast<uint32_t>(methodString.size())
   };
 
   NativeValue nativeValue{};
@@ -135,8 +135,8 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
   let setterCode = '';
   if (object.type == 'Element') {
     setterCode = `std::string key = "${p.name}";
-  NativeString *args_01 = stringToNativeString(key);
-  NativeString *args_02 = jsValueToNativeString(ctx, argv[0]);
+  std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
+  std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
   foundation::UICommandBuffer::instance(${instanceName}->m_context->getContextId())
     ->addCommand(${instanceName}->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
   return JS_NULL;`;
@@ -309,7 +309,7 @@ function generateEventConstructorCode(object: ClassObject) {
   }
 
   auto *nativeEvent = new Native${object.name}();
-  nativeEvent->nativeEvent.type = jsValueToNativeString(ctx, eventTypeValue);
+  nativeEvent->nativeEvent.type = jsValueToNativeString(ctx, eventTypeValue).release();
 
   ${generateEventInstanceConstructorCode(object)}
 
@@ -333,14 +333,15 @@ function generateEventInstanceConstructorCode(object: ClassObject) {
       propApplyCode = `JS_ToInt32(m_ctx, reinterpret_cast<int32_t *>(&nativeEvent->${p.name}), JS_GetProperty(m_ctx, eventInit, ${p.name}Atom));`
     } else if (p.kind === PropsDeclarationKind.string) {
       propApplyCode = addIndent(`JSValue v = JS_GetProperty(m_ctx, eventInit, ${p.name}Atom);
-  nativeEvent->${p.name} = jsValueToNativeString(m_ctx, v);
+  nativeEvent->${p.name} = jsValueToNativeString(m_ctx, v).release();
   JS_FreeValue(m_ctx, v);`, 0);
     } else if (p.kind === PropsDeclarationKind.double) {
       propApplyCode = `JS_ToFloat64(m_ctx, &nativeEvent->${p.name}, JS_GetProperty(m_ctx, eventInit, ${p.name}Atom));`;
     } else if (p.kind === PropsDeclarationKind.object) {
       propApplyCode = addIndent(`JSValue v = JS_GetProperty(m_ctx, eventInit, ${p.name}Atom);
   JSValue json = JS_JSONStringify(m_ctx, v, JS_NULL, JS_NULL);
-  nativeEvent->${p.name} = jsValueToNativeString(m_ctx, json);
+  if (JS_IsException(json)) return json;
+  nativeEvent->${p.name} = jsValueToNativeString(m_ctx, json).release();
   JS_FreeValue(m_ctx, json);
   JS_FreeValue(m_ctx, v);`, 0);
     }

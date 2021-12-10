@@ -9,8 +9,8 @@ import 'package:kraken/dom.dart';
 const String DOCUMENT_FRAGMENT = 'DOCUMENTFRAGMENT';
 
 class DocumentFragment extends Node {
-  DocumentFragment(int targetId, nativeNodePtr, ElementManager elementManager)
-      : super(NodeType.COMMENT_NODE, targetId, nativeNodePtr, elementManager);
+  DocumentFragment(EventTargetContext? context)
+      : super(NodeType.COMMENT_NODE, context);
 
   @override
   String get nodeName => '#documentfragment';

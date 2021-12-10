@@ -12,19 +12,20 @@ final RegExp _commaRegExp = RegExp(r'\s*,\s*');
 // CSS Text: https://drafts.csswg.org/css-text-3/
 // CSS Text Decoration: https://drafts.csswg.org/css-text-decor-3/
 // CSS Box Alignment: https://drafts.csswg.org/css-align/
-mixin CSSTextMixin on RenderStyleBase {
-
+mixin CSSTextMixin on RenderStyle {
   bool get hasColor => _color != null;
 
+  @override
+  Color get currentColor => color;
+
   Color? _color;
+
+  @override
   Color get color {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
-    if (_color == null) {
-      RenderStyle renderStyle = this as RenderStyle;
-      if (renderStyle.parent != null) {
-        return renderStyle.parent!.color;
-      }
+    if (_color == null && parent != null) {
+      return parent!.color;
     }
 
     // The root element has no color, and the color is initial.
@@ -39,18 +40,18 @@ mixin CSSTextMixin on RenderStyleBase {
   }
 
   // Current not update the dependent property relative to the color.
-  final Map<String, bool> _colorRealativeProperties = {};
+  final Map<String, bool> _colorRelativeProperties = {};
 
+  @override
   void addColorRelativeProperty(String propertyName) {
-    _colorRealativeProperties[propertyName] = true;
+    _colorRelativeProperties[propertyName] = true;
   }
 
   void updateColorRelativeProperty() {
-    if (_colorRealativeProperties.isEmpty) return;
-    RenderStyle renderStyle = this as RenderStyle;
-    _colorRealativeProperties.forEach((String propertyName, _) {
+    if (_colorRelativeProperties.isEmpty) return;
+    _colorRelativeProperties.forEach((String propertyName, _) {
       // TODO: use css color abstraction avoid re-parse the property string.
-      renderStyle.target.setRenderStyle(propertyName, renderStyle.target.style.getPropertyValue(propertyName));
+      target.setRenderStyle(propertyName, target.style.getPropertyValue(propertyName));
     });
   }
 
@@ -86,14 +87,12 @@ mixin CSSTextMixin on RenderStyleBase {
   }
 
   FontWeight? _fontWeight;
+  @override
   FontWeight get fontWeight {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
-    if (_fontWeight == null) {
-      RenderStyle renderStyle = this as RenderStyle;
-      if (renderStyle.parent != null) {
-        return renderStyle.parent!.fontWeight;
-      }
+    if (_fontWeight == null && parent != null) {
+      return parent!.fontWeight;
     }
 
     // The root element has no fontWeight, and the fontWeight is initial.
@@ -107,14 +106,13 @@ mixin CSSTextMixin on RenderStyleBase {
   }
 
   FontStyle? _fontStyle;
+
+  @override
   FontStyle get fontStyle {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
-    if (_fontStyle == null) {
-      RenderStyle renderStyle = this as RenderStyle;
-      if (renderStyle.parent != null) {
-        return renderStyle.parent!.fontStyle;
-      }
+    if (_fontStyle == null && parent != null) {
+      return parent!.fontStyle;
     }
 
     // The root element has no fontWeight, and the fontWeight is initial.
@@ -128,14 +126,13 @@ mixin CSSTextMixin on RenderStyleBase {
   }
 
   List<String>? _fontFamily;
+
+  @override
   List<String>? get fontFamily {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
-    if (_fontFamily == null) {
-      RenderStyle renderStyle = this as RenderStyle;
-      if (renderStyle.parent != null) {
-        return renderStyle.parent!.fontFamily;
-      }
+    if (_fontFamily == null && parent != null) {
+      return parent!.fontFamily;
     }
     return _fontFamily ?? CSSText.DEFAULT_FONT_FAMILY_FALLBACK;
   }
@@ -149,14 +146,13 @@ mixin CSSTextMixin on RenderStyleBase {
   bool get hasFontSize => _fontSize != null;
 
   CSSLengthValue? _fontSize;
+
+  @override
   CSSLengthValue get fontSize {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
-    if (_fontSize == null) {
-      RenderStyle renderStyle = this as RenderStyle;
-      if (renderStyle.parent != null) {
-        return renderStyle.parent!.fontSize;
-      }
+    if (_fontSize == null && parent != null) {
+      return parent!.fontSize;
     }
     return _fontSize ?? CSSText.DEFAULT_FONT_SIZE;
   }
@@ -175,6 +171,7 @@ mixin CSSTextMixin on RenderStyleBase {
   final Map<String, bool> _fontRealativeProperties = {};
   final Map<String, bool> _rootFontRealativeProperties = {};
 
+  @override
   void addFontRelativeProperty(String propertyName) {
     _fontRealativeProperties[propertyName] = true;
   }
@@ -184,6 +181,7 @@ mixin CSSTextMixin on RenderStyleBase {
     renderBoxModel?.markNeedsLayout();
   }
 
+  @override
   void addRootFontRelativeProperty(String propertyName) {
     _rootFontRealativeProperties[propertyName] = true;
   }
@@ -194,12 +192,11 @@ mixin CSSTextMixin on RenderStyleBase {
   }
 
   CSSLengthValue? _lineHeight;
+
+  @override
   CSSLengthValue get lineHeight {
-    if (_lineHeight == null) {
-      RenderStyle renderStyle = this as RenderStyle;
-      if (renderStyle.parent != null) {
-        return renderStyle.parent!.lineHeight;
-      }
+    if (_lineHeight == null && parent != null) {
+      return parent!.lineHeight;
     }
 
     return _lineHeight ?? CSSText.DEFAULT_LINE_HEIGHT;
@@ -213,14 +210,13 @@ mixin CSSTextMixin on RenderStyleBase {
   }
 
   CSSLengthValue? _letterSpacing;
+
+  @override
   CSSLengthValue? get letterSpacing {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
-    if (_letterSpacing == null) {
-      RenderStyle renderStyle = this as RenderStyle;
-      if (renderStyle.parent != null) {
-        return renderStyle.parent!.letterSpacing;
-      }
+    if (_letterSpacing == null && parent != null) {
+      return parent!.letterSpacing;
     }
     return _letterSpacing;
   }
@@ -232,14 +228,13 @@ mixin CSSTextMixin on RenderStyleBase {
   }
 
   CSSLengthValue? _wordSpacing;
+
+  @override
   CSSLengthValue? get wordSpacing {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
-    if (_wordSpacing == null) {
-      RenderStyle renderStyle = this as RenderStyle;
-      if (renderStyle.parent != null) {
-        return renderStyle.parent!.wordSpacing;
-      }
+    if (_wordSpacing == null && parent != null) {
+      return parent!.wordSpacing;
     }
     return _wordSpacing;
   }
@@ -251,14 +246,13 @@ mixin CSSTextMixin on RenderStyleBase {
   }
 
   List<Shadow>? _textShadow;
+
+  @override
   List<Shadow>? get textShadow {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
-    if (_textShadow == null) {
-      RenderStyle renderStyle = this as RenderStyle;
-      if (renderStyle.parent != null) {
-        return renderStyle.parent!.textShadow;
-      }
+    if (_textShadow == null && parent != null) {
+      return parent!.textShadow;
     }
     return _textShadow;
   }
@@ -270,14 +264,13 @@ mixin CSSTextMixin on RenderStyleBase {
   }
 
   WhiteSpace? _whiteSpace;
+
+  @override
   WhiteSpace get whiteSpace {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
-    if (_whiteSpace == null) {
-      RenderStyle renderStyle = this as RenderStyle;
-      if (renderStyle.parent != null) {
-        return renderStyle.parent!.whiteSpace;
-      }
+    if (_whiteSpace == null && parent != null) {
+      return parent!.whiteSpace;
     }
     return _whiteSpace ?? WhiteSpace.normal;
   }
@@ -289,6 +282,8 @@ mixin CSSTextMixin on RenderStyleBase {
   }
 
   TextOverflow _textOverflow = TextOverflow.clip;
+
+  @override
   TextOverflow get textOverflow {
     return _textOverflow;
   }
@@ -300,6 +295,8 @@ mixin CSSTextMixin on RenderStyleBase {
   }
 
   int? _lineClamp;
+
+  @override
   int? get lineClamp {
     return _lineClamp;
   }
@@ -311,14 +308,13 @@ mixin CSSTextMixin on RenderStyleBase {
   }
 
   TextAlign? _textAlign;
+
+  @override
   TextAlign get textAlign {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
-    if (_textAlign == null) {
-      RenderStyle renderStyle = this as RenderStyle;
-      if (renderStyle.parent != null) {
-        return renderStyle.parent!.textAlign;
-      }
+    if (_textAlign == null && parent != null) {
+      return parent!.textAlign;
     }
     return _textAlign ?? TextAlign.start;
   }
@@ -417,7 +413,7 @@ mixin CSSTextMixin on RenderStyleBase {
     return alignment;
   }
 
-  static TextSpan createTextSpan(String? text, RenderStyle renderStyle) {
+  static TextSpan createTextSpan(String? text, CSSRenderStyle renderStyle) {
     /// Creates a new TextStyle object.
     ///   color: The color to use when painting the text. If this is specified, foreground must be null.
     ///   decoration: The decorations to paint near the text (e.g., an underline).
@@ -474,7 +470,7 @@ class CSSText {
   }
 
   static bool isValidLineHeightValue(String value) {
-    return CSSLength.isLength(value) || CSSPercentage.isPercentage(value) ||
+    return CSSLength.isNonNegativeLength(value) || CSSPercentage.isNonNegativePercentage(value) ||
       value == 'normal' || double.tryParse(value) != null;
   }
 
@@ -489,7 +485,7 @@ class CSSText {
   static CSSLengthValue DEFAULT_LINE_HEIGHT = CSSLengthValue.normal;
   static CSSLengthValue? resolveLineHeight(String value, RenderStyle renderStyle, String propertyName) {
     if (value.isNotEmpty) {
-      if (CSSLength.isLength(value) || CSSPercentage.isPercentage(value)) {
+      if (CSSLength.isNonNegativeLength(value) || CSSPercentage.isNonNegativePercentage(value)) {
         CSSLengthValue lineHeight = CSSLength.parseLength(value, renderStyle, propertyName);
         // Line-height 0 and negative value is considered invalid.
         if (lineHeight.computedValue != double.infinity && lineHeight.computedValue > 0) {

@@ -9,15 +9,16 @@ enum Visibility {
   hidden,
 }
 
-mixin CSSVisibilityMixin on RenderStyleBase {
+mixin CSSVisibilityMixin on RenderStyle {
   Visibility _visibility = Visibility.visible;
 
   void set visibility(Visibility value) {
     if (_visibility == value) return;
     _visibility = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
+  @override
   Visibility get visibility => _visibility;
 
   bool get isVisibilityHidden {

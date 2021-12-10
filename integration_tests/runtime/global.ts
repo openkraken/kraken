@@ -192,7 +192,7 @@ async function simulatePointDown(x: number, y: number, pointer: number = 0) {
 }
 
 // Simulate an point up action.
-async function simulatePoinrUp(x: number, y: number, pointer: number = 0) {
+async function simulatePointUp(x: number, y: number, pointer: number = 0) {
   await simulatePointer([
     [x, y, PointerChange.up],
   ], pointer);
@@ -228,5 +228,5 @@ Object.assign(global, {
   sleep,
   snapshot,
   simulatePointDown,
-  simulatePoinrUp,
+  simulatePointUp,
 });
