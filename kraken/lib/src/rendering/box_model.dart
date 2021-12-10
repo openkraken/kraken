@@ -227,7 +227,7 @@ class RenderLayoutBox extends RenderBoxModel
           if (left is RenderBoxModel && left.renderStyle.position == CSSPositionType.fixed &&
             right is RenderBoxModel && right.renderStyle.position == CSSPositionType.fixed) {
             // Child element always paint after parent element in the renderObject tree.
-            return right.renderStyle.isAncestorForChild(left.renderStyle) ? 1 : -1;
+            return right.renderStyle.isAncestorOf(left.renderStyle) ? 1 : -1;
           }
 
           bool isLeftNeedsStacking = left is RenderBoxModel && left.needsStacking;

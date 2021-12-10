@@ -899,7 +899,7 @@ class CSSRenderStyle
   }
 
   // Whether current renderStyle is ancestor for child renderStyle in the renderStyle tree.
-  bool isAncestorForChild(RenderStyle childRenderStyle) {
+  bool isAncestorOf(RenderStyle childRenderStyle) {
     RenderStyle? parentRenderStyle = childRenderStyle.parent;
     while(parentRenderStyle != null) {
       if (parentRenderStyle == this) {
