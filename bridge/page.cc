@@ -207,9 +207,11 @@ void KrakenPage::evaluateByteCode(uint8_t* bytes, size_t byteLength) {
 }
 
 KrakenPage::~KrakenPage() {
+#if IS_TEST
   if (disposeCallback != nullptr) {
     disposeCallback(this);
   }
+#endif
 }
 
 void KrakenPage::reportError(const char* errmsg) {
