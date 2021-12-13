@@ -600,19 +600,18 @@ class RenderFlowLayout extends RenderLayoutBox {
           }
         }
       }
-
-      // white-space property not only specifies whether and how white space is collapsed
-      // but only specifies whether lines may wrap at unforced soft wrap opportunities
-      // https://www.w3.org/TR/css-text-3/#line-breaking
-      bool isChildBlockLevel = _isChildBlockLevel(child);
-      bool isPreChildBlockLevel = _isChildBlockLevel(preChild);
-      bool isLineLengthExceedContainer = whiteSpace != WhiteSpace.nowrap &&
-          (runMainAxisExtent + childMainAxisExtent > mainAxisLimit);
-
       if (runChildren.isNotEmpty &&
-          (isChildBlockLevel ||
-              isPreChildBlockLevel ||
-              isLineLengthExceedContainer)) {
+          // Current is block. 
+          (_isChildBlockLevel(child) ||
+          // Previous is block.
+          _isChildBlockLevel(preChild) ||
+          // Line length is exceed container.
+          // The white-space property not only specifies whether and how white space is collapsed
+          // but only specifies whether lines may wrap at unforced soft wrap opportunities
+          // https://www.w3.org/TR/css-text-3/#line-breaking
+          (whiteSpace != WhiteSpace.nowrap && (runMainAxisExtent + childMainAxisExtent > mainAxisLimit)) ||
+          // Previou is linebreak.
+          preChild is RenderLineBreak)) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
         runMetrics.add(_RunMetrics(
@@ -944,6 +943,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       else
         crossAxisOffset += runCrossAxisExtent + runBetweenSpace;
     }
+
+    print(runMetrics);
   }
 
   /// Compute distance to baseline of flow layout
@@ -1281,10 +1282,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   }
 
   bool _isChildBlockLevel(RenderBox? child) {
-    if (child is RenderLineBreak) {
-      // FIXME: current make a block box make a line break works
-      return true;
-    } else if (child is RenderBoxModel || child is RenderPositionPlaceholder) {
+    if (child is RenderBoxModel || child is RenderPositionPlaceholder) {
       RenderStyle? childRenderStyle = _getChildRenderStyle(child!);
       if (childRenderStyle != null) {
         CSSDisplay? childDisplay = childRenderStyle.display;
