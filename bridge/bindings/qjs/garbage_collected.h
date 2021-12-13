@@ -47,7 +47,7 @@ namespace kraken::binding::qjs {
  */
 template <typename T>
 class GarbageCollected {
-public:
+ public:
   using ParentMostGarbageCollectedType = T;
 
   // Must use MakeGarbageCollected.
@@ -55,8 +55,7 @@ public:
   void* operator new[](size_t) = delete;
 
   // The garbage collector is taking care of reclaiming the object.
-  void operator delete(void*) = delete
-  void operator delete[](void*) = delete;
+  void operator delete(void*) = delete void operator delete[](void*) = delete;
 
   /**
    * This Trace method must be override by objects inheriting from
@@ -64,20 +63,17 @@ public:
    */
   virtual void trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) const {};
 
-protected:
+ protected:
   GarbageCollected() = default;
 };
 
 template <typename T>
-T* MakeGarbageCollected(Args&& ...args) {
-  static_assert(
-    std::is_base_of<typename T::ParentMostGarbageCollectedType, T>::value,
-    "U of GarbageCollected<U> must be a base of T. Check "
-    "GarbageCollected<T> base class inheritance.");
-
+T* MakeGarbageCollected(Args&&... args) {
+  static_assert(std::is_base_of<typename T::ParentMostGarbageCollectedType, T>::value,
+                "U of GarbageCollected<U> must be a base of T. Check "
+                "GarbageCollected<T> base class inheritance.");
 };
 
-}
+}  // namespace kraken::binding::qjs
 
-
-#endif //KRAKENBRIDGE_GARBAGE_COLLECTED_H
+#endif  // KRAKENBRIDGE_GARBAGE_COLLECTED_H
