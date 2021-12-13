@@ -73,7 +73,7 @@ JSValue EventTarget::addEventListener(QjsContext* ctx, JSValue this_val, int arg
     eventTargetInstance->m_eventHandlers[eventTypeAtom] = std::vector<JSValue>();
   }
 
-  auto &eventHandlers = eventTargetInstance->m_eventHandlers[eventTypeAtom];
+  auto& eventHandlers = eventTargetInstance->m_eventHandlers[eventTypeAtom];
 
   // Dart needs to be notified for the first registration event.
   if (eventHandlers.empty() || JS_HasProperty(ctx, eventTargetInstance->m_propertyEventHandler.value(), eventTypeAtom)) {
@@ -115,10 +115,8 @@ JSValue EventTarget::removeEventListener(QjsContext* ctx, JSValue this_val, int 
     return JS_UNDEFINED;
   }
 
-  auto &eventHandles = eventTargetInstance->m_eventHandlers[eventTypeAtom];
-  auto idx = std::find_if(eventHandles.begin(), eventHandles.end(), [&callback](JSValue v) {
-    return JS_VALUE_GET_PTR(v) == JS_VALUE_GET_PTR(callback);
-  });
+  auto& eventHandles = eventTargetInstance->m_eventHandlers[eventTypeAtom];
+  auto idx = std::find_if(eventHandles.begin(), eventHandles.end(), [&callback](JSValue v) { return JS_VALUE_GET_PTR(v) == JS_VALUE_GET_PTR(callback); });
 
   if (idx != eventHandles.end()) {
     JS_FreeValue(ctx, *idx);
@@ -443,8 +441,8 @@ JSValue EventTargetInstance::getNativeProperty(const char* prop) {
 // We needs to gc which JSValues are still holding.
 void EventTargetInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
   // Trace m_eventHandlers
-  for(auto &eventHandlers : m_eventHandlers) {
-    for (auto &eventHandler : eventHandlers.second) {
+  for (auto& eventHandlers : m_eventHandlers) {
+    for (auto& eventHandler : eventHandlers.second) {
       JS_MarkValue(rt, eventHandler, mark_func);
     }
   }
