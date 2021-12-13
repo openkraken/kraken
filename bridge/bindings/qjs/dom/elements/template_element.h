@@ -30,7 +30,7 @@ class TemplateElementInstance : public ElementInstance {
   ~TemplateElementInstance();
 
  protected:
-  void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
  private:
   DocumentFragmentInstance* m_content{nullptr};

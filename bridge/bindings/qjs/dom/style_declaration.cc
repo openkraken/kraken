@@ -218,8 +218,8 @@ JSClassExoticMethods StyleDeclarationInstance::m_exoticMethods{
     nullptr, nullptr, nullptr, nullptr, nullptr, getProperty, setProperty,
 };
 
-void StyleDeclarationInstance::gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
-  Instance::gcMark(rt, val, mark_func);
+void StyleDeclarationInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
+  Instance::trace(rt, val, mark_func);
   // We should tel gc style relies on element
   JS_MarkValue(rt, ownerEventTarget->instanceObject, mark_func);
 }

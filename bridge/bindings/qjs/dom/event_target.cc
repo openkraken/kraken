@@ -69,18 +69,14 @@ JSValue EventTarget::addEventListener(QjsContext* ctx, JSValue this_val, int arg
   JSAtom eventTypeAtom = JS_ValueToAtom(ctx, eventTypeValue);
 
   // Init list.
-  if (!JS_HasProperty(ctx, eventTargetInstance->m_eventHandlers.value(), eventTypeAtom)) {
-    JS_DupAtom(ctx, eventTypeAtom);
-    auto* atomJob = new AtomJob{eventTypeAtom};
-    list_add_tail(&atomJob->link, &eventTargetInstance->m_context->atom_job_list);
-    JS_SetProperty(ctx, eventTargetInstance->m_eventHandlers.value(), eventTypeAtom, JS_NewArray(ctx));
+  if (eventTargetInstance->m_eventHandlers.count(eventTypeAtom) == 0) {
+    eventTargetInstance->m_eventHandlers[eventTypeAtom] = std::vector<JSValue>();
   }
 
-  JSValue eventHandlers = JS_GetProperty(ctx, eventTargetInstance->m_eventHandlers.value(), eventTypeAtom);
-  int32_t eventHandlerLen = arrayGetLength(ctx, eventHandlers);
+  auto &eventHandlers = eventTargetInstance->m_eventHandlers[eventTypeAtom];
 
   // Dart needs to be notified for the first registration event.
-  if (eventHandlerLen == 0 || JS_HasProperty(ctx, eventTargetInstance->m_propertyEventHandler.value(), eventTypeAtom)) {
+  if (eventHandlers.empty() || JS_HasProperty(ctx, eventTargetInstance->m_propertyEventHandler.value(), eventTypeAtom)) {
     int32_t contextId = eventTargetInstance->prototype()->contextId();
 
     NativeString args_01{};
@@ -88,9 +84,9 @@ JSValue EventTarget::addEventListener(QjsContext* ctx, JSValue this_val, int arg
 
     foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetInstance->m_eventTargetId, UICommand::addEvent, args_01, nullptr);
   }
-  arrayPushValue(ctx, eventHandlers, callback);
+
+  eventHandlers.emplace_back(JS_DupValue(ctx, callback));
   JS_FreeAtom(ctx, eventTypeAtom);
-  JS_FreeValue(ctx, eventHandlers);
 
   return JS_UNDEFINED;
 }
@@ -114,21 +110,22 @@ JSValue EventTarget::removeEventListener(QjsContext* ctx, JSValue this_val, int 
 
   JSAtom eventTypeAtom = JS_ValueToAtom(ctx, eventTypeValue);
 
-  if (!JS_HasProperty(ctx, eventTargetInstance->m_eventHandlers.value(), eventTypeAtom)) {
+  if (eventTargetInstance->m_eventHandlers.count(eventTypeAtom) == 0) {
     JS_FreeAtom(ctx, eventTypeAtom);
     return JS_UNDEFINED;
   }
 
-  JSValue eventHandlers = JS_GetProperty(ctx, eventTargetInstance->m_eventHandlers.value(), eventTypeAtom);
-  int32_t targetIdx = arrayFindIdx(ctx, eventHandlers, callback);
+  auto &eventHandles = eventTargetInstance->m_eventHandlers[eventTypeAtom];
+  auto idx = std::find_if(eventHandles.begin(), eventHandles.end(), [&callback](JSValue v) {
+    return JS_VALUE_GET_PTR(v) == JS_VALUE_GET_PTR(callback);
+  });
 
-  if (targetIdx != -1) {
-    arraySpliceValue(ctx, eventHandlers, targetIdx, 1);
+  if (idx != eventHandles.end()) {
+    JS_FreeValue(ctx, *idx);
+    eventHandles.erase(idx);
   }
 
-  int32_t eventHandlersLen = arrayGetLength(ctx, eventHandlers);
-
-  if (eventHandlersLen && JS_HasProperty(ctx, eventTargetInstance->m_propertyEventHandler.value(), eventTypeAtom)) {
+  if (eventHandles.empty() && JS_HasProperty(ctx, eventTargetInstance->m_propertyEventHandler.value(), eventTypeAtom)) {
     // Dart needs to be notified for handles is empty.
     int32_t contextId = eventTargetInstance->prototype()->contextId();
 
@@ -139,7 +136,6 @@ JSValue EventTarget::removeEventListener(QjsContext* ctx, JSValue this_val, int 
   }
 
   JS_FreeAtom(ctx, eventTypeAtom);
-  JS_FreeValue(ctx, eventHandlers);
   return JS_UNDEFINED;
 }
 
@@ -207,17 +203,11 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
     JS_FreeValue(m_ctx, returnedValue);
   };
 
-  if (JS_HasProperty(m_ctx, m_eventHandlers.value(), eventTypeAtom)) {
-    JSValue eventHandlers = JS_GetProperty(m_ctx, m_eventHandlers.value(), eventTypeAtom);
-    int32_t len = arrayGetLength(m_ctx, eventHandlers);
-
-    for (int i = 0; i < len; i++) {
-      JSValue v = JS_GetPropertyUint32(m_ctx, eventHandlers, i);
-      _dispatchEvent(v);
-      JS_FreeValue(m_ctx, v);
+  if (m_eventHandlers.count(eventTypeAtom) > 0) {
+    auto& eventHandlers = m_eventHandlers[eventTypeAtom];
+    for (auto& eventHandler : eventHandlers) {
+      _dispatchEvent(eventHandler);
     }
-
-    JS_FreeValue(m_ctx, eventHandlers);
   }
 
   // Dispatch event listener white by 'on' prefix property.
@@ -419,8 +409,7 @@ void EventTargetInstance::setPropertyHandler(JSString* p, JSValue value) {
 
   JSValue newCallback = JS_DupValue(m_ctx, value);
   JS_SetProperty(m_ctx, m_propertyEventHandler.value(), atom, newCallback);
-  int32_t eventHandlerLen = arrayGetLength(m_ctx, m_eventHandlers.value());
-  if (eventHandlerLen == 0) {
+  if (m_eventHandlers.empty()) {
     int32_t contextId = m_context->getContextId();
     std::unique_ptr<NativeString> args_01 = atomToNativeString(m_ctx, atom);
     int32_t type = JS_IsFunction(m_ctx, value) ? UICommand::addEvent : UICommand::removeEvent;
@@ -450,7 +439,16 @@ JSValue EventTargetInstance::getNativeProperty(const char* prop) {
   return result;
 }
 
-void EventTargetInstance::gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {}
+// JSValues are stored in this class are no visible to QuickJS GC.
+// We needs to gc which JSValues are still holding.
+void EventTargetInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
+  // Trace m_eventHandlers
+  for(auto &eventHandlers : m_eventHandlers) {
+    for (auto &eventHandler : eventHandlers.second) {
+      JS_MarkValue(rt, eventHandler, mark_func);
+    }
+  }
+}
 
 void EventTargetInstance::copyNodeProperties(EventTargetInstance* newNode, EventTargetInstance* referenceNode) {
   QjsContext* ctx = referenceNode->m_ctx;

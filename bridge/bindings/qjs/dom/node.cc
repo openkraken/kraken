@@ -590,8 +590,8 @@ void NodeInstance::ensureDetached(NodeInstance* node) {
   }
 }
 
-void NodeInstance::gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
-  EventTargetInstance::gcMark(rt, val, mark_func);
+void NodeInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
+  EventTargetInstance::trace(rt, val, mark_func);
 
   // Should check object is already inited before gc mark.
   if (JS_IsObject(parentNode))

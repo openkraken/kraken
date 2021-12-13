@@ -100,11 +100,13 @@ class Instance {
  private:
   static void proxyGCMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) {
     auto* instance = static_cast<Instance*>(JS_GetOpaque(val, JSValueGetClassId(val)));
-    instance->gcMark(rt, val, mark_func);
+    instance->trace(rt, val, mark_func);
   }
 
  protected:
-  virtual void gcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func){};
+  // Subclass must to provider a method of void trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func)
+  // to tell GC all JSValues are managed by them.
+  virtual void trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) = 0;
 
   JSContext* m_context{nullptr};
   QjsContext* m_ctx{nullptr};

@@ -108,7 +108,7 @@ class NodeInstance : public EventTargetInstance {
   virtual void _notifyNodeInsert(NodeInstance* node);
 
  protected:
-  void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
  private:
   DEFINE_HOST_CLASS_PROPERTY(9, isConnected, ownerDocument, firstChild, lastChild, parentNode, previousSibling, nextSibling, nodeType, textContent);

@@ -84,11 +84,12 @@ class EventTargetInstance : public Instance {
 
  protected:
   int32_t m_eventTargetId;
-  ObjectProperty m_eventHandlers{m_context, instanceObject, "__eventHandlers", JS_NewObject(m_ctx)};
+  // EventHandlers
+  std::unordered_map<JSAtom, std::vector<JSValue>> m_eventHandlers;
   ObjectProperty m_propertyEventHandler{m_context, instanceObject, "__propertyEventHandler", JS_NewObject(m_ctx)};
   ObjectProperty m_properties{m_context, instanceObject, "__properties", JS_NewObject(m_ctx)};
 
-  void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
   static void copyNodeProperties(EventTargetInstance* newNode, EventTargetInstance* referenceNode);
 
   static int hasProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom);

@@ -50,7 +50,7 @@ class WindowInstance : public EventTargetInstance {
   ~WindowInstance() {}
 
  private:
-  void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
   ObjectProperty m_location{m_context, instanceObject, "m_location", (new Location(m_context))->jsObject};
   ObjectProperty m_onerror{m_context, instanceObject, "m_onerror", JS_NULL};

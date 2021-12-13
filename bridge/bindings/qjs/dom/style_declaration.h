@@ -56,7 +56,7 @@ class StyleDeclarationInstance : public Instance {
   std::string toString();
   void copyWith(StyleDeclarationInstance* instance);
 
-  void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
   const EventTargetInstance* ownerEventTarget;
 
