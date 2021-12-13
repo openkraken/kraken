@@ -164,6 +164,8 @@ class ImageElement extends Element {
     return height;
   }
 
+  // Read the original image width of loaded image.
+  // The getter must be called after image had loaded, otherwise will return 0.0.
   double get naturalWidth {
     ImageProvider? imageProvider = _cachedImageProvider;
     if (imageProvider is KrakenResizeImage) {
@@ -174,6 +176,9 @@ class ImageElement extends Element {
     }
     return image?.width.toDouble() ?? 0;
   }
+
+  // Read the original image height of loaded image.
+  // The getter must be called after image had loaded, otherwise will return 0.0.
   double get naturalHeight {
     ImageProvider? imageProvider = _cachedImageProvider;
     if (imageProvider is KrakenResizeImage) {
@@ -240,6 +245,11 @@ class ImageElement extends Element {
 
     renderStyle.intrinsicWidth = naturalWidth;
     renderStyle.intrinsicHeight = naturalHeight;
+
+    // Try to update image size if image already resolved.
+    // Set size to RenderImage is needs, to avoid makeNeedsLayout when update image.
+    _renderImage?.width = width;
+    _renderImage?.height = height;
 
     if (naturalWidth == 0.0 || naturalHeight == 0.0) {
       renderStyle.intrinsicRatio = null;
@@ -412,11 +422,10 @@ class ImageElement extends Element {
   void setProperty(String key, dynamic value) {
     bool propertyChanged = properties[key] != value;
     super.setProperty(key, value);
-    // Reset frame number to zero when image needs to reload
     if (key == 'src' && propertyChanged) {
       final Uri? resolvedUri = _resolvedUri =  _resolveSrc();
-      // Update image source if image already attached.
-      if (isRendererAttached) {
+      // Update image source if image already attached except image is lazy loading.
+      if (isRendererAttached && !_isInLazyLoading) {
         _resolveImage(resolvedUri, updateImageProvider: true);
       } else {
         _precacheImage();
