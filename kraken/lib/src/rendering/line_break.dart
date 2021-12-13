@@ -68,7 +68,7 @@ class RenderLineBreak extends RenderIntrinsic {
   }
 
   @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
+  double computeDistanceToBaseline() {
     return textPainter.computeDistanceToActualBaseline(CSSText.getTextBaseLine());
   }
 }
