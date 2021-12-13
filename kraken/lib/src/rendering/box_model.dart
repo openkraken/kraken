@@ -745,8 +745,8 @@ class RenderBoxModel extends RenderBox
   // child has percentage length and parent's size can not be calculated by style
   // thus parent needs relayout for its child calculate percentage length.
   void markParentNeedsRelayout() {
-    RenderBoxModel? parent = this.parent as RenderBoxModel?;
-    if (parent != null) {
+    AbstractNode? parent = this.parent;
+    if (parent is RenderBoxModel) {
       parent.needsRelayout = true;
     }
   }
