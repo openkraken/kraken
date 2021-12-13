@@ -943,8 +943,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       else
         crossAxisOffset += runCrossAxisExtent + runBetweenSpace;
     }
-
-    print(runMetrics);
   }
 
   /// Compute distance to baseline of flow layout
