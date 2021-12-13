@@ -15,9 +15,9 @@ namespace kraken::binding::qjs {
 
 static std::atomic<int32_t> context_unique_id{0};
 
-JSClassID JSContext::kHostClassClassId{0};
-JSClassID JSContext::kHostObjectClassId{0};
-JSClassID JSContext::kHostExoticObjectClassId{0};
+JSClassID PageJSContext::kHostClassClassId{0};
+JSClassID PageJSContext::kHostObjectClassId{0};
+JSClassID PageJSContext::kHostExoticObjectClassId{0};
 
 std::atomic<int32_t> runningContexts{0};
 
@@ -25,13 +25,13 @@ std::atomic<int32_t> runningContexts{0};
 bool valid_contexts[MAX_JS_CONTEXT];
 std::atomic<uint32_t> running_context_list{0};
 
-std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler& handler, void* owner) {
-  return std::make_unique<JSContext>(contextId, handler, owner);
+std::unique_ptr<PageJSContext> createJSContext(int32_t contextId, const JSExceptionHandler& handler, void* owner) {
+  return std::make_unique<PageJSContext>(contextId, handler, owner);
 }
 
 static JSRuntime* m_runtime{nullptr};
 
-JSContext::JSContext(int32_t contextId, const JSExceptionHandler& handler, void* owner) : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false), uniqueId(context_unique_id++) {
+PageJSContext::PageJSContext(int32_t contextId, const JSExceptionHandler& handler, void* owner) : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false), uniqueId(context_unique_id++) {
   // @FIXME: maybe contextId will larger than MAX_JS_CONTEXT
   valid_contexts[contextId] = true;
   if (contextId > running_context_list)
@@ -70,7 +70,7 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler& handler, void*
   runningContexts++;
 }
 
-JSContext::~JSContext() {
+PageJSContext::~PageJSContext() {
   valid_contexts[contextId] = false;
   ctxInvalid_ = true;
 
@@ -163,7 +163,7 @@ JSContext::~JSContext() {
   m_ctx = nullptr;
 }
 
-bool JSContext::evaluateJavaScript(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) {
+bool PageJSContext::evaluateJavaScript(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) {
   std::string utf8Code = toUTF8(std::u16string(reinterpret_cast<const char16_t*>(code), codeLength));
   JSValue result = JS_Eval(m_ctx, utf8Code.c_str(), utf8Code.size(), sourceURL, JS_EVAL_TYPE_GLOBAL);
   drainPendingPromiseJobs();
@@ -172,7 +172,7 @@ bool JSContext::evaluateJavaScript(const uint16_t* code, size_t codeLength, cons
   return success;
 }
 
-bool JSContext::evaluateJavaScript(const char16_t* code, size_t length, const char* sourceURL, int startLine) {
+bool PageJSContext::evaluateJavaScript(const char16_t* code, size_t length, const char* sourceURL, int startLine) {
   std::string utf8Code = toUTF8(std::u16string(reinterpret_cast<const char16_t*>(code), length));
   JSValue result = JS_Eval(m_ctx, utf8Code.c_str(), utf8Code.size(), sourceURL, JS_EVAL_TYPE_GLOBAL);
   drainPendingPromiseJobs();
@@ -181,7 +181,7 @@ bool JSContext::evaluateJavaScript(const char16_t* code, size_t length, const ch
   return success;
 }
 
-bool JSContext::evaluateJavaScript(const char* code, size_t codeLength, const char* sourceURL, int startLine) {
+bool PageJSContext::evaluateJavaScript(const char* code, size_t codeLength, const char* sourceURL, int startLine) {
   JSValue result = JS_Eval(m_ctx, code, codeLength, sourceURL, JS_EVAL_TYPE_GLOBAL);
   drainPendingPromiseJobs();
   bool success = handleException(&result);
@@ -189,7 +189,7 @@ bool JSContext::evaluateJavaScript(const char* code, size_t codeLength, const ch
   return success;
 }
 
-bool JSContext::evaluateByteCode(uint8_t* bytes, size_t byteLength) {
+bool PageJSContext::evaluateByteCode(uint8_t* bytes, size_t byteLength) {
   JSValue obj, val;
   obj = JS_ReadObject(m_ctx, bytes, byteLength, JS_READ_OBJ_BYTECODE);
   if (!handleException(&obj))
@@ -201,21 +201,21 @@ bool JSContext::evaluateByteCode(uint8_t* bytes, size_t byteLength) {
   return true;
 }
 
-bool JSContext::isValid() const {
+bool PageJSContext::isValid() const {
   return !ctxInvalid_;
 }
 
-int32_t JSContext::getContextId() const {
+int32_t PageJSContext::getContextId() const {
   assert(!ctxInvalid_ && "context has been released");
   return contextId;
 }
 
-void* JSContext::getOwner() {
+void* PageJSContext::getOwner() {
   assert(!ctxInvalid_ && "context has been released");
   return owner;
 }
 
-bool JSContext::handleException(JSValue* exception) {
+bool PageJSContext::handleException(JSValue* exception) {
   if (JS_IsException(*exception)) {
     JSValue error = JS_GetException(m_ctx);
     reportError(error);
@@ -227,20 +227,20 @@ bool JSContext::handleException(JSValue* exception) {
   return true;
 }
 
-JSValue JSContext::global() {
+JSValue PageJSContext::global() {
   return globalObject;
 }
 
-QjsContext* JSContext::ctx() {
+QjsContext* PageJSContext::ctx() {
   assert(!ctxInvalid_ && "context has been released");
   return m_ctx;
 }
 
-JSRuntime* JSContext::runtime() {
+JSRuntime* PageJSContext::runtime() {
   return m_runtime;
 }
 
-void JSContext::reportError(JSValueConst error) {
+void PageJSContext::reportError(JSValueConst error) {
   if (!JS_IsError(m_ctx, error))
     return;
 
@@ -275,7 +275,7 @@ void JSContext::reportError(JSValueConst error) {
   JS_FreeCString(m_ctx, type);
 }
 
-void JSContext::drainPendingPromiseJobs() {
+void PageJSContext::drainPendingPromiseJobs() {
   // should executing pending promise jobs.
   QjsContext* pctx;
   int finished = JS_ExecutePendingJob(runtime(), &pctx);
@@ -287,13 +287,13 @@ void JSContext::drainPendingPromiseJobs() {
   }
 }
 
-void JSContext::defineGlobalProperty(const char* prop, JSValue value) {
+void PageJSContext::defineGlobalProperty(const char* prop, JSValue value) {
   JSAtom atom = JS_NewAtom(m_ctx, prop);
   JS_SetProperty(m_ctx, globalObject, atom, value);
   JS_FreeAtom(m_ctx, atom);
 }
 
-uint8_t* JSContext::dumpByteCode(const char* code, uint32_t codeLength, const char* sourceURL, size_t* bytecodeLength) {
+uint8_t* PageJSContext::dumpByteCode(const char* code, uint32_t codeLength, const char* sourceURL, size_t* bytecodeLength) {
   JSValue object = JS_Eval(m_ctx, code, codeLength, sourceURL, JS_EVAL_TYPE_GLOBAL | JS_EVAL_FLAG_COMPILE_ONLY);
   bool success = handleException(&object);
   if (!success)
@@ -303,7 +303,7 @@ uint8_t* JSContext::dumpByteCode(const char* code, uint32_t codeLength, const ch
   return bytes;
 }
 
-void JSContext::dispatchGlobalErrorEvent(JSValueConst error) {
+void PageJSContext::dispatchGlobalErrorEvent(JSValueConst error) {
   JSValue errorHandler = JS_GetPropertyStr(m_ctx, globalObject, "__global_onerror_handler__");
   JSValue returnValue = JS_Call(m_ctx, errorHandler, globalObject, 1, &error);
   drainPendingPromiseJobs();
@@ -316,7 +316,7 @@ void JSContext::dispatchGlobalErrorEvent(JSValueConst error) {
   JS_FreeValue(m_ctx, errorHandler);
 }
 
-void JSContext::dispatchGlobalPromiseRejectionEvent(JSValueConst promise, JSValueConst error) {
+void PageJSContext::dispatchGlobalPromiseRejectionEvent(JSValueConst promise, JSValueConst error) {
   JSValue errorHandler = JS_GetPropertyStr(m_ctx, globalObject, "__global_unhandled_promise_handler__");
   JSValue arguments[] = {promise, error};
   JSValue returnValue = JS_Call(m_ctx, errorHandler, globalObject, 2, arguments);
@@ -326,8 +326,8 @@ void JSContext::dispatchGlobalPromiseRejectionEvent(JSValueConst promise, JSValu
   JS_FreeValue(m_ctx, errorHandler);
 }
 
-void JSContext::promiseRejectTracker(QjsContext* ctx, JSValue promise, JSValue reason, int is_handled, void* opaque) {
-  auto* context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
+void PageJSContext::promiseRejectTracker(QjsContext* ctx, JSValue promise, JSValue reason, int is_handled, void* opaque) {
+  auto* context = static_cast<PageJSContext*>(JS_GetContextOpaque(ctx));
   context->reportError(reason);
   context->dispatchGlobalPromiseRejectionEvent(promise, reason);
 }

@@ -24,7 +24,7 @@ bool JSBridgeTest::parseTestHTML(const uint16_t* code, size_t codeLength) {
 
 static JSValue executeTest(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   JSValue& callback = argv[0];
-  auto context = static_cast<binding::qjs::JSContext*>(JS_GetContextOpaque(ctx));
+  auto context = static_cast<binding::qjs::PageJSContext*>(JS_GetContextOpaque(ctx));
   if (!JS_IsObject(callback)) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.");
   }
@@ -43,7 +43,7 @@ static JSValue matchImageSnapshot(QjsContext* ctx, JSValueConst this_val, int ar
   JSValue& blobValue = argv[0];
   JSValue& screenShotValue = argv[1];
   JSValue& callbackValue = argv[2];
-  auto* context = static_cast<binding::qjs::JSContext*>(JS_GetContextOpaque(ctx));
+  auto* context = static_cast<binding::qjs::PageJSContext*>(JS_GetContextOpaque(ctx));
 
   if (!JS_IsObject(blobValue)) {
     return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 1 (blob) must be an Blob object.");
@@ -117,7 +117,7 @@ static JSValue simulatePointer(QjsContext* ctx, JSValueConst this_val, int argc,
     return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_pointer__': dart method(simulatePointer) is not registered.");
   }
 
-  auto* context = static_cast<binding::qjs::JSContext*>(JS_GetContextOpaque(ctx));
+  auto* context = static_cast<binding::qjs::PageJSContext*>(JS_GetContextOpaque(ctx));
 
   JSValue& inputArrayValue = argv[0];
   if (!JS_IsObject(inputArrayValue)) {
@@ -191,13 +191,13 @@ static JSValue simulateInputText(QjsContext* ctx, JSValueConst this_val, int arg
 };
 
 static JSValue runGC(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-  auto* context = static_cast<binding::qjs::JSContext*>(JS_GetContextOpaque(ctx));
+  auto* context = static_cast<binding::qjs::PageJSContext*>(JS_GetContextOpaque(ctx));
   JS_RunGC(context->runtime());
   return JS_NULL;
 }
 
 static JSValue parseHTML(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-  auto* context = static_cast<binding::qjs::JSContext*>(JS_GetContextOpaque(ctx));
+  auto* context = static_cast<binding::qjs::PageJSContext*>(JS_GetContextOpaque(ctx));
 
   if (argc == 1) {
     JSValue& html = argv[0];
@@ -217,7 +217,7 @@ static JSValue parseHTML(QjsContext* ctx, JSValueConst this_val, int argc, JSVal
 }
 
 static JSValue triggerGlobalError(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-  auto* context = static_cast<binding::qjs::JSContext*>(JS_GetContextOpaque(ctx));
+  auto* context = static_cast<binding::qjs::PageJSContext*>(JS_GetContextOpaque(ctx));
 
   JSValue globalErrorFunc = JS_GetPropertyStr(ctx, context->global(), "triggerGlobalError");
 
@@ -249,9 +249,9 @@ JSBridgeTest::JSBridgeTest(JSBridge* bridge) : bridge_(bridge), context(bridge->
 struct ExecuteCallbackContext {
   ExecuteCallbackContext() = delete;
 
-  explicit ExecuteCallbackContext(binding::qjs::JSContext* context, ExecuteCallback executeCallback) : executeCallback(executeCallback), context(context){};
+  explicit ExecuteCallbackContext(binding::qjs::PageJSContext* context, ExecuteCallback executeCallback) : executeCallback(executeCallback), context(context){};
   ExecuteCallback executeCallback;
-  binding::qjs::JSContext* context;
+  binding::qjs::PageJSContext* context;
 };
 
 void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {

@@ -14,18 +14,18 @@ static bool isSampleFree = false;
 
 class SampleObject : public HostObject {
  public:
-  explicit SampleObject(JSContext* context) : HostObject(context, "SampleObject"){};
+  explicit SampleObject(PageJSContext* context) : HostObject(context, "SampleObject"){};
   ~SampleObject() { isSampleFree = true; }
 
  private:
   class FooPropertyDescriptor {
    public:
     static JSValue getter(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-      auto* sampleObject = static_cast<SampleObject*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+      auto* sampleObject = static_cast<SampleObject*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
       return JS_NewFloat64(ctx, sampleObject->m_foo);
     }
     static JSValue setter(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-      auto* sampleObject = static_cast<SampleObject*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+      auto* sampleObject = static_cast<SampleObject*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
       double f;
       JS_ToFloat64(ctx, &f, argv[0]);
       sampleObject->m_foo = f;
@@ -118,7 +118,7 @@ TEST(HostObject, defineFunction) {
 
 class SampleExoticHostObject : public ExoticHostObject {
  public:
-  explicit SampleExoticHostObject(JSContext* context) : ExoticHostObject(context, "SampleObject"){};
+  explicit SampleExoticHostObject(PageJSContext* context) : ExoticHostObject(context, "SampleObject"){};
   ~SampleExoticHostObject() { isSampleFree = true; }
 
   JSValue getProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);

@@ -41,7 +41,7 @@ class JSBridge final {
   uint8_t* dumpByteCode(const char* script, size_t length, const char* url, size_t* byteLength);
   void evaluateByteCode(uint8_t* bytes, size_t byteLength);
 
-  const std::unique_ptr<kraken::binding::qjs::JSContext>& getContext() const { return m_context; }
+  const std::unique_ptr<kraken::binding::qjs::PageJSContext>& getContext() const { return m_context; }
 
   void invokeModuleEvent(NativeString* moduleName, const char* eventType, void* event, NativeString* extra);
   void reportError(const char* errmsg);
@@ -50,7 +50,7 @@ class JSBridge final {
   std::atomic<bool> event_registered = false;
 
  private:
-  std::unique_ptr<binding::qjs::JSContext> m_context;
+  std::unique_ptr<binding::qjs::PageJSContext> m_context;
   JSExceptionHandler m_handler;
   Task m_disposeCallback{nullptr};
   void* m_disposePrivateData{nullptr};

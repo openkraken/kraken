@@ -19,7 +19,7 @@ class HTMLParser {
   static bool parseHTML(std::string html, NodeInstance* rootNode);
 
  private:
-  JSContext* m_context;
+  PageJSContext* m_context;
   static void traverseHTML(NodeInstance* root, GumboNode* node);
   static void parseProperty(ElementInstance* element, GumboElement* gumboElement);
 };

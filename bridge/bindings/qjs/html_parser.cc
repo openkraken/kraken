@@ -19,7 +19,7 @@ inline std::string trim(std::string& str) {
 }
 
 void HTMLParser::traverseHTML(NodeInstance* root, GumboNode* node) {
-  JSContext* context = root->context();
+  PageJSContext* context = root->context();
   QjsContext* ctx = context->ctx();
 
   const GumboVector* children = &node->v.element.children;
@@ -96,7 +96,7 @@ bool HTMLParser::parseHTML(const char* code, size_t codeLength, NodeInstance* ro
 }
 
 void HTMLParser::parseProperty(ElementInstance* element, GumboElement* gumboElement) {
-  JSContext* context = element->context();
+  PageJSContext* context = element->context();
   QjsContext* ctx = context->ctx();
 
   GumboVector* attributes = &gumboElement->attributes;

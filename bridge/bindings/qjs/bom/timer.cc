@@ -65,7 +65,7 @@ static JSValue setTimeout(QjsContext* ctx, JSValueConst this_val, int argc, JSVa
     return JS_ThrowTypeError(ctx, "Failed to execute 'setTimeout': 1 argument required, but only 0 present.");
   }
 
-  auto context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
+  auto context = static_cast<PageJSContext*>(JS_GetContextOpaque(ctx));
   JSValue callbackValue = argv[0];
   JSValue timeoutValue = argv[1];
 
@@ -148,7 +148,7 @@ static JSValue setInterval(QjsContext* ctx, JSValueConst this_val, int argc, JSV
     return JS_ThrowTypeError(ctx, "Failed to execute 'setInterval': 1 argument required, but only 0 present.");
   }
 
-  auto context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
+  auto context = static_cast<PageJSContext*>(JS_GetContextOpaque(ctx));
   JSValue callbackValue = argv[0];
   JSValue timeoutValue = argv[1];
 
@@ -190,7 +190,7 @@ static JSValue requestAnimationFrame(QjsContext* ctx, JSValueConst this_val, int
     return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': 1 argument required, but only 0 present.");
   }
 
-  auto context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
+  auto context = static_cast<PageJSContext*>(JS_GetContextOpaque(ctx));
   JSValue callbackValue = argv[0];
 
   if (!JS_IsObject(callbackValue)) {
@@ -231,7 +231,7 @@ static JSValue clearTimeout(QjsContext* ctx, JSValueConst this_val, int argc, JS
     return JS_ThrowTypeError(ctx, "Failed to execute 'clearTimeout': 1 argument required, but only 0 present.");
   }
 
-  auto context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
+  auto context = static_cast<PageJSContext*>(JS_GetContextOpaque(ctx));
 
   JSValue timeIdValue = argv[0];
   if (!JS_IsNumber(timeIdValue)) {
@@ -253,7 +253,7 @@ static JSValue cancelAnimationFrame(QjsContext* ctx, JSValueConst this_val, int 
   if (argc <= 0) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'cancelAnimationFrame': 1 argument required, but only 0 present.");
   }
-  auto context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
+  auto context = static_cast<PageJSContext*>(JS_GetContextOpaque(ctx));
   JSValue requestIdValue = argv[0];
   if (!JS_IsNumber(requestIdValue)) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'cancelAnimationFrame': parameter 1 (timer) is not a timer kind.");
@@ -270,7 +270,7 @@ static JSValue cancelAnimationFrame(QjsContext* ctx, JSValueConst this_val, int 
   return JS_NULL;
 }
 
-void bindTimer(std::unique_ptr<JSContext>& context) {
+void bindTimer(std::unique_ptr<PageJSContext>& context) {
   QJS_GLOBAL_BINDING_FUNCTION(context, setTimeout, "setTimeout", 2);
   QJS_GLOBAL_BINDING_FUNCTION(context, setInterval, "setInterval", 2);
   QJS_GLOBAL_BINDING_FUNCTION(context, requestAnimationFrame, "requestAnimationFrame", 1);

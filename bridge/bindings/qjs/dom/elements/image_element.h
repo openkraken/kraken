@@ -10,13 +10,13 @@
 
 namespace kraken::binding::qjs {
 
-void bindImageElement(std::unique_ptr<JSContext>& context);
+void bindImageElement(std::unique_ptr<PageJSContext>& context);
 
 class ImageElementInstance;
 class ImageElement : public Element {
  public:
   ImageElement() = delete;
-  explicit ImageElement(JSContext* context);
+  explicit ImageElement(PageJSContext* context);
   JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
   OBJECT_INSTANCE(ImageElement);

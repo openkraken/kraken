@@ -9,11 +9,11 @@
 
 namespace kraken::binding::qjs {
 
-ImageElement::ImageElement(JSContext* context) : Element(context) {
+ImageElement::ImageElement(PageJSContext* context) : Element(context) {
   JS_SetPrototype(m_ctx, m_prototypeObject, Element::instance(m_context)->prototype());
 }
 
-void bindImageElement(std::unique_ptr<JSContext>& context) {
+void bindImageElement(std::unique_ptr<PageJSContext>& context) {
   auto* constructor = ImageElement::instance(context.get());
   context->defineGlobalProperty("HTMLImageElement", constructor->jsObject);
   context->defineGlobalProperty("Image", JS_DupValue(context->ctx(), constructor->jsObject));

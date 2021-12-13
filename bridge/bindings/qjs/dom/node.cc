@@ -14,7 +14,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindNode(std::unique_ptr<JSContext>& context) {
+void bindNode(std::unique_ptr<PageJSContext>& context) {
   auto* constructor = Node::instance(context.get());
   context->defineGlobalProperty("Node", constructor->jsObject);
 }

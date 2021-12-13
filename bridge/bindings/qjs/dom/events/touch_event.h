@@ -10,7 +10,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindTouchEvent(std::unique_ptr<JSContext>& context);
+void bindTouchEvent(std::unique_ptr<PageJSContext>& context);
 
 struct NativeTouch {
   int64_t identifier;
@@ -33,7 +33,7 @@ struct NativeTouch {
 class Touch : public HostObject {
  public:
   Touch() = delete;
-  explicit Touch(JSContext* context, NativeTouch* nativePtr);
+  explicit Touch(PageJSContext* context, NativeTouch* nativePtr);
 
  private:
   NativeTouch* m_nativeTouch{nullptr};
@@ -57,7 +57,7 @@ class Touch : public HostObject {
 class TouchList : public ExoticHostObject {
  public:
   TouchList() = delete;
-  explicit TouchList(JSContext* context, NativeTouch** touches, int64_t length);
+  explicit TouchList(PageJSContext* context, NativeTouch** touches, int64_t length);
 
   JSValue getProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);
   int setProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
@@ -87,7 +87,7 @@ class TouchEventInstance;
 class TouchEvent : public Event {
  public:
   TouchEvent() = delete;
-  explicit TouchEvent(JSContext* context);
+  explicit TouchEvent(PageJSContext* context);
   JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
   OBJECT_INSTANCE(TouchEvent);

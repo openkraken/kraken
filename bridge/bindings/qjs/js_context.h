@@ -29,7 +29,7 @@ static std::once_flag kinitJSClassIDFlag;
 JSRuntime* getGlobalJSRuntime();
 class WindowInstance;
 class DocumentInstance;
-class JSContext;
+class PageJSContext;
 std::string jsAtomToStdString(QjsContext* ctx, JSAtom atom);
 
 static inline bool isNumberIndex(const std::string& name) {
@@ -41,7 +41,7 @@ static inline bool isNumberIndex(const std::string& name) {
 
 struct PromiseContext {
   void* data;
-  JSContext* context;
+  PageJSContext* context;
   JSValue resolveFunc;
   JSValue rejectFunc;
   JSValue promise;
@@ -55,11 +55,12 @@ struct AtomJob {
 
 bool isContextValid(int32_t contextId);
 
-class JSContext {
+// Manage the whole life time of a kraken page.
+class PageJSContext {
  public:
-  JSContext() = delete;
-  JSContext(int32_t contextId, const JSExceptionHandler& handler, void* owner);
-  ~JSContext();
+  PageJSContext() = delete;
+  PageJSContext(int32_t contextId, const JSExceptionHandler& handler, void* owner);
+  ~PageJSContext();
 
   bool evaluateJavaScript(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine);
   bool evaluateJavaScript(const char16_t* code, size_t length, const char* sourceURL, int startLine);
@@ -130,7 +131,7 @@ class ObjectProperty {
   ObjectProperty() = delete;
 
   // Define a property on object with a getter and setter function.
-  explicit ObjectProperty(JSContext* context, JSValueConst thisObject, const std::string& property, JSCFunction getterFunction, JSCFunction setterFunction) {
+  explicit ObjectProperty(PageJSContext* context, JSValueConst thisObject, const std::string& property, JSCFunction getterFunction, JSCFunction setterFunction) {
     // Getter on jsObject works well with all conditions.
     // We create an getter function and define to jsObject directly.
     JSAtom propertyKeyAtom = JS_NewAtom(context->ctx(), property.c_str());
@@ -150,7 +151,7 @@ class ObjectProperty {
     JS_FreeValue(context->ctx(), setter);
   };
 
-  explicit ObjectProperty(JSContext* context, JSValueConst thisObject, const std::string& property, JSCFunction getterFunction) {
+  explicit ObjectProperty(PageJSContext* context, JSValueConst thisObject, const std::string& property, JSCFunction getterFunction) {
     // Getter on jsObject works well with all conditions.
     // We create an getter function and define to jsObject directly.
     JSAtom propertyKeyAtom = JS_NewAtom(context->ctx(), property.c_str());
@@ -162,7 +163,7 @@ class ObjectProperty {
   };
 
   // Define an property on object with a JSValue.
-  explicit ObjectProperty(JSContext* context, JSValueConst thisObject, const char* property, JSValue value) : m_value(value) {
+  explicit ObjectProperty(PageJSContext* context, JSValueConst thisObject, const char* property, JSValue value) : m_value(value) {
     JS_DefinePropertyValueStr(context->ctx(), thisObject, property, value, JS_PROP_ENUMERABLE);
   }
 
@@ -177,7 +178,7 @@ class ObjectFunction {
 
  public:
   ObjectFunction() = delete;
-  explicit ObjectFunction(JSContext* context, JSValueConst thisObject, const char* functionName, JSCFunction function, int argc) {
+  explicit ObjectFunction(PageJSContext* context, JSValueConst thisObject, const char* functionName, JSCFunction function, int argc) {
     JSValue f = JS_NewCFunction(context->ctx(), function, functionName, argc);
     JSValue pf = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, argc, 0, 1, &f);
     JSAtom key = JS_NewAtom(context->ctx(), functionName);
@@ -212,7 +213,7 @@ class JSValueHolder {
   JSValue m_value{JS_NULL};
 };
 
-std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler& handler, void* owner);
+std::unique_ptr<PageJSContext> createJSContext(int32_t contextId, const JSExceptionHandler& handler, void* owner);
 
 // Convert to string and return a full copy of NativeString from JSValue.
 std::unique_ptr<NativeString> jsValueToNativeString(QjsContext* ctx, JSValue value);

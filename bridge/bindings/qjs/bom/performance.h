@@ -125,7 +125,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindPerformance(std::unique_ptr<JSContext>& context);
+void bindPerformance(std::unique_ptr<PageJSContext>& context);
 
 struct NativePerformanceEntry {
   NativePerformanceEntry(const std::string& name, const std::string& entryType, int64_t startTime, int64_t duration, int64_t uniqueId) : startTime(startTime), duration(duration), uniqueId(uniqueId) {
@@ -144,7 +144,7 @@ struct NativePerformanceEntry {
 class PerformanceEntry : public HostObject {
  public:
   PerformanceEntry() = delete;
-  explicit PerformanceEntry(JSContext* context, NativePerformanceEntry* m_nativePerformanceEntry);
+  explicit PerformanceEntry(PageJSContext* context, NativePerformanceEntry* m_nativePerformanceEntry);
 
   DEFINE_READONLY_PROPERTY(name);
   DEFINE_READONLY_PROPERTY(entryType);
@@ -158,15 +158,15 @@ class PerformanceEntry : public HostObject {
 class PerformanceMark : public PerformanceEntry {
  public:
   PerformanceMark() = delete;
-  explicit PerformanceMark(JSContext* context, std::string& name, int64_t startTime);
-  explicit PerformanceMark(JSContext* context, NativePerformanceEntry* nativePerformanceEntry);
+  explicit PerformanceMark(PageJSContext* context, std::string& name, int64_t startTime);
+  explicit PerformanceMark(PageJSContext* context, NativePerformanceEntry* nativePerformanceEntry);
 };
 
 class PerformanceMeasure : public PerformanceEntry {
  public:
   PerformanceMeasure() = delete;
-  explicit PerformanceMeasure(JSContext* context, std::string& name, int64_t startTime, int64_t duration);
-  explicit PerformanceMeasure(JSContext* context, NativePerformanceEntry* nativePerformanceEntry);
+  explicit PerformanceMeasure(PageJSContext* context, std::string& name, int64_t startTime, int64_t duration);
+  explicit PerformanceMeasure(PageJSContext* context, NativePerformanceEntry* nativePerformanceEntry);
 };
 
 class NativePerformance {
@@ -179,7 +179,7 @@ class NativePerformance {
 class Performance : public HostObject {
  public:
   Performance() = delete;
-  explicit Performance(JSContext* context);
+  explicit Performance(PageJSContext* context);
 
   OBJECT_INSTANCE(Performance);
 

@@ -12,7 +12,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindWindow(std::unique_ptr<JSContext>& context);
+void bindWindow(std::unique_ptr<PageJSContext>& context);
 
 class WindowInstance;
 
@@ -28,7 +28,7 @@ class Window : public EventTarget {
   static JSValue postMessage(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
   Window() = delete;
-  explicit Window(JSContext* context);
+  explicit Window(PageJSContext* context);
 
   OBJECT_INSTANCE(Window);
 
@@ -68,7 +68,7 @@ class WindowInstance : public EventTargetInstance {
   ObjectProperty m_onerror{m_context, jsObject, "m_onerror", JS_NULL};
   JSValue onerror{JS_NULL};
   friend Window;
-  friend JSContext;
+  friend PageJSContext;
 };
 
 }  // namespace kraken::binding::qjs

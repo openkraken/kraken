@@ -42,10 +42,10 @@ static void call_native_function(NativeFunctionContext* functionContext, int32_t
 
 struct NativeFunctionContext {
   CallNativeFunction call;
-  NativeFunctionContext(JSContext* context, JSValue callback);
+  NativeFunctionContext(PageJSContext* context, JSValue callback);
   ~NativeFunctionContext();
   JSValue m_callback{JS_NULL};
-  JSContext* m_context{nullptr};
+  PageJSContext* m_context{nullptr};
   QjsContext* m_ctx{nullptr};
   list_head link;
 };
@@ -57,9 +57,9 @@ NativeValue Native_NewFloat64(double value);
 NativeValue Native_NewBool(bool value);
 NativeValue Native_NewInt32(int32_t value);
 NativeValue Native_NewPtr(JSPointerType pointerType, void* ptr);
-NativeValue Native_NewJSON(JSContext* context, JSValue& value);
+NativeValue Native_NewJSON(PageJSContext* context, JSValue& value);
 NativeValue jsValueToNativeValue(QjsContext* ctx, JSValue& value);
-JSValue nativeValueToJSValue(JSContext* context, NativeValue& value);
+JSValue nativeValueToJSValue(PageJSContext* context, NativeValue& value);
 
 }  // namespace kraken::binding::qjs
 

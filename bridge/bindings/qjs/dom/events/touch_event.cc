@@ -9,12 +9,12 @@
 
 namespace kraken::binding::qjs {
 
-void bindTouchEvent(std::unique_ptr<JSContext>& context) {
+void bindTouchEvent(std::unique_ptr<PageJSContext>& context) {
   auto* constructor = TouchEvent::instance(context.get());
   context->defineGlobalProperty("TouchEvent", constructor->jsObject);
 }
 
-TouchList::TouchList(JSContext* context, NativeTouch** touches, int64_t length) : ExoticHostObject(context, "TouchList"), m_touches(touches), _length(length) {}
+TouchList::TouchList(PageJSContext* context, NativeTouch** touches, int64_t length) : ExoticHostObject(context, "TouchList"), m_touches(touches), _length(length) {}
 
 JSValue TouchList::getProperty(QjsContext* ctx, JSValue obj, JSAtom atom, JSValue receiver) {
   std::string key = jsAtomToStdString(ctx, atom);
@@ -31,78 +31,78 @@ int TouchList::setProperty(QjsContext* ctx, JSValue obj, JSAtom atom, JSValue va
 }
 
 IMPL_PROPERTY_GETTER(TouchList, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* touchList = static_cast<TouchList*>(JS_GetOpaque(this_val, JSContext::kHostExoticObjectClassId));
+  auto* touchList = static_cast<TouchList*>(JS_GetOpaque(this_val, PageJSContext::kHostExoticObjectClassId));
   return JS_NewUint32(ctx, touchList->_length);
 }
 IMPL_PROPERTY_SETTER(TouchList, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
 
-Touch::Touch(JSContext* context, NativeTouch* nativeTouch) : HostObject(context, "Touch"), m_nativeTouch(nativeTouch) {}
+Touch::Touch(PageJSContext* context, NativeTouch* nativeTouch) : HostObject(context, "Touch"), m_nativeTouch(nativeTouch) {}
 
 IMPL_PROPERTY_GETTER(Touch, identifier)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   return JS_NewUint32(ctx, object->m_nativeTouch->identifier);
 }
 IMPL_PROPERTY_GETTER(Touch, target)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   auto* eventTarget = object->m_nativeTouch->target;
   return JS_DupValue(ctx, eventTarget->instance->jsObject);
 }
 IMPL_PROPERTY_GETTER(Touch, clientX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->clientX);
 }
 IMPL_PROPERTY_GETTER(Touch, clientY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->clientY);
 }
 IMPL_PROPERTY_GETTER(Touch, screenX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->screenX);
 }
 IMPL_PROPERTY_GETTER(Touch, screenY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->screenY);
 }
 IMPL_PROPERTY_GETTER(Touch, pageX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->pageX);
 }
 IMPL_PROPERTY_GETTER(Touch, pageY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->pageY);
 }
 IMPL_PROPERTY_GETTER(Touch, radiusX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->radiusX);
 }
 IMPL_PROPERTY_GETTER(Touch, radiusY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->radiusY);
 }
 IMPL_PROPERTY_GETTER(Touch, rotationAngle)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->rotationAngle);
 }
 IMPL_PROPERTY_GETTER(Touch, force)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->force);
 }
 IMPL_PROPERTY_GETTER(Touch, altitudeAngle)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->altitudeAngle);
 }
 IMPL_PROPERTY_GETTER(Touch, azimuthAngle)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, object->m_nativeTouch->azimuthAngle);
 }
 IMPL_PROPERTY_GETTER(Touch, touchType)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   return JS_NewUint32(ctx, object->m_nativeTouch->touchType);
 }
 
-TouchEvent::TouchEvent(JSContext* context) : Event(context) {}
+TouchEvent::TouchEvent(PageJSContext* context) : Event(context) {}
 
 JSValue TouchEvent::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
@@ -141,7 +141,7 @@ JSValue TouchEvent::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSVal
         for (int i = 0; i < length; i++) {
           JSValue v = JS_GetPropertyUint32(ctx, touchesValue, i);
           if (JS_IsInstanceOf(ctx, v, TouchEvent::instance(m_context)->jsObject)) {
-            ne->touches[i] = static_cast<NativeTouch*>(JS_GetOpaque(v, JSContext::kHostObjectClassId));
+            ne->touches[i] = static_cast<NativeTouch*>(JS_GetOpaque(v, PageJSContext::kHostObjectClassId));
           }
         }
       }
@@ -158,7 +158,7 @@ JSValue TouchEvent::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSVal
         for (int i = 0; i < length; i++) {
           JSValue v = JS_GetPropertyUint32(ctx, targetTouchesValue, i);
           if (JS_IsInstanceOf(ctx, v, TouchEvent::instance(m_context)->jsObject)) {
-            ne->targetTouches[i] = static_cast<NativeTouch*>(JS_GetOpaque(v, JSContext::kHostObjectClassId));
+            ne->targetTouches[i] = static_cast<NativeTouch*>(JS_GetOpaque(v, PageJSContext::kHostObjectClassId));
           }
         }
       }
@@ -175,7 +175,7 @@ JSValue TouchEvent::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSVal
         for (int i = 0; i < length; i++) {
           JSValue v = JS_GetPropertyUint32(ctx, changedTouchesValue, i);
           if (JS_IsInstanceOf(ctx, v, TouchEvent::instance(m_context)->jsObject)) {
-            ne->changedTouches[i] = static_cast<NativeTouch*>(JS_GetOpaque(v, JSContext::kHostObjectClassId));
+            ne->changedTouches[i] = static_cast<NativeTouch*>(JS_GetOpaque(v, PageJSContext::kHostObjectClassId));
           }
         }
       }

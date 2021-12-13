@@ -13,7 +13,7 @@ namespace kraken::binding::qjs {
 
 class AllCollection : public HostObject {
  public:
-  AllCollection(JSContext* context) : HostObject(context, "AllCollection"){};
+  AllCollection(PageJSContext* context) : HostObject(context, "AllCollection"){};
 
   static JSValue item(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   static JSValue add(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);

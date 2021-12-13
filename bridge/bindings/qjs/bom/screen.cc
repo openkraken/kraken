@@ -7,7 +7,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindScreen(std::unique_ptr<JSContext>& context) {
+void bindScreen(std::unique_ptr<PageJSContext>& context) {
   auto* screen = new Screen(context.get());
   context->defineGlobalProperty("screen", screen->jsObject);
 }
@@ -17,7 +17,7 @@ IMPL_PROPERTY_GETTER(Screen, width)(QjsContext* ctx, JSValue this_val, int argc,
     return JS_ThrowTypeError(ctx, "Failed to read screen: dart method (getScreen) is not registered.");
   }
 
-  auto context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
+  auto context = static_cast<PageJSContext*>(JS_GetContextOpaque(ctx));
   NativeScreen* screen = getDartMethod()->getScreen(context->getContextId());
   return JS_NewFloat64(ctx, screen->width);
 }
@@ -27,7 +27,7 @@ IMPL_PROPERTY_GETTER(Screen, height)(QjsContext* ctx, JSValue this_val, int argc
     return JS_ThrowTypeError(ctx, "Failed to read screen: dart method (getScreen) is not registered.");
   }
 
-  auto context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
+  auto context = static_cast<PageJSContext*>(JS_GetContextOpaque(ctx));
   NativeScreen* screen = getDartMethod()->getScreen(context->getContextId());
   return JS_NewFloat64(ctx, screen->height);
 }

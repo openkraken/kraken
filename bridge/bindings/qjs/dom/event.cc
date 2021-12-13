@@ -13,14 +13,14 @@ namespace kraken::binding::qjs {
 
 std::once_flag kEventInitOnceFlag;
 
-void bindEvent(std::unique_ptr<JSContext>& context) {
+void bindEvent(std::unique_ptr<PageJSContext>& context) {
   auto* constructor = Event::instance(context.get());
   context->defineGlobalProperty("Event", constructor->jsObject);
 }
 
 JSClassID Event::kEventClassID{0};
 
-Event::Event(JSContext* context) : HostClass(context, "Event") {
+Event::Event(PageJSContext* context) : HostClass(context, "Event") {
   std::call_once(kEventInitOnceFlag, []() { JS_NewClassID(&kEventClassID); });
 }
 
@@ -101,7 +101,7 @@ IMPL_PROPERTY_GETTER(Event, cancelBubble)(QjsContext* ctx, JSValue this_val, int
   return JS_NewBool(ctx, eventInstance->cancelled());
 }
 
-EventInstance* Event::buildEventInstance(std::string& eventType, JSContext* context, void* nativeEvent, bool isCustomEvent) {
+EventInstance* Event::buildEventInstance(std::string& eventType, PageJSContext* context, void* nativeEvent, bool isCustomEvent) {
   EventInstance* eventInstance;
   if (isCustomEvent) {
     eventInstance = new CustomEventInstance(CustomEvent::instance(context), reinterpret_cast<NativeCustomEvent*>(nativeEvent));

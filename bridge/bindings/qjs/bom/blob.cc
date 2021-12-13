@@ -10,12 +10,12 @@ namespace kraken::binding::qjs {
 
 std::once_flag kBlobInitOnceFlag;
 
-void bindBlob(std::unique_ptr<JSContext>& context) {
+void bindBlob(std::unique_ptr<PageJSContext>& context) {
   auto* constructor = Blob::instance(context.get());
   context->defineGlobalProperty("Blob", constructor->jsObject);
 }
 
-Blob::Blob(JSContext* context) : HostClass(context, "Blob") {
+Blob::Blob(PageJSContext* context) : HostClass(context, "Blob") {
   std::call_once(kBlobInitOnceFlag, []() { JS_NewClassID(&kBlobClassID); });
 }
 
@@ -23,7 +23,7 @@ JSClassID Blob::kBlobClassID{0};
 
 JSValue Blob::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
   BlobBuilder builder;
-  auto constructor = static_cast<Blob*>(JS_GetOpaque(func_obj, JSContext::kHostClassClassId));
+  auto constructor = static_cast<Blob*>(JS_GetOpaque(func_obj, PageJSContext::kHostClassClassId));
   if (argc == 0) {
     auto blob = new BlobInstance(constructor);
     return blob->jsObject;
@@ -205,13 +205,13 @@ void BlobInstance::finalize(JSRuntime* rt, JSValue val) {
   delete eventTarget;
 }
 
-void BlobBuilder::append(JSContext& context, BlobInstance* blob) {
+void BlobBuilder::append(PageJSContext& context, BlobInstance* blob) {
   std::vector<uint8_t> blobData = blob->_data;
   _data.reserve(_data.size() + blobData.size());
   _data.insert(_data.end(), blobData.begin(), blobData.end());
 }
 
-void BlobBuilder::append(JSContext& context, JSValue& value) {
+void BlobBuilder::append(PageJSContext& context, JSValue& value) {
   if (JS_IsString(value)) {
     const char* buffer = JS_ToCString(context.ctx(), value);
     std::string str = std::string(buffer);

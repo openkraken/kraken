@@ -55,7 +55,7 @@ void traverseNode(NodeInstance* node, TraverseHandler handler) {
 
 std::once_flag kDocumentInitOnceFlag;
 
-void bindDocument(std::unique_ptr<JSContext>& context) {
+void bindDocument(std::unique_ptr<PageJSContext>& context) {
   auto* documentConstructor = Document::instance(context.get());
   context->defineGlobalProperty("Document", documentConstructor->jsObject);
   JSValue documentInstance = JS_CallConstructor(context->ctx(), documentConstructor->jsObject, 0, nullptr);
@@ -64,7 +64,7 @@ void bindDocument(std::unique_ptr<JSContext>& context) {
 
 JSClassID Document::kDocumentClassID{0};
 
-Document::Document(JSContext* context) : Node(context, "Document") {
+Document::Document(PageJSContext* context) : Node(context, "Document") {
   std::call_once(kDocumentInitOnceFlag, []() { JS_NewClassID(&kDocumentClassID); });
   JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
   if (!document_registered) {
@@ -81,38 +81,38 @@ Document::Document(JSContext* context) : Node(context, "Document") {
   if (!event_registered) {
     event_registered = true;
     Event::defineEvent(EVENT_INPUT,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new InputEventInstance(InputEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_MEDIA_ERROR, [](JSContext* context, void* nativeEvent) -> EventInstance* {
+                       [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new InputEventInstance(InputEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+    Event::defineEvent(EVENT_MEDIA_ERROR, [](PageJSContext* context, void* nativeEvent) -> EventInstance* {
       return new MediaErrorEventInstance(MediaErrorEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
     });
     Event::defineEvent(EVENT_MESSAGE,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new MessageEventInstance(MessageEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+                       [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new MessageEventInstance(MessageEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
     Event::defineEvent(EVENT_CLOSE,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new CloseEventInstance(CloseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_INTERSECTION_CHANGE, [](JSContext* context, void* nativeEvent) -> EventInstance* {
+                       [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new CloseEventInstance(CloseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+    Event::defineEvent(EVENT_INTERSECTION_CHANGE, [](PageJSContext* context, void* nativeEvent) -> EventInstance* {
       return new IntersectionChangeEventInstance(IntersectionChangeEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
     });
     Event::defineEvent(EVENT_TOUCH_START,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+                       [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
     Event::defineEvent(EVENT_TOUCH_END,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+                       [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
     Event::defineEvent(EVENT_TOUCH_MOVE,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+                       [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
     Event::defineEvent(EVENT_TOUCH_CANCEL,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+                       [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
     Event::defineEvent(EVENT_SWIPE,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+                       [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
     Event::defineEvent(EVENT_PAN,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+                       [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
     Event::defineEvent(EVENT_LONG_PRESS,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+                       [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
     Event::defineEvent(EVENT_SCALE,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+                       [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
     Event::defineEvent(EVENT_CLICK,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new MouseEventInstance(MouseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+                       [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new MouseEventInstance(MouseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
     Event::defineEvent(EVENT_CANCEL,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new MouseEventInstance(MouseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_POPSTATE, [](JSContext* context, void* nativeEvent) -> EventInstance* {
+                       [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new MouseEventInstance(MouseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+    Event::defineEvent(EVENT_POPSTATE, [](PageJSContext* context, void* nativeEvent) -> EventInstance* {
       return new PopStateEventInstance(PopStateEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
     });
   }
@@ -162,7 +162,7 @@ JSValue Document::createElement(QjsContext* ctx, JSValue this_val, int argc, JSV
   }
 
   auto document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
-  auto* context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
+  auto* context = static_cast<PageJSContext*>(JS_GetContextOpaque(ctx));
   std::string tagName = jsValueToStdString(ctx, tagNameValue);
   JSValue constructor = static_cast<Document*>(document->prototype())->getElementConstructor(document->m_context, tagName);
 
@@ -294,7 +294,7 @@ void Document::defineElement(const std::string& tagName, Element* constructor) {
   elementConstructorMap[tagName] = constructor;
 }
 
-JSValue Document::getElementConstructor(JSContext* context, const std::string& tagName) {
+JSValue Document::getElementConstructor(PageJSContext* context, const std::string& tagName) {
   if (elementConstructorMap.count(tagName) > 0)
     return elementConstructorMap[tagName]->jsObject;
   return Element::instance(context)->jsObject;

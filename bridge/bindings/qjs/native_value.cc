@@ -61,7 +61,7 @@ NativeValue Native_NewInt32(int32_t value) {
   };
 }
 
-NativeValue Native_NewJSON(JSContext* context, JSValue& value) {
+NativeValue Native_NewJSON(PageJSContext* context, JSValue& value) {
   JSValue stringifiedValue = JS_JSONStringify(context->ctx(), value, JS_UNDEFINED, JS_UNDEFINED);
   if (JS_IsException(stringifiedValue))
     return Native_NewNull();
@@ -119,11 +119,11 @@ NativeValue jsValueToNativeValue(QjsContext* ctx, JSValue& value) {
     NativeString* string = jsValueToNativeString(ctx, value).release();
     return Native_NewString(string);
   } else if (JS_IsFunction(ctx, value)) {
-    auto* context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
+    auto* context = static_cast<PageJSContext*>(JS_GetContextOpaque(ctx));
     auto* functionContext = new NativeFunctionContext{context, value};
     return Native_NewPtr(JSPointerType::NativeFunctionContext, functionContext);
   } else if (JS_IsObject(value)) {
-    auto* context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
+    auto* context = static_cast<PageJSContext*>(JS_GetContextOpaque(ctx));
     if (JS_IsInstanceOf(ctx, value, ImageElement::instance(context)->jsObject)) {
       auto* imageElementInstance = static_cast<ImageElementInstance*>(JS_GetOpaque(value, Element::classId()));
       return Native_NewPtr(JSPointerType::NativeEventTarget, imageElementInstance->nativeEventTarget);
@@ -135,7 +135,7 @@ NativeValue jsValueToNativeValue(QjsContext* ctx, JSValue& value) {
   return Native_NewNull();
 }
 
-NativeFunctionContext::NativeFunctionContext(JSContext* context, JSValue callback) : m_context(context), m_ctx(context->ctx()), m_callback(callback), call(call_native_function) {
+NativeFunctionContext::NativeFunctionContext(PageJSContext* context, JSValue callback) : m_context(context), m_ctx(context->ctx()), m_callback(callback), call(call_native_function) {
   JS_DupValue(context->ctx(), callback);
   list_add_tail(&link, &m_context->native_function_job_list);
 };
@@ -218,7 +218,7 @@ static JSValue anonymousAsyncFunction(QjsContext* ctx, JSValueConst this_val, in
   return promise;
 }
 
-JSValue nativeValueToJSValue(JSContext* context, NativeValue& value) {
+JSValue nativeValueToJSValue(PageJSContext* context, NativeValue& value) {
   switch (value.tag) {
     case NativeTag::TAG_STRING: {
       auto* string = static_cast<NativeString*>(value.u.ptr);

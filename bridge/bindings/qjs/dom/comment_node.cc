@@ -13,7 +13,7 @@ std::once_flag kCommentInitFlag;
 
 JSClassID Comment::kCommentClassId{0};
 
-void bindCommentNode(std::unique_ptr<JSContext>& context) {
+void bindCommentNode(std::unique_ptr<PageJSContext>& context) {
   auto* constructor = Comment::instance(context.get());
   context->defineGlobalProperty("Comment", constructor->jsObject);
 }
@@ -22,7 +22,7 @@ JSClassID Comment::classId() {
   return kCommentClassId;
 }
 
-Comment::Comment(JSContext* context) : Node(context, "Comment") {
+Comment::Comment(PageJSContext* context) : Node(context, "Comment") {
   std::call_once(kCommentInitFlag, []() { JS_NewClassID(&kCommentClassId); });
   JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
 }

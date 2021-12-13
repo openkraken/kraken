@@ -15,7 +15,7 @@ namespace kraken {
 
 struct ImageSnapShotContext {
   JSValue callback;
-  binding::qjs::JSContext* context;
+  binding::qjs::PageJSContext* context;
   list_head link;
 };
 
@@ -54,7 +54,7 @@ class JSBridgeTest final {
   /// the pointer of bridge, ownership belongs to JSBridge
   JSBridge* bridge_;
   /// the pointer of JSContext, overship belongs to JSContext
-  const std::unique_ptr<binding::qjs::JSContext>& context;
+  const std::unique_ptr<binding::qjs::PageJSContext>& context;
 };
 
 }  // namespace kraken

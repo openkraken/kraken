@@ -50,11 +50,11 @@ namespace kraken::binding::qjs {
 #define EVENT_LONG_PRESS "longpress"
 #define EVENT_SCALE "scale"
 
-void bindEvent(std::unique_ptr<JSContext>& context);
+void bindEvent(std::unique_ptr<PageJSContext>& context);
 
 class EventInstance;
 
-using EventCreator = EventInstance* (*)(JSContext* context, void* nativeEvent);
+using EventCreator = EventInstance* (*)(PageJSContext* context, void* nativeEvent);
 
 class Event : public HostClass {
  public:
@@ -62,9 +62,9 @@ class Event : public HostClass {
 
   JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
   Event() = delete;
-  explicit Event(JSContext* context);
+  explicit Event(PageJSContext* context);
 
-  static EventInstance* buildEventInstance(std::string& eventType, JSContext* context, void* nativeEvent, bool isCustomEvent);
+  static EventInstance* buildEventInstance(std::string& eventType, PageJSContext* context, void* nativeEvent, bool isCustomEvent);
   static void defineEvent(const std::string& eventType, EventCreator creator);
 
   OBJECT_INSTANCE(Event);

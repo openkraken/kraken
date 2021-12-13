@@ -11,7 +11,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindCustomEvent(std::unique_ptr<JSContext>& context) {
+void bindCustomEvent(std::unique_ptr<PageJSContext>& context) {
   auto* constructor = CustomEvent::instance(context.get());
   context->defineGlobalProperty("CustomEvent", constructor->jsObject);
 }

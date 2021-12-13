@@ -12,7 +12,7 @@ namespace kraken::binding::qjs {
 
 class ParentClass : public HostClass {
  public:
-  explicit ParentClass(JSContext* context) : HostClass(context, "ParentClass") {}
+  explicit ParentClass(PageJSContext* context) : HostClass(context, "ParentClass") {}
   JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValueConst* argv) override {
     return HostClass::instanceConstructor(ctx, func_obj, this_val, argc, argv);
   }
@@ -45,12 +45,12 @@ class SampleClassInstance : public Instance {
 std::once_flag kSampleClassOnceFlag;
 class SampleClass : public ParentClass {
  public:
-  explicit SampleClass(JSContext* context) : ParentClass(context) {
+  explicit SampleClass(PageJSContext* context) : ParentClass(context) {
     std::call_once(kSampleClassOnceFlag, []() { JS_NewClassID(&kSampleClassId); });
     JS_SetPrototype(m_ctx, m_prototypeObject, ParentClass::instance(m_context)->prototype());
   }
   JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override {
-    auto* sampleClass = static_cast<SampleClass*>(JS_GetOpaque(func_obj, JSContext::kHostClassClassId));
+    auto* sampleClass = static_cast<SampleClass*>(JS_GetOpaque(func_obj, PageJSContext::kHostClassClassId));
     auto* instance = new SampleClassInstance(sampleClass);
     return instance->jsObject;
   }
@@ -281,7 +281,7 @@ class ExoticClass : public HostClass {
  public:
   static JSClassID exoticClassID;
   ExoticClass() = delete;
-  explicit ExoticClass(JSContext* context) : HostClass(context, "ExoticClass") {
+  explicit ExoticClass(PageJSContext* context) : HostClass(context, "ExoticClass") {
     std::call_once(kExoticClassOnceFlag, []() { JS_NewClassID(&exoticClassID); });
   }
   JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv);

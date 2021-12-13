@@ -12,11 +12,11 @@ namespace kraken::binding::qjs {
 
 struct TimerCallbackContext {
   JSValue callback;
-  JSContext* context;
+  PageJSContext* context;
   list_head link;
 };
 
-void bindTimer(std::unique_ptr<JSContext>& context);
+void bindTimer(std::unique_ptr<PageJSContext>& context);
 
 }  // namespace kraken::binding::qjs
 

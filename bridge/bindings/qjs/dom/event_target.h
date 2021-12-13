@@ -20,15 +20,15 @@ class NativeEventTarget;
 class CSSStyleDeclaration;
 class StyleDeclarationInstance;
 
-void bindEventTarget(std::unique_ptr<JSContext>& context);
+void bindEventTarget(std::unique_ptr<PageJSContext>& context);
 
 class EventTarget : public HostClass {
  public:
   static JSClassID kEventTargetClassId;
   JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
   EventTarget() = delete;
-  explicit EventTarget(JSContext* context, const char* name);
-  explicit EventTarget(JSContext* context);
+  explicit EventTarget(PageJSContext* context, const char* name);
+  explicit EventTarget(PageJSContext* context);
 
   static JSClassID classId();
   static JSClassID classId(JSValue& value);

@@ -14,7 +14,7 @@ namespace kraken::binding::qjs {
 class Location : public HostObject {
  public:
   Location() = delete;
-  explicit Location(JSContext* context) : HostObject(context, "Location") {}
+  explicit Location(PageJSContext* context) : HostObject(context, "Location") {}
 
   static JSValue reload(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 

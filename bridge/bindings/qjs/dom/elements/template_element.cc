@@ -10,11 +10,11 @@
 
 namespace kraken::binding::qjs {
 
-TemplateElement::TemplateElement(JSContext* context) : Element(context) {
+TemplateElement::TemplateElement(PageJSContext* context) : Element(context) {
   JS_SetPrototype(m_ctx, m_prototypeObject, Element::instance(m_context)->prototype());
 }
 
-void bindTemplateElement(std::unique_ptr<JSContext>& context) {
+void bindTemplateElement(std::unique_ptr<PageJSContext>& context) {
   auto* constructor = TemplateElement::instance(context.get());
   context->defineGlobalProperty("HTMLTemplateElement", constructor->jsObject);
 }

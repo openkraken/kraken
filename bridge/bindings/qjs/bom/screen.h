@@ -14,14 +14,14 @@ namespace kraken::binding::qjs {
 
 class Screen : public HostObject {
  public:
-  explicit Screen(JSContext* context) : HostObject(context, "Screen"){};
+  explicit Screen(PageJSContext* context) : HostObject(context, "Screen"){};
 
  private:
   DEFINE_READONLY_PROPERTY(width);
   DEFINE_READONLY_PROPERTY(height);
 };
 
-void bindScreen(std::unique_ptr<JSContext>& context);
+void bindScreen(std::unique_ptr<PageJSContext>& context);
 
 }  // namespace kraken::binding::qjs
 

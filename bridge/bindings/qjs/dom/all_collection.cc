@@ -14,7 +14,7 @@ JSValue AllCollection::item(QjsContext* ctx, JSValue this_val, int argc, JSValue
 
   uint32_t index;
   JS_ToUint32(ctx, &index, argv[0]);
-  auto* collection = static_cast<AllCollection*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* collection = static_cast<AllCollection*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
 
   if (index >= collection->m_nodes.size()) {
     return JS_NULL;
@@ -38,12 +38,12 @@ JSValue AllCollection::add(QjsContext* ctx, JSValue this_val, int argc, JSValue*
     before = argv[1];
   }
 
-  auto* node = static_cast<NodeInstance*>(JS_GetOpaque(argv[0], JSContext::kHostObjectClassId));
-  auto* collection = static_cast<AllCollection*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* node = static_cast<NodeInstance*>(JS_GetOpaque(argv[0], PageJSContext::kHostObjectClassId));
+  auto* collection = static_cast<AllCollection*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   NodeInstance* beforeNode = nullptr;
 
   if (!JS_IsNull(before)) {
-    beforeNode = static_cast<NodeInstance*>(JS_GetOpaque(before, JSContext::kHostObjectClassId));
+    beforeNode = static_cast<NodeInstance*>(JS_GetOpaque(before, PageJSContext::kHostObjectClassId));
   }
 
   collection->internalAdd(node, beforeNode);
@@ -57,7 +57,7 @@ JSValue AllCollection::remove(QjsContext* ctx, JSValue this_val, int argc, JSVal
 
   uint32_t index;
   JS_ToUint32(ctx, &index, argv[0]);
-  auto* collection = static_cast<AllCollection*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* collection = static_cast<AllCollection*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   collection->m_nodes.erase(collection->m_nodes.begin() + index);
   return JS_NULL;
 }
@@ -72,7 +72,7 @@ void AllCollection::internalAdd(NodeInstance* node, NodeInstance* before) {
 }
 
 IMPL_PROPERTY_GETTER(AllCollection, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* collection = static_cast<AllCollection*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* collection = static_cast<AllCollection*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   return JS_NewUint32(ctx, collection->m_nodes.size());
 }
 
