@@ -57,3 +57,4 @@ export 'src/css/values/position.dart';
 export 'src/css/values/time.dart';
 export 'src/css/values/percentage.dart';
 export 'src/css/values/textual.dart';
+export 'src/css/values/variable.dart';
