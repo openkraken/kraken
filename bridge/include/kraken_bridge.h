@@ -91,15 +91,15 @@ typedef void (*Task)(void*);
 typedef void (*ConsoleMessageHandler)(void* ctx, const std::string& message, int logLevel);
 
 KRAKEN_EXPORT_C
-void initJSContextPool(int poolSize);
+void initJSPagePool(int poolSize);
 KRAKEN_EXPORT_C
-void disposeContext(int32_t contextId);
+void disposePage(int32_t contextId);
 KRAKEN_EXPORT_C
-int32_t allocateNewContext(int32_t targetContextId);
+int32_t allocateNewPage(int32_t targetContextId);
 KRAKEN_EXPORT_C
-void* getJSContext(int32_t contextId);
-bool checkContext(int32_t contextId);
-bool checkContext(int32_t contextId, void* context);
+void* getPage(int32_t contextId);
+bool checkPage(int32_t contextId);
+bool checkPage(int32_t contextId, void* context);
 KRAKEN_EXPORT_C
 void evaluateScripts(int32_t contextId, NativeString* code, const char* bundleFilename, int startLine);
 KRAKEN_EXPORT_C

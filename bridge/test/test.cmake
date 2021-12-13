@@ -15,8 +15,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   )
 elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   list(APPEND KRAKEN_TEST_SOURCE
-    bridge_test_qjs.cc
-    bridge_test_qjs.h
+    page_test.cc
+    page_test.h
   )
   list(APPEND KRAKEN_UNIT_TEST_SOURCE
     ./bindings/qjs/js_context_test.cc

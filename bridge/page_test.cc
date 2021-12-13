@@ -3,26 +3,26 @@
  * Author: Kraken Team.
  */
 
-#include "bridge_test_qjs.h"
+#include "page_test.h"
 #include "bindings/qjs/bom/blob.h"
 #include "testframework.h"
 
 namespace kraken {
 
-bool JSBridgeTest::evaluateTestScripts(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) {
-  if (!context->isValid())
+bool KrakenPageTest::evaluateTestScripts(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) {
+  if (!m_page_context->isValid())
     return false;
-  return context->evaluateJavaScript(code, codeLength, sourceURL, startLine);
+  return m_page_context->evaluateJavaScript(code, codeLength, sourceURL, startLine);
 }
 
-bool JSBridgeTest::parseTestHTML(const uint16_t* code, size_t codeLength) {
-  if (!context->isValid())
+bool KrakenPageTest::parseTestHTML(const uint16_t* code, size_t codeLength) {
+  if (!m_page_context->isValid())
     return false;
   std::string utf8Code = toUTF8(std::u16string(reinterpret_cast<const char16_t*>(code), codeLength));
-  return bridge_->parseHTML(utf8Code.c_str(), utf8Code.length());
+  return m_page->parseHTML(utf8Code.c_str(), utf8Code.length());
 }
 
-static JSValue executeTest(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+static JSValue executeTest(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   JSValue& callback = argv[0];
   auto context = static_cast<binding::qjs::PageJSContext*>(JS_GetContextOpaque(ctx));
   if (!JS_IsObject(callback)) {
@@ -32,14 +32,14 @@ static JSValue executeTest(QjsContext* ctx, JSValueConst this_val, int argc, JSV
   if (!JS_IsFunction(ctx, callback)) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.");
   }
-  auto bridge = static_cast<JSBridge*>(context->getOwner());
-  auto bridgeTest = static_cast<JSBridgeTest*>(bridge->owner);
+  auto bridge = static_cast<KrakenPage*>(context->getOwner());
+  auto bridgeTest = static_cast<KrakenPageTest*>(bridge->owner);
   JS_DupValue(ctx, callback);
   bridgeTest->executeTestCallback = callback;
   return JS_NULL;
 }
 
-static JSValue matchImageSnapshot(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+static JSValue matchImageSnapshot(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   JSValue& blobValue = argv[0];
   JSValue& screenShotValue = argv[1];
   JSValue& callbackValue = argv[2];
@@ -71,13 +71,13 @@ static JSValue matchImageSnapshot(QjsContext* ctx, JSValueConst this_val, int ar
   }
 
   std::unique_ptr<NativeString> screenShotNativeString = kraken::binding::qjs::jsValueToNativeString(ctx, screenShotValue);
-  auto bridge = static_cast<JSBridgeTest*>(static_cast<JSBridge*>(context->getOwner())->owner);
+  auto bridge = static_cast<KrakenPageTest*>(static_cast<KrakenPage*>(context->getOwner())->owner);
   auto* callbackContext = new ImageSnapShotContext{JS_DupValue(ctx, callbackValue), context};
   list_add_tail(&callbackContext->link, &bridge->image_link);
 
   auto fn = [](void* ptr, int32_t contextId, int8_t result, const char* errmsg) {
     auto* callbackContext = static_cast<ImageSnapShotContext*>(ptr);
-    QjsContext* ctx = callbackContext->context->ctx();
+    JSContext* ctx = callbackContext->context->ctx();
 
     if (errmsg == nullptr) {
       JSValue arguments[] = {JS_NewBool(ctx, result != 0), JS_NULL};
@@ -100,7 +100,7 @@ static JSValue matchImageSnapshot(QjsContext* ctx, JSValueConst this_val, int ar
   return JS_NULL;
 }
 
-static JSValue environment(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+static JSValue environment(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
 #if FLUTTER_BACKEND
   if (getDartMethod()->environment == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_environment__': dart method (environment) is not registered.");
@@ -112,7 +112,7 @@ static JSValue environment(QjsContext* ctx, JSValueConst this_val, int argc, JSV
 #endif
 }
 
-static JSValue simulatePointer(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+static JSValue simulatePointer(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (getDartMethod()->simulatePointer == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_pointer__': dart method(simulatePointer) is not registered.");
   }
@@ -173,7 +173,7 @@ static JSValue simulatePointer(QjsContext* ctx, JSValueConst this_val, int argc,
   return JS_NULL;
 }
 
-static JSValue simulateInputText(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+static JSValue simulateInputText(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (getDartMethod()->simulateInputText == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_keypress__': dart method(simulateInputText) is not registered.");
   }
@@ -190,13 +190,13 @@ static JSValue simulateInputText(QjsContext* ctx, JSValueConst this_val, int arg
   return JS_NULL;
 };
 
-static JSValue runGC(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+static JSValue runGC(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   auto* context = static_cast<binding::qjs::PageJSContext*>(JS_GetContextOpaque(ctx));
   JS_RunGC(context->runtime());
   return JS_NULL;
 }
 
-static JSValue parseHTML(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+static JSValue parseHTML(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   auto* context = static_cast<binding::qjs::PageJSContext*>(JS_GetContextOpaque(ctx));
 
   if (argc == 1) {
@@ -216,7 +216,7 @@ static JSValue parseHTML(QjsContext* ctx, JSValueConst this_val, int argc, JSVal
   return JS_NULL;
 }
 
-static JSValue triggerGlobalError(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+static JSValue triggerGlobalError(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   auto* context = static_cast<binding::qjs::PageJSContext*>(JS_GetContextOpaque(ctx));
 
   JSValue globalErrorFunc = JS_GetPropertyStr(ctx, context->global(), "triggerGlobalError");
@@ -230,17 +230,17 @@ static JSValue triggerGlobalError(QjsContext* ctx, JSValueConst this_val, int ar
   return JS_NULL;
 }
 
-JSBridgeTest::JSBridgeTest(JSBridge* bridge) : bridge_(bridge), context(bridge->getContext()) {
+KrakenPageTest::KrakenPageTest(KrakenPage* bridge) : m_page(bridge), m_page_context(bridge->getContext()) {
   bridge->owner = this;
-  bridge->disposeCallback = [](JSBridge* bridge) { delete static_cast<JSBridgeTest*>(bridge->owner); };
-  QJS_GLOBAL_BINDING_FUNCTION(context, executeTest, "__kraken_execute_test__", 1);
-  QJS_GLOBAL_BINDING_FUNCTION(context, matchImageSnapshot, "__kraken_match_image_snapshot__", 3);
-  QJS_GLOBAL_BINDING_FUNCTION(context, environment, "__kraken_environment__", 0);
-  QJS_GLOBAL_BINDING_FUNCTION(context, simulatePointer, "__kraken_simulate_pointer__", 1);
-  QJS_GLOBAL_BINDING_FUNCTION(context, simulateInputText, "__kraken_simulate_inputtext__", 1);
-  QJS_GLOBAL_BINDING_FUNCTION(context, triggerGlobalError, "__kraken_trigger_global_error__", 0);
-  QJS_GLOBAL_BINDING_FUNCTION(context, runGC, "__kraken_run_gc__", 0);
-  QJS_GLOBAL_BINDING_FUNCTION(context, parseHTML, "__kraken_parse_html__", 1);
+  bridge->disposeCallback = [](KrakenPage* bridge) { delete static_cast<KrakenPageTest*>(bridge->owner); };
+  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, executeTest, "__kraken_execute_test__", 1);
+  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, matchImageSnapshot, "__kraken_match_image_snapshot__", 3);
+  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, environment, "__kraken_environment__", 0);
+  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, simulatePointer, "__kraken_simulate_pointer__", 1);
+  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, simulateInputText, "__kraken_simulate_inputtext__", 1);
+  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, triggerGlobalError, "__kraken_trigger_global_error__", 0);
+  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, runGC, "__kraken_run_gc__", 0);
+  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, parseHTML, "__kraken_parse_html__", 1);
 
   initKrakenTestFramework(bridge);
   init_list_head(&image_link);
@@ -254,15 +254,15 @@ struct ExecuteCallbackContext {
   binding::qjs::PageJSContext* context;
 };
 
-void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
+void KrakenPageTest::invokeExecuteTest(ExecuteCallback executeCallback) {
   if (JS_IsNull(executeTestCallback)) {
     return;
   }
-  if (!JS_IsFunction(context->ctx(), executeTestCallback)) {
+  if (!JS_IsFunction(m_page_context->ctx(), executeTestCallback)) {
     return;
   }
 
-  auto done = [](QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv, int magic, JSValue* func_data) -> JSValue {
+  auto done = [](JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv, int magic, JSValue* func_data) -> JSValue {
     JSValue& statusValue = argv[0];
     JSValue proxyObject = func_data[0];
     auto* callbackContext = static_cast<ExecuteCallbackContext*>(JS_GetOpaque(proxyObject, 1));
@@ -275,18 +275,18 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
     callbackContext->executeCallback(callbackContext->context->getContextId(), status.get());
     return JS_NULL;
   };
-  auto* callbackContext = new ExecuteCallbackContext(context.get(), executeCallback);
-  executeTestProxyObject = JS_NewObject(context->ctx());
+  auto* callbackContext = new ExecuteCallbackContext(m_page_context.get(), executeCallback);
+  executeTestProxyObject = JS_NewObject(m_page_context->ctx());
   JS_SetOpaque(executeTestProxyObject, callbackContext);
   JSValue callbackData[]{executeTestProxyObject};
-  JSValue callback = JS_NewCFunctionData(context->ctx(), done, 0, 0, 1, callbackData);
+  JSValue callback = JS_NewCFunctionData(m_page_context->ctx(), done, 0, 0, 1, callbackData);
 
   JSValue arguments[] = {callback};
-  JSValue result = JS_Call(context->ctx(), executeTestCallback, executeTestCallback, 1, arguments);
-  context->handleException(&result);
-  context->drainPendingPromiseJobs();
-  JS_FreeValue(context->ctx(), executeTestCallback);
-  JS_FreeValue(context->ctx(), callback);
+  JSValue result = JS_Call(m_page_context->ctx(), executeTestCallback, executeTestCallback, 1, arguments);
+  m_page_context->handleException(&result);
+  m_page_context->drainPendingPromiseJobs();
+  JS_FreeValue(m_page_context->ctx(), executeTestCallback);
+  JS_FreeValue(m_page_context->ctx(), callback);
   executeTestCallback = JS_NULL;
 }
 

@@ -7,11 +7,7 @@
 #include <algorithm>
 #include "colors.h"
 
-#if KRAKEN_JSC_ENGINE
-#include "bridge_jsc.h"
-#elif KRAKEN_QUICK_JS_ENGINE
-#include "bridge_qjs.h"
-#endif
+#include "page.h"
 
 #if defined(IS_ANDROID)
 #include <android/log.h>
@@ -140,8 +136,8 @@ void printLog(int32_t contextId, std::stringstream& stream, std::string level, v
       KRAKEN_LOG(VERBOSE) << stream.str();
   }
 
-  if (kraken::JSBridge::consoleMessageHandler != nullptr) {
-    kraken::JSBridge::consoleMessageHandler(ctx, stream.str(), static_cast<int>(_log_level));
+  if (kraken::KrakenPage::consoleMessageHandler != nullptr) {
+    kraken::KrakenPage::consoleMessageHandler(ctx, stream.str(), static_cast<int>(_log_level));
   }
 }
 

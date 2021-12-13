@@ -3,12 +3,12 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKENBRIDGE_BRIDGE_TEST_QJS_H
-#define KRAKENBRIDGE_BRIDGE_TEST_QJS_H
+#ifndef KRAKENBRIDGE_PAGE_TEST_H
+#define KRAKENBRIDGE_PAGE_TEST_H
 
 #include "bindings/qjs/dom/document.h"
 #include "bindings/qjs/html_parser.h"
-#include "bridge_qjs.h"
+#include "page.h"
 #include "kraken_bridge_test.h"
 
 namespace kraken {
@@ -19,24 +19,24 @@ struct ImageSnapShotContext {
   list_head link;
 };
 
-class JSBridgeTest final {
+class KrakenPageTest final {
  public:
-  explicit JSBridgeTest() = delete;
-  explicit JSBridgeTest(JSBridge* bridge);
+  explicit KrakenPageTest() = delete;
+  explicit KrakenPageTest(KrakenPage* bridge);
 
-  ~JSBridgeTest() {
+  ~KrakenPageTest() {
     if (!JS_IsNull(executeTestCallback)) {
-      JS_FreeValue(context->ctx(), executeTestCallback);
+      JS_FreeValue(m_page_context->ctx(), executeTestCallback);
     }
     if (!JS_IsNull(executeTestProxyObject)) {
-      JS_FreeValue(context->ctx(), executeTestProxyObject);
+      JS_FreeValue(m_page_context->ctx(), executeTestProxyObject);
     }
 
     {
       struct list_head *el, *el1;
       list_for_each_safe(el, el1, &image_link) {
         auto* image = list_entry(el, ImageSnapShotContext, link);
-        JS_FreeValue(context->ctx(), image->callback);
+        JS_FreeValue(m_page_context->ctx(), image->callback);
       }
     }
   }
@@ -52,11 +52,11 @@ class JSBridgeTest final {
 
  private:
   /// the pointer of bridge, ownership belongs to JSBridge
-  JSBridge* bridge_;
+  KrakenPage* m_page;
   /// the pointer of JSContext, overship belongs to JSContext
-  const std::unique_ptr<binding::qjs::PageJSContext>& context;
+  const std::unique_ptr<binding::qjs::PageJSContext>& m_page_context;
 };
 
 }  // namespace kraken
 
-#endif  // KRAKENBRIDGE_BRIDGE_TEST_QJS_H
+#endif  // KRAKENBRIDGE_PAGE_TEST_H

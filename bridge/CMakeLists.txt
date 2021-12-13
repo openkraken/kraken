@@ -176,8 +176,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   list(APPEND BRIDGE_LINK_LIBS quickjs)
 
   list(APPEND BRIDGE_SOURCE
-    bridge_qjs.cc
-    bridge_qjs.h
+    page.cc
+    page.h
     bindings/qjs/garbage_collected.h
     bindings/qjs/js_context.cc
     bindings/qjs/js_context.h
