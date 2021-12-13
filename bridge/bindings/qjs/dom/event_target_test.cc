@@ -4,8 +4,8 @@
  */
 
 #include "event_target.h"
-#include "page.h"
 #include "gtest/gtest.h"
+#include "page.h"
 
 TEST(EventTarget, addEventListener) {
   bool static errorCalled = false;

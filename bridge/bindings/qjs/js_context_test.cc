@@ -3,8 +3,8 @@
  * Author: Kraken Team.
  */
 
-#include "page.h"
 #include "gtest/gtest.h"
+#include "page.h"
 
 TEST(Context, isValid) {
   auto bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {});

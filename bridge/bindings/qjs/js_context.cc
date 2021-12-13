@@ -31,7 +31,8 @@ std::unique_ptr<PageJSContext> createJSContext(int32_t contextId, const JSExcept
 
 static JSRuntime* m_runtime{nullptr};
 
-PageJSContext::PageJSContext(int32_t contextId, const JSExceptionHandler& handler, void* owner) : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false), uniqueId(context_unique_id++) {
+PageJSContext::PageJSContext(int32_t contextId, const JSExceptionHandler& handler, void* owner)
+    : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false), uniqueId(context_unique_id++) {
   // @FIXME: maybe contextId will larger than MAX_JS_CONTEXT
   valid_contexts[contextId] = true;
   if (contextId > running_context_list)

@@ -53,7 +53,7 @@ class KrakenPage final {
   void* owner;
   JSBridgeDisposeCallback disposeCallback{nullptr};
 #endif
-private:
+ private:
   std::unique_ptr<binding::qjs::PageJSContext> m_context;
   JSExceptionHandler m_handler;
 };

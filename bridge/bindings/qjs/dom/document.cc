@@ -85,8 +85,9 @@ Document::Document(PageJSContext* context) : Node(context, "Document") {
     Event::defineEvent(EVENT_MEDIA_ERROR, [](PageJSContext* context, void* nativeEvent) -> EventInstance* {
       return new MediaErrorEventInstance(MediaErrorEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
     });
-    Event::defineEvent(EVENT_MESSAGE,
-                       [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new MessageEventInstance(MessageEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+    Event::defineEvent(EVENT_MESSAGE, [](PageJSContext* context, void* nativeEvent) -> EventInstance* {
+      return new MessageEventInstance(MessageEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    });
     Event::defineEvent(EVENT_CLOSE,
                        [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new CloseEventInstance(CloseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
     Event::defineEvent(EVENT_INTERSECTION_CHANGE, [](PageJSContext* context, void* nativeEvent) -> EventInstance* {
@@ -100,14 +101,17 @@ Document::Document(PageJSContext* context) : Node(context, "Document") {
                        [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
     Event::defineEvent(EVENT_TOUCH_CANCEL,
                        [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_SWIPE,
-                       [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_PAN,
-                       [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_LONG_PRESS,
-                       [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_SCALE,
-                       [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+    Event::defineEvent(EVENT_SWIPE, [](PageJSContext* context, void* nativeEvent) -> EventInstance* {
+      return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    });
+    Event::defineEvent(
+        EVENT_PAN, [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+    Event::defineEvent(EVENT_LONG_PRESS, [](PageJSContext* context, void* nativeEvent) -> EventInstance* {
+      return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_SCALE, [](PageJSContext* context, void* nativeEvent) -> EventInstance* {
+      return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    });
     Event::defineEvent(EVENT_CLICK,
                        [](PageJSContext* context, void* nativeEvent) -> EventInstance* { return new MouseEventInstance(MouseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
     Event::defineEvent(EVENT_CANCEL,

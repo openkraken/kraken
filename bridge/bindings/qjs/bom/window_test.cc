@@ -4,8 +4,8 @@
  */
 
 #include "window.h"
-#include "page.h"
 #include "gtest/gtest.h"
+#include "page.h"
 
 TEST(Window, instanceofEventTarget) {
   bool static errorCalled = false;

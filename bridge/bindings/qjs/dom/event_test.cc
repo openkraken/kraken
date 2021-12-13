@@ -3,9 +3,9 @@
  * Author: Kraken Team.
  */
 
-#include "page.h"
 #include "event_target.h"
 #include "gtest/gtest.h"
+#include "page.h"
 
 TEST(MouseEvent, init) {
   bool static errorCalled = false;

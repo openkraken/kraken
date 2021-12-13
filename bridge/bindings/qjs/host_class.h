@@ -132,7 +132,7 @@ class Instance {
  protected:
   // Subclass must to provider a method of void trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func)
   // to tell GC all JSValues are managed by them.
-  virtual void trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) {};
+  virtual void trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func){};
 
   PageJSContext* m_context{nullptr};
   JSContext* m_ctx{nullptr};

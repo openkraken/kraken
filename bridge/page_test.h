@@ -8,8 +8,8 @@
 
 #include "bindings/qjs/dom/document.h"
 #include "bindings/qjs/html_parser.h"
-#include "page.h"
 #include "kraken_bridge_test.h"
+#include "page.h"
 
 namespace kraken {
 

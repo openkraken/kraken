@@ -7,8 +7,8 @@
 
 #include <atomic>
 #include "bindings/qjs/qjs_patch.h"
-#include "page.h"
 #include "dart_methods.h"
+#include "page.h"
 
 #include "bindings/qjs/bom/blob.h"
 #include "bindings/qjs/bom/console.h"

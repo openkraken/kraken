@@ -5,17 +5,15 @@
 
 #include "host_class.h"
 #include <unordered_map>
-#include "page.h"
 #include "gtest/gtest.h"
+#include "page.h"
 
 namespace kraken::binding::qjs {
 
 class ParentClass : public HostClass {
  public:
   explicit ParentClass(PageJSContext* context) : HostClass(context, "ParentClass") {}
-  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValueConst* argv) override {
-    return HostClass::instanceConstructor(ctx, func_obj, this_val, argc, argv);
-  }
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValueConst* argv) override { return HostClass::instanceConstructor(ctx, func_obj, this_val, argc, argv); }
 
   OBJECT_INSTANCE(ParentClass);
 

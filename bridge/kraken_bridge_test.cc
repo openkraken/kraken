@@ -20,7 +20,7 @@ void initTestFramework(int32_t contextId) {
     bridgeTestPool = new kraken::KrakenPageTest*[10];
   }
 
-  auto *page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
   auto bridgeTest = new kraken::KrakenPageTest(page);
   bridgeTestPool[contextId] = bridgeTest;
 }

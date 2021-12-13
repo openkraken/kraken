@@ -234,7 +234,8 @@ JSValue Performance::measure(JSContext* ctx, JSValue this_val, int argc, JSValue
   return JS_NULL;
 }
 
-PerformanceEntry::PerformanceEntry(PageJSContext* context, NativePerformanceEntry* nativePerformanceEntry) : HostObject(context, "PerformanceEntry"), m_nativePerformanceEntry(nativePerformanceEntry) {}
+PerformanceEntry::PerformanceEntry(PageJSContext* context, NativePerformanceEntry* nativePerformanceEntry)
+    : HostObject(context, "PerformanceEntry"), m_nativePerformanceEntry(nativePerformanceEntry) {}
 
 PerformanceMark::PerformanceMark(PageJSContext* context, std::string& name, int64_t startTime)
     : PerformanceEntry(context, new NativePerformanceEntry(name, "mark", startTime, 0, PERFORMANCE_ENTRY_NONE_UNIQUE_ID)) {}

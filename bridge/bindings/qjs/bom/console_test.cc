@@ -4,8 +4,8 @@
  */
 
 #include "console.h"
-#include "page.h"
 #include "gtest/gtest.h"
+#include "page.h"
 
 std::once_flag kGlobalClassIdFlag;
 

@@ -3,9 +3,9 @@
  * Author: Kraken Team.
  */
 
-#include "page.h"
 #include "event_target.h"
 #include "gtest/gtest.h"
+#include "page.h"
 
 TEST(Node, appendChild) {
   bool static errorCalled = false;
