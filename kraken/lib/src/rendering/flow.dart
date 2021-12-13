@@ -394,7 +394,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   @override
   void performLayout() {
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       childLayoutDuration = 0;
       PerformanceTiming.instance()
         .mark(PERF_FLOW_LAYOUT_START, uniqueId: hashCode);
@@ -407,7 +407,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       needsRelayout = false;
     }
 
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       DateTime flowLayoutEndTime = DateTime.now();
       int amendEndTime =
         flowLayoutEndTime.microsecondsSinceEpoch - childLayoutDuration;
@@ -559,7 +559,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       if (isChildNeedsLayout) {
         late DateTime childLayoutStart;
-        if (kProfileMode) {
+        if (kProfileMode && PerformanceTiming.enabled()) {
           childLayoutStart = DateTime.now();
         }
 
@@ -579,7 +579,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         }
         child.layout(childConstraints, parentUsesSize: true);
 
-        if (kProfileMode) {
+        if (kProfileMode && PerformanceTiming.enabled()) {
           DateTime childLayoutEnd = DateTime.now();
           childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch -
               childLayoutStart.microsecondsSinceEpoch);
@@ -1558,13 +1558,13 @@ class RenderFlowLayout extends RenderLayoutBox {
       RenderObject child = paintingOrder[i];
       if (child is! RenderPositionPlaceholder) {
         late DateTime childPaintStart;
-        if (kProfileMode) {
+        if (kProfileMode && PerformanceTiming.enabled()) {
           childPaintStart = DateTime.now();
         }
         final RenderLayoutParentData childParentData =
             child.parentData as RenderLayoutParentData;
         context.paintChild(child, childParentData.offset + offset);
-        if (kProfileMode) {
+        if (kProfileMode && PerformanceTiming.enabled()) {
           DateTime childPaintEnd = DateTime.now();
           childPaintDuration += (childPaintEnd.microsecondsSinceEpoch -
               childPaintStart.microsecondsSinceEpoch);
