@@ -267,6 +267,7 @@ class CSSLengthValue {
               if (renderBoxModel != null) {
                 renderBoxModel.markParentNeedsRelayout();
               }
+              // Set as initial value, use infinity as auto value.
               _computedValue = double.infinity;
             }
             break;
@@ -301,6 +302,7 @@ class CSSLengthValue {
                 if (renderBoxModel != null) {
                   renderBoxModel.markParentNeedsRelayout();
                 }
+                // Set as initial value.
                 _computedValue = 0;
               }
             } else if (axisType == Axis.vertical) {
