@@ -71,3 +71,32 @@ TEST(Element, instanceofEventTarget) {
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);
 }
+
+TEST(Element, stringifyBoundingClientRect) {
+  using namespace kraken::binding::qjs;
+
+  bool static errorCalled = false;
+  bool static logCalled = false;
+  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(), "{\"x\":10,\"y\":20,\"width\":30,\"height\":40,\"top\":10,\"right\":20,\"bottom\":30,\"left\":40}");
+  };
+  auto* bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+    KRAKEN_LOG(VERBOSE) << errmsg;
+    errorCalled = true;
+  });
+  auto& context = bridge->getContext();
+
+  NativeBoundingClientRect nativeRect{
+      10.0, 20.0, 30.0, 40.0, 10.0, 20.0, 30.0, 40.0,
+  };
+
+  auto* clientRect = new BoundingClientRect(context.get(), &nativeRect);
+  context->defineGlobalProperty("boundingClient", clientRect->jsObject);
+
+  const char* code = "console.log(JSON.stringify(boundingClient))";
+  bridge->evaluateScript(code, strlen(code), "vm://", 0);
+  delete bridge;
+  EXPECT_EQ(errorCalled, false);
+  EXPECT_EQ(logCalled, true);
+}

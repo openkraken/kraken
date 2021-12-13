@@ -19,7 +19,7 @@ class Location : public HostObject {
   static JSValue reload(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
  private:
-  ObjectFunction m_reload{m_context, jsObject, "reload", reload, 0};
+  DEFINE_FUNCTION(reload, 0);
 };
 
 }  // namespace kraken::binding::qjs

@@ -79,7 +79,7 @@ JSContext::~JSContext() {
     struct list_head *el, *el1;
     list_for_each_safe(el, el1, &node_job_list) {
       auto* node = list_entry(el, NodeJob, link);
-      JS_FreeValue(m_ctx, node->nodeInstance->instanceObject);
+      JS_FreeValue(m_ctx, node->nodeInstance->jsObject);
     }
   }
 
@@ -88,7 +88,7 @@ JSContext::~JSContext() {
     struct list_head *el, *el1;
     list_for_each_safe(el, el1, &document_job_list) {
       auto* node = list_entry(el, NodeJob, link);
-      JS_FreeValue(m_ctx, node->nodeInstance->instanceObject);
+      JS_FreeValue(m_ctx, node->nodeInstance->jsObject);
     }
   }
   // Manual free timers

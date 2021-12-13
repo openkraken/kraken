@@ -16,11 +16,11 @@ void bindWindow(std::unique_ptr<JSContext>& context) {
   // Set globalThis and Window's prototype to EventTarget's prototype to support EventTarget methods in global.
   auto* windowConstructor = new Window(context.get());
   JS_SetPrototype(context->ctx(), context->global(), windowConstructor->prototype());
-  context->defineGlobalProperty("Window", windowConstructor->classObject);
+  context->defineGlobalProperty("Window", windowConstructor->jsObject);
 
   auto* window = new WindowInstance(windowConstructor);
   JS_SetOpaque(context->global(), window);
-  context->defineGlobalProperty("__window__", window->instanceObject);
+  context->defineGlobalProperty("__window__", window->jsObject);
 }
 
 JSClassID Window::kWindowClassId{0};
@@ -60,7 +60,7 @@ JSValue Window::postMessage(QjsContext* ctx, JSValue this_val, int argc, JSValue
   JS_SetPropertyStr(ctx, messageEventInitValue, "data", JS_DupValue(ctx, messageValue));
   JS_SetPropertyStr(ctx, originValue, "origin", JS_DupValue(ctx, originValue));
 
-  JSValue messageEventValue = JS_CallConstructor(ctx, MessageEvent::instance(window->m_context)->classObject, 1, &messageEventInitValue);
+  JSValue messageEventValue = JS_CallConstructor(ctx, MessageEvent::instance(window->m_context)->jsObject, 1, &messageEventInitValue);
   auto* event = static_cast<MessageEventInstance*>(JS_GetOpaque(messageEventValue, Event::kEventClassID));
   window->dispatchEvent(event);
 
@@ -70,7 +70,7 @@ JSValue Window::postMessage(QjsContext* ctx, JSValue this_val, int argc, JSValue
   return JS_NULL;
 }
 
-PROP_GETTER(Window, devicePixelRatio)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Window, devicePixelRatio)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (getDartMethod()->devicePixelRatio == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to read devicePixelRatio: dart method (devicePixelRatio) is not register.");
   }
@@ -79,11 +79,8 @@ PROP_GETTER(Window, devicePixelRatio)(QjsContext* ctx, JSValue this_val, int arg
   double devicePixelRatio = getDartMethod()->devicePixelRatio(context->getContextId());
   return JS_NewFloat64(ctx, devicePixelRatio);
 }
-PROP_SETTER(Window, devicePixelRatio)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
-PROP_GETTER(Window, colorScheme)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Window, colorScheme)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (getDartMethod()->platformBrightness == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to read colorScheme: dart method (platformBrightness) not register.");
   }
@@ -92,62 +89,42 @@ PROP_GETTER(Window, colorScheme)(QjsContext* ctx, JSValue this_val, int argc, JS
   const NativeString* code = getDartMethod()->platformBrightness(context->getContextId());
   return JS_NewUnicodeString(context->runtime(), ctx, code->string, code->length);
 }
-PROP_SETTER(Window, colorScheme)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
-PROP_GETTER(Window, __location__)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Window, __location__)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
   if (window == nullptr)
     return JS_UNDEFINED;
   return JS_DupValue(ctx, window->m_location.value());
 }
-PROP_SETTER(Window, __location__)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
-PROP_GETTER(Window, location)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Window, location)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
   return JS_GetPropertyStr(ctx, window->m_context->global(), "location");
 }
-PROP_SETTER(Window, location)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
-PROP_GETTER(Window, window)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Window, window)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_GetGlobalObject(ctx);
 }
-PROP_SETTER(Window, window)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
-PROP_GETTER(Window, parent)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+
+IMPL_PROPERTY_GETTER(Window, parent)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_GetGlobalObject(ctx);
 }
-PROP_SETTER(Window, parent)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
-PROP_GETTER(Window, scrollX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Window, scrollX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
   return window->callNativeMethods("scrollX", 0, nullptr);
 }
-PROP_SETTER(Window, scrollX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
-PROP_GETTER(Window, scrollY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Window, scrollY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
   return window->callNativeMethods("scrollY", 0, nullptr);
 }
-PROP_SETTER(Window, scrollY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
-PROP_GETTER(Window, onerror)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Window, onerror)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
   return JS_DupValue(ctx, window->onerror);
 }
-PROP_SETTER(Window, onerror)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_SETTER(Window, onerror)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
   JSValue eventString = JS_NewString(ctx, "onerror");
   JSString* p = JS_VALUE_GET_STRING(eventString);
@@ -162,10 +139,7 @@ PROP_SETTER(Window, onerror)(QjsContext* ctx, JSValue this_val, int argc, JSValu
   return JS_NULL;
 }
 
-PROP_SETTER(Window, self)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
-PROP_GETTER(Window, self)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Window, self)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_GetGlobalObject(ctx);
 }
 

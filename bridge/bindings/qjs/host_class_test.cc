@@ -36,7 +36,7 @@ class SampleClassInstance : public Instance {
   static void finalizer(JSRuntime* rt, JSValue v) {
     auto* instance = static_cast<SampleClassInstance*>(JS_GetOpaque(v, kSampleClassId));
     if (instance->context()->isValid()) {
-      JS_FreeValue(instance->m_ctx, instance->instanceObject);
+      JS_FreeValue(instance->m_ctx, instance->jsObject);
     }
     delete instance;
   }
@@ -52,7 +52,7 @@ class SampleClass : public ParentClass {
   JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override {
     auto* sampleClass = static_cast<SampleClass*>(JS_GetOpaque(func_obj, JSContext::kHostClassClassId));
     auto* instance = new SampleClassInstance(sampleClass);
-    return instance->instanceObject;
+    return instance->jsObject;
   }
   ~SampleClass() {}
 
@@ -76,8 +76,8 @@ TEST(HostClass, newInstance) {
   auto& context = bridge->getContext();
   auto* sampleObject = new SampleClass(context.get());
   auto* parentObject = ParentClass::instance(context.get());
-  context->defineGlobalProperty("SampleClass", sampleObject->classObject);
-  context->defineGlobalProperty("ParentClass", parentObject->classObject);
+  context->defineGlobalProperty("SampleClass", sampleObject->jsObject);
+  context->defineGlobalProperty("ParentClass", parentObject->jsObject);
   const char* code = "let obj = new SampleClass(1,2,3,4); console.log(obj.f())";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   delete bridge;
@@ -100,11 +100,11 @@ TEST(HostClass, instanceOf) {
   auto* sampleObject = new SampleClass(context.get());
   auto* parentObject = ParentClass::instance(context.get());
   // Test for C API
-  context->defineGlobalProperty("SampleClass", sampleObject->classObject);
-  context->defineGlobalProperty("ParentClass", parentObject->classObject);
+  context->defineGlobalProperty("SampleClass", sampleObject->jsObject);
+  context->defineGlobalProperty("ParentClass", parentObject->jsObject);
   JSValue args[] = {};
-  JSValue object = JS_CallConstructor(context->ctx(), sampleObject->classObject, 0, args);
-  bool isInstanceof = JS_IsInstanceOf(context->ctx(), object, parentObject->classObject);
+  JSValue object = JS_CallConstructor(context->ctx(), sampleObject->jsObject, 0, args);
+  bool isInstanceof = JS_IsInstanceOf(context->ctx(), object, parentObject->jsObject);
   EXPECT_EQ(isInstanceof, true);
   JS_FreeValue(context->ctx(), object);
 
@@ -131,9 +131,9 @@ TEST(HostClass, inheritance) {
   auto* sampleObject = new SampleClass(context.get());
 
   auto* parentObject = ParentClass::instance(context.get());
-  context->defineGlobalProperty("ParentClass", parentObject->classObject);
+  context->defineGlobalProperty("ParentClass", parentObject->jsObject);
 
-  context->defineGlobalProperty("SampleClass", sampleObject->classObject);
+  context->defineGlobalProperty("SampleClass", sampleObject->jsObject);
 
   const char* code =
       "let obj = new SampleClass(1,2,3,4);\n"
@@ -159,9 +159,9 @@ TEST(HostClass, inherintanceInJavaScript) {
   auto* sampleObject = new SampleClass(context.get());
 
   auto* parentObject = ParentClass::instance(context.get());
-  context->defineGlobalProperty("ParentClass", parentObject->classObject);
+  context->defineGlobalProperty("ParentClass", parentObject->jsObject);
 
-  context->defineGlobalProperty("SampleClass", sampleObject->classObject);
+  context->defineGlobalProperty("SampleClass", sampleObject->jsObject);
 
   const char* code = R"(
 class Demo extends SampleClass {
@@ -196,7 +196,7 @@ TEST(HostClass, haveFunctionProtoMethods) {
   });
   auto& context = bridge->getContext();
   auto* parentObject = ParentClass::instance(context.get());
-  context->defineGlobalProperty("ParentClass", parentObject->classObject);
+  context->defineGlobalProperty("ParentClass", parentObject->jsObject);
 
   const char* code = R"(
 class Demo extends ParentClass {
@@ -226,15 +226,15 @@ TEST(HostClass, multipleInstance) {
   auto& context = bridge->getContext();
 
   auto* parentObject = ParentClass::instance(context.get());
-  context->defineGlobalProperty("ParentClass", parentObject->classObject);
+  context->defineGlobalProperty("ParentClass", parentObject->jsObject);
 
   // Test for C API 1
   {
     auto* sampleObject = new SampleClass(context.get());
-    context->defineGlobalProperty("SampleClass1", sampleObject->classObject);
+    context->defineGlobalProperty("SampleClass1", sampleObject->jsObject);
     JSValue args[] = {};
-    JSValue object = JS_CallConstructor(context->ctx(), sampleObject->classObject, 0, args);
-    bool isInstanceof = JS_IsInstanceOf(context->ctx(), object, sampleObject->classObject);
+    JSValue object = JS_CallConstructor(context->ctx(), sampleObject->jsObject, 0, args);
+    bool isInstanceof = JS_IsInstanceOf(context->ctx(), object, sampleObject->jsObject);
     EXPECT_EQ(isInstanceof, true);
     JS_FreeValue(context->ctx(), object);
   }
@@ -242,30 +242,30 @@ TEST(HostClass, multipleInstance) {
   // Test for C API 2
   {
     auto* sampleObject = new SampleClass(context.get());
-    context->defineGlobalProperty("SampleClass2", sampleObject->classObject);
+    context->defineGlobalProperty("SampleClass2", sampleObject->jsObject);
     JSValue args[] = {};
-    JSValue object = JS_CallConstructor(context->ctx(), sampleObject->classObject, 0, args);
-    bool isInstanceof = JS_IsInstanceOf(context->ctx(), object, sampleObject->classObject);
+    JSValue object = JS_CallConstructor(context->ctx(), sampleObject->jsObject, 0, args);
+    bool isInstanceof = JS_IsInstanceOf(context->ctx(), object, sampleObject->jsObject);
     EXPECT_EQ(isInstanceof, true);
     JS_FreeValue(context->ctx(), object);
   }
 
   {
     auto* sampleObject = new SampleClass(context.get());
-    context->defineGlobalProperty("SampleClass3", sampleObject->classObject);
+    context->defineGlobalProperty("SampleClass3", sampleObject->jsObject);
     JSValue args[] = {};
-    JSValue object = JS_CallConstructor(context->ctx(), sampleObject->classObject, 0, args);
-    bool isInstanceof = JS_IsInstanceOf(context->ctx(), object, sampleObject->classObject);
+    JSValue object = JS_CallConstructor(context->ctx(), sampleObject->jsObject, 0, args);
+    bool isInstanceof = JS_IsInstanceOf(context->ctx(), object, sampleObject->jsObject);
     EXPECT_EQ(isInstanceof, true);
     JS_FreeValue(context->ctx(), object);
   }
 
   {
     auto* sampleObject = new SampleClass(context.get());
-    context->defineGlobalProperty("SampleClass4", sampleObject->classObject);
+    context->defineGlobalProperty("SampleClass4", sampleObject->jsObject);
     JSValue args[] = {};
-    JSValue object = JS_CallConstructor(context->ctx(), sampleObject->classObject, 0, args);
-    bool isInstanceof = JS_IsInstanceOf(context->ctx(), object, sampleObject->classObject);
+    JSValue object = JS_CallConstructor(context->ctx(), sampleObject->jsObject, 0, args);
+    bool isInstanceof = JS_IsInstanceOf(context->ctx(), object, sampleObject->jsObject);
     EXPECT_EQ(isInstanceof, true);
     JS_FreeValue(context->ctx(), object);
   }
@@ -317,7 +317,7 @@ class ExoticClassInstance : public Instance {
   static void finalizer(JSRuntime* rt, JSValue val) {
     auto* instance = static_cast<ExoticClassInstance*>(JS_GetOpaque(val, ExoticClass::exoticClassID));
     if (instance->context()->isValid()) {
-      JS_FreeValue(instance->m_ctx, instance->instanceObject);
+      JS_FreeValue(instance->m_ctx, instance->jsObject);
     }
     delete instance;
   };
@@ -344,7 +344,7 @@ class ExoticClassInstance : public Instance {
       return JS_NULL;
     };
   };
-  ObjectProperty m_getClassName{m_context, instanceObject, "className", ClassNamePropertyDescriptor::getter, ClassNamePropertyDescriptor::setter};
+  ObjectProperty m_getClassName{m_context, jsObject, "className", ClassNamePropertyDescriptor::getter, ClassNamePropertyDescriptor::setter};
 
  private:
   std::unordered_map<JSAtom, JSValue> m_properties;
@@ -354,7 +354,7 @@ class ExoticClassInstance : public Instance {
 JSClassExoticMethods ExoticClassInstance::methods{nullptr, nullptr, nullptr, nullptr, nullptr, getProperty, setProperty};
 
 JSValue ExoticClass::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
-  return (new ExoticClassInstance(this))->instanceObject;
+  return (new ExoticClassInstance(this))->jsObject;
 }
 
 TEST(HostClass, exoticClass) {
@@ -371,7 +371,7 @@ TEST(HostClass, exoticClass) {
 
   auto& context = bridge->getContext();
   auto* constructor = new ExoticClass(context.get());
-  context->defineGlobalProperty("ExoticClass", constructor->classObject);
+  context->defineGlobalProperty("ExoticClass", constructor->jsObject);
 
   std::string code =
       "globalThis.obj = new ExoticClass();"
@@ -400,7 +400,7 @@ TEST(HostClass, setExoticClassProperty) {
 
   auto& context = bridge->getContext();
   auto* constructor = new ExoticClass(context.get());
-  context->defineGlobalProperty("ExoticClass", constructor->classObject);
+  context->defineGlobalProperty("ExoticClass", constructor->jsObject);
 
   std::string code =
       "var obj = new ExoticClass();"

@@ -16,7 +16,7 @@ namespace kraken::binding::qjs {
 
 void bindNode(std::unique_ptr<JSContext>& context) {
   auto* constructor = Node::instance(context.get());
-  context->defineGlobalProperty("Node", constructor->classObject);
+  context->defineGlobalProperty("Node", constructor->jsObject);
 }
 
 JSValue Node::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
@@ -59,13 +59,13 @@ JSValue Node::cloneNode(QjsContext* ctx, JSValue this_val, int argc, JSValue* ar
     if (deep) {
       traverseCloneNode(ctx, selfInstance, newElementInstance);
     }
-    return newElementInstance->instanceObject;
+    return newElementInstance->jsObject;
   } else if (selfInstance->nodeType == NodeType::TEXT_NODE) {
     auto textNode = static_cast<TextNodeInstance*>(selfInstance);
     JSValue newTextNode = copyNodeValue(ctx, static_cast<NodeInstance*>(textNode));
     return newTextNode;
   } else if (selfInstance->nodeType == NodeType::DOCUMENT_FRAGMENT_NODE) {
-    JSValue newFragment = JS_CallConstructor(ctx, DocumentFragment::instance(selfInstance->m_context)->classObject, 0, nullptr);
+    JSValue newFragment = JS_CallConstructor(ctx, DocumentFragment::instance(selfInstance->m_context)->jsObject, 0, nullptr);
     auto* newFragmentInstance = static_cast<NodeInstance*>(JS_GetOpaque(newFragment, Node::classId(newFragment)));
 
     if (deep) {
@@ -116,7 +116,7 @@ JSValue Node::appendChild(QjsContext* ctx, JSValue this_val, int argc, JSValue* 
     selfInstance->internalAppendChild(nodeInstance);
   }
 
-  return JS_DupValue(ctx, nodeInstance->instanceObject);
+  return JS_DupValue(ctx, nodeInstance->jsObject);
 }
 JSValue Node::remove(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto selfInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
@@ -142,7 +142,7 @@ JSValue Node::removeChild(QjsContext* ctx, JSValue this_val, int argc, JSValue* 
   }
 
   auto removedNode = selfInstance->internalRemoveChild(nodeInstance);
-  return JS_DupValue(ctx, removedNode->instanceObject);
+  return JS_DupValue(ctx, removedNode->jsObject);
 }
 
 JSValue Node::insertBefore(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -211,7 +211,7 @@ JSValue Node::replaceChild(QjsContext* ctx, JSValue this_val, int argc, JSValue*
   auto newChildInstance = static_cast<NodeInstance*>(JS_GetOpaque(newChildValue, Node::classId(newChildValue)));
   auto oldChildInstance = static_cast<NodeInstance*>(JS_GetOpaque(oldChildValue, Node::classId(oldChildValue)));
 
-  if (oldChildInstance == nullptr || JS_VALUE_GET_PTR(oldChildInstance->parentNode) != JS_VALUE_GET_PTR(selfInstance->instanceObject) || oldChildInstance->document() != selfInstance->document()) {
+  if (oldChildInstance == nullptr || JS_VALUE_GET_PTR(oldChildInstance->parentNode) != JS_VALUE_GET_PTR(selfInstance->jsObject) || oldChildInstance->document() != selfInstance->document()) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'replaceChild' on 'Node': The node to be replaced is not a child of this node.");
   }
 
@@ -234,7 +234,7 @@ JSValue Node::replaceChild(QjsContext* ctx, JSValue this_val, int argc, JSValue*
     selfInstance->ensureDetached(newChildInstance);
     selfInstance->internalReplaceChild(newChildInstance, oldChildInstance);
   }
-  return JS_DupValue(ctx, oldChildInstance->instanceObject);
+  return JS_DupValue(ctx, oldChildInstance->jsObject);
 }
 
 void Node::traverseCloneNode(QjsContext* ctx, NodeInstance* baseNode, NodeInstance* targetNode) {
@@ -263,7 +263,7 @@ JSValue Node::copyNodeValue(QjsContext* ctx, NodeInstance* node) {
     std::string tagName = element->getRegisteredTagName();
     JSValue tagNameValue = JS_NewString(element->m_ctx, tagName.c_str());
     JSValue arguments[] = {tagNameValue};
-    JSValue newElementValue = JS_CallConstructor(element->context()->ctx(), Element::instance(element->context())->classObject, 1, arguments);
+    JSValue newElementValue = JS_CallConstructor(element->context()->ctx(), Element::instance(element->context())->jsObject, 1, arguments);
     JS_FreeValue(ctx, tagNameValue);
 
     auto* newElement = static_cast<ElementInstance*>(JS_GetOpaque(newElementValue, Node::classId(newElementValue)));
@@ -281,91 +281,67 @@ JSValue Node::copyNodeValue(QjsContext* ctx, NodeInstance* node) {
     std::unique_ptr<NativeString> args_01 = stringToNativeString(newNodeEventTargetId);
     foundation::UICommandBuffer::instance(newElement->context()->getContextId())->addCommand(element->m_eventTargetId, UICommand::cloneNode, *args_01, nullptr);
 
-    return newElement->instanceObject;
+    return newElement->jsObject;
   } else if (node->nodeType == TEXT_NODE) {
     auto* textNode = reinterpret_cast<TextNodeInstance*>(node);
     JSValue textContent = textNode->internalGetTextContent();
     JSValue arguments[] = {textContent};
-    JSValue result = JS_CallConstructor(ctx, TextNode::instance(textNode->m_context)->classObject, 1, arguments);
+    JSValue result = JS_CallConstructor(ctx, TextNode::instance(textNode->m_context)->jsObject, 1, arguments);
     JS_FreeValue(ctx, textContent);
     return result;
   }
   return JS_NULL;
 }
 
-PROP_GETTER(NodeInstance, isConnected)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Node, isConnected)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
   return JS_NewBool(ctx, nodeInstance->isConnected());
 }
-PROP_SETTER(NodeInstance, isConnected)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
-PROP_GETTER(NodeInstance, ownerDocument)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Node, ownerDocument)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
-  return JS_DupValue(ctx, nodeInstance->m_document->instanceObject);
-}
-PROP_SETTER(NodeInstance, ownerDocument)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
+  return JS_DupValue(ctx, nodeInstance->m_document->jsObject);
 }
 
-PROP_GETTER(NodeInstance, firstChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Node, firstChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
   auto* instance = nodeInstance->firstChild();
-  return instance != nullptr ? instance->instanceObject : JS_NULL;
-}
-PROP_SETTER(NodeInstance, firstChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
+  return instance != nullptr ? instance->jsObject : JS_NULL;
 }
 
-PROP_GETTER(NodeInstance, lastChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Node, lastChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
   auto* instance = nodeInstance->lastChild();
-  return instance != nullptr ? instance->instanceObject : JS_NULL;
-}
-PROP_SETTER(NodeInstance, lastChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
+  return instance != nullptr ? instance->jsObject : JS_NULL;
 }
 
-PROP_GETTER(NodeInstance, parentNode)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Node, parentNode)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
   return JS_DupValue(ctx, nodeInstance->parentNode);
 }
-PROP_SETTER(NodeInstance, parentNode)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
-PROP_GETTER(NodeInstance, previousSibling)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Node, previousSibling)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
   auto* instance = nodeInstance->previousSibling();
-  return instance != nullptr ? instance->instanceObject : JS_NULL;
-}
-PROP_SETTER(NodeInstance, previousSibling)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
+  return instance != nullptr ? instance->jsObject : JS_NULL;
 }
 
-PROP_GETTER(NodeInstance, nextSibling)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Node, nextSibling)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
   auto* instance = nodeInstance->nextSibling();
-  return instance != nullptr ? instance->instanceObject : JS_NULL;
-}
-PROP_SETTER(NodeInstance, nextSibling)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
+  return instance != nullptr ? instance->jsObject : JS_NULL;
 }
 
-PROP_GETTER(NodeInstance, nodeType)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Node, nodeType)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
   return JS_NewUint32(ctx, nodeInstance->nodeType);
 }
-PROP_SETTER(NodeInstance, nodeType)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
-PROP_GETTER(NodeInstance, textContent)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Node, textContent)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
   return nodeInstance->internalGetTextContent();
 }
-PROP_SETTER(NodeInstance, textContent)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_SETTER(Node, textContent)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
   nodeInstance->internalSetTextContent(argv[0]);
   return JS_NULL;
@@ -412,7 +388,7 @@ NodeInstance* NodeInstance::previousSibling() {
 
   auto* parent = static_cast<NodeInstance*>(JS_GetOpaque(parentNode, Node::classId(parentNode)));
   auto parentChildNodes = parent->childNodes;
-  int32_t idx = arrayFindIdx(m_ctx, parentChildNodes, instanceObject);
+  int32_t idx = arrayFindIdx(m_ctx, parentChildNodes, jsObject);
   int32_t parentChildNodeLen = arrayGetLength(m_ctx, parentChildNodes);
 
   if (idx - 1 < parentChildNodeLen) {
@@ -427,7 +403,7 @@ NodeInstance* NodeInstance::nextSibling() {
     return nullptr;
   auto* parent = static_cast<NodeInstance*>(JS_GetOpaque(parentNode, Node::classId(parentNode)));
   auto parentChildNodes = parent->childNodes;
-  int32_t idx = arrayFindIdx(m_ctx, parentChildNodes, instanceObject);
+  int32_t idx = arrayFindIdx(m_ctx, parentChildNodes, jsObject);
   int32_t parentChildNodeLen = arrayGetLength(m_ctx, parentChildNodes);
 
   if (idx + 1 < parentChildNodeLen) {
@@ -438,7 +414,7 @@ NodeInstance* NodeInstance::nextSibling() {
   return nullptr;
 }
 void NodeInstance::internalAppendChild(NodeInstance* node) {
-  arrayPushValue(m_ctx, childNodes, node->instanceObject);
+  arrayPushValue(m_ctx, childNodes, node->jsObject);
   node->setParentNode(this);
 
   node->_notifyNodeInsert(this);
@@ -472,7 +448,7 @@ void NodeInstance::internalClearChild() {
   JS_SetPropertyStr(m_ctx, childNodes, "length", JS_NewUint32(m_ctx, 0));
 }
 NodeInstance* NodeInstance::internalRemoveChild(NodeInstance* node) {
-  int32_t idx = arrayFindIdx(m_ctx, childNodes, node->instanceObject);
+  int32_t idx = arrayFindIdx(m_ctx, childNodes, node->jsObject);
 
   if (idx != -1) {
     arraySpliceValue(m_ctx, childNodes, idx, 1);
@@ -487,7 +463,7 @@ JSValue NodeInstance::internalInsertBefore(NodeInstance* node, NodeInstance* ref
   if (referenceNode == nullptr) {
     internalAppendChild(node);
   } else {
-    if (JS_VALUE_GET_PTR(referenceNode->parentNode) != JS_VALUE_GET_PTR(instanceObject)) {
+    if (JS_VALUE_GET_PTR(referenceNode->parentNode) != JS_VALUE_GET_PTR(jsObject)) {
       return JS_ThrowTypeError(m_ctx, "Uncaught TypeError: Failed to execute 'insertBefore' on 'Node': reference node is not a child of this node.");
     }
 
@@ -495,13 +471,13 @@ JSValue NodeInstance::internalInsertBefore(NodeInstance* node, NodeInstance* ref
     auto* parent = static_cast<NodeInstance*>(JS_GetOpaque(parentNodeValue, Node::classId(parentNodeValue)));
     if (parent != nullptr) {
       JSValue parentChildNodes = parent->childNodes;
-      int32_t idx = arrayFindIdx(m_ctx, parentChildNodes, referenceNode->instanceObject);
+      int32_t idx = arrayFindIdx(m_ctx, parentChildNodes, referenceNode->jsObject);
 
       if (idx == -1) {
         return JS_ThrowTypeError(m_ctx, "Failed to execute 'insertBefore' on 'Node': reference node is not a child of this node.");
       }
 
-      arrayInsert(m_ctx, parentChildNodes, idx, node->instanceObject);
+      arrayInsert(m_ctx, parentChildNodes, idx, node->jsObject);
       node->setParentNode(parent);
       node->_notifyNodeInsert(parent);
 
@@ -525,14 +501,14 @@ JSValue NodeInstance::internalReplaceChild(NodeInstance* newChild, NodeInstance*
   assert_m(JS_IsNull(newChild->parentNode), "ReplaceChild Error: newChild was not detached.");
   oldChild->removeParentNode();
 
-  int32_t childIndex = arrayFindIdx(m_ctx, childNodes, oldChild->instanceObject);
+  int32_t childIndex = arrayFindIdx(m_ctx, childNodes, oldChild->jsObject);
   if (childIndex == -1) {
     return JS_ThrowTypeError(m_ctx, "Failed to execute 'replaceChild' on 'Node': old child is not exist on childNodes.");
   }
 
   newChild->setParentNode(this);
 
-  arraySpliceValue(m_ctx, childNodes, childIndex, 1, newChild->instanceObject);
+  arraySpliceValue(m_ctx, childNodes, childIndex, 1, newChild->jsObject);
 
   oldChild->_notifyNodeRemoved(this);
   newChild->_notifyNodeInsert(this);
@@ -547,7 +523,7 @@ JSValue NodeInstance::internalReplaceChild(NodeInstance* newChild, NodeInstance*
 
   foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(oldChild->m_eventTargetId, UICommand::removeNode, nullptr);
 
-  return oldChild->instanceObject;
+  return oldChild->jsObject;
 }
 
 void NodeInstance::setParentNode(NodeInstance* parent) {
@@ -555,7 +531,7 @@ void NodeInstance::setParentNode(NodeInstance* parent) {
     JS_FreeValue(m_ctx, parentNode);
   }
 
-  parentNode = JS_DupValue(m_ctx, parent->instanceObject);
+  parentNode = JS_DupValue(m_ctx, parent->jsObject);
 }
 
 void NodeInstance::removeParentNode() {
@@ -568,12 +544,12 @@ void NodeInstance::removeParentNode() {
 
 NodeInstance::~NodeInstance() {}
 void NodeInstance::refer() {
-  JS_DupValue(m_ctx, instanceObject);
+  JS_DupValue(m_ctx, jsObject);
   list_add_tail(&nodeLink.link, &m_context->node_job_list);
 }
 void NodeInstance::unrefer() {
   list_del(&nodeLink.link);
-  JS_FreeValue(m_ctx, instanceObject);
+  JS_FreeValue(m_ctx, jsObject);
 }
 void NodeInstance::_notifyNodeRemoved(NodeInstance* node) {}
 void NodeInstance::_notifyNodeInsert(NodeInstance* node) {}
@@ -581,7 +557,7 @@ void NodeInstance::ensureDetached(NodeInstance* node) {
   auto* nodeParent = static_cast<NodeInstance*>(JS_GetOpaque(node->parentNode, Node::classId(node->parentNode)));
 
   if (nodeParent != nullptr) {
-    int32_t idx = arrayFindIdx(m_ctx, nodeParent->childNodes, node->instanceObject);
+    int32_t idx = arrayFindIdx(m_ctx, nodeParent->childNodes, node->jsObject);
     if (idx != -1) {
       node->_notifyNodeRemoved(nodeParent);
       arraySpliceValue(m_ctx, nodeParent->childNodes, idx, 1);

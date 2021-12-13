@@ -57,8 +57,8 @@ std::once_flag kDocumentInitOnceFlag;
 
 void bindDocument(std::unique_ptr<JSContext>& context) {
   auto* documentConstructor = Document::instance(context.get());
-  context->defineGlobalProperty("Document", documentConstructor->classObject);
-  JSValue documentInstance = JS_CallConstructor(context->ctx(), documentConstructor->classObject, 0, nullptr);
+  context->defineGlobalProperty("Document", documentConstructor->jsObject);
+  JSValue documentInstance = JS_CallConstructor(context->ctx(), documentConstructor->jsObject, 0, nullptr);
   context->defineGlobalProperty("document", documentInstance);
 }
 
@@ -124,7 +124,7 @@ JSClassID Document::classId() {
 
 JSValue Document::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
   auto* instance = new DocumentInstance(this);
-  return instance->instanceObject;
+  return instance->jsObject;
 }
 
 JSValue Document::createEvent(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -145,7 +145,7 @@ JSValue Document::createEvent(QjsContext* ctx, JSValue this_val, int argc, JSVal
 
     auto document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
     auto e = Event::buildEventInstance(eventType, document->context(), nativeEvent, false);
-    return e->instanceObject;
+    return e->jsObject;
   } else {
     return JS_NULL;
   }
@@ -176,18 +176,18 @@ JSValue Document::createTextNode(QjsContext* ctx, JSValue this_val, int argc, JS
   }
 
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
-  JSValue textNode = JS_CallConstructor(ctx, TextNode::instance(document->m_context)->classObject, argc, argv);
+  JSValue textNode = JS_CallConstructor(ctx, TextNode::instance(document->m_context)->jsObject, argc, argv);
   return textNode;
 }
 
 JSValue Document::createDocumentFragment(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
-  return JS_CallConstructor(ctx, DocumentFragment::instance(document->m_context)->classObject, 0, nullptr);
+  return JS_CallConstructor(ctx, DocumentFragment::instance(document->m_context)->jsObject, 0, nullptr);
 }
 
 JSValue Document::createComment(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
-  JSValue commentNode = JS_CallConstructor(ctx, Comment::instance(document->m_context)->classObject, argc, argv);
+  JSValue commentNode = JS_CallConstructor(ctx, Comment::instance(document->m_context)->jsObject, argc, argv);
   return commentNode;
 }
 
@@ -217,7 +217,7 @@ JSValue Document::getElementById(QjsContext* ctx, JSValue this_val, int argc, JS
 
   for (auto& element : targetElementList) {
     if (element->isConnected())
-      return JS_DupValue(ctx, element->instanceObject);
+      return JS_DupValue(ctx, element->jsObject);
   }
 
   return JS_NULL;
@@ -252,7 +252,7 @@ JSValue Document::getElementsByTagName(QjsContext* ctx, JSValue this_val, int ar
   JSValue pushMethod = JS_GetPropertyStr(ctx, array, "push");
 
   for (auto& element : elements) {
-    JS_Call(ctx, pushMethod, array, 1, &element->instanceObject);
+    JS_Call(ctx, pushMethod, array, 1, &element->jsObject);
   }
 
   JS_FreeValue(ctx, pushMethod);
@@ -283,7 +283,7 @@ JSValue Document::getElementsByClassName(QjsContext* ctx, JSValue this_val, int 
   JSValue pushMethod = JS_GetPropertyStr(ctx, array, "push");
 
   for (auto& element : elements) {
-    JS_Call(ctx, pushMethod, array, 1, &element->instanceObject);
+    JS_Call(ctx, pushMethod, array, 1, &element->jsObject);
   }
 
   JS_FreeValue(ctx, pushMethod);
@@ -296,35 +296,39 @@ void Document::defineElement(const std::string& tagName, Element* constructor) {
 
 JSValue Document::getElementConstructor(JSContext* context, const std::string& tagName) {
   if (elementConstructorMap.count(tagName) > 0)
-    return elementConstructorMap[tagName]->classObject;
-  return Element::instance(context)->classObject;
+    return elementConstructorMap[tagName]->jsObject;
+  return Element::instance(context)->jsObject;
 }
 
 bool Document::isCustomElement(const std::string& tagName) {
   return elementConstructorMap.count(tagName) > 0;
 }
 
-PROP_GETTER(DocumentInstance, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Document, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewString(ctx, "#document");
 }
 
-PROP_SETTER(DocumentInstance, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
+IMPL_PROPERTY_GETTER(Document, all)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
+  auto all = new AllCollection(document->m_context);
+
+  traverseNode(document, [&all](NodeInstance* node) {
+    all->internalAdd(node, nullptr);
+    return false;
+  });
+
+  return all->jsObject;
 }
 
 // document.documentElement
-PROP_GETTER(DocumentInstance, documentElement)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Document, documentElement)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   ElementInstance* documentElement = document->getDocumentElement();
-  return documentElement == nullptr ? JS_NULL : documentElement->instanceObject;
-}
-
-PROP_SETTER(DocumentInstance, documentElement)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
+  return documentElement == nullptr ? JS_NULL : documentElement->jsObject;
 }
 
 // document.head
-PROP_GETTER(DocumentInstance, head)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Document, head)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   ElementInstance* documentElement = document->getDocumentElement();
   int32_t len = arrayGetLength(ctx, documentElement->childNodes);
@@ -336,25 +340,21 @@ PROP_GETTER(DocumentInstance, head)(QjsContext* ctx, JSValue this_val, int argc,
       if (nodeInstance->nodeType == NodeType::ELEMENT_NODE) {
         auto* elementInstance = static_cast<ElementInstance*>(nodeInstance);
         if (elementInstance->tagName() == "HEAD") {
-          head = elementInstance->instanceObject;
+          head = elementInstance->jsObject;
           break;
         }
       }
       JS_FreeValue(ctx, v);
     }
 
-    JS_FreeValue(ctx, documentElement->instanceObject);
+    JS_FreeValue(ctx, documentElement->jsObject);
   }
 
   return head;
 }
 
-PROP_SETTER(DocumentInstance, head)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
-
 // document.body: https://html.spec.whatwg.org/multipage/dom.html#dom-document-body-dev
-PROP_GETTER(DocumentInstance, body)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Document, body)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   ElementInstance* documentElement = document->getDocumentElement();
   JSValue body = JS_NULL;
@@ -369,20 +369,20 @@ PROP_GETTER(DocumentInstance, body)(QjsContext* ctx, JSValue this_val, int argc,
       if (nodeInstance->nodeType == NodeType::ELEMENT_NODE) {
         auto* elementInstance = static_cast<ElementInstance*>(nodeInstance);
         if (elementInstance->tagName() == "BODY") {
-          body = elementInstance->instanceObject;
+          body = elementInstance->jsObject;
           break;
         }
       }
       JS_FreeValue(ctx, v);
     }
-    JS_FreeValue(ctx, documentElement->instanceObject);
+    JS_FreeValue(ctx, documentElement->jsObject);
   }
   return body;
 }
 
 // The body property is settable, setting a new body on a document will effectively remove all
 // the current children of the existing <body> element.
-PROP_SETTER(DocumentInstance, body)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_SETTER(Document, body)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   ElementInstance* documentElement = document->getDocumentElement();
   // If there is no document element, throw a Exception.
@@ -392,11 +392,11 @@ PROP_SETTER(DocumentInstance, body)(QjsContext* ctx, JSValue this_val, int argc,
   JSValue result = JS_NULL;
   JSValue newBody = argv[0];
   // If the body element is not null, then replace the body element with the new value within the body element's parent and return.
-  if (JS_IsInstanceOf(ctx, newBody, Element::instance(document->m_context)->classObject)) {
+  if (JS_IsInstanceOf(ctx, newBody, Element::instance(document->m_context)->jsObject)) {
     auto* newElementInstance = static_cast<ElementInstance*>(JS_GetOpaque(newBody, Element::classId()));
     // If the new value is not a body element, then throw a Exception.
     if (newElementInstance->tagName() == "BODY") {
-      JSValue oldBody = JS_GetPropertyStr(ctx, document->instanceObject, "body");
+      JSValue oldBody = JS_GetPropertyStr(ctx, document->jsObject, "body");
       if (JS_VALUE_GET_PTR(oldBody) != JS_VALUE_GET_PTR(newBody)) {
         // If the new value is the same as the body element.
         if (JS_IsNull(oldBody)) {
@@ -417,12 +417,12 @@ PROP_SETTER(DocumentInstance, body)(QjsContext* ctx, JSValue this_val, int argc,
     result = JS_ThrowTypeError(ctx, "The 1st argument provided is either null, or an invalid HTMLElement");
   }
 
-  JS_FreeValue(ctx, documentElement->instanceObject);
+  JS_FreeValue(ctx, documentElement->jsObject);
   return result;
 }
 
 // document.children
-PROP_GETTER(DocumentInstance, children)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Document, children)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   JSValue array = JS_NewArray(ctx);
   JSValue pushMethod = JS_GetPropertyStr(ctx, array, "push");
@@ -442,33 +442,12 @@ PROP_GETTER(DocumentInstance, children)(QjsContext* ctx, JSValue this_val, int a
   return array;
 }
 
-PROP_SETTER(DocumentInstance, children)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
-
-PROP_GETTER(DocumentInstance, all)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
-  auto all = new AllCollection(document->m_context);
-
-  traverseNode(document, [&all](NodeInstance* node) {
-    all->internalAdd(node, nullptr);
-    return false;
-  });
-
-  return all->jsObject;
-}
-
-PROP_SETTER(DocumentInstance, all)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
-
-PROP_GETTER(DocumentInstance, cookie)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Document, cookie)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   std::string cookie = document->m_cookie->getCookie();
   return JS_NewString(ctx, cookie.c_str());
 }
-
-PROP_SETTER(DocumentInstance, cookie)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_SETTER(Document, cookie)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   std::string value = jsValueToStdString(ctx, argv[0]);
   document->m_cookie->setCookie(value);
@@ -543,7 +522,7 @@ DocumentInstance::~DocumentInstance() {}
 void DocumentInstance::removeElementById(JSAtom id, ElementInstance* element) {
   if (m_elementMapById.count(id) > 0) {
     auto& list = m_elementMapById[id];
-    JS_FreeValue(m_ctx, element->instanceObject);
+    JS_FreeValue(m_ctx, element->jsObject);
     list_del(&element->documentLink.link);
     list.erase(std::find(list.begin(), list.end(), element));
   }
@@ -557,7 +536,7 @@ void DocumentInstance::addElementById(JSAtom id, ElementInstance* element) {
   auto it = std::find(list.begin(), list.end(), element);
 
   if (it == list.end()) {
-    JS_DupValue(m_ctx, element->instanceObject);
+    JS_DupValue(m_ctx, element->jsObject);
     list_add_tail(&element->documentLink.link, &m_context->document_job_list);
     m_elementMapById[id].emplace_back(element);
   }

@@ -6,7 +6,27 @@ import {addIndent} from "./utils";
 function generatePropsHeader(object: ClassObject, type: PropType) {
   let propsDefine = '';
   if (object.props.length > 0) {
-    propsDefine = `${type == PropType.hostObject ? 'DEFINE_HOST_OBJECT_PROPERTY' : 'DEFINE_HOST_CLASS_PROPERTY'}(${object.props.length}, ${object.props.map(o => o.name).join(', ')})`;
+
+    if (type == PropType.hostObject) {
+      for (let i = 0; i < object.props.length; i ++) {
+        let p = object.props[i];
+
+        if (p.readonly) {
+          propsDefine += `DEFINE_READONLY_PROPERTY(${p.name});\n`;
+        } else {
+          propsDefine += `DEFINE_PROPERTY(${p.name});\n`;
+        }
+      }
+    } else {
+      for (let i = 0; i < object.props.length; i ++) {
+        let p = object.props[i];
+        if (p.readonly) {
+          propsDefine += `DEFINE_PROTOTYPE_READONLY_PROPERTY(${p.name});\n`;
+        } else {
+          propsDefine += `DEFINE_PROTOTYPE_PROPERTY(${p.name});\n`;
+        }
+      }
+    }
   }
   return propsDefine;
 }
@@ -22,7 +42,12 @@ function generateMethodsHeader(object: ClassObject, type: PropType) {
   if (object.methods.length > 0) {
     let methods = uniqBy(object.methods, (o) => o.name);
     methodsDefine = methods.map(o => `static JSValue ${o.name}(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);`);
-    methodsImpl = methods.map(o => `ObjectFunction m_${o.name}{m_context, ${type == PropType.hostClass ? 'm_prototypeObject' : 'jsObject'}, "${o.name}", ${o.name}, ${o.args.length}};`)
+
+    if (type == PropType.hostClass) {
+      methodsImpl = methods.map(o => `DEFINE_PROTOTYPE_FUNCTION(${o.name}, ${o.args.length});`)
+    } else {
+      methodsImpl = methods.map(o => `DEFINE_FUNCTION(${o.name}, ${o.args.length});`)
+    }
   }
   return {
     methodsImpl,
@@ -88,6 +113,8 @@ ${addIndent(nativeStructPropsCode.join('\n'), 2)}
   let constructorHeader = `\n
 void bind${object.name}(std::unique_ptr<JSContext> &context);
 
+class ${object.name}Instance;
+
 ${nativeStructCode}
 class ${object.name} : public ${object.type} {
 public:
@@ -97,7 +124,9 @@ public:
   ${methodsDefine.join('\n  ')}
   OBJECT_INSTANCE(${object.name});
 private:
+  ${propsDefine}
   ${methodsImpl.join('\n  ')}
+  friend ${object.name}Instance;
 };`;
 
   let instanceConstructorHeader = ``;
@@ -112,7 +141,7 @@ public:
   ${object.name}Instance() = delete;
   ${instanceConstructorHeader}
 private:
-  ${propsDefine}
+  friend ${object.name};
 };
 `;
 
