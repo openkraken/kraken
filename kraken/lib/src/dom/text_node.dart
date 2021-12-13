@@ -2,11 +2,7 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
-import 'dart:ffi';
-
 import 'package:flutter/rendering.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
@@ -18,8 +14,8 @@ const String RETURN_CHAR = '\r';
 const String TAB_CHAR = '\t';
 
 class TextNode extends Node {
-  TextNode(int targetId, Pointer<NativeEventTarget> nativeEventTarget, this._data, ElementManager elementManager)
-      : super(NodeType.TEXT_NODE, targetId, nativeEventTarget, elementManager);
+  TextNode(this._data, EventTargetContext? context)
+      : super(NodeType.TEXT_NODE, context);
 
   // Must be existed after text node is attached, and all text update will after text attached.
   RenderTextBox? _renderTextBox;

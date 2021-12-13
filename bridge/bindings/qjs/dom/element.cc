@@ -138,15 +138,7 @@ JSValue Element::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue 
     return JS_CallConstructor(ctx, Document->getElementConstructor(context, name), argc, argv);
   }
 
-  ElementInstance* element;
-  if (name == "HTML") {
-    element = new ElementInstance(this, name, false);
-    element->m_eventTargetId = HTML_TARGET_ID;
-  } else {
-    // Fallback to default Element class
-    element = new ElementInstance(this, name, true);
-  }
-
+  auto* element = new ElementInstance(this, name, true);
   return element->instanceObject;
 }
 
@@ -395,6 +387,7 @@ PROP_GETTER(ElementInstance, className)(QjsContext* ctx, JSValue this_val, int a
   JSAtom valueAtom = element->m_attributes->getAttribute("class");
   return JS_AtomToString(ctx, valueAtom);
 }
+
 PROP_SETTER(ElementInstance, className)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   JSAtom atom = JS_ValueToAtom(ctx, argv[0]);
@@ -530,6 +523,7 @@ PROP_GETTER(ElementInstance, scrollWidth)(QjsContext* ctx, JSValue this_val, int
   NativeValue args[] = {Native_NewInt32(static_cast<int32_t>(ViewModuleProperty::scrollWidth))};
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
+
 PROP_SETTER(ElementInstance, scrollWidth)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
@@ -550,6 +544,7 @@ PROP_GETTER(ElementInstance, firstElementChild)(QjsContext* ctx, JSValue this_va
 
   return JS_NULL;
 }
+
 PROP_SETTER(ElementInstance, firstElementChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }

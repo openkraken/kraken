@@ -18,7 +18,6 @@ import 'package:kraken/module.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/src/dom/element_registry.dart';
-import 'package:kraken/src/dom/element_manager.dart';
 
 /// Get context of current widget.
 typedef GetContext = BuildContext Function();
@@ -742,7 +741,7 @@ class _KrakenState extends State<Kraken> {
     RenderObject? _rootRenderObject = context.findRenderObject();
     RenderViewportBox? renderViewportBox = _findRenderViewportBox(_rootRenderObject!);
     KrakenController controller = (renderViewportBox as RenderObjectWithControllerMixin).controller!;
-    dom.Element documentElement = controller.view.document!.documentElement;
+    dom.Element documentElement = controller.view.document.documentElement!;
     return documentElement;
   }
 
@@ -850,21 +849,12 @@ This situation often happened when you trying creating kraken when FlutterView n
 
     if (viewportWidthHasChanged) {
       controller.view.viewportWidth = viewportWidth;
-      controller.view.document!.documentElement.renderStyle.width = CSSLengthValue(viewportWidth, CSSLengthType.PX);
+      controller.view.document.documentElement!.renderStyle.width = CSSLengthValue(viewportWidth, CSSLengthType.PX);
     }
 
     if (viewportHeightHasChanged) {
       controller.view.viewportHeight = viewportHeight;
-      controller.view.document!.documentElement.renderStyle.height = CSSLengthValue(viewportHeight, CSSLengthType.PX);
-    }
-
-    if (viewportWidthHasChanged || viewportHeightHasChanged) {
-      traverseElement(controller.view.document!.documentElement, (element) {
-        if (element.isRendererAttached) {
-          element.style.flushPendingProperties();
-          element.renderBoxModel?.markNeedsLayout();
-        }
-      });
+      controller.view.document.documentElement!.renderStyle.height = CSSLengthValue(viewportHeight, CSSLengthType.PX);
     }
   }
 

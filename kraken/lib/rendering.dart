@@ -23,3 +23,4 @@ export 'src/rendering/opacity.dart';
 export 'src/rendering/transform.dart';
 export 'src/rendering/viewport.dart';
 export 'src/rendering/paragraph.dart';
+export 'src/rendering/image.dart';

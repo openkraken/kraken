@@ -133,6 +133,42 @@ mixin CSSSizingMixin on RenderStyle {
     _markSelfAndParentNeedsLayout();
   }
 
+  // Intrinsic width of replaced element.
+  double? _intrinsicWidth;
+  @override
+  double? get intrinsicWidth {
+    return _intrinsicWidth;
+  }
+  set intrinsicWidth(double? value) {
+    if (_intrinsicWidth == value) return;
+    _intrinsicWidth = value;
+    _markSelfAndParentNeedsLayout();
+  }
+
+  // Intrinsic height of replaced element.
+  double? _intrinsicHeight;
+  @override
+  double? get intrinsicHeight {
+    return _intrinsicHeight;
+  }
+  set intrinsicHeight(double? value) {
+    if (_intrinsicHeight == value) return;
+    _intrinsicHeight = value;
+    _markSelfAndParentNeedsLayout();
+  }
+
+  // Aspect ratio of replaced element.
+  double? _intrinsicRatio;
+  @override
+  double? get intrinsicRatio {
+    return _intrinsicRatio;
+  }
+  set intrinsicRatio(double? value) {
+    if (_intrinsicRatio == value) return;
+    _intrinsicRatio = value;
+    _markSelfAndParentNeedsLayout();
+  }
+
   void _markSelfAndParentNeedsLayout() {
     if (renderBoxModel == null) return;
     RenderBoxModel boxModel = renderBoxModel!;
@@ -144,34 +180,4 @@ mixin CSSSizingMixin on RenderStyle {
     }
   }
 
-  // Whether current node should stretch children's height
-  static bool isStretchChildHeight(RenderStyle renderStyle, RenderStyle childRenderStyle) {
-    bool isStretch = false;
-    bool isFlex = renderStyle.renderBoxModel is RenderFlexLayout;
-    bool isHorizontalDirection = false;
-    bool isAlignItemsStretch = false;
-    bool isFlexNoWrap = false;
-    bool isChildAlignSelfStretch = false;
-    bool isChildStretchSelf = false;
-    if (isFlex) {
-      isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
-      isAlignItemsStretch = renderStyle.effectiveAlignItems == AlignItems.stretch;
-      isFlexNoWrap = renderStyle.flexWrap != FlexWrap.wrap &&
-        childRenderStyle.flexWrap != FlexWrap.wrapReverse;
-      isChildAlignSelfStretch = childRenderStyle.alignSelf == AlignSelf.stretch;
-      isChildStretchSelf = childRenderStyle.alignSelf != AlignSelf.auto ?
-        isChildAlignSelfStretch : isAlignItemsStretch;
-    }
-
-    CSSLengthValue marginTop = childRenderStyle.marginTop;
-    CSSLengthValue marginBottom = childRenderStyle.marginBottom;
-
-    // Display as block if flex vertical layout children and stretch children
-    if (!marginTop.isAuto && !marginBottom.isAuto &&
-      isFlex && isHorizontalDirection && isFlexNoWrap && isChildStretchSelf) {
-      isStretch = true;
-    }
-
-    return isStretch;
-  }
 }

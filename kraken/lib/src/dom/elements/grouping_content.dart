@@ -2,9 +2,6 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'dart:ffi';
-
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 
@@ -60,68 +57,68 @@ const Map<String, dynamic> _lDefaultStyle = {
 
 
 class DivElement extends Element {
-  DivElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  DivElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
 }
 
 class FigureElement extends Element {
-  FigureElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _bDefaultStyle);
+  FigureElement(EventTargetContext? context)
+      : super(context, defaultStyle: _bDefaultStyle);
 }
 
 class FigureCaptionElement extends Element {
-  FigureCaptionElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  FigureCaptionElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
 }
 
 class BlockQuotationElement extends Element {
-  BlockQuotationElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _bDefaultStyle);
+  BlockQuotationElement(EventTargetContext? context)
+      : super(context, defaultStyle: _bDefaultStyle);
 }
 
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmlparagraphelement
 class ParagraphElement extends Element {
   static Map<String, dynamic> defaultStyle = _pDefaultStyle;
-  ParagraphElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: defaultStyle);
+  ParagraphElement(EventTargetContext? context)
+      : super(context, defaultStyle: defaultStyle);
 }
 
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmlulistelement
 class UListElement extends Element {
-  UListElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _lDefaultStyle);
+  UListElement(EventTargetContext? context)
+      : super(context, defaultStyle: _lDefaultStyle);
 }
 
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmlolistelement
 class OListElement extends Element {
-  OListElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _lDefaultStyle);
+  OListElement(EventTargetContext? context)
+      : super(context, defaultStyle: _lDefaultStyle);
 }
 
 class LIElement extends Element {
-  LIElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  LIElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
 }
 
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmlpreelement
 class PreElement extends Element {
-  PreElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _preDefaultStyle);
+  PreElement(EventTargetContext? context)
+      : super(context, defaultStyle: _preDefaultStyle);
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dd
 class DDElement extends Element {
-  DDElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _ddDefaultStyle);
+  DDElement(EventTargetContext? context)
+      : super(context, defaultStyle: _ddDefaultStyle);
 }
 
 class DTElement extends Element {
-  DTElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  DTElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
 }
 
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmldlistelement
 class DListElement extends Element {
-  DListElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _pDefaultStyle);
+  DListElement(EventTargetContext? context)
+      : super(context, defaultStyle: _pDefaultStyle);
 }

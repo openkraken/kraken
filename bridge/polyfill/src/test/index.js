@@ -160,8 +160,17 @@ global.simulateInputText = __kraken_simulate_inputtext__;
 
 function resetDocumentElement() {
   window.scrollTo(0, 0);
-  document.head = document.createElement('head');
-  document.body = document.createElement('body');
+  document.removeChild(document.documentElement);
+  let html = document.createElement('html');
+  document.appendChild(html);
+
+  let head = document.createElement('head');
+  document.documentElement.appendChild(head);
+
+  let body = document.createElement('body');
+  document.documentElement.appendChild(body);
+
+  document.documentElement.style.backgroundColor = 'white';
 }
 
 function traverseNode(node, handle) {

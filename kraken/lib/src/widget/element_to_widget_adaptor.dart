@@ -9,7 +9,7 @@ class KrakenElementToWidgetAdaptor extends RenderObjectWidget {
   @override
   RenderObjectElement createElement() {
     KrakenElementToFlutterElementAdaptor element = KrakenElementToFlutterElementAdaptor(this);
-    _krakenNode.elementManager.setFlutterElement(_krakenNode.targetId, element);
+    // _krakenNode.elementManager.setFlutterElement(_krakenNode.targetId, element);
     return element;
   }
 

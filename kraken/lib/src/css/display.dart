@@ -86,10 +86,12 @@ mixin CSSDisplayMixin on RenderStyle {
             parentRenderStyle.flexDirection == FlexDirection.columnReverse;
         // Flex item will not stretch in stretch alignment when flex wrap is set to wrap or wrap-reverse
         bool isFlexNoWrap = parentRenderStyle.flexWrap == FlexWrap.nowrap;
-        bool isAlignItemsStretch = parentRenderStyle.effectiveAlignItems == AlignItems.stretch;
+        bool isStretchSelf = alignSelf != AlignSelf.auto
+          ? alignSelf == AlignSelf.stretch
+          : parentRenderStyle.effectiveAlignItems == AlignItems.stretch;
 
         // Display as block if flex vertical layout children and stretch children
-        if (!marginLeft.isAuto && !marginRight.isAuto && isVerticalDirection && isFlexNoWrap && isAlignItemsStretch) {
+        if (!marginLeft.isAuto && !marginRight.isAuto && isVerticalDirection && isFlexNoWrap && isStretchSelf) {
           transformedDisplay = CSSDisplay.block;
         }
       }

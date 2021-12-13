@@ -2,10 +2,6 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
-import 'dart:ffi';
-
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 
@@ -30,41 +26,41 @@ const Map<String, dynamic> _addressDefaultStyle = {
 };
 
 class AddressElement extends Element {
-  AddressElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _addressDefaultStyle);
+  AddressElement(EventTargetContext? context)
+      : super(context, defaultStyle: _addressDefaultStyle);
 }
 
 class ArticleElement extends Element {
-  ArticleElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  ArticleElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
 }
 
 class AsideElement extends Element {
-  AsideElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  AsideElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
 }
 
 class FooterElement extends Element {
-  FooterElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  FooterElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
 }
 
 class HeaderElement extends Element {
-  HeaderElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  HeaderElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
 }
 
 class MainElement extends Element {
-  MainElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  MainElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
 }
 
 class NavElement extends Element {
-  NavElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  NavElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
 }
 
 class SectionElement extends Element {
-  SectionElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  SectionElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
 }

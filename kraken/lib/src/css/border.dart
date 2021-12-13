@@ -11,6 +11,9 @@ import 'package:kraken/css.dart';
 
 final RegExp _splitRegExp = RegExp(r'\s+');
 
+// Initial border value: medium
+final CSSLengthValue _mediumWidth = CSSLengthValue(3, CSSLengthType.PX);
+
 enum CSSBorderStyleType {
   none,
   hidden,
@@ -77,9 +80,6 @@ mixin CSSBorderMixin on RenderStyle {
   ///   borderColor: <color>
 
   /// Border-width = <length> | thin | medium | thick
-
-  // Initial value: medium
-  final CSSLengthValue _mediumWidth = CSSLengthValue(3, CSSLengthType.PX);
 
   CSSLengthValue? _borderTopWidth;
   set borderTopWidth(CSSLengthValue? value) {

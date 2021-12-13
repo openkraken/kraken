@@ -52,8 +52,6 @@ describe('auto-margins', () => {
       },
       [
         img = createElement('img', {
-          src:
-            'https://kraken.oss-cn-hangzhou.aliyuncs.com/images/300x150-green.png',
           style: {
             'box-sizing': 'border-box',
             margin: 'auto',
@@ -67,6 +65,7 @@ describe('auto-margins', () => {
     document.body.appendChild(div_1);
 
     await snapshot();
+    img.src = 'assets/300x150-green.png';
 
     img.onload = async () => {
       await snapshot();

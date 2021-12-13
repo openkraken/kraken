@@ -180,13 +180,11 @@ abstract class WidgetElement extends dom.Element {
   late Widget _widget;
   _KrakenAdapterWidgetState? _state;
 
-  WidgetElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, dom.ElementManager elementManager)
+  WidgetElement(dom.EventTargetContext? context)
       : super(
-      targetId,
-      nativeEventTarget,
-      elementManager,
-      // isIntrinsicBox: true,
-      defaultStyle: _defaultStyle
+  context,
+  // isIntrinsicBox: true,
+  defaultStyle: _defaultStyle
   ) {
     WidgetsFlutterBinding.ensureInitialized();
     _state = _KrakenAdapterWidgetState(this, properties, childNodes);
@@ -248,7 +246,7 @@ abstract class WidgetElement extends dom.Element {
   KrakenRenderObjectToWidgetAdapter? _adaptor;
 
   void _attachWidget(Widget widget) {
-    RenderObjectElement rootWidgetElement = elementManager.controller.rootKrakenElement;
+    RenderObjectElement rootWidgetElement = ownerDocument.controller.rootKrakenElement;
 
     _adaptor = KrakenRenderObjectToWidgetAdapter(
         child: widget,
@@ -260,7 +258,7 @@ abstract class WidgetElement extends dom.Element {
     if (parentNode is WidgetElement) {
       parentElement = ((parentNode as WidgetElement)._widget as _KrakenAdapterWidget).createElement();
     } else {
-      parentElement = elementManager.getFlutterElementByTargetId((parentNode as dom.Element).targetId);
+      // parentElement = elementManager.getFlutterElementByTargetId((parentNode as dom.Element).targetId);
     }
 
     if (parentElement != null) {

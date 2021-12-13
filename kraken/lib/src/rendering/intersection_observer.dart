@@ -171,7 +171,7 @@ class IntersectionObserverLayer extends ContainerLayer {
         Matrix4? cachedTransform = _layerTransformCache[child.hashCode];
         // Get the transform of parent layer to root layer directly if exists.
         if (cachedTransform != null) {
-          transform = cachedTransform;
+          transform = cachedTransform.clone();
         } else {
           (parent as ContainerLayer).applyTransform(child, transform);
           // Cache the transform of parent layer to root layer.
