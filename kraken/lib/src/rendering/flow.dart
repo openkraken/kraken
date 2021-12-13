@@ -601,7 +601,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         }
       }
       if (runChildren.isNotEmpty &&
-          // Current is block. 
+          // Current is block.
           (_isChildBlockLevel(child) ||
           // Previous is block.
           _isChildBlockLevel(preChild) ||
@@ -610,7 +610,7 @@ class RenderFlowLayout extends RenderLayoutBox {
           // but only specifies whether lines may wrap at unforced soft wrap opportunities
           // https://www.w3.org/TR/css-text-3/#line-breaking
           (whiteSpace != WhiteSpace.nowrap && (runMainAxisExtent + childMainAxisExtent > mainAxisLimit)) ||
-          // Previou is linebreak.
+          // Previous is linebreak.
           preChild is RenderLineBreak)) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
@@ -670,7 +670,7 @@ class RenderFlowLayout extends RenderLayoutBox {
           extentBelowBaseline,
           maxSizeBelowBaseline,
         );
-        runCrossAxisExtent = maxSizeAboveBaseline + maxSizeBelowBaseline;
+        runCrossAxisExtent = math.max(runCrossAxisExtent, maxSizeAboveBaseline + maxSizeBelowBaseline);
       } else {
         runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
       }
