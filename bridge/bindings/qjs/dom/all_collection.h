@@ -15,9 +15,9 @@ class AllCollection : public HostObject {
  public:
   AllCollection(PageJSContext* context) : HostObject(context, "AllCollection"){};
 
-  static JSValue item(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue add(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue remove(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue item(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue add(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue remove(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
   DEFINE_READONLY_PROPERTY(length);
 

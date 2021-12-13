@@ -7,7 +7,7 @@
 
 namespace kraken::binding::qjs {
 
-JSValue AllCollection::item(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue AllCollection::item(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
     return JS_NULL;
   }
@@ -23,7 +23,7 @@ JSValue AllCollection::item(QjsContext* ctx, JSValue this_val, int argc, JSValue
   auto node = collection->m_nodes[index];
   return node->jsObject;
 }
-JSValue AllCollection::add(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue AllCollection::add(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Failed to execute add() on HTMLAllCollection: 1 arguments required.");
   }
@@ -50,7 +50,7 @@ JSValue AllCollection::add(QjsContext* ctx, JSValue this_val, int argc, JSValue*
 
   return JS_NULL;
 }
-JSValue AllCollection::remove(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue AllCollection::remove(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Failed to execute remove() on HTMLAllCollection: 1 arguments required.");
   }
@@ -71,7 +71,7 @@ void AllCollection::internalAdd(NodeInstance* node, NodeInstance* before) {
   }
 }
 
-IMPL_PROPERTY_GETTER(AllCollection, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(AllCollection, length)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* collection = static_cast<AllCollection*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   return JS_NewUint32(ctx, collection->m_nodes.size());
 }

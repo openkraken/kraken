@@ -6,7 +6,7 @@
 #include "template_element.h"
 #include "bindings/qjs/dom/text_node.h"
 #include "bindings/qjs/qjs_patch.h"
-#include "bridge_qjs.h"
+#include "page.h"
 
 namespace kraken::binding::qjs {
 
@@ -19,7 +19,7 @@ void bindTemplateElement(std::unique_ptr<PageJSContext>& context) {
   context->defineGlobalProperty("HTMLTemplateElement", constructor->jsObject);
 }
 
-JSValue TemplateElement::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
+JSValue TemplateElement::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
   auto instance = new TemplateElementInstance(this);
   return instance->jsObject;
 }

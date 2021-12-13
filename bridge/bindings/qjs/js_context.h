@@ -19,7 +19,6 @@
 #include "js_context_macros.h"
 #include "kraken_foundation.h"
 #include "qjs_patch.h"
-using QjsContext = JSContext;
 using JSExceptionHandler = std::function<void(int32_t contextId, const char* message)>;
 
 namespace kraken::binding::qjs {
@@ -30,7 +29,7 @@ JSRuntime* getGlobalJSRuntime();
 class WindowInstance;
 class DocumentInstance;
 class PageJSContext;
-std::string jsAtomToStdString(QjsContext* ctx, JSAtom atom);
+std::string jsAtomToStdString(JSContext* ctx, JSAtom atom);
 
 static inline bool isNumberIndex(const std::string& name) {
   if (name.empty())
@@ -68,7 +67,7 @@ class PageJSContext {
   bool evaluateByteCode(uint8_t* bytes, size_t byteLength);
   bool isValid() const;
   JSValue global();
-  QjsContext* ctx();
+  JSContext* ctx();
   JSRuntime* runtime();
   int32_t getContextId() const;
   void* getOwner();
@@ -95,7 +94,7 @@ class PageJSContext {
   static JSClassID kHostExoticObjectClassId;
 
  private:
-  static void promiseRejectTracker(QjsContext* ctx, JSValueConst promise, JSValueConst reason, JS_BOOL is_handled, void* opaque);
+  static void promiseRejectTracker(JSContext* ctx, JSValueConst promise, JSValueConst reason, JS_BOOL is_handled, void* opaque);
   void dispatchGlobalErrorEvent(JSValueConst error);
   void dispatchGlobalPromiseRejectionEvent(JSValueConst promise, JSValueConst error);
   void reportError(JSValueConst error);
@@ -105,7 +104,7 @@ class PageJSContext {
   void* owner;
   JSValue globalObject{JS_NULL};
   bool ctxInvalid_{false};
-  QjsContext* m_ctx{nullptr};
+  JSContext* m_ctx{nullptr};
   friend WindowInstance;
   friend DocumentInstance;
   WindowInstance* m_window{nullptr};
@@ -113,7 +112,7 @@ class PageJSContext {
 
 // The read object's method or properties via Proxy, we should redirect this_val from Proxy into target property of
 // proxy object.
-static JSValue handleCallThisOnProxy(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv, int data_len, JSValueConst* data) {
+static JSValue handleCallThisOnProxy(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv, int data_len, JSValueConst* data) {
   JSValue f = data[0];
   JSValue result;
   if (JS_IsProxy(this_val)) {
@@ -198,7 +197,7 @@ class ObjectFunction {
 class JSValueHolder {
  public:
   JSValueHolder() = delete;
-  explicit JSValueHolder(QjsContext* ctx, JSValue value) : m_value(value), m_ctx(ctx){};
+  explicit JSValueHolder(JSContext* ctx, JSValue value) : m_value(value), m_ctx(ctx){};
   ~JSValueHolder() { JS_FreeValue(m_ctx, m_value); }
   inline void value(JSValue value) {
     if (!JS_IsNull(m_value)) {
@@ -209,39 +208,39 @@ class JSValueHolder {
   inline JSValue value() const { return JS_DupValue(m_ctx, m_value); }
 
  private:
-  QjsContext* m_ctx{nullptr};
+  JSContext* m_ctx{nullptr};
   JSValue m_value{JS_NULL};
 };
 
 std::unique_ptr<PageJSContext> createJSContext(int32_t contextId, const JSExceptionHandler& handler, void* owner);
 
 // Convert to string and return a full copy of NativeString from JSValue.
-std::unique_ptr<NativeString> jsValueToNativeString(QjsContext* ctx, JSValue value);
+std::unique_ptr<NativeString> jsValueToNativeString(JSContext* ctx, JSValue value);
 
-void buildUICommandArgs(QjsContext* ctx, JSValue key, NativeString& args_01);
+void buildUICommandArgs(JSContext* ctx, JSValue key, NativeString& args_01);
 
 // Encode utf-8 to utf-16, and return a full copy of NativeString.
 std::unique_ptr<NativeString> stringToNativeString(const std::string& string);
 
 // Return a full copy of NativeString form JSAtom.
-std::unique_ptr<NativeString> atomToNativeString(QjsContext* ctx, JSAtom atom);
+std::unique_ptr<NativeString> atomToNativeString(JSContext* ctx, JSAtom atom);
 
 // Convert to string and return a full copy of std::string from JSValue.
-std::string jsValueToStdString(QjsContext* ctx, JSValue& value);
+std::string jsValueToStdString(JSContext* ctx, JSValue& value);
 
 // Return a full copy of std::string form JSAtom.
-std::string jsAtomToStdString(QjsContext* ctx, JSAtom atom);
+std::string jsAtomToStdString(JSContext* ctx, JSAtom atom);
 
 // JS array operation utilities.
-void arrayPushValue(QjsContext* ctx, JSValue array, JSValue val);
-void arrayInsert(QjsContext* ctx, JSValue array, uint32_t start, JSValue targetValue);
-int32_t arrayGetLength(QjsContext* ctx, JSValue array);
-int32_t arrayFindIdx(QjsContext* ctx, JSValue array, JSValue target);
-void arraySpliceValue(QjsContext* ctx, JSValue array, uint32_t start, uint32_t deleteCount);
-void arraySpliceValue(QjsContext* ctx, JSValue array, uint32_t start, uint32_t deleteCount, JSValue replacedValue);
+void arrayPushValue(JSContext* ctx, JSValue array, JSValue val);
+void arrayInsert(JSContext* ctx, JSValue array, uint32_t start, JSValue targetValue);
+int32_t arrayGetLength(JSContext* ctx, JSValue array);
+int32_t arrayFindIdx(JSContext* ctx, JSValue array, JSValue target);
+void arraySpliceValue(JSContext* ctx, JSValue array, uint32_t start, uint32_t deleteCount);
+void arraySpliceValue(JSContext* ctx, JSValue array, uint32_t start, uint32_t deleteCount, JSValue replacedValue);
 
 // JS object operation utilities.
-JSValue objectGetKeys(QjsContext* ctx, JSValue obj);
+JSValue objectGetKeys(JSContext* ctx, JSValue obj);
 
 }  // namespace kraken::binding::qjs
 

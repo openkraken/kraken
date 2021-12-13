@@ -38,7 +38,7 @@ static void handleTimerCallback(TimerCallbackContext* callbackContext, const cha
 
 static void handleTransientCallback(void* ptr, int32_t contextId, const char* errmsg) {
   auto* callbackContext = static_cast<TimerCallbackContext*>(ptr);
-  if (!checkContext(contextId, callbackContext->context))
+  if (!checkPage(contextId, callbackContext->context))
     return;
   if (!callbackContext->context->isValid())
     return;
@@ -52,7 +52,7 @@ static void handleTransientCallback(void* ptr, int32_t contextId, const char* er
 
 static void handlePersistentCallback(void* ptr, int32_t contextId, const char* errmsg) {
   auto* callbackContext = static_cast<TimerCallbackContext*>(ptr);
-  if (!checkContext(contextId, callbackContext->context))
+  if (!checkPage(contextId, callbackContext->context))
     return;
   if (!callbackContext->context->isValid())
     return;
@@ -60,7 +60,7 @@ static void handlePersistentCallback(void* ptr, int32_t contextId, const char* e
   handleTimerCallback(callbackContext, errmsg);
 }
 
-static JSValue setTimeout(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+static JSValue setTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'setTimeout': 1 argument required, but only 0 present.");
   }
@@ -106,7 +106,7 @@ static JSValue setTimeout(QjsContext* ctx, JSValueConst this_val, int argc, JSVa
 
 static void handleRAFTransientCallback(void* ptr, int32_t contextId, double highResTimeStamp, const char* errmsg) {
   auto* callbackContext = static_cast<TimerCallbackContext*>(ptr);
-  if (!checkContext(contextId, callbackContext->context))
+  if (!checkPage(contextId, callbackContext->context))
     return;
 
   if (!callbackContext->context->isValid())
@@ -143,7 +143,7 @@ static void handleRAFTransientCallback(void* ptr, int32_t contextId, double high
   delete callbackContext;
 }
 
-static JSValue setInterval(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+static JSValue setInterval(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'setInterval': 1 argument required, but only 0 present.");
   }
@@ -185,7 +185,7 @@ static JSValue setInterval(QjsContext* ctx, JSValueConst this_val, int argc, JSV
   return JS_NewUint32(ctx, timerId);
 }
 
-static JSValue requestAnimationFrame(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+static JSValue requestAnimationFrame(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (argc <= 0) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': 1 argument required, but only 0 present.");
   }
@@ -226,7 +226,7 @@ static JSValue requestAnimationFrame(QjsContext* ctx, JSValueConst this_val, int
   return JS_NewUint32(ctx, requestId);
 }
 
-static JSValue clearTimeout(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+static JSValue clearTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (argc <= 0) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'clearTimeout': 1 argument required, but only 0 present.");
   }
@@ -249,7 +249,7 @@ static JSValue clearTimeout(QjsContext* ctx, JSValueConst this_val, int argc, JS
   return JS_NULL;
 }
 
-static JSValue cancelAnimationFrame(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+static JSValue cancelAnimationFrame(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (argc <= 0) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'cancelAnimationFrame': 1 argument required, but only 0 present.");
   }

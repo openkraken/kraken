@@ -34,23 +34,23 @@ JSClassID Window::classId() {
   return 1;
 }
 
-JSValue Window::open(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Window::open(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, Window::classId()));
   NativeValue arguments[] = {jsValueToNativeValue(ctx, argv[0])};
   return window->callNativeMethods("open", 1, arguments);
 }
-JSValue Window::scrollTo(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Window::scrollTo(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, Window::classId()));
   NativeValue arguments[] = {jsValueToNativeValue(ctx, argv[0]), jsValueToNativeValue(ctx, argv[1])};
   return window->callNativeMethods("scroll", 2, arguments);
 }
-JSValue Window::scrollBy(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Window::scrollBy(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, Window::classId()));
   NativeValue arguments[] = {jsValueToNativeValue(ctx, argv[0]), jsValueToNativeValue(ctx, argv[1])};
   return window->callNativeMethods("scrollBy", 2, arguments);
 }
 
-JSValue Window::postMessage(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Window::postMessage(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   JSValue messageValue = argv[0];
   JSValue originValue = argv[1];
   JSValue globalObjectValue = JS_GetGlobalObject(ctx);
@@ -70,7 +70,7 @@ JSValue Window::postMessage(QjsContext* ctx, JSValue this_val, int argc, JSValue
   return JS_NULL;
 }
 
-IMPL_PROPERTY_GETTER(Window, devicePixelRatio)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Window, devicePixelRatio)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (getDartMethod()->devicePixelRatio == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to read devicePixelRatio: dart method (devicePixelRatio) is not register.");
   }
@@ -80,7 +80,7 @@ IMPL_PROPERTY_GETTER(Window, devicePixelRatio)(QjsContext* ctx, JSValue this_val
   return JS_NewFloat64(ctx, devicePixelRatio);
 }
 
-IMPL_PROPERTY_GETTER(Window, colorScheme)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Window, colorScheme)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (getDartMethod()->platformBrightness == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to read colorScheme: dart method (platformBrightness) not register.");
   }
@@ -90,41 +90,41 @@ IMPL_PROPERTY_GETTER(Window, colorScheme)(QjsContext* ctx, JSValue this_val, int
   return JS_NewUnicodeString(context->runtime(), ctx, code->string, code->length);
 }
 
-IMPL_PROPERTY_GETTER(Window, __location__)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Window, __location__)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
   if (window == nullptr)
     return JS_UNDEFINED;
   return JS_DupValue(ctx, window->m_location.value());
 }
 
-IMPL_PROPERTY_GETTER(Window, location)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Window, location)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
   return JS_GetPropertyStr(ctx, window->m_context->global(), "location");
 }
 
-IMPL_PROPERTY_GETTER(Window, window)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Window, window)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_GetGlobalObject(ctx);
 }
 
-IMPL_PROPERTY_GETTER(Window, parent)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Window, parent)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_GetGlobalObject(ctx);
 }
 
-IMPL_PROPERTY_GETTER(Window, scrollX)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Window, scrollX)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
   return window->callNativeMethods("scrollX", 0, nullptr);
 }
 
-IMPL_PROPERTY_GETTER(Window, scrollY)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Window, scrollY)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
   return window->callNativeMethods("scrollY", 0, nullptr);
 }
 
-IMPL_PROPERTY_GETTER(Window, onerror)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Window, onerror)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
   return JS_DupValue(ctx, window->onerror);
 }
-IMPL_PROPERTY_SETTER(Window, onerror)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_SETTER(Window, onerror)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
   JSValue eventString = JS_NewString(ctx, "onerror");
   JSString* p = JS_VALUE_GET_STRING(eventString);
@@ -139,7 +139,7 @@ IMPL_PROPERTY_SETTER(Window, onerror)(QjsContext* ctx, JSValue this_val, int arg
   return JS_NULL;
 }
 
-IMPL_PROPERTY_GETTER(Window, self)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Window, self)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_GetGlobalObject(ctx);
 }
 

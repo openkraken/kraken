@@ -60,7 +60,7 @@ PageJSContext::PageJSContext(int32_t contextId, const JSExceptionHandler& handle
   timeOrigin = std::chrono::system_clock::now();
   globalObject = JS_GetGlobalObject(m_ctx);
   JSValue windowGetter = JS_NewCFunction(
-      m_ctx, [](QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue { return JS_GetGlobalObject(ctx); }, "get", 0);
+      m_ctx, [](JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue { return JS_GetGlobalObject(ctx); }, "get", 0);
   JSAtom windowKey = JS_NewAtom(m_ctx, "window");
   JS_DefinePropertyGetSet(m_ctx, globalObject, windowKey, windowGetter, JS_UNDEFINED, JS_PROP_HAS_GET | JS_PROP_ENUMERABLE);
   JS_FreeAtom(m_ctx, windowKey);
@@ -231,7 +231,7 @@ JSValue PageJSContext::global() {
   return globalObject;
 }
 
-QjsContext* PageJSContext::ctx() {
+JSContext* PageJSContext::ctx() {
   assert(!ctxInvalid_ && "context has been released");
   return m_ctx;
 }
@@ -277,7 +277,7 @@ void PageJSContext::reportError(JSValueConst error) {
 
 void PageJSContext::drainPendingPromiseJobs() {
   // should executing pending promise jobs.
-  QjsContext* pctx;
+  JSContext* pctx;
   int finished = JS_ExecutePendingJob(runtime(), &pctx);
   while (finished != 0) {
     finished = JS_ExecutePendingJob(runtime(), &pctx);
@@ -326,13 +326,13 @@ void PageJSContext::dispatchGlobalPromiseRejectionEvent(JSValueConst promise, JS
   JS_FreeValue(m_ctx, errorHandler);
 }
 
-void PageJSContext::promiseRejectTracker(QjsContext* ctx, JSValue promise, JSValue reason, int is_handled, void* opaque) {
+void PageJSContext::promiseRejectTracker(JSContext* ctx, JSValue promise, JSValue reason, int is_handled, void* opaque) {
   auto* context = static_cast<PageJSContext*>(JS_GetContextOpaque(ctx));
   context->reportError(reason);
   context->dispatchGlobalPromiseRejectionEvent(promise, reason);
 }
 
-std::unique_ptr<NativeString> jsValueToNativeString(QjsContext* ctx, JSValue value) {
+std::unique_ptr<NativeString> jsValueToNativeString(JSContext* ctx, JSValue value) {
   bool isValueString = true;
   if (JS_IsNull(value)) {
     value = JS_NewString(ctx, "");
@@ -354,7 +354,7 @@ std::unique_ptr<NativeString> jsValueToNativeString(QjsContext* ctx, JSValue val
   return ptr;
 }
 
-void buildUICommandArgs(QjsContext* ctx, JSValue key, NativeString& args_01) {
+void buildUICommandArgs(JSContext* ctx, JSValue key, NativeString& args_01) {
   if (!JS_IsString(key))
     return;
 
@@ -373,7 +373,7 @@ std::unique_ptr<NativeString> stringToNativeString(const std::string& string) {
   return std::unique_ptr<NativeString>(tmp.clone());
 }
 
-std::unique_ptr<NativeString> atomToNativeString(QjsContext* ctx, JSAtom atom) {
+std::unique_ptr<NativeString> atomToNativeString(JSContext* ctx, JSAtom atom) {
   JSValue stringValue = JS_AtomToString(ctx, atom);
   std::unique_ptr<NativeString> string = jsValueToNativeString(ctx, stringValue);
   JS_FreeValue(ctx, stringValue);
@@ -384,14 +384,14 @@ JSRuntime* getGlobalJSRuntime() {
   return m_runtime;
 }
 
-std::string jsValueToStdString(QjsContext* ctx, JSValue& value) {
+std::string jsValueToStdString(JSContext* ctx, JSValue& value) {
   const char* cString = JS_ToCString(ctx, value);
   std::string str = std::string(cString);
   JS_FreeCString(ctx, cString);
   return str;
 }
 
-std::string jsAtomToStdString(QjsContext* ctx, JSAtom atom) {
+std::string jsAtomToStdString(JSContext* ctx, JSAtom atom) {
   const char* cstr = JS_AtomToCString(ctx, atom);
   std::string str = std::string(cstr);
   JS_FreeCString(ctx, cstr);
@@ -405,7 +405,7 @@ bool isContextValid(int32_t contextId) {
   return valid_contexts[contextId];
 }
 
-void arrayPushValue(QjsContext* ctx, JSValue array, JSValue val) {
+void arrayPushValue(JSContext* ctx, JSValue array, JSValue val) {
   JSValue pushMethod = JS_GetPropertyStr(ctx, array, "push");
   JSValue arguments[] = {val};
   JSValue result = JS_Call(ctx, pushMethod, array, 1, arguments);
@@ -413,7 +413,7 @@ void arrayPushValue(QjsContext* ctx, JSValue array, JSValue val) {
   JS_FreeValue(ctx, result);
 }
 
-void arraySpliceValue(QjsContext* ctx, JSValue array, uint32_t start, uint32_t deleteCount) {
+void arraySpliceValue(JSContext* ctx, JSValue array, uint32_t start, uint32_t deleteCount) {
   JSValue spliceMethod = JS_GetPropertyStr(ctx, array, "splice");
   JSValue arguments[] = {JS_NewUint32(ctx, start), JS_NewUint32(ctx, deleteCount)};
   JSValue result = JS_Call(ctx, spliceMethod, array, 2, arguments);
@@ -421,7 +421,7 @@ void arraySpliceValue(QjsContext* ctx, JSValue array, uint32_t start, uint32_t d
   JS_FreeValue(ctx, result);
 }
 
-void arraySpliceValue(QjsContext* ctx, JSValue array, uint32_t start, uint32_t deleteCount, JSValue replacedValue) {
+void arraySpliceValue(JSContext* ctx, JSValue array, uint32_t start, uint32_t deleteCount, JSValue replacedValue) {
   JSValue spliceMethod = JS_GetPropertyStr(ctx, array, "splice");
   JSValue arguments[] = {JS_NewUint32(ctx, start), JS_NewUint32(ctx, deleteCount), replacedValue};
   JSValue result = JS_Call(ctx, spliceMethod, array, 3, arguments);
@@ -429,7 +429,7 @@ void arraySpliceValue(QjsContext* ctx, JSValue array, uint32_t start, uint32_t d
   JS_FreeValue(ctx, result);
 }
 
-void arrayInsert(QjsContext* ctx, JSValue array, uint32_t start, JSValue targetValue) {
+void arrayInsert(JSContext* ctx, JSValue array, uint32_t start, JSValue targetValue) {
   JSValue spliceMethod = JS_GetPropertyStr(ctx, array, "splice");
   JSValue arguments[] = {JS_NewUint32(ctx, start), JS_NewUint32(ctx, 0), targetValue};
   JSValue result = JS_Call(ctx, spliceMethod, array, 3, arguments);
@@ -437,7 +437,7 @@ void arrayInsert(QjsContext* ctx, JSValue array, uint32_t start, JSValue targetV
   JS_FreeValue(ctx, result);
 }
 
-int32_t arrayGetLength(QjsContext* ctx, JSValue array) {
+int32_t arrayGetLength(JSContext* ctx, JSValue array) {
   JSValue lenVal = JS_GetPropertyStr(ctx, array, "length");
   int32_t len;
   JS_ToInt32(ctx, &len, lenVal);
@@ -445,7 +445,7 @@ int32_t arrayGetLength(QjsContext* ctx, JSValue array) {
   return len;
 }
 
-int32_t arrayFindIdx(QjsContext* ctx, JSValue array, JSValue target) {
+int32_t arrayFindIdx(JSContext* ctx, JSValue array, JSValue target) {
   int32_t len = arrayGetLength(ctx, array);
   for (int i = 0; i < len; i++) {
     JSValue v = JS_GetPropertyUint32(ctx, array, i);
@@ -458,7 +458,7 @@ int32_t arrayFindIdx(QjsContext* ctx, JSValue array, JSValue target) {
   return -1;
 }
 
-JSValue objectGetKeys(QjsContext* ctx, JSValue obj) {
+JSValue objectGetKeys(JSContext* ctx, JSValue obj) {
   JSValue globalObject = JS_GetGlobalObject(ctx);
   JSValue object = JS_GetPropertyStr(ctx, globalObject, "Object");
   JSValue keysFunc = JS_GetPropertyStr(ctx, object, "keys");

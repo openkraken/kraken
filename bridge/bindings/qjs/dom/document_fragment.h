@@ -20,7 +20,7 @@ class DocumentFragment : public Node {
   DocumentFragment() = delete;
   explicit DocumentFragment(PageJSContext* context);
 
-  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
   OBJECT_INSTANCE(DocumentFragment);
 };

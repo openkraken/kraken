@@ -22,10 +22,10 @@ class Window : public EventTarget {
 
   static JSClassID classId();
 
-  static JSValue open(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue scrollTo(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue scrollBy(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue postMessage(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue open(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue scrollTo(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue scrollBy(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue postMessage(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
   Window() = delete;
   explicit Window(PageJSContext* context);

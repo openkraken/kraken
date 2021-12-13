@@ -23,11 +23,11 @@ class Blob : public HostClass {
   Blob() = delete;
   explicit Blob(PageJSContext* context);
 
-  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
-  static JSValue arrayBuffer(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue slice(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue text(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue arrayBuffer(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue slice(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue text(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
  private:
   friend BlobInstance;

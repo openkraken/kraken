@@ -3,11 +3,11 @@
  * Author: Kraken Team.
  */
 
-#include "bridge_qjs.h"
+#include "page.h"
 #include "gtest/gtest.h"
 
 TEST(Context, isValid) {
-  auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {});
+  auto bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {});
   EXPECT_EQ(bridge->getContext()->isValid(), true);
   delete bridge;
 }
@@ -20,7 +20,7 @@ TEST(Context, evalWithError) {
                  "TypeError: cannot read property 'toString' of null\n"
                  "    at <eval> (file://:1)\n");
   };
-  auto bridge = new kraken::JSBridge(0, errorHandler);
+  auto bridge = new kraken::KrakenPage(0, errorHandler);
   const char* code = "let object = null; object.toString();";
   bridge->evaluateScript(code, strlen(code), "file://", 0);
   EXPECT_EQ(errorHandlerExecuted, true);
@@ -37,7 +37,7 @@ TEST(Context, unrejectPromiseError) {
                  "    at Promise (native)\n"
                  "    at <eval> (file://:6)\n");
   };
-  auto bridge = new kraken::JSBridge(0, errorHandler);
+  auto bridge = new kraken::KrakenPage(0, errorHandler);
   const char* code =
       " var p = new Promise(function (resolve, reject) {\n"
       "        var nullObject = null;\n"
@@ -63,8 +63,8 @@ TEST(Context, unrejectPromiseErrorWithMultipleContext) {
                  "    at Promise (native)\n"
                  "    at <eval> (file://:6)\n");
   };
-  auto bridge2 = new kraken::JSBridge(0, errorHandler);
-  auto bridge = new kraken::JSBridge(0, errorHandler);
+  auto bridge2 = new kraken::KrakenPage(0, errorHandler);
+  auto bridge = new kraken::KrakenPage(0, errorHandler);
   const char* code =
       " var p = new Promise(function (resolve, reject) {\n"
       "        var nullObject = null;\n"
@@ -83,7 +83,7 @@ TEST(Context, unrejectPromiseErrorWithMultipleContext) {
 TEST(Context, window) {
   bool errorHandlerExecuted = false;
   static bool logCalled = false;
-  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "true");
   };
@@ -92,7 +92,7 @@ TEST(Context, window) {
     errorHandlerExecuted = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   };
-  auto bridge = new kraken::JSBridge(0, errorHandler);
+  auto bridge = new kraken::KrakenPage(0, errorHandler);
   const char* code = "console.log(window == globalThis)";
   bridge->evaluateScript(code, strlen(code), "file://", 0);
   EXPECT_EQ(errorHandlerExecuted, false);
@@ -103,7 +103,7 @@ TEST(Context, window) {
 TEST(Context, windowInheritEventTarget) {
   bool errorHandlerExecuted = false;
   static bool logCalled = false;
-  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "ƒ () ƒ () ƒ () true");
   };
@@ -112,7 +112,7 @@ TEST(Context, windowInheritEventTarget) {
     errorHandlerExecuted = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   };
-  auto bridge = new kraken::JSBridge(0, errorHandler);
+  auto bridge = new kraken::KrakenPage(0, errorHandler);
   const char* code = "console.log(window.addEventListener, addEventListener, globalThis.addEventListener, window.addEventListener === addEventListener)";
   bridge->evaluateScript(code, strlen(code), "file://", 0);
   EXPECT_EQ(errorHandlerExecuted, false);
@@ -123,13 +123,13 @@ TEST(Context, windowInheritEventTarget) {
 TEST(Context, evaluateByteCode) {
   bool errorHandlerExecuted = false;
   static bool logCalled = false;
-  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "Arguments {0: 1, 1: 2, 2: 3, 3: 4, callee: ƒ (), length: 4}");
   };
 
   auto errorHandler = [&errorHandlerExecuted](int32_t contextId, const char* errmsg) { errorHandlerExecuted = true; };
-  auto bridge = new kraken::JSBridge(0, errorHandler);
+  auto bridge = new kraken::KrakenPage(0, errorHandler);
   const char* code = "function f() { console.log(arguments)} f(1,2,3,4);";
   size_t byteLen;
   uint8_t* bytes = bridge->dumpByteCode(code, strlen(code), "vm://", &byteLen);
@@ -141,7 +141,7 @@ TEST(Context, evaluateByteCode) {
 }
 
 TEST(jsValueToNativeString, utf8String) {
-  auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {});
+  auto bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {});
   JSValue str = JS_NewString(bridge->getContext()->ctx(), "helloworld");
   std::unique_ptr<NativeString> nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
   EXPECT_EQ(nativeString->length, 10);
@@ -154,7 +154,7 @@ TEST(jsValueToNativeString, utf8String) {
 }
 
 TEST(jsValueToNativeString, unicodeChinese) {
-  auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {});
+  auto bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {});
   JSValue str = JS_NewString(bridge->getContext()->ctx(), "这是你的优乐美");
   std::unique_ptr<NativeString> nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
   std::u16string expectedString = u"这是你的优乐美";
@@ -167,7 +167,7 @@ TEST(jsValueToNativeString, unicodeChinese) {
 }
 
 TEST(jsValueToNativeString, emoji) {
-  auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {});
+  auto bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {});
   JSValue str = JS_NewString(bridge->getContext()->ctx(), "……🤪");
   std::unique_ptr<NativeString> nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
   std::u16string expectedString = u"……🤪";

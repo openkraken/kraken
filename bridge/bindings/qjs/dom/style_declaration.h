@@ -33,11 +33,11 @@ class CSSStyleDeclaration : public HostClass {
   ~CSSStyleDeclaration(){};
   explicit CSSStyleDeclaration(PageJSContext* context);
 
-  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
-  static JSValue setProperty(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue removeProperty(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue getPropertyValue(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue setProperty(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue removeProperty(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getPropertyValue(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
  protected:
   DEFINE_PROTOTYPE_FUNCTION(setProperty, 2);
@@ -61,10 +61,10 @@ class StyleDeclarationInstance : public Instance {
   const EventTargetInstance* ownerEventTarget;
 
  private:
-  static int hasProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom);
-  static int setProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
+  static int hasProperty(JSContext* ctx, JSValueConst obj, JSAtom atom);
+  static int setProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
 
-  static JSValue getProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);
+  static JSValue getProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);
 
   static void finalize(JSRuntime* rt, JSValue val) {
     auto* instance = static_cast<StyleDeclarationInstance*>(JS_GetOpaque(val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));

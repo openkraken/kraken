@@ -26,7 +26,7 @@
 #define DEFINE_PROTOTYPE_READONLY_PROPERTY(PROPERTY)                                             \
   class PROPERTY##PropertyDescriptor {                                                           \
    public:                                                                                       \
-    static JSValue getter(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
+    static JSValue getter(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
   };                                                                                             \
   ObjectProperty __##PROPERTY##__ { m_context, m_prototypeObject, #PROPERTY, PROPERTY##PropertyDescriptor::getter }
 
@@ -39,23 +39,23 @@
 #define DEFINE_PROTOTYPE_PROPERTY(PROPERTY)                                                      \
   class PROPERTY##PropertyDescriptor {                                                           \
    public:                                                                                       \
-    static JSValue getter(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
-    static JSValue setter(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
+    static JSValue getter(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
+    static JSValue setter(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
   };                                                                                             \
   ObjectProperty __##PROPERTY##__ { m_context, m_prototypeObject, #PROPERTY, PROPERTY##PropertyDescriptor::getter, PROPERTY##PropertyDescriptor::setter }
 
 #define DEFINE_READONLY_PROPERTY(PROPERTY)                                                       \
   class PROPERTY##PropertyDescriptor {                                                           \
    public:                                                                                       \
-    static JSValue getter(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
+    static JSValue getter(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
   };                                                                                             \
   ObjectProperty __##PROPERTY##__ { m_context, jsObject, #PROPERTY, PROPERTY##PropertyDescriptor::getter }
 
 #define DEFINE_PROPERTY(PROPERTY)                                                                \
   class PROPERTY##PropertyDescriptor {                                                           \
    public:                                                                                       \
-    static JSValue getter(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
-    static JSValue setter(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
+    static JSValue getter(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
+    static JSValue setter(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
   };                                                                                             \
   ObjectProperty __##PROPERTY##__ { m_context, jsObject, #PROPERTY, PROPERTY##PropertyDescriptor::getter, PROPERTY##PropertyDescriptor::setter }
 

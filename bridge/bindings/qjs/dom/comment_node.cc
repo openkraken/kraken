@@ -27,19 +27,19 @@ Comment::Comment(PageJSContext* context) : Node(context, "Comment") {
   JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
 }
 
-JSValue Comment::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
+JSValue Comment::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
   return (new CommentInstance(this))->jsObject;
 }
 
-IMPL_PROPERTY_GETTER(Comment, data)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Comment, data)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewString(ctx, "");
 }
 
-IMPL_PROPERTY_GETTER(Comment, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Comment, nodeName)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewString(ctx, "#comment");
 }
 
-IMPL_PROPERTY_GETTER(Comment, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Comment, length)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewUint32(ctx, 0);
 }
 

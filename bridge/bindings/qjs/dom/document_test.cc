@@ -3,18 +3,18 @@
  * Author: Kraken Team.
  */
 
-#include "bridge_qjs.h"
+#include "page.h"
 #include "event_target.h"
 #include "gtest/gtest.h"
 
 TEST(Document, createTextNode) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "<div>");
   };
-  auto* bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -35,11 +35,11 @@ TEST(Document, createTextNode) {
 TEST(Document, instanceofNode) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "true true true");
   };
-  auto* bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -52,20 +52,20 @@ TEST(Document, instanceofNode) {
 }
 
 TEST(Document, createElementShouldWorkWithMultipleContext) {
-  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {};
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {};
 
-  kraken::JSBridge* bridge1;
+  kraken::KrakenPage* bridge1;
 
   const char* code = "(() => { let img = document.createElement('img'); document.body.appendChild(img);  })();";
 
   {
-    auto* bridge = bridge1 = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {});
+    auto* bridge = bridge1 = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {});
     auto& context = bridge->getContext();
     bridge->evaluateScript(code, strlen(code), "vm://", 0);
   }
 
   {
-    auto* bridge = new kraken::JSBridge(1, [](int32_t contextId, const char* errmsg) {});
+    auto* bridge = new kraken::KrakenPage(1, [](int32_t contextId, const char* errmsg) {});
     auto& context = bridge->getContext();
     const char* code = "(() => { let img = document.createElement('img'); document.body.appendChild(img);  })();";
     bridge->evaluateScript(code, strlen(code), "vm://", 0);

@@ -36,7 +36,7 @@ class HostClass {
     ///  def.finalizer = [](JSRuntime* rt, JSValue val) {
     ///    // Do something when jsObject been freed by GC
     ///  };
-    ///  def.call = [](QjsContext * ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {
+    ///  def.call = [](JSContext * ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {
     ///    // Do something when jsObject been called as function or called as constructor.
     ///  };
     ///  JS_NewClass(runtime, sampleId, &def);
@@ -65,7 +65,7 @@ class HostClass {
   };
   virtual ~HostClass() = default;
 
-  virtual JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValueConst* argv) { return JS_NewObject(ctx); };
+  virtual JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValueConst* argv) { return JS_NewObject(ctx); };
   JSValue jsObject;
 
   inline uint32_t contextId() const { return m_contextId; }
@@ -77,7 +77,7 @@ class HostClass {
   std::string m_name;
   PageJSContext* m_context;
   int32_t m_contextId;
-  QjsContext* m_ctx;
+  JSContext* m_ctx;
 
  private:
   friend Instance;
@@ -88,7 +88,7 @@ class HostClass {
     }
     delete hostObject;
   };
-  static JSValue proxyCall(QjsContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) {
+  static JSValue proxyCall(JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) {
     // This jsObject is called as a constructor.
     if ((flags & JS_CALL_FLAG_CONSTRUCTOR) != 0) {
       auto* hostClass = static_cast<HostClass*>(JS_GetOpaque(func_obj, PageJSContext::kHostClassClassId));
@@ -135,7 +135,7 @@ class Instance {
   virtual void trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) {};
 
   PageJSContext* m_context{nullptr};
-  QjsContext* m_ctx{nullptr};
+  JSContext* m_ctx{nullptr};
   HostClass* m_hostClass{nullptr};
   std::string m_name;
   int64_t m_contextId{-1};

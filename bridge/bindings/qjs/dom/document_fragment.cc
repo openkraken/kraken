@@ -27,7 +27,7 @@ JSClassID DocumentFragment::classId() {
   return kDocumentFragmentID;
 }
 
-JSValue DocumentFragment::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
+JSValue DocumentFragment::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
   return (new DocumentFragmentInstance(this))->jsObject;
 }
 

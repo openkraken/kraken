@@ -75,17 +75,17 @@ class Element : public Node {
 
   static JSClassID classId();
 
-  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
-  static JSValue getBoundingClientRect(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue hasAttribute(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue setAttribute(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue getAttribute(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue removeAttribute(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue toBlob(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue click(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue scroll(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue scrollBy(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getBoundingClientRect(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue hasAttribute(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue setAttribute(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getAttribute(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue removeAttribute(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue toBlob(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue click(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue scroll(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue scrollBy(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
   OBJECT_INSTANCE(Element);
 

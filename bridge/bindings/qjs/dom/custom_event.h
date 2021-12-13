@@ -23,9 +23,9 @@ class CustomEvent : public Event {
  public:
   CustomEvent() = delete;
   explicit CustomEvent(PageJSContext* context) : Event(context) { JS_SetPrototype(m_ctx, m_prototypeObject, Event::instance(m_context)->prototype()); };
-  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
-  static JSValue initCustomEvent(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue initCustomEvent(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   OBJECT_INSTANCE(CustomEvent);
 
  private:

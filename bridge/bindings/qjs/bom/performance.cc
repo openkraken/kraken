@@ -18,37 +18,37 @@ void bindPerformance(std::unique_ptr<PageJSContext>& context) {
 
 using namespace std::chrono;
 
-IMPL_PROPERTY_GETTER(PerformanceEntry, name)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(PerformanceEntry, name)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* entry = static_cast<PerformanceEntry*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   return JS_NewString(ctx, entry->m_nativePerformanceEntry->name);
 }
 
-IMPL_PROPERTY_GETTER(PerformanceEntry, entryType)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(PerformanceEntry, entryType)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* entry = static_cast<PerformanceEntry*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   return JS_NewString(ctx, entry->m_nativePerformanceEntry->entryType);
 }
 
-IMPL_PROPERTY_GETTER(PerformanceEntry, startTime)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(PerformanceEntry, startTime)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* entry = static_cast<PerformanceEntry*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   return JS_NewUint32(ctx, entry->m_nativePerformanceEntry->startTime);
 }
 
-IMPL_PROPERTY_GETTER(PerformanceEntry, duration)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(PerformanceEntry, duration)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* entry = static_cast<PerformanceEntry*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   return JS_NewUint32(ctx, entry->m_nativePerformanceEntry->duration);
 }
 
-IMPL_PROPERTY_GETTER(Performance, timeOrigin)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Performance, timeOrigin)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   int64_t time = std::chrono::duration_cast<std::chrono::milliseconds>(performance->m_context->timeOrigin.time_since_epoch()).count();
   return JS_NewUint32(ctx, time);
 }
 
-JSValue Performance::now(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Performance::now(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, performance->internalNow());
 }
-JSValue Performance::toJSON(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Performance::toJSON(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   double now = performance->internalNow();
   int64_t timeOrigin = std::chrono::duration_cast<std::chrono::milliseconds>(performance->m_context->timeOrigin.time_since_epoch()).count();
@@ -70,7 +70,7 @@ static JSValue buildPerformanceEntry(const std::string& entryType, PageJSContext
   return JS_NULL;
 }
 
-JSValue Performance::clearMarks(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Performance::clearMarks(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   JSValue targetMark = JS_NULL;
   if (argc == 1) {
@@ -101,7 +101,7 @@ JSValue Performance::clearMarks(QjsContext* ctx, JSValue this_val, int argc, JSV
 
   return JS_NULL;
 }
-JSValue Performance::clearMeasures(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Performance::clearMeasures(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   JSValue targetMark = JS_NULL;
   if (argc == 1) {
     targetMark = argv[0];
@@ -132,7 +132,7 @@ JSValue Performance::clearMeasures(QjsContext* ctx, JSValue this_val, int argc, 
 
   return JS_NULL;
 }
-JSValue Performance::getEntries(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Performance::getEntries(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   auto entries = performance->getFullEntries();
 
@@ -151,7 +151,7 @@ JSValue Performance::getEntries(QjsContext* ctx, JSValue this_val, int argc, JSV
   JS_FreeValue(ctx, pushMethod);
   return returnArray;
 }
-JSValue Performance::getEntriesByName(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Performance::getEntriesByName(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc == 0) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'getEntriesByName' on 'Performance': 1 argument required, but only 0 present.");
   }
@@ -173,7 +173,7 @@ JSValue Performance::getEntriesByName(QjsContext* ctx, JSValue this_val, int arg
   JS_FreeValue(ctx, pushMethod);
   return targetEntriesArray;
 }
-JSValue Performance::getEntriesByType(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Performance::getEntriesByType(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc == 0) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'getEntriesByName' on 'Performance': 1 argument required, but only 0 present.");
   }
@@ -194,7 +194,7 @@ JSValue Performance::getEntriesByType(QjsContext* ctx, JSValue this_val, int arg
   JS_FreeValue(ctx, pushMethod);
   return targetEntriesArray;
 }
-JSValue Performance::mark(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Performance::mark(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc != 1) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'mark' on 'Performance': 1 argument required, but only 0 present.");
   }
@@ -205,7 +205,7 @@ JSValue Performance::mark(QjsContext* ctx, JSValue this_val, int argc, JSValue* 
 
   return JS_NULL;
 }
-JSValue Performance::measure(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Performance::measure(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc == 0) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'measure' on 'Performance': 1 argument required, but only 0 present.");
   }
@@ -410,7 +410,7 @@ double getMeasureTotalDuration(const std::vector<NativePerformanceEntry*>& measu
   return duration / 1000;
 }
 
-JSValue Performance::__kraken_navigation_summary__(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Performance::__kraken_navigation_summary__(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
   JSValue exception = JS_NULL;
   performance->measureSummary(&exception);

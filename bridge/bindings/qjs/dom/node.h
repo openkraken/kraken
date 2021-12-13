@@ -30,18 +30,18 @@ class Node : public EventTarget {
 
   OBJECT_INSTANCE(Node);
 
-  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
   static JSClassID classId();
 
   static JSClassID classId(JSValue& value);
 
-  static JSValue cloneNode(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue appendChild(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue remove(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue removeChild(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue insertBefore(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue replaceChild(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue cloneNode(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue appendChild(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue remove(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue removeChild(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue insertBefore(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue replaceChild(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
  private:
   DEFINE_PROTOTYPE_PROPERTY(textContent);
@@ -62,8 +62,8 @@ class Node : public EventTarget {
   DEFINE_PROTOTYPE_FUNCTION(insertBefore, 2);
   DEFINE_PROTOTYPE_FUNCTION(replaceChild, 2);
 
-  static void traverseCloneNode(QjsContext* ctx, NodeInstance* baseNode, NodeInstance* targetNode);
-  static JSValue copyNodeValue(QjsContext* ctx, NodeInstance* node);
+  static void traverseCloneNode(JSContext* ctx, NodeInstance* baseNode, NodeInstance* targetNode);
+  static JSValue copyNodeValue(JSContext* ctx, NodeInstance* node);
   friend ElementInstance;
   friend TextNodeInstance;
 };

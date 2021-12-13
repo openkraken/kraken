@@ -25,7 +25,7 @@ void bindEventTarget(std::unique_ptr<PageJSContext>& context);
 class EventTarget : public HostClass {
  public:
   static JSClassID kEventTargetClassId;
-  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
   EventTarget() = delete;
   explicit EventTarget(PageJSContext* context, const char* name);
   explicit EventTarget(PageJSContext* context);
@@ -36,9 +36,9 @@ class EventTarget : public HostClass {
   OBJECT_INSTANCE(EventTarget);
 
  private:
-  static JSValue addEventListener(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue removeEventListener(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue dispatchEvent(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue addEventListener(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue removeEventListener(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue dispatchEvent(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
   DEFINE_PROTOTYPE_FUNCTION(addEventListener, 3);
   DEFINE_PROTOTYPE_FUNCTION(removeEventListener, 2);
@@ -86,10 +86,10 @@ class EventTargetInstance : public Instance {
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
   static void copyNodeProperties(EventTargetInstance* newNode, EventTargetInstance* referenceNode);
 
-  static int hasProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom);
-  static JSValue getProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);
-  static int setProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
-  static int deleteProperty(QjsContext* ctx, JSValueConst obj, JSAtom prop);
+  static int hasProperty(JSContext* ctx, JSValueConst obj, JSAtom atom);
+  static JSValue getProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);
+  static int setProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
+  static int deleteProperty(JSContext* ctx, JSValueConst obj, JSAtom prop);
 
   void setPropertyHandler(JSString* p, JSValue value);
   JSValue getPropertyHandler(JSString* p);

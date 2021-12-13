@@ -16,7 +16,7 @@ class Location : public HostObject {
   Location() = delete;
   explicit Location(PageJSContext* context) : HostObject(context, "Location") {}
 
-  static JSValue reload(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue reload(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
  private:
   DEFINE_FUNCTION(reload, 0);

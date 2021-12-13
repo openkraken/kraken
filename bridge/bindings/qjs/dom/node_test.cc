@@ -3,18 +3,18 @@
  * Author: Kraken Team.
  */
 
-#include "bridge_qjs.h"
+#include "page.h"
 #include "event_target.h"
 #include "gtest/gtest.h"
 
 TEST(Node, appendChild) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     EXPECT_STREQ(message.c_str(), "true true true");
     logCalled = true;
   };
-  auto* bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) { errorCalled = true; });
+  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) { errorCalled = true; });
   auto& context = bridge->getContext();
   const char* code =
       "let div = document.createElement('div');"
@@ -29,11 +29,11 @@ TEST(Node, appendChild) {
 TEST(Node, childNodes) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     EXPECT_STREQ(message.c_str(), "true true true true");
     logCalled = true;
   };
-  auto* bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) { errorCalled = true; });
+  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) { errorCalled = true; });
   auto& context = bridge->getContext();
   const char* code =
       "let div1 = document.createElement('div');"
@@ -54,11 +54,11 @@ TEST(Node, childNodes) {
 TEST(Node, textContent) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     EXPECT_STREQ(message.c_str(), "1234helloworld");
     logCalled = true;
   };
-  auto* bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) { errorCalled = true; });
+  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) { errorCalled = true; });
   auto& context = bridge->getContext();
   const char* code =
       "let text1 = document.createTextNode('1234');"
@@ -76,11 +76,11 @@ TEST(Node, textContent) {
 TEST(Node, setTextContent) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     EXPECT_STREQ(message.c_str(), "1234");
     logCalled = true;
   };
-  auto* bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) { errorCalled = true; });
+  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) { errorCalled = true; });
   auto& context = bridge->getContext();
   const char* code =
       "let div = document.createElement('div');"
@@ -95,11 +95,11 @@ TEST(Node, setTextContent) {
 TEST(Node, ensureDetached) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     EXPECT_STREQ(message.c_str(), "true true");
     logCalled = true;
   };
-  auto* bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) { errorCalled = true; });
+  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) { errorCalled = true; });
   auto& context = bridge->getContext();
   const char* code =
       "let div = document.createElement('div');"
@@ -117,8 +117,8 @@ TEST(Node, ensureDetached) {
 TEST(Node, replaceBody) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { logCalled = true; };
-  auto* bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { logCalled = true; };
+  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -149,11 +149,11 @@ console.log(div.style.width == div2.style.height, div.getAttribute('id') == '123
 
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "true true true");
   };
-  auto* bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -197,11 +197,11 @@ console.log(
 
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "true true true");
   };
-  auto* bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });

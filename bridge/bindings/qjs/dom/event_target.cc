@@ -34,7 +34,7 @@ EventTarget::EventTarget(PageJSContext* context) : HostClass(context, "EventTarg
   std::call_once(kEventTargetInitFlag, []() { JS_NewClassID(&kEventTargetClassId); });
 }
 
-JSValue EventTarget::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
+JSValue EventTarget::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
   auto eventTarget = new EventTargetInstance(this, kEventTargetClassId, "EventTarget");
   return eventTarget->jsObject;
 }
@@ -49,7 +49,7 @@ JSClassID EventTarget::classId(JSValue& value) {
   return classId;
 }
 
-JSValue EventTarget::addEventListener(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue EventTarget::addEventListener(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 2) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: type and listener are required.");
   }
@@ -91,7 +91,7 @@ JSValue EventTarget::addEventListener(QjsContext* ctx, JSValue this_val, int arg
   return JS_UNDEFINED;
 }
 
-JSValue EventTarget::removeEventListener(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue EventTarget::removeEventListener(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 2) {
     return JS_ThrowTypeError(ctx, "Failed to removeEventListener: at least type and listener are required.");
   }
@@ -137,7 +137,7 @@ JSValue EventTarget::removeEventListener(QjsContext* ctx, JSValue this_val, int 
   return JS_UNDEFINED;
 }
 
-JSValue EventTarget::dispatchEvent(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue EventTarget::dispatchEvent(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc != 1) {
     return JS_ThrowTypeError(ctx, "Failed to dispatchEvent: first arguments should be an event object");
   }
@@ -270,7 +270,7 @@ EventTargetInstance::~EventTargetInstance() {
 #endif
 }
 
-int EventTargetInstance::hasProperty(QjsContext* ctx, JSValue obj, JSAtom atom) {
+int EventTargetInstance::hasProperty(JSContext* ctx, JSValue obj, JSAtom atom) {
   auto* eventTarget = static_cast<EventTargetInstance*>(JS_GetOpaque(obj, JSValueGetClassId(obj)));
   auto* prototype = static_cast<EventTarget*>(eventTarget->prototype());
 
@@ -289,7 +289,7 @@ int EventTargetInstance::hasProperty(QjsContext* ctx, JSValue obj, JSAtom atom) 
   return JS_HasProperty(ctx, eventTarget->m_properties.value(), atom);
 }
 
-JSValue EventTargetInstance::getProperty(QjsContext* ctx, JSValue obj, JSAtom atom, JSValue receiver) {
+JSValue EventTargetInstance::getProperty(JSContext* ctx, JSValue obj, JSAtom atom, JSValue receiver) {
   auto* eventTarget = static_cast<EventTargetInstance*>(JS_GetOpaque(obj, JSValueGetClassId(obj)));
   JSValue prototype = JS_GetPrototype(ctx, eventTarget->jsObject);
   if (JS_HasProperty(ctx, prototype, atom)) {
@@ -328,7 +328,7 @@ JSValue EventTargetInstance::getProperty(QjsContext* ctx, JSValue obj, JSAtom at
   return JS_UNDEFINED;
 }
 
-int EventTargetInstance::setProperty(QjsContext* ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver, int flags) {
+int EventTargetInstance::setProperty(JSContext* ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver, int flags) {
   auto* eventTarget = static_cast<EventTargetInstance*>(JS_GetOpaque(obj, JSValueGetClassId(obj)));
   JSValue prototype = JS_GetPrototype(ctx, eventTarget->jsObject);
 
@@ -379,7 +379,7 @@ int EventTargetInstance::setProperty(QjsContext* ctx, JSValue obj, JSAtom atom, 
   return 0;
 }
 
-int EventTargetInstance::deleteProperty(QjsContext* ctx, JSValue obj, JSAtom prop) {
+int EventTargetInstance::deleteProperty(JSContext* ctx, JSValue obj, JSAtom prop) {
   return 0;
 }
 
@@ -464,7 +464,7 @@ void EventTargetInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_fu
 }
 
 void EventTargetInstance::copyNodeProperties(EventTargetInstance* newNode, EventTargetInstance* referenceNode) {
-  QjsContext* ctx = referenceNode->m_ctx;
+  JSContext* ctx = referenceNode->m_ctx;
   JSValue propKeys = objectGetKeys(ctx, referenceNode->m_properties.value());
   uint32_t propKeyLen = arrayGetLength(ctx, propKeys);
 

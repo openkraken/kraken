@@ -183,18 +183,18 @@ class Performance : public HostObject {
 
   OBJECT_INSTANCE(Performance);
 
-  static JSValue now(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue toJSON(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue clearMarks(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue clearMeasures(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue getEntries(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue getEntriesByName(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue getEntriesByType(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue mark(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue measure(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue now(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue toJSON(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue clearMarks(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue clearMeasures(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getEntries(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getEntriesByName(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getEntriesByType(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue mark(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue measure(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
 #if ENABLE_PROFILE
-  static JSValue __kraken_navigation_summary__(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue __kraken_navigation_summary__(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   void measureSummary(JSValue* exception);
 #endif
 

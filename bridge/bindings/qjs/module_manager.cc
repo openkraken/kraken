@@ -4,12 +4,12 @@
  */
 
 #include "module_manager.h"
-#include "bridge_qjs.h"
+#include "page.h"
 #include "qjs_patch.h"
 
 namespace kraken::binding::qjs {
 
-JSValue krakenModuleListener(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+JSValue krakenModuleListener(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_module_listener__': 1 parameter required, but only 0 present.");
   }
@@ -34,7 +34,7 @@ void handleInvokeModuleTransientCallback(void* callbackContext, int32_t contextI
   auto* moduleContext = static_cast<ModuleContext*>(callbackContext);
   PageJSContext* context = moduleContext->context;
 
-  if (!checkContext(contextId, context))
+  if (!checkPage(contextId, context))
     return;
   if (!context->isValid())
     return;
@@ -45,7 +45,7 @@ void handleInvokeModuleTransientCallback(void* callbackContext, int32_t contextI
     return;
   }
 
-  QjsContext* ctx = moduleContext->context->ctx();
+  JSContext* ctx = moduleContext->context->ctx();
   if (!JS_IsObject(moduleContext->callback)) {
     return;
   }
@@ -80,7 +80,7 @@ void handleInvokeModuleUnexpectedCallback(void* callbackContext, int32_t context
   static_assert("Unexpected module callback, please check your invokeModule implementation on the dart side.");
 }
 
-JSValue krakenInvokeModule(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+JSValue krakenInvokeModule(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (argc < 2) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'kraken.invokeModule()': 2 arguments required.");
   }
@@ -122,7 +122,7 @@ JSValue krakenInvokeModule(QjsContext* ctx, JSValueConst this_val, int argc, JSV
 
   ModuleContext* moduleContext;
   if (JS_IsNull(callbackValue)) {
-    auto emptyFunction = [](QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue { return JS_NULL; };
+    auto emptyFunction = [](JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue { return JS_NULL; };
     JSValue callbackFunc = JS_NewCFunction(ctx, emptyFunction, "_f", 0);
     moduleContext = new ModuleContext{callbackFunc, context};
   } else {
@@ -154,7 +154,7 @@ JSValue krakenInvokeModule(QjsContext* ctx, JSValueConst this_val, int argc, JSV
   return resultString;
 }
 
-JSValue flushUICommand(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+JSValue flushUICommand(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (getDartMethod()->flushUICommand == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.");
   }

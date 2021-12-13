@@ -26,18 +26,18 @@ class Document : public Node {
 
   static JSClassID classId();
 
-  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
   OBJECT_INSTANCE(Document);
 
-  static JSValue createEvent(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue createElement(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue createTextNode(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue createDocumentFragment(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue createComment(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue getElementById(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue getElementsByTagName(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue getElementsByClassName(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue createEvent(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue createElement(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue createTextNode(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue createDocumentFragment(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue createComment(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getElementById(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getElementsByTagName(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getElementsByClassName(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
   JSValue getElementConstructor(PageJSContext* context, const std::string& tagName);
   bool isCustomElement(const std::string& tagName);

@@ -7,7 +7,7 @@
 
 namespace kraken::binding::qjs {
 
-JSValue print(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+JSValue print(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   std::stringstream stream;
   JSValue log = argv[0];
   if (JS_IsString(log)) {

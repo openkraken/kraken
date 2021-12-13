@@ -31,7 +31,7 @@ class HostObject {
   std::string m_name;
   PageJSContext* m_context;
   int32_t m_contextId;
-  QjsContext* m_ctx;
+  JSContext* m_ctx;
 
  private:
   static void proxyFinalize(JSRuntime* rt, JSValue val) {
@@ -58,24 +58,24 @@ class ExoticHostObject {
 
   JSValue jsObject{JS_NULL};
 
-  static JSValue proxyGetProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver) {
+  static JSValue proxyGetProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver) {
     auto* object = static_cast<ExoticHostObject*>(JS_GetOpaque(obj, PageJSContext::kHostExoticObjectClassId));
     return object->getProperty(ctx, obj, atom, receiver);
   };
-  static int proxySetProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags) {
+  static int proxySetProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags) {
     auto* object = static_cast<ExoticHostObject*>(JS_GetOpaque(obj, PageJSContext::kHostExoticObjectClassId));
     return object->setProperty(ctx, obj, atom, value, receiver, flags);
   };
 
-  virtual JSValue getProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);
-  virtual int setProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
+  virtual JSValue getProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);
+  virtual int setProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
 
  protected:
   virtual ~ExoticHostObject() = default;
   std::string m_name;
   PageJSContext* m_context;
   int32_t m_contextId;
-  QjsContext* m_ctx;
+  JSContext* m_ctx;
 
   static void proxyFinalize(JSRuntime* rt, JSValue val) {
     auto hostObject = static_cast<ExoticHostObject*>(JS_GetOpaque(val, PageJSContext::kHostExoticObjectClassId));

@@ -98,7 +98,7 @@ void call_native_function(NativeFunctionContext* functionContext, int32_t argc, 
   delete functionContext;
 }
 
-NativeValue jsValueToNativeValue(QjsContext* ctx, JSValue& value) {
+NativeValue jsValueToNativeValue(JSContext* ctx, JSValue& value) {
   if (JS_IsNull(value) || JS_IsUndefined(value)) {
     return Native_NewNull();
   } else if (JS_IsBool(value)) {
@@ -145,7 +145,7 @@ NativeFunctionContext::~NativeFunctionContext() {
   JS_FreeValue(m_ctx, m_callback);
 }
 
-static JSValue anonymousFunction(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv, int magic, JSValue* func_data) {
+static JSValue anonymousFunction(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv, int magic, JSValue* func_data) {
   auto id = magic;
   auto* eventTarget = static_cast<EventTargetInstance*>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
 
@@ -190,7 +190,7 @@ void anonymousAsyncCallback(void* callbackContext, NativeValue* nativeValue, int
   list_del(&promiseContext->link);
 }
 
-static JSValue anonymousAsyncFunction(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv, int magic, JSValue* func_data) {
+static JSValue anonymousAsyncFunction(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv, int magic, JSValue* func_data) {
   JSValue resolving_funcs[2];
   JSValue promise = JS_NewPromiseCapability(ctx, resolving_funcs);
 

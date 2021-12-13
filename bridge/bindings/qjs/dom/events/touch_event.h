@@ -59,8 +59,8 @@ class TouchList : public ExoticHostObject {
   TouchList() = delete;
   explicit TouchList(PageJSContext* context, NativeTouch** touches, int64_t length);
 
-  JSValue getProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);
-  int setProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
+  JSValue getProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);
+  int setProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
 
  private:
   DEFINE_PROPERTY(length);
@@ -88,7 +88,7 @@ class TouchEvent : public Event {
  public:
   TouchEvent() = delete;
   explicit TouchEvent(PageJSContext* context);
-  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
   OBJECT_INSTANCE(TouchEvent);
 
