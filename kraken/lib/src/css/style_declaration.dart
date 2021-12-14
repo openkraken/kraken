@@ -256,8 +256,13 @@ class CSSStyleDeclaration {
 
   bool _isValidValue(String propertyName, String normalizedValue) {
 
-    // Illegal value like '   ' after trim is '' should do nothing.
+    // Illegal value like '   ' after trimming is '' should do nothing.
     if (normalizedValue.isEmpty) return false;
+
+    // Always return true if is CSS function notation, for value is
+    // lazy calculated.
+    // Eg. var(--x), calc(1 + 1)
+    if (CSSFunction.isFunction(normalizedValue)) return true;
 
     // Validate value.
     switch (propertyName) {
@@ -266,8 +271,7 @@ class CSSStyleDeclaration {
         // Validation length type
         if (!CSSLength.isNonNegativeLength(normalizedValue) &&
           !CSSLength.isAuto(normalizedValue) &&
-          !CSSPercentage.isNonNegativePercentage(normalizedValue) &&
-          !CSSFunction.isFunction(normalizedValue)
+          !CSSPercentage.isNonNegativePercentage(normalizedValue)
         ) {
           return false;
         }

@@ -32,18 +32,18 @@ class CSSFunction {
     var left = value.indexOf(_functionStart, start);
     List<CSSFunctionalNotation> notations = [];
 
-    // function may contain function, should handle this situation
+    // Function may contain function, should handle this situation.
     while (left != -1 && start < left) {
       String fn = value.substring(start, left);
       int argsBeginIndex = left + 1;
       List<String> argList = [];
       int argBeginIndex = argsBeginIndex;
-      // contains function count
+      // Contain function count.
       int containLeftCount = 0;
       bool match = false;
-      // find all args in this function
+      // Find all args in this function.
       while (argsBeginIndex < value.length) {
-        // url() function notation should not be splitted cause it only accept one URL.
+        // url() function notation should not be split causing it only accept one URL.
         // https://drafts.csswg.org/css-values-3/#urls
         if (fn != _functionNotationUrl && value[argsBeginIndex] == FUNCTION_ARGS_SPLIT) {
           if (containLeftCount == 0 && argBeginIndex < argsBeginIndex) {
@@ -60,7 +60,7 @@ class CSSFunction {
               argList.add(value.substring(argBeginIndex, argsBeginIndex));
               argBeginIndex = argsBeginIndex + 1;
             }
-            // function parse success when find the matched right parenthesis
+            // Function parse success when find the matched right parenthesis.
             match = true;
             break;
           }
@@ -68,7 +68,7 @@ class CSSFunction {
         argsBeginIndex++;
       }
       if (match) {
-        // only add the right function
+        // Only add the right function.
         fn = fn.trim();
         if (fn.startsWith(FUNCTION_SPLIT)) {
           fn = fn.substring(1, ).trim();

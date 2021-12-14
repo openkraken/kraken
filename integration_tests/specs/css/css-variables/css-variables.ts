@@ -55,7 +55,7 @@ describe('CSS Variables', () => {
         --x: red;
         --y: green;
         --z: 28px;
-        background: var(--x);
+        background-color: var(--x);
       }
     `));
 
@@ -68,6 +68,95 @@ describe('CSS Variables', () => {
     );
 
     await snapshot();
+  });
+
+  describe('Shorthand CSS properties', () => {
+    it('background', async () => {
+      document.head.appendChild(createStyle(`
+        .inner {
+          --x: red;
+          --y: green;
+          --z: 28px;
+          background: var(--y);
+        }
+      `));
+
+      document.body.appendChild(
+        <div class="outer">
+          <div class="inbetween">
+            <div class="inner">Background should be green.</div>
+          </div>
+        </div>
+      );
+
+      await snapshot();
+    });
+
+    it('margin', async () => {
+      document.head.appendChild(createStyle(`
+        .inner {
+          --x: red;
+          --y: green;
+          --z: 28px;
+          margin: var(--z);
+          background: red;
+        }
+      `));
+
+      document.body.appendChild(
+        <div class="outer">
+          <div class="inbetween">
+            <div class="inner">Background should be red with 28px margin.</div>
+          </div>
+        </div>
+      );
+
+      await snapshot();
+    });
+
+    it('padding', async () => {
+      document.head.appendChild(createStyle(`
+        .inner {
+          --x: red;
+          --y: green;
+          --z: 28px;
+          padding: var(--z);
+          background: red;
+        }
+      `));
+
+      document.body.appendChild(
+        <div class="outer">
+          <div class="inbetween">
+            <div class="inner">Background should be red with 28px padding.</div>
+          </div>
+        </div>
+      );
+
+      await snapshot();
+    });
+
+    it('border', async () => {
+      document.head.appendChild(createStyle(`
+        .inner {
+          --x: 4px;
+          --y: solid;
+          --z: green;
+          border: var(--x) var(--y) var(--z);
+          background: red;
+        }
+      `));
+
+      document.body.appendChild(
+        <div class="outer">
+          <div class="inbetween">
+            <div class="inner">Background should be red with 4px green solid border.</div>
+          </div>
+        </div>
+      );
+
+      await snapshot();
+    });
   });
 
   function createStyle(text) {
