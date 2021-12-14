@@ -73,6 +73,25 @@ TEST(Node, textContent) {
   EXPECT_EQ(logCalled, true);
 }
 
+TEST(Node, setTextContent) {
+  bool static errorCalled = false;
+  bool static logCalled = false;
+  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    EXPECT_STREQ(message.c_str(), "1234");
+    logCalled = true;
+  };
+  auto* bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) { errorCalled = true; });
+  auto& context = bridge->getContext();
+  const char* code =
+      "let div = document.createElement('div');"
+      "div.textContent = '1234';"
+      "console.log(div.textContent);";
+  bridge->evaluateScript(code, strlen(code), "vm://", 0);
+  delete bridge;
+  EXPECT_EQ(errorCalled, false);
+  EXPECT_EQ(logCalled, true);
+}
+
 TEST(Node, ensureDetached) {
   bool static errorCalled = false;
   bool static logCalled = false;

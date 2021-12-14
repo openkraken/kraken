@@ -16,62 +16,26 @@ TemplateElement::TemplateElement(JSContext* context) : Element(context) {
 
 void bindTemplateElement(std::unique_ptr<JSContext>& context) {
   auto* constructor = TemplateElement::instance(context.get());
-  context->defineGlobalProperty("HTMLTemplateElement", constructor->classObject);
+  context->defineGlobalProperty("HTMLTemplateElement", constructor->jsObject);
 }
 
 JSValue TemplateElement::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
   auto instance = new TemplateElementInstance(this);
-  return instance->instanceObject;
+  return instance->jsObject;
 }
-PROP_GETTER(TemplateElementInstance, content)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  getDartMethod()->flushUICommand();
-  auto* element = static_cast<TemplateElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return JS_DupValue(ctx, element->m_content->instanceObject);
-}
-PROP_SETTER(TemplateElementInstance, content)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
-PROP_GETTER(TemplateElementInstance, innerHTML)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  getDartMethod()->flushUICommand();
-  auto* element = static_cast<TemplateElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
 
-  std::string s = "";
-  int32_t childLen = arrayGetLength(ctx, element->m_content->childNodes);
-  for (int i = 0; i < childLen; i++) {
-    JSValue v = JS_GetPropertyUint32(ctx, element->m_content->childNodes, i);
-    auto* node = static_cast<NodeInstance*>(JS_GetOpaque(v, Node::classId(v)));
-    if (node->nodeType == NodeType::ELEMENT_NODE) {
-      s += reinterpret_cast<ElementInstance*>(node)->outerHTML();
-    } else if (node->nodeType == NodeType::TEXT_NODE) {
-      s += reinterpret_cast<TextNodeInstance*>(node)->toString();
-    }
-
-    JS_FreeValue(ctx, v);
-  }
-  return JS_NewString(ctx, s.c_str());
-}
-PROP_SETTER(TemplateElementInstance, innerHTML)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* element = static_cast<TemplateElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  const char* codeString = JS_ToCString(ctx, argv[0]);
-  size_t len = strlen(codeString);
-  HTMLParser::parseHTML(codeString, len, element->m_content);
-  return JS_NULL;
+DocumentFragmentInstance* TemplateElementInstance::content() const {
+  return static_cast<DocumentFragmentInstance*>(JS_GetOpaque(m_content.value(), DocumentFragment::classId()));
 }
 
 TemplateElementInstance::TemplateElementInstance(TemplateElement* element) : ElementInstance(element, "template", true) {
-  JSValue documentFragmentValue = JS_CallConstructor(m_ctx, DocumentFragment::instance(m_context)->classObject, 0, nullptr);
-  m_content = static_cast<DocumentFragmentInstance*>(JS_GetOpaque(documentFragmentValue, DocumentFragment::classId()));
+  setNodeFlag(NodeFlag::IsTemplateElement);
 }
 
-TemplateElementInstance::~TemplateElementInstance() {
-  JS_FreeValue(m_ctx, m_content->instanceObject);
-}
+TemplateElementInstance::~TemplateElementInstance() {}
 
 void TemplateElementInstance::gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
   NodeInstance::gcMark(rt, val, mark_func);
-  // Should check object is already inited before gc mark.
-  if (JS_IsObject(m_content->instanceObject))
-    JS_MarkValue(rt, m_content->instanceObject, mark_func);
 }
 
 }  // namespace kraken::binding::qjs

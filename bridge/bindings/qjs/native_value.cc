@@ -124,7 +124,7 @@ NativeValue jsValueToNativeValue(QjsContext* ctx, JSValue& value) {
     return Native_NewPtr(JSPointerType::NativeFunctionContext, functionContext);
   } else if (JS_IsObject(value)) {
     auto* context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
-    if (JS_IsInstanceOf(ctx, value, ImageElement::instance(context)->classObject)) {
+    if (JS_IsInstanceOf(ctx, value, ImageElement::instance(context)->jsObject)) {
       auto* imageElementInstance = static_cast<ImageElementInstance*>(JS_GetOpaque(value, Element::classId()));
       return Native_NewPtr(JSPointerType::NativeEventTarget, imageElementInstance->nativeEventTarget);
     }
@@ -249,13 +249,13 @@ JSValue nativeValueToJSValue(JSContext* context, NativeValue& value) {
     case NativeTag::TAG_POINTER: {
       auto* ptr = value.u.ptr;
       int ptrType = (int)value.float64;
-      if (ptrType == JSPointerType::NativeBoundingClientRect) {
+      if (ptrType == static_cast<int64_t>(JSPointerType::NativeBoundingClientRect)) {
         return (new BoundingClientRect(context, static_cast<NativeBoundingClientRect*>(ptr)))->jsObject;
-      } else if (ptrType == JSPointerType::NativeCanvasRenderingContext2D) {
+      } else if (ptrType == static_cast<int64_t>(JSPointerType::NativeCanvasRenderingContext2D)) {
         return (new CanvasRenderingContext2D(context, static_cast<NativeCanvasRenderingContext2D*>(ptr)))->jsObject;
-      } else if (ptrType == JSPointerType::NativeEventTarget) {
+      } else if (ptrType == static_cast<int64_t>(JSPointerType::NativeEventTarget)) {
         auto* nativeEventTarget = static_cast<NativeEventTarget*>(ptr);
-        return JS_DupValue(context->ctx(), nativeEventTarget->instance->instanceObject);
+        return JS_DupValue(context->ctx(), nativeEventTarget->instance->jsObject);
       }
     }
     case NativeTag::TAG_FUNCTION: {

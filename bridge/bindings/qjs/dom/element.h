@@ -90,16 +90,39 @@ class Element : public Node {
   OBJECT_INSTANCE(Element);
 
  private:
-  ObjectFunction m_getBoundingClientRect{m_context, m_prototypeObject, "getBoundingClientRect", getBoundingClientRect, 0};
-  ObjectFunction m_hasAttribute{m_context, m_prototypeObject, "hasAttribute", hasAttribute, 1};
-  ObjectFunction m_setAttribute{m_context, m_prototypeObject, "setAttribute", setAttribute, 2};
-  ObjectFunction m_getAttribute{m_context, m_prototypeObject, "getAttribute", getAttribute, 2};
-  ObjectFunction m_removeAttribute{m_context, m_prototypeObject, "removeAttribute", removeAttribute, 1};
-  ObjectFunction m_toBlob{m_context, m_prototypeObject, "toBlob", toBlob, 0};
-  ObjectFunction m_click{m_context, m_prototypeObject, "click", click, 0};
-  ObjectFunction m_scroll{m_context, m_prototypeObject, "scroll", scroll, 2};
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(nodeName);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(tagName);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(offsetLeft);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(offsetTop);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(offsetWidth);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(offsetHeight);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(clientWidth);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(clientHeight);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(clientTop);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(clientLeft);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(scrollHeight);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(scrollWidth);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(firstElementChild);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(lastElementChild);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(children);
+
+  DEFINE_PROTOTYPE_PROPERTY(className);
+  DEFINE_PROTOTYPE_PROPERTY(innerHTML);
+  DEFINE_PROTOTYPE_PROPERTY(outerHTML);
+  DEFINE_PROTOTYPE_PROPERTY(scrollTop);
+  DEFINE_PROTOTYPE_PROPERTY(scrollLeft);
+
+  DEFINE_PROTOTYPE_FUNCTION(getBoundingClientRect, 0);
+  DEFINE_PROTOTYPE_FUNCTION(hasAttribute, 1);
+  DEFINE_PROTOTYPE_FUNCTION(setAttribute, 2);
+  DEFINE_PROTOTYPE_FUNCTION(getAttribute, 2);
+  DEFINE_PROTOTYPE_FUNCTION(removeAttribute, 1);
+  DEFINE_PROTOTYPE_FUNCTION(toBlob, 0);
+  DEFINE_PROTOTYPE_FUNCTION(click, 2);
+  DEFINE_PROTOTYPE_FUNCTION(scroll, 2);
+  // ScrollTo is same as scroll which reuse scroll functions. Macro expand is not support here.
   ObjectFunction m_scrollTo{m_context, m_prototypeObject, "scrollTo", scroll, 2};
-  ObjectFunction m_scrollBy{m_context, m_prototypeObject, "scrollBy", scrollBy, 2};
+  DEFINE_PROTOTYPE_FUNCTION(scrollBy, 2);
   friend ElementInstance;
 };
 
@@ -129,27 +152,6 @@ class ElementInstance : public NodeInstance {
   explicit ElementInstance(Element* element, std::string tagName, bool shouldAddUICommand);
 
  private:
-  DEFINE_HOST_CLASS_PROPERTY(20,
-                             nodeName,
-                             tagName,
-                             className,
-                             offsetLeft,
-                             offsetTop,
-                             offsetWidth,
-                             offsetHeight,
-                             clientWidth,
-                             clientHeight,
-                             clientTop,
-                             clientLeft,
-                             scrollTop,
-                             scrollLeft,
-                             scrollHeight,
-                             scrollWidth,
-                             firstElementChild,
-                             lastElementChild,
-                             children,
-                             innerHTML,
-                             outerHTML);
   void _notifyNodeRemoved(NodeInstance* node) override;
   void _notifyChildRemoved();
   void _notifyNodeInsert(NodeInstance* insertNode) override;
@@ -172,14 +174,18 @@ class BoundingClientRect : public HostObject {
  public:
   BoundingClientRect() = delete;
   explicit BoundingClientRect(JSContext* context, NativeBoundingClientRect* nativeBoundingClientRect)
-      : HostObject(context, "BoundingClientRect"),
-        m_nativeBoundingClientRect(nativeBoundingClientRect){
-
-        };
-
-  DEFINE_HOST_OBJECT_PROPERTY(8, x, y, width, height, top, right, bottom, left);
+      : HostObject(context, "BoundingClientRect"), m_nativeBoundingClientRect(nativeBoundingClientRect){};
 
  private:
+  DEFINE_READONLY_PROPERTY(x);
+  DEFINE_READONLY_PROPERTY(y);
+  DEFINE_READONLY_PROPERTY(width);
+  DEFINE_READONLY_PROPERTY(height);
+  DEFINE_READONLY_PROPERTY(top);
+  DEFINE_READONLY_PROPERTY(right);
+  DEFINE_READONLY_PROPERTY(bottom);
+  DEFINE_READONLY_PROPERTY(left);
+
   NativeBoundingClientRect* m_nativeBoundingClientRect{nullptr};
 };
 

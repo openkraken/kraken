@@ -13,7 +13,7 @@ std::once_flag kinitCSSStyleDeclarationFlag;
 
 void bindCSSStyleDeclaration(std::unique_ptr<JSContext>& context) {
   auto style = CSSStyleDeclaration::instance(context.get());
-  context->defineGlobalProperty("CSSStyleDeclaration", style->classObject);
+  context->defineGlobalProperty("CSSStyleDeclaration", style->jsObject);
 }
 
 static std::string parseJavaScriptCSSPropertyName(std::string& propertyName) {
@@ -55,7 +55,7 @@ JSValue CSSStyleDeclaration::instanceConstructor(QjsContext* ctx, JSValue func_o
 
   auto eventTargetInstance = static_cast<EventTargetInstance*>(JS_GetOpaque(eventTargetValue, EventTarget::classId(eventTargetValue)));
   auto style = new StyleDeclarationInstance(this, eventTargetInstance);
-  return style->instanceObject;
+  return style->jsObject;
 }
 
 JSClassID CSSStyleDeclaration::kCSSStyleDeclarationClassId{0};
@@ -113,7 +113,7 @@ JSValue CSSStyleDeclaration::getPropertyValue(QjsContext* ctx, JSValue this_val,
 
 StyleDeclarationInstance::StyleDeclarationInstance(CSSStyleDeclaration* cssStyleDeclaration, EventTargetInstance* ownerEventTarget)
     : Instance(cssStyleDeclaration, "CSSStyleDeclaration", &m_exoticMethods, CSSStyleDeclaration::kCSSStyleDeclarationClassId, finalize), ownerEventTarget(ownerEventTarget) {
-  JS_DupValue(m_ctx, ownerEventTarget->instanceObject);
+  JS_DupValue(m_ctx, ownerEventTarget->jsObject);
 }
 StyleDeclarationInstance::~StyleDeclarationInstance() {}
 
@@ -198,9 +198,9 @@ int StyleDeclarationInstance::setProperty(QjsContext* ctx, JSValue obj, JSAtom a
 
 JSValue StyleDeclarationInstance::getProperty(QjsContext* ctx, JSValue obj, JSAtom atom, JSValue receiver) {
   auto* styleInstance = static_cast<EventTargetInstance*>(JS_GetOpaque(obj, JSValueGetClassId(obj)));
-  JSValue prototype = JS_GetPrototype(ctx, styleInstance->instanceObject);
+  JSValue prototype = JS_GetPrototype(ctx, styleInstance->jsObject);
   if (JS_HasProperty(ctx, prototype, atom)) {
-    JSValue ret = JS_GetPropertyInternal(ctx, prototype, atom, styleInstance->instanceObject, 0);
+    JSValue ret = JS_GetPropertyInternal(ctx, prototype, atom, styleInstance->jsObject, 0);
     JS_FreeValue(ctx, prototype);
     return ret;
   }
@@ -221,7 +221,7 @@ JSClassExoticMethods StyleDeclarationInstance::m_exoticMethods{
 void StyleDeclarationInstance::gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
   Instance::gcMark(rt, val, mark_func);
   // We should tel gc style relies on element
-  JS_MarkValue(rt, ownerEventTarget->instanceObject, mark_func);
+  JS_MarkValue(rt, ownerEventTarget->jsObject, mark_func);
 }
 
 }  // namespace kraken::binding::qjs

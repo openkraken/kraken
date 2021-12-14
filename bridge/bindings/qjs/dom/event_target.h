@@ -39,16 +39,10 @@ class EventTarget : public HostClass {
   static JSValue addEventListener(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   static JSValue removeEventListener(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   static JSValue dispatchEvent(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-#if IS_TEST
-  static JSValue __kraken_clear_event_listener(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-#endif
 
-  ObjectFunction m_addEventListener{m_context, m_prototypeObject, "addEventListener", addEventListener, 3};
-  ObjectFunction m_removeEventListener{m_context, m_prototypeObject, "removeEventListener", removeEventListener, 2};
-  ObjectFunction m_dispatchEvent{m_context, m_prototypeObject, "dispatchEvent", dispatchEvent, 1};
-#if IS_TEST
-  ObjectFunction m_kraken_clear_event_listener_{m_context, m_prototypeObject, "__kraken_clear_event_listeners__", __kraken_clear_event_listener, 0};
-#endif
+  DEFINE_PROTOTYPE_FUNCTION(addEventListener, 3);
+  DEFINE_PROTOTYPE_FUNCTION(removeEventListener, 2);
+  DEFINE_PROTOTYPE_FUNCTION(dispatchEvent, 1);
   friend EventTargetInstance;
 };
 
@@ -84,9 +78,9 @@ class EventTargetInstance : public Instance {
 
  protected:
   int32_t m_eventTargetId;
-  ObjectProperty m_eventHandlers{m_context, instanceObject, "__eventHandlers", JS_NewObject(m_ctx)};
-  ObjectProperty m_propertyEventHandler{m_context, instanceObject, "__propertyEventHandler", JS_NewObject(m_ctx)};
-  ObjectProperty m_properties{m_context, instanceObject, "__properties", JS_NewObject(m_ctx)};
+  ObjectProperty m_eventHandlers{m_context, jsObject, "__eventHandlers", JS_NewObject(m_ctx)};
+  ObjectProperty m_propertyEventHandler{m_context, jsObject, "__propertyEventHandler", JS_NewObject(m_ctx)};
+  ObjectProperty m_properties{m_context, jsObject, "__properties", JS_NewObject(m_ctx)};
 
   void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
   static void copyNodeProperties(EventTargetInstance* newNode, EventTargetInstance* referenceNode);

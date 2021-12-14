@@ -146,7 +146,10 @@ class PerformanceEntry : public HostObject {
   PerformanceEntry() = delete;
   explicit PerformanceEntry(JSContext* context, NativePerformanceEntry* m_nativePerformanceEntry);
 
-  DEFINE_HOST_OBJECT_PROPERTY(4, name, entryType, startTime, duration)
+  DEFINE_READONLY_PROPERTY(name);
+  DEFINE_READONLY_PROPERTY(entryType);
+  DEFINE_READONLY_PROPERTY(startTime);
+  DEFINE_READONLY_PROPERTY(duration);
 
  private:
   NativePerformanceEntry* m_nativePerformanceEntry{nullptr};
@@ -197,24 +200,25 @@ class Performance : public HostObject {
 
   NativePerformance m_nativePerformance;
 
-  DEFINE_HOST_OBJECT_PROPERTY(1, timeOrigin);
+  DEFINE_READONLY_PROPERTY(timeOrigin);
 
  private:
   void internalMeasure(const std::string& name, const std::string& startMark, const std::string& endMark, JSValue* exception);
   double internalNow();
   std::vector<NativePerformanceEntry*> getFullEntries();
-  ObjectFunction m_now{m_context, jsObject, "now", now, 0};
-  ObjectFunction m_toJSON{m_context, jsObject, "toJSON", toJSON, 0};
-  ObjectFunction m_clearMarks{m_context, jsObject, "clearMarks", clearMarks, 1};
-  ObjectFunction m_clearMeasures{m_context, jsObject, "clearMeasures", clearMeasures, 1};
-  ObjectFunction m_getEntries{m_context, jsObject, "getEntries", getEntries, 0};
-  ObjectFunction m_getEntriesByName{m_context, jsObject, "getEntriesByName", getEntriesByName, 2};
-  ObjectFunction m_getEntriesByType{m_context, jsObject, "getEntriesByType", getEntriesByType, 1};
-  ObjectFunction m_mark{m_context, jsObject, "mark", mark, 1};
-  ObjectFunction m_measure{m_context, jsObject, "measure", measure, 4};
+
+  DEFINE_FUNCTION(now, 0);
+  DEFINE_FUNCTION(toJSON, 0);
+  DEFINE_FUNCTION(clearMarks, 1);
+  DEFINE_FUNCTION(clearMeasures, 1);
+  DEFINE_FUNCTION(getEntries, 0);
+  DEFINE_FUNCTION(getEntriesByName, 2);
+  DEFINE_FUNCTION(getEntriesByType, 1);
+  DEFINE_FUNCTION(mark, 1);
+  DEFINE_FUNCTION(measure, 4);
 
 #if ENABLE_PROFILE
-  ObjectFunction m___kraken_navigation_summary__{m_context, jsObject, "__kraken_navigation_summary__", __kraken_navigation_summary__, 0};
+  DEFINE_FUNCTION(__kraken_navigation_summary__, 0);
 #endif
 };
 
