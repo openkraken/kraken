@@ -5,21 +5,21 @@
 
 #include "console.h"
 #include "gtest/gtest.h"
-#include "page.h"
 #include "kraken_bridge.h"
 #include "kraken_test_env.h"
+#include "page.h"
 
 TEST(Timer, setTimeout) {
-
   initJSPagePool(1);
-  auto *bridge = static_cast<kraken::KrakenPage*>(getPage(0));
+  auto* bridge = static_cast<kraken::KrakenPage*>(getPage(0));
 
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     static int logIdx = 0;
-    switch(logIdx) {
+    switch (logIdx) {
       case 0:
         EXPECT_STREQ(message.c_str(), "1234");
-        break;;
+        break;
+        ;
       case 1:
         EXPECT_STREQ(message.c_str(), "789");
         break;
