@@ -10,7 +10,7 @@
 
 namespace kraken::binding::qjs {
 
-struct TimerCallbackContext {
+struct DOMTimerCallbackContext {
   JSValue callback;
   PageJSContext* context;
   list_head link;

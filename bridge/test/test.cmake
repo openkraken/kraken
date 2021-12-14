@@ -19,7 +19,10 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     page_test.h
   )
   list(APPEND KRAKEN_UNIT_TEST_SOURCE
+    ./test/kraken_test_env.cc
+    ./test/kraken_test_env.h
     ./bindings/qjs/js_context_test.cc
+    ./bindings/qjs/bom/timer_test.cc
     ./bindings/qjs/bom/console_test.cc
     ./bindings/qjs/qjs_patch_test.cc
     ./bindings/qjs/host_object_test.cc
@@ -37,7 +40,7 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
 
   ### kraken_unit_test executable
   add_executable(kraken_unit_test ${KRAKEN_UNIT_TEST_SOURCE} ${KRAKEN_TEST_SOURCE} ${BRIDGE_SOURCE} ../bindings/qjs/html_parser.cc ../bindings/qjs/html_parser.h ../bindings/qjs/module_manager_test.cc)
-  target_include_directories(kraken_unit_test PUBLIC ./third_party/googletest/googletest/include ${BRIDGE_INCLUDE})
+  target_include_directories(kraken_unit_test PUBLIC ./third_party/googletest/googletest/include ${BRIDGE_INCLUDE} ./test)
   target_link_libraries(kraken_unit_test gtest gtest_main ${BRIDGE_LINK_LIBS})
 
   target_compile_options(quickjs PUBLIC -DDUMP_LEAKS=1)

@@ -7,9 +7,13 @@
 #include "bindings/qjs/qjs_patch.h"
 #include "dart_methods.h"
 
+#if IS_TEST
+#include "kraken_test_env.h"
+#endif
+
 namespace kraken::binding::qjs {
 
-static void handleTimerCallback(TimerCallbackContext* callbackContext, const char* errmsg) {
+static void handleTimerCallback(DOMTimerCallbackContext* callbackContext, const char* errmsg) {
   if (JS_IsNull(callbackContext->callback)) {
     // throw JSError inside of dart function callback will directly cause crash
     // so we handle it instead of throw
@@ -37,7 +41,7 @@ static void handleTimerCallback(TimerCallbackContext* callbackContext, const cha
 }
 
 static void handleTransientCallback(void* ptr, int32_t contextId, const char* errmsg) {
-  auto* callbackContext = static_cast<TimerCallbackContext*>(ptr);
+  auto* callbackContext = static_cast<DOMTimerCallbackContext*>(ptr);
   if (!checkPage(contextId, callbackContext->context))
     return;
   if (!callbackContext->context->isValid())
@@ -51,7 +55,7 @@ static void handleTransientCallback(void* ptr, int32_t contextId, const char* er
 }
 
 static void handlePersistentCallback(void* ptr, int32_t contextId, const char* errmsg) {
-  auto* callbackContext = static_cast<TimerCallbackContext*>(ptr);
+  auto* callbackContext = static_cast<DOMTimerCallbackContext*>(ptr);
   if (!checkPage(contextId, callbackContext->context))
     return;
   if (!callbackContext->context->isValid())
@@ -87,14 +91,20 @@ static JSValue setTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSVal
     return JS_ThrowTypeError(ctx, "Failed to execute 'setTimeout': parameter 2 (timeout) only can be a number or undefined.");
   }
 
+#if FLUTTER_BACKEND
   if (getDartMethod()->setTimeout == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'setTimeout': dart method (setTimeout) is not registered.");
   }
+#endif
 
-  auto* callbackContext = new TimerCallbackContext{JS_DupValue(ctx, callbackValue), context};
-  list_add_tail(&callbackContext->link, &context->timer_job_list);
+  auto* callbackContext = new DOMTimerCallbackContext{JS_DupValue(ctx, callbackValue), context};
+  context->trackPendingDOMTimer(callbackContext);
 
+#if FLUTTER_BACKEND
   auto timerId = getDartMethod()->setTimeout(callbackContext, context->getContextId(), handleTransientCallback, timeout);
+#elif IS_TEST
+  auto timerId = TEST_setTimeout(callbackContext, context->getContextId(), handleTransientCallback, timeout);
+#endif
 
   // `-1` represents ffi error occurred.
   if (timerId == -1) {
@@ -105,7 +115,7 @@ static JSValue setTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSVal
 }
 
 static void handleRAFTransientCallback(void* ptr, int32_t contextId, double highResTimeStamp, const char* errmsg) {
-  auto* callbackContext = static_cast<TimerCallbackContext*>(ptr);
+  auto* callbackContext = static_cast<DOMTimerCallbackContext*>(ptr);
   if (!checkPage(contextId, callbackContext->context))
     return;
 
@@ -174,8 +184,8 @@ static JSValue setInterval(JSContext* ctx, JSValueConst this_val, int argc, JSVa
   }
 
   // the context pointer which will be pass by pointer address to dart code.
-  auto* callbackContext = new TimerCallbackContext{JS_DupValue(ctx, callbackValue), context};
-  list_add_tail(&callbackContext->link, &context->timer_job_list);
+  auto* callbackContext = new DOMTimerCallbackContext{JS_DupValue(ctx, callbackValue), context};
+  context->trackPendingDOMTimer(callbackContext);
   uint32_t timerId = getDartMethod()->setInterval(callbackContext, context->getContextId(), handlePersistentCallback, timeout);
 
   if (timerId == -1) {
@@ -211,8 +221,8 @@ static JSValue requestAnimationFrame(JSContext* ctx, JSValueConst this_val, int 
     return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) is not registered.");
   }
 
-  auto* callbackContext = new TimerCallbackContext{JS_DupValue(ctx, callbackValue), context};
-  list_add_tail(&callbackContext->link, &context->timer_job_list);
+  auto* callbackContext = new DOMTimerCallbackContext{JS_DupValue(ctx, callbackValue), context};
+  context->trackPendingDOMTimer(callbackContext);
 
   uint32_t requestId = getDartMethod()->requestAnimationFrame(callbackContext, context->getContextId(), handleRAFTransientCallback);
 
