@@ -8,6 +8,7 @@
 import 'package:quiver/collection.dart';
 
 final _functionRegExp = RegExp(r'^[a-zA-Z_]+\(.+\)$', caseSensitive: false);
+final _variableFunctionRegExp = RegExp(r'^var\(.+\)$', caseSensitive: false);
 final _functionStart = '(';
 final _functionEnd = ')';
 final _functionNotationUrl = 'url';
@@ -22,6 +23,10 @@ class CSSFunction {
 
   static bool isFunction(String value) {
     return _functionRegExp.hasMatch(value);
+  }
+
+  static bool isVariableFunction(String value) {
+    return _variableFunctionRegExp.hasMatch(value);
   }
 
   static List<CSSFunctionalNotation> parseFunction(String value) {

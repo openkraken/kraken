@@ -477,29 +477,29 @@ class CSSStyleProperty {
     bool isPositionEndAndSizeStart = false;
 
     for (String value in values) {
-      final bool isValueFunction = CSSFunction.isFunction(value);
-      if (color == null && (CSSColor.isColor(value) || isValueFunction)) {
+      final bool isValueVariableFunction = CSSFunction.isVariableFunction(value);
+      if (color == null && (isValueVariableFunction || CSSColor.isColor(value))) {
         color = value;
-      } else if (image == null && (CSSBackground.isValidBackgroundImageValue(value) || isValueFunction)) {
+      } else if (image == null && (isValueVariableFunction || CSSBackground.isValidBackgroundImageValue(value))) {
         image = value;
-      } else if (repeat == null && (CSSBackground.isValidBackgroundRepeatValue(value) || isValueFunction)) {
+      } else if (repeat == null && (isValueVariableFunction || CSSBackground.isValidBackgroundRepeatValue(value))) {
         repeat = value;
-      } else if (attachment == null && (CSSBackground.isValidBackgroundAttachmentValue(value) || isValueFunction)) {
+      } else if (attachment == null && (isValueVariableFunction || CSSBackground.isValidBackgroundAttachmentValue(value))) {
         attachment = value;
       } else if (positionX == null &&
           !isPositionEndAndSizeStart &&
-          (CSSBackground.isValidBackgroundPositionValue(value) || isValueFunction)) {
+          (isValueVariableFunction || CSSBackground.isValidBackgroundPositionValue(value))) {
         positionX = value;
       } else if (positionY == null &&
           !isPositionEndAndSizeStart &&
-          (CSSBackground.isValidBackgroundPositionValue(value) || isValueFunction)) {
+          (isValueVariableFunction || CSSBackground.isValidBackgroundPositionValue(value))) {
         positionY = value;
       } else if (value == '/') {
         isPositionEndAndSizeStart = true;
         continue;
-      } else if (sizeWidth == null && (CSSBackground.isValidBackgroundSizeValue(value) || isValueFunction)) {
+      } else if (sizeWidth == null && (isValueVariableFunction || CSSBackground.isValidBackgroundSizeValue(value))) {
         sizeWidth = value;
-      } else if (sizeHeight == null && (CSSBackground.isValidBackgroundSizeValue(value) || isValueFunction)) {
+      } else if (sizeHeight == null && (isValueVariableFunction || CSSBackground.isValidBackgroundSizeValue(value))) {
         sizeHeight = value;
       } else {
         return null;
@@ -547,17 +547,17 @@ class CSSStyleProperty {
     bool isSizeEndAndLineHeightStart = false;
 
     for (String value in values) {
-      final bool isValueFunction = CSSFunction.isFunction(value);
-      if (style == null && (isValueFunction || CSSText.isValidFontStyleValue(value))) {
+      final bool isValueVariableFunction = CSSFunction.isVariableFunction(value);
+      if (style == null && (isValueVariableFunction || CSSText.isValidFontStyleValue(value))) {
         style = value;
-      } else if (weight == null && (isValueFunction || CSSText.isValidFontWeightValue(value))) {
+      } else if (weight == null && (isValueVariableFunction || CSSText.isValidFontWeightValue(value))) {
         weight = value;
-      } else if (size == null && (isValueFunction || CSSLength.isNonNegativeLength(value))) {
+      } else if (size == null && (isValueVariableFunction || CSSLength.isNonNegativeLength(value))) {
         size = value;
       } else if (value == '/') {
         isSizeEndAndLineHeightStart = true;
         continue;
-      } else if (lineHeight == null && (isValueFunction || CSSText.isValidLineHeightValue(value))) {
+      } else if (lineHeight == null && (isValueVariableFunction || CSSText.isValidLineHeightValue(value))) {
         lineHeight = value;
       } else if (family == null) {
         // The font-family must be the last value specified.
@@ -643,10 +643,10 @@ class CSSStyleProperty {
     String? wrap;
 
     for (String value in values) {
-      final bool isValueFunction = CSSFunction.isFunction(value);
-      if (direction == null && (isValueFunction || CSSFlex.isValidFlexDirectionValue(value))) {
+      final bool isValueVariableFunction = CSSFunction.isVariableFunction(value);
+      if (direction == null && (isValueVariableFunction || CSSFlex.isValidFlexDirectionValue(value))) {
         direction = value;
-      } else if (wrap == null && (isValueFunction || CSSFlex.isValidFlexWrapValue(value))) {
+      } else if (wrap == null && (isValueVariableFunction || CSSFlex.isValidFlexWrapValue(value))) {
         wrap = value;
       } else {
         return null;
@@ -684,12 +684,12 @@ class CSSStyleProperty {
         }
       }
 
-      final bool isValueFunction = CSSFunction.isFunction(value);
-      if (grow == null && (isValueFunction || CSSNumber.isNumber(value))) {
+      final bool isValueVariableFunction = CSSFunction.isVariableFunction(value);
+      if (grow == null && (isValueVariableFunction || CSSNumber.isNumber(value))) {
         grow = value;
-      } else if (shrink == null && (isValueFunction || CSSNumber.isNumber(value))) {
+      } else if (shrink == null && (isValueVariableFunction || CSSNumber.isNumber(value))) {
         shrink = value;
-      } else if (basis == null && ((isValueFunction || CSSLength.isNonNegativeLength(value) || value == AUTO))) {
+      } else if (basis == null && ((isValueVariableFunction || CSSLength.isNonNegativeLength(value) || value == AUTO))) {
         basis = value;
       } else {
         return null;
@@ -708,12 +708,12 @@ class CSSStyleProperty {
 
     // NOTE: if one of token is wrong like `1pxxx solid red` that all should not work
     for (String value in values) {
-      final bool isValueFunction = CSSFunction.isFunction(value);
-      if (width == null && (isValueFunction || CSSBorderSide.isValidBorderWidthValue(value))) {
+      final bool isValueVariableFunction = CSSFunction.isVariableFunction(value);
+      if (width == null && (isValueVariableFunction || CSSBorderSide.isValidBorderWidthValue(value))) {
         width = value;
-      } else if (style == null && (isValueFunction || CSSBorderSide.isValidBorderStyleValue(value))) {
+      } else if (style == null && (isValueVariableFunction || CSSBorderSide.isValidBorderStyleValue(value))) {
         style = value;
-      } else if (color == null && (isValueFunction || CSSColor.isColor(value))) {
+      } else if (color == null && (isValueVariableFunction || CSSColor.isColor(value))) {
         color = value;
       } else {
         return null;
