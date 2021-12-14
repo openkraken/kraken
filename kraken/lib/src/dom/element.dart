@@ -573,8 +573,14 @@ class Element extends Node
       willAttachRenderer();
     }
 
+
+
     if (renderer != null) {
-      _attachRenderBoxModel(parent.renderer!, renderer!, after: after);
+      if (parent is! WidgetElement) {
+        _attachRenderBoxModel(parent.renderer!, renderer!, after: after);
+      } else {
+        print('111');
+      }
 
       // Flush pending style before child attached.
       style.flushPendingProperties();
@@ -800,7 +806,9 @@ class Element extends Node
     _updateRenderBoxModel();
     // Attach renderBoxModel to parent if change from `display: none` to other values.
     if (!isRendererAttached && parentElement != null && parentElement!.isRendererAttached) {
-      _addToContainingBlock(after: previousSibling?.renderer);
+      if (parentNode is! WidgetElement) {
+        _addToContainingBlock(after: previousSibling?.renderer);
+      }
       ensureChildAttached();
     }
   }
