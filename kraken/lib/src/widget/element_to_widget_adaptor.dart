@@ -4,13 +4,12 @@ import 'package:kraken/dom.dart' as dom;
 class KrakenElementToWidgetAdaptor extends RenderObjectWidget {
   final dom.Node _krakenNode;
 
-  KrakenElementToWidgetAdaptor(this._krakenNode);
+  KrakenElementToWidgetAdaptor(this._krakenNode, { Key? key }): super(key: key);
 
   @override
   RenderObjectElement createElement() {
-    KrakenElementToFlutterElementAdaptor element = KrakenElementToFlutterElementAdaptor(this);
-    // _krakenNode.elementManager.setFlutterElement(_krakenNode.targetId, element);
-    return element;
+    _krakenNode.element = KrakenElementToFlutterElementAdaptor(this);
+    return _krakenNode.element as RenderObjectElement;
   }
 
   @override

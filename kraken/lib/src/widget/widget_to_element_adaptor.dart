@@ -259,6 +259,7 @@ abstract class WidgetElement extends dom.Element {
       parentElement = ((parentNode as WidgetElement)._widget as _KrakenAdapterWidget).createElement();
     } else {
       // parentElement = elementManager.getFlutterElementByTargetId((parentNode as dom.Element).targetId);
+      parentElement = (parentNode as dom.Element).element;
     }
 
     if (parentElement != null) {
@@ -274,6 +275,7 @@ class _KrakenAdapterWidget extends StatefulWidget {
 
   _KrakenAdapterWidget(this._state);
 
+
   @override
   State<StatefulWidget> createState() {
     return _state;
@@ -284,25 +286,29 @@ class _KrakenAdapterWidget extends StatefulWidget {
 class _KrakenAdapterWidgetState extends State<_KrakenAdapterWidget> {
   Map<String, dynamic> _properties;
   final WidgetElement _element;
-  late List<Widget> _childNodes;
+  late List<dom.Node> _childNodes;
 
   _KrakenAdapterWidgetState(this._element, this._properties, List<dom.Node> childNodes) {
-    _childNodes = convertNodeListToWidgetList(childNodes);
+    _childNodes = childNodes;
   }
 
   void onAttributeChanged(Map<String, dynamic> properties) {
-    setState(() {
+    if (mounted) {
+      setState(() {
+        _properties = properties;
+      });
+    } else {
       _properties = properties;
-    });
+    }
   }
 
   List<Widget> convertNodeListToWidgetList(List<dom.Node> childNodes) {
     List<Widget> children = List.generate(childNodes.length, (index) {
       if (childNodes[index] is WidgetElement) {
         _KrakenAdapterWidgetState state = (childNodes[index] as WidgetElement)._state!;
-        return state._element.build(context, state._properties, state._childNodes);
+        return state.build(context);
       } else {
-        return KrakenElementToWidgetAdaptor(childNodes[index]);
+        return KrakenElementToWidgetAdaptor(childNodes[index], key: Key(index.toString()));
       }
     });
 
@@ -310,13 +316,17 @@ class _KrakenAdapterWidgetState extends State<_KrakenAdapterWidget> {
   }
 
   void onChildrenChanged(List<dom.Node> childNodes) {
-    setState(() {
-      _childNodes = convertNodeListToWidgetList(childNodes);
-    });
+    if (mounted) {
+      setState(() {
+        _childNodes = childNodes;
+      });
+    } else {
+      _childNodes = childNodes;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return _element.build(context, _properties, _childNodes);
+    return _element.build(context, _properties, convertNodeListToWidgetList(_childNodes));
   }
 }
