@@ -61,7 +61,7 @@ void HTMLParser::traverseHTML(NodeInstance* root, GumboNode* node) {
     } else if (child->type == GUMBO_NODE_TEXT) {
       JSValue textContentValue = JS_NewString(ctx, child->v.text.text);
       JSValue argv[] = {textContentValue};
-      JSValue textNodeValue = JS_CallConstructor(ctx, TextNode::instance(context)->classObject, 1, argv);
+      JSValue textNodeValue = JS_CallConstructor(ctx, TextNode::instance(context)->jsObject, 1, argv);
       JS_FreeValue(ctx, textContentValue);
 
       auto* textNodeInstance = static_cast<TextNodeInstance*>(JS_GetOpaque(textNodeValue, TextNode::classId()));
@@ -138,10 +138,10 @@ void HTMLParser::parseProperty(ElementInstance* element, GumboElement* gumboElem
       JSValue key = JS_NewString(ctx, strName.c_str());
       JSValue value = JS_NewString(ctx, strValue.c_str());
 
-      JSValue setAttributeFunc = JS_GetPropertyStr(ctx, element->instanceObject, "setAttribute");
+      JSValue setAttributeFunc = JS_GetPropertyStr(ctx, element->jsObject, "setAttribute");
       JSValue arguments[] = {key, value};
 
-      JS_Call(ctx, setAttributeFunc, element->instanceObject, 2, arguments);
+      JS_Call(ctx, setAttributeFunc, element->jsObject, 2, arguments);
 
       JS_FreeValue(ctx, setAttributeFunc);
       JS_FreeValue(ctx, key);

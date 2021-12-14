@@ -40,9 +40,9 @@ class CSSStyleDeclaration : public HostClass {
   static JSValue getPropertyValue(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
  protected:
-  ObjectFunction m_setProperty{m_context, m_prototypeObject, "setProperty", setProperty, 2};
-  ObjectFunction m_getPropertyValue{m_context, m_prototypeObject, "getPropertyValue", getPropertyValue, 2};
-  ObjectFunction m_removeProperty{m_context, m_prototypeObject, "removeProperty", removeProperty, 2};
+  DEFINE_PROTOTYPE_FUNCTION(setProperty, 2);
+  DEFINE_PROTOTYPE_FUNCTION(getPropertyValue, 2);
+  DEFINE_PROTOTYPE_FUNCTION(removeProperty, 2);
 };
 
 class StyleDeclarationInstance : public Instance {

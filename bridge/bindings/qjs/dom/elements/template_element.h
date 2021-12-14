@@ -12,6 +12,7 @@
 namespace kraken::binding::qjs {
 
 void bindTemplateElement(std::unique_ptr<JSContext>& context);
+class TemplateElementInstance;
 
 class TemplateElement : public Element {
  public:
@@ -22,19 +23,23 @@ class TemplateElement : public Element {
   OBJECT_INSTANCE(TemplateElement);
 
  private:
+  friend TemplateElementInstance;
 };
+
 class TemplateElementInstance : public ElementInstance {
  public:
   TemplateElementInstance() = delete;
   explicit TemplateElementInstance(TemplateElement* element);
   ~TemplateElementInstance();
 
+  DocumentFragmentInstance* content() const;
+
  protected:
   void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
  private:
-  DocumentFragmentInstance* m_content{nullptr};
-  DEFINE_HOST_CLASS_PROPERTY(2, content, innerHTML)
+  ObjectProperty m_content{m_context, jsObject, "content", JS_CallConstructor(m_ctx, DocumentFragment::instance(m_context)->jsObject, 0, nullptr)};
+  friend TemplateElement;
 };
 
 }  // namespace kraken::binding::qjs

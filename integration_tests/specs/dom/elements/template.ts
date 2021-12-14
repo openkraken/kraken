@@ -12,7 +12,7 @@ describe('Tags template', () => {
     const t = document.createElement('template')
     t.innerHTML = '<div>template text</div>';
     document.body.appendChild(t.content);
-
+    expect(t.innerHTML).toBe('');
     await snapshot();
   });
 });
