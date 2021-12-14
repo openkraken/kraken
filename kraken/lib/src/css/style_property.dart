@@ -477,7 +477,7 @@ class CSSStyleProperty {
     bool isPositionEndAndSizeStart = false;
 
     for (String value in values) {
-      final bool isValueVariableFunction = CSSFunction.isVariableFunction(value);
+      final bool isValueVariableFunction = CSSFunction.isFunction(value, functionName: VAR);
       if (color == null && (isValueVariableFunction || CSSColor.isColor(value))) {
         color = value;
       } else if (image == null && (isValueVariableFunction || CSSBackground.isValidBackgroundImageValue(value))) {
@@ -547,7 +547,7 @@ class CSSStyleProperty {
     bool isSizeEndAndLineHeightStart = false;
 
     for (String value in values) {
-      final bool isValueVariableFunction = CSSFunction.isVariableFunction(value);
+      final bool isValueVariableFunction = CSSFunction.isFunction(value, functionName: VAR);
       if (style == null && (isValueVariableFunction || CSSText.isValidFontStyleValue(value))) {
         style = value;
       } else if (weight == null && (isValueVariableFunction || CSSText.isValidFontWeightValue(value))) {
@@ -643,7 +643,7 @@ class CSSStyleProperty {
     String? wrap;
 
     for (String value in values) {
-      final bool isValueVariableFunction = CSSFunction.isVariableFunction(value);
+      final bool isValueVariableFunction = CSSFunction.isFunction(value, functionName: VAR);
       if (direction == null && (isValueVariableFunction || CSSFlex.isValidFlexDirectionValue(value))) {
         direction = value;
       } else if (wrap == null && (isValueVariableFunction || CSSFlex.isValidFlexWrapValue(value))) {
@@ -684,7 +684,7 @@ class CSSStyleProperty {
         }
       }
 
-      final bool isValueVariableFunction = CSSFunction.isVariableFunction(value);
+      final bool isValueVariableFunction = CSSFunction.isFunction(value, functionName: VAR);
       if (grow == null && (isValueVariableFunction || CSSNumber.isNumber(value))) {
         grow = value;
       } else if (shrink == null && (isValueVariableFunction || CSSNumber.isNumber(value))) {
@@ -708,7 +708,7 @@ class CSSStyleProperty {
 
     // NOTE: if one of token is wrong like `1pxxx solid red` that all should not work
     for (String value in values) {
-      final bool isValueVariableFunction = CSSFunction.isVariableFunction(value);
+      final bool isValueVariableFunction = CSSFunction.isFunction(value, functionName: VAR);
       if (width == null && (isValueVariableFunction || CSSBorderSide.isValidBorderWidthValue(value))) {
         width = value;
       } else if (style == null && (isValueVariableFunction || CSSBorderSide.isValidBorderStyleValue(value))) {
