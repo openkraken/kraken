@@ -468,13 +468,14 @@ class KrakenRenderParagraph extends RenderBox
   @visibleForTesting
   bool get debugHasOverflowShader => _overflowShader != null;
 
-  // Auto minimum width of text node equals to the width of the longest word.
+  // Auto minimum width of paragraph equals to the width of its longest word.
   double computeAutoMinWidth() {
     String str = text.text!;
     int i = 0;
     String longestWord = '';
     int wordMaxLength = 0;
 
+    // Loop paragraph string to find the longest word.
     while (i < str.length) {
       TextRange wordBoundary = _textPainter.getWordBoundary(TextPosition(offset: i));
       if (wordBoundary.end - wordBoundary.start > wordMaxLength) {
@@ -484,6 +485,7 @@ class KrakenRenderParagraph extends RenderBox
       i = wordBoundary.end;
     }
 
+    // Paint the longest word to get the width.
     TextPainter textPainter = TextPainter(
       text: TextSpan(text: longestWord, style: text.style),
       textAlign: textAlign,
