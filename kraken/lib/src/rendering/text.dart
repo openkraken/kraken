@@ -15,16 +15,17 @@ enum WhiteSpace { normal, nowrap, pre, preWrap, preLine, breakSpaces }
 class RenderTextBox extends RenderBox
     with RenderObjectWithChildMixin<RenderBox> {
   RenderTextBox(
-    this.text, {
-    required this.renderStyle,
-  }) {
+    this.data, {
+      required this.renderStyle,
+    }) {
+    TextSpan text = CSSTextMixin.createTextSpan(data, renderStyle);
     _renderParagraph = child = KrakenRenderParagraph(
       text,
       textDirection: TextDirection.ltr,
     );
   }
 
-  late TextSpan text;
+  late String data;
   late KrakenRenderParagraph _renderParagraph;
   CSSRenderStyle renderStyle;
 
@@ -138,7 +139,8 @@ class RenderTextBox extends RenderBox
   @override
   void performLayout() {
     if (child != null) {
-      _renderParagraph.text = text;
+      // FIXME(yuanyan): do not create text span every time.
+      _renderParagraph.text = CSSTextMixin.createTextSpan(data, renderStyle);
       _renderParagraph.overflow = overflow;
       // Forcing a break after a set number of lines
       // https://drafts.csswg.org/css-overflow-3/#max-lines
@@ -151,6 +153,11 @@ class RenderTextBox extends RenderBox
       child!.layout(constraints, parentUsesSize: true);
       size = child!.size;
 
+      // @FIXME: Minimum size of text equals to single word in browser
+      // which cannot be calculated in Flutter currently.
+
+      // Set minimum width to 0 to allow flex item containing text to shrink into
+      // flex container which is similar to the effect of word-break: break-all in the browser.
       autoMinWidth = 0;
       autoMinHeight = size.height;
     } else {

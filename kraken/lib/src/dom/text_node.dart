@@ -83,18 +83,6 @@ class TextNode extends Node {
     }
   }
 
-  TextSpan? _textSpan;
-  TextSpan? get _text {
-    if (_textSpan == null) {
-      return CSSTextMixin.createTextSpan(null, parentElement!.renderStyle);
-    }
-    return _textSpan ;
-  }
-
-  void setText() {
-    _textSpan = CSSTextMixin.createTextSpan(data, parentElement!.renderStyle);
-  }
-
   @override
   String get nodeName => '#text';
 
@@ -102,14 +90,12 @@ class TextNode extends Node {
   RenderBox? get renderer => _renderTextBox;
 
   void _applyTextStyle() {
-    Element _parentElement = parentElement!;
-    CSSRenderStyle renderStyle = _parentElement.renderStyle;
-    setText();
-
     if (isRendererAttached) {
+      Element _parentElement = parentElement!;
+
       // The parentNode must be an element.
-      _renderTextBox!.renderStyle = renderStyle;
-      _renderTextBox!.text = _text!;
+      _renderTextBox!.renderStyle = _parentElement.renderStyle;
+      _renderTextBox!.data = data;
 
       KrakenRenderParagraph renderParagraph = _renderTextBox!.child as KrakenRenderParagraph;
       renderParagraph.markNeedsLayout();
@@ -163,7 +149,7 @@ class TextNode extends Node {
     if (_renderTextBox != null) {
       return _renderTextBox!;
     }
-    return _renderTextBox = RenderTextBox(_text!, renderStyle: parentElement!.renderStyle);
+    return _renderTextBox = RenderTextBox(data, renderStyle: parentElement!.renderStyle);
   }
 
   @override
