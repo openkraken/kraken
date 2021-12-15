@@ -6,6 +6,7 @@
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
+import 'package:quiver/collection.dart';
 
 typedef StyleChangeListener = void Function(String property,  String? original, String present);
 
@@ -44,6 +45,8 @@ List<String> _propertyOrders = [
 ];
 
 RegExp _kebabCaseReg = RegExp(r'[A-Z]');
+
+final LinkedLruHashMap<String, Map<String, String?>> _cachedExpandedShorthand = LinkedLruHashMap(maximumSize: 500);
 
 // CSS Object Model: https://drafts.csswg.org/cssom/#the-cssstyledeclaration-interface
 
@@ -169,51 +172,59 @@ class CSSStyleDeclaration {
   }
 
   void _expandShorthand(String propertyName, String normalizedValue, bool? isImportant) {
-    Map<String, String?> longhandProperties = {};
-    switch(propertyName) {
-      case PADDING:
-        CSSStyleProperty.setShorthandPadding(longhandProperties, normalizedValue);
-        break;
-      case MARGIN:
-        CSSStyleProperty.setShorthandMargin(longhandProperties, normalizedValue);
-        break;
-      case BACKGROUND:
-        CSSStyleProperty.setShorthandBackground(longhandProperties, normalizedValue);
-        break;
-      case BACKGROUND_POSITION:
-        CSSStyleProperty.setShorthandBackgroundPosition(longhandProperties, normalizedValue);
-        break;
-      case BORDER_RADIUS:
-        CSSStyleProperty.setShorthandBorderRadius(longhandProperties, normalizedValue);
-        break;
-      case OVERFLOW:
-        CSSStyleProperty.setShorthandOverflow(longhandProperties, normalizedValue);
-        break;
-      case FONT:
-        CSSStyleProperty.setShorthandFont(longhandProperties, normalizedValue);
-        break;
-      case FLEX:
-        CSSStyleProperty.setShorthandFlex(longhandProperties, normalizedValue);
-        break;
-      case FLEX_FLOW:
-        CSSStyleProperty.setShorthandFlexFlow(longhandProperties, normalizedValue);
-        break;
-      case BORDER:
-      case BORDER_TOP:
-      case BORDER_RIGHT:
-      case BORDER_BOTTOM:
-      case BORDER_LEFT:
-      case BORDER_COLOR:
-      case BORDER_STYLE:
-      case BORDER_WIDTH:
-        CSSStyleProperty.setShorthandBorder(longhandProperties, propertyName, normalizedValue);
-        break;
-      case TRANSITION:
-        CSSStyleProperty.setShorthandTransition(longhandProperties, normalizedValue);
-        break;
-      case TEXT_DECORATION:
-        CSSStyleProperty.setShorthandTextDecoration(longhandProperties, normalizedValue);
-        break;
+    Map<String, String?> longhandProperties;
+    String cacheKey = '$propertyName:$normalizedValue';
+    if (_cachedExpandedShorthand.containsKey(cacheKey)) {
+      longhandProperties = _cachedExpandedShorthand[cacheKey]!;
+    } else {
+      longhandProperties = {};
+
+      switch(propertyName) {
+        case PADDING:
+          CSSStyleProperty.setShorthandPadding(longhandProperties, normalizedValue);
+          break;
+        case MARGIN:
+          CSSStyleProperty.setShorthandMargin(longhandProperties, normalizedValue);
+          break;
+        case BACKGROUND:
+          CSSStyleProperty.setShorthandBackground(longhandProperties, normalizedValue);
+          break;
+        case BACKGROUND_POSITION:
+          CSSStyleProperty.setShorthandBackgroundPosition(longhandProperties, normalizedValue);
+          break;
+        case BORDER_RADIUS:
+          CSSStyleProperty.setShorthandBorderRadius(longhandProperties, normalizedValue);
+          break;
+        case OVERFLOW:
+          CSSStyleProperty.setShorthandOverflow(longhandProperties, normalizedValue);
+          break;
+        case FONT:
+          CSSStyleProperty.setShorthandFont(longhandProperties, normalizedValue);
+          break;
+        case FLEX:
+          CSSStyleProperty.setShorthandFlex(longhandProperties, normalizedValue);
+          break;
+        case FLEX_FLOW:
+          CSSStyleProperty.setShorthandFlexFlow(longhandProperties, normalizedValue);
+          break;
+        case BORDER:
+        case BORDER_TOP:
+        case BORDER_RIGHT:
+        case BORDER_BOTTOM:
+        case BORDER_LEFT:
+        case BORDER_COLOR:
+        case BORDER_STYLE:
+        case BORDER_WIDTH:
+          CSSStyleProperty.setShorthandBorder(longhandProperties, propertyName, normalizedValue);
+          break;
+        case TRANSITION:
+          CSSStyleProperty.setShorthandTransition(longhandProperties, normalizedValue);
+          break;
+        case TEXT_DECORATION:
+          CSSStyleProperty.setShorthandTextDecoration(longhandProperties, normalizedValue);
+          break;
+      }
+      _cachedExpandedShorthand[cacheKey] = longhandProperties;
     }
 
     if (longhandProperties.isNotEmpty) {
@@ -338,7 +349,7 @@ class CSSStyleDeclaration {
 
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
-  void setProperty(String propertyName, value, [bool? isImportant]) {
+  void setProperty(String propertyName, String? value, [bool? isImportant]) {
     // Null or empty value means should be removed.
     if (isNullOrEmptyValue(value)) {
       removeProperty(propertyName, isImportant);

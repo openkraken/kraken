@@ -521,7 +521,7 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     }
   }
 
-  void setInlineStyle(int targetId, String key, dynamic value) {
+  void setInlineStyle(int targetId, String key, String value) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_SET_STYLE_START, uniqueId: targetId);
     }

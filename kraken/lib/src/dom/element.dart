@@ -1416,7 +1416,7 @@ class Element extends Node
   }
 
   // Set inline style property.
-  void setInlineStyle(String property, dynamic value) {
+  void setInlineStyle(String property, String value) {
     // Current only for mark property is setting by inline style.
     inlineStyle[property] = value;
     style.setProperty(property, value, true);
