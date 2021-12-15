@@ -141,7 +141,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
 
   @override
   void performLayout() {
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       childLayoutDuration = 0;
       PerformanceTiming.instance()
           .mark(PERF_SILVER_LAYOUT_START, uniqueId: hashCode);
@@ -175,13 +175,13 @@ class RenderSliverListLayout extends RenderLayoutBox {
     }
 
     late DateTime childLayoutStart;
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       childLayoutStart = DateTime.now();
     }
 
     child.layout(childConstraints, parentUsesSize: true);
 
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       DateTime childLayoutEnd = DateTime.now();
       childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch -
           childLayoutStart.microsecondsSinceEpoch);
@@ -191,7 +191,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
 
     didLayout();
 
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       PerformanceTiming.instance().mark(PERF_SILVER_LAYOUT_END,
           uniqueId: hashCode,
           startTime:
@@ -208,11 +208,11 @@ class RenderSliverListLayout extends RenderLayoutBox {
 
     if (firstChild != null) {
       late DateTime childPaintStart;
-      if (kProfileMode) {
+      if (kProfileMode && PerformanceTiming.enabled()) {
         childPaintStart = DateTime.now();
       }
       context.paintChild(firstChild!, offset);
-      if (kProfileMode) {
+      if (kProfileMode && PerformanceTiming.enabled()) {
         DateTime childPaintEnd = DateTime.now();
         childPaintDuration += (childPaintEnd.microsecondsSinceEpoch -
             childPaintStart.microsecondsSinceEpoch);

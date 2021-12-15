@@ -1059,19 +1059,19 @@ class RenderBoxModel extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       childPaintDuration = 0;
       PerformanceTiming.instance().mark(PERF_PAINT_START, uniqueId: hashCode);
     }
     if (renderStyle.isVisibilityHidden) {
-      if (kProfileMode) {
+      if (kProfileMode && PerformanceTiming.enabled()) {
         PerformanceTiming.instance().mark(PERF_PAINT_END, uniqueId: hashCode);
       }
       return;
     }
 
     paintBoxModel(context, offset);
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       int amendEndTime =
           DateTime.now().microsecondsSinceEpoch - childPaintDuration;
       PerformanceTiming.instance()
