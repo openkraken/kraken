@@ -143,4 +143,60 @@ describe('custom html element', () => {
     document.body.appendChild(container);
     snapshot();
   });
+
+  it('flutter widget should be child of flutter container', () => {
+    const container = document.createElement('flutter-container');
+    const fluttetText = document.createElement('flutter-text');
+    fluttetText.setAttribute('value', 'text');
+    container.appendChild(fluttetText);
+    document.body.appendChild(container);
+
+    snapshot();
+  });
+
+  it('flutter widget and dom node should be child of flutter container', () => {
+    const container = document.createElement('flutter-container');
+    document.body.appendChild(container);
+
+    const element = document.createElement('div');
+    element.style.backgroundColor = 'red';
+    element.appendChild(document.createTextNode('div element'));
+    container.appendChild(element);
+
+    const fluttetText = document.createElement('flutter-text');
+    fluttetText.setAttribute('value', 'text');
+    container.appendChild(fluttetText);
+
+    const text = document.createTextNode('text');
+    container.appendChild(text);
+
+    snapshot();
+  });
+
+  it('flutter widget should be child of element', () => {
+    const container = document.createElement('div');
+    container.style.width = '100px';
+    container.style.height = '100px';
+    container.style.backgroundColor = 'red';
+    const element = document.createElement('flutter-text');
+    element.setAttribute('value', 'text');
+    container.appendChild(element);
+    document.body.appendChild(container);
+
+    snapshot();
+  });
+
+  it('flutter widget should be child of element and the element should be child of flutter widget', () => {
+    const container = document.createElement('flutter-container');
+    document.body.appendChild(container);
+
+    const childContainer = document.createElement('div');
+    container.appendChild(childContainer);
+
+    const fluttetText = document.createElement('flutter-text');
+    fluttetText.setAttribute('value', 'text');
+    childContainer.appendChild(fluttetText);
+
+    snapshot();
+  });
 });
