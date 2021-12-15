@@ -124,4 +124,23 @@ describe('custom html element', () => {
     // @ts-ignore
     expect(sampleElement._fake).toEqual([1, 2, 3, 4, 5]);
   });
+
+  it('text node should be child of flutter container', () => {
+    const container = document.createElement('flutter-container');
+    const text = document.createTextNode('text');
+    document.body.appendChild(container);
+    container.appendChild(text);
+    snapshot();
+  });
+
+  it('element should be child of flutter container', () => {
+    const container = document.createElement('flutter-container');
+    const element = document.createElement('div');
+    element.style.width = '30px';
+    element.style.height = '30px';
+    element.style.backgroundColor = 'red';
+    container.appendChild(element);
+    document.body.appendChild(container);
+    snapshot();
+  });
 });
