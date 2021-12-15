@@ -897,5 +897,17 @@ class CSSRenderStyle
     }
     return parentRenderStyle;
   }
+
+  // Whether current renderStyle is ancestor for child renderStyle in the renderStyle tree.
+  bool isAncestorOf(RenderStyle childRenderStyle) {
+    RenderStyle? parentRenderStyle = childRenderStyle.parent;
+    while(parentRenderStyle != null) {
+      if (parentRenderStyle == this) {
+        return true;
+      }
+      parentRenderStyle = parentRenderStyle.parent;
+    }
+    return false;
+  }
 }
 
