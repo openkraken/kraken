@@ -4,30 +4,28 @@
  */
 
 #include "kraken_test_env.h"
-#include <vector>
 #include <sys/time.h>
+#include <vector>
 
 #if defined(__linux__) || defined(__APPLE__)
-static int64_t get_time_ms(void)
-{
+static int64_t get_time_ms(void) {
   struct timespec ts;
   clock_gettime(CLOCK_MONOTONIC, &ts);
   return (uint64_t)ts.tv_sec * 1000 + (ts.tv_nsec / 1000000);
 }
 #else
 /* more portable, but does not work if the date is updated */
-static int64_t get_time_ms(void)
-{
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return (int64_t)tv.tv_sec * 1000 + (tv.tv_usec / 1000);
+static int64_t get_time_ms(void) {
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  return (int64_t)tv.tv_sec * 1000 + (tv.tv_usec / 1000);
 }
 #endif
 
 typedef struct {
   struct list_head link;
   int64_t timeout;
-  void *callbackContext;
+  void* callbackContext;
   int32_t contextId;
   AsyncCallback func;
 } JSOSTimer;
@@ -36,8 +34,7 @@ typedef struct JSThreadState {
   struct list_head os_timers; /* list of timer.link */
 } JSThreadState;
 
-static void unlink_timer(JSRuntime *rt, JSOSTimer *th)
-{
+static void unlink_timer(JSRuntime* rt, JSOSTimer* th) {
   if (th->link.prev) {
     list_del(&th->link);
     th->link.prev = th->link.next = NULL;
@@ -45,15 +42,15 @@ static void unlink_timer(JSRuntime *rt, JSOSTimer *th)
 }
 
 void TEST_init(ExecutionContext *context) {
-  JSThreadState *th = new JSThreadState();
+  JSThreadState*th = new JSThreadState();
   init_list_head(&th->os_timers);
   JS_SetRuntimeOpaque(context->runtime(), th);
 }
 
-int32_t TEST_setTimeout(DOMTimerCallbackContext *callbackContext, int32_t contextId, AsyncCallback callback, int32_t timeout) {
-  JSRuntime *rt = JS_GetRuntime(callbackContext->context->ctx());
-  JSThreadState *ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
-  JSOSTimer *th = static_cast<JSOSTimer*>(js_mallocz(callbackContext->context->ctx(), sizeof(*th)));
+int32_t TEST_setTimeout(DOMTimerCallbackContext* callbackContext, int32_t contextId, AsyncCallback callback, int32_t timeout) {
+  JSRuntime* rt = JS_GetRuntime(callbackContext->context->ctx());
+  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
+  JSOSTimer* th = static_cast<JSOSTimer*>(js_mallocz(callbackContext->context->ctx(), sizeof(*th)));
   th->timeout = get_time_ms() + timeout;
   th->func = callback;
   th->callbackContext = callbackContext;
@@ -64,10 +61,10 @@ int32_t TEST_setTimeout(DOMTimerCallbackContext *callbackContext, int32_t contex
 }
 
 static bool jsPool(ExecutionContext *context) {
-  JSRuntime *rt = context->runtime();
-  JSThreadState *ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
+  JSRuntime* rt = context->runtime();
+  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
   int64_t cur_time, delay;
-  struct list_head *el;
+  struct list_head* el;
 
   if (list_empty(&ts->os_timers))
     return true; /* no more events */
@@ -75,7 +72,7 @@ static bool jsPool(ExecutionContext *context) {
   if (!list_empty(&ts->os_timers)) {
     cur_time = get_time_ms();
     list_for_each(el, &ts->os_timers) {
-      JSOSTimer *th = list_entry(el, JSOSTimer, link);
+      JSOSTimer* th = list_entry(el, JSOSTimer, link);
       delay = th->timeout - cur_time;
       if (delay <= 0) {
         AsyncCallback func;
@@ -95,6 +92,7 @@ static bool jsPool(ExecutionContext *context) {
 void TEST_runLoop(ExecutionContext *context) {
   for(;;) {
     context->drainPendingPromiseJobs();
-    if (jsPool(context)) break;
+    if (jsPool(context))
+      break;
   }
 }

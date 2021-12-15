@@ -24,13 +24,13 @@
 #define KRAKEN_EXPORT __attribute__((__visibility__("default")))
 
 #if defined(__GNUC__) || defined(__clang__)
-#define LIKELY(x)          __builtin_expect(!!(x), 1)
-#define UNLIKELY(x)        __builtin_expect(!!(x), 0)
-#define FORCE_INLINE       inline __attribute__((always_inline))
+#define LIKELY(x) __builtin_expect(!!(x), 1)
+#define UNLIKELY(x) __builtin_expect(!!(x), 0)
+#define FORCE_INLINE inline __attribute__((always_inline))
 #else
-#define LIKELY(x)     (x)
-#define UNLIKELY(x)   (x)
-#define FORCE_INLINE  inline
+#define LIKELY(x) (x)
+#define UNLIKELY(x) (x)
+#define FORCE_INLINE inline
 #endif
 
 #define KRAKEN_DISALLOW_COPY(TypeName) TypeName(const TypeName&) = delete
