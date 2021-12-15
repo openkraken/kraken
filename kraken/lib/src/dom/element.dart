@@ -574,6 +574,7 @@ class Element extends Node
     }
 
     if (renderer != null) {
+      // If element attach WidgetElement, render obeject should be attach to render tree when mount.
       if (parent is! WidgetElement) {
         _attachRenderBoxModel(parent.renderer!, renderer!, after: after);
       }
@@ -802,6 +803,7 @@ class Element extends Node
     _updateRenderBoxModel();
     // Attach renderBoxModel to parent if change from `display: none` to other values.
     if (!isRendererAttached && parentElement != null && parentElement!.isRendererAttached) {
+      // If element attach WidgetElement, render obeject should be attach to render tree when mount.
       if (parentNode is! WidgetElement) {
         _addToContainingBlock(after: previousSibling?.renderer);
       }
