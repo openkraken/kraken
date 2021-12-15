@@ -241,6 +241,7 @@ abstract class WidgetElement extends dom.Element {
   }
 
   KrakenRenderObjectToWidgetAdapter? _adaptor;
+  RenderObjectElement? renderObjectElement;
 
   void _attachWidget(Widget widget) {
     RenderObjectElement rootWidgetElement = ownerDocument.controller.rootKrakenElement;
@@ -253,15 +254,16 @@ abstract class WidgetElement extends dom.Element {
 
     Element? parentElement;
     if (parentNode is WidgetElement) {
-      parentElement = ((parentNode as WidgetElement)._widget as _KrakenAdapterWidget).createElement();
+      //parentElement = ((parentNode as WidgetElement)._widget as _KrakenAdapterWidget).createElement();
+      parentElement = (parentNode as WidgetElement).renderObjectElement;
     } else {
       parentElement = (parentNode as dom.Element).element;
     }
 
     if (parentElement != null) {
-      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, parentElement as RenderObjectElement, false);
+      renderObjectElement = _adaptor?.attachToRenderTree(rootWidgetElement.owner!, parentElement as RenderObjectElement, false);
     } else {
-      _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement, true);
+      renderObjectElement = _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement, true);
     }
   }
 }
