@@ -14,7 +14,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindNode(std::unique_ptr<PageJSContext>& context) {
+void bindNode(std::unique_ptr<ExecutionContext>& context) {
   auto* constructor = Node::instance(context.get());
   context->defineGlobalProperty("Node", constructor->jsObject);
 }
@@ -345,6 +345,10 @@ IMPL_PROPERTY_SETTER(Node, textContent)(JSContext* ctx, JSValue this_val, int ar
   auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
   nodeInstance->internalSetTextContent(argv[0]);
   return JS_NULL;
+}
+IMPL_PROPERTY_GETTER(Node, childNodes)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
+//  return JS_DupValue(ctx, nodeInstance->childNodes);
 }
 
 bool NodeInstance::isConnected() {

@@ -13,7 +13,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindElement(std::unique_ptr<PageJSContext>& context);
+void bindElement(std::unique_ptr<ExecutionContext>& context);
 
 class ElementInstance;
 
@@ -49,7 +49,7 @@ class SpaceSplitString {
 class ElementAttributes : public HostObject {
  public:
   ElementAttributes() = delete;
-  explicit ElementAttributes(PageJSContext* context) : HostObject(context, "ElementAttributes") {}
+  explicit ElementAttributes(ExecutionContext* context) : HostObject(context, "ElementAttributes") {}
   ~ElementAttributes();
 
   JSAtom getAttribute(const std::string& name);
@@ -65,13 +65,13 @@ class ElementAttributes : public HostObject {
   std::shared_ptr<SpaceSplitString> m_className{std::make_shared<SpaceSplitString>("")};
 };
 
-bool isJavaScriptExtensionElementInstance(PageJSContext* context, JSValue instance);
+bool isJavaScriptExtensionElementInstance(ExecutionContext* context, JSValue instance);
 
 class Element : public Node {
  public:
   static JSClassID kElementClassId;
   Element() = delete;
-  explicit Element(PageJSContext* context);
+  explicit Element(ExecutionContext* context);
 
   static JSClassID classId();
 
@@ -173,7 +173,7 @@ class ElementInstance : public NodeInstance {
 class BoundingClientRect : public HostObject {
  public:
   BoundingClientRect() = delete;
-  explicit BoundingClientRect(PageJSContext* context, NativeBoundingClientRect* nativeBoundingClientRect)
+  explicit BoundingClientRect(ExecutionContext* context, NativeBoundingClientRect* nativeBoundingClientRect)
       : HostObject(context, "BoundingClientRect"), m_nativeBoundingClientRect(nativeBoundingClientRect){};
 
  private:

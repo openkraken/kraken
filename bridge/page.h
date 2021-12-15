@@ -8,7 +8,7 @@
 
 #include <quickjs/quickjs.h>
 #include "bindings/qjs/html_parser.h"
-#include "bindings/qjs/js_context.h"
+#include "bindings/qjs/executing_context.h"
 #include "include/kraken_bridge.h"
 
 #include <atomic>
@@ -42,7 +42,7 @@ class KrakenPage final {
   uint8_t* dumpByteCode(const char* script, size_t length, const char* url, size_t* byteLength);
   void evaluateByteCode(uint8_t* bytes, size_t byteLength);
 
-  [[nodiscard]] const std::unique_ptr<kraken::binding::qjs::PageJSContext>& getContext() const { return m_context; }
+  [[nodiscard]] const std::unique_ptr<kraken::binding::qjs::ExecutionContext>& getContext() const { return m_context; }
 
   void invokeModuleEvent(NativeString* moduleName, const char* eventType, void* event, NativeString* extra);
   void reportError(const char* errmsg);
@@ -54,7 +54,7 @@ class KrakenPage final {
   JSBridgeDisposeCallback disposeCallback{nullptr};
 #endif
  private:
-  std::unique_ptr<binding::qjs::PageJSContext> m_context;
+  std::unique_ptr<binding::qjs::ExecutionContext> m_context;
   JSExceptionHandler m_handler;
 };
 

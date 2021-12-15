@@ -13,7 +13,7 @@ namespace kraken::binding::qjs {
 class BlobBuilder;
 class BlobInstance;
 
-void bindBlob(std::unique_ptr<PageJSContext>& context);
+void bindBlob(std::unique_ptr<ExecutionContext>& context);
 
 class Blob : public HostClass {
  public:
@@ -21,7 +21,7 @@ class Blob : public HostClass {
   OBJECT_INSTANCE(Blob);
 
   Blob() = delete;
-  explicit Blob(PageJSContext* context);
+  explicit Blob(ExecutionContext* context);
 
   JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
@@ -64,8 +64,8 @@ class BlobInstance : public Instance {
 
 class BlobBuilder {
  public:
-  void append(PageJSContext& context, JSValue& value);
-  void append(PageJSContext& context, BlobInstance* blob);
+  void append(ExecutionContext& context, JSValue& value);
+  void append(ExecutionContext& context, BlobInstance* blob);
 
   std::vector<uint8_t> finalize();
 

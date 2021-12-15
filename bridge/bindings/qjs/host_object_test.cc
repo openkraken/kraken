@@ -5,7 +5,7 @@
 
 #include "host_object.h"
 #include <gtest/gtest.h>
-#include "js_context.h"
+#include "executing_context.h"
 #include "page.h"
 
 namespace kraken::binding::qjs {
@@ -14,18 +14,18 @@ static bool isSampleFree = false;
 
 class SampleObject : public HostObject {
  public:
-  explicit SampleObject(PageJSContext* context) : HostObject(context, "SampleObject"){};
+  explicit SampleObject(ExecutionContext* context) : HostObject(context, "SampleObject"){};
   ~SampleObject() { isSampleFree = true; }
 
  private:
   class FooPropertyDescriptor {
    public:
     static JSValue getter(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-      auto* sampleObject = static_cast<SampleObject*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+      auto* sampleObject = static_cast<SampleObject*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
       return JS_NewFloat64(ctx, sampleObject->m_foo);
     }
     static JSValue setter(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-      auto* sampleObject = static_cast<SampleObject*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+      auto* sampleObject = static_cast<SampleObject*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
       double f;
       JS_ToFloat64(ctx, &f, argv[0]);
       sampleObject->m_foo = f;
@@ -118,7 +118,7 @@ TEST(HostObject, defineFunction) {
 
 class SampleExoticHostObject : public ExoticHostObject {
  public:
-  explicit SampleExoticHostObject(PageJSContext* context) : ExoticHostObject(context, "SampleObject"){};
+  explicit SampleExoticHostObject(ExecutionContext* context) : ExoticHostObject(context, "SampleObject"){};
   ~SampleExoticHostObject() { isSampleFree = true; }
 
   JSValue getProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);

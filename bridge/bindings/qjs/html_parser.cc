@@ -6,7 +6,7 @@
 #include "html_parser.h"
 #include "dom/document.h"
 #include "dom/text_node.h"
-#include "js_context.h"
+#include "executing_context.h"
 
 #include <utility>
 
@@ -19,7 +19,7 @@ inline std::string trim(std::string& str) {
 }
 
 void HTMLParser::traverseHTML(NodeInstance* root, GumboNode* node) {
-  PageJSContext* context = root->context();
+  ExecutionContext* context = root->context();
   JSContext* ctx = context->ctx();
 
   const GumboVector* children = &node->v.element.children;
@@ -96,7 +96,7 @@ bool HTMLParser::parseHTML(const char* code, size_t codeLength, NodeInstance* ro
 }
 
 void HTMLParser::parseProperty(ElementInstance* element, GumboElement* gumboElement) {
-  PageJSContext* context = element->context();
+  ExecutionContext* context = element->context();
   JSContext* ctx = context->ctx();
 
   GumboVector* attributes = &gumboElement->attributes;

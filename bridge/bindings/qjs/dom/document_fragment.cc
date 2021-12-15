@@ -9,7 +9,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindDocumentFragment(std::unique_ptr<PageJSContext>& context) {
+void bindDocumentFragment(std::unique_ptr<ExecutionContext>& context) {
   auto* constructor = DocumentFragment::instance(context.get());
   context->defineGlobalProperty("DocumentFragment", constructor->jsObject);
 }
@@ -18,7 +18,7 @@ std::once_flag kDocumentFragmentFlag;
 
 JSClassID DocumentFragment::kDocumentFragmentID{0};
 
-DocumentFragment::DocumentFragment(PageJSContext* context) : Node(context) {
+DocumentFragment::DocumentFragment(ExecutionContext* context) : Node(context) {
   std::call_once(kDocumentFragmentFlag, []() { JS_NewClassID(&kDocumentFragmentID); });
   JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
 }

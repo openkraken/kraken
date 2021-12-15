@@ -12,14 +12,14 @@ namespace kraken::binding::qjs {
 
 class TextNodeInstance;
 
-void bindTextNode(std::unique_ptr<PageJSContext>& context);
+void bindTextNode(std::unique_ptr<ExecutionContext>& context);
 
 class TextNode : public Node {
  public:
   static JSClassID kTextNodeClassId;
   static JSClassID classId();
   TextNode() = delete;
-  explicit TextNode(PageJSContext* context);
+  explicit TextNode(ExecutionContext* context);
 
   OBJECT_INSTANCE(TextNode);
 

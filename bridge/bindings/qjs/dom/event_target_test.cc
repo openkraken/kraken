@@ -84,6 +84,48 @@ TEST(EventTarget, propertyEventHandler) {
 //  EXPECT_EQ(logCalled, true);
 //}
 
+TEST(EventTarget, asyncFunctionCallback) {
+  bool static errorCalled = false;
+  bool static logCalled = false;
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(), "done");
+  };
+  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {
+    KRAKEN_LOG(VERBOSE) << errmsg;
+    errorCalled = true;
+  });
+  auto& context = bridge->getContext();
+  std::string code = R"(
+    const img = document.createElement('img');
+    img.style.width = '100px';
+    img.style.height = '100px';
+    img.src = "assets/kraken.png";
+    document.body.appendChild(img);
+    const img2 = img.cloneNode(false);
+    document.body.appendChild(img2);
+
+    let anotherImgHasLoad = false;
+    async function loadImg() {
+      if (anotherImgHasLoad) {
+        console.log('done');
+      } else {
+        anotherImgHasLoad = true;
+      }
+    }
+
+    img.addEventListener('load', loadImg);
+    img2.addEventListener('load', loadImg);
+
+    img.dispatchEvent(new Event('load'));
+    img2.dispatchEvent(new Event('load'));
+)";
+  bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
+  delete bridge;
+  EXPECT_EQ(errorCalled, false);
+  EXPECT_EQ(logCalled, true);
+}
+
 TEST(EventTarget, ClassInheritEventTarget) {
   bool static errorCalled = false;
   bool static logCalled = false;

@@ -10,7 +10,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindCommentNode(std::unique_ptr<PageJSContext>& context);
+void bindCommentNode(std::unique_ptr<ExecutionContext>& context);
 
 class CommentInstance;
 
@@ -19,7 +19,7 @@ class Comment : public Node {
   static JSClassID kCommentClassId;
   static JSClassID classId();
   Comment() = delete;
-  explicit Comment(PageJSContext* context);
+  explicit Comment(ExecutionContext* context);
 
   OBJECT_INSTANCE(Comment);
 

@@ -12,7 +12,7 @@ namespace kraken::binding::qjs {
 
 std::once_flag kWindowInitOnceFlag;
 
-void bindWindow(std::unique_ptr<PageJSContext>& context) {
+void bindWindow(std::unique_ptr<ExecutionContext>& context) {
   // Set globalThis and Window's prototype to EventTarget's prototype to support EventTarget methods in global.
   auto* windowConstructor = new Window(context.get());
   JS_SetPrototype(context->ctx(), context->global(), windowConstructor->prototype());
@@ -25,7 +25,7 @@ void bindWindow(std::unique_ptr<PageJSContext>& context) {
 
 JSClassID Window::kWindowClassId{0};
 
-Window::Window(PageJSContext* context) : EventTarget(context, "Window") {
+Window::Window(ExecutionContext* context) : EventTarget(context, "Window") {
   std::call_once(kWindowInitOnceFlag, []() { JS_NewClassID(&kWindowClassId); });
   JS_SetPrototype(m_ctx, m_prototypeObject, EventTarget::instance(m_context)->prototype());
 }
@@ -74,7 +74,7 @@ IMPL_PROPERTY_GETTER(Window, devicePixelRatio)(JSContext* ctx, JSValue this_val,
   if (getDartMethod()->devicePixelRatio == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to read devicePixelRatio: dart method (devicePixelRatio) is not register.");
   }
-  auto* context = static_cast<PageJSContext*>(JS_GetContextOpaque(ctx));
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
 
   double devicePixelRatio = getDartMethod()->devicePixelRatio(context->getContextId());
   return JS_NewFloat64(ctx, devicePixelRatio);
@@ -84,7 +84,7 @@ IMPL_PROPERTY_GETTER(Window, colorScheme)(JSContext* ctx, JSValue this_val, int 
   if (getDartMethod()->platformBrightness == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to read colorScheme: dart method (platformBrightness) not register.");
   }
-  auto* context = static_cast<PageJSContext*>(JS_GetContextOpaque(ctx));
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
 
   const NativeString* code = getDartMethod()->platformBrightness(context->getContextId());
   return JS_NewUnicodeString(context->runtime(), ctx, code->string, code->length);

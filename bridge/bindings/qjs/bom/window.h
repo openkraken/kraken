@@ -8,11 +8,11 @@
 
 #include "bindings/qjs/bom/location.h"
 #include "bindings/qjs/dom/event_target.h"
-#include "bindings/qjs/js_context.h"
+#include "bindings/qjs/executing_context.h"
 
 namespace kraken::binding::qjs {
 
-void bindWindow(std::unique_ptr<PageJSContext>& context);
+void bindWindow(std::unique_ptr<ExecutionContext>& context);
 
 class WindowInstance;
 
@@ -28,7 +28,7 @@ class Window : public EventTarget {
   static JSValue postMessage(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
   Window() = delete;
-  explicit Window(PageJSContext* context);
+  explicit Window(ExecutionContext* context);
 
   OBJECT_INSTANCE(Window);
 
@@ -68,7 +68,7 @@ class WindowInstance : public EventTargetInstance {
   ObjectProperty m_onerror{m_context, jsObject, "m_onerror", JS_NULL};
   JSValue onerror{JS_NULL};
   friend Window;
-  friend PageJSContext;
+  friend ExecutionContext;
 };
 
 }  // namespace kraken::binding::qjs

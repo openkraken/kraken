@@ -11,7 +11,7 @@ namespace kraken::binding::qjs {
 
 std::once_flag kinitCSSStyleDeclarationFlag;
 
-void bindCSSStyleDeclaration(std::unique_ptr<PageJSContext>& context) {
+void bindCSSStyleDeclaration(std::unique_ptr<ExecutionContext>& context) {
   auto style = CSSStyleDeclaration::instance(context.get());
   context->defineGlobalProperty("CSSStyleDeclaration", style->jsObject);
 }
@@ -60,7 +60,7 @@ JSValue CSSStyleDeclaration::instanceConstructor(JSContext* ctx, JSValue func_ob
 
 JSClassID CSSStyleDeclaration::kCSSStyleDeclarationClassId{0};
 
-CSSStyleDeclaration::CSSStyleDeclaration(PageJSContext* context) : HostClass(context, "CSSStyleDeclaration") {
+CSSStyleDeclaration::CSSStyleDeclaration(ExecutionContext* context) : HostClass(context, "CSSStyleDeclaration") {
   std::call_once(kinitCSSStyleDeclarationFlag, []() { JS_NewClassID(&kCSSStyleDeclarationClassId); });
 }
 

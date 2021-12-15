@@ -9,7 +9,7 @@
 #include "bindings/qjs/dom/event.h"
 #include "bindings/qjs/host_class.h"
 #include "bindings/qjs/host_object.h"
-#include "bindings/qjs/js_context.h"
+#include "bindings/qjs/executing_context.h"
 #include "bindings/qjs/native_value.h"
 #include "bindings/qjs/qjs_patch.h"
 
@@ -20,15 +20,15 @@ class NativeEventTarget;
 class CSSStyleDeclaration;
 class StyleDeclarationInstance;
 
-void bindEventTarget(std::unique_ptr<PageJSContext>& context);
+void bindEventTarget(std::unique_ptr<ExecutionContext>& context);
 
 class EventTarget : public HostClass {
  public:
   static JSClassID kEventTargetClassId;
   JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
   EventTarget() = delete;
-  explicit EventTarget(PageJSContext* context, const char* name);
-  explicit EventTarget(PageJSContext* context);
+  explicit EventTarget(ExecutionContext* context, const char* name);
+  explicit EventTarget(ExecutionContext* context);
 
   static JSClassID classId();
   static JSClassID classId(JSValue& value);
@@ -78,8 +78,9 @@ class EventTargetInstance : public Instance {
 
  protected:
   int32_t m_eventTargetId;
-  // EventHandlers
+  // EventListener handlers registered with addEventListener API.
   std::unordered_map<JSAtom, std::vector<JSValue>> m_eventHandlers;
+  // EventListener handlers registered with attribute property.
   ObjectProperty m_propertyEventHandler{m_context, jsObject, "__propertyEventHandler", JS_NewObject(m_ctx)};
   ObjectProperty m_properties{m_context, jsObject, "__properties", JS_NewObject(m_ctx)};
 

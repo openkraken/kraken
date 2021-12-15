@@ -11,7 +11,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindDocument(std::unique_ptr<PageJSContext>& context);
+void bindDocument(std::unique_ptr<ExecutionContext>& context);
 
 using TraverseHandler = std::function<bool(NodeInstance*)>;
 
@@ -22,7 +22,7 @@ class Document : public Node {
   static JSClassID kDocumentClassID;
 
   Document() = delete;
-  Document(PageJSContext* context);
+  Document(ExecutionContext* context);
 
   static JSClassID classId();
 
@@ -39,7 +39,7 @@ class Document : public Node {
   static JSValue getElementsByTagName(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   static JSValue getElementsByClassName(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
-  JSValue getElementConstructor(PageJSContext* context, const std::string& tagName);
+  JSValue getElementConstructor(ExecutionContext* context, const std::string& tagName);
   bool isCustomElement(const std::string& tagName);
 
  private:
@@ -104,7 +104,7 @@ class DocumentInstance : public NodeInstance {
 
   friend Document;
   friend ElementInstance;
-  friend PageJSContext;
+  friend ExecutionContext;
 };
 
 }  // namespace kraken::binding::qjs

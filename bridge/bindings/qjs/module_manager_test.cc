@@ -5,7 +5,7 @@
 
 #include <gtest/gtest.h>
 #include "host_object.h"
-#include "js_context.h"
+#include "executing_context.h"
 #include "page.h"
 
 namespace kraken::binding::qjs {

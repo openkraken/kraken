@@ -11,14 +11,14 @@ namespace kraken::binding::qjs {
 
 std::once_flag kTextNodeInitFlag;
 
-void bindTextNode(std::unique_ptr<PageJSContext>& context) {
+void bindTextNode(std::unique_ptr<ExecutionContext>& context) {
   auto* constructor = TextNode::instance(context.get());
   context->defineGlobalProperty("Text", constructor->jsObject);
 }
 
 JSClassID TextNode::kTextNodeClassId{0};
 
-TextNode::TextNode(PageJSContext* context) : Node(context, "TextNode") {
+TextNode::TextNode(ExecutionContext* context) : Node(context, "TextNode") {
   std::call_once(kTextNodeInitFlag, []() { JS_NewClassID(&kTextNodeClassId); });
   JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
 }

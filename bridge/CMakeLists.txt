@@ -179,8 +179,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     page.cc
     page.h
     bindings/qjs/garbage_collected.h
-    bindings/qjs/js_context.cc
-    bindings/qjs/js_context.h
+    bindings/qjs/executing_context.cc
+    bindings/qjs/executing_context.h
     bindings/qjs/native_value.cc
     bindings/qjs/native_value.h
     bindings/qjs/host_object.h
@@ -198,6 +198,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/bom/screen.h
     bindings/qjs/bom/timer.cc
     bindings/qjs/bom/timer.h
+    bindings/qjs/bom/dom_timer_coordinator.cc
+    bindings/qjs/bom/dom_timer_coordinator.h
     bindings/qjs/dom/event_target.cc
     bindings/qjs/dom/event_target.h
     bindings/qjs/dom/event.cc

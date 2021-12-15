@@ -11,13 +11,13 @@
 
 namespace kraken::binding::qjs {
 
-void bindTemplateElement(std::unique_ptr<PageJSContext>& context);
+void bindTemplateElement(std::unique_ptr<ExecutionContext>& context);
 class TemplateElementInstance;
 
 class TemplateElement : public Element {
  public:
   TemplateElement() = delete;
-  explicit TemplateElement(PageJSContext* context);
+  explicit TemplateElement(ExecutionContext* context);
   JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
   OBJECT_INSTANCE(TemplateElement);

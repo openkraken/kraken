@@ -44,7 +44,7 @@ static void unlink_timer(JSRuntime *rt, JSOSTimer *th)
   }
 }
 
-void TEST_init(PageJSContext *context) {
+void TEST_init(ExecutionContext *context) {
   JSThreadState *th = new JSThreadState();
   init_list_head(&th->os_timers);
   JS_SetRuntimeOpaque(context->runtime(), th);
@@ -63,7 +63,7 @@ int32_t TEST_setTimeout(DOMTimerCallbackContext *callbackContext, int32_t contex
   return 0;
 }
 
-static bool jsPool(PageJSContext *context) {
+static bool jsPool(ExecutionContext *context) {
   JSRuntime *rt = context->runtime();
   JSThreadState *ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
   int64_t cur_time, delay;
@@ -92,7 +92,7 @@ static bool jsPool(PageJSContext *context) {
   return false;
 }
 
-void TEST_runLoop(PageJSContext *context) {
+void TEST_runLoop(ExecutionContext *context) {
   for(;;) {
     context->drainPendingPromiseJobs();
     if (jsPool(context)) break;

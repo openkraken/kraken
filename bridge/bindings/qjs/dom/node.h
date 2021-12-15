@@ -13,7 +13,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindNode(std::unique_ptr<PageJSContext>& context);
+void bindNode(std::unique_ptr<ExecutionContext>& context);
 
 enum NodeType { ELEMENT_NODE = 1, TEXT_NODE = 3, COMMENT_NODE = 8, DOCUMENT_NODE = 9, DOCUMENT_TYPE_NODE = 10, DOCUMENT_FRAGMENT_NODE = 11 };
 
@@ -25,8 +25,8 @@ class TextNodeInstance;
 class Node : public EventTarget {
  public:
   Node() = delete;
-  Node(PageJSContext* context, const std::string& className) : EventTarget(context, className.c_str()) { JS_SetPrototype(m_ctx, m_prototypeObject, EventTarget::instance(m_context)->prototype()); }
-  Node(PageJSContext* context) : EventTarget(context, "Node") { JS_SetPrototype(m_ctx, m_prototypeObject, EventTarget::instance(m_context)->prototype()); }
+  Node(ExecutionContext* context, const std::string& className) : EventTarget(context, className.c_str()) { JS_SetPrototype(m_ctx, m_prototypeObject, EventTarget::instance(m_context)->prototype()); }
+  Node(ExecutionContext* context) : EventTarget(context, "Node") { JS_SetPrototype(m_ctx, m_prototypeObject, EventTarget::instance(m_context)->prototype()); }
 
   OBJECT_INSTANCE(Node);
 
@@ -54,6 +54,7 @@ class Node : public EventTarget {
   DEFINE_PROTOTYPE_READONLY_PROPERTY(previousSibling);
   DEFINE_PROTOTYPE_READONLY_PROPERTY(nextSibling);
   DEFINE_PROTOTYPE_READONLY_PROPERTY(nodeType);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(childNodes);
 
   DEFINE_PROTOTYPE_FUNCTION(cloneNode, 1);
   DEFINE_PROTOTYPE_FUNCTION(appendChild, 1);

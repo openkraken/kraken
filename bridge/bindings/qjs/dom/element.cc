@@ -15,14 +15,14 @@ namespace kraken::binding::qjs {
 
 std::once_flag kElementInitOnceFlag;
 
-void bindElement(std::unique_ptr<PageJSContext>& context) {
+void bindElement(std::unique_ptr<ExecutionContext>& context) {
   auto* constructor = Element::instance(context.get());
   //  auto* domRectConstructor = BoundingClientRect
   context->defineGlobalProperty("Element", constructor->jsObject);
   context->defineGlobalProperty("HTMLElement", JS_DupValue(context->ctx(), constructor->jsObject));
 }
 
-bool isJavaScriptExtensionElementInstance(PageJSContext* context, JSValue instance) {
+bool isJavaScriptExtensionElementInstance(ExecutionContext* context, JSValue instance) {
   if (JS_IsInstanceOf(context->ctx(), instance, Element::instance(context)->jsObject)) {
     auto* elementInstance = static_cast<ElementInstance*>(JS_GetOpaque(instance, Element::classId()));
     std::string tagName = elementInstance->getRegisteredTagName();
@@ -42,7 +42,7 @@ bool isJavaScriptExtensionElementInstance(PageJSContext* context, JSValue instan
 
 JSClassID Element::kElementClassId{0};
 
-Element::Element(PageJSContext* context) : Node(context, "Element") {
+Element::Element(ExecutionContext* context) : Node(context, "Element") {
   std::call_once(kElementInitOnceFlag, []() { JS_NewClassID(&kElementClassId); });
   JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
 }
@@ -132,7 +132,7 @@ JSValue Element::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue t
     return JS_ThrowTypeError(ctx, "Illegal constructor");
   }
 
-  auto* context = static_cast<PageJSContext*>(JS_GetContextOpaque(ctx));
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
   std::string name = jsValueToStdString(ctx, tagName);
 
   auto* Document = Document::instance(context);
@@ -823,42 +823,42 @@ ElementAttributes* ElementInstance::attributes() {
 }
 
 IMPL_PROPERTY_GETTER(BoundingClientRect, x)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->x);
 }
 
 IMPL_PROPERTY_GETTER(BoundingClientRect, y)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->y);
 }
 
 IMPL_PROPERTY_GETTER(BoundingClientRect, width)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->width);
 }
 
 IMPL_PROPERTY_GETTER(BoundingClientRect, height)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->height);
 }
 
 IMPL_PROPERTY_GETTER(BoundingClientRect, top)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->top);
 }
 
 IMPL_PROPERTY_GETTER(BoundingClientRect, right)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->right);
 }
 
 IMPL_PROPERTY_GETTER(BoundingClientRect, bottom)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->bottom);
 }
 
 IMPL_PROPERTY_GETTER(BoundingClientRect, left)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->left);
 }
 

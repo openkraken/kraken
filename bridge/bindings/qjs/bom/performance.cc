@@ -11,7 +11,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindPerformance(std::unique_ptr<PageJSContext>& context) {
+void bindPerformance(std::unique_ptr<ExecutionContext>& context) {
   auto* performance = Performance::instance(context.get());
   context->defineGlobalProperty("performance", performance->jsObject);
 }
@@ -19,37 +19,37 @@ void bindPerformance(std::unique_ptr<PageJSContext>& context) {
 using namespace std::chrono;
 
 IMPL_PROPERTY_GETTER(PerformanceEntry, name)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* entry = static_cast<PerformanceEntry*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* entry = static_cast<PerformanceEntry*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewString(ctx, entry->m_nativePerformanceEntry->name);
 }
 
 IMPL_PROPERTY_GETTER(PerformanceEntry, entryType)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* entry = static_cast<PerformanceEntry*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* entry = static_cast<PerformanceEntry*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewString(ctx, entry->m_nativePerformanceEntry->entryType);
 }
 
 IMPL_PROPERTY_GETTER(PerformanceEntry, startTime)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* entry = static_cast<PerformanceEntry*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* entry = static_cast<PerformanceEntry*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewUint32(ctx, entry->m_nativePerformanceEntry->startTime);
 }
 
 IMPL_PROPERTY_GETTER(PerformanceEntry, duration)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* entry = static_cast<PerformanceEntry*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* entry = static_cast<PerformanceEntry*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewUint32(ctx, entry->m_nativePerformanceEntry->duration);
 }
 
 IMPL_PROPERTY_GETTER(Performance, timeOrigin)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   int64_t time = std::chrono::duration_cast<std::chrono::milliseconds>(performance->m_context->timeOrigin.time_since_epoch()).count();
   return JS_NewUint32(ctx, time);
 }
 
 JSValue Performance::now(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, performance->internalNow());
 }
 JSValue Performance::toJSON(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   double now = performance->internalNow();
   int64_t timeOrigin = std::chrono::duration_cast<std::chrono::milliseconds>(performance->m_context->timeOrigin.time_since_epoch()).count();
 
@@ -59,7 +59,7 @@ JSValue Performance::toJSON(JSContext* ctx, JSValue this_val, int argc, JSValue*
   return object;
 }
 
-static JSValue buildPerformanceEntry(const std::string& entryType, PageJSContext* context, NativePerformanceEntry* nativePerformanceEntry) {
+static JSValue buildPerformanceEntry(const std::string& entryType, ExecutionContext* context, NativePerformanceEntry* nativePerformanceEntry) {
   if (entryType == "mark") {
     auto* mark = new PerformanceMark(context, nativePerformanceEntry);
     return mark->jsObject;
@@ -71,7 +71,7 @@ static JSValue buildPerformanceEntry(const std::string& entryType, PageJSContext
 }
 
 JSValue Performance::clearMarks(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   JSValue targetMark = JS_NULL;
   if (argc == 1) {
     targetMark = argv[0];
@@ -107,7 +107,7 @@ JSValue Performance::clearMeasures(JSContext* ctx, JSValue this_val, int argc, J
     targetMark = argv[0];
   }
 
-  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   auto entries = performance->m_nativePerformance.entries;
   auto it = std::begin(*entries);
 
@@ -133,7 +133,7 @@ JSValue Performance::clearMeasures(JSContext* ctx, JSValue this_val, int argc, J
   return JS_NULL;
 }
 JSValue Performance::getEntries(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   auto entries = performance->getFullEntries();
 
   size_t entriesSize = entries.size();
@@ -157,7 +157,7 @@ JSValue Performance::getEntriesByName(JSContext* ctx, JSValue this_val, int argc
   }
 
   std::string targetName = jsValueToStdString(ctx, argv[0]);
-  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   auto entries = performance->getFullEntries();
   JSValue targetEntriesArray = JS_NewArray(ctx);
   JSValue pushMethod = JS_GetPropertyStr(ctx, targetEntriesArray, "push");
@@ -179,7 +179,7 @@ JSValue Performance::getEntriesByType(JSContext* ctx, JSValue this_val, int argc
   }
 
   std::string entryType = jsValueToStdString(ctx, argv[0]);
-  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   auto entries = performance->getFullEntries();
   JSValue targetEntriesArray = JS_NewArray(ctx);
   JSValue pushMethod = JS_GetPropertyStr(ctx, targetEntriesArray, "push");
@@ -199,7 +199,7 @@ JSValue Performance::mark(JSContext* ctx, JSValue this_val, int argc, JSValue* a
     return JS_ThrowTypeError(ctx, "Failed to execute 'mark' on 'Performance': 1 argument required, but only 0 present.");
   }
 
-  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   std::string markName = jsValueToStdString(ctx, argv[0]);
   performance->m_nativePerformance.mark(markName);
 
@@ -224,7 +224,7 @@ JSValue Performance::measure(JSContext* ctx, JSValue this_val, int argc, JSValue
     endMark = jsValueToStdString(ctx, argv[2]);
   }
 
-  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   JSValue exception = JS_NULL;
   performance->internalMeasure(name, startMark, endMark, &exception);
 
@@ -234,15 +234,15 @@ JSValue Performance::measure(JSContext* ctx, JSValue this_val, int argc, JSValue
   return JS_NULL;
 }
 
-PerformanceEntry::PerformanceEntry(PageJSContext* context, NativePerformanceEntry* nativePerformanceEntry)
+PerformanceEntry::PerformanceEntry(ExecutionContext* context, NativePerformanceEntry* nativePerformanceEntry)
     : HostObject(context, "PerformanceEntry"), m_nativePerformanceEntry(nativePerformanceEntry) {}
 
-PerformanceMark::PerformanceMark(PageJSContext* context, std::string& name, int64_t startTime)
+PerformanceMark::PerformanceMark(ExecutionContext* context, std::string& name, int64_t startTime)
     : PerformanceEntry(context, new NativePerformanceEntry(name, "mark", startTime, 0, PERFORMANCE_ENTRY_NONE_UNIQUE_ID)) {}
-PerformanceMark::PerformanceMark(PageJSContext* context, NativePerformanceEntry* nativePerformanceEntry) : PerformanceEntry(context, nativePerformanceEntry) {}
-PerformanceMeasure::PerformanceMeasure(PageJSContext* context, std::string& name, int64_t startTime, int64_t duration)
+PerformanceMark::PerformanceMark(ExecutionContext* context, NativePerformanceEntry* nativePerformanceEntry) : PerformanceEntry(context, nativePerformanceEntry) {}
+PerformanceMeasure::PerformanceMeasure(ExecutionContext* context, std::string& name, int64_t startTime, int64_t duration)
     : PerformanceEntry(context, new NativePerformanceEntry(name, "measure", startTime, duration, PERFORMANCE_ENTRY_NONE_UNIQUE_ID)) {}
-PerformanceMeasure::PerformanceMeasure(PageJSContext* context, NativePerformanceEntry* nativePerformanceEntry) : PerformanceEntry(context, nativePerformanceEntry) {}
+PerformanceMeasure::PerformanceMeasure(ExecutionContext* context, NativePerformanceEntry* nativePerformanceEntry) : PerformanceEntry(context, nativePerformanceEntry) {}
 void NativePerformance::mark(const std::string& markName) {
   int64_t startTime = std::chrono::duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
   auto* nativePerformanceEntry = new NativePerformanceEntry{markName, "mark", startTime, 0, PERFORMANCE_ENTRY_NONE_UNIQUE_ID};
@@ -253,7 +253,7 @@ void NativePerformance::mark(const std::string& markName, int64_t startTime) {
   entries->emplace_back(nativePerformanceEntry);
 }
 
-Performance::Performance(PageJSContext* context) : HostObject(context, "Performance") {}
+Performance::Performance(ExecutionContext* context) : HostObject(context, "Performance") {}
 void Performance::internalMeasure(const std::string& name, const std::string& startMark, const std::string& endMark, JSValue* exception) {
   auto entries = getFullEntries();
 
@@ -412,7 +412,7 @@ double getMeasureTotalDuration(const std::vector<NativePerformanceEntry*>& measu
 }
 
 JSValue Performance::__kraken_navigation_summary__(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, PageJSContext::kHostObjectClassId));
+  auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   JSValue exception = JS_NULL;
   performance->measureSummary(&exception);
 

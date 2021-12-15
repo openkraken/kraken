@@ -67,7 +67,7 @@ struct Native${object.name} {
 class ${object.name} : public ${object.type} {
 public:
   ${object.name}() = delete;
-  explicit ${object.name}(PageJSContext *context, Native${object.name} *nativePtr);
+  explicit ${object.name}(ExecutionContext *context, Native${object.name} *nativePtr);
 
   JSValue callNativeMethods(const char* method, int32_t argc,
                           NativeValue *argv);
@@ -111,7 +111,7 @@ ${addIndent(nativeStructPropsCode.join('\n'), 2)}
   }
 
   let constructorHeader = `\n
-void bind${object.name}(std::unique_ptr<PageJSContext> &context);
+void bind${object.name}(std::unique_ptr<ExecutionContext> &context);
 
 class ${object.name}Instance;
 
@@ -119,7 +119,7 @@ ${nativeStructCode}
 class ${object.name} : public ${object.type} {
 public:
   ${object.name}() = delete;
-  explicit ${object.name}(PageJSContext *context);
+  explicit ${object.name}(ExecutionContext *context);
   JSValue instanceConstructor(JSContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
   ${methodsDefine.join('\n  ')}
   OBJECT_INSTANCE(${object.name});

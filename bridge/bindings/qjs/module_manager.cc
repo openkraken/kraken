@@ -23,7 +23,7 @@ JSValue krakenModuleListener(JSContext* ctx, JSValueConst this_val, int argc, JS
     return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_module_listener__': parameter 1 (callback) must be a function.");
   }
 
-  auto context = static_cast<PageJSContext*>(JS_GetContextOpaque(ctx));
+  auto context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
   auto* link = new ModuleContext{JS_DupValue(ctx, callbackValue), context};
   list_add_tail(&link->link, &context->module_job_list);
 
@@ -32,7 +32,7 @@ JSValue krakenModuleListener(JSContext* ctx, JSValueConst this_val, int argc, JS
 
 void handleInvokeModuleTransientCallback(void* callbackContext, int32_t contextId, NativeString* errmsg, NativeString* json) {
   auto* moduleContext = static_cast<ModuleContext*>(callbackContext);
-  PageJSContext* context = moduleContext->context;
+  ExecutionContext* context = moduleContext->context;
 
   if (!checkPage(contextId, context))
     return;
@@ -90,7 +90,7 @@ JSValue krakenInvokeModule(JSContext* ctx, JSValueConst this_val, int argc, JSVa
   JSValue paramsValue = JS_NULL;
   JSValue callbackValue = JS_NULL;
 
-  auto* context = static_cast<PageJSContext*>(JS_GetContextOpaque(ctx));
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
 
   if (argc > 2 && !JS_IsNull(argv[2])) {
     paramsValue = argv[2];
@@ -162,7 +162,7 @@ JSValue flushUICommand(JSContext* ctx, JSValueConst this_val, int argc, JSValueC
   return JS_NULL;
 }
 
-void bindModuleManager(std::unique_ptr<PageJSContext>& context) {
+void bindModuleManager(std::unique_ptr<ExecutionContext>& context) {
   QJS_GLOBAL_BINDING_FUNCTION(context, krakenModuleListener, "__kraken_module_listener__", 1);
   QJS_GLOBAL_BINDING_FUNCTION(context, krakenInvokeModule, "__kraken_invoke_module__", 3);
   QJS_GLOBAL_BINDING_FUNCTION(context, flushUICommand, "__kraken_flush_ui_command__", 0);

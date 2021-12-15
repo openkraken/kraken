@@ -7,14 +7,14 @@
 #define KRAKENBRIDGE_LOCATION_H
 
 #include "bindings/qjs/host_object.h"
-#include "bindings/qjs/js_context.h"
+#include "bindings/qjs/executing_context.h"
 
 namespace kraken::binding::qjs {
 
 class Location : public HostObject {
  public:
   Location() = delete;
-  explicit Location(PageJSContext* context) : HostObject(context, "Location") {}
+  explicit Location(ExecutionContext* context) : HostObject(context, "Location") {}
 
   static JSValue reload(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 

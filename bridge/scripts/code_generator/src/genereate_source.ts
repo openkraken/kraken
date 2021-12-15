@@ -12,7 +12,7 @@ import {addIndent} from "./utils";
 function generateHostObjectSource(object: ClassObject) {
   let propSource: string[] = generatePropsSource(object, PropType.hostObject);
   let methodsSource: string[] = generateMethodsSource(object, PropType.hostObject);
-  return `${object.name}::${object.name}(PageJSContext *context,
+  return `${object.name}::${object.name}(ExecutionContext *context,
                                                    Native${object.name} *nativePtr)
   : HostObject(context, "${object.name}"), m_nativePtr(nativePtr) {
 }
@@ -57,7 +57,7 @@ function getPropsVars(object: ClassObject, type: PropType) {
   let classId = '';
   if (type == PropType.hostObject) {
     instanceName = 'object';
-    classId = 'PageJSContext::kHostObjectClassId';
+    classId = 'ExecutionContext::kHostObjectClassId';
   } else if (type == PropType.Element) {
     instanceName = 'element';
     classId = 'Element::classId()';
@@ -420,11 +420,11 @@ function generateHostClassSource(object: ClassObject) {
   }
 
   return `
-${object.name}::${object.name}(PageJSContext *context) : ${object.type}(context) {
+${object.name}::${object.name}(ExecutionContext *context) : ${object.type}(context) {
   ${classInheritCode}
 }
 
-void bind${object.name}(std::unique_ptr<PageJSContext> &context) {
+void bind${object.name}(std::unique_ptr<ExecutionContext> &context) {
   auto *constructor = ${object.name}::instance(context.get());
   context->defineGlobalProperty("${globalBindingName}", constructor->jsObject);
   ${specialBind}

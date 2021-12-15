@@ -20,7 +20,7 @@ static std::atomic<int32_t> globalEventTargetId{0};
 std::once_flag kEventTargetInitFlag;
 #define GetPropertyCallPreFix "_getProperty_"
 
-void bindEventTarget(std::unique_ptr<PageJSContext>& context) {
+void bindEventTarget(std::unique_ptr<ExecutionContext>& context) {
   auto* constructor = EventTarget::instance(context.get());
   // Set globalThis and Window's prototype to EventTarget's prototype to support EventTarget methods in global.
   JS_SetPrototype(context->ctx(), context->global(), constructor->jsObject);
@@ -29,8 +29,8 @@ void bindEventTarget(std::unique_ptr<PageJSContext>& context) {
 
 JSClassID EventTarget::kEventTargetClassId{0};
 
-EventTarget::EventTarget(PageJSContext* context, const char* name) : HostClass(context, name) {}
-EventTarget::EventTarget(PageJSContext* context) : HostClass(context, "EventTarget") {
+EventTarget::EventTarget(ExecutionContext* context, const char* name) : HostClass(context, name) {}
+EventTarget::EventTarget(ExecutionContext* context) : HostClass(context, "EventTarget") {
   std::call_once(kEventTargetInitFlag, []() { JS_NewClassID(&kEventTargetClassId); });
 }
 
@@ -484,7 +484,7 @@ void EventTargetInstance::copyNodeProperties(EventTargetInstance* newNode, Event
 void NativeEventTarget::dispatchEventImpl(NativeEventTarget* nativeEventTarget, NativeString* nativeEventType, void* rawEvent, int32_t isCustomEvent) {
   assert_m(nativeEventTarget->instance != nullptr, "NativeEventTarget should have owner");
   EventTargetInstance* eventTargetInstance = nativeEventTarget->instance;
-  PageJSContext* context = eventTargetInstance->context();
+  ExecutionContext* context = eventTargetInstance->context();
   std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(nativeEventType->string), nativeEventType->length);
   std::string eventType = toUTF8(u16EventType);
   auto* raw = static_cast<RawEvent*>(rawEvent);

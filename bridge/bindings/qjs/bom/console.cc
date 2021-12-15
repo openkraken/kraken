@@ -18,7 +18,7 @@ JSValue print(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* arg
     return JS_ThrowTypeError(ctx, "Failed to execute 'print': log must be string.");
   }
 
-  auto* context = static_cast<PageJSContext*>(JS_GetContextOpaque(ctx));
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
   const char* logLevel = "info";
   JSValue level = argv[1];
   if (JS_IsString(level)) {
@@ -30,7 +30,7 @@ JSValue print(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* arg
   return JS_UNDEFINED;
 }
 
-void bindConsole(std::unique_ptr<PageJSContext>& context) {
+void bindConsole(std::unique_ptr<ExecutionContext>& context) {
   QJS_GLOBAL_BINDING_FUNCTION(context, print, "__kraken_print__", 2);
 }
 

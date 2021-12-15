@@ -11,7 +11,7 @@
 namespace kraken::binding::qjs {
 
 class EventTargetInstance;
-void bindCSSStyleDeclaration(std::unique_ptr<PageJSContext>& context);
+void bindCSSStyleDeclaration(std::unique_ptr<ExecutionContext>& context);
 
 template <typename CharacterType>
 inline bool isASCIILower(CharacterType character) {
@@ -31,7 +31,7 @@ class CSSStyleDeclaration : public HostClass {
 
   CSSStyleDeclaration() = delete;
   ~CSSStyleDeclaration(){};
-  explicit CSSStyleDeclaration(PageJSContext* context);
+  explicit CSSStyleDeclaration(ExecutionContext* context);
 
   JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 

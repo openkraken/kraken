@@ -7,43 +7,26 @@
 #define KRAKENBRIDGE_GARBAGE_COLLECTED_H
 
 #include <quickjs/quickjs.h>
+#include "qjs_patch.h"
 
 namespace kraken::binding::qjs {
+
+template<typename T>
+class MakeGarbageCollectedTrait;
 
 /**
  * Base class for GC managed objects. Only descendent types of `GarbageCollected`
  * can be constructed using `MakeGarbageCollected()`. Must be inherited from as
  * left-most base class.
  *
- * Types inheriting from GarbageCollected must provide a method of
- * signature `void Trace(cppgc::Visitor*) const` that dispatchs all managed
- * pointers to the visitor and delegates to garbage-collected base classes.
- * The method must be virtual if the type is not directly a child of
- * GarbageCollected and marked as final.
- *
  * \code
  * // Example using final class.
  * class FinalType final : public GarbageCollected<FinalType> {
  *  public:
- *   void Trace(cppgc::Visitor* visitor) const {
- *     // Dispatch using visitor->Trace(...);
+ *   void Trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) const {
+ *     // trace all memory wants to collected by GC.
  *   }
  * };
- *
- * // Example using non-final base class.
- * class NonFinalBase : public GarbageCollected<NonFinalBase> {
- *  public:
- *   virtual void Trace(cppgc::Visitor*) const {}
- * };
- *
- * class FinalChild final : public NonFinalBase {
- *  public:
- *   void Trace(cppgc::Visitor* visitor) const final {
- *     // Dispatch using visitor->Trace(...);
- *     NonFinalBase::Trace(visitor);
- *   }
- * };
- * \endcode
  */
 template <typename T>
 class GarbageCollected {
@@ -55,7 +38,8 @@ class GarbageCollected {
   void* operator new[](size_t) = delete;
 
   // The garbage collector is taking care of reclaiming the object.
-  void operator delete(void*) = delete void operator delete[](void*) = delete;
+  void operator delete(void*) = delete;
+  void operator delete[](void*) = delete;
 
   /**
    * This Trace method must be override by objects inheriting from
@@ -63,16 +47,78 @@ class GarbageCollected {
    */
   virtual void trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) const {};
 
+  /**
+    * Specifies a name for the garbage-collected object. Such names will never
+    * be hidden, as they are explicitly specified by the user of this API.
+    *
+    * @returns a human readable name for the object.
+    */
+  virtual const char *getHumanReadableName() const { return nullptr; };
+
+  FORCE_INLINE JSValue toQuickJS() {
+    return jsObject;
+  };
+
  protected:
-  GarbageCollected() = default;
+  JSValue jsObject{JS_NULL};
+  GarbageCollected() {};
+  friend class MakeGarbageCollectedTrait<T>;
+};
+
+template<typename T>
+class MakeGarbageCollectedTrait {
+ public:
+  static T* allocate(JSContext *ctx, JSClassID *classId) {
+    T* object = ::new T();
+    JSRuntime *runtime = JS_GetRuntime(ctx);
+
+    /// When classId is 0, it means this class are not initialized. We should create a JSClassDef to describe the behavior of this class and associate with classID.
+    /// ClassId should be a static value to make sure JSClassDef when this class are created at the first class.
+    if (*classId == 0 || !JS_HasClassId(runtime, *classId)) {
+      /// Allocate a new unique classID from QuickJS.
+      JS_NewClassID(classId);
+      /// Basic template to describe the behavior about this class.
+      JSClassDef def{};
+
+      def.class_name = object->getHumanReadableName();
+
+      /// This callback will be called when QuickJS GC is running at marking stage.
+      /// Users of this class should override `void trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func)` to tell GC
+      /// which member of their class should be collected by GC.
+      def.gc_mark = [](JSRuntime *rt, JSValueConst val,
+                       JS_MarkFunc *mark_func) {
+        auto* object = static_cast<T*>(JS_GetOpaque(val, JSValueGetClassId(val)));
+        object->trace(rt, val, mark_func);
+      };
+
+      /// This callback will be called when QuickJS GC will release the `jsObject` object memory of this class.
+      /// The deconstruct method of this class will be called and all memory about this class will be freed when finalize completed.
+      def.finalizer = [](JSRuntime *rt, JSValue val) {
+        auto *object = static_cast<T*>(JS_GetOpaque(val, JSValueGetClassId(val)));
+        free(object);
+      };
+
+      JS_NewClass(runtime, *classId, &def);
+    }
+
+    /// The JavaScript object underline this class. This `jsObject` is the JavaScript object which can be directly access within JavaScript code.
+    /// When the reference count of `jsObject` decrease to 0, QuickJS will trigger `finalizer` callback and free `jsObject` memory.
+    /// When QuickJS GC found `jsObject` at marking stage, `gc_mark` callback will be triggered.
+    object->jsObject = JS_NewObjectClass(ctx, *classId);
+    JS_SetOpaque(object->jsObject, object);
+    return object;
+  }
+
+  friend GarbageCollected<T>;
 };
 
 template <typename T>
-T* MakeGarbageCollected(Args&&... args) {
+T* makeGarbageCollected(JSContext *ctx, JSClassID *classId) {
   static_assert(std::is_base_of<typename T::ParentMostGarbageCollectedType, T>::value,
                 "U of GarbageCollected<U> must be a base of T. Check "
                 "GarbageCollected<T> base class inheritance.");
-};
+  return MakeGarbageCollectedTrait<T>::allocate(ctx, classId);
+}
 
 }  // namespace kraken::binding::qjs
 
