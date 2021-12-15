@@ -151,7 +151,7 @@ class RenderTextBox extends RenderBox
       child!.layout(constraints, parentUsesSize: true);
       size = child!.size;
 
-      autoMinWidth = _renderParagraph.computeAutoMinWidth();
+      autoMinWidth = 0;
       autoMinHeight = size.height;
     } else {
       performResize();
