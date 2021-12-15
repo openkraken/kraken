@@ -254,7 +254,6 @@ abstract class WidgetElement extends dom.Element {
 
     Element? parentElement;
     if (parentNode is WidgetElement) {
-      //parentElement = ((parentNode as WidgetElement)._widget as _KrakenAdapterWidget).createElement();
       parentElement = (parentNode as WidgetElement).renderObjectElement;
     } else {
       parentElement = (parentNode as dom.Element).element;
