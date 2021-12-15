@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'package:kraken/dom.dart';
+import 'package:kraken/dom.dart' as dom;
 import 'package:kraken/widget.dart';
 import 'package:waterfall_flow/waterfall_flow.dart';
-import 'package:flutter/material.dart' show TextDirection, TextStyle, Color, Image, Text, AssetImage, Widget, BuildContext hide Element;
+import 'package:flutter/material.dart';
 
 class WaterfallFlowWidgetElement extends WidgetElement {
-  WaterfallFlowWidgetElement(EventTargetContext? context) :
+  WaterfallFlowWidgetElement(dom.EventTargetContext? context) :
         super(context);
 
   List<Widget> _children = [];
@@ -34,7 +34,7 @@ class WaterfallFlowWidgetElement extends WidgetElement {
 }
 
 class TextWidgetElement extends WidgetElement {
-  TextWidgetElement(EventTargetContext? context) :
+  TextWidgetElement(dom.EventTargetContext? context) :
         super(context);
 
   @override
@@ -44,7 +44,7 @@ class TextWidgetElement extends WidgetElement {
 }
 
 class ImageWidgetElement extends WidgetElement {
-  ImageWidgetElement(EventTargetContext? context) :
+  ImageWidgetElement(dom.EventTargetContext? context) :
         super(context);
 
   @override
@@ -54,7 +54,7 @@ class ImageWidgetElement extends WidgetElement {
 }
 
 class ContainerWidgetElement extends WidgetElement {
-  ContainerWidgetElement(EventTargetContext? context) :
+  ContainerWidgetElement(dom.EventTargetContext? context) :
         super(context);
 
   @override
@@ -72,8 +72,8 @@ class ContainerWidgetElement extends WidgetElement {
   }
 }
 
-class SampleElement extends Element {
-  SampleElement(EventTargetContext? context)
+class SampleElement extends dom.Element {
+  SampleElement(dom.EventTargetContext? context)
       : super(context);
 
   @override
@@ -112,19 +112,19 @@ class SampleElement extends Element {
 }
 
 void defineKrakenCustomElements() {
-  Kraken.defineCustomElement('waterfall-flow', (EventTargetContext? context) {
+  Kraken.defineCustomElement('waterfall-flow', (dom.EventTargetContext? context) {
     return WaterfallFlowWidgetElement(context);
   });
-  Kraken.defineCustomElement('flutter-container', (EventTargetContext? context) {
+  Kraken.defineCustomElement('flutter-container', (dom.EventTargetContext? context) {
     return ContainerWidgetElement(context);
   });
-  Kraken.defineCustomElement('sample-element', (EventTargetContext? context) {
+  Kraken.defineCustomElement('sample-element', (dom.EventTargetContext? context) {
     return SampleElement(context);
   });
-  Kraken.defineCustomElement('flutter-text', (EventTargetContext? context) {
+  Kraken.defineCustomElement('flutter-text', (dom.EventTargetContext? context) {
     return TextWidgetElement(context);
   });
-  Kraken.defineCustomElement('flutter-asset-image', (EventTargetContext? context) {
+  Kraken.defineCustomElement('flutter-asset-image', (dom.EventTargetContext? context) {
     return ImageWidgetElement(context);
   });
 }
