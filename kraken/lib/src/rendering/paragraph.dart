@@ -468,6 +468,38 @@ class KrakenRenderParagraph extends RenderBox
   @visibleForTesting
   bool get debugHasOverflowShader => _overflowShader != null;
 
+  // Auto minimum width of text node equals to the width of the longest word.
+  double computeAutoMinWidth() {
+    String str = text.text!;
+    int i = 0;
+    String longestWord = '';
+    int wordMaxLength = 0;
+
+    while (i < str.length) {
+      TextRange wordBoundary = _textPainter.getWordBoundary(TextPosition(offset: i));
+      if (wordBoundary.end - wordBoundary.start > wordMaxLength) {
+        wordMaxLength = wordBoundary.end - wordBoundary.start;
+        longestWord = str.substring(wordBoundary.start, wordBoundary.end);
+      }
+      i = wordBoundary.end;
+    }
+
+    TextPainter textPainter = TextPainter(
+      text: TextSpan(text: longestWord, style: text.style),
+      textAlign: textAlign,
+      textDirection: textDirection,
+      textScaleFactor: textScaleFactor,
+      locale: locale,
+      strutStyle: strutStyle,
+      textWidthBasis: textWidthBasis,
+      textHeightBehavior: textHeightBehavior
+    );
+    textPainter.layout();
+    Size wordSize = textPainter.size;
+
+    return wordSize.width;
+  }
+
   void _layoutText({double minWidth = 0.0, double maxWidth = double.infinity}) {
     final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;
     _textPainter.layout(
