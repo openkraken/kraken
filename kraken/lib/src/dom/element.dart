@@ -628,18 +628,25 @@ class Element extends Node
     if (child is Element) {
       child.renderStyle.parent = renderStyle;
     }
+
+    RenderLayoutBox? renderLayoutBox = _renderLayoutBox;
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
-      if (!child.isRendererAttached && _renderLayoutBox != null) {
+      if (!child.isRendererAttached && renderLayoutBox != null) {
         RenderBox? after;
-        RenderLayoutBox? scrollingContentBox = _renderLayoutBox!.renderScrollingContent;
+        RenderLayoutBox? scrollingContentBox = renderLayoutBox.renderScrollingContent;
         if (scrollingContentBox != null) {
           after = scrollingContentBox.lastChild;
         } else {
-          after = _renderLayoutBox!.lastChild;
+          after = renderLayoutBox.lastChild;
         }
 
         child.attachTo(this, after: after);
+
+        // Lazy trigger render sliver to dynamic rebuild child by element tree.
+        if (renderLayoutBox is RenderSliverListLayout) {
+          renderLayoutBox.markSliverListNeedsLayout();
+        }
       }
     }
 

@@ -331,8 +331,8 @@ class ImageElement extends Element {
     if (resolvedUri == null) return;
 
     // Try to make sure that this image can be encoded into a smaller size.
-    int? cachedWidth = width > 0 ? (width * ui.window.devicePixelRatio).toInt() : null;
-    int? cachedHeight = height > 0 ? (height * ui.window.devicePixelRatio).toInt() : null;
+    int? cachedWidth = width > 0 && width.isFinite ? (width * ui.window.devicePixelRatio).toInt() : null;
+    int? cachedHeight = height > 0 && height.isFinite ? (height * ui.window.devicePixelRatio).toInt() : null;
 
     ImageProvider? provider = _cachedImageProvider;
     if (updateImageProvider || provider == null) {
@@ -459,11 +459,13 @@ class ImageElement extends Element {
   void _stylePropertyChanged(String property, String? original, String present) {
     if (property == WIDTH || property == HEIGHT) {
       if (property == WIDTH) {
-        _styleWidth = renderStyle.width.value == null && renderStyle.width.isNotAuto
+        double? resolveStyleWidth = renderStyle.width.value == null && renderStyle.width.isNotAuto
           ? null : renderStyle.width.computedValue;
+        _styleWidth = resolveStyleWidth == double.infinity ? null : resolveStyleWidth;
       } else if (property == HEIGHT) {
-        _styleHeight = renderStyle.height.value == null && renderStyle.height.isNotAuto
+        double? resolveStyleHeight = renderStyle.height.value == null && renderStyle.height.isNotAuto
           ? null : renderStyle.height.computedValue;
+        _styleHeight = resolveStyleHeight == double.infinity ? null : resolveStyleHeight;
       }
       // Resize image
       _resolveImage(_resolvedUri, updateImageProvider: true);

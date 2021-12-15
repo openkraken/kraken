@@ -42,7 +42,6 @@ class RenderSliverListLayout extends RenderLayoutBox {
   }) : _renderSliverBoxChildManager = manager,
        _scrollListener = onScroll,
         super(renderStyle: renderStyle) {
-    scrollablePointerListener = _scrollablePointerListener;
     scrollable = KrakenScrollable(axisDirection: getAxisDirection(axis));
     axis = renderStyle.sliverDirection;
 
@@ -67,6 +66,10 @@ class RenderSliverListLayout extends RenderLayoutBox {
     manager.setupSliverListLayout(this);
     super.insert(_renderViewport);
   }
+
+  // Override the scrollable pointer listener.
+  @override
+  void Function(PointerEvent event) get scrollablePointerListener => _scrollablePointerListener;
 
   @override
   ScrollListener? get scrollListener => _scrollListener;
@@ -130,6 +133,11 @@ class RenderSliverListLayout extends RenderLayoutBox {
   @protected
   RenderSliverList _buildRenderSliverList() {
     return _renderSliverList = RenderSliverList(childManager: _renderSliverBoxChildManager);
+  }
+
+  // Make sliver list trigger layout.
+  void markSliverListNeedsLayout() {
+    _renderSliverList.markNeedsLayout();
   }
 
   /// Child count should rely on element's childNodes, the real
@@ -232,7 +240,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
       // Ignore detached render object.
       if (!child.attached) continue;
 
-      final ContainerBoxParentData childParentData = child.parentData as ContainerBoxParentData;
+      final ContainerBoxParentData childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset + currentOffset,
         position: position,
