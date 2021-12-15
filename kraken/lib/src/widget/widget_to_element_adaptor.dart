@@ -3,8 +3,6 @@
  * Author: Kraken Team.
  */
 
-import 'dart:ffi';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/dom.dart' as dom;
 import 'package:kraken/css.dart';
-import 'package:kraken/bridge.dart';
 
 import 'element_to_widget_adaptor.dart';
 
