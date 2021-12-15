@@ -30,6 +30,7 @@ dependencies:
   kraken_video_player: ^2.0.0-dev.0
   kraken_websocket: ^1.0.0
   kraken_webview: ^2.0.0-dev.0
+  waterfall_flow: ^3.0.1
 
 dev_dependencies:
   flutter_test:
