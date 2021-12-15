@@ -573,13 +573,9 @@ class Element extends Node
       willAttachRenderer();
     }
 
-
-
     if (renderer != null) {
       if (parent is! WidgetElement) {
         _attachRenderBoxModel(parent.renderer!, renderer!, after: after);
-      } else {
-        print('111');
       }
 
       // Flush pending style before child attached.
