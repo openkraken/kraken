@@ -255,7 +255,6 @@ abstract class WidgetElement extends dom.Element {
     if (parentNode is WidgetElement) {
       parentElement = ((parentNode as WidgetElement)._widget as _KrakenAdapterWidget).createElement();
     } else {
-      // parentElement = elementManager.getFlutterElementByTargetId((parentNode as dom.Element).targetId);
       parentElement = (parentNode as dom.Element).element;
     }
 
