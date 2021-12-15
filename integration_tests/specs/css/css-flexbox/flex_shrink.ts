@@ -1060,5 +1060,35 @@ describe('flexbox flex-shrink', () => {
     await snapshot();
   });
 
+  it('should work with flex item containing only text not overflow flex container', async () => {
+    const div = createElement('div',{
+      style: {
+        display: 'flex',
+        alignContent: 'flex-start',
+        alignItems: 'flex-start',
+        width: '300px'
+      }
+    }, [
+      createElement('div', {
+        style: {
+          width: '100px',
+          height: '100px',
+          background: 'red',
+          flexShrink: 0
+        }
+      }),
+      createElement('div', {
+        style: {
+          height: '100px',
+          background: 'green',
+        }
+      }, [
+        createText('Flex item should not overflow container.')
+      ]),
+    ]);
+    document.body.appendChild(div);
+    await snapshot();
+  });
+
 
 });
