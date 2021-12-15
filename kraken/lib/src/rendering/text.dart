@@ -16,8 +16,8 @@ class RenderTextBox extends RenderBox
     with RenderObjectWithChildMixin<RenderBox> {
   RenderTextBox(
     this.data, {
-      required this.renderStyle,
-    }) {
+    required this.renderStyle,
+  }) {
     TextSpan text = CSSTextMixin.createTextSpan(data, renderStyle);
     _renderParagraph = child = KrakenRenderParagraph(
       text,
