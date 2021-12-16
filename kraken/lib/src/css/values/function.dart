@@ -7,7 +7,7 @@
 
 import 'package:quiver/collection.dart';
 
-final _functionRegExp = RegExp(r'^[a-zA-Z_]+\(.+\)$', caseSensitive: false);
+final _functionRegExp = RegExp(r'^[a-zA-Z_]+\(.+\)$');
 final _functionStart = '(';
 final _functionEnd = ')';
 final _functionNotationUrl = 'url';
@@ -40,13 +40,16 @@ class CSSFunction {
     return _functionRegExp.hasMatch(value);
   }
 
-  static List<CSSFunctionalNotation> parseFunction(String value) {
+  static List<CSSFunctionalNotation> parseFunction(final String value) {
     if (_cachedParsedFunction.containsKey(value)) {
       return _cachedParsedFunction[value]!;
     }
-    var start = 0;
-    var left = value.indexOf(_functionStart, start);
-    List<CSSFunctionalNotation> notations = [];
+
+    final int valueLength = value.length;
+    final List<CSSFunctionalNotation> notations = [];
+
+    int start = 0;
+    int left = value.indexOf(_functionStart, start);
 
     // Function may contain function, should handle this situation.
     while (left != -1 && start < left) {
@@ -58,7 +61,7 @@ class CSSFunction {
       int containLeftCount = 0;
       bool match = false;
       // Find all args in this function.
-      while (argsBeginIndex < value.length) {
+      while (argsBeginIndex < valueLength) {
         // url() function notation should not be split causing it only accept one URL.
         // https://drafts.csswg.org/css-values-3/#urls
         if (fn != _functionNotationUrl && value[argsBeginIndex] == FUNCTION_ARGS_SPLIT) {
