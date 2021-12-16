@@ -21,11 +21,23 @@ final LinkedLruHashMap<String, List<CSSFunctionalNotation>> _cachedParsedFunctio
 class CSSFunction {
 
   static bool isFunction(String value, { String? functionName }) {
-    bool isMatch = _functionRegExp.hasMatch(value);
-    if (functionName != null && isMatch) {
-      isMatch = value.startsWith(functionName);
+    if (functionName != null) {
+      bool isMatch;
+      final int functionNameLength = functionName.length;
+
+      if (value.length < functionNameLength) {
+        return false;
+      }
+
+      for (int i = 0; i < functionNameLength; i++) {
+        isMatch = functionName.codeUnitAt(i) == value.codeUnitAt(i);
+        if (!isMatch) {
+          return false;
+        }
+      }
     }
-    return isMatch;
+
+    return _functionRegExp.hasMatch(value);
   }
 
   static List<CSSFunctionalNotation> parseFunction(String value) {
