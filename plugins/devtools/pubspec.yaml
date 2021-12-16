@@ -1,0 +1,24 @@
+name: kraken_devtools
+description: A kraken plugin to support Chrome DevTools.
+version: 0.4.0-dev.2
+homepage: https://openkraken.com
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+  flutter: ">=1.20.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  ffi: ^1.1.1
+  kraken: ^0.9.1-rc.1
+  meta: ^1.3.0
+  path: ^1.8.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+dependency_overrides:
+  kraken:
+    path: ../../kraken
