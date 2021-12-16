@@ -243,6 +243,21 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
 
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
 
+  T? debugGetEventTargetById<T>(int targetId) {
+    return _getEventTargetById(targetId);
+  }
+
+  int? debugGetTargetIdByEventTarget(EventTarget eventTarget) {
+    if (_eventTargets.containsValue(eventTarget)) {
+      for (var entry in _eventTargets.entries) {
+        if (entry.value == eventTarget) {
+          return entry.key;
+        }
+      }
+    }
+    return null;
+  }
+
   T? _getEventTargetById<T>(int targetId) {
     EventTarget? target = _eventTargets[targetId];
     if (target is T)
