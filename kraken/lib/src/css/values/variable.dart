@@ -5,8 +5,18 @@
 
 import 'package:kraken/css.dart';
 
+const int _HYPHEN_CODE = 45; // -
+
 // https://www.w3.org/TR/css-variables-1/#defining-variables
 class CSSVariable {
+
+  static bool isVariable(String? value) {
+    if (value == null) {
+      return false;
+    }
+    return value.length > 2 && value.codeUnitAt(0) == _HYPHEN_CODE && value.codeUnitAt(1) == _HYPHEN_CODE;
+  }
+
   final String identifier;
   final dynamic defaultValue;
   final RenderStyle _renderStyle;

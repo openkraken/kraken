@@ -407,17 +407,11 @@ class CSSRenderStyle
     RenderStyle renderStyle = this;
     dynamic value;
 
-    // --x: foo;
-    // Directly passing the value, not to resolve now.
-    if (CSSVariableMixin.isVariable(propertyName)) {
-      return propertyValue;
-    }
-
     // font-size: var(--x);
     // font-size: var(--x, 28px);
-    if (CSSFunction.isFunction(propertyValue)) {
+    if (CSSFunction.isFunction(propertyValue, functionName: 'var')) {
       List<CSSFunctionalNotation> fns = CSSFunction.parseFunction(propertyValue);
-      if (fns.length == 1 && fns.first.name.toUpperCase() == 'VAR' && fns.first.args.isNotEmpty) {
+      if (fns.first.args.isNotEmpty) {
         if (fns.first.args.length > 1) {
           // Has default value for CSS Variable.
           return CSSVariable(fns.first.args.first, renderStyle,
@@ -603,7 +597,7 @@ class CSSRenderStyle
         value = CSSText.resolveWhiteSpace(propertyValue);
         break;
       case TEXT_OVERFLOW:
-      // Overflow will affect text-overflow ellipsis taking effect
+        // Overflow will affect text-overflow ellipsis taking effect
         value = CSSText.resolveTextOverflow(propertyValue);
         break;
       case LINE_CLAMP:
@@ -612,13 +606,19 @@ class CSSRenderStyle
       case VERTICAL_ALIGN:
         value = CSSInlineMixin.resolveVerticalAlign(propertyValue);
         break;
-    // Transition
+      // Transition
       case TRANSITION_DELAY:
       case TRANSITION_DURATION:
       case TRANSITION_TIMING_FUNCTION:
       case TRANSITION_PROPERTY:
         value = CSSStyleProperty.getMultipleValues(propertyValue);
         break;
+    }
+
+    // --x: foo;
+    // Directly passing the value, not to resolve now.
+    if (CSSVariable.isVariable(propertyName)) {
+      return propertyValue;
     }
 
     return value;

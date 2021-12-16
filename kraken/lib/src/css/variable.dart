@@ -6,16 +6,7 @@
 import 'dart:collection';
 import 'render_style.dart';
 
-const int _HYPHEN_CODE = 45; // -
-
 mixin CSSVariableMixin on RenderStyle {
-  static bool isVariable(String? value) {
-    if (value == null) {
-      return false;
-    }
-    return value.length > 2 && value.codeUnitAt(0) == _HYPHEN_CODE && value.codeUnitAt(1) == _HYPHEN_CODE;
-  }
-
   Map<String, String>? _storage;
   final Map<String, List<String>> _propertyDependencies = {};
 

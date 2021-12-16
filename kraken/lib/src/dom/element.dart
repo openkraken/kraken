@@ -824,7 +824,7 @@ class Element extends Node
 
   void setRenderStyleProperty(String name, dynamic value) {
     // Memorize the variable value to renderStyle object.
-    if (CSSVariableMixin.isVariable(name)) {
+    if (CSSVariable.isVariable(name)) {
       renderStyle.setCSSVariable(name, value.toString());
       return;
     }
