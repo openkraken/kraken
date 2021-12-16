@@ -17,6 +17,24 @@ class CSSVariable {
     return value.length > 2 && value.codeUnitAt(0) == _HYPHEN_CODE && value.codeUnitAt(1) == _HYPHEN_CODE;
   }
 
+  // Try to parse CSSVariable.
+  static CSSVariable? tryParse(RenderStyle renderStyle, String propertyName, String propertyValue) {
+    // font-size: var(--x);
+    // font-size: var(--x, 28px);
+    if (CSSFunction.isFunction(propertyValue, functionName: VAR)) {
+      List<CSSFunctionalNotation> fns = CSSFunction.parseFunction(propertyValue);
+      if (fns.first.args.isNotEmpty) {
+        if (fns.first.args.length > 1) {
+          // Has default value for CSS Variable.
+          return CSSVariable(fns.first.args.first, renderStyle,
+              defaultValue: renderStyle.resolveValue(propertyName, fns.first.args.last));
+        } else {
+          return CSSVariable(fns.first.args.first, renderStyle);
+        }
+      }
+    }
+  }
+
   final String identifier;
   final dynamic defaultValue;
   final RenderStyle _renderStyle;

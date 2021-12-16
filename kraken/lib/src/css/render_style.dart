@@ -405,21 +405,11 @@ class CSSRenderStyle
   @override
   dynamic resolveValue(String propertyName, String propertyValue) {
     RenderStyle renderStyle = this;
-    dynamic value;
 
-    // font-size: var(--x);
-    // font-size: var(--x, 28px);
-    if (CSSFunction.isFunction(propertyValue, functionName: 'var')) {
-      List<CSSFunctionalNotation> fns = CSSFunction.parseFunction(propertyValue);
-      if (fns.first.args.isNotEmpty) {
-        if (fns.first.args.length > 1) {
-          // Has default value for CSS Variable.
-          return CSSVariable(fns.first.args.first, renderStyle,
-              defaultValue: resolveValue(propertyName, fns.first.args.last));
-        } else {
-          return CSSVariable(fns.first.args.first, renderStyle);
-        }
-      }
+    // Process CSSVariable.
+    dynamic value = CSSVariable.tryParse(renderStyle, propertyName, propertyValue);
+    if (value != null) {
+      return value;
     }
 
     switch (propertyName) {
