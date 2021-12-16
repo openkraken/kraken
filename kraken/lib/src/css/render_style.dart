@@ -11,13 +11,21 @@ import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 
+typedef RenderStyleVisitor<T extends RenderStyle> = void Function(T renderStyle);
+
 /// The abstract class for render-style, declare the
 /// getter interface for all available CSS rule.
 abstract class RenderStyle {
   // Common
   Element get target;
   RenderStyle? get parent;
-  getProperty(String key);
+  dynamic getProperty(String key);
+  /// Resolve the style value.
+  dynamic resolveValue(String property, String present);
+
+  // CSSVariable
+  String? getCSSVariable(String identifier, String propertyName);
+  void setCSSVariable(String identifier, String value);
 
   // Geometry
   CSSLengthValue get top;
@@ -173,6 +181,8 @@ abstract class RenderStyle {
   Size get viewportSize => target.ownerDocument.viewport.viewportSize;
 
   double get rootFontSize => target.ownerDocument.documentElement!.renderStyle.fontSize.computedValue;
+
+  void visitChildren<T extends RenderStyle>(RenderStyleVisitor<T> visitor);
 }
 
 class CSSRenderStyle
@@ -200,7 +210,8 @@ class CSSRenderStyle
     CSSOverflowMixin,
     CSSFilterEffectsMixin,
     CSSOpacityMixin,
-    CSSTransitionMixin {
+    CSSTransitionMixin,
+    CSSVariableMixin {
   CSSRenderStyle({ required this.target });
 
   @override
@@ -391,6 +402,219 @@ class CSSRenderStyle
     }
   }
 
+  @override
+  dynamic resolveValue(String propertyName, String propertyValue) {
+    RenderStyle renderStyle = this;
+
+    // Process CSSVariable.
+    dynamic value = CSSVariable.tryParse(renderStyle, propertyName, propertyValue);
+    if (value != null) {
+      return value;
+    }
+
+    switch (propertyName) {
+      case DISPLAY:
+        value = CSSDisplayMixin.resolveDisplay(propertyValue);
+        break;
+      case OVERFLOW_X:
+      case OVERFLOW_Y:
+        value = CSSOverflowMixin.resolveOverflowType(propertyValue);
+        break;
+      case POSITION:
+        value = CSSPositionMixin.resolvePositionType(propertyValue);
+        break;
+      case Z_INDEX:
+        value = int.tryParse(propertyValue);
+        break;
+      case TOP:
+      case LEFT:
+      case BOTTOM:
+      case RIGHT:
+      case FLEX_BASIS:
+      case PADDING_TOP:
+      case PADDING_RIGHT:
+      case PADDING_BOTTOM:
+      case PADDING_LEFT:
+      case WIDTH:
+      case MIN_WIDTH:
+      case MAX_WIDTH:
+      case HEIGHT:
+      case MIN_HEIGHT:
+      case MAX_HEIGHT:
+      case MARGIN_LEFT:
+      case MARGIN_TOP:
+      case MARGIN_RIGHT:
+      case MARGIN_BOTTOM:
+      case FONT_SIZE:
+        value = CSSLength.resolveLength(propertyValue, renderStyle, propertyName);
+        break;
+      case FLEX_DIRECTION:
+        value = CSSFlexboxMixin.resolveFlexDirection(propertyValue);
+        break;
+      case FLEX_WRAP:
+        value = CSSFlexboxMixin.resolveFlexWrap(propertyValue);
+        break;
+      case ALIGN_CONTENT:
+        value = CSSFlexboxMixin.resolveAlignContent(propertyValue);
+        break;
+      case ALIGN_ITEMS:
+        value = CSSFlexboxMixin.resolveAlignItems(propertyValue);
+        break;
+      case JUSTIFY_CONTENT:
+        value = CSSFlexboxMixin.resolveJustifyContent(propertyValue);
+        break;
+      case ALIGN_SELF:
+        value = CSSFlexboxMixin.resolveAlignSelf(propertyValue);
+        break;
+      case FLEX_GROW:
+        value = CSSFlexboxMixin.resolveFlexGrow(propertyValue);
+        break;
+      case FLEX_SHRINK:
+        value = CSSFlexboxMixin.resolveFlexShrink(propertyValue);
+        break;
+      case SLIVER_DIRECTION:
+        value = CSSSliverMixin.resolveAxis(propertyValue);
+        break;
+      case TEXT_ALIGN:
+        value = CSSTextMixin.resolveTextAlign(propertyValue);
+        break;
+      case BACKGROUND_ATTACHMENT:
+        value = CSSBackground.resolveBackgroundAttachment(propertyValue);
+        break;
+      case BACKGROUND_IMAGE:
+        value = CSSBackground.resolveBackgroundImage(propertyValue, renderStyle, propertyName, renderStyle.target.ownerDocument.controller);
+        break;
+      case BACKGROUND_REPEAT:
+        value = CSSBackground.resolveBackgroundRepeat(propertyValue);
+        break;
+      case BACKGROUND_POSITION_X:
+        value = CSSPosition.resolveBackgroundPosition(propertyValue, renderStyle, propertyName, true);
+        break;
+      case BACKGROUND_POSITION_Y:
+        value = CSSPosition.resolveBackgroundPosition(propertyValue, renderStyle, propertyName, false);
+        break;
+      case BACKGROUND_SIZE:
+        value = CSSBackground.resolveBackgroundSize(propertyValue, renderStyle, propertyName);
+        break;
+      case BACKGROUND_CLIP:
+        value = CSSBackground.resolveBackgroundClip(propertyValue);
+        break;
+      case BACKGROUND_ORIGIN:
+        value = CSSBackground.resolveBackgroundOrigin(propertyValue);
+        break;
+      case BORDER_LEFT_WIDTH:
+      case BORDER_TOP_WIDTH:
+      case BORDER_RIGHT_WIDTH:
+      case BORDER_BOTTOM_WIDTH:
+        value = CSSBorderSide.resolveBorderWidth(propertyValue, renderStyle, propertyName);
+        break;
+      case BORDER_LEFT_STYLE:
+      case BORDER_TOP_STYLE:
+      case BORDER_RIGHT_STYLE:
+      case BORDER_BOTTOM_STYLE:
+        value = CSSBorderSide.resolveBorderStyle(propertyValue);
+        break;
+      case COLOR:
+      case BACKGROUND_COLOR:
+      case TEXT_DECORATION_COLOR:
+      case BORDER_LEFT_COLOR:
+      case BORDER_TOP_COLOR:
+      case BORDER_RIGHT_COLOR:
+      case BORDER_BOTTOM_COLOR:
+        value = CSSColor.resolveColor(propertyValue, renderStyle, propertyName);
+        break;
+      case BOX_SHADOW:
+        value = CSSBoxShadow.parseBoxShadow(propertyValue, renderStyle, propertyName);
+        break;
+      case BORDER_TOP_LEFT_RADIUS:
+      case BORDER_TOP_RIGHT_RADIUS:
+      case BORDER_BOTTOM_LEFT_RADIUS:
+      case BORDER_BOTTOM_RIGHT_RADIUS:
+        value = CSSBorderRadius.parseBorderRadius(propertyValue, renderStyle, propertyName);
+        break;
+      case OPACITY:
+        value = CSSOpacityMixin.resolveOpacity(propertyValue);
+        break;
+      case VISIBILITY:
+        value = CSSVisibilityMixin.resolveVisibility(propertyValue);
+        break;
+      case CONTENT_VISIBILITY:
+        value = CSSContentVisibilityMixin.resolveContentVisibility(propertyValue);
+        break;
+      case TRANSFORM:
+        value = CSSTransformMixin.resolveTransform(propertyValue);
+        break;
+      case FILTER:
+        value = CSSFunction.parseFunction(propertyValue);
+        break;
+      case TRANSFORM_ORIGIN:
+        value = CSSOrigin.parseOrigin(propertyValue, renderStyle, propertyName);
+        break;
+      case OBJECT_FIT:
+        value = CSSObjectFitMixin.resolveBoxFit(propertyValue);
+        break;
+      case OBJECT_POSITION:
+        value = CSSObjectPositionMixin.resolveObjectPosition(propertyValue);
+        break;
+      case TEXT_DECORATION_LINE:
+        value = CSSText.resolveTextDecorationLine(propertyValue);
+        break;
+      case TEXT_DECORATION_STYLE:
+        value = CSSText.resolveTextDecorationStyle(propertyValue);
+        break;
+      case FONT_WEIGHT:
+        value = CSSText.resolveFontWeight(propertyValue);
+        break;
+      case FONT_STYLE:
+        value = CSSText.resolveFontStyle(propertyValue);
+        break;
+      case FONT_FAMILY:
+        value = CSSText.resolveFontFamilyFallback(propertyValue);
+        break;
+      case LINE_HEIGHT:
+        value = CSSText.resolveLineHeight(propertyValue, renderStyle, propertyName);
+        break;
+      case LETTER_SPACING:
+        value = CSSText.resolveSpacing(propertyValue, renderStyle, propertyName);
+        break;
+      case WORD_SPACING:
+        value = CSSText.resolveSpacing(propertyValue, renderStyle, propertyName);
+        break;
+      case TEXT_SHADOW:
+        value = CSSText.resolveTextShadow(propertyValue, renderStyle, propertyName);
+        break;
+      case WHITE_SPACE:
+        value = CSSText.resolveWhiteSpace(propertyValue);
+        break;
+      case TEXT_OVERFLOW:
+        // Overflow will affect text-overflow ellipsis taking effect
+        value = CSSText.resolveTextOverflow(propertyValue);
+        break;
+      case LINE_CLAMP:
+        value = CSSText.parseLineClamp(propertyValue);
+        break;
+      case VERTICAL_ALIGN:
+        value = CSSInlineMixin.resolveVerticalAlign(propertyValue);
+        break;
+      // Transition
+      case TRANSITION_DELAY:
+      case TRANSITION_DURATION:
+      case TRANSITION_TIMING_FUNCTION:
+      case TRANSITION_PROPERTY:
+        value = CSSStyleProperty.getMultipleValues(propertyValue);
+        break;
+    }
+
+    // --x: foo;
+    // Directly passing the value, not to resolve now.
+    if (CSSVariable.isVariable(propertyName)) {
+      return propertyValue;
+    }
+
+    return value;
+  }
+
+
   // Compute the content box width from render style.
   void computeContentBoxLogicalWidth() {
     RenderBoxModel current = renderBoxModel!;
@@ -438,7 +662,7 @@ class CSSRenderStyle
         break;
       case CSSDisplay.inline:
         break;
-      default:
+      case CSSDisplay.none:
         break;
     }
 
@@ -851,6 +1075,14 @@ class CSSRenderStyle
     }
     double realWidth = realHeight! / intrinsicRatio!;
     return realWidth;
+  }
+
+
+  @override
+  void visitChildren<T extends RenderStyle>(RenderStyleVisitor<T> visitor) {
+    target.children.forEach((Element childElement) {
+      visitor(childElement.renderStyle as T);
+    });
   }
 
   // Mark this node as detached.

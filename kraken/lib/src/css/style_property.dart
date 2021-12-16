@@ -156,7 +156,7 @@ class CSSStyleProperty {
   }
 
   static void setShorthandOverflow(Map<String, String?> properties, String shorthandValue) {
-    List<String> values = shorthandValue.split(_spaceRegExp);
+    List<String> values = _splitBySpace(shorthandValue);
     if (values.length == 1) {
       properties[OVERFLOW_Y] = properties[OVERFLOW_X] = values[0];
     } else if (values.length == 2) {
@@ -395,7 +395,7 @@ class CSSStyleProperty {
       if (shadow == NONE) {
         continue;
       }
-      List<String> parts = shadow.trim().split(_spaceRegExp);
+      List<String> parts = _splitBySpace(shadow.trim());
 
       String? inset;
       String? color;
@@ -461,7 +461,7 @@ class CSSStyleProperty {
   static List<String?>? _getBackgroundValues(String shorthandProperty) {
     // Convert 40%/10em -> 40% / 10em
     shorthandProperty = shorthandProperty.replaceAll(_slashRegExp, ' / ');
-    List values = shorthandProperty.split(_spaceRegExp);
+    List<String> values = shorthandProperty.split(_spaceRegExp);
 
     String? color;
     String? image;
@@ -476,29 +476,30 @@ class CSSStyleProperty {
     String? size;
     bool isPositionEndAndSizeStart = false;
 
-    for (String value in values as Iterable<String>) {
-      if (color == null && CSSColor.isColor(value)) {
+    for (String value in values) {
+      final bool isValueVariableFunction = CSSFunction.isFunction(value, functionName: VAR);
+      if (color == null && (isValueVariableFunction || CSSColor.isColor(value))) {
         color = value;
-      } else if (image == null && CSSBackground.isValidBackgroundImageValue(value)) {
+      } else if (image == null && (isValueVariableFunction || CSSBackground.isValidBackgroundImageValue(value))) {
         image = value;
-      } else if (repeat == null && CSSBackground.isValidBackgroundRepeatValue(value)) {
+      } else if (repeat == null && (isValueVariableFunction || CSSBackground.isValidBackgroundRepeatValue(value))) {
         repeat = value;
-      } else if (attachment == null && CSSBackground.isValidBackgroundAttachmentValue(value)) {
+      } else if (attachment == null && (isValueVariableFunction || CSSBackground.isValidBackgroundAttachmentValue(value))) {
         attachment = value;
       } else if (positionX == null &&
           !isPositionEndAndSizeStart &&
-          CSSBackground.isValidBackgroundPositionValue(value)) {
+          (isValueVariableFunction || CSSBackground.isValidBackgroundPositionValue(value))) {
         positionX = value;
       } else if (positionY == null &&
           !isPositionEndAndSizeStart &&
-          CSSBackground.isValidBackgroundPositionValue(value)) {
+          (isValueVariableFunction || CSSBackground.isValidBackgroundPositionValue(value))) {
         positionY = value;
       } else if (value == '/') {
         isPositionEndAndSizeStart = true;
         continue;
-      } else if (sizeWidth == null && CSSBackground.isValidBackgroundSizeValue(value)) {
+      } else if (sizeWidth == null && (isValueVariableFunction || CSSBackground.isValidBackgroundSizeValue(value))) {
         sizeWidth = value;
-      } else if (sizeHeight == null && CSSBackground.isValidBackgroundSizeValue(value)) {
+      } else if (sizeHeight == null && (isValueVariableFunction || CSSBackground.isValidBackgroundSizeValue(value))) {
         sizeHeight = value;
       } else {
         return null;
@@ -535,7 +536,7 @@ class CSSStyleProperty {
     shorthandProperty = shorthandProperty.replaceAll(_slashRegExp, ' / ');
     // Convert "Goudy Bookletter 1911", sans-serif => "Goudy Bookletter 1911",sans-serif
     shorthandProperty = shorthandProperty.replaceAll(_replaceCommaRegExp, ',');
-    List values = _splitBySpace(shorthandProperty);
+    List<String> values = _splitBySpace(shorthandProperty);
 
     String? style;
     String? weight;
@@ -545,17 +546,18 @@ class CSSStyleProperty {
 
     bool isSizeEndAndLineHeightStart = false;
 
-    for (String value in values as Iterable<String>) {
-      if (style == null && CSSText.isValidFontStyleValue(value)) {
+    for (String value in values) {
+      final bool isValueVariableFunction = CSSFunction.isFunction(value, functionName: VAR);
+      if (style == null && (isValueVariableFunction || CSSText.isValidFontStyleValue(value))) {
         style = value;
-      } else if (weight == null && CSSText.isValidFontWeightValue(value)) {
+      } else if (weight == null && (isValueVariableFunction || CSSText.isValidFontWeightValue(value))) {
         weight = value;
-      } else if (size == null && CSSLength.isNonNegativeLength(value)) {
+      } else if (size == null && (isValueVariableFunction || CSSLength.isNonNegativeLength(value))) {
         size = value;
       } else if (value == '/') {
         isSizeEndAndLineHeightStart = true;
         continue;
-      } else if (lineHeight == null && CSSText.isValidLineHeightValue(value)) {
+      } else if (lineHeight == null && (isValueVariableFunction || CSSText.isValidLineHeightValue(value))) {
         lineHeight = value;
       } else if (family == null) {
         // The font-family must be the last value specified.
@@ -574,7 +576,7 @@ class CSSStyleProperty {
   }
 
   static List<String?>? _getTextDecorationValues(String shorthandProperty) {
-    List<String> values = shorthandProperty.split(_spaceRegExp);
+    List<String> values = _splitBySpace(shorthandProperty);
     String? line;
     String? color;
     String? style;
@@ -595,15 +597,15 @@ class CSSStyleProperty {
   }
 
   static List<String?>? _getTransitionValues(String shorthandProperty) {
-    List transitions = shorthandProperty.split(_commaRegExp);
+    List<String> transitions = shorthandProperty.split(_commaRegExp);
     List<String?> values = List.filled(4, null);
 
-    for (String transition in transitions as Iterable<String>) {
-      List<String> parts = transition.trim().split(_spaceRegExp);
+    for (String transition in transitions) {
+      List<String> parts = _splitBySpace(transition.trim());
 
       String? property;
       String? duration;
-      String? timingFuction;
+      String? timingFunction;
       String? delay;
 
       for (String part in parts) {
@@ -611,8 +613,8 @@ class CSSStyleProperty {
           property = part;
         } else if (duration == null && CSSTime.isTime(part)) {
           duration = part;
-        } else if (timingFuction == null && CSSTransitionMixin.isValidTransitionTimingFunctionValue(part)) {
-          timingFuction = part;
+        } else if (timingFunction == null && CSSTransitionMixin.isValidTransitionTimingFunctionValue(part)) {
+          timingFunction = part;
         } else if (delay == null && CSSTime.isTime(part)) {
           delay = part;
         } else {
@@ -622,12 +624,12 @@ class CSSStyleProperty {
 
       property = property ?? ALL;
       duration = duration ?? _0s;
-      timingFuction = timingFuction ?? EASE;
+      timingFunction = timingFunction ?? EASE;
       delay = delay ?? _0s;
 
       values[0] == null ? values[0] = property : values[0] = values[0]! + (_comma + property);
       values[1] == null ? values[1] = duration : values[1] = values[1]! + (_comma + duration);
-      values[2] == null ? values[2] = timingFuction : values[2] = values[2]! + (_comma + timingFuction);
+      values[2] == null ? values[2] = timingFunction : values[2] = values[2]! + (_comma + timingFunction);
       values[3] == null ? values[3] = delay : values[3] = values[3]! + (_comma + delay);
     }
 
@@ -635,15 +637,16 @@ class CSSStyleProperty {
   }
 
   static List<String?>? _getFlexFlowValues(String shorthandProperty) {
-    List<String> values = shorthandProperty.split(_spaceRegExp);
+    List<String> values = _splitBySpace(shorthandProperty);
 
     String? direction;
     String? wrap;
 
     for (String value in values) {
-      if (direction == null && CSSFlex.isValidFlexDirectionValue(value)) {
+      final bool isValueVariableFunction = CSSFunction.isFunction(value, functionName: VAR);
+      if (direction == null && (isValueVariableFunction || CSSFlex.isValidFlexDirectionValue(value))) {
         direction = value;
-      } else if (wrap == null && CSSFlex.isValidFlexWrapValue(value)) {
+      } else if (wrap == null && (isValueVariableFunction || CSSFlex.isValidFlexWrapValue(value))) {
         wrap = value;
       } else {
         return null;
@@ -654,7 +657,7 @@ class CSSStyleProperty {
   }
 
   static List<String>? _getFlexValues(String shorthandProperty) {
-    List<String> values = shorthandProperty.split(_spaceRegExp);
+    List<String> values = _splitBySpace(shorthandProperty);
 
     // In flex shorthand case it is interpreted as flex: <number> 1 0;
     String? grow;
@@ -681,11 +684,12 @@ class CSSStyleProperty {
         }
       }
 
-      if (grow == null && CSSNumber.isNumber(value)) {
+      final bool isValueVariableFunction = CSSFunction.isFunction(value, functionName: VAR);
+      if (grow == null && (isValueVariableFunction || CSSNumber.isNumber(value))) {
         grow = value;
-      } else if (shrink == null && CSSNumber.isNumber(value)) {
+      } else if (shrink == null && (isValueVariableFunction || CSSNumber.isNumber(value))) {
         shrink = value;
-      } else if (basis == null && ((CSSLength.isNonNegativeLength(value) || value == AUTO))) {
+      } else if (basis == null && ((isValueVariableFunction || CSSLength.isNonNegativeLength(value) || value == AUTO))) {
         basis = value;
       } else {
         return null;
@@ -696,7 +700,7 @@ class CSSStyleProperty {
   }
 
   static List<String?>? _getBorderValues(String shorthandProperty) {
-    List<String> values = shorthandProperty.split(_spaceRegExp);
+    List<String> values = _splitBySpace(shorthandProperty);
 
     String? width;
     String? style;
@@ -704,11 +708,12 @@ class CSSStyleProperty {
 
     // NOTE: if one of token is wrong like `1pxxx solid red` that all should not work
     for (String value in values) {
-      if (width == null && CSSBorderSide.isValidBorderWidthValue(value)) {
+      final bool isValueVariableFunction = CSSFunction.isFunction(value, functionName: VAR);
+      if (width == null && (isValueVariableFunction || CSSBorderSide.isValidBorderWidthValue(value))) {
         width = value;
-      } else if (style == null && CSSBorderSide.isValidBorderStyleValue(value)) {
+      } else if (style == null && (isValueVariableFunction || CSSBorderSide.isValidBorderStyleValue(value))) {
         style = value;
-      } else if (color == null && CSSColor.isColor(value)) {
+      } else if (color == null && (isValueVariableFunction || CSSColor.isColor(value))) {
         color = value;
       } else {
         return null;
@@ -723,7 +728,7 @@ class CSSStyleProperty {
     bool isNonNegativeLengthOrPercentage = false,
     bool isNonNegativeLength = false,
   }) {
-    var properties = shorthandProperty.split(_spaceRegExp);
+    List<String> properties = _splitBySpace(shorthandProperty);
 
     String? topValue;
     String? rightValue;
@@ -744,6 +749,13 @@ class CSSStyleProperty {
       rightValue = properties[1];
       bottomValue = properties[2];
       leftValue = properties[3];
+    }
+
+    if (topValue != null && CSSFunction.isFunction(topValue) &&
+        rightValue != null && CSSFunction.isFunction(rightValue) &&
+        bottomValue != null && CSSFunction.isFunction(bottomValue) &&
+        leftValue != null && CSSFunction.isFunction(leftValue)) {
+      return [topValue, rightValue, bottomValue, leftValue];
     }
 
     if (isLengthOrPercentage) {
@@ -775,7 +787,7 @@ class CSSStyleProperty {
 
   // https://drafts.csswg.org/css-values-4/#typedef-position
   static List<String?> getPositionValues(String shorthandProperty) {
-    var properties = shorthandProperty.trim().split(_spaceRegExp);
+    List<String> properties = _splitBySpace(shorthandProperty.trim());
 
     String? x;
     String? y;

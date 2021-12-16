@@ -960,9 +960,6 @@ This situation often happened when you trying creating kraken when FlutterView n
       PerformanceTiming.instance().mark(PERF_CONTROLLER_INIT_END);
     }
 
-    // FIXME: reset href when dart hot reload that href is prev href
-    controller.href = '';
-
     return controller.view.getRootRenderObject();
   }
 

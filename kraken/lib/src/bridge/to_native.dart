@@ -367,8 +367,8 @@ List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, in
     // +-------+-------+
     // |  id   | type  |
     // +-------+-------+
-    int id = typeIdCombine >> 32;
-    int type = typeIdCombine ^ (id << 32);
+    int id = (typeIdCombine >> 32).toSigned(32);
+    int type = (typeIdCombine ^ (id << 32)).toSigned(32);
 
     command.type = UICommandType.values[type];
     command.id = id;
@@ -383,8 +383,8 @@ List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, in
     if (args01And02Length == 0) {
       args01Length = args02Length = 0;
     } else {
-      args02Length = args01And02Length >> 32;
-      args01Length = args01And02Length ^ (args02Length << 32);
+      args02Length = (args01And02Length >> 32).toSigned(32);
+      args01Length = (args01And02Length ^ (args02Length << 32)).toSigned(32);
     }
 
     int args01StringMemory = rawMemory[i + args01StringMemOffset];
