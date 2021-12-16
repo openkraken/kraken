@@ -567,8 +567,11 @@ class Element extends Node
   void attachTo(Node parent, {RenderBox? after}) {
     _applyStyle(style);
 
-    // @NOTE: Sliver should not create renderer here.
-    if (parentElement?.renderStyle.display != CSSDisplay.sliver) {
+    if (parentElement?.renderStyle.display == CSSDisplay.sliver) {
+      // Sliver should not create renderer here, but need to trigger
+      // render sliver list dynamical rebuild child by element tree.
+      parentElement?._renderLayoutBox?.markNeedsLayout();
+    } else {
       willAttachRenderer();
     }
 
@@ -642,11 +645,6 @@ class Element extends Node
         }
 
         child.attachTo(this, after: after);
-
-        // Lazy trigger render sliver to dynamic rebuild child by element tree.
-        if (renderLayoutBox is RenderSliverListLayout) {
-          renderLayoutBox.markSliverListNeedsLayout();
-        }
       }
     }
 
