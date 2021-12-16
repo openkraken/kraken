@@ -461,6 +461,9 @@ class ImageElement extends Element {
       if (property == WIDTH) {
         double? resolveStyleWidth = renderStyle.width.value == null && renderStyle.width.isNotAuto
           ? null : renderStyle.width.computedValue;
+        // To avoid resolved auto, which computed value is infinity, we can not calculate
+        // infinite double as valid number, mark null to let width/height resized by decode
+        // size.
         _styleWidth = resolveStyleWidth == double.infinity ? null : resolveStyleWidth;
       } else if (property == HEIGHT) {
         double? resolveStyleHeight = renderStyle.height.value == null && renderStyle.height.isNotAuto
