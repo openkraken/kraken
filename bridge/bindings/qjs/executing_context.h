@@ -20,6 +20,7 @@
 #include "kraken_foundation.h"
 #include "qjs_patch.h"
 #include "garbage_collected.h"
+#include "bindings/qjs/bom/dom_timer_coordinator.h"
 
 using JSExceptionHandler = std::function<void(int32_t contextId, const char* message)>;
 
@@ -57,6 +58,16 @@ struct AtomJob {
 
 bool isContextValid(int32_t contextId);
 
+class ExecutionContextGCTracker : public GarbageCollected<ExecutionContextGCTracker> {
+ public:
+  static JSClassID contextGcTrackerClassId;
+
+  ExecutionContextGCTracker(JSContext* ctx);
+
+  void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const override;
+ private:
+};
+
 // An environment in which script can execute. This class exposes the common
 // properties of script execution environments on the kraken.
 // Window : Document : ExecutionContext = 1 : 1 : 1 at any point in time.
@@ -80,6 +91,14 @@ class ExecutionContext {
   void drainPendingPromiseJobs();
   void defineGlobalProperty(const char* prop, JSValueConst value);
   uint8_t* dumpByteCode(const char* code, uint32_t codeLength, const char* sourceURL, size_t* bytecodeLength);
+
+  // Gets the DOMTimerCoordinator which maintains the "active timer
+  // list" of tasks created by setTimeout and setInterval. The
+  // DOMTimerCoordinator is owned by the ExecutionContext and should
+  // not be used after the ExecutionContext is destroyed.
+  DOMTimerCoordinator* timers();
+
+  void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func);
 
   std::chrono::time_point<std::chrono::system_clock> timeOrigin;
   std::unordered_map<std::string, void*> constructorMap;
@@ -112,6 +131,8 @@ class ExecutionContext {
   friend WindowInstance;
   friend DocumentInstance;
   WindowInstance* m_window{nullptr};
+  DOMTimerCoordinator m_timers;
+  ExecutionContextGCTracker *m_gcTracker{nullptr};
 };
 
 // The read object's method or properties via Proxy, we should redirect this_val from Proxy into target property of

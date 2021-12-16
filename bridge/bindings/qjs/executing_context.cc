@@ -11,6 +11,7 @@
 #include "kraken_bridge.h"
 #include "qjs_patch.h"
 #include "garbage_collected.h"
+#include "bom/dom_timer_coordinator.h"
 
 namespace kraken::binding::qjs {
 
@@ -32,35 +33,14 @@ std::unique_ptr<ExecutionContext> createJSContext(int32_t contextId, const JSExc
 
 static JSRuntime* m_runtime{nullptr};
 
-JSClassID GCInvisibleObjectsTracker::pageGlobalVarClassId{0};
-GCInvisibleObjectsTracker::GCInvisibleObjectsTracker(): GarbageCollected<GCInvisibleObjectsTracker>() {
-  init_list_head(&timer_job_list);
+ExecutionContextGCTracker::ExecutionContextGCTracker(JSContext* ctx): GarbageCollected<ExecutionContextGCTracker>(ctx) {}
+
+void ExecutionContextGCTracker::trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const {
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
+  context->trace(rt, context->global(), mark_func);
 }
 
-GCInvisibleObjectsTracker::~GCInvisibleObjectsTracker() {
-  {
-    struct list_head *el, *el1;
-    list_for_each_safe(el, el1, &timer_job_list) {
-      auto* callbackContext = list_entry(el, DOMTimerCallbackContext, link);
-      delete callbackContext;
-    }
-  }
-}
-
-void GCInvisibleObjectsTracker::trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const {
-  // track timers
-  {
-    struct list_head *el, *el1;
-    list_for_each_safe(el, el1, &timer_job_list) {
-      auto* callbackContext = list_entry(el, DOMTimerCallbackContext, link);
-      JS_MarkValue(rt, callbackContext->callback, mark_func);
-    }
-  }
-}
-
-const char *GCInvisibleObjectsTracker::getHumanReadableName() const {
-  return "PageInvisibleObjects";
-}
+JSClassID ExecutionContextGCTracker::contextGcTrackerClassId{0};
 
 ExecutionContext::ExecutionContext(int32_t contextId, const JSExceptionHandler& handler, void* owner)
     : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false), uniqueId(context_unique_id++) {
@@ -97,6 +77,9 @@ ExecutionContext::ExecutionContext(int32_t contextId, const JSExceptionHandler& 
   JS_FreeAtom(m_ctx, windowKey);
   JS_SetContextOpaque(m_ctx, this);
   JS_SetHostPromiseRejectionTracker(m_runtime, promiseRejectTracker, nullptr);
+
+  m_gcTracker = makeGarbageCollected<ExecutionContextGCTracker>(m_ctx, &ExecutionContextGCTracker::contextGcTrackerClassId);
+  JS_DefinePropertyValueStr(m_ctx, globalObject, "_gc_tracker_", m_gcTracker->toQuickJS(), JS_PROP_NORMAL);
 
   runningContexts++;
 }
@@ -355,8 +338,8 @@ void ExecutionContext::promiseRejectTracker(JSContext* ctx, JSValue promise, JSV
   context->dispatchGlobalPromiseRejectionEvent(promise, reason);
 }
 
-void ExecutionContext::trackPendingDOMTimer(DOMTimerCallbackContext* timerContext) {
-  list_add_tail(&timerContext->link, &m_gcInvisibleTracker->timer_job_list);
+DOMTimerCoordinator *ExecutionContext::timers() {
+  return &m_timers;
 }
 
 std::unique_ptr<NativeString> jsValueToNativeString(JSContext* ctx, JSValue value) {
@@ -493,6 +476,10 @@ JSValue objectGetKeys(JSContext* ctx, JSValue obj) {
   JS_FreeValue(ctx, globalObject);
 
   return result;
+}
+
+void ExecutionContext::trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) {
+  m_timers.trace(rt, JS_NULL, mark_func);
 }
 
 }  // namespace kraken::binding::qjs

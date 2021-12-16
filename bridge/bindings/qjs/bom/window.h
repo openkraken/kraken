@@ -26,6 +26,8 @@ class Window : public EventTarget {
   static JSValue scrollTo(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   static JSValue scrollBy(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   static JSValue postMessage(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue requestAnimationFrame(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue cancelAnimationFrame(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
   Window() = delete;
   explicit Window(ExecutionContext* context);
@@ -51,6 +53,8 @@ class Window : public EventTarget {
   DEFINE_PROTOTYPE_FUNCTION(scrollTo, 2);
   DEFINE_PROTOTYPE_FUNCTION(scrollBy, 2);
   DEFINE_PROTOTYPE_FUNCTION(postMessage, 3);
+  DEFINE_PROTOTYPE_FUNCTION(requestAnimationFrame, 1);
+  DEFINE_PROTOTYPE_FUNCTION(cancelAnimationFrame, 1);
 
   friend WindowInstance;
 };

@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 
-#include "console.h"
 #include "gtest/gtest.h"
 #include "kraken_bridge.h"
 #include "kraken_test_env.h"
@@ -19,7 +18,6 @@ TEST(Timer, setTimeout) {
       case 0:
         EXPECT_STREQ(message.c_str(), "1234");
         break;
-        ;
       case 1:
         EXPECT_STREQ(message.c_str(), "789");
         break;
@@ -43,5 +41,35 @@ console.log('1234');
 
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
   TEST_runLoop(bridge->getContext().get());
-  delete bridge;
+  disposePage(0);
+}
+
+TEST(Timer, clearTimeout) {
+  initJSPagePool(1);
+  auto* bridge = static_cast<kraken::KrakenPage*>(getPage(0));
+
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  };
+
+  TEST_init(bridge->getContext().get());
+
+  std::string code = R"(
+function getCachedData() {
+  let index = 0;
+
+  return function() {
+    return index++;
+  }
+}
+
+let timer = setTimeout(async () => {
+  let data = getCachedData()();
+  console.log(data);
+}, 10);
+clearTimeout(timer);
+)";
+
+  bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
+  TEST_runLoop(bridge->getContext().get());
+  disposePage(0);
 }

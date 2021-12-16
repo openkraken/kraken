@@ -8,10 +8,11 @@
 
 #include <quickjs/quickjs.h>
 #include "qjs_patch.h"
+#include "include/kraken_foundation.h"
 
 namespace kraken::binding::qjs {
 
-template<typename T>
+template <typename T>
 class MakeGarbageCollectedTrait;
 
 /**
@@ -53,23 +54,32 @@ class GarbageCollected {
     *
     * @returns a human readable name for the object.
     */
-  virtual const char *getHumanReadableName() const { return nullptr; };
+  [[nodiscard]] virtual const char *getHumanReadableName() const { return ""; };
 
   FORCE_INLINE JSValue toQuickJS() {
     return jsObject;
   };
 
+  FORCE_INLINE JSContext* ctx() {
+    return m_ctx;
+  }
+
+  // A anchor to efficiently bind the current object to a linked-list.
+  list_head link;
+
  protected:
   JSValue jsObject{JS_NULL};
-  GarbageCollected() {};
+  JSContext *m_ctx{nullptr};
+  GarbageCollected(JSContext *ctx): m_ctx(ctx) {};
   friend class MakeGarbageCollectedTrait<T>;
 };
 
-template<typename T>
+template <typename T>
 class MakeGarbageCollectedTrait {
  public:
-  static T* allocate(JSContext *ctx, JSClassID *classId) {
-    T* object = ::new T();
+  template<typename... Args>
+  static T* allocate(JSContext *ctx, JSClassID *classId, Args&& ...args) {
+    T* object = ::new T(ctx, std::forward<Args>(args)...);
     JSRuntime *runtime = JS_GetRuntime(ctx);
 
     /// When classId is 0, it means this class are not initialized. We should create a JSClassDef to describe the behavior of this class and associate with classID.
@@ -112,12 +122,12 @@ class MakeGarbageCollectedTrait {
   friend GarbageCollected<T>;
 };
 
-template <typename T>
-T* makeGarbageCollected(JSContext *ctx, JSClassID *classId) {
+template <typename T, typename... Args>
+T* makeGarbageCollected(JSContext *ctx, JSClassID *classId, Args&& ...args) {
   static_assert(std::is_base_of<typename T::ParentMostGarbageCollectedType, T>::value,
                 "U of GarbageCollected<U> must be a base of T. Check "
                 "GarbageCollected<T> base class inheritance.");
-  return MakeGarbageCollectedTrait<T>::allocate(ctx, classId);
+  return MakeGarbageCollectedTrait<T>::allocate(ctx, classId, std::forward<Args>(args)...);
 }
 
 }  // namespace kraken::binding::qjs

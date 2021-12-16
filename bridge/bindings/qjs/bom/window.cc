@@ -6,6 +6,7 @@
 #include "window.h"
 #include "bindings/qjs/dom/events/.gen/message_event.h"
 #include "bindings/qjs/qjs_patch.h"
+#include "frame_request_callback_collection.h"
 #include "dart_methods.h"
 
 namespace kraken::binding::qjs {
@@ -67,6 +68,87 @@ JSValue Window::postMessage(JSContext* ctx, JSValue this_val, int argc, JSValue*
   JS_FreeValue(ctx, messageEventValue);
   JS_FreeValue(ctx, messageEventInitValue);
   JS_FreeValue(ctx, globalObjectValue);
+  return JS_NULL;
+}
+
+
+static void handleRAFTransientCallback(void* ptr, int32_t contextId, double highResTimeStamp, const char* errmsg) {
+  auto* frameCallback = static_cast<FrameCallback*>(ptr);
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(frameCallback->ctx()));
+
+  if (!context->isValid())
+    return;
+
+  if (errmsg != nullptr) {
+    JSValue exception = JS_ThrowTypeError(frameCallback->ctx(), "%s", errmsg);
+    context->handleException(&exception);
+    return;
+  }
+
+  // Trigger callbacks.
+  frameCallback->fire(highResTimeStamp);
+
+  context->drainPendingPromiseJobs();
+}
+
+JSValue Window::requestAnimationFrame(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  if (argc <= 0) {
+    return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': 1 argument required, but only 0 present.");
+  }
+
+  auto context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  JSValue callbackValue = argv[0];
+
+  if (!JS_IsObject(callbackValue)) {
+    return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.");
+  }
+
+  if (!JS_IsFunction(ctx, callbackValue)) {
+    return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.");
+  }
+
+  if (getDartMethod()->flushUICommand == nullptr) {
+    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.");
+  }
+  // Flush all pending ui messages.
+  getDartMethod()->flushUICommand();
+
+  if (getDartMethod()->requestAnimationFrame == nullptr) {
+    return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) is not registered.");
+  }
+
+  auto* frameCallback = makeGarbageCollected<FrameCallback>(ctx, &FrameCallback::frameCallbackClassId, callbackValue);
+  uint32_t requestId = getDartMethod()->requestAnimationFrame(frameCallback, context->getContextId(), handleRAFTransientCallback);
+
+  // `-1` represents some error occurred.
+  if (requestId == -1) {
+    return JS_ThrowTypeError(ctx,
+                             "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) executed "
+                             "with unexpected error.");
+  }
+
+  return JS_NewUint32(ctx, requestId);
+}
+
+JSValue Window::cancelAnimationFrame(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  if (argc <= 0) {
+    return JS_ThrowTypeError(ctx, "Failed to execute 'cancelAnimationFrame': 1 argument required, but only 0 present.");
+  }
+
+  auto context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  JSValue requestIdValue = argv[0];
+  if (!JS_IsNumber(requestIdValue)) {
+    return JS_ThrowTypeError(ctx, "Failed to execute 'cancelAnimationFrame': parameter 1 (timer) is not a timer kind.");
+  }
+
+  int32_t id;
+  JS_ToInt32(ctx, &id, requestIdValue);
+
+  if (getDartMethod()->cancelAnimationFrame == nullptr) {
+    return JS_ThrowTypeError(ctx, "Failed to execute 'cancelAnimationFrame': dart method (cancelAnimationFrame) is not registered.");
+  }
+  getDartMethod()->cancelAnimationFrame(context->getContextId(), id);
+
   return JS_NULL;
 }
 

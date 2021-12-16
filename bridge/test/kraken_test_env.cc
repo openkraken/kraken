@@ -25,39 +25,47 @@ static int64_t get_time_ms(void) {
 typedef struct {
   struct list_head link;
   int64_t timeout;
-  void* callbackContext;
+  DOMTimer* timer;
   int32_t contextId;
   AsyncCallback func;
 } JSOSTimer;
 
 typedef struct JSThreadState {
-  struct list_head os_timers; /* list of timer.link */
+  std::unordered_map<int32_t, JSOSTimer*> os_timers; /* list of timer.link */
 } JSThreadState;
 
-static void unlink_timer(JSRuntime* rt, JSOSTimer* th) {
-  if (th->link.prev) {
-    list_del(&th->link);
-    th->link.prev = th->link.next = NULL;
-  }
+static void unlink_timer(JSThreadState* ts, JSOSTimer* th) {
+  ts->os_timers.erase(th->timer->timerId());
 }
 
 void TEST_init(ExecutionContext *context) {
   JSThreadState*th = new JSThreadState();
-  init_list_head(&th->os_timers);
   JS_SetRuntimeOpaque(context->runtime(), th);
 }
 
-int32_t TEST_setTimeout(DOMTimerCallbackContext* callbackContext, int32_t contextId, AsyncCallback callback, int32_t timeout) {
-  JSRuntime* rt = JS_GetRuntime(callbackContext->context->ctx());
+int32_t timerId = 0;
+
+int32_t TEST_setTimeout(DOMTimer* timer, int32_t contextId, AsyncCallback callback, int32_t timeout) {
+  JSRuntime* rt = JS_GetRuntime(timer->ctx());
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
-  JSOSTimer* th = static_cast<JSOSTimer*>(js_mallocz(callbackContext->context->ctx(), sizeof(*th)));
+  JSOSTimer* th = static_cast<JSOSTimer*>(js_mallocz(context->ctx(), sizeof(*th)));
   th->timeout = get_time_ms() + timeout;
   th->func = callback;
-  th->callbackContext = callbackContext;
+  th->timer = timer;
   th->contextId = contextId;
-  list_add_tail(&th->link, &ts->os_timers);
+  int32_t id = timerId++;
 
-  return 0;
+  ts->os_timers[id] = th;
+
+  return id;
+}
+
+void TEST_clearTimeout(DOMTimer* timer) {
+  JSRuntime* rt = JS_GetRuntime(timer->ctx());
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
+  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
+  ts->os_timers.erase(timer->timerId());
 }
 
 static bool jsPool(ExecutionContext *context) {
@@ -66,21 +74,21 @@ static bool jsPool(ExecutionContext *context) {
   int64_t cur_time, delay;
   struct list_head* el;
 
-  if (list_empty(&ts->os_timers))
+  if (ts->os_timers.empty())
     return true; /* no more events */
 
-  if (!list_empty(&ts->os_timers)) {
+  if (!ts->os_timers.empty()) {
     cur_time = get_time_ms();
-    list_for_each(el, &ts->os_timers) {
-      JSOSTimer* th = list_entry(el, JSOSTimer, link);
+    for (auto &entry: ts->os_timers) {
+      JSOSTimer *th = entry.second;
       delay = th->timeout - cur_time;
       if (delay <= 0) {
         AsyncCallback func;
         /* the timer expired */
         func = th->func;
         th->func = nullptr;
-        unlink_timer(rt, th);
-        func(th->callbackContext, th->contextId, nullptr);
+        unlink_timer(ts, th);
+        func(th->timer, th->contextId, nullptr);
         return false;
       }
     }
