@@ -7,7 +7,8 @@
 
 import 'package:quiver/collection.dart';
 
-final _functionRegExp = RegExp(r'^[a-zA-Z_]+\(.+\)$');
+// DotAll means accept line terminators like `\n`.
+final _functionRegExp = RegExp(r'^[a-zA-Z-_]+\(.+\)$', dotAll: true);
 final _functionStart = '(';
 final _functionEnd = ')';
 final _functionNotationUrl = 'url';
