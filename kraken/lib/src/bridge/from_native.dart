@@ -174,12 +174,22 @@ int _setTimeout(Pointer<Void> callbackContext, int contextId,
 
   return controller.module.setTimeout(timeout, () {
     DartAsyncCallback func = callback.asFunction();
-    try {
-      func(callbackContext, contextId, nullptr);
-    } catch (e, stack) {
-      Pointer<Utf8> nativeErrorMessage = ('Error: $e\n$stack').toNativeUtf8();
-      func(callbackContext, contextId, nativeErrorMessage);
-      malloc.free(nativeErrorMessage);
+
+    void _runCallback() {
+      try {
+        func(callbackContext, contextId, nullptr);
+      } catch (e, stack) {
+        Pointer<Utf8> nativeErrorMessage = ('Error: $e\n$stack').toNativeUtf8();
+        func(callbackContext, contextId, nativeErrorMessage);
+        malloc.free(nativeErrorMessage);
+      }
+    }
+
+    // Pause if kraken page paused.
+    if (controller.paused) {
+      controller.pushPendingCallbacks(_runCallback);
+    } else {
+      _runCallback();
     }
   });
 }
@@ -195,13 +205,22 @@ int _setInterval(Pointer<Void> callbackContext, int contextId,
     Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
   return controller.module.setInterval(timeout, () {
-    DartAsyncCallback func = callback.asFunction();
-    try {
-      func(callbackContext, contextId, nullptr);
-    } catch (e, stack) {
-      Pointer<Utf8> nativeErrorMessage = ('Dart Error: $e\n$stack').toNativeUtf8();
-      func(callbackContext, contextId, nativeErrorMessage);
-      malloc.free(nativeErrorMessage);
+    void _runCallbacks() {
+      DartAsyncCallback func = callback.asFunction();
+      try {
+        func(callbackContext, contextId, nullptr);
+      } catch (e, stack) {
+        Pointer<Utf8> nativeErrorMessage = ('Dart Error: $e\n$stack').toNativeUtf8();
+        func(callbackContext, contextId, nativeErrorMessage);
+        malloc.free(nativeErrorMessage);
+      }
+    }
+
+    // Pause if kraken page paused.
+    if (controller.paused) {
+      controller.pushPendingCallbacks(_runCallbacks);
+    } else {
+      _runCallbacks();
     }
   });
 }
@@ -228,14 +247,24 @@ int _requestAnimationFrame(Pointer<Void> callbackContext, int contextId,
     Pointer<NativeFunction<NativeRAFAsyncCallback>> callback) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
   return controller.module.requestAnimationFrame((double highResTimeStamp) {
-    DartRAFAsyncCallback func = callback.asFunction();
-    try {
-      func(callbackContext, contextId, highResTimeStamp, nullptr);
-    } catch (e, stack) {
-      Pointer<Utf8> nativeErrorMessage = ('Error: $e\n$stack').toNativeUtf8();
-      func(callbackContext, contextId, highResTimeStamp, nativeErrorMessage);
-      malloc.free(nativeErrorMessage);
+    void _runCallback() {
+      DartRAFAsyncCallback func = callback.asFunction();
+      try {
+        func(callbackContext, contextId, highResTimeStamp, nullptr);
+      } catch (e, stack) {
+        Pointer<Utf8> nativeErrorMessage = ('Error: $e\n$stack').toNativeUtf8();
+        func(callbackContext, contextId, highResTimeStamp, nativeErrorMessage);
+        malloc.free(nativeErrorMessage);
+      }
     }
+
+    // Pause if kraken page paused.
+    if (controller.paused) {
+      controller.pushPendingCallbacks(_runCallback);
+    } else {
+      _runCallback();
+    }
+
   });
 }
 

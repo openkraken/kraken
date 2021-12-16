@@ -173,6 +173,11 @@ class Kraken extends StatefulWidget {
   // A method channel for receiving messaged from JavaScript code and sending message to JavaScript.
   final KrakenMethodChannel? javaScriptChannel;
 
+  // Register the RouteObserver to observer page navigation.
+  // This is useful if you wants to pause kraken timers and callbacks when kraken widget are hidden by page route.
+  // https://api.flutter.dev/flutter/widgets/RouteObserver-class.html
+  final RouteObserver<ModalRoute<void>>? routeObserver;
+
   final LoadErrorHandler? onLoadError;
 
   final LoadHandler? onLoad;
@@ -294,6 +299,7 @@ class Kraken extends StatefulWidget {
     // Kraken's http client interceptor.
     this.httpClientInterceptor,
     this.uriParser,
+    this.routeObserver,
     // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
     // Maybe got unexpected error when change to other values, use this at your own risk!
     // We will fixed this on next version released. (v0.6.0)
@@ -321,7 +327,7 @@ class Kraken extends StatefulWidget {
   _KrakenState createState() => _KrakenState();
 
 }
-class _KrakenState extends State<Kraken> {
+class _KrakenState extends State<Kraken> with RouteAware {
   Map<Type, Action<Intent>>? _actionMap;
 
   final FocusNode _focusNode = FocusNode();
@@ -396,6 +402,37 @@ class _KrakenState extends State<Kraken> {
   void _requestFocus() {
     _focusNode.requestFocus();
   }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.routeObserver != null) {
+      widget.routeObserver!.subscribe(this, ModalRoute.of(context)!);
+    }
+  }
+
+  // Resume call timer and callbacks when kraken widget change to visible.
+  @override
+  void didPopNext() {
+    assert(widget.controller != null);
+    widget.controller!.resume();
+  }
+
+  // Pause all timer and callbacks when kraken widget has been invisible. 
+  @override
+  void didPushNext() {
+    assert(widget.controller != null);
+    widget.controller!.pause();
+  }
+
+  @override
+  void dispose() {
+    if (widget.routeObserver != null) {
+      widget.routeObserver!.unsubscribe(this);
+    }
+    super.dispose();
+  }
+
 
   // Get the target platform.
   TargetPlatform _getTargetPlatform() {
@@ -874,7 +911,7 @@ class _KrakenState extends State<Kraken> {
 }
 
 class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
-  /// Creates a widget that visually hides its child.
+  // Creates a widget that visually hides its child.
   const _KrakenRenderObjectWidget(
     Kraken widget,
     WidgetDelegate widgetDelegate,

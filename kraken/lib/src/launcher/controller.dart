@@ -13,7 +13,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart' show RouteInformation, WidgetsBinding, WidgetsBindingObserver;
+import 'package:flutter/widgets.dart'
+    show RouteInformation, WidgetsBinding, WidgetsBindingObserver;
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
@@ -32,6 +33,7 @@ const int DOCUMENT_ID = -2;
 typedef LoadHandler = void Function(KrakenController controller);
 typedef LoadErrorHandler = void Function(FlutterError error, StackTrace stack);
 typedef JSErrorHandler = void Function(String message);
+typedef PendingCallback = void Function();
 
 typedef TraverseElementCallback = void Function(Element element);
 
@@ -62,8 +64,8 @@ abstract class DevToolsService {
 }
 
 // An kraken View Controller designed for multiple kraken view control.
-class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObserver {
-
+class KrakenViewController
+    implements WidgetsBindingObserver, ElementsBindingObserver {
   static Map<int, Pointer<NativeEventTarget>> documentNativePtrMap = {};
   static Map<int, Pointer<NativeEventTarget>> windowNativePtrMap = {};
 
@@ -125,11 +127,10 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     }
 
     viewport = RenderViewportBox(
-      background: background,
-      viewportSize: Size(viewportWidth, viewportHeight),
-      gestureListener: gestureListener,
-      controller: rootController
-    );
+        background: background,
+        viewportSize: Size(viewportWidth, viewportHeight),
+        gestureListener: gestureListener,
+        controller: rootController);
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_VIEWPORT_END);
@@ -149,8 +150,10 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     );
     _setEventTarget(DOCUMENT_ID, document);
 
-    window = Window(EventTargetContext(_contextId, windowNativePtrMap[_contextId]!), document);
-    _setEventTarget(WINDOW_ID ,window);
+    window = Window(
+        EventTargetContext(_contextId, windowNativePtrMap[_contextId]!),
+        document);
+    _setEventTarget(WINDOW_ID, window);
 
     // Listeners need to be registered to window in order to dispatch events on demand.
     if (gestureListener != null) {
@@ -280,7 +283,9 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
         completer.completeError(Exception(msg));
         return completer.future;
       }
-      var node = eventTargetId == null ? document.documentElement : _getEventTargetById<EventTarget>(eventTargetId);
+      var node = eventTargetId == null
+          ? document.documentElement
+          : _getEventTargetById<EventTarget>(eventTargetId);
       if (node is Element) {
         if (!node.isRendererAttached) {
           String msg = 'toImage: the element is not attached to document tree.';
@@ -291,7 +296,8 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
         node.toBlob(devicePixelRatio: devicePixelRatio).then((Uint8List bytes) {
           completer.complete(bytes);
         }).catchError((e, stack) {
-          String msg = 'toBlob: failed to export image data from element id: $eventTargetId. error: $e}.\n$stack';
+          String msg =
+              'toBlob: failed to export image data from element id: $eventTargetId. error: $e}.\n$stack';
           completer.completeError(Exception(msg));
         });
       } else {
@@ -304,54 +310,71 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     return completer.future;
   }
 
-  void createElement(int targetId, Pointer<NativeEventTarget> nativePtr, String tagName) {
+  void createElement(
+      int targetId, Pointer<NativeEventTarget> nativePtr, String tagName) {
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_CREATE_ELEMENT_START, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_CREATE_ELEMENT_START, uniqueId: targetId);
     }
-    assert(!_existsTarget(targetId), 'ERROR: Can not create element with same id "$targetId"');
-    Element element = document.createElement(tagName.toUpperCase(), EventTargetContext(_contextId, nativePtr));
+    assert(!_existsTarget(targetId),
+        'ERROR: Can not create element with same id "$targetId"');
+    Element element = document.createElement(
+        tagName.toUpperCase(), EventTargetContext(_contextId, nativePtr));
     _setEventTarget(targetId, element);
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_CREATE_ELEMENT_END, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_CREATE_ELEMENT_END, uniqueId: targetId);
     }
   }
 
-  void createTextNode(int targetId, Pointer<NativeEventTarget> nativePtr, String data) {
+  void createTextNode(
+      int targetId, Pointer<NativeEventTarget> nativePtr, String data) {
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_CREATE_TEXT_NODE_START, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_CREATE_TEXT_NODE_START, uniqueId: targetId);
     }
-    TextNode textNode = document.createTextNode(data, EventTargetContext(_contextId, nativePtr));
+    TextNode textNode = document.createTextNode(
+        data, EventTargetContext(_contextId, nativePtr));
     _setEventTarget(targetId, textNode);
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_CREATE_TEXT_NODE_END, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_CREATE_TEXT_NODE_END, uniqueId: targetId);
     }
   }
 
   void createComment(int targetId, Pointer<NativeEventTarget> nativePtr) {
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_CREATE_COMMENT_START, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_CREATE_COMMENT_START, uniqueId: targetId);
     }
-    Comment comment = document.createComment(EventTargetContext(_contextId, nativePtr));
+    Comment comment =
+        document.createComment(EventTargetContext(_contextId, nativePtr));
     _setEventTarget(targetId, comment);
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_CREATE_COMMENT_END, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_CREATE_COMMENT_END, uniqueId: targetId);
     }
   }
 
-  void createDocumentFragment(int targetId, Pointer<NativeEventTarget> nativePtr) {
+  void createDocumentFragment(
+      int targetId, Pointer<NativeEventTarget> nativePtr) {
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_CREATE_DOCUMENT_FRAGMENT_START, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_CREATE_DOCUMENT_FRAGMENT_START, uniqueId: targetId);
     }
-    DocumentFragment fragment = document.createDocumentFragment(EventTargetContext(_contextId, nativePtr));
+    DocumentFragment fragment = document
+        .createDocumentFragment(EventTargetContext(_contextId, nativePtr));
     _setEventTarget(targetId, fragment);
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_CREATE_DOCUMENT_FRAGMENT_END, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_CREATE_DOCUMENT_FRAGMENT_END, uniqueId: targetId);
     }
   }
 
   void addEvent(int targetId, String eventType) {
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_ADD_EVENT_START, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_ADD_EVENT_START, uniqueId: targetId);
     }
     if (!_existsTarget(targetId)) return;
     EventTarget target = _getEventTargetById<EventTarget>(targetId)!;
@@ -371,7 +394,8 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
 
   void removeEvent(int targetId, String eventType) {
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_REMOVE_EVENT_START, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_REMOVE_EVENT_START, uniqueId: targetId);
     }
     assert(_existsTarget(targetId), 'targetId: $targetId event: $eventType');
 
@@ -379,7 +403,8 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
 
     target.removeEvent(eventType);
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_REMOVE_EVENT_END, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_REMOVE_EVENT_END, uniqueId: targetId);
     }
   }
 
@@ -403,7 +428,8 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
 
   void removeNode(int targetId) {
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_REMOVE_NODE_START, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_REMOVE_NODE_START, uniqueId: targetId);
     }
 
     assert(_existsTarget(targetId), 'targetId: $targetId');
@@ -414,7 +440,8 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     _debugDOMTreeChanged();
 
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_REMOVE_NODE_END, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_REMOVE_NODE_END, uniqueId: targetId);
     }
   }
 
@@ -427,11 +454,14 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
   /// <!-- afterend -->
   void insertAdjacentNode(int targetId, String position, int newTargetId) {
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_INSERT_ADJACENT_NODE_START, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_INSERT_ADJACENT_NODE_START, uniqueId: targetId);
     }
 
-    assert(_existsTarget(targetId), 'targetId: $targetId position: $position newTargetId: $newTargetId');
-    assert(_existsTarget(newTargetId), 'newTargetId: $newTargetId position: $position');
+    assert(_existsTarget(targetId),
+        'targetId: $targetId position: $position newTargetId: $newTargetId');
+    assert(_existsTarget(newTargetId),
+        'newTargetId: $newTargetId position: $position');
 
     Node target = _getEventTargetById<Node>(targetId)!;
     Node newNode = _getEventTargetById<Node>(newTargetId)!;
@@ -453,7 +483,8 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
         } else {
           targetParentNode.insertBefore(
             newNode,
-            targetParentNode.childNodes[targetParentNode.childNodes.indexOf(target) + 1],
+            targetParentNode
+                .childNodes[targetParentNode.childNodes.indexOf(target) + 1],
           );
         }
         break;
@@ -462,16 +493,19 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     _debugDOMTreeChanged();
 
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_INSERT_ADJACENT_NODE_END, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_INSERT_ADJACENT_NODE_END, uniqueId: targetId);
     }
   }
 
   void setProperty(int targetId, String key, dynamic value) {
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_SET_PROPERTIES_START, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_SET_PROPERTIES_START, uniqueId: targetId);
     }
 
-    assert(_existsTarget(targetId), 'targetId: $targetId key: $key value: $value');
+    assert(
+        _existsTarget(targetId), 'targetId: $targetId key: $key value: $value');
     Node target = _getEventTargetById<Node>(targetId)!;
 
     if (target is Element) {
@@ -480,11 +514,13 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     } else if (target is TextNode && key == 'data' || key == 'nodeValue') {
       (target as TextNode).data = value;
     } else {
-      debugPrint('Only element has properties, try setting $key to Node(#$targetId).');
+      debugPrint(
+          'Only element has properties, try setting $key to Node(#$targetId).');
     }
 
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_SET_PROPERTIES_END, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_SET_PROPERTIES_END, uniqueId: targetId);
     }
   }
 
@@ -504,7 +540,8 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
 
   void removeProperty(int targetId, String key) {
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_SET_PROPERTIES_START, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_SET_PROPERTIES_START, uniqueId: targetId);
     }
     assert(_existsTarget(targetId), 'targetId: $targetId key: $key');
     Node target = _getEventTargetById<Node>(targetId)!;
@@ -514,16 +551,19 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     } else if (target is TextNode && key == 'data' || key == 'nodeValue') {
       (target as TextNode).data = '';
     } else {
-      debugPrint('Only element has properties, try removing $key from Node(#$targetId).');
+      debugPrint(
+          'Only element has properties, try removing $key from Node(#$targetId).');
     }
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_SET_PROPERTIES_END, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_SET_PROPERTIES_END, uniqueId: targetId);
     }
   }
 
   void setInlineStyle(int targetId, String key, String value) {
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_SET_STYLE_START, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_SET_STYLE_START, uniqueId: targetId);
     }
     assert(_existsTarget(targetId), 'id: $targetId key: $key value: $value');
     Node? target = _getEventTargetById<Node>(targetId);
@@ -532,7 +572,8 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     if (target is Element) {
       target.setInlineStyle(key, value);
     } else {
-      debugPrint('Only element has style, try setting style.$key from Node(#$targetId).');
+      debugPrint(
+          'Only element has style, try setting style.$key from Node(#$targetId).');
     }
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_SET_STYLE_END, uniqueId: targetId);
@@ -547,7 +588,8 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     if (target is Element) {
       target.style.flushPendingProperties();
     } else {
-      debugPrint('Only element has style, try flushPendingStyleProperties from Node(#$targetId).');
+      debugPrint(
+          'Only element has style, try flushPendingStyleProperties from Node(#$targetId).');
     }
   }
 
@@ -560,13 +602,16 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
     }
   }
 
-  Future<void> handleNavigationAction(String? sourceUrl, String targetUrl, KrakenNavigationType navigationType) async {
-    KrakenNavigationAction action = KrakenNavigationAction(sourceUrl, targetUrl, navigationType);
+  Future<void> handleNavigationAction(String? sourceUrl, String targetUrl,
+      KrakenNavigationType navigationType) async {
+    KrakenNavigationAction action =
+        KrakenNavigationAction(sourceUrl, targetUrl, navigationType);
 
     KrakenNavigationDelegate _delegate = navigationDelegate!;
 
     try {
-      KrakenNavigationActionPolicy policy = await _delegate.dispatchDecisionHandler(action);
+      KrakenNavigationActionPolicy policy =
+          await _delegate.dispatchDecisionHandler(action);
       if (policy == KrakenNavigationActionPolicy.cancel) return;
 
       switch (action.navigationType) {
@@ -621,7 +666,8 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
 
   @override
   void didChangeMetrics() {
-    double bottomInset = ui.window.viewInsets.bottom / ui.window.devicePixelRatio;
+    double bottomInset =
+        ui.window.viewInsets.bottom / ui.window.devicePixelRatio;
     if (_prevViewInsets.bottom > ui.window.viewInsets.bottom) {
       // Hide keyboard
       viewport.bottomInset = bottomInset;
@@ -633,7 +679,8 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
         if (renderer != null && renderer.hasSize) {
           Offset focusOffset = renderer.localToGlobal(Offset.zero);
           // FOCUS_VIEWINSET_BOTTOM_OVERALL to meet border case.
-          if (focusOffset.dy > viewportHeight - bottomInset - FOCUS_VIEWINSET_BOTTOM_OVERALL) {
+          if (focusOffset.dy >
+              viewportHeight - bottomInset - FOCUS_VIEWINSET_BOTTOM_OVERALL) {
             shouldScrollByToCenter = true;
           }
         }
@@ -677,7 +724,8 @@ class KrakenViewController implements WidgetsBindingObserver, ElementsBindingObs
   }
 
   @override
-  Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
+  Future<bool> didPushRouteInformation(
+      RouteInformation routeInformation) async {
     // TODO: implement didPushRouteInformation
     return false;
   }
@@ -693,14 +741,15 @@ class KrakenModuleController with TimerMixin, ScheduleFrameMixin {
   }
 
   void dispose() {
-    clearTimer();
-    clearAnimationFrame();
+    disposeTimer();
+    disposeScheduleFrame();
     _moduleManager.dispose();
   }
 }
 
 class KrakenController {
-  static final SplayTreeMap<int, KrakenController?> _controllerMap = SplayTreeMap();
+  static final SplayTreeMap<int, KrakenController?> _controllerMap =
+      SplayTreeMap();
   static final Map<String, int> _nameIdMap = {};
 
   UriParser? uriParser;
@@ -756,25 +805,22 @@ class KrakenController {
 
   final GestureListener? _gestureListener;
 
-  KrakenController(
-    String? name,
-    double viewportWidth,
-    double viewportHeight, {
-    bool showPerformanceOverlay = false,
-    enableDebug = false,
-    Color? background,
-    GestureListener? gestureListener,
-    KrakenNavigationDelegate? navigationDelegate,
-    KrakenMethodChannel? methodChannel,
-    this.widgetDelegate,
-    this.bundle,
-    this.onLoad,
-    this.onLoadError,
-    this.onJSError,
-    this.httpClientInterceptor,
-    this.devToolsService,
-    this.uriParser
-  })  : _name = name,
+  KrakenController(String? name, double viewportWidth, double viewportHeight,
+      {bool showPerformanceOverlay = false,
+      enableDebug = false,
+      Color? background,
+      GestureListener? gestureListener,
+      KrakenNavigationDelegate? navigationDelegate,
+      KrakenMethodChannel? methodChannel,
+      this.widgetDelegate,
+      this.bundle,
+      this.onLoad,
+      this.onLoadError,
+      this.onJSError,
+      this.httpClientInterceptor,
+      this.devToolsService,
+      this.uriParser})
+      : _name = name,
         _gestureListener = gestureListener {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_PROPERTY_INIT);
@@ -784,13 +830,15 @@ class KrakenController {
     _methodChannel = methodChannel;
     KrakenMethodChannel.setJSMethodCallCallback(this);
 
-    _view = KrakenViewController(viewportWidth, viewportHeight,
-        background: background,
-        enableDebug: enableDebug,
-        rootController: this,
-        navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate(),
-        gestureListener: _gestureListener,
-        widgetDelegate: widgetDelegate,
+    _view = KrakenViewController(
+      viewportWidth,
+      viewportHeight,
+      background: background,
+      enableDebug: enableDebug,
+      rootController: this,
+      navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate(),
+      gestureListener: _gestureListener,
+      widgetDelegate: widgetDelegate,
     );
 
     if (kProfileMode) {
@@ -802,14 +850,16 @@ class KrakenController {
     _module = KrakenModuleController(this, contextId);
 
     if (bundle != null) {
-      HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
+      HistoryModule historyModule =
+          module.moduleManager.getModule<HistoryModule>('History')!;
       historyModule.bundle = bundle!;
     }
 
     assert(!_controllerMap.containsKey(contextId),
         'found exist contextId of KrakenController, contextId: $contextId');
     _controllerMap[contextId] = this;
-    assert(!_nameIdMap.containsKey(name), 'found exist name of KrakenController, name: $name');
+    assert(!_nameIdMap.containsKey(name),
+        'found exist name of KrakenController, name: $name');
     if (name != null) {
       _nameIdMap[name] = contextId;
     }
@@ -891,7 +941,8 @@ class KrakenController {
   }
 
   String get href {
-    HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
+    HistoryModule historyModule =
+        module.moduleManager.getModule<HistoryModule>('History')!;
     return historyModule.href;
   }
 
@@ -900,12 +951,13 @@ class KrakenController {
   }
 
   _addHistory(KrakenBundle bundle) {
-    HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
+    HistoryModule historyModule =
+        module.moduleManager.getModule<HistoryModule>('History')!;
     historyModule.bundle = bundle;
   }
 
   // reload current kraken view.
-  Future<void> reload({ String? url }) async {
+  Future<void> reload({String? url}) async {
     assert(!_view._disposed, 'Kraken have already disposed');
 
     if (devToolsService != null) {
@@ -919,6 +971,35 @@ class KrakenController {
     if (devToolsService != null) {
       devToolsService!.didReload();
     }
+  }
+
+  bool _paused = false;
+  bool get paused => _paused;
+
+  final List<PendingCallback> _pendingCallbacks = [];
+
+  void pushPendingCallbacks(PendingCallback callback) {
+    _pendingCallbacks.add(callback);
+  }
+
+  void flushPendingCallbacks() {
+    for (int i = 0; i < _pendingCallbacks.length; i++) {
+      _pendingCallbacks[i]();
+    }
+    _pendingCallbacks.clear();
+  }
+
+  // Pause all timers and callbacks if kraken page are invisible.
+  void pause() {
+    _paused = true;
+    module.pauseInterval();
+  }
+
+  // Resume all timers and callbacks if kraken page now visible.
+  void resume() {
+    _paused = false;
+    flushPendingCallbacks();
+    module.resumeInterval();
   }
 
   void dispose() {
@@ -956,9 +1037,7 @@ class KrakenController {
   String get origin => Uri.parse(href).origin;
 
   // preload javascript source and cache it.
-  Future<void> loadBundle({
-    KrakenBundle? bundle
-  }) async {
+  Future<void> loadBundle({KrakenBundle? bundle}) async {
     assert(!_view._disposed, 'Kraken have already disposed');
 
     if (kProfileMode) {
@@ -967,7 +1046,9 @@ class KrakenController {
 
     // Load bundle need push curret href to history.
     if (bundle != null) {
-      String? url = bundle.uri.toString().isEmpty ? (getBundleURLFromEnv() ?? getBundlePathFromEnv()) : href;
+      String? url = bundle.uri.toString().isEmpty
+          ? (getBundleURLFromEnv() ?? getBundlePathFromEnv())
+          : href;
       if (url == null && methodChannel is KrakenNativeChannel) {
         url = await (methodChannel as KrakenNativeChannel).getUrl();
       }
@@ -1014,7 +1095,6 @@ class KrakenController {
           onLoad!(this);
         });
       }
-
     }
   }
 }

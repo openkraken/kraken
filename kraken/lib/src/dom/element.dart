@@ -443,6 +443,7 @@ class Element extends Node
   }
 
   void _handleScroll(double scrollOffset, AxisDirection axisDirection) {
+    if (renderBoxModel == null) return;
     _applyStickyChildrenOffset();
     _applyFixedChildrenOffset(scrollOffset, axisDirection);
 
