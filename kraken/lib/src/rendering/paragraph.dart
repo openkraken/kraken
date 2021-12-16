@@ -559,7 +559,7 @@ class KrakenRenderParagraph extends RenderBox
     }
   }
 
-  /// Get text of each line in the paragraph
+  // Get text of each line in the paragraph.
   List<String> _getLineTexts(TextPainter textPainter, TextSpan textSpan) {
     TextSelection selection =
         TextSelection(baseOffset: 0, extentOffset: textSpan.text!.length);
@@ -596,11 +596,9 @@ class KrakenRenderParagraph extends RenderBox
     return lineTexts;
   }
 
-  // Create and layout line text painters according to text lines in the paragraph
-  void _layoutMultiLineTextWithConstraints(BoxConstraints constraints) {
-    // Get text of each line
-    List<String> lineTexts =
-        _getLineTexts(_textPainter, _textPainter.text as TextSpan);
+  // Compute line metrics and line offset according to line-height spec.
+  // https://www.w3.org/TR/css-inline-3/#inline-height
+  void _computeLineMetrics() {
     _lineMetrics = _textPainter.computeLineMetrics();
     // Leading of each line
     List<double> _lineLeading = [];
@@ -611,17 +609,43 @@ class KrakenRenderParagraph extends RenderBox
       // Do not add line height in the case of textOverflow ellipsis
       // cause height of line metric equals to 0.
       double leading = lineHeight != null && lineMetric.height != 0 ?
-        lineHeight! - lineMetric.height : 0;
+      lineHeight! - lineMetric.height : 0;
       _lineLeading.add(leading);
       // Offset of previous line
       double preLineBottom = i > 0
-          ? _lineOffset[i - 1] +
-              _lineMetrics[i - 1].height +
-              _lineLeading[i - 1] / 2
-          : 0;
+        ? _lineOffset[i - 1] +
+        _lineMetrics[i - 1].height +
+        _lineLeading[i - 1] / 2
+        : 0;
       double offset = preLineBottom + leading / 2;
       _lineOffset.add(offset);
     }
+  }
+
+  // Compute paragraph height according to line metrics.
+  double _getParagraphHeight() {
+    double paragraphHeight = 0;
+    // Height of paragraph
+    for (int i = 0; i < _lineMetrics.length; i++) {
+      ui.LineMetrics lineMetric = _lineMetrics[i];
+      // Do not add line height in the case of textOverflow ellipsis
+      // cause height of line metric equals to 0.
+      double height = lineHeight != null && lineMetric.height != 0 ?
+      lineHeight! : lineMetric.height;
+      paragraphHeight += height;
+    }
+
+    return paragraphHeight;
+  }
+
+  // Create and layout text painter of each line in the paragraph for later use
+  // in the paint stage to adjust the vertical space between text painters according to
+  // W3C line-height spec.
+  void _relayoutMultiLineText() {
+    final BoxConstraints constraints = this.constraints;
+    // Get text of each line
+    List<String> lineTexts = _getLineTexts(_textPainter, _textPainter.text as TextSpan);
+
     _lineTextPainters = [];
     // Create text painter of each line and layout
     for (int i = 0; i < lineTexts.length; i++) {
@@ -657,19 +681,14 @@ class KrakenRenderParagraph extends RenderBox
     _layoutChildren(constraints);
     _layoutTextWithConstraints(constraints);
     _setParentData();
-    _layoutMultiLineTextWithConstraints(constraints);
+    _computeLineMetrics();
 
-    double paragraphHeight = 0;
-    if (text.text != '') {
-      // Height of paragraph
-      for (int i = 0; i < _lineMetrics.length; i++) {
-        ui.LineMetrics lineMetric = _lineMetrics[i];
-        // Do not add line height in the case of textOverflow ellipsis
-        // cause height of line metric equals to 0.
-        double height = lineHeight != null && lineMetric.height != 0 ?
-          lineHeight! : lineMetric.height;
-        paragraphHeight += height;
-      }
+    // @FIXME: Layout twice will hurt performance, ideally this logic should be done
+    // in flutter text engine.
+    // Layout each line of the paragraph indivisually to
+    // place each line according to W3C line-height rule.
+    if (lineHeight != null) {
+      _relayoutMultiLineText();
     }
 
     // We grab _textPainter.size and _textPainter.didExceedMaxLines here because
@@ -680,7 +699,9 @@ class KrakenRenderParagraph extends RenderBox
     final Size textSize = _textPainter.size;
     final bool textDidExceedMaxLines = _textPainter.didExceedMaxLines;
 
-    Size paragraphSize = Size(_textPainter.size.width, paragraphHeight);
+    double paragraphHeight = _getParagraphHeight();
+    Size paragraphSize = Size(textSize.width, paragraphHeight);
+
     size = constraints.constrain(paragraphSize);
 
     final bool didOverflowHeight =
@@ -747,13 +768,6 @@ class KrakenRenderParagraph extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    // Paint line painters
-    for (int i = 0; i < _lineTextPainters.length; i++) {
-      TextPainter _lineTextPainter = _lineTextPainters[i];
-      Offset lineOffset = Offset(offset.dx, offset.dy + _lineOffset[i]);
-      _lineTextPainter.paint(context.canvas, lineOffset);
-    }
-
     assert(() {
       if (debugRepaintTextRainbowEnabled) {
         final Paint paint = Paint()..color = debugCurrentRepaintColor.toColor();
@@ -772,6 +786,17 @@ class KrakenRenderParagraph extends RenderBox
         context.canvas.save();
       }
       context.canvas.clipRect(bounds);
+    }
+
+    if (lineHeight != null) {
+      // Adjust text paint offset of each line according to line-height.
+      for (int i = 0; i < _lineTextPainters.length; i++) {
+        TextPainter _lineTextPainter = _lineTextPainters[i];
+        Offset lineOffset = Offset(offset.dx, offset.dy + _lineOffset[i]);
+        _lineTextPainter.paint(context.canvas, lineOffset);
+      }
+    } else {
+      _textPainter.paint(context.canvas, offset);
     }
 
     RenderBox? child = firstChild;
