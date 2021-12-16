@@ -231,8 +231,9 @@ typedef DartProfileModeEnabled = int Function();
 final DartProfileModeEnabled _profileModeEnabled =
 nativeDynamicLibrary.lookup<NativeFunction<NativeProfileModeEnabled>>('profileModeEnabled').asFunction();
 
+const _CODE_ENABLED = 1;
 bool profileModeEnabled() {
-  return _profileModeEnabled() == 1 ? true : false;
+  return _profileModeEnabled() == _CODE_ENABLED;
 }
 
 // Regisdster reloadJsContext

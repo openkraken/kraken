@@ -568,8 +568,11 @@ class Element extends Node
   void attachTo(Node parent, {RenderBox? after}) {
     _applyStyle(style);
 
-    // @NOTE: Sliver should not create renderer here.
-    if (parentElement?.renderStyle.display != CSSDisplay.sliver) {
+    if (parentElement?.renderStyle.display == CSSDisplay.sliver) {
+      // Sliver should not create renderer here, but need to trigger
+      // render sliver list dynamical rebuild child by element tree.
+      parentElement?._renderLayoutBox?.markNeedsLayout();
+    } else {
       willAttachRenderer();
     }
 
@@ -629,15 +632,17 @@ class Element extends Node
     if (child is Element) {
       child.renderStyle.parent = renderStyle;
     }
+
+    RenderLayoutBox? renderLayoutBox = _renderLayoutBox;
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
-      if (!child.isRendererAttached && _renderLayoutBox != null) {
+      if (!child.isRendererAttached && renderLayoutBox != null) {
         RenderBox? after;
-        RenderLayoutBox? scrollingContentBox = _renderLayoutBox!.renderScrollingContent;
+        RenderLayoutBox? scrollingContentBox = renderLayoutBox.renderScrollingContent;
         if (scrollingContentBox != null) {
           after = scrollingContentBox.lastChild;
         } else {
-          after = _renderLayoutBox!.lastChild;
+          after = renderLayoutBox.lastChild;
         }
 
         child.attachTo(this, after: after);
