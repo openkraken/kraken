@@ -2,8 +2,10 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/rendering.dart';
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element#inline_text_semantics
 const String SPAN = 'SPAN';
@@ -26,11 +28,6 @@ const String Q = 'Q';
 const String KBD = 'KBD';
 const String DFN = 'DFN';
 const String BR = 'BR';
-
-// HACK: current use block layout make text force line break
-const Map<String, dynamic> _breakDefaultStyle = {
-  DISPLAY: BLOCK,
-};
 
 const Map<String, dynamic> _uDefaultStyle = {
   TEXT_DECORATION: UNDERLINE
@@ -68,12 +65,23 @@ const Map<String, dynamic> _defaultStyle = {
 
 // https://html.spec.whatwg.org/multipage/text-level-semantics.html#htmlbrelement
 class BRElement extends Element {
+  RenderLineBreak? _renderLineBreak;
+
   BRElement(EventTargetContext? context)
-      : super(
-        context,
-        defaultStyle: _breakDefaultStyle,
-        isIntrinsicBox: true,
-      );
+      : super(context, isIntrinsicBox: true);
+
+  @override
+  RenderBoxModel? get renderBoxModel => _renderLineBreak;
+
+  @override
+  void setRenderStyle(String property, String present) {
+    // Noop
+  }
+
+  @override
+  RenderBox createRenderer() {
+    return _renderLineBreak ??= RenderLineBreak(renderStyle);
+  }
 }
 
 class BringElement extends Element {

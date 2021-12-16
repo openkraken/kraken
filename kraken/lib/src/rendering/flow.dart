@@ -600,19 +600,18 @@ class RenderFlowLayout extends RenderLayoutBox {
           }
         }
       }
-
-      // white-space property not only specifies whether and how white space is collapsed
-      // but only specifies whether lines may wrap at unforced soft wrap opportunities
-      // https://www.w3.org/TR/css-text-3/#line-breaking
-      bool isChildBlockLevel = _isChildBlockLevel(child);
-      bool isPreChildBlockLevel = _isChildBlockLevel(preChild);
-      bool isLineLengthExceedContainer = whiteSpace != WhiteSpace.nowrap &&
-          (runMainAxisExtent + childMainAxisExtent > mainAxisLimit);
-
       if (runChildren.isNotEmpty &&
-          (isChildBlockLevel ||
-              isPreChildBlockLevel ||
-              isLineLengthExceedContainer)) {
+          // Current is block.
+          (_isChildBlockLevel(child) ||
+          // Previous is block.
+          _isChildBlockLevel(preChild) ||
+          // Line length is exceed container.
+          // The white-space property not only specifies whether and how white space is collapsed
+          // but only specifies whether lines may wrap at unforced soft wrap opportunities
+          // https://www.w3.org/TR/css-text-3/#line-breaking
+          (whiteSpace != WhiteSpace.nowrap && (runMainAxisExtent + childMainAxisExtent > mainAxisLimit)) ||
+          // Previous is linebreak.
+          preChild is RenderLineBreak)) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
         runMetrics.add(_RunMetrics(
@@ -671,7 +670,7 @@ class RenderFlowLayout extends RenderLayoutBox {
           extentBelowBaseline,
           maxSizeBelowBaseline,
         );
-        runCrossAxisExtent = maxSizeAboveBaseline + maxSizeBelowBaseline;
+        runCrossAxisExtent = math.max(runCrossAxisExtent, maxSizeAboveBaseline + maxSizeBelowBaseline);
       } else {
         runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
       }
@@ -1266,7 +1265,6 @@ class RenderFlowLayout extends RenderLayoutBox {
         childDisplay == CSSDisplay.inlineFlex;
     }
     return false;
-
   }
 
   RenderStyle? _getChildRenderStyle(RenderBox child) {
@@ -1282,8 +1280,8 @@ class RenderFlowLayout extends RenderLayoutBox {
   }
 
   bool _isChildBlockLevel(RenderBox? child) {
-    if (child != null && child is! RenderTextBox) {
-      RenderStyle? childRenderStyle = _getChildRenderStyle(child);
+    if (child is RenderBoxModel || child is RenderPositionPlaceholder) {
+      RenderStyle? childRenderStyle = _getChildRenderStyle(child!);
       if (childRenderStyle != null) {
         CSSDisplay? childDisplay = childRenderStyle.display;
         return childDisplay == CSSDisplay.block ||

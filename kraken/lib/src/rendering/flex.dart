@@ -1319,21 +1319,8 @@ class RenderFlexLayout extends RenderLayoutBox {
         final RenderLayoutParentData? childParentData =
             child.parentData as RenderLayoutParentData?;
 
-        AlignSelf alignSelf = _getAlignSelf(child);
-
-        // If size exists in align-items direction, stretch not works
-        bool isStretchSelfValid = false;
-        if (child is RenderBoxModel) {
-          isStretchSelfValid = _isHorizontalFlexDirection
-                ? child.renderStyle.height.isAuto
-                : child.renderStyle.width.isAuto;
-        }
-
-        // Whether child should be stretched
-        bool isStretchSelf = placeholderChild == null &&
-            isStretchSelfValid &&
-            (alignSelf != AlignSelf.auto ? alignSelf == AlignSelf.stretch
-                : renderStyle.effectiveAlignItems == AlignItems.stretch);
+        // Whether child needs to be stretched in the cross axis.
+        bool isStretchSelf = needToStretchChildCrossSize(child);
 
         // Whether child is positioned placeholder or positioned renderObject
         bool isChildPositioned = placeholderChild == null &&
@@ -2163,6 +2150,28 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       crossAxisOffset += runCrossAxisExtent + runBetweenSpace;
     }
+  }
+
+  // Whether need to stretch child in the cross axis according to alignment property and child cross length.
+  bool needToStretchChildCrossSize(RenderBox child) {
+    // Position placeholder and BR element has size of zero, so they can not be stretched.
+    if (child is RenderPositionPlaceholder || child is RenderLineBreak) return false;
+
+    AlignSelf alignSelf = _getAlignSelf(child);
+    bool isChildAlignmentStretch = alignSelf != AlignSelf.auto
+      ? alignSelf == AlignSelf.stretch
+      : renderStyle.effectiveAlignItems == AlignItems.stretch;
+
+    if (!isChildAlignmentStretch) return false;
+
+    // If child length is auto in cross axis, stretch does not work.
+    if (child is RenderBoxModel) {
+      bool isLengthAuto = _isHorizontalFlexDirection
+        ? child.renderStyle.height.isAuto
+        : child.renderStyle.width.isAuto;
+      return isLengthAuto;
+    }
+    return false;
   }
 
   // Whether margin auto of child is set in the main axis.
