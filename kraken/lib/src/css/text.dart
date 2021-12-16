@@ -168,26 +168,26 @@ mixin CSSTextMixin on RenderStyle {
   }
 
   // Current not update the dependent property relative to the font-size.
-  final Map<String, bool> _fontRealativeProperties = {};
-  final Map<String, bool> _rootFontRealativeProperties = {};
+  final Map<String, bool> _fontRelativeProperties = {};
+  final Map<String, bool> _rootFontRelativeProperties = {};
 
   @override
   void addFontRelativeProperty(String propertyName) {
-    _fontRealativeProperties[propertyName] = true;
+    _fontRelativeProperties[propertyName] = true;
   }
 
   void updateFontRelativeLength() {
-    if (_fontRealativeProperties.isEmpty) return;
+    if (_fontRelativeProperties.isEmpty) return;
     renderBoxModel?.markNeedsLayout();
   }
 
   @override
   void addRootFontRelativeProperty(String propertyName) {
-    _rootFontRealativeProperties[propertyName] = true;
+    _rootFontRelativeProperties[propertyName] = true;
   }
 
   void updateRootFontRelativeLength() {
-    if (_rootFontRealativeProperties.isEmpty) return;
+    if (_rootFontRelativeProperties.isEmpty) return;
     renderBoxModel?.markNeedsLayout();
   }
 

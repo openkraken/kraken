@@ -14,6 +14,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
+import 'package:kraken/css.dart';
 
 import 'manifest.dart';
 
@@ -23,6 +24,7 @@ const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
 const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 
 const String ASSETS_PROROCOL = 'assets://';
+final ContentType css = ContentType('text', 'css', charset: 'utf-8');
 
 String? getBundleURLFromEnv() {
   return Platform.environment[BUNDLE_URL];
@@ -76,15 +78,16 @@ abstract class KrakenBundle {
   ContentType contentType = ContentType.binary;
 
   @mustCallSuper
-  Future<void> resolve(int contextId) async {
-    if (kDebugMode) {
-      print('Kraken getting bundle for contextId: $contextId, src: $src');
-    }
-
+  Future<void> resolve(int? contextId) async {
     uri = Uri.parse(src);
-    KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
-    if (controller != null && !isAssetAbsolutePath(src)) {
-      uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri!);
+    if (contextId != null) {
+      if (kDebugMode) {
+        print('Getting bundle for contextId: $contextId, src: $src');
+      }
+      KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
+      if (controller != null && !isAssetAbsolutePath(src)) {
+        uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri!);
+      }
     }
 
     isResolved = true;
@@ -107,32 +110,37 @@ abstract class KrakenBundle {
   }
 
 
-  Future<void> eval(int contextId) async {
+  Future<void> eval(int? contextId) async {
     if (!isResolved) await resolve(contextId);
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_START);
     }
 
-    // For raw javascript code or bytecode from API directly.
-    if (content != null) {
-      evaluateScripts(contextId, content!, src, lineOffset);
-    } else if (bytecode != null) {
-      evaluateQuickjsByteCode(contextId, bytecode!);
-    }
+    if (contextId != null) {
+      // For raw javascript code or bytecode from API directly.
+      if (content != null) {
+        evaluateScripts(contextId, content!, src, lineOffset);
+      } else if (bytecode != null) {
+        evaluateQuickjsByteCode(contextId, bytecode!);
+      }
 
-    // For javascript code, HTML or bytecode from networks and hardware disk.
-    else if (contentType.mimeType == ContentType.html.mimeType || src.contains('.html')) {
-      String code = _resolveStringFromData(rawBundle);
-      // parse html.
-      parseHTML(contextId, code);
-    } else if (isByteCodeSupported(contentType.mimeType, src)) {
-      Uint8List buffer = rawBundle.buffer.asUint8List();
-      evaluateQuickjsByteCode(contextId, buffer);
-    } else {
-      String code = _resolveStringFromData(rawBundle);
-      // eval JavaScript.
-      evaluateScripts(contextId, code, src, lineOffset);
+      // For javascript code, HTML or bytecode from networks and hardware disk.
+      else if (contentType.mimeType == ContentType.html.mimeType || src.contains('.html')) {
+        String code = _resolveStringFromData(rawBundle);
+        // parse html.
+        parseHTML(contextId, code);
+      } else if (contentType.mimeType == css.mimeType || src.contains('.css')) {
+        KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
+        controller?.view.document.addStyleSheet(CSSStyleSheet(_resolveStringFromData(rawBundle)));
+      } else if (isByteCodeSupported(contentType.mimeType, src)) {
+        Uint8List buffer = rawBundle.buffer.asUint8List();
+        evaluateQuickjsByteCode(contextId, buffer);
+      } else {
+        String code = _resolveStringFromData(rawBundle);
+        // eval JavaScript.
+        evaluateScripts(contextId, code, src, lineOffset);
+      }
     }
 
     if (kProfileMode) {
@@ -153,7 +161,7 @@ class RawBundle extends KrakenBundle {
   }
 
   @override
-  Future<void> resolve(int contextId) async {
+  Future<void> resolve(int? contextId) async {
     super.resolve(contextId);
     isResolved = true;
   }
@@ -166,7 +174,7 @@ class NetworkBundle extends KrakenBundle {
   Map<String, String>? additionalHttpHeaders = {};
 
   @override
-  Future<void> resolve(int contextId) async {
+  Future<void> resolve(int? contextId) async {
     super.resolve(contextId);
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
     Uri baseUrl = Uri.parse(controller.href);
@@ -211,7 +219,7 @@ class NetworkAssetBundle extends AssetBundle {
     if (_additionalHttpHeaders != null) {
       _additionalHttpHeaders?.forEach(request.headers.set);
     }
-  
+
     if (contextId != null) {
       KrakenHttpOverrides.setContextHeader(request.headers, contextId!);
     }
@@ -249,7 +257,7 @@ class AssetsBundle extends KrakenBundle {
       : super(url);
 
   @override
-  Future<KrakenBundle> resolve(int contextId) async {
+  Future<KrakenBundle> resolve(int? contextId) async {
     super.resolve(contextId);
     // JSBundle get default bundle manifest.
     manifest = AppManifest();
