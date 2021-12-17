@@ -22,7 +22,7 @@ import 'package:kraken/foundation.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/src/widget/kraken.dart';
+import 'package:kraken/widget.dart';
 import 'package:kraken/src/dom/element_registry.dart' as element_registry;
 
 
