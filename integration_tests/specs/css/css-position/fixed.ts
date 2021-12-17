@@ -318,4 +318,41 @@ describe('Position fixed', () => {
 
     await snapshot();
   });
+
+  it('should work with parent zIndex of parent fixed element larger than zIndex of child fixed element in nested container', async () => {
+    let div;
+    div = createElement('div', {
+       style: {
+       }
+    }, [
+      createElement(
+        'div',
+        {
+            style: {
+            position: 'fixed',
+            width: '200px',
+            height: '200px',
+            background: 'yellow',
+            zIndex: 1000,
+            },
+        },
+        [
+            createElement('div', {
+            style: {
+                position: 'fixed',
+                width: '100px',
+                height: '100px',
+                display: 'flex',
+                'background-color': 'green',
+                zIndex: 100,
+            },
+            }),
+        ]
+      )
+    ]);
+
+    document.body.appendChild(div);
+
+    await snapshot();
+  });
 });

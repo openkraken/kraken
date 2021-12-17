@@ -155,7 +155,10 @@ class RenderTextBox extends RenderBox
 
       // @FIXME: Minimum size of text equals to single word in browser
       // which cannot be calculated in Flutter currently.
-      autoMinWidth = size.width;
+
+      // Set minimum width to 0 to allow flex item containing text to shrink into
+      // flex container which is similar to the effect of word-break: break-all in the browser.
+      autoMinWidth = 0;
       autoMinHeight = size.height;
     } else {
       performResize();

@@ -634,7 +634,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   @override
   void performLayout() {
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       childLayoutDuration = 0;
       PerformanceTiming.instance()
           .mark(PERF_FLEX_LAYOUT_START, uniqueId: hashCode);
@@ -647,7 +647,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       needsRelayout = false;
     }
 
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       DateTime flexLayoutEndTime = DateTime.now();
       int amendEndTime =
           flexLayoutEndTime.microsecondsSinceEpoch - childLayoutDuration;
@@ -943,7 +943,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       if (isChildNeedsLayout) {
         late DateTime childLayoutStart;
-        if (kProfileMode) {
+        if (kProfileMode && PerformanceTiming.enabled()) {
           childLayoutStart = DateTime.now();
         }
         childrenOldConstraints[child.hashCode] = childConstraints;
@@ -963,7 +963,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           );
         }
         child.layout(childConstraints, parentUsesSize: true);
-        if (kProfileMode) {
+        if (kProfileMode && PerformanceTiming.enabled()) {
           DateTime childLayoutEnd = DateTime.now();
           childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch -
               childLayoutStart.microsecondsSinceEpoch);
@@ -1319,21 +1319,8 @@ class RenderFlexLayout extends RenderLayoutBox {
         final RenderLayoutParentData? childParentData =
             child.parentData as RenderLayoutParentData?;
 
-        AlignSelf alignSelf = _getAlignSelf(child);
-
-        // If size exists in align-items direction, stretch not works
-        bool isStretchSelfValid = false;
-        if (child is RenderBoxModel) {
-          isStretchSelfValid = _isHorizontalFlexDirection
-                ? child.renderStyle.height.isAuto
-                : child.renderStyle.width.isAuto;
-        }
-
-        // Whether child should be stretched
-        bool isStretchSelf = placeholderChild == null &&
-            isStretchSelfValid &&
-            (alignSelf != AlignSelf.auto ? alignSelf == AlignSelf.stretch
-                : renderStyle.effectiveAlignItems == AlignItems.stretch);
+        // Whether child needs to be stretched in the cross axis.
+        bool isStretchSelf = needToStretchChildCrossSize(child);
 
         // Whether child is positioned placeholder or positioned renderObject
         bool isChildPositioned = placeholderChild == null &&
@@ -1415,7 +1402,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
 
         late DateTime childLayoutStart;
-        if (kProfileMode) {
+        if (kProfileMode && PerformanceTiming.enabled()) {
           childLayoutStart = DateTime.now();
         }
 
@@ -1431,7 +1418,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
         // @FIXME: need to update runMetrics cause child relayout may affect container size
 
-        if (kProfileMode) {
+        if (kProfileMode && PerformanceTiming.enabled()) {
           DateTime childLayoutEnd = DateTime.now();
           childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch -
               childLayoutStart.microsecondsSinceEpoch);
@@ -2165,6 +2152,28 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
   }
 
+  // Whether need to stretch child in the cross axis according to alignment property and child cross length.
+  bool needToStretchChildCrossSize(RenderBox child) {
+    // Position placeholder and BR element has size of zero, so they can not be stretched.
+    if (child is RenderPositionPlaceholder || child is RenderLineBreak) return false;
+
+    AlignSelf alignSelf = _getAlignSelf(child);
+    bool isChildAlignmentStretch = alignSelf != AlignSelf.auto
+      ? alignSelf == AlignSelf.stretch
+      : renderStyle.effectiveAlignItems == AlignItems.stretch;
+
+    if (!isChildAlignmentStretch) return false;
+
+    // If child length is auto in cross axis, stretch does not work.
+    if (child is RenderBoxModel) {
+      bool isLengthAuto = _isHorizontalFlexDirection
+        ? child.renderStyle.height.isAuto
+        : child.renderStyle.width.isAuto;
+      return isLengthAuto;
+    }
+    return false;
+  }
+
   // Whether margin auto of child is set in the main axis.
   bool isChildMainAxisMarginAutoExist(RenderBox child) {
     if (child is RenderBoxModel) {
@@ -2406,13 +2415,13 @@ class RenderFlexLayout extends RenderLayoutBox {
       // Don't paint placeholder of positioned element
       if (child is! RenderPositionPlaceholder) {
         late DateTime childPaintStart;
-        if (kProfileMode) {
+        if (kProfileMode && PerformanceTiming.enabled()) {
           childPaintStart = DateTime.now();
         }
         final RenderLayoutParentData childParentData =
             child.parentData as RenderLayoutParentData;
         context.paintChild(child, childParentData.offset + offset);
-        if (kProfileMode) {
+        if (kProfileMode && PerformanceTiming.enabled()) {
           DateTime childPaintEnd = DateTime.now();
           childPaintDuration += (childPaintEnd.microsecondsSinceEpoch -
               childPaintStart.microsecondsSinceEpoch);

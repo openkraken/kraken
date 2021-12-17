@@ -48,7 +48,7 @@ class RenderIntrinsic extends RenderBoxModel
 
   @override
   void performLayout() {
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       childLayoutDuration = 0;
       PerformanceTiming.instance()
           .mark(PERF_INTRINSIC_LAYOUT_START, uniqueId: hashCode);
@@ -58,13 +58,13 @@ class RenderIntrinsic extends RenderBoxModel
 
     if (child != null) {
       late DateTime childLayoutStart;
-      if (kProfileMode) {
+      if (kProfileMode && PerformanceTiming.enabled()) {
         childLayoutStart = DateTime.now();
       }
 
       child!.layout(contentConstraints!, parentUsesSize: true);
 
-      if (kProfileMode) {
+      if (kProfileMode && PerformanceTiming.enabled()) {
         DateTime childLayoutEnd = DateTime.now();
         childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch) -
             childLayoutStart.microsecondsSinceEpoch;
@@ -83,7 +83,7 @@ class RenderIntrinsic extends RenderBoxModel
       performResize();
     }
 
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       PerformanceTiming.instance()
           .mark(PERF_INTRINSIC_LAYOUT_END, uniqueId: hashCode);
     }
@@ -136,11 +136,11 @@ class RenderIntrinsic extends RenderBoxModel
 
     if (child != null) {
       late DateTime childPaintStart;
-      if (kProfileMode) {
+      if (kProfileMode && PerformanceTiming.enabled()) {
         childPaintStart = DateTime.now();
       }
       context.paintChild(child!, offset);
-      if (kProfileMode) {
+      if (kProfileMode && PerformanceTiming.enabled()) {
         DateTime childPaintEnd = DateTime.now();
         childPaintDuration += (childPaintEnd.microsecondsSinceEpoch -
             childPaintStart.microsecondsSinceEpoch);

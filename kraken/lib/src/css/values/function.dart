@@ -7,7 +7,8 @@
 
 import 'package:quiver/collection.dart';
 
-final _functionRegExp = RegExp(r'^[a-zA-Z_]+\(.+\)$', caseSensitive: false);
+// DotAll means accept line terminators like `\n`.
+final _functionRegExp = RegExp(r'^[a-zA-Z-_]+\(.+\)$', dotAll: true);
 final _functionStart = '(';
 final _functionEnd = ')';
 final _functionNotationUrl = 'url';
@@ -20,30 +21,49 @@ final LinkedLruHashMap<String, List<CSSFunctionalNotation>> _cachedParsedFunctio
 // ignore: public_member_api_docs
 class CSSFunction {
 
-  static bool isFunction(String value) {
+  static bool isFunction(String value, { String? functionName }) {
+    if (functionName != null) {
+      bool isMatch;
+      final int functionNameLength = functionName.length;
+
+      if (value.length < functionNameLength) {
+        return false;
+      }
+
+      for (int i = 0; i < functionNameLength; i++) {
+        isMatch = functionName.codeUnitAt(i) == value.codeUnitAt(i);
+        if (!isMatch) {
+          return false;
+        }
+      }
+    }
+
     return _functionRegExp.hasMatch(value);
   }
 
-  static List<CSSFunctionalNotation> parseFunction(String value) {
+  static List<CSSFunctionalNotation> parseFunction(final String value) {
     if (_cachedParsedFunction.containsKey(value)) {
       return _cachedParsedFunction[value]!;
     }
-    var start = 0;
-    var left = value.indexOf(_functionStart, start);
-    List<CSSFunctionalNotation> notations = [];
 
-    // function may contain function, should handle this situation
+    final int valueLength = value.length;
+    final List<CSSFunctionalNotation> notations = [];
+
+    int start = 0;
+    int left = value.indexOf(_functionStart, start);
+
+    // Function may contain function, should handle this situation.
     while (left != -1 && start < left) {
       String fn = value.substring(start, left);
       int argsBeginIndex = left + 1;
       List<String> argList = [];
       int argBeginIndex = argsBeginIndex;
-      // contains function count
+      // Contain function count.
       int containLeftCount = 0;
       bool match = false;
-      // find all args in this function
-      while (argsBeginIndex < value.length) {
-        // url() function notation should not be splitted cause it only accept one URL.
+      // Find all args in this function.
+      while (argsBeginIndex < valueLength) {
+        // url() function notation should not be split causing it only accept one URL.
         // https://drafts.csswg.org/css-values-3/#urls
         if (fn != _functionNotationUrl && value[argsBeginIndex] == FUNCTION_ARGS_SPLIT) {
           if (containLeftCount == 0 && argBeginIndex < argsBeginIndex) {
@@ -60,7 +80,7 @@ class CSSFunction {
               argList.add(value.substring(argBeginIndex, argsBeginIndex));
               argBeginIndex = argsBeginIndex + 1;
             }
-            // function parse success when find the matched right parenthesis
+            // Function parse success when find the matched right parenthesis.
             match = true;
             break;
           }
@@ -68,7 +88,7 @@ class CSSFunction {
         argsBeginIndex++;
       }
       if (match) {
-        // only add the right function
+        // Only add the right function.
         fn = fn.trim();
         if (fn.startsWith(FUNCTION_SPLIT)) {
           fn = fn.substring(1, ).trim();

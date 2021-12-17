@@ -224,11 +224,10 @@ class RenderLayoutBox extends RenderBoxModel
         children.sort((RenderBox left, RenderBox right) {
           // @FIXME: Add patch to handle nested fixed element paint priority, need to remove
           // this logic after Kraken has implemented stacking context tree.
-          if(left is RenderBoxModel && left.renderStyle.position == CSSPositionType.fixed &&
+          if (left is RenderBoxModel && left.renderStyle.position == CSSPositionType.fixed &&
             right is RenderBoxModel && right.renderStyle.position == CSSPositionType.fixed) {
-            // Child element who has higher depth always paint after parent element who has lower depth
-            // in the renderObject tree.
-            return left.renderPositionPlaceholder!.depth - right.renderPositionPlaceholder!.depth;
+            // Child element always paint after parent element in the renderObject tree.
+            return right.renderStyle.isAncestorOf(left.renderStyle) ? 1 : -1;
           }
 
           bool isLeftNeedsStacking = left is RenderBoxModel && left.needsStacking;
@@ -1060,19 +1059,19 @@ class RenderBoxModel extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       childPaintDuration = 0;
       PerformanceTiming.instance().mark(PERF_PAINT_START, uniqueId: hashCode);
     }
     if (renderStyle.isVisibilityHidden) {
-      if (kProfileMode) {
+      if (kProfileMode && PerformanceTiming.enabled()) {
         PerformanceTiming.instance().mark(PERF_PAINT_END, uniqueId: hashCode);
       }
       return;
     }
 
     paintBoxModel(context, offset);
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       int amendEndTime =
           DateTime.now().microsecondsSinceEpoch - childPaintDuration;
       PerformanceTiming.instance()
