@@ -180,7 +180,6 @@ abstract class WidgetElement extends dom.Element {
   WidgetElement(dom.EventTargetContext? context)
       : super(
   context,
-  // isIntrinsicBox: true,
   defaultStyle: _defaultStyle
   ) {
     WidgetsFlutterBinding.ensureInitialized();
