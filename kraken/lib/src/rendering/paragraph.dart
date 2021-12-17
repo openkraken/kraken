@@ -608,14 +608,13 @@ class KrakenRenderParagraph extends RenderBox
       ui.LineMetrics lineMetric = _lineMetrics[i];
       // Do not add line height in the case of textOverflow ellipsis
       // cause height of line metric equals to 0.
-      double leading = lineHeight != null && lineMetric.height != 0 ?
-      lineHeight! - lineMetric.height : 0;
+      double leading = lineHeight != null && lineMetric.height != 0
+        ? lineHeight! - lineMetric.height
+        : 0;
       _lineLeading.add(leading);
       // Offset of previous line
       double preLineBottom = i > 0
-        ? _lineOffset[i - 1] +
-        _lineMetrics[i - 1].height +
-        _lineLeading[i - 1] / 2
+        ? _lineOffset[i - 1] + _lineMetrics[i - 1].height + _lineLeading[i - 1] / 2
         : 0;
       double offset = preLineBottom + leading / 2;
       _lineOffset.add(offset);

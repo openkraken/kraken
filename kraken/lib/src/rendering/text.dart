@@ -197,19 +197,19 @@ class RenderTextBox extends RenderBox
 
   @override
   void performLayout() {
-    if (child != null) {
-      _renderParagraph.overflow = renderStyle.effectiveTextOverflow;
-      _renderParagraph.textAlign = renderStyle.textAlign;
-      _renderParagraph.text = _textSpan;
-      _renderParagraph.maxLines = _maxLines;
-      _renderParagraph.lineHeight = _lineHeight;
+    KrakenRenderParagraph? paragraph = child as KrakenRenderParagraph?;
+    if (paragraph != null) {
+      paragraph.overflow = renderStyle.effectiveTextOverflow;
+      paragraph.textAlign = renderStyle.textAlign;
+      paragraph.text = _textSpan;
+      paragraph.maxLines = _maxLines;
+      paragraph.lineHeight = _lineHeight;
+      paragraph.layout(constraints, parentUsesSize: true);
 
-      child!.layout(constraints, parentUsesSize: true);
-      size = child!.size;
+      size = paragraph.size;
 
       // @FIXME: Minimum size of text equals to single word in browser
       // which cannot be calculated in Flutter currently.
-
       // Set minimum width to 0 to allow flex item containing text to shrink into
       // flex container which is similar to the effect of word-break: break-all in the browser.
       autoMinWidth = 0;
