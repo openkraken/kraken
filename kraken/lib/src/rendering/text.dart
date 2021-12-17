@@ -148,8 +148,8 @@ class RenderTextBox extends RenderBox
         maxHeight: double.infinity);
   }
 
-  // Empty string is the minimum width character, use it as the base width
-  // to calculate the maximum characters to display in a certain width.
+  // Empty string is the minimum size character, use it as the base size
+  // for calculating the maximum characters to display in its container.
   Size get minCharSize {
     TextStyle textStyle = TextStyle(
       fontFamilyFallback: renderStyle.fontFamily,
@@ -173,22 +173,40 @@ class RenderTextBox extends RenderBox
   // displayed fully and parent is not scrollable to improve text layout performance.
   String _getClippedText(String data) {
     String clipText = data;
+    RenderBoxModel parentRenderBoxModel = parent as RenderBoxModel;
+    BoxConstraints? parentContentConstraints = parentRenderBoxModel.contentConstraints;
     // Text only need to render in parent container's content area when
     // white-space is nowrap and overflow is hidden/clip.
     CSSOverflowType effectiveOverflowX = renderStyle.effectiveOverflowX;
-    if (renderStyle.whiteSpace == WhiteSpace.nowrap
+    if (parentContentConstraints != null
       && (effectiveOverflowX == CSSOverflowType.hidden
-        || effectiveOverflowX == CSSOverflowType.clip)
+      || effectiveOverflowX == CSSOverflowType.clip)
     ) {
-      RenderBoxModel parentRenderBoxModel = parent as RenderBoxModel;
-      BoxConstraints? parentContentConstraints = parentRenderBoxModel.contentConstraints;
-      if (parentContentConstraints != null
-        && parentContentConstraints.maxWidth.isFinite) {
+      // Max character to display in one line.
+      int? maxCharsOfLine;
+      // Max lines in parent.
+      int? maxLines;
 
-        // Max character to display in parent's content area.
-        int maxDisplayCharCount = (parentContentConstraints.maxWidth / minCharSize.width).ceil();
-        if (data.length > maxDisplayCharCount) {
-          clipText = data.substring(0, maxDisplayCharCount);
+      if (parentContentConstraints.maxWidth.isFinite) {
+        maxCharsOfLine = (parentContentConstraints.maxWidth / minCharSize.width).ceil();
+      }
+      if (parentContentConstraints.maxHeight.isFinite) {
+        maxLines = (parentContentConstraints.maxHeight / (_lineHeight ?? minCharSize.height)).ceil();
+      }
+
+      if (renderStyle.whiteSpace == WhiteSpace.nowrap) {
+        if (maxCharsOfLine != null) {
+          int maxChars = maxCharsOfLine;
+          if (data.length > maxChars) {
+            clipText = data.substring(0, maxChars);
+          }
+        }
+      } else {
+        if (maxCharsOfLine != null && maxLines != null) {
+          int maxChars = maxCharsOfLine * maxLines;
+          if (data.length > maxChars) {
+            clipText = data.substring(0, maxChars);
+          }
         }
       }
     }
