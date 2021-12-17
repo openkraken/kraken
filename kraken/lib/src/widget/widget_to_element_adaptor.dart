@@ -244,7 +244,7 @@ abstract class WidgetElement extends dom.Element {
   RenderObjectElement? renderObjectElement;
 
   void _attachWidget(Widget widget) {
-    RenderObjectElement rootWidgetElement = ownerDocument.controller.rootKrakenElement;
+    RenderObjectElement rootFlutterElement = ownerDocument.controller.rootFlutterElement;
 
     _adaptor = KrakenRenderObjectToWidgetAdapter(
         child: widget,
@@ -259,7 +259,7 @@ abstract class WidgetElement extends dom.Element {
       parentElement = (parentNode as dom.Element).element;
     }
 
-    renderObjectElement = _adaptor?.attachToRenderTree(rootWidgetElement.owner!, (parentElement ?? rootWidgetElement) as RenderObjectElement, parentElement == null);
+    renderObjectElement = _adaptor?.attachToRenderTree(rootFlutterElement.owner!, (parentElement ?? rootFlutterElement) as RenderObjectElement, parentElement == null);
   }
 }
 

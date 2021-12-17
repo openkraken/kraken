@@ -881,7 +881,7 @@ class _KrakenRenderObjectElement extends SingleChildRenderObjectElement {
 
     // We should make sure every flutter elements created under kraken can be walk up to the root.
     // So we bind _KrakenRenderObjectElement into KrakenController, and widgetElements created by controller can follow this to the root.
-    controller.rootKrakenElement = this;
+    controller.rootFlutterElement = this;
 
     if (controller.bundle == null || (controller.bundle?.content == null && controller.bundle?.bytecode == null && controller.bundle?.src == null)) {
       return;

@@ -771,7 +771,7 @@ class KrakenController {
 
   UriParser? uriParser;
 
-  late RenderObjectElement rootKrakenElement;
+  late RenderObjectElement rootFlutterElement;
 
   static KrakenController? getControllerOfJSContextId(int? contextId) {
     if (!_controllerMap.containsKey(contextId)) {
