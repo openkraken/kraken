@@ -27,6 +27,8 @@ const Map<String, dynamic> _defaultStyle = {
 const Map<String, dynamic> _preDefaultStyle = {
   DISPLAY: BLOCK,
   WHITE_SPACE: 'pre',
+  MARGIN_TOP: '1em',
+  MARGIN_BOTTOM: '1em',
 };
 
 const Map<String, dynamic> _bDefaultStyle = {
