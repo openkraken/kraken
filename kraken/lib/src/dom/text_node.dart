@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/src/css/display.dart';
 
 final RegExp _whiteSpaceReg = RegExp(r'\s+');
 const String WHITE_SPACE_CHAR = ' ';
