@@ -542,6 +542,8 @@ class RenderFlowLayout extends RenderLayoutBox {
         childConstraints = child.getConstraints();
       } else if (child is RenderTextBox) {
         childConstraints = child.getConstraints();
+      } else if (child is RenderPositionPlaceholder) {
+        childConstraints = BoxConstraints();
       } else {
         // Custom element.
         childConstraints = constraints;
