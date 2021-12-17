@@ -1273,7 +1273,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   }
 
   RenderStyle? _getChildRenderStyle(RenderBox child) {
-    RenderStyle? childRenderStyle = null;
+    RenderStyle? childRenderStyle;
     if (child is RenderTextBox) {
       childRenderStyle = renderStyle;
     } else if (child is RenderBoxModel) {

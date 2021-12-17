@@ -252,14 +252,14 @@ abstract class WidgetElement extends dom.Element {
             ContainerBoxParentData<RenderBox>>
     );
 
-    Element? parentElement;
+    Element? parentFlutterElement;
     if (parentNode is WidgetElement) {
-      parentElement = (parentNode as WidgetElement).renderObjectElement;
+      parentFlutterElement = (parentNode as WidgetElement).renderObjectElement;
     } else {
-      parentElement = (parentNode as dom.Element).element;
+      parentFlutterElement = (parentNode as dom.Element).flutterElement;
     }
 
-    renderObjectElement = _adaptor?.attachToRenderTree(rootFlutterElement.owner!, (parentElement ?? rootFlutterElement) as RenderObjectElement, parentElement == null);
+    renderObjectElement = _adaptor?.attachToRenderTree(rootFlutterElement.owner!, (parentFlutterElement ?? rootFlutterElement) as RenderObjectElement, parentFlutterElement == null);
   }
 }
 
