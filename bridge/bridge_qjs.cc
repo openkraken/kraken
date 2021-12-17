@@ -116,15 +116,16 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler& handler) : conte
 #endif
 }
 
-void JSBridge::parseHTML(const char* code, size_t length) {
+bool JSBridge::parseHTML(const char* code, size_t length) {
   if (!m_context->isValid())
-    return;
+    return false;
   Document* Document = Document::instance(m_context.get());
   auto document = DocumentInstance::instance(Document);
-  JSValue bodyValue = JS_GetPropertyStr(m_context->ctx(), document->instanceObject, "body");
+  JSValue bodyValue = JS_GetPropertyStr(m_context->ctx(), document->jsObject, "body");
   auto* body = static_cast<ElementInstance*>(JS_GetOpaque(bodyValue, Element::classId()));
   HTMLParser::parseHTML(code, length, body);
   JS_FreeValue(m_context->ctx(), bodyValue);
+  return true;
 }
 
 void JSBridge::invokeModuleEvent(NativeString* moduleName, const char* eventType, void* rawEvent, NativeString* extra) {
@@ -136,7 +137,7 @@ void JSBridge::invokeModuleEvent(NativeString* moduleName, const char* eventType
     std::string type = std::string(eventType);
     auto* event = static_cast<RawEvent*>(rawEvent)->bytes;
     EventInstance* eventInstance = Event::buildEventInstance(type, m_context.get(), event, false);
-    eventObject = eventInstance->instanceObject;
+    eventObject = eventInstance->jsObject;
   }
 
   JSValue moduleNameValue = JS_NewUnicodeString(m_context->runtime(), m_context->ctx(), moduleName->string, moduleName->length);

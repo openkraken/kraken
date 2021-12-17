@@ -19,7 +19,7 @@ class AllCollection : public HostObject {
   static JSValue add(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   static JSValue remove(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
-  DEFINE_HOST_OBJECT_PROPERTY(1, length);
+  DEFINE_READONLY_PROPERTY(length);
 
   void internalAdd(NodeInstance* node, NodeInstance* before);
 

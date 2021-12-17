@@ -33,13 +33,25 @@ class Window : public EventTarget {
   OBJECT_INSTANCE(Window);
 
  private:
-  ObjectFunction m_open{m_context, m_prototypeObject, "open", open, 1};
-  ObjectFunction m_scroll{m_context, m_prototypeObject, "scroll", scrollTo, 2};
-  ObjectFunction m_scrollTo{m_context, m_prototypeObject, "scrollTo", scrollTo, 2};
-  ObjectFunction m_scrollBy{m_context, m_prototypeObject, "scrollBy", scrollBy, 2};
-  ObjectFunction m_postMessage{m_context, m_prototypeObject, "postMessage", postMessage, 3};
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(devicePixelRatio);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(colorScheme);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(__location__);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(location);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(window);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(parent);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(scrollX);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(scrollY);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(self);
 
-  DEFINE_HOST_CLASS_PROTOTYPE_PROPERTY(10, devicePixelRatio, colorScheme, __location__, location, window, parent, scrollX, scrollY, onerror, self);
+  DEFINE_PROTOTYPE_PROPERTY(onerror);
+
+  DEFINE_PROTOTYPE_FUNCTION(open, 1);
+  // ScrollTo is same as scroll which reuse scroll functions. Macro expand is not support here.
+  ObjectFunction m_scroll{m_context, m_prototypeObject, "scroll", scrollTo, 2};
+  DEFINE_PROTOTYPE_FUNCTION(scrollTo, 2);
+  DEFINE_PROTOTYPE_FUNCTION(scrollBy, 2);
+  DEFINE_PROTOTYPE_FUNCTION(postMessage, 3);
+
   friend WindowInstance;
 };
 
@@ -47,12 +59,13 @@ class WindowInstance : public EventTargetInstance {
  public:
   WindowInstance() = delete;
   explicit WindowInstance(Window* window);
-  ~WindowInstance() { JS_FreeValue(m_ctx, onerror); }
+  ~WindowInstance() {}
 
  private:
   void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
-  Location* m_location{new Location(m_context)};
+  ObjectProperty m_location{m_context, jsObject, "m_location", (new Location(m_context))->jsObject};
+  ObjectProperty m_onerror{m_context, jsObject, "m_onerror", JS_NULL};
   JSValue onerror{JS_NULL};
   friend Window;
   friend JSContext;

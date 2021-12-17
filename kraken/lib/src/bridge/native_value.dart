@@ -70,7 +70,10 @@ dynamic fromNativeValue(Pointer<NativeValue> nativeValue) {
   JSValueType type = JSValueType.values[nativeValue.ref.tag];
   switch(type) {
     case JSValueType.TAG_STRING:
-      return nativeStringToString(Pointer.fromAddress(nativeValue.ref.u));
+      Pointer<NativeString> nativeString = Pointer.fromAddress(nativeValue.ref.u);
+      String result = nativeStringToString(nativeString);
+      freeNativeString(nativeString);
+      return result;
     case JSValueType.TAG_INT:
       return nativeValue.ref.u;
     case JSValueType.TAG_BOOL:
@@ -95,7 +98,10 @@ dynamic fromNativeValue(Pointer<NativeValue> nativeValue) {
     case JSValueType.TAG_ASYNC_FUNCTION:
       break;
     case JSValueType.TAG_JSON:
-      return jsonDecode(nativeStringToString(Pointer.fromAddress(nativeValue.ref.u)));
+      Pointer<NativeString> nativeString = Pointer.fromAddress(nativeValue.ref.u);
+      dynamic value = jsonDecode(nativeStringToString(nativeString));
+      freeNativeString(nativeString);
+      return value;
   }
 }
 

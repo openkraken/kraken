@@ -20,7 +20,7 @@ enum NativeTag {
   TAG_ASYNC_FUNCTION = 8,
 };
 
-enum JSPointerType { AsyncContextContext = 0, NativeFunctionContext = 1, NativeBoundingClientRect = 2, NativeCanvasRenderingContext2D = 3, NativeEventTarget = 4 };
+enum class JSPointerType { AsyncContextContext = 0, NativeFunctionContext = 1, NativeBoundingClientRect = 2, NativeCanvasRenderingContext2D = 3, NativeEventTarget = 4 };
 
 namespace kraken::binding::qjs {
 

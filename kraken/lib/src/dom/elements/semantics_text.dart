@@ -2,12 +2,10 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
-import 'dart:ffi';
-
-import 'package:kraken/bridge.dart';
+import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/rendering.dart';
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element#inline_text_semantics
 const String SPAN = 'SPAN';
@@ -30,11 +28,6 @@ const String Q = 'Q';
 const String KBD = 'KBD';
 const String DFN = 'DFN';
 const String BR = 'BR';
-
-// HACK: current use block layout make text force line break
-const Map<String, dynamic> _breakDefaultStyle = {
-  DISPLAY: BLOCK,
-};
 
 const Map<String, dynamic> _uDefaultStyle = {
   TEXT_DECORATION: UNDERLINE
@@ -72,108 +65,119 @@ const Map<String, dynamic> _defaultStyle = {
 
 // https://html.spec.whatwg.org/multipage/text-level-semantics.html#htmlbrelement
 class BRElement extends Element {
-  BRElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(
-        targetId, nativePtr, elementManager,
-        defaultStyle: _breakDefaultStyle,
-        isIntrinsicBox: true,
-      );
+  RenderLineBreak? _renderLineBreak;
+
+  BRElement(EventTargetContext? context)
+      : super(context, isIntrinsicBox: true);
+
+  @override
+  RenderBoxModel? get renderBoxModel => _renderLineBreak;
+
+  @override
+  void setRenderStyle(String property, String present) {
+    // Noop
+  }
+
+  @override
+  RenderBox createRenderer() {
+    return _renderLineBreak ??= RenderLineBreak(renderStyle);
+  }
 }
 
 class BringElement extends Element {
-  BringElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _boldDefaultStyle);
+  BringElement(EventTargetContext? context)
+      : super(context, defaultStyle: _boldDefaultStyle);
 }
 
 class AbbreviationElement extends Element {
-  AbbreviationElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _abbrDefaultStyle);
+  AbbreviationElement(EventTargetContext? context)
+      : super(context, defaultStyle: _abbrDefaultStyle);
 }
 
 class EmphasisElement extends Element {
-  EmphasisElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  EmphasisElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
 }
 
 class CitationElement extends Element {
-  CitationElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  CitationElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
 }
 
 class DefinitionElement extends Element {
-  DefinitionElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  DefinitionElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/i
 class IdiomaticElement extends Element {
-  IdiomaticElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  IdiomaticElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
 }
 
 class CodeElement extends Element {
-  CodeElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _codeDefaultStyle);
+  CodeElement(EventTargetContext? context)
+      : super(context, defaultStyle: _codeDefaultStyle);
 }
 
 class SampleElement extends Element {
-  SampleElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _codeDefaultStyle);
+  SampleElement(EventTargetContext? context)
+      : super(context, defaultStyle: _codeDefaultStyle);
 }
 
 class KeyboardElement extends Element {
-  KeyboardElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _codeDefaultStyle);
+  KeyboardElement(EventTargetContext? context)
+      : super(context, defaultStyle: _codeDefaultStyle);
 }
 
 class SpanElement extends Element {
-  SpanElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager);
+  SpanElement(EventTargetContext? context)
+      : super(context);
 }
 
 class DataElement extends Element {
-  DataElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager);
+  DataElement(EventTargetContext? context)
+      : super(context);
 }
 
 // TODO: enclosed text is a short inline quotation
 class QuoteElement extends Element {
-  QuoteElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager);
+  QuoteElement(EventTargetContext? context)
+      : super(context);
 }
 
 class StrongElement extends Element {
-  StrongElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _boldDefaultStyle);
+  StrongElement(EventTargetContext? context)
+      : super(context, defaultStyle: _boldDefaultStyle);
 }
 
 class TimeElement extends Element {
-  TimeElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _boldDefaultStyle);
+  TimeElement(EventTargetContext? context)
+      : super(context, defaultStyle: _boldDefaultStyle);
 }
 
 class SmallElement extends Element {
-  SmallElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _smallDefaultStyle);
+  SmallElement(EventTargetContext? context)
+      : super(context, defaultStyle: _smallDefaultStyle);
 }
 
 class StrikethroughElement extends Element {
-  StrikethroughElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _sDefaultStyle);
+  StrikethroughElement(EventTargetContext? context)
+      : super(context, defaultStyle: _sDefaultStyle);
 }
 
 // https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-u-element
 class UnarticulatedElement extends Element {
-  UnarticulatedElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _uDefaultStyle);
+  UnarticulatedElement(EventTargetContext? context)
+      : super(context, defaultStyle: _uDefaultStyle);
 }
 
 class VariableElement extends Element {
-  VariableElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  VariableElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
 }
 
 class MarkElement extends Element {
-  MarkElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _markDefaultStyle);
+  MarkElement(EventTargetContext? context)
+      : super(context, defaultStyle: _markDefaultStyle);
 }

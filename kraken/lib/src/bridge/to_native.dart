@@ -225,6 +225,17 @@ void registerPluginByteCode(Uint8List bytecode, String name) {
   _registerPluginByteCode(bytes, bytecode.length, name.toNativeUtf8());
 }
 
+typedef NativeProfileModeEnabled = Int32 Function();
+typedef DartProfileModeEnabled = int Function();
+
+final DartProfileModeEnabled _profileModeEnabled =
+nativeDynamicLibrary.lookup<NativeFunction<NativeProfileModeEnabled>>('profileModeEnabled').asFunction();
+
+const _CODE_ENABLED = 1;
+bool profileModeEnabled() {
+  return _profileModeEnabled() == _CODE_ENABLED;
+}
+
 // Regisdster reloadJsContext
 typedef NativeReloadJSContext = Void Function(Int32 contextId);
 typedef DartReloadJSContext = void Function(int contextId);
@@ -356,8 +367,8 @@ List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, in
     // +-------+-------+
     // |  id   | type  |
     // +-------+-------+
-    int id = typeIdCombine >> 32;
-    int type = typeIdCombine ^ (id << 32);
+    int id = (typeIdCombine >> 32).toSigned(32);
+    int type = (typeIdCombine ^ (id << 32)).toSigned(32);
 
     command.type = UICommandType.values[type];
     command.id = id;
@@ -372,8 +383,8 @@ List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, in
     if (args01And02Length == 0) {
       args01Length = args02Length = 0;
     } else {
-      args02Length = args01And02Length >> 32;
-      args01Length = args01And02Length ^ (args02Length << 32);
+      args02Length = (args01And02Length >> 32).toSigned(32);
+      args01Length = (args01And02Length ^ (args02Length << 32)).toSigned(32);
     }
 
     int args01StringMemory = rawMemory[i + args01StringMemOffset];
@@ -453,7 +464,7 @@ void flushUICommand() {
             controller.view.createComment(id, nativePtr.cast<NativeEventTarget>());
             break;
           case UICommandType.disposeEventTarget:
-            ElementManager.disposeEventTarget(controller.view.contextId, id);
+            controller.view.disposeEventTarget(id);
             break;
           case UICommandType.addEvent:
             controller.view.addEvent(id, command.args[0]);

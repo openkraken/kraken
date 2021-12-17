@@ -65,7 +65,7 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler& handler, void*
   JS_DefinePropertyGetSet(m_ctx, globalObject, windowKey, windowGetter, JS_UNDEFINED, JS_PROP_HAS_GET | JS_PROP_ENUMERABLE);
   JS_FreeAtom(m_ctx, windowKey);
   JS_SetContextOpaque(m_ctx, this);
-  JS_SetHostPromiseRejectionTracker(m_runtime, promiseRejectTracker, this);
+  JS_SetHostPromiseRejectionTracker(m_runtime, promiseRejectTracker, nullptr);
 
   runningContexts++;
 }
@@ -79,7 +79,7 @@ JSContext::~JSContext() {
     struct list_head *el, *el1;
     list_for_each_safe(el, el1, &node_job_list) {
       auto* node = list_entry(el, NodeJob, link);
-      JS_FreeValue(m_ctx, node->nodeInstance->instanceObject);
+      JS_FreeValue(m_ctx, node->nodeInstance->jsObject);
     }
   }
 
@@ -88,7 +88,7 @@ JSContext::~JSContext() {
     struct list_head *el, *el1;
     list_for_each_safe(el, el1, &document_job_list) {
       auto* node = list_entry(el, NodeJob, link);
-      JS_FreeValue(m_ctx, node->nodeInstance->instanceObject);
+      JS_FreeValue(m_ctx, node->nodeInstance->jsObject);
     }
   }
   // Manual free timers
@@ -150,7 +150,6 @@ JSContext::~JSContext() {
     }
   }
 
-  JS_RunGC(m_runtime);
   JS_FreeValue(m_ctx, globalObject);
   JS_FreeContext(m_ctx);
   JS_RunGC(m_runtime);
@@ -328,12 +327,12 @@ void JSContext::dispatchGlobalPromiseRejectionEvent(JSValueConst promise, JSValu
 }
 
 void JSContext::promiseRejectTracker(QjsContext* ctx, JSValue promise, JSValue reason, int is_handled, void* opaque) {
-  auto* context = static_cast<JSContext*>(opaque);
+  auto* context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
   context->reportError(reason);
   context->dispatchGlobalPromiseRejectionEvent(promise, reason);
 }
 
-NativeString* jsValueToNativeString(QjsContext* ctx, JSValue value) {
+std::unique_ptr<NativeString> jsValueToNativeString(QjsContext* ctx, JSValue value) {
   bool isValueString = true;
   if (JS_IsNull(value)) {
     value = JS_NewString(ctx, "");
@@ -345,15 +344,14 @@ NativeString* jsValueToNativeString(QjsContext* ctx, JSValue value) {
 
   uint32_t length;
   uint16_t* buffer = JS_ToUnicode(ctx, value, &length);
-  NativeString tmp{};
-  tmp.string = buffer;
-  tmp.length = length;
-  NativeString* cloneString = tmp.clone();
+  std::unique_ptr<NativeString> ptr = std::make_unique<NativeString>();
+  ptr->string = buffer;
+  ptr->length = length;
 
   if (!isValueString) {
     JS_FreeValue(ctx, value);
   }
-  return cloneString;
+  return ptr;
 }
 
 void buildUICommandArgs(QjsContext* ctx, JSValue key, NativeString& args_01) {
@@ -366,18 +364,18 @@ void buildUICommandArgs(QjsContext* ctx, JSValue key, NativeString& args_01) {
   args_01.length = length;
 }
 
-NativeString* stringToNativeString(const std::string& string) {
+std::unique_ptr<NativeString> stringToNativeString(const std::string& string) {
   std::u16string utf16;
   fromUTF8(string, utf16);
   NativeString tmp{};
   tmp.string = reinterpret_cast<const uint16_t*>(utf16.c_str());
   tmp.length = utf16.size();
-  return tmp.clone();
+  return std::unique_ptr<NativeString>(tmp.clone());
 }
 
-NativeString* atomToNativeString(QjsContext* ctx, JSAtom atom) {
+std::unique_ptr<NativeString> atomToNativeString(QjsContext* ctx, JSAtom atom) {
   JSValue stringValue = JS_AtomToString(ctx, atom);
-  NativeString* string = jsValueToNativeString(ctx, stringValue);
+  std::unique_ptr<NativeString> string = jsValueToNativeString(ctx, stringValue);
   JS_FreeValue(ctx, stringValue);
   return string;
 }

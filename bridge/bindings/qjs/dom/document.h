@@ -39,19 +39,35 @@ class Document : public Node {
   static JSValue getElementsByTagName(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   static JSValue getElementsByClassName(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
+  JSValue getElementConstructor(JSContext* context, const std::string& tagName);
+  bool isCustomElement(const std::string& tagName);
+
  private:
-  ObjectFunction m_createEvent{m_context, m_prototypeObject, "createEvent", createEvent, 1};
-  ObjectFunction m_createElement{m_context, m_prototypeObject, "createElement", createElement, 1};
-  ObjectFunction m_createDocumentFragment{m_context, m_prototypeObject, "createDocumentFragment", createDocumentFragment, 0};
-  ObjectFunction m_createTextNode{m_context, m_prototypeObject, "createTextNode", createTextNode, 1};
-  ObjectFunction m_createComment{m_context, m_prototypeObject, "createComment", createComment, 1};
-  ObjectFunction m_getElementById{m_context, m_prototypeObject, "getElementById", getElementById, 1};
-  ObjectFunction m_getElementsByTagName{m_context, m_prototypeObject, "getElementsByTagName", getElementsByTagName, 1};
-  ObjectFunction m_getElementsByClassName{m_context, m_prototypeObject, "getElementsByClassName", getElementsByClassName, 1};
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(nodeName);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(all);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(documentElement);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(children);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(head);
+
+  DEFINE_PROTOTYPE_PROPERTY(cookie);
+  DEFINE_PROTOTYPE_PROPERTY(body);
+
+  DEFINE_PROTOTYPE_FUNCTION(createEvent, 1);
+  DEFINE_PROTOTYPE_FUNCTION(createElement, 1);
+  DEFINE_PROTOTYPE_FUNCTION(createDocumentFragment, 0);
+  DEFINE_PROTOTYPE_FUNCTION(createTextNode, 1);
+  DEFINE_PROTOTYPE_FUNCTION(createComment, 1);
+  DEFINE_PROTOTYPE_FUNCTION(getElementById, 1);
+  DEFINE_PROTOTYPE_FUNCTION(getElementsByTagName, 1);
+  DEFINE_PROTOTYPE_FUNCTION(getElementsByClassName, 1);
+
+  void defineElement(const std::string& tagName, Element* constructor);
+
   friend DocumentInstance;
 
   bool event_registered{false};
   bool document_registered{false};
+  std::unordered_map<std::string, Element*> elementConstructorMap;
 };
 
 class DocumentCookie {
@@ -71,7 +87,6 @@ class DocumentInstance : public NodeInstance {
   explicit DocumentInstance(Document* document);
   ~DocumentInstance();
   static std::unordered_map<Document*, DocumentInstance*> m_instanceMap;
-  ElementInstance* documentElement();
   static DocumentInstance* instance(Document* document) {
     if (m_instanceMap.count(document) == 0) {
       m_instanceMap[document] = new DocumentInstance(document);
@@ -80,10 +95,9 @@ class DocumentInstance : public NodeInstance {
   }
 
  private:
-  DEFINE_HOST_CLASS_PROPERTY(3, nodeName, all, cookie);
-
   void removeElementById(JSAtom id, ElementInstance* element);
   void addElementById(JSAtom id, ElementInstance* element);
+  ElementInstance* getDocumentElement();
   std::unordered_map<JSAtom, std::vector<ElementInstance*>> m_elementMapById;
   ElementInstance* m_documentElement{nullptr};
   std::unique_ptr<DocumentCookie> m_cookie;

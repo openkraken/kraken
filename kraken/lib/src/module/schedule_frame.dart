@@ -37,7 +37,7 @@ mixin ScheduleFrameMixin {
     SchedulerBinding.instance!.scheduleFrame();
   }
 
-  void clearAnimationFrame() {
+  void disposeScheduleFrame() {
     _animationFrameCallbackMap.clear();
   }
 }

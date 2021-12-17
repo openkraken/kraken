@@ -21,7 +21,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
   late RenderViewport _renderViewport;
 
   // The sliver list render object reference.
-  late RenderSliverList _renderSliverList;
+  RenderSliverList? _renderSliverList;
 
   // The scrollable context to handle gestures.
   late KrakenScrollable scrollable;
@@ -36,13 +36,12 @@ class RenderSliverListLayout extends RenderLayoutBox {
   final RenderSliverBoxChildManager _renderSliverBoxChildManager;
 
   RenderSliverListLayout({
-    required RenderStyle renderStyle,
+    required CSSRenderStyle renderStyle,
     required RenderSliverElementChildManager manager,
     ScrollListener? onScroll,
   }) : _renderSliverBoxChildManager = manager,
        _scrollListener = onScroll,
         super(renderStyle: renderStyle) {
-    pointerListener = _pointerListener;
     scrollable = KrakenScrollable(axisDirection: getAxisDirection(axis));
     axis = renderStyle.sliverDirection;
 
@@ -57,16 +56,20 @@ class RenderSliverListLayout extends RenderLayoutBox {
         break;
     }
 
-    _renderSliverList = _buildRenderSliverList();
+    RenderSliverList renderSliverList = _renderSliverList = _buildRenderSliverList();
     _renderViewport = RenderViewport(
       offset: scrollable.position!,
       axisDirection: scrollable.axisDirection,
       crossAxisDirection: getCrossAxisDirection(axis),
-      children: [_renderSliverList],
+      children: [renderSliverList],
     );
     manager.setupSliverListLayout(this);
     super.insert(_renderViewport);
   }
+
+  // Override the scrollable pointer listener.
+  @override
+  void Function(PointerEvent event) get scrollablePointerListener => _scrollablePointerListener;
 
   @override
   ScrollListener? get scrollListener => _scrollListener;
@@ -87,7 +90,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
   // Insert render box child as sliver child.
   void insertSliverChild(RenderBox child, { RenderBox? after }) {
     setupParentData(child);
-    _renderSliverList.insert(child, after: after);
+    _renderSliverList?.insert(child, after: after);
   }
 
   @override
@@ -95,20 +98,19 @@ class RenderSliverListLayout extends RenderLayoutBox {
     if (child == _renderViewport) {
       super.remove(child);
     } else if (child.parent == _renderSliverList) {
-      _renderSliverList.remove(child);
+      _renderSliverList?.remove(child);
     }
   }
 
   @override
   void removeAll() {
-    _renderSliverList.removeAll();
+    _renderSliverList?.removeAll();
   }
 
   @override
   void move(RenderBox child, {RenderBox? after}) {
     if (child.parent == _renderSliverList) {
-      remove(child);
-      insertSliverChild(child, after: after);
+      _renderSliverList?.move(child, after: after);
     }
   }
 
@@ -121,7 +123,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
     }
   }
 
-  void _pointerListener(PointerEvent event) {
+  void _scrollablePointerListener(PointerEvent event) {
     if (event is PointerDownEvent) {
       scrollable.handlePointerDown(event);
     }
@@ -130,6 +132,13 @@ class RenderSliverListLayout extends RenderLayoutBox {
   @protected
   RenderSliverList _buildRenderSliverList() {
     return _renderSliverList = RenderSliverList(childManager: _renderSliverBoxChildManager);
+  }
+
+  // Trigger sliver list to rebuild children.
+  @override
+  void markNeedsLayout() {
+    super.markNeedsLayout();
+    _renderSliverList?.markNeedsLayout();
   }
 
   /// Child count should rely on element's childNodes, the real
@@ -141,7 +150,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
 
   @override
   void performLayout() {
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       childLayoutDuration = 0;
       PerformanceTiming.instance()
           .mark(PERF_SILVER_LAYOUT_START, uniqueId: hashCode);
@@ -175,13 +184,13 @@ class RenderSliverListLayout extends RenderLayoutBox {
     }
 
     late DateTime childLayoutStart;
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       childLayoutStart = DateTime.now();
     }
 
     child.layout(childConstraints, parentUsesSize: true);
 
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       DateTime childLayoutEnd = DateTime.now();
       childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch -
           childLayoutStart.microsecondsSinceEpoch);
@@ -191,7 +200,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
 
     didLayout();
 
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       PerformanceTiming.instance().mark(PERF_SILVER_LAYOUT_END,
           uniqueId: hashCode,
           startTime:
@@ -208,16 +217,42 @@ class RenderSliverListLayout extends RenderLayoutBox {
 
     if (firstChild != null) {
       late DateTime childPaintStart;
-      if (kProfileMode) {
+      if (kProfileMode && PerformanceTiming.enabled()) {
         childPaintStart = DateTime.now();
       }
       context.paintChild(firstChild!, offset);
-      if (kProfileMode) {
+      if (kProfileMode && PerformanceTiming.enabled()) {
         DateTime childPaintEnd = DateTime.now();
         childPaintDuration += (childPaintEnd.microsecondsSinceEpoch -
             childPaintStart.microsecondsSinceEpoch);
       }
     }
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    // The x, y parameters have the top left of the node's box as the origin.
+    // Get the sliver content scrolling offset.
+    final Offset currentOffset = Offset(scrollLeft, scrollTop);
+
+    // The z-index needs to be sorted, and higher-level nodes are processed first.
+    for (int i = paintingOrder.length - 1; i >= 0; i--) {
+      RenderBox child = paintingOrder[i];
+      // Ignore detached render object.
+      if (!child.attached) continue;
+
+      final ContainerBoxParentData childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+      final bool isHit = result.addWithPaintOffset(
+        offset: childParentData.offset + currentOffset,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset transformed) {
+          return child.hitTest(result, position: transformed);
+        },
+      );
+      if (isHit) return true;
+    }
+
+    return false;
   }
 
   Offset getChildScrollOffset(RenderObject child, Offset offset) {

@@ -26,6 +26,10 @@ class TextNode : public Node {
   JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
  private:
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(nodeName);
+
+  DEFINE_PROTOTYPE_PROPERTY(data);
+  DEFINE_PROTOTYPE_PROPERTY(nodeValue);
   friend TextNodeInstance;
 };
 
@@ -38,13 +42,12 @@ class TextNodeInstance : public NodeInstance {
   std::string toString();
 
  private:
-  DEFINE_HOST_CLASS_PROPERTY(3, data, nodeValue, nodeName);
   JSValue internalGetTextContent() override;
   void internalSetTextContent(JSValue content) override;
   friend TextNode;
   friend Node;
 
-  JSValue m_data{JS_NULL};
+  std::string m_data;
 };
 
 }  // namespace kraken::binding::qjs

@@ -37,10 +37,8 @@ class _RunMetrics {
 class RenderFlowLayout extends RenderLayoutBox {
   RenderFlowLayout({
     List<RenderBox>? children,
-    required RenderStyle renderStyle,
-  }) : super(
-    renderStyle: renderStyle,
-  ) {
+    required CSSRenderStyle renderStyle,
+  }) : super(renderStyle: renderStyle) {
     addAll(children);
   }
 
@@ -174,6 +172,13 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   /// Line boxes of flow layout
   List<_RunMetrics> lineBoxMetrics = <_RunMetrics>[];
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    lineBoxMetrics.clear();
+  }
 
   @override
   void setupParentData(RenderBox child) {
@@ -389,7 +394,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   @override
   void performLayout() {
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       childLayoutDuration = 0;
       PerformanceTiming.instance()
         .mark(PERF_FLOW_LAYOUT_START, uniqueId: hashCode);
@@ -402,7 +407,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       needsRelayout = false;
     }
 
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       DateTime flowLayoutEndTime = DateTime.now();
       int amendEndTime =
         flowLayoutEndTime.microsecondsSinceEpoch - childLayoutDuration;
@@ -474,20 +479,12 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     // If no child exists, stop layout.
     if (childCount == 0) {
-      Size layoutSize = getLayoutSize(
-        logicalContentWidth: logicalContentWidth,
-        logicalContentHeight: logicalContentHeight,
+      Size layoutContentSize = getContentSize(
         contentWidth: 0,
         contentHeight: 0,
       );
-      double constraintWidth = layoutSize.width;
-      double constraintHeight = layoutSize.height;
-
-      setMaxScrollableSize(constraintWidth, constraintHeight);
-      size = getBoxSize(Size(
-        constraintWidth,
-        constraintHeight,
-      ));
+      setMaxScrollableSize(layoutContentSize);
+      size = getBoxSize(layoutContentSize);
       return;
     }
 
@@ -562,7 +559,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       if (isChildNeedsLayout) {
         late DateTime childLayoutStart;
-        if (kProfileMode) {
+        if (kProfileMode && PerformanceTiming.enabled()) {
           childLayoutStart = DateTime.now();
         }
 
@@ -582,7 +579,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         }
         child.layout(childConstraints, parentUsesSize: true);
 
-        if (kProfileMode) {
+        if (kProfileMode && PerformanceTiming.enabled()) {
           DateTime childLayoutEnd = DateTime.now();
           childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch -
               childLayoutStart.microsecondsSinceEpoch);
@@ -603,19 +600,18 @@ class RenderFlowLayout extends RenderLayoutBox {
           }
         }
       }
-
-      // white-space property not only specifies whether and how white space is collapsed
-      // but only specifies whether lines may wrap at unforced soft wrap opportunities
-      // https://www.w3.org/TR/css-text-3/#line-breaking
-      bool isChildBlockLevel = _isChildBlockLevel(child);
-      bool isPreChildBlockLevel = _isChildBlockLevel(preChild);
-      bool isLineLengthExceedContainer = whiteSpace != WhiteSpace.nowrap &&
-          (runMainAxisExtent + childMainAxisExtent > mainAxisLimit);
-
       if (runChildren.isNotEmpty &&
-          (isChildBlockLevel ||
-              isPreChildBlockLevel ||
-              isLineLengthExceedContainer)) {
+          // Current is block.
+          (_isChildBlockLevel(child) ||
+          // Previous is block.
+          _isChildBlockLevel(preChild) ||
+          // Line length is exceed container.
+          // The white-space property not only specifies whether and how white space is collapsed
+          // but only specifies whether lines may wrap at unforced soft wrap opportunities
+          // https://www.w3.org/TR/css-text-3/#line-breaking
+          (whiteSpace != WhiteSpace.nowrap && (runMainAxisExtent + childMainAxisExtent > mainAxisLimit)) ||
+          // Previous is linebreak.
+          preChild is RenderLineBreak)) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
         runMetrics.add(_RunMetrics(
@@ -674,7 +670,7 @@ class RenderFlowLayout extends RenderLayoutBox {
           extentBelowBaseline,
           maxSizeBelowBaseline,
         );
-        runCrossAxisExtent = maxSizeAboveBaseline + maxSizeBelowBaseline;
+        runCrossAxisExtent = math.max(runCrossAxisExtent, maxSizeAboveBaseline + maxSizeBelowBaseline);
       } else {
         runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
       }
@@ -698,14 +694,10 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     final int runCount = runMetrics.length;
 
-    Size layoutSize = getLayoutSize(
-      logicalContentWidth: logicalContentWidth,
-      logicalContentHeight: logicalContentHeight,
+    Size layoutContentSize = getContentSize(
       contentWidth: mainAxisExtent,
       contentHeight: crossAxisExtent,
     );
-    double constraintWidth = layoutSize.width;
-    double constraintHeight = layoutSize.height;
 
     // Main and cross content size of flow layout
     double mainAxisContentSize = 0.0;
@@ -713,8 +705,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     switch (direction) {
       case Axis.horizontal:
-        Size logicalSize = Size(constraintWidth, constraintHeight);
-        size = getBoxSize(logicalSize);
+        size = getBoxSize(layoutContentSize);
         mainAxisContentSize = contentSize.width;
         crossAxisContentSize = contentSize.height;
         break;
@@ -912,9 +903,17 @@ class RenderFlowLayout extends RenderLayoutBox {
 
         double? childMarginLeft = 0;
         double? childMarginTop = 0;
+
+        RenderBoxModel? childRenderBoxModel;
         if (child is RenderBoxModel) {
-          childMarginLeft = child.renderStyle.marginLeft.computedValue;
-          childMarginTop = _getChildMarginTop(child);
+          childRenderBoxModel = child;
+        } else if (child is RenderPositionPlaceholder) {
+          childRenderBoxModel = child.positioned;
+        }
+
+        if (childRenderBoxModel is RenderBoxModel) {
+          childMarginLeft = childRenderBoxModel.renderStyle.marginLeft.computedValue;
+          childMarginTop = _getChildMarginTop(childRenderBoxModel);
         }
 
         // No need to add padding and border for scrolling content box.
@@ -1266,7 +1265,6 @@ class RenderFlowLayout extends RenderLayoutBox {
         childDisplay == CSSDisplay.inlineFlex;
     }
     return false;
-
   }
 
   RenderStyle? _getChildRenderStyle(RenderBox child) {
@@ -1282,8 +1280,8 @@ class RenderFlowLayout extends RenderLayoutBox {
   }
 
   bool _isChildBlockLevel(RenderBox? child) {
-    if (child != null && child is! RenderTextBox) {
-      RenderStyle? childRenderStyle = _getChildRenderStyle(child);
+    if (child is RenderBoxModel || child is RenderPositionPlaceholder) {
+      RenderStyle? childRenderStyle = _getChildRenderStyle(child!);
       if (childRenderStyle != null) {
         CSSDisplay? childDisplay = childRenderStyle.display;
         return childDisplay == CSSDisplay.block ||
@@ -1553,42 +1551,18 @@ class RenderFlowLayout extends RenderLayoutBox {
   }
 
   @override
-  int sortSiblingsByZIndex(RenderObject prev, RenderObject next) {
-    CSSPositionType prevPosition = prev is RenderBoxModel
-      ? prev.renderStyle.position
-      : CSSPositionType.static;
-    CSSPositionType nextPosition = next is RenderBoxModel
-      ? next.renderStyle.position
-      : CSSPositionType.static;
-    // Place positioned element after non positioned element
-    if (prevPosition == CSSPositionType.static &&
-      nextPosition != CSSPositionType.static) {
-      return -1;
-    }
-    if (prevPosition != CSSPositionType.static &&
-      nextPosition == CSSPositionType.static) {
-      return 1;
-    }
-    int prevZIndex =
-      prev is RenderBoxModel ? (prev.renderStyle.zIndex ?? 0) : 0;
-    int nextZIndex =
-      next is RenderBoxModel ? (next.renderStyle.zIndex ?? 0) : 0;
-    return prevZIndex - nextZIndex;
-  }
-
-  @override
   void performPaint(PaintingContext context, Offset offset) {
     for (int i = 0; i < paintingOrder.length; i++) {
       RenderObject child = paintingOrder[i];
       if (child is! RenderPositionPlaceholder) {
         late DateTime childPaintStart;
-        if (kProfileMode) {
+        if (kProfileMode && PerformanceTiming.enabled()) {
           childPaintStart = DateTime.now();
         }
         final RenderLayoutParentData childParentData =
             child.parentData as RenderLayoutParentData;
         context.paintChild(child, childParentData.offset + offset);
-        if (kProfileMode) {
+        if (kProfileMode && PerformanceTiming.enabled()) {
           DateTime childPaintEnd = DateTime.now();
           childPaintDuration += (childPaintEnd.microsecondsSinceEpoch -
               childPaintStart.microsecondsSinceEpoch);
@@ -1607,7 +1581,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 class RenderRepaintBoundaryFlowLayout extends RenderFlowLayout {
   RenderRepaintBoundaryFlowLayout({
     List<RenderBox>? children,
-    required RenderStyle renderStyle,
+    required CSSRenderStyle renderStyle,
   }) : super(
     children: children,
     renderStyle: renderStyle,

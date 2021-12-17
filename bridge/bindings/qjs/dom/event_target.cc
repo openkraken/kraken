@@ -23,8 +23,8 @@ std::once_flag kEventTargetInitFlag;
 void bindEventTarget(std::unique_ptr<JSContext>& context) {
   auto* constructor = EventTarget::instance(context.get());
   // Set globalThis and Window's prototype to EventTarget's prototype to support EventTarget methods in global.
-  JS_SetPrototype(context->ctx(), context->global(), constructor->classObject);
-  context->defineGlobalProperty("EventTarget", constructor->classObject);
+  JS_SetPrototype(context->ctx(), context->global(), constructor->jsObject);
+  context->defineGlobalProperty("EventTarget", constructor->jsObject);
 }
 
 JSClassID EventTarget::kEventTargetClassId{0};
@@ -36,7 +36,7 @@ EventTarget::EventTarget(JSContext* context) : HostClass(context, "EventTarget")
 
 JSValue EventTarget::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
   auto eventTarget = new EventTargetInstance(this, kEventTargetClassId, "EventTarget");
-  return eventTarget->instanceObject;
+  return eventTarget->jsObject;
 }
 
 JSClassID EventTarget::classId() {
@@ -62,39 +62,31 @@ JSValue EventTarget::addEventListener(QjsContext* ctx, JSValue this_val, int arg
   JSValue eventTypeValue = argv[0];
   JSValue callback = argv[1];
 
-  if (!JS_IsString(eventTypeValue)) {
-    return JS_ThrowTypeError(ctx, "Failed to addEventListener: eventName should be an string.");
-  }
-
-  if (!JS_IsObject(callback)) {
-    return JS_ThrowTypeError(ctx, "Failed to addEventListener: callback should be an function.");
-  }
-
-  if (!JS_IsFunction(ctx, callback)) {
-    return JS_ThrowTypeError(ctx, "Failed to addEventListener: callback should be an function.");
+  if (!JS_IsString(eventTypeValue) || !JS_IsObject(callback) || !JS_IsFunction(ctx, callback)) {
+    return JS_UNDEFINED;
   }
 
   JSAtom eventTypeAtom = JS_ValueToAtom(ctx, eventTypeValue);
 
   // Init list.
-  if (!JS_HasProperty(ctx, eventTargetInstance->m_eventHandlers, eventTypeAtom)) {
+  if (!JS_HasProperty(ctx, eventTargetInstance->m_eventHandlers.value(), eventTypeAtom)) {
     JS_DupAtom(ctx, eventTypeAtom);
     auto* atomJob = new AtomJob{eventTypeAtom};
     list_add_tail(&atomJob->link, &eventTargetInstance->m_context->atom_job_list);
-    JS_SetProperty(ctx, eventTargetInstance->m_eventHandlers, eventTypeAtom, JS_NewArray(ctx));
+    JS_SetProperty(ctx, eventTargetInstance->m_eventHandlers.value(), eventTypeAtom, JS_NewArray(ctx));
   }
 
-  JSValue eventHandlers = JS_GetProperty(ctx, eventTargetInstance->m_eventHandlers, eventTypeAtom);
+  JSValue eventHandlers = JS_GetProperty(ctx, eventTargetInstance->m_eventHandlers.value(), eventTypeAtom);
   int32_t eventHandlerLen = arrayGetLength(ctx, eventHandlers);
 
   // Dart needs to be notified for the first registration event.
-  if (eventHandlerLen == 0 || JS_HasProperty(ctx, eventTargetInstance->m_propertyEventHandler, eventTypeAtom)) {
+  if (eventHandlerLen == 0 || JS_HasProperty(ctx, eventTargetInstance->m_propertyEventHandler.value(), eventTypeAtom)) {
     int32_t contextId = eventTargetInstance->prototype()->contextId();
 
     NativeString args_01{};
     buildUICommandArgs(ctx, eventTypeValue, args_01);
 
-    foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetInstance->eventTargetId, UICommand::addEvent, args_01, nullptr);
+    foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetInstance->m_eventTargetId, UICommand::addEvent, args_01, nullptr);
   }
   arrayPushValue(ctx, eventHandlers, callback);
   JS_FreeAtom(ctx, eventTypeAtom);
@@ -116,26 +108,18 @@ JSValue EventTarget::removeEventListener(QjsContext* ctx, JSValue this_val, int 
   JSValue eventTypeValue = argv[0];
   JSValue callback = argv[1];
 
-  if (!JS_IsString(eventTypeValue)) {
+  if (!JS_IsString(eventTypeValue) || !JS_IsObject(callback) || !JS_IsObject(callback)) {
     return JS_ThrowTypeError(ctx, "Failed to removeEventListener: eventName should be an string.");
-  }
-
-  if (!JS_IsObject(callback)) {
-    return JS_ThrowTypeError(ctx, "Failed to removeEventListener: callback should be an function.");
-  }
-
-  if (!JS_IsFunction(ctx, callback)) {
-    return JS_ThrowTypeError(ctx, "Failed to removeEventListener: callback should be an function.");
   }
 
   JSAtom eventTypeAtom = JS_ValueToAtom(ctx, eventTypeValue);
 
-  if (!JS_HasProperty(ctx, eventTargetInstance->m_eventHandlers, eventTypeAtom)) {
+  if (!JS_HasProperty(ctx, eventTargetInstance->m_eventHandlers.value(), eventTypeAtom)) {
     JS_FreeAtom(ctx, eventTypeAtom);
     return JS_UNDEFINED;
   }
 
-  JSValue eventHandlers = JS_GetProperty(ctx, eventTargetInstance->m_eventHandlers, eventTypeAtom);
+  JSValue eventHandlers = JS_GetProperty(ctx, eventTargetInstance->m_eventHandlers.value(), eventTypeAtom);
   int32_t targetIdx = arrayFindIdx(ctx, eventHandlers, callback);
 
   if (targetIdx != -1) {
@@ -144,14 +128,14 @@ JSValue EventTarget::removeEventListener(QjsContext* ctx, JSValue this_val, int 
 
   int32_t eventHandlersLen = arrayGetLength(ctx, eventHandlers);
 
-  if (eventHandlersLen && JS_HasProperty(ctx, eventTargetInstance->m_propertyEventHandler, eventTypeAtom)) {
+  if (eventHandlersLen && JS_HasProperty(ctx, eventTargetInstance->m_propertyEventHandler.value(), eventTypeAtom)) {
     // Dart needs to be notified for handles is empty.
     int32_t contextId = eventTargetInstance->prototype()->contextId();
 
     NativeString args_01{};
     buildUICommandArgs(ctx, eventTypeValue, args_01);
 
-    foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetInstance->eventTargetId, UICommand::removeEvent, args_01, nullptr);
+    foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetInstance->m_eventTargetId, UICommand::removeEvent, args_01, nullptr);
   }
 
   JS_FreeAtom(ctx, eventTypeAtom);
@@ -179,7 +163,7 @@ bool EventTargetInstance::dispatchEvent(EventInstance* event) {
   std::string eventType = toUTF8(u16EventType);
 
   // protect this util event trigger finished.
-  JS_DupValue(m_ctx, instanceObject);
+  JS_DupValue(m_ctx, jsObject);
 
   internalDispatchEvent(event);
 
@@ -199,7 +183,7 @@ bool EventTargetInstance::dispatchEvent(EventInstance* event) {
     }
   }
 
-  JS_FreeValue(m_ctx, instanceObject);
+  JS_FreeValue(m_ctx, jsObject);
 
   return event->cancelled();
 }
@@ -217,14 +201,14 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
     if (eventInstance->propagationImmediatelyStopped())
       return;
     // The third params `thisObject` to null equals global object.
-    JSValue returnedValue = JS_Call(m_ctx, handler, JS_NULL, 1, &eventInstance->instanceObject);
+    JSValue returnedValue = JS_Call(m_ctx, handler, JS_NULL, 1, &eventInstance->jsObject);
     m_context->handleException(&returnedValue);
     m_context->drainPendingPromiseJobs();
     JS_FreeValue(m_ctx, returnedValue);
   };
 
-  if (JS_HasProperty(m_ctx, m_eventHandlers, eventTypeAtom)) {
-    JSValue eventHandlers = JS_GetProperty(m_ctx, m_eventHandlers, eventTypeAtom);
+  if (JS_HasProperty(m_ctx, m_eventHandlers.value(), eventTypeAtom)) {
+    JSValue eventHandlers = JS_GetProperty(m_ctx, m_eventHandlers.value(), eventTypeAtom);
     int32_t len = arrayGetLength(m_ctx, eventHandlers);
 
     for (int i = 0; i < len; i++) {
@@ -237,17 +221,17 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
   }
 
   // Dispatch event listener white by 'on' prefix property.
-  if (JS_HasProperty(m_ctx, m_propertyEventHandler, eventTypeAtom)) {
+  if (JS_HasProperty(m_ctx, m_propertyEventHandler.value(), eventTypeAtom)) {
     if (eventType == "error") {
       auto _dispatchErrorEvent = [&eventInstance, this, eventType](JSValue& handler) {
-        JSValue error = JS_GetPropertyStr(m_ctx, eventInstance->instanceObject, "error");
+        JSValue error = JS_GetPropertyStr(m_ctx, eventInstance->jsObject, "error");
         JSValue messageValue = JS_GetPropertyStr(m_ctx, error, "message");
         JSValue lineNumberValue = JS_GetPropertyStr(m_ctx, error, "lineNumber");
         JSValue fileNameValue = JS_GetPropertyStr(m_ctx, error, "fileName");
         JSValue columnValue = JS_NewUint32(m_ctx, 0);
 
         JSValue args[]{messageValue, fileNameValue, lineNumberValue, columnValue, error};
-        JS_Call(m_ctx, handler, eventInstance->instanceObject, 5, args);
+        JS_Call(m_ctx, handler, eventInstance->jsObject, 5, args);
         m_context->drainPendingPromiseJobs();
 
         JS_FreeValue(m_ctx, error);
@@ -256,11 +240,11 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
         JS_FreeValue(m_ctx, lineNumberValue);
         JS_FreeValue(m_ctx, columnValue);
       };
-      JSValue v = JS_GetProperty(m_ctx, m_propertyEventHandler, eventTypeAtom);
+      JSValue v = JS_GetProperty(m_ctx, m_propertyEventHandler.value(), eventTypeAtom);
       _dispatchErrorEvent(v);
       JS_FreeValue(m_ctx, v);
     } else {
-      JSValue v = JS_GetProperty(m_ctx, m_propertyEventHandler, eventTypeAtom);
+      JSValue v = JS_GetProperty(m_ctx, m_propertyEventHandler.value(), eventTypeAtom);
       _dispatchEvent(v);
       JS_FreeValue(m_ctx, v);
     }
@@ -273,23 +257,17 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
   return eventInstance->cancelled();
 }
 
-#if IS_TEST
-JSValue EventTarget::__kraken_clear_event_listener(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
-#endif
-
 EventTargetInstance::EventTargetInstance(EventTarget* eventTarget, JSClassID classId, JSClassExoticMethods& exoticMethods, std::string name)
     : Instance(eventTarget, name, &exoticMethods, classId, finalize) {
-  eventTargetId = globalEventTargetId++;
+  m_eventTargetId = globalEventTargetId++;
 }
 
 EventTargetInstance::EventTargetInstance(EventTarget* eventTarget, JSClassID classId, std::string name) : Instance(eventTarget, std::move(name), nullptr, classId, finalize) {
-  eventTargetId = globalEventTargetId++;
+  m_eventTargetId = globalEventTargetId++;
 }
 
 EventTargetInstance::EventTargetInstance(EventTarget* eventTarget, JSClassID classId, std::string name, int64_t eventTargetId)
-    : Instance(eventTarget, std::move(name), nullptr, classId, finalize), eventTargetId(eventTargetId) {}
+    : Instance(eventTarget, std::move(name), nullptr, classId, finalize), m_eventTargetId(eventTargetId) {}
 
 JSClassID EventTargetInstance::classId() {
   assert_m(false, "classId is not implemented");
@@ -297,13 +275,11 @@ JSClassID EventTargetInstance::classId() {
 }
 
 EventTargetInstance::~EventTargetInstance() {
-  foundation::UICommandBuffer::instance(m_contextId)->addCommand(eventTargetId, UICommand::disposeEventTarget, nullptr, false);
+  foundation::UICommandBuffer::instance(m_contextId)->addCommand(m_eventTargetId, UICommand::disposeEventTarget, nullptr, false);
 #if FLUTTER_BACKEND
   getDartMethod()->flushUICommand();
+  delete nativeEventTarget;
 #endif
-  JS_FreeValue(m_ctx, m_properties);
-  JS_FreeValue(m_ctx, m_eventHandlers);
-  JS_FreeValue(m_ctx, m_propertyEventHandler);
 }
 
 int EventTargetInstance::hasProperty(QjsContext* ctx, JSValue obj, JSAtom atom) {
@@ -322,14 +298,14 @@ int EventTargetInstance::hasProperty(QjsContext* ctx, JSValue obj, JSAtom atom) 
     return !JS_IsNull(eventTarget->getPropertyHandler(p));
   }
 
-  return JS_HasProperty(ctx, eventTarget->m_properties, atom);
+  return JS_HasProperty(ctx, eventTarget->m_properties.value(), atom);
 }
 
 JSValue EventTargetInstance::getProperty(QjsContext* ctx, JSValue obj, JSAtom atom, JSValue receiver) {
   auto* eventTarget = static_cast<EventTargetInstance*>(JS_GetOpaque(obj, JSValueGetClassId(obj)));
-  JSValue prototype = JS_GetPrototype(ctx, eventTarget->instanceObject);
+  JSValue prototype = JS_GetPrototype(ctx, eventTarget->jsObject);
   if (JS_HasProperty(ctx, prototype, atom)) {
-    JSValue ret = JS_GetPropertyInternal(ctx, prototype, atom, eventTarget->instanceObject, 0);
+    JSValue ret = JS_GetPropertyInternal(ctx, prototype, atom, eventTarget->jsObject, 0);
     JS_FreeValue(ctx, prototype);
     return ret;
   }
@@ -344,12 +320,12 @@ JSValue EventTargetInstance::getProperty(QjsContext* ctx, JSValue obj, JSAtom at
     return eventTarget->getPropertyHandler(p);
   }
 
-  if (JS_HasProperty(ctx, eventTarget->m_properties, atom)) {
-    return JS_GetProperty(ctx, eventTarget->m_properties, atom);
+  if (JS_HasProperty(ctx, eventTarget->m_properties.value(), atom)) {
+    return JS_GetProperty(ctx, eventTarget->m_properties.value(), atom);
   }
 
   // For plugin elements, try to auto generate properties and functions from dart response.
-  if (isJavaScriptExtensionElementInstance(eventTarget->context(), eventTarget->instanceObject)) {
+  if (isJavaScriptExtensionElementInstance(eventTarget->context(), eventTarget->jsObject)) {
     const char* cmethod = JS_AtomToCString(eventTarget->m_ctx, atom);
     // Property starts with underscore are taken as private property in javascript object.
     if (cmethod[0] == '_') {
@@ -366,6 +342,27 @@ JSValue EventTargetInstance::getProperty(QjsContext* ctx, JSValue obj, JSAtom at
 
 int EventTargetInstance::setProperty(QjsContext* ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver, int flags) {
   auto* eventTarget = static_cast<EventTargetInstance*>(JS_GetOpaque(obj, JSValueGetClassId(obj)));
+  JSValue prototype = JS_GetPrototype(ctx, eventTarget->jsObject);
+
+  // Check there are setter functions on prototype.
+  if (JS_HasProperty(ctx, prototype, atom)) {
+    // Read setter function from prototype Object.
+    JSPropertyDescriptor descriptor;
+    JS_GetOwnProperty(ctx, &descriptor, prototype, atom);
+    JSValue setterFunc = descriptor.setter;
+    assert_m(JS_IsFunction(ctx, setterFunc), "Setter on prototype should be an function.");
+    JSValue ret = JS_Call(ctx, setterFunc, eventTarget->jsObject, 1, &value);
+    if (JS_IsException(ret))
+      return -1;
+
+    JS_FreeValue(ctx, ret);
+    JS_FreeValue(ctx, descriptor.setter);
+    JS_FreeValue(ctx, descriptor.getter);
+    JS_FreeValue(ctx, prototype);
+    return 1;
+  }
+
+  JS_FreeValue(ctx, prototype);
 
   JSValue atomString = JS_AtomToString(ctx, atom);
   JSString* p = JS_VALUE_GET_STRING(atomString);
@@ -373,19 +370,19 @@ int EventTargetInstance::setProperty(QjsContext* ctx, JSValue obj, JSAtom atom, 
   if (!p->is_wide_char && p->u.str8[0] == 'o' && p->u.str8[1] == 'n') {
     eventTarget->setPropertyHandler(p, value);
   } else {
-    if (!JS_HasProperty(ctx, eventTarget->m_properties, atom)) {
+    if (!JS_HasProperty(ctx, eventTarget->m_properties.value(), atom)) {
       auto* atomJob = new AtomJob{atom};
       list_add_tail(&atomJob->link, &eventTarget->m_context->atom_job_list);
       // Increase one reference count for atom to hold this atom value until eventTarget disposed.
       JS_DupAtom(ctx, atom);
     }
 
-    JS_SetProperty(ctx, eventTarget->m_properties, atom, JS_DupValue(ctx, value));
+    JS_SetProperty(ctx, eventTarget->m_properties.value(), atom, JS_DupValue(ctx, value));
 
-    if (isJavaScriptExtensionElementInstance(eventTarget->context(), eventTarget->instanceObject) && !p->is_wide_char && p->u.str8[0] != '_') {
-      NativeString* args_01 = atomToNativeString(ctx, atom);
-      NativeString* args_02 = jsValueToNativeString(ctx, value);
-      foundation::UICommandBuffer::instance(eventTarget->m_contextId)->addCommand(eventTarget->eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+    if (isJavaScriptExtensionElementInstance(eventTarget->context(), eventTarget->jsObject) && !p->is_wide_char && p->u.str8[0] != '_') {
+      std::unique_ptr<NativeString> args_01 = atomToNativeString(ctx, atom);
+      std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, value);
+      foundation::UICommandBuffer::instance(eventTarget->m_contextId)->addCommand(eventTarget->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
     }
   }
 
@@ -406,7 +403,7 @@ JSValue EventTargetInstance::callNativeMethods(const char* method, int32_t argc,
   std::u16string methodString;
   fromUTF8(method, methodString);
 
-  NativeString m{reinterpret_cast<const uint16_t*>(methodString.c_str()), static_cast<int32_t>(methodString.size())};
+  NativeString m{reinterpret_cast<const uint16_t*>(methodString.c_str()), static_cast<uint32_t>(methodString.size())};
 
   NativeValue nativeValue{};
   nativeEventTarget->callNativeMethods(nativeEventTarget, &nativeValue, &m, argc, argv);
@@ -425,7 +422,7 @@ void EventTargetInstance::setPropertyHandler(JSString* p, JSValue value) {
   if (JS_IsNull(value)) {
     JS_FreeAtom(m_ctx, atom);
     list_del(&atomJob->link);
-    JS_DeleteProperty(m_ctx, m_propertyEventHandler, atom, 0);
+    JS_DeleteProperty(m_ctx, m_propertyEventHandler.value(), atom, 0);
     return;
   }
 
@@ -436,14 +433,13 @@ void EventTargetInstance::setPropertyHandler(JSString* p, JSValue value) {
   }
 
   JSValue newCallback = JS_DupValue(m_ctx, value);
-  JS_SetProperty(m_ctx, m_propertyEventHandler, atom, newCallback);
-
-  int32_t eventHandlerLen = arrayGetLength(m_ctx, m_eventHandlers);
+  JS_SetProperty(m_ctx, m_propertyEventHandler.value(), atom, newCallback);
+  int32_t eventHandlerLen = arrayGetLength(m_ctx, m_eventHandlers.value());
   if (eventHandlerLen == 0) {
     int32_t contextId = m_context->getContextId();
-    NativeString* args_01 = atomToNativeString(m_ctx, atom);
+    std::unique_ptr<NativeString> args_01 = atomToNativeString(m_ctx, atom);
     int32_t type = JS_IsFunction(m_ctx, value) ? UICommand::addEvent : UICommand::removeEvent;
-    foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetId, type, *args_01, nullptr);
+    foundation::UICommandBuffer::instance(contextId)->addCommand(m_eventTargetId, type, *args_01, nullptr);
   }
 }
 
@@ -451,10 +447,10 @@ JSValue EventTargetInstance::getPropertyHandler(JSString* p) {
   char eventType[p->len + 1 - 2];
   memcpy(eventType, &p->u.str8[2], p->len + 1 - 2);
   JSAtom atom = JS_NewAtom(m_ctx, eventType);
-  if (!JS_HasProperty(m_ctx, m_propertyEventHandler, atom)) {
+  if (!JS_HasProperty(m_ctx, m_propertyEventHandler.value(), atom)) {
     return JS_NULL;
   }
-  return JS_GetProperty(m_ctx, m_propertyEventHandler, atom);
+  return JS_GetProperty(m_ctx, m_propertyEventHandler.value(), atom);
 }
 
 void EventTargetInstance::finalize(JSRuntime* rt, JSValue val) {
@@ -469,27 +465,18 @@ JSValue EventTargetInstance::getNativeProperty(const char* prop) {
   return result;
 }
 
-void EventTargetInstance::gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
-  // Tell gc eventTargetInstance have these properties.
-  // Should check object is already inited before gc mark.
-  if (JS_IsObject(m_eventHandlers))
-    JS_MarkValue(rt, m_eventHandlers, mark_func);
-  if (JS_IsObject(m_propertyEventHandler))
-    JS_MarkValue(rt, m_propertyEventHandler, mark_func);
-  if (JS_IsObject(m_properties))
-    JS_MarkValue(rt, m_properties, mark_func);
-}
+void EventTargetInstance::gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {}
 
 void EventTargetInstance::copyNodeProperties(EventTargetInstance* newNode, EventTargetInstance* referenceNode) {
   QjsContext* ctx = referenceNode->m_ctx;
-  JSValue propKeys = objectGetKeys(ctx, referenceNode->m_properties);
+  JSValue propKeys = objectGetKeys(ctx, referenceNode->m_properties.value());
   uint32_t propKeyLen = arrayGetLength(ctx, propKeys);
 
   for (int i = 0; i < propKeyLen; i++) {
     JSValue k = JS_GetPropertyUint32(ctx, propKeys, i);
     JSAtom kt = JS_ValueToAtom(ctx, k);
-    JSValue v = JS_GetProperty(ctx, referenceNode->m_properties, kt);
-    JS_SetProperty(ctx, newNode->m_properties, kt, v);
+    JSValue v = JS_GetProperty(ctx, referenceNode->m_properties.value(), kt);
+    JS_SetProperty(ctx, newNode->m_properties.value(), kt, JS_DupValue(ctx, v));
 
     JS_FreeAtom(ctx, kt);
     JS_FreeValue(ctx, k);
@@ -511,7 +498,7 @@ void NativeEventTarget::dispatchEventImpl(NativeEventTarget* nativeEventTarget, 
   EventInstance* eventInstance = Event::buildEventInstance(eventType, context, nativeEvent, isCustomEvent == 1);
   eventInstance->nativeEvent->target = eventTargetInstance;
   eventTargetInstance->dispatchEvent(eventInstance);
-  JS_FreeValue(context->ctx(), eventInstance->instanceObject);
+  JS_FreeValue(context->ctx(), eventInstance->jsObject);
 }
 
 }  // namespace kraken::binding::qjs

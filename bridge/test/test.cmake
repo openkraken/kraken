@@ -26,15 +26,17 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     ./bindings/qjs/host_class_test.cc
     ./bindings/qjs/dom/event_target_test.cc
     ./bindings/qjs/dom/node_test.cc
+    ./bindings/qjs/dom/event_test.cc
     ./bindings/qjs/dom/element_test.cc
     ./bindings/qjs/dom/document_test.cc
     ./bindings/qjs/dom/text_node_test.cc
     ./bindings/qjs/bom/window_test.cc
     ./bindings/qjs/dom/custom_event_test.cc
+    ./bindings/qjs/module_manager_test.cc
   )
 
   ### kraken_unit_test executable
-  add_executable(kraken_unit_test ${KRAKEN_UNIT_TEST_SOURCE} ${KRAKEN_TEST_SOURCE} ${BRIDGE_SOURCE} ../bindings/qjs/html_parser.cc ../bindings/qjs/html_parser.h)
+  add_executable(kraken_unit_test ${KRAKEN_UNIT_TEST_SOURCE} ${KRAKEN_TEST_SOURCE} ${BRIDGE_SOURCE} ../bindings/qjs/html_parser.cc ../bindings/qjs/html_parser.h ../bindings/qjs/module_manager_test.cc)
   target_include_directories(kraken_unit_test PUBLIC ./third_party/googletest/googletest/include ${BRIDGE_INCLUDE})
   target_link_libraries(kraken_unit_test gtest gtest_main ${BRIDGE_LINK_LIBS})
 

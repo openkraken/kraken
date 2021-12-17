@@ -4,7 +4,6 @@
  */
 import 'dart:io';
 import 'dart:ui';
-import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -20,8 +19,6 @@ import 'package:kraken/module.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/src/dom/element_registry.dart';
-import 'package:kraken/src/dom/element_manager.dart';
-import 'package:kraken/bridge.dart';
 
 /// Get context of current widget.
 typedef GetContext = BuildContext Function();
@@ -68,11 +65,9 @@ abstract class WidgetElement extends dom.Element {
   late BuildOwner _buildOwner;
   late Widget _widget;
   _KrakenAdapterWidgetPropertiesState? _propertiesState;
-  WidgetElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, dom.ElementManager elementManager)
+  WidgetElement(dom.EventTargetContext? context)
       : super(
-      targetId,
-      nativeEventTarget,
-      elementManager,
+      context,
       isIntrinsicBox: true,
       defaultStyle: _defaultStyle
   );
@@ -164,17 +159,8 @@ class Kraken extends StatefulWidget {
   // the height of krakenWidget
   final double? viewportHeight;
 
-  // The initial URL to load.
-  final String? bundleURL;
-
-  // The initial assets path to load.
-  final String? bundlePath;
-
-  // The initial raw javascript content to load.
-  final String? bundleContent;
-
-  // The initial raw bytecode to load.
-  final Uint8List? bundleByteCode;
+  //  The initial bundle to load.
+  final KrakenBundle? bundle;
 
   // The animationController of Flutter Route object.
   // Pass this object to KrakenWidget to make sure Kraken execute JavaScripts scripts after route transition animation completed.
@@ -186,6 +172,11 @@ class Kraken extends StatefulWidget {
 
   // A method channel for receiving messaged from JavaScript code and sending message to JavaScript.
   final KrakenMethodChannel? javaScriptChannel;
+
+  // Register the RouteObserver to observer page navigation.
+  // This is useful if you wants to pause kraken timers and callbacks when kraken widget are hidden by page route.
+  // https://api.flutter.dev/flutter/widgets/RouteObserver-class.html
+  final RouteObserver<ModalRoute<void>>? routeObserver;
 
   final LoadErrorHandler? onLoadError;
 
@@ -226,34 +217,66 @@ class Kraken extends StatefulWidget {
     defineElement(tagName.toUpperCase(), creator);
   }
 
+  loadBundle(KrakenBundle bundle) async {
+    await controller!.unload();
+    await controller!.loadBundle(
+        bundle: bundle
+    );
+    _evalBundle(controller!, animationController);
+  }
+
+  @deprecated
   loadContent(String bundleContent) async {
     await controller!.unload();
     await controller!.loadBundle(
-      bundleContent: bundleContent
+        bundle: KrakenBundle.fromContent(bundleContent)
     );
     _evalBundle(controller!, animationController);
   }
 
-  loadByteCode(Uint8List bytecode) async {
+  @deprecated
+  loadByteCode(Uint8List bundleByteCode) async {
     await controller!.unload();
     await controller!.loadBundle(
-      bundleByteCode: bytecode
+        bundle: KrakenBundle.fromBytecode(bundleByteCode)
     );
     _evalBundle(controller!, animationController);
   }
 
-  loadURL(String bundleURL) async {
+  @deprecated
+  loadURL(String bundleURL, { String? bundleContent, Uint8List? bundleByteCode }) async {
     await controller!.unload();
+
+    KrakenBundle bundle;
+    if (bundleByteCode != null) {
+      bundle = KrakenBundle.fromBytecode(bundleByteCode, url: bundleURL);
+    } else if (bundleContent != null) {
+      bundle = KrakenBundle.fromContent(bundleContent, url: bundleURL);
+    } else {
+      bundle = KrakenBundle.fromUrl(bundleURL);
+    }
+
     await controller!.loadBundle(
-      bundleURL: bundleURL
+        bundle: bundle
     );
     _evalBundle(controller!, animationController);
   }
 
-  loadPath(String bundlePath) async {
+  @deprecated
+  loadPath(String bundlePath, { String? bundleContent, Uint8List? bundleByteCode }) async {
     await controller!.unload();
+
+    KrakenBundle bundle;
+    if (bundleByteCode != null) {
+      bundle = KrakenBundle.fromBytecode(bundleByteCode, url: bundlePath);
+    } else if (bundleContent != null) {
+      bundle = KrakenBundle.fromContent(bundleContent, url: bundlePath);
+    } else {
+      bundle = KrakenBundle.fromUrl(bundlePath);
+    }
+
     await controller!.loadBundle(
-      bundlePath: bundlePath
+        bundle: bundle
     );
     _evalBundle(controller!, animationController);
   }
@@ -266,10 +289,7 @@ class Kraken extends StatefulWidget {
     Key? key,
     this.viewportWidth,
     this.viewportHeight,
-    this.bundleURL,
-    this.bundlePath,
-    this.bundleContent,
-    this.bundleByteCode,
+    this.bundle,
     this.onLoad,
     this.navigationDelegate,
     this.javaScriptChannel,
@@ -279,6 +299,7 @@ class Kraken extends StatefulWidget {
     // Kraken's http client interceptor.
     this.httpClientInterceptor,
     this.uriParser,
+    this.routeObserver,
     // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
     // Maybe got unexpected error when change to other values, use this at your own risk!
     // We will fixed this on next version released. (v0.6.0)
@@ -306,7 +327,7 @@ class Kraken extends StatefulWidget {
   _KrakenState createState() => _KrakenState();
 
 }
-class _KrakenState extends State<Kraken> {
+class _KrakenState extends State<Kraken> with RouteAware {
   Map<Type, Action<Intent>>? _actionMap;
 
   final FocusNode _focusNode = FocusNode();
@@ -381,6 +402,37 @@ class _KrakenState extends State<Kraken> {
   void _requestFocus() {
     _focusNode.requestFocus();
   }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.routeObserver != null) {
+      widget.routeObserver!.subscribe(this, ModalRoute.of(context)!);
+    }
+  }
+
+  // Resume call timer and callbacks when kraken widget change to visible.
+  @override
+  void didPopNext() {
+    assert(widget.controller != null);
+    widget.controller!.resume();
+  }
+
+  // Pause all timer and callbacks when kraken widget has been invisible. 
+  @override
+  void didPushNext() {
+    assert(widget.controller != null);
+    widget.controller!.pause();
+  }
+
+  @override
+  void dispose() {
+    if (widget.routeObserver != null) {
+      widget.routeObserver!.unsubscribe(this);
+    }
+    super.dispose();
+  }
+
 
   // Get the target platform.
   TargetPlatform _getTargetPlatform() {
@@ -820,7 +872,7 @@ class _KrakenState extends State<Kraken> {
     RenderObject? _rootRenderObject = context.findRenderObject();
     RenderViewportBox? renderViewportBox = _findRenderViewportBox(_rootRenderObject!);
     KrakenController controller = (renderViewportBox as RenderObjectWithControllerMixin).controller!;
-    dom.Element documentElement = controller.view.document!.documentElement;
+    dom.Element documentElement = controller.view.document.documentElement!;
     return documentElement;
   }
 
@@ -859,7 +911,7 @@ class _KrakenState extends State<Kraken> {
 }
 
 class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
-  /// Creates a widget that visually hides its child.
+  // Creates a widget that visually hides its child.
   const _KrakenRenderObjectWidget(
     Kraken widget,
     WidgetDelegate widgetDelegate,
@@ -891,9 +943,7 @@ This situation often happened when you trying creating kraken when FlutterView n
       viewportHeight,
       background: _krakenWidget.background,
       showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
-      bundleContent: _krakenWidget.bundleContent,
-      bundleURL: _krakenWidget.bundleURL,
-      bundlePath: _krakenWidget.bundlePath,
+      bundle: _krakenWidget.bundle,
       onLoad: _krakenWidget.onLoad,
       onLoadError: _krakenWidget.onLoadError,
       onJSError: _krakenWidget.onJSError,
@@ -910,9 +960,6 @@ This situation often happened when you trying creating kraken when FlutterView n
       PerformanceTiming.instance().mark(PERF_CONTROLLER_INIT_END);
     }
 
-    // FIXME: reset href when dart hot reload that href is prev href
-    controller.href = '';
-
     return controller.view.getRootRenderObject();
   }
 
@@ -928,23 +975,16 @@ This situation often happened when you trying creating kraken when FlutterView n
     double viewportWidth = _krakenWidget.viewportWidth ?? window.physicalSize.width / window.devicePixelRatio;
     double viewportHeight = _krakenWidget.viewportHeight ?? window.physicalSize.height / window.devicePixelRatio;
 
+    if (controller.view.document.documentElement == null) return;
+
     if (viewportWidthHasChanged) {
       controller.view.viewportWidth = viewportWidth;
-      controller.view.document!.documentElement.renderStyle.width = CSSLengthValue(viewportWidth, CSSLengthType.PX);
+      controller.view.document.documentElement!.renderStyle.width = CSSLengthValue(viewportWidth, CSSLengthType.PX);
     }
 
     if (viewportHeightHasChanged) {
       controller.view.viewportHeight = viewportHeight;
-      controller.view.document!.documentElement.renderStyle.height = CSSLengthValue(viewportHeight, CSSLengthType.PX);
-    }
-
-    if (viewportWidthHasChanged || viewportHeightHasChanged) {
-      traverseElement(controller.view.document!.documentElement, (element) {
-        if (element.isRendererAttached) {
-          element.style.flushPendingProperties();
-          element.renderBoxModel?.markNeedsLayout();
-        }
-      });
+      controller.view.document.documentElement!.renderStyle.height = CSSLengthValue(viewportHeight, CSSLengthType.PX);
     }
   }
 
@@ -969,7 +1009,8 @@ class _KrakenRenderObjectElement extends SingleChildRenderObjectElement {
 
     KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller!;
 
-    if (controller.bundleContent == null && controller.bundlePath == null && controller.bundleURL == null) {
+
+    if (controller.bundle == null || (controller.bundle?.content == null && controller.bundle?.bytecode == null && controller.bundle?.src == null)) {
       return;
     }
 

@@ -12,7 +12,7 @@ std::once_flag kBlobInitOnceFlag;
 
 void bindBlob(std::unique_ptr<JSContext>& context) {
   auto* constructor = Blob::instance(context.get());
-  context->defineGlobalProperty("Blob", constructor->classObject);
+  context->defineGlobalProperty("Blob", constructor->jsObject);
 }
 
 Blob::Blob(JSContext* context) : HostClass(context, "Blob") {
@@ -26,7 +26,7 @@ JSValue Blob::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue thi
   auto constructor = static_cast<Blob*>(JS_GetOpaque(func_obj, JSContext::kHostClassClassId));
   if (argc == 0) {
     auto blob = new BlobInstance(constructor);
-    return blob->instanceObject;
+    return blob->jsObject;
   }
 
   JSValue arrayValue = argv[0];
@@ -43,7 +43,7 @@ JSValue Blob::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue thi
   if (argc == 1 || JS_IsUndefined(optionValue)) {
     builder.append(*constructor->m_context, arrayValue);
     auto blob = new BlobInstance(constructor, builder.finalize());
-    return blob->instanceObject;
+    return blob->jsObject;
   }
 
   if (!JS_IsObject(optionValue)) {
@@ -65,23 +65,17 @@ JSValue Blob::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue thi
   JS_FreeCString(ctx, mimeType.c_str());
   JS_FreeAtom(ctx, mimeTypeKey);
 
-  return blob->instanceObject;
+  return blob->jsObject;
 }
 
-PROP_GETTER(BlobInstance, type)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Blob, type)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* blobInstance = static_cast<BlobInstance*>(JS_GetOpaque(this_val, Blob::kBlobClassID));
   return JS_NewString(blobInstance->m_ctx, blobInstance->mimeType.empty() ? "" : blobInstance->mimeType.c_str());
 }
-PROP_SETTER(BlobInstance, type)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
-PROP_GETTER(BlobInstance, size)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Blob, size)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* blobInstance = static_cast<BlobInstance*>(JS_GetOpaque(this_val, Blob::kBlobClassID));
   return JS_NewFloat64(blobInstance->m_ctx, blobInstance->_size);
-}
-PROP_SETTER(BlobInstance, size)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
 }
 
 JSValue Blob::arrayBuffer(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -90,7 +84,7 @@ JSValue Blob::arrayBuffer(QjsContext* ctx, JSValue this_val, int argc, JSValue* 
 
   auto blob = static_cast<BlobInstance*>(JS_GetOpaque(this_val, Blob::kBlobClassID));
 
-  JS_DupValue(ctx, blob->instanceObject);
+  JS_DupValue(ctx, blob->jsObject);
 
   auto* promiseContext = new PromiseContext{blob, blob->m_context, resolving_funcs[0], resolving_funcs[1], promise};
   auto callback = [](void* callbackContext, int32_t contextId, const char* errmsg) {
@@ -116,7 +110,7 @@ JSValue Blob::arrayBuffer(QjsContext* ctx, JSValue this_val, int argc, JSValue* 
     JS_FreeValue(ctx, promiseContext->resolveFunc);
     JS_FreeValue(ctx, promiseContext->rejectFunc);
     JS_FreeValue(ctx, arrayBuffer);
-    JS_FreeValue(ctx, blob->instanceObject);
+    JS_FreeValue(ctx, blob->jsObject);
     list_del(&promiseContext->link);
     delete promiseContext;
   };
@@ -154,16 +148,14 @@ JSValue Blob::slice(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) 
 
   if (start == 0 && end == blob->_data.size()) {
     auto newBlob = new BlobInstance(reinterpret_cast<Blob*>(blob->m_hostClass), std::move(blob->_data), mimeType);
-    JS_SetPrototype(blob->m_ctx, newBlob->instanceObject, blob->m_hostClass->prototype());
-    return newBlob->instanceObject;
+    return newBlob->jsObject;
   }
   std::vector<uint8_t> newData;
   newData.reserve(blob->_data.size() - (end - start));
   newData.insert(newData.begin(), blob->_data.begin() + start, blob->_data.end() - (blob->_data.size() - end));
 
   auto newBlob = new BlobInstance(reinterpret_cast<Blob*>(blob->m_hostClass), std::move(newData), mimeType);
-  JS_SetPrototype(blob->m_ctx, newBlob->instanceObject, blob->m_hostClass->prototype());
-  return newBlob->instanceObject;
+  return newBlob->jsObject;
 }
 
 JSValue Blob::text(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -171,7 +163,7 @@ JSValue Blob::text(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   JSValue promise = JS_NewPromiseCapability(ctx, resolving_funcs);
 
   auto blob = static_cast<BlobInstance*>(JS_GetOpaque(this_val, Blob::kBlobClassID));
-  JS_DupValue(ctx, blob->instanceObject);
+  JS_DupValue(ctx, blob->jsObject);
 
   auto* promiseContext = new PromiseContext{blob, blob->m_context, resolving_funcs[0], resolving_funcs[1], promise};
   auto callback = [](void* callbackContext, int32_t contextId, const char* errmsg) {
@@ -197,7 +189,7 @@ JSValue Blob::text(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
     JS_FreeValue(ctx, promiseContext->resolveFunc);
     JS_FreeValue(ctx, promiseContext->rejectFunc);
     JS_FreeValue(ctx, text);
-    JS_FreeValue(ctx, blob->instanceObject);
+    JS_FreeValue(ctx, blob->jsObject);
     list_del(&promiseContext->link);
     delete promiseContext;
   };
@@ -242,7 +234,7 @@ void BlobBuilder::append(JSContext& context, JSValue& value) {
       JS_FreeValue(context.ctx(), v);
     }
   } else if (JS_IsObject(value)) {
-    if (JS_IsInstanceOf(context.ctx(), value, Blob::instance(&context)->classObject)) {
+    if (JS_IsInstanceOf(context.ctx(), value, Blob::instance(&context)->jsObject)) {
       auto blob = static_cast<BlobInstance*>(JS_GetOpaque(value, Blob::kBlobClassID));
       if (blob == nullptr)
         return;

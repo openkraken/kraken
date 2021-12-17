@@ -2,12 +2,7 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
-import 'dart:ffi';
-
 import 'package:flutter/rendering.dart';
-import 'package:kraken/bridge.dart';
-import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 
@@ -18,8 +13,8 @@ const String RETURN_CHAR = '\r';
 const String TAB_CHAR = '\t';
 
 class TextNode extends Node {
-  TextNode(int targetId, Pointer<NativeEventTarget> nativeEventTarget, this._data, ElementManager elementManager)
-      : super(NodeType.TEXT_NODE, targetId, nativeEventTarget, elementManager);
+  TextNode(this._data, EventTargetContext? context)
+      : super(NodeType.TEXT_NODE, context);
 
   // Must be existed after text node is attached, and all text update will after text attached.
   RenderTextBox? _renderTextBox;
@@ -32,8 +27,6 @@ class TextNode extends Node {
 
     if (_d == null || _d.isEmpty) return '';
 
-    WhiteSpace whiteSpace = CSSText.resolveWhiteSpace(parentElement!.style[WHITE_SPACE]);
-
     /// https://drafts.csswg.org/css-text-3/#propdef-white-space
     /// The following table summarizes the behavior of the various white-space values:
     //
@@ -44,6 +37,7 @@ class TextNode extends Node {
     // pre-wrap  Preserve  Preserve  Wrap     Hang
     // pre-line  Preserve  Collapse  Wrap     Remove
     // break-spaces  Preserve  Preserve  Wrap  Wrap
+    WhiteSpace whiteSpace = parentElement!.renderStyle.whiteSpace;
     if (whiteSpace == WhiteSpace.pre ||
         whiteSpace == WhiteSpace.preLine ||
         whiteSpace == WhiteSpace.preWrap ||
@@ -116,12 +110,8 @@ class TextNode extends Node {
       KrakenRenderParagraph renderParagraph = _renderTextBox!.child as KrakenRenderParagraph;
       renderParagraph.markNeedsLayout();
 
-      RenderLayoutBox? parentRenderLayoutBox;
-      if (_parentElement.scrollingContentBox != null) {
-        parentRenderLayoutBox = _parentElement.scrollingContentBox!;
-      } else {
-        parentRenderLayoutBox = (_parentElement.renderBoxModel as RenderLayoutBox?)!;
-      }
+      RenderLayoutBox parentRenderLayoutBox = _parentElement.renderBoxModel as RenderLayoutBox;
+      parentRenderLayoutBox = parentRenderLayoutBox.renderScrollingContent ?? parentRenderLayoutBox;
       _setTextSizeType(parentRenderLayoutBox.widthSizeType, parentRenderLayoutBox.heightSizeType);
     }
   }
@@ -141,7 +131,7 @@ class TextNode extends Node {
     createRenderer();
 
     if (parent.renderBoxModel is RenderLayoutBox) {
-      RenderLayoutBox? parentRenderLayoutBox = parent.renderBoxModel as RenderLayoutBox;
+      RenderLayoutBox parentRenderLayoutBox = parent.renderBoxModel as RenderLayoutBox;
       parentRenderLayoutBox = parentRenderLayoutBox.renderScrollingContent ?? parentRenderLayoutBox;
       parentRenderLayoutBox.insert(_renderTextBox!, after: after);
       _applyTextStyle();

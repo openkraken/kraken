@@ -11,7 +11,7 @@ namespace kraken::binding::qjs {
 
 void bindDocumentFragment(std::unique_ptr<JSContext>& context) {
   auto* constructor = DocumentFragment::instance(context.get());
-  context->defineGlobalProperty("DocumentFragment", constructor->classObject);
+  context->defineGlobalProperty("DocumentFragment", constructor->jsObject);
 }
 
 std::once_flag kDocumentFragmentFlag;
@@ -28,12 +28,12 @@ JSClassID DocumentFragment::classId() {
 }
 
 JSValue DocumentFragment::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
-  return (new DocumentFragmentInstance(this))->instanceObject;
+  return (new DocumentFragmentInstance(this))->jsObject;
 }
 
 DocumentFragmentInstance::DocumentFragmentInstance(DocumentFragment* fragment)
     : NodeInstance(fragment, NodeType::DOCUMENT_FRAGMENT_NODE, DocumentInstance::instance(Document::instance(fragment->context())), DocumentFragment::classId(), "DocumentFragment") {
   setNodeFlag(DocumentFragmentInstance::NodeFlag::IsDocumentFragment);
-  foundation::UICommandBuffer::instance(m_contextId)->addCommand(eventTargetId, UICommand::createDocumentFragment, nativeEventTarget);
+  foundation::UICommandBuffer::instance(m_contextId)->addCommand(m_eventTargetId, UICommand::createDocumentFragment, nativeEventTarget);
 }
 }  // namespace kraken::binding::qjs
