@@ -52,27 +52,38 @@ class RenderTextBox extends RenderBox
     super.size = value;
   }
 
-  WhiteSpace? get whiteSpace {
-    return renderStyle.whiteSpace;
-  }
-
-  TextOverflow get overflow {
-    // Set line-clamp to number makes text-overflow ellipsis which takes priority over text-overflow
-    if (renderStyle.lineClamp != null && renderStyle.lineClamp! > 0) {
-      return TextOverflow.ellipsis;
-    } else if (renderStyle.effectiveOverflowX != CSSOverflowType.hidden || renderStyle.whiteSpace != WhiteSpace.nowrap) {
-      //  To make text overflow its container you have to set overflowX hidden and white-space: nowrap.
-      return TextOverflow.visible;
-    } else {
-      return renderStyle.textOverflow;
-    }
-  }
-
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! TextParentData) {
       child.parentData = TextParentData();
     }
+  }
+
+  int? get _maxLines {
+    int? lineClamp = renderStyle.lineClamp;
+    // Forcing a break after a set number of lines.
+    // https://drafts.csswg.org/css-overflow-3/#max-lines
+    if (lineClamp != null) {
+      return lineClamp;
+    }
+    // Force display single line when white-space is nowrap.
+    if (renderStyle.whiteSpace == WhiteSpace.nowrap) {
+      return 1;
+    }
+    return null;
+  }
+
+  double? get _lineHeight {
+    if (renderStyle.lineHeight.type != CSSLengthType.NORMAL) {
+      return renderStyle.lineHeight.computedValue;
+    }
+    return null;
+  }
+
+  TextSpan get _textSpan {
+    String clippedText = _getClippedText(data);
+    // FIXME(yuanyan): do not create text span every time.
+    return CSSTextMixin.createTextSpan(clippedText, renderStyle);
   }
 
   // Mirror debugNeedsLayout flag in Flutter to use in layout performance optimization
@@ -90,10 +101,11 @@ class RenderTextBox extends RenderBox
   }
 
   BoxConstraints getConstraints() {
-    if (whiteSpace == WhiteSpace.nowrap &&
-        overflow != TextOverflow.ellipsis) {
+    if (renderStyle.whiteSpace == WhiteSpace.nowrap &&
+        renderStyle.effectiveTextOverflow != TextOverflow.ellipsis) {
       return BoxConstraints();
     }
+
     double maxConstraintWidth = double.infinity;
     if (parent is RenderBoxModel) {
       RenderBoxModel parentRenderBoxModel = parent as RenderBoxModel;
@@ -136,19 +148,61 @@ class RenderTextBox extends RenderBox
         maxHeight: double.infinity);
   }
 
+  // Empty string is the minimum width character, use it as the base width
+  // to calculate the maximum characters to display in a certain width.
+  Size get minCharSize {
+    TextStyle textStyle = TextStyle(
+      fontFamilyFallback: renderStyle.fontFamily,
+      fontSize: renderStyle.fontSize.computedValue,
+      textBaseline: CSSText.getTextBaseLine(),
+      package: CSSText.getFontPackage(),
+      locale: CSSText.getLocale(),
+    );
+    TextPainter painter = TextPainter(
+      text: TextSpan(
+        text: ' ',
+        style: textStyle,
+      ),
+      textDirection: TextDirection.ltr
+    );
+    painter.layout();
+    return painter.size;
+  }
+
+  // Avoid to render the whole text when text overflows its parent and text is not
+  // displayed fully and parent is not scrollable to improve text layout performance.
+  String _getClippedText(String data) {
+    String clipText = data;
+    // Text only need to render in parent container's content area when
+    // white-space is nowrap and overflow is hidden/clip.
+    CSSOverflowType effectiveOverflowX = renderStyle.effectiveOverflowX;
+    if (renderStyle.whiteSpace == WhiteSpace.nowrap
+      && (effectiveOverflowX == CSSOverflowType.hidden
+        || effectiveOverflowX == CSSOverflowType.clip)
+    ) {
+      RenderBoxModel parentRenderBoxModel = parent as RenderBoxModel;
+      BoxConstraints? parentContentConstraints = parentRenderBoxModel.contentConstraints;
+      if (parentContentConstraints != null
+        && parentContentConstraints.maxWidth.isFinite) {
+
+        // Max character to display in parent's content area.
+        int maxDisplayCharCount = (parentContentConstraints.maxWidth / minCharSize.width).ceil();
+        if (data.length > maxDisplayCharCount) {
+          clipText = data.substring(0, maxDisplayCharCount);
+        }
+      }
+    }
+    return clipText;
+  }
+
   @override
   void performLayout() {
     if (child != null) {
-      // FIXME(yuanyan): do not create text span every time.
-      _renderParagraph.text = CSSTextMixin.createTextSpan(data, renderStyle);
-      _renderParagraph.overflow = overflow;
-      // Forcing a break after a set number of lines
-      // https://drafts.csswg.org/css-overflow-3/#max-lines
-      _renderParagraph.maxLines = renderStyle.lineClamp;
+      _renderParagraph.overflow = renderStyle.effectiveTextOverflow;
       _renderParagraph.textAlign = renderStyle.textAlign;
-      if (renderStyle.lineHeight.type != CSSLengthType.NORMAL) {
-        _renderParagraph.lineHeight = renderStyle.lineHeight.computedValue;
-      }
+      _renderParagraph.text = _textSpan;
+      _renderParagraph.maxLines = _maxLines;
+      _renderParagraph.lineHeight = _lineHeight;
 
       child!.layout(constraints, parentUsesSize: true);
       size = child!.size;
