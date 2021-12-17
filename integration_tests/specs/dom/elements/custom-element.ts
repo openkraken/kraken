@@ -40,15 +40,15 @@ describe('custom widget element', () => {
     simulateClick(20, 20);
   });
 
-  it('text node should be child of flutter container', () => {
+  it('text node should be child of flutter container', async () => {
     const container = document.createElement('flutter-container');
     const text = document.createTextNode('text');
     document.body.appendChild(container);
     container.appendChild(text);
-    snapshot();
+    await snapshot();
   });
 
-  it('element should be child of flutter container', () => {
+  it('element should be child of flutter container', async () => {
     const container = document.createElement('flutter-container');
     const element = document.createElement('div');
     element.style.width = '30px';
@@ -56,20 +56,20 @@ describe('custom widget element', () => {
     element.style.backgroundColor = 'red';
     container.appendChild(element);
     document.body.appendChild(container);
-    snapshot();
+    await snapshot();
   });
 
-  it('flutter widget should be child of flutter container', () => {
+  it('flutter widget should be child of flutter container', async () => {
     const container = document.createElement('flutter-container');
     const fluttetText = document.createElement('flutter-text');
     fluttetText.setAttribute('value', 'text');
     container.appendChild(fluttetText);
     document.body.appendChild(container);
 
-    snapshot();
+    await snapshot();
   });
 
-  it('flutter widget and dom node should be child of flutter container', () => {
+  it('flutter widget and dom node should be child of flutter container', async () => {
     const container = document.createElement('flutter-container');
     document.body.appendChild(container);
 
@@ -85,10 +85,10 @@ describe('custom widget element', () => {
     const text = document.createTextNode('text');
     container.appendChild(text);
 
-    snapshot();
+    await snapshot();
   });
 
-  it('flutter widget should be child of element', () => {
+  it('flutter widget should be child of element', async () => {
     const container = document.createElement('div');
     container.style.width = '100px';
     container.style.height = '100px';
@@ -98,10 +98,10 @@ describe('custom widget element', () => {
     container.appendChild(element);
     document.body.appendChild(container);
 
-    snapshot();
+    await snapshot();
   });
 
-  it('flutter widget should be child of element and the element should be child of flutter widget', () => {
+  it('flutter widget should be child of element and the element should be child of flutter widget', async () => {
     const container = document.createElement('flutter-container');
     document.body.appendChild(container);
 
@@ -112,10 +112,10 @@ describe('custom widget element', () => {
     fluttetText.setAttribute('value', 'text');
     childContainer.appendChild(fluttetText);
 
-    snapshot();
+    await snapshot();
   });
 
-  it('should work with waterfall-flow', () => {
+  it('should work with waterfall-flow', async () => {
     const flutterContainer = document.createElement('waterfall-flow');
     flutterContainer.style.height = '100vh';
     flutterContainer.style.display = 'block';
@@ -138,7 +138,7 @@ describe('custom widget element', () => {
       flutterContainer.appendChild(div);
     }
 
-    snapshot();
+    await snapshot();
   });
 });
 

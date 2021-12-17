@@ -259,11 +259,7 @@ abstract class WidgetElement extends dom.Element {
       parentElement = (parentNode as dom.Element).element;
     }
 
-    if (parentElement != null) {
-      renderObjectElement = _adaptor?.attachToRenderTree(rootWidgetElement.owner!, parentElement as RenderObjectElement, false);
-    } else {
-      renderObjectElement = _adaptor?.attachToRenderTree(rootWidgetElement.owner!, rootWidgetElement, true);
-    }
+    renderObjectElement = _adaptor?.attachToRenderTree(rootWidgetElement.owner!, (parentElement ?? rootWidgetElement) as RenderObjectElement, parentElement == null);
   }
 }
 
