@@ -4,7 +4,9 @@
  */
 
 #include "kraken_test_env.h"
+#include "bindings/qjs/dom/event_target.h"
 #include <sys/time.h>
+#include "kraken_bridge_test.h"
 #include <vector>
 
 #if defined(__linux__) || defined(__APPLE__)
@@ -87,8 +89,8 @@ static bool jsPool(ExecutionContext *context) {
         /* the timer expired */
         func = th->func;
         th->func = nullptr;
-        unlink_timer(ts, th);
         func(th->timer, th->contextId, nullptr);
+        unlink_timer(ts, th);
         return false;
       }
     }
@@ -103,4 +105,17 @@ void TEST_runLoop(ExecutionContext *context) {
     if (jsPool(context))
       break;
   }
+}
+
+void TEST_dispatchEvent(EventTargetInstance* eventTarget, const std::string type) {
+  NativeEventTarget *nativeEventTarget = new NativeEventTarget(eventTarget);
+  auto nativeEventType = stringToNativeString(type);
+  NativeEvent* nativeEvent = new NativeEvent();
+  nativeEvent->type = nativeEventType.get();
+
+  RawEvent rawEvent{
+    reinterpret_cast<uint64_t*>(nativeEvent)
+  };
+
+  NativeEventTarget::dispatchEventImpl(nativeEventTarget, nativeEventType.get(), &rawEvent, false);
 }

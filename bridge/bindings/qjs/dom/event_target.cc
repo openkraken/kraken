@@ -194,8 +194,15 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
   auto _dispatchEvent = [&eventInstance, this](JSValue& handler) {
     if (eventInstance->propagationImmediatelyStopped())
       return;
+
+    /* 'handler' might be destroyed when calling itself (if it frees the
+     handler), so must take extra care */
+    JS_DupValue(m_ctx, handler);
+
     // The third params `thisObject` to null equals global object.
     JSValue returnedValue = JS_Call(m_ctx, handler, JS_NULL, 1, &eventInstance->jsObject);
+
+    JS_FreeValue(m_ctx, handler);
     m_context->handleException(&returnedValue);
     m_context->drainPendingPromiseJobs();
     JS_FreeValue(m_ctx, returnedValue);

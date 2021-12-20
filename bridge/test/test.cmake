@@ -36,6 +36,7 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     ./bindings/qjs/bom/window_test.cc
     ./bindings/qjs/dom/custom_event_test.cc
     ./bindings/qjs/module_manager_test.cc
+#     ./test/run_integration_test.cc  # Only for debug usage.
   )
 
   ### kraken_unit_test executable
@@ -48,6 +49,8 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
 
   target_compile_definitions(kraken_unit_test PUBLIC -DFLUTTER_BACKEND=0)
   target_compile_definitions(kraken_unit_test PUBLIC -DUNIT_TEST=1)
+  target_compile_definitions(kraken_unit_test PUBLIC -DSPEC_FILE_PATH="${CMAKE_CURRENT_SOURCE_DIR}")
+
   target_compile_definitions(kraken_static PUBLIC -DFLUTTER_BACKEND=1)
   if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
     set_target_properties(kraken_unit_test

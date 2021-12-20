@@ -40,14 +40,14 @@ static void handleTransientCallback(void* ptr, int32_t contextId, const char* er
 
   handleTimerCallback(timer, errmsg);
 
-  context->timers()->removeTimeoutByID(timer->timerId());
+  context->timers()->removeTimeoutById(timer->timerId());
 }
 
 void DOMTimerCoordinator::installNewTimer(ExecutionContext* context, int32_t timerId, DOMTimer* timer) {
   m_activeTimers[timerId] = timer;
 }
 
-void *DOMTimerCoordinator::removeTimeoutByID(int32_t timerId) {
+void *DOMTimerCoordinator::removeTimeoutById(int32_t timerId) {
   if (m_activeTimers.count(timerId) == 0) return nullptr;
   DOMTimer* timer = m_activeTimers[timerId];
 

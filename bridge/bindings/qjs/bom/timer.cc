@@ -56,6 +56,8 @@ static void handleTimerCallback(DOMTimer *timer, const char* errmsg) {
     return;
   }
 
+  if (context->timers()->getTimerById(timer->timerId()) == nullptr) return;
+
   // Trigger timer callbacks.
   timer->fire();
 
@@ -74,7 +76,7 @@ static void handleTransientCallback(void* ptr, int32_t contextId, const char* er
 
   handleTimerCallback(timer, errmsg);
 
-  context->timers()->removeTimeoutByID(timer->timerId());
+  context->timers()->removeTimeoutById(timer->timerId());
 }
 
 static void handlePersistentCallback(void* ptr, int32_t contextId, const char* errmsg) {
@@ -135,8 +137,6 @@ static JSValue setTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSVal
   timer->setTimerId(timerId);
 
   context->timers()->installNewTimer(context, timerId, timer);
-
-  KRAKEN_LOG(VERBOSE) << "SetTimeout " << JS_VALUE_GET_PTR(callbackValue) << " id " << timerId;
 
   // `-1` represents ffi error occurred.
   if (timerId == -1) {
@@ -213,7 +213,7 @@ static JSValue clearTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSV
   TEST_clearTimeout(timer);
 #endif
 
-  context->timers()->removeTimeoutByID(id);
+  context->timers()->removeTimeoutById(id);
   return JS_NULL;
 }
 

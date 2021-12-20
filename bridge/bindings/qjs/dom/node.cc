@@ -346,10 +346,6 @@ IMPL_PROPERTY_SETTER(Node, textContent)(JSContext* ctx, JSValue this_val, int ar
   nodeInstance->internalSetTextContent(argv[0]);
   return JS_NULL;
 }
-IMPL_PROPERTY_GETTER(Node, childNodes)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
-//  return JS_DupValue(ctx, nodeInstance->childNodes);
-}
 
 bool NodeInstance::isConnected() {
   bool _isConnected = this == document();

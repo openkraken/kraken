@@ -27,8 +27,7 @@ class DOMTimerCoordinator {
 
   // Removes and disposes the timer with the specified ID, if any. This may
   // destroy the timer.
-  void* removeTimeoutByID(int32_t timerId);
-
+  void* removeTimeoutById(int32_t timerId);
   DOMTimer* getTimerById(int32_t timerId);
 
   void trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func);

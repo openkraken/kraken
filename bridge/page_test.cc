@@ -190,12 +190,6 @@ static JSValue simulateInputText(JSContext* ctx, JSValueConst this_val, int argc
   return JS_NULL;
 };
 
-static JSValue runGC(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-  auto* context = static_cast<binding::qjs::ExecutionContext*>(JS_GetContextOpaque(ctx));
-  JS_RunGC(context->runtime());
-  return JS_NULL;
-}
-
 static JSValue parseHTML(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   auto* context = static_cast<binding::qjs::ExecutionContext*>(JS_GetContextOpaque(ctx));
 
@@ -239,7 +233,6 @@ KrakenPageTest::KrakenPageTest(KrakenPage* bridge) : m_page(bridge), m_page_cont
   QJS_GLOBAL_BINDING_FUNCTION(m_page_context, simulatePointer, "__kraken_simulate_pointer__", 1);
   QJS_GLOBAL_BINDING_FUNCTION(m_page_context, simulateInputText, "__kraken_simulate_inputtext__", 1);
   QJS_GLOBAL_BINDING_FUNCTION(m_page_context, triggerGlobalError, "__kraken_trigger_global_error__", 0);
-  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, runGC, "__kraken_run_gc__", 0);
   QJS_GLOBAL_BINDING_FUNCTION(m_page_context, parseHTML, "__kraken_parse_html__", 1);
 
   initKrakenTestFramework(bridge);
