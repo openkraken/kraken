@@ -6,6 +6,7 @@
 #include "timer.h"
 #include "bindings/qjs/qjs_patch.h"
 #include "dart_methods.h"
+#include "bindings/qjs/garbage_collected.h"
 
 #if UNIT_TEST
 #include "kraken_test_env.h"
@@ -13,9 +14,9 @@
 
 namespace kraken::binding::qjs {
 
-DOMTimer::DOMTimer(JSContext* ctx, JSValue callback) : m_callback(JS_DupValue(ctx, callback)), GarbageCollected<DOMTimer>(ctx) {}
+DOMTimer::DOMTimer(JSValue callback) : m_callback(callback) {}
 
-JSClassID DOMTimer::domTimerClassId{0};
+JSClassID DOMTimer::classId{0};
 
 void DOMTimer::fire() {
   /* 'callback' might be destroyed when calling itself (if it frees the
@@ -126,7 +127,7 @@ static JSValue setTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSVal
 #endif
 
   // Create a timer object to keep track timer callback
-  auto* timer = makeGarbageCollected<DOMTimer>(context->ctx(), &DOMTimer::domTimerClassId, callbackValue);
+  auto* timer = makeGarbageCollected<DOMTimer>(JS_DupValue(ctx, callbackValue))->initialize(context->ctx(), &DOMTimer::classId);
 
 #if FLUTTER_BACKEND
   auto timerId = getDartMethod()->setTimeout(timer, context->getContextId(), handleTransientCallback, timeout);
@@ -178,7 +179,7 @@ static JSValue setInterval(JSContext* ctx, JSValueConst this_val, int argc, JSVa
   }
 
   // Create a timer object to keep track timer callback
-  auto* timer = makeGarbageCollected<DOMTimer>(context->ctx(), &DOMTimer::domTimerClassId, callbackValue);
+  auto* timer = makeGarbageCollected<DOMTimer>(JS_DupValue(ctx, callbackValue))->initialize(context->ctx(), &DOMTimer::classId);
   uint32_t timerId = getDartMethod()->setInterval(timer, context->getContextId(), handlePersistentCallback, timeout);
 
   if (timerId == -1) {

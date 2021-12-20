@@ -32,12 +32,25 @@ typedef struct {
   AsyncCallback func;
 } JSOSTimer;
 
+typedef struct {
+  struct list_head link;
+  FrameCallback* callback;
+  int32_t contextId;
+  AsyncRAFCallback handler;
+  int32_t callbackId;
+} JSFrameCallback;
+
 typedef struct JSThreadState {
   std::unordered_map<int32_t, JSOSTimer*> os_timers; /* list of timer.link */
+  std::unordered_map<int32_t, JSFrameCallback*> os_frameCallbacks;
 } JSThreadState;
 
 static void unlink_timer(JSThreadState* ts, JSOSTimer* th) {
   ts->os_timers.erase(th->timer->timerId());
+}
+
+static void unlink_callback(JSThreadState* ts, JSFrameCallback* th) {
+  ts->os_frameCallbacks.erase(th->callbackId);
 }
 
 void TEST_init(ExecutionContext* context) {
@@ -63,6 +76,25 @@ int32_t TEST_setTimeout(DOMTimer* timer, int32_t contextId, AsyncCallback callba
   return id;
 }
 
+int32_t callbackId = 0;
+
+uint32_t TEST_requestAnimationFrame(FrameCallback *frameCallback, AsyncRAFCallback handler) {
+  JSRuntime* rt = JS_GetRuntime(frameCallback->ctx());
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(frameCallback->ctx()));
+  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
+  JSFrameCallback* th = static_cast<JSFrameCallback *>(js_mallocz(context->ctx(), sizeof(*th)));
+  th->handler = handler;
+  th->callback = frameCallback;
+  th->contextId = context->getContextId();
+  int32_t id = callbackId++;
+
+  th->callbackId = id;
+
+  ts->os_frameCallbacks[id] = th;
+
+  return id;
+}
+
 void TEST_clearTimeout(DOMTimer* timer) {
   JSRuntime* rt = JS_GetRuntime(timer->ctx());
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
@@ -76,7 +108,7 @@ static bool jsPool(ExecutionContext* context) {
   int64_t cur_time, delay;
   struct list_head* el;
 
-  if (ts->os_timers.empty())
+  if (ts->os_timers.empty() && ts->os_frameCallbacks.empty())
     return true; /* no more events */
 
   if (!ts->os_timers.empty()) {
@@ -93,6 +125,17 @@ static bool jsPool(ExecutionContext* context) {
         unlink_timer(ts, th);
         return false;
       }
+    }
+  }
+
+  if (!ts->os_frameCallbacks.empty()) {
+    for (auto& entry : ts->os_frameCallbacks) {
+      JSFrameCallback* th = entry.second;
+      AsyncRAFCallback handler = th->handler;
+      th->handler = nullptr;
+      handler(th->callback, th->contextId, 0, nullptr);
+      unlink_callback(ts, th);
+      return false;
     }
   }
 

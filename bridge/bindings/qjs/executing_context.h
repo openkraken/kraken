@@ -62,10 +62,7 @@ class ExecutionContextGCTracker : public GarbageCollected<ExecutionContextGCTrac
  public:
   static JSClassID contextGcTrackerClassId;
 
-  ExecutionContextGCTracker(JSContext* ctx);
-
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
-
  private:
 };
 
@@ -132,6 +129,7 @@ class ExecutionContext {
   friend WindowInstance;
   friend DocumentInstance;
   WindowInstance* m_window{nullptr};
+  DocumentInstance* m_document{nullptr};
   DOMTimerCoordinator m_timers;
   ExecutionContextGCTracker* m_gcTracker{nullptr};
 };

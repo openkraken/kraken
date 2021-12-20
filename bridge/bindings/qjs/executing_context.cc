@@ -33,8 +33,6 @@ std::unique_ptr<ExecutionContext> createJSContext(int32_t contextId, const JSExc
 
 static JSRuntime* m_runtime{nullptr};
 
-ExecutionContextGCTracker::ExecutionContextGCTracker(JSContext* ctx) : GarbageCollected<ExecutionContextGCTracker>(ctx) {}
-
 void ExecutionContextGCTracker::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
   context->trace(rt, context->global(), mark_func);
@@ -78,7 +76,7 @@ ExecutionContext::ExecutionContext(int32_t contextId, const JSExceptionHandler& 
   JS_SetContextOpaque(m_ctx, this);
   JS_SetHostPromiseRejectionTracker(m_runtime, promiseRejectTracker, nullptr);
 
-  m_gcTracker = makeGarbageCollected<ExecutionContextGCTracker>(m_ctx, &ExecutionContextGCTracker::contextGcTrackerClassId);
+  m_gcTracker = makeGarbageCollected<ExecutionContextGCTracker>()->initialize(m_ctx, &ExecutionContextGCTracker::contextGcTrackerClassId);
   JS_DefinePropertyValueStr(m_ctx, globalObject, "_gc_tracker_", m_gcTracker->toQuickJS(), JS_PROP_NORMAL);
 
   runningContexts++;

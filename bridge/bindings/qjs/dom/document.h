@@ -8,6 +8,8 @@
 
 #include "element.h"
 #include "node.h"
+#include "frame_request_callback_collection.h"
+#include "script_animation_controller.h"
 
 namespace kraken::binding::qjs {
 
@@ -94,6 +96,9 @@ class DocumentInstance : public NodeInstance {
     return m_instanceMap[document];
   }
 
+  int32_t requestAnimationFrame(FrameCallback* frameCallback);
+  void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) override;
+
  private:
   void removeElementById(JSAtom id, ElementInstance* element);
   void addElementById(JSAtom id, ElementInstance* element);
@@ -101,6 +106,8 @@ class DocumentInstance : public NodeInstance {
   std::unordered_map<JSAtom, std::vector<ElementInstance*>> m_elementMapById;
   ElementInstance* m_documentElement{nullptr};
   std::unique_ptr<DocumentCookie> m_cookie;
+
+  ScriptAnimationController* m_scriptAnimationController;
 
   friend Document;
   friend ElementInstance;

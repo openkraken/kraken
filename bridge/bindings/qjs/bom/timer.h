@@ -14,8 +14,8 @@ namespace kraken::binding::qjs {
 
 class DOMTimer : public GarbageCollected<DOMTimer> {
  public:
-  static JSClassID domTimerClassId;
-  DOMTimer(JSContext* ctx, JSValue callback);
+  static JSClassID classId;
+  DOMTimer(JSValue callback);
 
   // Trigger timer callback.
   void fire();

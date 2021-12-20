@@ -67,6 +67,7 @@ class WindowInstance : public EventTargetInstance {
 
  private:
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
+  DocumentInstance* document();
 
   ObjectProperty m_location{m_context, jsObject, "m_location", (new Location(m_context))->jsObject};
   ObjectProperty m_onerror{m_context, jsObject, "m_onerror", JS_NULL};

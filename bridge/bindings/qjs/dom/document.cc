@@ -517,9 +517,12 @@ void DocumentCookie::setCookie(std::string& cookieStr) {
 }
 
 DocumentInstance::DocumentInstance(Document* document) : NodeInstance(document, NodeType::DOCUMENT_NODE, this, Document::classId(), "document") {
+  m_context->m_document = this;
   m_cookie = std::make_unique<DocumentCookie>();
   m_instanceMap[Document::instance(m_context)] = this;
   m_eventTargetId = DOCUMENT_TARGET_ID;
+
+  m_scriptAnimationController = makeGarbageCollected<ScriptAnimationController>()->initialize(m_ctx, &ScriptAnimationController::classId);
 
 #if FLUTTER_BACKEND
   getDartMethod()->initDocument(m_context->getContextId(), nativeEventTarget);
@@ -565,6 +568,14 @@ ElementInstance* DocumentInstance::getDocumentElement() {
   }
 
   return nullptr;
+}
+
+int32_t DocumentInstance::requestAnimationFrame(FrameCallback *frameCallback) {
+  return m_scriptAnimationController->registerFrameCallback(frameCallback);
+}
+
+void DocumentInstance::trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) {
+  JS_MarkValue(rt, m_scriptAnimationController->toQuickJS(), mark_func);
 }
 
 }  // namespace kraken::binding::qjs

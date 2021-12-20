@@ -14,19 +14,33 @@ namespace kraken::binding::qjs {
 // invoked when a script-based animation needs to be resampled.
 class FrameCallback : public GarbageCollected<FrameCallback> {
  public:
-  FrameCallback(JSContext* ctx, JSValue callback);
+  static JSClassID classId;
+
+  FrameCallback(JSValue callback);
 
   void fire(double highResTimeStamp);
 
-  static JSClassID frameCallbackClassId;
+  FORCE_INLINE const char* getHumanReadableName() const override {
+    return "FrameCallback";
+  }
+
+  void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const override;
 
  private:
   JSValue m_callback{JS_NULL};
+  int32_t m_callbackId{-1};
 };
 
 class FrameRequestCallbackCollection final {
  public:
+  void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func);
+  void registerFrameCallback(uint32_t callbackId, FrameCallback* frameCallback);
+  void cancelFrameCallback(uint32_t callbackId);
+
  private:
+
+  std::unordered_map<uint32_t, FrameCallback*> m_frameCallbacks;
+  std::vector<FrameCallback*> m_abandonedCallbacks;
 };
 
 }  // namespace kraken::binding::qjs
