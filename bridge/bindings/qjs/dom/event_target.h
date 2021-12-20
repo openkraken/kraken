@@ -12,6 +12,7 @@
 #include "bindings/qjs/host_object.h"
 #include "bindings/qjs/native_value.h"
 #include "bindings/qjs/qjs_patch.h"
+#include "event_listener_map.h"
 
 namespace kraken::binding::qjs {
 
@@ -79,7 +80,11 @@ class EventTargetInstance : public Instance {
  protected:
   int32_t m_eventTargetId;
   // EventListener handlers registered with addEventListener API.
-  std::unordered_map<JSAtom, std::vector<JSValue>> m_eventHandlers;
+  // We use vector instead of hashMap because
+  //  - vector is much more space efficient than hashMap.
+  //  - An EventTarget rarely has event listeners for many event types, and
+  //    vector is faster in such cases.
+  EventListenerMap m_eventHandlers;
   // EventListener handlers registered with attribute property.
   ObjectProperty m_propertyEventHandler{m_context, jsObject, "__propertyEventHandler", JS_NewObject(m_ctx)};
   ObjectProperty m_properties{m_context, jsObject, "__properties", JS_NewObject(m_ctx)};

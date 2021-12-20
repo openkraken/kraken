@@ -67,16 +67,7 @@ JSValue EventTarget::addEventListener(JSContext* ctx, JSValue this_val, int argc
   }
 
   JSAtom eventTypeAtom = JS_ValueToAtom(ctx, eventTypeValue);
-
-  // Init list.
-  if (eventTargetInstance->m_eventHandlers.count(eventTypeAtom) == 0) {
-    std::vector<JSValue> list = std::vector<JSValue>();
-    // One eventType with 8 eventListeners are pretty rare in most scenario and could be avoid reallocations.
-    list.reserve(8);
-    eventTargetInstance->m_eventHandlers[eventTypeAtom] = list;
-  }
-
-  auto& eventHandlers = eventTargetInstance->m_eventHandlers[eventTypeAtom];
+  auto &eventHandlers =  eventTargetInstance->m_eventHandlers;
 
   // Dart needs to be notified for the first registration event.
   if (eventHandlers.empty() || JS_HasProperty(ctx, eventTargetInstance->m_propertyEventHandler.value(), eventTypeAtom)) {
@@ -88,7 +79,7 @@ JSValue EventTarget::addEventListener(JSContext* ctx, JSValue this_val, int argc
     foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetInstance->m_eventTargetId, UICommand::addEvent, args_01, nullptr);
   }
 
-  eventHandlers.emplace_back(JS_DupValue(ctx, callback));
+  eventHandlers.add(eventTypeAtom, JS_DupValue(ctx, callback));
   JS_FreeAtom(ctx, eventTypeAtom);
 
   return JS_UNDEFINED;
@@ -112,21 +103,20 @@ JSValue EventTarget::removeEventListener(JSContext* ctx, JSValue this_val, int a
   }
 
   JSAtom eventTypeAtom = JS_ValueToAtom(ctx, eventTypeValue);
+  auto& eventHandlers = eventTargetInstance->m_eventHandlers;
 
-  if (eventTargetInstance->m_eventHandlers.count(eventTypeAtom) == 0) {
+  if (!eventTargetInstance->m_eventHandlers.contains(eventTypeAtom)) {
     JS_FreeAtom(ctx, eventTypeAtom);
     return JS_UNDEFINED;
   }
 
-  auto& eventHandles = eventTargetInstance->m_eventHandlers[eventTypeAtom];
-  auto idx = std::find_if(eventHandles.begin(), eventHandles.end(), [&callback](JSValue v) { return JS_VALUE_GET_PTR(v) == JS_VALUE_GET_PTR(callback); });
+  auto list = eventHandlers.find(eventTypeAtom);
 
-  if (idx != eventHandles.end()) {
-    JS_FreeValue(ctx, *idx);
-    eventHandles.erase(idx);
+  if (eventHandlers.remove(eventTypeAtom, callback)) {
+    JS_FreeValue(ctx, callback);
   }
 
-  if (eventHandles.empty() && JS_HasProperty(ctx, eventTargetInstance->m_propertyEventHandler.value(), eventTypeAtom)) {
+  if (eventHandlers.empty() && JS_HasProperty(ctx, eventTargetInstance->m_propertyEventHandler.value(), eventTypeAtom)) {
     // Dart needs to be notified for handles is empty.
     int32_t contextId = eventTargetInstance->prototype()->contextId();
 
@@ -211,9 +201,9 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
     JS_FreeValue(m_ctx, returnedValue);
   };
 
-  if (m_eventHandlers.count(eventTypeAtom) > 0) {
-    auto& eventHandlers = m_eventHandlers[eventTypeAtom];
-    for (auto& eventHandler : eventHandlers) {
+  if (m_eventHandlers.contains(eventTypeAtom)) {
+    const EventListenerVector* vector = m_eventHandlers.find(eventTypeAtom);
+    for (auto& eventHandler : *vector) {
       _dispatchEvent(eventHandler);
     }
   }
@@ -466,11 +456,7 @@ JSValue EventTargetInstance::getNativeProperty(const char* prop) {
 // We needs to gc which JSValues are still holding.
 void EventTargetInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
   // Trace m_eventHandlers
-  for (auto& eventHandlers : m_eventHandlers) {
-    for (auto& eventHandler : eventHandlers.second) {
-      JS_MarkValue(rt, eventHandler, mark_func);
-    }
-  }
+  m_eventHandlers.trace(rt, JS_UNDEFINED, mark_func);
 }
 
 void EventTargetInstance::copyNodeProperties(EventTargetInstance* newNode, EventTargetInstance* referenceNode) {

@@ -202,6 +202,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/bom/dom_timer_coordinator.h
     bindings/qjs/dom/frame_request_callback_collection.cc
     bindings/qjs/dom/frame_request_callback_collection.h
+    bindings/qjs/dom/event_listener_map.cc
+    bindings/qjs/dom/event_listener_map.h
     bindings/qjs/dom/script_animation_controller.cc
     bindings/qjs/dom/script_animation_controller.h
     bindings/qjs/dom/event_target.cc
