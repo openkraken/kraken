@@ -50,9 +50,7 @@ TEST(Window, cancelAnimationFrame) {
   initJSPagePool(1);
   auto* bridge = static_cast<kraken::KrakenPage*>(getPage(0));
 
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
-    abort();
-  };
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { abort(); };
 
   TEST_init(bridge->getContext().get());
 
