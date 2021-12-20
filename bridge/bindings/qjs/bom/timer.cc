@@ -224,7 +224,8 @@ static JSValue clearTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSV
   getDartMethod()->clearTimeout(context->getContextId(), id);
 #elif UNIT_TEST
   DOMTimer* timer = context->timers()->getTimerById(id);
-  if (timer == nullptr) return JS_NULL;
+  if (timer == nullptr)
+    return JS_NULL;
   TEST_clearTimeout(timer);
 #endif
 

@@ -95,7 +95,6 @@ int32_t TEST_setInterval(DOMTimer* timer, int32_t contextId, AsyncCallback callb
   return id;
 }
 
-
 int32_t callbackId = 0;
 
 uint32_t TEST_requestAnimationFrame(FrameCallback* frameCallback, AsyncRAFCallback handler) {
