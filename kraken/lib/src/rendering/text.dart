@@ -172,12 +172,18 @@ class RenderTextBox extends RenderBox
   // Avoid to render the whole text when text overflows its parent and text is not
   // displayed fully and parent is not scrollable to improve text layout performance.
   String _getClippedText(String data) {
-    String clipText = data;
+    // Only clip text in container which meets CSS box model spec.
+    if (parent is! RenderBoxModel) {
+      return data;
+    }
+
+    String clippedText = data;
     RenderBoxModel parentRenderBoxModel = parent as RenderBoxModel;
     BoxConstraints? parentContentConstraints = parentRenderBoxModel.contentConstraints;
     // Text only need to render in parent container's content area when
     // white-space is nowrap and overflow is hidden/clip.
     CSSOverflowType effectiveOverflowX = renderStyle.effectiveOverflowX;
+
     if (parentContentConstraints != null
       && (effectiveOverflowX == CSSOverflowType.hidden
       || effectiveOverflowX == CSSOverflowType.clip)
@@ -198,19 +204,19 @@ class RenderTextBox extends RenderBox
         if (maxCharsOfLine != null) {
           int maxChars = maxCharsOfLine;
           if (data.length > maxChars) {
-            clipText = data.substring(0, maxChars);
+            clippedText = data.substring(0, maxChars);
           }
         }
       } else {
         if (maxCharsOfLine != null && maxLines != null) {
           int maxChars = maxCharsOfLine * maxLines;
           if (data.length > maxChars) {
-            clipText = data.substring(0, maxChars);
+            clippedText = data.substring(0, maxChars);
           }
         }
       }
     }
-    return clipText;
+    return clippedText;
   }
 
   @override
