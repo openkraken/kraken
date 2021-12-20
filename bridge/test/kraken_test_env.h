@@ -15,6 +15,7 @@ using namespace kraken::binding::qjs;
 
 void TEST_init(ExecutionContext* context);
 int32_t TEST_setTimeout(DOMTimer* timer, int32_t contextId, AsyncCallback callback, int32_t timeout);
+int32_t TEST_setInterval(DOMTimer* timer, int32_t contextId, AsyncCallback callback, int32_t timeout);
 void TEST_clearTimeout(DOMTimer* timer);
 uint32_t TEST_requestAnimationFrame(FrameCallback* frameCallback, AsyncRAFCallback handler);
 void TEST_cancelAnimationFrame(JSContext* ctx, uint32_t callbackId);

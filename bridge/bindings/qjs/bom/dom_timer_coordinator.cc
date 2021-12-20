@@ -60,6 +60,7 @@ void* DOMTimerCoordinator::removeTimeoutById(int32_t timerId) {
 }
 
 DOMTimer* DOMTimerCoordinator::getTimerById(int32_t timerId) {
+  if (m_activeTimers.count(timerId) == 0) return nullptr;
   return m_activeTimers[timerId];
 }
 

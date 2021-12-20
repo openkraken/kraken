@@ -29,6 +29,7 @@ typedef struct {
   int64_t timeout;
   DOMTimer* timer;
   int32_t contextId;
+  bool isInterval;
   AsyncCallback func;
 } JSOSTimer;
 
@@ -69,12 +70,31 @@ int32_t TEST_setTimeout(DOMTimer* timer, int32_t contextId, AsyncCallback callba
   th->func = callback;
   th->timer = timer;
   th->contextId = contextId;
+  th->isInterval = false;
   int32_t id = timerId++;
 
   ts->os_timers[id] = th;
 
   return id;
 }
+
+int32_t TEST_setInterval(DOMTimer* timer, int32_t contextId, AsyncCallback callback, int32_t timeout) {
+  JSRuntime* rt = JS_GetRuntime(timer->ctx());
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
+  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
+  JSOSTimer* th = static_cast<JSOSTimer*>(js_mallocz(context->ctx(), sizeof(*th)));
+  th->timeout = get_time_ms() + timeout;
+  th->func = callback;
+  th->timer = timer;
+  th->contextId = contextId;
+  th->isInterval = true;
+  int32_t id = timerId++;
+
+  ts->os_timers[id] = th;
+
+  return id;
+}
+
 
 int32_t callbackId = 0;
 
@@ -126,9 +146,15 @@ static bool jsPool(ExecutionContext* context) {
         AsyncCallback func;
         /* the timer expired */
         func = th->func;
-        th->func = nullptr;
-        func(th->timer, th->contextId, nullptr);
-        unlink_timer(ts, th);
+
+        if (th->isInterval) {
+          func(th->timer, th->contextId, nullptr);
+        } else {
+          th->func = nullptr;
+          func(th->timer, th->contextId, nullptr);
+          unlink_timer(ts, th);
+        }
+
         return false;
       }
     }
