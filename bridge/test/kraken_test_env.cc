@@ -4,10 +4,10 @@
  */
 
 #include "kraken_test_env.h"
-#include "bindings/qjs/dom/event_target.h"
 #include <sys/time.h>
-#include "kraken_bridge_test.h"
 #include <vector>
+#include "bindings/qjs/dom/event_target.h"
+#include "kraken_bridge_test.h"
 
 #if defined(__linux__) || defined(__APPLE__)
 static int64_t get_time_ms(void) {
@@ -40,8 +40,8 @@ static void unlink_timer(JSThreadState* ts, JSOSTimer* th) {
   ts->os_timers.erase(th->timer->timerId());
 }
 
-void TEST_init(ExecutionContext *context) {
-  JSThreadState*th = new JSThreadState();
+void TEST_init(ExecutionContext* context) {
+  JSThreadState* th = new JSThreadState();
   JS_SetRuntimeOpaque(context->runtime(), th);
 }
 
@@ -70,7 +70,7 @@ void TEST_clearTimeout(DOMTimer* timer) {
   ts->os_timers.erase(timer->timerId());
 }
 
-static bool jsPool(ExecutionContext *context) {
+static bool jsPool(ExecutionContext* context) {
   JSRuntime* rt = context->runtime();
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
   int64_t cur_time, delay;
@@ -81,8 +81,8 @@ static bool jsPool(ExecutionContext *context) {
 
   if (!ts->os_timers.empty()) {
     cur_time = get_time_ms();
-    for (auto &entry: ts->os_timers) {
-      JSOSTimer *th = entry.second;
+    for (auto& entry : ts->os_timers) {
+      JSOSTimer* th = entry.second;
       delay = th->timeout - cur_time;
       if (delay <= 0) {
         AsyncCallback func;
@@ -99,8 +99,8 @@ static bool jsPool(ExecutionContext *context) {
   return false;
 }
 
-void TEST_runLoop(ExecutionContext *context) {
-  for(;;) {
+void TEST_runLoop(ExecutionContext* context) {
+  for (;;) {
     context->drainPendingPromiseJobs();
     if (jsPool(context))
       break;
@@ -108,14 +108,12 @@ void TEST_runLoop(ExecutionContext *context) {
 }
 
 void TEST_dispatchEvent(EventTargetInstance* eventTarget, const std::string type) {
-  NativeEventTarget *nativeEventTarget = new NativeEventTarget(eventTarget);
+  NativeEventTarget* nativeEventTarget = new NativeEventTarget(eventTarget);
   auto nativeEventType = stringToNativeString(type);
   NativeEvent* nativeEvent = new NativeEvent();
   nativeEvent->type = nativeEventType.get();
 
-  RawEvent rawEvent{
-    reinterpret_cast<uint64_t*>(nativeEvent)
-  };
+  RawEvent rawEvent{reinterpret_cast<uint64_t*>(nativeEvent)};
 
   NativeEventTarget::dispatchEventImpl(nativeEventTarget, nativeEventType.get(), &rawEvent, false);
 }

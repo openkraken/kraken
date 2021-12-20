@@ -6,8 +6,8 @@
 #include "window.h"
 #include "bindings/qjs/dom/events/.gen/message_event.h"
 #include "bindings/qjs/qjs_patch.h"
-#include "frame_request_callback_collection.h"
 #include "dart_methods.h"
+#include "frame_request_callback_collection.h"
 
 namespace kraken::binding::qjs {
 
@@ -75,7 +75,6 @@ JSValue Window::postMessage(JSContext* ctx, JSValue this_val, int argc, JSValue*
   return JS_NULL;
 }
 
-
 static void handleRAFTransientCallback(void* ptr, int32_t contextId, double highResTimeStamp, const char* errmsg) {
   auto* frameCallback = static_cast<FrameCallback*>(ptr);
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(frameCallback->ctx()));
@@ -95,7 +94,7 @@ static void handleRAFTransientCallback(void* ptr, int32_t contextId, double high
   context->drainPendingPromiseJobs();
 }
 
-JSValue Window::requestAnimationFrame(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+JSValue Window::requestAnimationFrame(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc <= 0) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': 1 argument required, but only 0 present.");
   }
@@ -134,7 +133,7 @@ JSValue Window::requestAnimationFrame(JSContext *ctx, JSValue this_val, int argc
   return JS_NewUint32(ctx, requestId);
 }
 
-JSValue Window::cancelAnimationFrame(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+JSValue Window::cancelAnimationFrame(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc <= 0) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'cancelAnimationFrame': 1 argument required, but only 0 present.");
   }

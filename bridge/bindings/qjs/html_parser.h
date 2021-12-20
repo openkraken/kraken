@@ -7,8 +7,8 @@
 #define KRAKENBRIDGE_HTML_PARSER_H
 
 #include "bindings/qjs/dom/element.h"
-#include "include/kraken_bridge.h"
 #include "executing_context.h"
+#include "include/kraken_bridge.h"
 #include "third_party/gumbo-parser/src/gumbo.h"
 
 namespace kraken::binding::qjs {

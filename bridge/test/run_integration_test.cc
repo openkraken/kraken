@@ -3,11 +3,11 @@
  * Author: Kraken Team.
  */
 
-#include "gtest/gtest.h"
-#include "page.h"
-#include "kraken_test_env.h"
-#include "kraken_bridge_test.h"
 #include <fstream>
+#include "gtest/gtest.h"
+#include "kraken_bridge_test.h"
+#include "kraken_test_env.h"
+#include "page.h"
 
 std::string readTestSpec() {
   std::string filepath = std::string(SPEC_FILE_PATH) + "/../integration_tests/.specs/core.build.js";
@@ -40,9 +40,7 @@ TEST(IntegrationTest, runSpecs) {
   std::string code = readTestSpec();
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
 
-  executeTest(context->getContextId(), [](int32_t contextId, NativeString* status) -> void* {
-    KRAKEN_LOG(VERBOSE) << "done";
-  });
+  executeTest(context->getContextId(), [](int32_t contextId, NativeString* status) -> void* { KRAKEN_LOG(VERBOSE) << "done"; });
 
   TEST_runLoop(context.get());
   disposePage(0);

@@ -7,8 +7,8 @@
 #define KRAKEN_JS_QJS_BRIDGE_H_
 
 #include <quickjs/quickjs.h>
-#include "bindings/qjs/html_parser.h"
 #include "bindings/qjs/executing_context.h"
+#include "bindings/qjs/html_parser.h"
 #include "include/kraken_bridge.h"
 
 #include <atomic>

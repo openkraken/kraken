@@ -15,7 +15,7 @@ namespace kraken::binding::qjs {
 class DOMTimer : public GarbageCollected<DOMTimer> {
  public:
   static JSClassID domTimerClassId;
-  DOMTimer(JSContext *ctx, JSValue callback);
+  DOMTimer(JSContext* ctx, JSValue callback);
 
   // Trigger timer callback.
   void fire();
@@ -25,7 +25,7 @@ class DOMTimer : public GarbageCollected<DOMTimer> {
 
   [[nodiscard]] const char* getHumanReadableName() const override { return "DOMTimer"; }
 
-  void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const override;
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
 
  private:
   int32_t m_timerId{-1};

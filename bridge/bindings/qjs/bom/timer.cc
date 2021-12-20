@@ -13,16 +13,16 @@
 
 namespace kraken::binding::qjs {
 
-
-DOMTimer::DOMTimer(JSContext *ctx, JSValue callback): m_callback(JS_DupValue(ctx, callback)), GarbageCollected<DOMTimer>(ctx) {}
+DOMTimer::DOMTimer(JSContext* ctx, JSValue callback) : m_callback(JS_DupValue(ctx, callback)), GarbageCollected<DOMTimer>(ctx) {}
 
 JSClassID DOMTimer::domTimerClassId{0};
 
 void DOMTimer::fire() {
   /* 'callback' might be destroyed when calling itself (if it frees the
      handler), so must take extra care */
-  auto *context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
-  if (!JS_IsFunction(m_ctx, m_callback)) return;
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
+  if (!JS_IsFunction(m_ctx, m_callback))
+    return;
 
   JS_DupValue(m_ctx, m_callback);
   JSValue returnValue = JS_Call(m_ctx, m_callback, JS_UNDEFINED, 0, nullptr);
@@ -35,7 +35,7 @@ void DOMTimer::fire() {
   JS_FreeValue(m_ctx, returnValue);
 }
 
-void DOMTimer::trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const {
+void DOMTimer::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
   JS_MarkValue(rt, m_callback, mark_func);
 }
 
@@ -47,8 +47,8 @@ void DOMTimer::setTimerId(int32_t timerId) {
   m_timerId = timerId;
 }
 
-static void handleTimerCallback(DOMTimer *timer, const char* errmsg) {
-  auto *context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
+static void handleTimerCallback(DOMTimer* timer, const char* errmsg) {
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
 
   if (errmsg != nullptr) {
     JSValue exception = JS_ThrowTypeError(timer->ctx(), "%s", errmsg);
@@ -56,7 +56,8 @@ static void handleTimerCallback(DOMTimer *timer, const char* errmsg) {
     return;
   }
 
-  if (context->timers()->getTimerById(timer->timerId()) == nullptr) return;
+  if (context->timers()->getTimerById(timer->timerId()) == nullptr)
+    return;
 
   // Trigger timer callbacks.
   timer->fire();
@@ -125,7 +126,7 @@ static JSValue setTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSVal
 #endif
 
   // Create a timer object to keep track timer callback
-  auto *timer = makeGarbageCollected<DOMTimer>(context->ctx(), &DOMTimer::domTimerClassId, callbackValue);
+  auto* timer = makeGarbageCollected<DOMTimer>(context->ctx(), &DOMTimer::domTimerClassId, callbackValue);
 
 #if FLUTTER_BACKEND
   auto timerId = getDartMethod()->setTimeout(timer, context->getContextId(), handleTransientCallback, timeout);
@@ -177,7 +178,7 @@ static JSValue setInterval(JSContext* ctx, JSValueConst this_val, int argc, JSVa
   }
 
   // Create a timer object to keep track timer callback
-  auto *timer = makeGarbageCollected<DOMTimer>(context->ctx(), &DOMTimer::domTimerClassId, callbackValue);
+  auto* timer = makeGarbageCollected<DOMTimer>(context->ctx(), &DOMTimer::domTimerClassId, callbackValue);
   uint32_t timerId = getDartMethod()->setInterval(timer, context->getContextId(), handlePersistentCallback, timeout);
 
   if (timerId == -1) {

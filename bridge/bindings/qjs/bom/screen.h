@@ -6,8 +6,8 @@
 #ifndef KRAKENBRIDGE_SCREEN_H
 #define KRAKENBRIDGE_SCREEN_H
 
-#include "bindings/qjs/host_object.h"
 #include "bindings/qjs/executing_context.h"
+#include "bindings/qjs/host_object.h"
 #include "dart_methods.h"
 
 namespace kraken::binding::qjs {

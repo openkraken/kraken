@@ -6,9 +6,9 @@
 #ifndef KRAKENBRIDGE_BINDINGS_QJS_BOM_DOM_TIMER_COORDINATOR_H_
 #define KRAKENBRIDGE_BINDINGS_QJS_BOM_DOM_TIMER_COORDINATOR_H_
 
+#include <quickjs/quickjs.h>
 #include <unordered_map>
 #include <vector>
-#include <quickjs/quickjs.h>
 
 namespace kraken::binding::qjs {
 
@@ -37,6 +37,6 @@ class DOMTimerCoordinator {
   std::vector<DOMTimer*> m_abandonedTimers;
 };
 
-}
+}  // namespace kraken::binding::qjs
 
-#endif //KRAKENBRIDGE_BINDINGS_QJS_BOM_DOM_TIMER_COORDINATOR_H_
+#endif  // KRAKENBRIDGE_BINDINGS_QJS_BOM_DOM_TIMER_COORDINATOR_H_

@@ -6,8 +6,8 @@
 #ifndef KRAKENBRIDGE_LOCATION_H
 #define KRAKENBRIDGE_LOCATION_H
 
-#include "bindings/qjs/host_object.h"
 #include "bindings/qjs/executing_context.h"
+#include "bindings/qjs/host_object.h"
 
 namespace kraken::binding::qjs {
 

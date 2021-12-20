@@ -8,10 +8,10 @@
 #include "bindings/qjs/bom/window.h"
 #include "bindings/qjs/dom/document.h"
 #include "bindings/qjs/module_manager.h"
+#include "bom/dom_timer_coordinator.h"
+#include "garbage_collected.h"
 #include "kraken_bridge.h"
 #include "qjs_patch.h"
-#include "garbage_collected.h"
-#include "bom/dom_timer_coordinator.h"
 
 namespace kraken::binding::qjs {
 
@@ -33,9 +33,9 @@ std::unique_ptr<ExecutionContext> createJSContext(int32_t contextId, const JSExc
 
 static JSRuntime* m_runtime{nullptr};
 
-ExecutionContextGCTracker::ExecutionContextGCTracker(JSContext* ctx): GarbageCollected<ExecutionContextGCTracker>(ctx) {}
+ExecutionContextGCTracker::ExecutionContextGCTracker(JSContext* ctx) : GarbageCollected<ExecutionContextGCTracker>(ctx) {}
 
-void ExecutionContextGCTracker::trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const {
+void ExecutionContextGCTracker::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
   context->trace(rt, context->global(), mark_func);
 }
@@ -105,7 +105,6 @@ ExecutionContext::~ExecutionContext() {
       JS_FreeValue(m_ctx, node->nodeInstance->jsObject);
     }
   }
-
 
   // Manual free moduleListener
   {
@@ -338,7 +337,7 @@ void ExecutionContext::promiseRejectTracker(JSContext* ctx, JSValue promise, JSV
   context->dispatchGlobalPromiseRejectionEvent(promise, reason);
 }
 
-DOMTimerCoordinator *ExecutionContext::timers() {
+DOMTimerCoordinator* ExecutionContext::timers() {
   return &m_timers;
 }
 
@@ -478,7 +477,7 @@ JSValue objectGetKeys(JSContext* ctx, JSValue obj) {
   return result;
 }
 
-void ExecutionContext::trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) {
+void ExecutionContext::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
   m_timers.trace(rt, JS_NULL, mark_func);
 }
 

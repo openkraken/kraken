@@ -4,8 +4,8 @@
  */
 
 #include "dom_timer_coordinator.h"
-#include "timer.h"
 #include "dart_methods.h"
+#include "timer.h"
 
 #if UNIT_TEST
 #include "kraken_test_env.h"
@@ -13,8 +13,8 @@
 
 namespace kraken::binding::qjs {
 
-static void handleTimerCallback(DOMTimer *timer, const char* errmsg) {
-  auto *context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
+static void handleTimerCallback(DOMTimer* timer, const char* errmsg) {
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
 
   if (errmsg != nullptr) {
     JSValue exception = JS_ThrowTypeError(timer->ctx(), "%s", errmsg);
@@ -47,8 +47,9 @@ void DOMTimerCoordinator::installNewTimer(ExecutionContext* context, int32_t tim
   m_activeTimers[timerId] = timer;
 }
 
-void *DOMTimerCoordinator::removeTimeoutById(int32_t timerId) {
-  if (m_activeTimers.count(timerId) == 0) return nullptr;
+void* DOMTimerCoordinator::removeTimeoutById(int32_t timerId) {
+  if (m_activeTimers.count(timerId) == 0)
+    return nullptr;
   DOMTimer* timer = m_activeTimers[timerId];
 
   // Push this timer to abandoned list to mark this timer is deprecated.
@@ -58,19 +59,18 @@ void *DOMTimerCoordinator::removeTimeoutById(int32_t timerId) {
   return nullptr;
 }
 
-
-DOMTimer *DOMTimerCoordinator::getTimerById(int32_t timerId) {
+DOMTimer* DOMTimerCoordinator::getTimerById(int32_t timerId) {
   return m_activeTimers[timerId];
 }
 
-void DOMTimerCoordinator::trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func){
-  for (auto& timer: m_activeTimers) {
+void DOMTimerCoordinator::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
+  for (auto& timer : m_activeTimers) {
     JS_MarkValue(rt, timer.second->toQuickJS(), mark_func);
   }
 
   // Recycle all abandoned timers.
   if (!m_abandonedTimers.empty()) {
-    for (auto& timer: m_abandonedTimers) {
+    for (auto& timer : m_abandonedTimers) {
       JS_MarkValue(rt, timer->toQuickJS(), mark_func);
     }
     // All abandoned timers should be freed at the sweep stage.
@@ -78,4 +78,4 @@ void DOMTimerCoordinator::trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_fu
   }
 }
 
-}
+}  // namespace kraken::binding::qjs

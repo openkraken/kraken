@@ -80,42 +80,48 @@ Document::Document(ExecutionContext* context) : Node(context, "Document") {
 
   if (!event_registered) {
     event_registered = true;
-    Event::defineEvent(EVENT_INPUT,
-                       [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new InputEventInstance(InputEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+    Event::defineEvent(
+        EVENT_INPUT, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new InputEventInstance(InputEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
     Event::defineEvent(EVENT_MEDIA_ERROR, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
       return new MediaErrorEventInstance(MediaErrorEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
     });
     Event::defineEvent(EVENT_MESSAGE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
       return new MessageEventInstance(MessageEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
     });
-    Event::defineEvent(EVENT_CLOSE,
-                       [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new CloseEventInstance(CloseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+    Event::defineEvent(
+        EVENT_CLOSE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new CloseEventInstance(CloseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
     Event::defineEvent(EVENT_INTERSECTION_CHANGE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
       return new IntersectionChangeEventInstance(IntersectionChangeEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
     });
-    Event::defineEvent(EVENT_TOUCH_START,
-                       [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_TOUCH_END,
-                       [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_TOUCH_MOVE,
-                       [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_TOUCH_CANCEL,
-                       [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+    Event::defineEvent(EVENT_TOUCH_START, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_TOUCH_END, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_TOUCH_MOVE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_TOUCH_CANCEL, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    });
     Event::defineEvent(EVENT_SWIPE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
       return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
     });
-    Event::defineEvent(
-        EVENT_PAN, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+    Event::defineEvent(EVENT_PAN, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+      return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    });
     Event::defineEvent(EVENT_LONG_PRESS, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
       return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
     });
     Event::defineEvent(EVENT_SCALE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
       return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
     });
-    Event::defineEvent(EVENT_CLICK,
-                       [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new MouseEventInstance(MouseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_CANCEL,
-                       [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new MouseEventInstance(MouseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+    Event::defineEvent(
+        EVENT_CLICK, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new MouseEventInstance(MouseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+    Event::defineEvent(EVENT_CANCEL, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+      return new MouseEventInstance(MouseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    });
     Event::defineEvent(EVENT_POPSTATE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
       return new PopStateEventInstance(PopStateEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
     });

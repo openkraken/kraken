@@ -19,22 +19,18 @@ class FrameCallback : public GarbageCollected<FrameCallback> {
   void fire(double highResTimeStamp);
 
   static JSClassID frameCallbackClassId;
+
  private:
   JSValue m_callback{JS_NULL};
 };
 
 class FrameRequestCallbackCollection final {
  public:
-
  private:
-
 };
 
+}  // namespace kraken::binding::qjs
 
-}
+class frame_request_callback_collection {};
 
-class frame_request_callback_collection {
-
-};
-
-#endif //KRAKENBRIDGE_BINDINGS_QJS_BOM_FRAME_REQUEST_CALLBACK_COLLECTION_H_
+#endif  // KRAKENBRIDGE_BINDINGS_QJS_BOM_FRAME_REQUEST_CALLBACK_COLLECTION_H_

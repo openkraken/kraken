@@ -7,7 +7,7 @@
 #define KRAKENBRIDGE_JS_CONTEXT_MACROS_H
 
 #define OBJECT_INSTANCE(NAME)                                                 \
-  static NAME* instance(ExecutionContext* context) {                             \
+  static NAME* instance(ExecutionContext* context) {                          \
     if (context->constructorMap.count(#NAME) == 0) {                          \
       context->constructorMap[#NAME] = static_cast<void*>(new NAME(context)); \
     }                                                                         \

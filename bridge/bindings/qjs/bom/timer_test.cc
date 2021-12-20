@@ -48,8 +48,7 @@ TEST(Timer, clearTimeout) {
   initJSPagePool(1);
   auto* bridge = static_cast<kraken::KrakenPage*>(getPage(0));
 
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
-  };
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {};
 
   TEST_init(bridge->getContext().get());
 

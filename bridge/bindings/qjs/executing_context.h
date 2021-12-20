@@ -16,11 +16,11 @@
 #include <memory>
 #include <mutex>
 #include <unordered_map>
+#include "bindings/qjs/bom/dom_timer_coordinator.h"
+#include "garbage_collected.h"
 #include "js_context_macros.h"
 #include "kraken_foundation.h"
 #include "qjs_patch.h"
-#include "garbage_collected.h"
-#include "bindings/qjs/bom/dom_timer_coordinator.h"
 
 using JSExceptionHandler = std::function<void(int32_t contextId, const char* message)>;
 
@@ -64,7 +64,8 @@ class ExecutionContextGCTracker : public GarbageCollected<ExecutionContextGCTrac
 
   ExecutionContextGCTracker(JSContext* ctx);
 
-  void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const override;
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
+
  private:
 };
 
@@ -98,7 +99,7 @@ class ExecutionContext {
   // not be used after the ExecutionContext is destroyed.
   DOMTimerCoordinator* timers();
 
-  void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func);
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func);
 
   std::chrono::time_point<std::chrono::system_clock> timeOrigin;
   std::unordered_map<std::string, void*> constructorMap;
@@ -132,7 +133,7 @@ class ExecutionContext {
   friend DocumentInstance;
   WindowInstance* m_window{nullptr};
   DOMTimerCoordinator m_timers;
-  ExecutionContextGCTracker *m_gcTracker{nullptr};
+  ExecutionContextGCTracker* m_gcTracker{nullptr};
 };
 
 // The read object's method or properties via Proxy, we should redirect this_val from Proxy into target property of
