@@ -3,8 +3,6 @@
  * Author: Kraken Team.
  */
 
-import 'dart:collection';
-import 'dart:math' as math;
 import 'dart:ui' as ui
     show
         LineMetrics,
