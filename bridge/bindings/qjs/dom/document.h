@@ -97,6 +97,7 @@ class DocumentInstance : public NodeInstance {
   }
 
   int32_t requestAnimationFrame(FrameCallback* frameCallback);
+  void cancelAnimationFrame(uint32_t callbackId);
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
  private:

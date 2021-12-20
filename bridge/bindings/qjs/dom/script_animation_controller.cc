@@ -46,19 +46,6 @@ static void handleRAFTransientCallback(void* ptr, int32_t contextId, double high
 uint32_t ScriptAnimationController::registerFrameCallback(FrameCallback* frameCallback) {
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
 
-  // Flutter backend implements check
-#if FLUTTER_BACKEND
-  if (getDartMethod()->flushUICommand == nullptr) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.");
-  }
-  // Flush all pending ui messages.
-  getDartMethod()->flushUICommand();
-
-  if (getDartMethod()->requestAnimationFrame == nullptr) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) is not registered.");
-  }
-#endif
-
 #if FLUTTER_BACKEND
   uint32_t requestId = getDartMethod()->requestAnimationFrame(frameCallback, context->getContextId(), handleRAFTransientCallback);
 #elif UNIT_TEST
@@ -69,6 +56,17 @@ uint32_t ScriptAnimationController::registerFrameCallback(FrameCallback* frameCa
   m_frameRequestCallbackCollection.registerFrameCallback(requestId, frameCallback);
 
   return requestId;
+}
+void ScriptAnimationController::cancelFrameCallback(uint32_t callbackId) {
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
+
+#if FLUTTER_BACKEND
+  getDartMethod()->cancelAnimationFrame(context->getContextId(), callbackId);
+#elif UNIT_TEST
+  TEST_cancelAnimationFrame(m_ctx, callbackId);
+#endif
+
+  m_frameRequestCallbackCollection.cancelFrameCallback(callbackId);
 }
 
 }  // namespace kraken::binding::qjs

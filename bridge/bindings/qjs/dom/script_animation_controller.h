@@ -19,6 +19,7 @@ class ScriptAnimationController : public GarbageCollected<ScriptAnimationControl
 
   // Animation frame callbacks are used for requestAnimationFrame().
   uint32_t registerFrameCallback(FrameCallback* frameCallback);
+  void cancelFrameCallback(uint32_t callbackId);
 
   const char* getHumanReadableName() const override { return "ScriptAnimationController"; }
 

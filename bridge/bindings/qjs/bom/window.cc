@@ -94,6 +94,19 @@ JSValue Window::requestAnimationFrame(JSContext* ctx, JSValue this_val, int argc
     return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.");
   }
 
+  // Flutter backend implements check
+#if FLUTTER_BACKEND
+  if (getDartMethod()->flushUICommand == nullptr) {
+    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.");
+  }
+  // Flush all pending ui messages.
+  getDartMethod()->flushUICommand();
+
+  if (getDartMethod()->requestAnimationFrame == nullptr) {
+    return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) is not registered.");
+  }
+#endif
+
   auto* frameCallback = makeGarbageCollected<FrameCallback>(JS_DupValue(ctx, callbackValue))->initialize(ctx, &FrameCallback::classId);
 
   int32_t requestId = window->document()->requestAnimationFrame(frameCallback);
@@ -114,6 +127,8 @@ JSValue Window::cancelAnimationFrame(JSContext* ctx, JSValue this_val, int argc,
   }
 
   auto context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  auto window = static_cast<WindowInstance*>(JS_GetOpaque(context->global(), Window::classId()));
+
   JSValue requestIdValue = argv[0];
   if (!JS_IsNumber(requestIdValue)) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'cancelAnimationFrame': parameter 1 (timer) is not a timer kind.");
@@ -122,10 +137,13 @@ JSValue Window::cancelAnimationFrame(JSContext* ctx, JSValue this_val, int argc,
   int32_t id;
   JS_ToInt32(ctx, &id, requestIdValue);
 
+#if FLUTTER_BACKEND
   if (getDartMethod()->cancelAnimationFrame == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'cancelAnimationFrame': dart method (cancelAnimationFrame) is not registered.");
   }
-  getDartMethod()->cancelAnimationFrame(context->getContextId(), id);
+#endif
+
+  window->document()->cancelAnimationFrame(id);
 
   return JS_NULL;
 }

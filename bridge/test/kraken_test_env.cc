@@ -95,6 +95,12 @@ uint32_t TEST_requestAnimationFrame(FrameCallback* frameCallback, AsyncRAFCallba
   return id;
 }
 
+void TEST_cancelAnimationFrame(JSContext* ctx, uint32_t callbackId) {
+  JSRuntime* rt = JS_GetRuntime(ctx);
+  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
+  ts->os_frameCallbacks.erase(callbackId);
+}
+
 void TEST_clearTimeout(DOMTimer* timer) {
   JSRuntime* rt = JS_GetRuntime(timer->ctx());
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));

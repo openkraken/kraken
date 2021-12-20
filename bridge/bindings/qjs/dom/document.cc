@@ -574,6 +574,10 @@ int32_t DocumentInstance::requestAnimationFrame(FrameCallback* frameCallback) {
   return m_scriptAnimationController->registerFrameCallback(frameCallback);
 }
 
+void DocumentInstance::cancelAnimationFrame(uint32_t callbackId) {
+  m_scriptAnimationController->cancelFrameCallback(callbackId);
+}
+
 void DocumentInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
   JS_MarkValue(rt, m_scriptAnimationController->toQuickJS(), mark_func);
 }
