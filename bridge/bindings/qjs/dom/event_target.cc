@@ -67,7 +67,7 @@ JSValue EventTarget::addEventListener(JSContext* ctx, JSValue this_val, int argc
   }
 
   JSAtom eventTypeAtom = JS_ValueToAtom(ctx, eventTypeValue);
-  auto &eventHandlers =  eventTargetInstance->m_eventHandlers;
+  auto& eventHandlers = eventTargetInstance->m_eventHandlers;
 
   // Dart needs to be notified for the first registration event.
   if (eventHandlers.empty() || JS_HasProperty(ctx, eventTargetInstance->m_propertyEventHandler.value(), eventTypeAtom)) {

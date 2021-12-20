@@ -6,9 +6,9 @@
 #ifndef KRAKENBRIDGE_BINDINGS_QJS_DOM_EVENT_LISTENER_MAP_H_
 #define KRAKENBRIDGE_BINDINGS_QJS_DOM_EVENT_LISTENER_MAP_H_
 
-#include "include/kraken_foundation.h"
-#include <vector>
 #include <quickjs/quickjs.h>
+#include <vector>
+#include "include/kraken_foundation.h"
 
 namespace kraken::binding::qjs {
 
@@ -16,7 +16,6 @@ using EventListenerVector = std::vector<JSValue>;
 
 class EventListenerMap final {
  public:
-
   [[nodiscard]] bool empty() const { return m_entries.empty(); }
   [[nodiscard]] bool contains(JSAtom eventType) const;
   void clear();
@@ -35,6 +34,6 @@ class EventListenerMap final {
   std::vector<std::pair<JSAtom, EventListenerVector>> m_entries;
 };
 
-}
+}  // namespace kraken::binding::qjs
 
-#endif //KRAKENBRIDGE_BINDINGS_QJS_DOM_EVENT_LISTENER_MAP_H_
+#endif  // KRAKENBRIDGE_BINDINGS_QJS_DOM_EVENT_LISTENER_MAP_H_
