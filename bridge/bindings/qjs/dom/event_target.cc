@@ -70,7 +70,10 @@ JSValue EventTarget::addEventListener(JSContext* ctx, JSValue this_val, int argc
 
   // Init list.
   if (eventTargetInstance->m_eventHandlers.count(eventTypeAtom) == 0) {
-    eventTargetInstance->m_eventHandlers[eventTypeAtom] = std::vector<JSValue>();
+    std::vector<JSValue> list = std::vector<JSValue>();
+    // One eventType with 8 eventListeners are pretty rare in most scenario and could be avoid reallocations.
+    list.reserve(8);
+    eventTargetInstance->m_eventHandlers[eventTypeAtom] = list;
   }
 
   auto& eventHandlers = eventTargetInstance->m_eventHandlers[eventTypeAtom];
@@ -191,7 +194,7 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
   eventInstance->nativeEvent->currentTarget = this;
 
   // Dispatch event listeners writen by addEventListener
-  auto _dispatchEvent = [&eventInstance, this](JSValue& handler) {
+  auto _dispatchEvent = [&eventInstance, this](JSValue handler) {
     if (eventInstance->propagationImmediatelyStopped())
       return;
 
