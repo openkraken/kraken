@@ -8,7 +8,7 @@
 namespace kraken::binding::qjs {
 
 JSClassID FrameCallback::classId{0};
-FrameCallback::FrameCallback( JSValue callback) : m_callback(callback) {}
+FrameCallback::FrameCallback(JSValue callback) : m_callback(callback) {}
 
 void FrameCallback::fire(double highResTimeStamp) {
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
@@ -31,7 +31,7 @@ void FrameCallback::fire(double highResTimeStamp) {
   JS_FreeValue(m_ctx, returnValue);
 }
 
-void FrameCallback::trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const {
+void FrameCallback::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
   JS_MarkValue(rt, m_callback, mark_func);
 }
 
@@ -50,8 +50,8 @@ void FrameRequestCallbackCollection::cancelFrameCallback(uint32_t callbackId) {
   m_frameCallbacks.erase(callbackId);
 }
 
-void FrameRequestCallbackCollection::trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) {
-  for (auto &callback: m_frameCallbacks) {
+void FrameRequestCallbackCollection::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
+  for (auto& callback : m_frameCallbacks) {
     JS_MarkValue(rt, callback.second->toQuickJS(), mark_func);
   }
 

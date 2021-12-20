@@ -4,10 +4,10 @@
  */
 
 #include "window.h"
+#include "bindings/qjs/dom/document.h"
 #include "bindings/qjs/dom/events/.gen/message_event.h"
 #include "bindings/qjs/garbage_collected.h"
 #include "bindings/qjs/qjs_patch.h"
-#include "bindings/qjs/dom/document.h"
 #include "dart_methods.h"
 
 namespace kraken::binding::qjs {
@@ -218,7 +218,7 @@ void WindowInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
     JS_MarkValue(rt, onerror, mark_func);
 }
 
-DocumentInstance *WindowInstance::document() {
+DocumentInstance* WindowInstance::document() {
   return m_context->m_document;
 }
 

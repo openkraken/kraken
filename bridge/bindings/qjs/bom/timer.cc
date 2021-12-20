@@ -4,9 +4,9 @@
  */
 
 #include "timer.h"
+#include "bindings/qjs/garbage_collected.h"
 #include "bindings/qjs/qjs_patch.h"
 #include "dart_methods.h"
-#include "bindings/qjs/garbage_collected.h"
 
 #if UNIT_TEST
 #include "kraken_test_env.h"

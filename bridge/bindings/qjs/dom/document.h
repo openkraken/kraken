@@ -7,8 +7,8 @@
 #define KRAKENBRIDGE_DOCUMENT_H
 
 #include "element.h"
-#include "node.h"
 #include "frame_request_callback_collection.h"
+#include "node.h"
 #include "script_animation_controller.h"
 
 namespace kraken::binding::qjs {
@@ -97,7 +97,7 @@ class DocumentInstance : public NodeInstance {
   }
 
   int32_t requestAnimationFrame(FrameCallback* frameCallback);
-  void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) override;
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
  private:
   void removeElementById(JSAtom id, ElementInstance* element);

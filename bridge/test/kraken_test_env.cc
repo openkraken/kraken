@@ -78,11 +78,11 @@ int32_t TEST_setTimeout(DOMTimer* timer, int32_t contextId, AsyncCallback callba
 
 int32_t callbackId = 0;
 
-uint32_t TEST_requestAnimationFrame(FrameCallback *frameCallback, AsyncRAFCallback handler) {
+uint32_t TEST_requestAnimationFrame(FrameCallback* frameCallback, AsyncRAFCallback handler) {
   JSRuntime* rt = JS_GetRuntime(frameCallback->ctx());
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(frameCallback->ctx()));
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
-  JSFrameCallback* th = static_cast<JSFrameCallback *>(js_mallocz(context->ctx(), sizeof(*th)));
+  JSFrameCallback* th = static_cast<JSFrameCallback*>(js_mallocz(context->ctx(), sizeof(*th)));
   th->handler = handler;
   th->callback = frameCallback;
   th->contextId = context->getContextId();

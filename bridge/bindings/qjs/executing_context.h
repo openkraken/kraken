@@ -63,6 +63,7 @@ class ExecutionContextGCTracker : public GarbageCollected<ExecutionContextGCTrac
   static JSClassID contextGcTrackerClassId;
 
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
+
  private:
 };
 

@@ -4,8 +4,8 @@
  */
 
 #include "script_animation_controller.h"
-#include "frame_request_callback_collection.h"
 #include "dart_methods.h"
+#include "frame_request_callback_collection.h"
 
 #if UNIT_TEST
 #include "kraken_test_env.h"
@@ -15,15 +15,14 @@ namespace kraken::binding::qjs {
 
 JSClassID ScriptAnimationController::classId{0};
 
-void ScriptAnimationController::trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const {
+void ScriptAnimationController::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
   auto* controller = static_cast<ScriptAnimationController*>(JS_GetOpaque(val, ScriptAnimationController::classId));
   controller->m_frameRequestCallbackCollection.trace(rt, JS_UNDEFINED, mark_func);
 }
 
-ScriptAnimationController *ScriptAnimationController::initialize(JSContext *ctx, JSClassID *classId) {
+ScriptAnimationController* ScriptAnimationController::initialize(JSContext* ctx, JSClassID* classId) {
   return GarbageCollected::initialize(ctx, classId);
 }
-
 
 static void handleRAFTransientCallback(void* ptr, int32_t contextId, double highResTimeStamp, const char* errmsg) {
   auto* frameCallback = static_cast<FrameCallback*>(ptr);
@@ -72,4 +71,4 @@ uint32_t ScriptAnimationController::registerFrameCallback(FrameCallback* frameCa
   return requestId;
 }
 
-}
+}  // namespace kraken::binding::qjs

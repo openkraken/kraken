@@ -5,8 +5,8 @@
 
 #include "window.h"
 #include "gtest/gtest.h"
-#include "page.h"
 #include "kraken_test_env.h"
+#include "page.h"
 
 TEST(Window, instanceofEventTarget) {
   bool static errorCalled = false;
@@ -31,9 +31,7 @@ TEST(Window, requestAnimationFrame) {
   initJSPagePool(1);
   auto* bridge = static_cast<kraken::KrakenPage*>(getPage(0));
 
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
-    EXPECT_STREQ(message.c_str(), "456");
-  };
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { EXPECT_STREQ(message.c_str(), "456"); };
 
   TEST_init(bridge->getContext().get());
 

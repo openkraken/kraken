@@ -7,8 +7,8 @@
 #define KRAKENBRIDGE_TEST_KRAKEN_TEST_ENV_H_
 
 #include "bindings/qjs/bom/timer.h"
-#include "bindings/qjs/dom/frame_request_callback_collection.h"
 #include "bindings/qjs/dom/event_target.h"
+#include "bindings/qjs/dom/frame_request_callback_collection.h"
 #include "include/dart_methods.h"
 
 using namespace kraken::binding::qjs;

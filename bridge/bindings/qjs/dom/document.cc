@@ -570,11 +570,11 @@ ElementInstance* DocumentInstance::getDocumentElement() {
   return nullptr;
 }
 
-int32_t DocumentInstance::requestAnimationFrame(FrameCallback *frameCallback) {
+int32_t DocumentInstance::requestAnimationFrame(FrameCallback* frameCallback) {
   return m_scriptAnimationController->registerFrameCallback(frameCallback);
 }
 
-void DocumentInstance::trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) {
+void DocumentInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
   JS_MarkValue(rt, m_scriptAnimationController->toQuickJS(), mark_func);
 }
 

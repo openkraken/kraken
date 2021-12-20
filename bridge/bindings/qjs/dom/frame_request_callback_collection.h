@@ -20,11 +20,9 @@ class FrameCallback : public GarbageCollected<FrameCallback> {
 
   void fire(double highResTimeStamp);
 
-  FORCE_INLINE const char* getHumanReadableName() const override {
-    return "FrameCallback";
-  }
+  FORCE_INLINE const char* getHumanReadableName() const override { return "FrameCallback"; }
 
-  void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const override;
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
 
  private:
   JSValue m_callback{JS_NULL};
@@ -33,12 +31,11 @@ class FrameCallback : public GarbageCollected<FrameCallback> {
 
 class FrameRequestCallbackCollection final {
  public:
-  void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func);
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func);
   void registerFrameCallback(uint32_t callbackId, FrameCallback* frameCallback);
   void cancelFrameCallback(uint32_t callbackId);
 
  private:
-
   std::unordered_map<uint32_t, FrameCallback*> m_frameCallbacks;
   std::vector<FrameCallback*> m_abandonedCallbacks;
 };

@@ -68,7 +68,7 @@ class GarbageCollected {
  protected:
   JSValue jsObject{JS_NULL};
   JSContext* m_ctx{nullptr};
-  GarbageCollected() {};
+  GarbageCollected(){};
   friend class MakeGarbageCollectedTrait<T>;
 };
 
@@ -76,7 +76,7 @@ template <typename T>
 class MakeGarbageCollectedTrait {
  public:
   template <typename... Args>
-  static T* allocate(Args&& ...args) {
+  static T* allocate(Args&&... args) {
     T* object = ::new T(std::forward<Args>(args)...);
     return object;
   }
@@ -84,8 +84,8 @@ class MakeGarbageCollectedTrait {
   friend GarbageCollected<T>;
 };
 
-template<typename T>
-T* GarbageCollected<T>::initialize(JSContext *ctx, JSClassID *classId) {
+template <typename T>
+T* GarbageCollected<T>::initialize(JSContext* ctx, JSClassID* classId) {
   JSRuntime* runtime = JS_GetRuntime(ctx);
 
   /// When classId is 0, it means this class are not initialized. We should create a JSClassDef to describe the behavior of this class and associate with classID.
