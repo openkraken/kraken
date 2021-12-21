@@ -28,6 +28,7 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     ./bindings/qjs/host_object_test.cc
     ./bindings/qjs/host_class_test.cc
     ./bindings/qjs/dom/event_target_test.cc
+    ./bindings/qjs/module_manager_test.cc
     ./bindings/qjs/dom/node_test.cc
     ./bindings/qjs/dom/event_test.cc
     ./bindings/qjs/dom/element_test.cc
@@ -36,20 +37,37 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     ./bindings/qjs/bom/window_test.cc
     ./bindings/qjs/dom/custom_event_test.cc
     ./bindings/qjs/module_manager_test.cc
-#     ./test/run_integration_test.cc  # Only for debug usage.
   )
 
   ### kraken_unit_test executable
-  add_executable(kraken_unit_test ${KRAKEN_UNIT_TEST_SOURCE} ${KRAKEN_TEST_SOURCE} ${BRIDGE_SOURCE} ../bindings/qjs/html_parser.cc ../bindings/qjs/html_parser.h ../bindings/qjs/module_manager_test.cc)
+  add_executable(kraken_unit_test
+    ${KRAKEN_UNIT_TEST_SOURCE}
+    ${KRAKEN_TEST_SOURCE}
+    ${BRIDGE_SOURCE}
+  )
+  add_executable(kraken_integration_test
+    ${KRAKEN_TEST_SOURCE}
+    ${BRIDGE_SOURCE}
+    ./test/kraken_test_env.cc
+    ./test/kraken_test_env.h
+    ./test/run_integration_test.cc
+  )
+
   target_include_directories(kraken_unit_test PUBLIC ./third_party/googletest/googletest/include ${BRIDGE_INCLUDE} ./test)
+  target_include_directories(kraken_integration_test PUBLIC ./third_party/googletest/googletest/include ${BRIDGE_INCLUDE} ./test)
   target_link_libraries(kraken_unit_test gtest gtest_main ${BRIDGE_LINK_LIBS})
+  target_link_libraries(kraken_integration_test gtest gtest_main ${BRIDGE_LINK_LIBS})
 
   target_compile_options(quickjs PUBLIC -DDUMP_LEAKS=1)
   target_compile_options(kraken PUBLIC -DDUMP_LEAKS=1)
 
   target_compile_definitions(kraken_unit_test PUBLIC -DFLUTTER_BACKEND=0)
-  target_compile_definitions(kraken_unit_test PUBLIC -DUNIT_TEST=1)
   target_compile_definitions(kraken_unit_test PUBLIC -DSPEC_FILE_PATH="${CMAKE_CURRENT_SOURCE_DIR}")
+  target_compile_definitions(kraken_unit_test PUBLIC -DUNIT_TEST=1)
+
+  target_compile_definitions(kraken_integration_test PUBLIC -DFLUTTER_BACKEND=0)
+  target_compile_definitions(kraken_integration_test PUBLIC -DUNIT_TEST=1)
+  target_compile_definitions(kraken_integration_test PUBLIC -DSPEC_FILE_PATH="${CMAKE_CURRENT_SOURCE_DIR}")
 
   target_compile_definitions(kraken_static PUBLIC -DFLUTTER_BACKEND=1)
   if (DEFINED ENV{LIBRARY_OUTPUT_DIR})

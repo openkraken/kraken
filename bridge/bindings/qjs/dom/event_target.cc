@@ -67,10 +67,9 @@ JSValue EventTarget::addEventListener(JSContext* ctx, JSValue this_val, int argc
   }
 
   JSAtom eventTypeAtom = JS_ValueToAtom(ctx, eventTypeValue);
-  auto& eventHandlers = eventTargetInstance->m_eventHandlers;
 
   // Dart needs to be notified for the first registration event.
-  if (eventHandlers.empty() || JS_HasProperty(ctx, eventTargetInstance->m_propertyEventHandler.value(), eventTypeAtom)) {
+  if (!eventTargetInstance->m_eventHandlers.contains(eventTypeAtom) || JS_HasProperty(ctx, eventTargetInstance->m_propertyEventHandler.value(), eventTypeAtom)) {
     int32_t contextId = eventTargetInstance->prototype()->contextId();
 
     NativeString args_01{};
@@ -79,7 +78,7 @@ JSValue EventTarget::addEventListener(JSContext* ctx, JSValue this_val, int argc
     foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetInstance->m_eventTargetId, UICommand::addEvent, args_01, nullptr);
   }
 
-  eventHandlers.add(eventTypeAtom, JS_DupValue(ctx, callback));
+  eventTargetInstance->m_eventHandlers.add(eventTypeAtom, JS_DupValue(ctx, callback));
   JS_FreeAtom(ctx, eventTypeAtom);
 
   return JS_UNDEFINED;

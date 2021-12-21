@@ -10,13 +10,16 @@
 TEST(EventTarget, addEventListener) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { logCalled = true; };
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    EXPECT_STREQ(message.c_str(), "1234");
+    logCalled = true;
+  };
   auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
   auto& context = bridge->getContext();
-  const char* code = "let div = document.createElement('div'); function f(){ console.log(1234); }; div.addEventListener('click', f);";
+  const char* code = "let div = document.createElement('div'); function f(){ console.log(1234); }; div.addEventListener('click', f); div.dispatchEvent(new Event('click'));";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   delete bridge;
   EXPECT_EQ(errorCalled, false);
