@@ -58,11 +58,11 @@ class RenderTextBox extends RenderBox
         //   <p><span>foo </span> bar</p>
         // Refs:
         //   https://github.com/WebKit/WebKit/blob/6a970b217d59f36e64606ed03f5238d572c23c48/Source/WebCore/layout/inlineformatting/InlineLineBuilder.cpp#L295
-        RenderBoxModel? previousSibling = (parentData as RenderLayoutParentData).previousSibling as RenderBoxModel?;
+        RenderObject? previousSibling = (parentData as RenderLayoutParentData).previousSibling;
 
         if (previousSibling == null) {
           collapsedData = collapsedData.trimLeft();
-        } else if (previousSibling.renderStyle.display == CSSDisplay.block || previousSibling.renderStyle.display == CSSDisplay.flex) {
+        } else if (previousSibling is RenderBoxModel &&(previousSibling.renderStyle.display == CSSDisplay.block || previousSibling.renderStyle.display == CSSDisplay.flex)) {
           // If previousSibling is block,should trimLeft slef.
           CSSDisplay? display = previousSibling.renderStyle.display;
           if (display == CSSDisplay.block || display == CSSDisplay.sliver || display == CSSDisplay.flex) {
@@ -70,10 +70,10 @@ class RenderTextBox extends RenderBox
           }
         }
 
-        RenderBoxModel? nextSibling = (parentData as RenderLayoutParentData).nextSibling as RenderBoxModel?;
+        RenderObject? nextSibling = (parentData as RenderLayoutParentData).nextSibling;
         if (nextSibling == null) {
           collapsedData = collapsedData.trimRight();
-        } else if (nextSibling.renderStyle.display == CSSDisplay.block || nextSibling.renderStyle.display == CSSDisplay.flex) {
+        } else if (nextSibling is RenderBoxModel && (nextSibling.renderStyle.display == CSSDisplay.block || nextSibling.renderStyle.display == CSSDisplay.flex)) {
           // If nextSibling is block,should trimRight slef.
           CSSDisplay? display = nextSibling.renderStyle.display;
           if (display == CSSDisplay.block || display == CSSDisplay.sliver || display == CSSDisplay.flex) {
