@@ -403,6 +403,7 @@ class Element extends Node
 
   @override
   void didAttachRenderer() {
+    super.didAttachRenderer();
     // Ensure that the child is attached.
     ensureChildAttached();
   }
@@ -426,6 +427,7 @@ class Element extends Node
 
   @override
   void didDetachRenderer() {
+    super.didDetachRenderer();
     style.reset();
   }
 

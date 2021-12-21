@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/rendering.dart';
 import 'package:meta/meta.dart';
 
 enum NodeType {
@@ -158,13 +159,31 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   void willAttachRenderer() {}
 
   @override
-  void didAttachRenderer() {}
+  @mustCallSuper
+  void didAttachRenderer() {
+    if (previousSibling is TextNode) {
+      (previousSibling as TextNode).markNeedsLayout();
+    }
+
+    if (nextSibling is TextNode) {
+      (nextSibling as TextNode).markNeedsLayout();
+    }
+  }
 
   @override
   void willDetachRenderer() {}
 
   @override
-  void didDetachRenderer() {}
+  @mustCallSuper
+  void didDetachRenderer() {
+    if (previousSibling is TextNode) {
+      (previousSibling as TextNode).markNeedsLayout();
+    }
+
+    if (nextSibling is TextNode) {
+      (nextSibling as TextNode).markNeedsLayout();
+    }
+  }
 
   @mustCallSuper
   Node appendChild(Node child) {
