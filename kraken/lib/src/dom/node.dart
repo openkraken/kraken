@@ -73,6 +73,7 @@ abstract class LifecycleCallbacks {
 
 abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCallbacks {
   KrakenElementToFlutterElementAdaptor? flutterElement;
+  KrakenElementToWidgetAdaptor? flutterWidget;
   List<Node> childNodes = [];
   /// The Node.parentNode read-only property returns the parent of the specified node in the DOM tree.
   Node? parentNode;
