@@ -299,7 +299,7 @@ class _KrakenAdapterWidgetState extends State<_KrakenAdapterWidget> {
         _KrakenAdapterWidgetState state = (childNodes[index] as WidgetElement)._state!;
         return state.build(context);
       } else {
-        return KrakenElementToWidgetAdaptor(childNodes[index], key: Key(index.toString()));
+        return childNodes[index].flutterWidget ?? KrakenElementToWidgetAdaptor(childNodes[index], key: Key(index.toString()));
       }
     });
 
