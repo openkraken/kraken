@@ -263,10 +263,8 @@ JSClassID EventTargetInstance::classId() {
 
 EventTargetInstance::~EventTargetInstance() {
   foundation::UICommandBuffer::instance(m_contextId)->addCommand(m_eventTargetId, UICommand::disposeEventTarget, nullptr, false);
-#if FLUTTER_BACKEND
   getDartMethod()->flushUICommand();
   delete nativeEventTarget;
-#endif
 }
 
 int EventTargetInstance::hasProperty(JSContext* ctx, JSValue obj, JSAtom atom) {

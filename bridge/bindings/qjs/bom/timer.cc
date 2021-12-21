@@ -129,11 +129,7 @@ static JSValue setTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSVal
   // Create a timer object to keep track timer callback
   auto* timer = makeGarbageCollected<DOMTimer>(JS_DupValue(ctx, callbackValue))->initialize(context->ctx(), &DOMTimer::classId);
 
-#if FLUTTER_BACKEND
   auto timerId = getDartMethod()->setTimeout(timer, context->getContextId(), handleTransientCallback, timeout);
-#elif UNIT_TEST
-  auto timerId = TEST_setTimeout(timer, context->getContextId(), handleTransientCallback, timeout);
-#endif
 
   //   Register timerId.
   timer->setTimerId(timerId);
@@ -175,20 +171,14 @@ static JSValue setInterval(JSContext* ctx, JSValueConst this_val, int argc, JSVa
     return JS_ThrowTypeError(ctx, "Failed to execute 'setTimeout': parameter 2 (timeout) only can be a number or undefined.");
   }
 
-#if FLUTTER_BACKEND
   if (getDartMethod()->setInterval == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'setInterval': dart method (setInterval) is not registered.");
   }
-#endif
 
   // Create a timer object to keep track timer callback
   auto* timer = makeGarbageCollected<DOMTimer>(JS_DupValue(ctx, callbackValue))->initialize(context->ctx(), &DOMTimer::classId);
 
-#if FLUTTER_BACKEND
   uint32_t timerId = getDartMethod()->setInterval(timer, context->getContextId(), handlePersistentCallback, timeout);
-#elif UNIT_TEST
-  uint32_t timerId = TEST_setInterval(timer, context->getContextId(), handlePersistentCallback, timeout);
-#endif
 
   // Register timerId.
   timer->setTimerId(timerId);
@@ -216,18 +206,11 @@ static JSValue clearTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSV
   int32_t id;
   JS_ToInt32(ctx, &id, timeIdValue);
 
-#if FLUTTER_BACKEND
   if (getDartMethod()->clearTimeout == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'clearTimeout': dart method (clearTimeout) is not registered.");
   }
 
   getDartMethod()->clearTimeout(context->getContextId(), id);
-#elif UNIT_TEST
-  DOMTimer* timer = context->timers()->getTimerById(id);
-  if (timer == nullptr)
-    return JS_NULL;
-  TEST_clearTimeout(timer);
-#endif
 
   context->timers()->removeTimeoutById(id);
   return JS_NULL;

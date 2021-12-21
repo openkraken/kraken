@@ -46,11 +46,7 @@ static void handleRAFTransientCallback(void* ptr, int32_t contextId, double high
 uint32_t ScriptAnimationController::registerFrameCallback(FrameCallback* frameCallback) {
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
 
-#if FLUTTER_BACKEND
   uint32_t requestId = getDartMethod()->requestAnimationFrame(frameCallback, context->getContextId(), handleRAFTransientCallback);
-#elif UNIT_TEST
-  uint32_t requestId = TEST_requestAnimationFrame(frameCallback, handleRAFTransientCallback);
-#endif
 
   // Register frame callback to collection.
   m_frameRequestCallbackCollection.registerFrameCallback(requestId, frameCallback);
@@ -60,11 +56,7 @@ uint32_t ScriptAnimationController::registerFrameCallback(FrameCallback* frameCa
 void ScriptAnimationController::cancelFrameCallback(uint32_t callbackId) {
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
 
-#if FLUTTER_BACKEND
   getDartMethod()->cancelAnimationFrame(context->getContextId(), callbackId);
-#elif UNIT_TEST
-  TEST_cancelAnimationFrame(m_ctx, callbackId);
-#endif
 
   m_frameRequestCallbackCollection.cancelFrameCallback(callbackId);
 }

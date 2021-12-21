@@ -4,8 +4,11 @@
  */
 
 #include "kraken_test_env.h"
+#include "dart_methods.h"
+#include "include/kraken_bridge.h"
 #include <sys/time.h>
 #include <vector>
+#include "page.h"
 #include "bindings/qjs/dom/event_target.h"
 #include "kraken_bridge_test.h"
 
@@ -54,10 +57,17 @@ static void unlink_callback(JSThreadState* ts, JSFrameCallback* th) {
   ts->os_frameCallbacks.erase(th->callbackId);
 }
 
-void TEST_init(ExecutionContext* context) {
-  JSThreadState* th = new JSThreadState();
-  JS_SetRuntimeOpaque(context->runtime(), th);
+NativeString* TEST_invokeModule(void* callbackContext, int32_t contextId, NativeString* moduleName, NativeString* method, NativeString* params, AsyncModuleCallback callback) {
+  return nullptr;
+};
+
+void TEST_requestBatchUpdate(int32_t contextId) {
+};
+
+void TEST_reloadApp(int32_t contextId) {
+
 }
+
 
 int32_t timerId = 0;
 
@@ -97,7 +107,7 @@ int32_t TEST_setInterval(DOMTimer* timer, int32_t contextId, AsyncCallback callb
 
 int32_t callbackId = 0;
 
-uint32_t TEST_requestAnimationFrame(FrameCallback* frameCallback, AsyncRAFCallback handler) {
+uint32_t TEST_requestAnimationFrame(FrameCallback* frameCallback, int32_t contextId, AsyncRAFCallback handler) {
   JSRuntime* rt = JS_GetRuntime(frameCallback->ctx());
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(frameCallback->ctx()));
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
@@ -114,18 +124,95 @@ uint32_t TEST_requestAnimationFrame(FrameCallback* frameCallback, AsyncRAFCallba
   return id;
 }
 
-void TEST_cancelAnimationFrame(JSContext* ctx, uint32_t callbackId) {
-  JSRuntime* rt = JS_GetRuntime(ctx);
-  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
+void TEST_cancelAnimationFrame(int32_t contextId, int32_t id) {
+  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  auto* context = page->getContext().get();
+  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(context->runtime()));
   ts->os_frameCallbacks.erase(callbackId);
 }
 
-void TEST_clearTimeout(DOMTimer* timer) {
-  JSRuntime* rt = JS_GetRuntime(timer->ctx());
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
-  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
-  ts->os_timers.erase(timer->timerId());
+void TEST_clearTimeout(int32_t contextId, int32_t timerId) {
+  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  auto* context = page->getContext().get();
+  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(context->runtime()));
+  ts->os_timers.erase(timerId);
 }
+
+NativeScreen* TEST_getScreen(int32_t contextId) {
+  return nullptr;
+};
+
+double TEST_devicePixelRatio(int32_t contextId) {
+  return 1.0;
+}
+
+NativeString* TEST_platformBrightness(int32_t contextId) {
+  return nullptr;
+}
+
+void TEST_toBlob(void* callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId, double devicePixelRatio) {
+
+}
+
+void TEST_flushUICommand() {
+
+}
+
+void TEST_initWindow(int32_t contextId, void* nativePtr) {
+
+}
+
+void TEST_initDocument(int32_t contextId, void* nativePtr) {
+
+}
+
+#if ENABLE_PROFILE
+struct NativePerformanceEntryList {
+  uint64_t* entries;
+  int32_t length;
+};
+NativePerformanceEntryList* TEST_getPerformanceEntries(int32_t) {
+
+}
+#endif
+
+void TEST_onJSError(int32_t contextId, const char*) {
+
+};
+
+void TEST_init(ExecutionContext* context) {
+  JSThreadState* th = new JSThreadState();
+  JS_SetRuntimeOpaque(context->runtime(), th);
+
+  std::vector<uint64_t> mockMethods {
+    reinterpret_cast<uint64_t>(TEST_invokeModule),
+    reinterpret_cast<uint64_t>(TEST_requestBatchUpdate),
+    reinterpret_cast<uint64_t>(TEST_reloadApp),
+    reinterpret_cast<uint64_t>(TEST_setTimeout),
+    reinterpret_cast<uint64_t>(TEST_setInterval),
+    reinterpret_cast<uint64_t>(TEST_clearTimeout),
+    reinterpret_cast<uint64_t>(TEST_requestAnimationFrame),
+    reinterpret_cast<uint64_t>(TEST_cancelAnimationFrame),
+    reinterpret_cast<uint64_t>(TEST_getScreen),
+    reinterpret_cast<uint64_t>(TEST_devicePixelRatio),
+    reinterpret_cast<uint64_t>(TEST_platformBrightness),
+    reinterpret_cast<uint64_t>(TEST_toBlob),
+    reinterpret_cast<uint64_t>(TEST_flushUICommand),
+    reinterpret_cast<uint64_t>(TEST_initWindow),
+    reinterpret_cast<uint64_t>(TEST_initDocument),
+  };
+
+#if ENABLE_PROFILE
+  mockMethods.emplace_pack(reinterpret_cast<uint64_t>(TEST_getPerformanceEntries));
+#else
+  mockMethods.emplace_back(0);
+#endif
+
+  mockMethods.emplace_back(reinterpret_cast<uint64_t>(TEST_onJSError));
+  registerDartMethods(mockMethods.data(), mockMethods.size());
+
+}
+
 
 static bool jsPool(ExecutionContext* context) {
   JSRuntime* rt = context->runtime();
@@ -190,4 +277,12 @@ void TEST_dispatchEvent(EventTargetInstance* eventTarget, const std::string type
   RawEvent rawEvent{reinterpret_cast<uint64_t*>(nativeEvent)};
 
   NativeEventTarget::dispatchEventImpl(nativeEventTarget, nativeEventType.get(), &rawEvent, false);
+}
+
+void TEST_callNativeMethod(void *nativePtr,
+                           NativeValue *returnValue,
+                           NativeString *method,
+                           int32_t argc,
+                           NativeValue *argv) {
+
 }

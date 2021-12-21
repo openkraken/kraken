@@ -137,11 +137,9 @@ JSValue Window::cancelAnimationFrame(JSContext* ctx, JSValue this_val, int argc,
   int32_t id;
   JS_ToInt32(ctx, &id, requestIdValue);
 
-#if FLUTTER_BACKEND
   if (getDartMethod()->cancelAnimationFrame == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'cancelAnimationFrame': dart method (cancelAnimationFrame) is not registered.");
   }
-#endif
 
   window->document()->cancelAnimationFrame(id);
 
