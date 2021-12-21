@@ -230,7 +230,6 @@ class IsolateInspectorServer {
           .upgrade(request, compression: CompressionOptions.compressionOff)
           .then((WebSocket webSocket) {
             _ws = webSocket;
-            webSocket.pingInterval = Duration(seconds: 20);
             webSocket.listen(onWebSocketRequest, onDone: () {
               _ws = null;
             }, onError: (obj, stack) {

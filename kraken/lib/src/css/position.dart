@@ -3,6 +3,8 @@
  * Author: Kraken Team.
  */
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
@@ -103,8 +105,10 @@ mixin CSSPositionMixin on RenderStyle {
 
   void _markNeedsSort() {
     if (renderBoxModel?.parentData is RenderLayoutParentData) {
-      RenderLayoutBox parent = renderBoxModel!.parent as RenderLayoutBox;
-      parent.markChildrenNeedsSort();
+      AbstractNode? parent = renderBoxModel!.parent;
+      if (parent is RenderLayoutBox) {
+        parent.markChildrenNeedsSort();
+      }
     }
   }
 
@@ -115,8 +119,10 @@ mixin CSSPositionMixin on RenderStyle {
     if (renderBoxModel?.parentData is RenderLayoutParentData) {
       RenderStyle renderStyle = renderBoxModel!.renderStyle;
       if (renderStyle.position != DEFAULT_POSITION_TYPE) {
-        RenderBoxModel parent = renderBoxModel!.parent as RenderBoxModel;
-        parent.markNeedsLayout();
+        AbstractNode? parent = renderBoxModel!.parent;
+        if (parent is RenderObject) {
+          parent.markNeedsLayout();
+        }
       }
     }
   }
@@ -132,8 +138,11 @@ mixin CSSPositionMixin on RenderStyle {
       if (renderStyle.position != DEFAULT_POSITION_TYPE ||
         parentRenderStyle?.effectiveDisplay == CSSDisplay.flex ||
         parentRenderStyle?.effectiveDisplay == CSSDisplay.inlineFlex) {
-        RenderBoxModel parent = renderBoxModel!.parent as RenderBoxModel;
-        parent.markNeedsPaint();
+
+        AbstractNode? parent = renderBoxModel!.parent;
+        if (parent is RenderObject) {
+          parent.markNeedsPaint();
+        }
       }
     }
   }
