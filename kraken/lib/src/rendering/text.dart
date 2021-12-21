@@ -16,10 +16,10 @@ enum WhiteSpace { normal, nowrap, pre, preWrap, preLine, breakSpaces }
 
 class RenderTextBox extends RenderBox
     with RenderObjectWithChildMixin<RenderBox> {
-  RenderTextBox(originData, {
+  RenderTextBox(data, {
     required this.renderStyle,
-  }) : _data = originData {
-    TextSpan text = CSSTextMixin.createTextSpan(originData, renderStyle);
+  }) : _data = data {
+    TextSpan text = CSSTextMixin.createTextSpan(_data, renderStyle);
     _renderParagraph = child = KrakenRenderParagraph(
       text,
       textDirection: TextDirection.ltr,
@@ -30,6 +30,12 @@ class RenderTextBox extends RenderBox
 
   set data(String value) {
     _data = value;
+  }
+
+  String get originData => _data;
+
+  bool isEndWithSpace(String str) {
+    return str.endsWith(WHITE_SPACE_CHAR) || str.endsWith(NEW_LINE_CHAR) || str.endsWith(RETURN_CHAR) || str.endsWith(TAB_CHAR);
   }
 
   String get data {
@@ -68,6 +74,8 @@ class RenderTextBox extends RenderBox
           if (display == CSSDisplay.block || display == CSSDisplay.sliver || display == CSSDisplay.flex) {
             collapsedData = collapsedData.trimLeft();
           }
+        } else if (previousSibling is RenderTextBox && isEndWithSpace(previousSibling.originData)) {
+          collapsedData = collapsedData.trimLeft();
         }
 
         RenderObject? nextSibling = (parentData as RenderLayoutParentData).nextSibling;
