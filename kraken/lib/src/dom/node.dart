@@ -4,6 +4,7 @@
  */
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:meta/meta.dart';
 import 'package:kraken/widget.dart';
@@ -163,12 +164,17 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   @override
   @mustCallSuper
   void didAttachRenderer() {
-    if (previousSibling is TextNode) {
-      (previousSibling as TextNode).markNeedsLayout();
-    }
+    // The node attach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
+    if (parentNode != null && parentNode?.renderer is RenderFlowLayout) {
+      RenderLayoutParentData childParentData = renderer?.parentData as RenderLayoutParentData;
 
-    if (nextSibling is TextNode) {
-      (nextSibling as TextNode).markNeedsLayout();
+      if (childParentData.nextSibling is RenderTextBox) {
+        (childParentData.nextSibling as RenderTextBox).markNeedsLayout();
+      }
+
+      if (childParentData.previousSibling is RenderTextBox) {
+        (childParentData.previousSibling as RenderTextBox).markNeedsLayout();
+      }
     }
   }
 
@@ -178,12 +184,17 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   @override
   @mustCallSuper
   void didDetachRenderer() {
-    if (previousSibling is TextNode) {
-      (previousSibling as TextNode).markNeedsLayout();
-    }
+    // The node detach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
+    if (parentNode != null && parentNode?.renderer is RenderFlowLayout) {
+      RenderLayoutParentData childParentData = renderer?.parentData as RenderLayoutParentData;
 
-    if (nextSibling is TextNode) {
-      (nextSibling as TextNode).markNeedsLayout();
+      if (childParentData.nextSibling is RenderTextBox) {
+        (childParentData.nextSibling as RenderTextBox).markNeedsLayout();
+      }
+
+      if (childParentData.previousSibling is RenderTextBox) {
+        (childParentData.previousSibling as RenderTextBox).markNeedsLayout();
+      }
     }
   }
 
