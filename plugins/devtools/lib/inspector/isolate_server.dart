@@ -13,6 +13,7 @@ import '../bridge/platform.dart';
 
 const String CONTENT_TYPE = 'Content-Type';
 const String CONTENT_LENGTH = 'Content-Length';
+const String FAVICON = 'https://gw.alicdn.com/tfs/TB1tTwGAAL0gK0jSZFxXXXWHVXa-144-144.png';
 
 typedef MessageCallback = void Function(Map<String, dynamic>?);
 
@@ -196,13 +197,15 @@ class IsolateInspectorServer {
   }
 
   /// InspectServer has connected frontend.
-  bool get connected => _ws != null;
+  bool get connected => _ws?.readyState == WebSocket.open;
 
   int _bindServerRetryTime = 0;
 
   Future<void> _bindServer(int port) async {
     try {
-      _httpServer = await HttpServer.bind(address, port);
+      ServerSocket serverSocket = await ServerSocket.bind(address, port);
+      _httpServer = await HttpServer.listenOn(serverSocket);
+      // _httpServer = await HttpServer.bind(address, port);
       this.port = port;
     } on SocketException {
       if (_bindServerRetryTime < 10) {
@@ -221,15 +224,23 @@ class IsolateInspectorServer {
       onStarted!();
     }
 
-    await for (HttpRequest request in _httpServer) {
-      HttpHeaders headers = request.headers;
-      if (headers.value('upgrade') == 'websocket') {
-        _ws = await WebSocketTransformer.upgrade(request);
-        _ws!.listen(onWebSocketRequest);
+    _httpServer.listen((HttpRequest request) {
+      if (WebSocketTransformer.isUpgradeRequest(request)) {
+        WebSocketTransformer
+          .upgrade(request, compression: CompressionOptions.compressionOff)
+          .then((WebSocket webSocket) {
+            _ws = webSocket;
+            webSocket.pingInterval = Duration(seconds: 20);
+            webSocket.listen(onWebSocketRequest, onDone: () {
+              _ws = null;
+            }, onError: (obj, stack) {
+              _ws = null;
+            });
+          });
       } else {
-        await onHTTPRequest(request);
+        onHTTPRequest(request);
       }
-    }
+    });
   }
 
   void sendToFrontend(int? id, Map? result) {
@@ -304,9 +315,10 @@ class IsolateInspectorServer {
 
   void _writeJSONObject(HttpRequest request, Object obj) {
     String body = jsonEncode(obj);
+    // Must preserve header case, or chrome devtools inspector will drop data.
     request.response.headers
-        .set(CONTENT_TYPE, 'application/json; charset=UTF-8');
-    request.response.headers.set(CONTENT_LENGTH, body.length);
+        .set(CONTENT_TYPE, 'application/json; charset=UTF-8', preserveHeaderCase: true);
+    request.response.headers.set(CONTENT_LENGTH, body.length, preserveHeaderCase: true);
     request.response.write(body);
   }
 
@@ -322,12 +334,14 @@ class IsolateInspectorServer {
 
   void onRequestList(HttpRequest request) {
     request.response.headers.clear();
-    String entryURL = '$address:$port';
+    String pageId = hashCode.toString();
+    String entryURL = '$address:$port/devtools/page/$pageId';
     _writeJSONObject(request, [
       {
-        'description': '',
+        'faviconUrl': FAVICON,
         'devtoolsFrontendUrl': '$INSPECTOR_URL?ws=$entryURL',
         'title': 'Kraken App',
+        'id': pageId,
         'type': 'page',
         'url': bundleURL,
         'webSocketDebuggerUrl': 'ws://$entryURL'

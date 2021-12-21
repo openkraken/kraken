@@ -18,16 +18,18 @@ abstract class _InspectorModule {
   bool _enable = false;
 
   void invoke(int? id, String method, Map<String, dynamic>? params) {
-    if (method == 'enable') {
-      _enable = true;
-      sendToFrontend(id, null);
-    } else if (method == 'disable') {
-      _enable = false;
-      sendToFrontend(id, null);
-    }
+    switch (method) {
+      case 'enable':
+        _enable = true;
+        sendToFrontend(id, null);
+        break;
+      case 'disable':
+        _enable = false;
+        sendToFrontend(id, null);
+        break;
 
-    if (_enable) {
-      receiveFromFrontend(id, method, params);
+      default:
+        if (_enable) receiveFromFrontend(id, method, params);
     }
   }
 
