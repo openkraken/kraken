@@ -119,12 +119,12 @@ static JSValue simulatePointer(JSContext* ctx, JSValueConst this_val, int argc, 
 
   auto* context = static_cast<binding::qjs::ExecutionContext*>(JS_GetContextOpaque(ctx));
 
-  JSValue& inputArrayValue = argv[0];
+  JSValue inputArrayValue = argv[0];
   if (!JS_IsObject(inputArrayValue)) {
     return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_pointer__': first arguments should be an array.");
   }
 
-  JSValue& pointerValue = argv[1];
+  JSValue pointerValue = argv[1];
   if (!JS_IsNumber(pointerValue)) {
     return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_pointer__': second arguments should be an number.");
   }

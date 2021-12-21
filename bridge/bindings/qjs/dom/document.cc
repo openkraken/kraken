@@ -579,6 +579,7 @@ void DocumentInstance::cancelAnimationFrame(uint32_t callbackId) {
 }
 
 void DocumentInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
+  NodeInstance::trace(rt, val, mark_func);
   JS_MarkValue(rt, m_scriptAnimationController->toQuickJS(), mark_func);
 }
 

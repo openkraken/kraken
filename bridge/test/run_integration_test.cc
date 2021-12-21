@@ -30,14 +30,8 @@ std::string readTestSpec() {
 // Run kraken integration test specs with Google Test.
 // Very useful to fix bridge bugs.
 TEST(IntegrationTest, runSpecs) {
-  initJSPagePool(1);
-  initTestFramework(0);
-
-  auto* bridge = static_cast<kraken::KrakenPage*>(getPage(0));
-
+  auto bridge = TEST_init();
   auto& context = bridge->getContext();
-
-  TEST_init(context.get());
 
   std::string code = readTestSpec();
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
@@ -45,5 +39,4 @@ TEST(IntegrationTest, runSpecs) {
   executeTest(context->getContextId(), [](int32_t contextId, NativeString* status) -> void* { KRAKEN_LOG(VERBOSE) << "done"; });
 
   TEST_runLoop(context.get());
-  disposePage(0);
 }

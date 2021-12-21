@@ -162,9 +162,22 @@ struct NativePerformanceEntryList {
 NativePerformanceEntryList* TEST_getPerformanceEntries(int32_t) {}
 #endif
 
+std::once_flag testInitOnceFlag;
+static int32_t inited{false};
+
 std::unique_ptr<kraken::KrakenPage> TEST_init(OnJSError onJsError) {
-  initJSPagePool(1024);
-  auto* page = static_cast<kraken::KrakenPage*>(getPage(0));
+  uint32_t contextId;
+  if (inited) {
+    contextId = allocateNewPage(-1);
+  } else {
+    contextId = 0;
+  }
+  std::call_once(testInitOnceFlag, []() {
+    initJSPagePool(1024);
+    inited = true;
+  });
+  initTestFramework(contextId);
+  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
   auto* context = page->getContext().get();
   JSThreadState* th = new JSThreadState();
   JS_SetRuntimeOpaque(context->runtime(), th);
