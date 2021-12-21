@@ -15,6 +15,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/widget.dart';
 import 'package:kraken/src/dom/element_event.dart';
 import 'package:kraken/src/dom/element_view.dart';
 import 'package:meta/meta.dart';
@@ -577,7 +578,10 @@ class Element extends Node
     }
 
     if (renderer != null) {
-      _attachRenderBoxModel(parent.renderer!, renderer!, after: after);
+      // If element attach WidgetElement, render obeject should be attach to render tree when mount.
+      if (parent is! WidgetElement) {
+        _attachRenderBoxModel(parent.renderer!, renderer!, after: after);
+      }
 
       // Flush pending style before child attached.
       style.flushPendingProperties();
@@ -636,7 +640,7 @@ class Element extends Node
     RenderLayoutBox? renderLayoutBox = _renderLayoutBox;
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
-      if (!child.isRendererAttached && renderLayoutBox != null) {
+      if (!child.isRendererAttached && renderLayoutBox != null && this is! WidgetElement) {
         RenderBox? after;
         RenderLayoutBox? scrollingContentBox = renderLayoutBox.renderScrollingContent;
         if (scrollingContentBox != null) {
@@ -805,7 +809,10 @@ class Element extends Node
     _updateRenderBoxModel();
     // Attach renderBoxModel to parent if change from `display: none` to other values.
     if (!isRendererAttached && parentElement != null && parentElement!.isRendererAttached) {
-      _addToContainingBlock(after: previousSibling?.renderer);
+      // If element attach WidgetElement, render obeject should be attach to render tree when mount.
+      if (parentNode is! WidgetElement) {
+        _addToContainingBlock(after: previousSibling?.renderer);
+      }
       ensureChildAttached();
     }
   }

@@ -10,6 +10,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/widgets.dart' show RenderObjectElement;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -23,6 +24,7 @@ import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/widget.dart';
 import 'package:kraken/src/dom/element_registry.dart' as element_registry;
+
 
 import 'bundle.dart';
 
@@ -769,6 +771,8 @@ class KrakenController {
 
   UriParser? uriParser;
 
+  late RenderObjectElement rootFlutterElement;
+
   static KrakenController? getControllerOfJSContextId(int? contextId) {
     if (!_controllerMap.containsKey(contextId)) {
       return null;
@@ -820,22 +824,25 @@ class KrakenController {
 
   final GestureListener? _gestureListener;
 
-  KrakenController(String? name, double viewportWidth, double viewportHeight,
-      {bool showPerformanceOverlay = false,
-      enableDebug = false,
-      Color? background,
-      GestureListener? gestureListener,
-      KrakenNavigationDelegate? navigationDelegate,
-      KrakenMethodChannel? methodChannel,
-      this.widgetDelegate,
-      this.bundle,
-      this.onLoad,
-      this.onLoadError,
-      this.onJSError,
-      this.httpClientInterceptor,
-      this.devToolsService,
-      this.uriParser})
-      : _name = name,
+  KrakenController(
+    String? name,
+    double viewportWidth,
+    double viewportHeight, {
+    bool showPerformanceOverlay = false,
+    enableDebug = false,
+    Color? background,
+    GestureListener? gestureListener,
+    KrakenNavigationDelegate? navigationDelegate,
+    KrakenMethodChannel? methodChannel,
+    this.widgetDelegate,
+    this.bundle,
+    this.onLoad,
+    this.onLoadError,
+    this.onJSError,
+    this.httpClientInterceptor,
+    this.devToolsService,
+    this.uriParser,
+  })  : _name = name,
         _gestureListener = gestureListener {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_PROPERTY_INIT);
