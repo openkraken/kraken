@@ -14,6 +14,10 @@
 #include "bindings/qjs/qjs_patch.h"
 #include "event_listener_map.h"
 
+#if UNIT_TEST
+void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv);
+#endif
+
 namespace kraken::binding::qjs {
 
 class EventTargetInstance;
@@ -57,11 +61,11 @@ struct NativeEventTarget {
   static void dispatchEventImpl(NativeEventTarget* nativeEventTarget, NativeString* eventType, void* nativeEvent, int32_t isCustomEvent);
   EventTargetInstance* instance{nullptr};
   NativeDispatchEvent dispatchEvent{nullptr};
-//#if UNIT_TEST
-//  CallNativeMethods callNativeMethods{TEST_callNativeMethod};
-//#else
+#if UNIT_TEST
+  CallNativeMethods callNativeMethods{reinterpret_cast<CallNativeMethods>(TEST_callNativeMethod)};
+#else
   CallNativeMethods callNativeMethods{nullptr};
-//#endif
+#endif
 
 };
 

@@ -107,8 +107,11 @@ void disposePage(int32_t contextId) {
   assert(contextId < maxPoolSize);
   if (pageContextPool[contextId] == nullptr)
     return;
+  // UnitTest will free page after test suit complete.
+#ifndef UNIT_TEST
   auto* page = static_cast<kraken::KrakenPage*>(pageContextPool[contextId]);
   delete page;
+#endif
   pageContextPool[contextId] = nullptr;
 }
 

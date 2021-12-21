@@ -28,12 +28,9 @@ TEST(Window, instanceofEventTarget) {
 }
 
 TEST(Window, requestAnimationFrame) {
-  initJSPagePool(1);
-  auto* bridge = static_cast<kraken::KrakenPage*>(getPage(0));
+  auto bridge = TEST_init();
 
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { EXPECT_STREQ(message.c_str(), "456"); };
-
-  TEST_init(bridge->getContext().get());
 
   std::string code = R"(
 requestAnimationFrame(() => {
@@ -47,12 +44,9 @@ requestAnimationFrame(() => {
 }
 
 TEST(Window, cancelAnimationFrame) {
-  initJSPagePool(1);
-  auto* bridge = static_cast<kraken::KrakenPage*>(getPage(0));
+  auto bridge = TEST_init();
 
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { abort(); };
-
-  TEST_init(bridge->getContext().get());
 
   std::string code = R"(
 let id = requestAnimationFrame(() => {

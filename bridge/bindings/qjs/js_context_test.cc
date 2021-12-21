@@ -5,31 +5,30 @@
 
 #include "gtest/gtest.h"
 #include "page.h"
+#include "kraken_test_env.h"
 
 TEST(Context, isValid) {
-  auto bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {});
+  auto bridge = TEST_init();
   EXPECT_EQ(bridge->getContext()->isValid(), true);
-  delete bridge;
 }
 
 TEST(Context, evalWithError) {
-  bool errorHandlerExecuted = false;
-  auto errorHandler = [&errorHandlerExecuted](int32_t contextId, const char* errmsg) {
+  static bool errorHandlerExecuted = false;
+  auto errorHandler = [](int32_t contextId, const char* errmsg) {
     errorHandlerExecuted = true;
     EXPECT_STREQ(errmsg,
                  "TypeError: cannot read property 'toString' of null\n"
                  "    at <eval> (file://:1)\n");
   };
-  auto bridge = new kraken::KrakenPage(0, errorHandler);
+  auto bridge = TEST_init(errorHandler);
   const char* code = "let object = null; object.toString();";
   bridge->evaluateScript(code, strlen(code), "file://", 0);
   EXPECT_EQ(errorHandlerExecuted, true);
-  delete bridge;
 }
 
 TEST(Context, unrejectPromiseError) {
-  bool errorHandlerExecuted = false;
-  auto errorHandler = [&errorHandlerExecuted](int32_t contextId, const char* errmsg) {
+  static bool errorHandlerExecuted = false;
+  auto errorHandler = [](int32_t contextId, const char* errmsg) {
     errorHandlerExecuted = true;
     EXPECT_STREQ(errmsg,
                  "TypeError: cannot read property 'forceNullError' of null\n"
@@ -37,7 +36,7 @@ TEST(Context, unrejectPromiseError) {
                  "    at Promise (native)\n"
                  "    at <eval> (file://:6)\n");
   };
-  auto bridge = new kraken::KrakenPage(0, errorHandler);
+  auto bridge = TEST_init(errorHandler);
   const char* code =
       " var p = new Promise(function (resolve, reject) {\n"
       "        var nullObject = null;\n"
@@ -48,13 +47,12 @@ TEST(Context, unrejectPromiseError) {
       "\n";
   bridge->evaluateScript(code, strlen(code), "file://", 0);
   EXPECT_EQ(errorHandlerExecuted, true);
-  delete bridge;
 }
 
 TEST(Context, unrejectPromiseErrorWithMultipleContext) {
-  bool errorHandlerExecuted = false;
-  int32_t errorCalledCount = 0;
-  auto errorHandler = [&errorHandlerExecuted, &errorCalledCount](int32_t contextId, const char* errmsg) {
+  static bool errorHandlerExecuted = false;
+  static int32_t errorCalledCount = 0;
+  auto errorHandler = [](int32_t contextId, const char* errmsg) {
     errorHandlerExecuted = true;
     errorCalledCount++;
     EXPECT_STREQ(errmsg,
@@ -63,8 +61,9 @@ TEST(Context, unrejectPromiseErrorWithMultipleContext) {
                  "    at Promise (native)\n"
                  "    at <eval> (file://:6)\n");
   };
-  auto bridge2 = new kraken::KrakenPage(0, errorHandler);
-  auto bridge = new kraken::KrakenPage(0, errorHandler);
+
+  auto bridge = TEST_init(errorHandler);
+  auto bridge2 = TEST_allocateNewPage();
   const char* code =
       " var p = new Promise(function (resolve, reject) {\n"
       "        var nullObject = null;\n"
@@ -77,7 +76,6 @@ TEST(Context, unrejectPromiseErrorWithMultipleContext) {
   bridge2->evaluateScript(code, strlen(code), "file://", 0);
   EXPECT_EQ(errorHandlerExecuted, true);
   EXPECT_EQ(errorCalledCount, 2);
-  delete bridge;
 }
 
 TEST(Context, window) {

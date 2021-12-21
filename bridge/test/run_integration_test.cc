@@ -27,6 +27,8 @@ std::string readTestSpec() {
   return content;
 }
 
+// Run kraken integration test specs with Google Test.
+// Very useful to fix bridge bugs.
 TEST(IntegrationTest, runSpecs) {
   initJSPagePool(1);
   initTestFramework(0);

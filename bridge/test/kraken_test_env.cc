@@ -128,7 +128,7 @@ void TEST_cancelAnimationFrame(int32_t contextId, int32_t id) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
   auto* context = page->getContext().get();
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(context->runtime()));
-  ts->os_frameCallbacks.erase(callbackId);
+  ts->os_frameCallbacks.erase(id);
 }
 
 void TEST_clearTimeout(int32_t contextId, int32_t timerId) {
@@ -176,11 +176,10 @@ NativePerformanceEntryList* TEST_getPerformanceEntries(int32_t) {
 }
 #endif
 
-void TEST_onJSError(int32_t contextId, const char*) {
-
-};
-
-void TEST_init(ExecutionContext* context) {
+std::unique_ptr<kraken::KrakenPage> TEST_init(OnJSError onJsError) {
+  initJSPagePool(1024);
+  auto* page = static_cast<kraken::KrakenPage*>(getPage(0));
+  auto* context = page->getContext().get();
   JSThreadState* th = new JSThreadState();
   JS_SetRuntimeOpaque(context->runtime(), th);
 
@@ -208,9 +207,19 @@ void TEST_init(ExecutionContext* context) {
   mockMethods.emplace_back(0);
 #endif
 
-  mockMethods.emplace_back(reinterpret_cast<uint64_t>(TEST_onJSError));
+  mockMethods.emplace_back(reinterpret_cast<uint64_t>(onJsError));
   registerDartMethods(mockMethods.data(), mockMethods.size());
 
+  return std::unique_ptr<kraken::KrakenPage>(page);
+}
+
+std::unique_ptr<kraken::KrakenPage> TEST_init() {
+  return TEST_init(nullptr);
+}
+
+std::unique_ptr<kraken::KrakenPage> TEST_allocateNewPage() {
+  uint32_t newContextId = allocateNewPage(-1);
+  return std::unique_ptr<kraken::KrakenPage>(static_cast<kraken::KrakenPage*>(getPage(newContextId)));
 }
 
 
@@ -279,10 +288,6 @@ void TEST_dispatchEvent(EventTargetInstance* eventTarget, const std::string type
   NativeEventTarget::dispatchEventImpl(nativeEventTarget, nativeEventType.get(), &rawEvent, false);
 }
 
-void TEST_callNativeMethod(void *nativePtr,
-                           NativeValue *returnValue,
-                           NativeString *method,
-                           int32_t argc,
-                           NativeValue *argv) {
+void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv) {
 
 }

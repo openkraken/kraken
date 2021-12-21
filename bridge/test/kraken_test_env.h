@@ -10,12 +10,18 @@
 #include "bindings/qjs/dom/event_target.h"
 #include "bindings/qjs/dom/frame_request_callback_collection.h"
 #include "include/dart_methods.h"
+#include "page.h"
+#include <memory>
 
 using namespace kraken::binding::qjs;
 
-void TEST_init(ExecutionContext* context);
+// Mock dart methods and add async timer to emulate kraken environment in C++ unit test.
+
+std::unique_ptr<kraken::KrakenPage> TEST_init(OnJSError onJsError);
+std::unique_ptr<kraken::KrakenPage> TEST_init();
+std::unique_ptr<kraken::KrakenPage> TEST_allocateNewPage();
 void TEST_runLoop(ExecutionContext* context);
 void TEST_dispatchEvent(EventTargetInstance* eventTarget, const std::string type);
-//void TEST_callNativeMethod(void* nativePtr, NativeValue* returnValue, NativeString* method, int32_t argc, NativeValue* argv);
+void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv);
 
 #endif  // KRAKENBRIDGE_TEST_KRAKEN_TEST_ENV_H_

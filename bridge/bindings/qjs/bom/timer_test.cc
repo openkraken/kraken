@@ -9,8 +9,7 @@
 #include "page.h"
 
 TEST(Timer, setTimeout) {
-  initJSPagePool(1);
-  auto* bridge = static_cast<kraken::KrakenPage*>(getPage(0));
+  auto bridge = TEST_init();
 
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     static int logIdx = 0;
@@ -29,8 +28,6 @@ TEST(Timer, setTimeout) {
     logIdx++;
   };
 
-  TEST_init(bridge->getContext().get());
-
   std::string code = R"(
 setTimeout(() => {
   console.log('456');
@@ -45,12 +42,9 @@ console.log('1234');
 }
 
 TEST(Timer, clearTimeout) {
-  initJSPagePool(1);
-  auto* bridge = static_cast<kraken::KrakenPage*>(getPage(0));
+  auto bridge = TEST_init();
 
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {};
-
-  TEST_init(bridge->getContext().get());
 
   std::string code = R"(
 function getCachedData() {
