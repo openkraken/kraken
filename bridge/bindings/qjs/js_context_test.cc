@@ -4,8 +4,8 @@
  */
 
 #include "gtest/gtest.h"
-#include "page.h"
 #include "kraken_test_env.h"
+#include "page.h"
 
 TEST(Context, isValid) {
   auto bridge = TEST_init();

@@ -4,13 +4,13 @@
  */
 
 #include "kraken_test_env.h"
-#include "dart_methods.h"
-#include "include/kraken_bridge.h"
 #include <sys/time.h>
 #include <vector>
-#include "page.h"
 #include "bindings/qjs/dom/event_target.h"
+#include "dart_methods.h"
+#include "include/kraken_bridge.h"
 #include "kraken_bridge_test.h"
+#include "page.h"
 
 #if defined(__linux__) || defined(__APPLE__)
 static int64_t get_time_ms(void) {
@@ -61,13 +61,9 @@ NativeString* TEST_invokeModule(void* callbackContext, int32_t contextId, Native
   return nullptr;
 };
 
-void TEST_requestBatchUpdate(int32_t contextId) {
-};
+void TEST_requestBatchUpdate(int32_t contextId){};
 
-void TEST_reloadApp(int32_t contextId) {
-
-}
-
+void TEST_reloadApp(int32_t contextId) {}
 
 int32_t timerId = 0;
 
@@ -150,30 +146,20 @@ NativeString* TEST_platformBrightness(int32_t contextId) {
   return nullptr;
 }
 
-void TEST_toBlob(void* callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId, double devicePixelRatio) {
+void TEST_toBlob(void* callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId, double devicePixelRatio) {}
 
-}
+void TEST_flushUICommand() {}
 
-void TEST_flushUICommand() {
+void TEST_initWindow(int32_t contextId, void* nativePtr) {}
 
-}
-
-void TEST_initWindow(int32_t contextId, void* nativePtr) {
-
-}
-
-void TEST_initDocument(int32_t contextId, void* nativePtr) {
-
-}
+void TEST_initDocument(int32_t contextId, void* nativePtr) {}
 
 #if ENABLE_PROFILE
 struct NativePerformanceEntryList {
   uint64_t* entries;
   int32_t length;
 };
-NativePerformanceEntryList* TEST_getPerformanceEntries(int32_t) {
-
-}
+NativePerformanceEntryList* TEST_getPerformanceEntries(int32_t) {}
 #endif
 
 std::unique_ptr<kraken::KrakenPage> TEST_init(OnJSError onJsError) {
@@ -183,22 +169,22 @@ std::unique_ptr<kraken::KrakenPage> TEST_init(OnJSError onJsError) {
   JSThreadState* th = new JSThreadState();
   JS_SetRuntimeOpaque(context->runtime(), th);
 
-  std::vector<uint64_t> mockMethods {
-    reinterpret_cast<uint64_t>(TEST_invokeModule),
-    reinterpret_cast<uint64_t>(TEST_requestBatchUpdate),
-    reinterpret_cast<uint64_t>(TEST_reloadApp),
-    reinterpret_cast<uint64_t>(TEST_setTimeout),
-    reinterpret_cast<uint64_t>(TEST_setInterval),
-    reinterpret_cast<uint64_t>(TEST_clearTimeout),
-    reinterpret_cast<uint64_t>(TEST_requestAnimationFrame),
-    reinterpret_cast<uint64_t>(TEST_cancelAnimationFrame),
-    reinterpret_cast<uint64_t>(TEST_getScreen),
-    reinterpret_cast<uint64_t>(TEST_devicePixelRatio),
-    reinterpret_cast<uint64_t>(TEST_platformBrightness),
-    reinterpret_cast<uint64_t>(TEST_toBlob),
-    reinterpret_cast<uint64_t>(TEST_flushUICommand),
-    reinterpret_cast<uint64_t>(TEST_initWindow),
-    reinterpret_cast<uint64_t>(TEST_initDocument),
+  std::vector<uint64_t> mockMethods{
+      reinterpret_cast<uint64_t>(TEST_invokeModule),
+      reinterpret_cast<uint64_t>(TEST_requestBatchUpdate),
+      reinterpret_cast<uint64_t>(TEST_reloadApp),
+      reinterpret_cast<uint64_t>(TEST_setTimeout),
+      reinterpret_cast<uint64_t>(TEST_setInterval),
+      reinterpret_cast<uint64_t>(TEST_clearTimeout),
+      reinterpret_cast<uint64_t>(TEST_requestAnimationFrame),
+      reinterpret_cast<uint64_t>(TEST_cancelAnimationFrame),
+      reinterpret_cast<uint64_t>(TEST_getScreen),
+      reinterpret_cast<uint64_t>(TEST_devicePixelRatio),
+      reinterpret_cast<uint64_t>(TEST_platformBrightness),
+      reinterpret_cast<uint64_t>(TEST_toBlob),
+      reinterpret_cast<uint64_t>(TEST_flushUICommand),
+      reinterpret_cast<uint64_t>(TEST_initWindow),
+      reinterpret_cast<uint64_t>(TEST_initDocument),
   };
 
 #if ENABLE_PROFILE
@@ -221,7 +207,6 @@ std::unique_ptr<kraken::KrakenPage> TEST_allocateNewPage() {
   uint32_t newContextId = allocateNewPage(-1);
   return std::unique_ptr<kraken::KrakenPage>(static_cast<kraken::KrakenPage*>(getPage(newContextId)));
 }
-
 
 static bool jsPool(ExecutionContext* context) {
   JSRuntime* rt = context->runtime();
@@ -288,6 +273,4 @@ void TEST_dispatchEvent(EventTargetInstance* eventTarget, const std::string type
   NativeEventTarget::dispatchEventImpl(nativeEventTarget, nativeEventType.get(), &rawEvent, false);
 }
 
-void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv) {
-
-}
+void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv) {}

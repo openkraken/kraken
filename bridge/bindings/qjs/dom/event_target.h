@@ -66,7 +66,6 @@ struct NativeEventTarget {
 #else
   CallNativeMethods callNativeMethods{nullptr};
 #endif
-
 };
 
 class EventTargetInstance : public Instance {
