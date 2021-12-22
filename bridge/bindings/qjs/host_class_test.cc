@@ -6,8 +6,8 @@
 #include "host_class.h"
 #include <unordered_map>
 #include "gtest/gtest.h"
-#include "page.h"
 #include "kraken_test_env.h"
+#include "page.h"
 
 namespace kraken::binding::qjs {
 
@@ -68,7 +68,7 @@ TEST(HostClass, newInstance) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "10");
   };
-  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -91,7 +91,7 @@ TEST(HostClass, instanceOf) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "true");
   };
-  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     errorCalled = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   });
@@ -122,7 +122,7 @@ TEST(HostClass, inheritance) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "20");
   };
-  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     errorCalled = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   });
@@ -150,7 +150,7 @@ TEST(HostClass, inherintanceInJavaScript) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "TEST 10 20");
   };
-  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     errorCalled = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   });
@@ -189,7 +189,7 @@ TEST(HostClass, haveFunctionProtoMethods) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "ƒ ()");
   };
-  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     errorCalled = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   });
@@ -218,7 +218,7 @@ console.log(Demo.call);
 
 TEST(HostClass, multipleInstance) {
   bool static errorCalled = false;
-  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     errorCalled = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   });
@@ -268,7 +268,6 @@ TEST(HostClass, multipleInstance) {
     EXPECT_EQ(isInstanceof, true);
     JS_FreeValue(context->ctx(), object);
   }
-
 
   EXPECT_EQ(errorCalled, false);
 }
@@ -359,7 +358,7 @@ JSValue ExoticClass::instanceConstructor(JSContext* ctx, JSValue func_obj, JSVal
 TEST(HostClass, exoticClass) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -387,7 +386,7 @@ TEST(HostClass, exoticClass) {
 TEST(HostClass, setExoticClassProperty) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });

@@ -5,8 +5,8 @@
 
 #include "event_target.h"
 #include "gtest/gtest.h"
-#include "page.h"
 #include "kraken_test_env.h"
+#include "page.h"
 
 TEST(MouseEvent, init) {
   bool static errorCalled = false;
@@ -15,7 +15,7 @@ TEST(MouseEvent, init) {
     EXPECT_STREQ(message.c_str(), "10");
     logCalled = true;
   };
-  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) { errorCalled = true; });
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
   auto& context = bridge->getContext();
   const char* code = "let mouseEvent = new MouseEvent('click', {clientX: 10, clientY: 20}); console.log(mouseEvent.clientX);";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);

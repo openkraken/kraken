@@ -6,14 +6,14 @@
 #include <gtest/gtest.h>
 #include "executing_context.h"
 #include "host_object.h"
-#include "page.h"
 #include "kraken_test_env.h"
+#include "page.h"
 
 namespace kraken::binding::qjs {
 
 TEST(ModuleManager, shouldThrowErrorWhenBadJSON) {
   bool static errorCalled = false;
-  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     std::string stdErrorMsg = std::string(errmsg);
     EXPECT_EQ(stdErrorMsg.find("TypeError: circular reference") != std::string::npos, true);
     errorCalled = true;

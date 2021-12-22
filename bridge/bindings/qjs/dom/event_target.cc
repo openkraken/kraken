@@ -444,7 +444,7 @@ void EventTargetInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_fu
     JS_MarkValue(rt, entry.second, mark_func);
   }
 
-  for (auto& entry: m_properties) {
+  for (auto& entry : m_properties) {
     JS_MarkValue(rt, entry.second, mark_func);
   }
 }

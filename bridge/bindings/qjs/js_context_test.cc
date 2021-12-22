@@ -6,7 +6,6 @@
 #include "gtest/gtest.h"
 #include "kraken_test_env.h"
 #include "page.h"
-#include "kraken_test_env.h"
 
 TEST(Context, isValid) {
   auto bridge = TEST_init();
@@ -96,7 +95,6 @@ TEST(Context, window) {
   bridge->evaluateScript(code, strlen(code), "file://", 0);
   EXPECT_EQ(errorHandlerExecuted, false);
   EXPECT_EQ(logCalled, true);
-
 }
 
 TEST(Context, windowInheritEventTarget) {
@@ -111,12 +109,11 @@ TEST(Context, windowInheritEventTarget) {
     errorHandlerExecuted = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   };
-  auto bridge = TEST_init( errorHandler);
+  auto bridge = TEST_init(errorHandler);
   const char* code = "console.log(window.addEventListener, addEventListener, globalThis.addEventListener, window.addEventListener === addEventListener)";
   bridge->evaluateScript(code, strlen(code), "file://", 0);
   EXPECT_EQ(errorHandlerExecuted, false);
   EXPECT_EQ(logCalled, true);
-
 }
 
 TEST(Context, evaluateByteCode) {
@@ -128,7 +125,7 @@ TEST(Context, evaluateByteCode) {
   };
 
   auto errorHandler = [](int32_t contextId, const char* errmsg) { errorHandlerExecuted = true; };
-  auto bridge = TEST_init( errorHandler);
+  auto bridge = TEST_init(errorHandler);
   const char* code = "function f() { console.log(arguments)} f(1,2,3,4);";
   size_t byteLen;
   uint8_t* bytes = bridge->dumpByteCode(code, strlen(code), "vm://", &byteLen);
@@ -136,11 +133,10 @@ TEST(Context, evaluateByteCode) {
 
   EXPECT_EQ(errorHandlerExecuted, false);
   EXPECT_EQ(logCalled, true);
-
 }
 
 TEST(jsValueToNativeString, utf8String) {
-  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {});
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {});
   JSValue str = JS_NewString(bridge->getContext()->ctx(), "helloworld");
   std::unique_ptr<NativeString> nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
   EXPECT_EQ(nativeString->length, 10);
@@ -149,11 +145,10 @@ TEST(jsValueToNativeString, utf8String) {
     EXPECT_EQ(expectedString[i], *(nativeString->string + i));
   }
   JS_FreeValue(bridge->getContext()->ctx(), str);
-
 }
 
 TEST(jsValueToNativeString, unicodeChinese) {
-  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {});
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {});
   JSValue str = JS_NewString(bridge->getContext()->ctx(), "这是你的优乐美");
   std::unique_ptr<NativeString> nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
   std::u16string expectedString = u"这是你的优乐美";
@@ -162,11 +157,10 @@ TEST(jsValueToNativeString, unicodeChinese) {
     EXPECT_EQ(expectedString[i], *(nativeString->string + i));
   }
   JS_FreeValue(bridge->getContext()->ctx(), str);
-
 }
 
 TEST(jsValueToNativeString, emoji) {
-  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {});
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {});
   JSValue str = JS_NewString(bridge->getContext()->ctx(), "……🤪");
   std::unique_ptr<NativeString> nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
   std::u16string expectedString = u"……🤪";
@@ -175,5 +169,4 @@ TEST(jsValueToNativeString, emoji) {
     EXPECT_EQ(expectedString[i], *(nativeString->string + i));
   }
   JS_FreeValue(bridge->getContext()->ctx(), str);
-
 }

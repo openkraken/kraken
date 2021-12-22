@@ -5,8 +5,8 @@
 
 #include "event_target.h"
 #include "gtest/gtest.h"
-#include "page.h"
 #include "kraken_test_env.h"
+#include "page.h"
 
 TEST(TextNode, instanceofNode) {
   bool static errorCalled = false;
@@ -15,7 +15,7 @@ TEST(TextNode, instanceofNode) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "true true");
   };
-  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });

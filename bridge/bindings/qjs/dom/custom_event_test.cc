@@ -5,8 +5,8 @@
 
 #include "event_target.h"
 #include "gtest/gtest.h"
-#include "page.h"
 #include "kraken_test_env.h"
+#include "page.h"
 
 TEST(CustomEvent, instanceofEvent) {
   bool static errorCalled = false;

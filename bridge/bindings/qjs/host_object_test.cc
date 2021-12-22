@@ -6,8 +6,8 @@
 #include "host_object.h"
 #include <gtest/gtest.h>
 #include "executing_context.h"
-#include "page.h"
 #include "kraken_test_env.h"
+#include "page.h"
 
 namespace kraken::binding::qjs {
 
@@ -53,7 +53,7 @@ TEST(HostObject, defineProperty) {
 
     EXPECT_STREQ(message.c_str(), "{f: ƒ (), foo: 1}");
   };
-  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) { errorCalled = true; });
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
   auto& context = bridge->getContext();
   auto* sampleObject = new SampleObject(context.get());
   JSValue object = sampleObject->jsObject;
@@ -72,7 +72,7 @@ TEST(ObjectProperty, worksWithProxy) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "0");
   };
-  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -101,7 +101,7 @@ TEST(HostObject, defineFunction) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "20");
   };
-  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -142,7 +142,7 @@ TEST(ExoticHostObject, overriteGetterSetter) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "100");
   };
-  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });

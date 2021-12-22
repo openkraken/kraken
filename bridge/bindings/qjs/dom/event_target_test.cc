@@ -5,8 +5,8 @@
 
 #include "event_target.h"
 #include "gtest/gtest.h"
-#include "page.h"
 #include "kraken_test_env.h"
+#include "page.h"
 
 TEST(EventTarget, addEventListener) {
   bool static errorCalled = false;
@@ -15,7 +15,7 @@ TEST(EventTarget, addEventListener) {
     EXPECT_STREQ(message.c_str(), "1234");
     logCalled = true;
   };
-  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -67,10 +67,10 @@ TEST(EventTarget, propertyEventHandler) {
   EXPECT_EQ(logCalled, true);
 }
 
- TEST(EventTarget, propertyEventOnWindow) {
+TEST(EventTarget, propertyEventOnWindow) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::KrakenPage::consoleMessageHandler = [](void *ctx, const std::string &message, int logLevel) {
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "1234");
   };
@@ -78,9 +78,10 @@ TEST(EventTarget, propertyEventHandler) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto &context = bridge->getContext();
-  const char* code = "window.onclick = function() { console.log(1234); };"
-                     "window.dispatchEvent(new Event('click'));";
+  auto& context = bridge->getContext();
+  const char* code =
+      "window.onclick = function() { console.log(1234); };"
+      "window.dispatchEvent(new Event('click'));";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);
@@ -93,7 +94,7 @@ TEST(EventTarget, asyncFunctionCallback) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "done");
   };
-  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -135,7 +136,7 @@ TEST(EventTarget, ClassInheritEventTarget) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "ƒ () ƒ ()");
   };
-  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });

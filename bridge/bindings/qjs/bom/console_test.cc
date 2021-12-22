@@ -5,8 +5,8 @@
 
 #include "console.h"
 #include "gtest/gtest.h"
-#include "page.h"
 #include "kraken_test_env.h"
+#include "page.h"
 
 std::once_flag kGlobalClassIdFlag;
 
