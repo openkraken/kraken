@@ -28,10 +28,8 @@ static void CreateDivElement(benchmark::State& state) {
   delete bridge;
 }
 
-
 BENCHMARK(CreateRawJavaScriptObject)->Threads(1);
 BENCHMARK(CreateDivElement)->Threads(1);
-
 
 // Run the benchmark
 BENCHMARK_MAIN();
