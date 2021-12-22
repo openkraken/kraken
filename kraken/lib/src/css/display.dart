@@ -34,10 +34,10 @@ mixin CSSDisplayMixin on RenderStyle {
       if (renderBoxModel?.parent != null && renderBoxModel?.parent is RenderFlowLayout && renderBoxModel?.parentData is RenderLayoutParentData) {
         RenderLayoutParentData childParentData = renderBoxModel?.parentData as RenderLayoutParentData;
         if (childParentData.nextSibling is RenderTextBox) {
-          (childParentData.nextSibling as RenderTextBox).markNeedsLayout();
+          (childParentData.nextSibling as RenderTextBox).markRenderParagraphLyout();
         }
         if (childParentData.previousSibling is RenderTextBox) {
-          (childParentData.previousSibling as RenderTextBox).markNeedsLayout();
+          (childParentData.previousSibling as RenderTextBox).markRenderParagraphLyout();
         }
       }
     }

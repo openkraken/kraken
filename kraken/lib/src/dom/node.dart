@@ -169,34 +169,34 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
       RenderLayoutParentData childParentData = renderer?.parentData as RenderLayoutParentData;
 
       if (childParentData.nextSibling is RenderTextBox) {
-        (childParentData.nextSibling as RenderTextBox).markNeedsLayout();
+        (childParentData.nextSibling as RenderTextBox).markRenderParagraphLyout();
       }
 
       if (childParentData.previousSibling is RenderTextBox) {
-        (childParentData.previousSibling as RenderTextBox).markNeedsLayout();
+        (childParentData.previousSibling as RenderTextBox).markRenderParagraphLyout();
       }
     }
   }
 
   @override
-  void willDetachRenderer() {}
-
-  @override
   @mustCallSuper
-  void didDetachRenderer() {
+  void willDetachRenderer() {
     // The node detach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
     if (parentNode != null && parentNode?.renderer is RenderFlowLayout && renderer?.parentData is RenderLayoutParentData) {
       RenderLayoutParentData childParentData = renderer?.parentData as RenderLayoutParentData;
 
       if (childParentData.nextSibling is RenderTextBox) {
-        (childParentData.nextSibling as RenderTextBox).markNeedsLayout();
+        (childParentData.nextSibling as RenderTextBox).markRenderParagraphLyout();
       }
 
       if (childParentData.previousSibling is RenderTextBox) {
-        (childParentData.previousSibling as RenderTextBox).markNeedsLayout();
+        (childParentData.previousSibling as RenderTextBox).markRenderParagraphLyout();
       }
     }
   }
+
+  @override
+  void didDetachRenderer() {}
 
   @mustCallSuper
   Node appendChild(Node child) {

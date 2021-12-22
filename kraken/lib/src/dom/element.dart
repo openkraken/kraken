@@ -411,6 +411,7 @@ class Element extends Node
 
   @override
   void willDetachRenderer() {
+    super.willDetachRenderer();
     // Cancel running transition.
     renderStyle.cancelRunningTransition();
     // Remove all intersection change listeners.
@@ -428,7 +429,6 @@ class Element extends Node
 
   @override
   void didDetachRenderer() {
-    super.didDetachRenderer();
     style.reset();
   }
 
