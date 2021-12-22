@@ -11,6 +11,10 @@
 #include "elements/template_element.h"
 #include "text_node.h"
 
+#if UNIT_TEST
+#include "kraken_test_env.h"
+#endif
+
 namespace kraken::binding::qjs {
 
 std::once_flag kElementInitOnceFlag;
@@ -345,9 +349,16 @@ JSValue Element::toBlob(JSContext* ctx, JSValue this_val, int argc, JSValue* arg
 }
 
 JSValue Element::click(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+#if FLUTTER_BACKEND
   getDartMethod()->flushUICommand();
   auto element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   return element->callNativeMethods("click", 0, nullptr);
+#elif UNIT_TEST
+
+  auto element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
+  TEST_dispatchEvent(element, "click");
+  return JS_UNDEFINED;
+#endif
 }
 
 JSValue Element::scroll(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {

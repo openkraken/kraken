@@ -70,7 +70,6 @@ class WindowInstance : public EventTargetInstance {
   DocumentInstance* document();
 
   ObjectProperty m_location{m_context, jsObject, "m_location", (new Location(m_context))->jsObject};
-  ObjectProperty m_onerror{m_context, jsObject, "m_onerror", JS_NULL};
   JSValue onerror{JS_NULL};
   friend Window;
   friend ExecutionContext;

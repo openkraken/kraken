@@ -386,17 +386,20 @@ JSValue EventTargetInstance::callNativeMethods(const char* method, int32_t argc,
 }
 
 void EventTargetInstance::setAttributesEventHandler(JSString* p, JSValue value) {
-  if (!JS_IsFunction(m_ctx, value)) {
-    return;
-  }
-
   char eventType[p->len + 1 - 2];
   memcpy(eventType, &p->u.str8[2], p->len + 1 - 2);
   JSAtom atom = JS_NewAtom(m_ctx, eventType);
 
   // When evaluate scripts like 'element.onclick = null', we needs to remove the event handlers callbacks
   if (JS_IsNull(value)) {
+    // EventHandler are no long visible by GC. Should free it manually.
+    JS_FreeValue(m_ctx, m_eventHandlerMap[atom]);
     m_eventHandlerMap.erase(atom);
+    JS_FreeAtom(m_ctx, atom);
+    return;
+  }
+
+  if (!JS_IsFunction(m_ctx, value)) {
     JS_FreeAtom(m_ctx, atom);
     return;
   }
@@ -409,6 +412,8 @@ void EventTargetInstance::setAttributesEventHandler(JSString* p, JSValue value) 
     int32_t type = JS_IsFunction(m_ctx, value) ? UICommand::addEvent : UICommand::removeEvent;
     foundation::UICommandBuffer::instance(contextId)->addCommand(m_eventTargetId, type, *args_01, nullptr);
   }
+
+  JS_FreeAtom(m_ctx, atom);
 }
 
 JSValue EventTargetInstance::getAttributesEventHandler(JSString* p) {

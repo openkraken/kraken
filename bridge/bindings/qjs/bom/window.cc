@@ -204,13 +204,14 @@ IMPL_PROPERTY_SETTER(Window, onerror)(JSContext* ctx, JSValue this_val, int argc
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
   JSValue eventString = JS_NewString(ctx, "onerror");
   JSString* p = JS_VALUE_GET_STRING(eventString);
-  window->setAttributesEventHandler(p, argv[0]);
+  JSValue onerrorHandler = argv[0];
+  window->setAttributesEventHandler(p, onerrorHandler);
 
   if (!JS_IsNull(window->onerror)) {
     JS_FreeValue(ctx, window->onerror);
   }
 
-  window->onerror = JS_DupValue(ctx, argv[0]);
+  window->onerror = onerrorHandler;
   JS_FreeValue(ctx, eventString);
   return JS_NULL;
 }
@@ -228,10 +229,6 @@ WindowInstance::WindowInstance(Window* window) : EventTargetInstance(window, Win
 
 void WindowInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
   EventTargetInstance::trace(rt, val, mark_func);
-
-  // Should check object is already inited before gc mark.
-  if (JS_IsObject(onerror))
-    JS_MarkValue(rt, onerror, mark_func);
 }
 
 DocumentInstance* WindowInstance::document() {
