@@ -773,14 +773,12 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Relayout only flex items (not include position placeholder) based on
     // flex factors (flex-grow/flex-shrink) and alignment in cross axis (align-items).
     _relayoutFlexItems(
-      _flexItemChildren,
       _runMetrics,
       _runSpacingMap,
       _containerSizeMap,
     );
     // Set flex container size according to children size.
     _setContainerSize(
-      _flexItemChildren,
       _runMetrics,
       _runSpacingMap,
       _containerSizeMap,
@@ -809,7 +807,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         _containerSizeMap,
       );
       _setChildrenOffset(
-        _positionPlaceholderChildren,
         _runMetrics,
         _runSpacingMap,
         _containerSizeMap,
@@ -818,7 +815,6 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     // Set children offset based on flex alignment properties.
     _setChildrenOffset(
-      _flexItemChildren,
       _runMetrics,
       _runSpacingMap,
       _containerSizeMap,
@@ -1287,12 +1283,11 @@ class RenderFlexLayout extends RenderLayoutBox {
   // Relayout flex item based on flex factors(flex-grow/flex-shrink) and alignment in cross axis(align-items).
   //  https://www.w3.org/TR/css-flexbox-1/#resolve-flexible-lengths
   void _relayoutFlexItems(
-    List<RenderBox> children,
     List<_RunMetrics> _runMetrics,
     Map<String, double> _runSpacingMap,
     Map<String, double> _containerSizeMap,
   ) {
-    if (children.isEmpty) return;
+    if (_runMetrics.isEmpty) return;
 
     double runBetweenSpace = _runSpacingMap['between']!;
     double? contentBoxLogicalWidth = renderStyle.contentBoxLogicalWidth;
@@ -1335,6 +1330,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       final double totalFlexGrow = metrics.totalFlexGrow;
       final double totalFlexShrink = metrics.totalFlexShrink;
       final Map<int?, _RunChild> runChildren = metrics.runChildren;
+      final List<_RunChild> runChildrenList = runChildren.values.toList();
 
       double totalSpace = 0;
       // Flex factor calculation depends on flex-basis if exists.
@@ -1375,14 +1371,11 @@ class RenderFlexLayout extends RenderLayoutBox {
         while (_resolveFlexibleLengths(metrics, initialFreeSpace)) {}
       }
 
-      for (RenderBox child in children) {
-        final RenderLayoutParentData? childParentData = child.parentData as RenderLayoutParentData?;
+      for (_RunChild runChild in runChildrenList) {
+        RenderBox child = runChild.child;
 
         // Whether child needs to be stretched in the cross axis.
         bool isStretchSelf = needToStretchChildCrossSize(child);
-
-        // Whether child is positioned placeholder or positioned renderObject
-        bool isChildPositioned = _isPlaceholderPositioned(child) || childParentData!.isPositioned;
         // Whether child cross size should be changed based on cross axis alignment change
         bool isCrossSizeChanged = false;
 
@@ -1428,16 +1421,10 @@ class RenderFlexLayout extends RenderLayoutBox {
           isCrossSizeChanged = childCrossSize != childCrossLogicalSize;
         }
 
-        // Don't need to relayout child in following cases
-        // 1. child is placeholder when in layout non placeholder stage
-        // 2. child is positioned renderObject, it needs to layout in its special stage
-        // 3. child's size don't need to recompute if no flex-grow、flex-shrink or cross size not changed
-        if (isChildPositioned ||
-          (!isFlexGrow && !isFlexShrink && !isCrossSizeChanged)) {
+        // child's size don't need to recompute if no flex-grow、flex-shrink or cross size not changed.
+        if (!isFlexGrow && !isFlexShrink && !isCrossSizeChanged) {
           continue;
         }
-
-        if (childParentData.runIndex != i) break;
 
         // Skip scrolling content box
         if (child is RenderBoxModel && child.isScrollingContentBox) {
@@ -1454,7 +1441,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         if (!isChildNeedsLayout) {
           continue;
         }
-
 
         late DateTime childLayoutStart;
         if (kProfileMode && PerformanceTiming.enabled()) {
@@ -1612,12 +1598,11 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   // Set flex container size according to children size.
   void _setContainerSize(
-    List<RenderBox> children,
     List<_RunMetrics> _runMetrics,
     Map<String, double> _runSpacingMap,
     Map<String, double> _containerSizeMap,
   ) {
-    if (children.isEmpty) {
+    if (_runMetrics.isEmpty) {
       _setContainerSizeWithNoChild();
       return;
     }
@@ -1907,12 +1892,11 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   // Set flex item offset based on flex alignment properties.
   void _setChildrenOffset(
-    List<RenderBox> children,
     List<_RunMetrics> _runMetrics,
     Map<String, double> _runSpacingMap,
     Map<String, double> _containerSizeMap,
   ) {
-    if (children.isEmpty) return;
+    if (_runMetrics.isEmpty) return;
 
     double runLeadingSpace = _runSpacingMap['leading']!;
     double runBetweenSpace = _runSpacingMap['between']!;
@@ -1929,7 +1913,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       crossAxisContentSize = contentSize.width;
     }
 
-    // Set offset of children
+    // Set offset of children in each flex line.
     for (int i = 0; i < _runMetrics.length; ++i) {
       final _RunMetrics metrics = _runMetrics[i];
       final double runMainAxisExtent = metrics.mainAxisExtent;
@@ -1938,6 +1922,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       final double totalFlexGrow = metrics.totalFlexGrow;
       final double totalFlexShrink = metrics.totalFlexShrink;
       final Map<int?, _RunChild> runChildren = metrics.runChildren;
+      final List<_RunChild> runChildrenList = runChildren.values.toList();
 
       final double mainContentSizeDelta =
           mainAxisContentSize - runMainAxisExtent;
@@ -2010,17 +1995,12 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       // Calculate margin auto children in the main axis
       double mainAxisMarginAutoChildrenCount = 0;
-      RenderBox? runChild = firstChild;
 
-      while (runChild != null) {
-        final RenderLayoutParentData childParentData =
-            runChild.parentData as RenderLayoutParentData;
-        if (childParentData.runIndex != i) break;
-
-        if (isChildMainAxisMarginAutoExist(runChild)) {
+      for (_RunChild runChild in runChildrenList) {
+        RenderBox child = runChild.child;
+        if (isChildMainAxisMarginAutoExist(child)) {
           mainAxisMarginAutoChildrenCount++;
         }
-        runChild = childParentData.nextSibling;
       }
 
       // Justify-content has no effect if auto margin of child exists in the main axis.
@@ -2043,12 +2023,8 @@ class RenderFlexLayout extends RenderLayoutBox {
               leadingSpace
           : leadingSpace + mainAxisStartPadding + mainAxisStartBorder;
 
-      for (RenderBox child in children) {
-        final RenderLayoutParentData? childParentData =
-        child.parentData as RenderLayoutParentData?;
-
-        if (childParentData!.runIndex != i) break;
-
+      for (_RunChild runChild in runChildrenList) {
+        RenderBox child = runChild.child;
         double childMainAxisMargin = flowAwareChildMainAxisMargin(child)!;
         // Add start margin of main axis when setting offset
         childMainPosition += childMainAxisMargin;
