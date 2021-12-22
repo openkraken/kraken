@@ -750,11 +750,9 @@ class RenderFlexLayout extends RenderLayoutBox {
       size = getBoxSize(layoutContentSize);
       return;
     }
-    assert(contentConstraints != null);
 
-    // Metrics of each flex line.
+    // Reset global variables on each layout.
     _runMetrics = <_RunMetrics>[];
-    // Spacing between each flex line.
     _runSpacingMap = {
       'leading': 0.0,
       'between': 0.0,
@@ -763,6 +761,8 @@ class RenderFlexLayout extends RenderLayoutBox {
       'main': 0.0,
       'cross': 0.0,
     };
+    _childrenIntrinsicMainSizes = {};
+    _childrenOldConstraints = {};
 
     if (placeholderChild == null) {
       _flexLineBoxMetrics = _runMetrics;
@@ -785,6 +785,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     _alignChildren(placeholderChild);
   }
 
+  // Compute the leading and between spacing of each flex line.
   void _computeRunSpacing() {
     double? contentBoxLogicalWidth = renderStyle.contentBoxLogicalWidth;
     double? contentBoxLogicalHeight = renderStyle.contentBoxLogicalHeight;
