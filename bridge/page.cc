@@ -116,9 +116,7 @@ KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : c
 bool KrakenPage::parseHTML(const char* code, size_t length) {
   if (!m_context->isValid())
     return false;
-  Document* Document = Document::instance(m_context.get());
-  auto document = DocumentInstance::instance(Document);
-  JSValue bodyValue = JS_GetPropertyStr(m_context->ctx(), document->jsObject, "body");
+  JSValue bodyValue = JS_GetPropertyStr(m_context->ctx(), m_context->document()->jsObject, "body");
   auto* body = static_cast<ElementInstance*>(JS_GetOpaque(bodyValue, Element::classId()));
   HTMLParser::parseHTML(code, length, body);
   JS_FreeValue(m_context->ctx(), bodyValue);

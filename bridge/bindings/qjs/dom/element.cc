@@ -809,7 +809,7 @@ void ElementInstance::_beforeUpdateId(JSAtom oldId, JSAtom newId) {
 }
 
 ElementInstance::ElementInstance(Element* element, std::string tagName, bool shouldAddUICommand)
-    : m_tagName(tagName), NodeInstance(element, NodeType::ELEMENT_NODE, DocumentInstance::instance(Document::instance(element->m_context)), Element::classId(), exoticMethods, "Element") {
+    : m_tagName(tagName), NodeInstance(element, NodeType::ELEMENT_NODE, Element::classId(), exoticMethods, "Element") {
   m_attributes = new ElementAttributes(m_context);
   JSValue arguments[] = {jsObject};
   JSValue style = JS_CallConstructor(m_ctx, CSSStyleDeclaration::instance(m_context)->jsObject, 1, arguments);

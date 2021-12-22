@@ -88,13 +88,6 @@ class DocumentInstance : public NodeInstance {
   DocumentInstance() = delete;
   explicit DocumentInstance(Document* document);
   ~DocumentInstance();
-  static std::unordered_map<Document*, DocumentInstance*> m_instanceMap;
-  static DocumentInstance* instance(Document* document) {
-    if (m_instanceMap.count(document) == 0) {
-      m_instanceMap[document] = new DocumentInstance(document);
-    }
-    return m_instanceMap[document];
-  }
 
   int32_t requestAnimationFrame(FrameCallback* frameCallback);
   void cancelAnimationFrame(uint32_t callbackId);

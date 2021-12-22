@@ -516,10 +516,10 @@ void DocumentCookie::setCookie(std::string& cookieStr) {
   cookiePairs[key] = value;
 }
 
-DocumentInstance::DocumentInstance(Document* document) : NodeInstance(document, NodeType::DOCUMENT_NODE, this, Document::classId(), "document") {
+DocumentInstance::DocumentInstance(Document* document) : NodeInstance(document, NodeType::DOCUMENT_NODE, Document::classId(), "document") {
   m_context->m_document = this;
+  m_document = this;
   m_cookie = std::make_unique<DocumentCookie>();
-  m_instanceMap[Document::instance(m_context)] = this;
   m_eventTargetId = DOCUMENT_TARGET_ID;
 
   m_scriptAnimationController = makeGarbageCollected<ScriptAnimationController>()->initialize(m_ctx, &ScriptAnimationController::classId);
@@ -528,8 +528,6 @@ DocumentInstance::DocumentInstance(Document* document) : NodeInstance(document, 
   getDartMethod()->initDocument(m_context->getContextId(), nativeEventTarget);
 #endif
 }
-
-std::unordered_map<Document*, DocumentInstance*> DocumentInstance::m_instanceMap{};
 
 DocumentInstance::~DocumentInstance() {}
 void DocumentInstance::removeElementById(JSAtom id, ElementInstance* element) {

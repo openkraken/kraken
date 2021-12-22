@@ -43,7 +43,7 @@ IMPL_PROPERTY_GETTER(Comment, length)(JSContext* ctx, JSValue this_val, int argc
   return JS_NewUint32(ctx, 0);
 }
 
-CommentInstance::CommentInstance(Comment* comment) : NodeInstance(comment, NodeType::COMMENT_NODE, DocumentInstance::instance(Document::instance(comment->m_context)), Comment::classId(), "Comment") {
+CommentInstance::CommentInstance(Comment* comment) : NodeInstance(comment, NodeType::COMMENT_NODE, Comment::classId(), "Comment") {
   ::foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_eventTargetId, UICommand::createComment, nativeEventTarget);
 }
 

@@ -198,9 +198,7 @@ static JSValue parseHTML(JSContext* ctx, JSValueConst this_val, int argc, JSValu
 
     std::string strHTML = binding::qjs::jsValueToStdString(ctx, html);
 
-    binding::qjs::Document* Document = binding::qjs::Document::instance(context);
-    auto document = binding::qjs::DocumentInstance::instance(Document);
-    JSValue bodyValue = JS_GetPropertyStr(context->ctx(), document->jsObject, "body");
+    JSValue bodyValue = JS_GetPropertyStr(context->ctx(), context->document()->jsObject, "body");
     auto* body = static_cast<binding::qjs::ElementInstance*>(JS_GetOpaque(bodyValue, binding::qjs::Element::classId()));
     binding::qjs::HTMLParser::parseHTML(strHTML, body);
 

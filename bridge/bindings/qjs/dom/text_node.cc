@@ -61,7 +61,7 @@ IMPL_PROPERTY_GETTER(TextNode, nodeName)(JSContext* ctx, JSValue this_val, int a
 }
 
 TextNodeInstance::TextNodeInstance(TextNode* textNode, JSValue text)
-    : NodeInstance(textNode, NodeType::TEXT_NODE, DocumentInstance::instance(Document::instance(textNode->m_context)), TextNode::classId(), "TextNode") {
+    : NodeInstance(textNode, NodeType::TEXT_NODE, TextNode::classId(), "TextNode") {
   m_data = jsValueToStdString(m_ctx, text);
   std::unique_ptr<NativeString> args_01 = stringToNativeString(m_data);
   foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_eventTargetId, UICommand::createTextNode, *args_01, nativeEventTarget);
