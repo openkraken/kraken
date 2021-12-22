@@ -154,6 +154,10 @@ class RenderTextBox extends RenderBox
     needsLayout = true;
   }
 
+  void markRenderParagraphLyout() {
+    _renderParagraph.markNeedsLayout();
+  }
+
   // @HACK: sync _needsLayout flag in Flutter to do performance opt.
   void syncNeedsLayoutFlag() {
     needsLayout = true;

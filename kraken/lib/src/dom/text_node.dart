@@ -25,13 +25,6 @@ class TextNode extends Node {
     return (_data == null || _data!.isEmpty) ? '' : _data!;
   }
 
-  void markNeedsLayout() {
-    if (isRendererAttached) {
-      renderer?.markNeedsLayout();
-      _renderTextBox?.child?.markNeedsLayout();
-    }
-  }
-
   set data(String? newData) {
     assert(newData != null);
 
