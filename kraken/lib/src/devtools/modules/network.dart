@@ -37,7 +37,7 @@ class InspectNetworkModule extends UIInspectorModule implements HttpClientInterc
         sendToFrontend(id, null);
         break;
       case 'getResponseBody':
-        String requestId = params!['requestId'];
+        // String requestId = params!['requestId'];
         sendToFrontend(id, JSONEncodableMap({
           'body': '{"content":"the body"}',
           // True, if content was sent as base64.
