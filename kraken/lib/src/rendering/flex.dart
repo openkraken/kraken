@@ -660,6 +660,10 @@ class RenderFlexLayout extends RenderLayoutBox {
     beforeLayout();
 
     RenderBox? child = firstChild;
+
+    // Layout non positioned element and its placeholder
+    _layoutChildren(null);
+
     // Layout positioned element
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData as RenderLayoutParentData;
@@ -672,9 +676,6 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       child = childParentData.nextSibling;
     }
-
-    // Layout non positioned element and its placeholder
-    _layoutChildren(null);
 
     // Reset offset of positioned and sticky element
     child = firstChild;

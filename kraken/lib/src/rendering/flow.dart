@@ -421,6 +421,9 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     RenderBox? child = firstChild;
 
+    // Layout non positioned element
+    _layoutChildren();
+
     // Layout positioned element
     while (child != null) {
       final RenderLayoutParentData childParentData =
@@ -431,9 +434,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       }
       child = childParentData.nextSibling;
     }
-
-    // Layout non positioned element
-    _layoutChildren();
 
     // Set offset of positioned and sticky element
     child = firstChild;
