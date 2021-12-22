@@ -7,6 +7,7 @@ list(APPEND KRAKEN_TEST_SOURCE
 set(gtest_disable_pthreads ON)
 
 add_subdirectory(./third_party/googletest)
+add_subdirectory(./third_party/benchmark)
 
 if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   list(APPEND KRAKEN_TEST_SOURCE
@@ -51,6 +52,19 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
             RUNTIME_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
             )
   endif()
+
+  add_executable(kraken_benchmark
+    ${BRIDGE_SOURCE}
+    ./test/benchmark/create_element.cc
+    )
+  target_include_directories(kraken_benchmark PUBLIC
+    ./third_party/googletest/googletest/include
+    ./third_party/benchmark/include
+    ${BRIDGE_INCLUDE}
+    )
+  target_link_libraries(kraken_benchmark benchmark::benchmark ${BRIDGE_LINK_LIBS})
+  target_compile_options(kraken_benchmark PRIVATE -g -O2)
+
 endif()
 
 ### kraken_integration support library
