@@ -421,10 +421,9 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     RenderBox? child = firstChild;
 
-    // Layout non positioned element
-    _layoutChildren();
-
-    // Layout positioned element
+    // Need to layout out of flow positioned element before normal flow element
+    // cause the size of RenderPositionPlaceholder in flex layout needs to use
+    // the size of its original RenderBoxModel.
     while (child != null) {
       final RenderLayoutParentData childParentData =
       child.parentData as RenderLayoutParentData;
@@ -434,6 +433,9 @@ class RenderFlowLayout extends RenderLayoutBox {
       }
       child = childParentData.nextSibling;
     }
+
+    // Layout non positioned element
+    _layoutChildren();
 
     // Set offset of positioned and sticky element
     child = firstChild;
