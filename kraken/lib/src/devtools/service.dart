@@ -112,6 +112,8 @@ class ChromeDevToolsService extends DevToolsService {
     _isolateServerPort!.send(InspectorReload(_controller!.view.contextId));
   }
 
+  // @TODO: Implement and remove.
+  // ignore: unused_element
   static bool _registerUIDartMethodsToCpp() {
     final DartRegisterDartMethods _registerDartMethods = nativeDynamicLibrary.lookup<NativeFunction<NativeRegisterDartMethods>>('registerUIDartMethods').asFunction();
     Pointer<Uint64> bytes = malloc.allocate<Uint64>(_dartNativeMethods.length * sizeOf<Uint64>());
