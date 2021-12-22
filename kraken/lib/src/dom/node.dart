@@ -169,11 +169,11 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
       RenderLayoutParentData childParentData = renderer?.parentData as RenderLayoutParentData;
 
       if (childParentData.nextSibling is RenderTextBox) {
-        (childParentData.nextSibling as RenderTextBox).markRenderParagraphLyout();
+        (childParentData.nextSibling as RenderTextBox).markRenderParagraphNeedsLayout();
       }
 
       if (childParentData.previousSibling is RenderTextBox) {
-        (childParentData.previousSibling as RenderTextBox).markRenderParagraphLyout();
+        (childParentData.previousSibling as RenderTextBox).markRenderParagraphNeedsLayout();
       }
     }
   }
@@ -186,11 +186,11 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
       RenderLayoutParentData childParentData = renderer?.parentData as RenderLayoutParentData;
 
       if (childParentData.nextSibling is RenderTextBox) {
-        (childParentData.nextSibling as RenderTextBox).markRenderParagraphLyout();
+        (childParentData.nextSibling as RenderTextBox).markRenderParagraphNeedsLayout();
       }
 
       if (childParentData.previousSibling is RenderTextBox) {
-        (childParentData.previousSibling as RenderTextBox).markRenderParagraphLyout();
+        (childParentData.previousSibling as RenderTextBox).markRenderParagraphNeedsLayout();
       }
     }
   }

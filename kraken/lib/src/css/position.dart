@@ -104,10 +104,10 @@ mixin CSSPositionMixin on RenderStyle {
     if (renderBoxModel?.parent != null && renderBoxModel?.parent is RenderFlowLayout && renderBoxModel?.parentData is RenderLayoutParentData) {
       RenderLayoutParentData childParentData = renderBoxModel?.parentData as RenderLayoutParentData;
       if (childParentData.nextSibling is RenderTextBox) {
-        (childParentData.nextSibling as RenderTextBox).markRenderParagraphLyout();
+        (childParentData.nextSibling as RenderTextBox).markRenderParagraphNeedsLayout();
       }
       if (childParentData.previousSibling is RenderTextBox) {
-        (childParentData.previousSibling as RenderTextBox).markRenderParagraphLyout();
+        (childParentData.previousSibling as RenderTextBox).markRenderParagraphNeedsLayout();
       }
     }
   }

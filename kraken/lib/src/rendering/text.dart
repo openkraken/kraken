@@ -154,7 +154,7 @@ class RenderTextBox extends RenderBox
     needsLayout = true;
   }
 
-  void markRenderParagraphLyout() {
+  void markRenderParagraphNeedsLayout() {
     _renderParagraph.markNeedsLayout();
   }
 
@@ -211,7 +211,7 @@ class RenderTextBox extends RenderBox
   }
 
   // '  a b  c   \n' => ' a b c '
-  String _collapseWhitespace(String string) {
+  static String _collapseWhitespace(String string) {
     return string.replaceAll(_whiteSpaceReg, WHITE_SPACE_CHAR);
   }
 
