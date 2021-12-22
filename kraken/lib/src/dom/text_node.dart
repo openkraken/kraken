@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 import 'package:flutter/rendering.dart';
-import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 
@@ -28,8 +27,6 @@ class TextNode extends Node {
 
     if (_d == null || _d.isEmpty) return '';
 
-    WhiteSpace whiteSpace = CSSText.resolveWhiteSpace(parentElement!.style[WHITE_SPACE]);
-
     /// https://drafts.csswg.org/css-text-3/#propdef-white-space
     /// The following table summarizes the behavior of the various white-space values:
     //
@@ -40,6 +37,7 @@ class TextNode extends Node {
     // pre-wrap  Preserve  Preserve  Wrap     Hang
     // pre-line  Preserve  Collapse  Wrap     Remove
     // break-spaces  Preserve  Preserve  Wrap  Wrap
+    WhiteSpace whiteSpace = parentElement!.renderStyle.whiteSpace;
     if (whiteSpace == WhiteSpace.pre ||
         whiteSpace == WhiteSpace.preLine ||
         whiteSpace == WhiteSpace.preWrap ||

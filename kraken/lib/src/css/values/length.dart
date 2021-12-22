@@ -267,6 +267,7 @@ class CSSLengthValue {
               if (renderBoxModel != null) {
                 renderBoxModel.markParentNeedsRelayout();
               }
+              // Set as initial value, use infinity as auto value.
               _computedValue = double.infinity;
             }
             break;
@@ -301,6 +302,7 @@ class CSSLengthValue {
                 if (renderBoxModel != null) {
                   renderBoxModel.markParentNeedsRelayout();
                 }
+                // Set as initial value.
                 _computedValue = 0;
               }
             } else if (axisType == Axis.vertical) {
@@ -530,9 +532,7 @@ class CSSLength {
             // Using fallback value if not match user agent-defined environment variable: env(xxx, 50px).
             return parseLength(notations[0].args[1], renderStyle, propertyName, axisType);
         }
-
       }
-      // TODO: impl CSS Variables.
     }
 
     if (value == 0) {

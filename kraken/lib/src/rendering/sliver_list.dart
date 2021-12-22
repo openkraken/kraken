@@ -21,7 +21,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
   late RenderViewport _renderViewport;
 
   // The sliver list render object reference.
-  late RenderSliverList _renderSliverList;
+  RenderSliverList? _renderSliverList;
 
   // The scrollable context to handle gestures.
   late KrakenScrollable scrollable;
@@ -42,7 +42,6 @@ class RenderSliverListLayout extends RenderLayoutBox {
   }) : _renderSliverBoxChildManager = manager,
        _scrollListener = onScroll,
         super(renderStyle: renderStyle) {
-    scrollablePointerListener = _scrollablePointerListener;
     scrollable = KrakenScrollable(axisDirection: getAxisDirection(axis));
     axis = renderStyle.sliverDirection;
 
@@ -57,16 +56,20 @@ class RenderSliverListLayout extends RenderLayoutBox {
         break;
     }
 
-    _renderSliverList = _buildRenderSliverList();
+    RenderSliverList renderSliverList = _renderSliverList = _buildRenderSliverList();
     _renderViewport = RenderViewport(
       offset: scrollable.position!,
       axisDirection: scrollable.axisDirection,
       crossAxisDirection: getCrossAxisDirection(axis),
-      children: [_renderSliverList],
+      children: [renderSliverList],
     );
     manager.setupSliverListLayout(this);
     super.insert(_renderViewport);
   }
+
+  // Override the scrollable pointer listener.
+  @override
+  void Function(PointerEvent event) get scrollablePointerListener => _scrollablePointerListener;
 
   @override
   ScrollListener? get scrollListener => _scrollListener;
@@ -87,7 +90,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
   // Insert render box child as sliver child.
   void insertSliverChild(RenderBox child, { RenderBox? after }) {
     setupParentData(child);
-    _renderSliverList.insert(child, after: after);
+    _renderSliverList?.insert(child, after: after);
   }
 
   @override
@@ -95,20 +98,19 @@ class RenderSliverListLayout extends RenderLayoutBox {
     if (child == _renderViewport) {
       super.remove(child);
     } else if (child.parent == _renderSliverList) {
-      _renderSliverList.remove(child);
+      _renderSliverList?.remove(child);
     }
   }
 
   @override
   void removeAll() {
-    _renderSliverList.removeAll();
+    _renderSliverList?.removeAll();
   }
 
   @override
   void move(RenderBox child, {RenderBox? after}) {
     if (child.parent == _renderSliverList) {
-      remove(child);
-      insertSliverChild(child, after: after);
+      _renderSliverList?.move(child, after: after);
     }
   }
 
@@ -130,6 +132,13 @@ class RenderSliverListLayout extends RenderLayoutBox {
   @protected
   RenderSliverList _buildRenderSliverList() {
     return _renderSliverList = RenderSliverList(childManager: _renderSliverBoxChildManager);
+  }
+
+  // Trigger sliver list to rebuild children.
+  @override
+  void markNeedsLayout() {
+    super.markNeedsLayout();
+    _renderSliverList?.markNeedsLayout();
   }
 
   /// Child count should rely on element's childNodes, the real
@@ -232,7 +241,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
       // Ignore detached render object.
       if (!child.attached) continue;
 
-      final ContainerBoxParentData childParentData = child.parentData as ContainerBoxParentData;
+      final ContainerBoxParentData childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset + currentOffset,
         position: position,

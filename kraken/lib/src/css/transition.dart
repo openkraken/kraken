@@ -116,7 +116,7 @@ const List<Function> _numberHandler = [_parseNumber, _updateNumber];
 const List<Function> _lineHeightHandler = [_parseLineHeight, _updateLineHeight];
 const List<Function> _transformHandler = [_parseTransform, _updateTransform];
 
-Map<String, List<Function>> CSSTranstionHandlers = {
+Map<String, List<Function>> CSSTransitionHandlers = {
   COLOR: _colorHandler,
   BACKGROUND_COLOR: _colorHandler,
   BORDER_BOTTOM_COLOR: _colorHandler,
@@ -281,7 +281,7 @@ mixin CSSTransitionMixin on RenderStyle {
     }
 
     // Transition does not work when renderBoxModel has not been layout yet.
-    if (renderBoxModel != null && renderBoxModel!.hasSize && CSSTranstionHandlers[property] != null &&
+    if (renderBoxModel != null && renderBoxModel!.hasSize && CSSTransitionHandlers[property] != null &&
       (effectiveTransitions.containsKey(property) || effectiveTransitions.containsKey(ALL))) {
       bool shouldTransition = false;
       // Transition will be disabled when all transition has transitionDuration as 0.

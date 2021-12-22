@@ -15,6 +15,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/widget.dart';
 import 'package:kraken/src/dom/element_event.dart';
 import 'package:kraken/src/dom/element_view.dart';
 import 'package:meta/meta.dart';
@@ -443,6 +444,7 @@ class Element extends Node
   }
 
   void _handleScroll(double scrollOffset, AxisDirection axisDirection) {
+    if (renderBoxModel == null) return;
     _applyStickyChildrenOffset();
     _applyFixedChildrenOffset(scrollOffset, axisDirection);
 
@@ -567,13 +569,19 @@ class Element extends Node
   void attachTo(Node parent, {RenderBox? after}) {
     _applyStyle(style);
 
-    // @NOTE: Sliver should not create renderer here.
-    if (parentElement?.renderStyle.display != CSSDisplay.sliver) {
+    if (parentElement?.renderStyle.display == CSSDisplay.sliver) {
+      // Sliver should not create renderer here, but need to trigger
+      // render sliver list dynamical rebuild child by element tree.
+      parentElement?._renderLayoutBox?.markNeedsLayout();
+    } else {
       willAttachRenderer();
     }
 
     if (renderer != null) {
-      _attachRenderBoxModel(parent.renderer!, renderer!, after: after);
+      // If element attach WidgetElement, render obeject should be attach to render tree when mount.
+      if (parent is! WidgetElement) {
+        _attachRenderBoxModel(parent.renderer!, renderer!, after: after);
+      }
 
       // Flush pending style before child attached.
       style.flushPendingProperties();
@@ -628,15 +636,17 @@ class Element extends Node
     if (child is Element) {
       child.renderStyle.parent = renderStyle;
     }
+
+    RenderLayoutBox? renderLayoutBox = _renderLayoutBox;
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
-      if (!child.isRendererAttached && _renderLayoutBox != null) {
+      if (!child.isRendererAttached && renderLayoutBox != null && this is! WidgetElement) {
         RenderBox? after;
-        RenderLayoutBox? scrollingContentBox = _renderLayoutBox!.renderScrollingContent;
+        RenderLayoutBox? scrollingContentBox = renderLayoutBox.renderScrollingContent;
         if (scrollingContentBox != null) {
           after = scrollingContentBox.lastChild;
         } else {
-          after = _renderLayoutBox!.lastChild;
+          after = renderLayoutBox.lastChild;
         }
 
         child.attachTo(this, after: after);
@@ -799,7 +809,10 @@ class Element extends Node
     _updateRenderBoxModel();
     // Attach renderBoxModel to parent if change from `display: none` to other values.
     if (!isRendererAttached && parentElement != null && parentElement!.isRendererAttached) {
-      _addToContainingBlock(after: previousSibling?.renderer);
+      // If element attach WidgetElement, render obeject should be attach to render tree when mount.
+      if (parentNode is! WidgetElement) {
+        _addToContainingBlock(after: previousSibling?.renderer);
+      }
       ensureChildAttached();
     }
   }
@@ -823,6 +836,17 @@ class Element extends Node
   }
 
   void setRenderStyleProperty(String name, dynamic value) {
+    // Memorize the variable value to renderStyle object.
+    if (CSSVariable.isVariable(name)) {
+      renderStyle.setCSSVariable(name, value.toString());
+      return;
+    }
+
+    // Get the computed value of CSS variable.
+    if (value is CSSVariable) {
+      value = value.computedValue(name);
+    }
+
     switch (name) {
       case DISPLAY:
         renderStyle.display = value;
@@ -1125,207 +1149,8 @@ class Element extends Node
     }
   }
 
-  /// Set internal style value to the element.
-  dynamic _resolveRenderStyleValue(String property, dynamic present) {
-    dynamic value;
-    switch (property) {
-      case DISPLAY:
-        value = CSSDisplayMixin.resolveDisplay(present);
-        break;
-      case OVERFLOW_X:
-      case OVERFLOW_Y:
-        value = CSSOverflowMixin.resolveOverflowType(present);
-        break;
-      case POSITION:
-        value = CSSPositionMixin.resolvePositionType(present);
-        break;
-      case Z_INDEX:
-        value = int.tryParse(present);
-        break;
-      case TOP:
-      case LEFT:
-      case BOTTOM:
-      case RIGHT:
-      case FLEX_BASIS:
-      case PADDING_TOP:
-      case PADDING_RIGHT:
-      case PADDING_BOTTOM:
-      case PADDING_LEFT:
-      case WIDTH:
-      case MIN_WIDTH:
-      case MAX_WIDTH:
-      case HEIGHT:
-      case MIN_HEIGHT:
-      case MAX_HEIGHT:
-      case MARGIN_LEFT:
-      case MARGIN_TOP:
-      case MARGIN_RIGHT:
-      case MARGIN_BOTTOM:
-      case FONT_SIZE:
-        value = CSSLength.resolveLength(present, renderStyle, property);
-        break;
-      case FLEX_DIRECTION:
-        value = CSSFlexboxMixin.resolveFlexDirection(present);
-        break;
-      case FLEX_WRAP:
-        value = CSSFlexboxMixin.resolveFlexWrap(present);
-        break;
-      case ALIGN_CONTENT:
-        value = CSSFlexboxMixin.resolveAlignContent(present);
-        break;
-      case ALIGN_ITEMS:
-        value = CSSFlexboxMixin.resolveAlignItems(present);
-        break;
-      case JUSTIFY_CONTENT:
-        value = CSSFlexboxMixin.resolveJustifyContent(present);
-        break;
-      case ALIGN_SELF:
-        value = CSSFlexboxMixin.resolveAlignSelf(present);
-        break;
-      case FLEX_GROW:
-        value = CSSFlexboxMixin.resolveFlexGrow(present);
-        break;
-      case FLEX_SHRINK:
-        value = CSSFlexboxMixin.resolveFlexShrink(present);
-        break;
-      case SLIVER_DIRECTION:
-        value = CSSSliverMixin.resolveAxis(present);
-        break;
-      case TEXT_ALIGN:
-        value = CSSTextMixin.resolveTextAlign(present);
-        break;
-      case BACKGROUND_ATTACHMENT:
-        value = CSSBackground.resolveBackgroundAttachment(present);
-        break;
-      case BACKGROUND_IMAGE:
-        value = CSSBackground.resolveBackgroundImage(present, renderStyle, property, ownerDocument.controller);
-        break;
-      case BACKGROUND_REPEAT:
-        value = CSSBackground.resolveBackgroundRepeat(present);
-        break;
-      case BACKGROUND_POSITION_X:
-        value = CSSPosition.resolveBackgroundPosition(present, renderStyle, property, true);
-        break;
-      case BACKGROUND_POSITION_Y:
-        value = CSSPosition.resolveBackgroundPosition(present, renderStyle, property, false);
-        break;
-      case BACKGROUND_SIZE:
-        value = CSSBackground.resolveBackgroundSize(present, renderStyle, property);
-        break;
-      case BACKGROUND_CLIP:
-        value = CSSBackground.resolveBackgroundClip(present);
-        break;
-      case BACKGROUND_ORIGIN:
-        value = CSSBackground.resolveBackgroundOrigin(present);
-        break;
-      case BORDER_LEFT_WIDTH:
-      case BORDER_TOP_WIDTH:
-      case BORDER_RIGHT_WIDTH:
-      case BORDER_BOTTOM_WIDTH:
-        value = CSSBorderSide.resolveBorderWidth(present, renderStyle, property);
-        break;
-      case BORDER_LEFT_STYLE:
-      case BORDER_TOP_STYLE:
-      case BORDER_RIGHT_STYLE:
-      case BORDER_BOTTOM_STYLE:
-        value = CSSBorderSide.resolveBorderStyle(present);
-        break;
-      case COLOR:
-      case BACKGROUND_COLOR:
-      case TEXT_DECORATION_COLOR:
-      case BORDER_LEFT_COLOR:
-      case BORDER_TOP_COLOR:
-      case BORDER_RIGHT_COLOR:
-      case BORDER_BOTTOM_COLOR:
-        value = CSSColor.resolveColor(present, renderStyle, property);
-        break;
-      case BOX_SHADOW:
-        value = CSSBoxShadow.parseBoxShadow(present, renderStyle, property);
-        break;
-      case BORDER_TOP_LEFT_RADIUS:
-      case BORDER_TOP_RIGHT_RADIUS:
-      case BORDER_BOTTOM_LEFT_RADIUS:
-      case BORDER_BOTTOM_RIGHT_RADIUS:
-        value = CSSBorderRadius.parseBorderRadius(present, renderStyle, property);
-        break;
-      case OPACITY:
-        value = CSSOpacityMixin.resolveOpacity(present);
-        break;
-      case VISIBILITY:
-        value = CSSVisibilityMixin.resolveVisibility(present);
-        break;
-      case CONTENT_VISIBILITY:
-        value = CSSContentVisibilityMixin.resolveContentVisibility(present);
-        break;
-      case TRANSFORM:
-        value = CSSTransformMixin.resolveTransform(present);
-        break;
-      case FILTER:
-        value = CSSFunction.parseFunction(present);
-        break;
-      case TRANSFORM_ORIGIN:
-        value = CSSOrigin.parseOrigin(present, renderStyle, property);
-        break;
-      case OBJECT_FIT:
-        value = CSSObjectFitMixin.resolveBoxFit(present);
-        break;
-      case OBJECT_POSITION:
-        value = CSSObjectPositionMixin.resolveObjectPosition(present);
-        break;
-      case TEXT_DECORATION_LINE:
-        value = CSSText.resolveTextDecorationLine(present);
-        break;
-      case TEXT_DECORATION_STYLE:
-        value = CSSText.resolveTextDecorationStyle(present);
-        break;
-      case FONT_WEIGHT:
-        value = CSSText.resolveFontWeight(present);
-        break;
-      case FONT_STYLE:
-        value = CSSText.resolveFontStyle(present);
-        break;
-      case FONT_FAMILY:
-        value = CSSText.resolveFontFamilyFallback(present);
-        break;
-      case LINE_HEIGHT:
-        value = CSSText.resolveLineHeight(present, renderStyle, property);
-        break;
-      case LETTER_SPACING:
-        value = CSSText.resolveSpacing(present, renderStyle, property);
-        break;
-      case WORD_SPACING:
-        value = CSSText.resolveSpacing(present, renderStyle, property);
-        break;
-      case TEXT_SHADOW:
-        value = CSSText.resolveTextShadow(present, renderStyle, property);
-        break;
-      case WHITE_SPACE:
-        value = CSSText.resolveWhiteSpace(present);
-        break;
-      case TEXT_OVERFLOW:
-        // Overflow will affect text-overflow ellipsis taking effect
-        value = CSSText.resolveTextOverflow(present);
-        break;
-      case LINE_CLAMP:
-        value = CSSText.parseLineClamp(present);
-        break;
-      case VERTICAL_ALIGN:
-        value = CSSInlineMixin.resolveVerticalAlign(present);
-        break;
-      // Transition
-      case TRANSITION_DELAY:
-      case TRANSITION_DURATION:
-      case TRANSITION_TIMING_FUNCTION:
-      case TRANSITION_PROPERTY:
-        value = CSSStyleProperty.getMultipleValues(present);
-        break;
-    }
-
-    return value;
-  }
-
   void setRenderStyle(String property, String present) {
-    dynamic value = present.isEmpty ? null : _resolveRenderStyleValue(property, present);
+    dynamic value = present.isEmpty ? null : renderStyle.resolveValue(property, present);
     setRenderStyleProperty(property, value);
   }
 
@@ -1416,7 +1241,7 @@ class Element extends Node
   }
 
   // Set inline style property.
-  void setInlineStyle(String property, dynamic value) {
+  void setInlineStyle(String property, String value) {
     // Current only for mark property is setting by inline style.
     inlineStyle[property] = value;
     style.setProperty(property, value, true);
