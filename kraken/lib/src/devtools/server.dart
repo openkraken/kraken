@@ -197,9 +197,7 @@ class IsolateInspectorServer {
 
   Future<void> _bindServer(int port) async {
     try {
-      ServerSocket serverSocket = await ServerSocket.bind(address, port);
-      _httpServer = await HttpServer.listenOn(serverSocket);
-      // _httpServer = await HttpServer.bind(address, port);
+      _httpServer = await HttpServer.bind(address, port);
       this.port = port;
     } on SocketException {
       if (_bindServerRetryTime < 10) {
