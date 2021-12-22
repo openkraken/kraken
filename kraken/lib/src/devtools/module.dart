@@ -1,16 +1,11 @@
+/*
+ * Copyright (C) 2020-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
 import 'dart:convert';
-import '../kraken_devtools.dart';
-import 'ui_inspector.dart';
-import 'isolate_server.dart';
-export 'modules/dom.dart';
-export 'modules/css.dart';
-export 'modules/page.dart';
-export 'modules/log.dart';
-export 'modules/network.dart';
-export 'modules/overlay.dart';
-export 'modules/profiler.dart';
-export 'modules/runtime.dart';
-export 'modules/debugger.dart';
+
+import 'package:kraken/devtools.dart';
 
 abstract class _InspectorModule {
   String get name;
@@ -43,9 +38,12 @@ abstract class UIInspectorModule extends _InspectorModule {
   final ChromeDevToolsService? devTool;
   UIInspectorModule(this.devTool);
 
+  @override
   void sendToFrontend(int? id, JSONEncodable? result) {
     devTool!.isolateServerPort!.send(InspectorMethodResult(id, result?.toJson()));
   }
+
+  @override
   void sendEventToFrontend(InspectorEvent event) {
     devTool!.isolateServerPort!.send(event);
   }
@@ -57,10 +55,12 @@ abstract class IsolateInspectorModule extends _InspectorModule {
 
   final IsolateInspectorServer server;
 
+  @override
   void sendToFrontend(int? id, JSONEncodable? result) {
     server.sendToFrontend(id, result?.toJson());
   }
 
+  @override
   void sendEventToFrontend(InspectorEvent event) {
     server.sendEventToFrontend(event);
   }

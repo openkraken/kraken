@@ -13,7 +13,6 @@ dependencies:
     sdk: flutter
   kraken: ^0.7.2
   kraken_websocket: ^1.0.5
-  kraken_devtools: ^0.4.0
 
 # When depending on this package from a real application,
 # you should remove the following overrides.
@@ -23,8 +22,6 @@ dependencies:
 dependency_overrides:
   kraken:
     path: ../
-  kraken_devtools:
-    path: ../../plugins/devtools
 
 # The following section is specific to Flutter.
 flutter:

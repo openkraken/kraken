@@ -1,12 +1,16 @@
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:kraken_devtools/kraken_devtools.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/dom.dart';
-import '../module.dart';
-import '../ui_inspector.dart';
+import 'package:kraken/devtools.dart';
+
 
 String enumKey(String key) {
   return key.split('.').last;
@@ -284,6 +288,7 @@ class ScreenCastFrame implements JSONEncodable {
 
   ScreenCastFrame(this.data, this.metadata, this.sessionId);
 
+  @override
   Map toJson() {
     return {
       'data': data,
@@ -312,6 +317,7 @@ class ScreencastFrameMetadata implements JSONEncodable {
       this.scrollOffsetY,
       {this.timestamp});
 
+  @override
   Map toJson() {
     return {
       'offsetTop': offsetTop,

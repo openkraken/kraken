@@ -1,11 +1,13 @@
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 import 'dart:ui' as ui;
 
-import 'package:kraken_devtools/kraken_devtools.dart';
+import 'package:kraken/devtools.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:flutter/rendering.dart';
-import '../module.dart';
-import '../ui_inspector.dart';
 
 const int DOCUMENT_NODE_ID = 0;
 const String DEFAULT_FRAME_ID = 'main_frame';
@@ -220,6 +222,7 @@ class InspectorNode extends JSONEncodable {
     }
   }
 
+  @override
   Map toJson() {
     return {
       'nodeId': nodeId,

@@ -1,9 +1,11 @@
-import 'package:kraken_devtools/kraken_devtools.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
-import '../module.dart';
-import '../ui_inspector.dart';
+import 'package:kraken/css.dart';
+import 'package:kraken/devtools.dart';
+import 'package:kraken/dom.dart';
 
 const int INLINED_STYLESHEET_ID = 1;
 const String ZERO_PX = '0px';
@@ -262,6 +264,7 @@ class MatchedStyles extends JSONEncodable {
   List<InheritedStyleEntry>? inherited;
   List<CSSKeyframesRule>? cssKeyframesRules;
 
+  @override
   Map toJson() {
     return {
       if (inlineStyle != null) 'inlineStyle': inlineStyle,

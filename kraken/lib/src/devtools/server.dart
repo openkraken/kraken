@@ -1,14 +1,19 @@
+/*
+ * Copyright (C) 2020-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:ffi';
 import 'dart:typed_data';
+
 import 'package:kraken/module.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/kraken.dart';
+import 'package:kraken/devtools.dart';
 import 'package:ffi/ffi.dart';
-import 'ui_inspector.dart';
-import 'module.dart';
 import '../bridge/platform.dart';
 
 const String CONTENT_TYPE = 'Content-Type';
@@ -17,7 +22,7 @@ const String FAVICON = 'https://gw.alicdn.com/tfs/TB1tTwGAAL0gK0jSZFxXXXWHVXa-14
 
 typedef MessageCallback = void Function(Map<String, dynamic>?);
 
-Map<int, IsolateInspectorServer?> _inspectorServerMap = Map();
+Map<int, IsolateInspectorServer?> _inspectorServerMap = {};
 
 typedef NativeInspectorMessageCallback = Void Function(Pointer<Void> rpcSession, Pointer<Utf8> message);
 typedef DartInspectorMessageCallback = void Function(Pointer<Void> rpcSession, Pointer<Utf8> message);
@@ -25,9 +30,12 @@ typedef NativeRegisterInspectorMessageCallback = Void Function(
     Int32 contextId,
     Pointer<Void> rpcSession,
     Pointer<NativeFunction<NativeInspectorMessageCallback>> inspectorMessageCallback);
-
 typedef NativeAttachInspector = Void Function(Int32);
 typedef DartAttachInspector = void Function(int);
+typedef NativeInspectorMessage = Void Function(Int32 contextId, Pointer<Utf8>);
+typedef NativePostTaskToUIThread = Void Function(Int32 contextId, Pointer<Void> context, Pointer<Void> callback);
+typedef NativeDispatchInspectorTask = Void Function(Int32 contextId, Pointer<Void> context, Pointer<Void> callback);
+typedef DartDispatchInspectorTask = void Function(int? contextId, Pointer<Void> context, Pointer<Void> callback);
 
 void _registerInspectorMessageCallback(
     int contextId,
@@ -44,8 +52,6 @@ void _registerInspectorMessageCallback(
   };
 }
 
-typedef NativeInspectorMessage = Void Function(Int32 contextId, Pointer<Utf8>);
-
 void _onInspectorMessage(int contextId, Pointer<Utf8> message) {
   IsolateInspectorServer? server = _inspectorServerMap[contextId];
   if (server == null) {
@@ -56,8 +62,6 @@ void _onInspectorMessage(int contextId, Pointer<Utf8> message) {
   server.sendRawJSONToFrontend(data);
 }
 
-typedef NativePostTaskToUIThread = Void Function(Int32 contextId, Pointer<Void> context, Pointer<Void> callback);
-
 void _postTaskToUIThread(int contextId, Pointer<Void> context, Pointer<Void> callback) {
   IsolateInspectorServer? server = _inspectorServerMap[contextId];
   if (server == null) {
@@ -67,15 +71,7 @@ void _postTaskToUIThread(int contextId, Pointer<Void> context, Pointer<Void> cal
   server.isolateToMainStream!.send(InspectorPostTaskMessage(context.address, callback.address));
 }
 
-typedef NativeRegisterDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);
-typedef DartRegisterDartMethods = void Function(Pointer<Uint64> methodBytes, int length);
-
-typedef NativeDispatchInspectorTask = Void Function(Int32 contextId, Pointer<Void> context, Pointer<Void> callback);
-typedef DartDispatchInspectorTask = void Function(int? contextId, Pointer<Void> context, Pointer<Void> callback);
-
 void attachInspector(int contextId) {
-  DynamicLibrary? nativeDynamicLibrary = getDynamicLibrary();
-  if (nativeDynamicLibrary == null) return;
   final DartAttachInspector _attachInspector = nativeDynamicLibrary
       .lookup<NativeFunction<NativeAttachInspector>>('attachInspector')
       .asFunction();
@@ -83,8 +79,6 @@ void attachInspector(int contextId) {
 }
 
 void initInspectorServerNativeBinding(int contextId) {
-  DynamicLibrary? nativeDynamicLibrary = getDynamicLibrary();
-  if (nativeDynamicLibrary == null) return;
   final DartRegisterDartMethods _registerInspectorServerDartMethods =
       nativeDynamicLibrary
           .lookup<NativeFunction<NativeRegisterDartMethods>>(
@@ -141,22 +135,22 @@ void serverIsolateEntryPoint(SendPort isolateToMainStream) {
       server!.start();
       _inspectorServerMap[data.contextId] = server;
       mainIsolateJSContextId = data.contextId;
-      initInspectorServerNativeBinding(data.contextId);
-      attachInspector(data.contextId);
+      // @TODO
+      // initInspectorServerNativeBinding(data.contextId);
+      // attachInspector(data.contextId);
     } else if (server != null && server!.connected) {
       if (data is InspectorEvent) {
         server!.sendEventToFrontend(data);
       } else if (data is InspectorMethodResult) {
         server!.sendToFrontend(data.id, data.result);
       } else if (data is InspectorPostTaskMessage) {
-        DynamicLibrary? nativeDynamicLibrary = getDynamicLibrary();
-        if (nativeDynamicLibrary == null) return;
         final DartDispatchInspectorTask _dispatchInspectorTask = nativeDynamicLibrary
             .lookup<NativeFunction<NativeDispatchInspectorTask>>('dispatchInspectorTask')
             .asFunction();
         _dispatchInspectorTask(mainIsolateJSContextId, Pointer.fromAddress(data.context), Pointer.fromAddress(data.callback));
       } else if (data is InspectorReload) {
-        attachInspector(data.contextId);
+        // @TODO
+        // attachInspector(data.contextId);
       }
     }
   });
