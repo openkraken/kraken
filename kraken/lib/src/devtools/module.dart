@@ -35,17 +35,17 @@ abstract class _InspectorModule {
 
 // Inspector modules working on flutter.ui thread.
 abstract class UIInspectorModule extends _InspectorModule {
-  final ChromeDevToolsService? devTool;
-  UIInspectorModule(this.devTool);
+  final ChromeDevToolsService devtoolsService;
+  UIInspectorModule(this.devtoolsService);
 
   @override
   void sendToFrontend(int? id, JSONEncodable? result) {
-    devTool!.isolateServerPort!.send(InspectorMethodResult(id, result?.toJson()));
+    devtoolsService.isolateServerPort!.send(InspectorMethodResult(id, result?.toJson()));
   }
 
   @override
   void sendEventToFrontend(InspectorEvent event) {
-    devTool!.isolateServerPort!.send(event);
+    devtoolsService.isolateServerPort!.send(event);
   }
 }
 

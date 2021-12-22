@@ -10,8 +10,8 @@ class InspectOverlayModule extends UIInspectorModule {
   @override
   String get name => 'Overlay';
 
-  Document get document => devTool!.controller!.view.document;
-  InspectOverlayModule(ChromeDevToolsService? devTool): super(devTool);
+  Document get document => devtoolsService.controller!.view.document;
+  InspectOverlayModule(ChromeDevToolsService devtoolsService): super(devtoolsService);
 
   @override
   void receiveFromFrontend(int? id, String method, Map<String, dynamic>? params) {

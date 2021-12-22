@@ -13,8 +13,8 @@ RegExp _kebabCaseReg = RegExp(r'[A-Z]');
 RegExp _camelCaseReg = RegExp(r'-(\w)');
 
 class InspectCSSModule extends UIInspectorModule {
-  Document get document => devTool!.controller!.view.document;
-  InspectCSSModule(ChromeDevToolsService? devTool): super(devTool);
+  Document get document => devtoolsService.controller!.view.document;
+  InspectCSSModule(ChromeDevToolsService devtoolsService): super(devtoolsService);
 
   @override
   String get name => 'CSS';

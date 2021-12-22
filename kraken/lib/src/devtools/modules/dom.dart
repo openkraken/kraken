@@ -16,8 +16,8 @@ class InspectDOMModule extends UIInspectorModule {
   @override
   String get name => 'DOM';
 
-  Document get document => devTool!.controller!.view.document;
-  InspectDOMModule(ChromeDevToolsService? devTool): super(devTool);
+  Document get document => devtoolsService.controller!.view.document;
+  InspectDOMModule(ChromeDevToolsService devtoolsService): super(devtoolsService);
 
   @override
   void receiveFromFrontend(int? id, String method, Map<String, dynamic>? params) {

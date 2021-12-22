@@ -66,6 +66,7 @@ class UIInspector {
     registerModule(InspectOverlayModule(devtoolsService));
     registerModule(InspectPageModule(devtoolsService));
     registerModule(InspectCSSModule(devtoolsService));
+    registerModule(InspectNetworkModule(devtoolsService));
   }
 
   void registerModule(UIInspectorModule module) {

@@ -190,9 +190,9 @@ enum ResourceType {
 
 class InspectPageModule extends UIInspectorModule {
 
-  Document get document => devTool!.controller!.view.document;
+  Document get document => devtoolsService.controller!.view.document;
 
-  InspectPageModule(ChromeDevToolsService? devTool): super(devTool);
+  InspectPageModule(ChromeDevToolsService devtoolsService): super(devtoolsService);
 
   @override
   String get name => 'Page';
@@ -214,7 +214,7 @@ class InspectPageModule extends UIInspectorModule {
         break;
       case 'getResourceContent':
         sendToFrontend(id, JSONEncodableMap({
-          'content': devTool!.controller?.bundle?.content,
+          'content': devtoolsService.controller?.bundle?.content,
           'base64Encoded': false
         }));
         break;
