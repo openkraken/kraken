@@ -58,7 +58,6 @@ ExecutionContext::ExecutionContext(int32_t contextId, const JSExceptionHandler& 
   init_list_head(&module_job_list);
   init_list_head(&module_callback_job_list);
   init_list_head(&promise_job_list);
-  init_list_head(&atom_job_list);
   init_list_head(&native_function_job_list);
 
   if (m_runtime == nullptr) {
@@ -131,16 +130,6 @@ ExecutionContext::~ExecutionContext() {
       JS_FreeValue(m_ctx, promiseContext->resolveFunc);
       JS_FreeValue(m_ctx, promiseContext->rejectFunc);
       delete promiseContext;
-    }
-  }
-
-  // Free unreleased atoms.
-  {
-    struct list_head *el, *el1;
-    list_for_each_safe(el, el1, &atom_job_list) {
-      auto* job = list_entry(el, AtomJob, link);
-      JS_FreeAtom(m_ctx, job->atom);
-      delete job;
     }
   }
 

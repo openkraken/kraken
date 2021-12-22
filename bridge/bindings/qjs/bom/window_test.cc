@@ -15,14 +15,14 @@ TEST(Window, instanceofEventTarget) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "true");
   };
-  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
   auto& context = bridge->getContext();
   const char* code = "console.log(window instanceof EventTarget)";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
-  delete bridge;
+
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);
 }
@@ -40,7 +40,6 @@ requestAnimationFrame(() => {
 
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
   TEST_runLoop(bridge->getContext().get());
-  disposePage(0);
 }
 
 TEST(Window, cancelAnimationFrame) {
@@ -57,5 +56,4 @@ cancelAnimationFrame(id);
 
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
   TEST_runLoop(bridge->getContext().get());
-  disposePage(0);
 }

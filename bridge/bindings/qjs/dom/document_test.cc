@@ -6,6 +6,7 @@
 #include "event_target.h"
 #include "gtest/gtest.h"
 #include "page.h"
+#include "kraken_test_env.h"
 
 TEST(Document, createTextNode) {
   bool static errorCalled = false;
@@ -14,7 +15,7 @@ TEST(Document, createTextNode) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "<div>");
   };
-  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -27,7 +28,6 @@ TEST(Document, createTextNode) {
       "div.appendChild(text);"
       "console.log(div);";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
-  delete bridge;
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);
 }
@@ -39,14 +39,13 @@ TEST(Document, instanceofNode) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "true true true");
   };
-  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
   auto& context = bridge->getContext();
   const char* code = "console.log(document instanceof Node, document instanceof Document, document instanceof EventTarget)";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
-  delete bridge;
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);
 }
@@ -59,17 +58,17 @@ TEST(Document, createElementShouldWorkWithMultipleContext) {
   const char* code = "(() => { let img = document.createElement('img'); document.body.appendChild(img);  })();";
 
   {
-    auto* bridge = bridge1 = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {});
+    auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {});
     auto& context = bridge->getContext();
     bridge->evaluateScript(code, strlen(code), "vm://", 0);
+    bridge1 = bridge.release();
   }
 
   {
-    auto* bridge = new kraken::KrakenPage(1, [](int32_t contextId, const char* errmsg) {});
+    auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {});
     auto& context = bridge->getContext();
     const char* code = "(() => { let img = document.createElement('img'); document.body.appendChild(img);  })();";
     bridge->evaluateScript(code, strlen(code), "vm://", 0);
-    delete bridge;
   }
 
   bridge1->evaluateScript(code, strlen(code), "vm://", 0);

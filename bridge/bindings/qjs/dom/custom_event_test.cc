@@ -6,6 +6,7 @@
 #include "event_target.h"
 #include "gtest/gtest.h"
 #include "page.h"
+#include "kraken_test_env.h"
 
 TEST(CustomEvent, instanceofEvent) {
   bool static errorCalled = false;
@@ -14,7 +15,7 @@ TEST(CustomEvent, instanceofEvent) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "true");
   };
-  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -23,7 +24,6 @@ TEST(CustomEvent, instanceofEvent) {
       "let customEvent = new CustomEvent('abc', { detail: 'helloworld'});"
       "console.log(customEvent instanceof Event);";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
-  delete bridge;
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);
 }

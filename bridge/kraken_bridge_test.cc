@@ -13,13 +13,9 @@
 #endif
 #include <atomic>
 
-kraken::KrakenPageTest** bridgeTestPool{nullptr};
+std::unordered_map<int, kraken::KrakenPageTest*> bridgeTestPool = std::unordered_map<int, kraken::KrakenPageTest*>();
 
 void initTestFramework(int32_t contextId) {
-  if (bridgeTestPool == nullptr) {
-    bridgeTestPool = new kraken::KrakenPageTest*[10];
-  }
-
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
   auto bridgeTest = new kraken::KrakenPageTest(page);
   bridgeTestPool[contextId] = bridgeTest;

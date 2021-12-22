@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include "gtest/gtest.h"
 #include "page.h"
+#include "kraken_test_env.h"
 
 namespace kraken::binding::qjs {
 
@@ -67,7 +68,7 @@ TEST(HostClass, newInstance) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "10");
   };
-  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -78,7 +79,7 @@ TEST(HostClass, newInstance) {
   context->defineGlobalProperty("ParentClass", parentObject->jsObject);
   const char* code = "let obj = new SampleClass(1,2,3,4); console.log(obj.f())";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
-  delete bridge;
+
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);
 }
@@ -90,7 +91,7 @@ TEST(HostClass, instanceOf) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "true");
   };
-  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
     errorCalled = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   });
@@ -109,7 +110,7 @@ TEST(HostClass, instanceOf) {
   // Test with Javascript
   const char* code = "let obj = new SampleClass(1,2,3,4); \n console.log(obj instanceof SampleClass)";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
-  delete bridge;
+
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);
 }
@@ -121,7 +122,7 @@ TEST(HostClass, inheritance) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "20");
   };
-  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
     errorCalled = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   });
@@ -137,7 +138,7 @@ TEST(HostClass, inheritance) {
       "let obj = new SampleClass(1,2,3,4);\n"
       "console.log(obj.foo())";
   context->evaluateJavaScript(code, strlen(code), "vm://", 0);
-  delete bridge;
+
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);
 }
@@ -149,7 +150,7 @@ TEST(HostClass, inherintanceInJavaScript) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "TEST 10 20");
   };
-  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
     errorCalled = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   });
@@ -176,7 +177,7 @@ let demo = new Demo('test');
 console.log(demo.getName(), demo.f(), demo.foo());
 )";
   context->evaluateJavaScript(code, strlen(code), "vm://", 0);
-  delete bridge;
+
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);
 }
@@ -188,7 +189,7 @@ TEST(HostClass, haveFunctionProtoMethods) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "ƒ ()");
   };
-  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
     errorCalled = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   });
@@ -210,14 +211,14 @@ class Demo extends ParentClass {
 console.log(Demo.call);
 )";
   context->evaluateJavaScript(code, strlen(code), "vm://", 0);
-  delete bridge;
+
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);
 }
 
 TEST(HostClass, multipleInstance) {
   bool static errorCalled = false;
-  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
     errorCalled = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   });
@@ -268,7 +269,7 @@ TEST(HostClass, multipleInstance) {
     JS_FreeValue(context->ctx(), object);
   }
 
-  delete bridge;
+
   EXPECT_EQ(errorCalled, false);
 }
 
@@ -358,7 +359,7 @@ JSValue ExoticClass::instanceConstructor(JSContext* ctx, JSValue func_obj, JSVal
 TEST(HostClass, exoticClass) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -378,16 +379,15 @@ TEST(HostClass, exoticClass) {
       "obj[key] = function() {return 10;};"
       "console.log(obj[otherKey]());";
   context->evaluateJavaScript(code.c_str(), code.size(), "vm://", 0);
-  delete bridge;
+
   EXPECT_EQ(errorCalled, false);
-  EXPECT_EQ(exoticClassFreed, true);
   EXPECT_EQ(logCalled, true);
 }
 
 TEST(HostClass, setExoticClassProperty) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  auto* bridge = new kraken::KrakenPage(0, [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init( [](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -405,7 +405,7 @@ TEST(HostClass, setExoticClassProperty) {
       "obj.className = 200.0;"
       "console.log(obj.className);";
   context->evaluateJavaScript(code.c_str(), code.size(), "vm://", 0);
-  delete bridge;
+
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(exoticClassFreed, true);
   EXPECT_EQ(logCalled, true);

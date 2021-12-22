@@ -88,14 +88,17 @@ class EventTargetInstance : public Instance {
  protected:
   int32_t m_eventTargetId;
   // EventListener handlers registered with addEventListener API.
-  // We use vector instead of hashMap because
-  //  - vector is much more space efficient than hashMap.
-  //  - An EventTarget rarely has event listeners for many event types, and
-  //    vector is faster in such cases.
-  EventListenerMap m_eventHandlers;
-  // EventListener handlers registered with attribute property.
-  ObjectProperty m_propertyEventHandler{m_context, jsObject, "__propertyEventHandler", JS_NewObject(m_ctx)};
-  ObjectProperty m_properties{m_context, jsObject, "__properties", JS_NewObject(m_ctx)};
+  // https://dom.spec.whatwg.org/#concept-event-listener
+  EventListenerMap m_eventListenerMap;
+
+  // EventListener handlers registered with DOM attributes API.
+  // https://html.spec.whatwg.org/C/#event-handler-attributes
+  std::unordered_map<JSAtom, JSValue> m_eventHandlerMap;
+
+  // When javascript code set a property on EventTarget instance, EventTarget::setProperty callback will be called when
+  // property are not defined by Object.defineProperty or setProperty.
+  // We store there values in here.
+  std::unordered_map<JSAtom, JSValue> m_properties;
 
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
   static void copyNodeProperties(EventTargetInstance* newNode, EventTargetInstance* referenceNode);
@@ -105,8 +108,9 @@ class EventTargetInstance : public Instance {
   static int setProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
   static int deleteProperty(JSContext* ctx, JSValueConst obj, JSAtom prop);
 
-  void setPropertyHandler(JSString* p, JSValue value);
-  JSValue getPropertyHandler(JSString* p);
+  // Used for legacy "onEvent" attribute APIs.
+  void setAttributesEventHandler(JSString* p, JSValue value);
+  JSValue getAttributesEventHandler(JSString* p);
 
  private:
   bool internalDispatchEvent(EventInstance* eventInstance);

@@ -204,7 +204,7 @@ IMPL_PROPERTY_SETTER(Window, onerror)(JSContext* ctx, JSValue this_val, int argc
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
   JSValue eventString = JS_NewString(ctx, "onerror");
   JSString* p = JS_VALUE_GET_STRING(eventString);
-  window->setPropertyHandler(p, argv[0]);
+  window->setAttributesEventHandler(p, argv[0]);
 
   if (!JS_IsNull(window->onerror)) {
     JS_FreeValue(ctx, window->onerror);
