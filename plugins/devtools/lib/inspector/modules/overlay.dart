@@ -32,7 +32,7 @@ class InspectOverlayModule extends UIInspectorModule {
     _highlightElement?.debugHideHighlight();
 
     int nodeId = params['nodeId'];
-    Element? element = document.controller.view.debugGetEventTargetById<Element>(nodeId);
+    Element? element = document.controller.view.getEventTargetById<Element>(nodeId);
 
     if (element != null) {
       element.debugHighlight();

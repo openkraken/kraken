@@ -49,7 +49,6 @@ abstract class UIInspectorModule extends _InspectorModule {
   void sendEventToFrontend(InspectorEvent event) {
     devTool!.isolateServerPort!.send(event);
   }
-  void receiveFromFrontend(int? id, String method, Map<String, dynamic>? params);
 }
 
 // Inspector modules working on dart isolates
@@ -70,6 +69,4 @@ abstract class IsolateInspectorModule extends _InspectorModule {
     assert(server.nativeInspectorMessageHandler != null);
     server.nativeInspectorMessageHandler!(jsonEncode({'id': id, 'method': name + '.' + method, 'params': params}));
   }
-
-  void receiveFromFrontend(int? id, String method, Map<String, dynamic>? params);
 }

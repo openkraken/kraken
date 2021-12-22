@@ -166,7 +166,7 @@ class IsolateInspectorServer {
   IsolateInspectorServer(this.port, this.address, this.bundleURL) {
     // registerModule(InspectRuntimeModule(this));
     // registerModule(InspectDebuggerModule(this));
-    // registerModule(InspectorLogModule(this));
+    registerModule(InspectorLogModule(this));
   }
 
   // final Inspector inspector;
@@ -243,24 +243,20 @@ class IsolateInspectorServer {
   }
 
   void sendToFrontend(int? id, Map? result) {
-    assert(_ws != null, 'WebSocket should connect.');
-
     String data = jsonEncode({
       if (id != null) 'id': id,
       // Give an empty object for response.
       'result': result ?? {},
     });
-    _ws!.add(data);
+    _ws?.add(data);
   }
 
   void sendEventToFrontend(InspectorEvent event) {
-    assert(_ws != null, 'WebSocket should connect.');
-    _ws!.add(jsonEncode(event));
+    _ws?.add(jsonEncode(event));
   }
 
   void sendRawJSONToFrontend(String message) {
-    assert(_ws != null, 'WebSocket should connect.');
-    _ws!.add(message);
+    _ws?.add(message);
   }
 
   Map<String, dynamic>? _parseMessage(message) {

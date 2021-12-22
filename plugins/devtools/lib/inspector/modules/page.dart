@@ -282,10 +282,7 @@ class ScreenCastFrame implements JSONEncodable {
   final ScreencastFrameMetadata metadata;
   final int sessionId;
 
-  ScreenCastFrame(this.data, this.metadata, this.sessionId)
-      : assert(data != null),
-        assert(metadata != null),
-        assert(sessionId != null);
+  ScreenCastFrame(this.data, this.metadata, this.sessionId);
 
   Map toJson() {
     return {

@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import '../module.dart';
 import '../ui_inspector.dart';
 
-const int DOCUMENT_NODE_ID = -3;
+const int DOCUMENT_NODE_ID = 0;
 const String DEFAULT_FRAME_ID = 'main_frame';
 
 class InspectDOMModule extends UIInspectorModule {
@@ -44,7 +44,7 @@ class InspectDOMModule extends UIInspectorModule {
     rootRenderObject.hitTest(result, position: Offset(x.toDouble(), y.toDouble()));
     if (result.path.first.target is RenderBoxModel) {
       RenderBoxModel lastHitRenderBoxModel = result.path.first.target as RenderBoxModel;
-      int? targetId = document.controller.view.debugGetTargetIdByEventTarget(lastHitRenderBoxModel.renderStyle.target);
+      int? targetId = document.controller.view.getTargetIdByEventTarget(lastHitRenderBoxModel.renderStyle.target);
       sendToFrontend(id, JSONEncodableMap({
         'backendId': targetId,
         'frameId': DEFAULT_FRAME_ID,
@@ -61,7 +61,7 @@ class InspectDOMModule extends UIInspectorModule {
 
   void onSetInspectedNode(int? id, Map<String, dynamic> params) {
     int nodeId = params['nodeId'];
-    Node? node = document.controller.view.debugGetEventTargetById(nodeId);
+    Node? node = document.controller.view.getEventTargetById(nodeId);
     if (node != null) {
       inspectedNode = node;
     }
@@ -80,7 +80,7 @@ class InspectDOMModule extends UIInspectorModule {
 
   void onGetBoxModel(int? id, Map<String, dynamic> params) {
     int nodeId = params['nodeId'];
-    Element? element = document.controller.view.debugGetEventTargetById<Element>(nodeId);
+    Element? element = document.controller.view.getEventTargetById<Element>(nodeId);
 
     // BoxModel design to BorderBox in kraken.
     if (element != null && element.renderBoxModel != null && element.renderBoxModel!.hasSize) {
@@ -139,6 +139,7 @@ class InspectorDocument extends JSONEncodable {
   Map toJson() {
     var owner = child.referencedNode.ownerDocument;
     return {
+      'depth': 0,
       'root': {
         'nodeId': DOCUMENT_NODE_ID,
         'backendNodeId': DOCUMENT_NODE_ID,
@@ -146,8 +147,8 @@ class InspectorDocument extends JSONEncodable {
         'nodeName': '#document',
         'childNodeCount': 1,
         'children': [child.toJson()],
-        'baseURL': owner.controller.bundleURL,
-        'documentURL': owner.controller.bundleURL,
+        'baseURL': owner.controller.href,
+        'documentURL': owner.controller.href,
       },
     };
   }
@@ -157,7 +158,7 @@ class InspectorDocument extends JSONEncodable {
 class InspectorNode extends JSONEncodable {
   /// DOM interaction is implemented in terms of mirror objects that represent the actual
   /// DOM nodes. DOMNode is a base node mirror type.
-  InspectorNode(this.referencedNode) : assert(referencedNode != null);
+  InspectorNode(this.referencedNode);
 
   /// Reference backend Kraken DOM Node.
   Node referencedNode;
@@ -165,12 +166,12 @@ class InspectorNode extends JSONEncodable {
   /// Node identifier that is passed into the rest of the DOM messages as the nodeId.
   /// Backend will only push node with given id once. It is aware of all requested nodes
   /// and will only fire DOM events for nodes known to the client.
-  int? get nodeId => referencedNode.ownerDocument.controller.view.debugGetTargetIdByEventTarget(referencedNode);
+  int? get nodeId => referencedNode.ownerDocument.controller.view.getTargetIdByEventTarget(referencedNode);
 
   /// Optional. The id of the parent node if any.
   int get parentId {
     if (referencedNode.parentNode != null) {
-      return referencedNode.ownerDocument.controller.view.debugGetTargetIdByEventTarget(referencedNode.parentNode!) ?? 0;
+      return referencedNode.ownerDocument.controller.view.getTargetIdByEventTarget(referencedNode.parentNode!) ?? 0;
     } else {
       return 0;
     }

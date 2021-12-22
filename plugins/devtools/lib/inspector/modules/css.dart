@@ -1,8 +1,7 @@
 import 'package:kraken_devtools/kraken_devtools.dart';
-import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/rendering.dart';
+
 import '../module.dart';
 import '../ui_inspector.dart';
 
@@ -38,7 +37,7 @@ class InspectCSSModule extends UIInspectorModule {
 
   void handleGetMatchedStylesForNode(int? id, Map<String, dynamic> params) {
     int nodeId = params['nodeId'];
-    Element? element = document.controller.view.debugGetEventTargetById<Element>(nodeId);
+    Element? element = document.controller.view.getEventTargetById<Element>(nodeId);
     if (element != null) {
       MatchedStyles matchedStyles = MatchedStyles(
         inlineStyle: buildInlineStyle(element),
@@ -49,7 +48,7 @@ class InspectCSSModule extends UIInspectorModule {
 
   void handleGetComputedStyleForNode(int? id, Map<String, dynamic> params) {
     int nodeId = params['nodeId'];
-    Element? element = document.controller.view.debugGetEventTargetById<Element>(nodeId);
+    Element? element = document.controller.view.getEventTargetById<Element>(nodeId);
 
     if (element != null) {
       ComputedStyle computedStyle = ComputedStyle(
@@ -63,7 +62,7 @@ class InspectCSSModule extends UIInspectorModule {
   // implicitly, using DOM attributes) for a DOM node identified by nodeId.
   void handleGetInlineStylesForNode(int? id, Map<String, dynamic> params) {
     int nodeId = params['nodeId'];
-    Element? element = document.controller.view.debugGetEventTargetById<Element>(nodeId);
+    Element? element = document.controller.view.getEventTargetById<Element>(nodeId);
 
     if (element != null) {
       InlinedStyle inlinedStyle = InlinedStyle(
@@ -85,7 +84,7 @@ class InspectCSSModule extends UIInspectorModule {
       int nodeId = edit['styleSheetId'];
       String text = edit['text'] ?? '';
       List<String> texts = text.split(';');
-      Element? element = document.controller.view.debugGetEventTargetById<Element>(nodeId);
+      Element? element = document.controller.view.getEventTargetById<Element>(nodeId);
       if (element != null) {
         for (String kv in texts) {
           kv = kv.trim();
