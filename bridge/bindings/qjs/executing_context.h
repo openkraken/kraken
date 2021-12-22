@@ -92,9 +92,7 @@ class ExecutionContext {
   // not be used after the ExecutionContext is destroyed.
   DOMTimerCoordinator* timers();
 
-  FORCE_INLINE DocumentInstance* document() {
-    return m_document;
-  };
+  FORCE_INLINE DocumentInstance* document() { return m_document; };
 
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func);
 
