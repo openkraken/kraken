@@ -32,13 +32,13 @@ class RenderTextBox extends RenderBox
     _data = value;
   }
 
-  String get originData => _data;
+  String get data => _data;
 
   bool isEndWithSpace(String str) {
     return str.endsWith(WHITE_SPACE_CHAR) || str.endsWith(NEW_LINE_CHAR) || str.endsWith(RETURN_CHAR) || str.endsWith(TAB_CHAR);
   }
 
-  String get data {
+  String get _trimmedData {
     if (parentData is RenderLayoutParentData) {
       /// https://drafts.csswg.org/css-text-3/#propdef-white-space
       /// The following table summarizes the behavior of the various white-space values:
@@ -74,7 +74,7 @@ class RenderTextBox extends RenderBox
           if (display == CSSDisplay.block || display == CSSDisplay.sliver || display == CSSDisplay.flex) {
             collapsedData = collapsedData.trimLeft();
           }
-        } else if (previousSibling is RenderTextBox && isEndWithSpace(previousSibling.originData)) {
+        } else if (previousSibling is RenderTextBox && isEndWithSpace(previousSibling.data)) {
           collapsedData = collapsedData.trimLeft();
         }
 
@@ -151,7 +151,7 @@ class RenderTextBox extends RenderBox
   }
 
   TextSpan get _textSpan {
-    String clippedText = _getClippedText(data);
+    String clippedText = _getClippedText(_trimmedData);
     // FIXME(yuanyan): do not create text span every time.
     return CSSTextMixin.createTextSpan(clippedText, renderStyle);
   }
