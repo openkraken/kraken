@@ -3,8 +3,11 @@
  * Author: Kraken Team.
  */
 
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:kraken/devtools.dart';
 import 'package:kraken/foundation.dart';
 
@@ -24,6 +27,8 @@ class InspectNetworkModule extends UIInspectorModule implements HttpClientInterc
 
   final HttpCacheMode _httpCacheOriginalMode = HttpCacheController.mode;
   final int _initialTimestamp = DateTime.now().millisecondsSinceEpoch;
+  // RequestId to data buffer.
+  final Map<String, Uint8List> _responseBuffers = {};
 
   @override
   void receiveFromFrontend(int? id, String method, Map<String, dynamic>? params) {
@@ -38,9 +43,10 @@ class InspectNetworkModule extends UIInspectorModule implements HttpClientInterc
         sendToFrontend(id, null);
         break;
       case 'getResponseBody':
-        // String requestId = params!['requestId'];
+        String requestId = params!['requestId'];
+        Uint8List? buffer = _responseBuffers[requestId];
         sendToFrontend(id, JSONEncodableMap({
-          'body': '{"content":"the body"}',
+          if (buffer != null) 'body': utf8.decode(buffer),
           // True, if content was sent as base64.
           'base64Encoded': false,
         }));
@@ -68,8 +74,9 @@ class InspectNetworkModule extends UIInspectorModule implements HttpClientInterc
 
   @override
   Future<HttpClientResponse?> afterResponse(HttpClientRequest request, HttpClientResponse response) async {
+    String requestId = _getRequestId(request);
     sendEventToFrontend(NetworkResponseReceivedEvent(
-      requestId: _getRequestId(request),
+      requestId: requestId,
       loaderId: devtoolsService.controller!.view.contextId.toString(),
       url: request.uri.toString(),
       headers: _getHttpHeaders(request.headers),
@@ -86,16 +93,24 @@ class InspectNetworkModule extends UIInspectorModule implements HttpClientInterc
       timestamp: (DateTime.now().millisecondsSinceEpoch - _initialTimestamp) ~/ 1000,
     ));
     sendEventToFrontend(NetworkLoadingFinishedEvent(
-      requestId: _getRequestId(request),
+      requestId: requestId,
       contentLength: response.contentLength,
       timestamp: (DateTime.now().millisecondsSinceEpoch - _initialTimestamp) ~/ 1000,
     ));
+    Uint8List data = await consolidateHttpClientResponseBytes(response);
+    _responseBuffers[requestId] = data;
+
+    HttpClientStreamResponse proxyResponse = HttpClientStreamResponse(
+        Stream.value(data),
+        statusCode: response.statusCode,
+        reasonPhrase: response.reasonPhrase,
+        responseHeaders: _getHttpHeaders(response.headers));
 
     HttpClientInterceptor? customHttpClientInterceptor = _customHttpClientInterceptor;
     if (customHttpClientInterceptor != null) {
-      return customHttpClientInterceptor.afterResponse(request, response);
+      return customHttpClientInterceptor.afterResponse(request, proxyResponse);
     } else {
-      return Future.value(null);
+      return Future.value(proxyResponse);
     }
   }
 
