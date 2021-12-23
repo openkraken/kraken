@@ -182,6 +182,8 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
 
   // Dispatch event listeners writen by addEventListener
   auto _dispatchEvent = [&eventInstance, this](JSValue handler) {
+    if (!JS_IsFunction(m_ctx, handler)) return;
+
     if (eventInstance->propagationImmediatelyStopped())
       return;
 
@@ -349,7 +351,7 @@ int EventTargetInstance::setProperty(JSContext* ctx, JSValue obj, JSAtom atom, J
   JSValue atomString = JS_AtomToString(ctx, atom);
   JSString* p = JS_VALUE_GET_STRING(atomString);
 
-  if (!p->is_wide_char && p->u.str8[0] == 'o' && p->u.str8[1] == 'n') {
+  if (!p->is_wide_char && p->len > 2 && p->u.str8[0] == 'o' && p->u.str8[1] == 'n') {
     eventTarget->setAttributesEventHandler(p, value);
   } else {
     eventTarget->m_properties[atom] = JS_DupValue(ctx, value);
@@ -390,23 +392,22 @@ void EventTargetInstance::setAttributesEventHandler(JSString* p, JSValue value) 
   memcpy(eventType, &p->u.str8[2], p->len + 1 - 2);
   JSAtom atom = JS_NewAtom(m_ctx, eventType);
 
-  // When evaluate scripts like 'element.onclick = null', we needs to remove the event handlers callbacks
-  if (JS_IsNull(value)) {
-    // EventHandler are no long visible by GC. Should free it manually.
+  // EventHandler are no long visible by GC. Should free it manually.
+  if (m_eventHandlerMap.count(atom) > 0) {
     JS_FreeValue(m_ctx, m_eventHandlerMap[atom]);
-    m_eventHandlerMap.erase(atom);
-    JS_FreeAtom(m_ctx, atom);
-    return;
   }
 
-  if (!JS_IsFunction(m_ctx, value)) {
+  // When evaluate scripts like 'element.onclick = null', we needs to remove the event handlers callbacks
+  if (JS_IsNull(value)) {
+    m_eventHandlerMap.erase(atom);
     JS_FreeAtom(m_ctx, atom);
     return;
   }
 
   JSValue newCallback = JS_DupValue(m_ctx, value);
   m_eventHandlerMap[atom] = newCallback;
-  if (m_eventListenerMap.empty()) {
+
+  if (JS_IsFunction(m_ctx, value) && m_eventListenerMap.empty()) {
     int32_t contextId = m_context->getContextId();
     std::unique_ptr<NativeString> args_01 = atomToNativeString(m_ctx, atom);
     int32_t type = JS_IsFunction(m_ctx, value) ? UICommand::addEvent : UICommand::removeEvent;
