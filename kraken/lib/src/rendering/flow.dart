@@ -399,13 +399,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     for (RenderBox child in children) {
       final RenderLayoutParentData childParentData = child.parentData as RenderLayoutParentData;
-
-      int? childNodeId;
-      if (child is RenderTextBox) {
-        childNodeId = child.hashCode;
-      } else if (child is RenderBoxModel) {
-        childNodeId = child.hashCode;
-      }
+      int childNodeId = child.hashCode;
 
       BoxConstraints childConstraints;
       if (child is RenderBoxModel) {
