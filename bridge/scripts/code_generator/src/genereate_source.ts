@@ -48,6 +48,7 @@ enum PropType {
 
 function getPropsVars(object: ClassObject, type: PropType) {
   let classSubFix = object.name;
+  let className = object.name;
   if (type == PropType.Element || type == PropType.Event) {
     classSubFix += 'Instance';
   }
@@ -66,6 +67,7 @@ function getPropsVars(object: ClassObject, type: PropType) {
   }
 
   return {
+    className,
     classSubFix,
     classId,
     instanceName
@@ -76,6 +78,7 @@ function generatePropsGetter(object: ClassObject, type: PropType, p: PropsDeclar
   let {
     classId,
     classSubFix,
+    className,
     instanceName
   } = getPropsVars(object, type);
 
@@ -113,7 +116,7 @@ function generatePropsGetter(object: ClassObject, type: PropType, p: PropsDeclar
     flushUICommandCode = 'getDartMethod()->flushUICommand();'
   }
 
-  return `PROP_GETTER(${classSubFix}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return `IMPL_PROPERTY_GETTER(${className}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   ${flushUICommandCode}
   ${getterCode}
 }`;
@@ -123,13 +126,12 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
   let {
     classId,
     classSubFix,
+    className,
     instanceName
   } = getPropsVars(object, type);
 
   if (p.readonly) {
-    return `PROP_SETTER(${classSubFix}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  return JS_NULL;
-}`;
+    return '';
   }
 
   let setterCode = '';
@@ -148,7 +150,7 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
   }
 
 
-  return `PROP_SETTER(${classSubFix}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return `IMPL_PROPERTY_SETTER(${className}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *${instanceName} = static_cast<${classSubFix} *>(JS_GetOpaque(this_val, ${classId}));
   ${setterCode}
 }`;
@@ -314,7 +316,7 @@ function generateEventConstructorCode(object: ClassObject) {
   ${generateEventInstanceConstructorCode(object)}
 
   auto event = new ${object.name}Instance(this, reinterpret_cast<NativeEvent *>(nativeEvent));
-  return event->instanceObject;`;
+  return event->jsObject;`;
 }
 
 function generateEventInstanceConstructorCode(object: ClassObject) {
@@ -386,7 +388,7 @@ function generateHostClassSource(object: ClassObject) {
   let constructorCode = '';
   if (object.type === 'Element') {
     constructorCode = `auto instance = new ${object.name}Instance(this);
-  return instance->instanceObject;`;
+  return instance->jsObject;`;
   } else if (object.type === 'Event') {
     constructorCode = generateEventConstructorCode(object);
   }
@@ -407,7 +409,7 @@ function generateHostClassSource(object: ClassObject) {
 
   let specialBind = '';
   if (object.name === 'ImageElement') {
-    specialBind = `context->defineGlobalProperty("Image", JS_DupValue(context->ctx(), constructor->classObject));`
+    specialBind = `context->defineGlobalProperty("Image", JS_DupValue(context->ctx(), constructor->jsObject));`
   }
 
   let classInheritCode = '';
@@ -424,7 +426,7 @@ ${object.name}::${object.name}(JSContext *context) : ${object.type}(context) {
 
 void bind${object.name}(std::unique_ptr<JSContext> &context) {
   auto *constructor = ${object.name}::instance(context.get());
-  context->defineGlobalProperty("${globalBindingName}", constructor->classObject);
+  context->defineGlobalProperty("${globalBindingName}", constructor->jsObject);
   ${specialBind}
 }
 

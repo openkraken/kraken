@@ -13,7 +13,7 @@ namespace kraken::binding::qjs {
 
 void bindCustomEvent(std::unique_ptr<JSContext>& context) {
   auto* constructor = CustomEvent::instance(context.get());
-  context->defineGlobalProperty("CustomEvent", constructor->classObject);
+  context->defineGlobalProperty("CustomEvent", constructor->jsObject);
 }
 
 JSValue CustomEvent::initCustomEvent(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -61,19 +61,12 @@ JSValue CustomEvent::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSVa
   auto* customEvent = new CustomEventInstance(CustomEvent::instance(context()), typeAtom, customEventInit);
   JS_FreeAtom(m_ctx, typeAtom);
 
-  return customEvent->instanceObject;
+  return customEvent->jsObject;
 }
 
-PROP_GETTER(CustomEventInstance, detail)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(CustomEvent, detail)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* customEventInstance = static_cast<CustomEventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
   return customEventInstance->m_detail.value();
-}
-PROP_SETTER(CustomEventInstance, detail)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  if (argc == 0)
-    return JS_NULL;
-  auto* customEventInstance = static_cast<CustomEventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
-  customEventInstance->m_detail.value(argv[0]);
-  return JS_NULL;
 }
 
 CustomEventInstance::CustomEventInstance(CustomEvent* jsCustomEvent, JSAtom customEventType, JSValue eventInit) : EventInstance(jsCustomEvent, customEventType, eventInit) {

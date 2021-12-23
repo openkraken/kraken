@@ -16,6 +16,7 @@ import 'src/module/fetch.dart' as fetch;
 
 import 'src/css/style_rule_parser.dart' as style_rule_parser;
 import 'src/css/style_sheet_parser.dart' as style_sheet_parser;
+import 'src/css/values.dart' as css_values;
 
 import 'src/gesture/scroll_physics.dart' as scroll_physics;
 
@@ -54,6 +55,7 @@ void main() {
   group('css', () {
     style_rule_parser.main();
     style_sheet_parser.main();
+    css_values.main();
   });
 
   group('gesture', () {

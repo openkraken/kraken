@@ -40,7 +40,7 @@ void launch({
       httpClientInterceptor: httpClientInterceptor
     );
 
-    controller.view.attachView(RendererBinding.instance!.renderView);
+    controller.view.attachTo(RendererBinding.instance!.renderView);
 
     await controller.loadBundle(bundle: bundle);
 

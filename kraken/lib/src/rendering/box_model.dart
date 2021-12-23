@@ -222,6 +222,14 @@ class RenderLayoutBox extends RenderBoxModel
       List<RenderBox> children = getChildren();
       if (_childrenNeedsSort) {
         children.sort((RenderBox left, RenderBox right) {
+          // @FIXME: Add patch to handle nested fixed element paint priority, need to remove
+          // this logic after Kraken has implemented stacking context tree.
+          if (left is RenderBoxModel && left.renderStyle.position == CSSPositionType.fixed &&
+            right is RenderBoxModel && right.renderStyle.position == CSSPositionType.fixed) {
+            // Child element always paint after parent element in the renderObject tree.
+            return right.renderStyle.isAncestorOf(left.renderStyle) ? 1 : -1;
+          }
+
           bool isLeftNeedsStacking = left is RenderBoxModel && left.needsStacking;
           bool isRightNeedsStacking = right is RenderBoxModel && right.needsStacking;
           if (!isLeftNeedsStacking && isRightNeedsStacking) {
@@ -736,8 +744,8 @@ class RenderBoxModel extends RenderBox
   // child has percentage length and parent's size can not be calculated by style
   // thus parent needs relayout for its child calculate percentage length.
   void markParentNeedsRelayout() {
-    RenderBoxModel? parent = this.parent as RenderBoxModel?;
-    if (parent != null) {
+    AbstractNode? parent = this.parent;
+    if (parent is RenderBoxModel) {
       parent.needsRelayout = true;
     }
   }
@@ -786,6 +794,18 @@ class RenderBoxModel extends RenderBox
       }
     }
     super.layout(newConstraints, parentUsesSize: parentUsesSize);
+  }
+
+  void markAdjacentRenderParagraphNeedsLayout() {
+    if (parent != null && parent is RenderFlowLayout && parentData is RenderLayoutParentData) {
+      if ((parentData as RenderLayoutParentData).nextSibling is RenderTextBox) {
+        ((parentData as RenderLayoutParentData).nextSibling as RenderTextBox).markRenderParagraphNeedsLayout();
+      }
+
+      if ((parentData as RenderLayoutParentData).previousSibling is RenderTextBox) {
+        ((parentData as RenderLayoutParentData).previousSibling as RenderTextBox).markRenderParagraphNeedsLayout();
+      }
+    }
   }
 
   // Calculate constraints of renderBoxModel on layout stage and
@@ -1051,19 +1071,19 @@ class RenderBoxModel extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       childPaintDuration = 0;
       PerformanceTiming.instance().mark(PERF_PAINT_START, uniqueId: hashCode);
     }
     if (renderStyle.isVisibilityHidden) {
-      if (kProfileMode) {
+      if (kProfileMode && PerformanceTiming.enabled()) {
         PerformanceTiming.instance().mark(PERF_PAINT_END, uniqueId: hashCode);
       }
       return;
     }
 
     paintBoxModel(context, offset);
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       int amendEndTime =
           DateTime.now().microsecondsSinceEpoch - childPaintDuration;
       PerformanceTiming.instance()

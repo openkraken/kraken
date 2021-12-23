@@ -29,7 +29,9 @@ class CustomEvent : public Event {
   OBJECT_INSTANCE(CustomEvent);
 
  private:
-  ObjectFunction m_initCustomEvent{m_context, m_prototypeObject, "initCustomEvent", initCustomEvent, 4};
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(detail);
+
+  DEFINE_PROTOTYPE_FUNCTION(initCustomEvent, 4);
   friend CustomEventInstance;
 };
 
@@ -39,8 +41,6 @@ class CustomEventInstance : public EventInstance {
   explicit CustomEventInstance(CustomEvent* jsCustomEvent, NativeCustomEvent* nativeCustomEvent);
 
  private:
-  DEFINE_HOST_CLASS_PROPERTY(1, detail);
-
   JSValueHolder m_detail{m_ctx, JS_NULL};
   NativeCustomEvent* nativeCustomEvent{nullptr};
   friend CustomEvent;

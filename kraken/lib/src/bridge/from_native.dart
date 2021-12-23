@@ -13,7 +13,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:kraken/bridge.dart';
-import 'package:kraken/dom.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/src/module/performance_timing.dart';
@@ -175,12 +174,22 @@ int _setTimeout(Pointer<Void> callbackContext, int contextId,
 
   return controller.module.setTimeout(timeout, () {
     DartAsyncCallback func = callback.asFunction();
-    try {
-      func(callbackContext, contextId, nullptr);
-    } catch (e, stack) {
-      Pointer<Utf8> nativeErrorMessage = ('Error: $e\n$stack').toNativeUtf8();
-      func(callbackContext, contextId, nativeErrorMessage);
-      malloc.free(nativeErrorMessage);
+
+    void _runCallback() {
+      try {
+        func(callbackContext, contextId, nullptr);
+      } catch (e, stack) {
+        Pointer<Utf8> nativeErrorMessage = ('Error: $e\n$stack').toNativeUtf8();
+        func(callbackContext, contextId, nativeErrorMessage);
+        malloc.free(nativeErrorMessage);
+      }
+    }
+
+    // Pause if kraken page paused.
+    if (controller.paused) {
+      controller.pushPendingCallbacks(_runCallback);
+    } else {
+      _runCallback();
     }
   });
 }
@@ -196,13 +205,22 @@ int _setInterval(Pointer<Void> callbackContext, int contextId,
     Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
   return controller.module.setInterval(timeout, () {
-    DartAsyncCallback func = callback.asFunction();
-    try {
-      func(callbackContext, contextId, nullptr);
-    } catch (e, stack) {
-      Pointer<Utf8> nativeErrorMessage = ('Dart Error: $e\n$stack').toNativeUtf8();
-      func(callbackContext, contextId, nativeErrorMessage);
-      malloc.free(nativeErrorMessage);
+    void _runCallbacks() {
+      DartAsyncCallback func = callback.asFunction();
+      try {
+        func(callbackContext, contextId, nullptr);
+      } catch (e, stack) {
+        Pointer<Utf8> nativeErrorMessage = ('Dart Error: $e\n$stack').toNativeUtf8();
+        func(callbackContext, contextId, nativeErrorMessage);
+        malloc.free(nativeErrorMessage);
+      }
+    }
+
+    // Pause if kraken page paused.
+    if (controller.paused) {
+      controller.pushPendingCallbacks(_runCallbacks);
+    } else {
+      _runCallbacks();
     }
   });
 }
@@ -229,14 +247,24 @@ int _requestAnimationFrame(Pointer<Void> callbackContext, int contextId,
     Pointer<NativeFunction<NativeRAFAsyncCallback>> callback) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
   return controller.module.requestAnimationFrame((double highResTimeStamp) {
-    DartRAFAsyncCallback func = callback.asFunction();
-    try {
-      func(callbackContext, contextId, highResTimeStamp, nullptr);
-    } catch (e, stack) {
-      Pointer<Utf8> nativeErrorMessage = ('Error: $e\n$stack').toNativeUtf8();
-      func(callbackContext, contextId, highResTimeStamp, nativeErrorMessage);
-      malloc.free(nativeErrorMessage);
+    void _runCallback() {
+      DartRAFAsyncCallback func = callback.asFunction();
+      try {
+        func(callbackContext, contextId, highResTimeStamp, nullptr);
+      } catch (e, stack) {
+        Pointer<Utf8> nativeErrorMessage = ('Error: $e\n$stack').toNativeUtf8();
+        func(callbackContext, contextId, highResTimeStamp, nativeErrorMessage);
+        malloc.free(nativeErrorMessage);
+      }
     }
+
+    // Pause if kraken page paused.
+    if (controller.paused) {
+      controller.pushPendingCallbacks(_runCallback);
+    } else {
+      _runCallback();
+    }
+
   });
 }
 
@@ -327,18 +355,11 @@ void _flushUICommand() {
 
 final Pointer<NativeFunction<NativeFlushUICommand>> _nativeFlushUICommand = Pointer.fromFunction(_flushUICommand);
 
-// HTML Element is special element which created at initialize time, so we can't use UICommandQueue to init.
-typedef NativeInitHTML = Void Function(Int32 contextId, Pointer<NativeEventTarget> nativePtr);
-void _initHTML(int contextId, Pointer<NativeEventTarget> nativePtr) {
-  ElementManager.htmlNativePtrMap[contextId] = nativePtr;
-}
-final Pointer<NativeFunction<NativeInitHTML>> _nativeInitHTML = Pointer.fromFunction(_initHTML);
-
 typedef NativeInitWindow = Void Function(Int32 contextId, Pointer<NativeEventTarget> nativePtr);
 typedef DartInitWindow = void Function(int contextId, Pointer<NativeEventTarget> nativePtr);
 
 void _initWindow(int contextId, Pointer<NativeEventTarget> nativePtr) {
-  ElementManager.windowNativePtrMap[contextId] = nativePtr;
+  KrakenViewController.windowNativePtrMap[contextId] = nativePtr;
 }
 
 final Pointer<NativeFunction<NativeInitWindow>> _nativeInitWindow = Pointer.fromFunction(_initWindow);
@@ -347,7 +368,7 @@ typedef NativeInitDocument = Void Function(Int32 contextId, Pointer<NativeEventT
 typedef DartInitDocument = void Function(int contextId, Pointer<NativeEventTarget> nativePtr);
 
 void _initDocument(int contextId, Pointer<NativeEventTarget> nativePtr) {
-  ElementManager.documentNativePtrMap[contextId] = nativePtr;
+  KrakenViewController.documentNativePtrMap[contextId] = nativePtr;
 }
 
 final Pointer<NativeFunction<NativeInitDocument>> _nativeInitDocument = Pointer.fromFunction(_initDocument);
@@ -391,7 +412,6 @@ final List<int> _dartNativeMethods = [
   _nativePlatformBrightness.address,
   _nativeToBlob.address,
   _nativeFlushUICommand.address,
-  _nativeInitHTML.address,
   _nativeInitWindow.address,
   _nativeInitDocument.address,
   _nativeGetEntries.address,

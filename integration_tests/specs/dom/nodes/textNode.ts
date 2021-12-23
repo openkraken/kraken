@@ -55,6 +55,28 @@ describe('TextNode', () => {
     await snapshot();
   });
 
+  it('the previous sibling is block, the left space of this textnode is hidden', async () => {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode('text1'));
+    document.body.appendChild(div);
+
+    const text = document.createTextNode(' text2');
+    document.body.appendChild(text);
+
+    await snapshot();
+  });
+
+  it('the next sibling is block, the right space of this textnode is hidden', async () => {
+    const text = document.createTextNode('text1 ');
+    document.body.appendChild(text);
+
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode('text2'));
+    document.body.appendChild(div);
+
+    await snapshot();
+  });
+
   it('should work with set textContent', async () => {
     const div = document.createElement('div');
     const text = document.createTextNode('before modified');

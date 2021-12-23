@@ -394,7 +394,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   @override
   void performLayout() {
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       childLayoutDuration = 0;
       PerformanceTiming.instance()
         .mark(PERF_FLOW_LAYOUT_START, uniqueId: hashCode);
@@ -407,7 +407,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       needsRelayout = false;
     }
 
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       DateTime flowLayoutEndTime = DateTime.now();
       int amendEndTime =
         flowLayoutEndTime.microsecondsSinceEpoch - childLayoutDuration;
@@ -542,8 +542,11 @@ class RenderFlowLayout extends RenderLayoutBox {
         childConstraints = child.getConstraints();
       } else if (child is RenderTextBox) {
         childConstraints = child.getConstraints();
-      } else {
+      } else if (child is RenderPositionPlaceholder) {
         childConstraints = BoxConstraints();
+      } else {
+        // Custom element.
+        childConstraints = constraints;
       }
 
       // Whether child need to layout
@@ -559,7 +562,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       if (isChildNeedsLayout) {
         late DateTime childLayoutStart;
-        if (kProfileMode) {
+        if (kProfileMode && PerformanceTiming.enabled()) {
           childLayoutStart = DateTime.now();
         }
 
@@ -579,7 +582,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         }
         child.layout(childConstraints, parentUsesSize: true);
 
-        if (kProfileMode) {
+        if (kProfileMode && PerformanceTiming.enabled()) {
           DateTime childLayoutEnd = DateTime.now();
           childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch -
               childLayoutStart.microsecondsSinceEpoch);
@@ -600,19 +603,18 @@ class RenderFlowLayout extends RenderLayoutBox {
           }
         }
       }
-
-      // white-space property not only specifies whether and how white space is collapsed
-      // but only specifies whether lines may wrap at unforced soft wrap opportunities
-      // https://www.w3.org/TR/css-text-3/#line-breaking
-      bool isChildBlockLevel = _isChildBlockLevel(child);
-      bool isPreChildBlockLevel = _isChildBlockLevel(preChild);
-      bool isLineLengthExceedContainer = whiteSpace != WhiteSpace.nowrap &&
-          (runMainAxisExtent + childMainAxisExtent > mainAxisLimit);
-
       if (runChildren.isNotEmpty &&
-          (isChildBlockLevel ||
-              isPreChildBlockLevel ||
-              isLineLengthExceedContainer)) {
+          // Current is block.
+          (_isChildBlockLevel(child) ||
+          // Previous is block.
+          _isChildBlockLevel(preChild) ||
+          // Line length is exceed container.
+          // The white-space property not only specifies whether and how white space is collapsed
+          // but only specifies whether lines may wrap at unforced soft wrap opportunities
+          // https://www.w3.org/TR/css-text-3/#line-breaking
+          (whiteSpace != WhiteSpace.nowrap && (runMainAxisExtent + childMainAxisExtent > mainAxisLimit)) ||
+          // Previous is linebreak.
+          preChild is RenderLineBreak)) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
         runMetrics.add(_RunMetrics(
@@ -630,8 +632,12 @@ class RenderFlowLayout extends RenderLayoutBox {
       runMainAxisExtent += childMainAxisExtent;
 
       /// Calculate baseline extent of layout box
-      RenderStyle childRenderStyle = _getChildRenderStyle(child)!;
-      VerticalAlign verticalAlign = childRenderStyle.verticalAlign;
+      RenderStyle? childRenderStyle = _getChildRenderStyle(child);
+      VerticalAlign verticalAlign = VerticalAlign.baseline;
+      if (childRenderStyle != null) {
+        verticalAlign = childRenderStyle.verticalAlign;
+      }
+
 
       bool isLineHeightValid = _isLineHeightValid(child);
 
@@ -671,7 +677,7 @@ class RenderFlowLayout extends RenderLayoutBox {
           extentBelowBaseline,
           maxSizeBelowBaseline,
         );
-        runCrossAxisExtent = maxSizeAboveBaseline + maxSizeBelowBaseline;
+        runCrossAxisExtent = math.max(runCrossAxisExtent, maxSizeAboveBaseline + maxSizeBelowBaseline);
       } else {
         runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
       }
@@ -1266,7 +1272,6 @@ class RenderFlowLayout extends RenderLayoutBox {
         childDisplay == CSSDisplay.inlineFlex;
     }
     return false;
-
   }
 
   RenderStyle? _getChildRenderStyle(RenderBox child) {
@@ -1282,8 +1287,8 @@ class RenderFlowLayout extends RenderLayoutBox {
   }
 
   bool _isChildBlockLevel(RenderBox? child) {
-    if (child != null && child is! RenderTextBox) {
-      RenderStyle? childRenderStyle = _getChildRenderStyle(child);
+    if (child is RenderBoxModel || child is RenderPositionPlaceholder) {
+      RenderStyle? childRenderStyle = _getChildRenderStyle(child!);
       if (childRenderStyle != null) {
         CSSDisplay? childDisplay = childRenderStyle.display;
         return childDisplay == CSSDisplay.block ||
@@ -1558,13 +1563,13 @@ class RenderFlowLayout extends RenderLayoutBox {
       RenderObject child = paintingOrder[i];
       if (child is! RenderPositionPlaceholder) {
         late DateTime childPaintStart;
-        if (kProfileMode) {
+        if (kProfileMode && PerformanceTiming.enabled()) {
           childPaintStart = DateTime.now();
         }
         final RenderLayoutParentData childParentData =
             child.parentData as RenderLayoutParentData;
         context.paintChild(child, childParentData.offset + offset);
-        if (kProfileMode) {
+        if (kProfileMode && PerformanceTiming.enabled()) {
           DateTime childPaintEnd = DateTime.now();
           childPaintDuration += (childPaintEnd.microsecondsSinceEpoch -
               childPaintStart.microsecondsSinceEpoch);

@@ -2,20 +2,19 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
 import 'dart:async';
-import 'dart:ffi';
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/rendering.dart';
 
 const String IMAGE = 'IMG';
+const String NATURAL_WIDTH = 'naturalWidth';
+const String NATURAL_HEIGHT = 'naturalHeight';
 
 // FIXME: should be inline default.
 const Map<String, dynamic> _defaultStyle = {
@@ -25,7 +24,7 @@ const Map<String, dynamic> _defaultStyle = {
 // The HTMLImageElement.
 class ImageElement extends Element {
   // The render box to draw image.
-  RenderImage? _renderImage;
+  KrakenRenderImage? _renderImage;
 
   ImageProvider? _cachedImageProvider;
   dynamic _imageProviderKey;
@@ -34,8 +33,13 @@ class ImageElement extends Element {
   ImageInfo? _cachedImageInfo;
   Uri? _resolvedUri;
 
+  // Width and height set through property.
   double? _propertyWidth;
   double? _propertyHeight;
+
+  // Width and height set through style.
+  double? _styleWidth;
+  double? _styleHeight;
 
   ui.Image? get image => _cachedImageInfo?.image;
 
@@ -51,11 +55,9 @@ class ImageElement extends Element {
   bool get _shouldLazyLoading => properties['loading'] == 'lazy';
   ImageStreamCompleterHandle? _completerHandle;
 
-  ImageElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
+  ImageElement(EventTargetContext? context)
       : super(
-      targetId,
-      nativeEventTarget,
-      elementManager,
+      context,
       isIntrinsicBox: true,
       defaultStyle: _defaultStyle) {
   }
@@ -133,31 +135,37 @@ class ImageElement extends Element {
   }
 
   double get width {
-    if (_renderImage != null && _renderImage!.width != null) {
-      return _renderImage!.width!;
+    double? width = _styleWidth ?? _propertyWidth;
+
+    if (width == null) {
+      width = naturalWidth;
+      double? height = _styleHeight ?? _propertyHeight;
+
+      if (height != null && naturalHeight != 0) {
+        width = height * naturalWidth / naturalHeight;
+      }
     }
 
-    if (renderBoxModel != null && renderBoxModel!.hasSize) {
-      return renderBoxModel!.clientWidth;
-    }
-
-    // Fallback to natural width, if image is not on screen.
-    return naturalWidth;
+    return width;
   }
 
   double get height {
-    if (_renderImage != null && _renderImage!.height != null) {
-      return _renderImage!.height!;
+    double? height = _styleHeight ?? _propertyHeight;
+
+    if (height == null) {
+      height = naturalHeight;
+      double? width = _styleWidth ?? _propertyWidth;
+
+      if (width != null && naturalWidth != 0) {
+        height = width * naturalHeight / naturalWidth;
+      }
     }
 
-    if (renderBoxModel != null && renderBoxModel!.hasSize) {
-      return renderBoxModel!.clientHeight;
-    }
-
-    // Fallback to natural height, if image is not on screen.
-    return naturalHeight;
+    return height;
   }
 
+  // Read the original image width of loaded image.
+  // The getter must be called after image had loaded, otherwise will return 0.0.
   double get naturalWidth {
     ImageProvider? imageProvider = _cachedImageProvider;
     if (imageProvider is KrakenResizeImage) {
@@ -168,6 +176,9 @@ class ImageElement extends Element {
     }
     return image?.width.toDouble() ?? 0;
   }
+
+  // Read the original image height of loaded image.
+  // The getter must be called after image had loaded, otherwise will return 0.0.
   double get naturalHeight {
     ImageProvider? imageProvider = _cachedImageProvider;
     if (imageProvider is KrakenResizeImage) {
@@ -223,40 +234,22 @@ class ImageElement extends Element {
   void _resizeImage() {
     assert(isRendererAttached);
 
-    double? width = renderStyle.width.isAuto ? _propertyWidth : renderStyle.width.computedValue;
-    double? height = renderStyle.height.isAuto ? _propertyHeight : renderStyle.height.computedValue;
-
-    if (renderStyle.width.isAuto && _propertyWidth != null) {
+    if (_styleWidth == null && _propertyWidth != null) {
       // The intrinsic width of the image in pixels. Must be an integer without a unit.
       renderStyle.width = CSSLengthValue(_propertyWidth, CSSLengthType.PX);
     }
-    if (renderStyle.height.isAuto && _propertyHeight != null) {
+    if (_styleHeight == null && _propertyHeight != null) {
       // The intrinsic height of the image, in pixels. Must be an integer without a unit.
       renderStyle.height = CSSLengthValue(_propertyHeight, CSSLengthType.PX);
     }
 
-    if (width == null && height == null) {
-      width = naturalWidth;
-      height = naturalHeight;
-    } else if (width != null && height == null && naturalWidth != 0) {
-      height = width * naturalHeight / naturalWidth;
-    } else if (width == null && height != null && naturalHeight != 0) {
-      width = height * naturalWidth / naturalHeight;
-    }
-
-    if (height == null || !height.isFinite) {
-      height = 0.0;
-    }
-
-    if (width == null || !width.isFinite) {
-      width = 0.0;
-    }
-
-    // Try to update image size if image already resolved.
-    _renderImage?.width = width;
-    _renderImage?.height = height;
     renderStyle.intrinsicWidth = naturalWidth;
     renderStyle.intrinsicHeight = naturalHeight;
+
+    // Try to update image size if image already resolved.
+    // Set size to RenderImage is needs, to avoid makeNeedsLayout when update image.
+    _renderImage?.width = width;
+    _renderImage?.height = height;
 
     if (naturalWidth == 0.0 || naturalHeight == 0.0) {
       renderStyle.intrinsicRatio = null;
@@ -265,12 +258,12 @@ class ImageElement extends Element {
     }
   }
 
-  RenderImage _createRenderImageBox() {
+  KrakenRenderImage _createRenderImageBox() {
     RenderStyle renderStyle = renderBoxModel!.renderStyle;
     BoxFit objectFit = renderStyle.objectFit;
     Alignment objectPosition = renderStyle.objectPosition;
 
-    return RenderImage(
+    return KrakenRenderImage(
       image: _cachedImageInfo?.image,
       fit: objectFit,
       alignment: objectPosition,
@@ -310,8 +303,8 @@ class ImageElement extends Element {
   Uri? _resolveSrc() {
     String? src = properties['src'];
     if (src != null && src.isNotEmpty) {
-      Uri base = Uri.parse(elementManager.controller.href);
-      return elementManager.controller.uriParser!.resolve(base, Uri.parse(src));
+      Uri base = Uri.parse(ownerDocument.controller.href);
+      return ownerDocument.controller.uriParser!.resolve(base, Uri.parse(src));
     }
     return null;
   }
@@ -338,19 +331,8 @@ class ImageElement extends Element {
     if (resolvedUri == null) return;
 
     // Try to make sure that this image can be encoded into a smaller size.
-    double? width = null;
-    double? height = null;
-
-    if (isRendererAttached) {
-      width = renderStyle.width.isAuto ? _propertyWidth : renderStyle.width.computedValue;
-      height = renderStyle.height.isAuto ? _propertyHeight : renderStyle.height.computedValue;
-    } else {
-      width = _propertyWidth;
-      height = _propertyHeight;
-    }
-
-    int? cachedWidth = (width != null && width > 0) ? (width * ui.window.devicePixelRatio).toInt() : null;
-    int? cachedHeight = (height != null && height > 0) ? (height * ui.window.devicePixelRatio).toInt() : null;
+    int? cachedWidth = width > 0 && width.isFinite ? (width * ui.window.devicePixelRatio).toInt() : null;
+    int? cachedHeight = height > 0 && height.isFinite ? (height * ui.window.devicePixelRatio).toInt() : null;
 
     ImageProvider? provider = _cachedImageProvider;
     if (updateImageProvider || provider == null) {
@@ -440,11 +422,10 @@ class ImageElement extends Element {
   void setProperty(String key, dynamic value) {
     bool propertyChanged = properties[key] != value;
     super.setProperty(key, value);
-    // Reset frame number to zero when image needs to reload
     if (key == 'src' && propertyChanged) {
       final Uri? resolvedUri = _resolvedUri =  _resolveSrc();
-      // Update image source if image already attached.
-      if (isRendererAttached) {
+      // Update image source if image already attached except image is lazy loading.
+      if (isRendererAttached && !_isInLazyLoading) {
         _resolveImage(resolvedUri, updateImageProvider: true);
       } else {
         _precacheImage();
@@ -458,29 +439,37 @@ class ImageElement extends Element {
       _propertyHeight = CSSNumber.parseNumber(value);
       _resolveImage(_resolvedUri, updateImageProvider: true);
     }
-
   }
 
   @override
   dynamic getProperty(String key) {
     switch (key) {
       case WIDTH:
-        return _renderImage?.width ?? 0;
+        return width;
       case HEIGHT:
-        return _renderImage?.height ?? 0;
-      case 'naturalWidth':
+        return height;
+      case NATURAL_WIDTH:
         return naturalWidth;
-      case 'naturalHeight':
+      case NATURAL_HEIGHT:
         return naturalHeight;
     }
-
     return super.getProperty(key);
   }
 
   void _stylePropertyChanged(String property, String? original, String present) {
     if (property == WIDTH || property == HEIGHT) {
-      // Resize renderBox
-      if (isRendererAttached) _resizeImage();
+      if (property == WIDTH) {
+        double? resolveStyleWidth = renderStyle.width.value == null && renderStyle.width.isNotAuto
+          ? null : renderStyle.width.computedValue;
+        // To avoid resolved auto, which computed value is infinity, we can not calculate
+        // infinite double as valid number, mark null to let width/height resized by decode
+        // size.
+        _styleWidth = resolveStyleWidth == double.infinity ? null : resolveStyleWidth;
+      } else if (property == HEIGHT) {
+        double? resolveStyleHeight = renderStyle.height.value == null && renderStyle.height.isNotAuto
+          ? null : renderStyle.height.computedValue;
+        _styleHeight = resolveStyleHeight == double.infinity ? null : resolveStyleHeight;
+      }
       // Resize image
       _resolveImage(_resolvedUri, updateImageProvider: true);
     } else if (property == OBJECT_FIT && _renderImage != null) {

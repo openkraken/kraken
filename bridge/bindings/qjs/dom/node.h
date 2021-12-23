@@ -44,12 +44,23 @@ class Node : public EventTarget {
   static JSValue replaceChild(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
  private:
-  ObjectFunction m_cloneNode{m_context, m_prototypeObject, "cloneNode", cloneNode, 1};
-  ObjectFunction m_appendChild{m_context, m_prototypeObject, "appendChild", appendChild, 1};
-  ObjectFunction m_remove{m_context, m_prototypeObject, "remove", remove, 0};
-  ObjectFunction m_removeChild{m_context, m_prototypeObject, "removeChild", removeChild, 1};
-  ObjectFunction m_insertBefore{m_context, m_prototypeObject, "insertBefore", insertBefore, 2};
-  ObjectFunction m_replaceChild{m_context, m_prototypeObject, "replaceChild", replaceChild, 2};
+  DEFINE_PROTOTYPE_PROPERTY(textContent);
+
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(isConnected);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(ownerDocument);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(firstChild);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(lastChild);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(parentNode);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(previousSibling);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(nextSibling);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(nodeType);
+
+  DEFINE_PROTOTYPE_FUNCTION(cloneNode, 1);
+  DEFINE_PROTOTYPE_FUNCTION(appendChild, 1);
+  DEFINE_PROTOTYPE_FUNCTION(remove, 0);
+  DEFINE_PROTOTYPE_FUNCTION(removeChild, 1);
+  DEFINE_PROTOTYPE_FUNCTION(insertBefore, 2);
+  DEFINE_PROTOTYPE_FUNCTION(replaceChild, 2);
 
   static void traverseCloneNode(QjsContext* ctx, NodeInstance* baseNode, NodeInstance* targetNode);
   static JSValue copyNodeValue(QjsContext* ctx, NodeInstance* node);
@@ -64,7 +75,7 @@ struct NodeJob {
 
 class NodeInstance : public EventTargetInstance {
  public:
-  enum class NodeFlag : uint32_t { IsDocumentFragment = 1 << 0 };
+  enum class NodeFlag : uint32_t { IsDocumentFragment = 1 << 0, IsTemplateElement = 1 << 1 };
   mutable std::set<NodeFlag> m_nodeFlags;
   bool hasNodeFlag(NodeFlag flag) const { return m_nodeFlags.size() != 0 && m_nodeFlags.find(flag) != m_nodeFlags.end(); }
   void setNodeFlag(NodeFlag flag) const { m_nodeFlags.insert(flag); }
@@ -111,9 +122,8 @@ class NodeInstance : public EventTargetInstance {
   void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
  private:
-  DEFINE_HOST_CLASS_PROPERTY(9, isConnected, ownerDocument, firstChild, lastChild, parentNode, previousSibling, nextSibling, nodeType, textContent);
   DocumentInstance* m_document{nullptr};
-  ObjectProperty m_childNodes{m_context, instanceObject, "childNodes", childNodes};
+  ObjectProperty m_childNodes{m_context, jsObject, "childNodes", childNodes};
   void ensureDetached(NodeInstance* node);
   friend DocumentInstance;
   friend Node;

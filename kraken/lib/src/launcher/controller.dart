@@ -8,9 +8,14 @@ import 'dart:collection';
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
+import 'package:flutter/widgets.dart' show RenderObjectElement;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart'
+    show RouteInformation, WidgetsBinding, WidgetsBindingObserver;
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
@@ -18,13 +23,19 @@ import 'package:kraken/gesture.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/widget.dart';
+import 'package:kraken/src/dom/element_registry.dart' as element_registry;
+
 
 import 'bundle.dart';
+
+const int WINDOW_ID = -1;
+const int DOCUMENT_ID = -2;
 
 // Error handler when load bundle failed.
 typedef LoadHandler = void Function(KrakenController controller);
 typedef LoadErrorHandler = void Function(FlutterError error, StackTrace stack);
 typedef JSErrorHandler = void Function(String message);
+typedef PendingCallback = void Function();
 
 typedef TraverseElementCallback = void Function(Element element);
 
@@ -55,7 +66,11 @@ abstract class DevToolsService {
 }
 
 // An kraken View Controller designed for multiple kraken view control.
-class KrakenViewController {
+class KrakenViewController
+    implements WidgetsBindingObserver, ElementsBindingObserver {
+  static Map<int, Pointer<NativeEventTarget>> documentNativePtrMap = {};
+  static Map<int, Pointer<NativeEventTarget>> windowNativePtrMap = {};
+
   KrakenController rootController;
 
   // The methods of the KrakenNavigateDelegation help you implement custom behaviors that are triggered
@@ -90,7 +105,6 @@ class KrakenViewController {
     this._viewportWidth,
     this._viewportHeight, {
     this.background,
-    this.showPerformanceOverlay,
     this.enableDebug = false,
     int? contextId,
     required this.rootController,
@@ -98,16 +112,12 @@ class KrakenViewController {
     this.gestureListener,
     this.widgetDelegate,
   }) {
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT);
-    }
-
     if (enableDebug) {
       debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
       debugPaintSizeEnabled = true;
     }
-
     if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT);
       PerformanceTiming.instance().mark(PERF_BRIDGE_INIT_START);
     }
 
@@ -115,81 +125,114 @@ class KrakenViewController {
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_BRIDGE_INIT_END);
-    }
-
-    if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_VIEWPORT_START);
     }
 
     viewport = RenderViewportBox(
-      background: background,
-      viewportSize: Size(viewportWidth, viewportHeight),
-      gestureListener: gestureListener,
-      controller: rootController
-    );
+        background: background,
+        viewportSize: Size(viewportWidth, viewportHeight),
+        gestureListener: gestureListener,
+        controller: rootController);
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_VIEWPORT_END);
       PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_INIT_START);
     }
 
-    _elementManager = ElementManager(
-      contextId: _contextId,
+    _setupObserver();
+
+    element_registry.defineBuiltInElements();
+
+    document = Document(
+      EventTargetContext(_contextId, documentNativePtrMap[_contextId]!),
       viewport: viewport,
-      showPerformanceOverlayOverride: showPerformanceOverlay,
       controller: rootController,
       gestureListener: gestureListener,
       widgetDelegate: widgetDelegate,
     );
+    _setEventTarget(DOCUMENT_ID, document);
+
+    window = Window(
+        EventTargetContext(_contextId, windowNativePtrMap[_contextId]!),
+        document);
+    _setEventTarget(WINDOW_ID, window);
+
+    // Listeners need to be registered to window in order to dispatch events on demand.
+    if (gestureListener != null) {
+      if (gestureListener!.onTouchStart != null) {
+        window.addEvent(EVENT_TOUCH_START);
+      }
+
+      if (gestureListener!.onTouchMove != null) {
+        window.addEvent(EVENT_TOUCH_MOVE);
+      }
+
+      if (gestureListener!.onTouchEnd != null) {
+        window.addEvent(EVENT_TOUCH_END);
+      }
+    }
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_INIT_END);
     }
   }
 
-  // the manager which controller all renderObjects of Kraken
-  late ElementManager _elementManager;
-  ElementManager get elementManager => _elementManager;
-
-  // index value which identify javascript runtime context.
+  // Index value which identify javascript runtime context.
   late int _contextId;
   int get contextId => _contextId;
 
-  // should render performanceOverlay layer into the screen for performance profile.
-  bool? showPerformanceOverlay;
-
-  // print debug message when rendering.
+  // Enable print debug message when rendering.
   bool enableDebug;
 
-  // Kraken have already disposed
+  // Kraken have already disposed.
   bool _disposed = false;
 
   bool get disposed => _disposed;
 
   late RenderViewportBox viewport;
+  late Document document;
+  late Window window;
 
   void evaluateJavaScripts(String code, [String source = 'vm://']) {
     assert(!_disposed, 'Kraken have already disposed');
     evaluateScripts(_contextId, code, source);
   }
 
-  // attach kraken's renderObject to an renderObject.
-  void attachView(RenderObject parent, [RenderObject? previousSibling]) {
-    _elementManager.attach(parent, previousSibling, showPerformanceOverlay: showPerformanceOverlay ?? false);
+  void _setupObserver() {
+    if (ElementsBinding.instance != null) {
+      ElementsBinding.instance!.addObserver(this);
+    } else if (WidgetsBinding.instance != null) {
+      WidgetsBinding.instance!.addObserver(this);
+    }
   }
 
-  Window? get window => getEventTargetById(WINDOW_ID) as Window?;
+  void _teardownObserver() {
+    if (ElementsBinding.instance != null) {
+      ElementsBinding.instance!.removeObserver(this);
+    } else if (WidgetsBinding.instance != null) {
+      WidgetsBinding.instance!.removeObserver(this);
+    }
+  }
 
-  Document? get document => getEventTargetById(DOCUMENT_ID) as Document?;
+  // Attach kraken's renderObject to an renderObject.
+  void attachTo(RenderObject parent, [RenderObject? previousSibling]) {
+    if (parent is ContainerRenderObjectMixin) {
+      parent.insert(document.renderer!, after: previousSibling);
+    } else if (parent is RenderObjectWithChildMixin) {
+      parent.child = document.renderer;
+    }
+  }
 
-  // dispose controller and recycle all resources.
+  // Dispose controller and recycle all resources.
   void dispose() {
-    // break circle reference
-    (_elementManager.getRootRenderBox() as RenderObjectWithControllerMixin).controller = null;
+    // FIXME: for break circle reference
+    viewport.controller = null;
 
-    detachView();
+    debugDOMTreeChanged = null;
 
-    // should clear previous page cached ui commands
+    _teardownObserver();
+
+    // Should clear previous page cached ui commands
     clearUICommand(_contextId);
 
     disposeContext(_contextId);
@@ -197,22 +240,69 @@ class KrakenViewController {
     // DisposeEventTarget command will created when js context disposed, should flush them all.
     flushUICommand();
 
-    _elementManager.dispose();
+    _clearTargets();
+    document.dispose();
+    window.dispose();
     _disposed = true;
   }
 
+  Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
+
+  T? debugGetEventTargetById<T>(int targetId) {
+    return _getEventTargetById(targetId);
+  }
+
+  int? debugGetTargetIdByEventTarget(EventTarget eventTarget) {
+    if (_eventTargets.containsValue(eventTarget)) {
+      for (var entry in _eventTargets.entries) {
+        if (entry.value == eventTarget) {
+          return entry.key;
+        }
+      }
+    }
+    return null;
+  }
+
+  T? _getEventTargetById<T>(int targetId) {
+    EventTarget? target = _eventTargets[targetId];
+    if (target is T)
+      return target as T;
+    else
+      return null;
+  }
+
+  bool _existsTarget(int id) {
+    return _eventTargets.containsKey(id);
+  }
+
+  void _removeTarget(int targetId) {
+    if (_eventTargets.containsKey(targetId)) {
+      _eventTargets.remove(targetId);
+    }
+  }
+
+  void _setEventTarget(int targetId, EventTarget target) {
+    _eventTargets[targetId] = target;
+  }
+
+  void _clearTargets() {
+    // Set current eventTargets to a new object, clean old targets by gc.
+    _eventTargets = <int, EventTarget>{};
+  }
+
   // export Uint8List bytes from rendered result.
-  Future<Uint8List> toImage(double devicePixelRatio, [int eventTargetId = HTML_ID]) {
+  Future<Uint8List> toImage(double devicePixelRatio, [int? eventTargetId]) {
     assert(!_disposed, 'Kraken have already disposed');
     Completer<Uint8List> completer = Completer();
     try {
-      if (!_elementManager.existsTarget(eventTargetId)) {
+      if (eventTargetId != null && !_existsTarget(eventTargetId)) {
         String msg = 'toImage: unknown node id: $eventTargetId';
         completer.completeError(Exception(msg));
         return completer.future;
       }
-
-      var node = _elementManager.getEventTargetByTargetId<EventTarget>(eventTargetId);
+      var node = eventTargetId == null
+          ? document.documentElement
+          : _getEventTargetById<EventTarget>(eventTargetId);
       if (node is Element) {
         if (!node.isRendererAttached) {
           String msg = 'toImage: the element is not attached to document tree.';
@@ -223,7 +313,8 @@ class KrakenViewController {
         node.toBlob(devicePixelRatio: devicePixelRatio).then((Uint8List bytes) {
           completer.complete(bytes);
         }).catchError((e, stack) {
-          String msg = 'toBlob: failed to export image data from element id: $eventTargetId. error: $e}.\n$stack';
+          String msg =
+              'toBlob: failed to export image data from element id: $eventTargetId. error: $e}.\n$stack';
           completer.completeError(Exception(msg));
         });
       } else {
@@ -236,42 +327,83 @@ class KrakenViewController {
     return completer.future;
   }
 
-  Element createElement(int id, Pointer<NativeEventTarget> nativePtr, String tagName) {
+  void createElement(
+      int targetId, Pointer<NativeEventTarget> nativePtr, String tagName) {
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_CREATE_ELEMENT_START, uniqueId: id);
+      PerformanceTiming.instance()
+          .mark(PERF_CREATE_ELEMENT_START, uniqueId: targetId);
     }
-    Element result = _elementManager.createElement(id, nativePtr, tagName.toUpperCase(), null, null);
+    assert(!_existsTarget(targetId),
+        'ERROR: Can not create element with same id "$targetId"');
+    Element element = document.createElement(
+        tagName.toUpperCase(), EventTargetContext(_contextId, nativePtr));
+    _setEventTarget(targetId, element);
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_CREATE_ELEMENT_END, uniqueId: id);
-    }
-    return result;
-  }
-
-  void createTextNode(int id, Pointer<NativeEventTarget> nativePtr, String data) {
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_CREATE_TEXT_NODE_START, uniqueId: id);
-    }
-    _elementManager.createTextNode(id, nativePtr, data);
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_CREATE_TEXT_NODE_END, uniqueId: id);
+      PerformanceTiming.instance()
+          .mark(PERF_CREATE_ELEMENT_END, uniqueId: targetId);
     }
   }
 
-  void createComment(int id, Pointer<NativeEventTarget> nativePtr) {
+  void createTextNode(
+      int targetId, Pointer<NativeEventTarget> nativePtr, String data) {
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_CREATE_COMMENT_START, uniqueId: id);
+      PerformanceTiming.instance()
+          .mark(PERF_CREATE_TEXT_NODE_START, uniqueId: targetId);
     }
-    _elementManager.createComment(id, nativePtr);
+    TextNode textNode = document.createTextNode(
+        data, EventTargetContext(_contextId, nativePtr));
+    _setEventTarget(targetId, textNode);
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_CREATE_COMMENT_END, uniqueId: id);
+      PerformanceTiming.instance()
+          .mark(PERF_CREATE_TEXT_NODE_END, uniqueId: targetId);
+    }
+  }
+
+  void createComment(int targetId, Pointer<NativeEventTarget> nativePtr) {
+    if (kProfileMode) {
+      PerformanceTiming.instance()
+          .mark(PERF_CREATE_COMMENT_START, uniqueId: targetId);
+    }
+    Comment comment =
+        document.createComment(EventTargetContext(_contextId, nativePtr));
+    _setEventTarget(targetId, comment);
+    if (kProfileMode) {
+      PerformanceTiming.instance()
+          .mark(PERF_CREATE_COMMENT_END, uniqueId: targetId);
+    }
+  }
+
+  void createDocumentFragment(
+      int targetId, Pointer<NativeEventTarget> nativePtr) {
+    if (kProfileMode) {
+      PerformanceTiming.instance()
+          .mark(PERF_CREATE_DOCUMENT_FRAGMENT_START, uniqueId: targetId);
+    }
+    DocumentFragment fragment = document
+        .createDocumentFragment(EventTargetContext(_contextId, nativePtr));
+    _setEventTarget(targetId, fragment);
+    if (kProfileMode) {
+      PerformanceTiming.instance()
+          .mark(PERF_CREATE_DOCUMENT_FRAGMENT_END, uniqueId: targetId);
     }
   }
 
   void addEvent(int targetId, String eventType) {
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_ADD_EVENT_START, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_ADD_EVENT_START, uniqueId: targetId);
     }
-    _elementManager.addEvent(targetId, eventType);
+    if (!_existsTarget(targetId)) return;
+    EventTarget target = _getEventTargetById<EventTarget>(targetId)!;
+
+    if (target is Element) {
+      target.addEvent(eventType);
+    } else if (target is Window) {
+      target.addEvent(eventType);
+    } else if (target is Document) {
+      target.addEvent(eventType);
+    }
+
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_ADD_EVENT_END, uniqueId: targetId);
     }
@@ -279,93 +411,224 @@ class KrakenViewController {
 
   void removeEvent(int targetId, String eventType) {
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_REMOVE_EVENT_START, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_REMOVE_EVENT_START, uniqueId: targetId);
     }
-    _elementManager.removeEvent(targetId, eventType);
+    assert(_existsTarget(targetId), 'targetId: $targetId event: $eventType');
+
+    Element target = _getEventTargetById<Element>(targetId)!;
+
+    target.removeEvent(eventType);
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_REMOVE_EVENT_END, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_REMOVE_EVENT_END, uniqueId: targetId);
     }
   }
 
-  void insertAdjacentNode(int targetId, String position, int childId) {
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_INSERT_ADJACENT_NODE_START, uniqueId: targetId);
-    }
-    _elementManager.insertAdjacentNode(targetId, position, childId);
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_INSERT_ADJACENT_NODE_END, uniqueId: targetId);
+  void cloneNode(int originalId, int newId) {
+    EventTarget originalTarget = _getEventTargetById(originalId)!;
+    EventTarget newTarget = _getEventTargetById(newId)!;
+
+    // Current only element clone will process in dart.
+    if (originalTarget is Element) {
+      Element newElement = newTarget as Element;
+      // Copy inline style.
+      originalTarget.inlineStyle.forEach((key, value) {
+        newElement.setInlineStyle(key, value);
+      });
+      // Copy element attributes.
+      originalTarget.properties.forEach((key, value) {
+        newElement.setProperty(key, value);
+      });
     }
   }
 
   void removeNode(int targetId) {
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_REMOVE_NODE_START, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_REMOVE_NODE_START, uniqueId: targetId);
     }
-    _elementManager.removeNode(targetId);
+
+    assert(_existsTarget(targetId), 'targetId: $targetId');
+
+    Node target = _getEventTargetById<Node>(targetId)!;
+    target.parentNode?.removeChild(target);
+
+    _debugDOMTreeChanged();
+
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_REMOVE_NODE_END, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_REMOVE_NODE_END, uniqueId: targetId);
     }
   }
 
-  void cloneNode(int oldId, int newId) {
-    _elementManager.cloneNode(oldId, newId);
+  /// <!-- beforebegin -->
+  /// <p>
+  ///   <!-- afterbegin -->
+  ///   foo
+  ///   <!-- beforeend -->
+  /// </p>
+  /// <!-- afterend -->
+  void insertAdjacentNode(int targetId, String position, int newTargetId) {
+    if (kProfileMode) {
+      PerformanceTiming.instance()
+          .mark(PERF_INSERT_ADJACENT_NODE_START, uniqueId: targetId);
+    }
+
+    assert(_existsTarget(targetId),
+        'targetId: $targetId position: $position newTargetId: $newTargetId');
+    assert(_existsTarget(newTargetId),
+        'newTargetId: $newTargetId position: $position');
+
+    Node target = _getEventTargetById<Node>(targetId)!;
+    Node newNode = _getEventTargetById<Node>(newTargetId)!;
+    Node? targetParentNode = target.parentNode;
+
+    switch (position) {
+      case 'beforebegin':
+        targetParentNode!.insertBefore(newNode, target);
+        break;
+      case 'afterbegin':
+        target.insertBefore(newNode, target.firstChild);
+        break;
+      case 'beforeend':
+        target.appendChild(newNode);
+        break;
+      case 'afterend':
+        if (targetParentNode!.lastChild == target) {
+          targetParentNode.appendChild(newNode);
+        } else {
+          targetParentNode.insertBefore(
+            newNode,
+            targetParentNode
+                .childNodes[targetParentNode.childNodes.indexOf(target) + 1],
+          );
+        }
+        break;
+    }
+
+    _debugDOMTreeChanged();
+
+    if (kProfileMode) {
+      PerformanceTiming.instance()
+          .mark(PERF_INSERT_ADJACENT_NODE_END, uniqueId: targetId);
+    }
+  }
+
+  void setProperty(int targetId, String key, dynamic value) {
+    if (kProfileMode) {
+      PerformanceTiming.instance()
+          .mark(PERF_SET_PROPERTIES_START, uniqueId: targetId);
+    }
+
+    assert(
+        _existsTarget(targetId), 'targetId: $targetId key: $key value: $value');
+    Node target = _getEventTargetById<Node>(targetId)!;
+
+    if (target is Element) {
+      // Only Element has properties.
+      target.setProperty(key, value);
+    } else if (target is TextNode && key == 'data' || key == 'nodeValue') {
+      (target as TextNode).data = value;
+    } else {
+      debugPrint(
+          'Only element has properties, try setting $key to Node(#$targetId).');
+    }
+
+    if (kProfileMode) {
+      PerformanceTiming.instance()
+          .mark(PERF_SET_PROPERTIES_END, uniqueId: targetId);
+    }
+  }
+
+  dynamic getProperty(int targetId, String key) {
+    assert(_existsTarget(targetId), 'targetId: $targetId key: $key');
+    Node target = _getEventTargetById<Node>(targetId)!;
+
+    if (target is Element) {
+      // Only Element has properties
+      return target.getProperty(key);
+    } else if (target is TextNode && key == 'data' || key == 'nodeValue') {
+      return (target as TextNode).data;
+    } else {
+      return null;
+    }
+  }
+
+  void removeProperty(int targetId, String key) {
+    if (kProfileMode) {
+      PerformanceTiming.instance()
+          .mark(PERF_SET_PROPERTIES_START, uniqueId: targetId);
+    }
+    assert(_existsTarget(targetId), 'targetId: $targetId key: $key');
+    Node target = _getEventTargetById<Node>(targetId)!;
+
+    if (target is Element) {
+      target.removeProperty(key);
+    } else if (target is TextNode && key == 'data' || key == 'nodeValue') {
+      (target as TextNode).data = '';
+    } else {
+      debugPrint(
+          'Only element has properties, try removing $key from Node(#$targetId).');
+    }
+    if (kProfileMode) {
+      PerformanceTiming.instance()
+          .mark(PERF_SET_PROPERTIES_END, uniqueId: targetId);
+    }
   }
 
   void setInlineStyle(int targetId, String key, String value) {
     if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_SET_STYLE_START, uniqueId: targetId);
+      PerformanceTiming.instance()
+          .mark(PERF_SET_STYLE_START, uniqueId: targetId);
     }
-    _elementManager.setInlineStyle(targetId, key, value);
+    assert(_existsTarget(targetId), 'id: $targetId key: $key value: $value');
+    Node? target = _getEventTargetById<Node>(targetId);
+    if (target == null) return;
+
+    if (target is Element) {
+      target.setInlineStyle(key, value);
+    } else {
+      debugPrint(
+          'Only element has style, try setting style.$key from Node(#$targetId).');
+    }
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_SET_STYLE_END, uniqueId: targetId);
     }
   }
 
   void flushPendingStyleProperties(int targetId) {
-    _elementManager.flushPendingStyleProperties(targetId);
-  }
+    if (!_existsTarget(targetId)) return;
+    Node? target = _getEventTargetById<Node>(targetId);
+    if (target == null) return;
 
-  void setProperty(int targetId, String key, String value) {
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_SET_PROPERTIES_START, uniqueId: targetId);
-    }
-    _elementManager.setProperty(targetId, key, value);
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_SET_PROPERTIES_END, uniqueId: targetId);
-    }
-  }
-
-  void removeProperty(int targetId, String key) {
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_SET_PROPERTIES_START, uniqueId: targetId);
-    }
-    _elementManager.removeProperty(targetId, key);
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_SET_PROPERTIES_END, uniqueId: targetId);
+    if (target is Element) {
+      target.style.flushPendingProperties();
+    } else {
+      debugPrint(
+          'Only element has style, try flushPendingStyleProperties from Node(#$targetId).');
     }
   }
 
-  void createDocumentFragment(int targetId, Pointer<NativeEventTarget> nativePtr) {
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_CREATE_DOCUMENT_FRAGMENT_START, uniqueId: targetId);
-    }
-    _elementManager.createDocumentFragment(targetId, nativePtr);
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_CREATE_DOCUMENT_FRAGMENT_END, uniqueId: targetId);
+  // Hooks for DevTools.
+  VoidCallback? debugDOMTreeChanged;
+  void _debugDOMTreeChanged() {
+    VoidCallback? f = debugDOMTreeChanged;
+    if (f != null) {
+      f();
     }
   }
 
-  EventTarget? getEventTargetById(int id) {
-    return _elementManager.getEventTargetByTargetId<EventTarget>(id);
-  }
-
-  Future<void> handleNavigationAction(String? sourceUrl, String targetUrl, KrakenNavigationType navigationType) async {
-    KrakenNavigationAction action = KrakenNavigationAction(sourceUrl, targetUrl, navigationType);
+  Future<void> handleNavigationAction(String? sourceUrl, String targetUrl,
+      KrakenNavigationType navigationType) async {
+    KrakenNavigationAction action =
+        KrakenNavigationAction(sourceUrl, targetUrl, navigationType);
 
     KrakenNavigationDelegate _delegate = navigationDelegate!;
 
     try {
-      KrakenNavigationActionPolicy policy = await _delegate.dispatchDecisionHandler(action);
+      KrakenNavigationActionPolicy policy =
+          await _delegate.dispatchDecisionHandler(action);
       if (policy == KrakenNavigationActionPolicy.cancel) return;
 
       switch (action.navigationType) {
@@ -387,13 +650,101 @@ class KrakenViewController {
     }
   }
 
-  // detach renderObject from parent but keep everything in active.
-  void detachView() {
-    _elementManager.detach();
+  // Call from JS Bridge before JS side eventTarget object been Garbage collected.
+  void disposeEventTarget(int targetId) {
+    Node? target = _getEventTargetById<Node>(targetId);
+    if (target == null) return;
+
+    _removeTarget(targetId);
+    target.dispose();
   }
 
   RenderObject getRootRenderObject() {
-    return _elementManager.getRootRenderBox();
+    return viewport;
+  }
+
+  @override
+  void didChangeAccessibilityFeatures() {
+    // TODO: implement didChangeAccessibilityFeatures
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+  }
+
+  @override
+  void didChangeLocales(List<Locale>? locales) {
+    // TODO: implement didChangeLocales
+  }
+
+  ui.WindowPadding _prevViewInsets = ui.window.viewInsets;
+  static double FOCUS_VIEWINSET_BOTTOM_OVERALL = 32;
+
+  @override
+  void didChangeMetrics() {
+    double bottomInset =
+        ui.window.viewInsets.bottom / ui.window.devicePixelRatio;
+    if (_prevViewInsets.bottom > ui.window.viewInsets.bottom) {
+      // Hide keyboard
+      viewport.bottomInset = bottomInset;
+    } else {
+      bool shouldScrollByToCenter = false;
+      InputElement? focusInputElement = InputElement.focusInputElement;
+      if (focusInputElement != null) {
+        RenderBox? renderer = focusInputElement.renderer;
+        if (renderer != null && renderer.hasSize) {
+          Offset focusOffset = renderer.localToGlobal(Offset.zero);
+          // FOCUS_VIEWINSET_BOTTOM_OVERALL to meet border case.
+          if (focusOffset.dy >
+              viewportHeight - bottomInset - FOCUS_VIEWINSET_BOTTOM_OVERALL) {
+            shouldScrollByToCenter = true;
+          }
+        }
+      }
+      // Show keyboard
+      viewport.bottomInset = bottomInset;
+      if (shouldScrollByToCenter) {
+        SchedulerBinding.instance!.addPostFrameCallback((_) {
+          window.scrollBy(0, bottomInset);
+        });
+      }
+    }
+    _prevViewInsets = ui.window.viewInsets;
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    // TODO: implement didChangePlatformBrightness
+  }
+
+  @override
+  void didChangeTextScaleFactor() {
+    // TODO: implement didChangeTextScaleFactor
+  }
+
+  @override
+  void didHaveMemoryPressure() {
+    // TODO: implement didHaveMemoryPressure
+  }
+
+  @override
+  Future<bool> didPopRoute() async {
+    // TODO: implement didPopRoute
+    return false;
+  }
+
+  @override
+  Future<bool> didPushRoute(String route) async {
+    // TODO: implement didPushRoute
+    return false;
+  }
+
+  @override
+  Future<bool> didPushRouteInformation(
+      RouteInformation routeInformation) async {
+    // TODO: implement didPushRouteInformation
+    return false;
   }
 }
 
@@ -407,17 +758,20 @@ class KrakenModuleController with TimerMixin, ScheduleFrameMixin {
   }
 
   void dispose() {
-    clearTimer();
-    clearAnimationFrame();
+    disposeTimer();
+    disposeScheduleFrame();
     _moduleManager.dispose();
   }
 }
 
 class KrakenController {
-  static final SplayTreeMap<int, KrakenController?> _controllerMap = SplayTreeMap();
+  static final SplayTreeMap<int, KrakenController?> _controllerMap =
+      SplayTreeMap();
   static final Map<String, int> _nameIdMap = {};
 
   UriParser? uriParser;
+
+  late RenderObjectElement rootFlutterElement;
 
   static KrakenController? getControllerOfJSContextId(int? contextId) {
     if (!_controllerMap.containsKey(contextId)) {
@@ -487,7 +841,7 @@ class KrakenController {
     this.onJSError,
     this.httpClientInterceptor,
     this.devToolsService,
-    this.uriParser
+    this.uriParser,
   })  : _name = name,
         _gestureListener = gestureListener {
     if (kProfileMode) {
@@ -498,14 +852,15 @@ class KrakenController {
     _methodChannel = methodChannel;
     KrakenMethodChannel.setJSMethodCallCallback(this);
 
-    _view = KrakenViewController(viewportWidth, viewportHeight,
-        background: background,
-        showPerformanceOverlay: showPerformanceOverlay,
-        enableDebug: enableDebug,
-        rootController: this,
-        navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate(),
-        gestureListener: _gestureListener,
-        widgetDelegate: widgetDelegate,
+    _view = KrakenViewController(
+      viewportWidth,
+      viewportHeight,
+      background: background,
+      enableDebug: enableDebug,
+      rootController: this,
+      navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate(),
+      gestureListener: _gestureListener,
+      widgetDelegate: widgetDelegate,
     );
 
     if (kProfileMode) {
@@ -517,14 +872,16 @@ class KrakenController {
     _module = KrakenModuleController(this, contextId);
 
     if (bundle != null) {
-      HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
+      HistoryModule historyModule =
+          module.moduleManager.getModule<HistoryModule>('History')!;
       historyModule.bundle = bundle!;
     }
 
     assert(!_controllerMap.containsKey(contextId),
         'found exist contextId of KrakenController, contextId: $contextId');
     _controllerMap[contextId] = this;
-    assert(!_nameIdMap.containsKey(name), 'found exist name of KrakenController, name: $name');
+    assert(!_nameIdMap.containsKey(name),
+        'found exist name of KrakenController, name: $name');
     if (name != null) {
       _nameIdMap[name] = contextId;
     }
@@ -574,14 +931,8 @@ class KrakenController {
 
   Future<void> unload() async {
     assert(!_view._disposed, 'Kraken have already disposed');
-    RenderObject root = _view.getRootRenderObject();
-    RenderObject? parent = root.parent as RenderObject?;
-    RenderObject? previousSibling;
-    if (parent is ContainerRenderObjectMixin) {
-      previousSibling = (root.parentData as ContainerParentDataMixin).previousSibling;
-    }
     _module.dispose();
-    _view.detachView();
+    _view.dispose();
 
     // Should clear previous page cached ui commands
     clearUICommand(_view.contextId);
@@ -596,14 +947,12 @@ class KrakenController {
 
       allocateNewContext(_view.contextId);
 
-      _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
+      _view = KrakenViewController(view.viewportWidth, view.viewportHeight,
           background: _view.background,
-          showPerformanceOverlay: _view.showPerformanceOverlay,
           enableDebug: _view.enableDebug,
           contextId: _view.contextId,
           rootController: this,
           navigationDelegate: _view.navigationDelegate);
-      _view.attachView(parent!, previousSibling);
 
       _module = KrakenModuleController(this, _view.contextId);
 
@@ -614,7 +963,8 @@ class KrakenController {
   }
 
   String get href {
-    HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
+    HistoryModule historyModule =
+        module.moduleManager.getModule<HistoryModule>('History')!;
     return historyModule.href;
   }
 
@@ -623,12 +973,13 @@ class KrakenController {
   }
 
   _addHistory(KrakenBundle bundle) {
-    HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
+    HistoryModule historyModule =
+        module.moduleManager.getModule<HistoryModule>('History')!;
     historyModule.bundle = bundle;
   }
 
   // reload current kraken view.
-  Future<void> reload({ String? url }) async {
+  Future<void> reload({String? url}) async {
     assert(!_view._disposed, 'Kraken have already disposed');
 
     if (devToolsService != null) {
@@ -642,6 +993,35 @@ class KrakenController {
     if (devToolsService != null) {
       devToolsService!.didReload();
     }
+  }
+
+  bool _paused = false;
+  bool get paused => _paused;
+
+  final List<PendingCallback> _pendingCallbacks = [];
+
+  void pushPendingCallbacks(PendingCallback callback) {
+    _pendingCallbacks.add(callback);
+  }
+
+  void flushPendingCallbacks() {
+    for (int i = 0; i < _pendingCallbacks.length; i++) {
+      _pendingCallbacks[i]();
+    }
+    _pendingCallbacks.clear();
+  }
+
+  // Pause all timers and callbacks if kraken page are invisible.
+  void pause() {
+    _paused = true;
+    module.pauseInterval();
+  }
+
+  // Resume all timers and callbacks if kraken page now visible.
+  void resume() {
+    _paused = false;
+    flushPendingCallbacks();
+    module.resumeInterval();
   }
 
   void dispose() {
@@ -679,9 +1059,7 @@ class KrakenController {
   String get origin => Uri.parse(href).origin;
 
   // preload javascript source and cache it.
-  Future<void> loadBundle({
-    KrakenBundle? bundle
-  }) async {
+  Future<void> loadBundle({KrakenBundle? bundle}) async {
     assert(!_view._disposed, 'Kraken have already disposed');
 
     if (kProfileMode) {
@@ -690,7 +1068,9 @@ class KrakenController {
 
     // Load bundle need push curret href to history.
     if (bundle != null) {
-      String? url = bundle.uri.toString().isEmpty ? (getBundleURLFromEnv() ?? getBundlePathFromEnv()) : href;
+      String? url = bundle.uri.toString().isEmpty
+          ? (getBundleURLFromEnv() ?? getBundlePathFromEnv())
+          : href;
       if (url == null && methodChannel is KrakenNativeChannel) {
         url = await (methodChannel as KrakenNativeChannel).getUrl();
       }
@@ -721,16 +1101,14 @@ class KrakenController {
       // trigger DOMContentLoaded event
       module.requestAnimationFrame((_) {
         Event event = Event(EVENT_DOM_CONTENT_LOADED);
-        EventTarget? window = view.getEventTargetById(WINDOW_ID);
-        if (window != null) {
+        EventTarget window = view.window;
+        window.dispatchEvent(event);
+        // @HACK: window.load should trigger after all image had loaded.
+        // Someone needs to fix this in the future.
+        module.requestAnimationFrame((_) {
+          Event event = Event(EVENT_LOAD);
           window.dispatchEvent(event);
-          // @HACK: window.load should trigger after all image had loaded.
-          // Someone needs to fix this in the future.
-          module.requestAnimationFrame((_) {
-            Event event = Event(EVENT_LOAD);
-            window.dispatchEvent(event);
-          });
-        }
+        });
       });
 
       if (onLoad != null) {
@@ -739,7 +1117,6 @@ class KrakenController {
           onLoad!(this);
         });
       }
-
     }
   }
 }

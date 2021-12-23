@@ -231,8 +231,9 @@ typedef DartProfileModeEnabled = int Function();
 final DartProfileModeEnabled _profileModeEnabled =
 nativeDynamicLibrary.lookup<NativeFunction<NativeProfileModeEnabled>>('profileModeEnabled').asFunction();
 
+const _CODE_ENABLED = 1;
 bool profileModeEnabled() {
-  return _profileModeEnabled() == 1 ? true : false;
+  return _profileModeEnabled() == _CODE_ENABLED;
 }
 
 // Regisdster reloadJsContext
@@ -465,7 +466,7 @@ void flushUICommand() {
             controller.view.createComment(id, nativePtr.cast<NativeEventTarget>());
             break;
           case UICommandType.disposeEventTarget:
-            ElementManager.disposeEventTarget(controller.view.contextId, id);
+            controller.view.disposeEventTarget(id);
             break;
           case UICommandType.addEvent:
             controller.view.addEvent(id, command.args[0]);

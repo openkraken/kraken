@@ -2,12 +2,12 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'dart:ffi';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/bridge.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:meta/meta.dart';
+import 'package:kraken/widget.dart';
 
 enum NodeType {
   ELEMENT_NODE,
@@ -15,22 +15,6 @@ enum NodeType {
   COMMENT_NODE,
   DOCUMENT_NODE,
   DOCUMENT_FRAGMENT_NODE,
-}
-
-class Comment extends Node {
-  Comment(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
-      : super(NodeType.COMMENT_NODE, targetId, nativeEventTarget, elementManager);
-
-  @override
-  String get nodeName => '#comment';
-
-  @override
-  RenderBox? get renderer => null;
-
-  // @TODO: Get data from bridge side.
-  String get data => '';
-
-  int get length => data.length;
 }
 
 /// [RenderObjectNode] provide the renderObject related abstract life cycle for
@@ -89,11 +73,16 @@ abstract class LifecycleCallbacks {
 }
 
 abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCallbacks {
+  KrakenElementToFlutterElementAdaptor? flutterElement;
+  KrakenElementToWidgetAdaptor? flutterWidget;
   List<Node> childNodes = [];
   /// The Node.parentNode read-only property returns the parent of the specified node in the DOM tree.
   Node? parentNode;
   NodeType nodeType;
   String get nodeName;
+
+  // The read-only ownerDocument property of the Node interface returns the top-level document object of the node.
+  late Document ownerDocument;
 
   /// The Node.parentElement read-only property returns the DOM node's parent Element,
   /// or null if the node either has no parent, or its parent isn't a DOM Element.
@@ -112,8 +101,8 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
     return _children;
   }
 
-  Node(this.nodeType, int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
-      : super(targetId, nativeEventTarget, elementManager);
+  Node(this.nodeType, EventTargetContext? context)
+      : super(context);
 
   // If node is on the tree, the root parent is body.
   bool get isConnected {
@@ -121,8 +110,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
     while (parent.parentNode != null) {
       parent = parent.parentNode!;
     }
-    Document document = elementManager.document;
-    return this == document || parent == document;
+    return parent == ownerDocument;
   }
 
   Node get firstChild => childNodes.first;
@@ -144,6 +132,10 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   }
   // Is child renderObject attached.
   bool get isRendererAttached => renderer != null && renderer!.attached;
+
+  bool contains(Node child) {
+    return childNodes.contains(child);
+  }
 
   /// Attach a renderObject to parent.
   void attachTo(Element parent, {RenderBox? after}) {}
@@ -170,10 +162,22 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   void willAttachRenderer() {}
 
   @override
-  void didAttachRenderer() {}
+  @mustCallSuper
+  void didAttachRenderer() {
+    // The node attach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
+    if (renderer is RenderBoxModel) {
+      (renderer as RenderBoxModel).markAdjacentRenderParagraphNeedsLayout();
+    }
+  }
 
   @override
-  void willDetachRenderer() {}
+  @mustCallSuper
+  void willDetachRenderer() {
+    // The node detach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
+    if (renderer is RenderBoxModel) {
+      (renderer as RenderBoxModel).markAdjacentRenderParagraphNeedsLayout();
+    }
+  }
 
   @override
   void didDetachRenderer() {}
@@ -191,38 +195,31 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
     return child;
   }
 
-  bool contains(Node child) {
-    return childNodes.contains(child);
-  }
-
-  Node getRootNode() {
-    Node root = this;
-    while (root.parentNode != null) {
-      root = root.parentNode as Node;
-    }
-    return root;
-  }
-
   @mustCallSuper
-  Node insertBefore(Node newNode, Node referenceNode) {
-    newNode._ensureOrphan();
+  Node insertBefore(Node child, Node referenceNode) {
+    child._ensureOrphan();
     int referenceIndex = childNodes.indexOf(referenceNode);
     if (referenceIndex == -1) {
-      return appendChild(newNode);
+      return appendChild(child);
     } else {
-      newNode.parentNode = this;
-      childNodes.insert(referenceIndex, newNode);
-      if (newNode.isConnected) newNode.connectedCallback();
-      return newNode;
+      child.parentNode = this;
+      childNodes.insert(referenceIndex, child);
+      if (child.isConnected) {
+        child.connectedCallback();
+      }
+      return child;
     }
   }
 
   @mustCallSuper
   Node removeChild(Node child) {
     if (childNodes.contains(child)) {
+      bool isConnected = child.isConnected;
       childNodes.remove(child);
       child.parentNode = null;
-      child.disconnectedCallback();
+      if (isConnected) {
+        child.disconnectedCallback();
+      }
     }
     return child;
   }
@@ -231,16 +228,17 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   Node? replaceChild(Node newNode, Node oldNode) {
     Node? replacedNode;
     if (childNodes.contains(oldNode)) {
+      newNode._ensureOrphan();
+      bool isOldNodeConnected = oldNode.isConnected;
       int referenceIndex = childNodes.indexOf(oldNode);
       oldNode.parentNode = null;
       replacedNode = oldNode;
       childNodes[referenceIndex] = newNode;
-      if (newNode.isConnected) {
-        newNode.disconnectedCallback();
+
+      if (isOldNodeConnected) {
+        oldNode.disconnectedCallback();
         newNode.connectedCallback();
       }
-    } else {
-      appendChild(newNode);
     }
     return replacedNode;
   }
@@ -267,6 +265,27 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   void disconnectedCallback() {
     for (var child in childNodes) {
       child.disconnectedCallback();
+    }
+  }
+
+  @override
+  void dispatchEvent(Event event) {
+    if (disposed) return;
+    super.dispatchEvent(event);
+
+    // Dispatch listener for widget.
+    if (ownerDocument.gestureListener != null) {
+      if (ownerDocument.gestureListener?.onTouchStart != null && event.type == EVENT_TOUCH_START) {
+        ownerDocument.gestureListener?.onTouchStart!(event as TouchEvent);
+      }
+
+      if (ownerDocument.gestureListener?.onTouchMove != null && event.type == EVENT_TOUCH_MOVE) {
+        ownerDocument.gestureListener?.onTouchMove!(event as TouchEvent);
+      }
+
+      if (ownerDocument.gestureListener?.onTouchEnd != null && event.type == EVENT_TOUCH_END) {
+        ownerDocument.gestureListener?.onTouchEnd!(event as TouchEvent);
+      }
     }
   }
 }

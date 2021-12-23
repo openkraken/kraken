@@ -2,10 +2,6 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
-import 'dart:ffi';
-
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 
@@ -22,11 +18,11 @@ const Map<String, dynamic> _delDefaultStyle = {
 };
 
 class DelElement extends Element {
-  DelElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _delDefaultStyle);
+  DelElement(EventTargetContext? context)
+      : super(context, defaultStyle: _delDefaultStyle);
 }
 
 class InsElement extends Element {
-  InsElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _insDefaultStyle);
+  InsElement(EventTargetContext? context)
+      : super(context, defaultStyle: _insDefaultStyle);
 }

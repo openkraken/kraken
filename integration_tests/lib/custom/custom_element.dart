@@ -1,45 +1,80 @@
-import 'dart:ffi';
 import 'dart:async';
-import 'package:kraken/bridge.dart';
-import 'package:kraken/dom.dart';
+import 'package:kraken/dom.dart' as dom;
 import 'package:kraken/widget.dart';
-import 'package:flutter/material.dart' show TextDirection, TextStyle, Color, Image, Text, AssetImage, Widget, BuildContext hide Element;
+import 'package:waterfall_flow/waterfall_flow.dart';
+import 'package:flutter/material.dart';
 
-class TextWidgetElement extends WidgetElement {
-  TextWidgetElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager) :
-        super(targetId, nativeEventTarget, elementManager);
+class WaterfallFlowWidgetElement extends WidgetElement {
+  WaterfallFlowWidgetElement(dom.EventTargetContext? context) :
+        super(context);
+
+  List<Widget> _children = [];
+
+  Widget _func (BuildContext context, int index) {
+    return _children[index];
+  }
 
   @override
-  Widget build(BuildContext context, Map<String, dynamic> properties) {
+  Widget build(BuildContext context, Map<String, dynamic> properties, List<Widget> children) {
+    _children = children;
+
+    return WaterfallFlow.builder(
+      itemBuilder: _func,
+      padding: EdgeInsets.all(5.0),
+      gridDelegate: SliverWaterfallFlowDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 5.0,
+        mainAxisSpacing: 5.0,
+        lastChildLayoutTypeBuilder: (index) => index == children.length
+            ? LastChildLayoutType.foot
+            : LastChildLayoutType.none,
+      ),
+    );
+  }
+}
+
+class TextWidgetElement extends WidgetElement {
+  TextWidgetElement(dom.EventTargetContext? context) :
+        super(context);
+
+  @override
+  Widget build(BuildContext context, Map<String, dynamic> properties, List<Widget> children) {
     return Text(properties['value'] ?? '', textDirection: TextDirection.ltr, style: TextStyle(color: Color.fromARGB(255, 100, 100, 100)));
   }
 }
 
 class ImageWidgetElement extends WidgetElement {
-  ImageWidgetElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager) :
-        super(targetId, nativeEventTarget, elementManager);
+  ImageWidgetElement(dom.EventTargetContext? context) :
+        super(context);
 
   @override
-  Widget build(BuildContext context, Map<String, dynamic> properties) {
+  Widget build(BuildContext context, Map<String, dynamic> properties, List<Widget> children) {
     return Image(image: AssetImage(properties['src']));
   }
 }
 
-void defineKrakenCustomElements() {
-  Kraken.defineCustomElement('sample-element', (int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager) {
-    return SampleElement(targetId, nativeEventTarget, elementManager);
-  });
-  Kraken.defineCustomElement('flutter-text', (targetId, nativeEventTarget, elementManager) {
-    return TextWidgetElement(targetId, nativeEventTarget, elementManager);
-  });
-  Kraken.defineCustomElement('flutter-asset-image', (targetId, nativeEventTarget, elementManager) {
-    return ImageWidgetElement(targetId, nativeEventTarget, elementManager);
-  });
+class ContainerWidgetElement extends WidgetElement {
+  ContainerWidgetElement(dom.EventTargetContext? context) :
+        super(context);
+
+  @override
+  Widget build(BuildContext context, Map<String, dynamic> properties, List<Widget> children) {
+    return Container(
+      width: 200,
+      height: 200,
+      decoration: const BoxDecoration(
+        border: Border( top: BorderSide( width: 5, color: Colors.red ), bottom: BorderSide( width: 5, color: Colors.red ), left: BorderSide( width: 5, color: Colors.red ), right: BorderSide( width: 5, color: Colors.red )),
+      ),
+      child: Column(
+        children: children,
+      ),
+    );
+  }
 }
 
-class SampleElement extends Element {
-  SampleElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
-      : super(targetId, nativeEventTarget, elementManager);
+class SampleElement extends dom.Element {
+  SampleElement(dom.EventTargetContext? context)
+      : super(context);
 
   @override
   getProperty(String key) {
@@ -76,4 +111,20 @@ class SampleElement extends Element {
   }
 }
 
-
+void defineKrakenCustomElements() {
+  Kraken.defineCustomElement('waterfall-flow', (dom.EventTargetContext? context) {
+    return WaterfallFlowWidgetElement(context);
+  });
+  Kraken.defineCustomElement('flutter-container', (dom.EventTargetContext? context) {
+    return ContainerWidgetElement(context);
+  });
+  Kraken.defineCustomElement('sample-element', (dom.EventTargetContext? context) {
+    return SampleElement(context);
+  });
+  Kraken.defineCustomElement('flutter-text', (dom.EventTargetContext? context) {
+    return TextWidgetElement(context);
+  });
+  Kraken.defineCustomElement('flutter-asset-image', (dom.EventTargetContext? context) {
+    return ImageWidgetElement(context);
+  });
+}

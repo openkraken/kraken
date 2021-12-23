@@ -168,26 +168,26 @@ mixin CSSTextMixin on RenderStyle {
   }
 
   // Current not update the dependent property relative to the font-size.
-  final Map<String, bool> _fontRealativeProperties = {};
-  final Map<String, bool> _rootFontRealativeProperties = {};
+  final Map<String, bool> _fontRelativeProperties = {};
+  final Map<String, bool> _rootFontRelativeProperties = {};
 
   @override
   void addFontRelativeProperty(String propertyName) {
-    _fontRealativeProperties[propertyName] = true;
+    _fontRelativeProperties[propertyName] = true;
   }
 
   void updateFontRelativeLength() {
-    if (_fontRealativeProperties.isEmpty) return;
+    if (_fontRelativeProperties.isEmpty) return;
     renderBoxModel?.markNeedsLayout();
   }
 
   @override
   void addRootFontRelativeProperty(String propertyName) {
-    _rootFontRealativeProperties[propertyName] = true;
+    _rootFontRelativeProperties[propertyName] = true;
   }
 
   void updateRootFontRelativeLength() {
-    if (_rootFontRealativeProperties.isEmpty) return;
+    if (_rootFontRelativeProperties.isEmpty) return;
     renderBoxModel?.markNeedsLayout();
   }
 
@@ -292,6 +292,24 @@ mixin CSSTextMixin on RenderStyle {
     _textOverflow = value;
     // Non inheritable style change should only update text node in direct children.
     _markTextNeedsLayout();
+  }
+
+  // text-overflow is affect by the value of line-clamp,overflow and white-space styles,
+  // get the real working style of text-overflow after other style is set.
+  TextOverflow get effectiveTextOverflow {
+    // Set line-clamp to number makes text-overflow ellipsis which takes priority over text-overflow style.
+    if (lineClamp != null && lineClamp! > 0) {
+      return TextOverflow.ellipsis;
+    }
+
+    // text-overflow only works when overflow is not visible and white-space is nowrap.
+    if (effectiveOverflowX == CSSOverflowType.visible || whiteSpace != WhiteSpace.nowrap) {
+      // TextOverflow.visible value does not exist in CSS spec, use it to specify the case
+      // when text overflow its container and not clipped.
+      return TextOverflow.visible;
+    }
+
+    return textOverflow;
   }
 
   int? _lineClamp;

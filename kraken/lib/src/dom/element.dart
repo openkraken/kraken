@@ -4,7 +4,6 @@
  */
 
 import 'dart:async';
-import 'dart:ffi';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -13,13 +12,13 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/widget.dart';
+import 'package:kraken/src/dom/element_event.dart';
+import 'package:kraken/src/dom/element_view.dart';
 import 'package:meta/meta.dart';
-
-import 'element_native_methods.dart';
 
 final RegExp _splitRegExp = RegExp(r'\s+');
 const String _ONE_SPACE = ' ';
@@ -31,6 +30,7 @@ const String _CLASS_NAME = 'class';
 /// height is 150 in pixel.
 const String ELEMENT_DEFAULT_WIDTH = '300px';
 const String ELEMENT_DEFAULT_HEIGHT = '150px';
+const String UNKNOWN = 'UNKNOWN';
 
 typedef TestElement = bool Function(Element element);
 
@@ -82,7 +82,7 @@ typedef GetRenderBoxModel = RenderBoxModel? Function();
 class Element extends Node
     with
         ElementBase,
-        ElementNativeMethods,
+        ElementViewMixin,
         ElementEventMixin,
         ElementOverflowMixin {
 
@@ -146,15 +146,18 @@ class Element extends Node
     _updateRenderBoxModel();
   }
 
-  Element(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager,
-      { Map<String, dynamic> defaultStyle = const {},
-        // Whether element allows children.
-        bool isIntrinsicBox = false,
-        bool isDefaultRepaintBoundary = false})
-      : _defaultStyle = defaultStyle,
-        _isIntrinsicBox = isIntrinsicBox,
-        _isDefaultRepaintBoundary = isDefaultRepaintBoundary,
-        super(NodeType.ELEMENT_NODE, targetId, nativeEventTarget, elementManager) {
+  Element(
+    EventTargetContext? context,
+    {
+      Map<String, dynamic> defaultStyle = const {},
+      // Whether element allows children.
+      bool isIntrinsicBox = false,
+      bool isDefaultRepaintBoundary = false
+    })
+    : _defaultStyle = defaultStyle,
+      _isIntrinsicBox = isIntrinsicBox,
+      _isDefaultRepaintBoundary = isDefaultRepaintBoundary,
+      super(NodeType.ELEMENT_NODE, context) {
 
     // Init style and add change listener.
     style = CSSStyleDeclaration.computedStyle(this, _defaultStyle, _onStyleChanged);
@@ -401,19 +404,21 @@ class Element extends Node
 
   @override
   void didAttachRenderer() {
+    super.didAttachRenderer();
     // Ensure that the child is attached.
     ensureChildAttached();
   }
 
   @override
   void willDetachRenderer() {
+    super.willDetachRenderer();
     // Cancel running transition.
     renderStyle.cancelRunningTransition();
     // Remove all intersection change listeners.
     renderBoxModel!.clearIntersectionChangeListeners();
 
     // Remove fixed children from root when element disposed.
-    _removeFixedChild(renderBoxModel!, elementManager.viewportElement._renderLayoutBox!);
+    _removeFixedChild(renderBoxModel!, ownerDocument.documentElement!._renderLayoutBox!);
 
     // Remove renderBox.
     _removeRenderBoxModel(renderBoxModel!);
@@ -441,6 +446,7 @@ class Element extends Node
   }
 
   void _handleScroll(double scrollOffset, AxisDirection axisDirection) {
+    if (renderBoxModel == null) return;
     _applyStickyChildrenOffset();
     _applyFixedChildrenOffset(scrollOffset, axisDirection);
 
@@ -456,7 +462,7 @@ class Element extends Node
   /// So it needs to manually mark element needs paint and add scroll offset in paint stage
   void _applyFixedChildrenOffset(double scrollOffset, AxisDirection axisDirection) {
     // Only root element has fixed children
-    if (this == elementManager.viewportElement && renderBoxModel != null) {
+    if (this == ownerDocument.documentElement && renderBoxModel != null) {
       RenderBoxModel layoutBox = (renderBoxModel as RenderLayoutBox).renderScrollingContent ?? renderBoxModel!;
       for (RenderBoxModel child in layoutBox.fixedChildren) {
         // Save scrolling offset for paint
@@ -483,7 +489,7 @@ class Element extends Node
 
     // Remove fixed children before convert to non repaint boundary renderObject
     if (currentPosition != CSSPositionType.fixed) {
-      _removeFixedChild(_renderBoxModel, elementManager.viewportElement._renderLayoutBox!);
+      _removeFixedChild(_renderBoxModel, ownerDocument.documentElement!._renderLayoutBox!);
     }
 
     RenderBox? previousSibling;
@@ -510,22 +516,8 @@ class Element extends Node
 
     // Add fixed children after convert to repaint boundary renderObject.
     if (currentPosition == CSSPositionType.fixed) {
-      _addFixedChild(renderBoxModel!, elementManager.viewportElement._renderLayoutBox!);
+      _addFixedChild(renderBoxModel!, ownerDocument.documentElement!._renderLayoutBox!);
     }
-  }
-
-  Element? getElementById(Element parentElement, int targetId) {
-    Element? result;
-    List childNodes = parentElement.childNodes;
-
-    for (int i = 0; i < childNodes.length; i++) {
-      Element element = childNodes[i];
-      if (element.targetId == targetId) {
-        result = element;
-        break;
-      }
-    }
-    return result;
   }
 
   void addChild(RenderBox child) {
@@ -579,19 +571,20 @@ class Element extends Node
   void attachTo(Node parent, {RenderBox? after}) {
     _applyStyle(style);
 
-    // @NOTE: Sliver should not create renderer here.
-    if (parentElement?.renderStyle.display != CSSDisplay.sliver) {
+    if (parentElement?.renderStyle.display == CSSDisplay.sliver) {
+      // Sliver should not create renderer here, but need to trigger
+      // render sliver list dynamical rebuild child by element tree.
+      parentElement?._renderLayoutBox?.markNeedsLayout();
+    } else {
       willAttachRenderer();
     }
 
     if (renderer != null) {
-      // HTML element override attachTo method to attach renderObject to viewportBox.
-      if (parent is Element) {
-        RenderLayoutBox? parentRenderLayoutBox = parentElement?._renderLayoutBox?.renderScrollingContent ?? parentElement?._renderLayoutBox;
-        parentRenderLayoutBox!.insert(renderBoxModel!, after: after);
-      } else if (parent is Document) {
-        parent.appendChild(this);
+      // If element attach WidgetElement, render obeject should be attach to render tree when mount.
+      if (parent is! WidgetElement) {
+        _attachRenderBoxModel(parent.renderer!, renderer!, after: after);
       }
+
       // Flush pending style before child attached.
       style.flushPendingProperties();
 
@@ -645,15 +638,17 @@ class Element extends Node
     if (child is Element) {
       child.renderStyle.parent = renderStyle;
     }
+
+    RenderLayoutBox? renderLayoutBox = _renderLayoutBox;
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
-      if (!child.isRendererAttached && _renderLayoutBox != null) {
+      if (!child.isRendererAttached && renderLayoutBox != null && this is! WidgetElement) {
         RenderBox? after;
-        RenderLayoutBox? scrollingContentBox = _renderLayoutBox!.renderScrollingContent;
+        RenderLayoutBox? scrollingContentBox = renderLayoutBox.renderScrollingContent;
         if (scrollingContentBox != null) {
           after = scrollingContentBox.lastChild;
         } else {
-          after = _renderLayoutBox!.lastChild;
+          after = renderLayoutBox.lastChild;
         }
 
         child.attachTo(this, after: after);
@@ -761,11 +756,11 @@ class Element extends Node
         //    the padding boxes of the first and the last inline boxes generated for that element.
         //    In CSS 2.1, if the inline element is split across multiple lines, the containing block is undefined.
         //  2. Otherwise, the containing block is formed by the padding edge of the ancestor.
-        containingBlockRenderBox = _findContainingBlock(this, elementManager.viewportElement)?._renderLayoutBox;
+        containingBlockRenderBox = _findContainingBlock(this, ownerDocument.documentElement!)?._renderLayoutBox;
       } else if (positionType == CSSPositionType.fixed) {
         // If the element has 'position: fixed', the containing block is established by the viewport
         // in the case of continuous media or the page area in the case of paged media.
-        containingBlockRenderBox = elementManager.viewportElement._renderLayoutBox;
+        containingBlockRenderBox = ownerDocument.documentElement!._renderLayoutBox;
       }
 
       if (containingBlockRenderBox == null) return;
@@ -816,7 +811,10 @@ class Element extends Node
     _updateRenderBoxModel();
     // Attach renderBoxModel to parent if change from `display: none` to other values.
     if (!isRendererAttached && parentElement != null && parentElement!.isRendererAttached) {
-      _addToContainingBlock(after: previousSibling?.renderer);
+      // If element attach WidgetElement, render obeject should be attach to render tree when mount.
+      if (parentNode is! WidgetElement) {
+        _addToContainingBlock(after: previousSibling?.renderer);
+      }
       ensureChildAttached();
     }
   }
@@ -840,6 +838,17 @@ class Element extends Node
   }
 
   void setRenderStyleProperty(String name, dynamic value) {
+    // Memorize the variable value to renderStyle object.
+    if (CSSVariable.isVariable(name)) {
+      renderStyle.setCSSVariable(name, value.toString());
+      return;
+    }
+
+    // Get the computed value of CSS variable.
+    if (value is CSSVariable) {
+      value = value.computedValue(name);
+    }
+
     switch (name) {
       case DISPLAY:
         renderStyle.display = value;
@@ -1142,207 +1151,8 @@ class Element extends Node
     }
   }
 
-  /// Set internal style value to the element.
-  dynamic _resolveRenderStyleValue(String property, dynamic present) {
-    dynamic value;
-    switch (property) {
-      case DISPLAY:
-        value = CSSDisplayMixin.resolveDisplay(present);
-        break;
-      case OVERFLOW_X:
-      case OVERFLOW_Y:
-        value = CSSOverflowMixin.resolveOverflowType(present);
-        break;
-      case POSITION:
-        value = CSSPositionMixin.resolvePositionType(present);
-        break;
-      case Z_INDEX:
-        value = int.tryParse(present);
-        break;
-      case TOP:
-      case LEFT:
-      case BOTTOM:
-      case RIGHT:
-      case FLEX_BASIS:
-      case PADDING_TOP:
-      case PADDING_RIGHT:
-      case PADDING_BOTTOM:
-      case PADDING_LEFT:
-      case WIDTH:
-      case MIN_WIDTH:
-      case MAX_WIDTH:
-      case HEIGHT:
-      case MIN_HEIGHT:
-      case MAX_HEIGHT:
-      case MARGIN_LEFT:
-      case MARGIN_TOP:
-      case MARGIN_RIGHT:
-      case MARGIN_BOTTOM:
-      case FONT_SIZE:
-        value = CSSLength.resolveLength(present, renderStyle, property);
-        break;
-      case FLEX_DIRECTION:
-        value = CSSFlexboxMixin.resolveFlexDirection(present);
-        break;
-      case FLEX_WRAP:
-        value = CSSFlexboxMixin.resolveFlexWrap(present);
-        break;
-      case ALIGN_CONTENT:
-        value = CSSFlexboxMixin.resolveAlignContent(present);
-        break;
-      case ALIGN_ITEMS:
-        value = CSSFlexboxMixin.resolveAlignItems(present);
-        break;
-      case JUSTIFY_CONTENT:
-        value = CSSFlexboxMixin.resolveJustifyContent(present);
-        break;
-      case ALIGN_SELF:
-        value = CSSFlexboxMixin.resolveAlignSelf(present);
-        break;
-      case FLEX_GROW:
-        value = CSSFlexboxMixin.resolveFlexGrow(present);
-        break;
-      case FLEX_SHRINK:
-        value = CSSFlexboxMixin.resolveFlexShrink(present);
-        break;
-      case SLIVER_DIRECTION:
-        value = CSSSliverMixin.resolveAxis(present);
-        break;
-      case TEXT_ALIGN:
-        value = CSSTextMixin.resolveTextAlign(present);
-        break;
-      case BACKGROUND_ATTACHMENT:
-        value = CSSBackground.resolveBackgroundAttachment(present);
-        break;
-      case BACKGROUND_IMAGE:
-        value = CSSBackground.resolveBackgroundImage(present, renderStyle, property, elementManager.controller);
-        break;
-      case BACKGROUND_REPEAT:
-        value = CSSBackground.resolveBackgroundRepeat(present);
-        break;
-      case BACKGROUND_POSITION_X:
-        value = CSSPosition.resolveBackgroundPosition(present, renderStyle, property, true);
-        break;
-      case BACKGROUND_POSITION_Y:
-        value = CSSPosition.resolveBackgroundPosition(present, renderStyle, property, false);
-        break;
-      case BACKGROUND_SIZE:
-        value = CSSBackground.resolveBackgroundSize(present, renderStyle, property);
-        break;
-      case BACKGROUND_CLIP:
-        value = CSSBackground.resolveBackgroundClip(present);
-        break;
-      case BACKGROUND_ORIGIN:
-        value = CSSBackground.resolveBackgroundOrigin(present);
-        break;
-      case BORDER_LEFT_WIDTH:
-      case BORDER_TOP_WIDTH:
-      case BORDER_RIGHT_WIDTH:
-      case BORDER_BOTTOM_WIDTH:
-        value = CSSBorderSide.resolveBorderWidth(present, renderStyle, property);
-        break;
-      case BORDER_LEFT_STYLE:
-      case BORDER_TOP_STYLE:
-      case BORDER_RIGHT_STYLE:
-      case BORDER_BOTTOM_STYLE:
-        value = CSSBorderSide.resolveBorderStyle(present);
-        break;
-      case COLOR:
-      case BACKGROUND_COLOR:
-      case TEXT_DECORATION_COLOR:
-      case BORDER_LEFT_COLOR:
-      case BORDER_TOP_COLOR:
-      case BORDER_RIGHT_COLOR:
-      case BORDER_BOTTOM_COLOR:
-        value = CSSColor.resolveColor(present, renderStyle, property);
-        break;
-      case BOX_SHADOW:
-        value = CSSBoxShadow.parseBoxShadow(present, renderStyle, property);
-        break;
-      case BORDER_TOP_LEFT_RADIUS:
-      case BORDER_TOP_RIGHT_RADIUS:
-      case BORDER_BOTTOM_LEFT_RADIUS:
-      case BORDER_BOTTOM_RIGHT_RADIUS:
-        value = CSSBorderRadius.parseBorderRadius(present, renderStyle, property);
-        break;
-      case OPACITY:
-        value = CSSOpacityMixin.resolveOpacity(present);
-        break;
-      case VISIBILITY:
-        value = CSSVisibilityMixin.resolveVisibility(present);
-        break;
-      case CONTENT_VISIBILITY:
-        value = CSSContentVisibilityMixin.resolveContentVisibility(present);
-        break;
-      case TRANSFORM:
-        value = CSSTransformMixin.resolveTransform(present);
-        break;
-      case FILTER:
-        value = CSSFunction.parseFunction(present);
-        break;
-      case TRANSFORM_ORIGIN:
-        value = CSSOrigin.parseOrigin(present, renderStyle, property);
-        break;
-      case OBJECT_FIT:
-        value = CSSObjectFitMixin.resolveBoxFit(present);
-        break;
-      case OBJECT_POSITION:
-        value = CSSObjectPositionMixin.resolveObjectPosition(present);
-        break;
-      case TEXT_DECORATION_LINE:
-        value = CSSText.resolveTextDecorationLine(present);
-        break;
-      case TEXT_DECORATION_STYLE:
-        value = CSSText.resolveTextDecorationStyle(present);
-        break;
-      case FONT_WEIGHT:
-        value = CSSText.resolveFontWeight(present);
-        break;
-      case FONT_STYLE:
-        value = CSSText.resolveFontStyle(present);
-        break;
-      case FONT_FAMILY:
-        value = CSSText.resolveFontFamilyFallback(present);
-        break;
-      case LINE_HEIGHT:
-        value = CSSText.resolveLineHeight(present, renderStyle, property);
-        break;
-      case LETTER_SPACING:
-        value = CSSText.resolveSpacing(present, renderStyle, property);
-        break;
-      case WORD_SPACING:
-        value = CSSText.resolveSpacing(present, renderStyle, property);
-        break;
-      case TEXT_SHADOW:
-        value = CSSText.resolveTextShadow(present, renderStyle, property);
-        break;
-      case WHITE_SPACE:
-        value = CSSText.resolveWhiteSpace(present);
-        break;
-      case TEXT_OVERFLOW:
-        // Overflow will affect text-overflow ellipsis taking effect
-        value = CSSText.resolveTextOverflow(present);
-        break;
-      case LINE_CLAMP:
-        value = CSSText.parseLineClamp(present);
-        break;
-      case VERTICAL_ALIGN:
-        value = CSSInlineMixin.resolveVerticalAlign(present);
-        break;
-      // Transition
-      case TRANSITION_DELAY:
-      case TRANSITION_DURATION:
-      case TRANSITION_TIMING_FUNCTION:
-      case TRANSITION_PROPERTY:
-        value = CSSStyleProperty.getMultipleValues(present);
-        break;
-    }
-
-    return value;
-  }
-
   void setRenderStyle(String property, String present) {
-    dynamic value = present.isEmpty ? null : _resolveRenderStyleValue(property, present);
+    dynamic value = present.isEmpty ? null : renderStyle.resolveValue(property, present);
     setRenderStyleProperty(property, value);
   }
 
@@ -1408,7 +1218,7 @@ class Element extends Node
     if (classList.isNotEmpty) {
       const String classSelectorPrefix = '.';
       for (String className in classList) {
-        for (CSSStyleSheet sheet in elementManager.styleSheets) {
+        for (CSSStyleSheet sheet in ownerDocument.styleSheets) {
           List<CSSRule> rules = sheet.cssRules;
           for (int i = 0; i < rules.length; i++) {
             CSSRule rule = rules[i];
@@ -1433,7 +1243,7 @@ class Element extends Node
   }
 
   // Set inline style property.
-  void setInlineStyle(String property, dynamic value) {
+  void setInlineStyle(String property, String value) {
     // Current only for mark property is setting by inline style.
     inlineStyle[property] = value;
     style.setProperty(property, value, true);
@@ -1569,13 +1379,10 @@ class Element extends Node
 
   Offset getOffset(RenderBox renderBox) {
     // Need to flush layout to get correct size.
-    elementManager
-        .getRootRenderBox()
-        .owner!
-        .flushLayout();
+    ownerDocument.documentElement!.renderBoxModel!.owner!.flushLayout();
 
-    Element? element = _findContainingBlock(this, elementManager.viewportElement);
-    element ??= elementManager.viewportElement;
+    Element? element = _findContainingBlock(this, ownerDocument.documentElement!);
+    element ??= ownerDocument.documentElement!;
     return renderBox.localToGlobal(Offset.zero, ancestor: element.renderBoxModel);
   }
 
@@ -1630,14 +1437,12 @@ class Element extends Node
 
     SchedulerBinding.instance!.addPostFrameCallback((_) async {
       Uint8List captured;
-      RenderBoxModel? renderObject = targetId == HTML_ID
-          ? elementManager.viewportElement.renderBoxModel
-          : renderBoxModel;
-      if (renderObject!.hasSize && renderObject.size.isEmpty) {
+      RenderBoxModel? _renderBoxModel = renderBoxModel;
+      if (_renderBoxModel!.hasSize && _renderBoxModel.size.isEmpty) {
         // Return a blob with zero length.
         captured = Uint8List(0);
       } else {
-        Image image = await renderObject.toImage(pixelRatio: devicePixelRatio!);
+        Image image = await _renderBoxModel.toImage(pixelRatio: devicePixelRatio!);
         ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
         captured = byteData!.buffer.asUint8List();
       }

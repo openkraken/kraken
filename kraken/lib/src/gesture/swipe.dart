@@ -39,11 +39,11 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   /// {@macro flutter.gestures.gestureRecognizer.kind}
   SwipeGestureRecognizer({
     Object? debugOwner,
-    Set<PointerDeviceKind>? supportedDevices,
+    PointerDeviceKind? kind,
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
     this.onSwipe,
-  }) : super(debugOwner: debugOwner, supportedDevices: supportedDevices);
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
   /// Configure the behavior of offsets sent to [onStart].

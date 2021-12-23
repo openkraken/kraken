@@ -48,7 +48,7 @@ class RenderIntrinsic extends RenderBoxModel
 
   @override
   void performLayout() {
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       childLayoutDuration = 0;
       PerformanceTiming.instance()
           .mark(PERF_INTRINSIC_LAYOUT_START, uniqueId: hashCode);
@@ -56,77 +56,24 @@ class RenderIntrinsic extends RenderBoxModel
 
     beforeLayout();
 
-    double? width = renderStyle.width.isAuto ? null : renderStyle.width.computedValue;
-    double? height = renderStyle.height.isAuto ? null : renderStyle.height.computedValue;
-    double? minWidth = renderStyle.minWidth.isAuto ? null : renderStyle.minWidth.computedValue;
-    double? maxWidth = renderStyle.maxWidth.isNone ? null : renderStyle.maxWidth.computedValue;
-    double? minHeight = renderStyle.minHeight.isAuto ? null : renderStyle.minHeight.computedValue;
-    double? maxHeight = renderStyle.maxHeight.isNone ? null : renderStyle.maxHeight.computedValue;
-    double? intrinsicRatio = renderStyle.intrinsicRatio;
-
     if (child != null) {
       late DateTime childLayoutStart;
-      if (kProfileMode) {
+      if (kProfileMode && PerformanceTiming.enabled()) {
         childLayoutStart = DateTime.now();
       }
 
       child!.layout(contentConstraints!, parentUsesSize: true);
 
-      if (kProfileMode) {
+      if (kProfileMode && PerformanceTiming.enabled()) {
         DateTime childLayoutEnd = DateTime.now();
         childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch) -
             childLayoutStart.microsecondsSinceEpoch;
       }
 
-      setMaxScrollableSize(child!.size);
+      Size childSize = child!.size;
 
-      CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
-      bool isInlineLevel = effectiveDisplay == CSSDisplay.inlineBlock ||
-          effectiveDisplay == CSSDisplay.inlineFlex;
-
-      double constraintWidth = child!.size.width;
-      double constraintHeight = child!.size.height;
-
-      // Constrain to min-width or max-width if width not exists
-      if (isInlineLevel && maxWidth != null && width == null) {
-        constraintWidth =
-            constraintWidth > maxWidth ? maxWidth : constraintWidth;
-
-        // max-height should respect intrinsic ratio with max-width
-        if (intrinsicRatio != null && maxHeight == null) {
-          constraintHeight = constraintWidth * intrinsicRatio;
-        }
-      } else if (isInlineLevel && minWidth != null && width == null) {
-        constraintWidth =
-            constraintWidth < minWidth ? minWidth : constraintWidth;
-
-        // max-height should respect intrinsic ratio with max-width
-        if (intrinsicRatio != null && minHeight == null) {
-          constraintHeight = constraintWidth * intrinsicRatio;
-        }
-      }
-
-      // Constrain to min-height or max-height if width not exists
-      if (isInlineLevel && maxHeight != null && height == null) {
-        constraintHeight =
-            constraintHeight > maxHeight ? maxHeight : constraintHeight;
-
-        // max-width should respect intrinsic ratio with max-height
-        if (intrinsicRatio != null && maxWidth == null) {
-          constraintWidth = constraintHeight / intrinsicRatio;
-        }
-      } else if (isInlineLevel && minHeight != null && height == null) {
-        constraintHeight =
-            constraintHeight < minHeight ? minHeight : constraintHeight;
-
-        // max-width should respect intrinsic ratio with max-height
-        if (intrinsicRatio != null && minWidth == null) {
-          constraintWidth = constraintHeight / intrinsicRatio;
-        }
-      }
-
-      Size contentSize = Size(constraintWidth, constraintHeight);
-      size = getBoxSize(contentSize);
+      setMaxScrollableSize(childSize);
+      size = getBoxSize(childSize);
 
       autoMinWidth = size.width;
       autoMinHeight = size.height;
@@ -136,7 +83,7 @@ class RenderIntrinsic extends RenderBoxModel
       performResize();
     }
 
-    if (kProfileMode) {
+    if (kProfileMode && PerformanceTiming.enabled()) {
       PerformanceTiming.instance()
           .mark(PERF_INTRINSIC_LAYOUT_END, uniqueId: hashCode);
     }
@@ -189,11 +136,11 @@ class RenderIntrinsic extends RenderBoxModel
 
     if (child != null) {
       late DateTime childPaintStart;
-      if (kProfileMode) {
+      if (kProfileMode && PerformanceTiming.enabled()) {
         childPaintStart = DateTime.now();
       }
       context.paintChild(child!, offset);
-      if (kProfileMode) {
+      if (kProfileMode && PerformanceTiming.enabled()) {
         DateTime childPaintEnd = DateTime.now();
         childPaintDuration += (childPaintEnd.microsecondsSinceEpoch -
             childPaintStart.microsecondsSinceEpoch);
