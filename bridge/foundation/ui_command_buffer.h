@@ -28,7 +28,6 @@ class UICommandBuffer {
   std::vector<UICommandItem> queue;
 };
 
+}  // namespace foundation
 
-}
-
-#endif //KRAKENBRIDGE_FOUNDATION_UI_COMMAND_BUFFER_H_
+#endif  // KRAKENBRIDGE_FOUNDATION_UI_COMMAND_BUFFER_H_

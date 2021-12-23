@@ -17,10 +17,10 @@
 #include <mutex>
 #include <unordered_map>
 #include "bindings/qjs/bom/dom_timer_coordinator.h"
+#include "foundation/ui_command_buffer.h"
 #include "garbage_collected.h"
 #include "js_context_macros.h"
 #include "kraken_foundation.h"
-#include "foundation/ui_command_buffer.h"
 #include "qjs_patch.h"
 
 using JSExceptionHandler = std::function<void(int32_t contextId, const char* message)>;
