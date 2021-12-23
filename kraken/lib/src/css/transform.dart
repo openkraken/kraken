@@ -40,6 +40,7 @@ mixin CSSTransformMixin on RenderStyle {
       parentRenderer.markChildrenNeedsSort();
     }
 
+    // Transform stage are applied at paint stage, should avoid re-layout.
     renderBoxModel?.markNeedsPaint();
   }
 
