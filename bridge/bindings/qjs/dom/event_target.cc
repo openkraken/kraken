@@ -182,7 +182,8 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
 
   // Dispatch event listeners writen by addEventListener
   auto _dispatchEvent = [&eventInstance, this](JSValue handler) {
-    if (!JS_IsFunction(m_ctx, handler)) return;
+    if (!JS_IsFunction(m_ctx, handler))
+      return;
 
     if (eventInstance->propagationImmediatelyStopped())
       return;

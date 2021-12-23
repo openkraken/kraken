@@ -70,9 +70,7 @@ TEST(EventTarget, propertyEventHandler) {
 TEST(EventTarget, setUnExpectedAttributeEventHandler) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
-    logCalled = false;
-  };
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { logCalled = false; };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
