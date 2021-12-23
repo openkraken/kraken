@@ -294,6 +294,24 @@ mixin CSSTextMixin on RenderStyle {
     _markTextNeedsLayout();
   }
 
+  // text-overflow is affect by the value of line-clamp,overflow and white-space styles,
+  // get the real working style of text-overflow after other style is set.
+  TextOverflow get effectiveTextOverflow {
+    // Set line-clamp to number makes text-overflow ellipsis which takes priority over text-overflow style.
+    if (lineClamp != null && lineClamp! > 0) {
+      return TextOverflow.ellipsis;
+    }
+
+    // text-overflow only works when overflow is not visible and white-space is nowrap.
+    if (effectiveOverflowX == CSSOverflowType.visible || whiteSpace != WhiteSpace.nowrap) {
+      // TextOverflow.visible value does not exist in CSS spec, use it to specify the case
+      // when text overflow its container and not clipped.
+      return TextOverflow.visible;
+    }
+
+    return textOverflow;
+  }
+
   int? _lineClamp;
 
   @override
