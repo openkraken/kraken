@@ -40,7 +40,7 @@ mixin CSSTransformMixin on RenderStyle {
       parentRenderer.markChildrenNeedsSort();
     }
 
-    renderBoxModel?.markNeedsLayout();
+    renderBoxModel?.markNeedsPaint();
   }
 
   static List<CSSFunctionalNotation>? resolveTransform(String present) {
@@ -60,7 +60,7 @@ mixin CSSTransformMixin on RenderStyle {
   set transformMatrix(Matrix4? value) {
     if (value == null || _transformMatrix == value) return;
     _transformMatrix = value;
-    renderBoxModel?.markNeedsLayout();
+    renderBoxModel?.markNeedsPaint();
   }
 
   Offset get transformOffset => _transformOffset;
