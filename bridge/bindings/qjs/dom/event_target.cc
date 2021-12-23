@@ -75,7 +75,7 @@ JSValue EventTarget::addEventListener(JSContext* ctx, JSValue this_val, int argc
     NativeString args_01{};
     buildUICommandArgs(ctx, eventTypeValue, args_01);
 
-    foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetInstance->m_eventTargetId, UICommand::addEvent, args_01, nullptr);
+    eventTargetInstance->m_context->uiCommandBuffer()->addCommand(eventTargetInstance->m_eventTargetId, UICommand::addEvent, args_01, nullptr);
   }
 
   eventTargetInstance->m_eventListenerMap.add(eventType, JS_DupValue(ctx, callback));
@@ -120,7 +120,7 @@ JSValue EventTarget::removeEventListener(JSContext* ctx, JSValue this_val, int a
     NativeString args_01{};
     buildUICommandArgs(ctx, eventTypeValue, args_01);
 
-    foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetInstance->m_eventTargetId, UICommand::removeEvent, args_01, nullptr);
+    eventTargetInstance->m_context->uiCommandBuffer()->addCommand(eventTargetInstance->m_eventTargetId, UICommand::removeEvent, args_01, nullptr);
   }
 
   JS_FreeAtom(ctx, eventType);
@@ -259,7 +259,7 @@ JSClassID EventTargetInstance::classId() {
 }
 
 EventTargetInstance::~EventTargetInstance() {
-  foundation::UICommandBuffer::instance(m_contextId)->addCommand(m_eventTargetId, UICommand::disposeEventTarget, nullptr, false);
+  m_context->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::disposeEventTarget, nullptr, false);
   getDartMethod()->flushUICommand();
   delete nativeEventTarget;
 }
@@ -356,7 +356,7 @@ int EventTargetInstance::setProperty(JSContext* ctx, JSValue obj, JSAtom atom, J
     if (isJavaScriptExtensionElementInstance(eventTarget->context(), eventTarget->jsObject) && !p->is_wide_char && p->u.str8[0] != '_') {
       std::unique_ptr<NativeString> args_01 = atomToNativeString(ctx, atom);
       std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, value);
-      foundation::UICommandBuffer::instance(eventTarget->m_contextId)->addCommand(eventTarget->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+      eventTarget->m_context->uiCommandBuffer()->addCommand(eventTarget->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
     }
   }
 
@@ -410,7 +410,7 @@ void EventTargetInstance::setAttributesEventHandler(JSString* p, JSValue value) 
     int32_t contextId = m_context->getContextId();
     std::unique_ptr<NativeString> args_01 = atomToNativeString(m_ctx, atom);
     int32_t type = JS_IsFunction(m_ctx, value) ? UICommand::addEvent : UICommand::removeEvent;
-    foundation::UICommandBuffer::instance(contextId)->addCommand(m_eventTargetId, type, *args_01, nullptr);
+    m_context->uiCommandBuffer()->addCommand(m_eventTargetId, type, *args_01, nullptr);
   }
 
   JS_FreeAtom(m_ctx, atom);

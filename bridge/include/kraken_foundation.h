@@ -79,26 +79,6 @@ class UICommandCallbackQueue {
   std::vector<CallbackItem> queue;
 };
 
-class UICommandBuffer {
- public:
-  UICommandBuffer() = delete;
-  explicit UICommandBuffer(int32_t contextId);
-  static KRAKEN_EXPORT UICommandBuffer* instance(int32_t contextId);
-
-  KRAKEN_EXPORT void addCommand(int32_t id, int32_t type, void* nativePtr, bool batchedUpdate);
-  KRAKEN_EXPORT void addCommand(int32_t id, int32_t type, void* nativePtr);
-  KRAKEN_EXPORT void addCommand(int32_t id, int32_t type, NativeString& args_01, NativeString& args_02, void* nativePtr);
-  KRAKEN_EXPORT void addCommand(int32_t id, int32_t type, NativeString& args_01, void* nativePtr);
-  KRAKEN_EXPORT UICommandItem* data();
-  KRAKEN_EXPORT int64_t size();
-  KRAKEN_EXPORT void clear();
-
- private:
-  int32_t contextId;
-  std::atomic<bool> update_batched{false};
-  std::vector<UICommandItem> queue;
-};
-
 typedef int LogSeverity;
 
 // Default log levels. Negative values can be used for verbose log levels.

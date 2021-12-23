@@ -91,7 +91,6 @@ void initJSPagePool(int poolSize) {
   // When dart hot restarted, should dispose previous bridge and clear task message queue.
   if (inited) {
     disposeAllPages();
-    foundation::UICommandBuffer::instance(0)->clear();
   };
   pageContextPool = new kraken::KrakenPage*[poolSize];
   for (int i = 1; i < poolSize; i++) {
@@ -225,15 +224,18 @@ void flushUICommandCallback() {
 }
 
 UICommandItem* getUICommandItems(int32_t contextId) {
-  return foundation::UICommandBuffer::instance(contextId)->data();
+  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  return page->getContext()->uiCommandBuffer()->data();
 }
 
 int64_t getUICommandItemSize(int32_t contextId) {
-  return foundation::UICommandBuffer::instance(contextId)->size();
+  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  return page->getContext()->uiCommandBuffer()->size();
 }
 
 void clearUICommandItems(int32_t contextId) {
-  return foundation::UICommandBuffer::instance(contextId)->clear();
+  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  page->getContext()->uiCommandBuffer()->clear();
 }
 
 void registerContextDisposedCallbacks(int32_t contextId, Task task, void* data) {

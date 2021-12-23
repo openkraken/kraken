@@ -96,6 +96,7 @@ list(APPEND BRIDGE_SOURCE
   foundation/task_queue.cc
   foundation/task_queue.h
   foundation/ui_command_buffer.cc
+  foundation/ui_command_buffer.h
   foundation/ui_command_callback_queue.cc
   foundation/closure.h
   dart_methods.cc
