@@ -101,15 +101,7 @@ mixin CSSPositionMixin on RenderStyle {
     // https://www.w3.org/TR/css-display-3/#transformations
 
     // The position changes of the node may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
-    if (renderBoxModel?.parent != null && renderBoxModel?.parent is RenderFlowLayout && renderBoxModel?.parentData is RenderLayoutParentData) {
-      RenderLayoutParentData parentData = renderBoxModel?.parentData as RenderLayoutParentData;
-      if (parentData.nextSibling is RenderTextBox) {
-        (parentData.nextSibling as RenderTextBox).markRenderParagraphNeedsLayout();
-      }
-      if (parentData.previousSibling is RenderTextBox) {
-        (parentData.previousSibling as RenderTextBox).markRenderParagraphNeedsLayout();
-      }
-    }
+    renderBoxModel?.markAdjacentRenderParagraphNeedsLayout();
   }
 
   void _markNeedsSort() {

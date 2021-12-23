@@ -165,16 +165,8 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   @mustCallSuper
   void didAttachRenderer() {
     // The node attach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
-    if (parentNode != null && parentNode?.renderer is RenderFlowLayout && renderer?.parentData is RenderLayoutParentData) {
-      RenderLayoutParentData parentData = renderer?.parentData as RenderLayoutParentData;
-
-      if (parentData.nextSibling is RenderTextBox) {
-        (parentData.nextSibling as RenderTextBox).markRenderParagraphNeedsLayout();
-      }
-
-      if (parentData.previousSibling is RenderTextBox) {
-        (parentData.previousSibling as RenderTextBox).markRenderParagraphNeedsLayout();
-      }
+    if (renderer is RenderBoxModel) {
+      (renderer as RenderBoxModel).markAdjacentRenderParagraphNeedsLayout();
     }
   }
 
