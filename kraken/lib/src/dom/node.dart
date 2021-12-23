@@ -166,14 +166,14 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   void didAttachRenderer() {
     // The node attach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
     if (parentNode != null && parentNode?.renderer is RenderFlowLayout && renderer?.parentData is RenderLayoutParentData) {
-      RenderLayoutParentData childParentData = renderer?.parentData as RenderLayoutParentData;
+      RenderLayoutParentData parentData = renderer?.parentData as RenderLayoutParentData;
 
-      if (childParentData.nextSibling is RenderTextBox) {
-        (childParentData.nextSibling as RenderTextBox).markRenderParagraphNeedsLayout();
+      if (parentData.nextSibling is RenderTextBox) {
+        (parentData.nextSibling as RenderTextBox).markRenderParagraphNeedsLayout();
       }
 
-      if (childParentData.previousSibling is RenderTextBox) {
-        (childParentData.previousSibling as RenderTextBox).markRenderParagraphNeedsLayout();
+      if (parentData.previousSibling is RenderTextBox) {
+        (parentData.previousSibling as RenderTextBox).markRenderParagraphNeedsLayout();
       }
     }
   }
@@ -183,14 +183,14 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   void willDetachRenderer() {
     // The node detach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
     if (parentNode != null && parentNode?.renderer is RenderFlowLayout && renderer?.parentData is RenderLayoutParentData) {
-      RenderLayoutParentData childParentData = renderer?.parentData as RenderLayoutParentData;
+      RenderLayoutParentData parentData = renderer?.parentData as RenderLayoutParentData;
 
-      if (childParentData.nextSibling is RenderTextBox) {
-        (childParentData.nextSibling as RenderTextBox).markRenderParagraphNeedsLayout();
+      if (parentData.nextSibling is RenderTextBox) {
+        (parentData.nextSibling as RenderTextBox).markRenderParagraphNeedsLayout();
       }
 
-      if (childParentData.previousSibling is RenderTextBox) {
-        (childParentData.previousSibling as RenderTextBox).markRenderParagraphNeedsLayout();
+      if (parentData.previousSibling is RenderTextBox) {
+        (parentData.previousSibling as RenderTextBox).markRenderParagraphNeedsLayout();
       }
     }
   }

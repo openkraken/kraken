@@ -32,12 +32,12 @@ mixin CSSDisplayMixin on RenderStyle {
 
       // The display changes of the node may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
       if (renderBoxModel?.parent != null && renderBoxModel?.parent is RenderFlowLayout && renderBoxModel?.parentData is RenderLayoutParentData) {
-        RenderLayoutParentData childParentData = renderBoxModel?.parentData as RenderLayoutParentData;
-        if (childParentData.nextSibling is RenderTextBox) {
-          (childParentData.nextSibling as RenderTextBox).markRenderParagraphNeedsLayout();
+        RenderLayoutParentData parentData = renderBoxModel?.parentData as RenderLayoutParentData;
+        if (parentData.nextSibling is RenderTextBox) {
+          (parentData.nextSibling as RenderTextBox).markRenderParagraphNeedsLayout();
         }
-        if (childParentData.previousSibling is RenderTextBox) {
-          (childParentData.previousSibling as RenderTextBox).markRenderParagraphNeedsLayout();
+        if (parentData.previousSibling is RenderTextBox) {
+          (parentData.previousSibling as RenderTextBox).markRenderParagraphNeedsLayout();
         }
       }
     }
