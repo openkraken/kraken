@@ -531,7 +531,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     beforeLayout();
 
     List<RenderBoxModel> _positionedChildren = [];
-    List<RenderBox> _nonPositionedChildren = [];
+    List<RenderPositionPlaceholder> _positionPlaceholderChildren = [];
+    List<RenderBox> _flexItemChildren = [];
     List<RenderBoxModel> _stickyChildren = [];
 
     // Prepare children of different type for layout.
@@ -540,8 +541,10 @@ class RenderFlexLayout extends RenderLayoutBox {
       final RenderLayoutParentData childParentData = child.parentData as RenderLayoutParentData;
       if (child is RenderBoxModel && childParentData.isPositioned) {
         _positionedChildren.add(child);
+      } else if (child is RenderPositionPlaceholder && _isPlaceholderPositioned(child)) {
+        _positionPlaceholderChildren.add(child);
       } else {
-        _nonPositionedChildren.add(child);
+        _flexItemChildren.add(child);
         if (child is RenderBoxModel && CSSPositionedLayout.isSticky(child)) {
           _stickyChildren.add(child);
         }
@@ -556,9 +559,17 @@ class RenderFlexLayout extends RenderLayoutBox {
       CSSPositionedLayout.layoutPositionedChild(this, child);
     }
 
-    // Layout non positioned element (include element in flow and
+    // Layout non positioned element (include element in normal flow and
     // placeholder of positioned element).
-    _layoutChildren(_nonPositionedChildren);
+    _layoutFlexItems(_flexItemChildren);
+
+    // Layout position place holder separately after layout size is set.
+    // Every placeholder of positioned element in flex layout layout in a separated layer which is
+    // different from the placeholder in flow layout which layout in the same flow as other elements
+    // in normal flow.
+    for (RenderPositionPlaceholder child in _positionPlaceholderChildren) {
+      _layoutPositionPlaceholder(child);
+    }
 
     // Set offset of positioned element after flex box size is set.
     for (RenderBoxModel child in _positionedChildren) {
@@ -595,32 +606,20 @@ class RenderFlexLayout extends RenderLayoutBox {
     didLayout();
   }
 
-  // There are 4 steps for layout children.
+  // There are 4 steps for layout flex items.
   // 1. Layout children to generate flex line boxes metrics.
   // 2. Relayout children according to flex factor properties and alignment properties in cross axis.
   // 3. Set flex container size according to children size and its own size styles.
   // 4. Align children according to alignment properties.
-  void _layoutChildren(List<RenderBox> children) {
+  void _layoutFlexItems(List<RenderBox> children) {
     // If no child exists, stop layout.
     if (children.isEmpty) {
       _setContainerSizeWithNoChild();
       return;
     }
 
-    List<RenderPositionPlaceholder> _positionPlaceholderChildren = [];
-    List<RenderBox> _flexItemChildren = [];
-
-    // Prepare children of placeholder and non placeholder for later layout.
-    for (RenderBox child in children) {
-      if (child is RenderPositionPlaceholder && _isPlaceholderPositioned(child)) {
-        _positionPlaceholderChildren.add(child);
-      } else {
-        _flexItemChildren.add(child);
-      }
-    }
-
     // Layout children to compute metrics of flex lines.
-    List<_RunMetrics> _runMetrics = _computeRunMetrics(_flexItemChildren);
+    List<_RunMetrics> _runMetrics = _computeRunMetrics(children);
 
     // Compute spacing before and between each flex line.
     Map<String, double> _runSpacingMap = _computeRunSpacing(_runMetrics);
@@ -633,14 +632,19 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Set flex container size.
     _setContainerSize(_runMetrics);
 
-    // Layout and set offset of RenderPositionPlaceholder first because positioned element depends
-    // on the offset of its RenderPositionPlaceholder.
-    for (RenderPositionPlaceholder child in _positionPlaceholderChildren) {
-      List<RenderBox> _positionPlaceholderChildren = [child];
-      List<_RunMetrics> _runMetrics = _computeRunMetrics(_positionPlaceholderChildren);
-      Map<String, double> _runSpacingMap = _computeRunSpacing(_runMetrics);
-      _setChildrenOffset(_runMetrics, _runSpacingMap);
-    }
+    // Set children offset based on flex alignment properties.
+    _setChildrenOffset(_runMetrics, _runSpacingMap);
+  }
+
+  // Layout position placeholder.
+  void _layoutPositionPlaceholder(RenderPositionPlaceholder child) {
+    List<RenderBox> _positionPlaceholderChildren = [child];
+
+    // Layout children to compute metrics of flex lines.
+    List<_RunMetrics> _runMetrics = _computeRunMetrics(_positionPlaceholderChildren);
+
+    // Compute spacing before and between each flex line.
+    Map<String, double> _runSpacingMap = _computeRunSpacing(_runMetrics);
 
     // Set children offset based on flex alignment properties.
     _setChildrenOffset(_runMetrics, _runSpacingMap);
