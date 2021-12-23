@@ -23,6 +23,7 @@ class InspectNetworkModule extends UIInspectorModule implements HttpClientInterc
   String get name => 'Network';
 
   final HttpCacheMode _httpCacheOriginalMode = HttpCacheController.mode;
+  final int _initialTimestamp = DateTime.now().millisecondsSinceEpoch;
 
   @override
   void receiveFromFrontend(int? id, String method, Map<String, dynamic>? params) {
@@ -55,6 +56,7 @@ class InspectNetworkModule extends UIInspectorModule implements HttpClientInterc
       requestMethod: request.method,
       url: request.uri.toString(),
       headers: _getHttpHeaders(request.headers),
+      timestamp: (DateTime.now().millisecondsSinceEpoch - _initialTimestamp) ~/ 1000,
     ));
     HttpClientInterceptor? customHttpClientInterceptor = _customHttpClientInterceptor;
     if (customHttpClientInterceptor != null) {
@@ -81,10 +83,12 @@ class InspectNetworkModule extends UIInspectorModule implements HttpClientInterc
       encodedDataLength: response.contentLength,
       protocol: request.uri.scheme,
       type: _getRequestType(request),
+      timestamp: (DateTime.now().millisecondsSinceEpoch - _initialTimestamp) ~/ 1000,
     ));
     sendEventToFrontend(NetworkLoadingFinishedEvent(
       requestId: _getRequestId(request),
       contentLength: response.contentLength,
+      timestamp: (DateTime.now().millisecondsSinceEpoch - _initialTimestamp) ~/ 1000,
     ));
 
     HttpClientInterceptor? customHttpClientInterceptor = _customHttpClientInterceptor;
@@ -113,6 +117,7 @@ class NetworkRequestWillBeSentEvent extends InspectorEvent {
   final String url;
   final String requestMethod;
   final Map<String, String> headers;
+  final int timestamp;
 
   NetworkRequestWillBeSentEvent({
     required this.requestId,
@@ -120,6 +125,7 @@ class NetworkRequestWillBeSentEvent extends InspectorEvent {
     required this.requestMethod,
     required this.url,
     required this.headers,
+    required this.timestamp,
   });
 
   @override
@@ -137,7 +143,7 @@ class NetworkRequestWillBeSentEvent extends InspectorEvent {
       'initialPriority': 'Medium',
       'referrerPolicy': '',
     },
-    'timestamp': DateTime.now().microsecondsSinceEpoch,
+    'timestamp': timestamp,
     'initiator': {
       'type': 'script',
       'lineNumber': 0,
@@ -161,6 +167,7 @@ class NetworkResponseReceivedEvent extends InspectorEvent {
   final int encodedDataLength;
   final String protocol;
   final String type;
+  final int timestamp;
 
   NetworkResponseReceivedEvent({
     required this.requestId,
@@ -176,8 +183,8 @@ class NetworkResponseReceivedEvent extends InspectorEvent {
     required this.encodedDataLength,
     required this.protocol,
     required this.type,
+    required this.timestamp,
   });
-  final int now = DateTime.now().millisecondsSinceEpoch;
 
   @override
   String get method => 'Network.responseReceived';
@@ -186,7 +193,7 @@ class NetworkResponseReceivedEvent extends InspectorEvent {
   JSONEncodable? get params => JSONEncodableMap({
     'requestId': requestId,
     'loaderId': loaderId,
-    'timestamp': now,
+    'timestamp': timestamp,
     'type': type,
     'response': {
       'url': url,
@@ -202,7 +209,6 @@ class NetworkResponseReceivedEvent extends InspectorEvent {
       'encodedDataLength': encodedDataLength,
       'protocol': protocol,
       'securityState': 'secure',
-      'responseTime': now,
     },
     'hasExtraInfo': false,
   });
@@ -211,8 +217,9 @@ class NetworkResponseReceivedEvent extends InspectorEvent {
 class NetworkLoadingFinishedEvent extends InspectorEvent {
   final String requestId;
   final int contentLength;
+  final int timestamp;
 
-  NetworkLoadingFinishedEvent({ required this.requestId, required this.contentLength });
+  NetworkLoadingFinishedEvent({ required this.requestId, required this.contentLength, required this.timestamp });
 
   @override
   String get method => 'Network.loadingFinished';
@@ -220,7 +227,7 @@ class NetworkLoadingFinishedEvent extends InspectorEvent {
   @override
   JSONEncodable? get params => JSONEncodableMap({
     'requestId': requestId,
-    'timestamp': DateTime.now().millisecondsSinceEpoch,
+    'timestamp': timestamp,
     'encodedDataLength': contentLength,
   });
 

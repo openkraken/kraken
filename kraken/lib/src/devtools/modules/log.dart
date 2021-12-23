@@ -22,7 +22,7 @@ class LogEntryEvent extends InspectorEvent {
   // Allowed Values: xml, javascript, network, storage, appcache,
   // rendering, security, deprecation, worker, violation, intervention,
   // recommendation, other
-  String source = 'network';
+  String source;
 
   // Allowed Values: verbose, info, warning, error
   String level;
@@ -35,6 +35,7 @@ class LogEntryEvent extends InspectorEvent {
   LogEntryEvent({
     required this.level,
     required this.text,
+    this.source = 'javascript',
     this.url,
   });
 
