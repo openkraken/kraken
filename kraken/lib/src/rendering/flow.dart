@@ -683,9 +683,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       if (flipCrossAxis) crossAxisOffset -= runCrossAxisExtent;
 
       for (RenderBox child in runChildrenList) {
-        final RenderLayoutParentData childParentData =
-        child.parentData as RenderLayoutParentData;
-
         final double childMainAxisExtent = _getMainAxisExtent(child);
         final double childCrossAxisExtent = _getCrossAxisExtent(child);
 
