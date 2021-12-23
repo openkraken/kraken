@@ -211,7 +211,7 @@ IMPL_PROPERTY_SETTER(Window, onerror)(JSContext* ctx, JSValue this_val, int argc
     JS_FreeValue(ctx, window->onerror);
   }
 
-  window->onerror = onerrorHandler;
+  window->onerror = JS_DupValue(ctx, onerrorHandler);
   JS_FreeValue(ctx, eventString);
   return JS_NULL;
 }
