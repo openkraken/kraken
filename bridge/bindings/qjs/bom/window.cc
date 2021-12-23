@@ -229,6 +229,8 @@ WindowInstance::WindowInstance(Window* window) : EventTargetInstance(window, Win
 
 void WindowInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
   EventTargetInstance::trace(rt, val, mark_func);
+
+  JS_MarkValue(rt, onerror, mark_func);
 }
 
 DocumentInstance* WindowInstance::document() {
