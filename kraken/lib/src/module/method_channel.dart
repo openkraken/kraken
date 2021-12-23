@@ -134,4 +134,12 @@ class KrakenNativeChannel extends KrakenMethodChannel {
     if (url != null && url.isEmpty) url = null;
     return url;
   }
+
+  static Future<void> syncDynamicLibraryPath() async {
+    String? path = await _nativeChannel.invokeMethod('getDynamicLibraryPath');
+    print('syncDynamicLibraryPath get path $path');
+    if (path != null) {
+      setDynamicLibraryPath(path);
+    }
+  }
 }

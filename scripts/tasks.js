@@ -625,7 +625,7 @@ task('build-android-kraken-lib', (done) => {
 
   const soFileNames = [
     'libkraken',
-    'libquick',
+    // 'libquick',
     'libc++_shared'
   ];
 

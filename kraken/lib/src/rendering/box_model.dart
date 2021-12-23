@@ -1201,7 +1201,7 @@ class RenderBoxModel extends RenderBox
         renderStyle.backgroundAttachment == CSSBackgroundAttachmentType.local;
   }
 
-  void _detachAllChildren() {
+  void _dropAllChildren() {
     if (this is RenderObjectWithChildMixin) {
       (this as RenderObjectWithChildMixin).child = null;
     } else if (this is ContainerRenderObjectMixin) {
@@ -1213,7 +1213,6 @@ class RenderBoxModel extends RenderBox
   @override
   @mustCallSuper
   void dispose() {
-    super.dispose();
     // Clear renderObjects in list when disposed to avoid memory leak
     if (fixedChildren.isNotEmpty) {
       fixedChildren.clear();
@@ -1228,7 +1227,9 @@ class RenderBoxModel extends RenderBox
     renderStyle.decoration?.image?.image.evict();
 
     // Remove reference from childs
-    _detachAllChildren();
+    _dropAllChildren();
+
+    super.dispose();
   }
 
   Offset getTotalScrollOffset() {

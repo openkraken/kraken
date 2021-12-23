@@ -354,8 +354,10 @@ final bool isEnabledLog = kDebugMode && Platform.environment['ENABLE_KRAKEN_JS_L
 // So we align all UI instructions to a whole block of memory, and then convert them into a dart array at one time,
 // To ensure the fastest subsequent random access.
 List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, int commandLength, int contextId) {
-  List<int> rawMemory = nativeCommandItems.asTypedList(commandLength * nativeCommandSize).toList(growable: false);
-
+  List<int> rawMemory = nativeCommandItems
+      .cast<Int64>()
+      .asTypedList(commandLength * nativeCommandSize)
+      .toList(growable: false);
   List<UICommand> results = List.generate(commandLength, (int _i) {
     int i = _i * nativeCommandSize;
     UICommand command = UICommand();
@@ -366,8 +368,8 @@ List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, in
     // +-------+-------+
     // |  id   | type  |
     // +-------+-------+
-    int id = typeIdCombine >> 32;
-    int type = typeIdCombine ^ (id << 32);
+    int id = (typeIdCombine >> 32).toSigned(32);
+    int type = (typeIdCombine ^ (id << 32)).toSigned(32);
 
     command.type = UICommandType.values[type];
     command.id = id;
@@ -382,8 +384,8 @@ List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, in
     if (args01And02Length == 0) {
       args01Length = args02Length = 0;
     } else {
-      args02Length = args01And02Length >> 32;
-      args01Length = args01And02Length ^ (args02Length << 32);
+      args02Length = (args01And02Length >> 32).toSigned(32);
+      args01Length = (args01And02Length ^ (args02Length << 32)).toSigned(32);
     }
 
     int args01StringMemory = rawMemory[i + args01StringMemOffset];

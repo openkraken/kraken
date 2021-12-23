@@ -4,6 +4,7 @@
  */
 
 export 'src/bridge/bridge.dart';
+export 'src/bridge/platform.dart';
 export 'src/bridge/to_native.dart';
 export 'src/bridge/from_native.dart';
 export 'src/bridge/native_types.dart';
