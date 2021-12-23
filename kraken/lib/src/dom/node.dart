@@ -4,6 +4,7 @@
  */
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:meta/meta.dart';
 import 'package:kraken/widget.dart';
@@ -161,10 +162,22 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   void willAttachRenderer() {}
 
   @override
-  void didAttachRenderer() {}
+  @mustCallSuper
+  void didAttachRenderer() {
+    // The node attach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
+    if (renderer is RenderBoxModel) {
+      (renderer as RenderBoxModel).markAdjacentRenderParagraphNeedsLayout();
+    }
+  }
 
   @override
-  void willDetachRenderer() {}
+  @mustCallSuper
+  void willDetachRenderer() {
+    // The node detach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
+    if (renderer is RenderBoxModel) {
+      (renderer as RenderBoxModel).markAdjacentRenderParagraphNeedsLayout();
+    }
+  }
 
   @override
   void didDetachRenderer() {}

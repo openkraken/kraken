@@ -28,8 +28,10 @@ mixin CSSDisplayMixin on RenderStyle {
   set display(CSSDisplay value) {
     if (_display != value) {
       _display = value;
-
       renderBoxModel?.markNeedsLayout();
+
+      // The display changes of the node may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
+      renderBoxModel?.markAdjacentRenderParagraphNeedsLayout();
     }
   }
 

@@ -8,24 +8,94 @@ import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 
+final RegExp _whiteSpaceReg = RegExp(r'\s+');
+
 class TextParentData extends ContainerBoxParentData<RenderBox> {}
 
 enum WhiteSpace { normal, nowrap, pre, preWrap, preLine, breakSpaces }
 
 class RenderTextBox extends RenderBox
     with RenderObjectWithChildMixin<RenderBox> {
-  RenderTextBox(
-    this.data, {
+  RenderTextBox(data, {
     required this.renderStyle,
-  }) {
-    TextSpan text = CSSTextMixin.createTextSpan(data, renderStyle);
+  }) : _data = data {
+    TextSpan text = CSSTextMixin.createTextSpan(_data, renderStyle);
     _renderParagraph = child = KrakenRenderParagraph(
       text,
       textDirection: TextDirection.ltr,
     );
   }
 
-  late String data;
+  String _data;
+
+  set data(String value) {
+    _data = value;
+  }
+
+  String get data => _data;
+
+  bool isEndWithSpace(String str) {
+    return str.endsWith(WHITE_SPACE_CHAR) || str.endsWith(NEW_LINE_CHAR) || str.endsWith(RETURN_CHAR) || str.endsWith(TAB_CHAR);
+  }
+
+  String get _trimmedData {
+    if (parentData is RenderLayoutParentData) {
+      /// https://drafts.csswg.org/css-text-3/#propdef-white-space
+      /// The following table summarizes the behavior of the various white-space values:
+      //
+      //       New lines / Spaces and tabs / Text wrapping / End-of-line spaces
+      // normal    Collapse  Collapse  Wrap     Remove
+      // nowrap    Collapse  Collapse  No wrap  Remove
+      // pre       Preserve  Preserve  No wrap  Preserve
+      // pre-wrap  Preserve  Preserve  Wrap     Hang
+      // pre-line  Preserve  Collapse  Wrap     Remove
+      // break-spaces  Preserve  Preserve  Wrap  Wrap
+      CSSRenderStyle parentRenderStyle = (parent as RenderLayoutBox).renderStyle;
+      WhiteSpace whiteSpace = parentRenderStyle.whiteSpace;
+      if (whiteSpace == WhiteSpace.pre ||
+          whiteSpace == WhiteSpace.preLine ||
+          whiteSpace == WhiteSpace.preWrap ||
+          whiteSpace == WhiteSpace.breakSpaces) {
+        return whiteSpace == WhiteSpace.preLine ? _collapseWhitespace(_data) : _data;
+      } else {
+        String collapsedData = _collapseWhitespace(_data);
+        // TODO:
+        // Remove the leading space while prev element have space too:
+        //   <p><span>foo </span> bar</p>
+        // Refs:
+        //   https://github.com/WebKit/WebKit/blob/6a970b217d59f36e64606ed03f5238d572c23c48/Source/WebCore/layout/inlineformatting/InlineLineBuilder.cpp#L295
+        RenderObject? previousSibling = (parentData as RenderLayoutParentData).previousSibling;
+
+        if (previousSibling == null) {
+          collapsedData = collapsedData.trimLeft();
+        } else if (previousSibling is RenderBoxModel &&(previousSibling.renderStyle.display == CSSDisplay.block || previousSibling.renderStyle.display == CSSDisplay.flex)) {
+          // If previousSibling is block,should trimLeft slef.
+          CSSDisplay? display = previousSibling.renderStyle.display;
+          if (display == CSSDisplay.block || display == CSSDisplay.sliver || display == CSSDisplay.flex) {
+            collapsedData = collapsedData.trimLeft();
+          }
+        } else if (previousSibling is RenderTextBox && isEndWithSpace(previousSibling.data)) {
+          collapsedData = collapsedData.trimLeft();
+        }
+
+        RenderObject? nextSibling = (parentData as RenderLayoutParentData).nextSibling;
+        if (nextSibling == null) {
+          collapsedData = collapsedData.trimRight();
+        } else if (nextSibling is RenderBoxModel && (nextSibling.renderStyle.display == CSSDisplay.block || nextSibling.renderStyle.display == CSSDisplay.flex)) {
+          // If nextSibling is block,should trimRight slef.
+          CSSDisplay? display = nextSibling.renderStyle.display;
+          if (display == CSSDisplay.block || display == CSSDisplay.sliver || display == CSSDisplay.flex) {
+            collapsedData = collapsedData.trimRight();
+          }
+        }
+
+        return collapsedData;
+      }
+    }
+
+    return _data;
+  }
+
   late KrakenRenderParagraph _renderParagraph;
   CSSRenderStyle renderStyle;
 
@@ -81,7 +151,7 @@ class RenderTextBox extends RenderBox
   }
 
   TextSpan get _textSpan {
-    String clippedText = _getClippedText(data);
+    String clippedText = _getClippedText(_trimmedData);
     // FIXME(yuanyan): do not create text span every time.
     return CSSTextMixin.createTextSpan(clippedText, renderStyle);
   }
@@ -93,6 +163,10 @@ class RenderTextBox extends RenderBox
   void markNeedsLayout() {
     super.markNeedsLayout();
     needsLayout = true;
+  }
+
+  void markRenderParagraphNeedsLayout() {
+    _renderParagraph.markNeedsLayout();
   }
 
   // @HACK: sync _needsLayout flag in Flutter to do performance opt.
@@ -217,6 +291,11 @@ class RenderTextBox extends RenderBox
       }
     }
     return clippedText;
+  }
+
+  // '  a b  c   \n' => ' a b c '
+  static String _collapseWhitespace(String string) {
+    return string.replaceAll(_whiteSpaceReg, WHITE_SPACE_CHAR);
   }
 
   @override
