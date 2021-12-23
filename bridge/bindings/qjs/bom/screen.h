@@ -17,7 +17,8 @@ class Screen : public HostObject {
   explicit Screen(JSContext* context) : HostObject(context, "Screen"){};
 
  private:
-  DEFINE_HOST_OBJECT_PROPERTY(2, width, height);
+  DEFINE_READONLY_PROPERTY(width);
+  DEFINE_READONLY_PROPERTY(height);
 };
 
 void bindScreen(std::unique_ptr<JSContext>& context);

@@ -39,6 +39,107 @@ describe('custom widget element', () => {
 
     simulateClick(20, 20);
   });
+
+  it('text node should be child of flutter container', async () => {
+    const container = document.createElement('flutter-container');
+    const text = document.createTextNode('text');
+    document.body.appendChild(container);
+    container.appendChild(text);
+    await snapshot();
+  });
+
+  it('element should be child of flutter container', async () => {
+    const container = document.createElement('flutter-container');
+    const element = document.createElement('div');
+    element.style.width = '30px';
+    element.style.height = '30px';
+    element.style.backgroundColor = 'red';
+    container.appendChild(element);
+    document.body.appendChild(container);
+    await snapshot();
+  });
+
+  it('flutter widget should be child of flutter container', async () => {
+    const container = document.createElement('flutter-container');
+    const fluttetText = document.createElement('flutter-text');
+    fluttetText.setAttribute('value', 'text');
+    container.appendChild(fluttetText);
+    document.body.appendChild(container);
+
+    await snapshot();
+  });
+
+  it('flutter widget and dom node should be child of flutter container', async () => {
+    const container = document.createElement('flutter-container');
+    document.body.appendChild(container);
+
+    const element = document.createElement('div');
+    element.style.backgroundColor = 'red';
+    element.appendChild(document.createTextNode('div element'));
+    container.appendChild(element);
+
+    const fluttetText = document.createElement('flutter-text');
+    fluttetText.setAttribute('value', 'text');
+    container.appendChild(fluttetText);
+
+    const text = document.createTextNode('text');
+    container.appendChild(text);
+
+    await snapshot();
+  });
+
+  it('flutter widget should be child of element', async () => {
+    const container = document.createElement('div');
+    container.style.width = '100px';
+    container.style.height = '100px';
+    container.style.backgroundColor = 'red';
+    const element = document.createElement('flutter-text');
+    element.setAttribute('value', 'text');
+    container.appendChild(element);
+    document.body.appendChild(container);
+
+    await snapshot();
+  });
+
+  it('flutter widget should be child of element and the element should be child of flutter widget', async () => {
+    const container = document.createElement('flutter-container');
+    document.body.appendChild(container);
+
+    const childContainer = document.createElement('div');
+    container.appendChild(childContainer);
+
+    const fluttetText = document.createElement('flutter-text');
+    fluttetText.setAttribute('value', 'text');
+    childContainer.appendChild(fluttetText);
+
+    await snapshot();
+  });
+
+  it('should work with waterfall-flow', async () => {
+    const flutterContainer = document.createElement('waterfall-flow');
+    flutterContainer.style.height = '100vh';
+    flutterContainer.style.display = 'block';
+
+    document.body.appendChild(flutterContainer);
+
+    const colors = ['red', 'yellow', 'black', 'blue', 'green'];
+
+    for (let i = 0; i < 10; i++) {
+      const div = document.createElement('div');
+      div.style.width = '100%';
+      div.style.border = `1px solid ${colors[i % colors.length]}`;
+      div.appendChild(document.createTextNode(`${i}`));
+
+      const img = document.createElement('img');
+      img.src = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
+      div.appendChild(img);
+      img.style.width = '100px';
+
+      flutterContainer.appendChild(div);
+    }
+
+    await snapshot();
+  });
 });
 
 describe('custom html element', () => {

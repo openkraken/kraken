@@ -501,7 +501,7 @@ class KeyframeEffect extends AnimationEffect {
 
         if (left == right) continue;
 
-        List? handlers = CSSTranstionHandlers[property];
+        List? handlers = CSSTransitionHandlers[property];
         handlers ??= [_defaultParse, _defaultLerp];
         Function parseProperty = handlers[0];
 

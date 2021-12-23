@@ -28,8 +28,9 @@ NativeValue Native_NewString(NativeString* string) {
 }
 
 NativeValue Native_NewCString(std::string string) {
-  NativeString* nativeString = stringToNativeString(string);
-  return Native_NewString(nativeString);
+  std::unique_ptr<NativeString> nativeString = stringToNativeString(string);
+  // NativeString owned by NativeValue will be freed by users.
+  return Native_NewString(nativeString.release());
 }
 
 NativeValue Native_NewFloat64(double value) {
@@ -62,7 +63,11 @@ NativeValue Native_NewInt32(int32_t value) {
 
 NativeValue Native_NewJSON(JSContext* context, JSValue& value) {
   JSValue stringifiedValue = JS_JSONStringify(context->ctx(), value, JS_UNDEFINED, JS_UNDEFINED);
-  NativeString* string = jsValueToNativeString(context->ctx(), stringifiedValue);
+  if (JS_IsException(stringifiedValue))
+    return Native_NewNull();
+
+  // NativeString owned by NativeValue will be freed by users.
+  NativeString* string = jsValueToNativeString(context->ctx(), stringifiedValue).release();
   NativeValue result = (NativeValue){
       0,
       .u = {.ptr = static_cast<void*>(string)},
@@ -110,7 +115,8 @@ NativeValue jsValueToNativeValue(QjsContext* ctx, JSValue& value) {
       return Native_NewInt32(v);
     }
   } else if (JS_IsString(value)) {
-    NativeString* string = jsValueToNativeString(ctx, value);
+    // NativeString owned by NativeValue will be freed by users.
+    NativeString* string = jsValueToNativeString(ctx, value).release();
     return Native_NewString(string);
   } else if (JS_IsFunction(ctx, value)) {
     auto* context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
@@ -118,7 +124,7 @@ NativeValue jsValueToNativeValue(QjsContext* ctx, JSValue& value) {
     return Native_NewPtr(JSPointerType::NativeFunctionContext, functionContext);
   } else if (JS_IsObject(value)) {
     auto* context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
-    if (JS_IsInstanceOf(ctx, value, ImageElement::instance(context)->classObject)) {
+    if (JS_IsInstanceOf(ctx, value, ImageElement::instance(context)->jsObject)) {
       auto* imageElementInstance = static_cast<ImageElementInstance*>(JS_GetOpaque(value, Element::classId()));
       return Native_NewPtr(JSPointerType::NativeEventTarget, imageElementInstance->nativeEventTarget);
     }
@@ -243,13 +249,13 @@ JSValue nativeValueToJSValue(JSContext* context, NativeValue& value) {
     case NativeTag::TAG_POINTER: {
       auto* ptr = value.u.ptr;
       int ptrType = (int)value.float64;
-      if (ptrType == JSPointerType::NativeBoundingClientRect) {
+      if (ptrType == static_cast<int64_t>(JSPointerType::NativeBoundingClientRect)) {
         return (new BoundingClientRect(context, static_cast<NativeBoundingClientRect*>(ptr)))->jsObject;
-      } else if (ptrType == JSPointerType::NativeCanvasRenderingContext2D) {
+      } else if (ptrType == static_cast<int64_t>(JSPointerType::NativeCanvasRenderingContext2D)) {
         return (new CanvasRenderingContext2D(context, static_cast<NativeCanvasRenderingContext2D*>(ptr)))->jsObject;
-      } else if (ptrType == JSPointerType::NativeEventTarget) {
+      } else if (ptrType == static_cast<int64_t>(JSPointerType::NativeEventTarget)) {
         auto* nativeEventTarget = static_cast<NativeEventTarget*>(ptr);
-        return JS_DupValue(context->ctx(), nativeEventTarget->instance->instanceObject);
+        return JS_DupValue(context->ctx(), nativeEventTarget->instance->jsObject);
       }
     }
     case NativeTag::TAG_FUNCTION: {

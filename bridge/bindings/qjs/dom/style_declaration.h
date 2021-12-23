@@ -40,22 +40,25 @@ class CSSStyleDeclaration : public HostClass {
   static JSValue getPropertyValue(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
  protected:
-  ObjectFunction m_setProperty{m_context, m_prototypeObject, "setProperty", setProperty, 2};
-  ObjectFunction m_getPropertyValue{m_context, m_prototypeObject, "getPropertyValue", getPropertyValue, 2};
-  ObjectFunction m_removeProperty{m_context, m_prototypeObject, "removeProperty", removeProperty, 2};
+  DEFINE_PROTOTYPE_FUNCTION(setProperty, 2);
+  DEFINE_PROTOTYPE_FUNCTION(getPropertyValue, 2);
+  DEFINE_PROTOTYPE_FUNCTION(removeProperty, 2);
 };
 
 class StyleDeclarationInstance : public Instance {
  public:
   StyleDeclarationInstance() = delete;
-  explicit StyleDeclarationInstance(CSSStyleDeclaration* cssStyleDeclaration, EventTargetInstance* ownerEventTarget)
-      : Instance(cssStyleDeclaration, "CSSStyleDeclaration", &m_exoticMethods, CSSStyleDeclaration::kCSSStyleDeclarationClassId, finalize), m_ownerEventTarget(ownerEventTarget){};
+  explicit StyleDeclarationInstance(CSSStyleDeclaration* cssStyleDeclaration, EventTargetInstance* ownerEventTarget);
   ~StyleDeclarationInstance();
   bool internalSetProperty(std::string& name, JSValue value);
   void internalRemoveProperty(std::string& name);
   JSValue internalGetPropertyValue(std::string& name);
   std::string toString();
   void copyWith(StyleDeclarationInstance* instance);
+
+  void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
+
+  const EventTargetInstance* ownerEventTarget;
 
  private:
   static int hasProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom);
@@ -70,8 +73,7 @@ class StyleDeclarationInstance : public Instance {
 
   static JSClassExoticMethods m_exoticMethods;
 
-  std::unordered_map<std::string, JSValue> properties;
-  const EventTargetInstance* m_ownerEventTarget;
+  std::unordered_map<std::string, std::string> properties;
   friend EventTargetInstance;
 };
 

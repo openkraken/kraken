@@ -6,14 +6,15 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 
-mixin CSSSliverMixin on RenderStyleBase {
+mixin CSSSliverMixin on RenderStyle {
 
-  Axis _sliverDirection = Axis.vertical;
+  @override
   Axis get sliverDirection => _sliverDirection;
+  Axis _sliverDirection = Axis.vertical;
   set sliverDirection(Axis value) {
     if (_sliverDirection == value) return;
     _sliverDirection = value;
-    renderBoxModel!.markNeedsLayout();
+    renderBoxModel?.markNeedsLayout();
   }
 
   static Axis resolveAxis(String sliverDirection) {

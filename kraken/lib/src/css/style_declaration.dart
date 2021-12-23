@@ -6,6 +6,7 @@
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
+import 'package:quiver/collection.dart';
 
 typedef StyleChangeListener = void Function(String property,  String? original, String present);
 
@@ -44,6 +45,8 @@ List<String> _propertyOrders = [
 ];
 
 RegExp _kebabCaseReg = RegExp(r'[A-Z]');
+
+final LinkedLruHashMap<String, Map<String, String?>> _cachedExpandedShorthand = LinkedLruHashMap(maximumSize: 500);
 
 // CSS Object Model: https://drafts.csswg.org/cssom/#the-cssstyledeclaration-interface
 
@@ -169,51 +172,59 @@ class CSSStyleDeclaration {
   }
 
   void _expandShorthand(String propertyName, String normalizedValue, bool? isImportant) {
-    Map<String, String?> longhandProperties = {};
-    switch(propertyName) {
-      case PADDING:
-        CSSStyleProperty.setShorthandPadding(longhandProperties, normalizedValue);
-        break;
-      case MARGIN:
-        CSSStyleProperty.setShorthandMargin(longhandProperties, normalizedValue);
-        break;
-      case BACKGROUND:
-        CSSStyleProperty.setShorthandBackground(longhandProperties, normalizedValue);
-        break;
-      case BACKGROUND_POSITION:
-        CSSStyleProperty.setShorthandBackgroundPosition(longhandProperties, normalizedValue);
-        break;
-      case BORDER_RADIUS:
-        CSSStyleProperty.setShorthandBorderRadius(longhandProperties, normalizedValue);
-        break;
-      case OVERFLOW:
-        CSSStyleProperty.setShorthandOverflow(longhandProperties, normalizedValue);
-        break;
-      case FONT:
-        CSSStyleProperty.setShorthandFont(longhandProperties, normalizedValue);
-        break;
-      case FLEX:
-        CSSStyleProperty.setShorthandFlex(longhandProperties, normalizedValue);
-        break;
-      case FLEX_FLOW:
-        CSSStyleProperty.setShorthandFlexFlow(longhandProperties, normalizedValue);
-        break;
-      case BORDER:
-      case BORDER_TOP:
-      case BORDER_RIGHT:
-      case BORDER_BOTTOM:
-      case BORDER_LEFT:
-      case BORDER_COLOR:
-      case BORDER_STYLE:
-      case BORDER_WIDTH:
-        CSSStyleProperty.setShorthandBorder(longhandProperties, propertyName, normalizedValue);
-        break;
-      case TRANSITION:
-        CSSStyleProperty.setShorthandTransition(longhandProperties, normalizedValue);
-        break;
-      case TEXT_DECORATION:
-        CSSStyleProperty.setShorthandTextDecoration(longhandProperties, normalizedValue);
-        break;
+    Map<String, String?> longhandProperties;
+    String cacheKey = '$propertyName:$normalizedValue';
+    if (_cachedExpandedShorthand.containsKey(cacheKey)) {
+      longhandProperties = _cachedExpandedShorthand[cacheKey]!;
+    } else {
+      longhandProperties = {};
+
+      switch(propertyName) {
+        case PADDING:
+          CSSStyleProperty.setShorthandPadding(longhandProperties, normalizedValue);
+          break;
+        case MARGIN:
+          CSSStyleProperty.setShorthandMargin(longhandProperties, normalizedValue);
+          break;
+        case BACKGROUND:
+          CSSStyleProperty.setShorthandBackground(longhandProperties, normalizedValue);
+          break;
+        case BACKGROUND_POSITION:
+          CSSStyleProperty.setShorthandBackgroundPosition(longhandProperties, normalizedValue);
+          break;
+        case BORDER_RADIUS:
+          CSSStyleProperty.setShorthandBorderRadius(longhandProperties, normalizedValue);
+          break;
+        case OVERFLOW:
+          CSSStyleProperty.setShorthandOverflow(longhandProperties, normalizedValue);
+          break;
+        case FONT:
+          CSSStyleProperty.setShorthandFont(longhandProperties, normalizedValue);
+          break;
+        case FLEX:
+          CSSStyleProperty.setShorthandFlex(longhandProperties, normalizedValue);
+          break;
+        case FLEX_FLOW:
+          CSSStyleProperty.setShorthandFlexFlow(longhandProperties, normalizedValue);
+          break;
+        case BORDER:
+        case BORDER_TOP:
+        case BORDER_RIGHT:
+        case BORDER_BOTTOM:
+        case BORDER_LEFT:
+        case BORDER_COLOR:
+        case BORDER_STYLE:
+        case BORDER_WIDTH:
+          CSSStyleProperty.setShorthandBorder(longhandProperties, propertyName, normalizedValue);
+          break;
+        case TRANSITION:
+          CSSStyleProperty.setShorthandTransition(longhandProperties, normalizedValue);
+          break;
+        case TEXT_DECORATION:
+          CSSStyleProperty.setShorthandTextDecoration(longhandProperties, normalizedValue);
+          break;
+      }
+      _cachedExpandedShorthand[cacheKey] = longhandProperties;
     }
 
     if (longhandProperties.isNotEmpty) {
@@ -256,13 +267,26 @@ class CSSStyleDeclaration {
 
   bool _isValidValue(String propertyName, String normalizedValue) {
 
-    // Illegal value like '   ' after trim is '' should do nothing.
+    // Illegal value like '   ' after trimming is '' should do nothing.
     if (normalizedValue.isEmpty) return false;
+
+    // Always return true if is CSS function notation, for value is
+    // lazy calculated.
+    // Eg. var(--x), calc(1 + 1)
+    if (CSSFunction.isFunction(normalizedValue)) return true;
 
     // Validate value.
     switch (propertyName) {
       case WIDTH:
       case HEIGHT:
+        // Validation length type
+        if (!CSSLength.isNonNegativeLength(normalizedValue) &&
+          !CSSLength.isAuto(normalizedValue) &&
+          !CSSPercentage.isNonNegativePercentage(normalizedValue)
+        ) {
+          return false;
+        }
+        break;
       case TOP:
       case LEFT:
       case RIGHT:
@@ -282,8 +306,8 @@ class CSSStyleDeclaration {
       case MAX_WIDTH:
       case MAX_HEIGHT:
         if (normalizedValue != NONE &&
-          !CSSLength.isLength(normalizedValue) &&
-          !CSSPercentage.isPercentage(normalizedValue)
+          !CSSLength.isNonNegativeLength(normalizedValue) &&
+          !CSSPercentage.isNonNegativePercentage(normalizedValue)
         ) {
           return false;
         }
@@ -294,8 +318,8 @@ class CSSStyleDeclaration {
       case PADDING_LEFT:
       case PADDING_BOTTOM:
       case PADDING_RIGHT:
-        if (!CSSLength.isLength(normalizedValue) &&
-          !CSSPercentage.isPercentage(normalizedValue)
+        if (!CSSLength.isNonNegativeLength(normalizedValue) &&
+          !CSSPercentage.isNonNegativePercentage(normalizedValue)
         ) {
           return false;
         }
@@ -304,7 +328,7 @@ class CSSStyleDeclaration {
       case BORDER_TOP_WIDTH:
       case BORDER_LEFT_WIDTH:
       case BORDER_RIGHT_WIDTH:
-        if (!CSSLength.isLength(normalizedValue)) {
+        if (!CSSLength.isNonNegativeLength(normalizedValue)) {
           return false;
         }
         break;
@@ -330,7 +354,7 @@ class CSSStyleDeclaration {
 
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
-  void setProperty(String propertyName, value, [bool? isImportant]) {
+  void setProperty(String propertyName, String? value, [bool? isImportant]) {
     // Null or empty value means should be removed.
     if (isNullOrEmptyValue(value)) {
       removeProperty(propertyName, isImportant);
@@ -367,10 +391,13 @@ class CSSStyleDeclaration {
   }
 
   void flushPendingProperties() {
-    if (target?.parentNode?.renderer == null) return;
+    Element? _target = target;
+    // If style target element not exists, no need to do flush operation.
+    if (_target == null) return;
 
     // Display change from none to other value that the renderBoxModel is null.
-    if (_pendingProperties.containsKey(DISPLAY) && target!.isConnected) {
+    if (_pendingProperties.containsKey(DISPLAY) && _target.isConnected &&
+        _target.parentElement?.renderStyle.display != CSSDisplay.sliver) {
       String? prevValue = _properties[DISPLAY];
       String currentValue = _pendingProperties[DISPLAY]!;
       _properties[DISPLAY] = currentValue;
@@ -378,7 +405,10 @@ class CSSStyleDeclaration {
       _emitPropertyChanged(DISPLAY, prevValue, currentValue);
     }
 
-    RenderBoxModel? renderBoxModel = target!.renderBoxModel;
+    // If target has no renderer attached, no need to flush.
+    if (!_target.isRendererAttached) return;
+
+    RenderBoxModel? renderBoxModel = _target.renderBoxModel;
     if (_pendingProperties.isEmpty || renderBoxModel == null) {
       return;
     }

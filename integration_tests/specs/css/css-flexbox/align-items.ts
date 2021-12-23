@@ -1130,6 +1130,46 @@ describe('align-items', () => {
     await snapshot();
   });
 
+  it('does not work with stretch when align-self of flex item changed from auto to flex-start', async (done) => {
+    let flexbox;
+    let flexitem;
+
+    flexbox = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          'background-color': '#aaa',
+          position: 'relative',
+          flexDirection: 'column',
+          width: '200px',
+          height: '120px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (flexitem = createElement('div', {
+          style: {
+            'height': '50px',
+            'background-color': 'lightblue',
+            'box-sizing': 'border-box',
+            // 'align-self': 'flex-start',
+          },
+        })),
+      ]
+    );
+
+    BODY.appendChild(flexbox);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      flexitem.style.alignSelf = 'flex-start';
+      await snapshot();
+      done();
+    });
+  });
+
   it('should works with img with no size set', async () => {
     const container = createElement(
       'div',

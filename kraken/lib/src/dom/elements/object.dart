@@ -2,11 +2,7 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
-import 'dart:ffi';
-
 import 'package:flutter/rendering.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 
@@ -25,8 +21,8 @@ const Map<String, dynamic> _paramStyle = {
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/param
 class ParamElement extends Element {
-  ParamElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _paramStyle);
+  ParamElement(EventTargetContext? context)
+      : super(context, defaultStyle: _paramStyle);
 }
 
 _DefaultObjectElementClient _DefaultObjectElementClientFactory(ObjectElementHost objectElementHost) {
@@ -39,11 +35,10 @@ class ObjectElement extends Element implements ObjectElementHost {
   late ObjectElementClientFactory _objectElementClientFactory;
   late ObjectElementClient _objectElementClient;
 
-  ObjectElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _objectStyle, isIntrinsicBox: true) {
+  ObjectElement(EventTargetContext? context)
+      : super(context, defaultStyle: _objectStyle, isIntrinsicBox: true) {
     initObjectClient();
     initElementClient();
-    initDetachCallback(elementManager);
   }
 
   void initObjectClient() {
@@ -57,10 +52,6 @@ class ObjectElement extends Element implements ObjectElementHost {
     } catch (error, stackTrace) {
       print('$error\n$stackTrace');
     }
-  }
-
-  void initDetachCallback(final ElementManager elementManager) {
-    elementManager.setDetachCallback(disposeClient);
   }
 
   @override
