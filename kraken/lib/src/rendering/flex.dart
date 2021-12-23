@@ -375,46 +375,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
   }
 
-  @override
-  double computeMinIntrinsicWidth(double height) {
-    return _getIntrinsicSize(
-      sizingDirection: FlexDirection.row,
-      extent: height,
-      childSize: (RenderBox child, double? extent) =>
-          child.getMinIntrinsicWidth(extent!),
-    );
-  }
-
-  @override
-  double computeMaxIntrinsicWidth(double height) {
-    return _getIntrinsicSize(
-      sizingDirection: FlexDirection.row,
-      extent: height,
-      childSize: (RenderBox child, double? extent) =>
-          child.getMaxIntrinsicWidth(extent!),
-    );
-  }
-
-  @override
-  double computeMinIntrinsicHeight(double width) {
-    return _getIntrinsicSize(
-      sizingDirection: FlexDirection.column,
-      extent: width,
-      childSize: (RenderBox child, double? extent) =>
-          child.getMinIntrinsicHeight(extent!),
-    );
-  }
-
-  @override
-  double computeMaxIntrinsicHeight(double width) {
-    return _getIntrinsicSize(
-      sizingDirection: FlexDirection.column,
-      extent: width,
-      childSize: (RenderBox child, double? extent) =>
-          child.getMaxIntrinsicHeight(extent!),
-    );
-  }
-
   double _getFlexGrow(RenderBox child) {
     // Flex shrink has no effect on placeholder of positioned element
     if (child is RenderPositionPlaceholder) {
