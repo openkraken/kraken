@@ -19,8 +19,7 @@ DOMTimer::DOMTimer(JSValue callback) : m_callback(callback) {}
 JSClassID DOMTimer::classId{0};
 
 void DOMTimer::fire() {
-  /* 'callback' might be destroyed when calling itself (if it frees the
-     handler), so must take extra care */
+  // 'callback' might be destroyed when calling itself (if it frees the handler), so must take extra care.
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
   if (!JS_IsFunction(m_ctx, m_callback))
     return;
@@ -126,12 +125,12 @@ static JSValue setTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSVal
   }
 #endif
 
-  // Create a timer object to keep track timer callback
+  // Create a timer object to keep track timer callback.
   auto* timer = makeGarbageCollected<DOMTimer>(JS_DupValue(ctx, callbackValue))->initialize(context->ctx(), &DOMTimer::classId);
 
   auto timerId = getDartMethod()->setTimeout(timer, context->getContextId(), handleTransientCallback, timeout);
 
-  //   Register timerId.
+  // Register timerId.
   timer->setTimerId(timerId);
 
   context->timers()->installNewTimer(context, timerId, timer);
@@ -175,7 +174,7 @@ static JSValue setInterval(JSContext* ctx, JSValueConst this_val, int argc, JSVa
     return JS_ThrowTypeError(ctx, "Failed to execute 'setInterval': dart method (setInterval) is not registered.");
   }
 
-  // Create a timer object to keep track timer callback
+  // Create a timer object to keep track timer callback.
   auto* timer = makeGarbageCollected<DOMTimer>(JS_DupValue(ctx, callbackValue))->initialize(context->ctx(), &DOMTimer::classId);
 
   uint32_t timerId = getDartMethod()->setInterval(timer, context->getContextId(), handlePersistentCallback, timeout);

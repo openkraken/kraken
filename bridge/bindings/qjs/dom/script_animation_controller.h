@@ -21,7 +21,7 @@ class ScriptAnimationController : public GarbageCollected<ScriptAnimationControl
   uint32_t registerFrameCallback(FrameCallback* frameCallback);
   void cancelFrameCallback(uint32_t callbackId);
 
-  const char* getHumanReadableName() const override { return "ScriptAnimationController"; }
+  [[nodiscard]] FORCE_INLINE const char* getHumanReadableName() const override { return "ScriptAnimationController"; }
 
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
 

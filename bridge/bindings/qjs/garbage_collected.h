@@ -56,7 +56,7 @@ class GarbageCollected {
    *
    * @returns a human readable name for the object.
    */
-  [[nodiscard]] virtual const char* getHumanReadableName() const { return ""; };
+  [[nodiscard]] FORCE_INLINE virtual const char* getHumanReadableName() const { return ""; };
 
   FORCE_INLINE JSValue toQuickJS() { return jsObject; };
 
