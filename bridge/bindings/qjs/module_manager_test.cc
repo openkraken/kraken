@@ -4,20 +4,21 @@
  */
 
 #include <gtest/gtest.h>
-#include "bridge_qjs.h"
+#include "executing_context.h"
 #include "host_object.h"
-#include "js_context.h"
+#include "kraken_test_env.h"
+#include "page.h"
 
 namespace kraken::binding::qjs {
 
 TEST(ModuleManager, shouldThrowErrorWhenBadJSON) {
   bool static errorCalled = false;
-  auto* bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     std::string stdErrorMsg = std::string(errmsg);
     EXPECT_EQ(stdErrorMsg.find("TypeError: circular reference") != std::string::npos, true);
     errorCalled = true;
   });
-  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {};
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {};
 
   auto& context = bridge->getContext();
 
@@ -35,7 +36,7 @@ object.other = object;
 kraken.methodChannel.invokeMethod('abc', 'fn', object);
 )");
   context->evaluateJavaScript(code.c_str(), code.size(), "vm://", 0);
-  delete bridge;
+
   EXPECT_EQ(errorCalled, true);
 }
 

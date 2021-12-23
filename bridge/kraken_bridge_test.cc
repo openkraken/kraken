@@ -9,19 +9,15 @@
 #if KRAKEN_JSC_ENGINE
 #include "bridge_test_jsc.h"
 #elif KRAKEN_QUICK_JS_ENGINE
-#include "bridge_test_qjs.h"
+#include "page_test.h"
 #endif
 #include <atomic>
 
-kraken::JSBridgeTest** bridgeTestPool{nullptr};
+std::unordered_map<int, kraken::KrakenPageTest*> bridgeTestPool = std::unordered_map<int, kraken::KrakenPageTest*>();
 
 void initTestFramework(int32_t contextId) {
-  if (bridgeTestPool == nullptr) {
-    bridgeTestPool = new kraken::JSBridgeTest*[10];
-  }
-
-  auto bridge = static_cast<kraken::JSBridge*>(getJSContext(contextId));
-  auto bridgeTest = new kraken::JSBridgeTest(bridge);
+  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  auto bridgeTest = new kraken::KrakenPageTest(page);
   bridgeTestPool[contextId] = bridgeTest;
 }
 

@@ -13,7 +13,7 @@ namespace kraken::binding::qjs {
 class BlobBuilder;
 class BlobInstance;
 
-void bindBlob(std::unique_ptr<JSContext>& context);
+void bindBlob(std::unique_ptr<ExecutionContext>& context);
 
 class Blob : public HostClass {
  public:
@@ -21,13 +21,13 @@ class Blob : public HostClass {
   OBJECT_INSTANCE(Blob);
 
   Blob() = delete;
-  explicit Blob(JSContext* context);
+  explicit Blob(ExecutionContext* context);
 
-  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
-  static JSValue arrayBuffer(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue slice(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue text(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue arrayBuffer(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue slice(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue text(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
  private:
   friend BlobInstance;
@@ -64,8 +64,8 @@ class BlobInstance : public Instance {
 
 class BlobBuilder {
  public:
-  void append(JSContext& context, JSValue& value);
-  void append(JSContext& context, BlobInstance* blob);
+  void append(ExecutionContext& context, JSValue& value);
+  void append(ExecutionContext& context, BlobInstance* blob);
 
   std::vector<uint8_t> finalize();
 

@@ -37,10 +37,10 @@ const getPolyFillHeader = (outputName) => `/*
 #if KRAKEN_JSC_ENGINE
 #include "bridge_jsc.h"
 #elif KRAKEN_QUICK_JS_ENGINE
-#include "bridge_qjs.h"
+#include "page.h"
 #endif
 
-void initKraken${outputName}(kraken::JSBridge *bridge);
+void initKraken${outputName}(kraken::KrakenPage *page);
 
 #endif // KRAKEN_${outputName.toUpperCase()}_H
 `;
@@ -53,7 +53,7 @@ uint8_t bytes[${uint8Array.length}] = {${uint8Array.join(',')}}; }`;
 };
 
 const getPolyfillEvalCall = () => {
-  return 'bridge->evaluateByteCode(bytes, byteLength);';
+  return 'page->evaluateByteCode(bytes, byteLength);';
 }
 
 const getPolyFillSource = (source, outputName) => `/*
@@ -65,7 +65,7 @@ const getPolyFillSource = (source, outputName) => `/*
 
 ${getPolyFillJavaScriptSource(source)}
 
-void initKraken${outputName}(kraken::JSBridge *bridge) {
+void initKraken${outputName}(kraken::KrakenPage *page) {
   ${getPolyfillEvalCall()}
 }
 `;

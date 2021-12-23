@@ -6,17 +6,17 @@
 #ifndef KRAKENBRIDGE_MODULE_MANAGER_H
 #define KRAKENBRIDGE_MODULE_MANAGER_H
 
-#include "js_context.h"
+#include "executing_context.h"
 
 namespace kraken::binding::qjs {
 
 struct ModuleContext {
   JSValue callback;
-  JSContext* context;
+  ExecutionContext* context;
   list_head link;
 };
 
-void bindModuleManager(std::unique_ptr<JSContext>& context);
+void bindModuleManager(std::unique_ptr<ExecutionContext>& context);
 void handleInvokeModuleUnexpectedCallback(void* callbackContext, int32_t contextId, NativeString* errmsg, NativeString* json);
 }  // namespace kraken::binding::qjs
 

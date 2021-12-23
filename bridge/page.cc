@@ -7,8 +7,8 @@
 
 #include <atomic>
 #include "bindings/qjs/qjs_patch.h"
-#include "bridge_qjs.h"
 #include "dart_methods.h"
+#include "page.h"
 
 #include "bindings/qjs/bom/blob.h"
 #include "bindings/qjs/bom/console.h"
@@ -47,15 +47,12 @@ namespace kraken {
 
 using namespace binding::qjs;
 
-std::unordered_map<std::string, NativeByteCode> JSBridge::pluginByteCode{};
-ConsoleMessageHandler JSBridge::consoleMessageHandler{nullptr};
+std::unordered_map<std::string, NativeByteCode> KrakenPage::pluginByteCode{};
+ConsoleMessageHandler KrakenPage::consoleMessageHandler{nullptr};
 
-/**
- * JSRuntime
- */
-JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler& handler) : contextId(contextId) {
+KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : contextId(contextId) {
 #if ENABLE_PROFILE
-  double jsContextStartTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+  auto jsContextStartTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 #endif
   m_context = binding::qjs::createJSContext(contextId, handler, this);
 
@@ -116,19 +113,17 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler& handler) : conte
 #endif
 }
 
-bool JSBridge::parseHTML(const char* code, size_t length) {
+bool KrakenPage::parseHTML(const char* code, size_t length) {
   if (!m_context->isValid())
     return false;
-  Document* Document = Document::instance(m_context.get());
-  auto document = DocumentInstance::instance(Document);
-  JSValue bodyValue = JS_GetPropertyStr(m_context->ctx(), document->jsObject, "body");
+  JSValue bodyValue = JS_GetPropertyStr(m_context->ctx(), m_context->document()->jsObject, "body");
   auto* body = static_cast<ElementInstance*>(JS_GetOpaque(bodyValue, Element::classId()));
   HTMLParser::parseHTML(code, length, body);
   JS_FreeValue(m_context->ctx(), bodyValue);
   return true;
 }
 
-void JSBridge::invokeModuleEvent(NativeString* moduleName, const char* eventType, void* rawEvent, NativeString* extra) {
+void KrakenPage::invokeModuleEvent(NativeString* moduleName, const char* eventType, void* rawEvent, NativeString* extra) {
   if (!m_context->isValid())
     return;
 
@@ -171,7 +166,7 @@ void JSBridge::invokeModuleEvent(NativeString* moduleName, const char* eventType
   }
 }
 
-void JSBridge::evaluateScript(const NativeString* script, const char* url, int startLine) {
+void KrakenPage::evaluateScript(const NativeString* script, const char* url, int startLine) {
   if (!m_context->isValid())
     return;
 
@@ -185,50 +180,40 @@ void JSBridge::evaluateScript(const NativeString* script, const char* url, int s
 #endif
 }
 
-void JSBridge::evaluateScript(const uint16_t* script, size_t length, const char* url, int startLine) {
+void KrakenPage::evaluateScript(const uint16_t* script, size_t length, const char* url, int startLine) {
   if (!m_context->isValid())
     return;
   m_context->evaluateJavaScript(script, length, url, startLine);
 }
 
-void JSBridge::evaluateScript(const char* script, size_t length, const char* url, int startLine) {
+void KrakenPage::evaluateScript(const char* script, size_t length, const char* url, int startLine) {
   if (!m_context->isValid())
     return;
   m_context->evaluateJavaScript(script, length, url, startLine);
 }
 
-uint8_t* JSBridge::dumpByteCode(const char* script, size_t length, const char* url, size_t* byteLength) {
+uint8_t* KrakenPage::dumpByteCode(const char* script, size_t length, const char* url, size_t* byteLength) {
   if (!m_context->isValid())
     return nullptr;
   return m_context->dumpByteCode(script, length, url, byteLength);
 }
 
-void JSBridge::evaluateByteCode(uint8_t* bytes, size_t byteLength) {
+void KrakenPage::evaluateByteCode(uint8_t* bytes, size_t byteLength) {
   if (!m_context->isValid())
     return;
   m_context->evaluateByteCode(bytes, byteLength);
 }
 
-JSBridge::~JSBridge() {
+KrakenPage::~KrakenPage() {
+#if IS_TEST
   if (disposeCallback != nullptr) {
     disposeCallback(this);
   }
-
-  if (!m_context->isValid())
-    return;
-
-  if (m_disposeCallback != nullptr) {
-    this->m_disposeCallback(m_disposePrivateData);
-  }
+#endif
 }
 
-void JSBridge::reportError(const char* errmsg) {
+void KrakenPage::reportError(const char* errmsg) {
   m_handler(m_context->getContextId(), errmsg);
-}
-
-void JSBridge::setDisposeCallback(Task task, void* data) {
-  m_disposeCallback = task;
-  m_disposePrivateData = data;
 }
 
 }  // namespace kraken

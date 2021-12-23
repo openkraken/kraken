@@ -41,7 +41,7 @@ function generateMethodsHeader(object: ClassObject, type: PropType) {
   let methodsImpl: string[] = [];
   if (object.methods.length > 0) {
     let methods = uniqBy(object.methods, (o) => o.name);
-    methodsDefine = methods.map(o => `static JSValue ${o.name}(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);`);
+    methodsDefine = methods.map(o => `static JSValue ${o.name}(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);`);
 
     if (type == PropType.hostClass) {
       methodsImpl = methods.map(o => `DEFINE_PROTOTYPE_FUNCTION(${o.name}, ${o.args.length});`)
@@ -67,7 +67,7 @@ struct Native${object.name} {
 class ${object.name} : public ${object.type} {
 public:
   ${object.name}() = delete;
-  explicit ${object.name}(JSContext *context, Native${object.name} *nativePtr);
+  explicit ${object.name}(ExecutionContext *context, Native${object.name} *nativePtr);
 
   JSValue callNativeMethods(const char* method, int32_t argc,
                           NativeValue *argv);
@@ -111,7 +111,7 @@ ${addIndent(nativeStructPropsCode.join('\n'), 2)}
   }
 
   let constructorHeader = `\n
-void bind${object.name}(std::unique_ptr<JSContext> &context);
+void bind${object.name}(std::unique_ptr<ExecutionContext> &context);
 
 class ${object.name}Instance;
 
@@ -119,8 +119,8 @@ ${nativeStructCode}
 class ${object.name} : public ${object.type} {
 public:
   ${object.name}() = delete;
-  explicit ${object.name}(JSContext *context);
-  JSValue instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
+  explicit ${object.name}(ExecutionContext *context);
+  JSValue instanceConstructor(JSContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
   ${methodsDefine.join('\n  ')}
   OBJECT_INSTANCE(${object.name});
 private:

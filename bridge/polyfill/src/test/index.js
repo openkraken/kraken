@@ -60,7 +60,6 @@ class JasmineTracker {
     clearAllTimer();
     resetDocumentElement();
     kraken.methodChannel.clearMethodCallHandler();
-    __kraken_run_gc__();
   }
   specStarted(result) {
   }

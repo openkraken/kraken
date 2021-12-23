@@ -12,7 +12,7 @@
 #if KRAKEN_JSC_ENGINE
 #include "bindings/jsc/KOM/performance.h"
 #elif KRAKEN_QUICK_JS_ENGINE
-#include "bridge_qjs.h"
+#include "page.h"
 #endif
 
 #if KRAKEN_JSC_ENGINE
@@ -49,7 +49,7 @@
 std::atomic<bool> inited{false};
 std::atomic<int32_t> poolIndex{0};
 int maxPoolSize = 0;
-kraken::JSBridge** contextPool;
+kraken::KrakenPage** pageContextPool;
 NativeScreen screen;
 
 std::thread::id uiThreadId;
@@ -67,9 +67,9 @@ void printError(int32_t contextId, const char* errmsg) {
 
 namespace {
 
-void disposeAllBridge() {
+void disposeAllPages() {
   for (int i = 0; i <= poolIndex && i < maxPoolSize; i++) {
-    disposeContext(i);
+    disposePage(i);
   }
   poolIndex = 0;
   inited = false;
@@ -77,7 +77,7 @@ void disposeAllBridge() {
 
 int32_t searchForAvailableContextId() {
   for (int i = 0; i < maxPoolSize; i++) {
-    if (contextPool[i] == nullptr) {
+    if (pageContextPool[i] == nullptr) {
       return i;
     }
   }
@@ -86,33 +86,36 @@ int32_t searchForAvailableContextId() {
 
 }  // namespace
 
-void initJSContextPool(int poolSize) {
+void initJSPagePool(int poolSize) {
   uiThreadId = std::this_thread::get_id();
   // When dart hot restarted, should dispose previous bridge and clear task message queue.
   if (inited) {
-    disposeAllBridge();
+    disposeAllPages();
     foundation::UICommandBuffer::instance(0)->clear();
   };
-  contextPool = new kraken::JSBridge*[poolSize];
+  pageContextPool = new kraken::KrakenPage*[poolSize];
   for (int i = 1; i < poolSize; i++) {
-    contextPool[i] = nullptr;
+    pageContextPool[i] = nullptr;
   }
 
-  contextPool[0] = new kraken::JSBridge(0, printError);
+  pageContextPool[0] = new kraken::KrakenPage(0, printError);
   inited = true;
   maxPoolSize = poolSize;
 }
 
-void disposeContext(int32_t contextId) {
+void disposePage(int32_t contextId) {
   assert(contextId < maxPoolSize);
-  if (contextPool[contextId] == nullptr)
+  if (pageContextPool[contextId] == nullptr)
     return;
-  auto context = static_cast<kraken::JSBridge*>(contextPool[contextId]);
-  delete context;
-  contextPool[contextId] = nullptr;
+    // UnitTest will free page after test suit complete.
+#ifndef UNIT_TEST
+  auto* page = static_cast<kraken::KrakenPage*>(pageContextPool[contextId]);
+  delete page;
+#endif
+  pageContextPool[contextId] = nullptr;
 }
 
-int32_t allocateNewContext(int32_t targetContextId) {
+int32_t allocateNewPage(int32_t targetContextId) {
   if (targetContextId == -1) {
     targetContextId = ++poolIndex;
   }
@@ -121,58 +124,58 @@ int32_t allocateNewContext(int32_t targetContextId) {
     targetContextId = searchForAvailableContextId();
   }
 
-  assert(contextPool[targetContextId] == nullptr && (std::string("can not allocate JSBridge at index") + std::to_string(targetContextId) + std::string(": bridge have already exist.")).c_str());
-  auto context = new kraken::JSBridge(targetContextId, printError);
-  contextPool[targetContextId] = context;
+  assert(pageContextPool[targetContextId] == nullptr && (std::string("can not allocate page at index") + std::to_string(targetContextId) + std::string(": page have already exist.")).c_str());
+  auto* page = new kraken::KrakenPage(targetContextId, printError);
+  pageContextPool[targetContextId] = page;
   return targetContextId;
 }
 
-void* getJSContext(int32_t contextId) {
-  assert(checkContext(contextId) && "getJSContext: contextId is not valid.");
-  return contextPool[contextId];
+void* getPage(int32_t contextId) {
+  assert(checkPage(contextId) && "getPage: contextId is not valid.");
+  return pageContextPool[contextId];
 }
 
-bool checkContext(int32_t contextId) {
-  return inited && contextId < maxPoolSize && contextPool[contextId] != nullptr;
+bool checkPage(int32_t contextId) {
+  return inited && contextId < maxPoolSize && pageContextPool[contextId] != nullptr;
 }
 
-bool checkContext(int32_t contextId, void* context) {
-  if (contextPool[contextId] == nullptr)
+bool checkPage(int32_t contextId, void* context) {
+  if (pageContextPool[contextId] == nullptr)
     return false;
-  auto bridge = static_cast<kraken::JSBridge*>(getJSContext(contextId));
-  return bridge->getContext().get() == context;
+  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  return page->getContext().get() == context;
 }
 
 void evaluateScripts(int32_t contextId, NativeString* code, const char* bundleFilename, int startLine) {
-  assert(checkContext(contextId) && "evaluateScripts: contextId is not valid");
-  auto context = static_cast<kraken::JSBridge*>(getJSContext(contextId));
+  assert(checkPage(contextId) && "evaluateScripts: contextId is not valid");
+  auto context = static_cast<kraken::KrakenPage*>(getPage(contextId));
   context->evaluateScript(code, bundleFilename, startLine);
 }
 
 void evaluateQuickjsByteCode(int32_t contextId, uint8_t* bytes, int32_t byteLen) {
-  assert(checkContext(contextId) && "evaluateScripts: contextId is not valid");
-  auto context = static_cast<kraken::JSBridge*>(getJSContext(contextId));
+  assert(checkPage(contextId) && "evaluateScripts: contextId is not valid");
+  auto context = static_cast<kraken::KrakenPage*>(getPage(contextId));
   context->evaluateByteCode(bytes, byteLen);
 }
 
 void parseHTML(int32_t contextId, const char* code, int32_t length) {
-  assert(checkContext(contextId) && "parseHTML: contextId is not valid");
-  auto context = static_cast<kraken::JSBridge*>(getJSContext(contextId));
+  assert(checkPage(contextId) && "parseHTML: contextId is not valid");
+  auto context = static_cast<kraken::KrakenPage*>(getPage(contextId));
   context->parseHTML(code, length);
 }
 
 void reloadJsContext(int32_t contextId) {
-  assert(checkContext(contextId) && "reloadJSContext: contextId is not valid");
-  auto bridgePtr = getJSContext(contextId);
-  auto context = static_cast<kraken::JSBridge*>(bridgePtr);
-  auto newContext = new kraken::JSBridge(contextId, printError);
+  assert(checkPage(contextId) && "reloadJSContext: contextId is not valid");
+  auto bridgePtr = getPage(contextId);
+  auto context = static_cast<kraken::KrakenPage*>(bridgePtr);
+  auto newContext = new kraken::KrakenPage(contextId, printError);
   delete context;
-  contextPool[contextId] = newContext;
+  pageContextPool[contextId] = newContext;
 }
 
 void invokeModuleEvent(int32_t contextId, NativeString* moduleName, const char* eventType, void* event, NativeString* extra) {
-  assert(checkContext(contextId) && "invokeEventListener: contextId is not valid");
-  auto context = static_cast<kraken::JSBridge*>(getJSContext(contextId));
+  assert(checkPage(contextId) && "invokeEventListener: contextId is not valid");
+  auto context = static_cast<kraken::KrakenPage*>(getPage(contextId));
   context->invokeModuleEvent(moduleName, eventType, event, extra);
 }
 
@@ -201,7 +204,7 @@ KrakenInfo* getKrakenInfo() {
 }
 
 void setConsoleMessageHandler(ConsoleMessageHandler handler) {
-  kraken::JSBridge::consoleMessageHandler = handler;
+  kraken::KrakenPage::consoleMessageHandler = handler;
 }
 
 void dispatchUITask(int32_t contextId, void* context, void* callback) {
@@ -234,12 +237,12 @@ void clearUICommandItems(int32_t contextId) {
 }
 
 void registerContextDisposedCallbacks(int32_t contextId, Task task, void* data) {
-  assert(checkContext(contextId));
-  auto context = static_cast<kraken::JSBridge*>(getJSContext(contextId));
+  assert(checkPage(contextId));
+  auto context = static_cast<kraken::KrakenPage*>(getPage(contextId));
 }
 
 void registerPluginByteCode(uint8_t* bytes, int32_t length, const char* pluginName) {
-  kraken::JSBridge::pluginByteCode[pluginName] = NativeByteCode{bytes, length};
+  kraken::KrakenPage::pluginByteCode[pluginName] = NativeByteCode{bytes, length};
 }
 
 int32_t profileModeEnabled() {

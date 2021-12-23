@@ -125,7 +125,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindPerformance(std::unique_ptr<JSContext>& context);
+void bindPerformance(std::unique_ptr<ExecutionContext>& context);
 
 struct NativePerformanceEntry {
   NativePerformanceEntry(const std::string& name, const std::string& entryType, int64_t startTime, int64_t duration, int64_t uniqueId) : startTime(startTime), duration(duration), uniqueId(uniqueId) {
@@ -144,7 +144,7 @@ struct NativePerformanceEntry {
 class PerformanceEntry : public HostObject {
  public:
   PerformanceEntry() = delete;
-  explicit PerformanceEntry(JSContext* context, NativePerformanceEntry* m_nativePerformanceEntry);
+  explicit PerformanceEntry(ExecutionContext* context, NativePerformanceEntry* m_nativePerformanceEntry);
 
   DEFINE_READONLY_PROPERTY(name);
   DEFINE_READONLY_PROPERTY(entryType);
@@ -158,15 +158,15 @@ class PerformanceEntry : public HostObject {
 class PerformanceMark : public PerformanceEntry {
  public:
   PerformanceMark() = delete;
-  explicit PerformanceMark(JSContext* context, std::string& name, int64_t startTime);
-  explicit PerformanceMark(JSContext* context, NativePerformanceEntry* nativePerformanceEntry);
+  explicit PerformanceMark(ExecutionContext* context, std::string& name, int64_t startTime);
+  explicit PerformanceMark(ExecutionContext* context, NativePerformanceEntry* nativePerformanceEntry);
 };
 
 class PerformanceMeasure : public PerformanceEntry {
  public:
   PerformanceMeasure() = delete;
-  explicit PerformanceMeasure(JSContext* context, std::string& name, int64_t startTime, int64_t duration);
-  explicit PerformanceMeasure(JSContext* context, NativePerformanceEntry* nativePerformanceEntry);
+  explicit PerformanceMeasure(ExecutionContext* context, std::string& name, int64_t startTime, int64_t duration);
+  explicit PerformanceMeasure(ExecutionContext* context, NativePerformanceEntry* nativePerformanceEntry);
 };
 
 class NativePerformance {
@@ -179,22 +179,22 @@ class NativePerformance {
 class Performance : public HostObject {
  public:
   Performance() = delete;
-  explicit Performance(JSContext* context);
+  explicit Performance(ExecutionContext* context);
 
   OBJECT_INSTANCE(Performance);
 
-  static JSValue now(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue toJSON(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue clearMarks(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue clearMeasures(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue getEntries(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue getEntriesByName(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue getEntriesByType(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue mark(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue measure(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue now(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue toJSON(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue clearMarks(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue clearMeasures(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getEntries(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getEntriesByName(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getEntriesByType(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue mark(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue measure(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
 #if ENABLE_PROFILE
-  static JSValue __kraken_navigation_summary__(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue __kraken_navigation_summary__(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   void measureSummary(JSValue* exception);
 #endif
 

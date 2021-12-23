@@ -7,11 +7,16 @@
 #define KRAKENBRIDGE_EVENT_TARGET_H
 
 #include "bindings/qjs/dom/event.h"
+#include "bindings/qjs/executing_context.h"
 #include "bindings/qjs/host_class.h"
 #include "bindings/qjs/host_object.h"
-#include "bindings/qjs/js_context.h"
 #include "bindings/qjs/native_value.h"
 #include "bindings/qjs/qjs_patch.h"
+#include "event_listener_map.h"
+
+#if UNIT_TEST
+void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv);
+#endif
 
 namespace kraken::binding::qjs {
 
@@ -20,15 +25,15 @@ class NativeEventTarget;
 class CSSStyleDeclaration;
 class StyleDeclarationInstance;
 
-void bindEventTarget(std::unique_ptr<JSContext>& context);
+void bindEventTarget(std::unique_ptr<ExecutionContext>& context);
 
 class EventTarget : public HostClass {
  public:
   static JSClassID kEventTargetClassId;
-  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
   EventTarget() = delete;
-  explicit EventTarget(JSContext* context, const char* name);
-  explicit EventTarget(JSContext* context);
+  explicit EventTarget(ExecutionContext* context, const char* name);
+  explicit EventTarget(ExecutionContext* context);
 
   static JSClassID classId();
   static JSClassID classId(JSValue& value);
@@ -36,9 +41,9 @@ class EventTarget : public HostClass {
   OBJECT_INSTANCE(EventTarget);
 
  private:
-  static JSValue addEventListener(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue removeEventListener(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue dispatchEvent(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue addEventListener(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue removeEventListener(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue dispatchEvent(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
   DEFINE_PROTOTYPE_FUNCTION(addEventListener, 3);
   DEFINE_PROTOTYPE_FUNCTION(removeEventListener, 2);
@@ -56,7 +61,11 @@ struct NativeEventTarget {
   static void dispatchEventImpl(NativeEventTarget* nativeEventTarget, NativeString* eventType, void* nativeEvent, int32_t isCustomEvent);
   EventTargetInstance* instance{nullptr};
   NativeDispatchEvent dispatchEvent{nullptr};
+#if UNIT_TEST
+  CallNativeMethods callNativeMethods{reinterpret_cast<CallNativeMethods>(TEST_callNativeMethod)};
+#else
   CallNativeMethods callNativeMethods{nullptr};
+#endif
 };
 
 class EventTargetInstance : public Instance {
@@ -78,20 +87,30 @@ class EventTargetInstance : public Instance {
 
  protected:
   int32_t m_eventTargetId;
-  ObjectProperty m_eventHandlers{m_context, jsObject, "__eventHandlers", JS_NewObject(m_ctx)};
-  ObjectProperty m_propertyEventHandler{m_context, jsObject, "__propertyEventHandler", JS_NewObject(m_ctx)};
-  ObjectProperty m_properties{m_context, jsObject, "__properties", JS_NewObject(m_ctx)};
+  // EventListener handlers registered with addEventListener API.
+  // https://dom.spec.whatwg.org/#concept-event-listener
+  EventListenerMap m_eventListenerMap;
 
-  void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
+  // EventListener handlers registered with DOM attributes API.
+  // https://html.spec.whatwg.org/C/#event-handler-attributes
+  std::unordered_map<JSAtom, JSValue> m_eventHandlerMap;
+
+  // When javascript code set a property on EventTarget instance, EventTarget::setProperty callback will be called when
+  // property are not defined by Object.defineProperty or setProperty.
+  // We store there values in here.
+  std::unordered_map<JSAtom, JSValue> m_properties;
+
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
   static void copyNodeProperties(EventTargetInstance* newNode, EventTargetInstance* referenceNode);
 
-  static int hasProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom);
-  static JSValue getProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);
-  static int setProperty(QjsContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
-  static int deleteProperty(QjsContext* ctx, JSValueConst obj, JSAtom prop);
+  static int hasProperty(JSContext* ctx, JSValueConst obj, JSAtom atom);
+  static JSValue getProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);
+  static int setProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
+  static int deleteProperty(JSContext* ctx, JSValueConst obj, JSAtom prop);
 
-  void setPropertyHandler(JSString* p, JSValue value);
-  JSValue getPropertyHandler(JSString* p);
+  // Used for legacy "onEvent" attribute APIs.
+  void setAttributesEventHandler(JSString* p, JSValue value);
+  JSValue getAttributesEventHandler(JSString* p);
 
  private:
   bool internalDispatchEvent(EventInstance* eventInstance);

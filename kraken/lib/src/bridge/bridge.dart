@@ -12,8 +12,9 @@ import 'package:kraken/module.dart';
 import 'from_native.dart';
 import 'to_native.dart';
 
-/// the Kraken JS Bridge Size
-int kKrakenJSBridgePoolSize = 8;
+/// The maximum kraken pages running in the same times.
+/// Can be upgrade to larger amount if you have enough memory spaces.
+int kKrakenJSPagePoolSize = 1024;
 
 bool _firstView = true;
 
@@ -45,11 +46,11 @@ int initBridge() {
   }
 
   if (_firstView) {
-    initJSContextPool(kKrakenJSBridgePoolSize);
+    initJSPagePool(kKrakenJSPagePoolSize);
     _firstView = false;
     contextId = 0;
   } else {
-    contextId = allocateNewContext();
+    contextId = allocateNewPage();
     if (contextId == -1) {
       throw Exception('Can\' allocate new kraken bridge: bridge count had reach the maximum size.');
     }

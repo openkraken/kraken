@@ -13,7 +13,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindNode(std::unique_ptr<JSContext>& context);
+void bindNode(std::unique_ptr<ExecutionContext>& context);
 
 enum NodeType { ELEMENT_NODE = 1, TEXT_NODE = 3, COMMENT_NODE = 8, DOCUMENT_NODE = 9, DOCUMENT_TYPE_NODE = 10, DOCUMENT_FRAGMENT_NODE = 11 };
 
@@ -25,23 +25,23 @@ class TextNodeInstance;
 class Node : public EventTarget {
  public:
   Node() = delete;
-  Node(JSContext* context, const std::string& className) : EventTarget(context, className.c_str()) { JS_SetPrototype(m_ctx, m_prototypeObject, EventTarget::instance(m_context)->prototype()); }
-  Node(JSContext* context) : EventTarget(context, "Node") { JS_SetPrototype(m_ctx, m_prototypeObject, EventTarget::instance(m_context)->prototype()); }
+  Node(ExecutionContext* context, const std::string& className) : EventTarget(context, className.c_str()) { JS_SetPrototype(m_ctx, m_prototypeObject, EventTarget::instance(m_context)->prototype()); }
+  Node(ExecutionContext* context) : EventTarget(context, "Node") { JS_SetPrototype(m_ctx, m_prototypeObject, EventTarget::instance(m_context)->prototype()); }
 
   OBJECT_INSTANCE(Node);
 
-  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
   static JSClassID classId();
 
   static JSClassID classId(JSValue& value);
 
-  static JSValue cloneNode(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue appendChild(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue remove(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue removeChild(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue insertBefore(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue replaceChild(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue cloneNode(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue appendChild(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue remove(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue removeChild(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue insertBefore(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue replaceChild(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
  private:
   DEFINE_PROTOTYPE_PROPERTY(textContent);
@@ -62,8 +62,8 @@ class Node : public EventTarget {
   DEFINE_PROTOTYPE_FUNCTION(insertBefore, 2);
   DEFINE_PROTOTYPE_FUNCTION(replaceChild, 2);
 
-  static void traverseCloneNode(QjsContext* ctx, NodeInstance* baseNode, NodeInstance* targetNode);
-  static JSValue copyNodeValue(QjsContext* ctx, NodeInstance* node);
+  static void traverseCloneNode(JSContext* ctx, NodeInstance* baseNode, NodeInstance* targetNode);
+  static JSValue copyNodeValue(JSContext* ctx, NodeInstance* node);
   friend ElementInstance;
   friend TextNodeInstance;
 };
@@ -82,10 +82,10 @@ class NodeInstance : public EventTargetInstance {
   void removeNodeFlag(NodeFlag flag) const { m_nodeFlags.erase(flag); }
 
   NodeInstance() = delete;
-  explicit NodeInstance(Node* node, NodeType nodeType, DocumentInstance* document, JSClassID classId, std::string name)
-      : EventTargetInstance(node, classId, std::move(name)), m_document(document), nodeType(nodeType) {}
-  explicit NodeInstance(Node* node, NodeType nodeType, DocumentInstance* document, JSClassID classId, JSClassExoticMethods& exoticMethods, std::string name)
-      : EventTargetInstance(node, classId, exoticMethods, name), m_document(document), nodeType(nodeType) {}
+  explicit NodeInstance(Node* node, NodeType nodeType, JSClassID classId, std::string name)
+      : EventTargetInstance(node, classId, std::move(name)), m_document(m_context->document()), nodeType(nodeType) {}
+  explicit NodeInstance(Node* node, NodeType nodeType, JSClassID classId, JSClassExoticMethods& exoticMethods, std::string name)
+      : EventTargetInstance(node, classId, exoticMethods, name), m_document(m_context->document()), nodeType(nodeType) {}
   ~NodeInstance();
   bool isConnected();
   DocumentInstance* ownerDocument();
@@ -119,7 +119,7 @@ class NodeInstance : public EventTargetInstance {
   virtual void _notifyNodeInsert(NodeInstance* node);
 
  protected:
-  void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
  private:
   DocumentInstance* m_document{nullptr};

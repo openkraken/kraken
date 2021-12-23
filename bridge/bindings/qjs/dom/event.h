@@ -50,29 +50,29 @@ namespace kraken::binding::qjs {
 #define EVENT_LONG_PRESS "longpress"
 #define EVENT_SCALE "scale"
 
-void bindEvent(std::unique_ptr<JSContext>& context);
+void bindEvent(std::unique_ptr<ExecutionContext>& context);
 
 class EventInstance;
 
-using EventCreator = EventInstance* (*)(JSContext* context, void* nativeEvent);
+using EventCreator = EventInstance* (*)(ExecutionContext* context, void* nativeEvent);
 
 class Event : public HostClass {
  public:
   static JSClassID kEventClassID;
 
-  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
   Event() = delete;
-  explicit Event(JSContext* context);
+  explicit Event(ExecutionContext* context);
 
-  static EventInstance* buildEventInstance(std::string& eventType, JSContext* context, void* nativeEvent, bool isCustomEvent);
+  static EventInstance* buildEventInstance(std::string& eventType, ExecutionContext* context, void* nativeEvent, bool isCustomEvent);
   static void defineEvent(const std::string& eventType, EventCreator creator);
 
   OBJECT_INSTANCE(Event);
 
-  static JSValue stopPropagation(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue stopImmediatePropagation(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue preventDefault(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue initEvent(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue stopPropagation(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue stopImmediatePropagation(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue preventDefault(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue initEvent(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
  private:
   static std::unordered_map<std::string, EventCreator> m_eventCreatorMap;

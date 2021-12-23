@@ -11,18 +11,22 @@
 #include "elements/template_element.h"
 #include "text_node.h"
 
+#if UNIT_TEST
+#include "kraken_test_env.h"
+#endif
+
 namespace kraken::binding::qjs {
 
 std::once_flag kElementInitOnceFlag;
 
-void bindElement(std::unique_ptr<JSContext>& context) {
+void bindElement(std::unique_ptr<ExecutionContext>& context) {
   auto* constructor = Element::instance(context.get());
   //  auto* domRectConstructor = BoundingClientRect
   context->defineGlobalProperty("Element", constructor->jsObject);
   context->defineGlobalProperty("HTMLElement", JS_DupValue(context->ctx(), constructor->jsObject));
 }
 
-bool isJavaScriptExtensionElementInstance(JSContext* context, JSValue instance) {
+bool isJavaScriptExtensionElementInstance(ExecutionContext* context, JSValue instance) {
   if (JS_IsInstanceOf(context->ctx(), instance, Element::instance(context)->jsObject)) {
     auto* elementInstance = static_cast<ElementInstance*>(JS_GetOpaque(instance, Element::classId()));
     std::string tagName = elementInstance->getRegisteredTagName();
@@ -42,7 +46,7 @@ bool isJavaScriptExtensionElementInstance(JSContext* context, JSValue instance) 
 
 JSClassID Element::kElementClassId{0};
 
-Element::Element(JSContext* context) : Node(context, "Element") {
+Element::Element(ExecutionContext* context) : Node(context, "Element") {
   std::call_once(kElementInitOnceFlag, []() { JS_NewClassID(&kElementClassId); });
   JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
 }
@@ -123,7 +127,7 @@ std::string ElementAttributes::toString() {
   return s;
 }
 
-JSValue Element::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
+JSValue Element::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
   if (argc == 0)
     return JS_ThrowTypeError(ctx, "Illegal constructor");
   JSValue tagName = argv[0];
@@ -132,7 +136,7 @@ JSValue Element::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue 
     return JS_ThrowTypeError(ctx, "Illegal constructor");
   }
 
-  auto* context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
   std::string name = jsValueToStdString(ctx, tagName);
 
   auto* Document = Document::instance(context);
@@ -144,13 +148,13 @@ JSValue Element::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue 
   return element->jsObject;
 }
 
-JSValue Element::getBoundingClientRect(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Element::getBoundingClientRect(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   getDartMethod()->flushUICommand();
   return element->callNativeMethods("getBoundingClientRect", 0, nullptr);
 }
 
-JSValue Element::hasAttribute(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Element::hasAttribute(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'hasAttribute' on 'Element': 1 argument required, but only 0 present");
   }
@@ -173,7 +177,7 @@ JSValue Element::hasAttribute(QjsContext* ctx, JSValue this_val, int argc, JSVal
   return result;
 }
 
-JSValue Element::setAttribute(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Element::setAttribute(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc != 2) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'setAttribute' on 'Element': 2 arguments required, but only %d present", argc);
   }
@@ -218,7 +222,7 @@ JSValue Element::setAttribute(QjsContext* ctx, JSValue this_val, int argc, JSVal
   return JS_NULL;
 }
 
-JSValue Element::getAttribute(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Element::getAttribute(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc != 1) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'getAttribute' on 'Element': 1 argument required, but only 0 present");
   }
@@ -241,7 +245,7 @@ JSValue Element::getAttribute(QjsContext* ctx, JSValue this_val, int argc, JSVal
   return JS_NULL;
 }
 
-JSValue Element::removeAttribute(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Element::removeAttribute(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc != 1) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'removeAttribute' on 'Element': 1 argument required, but only 0 present");
   }
@@ -268,7 +272,7 @@ JSValue Element::removeAttribute(QjsContext* ctx, JSValue this_val, int argc, JS
   return JS_NULL;
 }
 
-JSValue Element::toBlob(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Element::toBlob(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   double devicePixelRatio = 1.0;
 
   if (argc > 0) {
@@ -293,7 +297,7 @@ JSValue Element::toBlob(QjsContext* ctx, JSValue this_val, int argc, JSValue* ar
       return;
 
     auto promiseContext = static_cast<PromiseContext*>(callbackContext);
-    QjsContext* ctx = promiseContext->context->ctx();
+    JSContext* ctx = promiseContext->context->ctx();
     if (error == nullptr) {
       std::vector<uint8_t> vec(bytes, bytes + length);
       JSValue arrayBuffer = JS_NewArrayBuffer(ctx, bytes, length, nullptr, nullptr, false);
@@ -344,44 +348,52 @@ JSValue Element::toBlob(QjsContext* ctx, JSValue this_val, int argc, JSValue* ar
   return promise;
 }
 
-JSValue Element::click(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Element::click(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+#if FLUTTER_BACKEND
   getDartMethod()->flushUICommand();
   auto element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   return element->callNativeMethods("click", 0, nullptr);
+#elif UNIT_TEST
+  auto element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
+  TEST_dispatchEvent(element, "click");
+  return JS_UNDEFINED;
+#else
+  return JS_UNDEFINED;
+#endif
 }
 
-JSValue Element::scroll(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Element::scroll(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue arguments[] = {jsValueToNativeValue(ctx, argv[0]), jsValueToNativeValue(ctx, argv[1])};
   return element->callNativeMethods("scroll", 2, arguments);
 }
 
-JSValue Element::scrollBy(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Element::scrollBy(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue arguments[] = {jsValueToNativeValue(ctx, argv[0]), jsValueToNativeValue(ctx, argv[1])};
   return element->callNativeMethods("scrollBy", 2, arguments);
 }
 
-IMPL_PROPERTY_GETTER(Element, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Element, nodeName)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   std::string tagName = element->tagName();
   return JS_NewString(ctx, tagName.c_str());
 }
 
-IMPL_PROPERTY_GETTER(Element, tagName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Element, tagName)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   std::string tagName = element->tagName();
   return JS_NewString(ctx, tagName.c_str());
 }
 
-IMPL_PROPERTY_GETTER(Element, className)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Element, className)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   JSAtom valueAtom = element->m_attributes->getAttribute("class");
   return JS_AtomToString(ctx, valueAtom);
 }
-IMPL_PROPERTY_SETTER(Element, className)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_SETTER(Element, className)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   JSAtom atom = JS_ValueToAtom(ctx, argv[0]);
   element->m_attributes->setAttribute("class", atom);
@@ -394,96 +406,96 @@ IMPL_PROPERTY_SETTER(Element, className)(QjsContext* ctx, JSValue this_val, int 
 
 enum class ViewModuleProperty { offsetTop, offsetLeft, offsetWidth, offsetHeight, clientWidth, clientHeight, clientTop, clientLeft, scrollTop, scrollLeft, scrollHeight, scrollWidth };
 
-IMPL_PROPERTY_GETTER(Element, offsetLeft)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Element, offsetLeft)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {Native_NewInt32(static_cast<int32_t>(ViewModuleProperty::offsetLeft))};
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
 
-IMPL_PROPERTY_GETTER(Element, offsetTop)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Element, offsetTop)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {Native_NewInt32(static_cast<int32_t>(ViewModuleProperty::offsetTop))};
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
 
-IMPL_PROPERTY_GETTER(Element, offsetWidth)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Element, offsetWidth)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {Native_NewInt32(static_cast<int32_t>(ViewModuleProperty::offsetWidth))};
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
 
-IMPL_PROPERTY_GETTER(Element, offsetHeight)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Element, offsetHeight)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {Native_NewInt32(static_cast<int32_t>(ViewModuleProperty::offsetHeight))};
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
 
-IMPL_PROPERTY_GETTER(Element, clientWidth)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Element, clientWidth)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {Native_NewInt32(static_cast<int32_t>(ViewModuleProperty::clientWidth))};
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
 
-IMPL_PROPERTY_GETTER(Element, clientHeight)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Element, clientHeight)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {Native_NewInt32(static_cast<int32_t>(ViewModuleProperty::clientHeight))};
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
 
-IMPL_PROPERTY_GETTER(Element, clientTop)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Element, clientTop)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {Native_NewInt32(static_cast<int32_t>(ViewModuleProperty::clientTop))};
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
 
-IMPL_PROPERTY_GETTER(Element, clientLeft)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Element, clientLeft)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {Native_NewInt32(static_cast<int32_t>(ViewModuleProperty::clientLeft))};
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
 
-IMPL_PROPERTY_GETTER(Element, scrollTop)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Element, scrollTop)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {Native_NewInt32(static_cast<int32_t>(ViewModuleProperty::scrollTop))};
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
-IMPL_PROPERTY_SETTER(Element, scrollTop)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_SETTER(Element, scrollTop)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {Native_NewInt32(static_cast<int32_t>(ViewModuleProperty::scrollTop)), jsValueToNativeValue(ctx, argv[0])};
   return element->callNativeMethods("setViewModuleProperty", 2, args);
 }
 
-IMPL_PROPERTY_GETTER(Element, scrollLeft)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Element, scrollLeft)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {Native_NewInt32(static_cast<int32_t>(ViewModuleProperty::scrollLeft))};
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
-IMPL_PROPERTY_SETTER(Element, scrollLeft)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_SETTER(Element, scrollLeft)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {Native_NewInt32(static_cast<int32_t>(ViewModuleProperty::scrollLeft)), jsValueToNativeValue(ctx, argv[0])};
   return element->callNativeMethods("setViewModuleProperty", 2, args);
 }
 
-IMPL_PROPERTY_GETTER(Element, scrollHeight)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Element, scrollHeight)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {Native_NewInt32(static_cast<int32_t>(ViewModuleProperty::scrollHeight))};
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
 
-IMPL_PROPERTY_GETTER(Element, scrollWidth)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Element, scrollWidth)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   NativeValue args[] = {Native_NewInt32(static_cast<int32_t>(ViewModuleProperty::scrollWidth))};
@@ -491,7 +503,7 @@ IMPL_PROPERTY_GETTER(Element, scrollWidth)(QjsContext* ctx, JSValue this_val, in
 }
 
 // Definition for firstElementChild
-IMPL_PROPERTY_GETTER(Element, firstElementChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Element, firstElementChild)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   int32_t len = arrayGetLength(ctx, element->childNodes);
 
@@ -508,7 +520,7 @@ IMPL_PROPERTY_GETTER(Element, firstElementChild)(QjsContext* ctx, JSValue this_v
 }
 
 // Definition for lastElementChild
-IMPL_PROPERTY_GETTER(Element, lastElementChild)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Element, lastElementChild)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   int32_t len = arrayGetLength(ctx, element->childNodes);
 
@@ -524,7 +536,7 @@ IMPL_PROPERTY_GETTER(Element, lastElementChild)(QjsContext* ctx, JSValue this_va
   return JS_NULL;
 }
 
-IMPL_PROPERTY_GETTER(Element, children)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Element, children)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   JSValue array = JS_NewArray(ctx);
   JSValue pushMethod = JS_GetPropertyStr(ctx, array, "push");
@@ -546,11 +558,11 @@ IMPL_PROPERTY_GETTER(Element, children)(QjsContext* ctx, JSValue this_val, int a
   return array;
 }
 
-IMPL_PROPERTY_GETTER(Element, innerHTML)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Element, innerHTML)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   return JS_NewString(ctx, element->innerHTML().c_str());
 }
-IMPL_PROPERTY_SETTER(Element, innerHTML)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_SETTER(Element, innerHTML)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   const char* chtml = JS_ToCString(ctx, argv[0]);
 
@@ -565,11 +577,11 @@ IMPL_PROPERTY_SETTER(Element, innerHTML)(QjsContext* ctx, JSValue this_val, int 
   return JS_NULL;
 }
 
-IMPL_PROPERTY_GETTER(Element, outerHTML)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Element, outerHTML)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   return JS_NewString(ctx, element->outerHTML().c_str());
 }
-IMPL_PROPERTY_SETTER(Element, outerHTML)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_SETTER(Element, outerHTML)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
 
@@ -797,7 +809,7 @@ void ElementInstance::_beforeUpdateId(JSAtom oldId, JSAtom newId) {
 }
 
 ElementInstance::ElementInstance(Element* element, std::string tagName, bool shouldAddUICommand)
-    : m_tagName(tagName), NodeInstance(element, NodeType::ELEMENT_NODE, DocumentInstance::instance(Document::instance(element->m_context)), Element::classId(), exoticMethods, "Element") {
+    : m_tagName(tagName), NodeInstance(element, NodeType::ELEMENT_NODE, Element::classId(), exoticMethods, "Element") {
   m_attributes = new ElementAttributes(m_context);
   JSValue arguments[] = {jsObject};
   JSValue style = JS_CallConstructor(m_ctx, CSSStyleDeclaration::instance(m_context)->jsObject, 1, arguments);
@@ -822,43 +834,43 @@ ElementAttributes* ElementInstance::attributes() {
   return m_attributes;
 }
 
-IMPL_PROPERTY_GETTER(BoundingClientRect, x)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+IMPL_PROPERTY_GETTER(BoundingClientRect, x)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->x);
 }
 
-IMPL_PROPERTY_GETTER(BoundingClientRect, y)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+IMPL_PROPERTY_GETTER(BoundingClientRect, y)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->y);
 }
 
-IMPL_PROPERTY_GETTER(BoundingClientRect, width)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+IMPL_PROPERTY_GETTER(BoundingClientRect, width)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->width);
 }
 
-IMPL_PROPERTY_GETTER(BoundingClientRect, height)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+IMPL_PROPERTY_GETTER(BoundingClientRect, height)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->height);
 }
 
-IMPL_PROPERTY_GETTER(BoundingClientRect, top)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+IMPL_PROPERTY_GETTER(BoundingClientRect, top)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->top);
 }
 
-IMPL_PROPERTY_GETTER(BoundingClientRect, right)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+IMPL_PROPERTY_GETTER(BoundingClientRect, right)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->right);
 }
 
-IMPL_PROPERTY_GETTER(BoundingClientRect, bottom)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+IMPL_PROPERTY_GETTER(BoundingClientRect, bottom)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->bottom);
 }
 
-IMPL_PROPERTY_GETTER(BoundingClientRect, left)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+IMPL_PROPERTY_GETTER(BoundingClientRect, left)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->left);
 }
 
