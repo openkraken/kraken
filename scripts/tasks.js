@@ -476,7 +476,7 @@ task(`build-ios-kraken-lib`, (done) => {
   execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm --target kraken kraken_static -- -j 12`, {
     stdio: 'inherit'
   });
-  
+
   // Generate builds scripts for ARMv7s, ARMv7
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
     -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
@@ -524,8 +524,8 @@ task(`build-ios-kraken-lib`, (done) => {
 
     if (buildMode === 'RelWithDebInfo') {
       execSync(`xcodebuild -create-xcframework \
-        -framework ${x64DynamicSDKPath} -debug-symbols ${x64DynamicSDKPath}/${target}.dSYM \
-        -framework ${armDynamicSDKPath} -debug-symbols ${armDynamicSDKPath}/${target}.dSYM -output ${frameworkPath}`, {
+        -framework ${x64DynamicSDKPath} -debug-symbols ${x64DynamicSDKPath}/../${target}.dSYM \
+        -framework ${armDynamicSDKPath} -debug-symbols ${armDynamicSDKPath}/../${target}.dSYM -output ${frameworkPath}`, {
         stdio: 'inherit'
       });
 
