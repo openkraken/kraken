@@ -74,19 +74,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     markNeedsLayout();
   }
 
-  /// If there is additional free space in the overall [RenderWrap] (e.g.,
-  /// The distance by which the child's top edge is inset from the top of the stack.
-  double? top;
-
-  /// The distance by which the child's right edge is inset from the right of the stack.
-  double? right;
-
-  /// The distance by which the child's bottom edge is inset from the bottom of the stack.
-  double? bottom;
-
-  /// The distance by which the child's left edge is inset from the left of the stack.
-  double? left;
-
   /// How the children within a run should be aligned relative to each other in
   /// the cross axis.
   ///
@@ -301,51 +288,59 @@ class RenderFlowLayout extends RenderLayoutBox {
   void _doPerformLayout() {
     beforeLayout();
 
+    List<RenderBoxModel> _positionedChildren = [];
+    List<RenderBox> _nonPositionedChildren = [];
+    List<RenderBoxModel> _stickyChildren = [];
+
+    // Prepare children of different type for layout.
     RenderBox? child = firstChild;
-
-    // Need to layout out of flow positioned element before normal flow element
-    // cause the size of RenderPositionPlaceholder in flex layout needs to use
-    // the size of its original RenderBoxModel.
     while (child != null) {
-      final RenderLayoutParentData childParentData =
-      child.parentData as RenderLayoutParentData;
-      if (childParentData.isPositioned) {
-        CSSPositionedLayout.layoutPositionedChild(
-          this, child as RenderBoxModel);
-      }
-      child = childParentData.nextSibling;
-    }
-
-    // Layout non positioned element
-    _layoutChildren();
-
-    // Set offset of positioned and sticky element
-    child = firstChild;
-    while (child != null) {
-      final RenderLayoutParentData childParentData =
-      child.parentData as RenderLayoutParentData;
-
+      final RenderLayoutParentData childParentData = child.parentData as RenderLayoutParentData;
       if (child is RenderBoxModel && childParentData.isPositioned) {
-        CSSPositionedLayout.applyPositionedChildOffset(this, child);
-
-        extendMaxScrollableSize(child);
-        ensureBoxSizeLargerThanScrollableSize();
-      } else if (child is RenderBoxModel &&
-        CSSPositionedLayout.isSticky(child)) {
-        RenderBoxModel scrollContainer = child.findScrollContainer()!;
-        // Sticky offset depends on the layout of scroll container, delay the calculation of
-        // sticky offset to the layout stage of  scroll container if its not layouted yet
-        // due to the layout order of Flutter renderObject tree is from down to up.
-        if (scrollContainer.hasSize) {
-          CSSPositionedLayout.applyStickyChildOffset(scrollContainer, child);
+        _positionedChildren.add(child);
+      } else {
+        _nonPositionedChildren.add(child);
+        if (child is RenderBoxModel && CSSPositionedLayout.isSticky(child)) {
+          _stickyChildren.add(child);
         }
       }
       child = childParentData.nextSibling;
     }
 
+    // Need to layout out of flow positioned element before normal flow element
+    // cause the size of RenderPositionPlaceholder in flex layout needs to use
+    // the size of its original RenderBoxModel.
+    for (RenderBoxModel child in _positionedChildren) {
+      CSSPositionedLayout.layoutPositionedChild(this, child);
+    }
+
+    // Layout non positioned element (include element in flow and
+    // placeholder of positioned element).
+    _layoutChildren(_nonPositionedChildren);
+
+    // Set offset of positioned element after flex box size is set.
+    for (RenderBoxModel child in _positionedChildren) {
+      CSSPositionedLayout.applyPositionedChildOffset(this, child);
+      // Position of positioned element affect the scroll size of container.
+      extendMaxScrollableSize(child);
+      ensureBoxSizeLargerThanScrollableSize();
+    }
+
+    // Set offset of sticky element on each layout.
+    for (RenderBoxModel child in _stickyChildren) {
+      RenderBoxModel scrollContainer = child.findScrollContainer()!;
+      // Sticky offset depends on the layout of scroll container, delay the calculation of
+      // sticky offset to the layout stage of  scroll container if its not layouted yet
+      // due to the layout order of Flutter renderObject tree is from down to up.
+      if (scrollContainer.hasSize) {
+        CSSPositionedLayout.applyStickyChildOffset(scrollContainer, child);
+      }
+    }
+
     bool isScrollContainer =
-    (renderStyle.effectiveOverflowX != CSSOverflowType.visible ||
-      renderStyle.effectiveOverflowY != CSSOverflowType.visible);
+      renderStyle.effectiveOverflowX != CSSOverflowType.visible
+      || renderStyle.effectiveOverflowY != CSSOverflowType.visible;
+
     if (isScrollContainer) {
       // Find all the sticky children when scroll container is layouted
       stickyChildren = findStickyChildren();
@@ -358,17 +353,14 @@ class RenderFlowLayout extends RenderLayoutBox {
     didLayout();
   }
 
-  void _layoutChildren() {
-    RenderBox? child = firstChild;
-
+  // There are 3 steps for layout children.
+  // 1. Layout children to generate line boxes metrics.
+  // 2. Set flex container size according to children size and its own size styles.
+  // 3. Align children according to alignment properties.
+  void _layoutChildren(List<RenderBox> children) {
     // If no child exists, stop layout.
-    if (childCount == 0) {
-      Size layoutContentSize = getContentSize(
-        contentWidth: 0,
-        contentHeight: 0,
-      );
-      setMaxScrollableSize(layoutContentSize);
-      size = getBoxSize(layoutContentSize);
+    if (children.isEmpty) {
+      _setContainerSizeWithNoChild();
       return;
     }
 
@@ -405,14 +397,8 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     WhiteSpace? whiteSpace = renderStyle.whiteSpace;
 
-    while (child != null) {
-      final RenderLayoutParentData childParentData =
-          child.parentData as RenderLayoutParentData;
-
-      if (childParentData.isPositioned) {
-        child = childParentData.nextSibling;
-        continue;
-      }
+    for (RenderBox child in children) {
+      final RenderLayoutParentData childParentData = child.parentData as RenderLayoutParentData;
 
       int? childNodeId;
       if (child is RenderTextBox) {
@@ -437,10 +423,10 @@ class RenderFlowLayout extends RenderLayoutBox {
       bool isChildNeedsLayout = true;
 
       if (child.hasSize &&
-          !needsRelayout &&
-          (childConstraints == child.constraints) &&
-          ((child is RenderBoxModel && !child.needsLayout) ||
-              (child is RenderTextBox && !child.needsLayout))) {
+        !needsRelayout &&
+        (childConstraints == child.constraints) &&
+        ((child is RenderBoxModel && !child.needsLayout) ||
+          (child is RenderTextBox && !child.needsLayout))) {
         isChildNeedsLayout = false;
       }
 
@@ -455,12 +441,12 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (child is RenderBoxModel && needsRelayout) {
           childConstraints = BoxConstraints(
             minWidth: childConstraints.maxWidth != double.infinity
-                ? childConstraints.maxWidth
-                : 0,
+              ? childConstraints.maxWidth
+              : 0,
             maxWidth: double.infinity,
             minHeight: childConstraints.maxHeight != double.infinity
-                ? childConstraints.maxHeight
-                : 0,
+              ? childConstraints.maxHeight
+              : 0,
             maxHeight: double.infinity,
           );
         }
@@ -469,7 +455,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (kProfileMode && PerformanceTiming.enabled()) {
           DateTime childLayoutEnd = DateTime.now();
           childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch -
-              childLayoutStart.microsecondsSinceEpoch);
+            childLayoutStart.microsecondsSinceEpoch);
         }
       }
 
@@ -481,15 +467,15 @@ class RenderFlowLayout extends RenderLayoutBox {
         RenderBoxModel? childRenderBoxModel = positionHolder.positioned;
         if (childRenderBoxModel != null) {
           RenderLayoutParentData childParentData =
-              childRenderBoxModel.parentData as RenderLayoutParentData;
+          childRenderBoxModel.parentData as RenderLayoutParentData;
           if (childParentData.isPositioned) {
             childMainAxisExtent = childCrossAxisExtent = 0;
           }
         }
       }
       if (runChildren.isNotEmpty &&
-          // Current is block.
-          (_isChildBlockLevel(child) ||
+        // Current is block.
+        (_isChildBlockLevel(child) ||
           // Previous is block.
           _isChildBlockLevel(preChild) ||
           // Line length is exceed container.
@@ -522,7 +508,6 @@ class RenderFlowLayout extends RenderLayoutBox {
         verticalAlign = childRenderStyle.verticalAlign;
       }
 
-
       bool isLineHeightValid = _isLineHeightValid(child);
 
       // Vertical align is only valid for inline box
@@ -547,10 +532,10 @@ class RenderFlowLayout extends RenderLayoutBox {
 
         double extentAboveBaseline = childAscent + childLeading / 2;
         double extentBelowBaseline = childMarginTop +
-            childSize.height +
-            childMarginBottom -
-            childAscent +
-            childLeading / 2;
+          childSize.height +
+          childMarginBottom -
+          childAscent +
+          childLeading / 2;
 
         maxSizeAboveBaseline = math.max(
           extentAboveBaseline,
@@ -569,7 +554,6 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       childParentData.runIndex = runMetrics.length;
       preChild = child;
-      child = childParentData.nextSibling;
     }
 
     if (runChildren.isNotEmpty) {
@@ -644,15 +628,15 @@ class RenderFlowLayout extends RenderLayoutBox {
     double crossAxisOffset = flipCrossAxis
         ? crossAxisContentSize - runLeadingSpace
         : runLeadingSpace;
-    child = firstChild;
 
-    /// Set offset of children
-    for (int i = 0; i < runCount; ++i) {
+    // Set offset of children in each line.
+    for (int i = 0; i < runMetrics.length; ++i) {
       final _RunMetrics metrics = runMetrics[i];
       final double runMainAxisExtent = metrics.mainAxisExtent;
       final double runCrossAxisExtent = metrics.crossAxisExtent;
       final double runBaselineExtent = metrics.baselineExtent;
       final Map<int?, RenderBox> runChildren = metrics.runChildren;
+      final List<RenderBox> runChildrenList = runChildren.values.toList();
       final int runChildrenCount = metrics.runChildren.length;
       final double mainAxisFreeSpace = math.max(0.0, mainAxisContentSize - runMainAxisExtent);
 
@@ -698,15 +682,10 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       if (flipCrossAxis) crossAxisOffset -= runCrossAxisExtent;
 
-      while (child != null) {
+      for (RenderBox child in runChildrenList) {
         final RenderLayoutParentData childParentData =
-            child.parentData as RenderLayoutParentData;
+        child.parentData as RenderLayoutParentData;
 
-        if (childParentData.isPositioned) {
-          child = childParentData.nextSibling;
-          continue;
-        }
-        if (childParentData.runIndex != i) break;
         final double childMainAxisExtent = _getMainAxisExtent(child);
         final double childCrossAxisExtent = _getCrossAxisExtent(child);
 
@@ -718,14 +697,14 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (child is RenderBoxModel) {
           RenderStyle childRenderStyle = child.renderStyle;
           CSSDisplay? childEffectiveDisplay =
-              childRenderStyle.effectiveDisplay;
+            childRenderStyle.effectiveDisplay;
           CSSLengthValue marginLeft = childRenderStyle.marginLeft;
           CSSLengthValue marginRight = childRenderStyle.marginRight;
 
           // 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right' +
           // 'border-right-width' + 'margin-right' = width of containing block
           if (childEffectiveDisplay == CSSDisplay.block ||
-              childEffectiveDisplay == CSSDisplay.flex) {
+            childEffectiveDisplay == CSSDisplay.flex) {
             if (marginLeft.isAuto) {
               double remainingSpace = mainAxisContentSize - childMainAxisExtent;
               if (marginRight.isAuto) {
@@ -740,9 +719,9 @@ class RenderFlowLayout extends RenderLayoutBox {
         // Always align to the top of run when positioning positioned element placeholder
         // @HACK(kraken): Judge positioned holder to impl top align.
         final double childCrossAxisOffset = isPositionPlaceholder(child)
-            ? 0
-            : _getChildCrossAxisOffset(
-                flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
+          ? 0
+          : _getChildCrossAxisOffset(
+          flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
         if (flipMainAxis) childMainPosition -= childMainAxisExtent;
 
         Size? childSize = _getChildSize(child);
@@ -774,21 +753,21 @@ class RenderFlowLayout extends RenderLayoutBox {
           switch (verticalAlign) {
             case VerticalAlign.baseline:
               childLineExtent =
-                  lineBoxLeading / 2 + (runBaselineExtent - childAscent);
+                lineBoxLeading / 2 + (runBaselineExtent - childAscent);
               break;
             case VerticalAlign.top:
               childLineExtent = childLeading / 2;
               break;
             case VerticalAlign.bottom:
               childLineExtent =
-                  (lineBoxHeight ?? runCrossAxisExtent) -
-                      childSize!.height -
-                      childLeading / 2;
+                (lineBoxHeight ?? runCrossAxisExtent) -
+                  childSize!.height -
+                  childLeading / 2;
               break;
-            // @TODO Vertical align middle needs to caculate the baseline of the parent box plus half the x-height of the parent from W3C spec,
-            // currently flutter lack the api to caculate x-height of glyph
-            //  case VerticalAlign.middle:
-            //  break;
+          // @TODO Vertical align middle needs to caculate the baseline of the parent box plus half the x-height of the parent from W3C spec,
+          // currently flutter lack the api to caculate x-height of glyph
+          //  case VerticalAlign.middle:
+          //  break;
           }
         }
 
@@ -809,15 +788,15 @@ class RenderFlowLayout extends RenderLayoutBox {
 
         // No need to add padding and border for scrolling content box.
         Offset relativeOffset = _getOffset(
-            childMainPosition +
-                renderStyle.paddingLeft.computedValue +
-                renderStyle.effectiveBorderLeftWidth.computedValue +
-                childMarginLeft,
-            crossAxisOffset +
-                childLineExtent +
-                renderStyle.paddingTop.computedValue +
-                renderStyle.effectiveBorderTopWidth.computedValue +
-                childMarginTop);
+          childMainPosition +
+            renderStyle.paddingLeft.computedValue +
+            renderStyle.effectiveBorderLeftWidth.computedValue +
+            childMarginLeft,
+          crossAxisOffset +
+            childLineExtent +
+            renderStyle.paddingTop.computedValue +
+            renderStyle.effectiveBorderTopWidth.computedValue +
+            childMarginTop);
         // Apply position relative offset change.
         CSSPositionedLayout.applyRelativeOffset(relativeOffset, child);
 
@@ -825,8 +804,6 @@ class RenderFlowLayout extends RenderLayoutBox {
           childMainPosition -= childBetweenSpace;
         else
           childMainPosition += childMainAxisExtent + childBetweenSpace;
-
-        child = childParentData.nextSibling;
       }
 
       if (flipCrossAxis)
@@ -834,6 +811,16 @@ class RenderFlowLayout extends RenderLayoutBox {
       else
         crossAxisOffset += runCrossAxisExtent + runBetweenSpace;
     }
+  }
+
+  // Set size when layout has no child.
+  void _setContainerSizeWithNoChild() {
+    Size layoutContentSize = getContentSize(
+      contentWidth: 0,
+      contentHeight: 0,
+    );
+    setMaxScrollableSize(layoutContentSize);
+    size = getBoxSize(layoutContentSize);
   }
 
   /// Compute distance to baseline of flow layout

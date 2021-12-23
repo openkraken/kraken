@@ -584,9 +584,9 @@ class RenderFlexLayout extends RenderLayoutBox {
       || renderStyle.effectiveOverflowY != CSSOverflowType.visible;
 
     if (isScrollContainer) {
-      // Find all the sticky children when scroll container is layouted
+      // Find all the sticky children when scroll container is layouted.
       stickyChildren = findStickyChildren();
-      // Calculate the offset of its sticky children
+      // Calculate the offset of its sticky children.
       for (RenderBoxModel stickyChild in stickyChildren) {
         CSSPositionedLayout.applyStickyChildOffset(this, stickyChild);
       }
@@ -596,10 +596,10 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   // There are 4 steps for layout children.
-  // 1. Layout children in flow order to calculate flex lines according to its constaints and flex-wrap property.
-  // 2. Relayout children according to flex-grow and flex-shrink factor and alignment in cross axis(align-items).
-  // 3. Set flex container size according to children size.
-  // 4. Align children according to justify-content, align-items and align-self properties.
+  // 1. Layout children to generate flex line boxes metrics.
+  // 2. Relayout children according to flex factor properties and alignment properties in cross axis.
+  // 3. Set flex container size according to children size and its own size styles.
+  // 4. Align children according to alignment properties.
   void _layoutChildren(List<RenderBox> children) {
     // If no child exists, stop layout.
     if (children.isEmpty) {
@@ -633,7 +633,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     };
 
     // Layout children in flow order to calculate flex lines.
-    _layoutChildrenByFlexLine(
+    _layoutChildrenByFlexLines(
       _flexItemChildren,
       _runMetrics,
       _runSpacingMap,
@@ -651,7 +651,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Set flex container size according to children size.
     _setContainerSize(
       _runMetrics,
-      _runSpacingMap,
       _containerSizeMap,
     );
 
@@ -671,7 +670,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         'cross': 0.0,
       };
       List<RenderBox> _positionPlaceholderChildren = [child];
-      _layoutChildrenByFlexLine(
+      _layoutChildrenByFlexLines(
         _positionPlaceholderChildren,
         _runMetrics,
         _runSpacingMap,
@@ -692,7 +691,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     );
   }
 
-  // Set size when flexbox has no child.
+  // Set size when layout has no child.
   void _setContainerSizeWithNoChild() {
     Size layoutContentSize = getContentSize(
       contentWidth: 0,
@@ -779,7 +778,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   // Layout children in flow order to calculate flex lines according to its constraints and flex-wrap property.
-  void _layoutChildrenByFlexLine(
+  void _layoutChildrenByFlexLines(
     List<RenderBox> children,
     List<_RunMetrics> _runMetrics,
     Map<String, double> _runSpacingMap,
@@ -811,7 +810,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       flexLineLimit = containerBox!.contentConstraints!.maxHeight;
     }
 
-    // Infos about each flex item in each flex line
+    // Info about each flex item in each flex line
     Map<int?, _RunChild> runChildren = {};
 
     for (RenderBox child in children) {
@@ -1469,7 +1468,6 @@ class RenderFlexLayout extends RenderLayoutBox {
   // Set flex container size according to children size.
   void _setContainerSize(
     List<_RunMetrics> _runMetrics,
-    Map<String, double> _runSpacingMap,
     Map<String, double> _containerSizeMap,
   ) {
     if (_runMetrics.isEmpty) {
