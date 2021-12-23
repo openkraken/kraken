@@ -1457,7 +1457,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         );
         child.layout(childConstraints, parentUsesSize: true);
 
-        // @FIXME: need to update _runMetrics cause child relayout may affect container size
         if (kProfileMode && PerformanceTiming.enabled()) {
           DateTime childLayoutEnd = DateTime.now();
           childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch -
@@ -1504,7 +1503,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       if (isStretchSelf) {
         bool isFlexWrap = renderStyle.flexWrap == FlexWrap.wrap ||
             renderStyle.flexWrap == FlexWrap.wrapReverse;
-        final double runCrossAxisExtent = hasSize ? size.height : metrics.crossAxisExtent;
+        final double runCrossAxisExtent = metrics.crossAxisExtent;
         if (_isHorizontalFlexDirection) {
           CSSLengthValue marginTop = childRenderStyle.marginTop;
           CSSLengthValue marginBottom = childRenderStyle.marginBottom;
@@ -2064,7 +2063,7 @@ class RenderFlexLayout extends RenderLayoutBox {
                 alignment = 'center';
                 break;
               case AlignItems.baseline:
-              // FIXME: baseline alignment in wrap-reverse flexWrap may display different from browser in some case
+                // FIXME: baseline alignment in wrap-reverse flexWrap may display different from browser in some case
                 if (_isHorizontalFlexDirection) {
                   alignment = 'baseline';
                 } else if (renderStyle.flexWrap == FlexWrap.wrapReverse) {
