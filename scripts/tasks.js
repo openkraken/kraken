@@ -499,7 +499,7 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit'
   });
 
-  const targetSourceFrameworks = ['kraken_bridge', 'quickjs'];
+  const targetSourceFrameworks = ['kraken_bridge', 'quick'];
 
   targetSourceFrameworks.forEach(target => {
     const armDynamicSDKPath = path.join(paths.bridge, `build/ios/lib/arm/${target}.framework`);
@@ -625,7 +625,7 @@ task('build-android-kraken-lib', (done) => {
 
   const soFileNames = [
     'libkraken',
-    'libquickjs',
+    'libquick',
     'libc++_shared'
   ];
 

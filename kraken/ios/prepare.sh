@@ -13,5 +13,5 @@ if [ -L "quickjs.xcframework" ]; then
 fi
 
 # apply patch for flutter 2.5.x
-cd $ROOT/../
-sh ./patches/apply_patch.sh
+#cd $ROOT/../
+#sh ./patches/apply_patch.sh

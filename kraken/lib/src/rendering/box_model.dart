@@ -1230,8 +1230,10 @@ class RenderBoxModel extends RenderBox
   }
 
   /// Called when its corresponding element disposed
+  @override
   @mustCallSuper
   void dispose() {
+    super.dispose();
     // Clear renderObjects in list when disposed to avoid memory leak
     if (fixedChildren.isNotEmpty) {
       fixedChildren.clear();

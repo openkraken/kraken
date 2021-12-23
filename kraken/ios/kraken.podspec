@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'kraken'
-  s.version          = '0.6.3'
+  s.version          = '0.9.1'
   s.summary          = 'A high-performance, web standards-compliant rendering engine.'
   s.description      = <<-DESC
 A high-performance, web standards-compliant rendering engine.
@@ -17,7 +17,7 @@ A high-performance, web standards-compliant rendering engine.
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
   s.platform = :ios, '8.0'
-  s.vendored_frameworks = 'kraken_bridge.xcframework', 'quickjs.xcframework'
+  s.vendored_frameworks = 'kraken_bridge.xcframework', 'quick.xcframework'
   s.prepare_command = 'bash prepare.sh'
 
   # Flutter.framework does not contain a i386 slice. Only x86_64 simulators are supported.
