@@ -59,13 +59,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   List<_RunMetrics> _lineBoxMetrics = <_RunMetrics>[];
 
   @override
-  void dispose() {
-    super.dispose();
-
-    _lineBoxMetrics.clear();
-  }
-
-  @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderLayoutParentData) {
       child.parentData = RenderLayoutParentData();
@@ -74,6 +67,13 @@ class RenderFlowLayout extends RenderLayoutBox {
       child.parentData = CSSPositionedLayout.getPositionParentData(
           child, child.parentData as RenderLayoutParentData);
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    _lineBoxMetrics.clear();
   }
 
   double _getMainAxisExtent(RenderBox child) {

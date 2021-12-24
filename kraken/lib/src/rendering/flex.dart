@@ -144,13 +144,13 @@ bool? _startIsTopLeft(FlexDirection direction) {
 ///    layouted later depends on the size of its original RenderBoxModel.
 /// 2. Layout flex items (not including position child and its position placeholder renderObject)
 ///    with no constraints and compute information of flex lines.
-/// 3. Relayout children if flex factor styles (flex-grow/flex-shrink) or cross axis stretch style (align-items) exist.
+/// 3. Relayout children if flex factor styles (eg. flex-grow/flex-shrink) or cross axis stretch style (eg. align-items) exist.
 /// 4. Set flex container depends on children size and container size styles.
-/// 5. Set children offset based on flex container size and flex alignment styles.
+/// 5. Set children offset based on flex container size and flex alignment styles (eg. justify-content).
 /// 6. Layout and set offset of all the positioned placeholder renderObjects based on flex container size and
 ///    flex alignment styles cause positioned placeholder renderObject layout in a separated layer which is different
 ///    from flow layout algorithm.
-/// 7. Set positioned child offset based on flex container size and its offset styles.
+/// 7. Set positioned child offset based on flex container size and its offset styles (eg. top/right/bottom/left).
 ///
 class RenderFlexLayout extends RenderLayoutBox {
   RenderFlexLayout({
@@ -170,13 +170,6 @@ class RenderFlexLayout extends RenderLayoutBox {
   // Cache original constraints of children on the first layout.
   final Map<int, BoxConstraints> _childrenOldConstraints = {};
 
-  // Set during layout if overflow occurred on the main axis.
-  double? _overflow;
-
-  // Check whether any meaningful overflow is present. Values below an epsilon
-  // are treated as not overflowing.
-  bool get _hasOverflow => _overflow != null && _overflow! > precisionErrorTolerance;
-
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderLayoutParentData) {
@@ -188,10 +181,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
   }
 
-  bool get _isHorizontalFlexDirection {
-    return CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
-  }
-
   @override
   void dispose() {
     super.dispose();
@@ -199,6 +188,10 @@ class RenderFlexLayout extends RenderLayoutBox {
     _flexLineBoxMetrics.clear();
     _childrenIntrinsicMainSizes.clear();
     _childrenOldConstraints.clear();
+  }
+
+  bool get _isHorizontalFlexDirection {
+    return CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
   }
 
   // Get start/end padding in the main axis according to flex direction.
@@ -1730,7 +1723,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       bool isFlexGrow = mainContentSizeDelta > 0 && totalFlexGrow > 0;
       bool isFlexShrink = mainContentSizeDelta < 0 && totalFlexShrink > 0;
 
-      _overflow = math.max(0.0, -mainContentSizeDelta);
       // If flex grow or flex shrink exists, remaining space should be zero
       final double remainingSpace =
           (isFlexGrow || isFlexShrink) ? 0 : mainContentSizeDelta;
@@ -2260,17 +2252,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         }
       }
     }
-  }
-
-  @override
-  Rect? describeApproximatePaintClip(RenderObject child) =>
-      _hasOverflow ? Offset.zero & size : null;
-
-  @override
-  String toStringShort() {
-    String header = super.toStringShort();
-    if (_overflow is double && _hasOverflow) header += ' OVERFLOWING';
-    return header;
   }
 
   @override
