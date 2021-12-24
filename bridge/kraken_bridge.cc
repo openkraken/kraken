@@ -110,7 +110,7 @@ void disposePage(int32_t contextId) {
   // In order to avoid accessing pageContextPool when the page is being released. We need to clear the value in pageContextPool before releasing.
   pageContextPool[contextId] = nullptr;
 
-    // UnitTest will free page after test suit complete.
+  // UnitTest will free page after test suit complete.
 #ifndef UNIT_TEST
   auto* page = static_cast<kraken::KrakenPage*>(pageContextPool[contextId]);
   delete page;
