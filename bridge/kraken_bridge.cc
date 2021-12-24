@@ -106,12 +106,15 @@ void disposePage(int32_t contextId) {
   assert(contextId < maxPoolSize);
   if (pageContextPool[contextId] == nullptr)
     return;
+
+  // In order to avoid accessing pageContextPool when the page is being released. We need to clear the value in pageContextPool before releasing.
+  pageContextPool[contextId] = nullptr;
+
     // UnitTest will free page after test suit complete.
 #ifndef UNIT_TEST
   auto* page = static_cast<kraken::KrakenPage*>(pageContextPool[contextId]);
   delete page;
 #endif
-  pageContextPool[contextId] = nullptr;
 }
 
 int32_t allocateNewPage(int32_t targetContextId) {
