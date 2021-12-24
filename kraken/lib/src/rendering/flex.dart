@@ -131,44 +131,34 @@ bool? _startIsTopLeft(FlexDirection direction) {
     case FlexDirection.columnReverse:
       return false;
   }
-
 }
 
 /// ## Layout algorithm
 ///
-/// _This section describes how the framework causes [RenderFlexLayout] to position
+/// _This section describes how the framework causes [RenderFlowLayout] to position
 /// its children._
 ///
-/// Layout for a [RenderFlexLayout] proceeds in 5 steps:
+/// Layout for a [RenderFlowLayout] proceeds in 7 steps:
 ///
-/// 1. Layout placeholder child of positioned element(absolute/fixed) in new layer
-/// 2. Layout no positioned children with no constraints, compare children width with flex container main axis extent
-///    to calculate total flex lines
-/// 3. Calculate horizontal constraints of each child according to available horizontal space in each flex line
-///    and flex-grow and flex-shrink properties
-/// 4. Calculate vertical constraints of each child according to available vertical space in flex container vertical
-///    and align-content properties and set
-/// 5. Layout children again with above calculated constraints
-/// 6. Calculate flex line leading space and between space and position children in each flex line
+/// 1. Layout positioned (eg. absolute/fixed) child first cause the size of position placeholder renderObject which is
+///    layouted later depends on the size of its original RenderBoxModel.
+/// 2. Layout flex items (not including position child and its position placeholder renderObject)
+///    with no constraints and compute information of flex lines.
+/// 3. Relayout children if flex factor styles (flex-grow/flex-shrink) or cross axis stretch style (align-items) exist.
+/// 4. Set flex container depends on children size and container size styles.
+/// 5. Set children offset based on flex container size and flex alignment styles.
+/// 6. Layout and set offset of all the positioned placeholder renderObjects based on flex container size and
+///    flex alignment styles cause positioned placeholder renderObject layout in a separated layer which is different
+///    from flow layout algorithm.
+/// 7. Set positioned child offset based on flex container size and its offset styles.
 ///
 class RenderFlexLayout extends RenderLayoutBox {
-  /// Creates a flex render object.
-  ///
-  /// By default, the flex layout is horizontal and children are aligned to the
-  /// start of the main axis and the center of the cross axis.
   RenderFlexLayout({
     List<RenderBox>? children,
     required CSSRenderStyle renderStyle,
   }) : super(renderStyle: renderStyle) {
     addAll(children);
   }
-
-  // Set during layout if overflow occurred on the main axis.
-  double? _overflow;
-
-  // Check whether any meaningful overflow is present. Values below an epsilon
-  // are treated as not overflowing.
-  bool get _hasOverflow => _overflow != null && _overflow! > precisionErrorTolerance;
 
   // Flex line boxes of flex layout.
   List<_RunMetrics> _flexLineBoxMetrics = <_RunMetrics>[];
@@ -179,6 +169,13 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   // Cache original constraints of children on the first layout.
   final Map<int, BoxConstraints> _childrenOldConstraints = {};
+
+  // Set during layout if overflow occurred on the main axis.
+  double? _overflow;
+
+  // Check whether any meaningful overflow is present. Values below an epsilon
+  // are treated as not overflowing.
+  bool get _hasOverflow => _overflow != null && _overflow! > precisionErrorTolerance;
 
   @override
   void setupParentData(RenderBox child) {

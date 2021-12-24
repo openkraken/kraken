@@ -33,7 +33,20 @@ class _RunMetrics {
   final Map<int?, RenderBox> runChildren;
 }
 
-/// Impl flow layout algorithm.
+/// ## Layout algorithm
+///
+/// _This section describes how the framework causes [RenderFlowLayout] to position
+/// its children._
+///
+/// Layout for a [RenderFlowLayout] proceeds in 5 steps:
+///
+/// 1. Layout positioned (eg. absolute/fixed) child first cause the size of position placeholder renderObject which is
+///    layouted later depends on the size of its original RenderBoxModel.
+/// 2. Layout children (not including positioned child) with no constraints and compute information of line boxes.
+/// 3. Set container size depends on children size and container size styles (eg. width/height).
+/// 4. Set children offset based on flow container size and flow alignment styles (eg. text-align).
+/// 5. Set positioned children offset based on flow container size and its offset styles (eg. top/right/bottom/right).
+///
 class RenderFlowLayout extends RenderLayoutBox {
   RenderFlowLayout({
     List<RenderBox>? children,
@@ -65,15 +78,14 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   double _getMainAxisExtent(RenderBox child) {
     double marginHorizontal = 0;
-    double marginVertical = 0;
 
     if (child is RenderBoxModel) {
       marginHorizontal = child.renderStyle.marginLeft.computedValue +
           child.renderStyle.marginRight.computedValue;
-      marginVertical = _getChildMarginTop(child) + _getChildMarginBottom(child);
     }
 
     Size childSize = _getChildSize(child) ?? Size.zero;
+
     return childSize.width + marginHorizontal;
   }
 
@@ -81,14 +93,12 @@ class RenderFlowLayout extends RenderLayoutBox {
     bool isLineHeightValid = _isLineHeightValid(child);
     double? lineHeight = isLineHeightValid ? _getLineHeight(child) : 0;
     double marginVertical = 0;
-    double marginHorizontal = 0;
 
     if (child is RenderBoxModel) {
-      marginHorizontal = child.renderStyle.marginLeft.computedValue +
-          child.renderStyle.marginRight.computedValue;
       marginVertical = _getChildMarginTop(child) + _getChildMarginBottom(child);
     }
     Size childSize = _getChildSize(child) ?? Size.zero;
+
     return lineHeight != null
       ? math.max(lineHeight, childSize.height) + marginVertical
       : childSize.height + marginVertical;
@@ -658,7 +668,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
   }
 
-  /// Compute distance to baseline of flow layout
+  // Compute distance to baseline of flow layout
   @override
   double? computeDistanceToBaseline() {
     double? lineDistance;
@@ -734,7 +744,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     return lineDistance;
   }
 
-  /// Record the main size of all lines
+  // Record the main size of all lines
   void _recordRunsMainSize(_RunMetrics runMetrics, List<double> runMainSize) {
     Map<int?, RenderBox> runChildren = runMetrics.runChildren;
     double runMainExtent = 0;
@@ -756,8 +766,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     runMainSize.add(runMainExtent);
   }
 
-  /// Get auto min size in the main axis which equals the main axis size of its contents
-  /// https://www.w3.org/TR/css-sizing-3/#automatic-minimum-size
+  // Get auto min size in the main axis which equals the main axis size of its contents.
+  // https://www.w3.org/TR/css-sizing-3/#automatic-minimum-size
   double _getMainAxisAutoSize(
     List<_RunMetrics> runMetrics,
   ) {
@@ -780,7 +790,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     return autoMinSize;
   }
 
-  /// Record the cross size of all lines
+  // Record the cross size of all lines.
   void _recordRunsCrossSize(_RunMetrics runMetrics, List<double> runCrossSize) {
     Map<int?, RenderBox> runChildren = runMetrics.runChildren;
     double runCrossExtent = 0;
@@ -801,8 +811,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     runCrossSize.add(runCrossExtent);
   }
 
-  /// Get auto min size in the cross axis which equals the cross axis size of its contents
-  /// https://www.w3.org/TR/css-sizing-3/#automatic-minimum-size
+  // Get auto min size in the cross axis which equals the cross axis size of its contents.
+  // https://www.w3.org/TR/css-sizing-3/#automatic-minimum-size
   double _getCrossAxisAutoSize(
     List<_RunMetrics> runMetrics,
   ) {
@@ -823,8 +833,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     return autoMinSize;
   }
 
-  /// Set the size of scrollable overflow area for flow layout
-  /// https://drafts.csswg.org/css-overflow-3/#scrollable
+  // Set the size of scrollable overflow area for flow layout.
+  // https://drafts.csswg.org/css-overflow-3/#scrollable
   void _setMaxScrollableSizeForFlow(List<_RunMetrics> runMetrics) {
     // Scrollable main size collection of each line
     List<double> scrollableMainSizeOfLines = [];
@@ -956,7 +966,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     return extentAboveBaseline;
   }
 
-  /// Get child size through boxSize to avoid flutter error when parentUsesSize is set to false
+  // Get child size through boxSize to avoid flutter error when parentUsesSize is set to false.
   Size? _getChildSize(RenderBox child) {
     if (child is RenderBoxModel) {
       return child.boxSize;
@@ -1004,7 +1014,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     return false;
   }
 
-  /// Get the collapsed margin top with the margin-bottom of its previous sibling
+  // Get the collapsed margin top with the margin-bottom of its previous sibling.
   double _getCollapsedMarginTopWithPreSibling(RenderBoxModel renderBoxModel, RenderObject preSibling, double marginTop) {
     if (preSibling is RenderBoxModel &&
       (preSibling.renderStyle.effectiveDisplay == CSSDisplay.block ||
@@ -1018,7 +1028,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     return marginTop;
   }
 
-  /// Get the collapsed margin top with parent if it is the first child of its parent
+  // Get the collapsed margin top with parent if it is the first child of its parent.
   double _getCollapsedMarginTopWithParent(RenderBoxModel renderBoxModel, double marginTop) {
     RenderLayoutBox parent = renderBoxModel.parent as RenderLayoutBox;
     // Use parent renderStyle if renderBoxModel is scrollingContentBox cause its style is not
@@ -1043,7 +1053,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     return marginTop;
   }
 
-  /// Get the collapsed margin top with its nested first child
+  // Get the collapsed margin top with its nested first child.
   double _getCollapsedMarginTopWithNestedFirstChild(RenderBoxModel renderBoxModel) {
     // Use parent renderStyle if renderBoxModel is scrollingContentBox cause its style is not
     // the same with its parent.
@@ -1085,8 +1095,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     return marginTop;
   }
 
-  /// Get the collapsed margin top of child due to the margin collapse rule.
-  /// https://www.w3.org/TR/CSS2/box.html#collapsing-margins
+  // Get the collapsed margin top of child due to the margin collapse rule.
+  // https://www.w3.org/TR/CSS2/box.html#collapsing-margins
   double _getChildMarginTop(RenderBoxModel child) {
     CSSDisplay? childEffectiveDisplay = child.renderStyle.effectiveDisplay;
     // Margin is invalid for inline element.
@@ -1139,7 +1149,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     return marginTop;
   }
 
-  /// Get the collapsed margin bottom with parent if it is the last child of its parent
+  // Get the collapsed margin bottom with parent if it is the last child of its parent.
   double _getCollapsedMarginBottomWithParent(RenderBoxModel renderBoxModel, double marginBottom) {
     RenderLayoutBox parent = renderBoxModel.parent as RenderLayoutBox;
     // Use parent renderStyle if renderBoxModel is scrollingContentBox cause its style is not
@@ -1164,7 +1174,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     return marginBottom;
   }
 
-  /// Get the collapsed margin bottom with its nested last child
+  // Get the collapsed margin bottom with its nested last child.
   double _getCollapsedMarginBottomWithNestedLastChild(RenderBoxModel renderBoxModel) {
     // Use parent renderStyle if renderBoxModel is scrollingContentBox cause its style is not
     // the same with its parent.
@@ -1207,8 +1217,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     return marginBottom;
   }
 
-  /// Get the collapsed margin bottom of child due to the margin collapse rule.
-  /// https://www.w3.org/TR/CSS2/box.html#collapsing-margins
+  // Get the collapsed margin bottom of child due to the margin collapse rule.
+  // https://www.w3.org/TR/CSS2/box.html#collapsing-margins
   double _getChildMarginBottom(RenderBoxModel child) {
     CSSDisplay? childEffectiveDisplay = child.renderStyle.effectiveDisplay;
     // Margin is invalid for inline element.
