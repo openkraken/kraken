@@ -563,10 +563,9 @@ class RenderFlexLayout extends RenderLayoutBox {
     // placeholder of positioned element).
     _layoutFlexItems(_flexItemChildren);
 
-    // Layout position place holder separately after layout size is set.
-    // Every placeholder of positioned element in flex layout layout in a separated layer which is
-    // different from the placeholder in flow layout which layout in the same flow as other elements
-    // in normal flow.
+    // Every placeholder of positioned element should be layouted in a separated layer in flex layout
+    // which is different from the placeholder in flow layout which layout in the same flow as
+    // other elements in normal flow.
     for (RenderPositionPlaceholder child in _positionPlaceholderChildren) {
       _layoutPositionPlaceholder(child);
     }
@@ -627,8 +626,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Adjust children size based on flex properties which may affect children size.
     _adjustChildrenSize(_runMetrics, _runSpacingMap);
 
-    _flexLineBoxMetrics = _runMetrics;
-
     // Set flex container size.
     _setContainerSize(_runMetrics);
 
@@ -648,93 +645,6 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     // Set children offset based on flex alignment properties.
     _setChildrenOffset(_runMetrics, _runSpacingMap);
-  }
-
-  // Set size when layout has no child.
-  void _setContainerSizeWithNoChild() {
-    Size layoutContentSize = getContentSize(
-      contentWidth: 0,
-      contentHeight: 0,
-    );
-    setMaxScrollableSize(layoutContentSize);
-    size = getBoxSize(layoutContentSize);
-  }
-
-  // Compute the leading and between spacing of each flex line.
-  Map<String, double> _computeRunSpacing(
-    List<_RunMetrics> _runMetrics,
-  ) {
-    double? contentBoxLogicalWidth = renderStyle.contentBoxLogicalWidth;
-    double? contentBoxLogicalHeight = renderStyle.contentBoxLogicalHeight;
-    double containerCrossAxisExtent = 0.0;
-
-    if (!_isHorizontalFlexDirection) {
-      containerCrossAxisExtent = contentBoxLogicalWidth ?? 0;
-    } else {
-      containerCrossAxisExtent = contentBoxLogicalHeight ?? 0;
-    }
-
-    double runCrossSize = _getRunsCrossSize(_runMetrics);
-
-    // Calculate leading and between space between flex lines
-    final double crossAxisFreeSpace = containerCrossAxisExtent - runCrossSize;
-    final int runCount = _runMetrics.length;
-    double runLeadingSpace = 0.0;
-    double runBetweenSpace = 0.0;
-
-    // Align-content only works in when flex-wrap is no nowrap
-    if (renderStyle.flexWrap == FlexWrap.wrap ||
-      renderStyle.flexWrap == FlexWrap.wrapReverse) {
-      switch (renderStyle.alignContent) {
-        case AlignContent.flexStart:
-        case AlignContent.start:
-          break;
-        case AlignContent.flexEnd:
-        case AlignContent.end:
-          runLeadingSpace = crossAxisFreeSpace;
-          break;
-        case AlignContent.center:
-          runLeadingSpace = crossAxisFreeSpace / 2.0;
-          break;
-        case AlignContent.spaceBetween:
-          if (crossAxisFreeSpace < 0) {
-            runBetweenSpace = 0;
-          } else {
-            runBetweenSpace =
-            runCount > 1 ? crossAxisFreeSpace / (runCount - 1) : 0.0;
-          }
-          break;
-        case AlignContent.spaceAround:
-          if (crossAxisFreeSpace < 0) {
-            runLeadingSpace = crossAxisFreeSpace / 2.0;
-            runBetweenSpace = 0;
-          } else {
-            runBetweenSpace = crossAxisFreeSpace / runCount;
-            runLeadingSpace = runBetweenSpace / 2.0;
-          }
-          break;
-        case AlignContent.spaceEvenly:
-          if (crossAxisFreeSpace < 0) {
-            runLeadingSpace = crossAxisFreeSpace / 2.0;
-            runBetweenSpace = 0;
-          } else {
-            runBetweenSpace = crossAxisFreeSpace / (runCount + 1);
-            runLeadingSpace = runBetweenSpace;
-          }
-          break;
-        case AlignContent.stretch:
-          runBetweenSpace = crossAxisFreeSpace / runCount;
-          if (runBetweenSpace < 0) {
-            runBetweenSpace = 0;
-          }
-          break;
-      }
-    }
-    Map<String, double> _runSpacingMap = {
-      'leading': runLeadingSpace,
-      'between': runBetweenSpace
-    };
-    return _runSpacingMap;
   }
 
   // Layout children in normal flow order to calculate metrics of flex lines according to its constraints
@@ -950,7 +860,86 @@ class RenderFlexLayout extends RenderLayoutBox {
         0));
     }
 
+    _flexLineBoxMetrics = _runMetrics;
+
     return _runMetrics;
+  }
+
+  // Compute the leading and between spacing of each flex line.
+  Map<String, double> _computeRunSpacing(
+    List<_RunMetrics> _runMetrics,
+    ) {
+    double? contentBoxLogicalWidth = renderStyle.contentBoxLogicalWidth;
+    double? contentBoxLogicalHeight = renderStyle.contentBoxLogicalHeight;
+    double containerCrossAxisExtent = 0.0;
+
+    if (!_isHorizontalFlexDirection) {
+      containerCrossAxisExtent = contentBoxLogicalWidth ?? 0;
+    } else {
+      containerCrossAxisExtent = contentBoxLogicalHeight ?? 0;
+    }
+
+    double runCrossSize = _getRunsCrossSize(_runMetrics);
+
+    // Calculate leading and between space between flex lines
+    final double crossAxisFreeSpace = containerCrossAxisExtent - runCrossSize;
+    final int runCount = _runMetrics.length;
+    double runLeadingSpace = 0.0;
+    double runBetweenSpace = 0.0;
+
+    // Align-content only works in when flex-wrap is no nowrap
+    if (renderStyle.flexWrap == FlexWrap.wrap ||
+      renderStyle.flexWrap == FlexWrap.wrapReverse) {
+      switch (renderStyle.alignContent) {
+        case AlignContent.flexStart:
+        case AlignContent.start:
+          break;
+        case AlignContent.flexEnd:
+        case AlignContent.end:
+          runLeadingSpace = crossAxisFreeSpace;
+          break;
+        case AlignContent.center:
+          runLeadingSpace = crossAxisFreeSpace / 2.0;
+          break;
+        case AlignContent.spaceBetween:
+          if (crossAxisFreeSpace < 0) {
+            runBetweenSpace = 0;
+          } else {
+            runBetweenSpace =
+            runCount > 1 ? crossAxisFreeSpace / (runCount - 1) : 0.0;
+          }
+          break;
+        case AlignContent.spaceAround:
+          if (crossAxisFreeSpace < 0) {
+            runLeadingSpace = crossAxisFreeSpace / 2.0;
+            runBetweenSpace = 0;
+          } else {
+            runBetweenSpace = crossAxisFreeSpace / runCount;
+            runLeadingSpace = runBetweenSpace / 2.0;
+          }
+          break;
+        case AlignContent.spaceEvenly:
+          if (crossAxisFreeSpace < 0) {
+            runLeadingSpace = crossAxisFreeSpace / 2.0;
+            runBetweenSpace = 0;
+          } else {
+            runBetweenSpace = crossAxisFreeSpace / (runCount + 1);
+            runLeadingSpace = runBetweenSpace;
+          }
+          break;
+        case AlignContent.stretch:
+          runBetweenSpace = crossAxisFreeSpace / runCount;
+          if (runBetweenSpace < 0) {
+            runBetweenSpace = 0;
+          }
+          break;
+      }
+    }
+    Map<String, double> _runSpacingMap = {
+      'leading': runLeadingSpace,
+      'between': runBetweenSpace
+    };
+    return _runSpacingMap;
   }
 
   // Find the size in the cross axis of flex lines.
@@ -1448,6 +1437,16 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
   }
 
+  // Set size when layout has no child.
+  void _setContainerSizeWithNoChild() {
+    Size layoutContentSize = getContentSize(
+      contentWidth: 0,
+      contentHeight: 0,
+    );
+    setMaxScrollableSize(layoutContentSize);
+    size = getBoxSize(layoutContentSize);
+  }
+
   // Record the main size of all lines
   void _recordRunsMainSize(_RunMetrics _runMetrics, List<double> runMainSize) {
     Map<int?, _RunChild> runChildren = _runMetrics.runChildren;
@@ -1696,7 +1695,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
   }
 
-  // Set flex item offset based on flex alignment properties.
+  // Set children offset based on alignment properties.
   void _setChildrenOffset(
     List<_RunMetrics> _runMetrics,
     Map<String, double> _runSpacingMap,

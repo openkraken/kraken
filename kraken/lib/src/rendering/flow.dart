@@ -10,8 +10,8 @@ import 'package:kraken/css.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 
-/// Infos of each run (line box) in flow layout
-/// https://www.w3.org/TR/css-inline-3/#line-boxes
+// Position and size of each run (line box) in flow layout
+// https://www.w3.org/TR/css-inline-3/#line-boxes
 class _RunMetrics {
   _RunMetrics(
     this.mainAxisExtent,
@@ -42,129 +42,14 @@ class RenderFlowLayout extends RenderLayoutBox {
     addAll(children);
   }
 
-  /// The direction to use as the main axis.
-  ///
-  /// For example, if [direction] is [Axis.horizontal], the default, the
-  /// children are placed adjacent to one another in a horizontal run until the
-  /// available horizontal space is consumed, at which point a subsequent
-  /// children are placed in a new run vertically adjacent to the previous run.
-  Axis get direction => _direction;
-  Axis _direction = Axis.horizontal;
-
-  set direction(Axis value) {
-    if (_direction == value) return;
-    _direction = value;
-    markNeedsLayout();
-  }
-
-  /// How the runs themselves should be placed in the cross axis.
-  ///
-  /// For example, if [runAlignment] is [MainAxisAlignment.center], the runs are
-  /// grouped together in the center of the overall [RenderWrap] in the cross
-  /// axis.
-  ///
-  /// Defaults to [MainAxisAlignment.start].
-  ///
-  MainAxisAlignment get runAlignment => _runAlignment;
-  MainAxisAlignment _runAlignment = MainAxisAlignment.start;
-
-  set runAlignment(MainAxisAlignment value) {
-    if (_runAlignment == value) return;
-    _runAlignment = value;
-    markNeedsLayout();
-  }
-
-  /// How the children within a run should be aligned relative to each other in
-  /// the cross axis.
-  ///
-  /// For example, if this is set to [CrossAxisAlignment.end], and the
-  /// [direction] is [Axis.horizontal], then the children within each
-  /// run will have their bottom edges aligned to the bottom edge of the run.
-  ///
-  /// Defaults to [CrossAxisAlignment.end].
-  ///
-  CrossAxisAlignment get crossAxisAlignment => _crossAxisAlignment;
-  CrossAxisAlignment _crossAxisAlignment = CrossAxisAlignment.end;
-
-  set crossAxisAlignment(CrossAxisAlignment value) {
-    if (_crossAxisAlignment == value) return;
-    _crossAxisAlignment = value;
-    markNeedsLayout();
-  }
-
-  /// Determines the order to lay children out horizontally and how to interpret
-  /// `start` and `end` in the horizontal direction.
-  ///
-  /// If the [direction] is [Axis.horizontal], this controls the order in which
-  /// children are positioned (left-to-right or right-to-left), and the meaning
-  /// of the textAlign style's [TextAlign.start] and
-  /// [TextAlign.end] values.
-  ///
-  /// If the [direction] is [Axis.horizontal], and either the
-  /// textAlign style is either [TextAlign.start] or [TextAlign.end], or
-  /// there's more than one child, then the [textDirection] must not be null.
-  ///
-  /// If the [direction] is [Axis.vertical], this controls the order in
-  /// which runs are positioned, the meaning of the [runAlignment] property's
-  /// [TextAlign.start] and [TextAlign.end] values, as well as the
-  /// [crossAxisAlignment] property's [CrossAxisAlignment.start] and
-  /// [CrossAxisAlignment.end] values.
-  ///
-  /// If the [direction] is [Axis.vertical], and either the
-  /// [runAlignment] is either [MainAxisAlignment.start] or [MainAxisAlignment.end], the
-  /// [crossAxisAlignment] is either [CrossAxisAlignment.start] or
-  /// [CrossAxisAlignment.end], or there's more than one child, then the
-  /// [textDirection] must not be null.
-  TextDirection get textDirection => _textDirection;
-  TextDirection _textDirection = TextDirection.ltr;
-
-  set textDirection(TextDirection value) {
-    if (_textDirection != value) {
-      _textDirection = value;
-      markNeedsLayout();
-    }
-  }
-
-  /// Determines the order to lay children out vertically and how to interpret
-  /// `start` and `end` in the vertical direction.
-  ///
-  /// If the [direction] is [Axis.vertical], this controls which order children
-  /// are painted in (down or up), the meaning of the textAlign style's
-  /// [TextAlign.start] and [TextAlign.end] values.
-  ///
-  /// If the [direction] is [Axis.vertical], and either the textAlign
-  /// is either [TextAlign.start] or [TextAlign.end], or there's
-  /// more than one child, then the [verticalDirection] must not be null.
-  ///
-  /// If the [direction] is [Axis.horizontal], this controls the order in which
-  /// runs are positioned, the meaning of the [runAlignment] property's
-  /// [MainAxisAlignment.start] and [MainAxisAlignment.end] values, as well as the
-  /// [crossAxisAlignment] property's [CrossAxisAlignment.start] and
-  /// [CrossAxisAlignment.end] values.
-  ///
-  /// If the [direction] is [Axis.horizontal], and either the
-  /// [runAlignment] is either [MainAxisAlignment.start] or [MainAxisAlignment.end], the
-  /// [crossAxisAlignment] is either [CrossAxisAlignment.start] or
-  /// [CrossAxisAlignment.end], or there's more than one child, then the
-  /// [verticalDirection] must not be null.
-  VerticalDirection get verticalDirection => _verticalDirection;
-  VerticalDirection _verticalDirection = VerticalDirection.down;
-
-  set verticalDirection(VerticalDirection value) {
-    if (_verticalDirection != value) {
-      _verticalDirection = value;
-      markNeedsLayout();
-    }
-  }
-
-  /// Line boxes of flow layout
-  List<_RunMetrics> lineBoxMetrics = <_RunMetrics>[];
+  // Line boxes of flow layout.
+  List<_RunMetrics> _lineBoxMetrics = <_RunMetrics>[];
 
   @override
   void dispose() {
     super.dispose();
 
-    lineBoxMetrics.clear();
+    _lineBoxMetrics.clear();
   }
 
   @override
@@ -189,12 +74,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
 
     Size childSize = _getChildSize(child) ?? Size.zero;
-    switch (direction) {
-      case Axis.horizontal:
-        return childSize.width + marginHorizontal;
-      case Axis.vertical:
-        return childSize.height + marginVertical;
-    }
+    return childSize.width + marginHorizontal;
   }
 
   double _getCrossAxisExtent(RenderBox child) {
@@ -209,40 +89,20 @@ class RenderFlowLayout extends RenderLayoutBox {
       marginVertical = _getChildMarginTop(child) + _getChildMarginBottom(child);
     }
     Size childSize = _getChildSize(child) ?? Size.zero;
-    switch (direction) {
-      case Axis.horizontal:
-        return lineHeight != null
-            ? math.max(lineHeight, childSize.height) + marginVertical
-            : childSize.height + marginVertical;
-      case Axis.vertical:
-        return childSize.width + marginHorizontal;
-    }
+    return lineHeight != null
+      ? math.max(lineHeight, childSize.height) + marginVertical
+      : childSize.height + marginVertical;
   }
 
   Offset _getOffset(double mainAxisOffset, double crossAxisOffset) {
-    switch (direction) {
-      case Axis.horizontal:
-        return Offset(mainAxisOffset, crossAxisOffset);
-      case Axis.vertical:
-        return Offset(crossAxisOffset, mainAxisOffset);
-    }
+    return Offset(mainAxisOffset, crossAxisOffset);
   }
 
-  double _getChildCrossAxisOffset(bool flipCrossAxis, double runCrossAxisExtent,
-      double childCrossAxisExtent) {
-    final double freeSpace = runCrossAxisExtent - childCrossAxisExtent;
-    switch (crossAxisAlignment) {
-      case CrossAxisAlignment.start:
-        return flipCrossAxis ? freeSpace : 0.0;
-      case CrossAxisAlignment.end:
-        return flipCrossAxis ? 0.0 : freeSpace;
-      case CrossAxisAlignment.center:
-        return freeSpace / 2.0;
-      case CrossAxisAlignment.baseline:
-        return 0.0;
-      case CrossAxisAlignment.stretch:
-        return 0.0;
-    }
+  double _getChildCrossAxisOffset(
+    double runCrossAxisExtent,
+    double childCrossAxisExtent
+  ) {
+    return runCrossAxisExtent - childCrossAxisExtent;
   }
 
   double? _getLineHeight(RenderBox child) {
@@ -353,6 +213,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     didLayout();
   }
 
+
   // There are 3 steps for layout children.
   // 1. Layout children to generate line boxes metrics.
   // 2. Set flex container size according to children size and its own size styles.
@@ -364,36 +225,30 @@ class RenderFlowLayout extends RenderLayoutBox {
       return;
     }
 
-    double mainAxisLimit = 0.0;
-    bool flipMainAxis = false;
-    bool flipCrossAxis = false;
+    // Layout children to compute metrics of lines.
+    List<_RunMetrics> _runMetrics = _computeRunMetrics(children);
 
-    // Use scrolling container to calculate flex line limit for scrolling content box
-    RenderBoxModel? containerBox =
-      isScrollingContentBox ? parent as RenderBoxModel? : this;
-    switch (direction) {
-      case Axis.horizontal:
-        mainAxisLimit = renderStyle.contentMaxConstraintsWidth;
-        if (textDirection == TextDirection.rtl) flipMainAxis = true;
-        if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
-        break;
-      case Axis.vertical:
-        mainAxisLimit = containerBox!.contentConstraints!.maxHeight;
-        if (verticalDirection == VerticalDirection.up) flipMainAxis = true;
-        if (textDirection == TextDirection.rtl) flipCrossAxis = true;
-        break;
-    }
-    List<_RunMetrics> runMetrics = <_RunMetrics>[];
-    double mainAxisExtent = 0.0;
-    double crossAxisExtent = 0.0;
+    // Set container size.
+    _setContainerSize(_runMetrics);
+
+    // Set children offset based on alignment properties.
+    _setChildrenOffset(_runMetrics);
+  }
+
+  // Layout children in normal flow order to calculate metrics of lines according to its constraints
+  // and alignment properties.
+  List<_RunMetrics> _computeRunMetrics(
+    List<RenderBox> children,
+    ) {
+    List<_RunMetrics> _runMetrics = <_RunMetrics>[];
+    double mainAxisLimit = renderStyle.contentMaxConstraintsWidth;
+
     double runMainAxisExtent = 0.0;
     double runCrossAxisExtent = 0.0;
     RenderBox? preChild;
     double maxSizeAboveBaseline = 0;
     double maxSizeBelowBaseline = 0;
     Map<int?, RenderBox> runChildren = {};
-
-    lineBoxMetrics = runMetrics;
 
     WhiteSpace? whiteSpace = renderStyle.whiteSpace;
 
@@ -479,9 +334,7 @@ class RenderFlowLayout extends RenderLayoutBox {
           (whiteSpace != WhiteSpace.nowrap && (runMainAxisExtent + childMainAxisExtent > mainAxisLimit)) ||
           // Previous is linebreak.
           preChild is RenderLineBreak)) {
-        mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
-        crossAxisExtent += runCrossAxisExtent;
-        runMetrics.add(_RunMetrics(
+        _runMetrics.add(_RunMetrics(
           runMainAxisExtent,
           runCrossAxisExtent,
           maxSizeAboveBaseline,
@@ -495,7 +348,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       }
       runMainAxisExtent += childMainAxisExtent;
 
-      /// Calculate baseline extent of layout box
+      // Calculate baseline extent of layout box.
       RenderStyle? childRenderStyle = _getChildRenderStyle(child);
       VerticalAlign verticalAlign = VerticalAlign.baseline;
       if (childRenderStyle != null) {
@@ -546,14 +399,12 @@ class RenderFlowLayout extends RenderLayoutBox {
       }
       runChildren[childNodeId] = child;
 
-      childParentData.runIndex = runMetrics.length;
+      childParentData.runIndex = _runMetrics.length;
       preChild = child;
     }
 
     if (runChildren.isNotEmpty) {
-      mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
-      crossAxisExtent += runCrossAxisExtent;
-      runMetrics.add(_RunMetrics(
+      _runMetrics.add(_RunMetrics(
         runMainAxisExtent,
         runCrossAxisExtent,
         maxSizeAboveBaseline,
@@ -561,71 +412,86 @@ class RenderFlowLayout extends RenderLayoutBox {
       ));
     }
 
-    final int runCount = runMetrics.length;
+    _lineBoxMetrics = _runMetrics;
+
+    return _runMetrics;
+  }
+
+  // Find the size in the cross axis of lines.
+  // @TODO: add cache to avoid recalculate in one layout stage.
+  double _getRunsCrossSize(
+    List<_RunMetrics> _runMetrics,
+    ) {
+    double crossSize = 0;
+    for (_RunMetrics run in _runMetrics) {
+      crossSize += run.crossAxisExtent;
+    }
+    return crossSize;
+  }
+
+  // Find the max size in the main axis of lines.
+  // @TODO: add cache to avoid recalculate in one layout stage.
+  double _getRunsMaxMainSize(
+    List<_RunMetrics> _runMetrics,
+    ) {
+    // Find the max size of lines.
+    _RunMetrics maxMainSizeMetrics =
+    _runMetrics.reduce((_RunMetrics curr, _RunMetrics next) {
+      return curr.mainAxisExtent > next.mainAxisExtent ? curr : next;
+    });
+    return maxMainSizeMetrics.mainAxisExtent;
+  }
+
+  // Set flex container size according to children size.
+  void _setContainerSize(
+    List<_RunMetrics> _runMetrics,
+    ) {
+    if (_runMetrics.isEmpty) {
+      _setContainerSizeWithNoChild();
+      return;
+    }
+
+    double runMaxMainSize = _getRunsMaxMainSize(_runMetrics);
+    double runCrossSize = _getRunsCrossSize(_runMetrics);
 
     Size layoutContentSize = getContentSize(
-      contentWidth: mainAxisExtent,
-      contentHeight: crossAxisExtent,
+      contentWidth: runMaxMainSize,
+      contentHeight: runCrossSize,
     );
 
-    // Main and cross content size of flow layout
-    double mainAxisContentSize = 0.0;
-    double crossAxisContentSize = 0.0;
+    size = getBoxSize(layoutContentSize);
 
-    switch (direction) {
-      case Axis.horizontal:
-        size = getBoxSize(layoutContentSize);
-        mainAxisContentSize = contentSize.width;
-        crossAxisContentSize = contentSize.height;
-        break;
-      case Axis.vertical:
-        Size logicalSize = Size(crossAxisExtent, mainAxisExtent);
-        size = getBoxSize(logicalSize);
+    _setMaxScrollableSizeForFlow(_runMetrics);
 
-        mainAxisContentSize = contentSize.height;
-        crossAxisContentSize = contentSize.width;
-        break;
-    }
+    autoMinWidth = _getMainAxisAutoSize(_runMetrics);
+    autoMinHeight = _getCrossAxisAutoSize(_runMetrics);
+  }
 
-    _setMaxScrollableSizeForFlow(runMetrics);
+  // Set size when layout has no child.
+  void _setContainerSizeWithNoChild() {
+    Size layoutContentSize = getContentSize(
+      contentWidth: 0,
+      contentHeight: 0,
+    );
+    setMaxScrollableSize(layoutContentSize);
+    size = getBoxSize(layoutContentSize);
+  }
 
-    autoMinWidth = _getMainAxisAutoSize(runMetrics);
-    autoMinHeight = _getCrossAxisAutoSize(runMetrics);
+  // Set children offset based on alignment properties.
+  void _setChildrenOffset(
+    List<_RunMetrics> _runMetrics,
+  ) {
+    if (_runMetrics.isEmpty) return;
 
-    final double crossAxisFreeSpace =
-        math.max(0.0, crossAxisContentSize - crossAxisExtent);
-    double runLeadingSpace = 0.0;
-    double runBetweenSpace = 0.0;
-    switch (runAlignment) {
-      case MainAxisAlignment.start:
-        break;
-      case MainAxisAlignment.end:
-        runLeadingSpace = crossAxisFreeSpace;
-        break;
-      case MainAxisAlignment.center:
-        runLeadingSpace = crossAxisFreeSpace / 2.0;
-        break;
-      case MainAxisAlignment.spaceBetween:
-        runBetweenSpace =
-            runCount > 1 ? crossAxisFreeSpace / (runCount - 1) : 0.0;
-        break;
-      case MainAxisAlignment.spaceAround:
-        runBetweenSpace = crossAxisFreeSpace / runCount;
-        runLeadingSpace = runBetweenSpace / 2.0;
-        break;
-      case MainAxisAlignment.spaceEvenly:
-        runBetweenSpace = crossAxisFreeSpace / (runCount + 1);
-        runLeadingSpace = runBetweenSpace;
-        break;
-    }
-
-    double crossAxisOffset = flipCrossAxis
-        ? crossAxisContentSize - runLeadingSpace
-        : runLeadingSpace;
+    double runLeadingSpace = 0;
+    double runBetweenSpace = 0;
+    // Cross axis offset of each flex line
+    double crossAxisOffset = runLeadingSpace;
+    double mainAxisContentSize = contentSize.width;
 
     // Set offset of children in each line.
-    for (int i = 0; i < runMetrics.length; ++i) {
-      final _RunMetrics metrics = runMetrics[i];
+    for (int i = 0; i < _runMetrics.length; ++i) {
+      final _RunMetrics metrics = _runMetrics[i];
       final double runMainAxisExtent = metrics.mainAxisExtent;
       final double runCrossAxisExtent = metrics.crossAxisExtent;
       final double runBaselineExtent = metrics.baselineExtent;
@@ -670,11 +536,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         }
       }
 
-      double childMainPosition = flipMainAxis
-        ? mainAxisContentSize - childLeadingSpace
-        : childLeadingSpace;
-
-      if (flipCrossAxis) crossAxisOffset -= runCrossAxisExtent;
+      double childMainPosition = childLeadingSpace;
 
       for (RenderBox child in runChildrenList) {
         final double childMainAxisExtent = _getMainAxisExtent(child);
@@ -711,9 +573,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         // @HACK(kraken): Judge positioned holder to impl top align.
         final double childCrossAxisOffset = isPositionPlaceholder(child)
           ? 0
-          : _getChildCrossAxisOffset(
-          flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
-        if (flipMainAxis) childMainPosition -= childMainAxisExtent;
+          : _getChildCrossAxisOffset(runCrossAxisExtent, childCrossAxisExtent);
 
         Size? childSize = _getChildSize(child);
         // Line height of child
@@ -723,7 +583,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (childLineHeight != null) {
           childLeading = childLineHeight - childSize!.height;
         }
-        // Child line extent caculated according to vertical align
+        // Child line extent calculated according to vertical align.
         double childLineExtent = childCrossAxisOffset;
 
         bool isLineHeightValid = _isLineHeightValid(child);
@@ -756,7 +616,7 @@ class RenderFlowLayout extends RenderLayoutBox {
                   childLeading / 2;
               break;
           // @TODO Vertical align middle needs to caculate the baseline of the parent box plus half the x-height of the parent from W3C spec,
-          // currently flutter lack the api to caculate x-height of glyph
+          // currently flutter lack the api to calculate x-height of glyph
           //  case VerticalAlign.middle:
           //  break;
           }
@@ -791,27 +651,11 @@ class RenderFlowLayout extends RenderLayoutBox {
         // Apply position relative offset change.
         CSSPositionedLayout.applyRelativeOffset(relativeOffset, child);
 
-        if (flipMainAxis)
-          childMainPosition -= childBetweenSpace;
-        else
-          childMainPosition += childMainAxisExtent + childBetweenSpace;
+        childMainPosition += childMainAxisExtent + childBetweenSpace;
       }
 
-      if (flipCrossAxis)
-        crossAxisOffset -= runBetweenSpace;
-      else
-        crossAxisOffset += runCrossAxisExtent + runBetweenSpace;
+      crossAxisOffset += runCrossAxisExtent + runBetweenSpace;
     }
-  }
-
-  // Set size when layout has no child.
-  void _setContainerSizeWithNoChild() {
-    Size layoutContentSize = getContentSize(
-      contentWidth: 0,
-      contentHeight: 0,
-    );
-    setMaxScrollableSize(layoutContentSize);
-    size = getBoxSize(layoutContentSize);
   }
 
   /// Compute distance to baseline of flow layout
@@ -829,7 +673,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         effectiveDisplay == CSSDisplay.inlineFlex;
 
     // Use margin bottom as baseline if layout has no children
-    if (lineBoxMetrics.isEmpty) {
+    if (_lineBoxMetrics.isEmpty) {
       if (isDisplayInline) {
         // Flex item baseline does not includes margin-bottom
         lineDistance = isParentFlowLayout
@@ -845,8 +689,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     // otherwise use baseline of first line
     bool isLastLineBaseline = isParentFlowLayout && isDisplayInline;
     _RunMetrics lineMetrics = isLastLineBaseline
-        ? lineBoxMetrics[lineBoxMetrics.length - 1]
-        : lineBoxMetrics[0];
+        ? _lineBoxMetrics[_lineBoxMetrics.length - 1]
+        : _lineBoxMetrics[0];
     // Use the max baseline of the children as the baseline in flow layout
     lineMetrics.runChildren.forEach((int? hashCode, RenderBox child) {
       double? childMarginTop =
