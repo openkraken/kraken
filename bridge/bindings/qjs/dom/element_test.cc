@@ -52,8 +52,7 @@ TEST(Element, getAttribute) {
       "otherDiv.setAttribute('hello', string2);"
       "document.body.appendChild(div);"
       "console.log(div.getAttribute('hello'));"
-      "console.log(otherDiv.getAttribute('hello'));"
-      ;
+      "console.log(otherDiv.getAttribute('hello'));";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);
@@ -62,9 +61,7 @@ TEST(Element, getAttribute) {
 TEST(Element, setAttributeWithHTML) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
-    logCalled = true;
-  };
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { logCalled = true; };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
@@ -72,8 +69,7 @@ TEST(Element, setAttributeWithHTML) {
   auto& context = bridge->getContext();
   const char* code =
       "let div = document.createElement('div');"
-      "div.innerHTML = '<img src=\"https://miniapp-nikestore-demo.oss-cn-beijing.aliyuncs.com/white_shoes_v1.png\" style=\"width:100%;height:auto;\">';"
-  ;
+      "div.innerHTML = '<img src=\"https://miniapp-nikestore-demo.oss-cn-beijing.aliyuncs.com/white_shoes_v1.png\" style=\"width:100%;height:auto;\">';";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   EXPECT_EQ(errorCalled, false);
 }

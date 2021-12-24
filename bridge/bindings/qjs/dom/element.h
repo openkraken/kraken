@@ -7,10 +7,10 @@
 #define KRAKENBRIDGE_ELEMENT_H
 
 #include <unordered_map>
+#include "bindings/qjs/garbage_collected.h"
 #include "bindings/qjs/host_object.h"
 #include "node.h"
 #include "style_declaration.h"
-#include "bindings/qjs/garbage_collected.h"
 
 namespace kraken::binding::qjs {
 
@@ -52,9 +52,7 @@ class ElementAttributes : public GarbageCollected<ElementAttributes> {
  public:
   static JSClassID classId;
 
-  FORCE_INLINE const char * getHumanReadableName() const override {
-    return "ElementAttributes";
-  }
+  FORCE_INLINE const char* getHumanReadableName() const override { return "ElementAttributes"; }
 
   void dispose() const override;
 
@@ -157,7 +155,7 @@ class ElementInstance : public NodeInstance {
  protected:
   explicit ElementInstance(Element* element, std::string tagName, bool shouldAddUICommand);
 
-  void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) override;
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
  private:
   void _notifyNodeRemoved(NodeInstance* node) override;

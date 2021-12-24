@@ -827,7 +827,7 @@ void ElementInstance::_beforeUpdateId(JSAtom oldId, JSAtom newId) {
   }
 }
 
-void ElementInstance::trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) {
+void ElementInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
   JS_MarkValue(rt, m_attributes->toQuickJS(), mark_func);
   NodeInstance::trace(rt, val, mark_func);
 }
