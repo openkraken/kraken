@@ -10,6 +10,7 @@
 #include "bindings/qjs/host_object.h"
 #include "node.h"
 #include "style_declaration.h"
+#include "bindings/qjs/garbage_collected.h"
 
 namespace kraken::binding::qjs {
 
@@ -46,11 +47,16 @@ class SpaceSplitString {
   std::vector<std::string> m_szData;
 };
 
-class ElementAttributes : public HostObject {
+// TODO: refactor for better W3C standard support and higher performance.
+class ElementAttributes : public GarbageCollected<ElementAttributes> {
  public:
-  ElementAttributes() = delete;
-  explicit ElementAttributes(ExecutionContext* context) : HostObject(context, "ElementAttributes") {}
-  ~ElementAttributes();
+  static JSClassID classId;
+
+  FORCE_INLINE const char * getHumanReadableName() const override {
+    return "ElementAttributes";
+  }
+
+  void dispose() const override;
 
   JSAtom getAttribute(const std::string& name);
   JSValue setAttribute(const std::string& name, JSAtom value);
@@ -105,6 +111,7 @@ class Element : public Node {
   DEFINE_PROTOTYPE_READONLY_PROPERTY(firstElementChild);
   DEFINE_PROTOTYPE_READONLY_PROPERTY(lastElementChild);
   DEFINE_PROTOTYPE_READONLY_PROPERTY(children);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(attributes);
 
   DEFINE_PROTOTYPE_PROPERTY(className);
   DEFINE_PROTOTYPE_PROPERTY(innerHTML);
@@ -144,12 +151,13 @@ class ElementInstance : public NodeInstance {
   std::string outerHTML();
   std::string innerHTML();
   StyleDeclarationInstance* style();
-  ElementAttributes* attributes();
 
   static inline JSClassID classID();
 
  protected:
   explicit ElementInstance(Element* element, std::string tagName, bool shouldAddUICommand);
+
+  void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) override;
 
  private:
   void _notifyNodeRemoved(NodeInstance* node) override;

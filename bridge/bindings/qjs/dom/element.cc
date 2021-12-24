@@ -55,6 +55,7 @@ JSClassID Element::classId() {
   return kElementClassId;
 }
 
+JSClassID ElementAttributes::classId{0};
 JSAtom ElementAttributes::getAttribute(const std::string& name) {
   bool numberIndex = isNumberIndex(name);
 
@@ -62,13 +63,7 @@ JSAtom ElementAttributes::getAttribute(const std::string& name) {
     return JS_ATOM_NULL;
   }
 
-  return m_attributes[name];
-}
-
-ElementAttributes::~ElementAttributes() {
-  for (auto& attr : m_attributes) {
-    JS_FreeAtom(m_ctx, attr.second);
-  }
+  return JS_DupAtom(m_ctx, m_attributes[name]);
 }
 
 JSValue ElementAttributes::setAttribute(const std::string& name, JSAtom atom) {
@@ -81,6 +76,11 @@ JSValue ElementAttributes::setAttribute(const std::string& name, JSAtom atom) {
   if (name == "class") {
     std::string classNameString = jsAtomToStdString(m_ctx, atom);
     m_className->set(classNameString);
+  }
+
+  // If attribute exists, should free the previous value.
+  if (m_attributes.count(name) > 0) {
+    JS_FreeAtom(m_ctx, m_attributes[name]);
   }
 
   m_attributes[name] = JS_DupAtom(m_ctx, atom);
@@ -125,6 +125,12 @@ std::string ElementAttributes::toString() {
   }
 
   return s;
+}
+
+void ElementAttributes::dispose() const {
+  for (auto& attr : m_attributes) {
+    JS_FreeAtom(m_ctx, attr.second);
+  }
 }
 
 JSValue Element::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
@@ -239,7 +245,10 @@ JSValue Element::getAttribute(JSContext* ctx, JSValue this_val, int argc, JSValu
   auto* attributes = element->m_attributes;
 
   if (attributes->hasAttribute(name)) {
-    return JS_AtomToValue(ctx, attributes->getAttribute(name));
+    JSAtom v = attributes->getAttribute(name);
+    JSValue result = JS_AtomToValue(ctx, v);
+    JS_FreeAtom(ctx, v);
+    return result;
   }
 
   return JS_NULL;
@@ -264,6 +273,7 @@ JSValue Element::removeAttribute(JSContext* ctx, JSValue this_val, int argc, JSV
     JSAtom id = attributes->getAttribute(name);
     element->m_attributes->removeAttribute(name);
     element->_didModifyAttribute(name, id, JS_ATOM_NULL);
+    JS_FreeAtom(ctx, id);
 
     std::unique_ptr<NativeString> args_01 = stringToNativeString(name);
     ::foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->m_eventTargetId, UICommand::removeProperty, *args_01, nullptr);
@@ -391,7 +401,9 @@ IMPL_PROPERTY_GETTER(Element, tagName)(JSContext* ctx, JSValue this_val, int arg
 IMPL_PROPERTY_GETTER(Element, className)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   JSAtom valueAtom = element->m_attributes->getAttribute("class");
-  return JS_AtomToString(ctx, valueAtom);
+  JSValue v = JS_AtomToString(ctx, valueAtom);
+  JS_FreeAtom(ctx, valueAtom);
+  return v;
 }
 IMPL_PROPERTY_SETTER(Element, className)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
@@ -556,6 +568,11 @@ IMPL_PROPERTY_GETTER(Element, children)(JSContext* ctx, JSValue this_val, int ar
   JS_FreeValue(ctx, pushMethod);
 
   return array;
+}
+
+IMPL_PROPERTY_GETTER(Element, attributes)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
+  return JS_DupValue(ctx, element->m_attributes->toQuickJS());
 }
 
 IMPL_PROPERTY_GETTER(Element, innerHTML)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -763,6 +780,7 @@ void ElementInstance::_notifyChildRemoved() {
   if (m_attributes->hasAttribute(id)) {
     JSAtom v = m_attributes->getAttribute(id);
     document()->removeElementById(v, this);
+    JS_FreeAtom(m_ctx, v);
   }
 }
 
@@ -785,6 +803,7 @@ void ElementInstance::_notifyChildInsert() {
   if (m_attributes->hasAttribute(idKey)) {
     JSAtom v = m_attributes->getAttribute(idKey);
     document()->addElementById(v, this);
+    JS_FreeAtom(m_ctx, v);
   }
 }
 
@@ -808,15 +827,19 @@ void ElementInstance::_beforeUpdateId(JSAtom oldId, JSAtom newId) {
   }
 }
 
+void ElementInstance::trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) {
+  JS_MarkValue(rt, m_attributes->toQuickJS(), mark_func);
+  NodeInstance::trace(rt, val, mark_func);
+}
+
 ElementInstance::ElementInstance(Element* element, std::string tagName, bool shouldAddUICommand)
     : m_tagName(tagName), NodeInstance(element, NodeType::ELEMENT_NODE, Element::classId(), exoticMethods, "Element") {
-  m_attributes = new ElementAttributes(m_context);
+  m_attributes = makeGarbageCollected<ElementAttributes>()->initialize(m_ctx, &ElementAttributes::classId);
   JSValue arguments[] = {jsObject};
   JSValue style = JS_CallConstructor(m_ctx, CSSStyleDeclaration::instance(m_context)->jsObject, 1, arguments);
   m_style = static_cast<StyleDeclarationInstance*>(JS_GetOpaque(style, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
 
   JS_DefinePropertyValueStr(m_ctx, jsObject, "style", m_style->jsObject, JS_PROP_C_W_E);
-  JS_DefinePropertyValueStr(m_ctx, jsObject, "attributes", m_attributes->jsObject, JS_PROP_C_W_E);
 
   if (shouldAddUICommand) {
     std::unique_ptr<NativeString> args_01 = stringToNativeString(tagName);
@@ -828,10 +851,6 @@ JSClassExoticMethods ElementInstance::exoticMethods{nullptr, nullptr, nullptr, n
 
 StyleDeclarationInstance* ElementInstance::style() {
   return m_style;
-}
-
-ElementAttributes* ElementInstance::attributes() {
-  return m_attributes;
 }
 
 IMPL_PROPERTY_GETTER(BoundingClientRect, x)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {

@@ -51,6 +51,11 @@ class GarbageCollected {
   virtual void trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) const {};
 
   /**
+   * Called before underline JavaScript object been collected by GC.
+   */
+  virtual void dispose() const {};
+
+  /**
    * Specifies a name for the garbage-collected object. Such names will never
    * be hidden, as they are explicitly specified by the user of this API.
    *
@@ -110,6 +115,7 @@ T* GarbageCollected<T>::initialize(JSContext* ctx, JSClassID* classId) {
     /// The deconstruct method of this class will be called and all memory about this class will be freed when finalize completed.
     def.finalizer = [](JSRuntime* rt, JSValue val) {
       auto* object = static_cast<T*>(JS_GetOpaque(val, JSValueGetClassId(val)));
+      object->dispose();
       free(object);
     };
 

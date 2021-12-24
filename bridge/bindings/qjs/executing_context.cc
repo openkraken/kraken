@@ -142,9 +142,11 @@ ExecutionContext::~ExecutionContext() {
     }
   }
 
+  // Run GC before free JSContext, *ctx are still necessary to finalize objects and atoms.
+  JS_RunGC(m_runtime);
+
   JS_FreeValue(m_ctx, globalObject);
   JS_FreeContext(m_ctx);
-  JS_RunGC(m_runtime);
 
 #if DUMP_LEAKS
   if (--runningContexts == 0) {
