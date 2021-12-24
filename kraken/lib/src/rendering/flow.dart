@@ -56,7 +56,16 @@ class RenderFlowLayout extends RenderLayoutBox {
   }
 
   // Line boxes of flow layout.
+  // https://www.w3.org/TR/css-inline-3/#line-boxes
   List<_RunMetrics> _lineBoxMetrics = <_RunMetrics>[];
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    // Do not forget to clear reference variables, or it will cause memory leaks!
+    _lineBoxMetrics.clear();
+  }
 
   @override
   void setupParentData(RenderBox child) {
@@ -67,13 +76,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       child.parentData = CSSPositionedLayout.getPositionParentData(
           child, child.parentData as RenderLayoutParentData);
     }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-
-    _lineBoxMetrics.clear();
   }
 
   double _getMainAxisExtent(RenderBox child) {

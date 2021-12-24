@@ -161,6 +161,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   // Flex line boxes of flex layout.
+  // https://www.w3.org/TR/css-flexbox-1/#flex-lines
   List<_RunMetrics> _flexLineBoxMetrics = <_RunMetrics>[];
 
   // Cache the intrinsic size of children before flex-grow/flex-shrink
@@ -171,6 +172,16 @@ class RenderFlexLayout extends RenderLayoutBox {
   final Map<int, BoxConstraints> _childrenOldConstraints = {};
 
   @override
+  void dispose() {
+    super.dispose();
+
+    // Do not forget to clear reference variables, or it will cause memory leaks!
+    _flexLineBoxMetrics.clear();
+    _childrenIntrinsicMainSizes.clear();
+    _childrenOldConstraints.clear();
+  }
+
+  @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderLayoutParentData) {
       child.parentData = RenderLayoutParentData();
@@ -179,15 +190,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       child.parentData = CSSPositionedLayout.getPositionParentData(
           child, child.parentData as RenderLayoutParentData);
     }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-
-    _flexLineBoxMetrics.clear();
-    _childrenIntrinsicMainSizes.clear();
-    _childrenOldConstraints.clear();
   }
 
   bool get _isHorizontalFlexDirection {
