@@ -56,8 +56,8 @@ class ElementAttributes : public GarbageCollected<ElementAttributes> {
 
   void dispose() const override;
 
-  JSAtom getAttribute(const std::string& name);
-  JSValue setAttribute(const std::string& name, JSAtom value);
+  JSValue getAttribute(const std::string& name);
+  JSValue setAttribute(const std::string& name, JSValue value);
   bool hasAttribute(std::string& name);
   void removeAttribute(std::string& name);
   void copyWith(ElementAttributes* attributes);
@@ -65,7 +65,7 @@ class ElementAttributes : public GarbageCollected<ElementAttributes> {
   std::string toString();
 
  private:
-  std::unordered_map<std::string, JSAtom> m_attributes;
+  std::unordered_map<std::string, JSValue> m_attributes;
   std::shared_ptr<SpaceSplitString> m_className{std::make_shared<SpaceSplitString>("")};
 };
 
@@ -162,8 +162,8 @@ class ElementInstance : public NodeInstance {
   void _notifyChildRemoved();
   void _notifyNodeInsert(NodeInstance* insertNode) override;
   void _notifyChildInsert();
-  void _didModifyAttribute(std::string& name, JSAtom oldId, JSAtom newId);
-  void _beforeUpdateId(JSAtom oldId, JSAtom newId);
+  void _didModifyAttribute(std::string& name, JSValue oldId, JSValue newId);
+  void _beforeUpdateId(JSValue oldIdValue, JSValue newIdValue);
 
   std::string m_tagName;
   friend Element;

@@ -52,6 +52,7 @@ class GarbageCollected {
 
   /**
    * Called before underline JavaScript object been collected by GC.
+   * Note: JS_FreeValue and JS_FreeAtom is not available, use JS_FreeValueRT and JS_FreeAtomRT instead.
    */
   virtual void dispose() const {};
 
@@ -73,6 +74,7 @@ class GarbageCollected {
  protected:
   JSValue jsObject{JS_NULL};
   JSContext* m_ctx{nullptr};
+  JSRuntime* m_runtime{nullptr};
   GarbageCollected(){};
   friend class MakeGarbageCollectedTrait<T>;
 };
@@ -129,6 +131,7 @@ T* GarbageCollected<T>::initialize(JSContext* ctx, JSClassID* classId) {
   JS_SetOpaque(jsObject, this);
 
   m_ctx = ctx;
+  m_runtime = JS_GetRuntime(m_ctx);
 
   return static_cast<T*>(this);
 }
