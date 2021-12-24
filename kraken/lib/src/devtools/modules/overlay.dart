@@ -4,15 +4,14 @@
  */
 
 import 'package:kraken/dom.dart';
-import '../module.dart';
-import 'package:kraken_devtools/kraken_devtools.dart';
+import 'package:kraken/devtools.dart';
 
 class InspectOverlayModule extends UIInspectorModule {
   @override
   String get name => 'Overlay';
 
-  Document get document => devTool!.controller!.view.document;
-  InspectOverlayModule(ChromeDevToolsService? devTool): super(devTool);
+  Document get document => devtoolsService.controller!.view.document;
+  InspectOverlayModule(ChromeDevToolsService devtoolsService): super(devtoolsService);
 
   @override
   void receiveFromFrontend(int? id, String method, Map<String, dynamic>? params) {
@@ -32,7 +31,7 @@ class InspectOverlayModule extends UIInspectorModule {
     _highlightElement?.debugHideHighlight();
 
     int nodeId = params['nodeId'];
-    Element? element = document.controller.view.debugGetEventTargetById<Element>(nodeId);
+    Element? element = document.controller.view.getEventTargetById<Element>(nodeId);
 
     if (element != null) {
       element.debugHighlight();

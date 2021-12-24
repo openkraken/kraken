@@ -1,21 +1,22 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
-import 'package:kraken/module.dart';
 import 'package:kraken/widget.dart';
 import 'package:kraken/launcher.dart';
 import 'package:ansicolor/ansicolor.dart';
 import 'package:path/path.dart' as path;
-import 'bridge/from_native.dart';
-import 'bridge/to_native.dart';
-import 'custom/custom_object_element.dart';
 import 'package:kraken_websocket/kraken_websocket.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
 import 'package:kraken_webview/kraken_webview.dart';
+
+import 'bridge/from_native.dart';
+import 'bridge/to_native.dart';
+import 'custom/custom_object_element.dart';
 
 String? pass = (AnsiPen()..green())('[TEST PASS]');
 String? err = (AnsiPen()..red())('[TEST FAILED]');

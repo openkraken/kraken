@@ -5,14 +5,13 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:kraken/kraken.dart';
-import 'package:kraken/module.dart';
-import 'package:kraken_devtools/kraken_devtools.dart';
-import 'module.dart';
+import 'package:kraken/devtools.dart';
 
 const String INSPECTOR_URL = 'devtools://devtools/bundled/inspector.html';
 const int INSPECTOR_DEFAULT_PORT = 9222;
 const String INSPECTOR_DEFAULT_ADDRESS = '127.0.0.1';
+
+typedef NativeInspectorMessageHandler = void Function(String message);
 
 class DOMUpdatedEvent extends InspectorEvent {
   @override
@@ -21,8 +20,6 @@ class DOMUpdatedEvent extends InspectorEvent {
   @override
   JSONEncodable? get params => null;
 }
-
-typedef NativeInspectorMessageHandler = void Function(String message);
 
 class InspectorServerInit {
   final int port;
@@ -33,8 +30,7 @@ class InspectorServerInit {
   InspectorServerInit(this.contextId, this.port, this.address, this.bundleURL);
 }
 
-class InspectorServerStart {
-}
+class InspectorServerStart { }
 
 class InspectorFrontEndMessage {
   InspectorFrontEndMessage(this.id, this.module, this.method, this.params);
@@ -62,14 +58,15 @@ class InspectorReload {
 }
 
 class UIInspector {
-  ChromeDevToolsService? devTool;
+  final ChromeDevToolsService devtoolsService;
   final Map<String, UIInspectorModule> moduleRegistrar = {};
 
-  UIInspector(this.devTool) {
-    registerModule(InspectDOMModule(devTool));
-    registerModule(InspectOverlayModule(devTool));
-    registerModule(InspectPageModule(devTool));
-    registerModule(InspectCSSModule(devTool));
+  UIInspector(this.devtoolsService) {
+    registerModule(InspectDOMModule(devtoolsService));
+    registerModule(InspectOverlayModule(devtoolsService));
+    registerModule(InspectPageModule(devtoolsService));
+    registerModule(InspectCSSModule(devtoolsService));
+    registerModule(InspectNetworkModule(devtoolsService));
   }
 
   void registerModule(UIInspectorModule module) {
@@ -79,10 +76,9 @@ class UIInspector {
   void onServerStart(int port) async {
     String remoteAddress = await UIInspector.getConnectedLocalNetworkAddress();
     String inspectorURL = '$INSPECTOR_URL?ws=$remoteAddress:$port';
-    await ClipBoardModule.writeText(inspectorURL);
 
     print('Kraken DevTool listening at ws://$remoteAddress:$port');
-    print('Open Chrome/Edge and paste following url to your navigator:');
+    print('Open Chrome/Edge and enter following url to your navigator:');
     print('    $inspectorURL');
   }
 
@@ -93,12 +89,11 @@ class UIInspector {
   }
 
   void onDOMTreeChanged() {
-    devTool!.isolateServerPort?.send(DOMUpdatedEvent());
+    devtoolsService.isolateServerPort?.send(DOMUpdatedEvent());
   }
 
   void dispose() {
     moduleRegistrar.clear();
-    devTool = null;
   }
 
   static Future<String> getConnectedLocalNetworkAddress() async {
@@ -119,6 +114,8 @@ class UIInspector {
 
 abstract class JSONEncodable {
   Map toJson();
+
+  @override
   String toString() {
     return jsonEncode(toJson());
   }
@@ -129,6 +126,7 @@ abstract class InspectorEvent extends JSONEncodable {
   JSONEncodable? get params;
   InspectorEvent();
 
+  @override
   Map toJson() {
     return {
       'method': method,
@@ -141,5 +139,6 @@ class JSONEncodableMap extends JSONEncodable {
   Map<String, dynamic> map;
   JSONEncodableMap(this.map);
 
+  @override
   Map toJson() => map;
 }

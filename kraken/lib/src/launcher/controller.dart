@@ -248,11 +248,11 @@ class KrakenViewController
 
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
 
-  T? debugGetEventTargetById<T>(int targetId) {
+  T? getEventTargetById<T>(int targetId) {
     return _getEventTargetById(targetId);
   }
 
-  int? debugGetTargetIdByEventTarget(EventTarget eventTarget) {
+  int? getTargetIdByEventTarget(EventTarget eventTarget) {
     if (_eventTargets.containsValue(eventTarget)) {
       for (var entry in _eventTargets.entries) {
         if (entry.value == eventTarget) {

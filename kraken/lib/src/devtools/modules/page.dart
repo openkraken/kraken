@@ -1,12 +1,16 @@
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:kraken_devtools/kraken_devtools.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/dom.dart';
-import '../module.dart';
-import '../ui_inspector.dart';
+import 'package:kraken/devtools.dart';
+
 
 String enumKey(String key) {
   return key.split('.').last;
@@ -186,9 +190,9 @@ enum ResourceType {
 
 class InspectPageModule extends UIInspectorModule {
 
-  Document get document => devTool!.controller!.view.document;
+  Document get document => devtoolsService.controller!.view.document;
 
-  InspectPageModule(ChromeDevToolsService? devTool): super(devTool);
+  InspectPageModule(ChromeDevToolsService devtoolsService): super(devtoolsService);
 
   @override
   String get name => 'Page';
@@ -210,7 +214,7 @@ class InspectPageModule extends UIInspectorModule {
         break;
       case 'getResourceContent':
         sendToFrontend(id, JSONEncodableMap({
-          'content': devTool!.controller?.bundle?.content,
+          'content': devtoolsService.controller?.bundle?.content,
           'base64Encoded': false
         }));
         break;
@@ -282,11 +286,9 @@ class ScreenCastFrame implements JSONEncodable {
   final ScreencastFrameMetadata metadata;
   final int sessionId;
 
-  ScreenCastFrame(this.data, this.metadata, this.sessionId)
-      : assert(data != null),
-        assert(metadata != null),
-        assert(sessionId != null);
+  ScreenCastFrame(this.data, this.metadata, this.sessionId);
 
+  @override
   Map toJson() {
     return {
       'data': data,
@@ -315,6 +317,7 @@ class ScreencastFrameMetadata implements JSONEncodable {
       this.scrollOffsetY,
       {this.timestamp});
 
+  @override
   Map toJson() {
     return {
       'offsetTop': offsetTop,

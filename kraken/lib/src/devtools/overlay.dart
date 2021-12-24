@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 import 'dart:ui';
-import 'package:meta/meta.dart';
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 
