@@ -579,8 +579,8 @@ void DocumentInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func)
   // Trace scriptAnimationController
   JS_MarkValue(rt, m_scriptAnimationController->toQuickJS(), mark_func);
   // Trace elementByIdMaps
-  for (auto& entry: m_elementMapById) {
-    for(auto& value: entry.second) {
+  for (auto& entry : m_elementMapById) {
+    for (auto& value : entry.second) {
       JS_MarkValue(rt, value->jsObject, mark_func);
     }
   }
