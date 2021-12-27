@@ -11,7 +11,7 @@ const del = require('del');
 const os = require('os');
 
 program
-.option('--built-with-debug-jsc', 'Built bridge binary with debuggable JSC.')
+.option('--static-quickjs', 'Build quickjs as static library and bundled into kraken library.', false)
 .parse(process.argv);
 
 const SUPPORTED_JS_ENGINES = ['jsc', 'quickjs'];
@@ -182,8 +182,6 @@ task('build-darwin-kraken-lib', done => {
     buildType = 'RelWithDebInfo';
   }
 
-  let builtWithDebugJsc = targetJSEngine === 'jsc' && !!program.builtWithDebugJsc;
-
   if (isProfile) {
     externCmakeArgs.push('-DENABLE_PROFILE=TRUE');
   }
@@ -192,9 +190,9 @@ task('build-darwin-kraken-lib', done => {
     externCmakeArgs.push('-DENABLE_ASAN=true');
   }
 
-  if (builtWithDebugJsc) {
-    let debugJsEngine = findDebugJSEngine(platform == 'darwin' ? 'macos' : platform);
-    externCmakeArgs.push(`-DDEBUG_JSC_ENGINE=${debugJsEngine}`)
+  // Bundle quickjs into kraken.
+  if (program.staticQuickjs) {
+    externCmakeArgs.push('-DSTATIC_QUICKJS=true');
   }
 
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} -DENABLE_TEST=true ${externCmakeArgs.join(' ')} \
@@ -432,6 +430,11 @@ task(`build-ios-kraken-lib`, (done) => {
     externCmakeArgs.push('-DENABLE_ASAN=true');
   }
 
+  // Bundle quickjs into kraken.
+  if (program.staticQuickjs) {
+    externCmakeArgs.push('-DSTATIC_QUICKJS=true');
+  }
+
   // generate build scripts for simulator
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
     -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
@@ -476,7 +479,7 @@ task(`build-ios-kraken-lib`, (done) => {
   execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm --target kraken kraken_static -- -j 12`, {
     stdio: 'inherit'
   });
-  
+
   // Generate builds scripts for ARMv7s, ARMv7
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
     -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
@@ -499,7 +502,12 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit'
   });
 
-  const targetSourceFrameworks = ['kraken_bridge', 'quickjs'];
+  const targetSourceFrameworks = ['kraken_bridge'];
+
+  // If quickjs is not static, there will be another framework called quickjs.framework.
+  if (!program.staticQuickjs) {
+    targetSourceFrameworks.push('quickjs');
+  }
 
   targetSourceFrameworks.forEach(target => {
     const armDynamicSDKPath = path.join(paths.bridge, `build/ios/lib/arm/${target}.framework`);
@@ -623,11 +631,20 @@ task('build-android-kraken-lib', (done) => {
     externCmakeArgs.push('-DENABLE_ASAN=true');
   }
 
+  // Bundle quickjs into kraken.
+  if (program.staticQuickjs) {
+    externCmakeArgs.push('-DSTATIC_QUICKJS=true');
+  }
+
   const soFileNames = [
     'libkraken',
-    'libquickjs',
     'libc++_shared'
   ];
+
+  // If quickjs is not static, there will be another so called libquickjs.so.
+  if (!program.staticQuickjs) {
+    soFileNames.push('libquickjs');
+  }
 
   const cmakeGeneratorTemplate = platform == 'win32' ? 'Ninja' : 'Unix Makefiles';
   archs.forEach(arch => {

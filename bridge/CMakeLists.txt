@@ -170,7 +170,11 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-atom.h
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-opcode.h
     )
-  add_library(quickjs SHARED ${QUICK_JS_SOURCE})
+  if(${STATIC_QUICKJS})
+    add_library(quickjs STATIC ${QUICK_JS_SOURCE})
+  else()
+    add_library(quickjs SHARED ${QUICK_JS_SOURCE})
+  endif()
 
   list(APPEND BRIDGE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
   list(APPEND BRIDGE_LINK_LIBS quickjs)
@@ -365,11 +369,14 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
     PUBLIC_HEADER ${KRAKEN_PUBLIC_HEADERS}
     )
 
-  set_target_properties(quickjs PROPERTIES
-    OUTPUT_NAME quickjs
-    FRAMEWORK TRUE
-    FRAMEWORK_VERSION C
-    MACOSX_FRAMEWORK_IDENTIFIER com.openkraken.quickjs
-    PUBLIC_HEADER ${QUICKJS_PUBLIC_HEADERS}
-    )
+  # If quickjs is static, there will be no quickjs.framework any more.
+  if(NOT ${STATIC_QUICKJS})
+    set_target_properties(quickjs PROPERTIES
+      OUTPUT_NAME quickjs
+      FRAMEWORK TRUE
+      FRAMEWORK_VERSION C
+      MACOSX_FRAMEWORK_IDENTIFIER com.openkraken.quickjs
+      PUBLIC_HEADER ${QUICKJS_PUBLIC_HEADERS}
+      )
+  endif()
 endif ()
