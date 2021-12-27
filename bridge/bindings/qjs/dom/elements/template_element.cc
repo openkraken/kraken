@@ -6,20 +6,20 @@
 #include "template_element.h"
 #include "bindings/qjs/dom/text_node.h"
 #include "bindings/qjs/qjs_patch.h"
-#include "bridge_qjs.h"
+#include "page.h"
 
 namespace kraken::binding::qjs {
 
-TemplateElement::TemplateElement(JSContext* context) : Element(context) {
+TemplateElement::TemplateElement(ExecutionContext* context) : Element(context) {
   JS_SetPrototype(m_ctx, m_prototypeObject, Element::instance(m_context)->prototype());
 }
 
-void bindTemplateElement(std::unique_ptr<JSContext>& context) {
+void bindTemplateElement(std::unique_ptr<ExecutionContext>& context) {
   auto* constructor = TemplateElement::instance(context.get());
   context->defineGlobalProperty("HTMLTemplateElement", constructor->jsObject);
 }
 
-JSValue TemplateElement::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
+JSValue TemplateElement::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
   auto instance = new TemplateElementInstance(this);
   return instance->jsObject;
 }
@@ -34,8 +34,8 @@ TemplateElementInstance::TemplateElementInstance(TemplateElement* element) : Ele
 
 TemplateElementInstance::~TemplateElementInstance() {}
 
-void TemplateElementInstance::gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
-  NodeInstance::gcMark(rt, val, mark_func);
+void TemplateElementInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
+  NodeInstance::trace(rt, val, mark_func);
 }
 
 }  // namespace kraken::binding::qjs

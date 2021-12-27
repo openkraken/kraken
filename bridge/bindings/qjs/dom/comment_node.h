@@ -10,7 +10,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindCommentNode(std::unique_ptr<JSContext>& context);
+void bindCommentNode(std::unique_ptr<ExecutionContext>& context);
 
 class CommentInstance;
 
@@ -19,11 +19,11 @@ class Comment : public Node {
   static JSClassID kCommentClassId;
   static JSClassID classId();
   Comment() = delete;
-  explicit Comment(JSContext* context);
+  explicit Comment(ExecutionContext* context);
 
   OBJECT_INSTANCE(Comment);
 
-  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
  private:
   DEFINE_PROTOTYPE_READONLY_PROPERTY(data);

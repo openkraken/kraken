@@ -6,7 +6,7 @@
 #include "document.h"
 #include <regex>
 #include "all_collection.h"
-#include "bindings/qjs/js_context.h"
+#include "bindings/qjs/executing_context.h"
 #include "comment_node.h"
 #include "dart_methods.h"
 #include "document_fragment.h"
@@ -39,7 +39,7 @@ void traverseNode(NodeInstance* node, TraverseHandler handler) {
   if (shouldExit)
     return;
 
-  QjsContext* ctx = node->context()->ctx();
+  JSContext* ctx = node->context()->ctx();
   int childNodesLen = arrayGetLength(ctx, node->childNodes);
 
   if (childNodesLen != 0) {
@@ -55,7 +55,7 @@ void traverseNode(NodeInstance* node, TraverseHandler handler) {
 
 std::once_flag kDocumentInitOnceFlag;
 
-void bindDocument(std::unique_ptr<JSContext>& context) {
+void bindDocument(std::unique_ptr<ExecutionContext>& context) {
   auto* documentConstructor = Document::instance(context.get());
   context->defineGlobalProperty("Document", documentConstructor->jsObject);
   JSValue documentInstance = JS_CallConstructor(context->ctx(), documentConstructor->jsObject, 0, nullptr);
@@ -64,7 +64,7 @@ void bindDocument(std::unique_ptr<JSContext>& context) {
 
 JSClassID Document::kDocumentClassID{0};
 
-Document::Document(JSContext* context) : Node(context, "Document") {
+Document::Document(ExecutionContext* context) : Node(context, "Document") {
   std::call_once(kDocumentInitOnceFlag, []() { JS_NewClassID(&kDocumentClassID); });
   JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
   if (!document_registered) {
@@ -80,39 +80,49 @@ Document::Document(JSContext* context) : Node(context, "Document") {
 
   if (!event_registered) {
     event_registered = true;
-    Event::defineEvent(EVENT_INPUT,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new InputEventInstance(InputEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_MEDIA_ERROR, [](JSContext* context, void* nativeEvent) -> EventInstance* {
+    Event::defineEvent(
+        EVENT_INPUT, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new InputEventInstance(InputEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+    Event::defineEvent(EVENT_MEDIA_ERROR, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
       return new MediaErrorEventInstance(MediaErrorEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
     });
-    Event::defineEvent(EVENT_MESSAGE,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new MessageEventInstance(MessageEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_CLOSE,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new CloseEventInstance(CloseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_INTERSECTION_CHANGE, [](JSContext* context, void* nativeEvent) -> EventInstance* {
+    Event::defineEvent(EVENT_MESSAGE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+      return new MessageEventInstance(MessageEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    });
+    Event::defineEvent(
+        EVENT_CLOSE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new CloseEventInstance(CloseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+    Event::defineEvent(EVENT_INTERSECTION_CHANGE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
       return new IntersectionChangeEventInstance(IntersectionChangeEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
     });
-    Event::defineEvent(EVENT_TOUCH_START,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_TOUCH_END,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_TOUCH_MOVE,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_TOUCH_CANCEL,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_SWIPE,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_PAN,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_LONG_PRESS,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_SCALE,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_CLICK,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new MouseEventInstance(MouseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_CANCEL,
-                       [](JSContext* context, void* nativeEvent) -> EventInstance* { return new MouseEventInstance(MouseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_POPSTATE, [](JSContext* context, void* nativeEvent) -> EventInstance* {
+    Event::defineEvent(EVENT_TOUCH_START, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_TOUCH_END, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_TOUCH_MOVE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_TOUCH_CANCEL, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_SWIPE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+      return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_PAN, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+      return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_LONG_PRESS, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+      return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_SCALE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+      return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    });
+    Event::defineEvent(
+        EVENT_CLICK, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new MouseEventInstance(MouseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+    Event::defineEvent(EVENT_CANCEL, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+      return new MouseEventInstance(MouseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    });
+    Event::defineEvent(EVENT_POPSTATE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
       return new PopStateEventInstance(PopStateEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
     });
   }
@@ -122,12 +132,12 @@ JSClassID Document::classId() {
   return kDocumentClassID;
 }
 
-JSValue Document::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
+JSValue Document::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
   auto* instance = new DocumentInstance(this);
   return instance->jsObject;
 }
 
-JSValue Document::createEvent(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Document::createEvent(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Failed to argumentCount: 1 argument required, but only 0 present.");
   }
@@ -151,7 +161,7 @@ JSValue Document::createEvent(QjsContext* ctx, JSValue this_val, int argc, JSVal
   }
 }
 
-JSValue Document::createElement(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Document::createElement(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Failed to createElement: 1 argument required, but only 0 present.");
   }
@@ -162,7 +172,7 @@ JSValue Document::createElement(QjsContext* ctx, JSValue this_val, int argc, JSV
   }
 
   auto document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
-  auto* context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
   std::string tagName = jsValueToStdString(ctx, tagNameValue);
   JSValue constructor = static_cast<Document*>(document->prototype())->getElementConstructor(document->m_context, tagName);
 
@@ -170,7 +180,7 @@ JSValue Document::createElement(QjsContext* ctx, JSValue this_val, int argc, JSV
   return element;
 }
 
-JSValue Document::createTextNode(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Document::createTextNode(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc != 1) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'createTextNode' on 'Document': 1 argument required, but only 0 present.");
   }
@@ -180,18 +190,18 @@ JSValue Document::createTextNode(QjsContext* ctx, JSValue this_val, int argc, JS
   return textNode;
 }
 
-JSValue Document::createDocumentFragment(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Document::createDocumentFragment(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   return JS_CallConstructor(ctx, DocumentFragment::instance(document->m_context)->jsObject, 0, nullptr);
 }
 
-JSValue Document::createComment(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Document::createComment(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   JSValue commentNode = JS_CallConstructor(ctx, Comment::instance(document->m_context)->jsObject, argc, argv);
   return commentNode;
 }
 
-JSValue Document::getElementById(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Document::getElementById(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Uncaught TypeError: Failed to execute 'getElementById' on 'Document': 1 argument required, but only 0 present.");
   }
@@ -223,7 +233,7 @@ JSValue Document::getElementById(QjsContext* ctx, JSValue this_val, int argc, JS
   return JS_NULL;
 }
 
-JSValue Document::getElementsByTagName(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Document::getElementsByTagName(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx,
                              "Uncaught TypeError: Failed to execute 'getElementsByTagName' on 'Document': 1 argument required, "
@@ -259,7 +269,7 @@ JSValue Document::getElementsByTagName(QjsContext* ctx, JSValue this_val, int ar
   return array;
 }
 
-JSValue Document::getElementsByClassName(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Document::getElementsByClassName(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Uncaught TypeError: Failed to execute 'getElementsByClassName' on 'Document': 1 argument required, but only 0 present.");
   }
@@ -294,7 +304,7 @@ void Document::defineElement(const std::string& tagName, Element* constructor) {
   elementConstructorMap[tagName] = constructor;
 }
 
-JSValue Document::getElementConstructor(JSContext* context, const std::string& tagName) {
+JSValue Document::getElementConstructor(ExecutionContext* context, const std::string& tagName) {
   if (elementConstructorMap.count(tagName) > 0)
     return elementConstructorMap[tagName]->jsObject;
   return Element::instance(context)->jsObject;
@@ -304,11 +314,11 @@ bool Document::isCustomElement(const std::string& tagName) {
   return elementConstructorMap.count(tagName) > 0;
 }
 
-IMPL_PROPERTY_GETTER(Document, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Document, nodeName)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewString(ctx, "#document");
 }
 
-IMPL_PROPERTY_GETTER(Document, all)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Document, all)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   auto all = new AllCollection(document->m_context);
 
@@ -321,14 +331,14 @@ IMPL_PROPERTY_GETTER(Document, all)(QjsContext* ctx, JSValue this_val, int argc,
 }
 
 // document.documentElement
-IMPL_PROPERTY_GETTER(Document, documentElement)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Document, documentElement)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   ElementInstance* documentElement = document->getDocumentElement();
   return documentElement == nullptr ? JS_NULL : documentElement->jsObject;
 }
 
 // document.head
-IMPL_PROPERTY_GETTER(Document, head)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Document, head)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   ElementInstance* documentElement = document->getDocumentElement();
   int32_t len = arrayGetLength(ctx, documentElement->childNodes);
@@ -354,7 +364,7 @@ IMPL_PROPERTY_GETTER(Document, head)(QjsContext* ctx, JSValue this_val, int argc
 }
 
 // document.body: https://html.spec.whatwg.org/multipage/dom.html#dom-document-body-dev
-IMPL_PROPERTY_GETTER(Document, body)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Document, body)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   ElementInstance* documentElement = document->getDocumentElement();
   JSValue body = JS_NULL;
@@ -382,7 +392,7 @@ IMPL_PROPERTY_GETTER(Document, body)(QjsContext* ctx, JSValue this_val, int argc
 
 // The body property is settable, setting a new body on a document will effectively remove all
 // the current children of the existing <body> element.
-IMPL_PROPERTY_SETTER(Document, body)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_SETTER(Document, body)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   ElementInstance* documentElement = document->getDocumentElement();
   // If there is no document element, throw a Exception.
@@ -422,7 +432,7 @@ IMPL_PROPERTY_SETTER(Document, body)(QjsContext* ctx, JSValue this_val, int argc
 }
 
 // document.children
-IMPL_PROPERTY_GETTER(Document, children)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Document, children)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   JSValue array = JS_NewArray(ctx);
   JSValue pushMethod = JS_GetPropertyStr(ctx, array, "push");
@@ -442,12 +452,12 @@ IMPL_PROPERTY_GETTER(Document, children)(QjsContext* ctx, JSValue this_val, int 
   return array;
 }
 
-IMPL_PROPERTY_GETTER(Document, cookie)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Document, cookie)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   std::string cookie = document->m_cookie->getCookie();
   return JS_NewString(ctx, cookie.c_str());
 }
-IMPL_PROPERTY_SETTER(Document, cookie)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_SETTER(Document, cookie)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
   std::string value = jsValueToStdString(ctx, argv[0]);
   document->m_cookie->setCookie(value);
@@ -506,17 +516,18 @@ void DocumentCookie::setCookie(std::string& cookieStr) {
   cookiePairs[key] = value;
 }
 
-DocumentInstance::DocumentInstance(Document* document) : NodeInstance(document, NodeType::DOCUMENT_NODE, this, Document::classId(), "document") {
+DocumentInstance::DocumentInstance(Document* document) : NodeInstance(document, NodeType::DOCUMENT_NODE, Document::classId(), "document") {
+  m_context->m_document = this;
+  m_document = this;
   m_cookie = std::make_unique<DocumentCookie>();
-  m_instanceMap[Document::instance(m_context)] = this;
   m_eventTargetId = DOCUMENT_TARGET_ID;
+
+  m_scriptAnimationController = makeGarbageCollected<ScriptAnimationController>()->initialize(m_ctx, &ScriptAnimationController::classId);
 
 #if FLUTTER_BACKEND
   getDartMethod()->initDocument(m_context->getContextId(), nativeEventTarget);
 #endif
 }
-
-std::unordered_map<Document*, DocumentInstance*> DocumentInstance::m_instanceMap{};
 
 DocumentInstance::~DocumentInstance() {}
 void DocumentInstance::removeElementById(JSAtom id, ElementInstance* element) {
@@ -555,6 +566,19 @@ ElementInstance* DocumentInstance::getDocumentElement() {
   }
 
   return nullptr;
+}
+
+int32_t DocumentInstance::requestAnimationFrame(FrameCallback* frameCallback) {
+  return m_scriptAnimationController->registerFrameCallback(frameCallback);
+}
+
+void DocumentInstance::cancelAnimationFrame(uint32_t callbackId) {
+  m_scriptAnimationController->cancelFrameCallback(callbackId);
+}
+
+void DocumentInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
+  NodeInstance::trace(rt, val, mark_func);
+  JS_MarkValue(rt, m_scriptAnimationController->toQuickJS(), mark_func);
 }
 
 }  // namespace kraken::binding::qjs

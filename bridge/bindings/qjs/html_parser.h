@@ -7,8 +7,8 @@
 #define KRAKENBRIDGE_HTML_PARSER_H
 
 #include "bindings/qjs/dom/element.h"
+#include "executing_context.h"
 #include "include/kraken_bridge.h"
-#include "js_context.h"
 #include "third_party/gumbo-parser/src/gumbo.h"
 
 namespace kraken::binding::qjs {
@@ -19,7 +19,7 @@ class HTMLParser {
   static bool parseHTML(std::string html, NodeInstance* rootNode);
 
  private:
-  JSContext* m_context;
+  ExecutionContext* m_context;
   static void traverseHTML(NodeInstance* root, GumboNode* node);
   static void parseProperty(ElementInstance* element, GumboElement* gumboElement);
 };

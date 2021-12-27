@@ -4,68 +4,100 @@
  */
 
 #include "timer.h"
+#include "bindings/qjs/garbage_collected.h"
 #include "bindings/qjs/qjs_patch.h"
 #include "dart_methods.h"
 
+#if UNIT_TEST
+#include "kraken_test_env.h"
+#endif
+
 namespace kraken::binding::qjs {
 
-static void handleTimerCallback(TimerCallbackContext* callbackContext, const char* errmsg) {
-  if (JS_IsNull(callbackContext->callback)) {
-    // throw JSError inside of dart function callback will directly cause crash
-    // so we handle it instead of throw
-    JSValue exception = JS_ThrowTypeError(callbackContext->context->ctx(), "Failed to trigger callback: timer callback is null.");
-    callbackContext->context->handleException(&exception);
+DOMTimer::DOMTimer(JSValue callback) : m_callback(callback) {}
+
+JSClassID DOMTimer::classId{0};
+
+void DOMTimer::fire() {
+  // 'callback' might be destroyed when calling itself (if it frees the handler), so must take extra care.
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
+  if (!JS_IsFunction(m_ctx, m_callback))
     return;
+
+  JS_DupValue(m_ctx, m_callback);
+  JSValue returnValue = JS_Call(m_ctx, m_callback, JS_UNDEFINED, 0, nullptr);
+  JS_FreeValue(m_ctx, m_callback);
+
+  if (JS_IsException(returnValue)) {
+    context->handleException(&returnValue);
   }
 
-  if (!JS_IsObject(callbackContext->callback)) {
-    return;
-  }
+  JS_FreeValue(m_ctx, returnValue);
+}
+
+void DOMTimer::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
+  JS_MarkValue(rt, m_callback, mark_func);
+}
+
+int32_t DOMTimer::timerId() {
+  return m_timerId;
+}
+
+void DOMTimer::setTimerId(int32_t timerId) {
+  m_timerId = timerId;
+}
+
+static void handleTimerCallback(DOMTimer* timer, const char* errmsg) {
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
 
   if (errmsg != nullptr) {
-    JSValue exception = JS_ThrowTypeError(callbackContext->context->ctx(), "%s", errmsg);
-    callbackContext->context->handleException(&exception);
+    JSValue exception = JS_ThrowTypeError(timer->ctx(), "%s", errmsg);
+    context->handleException(&exception);
     return;
   }
 
-  JSValue returnValue = JS_Call(callbackContext->context->ctx(), callbackContext->callback, callbackContext->context->global(), 0, nullptr);
-  callbackContext->context->handleException(&returnValue);
+  if (context->timers()->getTimerById(timer->timerId()) == nullptr)
+    return;
 
-  callbackContext->context->drainPendingPromiseJobs();
+  // Trigger timer callbacks.
+  timer->fire();
 
-  JS_FreeValue(callbackContext->context->ctx(), returnValue);
+  // Executing pending async jobs.
+  context->drainPendingPromiseJobs();
 }
 
 static void handleTransientCallback(void* ptr, int32_t contextId, const char* errmsg) {
-  auto* callbackContext = static_cast<TimerCallbackContext*>(ptr);
-  if (!checkContext(contextId, callbackContext->context))
+  auto* timer = static_cast<DOMTimer*>(ptr);
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
+
+  if (!checkPage(contextId, context))
     return;
-  if (!callbackContext->context->isValid())
+  if (!context->isValid())
     return;
 
-  handleTimerCallback(callbackContext, errmsg);
+  handleTimerCallback(timer, errmsg);
 
-  list_del(&callbackContext->link);
-  JS_FreeValue(callbackContext->context->ctx(), callbackContext->callback);
-  delete callbackContext;
+  context->timers()->removeTimeoutById(timer->timerId());
 }
 
 static void handlePersistentCallback(void* ptr, int32_t contextId, const char* errmsg) {
-  auto* callbackContext = static_cast<TimerCallbackContext*>(ptr);
-  if (!checkContext(contextId, callbackContext->context))
+  auto* timer = static_cast<DOMTimer*>(ptr);
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
+
+  if (!checkPage(contextId, context))
     return;
-  if (!callbackContext->context->isValid())
+  if (!context->isValid())
     return;
 
-  handleTimerCallback(callbackContext, errmsg);
+  handleTimerCallback(timer, errmsg);
 }
 
-static JSValue setTimeout(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+static JSValue setTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'setTimeout': 1 argument required, but only 0 present.");
   }
 
-  auto context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
+  auto context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
   JSValue callbackValue = argv[0];
   JSValue timeoutValue = argv[1];
 
@@ -87,14 +119,21 @@ static JSValue setTimeout(QjsContext* ctx, JSValueConst this_val, int argc, JSVa
     return JS_ThrowTypeError(ctx, "Failed to execute 'setTimeout': parameter 2 (timeout) only can be a number or undefined.");
   }
 
+#if FLUTTER_BACKEND
   if (getDartMethod()->setTimeout == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'setTimeout': dart method (setTimeout) is not registered.");
   }
+#endif
 
-  auto* callbackContext = new TimerCallbackContext{JS_DupValue(ctx, callbackValue), context};
-  list_add_tail(&callbackContext->link, &context->timer_job_list);
+  // Create a timer object to keep track timer callback.
+  auto* timer = makeGarbageCollected<DOMTimer>(JS_DupValue(ctx, callbackValue))->initialize(context->ctx(), &DOMTimer::classId);
 
-  auto timerId = getDartMethod()->setTimeout(callbackContext, context->getContextId(), handleTransientCallback, timeout);
+  auto timerId = getDartMethod()->setTimeout(timer, context->getContextId(), handleTransientCallback, timeout);
+
+  // Register timerId.
+  timer->setTimerId(timerId);
+
+  context->timers()->installNewTimer(context, timerId, timer);
 
   // `-1` represents ffi error occurred.
   if (timerId == -1) {
@@ -104,51 +143,12 @@ static JSValue setTimeout(QjsContext* ctx, JSValueConst this_val, int argc, JSVa
   return JS_NewUint32(ctx, timerId);
 }
 
-static void handleRAFTransientCallback(void* ptr, int32_t contextId, double highResTimeStamp, const char* errmsg) {
-  auto* callbackContext = static_cast<TimerCallbackContext*>(ptr);
-  if (!checkContext(contextId, callbackContext->context))
-    return;
-
-  if (!callbackContext->context->isValid())
-    return;
-
-  if (JS_IsNull(callbackContext->callback)) {
-    // throw JSError inside of dart function callback will directly cause crash
-    // so we handle it instead of throw
-    JSValue exception = JS_ThrowTypeError(callbackContext->context->ctx(), "Failed to trigger callback: requestAnimationFrame callback is null.");
-    callbackContext->context->handleException(&exception);
-    return;
-  }
-
-  if (!JS_IsObject(callbackContext->callback)) {
-    return;
-  }
-
-  if (errmsg != nullptr) {
-    JSValue exception = JS_ThrowTypeError(callbackContext->context->ctx(), "%s", errmsg);
-    callbackContext->context->handleException(&exception);
-    return;
-  }
-
-  JSValue arguments[] = {JS_NewFloat64(callbackContext->context->ctx(), highResTimeStamp)};
-
-  JSValue returnValue = JS_Call(callbackContext->context->ctx(), callbackContext->callback, callbackContext->context->global(), 1, arguments);
-  callbackContext->context->handleException(&returnValue);
-
-  callbackContext->context->drainPendingPromiseJobs();
-
-  list_del(&callbackContext->link);
-  JS_FreeValue(callbackContext->context->ctx(), callbackContext->callback);
-  JS_FreeValue(callbackContext->context->ctx(), returnValue);
-  delete callbackContext;
-}
-
-static JSValue setInterval(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+static JSValue setInterval(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'setInterval': 1 argument required, but only 0 present.");
   }
 
-  auto context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
+  auto context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
   JSValue callbackValue = argv[0];
   JSValue timeoutValue = argv[1];
 
@@ -169,14 +169,19 @@ static JSValue setInterval(QjsContext* ctx, JSValueConst this_val, int argc, JSV
   } else {
     return JS_ThrowTypeError(ctx, "Failed to execute 'setTimeout': parameter 2 (timeout) only can be a number or undefined.");
   }
+
   if (getDartMethod()->setInterval == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'setInterval': dart method (setInterval) is not registered.");
   }
 
-  // the context pointer which will be pass by pointer address to dart code.
-  auto* callbackContext = new TimerCallbackContext{JS_DupValue(ctx, callbackValue), context};
-  list_add_tail(&callbackContext->link, &context->timer_job_list);
-  uint32_t timerId = getDartMethod()->setInterval(callbackContext, context->getContextId(), handlePersistentCallback, timeout);
+  // Create a timer object to keep track timer callback.
+  auto* timer = makeGarbageCollected<DOMTimer>(JS_DupValue(ctx, callbackValue))->initialize(context->ctx(), &DOMTimer::classId);
+
+  uint32_t timerId = getDartMethod()->setInterval(timer, context->getContextId(), handlePersistentCallback, timeout);
+
+  // Register timerId.
+  timer->setTimerId(timerId);
+  context->timers()->installNewTimer(context, timerId, timer);
 
   if (timerId == -1) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'setInterval': dart method (setInterval) got unexpected error.");
@@ -185,53 +190,12 @@ static JSValue setInterval(QjsContext* ctx, JSValueConst this_val, int argc, JSV
   return JS_NewUint32(ctx, timerId);
 }
 
-static JSValue requestAnimationFrame(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-  if (argc <= 0) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': 1 argument required, but only 0 present.");
-  }
-
-  auto context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
-  JSValue callbackValue = argv[0];
-
-  if (!JS_IsObject(callbackValue)) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.");
-  }
-
-  if (!JS_IsFunction(ctx, callbackValue)) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.");
-  }
-
-  if (getDartMethod()->flushUICommand == nullptr) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.");
-  }
-  // Flush all pending ui messages.
-  getDartMethod()->flushUICommand();
-
-  if (getDartMethod()->requestAnimationFrame == nullptr) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) is not registered.");
-  }
-
-  auto* callbackContext = new TimerCallbackContext{JS_DupValue(ctx, callbackValue), context};
-  list_add_tail(&callbackContext->link, &context->timer_job_list);
-
-  uint32_t requestId = getDartMethod()->requestAnimationFrame(callbackContext, context->getContextId(), handleRAFTransientCallback);
-
-  // `-1` represents some error occurred.
-  if (requestId == -1) {
-    return JS_ThrowTypeError(ctx,
-                             "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) executed "
-                             "with unexpected error.");
-  }
-
-  return JS_NewUint32(ctx, requestId);
-}
-
-static JSValue clearTimeout(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+static JSValue clearTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (argc <= 0) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'clearTimeout': 1 argument required, but only 0 present.");
   }
 
-  auto context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
+  auto context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
 
   JSValue timeIdValue = argv[0];
   if (!JS_IsNumber(timeIdValue)) {
@@ -246,36 +210,15 @@ static JSValue clearTimeout(QjsContext* ctx, JSValueConst this_val, int argc, JS
   }
 
   getDartMethod()->clearTimeout(context->getContextId(), id);
+
+  context->timers()->removeTimeoutById(id);
   return JS_NULL;
 }
 
-static JSValue cancelAnimationFrame(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-  if (argc <= 0) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'cancelAnimationFrame': 1 argument required, but only 0 present.");
-  }
-  auto context = static_cast<JSContext*>(JS_GetContextOpaque(ctx));
-  JSValue requestIdValue = argv[0];
-  if (!JS_IsNumber(requestIdValue)) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'cancelAnimationFrame': parameter 1 (timer) is not a timer kind.");
-  }
-
-  int32_t id;
-  JS_ToInt32(ctx, &id, requestIdValue);
-
-  if (getDartMethod()->cancelAnimationFrame == nullptr) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'cancelAnimationFrame': dart method (cancelAnimationFrame) is not registered.");
-  }
-  getDartMethod()->cancelAnimationFrame(context->getContextId(), id);
-
-  return JS_NULL;
-}
-
-void bindTimer(std::unique_ptr<JSContext>& context) {
+void bindTimer(std::unique_ptr<ExecutionContext>& context) {
   QJS_GLOBAL_BINDING_FUNCTION(context, setTimeout, "setTimeout", 2);
   QJS_GLOBAL_BINDING_FUNCTION(context, setInterval, "setInterval", 2);
-  QJS_GLOBAL_BINDING_FUNCTION(context, requestAnimationFrame, "requestAnimationFrame", 1);
   QJS_GLOBAL_BINDING_FUNCTION(context, clearTimeout, "clearTimeout", 1);
   QJS_GLOBAL_BINDING_FUNCTION(context, clearTimeout, "clearInterval", 1);
-  QJS_GLOBAL_BINDING_FUNCTION(context, cancelAnimationFrame, "cancelAnimationFrame", 1);
 }
 }  // namespace kraken::binding::qjs

@@ -1,8 +1,9 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:kraken/kraken.dart';
+import 'package:kraken/devtools.dart';
 import 'package:kraken_websocket/kraken_websocket.dart';
-import 'package:kraken_devtools/kraken_devtools.dart';
-import 'dart:ui';
 
 void main() {
   KrakenWebsocket.initialize();

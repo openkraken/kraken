@@ -404,12 +404,14 @@ class Element extends Node
 
   @override
   void didAttachRenderer() {
+    super.didAttachRenderer();
     // Ensure that the child is attached.
     ensureChildAttached();
   }
 
   @override
   void willDetachRenderer() {
+    super.willDetachRenderer();
     // Cancel running transition.
     renderStyle.cancelRunningTransition();
     // Remove all intersection change listeners.

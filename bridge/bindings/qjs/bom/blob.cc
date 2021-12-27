@@ -10,20 +10,20 @@ namespace kraken::binding::qjs {
 
 std::once_flag kBlobInitOnceFlag;
 
-void bindBlob(std::unique_ptr<JSContext>& context) {
+void bindBlob(std::unique_ptr<ExecutionContext>& context) {
   auto* constructor = Blob::instance(context.get());
   context->defineGlobalProperty("Blob", constructor->jsObject);
 }
 
-Blob::Blob(JSContext* context) : HostClass(context, "Blob") {
+Blob::Blob(ExecutionContext* context) : HostClass(context, "Blob") {
   std::call_once(kBlobInitOnceFlag, []() { JS_NewClassID(&kBlobClassID); });
 }
 
 JSClassID Blob::kBlobClassID{0};
 
-JSValue Blob::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
+JSValue Blob::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
   BlobBuilder builder;
-  auto constructor = static_cast<Blob*>(JS_GetOpaque(func_obj, JSContext::kHostClassClassId));
+  auto constructor = static_cast<Blob*>(JS_GetOpaque(func_obj, ExecutionContext::kHostClassClassId));
   if (argc == 0) {
     auto blob = new BlobInstance(constructor);
     return blob->jsObject;
@@ -68,17 +68,17 @@ JSValue Blob::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue thi
   return blob->jsObject;
 }
 
-IMPL_PROPERTY_GETTER(Blob, type)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Blob, type)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* blobInstance = static_cast<BlobInstance*>(JS_GetOpaque(this_val, Blob::kBlobClassID));
   return JS_NewString(blobInstance->m_ctx, blobInstance->mimeType.empty() ? "" : blobInstance->mimeType.c_str());
 }
 
-IMPL_PROPERTY_GETTER(Blob, size)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Blob, size)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* blobInstance = static_cast<BlobInstance*>(JS_GetOpaque(this_val, Blob::kBlobClassID));
   return JS_NewFloat64(blobInstance->m_ctx, blobInstance->_size);
 }
 
-JSValue Blob::arrayBuffer(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Blob::arrayBuffer(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   JSValue resolving_funcs[2];
   JSValue promise = JS_NewPromiseCapability(ctx, resolving_funcs);
 
@@ -92,7 +92,7 @@ JSValue Blob::arrayBuffer(QjsContext* ctx, JSValue this_val, int argc, JSValue* 
       return;
     auto* promiseContext = static_cast<PromiseContext*>(callbackContext);
     auto* blob = static_cast<BlobInstance*>(promiseContext->data);
-    QjsContext* ctx = blob->m_ctx;
+    JSContext* ctx = blob->m_ctx;
 
     JSValue arrayBuffer = JS_NewArrayBuffer(
         ctx, blob->bytes(), blob->size(), [](JSRuntime* rt, void* opaque, void* ptr) {}, nullptr, false);
@@ -122,7 +122,7 @@ JSValue Blob::arrayBuffer(QjsContext* ctx, JSValue this_val, int argc, JSValue* 
   return promise;
 }
 
-JSValue Blob::slice(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Blob::slice(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   JSValue startValue = argv[0];
   JSValue endValue = argv[1];
   JSValue contentTypeValue = argv[2];
@@ -158,7 +158,7 @@ JSValue Blob::slice(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) 
   return newBlob->jsObject;
 }
 
-JSValue Blob::text(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Blob::text(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   JSValue resolving_funcs[2];
   JSValue promise = JS_NewPromiseCapability(ctx, resolving_funcs);
 
@@ -172,7 +172,7 @@ JSValue Blob::text(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
 
     auto* promiseContext = static_cast<PromiseContext*>(callbackContext);
     auto* blob = static_cast<BlobInstance*>(promiseContext->data);
-    QjsContext* ctx = blob->m_ctx;
+    JSContext* ctx = blob->m_ctx;
 
     JSValue text = JS_NewStringLen(ctx, reinterpret_cast<const char*>(blob->bytes()), blob->size());
     JSValue arguments[] = {text};
@@ -205,13 +205,13 @@ void BlobInstance::finalize(JSRuntime* rt, JSValue val) {
   delete eventTarget;
 }
 
-void BlobBuilder::append(JSContext& context, BlobInstance* blob) {
+void BlobBuilder::append(ExecutionContext& context, BlobInstance* blob) {
   std::vector<uint8_t> blobData = blob->_data;
   _data.reserve(_data.size() + blobData.size());
   _data.insert(_data.end(), blobData.begin(), blobData.end());
 }
 
-void BlobBuilder::append(JSContext& context, JSValue& value) {
+void BlobBuilder::append(ExecutionContext& context, JSValue& value) {
   if (JS_IsString(value)) {
     const char* buffer = JS_ToCString(context.ctx(), value);
     std::string str = std::string(buffer);

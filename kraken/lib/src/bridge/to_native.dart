@@ -184,34 +184,34 @@ void parseHTML(int contextId, String code) {
 }
 
 // Register initJsEngine
-typedef NativeInitJSContextPool = Void Function(Int32 poolSize);
-typedef DartInitJSContextPool = void Function(int poolSize);
+typedef NativeInitJSPagePool = Void Function(Int32 poolSize);
+typedef DartInitJSPagePool = void Function(int poolSize);
 
-final DartInitJSContextPool _initJSContextPool =
-    nativeDynamicLibrary.lookup<NativeFunction<NativeInitJSContextPool>>('initJSContextPool').asFunction();
+final DartInitJSPagePool _initJSPagePool =
+    nativeDynamicLibrary.lookup<NativeFunction<NativeInitJSPagePool>>('initJSPagePool').asFunction();
 
-void initJSContextPool(int poolSize) {
-  _initJSContextPool(poolSize);
+void initJSPagePool(int poolSize) {
+  _initJSPagePool(poolSize);
 }
 
-typedef NativeDisposeContext = Void Function(Int32 contextId);
-typedef DartDisposeContext = void Function(int contextId);
+typedef NativeDisposePage = Void Function(Int32 contextId);
+typedef DartDisposePage = void Function(int contextId);
 
-final DartDisposeContext _disposeContext =
-    nativeDynamicLibrary.lookup<NativeFunction<NativeDisposeContext>>('disposeContext').asFunction();
+final DartDisposePage _disposePage =
+    nativeDynamicLibrary.lookup<NativeFunction<NativeDisposePage>>('disposePage').asFunction();
 
-void disposeContext(int contextId) {
-  _disposeContext(contextId);
+void disposePage(int contextId) {
+  _disposePage(contextId);
 }
 
-typedef NativeAllocateNewContext = Int32 Function(Int32);
-typedef DartAllocateNewContext = int Function(int);
+typedef NativeAllocateNewPage = Int32 Function(Int32);
+typedef DartAllocateNewPage = int Function(int);
 
-final DartAllocateNewContext _allocateNewContext =
-    nativeDynamicLibrary.lookup<NativeFunction<NativeAllocateNewContext>>('allocateNewContext').asFunction();
+final DartAllocateNewPage _allocateNewPage =
+    nativeDynamicLibrary.lookup<NativeFunction<NativeAllocateNewPage>>('allocateNewPage').asFunction();
 
-int allocateNewContext([int targetContextId = -1]) {
-  return _allocateNewContext(targetContextId);
+int allocateNewPage([int targetContextId = -1]) {
+  return _allocateNewPage(targetContextId);
 }
 
 typedef NativeRegisterPluginByteCode = Void Function(Pointer<Uint8> bytes, Int32 length, Pointer<Utf8> pluginName);

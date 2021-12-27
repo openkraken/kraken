@@ -10,7 +10,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindDocumentFragment(std::unique_ptr<JSContext>& context);
+void bindDocumentFragment(std::unique_ptr<ExecutionContext>& context);
 
 class DocumentFragment : public Node {
  public:
@@ -18,9 +18,9 @@ class DocumentFragment : public Node {
   static JSClassID classId();
 
   DocumentFragment() = delete;
-  explicit DocumentFragment(JSContext* context);
+  explicit DocumentFragment(ExecutionContext* context);
 
-  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
   OBJECT_INSTANCE(DocumentFragment);
 };

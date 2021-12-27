@@ -10,7 +10,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindCustomEvent(std::unique_ptr<JSContext>& context);
+void bindCustomEvent(std::unique_ptr<ExecutionContext>& context);
 
 struct NativeCustomEvent {
   NativeEvent nativeEvent;
@@ -22,10 +22,10 @@ class CustomEventInstance;
 class CustomEvent : public Event {
  public:
   CustomEvent() = delete;
-  explicit CustomEvent(JSContext* context) : Event(context) { JS_SetPrototype(m_ctx, m_prototypeObject, Event::instance(m_context)->prototype()); };
-  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  explicit CustomEvent(ExecutionContext* context) : Event(context) { JS_SetPrototype(m_ctx, m_prototypeObject, Event::instance(m_context)->prototype()); };
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
-  static JSValue initCustomEvent(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue initCustomEvent(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   OBJECT_INSTANCE(CustomEvent);
 
  private:

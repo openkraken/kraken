@@ -146,7 +146,7 @@ void main() async {
 
     // Manual dispose context for memory leak check.
     krakenMap.forEach((key, kraken) {
-      disposeContext(kraken.controller!.view.contextId);
+      disposePage(kraken.controller!.view.contextId);
     });
 
     for (int i = 0; i < results.length; i ++) {

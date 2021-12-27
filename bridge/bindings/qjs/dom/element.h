@@ -13,7 +13,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindElement(std::unique_ptr<JSContext>& context);
+void bindElement(std::unique_ptr<ExecutionContext>& context);
 
 class ElementInstance;
 
@@ -49,7 +49,7 @@ class SpaceSplitString {
 class ElementAttributes : public HostObject {
  public:
   ElementAttributes() = delete;
-  explicit ElementAttributes(JSContext* context) : HostObject(context, "ElementAttributes") {}
+  explicit ElementAttributes(ExecutionContext* context) : HostObject(context, "ElementAttributes") {}
   ~ElementAttributes();
 
   JSAtom getAttribute(const std::string& name);
@@ -65,27 +65,27 @@ class ElementAttributes : public HostObject {
   std::shared_ptr<SpaceSplitString> m_className{std::make_shared<SpaceSplitString>("")};
 };
 
-bool isJavaScriptExtensionElementInstance(JSContext* context, JSValue instance);
+bool isJavaScriptExtensionElementInstance(ExecutionContext* context, JSValue instance);
 
 class Element : public Node {
  public:
   static JSClassID kElementClassId;
   Element() = delete;
-  explicit Element(JSContext* context);
+  explicit Element(ExecutionContext* context);
 
   static JSClassID classId();
 
-  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
-  static JSValue getBoundingClientRect(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue hasAttribute(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue setAttribute(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue getAttribute(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue removeAttribute(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue toBlob(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue click(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue scroll(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue scrollBy(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getBoundingClientRect(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue hasAttribute(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue setAttribute(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getAttribute(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue removeAttribute(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue toBlob(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue click(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue scroll(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue scrollBy(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
   OBJECT_INSTANCE(Element);
 
@@ -173,7 +173,7 @@ class ElementInstance : public NodeInstance {
 class BoundingClientRect : public HostObject {
  public:
   BoundingClientRect() = delete;
-  explicit BoundingClientRect(JSContext* context, NativeBoundingClientRect* nativeBoundingClientRect)
+  explicit BoundingClientRect(ExecutionContext* context, NativeBoundingClientRect* nativeBoundingClientRect)
       : HostObject(context, "BoundingClientRect"), m_nativeBoundingClientRect(nativeBoundingClientRect){};
 
  private:

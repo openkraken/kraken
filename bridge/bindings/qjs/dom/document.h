@@ -7,11 +7,13 @@
 #define KRAKENBRIDGE_DOCUMENT_H
 
 #include "element.h"
+#include "frame_request_callback_collection.h"
 #include "node.h"
+#include "script_animation_controller.h"
 
 namespace kraken::binding::qjs {
 
-void bindDocument(std::unique_ptr<JSContext>& context);
+void bindDocument(std::unique_ptr<ExecutionContext>& context);
 
 using TraverseHandler = std::function<bool(NodeInstance*)>;
 
@@ -22,24 +24,24 @@ class Document : public Node {
   static JSClassID kDocumentClassID;
 
   Document() = delete;
-  Document(JSContext* context);
+  Document(ExecutionContext* context);
 
   static JSClassID classId();
 
-  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
   OBJECT_INSTANCE(Document);
 
-  static JSValue createEvent(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue createElement(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue createTextNode(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue createDocumentFragment(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue createComment(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue getElementById(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue getElementsByTagName(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue getElementsByClassName(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue createEvent(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue createElement(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue createTextNode(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue createDocumentFragment(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue createComment(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getElementById(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getElementsByTagName(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getElementsByClassName(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
-  JSValue getElementConstructor(JSContext* context, const std::string& tagName);
+  JSValue getElementConstructor(ExecutionContext* context, const std::string& tagName);
   bool isCustomElement(const std::string& tagName);
 
  private:
@@ -86,13 +88,10 @@ class DocumentInstance : public NodeInstance {
   DocumentInstance() = delete;
   explicit DocumentInstance(Document* document);
   ~DocumentInstance();
-  static std::unordered_map<Document*, DocumentInstance*> m_instanceMap;
-  static DocumentInstance* instance(Document* document) {
-    if (m_instanceMap.count(document) == 0) {
-      m_instanceMap[document] = new DocumentInstance(document);
-    }
-    return m_instanceMap[document];
-  }
+
+  int32_t requestAnimationFrame(FrameCallback* frameCallback);
+  void cancelAnimationFrame(uint32_t callbackId);
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
  private:
   void removeElementById(JSAtom id, ElementInstance* element);
@@ -102,9 +101,11 @@ class DocumentInstance : public NodeInstance {
   ElementInstance* m_documentElement{nullptr};
   std::unique_ptr<DocumentCookie> m_cookie;
 
+  ScriptAnimationController* m_scriptAnimationController;
+
   friend Document;
   friend ElementInstance;
-  friend JSContext;
+  friend ExecutionContext;
 };
 
 }  // namespace kraken::binding::qjs

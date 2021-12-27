@@ -8,11 +8,11 @@
 
 #include "bindings/qjs/bom/location.h"
 #include "bindings/qjs/dom/event_target.h"
-#include "bindings/qjs/js_context.h"
+#include "bindings/qjs/executing_context.h"
 
 namespace kraken::binding::qjs {
 
-void bindWindow(std::unique_ptr<JSContext>& context);
+void bindWindow(std::unique_ptr<ExecutionContext>& context);
 
 class WindowInstance;
 
@@ -22,13 +22,15 @@ class Window : public EventTarget {
 
   static JSClassID classId();
 
-  static JSValue open(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue scrollTo(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue scrollBy(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue postMessage(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue open(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue scrollTo(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue scrollBy(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue postMessage(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue requestAnimationFrame(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue cancelAnimationFrame(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
   Window() = delete;
-  explicit Window(JSContext* context);
+  explicit Window(ExecutionContext* context);
 
   OBJECT_INSTANCE(Window);
 
@@ -51,6 +53,8 @@ class Window : public EventTarget {
   DEFINE_PROTOTYPE_FUNCTION(scrollTo, 2);
   DEFINE_PROTOTYPE_FUNCTION(scrollBy, 2);
   DEFINE_PROTOTYPE_FUNCTION(postMessage, 3);
+  DEFINE_PROTOTYPE_FUNCTION(requestAnimationFrame, 1);
+  DEFINE_PROTOTYPE_FUNCTION(cancelAnimationFrame, 1);
 
   friend WindowInstance;
 };
@@ -62,13 +66,13 @@ class WindowInstance : public EventTargetInstance {
   ~WindowInstance() {}
 
  private:
-  void gcMark(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
+  DocumentInstance* document();
 
   ObjectProperty m_location{m_context, jsObject, "m_location", (new Location(m_context))->jsObject};
-  ObjectProperty m_onerror{m_context, jsObject, "m_onerror", JS_NULL};
   JSValue onerror{JS_NULL};
   friend Window;
-  friend JSContext;
+  friend ExecutionContext;
 };
 
 }  // namespace kraken::binding::qjs

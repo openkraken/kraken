@@ -796,6 +796,18 @@ class RenderBoxModel extends RenderBox
     super.layout(newConstraints, parentUsesSize: parentUsesSize);
   }
 
+  void markAdjacentRenderParagraphNeedsLayout() {
+    if (parent != null && parent is RenderFlowLayout && parentData is RenderLayoutParentData) {
+      if ((parentData as RenderLayoutParentData).nextSibling is RenderTextBox) {
+        ((parentData as RenderLayoutParentData).nextSibling as RenderTextBox).markRenderParagraphNeedsLayout();
+      }
+
+      if ((parentData as RenderLayoutParentData).previousSibling is RenderTextBox) {
+        ((parentData as RenderLayoutParentData).previousSibling as RenderTextBox).markRenderParagraphNeedsLayout();
+      }
+    }
+  }
+
   // Calculate constraints of renderBoxModel on layout stage and
   // only needed to be excuted once on every layout.
   BoxConstraints getConstraints() {
