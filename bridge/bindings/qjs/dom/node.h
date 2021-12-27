@@ -109,7 +109,6 @@ class NodeInstance : public EventTargetInstance {
   JSValue childNodes{JS_NewArray(m_ctx)};
 
   NodeJob nodeLink{this};
-  NodeJob documentLink{this};
 
   void refer();
   void unrefer();
