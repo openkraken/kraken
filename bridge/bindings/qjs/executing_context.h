@@ -101,7 +101,6 @@ class ExecutionContext {
 
   int32_t uniqueId;
   struct list_head node_job_list;
-  struct list_head document_job_list;
   struct list_head module_job_list;
   struct list_head module_callback_job_list;
   struct list_head promise_job_list;

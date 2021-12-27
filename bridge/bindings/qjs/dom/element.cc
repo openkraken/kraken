@@ -814,11 +814,11 @@ void ElementInstance::_beforeUpdateId(JSValue oldIdValue, JSValue newIdValue) {
     return;
   }
 
-  if (oldId != JS_ATOM_NULL) {
+  if (!JS_IsNull(oldIdValue)) {
     document()->removeElementById(oldId, this);
   }
 
-  if (newId != JS_ATOM_NULL) {
+  if (!JS_IsNull(newIdValue)) {
     document()->addElementById(newId, this);
   }
 

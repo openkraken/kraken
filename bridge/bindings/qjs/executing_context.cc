@@ -54,7 +54,6 @@ ExecutionContext::ExecutionContext(int32_t contextId, const JSExceptionHandler& 
   });
 
   init_list_head(&node_job_list);
-  init_list_head(&document_job_list);
   init_list_head(&module_job_list);
   init_list_head(&module_callback_job_list);
   init_list_head(&promise_job_list);
@@ -89,15 +88,6 @@ ExecutionContext::~ExecutionContext() {
   {
     struct list_head *el, *el1;
     list_for_each_safe(el, el1, &node_job_list) {
-      auto* node = list_entry(el, NodeJob, link);
-      JS_FreeValue(m_ctx, node->nodeInstance->jsObject);
-    }
-  }
-
-  // Manual free nodes bound by document.
-  {
-    struct list_head *el, *el1;
-    list_for_each_safe(el, el1, &document_job_list) {
       auto* node = list_entry(el, NodeJob, link);
       JS_FreeValue(m_ctx, node->nodeInstance->jsObject);
     }
