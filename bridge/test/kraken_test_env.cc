@@ -280,11 +280,9 @@ void TEST_dispatchEvent(int32_t contextId, EventTargetInstance* eventTarget, con
   auto nativeEventType = stringToNativeString(type);
   NativeString* rawEventType = nativeEventType.release();
 
-  NativeEvent* nativeEvent = new NativeEvent{
-      rawEventType
-  };
+  NativeEvent* nativeEvent = new NativeEvent{rawEventType};
 
-  RawEvent *rawEvent = new RawEvent{reinterpret_cast<uint64_t*>(nativeEvent)};
+  RawEvent* rawEvent = new RawEvent{reinterpret_cast<uint64_t*>(nativeEvent)};
 
   NativeEventTarget::dispatchEventImpl(contextId, nativeEventTarget, rawEventType, rawEvent, false);
 }
