@@ -197,7 +197,7 @@ describe('Insert before', () => {
     await snapshot();
   });
 
-  fit('insert before referenceNode is comment', async () => {
+  it('insert before referenceNode is comment', async () => {
     var container = document.createElement('div');
     document.body.appendChild(container);
     container.style.display = 'flex';
