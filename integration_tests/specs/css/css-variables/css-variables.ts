@@ -1,4 +1,4 @@
-describe('CSS Variables', () => {
+fdescribe('CSS Variables', () => {
   // https://github.com/web-platform-tests/wpt/blob/master/css/css-variables/css-variable-change-style-001.html
   it('change-style-001', async () => {
 
@@ -63,6 +63,28 @@ describe('CSS Variables', () => {
       <div class="outer">
         <div class="inbetween">
           <div class="inner">Background should be red.</div>
+        </div>
+      </div>
+    );
+
+    await snapshot();
+  });
+
+  it('nested variables', async () => {
+    document.head.appendChild(createStyle(`
+     .inner {
+        color: var(--x);
+      }
+      .outer {
+        --y: red;
+        --x: var(--y);
+      }
+    `));
+
+    document.body.appendChild(
+      <div class="outer">
+        <div class="inbetween">
+          <div class="inner">Color should be red.</div>
         </div>
       </div>
     );
@@ -158,6 +180,8 @@ describe('CSS Variables', () => {
       await snapshot();
     });
   });
+
+
 
   function createStyle(text) {
     const style = document.createElement('style');
