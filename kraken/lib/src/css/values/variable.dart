@@ -48,11 +48,11 @@ class CSSVariable {
       return null;
     }
 
-    var computedValue = _renderStyle.resolveValue(propertyName, unsolvedValue);
-    if (computedValue is CSSVariable) {
-      return computedValue.computedValue(propertyName);
+    var resolved = _renderStyle.resolveValue(propertyName, unsolvedValue);
+    if (resolved is CSSVariable) {
+      return resolved.computedValue(propertyName);
     } else {
-      return computedValue;
+      return resolved;
     }
   }
 
