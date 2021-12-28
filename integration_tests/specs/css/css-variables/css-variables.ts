@@ -1,4 +1,4 @@
-fdescribe('CSS Variables', () => {
+describe('CSS Variables', () => {
   // https://github.com/web-platform-tests/wpt/blob/master/css/css-variables/css-variable-change-style-001.html
   it('change-style-001', async () => {
 
