@@ -149,12 +149,12 @@ class Element extends Node
   Element(
     EventTargetContext? context,
     {
-      Map<String, dynamic> defaultStyle = const {},
+      Map<String, dynamic>? defaultStyle,
       // Whether element allows children.
       bool isIntrinsicBox = false,
       bool isDefaultRepaintBoundary = false
     })
-    : _defaultStyle = defaultStyle,
+    : _defaultStyle = defaultStyle ?? const {},
       _isIntrinsicBox = isIntrinsicBox,
       _isDefaultRepaintBoundary = isDefaultRepaintBoundary,
       super(NodeType.ELEMENT_NODE, context) {

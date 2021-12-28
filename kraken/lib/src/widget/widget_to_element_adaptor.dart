@@ -13,11 +13,6 @@ import 'package:kraken/css.dart';
 
 import 'element_to_widget_adaptor.dart';
 
-const Map<String, dynamic> _defaultStyle = {
-  DISPLAY: INLINE_BLOCK,
-  POSITION: RELATIVE
-};
-
 class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWidget {
   /// Creates a bridge from a [RenderObject] to an [Element] tree.
   ///
@@ -177,10 +172,15 @@ abstract class WidgetElement extends dom.Element {
   late Widget _widget;
   _KrakenAdapterWidgetState? _state;
 
-  WidgetElement(dom.EventTargetContext? context)
-      : super(
-  context,
-  defaultStyle: _defaultStyle
+  WidgetElement(dom.EventTargetContext? context, {
+    Map<String, dynamic>? defaultStyle,
+    bool isIntrinsicBox = false,
+    bool isDefaultRepaintBoundary = false,
+  }) : super(
+    context,
+    defaultStyle: defaultStyle,
+    isIntrinsicBox: isIntrinsicBox,
+    isDefaultRepaintBoundary: isDefaultRepaintBoundary,
   ) {
     WidgetsFlutterBinding.ensureInitialized();
     _state = _KrakenAdapterWidgetState(this, properties, childNodes);
