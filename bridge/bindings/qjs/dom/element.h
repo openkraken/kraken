@@ -55,6 +55,7 @@ class ElementAttributes : public GarbageCollected<ElementAttributes> {
   FORCE_INLINE const char* getHumanReadableName() const override { return "ElementAttributes"; }
 
   void dispose() const override;
+  void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const override;
 
   JSValue getAttribute(const std::string& name);
   JSValue setAttribute(const std::string& name, JSValue value);

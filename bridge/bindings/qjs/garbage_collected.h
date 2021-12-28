@@ -48,13 +48,13 @@ class GarbageCollected {
    * This Trace method must be override by objects inheriting from
    * GarbageCollected.
    */
-  virtual void trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) const {};
+  virtual void trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) const = 0;
 
   /**
    * Called before underline JavaScript object been collected by GC.
    * Note: JS_FreeValue and JS_FreeAtom is not available, use JS_FreeValueRT and JS_FreeAtomRT instead.
    */
-  virtual void dispose() const {};
+  virtual void dispose() const = 0;
 
   /**
    * Specifies a name for the garbage-collected object. Such names will never

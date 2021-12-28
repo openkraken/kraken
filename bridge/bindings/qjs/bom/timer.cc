@@ -39,6 +39,10 @@ void DOMTimer::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
   JS_MarkValue(rt, m_callback, mark_func);
 }
 
+void DOMTimer::dispose() const {
+  JS_FreeValueRT(m_runtime, m_callback);
+}
+
 int32_t DOMTimer::timerId() {
   return m_timerId;
 }

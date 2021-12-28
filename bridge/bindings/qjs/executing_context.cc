@@ -37,6 +37,7 @@ void ExecutionContextGCTracker::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* m
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
   context->trace(rt, context->global(), mark_func);
 }
+void ExecutionContextGCTracker::dispose() const {}
 
 JSClassID ExecutionContextGCTracker::contextGcTrackerClassId{0};
 

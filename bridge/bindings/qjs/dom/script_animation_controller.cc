@@ -19,6 +19,7 @@ void ScriptAnimationController::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* m
   auto* controller = static_cast<ScriptAnimationController*>(JS_GetOpaque(val, ScriptAnimationController::classId));
   controller->m_frameRequestCallbackCollection.trace(rt, JS_UNDEFINED, mark_func);
 }
+void ScriptAnimationController::dispose() const {}
 
 ScriptAnimationController* ScriptAnimationController::initialize(JSContext* ctx, JSClassID* classId) {
   return GarbageCollected::initialize(ctx, classId);

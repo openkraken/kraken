@@ -86,4 +86,12 @@ void EventListenerMap::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func)
   }
 }
 
+EventListenerMap::~EventListenerMap() {
+  for (const auto& entry : m_entries) {
+    for (const auto& vector : entry.second) {
+      JS_FreeValueRT(m_runtime, vector);
+    }
+  }
+}
+
 }  // namespace kraken::binding::qjs
