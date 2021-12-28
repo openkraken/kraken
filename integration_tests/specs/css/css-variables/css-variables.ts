@@ -181,8 +181,6 @@ describe('CSS Variables', () => {
     });
   });
 
-
-
   function createStyle(text) {
     const style = document.createElement('style');
     style.appendChild(document.createTextNode(text));
