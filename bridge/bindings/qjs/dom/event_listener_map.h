@@ -16,7 +16,7 @@ using EventListenerVector = std::vector<JSValue>;
 
 class EventListenerMap final {
  public:
-  EventListenerMap(JSContext* ctx): m_runtime(JS_GetRuntime(ctx)) {};
+  EventListenerMap(JSContext* ctx) : m_runtime(JS_GetRuntime(ctx)){};
   ~EventListenerMap();
 
   [[nodiscard]] bool empty() const { return m_entries.empty(); }

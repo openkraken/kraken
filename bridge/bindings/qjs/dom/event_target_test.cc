@@ -179,7 +179,8 @@ console.log(s.addEventListener, s.removeEventListener)
 
 TEST(EventTarget, wontLeakWithStringProperty) {
   auto bridge = TEST_init();
-  std::string code = "var img = new Image();\n"
-                     "img.any = '1234'";
+  std::string code =
+      "var img = new Image();\n"
+      "img.any = '1234'";
   bridge->evaluateScript(code.c_str(), code.size(), "internal://", 0);
 }

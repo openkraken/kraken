@@ -71,12 +71,12 @@ struct NativeEventTarget {
 
 class EventTargetProperties : public HeapHashMap<JSAtom> {
  public:
-  EventTargetProperties(JSContext* ctx): HeapHashMap<JSAtom>(ctx) {};
+  EventTargetProperties(JSContext* ctx) : HeapHashMap<JSAtom>(ctx){};
 };
 
 class EventHandlerMap : public HeapHashMap<JSAtom> {
  public:
-  EventHandlerMap(JSContext* ctx): HeapHashMap<JSAtom>(ctx) {};
+  EventHandlerMap(JSContext* ctx) : HeapHashMap<JSAtom>(ctx){};
 };
 
 class EventTargetInstance : public Instance {
