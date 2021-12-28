@@ -27,7 +27,7 @@ class CSSVariable {
         if (fns.first.args.length > 1) {
           // Has default value for CSS Variable.
           return CSSVariable(fns.first.args.first, renderStyle,
-              defaultValue: renderStyle.resolveValue(propertyName, fns.first.args.last));
+              defaultValue: fns.first.args.last);
         } else {
           return CSSVariable(fns.first.args.first, renderStyle);
         }
@@ -36,17 +36,28 @@ class CSSVariable {
   }
 
   final String identifier;
-  final dynamic defaultValue;
+  final String? defaultValue;
   final RenderStyle _renderStyle;
 
   CSSVariable(this.identifier, this._renderStyle, { this.defaultValue });
 
   // Get the lazy calculated CSS resolved value.
   dynamic computedValue(String propertyName) {
-    dynamic value = _renderStyle.getCSSVariable(identifier, propertyName) ?? defaultValue;
-    if (value != null) {
-      value = _renderStyle.resolveValue(propertyName, value);
+    String? unsolvedValue = _renderStyle.getCSSVariable(identifier, propertyName) ?? defaultValue;
+    if (unsolvedValue == null) {
+      return null;
     }
-    return value;
+
+    var resolved = _renderStyle.resolveValue(propertyName, unsolvedValue);
+    if (resolved is CSSVariable) {
+      return resolved.computedValue(propertyName);
+    } else {
+      return resolved;
+    }
+  }
+
+  @override
+  String toString() {
+    return 'var($identifier${defaultValue != null ? ', $defaultValue': ''})';
   }
 }
