@@ -483,7 +483,58 @@ class Element extends Node
     }
   }
 
-  void _updateRenderBoxModelWithPosition() {
+  List<Element> findPositionAbsoluteChildren() {
+    List<Element> positionAbsoluteChildren = [];
+
+    if (!isRendererAttached) return positionAbsoluteChildren;
+
+    children.forEach((Element child) {
+      if (!child.isRendererAttached) return;
+
+      RenderBoxModel childRenderBoxModel = child.renderBoxModel!;
+      RenderStyle childRenderStyle = childRenderBoxModel.renderStyle;
+      if (childRenderStyle.position == CSSPositionType.absolute) {
+        positionAbsoluteChildren.add(child);
+      }
+      // No need to loop layout box whose position is not static.
+      if (childRenderStyle.position != CSSPositionType.static) {
+        return;
+      }
+      if (childRenderBoxModel is RenderLayoutBox) {
+        List<Element> mergedChildren = child.findPositionAbsoluteChildren();
+        for (Element child in mergedChildren) {
+          positionAbsoluteChildren.add(child);
+        }
+      }
+    });
+
+    return positionAbsoluteChildren;
+  }
+
+  List<RenderBoxModel> findDirectPositionAbsoluteChildren() {
+    List<RenderBoxModel> directPositionAbsoluteChildren = [];
+
+    if (!isRendererAttached) return directPositionAbsoluteChildren;
+
+    RenderBox? child = (renderBoxModel as RenderLayoutBox).firstChild;
+
+    while (child != null) {
+      final ContainerParentDataMixin<RenderBox>? childParentData =
+        child.parentData as ContainerParentDataMixin<RenderBox>?;
+      if (child is! RenderLayoutBox) {
+        child = childParentData!.nextSibling;
+        continue;
+      }
+      if (child.renderStyle.position == CSSPositionType.absolute) {
+        directPositionAbsoluteChildren.add(child);
+      }
+      child = childParentData!.nextSibling;
+    }
+
+    return directPositionAbsoluteChildren;
+  }
+
+  void _updateRenderBoxModelWithPosition(CSSPositionType oldPosition) {
     RenderBoxModel _renderBoxModel = renderBoxModel!;
     CSSPositionType currentPosition = renderStyle.position;
 
@@ -512,11 +563,46 @@ class Element extends Node
     // Detach renderBoxModel from original parent.
     _detachRenderBoxModel(_renderBoxModel);
     _updateRenderBoxModel();
-    _addToContainingBlock(after: previousSibling);
+    addToContainingBlock(after: previousSibling);
 
     // Add fixed children after convert to repaint boundary renderObject.
     if (currentPosition == CSSPositionType.fixed) {
       _addFixedChild(renderBoxModel!, ownerDocument.documentElement!._renderLayoutBox!);
+    }
+
+    if (oldPosition == CSSPositionType.static) {
+      List<Element> positionAbsoluteChildren = findPositionAbsoluteChildren();
+      positionAbsoluteChildren.forEach((Element child) {
+        RenderBoxModel childRenderBoxModel = child.renderBoxModel!;
+        _detachRenderBoxModel(childRenderBoxModel);
+
+        RenderPositionPlaceholder renderPositionPlaceholder = childRenderBoxModel.renderPositionPlaceholder!;
+        previousSibling = (renderPositionPlaceholder.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
+        // The placeholder's previousSibling maybe the origin renderBox.
+        if (previousSibling == _renderBoxModel) {
+          previousSibling = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
+        }
+        _detachRenderBoxModel(renderPositionPlaceholder);
+        childRenderBoxModel.renderPositionPlaceholder = null;
+
+        child.addToContainingBlock(after: previousSibling);
+      });
+    } else if (currentPosition == CSSPositionType.static) {
+
+      List<RenderBoxModel> directPositionAbsoluteChildren = findDirectPositionAbsoluteChildren();
+      directPositionAbsoluteChildren.forEach((RenderBoxModel childRenderBoxModel) {
+        _detachRenderBoxModel(childRenderBoxModel);
+
+        RenderPositionPlaceholder renderPositionPlaceholder = childRenderBoxModel.renderPositionPlaceholder!;
+        previousSibling = (renderPositionPlaceholder.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
+        // The placeholder's previousSibling maybe the origin renderBox.
+        if (previousSibling == _renderBoxModel) {
+          previousSibling = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
+        }
+        _detachRenderBoxModel(renderPositionPlaceholder);
+        childRenderBoxModel.renderPositionPlaceholder = null;
+        childRenderBoxModel.renderStyle.target.addToContainingBlock(after: previousSibling);
+      });
     }
   }
 
@@ -739,7 +825,7 @@ class Element extends Node
   // The position and size of an element's box(es) are sometimes calculated relative to a certain rectangle,
   // called the containing block of the element.
   // Definition of "containing block": https://www.w3.org/TR/CSS21/visudet.html#containing-block-details
-  void _addToContainingBlock({RenderBox? after}) {
+  void addToContainingBlock({RenderBox? after}) {
     assert(parentNode != null);
     CSSPositionType positionType = renderStyle.position;
     RenderBoxModel _renderBoxModel = renderBoxModel!;
@@ -823,7 +909,7 @@ class Element extends Node
     if (!isRendererAttached && parentElement != null && parentElement!.isRendererAttached) {
       // If element attach WidgetElement, render obeject should be attach to render tree when mount.
       if (parentNode is! WidgetElement) {
-        _addToContainingBlock(after: previousSibling?.renderer);
+        addToContainingBlock(after: previousSibling?.renderer);
       }
       ensureChildAttached();
     }
@@ -901,8 +987,9 @@ class Element extends Node
         renderStyle.contentVisibility = value;
         break;
       case POSITION:
+        CSSPositionType oldPosition = renderStyle.position;
         renderStyle.position = value;
-        _updateRenderBoxModelWithPosition();
+        _updateRenderBoxModelWithPosition(oldPosition);
         break;
       case TOP:
         renderStyle.top = value;
