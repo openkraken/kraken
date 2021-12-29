@@ -174,7 +174,7 @@ abstract class WidgetElement extends dom.Element {
   WidgetElement(dom.EventTargetContext? context, {
     Map<String, dynamic>? defaultStyle,
     bool isIntrinsicBox = false,
-    bool isDefaultRepaintBoundary = false,
+    bool isDefaultRepaintBoundary = true,
   }) : super(
     context,
     defaultStyle: defaultStyle,
