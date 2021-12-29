@@ -893,10 +893,10 @@ class Element extends Node
         // Find the renderBox of its containing block.
         RenderBox? containingBlockRenderBox = getContainingBlockRenderBox();
         // Find the previous siblings to insert before renderBoxModel is detached.
-        RenderBox? previousSibling = _renderBoxModel.getPreviousSibling();
+        RenderBox? preSibling = previousSibling?.renderer;
         // Original parent renderBox.
         RenderBox parentRenderBox = parentNode!.renderer!;
-        _renderBoxModel.attachToContainingBlock(containingBlockRenderBox, parent: parentRenderBox, after: previousSibling);
+        _renderBoxModel.attachToContainingBlock(containingBlockRenderBox, parent: parentRenderBox, after: preSibling);
       }
       ensureChildAttached();
     }
