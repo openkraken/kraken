@@ -225,4 +225,47 @@ describe('custom html element', () => {
     // @ts-ignore
     expect(sampleElement._fake).toEqual([1, 2, 3, 4, 5]);
   });
+
+  it('flutter widget should spread out the parent node when parent node is line-block', async () => {
+    const fluttetText = document.createElement('flutter-text');
+    fluttetText.setAttribute('value', 'flutter text');
+    fluttetText.style.display = 'inline-block';
+    document.body.appendChild(fluttetText);
+    document.body.appendChild(document.createTextNode('dom text'));
+
+    await snapshot();
+  });
+
+  it('flutter widget should spread out the parent node when parent node is line', async () => {
+    const fluttetText = document.createElement('flutter-text');
+    fluttetText.setAttribute('value', 'flutter text');
+    fluttetText.style.display = 'inline';
+    document.body.appendChild(fluttetText);
+    document.body.appendChild(document.createTextNode('dom text'));
+
+    await snapshot();
+  });
+
+  it('flutter widget should spread out the parent node when parent node is block', async () => {
+    const fluttetText = document.createElement('flutter-text');
+    fluttetText.setAttribute('value', 'flutter text');
+    fluttetText.style.display = 'block';
+    document.body.appendChild(fluttetText);
+    document.body.appendChild(document.createTextNode('dom text'));
+
+    await snapshot();
+  });
+
+  it('flutter widget should spread out the parent node when parent node is flex', async () => {
+    const div = document.createElement('div');
+    div.style.display = 'flex';
+    const fluttetText = document.createElement('flutter-text');
+    fluttetText.setAttribute('value', 'flutter text');
+    fluttetText.style.display = 'block';
+    div.appendChild(fluttetText);
+    div.appendChild(document.createTextNode('111'));
+    document.body.appendChild(div);
+
+    await snapshot();
+  });
 });
