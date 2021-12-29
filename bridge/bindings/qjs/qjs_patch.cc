@@ -66,6 +66,16 @@ struct JSShape {
   JSShapeProperty prop[0]; /* prop_size elements */
 };
 
+struct JSClass {
+  uint32_t class_id; /* 0 means free entry */
+  JSAtom class_name;
+  JSClassFinalizer* finalizer;
+  JSClassGCMark* gc_mark;
+  JSClassCall* call;
+  /* pointers for exotic behavior, can be NULL if none are present */
+  const JSClassExoticMethods* exotic;
+};
+
 struct JSRuntime {
   JSMallocFunctions mf;
   JSMallocState malloc_state;
@@ -308,6 +318,12 @@ bool JS_IsProxy(JSValue value) {
     return false;
   JSObject* p = JS_VALUE_GET_OBJ(value);
   return p->class_id == JS_CLASS_PROXY;
+}
+
+bool JS_HasClassId(JSRuntime* runtime, JSClassID classId) {
+  if (runtime->class_count <= classId)
+    return false;
+  return runtime->class_array[classId].class_id == classId;
 }
 
 JSValue JS_GetProxyTarget(JSValue value) {

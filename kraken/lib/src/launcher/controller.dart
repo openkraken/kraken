@@ -235,7 +235,7 @@ class KrakenViewController
     // Should clear previous page cached ui commands
     clearUICommand(_contextId);
 
-    disposeContext(_contextId);
+    disposePage(_contextId);
 
     // DisposeEventTarget command will created when js context disposed, should flush them all.
     flushUICommand();
@@ -248,11 +248,11 @@ class KrakenViewController
 
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
 
-  T? debugGetEventTargetById<T>(int targetId) {
+  T? getEventTargetById<T>(int targetId) {
     return _getEventTargetById(targetId);
   }
 
-  int? debugGetTargetIdByEventTarget(EventTarget eventTarget) {
+  int? getTargetIdByEventTarget(EventTarget eventTarget) {
     if (_eventTargets.containsValue(eventTarget)) {
       for (var entry in _eventTargets.entries) {
         if (entry.value == eventTarget) {
@@ -940,12 +940,12 @@ class KrakenController {
     // Wait for next microtask to make sure C++ native Elements are GC collected and generate disposeEventTarget command in the command queue.
     Completer completer = Completer();
     Future.microtask(() {
-      disposeContext(_view.contextId);
+      disposePage(_view.contextId);
 
       // DisposeEventTarget command will created when js context disposed, should flush them before creating new view.
       flushUICommand();
 
-      allocateNewContext(_view.contextId);
+      allocateNewPage(_view.contextId);
 
       _view = KrakenViewController(view.viewportWidth, view.viewportHeight,
           background: _view.background,

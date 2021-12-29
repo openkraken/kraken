@@ -6,7 +6,7 @@
 #ifndef KRAKENBRIDGE_NATIVE_VALUE_H
 #define KRAKENBRIDGE_NATIVE_VALUE_H
 
-#include "js_context.h"
+#include "executing_context.h"
 
 enum NativeTag {
   TAG_STRING = 0,
@@ -42,11 +42,11 @@ static void call_native_function(NativeFunctionContext* functionContext, int32_t
 
 struct NativeFunctionContext {
   CallNativeFunction call;
-  NativeFunctionContext(JSContext* context, JSValue callback);
+  NativeFunctionContext(ExecutionContext* context, JSValue callback);
   ~NativeFunctionContext();
   JSValue m_callback{JS_NULL};
-  JSContext* m_context{nullptr};
-  QjsContext* m_ctx{nullptr};
+  ExecutionContext* m_context{nullptr};
+  JSContext* m_ctx{nullptr};
   list_head link;
 };
 
@@ -57,9 +57,9 @@ NativeValue Native_NewFloat64(double value);
 NativeValue Native_NewBool(bool value);
 NativeValue Native_NewInt32(int32_t value);
 NativeValue Native_NewPtr(JSPointerType pointerType, void* ptr);
-NativeValue Native_NewJSON(JSContext* context, JSValue& value);
-NativeValue jsValueToNativeValue(QjsContext* ctx, JSValue& value);
-JSValue nativeValueToJSValue(JSContext* context, NativeValue& value);
+NativeValue Native_NewJSON(ExecutionContext* context, JSValue& value);
+NativeValue jsValueToNativeValue(JSContext* ctx, JSValue& value);
+JSValue nativeValueToJSValue(ExecutionContext* context, NativeValue& value);
 
 }  // namespace kraken::binding::qjs
 

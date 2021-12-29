@@ -7,13 +7,14 @@
 #define KRAKENBRIDGE_ELEMENT_H
 
 #include <unordered_map>
+#include "bindings/qjs/garbage_collected.h"
 #include "bindings/qjs/host_object.h"
 #include "node.h"
 #include "style_declaration.h"
 
 namespace kraken::binding::qjs {
 
-void bindElement(std::unique_ptr<JSContext>& context);
+void bindElement(std::unique_ptr<ExecutionContext>& context);
 
 class ElementInstance;
 
@@ -46,14 +47,18 @@ class SpaceSplitString {
   std::vector<std::string> m_szData;
 };
 
-class ElementAttributes : public HostObject {
+// TODO: refactor for better W3C standard support and higher performance.
+class ElementAttributes : public GarbageCollected<ElementAttributes> {
  public:
-  ElementAttributes() = delete;
-  explicit ElementAttributes(JSContext* context) : HostObject(context, "ElementAttributes") {}
-  ~ElementAttributes();
+  static JSClassID classId;
 
-  JSAtom getAttribute(const std::string& name);
-  JSValue setAttribute(const std::string& name, JSAtom value);
+  FORCE_INLINE const char* getHumanReadableName() const override { return "ElementAttributes"; }
+
+  void dispose() const override;
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
+
+  JSValue getAttribute(const std::string& name);
+  JSValue setAttribute(const std::string& name, JSValue value);
   bool hasAttribute(std::string& name);
   void removeAttribute(std::string& name);
   void copyWith(ElementAttributes* attributes);
@@ -61,31 +66,31 @@ class ElementAttributes : public HostObject {
   std::string toString();
 
  private:
-  std::unordered_map<std::string, JSAtom> m_attributes;
+  std::unordered_map<std::string, JSValue> m_attributes;
   std::shared_ptr<SpaceSplitString> m_className{std::make_shared<SpaceSplitString>("")};
 };
 
-bool isJavaScriptExtensionElementInstance(JSContext* context, JSValue instance);
+bool isJavaScriptExtensionElementInstance(ExecutionContext* context, JSValue instance);
 
 class Element : public Node {
  public:
   static JSClassID kElementClassId;
   Element() = delete;
-  explicit Element(JSContext* context);
+  explicit Element(ExecutionContext* context);
 
   static JSClassID classId();
 
-  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
-  static JSValue getBoundingClientRect(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue hasAttribute(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue setAttribute(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue getAttribute(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue removeAttribute(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue toBlob(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue click(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue scroll(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue scrollBy(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getBoundingClientRect(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue hasAttribute(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue setAttribute(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getAttribute(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue removeAttribute(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue toBlob(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue click(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue scroll(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue scrollBy(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
   OBJECT_INSTANCE(Element);
 
@@ -105,6 +110,7 @@ class Element : public Node {
   DEFINE_PROTOTYPE_READONLY_PROPERTY(firstElementChild);
   DEFINE_PROTOTYPE_READONLY_PROPERTY(lastElementChild);
   DEFINE_PROTOTYPE_READONLY_PROPERTY(children);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(attributes);
 
   DEFINE_PROTOTYPE_PROPERTY(className);
   DEFINE_PROTOTYPE_PROPERTY(innerHTML);
@@ -144,20 +150,21 @@ class ElementInstance : public NodeInstance {
   std::string outerHTML();
   std::string innerHTML();
   StyleDeclarationInstance* style();
-  ElementAttributes* attributes();
 
   static inline JSClassID classID();
 
  protected:
   explicit ElementInstance(Element* element, std::string tagName, bool shouldAddUICommand);
 
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
+
  private:
   void _notifyNodeRemoved(NodeInstance* node) override;
   void _notifyChildRemoved();
   void _notifyNodeInsert(NodeInstance* insertNode) override;
   void _notifyChildInsert();
-  void _didModifyAttribute(std::string& name, JSAtom oldId, JSAtom newId);
-  void _beforeUpdateId(JSAtom oldId, JSAtom newId);
+  void _didModifyAttribute(std::string& name, JSValue oldId, JSValue newId);
+  void _beforeUpdateId(JSValue oldIdValue, JSValue newIdValue);
 
   std::string m_tagName;
   friend Element;
@@ -173,7 +180,7 @@ class ElementInstance : public NodeInstance {
 class BoundingClientRect : public HostObject {
  public:
   BoundingClientRect() = delete;
-  explicit BoundingClientRect(JSContext* context, NativeBoundingClientRect* nativeBoundingClientRect)
+  explicit BoundingClientRect(ExecutionContext* context, NativeBoundingClientRect* nativeBoundingClientRect)
       : HostObject(context, "BoundingClientRect"), m_nativeBoundingClientRect(nativeBoundingClientRect){};
 
  private:

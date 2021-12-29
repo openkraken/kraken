@@ -11,12 +11,12 @@
 
 namespace kraken::binding::qjs {
 
-void bindCustomEvent(std::unique_ptr<JSContext>& context) {
+void bindCustomEvent(std::unique_ptr<ExecutionContext>& context) {
   auto* constructor = CustomEvent::instance(context.get());
   context->defineGlobalProperty("CustomEvent", constructor->jsObject);
 }
 
-JSValue CustomEvent::initCustomEvent(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue CustomEvent::initCustomEvent(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'initCustomEvent' on 'CustomEvent': 1 argument required, but only 0 present");
   }
@@ -45,7 +45,7 @@ JSValue CustomEvent::initCustomEvent(QjsContext* ctx, JSValue this_val, int argc
   return JS_NULL;
 }
 
-JSValue CustomEvent::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
+JSValue CustomEvent::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Failed to construct 'CustomEvent': 1 argument required, but only 0 present.");
   }
@@ -64,7 +64,7 @@ JSValue CustomEvent::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSVa
   return customEvent->jsObject;
 }
 
-IMPL_PROPERTY_GETTER(CustomEvent, detail)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(CustomEvent, detail)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* customEventInstance = static_cast<CustomEventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
   return customEventInstance->m_detail.value();
 }

@@ -7,7 +7,7 @@
 #define KRAKENBRIDGE_JS_CONTEXT_MACROS_H
 
 #define OBJECT_INSTANCE(NAME)                                                 \
-  static NAME* instance(JSContext* context) {                                 \
+  static NAME* instance(ExecutionContext* context) {                          \
     if (context->constructorMap.count(#NAME) == 0) {                          \
       context->constructorMap[#NAME] = static_cast<void*>(new NAME(context)); \
     }                                                                         \
@@ -23,11 +23,11 @@
 #define IMPL_PROPERTY_GETTER(Constructor, Property) JSValue Constructor::Property##PropertyDescriptor::getter
 #define IMPL_PROPERTY_SETTER(Constructor, Property) JSValue Constructor::Property##PropertyDescriptor::setter
 
-#define DEFINE_PROTOTYPE_READONLY_PROPERTY(PROPERTY)                                             \
-  class PROPERTY##PropertyDescriptor {                                                           \
-   public:                                                                                       \
-    static JSValue getter(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
-  };                                                                                             \
+#define DEFINE_PROTOTYPE_READONLY_PROPERTY(PROPERTY)                                            \
+  class PROPERTY##PropertyDescriptor {                                                          \
+   public:                                                                                      \
+    static JSValue getter(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
+  };                                                                                            \
   ObjectProperty __##PROPERTY##__ { m_context, m_prototypeObject, #PROPERTY, PROPERTY##PropertyDescriptor::getter }
 
 #define DEFINE_PROTOTYPE_FUNCTION(PROPERTY, ARGS_COUNT) \
@@ -36,27 +36,27 @@
 #define DEFINE_FUNCTION(PROPERTY, ARGS_COUNT) \
   ObjectFunction __##PROPERTY##__ { m_context, jsObject, #PROPERTY, PROPERTY, ARGS_COUNT }
 
-#define DEFINE_PROTOTYPE_PROPERTY(PROPERTY)                                                      \
-  class PROPERTY##PropertyDescriptor {                                                           \
-   public:                                                                                       \
-    static JSValue getter(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
-    static JSValue setter(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
-  };                                                                                             \
+#define DEFINE_PROTOTYPE_PROPERTY(PROPERTY)                                                     \
+  class PROPERTY##PropertyDescriptor {                                                          \
+   public:                                                                                      \
+    static JSValue getter(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
+    static JSValue setter(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
+  };                                                                                            \
   ObjectProperty __##PROPERTY##__ { m_context, m_prototypeObject, #PROPERTY, PROPERTY##PropertyDescriptor::getter, PROPERTY##PropertyDescriptor::setter }
 
-#define DEFINE_READONLY_PROPERTY(PROPERTY)                                                       \
-  class PROPERTY##PropertyDescriptor {                                                           \
-   public:                                                                                       \
-    static JSValue getter(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
-  };                                                                                             \
+#define DEFINE_READONLY_PROPERTY(PROPERTY)                                                      \
+  class PROPERTY##PropertyDescriptor {                                                          \
+   public:                                                                                      \
+    static JSValue getter(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
+  };                                                                                            \
   ObjectProperty __##PROPERTY##__ { m_context, jsObject, #PROPERTY, PROPERTY##PropertyDescriptor::getter }
 
-#define DEFINE_PROPERTY(PROPERTY)                                                                \
-  class PROPERTY##PropertyDescriptor {                                                           \
-   public:                                                                                       \
-    static JSValue getter(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
-    static JSValue setter(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
-  };                                                                                             \
+#define DEFINE_PROPERTY(PROPERTY)                                                               \
+  class PROPERTY##PropertyDescriptor {                                                          \
+   public:                                                                                      \
+    static JSValue getter(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
+    static JSValue setter(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
+  };                                                                                            \
   ObjectProperty __##PROPERTY##__ { m_context, jsObject, #PROPERTY, PROPERTY##PropertyDescriptor::getter, PROPERTY##PropertyDescriptor::setter }
 
 #endif  // KRAKENBRIDGE_JS_CONTEXT_MACROS_H

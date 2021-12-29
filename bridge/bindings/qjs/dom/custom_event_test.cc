@@ -3,18 +3,19 @@
  * Author: Kraken Team.
  */
 
-#include "bridge_qjs.h"
 #include "event_target.h"
 #include "gtest/gtest.h"
+#include "kraken_test_env.h"
+#include "page.h"
 
 TEST(CustomEvent, instanceofEvent) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::JSBridge::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "true");
   };
-  auto* bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
@@ -23,7 +24,6 @@ TEST(CustomEvent, instanceofEvent) {
       "let customEvent = new CustomEvent('abc', { detail: 'helloworld'});"
       "console.log(customEvent instanceof Event);";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
-  delete bridge;
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);
 }

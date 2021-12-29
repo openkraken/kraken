@@ -40,7 +40,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
     _nativeHttpClient = nativeHttpClient;
 
   @override
-  Encoding get encoding => _backendRequest?.encoding ?? Encoding.getByName('utf-8')!;
+  Encoding get encoding => _backendRequest?.encoding ?? utf8;
 
   @override
   set encoding(Encoding _encoding) {

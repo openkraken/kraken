@@ -192,16 +192,6 @@ class RenderLayoutBox extends RenderBoxModel
     _paintingOrder = null;
   }
 
-  @override
-  void markNeedsLayout() {
-    super.markNeedsLayout();
-
-    // FlexItem layout must trigger flex container to layout.
-    if (parent is RenderFlexLayout) {
-      markParentNeedsLayout();
-    }
-  }
-
   // Sort children by zIndex, used for paint and hitTest.
   List<RenderBox>? _paintingOrder;
   List<RenderBox> get paintingOrder {

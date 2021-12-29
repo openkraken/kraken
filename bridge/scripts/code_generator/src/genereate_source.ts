@@ -12,7 +12,7 @@ import {addIndent} from "./utils";
 function generateHostObjectSource(object: ClassObject) {
   let propSource: string[] = generatePropsSource(object, PropType.hostObject);
   let methodsSource: string[] = generateMethodsSource(object, PropType.hostObject);
-  return `${object.name}::${object.name}(JSContext *context,
+  return `${object.name}::${object.name}(ExecutionContext *context,
                                                    Native${object.name} *nativePtr)
   : HostObject(context, "${object.name}"), m_nativePtr(nativePtr) {
 }
@@ -57,7 +57,7 @@ function getPropsVars(object: ClassObject, type: PropType) {
   let classId = '';
   if (type == PropType.hostObject) {
     instanceName = 'object';
-    classId = 'JSContext::kHostObjectClassId';
+    classId = 'ExecutionContext::kHostObjectClassId';
   } else if (type == PropType.Element) {
     instanceName = 'element';
     classId = 'Element::classId()';
@@ -116,7 +116,7 @@ function generatePropsGetter(object: ClassObject, type: PropType, p: PropsDeclar
     flushUICommandCode = 'getDartMethod()->flushUICommand();'
   }
 
-  return `IMPL_PROPERTY_GETTER(${className}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return `IMPL_PROPERTY_GETTER(${className}, ${p.name})(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   ${flushUICommandCode}
   ${getterCode}
 }`;
@@ -150,7 +150,7 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
   }
 
 
-  return `IMPL_PROPERTY_SETTER(${className}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return `IMPL_PROPERTY_SETTER(${className}, ${p.name})(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *${instanceName} = static_cast<${classSubFix} *>(JS_GetOpaque(this_val, ${classId}));
   ${setterCode}
 }`;
@@ -277,7 +277,7 @@ ${addIndent(createMethodBody(allConditions[i]), 2)}
   }\n  `)
         }
 
-        let polymorphismTemplate = `JSValue ${object.name}::${m.name}(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+        let polymorphismTemplate = `JSValue ${object.name}::${m.name}(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   switch(argc) {
   ${addIndent(caseCode.join(''), 2)}
   default:
@@ -288,7 +288,7 @@ ${addIndent(createMethodBody(allConditions[i]), 2)}
       } else {
         let body = createMethodBody(m);
 
-        methodsSource.push(`JSValue ${object.name}::${m.name}(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+        methodsSource.push(`JSValue ${object.name}::${m.name}(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) {
 ${body}
 }`);
       }
@@ -420,17 +420,17 @@ function generateHostClassSource(object: ClassObject) {
   }
 
   return `
-${object.name}::${object.name}(JSContext *context) : ${object.type}(context) {
+${object.name}::${object.name}(ExecutionContext *context) : ${object.type}(context) {
   ${classInheritCode}
 }
 
-void bind${object.name}(std::unique_ptr<JSContext> &context) {
+void bind${object.name}(std::unique_ptr<ExecutionContext> &context) {
   auto *constructor = ${object.name}::instance(context.get());
   context->defineGlobalProperty("${globalBindingName}", constructor->jsObject);
   ${specialBind}
 }
 
-JSValue ${object.name}::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
+JSValue ${object.name}::instanceConstructor(JSContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   ${constructorCode}
 }
 ${propSource.join('\n')}
@@ -456,7 +456,7 @@ export function generateCppSource(blob: Blob) {
  */
 
 #include "${blob.filename}.h"
-#include "bridge_qjs.h"
+#include "page.h"
 #include "bindings/qjs/qjs_patch.h"
 
 namespace kraken::binding::qjs {
