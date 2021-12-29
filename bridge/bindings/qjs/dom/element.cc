@@ -132,6 +132,11 @@ void ElementAttributes::dispose() const {
     JS_FreeValueRT(m_runtime, attr.second);
   }
 }
+void ElementAttributes::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
+  for (auto& attr : m_attributes) {
+    JS_MarkValue(rt, attr.second, mark_func);
+  }
+}
 
 JSValue Element::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
   if (argc == 0)
