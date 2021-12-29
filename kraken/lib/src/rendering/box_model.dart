@@ -1089,10 +1089,13 @@ class RenderBoxModel extends RenderBox
     ));
   }
 
+  // Reaint native EngineLayer sources with LayerHandle.
+  final LayerHandle<ColorFilterLayer> _colorFilterLayer = LayerHandle<ColorFilterLayer>();
+
   void paintColorFilter(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     ColorFilter? colorFilter = renderStyle.colorFilter;
     if (colorFilter != null) {
-      context.pushColorFilter(offset, colorFilter, callback);
+      _colorFilterLayer.layer = context.pushColorFilter(offset, colorFilter, callback, oldLayer: _colorFilterLayer.layer);
     } else {
       callback(context, offset);
     }
@@ -1114,13 +1117,13 @@ class RenderBoxModel extends RenderBox
     }
   }
 
-  ImageFilterLayer? _imageFilterLayer;
+  final LayerHandle<ImageFilterLayer> _imageFilterLayer = LayerHandle<ImageFilterLayer>();
   void paintImageFilter(PaintingContext context, Offset offset,
       PaintingContextCallback callback) {
     if (renderStyle.imageFilter != null) {
-      _imageFilterLayer ??= ImageFilterLayer();
-      _imageFilterLayer!.imageFilter = renderStyle.imageFilter;
-      context.pushLayer(_imageFilterLayer!, callback, offset);
+      _imageFilterLayer.layer ??= ImageFilterLayer();
+      _imageFilterLayer.layer!.imageFilter = renderStyle.imageFilter;
+      context.pushLayer(_imageFilterLayer.layer!, callback, offset);
     } else {
       callback(context, offset);
     }
@@ -1211,17 +1214,11 @@ class RenderBoxModel extends RenderBox
         renderStyle.backgroundAttachment == CSSBackgroundAttachmentType.local;
   }
 
-  void _detachAllChildren() {
-    if (this is RenderObjectWithChildMixin) {
-      (this as RenderObjectWithChildMixin).child = null;
-    } else if (this is ContainerRenderObjectMixin) {
-      (this as ContainerRenderObjectMixin).removeAll();
-    }
-  }
-
   /// Called when its corresponding element disposed
+  @override
   @mustCallSuper
   void dispose() {
+    super.dispose();
     // Clear renderObjects in list when disposed to avoid memory leak
     if (fixedChildren.isNotEmpty) {
       fixedChildren.clear();
@@ -1230,13 +1227,17 @@ class RenderBoxModel extends RenderBox
     // Dispose scroll behavior
     disposeScrollable();
 
+    // Clear all paint layers
+    _colorFilterLayer.layer = null;
+    _imageFilterLayer.layer = null;
+    disposeTransformLayer();
+    disposeOpacityLayer();
+    disposeIntersectionObserverLayer();
+
     // Dispose box decoration painter.
     disposePainter();
     // Evict render decoration image cache.
     renderStyle.decoration?.image?.image.evict();
-
-    // Remove reference from childs
-    _detachAllChildren();
   }
 
   Offset getTotalScrollOffset() {
