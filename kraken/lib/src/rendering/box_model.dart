@@ -1220,15 +1220,11 @@ class RenderBoxModel extends RenderBox
   }
 
   // Detach renderBoxModel from its containing block.
-  // Need to remove position placeholder and scrolling content box besides remove itself.
+  // Need to remove position placeholder besides removing itself.
   void detachFromContainingBlock() {
     RenderBoxModel renderBoxModel = this;
     detachRenderBox(renderBoxModel);
 
-    // Remove scrolling content layout box of overflow element.
-    if (renderBoxModel is RenderLayoutBox && renderBoxModel.renderScrollingContent != null) {
-      renderBoxModel.remove(renderBoxModel.renderScrollingContent!);
-    }
     // Remove placeholder of positioned element.
     _detachPositionPlaceholder(renderBoxModel);
   }
