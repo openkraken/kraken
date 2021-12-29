@@ -567,7 +567,7 @@ class Element extends Node
     // Original parent renderBox.
     RenderBox parentRenderBox = parentNode!.renderer!;
     // Attach renderBoxModel to its containing block.
-    _renderBoxModel.attachToContainingBlock(containingBlockRenderBox, parent: parentRenderBox, after: previousSibling);
+    renderBoxModel!.attachToContainingBlock(containingBlockRenderBox, parent: parentRenderBox, after: previousSibling);
 
     // Add fixed children after convert to repaint boundary renderObject.
     if (currentPosition == CSSPositionType.fixed) {
@@ -586,7 +586,9 @@ class Element extends Node
     // </div>
     if (oldPosition == CSSPositionType.static) {
       List<Element> positionAbsoluteChildren = findPositionAbsoluteChildren();
-      positionAbsoluteChildren.forEach(_rePositionChild);
+      positionAbsoluteChildren.forEach((Element child) {
+        child.addToContainingBlock();
+      });
 
     // Need to change the containing block of direct children who is positioned from itself to its upper parent.
     // Take following html for example, div of id=4 should reposition from div of id=2 to div of id=1.
@@ -600,22 +602,24 @@ class Element extends Node
     // </div>
     } else if (currentPosition == CSSPositionType.static) {
       List<Element> directPositionAbsoluteChildren = findDirectPositionAbsoluteChildren();
-      directPositionAbsoluteChildren.forEach(_rePositionChild);
+      directPositionAbsoluteChildren.forEach((Element child) {
+        child.addToContainingBlock();
+      });
     }
   }
 
-  void _rePositionChild(Element child) {
-    RenderBoxModel childRenderBoxModel = child.renderBoxModel!;
+  void addToContainingBlock() {
+    RenderBoxModel _renderBoxModel = renderBoxModel!;
     // Find the renderBox of its containing block.
-    RenderBox? containingBlockRenderBox = child.getContainingBlockRenderBox();
+    RenderBox? containingBlockRenderBox = getContainingBlockRenderBox();
     // Find the previous siblings to insert before renderBoxModel is detached.
-    RenderBox? previousSibling = childRenderBoxModel.getPreviousSibling();
+    RenderBox? previousSibling = _renderBoxModel.getPreviousSibling();
     // Detach renderBoxModel from its original parent.
-    childRenderBoxModel.detachFromContainingBlock();
+    _renderBoxModel.detachFromContainingBlock();
     // Original parent renderBox.
-    RenderBox parentRenderBox = child.parentNode!.renderer!;
-    // Attach renderBoxModel of child to its containing block.
-    childRenderBoxModel.attachToContainingBlock(containingBlockRenderBox, parent: parentRenderBox, after: previousSibling);
+    RenderBox parentRenderBox = parentNode!.renderer!;
+    // Attach renderBoxModel of to its containing block.
+    _renderBoxModel.attachToContainingBlock(containingBlockRenderBox, parent: parentRenderBox, after: previousSibling);
   }
 
   void addChild(RenderBox child) {
