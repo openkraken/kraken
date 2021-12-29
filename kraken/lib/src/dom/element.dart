@@ -200,7 +200,7 @@ class Element extends Node
           after = (previousRenderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
         }
 
-        _detachRenderBoxModel(previousRenderBoxModel);
+        _detachRenderBox(previousRenderBoxModel);
 
         if (parentRenderObject != null) {
           _attachRenderBoxModel(parentRenderObject, nextRenderBoxModel, after: after);
@@ -554,14 +554,14 @@ class Element extends Node
       if (previousSibling == _renderBoxModel) {
         previousSibling = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
       }
-      _detachRenderBoxModel(renderPositionPlaceholder);
+      _detachRenderBox(renderPositionPlaceholder);
       _renderBoxModel.renderPositionPlaceholder = null;
     } else {
       previousSibling = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
     }
 
     // Detach renderBoxModel from original parent.
-    _detachRenderBoxModel(_renderBoxModel);
+    _detachRenderBox(_renderBoxModel);
     _updateRenderBoxModel();
     addToContainingBlock(after: previousSibling);
 
@@ -570,11 +570,21 @@ class Element extends Node
       _addFixedChild(renderBoxModel!, ownerDocument.documentElement!._renderLayoutBox!);
     }
 
+    // Need to change the containing block of nested children who is positioned from its upper parent to itself.
+    // Take following html for example, div of id=4 should reposition from div of id=1 to div of id=2.
+    // <div id="1" style="position: relative">
+    //    <div id="2" style="position: relative"> <!-- changed from "static" to "relative" -->
+    //        <div id="3">
+    //            <div id="4" style="position: absolute">
+    //            </div>
+    //        </div>
+    //    </div>
+    // </div>
     if (oldPosition == CSSPositionType.static) {
       List<Element> positionAbsoluteChildren = findPositionAbsoluteChildren();
       positionAbsoluteChildren.forEach((Element child) {
         RenderBoxModel childRenderBoxModel = child.renderBoxModel!;
-        _detachRenderBoxModel(childRenderBoxModel);
+        _detachRenderBox(childRenderBoxModel);
 
         RenderPositionPlaceholder renderPositionPlaceholder = childRenderBoxModel.renderPositionPlaceholder!;
         previousSibling = (renderPositionPlaceholder.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
@@ -582,16 +592,27 @@ class Element extends Node
         if (previousSibling == _renderBoxModel) {
           previousSibling = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
         }
-        _detachRenderBoxModel(renderPositionPlaceholder);
+        _detachRenderBox(renderPositionPlaceholder);
         childRenderBoxModel.renderPositionPlaceholder = null;
 
         child.addToContainingBlock(after: previousSibling);
       });
+
+    // Need to change the containing block of direct children who is positioned from itself to its upper parent.
+    // Take following html for example, div of id=4 should reposition from div of id=2 to div of id=1.
+    // <div id="1" style="position: relative">
+    //    <div id="2" style="position: static"> <!-- changed from "relative" to "static" -->
+    //        <div id="3">
+    //            <div id="4" style="position: absolute">
+    //            </div>
+    //        </div>
+    //    </div>
+    // </div>
     } else if (currentPosition == CSSPositionType.static) {
 
       List<RenderBoxModel> directPositionAbsoluteChildren = findDirectPositionAbsoluteChildren();
       directPositionAbsoluteChildren.forEach((RenderBoxModel childRenderBoxModel) {
-        _detachRenderBoxModel(childRenderBoxModel);
+        _detachRenderBox(childRenderBoxModel);
 
         RenderPositionPlaceholder renderPositionPlaceholder = childRenderBoxModel.renderPositionPlaceholder!;
         previousSibling = (renderPositionPlaceholder.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
@@ -599,7 +620,7 @@ class Element extends Node
         if (previousSibling == _renderBoxModel) {
           previousSibling = (_renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
         }
-        _detachRenderBoxModel(renderPositionPlaceholder);
+        _detachRenderBox(renderPositionPlaceholder);
         childRenderBoxModel.renderPositionPlaceholder = null;
         childRenderBoxModel.renderStyle.target.addToContainingBlock(after: previousSibling);
       });
@@ -1606,7 +1627,7 @@ bool _hasIntersectionObserverEvent(Map eventHandlers) {
       eventHandlers.containsKey('intersectionchange');
 }
 
-void _detachRenderBoxModel(RenderObject renderBox) {
+void _detachRenderBox(RenderObject renderBox) {
   if (renderBox.parent == null) return;
 
   // Remove reference from parent
@@ -1619,7 +1640,7 @@ void _detachRenderBoxModel(RenderObject renderBox) {
 }
 
 void _removeRenderBoxModel(RenderBoxModel renderBox) {
-  _detachRenderBoxModel(renderBox);
+  _detachRenderBox(renderBox);
 
   // Remove scrolling content layout box of overflow element.
   if (renderBox is RenderLayoutBox && renderBox.renderScrollingContent != null) {
