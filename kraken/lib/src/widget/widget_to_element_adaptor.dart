@@ -265,7 +265,6 @@ class _KrakenAdapterWidget extends StatefulWidget {
 
   _KrakenAdapterWidget(this._state);
 
-
   @override
   State<StatefulWidget> createState() {
     return _state;
@@ -278,8 +277,7 @@ class _KrakenAdapterWidgetState extends State<_KrakenAdapterWidget> {
   final WidgetElement _element;
   late List<dom.Node> _childNodes;
 
-  _KrakenAdapterWidgetState(this._element, this._properties, List<dom.Node> childNodes) {
-    _childNodes = childNodes;
+  _KrakenAdapterWidgetState(this._element, this._properties, this._childNodes) {
   }
 
   void onAttributeChanged(Map<String, dynamic> properties) {
