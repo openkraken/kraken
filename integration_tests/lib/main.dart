@@ -6,6 +6,7 @@ import 'package:kraken/css.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
+import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/widget.dart';
 import 'package:ansicolor/ansicolor.dart';
@@ -82,7 +83,7 @@ void main() async {
     var kraken = krakenMap[i] = Kraken(
       viewportWidth: 360,
       viewportHeight: 640,
-      bundleContent: 'console.log("Starting integration tests...")',
+      bundle: KrakenBundle.fromContent('console.log("Starting integration tests...")'),
       disableViewportWidthAssertion: true,
       disableViewportHeightAssertion: true,
       javaScriptChannel: javaScriptChannel,
@@ -90,7 +91,7 @@ void main() async {
         onDrag: (GestureEvent gestureEvent) {
           if (gestureEvent.state == EVENT_STATE_START) {
             var event = CustomEvent('nativegesture', CustomEventInit(detail: 'nativegesture'));
-            krakenMap[i]!.controller!.view.document!.documentElement.dispatchEvent(event);
+            krakenMap[i]!.controller!.view.document.documentElement?.dispatchEvent(event);
           }
         },
       ),
@@ -99,18 +100,22 @@ void main() async {
     widgets.add(kraken);
   }
 
-  runApp(MaterialApp(
-    title: 'Kraken Integration Tests',
-    debugShowCheckedModeBanner: false,
-    home: Scaffold(
-      appBar: AppBar(
-        title: Text('Kraken Integration Tests')
+  runZonedGuarded(() {
+    runApp(MaterialApp(
+      title: 'Kraken Integration Tests',
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Kraken Integration Tests')
+        ),
+        body: Wrap(
+          children: widgets,
+        ),
       ),
-      body: Wrap(
-        children: widgets,
-      ),
-    ),
-  ));
+    ));
+  }, (Object error, StackTrace stack) {
+    print('$error\n$stack');
+  });
 
   testTextInput = TestTextInput();
   testTextInput.register();
@@ -141,7 +146,7 @@ void main() async {
 
     // Manual dispose context for memory leak check.
     krakenMap.forEach((key, kraken) {
-      disposeContext(kraken.controller!.view.contextId);
+      disposePage(kraken.controller!.view.contextId);
     });
 
     for (int i = 0; i < results.length; i ++) {

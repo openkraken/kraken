@@ -6,21 +6,22 @@
 #ifndef KRAKENBRIDGE_LOCATION_H
 #define KRAKENBRIDGE_LOCATION_H
 
+#include "bindings/qjs/executing_context.h"
 #include "bindings/qjs/host_object.h"
-#include "bindings/qjs/js_context.h"
 
 namespace kraken::binding::qjs {
 
 class Location : public HostObject {
-public:
+ public:
   Location() = delete;
-  explicit Location(JSContext *context) : HostObject(context, "Location") {}
+  explicit Location(ExecutionContext* context) : HostObject(context, "Location") {}
 
-  static JSValue reload(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-private:
-  ObjectFunction m_reload{m_context, jsObject, "reload", reload, 0};
+  static JSValue reload(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+
+ private:
+  DEFINE_FUNCTION(reload, 0);
 };
 
-} // namespace kraken::binding::qjs
+}  // namespace kraken::binding::qjs
 
-#endif // KRAKENBRIDGE_LOCATION_H
+#endif  // KRAKENBRIDGE_LOCATION_H

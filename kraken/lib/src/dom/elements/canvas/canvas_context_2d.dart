@@ -181,7 +181,7 @@ class CanvasRenderingContext2D {
         closePath();
         break;
       case 'drawImage':
-        ImageElement imageElement = EventTarget.getEventTargetOfNativePtr(argv[0]) as ImageElement;
+        ImageElement imageElement = EventTarget.getEventTargetByPointer(argv[0]) as ImageElement;
         num sx = 0.0, sy = 0.0, sWidth = 0.0, sHeight = 0.0, dx = 0.0, dy = 0.0, dWidth = 0.0, dHeight = 0.0;
 
         if (argv.length == 3) {
@@ -255,9 +255,6 @@ class CanvasRenderingContext2D {
 
   CanvasRenderingContext2DSettings getContextAttributes() => _settings;
 
-  late Size viewportSize;
-  late double? fontSize;
-  late double? rootFontSize;
   late CanvasElement canvas;
   // HACK: We need record the current matrix state because flutter canvas not export resetTransform now.
   // https://github.com/flutter/engine/pull/25449
@@ -364,11 +361,26 @@ class CanvasRenderingContext2D {
   TextDirection get direction => _direction;
 
   Map<String, String?> _fontProperties = {};
+  double? _fontSize;
   bool _parseFont(String newValue) {
     Map<String, String?> properties = {};
     CSSStyleProperty.setShorthandFont(properties, newValue);
     if (properties.isEmpty) return false;
     _fontProperties = properties;
+
+    // In canvas font property, the em and rem units do not update when font-size changed,
+    // so computed the relative length immediately.
+    String? fontSize = properties[FONT_SIZE];
+    if (fontSize != null) {
+      if (CSSPercentage.isPercentage(fontSize)) {
+        double? percentage = CSSPercentage.parsePercentage(fontSize);
+        if (percentage != null) {
+          _fontSize = percentage * canvas.renderStyle.fontSize.computedValue;
+        }
+      } else {
+        _fontSize = CSSLength.parseLength(properties[FONT_SIZE]!, canvas.renderStyle).computedValue;
+      }
+    }
     return true;
   }
   String _font = _DEFAULT_FONT; // (default 10px sans-serif)
@@ -763,17 +775,11 @@ class CanvasRenderingContext2D {
     if (_fontProperties.isEmpty) {
       _parseFont(_DEFAULT_FONT);
     }
-    double? _fontSize = CSSLength.toDisplayPortValue(
-      _fontProperties[FONT_SIZE] ?? '10px',
-      viewportSize: viewportSize,
-      rootFontSize: rootFontSize,
-      fontSize: fontSize
-    );
-    var fontFamilyFallback = CSSText.parseFontFamilyFallback(_fontProperties[FONT_FAMILY] ?? 'sans-serif');
-    FontWeight fontWeight = CSSText.parseFontWeight(_fontProperties[FONT_WEIGHT]);
+    var fontFamilyFallback = CSSText.resolveFontFamilyFallback(_fontProperties[FONT_FAMILY]);
+    FontWeight fontWeight = CSSText.resolveFontWeight(_fontProperties[FONT_WEIGHT]);
     if (shouldStrokeText) {
       return TextStyle(
-          fontSize: _fontSize,
+          fontSize: _fontSize ?? 10,
           fontFamilyFallback: fontFamilyFallback,
           foreground: Paint()
             ..strokeJoin = lineJoin

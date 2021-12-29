@@ -6,24 +6,17 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 
-mixin CSSObjectPositionMixin on RenderStyleBase {
+mixin CSSObjectPositionMixin on RenderStyle {
+  @override
+  Alignment get objectPosition => _objectPosition;
   Alignment _objectPosition = Alignment.center;
-  Alignment get objectPosition {
-    return _objectPosition;
-  }
   set objectPosition(Alignment value) {
     if (_objectPosition == value) return;
     _objectPosition = value;
+    renderBoxModel?.markNeedsLayout();
   }
 
-  void updateObjectPosition(String property, String value, {bool shouldMarkNeedsLayout = true}) {
-    RenderStyle renderStyle = this as RenderStyle;
-    renderStyle.objectPosition = _getBoxPosition(value);
-    if (shouldMarkNeedsLayout) {
-      renderBoxModel!.markNeedsLayout();
-    }
-  }
-  Alignment _getBoxPosition(String? position) {
+  static Alignment resolveObjectPosition(String? position) {
     // Syntax: object-position: <position>
     // position: From one to four values that define the 2D position of the element. Relative or absolute offsets can be used.
     // <position> = [ [ left | center | right ] || [ top | center | bottom ] | [ left | center | right | <length-percentage> ] [ top | center | bottom | <length-percentage> ]? | [ [ left | right ] <length-percentage> ] && [ [ top | bottom ] <length-percentage> ] ]

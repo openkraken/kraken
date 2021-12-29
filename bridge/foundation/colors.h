@@ -26,4 +26,4 @@
 #define BOLD(x) "\x1B[1m" x RST
 #define UNDL(x) "\x1B[4m" x RST
 
-#endif // KRAKENBRIDGE_COLORS_H
+#endif  // KRAKENBRIDGE_COLORS_H

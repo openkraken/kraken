@@ -2,10 +2,6 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
-import 'dart:ffi';
-
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 
@@ -16,13 +12,13 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class BodyElement extends Element {
-  BodyElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super( targetId, nativePtr, elementManager, tagName: BODY, defaultStyle: _defaultStyle);
+  BodyElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
 
   @override
-  void willAttachRenderer() {
-    super.willAttachRenderer();
-    RenderStyle renderStyle = renderBoxModel!.renderStyle;
-    renderStyle.width = elementManager.viewportWidth;
+  void addEvent(String eventType) {
+    // Scroll event not working on body.
+    if (eventType == EVENT_SCROLL) return;
+    super.addEvent(eventType);
   }
 }

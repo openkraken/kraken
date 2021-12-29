@@ -37,31 +37,23 @@ const getPolyFillHeader = (outputName) => `/*
 #if KRAKEN_JSC_ENGINE
 #include "bridge_jsc.h"
 #elif KRAKEN_QUICK_JS_ENGINE
-#include "bridge_qjs.h"
+#include "page.h"
 #endif
 
-void initKraken${outputName}(kraken::JSBridge *bridge);
+void initKraken${outputName}(kraken::KrakenPage *page);
 
 #endif // KRAKEN_${outputName.toUpperCase()}_H
 `;
 
 const getPolyFillJavaScriptSource = (source) => {
-  if (process.env.KRAKEN_JS_ENGINE === 'quickjs') {
-    let byteBuffer = qjsc.dumpByteCode(source, "kraken://");
-    let uint8Array = Uint8Array.from(byteBuffer);
-    return `namespace {size_t byteLength = ${uint8Array.length};
+  let byteBuffer = qjsc.compile(source, "kraken://");
+  let uint8Array = Uint8Array.from(byteBuffer);
+  return `namespace {size_t byteLength = ${uint8Array.length};
 uint8_t bytes[${uint8Array.length}] = {${uint8Array.join(',')}}; }`;
-  } else {
-    return `static std::u16string jsCode = std::u16string(uR"(${source})");`
-  }
 };
 
 const getPolyfillEvalCall = () => {
-  if (process.env.KRAKEN_JS_ENGINE === 'quickjs') {
-    return 'bridge->evaluateByteCode(bytes, byteLength);';
-  } else {
-    return 'bridge->evaluateScript(reinterpret_cast<const uint16_t *>(jsCode.c_str()), jsCode.length(), "internal://", 0);'
-  }
+  return 'page->evaluateByteCode(bytes, byteLength);';
 }
 
 const getPolyFillSource = (source, outputName) => `/*
@@ -73,16 +65,12 @@ const getPolyFillSource = (source, outputName) => `/*
 
 ${getPolyFillJavaScriptSource(source)}
 
-void initKraken${outputName}(kraken::JSBridge *bridge) {
+void initKraken${outputName}(kraken::KrakenPage *page) {
   ${getPolyfillEvalCall()}
 }
 `;
 
 function convertJSToCpp(code, outputName) {
-  // JavaScript Regexp expression may break C++ string code format.
-  if (process.env.KRAKEN_JS_ENGINE === 'jsc') {
-    code = code.replace(/\)\"/g, '))") + std::u16string(uR"("');
-  }
   return getPolyFillSource(code, outputName);
 }
 

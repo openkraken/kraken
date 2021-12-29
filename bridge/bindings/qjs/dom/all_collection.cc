@@ -7,24 +7,23 @@
 
 namespace kraken::binding::qjs {
 
-
-JSValue AllCollection::item(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+JSValue AllCollection::item(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
     return JS_NULL;
   }
 
   uint32_t index;
   JS_ToUint32(ctx, &index, argv[0]);
-  auto *collection = static_cast<AllCollection *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* collection = static_cast<AllCollection*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
 
   if (index >= collection->m_nodes.size()) {
     return JS_NULL;
   }
 
   auto node = collection->m_nodes[index];
-  return node->instanceObject;
+  return node->jsObject;
 }
-JSValue AllCollection::add(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+JSValue AllCollection::add(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Failed to execute add() on HTMLAllCollection: 1 arguments required.");
   }
@@ -39,30 +38,30 @@ JSValue AllCollection::add(QjsContext *ctx, JSValue this_val, int argc, JSValue 
     before = argv[1];
   }
 
-  auto *node = static_cast<NodeInstance *>(JS_GetOpaque(argv[0], JSContext::kHostObjectClassId));
-  auto *collection = static_cast<AllCollection *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
-  NodeInstance *beforeNode = nullptr;
+  auto* node = static_cast<NodeInstance*>(JS_GetOpaque(argv[0], ExecutionContext::kHostObjectClassId));
+  auto* collection = static_cast<AllCollection*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
+  NodeInstance* beforeNode = nullptr;
 
   if (!JS_IsNull(before)) {
-    beforeNode = static_cast<NodeInstance *>(JS_GetOpaque(before, JSContext::kHostObjectClassId));
+    beforeNode = static_cast<NodeInstance*>(JS_GetOpaque(before, ExecutionContext::kHostObjectClassId));
   }
 
   collection->internalAdd(node, beforeNode);
 
   return JS_NULL;
 }
-JSValue AllCollection::remove(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+JSValue AllCollection::remove(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Failed to execute remove() on HTMLAllCollection: 1 arguments required.");
   }
 
   uint32_t index;
   JS_ToUint32(ctx, &index, argv[0]);
-  auto *collection = static_cast<AllCollection *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+  auto* collection = static_cast<AllCollection*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   collection->m_nodes.erase(collection->m_nodes.begin() + index);
   return JS_NULL;
 }
-void AllCollection::internalAdd(NodeInstance *node, NodeInstance *before) {
+void AllCollection::internalAdd(NodeInstance* node, NodeInstance* before) {
   if (before != nullptr) {
     auto it = std::find(m_nodes.begin(), m_nodes.end(), before);
     m_nodes.erase(it);
@@ -72,12 +71,9 @@ void AllCollection::internalAdd(NodeInstance *node, NodeInstance *before) {
   }
 }
 
-PROP_GETTER(AllCollection, length)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  auto *collection = static_cast<AllCollection *>(JS_GetOpaque(this_val, JSContext::kHostObjectClassId));
+IMPL_PROPERTY_GETTER(AllCollection, length)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* collection = static_cast<AllCollection*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewUint32(ctx, collection->m_nodes.size());
 }
-PROP_SETTER(AllCollection, length)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  return JS_NULL;
-}
 
-}
+}  // namespace kraken::binding::qjs

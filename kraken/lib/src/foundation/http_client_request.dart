@@ -40,7 +40,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
     _nativeHttpClient = nativeHttpClient;
 
   @override
-  Encoding get encoding => _backendRequest?.encoding ?? Encoding.getByName('utf-8')!;
+  Encoding get encoding => _backendRequest?.encoding ?? utf8;
 
   @override
   set encoding(Encoding _encoding) {
@@ -138,8 +138,6 @@ class ProxyHttpClientRequest extends HttpClientRequest {
         if (cacheObject.hitLocalCache(request)) {
           HttpClientResponse? cacheResponse = await cacheObject.toHttpClientResponse();
           if (cacheResponse != null) {
-            // // Must cancel the ongoing request, make TCP connection closed.
-            // _clientRequest.abort();
             return cacheResponse;
           }
         }

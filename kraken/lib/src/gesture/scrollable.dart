@@ -239,7 +239,14 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
 
 mixin RenderOverflowMixin on RenderBox {
   ScrollListener? scrollListener;
-  void Function(PointerEvent)? pointerListener;
+  void Function(PointerEvent)? scrollablePointerListener;
+
+  void disposeScrollable() {
+    scrollListener = null;
+    scrollablePointerListener = null;
+    _scrollOffsetX = null;
+    _scrollOffsetY = null;
+  }
 
   bool _clipX = false;
   bool get clipX => _clipX;
@@ -381,6 +388,11 @@ mixin RenderOverflowMixin on RenderBox {
       PaintingContextCallback painter = (PaintingContext context, Offset offset) {
         callback(context, offset + paintOffset);
       };
+
+      // It needs to create new layer to clip children in case children has its own layer
+      // for all overflow value which is not visible (auto/scroll/hidden/clip).
+      bool _needsCompositing = true;
+
       if (decoration != null && decoration.borderRadius != null) {
         BorderRadius radius = decoration.borderRadius as BorderRadius;
         RRect clipRRect = RRect.fromRectAndCorners(clipRect,
@@ -389,9 +401,9 @@ mixin RenderOverflowMixin on RenderBox {
             bottomLeft: radius.bottomLeft,
             bottomRight: radius.bottomRight
         );
-        _oldClipRRectLayer = context.pushClipRRect(needsCompositing, offset, clipRect, clipRRect, painter, oldLayer: _oldClipRRectLayer);
+        _oldClipRRectLayer = context.pushClipRRect(_needsCompositing, offset, clipRect, clipRRect, painter, oldLayer: _oldClipRRectLayer);
       } else {
-        _oldClipRectLayer = context.pushClipRect(needsCompositing, offset, clipRect, painter, oldLayer: _oldClipRectLayer);
+        _oldClipRectLayer = context.pushClipRect(_needsCompositing, offset, clipRect, painter, oldLayer: _oldClipRectLayer);
       }
     } else {
       _oldClipRRectLayer = null;

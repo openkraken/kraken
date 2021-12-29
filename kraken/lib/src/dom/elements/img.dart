@@ -2,21 +2,19 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
 import 'dart:async';
-import 'dart:ffi';
-import 'dart:ui' as ui show Image;
+import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/painting.dart';
 import 'package:kraken/rendering.dart';
 
 const String IMAGE = 'IMG';
-
-final RegExp _numExp = RegExp(r'^\d+');
+const String NATURAL_WIDTH = 'naturalWidth';
+const String NATURAL_HEIGHT = 'naturalHeight';
 
 // FIXME: should be inline default.
 const Map<String, dynamic> _defaultStyle = {
@@ -26,40 +24,42 @@ const Map<String, dynamic> _defaultStyle = {
 // The HTMLImageElement.
 class ImageElement extends Element {
   // The render box to draw image.
-  RenderImage? _renderImage;
+  KrakenRenderImage? _renderImage;
 
-  // The image source url.
-  String? get _source => getProperty('src');
+  ImageProvider? _cachedImageProvider;
+  dynamic _imageProviderKey;
 
-  ImageProvider? _imageProvider;
+  ImageStream? _cachedImageStream;
+  ImageInfo? _cachedImageInfo;
+  Uri? _resolvedUri;
 
-  ImageStream? _imageStream;
-
-  ImageInfo? _imageInfo;
-
-  late ImageStreamListener _renderStreamListener;
-
+  // Width and height set through property.
   double? _propertyWidth;
   double? _propertyHeight;
 
-  ui.Image? get image => _imageInfo?.image;
+  // Width and height set through style.
+  double? _styleWidth;
+  double? _styleHeight;
+
+  ui.Image? get image => _cachedImageInfo?.image;
 
   /// Number of image frame, used to identify multi frame image after loaded.
   int _frameCount = 0;
 
+  bool _isListeningStream = false;
   bool _isInLazyLoading = false;
+  // https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-complete-dev
+  // A boolean value which indicates whether or not the image has completely loaded.
+  bool complete = false;
 
   bool get _shouldLazyLoading => properties['loading'] == 'lazy';
+  ImageStreamCompleterHandle? _completerHandle;
 
-  ImageElement(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager)
+  ImageElement(EventTargetContext? context)
       : super(
-      targetId,
-      nativeEventTarget,
-      elementManager,
+      context,
       isIntrinsicBox: true,
-      tagName: IMAGE,
       defaultStyle: _defaultStyle) {
-    _renderStreamListener = ImageStreamListener(_renderImageStream, onError: _onImageError);
   }
 
   @override
@@ -81,11 +81,18 @@ class ImageElement extends Element {
         // When detach renderer, all listeners will be cleared.
         renderBoxModel!.addIntersectionChangeListener(_handleIntersectionChange);
       } else {
-        _constructImageChild();
         _loadImage();
       }
     }
-    _resize();
+  }
+
+  void _loadImage() {
+    _constructImage();
+    // Try to attach image if image is cached.
+    _attachImage();
+    _resizeImage();
+    _resolveImage(_resolvedUri);
+    _listenToStream();
   }
 
   @override
@@ -93,71 +100,101 @@ class ImageElement extends Element {
     super.didDetachRenderer();
     style.removeStyleChangeListener(_stylePropertyChanged);
 
-    _resetImage();
-
-    // Unlink image render box, which has been detached.
-    _renderImage = null;
+    _stopListeningStream(keepStreamAlive: true);
   }
 
-  void _resetImage() {
-    _imageInfo = null;
+  ImageStreamListener? _imageStreamListener;
+  ImageStreamListener _getListener() {
+    _imageStreamListener ??= ImageStreamListener(
+      _handleImageFrame,
+      onError: _onImageError
+    );
+    return _imageStreamListener!;
+  }
 
-    // @NOTE: Evict image cache, make multi frame image can replay.
-    // https://github.com/flutter/flutter/issues/51775
-    _imageProvider?.evict();
-    _imageProvider = null;
+  void _listenToStream() {
+    if (_isListeningStream)
+      return;
 
-    _renderImage?.image = null;
+    _cachedImageStream?.addListener(_getListener());
+    _completerHandle?.dispose();
+    _completerHandle = null;
+
+    _isListeningStream = true;
   }
 
   @override
   void dispose() {
     super.dispose();
-
-    _imageProvider?.evict();
-    _imageProvider = null;
-
-    _imageStream?.removeListener(_renderStreamListener);
-    _imageStream = null;
-
-    _renderImage = null;
+    _stopListeningStream();
+    _completerHandle?.dispose();
+    _replaceImage(info: null);
+    _cachedImageProvider?.evict();
+    _cachedImageProvider = null;
+    _imageProviderKey = null;
   }
 
   double get width {
-    if (_renderImage != null && _renderImage!.width != null) {
-      return _renderImage!.width!;
+    double? width = _styleWidth ?? _propertyWidth;
+
+    if (width == null) {
+      width = naturalWidth;
+      double? height = _styleHeight ?? _propertyHeight;
+
+      if (height != null && naturalHeight != 0) {
+        width = height * naturalWidth / naturalHeight;
+      }
     }
 
-    if (renderBoxModel != null && renderBoxModel!.hasSize) {
-      return renderBoxModel!.clientWidth;
-    }
-
-    // Fallback to natural width, if image is not on screen.
-    return naturalWidth;
+    return width;
   }
 
   double get height {
-    if (_renderImage != null && _renderImage!.height != null) {
-      return _renderImage!.height!;
+    double? height = _styleHeight ?? _propertyHeight;
+
+    if (height == null) {
+      height = naturalHeight;
+      double? width = _styleWidth ?? _propertyWidth;
+
+      if (width != null && naturalWidth != 0) {
+        height = width * naturalHeight / naturalWidth;
+      }
     }
 
-    if (renderBoxModel != null && renderBoxModel!.hasSize) {
-      return renderBoxModel!.clientHeight;
-    }
-
-    // Fallback to natural height, if image is not on screen.
-    return naturalHeight;
+    return height;
   }
 
-  double get naturalWidth => image?.width.toDouble() ?? 0;
-  double get naturalHeight => image?.height.toDouble() ?? 0;
+  // Read the original image width of loaded image.
+  // The getter must be called after image had loaded, otherwise will return 0.0.
+  double get naturalWidth {
+    ImageProvider? imageProvider = _cachedImageProvider;
+    if (imageProvider is KrakenResizeImage) {
+      Size? size = KrakenResizeImage.getImageNaturalSize(_imageProviderKey);
+      if (size != null) {
+        return size.width;
+      }
+    }
+    return image?.width.toDouble() ?? 0;
+  }
+
+  // Read the original image height of loaded image.
+  // The getter must be called after image had loaded, otherwise will return 0.0.
+  double get naturalHeight {
+    ImageProvider? imageProvider = _cachedImageProvider;
+    if (imageProvider is KrakenResizeImage) {
+      Size? size = KrakenResizeImage.getImageNaturalSize(_imageProviderKey);
+      if (size != null) {
+        return size.height;
+      }
+    }
+    return image?.height.toDouble() ?? 0;
+  }
 
   void _handleIntersectionChange(IntersectionObserverEntry entry) {
     // When appear
     if (entry.isIntersecting) {
       // Once appear remove the listener
       _resetLazyLoading();
-      _constructImageChild();
       _loadImage();
     }
   }
@@ -167,15 +204,12 @@ class ImageElement extends Element {
     renderBoxModel!.removeIntersectionChangeListener(_handleIntersectionChange);
   }
 
-  void _constructImageChild() {
-    _renderImage = createRenderImageBox();
-
-    if (childNodes.isEmpty) {
-      addChild(_renderImage!);
-    }
+  void _constructImage() {
+    RenderImage image = _renderImage = _createRenderImageBox();
+    addChild(image);
   }
 
-  void dispatchImageLoadEvent() {
+  void _dispatchLoadEvent() {
     dispatchEvent(Event(EVENT_LOAD));
   }
 
@@ -185,130 +219,52 @@ class ImageElement extends Element {
       // If image in tree, make sure the image-box has been layout, using addPostFrameCallback.
       SchedulerBinding.instance!.scheduleFrame();
       SchedulerBinding.instance!.addPostFrameCallback((_) {
-        dispatchImageLoadEvent();
+        _dispatchLoadEvent();
       });
     } else {
       // If not in tree, dispatch the event directly.
-      dispatchImageLoadEvent();
+      _dispatchLoadEvent();
     }
   }
-
-  // Multi frame image should convert to repaint boundary.
-  @override
-  bool get shouldConvertToRepaintBoundary => _frameCount > 2 || super.shouldConvertToRepaintBoundary;
-
-  bool get shouldConvertToNonRepaintBoundary => _frameCount == 1;
-
-  void _renderImageStream(ImageInfo imageInfo, bool synchronousCall) {
-    _frameCount++;
-    _imageInfo = imageInfo;
-
-    // Only trigger load once.
-    if (!_loaded) {
-      _loaded = true;
-
-      if (synchronousCall) {
-        // `synchronousCall` happens when caches image and calling `addListener`.
-        scheduleMicrotask(_handleEventAfterImageLoaded);
-      } else {
-        _handleEventAfterImageLoaded();
-      }
-    }
-
-    if (isRendererAttached) {
-      // @HACK Flutter image cache will cause image steam listener to trigger twice when page reload
-      // so use two frames to tell multi frame image from static image, note this optimization will fail
-      // at multi frame image with only two frames which is not common.
-      if (shouldConvertToRepaintBoundary) {
-        convertToRepaintBoundary();
-      } else if (shouldConvertToNonRepaintBoundary) {
-        convertToNonRepaintBoundary();
-      }
-
-      _resize();
-      _renderImage?.image = image;
-    }
-  }
-
-  // Mark if the same src loaded.
-  bool _loaded = false;
 
   void _onImageError(Object exception, StackTrace? stackTrace) {
     dispatchEvent(Event(EVENT_ERROR));
   }
 
-  // Delay image size setting to next frame to make sure image has been layouted
-  // to wait for percentage size to be calculated correctly in the case of image has been cached
-  bool _hasImageLayoutCallbackPending = false;
+  void _resizeImage() {
+    assert(isRendererAttached);
 
-  void _handleImageResizeAfterLayout() {
-    if (_hasImageLayoutCallbackPending) return;
-    _hasImageLayoutCallbackPending = true;
-    SchedulerBinding.instance!.scheduleFrame();
-    SchedulerBinding.instance!.addPostFrameCallback((_) {
-      _hasImageLayoutCallbackPending = false;
-      _resize();
-    });
-  }
-
-  void _resize() {
-    if (!isRendererAttached) {
-      return;
+    if (_styleWidth == null && _propertyWidth != null) {
+      // The intrinsic width of the image in pixels. Must be an integer without a unit.
+      renderStyle.width = CSSLengthValue(_propertyWidth, CSSLengthType.PX);
+    }
+    if (_styleHeight == null && _propertyHeight != null) {
+      // The intrinsic height of the image, in pixels. Must be an integer without a unit.
+      renderStyle.height = CSSLengthValue(_propertyHeight, CSSLengthType.PX);
     }
 
-    RenderStyle renderStyle = renderBoxModel!.renderStyle;
-    // Waiting for size computed after layout stage
-    if (style.contains(WIDTH) && renderStyle.width == null ||
-        style.contains(HEIGHT) && renderStyle.height == null) {
-      return _handleImageResizeAfterLayout();
-    }
+    renderStyle.intrinsicWidth = naturalWidth;
+    renderStyle.intrinsicHeight = naturalHeight;
 
-    double? width = renderStyle.width ?? _propertyWidth;
-    double? height = renderStyle.height ?? _propertyHeight;
-
-    if (renderStyle.width == null && _propertyWidth != null) {
-      renderBoxModel!.renderStyle.updateSizing(WIDTH, _propertyWidth);
-    }
-    if (renderStyle.height == null && _propertyHeight != null) {
-      renderBoxModel!.renderStyle.updateSizing(HEIGHT, _propertyHeight);
-    }
-
-    if (width == null && height == null) {
-      width = naturalWidth;
-      height = naturalHeight;
-    } else if (width != null && height == null && naturalWidth != 0) {
-      height = width * naturalHeight / naturalWidth;
-    } else if (width == null && height != null && naturalHeight != 0) {
-      width = height * naturalWidth / naturalHeight;
-    }
-
-    if (height == null || !height.isFinite) {
-      height = 0.0;
-    }
-
-    if (width == null || !width.isFinite) {
-      width = 0.0;
-    }
-
+    // Try to update image size if image already resolved.
+    // Set size to RenderImage is needs, to avoid makeNeedsLayout when update image.
     _renderImage?.width = width;
     _renderImage?.height = height;
-    renderBoxModel!.intrinsicWidth = naturalWidth;
-    renderBoxModel!.intrinsicHeight = naturalHeight;
 
     if (naturalWidth == 0.0 || naturalHeight == 0.0) {
-      renderBoxModel!.intrinsicRatio = null;
+      renderStyle.intrinsicRatio = null;
     } else {
-      renderBoxModel!.intrinsicRatio = naturalHeight / naturalWidth;
+      renderStyle.intrinsicRatio = naturalHeight / naturalWidth;
     }
   }
 
-  RenderImage createRenderImageBox() {
+  KrakenRenderImage _createRenderImageBox() {
     RenderStyle renderStyle = renderBoxModel!.renderStyle;
     BoxFit objectFit = renderStyle.objectFit;
     Alignment objectPosition = renderStyle.objectPosition;
 
-    return RenderImage(
-      image: _imageInfo?.image,
+    return KrakenRenderImage(
+      image: _cachedImageInfo?.image,
       fit: objectFit,
       alignment: objectPosition,
     );
@@ -318,76 +274,170 @@ class ImageElement extends Element {
   void removeProperty(String key) {
     super.removeProperty(key);
     if (key == 'src') {
-      _resetImage();
-      _loaded = false;
-    } else if (key == 'loading' && _isInLazyLoading && _imageProvider == null) {
+      _stopListeningStream(keepStreamAlive: true);
+    } else if (key == 'loading' && _isInLazyLoading && _cachedImageProvider == null) {
       _resetLazyLoading();
+      _stopListeningStream(keepStreamAlive: true);
     }
+  }
+
+  /// Stops listening to the image stream, if this state object has attached a
+  /// listener.
+  ///
+  /// If the listener from this state is the last listener on the stream, the
+  /// stream will be disposed. To keep the stream alive, set `keepStreamAlive`
+  /// to true, which create [ImageStreamCompleterHandle] to keep the completer
+  /// alive.
+  void _stopListeningStream({bool keepStreamAlive = false}) {
+    if (!_isListeningStream)
+      return;
+
+    if (keepStreamAlive && _completerHandle == null && _cachedImageStream?.completer != null) {
+      _completerHandle = _cachedImageStream!.completer!.keepAlive();
+    }
+
+    _cachedImageStream?.removeListener(_getListener());
+    _isListeningStream = false;
+  }
+
+  Uri? _resolveSrc() {
+    String? src = properties['src'];
+    if (src != null && src.isNotEmpty) {
+      Uri base = Uri.parse(ownerDocument.controller.href);
+      return ownerDocument.controller.uriParser!.resolve(base, Uri.parse(src));
+    }
+    return null;
+  }
+
+  void _updateSourceStream(ImageStream newStream) {
+    if (_cachedImageStream?.key == newStream.key) return;
+
+    if (_isListeningStream) {
+      _cachedImageStream?.removeListener(_getListener());
+    }
+
+    _frameCount = 0;
+    _cachedImageStream = newStream;
+
+    if (_isListeningStream) {
+      _cachedImageStream!.addListener(_getListener());
+    }
+  }
+
+  // Obtain image resource from resolvedUri, and create an ImageStream that loads the image streams.
+  // If imageElement has propertySize or width,height properties on renderStyle,
+  // The image will be encoded into a small size for better rasterization performance.
+  void _resolveImage(Uri? resolvedUri, { bool updateImageProvider = false }) async {
+    if (resolvedUri == null) return;
+
+    // Try to make sure that this image can be encoded into a smaller size.
+    int? cachedWidth = width > 0 && width.isFinite ? (width * ui.window.devicePixelRatio).toInt() : null;
+    int? cachedHeight = height > 0 && height.isFinite ? (height * ui.window.devicePixelRatio).toInt() : null;
+
+    ImageProvider? provider = _cachedImageProvider;
+    if (updateImageProvider || provider == null) {
+      // When cachedWidth or cachedHeight is not null, KrakenResizeImage will be returned.
+      provider = _cachedImageProvider = getImageProvider(resolvedUri, cachedWidth: cachedWidth, cachedHeight: cachedHeight);
+    }
+    if (provider == null) return;
+
+    // Cached the key of imageProvider to read naturalSize of the image.
+    _imageProviderKey = await provider.obtainKey(ImageConfiguration.empty);
+    final ImageStream newStream = provider.resolve(ImageConfiguration.empty);
+    _updateSourceStream(newStream);
+  }
+
+  void _replaceImage({required ImageInfo? info}) {
+    _cachedImageInfo = info;
+  }
+
+  // Attach image to renderImage box.
+  void _attachImage() {
+    assert(isRendererAttached);
+    assert(_renderImage != null);
+    if (_cachedImageInfo == null) return;
+    _renderImage!.image = image?.clone();
+  }
+
+
+  // Callback when image are loaded, encoded and available to use.
+  // This callback may fire multiple times when image have multiple frames (such as an animated GIF).
+  void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
+    _replaceImage(info: imageInfo);
+    _frameCount++;
+
+    if (!complete) {
+      complete = true;
+      if (synchronousCall) {
+        // `synchronousCall` happens when caches image and calling `addListener`.
+        scheduleMicrotask(_handleEventAfterImageLoaded);
+      } else {
+        _handleEventAfterImageLoaded();
+      }
+    }
+
+    // Multi frame image should wrap a repaint boundary for better composite performance.
+    if (_frameCount > 2) {
+      forceToRepaintBoundary = true;
+    }
+
+    _attachImage();
+    _resizeImage();
+  }
+
+  // Prefetches an image into the image cache. When the imageElement is attached to the renderTree, the imageProvider can directly
+  // obtain the cached imageStream from imageCache instead of obtaining resources from I/O.
+  void _precacheImage() async {
+    final ImageConfiguration config = ImageConfiguration.empty;
+    final Uri? resolvedUri = _resolvedUri = _resolveSrc();
+    if (resolvedUri == null) return;
+    final ImageProvider? provider = _cachedImageProvider = getImageProvider(resolvedUri);
+    if (provider == null) return;
+    _imageProviderKey = await provider.obtainKey(ImageConfiguration.empty);
+    _frameCount = 0;
+    final ImageStream stream = provider.resolve(config);
+    ImageStreamListener? listener;
+    listener = ImageStreamListener(
+      (ImageInfo? imageInfo, bool sync) {
+        _replaceImage(info: imageInfo);
+        _frameCount++;
+
+        if (!complete && !_shouldLazyLoading) {
+          complete = true;
+          if (sync) {
+            // `synchronousCall` happens when caches image and calling `addListener`.
+            scheduleMicrotask(_handleEventAfterImageLoaded);
+          } else {
+            _handleEventAfterImageLoaded();
+          }
+        }
+        stream.removeListener(listener!);
+      },
+      onError: _onImageError
+    );
+    stream.addListener(listener);
   }
 
   @override
   void setProperty(String key, dynamic value) {
     bool propertyChanged = properties[key] != value;
     super.setProperty(key, value);
-    double? rootFontSize;
-    double? fontSize;
-    if (renderBoxModel != null) {
-      rootFontSize = renderBoxModel!.elementDelegate.getRootElementFontSize();
-      fontSize = renderBoxModel!.renderStyle.fontSize;
-    }
-
-    // Reset frame number to zero when image needs to reload
-    _frameCount = 0;
-    if (key == 'src' && propertyChanged && !_shouldLazyLoading) {
-      // Loads the image immediately.
-      _loaded = false;
-      _loadImage();
-    } else if (key == 'loading' && _isInLazyLoading) {
-      // Should reset lazy when value change.
+    if (key == 'src' && propertyChanged) {
+      final Uri? resolvedUri = _resolvedUri =  _resolveSrc();
+      // Update image source if image already attached except image is lazy loading.
+      if (isRendererAttached && !_isInLazyLoading) {
+        _resolveImage(resolvedUri, updateImageProvider: true);
+      } else {
+        _precacheImage();
+      }
+    } else if (key == 'loading' && propertyChanged && _isInLazyLoading) {
       _resetLazyLoading();
     } else if (key == WIDTH) {
-      if (value is String && _isNumber(value)) {
-        value += 'px';
-      }
-
-      _propertyWidth = CSSLength.toDisplayPortValue(
-          value,
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-      );
-      _resize();
+      _propertyWidth = CSSNumber.parseNumber(value);
+      _resolveImage(_resolvedUri, updateImageProvider: true);
     } else if (key == HEIGHT) {
-      if (value is String && _isNumber(value)) {
-        value += 'px';
-      }
-
-      _propertyHeight = CSSLength.toDisplayPortValue(
-          value,
-          viewportSize: viewportSize,
-          rootFontSize: rootFontSize,
-          fontSize: fontSize
-      );
-      _resize();
-    }
-  }
-
-  void _loadImage() {
-    _resetImage();
-
-    if (_source != null) {
-      Uri base = Uri.parse(elementManager.controller.href);
-      Uri resolvedUri = elementManager.controller.uriParser!.resolve(base, Uri.parse(_source!));
-
-      ImageProvider? imageProvider = _imageProvider ?? CSSUrl.parseUrl(resolvedUri,
-          cache: properties['caching'], contextId: elementManager.contextId);
-
-      if (imageProvider != null) {
-        _imageProvider = imageProvider;
-        _imageStream = imageProvider
-            .resolve(ImageConfiguration.empty)
-            ..addListener(_renderStreamListener);
-      }
+      _propertyHeight = CSSNumber.parseNumber(value);
+      _resolveImage(_resolvedUri, updateImageProvider: true);
     }
   }
 
@@ -395,21 +445,33 @@ class ImageElement extends Element {
   dynamic getProperty(String key) {
     switch (key) {
       case WIDTH:
-        return _renderImage?.width ?? 0;
+        return width;
       case HEIGHT:
-        return _renderImage?.height ?? 0;
-      case 'naturalWidth':
+        return height;
+      case NATURAL_WIDTH:
         return naturalWidth;
-      case 'naturalHeight':
+      case NATURAL_HEIGHT:
         return naturalHeight;
     }
-
     return super.getProperty(key);
   }
 
   void _stylePropertyChanged(String property, String? original, String present) {
     if (property == WIDTH || property == HEIGHT) {
-      _resize();
+      if (property == WIDTH) {
+        double? resolveStyleWidth = renderStyle.width.value == null && renderStyle.width.isNotAuto
+          ? null : renderStyle.width.computedValue;
+        // To avoid resolved auto, which computed value is infinity, we can not calculate
+        // infinite double as valid number, mark null to let width/height resized by decode
+        // size.
+        _styleWidth = resolveStyleWidth == double.infinity ? null : resolveStyleWidth;
+      } else if (property == HEIGHT) {
+        double? resolveStyleHeight = renderStyle.height.value == null && renderStyle.height.isNotAuto
+          ? null : renderStyle.height.computedValue;
+        _styleHeight = resolveStyleHeight == double.infinity ? null : resolveStyleHeight;
+      }
+      // Resize image
+      _resolveImage(_resolvedUri, updateImageProvider: true);
     } else if (property == OBJECT_FIT && _renderImage != null) {
       _renderImage!.fit = renderBoxModel!.renderStyle.objectFit;
     } else if (property == OBJECT_POSITION && _renderImage != null) {
@@ -418,7 +480,3 @@ class ImageElement extends Element {
   }
 }
 
-// Return true if the input string only contain numbers.
-bool _isNumber(String input) {
-  return _numExp.hasMatch(input);
-}

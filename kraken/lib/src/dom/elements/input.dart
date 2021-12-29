@@ -2,9 +2,7 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
 import 'dart:async';
-import 'dart:ffi';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -16,7 +14,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' show TextSelectionOverlay, TextSelectionControls, ClipboardStatusNotifier;
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
@@ -70,12 +67,12 @@ class EditableTextDelegate implements TextSelectionDelegate {
 
   @override
   void bringIntoView(TextPosition position) {
-    RenderEditable _renderEditable = _inputElement._renderEditable!;
+    RenderEditable renderEditable = _inputElement.renderEditable!;
     KrakenScrollable _scrollableX = _inputElement._scrollableX;
-    final Rect localRect = _renderEditable.getLocalRectForCaret(position);
+    final Rect localRect = renderEditable.getLocalRectForCaret(position);
     final RevealedOffset targetOffset = _inputElement._getOffsetToRevealCaret(localRect);
     _scrollableX.position!.jumpTo(targetOffset.offset);
-    _renderEditable.showOnScreen(rect: targetOffset.rect);
+    renderEditable.showOnScreen(rect: targetOffset.rect);
   }
 
   /// Shows the selection toolbar at the location of the current cursor.
@@ -152,7 +149,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   static void clearFocus() {
     if (InputElement.focusInputElement != null) {
-      InputElement.focusInputElement!.blur();
+      InputElement.focusInputElement!.blurInput();
     }
 
     InputElement.focusInputElement = null;
@@ -161,14 +158,14 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   static void setFocus(InputElement inputElement) {
     if (InputElement.focusInputElement != inputElement) {
       // Focus kraken widget to get focus from other widgets.
-      WidgetDelegate? widgetDelegate = inputElement.elementManager.widgetDelegate;
+      WidgetDelegate? widgetDelegate = inputElement.ownerDocument.widgetDelegate;
       if (widgetDelegate != null) {
         widgetDelegate.requestFocus();
       }
 
       clearFocus();
       InputElement.focusInputElement = inputElement;
-      inputElement.focus();
+      inputElement.focusInput();
     }
   }
 
@@ -212,7 +209,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   RenderInputBox? _renderInputBox;
 
   final LayerLink _toolbarLayerLink = LayerLink();
-  RenderEditable? _renderEditable;
+  RenderEditable? renderEditable;
   TextInputConnection? _textInputConnection;
 
   // This value is an eyeball estimation of the time it takes for the iOS cursor
@@ -230,15 +227,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   TextInputConfiguration? _textInputConfiguration;
 
-  InputElement(
-    int targetId,
-    Pointer<NativeEventTarget> nativeEventTarget,
-    ElementManager elementManager, {
+  InputElement(EventTargetContext? context, {
     this.textAlign = TextAlign.left,
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
-  }) : super(targetId, nativeEventTarget, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
+  }) : super(context, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
     _textSelectionDelegate = EditableTextDelegate(this);
     scrollOffsetX = _scrollableX.position;
   }
@@ -282,14 +276,22 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     return super.getProperty(key);
   }
 
+  void focus() {
+    setFocus(this);
+  }
+
+  void blur() {
+    clearFocus();
+  }
+
   @override
   handleJSCall(String method, List argv) {
     switch(method) {
       case 'focus':
-        setFocus(this);
+        focus();
         break;
       case 'blur':
-        clearFocus();
+        blur();
         break;
     }
     return super.handleJSCall(method, argv);
@@ -300,6 +302,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     super.didAttachRenderer();
 
     // Make element listen to click event to trigger focus.
+    addEvent(EVENT_TOUCH_START);
+    addEvent(EVENT_TOUCH_MOVE);
+    addEvent(EVENT_TOUCH_END);
     addEvent(EVENT_CLICK);
     addEvent(EVENT_DOUBLE_CLICK);
     addEvent(EVENT_LONG_PRESS);
@@ -308,9 +313,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     animationController.addListener(_onCursorColorTick);
 
     // Set default width of input when width is not set in style.
-    if (renderBoxModel!.renderStyle.width == null) {
-      double fontSize = renderBoxModel!.renderStyle.fontSize;
-      renderBoxModel!.renderStyle.width = fontSize * _FONT_SIZE_RATIO;
+    if (renderBoxModel!.renderStyle.width.isAuto) {
+      double fontSize = renderBoxModel!.renderStyle.fontSize.computedValue;
+      renderBoxModel!.renderStyle.width = CSSLengthValue(fontSize * _FONT_SIZE_RATIO, CSSLengthType.PX);
     }
 
     addChild(createRenderBox());
@@ -324,6 +329,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         InputElement.setFocus(this);
       }
     });
+  }
+
+  @override
+  void willAttachRenderer() {
+    super.willAttachRenderer();
+    style.addStyleChangeListener(_onStyleChanged);
   }
 
   @override
@@ -341,19 +352,17 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     super.didDetachRenderer();
     _cursorBlinkOpacityController!.removeListener(_onCursorColorTick);
     _cursorBlinkOpacityController = null;
-    _renderEditable = null;
+    renderEditable = null;
   }
 
-  @override
-  void setRenderStyle(String key, value) {
-    super.setRenderStyle(key, value);
+  void _onStyleChanged(String property, String? original, String present) {
 
     if (_renderInputLeaderLayer != null && isRendererAttached) {
-      RenderStyle renderStyle = renderBoxModel!.renderStyle;
-      if (key == HEIGHT) {
+      CSSRenderStyle renderStyle = renderBoxModel!.renderStyle;
+      if (property == HEIGHT) {
         _renderInputLeaderLayer!.markNeedsLayout();
 
-      } else if (key == LINE_HEIGHT && renderStyle.height == null) {
+      } else if (property == LINE_HEIGHT && renderStyle.height.isAuto) {
         _renderInputLeaderLayer!.markNeedsLayout();
         // It needs to mark _renderInputBox as needsLayout manually cause
         // line-height change will not affect constraints which will in turn
@@ -362,9 +371,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
       // It needs to judge width in style here cause
       // width in renderStyle may be set in node attach.
-      } else if (key == FONT_SIZE && style[WIDTH].isEmpty) {
-        double fontSize = renderStyle.fontSize;
-        renderStyle.width = fontSize * _FONT_SIZE_RATIO;
+      } else if (property == FONT_SIZE && style[WIDTH].isEmpty) {
+        double fontSize = renderStyle.fontSize.computedValue;
+        renderStyle.width = CSSLengthValue(fontSize * _FONT_SIZE_RATIO, CSSLengthType.PX);
         _renderInputLeaderLayer!.markNeedsLayout();
       }
     }
@@ -378,19 +387,19 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     TextEditingValue value = TextEditingValue(text: _actualText!.text!);
     _textSelectionDelegate.userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
     TextSpan? text = obscureText ? _buildPasswordTextSpan(_actualText!.text!) : _actualText;
-    if (_renderEditable != null) {
-      _renderEditable!.text = _actualText!.text!.isEmpty
+    if (renderEditable != null) {
+      renderEditable!.text = _actualText!.text!.isEmpty
           ? placeholderTextSpan
           : text;
     }
   }
 
   TextSpan _buildTextSpan({ String? text }) {
-    return CSSTextMixin.createTextSpan(text ?? '', parentElement: this);
+    return CSSTextMixin.createTextSpan(text ?? '', renderStyle);
   }
 
   TextSpan _buildPasswordTextSpan(String text) {
-    return CSSTextMixin.createTextSpan(obscuringCharacter * text.length, parentElement: this);
+    return CSSTextMixin.createTextSpan(obscuringCharacter * text.length, renderStyle);
   }
 
   Color cursorColor = CSSColor.initial;
@@ -404,7 +413,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   // Get the text size of input by layouting manually cause RenderEditable does not expose textPainter.
   Size getTextSize() {
     final Size textSize = (TextPainter(
-      text: _renderEditable!.text,
+      text: renderEditable!.text,
       maxLines: 1,
       textDirection: TextDirection.ltr)
       ..layout())
@@ -437,7 +446,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
           localPosition: Offset(touch.clientX, touch.clientY),
           kind: PointerDeviceKind.touch,
         );
-        _renderEditable!.handleTapDown(details);
+        renderEditable!.handleTapDown(details);
       }
       // Cache text size on touch start to be used in touch move and touch end.
       _textSize = getTextSize();
@@ -455,9 +464,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       Touch touch = touches.item(0);
       Offset _selectEndPosition = Offset(touch.clientX, touch.clientY);
       // Disable text selection and enable scrolling when text size is larger than input size.
-      if (_textSize!.width > _renderEditable!.size.width) {
+      if (_textSize!.width > renderEditable!.size.width) {
         if (event.type == EVENT_TOUCH_END && _selectStartPosition == _selectEndPosition) {
-          _renderEditable!.selectPositionAt(
+          renderEditable!.selectPositionAt(
             from: _selectStartPosition!,
             to: _selectEndPosition,
             cause: SelectionChangedCause.drag,
@@ -466,39 +475,39 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         return;
       }
 
-      _renderEditable!.selectPositionAt(
+      renderEditable!.selectPositionAt(
         from: _selectStartPosition!,
         to: _selectEndPosition,
         cause: SelectionChangedCause.drag,
       );
       _isDragging = true;
     } else if (event.type == EVENT_CLICK) {
-      _renderEditable!.handleTap();
+      renderEditable!.handleTap();
       _isDragging = false;
     } else if (!_isDragging && event.type == EVENT_LONG_PRESS) {
-      _renderEditable!.handleLongPress();
+      renderEditable!.handleLongPress();
       _textSelectionDelegate.showToolbar();
       _isDragging = false;
     } else if (event.type == EVENT_DOUBLE_CLICK) {
-      _renderEditable!.handleDoubleTap();
+      renderEditable!.handleDoubleTap();
       _textSelectionDelegate.showToolbar();
       _isDragging = false;
     }
   }
 
-  void focus() {
+  void focusInput() {
     if (isRendererAttached) {
       // Set focus that make it add keyboard listener
-      _renderEditable!.hasFocus = true;
+      renderEditable!.hasFocus = true;
       activeTextInput();
       dispatchEvent(Event(EVENT_FOCUS));
     }
   }
 
-  void blur() {
+  void blurInput() {
     if (isRendererAttached) {
       // Set focus that make it remove keyboard listener
-      _renderEditable!.hasFocus = false;
+      renderEditable!.hasFocus = false;
       deactiveTextInput();
       dispatchEvent(Event(EVENT_BLUR));
       // Trigger change event if value has changed.
@@ -566,7 +575,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       text = _buildPasswordTextSpan(text.text!);
     }
 
-    WidgetDelegate? widgetDelegate = elementManager.widgetDelegate;
+    WidgetDelegate? widgetDelegate = ownerDocument.widgetDelegate;
     if (widgetDelegate != null) {
       cursorColor = widgetDelegate.getCursorColor();
       selectionColor = widgetDelegate.getSelectionColor();
@@ -574,7 +583,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       _selectionControls = widgetDelegate.getTextSelectionControls();
     }
 
-    _renderEditable = RenderEditable(
+    renderEditable = RenderEditable(
       text: text,
       cursorColor: cursorColor,
       showCursor: _cursorVisibilityNotifier,
@@ -601,7 +610,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       endHandleLayerLink: _endHandleLayerLink,
       ignorePointer: true,
     );
-    return _renderEditable!;
+    return renderEditable!;
   }
 
   RenderInputLeaderLayer createRenderBox() {
@@ -743,21 +752,21 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       _handleTextChanged(value.text, userInteraction, cause);
     }
 
-    if (_renderEditable != null) {
-      _renderEditable!.selection = value.selection;
+    if (renderEditable != null) {
+      renderEditable!.selection = value.selection;
     }
 
     endBatchEdit();
   }
 
   void _handleTextChanged(String text, bool userInteraction, SelectionChangedCause? cause) {
-    if (_renderEditable != null) {
+    if (renderEditable != null) {
       if (text.isEmpty) {
-        _renderEditable!.text = placeholderTextSpan;
+        renderEditable!.text = placeholderTextSpan;
       } else if (obscureText) {
-        _renderEditable!.text = _buildPasswordTextSpan(text);
+        renderEditable!.text = _buildPasswordTextSpan(text);
       } else {
-        _actualText = _renderEditable!.text = _buildTextSpan(text: text);
+        _actualText = renderEditable!.text = _buildTextSpan(text: text);
       }
     } else {
       // Update text when input element is not appended to dom yet.
@@ -791,11 +800,11 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     // Show keyboard for selection change or user gestures.
     requestKeyboard();
 
-    if (_renderEditable == null) {
+    if (renderEditable == null) {
       return;
     }
 
-    WidgetDelegate? widgetDelegate = elementManager.widgetDelegate;
+    WidgetDelegate? widgetDelegate = ownerDocument.widgetDelegate;
 
     if (_selectionControls == null) {
       _selectionOverlay?.hide();
@@ -809,7 +818,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
           toolbarLayerLink: _toolbarLayerLink,
           startHandleLayerLink: _startHandleLayerLink,
           endHandleLayerLink: _endHandleLayerLink,
-          renderObject: _renderEditable!,
+          renderObject: renderEditable!,
           selectionControls: _selectionControls,
           selectionDelegate: _textSelectionDelegate,
           dragStartBehavior: DragStartBehavior.start,
@@ -836,7 +845,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       _showSelectionHandles = willShowSelectionHandles;
     }
 
-    WidgetDelegate? widgetDelegate = elementManager.widgetDelegate;
+    WidgetDelegate? widgetDelegate = ownerDocument.widgetDelegate;
     if (widgetDelegate != null) {
       TargetPlatform platform = widgetDelegate.getTargetPlatform();
       switch (platform) {
@@ -1033,8 +1042,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   void _enablePassword() {
     obscureText = true;
-    if (_renderEditable != null) {
-      _renderEditable!.obscureText = obscureText;
+    if (renderEditable != null) {
+      renderEditable!.obscureText = obscureText;
     }
   }
 
@@ -1049,7 +1058,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
       _showCaretOnScreenScheduled = false;
       Rect? currentCaretRect = _currentCaretRect;
-      if (currentCaretRect == null || _renderEditable == null) {
+      if (currentCaretRect == null || renderEditable == null) {
         return;
       }
 
@@ -1065,7 +1074,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
       scrollToCaret();
 
-      _renderEditable!.showOnScreen(
+      renderEditable!.showOnScreen(
         rect: inflatedRect,
         duration: _caretAnimationDuration,
         curve: _caretAnimationCurve,
@@ -1106,7 +1115,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   // `renderEditable.preferredLineHeight`, before the target scroll offset is
   // calculated.
   RevealedOffset _getOffsetToRevealCaret(Rect rect) {
-    final Size editableSize = _renderEditable!.size;
+    final Size editableSize = renderEditable!.size;
     final double additionalOffset;
     final Offset unitOffset;
 
@@ -1173,12 +1182,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   @override
   void updateFloatingCursor(RawFloatingCursorPoint point) {
     final TextPosition currentTextPosition = TextPosition(offset: 1);
-    Rect _startCaretRect = _renderEditable!.getLocalRectForCaret(currentTextPosition);
-    _renderEditable!.setFloatingCursor(point.state, _startCaretRect.center, currentTextPosition);
+    Rect _startCaretRect = renderEditable!.getLocalRectForCaret(currentTextPosition);
+    renderEditable!.setFloatingCursor(point.state, _startCaretRect.center, currentTextPosition);
   }
 
   void _onCursorColorTick() {
-    _renderEditable!.cursorColor = cursorColor.withOpacity(_cursorBlinkOpacityController!.value);
+    renderEditable!.cursorColor = cursorColor.withOpacity(_cursorBlinkOpacityController!.value);
     _cursorVisibilityNotifier.value = _cursorBlinkOpacityController!.value > 0;
   }
 
@@ -1252,15 +1261,16 @@ class RenderInputLeaderLayer extends RenderLeaderLayer {
     RenderStyle renderStyle = renderIntrinsic.renderStyle;
 
     double intrinsicInputHeight = renderEditable!.preferredLineHeight
-      + renderStyle.paddingTop + renderStyle.paddingBottom
-      + renderStyle.borderTop + renderStyle.borderBottom;
+      + renderStyle.paddingTop.computedValue + renderStyle.paddingBottom.computedValue
+      + renderStyle.effectiveBorderTopWidth.computedValue + renderStyle.effectiveBorderBottomWidth.computedValue;
 
     // Make render editable vertically center.
     double dy;
-    if (renderStyle.height != null) {
-      dy = (renderStyle.height! - intrinsicInputHeight) / 2;
-    } else if (renderStyle.lineHeight != null && renderStyle.lineHeight! > intrinsicInputHeight) {
-      dy = (renderStyle.lineHeight! - intrinsicInputHeight) /2;
+    if (renderStyle.height.isNotAuto) {
+      dy = (renderStyle.height.computedValue - intrinsicInputHeight) / 2;
+    } else if (renderStyle.lineHeight.type != CSSLengthType.NORMAL &&
+      renderStyle.lineHeight.computedValue > intrinsicInputHeight) {
+      dy = (renderStyle.lineHeight.computedValue - intrinsicInputHeight) /2;
     } else {
       dy = 0;
     }
@@ -1297,10 +1307,8 @@ class RenderInputBox extends RenderProxyBox {
       // Height priority: height > max(line-height, child height) > child height
       if (constraints.maxHeight != double.infinity) {
         height = constraints.maxHeight;
-      } else if (renderStyle.lineHeight != null) {
-        height = math.max(renderStyle.lineHeight!, childSize.height);
-      } else {
-        height = childSize.height;
+      } else  {
+        height = math.max(renderStyle.lineHeight.computedValue, childSize.height);
       }
 
       size = Size(width, height);

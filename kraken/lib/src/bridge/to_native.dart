@@ -84,7 +84,7 @@ final DartInvokeEventListener _invokeModuleEvent =
     nativeDynamicLibrary.lookup<NativeFunction<NativeInvokeEventListener>>('invokeModuleEvent').asFunction();
 
 void invokeModuleEvent(int contextId, String moduleName, Event? event, String extra) {
-  if(KrakenController.getControllerOfJSContextId(contextId) == null) {
+  if (KrakenController.getControllerOfJSContextId(contextId) == null) {
     return;
   }
   Pointer<NativeString> nativeModuleName = stringToNativeString(moduleName);
@@ -96,11 +96,10 @@ void invokeModuleEvent(int contextId, String moduleName, Event? event, String ex
 typedef DartDispatchEvent = void Function(
     Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeString> eventType, Pointer<Void> nativeEvent, int isCustomEvent);
 
-void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Event event) {
+void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativeEventTarget, Event event) {
   if(KrakenController.getControllerOfJSContextId(contextId) == null) {
     return;
   }
-  Pointer<NativeEventTarget> nativeEventTarget = nativePtr;
   DartDispatchEvent dispatchEvent = nativeEventTarget.ref.dispatchEvent.asFunction();
   Pointer<Void> rawEvent = event.toRaw().cast<Void>();
   bool isCustomEvent = event is CustomEvent;
@@ -185,34 +184,34 @@ void parseHTML(int contextId, String code) {
 }
 
 // Register initJsEngine
-typedef NativeInitJSContextPool = Void Function(Int32 poolSize);
-typedef DartInitJSContextPool = void Function(int poolSize);
+typedef NativeInitJSPagePool = Void Function(Int32 poolSize);
+typedef DartInitJSPagePool = void Function(int poolSize);
 
-final DartInitJSContextPool _initJSContextPool =
-    nativeDynamicLibrary.lookup<NativeFunction<NativeInitJSContextPool>>('initJSContextPool').asFunction();
+final DartInitJSPagePool _initJSPagePool =
+    nativeDynamicLibrary.lookup<NativeFunction<NativeInitJSPagePool>>('initJSPagePool').asFunction();
 
-void initJSContextPool(int poolSize) {
-  _initJSContextPool(poolSize);
+void initJSPagePool(int poolSize) {
+  _initJSPagePool(poolSize);
 }
 
-typedef NativeDisposeContext = Void Function(Int32 contextId);
-typedef DartDisposeContext = void Function(int contextId);
+typedef NativeDisposePage = Void Function(Int32 contextId);
+typedef DartDisposePage = void Function(int contextId);
 
-final DartDisposeContext _disposeContext =
-    nativeDynamicLibrary.lookup<NativeFunction<NativeDisposeContext>>('disposeContext').asFunction();
+final DartDisposePage _disposePage =
+    nativeDynamicLibrary.lookup<NativeFunction<NativeDisposePage>>('disposePage').asFunction();
 
-void disposeContext(int contextId) {
-  _disposeContext(contextId);
+void disposePage(int contextId) {
+  _disposePage(contextId);
 }
 
-typedef NativeAllocateNewContext = Int32 Function(Int32);
-typedef DartAllocateNewContext = int Function(int);
+typedef NativeAllocateNewPage = Int32 Function(Int32);
+typedef DartAllocateNewPage = int Function(int);
 
-final DartAllocateNewContext _allocateNewContext =
-    nativeDynamicLibrary.lookup<NativeFunction<NativeAllocateNewContext>>('allocateNewContext').asFunction();
+final DartAllocateNewPage _allocateNewPage =
+    nativeDynamicLibrary.lookup<NativeFunction<NativeAllocateNewPage>>('allocateNewPage').asFunction();
 
-int allocateNewContext([int targetContextId = -1]) {
-  return _allocateNewContext(targetContextId);
+int allocateNewPage([int targetContextId = -1]) {
+  return _allocateNewPage(targetContextId);
 }
 
 typedef NativeRegisterPluginByteCode = Void Function(Pointer<Uint8> bytes, Int32 length, Pointer<Utf8> pluginName);
@@ -224,6 +223,17 @@ final DartRegisterPluginByteCode _registerPluginByteCode =
 void registerPluginByteCode(Uint8List bytecode, String name) {
   Pointer<Uint8> bytes = malloc.allocate(sizeOf<Uint8>() * bytecode.length);
   _registerPluginByteCode(bytes, bytecode.length, name.toNativeUtf8());
+}
+
+typedef NativeProfileModeEnabled = Int32 Function();
+typedef DartProfileModeEnabled = int Function();
+
+final DartProfileModeEnabled _profileModeEnabled =
+nativeDynamicLibrary.lookup<NativeFunction<NativeProfileModeEnabled>>('profileModeEnabled').asFunction();
+
+const _CODE_ENABLED = 1;
+bool profileModeEnabled() {
+  return _profileModeEnabled() == _CODE_ENABLED;
 }
 
 // Regisdster reloadJsContext
@@ -357,8 +367,8 @@ List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, in
     // +-------+-------+
     // |  id   | type  |
     // +-------+-------+
-    int id = typeIdCombine >> 32;
-    int type = typeIdCombine ^ (id << 32);
+    int id = (typeIdCombine >> 32).toSigned(32);
+    int type = (typeIdCombine ^ (id << 32)).toSigned(32);
 
     command.type = UICommandType.values[type];
     command.id = id;
@@ -373,8 +383,8 @@ List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, in
     if (args01And02Length == 0) {
       args01Length = args02Length = 0;
     } else {
-      args02Length = args01And02Length >> 32;
-      args01Length = args01And02Length ^ (args02Length << 32);
+      args02Length = (args01And02Length >> 32).toSigned(32);
+      args01Length = (args01And02Length ^ (args02Length << 32)).toSigned(32);
     }
 
     int args01StringMemory = rawMemory[i + args01StringMemOffset];
@@ -433,7 +443,7 @@ void flushUICommand() {
       PerformanceTiming.instance().mark(PERF_FLUSH_UI_COMMAND_END);
     }
 
-    List<List<String>> _renderStyleCommands = [];
+    Map<int, bool> pendingStylePropertiesTargets = {};
 
     // For new ui commands, we needs to tell engine to update frames.
     for (int i = 0; i < commandLength; i++) {
@@ -454,7 +464,7 @@ void flushUICommand() {
             controller.view.createComment(id, nativePtr.cast<NativeEventTarget>());
             break;
           case UICommandType.disposeEventTarget:
-            ElementManager.disposeEventTarget(controller.view.contextId, id);
+            controller.view.disposeEventTarget(id);
             break;
           case UICommandType.addEvent:
             controller.view.addEvent(id, command.args[0]);
@@ -477,8 +487,8 @@ void flushUICommand() {
           case UICommandType.setStyle:
             String key = command.args[0];
             String value = command.args[1];
-            controller.view.setStyle(id, key, value);
-            _renderStyleCommands.add([id.toString(), key, value]);
+            controller.view.setInlineStyle(id, key, value);
+            pendingStylePropertiesTargets[id] = true;
             break;
           case UICommandType.setProperty:
             String key = command.args[0];
@@ -500,15 +510,14 @@ void flushUICommand() {
       }
     }
 
-    try {
-      for (int i = 0; i < _renderStyleCommands.length; i ++) {
-        var pair = _renderStyleCommands[i];
-        controller.view.setRenderStyle(int.parse(pair[0]), pair[1], pair[2]);
+    // For pending style properties, we needs to flush to render style.
+    for (int id in pendingStylePropertiesTargets.keys) {
+      try {
+        controller.view.flushPendingStyleProperties(id);
+      } catch (e, stack) {
+        print('$e\n$stack');
       }
-    } catch (e, stack) {
-      print('$e\n$stack');
     }
-
-    _renderStyleCommands.clear();
+    pendingStylePropertiesTargets.clear();
   }
 }

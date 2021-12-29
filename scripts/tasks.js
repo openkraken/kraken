@@ -11,7 +11,7 @@ const del = require('del');
 const os = require('os');
 
 program
-.option('--built-with-debug-jsc', 'Built bridge binary with debuggable JSC.')
+.option('--static-quickjs', 'Build quickjs as static library and bundled into kraken library.', false)
 .parse(process.argv);
 
 const SUPPORTED_JS_ENGINES = ['jsc', 'quickjs'];
@@ -182,8 +182,6 @@ task('build-darwin-kraken-lib', done => {
     buildType = 'RelWithDebInfo';
   }
 
-  let builtWithDebugJsc = targetJSEngine === 'jsc' && !!program.builtWithDebugJsc;
-
   if (isProfile) {
     externCmakeArgs.push('-DENABLE_PROFILE=TRUE');
   }
@@ -192,9 +190,9 @@ task('build-darwin-kraken-lib', done => {
     externCmakeArgs.push('-DENABLE_ASAN=true');
   }
 
-  if (builtWithDebugJsc) {
-    let debugJsEngine = findDebugJSEngine(platform == 'darwin' ? 'macos' : platform);
-    externCmakeArgs.push(`-DDEBUG_JSC_ENGINE=${debugJsEngine}`)
+  // Bundle quickjs into kraken.
+  if (program.staticQuickjs) {
+    externCmakeArgs.push('-DSTATIC_QUICKJS=true');
   }
 
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} -DENABLE_TEST=true ${externCmakeArgs.join(' ')} \
@@ -403,14 +401,47 @@ task('sdk-clean', (done) => {
   done();
 });
 
+function insertStringSlice(code, position, slice) {
+  let leftHalf = code.substring(0, position);
+  let rightHalf = code.substring(position);
+
+  return leftHalf + slice + rightHalf;
+}
+
+function patchiOSFrameworkPList(frameworkPath) {
+  const pListPath = path.join(frameworkPath, 'Info.plist');
+  let pListString = fs.readFileSync(pListPath, {encoding: 'utf-8'});
+  let versionIndex = pListString.indexOf('CFBundleVersion');
+  if (versionIndex != -1) {
+    let versionStringLast = pListString.indexOf('</string>', versionIndex) + '</string>'.length;
+
+    pListString = insertStringSlice(pListString, versionStringLast, `
+        <key>MinimumOSVersion</key>
+        <string>9.0</string>`);
+    fs.writeFileSync(pListPath, pListString);
+  }
+}
+
 task(`build-ios-kraken-lib`, (done) => {
   const buildType = (buildMode == 'Release' || buildMode === 'RelWithDebInfo')  ? 'RelWithDebInfo' : 'Debug';
+  let externCmakeArgs = [];
+
+  if (process.env.ENABLE_ASAN === 'true') {
+    externCmakeArgs.push('-DENABLE_ASAN=true');
+  }
+
+  // Bundle quickjs into kraken.
+  if (program.staticQuickjs) {
+    externCmakeArgs.push('-DSTATIC_QUICKJS=true');
+  }
 
   // generate build scripts for simulator
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
     -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
     -DPLATFORM=SIMULATOR64 \
+    -DDEPLOYMENT_TARGET=9.0 \
     ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
+    ${externCmakeArgs.join(' ')} \
     -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-x64 -S ${paths.bridge}`, {
     cwd: paths.bridge,
     stdio: 'inherit',
@@ -426,10 +457,13 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit'
   });
 
-  // Generate builds scripts for ARMv7
+  // Generate builds scripts for ARMv7s, ARMv7
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
     -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
     -DPLATFORM=OS \
+    -DARCHS="armv7;armv7s" \
+    -DDEPLOYMENT_TARGET=9.0 \
+    ${externCmakeArgs.join(' ')} \
     ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
     -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm -S ${paths.bridge}`, {
     cwd: paths.bridge,
@@ -441,17 +475,19 @@ task(`build-ios-kraken-lib`, (done) => {
     }
   });
 
-  // Build for ARMv7
+  // Build for ARMv7, ARMv7s
   execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm --target kraken kraken_static -- -j 12`, {
     stdio: 'inherit'
   });
 
-  // geneate builds scripts for ARM64
+  // Generate builds scripts for ARMv7s, ARMv7
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
-     -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
-     -DPLATFORM=OS64 \
-     ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
-     -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm64 -S ${paths.bridge}`, {
+    -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
+    -DPLATFORM=OS64 \
+    -DDEPLOYMENT_TARGET=9.0 \
+    ${externCmakeArgs.join(' ')} \
+    ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
+    -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm64 -S ${paths.bridge}`, {
     cwd: paths.bridge,
     stdio: 'inherit',
     env: {
@@ -461,43 +497,50 @@ task(`build-ios-kraken-lib`, (done) => {
     }
   });
 
-  // build for ARMV64
+  // Build for ARM64
   execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm64 --target kraken kraken_static -- -j 12`, {
     stdio: 'inherit'
   });
 
-  const targetSourceFrameworks = ['kraken_bridge', 'quickjs'];
+  const targetSourceFrameworks = ['kraken_bridge'];
+
+  // If quickjs is not static, there will be another framework called quickjs.framework.
+  if (!program.staticQuickjs) {
+    targetSourceFrameworks.push('quickjs');
+  }
 
   targetSourceFrameworks.forEach(target => {
     const armDynamicSDKPath = path.join(paths.bridge, `build/ios/lib/arm/${target}.framework`);
     const arm64DynamicSDKPath = path.join(paths.bridge, `build/ios/lib/arm64/${target}.framework`);
     const x64DynamicSDKPath = path.join(paths.bridge, `build/ios/lib/x86_64/${target}.framework`);
 
+    execSync(`lipo -create ${armDynamicSDKPath}/${target} ${arm64DynamicSDKPath}/${target} -output ${armDynamicSDKPath}/${target}`, {
+      stdio: 'inherit'
+    });
+
+    patchiOSFrameworkPList(x64DynamicSDKPath);
+    patchiOSFrameworkPList(armDynamicSDKPath);
+
     const targetDynamicSDKPath = `${paths.bridge}/build/ios/framework`;
     const frameworkPath = `${targetDynamicSDKPath}/${target}.xcframework`;
     mkdirp.sync(targetDynamicSDKPath);
 
-    // merge armv7 into armv8
-    execSync(`lipo -create ${armDynamicSDKPath}/${target} ${arm64DynamicSDKPath}/${target} -output ${arm64DynamicSDKPath}/${target}`, {
-      stdio: 'inherit'
-    });
+    // Create dSYM for x86_64
+    execSync(`dsymutil ${x64DynamicSDKPath}/${target} --out ${x64DynamicSDKPath}/../${target}.dSYM`, { stdio: 'inherit' });
+    // Create dSYM for arm64,armv7
+    execSync(`dsymutil ${armDynamicSDKPath}/${target} --out ${armDynamicSDKPath}/../${target}.dSYM`, { stdio: 'inherit' });
 
     if (buildMode === 'RelWithDebInfo') {
-      // Create dSYM for x86_64
-      execSync(`dsymutil ${x64DynamicSDKPath}/${target}`, { stdio: 'inherit' });
-
-      // Create dSYM for arm64
-      execSync(`dsymutil ${arm64DynamicSDKPath}/${target}`, { stdio: 'inherit' });
       execSync(`xcodebuild -create-xcframework \
         -framework ${x64DynamicSDKPath} -debug-symbols ${x64DynamicSDKPath}/${target}.dSYM \
-        -framework ${arm64DynamicSDKPath} -debug-symbols ${arm64DynamicSDKPath}/${target}.dSYM -output ${frameworkPath}`, {
+        -framework ${armDynamicSDKPath} -debug-symbols ${armDynamicSDKPath}/${target}.dSYM -output ${frameworkPath}`, {
         stdio: 'inherit'
       });
 
     } else {
       execSync(`xcodebuild -create-xcframework \
         -framework ${x64DynamicSDKPath} \
-        -framework ${arm64DynamicSDKPath} -output ${frameworkPath}`, {
+        -framework ${armDynamicSDKPath} -output ${frameworkPath}`, {
         stdio: 'inherit'
       });
     }
@@ -528,6 +571,38 @@ task('build-ios-frameworks', (done) => {
   done();
 });
 
+task('build-linux-arm64-kraken-lib', (done) => {
+
+  const archs = ['arm64'];
+  const buildType = buildMode == 'Release' ? 'Release' : 'Relwithdebinfo';
+  const cmakeGeneratorTemplate = platform == 'win32' ? 'Ninja' : 'Unix Makefiles';
+  archs.forEach(arch => {
+    const soBinaryDirectory = path.join(paths.bridge, `build/linux/lib/${arch}`);
+    const bridgeCmakeDir = path.join(paths.bridge, 'cmake-build-linux-' + arch);
+    // generate project
+    execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
+    ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
+    -G "${cmakeGeneratorTemplate}" \
+    -B ${paths.bridge}/cmake-build-linux-${arch} -S ${paths.bridge}`,
+      {
+        cwd: paths.bridge,
+        stdio: 'inherit',
+        env: {
+          ...process.env,
+          KRAKEN_JS_ENGINE: targetJSEngine,
+          LIBRARY_OUTPUT_DIR: soBinaryDirectory
+        }
+      });
+
+    // build
+    execSync(`cmake --build ${bridgeCmakeDir} --target kraken -- -j 12`, {
+      stdio: 'inherit'
+    });
+  });
+
+  done();
+});
+
 task('build-android-kraken-lib', (done) => {
   let androidHome;
 
@@ -545,19 +620,45 @@ task('build-android-kraken-lib', (done) => {
   }
 
   const archs = ['arm64-v8a', 'armeabi-v7a'];
+  const toolChainMap = {
+    'arm64-v8a': 'aarch64-linux-android',
+    'armeabi-v7a': 'arm-linux-androideabi'
+  };
   const buildType = (buildMode === 'Release' || buildMode == 'Relwithdebinfo') ? 'Relwithdebinfo' : 'Debug';
+  let externCmakeArgs = [];
+
+  if (process.env.ENABLE_ASAN === 'true') {
+    externCmakeArgs.push('-DENABLE_ASAN=true');
+  }
+
+  // Bundle quickjs into kraken.
+  if (program.staticQuickjs) {
+    externCmakeArgs.push('-DSTATIC_QUICKJS=true');
+  }
+
+  const soFileNames = [
+    'libkraken',
+    'libc++_shared'
+  ];
+
+  // If quickjs is not static, there will be another so called libquickjs.so.
+  if (!program.staticQuickjs) {
+    soFileNames.push('libquickjs');
+  }
 
   const cmakeGeneratorTemplate = platform == 'win32' ? 'Ninja' : 'Unix Makefiles';
   archs.forEach(arch => {
     const soBinaryDirectory = path.join(paths.bridge, `build/android/lib/${arch}`);
     const bridgeCmakeDir = path.join(paths.bridge, 'cmake-build-android-' + arch);
+    const ndkDir = path.join(androidHome, 'ndk', ndkVersion);
     // generate project
     execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
-    -DCMAKE_TOOLCHAIN_FILE=${path.join(androidHome, 'ndk', ndkVersion, '/build/cmake/android.toolchain.cmake')} \
-    -DANDROID_NDK=${path.join(androidHome, '/ndk/', ndkVersion)} \
+    -DCMAKE_TOOLCHAIN_FILE=${path.join(ndkDir, '/build/cmake/android.toolchain.cmake')} \
+    -DANDROID_NDK=${ndkDir} \
     -DIS_ANDROID=TRUE \
     -DANDROID_ABI="${arch}" \
     ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
+    ${externCmakeArgs.join(' ')} \
     -DANDROID_PLATFORM="android-18" \
     -DANDROID_STL=c++_shared \
     -G "${cmakeGeneratorTemplate}" \
@@ -576,6 +677,22 @@ task('build-android-kraken-lib', (done) => {
     execSync(`cmake --build ${bridgeCmakeDir} --target kraken -- -j 12`, {
       stdio: 'inherit'
     });
+
+    // Copy libc++_shared.so to dist from NDK.
+    const libcppSharedPath = path.join(ndkDir, `./toolchains/llvm/prebuilt/${os.platform()}-x86_64/sysroot/usr/lib/${toolChainMap[arch]}/libc++_shared.so`);
+    execSync(`cp ${libcppSharedPath} ${soBinaryDirectory}`);
+
+    // Strip release binary in release mode.
+    if (buildMode === 'Release' || buildMode === 'RelWithDebInfo') {
+      const strip = path.join(ndkDir, `./toolchains/llvm/prebuilt/${os.platform()}-x86_64/${toolChainMap[arch]}/bin/strip`);
+      const objcopy = path.join(ndkDir, `./toolchains/llvm/prebuilt/${os.platform()}-x86_64/${toolChainMap[arch]}/bin/objcopy`);
+
+      for (let soFileName of soFileNames) {
+        const soBinaryFile = path.join(soBinaryDirectory, soFileName + '.so');
+        execSync(`${objcopy} --only-keep-debug "${soBinaryFile}" "${soBinaryDirectory}/${soFileName}.debug"`);
+        execSync(`${strip} --strip-debug --strip-unneeded "${soBinaryFile}"`)
+      }
+    }
   });
 
   done();

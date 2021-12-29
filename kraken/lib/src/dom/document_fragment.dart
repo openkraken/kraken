@@ -9,9 +9,12 @@ import 'package:kraken/dom.dart';
 const String DOCUMENT_FRAGMENT = 'DOCUMENTFRAGMENT';
 
 class DocumentFragment extends Node {
-  DocumentFragment(int targetId, nativeNodePtr, ElementManager elementManager)
-      : super(NodeType.COMMENT_NODE, targetId, nativeNodePtr, elementManager, '#documentfragment');
+  DocumentFragment(EventTargetContext? context)
+      : super(NodeType.COMMENT_NODE, context);
 
   @override
-  RenderObject? get renderer => null;
+  String get nodeName => '#documentfragment';
+
+  @override
+  RenderBox? get renderer => null;
 }

@@ -21,28 +21,28 @@
 #define KRAKEN_EXPORT __attribute__((__visibility__("default")))
 
 KRAKEN_EXPORT
-std::__thread_id getUIThreadId();
+std::thread::id getUIThreadId();
 
 struct NativeString {
-  const uint16_t *string;
-  int32_t length;
+  const uint16_t* string;
+  uint32_t length;
 
-  NativeString *clone();
+  NativeString* clone();
   void free();
 };
 
 struct NativeByteCode {
-  uint8_t *bytes;
+  uint8_t* bytes;
   int32_t length;
 };
 
 struct KrakenInfo;
 
 struct KrakenInfo {
-  const char *app_name{nullptr};
-  const char *app_version{nullptr};
-  const char *app_revision{nullptr};
-  const char *system_name{nullptr};
+  const char* app_name{nullptr};
+  const char* app_version{nullptr};
+  const char* app_revision{nullptr};
+  const char* system_name{nullptr};
 };
 
 struct NativeScreen {
@@ -67,15 +67,17 @@ enum UICommand {
 };
 
 struct KRAKEN_EXPORT UICommandItem {
-  UICommandItem(int32_t id, int32_t type, NativeString args_01, NativeString args_02, void *nativePtr)
-    : type(type), string_01(reinterpret_cast<int64_t>(args_01.string)), args_01_length(args_01.length),
-      string_02(reinterpret_cast<int64_t>(args_02.string)), args_02_length(args_02.length), id(id),
-      nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
-  UICommandItem(int32_t id, int32_t type, NativeString args_01, void *nativePtr)
-    : type(type), string_01(reinterpret_cast<int64_t>(args_01.string)), args_01_length(args_01.length), id(id),
-      nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
-  UICommandItem(int32_t id, int32_t type, void *nativePtr)
-    : type(type), id(id), nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
+  UICommandItem(int32_t id, int32_t type, NativeString args_01, NativeString args_02, void* nativePtr)
+      : type(type),
+        string_01(reinterpret_cast<int64_t>(args_01.string)),
+        args_01_length(args_01.length),
+        string_02(reinterpret_cast<int64_t>(args_02.string)),
+        args_02_length(args_02.length),
+        id(id),
+        nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
+  UICommandItem(int32_t id, int32_t type, NativeString args_01, void* nativePtr)
+      : type(type), string_01(reinterpret_cast<int64_t>(args_01.string)), args_01_length(args_01.length), id(id), nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
+  UICommandItem(int32_t id, int32_t type, void* nativePtr) : type(type), id(id), nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
   int32_t type;
   int32_t id;
   int32_t args_01_length{0};
@@ -85,56 +87,57 @@ struct KRAKEN_EXPORT UICommandItem {
   int64_t nativePtr{0};
 };
 
-typedef void (*Task)(void *);
-typedef void (*ConsoleMessageHandler)(void* ctx, const std::string &message, int logLevel);
+typedef void (*Task)(void*);
+typedef void (*ConsoleMessageHandler)(void* ctx, const std::string& message, int logLevel);
 
 KRAKEN_EXPORT_C
-void initJSContextPool(int poolSize);
+void initJSPagePool(int poolSize);
 KRAKEN_EXPORT_C
-void disposeContext(int32_t contextId);
+void disposePage(int32_t contextId);
 KRAKEN_EXPORT_C
-int32_t allocateNewContext(int32_t targetContextId);
+int32_t allocateNewPage(int32_t targetContextId);
 KRAKEN_EXPORT_C
-void *getJSContext(int32_t contextId);
-bool checkContext(int32_t contextId);
-bool checkContext(int32_t contextId, void *context);
+void* getPage(int32_t contextId);
+bool checkPage(int32_t contextId);
+bool checkPage(int32_t contextId, void* context);
 KRAKEN_EXPORT_C
-void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine);
+void evaluateScripts(int32_t contextId, NativeString* code, const char* bundleFilename, int startLine);
 KRAKEN_EXPORT_C
-void evaluateQuickjsByteCode(int32_t contextId, uint8_t *bytes, int32_t byteLen);
+void evaluateQuickjsByteCode(int32_t contextId, uint8_t* bytes, int32_t byteLen);
 KRAKEN_EXPORT_C
-void parseHTML(int32_t contextId, const char *code, int32_t length);
+void parseHTML(int32_t contextId, const char* code, int32_t length);
 KRAKEN_EXPORT_C
 void reloadJsContext(int32_t contextId);
 KRAKEN_EXPORT_C
-void invokeModuleEvent(int32_t contextId, NativeString *module, const char *eventType, void *event,
-                       NativeString *extra);
+void invokeModuleEvent(int32_t contextId, NativeString* module, const char* eventType, void* event, NativeString* extra);
 KRAKEN_EXPORT_C
-void registerDartMethods(uint64_t *methodBytes, int32_t length);
+void registerDartMethods(uint64_t* methodBytes, int32_t length);
 KRAKEN_EXPORT_C
-NativeScreen *createScreen(double width, double height);
+NativeScreen* createScreen(double width, double height);
 KRAKEN_EXPORT_C
-KrakenInfo *getKrakenInfo();
+KrakenInfo* getKrakenInfo();
 KRAKEN_EXPORT_C
-void dispatchUITask(int32_t contextId, void *context, void *callback);
+void dispatchUITask(int32_t contextId, void* context, void* callback);
 KRAKEN_EXPORT_C
 void flushUITask(int32_t contextId);
 KRAKEN_EXPORT_C
-void registerUITask(int32_t contextId, Task task, void *data);
+void registerUITask(int32_t contextId, Task task, void* data);
 KRAKEN_EXPORT_C
 void flushUICommandCallback();
 KRAKEN_EXPORT_C
-UICommandItem *getUICommandItems(int32_t contextId);
+UICommandItem* getUICommandItems(int32_t contextId);
 KRAKEN_EXPORT_C
 int64_t getUICommandItemSize(int32_t contextId);
 KRAKEN_EXPORT_C
 void clearUICommandItems(int32_t contextId);
 KRAKEN_EXPORT_C
-void registerContextDisposedCallbacks(int32_t contextId, Task task, void *data);
+void registerContextDisposedCallbacks(int32_t contextId, Task task, void* data);
 KRAKEN_EXPORT_C
-void registerPluginByteCode(uint8_t *bytes, int32_t length, const char *pluginName);
+void registerPluginByteCode(uint8_t* bytes, int32_t length, const char* pluginName);
+KRAKEN_EXPORT_C
+int32_t profileModeEnabled();
 
 KRAKEN_EXPORT
 void setConsoleMessageHandler(ConsoleMessageHandler handler);
 
-#endif // KRAKEN_BRIDGE_EXPORT_H
+#endif  // KRAKEN_BRIDGE_EXPORT_H

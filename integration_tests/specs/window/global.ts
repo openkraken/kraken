@@ -1,4 +1,4 @@
-describe('windowisglobal', () => {
+describe('window', () => {
   it('window equal to globalThis', () => {
     expect(window).toBe(globalThis as any);
   });
@@ -7,6 +7,7 @@ describe('windowisglobal', () => {
     // @ts-ignore
     expect(typeof window.kraken).toBe('object');
   });
+
   it('equal to this', () => {
     function f() {
       // @ts-ignore
@@ -39,5 +40,18 @@ describe('windowisglobal', () => {
 
   it('window.self should be self', () => {
     expect(window.self).toBe(window);
+  });
+
+  it('window should work with addEventListener', async (done) => {
+    const div = document.createElement('div');
+    div.style.width = '100px';
+    div.style.height = '100px';
+    document.body.appendChild(div);
+
+    window.addEventListener('click', () => {
+      done();
+    });
+
+    await simulateClick(10, 10);
   });
 });

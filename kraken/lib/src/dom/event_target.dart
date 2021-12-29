@@ -2,7 +2,6 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
 import 'dart:collection';
 import 'dart:ffi';
 
@@ -10,6 +9,7 @@ import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/module.dart';
 import 'package:meta/meta.dart';
 
 typedef EventHandler = void Function(Event event);
@@ -61,7 +61,7 @@ void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> re
 
     toNativeValue(returnedValue, null);
   } else {
-    EventTarget eventTarget = EventTarget.getEventTargetOfNativePtr(nativeEventTarget.cast<NativeEventTarget>());
+    EventTarget eventTarget = EventTarget.getEventTargetByPointer(nativeEventTarget.cast<NativeEventTarget>());
     try {
       if (method.startsWith(GetPropertyCallPreFix) && values.isEmpty) {
         String key = method.substring(GetPropertyCallPreFix.length);
@@ -84,32 +84,39 @@ String jsMethodToKey(String method) {
 
 Pointer<NativeFunction<NativeCallNativeMethods>> _nativeCallNativeMethods = Pointer.fromFunction(_callNativeMethods);
 
+class EventTargetContext {
+  final int contextId;
+  final Pointer<NativeEventTarget> pointer;
+  const EventTargetContext(this.contextId, this.pointer);
+}
+
 abstract class EventTarget {
   static final SplayTreeMap<int, EventTarget> _nativeMap = SplayTreeMap();
-  static EventTarget getEventTargetOfNativePtr(Pointer<NativeEventTarget> nativePtr) {
-    EventTarget? target = _nativeMap[nativePtr.address];
-    if (target == null) throw FlutterError('Can not get eventTarget of nativePtr: $nativePtr');
+  static EventTarget getEventTargetByPointer(Pointer<NativeEventTarget> pointer) {
+    EventTarget? target = _nativeMap[pointer.address];
+    if (target == null) throw FlutterError('Can not get eventTarget by pointer: $pointer');
     return target;
   }
 
-  // A unique target identifier.
-  final int targetId;
+  // JS side context id.
+  int? contextId;
+  // JS side EventTarget object pointer.
+  Pointer<NativeEventTarget>? pointer;
 
-  // The Add
-  final Pointer<NativeEventTarget> nativeEventTargetPtr;
-
-  // the self reference the ElementManager
-  ElementManager elementManager;
+  bool _disposed = false;
+  bool get disposed => _disposed;
 
   @protected
   Map<String, List<EventHandler>> eventHandlers = {};
 
-  EventTarget(this.targetId, this.nativeEventTargetPtr, this.elementManager) {
-    nativeEventTargetPtr.ref.callNativeMethods = _nativeCallNativeMethods;
-    _nativeMap[nativeEventTargetPtr.address] = this;
+  EventTarget(EventTargetContext? context) {
+    if (context != null) {
+      contextId = context.contextId;
+      pointer = context.pointer;
+      pointer!.ref.callNativeMethods = _nativeCallNativeMethods;
+      _nativeMap[pointer!.address] = this;
+    }
   }
-
-  void addEvent(String eventType) {}
 
   void addEventListener(String eventType, EventHandler eventHandler) {
     List<EventHandler>? existHandler = eventHandlers[eventType];
@@ -127,9 +134,12 @@ abstract class EventTarget {
     currentHandlers.remove(eventHandler);
   }
 
+  @mustCallSuper
   void dispatchEvent(Event event) {
-    if (!elementManager.controller.view.disposed) {
-      event.currentTarget = event.target = this;
+    if (disposed) return;
+    event.target = this;
+    if (contextId != null && pointer != null) {
+      emitUIEvent(contextId!, pointer!, event);
     }
   }
 
@@ -137,12 +147,24 @@ abstract class EventTarget {
     return eventHandlers;
   }
 
-  dynamic handleJSCall(String method, List<dynamic> argv);
+  @mustCallSuper
+  dynamic handleJSCall(String method, List<dynamic> argv) {}
 
   @mustCallSuper
   void dispose() {
-    elementManager.removeTarget(this);
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_START, uniqueId: hashCode);
+    }
+
+    _disposed = true;
     eventHandlers.clear();
-    _nativeMap.remove(nativeEventTargetPtr.address);
+
+    if (pointer != null) {
+      _nativeMap.remove(pointer!.address);
+    }
+
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_END, uniqueId: hashCode);
+    }
   }
 }

@@ -15,13 +15,13 @@ describe('overflow-change', () => {
     );
     append(BODY, cont);
 
+    await snapshot();
+
     setTimeout(async() => {
       cont.style.overflow = 'hidden';
-      await snapshot(0.1);
+      await snapshot();
       done();
     }, 100);
-
-    await snapshot();
   });
 
   it('should work with overflow change from hidden to visible', async (done) => {
@@ -40,13 +40,13 @@ describe('overflow-change', () => {
     );
     append(BODY, cont);
 
+    await snapshot();
+
     setTimeout(async() => {
       cont.style.overflow = 'visible';
-      await snapshot(0.1);
+      await snapshot();
       done();
     }, 100);
-
-    await snapshot();
   });
 
   it('change from scroll to visible and no transform exists', async (done) => {
@@ -72,7 +72,7 @@ describe('overflow-change', () => {
 
     requestAnimationFrame(async() => {
       cont.style.overflow = 'visible';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });
@@ -101,7 +101,7 @@ describe('overflow-change', () => {
 
     requestAnimationFrame(async() => {
       cont.style.overflow = 'visible';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });
@@ -129,7 +129,7 @@ describe('overflow-change', () => {
 
     requestAnimationFrame(async() => {
       cont.style.overflow = 'scroll';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });
@@ -146,13 +146,12 @@ describe('overflow-change', () => {
         fontSize: '18px',
       }
     }, [
-      (inner2 = createElement('div', {
+      (createElement('div', {
         style: {
           "position": "relative"
         }
       }, [
         createText(`00000 11111 22222 33333 444444 55555 66666 77777 88888 99999`)
-
       ]))
     ]);
     BODY.appendChild(inner3);
@@ -164,7 +163,7 @@ describe('overflow-change', () => {
       inner3.style.position = 'relative';
       inner3.style.overflowY = 'visible';
       inner3.style.overflowY = 'scroll';
-      await snapshot(0.1);
+      await snapshot();
       done();
     });
   });

@@ -7,115 +7,87 @@ import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
 
-mixin CSSPaddingMixin on RenderStyleBase {
-  EdgeInsets? _resolvedPadding;
-
-  void _resolve() {
-    if (_resolvedPadding != null) return;
-    if (padding == null) return;
-    _resolvedPadding = padding!.resolve(TextDirection.ltr);
-    assert(_resolvedPadding!.isNonNegative);
-  }
-
-  void _markNeedResolution() {
-    _resolvedPadding = null;
-  }
-
+mixin CSSPaddingMixin on RenderStyle {
   /// The amount to pad the child in each dimension.
   ///
   /// If this is set to an [EdgeInsetsDirectional] object, then [textDirection]
   /// must not be null.
-  EdgeInsetsGeometry? get padding => _padding;
-  EdgeInsetsGeometry? _padding;
-  set padding(EdgeInsetsGeometry? value) {
-    if (value == null) return;
-    assert(value.isNonNegative);
-    if (_padding == value) return;
-    _padding = value;
-    _markNeedResolution();
-  }
-
-  double get paddingTop {
-    _resolve();
-    if (_resolvedPadding == null) return 0;
-    return _resolvedPadding!.top;
-  }
-
-  double get paddingRight {
-    _resolve();
-    if (_resolvedPadding == null) return 0;
-    return _resolvedPadding!.right;
-  }
-
-  double get paddingBottom {
-    _resolve();
-    if (_resolvedPadding == null) return 0;
-    return _resolvedPadding!.bottom;
-  }
-
-  double get paddingLeft {
-    _resolve();
-    if (_resolvedPadding == null) return 0;
-    return _resolvedPadding!.left;
-  }
-
-  void updatePadding(String property, double value, {bool shouldMarkNeedsLayout = true}) {
-    RenderStyle renderStyle = this as RenderStyle;
-    EdgeInsets prevPadding = renderStyle.padding as EdgeInsets? ?? EdgeInsets.only(
-      top: 0.0,
-      right: 0.0,
-      bottom: 0.0,
-      left: 0.0
+  @override
+  EdgeInsets get padding {
+    EdgeInsets insets = EdgeInsets.only(
+      left: paddingLeft.computedValue,
+      right: paddingRight.computedValue,
+      bottom: paddingBottom.computedValue,
+      top: paddingTop.computedValue
     );
+    assert(insets.isNonNegative);
+    return insets;
+  }
 
-    double left = prevPadding.left;
-    double top = prevPadding.top;
-    double right = prevPadding.right;
-    double bottom = prevPadding.bottom;
+  CSSLengthValue? _paddingLeft;
+  set paddingLeft(CSSLengthValue? value) {
+    if (_paddingLeft == value) return;
+    _paddingLeft = value;
+    _markSelfAndParentNeedsLayout();
+  }
 
-    // Can not use [EdgeInsets.copyWith], for zero cannot be replaced to value.
-    switch (property) {
-      case PADDING_LEFT:
-        left = value;
-        break;
-      case PADDING_TOP:
-        top = value;
-        break;
-      case PADDING_BOTTOM:
-        bottom = value;
-        break;
-      case PADDING_RIGHT:
-        right = value;
-        break;
-    }
+  @override
+  CSSLengthValue get paddingLeft => _paddingLeft ?? CSSLengthValue.zero;
 
-    renderStyle.padding = EdgeInsets.only(
-      left: left,
-      right: right,
-      bottom: bottom,
-      top: top
-    );
+  CSSLengthValue? _paddingRight;
+    set paddingRight(CSSLengthValue? value) {
+    if (_paddingRight == value) return;
+    _paddingRight = value;
+    _markSelfAndParentNeedsLayout();
+  }
 
-    if (shouldMarkNeedsLayout) {
-      renderBoxModel!.markNeedsLayout();
+  @override
+  CSSLengthValue get paddingRight => _paddingRight ?? CSSLengthValue.zero;
+
+  CSSLengthValue? _paddingBottom;
+  set paddingBottom(CSSLengthValue? value) {
+    if (_paddingBottom == value) return;
+    _paddingBottom = value;
+    _markSelfAndParentNeedsLayout();
+  }
+
+  @override
+  CSSLengthValue get paddingBottom => _paddingBottom ?? CSSLengthValue.zero;
+
+  CSSLengthValue? _paddingTop;
+  set paddingTop(CSSLengthValue? value) {
+    if (_paddingTop == value) return;
+    _paddingTop = value;
+    _markSelfAndParentNeedsLayout();
+  }
+
+  @override
+  CSSLengthValue get paddingTop => _paddingTop ?? CSSLengthValue.zero;
+
+  void _markSelfAndParentNeedsLayout() {
+    RenderBoxModel boxModel = renderBoxModel!;
+    boxModel.markNeedsLayout();
+    // Sizing may affect parent size, mark parent as needsLayout in case
+    // renderBoxModel has tight constraints which will prevent parent from marking.
+    if (boxModel.parent is RenderBoxModel) {
+      (boxModel.parent as RenderBoxModel).markNeedsLayout();
     }
   }
 
   BoxConstraints deflatePaddingConstraints(BoxConstraints constraints) {
-    if (padding != null) {
-      return constraints.deflate(padding as EdgeInsets);
-    }
-    return constraints;
+    return constraints.deflate(padding);
   }
 
   Size wrapPaddingSize(Size innerSize) {
-    _resolve();
-    return Size(_resolvedPadding!.left + innerSize.width + _resolvedPadding!.right,
-      _resolvedPadding!.top + innerSize.height + _resolvedPadding!.bottom);
+    return Size(
+      paddingLeft.computedValue + innerSize.width + paddingRight.computedValue,
+      paddingTop.computedValue + innerSize.height + paddingBottom.computedValue
+    );
   }
 
   void debugPaddingProperties(DiagnosticPropertiesBuilder properties) {
-    if (_padding != null) properties.add(DiagnosticsProperty('padding', _padding));
+    properties.add(DiagnosticsProperty('padding', padding));
   }
 }

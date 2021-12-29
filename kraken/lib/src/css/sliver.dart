@@ -5,34 +5,16 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/gesture.dart';
-import 'package:kraken/rendering.dart';
 
-mixin CSSSliverMixin on RenderStyleBase {
+mixin CSSSliverMixin on RenderStyle {
 
-  Axis _sliverAxis = Axis.vertical;
-  Axis get sliverAxis => _sliverAxis;
-  set sliverAxis(Axis value) {
-    if (_sliverAxis != value) {
-      _sliverAxis = value;
-
-      if (renderBoxModel is RenderRecyclerLayout) {
-        RenderRecyclerLayout recyclerLayout = renderBoxModel as RenderRecyclerLayout;
-        AxisDirection axisDirection = RenderRecyclerLayout.getAxisDirection(value);
-
-        recyclerLayout.scrollable = KrakenScrollable(axisDirection: axisDirection);
-        recyclerLayout.viewport
-          ..axisDirection = axisDirection
-          ..crossAxisDirection = RenderRecyclerLayout.getCrossAxisDirection(value)
-          ..offset = recyclerLayout.scrollable.position!;
-
-        recyclerLayout.markNeedsLayout();
-      }
-    }
-  }
-
-  void updateSliver(String value) {
-    sliverAxis = resolveAxis(value);
+  @override
+  Axis get sliverDirection => _sliverDirection;
+  Axis _sliverDirection = Axis.vertical;
+  set sliverDirection(Axis value) {
+    if (_sliverDirection == value) return;
+    _sliverDirection = value;
+    renderBoxModel?.markNeedsLayout();
   }
 
   static Axis resolveAxis(String sliverDirection) {

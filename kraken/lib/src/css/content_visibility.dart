@@ -4,7 +4,6 @@
  */
 
 import 'package:kraken/css.dart';
-import 'package:kraken/rendering.dart';
 
 // CSS Content Visibility: https://www.w3.org/TR/css-contain-2/#content-visibility
 
@@ -14,7 +13,7 @@ enum ContentVisibility {
   visible
 }
 
-mixin CSSContentVisibilityMixin on RenderStyleBase {
+mixin CSSContentVisibilityMixin on RenderStyle {
 
   /// Whether the child is hidden from the rest of the tree.
   ///
@@ -26,28 +25,17 @@ mixin CSSContentVisibilityMixin on RenderStyleBase {
   ///
   /// If ContentVisibility.auto, the framework will compute the intersection bounds and not to paint when child renderObject
   /// are no longer intersection with this renderObject.
-  ContentVisibility? _contentVisibility;
+  @override
   ContentVisibility? get contentVisibility => _contentVisibility;
+  ContentVisibility? _contentVisibility;
   set contentVisibility(ContentVisibility? value) {
     if (value == null) return;
     if (value == _contentVisibility) return;
     _contentVisibility = value;
-    renderBoxModel!.markNeedsPaint();
+    renderBoxModel?.markNeedsPaint();
   }
 
-  bool _hasIntersectionObserver = false;
-
-  void setContentVisibilityIntersectionObserver(
-    RenderBoxModel? renderBoxModel, ContentVisibility? contentVisibility) {
-    if (contentVisibility == ContentVisibility.auto && !_hasIntersectionObserver) {
-      renderBoxModel!.addIntersectionChangeListener(_handleIntersectionChange);
-      // Call needs paint make sure intersection observer works immediately
-      renderBoxModel.markNeedsPaint();
-      _hasIntersectionObserver = true;
-    }
-  }
-
-  static ContentVisibility getContentVisibility(String value) {
+  static ContentVisibility resolveContentVisibility(String value) {
     switch(value) {
       case HIDDEN:
         return ContentVisibility.hidden;
@@ -56,24 +44,6 @@ mixin CSSContentVisibilityMixin on RenderStyleBase {
       case VISIBLE:
       default:
         return ContentVisibility.visible;
-    }
-  }
-
-  void _handleIntersectionChange(IntersectionObserverEntry entry) {
-    assert(renderBoxModel != null);
-    contentVisibility = entry.isIntersecting
-        ? ContentVisibility.auto
-        : ContentVisibility.hidden;
-  }
-
-  void updateRenderContentVisibility(String value) {
-    if (renderBoxModel != null) {
-      contentVisibility = CSSContentVisibilityMixin.getContentVisibility(value);
-      if (contentVisibility != ContentVisibility.auto && _hasIntersectionObserver) {
-        renderBoxModel!.removeIntersectionChangeListener(_handleIntersectionChange);
-        _hasIntersectionObserver = false;
-      }
-      setContentVisibilityIntersectionObserver(renderBoxModel, contentVisibility);
     }
   }
 }

@@ -32,8 +32,10 @@ function setAttributes(dom: any, object: any) {
   }
 }
 
+// Avoid overwrited by jasmine.
+const originalTimeout = global.setTimeout;
 function sleep(second: number) {
-  return new Promise(done => setTimeout(done, second * 1000));
+  return new Promise(done => originalTimeout(done, second * 1000));
 }
 
 type ElementProps = {
@@ -190,7 +192,7 @@ async function simulatePointDown(x: number, y: number, pointer: number = 0) {
 }
 
 // Simulate an point up action.
-async function simulatePoinrUp(x: number, y: number, pointer: number = 0) {
+async function simulatePointUp(x: number, y: number, pointer: number = 0) {
   await simulatePointer([
     [x, y, PointerChange.up],
   ], pointer);
@@ -226,5 +228,5 @@ Object.assign(global, {
   sleep,
   snapshot,
   simulatePointDown,
-  simulatePoinrUp,
+  simulatePointUp,
 });

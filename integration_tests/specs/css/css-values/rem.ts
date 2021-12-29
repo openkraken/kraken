@@ -47,6 +47,8 @@ describe("rem", () => {
   }); 
 
   it("should works with style other than font-size of html", async () => {
+    document.documentElement.style.fontSize = '2rem';
+
     let div;
     let div2;
     let div3;

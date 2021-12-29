@@ -129,4 +129,87 @@ describe('Insert before', () => {
     await snapshot();
   });
 
+  it('insert before position fixed element', async () => {
+    let child1 = createElement('div', {
+      style: {
+        position: 'fixed',
+        top: '100px',
+        width: '100px',
+        height: '100px',
+        background: 'red'
+      }
+    });
+    let child2;
+    const container = createElement('div', {
+      style: {
+        width: '200px',
+        height: '200px',
+        background: 'yellow'
+      }
+    }, [
+      (child2 = createElement('div', {
+        style: {
+          position: 'fixed',
+          width: '100px',
+          height: '100px',
+          background: 'green'
+        }
+      }))
+    ]);
+
+    document.body.appendChild(container);
+
+    container.insertBefore(child1, child2);
+
+    await snapshot();
+  });
+
+  it('insert before position absolute element', async () => {
+    let child1 = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        background: 'red'
+      }
+    });
+    let child2;
+    const container = createElement('div', {
+      style: {
+        width: '200px',
+        height: '200px',
+        background: 'yellow'
+      }
+    }, [
+      (child2 = createElement('div', {
+        style: {
+          position: 'absolute',
+          width: '100px',
+          height: '100px',
+          background: 'green'
+        }
+      }))
+    ]);
+
+    document.body.appendChild(container);
+
+    container.insertBefore(child1, child2);
+
+    await snapshot();
+  });
+
+  it('insert before referenceNode is comment', async () => {
+    var container = document.createElement('div');
+    document.body.appendChild(container);
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+
+    var ref;
+    container.appendChild(document.createTextNode('text1'));
+    container.appendChild(ref = document.createComment('comment1'));
+    container.appendChild(document.createTextNode('text2'));
+
+    container.insertBefore(document.createTextNode('This line should between text1 and text2'), ref);
+
+    await snapshot();
+  });
 });
