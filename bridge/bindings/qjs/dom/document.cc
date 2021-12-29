@@ -534,7 +534,6 @@ void DocumentInstance::removeElementById(JSAtom id, ElementInstance* element) {
   if (m_elementMapById.count(id) > 0) {
     auto& list = m_elementMapById[id];
     JS_FreeValue(m_ctx, element->jsObject);
-    list_del(&element->documentLink.link);
     list.erase(std::find(list.begin(), list.end(), element));
   }
 }
@@ -548,7 +547,6 @@ void DocumentInstance::addElementById(JSAtom id, ElementInstance* element) {
 
   if (it == list.end()) {
     JS_DupValue(m_ctx, element->jsObject);
-    list_add_tail(&element->documentLink.link, &m_context->document_job_list);
     m_elementMapById[id].emplace_back(element);
   }
 }
@@ -578,7 +576,14 @@ void DocumentInstance::cancelAnimationFrame(uint32_t callbackId) {
 
 void DocumentInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
   NodeInstance::trace(rt, val, mark_func);
+  // Trace scriptAnimationController
   JS_MarkValue(rt, m_scriptAnimationController->toQuickJS(), mark_func);
+  // Trace elementByIdMaps
+  for (auto& entry : m_elementMapById) {
+    for (auto& value : entry.second) {
+      JS_MarkValue(rt, value->jsObject, mark_func);
+    }
+  }
 }
 
 }  // namespace kraken::binding::qjs

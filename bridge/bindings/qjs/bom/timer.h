@@ -26,6 +26,7 @@ class DOMTimer : public GarbageCollected<DOMTimer> {
   [[nodiscard]] FORCE_INLINE const char* getHumanReadableName() const override { return "DOMTimer"; }
 
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
+  void dispose() const override;
 
  private:
   int32_t m_timerId{-1};

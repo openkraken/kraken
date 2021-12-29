@@ -191,4 +191,65 @@ describe('flexbox-position-absolute', () => {
 
     await snapshot();
   });
+
+  it('should works with image of position absolute and self no height', async () => {
+    const div = createElement('div', {
+       style: {
+           display: 'flex',
+           backgroundColor: 'yellow',
+           position: 'relative',
+           overflow: 'hidden',
+       }
+    }, [
+        createElement('img', {
+            src: 'assets/100x100-green.png',
+            style: {
+                position: 'absolute',
+                height: '200px'
+             }
+        }),
+        createElement('div', {
+            style: {
+                display: 'flex',
+                width: '50px',
+                padding: '20px 0',
+                position: 'relative'
+            }
+        })
+    ]);
+    document.body.appendChild(div);
+
+    await snapshot(0.1);
+  });
+
+  it('should works with child of position absolute and self no height', async () => {
+    const div = createElement('div', {
+       style: {
+           display: 'flex',
+           alignItems: 'center',
+           backgroundColor: 'yellow',
+           position: 'relative',
+           overflow: 'hidden',
+       }
+    }, [
+        createElement('div', {
+            style: {
+                position: 'absolute',
+                width: '200px',
+                height: '200px',
+                backgroundColor: 'green'
+             }
+        }),
+        createElement('div', {
+            style: {
+                width: '200px',
+                padding: '150px 0',
+                position: 'relative'
+            }
+        })
+    ]);
+    document.body.appendChild(div);
+
+    await snapshot();
+  });
 });

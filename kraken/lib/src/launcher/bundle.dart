@@ -81,9 +81,6 @@ abstract class KrakenBundle {
   Future<void> resolve(int? contextId) async {
     uri = Uri.parse(src);
     if (contextId != null) {
-      if (kDebugMode) {
-        print('Getting bundle for contextId: $contextId, src: $src');
-      }
       KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
       if (controller != null && !isAssetAbsolutePath(src)) {
         uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri!);

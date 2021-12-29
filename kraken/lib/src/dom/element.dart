@@ -689,23 +689,33 @@ class Element extends Node
     }
 
     if (isRendererAttached) {
+      // If afterRenderObject is null, which means insert child at the head of parent.
+      RenderBox? afterRenderObject;
+
       // Only append child renderer when which is not attached.
       if (!child.isRendererAttached) {
-        RenderBox? afterRenderObject;
-        // `referenceNode` should not be null, or `referenceIndex` can only be -1.
-        if (referenceIndex != -1 && referenceNode.isRendererAttached) {
-          RenderBox renderer = referenceNode.renderer!;
-          // Renderer of referenceNode may not moved to a difference place compared to its original place
-          // in the dom tree due to position absolute/fixed.
-          // Use the renderPositionPlaceholder to get the same place as dom tree in this case.
-          if (renderer is RenderBoxModel) {
-            RenderBox? renderPositionPlaceholder = renderer.renderPositionPlaceholder;
-            if (renderPositionPlaceholder != null) {
-              renderer = renderPositionPlaceholder;
+        if (referenceIndex < childNodes.length) {
+          while (referenceIndex >= 0) {
+            Node reference = childNodes[referenceIndex];
+            if (reference.isRendererAttached) {
+              afterRenderObject = reference.renderer;
+              break;
+            } else {
+              referenceIndex--;
             }
           }
-          afterRenderObject = (renderer.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
         }
+
+        // Renderer of referenceNode may not moved to a difference place compared to its original place
+        // in the dom tree due to position absolute/fixed.
+        // Use the renderPositionPlaceholder to get the same place as dom tree in this case.
+        if (afterRenderObject is RenderBoxModel) {
+          RenderBox? renderPositionPlaceholder = afterRenderObject.renderPositionPlaceholder;
+          if (renderPositionPlaceholder != null) {
+            afterRenderObject = renderPositionPlaceholder;
+          }
+        }
+
         child.attachTo(this, after: afterRenderObject);
       }
     }

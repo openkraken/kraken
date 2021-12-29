@@ -23,6 +23,7 @@ class FrameCallback : public GarbageCollected<FrameCallback> {
   [[nodiscard]] FORCE_INLINE const char* getHumanReadableName() const override { return "FrameCallback"; }
 
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
+  void dispose() const override;
 
  private:
   JSValue m_callback{JS_NULL};

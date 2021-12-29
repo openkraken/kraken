@@ -48,7 +48,13 @@ class GarbageCollected {
    * This Trace method must be override by objects inheriting from
    * GarbageCollected.
    */
-  virtual void trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) const {};
+  virtual void trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) const = 0;
+
+  /**
+   * Called before underline JavaScript object been collected by GC.
+   * Note: JS_FreeValue and JS_FreeAtom is not available, use JS_FreeValueRT and JS_FreeAtomRT instead.
+   */
+  virtual void dispose() const = 0;
 
   /**
    * Specifies a name for the garbage-collected object. Such names will never
@@ -68,6 +74,7 @@ class GarbageCollected {
  protected:
   JSValue jsObject{JS_NULL};
   JSContext* m_ctx{nullptr};
+  JSRuntime* m_runtime{nullptr};
   GarbageCollected(){};
   friend class MakeGarbageCollectedTrait<T>;
 };
@@ -110,6 +117,7 @@ T* GarbageCollected<T>::initialize(JSContext* ctx, JSClassID* classId) {
     /// The deconstruct method of this class will be called and all memory about this class will be freed when finalize completed.
     def.finalizer = [](JSRuntime* rt, JSValue val) {
       auto* object = static_cast<T*>(JS_GetOpaque(val, JSValueGetClassId(val)));
+      object->dispose();
       free(object);
     };
 
@@ -123,6 +131,7 @@ T* GarbageCollected<T>::initialize(JSContext* ctx, JSClassID* classId) {
   JS_SetOpaque(jsObject, this);
 
   m_ctx = ctx;
+  m_runtime = JS_GetRuntime(m_ctx);
 
   return static_cast<T*>(this);
 }

@@ -58,6 +58,7 @@ class ExecutionContextGCTracker : public GarbageCollected<ExecutionContextGCTrac
   static JSClassID contextGcTrackerClassId;
 
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
+  void dispose() const override;
 
  private:
 };
@@ -101,7 +102,6 @@ class ExecutionContext {
 
   int32_t uniqueId;
   struct list_head node_job_list;
-  struct list_head document_job_list;
   struct list_head module_job_list;
   struct list_head module_callback_job_list;
   struct list_head promise_job_list;

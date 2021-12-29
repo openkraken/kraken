@@ -156,14 +156,14 @@ describe('Insert before', () => {
         }
       }))
     ]);
-    
+
     document.body.appendChild(container);
 
     container.insertBefore(child1, child2);
 
     await snapshot();
   });
-  
+
   it('insert before position absolute element', async () => {
     let child1 = createElement('div', {
       style: {
@@ -189,10 +189,26 @@ describe('Insert before', () => {
         }
       }))
     ]);
-    
+
     document.body.appendChild(container);
 
     container.insertBefore(child1, child2);
+
+    await snapshot();
+  });
+
+  it('insert before referenceNode is comment', async () => {
+    var container = document.createElement('div');
+    document.body.appendChild(container);
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+
+    var ref;
+    container.appendChild(document.createTextNode('text1'));
+    container.appendChild(ref = document.createComment('comment1'));
+    container.appendChild(document.createTextNode('text2'));
+
+    container.insertBefore(document.createTextNode('This line should between text1 and text2'), ref);
 
     await snapshot();
   });
