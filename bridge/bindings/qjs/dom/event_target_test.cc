@@ -184,3 +184,9 @@ TEST(EventTarget, wontLeakWithStringProperty) {
       "img.any = '1234'";
   bridge->evaluateScript(code.c_str(), code.size(), "internal://", 0);
 }
+
+TEST(EventTarget, globalBindListener) {
+  auto bridge = TEST_init();
+  std::string code = "addEventListener('click', () => {console.log('clicked'); })";
+  bridge->evaluateScript(code.c_str(), code.size(), "internal://", 0);
+}
