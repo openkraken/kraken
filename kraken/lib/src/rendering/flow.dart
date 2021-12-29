@@ -980,7 +980,10 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
 
     // child is WidgetElement.
-    return child.size;
+    if (hasSize) {
+      return child.size;
+    }
+    return null;
   }
 
   bool _isLineHeightValid(RenderBox child) {
