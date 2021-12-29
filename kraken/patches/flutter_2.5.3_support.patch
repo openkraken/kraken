@@ -1,0 +1,71 @@
+diff --git a/lib/src/gesture/monodrag.dart b/lib/src/gesture/monodrag.dart
+index 55cf3514f..b98788a87 100644
+--- a/lib/src/gesture/monodrag.dart
++++ b/lib/src/gesture/monodrag.dart
+@@ -45,10 +45,10 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
+   /// {@macro flutter.gestures.gestureRecognizer.kind}
+   CompetitiveDragGestureRecognizer({
+     Object? debugOwner,
+-    PointerDeviceKind? kind,
++    Set<PointerDeviceKind>? supportedDevices,
+     this.dragStartBehavior = DragStartBehavior.start,
+     this.velocityTrackerBuilder = _defaultBuilder,
+-  }) : super(debugOwner: debugOwner, kind: kind);
++  }) : super(debugOwner: debugOwner, supportedDevices: supportedDevices);
+ 
+   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
+   /// Configure the behavior of offsets sent to [onStart].
+@@ -479,8 +479,8 @@ class ScrollVerticalDragGestureRecognizer extends CompetitiveDragGestureRecogniz
+   /// {@macro flutter.gestures.gestureRecognizer.kind}
+   ScrollVerticalDragGestureRecognizer({
+     Object? debugOwner,
+-    PointerDeviceKind? kind,
+-  }) : super(debugOwner: debugOwner, kind: kind);
++    Set<PointerDeviceKind>? supportedDevices,
++  }) : super(debugOwner: debugOwner, supportedDevices: supportedDevices);
+ 
+   late IsAcceptedDragCallback isAcceptedDrag;
+ 
+@@ -522,8 +522,8 @@ class ScrollHorizontalDragGestureRecognizer extends CompetitiveDragGestureRecogn
+   /// {@macro flutter.gestures.gestureRecognizer.kind}
+   ScrollHorizontalDragGestureRecognizer({
+     Object? debugOwner,
+-    PointerDeviceKind? kind,
+-  }) : super(debugOwner: debugOwner, kind: kind);
++    Set<PointerDeviceKind>? supportedDevices,
++  }) : super(debugOwner: debugOwner, supportedDevices: supportedDevices);
+ 
+   late IsAcceptedDragCallback isAcceptedDrag;
+ 
+diff --git a/lib/src/gesture/swipe.dart b/lib/src/gesture/swipe.dart
+index bd1a4d05a..c7cedbc5e 100644
+--- a/lib/src/gesture/swipe.dart
++++ b/lib/src/gesture/swipe.dart
+@@ -39,11 +39,11 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
+   /// {@macro flutter.gestures.gestureRecognizer.kind}
+   SwipeGestureRecognizer({
+     Object? debugOwner,
+-    PointerDeviceKind? kind,
++    Set<PointerDeviceKind>? supportedDevices,
+     this.dragStartBehavior = DragStartBehavior.start,
+     this.velocityTrackerBuilder = _defaultBuilder,
+     this.onSwipe,
+-  }) : super(debugOwner: debugOwner, kind: kind);
++  }) : super(debugOwner: debugOwner, supportedDevices: supportedDevices);
+ 
+   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
+   /// Configure the behavior of offsets sent to [onStart].
+diff --git a/lib/src/rendering/box_model.dart b/lib/src/rendering/box_model.dart
+index e3553d910..22232aeae 100644
+--- a/lib/src/rendering/box_model.dart
++++ b/lib/src/rendering/box_model.dart
+@@ -1523,7 +1523,9 @@ class RenderBoxModel extends RenderBox
+   }
+ 
+   /// Called when its corresponding element disposed
++  @override
+   void dispose() {
++    super.dispose();
+     // Clear renderObjects in list when disposed to avoid memory leak
+     if (fixedChildren.isNotEmpty) {
+       fixedChildren.clear();
