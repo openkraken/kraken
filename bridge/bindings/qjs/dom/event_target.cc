@@ -78,7 +78,11 @@ JSValue EventTarget::addEventListener(JSContext* ctx, JSValue this_val, int argc
     foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetInstance->m_eventTargetId, UICommand::addEvent, args_01, nullptr);
   }
 
-  eventTargetInstance->m_eventListenerMap.add(eventType, JS_DupValue(ctx, callback));
+  bool success = eventTargetInstance->m_eventListenerMap.add(eventType, JS_DupValue(ctx, callback));
+  // Callback didn't saved to eventListenerMap.
+  if (!success) {
+    JS_FreeValue(ctx, callback);
+  }
   JS_FreeAtom(ctx, eventType);
 
   return JS_UNDEFINED;
