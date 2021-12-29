@@ -541,37 +541,36 @@ class Element extends Node
 
   void _updateRenderBoxModelWithPosition(CSSPositionType oldPosition) {
     CSSPositionType currentPosition = renderStyle.position;
+
     // No need to detach and reattach renderBoxMode when its position
     // changes between static and relative.
-    if ((oldPosition == CSSPositionType.static && currentPosition == CSSPositionType.relative)
-      || (oldPosition == CSSPositionType.relative && currentPosition == CSSPositionType.static)
+    if (!(oldPosition == CSSPositionType.static && currentPosition == CSSPositionType.relative)
+      && !(oldPosition == CSSPositionType.relative && currentPosition == CSSPositionType.static)
     ) {
-      return;
-    }
+      RenderBoxModel _renderBoxModel = renderBoxModel!;
+      // Remove fixed children before convert to non repaint boundary renderObject
+      if (currentPosition != CSSPositionType.fixed) {
+        _removeFixedChild(_renderBoxModel, ownerDocument.documentElement!._renderLayoutBox!);
+      }
 
-    RenderBoxModel _renderBoxModel = renderBoxModel!;
-    // Remove fixed children before convert to non repaint boundary renderObject
-    if (currentPosition != CSSPositionType.fixed) {
-      _removeFixedChild(_renderBoxModel, ownerDocument.documentElement!._renderLayoutBox!);
-    }
+      // Find the renderBox of its containing block.
+      RenderBox? containingBlockRenderBox = getContainingBlockRenderBox();
+      // Find the previous siblings to insert before renderBoxModel is detached.
+      RenderBox? previousSibling = _renderBoxModel.getPreviousSibling();
+      // Detach renderBoxModel from its original parent.
+      _renderBoxModel.detachFromContainingBlock();
+      // Change renderBoxModel type in cases such as position changes to fixed which
+      // need to create repaintBoundary.
+      _updateRenderBoxModel();
+      // Original parent renderBox.
+      RenderBox parentRenderBox = parentNode!.renderer!;
+      // Attach renderBoxModel to its containing block.
+      renderBoxModel!.attachToContainingBlock(containingBlockRenderBox, parent: parentRenderBox, after: previousSibling);
 
-    // Find the renderBox of its containing block.
-    RenderBox? containingBlockRenderBox = getContainingBlockRenderBox();
-    // Find the previous siblings to insert before renderBoxModel is detached.
-    RenderBox? previousSibling = _renderBoxModel.getPreviousSibling();
-    // Detach renderBoxModel from its original parent.
-    _renderBoxModel.detachFromContainingBlock();
-    // Change renderBoxModel type in cases such as position changes to fixed which
-    // need to create repaintBoundary.
-    _updateRenderBoxModel();
-    // Original parent renderBox.
-    RenderBox parentRenderBox = parentNode!.renderer!;
-    // Attach renderBoxModel to its containing block.
-    renderBoxModel!.attachToContainingBlock(containingBlockRenderBox, parent: parentRenderBox, after: previousSibling);
-
-    // Add fixed children after convert to repaint boundary renderObject.
-    if (currentPosition == CSSPositionType.fixed) {
-      _addFixedChild(renderBoxModel!, ownerDocument.documentElement!._renderLayoutBox!);
+      // Add fixed children after convert to repaint boundary renderObject.
+      if (currentPosition == CSSPositionType.fixed) {
+        _addFixedChild(renderBoxModel!, ownerDocument.documentElement!._renderLayoutBox!);
+      }
     }
 
     // Need to change the containing block of nested children who is positioned from its upper parent to itself.

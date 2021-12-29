@@ -1267,11 +1267,11 @@ class RenderBoxModel extends RenderBox
 
       // If container block is same as origin parent, the placeholder must after the origin renderBox
       // because placeholder depends the constraints in layout stage.
-      if (containingBlockRenderBox == parent) {
-        after = renderBoxModel;
-      }
+      RenderBox? previousSibling = containingBlockRenderBox == parent ?
+        renderBoxModel : after;
+
       // Add position holder to origin position parent.
-      _attachPositionPlaceholder(parent, renderBoxModel, after: after);
+      _attachPositionPlaceholder(parent, renderBoxModel, after: previousSibling);
     }
   }
 
