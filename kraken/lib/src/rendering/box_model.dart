@@ -1222,11 +1222,10 @@ class RenderBoxModel extends RenderBox
   // Detach renderBoxModel from its containing block.
   // Need to remove position placeholder besides removing itself.
   void detachFromContainingBlock() {
-    RenderBoxModel renderBoxModel = this;
-    detachRenderBox(renderBoxModel);
+    detachRenderBox(this);
 
     // Remove placeholder of positioned element.
-    _detachPositionPlaceholder(renderBoxModel);
+    _detachPositionPlaceholder(this);
   }
 
   // The position and size of an element's box(es) are sometimes calculated relative to a certain rectangle,
@@ -1328,7 +1327,7 @@ class RenderBoxModel extends RenderBox
     // Evict render decoration image cache.
     renderStyle.decoration?.image?.image.evict();
 
-    // Remove reference from childs
+    // Remove reference from children.
     _detachAllChildren();
   }
 
@@ -1506,12 +1505,12 @@ class RenderBoxModel extends RenderBox
   static void detachRenderBox(RenderObject renderBox) {
     if (renderBox.parent == null) return;
 
-    // Remove reference from parent
+    // Remove reference from parent.
     RenderObject? parentRenderObject = renderBox.parent as RenderObject;
     if (parentRenderObject is RenderObjectWithChildMixin) {
-      parentRenderObject.child = null; // Case for single child, eg. RenderViewportBox
+      parentRenderObject.child = null; // Case for single child, eg. RenderViewportBox.
     } else if (parentRenderObject is ContainerRenderObjectMixin) {
-      parentRenderObject.remove(renderBox); // Case for multi children, eg. RenderLayoutBox or RenderSliverList
+      parentRenderObject.remove(renderBox); // Case for multi children, eg. RenderLayoutBox or RenderSliverList.
     }
   }
 }
