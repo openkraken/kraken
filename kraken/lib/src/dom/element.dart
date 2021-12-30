@@ -486,8 +486,18 @@ class Element extends Node
     }
   }
 
-  // Find all the nested positioned absolute children.
-  List<Element> findPositionAbsoluteChildren() {
+  // Find all the nested position absolute elements which need to change the containing block
+  // from other element to this element when element's position is changed from static to relative.
+  // Take following html for example, div of id=4 should reposition from div of id=1 to div of id=2.
+  // <div id="1" style="position: relative">
+  //    <div id="2" style="position: relative"> <!-- changed from "static" to "relative" -->
+  //        <div id="3">
+  //            <div id="4" style="position: absolute">
+  //            </div>
+  //        </div>
+  //    </div>
+  // </div>
+  List<Element> findNestedPositionAbsoluteChildren() {
     List<Element> positionAbsoluteChildren = [];
 
     if (!isRendererAttached) return positionAbsoluteChildren;
@@ -505,7 +515,7 @@ class Element extends Node
         return;
       }
       if (childRenderBoxModel is RenderLayoutBox) {
-        List<Element> mergedChildren = child.findPositionAbsoluteChildren();
+        List<Element> mergedChildren = child.findNestedPositionAbsoluteChildren();
         for (Element child in mergedChildren) {
           positionAbsoluteChildren.add(child);
         }
@@ -515,7 +525,17 @@ class Element extends Node
     return positionAbsoluteChildren;
   }
 
-  // Find all the direct positioned absolute children.
+  // Find all the direct position absolute elements which need to change the containing block
+  // from this element to other element when element's position is changed from relative to static.
+  // Take following html for example, div of id=4 should reposition from div of id=2 to div of id=1.
+  // <div id="1" style="position: relative">
+  //    <div id="2" style="position: static"> <!-- changed from "relative" to "static" -->
+  //        <div id="3">
+  //            <div id="4" style="position: absolute">
+  //            </div>
+  //        </div>
+  //    </div>
+  // </div>
   List<Element> findDirectPositionAbsoluteChildren() {
     List<Element> directPositionAbsoluteChildren = [];
 
@@ -573,32 +593,16 @@ class Element extends Node
       }
     }
 
-    // Need to change the containing block of nested children who is positioned from its upper parent to itself.
-    // Take following html for example, div of id=4 should reposition from div of id=1 to div of id=2.
-    // <div id="1" style="position: relative">
-    //    <div id="2" style="position: relative"> <!-- changed from "static" to "relative" -->
-    //        <div id="3">
-    //            <div id="4" style="position: absolute">
-    //            </div>
-    //        </div>
-    //    </div>
-    // </div>
+    // Need to change the containing block of nested position absolute children from its upper parent
+    // to this element when element's position is changed from static to relative.
     if (oldPosition == CSSPositionType.static) {
-      List<Element> positionAbsoluteChildren = findPositionAbsoluteChildren();
+      List<Element> positionAbsoluteChildren = findNestedPositionAbsoluteChildren();
       positionAbsoluteChildren.forEach((Element child) {
         child.addToContainingBlock();
       });
 
-    // Need to change the containing block of direct children who is positioned from itself to its upper parent.
-    // Take following html for example, div of id=4 should reposition from div of id=2 to div of id=1.
-    // <div id="1" style="position: relative">
-    //    <div id="2" style="position: static"> <!-- changed from "relative" to "static" -->
-    //        <div id="3">
-    //            <div id="4" style="position: absolute">
-    //            </div>
-    //        </div>
-    //    </div>
-    // </div>
+    // Need to change the containing block of direct position absolute children from this element
+    // to its upper parent when element's position is changed from relative to static.
     } else if (currentPosition == CSSPositionType.static) {
       List<Element> directPositionAbsoluteChildren = findDirectPositionAbsoluteChildren();
       directPositionAbsoluteChildren.forEach((Element child) {
@@ -607,6 +611,8 @@ class Element extends Node
     }
   }
 
+  // Add element to its containing block which includes the steps of detach the renderBoxModel
+  // from its original parent and attach to its new containing block.
   void addToContainingBlock() {
     RenderBoxModel _renderBoxModel = renderBoxModel!;
     // Find the renderBox of its containing block.
