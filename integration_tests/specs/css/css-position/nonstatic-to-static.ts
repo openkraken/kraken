@@ -66,4 +66,57 @@ describe('Position non-static', () => {
 
     await snapshot();
   });
+
+  it('children should reposition when parent position changed from relative to static', async (done) => {
+    let div;
+    let item1;
+    let item2;
+    div = createElement(
+      'div',
+      {
+        style: {
+          position: 'relative',
+          width: '200px',
+          height: '100px',
+          display: 'flex',
+          flexDirection: 'row',
+          backgroundColor: 'green',
+        },
+      },
+      [
+        (item1 = createElement('div', {
+          style: {
+            position: 'relative',
+            margin: '30px',
+            width: '100px',
+            height: '50px',
+            backgroundColor: 'yellow',
+          }
+        }, [
+          createElement('div', {
+              style: {} 
+          }, [
+            (item2 = createElement('div', {
+              style: {
+                  position: 'absolute',
+                  top: 0, 
+                  left: 0,
+                  width: '30px',
+                  height: '30px',
+                  backgroundColor: 'red'
+              }
+            })),
+          ])
+        ])),
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    requestAnimationFrame(async () => {
+      item1.style.position = 'static';
+      await snapshot();
+      done();
+    });
+  });
 });
