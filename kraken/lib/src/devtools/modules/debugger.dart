@@ -1,5 +1,9 @@
-import '../module.dart';
-import '../isolate_server.dart';
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
+import 'package:kraken/devtools.dart';
 
 class InspectDebuggerModule extends IsolateInspectorModule {
   InspectDebuggerModule(IsolateInspectorServer server): super(server);

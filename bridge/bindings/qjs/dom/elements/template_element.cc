@@ -35,7 +35,7 @@ TemplateElementInstance::TemplateElementInstance(TemplateElement* element) : Ele
 TemplateElementInstance::~TemplateElementInstance() {}
 
 void TemplateElementInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
-  NodeInstance::trace(rt, val, mark_func);
+  ElementInstance::trace(rt, val, mark_func);
 }
 
 }  // namespace kraken::binding::qjs

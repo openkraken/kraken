@@ -211,7 +211,7 @@ IMPL_PROPERTY_SETTER(Window, onerror)(JSContext* ctx, JSValue this_val, int argc
     JS_FreeValue(ctx, window->onerror);
   }
 
-  window->onerror = onerrorHandler;
+  window->onerror = JS_DupValue(ctx, onerrorHandler);
   JS_FreeValue(ctx, eventString);
   return JS_NULL;
 }
@@ -229,6 +229,8 @@ WindowInstance::WindowInstance(Window* window) : EventTargetInstance(window, Win
 
 void WindowInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
   EventTargetInstance::trace(rt, val, mark_func);
+
+  JS_MarkValue(rt, onerror, mark_func);
 }
 
 DocumentInstance* WindowInstance::document() {

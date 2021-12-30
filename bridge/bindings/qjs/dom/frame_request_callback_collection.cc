@@ -35,6 +35,10 @@ void FrameCallback::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) co
   JS_MarkValue(rt, m_callback, mark_func);
 }
 
+void FrameCallback::dispose() const {
+  JS_FreeValueRT(m_runtime, m_callback);
+}
+
 void FrameRequestCallbackCollection::registerFrameCallback(uint32_t callbackId, FrameCallback* frameCallback) {
   m_frameCallbacks[callbackId] = frameCallback;
 }

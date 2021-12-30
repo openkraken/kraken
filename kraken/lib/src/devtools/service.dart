@@ -5,11 +5,28 @@
 
 import 'dart:isolate';
 import 'dart:ffi';
+import 'dart:typed_data';
 
-import 'inspector/ui_inspector.dart';
-import 'inspector/isolate_server.dart';
+import 'package:ffi/ffi.dart';
 import 'package:kraken/kraken.dart';
-import 'package:kraken/bridge.dart';
+import 'package:kraken/devtools.dart';
+import '../bridge/platform.dart';
+
+typedef NativePostTaskToInspectorThread = Void Function(Int32 contextId, Pointer<Void> context, Pointer<Void> callback);
+typedef DartPostTaskToInspectorThread = void Function(int contextId, Pointer<Void> context, Pointer<Void> callback);
+
+void _postTaskToInspectorThread(int contextId, Pointer<Void> context, Pointer<Void> callback) {
+  ChromeDevToolsService? devTool = ChromeDevToolsService.getDevToolOfContextId(contextId);
+  if (devTool != null) {
+    devTool.isolateServerPort!.send(InspectorPostTaskMessage(context.address, callback.address));
+  }
+}
+
+final Pointer<NativeFunction<NativePostTaskToInspectorThread>> _nativePostTaskToInspectorThread = Pointer.fromFunction(_postTaskToInspectorThread);
+
+final List<int> _dartNativeMethods = [
+  _nativePostTaskToInspectorThread.address
+];
 
 void spawnIsolateInspectorServer(ChromeDevToolsService devTool, KrakenController controller, { int port = INSPECTOR_DEFAULT_PORT, String? address }) {
   ReceivePort serverIsolateReceivePort = ReceivePort();
@@ -40,7 +57,7 @@ class ChromeDevToolsService extends DevToolsService {
   /// More detail see [InspectPageModule.handleReloadPage].
   static ChromeDevToolsService? prevDevTools;
 
-  static Map<int, ChromeDevToolsService> _contextDevToolMap = Map();
+  static final Map<int, ChromeDevToolsService> _contextDevToolMap = {};
   static ChromeDevToolsService? getDevToolOfContextId(int contextId) {
     return _contextDevToolMap[contextId];
   }
@@ -73,7 +90,7 @@ class ChromeDevToolsService extends DevToolsService {
     _contextDevToolMap[controller.view.contextId] = this;
     _controller = controller;
     // @TODO: Add JS debug support for QuickJS.
-    // bool nativeInited = registerUIDartMethodsToCpp();
+    // bool nativeInited = _registerUIDartMethodsToCpp();
     // if (!nativeInited) {
     //   print('Warning: kraken_devtools is not supported on your platform.');
     //   return;
@@ -93,5 +110,16 @@ class ChromeDevToolsService extends DevToolsService {
     _reloading = false;
     controller!.view.debugDOMTreeChanged = _uiInspector!.onDOMTreeChanged;
     _isolateServerPort!.send(InspectorReload(_controller!.view.contextId));
+  }
+
+  // @TODO: Implement and remove.
+  // ignore: unused_element
+  static bool _registerUIDartMethodsToCpp() {
+    final DartRegisterDartMethods _registerDartMethods = nativeDynamicLibrary.lookup<NativeFunction<NativeRegisterDartMethods>>('registerUIDartMethods').asFunction();
+    Pointer<Uint64> bytes = malloc.allocate<Uint64>(_dartNativeMethods.length * sizeOf<Uint64>());
+    Uint64List nativeMethodList = bytes.asTypedList(_dartNativeMethods.length);
+    nativeMethodList.setAll(0, _dartNativeMethods);
+    _registerDartMethods(bytes, _dartNativeMethods.length);
+    return true;
   }
 }

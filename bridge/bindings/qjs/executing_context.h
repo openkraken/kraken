@@ -59,6 +59,7 @@ class ExecutionContextGCTracker : public GarbageCollected<ExecutionContextGCTrac
   static JSClassID contextGcTrackerClassId;
 
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
+  void dispose() const override;
 
  private:
 };
@@ -103,7 +104,6 @@ class ExecutionContext {
 
   int32_t uniqueId;
   struct list_head node_job_list;
-  struct list_head document_job_list;
   struct list_head module_job_list;
   struct list_head module_callback_job_list;
   struct list_head promise_job_list;
@@ -142,7 +142,14 @@ static JSValue handleCallThisOnProxy(JSContext* ctx, JSValueConst this_val, int 
   if (JS_IsProxy(this_val)) {
     result = JS_Call(ctx, f, JS_GetProxyTarget(this_val), argc, argv);
   } else {
-    result = JS_Call(ctx, f, this_val, argc, argv);
+    // If this_val is undefined or null, this_val should set to globalThis.
+    if (JS_IsUndefined(this_val) || JS_IsNull(this_val)) {
+      this_val = JS_GetGlobalObject(ctx);
+      result = JS_Call(ctx, f, this_val, argc, argv);
+      JS_FreeValue(ctx, this_val);
+    } else {
+      result = JS_Call(ctx, f, this_val, argc, argv);
+    }
   }
   return result;
 }

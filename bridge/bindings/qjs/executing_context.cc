@@ -37,6 +37,7 @@ void ExecutionContextGCTracker::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* m
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
   context->trace(rt, context->global(), mark_func);
 }
+void ExecutionContextGCTracker::dispose() const {}
 
 JSClassID ExecutionContextGCTracker::contextGcTrackerClassId{0};
 
@@ -54,7 +55,6 @@ ExecutionContext::ExecutionContext(int32_t contextId, const JSExceptionHandler& 
   });
 
   init_list_head(&node_job_list);
-  init_list_head(&document_job_list);
   init_list_head(&module_job_list);
   init_list_head(&module_callback_job_list);
   init_list_head(&promise_job_list);
@@ -89,15 +89,6 @@ ExecutionContext::~ExecutionContext() {
   {
     struct list_head *el, *el1;
     list_for_each_safe(el, el1, &node_job_list) {
-      auto* node = list_entry(el, NodeJob, link);
-      JS_FreeValue(m_ctx, node->nodeInstance->jsObject);
-    }
-  }
-
-  // Manual free nodes bound by document.
-  {
-    struct list_head *el, *el1;
-    list_for_each_safe(el, el1, &document_job_list) {
       auto* node = list_entry(el, NodeJob, link);
       JS_FreeValue(m_ctx, node->nodeInstance->jsObject);
     }
@@ -144,6 +135,8 @@ ExecutionContext::~ExecutionContext() {
 
   JS_FreeValue(m_ctx, globalObject);
   JS_FreeContext(m_ctx);
+
+  // Run GC to clean up remaining objects about m_ctx;
   JS_RunGC(m_runtime);
 
 #if DUMP_LEAKS

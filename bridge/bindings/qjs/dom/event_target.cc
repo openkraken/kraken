@@ -69,7 +69,7 @@ JSValue EventTarget::addEventListener(JSContext* ctx, JSValue this_val, int argc
   JSAtom eventType = JS_ValueToAtom(ctx, eventTypeValue);
 
   // Dart needs to be notified for the first registration event.
-  if (!eventTargetInstance->m_eventListenerMap.contains(eventType) || eventTargetInstance->m_eventHandlerMap.count(eventType) > 0) {
+  if (!eventTargetInstance->m_eventListenerMap.contains(eventType) || eventTargetInstance->m_eventHandlerMap.contains(eventType)) {
     int32_t contextId = eventTargetInstance->prototype()->contextId();
 
     NativeString args_01{};
@@ -113,7 +113,7 @@ JSValue EventTarget::removeEventListener(JSContext* ctx, JSValue this_val, int a
     JS_FreeValue(ctx, callback);
   }
 
-  if (eventHandlers.empty() && eventTargetInstance->m_eventHandlerMap.count(eventType) > 0) {
+  if (eventHandlers.empty() && eventTargetInstance->m_eventHandlerMap.contains(eventType)) {
     // Dart needs to be notified for handles is empty.
     int32_t contextId = eventTargetInstance->prototype()->contextId();
 
@@ -182,6 +182,9 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
 
   // Dispatch event listeners writen by addEventListener
   auto _dispatchEvent = [&eventInstance, this](JSValue handler) {
+    if (!JS_IsFunction(m_ctx, handler))
+      return;
+
     if (eventInstance->propagationImmediatelyStopped())
       return;
 
@@ -206,12 +209,12 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
   }
 
   // Dispatch event listener white by 'on' prefix property.
-  if (m_eventHandlerMap.count(eventType) > 0) {
+  if (m_eventHandlerMap.contains(eventType)) {
     // Let special error event handling be true if event is an ErrorEvent.
     bool specialErrorEventHanding = eventTypeStr == "error";
 
     if (specialErrorEventHanding) {
-      auto _dispatchErrorEvent = [&eventInstance, this, eventTypeStr](JSValue& handler) {
+      auto _dispatchErrorEvent = [&eventInstance, this, eventTypeStr](JSValue handler) {
         JSValue error = JS_GetPropertyStr(m_ctx, eventInstance->jsObject, "error");
         JSValue messageValue = JS_GetPropertyStr(m_ctx, error, "message");
         JSValue lineNumberValue = JS_GetPropertyStr(m_ctx, error, "lineNumber");
@@ -228,9 +231,9 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
         JS_FreeValue(m_ctx, lineNumberValue);
         JS_FreeValue(m_ctx, columnValue);
       };
-      _dispatchErrorEvent(m_eventHandlerMap[eventType]);
+      _dispatchErrorEvent(m_eventHandlerMap.getProperty(eventType));
     } else {
-      _dispatchEvent(m_eventHandlerMap[eventType]);
+      _dispatchEvent(m_eventHandlerMap.getProperty(eventType));
     }
   }
 
@@ -280,7 +283,7 @@ int EventTargetInstance::hasProperty(JSContext* ctx, JSValue obj, JSAtom atom) {
     return !JS_IsNull(eventTarget->getAttributesEventHandler(p));
   }
 
-  return eventTarget->m_properties.count(atom) > 0;
+  return eventTarget->m_properties.contains(atom);
 }
 
 JSValue EventTargetInstance::getProperty(JSContext* ctx, JSValue obj, JSAtom atom, JSValue receiver) {
@@ -302,8 +305,8 @@ JSValue EventTargetInstance::getProperty(JSContext* ctx, JSValue obj, JSAtom ato
     return eventTarget->getAttributesEventHandler(p);
   }
 
-  if (eventTarget->m_properties.count(atom) > 0) {
-    return JS_DupValue(ctx, eventTarget->m_properties[atom]);
+  if (eventTarget->m_properties.contains(atom)) {
+    return JS_DupValue(ctx, eventTarget->m_properties.getProperty(atom));
   }
 
   // For plugin elements, try to auto generate properties and functions from dart response.
@@ -349,10 +352,16 @@ int EventTargetInstance::setProperty(JSContext* ctx, JSValue obj, JSAtom atom, J
   JSValue atomString = JS_AtomToString(ctx, atom);
   JSString* p = JS_VALUE_GET_STRING(atomString);
 
-  if (!p->is_wide_char && p->u.str8[0] == 'o' && p->u.str8[1] == 'n') {
+  if (!p->is_wide_char && p->len > 2 && p->u.str8[0] == 'o' && p->u.str8[1] == 'n') {
     eventTarget->setAttributesEventHandler(p, value);
   } else {
-    eventTarget->m_properties[atom] = JS_DupValue(ctx, value);
+    // GC can't track the value if key had been override.
+    // Should free the value if exist on m_properties.
+    if (eventTarget->m_properties.contains(atom)) {
+      JS_FreeValue(eventTarget->m_ctx, eventTarget->m_properties.getProperty(atom));
+    }
+
+    eventTarget->m_properties.setProperty(atom, JS_DupValue(ctx, value));
     if (isJavaScriptExtensionElementInstance(eventTarget->context(), eventTarget->jsObject) && !p->is_wide_char && p->u.str8[0] != '_') {
       std::unique_ptr<NativeString> args_01 = atomToNativeString(ctx, atom);
       std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, value);
@@ -390,23 +399,22 @@ void EventTargetInstance::setAttributesEventHandler(JSString* p, JSValue value) 
   memcpy(eventType, &p->u.str8[2], p->len + 1 - 2);
   JSAtom atom = JS_NewAtom(m_ctx, eventType);
 
+  // EventHandler are no long visible by GC. Should free it manually.
+  if (m_eventHandlerMap.contains(atom)) {
+    JS_FreeValue(m_ctx, m_eventHandlerMap.getProperty(atom));
+  }
+
   // When evaluate scripts like 'element.onclick = null', we needs to remove the event handlers callbacks
   if (JS_IsNull(value)) {
-    // EventHandler are no long visible by GC. Should free it manually.
-    JS_FreeValue(m_ctx, m_eventHandlerMap[atom]);
     m_eventHandlerMap.erase(atom);
     JS_FreeAtom(m_ctx, atom);
     return;
   }
 
-  if (!JS_IsFunction(m_ctx, value)) {
-    JS_FreeAtom(m_ctx, atom);
-    return;
-  }
-
   JSValue newCallback = JS_DupValue(m_ctx, value);
-  m_eventHandlerMap[atom] = newCallback;
-  if (m_eventListenerMap.empty()) {
+  m_eventHandlerMap.setProperty(atom, newCallback);
+
+  if (JS_IsFunction(m_ctx, value) && m_eventListenerMap.empty()) {
     int32_t contextId = m_context->getContextId();
     std::unique_ptr<NativeString> args_01 = atomToNativeString(m_ctx, atom);
     int32_t type = JS_IsFunction(m_ctx, value) ? UICommand::addEvent : UICommand::removeEvent;
@@ -420,11 +428,14 @@ JSValue EventTargetInstance::getAttributesEventHandler(JSString* p) {
   char eventType[p->len + 1 - 2];
   memcpy(eventType, &p->u.str8[2], p->len + 1 - 2);
   JSAtom atom = JS_NewAtom(m_ctx, eventType);
-  if (m_eventHandlerMap.count(atom) == 0) {
+  if (!m_eventHandlerMap.contains(atom)) {
+    JS_FreeAtom(m_ctx, atom);
     return JS_NULL;
   }
 
-  return JS_DupValue(m_ctx, m_eventHandlerMap[atom]);
+  JSValue handler = JS_DupValue(m_ctx, m_eventHandlerMap.getProperty(atom));
+  JS_FreeAtom(m_ctx, atom);
+  return handler;
 }
 
 void EventTargetInstance::finalize(JSRuntime* rt, JSValue val) {
@@ -442,23 +453,18 @@ JSValue EventTargetInstance::getNativeProperty(const char* prop) {
 // JSValues are stored in this class are no visible to QuickJS GC.
 // We needs to gc which JSValues are still holding.
 void EventTargetInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
-  // Trace m_eventHandlers
+  // Trace m_eventListeners.
   m_eventListenerMap.trace(rt, JS_UNDEFINED, mark_func);
 
-  for (auto& entry : m_eventHandlerMap) {
-    JS_MarkValue(rt, entry.second, mark_func);
-  }
+  // Trace m_eventHandlers.
+  m_eventHandlerMap.trace(rt, JS_UNDEFINED, mark_func);
 
-  for (auto& entry : m_properties) {
-    JS_MarkValue(rt, entry.second, mark_func);
-  }
+  // Trace properties.
+  m_properties.trace(rt, JS_UNDEFINED, mark_func);
 }
 
 void EventTargetInstance::copyNodeProperties(EventTargetInstance* newNode, EventTargetInstance* referenceNode) {
-  JSContext* ctx = referenceNode->m_ctx;
-  for (auto& entry : referenceNode->m_properties) {
-    newNode->m_properties[entry.first] = JS_DupValue(ctx, entry.second);
-  }
+  referenceNode->m_properties.copyWith(&newNode->m_properties);
 }
 
 void NativeEventTarget::dispatchEventImpl(NativeEventTarget* nativeEventTarget, NativeString* nativeEventType, void* rawEvent, int32_t isCustomEvent) {

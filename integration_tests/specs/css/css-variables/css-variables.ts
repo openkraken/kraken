@@ -70,6 +70,28 @@ describe('CSS Variables', () => {
     await snapshot();
   });
 
+  it('nested variables', async () => {
+    document.head.appendChild(createStyle(`
+     .inner {
+        color: var(--x);
+      }
+      .outer {
+        --y: red;
+        --x: var(--y);
+      }
+    `));
+
+    document.body.appendChild(
+      <div class="outer">
+        <div class="inbetween">
+          <div class="inner">Color should be red.</div>
+        </div>
+      </div>
+    );
+
+    await snapshot();
+  });
+
   describe('Shorthand CSS properties', () => {
     it('background', async () => {
       document.head.appendChild(createStyle(`

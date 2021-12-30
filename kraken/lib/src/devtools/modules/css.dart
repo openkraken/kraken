@@ -1,10 +1,11 @@
-import 'package:kraken_devtools/kraken_devtools.dart';
-import 'package:flutter/rendering.dart';
+/*
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
 import 'package:kraken/css.dart';
+import 'package:kraken/devtools.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/rendering.dart';
-import '../module.dart';
-import '../ui_inspector.dart';
 
 const int INLINED_STYLESHEET_ID = 1;
 const String ZERO_PX = '0px';
@@ -12,8 +13,8 @@ RegExp _kebabCaseReg = RegExp(r'[A-Z]');
 RegExp _camelCaseReg = RegExp(r'-(\w)');
 
 class InspectCSSModule extends UIInspectorModule {
-  Document get document => devTool!.controller!.view.document;
-  InspectCSSModule(ChromeDevToolsService? devTool): super(devTool);
+  Document get document => devtoolsService.controller!.view.document;
+  InspectCSSModule(ChromeDevToolsService devtoolsService): super(devtoolsService);
 
   @override
   String get name => 'CSS';
@@ -38,7 +39,7 @@ class InspectCSSModule extends UIInspectorModule {
 
   void handleGetMatchedStylesForNode(int? id, Map<String, dynamic> params) {
     int nodeId = params['nodeId'];
-    Element? element = document.controller.view.debugGetEventTargetById<Element>(nodeId);
+    Element? element = document.controller.view.getEventTargetById<Element>(nodeId);
     if (element != null) {
       MatchedStyles matchedStyles = MatchedStyles(
         inlineStyle: buildInlineStyle(element),
@@ -49,7 +50,7 @@ class InspectCSSModule extends UIInspectorModule {
 
   void handleGetComputedStyleForNode(int? id, Map<String, dynamic> params) {
     int nodeId = params['nodeId'];
-    Element? element = document.controller.view.debugGetEventTargetById<Element>(nodeId);
+    Element? element = document.controller.view.getEventTargetById<Element>(nodeId);
 
     if (element != null) {
       ComputedStyle computedStyle = ComputedStyle(
@@ -63,7 +64,7 @@ class InspectCSSModule extends UIInspectorModule {
   // implicitly, using DOM attributes) for a DOM node identified by nodeId.
   void handleGetInlineStylesForNode(int? id, Map<String, dynamic> params) {
     int nodeId = params['nodeId'];
-    Element? element = document.controller.view.debugGetEventTargetById<Element>(nodeId);
+    Element? element = document.controller.view.getEventTargetById<Element>(nodeId);
 
     if (element != null) {
       InlinedStyle inlinedStyle = InlinedStyle(
@@ -85,7 +86,7 @@ class InspectCSSModule extends UIInspectorModule {
       int nodeId = edit['styleSheetId'];
       String text = edit['text'] ?? '';
       List<String> texts = text.split(';');
-      Element? element = document.controller.view.debugGetEventTargetById<Element>(nodeId);
+      Element? element = document.controller.view.getEventTargetById<Element>(nodeId);
       if (element != null) {
         for (String kv in texts) {
           kv = kv.trim();
@@ -131,7 +132,7 @@ class InspectCSSModule extends UIInspectorModule {
     return CSSStyle(
       // Absent for user agent stylesheet and user-specified stylesheet rules.
       // Use hash code id to identity which element the rule belongs to.
-      styleSheetId: element.hashCode,
+      styleSheetId: element.ownerDocument.controller.view.getTargetIdByEventTarget(element),
       cssProperties: cssProperties,
       shorthandEntries: <ShorthandEntry>[],
       cssText: cssText,
@@ -263,6 +264,7 @@ class MatchedStyles extends JSONEncodable {
   List<InheritedStyleEntry>? inherited;
   List<CSSKeyframesRule>? cssKeyframesRules;
 
+  @override
   Map toJson() {
     return {
       if (inlineStyle != null) 'inlineStyle': inlineStyle,

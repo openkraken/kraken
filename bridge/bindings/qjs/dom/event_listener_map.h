@@ -16,6 +16,9 @@ using EventListenerVector = std::vector<JSValue>;
 
 class EventListenerMap final {
  public:
+  EventListenerMap(JSContext* ctx) : m_runtime(JS_GetRuntime(ctx)){};
+  ~EventListenerMap();
+
   [[nodiscard]] bool empty() const { return m_entries.empty(); }
   [[nodiscard]] bool contains(JSAtom eventType) const;
   void clear();
@@ -32,6 +35,8 @@ class EventListenerMap final {
   //  - An EventTarget rarely has event listeners for many event types, and
   //    vector is faster in such cases.
   std::vector<std::pair<JSAtom, EventListenerVector>> m_entries;
+
+  JSRuntime* m_runtime;
 };
 
 }  // namespace kraken::binding::qjs

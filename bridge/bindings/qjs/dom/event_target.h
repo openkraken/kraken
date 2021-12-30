@@ -8,6 +8,7 @@
 
 #include "bindings/qjs/dom/event.h"
 #include "bindings/qjs/executing_context.h"
+#include "bindings/qjs/heap_hashmap.h"
 #include "bindings/qjs/host_class.h"
 #include "bindings/qjs/host_object.h"
 #include "bindings/qjs/native_value.h"
@@ -68,6 +69,16 @@ struct NativeEventTarget {
 #endif
 };
 
+class EventTargetProperties : public HeapHashMap<JSAtom> {
+ public:
+  EventTargetProperties(JSContext* ctx) : HeapHashMap<JSAtom>(ctx){};
+};
+
+class EventHandlerMap : public HeapHashMap<JSAtom> {
+ public:
+  EventHandlerMap(JSContext* ctx) : HeapHashMap<JSAtom>(ctx){};
+};
+
 class EventTargetInstance : public Instance {
  public:
   EventTargetInstance() = delete;
@@ -89,16 +100,16 @@ class EventTargetInstance : public Instance {
   int32_t m_eventTargetId;
   // EventListener handlers registered with addEventListener API.
   // https://dom.spec.whatwg.org/#concept-event-listener
-  EventListenerMap m_eventListenerMap;
+  EventListenerMap m_eventListenerMap{m_ctx};
 
   // EventListener handlers registered with DOM attributes API.
   // https://html.spec.whatwg.org/C/#event-handler-attributes
-  std::unordered_map<JSAtom, JSValue> m_eventHandlerMap;
+  EventHandlerMap m_eventHandlerMap{m_ctx};
 
   // When javascript code set a property on EventTarget instance, EventTarget::setProperty callback will be called when
   // property are not defined by Object.defineProperty or setProperty.
   // We store there values in here.
-  std::unordered_map<JSAtom, JSValue> m_properties;
+  EventTargetProperties m_properties{m_ctx};
 
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
   static void copyNodeProperties(EventTargetInstance* newNode, EventTargetInstance* referenceNode);
