@@ -38,6 +38,7 @@ HeapHashMap<K>::HeapHashMap(JSContext* ctx) : m_runtime(JS_GetRuntime(ctx)), m_c
 template <typename K>
 HeapHashMap<K>::~HeapHashMap() {
   for (auto& entry : m_entries) {
+    JS_FreeAtomRT(m_runtime, entry.first);
     JS_FreeValueRT(m_runtime, entry.second);
   }
 }
@@ -53,6 +54,13 @@ JSValue HeapHashMap<K>::getProperty(K key) {
 
 template <typename K>
 void HeapHashMap<K>::setProperty(K key, JSValue value) {
+  // GC can't track the value if key had been override.
+  // Should free the value if exist on m_properties.
+  if (m_entries.count(key) > 0) {
+    JS_FreeAtom(m_ctx, key);
+    JS_FreeValue(m_ctx, value);
+  }
+
   m_entries[key] = value;
 }
 

@@ -66,6 +66,7 @@ JSValue EventTarget::addEventListener(JSContext* ctx, JSValue this_val, int argc
     return JS_UNDEFINED;
   }
 
+  // EventType atom will be freed when eventTarget finalized.
   JSAtom eventType = JS_ValueToAtom(ctx, eventTypeValue);
 
   // Dart needs to be notified for the first registration event.
@@ -79,7 +80,6 @@ JSValue EventTarget::addEventListener(JSContext* ctx, JSValue this_val, int argc
   }
 
   eventTargetInstance->m_eventListenerMap.add(eventType, JS_DupValue(ctx, callback));
-  JS_FreeAtom(ctx, eventType);
 
   return JS_UNDEFINED;
 }
@@ -355,13 +355,7 @@ int EventTargetInstance::setProperty(JSContext* ctx, JSValue obj, JSAtom atom, J
   if (!p->is_wide_char && p->len > 2 && p->u.str8[0] == 'o' && p->u.str8[1] == 'n') {
     eventTarget->setAttributesEventHandler(p, value);
   } else {
-    // GC can't track the value if key had been override.
-    // Should free the value if exist on m_properties.
-    if (eventTarget->m_properties.contains(atom)) {
-      JS_FreeValue(eventTarget->m_ctx, eventTarget->m_properties.getProperty(atom));
-    }
-
-    eventTarget->m_properties.setProperty(atom, JS_DupValue(ctx, value));
+    eventTarget->m_properties.setProperty(JS_DupAtom(ctx, atom), JS_DupValue(ctx, value));
     if (isJavaScriptExtensionElementInstance(eventTarget->context(), eventTarget->jsObject) && !p->is_wide_char && p->u.str8[0] != '_') {
       std::unique_ptr<NativeString> args_01 = atomToNativeString(ctx, atom);
       std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, value);
@@ -407,12 +401,10 @@ void EventTargetInstance::setAttributesEventHandler(JSString* p, JSValue value) 
   // When evaluate scripts like 'element.onclick = null', we needs to remove the event handlers callbacks
   if (JS_IsNull(value)) {
     m_eventHandlerMap.erase(atom);
-    JS_FreeAtom(m_ctx, atom);
     return;
   }
 
-  JSValue newCallback = JS_DupValue(m_ctx, value);
-  m_eventHandlerMap.setProperty(atom, newCallback);
+  m_eventHandlerMap.setProperty(atom, JS_DupValue(m_ctx, value));
 
   if (JS_IsFunction(m_ctx, value) && m_eventListenerMap.empty()) {
     int32_t contextId = m_context->getContextId();
@@ -420,8 +412,6 @@ void EventTargetInstance::setAttributesEventHandler(JSString* p, JSValue value) 
     int32_t type = JS_IsFunction(m_ctx, value) ? UICommand::addEvent : UICommand::removeEvent;
     foundation::UICommandBuffer::instance(contextId)->addCommand(m_eventTargetId, type, *args_01, nullptr);
   }
-
-  JS_FreeAtom(m_ctx, atom);
 }
 
 JSValue EventTargetInstance::getAttributesEventHandler(JSString* p) {
