@@ -61,7 +61,7 @@ void HeapHashMap<K>::setProperty(K key, JSValue value) {
   // Should free the value if exist on m_properties.
   if (m_entries.count(key) > 0) {
     JS_FreeAtom(m_ctx, key);
-    JS_FreeValue(m_ctx, value);
+    JS_FreeValue(m_ctx, m_entries[key]);
   }
 
   m_entries[key] = value;
