@@ -33,6 +33,7 @@ typedef GetSelectionColor = Color Function();
 typedef GetCursorRadius = Radius Function();
 /// Get the text selection controls according to the target platform.
 typedef GetTextSelectionControls = TextSelectionControls Function();
+typedef OnControllerCreated = void Function(KrakenController controller);
 
 /// Delegate methods of widget
 class WidgetDelegate {
@@ -83,6 +84,9 @@ class Kraken extends StatefulWidget {
   // This is useful if you wants to pause kraken timers and callbacks when kraken widget are hidden by page route.
   // https://api.flutter.dev/flutter/widgets/RouteObserver-class.html
   final RouteObserver<ModalRoute<void>>? routeObserver;
+
+  // Trigger when kraken controller once created.
+  final OnControllerCreated? onControllerCreated;
 
   final LoadErrorHandler? onLoadError;
 
@@ -196,6 +200,7 @@ class Kraken extends StatefulWidget {
     this.viewportWidth,
     this.viewportHeight,
     this.bundle,
+    this.onControllerCreated,
     this.onLoad,
     this.navigationDelegate,
     this.javaScriptChannel,
@@ -861,6 +866,11 @@ This situation often happened when you trying creating kraken when FlutterView n
         widgetDelegate: _widgetDelegate,
         uriParser: _krakenWidget.uriParser
     );
+
+    OnControllerCreated? onControllerCreated = _krakenWidget.onControllerCreated;
+    if (onControllerCreated != null) {
+      onControllerCreated(controller);
+    }
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_INIT_END);

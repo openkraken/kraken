@@ -14,7 +14,7 @@ Future<dynamic> _invokeMethodFromJavaScript(KrakenController? controller, String
   if (controller == null || controller.methodChannel == null) {
     return Future.error(FlutterError(METHOD_CHANNEL_NOT_INITIALIZED));
   }
-  return controller.methodChannel!._invokeMethodFromJavaScript(method, args);
+  return controller.methodChannel!.invokeMethodFromJavaScript(method, args);
 }
 
 const METHOD_CHANNEL_NAME = 'MethodChannel';
@@ -52,13 +52,15 @@ void setJSMethodCallCallback(KrakenController controller) {
   };
 }
 
-class KrakenMethodChannel {
+abstract class KrakenMethodChannel {
   MethodCallCallback? _onJSMethodCallCallback;
 
   set _onJSMethodCall(MethodCallCallback? value) {
     assert(value != null);
     _onJSMethodCallCallback = value;
   }
+
+  Future Function(String method, List args) get invokeMethodFromJavaScript => _invokeMethodFromJavaScript;
 
   Future<dynamic> _invokeMethodFromJavaScript(String method, List arguments) async {}
 
@@ -137,7 +139,6 @@ class KrakenNativeChannel extends KrakenMethodChannel {
 
   static Future<void> syncDynamicLibraryPath() async {
     String? path = await _nativeChannel.invokeMethod('getDynamicLibraryPath');
-    print('syncDynamicLibraryPath get path $path');
     if (path != null) {
       setDynamicLibraryPath(path);
     }
