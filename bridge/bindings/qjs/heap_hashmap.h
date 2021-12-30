@@ -49,6 +49,8 @@ bool HeapHashMap<K>::contains(K key) {
 
 template <typename K>
 JSValue HeapHashMap<K>::getProperty(K key) {
+  if (m_entries.count(key) == 0) return JS_NULL;
+
   return m_entries[key];
 }
 

@@ -393,11 +393,6 @@ void EventTargetInstance::setAttributesEventHandler(JSString* p, JSValue value) 
   memcpy(eventType, &p->u.str8[2], p->len + 1 - 2);
   JSAtom atom = JS_NewAtom(m_ctx, eventType);
 
-  // EventHandler are no long visible by GC. Should free it manually.
-  if (m_eventHandlerMap.contains(atom)) {
-    JS_FreeValue(m_ctx, m_eventHandlerMap.getProperty(atom));
-  }
-
   // When evaluate scripts like 'element.onclick = null', we needs to remove the event handlers callbacks
   if (JS_IsNull(value)) {
     m_eventHandlerMap.erase(atom);
