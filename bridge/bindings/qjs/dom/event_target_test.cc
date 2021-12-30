@@ -185,7 +185,6 @@ TEST(EventTarget, wontLeakWithStringProperty) {
   bridge->evaluateScript(code.c_str(), code.size(), "internal://", 0);
 }
 
-
 TEST(EventTarget, dispatchEventOnGC) {
   using namespace kraken::binding::qjs;
 
