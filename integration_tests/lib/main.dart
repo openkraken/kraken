@@ -118,7 +118,6 @@ void main() async {
   });
 
   testTextInput = TestTextInput();
-  testTextInput.register();
 
   WidgetsBinding.instance!.addPostFrameCallback((_) async {
     registerDartTestMethodsToCpp();

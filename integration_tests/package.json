@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "pretest": "npm install",
-    "test": "flutter clean && && flutter pub get && npm run clean && npm run integration",
+    "test": "flutter clean && flutter pub get && npm run clean && npm run integration",
     "posttest": "npm run lint",
     "plugin_test": "npm run pretest && flutter clean && flutter pub get && npm run clean && npm run lint && npm run plugin_integration",
     "lint": "cd ../ && npm run lint",
