@@ -110,6 +110,7 @@ JSValue EventTarget::removeEventListener(JSContext* ctx, JSValue this_val, int a
   }
 
   if (eventHandlers.remove(eventType, callback)) {
+    JS_FreeAtom(ctx, eventType);
     JS_FreeValue(ctx, callback);
   }
 

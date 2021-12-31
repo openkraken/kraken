@@ -26,6 +26,23 @@ TEST(EventTarget, addEventListener) {
   EXPECT_EQ(errorCalled, false);
 }
 
+TEST(EventTarget, removeEventListener) {
+  bool static errorCalled = false;
+  bool static logCalled = false;
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    logCalled = true;
+  };
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
+    KRAKEN_LOG(VERBOSE) << errmsg;
+    errorCalled = true;
+  });
+  auto& context = bridge->getContext();
+  const char* code = "let div = document.createElement('div'); function f(){ console.log(1234); }; div.addEventListener('click', f); div.removeEventListener('click', f); div.dispatchEvent(new Event('click'));";
+  bridge->evaluateScript(code, strlen(code), "vm://", 0);
+
+  EXPECT_EQ(logCalled, false);
+}
+
 TEST(EventTarget, setNoEventTargetProperties) {
   bool static errorCalled = false;
   bool static logCalled = false;

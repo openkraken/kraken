@@ -70,6 +70,11 @@ void HeapHashMap<K>::setProperty(K key, JSValue value) {
 template <typename K>
 void HeapHashMap<K>::copyWith(HeapHashMap* newValue) {
   for (auto& entry : m_entries) {
+    // We should also dup atom if K is JSAtom.
+    if (std::is_same<K, JSAtom>::value) {
+      JS_DupAtom(m_ctx, entry.first);
+    }
+
     newValue->m_entries[entry.first] = JS_DupValue(m_ctx, entry.second);
   }
 }
