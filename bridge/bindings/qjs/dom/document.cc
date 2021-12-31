@@ -530,11 +530,12 @@ DocumentInstance::DocumentInstance(Document* document) : NodeInstance(document, 
 }
 
 DocumentInstance::~DocumentInstance() {
+  // Atom string should keep alive in memory to make sure same string have the corresponding id.
+  // Only freed after document finalized.
   for(auto& entry: m_elementMapById) {
     JS_FreeAtomRT(m_context->runtime(), entry.first);
-    for (auto& element : entry.second) {
-      JS_FreeValueRT(m_context->runtime(), element->jsObject);
-    }
+    // Note: someone may be curious why there are no JS_FreeValueRT() call in this finalize callbacks.
+    // m_elementMapById's value are all elements, which are JavaScript objects. Will be freed by GC at marking phase.
   }
 }
 void DocumentInstance::removeElementById(JSAtom id, ElementInstance* element) {

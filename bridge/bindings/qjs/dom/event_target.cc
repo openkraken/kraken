@@ -397,6 +397,7 @@ void EventTargetInstance::setAttributesEventHandler(JSString* p, JSValue value) 
   // When evaluate scripts like 'element.onclick = null', we needs to remove the event handlers callbacks
   if (JS_IsNull(value)) {
     m_eventHandlerMap.erase(atom);
+    JS_FreeAtom(m_ctx, atom);
     return;
   }
 
