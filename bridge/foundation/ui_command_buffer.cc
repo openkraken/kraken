@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 
+#include "ui_command_buffer.h"
 #include "dart_methods.h"
 #include "include/kraken_bridge.h"
 
@@ -53,16 +54,6 @@ void UICommandBuffer::addCommand(int32_t id, int32_t type, NativeString& args_01
 #endif
   UICommandItem item{id, type, args_01, args_02, nativePtr};
   queue.emplace_back(item);
-}
-
-UICommandBuffer* UICommandBuffer::instance(int32_t contextId) {
-  static std::unordered_map<int32_t, UICommandBuffer*> instanceMap;
-
-  if (instanceMap.count(contextId) == 0) {
-    instanceMap[contextId] = new UICommandBuffer(contextId);
-  }
-
-  return instanceMap[contextId];
 }
 
 UICommandItem* UICommandBuffer::data() {

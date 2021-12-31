@@ -279,7 +279,7 @@ JSValue Node::copyNodeValue(JSContext* ctx, NodeInstance* node) {
 
     std::string newNodeEventTargetId = std::to_string(newElement->m_eventTargetId);
     std::unique_ptr<NativeString> args_01 = stringToNativeString(newNodeEventTargetId);
-    foundation::UICommandBuffer::instance(newElement->context()->getContextId())->addCommand(element->m_eventTargetId, UICommand::cloneNode, *args_01, nullptr);
+    element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::cloneNode, *args_01, nullptr);
 
     return newElement->jsObject;
   } else if (node->nodeType == TEXT_NODE) {
@@ -425,7 +425,7 @@ void NodeInstance::internalAppendChild(NodeInstance* node) {
   std::unique_ptr<NativeString> args_01 = stringToNativeString(nodeEventTargetId);
   std::unique_ptr<NativeString> args_02 = stringToNativeString(position);
 
-  foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
+  m_context->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
 }
 void NodeInstance::internalRemove() {
   if (JS_IsNull(parentNode))
@@ -441,7 +441,7 @@ void NodeInstance::internalClearChild() {
     auto* node = static_cast<NodeInstance*>(JS_GetOpaque(v, Node::classId(v)));
     node->removeParentNode();
     node->_notifyNodeRemoved(this);
-    foundation::UICommandBuffer::instance(node->m_context->getContextId())->addCommand(node->m_eventTargetId, UICommand::removeNode, nullptr);
+    node->m_context->uiCommandBuffer()->addCommand(node->m_eventTargetId, UICommand::removeNode, nullptr);
     JS_FreeValue(m_ctx, v);
   }
 
@@ -454,7 +454,7 @@ NodeInstance* NodeInstance::internalRemoveChild(NodeInstance* node) {
     arraySpliceValue(m_ctx, childNodes, idx, 1);
     node->removeParentNode();
     node->_notifyNodeRemoved(this);
-    foundation::UICommandBuffer::instance(node->m_context->getContextId())->addCommand(node->m_eventTargetId, UICommand::removeNode, nullptr);
+    node->m_context->uiCommandBuffer()->addCommand(node->m_eventTargetId, UICommand::removeNode, nullptr);
   }
 
   return node;
@@ -487,7 +487,7 @@ JSValue NodeInstance::internalInsertBefore(NodeInstance* node, NodeInstance* ref
       std::unique_ptr<NativeString> args_01 = stringToNativeString(nodeEventTargetId);
       std::unique_ptr<NativeString> args_02 = stringToNativeString(position);
 
-      foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(referenceNode->m_eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
+      m_context->uiCommandBuffer()->addCommand(referenceNode->m_eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
     }
   }
 
@@ -519,9 +519,9 @@ JSValue NodeInstance::internalReplaceChild(NodeInstance* newChild, NodeInstance*
   std::unique_ptr<NativeString> args_01 = stringToNativeString(newChildEventTargetId);
   std::unique_ptr<NativeString> args_02 = stringToNativeString(position);
 
-  foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(oldChild->m_eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
+  m_context->uiCommandBuffer()->addCommand(oldChild->m_eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
 
-  foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(oldChild->m_eventTargetId, UICommand::removeNode, nullptr);
+  m_context->uiCommandBuffer()->addCommand(oldChild->m_eventTargetId, UICommand::removeNode, nullptr);
 
   return oldChild->jsObject;
 }

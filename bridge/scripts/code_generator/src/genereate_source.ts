@@ -139,7 +139,7 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
     setterCode = `std::string key = "${p.name}";
   std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
   std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
-  foundation::UICommandBuffer::instance(${instanceName}->m_context->getContextId())
+  element->m_context->uiCommandBuffer()
     ->addCommand(${instanceName}->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
   return JS_NULL;`;
   } else {

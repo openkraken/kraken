@@ -125,7 +125,7 @@ bool StyleDeclarationInstance::internalSetProperty(std::string& name, JSValue va
   if (ownerEventTarget != nullptr) {
     std::unique_ptr<NativeString> args_01 = stringToNativeString(name);
     std::unique_ptr<NativeString> args_02 = jsValueToNativeString(m_ctx, value);
-    foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(ownerEventTarget->eventTargetId(), UICommand::setStyle, *args_01, *args_02, nullptr);
+    m_context->uiCommandBuffer()->addCommand(ownerEventTarget->eventTargetId(), UICommand::setStyle, *args_01, *args_02, nullptr);
   }
 
   return true;
@@ -143,7 +143,7 @@ void StyleDeclarationInstance::internalRemoveProperty(std::string& name) {
   if (ownerEventTarget != nullptr) {
     std::unique_ptr<NativeString> args_01 = stringToNativeString(name);
     std::unique_ptr<NativeString> args_02 = jsValueToNativeString(m_ctx, JS_NULL);
-    foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(ownerEventTarget->eventTargetId(), UICommand::setStyle, *args_01, *args_02, nullptr);
+    m_context->uiCommandBuffer()->addCommand(ownerEventTarget->eventTargetId(), UICommand::setStyle, *args_01, *args_02, nullptr);
   }
 }
 
