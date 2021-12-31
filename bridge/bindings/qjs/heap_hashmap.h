@@ -81,7 +81,8 @@ void HeapHashMap<K>::copyWith(HeapHashMap* newValue) {
 
 template <typename K>
 void HeapHashMap<K>::erase(K key) {
-  if (m_entries.count(key) == 0) return;
+  if (m_entries.count(key) == 0)
+    return;
   // We should also free atom if K is JSAtom.
   if (std::is_same<K, JSAtom>::value) {
     JS_FreeAtomRT(m_runtime, key);
