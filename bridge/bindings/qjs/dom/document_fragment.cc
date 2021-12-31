@@ -33,6 +33,6 @@ JSValue DocumentFragment::instanceConstructor(JSContext* ctx, JSValue func_obj, 
 
 DocumentFragmentInstance::DocumentFragmentInstance(DocumentFragment* fragment) : NodeInstance(fragment, NodeType::DOCUMENT_FRAGMENT_NODE, DocumentFragment::classId(), "DocumentFragment") {
   setNodeFlag(DocumentFragmentInstance::NodeFlag::IsDocumentFragment);
-  foundation::UICommandBuffer::instance(m_contextId)->addCommand(m_eventTargetId, UICommand::createDocumentFragment, nativeEventTarget);
+  m_context->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::createDocumentFragment, nativeEventTarget);
 }
 }  // namespace kraken::binding::qjs
