@@ -980,7 +980,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
 
     // child is WidgetElement.
-    if (hasSize) {
+    if (child.hasSize) {
       return child.size;
     }
     return null;
