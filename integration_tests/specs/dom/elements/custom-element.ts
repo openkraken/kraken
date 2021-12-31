@@ -183,6 +183,21 @@ describe('custom widget element', () => {
 
     await snapshot();
   });
+
+  it('flutter widget should spread out the parent node when parent node is sliver', async () => {
+    const div = document.createElement('div');
+    div.style.display = 'sliver';
+    div.style.height = '500px';
+    div.appendChild(document.createTextNode('111'));
+    const fluttetText = document.createElement('flutter-text');
+    fluttetText.setAttribute('value', 'flutter text');
+    fluttetText.style.display = 'block';
+    div.appendChild(fluttetText);
+    div.appendChild(document.createTextNode('111'));
+    document.body.appendChild(div);
+
+    await snapshot();
+  });
 });
 
 describe('custom html element', () => {
