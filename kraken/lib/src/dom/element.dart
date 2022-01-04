@@ -1489,7 +1489,7 @@ class Element extends Node
 
     // Returns (0, 0) when ancestor is null.
     if (ancestor == null) {
-      return Offset(0, 0);
+      return Offset.zero;
     }
     return renderBox.localToGlobal(Offset.zero, ancestor: ancestor.renderBoxModel);
   }
