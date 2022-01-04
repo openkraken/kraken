@@ -1,7 +1,6 @@
 name: Sync main code to release branch
 
-on: [workflow_dispatch]
-  
+on: [workflow_dispatch, push]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
