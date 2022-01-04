@@ -16,8 +16,13 @@ const builtInEvents = [
 
 // Set some default headers
 const defaultHeaders = {
-  "User-Agent": navigator.userAgent,
-  "Accept": "*/*",
+  // Use getter instead of value for lazy read value at initialize time.
+  get "User-Agent"() {
+    return navigator.userAgent;
+  },
+  get "Accept"() {
+    return "*/*";
+  }
 };
 
 // These request methods are not allowed

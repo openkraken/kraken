@@ -514,10 +514,12 @@ task(`build-ios-kraken-lib`, (done) => {
     const arm64DynamicSDKPath = path.join(paths.bridge, `build/ios/lib/arm64/${target}.framework`);
     const x64DynamicSDKPath = path.join(paths.bridge, `build/ios/lib/x86_64/${target}.framework`);
 
+    // Create flat frameworks with multiple archs.
     execSync(`lipo -create ${armDynamicSDKPath}/${target} ${arm64DynamicSDKPath}/${target} -output ${armDynamicSDKPath}/${target}`, {
       stdio: 'inherit'
     });
 
+    // CMake generated iOS frameworks does not contains <MinimumOSVersion> key in Info.plist.
     patchiOSFrameworkPList(x64DynamicSDKPath);
     patchiOSFrameworkPList(armDynamicSDKPath);
 
@@ -525,18 +527,20 @@ task(`build-ios-kraken-lib`, (done) => {
     const frameworkPath = `${targetDynamicSDKPath}/${target}.xcframework`;
     mkdirp.sync(targetDynamicSDKPath);
 
-    // Create dSYM for x86_64
+    // dSYM file are located at /path/to/kraken/build/ios/lib/${arch}/target.dSYM.
+    // Create dSYM for x86_64.
     execSync(`dsymutil ${x64DynamicSDKPath}/${target} --out ${x64DynamicSDKPath}/../${target}.dSYM`, { stdio: 'inherit' });
-    // Create dSYM for arm64,armv7
+    // Create dSYM for arm64,armv7.
     execSync(`dsymutil ${armDynamicSDKPath}/${target} --out ${armDynamicSDKPath}/../${target}.dSYM`, { stdio: 'inherit' });
 
+    // Generated xcframework at located at /path/to/kraken/build/ios/framework/${target}.xcframework.
+    // Generate xcframework with dSYM.
     if (buildMode === 'RelWithDebInfo') {
       execSync(`xcodebuild -create-xcframework \
-        -framework ${x64DynamicSDKPath} -debug-symbols ${x64DynamicSDKPath}/${target}.dSYM \
-        -framework ${armDynamicSDKPath} -debug-symbols ${armDynamicSDKPath}/${target}.dSYM -output ${frameworkPath}`, {
+        -framework ${x64DynamicSDKPath} -debug-symbols ${x64DynamicSDKPath}/../${target}.dSYM \
+        -framework ${armDynamicSDKPath} -debug-symbols ${armDynamicSDKPath}/../${target}.dSYM -output ${frameworkPath}`, {
         stdio: 'inherit'
       });
-
     } else {
       execSync(`xcodebuild -create-xcframework \
         -framework ${x64DynamicSDKPath} \

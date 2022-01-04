@@ -66,6 +66,7 @@ JSValue EventTarget::addEventListener(JSContext* ctx, JSValue this_val, int argc
     return JS_UNDEFINED;
   }
 
+  // EventType atom will be freed when eventTarget finalized.
   JSAtom eventType = JS_ValueToAtom(ctx, eventTypeValue);
 
   // Dart needs to be notified for the first registration event.
@@ -75,11 +76,15 @@ JSValue EventTarget::addEventListener(JSContext* ctx, JSValue this_val, int argc
     NativeString args_01{};
     buildUICommandArgs(ctx, eventTypeValue, args_01);
 
-    foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetInstance->m_eventTargetId, UICommand::addEvent, args_01, nullptr);
+    eventTargetInstance->m_context->uiCommandBuffer()->addCommand(eventTargetInstance->m_eventTargetId, UICommand::addEvent, args_01, nullptr);
   }
 
-  eventTargetInstance->m_eventListenerMap.add(eventType, JS_DupValue(ctx, callback));
-  JS_FreeAtom(ctx, eventType);
+  bool success = eventTargetInstance->m_eventListenerMap.add(eventType, JS_DupValue(ctx, callback));
+  // Callback didn't saved to eventListenerMap.
+  if (!success) {
+    JS_FreeAtom(ctx, eventType);
+    JS_FreeValue(ctx, callback);
+  }
 
   return JS_UNDEFINED;
 }
@@ -110,6 +115,7 @@ JSValue EventTarget::removeEventListener(JSContext* ctx, JSValue this_val, int a
   }
 
   if (eventHandlers.remove(eventType, callback)) {
+    JS_FreeAtom(ctx, eventType);
     JS_FreeValue(ctx, callback);
   }
 
@@ -120,7 +126,7 @@ JSValue EventTarget::removeEventListener(JSContext* ctx, JSValue this_val, int a
     NativeString args_01{};
     buildUICommandArgs(ctx, eventTypeValue, args_01);
 
-    foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetInstance->m_eventTargetId, UICommand::removeEvent, args_01, nullptr);
+    eventTargetInstance->m_context->uiCommandBuffer()->addCommand(eventTargetInstance->m_eventTargetId, UICommand::removeEvent, args_01, nullptr);
   }
 
   JS_FreeAtom(ctx, eventType);
@@ -262,7 +268,7 @@ JSClassID EventTargetInstance::classId() {
 }
 
 EventTargetInstance::~EventTargetInstance() {
-  foundation::UICommandBuffer::instance(m_contextId)->addCommand(m_eventTargetId, UICommand::disposeEventTarget, nullptr, false);
+  m_context->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::disposeEventTarget, nullptr, false);
   getDartMethod()->flushUICommand();
   delete nativeEventTarget;
 }
@@ -355,17 +361,11 @@ int EventTargetInstance::setProperty(JSContext* ctx, JSValue obj, JSAtom atom, J
   if (!p->is_wide_char && p->len > 2 && p->u.str8[0] == 'o' && p->u.str8[1] == 'n') {
     eventTarget->setAttributesEventHandler(p, value);
   } else {
-    // GC can't track the value if key had been override.
-    // Should free the value if exist on m_properties.
-    if (eventTarget->m_properties.contains(atom)) {
-      JS_FreeValue(eventTarget->m_ctx, eventTarget->m_properties.getProperty(atom));
-    }
-
-    eventTarget->m_properties.setProperty(atom, JS_DupValue(ctx, value));
+    eventTarget->m_properties.setProperty(JS_DupAtom(ctx, atom), JS_DupValue(ctx, value));
     if (isJavaScriptExtensionElementInstance(eventTarget->context(), eventTarget->jsObject) && !p->is_wide_char && p->u.str8[0] != '_') {
       std::unique_ptr<NativeString> args_01 = atomToNativeString(ctx, atom);
       std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, value);
-      foundation::UICommandBuffer::instance(eventTarget->m_contextId)->addCommand(eventTarget->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+      eventTarget->m_context->uiCommandBuffer()->addCommand(eventTarget->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
     }
   }
 
@@ -399,11 +399,6 @@ void EventTargetInstance::setAttributesEventHandler(JSString* p, JSValue value) 
   memcpy(eventType, &p->u.str8[2], p->len + 1 - 2);
   JSAtom atom = JS_NewAtom(m_ctx, eventType);
 
-  // EventHandler are no long visible by GC. Should free it manually.
-  if (m_eventHandlerMap.contains(atom)) {
-    JS_FreeValue(m_ctx, m_eventHandlerMap.getProperty(atom));
-  }
-
   // When evaluate scripts like 'element.onclick = null', we needs to remove the event handlers callbacks
   if (JS_IsNull(value)) {
     m_eventHandlerMap.erase(atom);
@@ -411,17 +406,14 @@ void EventTargetInstance::setAttributesEventHandler(JSString* p, JSValue value) 
     return;
   }
 
-  JSValue newCallback = JS_DupValue(m_ctx, value);
-  m_eventHandlerMap.setProperty(atom, newCallback);
+  m_eventHandlerMap.setProperty(atom, JS_DupValue(m_ctx, value));
 
   if (JS_IsFunction(m_ctx, value) && m_eventListenerMap.empty()) {
     int32_t contextId = m_context->getContextId();
     std::unique_ptr<NativeString> args_01 = atomToNativeString(m_ctx, atom);
     int32_t type = JS_IsFunction(m_ctx, value) ? UICommand::addEvent : UICommand::removeEvent;
-    foundation::UICommandBuffer::instance(contextId)->addCommand(m_eventTargetId, type, *args_01, nullptr);
+    m_context->uiCommandBuffer()->addCommand(m_eventTargetId, type, *args_01, nullptr);
   }
-
-  JS_FreeAtom(m_ctx, atom);
 }
 
 JSValue EventTargetInstance::getAttributesEventHandler(JSString* p) {

@@ -91,7 +91,6 @@ void initJSPagePool(int poolSize) {
   // When dart hot restarted, should dispose previous bridge and clear task message queue.
   if (inited) {
     disposeAllPages();
-    foundation::UICommandBuffer::instance(0)->clear();
   };
   pageContextPool = new kraken::KrakenPage*[poolSize];
   for (int i = 1; i < poolSize; i++) {
@@ -107,12 +106,15 @@ void disposePage(int32_t contextId) {
   assert(contextId < maxPoolSize);
   if (pageContextPool[contextId] == nullptr)
     return;
-    // UnitTest will free page after test suit complete.
+
+  // In order to avoid accessing pageContextPool when the page is being released. We need to clear the value in pageContextPool before releasing.
+  pageContextPool[contextId] = nullptr;
+
+  // UnitTest will free page after test suit complete.
 #ifndef UNIT_TEST
   auto* page = static_cast<kraken::KrakenPage*>(pageContextPool[contextId]);
   delete page;
 #endif
-  pageContextPool[contextId] = nullptr;
 }
 
 int32_t allocateNewPage(int32_t targetContextId) {
@@ -225,15 +227,18 @@ void flushUICommandCallback() {
 }
 
 UICommandItem* getUICommandItems(int32_t contextId) {
-  return foundation::UICommandBuffer::instance(contextId)->data();
+  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  return page->getContext()->uiCommandBuffer()->data();
 }
 
 int64_t getUICommandItemSize(int32_t contextId) {
-  return foundation::UICommandBuffer::instance(contextId)->size();
+  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  return page->getContext()->uiCommandBuffer()->size();
 }
 
 void clearUICommandItems(int32_t contextId) {
-  return foundation::UICommandBuffer::instance(contextId)->clear();
+  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  page->getContext()->uiCommandBuffer()->clear();
 }
 
 void registerContextDisposedCallbacks(int32_t contextId, Task task, void* data) {

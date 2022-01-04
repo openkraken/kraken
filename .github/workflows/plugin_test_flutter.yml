@@ -4,20 +4,6 @@ on: [workflow_dispatch, pull_request]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  plugin_test_f_220:
-    runs-on: [self-hosted, flutter_2.2.0]
-    steps:
-    - uses: actions/checkout@v2
-    - name: Run Plugin Test
-      run: npm run pretest && npm run plugin_test
-      id: test
-      continue-on-error: true
-    - name: Upload Snapshots
-      run: node scripts/upload_snapshots.js
-      continue-on-error: true
-    - name: Check on failures
-      if: steps.test.outcome != 'success'
-      run: exit 1
   plugin_test_f_253:
     runs-on: [self-hosted, flutter_2.5.3]
     steps:

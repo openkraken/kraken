@@ -223,7 +223,7 @@ JSValue Element::setAttribute(JSContext* ctx, JSValue this_val, int argc, JSValu
   std::unique_ptr<NativeString> args_01 = stringToNativeString(name);
   std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, attributeValue);
 
-  ::foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
 
   JS_FreeValue(ctx, attributeValue);
 
@@ -275,7 +275,7 @@ JSValue Element::removeAttribute(JSContext* ctx, JSValue this_val, int argc, JSV
     JS_FreeValue(ctx, targetValue);
 
     std::unique_ptr<NativeString> args_01 = stringToNativeString(name);
-    ::foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->m_eventTargetId, UICommand::removeProperty, *args_01, nullptr);
+    element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::removeProperty, *args_01, nullptr);
   }
 
   return JS_NULL;
@@ -406,7 +406,7 @@ IMPL_PROPERTY_SETTER(Element, className)(JSContext* ctx, JSValue this_val, int a
   element->m_attributes->setAttribute("class", argv[0]);
   std::unique_ptr<NativeString> args_01 = stringToNativeString("class");
   std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
-  ::foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
   return JS_NULL;
 }
 
@@ -816,6 +816,8 @@ void ElementInstance::_beforeUpdateId(JSValue oldIdValue, JSValue newIdValue) {
   JSAtom newId = JS_ValueToAtom(m_ctx, newIdValue);
 
   if (oldId == newId) {
+    JS_FreeAtom(m_ctx, oldId);
+    JS_FreeAtom(m_ctx, newId);
     return;
   }
 
@@ -832,7 +834,9 @@ void ElementInstance::_beforeUpdateId(JSValue oldIdValue, JSValue newIdValue) {
 }
 
 void ElementInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
-  JS_MarkValue(rt, m_attributes->toQuickJS(), mark_func);
+  if (m_attributes != nullptr) {
+    JS_MarkValue(rt, m_attributes->toQuickJS(), mark_func);
+  }
   NodeInstance::trace(rt, val, mark_func);
 }
 
@@ -847,7 +851,7 @@ ElementInstance::ElementInstance(Element* element, std::string tagName, bool sho
 
   if (shouldAddUICommand) {
     std::unique_ptr<NativeString> args_01 = stringToNativeString(tagName);
-    ::foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_eventTargetId, UICommand::createElement, *args_01, nativeEventTarget);
+    element->m_context->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::createElement, *args_01, nativeEventTarget);
   }
 }
 
