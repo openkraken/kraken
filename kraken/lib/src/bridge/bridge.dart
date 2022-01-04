@@ -39,10 +39,8 @@ int initBridge() {
     Future.microtask(() {
       // Port flutter's frame callback into bridge.
       SchedulerBinding.instance!.addPersistentFrameCallback((_) {
-        if (contextId != -1) {
-          flushUICommand();
-          flushUICommandCallback();
-        }
+        flushUICommand();
+        flushUICommandCallback();
       });
     });
   }

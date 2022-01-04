@@ -12,7 +12,7 @@ import 'package:kraken/dom.dart';
 /// manage element to implement lifecycles for sliver list, generate
 /// renderer from existing element tree.
 class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
-  // @TODO: Support hummer.
+  // @NOTE: For hummer support, no real function here.
   void restorePreparedChild(int index) { }
   void stashPreparedChild(int index) { }
 

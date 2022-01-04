@@ -15,7 +15,3 @@ if [ -L "libquickjs.dylib" ]; then
   rm libquickjs.dylib
   ln -s $ROOT/../../bridge/build/macos/lib/x86_64/libquickjs.dylib
 fi
-
-# apply patch for flutter 2.5.x
-cd $ROOT/../
-sh ./patches/apply_patch.sh
