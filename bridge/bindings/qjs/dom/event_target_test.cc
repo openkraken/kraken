@@ -229,3 +229,15 @@ setTimeout(() => {});
   EXPECT_EQ(logCalled, true);
 }
 
+TEST(EventTarget, globalBindListener) {
+  bool static logCalled = false;
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(), "clicked");
+  };
+  auto bridge = TEST_init();
+  std::string code = "addEventListener('click', () => {console.log('clicked'); }); dispatchEvent(new Event('click'))";
+  bridge->evaluateScript(code.c_str(), code.size(), "internal://", 0);
+  EXPECT_EQ(logCalled, true);
+}
+

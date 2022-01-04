@@ -33,7 +33,7 @@ IMPL_PROPERTY_SETTER(ImageElement, width)(JSContext* ctx, JSValue this_val, int 
   std::string key = "width";
   std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
   std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
-  foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
   return JS_NULL;
 }
 IMPL_PROPERTY_GETTER(ImageElement, height)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -46,7 +46,7 @@ IMPL_PROPERTY_SETTER(ImageElement, height)(JSContext* ctx, JSValue this_val, int
   std::string key = "height";
   std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
   std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
-  foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
   return JS_NULL;
 }
 IMPL_PROPERTY_GETTER(ImageElement, naturalWidth)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -69,7 +69,7 @@ IMPL_PROPERTY_SETTER(ImageElement, src)(JSContext* ctx, JSValue this_val, int ar
   std::string key = "src";
   std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
   std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
-  foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
   return JS_NULL;
 }
 IMPL_PROPERTY_GETTER(ImageElement, loading)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -82,7 +82,7 @@ IMPL_PROPERTY_SETTER(ImageElement, loading)(JSContext* ctx, JSValue this_val, in
   std::string key = "loading";
   std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
   std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
-  foundation::UICommandBuffer::instance(element->m_context->getContextId())->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
   return JS_NULL;
 }
 

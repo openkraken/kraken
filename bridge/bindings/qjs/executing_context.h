@@ -17,6 +17,7 @@
 #include <mutex>
 #include <unordered_map>
 #include "bindings/qjs/bom/dom_timer_coordinator.h"
+#include "foundation/ui_command_buffer.h"
 #include "garbage_collected.h"
 #include "js_context_macros.h"
 #include "kraken_foundation.h"
@@ -94,6 +95,7 @@ class ExecutionContext {
   DOMTimerCoordinator* timers();
 
   FORCE_INLINE DocumentInstance* document() { return m_document; };
+  FORCE_INLINE foundation::UICommandBuffer* uiCommandBuffer() { return &m_commandBuffer; };
 
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func);
 
@@ -129,6 +131,7 @@ class ExecutionContext {
   DocumentInstance* m_document{nullptr};
   DOMTimerCoordinator m_timers;
   ExecutionContextGCTracker* m_gcTracker{nullptr};
+  foundation::UICommandBuffer m_commandBuffer{contextId};
 };
 
 // The read object's method or properties via Proxy, we should redirect this_val from Proxy into target property of
@@ -139,7 +142,14 @@ static JSValue handleCallThisOnProxy(JSContext* ctx, JSValueConst this_val, int 
   if (JS_IsProxy(this_val)) {
     result = JS_Call(ctx, f, JS_GetProxyTarget(this_val), argc, argv);
   } else {
-    result = JS_Call(ctx, f, this_val, argc, argv);
+    // If this_val is undefined or null, this_val should set to globalThis.
+    if (JS_IsUndefined(this_val) || JS_IsNull(this_val)) {
+      this_val = JS_GetGlobalObject(ctx);
+      result = JS_Call(ctx, f, this_val, argc, argv);
+      JS_FreeValue(ctx, this_val);
+    } else {
+      result = JS_Call(ctx, f, this_val, argc, argv);
+    }
   }
   return result;
 }

@@ -44,7 +44,7 @@ IMPL_PROPERTY_GETTER(Comment, length)(JSContext* ctx, JSValue this_val, int argc
 }
 
 CommentInstance::CommentInstance(Comment* comment) : NodeInstance(comment, NodeType::COMMENT_NODE, Comment::classId(), "Comment") {
-  ::foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_eventTargetId, UICommand::createComment, nativeEventTarget);
+  m_context->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::createComment, nativeEventTarget);
 }
 
 }  // namespace kraken::binding::qjs
