@@ -1,0 +1,22 @@
+name: Sync main code to release branch
+
+on:
+  release:
+    branches: [main]
+  workflow_dispatch:
+    branches: [main]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  release/2.2.x:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v2
+      - ref: 'release/flutter-2.2.x'
+    - name: Merge code from main
+      run: git merge origin/main
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
