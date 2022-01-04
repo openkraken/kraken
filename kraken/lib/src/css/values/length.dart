@@ -288,18 +288,14 @@ class CSSLengthValue {
             }
             break;
 
-          // Percentage of transform refer to the size of reference box.
-          // https://www.w3.org/TR/css-transforms-1/#transform-property
           case TRANSLATE:
-          // Percentage of background-size is relative to the background positioning area.
-          // https://www.w3.org/TR/css-backgrounds-3/#background-size
           case BACKGROUND_SIZE:
-          // Percentage of border-radius refers to corresponding dimension of the border box.
-          // https://www.w3.org/TR/css-backgrounds-3/#propdef-border-radius
           case BORDER_TOP_LEFT_RADIUS:
           case BORDER_TOP_RIGHT_RADIUS:
           case BORDER_BOTTOM_LEFT_RADIUS:
           case BORDER_BOTTOM_RIGHT_RADIUS:
+            // Percentages for the horizontal axis refer to the width of the box.
+            // Percentages for the vertical axis refer to the height of the box.
             double? borderBoxWidth = renderStyle!.borderBoxWidth ?? renderStyle!.borderBoxLogicalWidth;
             double? borderBoxHeight = renderStyle!.borderBoxHeight ?? renderStyle!.borderBoxLogicalHeight;
 
