@@ -1,8 +1,11 @@
 name: Sync main code to release branch
 
-on: [workflow_dispatch, push]
+on:
+  push:
+    branches:
+      - main
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+# Sync main code to release/flutter-2.2.x branch.
 jobs:
   flutter_2_2_x:
     runs-on: ubuntu-latest
