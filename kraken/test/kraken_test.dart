@@ -24,7 +24,7 @@ import 'src/gesture/scroll_physics.dart' as scroll_physics;
 // Setup all common logic.
 void main() {
   // Setup environment.
-  WidgetsFlutterBinding.ensureInitialized();
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   // Start local HTTP server.
   LocalHttpServer.basePath = 'test/fixtures';

@@ -1,3 +1,5 @@
+ROOT=$(pwd)
+
 if [ -L "kraken_bridge.xcframework" ]; then
   ROOT=$(pwd)
   rm kraken_bridge.xcframework

@@ -159,7 +159,6 @@ class Document extends Node {
     widgetDelegate = null;
     styleSheets.clear();
     adoptedStyleSheets.clear();
-    documentElement?.dispose();
     super.dispose();
   }
 }
