@@ -158,9 +158,6 @@ class CSSLengthValue {
           ? parentPaddingBoxHeight
           : parentContentBoxHeight;
 
-        double? borderBoxWidth = renderStyle!.borderBoxWidth ?? renderStyle!.borderBoxLogicalWidth;
-        double? borderBoxHeight = renderStyle!.borderBoxHeight ?? renderStyle!.borderBoxLogicalHeight;
-
         switch (propertyName) {
           case FONT_SIZE:
             // Relative to the parent font size.
@@ -294,21 +291,6 @@ class CSSLengthValue {
           // Percentage of transform refer to the size of reference box.
           // https://www.w3.org/TR/css-transforms-1/#transform-property
           case TRANSLATE:
-            if (axisType == Axis.horizontal) {
-              _computedValue = borderBoxWidth != null
-                ? value! * borderBoxWidth
-                // Transform will be cached once resolved, so avoid resolve if width not defined.
-                // Use double.infinity to indicate percentage not resolved.
-                : double.infinity;
-            } else if (axisType == Axis.vertical) {
-              _computedValue = borderBoxHeight != null
-                ? value! * borderBoxHeight
-                // Transform will be cached once resolved, so avoid resolve if width not defined.
-                // Use double.infinity to indicate percentage not resolved.
-                : double.infinity;
-            }
-            break;
-
           // Percentage of background-size is relative to the background positioning area.
           // https://www.w3.org/TR/css-backgrounds-3/#background-size
           case BACKGROUND_SIZE:
@@ -318,14 +300,29 @@ class CSSLengthValue {
           case BORDER_TOP_RIGHT_RADIUS:
           case BORDER_BOTTOM_LEFT_RADIUS:
           case BORDER_BOTTOM_RIGHT_RADIUS:
+            double? borderBoxWidth = renderStyle!.borderBoxWidth ?? renderStyle!.borderBoxLogicalWidth;
+            double? borderBoxHeight = renderStyle!.borderBoxHeight ?? renderStyle!.borderBoxLogicalHeight;
+
             if (axisType == Axis.horizontal) {
-              _computedValue = borderBoxWidth != null
-                ? value! * borderBoxWidth
-                : 0;
+              if (borderBoxWidth != null) {
+                _computedValue = value! * borderBoxWidth;
+              } else {
+                _computedValue = propertyName == TRANSLATE
+                  // Transform will be cached once resolved, so avoid resolve if width not defined.
+                  // Use double.infinity to indicate percentage not resolved.
+                  ? double.infinity
+                  : 0;
+              }
             } else if (axisType == Axis.vertical) {
-              _computedValue = borderBoxHeight != null
-                ? value! * borderBoxHeight
-                : 0;
+              if (borderBoxHeight != null) {
+                _computedValue = value! * borderBoxHeight;
+              } else {
+                _computedValue = propertyName == TRANSLATE
+                  // Transform will be cached once resolved, so avoid resolve if height not defined.
+                  // Use double.infinity to indicate percentage not resolved.
+                  ? double.infinity
+                  : 0;
+              }
             }
           break;
         }
