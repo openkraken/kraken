@@ -176,7 +176,6 @@ async function simulateSwipe(startX: number, startY: number, endX: number, endY:
     let progress = i / totalCount;
     let diffX = diffXPerSecond * 100 * ease.transformInternal(progress);
     let diffY = diffYPerSecond * 100 * ease.transformInternal(progress);
-    await sleep(pointerMoveDelay);
     params.push([startX + diffX, startY + diffY, PointerChange.move])
   }
 

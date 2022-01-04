@@ -529,17 +529,28 @@ DocumentInstance::DocumentInstance(Document* document) : NodeInstance(document, 
 #endif
 }
 
-DocumentInstance::~DocumentInstance() {}
+DocumentInstance::~DocumentInstance() {
+  // Atom string should keep alive in memory to make sure same string have the corresponding id.
+  // Only freed after document finalized.
+  for (auto& entry : m_elementMapById) {
+    JS_FreeAtomRT(m_context->runtime(), entry.first);
+    // Note: someone may be curious why there are no JS_FreeValueRT() call in this finalize callbacks.
+    // m_elementMapById's value are all elements, which are JavaScript objects. Will be freed by GC at marking phase.
+  }
+}
 void DocumentInstance::removeElementById(JSAtom id, ElementInstance* element) {
   if (m_elementMapById.count(id) > 0) {
     auto& list = m_elementMapById[id];
+    auto idx = std::find(list.begin(), list.end(), element);
+    assert_m(idx != list.end(), "Element should exist in idMap");
+    list.erase(idx);
     JS_FreeValue(m_ctx, element->jsObject);
-    list.erase(std::find(list.begin(), list.end(), element));
   }
 }
 void DocumentInstance::addElementById(JSAtom id, ElementInstance* element) {
   if (m_elementMapById.count(id) == 0) {
     m_elementMapById[id] = std::vector<ElementInstance*>();
+    JS_DupAtom(m_ctx, id);
   }
 
   auto& list = m_elementMapById[id];
@@ -577,7 +588,9 @@ void DocumentInstance::cancelAnimationFrame(uint32_t callbackId) {
 void DocumentInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
   NodeInstance::trace(rt, val, mark_func);
   // Trace scriptAnimationController
-  JS_MarkValue(rt, m_scriptAnimationController->toQuickJS(), mark_func);
+  if (m_scriptAnimationController != nullptr) {
+    JS_MarkValue(rt, m_scriptAnimationController->toQuickJS(), mark_func);
+  }
   // Trace elementByIdMaps
   for (auto& entry : m_elementMapById) {
     for (auto& value : entry.second) {

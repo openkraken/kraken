@@ -1,15 +1,15 @@
-name: Integration Test with Flutter 2.2.0
+name: Plugin Test
 
 on: [workflow_dispatch, pull_request]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  integration_test:
-    runs-on: [self-hosted, flutter_2.2.0]
+  plugin_test_f_253:
+    runs-on: [self-hosted, flutter_2.5.3]
     steps:
     - uses: actions/checkout@v2
-    - name: Run Test
-      run: npm test
+    - name: Run Plugin Test
+      run: npm run pretest && npm run plugin_test
       id: test
       continue-on-error: true
     - name: Upload Snapshots

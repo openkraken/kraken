@@ -816,6 +816,8 @@ void ElementInstance::_beforeUpdateId(JSValue oldIdValue, JSValue newIdValue) {
   JSAtom newId = JS_ValueToAtom(m_ctx, newIdValue);
 
   if (oldId == newId) {
+    JS_FreeAtom(m_ctx, oldId);
+    JS_FreeAtom(m_ctx, newId);
     return;
   }
 
@@ -832,7 +834,9 @@ void ElementInstance::_beforeUpdateId(JSValue oldIdValue, JSValue newIdValue) {
 }
 
 void ElementInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
-  JS_MarkValue(rt, m_attributes->toQuickJS(), mark_func);
+  if (m_attributes != nullptr) {
+    JS_MarkValue(rt, m_attributes->toQuickJS(), mark_func);
+  }
   NodeInstance::trace(rt, val, mark_func);
 }
 

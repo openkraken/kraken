@@ -246,6 +246,9 @@ mixin RenderOverflowMixin on RenderBox {
     scrollablePointerListener = null;
     _scrollOffsetX = null;
     _scrollOffsetY = null;
+    // Dispose clip layer.
+    _clipRRectLayer.layer = null;
+    _clipRectLayer.layer = null;
   }
 
   bool _clipX = false;
@@ -370,8 +373,8 @@ mixin RenderOverflowMixin on RenderBox {
     return paintOffset < Offset.zero || !(Offset.zero & size).contains((paintOffset & childSize).bottomRight);
   }
 
-  ClipRRectLayer? _oldClipRRectLayer;
-  ClipRectLayer? _oldClipRectLayer;
+  final LayerHandle<ClipRRectLayer> _clipRRectLayer = LayerHandle<ClipRRectLayer>();
+  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
   void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, BoxDecoration? decoration, PaintingContextCallback callback) {
     if (clipX == false && clipY == false) return callback(context, offset);
@@ -401,13 +404,13 @@ mixin RenderOverflowMixin on RenderBox {
             bottomLeft: radius.bottomLeft,
             bottomRight: radius.bottomRight
         );
-        _oldClipRRectLayer = context.pushClipRRect(_needsCompositing, offset, clipRect, clipRRect, painter, oldLayer: _oldClipRRectLayer);
+        _clipRRectLayer.layer = context.pushClipRRect(_needsCompositing, offset, clipRect, clipRRect, painter, oldLayer: _clipRRectLayer.layer);
       } else {
-        _oldClipRectLayer = context.pushClipRect(_needsCompositing, offset, clipRect, painter, oldLayer: _oldClipRectLayer);
+        _clipRectLayer.layer = context.pushClipRect(_needsCompositing, offset, clipRect, painter, oldLayer: _clipRectLayer.layer);
       }
     } else {
-      _oldClipRRectLayer = null;
-      _oldClipRectLayer = null;
+      _clipRectLayer.layer = null;
+      _clipRRectLayer.layer = null;
       callback(context, offset);
     }
   }

@@ -26,6 +26,22 @@ TEST(EventTarget, addEventListener) {
   EXPECT_EQ(errorCalled, false);
 }
 
+TEST(EventTarget, removeEventListener) {
+  bool static errorCalled = false;
+  bool static logCalled = false;
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { logCalled = true; };
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
+    KRAKEN_LOG(VERBOSE) << errmsg;
+    errorCalled = true;
+  });
+  auto& context = bridge->getContext();
+  const char* code =
+      "let div = document.createElement('div'); function f(){ console.log(1234); }; div.addEventListener('click', f); div.removeEventListener('click', f); div.dispatchEvent(new Event('click'));";
+  bridge->evaluateScript(code, strlen(code), "vm://", 0);
+
+  EXPECT_EQ(logCalled, false);
+}
+
 TEST(EventTarget, setNoEventTargetProperties) {
   bool static errorCalled = false;
   bool static logCalled = false;
@@ -194,5 +210,26 @@ TEST(EventTarget, globalBindListener) {
   auto bridge = TEST_init();
   std::string code = "addEventListener('click', () => {console.log('clicked'); }); dispatchEvent(new Event('click'))";
   bridge->evaluateScript(code.c_str(), code.size(), "internal://", 0);
+  EXPECT_EQ(logCalled, true);
+}
+
+TEST(EventTarget, shouldKeepAtom) {
+  auto bridge = TEST_init();
+  bool static logCalled = false;
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(), "2");
+  };
+  std::string code = "addEventListener('click', () => {console.log(1)});";
+  bridge->evaluateScript(code.c_str(), code.size(), "internal://", 0);
+  JS_RunGC(bridge->getContext()->runtime());
+
+  std::string code2 = "addEventListener('appear', () => {console.log(2)});";
+  bridge->evaluateScript(code2.c_str(), code2.size(), "internal://", 0);
+
+  JS_RunGC(bridge->getContext()->runtime());
+
+  std::string code3 = "(function() { var eeee = new Event('appear'); dispatchEvent(eeee); } )();";
+  bridge->evaluateScript(code3.c_str(), code3.size(), "internal://", 0);
   EXPECT_EQ(logCalled, true);
 }
