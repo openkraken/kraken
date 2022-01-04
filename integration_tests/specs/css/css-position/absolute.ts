@@ -726,6 +726,24 @@ describe('Position absolute', () => {
     await snapshot();
   });
 
+  it('should work with percentage offset of containing block which is not parent', async () => {
+    let div1 = createElement(
+      'div',
+      {
+        style: {
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          width: '100px',
+          height: '100px',
+          backgroundColor: 'green'
+       },
+      });
+    
+    BODY.appendChild(div1);
+    await snapshot();
+  });
+
   it('should work with percentage after element is attached', async (done) => {
     let div2;
     let div;
