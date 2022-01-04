@@ -1089,10 +1089,13 @@ class RenderBoxModel extends RenderBox
     ));
   }
 
+  // Reaint native EngineLayer sources with LayerHandle.
+  final LayerHandle<ColorFilterLayer> _colorFilterLayer = LayerHandle<ColorFilterLayer>();
+
   void paintColorFilter(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     ColorFilter? colorFilter = renderStyle.colorFilter;
     if (colorFilter != null) {
-      context.pushColorFilter(offset, colorFilter, callback);
+      _colorFilterLayer.layer = context.pushColorFilter(offset, colorFilter, callback, oldLayer: _colorFilterLayer.layer);
     } else {
       callback(context, offset);
     }
@@ -1114,13 +1117,13 @@ class RenderBoxModel extends RenderBox
     }
   }
 
-  ImageFilterLayer? _imageFilterLayer;
+  final LayerHandle<ImageFilterLayer> _imageFilterLayer = LayerHandle<ImageFilterLayer>();
   void paintImageFilter(PaintingContext context, Offset offset,
       PaintingContextCallback callback) {
     if (renderStyle.imageFilter != null) {
-      _imageFilterLayer ??= ImageFilterLayer();
-      _imageFilterLayer!.imageFilter = renderStyle.imageFilter;
-      context.pushLayer(_imageFilterLayer!, callback, offset);
+      _imageFilterLayer.layer ??= ImageFilterLayer();
+      _imageFilterLayer.layer!.imageFilter = renderStyle.imageFilter;
+      context.pushLayer(_imageFilterLayer.layer!, callback, offset);
     } else {
       callback(context, offset);
     }
@@ -1211,17 +1214,104 @@ class RenderBoxModel extends RenderBox
         renderStyle.backgroundAttachment == CSSBackgroundAttachmentType.local;
   }
 
-  void _detachAllChildren() {
-    if (this is RenderObjectWithChildMixin) {
-      (this as RenderObjectWithChildMixin).child = null;
-    } else if (this is ContainerRenderObjectMixin) {
-      (this as ContainerRenderObjectMixin).removeAll();
+  // Detach renderBoxModel from its containing block.
+  // Need to remove position placeholder besides removing itself.
+  void detachFromContainingBlock() {
+    detachRenderBox(this);
+
+    // Remove placeholder of positioned element.
+    _detachPositionPlaceholder(this);
+  }
+
+  // The position and size of an element's box(es) are sometimes calculated relative to a certain rectangle,
+  // called the containing block of the element.
+  // Definition of "containing block": https://www.w3.org/TR/CSS21/visudet.html#containing-block-details
+  void attachToContainingBlock(
+      RenderBox? containingBlockRenderBox,
+      { RenderBox? parent, RenderBox? after }
+      ) {
+    if (parent == null || containingBlockRenderBox == null) return;
+
+    RenderBoxModel renderBoxModel = this;
+    CSSPositionType positionType = renderBoxModel.renderStyle.position;
+    // The containing block of an element is defined as follows:
+    if (positionType == CSSPositionType.relative
+        || positionType == CSSPositionType.static
+        || positionType == CSSPositionType.sticky
+    ) {
+      // If the element's position is 'relative' or 'static',
+      // the containing block is formed by the content edge of the nearest block container ancestor box.
+      attachRenderBox(containingBlockRenderBox, renderBoxModel, after: after);
+
+      if (positionType == CSSPositionType.sticky) {
+        // Placeholder of sticky renderBox need to inherit offset from original renderBox,
+        // so it needs to layout before original renderBox.
+        _attachPositionPlaceholder(containingBlockRenderBox, renderBoxModel, after: after);
+      }
+    } else {
+      // Set custom positioned parentData.
+      RenderLayoutParentData parentData = RenderLayoutParentData();
+      renderBoxModel.parentData = CSSPositionedLayout.getPositionParentData(renderBoxModel, parentData);
+      // Add child to containing block parent.
+      attachRenderBox(containingBlockRenderBox, renderBoxModel, isLast: true);
+
+      // If container block is same as origin parent, the placeholder must after the origin renderBox
+      // because placeholder depends the constraints in layout stage.
+      RenderBox? previousSibling = containingBlockRenderBox == parent ?
+      renderBoxModel : after;
+
+      // Add position holder to origin position parent.
+      _attachPositionPlaceholder(parent, renderBoxModel, after: previousSibling);
     }
   }
 
+  // Find previous sibling renderObject of renderBoxModel, used for inserting to containing block.
+  // If renderBoxModel is positioned, find the original place (position placeholder) to insert to
+  // when its position changes to relative/static/sticky.
+  RenderBox? getPreviousSibling() {
+    RenderBoxModel renderBoxModel = this;
+    RenderBox? previousSibling;
+    RenderPositionPlaceholder? renderPositionPlaceholder = renderBoxModel.renderPositionPlaceholder;
+    // It needs to find the previous sibling of the previous sibling if the placeholder of
+    // positioned element exists and follows renderObject at the same time, eg.
+    // <div style="position: relative"><div style="position: absolute" /></div>
+    if (renderPositionPlaceholder != null) {
+      previousSibling = (renderPositionPlaceholder.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
+      // The placeholder's previousSibling maybe the origin renderBox.
+      if (previousSibling == renderBoxModel) {
+        previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
+      }
+    } else {
+      previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>).previousSibling;
+    }
+    return previousSibling;
+  }
+
+  // Attach placeholder of renderBoxModel from tree.
+  void _attachPositionPlaceholder(RenderBox parentRenderBox, RenderBoxModel renderBoxModel, {RenderBox? after}) {
+    // Position holder size will be updated on layout.
+    RenderPositionPlaceholder renderPositionPlaceholder = RenderPositionPlaceholder(preferredSize: Size.zero);
+    renderBoxModel.renderPositionPlaceholder = renderPositionPlaceholder;
+    renderPositionPlaceholder.positioned = renderBoxModel;
+
+    attachRenderBox(parentRenderBox, renderPositionPlaceholder, after: after);
+  }
+
+  // Detach placeholder of renderBoxModel from tree.
+  void _detachPositionPlaceholder(RenderBoxModel renderBoxModel) {
+    RenderPositionPlaceholder? renderPositionHolder = renderBoxModel.renderPositionPlaceholder;
+    if (renderPositionHolder != null) {
+      detachRenderBox(renderPositionHolder);
+      renderBoxModel.renderPositionPlaceholder = null;
+    }
+  }
+
+
   /// Called when its corresponding element disposed
+  @override
   @mustCallSuper
   void dispose() {
+    super.dispose();
     // Clear renderObjects in list when disposed to avoid memory leak
     if (fixedChildren.isNotEmpty) {
       fixedChildren.clear();
@@ -1230,13 +1320,17 @@ class RenderBoxModel extends RenderBox
     // Dispose scroll behavior
     disposeScrollable();
 
+    // Clear all paint layers
+    _colorFilterLayer.layer = null;
+    _imageFilterLayer.layer = null;
+    disposeTransformLayer();
+    disposeOpacityLayer();
+    disposeIntersectionObserverLayer();
+
     // Dispose box decoration painter.
     disposePainter();
     // Evict render decoration image cache.
     renderStyle.decoration?.image?.image.evict();
-
-    // Remove reference from childs
-    _detachAllChildren();
   }
 
   Offset getTotalScrollOffset() {
@@ -1384,5 +1478,41 @@ class RenderBoxModel extends RenderBox
     debugOverflowProperties(properties);
     debugTransformProperties(properties);
     debugOpacityProperties(properties);
+  }
+
+  // Attach renderBox from tree.
+  static void attachRenderBox(
+    RenderObject parentRenderObject,
+    RenderBox renderBox,
+    {RenderObject? after, bool isLast = false}
+    ) {
+    if (isLast) {
+      assert(after == null);
+    }
+    if (parentRenderObject is RenderObjectWithChildMixin) { // RenderViewportBox
+      parentRenderObject.child = renderBox;
+    } else if (parentRenderObject is ContainerRenderObjectMixin) { // RenderLayoutBox or RenderSliverList
+      // Should attach to renderScrollingContent if it is scrollable.
+      if (parentRenderObject is RenderLayoutBox) {
+        parentRenderObject = parentRenderObject.renderScrollingContent ?? parentRenderObject;
+      }
+      if (isLast) {
+        after = parentRenderObject.lastChild;
+      }
+      parentRenderObject.insert(renderBox, after: after);
+    }
+  }
+
+  // Detach renderBox from tree.
+  static void detachRenderBox(RenderObject renderBox) {
+    if (renderBox.parent == null) return;
+
+    // Remove reference from parent.
+    RenderObject? parentRenderObject = renderBox.parent as RenderObject;
+    if (parentRenderObject is RenderObjectWithChildMixin) {
+      parentRenderObject.child = null; // Case for single child, eg. RenderViewportBox.
+    } else if (parentRenderObject is ContainerRenderObjectMixin) {
+      parentRenderObject.remove(renderBox); // Case for multi children, eg. RenderLayoutBox or RenderSliverList.
+    }
   }
 }
