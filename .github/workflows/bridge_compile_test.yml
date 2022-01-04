@@ -16,7 +16,7 @@ jobs:
     - name: compile for android
       run: npm run build:bridge:android:release
       env:
-        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}../
+        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}/../
 
   build_for_ios:
     runs-on: macos-latest
@@ -28,10 +28,8 @@ jobs:
         ndk-version: r21e
     - name: npm install
       run: npm install
-    - name: compile for android
+    - name: compile for ios
       run: npm run build:bridge:ios:release
-      env:
-        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}../
 
   build_for_macos:
     runs-on: macos-latest
@@ -43,8 +41,5 @@ jobs:
         ndk-version: r21e
     - name: npm install
       run: npm install
-    - name: compile for android
+    - name: compile for macos
       run: npm run build:bridge:macos:release
-      env:
-        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}../
-
