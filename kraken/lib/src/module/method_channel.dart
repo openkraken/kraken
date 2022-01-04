@@ -9,15 +9,7 @@ import 'module_manager.dart';
 typedef MethodCallCallback = Future<dynamic> Function(String method, dynamic arguments);
 const String METHOD_CHANNEL_NOT_INITIALIZED = 'MethodChannel not initialized.';
 const String CONTROLLER_NOT_INITIALIZED = 'Kraken controller not initialized.';
-
-Future<dynamic> _invokeMethodFromJavaScript(KrakenController? controller, String method, List args) {
-  if (controller == null || controller.methodChannel == null) {
-    return Future.error(FlutterError(METHOD_CHANNEL_NOT_INITIALIZED));
-  }
-  return controller.methodChannel!.invokeMethodFromJavaScript(method, args);
-}
-
-const METHOD_CHANNEL_NAME = 'MethodChannel';
+const String METHOD_CHANNEL_NAME = 'MethodChannel';
 
 class MethodChannelModule extends BaseModule {
   @override
@@ -47,7 +39,7 @@ void setJSMethodCallCallback(KrakenController controller) {
     try {
       controller.module.moduleManager.emitModuleEvent(METHOD_CHANNEL_NAME, data: [method, arguments]);
     } catch (e, stack) {
-      print('invoke module event: $e, $stack');
+      print('Error invoke module event: $e, $stack');
     }
   };
 }
@@ -60,14 +52,10 @@ abstract class KrakenMethodChannel {
     _onJSMethodCallCallback = value;
   }
 
-  Future Function(String method, List args) get invokeMethodFromJavaScript => _invokeMethodFromJavaScript;
-
-  Future<dynamic> _invokeMethodFromJavaScript(String method, List arguments) async {}
+  Future<dynamic> invokeMethodFromJavaScript(String method, List arguments);
 
   static void setJSMethodCallCallback(KrakenController controller) {
-    if (controller.methodChannel == null) return;
-
-    controller.methodChannel!._onJSMethodCall = (String method, dynamic arguments) async {
+    controller.methodChannel?._onJSMethodCall = (String method, dynamic arguments) async {
       controller.module.moduleManager.emitModuleEvent(METHOD_CHANNEL_NAME, data: [method, arguments]);
     };
   }
@@ -75,10 +63,12 @@ abstract class KrakenMethodChannel {
 
 class KrakenJavaScriptChannel extends KrakenMethodChannel {
   Future<dynamic> invokeMethod(String method, dynamic arguments) async {
-    if (_onJSMethodCallCallback == null) {
+    MethodCallCallback? jsMethodCallCallback = _onJSMethodCallCallback;
+    if (jsMethodCallCallback != null) {
+      return jsMethodCallCallback(method, arguments);
+    } else {
       return null;
     }
-    return _onJSMethodCallCallback!(method, arguments);
   }
 
   MethodCallCallback? _methodCallCallback;
@@ -91,9 +81,13 @@ class KrakenJavaScriptChannel extends KrakenMethodChannel {
   }
 
   @override
-  Future<dynamic> _invokeMethodFromJavaScript(String method, List arguments) {
-    if (_methodCallCallback == null) return Future.value(null);
-    return _methodCallCallback!(method, arguments);
+  Future<dynamic> invokeMethodFromJavaScript(String method, List arguments) {
+    MethodCallCallback? methodCallCallback = _methodCallCallback;
+    if (methodCallCallback != null) {
+      return _methodCallCallback!(method, arguments);
+    } else {
+      return Future.value(null);
+    }
   }
 }
 
@@ -118,7 +112,7 @@ class KrakenNativeChannel extends KrakenMethodChannel {
     });
 
   @override
-  Future<dynamic> _invokeMethodFromJavaScript(String method, List arguments) async {
+  Future<dynamic> invokeMethodFromJavaScript(String method, List arguments) async {
     Map<String, dynamic> argsWrap = {
       'method': method,
       'args': arguments,
@@ -142,5 +136,14 @@ class KrakenNativeChannel extends KrakenMethodChannel {
     if (path != null) {
       setDynamicLibraryPath(path);
     }
+  }
+}
+
+Future<dynamic> _invokeMethodFromJavaScript(KrakenController? controller, String method, List args) {
+  KrakenMethodChannel? krakenMethodChannel = controller?.methodChannel;
+  if (krakenMethodChannel != null) {
+    return krakenMethodChannel.invokeMethodFromJavaScript(method, args);
+  } else {
+    return Future.error(FlutterError(METHOD_CHANNEL_NOT_INITIALIZED));
   }
 }
