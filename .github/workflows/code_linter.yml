@@ -3,17 +3,17 @@ name: Run Code Linter
 on: [push]
 
 jobs:
-  check_merge_conflict:
-    runs-on: ubuntu-latest
-    name: Find merge conflicts
-    steps:
-      # Checkout the source code so we have some files to look at.
-      - uses: actions/checkout@v2
-      # Run the actual merge conflict finder
-      - name: Merge Conflict finder
-        uses: olivernybroe/action-conflict-finder@v2.0
-        with:
-          excludes: "./kraken/android/jniLibs/arm64-v8a/libquickjs.so,./kraken/android/jniLibs/arm64-v8a/libc++_shared.so,./kraken/android/jniLibs/arm64-v8a/libkraken.so"
+  # check_merge_conflict:
+  #   runs-on: ubuntu-latest
+  #   name: Find merge conflicts
+  #   steps:
+  #     # Checkout the source code so we have some files to look at.
+  #     - uses: actions/checkout@v2
+  #     # Run the actual merge conflict finder
+  #     - name: Merge Conflict finder
+  #       uses: olivernybroe/action-conflict-finder@v2.0
+  #       with:
+  #         exclude_dir: "node_modules/**"
   reformat-bridge:
     runs-on: ubuntu-latest
 
