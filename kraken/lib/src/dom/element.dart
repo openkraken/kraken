@@ -1414,7 +1414,7 @@ class Element extends Node
       }
 
       if (sizedBox.hasSize) {
-        Offset offset = getOffset(sizedBox, ancestor: ownerDocument.documentElement);
+        Offset offset = _getOffset(sizedBox, ancestor: ownerDocument.documentElement);
         Size size = sizedBox.size;
         boundingClientRect = BoundingClientRect(
           offset.dx,
@@ -1438,7 +1438,7 @@ class Element extends Node
     double offset = 0;
     RenderBoxModel selfRenderBoxModel = renderBoxModel!;
     if (selfRenderBoxModel.attached) {
-      Offset relative = getOffset(selfRenderBoxModel, ancestor: offsetParent);
+      Offset relative = _getOffset(selfRenderBoxModel, ancestor: offsetParent);
       offset += relative.dx;
     }
     return offset;
@@ -1451,7 +1451,7 @@ class Element extends Node
     double offset = 0;
     RenderBoxModel selfRenderBoxModel = renderBoxModel!;
     if (selfRenderBoxModel.attached) {
-      Offset relative = getOffset(selfRenderBoxModel, ancestor: offsetParent);
+      Offset relative = _getOffset(selfRenderBoxModel, ancestor: offsetParent);
       offset += relative.dy;
     }
     return offset;
@@ -1483,7 +1483,7 @@ class Element extends Node
   }
 
   // Get the offset of current element relative to specified ancestor element.
-  Offset getOffset(RenderBox renderBox, { Element? ancestor }) {
+  Offset _getOffset(RenderBox renderBox, { Element? ancestor }) {
     // Need to flush layout to get correct size.
     ownerDocument.documentElement!.renderBoxModel!.owner!.flushLayout();
 
