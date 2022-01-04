@@ -13,7 +13,7 @@ jobs:
       - name: Merge Conflict finder
         uses: olivernybroe/action-conflict-finder@v2.0
         with:
-          exclude_dir: "kraken/android/jniLibs/**,kraken/macos/**,kraken/ios/**,kraken/include/**"
+          excludes: "./kraken/android/jniLibs/arm64-v8a/libquickjs.so,./kraken/android/jniLibs/arm64-v8a/libc++_shared.so,./kraken/android/jniLibs/arm64-v8a/libkraken.so"
   reformat-bridge:
     runs-on: ubuntu-latest
 
