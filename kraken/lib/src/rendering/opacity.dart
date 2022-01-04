@@ -13,23 +13,23 @@ mixin RenderOpacityMixin on RenderBox {
   int alpha = ui.Color.getAlphaFromOpacity(1.0);
 
 
-  final LayerHandle<OpacityLayer> _opacityLayer = LayerHandle<OpacityLayer>();
+  OpacityLayer? _opacityLayer;
 
   void disposeOpacityLayer() {
-    _opacityLayer.layer = null;
+    _opacityLayer = null;
   }
 
   void paintOpacity(PaintingContext context, Offset offset,
       PaintingContextCallback callback) {
     if (alpha == 255) {
-      _opacityLayer.layer = null;
+      _opacityLayer = null;
       // No need to keep the layer. We'll create a new one if necessary.
       callback(context, offset);
       return;
     }
 
-    _opacityLayer.layer =
-        context.pushOpacity(offset, alpha, callback, oldLayer: _opacityLayer.layer);
+    _opacityLayer =
+        context.pushOpacity(offset, alpha, callback, oldLayer: _opacityLayer);
   }
 
   void debugOpacityProperties(DiagnosticPropertiesBuilder properties) {

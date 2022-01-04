@@ -1090,12 +1090,12 @@ class RenderBoxModel extends RenderBox
   }
 
   // Reaint native EngineLayer sources with LayerHandle.
-  final LayerHandle<ColorFilterLayer> _colorFilterLayer = LayerHandle<ColorFilterLayer>();
+  ColorFilterLayer? _colorFilterLayer;
 
   void paintColorFilter(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     ColorFilter? colorFilter = renderStyle.colorFilter;
     if (colorFilter != null) {
-      _colorFilterLayer.layer = context.pushColorFilter(offset, colorFilter, callback, oldLayer: _colorFilterLayer.layer);
+      _colorFilterLayer = context.pushColorFilter(offset, colorFilter, callback, oldLayer: _colorFilterLayer);
     } else {
       callback(context, offset);
     }
@@ -1117,13 +1117,13 @@ class RenderBoxModel extends RenderBox
     }
   }
 
-  final LayerHandle<ImageFilterLayer> _imageFilterLayer = LayerHandle<ImageFilterLayer>();
+  ImageFilterLayer? _imageFilterLayer;
   void paintImageFilter(PaintingContext context, Offset offset,
       PaintingContextCallback callback) {
     if (renderStyle.imageFilter != null) {
-      _imageFilterLayer.layer ??= ImageFilterLayer();
-      _imageFilterLayer.layer!.imageFilter = renderStyle.imageFilter;
-      context.pushLayer(_imageFilterLayer.layer!, callback, offset);
+      _imageFilterLayer ??= ImageFilterLayer();
+      _imageFilterLayer!.imageFilter = renderStyle.imageFilter;
+      context.pushLayer(_imageFilterLayer!, callback, offset);
     } else {
       callback(context, offset);
     }
@@ -1311,7 +1311,6 @@ class RenderBoxModel extends RenderBox
   @override
   @mustCallSuper
   void dispose() {
-    super.dispose();
     // Clear renderObjects in list when disposed to avoid memory leak
     if (fixedChildren.isNotEmpty) {
       fixedChildren.clear();
@@ -1321,8 +1320,8 @@ class RenderBoxModel extends RenderBox
     disposeScrollable();
 
     // Clear all paint layers
-    _colorFilterLayer.layer = null;
-    _imageFilterLayer.layer = null;
+    _colorFilterLayer = null;
+    _imageFilterLayer = null;
     disposeTransformLayer();
     disposeOpacityLayer();
     disposeIntersectionObserverLayer();
