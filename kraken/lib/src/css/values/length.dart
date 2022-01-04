@@ -124,8 +124,11 @@ class CSSLengthValue {
         bool isPositioned = positionType == CSSPositionType.absolute ||
           positionType == CSSPositionType.fixed;
 
-        RenderStyle? parentRenderStyle = renderStyle!.parent;
         RenderBoxModel? renderBoxModel = renderStyle!.renderBoxModel;
+        RenderBoxModel? parentRenderBoxModel = renderBoxModel?.parent as RenderBoxModel?;
+        // It needs to access the renderStyle of renderBoxModel parent
+        // cause parent equals to containing block here.
+        RenderStyle? parentRenderStyle = parentRenderBoxModel?.renderStyle;
 
         // Constraints is calculated before layout, the layouted size is identical to the tight constraints
         // if constraints is tight, so it's safe to use the tight constraints as the parent size to resolve
@@ -154,6 +157,9 @@ class CSSLengthValue {
         double? relativeParentHeight = isPositioned
           ? parentPaddingBoxHeight
           : parentContentBoxHeight;
+
+        double? borderBoxWidth = renderStyle!.borderBoxWidth ?? renderStyle!.borderBoxLogicalWidth;
+        double? borderBoxHeight = renderStyle!.borderBoxHeight ?? renderStyle!.borderBoxLogicalHeight;
 
         switch (propertyName) {
           case FONT_SIZE:
@@ -283,38 +289,43 @@ class CSSLengthValue {
               }
               _computedValue = double.infinity;
             }
-          break;
+            break;
+
+          // Percentage of transform refer to the size of reference box.
+          // https://www.w3.org/TR/css-transforms-1/#transform-property
           case TRANSLATE:
+            if (axisType == Axis.horizontal) {
+              _computedValue = borderBoxWidth != null
+                ? value! * borderBoxWidth
+                // Transform will be cached once resolved, so avoid resolve if width not defined.
+                // Use double.infinity to indicate percentage not resolved.
+                : double.infinity;
+            } else if (axisType == Axis.vertical) {
+              _computedValue = borderBoxHeight != null
+                ? value! * borderBoxHeight
+                // Transform will be cached once resolved, so avoid resolve if width not defined.
+                // Use double.infinity to indicate percentage not resolved.
+                : double.infinity;
+            }
+            break;
+
+          // Percentage of background-size is relative to the background positioning area.
+          // https://www.w3.org/TR/css-backgrounds-3/#background-size
           case BACKGROUND_SIZE:
+          // Percentage of border-radius refers to corresponding dimension of the border box.
+          // https://www.w3.org/TR/css-backgrounds-3/#propdef-border-radius
           case BORDER_TOP_LEFT_RADIUS:
           case BORDER_TOP_RIGHT_RADIUS:
           case BORDER_BOTTOM_LEFT_RADIUS:
           case BORDER_BOTTOM_RIGHT_RADIUS:
-            // Percentages for the horizontal axis refer to the width of the box.
-            // Percentages for the vertical axis refer to the height of the box.
-            double? borderBoxWidth = renderStyle!.borderBoxWidth ?? renderStyle!.borderBoxLogicalWidth;
-            double? borderBoxHeight = renderStyle!.borderBoxHeight ?? renderStyle!.borderBoxLogicalHeight;
             if (axisType == Axis.horizontal) {
-              if (borderBoxWidth != null) {
-                _computedValue = value! * borderBoxWidth;
-              } else {
-                // Mark parent to relayout to get renderer height of parent.
-                if (renderBoxModel != null) {
-                  renderBoxModel.markParentNeedsRelayout();
-                }
-                // Set as initial value.
-                _computedValue = 0;
-              }
+              _computedValue = borderBoxWidth != null
+                ? value! * borderBoxWidth
+                : 0;
             } else if (axisType == Axis.vertical) {
-              if (borderBoxHeight != null) {
-                _computedValue = value! * borderBoxHeight;
-              } else {
-                // Mark parent to relayout to get renderer height of parent.
-                if (renderBoxModel != null) {
-                  renderBoxModel.markParentNeedsRelayout();
-                }
-                _computedValue = 0;
-              }
+              _computedValue = borderBoxHeight != null
+                ? value! * borderBoxHeight
+                : 0;
             }
           break;
         }
