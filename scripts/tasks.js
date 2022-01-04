@@ -610,15 +610,21 @@ task('build-linux-arm64-kraken-lib', (done) => {
 task('build-android-kraken-lib', (done) => {
   let androidHome;
 
-  if (platform == 'win32') {
-    androidHome = path.join(process.env.LOCALAPPDATA, 'Android\\Sdk');
+  let ndkDir = '';
+
+  // If ANDROID_NDK_HOME env defined, use it.
+  if (process.env.ANDROID_NDK_HOME) {
+    ndkDir = process.env.ANDROID_NDK_HOME;
   } else {
-    androidHome = path.join(process.env.HOME, 'Library/Android/sdk')
+    if (platform == 'win32') {
+      androidHome = path.join(process.env.LOCALAPPDATA, 'Android\\Sdk');
+    } else {
+      androidHome = path.join(process.env.HOME, 'Library/Android/sdk')
+    }
+    ndkDir = path.join(androidHome, 'ndk');
   }
 
-  const ndkDir = path.join(androidHome, 'ndk');
   const ndkVersion = '21.4.7075529';
-
   if (!fs.existsSync(path.join(ndkDir, ndkVersion))) {
     throw new Error('Android NDK version (21.4.7075529) not installed.');
   }

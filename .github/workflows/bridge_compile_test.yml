@@ -1,0 +1,44 @@
+name: Bridge Compile Test
+
+on: [push]
+
+jobs:
+  build_for_android:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: nttld/setup-ndk@v1
+      id: setup-ndk
+      with:
+        ndk-version: r21e
+    - name: npm install
+      run: npm install
+    - name: compile for android
+      run: npm run build:bridge:android:release
+
+  build_for_ios:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: nttld/setup-ndk@v1
+      id: setup-ndk
+      with:
+        ndk-version: r21e
+    - name: npm install
+      run: npm install
+    - name: compile for android
+      run: npm run build:bridge:ios:release
+
+  build_for_macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: nttld/setup-ndk@v1
+      id: setup-ndk
+      with:
+        ndk-version: r21e
+    - name: npm install
+      run: npm install
+    - name: compile for android
+      run: npm run build:bridge:macos:release
+

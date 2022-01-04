@@ -372,7 +372,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
     )
 
   # If quickjs is static, there will be no quickjs.framework any more.
-  if(NOT ${STATIC_QUICKJS})
+  if(NOT DEFINED STATIC_QUICKJS)
     set_target_properties(quickjs PROPERTIES
       OUTPUT_NAME quickjs
       FRAMEWORK TRUE
