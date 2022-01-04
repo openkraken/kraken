@@ -621,12 +621,12 @@ task('build-android-kraken-lib', (done) => {
     } else {
       androidHome = path.join(process.env.HOME, 'Library/Android/sdk')
     }
-    ndkDir = path.join(androidHome, 'ndk');
-  }
+    const ndkVersion = '21.4.7075529';
+    ndkDir = path.join(androidHome, 'ndk', ndkVersion);
 
-  const ndkVersion = '21.4.7075529';
-  if (!fs.existsSync(path.join(ndkDir, ndkVersion))) {
-    throw new Error('Android NDK version (21.4.7075529) not installed.');
+    if (!fs.existsSync(ndkDir)) {
+      throw new Error('Android NDK version (21.4.7075529) not installed.');
+    }
   }
 
   const archs = ['arm64-v8a', 'armeabi-v7a'];
@@ -660,7 +660,6 @@ task('build-android-kraken-lib', (done) => {
   archs.forEach(arch => {
     const soBinaryDirectory = path.join(paths.bridge, `build/android/lib/${arch}`);
     const bridgeCmakeDir = path.join(paths.bridge, 'cmake-build-android-' + arch);
-    const ndkDir = path.join(androidHome, 'ndk', ndkVersion);
     // generate project
     execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
     -DCMAKE_TOOLCHAIN_FILE=${path.join(ndkDir, '/build/cmake/android.toolchain.cmake')} \

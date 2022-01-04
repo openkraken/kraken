@@ -16,7 +16,7 @@ jobs:
     - name: compile for android
       run: npm run build:bridge:android:release
       env:
-        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}/../
+        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
   build_for_ios:
     runs-on: macos-latest
