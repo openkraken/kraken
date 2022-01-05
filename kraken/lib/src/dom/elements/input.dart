@@ -222,6 +222,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     // TODO: support ::placeholder pseudo element
     return _buildTextSpan(
       text: placeholderText,
+      color: Color.fromARGB(255, 169, 169, 169)
     );
   }
 
@@ -394,8 +395,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
   }
 
-  TextSpan _buildTextSpan({ String? text }) {
-    return CSSTextMixin.createTextSpan(text ?? '', renderStyle);
+  TextSpan _buildTextSpan({ String? text, Color? color }) {
+    return CSSTextMixin.createTextSpan(text ?? '', renderStyle, color: color);
   }
 
   TextSpan _buildPasswordTextSpan(String text) {
