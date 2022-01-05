@@ -287,6 +287,9 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
         ownerDocument.gestureListener?.onTouchEnd!(event as TouchEvent);
       }
     }
+
+    // Dispatch listener for document to do someting such as shift the focus.
+    ownerDocument.controller.dispatchEvent(event);
   }
 }
 

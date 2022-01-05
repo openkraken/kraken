@@ -193,6 +193,13 @@ class KrakenViewController
   late Document document;
   late Window window;
 
+  void shiftFocus(EventTarget target) {
+    InputElement? inputElement = InputElement.focusInputElement;
+    if (inputElement != null && inputElement != target) {
+      InputElement.focusInputElement?.blur();
+    }
+  }
+
   void evaluateJavaScripts(String code, [String source = 'vm://']) {
     assert(!_disposed, 'Kraken have already disposed');
     evaluateScripts(_contextId, code, source);
@@ -892,6 +899,13 @@ class KrakenController {
 
     if (devToolsService != null) {
       devToolsService!.init(this);
+    }
+  }
+
+  void dispatchEvent(Event event) {
+    EventTarget? target = event.target;
+    if (event.type == 'click' && target != null) {
+      _view.shiftFocus(target);
     }
   }
 
