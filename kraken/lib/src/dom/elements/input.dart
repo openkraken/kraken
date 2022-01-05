@@ -222,6 +222,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     // TODO: support ::placeholder pseudo element
     return _buildTextSpan(
       text: placeholderText,
+      // The color of input placeholder.
       color: Color.fromARGB(255, 169, 169, 169)
     );
   }
