@@ -101,6 +101,13 @@ class KrakenViewController
 
   WidgetDelegate? widgetDelegate;
 
+  void shiftFocus(EventTarget target) {
+    InputElement? inputElement = InputElement.focusInputElement;
+    if (inputElement != null && inputElement != target) {
+      InputElement.focusInputElement?.blur();
+    }
+  }
+
   KrakenViewController(
     this._viewportWidth,
     this._viewportHeight, {
@@ -792,8 +799,9 @@ class KrakenController {
   }
 
   void dispatchEvent(Event event) {
-    if (event.type == 'click') {
-      print('click');
+    EventTarget? target = event.target;
+    if (event.type == 'click' && target != null) {
+      _view.shiftFocus(target);
     }
   }
 
