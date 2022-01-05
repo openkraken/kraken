@@ -744,6 +744,41 @@ describe('Position absolute', () => {
     await snapshot();
   });
 
+  it('should work with percentage offset of containing block which is not parent in scroll container', async () => {
+    let div = createElement('div', {
+        style: {
+          width: '200px',
+          height: '200px',
+          borderTop: '40px solid black',
+          backgroundColor: 'yellow',
+          position: 'relative',
+          overflow: 'scroll'
+        }
+    }, [
+      createElement('div', {
+        style: {
+            height: '200px',
+        }
+      }, [
+        createElement(
+          'div',
+          {
+            style: {
+              position: 'absolute',
+              top: '30%',
+              width: '100px',
+              height: '100px',
+              backgroundColor: 'green'
+            },
+        })
+      ])
+    ]);
+
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
   it('should work with percentage after element is attached', async (done) => {
     let div2;
     let div;

@@ -125,10 +125,14 @@ class CSSLengthValue {
           positionType == CSSPositionType.fixed;
 
         RenderBoxModel? renderBoxModel = renderStyle!.renderBoxModel;
+        // Should access the renderStyle of renderBoxModel parent but not renderStyle parent
+        // cause the element of renderStyle parent may not equal to containing block.
         RenderBoxModel? parentRenderBoxModel = renderBoxModel?.parent as RenderBoxModel?;
-        // It needs to access the renderStyle of renderBoxModel parent
-        // cause parent equals to containing block here.
-        RenderStyle? parentRenderStyle = parentRenderBoxModel?.renderStyle;
+        // Get the renderStyle of outer scrolling box cause the renderStyle of scrolling
+        // content box is only a fraction of the complete renderStyle.
+        RenderStyle? parentRenderStyle = parentRenderBoxModel != null && parentRenderBoxModel.isScrollingContentBox
+          ? (parentRenderBoxModel.parent as RenderBoxModel).renderStyle
+          : parentRenderBoxModel?.renderStyle;
 
         // Constraints is calculated before layout, the layouted size is identical to the tight constraints
         // if constraints is tight, so it's safe to use the tight constraints as the parent size to resolve
