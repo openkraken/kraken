@@ -157,8 +157,8 @@ typedef DartRAFAsyncCallback = void Function(
 typedef NativeRequestBatchUpdate = Void Function(Int32 contextId);
 
 void _requestBatchUpdate(int contextId) {
-  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
-  return controller.module.requestBatchUpdate();
+  KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
+  return controller?.module.requestBatchUpdate();
 }
 
 final Pointer<NativeFunction<NativeRequestBatchUpdate>> _nativeRequestBatchUpdate =

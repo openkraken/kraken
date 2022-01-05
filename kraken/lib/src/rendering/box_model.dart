@@ -1089,10 +1089,13 @@ class RenderBoxModel extends RenderBox
     ));
   }
 
+  // Reaint native EngineLayer sources with LayerHandle.
+  final LayerHandle<ColorFilterLayer> _colorFilterLayer = LayerHandle<ColorFilterLayer>();
+
   void paintColorFilter(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     ColorFilter? colorFilter = renderStyle.colorFilter;
     if (colorFilter != null) {
-      context.pushColorFilter(offset, colorFilter, callback);
+      _colorFilterLayer.layer = context.pushColorFilter(offset, colorFilter, callback, oldLayer: _colorFilterLayer.layer);
     } else {
       callback(context, offset);
     }
@@ -1114,13 +1117,13 @@ class RenderBoxModel extends RenderBox
     }
   }
 
-  ImageFilterLayer? _imageFilterLayer;
+  final LayerHandle<ImageFilterLayer> _imageFilterLayer = LayerHandle<ImageFilterLayer>();
   void paintImageFilter(PaintingContext context, Offset offset,
       PaintingContextCallback callback) {
     if (renderStyle.imageFilter != null) {
-      _imageFilterLayer ??= ImageFilterLayer();
-      _imageFilterLayer!.imageFilter = renderStyle.imageFilter;
-      context.pushLayer(_imageFilterLayer!, callback, offset);
+      _imageFilterLayer.layer ??= ImageFilterLayer();
+      _imageFilterLayer.layer!.imageFilter = renderStyle.imageFilter;
+      context.pushLayer(_imageFilterLayer.layer!, callback, offset);
     } else {
       callback(context, offset);
     }
@@ -1211,14 +1214,6 @@ class RenderBoxModel extends RenderBox
         renderStyle.backgroundAttachment == CSSBackgroundAttachmentType.local;
   }
 
-  void _detachAllChildren() {
-    if (this is RenderObjectWithChildMixin) {
-      (this as RenderObjectWithChildMixin).child = null;
-    } else if (this is ContainerRenderObjectMixin) {
-      (this as ContainerRenderObjectMixin).removeAll();
-    }
-  }
-
   // Detach renderBoxModel from its containing block.
   // Need to remove position placeholder besides removing itself.
   void detachFromContainingBlock() {
@@ -1232,17 +1227,17 @@ class RenderBoxModel extends RenderBox
   // called the containing block of the element.
   // Definition of "containing block": https://www.w3.org/TR/CSS21/visudet.html#containing-block-details
   void attachToContainingBlock(
-    RenderBox? containingBlockRenderBox,
-    { RenderBox? parent, RenderBox? after }
-  ) {
+      RenderBox? containingBlockRenderBox,
+      { RenderBox? parent, RenderBox? after }
+      ) {
     if (parent == null || containingBlockRenderBox == null) return;
 
     RenderBoxModel renderBoxModel = this;
     CSSPositionType positionType = renderBoxModel.renderStyle.position;
     // The containing block of an element is defined as follows:
     if (positionType == CSSPositionType.relative
-      || positionType == CSSPositionType.static
-      || positionType == CSSPositionType.sticky
+        || positionType == CSSPositionType.static
+        || positionType == CSSPositionType.sticky
     ) {
       // If the element's position is 'relative' or 'static',
       // the containing block is formed by the content edge of the nearest block container ancestor box.
@@ -1263,7 +1258,7 @@ class RenderBoxModel extends RenderBox
       // If container block is same as origin parent, the placeholder must after the origin renderBox
       // because placeholder depends the constraints in layout stage.
       RenderBox? previousSibling = containingBlockRenderBox == parent ?
-        renderBoxModel : after;
+      renderBoxModel : after;
 
       // Add position holder to origin position parent.
       _attachPositionPlaceholder(parent, renderBoxModel, after: previousSibling);
@@ -1311,9 +1306,12 @@ class RenderBoxModel extends RenderBox
     }
   }
 
+
   /// Called when its corresponding element disposed
+  @override
   @mustCallSuper
   void dispose() {
+    super.dispose();
     // Clear renderObjects in list when disposed to avoid memory leak
     if (fixedChildren.isNotEmpty) {
       fixedChildren.clear();
@@ -1322,13 +1320,17 @@ class RenderBoxModel extends RenderBox
     // Dispose scroll behavior
     disposeScrollable();
 
+    // Clear all paint layers
+    _colorFilterLayer.layer = null;
+    _imageFilterLayer.layer = null;
+    disposeTransformLayer();
+    disposeOpacityLayer();
+    disposeIntersectionObserverLayer();
+
     // Dispose box decoration painter.
     disposePainter();
     // Evict render decoration image cache.
     renderStyle.decoration?.image?.image.evict();
-
-    // Remove reference from children.
-    _detachAllChildren();
   }
 
   Offset getTotalScrollOffset() {

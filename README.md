@@ -42,7 +42,8 @@ Only flutter stable released version are fully tested.
 | Kraken  | Flutter |
 | ------------- | ------------- |
 | >= 0.7.0 < 0.8.0 | 1.22.0 ~ 1.22.6 |
-| >= 0.8.0 < 0.10.0  | 2.2.0 ~ 2.2.3  |
+| >= 0.8.0 < 0.10.0  | 2.2.0 ~ 2.2.3 |
+| >= 0.10.0 < 0.12.0 | 2.5.0 ~ 2.5.3 |
 
 
 ## 👏 Contributing
@@ -102,4 +103,7 @@ By contributing to Kraken, you agree that your contributions will be licensed un
     ```shell
     $ npm test
     ```
+    
+    
+
 

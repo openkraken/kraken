@@ -89,6 +89,7 @@ void EventListenerMap::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func)
 EventListenerMap::~EventListenerMap() {
   for (const auto& entry : m_entries) {
     for (const auto& vector : entry.second) {
+      JS_FreeAtomRT(m_runtime, entry.first);
       JS_FreeValueRT(m_runtime, vector);
     }
   }

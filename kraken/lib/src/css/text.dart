@@ -430,8 +430,10 @@ mixin CSSTextMixin on RenderStyle {
 
     return alignment;
   }
-
-  static TextSpan createTextSpan(String? text, CSSRenderStyle renderStyle, { Color? color }) {
+  
+  static TextSpan createTextSpan(String? text, CSSRenderStyle renderStyle, {
+    Color? color,
+  }) {
     /// Creates a new TextStyle object.
     ///   color: The color to use when painting the text. If this is specified, foreground must be null.
     ///   decoration: The decorations to paint near the text (e.g., an underline).
