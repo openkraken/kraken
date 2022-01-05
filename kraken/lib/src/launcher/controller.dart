@@ -791,6 +791,12 @@ class KrakenController {
     return getControllerOfJSContextId(contextId);
   }
 
+  void dispatchEvent(Event event) {
+    if (event.type == 'click') {
+      print('click');
+    }
+  }
+
   WidgetDelegate? widgetDelegate;
 
   KrakenBundle? bundle;
