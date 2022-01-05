@@ -904,7 +904,7 @@ class KrakenController {
 
   void dispatchEvent(Event event) {
     EventTarget? target = event.target;
-    if (event.type == 'click' && target != null) {
+    if (event.type == EVENT_CLICK && target != null) {
       _view.shiftFocus(target);
     }
   }
