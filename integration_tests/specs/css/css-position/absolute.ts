@@ -921,4 +921,37 @@ describe('Position absolute', () => {
 
     await snapshot();
   });
+
+  it('child of positioned element with no height stretch to parent in flex layout', async () => {
+    var div = createElement('div', {
+      style: {
+        width: '200px',
+        height: '200px',
+        position: 'relative',
+      }
+    }, [
+      createElement('div', {
+        style: {
+          backgroundColor: '#999',  
+          position: 'absolute', 
+          left: 0,
+          right: 0, 
+          bottom: 0, 
+          top: 0, 
+          display: 'flex', 
+        }
+      }, [
+        createElement('div', {
+          style: {
+            backgroundColor: 'green', 
+            width: '100px',
+          }
+        })
+      ])
+    ]);
+
+    append(BODY, div);
+
+    await snapshot();
+  });
 });
