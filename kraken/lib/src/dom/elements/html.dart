@@ -15,7 +15,7 @@ class HTMLElement extends Element {
   HTMLElement(EventTargetContext? context)
       : super(context, defaultStyle: defaultStyle) {
     // Since the bubbling process is in bridge, we need to globally hijack click for focus shifting, so you need to listen here.
-    addEvent('click');
+    addEvent(EVENT_CLICK);
   }
 
   @override
