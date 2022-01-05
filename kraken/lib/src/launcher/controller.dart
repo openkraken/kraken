@@ -196,7 +196,7 @@ class KrakenViewController
   void shiftFocus(EventTarget target) {
     InputElement? inputElement = InputElement.focusInputElement;
     if (inputElement != null && inputElement != target) {
-      InputElement.focusInputElement?.blur();
+      inputElement.blur();
     }
   }
 
