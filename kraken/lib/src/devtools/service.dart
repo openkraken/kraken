@@ -115,7 +115,7 @@ class ChromeDevToolsService extends DevToolsService {
   // @TODO: Implement and remove.
   // ignore: unused_element
   static bool _registerUIDartMethodsToCpp() {
-    final DartRegisterDartMethods _registerDartMethods = nativeDynamicLibrary.lookup<NativeFunction<NativeRegisterDartMethods>>('registerUIDartMethods').asFunction();
+    final DartRegisterDartMethods _registerDartMethods = KrakenPlatform.nativeDynamicLibrary.lookup<NativeFunction<NativeRegisterDartMethods>>('registerUIDartMethods').asFunction();
     Pointer<Uint64> bytes = malloc.allocate<Uint64>(_dartNativeMethods.length * sizeOf<Uint64>());
     Uint64List nativeMethodList = bytes.asTypedList(_dartNativeMethods.length);
     nativeMethodList.setAll(0, _dartNativeMethods);

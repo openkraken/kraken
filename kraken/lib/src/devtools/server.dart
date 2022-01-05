@@ -72,7 +72,7 @@ void _postTaskToUIThread(int contextId, Pointer<Void> context, Pointer<Void> cal
 }
 
 void attachInspector(int contextId) {
-  final DartAttachInspector _attachInspector = nativeDynamicLibrary
+  final DartAttachInspector _attachInspector = KrakenPlatform.nativeDynamicLibrary
       .lookup<NativeFunction<NativeAttachInspector>>('attachInspector')
       .asFunction();
   _attachInspector(contextId);
@@ -80,7 +80,7 @@ void attachInspector(int contextId) {
 
 void initInspectorServerNativeBinding(int contextId) {
   final DartRegisterDartMethods _registerInspectorServerDartMethods =
-      nativeDynamicLibrary
+  KrakenPlatform.nativeDynamicLibrary
           .lookup<NativeFunction<NativeRegisterDartMethods>>(
               'registerInspectorDartMethods')
           .asFunction();
@@ -144,7 +144,7 @@ void serverIsolateEntryPoint(SendPort isolateToMainStream) {
       } else if (data is InspectorMethodResult) {
         server!.sendToFrontend(data.id, data.result);
       } else if (data is InspectorPostTaskMessage) {
-        final DartDispatchInspectorTask _dispatchInspectorTask = nativeDynamicLibrary
+        final DartDispatchInspectorTask _dispatchInspectorTask = KrakenPlatform.nativeDynamicLibrary
             .lookup<NativeFunction<NativeDispatchInspectorTask>>('dispatchInspectorTask')
             .asFunction();
         _dispatchInspectorTask(mainIsolateJSContextId, Pointer.fromAddress(data.context), Pointer.fromAddress(data.callback));

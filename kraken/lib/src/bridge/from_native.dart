@@ -421,8 +421,10 @@ final List<int> _dartNativeMethods = [
 typedef NativeRegisterDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);
 typedef DartRegisterDartMethods = void Function(Pointer<Uint64> methodBytes, int length);
 
-final DartRegisterDartMethods _registerDartMethods =
-    nativeDynamicLibrary.lookup<NativeFunction<NativeRegisterDartMethods>>('registerDartMethods').asFunction();
+final DartRegisterDartMethods _registerDartMethods = KrakenPlatform
+    .nativeDynamicLibrary
+    .lookup<NativeFunction<NativeRegisterDartMethods>>('registerDartMethods')
+    .asFunction();
 
 void registerDartMethodsToCpp() {
   Pointer<Uint64> bytes = malloc.allocate<Uint64>(sizeOf<Uint64>() * _dartNativeMethods.length);

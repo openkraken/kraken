@@ -20,7 +20,6 @@ import 'package:flutter/services.dart';
 import 'package:test/test.dart';
 
 import 'test_input.dart';
-import 'platform.dart';
 import 'match_snapshots.dart';
 
 // Steps for using dart:ffi to call a Dart function from C:
@@ -146,7 +145,7 @@ typedef Native_RegisterTestEnvDartMethods = Void Function(Pointer<Uint64> method
 typedef Dart_RegisterTestEnvDartMethods = void Function(Pointer<Uint64> methodBytes, int length);
 
 final Dart_RegisterTestEnvDartMethods _registerTestEnvDartMethods =
-nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterTestEnvDartMethods>>('registerTestEnvDartMethods').asFunction();
+KrakenPlatform.nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterTestEnvDartMethods>>('registerTestEnvDartMethods').asFunction();
 
 
 void registerDartTestMethodsToCpp() {
