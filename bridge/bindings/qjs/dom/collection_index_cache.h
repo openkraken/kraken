@@ -47,14 +47,13 @@ class CollectionIndexCache {
     current_node_ = node;
     cached_node_index_ = index;
   }
-  FORCE_INLINE bool isCachedNodeCountValid() const {
-    return is_length_cache_valid_;
-  }
+  FORCE_INLINE bool isCachedNodeCountValid() const { return is_length_cache_valid_; }
   FORCE_INLINE unsigned cachedNodeCount() const { return cached_node_count_; }
   FORCE_INLINE void setCachedNodeCount(unsigned length) {
     cached_node_count_ = length;
     is_length_cache_valid_ = true;
   }
+
  private:
   NodeType* nodeBeforeCachedNode(const Collection&, unsigned index);
   NodeType* nodeAfterCachedNode(const Collection&, unsigned index);
@@ -65,25 +64,25 @@ class CollectionIndexCache {
   unsigned is_length_cache_valid_ : 1;
 };
 
-template<typename Collection, typename NodeType>
+template <typename Collection, typename NodeType>
 void CollectionIndexCache<Collection, NodeType>::invalidate() {
   current_node_ = nullptr;
   is_length_cache_valid_ = false;
 }
 
-template<typename Collection, typename NodeType>
+template <typename Collection, typename NodeType>
 void CollectionIndexCache<Collection, NodeType>::nodeInserted() {
   cached_node_count_++;
   current_node_ = nullptr;
 }
 
-template<typename Collection, typename NodeType>
+template <typename Collection, typename NodeType>
 void CollectionIndexCache<Collection, NodeType>::nodeRemoved() {
   cached_node_count_--;
   current_node_ = nullptr;
 }
 
-template<typename Collection, typename NodeType>
+template <typename Collection, typename NodeType>
 inline uint32_t CollectionIndexCache<Collection, NodeType>::nodeCount(const Collection& collection) {
   if (isCachedNodeCountValid())
     return cachedNodeCount();
@@ -94,8 +93,8 @@ inline uint32_t CollectionIndexCache<Collection, NodeType>::nodeCount(const Coll
   return cachedNodeCount();
 }
 
-template<typename Collection, typename NodeType>
-inline NodeType *CollectionIndexCache<Collection, NodeType>::nodeAt(const Collection& collection, uint32_t index) {
+template <typename Collection, typename NodeType>
+inline NodeType* CollectionIndexCache<Collection, NodeType>::nodeAt(const Collection& collection, uint32_t index) {
   if (isCachedNodeCountValid() && index >= cachedNodeCount())
     return nullptr;
 
@@ -118,9 +117,8 @@ inline NodeType *CollectionIndexCache<Collection, NodeType>::nodeAt(const Collec
   return index ? nodeAfterCachedNode(collection, index) : first_node;
 }
 
-
-template<typename Collection, typename NodeType>
-NodeType *CollectionIndexCache<Collection, NodeType>::nodeBeforeCachedNode(const Collection& collection, unsigned int index) {
+template <typename Collection, typename NodeType>
+NodeType* CollectionIndexCache<Collection, NodeType>::nodeBeforeCachedNode(const Collection& collection, unsigned int index) {
   assert(cachedNode() != nullptr);  // Cache should be valid.
   unsigned current_index = cachedNodeIndex();
   assert(current_index > index);
@@ -137,24 +135,21 @@ NodeType *CollectionIndexCache<Collection, NodeType>::nodeBeforeCachedNode(const
 
   // Backward traversal from the cached node to the requested index.
   assert(collection.canTraverseBackward());
-  NodeType* current_node =
-      collection.traverseBackwardToOffset(index, *cachedNode(), current_index);
+  NodeType* current_node = collection.traverseBackwardToOffset(index, *cachedNode(), current_index);
   assert(current_node != nullptr);
   setCachedNode(current_node, current_index);
   return current_node;
 }
 
-
-template<typename Collection, typename NodeType>
-NodeType *CollectionIndexCache<Collection, NodeType>::nodeAfterCachedNode(const Collection& collection, unsigned int index) {
+template <typename Collection, typename NodeType>
+NodeType* CollectionIndexCache<Collection, NodeType>::nodeAfterCachedNode(const Collection& collection, unsigned int index) {
   assert(cachedNode() != nullptr);  // Cache should be valid.
   unsigned current_index = cachedNodeIndex();
   assert(current_index < index);
 
   // Determine if we should traverse from the end of the collection instead of
   // the cached node.
-  bool last_is_closer = isCachedNodeCountValid() &&
-      cachedNodeCount() - index < index - current_index;
+  bool last_is_closer = isCachedNodeCountValid() && cachedNodeCount() - index < index - current_index;
   if (last_is_closer && collection.canTraverseBackward()) {
     NodeType* last_item = collection.traverseToLast();
     assert(last_item != nullptr);
@@ -165,8 +160,7 @@ NodeType *CollectionIndexCache<Collection, NodeType>::nodeAfterCachedNode(const 
   }
 
   // Forward traversal from the cached node to the requested index.
-  NodeType* current_node =
-      collection.traverseForwardToOffset(index, *cachedNode(), current_index);
+  NodeType* current_node = collection.traverseForwardToOffset(index, *cachedNode(), current_index);
   if (!current_node) {
     // Did not find the node. On plus side, we now know the length.
     if (isCachedNodeCountValid())
@@ -178,7 +172,6 @@ NodeType *CollectionIndexCache<Collection, NodeType>::nodeAfterCachedNode(const 
   return current_node;
 }
 
+}  // namespace kraken::binding::qjs
 
-}
-
-#endif //KRAKENBRIDGE_BINDINGS_QJS_DOM_COLLECTION_INDEX_CACHE_H_
+#endif  // KRAKENBRIDGE_BINDINGS_QJS_DOM_COLLECTION_INDEX_CACHE_H_

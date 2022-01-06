@@ -17,14 +17,7 @@ void bindNode(std::unique_ptr<ExecutionContext>& context);
 
 const int kDOMNodeTypeShift = 2;
 const int kElementNamespaceTypeShift = 4;
-enum class NodeType {
-  ELEMENT_NODE = 1,
-  TEXT_NODE = 3,
-  COMMENT_NODE = 8,
-  DOCUMENT_NODE = 9,
-  DOCUMENT_TYPE_NODE = 10,
-  DOCUMENT_FRAGMENT_NODE = 11
-};
+enum class NodeType { ELEMENT_NODE = 1, TEXT_NODE = 3, COMMENT_NODE = 8, DOCUMENT_NODE = 9, DOCUMENT_TYPE_NODE = 10, DOCUMENT_FRAGMENT_NODE = 11 };
 
 class NodeInstance;
 class ElementInstance;
@@ -40,17 +33,8 @@ using NodeVector = std::vector<NodeInstance*>;
 class Node : public EventTarget {
  public:
   Node() = delete;
-  Node(ExecutionContext* context, const std::string& className) : EventTarget(context,
-                                                                              className.c_str()) {
-    JS_SetPrototype(m_ctx,
-                    m_prototypeObject,
-                    EventTarget::instance(m_context)->prototype());
-  }
-  Node(ExecutionContext* context) : EventTarget(context, "Node") {
-    JS_SetPrototype(m_ctx,
-                    m_prototypeObject,
-                    EventTarget::instance(m_context)->prototype());
-  }
+  Node(ExecutionContext* context, const std::string& className) : EventTarget(context, className.c_str()) { JS_SetPrototype(m_ctx, m_prototypeObject, EventTarget::instance(m_context)->prototype()); }
+  Node(ExecutionContext* context) : EventTarget(context, "Node") { JS_SetPrototype(m_ctx, m_prototypeObject, EventTarget::instance(m_context)->prototype()); }
 
   OBJECT_INSTANCE(Node);
 
@@ -110,18 +94,10 @@ class NodeInstance : public EventTargetInstance {
     kIsConnectedFlag = 1 << 4,
   };
   uint32_t m_nodeFlags;
-  FORCE_INLINE bool getFlag(NodeFlag mask) const {
-    return m_nodeFlags & mask;
-  }
-  void setFlag(bool v, NodeFlag mask) {
-    m_nodeFlags = (m_nodeFlags & ~mask) | (-(int32_t) v & mask);
-  }
-  void setFlag(NodeFlag mask) {
-    m_nodeFlags |= mask;
-  }
-  void clearFlag(NodeFlag mask) {
-    m_nodeFlags &= ~mask;
-  }
+  FORCE_INLINE bool getFlag(NodeFlag mask) const { return m_nodeFlags & mask; }
+  void setFlag(bool v, NodeFlag mask) { m_nodeFlags = (m_nodeFlags & ~mask) | (-(int32_t)v & mask); }
+  void setFlag(NodeFlag mask) { m_nodeFlags |= mask; }
+  void clearFlag(NodeFlag mask) { m_nodeFlags &= ~mask; }
 
   enum class DOMNodeType : uint32_t {
     kElement = 0,
@@ -129,9 +105,7 @@ class NodeInstance : public EventTargetInstance {
     kDocumentFragment = 2 << kDOMNodeTypeShift,
     kOther = 3 << kDOMNodeTypeShift,
   };
-  FORCE_INLINE DOMNodeType getDOMNodeType() const {
-    return static_cast<DOMNodeType>(m_nodeFlags & kDOMNodeTypeMask);
-  }
+  FORCE_INLINE DOMNodeType getDOMNodeType() const { return static_cast<DOMNodeType>(m_nodeFlags & kDOMNodeTypeMask); }
 
   enum class ElementNamespaceType : uint32_t {
     kHTML = 0,
@@ -139,9 +113,7 @@ class NodeInstance : public EventTargetInstance {
     kSVG = 2 << kElementNamespaceTypeShift,
     kOther = 3 << kElementNamespaceTypeShift,
   };
-  FORCE_INLINE ElementNamespaceType getElementNamespaceType() const {
-    return static_cast<ElementNamespaceType>(m_nodeFlags & kElementNamespaceTypeMask);
-  }
+  FORCE_INLINE ElementNamespaceType getElementNamespaceType() const { return static_cast<ElementNamespaceType>(m_nodeFlags & kElementNamespaceTypeMask); }
 
   NodeInstance() = delete;
   ~NodeInstance();
@@ -151,7 +123,7 @@ class NodeInstance : public EventTargetInstance {
   NodeInstance* lastChild();
   NodeInstance* previousSibling();
   NodeInstance* nextSibling();
-  NodeInstance* internalAppendChild(NodeInstance* node, JSValue *exception);
+  NodeInstance* internalAppendChild(NodeInstance* node, JSValue* exception);
   void internalRemove();
   void internalClearChild();
   NodeInstance* internalRemoveChild(NodeInstance* node);
@@ -166,7 +138,7 @@ class NodeInstance : public EventTargetInstance {
   NodeInstance* parentNode() const;
   NodeInstance& treeRoot() const;
 
-  //TODO: remove this
+  // TODO: remove this
   void setParentNode(NodeInstance* parent);
   void removeParentNode();
 
@@ -180,49 +152,28 @@ class NodeInstance : public EventTargetInstance {
   virtual void _notifyNodeRemoved(NodeInstance* node);
   virtual void _notifyNodeInsert(NodeInstance* node);
 
-  FORCE_INLINE bool isElementNode() const {
-    return getDOMNodeType() == DOMNodeType::kElement;
-  }
-  FORCE_INLINE bool isDocumentFragment() const {
-    return getDOMNodeType() == DOMNodeType::kDocumentFragment;
-  }
-  FORCE_INLINE bool isTextNode() const {
-    return getDOMNodeType() == DOMNodeType::kText;
-  }
-  FORCE_INLINE bool isContainerNode() const {
-    return getFlag(kIsContainerFlag);
-  }
+  FORCE_INLINE bool isElementNode() const { return getDOMNodeType() == DOMNodeType::kElement; }
+  FORCE_INLINE bool isDocumentFragment() const { return getDOMNodeType() == DOMNodeType::kDocumentFragment; }
+  FORCE_INLINE bool isTextNode() const { return getDOMNodeType() == DOMNodeType::kText; }
+  FORCE_INLINE bool isContainerNode() const { return getFlag(kIsContainerFlag); }
 
  protected:
   enum ConstructionType {
     kCreateText = static_cast<NodeFlag>(NodeType::TEXT_NODE) | static_cast<NodeFlag>(DOMNodeType::kText),
     kCreateContainer = static_cast<NodeFlag>(kIsContainerFlag) | static_cast<NodeFlag>(DOMNodeType::kOther),
-    kCreateElement = kIsContainerFlag |
-        static_cast<NodeFlag>(DOMNodeType::kElement) |
-        static_cast<NodeFlag>(ElementNamespaceType::kOther),
-    kCreateDocumentFragment = kIsContainerFlag |
-        static_cast<NodeFlag>(DOMNodeType::kDocumentFragment) |
-        static_cast<NodeFlag>(ElementNamespaceType::kOther),
-    kCreateHTMLElement = kIsContainerFlag |
-        static_cast<NodeFlag>(DOMNodeType::kElement) |
-        static_cast<NodeFlag>(ElementNamespaceType::kHTML),
+    kCreateElement = kIsContainerFlag | static_cast<NodeFlag>(DOMNodeType::kElement) | static_cast<NodeFlag>(ElementNamespaceType::kOther),
+    kCreateDocumentFragment = kIsContainerFlag | static_cast<NodeFlag>(DOMNodeType::kDocumentFragment) | static_cast<NodeFlag>(ElementNamespaceType::kOther),
+    kCreateHTMLElement = kIsContainerFlag | static_cast<NodeFlag>(DOMNodeType::kElement) | static_cast<NodeFlag>(ElementNamespaceType::kHTML),
     kCreateDocument = kCreateContainer | kIsConnectedFlag,
   };
   explicit NodeInstance(Node* node, ConstructionType type, JSClassID classId, std::string name)
       : EventTargetInstance(node, classId, std::move(name)), m_document(m_context->document()), m_nodeFlags(type) {}
-  explicit NodeInstance(Node* node,
-                        ConstructionType type,
-                        JSClassID classId,
-                        JSClassExoticMethods& exoticMethods,
-                        std::string name)
-      : EventTargetInstance(node, classId, exoticMethods, name),
-        m_document(m_context->document()),
-        m_nodeFlags(type) {}
+  explicit NodeInstance(Node* node, ConstructionType type, JSClassID classId, JSClassExoticMethods& exoticMethods, std::string name)
+      : EventTargetInstance(node, classId, exoticMethods, name), m_document(m_context->document()), m_nodeFlags(type) {}
 
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
  private:
-
   // ensurePreInsertionValidity() is an implementation of step 2 to 6 of
   // https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity and
   // https://dom.spec.whatwg.org/#concept-node-replace .
@@ -230,8 +181,7 @@ class NodeInstance : public EventTargetInstance {
 
   // Returns true if |new_child| contains this node. In that case,
   // https://dom.spec.whatwg.org/#concept-tree-host-including-inclusive-ancestor
-  bool isHostIncludingInclusiveAncestorOfThis(const NodeInstance& newChild, JSValue *exception) const ;
-
+  bool isHostIncludingInclusiveAncestorOfThis(const NodeInstance& newChild, JSValue* exception) const;
 
   DocumentInstance* m_document{nullptr};
   NodeList* m_nodeList{nullptr};

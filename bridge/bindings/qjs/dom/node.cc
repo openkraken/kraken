@@ -10,8 +10,8 @@
 #include "document_fragment.h"
 #include "element.h"
 #include "kraken_bridge.h"
-#include "text_node.h"
 #include "node_list.h"
+#include "text_node.h"
 
 namespace kraken::binding::qjs {
 
@@ -374,11 +374,9 @@ NodeInstance* NodeInstance::nextSibling() {
   return m_nextSibling;
 }
 
-
 // Returns true if DOM mutation should be proceeded.
 static inline bool collectChildrenAndRemoveFromOldParent(NodeInstance& node, NodeVector& nodes, JSValue* exception) {
   if (node.isDocumentFragment()) {
-
   }
 }
 
@@ -389,20 +387,19 @@ NodeInstance* NodeInstance::internalAppendChild(NodeInstance* newChild, JSValue*
     return newChild;
   }
 
-//  arrayPushValue(m_ctx, childNodes, node->jsObject);
-//  node->setParentNode(this);
-//
-//  node->_notifyNodeInsert(this);
-//
-//  std::string nodeEventTargetId = std::to_string(node->m_eventTargetId);
-//  std::string position = std::string("beforeend");
-//
-//  std::unique_ptr<NativeString> args_01 = stringToNativeString(nodeEventTargetId);
-//  std::unique_ptr<NativeString> args_02 = stringToNativeString(position);
+  //  arrayPushValue(m_ctx, childNodes, node->jsObject);
+  //  node->setParentNode(this);
+  //
+  //  node->_notifyNodeInsert(this);
+  //
+  //  std::string nodeEventTargetId = std::to_string(node->m_eventTargetId);
+  //  std::string position = std::string("beforeend");
+  //
+  //  std::unique_ptr<NativeString> args_01 = stringToNativeString(nodeEventTargetId);
+  //  std::unique_ptr<NativeString> args_02 = stringToNativeString(position);
 
-//  m_context->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
+  //  m_context->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
 }
-
 
 void NodeInstance::internalRemove() {
   if (JS_IsNull(parentNode))
@@ -529,7 +526,7 @@ NodeInstance* NodeInstance::parentNode() const {
 
 NodeInstance& NodeInstance::treeRoot() const {
   const NodeInstance* node = this;
-  while(node->parentNode()) {
+  while (node->parentNode()) {
     node = node->parentNode();
   }
   return const_cast<NodeInstance&>(*node);
@@ -597,8 +594,7 @@ bool NodeInstance::ensurePreInsertionValidity(const NodeInstance& newChild, cons
   assert(!(next && oldChild));
 
   // Use common case fast path if possible.
-  if ((newChild.isElementNode() || newChild.isTextNode()) &&
-      isElementNode()) {
+  if ((newChild.isElementNode() || newChild.isTextNode()) && isElementNode()) {
     // 2. If node is a host-including inclusive ancestor of parent, throw a
     // HierarchyRequestError.
     if (IsHostIncludingInclusiveAncestorOfThis(new_child, exception_state))
@@ -613,7 +609,8 @@ bool NodeInstance::ensurePreInsertionValidity(const NodeInstance& newChild, cons
 // https://dom.spec.whatwg.org/#concept-tree-host-including-inclusive-ancestor
 bool NodeInstance::isHostIncludingInclusiveAncestorOfThis(const NodeInstance& newChild, JSValue* exception) const {
   // Non-ContainerNode contains nothing.
-  if (!newChild.isContainerNode()) return false;
+  if (!newChild.isContainerNode())
+    return false;
 
   bool childContainParent = false;
 

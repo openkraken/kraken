@@ -14,10 +14,8 @@ namespace kraken::binding::qjs {
 class ContainerNode : public NodeInstance {
  public:
  private:
-
-
 };
 
-}
+}  // namespace kraken::binding::qjs
 
-#endif //KRAKENBRIDGE_BINDINGS_QJS_DOM_CONTAINER_NODE_H_
+#endif  // KRAKENBRIDGE_BINDINGS_QJS_DOM_CONTAINER_NODE_H_

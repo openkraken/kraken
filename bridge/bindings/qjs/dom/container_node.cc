@@ -5,8 +5,4 @@
 
 #include "container_node.h"
 
-namespace kraken::binding::qjs {
-
-
-
-}
+namespace kraken::binding::qjs {}
