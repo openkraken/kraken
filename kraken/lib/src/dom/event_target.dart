@@ -167,4 +167,8 @@ abstract class EventTarget {
       PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_END, uniqueId: hashCode);
     }
   }
+
+  void focus() {}
+
+  void blur() {}
 }
