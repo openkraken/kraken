@@ -9,14 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/dom.dart' as dom;
-import 'package:kraken/css.dart';
 
 import 'element_to_widget_adaptor.dart';
-
-const Map<String, dynamic> _defaultStyle = {
-  DISPLAY: INLINE_BLOCK,
-  POSITION: RELATIVE
-};
 
 class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWidget {
   /// Creates a bridge from a [RenderObject] to an [Element] tree.
@@ -177,10 +171,18 @@ abstract class WidgetElement extends dom.Element {
   late Widget _widget;
   _KrakenAdapterWidgetState? _state;
 
-  WidgetElement(dom.EventTargetContext? context)
-      : super(
-  context,
-  defaultStyle: _defaultStyle
+  WidgetElement(dom.EventTargetContext? context, {
+    Map<String, dynamic>? defaultStyle,
+    bool isIntrinsicBox = false,
+    // WidgetElement Adds repaintBoundary by default to prevent the internal paint process from affecting the outside.
+    // If a lot of WidgetElement is used in a scene, you need to modify the default repaintBoundary according to the scene analysis.
+    // Otherwise it will cause performance problems by creating most layers.
+    bool isDefaultRepaintBoundary = true,
+  }) : super(
+    context,
+    defaultStyle: defaultStyle,
+    isIntrinsicBox: isIntrinsicBox,
+    isDefaultRepaintBoundary: isDefaultRepaintBoundary,
   ) {
     WidgetsFlutterBinding.ensureInitialized();
     _state = _KrakenAdapterWidgetState(this, properties, childNodes);
@@ -266,7 +268,6 @@ class _KrakenAdapterWidget extends StatefulWidget {
 
   _KrakenAdapterWidget(this._state);
 
-
   @override
   State<StatefulWidget> createState() {
     return _state;
@@ -279,8 +280,7 @@ class _KrakenAdapterWidgetState extends State<_KrakenAdapterWidget> {
   final WidgetElement _element;
   late List<dom.Node> _childNodes;
 
-  _KrakenAdapterWidgetState(this._element, this._properties, List<dom.Node> childNodes) {
-    _childNodes = childNodes;
+  _KrakenAdapterWidgetState(this._element, this._properties, this._childNodes) {
   }
 
   void onAttributeChanged(Map<String, dynamic> properties) {
