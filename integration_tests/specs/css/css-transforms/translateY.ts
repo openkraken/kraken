@@ -67,4 +67,24 @@ describe('Transform translate3d', () => {
     BODY.appendChild(div);
     await snapshot();
   });
+
+  it('should work with percentage of positioned element', async () => {
+    let div1 = createElement(
+      'div',
+      {
+        style: {
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            color: 'rgb(255, 255, 255)',
+            padding: '8px 16px', 
+            position: 'absolute',
+            textAlign: 'center', 
+            transform: 'translateY(50%)'
+        },
+      }, [
+          createText('foo bar')
+      ]);
+    
+    BODY.appendChild(div1);
+    await snapshot();
+  });
 });

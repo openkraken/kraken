@@ -1,0 +1,22 @@
+name: Sync main code to release branch
+
+on:
+  push:
+    branches:
+      - main
+
+# Sync main code to release/flutter-2.2.x branch.
+jobs:
+  flutter_2_2_x:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: 'release/flutter-2.2.x'
+    - name: Opening pull request
+      uses: tretuna/sync-branches@1.2.0
+      with:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        FROM_BRANCH: 'main'
+        TO_BRANCH: 'release/flutter-2.2.x'

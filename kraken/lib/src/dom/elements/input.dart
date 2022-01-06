@@ -222,6 +222,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     // TODO: support ::placeholder pseudo element
     return _buildTextSpan(
       text: placeholderText,
+      // The color of input placeholder.
+      color: Color.fromARGB(255, 169, 169, 169)
     );
   }
 
@@ -276,10 +278,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     return super.getProperty(key);
   }
 
+  @override
   void focus() {
     setFocus(this);
   }
 
+  @override
   void blur() {
     clearFocus();
   }
@@ -394,8 +398,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
   }
 
-  TextSpan _buildTextSpan({ String? text }) {
-    return CSSTextMixin.createTextSpan(text ?? '', renderStyle);
+  TextSpan _buildTextSpan({ String? text, Color? color }) {
+    return CSSTextMixin.createTextSpan(text ?? '', renderStyle, color: color);
   }
 
   TextSpan _buildPasswordTextSpan(String text) {
@@ -455,7 +459,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     ) {
       if (event.type == EVENT_TOUCH_END) {
         _textSelectionDelegate.hideToolbar(false);
-        InputElement.setFocus(this);
       }
 
       TouchList touches = (event as TouchEvent).touches;

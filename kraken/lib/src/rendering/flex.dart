@@ -2149,7 +2149,11 @@ class RenderFlexLayout extends RenderLayoutBox {
       childSize = child.boxSize;
     } else if (child is RenderTextBox) {
       childSize = child.boxSize;
+    } else if (child != null && child.hasSize) {
+      // child is WidgetElement.
+      childSize = child.size;
     }
+
     if (shouldUseIntrinsicMainSize) {
       double? childIntrinsicMainSize =
           _childrenIntrinsicMainSizes[child.hashCode];
