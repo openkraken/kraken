@@ -274,19 +274,26 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
     super.dispatchEvent(event);
 
     // Dispatch listener for widget.
-    if (ownerDocument.gestureListener != null) {
-      if (ownerDocument.gestureListener?.onTouchStart != null && event.type == EVENT_TOUCH_START) {
-        ownerDocument.gestureListener?.onTouchStart!(event as TouchEvent);
+    var gestureListener = ownerDocument.gestureListener;
+    if (gestureListener != null) {
+      Function? onTouchStart = gestureListener.onTouchStart;
+      if (onTouchStart != null && event.type == EVENT_TOUCH_START) {
+        onTouchStart(event as TouchEvent);
       }
 
-      if (ownerDocument.gestureListener?.onTouchMove != null && event.type == EVENT_TOUCH_MOVE) {
-        ownerDocument.gestureListener?.onTouchMove!(event as TouchEvent);
+      Function? onTouchMove = gestureListener.onTouchMove;
+      if (onTouchMove != null && event.type == EVENT_TOUCH_MOVE) {
+        onTouchMove(event as TouchEvent);
       }
 
-      if (ownerDocument.gestureListener?.onTouchEnd != null && event.type == EVENT_TOUCH_END) {
-        ownerDocument.gestureListener?.onTouchEnd!(event as TouchEvent);
+      Function? onTouchEnd = gestureListener.onTouchEnd;
+      if (onTouchEnd != null && event.type == EVENT_TOUCH_END) {
+        onTouchEnd(event as TouchEvent);
       }
     }
+
+    // Dispatch listener for document to do someting such as shift the focus.
+    ownerDocument.controller.dispatchEvent(event);
   }
 }
 
