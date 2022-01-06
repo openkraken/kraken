@@ -14,6 +14,7 @@ import io.flutter.plugin.common.MethodChannel;
 public class Kraken {
 
   private String url;
+  private String dynamicLibraryPath;
   private FlutterEngine flutterEngine;
 
   private MethodChannel.MethodCallHandler handler;
@@ -24,7 +25,7 @@ public class Kraken {
       this.flutterEngine = flutterEngine;
       sdkMap.put(flutterEngine, this);
     } else {
-      throw new IllegalArgumentException("flutter engine must not be null!");
+      throw new IllegalArgumentException("flutter engine must not be null.");
     }
   }
 
@@ -36,15 +37,27 @@ public class Kraken {
     this.handler = handler;
   }
   /**
-   * page load form
+   * Load url.
    * @param url
    */
   public void loadUrl(String url) {
     this.url = url;
   }
 
+  /**
+   * Set the dynamic library path.
+   * @param value
+   */
+  public void setDynamicLibraryPath(String value) {
+    this.dynamicLibraryPath = value;
+  }
+
   public String getUrl() {
     return url;
+  }
+
+  public String getDynamicLibraryPath() {
+    return dynamicLibraryPath != null ? dynamicLibraryPath : "";
   }
 
   public void _handleMethodCall(MethodCall call, MethodChannel.Result result) {

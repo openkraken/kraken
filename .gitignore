@@ -66,3 +66,4 @@ Podfile.lock
 
 temp
 coverage
+pubspec.lock

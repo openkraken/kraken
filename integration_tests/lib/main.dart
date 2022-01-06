@@ -42,6 +42,8 @@ class IntegrationTestUriParser extends UriParser {
 
 // By CLI: `KRAKEN_ENABLE_TEST=true flutter run`
 void main() async {
+  // Overrides library name.
+  KrakenDynamicLibrary.libName = 'libkraken_test';
   defineKrakenCustomElements();
 
   // FIXME: This is a workaround for testcase
@@ -57,7 +59,6 @@ void main() async {
     // This segment inject variables for test environment.
     LOCAL_HTTP_SERVER = '${httpServer.getUri().toString()}';
   ''';
-
 
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
   CSSText.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
