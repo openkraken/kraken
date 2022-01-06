@@ -194,7 +194,7 @@ class KrakenViewController
   late Window window;
 
   void shiftFocus(EventTarget target) {
-    // TODO: get focus for eventtarget.
+    // TODO: get focus for other element which need to get focus.
     InputElement? inputElement = InputElement.focusInputElement;
     if (inputElement != null && inputElement != target) {
       inputElement.blur();
