@@ -799,7 +799,7 @@ class RenderBoxModel extends RenderBox
   }
 
   // Calculate constraints of renderBoxModel on layout stage and
-  // only needed to be excuted once on every layout.
+  // only needed to be executed once on every layout.
   BoxConstraints getConstraints() {
     // Inner scrolling content box of overflow element inherits constraints from parent
     // but has indefinite max constraints to allow children overflow
