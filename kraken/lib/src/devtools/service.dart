@@ -10,7 +10,7 @@ import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/devtools.dart';
-import '../bridge/platform.dart';
+import '../bridge/dynamic_library.dart';
 
 typedef NativePostTaskToInspectorThread = Void Function(Int32 contextId, Pointer<Void> context, Pointer<Void> callback);
 typedef DartPostTaskToInspectorThread = void Function(int contextId, Pointer<Void> context, Pointer<Void> callback);
@@ -115,7 +115,7 @@ class ChromeDevToolsService extends DevToolsService {
   // @TODO: Implement and remove.
   // ignore: unused_element
   static bool _registerUIDartMethodsToCpp() {
-    final DartRegisterDartMethods _registerDartMethods = KrakenPlatform.nativeDynamicLibrary.lookup<NativeFunction<NativeRegisterDartMethods>>('registerUIDartMethods').asFunction();
+    final DartRegisterDartMethods _registerDartMethods = KrakenDynamicLibrary.ref.lookup<NativeFunction<NativeRegisterDartMethods>>('registerUIDartMethods').asFunction();
     Pointer<Uint64> bytes = malloc.allocate<Uint64>(_dartNativeMethods.length * sizeOf<Uint64>());
     Uint64List nativeMethodList = bytes.asTypedList(_dartNativeMethods.length);
     nativeMethodList.setAll(0, _dartNativeMethods);

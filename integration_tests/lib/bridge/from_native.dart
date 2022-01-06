@@ -145,7 +145,7 @@ typedef Native_RegisterTestEnvDartMethods = Void Function(Pointer<Uint64> method
 typedef Dart_RegisterTestEnvDartMethods = void Function(Pointer<Uint64> methodBytes, int length);
 
 final Dart_RegisterTestEnvDartMethods _registerTestEnvDartMethods =
-KrakenPlatform.nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterTestEnvDartMethods>>('registerTestEnvDartMethods').asFunction();
+KrakenDynamicLibrary.ref.lookup<NativeFunction<Native_RegisterTestEnvDartMethods>>('registerTestEnvDartMethods').asFunction();
 
 
 void registerDartTestMethodsToCpp() {

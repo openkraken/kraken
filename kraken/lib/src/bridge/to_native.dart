@@ -17,7 +17,7 @@ import 'package:kraken/module.dart';
 
 import 'from_native.dart';
 import 'native_types.dart';
-import 'platform.dart';
+import 'dynamic_library.dart';
 
 // Steps for using dart:ffi to call a C function from Dart:
 // 1. Import dart:ffi.
@@ -67,7 +67,7 @@ class KrakenInfo {
 typedef NativeGetKrakenInfo = Pointer<NativeKrakenInfo> Function();
 typedef DartGetKrakenInfo = Pointer<NativeKrakenInfo> Function();
 
-final DartGetKrakenInfo _getKrakenInfo = KrakenPlatform.nativeDynamicLibrary
+final DartGetKrakenInfo _getKrakenInfo = KrakenDynamicLibrary.ref
     .lookup<NativeFunction<NativeGetKrakenInfo>>('getKrakenInfo')
     .asFunction();
 
@@ -91,8 +91,8 @@ typedef DartInvokeEventListener = void Function(
     Pointer<Void> nativeEvent,
     Pointer<NativeString>);
 
-final DartInvokeEventListener _invokeModuleEvent = KrakenPlatform
-    .nativeDynamicLibrary
+final DartInvokeEventListener _invokeModuleEvent = KrakenDynamicLibrary
+    .ref
     .lookup<NativeFunction<NativeInvokeEventListener>>('invokeModuleEvent')
     .asFunction();
 
@@ -142,7 +142,7 @@ void emitModuleEvent(
 typedef NativeCreateScreen = Pointer<Void> Function(Double, Double);
 typedef DartCreateScreen = Pointer<Void> Function(double, double);
 
-final DartCreateScreen _createScreen = KrakenPlatform.nativeDynamicLibrary
+final DartCreateScreen _createScreen = KrakenDynamicLibrary.ref
     .lookup<NativeFunction<NativeCreateScreen>>('createScreen')
     .asFunction();
 
@@ -162,11 +162,11 @@ typedef NativeParseHTML = Void Function(
 typedef DartParseHTML = void Function(
     int contextId, Pointer<Utf8> code, int length);
 
-final DartEvaluateScripts _evaluateScripts = KrakenPlatform.nativeDynamicLibrary
+final DartEvaluateScripts _evaluateScripts = KrakenDynamicLibrary.ref
     .lookup<NativeFunction<NativeEvaluateScripts>>('evaluateScripts')
     .asFunction();
 
-final DartParseHTML _parseHTML = KrakenPlatform.nativeDynamicLibrary
+final DartParseHTML _parseHTML = KrakenDynamicLibrary.ref
     .lookup<NativeFunction<NativeParseHTML>>('parseHTML')
     .asFunction();
 
@@ -189,8 +189,8 @@ typedef NativeEvaluateQuickjsByteCode = Void Function(
 typedef DartEvaluateQuickjsByteCode = void Function(
     int contextId, Pointer<Uint8> bytes, int byteLen);
 
-final DartEvaluateQuickjsByteCode _evaluateQuickjsByteCode = KrakenPlatform
-    .nativeDynamicLibrary
+final DartEvaluateQuickjsByteCode _evaluateQuickjsByteCode = KrakenDynamicLibrary
+    .ref
     .lookup<NativeFunction<NativeEvaluateQuickjsByteCode>>('evaluateQuickjsByteCode')
     .asFunction();
 
@@ -221,7 +221,7 @@ void parseHTML(int contextId, String code) {
 typedef NativeInitJSPagePool = Void Function(Int32 poolSize);
 typedef DartInitJSPagePool = void Function(int poolSize);
 
-final DartInitJSPagePool _initJSPagePool = KrakenPlatform.nativeDynamicLibrary
+final DartInitJSPagePool _initJSPagePool = KrakenDynamicLibrary.ref
     .lookup<NativeFunction<NativeInitJSPagePool>>('initJSPagePool')
     .asFunction();
 
@@ -232,7 +232,7 @@ void initJSPagePool(int poolSize) {
 typedef NativeDisposePage = Void Function(Int32 contextId);
 typedef DartDisposePage = void Function(int contextId);
 
-final DartDisposePage _disposePage = KrakenPlatform.nativeDynamicLibrary
+final DartDisposePage _disposePage = KrakenDynamicLibrary.ref
     .lookup<NativeFunction<NativeDisposePage>>('disposePage')
     .asFunction();
 
@@ -243,7 +243,7 @@ void disposePage(int contextId) {
 typedef NativeAllocateNewPage = Int32 Function(Int32);
 typedef DartAllocateNewPage = int Function(int);
 
-final DartAllocateNewPage _allocateNewPage = KrakenPlatform.nativeDynamicLibrary
+final DartAllocateNewPage _allocateNewPage = KrakenDynamicLibrary.ref
     .lookup<NativeFunction<NativeAllocateNewPage>>('allocateNewPage')
     .asFunction();
 
@@ -256,8 +256,8 @@ typedef NativeRegisterPluginByteCode = Void Function(
 typedef DartRegisterPluginByteCode = void Function(
     Pointer<Uint8> bytes, int length, Pointer<Utf8> pluginName);
 
-final DartRegisterPluginByteCode _registerPluginByteCode = KrakenPlatform
-    .nativeDynamicLibrary
+final DartRegisterPluginByteCode _registerPluginByteCode = KrakenDynamicLibrary
+    .ref
     .lookup<NativeFunction<NativeRegisterPluginByteCode>>(
         'registerPluginByteCode')
     .asFunction();
@@ -270,8 +270,8 @@ void registerPluginByteCode(Uint8List bytecode, String name) {
 typedef NativeProfileModeEnabled = Int32 Function();
 typedef DartProfileModeEnabled = int Function();
 
-final DartProfileModeEnabled _profileModeEnabled = KrakenPlatform
-    .nativeDynamicLibrary
+final DartProfileModeEnabled _profileModeEnabled = KrakenDynamicLibrary
+    .ref
     .lookup<NativeFunction<NativeProfileModeEnabled>>('profileModeEnabled')
     .asFunction();
 
@@ -285,7 +285,7 @@ bool profileModeEnabled() {
 typedef NativeReloadJSContext = Void Function(Int32 contextId);
 typedef DartReloadJSContext = void Function(int contextId);
 
-final DartReloadJSContext _reloadJSContext = KrakenPlatform.nativeDynamicLibrary
+final DartReloadJSContext _reloadJSContext = KrakenDynamicLibrary.ref
     .lookup<NativeFunction<NativeReloadJSContext>>('reloadJsContext')
     .asFunction();
 
@@ -301,8 +301,8 @@ Future<void> reloadJSContext(int contextId) async {
 typedef NativeFlushUICommandCallback = Void Function();
 typedef DartFlushUICommandCallback = void Function();
 
-final DartFlushUICommandCallback _flushUICommandCallback = KrakenPlatform
-    .nativeDynamicLibrary
+final DartFlushUICommandCallback _flushUICommandCallback = KrakenDynamicLibrary
+    .ref
     .lookup<NativeFunction<NativeFlushUICommandCallback>>(
         'flushUICommandCallback')
     .asFunction();
@@ -316,7 +316,7 @@ typedef NativeDispatchUITask = Void Function(
 typedef DartDispatchUITask = void Function(
     int contextId, Pointer<Void> context, Pointer<Void> callback);
 
-final DartDispatchUITask _dispatchUITask = KrakenPlatform.nativeDynamicLibrary
+final DartDispatchUITask _dispatchUITask = KrakenDynamicLibrary.ref
     .lookup<NativeFunction<NativeDispatchUITask>>('dispatchUITask')
     .asFunction();
 
@@ -359,24 +359,24 @@ class UICommandItem extends Struct {
 typedef NativeGetUICommandItems = Pointer<Uint64> Function(Int32 contextId);
 typedef DartGetUICommandItems = Pointer<Uint64> Function(int contextId);
 
-final DartGetUICommandItems _getUICommandItems = KrakenPlatform
-    .nativeDynamicLibrary
+final DartGetUICommandItems _getUICommandItems = KrakenDynamicLibrary
+    .ref
     .lookup<NativeFunction<NativeGetUICommandItems>>('getUICommandItems')
     .asFunction();
 
 typedef NativeGetUICommandItemSize = Int64 Function(Int64 contextId);
 typedef DartGetUICommandItemSize = int Function(int contextId);
 
-final DartGetUICommandItemSize _getUICommandItemSize = KrakenPlatform
-    .nativeDynamicLibrary
+final DartGetUICommandItemSize _getUICommandItemSize = KrakenDynamicLibrary
+    .ref
     .lookup<NativeFunction<NativeGetUICommandItemSize>>('getUICommandItemSize')
     .asFunction();
 
 typedef NativeClearUICommandItems = Void Function(Int32 contextId);
 typedef DartClearUICommandItems = void Function(int contextId);
 
-final DartClearUICommandItems _clearUICommandItems = KrakenPlatform
-    .nativeDynamicLibrary
+final DartClearUICommandItems _clearUICommandItems = KrakenDynamicLibrary
+    .ref
     .lookup<NativeFunction<NativeClearUICommandItems>>('clearUICommandItems')
     .asFunction();
 

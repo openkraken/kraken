@@ -18,7 +18,7 @@ import 'package:kraken/module.dart';
 import 'package:kraken/src/module/performance_timing.dart';
 
 import 'native_types.dart';
-import 'platform.dart';
+import 'dynamic_library.dart';
 
 // An native struct can be directly convert to javaScript String without any conversion cost.
 class NativeString extends Struct {
@@ -421,8 +421,8 @@ final List<int> _dartNativeMethods = [
 typedef NativeRegisterDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);
 typedef DartRegisterDartMethods = void Function(Pointer<Uint64> methodBytes, int length);
 
-final DartRegisterDartMethods _registerDartMethods = KrakenPlatform
-    .nativeDynamicLibrary
+final DartRegisterDartMethods _registerDartMethods = KrakenDynamicLibrary
+    .ref
     .lookup<NativeFunction<NativeRegisterDartMethods>>('registerDartMethods')
     .asFunction();
 

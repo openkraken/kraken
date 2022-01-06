@@ -43,7 +43,7 @@ class IntegrationTestUriParser extends UriParser {
 // By CLI: `KRAKEN_ENABLE_TEST=true flutter run`
 void main() async {
   // Overrides library name.
-  KrakenPlatform.libName = 'libkraken_test';
+  KrakenDynamicLibrary.libName = 'libkraken_test';
   defineKrakenCustomElements();
 
   // FIXME: This is a workaround for testcase

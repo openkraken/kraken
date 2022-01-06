@@ -8,7 +8,7 @@ import 'dart:io' show Platform;
 
 import 'package:path/path.dart';
 
-abstract class KrakenPlatform {
+abstract class KrakenDynamicLibrary {
   static final String _defaultLibraryPath = Platform.isLinux ? '\$ORIGIN' : '';
 
   /// The search path that dynamic library be load, if null using default.
@@ -21,7 +21,7 @@ abstract class KrakenPlatform {
   // The kraken library name.
   static String libName = 'libkraken';
 
-  static String get nativeDynamicLibraryName {
+  static String get _nativeDynamicLibraryName {
     if (Platform.isMacOS) {
       return '$libName.dylib';
     } else if (Platform.isIOS) {
@@ -35,10 +35,10 @@ abstract class KrakenPlatform {
     }
   }
 
-  static DynamicLibrary? _nativeDynamicLibrary;
-  static DynamicLibrary get nativeDynamicLibrary {
-    DynamicLibrary? nativeDynamicLibrary = _nativeDynamicLibrary;
-    _nativeDynamicLibrary = nativeDynamicLibrary ??= DynamicLibrary.open(join(_dynamicLibraryPath, nativeDynamicLibraryName));
+  static DynamicLibrary? _ref;
+  static DynamicLibrary get ref {
+    DynamicLibrary? nativeDynamicLibrary = _ref;
+    _ref = nativeDynamicLibrary ??= DynamicLibrary.open(join(_dynamicLibraryPath, _nativeDynamicLibraryName));
     return nativeDynamicLibrary;
   }
 }
