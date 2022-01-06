@@ -127,12 +127,15 @@ class CSSLengthValue {
         RenderBoxModel? renderBoxModel = renderStyle!.renderBoxModel;
         // Should access the renderStyle of renderBoxModel parent but not renderStyle parent
         // cause the element of renderStyle parent may not equal to containing block.
-        RenderBoxModel? parentRenderBoxModel = renderBoxModel?.parent as RenderBoxModel?;
-        // Get the renderStyle of outer scrolling box cause the renderStyle of scrolling
-        // content box is only a fraction of the complete renderStyle.
-        RenderStyle? parentRenderStyle = parentRenderBoxModel != null && parentRenderBoxModel.isScrollingContentBox
-          ? (parentRenderBoxModel.parent as RenderBoxModel).renderStyle
-          : parentRenderBoxModel?.renderStyle;
+        RenderStyle? parentRenderStyle;
+        if (renderBoxModel?.parent is RenderBoxModel) {
+          RenderBoxModel parentRenderBoxModel = renderBoxModel?.parent as RenderBoxModel;
+          // Get the renderStyle of outer scrolling box cause the renderStyle of scrolling
+          // content box is only a fraction of the complete renderStyle.
+          parentRenderStyle = parentRenderBoxModel.isScrollingContentBox
+            ? (parentRenderBoxModel.parent as RenderBoxModel).renderStyle
+            : parentRenderBoxModel.renderStyle;
+        }
 
         // Constraints is calculated before layout, the layouted size is identical to the tight constraints
         // if constraints is tight, so it's safe to use the tight constraints as the parent size to resolve
@@ -302,27 +305,16 @@ class CSSLengthValue {
             // Percentages for the vertical axis refer to the height of the box.
             double? borderBoxWidth = renderStyle!.borderBoxWidth ?? renderStyle!.borderBoxLogicalWidth;
             double? borderBoxHeight = renderStyle!.borderBoxHeight ?? renderStyle!.borderBoxLogicalHeight;
+            double? borderBoxDimension = axisType == Axis.horizontal ? borderBoxWidth : borderBoxHeight;
 
-            if (axisType == Axis.horizontal) {
-              if (borderBoxWidth != null) {
-                _computedValue = value! * borderBoxWidth;
-              } else {
-                _computedValue = propertyName == TRANSLATE
-                  // Transform will be cached once resolved, so avoid resolve if width not defined.
-                  // Use double.infinity to indicate percentage not resolved.
-                  ? double.infinity
-                  : 0;
-              }
-            } else if (axisType == Axis.vertical) {
-              if (borderBoxHeight != null) {
-                _computedValue = value! * borderBoxHeight;
-              } else {
-                _computedValue = propertyName == TRANSLATE
-                  // Transform will be cached once resolved, so avoid resolve if height not defined.
-                  // Use double.infinity to indicate percentage not resolved.
-                  ? double.infinity
-                  : 0;
-              }
+            if (borderBoxDimension != null) {
+              _computedValue = value! * borderBoxDimension;
+            } else {
+              _computedValue = propertyName == TRANSLATE
+              // Transform will be cached once resolved, so avoid resolve if width not defined.
+              // Use double.infinity to indicate percentage not resolved.
+                ? double.infinity
+                : 0;
             }
           break;
         }
