@@ -80,7 +80,7 @@ class ExecutionContext {
   bool isValid() const;
   JSValue global();
   JSContext* ctx();
-  JSRuntime* runtime();
+  static JSRuntime* runtime();
   int32_t getContextId() const;
   void* getOwner();
   bool handleException(JSValue* exc);

@@ -14,6 +14,10 @@
 #include "event.h"
 #include "kraken_bridge.h"
 
+#if UNIT_TEST
+#include "kraken_test_env.h"
+#endif
+
 namespace kraken::binding::qjs {
 
 static std::atomic<int32_t> globalEventTargetId{0};
@@ -268,6 +272,13 @@ JSClassID EventTargetInstance::classId() {
 }
 
 EventTargetInstance::~EventTargetInstance() {
+#if UNIT_TEST
+  // Callback to unit test specs before eventTarget finalized.
+  if (TEST_getEnv(m_context->uniqueId)->onEventTargetDisposed != nullptr) {
+    TEST_getEnv(m_context->uniqueId)->onEventTargetDisposed(this);
+  }
+#endif
+
   m_context->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::disposeEventTarget, nullptr, false);
   getDartMethod()->flushUICommand();
   delete nativeEventTarget;
@@ -459,9 +470,22 @@ void EventTargetInstance::copyNodeProperties(EventTargetInstance* newNode, Event
   referenceNode->m_properties.copyWith(&newNode->m_properties);
 }
 
-void NativeEventTarget::dispatchEventImpl(NativeEventTarget* nativeEventTarget, NativeString* nativeEventType, void* rawEvent, int32_t isCustomEvent) {
+void NativeEventTarget::dispatchEventImpl(int32_t contextId, NativeEventTarget* nativeEventTarget, NativeString* nativeEventType, void* rawEvent, int32_t isCustomEvent) {
   assert_m(nativeEventTarget->instance != nullptr, "NativeEventTarget should have owner");
   EventTargetInstance* eventTargetInstance = nativeEventTarget->instance;
+
+  auto* runtime = ExecutionContext::runtime();
+
+  // Should avoid dispatch event is ctx is invalid.
+  if (!isContextValid(contextId)) {
+    return;
+  }
+
+  // We should avoid trigger event if eventTarget are no long live on heap.
+  if (!JS_IsLiveObject(runtime, eventTargetInstance->jsObject)) {
+    return;
+  }
+
   ExecutionContext* context = eventTargetInstance->context();
   std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(nativeEventType->string), nativeEventType->length);
   std::string eventType = toUTF8(u16EventType);
