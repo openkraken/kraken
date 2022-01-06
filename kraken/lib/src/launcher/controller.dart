@@ -198,8 +198,9 @@ class KrakenViewController
     InputElement? inputElement = InputElement.focusInputElement;
     if (inputElement != null && inputElement != target) {
       inputElement.blur();
-      target.focus();
     }
+
+    target.focus();
   }
 
   void evaluateJavaScripts(String code, [String source = 'vm://']) {
