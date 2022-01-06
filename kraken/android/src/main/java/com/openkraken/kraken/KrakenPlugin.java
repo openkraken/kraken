@@ -68,6 +68,12 @@ public class KrakenPlugin implements FlutterPlugin, MethodCallHandler {
             break;
           }
 
+          case "getDynamicLibraryPath": {
+            Kraken kraken = getKraken();
+            result.success(kraken == null ? "" : kraken.getDynamicLibraryPath());
+            break;
+          }
+
           case "invokeMethod": {
             Kraken kraken = getKraken();
             if (kraken != null) {

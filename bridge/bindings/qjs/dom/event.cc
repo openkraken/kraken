@@ -41,7 +41,7 @@ std::unordered_map<std::string, EventCreator> Event::m_eventCreatorMap{};
 
 IMPL_PROPERTY_GETTER(Event, type)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
-  return JS_NewUnicodeString(eventInstance->context()->runtime(), eventInstance->context()->ctx(), eventInstance->nativeEvent->type->string, eventInstance->nativeEvent->type->length);
+  return JS_NewUnicodeString(ExecutionContext::runtime(), eventInstance->context()->ctx(), eventInstance->nativeEvent->type->string, eventInstance->nativeEvent->type->length);
 }
 
 IMPL_PROPERTY_GETTER(Event, bubbles)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {

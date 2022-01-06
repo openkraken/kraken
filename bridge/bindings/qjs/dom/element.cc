@@ -364,7 +364,7 @@ JSValue Element::click(JSContext* ctx, JSValue this_val, int argc, JSValue* argv
   return element->callNativeMethods("click", 0, nullptr);
 #elif UNIT_TEST
   auto element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  TEST_dispatchEvent(element, "click");
+  TEST_dispatchEvent(element->m_contextId, element, "click");
   return JS_UNDEFINED;
 #else
   return JS_UNDEFINED;

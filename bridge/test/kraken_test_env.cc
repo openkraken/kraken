@@ -275,15 +275,33 @@ void TEST_runLoop(ExecutionContext* context) {
   }
 }
 
-void TEST_dispatchEvent(EventTargetInstance* eventTarget, const std::string type) {
+void TEST_dispatchEvent(int32_t contextId, EventTargetInstance* eventTarget, const std::string type) {
   NativeEventTarget* nativeEventTarget = new NativeEventTarget(eventTarget);
   auto nativeEventType = stringToNativeString(type);
-  NativeEvent* nativeEvent = new NativeEvent();
-  nativeEvent->type = nativeEventType.get();
+  NativeString* rawEventType = nativeEventType.release();
 
-  RawEvent rawEvent{reinterpret_cast<uint64_t*>(nativeEvent)};
+  NativeEvent* nativeEvent = new NativeEvent{rawEventType};
 
-  NativeEventTarget::dispatchEventImpl(nativeEventTarget, nativeEventType.get(), &rawEvent, false);
+  RawEvent* rawEvent = new RawEvent{reinterpret_cast<uint64_t*>(nativeEvent)};
+
+  NativeEventTarget::dispatchEventImpl(contextId, nativeEventTarget, rawEventType, rawEvent, false);
 }
 
 void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv) {}
+
+std::unordered_map<int32_t, std::shared_ptr<UnitTestEnv>> unitTestEnvMap;
+std::shared_ptr<UnitTestEnv> TEST_getEnv(int32_t contextUniqueId) {
+  if (unitTestEnvMap.count(contextUniqueId) == 0) {
+    unitTestEnvMap[contextUniqueId] = std::make_shared<UnitTestEnv>();
+  }
+
+  return unitTestEnvMap[contextUniqueId];
+}
+
+void TEST_registerEventTargetDisposedCallback(int32_t contextUniqueId, TEST_OnEventTargetDisposed callback) {
+  if (unitTestEnvMap.count(contextUniqueId) == 0) {
+    unitTestEnvMap[contextUniqueId] = std::make_shared<UnitTestEnv>();
+  }
+
+  unitTestEnvMap[contextUniqueId]->onEventTargetDisposed = callback;
+}
