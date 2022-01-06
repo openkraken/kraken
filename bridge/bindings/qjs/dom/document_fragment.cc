@@ -31,8 +31,7 @@ JSValue DocumentFragment::instanceConstructor(JSContext* ctx, JSValue func_obj, 
   return (new DocumentFragmentInstance(this))->jsObject;
 }
 
-DocumentFragmentInstance::DocumentFragmentInstance(DocumentFragment* fragment) : NodeInstance(fragment, NodeType::DOCUMENT_FRAGMENT_NODE, DocumentFragment::classId(), "DocumentFragment") {
-  setNodeFlag(DocumentFragmentInstance::NodeFlag::IsDocumentFragment);
+DocumentFragmentInstance::DocumentFragmentInstance(DocumentFragment* fragment) : NodeInstance(fragment, kCreateDocumentFragment, DocumentFragment::classId(), "DocumentFragment") {
   m_context->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::createDocumentFragment, nativeEventTarget);
 }
 }  // namespace kraken::binding::qjs

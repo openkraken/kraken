@@ -15,18 +15,42 @@ namespace kraken::binding::qjs {
 
 void bindNode(std::unique_ptr<ExecutionContext>& context);
 
-enum NodeType { ELEMENT_NODE = 1, TEXT_NODE = 3, COMMENT_NODE = 8, DOCUMENT_NODE = 9, DOCUMENT_TYPE_NODE = 10, DOCUMENT_FRAGMENT_NODE = 11 };
+const int kDOMNodeTypeShift = 2;
+const int kElementNamespaceTypeShift = 4;
+enum class NodeType {
+  ELEMENT_NODE = 1,
+  TEXT_NODE = 3,
+  COMMENT_NODE = 8,
+  DOCUMENT_NODE = 9,
+  DOCUMENT_TYPE_NODE = 10,
+  DOCUMENT_FRAGMENT_NODE = 11
+};
 
 class NodeInstance;
 class ElementInstance;
 class DocumentInstance;
 class TextNodeInstance;
+class NodeList;
+
+// This constant controls how much buffer is initially allocated
+// for a Node Vector that is used to store child Nodes of a given Node.
+const int kInitialNodeVectorSize = 11;
+using NodeVector = std::vector<NodeInstance*>;
 
 class Node : public EventTarget {
  public:
   Node() = delete;
-  Node(ExecutionContext* context, const std::string& className) : EventTarget(context, className.c_str()) { JS_SetPrototype(m_ctx, m_prototypeObject, EventTarget::instance(m_context)->prototype()); }
-  Node(ExecutionContext* context) : EventTarget(context, "Node") { JS_SetPrototype(m_ctx, m_prototypeObject, EventTarget::instance(m_context)->prototype()); }
+  Node(ExecutionContext* context, const std::string& className) : EventTarget(context,
+                                                                              className.c_str()) {
+    JS_SetPrototype(m_ctx,
+                    m_prototypeObject,
+                    EventTarget::instance(m_context)->prototype());
+  }
+  Node(ExecutionContext* context) : EventTarget(context, "Node") {
+    JS_SetPrototype(m_ctx,
+                    m_prototypeObject,
+                    EventTarget::instance(m_context)->prototype());
+  }
 
   OBJECT_INSTANCE(Node);
 
@@ -75,25 +99,59 @@ struct NodeJob {
 
 class NodeInstance : public EventTargetInstance {
  public:
-  enum class NodeFlag : uint32_t { IsDocumentFragment = 1 << 0, IsTemplateElement = 1 << 1 };
-  mutable std::set<NodeFlag> m_nodeFlags;
-  bool hasNodeFlag(NodeFlag flag) const { return m_nodeFlags.size() != 0 && m_nodeFlags.find(flag) != m_nodeFlags.end(); }
-  void setNodeFlag(NodeFlag flag) const { m_nodeFlags.insert(flag); }
-  void removeNodeFlag(NodeFlag flag) const { m_nodeFlags.erase(flag); }
+  enum NodeFlag : uint32_t {
+    // Node type flags. These never change once created.
+    kIsContainerFlag = 1 << 3,
+    kDOMNodeTypeMask = 0x3 << kDOMNodeTypeShift,
+    kElementNamespaceTypeMask = 0x3 << kElementNamespaceTypeShift,
+
+    // Tree state flags. These change when the element is added/removed
+    // from a DOM tree.
+    kIsConnectedFlag = 1 << 4,
+  };
+  uint32_t m_nodeFlags;
+  FORCE_INLINE bool getFlag(NodeFlag mask) const {
+    return m_nodeFlags & mask;
+  }
+  void setFlag(bool v, NodeFlag mask) {
+    m_nodeFlags = (m_nodeFlags & ~mask) | (-(int32_t) v & mask);
+  }
+  void setFlag(NodeFlag mask) {
+    m_nodeFlags |= mask;
+  }
+  void clearFlag(NodeFlag mask) {
+    m_nodeFlags &= ~mask;
+  }
+
+  enum class DOMNodeType : uint32_t {
+    kElement = 0,
+    kText = 1 << kDOMNodeTypeShift,
+    kDocumentFragment = 2 << kDOMNodeTypeShift,
+    kOther = 3 << kDOMNodeTypeShift,
+  };
+  FORCE_INLINE DOMNodeType getDOMNodeType() const {
+    return static_cast<DOMNodeType>(m_nodeFlags & kDOMNodeTypeMask);
+  }
+
+  enum class ElementNamespaceType : uint32_t {
+    kHTML = 0,
+    kMathML = 1 << kElementNamespaceTypeShift,
+    kSVG = 2 << kElementNamespaceTypeShift,
+    kOther = 3 << kElementNamespaceTypeShift,
+  };
+  FORCE_INLINE ElementNamespaceType getElementNamespaceType() const {
+    return static_cast<ElementNamespaceType>(m_nodeFlags & kElementNamespaceTypeMask);
+  }
 
   NodeInstance() = delete;
-  explicit NodeInstance(Node* node, NodeType nodeType, JSClassID classId, std::string name)
-      : EventTargetInstance(node, classId, std::move(name)), m_document(m_context->document()), nodeType(nodeType) {}
-  explicit NodeInstance(Node* node, NodeType nodeType, JSClassID classId, JSClassExoticMethods& exoticMethods, std::string name)
-      : EventTargetInstance(node, classId, exoticMethods, name), m_document(m_context->document()), nodeType(nodeType) {}
   ~NodeInstance();
-  bool isConnected();
+  bool isConnected() const;
   DocumentInstance* ownerDocument();
-  NodeInstance* firstChild();
+  inline NodeInstance* firstChild();
   NodeInstance* lastChild();
   NodeInstance* previousSibling();
   NodeInstance* nextSibling();
-  void internalAppendChild(NodeInstance* node);
+  NodeInstance* internalAppendChild(NodeInstance* node, JSValue *exception);
   void internalRemove();
   void internalClearChild();
   NodeInstance* internalRemoveChild(NodeInstance* node);
@@ -102,12 +160,17 @@ class NodeInstance : public EventTargetInstance {
   virtual void internalSetTextContent(JSValue content);
   JSValue internalReplaceChild(NodeInstance* newChild, NodeInstance* oldChild);
 
+  bool isDescendantOf(const NodeInstance*) const;
+  bool contains(const NodeInstance*) const;
+
+  NodeInstance* parentNode() const;
+  NodeInstance& treeRoot() const;
+
+  //TODO: remove this
   void setParentNode(NodeInstance* parent);
   void removeParentNode();
-  NodeType nodeType;
-  JSValue parentNode{JS_NULL};
-  JSValue childNodes{JS_NewArray(m_ctx)};
 
+  NodeList* childNodes();
   NodeJob nodeLink{this};
 
   void refer();
@@ -117,17 +180,82 @@ class NodeInstance : public EventTargetInstance {
   virtual void _notifyNodeRemoved(NodeInstance* node);
   virtual void _notifyNodeInsert(NodeInstance* node);
 
+  FORCE_INLINE bool isElementNode() const {
+    return getDOMNodeType() == DOMNodeType::kElement;
+  }
+  FORCE_INLINE bool isDocumentFragment() const {
+    return getDOMNodeType() == DOMNodeType::kDocumentFragment;
+  }
+  FORCE_INLINE bool isTextNode() const {
+    return getDOMNodeType() == DOMNodeType::kText;
+  }
+  FORCE_INLINE bool isContainerNode() const {
+    return getFlag(kIsContainerFlag);
+  }
+
  protected:
+  enum ConstructionType {
+    kCreateText = static_cast<NodeFlag>(NodeType::TEXT_NODE) | static_cast<NodeFlag>(DOMNodeType::kText),
+    kCreateContainer = static_cast<NodeFlag>(kIsContainerFlag) | static_cast<NodeFlag>(DOMNodeType::kOther),
+    kCreateElement = kIsContainerFlag |
+        static_cast<NodeFlag>(DOMNodeType::kElement) |
+        static_cast<NodeFlag>(ElementNamespaceType::kOther),
+    kCreateDocumentFragment = kIsContainerFlag |
+        static_cast<NodeFlag>(DOMNodeType::kDocumentFragment) |
+        static_cast<NodeFlag>(ElementNamespaceType::kOther),
+    kCreateHTMLElement = kIsContainerFlag |
+        static_cast<NodeFlag>(DOMNodeType::kElement) |
+        static_cast<NodeFlag>(ElementNamespaceType::kHTML),
+    kCreateDocument = kCreateContainer | kIsConnectedFlag,
+  };
+  explicit NodeInstance(Node* node, ConstructionType type, JSClassID classId, std::string name)
+      : EventTargetInstance(node, classId, std::move(name)), m_document(m_context->document()), m_nodeFlags(type) {}
+  explicit NodeInstance(Node* node,
+                        ConstructionType type,
+                        JSClassID classId,
+                        JSClassExoticMethods& exoticMethods,
+                        std::string name)
+      : EventTargetInstance(node, classId, exoticMethods, name),
+        m_document(m_context->document()),
+        m_nodeFlags(type) {}
+
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
  private:
+
+  // ensurePreInsertionValidity() is an implementation of step 2 to 6 of
+  // https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity and
+  // https://dom.spec.whatwg.org/#concept-node-replace .
+  bool ensurePreInsertionValidity(const NodeInstance& newChild, const NodeInstance* next, const NodeInstance* oldChild, JSValue* exception) const;
+
+  // Returns true if |new_child| contains this node. In that case,
+  // https://dom.spec.whatwg.org/#concept-tree-host-including-inclusive-ancestor
+  bool isHostIncludingInclusiveAncestorOfThis(const NodeInstance& newChild, JSValue *exception) const ;
+
+
   DocumentInstance* m_document{nullptr};
-  ObjectProperty m_childNodes{m_context, jsObject, "childNodes", childNodes};
+  NodeList* m_nodeList{nullptr};
+
+  NodeInstance* m_parent{nullptr};
+
+  NodeInstance* m_previousSibling{nullptr};
+  NodeInstance* m_nextSibling{nullptr};
+
+  // TODO: refactor these properties to ContainerNode.
+  NodeInstance* m_firstChild{nullptr};
+  NodeInstance* m_lastChild{nullptr};
+
   void ensureDetached(NodeInstance* node);
   friend DocumentInstance;
   friend Node;
   friend ElementInstance;
 };
+
+inline void getChildNodes(NodeInstance& node, NodeVector& nodes) {
+  assert(!nodes.empty());
+  for (NodeInstance* child = node.firstChild(); child; child = child->nextSibling())
+    nodes.emplace_back(child);
+}
 
 }  // namespace kraken::binding::qjs
 

@@ -218,6 +218,11 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/dom/event.h
     bindings/qjs/dom/node.h
     bindings/qjs/dom/node.cc
+    bindings/qjs/dom/node_list.cc
+    bindings/qjs/dom/node_list.h
+    bindings/qjs/dom/container_node.cc
+    bindings/qjs/dom/container_node.h
+    bindings/qjs/dom/collection_index_cache.h
     bindings/qjs/dom/element.cc
     bindings/qjs/dom/element.h
     bindings/qjs/dom/document.cc

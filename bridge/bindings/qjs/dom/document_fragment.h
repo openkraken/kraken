@@ -29,6 +29,8 @@ class DocumentFragmentInstance : public NodeInstance {
  public:
   DocumentFragmentInstance() = delete;
   DocumentFragmentInstance(DocumentFragment* fragment);
+
+  virtual bool isTemplateContent() const { return false; }
 };
 
 }  // namespace kraken::binding::qjs

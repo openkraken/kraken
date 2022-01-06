@@ -11,6 +11,7 @@
 #include "element.h"
 #include "kraken_bridge.h"
 #include "text_node.h"
+#include "node_list.h"
 
 namespace kraken::binding::qjs {
 
@@ -52,7 +53,7 @@ JSValue Node::cloneNode(JSContext* ctx, JSValue this_val, int argc, JSValue* arg
   }
   bool deep = JS_ToBool(ctx, deepValue);
 
-  if (selfInstance->nodeType == NodeType::ELEMENT_NODE) {
+  if (selfInstance->isElementNode()) {
     JSValue newElement = copyNodeValue(ctx, selfInstance);
     auto newElementInstance = static_cast<NodeInstance*>(JS_GetOpaque(newElement, Node::classId(newElement)));
 
@@ -60,11 +61,11 @@ JSValue Node::cloneNode(JSContext* ctx, JSValue this_val, int argc, JSValue* arg
       traverseCloneNode(ctx, selfInstance, newElementInstance);
     }
     return newElementInstance->jsObject;
-  } else if (selfInstance->nodeType == NodeType::TEXT_NODE) {
+  } else if (selfInstance->isTextNode()) {
     auto textNode = static_cast<TextNodeInstance*>(selfInstance);
     JSValue newTextNode = copyNodeValue(ctx, static_cast<NodeInstance*>(textNode));
     return newTextNode;
-  } else if (selfInstance->nodeType == NodeType::DOCUMENT_FRAGMENT_NODE) {
+  } else if (selfInstance->isDocumentFragment()) {
     JSValue newFragment = JS_CallConstructor(ctx, DocumentFragment::instance(selfInstance->m_context)->jsObject, 0, nullptr);
     auto* newFragmentInstance = static_cast<NodeInstance*>(JS_GetOpaque(newFragment, Node::classId(newFragment)));
 
@@ -82,8 +83,8 @@ JSValue Node::appendChild(JSContext* ctx, JSValue this_val, int argc, JSValue* a
     return JS_ThrowTypeError(ctx, "Failed to execute 'appendChild' on 'Node': first argument is required.");
   }
 
-  auto selfInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
-  if (selfInstance == nullptr)
+  auto self = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
+  if (self == nullptr)
     return JS_ThrowTypeError(ctx, "this object is not a instance of Node.");
   JSValue nodeValue = argv[0];
 
@@ -91,32 +92,27 @@ JSValue Node::appendChild(JSContext* ctx, JSValue this_val, int argc, JSValue* a
     return JS_ThrowTypeError(ctx, "Failed to execute 'appendChild' on 'Node': first arguments should be an Node type.");
   }
 
-  auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(nodeValue, Node::classId(nodeValue)));
+  auto* newNode = static_cast<NodeInstance*>(JS_GetOpaque(nodeValue, Node::classId(nodeValue)));
 
-  if (nodeInstance == nullptr || nodeInstance->document() != selfInstance->document()) {
+  if (newNode == nullptr || newNode->document() != self->document()) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'appendChild' on 'Node': first arguments should be an Node type.");
   }
 
-  if (nodeInstance == selfInstance) {
+  if (newNode == self) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'appendChild' on 'Node': The new child element contains the parent.");
   }
 
-  if (nodeInstance->hasNodeFlag(NodeInstance::NodeFlag::IsDocumentFragment)) {
-    size_t len = arrayGetLength(ctx, nodeInstance->childNodes);
-    for (int i = 0; i < len; i++) {
-      JSValue n = JS_GetPropertyUint32(ctx, nodeInstance->childNodes, i);
-      auto* node = static_cast<NodeInstance*>(JS_GetOpaque(n, Node::classId(n)));
-      selfInstance->internalAppendChild(node);
-      JS_FreeValue(ctx, n);
-    }
-
-    JS_SetPropertyStr(ctx, nodeInstance->childNodes, "length", JS_NewUint32(ctx, 0));
-  } else {
-    selfInstance->ensureDetached(nodeInstance);
-    selfInstance->internalAppendChild(nodeInstance);
+  if (!self->getFlag(NodeInstance::kIsConnectedFlag)) {
+    return JS_ThrowTypeError(ctx, "Failed to execute 'appendChild' on 'Node': This node type does not support this method.");
   }
 
-  return JS_DupValue(ctx, nodeInstance->jsObject);
+  JSValue exception = JS_NULL;
+  NodeInstance* returnNode = self->internalAppendChild(newNode, &exception);
+
+  if (JS_IsException(exception)) {
+    return exception;
+  }
+  return JS_DupValue(ctx, returnNode->jsObject);
 }
 JSValue Node::remove(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto selfInstance = static_cast<NodeInstance*>(JS_GetOpaque(this_val, Node::classId(this_val)));
@@ -172,7 +168,7 @@ JSValue Node::insertBefore(JSContext* ctx, JSValue this_val, int argc, JSValue* 
     return JS_ThrowTypeError(ctx, "Failed to execute 'insertBefore' on 'Node': parameter 1 is not of type 'Node'");
   }
 
-  if (nodeInstance->hasNodeFlag(NodeInstance::NodeFlag::IsDocumentFragment)) {
+  if (nodeInstance->hasNodeFlag(NodeInstance::NodeFlag::IsDocumentFragmentFlag)) {
     size_t len = arrayGetLength(ctx, nodeInstance->childNodes);
     for (int i = 0; i < len; i++) {
       JSValue n = JS_GetPropertyUint32(ctx, nodeInstance->childNodes, i);
@@ -219,7 +215,7 @@ JSValue Node::replaceChild(JSContext* ctx, JSValue this_val, int argc, JSValue* 
     return JS_ThrowTypeError(ctx, "Failed to execute 'replaceChild' on 'Node': The new node is not a type of node.");
   }
 
-  if (newChildInstance->hasNodeFlag(NodeInstance::NodeFlag::IsDocumentFragment)) {
+  if (newChildInstance->hasNodeFlag(NodeInstance::NodeFlag::IsDocumentFragmentFlag)) {
     size_t len = arrayGetLength(ctx, newChildInstance->childNodes);
     for (int i = 0; i < len; i++) {
       JSValue n = JS_GetPropertyUint32(ctx, newChildInstance->childNodes, i);
@@ -247,7 +243,7 @@ void Node::traverseCloneNode(JSContext* ctx, NodeInstance* baseNode, NodeInstanc
     targetNode->ensureDetached(newNodeInstance);
     targetNode->internalAppendChild(newNodeInstance);
     // element node needs recursive child nodes.
-    if (node->nodeType == NodeType::ELEMENT_NODE) {
+    if (node->isElementNode()) {
       traverseCloneNode(ctx, node, newNodeInstance);
     }
     JS_FreeValue(ctx, newNode);
@@ -256,7 +252,7 @@ void Node::traverseCloneNode(JSContext* ctx, NodeInstance* baseNode, NodeInstanc
 }
 
 JSValue Node::copyNodeValue(JSContext* ctx, NodeInstance* node) {
-  if (node->nodeType == NodeType::ELEMENT_NODE) {
+  if (node->isElementNode()) {
     auto* element = reinterpret_cast<ElementInstance*>(node);
 
     /* createElement */
@@ -282,7 +278,7 @@ JSValue Node::copyNodeValue(JSContext* ctx, NodeInstance* node) {
     element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::cloneNode, *args_01, nullptr);
 
     return newElement->jsObject;
-  } else if (node->nodeType == TEXT_NODE) {
+  } else if (node->isTextNode()) {
     auto* textNode = reinterpret_cast<TextNodeInstance*>(node);
     JSValue textContent = textNode->internalGetTextContent();
     JSValue arguments[] = {textContent};
@@ -347,17 +343,8 @@ IMPL_PROPERTY_SETTER(Node, textContent)(JSContext* ctx, JSValue this_val, int ar
   return JS_NULL;
 }
 
-bool NodeInstance::isConnected() {
-  bool _isConnected = this == document();
-  auto parent = static_cast<NodeInstance*>(JS_GetOpaque(parentNode, Node::classId(parentNode)));
-
-  while (parent != nullptr && !_isConnected) {
-    _isConnected = parent == document();
-    JSValue parentParentNode = parent->parentNode;
-    parent = static_cast<NodeInstance*>(JS_GetOpaque(parentParentNode, Node::classId(parentParentNode)));
-  }
-
-  return _isConnected;
+bool NodeInstance::isConnected() const {
+  return getFlag(kIsConnectedFlag);
 }
 DocumentInstance* NodeInstance::ownerDocument() {
   if (nodeType == NodeType::DOCUMENT_NODE) {
@@ -367,66 +354,56 @@ DocumentInstance* NodeInstance::ownerDocument() {
   return document();
 }
 NodeInstance* NodeInstance::firstChild() {
-  int32_t len = arrayGetLength(m_ctx, childNodes);
-  if (len == 0) {
+  if (!getFlag(kIsContainerFlag)) {
     return nullptr;
   }
-  JSValue result = JS_GetPropertyUint32(m_ctx, childNodes, 0);
-  return static_cast<NodeInstance*>(JS_GetOpaque(result, Node::classId(result)));
+
+  return m_firstChild;
 }
 NodeInstance* NodeInstance::lastChild() {
-  int32_t len = arrayGetLength(m_ctx, childNodes);
-  if (len == 0) {
+  if (!getFlag(kIsConnectedFlag)) {
     return nullptr;
   }
-  JSValue result = JS_GetPropertyUint32(m_ctx, childNodes, len - 1);
-  return static_cast<NodeInstance*>(JS_GetOpaque(result, Node::classId(result)));
+
+  return m_lastChild;
 }
 NodeInstance* NodeInstance::previousSibling() {
-  if (JS_IsNull(parentNode))
-    return nullptr;
-
-  auto* parent = static_cast<NodeInstance*>(JS_GetOpaque(parentNode, Node::classId(parentNode)));
-  auto parentChildNodes = parent->childNodes;
-  int32_t idx = arrayFindIdx(m_ctx, parentChildNodes, jsObject);
-  int32_t parentChildNodeLen = arrayGetLength(m_ctx, parentChildNodes);
-
-  if (idx - 1 < parentChildNodeLen) {
-    JSValue result = JS_GetPropertyUint32(m_ctx, parentChildNodes, idx - 1);
-    return static_cast<NodeInstance*>(JS_GetOpaque(result, Node::classId(result)));
-  }
-
-  return nullptr;
+  return m_previousSibling;
 }
 NodeInstance* NodeInstance::nextSibling() {
-  if (JS_IsNull(parentNode))
-    return nullptr;
-  auto* parent = static_cast<NodeInstance*>(JS_GetOpaque(parentNode, Node::classId(parentNode)));
-  auto parentChildNodes = parent->childNodes;
-  int32_t idx = arrayFindIdx(m_ctx, parentChildNodes, jsObject);
-  int32_t parentChildNodeLen = arrayGetLength(m_ctx, parentChildNodes);
+  return m_nextSibling;
+}
 
-  if (idx + 1 < parentChildNodeLen) {
-    JSValue result = JS_GetPropertyUint32(m_ctx, parentChildNodes, idx + 1);
-    return static_cast<NodeInstance*>(JS_GetOpaque(result, Node::classId(result)));
+
+// Returns true if DOM mutation should be proceeded.
+static inline bool collectChildrenAndRemoveFromOldParent(NodeInstance& node, NodeVector& nodes, JSValue* exception) {
+  if (node.isDocumentFragment()) {
+
+  }
+}
+
+NodeInstance* NodeInstance::internalAppendChild(NodeInstance* newChild, JSValue* exception) {
+  assert(newChild != nullptr);
+  // Make sure adding the new child is ok
+  if (!ensurePreInsertionValidity(*newChild, nullptr, nullptr, exception)) {
+    return newChild;
   }
 
-  return nullptr;
+//  arrayPushValue(m_ctx, childNodes, node->jsObject);
+//  node->setParentNode(this);
+//
+//  node->_notifyNodeInsert(this);
+//
+//  std::string nodeEventTargetId = std::to_string(node->m_eventTargetId);
+//  std::string position = std::string("beforeend");
+//
+//  std::unique_ptr<NativeString> args_01 = stringToNativeString(nodeEventTargetId);
+//  std::unique_ptr<NativeString> args_02 = stringToNativeString(position);
+
+//  m_context->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
 }
-void NodeInstance::internalAppendChild(NodeInstance* node) {
-  arrayPushValue(m_ctx, childNodes, node->jsObject);
-  node->setParentNode(this);
 
-  node->_notifyNodeInsert(this);
 
-  std::string nodeEventTargetId = std::to_string(node->m_eventTargetId);
-  std::string position = std::string("beforeend");
-
-  std::unique_ptr<NativeString> args_01 = stringToNativeString(nodeEventTargetId);
-  std::unique_ptr<NativeString> args_02 = stringToNativeString(position);
-
-  m_context->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
-}
 void NodeInstance::internalRemove() {
   if (JS_IsNull(parentNode))
     return;
@@ -526,6 +503,38 @@ JSValue NodeInstance::internalReplaceChild(NodeInstance* newChild, NodeInstance*
   return oldChild->jsObject;
 }
 
+bool NodeInstance::isDescendantOf(const NodeInstance* other) const {
+  assert(this);
+
+  // Return true if other is an ancestor of this, otherwise false
+  if (!other || isConnected() != other->isConnected())
+    return false;
+  for (const NodeInstance* n = parentNode(); n; n = n->parentNode()) {
+    if (n == other)
+      return true;
+  }
+  return false;
+}
+
+bool NodeInstance::contains(const NodeInstance* node) const {
+  if (!node) {
+    return false;
+  }
+  return this == node || node->isDescendantOf(this);
+}
+
+NodeInstance* NodeInstance::parentNode() const {
+  return m_parent;
+}
+
+NodeInstance& NodeInstance::treeRoot() const {
+  const NodeInstance* node = this;
+  while(node->parentNode()) {
+    node = node->parentNode();
+  }
+  return const_cast<NodeInstance&>(*node);
+}
+
 void NodeInstance::setParentNode(NodeInstance* parent) {
   if (!JS_IsNull(parentNode)) {
     JS_FreeValue(m_ctx, parentNode);
@@ -540,6 +549,13 @@ void NodeInstance::removeParentNode() {
   }
 
   parentNode = JS_NULL;
+}
+
+NodeList* NodeInstance::childNodes() {
+  if (m_nodeList == nullptr) {
+    return m_nodeList = makeGarbageCollected<NodeList>(this);
+  }
+  return m_nodeList;
 }
 
 NodeInstance::~NodeInstance() {}
@@ -572,6 +588,42 @@ void NodeInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
   // Should check object is already inited before gc mark.
   if (JS_IsObject(parentNode))
     JS_MarkValue(rt, parentNode, mark_func);
+}
+
+// ensurePreInsertionValidity() is an implementation of step 2 to 6 of
+// https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity and
+// https://dom.spec.whatwg.org/#concept-node-replace .
+bool NodeInstance::ensurePreInsertionValidity(const NodeInstance& newChild, const NodeInstance* next, const NodeInstance* oldChild, JSValue* exception) const {
+  assert(!(next && oldChild));
+
+  // Use common case fast path if possible.
+  if ((newChild.isElementNode() || newChild.isTextNode()) &&
+      isElementNode()) {
+    // 2. If node is a host-including inclusive ancestor of parent, throw a
+    // HierarchyRequestError.
+    if (IsHostIncludingInclusiveAncestorOfThis(new_child, exception_state))
+      return false;
+    // 3. If child is not null and its parent is not parent, then throw a
+    // NotFoundError.
+    return CheckReferenceChildParent(*this, next, old_child, exception_state);
+  }
+}
+
+// Returns true if |new_child| contains this node. In that case,
+// https://dom.spec.whatwg.org/#concept-tree-host-including-inclusive-ancestor
+bool NodeInstance::isHostIncludingInclusiveAncestorOfThis(const NodeInstance& newChild, JSValue* exception) const {
+  // Non-ContainerNode contains nothing.
+  if (!newChild.isContainerNode()) return false;
+
+  bool childContainParent = false;
+
+  const NodeInstance& root = treeRoot();
+  if (root.isDocumentFragment()) {
+    auto fragment = static_cast<const DocumentFragmentInstance*>(&root);
+    if (fragment && fragment->isTEmp)
+  } else {
+    childContainParent = newChild.contains(this);
+  }
 }
 
 }  // namespace kraken::binding::qjs

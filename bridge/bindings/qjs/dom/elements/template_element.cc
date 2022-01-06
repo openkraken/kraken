@@ -29,7 +29,7 @@ DocumentFragmentInstance* TemplateElementInstance::content() const {
 }
 
 TemplateElementInstance::TemplateElementInstance(TemplateElement* element) : ElementInstance(element, "template", true) {
-  setNodeFlag(NodeFlag::IsTemplateElement);
+//  setNodeFlag(NodeFlag::IsTemplateElementFlag);
 }
 
 TemplateElementInstance::~TemplateElementInstance() {}

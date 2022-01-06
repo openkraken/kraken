@@ -577,7 +577,7 @@ IMPL_PROPERTY_SETTER(Element, innerHTML)(JSContext* ctx, JSValue this_val, int a
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   const char* chtml = JS_ToCString(ctx, argv[0]);
 
-  if (element->hasNodeFlag(NodeInstance::NodeFlag::IsTemplateElement)) {
+  if (element->hasNodeFlag(NodeInstance::NodeFlag::IsTemplateElementFlag)) {
     auto* templateElement = static_cast<TemplateElementInstance*>(element);
     HTMLParser::parseHTML(chtml, strlen(chtml), templateElement->content());
   } else {
@@ -731,7 +731,7 @@ std::string ElementInstance::innerHTML() {
 
   // If Element is TemplateElement, the innerHTML content is the content of documentFragment.
   NodeInstance* parent = this;
-  if (hasNodeFlag(NodeInstance::NodeFlag::IsTemplateElement)) {
+  if (hasNodeFlag(NodeInstance::NodeFlag::IsTemplateElementFlag)) {
     parent = static_cast<TemplateElementInstance*>(this)->content();
   }
 
@@ -841,7 +841,7 @@ void ElementInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) 
 }
 
 ElementInstance::ElementInstance(Element* element, std::string tagName, bool shouldAddUICommand)
-    : m_tagName(tagName), NodeInstance(element, NodeType::ELEMENT_NODE, Element::classId(), exoticMethods, "Element") {
+    : m_tagName(tagName), NodeInstance(element, kCreateElement, Element::classId(), exoticMethods, "Element") {
   m_attributes = makeGarbageCollected<ElementAttributes>()->initialize(m_ctx, &ElementAttributes::classId);
   JSValue arguments[] = {jsObject};
   JSValue style = JS_CallConstructor(m_ctx, CSSStyleDeclaration::instance(m_context)->jsObject, 1, arguments);

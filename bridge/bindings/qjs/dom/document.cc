@@ -516,7 +516,7 @@ void DocumentCookie::setCookie(std::string& cookieStr) {
   cookiePairs[key] = value;
 }
 
-DocumentInstance::DocumentInstance(Document* document) : NodeInstance(document, NodeType::DOCUMENT_NODE, Document::classId(), "document") {
+DocumentInstance::DocumentInstance(Document* document) : NodeInstance(document, kCreateDocument, Document::classId(), "document") {
   m_context->m_document = this;
   m_document = this;
   m_cookie = std::make_unique<DocumentCookie>();

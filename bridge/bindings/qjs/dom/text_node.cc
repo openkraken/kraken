@@ -60,7 +60,7 @@ IMPL_PROPERTY_GETTER(TextNode, nodeName)(JSContext* ctx, JSValue this_val, int a
   return JS_NewString(ctx, "#text");
 }
 
-TextNodeInstance::TextNodeInstance(TextNode* textNode, JSValue text) : NodeInstance(textNode, NodeType::TEXT_NODE, TextNode::classId(), "TextNode") {
+TextNodeInstance::TextNodeInstance(TextNode* textNode, JSValue text) : NodeInstance(textNode, kCreateText, TextNode::classId(), "TextNode") {
   m_data = jsValueToStdString(m_ctx, text);
   std::unique_ptr<NativeString> args_01 = stringToNativeString(m_data);
   m_context->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::createTextNode, *args_01, nativeEventTarget);
