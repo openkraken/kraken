@@ -69,9 +69,9 @@ mixin ElementViewMixin on ElementBase {
     ViewModuleProperty kind = ViewModuleProperty.values[property];
     switch(kind) {
       case ViewModuleProperty.offsetTop:
-        return element.getOffsetY();
+        return element.offsetTop;
       case ViewModuleProperty.offsetLeft:
-        return element.getOffsetX();
+        return element.offsetLeft;
       case ViewModuleProperty.offsetWidth:
         return elementRenderBoxModel.hasSize ? elementRenderBoxModel.size.width : 0;
       case ViewModuleProperty.offsetHeight:

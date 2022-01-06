@@ -250,8 +250,8 @@ class InspectPageModule extends UIInspectorModule {
             1,
             document.viewport.viewportSize.width,
             document.viewport.viewportSize.height,
-            root.getOffsetX(),
-            root.getOffsetY(),
+            root.offsetLeft,
+            root.offsetTop,
             timestamp: timeStamp.inMilliseconds,
           ),
           _lastSentSessionID!));
