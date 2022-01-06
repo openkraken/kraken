@@ -21,7 +21,9 @@
 #include "garbage_collected.h"
 #include "js_context_macros.h"
 #include "kraken_foundation.h"
+#include "executing_context_data.h"
 #include "qjs_patch.h"
+#include "wrapper_type_info.h"
 
 using JSExceptionHandler = std::function<void(int32_t contextId, const char* message)>;
 
@@ -29,7 +31,6 @@ namespace kraken::binding::qjs {
 
 static std::once_flag kinitJSClassIDFlag;
 
-class WindowInstance;
 class DocumentInstance;
 class ExecutionContext;
 struct DOMTimerCallbackContext;
@@ -86,6 +87,7 @@ class ExecutionContext {
   bool handleException(JSValue* exc);
   void drainPendingPromiseJobs();
   void defineGlobalProperty(const char* prop, JSValueConst value);
+  ExecutionContextData* contextData();
   uint8_t* dumpByteCode(const char* code, uint32_t codeLength, const char* sourceURL, size_t* bytecodeLength);
 
   // Gets the DOMTimerCoordinator which maintains the "active timer
@@ -125,13 +127,12 @@ class ExecutionContext {
   JSValue globalObject{JS_NULL};
   bool ctxInvalid_{false};
   JSContext* m_ctx{nullptr};
-  friend WindowInstance;
-  friend DocumentInstance;
-  WindowInstance* m_window{nullptr};
   DocumentInstance* m_document{nullptr};
   DOMTimerCoordinator m_timers;
   ExecutionContextGCTracker* m_gcTracker{nullptr};
+  ExecutionContextData m_data{this};
   foundation::UICommandBuffer m_commandBuffer{contextId};
+  friend DocumentInstance;
 };
 
 // The read object's method or properties via Proxy, we should redirect this_val from Proxy into target property of
@@ -154,76 +155,10 @@ static JSValue handleCallThisOnProxy(JSContext* ctx, JSValueConst this_val, int 
   return result;
 }
 
-class ObjectProperty {
-  KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(ObjectProperty);
-
- public:
-  ObjectProperty() = delete;
-
-  // Define a property on object with a getter and setter function.
-  explicit ObjectProperty(ExecutionContext* context, JSValueConst thisObject, const std::string& property, JSCFunction getterFunction, JSCFunction setterFunction) {
-    // Getter on jsObject works well with all conditions.
-    // We create an getter function and define to jsObject directly.
-    JSAtom propertyKeyAtom = JS_NewAtom(context->ctx(), property.c_str());
-    JSValue getter = JS_NewCFunction(context->ctx(), getterFunction, "getter", 0);
-    JSValue getterProxy = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 0, 0, 1, &getter);
-
-    // Getter on jsObject works well with all conditions.
-    // We create an getter function and define to jsObject directly.
-    JSValue setter = JS_NewCFunction(context->ctx(), setterFunction, "setter", 0);
-    JSValue setterProxy = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 1, 0, 1, &setter);
-
-    // Define getter and setter property.
-    JS_DefinePropertyGetSet(context->ctx(), thisObject, propertyKeyAtom, getterProxy, setterProxy, JS_PROP_NORMAL | JS_PROP_ENUMERABLE);
-
-    JS_FreeAtom(context->ctx(), propertyKeyAtom);
-    JS_FreeValue(context->ctx(), getter);
-    JS_FreeValue(context->ctx(), setter);
-  };
-
-  explicit ObjectProperty(ExecutionContext* context, JSValueConst thisObject, const std::string& property, JSCFunction getterFunction) {
-    // Getter on jsObject works well with all conditions.
-    // We create an getter function and define to jsObject directly.
-    JSAtom propertyKeyAtom = JS_NewAtom(context->ctx(), property.c_str());
-    JSValue getter = JS_NewCFunction(context->ctx(), getterFunction, "getter", 0);
-    JSValue getterProxy = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 0, 0, 1, &getter);
-    JS_DefinePropertyGetSet(context->ctx(), thisObject, propertyKeyAtom, getterProxy, JS_UNDEFINED, JS_PROP_NORMAL | JS_PROP_ENUMERABLE);
-    JS_FreeAtom(context->ctx(), propertyKeyAtom);
-    JS_FreeValue(context->ctx(), getter);
-  };
-
-  // Define an property on object with a JSValue.
-  explicit ObjectProperty(ExecutionContext* context, JSValueConst thisObject, const char* property, JSValue value) : m_value(value) {
-    JS_DefinePropertyValueStr(context->ctx(), thisObject, property, value, JS_PROP_ENUMERABLE);
-  }
-
-  JSValue value() const { return m_value; }
-
- private:
-  JSValue m_value{JS_NULL};
-};
-
-class ObjectFunction {
-  KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(ObjectFunction);
-
- public:
-  ObjectFunction() = delete;
-  explicit ObjectFunction(ExecutionContext* context, JSValueConst thisObject, const char* functionName, JSCFunction function, int argc) {
-    JSValue f = JS_NewCFunction(context->ctx(), function, functionName, argc);
-    JSValue pf = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, argc, 0, 1, &f);
-    JSAtom key = JS_NewAtom(context->ctx(), functionName);
-
-    JS_FreeValue(context->ctx(), f);
-
-// We should avoid overwrite exist property functions.
-#ifdef DEBUG
-    assert_m(JS_HasProperty(context->ctx(), thisObject, key) == 0, (std::string("Found exist function property: ") + std::string(functionName)).c_str());
-#endif
-
-    JS_DefinePropertyValue(context->ctx(), thisObject, key, pf, JS_PROP_ENUMERABLE);
-    JS_FreeAtom(context->ctx(), key);
-  };
-};
+// Property define helpers
+void installFunctionProperty(ExecutionContext* context, JSValueConst thisObject, const char* functionName, JSCFunction function, int argc);
+void installPropertyGetterSetter(ExecutionContext* context, JSValueConst thisObject, const char* property, JSCFunction getterFunction, JSCFunction setterFunction);
+void installPropertyGetter(ExecutionContext* context, JSValueConst thisObject, const char* property, JSCFunction getterFunction);
 
 class JSValueHolder {
  public:

@@ -25,7 +25,7 @@ class HostClass {
     /// follow this steps:
     /// 1. Use JS_NewClassID() to allocate new id for your template.
     /// 2. Create JSClassDef and set up your customized behavior about your JSObject.
-    /// 3. Use JS_NewClass() to initialize your template and you can use your unique JSClassID to create JSObjects.
+    /// 3. Use JS_NewClass() to initializeAsJSObject your template and you can use your unique JSClassID to create JSObjects.
     /// 4. Use JS_NewObjectClass() to create your JSObjects.
     /// Example:
     ///  JSClassID sampleId;

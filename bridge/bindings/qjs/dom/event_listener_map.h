@@ -26,7 +26,7 @@ class EventListenerMap final {
   bool remove(JSAtom eventType, JSValue callback);
   const EventListenerVector* find(JSAtom eventType);
 
-  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func);
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const;
 
  private:
   // EventListener handlers registered with addEventListener API.

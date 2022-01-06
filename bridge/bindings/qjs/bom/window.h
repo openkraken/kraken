@@ -9,32 +9,27 @@
 #include "bindings/qjs/bom/location.h"
 #include "bindings/qjs/dom/event_target.h"
 #include "bindings/qjs/executing_context.h"
+#include "bindings/qjs/wrapper_type_info.h"
 
 namespace kraken::binding::qjs {
 
 void bindWindow(std::unique_ptr<ExecutionContext>& context);
 
-class WindowInstance;
-
 class Window : public EventTarget {
  public:
-  static JSClassID kWindowClassId;
 
-  static JSClassID classId();
+  Window();
 
-  static JSValue open(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue scrollTo(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue scrollBy(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue postMessage(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue requestAnimationFrame(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue cancelAnimationFrame(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSClassID classId;
+  static Window* create(JSContext* ctx);
 
-  Window() = delete;
-  explicit Window(ExecutionContext* context);
+  DEFINE_FUNCTION(open);
+  DEFINE_FUNCTION(scrollTo);
+  DEFINE_FUNCTION(scrollBy);
+  DEFINE_FUNCTION(postMessage);
+  DEFINE_FUNCTION(requestAnimationFrame);
+  DEFINE_FUNCTION(cancelAnimationFrame);
 
-  OBJECT_INSTANCE(Window);
-
- private:
   DEFINE_PROTOTYPE_READONLY_PROPERTY(devicePixelRatio);
   DEFINE_PROTOTYPE_READONLY_PROPERTY(colorScheme);
   DEFINE_PROTOTYPE_READONLY_PROPERTY(__location__);
@@ -47,33 +42,29 @@ class Window : public EventTarget {
 
   DEFINE_PROTOTYPE_PROPERTY(onerror);
 
-  DEFINE_PROTOTYPE_FUNCTION(open, 1);
-  // ScrollTo is same as scroll which reuse scroll functions. Macro expand is not support here.
-  ObjectFunction m_scroll{m_context, m_prototypeObject, "scroll", scrollTo, 2};
-  DEFINE_PROTOTYPE_FUNCTION(scrollTo, 2);
-  DEFINE_PROTOTYPE_FUNCTION(scrollBy, 2);
-  DEFINE_PROTOTYPE_FUNCTION(postMessage, 3);
-  DEFINE_PROTOTYPE_FUNCTION(requestAnimationFrame, 1);
-  DEFINE_PROTOTYPE_FUNCTION(cancelAnimationFrame, 1);
-
-  friend WindowInstance;
-};
-
-class WindowInstance : public EventTargetInstance {
- public:
-  WindowInstance() = delete;
-  explicit WindowInstance(Window* window);
-  ~WindowInstance() {}
+  void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const override;
 
  private:
-  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
   DocumentInstance* document();
 
-  ObjectProperty m_location{m_context, jsObject, "m_location", (new Location(m_context))->jsObject};
+  Location* m_location{nullptr};
   JSValue onerror{JS_NULL};
-  friend Window;
   friend ExecutionContext;
 };
+
+auto windowCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {
+
+  auto* type = static_cast<const WrapperTypeInfo*>(JS_GetOpaque(func_obj, JSValueGetClassId(func_obj)));
+  auto* window = Window::create(ctx);
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  JSValue prototype = context->contextData()->prototypeForType(type);
+
+  // Let eventTarget instance inherit EventTarget prototype methods.
+  JS_SetPrototype(ctx, window->toQuickJS(), prototype);
+  return window->toQuickJS();
+};
+
+const WrapperTypeInfo windowTypeInfo = {"Window", &eventTargetTypeInfo, windowCreator};
 
 }  // namespace kraken::binding::qjs
 

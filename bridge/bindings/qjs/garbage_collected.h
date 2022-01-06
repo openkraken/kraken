@@ -34,7 +34,8 @@ class GarbageCollected {
  public:
   using ParentMostGarbageCollectedType = T;
 
-  virtual T* initialize(JSContext* ctx, JSClassID* classId);
+  template<typename P> P* initialize(JSContext* ctx, JSClassID* classId);
+  template<typename P> P* initialize(JSContext* ctx, JSClassID* classId, JSClassExoticMethods* exoticMethods);
 
   // Must use MakeGarbageCollected.
   void* operator new(size_t) = delete;
@@ -67,9 +68,7 @@ class GarbageCollected {
   FORCE_INLINE JSValue toQuickJS() { return jsObject; };
 
   FORCE_INLINE JSContext* ctx() { return m_ctx; }
-
-  // A anchor to efficiently bind the current object to a linked-list.
-  list_head link;
+  FORCE_INLINE ExecutionContext* context() const { return static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx)); };
 
  protected:
   JSValue jsObject{JS_NULL};
@@ -92,7 +91,7 @@ class MakeGarbageCollectedTrait {
 };
 
 template <typename T>
-T* GarbageCollected<T>::initialize(JSContext* ctx, JSClassID* classId) {
+template <typename P> P* GarbageCollected<T>::initialize(JSContext* ctx, JSClassID* classId, JSClassExoticMethods* exoticMethods) {
   JSRuntime* runtime = JS_GetRuntime(ctx);
 
   /// When classId is 0, it means this class are not initialized. We should create a JSClassDef to describe the behavior of this class and associate with classID.
@@ -109,14 +108,19 @@ T* GarbageCollected<T>::initialize(JSContext* ctx, JSClassID* classId) {
     /// Users of this class should override `void trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func)` to tell GC
     /// which member of their class should be collected by GC.
     def.gc_mark = [](JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) {
-      auto* object = static_cast<T*>(JS_GetOpaque(val, JSValueGetClassId(val)));
+      auto* object = static_cast<P*>(JS_GetOpaque(val, JSValueGetClassId(val)));
       object->trace(rt, val, mark_func);
     };
+
+    /// Define custom behavior when call getProperty, setProperty on object.
+    if (exoticMethods != nullptr) {
+      def.exotic = exoticMethods;
+    }
 
     /// This callback will be called when QuickJS GC will release the `jsObject` object memory of this class.
     /// The deconstruct method of this class will be called and all memory about this class will be freed when finalize completed.
     def.finalizer = [](JSRuntime* rt, JSValue val) {
-      auto* object = static_cast<T*>(JS_GetOpaque(val, JSValueGetClassId(val)));
+      auto* object = static_cast<P*>(JS_GetOpaque(val, JSValueGetClassId(val)));
       object->dispose();
       free(object);
     };
@@ -133,7 +137,12 @@ T* GarbageCollected<T>::initialize(JSContext* ctx, JSClassID* classId) {
   m_ctx = ctx;
   m_runtime = JS_GetRuntime(m_ctx);
 
-  return static_cast<T*>(this);
+  return static_cast<P*>(this);
+}
+
+template <typename T>
+template <typename P> P* GarbageCollected<T>::initialize(JSContext* ctx, JSClassID* classId) {
+  return initialize<P>(ctx, classId, nullptr);
 }
 
 template <typename T, typename... Args>

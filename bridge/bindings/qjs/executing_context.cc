@@ -75,7 +75,7 @@ ExecutionContext::ExecutionContext(int32_t contextId, const JSExceptionHandler& 
   JS_SetContextOpaque(m_ctx, this);
   JS_SetHostPromiseRejectionTracker(m_runtime, promiseRejectTracker, nullptr);
 
-  m_gcTracker = makeGarbageCollected<ExecutionContextGCTracker>()->initialize(m_ctx, &ExecutionContextGCTracker::contextGcTrackerClassId);
+  m_gcTracker = makeGarbageCollected<ExecutionContextGCTracker>()->initialize<ExecutionContextGCTracker>(m_ctx, &ExecutionContextGCTracker::contextGcTrackerClassId);
   JS_DefinePropertyValueStr(m_ctx, globalObject, "_gc_tracker_", m_gcTracker->toQuickJS(), JS_PROP_NORMAL);
 
   runningContexts++;
@@ -278,6 +278,10 @@ void ExecutionContext::defineGlobalProperty(const char* prop, JSValue value) {
   JS_FreeAtom(m_ctx, atom);
 }
 
+ExecutionContextData* ExecutionContext::contextData() {
+  return &m_data;
+}
+
 uint8_t* ExecutionContext::dumpByteCode(const char* code, uint32_t codeLength, const char* sourceURL, size_t* bytecodeLength) {
   JSValue object = JS_Eval(m_ctx, code, codeLength, sourceURL, JS_EVAL_TYPE_GLOBAL | JS_EVAL_FLAG_COMPILE_ONLY);
   bool success = handleException(&object);
@@ -316,6 +320,54 @@ void ExecutionContext::promiseRejectTracker(JSContext* ctx, JSValue promise, JSV
   context->reportError(reason);
   context->dispatchGlobalPromiseRejectionEvent(promise, reason);
 }
+
+void installFunctionProperty(ExecutionContext* context, JSValue thisObject, const char* functionName, JSCFunction function, int argc) {
+  JSValue f = JS_NewCFunction(context->ctx(), function, functionName, argc);
+  JSValue pf = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, argc, 0, 1, &f);
+  JSAtom key = JS_NewAtom(context->ctx(), functionName);
+
+  JS_FreeValue(context->ctx(), f);
+
+// We should avoid overwrite exist property functions.
+#ifdef DEBUG
+  assert_m(JS_HasProperty(context->ctx(), thisObject, key) == 0, (std::string("Found exist function property: ") + std::string(functionName)).c_str());
+#endif
+
+  JS_DefinePropertyValue(context->ctx(), thisObject, key, pf, JS_PROP_ENUMERABLE);
+  JS_FreeAtom(context->ctx(), key);
+}
+
+void installPropertyGetterSetter(ExecutionContext* context, JSValue thisObject, const char* property, JSCFunction getterFunction, JSCFunction setterFunction) {
+  // Getter on jsObject works well with all conditions.
+  // We create an getter function and define to jsObject directly.
+  JSAtom propertyKeyAtom = JS_NewAtom(context->ctx(), property);
+  JSValue getter = JS_NewCFunction(context->ctx(), getterFunction, "getter", 0);
+  JSValue getterProxy = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 0, 0, 1, &getter);
+
+  // Getter on jsObject works well with all conditions.
+  // We create an getter function and define to jsObject directly.
+  JSValue setter = JS_NewCFunction(context->ctx(), setterFunction, "setter", 0);
+  JSValue setterProxy = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 1, 0, 1, &setter);
+
+  // Define getter and setter property.
+  JS_DefinePropertyGetSet(context->ctx(), thisObject, propertyKeyAtom, getterProxy, setterProxy, JS_PROP_NORMAL | JS_PROP_ENUMERABLE);
+
+  JS_FreeAtom(context->ctx(), propertyKeyAtom);
+  JS_FreeValue(context->ctx(), getter);
+  JS_FreeValue(context->ctx(), setter);
+}
+
+void installPropertyGetter(ExecutionContext* context, JSValue thisObject, const char* property, JSCFunction getterFunction) {
+  // Getter on jsObject works well with all conditions.
+  // We create an getter function and define to jsObject directly.
+  JSAtom propertyKeyAtom = JS_NewAtom(context->ctx(), property);
+  JSValue getter = JS_NewCFunction(context->ctx(), getterFunction, "getter", 0);
+  JSValue getterProxy = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 0, 0, 1, &getter);
+  JS_DefinePropertyGetSet(context->ctx(), thisObject, propertyKeyAtom, getterProxy, JS_UNDEFINED, JS_PROP_NORMAL | JS_PROP_ENUMERABLE);
+  JS_FreeAtom(context->ctx(), propertyKeyAtom);
+  JS_FreeValue(context->ctx(), getter);
+}
+
 
 DOMTimerCoordinator* ExecutionContext::timers() {
   return &m_timers;

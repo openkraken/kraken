@@ -10,7 +10,6 @@
 
 namespace kraken::binding::qjs {
 
-class EventTargetInstance;
 void bindCSSStyleDeclaration(std::unique_ptr<ExecutionContext>& context);
 
 template <typename CharacterType>

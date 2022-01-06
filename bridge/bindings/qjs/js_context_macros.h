@@ -23,18 +23,26 @@
 #define IMPL_PROPERTY_GETTER(Constructor, Property) JSValue Constructor::Property##PropertyDescriptor::getter
 #define IMPL_PROPERTY_SETTER(Constructor, Property) JSValue Constructor::Property##PropertyDescriptor::setter
 
+#define INSTALL_READONLY_PROPERTY(Host, thisObject, property) \
+  installPropertyGetter(context.get(), thisObject, #property, Host::property##PropertyDescriptor::getter)
+
+#define INSTALL_PROPERTY(Host, thisObject, property) \
+  installPropertyGetterSetter(context.get(), thisObject, #property, Host::property##PropertyDescriptor::getter, Host::property##PropertyDescriptor::setter)
+
+#define INSTALL_FUNCTION(Host, thisObject, property, argc) \
+  installFunctionProperty(context.get(), thisObject, #property, Host::m_##property##_, 1);
+
+#define DEFINE_FUNCTION(NAME) \
+    static JSValue m_##NAME##_(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+
+#define IMPL_FUNCTION(Host, NAME) JSValue Host::m_##NAME##_
+
+
 #define DEFINE_PROTOTYPE_READONLY_PROPERTY(PROPERTY)                                            \
   class PROPERTY##PropertyDescriptor {                                                          \
    public:                                                                                      \
     static JSValue getter(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
   };                                                                                            \
-  ObjectProperty __##PROPERTY##__ { m_context, m_prototypeObject, #PROPERTY, PROPERTY##PropertyDescriptor::getter }
-
-#define DEFINE_PROTOTYPE_FUNCTION(PROPERTY, ARGS_COUNT) \
-  ObjectFunction __##PROPERTY##__ { m_context, m_prototypeObject, #PROPERTY, PROPERTY, ARGS_COUNT }
-
-#define DEFINE_FUNCTION(PROPERTY, ARGS_COUNT) \
-  ObjectFunction __##PROPERTY##__ { m_context, jsObject, #PROPERTY, PROPERTY, ARGS_COUNT }
 
 #define DEFINE_PROTOTYPE_PROPERTY(PROPERTY)                                                     \
   class PROPERTY##PropertyDescriptor {                                                          \
@@ -42,14 +50,12 @@
     static JSValue getter(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
     static JSValue setter(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
   };                                                                                            \
-  ObjectProperty __##PROPERTY##__ { m_context, m_prototypeObject, #PROPERTY, PROPERTY##PropertyDescriptor::getter, PROPERTY##PropertyDescriptor::setter }
 
 #define DEFINE_READONLY_PROPERTY(PROPERTY)                                                      \
   class PROPERTY##PropertyDescriptor {                                                          \
    public:                                                                                      \
     static JSValue getter(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
   };                                                                                            \
-  ObjectProperty __##PROPERTY##__ { m_context, jsObject, #PROPERTY, PROPERTY##PropertyDescriptor::getter }
 
 #define DEFINE_PROPERTY(PROPERTY)                                                               \
   class PROPERTY##PropertyDescriptor {                                                          \
@@ -57,6 +63,5 @@
     static JSValue getter(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
     static JSValue setter(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
   };                                                                                            \
-  ObjectProperty __##PROPERTY##__ { m_context, jsObject, #PROPERTY, PROPERTY##PropertyDescriptor::getter, PROPERTY##PropertyDescriptor::setter }
 
 #endif  // KRAKENBRIDGE_JS_CONTEXT_MACROS_H

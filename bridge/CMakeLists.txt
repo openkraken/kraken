@@ -186,6 +186,9 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/garbage_collected.h
     bindings/qjs/executing_context.cc
     bindings/qjs/executing_context.h
+    bindings/qjs/executing_context_data.cc
+    bindings/qjs/executing_context_data.h
+    bindings/qjs/wrapper_type_info.h
     bindings/qjs/heap_hashmap.h
     bindings/qjs/native_value.cc
     bindings/qjs/native_value.h

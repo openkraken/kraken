@@ -15,6 +15,7 @@
 #include "bindings/qjs/bom/performance.h"
 #include "bindings/qjs/bom/screen.h"
 #include "bindings/qjs/bom/timer.h"
+#include "bindings/qjs/bom/location.h"
 #include "bindings/qjs/bom/window.h"
 #include "bindings/qjs/dom/comment_node.h"
 #include "bindings/qjs/dom/custom_event.h"
@@ -69,6 +70,7 @@ KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : c
   bindModuleManager(m_context);
   bindEventTarget(m_context);
   bindBlob(m_context);
+  bindLocation(m_context);
   bindWindow(m_context);
   bindEvent(m_context);
   bindCustomEvent(m_context);

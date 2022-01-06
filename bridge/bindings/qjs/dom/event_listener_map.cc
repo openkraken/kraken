@@ -78,7 +78,7 @@ const EventListenerVector* EventListenerMap::find(JSAtom eventType) {
   return nullptr;
 }
 
-void EventListenerMap::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
+void EventListenerMap::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
   for (const auto& entry : m_entries) {
     for (const auto& vector : entry.second) {
       JS_MarkValue(rt, vector, mark_func);
