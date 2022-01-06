@@ -278,10 +278,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     return super.getProperty(key);
   }
 
+  @override
   void focus() {
     setFocus(this);
   }
 
+  @override
   void blur() {
     clearFocus();
   }
@@ -457,7 +459,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     ) {
       if (event.type == EVENT_TOUCH_END) {
         _textSelectionDelegate.hideToolbar(false);
-        InputElement.setFocus(this);
       }
 
       TouchList touches = (event as TouchEvent).touches;
