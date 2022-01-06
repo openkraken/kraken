@@ -113,10 +113,12 @@ void invokeModuleEvent(
 }
 
 typedef DartDispatchEvent = void Function(
-    Pointer<NativeEventTarget> nativeEventTarget,
-    Pointer<NativeString> eventType,
-    Pointer<Void> nativeEvent,
-    int isCustomEvent);
+  int contextId,
+  Pointer<NativeEventTarget> nativeEventTarget,
+  Pointer<NativeString> eventType,
+  Pointer<Void> nativeEvent,
+  int isCustomEvent
+);
 
 void emitUIEvent(
     int contextId, Pointer<NativeEventTarget> nativeEventTarget, Event event) {
@@ -128,8 +130,7 @@ void emitUIEvent(
   Pointer<Void> rawEvent = event.toRaw().cast<Void>();
   bool isCustomEvent = event is CustomEvent;
   Pointer<NativeString> eventTypeString = stringToNativeString(event.type);
-  dispatchEvent(
-      nativeEventTarget, eventTypeString, rawEvent, isCustomEvent ? 1 : 0);
+  dispatchEvent(contextId, nativeEventTarget, eventTypeString, rawEvent, isCustomEvent ? 1 : 0);
   freeNativeString(eventTypeString);
 }
 
