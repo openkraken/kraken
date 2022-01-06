@@ -430,7 +430,7 @@ mixin CSSTextMixin on RenderStyle {
 
     return alignment;
   }
-  
+
   static TextSpan createTextSpan(String? text, CSSRenderStyle renderStyle, {
     Color? color,
   }) {
