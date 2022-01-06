@@ -726,6 +726,59 @@ describe('Position absolute', () => {
     await snapshot();
   });
 
+  it('should work with percentage offset of containing block which is not parent', async () => {
+    let div1 = createElement(
+      'div',
+      {
+        style: {
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          width: '100px',
+          height: '100px',
+          backgroundColor: 'green'
+       },
+      });
+    
+    BODY.appendChild(div1);
+    await snapshot();
+  });
+
+  it('should work with percentage offset of containing block which is not parent in scroll container', async () => {
+    let div = createElement('div', {
+        style: {
+          width: '200px',
+          height: '200px',
+          borderTop: '40px solid black',
+          backgroundColor: 'yellow',
+          position: 'relative',
+          overflow: 'scroll'
+        }
+    }, [
+      createElement('div', {
+        style: {
+            height: '200px',
+        }
+      }, [
+        createElement(
+          'div',
+          {
+            style: {
+              position: 'absolute',
+              top: '30%',
+              width: '100px',
+              height: '100px',
+              backgroundColor: 'green'
+            },
+        })
+      ])
+    ]);
+
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
   it('should work with percentage after element is attached', async (done) => {
     let div2;
     let div;
@@ -852,6 +905,105 @@ describe('Position absolute', () => {
     );
 
     BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it('child of positioned element with no width stretch to parent in flow layout', async () => {
+    var div = createElement('div', {
+      style: {
+        width: '200px',
+        height: '200px',
+        position: 'relative',
+      }
+    }, [
+      createElement('div', {
+        style: {
+          backgroundColor: '#999',  
+          position: 'absolute', 
+          left: 0,
+          right: 0, 
+          bottom: 0, 
+          top: 0, 
+        }
+      }, [
+        createElement('div', {
+          style: {
+            backgroundColor: 'green', 
+            height: '100px',
+          }
+        })
+      ])
+    ]);
+
+    append(BODY, div);
+
+    await snapshot();
+  });
+
+  it('child of positioned element with no width stretch to parent in flex layout', async () => {
+    var div = createElement('div', {
+      style: {
+        width: '200px',
+        height: '200px',
+        position: 'relative',
+      }
+    }, [
+      createElement('div', {
+        style: {
+          backgroundColor: '#999',  
+          position: 'absolute', 
+          left: 0,
+          right: 0, 
+          bottom: 0, 
+          top: 0, 
+          display: 'flex', 
+          flexDirection: 'column', 
+        }
+      }, [
+        createElement('div', {
+          style: {
+            backgroundColor: 'green', 
+            height: '100px',
+          }
+        })
+      ])
+    ]);
+
+    append(BODY, div);
+
+    await snapshot();
+  });
+
+  it('child of positioned element with no height stretch to parent in flex layout', async () => {
+    var div = createElement('div', {
+      style: {
+        width: '200px',
+        height: '200px',
+        position: 'relative',
+      }
+    }, [
+      createElement('div', {
+        style: {
+          backgroundColor: '#999',  
+          position: 'absolute', 
+          left: 0,
+          right: 0, 
+          bottom: 0, 
+          top: 0, 
+          display: 'flex', 
+        }
+      }, [
+        createElement('div', {
+          style: {
+            backgroundColor: 'green', 
+            width: '100px',
+          }
+        })
+      ])
+    ]);
+
+    append(BODY, div);
 
     await snapshot();
   });

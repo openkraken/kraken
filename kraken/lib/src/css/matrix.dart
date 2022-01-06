@@ -659,20 +659,32 @@ class CSSMatrix {
         if (method.args.length == 1) {
           CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSLATE, Axis.horizontal);
           x.renderStyle = renderStyle;
-          return Matrix4.identity()..translate(x.computedValue);
+          double computedValue = x.computedValue;
+          // Double.infinity indicates translate not resolved due to renderBox not layout yet
+          // in percentage case.
+          if (computedValue == double.infinity) return null;
+          return Matrix4.identity()..translate(computedValue);
         }
         break;
       case TRANSLATE_Y:
         if (method.args.length == 1) {
           CSSLengthValue y = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSLATE, Axis.vertical);
           y.renderStyle = renderStyle;
-          return Matrix4.identity()..translate(0.0, y.computedValue);
+          double computedValue = y.computedValue;
+          // Double.infinity indicates translate not resolved due to renderBox not layout yet
+          // in percentage case.
+          if (computedValue == double.infinity) return null;
+          return Matrix4.identity()..translate(0.0, computedValue);
         }
         break;
       case TRANSLATE_Z:
         if (method.args.length == 1) {
           CSSLengthValue z = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSLATE);
-          return Matrix4.identity()..translate(0.0, 0.0, z.computedValue);
+          double computedValue = z.computedValue;
+          // Double.infinity indicates translate not resolved due to renderBox not layout yet
+          // in percentage case.
+          if (computedValue == double.infinity) return null;
+          return Matrix4.identity()..translate(0.0, 0.0, computedValue);
         }
         break;
       // https://drafts.csswg.org/css-transforms-2/#individual-transforms

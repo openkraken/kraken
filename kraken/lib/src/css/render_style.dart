@@ -656,6 +656,32 @@ class CSSRenderStyle
       case CSSDisplay.inlineFlex:
         if (renderStyle.width.isNotAuto) {
           logicalWidth = renderStyle.width.computedValue;
+
+        // The width of positioned, non-replaced element is determined as following algorithm.
+        // https://www.w3.org/TR/css-position-3/#abs-non-replaced-width
+        } else if ((renderStyle.position == CSSPositionType.absolute ||
+          renderStyle.position == CSSPositionType.fixed)
+          && current is! RenderIntrinsic
+          && renderStyle.width.isAuto
+          && renderStyle.left.isNotAuto
+          && renderStyle.right.isNotAuto
+        ) {
+          if (current.parent is! RenderBoxModel) {
+            logicalWidth = null;
+          }
+          // Should access the renderStyle of renderBoxModel parent but not renderStyle parent
+          // cause the element of renderStyle parent may not equal to containing block.
+          RenderBoxModel parent = current.parent as RenderBoxModel;
+          // Get the renderStyle of outer scrolling box cause the renderStyle of scrolling
+          // content box is only a fraction of the complete renderStyle.
+          RenderStyle parentRenderStyle = parent.isScrollingContentBox
+            ? (parent.parent as RenderBoxModel).renderStyle
+            : parent.renderStyle;
+          // Width of positioned element should subtract its horizontal margin.
+          logicalWidth = (parentRenderStyle.paddingBoxLogicalWidth ?? 0)
+            - renderStyle.left.computedValue - renderStyle.right.computedValue
+            - renderStyle.marginLeft.computedValue - renderStyle.marginRight.computedValue;
+
         } else if (current.hasSize && current.constraints.hasTightWidth) {
           logicalWidth = current.constraints.maxWidth;
         }
@@ -701,6 +727,7 @@ class CSSRenderStyle
 
   // Compute the content box height from render style.
   void computeContentBoxLogicalHeight() {
+    RenderBoxModel current = renderBoxModel!;
     RenderStyle renderStyle = this;
     double? logicalHeight;
 
@@ -710,6 +737,31 @@ class CSSRenderStyle
     if (effectiveDisplay != CSSDisplay.inline) {
       if (renderStyle.height.isNotAuto) {
         logicalHeight = renderStyle.height.computedValue;
+
+      // The height of positioned, non-replaced element is determined as following algorithm.
+      // https://www.w3.org/TR/css-position-3/#abs-non-replaced-height
+      } else if ((renderStyle.position == CSSPositionType.absolute ||
+        renderStyle.position == CSSPositionType.fixed)
+        && current is! RenderIntrinsic
+        && renderStyle.height.isAuto
+        && renderStyle.top.isNotAuto
+        && renderStyle.bottom.isNotAuto
+      ) {
+        if (current.parent is! RenderBoxModel) {
+          logicalHeight = null;
+        }
+        // Should access the renderStyle of renderBoxModel parent but not renderStyle parent
+        // cause the element of renderStyle parent may not equal to containing block.
+        RenderBoxModel parent = current.parent as RenderBoxModel;
+        // Get the renderStyle of outer scrolling box cause the renderStyle of scrolling
+        // content box is only a fraction of the complete renderStyle.
+        RenderStyle parentRenderStyle = parent.isScrollingContentBox
+          ? (parent.parent as RenderBoxModel).renderStyle
+          : parent.renderStyle;
+        // Height of positioned element should subtract its vertical margin.
+        logicalHeight = (parentRenderStyle.paddingBoxLogicalHeight ?? 0)
+          - renderStyle.top.computedValue - renderStyle.bottom.computedValue
+          - renderStyle.marginTop.computedValue - renderStyle.marginBottom.computedValue;
 
       } else {
         if (renderStyle.parent != null) {
