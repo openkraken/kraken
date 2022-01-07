@@ -78,6 +78,16 @@ TEST(Context, unrejectPromiseErrorWithMultipleContext) {
   EXPECT_EQ(errorCalledCount, 2);
 }
 
+TEST(Context, accessGetUICommandItemsAfterDisposed) {
+  int32_t contextId;
+  {
+    auto bridge = TEST_init();
+    contextId = bridge->getContext()->getContextId();
+  }
+
+  EXPECT_EQ(getUICommandItems(contextId), nullptr);
+}
+
 TEST(Context, window) {
   static bool errorHandlerExecuted = false;
   static bool logCalled = false;
