@@ -3,22 +3,21 @@
 **Big News**
 
 * Support using Flutter Widget as HTML Custom Element which can greatly extend the capability of Web, refer to [this doc](https://openkraken.com/en-US/guide/advanced/widget-custom-element) for detailed use.
++ Support flutter 2.5.
 
 **Features**
 
-+ Support flutter 2.5. https://github.com/openkraken/kraken/pull/817
 + Support defining Flutter widget as HTML custom element. https://github.com/openkraken/kraken/pull/904
 + Support `style` element and `className` attribute. https://github.com/openkraken/kraken/pull/656
 + Support  `link` element and CSS variables. https://github.com/openkraken/kraken/pull/961
-+ Support clone documentFragment node. https://github.com/openkraken/kraken/pull/851
 + Support `assets:` protocol to load local assets. https://github.com/openkraken/kraken/pull/866
-+ Support pause Kraken pages when navigator changes. https://github.com/openkraken/kraken/pull/877
 
 **Bug Fixed**
 
 + Fix width error in case of min width width padding. https://github.com/openkraken/kraken/pull/843
 + Fix percentage with decimal point. https://github.com/openkraken/kraken/pull/845
 + Fix text height with text-overflow ellipsis. https://github.com/openkraken/kraken/pull/848
++ Fix clone documentFragment node support. https://github.com/openkraken/kraken/pull/851
 + Fix layout wrapping space. https://github.com/openkraken/kraken/pull/856
 + Fix position placeholder offset not including margin. https://github.com/openkraken/kraken/pull/857
 + Fix position sticky fail with overflow hidden. https://github.com/openkraken/kraken/pull/858
