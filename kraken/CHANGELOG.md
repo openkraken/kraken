@@ -10,7 +10,7 @@
 + Support defining Flutter widget as HTML custom element. https://github.com/openkraken/kraken/pull/904
 + Support `style` element and `className` attribute. https://github.com/openkraken/kraken/pull/656
 + Support  `link` element and CSS variables. https://github.com/openkraken/kraken/pull/961
-+ Support `assets:` protocol to load local assets. https://github.com/openkraken/kraken/pull/866
++ Support `assets:` protocol to unify the means to load local assets for different platforms. https://github.com/openkraken/kraken/pull/866
 
 **Bug Fixed**
 
