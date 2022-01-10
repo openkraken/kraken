@@ -122,14 +122,16 @@ int32_t allocateNewPage(int32_t targetContextId) {
     targetContextId = searchForAvailableContextId();
   }
 
-  assert(kraken::KrakenPage::pageContextPool[targetContextId] == nullptr && (std::string("can not allocate page at index") + std::to_string(targetContextId) + std::string(": page have already exist.")).c_str());
+  assert(kraken::KrakenPage::pageContextPool[targetContextId] == nullptr &&
+         (std::string("can not allocate page at index") + std::to_string(targetContextId) + std::string(": page have already exist.")).c_str());
   auto* page = new kraken::KrakenPage(targetContextId, printError);
   kraken::KrakenPage::pageContextPool[targetContextId] = page;
   return targetContextId;
 }
 
 void* getPage(int32_t contextId) {
-  if (!checkPage(contextId)) return nullptr;
+  if (!checkPage(contextId))
+    return nullptr;
   return kraken::KrakenPage::pageContextPool[contextId];
 }
 
@@ -224,19 +226,22 @@ void flushUICommandCallback() {
 
 UICommandItem* getUICommandItems(int32_t contextId) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
-  if (page == nullptr) return nullptr;
+  if (page == nullptr)
+    return nullptr;
   return page->getContext()->uiCommandBuffer()->data();
 }
 
 int64_t getUICommandItemSize(int32_t contextId) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
-  if (page == nullptr) return 0;
+  if (page == nullptr)
+    return 0;
   return page->getContext()->uiCommandBuffer()->size();
 }
 
 void clearUICommandItems(int32_t contextId) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
-  if (page == nullptr) return;
+  if (page == nullptr)
+    return;
   page->getContext()->uiCommandBuffer()->clear();
 }
 
