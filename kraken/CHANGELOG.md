@@ -3,7 +3,7 @@
 **Big News**
 
 * Support using Flutter Widget as HTML Custom Element which can greatly extend the capability of Web, refer to [this doc](https://openkraken.com/en-US/guide/advanced/widget-custom-element) for detailed use.
-+ Support flutter 2.5.3.
++ Support Flutter 2.5.3.
 
 **Features**
 
