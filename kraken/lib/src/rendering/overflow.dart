@@ -48,7 +48,9 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
     if (effectiveOverflowX != CSSOverflowType.visible) {
       Size scrollableSize = renderBoxModel.scrollableSize;
       Size scrollableViewportSize = renderBoxModel.scrollableViewportSize;
-      if (scrollableSize.width > scrollableViewportSize.width) {
+      if (scrollableSize.width > scrollableViewportSize.width ||
+        borderRadius != null
+      ) {
         return true;
       }
     }
@@ -81,7 +83,9 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
     if (effectiveOverflowY != CSSOverflowType.visible) {
       Size scrollableSize = renderBoxModel.scrollableSize;
       Size scrollableViewportSize = renderBoxModel.scrollableViewportSize;
-      if (scrollableSize.height > scrollableViewportSize.height) {
+      if (scrollableSize.height > scrollableViewportSize.height ||
+        borderRadius != null
+      ) {
         return true;
       }
     }

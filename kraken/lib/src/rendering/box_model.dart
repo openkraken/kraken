@@ -431,10 +431,8 @@ class RenderLayoutBox extends RenderBoxModel
     }
     double maxScrollableX = scrollableSize.width;
     double maxScrollableY = scrollableSize.height;
-    if (childRenderStyle.left.isNotAuto) {
-      maxScrollableX = math.max(maxScrollableX,
-          childRenderStyle.left.computedValue + childScrollableSize!.width);
-    }
+    maxScrollableX = math.max(maxScrollableX,
+        childRenderStyle.left.computedValue + childScrollableSize!.width);
 
     if (childRenderStyle.right.isNotAuto) {
       if (isScrollingContentBox &&
@@ -452,10 +450,8 @@ class RenderLayoutBox extends RenderBoxModel
       }
     }
 
-    if (childRenderStyle.top.isNotAuto) {
-      maxScrollableY = math.max(maxScrollableY,
-          childRenderStyle.top.computedValue + childScrollableSize!.height);
-    }
+    maxScrollableY = math.max(maxScrollableY,
+        childRenderStyle.top.computedValue + childScrollableSize.height);
     if (childRenderStyle.bottom.isNotAuto) {
       if (isScrollingContentBox &&
           (parent as RenderBoxModel).heightSizeType == BoxSizeType.specified) {
@@ -717,10 +713,12 @@ class RenderBoxModel extends RenderBox
     return currentBox.parent is RenderViewportBox;
   }
 
-  // Auto value for min-width
+  // Auto value for min-width which equals to the total width of children
+  // which is in flow (excluding position absolute/fixed).
   double autoMinWidth = 0;
 
-  // Auto value for min-height
+  // Auto value for min-height which equals to the total width of children
+  // which is in flow (excluding position absolute/fixed).
   double autoMinHeight = 0;
 
   // Whether it needs relayout due to percentage calculation.
