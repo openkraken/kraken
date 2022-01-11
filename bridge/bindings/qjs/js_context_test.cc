@@ -94,9 +94,7 @@ TEST(Context, disposeContext) {
   uint32_t contextId = 0;
   auto bridge = static_cast<kraken::KrakenPage*>(getPage(contextId));
   static bool disposed = false;
-  bridge->disposeCallback = [](kraken::KrakenPage* bridge) {
-    disposed = true;
-  };
+  bridge->disposeCallback = [](kraken::KrakenPage* bridge) { disposed = true; };
   disposePage(bridge->getContext()->getContextId());
   EXPECT_EQ(disposed, true);
 }
