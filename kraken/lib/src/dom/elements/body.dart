@@ -19,6 +19,15 @@ class BodyElement extends Element {
   void addEvent(String eventType) {
     // Scroll event not working on body.
     if (eventType == EVENT_SCROLL) return;
-    super.addEvent(eventType);
+
+    // Event of Body should set to documentElement.
+    // The Render Object of element which set position may be at the same level as the Render Object of body,
+    // resulting in the failure to get events handlers.
+    ownerDocument.documentElement?.addEvent(eventType);
+  }
+
+  @override
+  void removeEvent(String eventType) {
+    ownerDocument.documentElement?.removeEvent(eventType);
   }
 }
