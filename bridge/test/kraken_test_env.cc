@@ -173,7 +173,7 @@ std::unique_ptr<kraken::KrakenPage> TEST_init(OnJSError onJsError) {
     contextId = 0;
   }
   std::call_once(testInitOnceFlag, []() {
-    initJSPagePool(1024);
+    initJSPagePool(1024 * 1024);
     inited = true;
   });
   initTestFramework(contextId);

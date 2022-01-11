@@ -89,7 +89,7 @@ TEST(Context, accessGetUICommandItemsAfterDisposed) {
 }
 
 TEST(Context, disposeContext) {
-  initJSPagePool(8);
+  initJSPagePool(1024 * 1024);
   TEST_mockDartMethods(nullptr);
   uint32_t contextId = 0;
   auto bridge = static_cast<kraken::KrakenPage*>(getPage(contextId));
