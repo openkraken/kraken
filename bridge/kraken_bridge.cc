@@ -106,10 +106,9 @@ void disposePage(int32_t contextId) {
   if (kraken::KrakenPage::pageContextPool[contextId] == nullptr)
     return;
 
+  auto* page = static_cast<kraken::KrakenPage*>(kraken::KrakenPage::pageContextPool[contextId]);
   // In order to avoid accessing pageContextPool when the page is being released. We need to clear the value in pageContextPool before releasing.
   kraken::KrakenPage::pageContextPool[contextId] = nullptr;
-
-  auto* page = static_cast<kraken::KrakenPage*>(kraken::KrakenPage::pageContextPool[contextId]);
   delete page;
 }
 
