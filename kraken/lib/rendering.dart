@@ -20,6 +20,7 @@ export 'src/rendering/text.dart';
 export 'src/rendering/content_visibility.dart';
 export 'src/rendering/pointer.dart';
 export 'src/rendering/opacity.dart';
+export 'src/rendering/overflow.dart';
 export 'src/rendering/transform.dart';
 export 'src/rendering/viewport.dart';
 export 'src/rendering/paragraph.dart';
