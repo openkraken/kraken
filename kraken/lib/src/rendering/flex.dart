@@ -437,9 +437,9 @@ class RenderFlexLayout extends RenderLayoutBox {
       return false;
     }
     if (_isHorizontalFlexDirection) {
-      return renderBoxModel.clipX;
+      return renderBoxModel.renderStyle.overflowX != CSSOverflowType.visible;
     } else {
-      return renderBoxModel.clipY;
+      return renderBoxModel.renderStyle.overflowY != CSSOverflowType.visible;
     }
   }
 
