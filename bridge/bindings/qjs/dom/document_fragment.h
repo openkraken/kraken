@@ -14,21 +14,25 @@ void bindDocumentFragment(std::unique_ptr<ExecutionContext>& context);
 
 class DocumentFragment : public Node {
  public:
-  static JSClassID kDocumentFragmentID;
-  static JSClassID classId();
+  static JSClassID classId;
+  // Return the constructor class object of DocumentFragment.
+  static JSValue constructor(ExecutionContext* context);
+  DocumentFragment* create(JSContext* ctx);
+  DocumentFragment();
 
-  DocumentFragment() = delete;
-  explicit DocumentFragment(ExecutionContext* context);
-
-  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
-
-  OBJECT_INSTANCE(DocumentFragment);
+ private:
+  friend Node;
 };
 
-class DocumentFragmentInstance : public NodeInstance {
- public:
-  DocumentFragmentInstance() = delete;
-  DocumentFragmentInstance(DocumentFragment* fragment);
+auto documentFragmentCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {
+  auto* eventTarget = EventTarget::create(ctx);
+  return eventTarget->toQuickJS();
+};
+
+const WrapperTypeInfo documentFragmentInfo = {
+    "DocumentFragment",
+    &nodeTypeInfo,
+    documentFragmentCreator
 };
 
 }  // namespace kraken::binding::qjs

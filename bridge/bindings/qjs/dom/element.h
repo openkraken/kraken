@@ -16,11 +16,9 @@ namespace kraken::binding::qjs {
 
 void bindElement(std::unique_ptr<ExecutionContext>& context);
 
-class ElementInstance;
-
 class Element;
 
-using ElementCreator = ElementInstance* (*)(Element* element, std::string tagName);
+using ElementCreator = Element* (*)(Element* element, std::string tagName);
 
 struct NativeBoundingClientRect {
   double x;
@@ -74,27 +72,19 @@ bool isJavaScriptExtensionElementInstance(ExecutionContext* context, JSValue ins
 
 class Element : public Node {
  public:
-  static JSClassID kElementClassId;
-  Element() = delete;
-  explicit Element(ExecutionContext* context);
+  static JSClassID classId;
+  static Element* create(JSContext* ctx);
 
-  static JSClassID classId();
+  DEFINE_FUNCTION(getBoundingClientRect);
+  DEFINE_FUNCTION(hasAttribute);
+  DEFINE_FUNCTION(setAttribute);
+  DEFINE_FUNCTION(getAttribute);
+  DEFINE_FUNCTION(removeAttribute);
+  DEFINE_FUNCTION(toBlob);
+  DEFINE_FUNCTION(click);
+  DEFINE_FUNCTION(scroll);
+  DEFINE_FUNCTION(scrollBy);
 
-  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
-
-  static JSValue getBoundingClientRect(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue hasAttribute(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue setAttribute(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue getAttribute(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue removeAttribute(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue toBlob(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue click(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue scroll(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue scrollBy(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-
-  OBJECT_INSTANCE(Element);
-
- private:
   DEFINE_PROTOTYPE_READONLY_PROPERTY(nodeName);
   DEFINE_PROTOTYPE_READONLY_PROPERTY(tagName);
   DEFINE_PROTOTYPE_READONLY_PROPERTY(offsetLeft);
@@ -118,29 +108,6 @@ class Element : public Node {
   DEFINE_PROTOTYPE_PROPERTY(scrollTop);
   DEFINE_PROTOTYPE_PROPERTY(scrollLeft);
 
-  DEFINE_PROTOTYPE_FUNCTION(getBoundingClientRect, 0);
-  DEFINE_PROTOTYPE_FUNCTION(hasAttribute, 1);
-  DEFINE_PROTOTYPE_FUNCTION(setAttribute, 2);
-  DEFINE_PROTOTYPE_FUNCTION(getAttribute, 2);
-  DEFINE_PROTOTYPE_FUNCTION(removeAttribute, 1);
-  DEFINE_PROTOTYPE_FUNCTION(toBlob, 0);
-  DEFINE_PROTOTYPE_FUNCTION(click, 2);
-  DEFINE_PROTOTYPE_FUNCTION(scroll, 2);
-  // ScrollTo is same as scroll which reuse scroll functions. Macro expand is not support here.
-  ObjectFunction m_scrollTo{m_context, m_prototypeObject, "scrollTo", scroll, 2};
-  DEFINE_PROTOTYPE_FUNCTION(scrollBy, 2);
-  friend ElementInstance;
-};
-
-struct PersistElement {
-  ElementInstance* element;
-  list_head link;
-};
-
-class ElementInstance : public NodeInstance {
- public:
-  ElementInstance() = delete;
-  ~ElementInstance();
   JSValue internalGetTextContent() override;
   void internalSetTextContent(JSValue content) override;
 
@@ -151,37 +118,63 @@ class ElementInstance : public NodeInstance {
   std::string innerHTML();
   StyleDeclarationInstance* style();
 
-  static inline JSClassID classID();
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
+  void dispose() const override;
 
  protected:
-  explicit ElementInstance(Element* element, std::string tagName, bool shouldAddUICommand);
-
-  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
-
+  StyleDeclarationInstance* m_style{nullptr};
+  ElementAttributes* m_attributes{nullptr};
  private:
-  void _notifyNodeRemoved(NodeInstance* node) override;
+  std::string m_tagName;
+  void _notifyNodeRemoved(Node* node) override;
   void _notifyChildRemoved();
-  void _notifyNodeInsert(NodeInstance* insertNode) override;
+  void _notifyNodeInsert(Node* insertNode) override;
   void _notifyChildInsert();
   void _didModifyAttribute(std::string& name, JSValue oldId, JSValue newId);
   void _beforeUpdateId(JSValue oldIdValue, JSValue newIdValue);
 
-  std::string m_tagName;
-  friend Element;
-  friend NodeInstance;
-  friend Node;
-  friend DocumentInstance;
-  StyleDeclarationInstance* m_style{nullptr};
-  ElementAttributes* m_attributes{nullptr};
-
   static JSClassExoticMethods exoticMethods;
+  friend class Node;
 };
 
-class BoundingClientRect : public HostObject {
+struct PersistElement {
+  Element* element;
+  list_head link;
+};
+
+auto elementCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {
+  if (argc == 0) {
+    return JS_ThrowTypeError(ctx, "Illegal constructor");
+  }
+  JSValue tagName = argv[0];
+
+  if (!JS_IsString(tagName)) {
+    return JS_ThrowTypeError(ctx, "Illegal constructor");
+  }
+
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  std::string name = jsValueToStdString(ctx, tagName);
+
+  Element* element = Element::create(ctx);
+
+  auto* document = context->document();
+//  auto* Document = Document::instance(context);
+//  if (Document->isCustomElement(name)) {
+//    return JS_CallConstructor(ctx, Document->getElementConstructor(context, name), argc, argv);
+//  }
+//
+//  auto* element = new Element(this, name, true);
+//  return element->jsObject;
+};
+
+const WrapperTypeInfo elementTypeInfo = {"Element", &nodeTypeInfo, elementCreator};
+
+class BoundingClientRect : public GarbageCollected<BoundingClientRect> {
  public:
   BoundingClientRect() = delete;
-  explicit BoundingClientRect(ExecutionContext* context, NativeBoundingClientRect* nativeBoundingClientRect)
-      : HostObject(context, "BoundingClientRect"), m_nativeBoundingClientRect(nativeBoundingClientRect){};
+  explicit BoundingClientRect(ExecutionContext* context, NativeBoundingClientRect* nativeBoundingClientRect) : GarbageCollected(), m_nativeBoundingClientRect(nativeBoundingClientRect){};
+
+  const char* getHumanReadableName() const override { return "BoundingClientRect"; }
 
  private:
   DEFINE_READONLY_PROPERTY(x);

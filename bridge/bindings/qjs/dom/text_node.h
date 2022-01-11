@@ -16,38 +16,41 @@ void bindTextNode(std::unique_ptr<ExecutionContext>& context);
 
 class TextNode : public Node {
  public:
-  static JSClassID kTextNodeClassId;
-  static JSClassID classId();
+  static JSClassID classId;
+  static JSValue constructor(ExecutionContext* context);
+  static JSValue prototype(ExecutionContext* context);
+  static TextNode* create(JSContext* ctx, JSValue textContent);
+
   TextNode() = delete;
-  explicit TextNode(ExecutionContext* context);
+  explicit TextNode(JSValueConst textContent);
 
-  OBJECT_INSTANCE(TextNode);
+  std::string toString();
 
-  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
-
- private:
   DEFINE_PROTOTYPE_READONLY_PROPERTY(nodeName);
 
   DEFINE_PROTOTYPE_PROPERTY(data);
   DEFINE_PROTOTYPE_PROPERTY(nodeValue);
-  friend TextNodeInstance;
-};
 
-class TextNodeInstance : public NodeInstance {
- public:
-  TextNodeInstance() = delete;
-  explicit TextNodeInstance(TextNode* textNode, JSValue textData);
-  ~TextNodeInstance();
-
-  std::string toString();
-
- private:
+ protected:
   JSValue internalGetTextContent() override;
   void internalSetTextContent(JSValue content) override;
-  friend TextNode;
-  friend Node;
-
   std::string m_data;
+};
+
+auto textNodeCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {
+  JSValue textContent = JS_NULL;
+  if (argc == 1) {
+    textContent = argv[0];
+  }
+
+  TextNode* textNode = TextNode::create(ctx, textContent);
+  return textNode->toQuickJS();
+};
+
+const WrapperTypeInfo textNodeType = {
+    "TextNode",
+    &nodeTypeInfo,
+    textNodeCreator
 };
 
 }  // namespace kraken::binding::qjs

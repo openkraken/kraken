@@ -31,7 +31,6 @@ namespace kraken::binding::qjs {
 
 static std::once_flag kinitJSClassIDFlag;
 
-class DocumentInstance;
 class ExecutionContext;
 struct DOMTimerCallbackContext;
 
@@ -154,6 +153,22 @@ static JSValue handleCallThisOnProxy(JSContext* ctx, JSValueConst this_val, int 
   }
   return result;
 }
+
+class ObjectProperty {
+  KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(ObjectProperty);
+public:
+  ObjectProperty() = delete;
+
+  // Define an property on object with a JSValue.
+  explicit ObjectProperty(ExecutionContext* context, JSValueConst thisObject, const char* property, JSValue value) : m_value(value) {
+    JS_DefinePropertyValueStr(context->ctx(), thisObject, property, value, JS_PROP_ENUMERABLE);
+  }
+
+  JSValue value() const { return m_value; }
+
+private:
+  JSValue m_value{JS_NULL};
+};
 
 // Property define helpers
 void installFunctionProperty(ExecutionContext* context, JSValueConst thisObject, const char* functionName, JSCFunction function, int argc);

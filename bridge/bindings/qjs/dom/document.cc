@@ -34,21 +34,21 @@
 
 namespace kraken::binding::qjs {
 
-void traverseNode(NodeInstance* node, TraverseHandler handler) {
+void traverseNode(Node* node, TraverseHandler handler) {
   bool shouldExit = handler(node);
   if (shouldExit)
     return;
 
-  JSContext* ctx = node->context()->ctx();
+  JSContext* ctx = node->ctx();
   int childNodesLen = arrayGetLength(ctx, node->childNodes);
 
   if (childNodesLen != 0) {
     for (int i = 0; i < childNodesLen; i++) {
       JSValue n = JS_GetPropertyUint32(ctx, node->childNodes, i);
-      auto* nextNode = static_cast<NodeInstance*>(JS_GetOpaque(n, Node::classId(n)));
+      auto* nextNode = static_cast<Node*>(JS_GetOpaque(n, JSValueGetClassId(n)));
       traverseNode(nextNode, handler);
 
-      JS_FreeValue(node->context()->ctx(), n);
+      JS_FreeValue(node->ctx(), n);
     }
   }
 }
@@ -56,88 +56,88 @@ void traverseNode(NodeInstance* node, TraverseHandler handler) {
 std::once_flag kDocumentInitOnceFlag;
 
 void bindDocument(std::unique_ptr<ExecutionContext>& context) {
-  auto* documentConstructor = Document::instance(context.get());
-  context->defineGlobalProperty("Document", documentConstructor->jsObject);
-  JSValue documentInstance = JS_CallConstructor(context->ctx(), documentConstructor->jsObject, 0, nullptr);
-  context->defineGlobalProperty("document", documentInstance);
+
+//  auto* documentConstructor = Document::instance(context.get());
+//  context->defineGlobalProperty("Document", documentConstructor->jsObject);
+//  JSValue documentInstance = JS_CallConstructor(context->ctx(), documentConstructor->jsObject, 0, nullptr);
+//  context->defineGlobalProperty("document", documentInstance);
 }
 
-JSClassID Document::kDocumentClassID{0};
+JSClassID Document::classId{0};
 
-Document::Document(ExecutionContext* context) : Node(context, "Document") {
-  std::call_once(kDocumentInitOnceFlag, []() { JS_NewClassID(&kDocumentClassID); });
-  JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
+Document* Document::create(JSContext* ctx) {
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  JSValue prototype = context->contextData()->prototypeForType(&eventTargetTypeInfo);
+  auto* document = makeGarbageCollected<Document>()->initialize<Document>(ctx, &Document::classId, nullptr);
+
+  JS_SetPrototype(ctx, document->toQuickJS(), prototype);
+
+  return document;
+}
+
+Document::Document() : Node() {
   if (!document_registered) {
-    defineElement("img", ImageElement::instance(m_context));
-    defineElement("a", AnchorElement::instance(m_context));
-    defineElement("canvas", CanvasElement::instance(m_context));
-    defineElement("input", InputElement::instance(m_context));
-    defineElement("object", ObjectElement::instance(m_context));
-    defineElement("script", ScriptElement::instance(m_context));
-    defineElement("template", TemplateElement::instance(m_context));
+//    defineElement("img", ImageElement::instance(m_context));
+//    defineElement("a", AnchorElement::instance(m_context));
+//    defineElement("canvas", CanvasElement::instance(m_context));
+//    defineElement("input", InputElement::instance(m_context));
+//    defineElement("object", ObjectElement::instance(m_context));
+//    defineElement("script", ScriptElement::instance(m_context));
+//    defineElement("template", TemplateElement::instance(m_context));
     document_registered = true;
   }
 
   if (!event_registered) {
     event_registered = true;
-    Event::defineEvent(
-        EVENT_INPUT, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new InputEventInstance(InputEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_MEDIA_ERROR, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
-      return new MediaErrorEventInstance(MediaErrorEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
-    });
-    Event::defineEvent(EVENT_MESSAGE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
-      return new MessageEventInstance(MessageEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
-    });
-    Event::defineEvent(
-        EVENT_CLOSE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new CloseEventInstance(CloseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_INTERSECTION_CHANGE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
-      return new IntersectionChangeEventInstance(IntersectionChangeEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
-    });
-    Event::defineEvent(EVENT_TOUCH_START, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
-      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
-    });
-    Event::defineEvent(EVENT_TOUCH_END, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
-      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
-    });
-    Event::defineEvent(EVENT_TOUCH_MOVE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
-      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
-    });
-    Event::defineEvent(EVENT_TOUCH_CANCEL, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
-      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
-    });
-    Event::defineEvent(EVENT_SWIPE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
-      return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
-    });
-    Event::defineEvent(EVENT_PAN, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
-      return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
-    });
-    Event::defineEvent(EVENT_LONG_PRESS, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
-      return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
-    });
-    Event::defineEvent(EVENT_SCALE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
-      return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
-    });
-    Event::defineEvent(
-        EVENT_CLICK, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new MouseEventInstance(MouseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    Event::defineEvent(EVENT_CANCEL, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
-      return new MouseEventInstance(MouseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
-    });
-    Event::defineEvent(EVENT_POPSTATE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
-      return new PopStateEventInstance(PopStateEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
-    });
+//    Event::defineEvent(
+//        EVENT_INPUT, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new InputEventInstance(InputEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+//    Event::defineEvent(EVENT_MEDIA_ERROR, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+//      return new MediaErrorEventInstance(MediaErrorEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+//    });
+//    Event::defineEvent(EVENT_MESSAGE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+//      return new MessageEventInstance(MessageEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+//    });
+//    Event::defineEvent(
+//        EVENT_CLOSE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new CloseEventInstance(CloseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+//    Event::defineEvent(EVENT_INTERSECTION_CHANGE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+//      return new IntersectionChangeEventInstance(IntersectionChangeEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+//    });
+//    Event::defineEvent(EVENT_TOUCH_START, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+//      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+//    });
+//    Event::defineEvent(EVENT_TOUCH_END, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+//      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+//    });
+//    Event::defineEvent(EVENT_TOUCH_MOVE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+//      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+//    });
+//    Event::defineEvent(EVENT_TOUCH_CANCEL, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+//      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+//    });
+//    Event::defineEvent(EVENT_SWIPE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+//      return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+//    });
+//    Event::defineEvent(EVENT_PAN, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+//      return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+//    });
+//    Event::defineEvent(EVENT_LONG_PRESS, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+//      return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+//    });
+//    Event::defineEvent(EVENT_SCALE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+//      return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+//    });
+//    Event::defineEvent(
+//        EVENT_CLICK, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new MouseEventInstance(MouseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+//    Event::defineEvent(EVENT_CANCEL, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+//      return new MouseEventInstance(MouseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+//    });
+//    Event::defineEvent(EVENT_POPSTATE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
+//      return new PopStateEventInstance(PopStateEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+//    });
   }
 }
 
-JSClassID Document::classId() {
-  return kDocumentClassID;
-}
-
-JSValue Document::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
-  auto* instance = new DocumentInstance(this);
-  return instance->jsObject;
-}
-
-JSValue Document::createEvent(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_FUNCTION(Document, createEvent)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Failed to argumentCount: 1 argument required, but only 0 present.");
   }
@@ -153,7 +153,7 @@ JSValue Document::createEvent(JSContext* ctx, JSValue this_val, int argc, JSValu
     std::unique_ptr<NativeString> nativeEventType = jsValueToNativeString(ctx, eventTypeValue);
     auto nativeEvent = new NativeEvent{nativeEventType.release()};
 
-    auto document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
+    auto document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
     auto e = Event::buildEventInstance(eventType, document->context(), nativeEvent, false);
     return e->jsObject;
   } else {
@@ -161,7 +161,7 @@ JSValue Document::createEvent(JSContext* ctx, JSValue this_val, int argc, JSValu
   }
 }
 
-JSValue Document::createElement(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_FUNCTION(Document, createElement)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Failed to createElement: 1 argument required, but only 0 present.");
   }
@@ -171,7 +171,7 @@ JSValue Document::createElement(JSContext* ctx, JSValue this_val, int argc, JSVa
     return JS_ThrowTypeError(ctx, "Failed to createElement: tagName should be a string.");
   }
 
-  auto document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
+  auto document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
   std::string tagName = jsValueToStdString(ctx, tagNameValue);
   JSValue constructor = static_cast<Document*>(document->prototype())->getElementConstructor(document->m_context, tagName);
@@ -180,33 +180,33 @@ JSValue Document::createElement(JSContext* ctx, JSValue this_val, int argc, JSVa
   return element;
 }
 
-JSValue Document::createTextNode(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_FUNCTION(Document, createTextNode)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc != 1) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'createTextNode' on 'Document': 1 argument required, but only 0 present.");
   }
 
-  auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
+  auto* document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
   JSValue textNode = JS_CallConstructor(ctx, TextNode::instance(document->m_context)->jsObject, argc, argv);
   return textNode;
 }
 
-JSValue Document::createDocumentFragment(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
+IMPL_FUNCTION(Document, createDocumentFragment)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
   return JS_CallConstructor(ctx, DocumentFragment::instance(document->m_context)->jsObject, 0, nullptr);
 }
 
-JSValue Document::createComment(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
+IMPL_FUNCTION(Document, createComment)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
   JSValue commentNode = JS_CallConstructor(ctx, Comment::instance(document->m_context)->jsObject, argc, argv);
   return commentNode;
 }
 
-JSValue Document::getElementById(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_FUNCTION(Document, getElementById)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Uncaught TypeError: Failed to execute 'getElementById' on 'Document': 1 argument required, but only 0 present.");
   }
 
-  auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
+  auto* document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
   JSValue idValue = argv[0];
 
   if (!JS_IsString(idValue))
@@ -240,14 +240,14 @@ JSValue Document::getElementsByTagName(JSContext* ctx, JSValue this_val, int arg
                              "but only 0 present.");
   }
 
-  auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
+  auto* document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
   JSValue tagNameValue = argv[0];
   std::string tagName = jsValueToStdString(ctx, tagNameValue);
   std::transform(tagName.begin(), tagName.end(), tagName.begin(), ::toupper);
 
   std::vector<ElementInstance*> elements;
 
-  traverseNode(document, [tagName, &elements](NodeInstance* node) {
+  traverseNode(document, [tagName, &elements](Node* node) {
     if (node->nodeType == NodeType::ELEMENT_NODE) {
       auto* element = static_cast<ElementInstance*>(node);
       if (element->tagName() == tagName || tagName == "*") {
@@ -274,11 +274,11 @@ JSValue Document::getElementsByClassName(JSContext* ctx, JSValue this_val, int a
     return JS_ThrowTypeError(ctx, "Uncaught TypeError: Failed to execute 'getElementsByClassName' on 'Document': 1 argument required, but only 0 present.");
   }
 
-  auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
+  auto* document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
   std::string className = jsValueToStdString(ctx, argv[0]);
 
   std::vector<ElementInstance*> elements;
-  traverseNode(document, [ctx, className, &elements](NodeInstance* node) {
+  traverseNode(document, [ctx, className, &elements](Node* node) {
     if (node->nodeType == NodeType::ELEMENT_NODE) {
       auto element = reinterpret_cast<ElementInstance*>(node);
       if (element->classNames()->containsAll(className)) {
@@ -319,10 +319,10 @@ IMPL_PROPERTY_GETTER(Document, nodeName)(JSContext* ctx, JSValue this_val, int a
 }
 
 IMPL_PROPERTY_GETTER(Document, all)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
+  auto* document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
   auto all = new AllCollection(document->m_context);
 
-  traverseNode(document, [&all](NodeInstance* node) {
+  traverseNode(document, [&all](Node* node) {
     all->internalAdd(node, nullptr);
     return false;
   });
@@ -332,23 +332,23 @@ IMPL_PROPERTY_GETTER(Document, all)(JSContext* ctx, JSValue this_val, int argc, 
 
 // document.documentElement
 IMPL_PROPERTY_GETTER(Document, documentElement)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
-  ElementInstance* documentElement = document->getDocumentElement();
+  auto* document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
+  Element* documentElement = document->getDocumentElement();
   return documentElement == nullptr ? JS_NULL : documentElement->jsObject;
 }
 
 // document.head
 IMPL_PROPERTY_GETTER(Document, head)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
-  ElementInstance* documentElement = document->getDocumentElement();
+  auto* document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
+  Element* documentElement = document->getDocumentElement();
   int32_t len = arrayGetLength(ctx, documentElement->childNodes);
   JSValue head = JS_NULL;
   if (documentElement != nullptr) {
     for (int i = 0; i < len; i++) {
       JSValue v = JS_GetPropertyUint32(ctx, documentElement->childNodes, i);
-      auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(v, Node::classId(v)));
+      auto* nodeInstance = static_cast<Node*>(JS_GetOpaque(v, Node::classId(v)));
       if (nodeInstance->nodeType == NodeType::ELEMENT_NODE) {
-        auto* elementInstance = static_cast<ElementInstance*>(nodeInstance);
+        auto* elementInstance = static_cast<Element*>(nodeInstance);
         if (elementInstance->tagName() == "HEAD") {
           head = elementInstance->jsObject;
           break;
@@ -365,8 +365,8 @@ IMPL_PROPERTY_GETTER(Document, head)(JSContext* ctx, JSValue this_val, int argc,
 
 // document.body: https://html.spec.whatwg.org/multipage/dom.html#dom-document-body-dev
 IMPL_PROPERTY_GETTER(Document, body)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
-  ElementInstance* documentElement = document->getDocumentElement();
+  auto* document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
+  Element* documentElement = document->getDocumentElement();
   JSValue body = JS_NULL;
 
   if (documentElement != nullptr) {
@@ -375,9 +375,9 @@ IMPL_PROPERTY_GETTER(Document, body)(JSContext* ctx, JSValue this_val, int argc,
     // is either a body element or a frameset element, or null if there is no such element.
     for (int i = 0; i < len; i++) {
       JSValue v = JS_GetPropertyUint32(ctx, documentElement->childNodes, i);
-      auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(v, Node::classId(v)));
+      auto* nodeInstance = static_cast<Node*>(JS_GetOpaque(v, Node::classId(v)));
       if (nodeInstance->nodeType == NodeType::ELEMENT_NODE) {
-        auto* elementInstance = static_cast<ElementInstance*>(nodeInstance);
+        auto* elementInstance = static_cast<Element*>(nodeInstance);
         if (elementInstance->tagName() == "BODY") {
           body = elementInstance->jsObject;
           break;
@@ -393,8 +393,8 @@ IMPL_PROPERTY_GETTER(Document, body)(JSContext* ctx, JSValue this_val, int argc,
 // The body property is settable, setting a new body on a document will effectively remove all
 // the current children of the existing <body> element.
 IMPL_PROPERTY_SETTER(Document, body)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
-  ElementInstance* documentElement = document->getDocumentElement();
+  auto* document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
+  Element* documentElement = document->getDocumentElement();
   // If there is no document element, throw a Exception.
   if (documentElement == nullptr) {
     return JS_ThrowInternalError(ctx, "No document element exists");
@@ -403,7 +403,7 @@ IMPL_PROPERTY_SETTER(Document, body)(JSContext* ctx, JSValue this_val, int argc,
   JSValue newBody = argv[0];
   // If the body element is not null, then replace the body element with the new value within the body element's parent and return.
   if (JS_IsInstanceOf(ctx, newBody, Element::instance(document->m_context)->jsObject)) {
-    auto* newElementInstance = static_cast<ElementInstance*>(JS_GetOpaque(newBody, Element::classId()));
+    auto* newElementInstance = static_cast<Element*>(JS_GetOpaque(newBody, Element::classId()));
     // If the new value is not a body element, then throw a Exception.
     if (newElementInstance->tagName() == "BODY") {
       JSValue oldBody = JS_GetPropertyStr(ctx, document->jsObject, "body");
@@ -414,7 +414,7 @@ IMPL_PROPERTY_SETTER(Document, body)(JSContext* ctx, JSValue this_val, int argc,
           documentElement->internalAppendChild(newElementInstance);
         } else {
           // Otherwise, replace the body element with the new value within the body element's parent.
-          auto* oldElementInstance = static_cast<ElementInstance*>(JS_GetOpaque(oldBody, Element::classId()));
+          auto* oldElementInstance = static_cast<Element*>(JS_GetOpaque(oldBody, Element::classId()));
           documentElement->internalReplaceChild(newElementInstance, oldElementInstance);
         }
       }
@@ -433,14 +433,14 @@ IMPL_PROPERTY_SETTER(Document, body)(JSContext* ctx, JSValue this_val, int argc,
 
 // document.children
 IMPL_PROPERTY_GETTER(Document, children)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
+  auto* document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
   JSValue array = JS_NewArray(ctx);
   JSValue pushMethod = JS_GetPropertyStr(ctx, array, "push");
 
   int32_t len = arrayGetLength(ctx, document->childNodes);
   for (int i = 0; i < len; i++) {
     JSValue v = JS_GetPropertyUint32(ctx, document->childNodes, i);
-    auto* instance = static_cast<NodeInstance*>(JS_GetOpaque(v, Node::classId(v)));
+    auto* instance = static_cast<Node*>(JS_GetOpaque(v, Node::classId(v)));
     if (instance->nodeType == NodeType::ELEMENT_NODE) {
       JSValue arguments[] = {v};
       JS_Call(ctx, pushMethod, array, 1, arguments);
@@ -453,12 +453,12 @@ IMPL_PROPERTY_GETTER(Document, children)(JSContext* ctx, JSValue this_val, int a
 }
 
 IMPL_PROPERTY_GETTER(Document, cookie)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
+  auto* document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
   std::string cookie = document->m_cookie->getCookie();
   return JS_NewString(ctx, cookie.c_str());
 }
 IMPL_PROPERTY_SETTER(Document, cookie)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
+  auto* document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
   std::string value = jsValueToStdString(ctx, argv[0]);
   document->m_cookie->setCookie(value);
   return JS_NULL;
@@ -516,7 +516,7 @@ void DocumentCookie::setCookie(std::string& cookieStr) {
   cookiePairs[key] = value;
 }
 
-DocumentInstance::DocumentInstance(Document* document) : NodeInstance(document, NodeType::DOCUMENT_NODE, Document::classId(), "document") {
+Document::Document(Document* document) : Node(document, NodeType::DOCUMENT_NODE, Document::classId, "document") {
   m_context->m_document = this;
   m_document = this;
   m_cookie = std::make_unique<DocumentCookie>();
@@ -529,16 +529,9 @@ DocumentInstance::DocumentInstance(Document* document) : NodeInstance(document, 
 #endif
 }
 
-DocumentInstance::~DocumentInstance() {
-  // Atom string should keep alive in memory to make sure same string have the corresponding id.
-  // Only freed after document finalized.
-  for (auto& entry : m_elementMapById) {
-    JS_FreeAtomRT(m_context->runtime(), entry.first);
-    // Note: someone may be curious why there are no JS_FreeValueRT() call in this finalize callbacks.
-    // m_elementMapById's value are all elements, which are JavaScript objects. Will be freed by GC at marking phase.
-  }
+Document::~Document() {
 }
-void DocumentInstance::removeElementById(JSAtom id, ElementInstance* element) {
+void Document::removeElementById(JSAtom id, Element* element) {
   if (m_elementMapById.count(id) > 0) {
     auto& list = m_elementMapById[id];
     auto idx = std::find(list.begin(), list.end(), element);
@@ -547,9 +540,9 @@ void DocumentInstance::removeElementById(JSAtom id, ElementInstance* element) {
     JS_FreeValue(m_ctx, element->jsObject);
   }
 }
-void DocumentInstance::addElementById(JSAtom id, ElementInstance* element) {
+void Document::addElementById(JSAtom id, Element* element) {
   if (m_elementMapById.count(id) == 0) {
-    m_elementMapById[id] = std::vector<ElementInstance*>();
+    m_elementMapById[id] = std::vector<Element*>();
     JS_DupAtom(m_ctx, id);
   }
 
@@ -562,14 +555,14 @@ void DocumentInstance::addElementById(JSAtom id, ElementInstance* element) {
   }
 }
 
-ElementInstance* DocumentInstance::getDocumentElement() {
+Element* Document::getDocumentElement() {
   int32_t len = arrayGetLength(m_ctx, childNodes);
 
   for (int i = 0; i < len; i++) {
     JSValue v = JS_GetPropertyUint32(m_ctx, childNodes, i);
-    auto* instance = static_cast<NodeInstance*>(JS_GetOpaque(v, Node::classId(v)));
+    auto* instance = static_cast<Node*>(JS_GetOpaque(v, Node::classId(v)));
     if (instance->nodeType == NodeType::ELEMENT_NODE) {
-      return static_cast<ElementInstance*>(instance);
+      return static_cast<Element*>(instance);
     }
     JS_FreeValue(m_ctx, v);
   }
@@ -577,16 +570,16 @@ ElementInstance* DocumentInstance::getDocumentElement() {
   return nullptr;
 }
 
-int32_t DocumentInstance::requestAnimationFrame(FrameCallback* frameCallback) {
+int32_t Document::requestAnimationFrame(FrameCallback* frameCallback) {
   return m_scriptAnimationController->registerFrameCallback(frameCallback);
 }
 
-void DocumentInstance::cancelAnimationFrame(uint32_t callbackId) {
+void Document::cancelAnimationFrame(uint32_t callbackId) {
   m_scriptAnimationController->cancelFrameCallback(callbackId);
 }
 
-void DocumentInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
-  NodeInstance::trace(rt, val, mark_func);
+void Document::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
+  Node::trace(rt, val, mark_func);
   // Trace scriptAnimationController
   if (m_scriptAnimationController != nullptr) {
     JS_MarkValue(rt, m_scriptAnimationController->toQuickJS(), mark_func);
@@ -594,8 +587,20 @@ void DocumentInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func)
   // Trace elementByIdMaps
   for (auto& entry : m_elementMapById) {
     for (auto& value : entry.second) {
-      JS_MarkValue(rt, value->jsObject, mark_func);
+      JS_MarkValue(rt, value->toQuickJS(), mark_func);
     }
+  }
+}
+
+void Document::dispose() const {
+  Node::dispose();
+
+  // Atom string should keep alive in memory to make sure same string have the corresponding id.
+  // Only freed after document finalized.
+  for (auto& entry : m_elementMapById) {
+    JS_FreeAtomRT(m_runtime, entry.first);
+    // Note: someone may be curious why there are no JS_FreeValueRT() call in this finalize callbacks.
+    // m_elementMapById's value are all elements, which are JavaScript objects. Will be freed by GC at marking phase.
   }
 }
 

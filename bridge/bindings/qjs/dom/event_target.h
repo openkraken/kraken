@@ -59,15 +59,16 @@ class EventTarget : public GarbageCollected<EventTarget> {
   EventTarget();
   static JSClassID classId;
   static EventTarget* create(JSContext* ctx);
-  static JSValue addEventListener(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue removeEventListener(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue dispatchEvent(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+
+  DEFINE_FUNCTION(addEventListener);
+  DEFINE_FUNCTION(removeEventListener);
+  DEFINE_FUNCTION(dispatchEvent);
 
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
   void dispose() const override;
 
   virtual bool dispatchEvent(EventInstance* event);
-  inline int32_t eventTargetId() const { return m_eventTargetId; }
+  FORCE_INLINE int32_t eventTargetId() const { return m_eventTargetId; }
 
  protected:
   JSValue callNativeMethods(const char* method, int32_t argc, NativeValue* argv);
@@ -100,18 +101,10 @@ private:
   // property are not defined by Object.defineProperty or setProperty.
   // We store there values in here.
   EventTargetProperties m_properties{this->m_ctx};
-
 };
 
 auto eventTargetCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {
-  auto* type = static_cast<const WrapperTypeInfo*>(JS_GetOpaque(func_obj, JSValueGetClassId(func_obj)));
   auto* eventTarget = EventTarget::create(ctx);
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
-  JSValue prototype = context->contextData()->prototypeForType(type);
-
-  // Let eventTarget instance inherit EventTarget prototype methods.
-  JS_SetPrototype(ctx, eventTarget->toQuickJS(), prototype);
-
   return eventTarget->toQuickJS();
 };
 

@@ -162,10 +162,18 @@ IMPL_FUNCTION(Window, cancelAnimationFrame)(JSContext* ctx, JSValue this_val, in
 }
 
 Window* Window::create(JSContext* ctx) {
-  return makeGarbageCollected<Window>()->initialize<Window>(ctx, &classId, nullptr);
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  JSValue prototype = context->contextData()->prototypeForType(&windowTypeInfo);
+
+  auto* window = makeGarbageCollected<Window>()->initialize<Window>(ctx, &classId, nullptr);
+
+  // Let window inherit Window prototype methods.
+  JS_SetPrototype(ctx, window->toQuickJS(), prototype);
+
+  return window;
 }
 
-DocumentInstance* Window::document() {
+Document* Window::document() {
   return context()->document();
 }
 

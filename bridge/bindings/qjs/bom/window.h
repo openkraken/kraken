@@ -45,7 +45,7 @@ class Window : public EventTarget {
   void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const override;
 
  private:
-  DocumentInstance* document();
+  Document* document();
 
   Location* m_location{nullptr};
   JSValue onerror{JS_NULL};
@@ -53,14 +53,7 @@ class Window : public EventTarget {
 };
 
 auto windowCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {
-
-  auto* type = static_cast<const WrapperTypeInfo*>(JS_GetOpaque(func_obj, JSValueGetClassId(func_obj)));
   auto* window = Window::create(ctx);
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
-  JSValue prototype = context->contextData()->prototypeForType(type);
-
-  // Let eventTarget instance inherit EventTarget prototype methods.
-  JS_SetPrototype(ctx, window->toQuickJS(), prototype);
   return window->toQuickJS();
 };
 

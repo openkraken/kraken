@@ -6,14 +6,6 @@
 #ifndef KRAKENBRIDGE_JS_CONTEXT_MACROS_H
 #define KRAKENBRIDGE_JS_CONTEXT_MACROS_H
 
-#define OBJECT_INSTANCE(NAME)                                                 \
-  static NAME* instance(ExecutionContext* context) {                          \
-    if (context->constructorMap.count(#NAME) == 0) {                          \
-      context->constructorMap[#NAME] = static_cast<void*>(new NAME(context)); \
-    }                                                                         \
-    return static_cast<NAME*>(context->constructorMap[#NAME]);                \
-  }
-
 #define QJS_GLOBAL_BINDING_FUNCTION(context, function, name, argc)     \
   {                                                                    \
     JSValue f = JS_NewCFunction(context->ctx(), function, name, argc); \

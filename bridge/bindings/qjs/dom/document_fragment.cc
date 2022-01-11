@@ -10,29 +10,28 @@
 namespace kraken::binding::qjs {
 
 void bindDocumentFragment(std::unique_ptr<ExecutionContext>& context) {
-  auto* constructor = DocumentFragment::instance(context.get());
-  context->defineGlobalProperty("DocumentFragment", constructor->jsObject);
+  JSValue classObject = context->contextData()->constructorForType(&documentFragmentInfo);
+  context->defineGlobalProperty("DocumentFragment", classObject);
 }
 
-std::once_flag kDocumentFragmentFlag;
-
-JSClassID DocumentFragment::kDocumentFragmentID{0};
-
-DocumentFragment::DocumentFragment(ExecutionContext* context) : Node(context) {
-  std::call_once(kDocumentFragmentFlag, []() { JS_NewClassID(&kDocumentFragmentID); });
-  JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
+JSValue DocumentFragment::constructor(ExecutionContext* context) {
+  return context->contextData()->constructorForType(&documentFragmentInfo);
 }
 
-JSClassID DocumentFragment::classId() {
-  return kDocumentFragmentID;
+DocumentFragment * DocumentFragment::create(JSContext* ctx) {
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  JSValue prototype = context->contextData()->prototypeForType(&documentFragmentInfo);
+  auto* documentFragment = makeGarbageCollected<DocumentFragment>()->initialize<DocumentFragment>(ctx, &classId);
+
+  // Let documentFragment instance inherit Document prototype methods.
+  JS_SetPrototype(ctx, documentFragment->toQuickJS(), prototype);
+
+  return documentFragment;
 }
 
-JSValue DocumentFragment::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
-  return (new DocumentFragmentInstance(this))->jsObject;
+DocumentFragment::DocumentFragment() {
+  setNodeFlag(DocumentFragment::NodeFlag::IsDocumentFragment);
+  context()->uiCommandBuffer()->addCommand(eventTargetId(), UICommand::createDocumentFragment, nativeEventTarget);
 }
 
-DocumentFragmentInstance::DocumentFragmentInstance(DocumentFragment* fragment) : NodeInstance(fragment, NodeType::DOCUMENT_FRAGMENT_NODE, DocumentFragment::classId(), "DocumentFragment") {
-  setNodeFlag(DocumentFragmentInstance::NodeFlag::IsDocumentFragment);
-  m_context->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::createDocumentFragment, nativeEventTarget);
-}
 }  // namespace kraken::binding::qjs

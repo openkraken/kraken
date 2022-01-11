@@ -21,23 +21,23 @@ static std::atomic<int32_t> globalEventTargetId{0};
 
 void bindEventTarget(std::unique_ptr<ExecutionContext>& context) {
   auto* contextData = context->contextData();
-  JSValue classObject = contextData->constructorForType(&eventTargetTypeInfo);
+  JSValue constructor = contextData->constructorForType(&eventTargetTypeInfo);
   JSValue prototypeObject = contextData->prototypeForType(&eventTargetTypeInfo);
 
-  installFunctionProperty(context.get(), prototypeObject, "addEventListener", EventTarget::addEventListener, 3);
-  installFunctionProperty(context.get(), prototypeObject, "removeEventListener", EventTarget::removeEventListener, 2);
-  installFunctionProperty(context.get(), prototypeObject, "dispatchEvent", EventTarget::dispatchEvent, 1);
+  INSTALL_FUNCTION(EventTarget, prototypeObject, addEventListener, 3);
+  INSTALL_FUNCTION(EventTarget, prototypeObject, removeEventListener, 2);
+  INSTALL_FUNCTION(EventTarget, prototypeObject, dispatchEvent, 1);
 
   // Set globalThis and Window's prototype to EventTarget's prototype to support EventTarget methods in global.
-  JS_SetPrototype(context->ctx(), context->global(), classObject);
-  context->defineGlobalProperty("EventTarget", classObject);
+  JS_SetPrototype(context->ctx(), context->global(), constructor);
+  context->defineGlobalProperty("EventTarget", constructor);
 }
 
 EventTarget::EventTarget() : GarbageCollected<EventTarget>() {
   m_eventTargetId = globalEventTargetId++;
 }
 
-JSValue EventTarget::addEventListener(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_FUNCTION(EventTarget, addEventListener)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 2) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: type and listener are required.");
   }
@@ -75,7 +75,7 @@ JSValue EventTarget::addEventListener(JSContext* ctx, JSValue this_val, int argc
   return JS_UNDEFINED;
 }
 
-JSValue EventTarget::removeEventListener(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_FUNCTION(EventTarget, removeEventListener)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 2) {
     return JS_ThrowTypeError(ctx, "Failed to removeEventListener: at least type and listener are required.");
   }
@@ -116,7 +116,7 @@ JSValue EventTarget::removeEventListener(JSContext* ctx, JSValue this_val, int a
   return JS_UNDEFINED;
 }
 
-JSValue EventTarget::dispatchEvent(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_FUNCTION(EventTarget, dispatchEvent)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc != 1) {
     return JS_ThrowTypeError(ctx, "Failed to dispatchEvent: first arguments should be an event object");
   }
@@ -132,7 +132,14 @@ JSValue EventTarget::dispatchEvent(JSContext* ctx, JSValue this_val, int argc, J
 }
 
 EventTarget* EventTarget::create(JSContext* ctx) {
-  return makeGarbageCollected<EventTarget>()->initialize(ctx, &EventTarget::classId, nullptr);
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  JSValue prototype = context->contextData()->prototypeForType(&eventTargetTypeInfo);
+  auto* eventTarget = makeGarbageCollected<EventTarget>()->initialize<EventTarget>(ctx, &EventTarget::classId, nullptr);
+
+  // Let eventTarget instance inherit EventTarget prototype methods.
+  JS_SetPrototype(ctx, eventTarget->toQuickJS(), prototype);
+
+  return eventTarget;
 }
 
 bool EventTarget::dispatchEvent(EventInstance* event) {
