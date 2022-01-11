@@ -113,9 +113,6 @@ mixin ElementOverflowMixin on ElementBase {
   void updateRenderBoxModelWithOverflowX(ScrollListener scrollListener) {
     if (renderBoxModel is RenderSliverListLayout) {
       RenderSliverListLayout renderBoxModel = this.renderBoxModel as RenderSliverListLayout;
-      // Recycler layout not need repaintBoundary and scroll/pointer listeners,
-      // ignoring overflowX or overflowY sets, which handle it self.
-      renderBoxModel.clipX = false;
       renderBoxModel.scrollOffsetX = renderBoxModel.axis == Axis.horizontal
           ? renderBoxModel.scrollable.position : null;
     } else if (renderBoxModel != null) {
@@ -125,29 +122,19 @@ mixin ElementOverflowMixin on ElementBase {
       switch(overflowX) {
         case CSSOverflowType.hidden:
           _scrollableX = null;
-          renderBoxModel.clipX = true;
-          // Overflow hidden can be scrolled programmatically.
-          renderBoxModel.enableScrollX = true;
           break;
         case CSSOverflowType.clip:
           _scrollableX = null;
-          renderBoxModel.clipX = true;
-          // Overflow clip can't scrolled programmatically.
-          renderBoxModel.enableScrollX = false;
           break;
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
           _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right, scrollListener: scrollListener);
           shouldScrolling = true;
-          renderBoxModel.clipX = true;
-          renderBoxModel.enableScrollX = true;
           renderBoxModel.scrollOffsetX = _scrollableX!.position;
           break;
         case CSSOverflowType.visible:
         default:
           _scrollableX = null;
-          renderBoxModel.clipX = false;
-          renderBoxModel.enableScrollX = false;
           break;
       }
 
@@ -167,9 +154,6 @@ mixin ElementOverflowMixin on ElementBase {
   void updateRenderBoxModelWithOverflowY(ScrollListener scrollListener) {
     if (renderBoxModel is RenderSliverListLayout) {
       RenderSliverListLayout renderBoxModel = this.renderBoxModel as RenderSliverListLayout;
-      // Recycler layout not need repaintBoundary and scroll/pointer listeners,
-      // ignoring overflowX or overflowY sets, which handle it self.
-      renderBoxModel.clipY = false;
       renderBoxModel.scrollOffsetY = renderBoxModel.axis == Axis.vertical
           ? renderBoxModel.scrollable.position : null;
     } else if (renderBoxModel != null) {
@@ -179,27 +163,19 @@ mixin ElementOverflowMixin on ElementBase {
       switch(overflowY) {
         case CSSOverflowType.hidden:
           _scrollableY = null;
-          renderBoxModel.clipY = true;
-          renderBoxModel.enableScrollY = true;
           break;
         case CSSOverflowType.clip:
           _scrollableY = null;
-          renderBoxModel.clipY = true;
-          renderBoxModel.enableScrollY = false;
           break;
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
           _scrollableY = KrakenScrollable(axisDirection: AxisDirection.down, scrollListener: scrollListener);
           shouldScrolling = true;
-          renderBoxModel.clipY = true;
-          renderBoxModel.enableScrollY = true;
           renderBoxModel.scrollOffsetY = _scrollableY!.position;
           break;
         case CSSOverflowType.visible:
         default:
           _scrollableY = null;
-          renderBoxModel.clipY = false;
-          renderBoxModel.enableScrollY = false;
           break;
       }
 

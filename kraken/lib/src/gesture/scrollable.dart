@@ -10,6 +10,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
 
 import 'gesture_detector.dart';
 import 'monodrag.dart';
@@ -242,7 +244,7 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
   TickerProvider get vsync => this;
 }
 
-mixin RenderOverflowMixin on RenderBox {
+mixin RenderOverflowMixin on RenderBoxModelBase {
   ScrollListener? scrollListener;
   void Function(PointerEvent)? scrollablePointerListener;
 
@@ -256,34 +258,87 @@ mixin RenderOverflowMixin on RenderBox {
     _clipRectLayer.layer = null;
   }
 
-  bool _clipX = false;
-  bool get clipX => _clipX;
-  set clipX(bool value) {
-    if (_clipX == value) return;
-    _clipX = value;
-    markNeedsLayout();
+  bool get clipX {
+    RenderBoxModel renderBoxModel = this as RenderBoxModel;
+    // Recycler layout not need repaintBoundary and scroll/pointer listeners,
+    // ignoring overflowX or overflowY sets, which handle it self.
+    if (renderBoxModel is RenderSliverListLayout) {
+      return false;
+    }
+
+    // The content of replaced elements is always trimmed to the content edge curve.
+    // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
+    List<Radius>? borderRadius = renderStyle.borderRadius;
+    if (renderBoxModel is RenderIntrinsic && borderRadius != null) {
+      return true;
+    }
+
+    // Overflow value other than 'visible' always need to clip content.
+    // https://www.w3.org/TR/css-overflow-3/#overflow-properties
+    CSSOverflowType effectiveOverflowX = renderStyle.effectiveOverflowX;
+    if (effectiveOverflowX != CSSOverflowType.visible) {
+      Size scrollableSize = renderBoxModel.scrollableSize;
+      Size scrollableViewportSize = renderBoxModel.scrollableViewportSize;
+      if (scrollableSize.width > scrollableViewportSize.width) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
-  bool _clipY = false;
-  bool get clipY => _clipY;
-  set clipY(bool value) {
-    if (_clipY == value) return;
-    _clipY = value;
-    markNeedsLayout();
+  bool get clipY {
+    RenderBoxModel renderBoxModel = this as RenderBoxModel;
+    // Recycler layout not need repaintBoundary and scroll/pointer listeners,
+    // ignoring overflowX or overflowY sets, which handle it self.
+    if (renderBoxModel is RenderSliverListLayout) {
+      return false;
+    }
+
+    // The content of replaced elements is always trimmed to the content edge curve.
+    // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
+    List<Radius>? borderRadius = renderStyle.borderRadius;
+    if (renderBoxModel is RenderIntrinsic && borderRadius != null) {
+      return true;
+    }
+
+    // Overflow value other than 'visible' always need to clip content.
+    // https://www.w3.org/TR/css-overflow-3/#overflow-properties
+    CSSOverflowType effectiveOverflowY = renderStyle.effectiveOverflowY;
+    if (effectiveOverflowY != CSSOverflowType.visible) {
+      Size scrollableSize = renderBoxModel.scrollableSize;
+      Size scrollableViewportSize = renderBoxModel.scrollableViewportSize;
+      if (scrollableSize.height > scrollableViewportSize.height) {
+        return true;
+      }
+    }
+    return false;
   }
 
-  bool _enableScrollX = false;
-  bool get enableScrollX => _enableScrollX;
-  set enableScrollX(bool value) {
-    if (_enableScrollX == value) return;
-    _enableScrollX = value;
+  bool get enableScrollX {
+    CSSOverflowType effectiveOverflowX = renderStyle.effectiveOverflowX;
+    switch (effectiveOverflowX) {
+      case CSSOverflowType.hidden:
+      case CSSOverflowType.auto:
+      case CSSOverflowType.scroll:
+        return true;
+      case CSSOverflowType.clip:
+      case CSSOverflowType.visible:
+        return false;
+    }
   }
 
-  bool _enableScrollY = false;
-  bool get enableScrollY => _enableScrollY;
-  set enableScrollY(bool value) {
-    if (_enableScrollY == value) return;
-    _enableScrollY = value;
+  bool get enableScrollY {
+    CSSOverflowType effectiveOverflowY = renderStyle.effectiveOverflowY;
+    switch (effectiveOverflowY) {
+      case CSSOverflowType.hidden:
+      case CSSOverflowType.auto:
+      case CSSOverflowType.scroll:
+        return true;
+      case CSSOverflowType.clip:
+      case CSSOverflowType.visible:
+        return false;
+    }
   }
 
   Size? _scrollableSize;
@@ -321,18 +376,6 @@ mixin RenderOverflowMixin on RenderBox {
     markNeedsPaint();
   }
 
-  BoxConstraints deflateOverflowConstraints(BoxConstraints constraints) {
-    BoxConstraints result = constraints;
-    if (_clipX && _clipY) {
-      result = BoxConstraints();
-    } else if (_clipX) {
-      result = BoxConstraints(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
-    } else if (_clipY) {
-      result = BoxConstraints(minHeight: constraints.minHeight, maxHeight: constraints.maxHeight);
-    }
-    return result;
-  }
-
   void _setUpScrollX() {
     _scrollOffsetX!.applyViewportDimension(_viewportSize!.width);
     _scrollOffsetX!.applyContentDimensions(0.0, math.max(0.0, _scrollableSize!.width - _viewportSize!.width));
@@ -346,11 +389,11 @@ mixin RenderOverflowMixin on RenderBox {
   void setUpOverflowScroller(Size scrollableSize, Size viewportSize) {
     _scrollableSize = scrollableSize;
     _viewportSize = viewportSize;
-    if (_clipX && _scrollOffsetX != null) {
+    if (clipX && _scrollOffsetX != null) {
       _setUpScrollX();
     }
 
-    if (_clipY && _scrollOffsetY != null) {
+    if (clipY && _scrollOffsetY != null) {
       _setUpScrollY();
     }
   }

@@ -688,10 +688,6 @@ class RenderBoxModel extends RenderBox
       // Copy overflow
       ..scrollListener = scrollListener
       ..scrollablePointerListener = scrollablePointerListener
-      ..clipX = clipX
-      ..clipY = clipY
-      ..enableScrollX = enableScrollX
-      ..enableScrollY = enableScrollY
       ..scrollOffsetX = scrollOffsetX
       ..scrollOffsetY = scrollOffsetY
 
@@ -1021,17 +1017,15 @@ class RenderBoxModel extends RenderBox
 
   // Hooks when content box had layout.
   void didLayout() {
-    if (clipX || clipY) {
-      scrollableViewportSize = Size(
-        _contentSize!.width +
-          renderStyle.paddingLeft.computedValue +
-          renderStyle.paddingRight.computedValue,
-        _contentSize!.height +
-          renderStyle.paddingTop.computedValue +
-          renderStyle.paddingBottom.computedValue);
+    scrollableViewportSize = Size(
+      _contentSize!.width +
+        renderStyle.paddingLeft.computedValue +
+        renderStyle.paddingRight.computedValue,
+      _contentSize!.height +
+        renderStyle.paddingTop.computedValue +
+        renderStyle.paddingBottom.computedValue);
 
-      setUpOverflowScroller(scrollableSize, scrollableViewportSize);
-    }
+    setUpOverflowScroller(scrollableSize, scrollableViewportSize);
 
     if (positionedHolder != null &&
         renderStyle.position != CSSPositionType.sticky) {
