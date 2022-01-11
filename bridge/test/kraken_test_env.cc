@@ -182,32 +182,7 @@ std::unique_ptr<kraken::KrakenPage> TEST_init(OnJSError onJsError) {
   JSThreadState* th = new JSThreadState();
   JS_SetRuntimeOpaque(context->runtime(), th);
 
-  std::vector<uint64_t> mockMethods{
-      reinterpret_cast<uint64_t>(TEST_invokeModule),
-      reinterpret_cast<uint64_t>(TEST_requestBatchUpdate),
-      reinterpret_cast<uint64_t>(TEST_reloadApp),
-      reinterpret_cast<uint64_t>(TEST_setTimeout),
-      reinterpret_cast<uint64_t>(TEST_setInterval),
-      reinterpret_cast<uint64_t>(TEST_clearTimeout),
-      reinterpret_cast<uint64_t>(TEST_requestAnimationFrame),
-      reinterpret_cast<uint64_t>(TEST_cancelAnimationFrame),
-      reinterpret_cast<uint64_t>(TEST_getScreen),
-      reinterpret_cast<uint64_t>(TEST_devicePixelRatio),
-      reinterpret_cast<uint64_t>(TEST_platformBrightness),
-      reinterpret_cast<uint64_t>(TEST_toBlob),
-      reinterpret_cast<uint64_t>(TEST_flushUICommand),
-      reinterpret_cast<uint64_t>(TEST_initWindow),
-      reinterpret_cast<uint64_t>(TEST_initDocument),
-  };
-
-#if ENABLE_PROFILE
-  mockMethods.emplace_pack(reinterpret_cast<uint64_t>(TEST_getPerformanceEntries));
-#else
-  mockMethods.emplace_back(0);
-#endif
-
-  mockMethods.emplace_back(reinterpret_cast<uint64_t>(onJsError));
-  registerDartMethods(mockMethods.data(), mockMethods.size());
+  TEST_mockDartMethods(onJsError);
 
   return std::unique_ptr<kraken::KrakenPage>(page);
 }
@@ -305,4 +280,33 @@ void TEST_registerEventTargetDisposedCallback(int32_t contextUniqueId, TEST_OnEv
   }
 
   unitTestEnvMap[contextUniqueId]->onEventTargetDisposed = callback;
+}
+
+void TEST_mockDartMethods(OnJSError onJSError) {
+  std::vector<uint64_t> mockMethods{
+      reinterpret_cast<uint64_t>(TEST_invokeModule),
+      reinterpret_cast<uint64_t>(TEST_requestBatchUpdate),
+      reinterpret_cast<uint64_t>(TEST_reloadApp),
+      reinterpret_cast<uint64_t>(TEST_setTimeout),
+      reinterpret_cast<uint64_t>(TEST_setInterval),
+      reinterpret_cast<uint64_t>(TEST_clearTimeout),
+      reinterpret_cast<uint64_t>(TEST_requestAnimationFrame),
+      reinterpret_cast<uint64_t>(TEST_cancelAnimationFrame),
+      reinterpret_cast<uint64_t>(TEST_getScreen),
+      reinterpret_cast<uint64_t>(TEST_devicePixelRatio),
+      reinterpret_cast<uint64_t>(TEST_platformBrightness),
+      reinterpret_cast<uint64_t>(TEST_toBlob),
+      reinterpret_cast<uint64_t>(TEST_flushUICommand),
+      reinterpret_cast<uint64_t>(TEST_initWindow),
+      reinterpret_cast<uint64_t>(TEST_initDocument),
+  };
+
+#if ENABLE_PROFILE
+  mockMethods.emplace_pack(reinterpret_cast<uint64_t>(TEST_getPerformanceEntries));
+#else
+  mockMethods.emplace_back(0);
+#endif
+
+  mockMethods.emplace_back(reinterpret_cast<uint64_t>(onJSError));
+  registerDartMethods(mockMethods.data(), mockMethods.size());
 }

@@ -88,6 +88,19 @@ TEST(Context, accessGetUICommandItemsAfterDisposed) {
   EXPECT_EQ(getUICommandItems(contextId), nullptr);
 }
 
+TEST(Context, disposeContext) {
+  initJSPagePool(8);
+  TEST_mockDartMethods(nullptr);
+  uint32_t contextId = 0;
+  auto bridge = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  static bool disposed = false;
+  bridge->disposeCallback = [](kraken::KrakenPage* bridge) {
+    disposed = true;
+  };
+  disposePage(bridge->getContext()->getContextId());
+  EXPECT_EQ(disposed, true);
+}
+
 TEST(Context, window) {
   static bool errorHandlerExecuted = false;
   static bool logCalled = false;
