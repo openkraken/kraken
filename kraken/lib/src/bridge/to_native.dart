@@ -495,7 +495,7 @@ void flushUICommand() {
         _getUICommandItems(controller.view.contextId);
     int commandLength = _getUICommandItemSize(controller.view.contextId);
 
-    if (commandLength == 0) {
+    if (commandLength == 0 || nativeCommandItems == nullptr) {
       continue;
     }
 

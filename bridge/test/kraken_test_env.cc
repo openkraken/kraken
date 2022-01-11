@@ -218,6 +218,7 @@ std::unique_ptr<kraken::KrakenPage> TEST_init() {
 
 std::unique_ptr<kraken::KrakenPage> TEST_allocateNewPage() {
   uint32_t newContextId = allocateNewPage(-1);
+  initTestFramework(newContextId);
   return std::unique_ptr<kraken::KrakenPage>(static_cast<kraken::KrakenPage*>(getPage(newContextId)));
 }
 

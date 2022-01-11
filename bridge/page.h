@@ -26,6 +26,7 @@ using JSBridgeDisposeCallback = void (*)(KrakenPage* bridge);
 /// It's safe to allocate many KrakenPages at the same times on one thread, but not safe for multi-threads, only one thread can enter to KrakenPage at the same time.
 class KrakenPage final {
  public:
+  static kraken::KrakenPage** pageContextPool;
   static ConsoleMessageHandler consoleMessageHandler;
   KrakenPage() = delete;
   KrakenPage(int32_t jsContext, const JSExceptionHandler& handler);

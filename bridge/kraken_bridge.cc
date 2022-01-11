@@ -49,7 +49,6 @@
 std::atomic<bool> inited{false};
 std::atomic<int32_t> poolIndex{0};
 int maxPoolSize = 0;
-kraken::KrakenPage** pageContextPool;
 NativeScreen screen;
 
 std::thread::id uiThreadId;
@@ -77,7 +76,7 @@ void disposeAllPages() {
 
 int32_t searchForAvailableContextId() {
   for (int i = 0; i < maxPoolSize; i++) {
-    if (pageContextPool[i] == nullptr) {
+    if (kraken::KrakenPage::pageContextPool[i] == nullptr) {
       return i;
     }
   }
@@ -92,29 +91,26 @@ void initJSPagePool(int poolSize) {
   if (inited) {
     disposeAllPages();
   };
-  pageContextPool = new kraken::KrakenPage*[poolSize];
+  kraken::KrakenPage::pageContextPool = new kraken::KrakenPage*[poolSize];
   for (int i = 1; i < poolSize; i++) {
-    pageContextPool[i] = nullptr;
+    kraken::KrakenPage::pageContextPool[i] = nullptr;
   }
 
-  pageContextPool[0] = new kraken::KrakenPage(0, printError);
+  kraken::KrakenPage::pageContextPool[0] = new kraken::KrakenPage(0, printError);
   inited = true;
   maxPoolSize = poolSize;
 }
 
 void disposePage(int32_t contextId) {
   assert(contextId < maxPoolSize);
-  if (pageContextPool[contextId] == nullptr)
+  if (kraken::KrakenPage::pageContextPool[contextId] == nullptr)
     return;
 
   // In order to avoid accessing pageContextPool when the page is being released. We need to clear the value in pageContextPool before releasing.
-  pageContextPool[contextId] = nullptr;
+  kraken::KrakenPage::pageContextPool[contextId] = nullptr;
 
-  // UnitTest will free page after test suit complete.
-#ifndef UNIT_TEST
-  auto* page = static_cast<kraken::KrakenPage*>(pageContextPool[contextId]);
+  auto* page = static_cast<kraken::KrakenPage*>(kraken::KrakenPage::pageContextPool[contextId]);
   delete page;
-#endif
 }
 
 int32_t allocateNewPage(int32_t targetContextId) {
@@ -126,23 +122,25 @@ int32_t allocateNewPage(int32_t targetContextId) {
     targetContextId = searchForAvailableContextId();
   }
 
-  assert(pageContextPool[targetContextId] == nullptr && (std::string("can not allocate page at index") + std::to_string(targetContextId) + std::string(": page have already exist.")).c_str());
+  assert(kraken::KrakenPage::pageContextPool[targetContextId] == nullptr &&
+         (std::string("can not allocate page at index") + std::to_string(targetContextId) + std::string(": page have already exist.")).c_str());
   auto* page = new kraken::KrakenPage(targetContextId, printError);
-  pageContextPool[targetContextId] = page;
+  kraken::KrakenPage::pageContextPool[targetContextId] = page;
   return targetContextId;
 }
 
 void* getPage(int32_t contextId) {
-  assert(checkPage(contextId) && "getPage: contextId is not valid.");
-  return pageContextPool[contextId];
+  if (!checkPage(contextId))
+    return nullptr;
+  return kraken::KrakenPage::pageContextPool[contextId];
 }
 
 bool checkPage(int32_t contextId) {
-  return inited && contextId < maxPoolSize && pageContextPool[contextId] != nullptr;
+  return inited && contextId < maxPoolSize && kraken::KrakenPage::pageContextPool[contextId] != nullptr;
 }
 
 bool checkPage(int32_t contextId, void* context) {
-  if (pageContextPool[contextId] == nullptr)
+  if (kraken::KrakenPage::pageContextPool[contextId] == nullptr)
     return false;
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
   return page->getContext().get() == context;
@@ -172,7 +170,7 @@ void reloadJsContext(int32_t contextId) {
   auto context = static_cast<kraken::KrakenPage*>(bridgePtr);
   auto newContext = new kraken::KrakenPage(contextId, printError);
   delete context;
-  pageContextPool[contextId] = newContext;
+  kraken::KrakenPage::pageContextPool[contextId] = newContext;
 }
 
 void invokeModuleEvent(int32_t contextId, NativeString* moduleName, const char* eventType, void* event, NativeString* extra) {
@@ -228,16 +226,22 @@ void flushUICommandCallback() {
 
 UICommandItem* getUICommandItems(int32_t contextId) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  if (page == nullptr)
+    return nullptr;
   return page->getContext()->uiCommandBuffer()->data();
 }
 
 int64_t getUICommandItemSize(int32_t contextId) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  if (page == nullptr)
+    return 0;
   return page->getContext()->uiCommandBuffer()->size();
 }
 
 void clearUICommandItems(int32_t contextId) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  if (page == nullptr)
+    return;
   page->getContext()->uiCommandBuffer()->clear();
 }
 
