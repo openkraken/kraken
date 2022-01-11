@@ -25,6 +25,7 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
 
   bool get clipX {
     RenderBoxModel renderBoxModel = this as RenderBoxModel;
+
     // Recycler layout not need repaintBoundary and scroll/pointer listeners,
     // ignoring overflowX or overflowY sets, which handle it self.
     if (renderBoxModel is RenderSliverListLayout) {
@@ -34,8 +35,11 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
     // The content of replaced elements is always trimmed to the content edge curve.
     // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
     List<Radius>? borderRadius = renderStyle.borderRadius;
-    if (renderBoxModel is RenderIntrinsic && borderRadius != null) {
-      return true;
+    if (borderRadius != null) {
+      // Only clip when content of replaced element is loaded.
+      if (renderBoxModel is RenderIntrinsic && renderStyle.intrinsicRatio != null) {
+        return true;
+      }
     }
 
     // Overflow value other than 'visible' always need to clip content.
@@ -54,6 +58,7 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
 
   bool get clipY {
     RenderBoxModel renderBoxModel = this as RenderBoxModel;
+
     // Recycler layout not need repaintBoundary and scroll/pointer listeners,
     // ignoring overflowX or overflowY sets, which handle it self.
     if (renderBoxModel is RenderSliverListLayout) {
@@ -63,8 +68,11 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
     // The content of replaced elements is always trimmed to the content edge curve.
     // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
     List<Radius>? borderRadius = renderStyle.borderRadius;
-    if (renderBoxModel is RenderIntrinsic && borderRadius != null) {
-      return true;
+    if (borderRadius != null) {
+      // Only clip when content of replaced element is loaded.
+      if (renderBoxModel is RenderIntrinsic && renderStyle.intrinsicRatio != null) {
+        return true;
+      }
     }
 
     // Overflow value other than 'visible' always need to clip content.
