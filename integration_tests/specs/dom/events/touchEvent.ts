@@ -86,7 +86,7 @@ describe('TouchEvent', () => {
     document.body.appendChild(div);
 
     await simulatePointDown(20, 20);
-    
+
     await simulateClick(10, 10, 1);
   });
 
@@ -115,8 +115,8 @@ describe('TouchEvent', () => {
     div2.addEventListener('touchend', func);
 
     await simulatePointDown(20, 20);
-    
-    await simulateClick(5, 5 , 1);
+
+    await simulateClick(5, 5, 1);
   });
 
   it('touchend should work with changedTouches', async (done) => {
@@ -134,7 +134,7 @@ describe('TouchEvent', () => {
     div.addEventListener('touchend', func)
 
     document.body.appendChild(div);
-    
+
     await simulateClick(10, 10);
   });
 
@@ -153,7 +153,7 @@ describe('TouchEvent', () => {
     div.addEventListener('touchstart', func)
 
     document.body.appendChild(div);
-    
+
     await simulateClick(10, 10);
   });
 
@@ -172,7 +172,20 @@ describe('TouchEvent', () => {
     div.addEventListener('touchmove', func)
 
     document.body.appendChild(div);
-    
+
+    await simulateSwipe(0, 0, 0, 100, 0.5);
+  });
+
+  it('touchmove should work on body when element with position', async (done) => {
+    const div = document.createElement('div');
+    div.style.width = '100px';
+    div.style.height = '100px';
+    div.style.backgroundColor = 'red';
+    div.style.position = 'fixed';
+    document.body.appendChild(div);
+
+    window.addEventListener('touchmove', () => done())
+
     await simulateSwipe(0, 0, 0, 100, 0.5);
   });
 });
