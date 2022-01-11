@@ -162,11 +162,11 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
   void setUpOverflowScroller(Size scrollableSize, Size viewportSize) {
     _scrollableSize = scrollableSize;
     _viewportSize = viewportSize;
-    if (clipX && _scrollOffsetX != null) {
+    if (_scrollOffsetX != null) {
       _setUpScrollX();
     }
 
-    if (clipY && _scrollOffsetY != null) {
+    if (_scrollOffsetY != null) {
       _setUpScrollY();
     }
   }
