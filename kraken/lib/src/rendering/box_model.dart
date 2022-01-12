@@ -1023,7 +1023,9 @@ class RenderBoxModel extends RenderBox
         renderStyle.paddingTop.computedValue +
         renderStyle.paddingBottom.computedValue);
 
-    setUpOverflowScroller(scrollableSize, scrollableViewportSize);
+    if (clipX || clipY) {
+      setUpOverflowScroller(scrollableSize, scrollableViewportSize);
+    }
 
     if (positionedHolder != null &&
         renderStyle.position != CSSPositionType.sticky) {
