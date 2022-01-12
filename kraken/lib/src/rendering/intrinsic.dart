@@ -26,12 +26,18 @@ class RenderIntrinsic extends RenderBoxModel
     return heightDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
   }
 
-  // Set clipX and clipY to true for background cannot overflow beyond the boundary of replaced element
+  // The content of replaced elements is always trimmed to the content edge curve.
+  // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
   @override
-  bool get clipX => true;
+  bool get clipX {
+    // Only clip when content of replaced element is loaded.
+    return renderStyle.borderRadius != null && renderStyle.intrinsicRatio != null;
+  }
 
   @override
-  bool get clipY => true;
+  bool get clipY {
+    return renderStyle.borderRadius != null && renderStyle.intrinsicRatio != null;
+  }
 
   @override
   void setupParentData(RenderBox child) {
