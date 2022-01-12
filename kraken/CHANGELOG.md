@@ -1,8 +1,17 @@
 ## 0.10.0
 
+**Break Changes**
+
+* `Kraken.loadURL`, `Kraken.loadContent`, `Kraken.loadByteCode` are deprecated. Please use `KrakenBundle.fromUrl`, `KrakenBundle.fromContent` instead.
+* Flutter Widget API had been upgraded, please refer to https://openkraken.com/guide/advanced/widget-custom-element for more info.
+
 **Big News**
 
 * Support using Flutter Widget as HTML Custom Element which can greatly extend the capability of Web, refer to [this doc](https://openkraken.com/en-US/guide/advanced/widget-custom-element) for detailed use.
++ Performance optimized:
+  - Page load time reduced 10%.
+  - Scrolling FPS incrased 40%.
++ Linux platform supported.
 + Support Flutter 2.5.3.
 
 **Features**
@@ -11,11 +20,15 @@
 + Support `style` element and `className` attribute. https://github.com/openkraken/kraken/pull/656
 + Support  `link` element and CSS variables. https://github.com/openkraken/kraken/pull/961
 + Support `assets:` protocol to unify the means to load local assets for different platforms. https://github.com/openkraken/kraken/pull/866
++ Support pause kraken pages when navigator changes. https://github.com/openkraken/kraken/pull/877
++ Support linux platform. https://github.com/openkraken/kraken/pull/887
++ Support customize kraken dynamic library path. https://github.com/openkraken/kraken/pull/1048
 
 **Bug Fixed**
 
 + Fix width error in case of min width width padding. https://github.com/openkraken/kraken/pull/843
 + Fix percentage with decimal point. https://github.com/openkraken/kraken/pull/845
++ Fix iOS App store certificate validation. https://github.com/openkraken/kraken/pull/847
 + Fix text height with text-overflow ellipsis. https://github.com/openkraken/kraken/pull/848
 + Fix clone documentFragment node support. https://github.com/openkraken/kraken/pull/851
 + Fix layout wrapping space. https://github.com/openkraken/kraken/pull/856
