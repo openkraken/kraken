@@ -265,6 +265,7 @@ final DartRegisterPluginByteCode _registerPluginByteCode = KrakenDynamicLibrary
 
 void registerPluginByteCode(Uint8List bytecode, String name) {
   Pointer<Uint8> bytes = malloc.allocate(sizeOf<Uint8>() * bytecode.length);
+  bytes.asTypedList(bytecode.length).setAll(0, bytecode);
   _registerPluginByteCode(bytes, bytecode.length, name.toNativeUtf8());
 }
 
@@ -495,7 +496,7 @@ void flushUICommand() {
         _getUICommandItems(controller.view.contextId);
     int commandLength = _getUICommandItemSize(controller.view.contextId);
 
-    if (commandLength == 0) {
+    if (commandLength == 0 || nativeCommandItems == nullptr) {
       continue;
     }
 

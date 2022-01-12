@@ -50,6 +50,8 @@ using namespace binding::qjs;
 std::unordered_map<std::string, NativeByteCode> KrakenPage::pluginByteCode{};
 ConsoleMessageHandler KrakenPage::consoleMessageHandler{nullptr};
 
+kraken::KrakenPage** KrakenPage::pageContextPool{nullptr};
+
 KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : contextId(contextId) {
 #if ENABLE_PROFILE
   auto jsContextStartTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
@@ -210,6 +212,7 @@ KrakenPage::~KrakenPage() {
     disposeCallback(this);
   }
 #endif
+  pageContextPool[contextId] = nullptr;
 }
 
 void KrakenPage::reportError(const char* errmsg) {

@@ -30,6 +30,7 @@ void TEST_runLoop(ExecutionContext* context);
 void TEST_dispatchEvent(int32_t contextId, EventTargetInstance* eventTarget, const std::string type);
 void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv);
 void TEST_registerEventTargetDisposedCallback(int32_t contextUniqueId, TEST_OnEventTargetDisposed callback);
+void TEST_mockDartMethods(OnJSError onJSError);
 std::shared_ptr<UnitTestEnv> TEST_getEnv(int32_t contextUniqueId);
 
 #endif  // KRAKENBRIDGE_TEST_KRAKEN_TEST_ENV_H_

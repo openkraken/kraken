@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
@@ -42,6 +43,9 @@ class IntegrationTestUriParser extends UriParser {
 
 // By CLI: `KRAKEN_ENABLE_TEST=true flutter run`
 void main() async {
+  // Overrides library name.
+  KrakenDynamicLibrary.libName = 'libkraken_test';
+
   KrakenWebsocket.initialize();
   KrakenVideoPlayer.initialize();
   KrakenWebView.initialize();
