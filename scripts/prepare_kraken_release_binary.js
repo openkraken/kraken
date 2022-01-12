@@ -13,13 +13,17 @@ if (os.platform() == 'win32') {
   buildTasks.push(
     'patch-windows-symbol-link-for-android'
   );
-} else {
+} else if (os.platform() == 'darwin') {
   buildTasks.push(
     'macos-dylib-clean',
     'build-darwin-kraken-lib',
-    'ios-framework-clean',  
+    'ios-framework-clean',
     'build-ios-kraken-lib',
   );
+} else if (os.platform() == 'linux') {
+  buildTasks.push(
+    'build-linux-kraken-lib'
+  )
 }
 
 series(buildTasks)((err) => {
