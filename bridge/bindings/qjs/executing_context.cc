@@ -63,6 +63,8 @@ ExecutionContext::ExecutionContext(int32_t contextId, const JSExceptionHandler& 
   if (m_runtime == nullptr) {
     m_runtime = JS_NewRuntime();
   }
+  // Avoid stack overflow when running in multiple threads.
+  JS_UpdateStackTop(m_runtime);
   m_ctx = JS_NewContext(m_runtime);
 
   timeOrigin = std::chrono::system_clock::now();
