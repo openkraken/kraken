@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -56,7 +57,7 @@ class _CustomTicker extends Ticker {
 
 class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollContext {
   late AxisDirection _axisDirection;
-  ScrollPosition? position;
+  ScrollPositionWithSingleContext? position;
   final ScrollPhysics _physics = ScrollPhysics.createScrollPhysics();
   DragStartBehavior dragStartBehavior;
   ScrollListener? scrollListener;
@@ -98,7 +99,7 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
     } else {
       switch (axis) {
         case Axis.vertical:
-        // Vertical trag gesture recongnizer to trigger vertical scroll.
+          // Vertical drag gesture recognizer to trigger vertical scroll.
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             ScrollVerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<ScrollVerticalDragGestureRecognizer>(
               () => ScrollVerticalDragGestureRecognizer(),
@@ -119,7 +120,7 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
           };
           break;
         case Axis.horizontal:
-          // Horizontal trag gesture recongnizer to horizontal vertical scroll.
+          // Horizontal drag gesture recognizer to horizontal vertical scroll.
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             ScrollHorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<ScrollHorizontalDragGestureRecognizer>(
               () => ScrollHorizontalDragGestureRecognizer(),
@@ -146,20 +147,25 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
     _syncAll(_gestureRecognizers);
   }
 
-  // Used in the Arena to judge whether the vertical trag gesture can trigger the current container to scroll.
-  bool _isAcceptedVerticalDrag (AxisDirection direction) {
-    double? pixels = (_drag as ScrollDragController).pixels;
-    double? maxScrollExtent = (_drag as ScrollDragController).maxScrollExtent;
-    double? minScrollExtent = (_drag as ScrollDragController).minScrollExtent;
-    return !((direction == AxisDirection.down && pixels! <= minScrollExtent!) || direction == AxisDirection.up && pixels! >= maxScrollExtent!);
+  // Used in the Arena to judge whether the vertical drag gesture can trigger the current container to scroll.
+  bool _isAcceptedVerticalDrag(AxisDirection direction) {
+    ScrollDragController drag = _drag!;
+    double pixels = drag.pixels!;
+    double maxScrollExtent = drag.maxScrollExtent!;
+    double minScrollExtent = drag.minScrollExtent!;
+
+    return !((direction == AxisDirection.down && (pixels <= minScrollExtent || nearEqual(pixels, minScrollExtent, Tolerance.defaultTolerance.distance)))
+        || direction == AxisDirection.up && (pixels >= maxScrollExtent || nearEqual(pixels, maxScrollExtent, Tolerance.defaultTolerance.distance)));
   }
 
-  // Used in the Arena to judge whether the horizontal trag gesture can trigger the current container to scroll.
-  bool _isAcceptedHorizontalDrag (AxisDirection direction) {
-    double? pixels = (_drag as ScrollDragController).pixels;
-    double? maxScrollExtent = (_drag as ScrollDragController).maxScrollExtent;
-    double? minScrollExtent = (_drag as ScrollDragController).minScrollExtent;
-    return !((direction == AxisDirection.right && pixels! <= minScrollExtent!) || direction == AxisDirection.left && pixels! >= maxScrollExtent!);
+  // Used in the Arena to judge whether the horizontal drag gesture can trigger the current container to scroll.
+  bool _isAcceptedHorizontalDrag(AxisDirection direction) {
+    ScrollDragController drag = _drag!;
+    double pixels = drag.pixels!;
+    double maxScrollExtent = drag.maxScrollExtent!;
+    double minScrollExtent = drag.minScrollExtent!;
+    return !((direction == AxisDirection.right && (pixels <= minScrollExtent || nearEqual(pixels, minScrollExtent, Tolerance.defaultTolerance.distance)))
+        || direction == AxisDirection.left && (pixels >= maxScrollExtent || nearEqual(pixels, maxScrollExtent, Tolerance.defaultTolerance.distance)));
   }
 
   void _syncAll(Map<Type, GestureRecognizerFactory> gestures) {
@@ -179,8 +185,7 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
   }
 
   // TOUCH HANDLERS
-
-  Drag? _drag;
+  ScrollDragController? _drag;
   ScrollHoldController? _hold;
 
   void _handleDragDown(DragDownDetails details) {
@@ -246,6 +251,9 @@ mixin RenderOverflowMixin on RenderBox {
     scrollablePointerListener = null;
     _scrollOffsetX = null;
     _scrollOffsetY = null;
+    // Dispose clip layer.
+    _clipRRectLayer.layer = null;
+    _clipRectLayer.layer = null;
   }
 
   bool _clipX = false;
@@ -370,8 +378,8 @@ mixin RenderOverflowMixin on RenderBox {
     return paintOffset < Offset.zero || !(Offset.zero & size).contains((paintOffset & childSize).bottomRight);
   }
 
-  ClipRRectLayer? _oldClipRRectLayer;
-  ClipRectLayer? _oldClipRectLayer;
+  final LayerHandle<ClipRRectLayer> _clipRRectLayer = LayerHandle<ClipRRectLayer>();
+  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
   void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, BoxDecoration? decoration, PaintingContextCallback callback) {
     if (clipX == false && clipY == false) return callback(context, offset);
@@ -401,13 +409,13 @@ mixin RenderOverflowMixin on RenderBox {
             bottomLeft: radius.bottomLeft,
             bottomRight: radius.bottomRight
         );
-        _oldClipRRectLayer = context.pushClipRRect(_needsCompositing, offset, clipRect, clipRRect, painter, oldLayer: _oldClipRRectLayer);
+        _clipRRectLayer.layer = context.pushClipRRect(_needsCompositing, offset, clipRect, clipRRect, painter, oldLayer: _clipRRectLayer.layer);
       } else {
-        _oldClipRectLayer = context.pushClipRect(_needsCompositing, offset, clipRect, painter, oldLayer: _oldClipRectLayer);
+        _clipRectLayer.layer = context.pushClipRect(_needsCompositing, offset, clipRect, painter, oldLayer: _clipRectLayer.layer);
       }
     } else {
-      _oldClipRRectLayer = null;
-      _oldClipRectLayer = null;
+      _clipRectLayer.layer = null;
+      _clipRRectLayer.layer = null;
       callback(context, offset);
     }
   }

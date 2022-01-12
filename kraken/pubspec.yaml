@@ -1,11 +1,11 @@
 name: kraken
 description: A high-performance, web standards-compliant rendering engine.
-version: 0.9.1-rc
+version: 0.10.0-rc.3
 homepage: https://openkraken.com
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
-  flutter: ">=2.2.0"
+  sdk: ">=2.14.0 <3.0.0"
+  flutter: ">=2.5.0"
 
 dependencies:
   flutter:

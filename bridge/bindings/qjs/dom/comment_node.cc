@@ -13,47 +13,38 @@ std::once_flag kCommentInitFlag;
 
 JSClassID Comment::kCommentClassId{0};
 
-void bindCommentNode(std::unique_ptr<JSContext>& context) {
+void bindCommentNode(std::unique_ptr<ExecutionContext>& context) {
   auto* constructor = Comment::instance(context.get());
-  context->defineGlobalProperty("Comment", constructor->classObject);
+  context->defineGlobalProperty("Comment", constructor->jsObject);
 }
 
 JSClassID Comment::classId() {
   return kCommentClassId;
 }
 
-Comment::Comment(JSContext* context) : Node(context, "Comment") {
+Comment::Comment(ExecutionContext* context) : Node(context, "Comment") {
   std::call_once(kCommentInitFlag, []() { JS_NewClassID(&kCommentClassId); });
   JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
 }
 
-JSValue Comment::instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
-  return (new CommentInstance(this))->instanceObject;
+JSValue Comment::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
+  return (new CommentInstance(this))->jsObject;
 }
 
-PROP_GETTER(CommentInstance, data)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Comment, data)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewString(ctx, "");
 }
-PROP_SETTER(CommentInstance, data)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
-PROP_GETTER(CommentInstance, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Comment, nodeName)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewString(ctx, "#comment");
 }
-PROP_SETTER(CommentInstance, nodeName)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
-PROP_GETTER(CommentInstance, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_PROPERTY_GETTER(Comment, length)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewUint32(ctx, 0);
 }
-PROP_SETTER(CommentInstance, length)(QjsContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  return JS_NULL;
-}
 
-CommentInstance::CommentInstance(Comment* comment) : NodeInstance(comment, NodeType::COMMENT_NODE, DocumentInstance::instance(Document::instance(comment->m_context)), Comment::classId(), "Comment") {
-  ::foundation::UICommandBuffer::instance(m_context->getContextId())->addCommand(m_eventTargetId, UICommand::createComment, nativeEventTarget);
+CommentInstance::CommentInstance(Comment* comment) : NodeInstance(comment, NodeType::COMMENT_NODE, Comment::classId(), "Comment") {
+  m_context->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::createComment, nativeEventTarget);
 }
 
 }  // namespace kraken::binding::qjs

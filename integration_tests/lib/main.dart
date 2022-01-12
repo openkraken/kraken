@@ -6,6 +6,7 @@ import 'package:kraken/css.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
+import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/widget.dart';
 import 'package:ansicolor/ansicolor.dart';
@@ -41,6 +42,8 @@ class IntegrationTestUriParser extends UriParser {
 
 // By CLI: `KRAKEN_ENABLE_TEST=true flutter run`
 void main() async {
+  // Overrides library name.
+  KrakenDynamicLibrary.libName = 'libkraken_test';
   defineKrakenCustomElements();
 
   // FIXME: This is a workaround for testcase
@@ -56,7 +59,6 @@ void main() async {
     // This segment inject variables for test environment.
     LOCAL_HTTP_SERVER = '${httpServer.getUri().toString()}';
   ''';
-
 
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
   CSSText.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
@@ -82,7 +84,7 @@ void main() async {
     var kraken = krakenMap[i] = Kraken(
       viewportWidth: 360,
       viewportHeight: 640,
-      bundleContent: 'console.log("Starting integration tests...")',
+      bundle: KrakenBundle.fromContent('console.log("Starting integration tests...")'),
       disableViewportWidthAssertion: true,
       disableViewportHeightAssertion: true,
       javaScriptChannel: javaScriptChannel,
@@ -90,7 +92,7 @@ void main() async {
         onDrag: (GestureEvent gestureEvent) {
           if (gestureEvent.state == EVENT_STATE_START) {
             var event = CustomEvent('nativegesture', CustomEventInit(detail: 'nativegesture'));
-            krakenMap[i]!.controller!.view.document!.documentElement.dispatchEvent(event);
+            krakenMap[i]!.controller!.view.document.documentElement?.dispatchEvent(event);
           }
         },
       ),
@@ -117,7 +119,6 @@ void main() async {
   });
 
   testTextInput = TestTextInput();
-  testTextInput.register();
 
   WidgetsBinding.instance!.addPostFrameCallback((_) async {
     registerDartTestMethodsToCpp();
@@ -145,7 +146,7 @@ void main() async {
 
     // Manual dispose context for memory leak check.
     krakenMap.forEach((key, kraken) {
-      disposeContext(kraken.controller!.view.contextId);
+      disposePage(kraken.controller!.view.contextId);
     });
 
     for (int i = 0; i < results.length; i ++) {

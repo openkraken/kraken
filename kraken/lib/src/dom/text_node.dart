@@ -2,24 +2,18 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
-import 'dart:ffi';
-
 import 'package:flutter/rendering.dart';
-import 'package:kraken/bridge.dart';
-import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 
-final RegExp _whiteSpaceReg = RegExp(r'\s+');
 const String WHITE_SPACE_CHAR = ' ';
 const String NEW_LINE_CHAR = '\n';
 const String RETURN_CHAR = '\r';
 const String TAB_CHAR = '\t';
 
 class TextNode extends Node {
-  TextNode(int targetId, Pointer<NativeEventTarget> nativeEventTarget, this._data, ElementManager elementManager)
-      : super(NodeType.TEXT_NODE, targetId, nativeEventTarget, elementManager);
+  TextNode(this._data, EventTargetContext? context)
+      : super(NodeType.TEXT_NODE, context);
 
   // Must be existed after text node is attached, and all text update will after text attached.
   RenderTextBox? _renderTextBox;
@@ -27,47 +21,7 @@ class TextNode extends Node {
   static const String NORMAL_SPACE = '\u0020';
   // The text string.
   String? _data;
-  String get data {
-    String? _d = _data;
-
-    if (_d == null || _d.isEmpty) return '';
-
-    WhiteSpace whiteSpace = CSSText.resolveWhiteSpace(parentElement!.style[WHITE_SPACE]);
-
-    /// https://drafts.csswg.org/css-text-3/#propdef-white-space
-    /// The following table summarizes the behavior of the various white-space values:
-    //
-    //       New lines / Spaces and tabs / Text wrapping / End-of-line spaces
-    // normal    Collapse  Collapse  Wrap     Remove
-    // nowrap    Collapse  Collapse  No wrap  Remove
-    // pre       Preserve  Preserve  No wrap  Preserve
-    // pre-wrap  Preserve  Preserve  Wrap     Hang
-    // pre-line  Preserve  Collapse  Wrap     Remove
-    // break-spaces  Preserve  Preserve  Wrap  Wrap
-    if (whiteSpace == WhiteSpace.pre ||
-        whiteSpace == WhiteSpace.preLine ||
-        whiteSpace == WhiteSpace.preWrap ||
-        whiteSpace == WhiteSpace.breakSpaces) {
-      return whiteSpace == WhiteSpace.preLine ? _collapseWhitespace(_d) : _d;
-    } else {
-      String collapsedData = _collapseWhitespace(_d);
-      // TODO:
-      // Remove the leading space while prev element have space too:
-      //   <p><span>foo </span> bar</p>
-      // Refs:
-      //   https://github.com/WebKit/WebKit/blob/6a970b217d59f36e64606ed03f5238d572c23c48/Source/WebCore/layout/inlineformatting/InlineLineBuilder.cpp#L295
-
-      if (previousSibling == null) {
-        collapsedData = collapsedData.trimLeft();
-      }
-
-      if (nextSibling == null) {
-        collapsedData = collapsedData.trimRight();
-      }
-
-      return collapsedData;
-    }
-  }
+  String get data => (_data == null || _data!.isEmpty) ? '' : _data!;
 
   set data(String? newData) {
     assert(newData != null);
@@ -164,9 +118,4 @@ class TextNode extends Node {
 
     assert(_renderTextBox == null);
   }
-}
-
-// '  a b  c   \n' => ' a b c '
-String _collapseWhitespace(String string) {
-  return string.replaceAll(_whiteSpaceReg, WHITE_SPACE_CHAR);
 }

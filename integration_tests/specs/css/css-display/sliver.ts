@@ -153,6 +153,54 @@ describe('display sliver', () => {
     await snapshot();
   });
 
+  it('should works with height of sliver child changes', async (done) => {
+    let div;
+    let div1;
+    let div2;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'sliver',
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'red'
+        },
+      }, [
+        (div1 = createElement('div', {
+          style: {
+            positive: 'relative',
+            width: '200px',
+            height: '100px',
+            backgroundColor: 'green'
+          }
+        }, [
+            createText('1')
+        ])),
+        (div2 = createElement('div', {
+          style: {
+            positive: 'relative',
+            width: '200px',
+            height: '100px',
+            backgroundColor: 'yellow'
+          }
+        }, [
+          createText('2')
+        ]))
+      ]
+    );
+    BODY.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      div1.style.height = '50px';
+      div2.style.height = '50px';
+      await snapshot();
+      done();
+    });
+  });
+  
   it('sliver child is text or comment', async () => {
     var comment = document.createComment('HelloWorld');
     var text = document.createTextNode('HelloWorld');
@@ -198,5 +246,18 @@ describe('display sliver', () => {
     d.scrollBy(0, 30 * 100); // Move to the 30.
 
     await simulateClick(50, 20); // Will trigger done.
+  });
+
+  it('sliver child with none-static position not throw errors', async () => {
+    var container = createSliverBasicCase();
+    var firstChild = container.firstChild; // should be element.
+    firstChild.style.position = 'relative';
+    
+    var innerChild = document.createElement('div');
+    innerChild.appendChild(document.createTextNode('helloworld'));
+    innerChild.style.position = 'relative';
+    innerChild.style.top = innerChild.style.left = '15px';
+    firstChild?.appendChild(innerChild);
+    await snapshot();
   });
 });

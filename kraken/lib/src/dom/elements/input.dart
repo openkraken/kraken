@@ -2,9 +2,7 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
 import 'dart:async';
-import 'dart:ffi';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -16,7 +14,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' show TextSelectionOverlay, TextSelectionControls, ClipboardStatusNotifier;
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
@@ -161,7 +158,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   static void setFocus(InputElement inputElement) {
     if (InputElement.focusInputElement != inputElement) {
       // Focus kraken widget to get focus from other widgets.
-      WidgetDelegate? widgetDelegate = inputElement.elementManager.widgetDelegate;
+      WidgetDelegate? widgetDelegate = inputElement.ownerDocument.widgetDelegate;
       if (widgetDelegate != null) {
         widgetDelegate.requestFocus();
       }
@@ -225,20 +222,19 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     // TODO: support ::placeholder pseudo element
     return _buildTextSpan(
       text: placeholderText,
+      // The color of input placeholder.
+      color: Color.fromARGB(255, 169, 169, 169)
     );
   }
 
   TextInputConfiguration? _textInputConfiguration;
 
-  InputElement(
-    int targetId,
-    Pointer<NativeEventTarget> nativeEventTarget,
-    ElementManager elementManager, {
+  InputElement(EventTargetContext? context, {
     this.textAlign = TextAlign.left,
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
-  }) : super(targetId, nativeEventTarget, elementManager, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
+  }) : super(context, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
     _textSelectionDelegate = EditableTextDelegate(this);
     scrollOffsetX = _scrollableX.position;
   }
@@ -282,10 +278,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     return super.getProperty(key);
   }
 
+  @override
   void focus() {
     setFocus(this);
   }
 
+  @override
   void blur() {
     clearFocus();
   }
@@ -364,7 +362,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void _onStyleChanged(String property, String? original, String present) {
 
     if (_renderInputLeaderLayer != null && isRendererAttached) {
-      RenderStyle renderStyle = renderBoxModel!.renderStyle;
+      CSSRenderStyle renderStyle = renderBoxModel!.renderStyle;
       if (property == HEIGHT) {
         _renderInputLeaderLayer!.markNeedsLayout();
 
@@ -400,8 +398,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
   }
 
-  TextSpan _buildTextSpan({ String? text }) {
-    return CSSTextMixin.createTextSpan(text ?? '', renderStyle);
+  TextSpan _buildTextSpan({ String? text, Color? color }) {
+    return CSSTextMixin.createTextSpan(text ?? '', renderStyle, color: color);
   }
 
   TextSpan _buildPasswordTextSpan(String text) {
@@ -461,7 +459,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     ) {
       if (event.type == EVENT_TOUCH_END) {
         _textSelectionDelegate.hideToolbar(false);
-        InputElement.setFocus(this);
       }
 
       TouchList touches = (event as TouchEvent).touches;
@@ -581,7 +578,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       text = _buildPasswordTextSpan(text.text!);
     }
 
-    WidgetDelegate? widgetDelegate = elementManager.widgetDelegate;
+    WidgetDelegate? widgetDelegate = ownerDocument.widgetDelegate;
     if (widgetDelegate != null) {
       cursorColor = widgetDelegate.getCursorColor();
       selectionColor = widgetDelegate.getSelectionColor();
@@ -810,7 +807,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       return;
     }
 
-    WidgetDelegate? widgetDelegate = elementManager.widgetDelegate;
+    WidgetDelegate? widgetDelegate = ownerDocument.widgetDelegate;
 
     if (_selectionControls == null) {
       _selectionOverlay?.hide();
@@ -851,7 +848,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       _showSelectionHandles = willShowSelectionHandles;
     }
 
-    WidgetDelegate? widgetDelegate = elementManager.widgetDelegate;
+    WidgetDelegate? widgetDelegate = ownerDocument.widgetDelegate;
     if (widgetDelegate != null) {
       TargetPlatform platform = widgetDelegate.getTargetPlatform();
       switch (platform) {

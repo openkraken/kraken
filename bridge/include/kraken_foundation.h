@@ -16,13 +16,22 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#define HTML_TARGET_ID -1
-#define WINDOW_TARGET_ID -2
-#define DOCUMENT_TARGET_ID -3
+#define WINDOW_TARGET_ID -1
+#define DOCUMENT_TARGET_ID -2
 
 #define assert_m(exp, msg) assert(((void)msg, exp))
 
 #define KRAKEN_EXPORT __attribute__((__visibility__("default")))
+
+#if defined(__GNUC__) || defined(__clang__)
+#define LIKELY(x) __builtin_expect(!!(x), 1)
+#define UNLIKELY(x) __builtin_expect(!!(x), 0)
+#define FORCE_INLINE inline __attribute__((always_inline))
+#else
+#define LIKELY(x) (x)
+#define UNLIKELY(x) (x)
+#define FORCE_INLINE inline
+#endif
 
 #define KRAKEN_DISALLOW_COPY(TypeName) TypeName(const TypeName&) = delete
 
@@ -68,26 +77,6 @@ class UICommandCallbackQueue {
   };
 
   std::vector<CallbackItem> queue;
-};
-
-class UICommandBuffer {
- public:
-  UICommandBuffer() = delete;
-  explicit UICommandBuffer(int32_t contextId);
-  static KRAKEN_EXPORT UICommandBuffer* instance(int32_t contextId);
-
-  KRAKEN_EXPORT void addCommand(int32_t id, int32_t type, void* nativePtr, bool batchedUpdate);
-  KRAKEN_EXPORT void addCommand(int32_t id, int32_t type, void* nativePtr);
-  KRAKEN_EXPORT void addCommand(int32_t id, int32_t type, NativeString& args_01, NativeString& args_02, void* nativePtr);
-  KRAKEN_EXPORT void addCommand(int32_t id, int32_t type, NativeString& args_01, void* nativePtr);
-  KRAKEN_EXPORT UICommandItem* data();
-  KRAKEN_EXPORT int64_t size();
-  KRAKEN_EXPORT void clear();
-
- private:
-  int32_t contextId;
-  std::atomic<bool> update_batched{false};
-  std::vector<UICommandItem> queue;
 };
 
 typedef int LogSeverity;

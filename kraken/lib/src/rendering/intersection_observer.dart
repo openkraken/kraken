@@ -25,10 +25,16 @@ typedef IntersectionChangeCallback = void Function(
 
 mixin RenderIntersectionObserverMixin on RenderBox {
   IntersectionChangeCallback? _onIntersectionChange;
-  IntersectionObserverLayer? intersectionObserverLayer;
+  // IntersectionObserverLayer? intersectionObserverLayer;
+
+  final LayerHandle<IntersectionObserverLayer> _intersectionObserverLayer = LayerHandle<IntersectionObserverLayer>();
 
   /// A list of event handlers
   List<IntersectionChangeCallback>? _listeners;
+
+  void disposeIntersectionObserverLayer() {
+    _intersectionObserverLayer.layer = null;
+  }
 
   void addIntersectionChangeListener(IntersectionChangeCallback callback) {
     // Init things
@@ -78,18 +84,18 @@ mixin RenderIntersectionObserverMixin on RenderBox {
       return;
     }
 
-    if (intersectionObserverLayer == null) {
-      intersectionObserverLayer = IntersectionObserverLayer(
+    if (_intersectionObserverLayer.layer == null) {
+      _intersectionObserverLayer.layer = IntersectionObserverLayer(
           elementSize: size,
           paintOffset: offset,
           onIntersectionChange: _onIntersectionChange!
       );
     } else {
-      intersectionObserverLayer!.elementSize = semanticBounds.size;
-      intersectionObserverLayer!.paintOffset = offset;
+      _intersectionObserverLayer.layer!.elementSize = semanticBounds.size;
+      _intersectionObserverLayer.layer!.paintOffset = offset;
     }
 
-    context.pushLayer(intersectionObserverLayer!, callback, offset);
+    context.pushLayer(_intersectionObserverLayer.layer!, callback, offset);
   }
 }
 
@@ -171,7 +177,7 @@ class IntersectionObserverLayer extends ContainerLayer {
         Matrix4? cachedTransform = _layerTransformCache[child.hashCode];
         // Get the transform of parent layer to root layer directly if exists.
         if (cachedTransform != null) {
-          transform = cachedTransform;
+          transform = cachedTransform.clone();
         } else {
           (parent as ContainerLayer).applyTransform(child, transform);
           // Cache the transform of parent layer to root layer.

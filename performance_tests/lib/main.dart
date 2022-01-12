@@ -62,7 +62,7 @@ class _MyHomePageState extends State<MyBrowser> {
           controller: textEditingController,
           onSubmitted: (value) {
             textEditingController.text = value;
-            _kraken?.loadURL(value);
+            _kraken?.loadBundle(KrakenBundle.fromUrl(value));
           },
           decoration: InputDecoration(
             hintText: 'Enter a app url',
@@ -90,7 +90,7 @@ class _MyHomePageState extends State<MyBrowser> {
           child: _kraken = Kraken(
             viewportWidth: viewportSize.width - queryData.padding.horizontal,
             viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
-            bundleURL: 'https://kraken.oss-cn-hangzhou.aliyuncs.com/data/cvd3r6f068.js',
+            bundle: KrakenBundle.fromUrl('https://kraken.oss-cn-hangzhou.aliyuncs.com/data/cvd3r6f068.js'),
             onLoad: (KrakenController controller) {
               Timer(Duration(seconds: 4), () {
                 exit(0);

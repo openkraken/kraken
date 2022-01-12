@@ -12,6 +12,10 @@ import 'package:kraken/dom.dart';
 /// manage element to implement lifecycles for sliver list, generate
 /// renderer from existing element tree.
 class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
+  // @NOTE: For hummer support, no real function here.
+  void restorePreparedChild(int index) { }
+  void stashPreparedChild(int index) { }
+
   final Element _target;
   late RenderSliverListLayout _sliverListLayout;
 
@@ -49,11 +53,6 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
     childNode.willAttachRenderer();
 
     RenderBox? child;
-
-    if (childNode is Element) {
-      childNode.style.flushPendingProperties();
-    }
-
     if (childNode is Node) {
       child = childNode.renderer;
     } else {
@@ -68,8 +67,11 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
       _sliverListLayout.insertSliverChild(child, after: after);
     }
 
+    if (childNode is Element) {
+      childNode.style.flushPendingProperties();
+    }
+
     childNode.didAttachRenderer();
-    childNode.ensureChildAttached();
   }
 
   RenderBox _createEmptyRenderObject() {

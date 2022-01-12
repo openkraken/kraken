@@ -125,7 +125,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindPerformance(std::unique_ptr<JSContext>& context);
+void bindPerformance(std::unique_ptr<ExecutionContext>& context);
 
 struct NativePerformanceEntry {
   NativePerformanceEntry(const std::string& name, const std::string& entryType, int64_t startTime, int64_t duration, int64_t uniqueId) : startTime(startTime), duration(duration), uniqueId(uniqueId) {
@@ -144,9 +144,12 @@ struct NativePerformanceEntry {
 class PerformanceEntry : public HostObject {
  public:
   PerformanceEntry() = delete;
-  explicit PerformanceEntry(JSContext* context, NativePerformanceEntry* m_nativePerformanceEntry);
+  explicit PerformanceEntry(ExecutionContext* context, NativePerformanceEntry* m_nativePerformanceEntry);
 
-  DEFINE_HOST_OBJECT_PROPERTY(4, name, entryType, startTime, duration)
+  DEFINE_READONLY_PROPERTY(name);
+  DEFINE_READONLY_PROPERTY(entryType);
+  DEFINE_READONLY_PROPERTY(startTime);
+  DEFINE_READONLY_PROPERTY(duration);
 
  private:
   NativePerformanceEntry* m_nativePerformanceEntry{nullptr};
@@ -155,15 +158,15 @@ class PerformanceEntry : public HostObject {
 class PerformanceMark : public PerformanceEntry {
  public:
   PerformanceMark() = delete;
-  explicit PerformanceMark(JSContext* context, std::string& name, int64_t startTime);
-  explicit PerformanceMark(JSContext* context, NativePerformanceEntry* nativePerformanceEntry);
+  explicit PerformanceMark(ExecutionContext* context, std::string& name, int64_t startTime);
+  explicit PerformanceMark(ExecutionContext* context, NativePerformanceEntry* nativePerformanceEntry);
 };
 
 class PerformanceMeasure : public PerformanceEntry {
  public:
   PerformanceMeasure() = delete;
-  explicit PerformanceMeasure(JSContext* context, std::string& name, int64_t startTime, int64_t duration);
-  explicit PerformanceMeasure(JSContext* context, NativePerformanceEntry* nativePerformanceEntry);
+  explicit PerformanceMeasure(ExecutionContext* context, std::string& name, int64_t startTime, int64_t duration);
+  explicit PerformanceMeasure(ExecutionContext* context, NativePerformanceEntry* nativePerformanceEntry);
 };
 
 class NativePerformance {
@@ -176,45 +179,46 @@ class NativePerformance {
 class Performance : public HostObject {
  public:
   Performance() = delete;
-  explicit Performance(JSContext* context);
+  explicit Performance(ExecutionContext* context);
 
   OBJECT_INSTANCE(Performance);
 
-  static JSValue now(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue toJSON(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue clearMarks(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue clearMeasures(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue getEntries(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue getEntriesByName(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue getEntriesByType(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue mark(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue measure(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue now(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue toJSON(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue clearMarks(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue clearMeasures(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getEntries(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getEntriesByName(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue getEntriesByType(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue mark(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue measure(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
 #if ENABLE_PROFILE
-  static JSValue __kraken_navigation_summary__(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue __kraken_navigation_summary__(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   void measureSummary(JSValue* exception);
 #endif
 
   NativePerformance m_nativePerformance;
 
-  DEFINE_HOST_OBJECT_PROPERTY(1, timeOrigin);
+  DEFINE_READONLY_PROPERTY(timeOrigin);
 
  private:
   void internalMeasure(const std::string& name, const std::string& startMark, const std::string& endMark, JSValue* exception);
   double internalNow();
   std::vector<NativePerformanceEntry*> getFullEntries();
-  ObjectFunction m_now{m_context, jsObject, "now", now, 0};
-  ObjectFunction m_toJSON{m_context, jsObject, "toJSON", toJSON, 0};
-  ObjectFunction m_clearMarks{m_context, jsObject, "clearMarks", clearMarks, 1};
-  ObjectFunction m_clearMeasures{m_context, jsObject, "clearMeasures", clearMeasures, 1};
-  ObjectFunction m_getEntries{m_context, jsObject, "getEntries", getEntries, 0};
-  ObjectFunction m_getEntriesByName{m_context, jsObject, "getEntriesByName", getEntriesByName, 2};
-  ObjectFunction m_getEntriesByType{m_context, jsObject, "getEntriesByType", getEntriesByType, 1};
-  ObjectFunction m_mark{m_context, jsObject, "mark", mark, 1};
-  ObjectFunction m_measure{m_context, jsObject, "measure", measure, 4};
+
+  DEFINE_FUNCTION(now, 0);
+  DEFINE_FUNCTION(toJSON, 0);
+  DEFINE_FUNCTION(clearMarks, 1);
+  DEFINE_FUNCTION(clearMeasures, 1);
+  DEFINE_FUNCTION(getEntries, 0);
+  DEFINE_FUNCTION(getEntriesByName, 2);
+  DEFINE_FUNCTION(getEntriesByType, 1);
+  DEFINE_FUNCTION(mark, 1);
+  DEFINE_FUNCTION(measure, 4);
 
 #if ENABLE_PROFILE
-  ObjectFunction m___kraken_navigation_summary__{m_context, jsObject, "__kraken_navigation_summary__", __kraken_navigation_summary__, 0};
+  DEFINE_FUNCTION(__kraken_navigation_summary__, 0);
 #endif
 };
 

@@ -3,15 +3,12 @@
  * Author: Kraken Team.
  */
 
-import 'dart:collection';
-import 'dart:math' as math;
 import 'dart:ui' as ui
     show
         LineMetrics,
         Gradient,
         Shader,
         TextBox,
-        PlaceholderAlignment,
         TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
@@ -68,7 +65,6 @@ class KrakenRenderParagraph extends RenderBox
             textWidthBasis: textWidthBasis,
             textHeightBehavior: textHeightBehavior) {
     addAll(children);
-    _extractPlaceholderSpans(text);
   }
 
   @override
@@ -108,22 +104,8 @@ class KrakenRenderParagraph extends RenderBox
       case RenderComparison.layout:
         _textPainter.text = value;
         _overflowShader = null;
-        _extractPlaceholderSpans(value);
         break;
     }
-  }
-
-  late List<PlaceholderSpan> _placeholderSpans;
-
-  void _extractPlaceholderSpans(InlineSpan span) {
-    _placeholderSpans = <PlaceholderSpan>[];
-    span.visitChildren((InlineSpan span) {
-      if (span is PlaceholderSpan) {
-        final PlaceholderSpan placeholderSpan = span;
-        _placeholderSpans.add(placeholderSpan);
-      }
-      return true;
-    });
   }
 
   /// How the text should be aligned horizontally.
@@ -255,46 +237,6 @@ class KrakenRenderParagraph extends RenderBox
     _overflowShader = null;
     markNeedsLayout();
   }
-
-  @override
-  double computeMinIntrinsicWidth(double height) {
-    if (!_canComputeIntrinsics()) {
-      return 0.0;
-    }
-    _computeChildrenWidthWithMinIntrinsics(height);
-    _layoutText(); // layout with infinite width.
-    return _textPainter.minIntrinsicWidth;
-  }
-
-  @override
-  double computeMaxIntrinsicWidth(double height) {
-    if (!_canComputeIntrinsics()) {
-      return 0.0;
-    }
-    _computeChildrenWidthWithMaxIntrinsics(height);
-    _layoutText(); // layout with infinite width.
-    return _textPainter.maxIntrinsicWidth;
-  }
-
-  double _computeIntrinsicHeight(double width) {
-    if (!_canComputeIntrinsics()) {
-      return 0.0;
-    }
-    _computeChildrenHeightWithMinIntrinsics(width);
-    _layoutText(minWidth: width, maxWidth: width);
-    return _textPainter.height;
-  }
-
-  @override
-  double computeMinIntrinsicHeight(double width) {
-    return _computeIntrinsicHeight(width);
-  }
-
-  @override
-  double computeMaxIntrinsicHeight(double width) {
-    return _computeIntrinsicHeight(width);
-  }
-
   /// Compute distance to baseline of first text line
   double computeDistanceToFirstLineBaseline() {
     double firstLineOffset = _lineOffset[0];
@@ -311,94 +253,6 @@ class KrakenRenderParagraph extends RenderBox
 
     // Use the baseline of the last line as paragraph baseline.
     return text.text == '' ? 0.0 : (lastLineOffset + lastLineMetrics.ascent);
-  }
-
-  // Intrinsics cannot be calculated without a full layout for
-  // alignments that require the baseline (baseline, aboveBaseline,
-  // belowBaseline).
-  bool _canComputeIntrinsics() {
-    for (final PlaceholderSpan span in _placeholderSpans) {
-      switch (span.alignment) {
-        case ui.PlaceholderAlignment.baseline:
-        case ui.PlaceholderAlignment.aboveBaseline:
-        case ui.PlaceholderAlignment.belowBaseline:
-          {
-            assert(
-                RenderObject.debugCheckingIntrinsics,
-                'Intrinsics are not available for PlaceholderAlignment.baseline, '
-                'PlaceholderAlignment.aboveBaseline, or PlaceholderAlignment.belowBaseline,');
-            return false;
-          }
-        case ui.PlaceholderAlignment.top:
-        case ui.PlaceholderAlignment.middle:
-        case ui.PlaceholderAlignment.bottom:
-          {
-            continue;
-          }
-      }
-    }
-    return true;
-  }
-
-  void _computeChildrenWidthWithMaxIntrinsics(double height) {
-    RenderBox? child = firstChild;
-    final List<PlaceholderDimensions?> placeholderDimensions =
-        List<PlaceholderDimensions?>.filled(childCount, null);
-    int childIndex = 0;
-    while (child != null) {
-      // Height and baseline is irrelevant as all text will be laid
-      // out in a single line.
-      placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: Size(child.getMaxIntrinsicWidth(height), height),
-        alignment: _placeholderSpans[childIndex].alignment,
-        baseline: _placeholderSpans[childIndex].baseline,
-      );
-      child = childAfter(child);
-      childIndex += 1;
-    }
-    _textPainter.setPlaceholderDimensions(
-        placeholderDimensions as List<PlaceholderDimensions>?);
-  }
-
-  void _computeChildrenWidthWithMinIntrinsics(double height) {
-    RenderBox? child = firstChild;
-    final List<PlaceholderDimensions?> placeholderDimensions =
-        List<PlaceholderDimensions?>.filled(childCount, null);
-    int childIndex = 0;
-    while (child != null) {
-      final double intrinsicWidth = child.getMinIntrinsicWidth(height);
-      final double intrinsicHeight =
-          child.getMinIntrinsicHeight(intrinsicWidth);
-      placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: Size(intrinsicWidth, intrinsicHeight),
-        alignment: _placeholderSpans[childIndex].alignment,
-        baseline: _placeholderSpans[childIndex].baseline,
-      );
-      child = childAfter(child);
-      childIndex += 1;
-    }
-    _textPainter.setPlaceholderDimensions(
-        placeholderDimensions as List<PlaceholderDimensions>?);
-  }
-
-  void _computeChildrenHeightWithMinIntrinsics(double width) {
-    RenderBox? child = firstChild;
-    final List<PlaceholderDimensions?> placeholderDimensions =
-        List<PlaceholderDimensions?>.filled(childCount, null);
-    int childIndex = 0;
-    while (child != null) {
-      final double intrinsicHeight = child.getMinIntrinsicHeight(width);
-      final double intrinsicWidth = child.getMinIntrinsicWidth(intrinsicHeight);
-      placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: Size(intrinsicWidth, intrinsicHeight),
-        alignment: _placeholderSpans[childIndex].alignment,
-        baseline: _placeholderSpans[childIndex].baseline,
-      );
-      child = childAfter(child);
-      childIndex += 1;
-    }
-    _textPainter.setPlaceholderDimensions(
-        placeholderDimensions as List<PlaceholderDimensions>?);
   }
 
   @override
@@ -482,84 +336,11 @@ class KrakenRenderParagraph extends RenderBox
     _textPainter.markNeedsLayout();
   }
 
-  // Placeholder dimensions representing the sizes of child inline widgets.
-  //
-  // These need to be cached because the text painter's placeholder dimensions
-  // will be overwritten during intrinsic width/height calculations and must be
-  // restored to the original values before final layout and painting.
-  List<PlaceholderDimensions?>? _placeholderDimensions;
-
   void _layoutTextWithConstraints(BoxConstraints constraints) {
-    _textPainter.setPlaceholderDimensions(
-        _placeholderDimensions as List<PlaceholderDimensions>?);
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
   }
 
-  // Layout the child inline widgets. We then pass the dimensions of the
-  // children to _textPainter so that appropriate placeholders can be inserted
-  // into the LibTxt layout. This does not do anything if no inline widgets were
-  // specified.
-  void _layoutChildren(BoxConstraints constraints) {
-    if (childCount == 0) {
-      return;
-    }
-    RenderBox? child = firstChild;
-    _placeholderDimensions =
-        List<PlaceholderDimensions?>.filled(childCount, null);
-    int childIndex = 0;
-    while (child != null) {
-      // Only constrain the width to the maximum width of the paragraph.
-      // Leave height unconstrained, which will overflow if expanded past.
-      child.layout(
-        BoxConstraints(
-          maxWidth: constraints.maxWidth,
-        ),
-        parentUsesSize: true,
-      );
-      double? baselineOffset;
-      switch (_placeholderSpans[childIndex].alignment) {
-        case ui.PlaceholderAlignment.baseline:
-          {
-            baselineOffset = child
-                .getDistanceToBaseline(_placeholderSpans[childIndex].baseline!);
-            break;
-          }
-        default:
-          {
-            baselineOffset = null;
-            break;
-          }
-      }
-      _placeholderDimensions![childIndex] = PlaceholderDimensions(
-        size: child.size,
-        alignment: _placeholderSpans[childIndex].alignment,
-        baseline: _placeholderSpans[childIndex].baseline,
-        baselineOffset: baselineOffset,
-      );
-      child = childAfter(child);
-      childIndex += 1;
-    }
-  }
-
-  // Iterate through the laid-out children and set the parentData offsets based
-  // off of the placeholders inserted for each child.
-  void _setParentData() {
-    RenderBox? child = firstChild;
-    int childIndex = 0;
-    while (child != null &&
-        childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
-      final TextParentData textParentData = child.parentData as TextParentData;
-      textParentData.offset = Offset(
-        _textPainter.inlinePlaceholderBoxes![childIndex].left,
-        _textPainter.inlinePlaceholderBoxes![childIndex].top,
-      );
-      textParentData.scale = _textPainter.inlinePlaceholderScales![childIndex];
-      child = childAfter(child);
-      childIndex += 1;
-    }
-  }
-
-  /// Get text of each line in the paragraph
+  // Get text of each line in the paragraph.
   List<String> _getLineTexts(TextPainter textPainter, TextSpan textSpan) {
     TextSelection selection =
         TextSelection(baseOffset: 0, extentOffset: textSpan.text!.length);
@@ -596,11 +377,9 @@ class KrakenRenderParagraph extends RenderBox
     return lineTexts;
   }
 
-  // Create and layout line text painters according to text lines in the paragraph
-  void _layoutMultiLineTextWithConstraints(BoxConstraints constraints) {
-    // Get text of each line
-    List<String> lineTexts =
-        _getLineTexts(_textPainter, _textPainter.text as TextSpan);
+  // Compute line metrics and line offset according to line-height spec.
+  // https://www.w3.org/TR/css-inline-3/#inline-height
+  void _computeLineMetrics() {
     _lineMetrics = _textPainter.computeLineMetrics();
     // Leading of each line
     List<double> _lineLeading = [];
@@ -610,18 +389,43 @@ class KrakenRenderParagraph extends RenderBox
       ui.LineMetrics lineMetric = _lineMetrics[i];
       // Do not add line height in the case of textOverflow ellipsis
       // cause height of line metric equals to 0.
-      double leading = lineHeight != null && lineMetric.height != 0 ?
-        lineHeight! - lineMetric.height : 0;
+      double leading = lineHeight != null && lineMetric.height != 0
+        ? lineHeight! - lineMetric.height
+        : 0;
       _lineLeading.add(leading);
       // Offset of previous line
       double preLineBottom = i > 0
-          ? _lineOffset[i - 1] +
-              _lineMetrics[i - 1].height +
-              _lineLeading[i - 1] / 2
-          : 0;
+        ? _lineOffset[i - 1] + _lineMetrics[i - 1].height + _lineLeading[i - 1] / 2
+        : 0;
       double offset = preLineBottom + leading / 2;
       _lineOffset.add(offset);
     }
+  }
+
+  // Compute paragraph height according to line metrics.
+  double _getParagraphHeight() {
+    double paragraphHeight = 0;
+    // Height of paragraph
+    for (int i = 0; i < _lineMetrics.length; i++) {
+      ui.LineMetrics lineMetric = _lineMetrics[i];
+      // Do not add line height in the case of textOverflow ellipsis
+      // cause height of line metric equals to 0.
+      double height = lineHeight != null && lineMetric.height != 0 ?
+      lineHeight! : lineMetric.height;
+      paragraphHeight += height;
+    }
+
+    return paragraphHeight;
+  }
+
+  // Create and layout text painter of each line in the paragraph for later use
+  // in the paint stage to adjust the vertical space between text painters according to
+  // W3C line-height spec.
+  void _relayoutMultiLineText() {
+    final BoxConstraints constraints = this.constraints;
+    // Get text of each line
+    List<String> lineTexts = _getLineTexts(_textPainter, _textPainter.text as TextSpan);
+
     _lineTextPainters = [];
     // Create text painter of each line and layout
     for (int i = 0; i < lineTexts.length; i++) {
@@ -654,22 +458,15 @@ class KrakenRenderParagraph extends RenderBox
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    _layoutChildren(constraints);
     _layoutTextWithConstraints(constraints);
-    _setParentData();
-    _layoutMultiLineTextWithConstraints(constraints);
+    _computeLineMetrics();
 
-    double paragraphHeight = 0;
-    if (text.text != '') {
-      // Height of paragraph
-      for (int i = 0; i < _lineMetrics.length; i++) {
-        ui.LineMetrics lineMetric = _lineMetrics[i];
-        // Do not add line height in the case of textOverflow ellipsis
-        // cause height of line metric equals to 0.
-        double height = lineHeight != null && lineMetric.height != 0 ?
-          lineHeight! : lineMetric.height;
-        paragraphHeight += height;
-      }
+    // @FIXME: Layout twice will hurt performance, ideally this logic should be done
+    // in flutter text engine.
+    // Layout each line of the paragraph indivisually to
+    // place each line according to W3C line-height rule.
+    if (lineHeight != null) {
+      _relayoutMultiLineText();
     }
 
     // We grab _textPainter.size and _textPainter.didExceedMaxLines here because
@@ -680,7 +477,9 @@ class KrakenRenderParagraph extends RenderBox
     final Size textSize = _textPainter.size;
     final bool textDidExceedMaxLines = _textPainter.didExceedMaxLines;
 
-    Size paragraphSize = Size(_textPainter.size.width, paragraphHeight);
+    double paragraphHeight = _getParagraphHeight();
+    Size paragraphSize = Size(textSize.width, paragraphHeight);
+
     size = constraints.constrain(paragraphSize);
 
     final bool didOverflowHeight =
@@ -747,13 +546,6 @@ class KrakenRenderParagraph extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    // Paint line painters
-    for (int i = 0; i < _lineTextPainters.length; i++) {
-      TextPainter _lineTextPainter = _lineTextPainters[i];
-      Offset lineOffset = Offset(offset.dx, offset.dy + _lineOffset[i]);
-      _lineTextPainter.paint(context.canvas, lineOffset);
-    }
-
     assert(() {
       if (debugRepaintTextRainbowEnabled) {
         final Paint paint = Paint()..color = debugCurrentRepaintColor.toColor();
@@ -774,31 +566,17 @@ class KrakenRenderParagraph extends RenderBox
       context.canvas.clipRect(bounds);
     }
 
-    RenderBox? child = firstChild;
-    int childIndex = 0;
-    // childIndex might be out of index of placeholder boxes. This can happen
-    // if engine truncates children due to ellipsis. Sadly, we would not know
-    // it until we finish layout, and RenderObject is in immutable state at
-    // this point.
-    while (child != null &&
-        childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
-      final TextParentData textParentData = child.parentData as TextParentData;
-
-      final double scale = textParentData.scale!;
-      context.pushTransform(
-        needsCompositing,
-        offset + textParentData.offset,
-        Matrix4.diagonal3Values(scale, scale, scale),
-        (PaintingContext context, Offset offset) {
-          context.paintChild(
-            child!,
-            offset,
-          );
-        },
-      );
-      child = childAfter(child);
-      childIndex += 1;
+    if (lineHeight != null) {
+      // Adjust text paint offset of each line according to line-height.
+      for (int i = 0; i < _lineTextPainters.length; i++) {
+        TextPainter _lineTextPainter = _lineTextPainters[i];
+        Offset lineOffset = Offset(offset.dx, offset.dy + _lineOffset[i]);
+        _lineTextPainter.paint(context.canvas, lineOffset);
+      }
+    } else {
+      _textPainter.paint(context.canvas, offset);
     }
+
     if (_needsClipping) {
       if (_overflowShader != null) {
         context.canvas.translate(offset.dx, offset.dy);
@@ -875,40 +653,6 @@ class KrakenRenderParagraph extends RenderBox
   /// [assembleSemanticsNode] and [_combineSemanticsInfo].
   List<InlineSpanSemanticsInformation>? _semanticsInfo;
 
-  /// Combines _semanticsInfo entries where permissible, determined by
-  /// [InlineSpanSemanticsInformation.requiresOwnNode].
-  List<InlineSpanSemanticsInformation> _combineSemanticsInfo() {
-    assert(_semanticsInfo != null);
-    final List<InlineSpanSemanticsInformation> combined =
-        <InlineSpanSemanticsInformation>[];
-    String workingText = '';
-    String? workingLabel;
-    for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
-      if (info.requiresOwnNode) {
-        combined.add(InlineSpanSemanticsInformation(
-          workingText,
-          semanticsLabel: workingLabel ?? workingText,
-        ));
-        workingText = '';
-        workingLabel = null;
-        combined.add(info);
-      } else {
-        workingText += info.text;
-        workingLabel ??= '';
-        if (info.semanticsLabel != null) {
-          workingLabel += info.semanticsLabel!;
-        } else {
-          workingLabel += info.text;
-        }
-      }
-    }
-    combined.add(InlineSpanSemanticsInformation(
-      workingText,
-      semanticsLabel: workingLabel,
-    ));
-    return combined;
-  }
-
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -926,105 +670,6 @@ class KrakenRenderParagraph extends RenderBox
       config.label = buffer.toString();
       config.textDirection = textDirection;
     }
-  }
-
-  // Caches [SemanticsNode]s created during [assembleSemanticsNode] so they
-  // can be re-used when [assembleSemanticsNode] is called again. This ensures
-  // stable ids for the [SemanticsNode]s of [TextSpan]s across
-  // [assembleSemanticsNode] invocations.
-  Queue<SemanticsNode>? _cachedChildNodes;
-
-  @override
-  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config,
-      Iterable<SemanticsNode> children) {
-    assert(_semanticsInfo != null && _semanticsInfo!.isNotEmpty);
-    final List<SemanticsNode> newChildren = <SemanticsNode>[];
-    TextDirection currentDirection = textDirection;
-    Rect currentRect;
-    double ordinal = 0.0;
-    int start = 0;
-    int placeholderIndex = 0;
-    RenderBox? child = firstChild;
-    final Queue<SemanticsNode> newChildCache = Queue<SemanticsNode>();
-    for (final InlineSpanSemanticsInformation info in _combineSemanticsInfo()) {
-      final TextDirection initialDirection = currentDirection;
-      final TextSelection selection = TextSelection(
-        baseOffset: start,
-        extentOffset: start + info.text.length,
-      );
-      final List<ui.TextBox> rects = getBoxesForSelection(selection);
-      if (rects.isEmpty) {
-        continue;
-      }
-      Rect rect = rects.first.toRect();
-      currentDirection = rects.first.direction;
-      for (final ui.TextBox textBox in rects.skip(1)) {
-        rect = rect.expandToInclude(textBox.toRect());
-        currentDirection = textBox.direction;
-      }
-      // Any of the text boxes may have had infinite dimensions.
-      // We shouldn't pass infinite dimensions up to the bridges.
-      rect = Rect.fromLTWH(
-        math.max(0.0, rect.left),
-        math.max(0.0, rect.top),
-        math.min(rect.width, constraints.maxWidth),
-        math.min(rect.height, constraints.maxHeight),
-      );
-      // round the current rectangle to make this API testable and add some
-      // padding so that the accessibility rects do not overlap with the text.
-      currentRect = Rect.fromLTRB(
-        rect.left.floorToDouble() - 4.0,
-        rect.top.floorToDouble() - 4.0,
-        rect.right.ceilToDouble() + 4.0,
-        rect.bottom.ceilToDouble() + 4.0,
-      );
-
-      if (info.isPlaceholder) {
-        final SemanticsNode childNode = children.elementAt(placeholderIndex++);
-        final TextParentData parentData = child!.parentData as TextParentData;
-        childNode.rect = Rect.fromLTWH(
-          childNode.rect.left,
-          childNode.rect.top,
-          childNode.rect.width * parentData.scale!,
-          childNode.rect.height * parentData.scale!,
-        );
-        newChildren.add(childNode);
-        child = childAfter(child);
-      } else {
-        final SemanticsConfiguration configuration = SemanticsConfiguration()
-          ..sortKey = OrdinalSortKey(ordinal++)
-          ..textDirection = initialDirection
-          ..label = info.semanticsLabel ?? info.text;
-        final GestureRecognizer? recognizer = info.recognizer;
-        if (recognizer != null) {
-          if (recognizer is TapGestureRecognizer) {
-            configuration.onTap = recognizer.onTap;
-            configuration.isLink = true;
-          } else if (recognizer is LongPressGestureRecognizer) {
-            configuration.onLongPress = recognizer.onLongPress;
-          } else {
-            assert(false);
-          }
-        }
-        final SemanticsNode newChild = (_cachedChildNodes?.isNotEmpty == true)
-            ? _cachedChildNodes!.removeFirst()
-            : SemanticsNode();
-        newChild
-          ..updateWith(config: configuration)
-          ..rect = currentRect;
-        newChildCache.addLast(newChild);
-        newChildren.add(newChild);
-      }
-      start += info.text.length;
-    }
-    _cachedChildNodes = newChildCache;
-    node.updateWith(config: config, childrenInInversePaintOrder: newChildren);
-  }
-
-  @override
-  void clearSemantics() {
-    super.clearSemantics();
-    _cachedChildNodes = null;
   }
 
   @override

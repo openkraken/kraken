@@ -205,7 +205,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   ScrollDragController? _currentDrag;
 
   @override
-  Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
+  ScrollDragController drag(DragStartDetails details, VoidCallback dragCancelCallback) {
     final ScrollDragController drag = ScrollDragController(
       delegate: this,
       details: details,

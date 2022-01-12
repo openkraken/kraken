@@ -24,13 +24,14 @@ enum VerticalAlign {
   ///  middle,
 }
 
-mixin CSSInlineMixin on RenderStyleBase {
-  VerticalAlign _verticalAlign = VerticalAlign.baseline;
+mixin CSSInlineMixin on RenderStyle {
+  @override
   VerticalAlign get verticalAlign => _verticalAlign;
+  VerticalAlign _verticalAlign = VerticalAlign.baseline;
   set verticalAlign(VerticalAlign value) {
     if (_verticalAlign != value) {
-      renderBoxModel!.markNeedsLayout();
       _verticalAlign = value;
+      renderBoxModel?.markNeedsLayout();
     }
   }
 

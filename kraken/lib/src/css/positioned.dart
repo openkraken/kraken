@@ -11,39 +11,27 @@ import 'package:kraken/rendering.dart';
 
 // CSS Positioned Layout: https://drafts.csswg.org/css-position/
 
-BoxSizeType? _getChildWidthSizeType(RenderBox child) {
-  if (child is RenderTextBox) {
-    return child.widthSizeType;
-  } else if (child is RenderBoxModel) {
-    return child.widthSizeType;
-  }
-  return null;
-}
-
-BoxSizeType? _getChildHeightSizeType(RenderBox child) {
-  if (child is RenderTextBox) {
-    return child.heightSizeType;
-  } else if (child is RenderBoxModel) {
-    return child.heightSizeType;
-  }
-  return null;
-}
-
 // RenderPositionHolder may be affected by overflow: scroller offset.
 // We need to reset these offset to keep positioned elements render at their original position.
+// @NOTE: Attention that renderObjects in tree may not all subtype of RenderBoxModel, use `is` to identify.
 Offset? _getRenderPositionHolderScrollOffset(RenderPositionPlaceholder holder, RenderObject root) {
-  RenderBoxModel? parent = holder.parent as RenderBoxModel?;
-  while (parent != null && parent != root) {
-    if (parent.clipX || parent.clipY) {
-      return Offset(parent.scrollLeft, parent.scrollTop);
+  AbstractNode? current = holder.parent;
+  while (current != null && current != root) {
+    if (current is RenderBoxModel) {
+      if (current.clipX || current.clipY) {
+        return Offset(current.scrollLeft, current.scrollTop);
+      }
     }
-    parent = parent.parent as RenderBoxModel?;
+    current = current.parent;
   }
   return null;
 }
 
 // Get the offset of the RenderPlaceholder of positioned element to its parent RenderBoxModel.
 Offset _getPlaceholderToParentOffset(RenderPositionPlaceholder placeholder, RenderBoxModel parent) {
+  if (!placeholder.attached) {
+    return Offset.zero;
+  }
   Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(placeholder, parent) ?? Offset.zero;
   Offset placeholderOffset = placeholder.localToGlobal(positionHolderScrollOffset, ancestor: parent);
   return placeholderOffset;
@@ -331,73 +319,6 @@ class CSSPositionedLayout {
     {bool needsRelayout = false}
   ) {
     BoxConstraints childConstraints = child.getConstraints();
-
-    // Scrolling element has two repaint boundary box, positioned element is positioned
-    // relative to the outer renderBox.
-    RenderBoxModel containerBox = parent.isScrollingContentBox ? parent.parent as RenderBoxModel : parent;
-    Size trySize = containerBox.constraints.biggest;
-    Size parentSize = trySize.isInfinite ? containerBox.constraints.smallest : trySize;
-
-    // Positioned element's size stretch start at the padding-box of its parent in cases like
-    // `height: 0; top: 0; bottom: 0`.
-    double borderLeft = parent.renderStyle.effectiveBorderLeftWidth.computedValue;
-    double borderRight = parent.renderStyle.effectiveBorderRightWidth.computedValue;
-    double borderTop = parent.renderStyle.effectiveBorderTopWidth.computedValue;
-    double borderBottom = parent.renderStyle.effectiveBorderBottomWidth.computedValue;
-    Size parentPaddingBoxSize = Size(
-      parentSize.width - borderLeft - borderRight,
-      parentSize.height - borderTop - borderBottom,
-    );
-
-    BoxSizeType? widthType = _getChildWidthSizeType(child);
-    BoxSizeType? heightType = _getChildHeightSizeType(child);
-    RenderStyle childRenderStyle = child.renderStyle;
-
-    // If child has no width, calculate width by left and right.
-    // Element with intrinsic size such as image will not stretch
-    if (childRenderStyle.width.isAuto &&
-        widthType != BoxSizeType.intrinsic &&
-        childRenderStyle.left.isNotAuto &&
-        childRenderStyle.right.isNotAuto) {
-      double childMarginLeft = childRenderStyle.marginLeft.computedValue;
-      double childMarginRight = childRenderStyle.marginRight.computedValue;
-      // Child width calculation should subtract its horizontal margin.
-      double constraintWidth = parentPaddingBoxSize.width -
-        childRenderStyle.left.computedValue - childRenderStyle.right.computedValue -
-        childMarginLeft - childMarginRight;
-      double? maxWidth = childRenderStyle.maxWidth.isNone ? null : childRenderStyle.maxWidth.computedValue;
-      double? minWidth = childRenderStyle.minWidth.isAuto ? null : childRenderStyle.minWidth.computedValue;
-      // Constrain to min-width or max-width if width not exists
-      if (maxWidth != null) {
-        constraintWidth = constraintWidth > maxWidth ? maxWidth : constraintWidth;
-      } else if (minWidth != null) {
-        constraintWidth = constraintWidth < minWidth ? minWidth : constraintWidth;
-      }
-      childConstraints = childConstraints.tighten(width: constraintWidth);
-    }
-    // If child has not height, should be calculate height by top and bottom
-    if (childRenderStyle.height.isAuto &&
-        heightType != BoxSizeType.intrinsic &&
-        childRenderStyle.top.isNotAuto &&
-        childRenderStyle.bottom.isNotAuto) {
-      double childMarginTop = childRenderStyle.marginTop.computedValue;
-      double childMarginBottom = childRenderStyle.marginBottom.computedValue;
-      // Child height calculation should subtract its vertical margin.
-      double constraintHeight = parentPaddingBoxSize.height -
-        childRenderStyle.top.computedValue - childRenderStyle.bottom.computedValue -
-        childMarginTop - childMarginBottom;
-      CSSLengthValue maxHeightLength = childRenderStyle.maxHeight;
-      CSSLengthValue minHeightLength = childRenderStyle.minHeight;
-      // Constrain to min-height or max-height if width not exists
-      if (maxHeightLength.isNotNone) {
-        double maxHeight = maxHeightLength.computedValue;
-        constraintHeight = constraintHeight > maxHeight ? maxHeight : constraintHeight;
-      } else if (minHeightLength.isNotAuto) {
-        double minHeight = minHeightLength.computedValue;
-        constraintHeight = constraintHeight < minHeight ? minHeight : constraintHeight;
-      }
-      childConstraints = childConstraints.tighten(height: constraintHeight);
-    }
 
     // Whether child need to layout
     bool isChildNeedsLayout = true;

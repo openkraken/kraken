@@ -12,7 +12,7 @@ import {addIndent} from "./utils";
 function generateHostObjectSource(object: ClassObject) {
   let propSource: string[] = generatePropsSource(object, PropType.hostObject);
   let methodsSource: string[] = generateMethodsSource(object, PropType.hostObject);
-  return `${object.name}::${object.name}(JSContext *context,
+  return `${object.name}::${object.name}(ExecutionContext *context,
                                                    Native${object.name} *nativePtr)
   : HostObject(context, "${object.name}"), m_nativePtr(nativePtr) {
 }
@@ -27,7 +27,7 @@ JSValue ${object.name}::callNativeMethods(const char *method, int32_t argc,
 
   NativeString m{
     reinterpret_cast<const uint16_t *>(methodString.c_str()),
-    static_cast<int32_t>(methodString.size())
+    static_cast<uint32_t>(methodString.size())
   };
 
   NativeValue nativeValue{};
@@ -48,6 +48,7 @@ enum PropType {
 
 function getPropsVars(object: ClassObject, type: PropType) {
   let classSubFix = object.name;
+  let className = object.name;
   if (type == PropType.Element || type == PropType.Event) {
     classSubFix += 'Instance';
   }
@@ -56,7 +57,7 @@ function getPropsVars(object: ClassObject, type: PropType) {
   let classId = '';
   if (type == PropType.hostObject) {
     instanceName = 'object';
-    classId = 'JSContext::kHostObjectClassId';
+    classId = 'ExecutionContext::kHostObjectClassId';
   } else if (type == PropType.Element) {
     instanceName = 'element';
     classId = 'Element::classId()';
@@ -66,6 +67,7 @@ function getPropsVars(object: ClassObject, type: PropType) {
   }
 
   return {
+    className,
     classSubFix,
     classId,
     instanceName
@@ -76,6 +78,7 @@ function generatePropsGetter(object: ClassObject, type: PropType, p: PropsDeclar
   let {
     classId,
     classSubFix,
+    className,
     instanceName
   } = getPropsVars(object, type);
 
@@ -113,7 +116,7 @@ function generatePropsGetter(object: ClassObject, type: PropType, p: PropsDeclar
     flushUICommandCode = 'getDartMethod()->flushUICommand();'
   }
 
-  return `PROP_GETTER(${classSubFix}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return `IMPL_PROPERTY_GETTER(${className}, ${p.name})(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   ${flushUICommandCode}
   ${getterCode}
 }`;
@@ -123,21 +126,20 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
   let {
     classId,
     classSubFix,
+    className,
     instanceName
   } = getPropsVars(object, type);
 
   if (p.readonly) {
-    return `PROP_SETTER(${classSubFix}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  return JS_NULL;
-}`;
+    return '';
   }
 
   let setterCode = '';
   if (object.type == 'Element') {
     setterCode = `std::string key = "${p.name}";
-  NativeString *args_01 = stringToNativeString(key);
-  NativeString *args_02 = jsValueToNativeString(ctx, argv[0]);
-  foundation::UICommandBuffer::instance(${instanceName}->m_context->getContextId())
+  std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
+  std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
+  element->m_context->uiCommandBuffer()
     ->addCommand(${instanceName}->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
   return JS_NULL;`;
   } else {
@@ -148,7 +150,7 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
   }
 
 
-  return `PROP_SETTER(${classSubFix}, ${p.name})(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return `IMPL_PROPERTY_SETTER(${className}, ${p.name})(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *${instanceName} = static_cast<${classSubFix} *>(JS_GetOpaque(this_val, ${classId}));
   ${setterCode}
 }`;
@@ -275,7 +277,7 @@ ${addIndent(createMethodBody(allConditions[i]), 2)}
   }\n  `)
         }
 
-        let polymorphismTemplate = `JSValue ${object.name}::${m.name}(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+        let polymorphismTemplate = `JSValue ${object.name}::${m.name}(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   switch(argc) {
   ${addIndent(caseCode.join(''), 2)}
   default:
@@ -286,7 +288,7 @@ ${addIndent(createMethodBody(allConditions[i]), 2)}
       } else {
         let body = createMethodBody(m);
 
-        methodsSource.push(`JSValue ${object.name}::${m.name}(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+        methodsSource.push(`JSValue ${object.name}::${m.name}(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) {
 ${body}
 }`);
       }
@@ -309,12 +311,12 @@ function generateEventConstructorCode(object: ClassObject) {
   }
 
   auto *nativeEvent = new Native${object.name}();
-  nativeEvent->nativeEvent.type = jsValueToNativeString(ctx, eventTypeValue);
+  nativeEvent->nativeEvent.type = jsValueToNativeString(ctx, eventTypeValue).release();
 
   ${generateEventInstanceConstructorCode(object)}
 
   auto event = new ${object.name}Instance(this, reinterpret_cast<NativeEvent *>(nativeEvent));
-  return event->instanceObject;`;
+  return event->jsObject;`;
 }
 
 function generateEventInstanceConstructorCode(object: ClassObject) {
@@ -333,14 +335,15 @@ function generateEventInstanceConstructorCode(object: ClassObject) {
       propApplyCode = `JS_ToInt32(m_ctx, reinterpret_cast<int32_t *>(&nativeEvent->${p.name}), JS_GetProperty(m_ctx, eventInit, ${p.name}Atom));`
     } else if (p.kind === PropsDeclarationKind.string) {
       propApplyCode = addIndent(`JSValue v = JS_GetProperty(m_ctx, eventInit, ${p.name}Atom);
-  nativeEvent->${p.name} = jsValueToNativeString(m_ctx, v);
+  nativeEvent->${p.name} = jsValueToNativeString(m_ctx, v).release();
   JS_FreeValue(m_ctx, v);`, 0);
     } else if (p.kind === PropsDeclarationKind.double) {
       propApplyCode = `JS_ToFloat64(m_ctx, &nativeEvent->${p.name}, JS_GetProperty(m_ctx, eventInit, ${p.name}Atom));`;
     } else if (p.kind === PropsDeclarationKind.object) {
       propApplyCode = addIndent(`JSValue v = JS_GetProperty(m_ctx, eventInit, ${p.name}Atom);
   JSValue json = JS_JSONStringify(m_ctx, v, JS_NULL, JS_NULL);
-  nativeEvent->${p.name} = jsValueToNativeString(m_ctx, json);
+  if (JS_IsException(json)) return json;
+  nativeEvent->${p.name} = jsValueToNativeString(m_ctx, json).release();
   JS_FreeValue(m_ctx, json);
   JS_FreeValue(m_ctx, v);`, 0);
     }
@@ -385,7 +388,7 @@ function generateHostClassSource(object: ClassObject) {
   let constructorCode = '';
   if (object.type === 'Element') {
     constructorCode = `auto instance = new ${object.name}Instance(this);
-  return instance->instanceObject;`;
+  return instance->jsObject;`;
   } else if (object.type === 'Event') {
     constructorCode = generateEventConstructorCode(object);
   }
@@ -406,7 +409,7 @@ function generateHostClassSource(object: ClassObject) {
 
   let specialBind = '';
   if (object.name === 'ImageElement') {
-    specialBind = `context->defineGlobalProperty("Image", JS_DupValue(context->ctx(), constructor->classObject));`
+    specialBind = `context->defineGlobalProperty("Image", JS_DupValue(context->ctx(), constructor->jsObject));`
   }
 
   let classInheritCode = '';
@@ -417,17 +420,17 @@ function generateHostClassSource(object: ClassObject) {
   }
 
   return `
-${object.name}::${object.name}(JSContext *context) : ${object.type}(context) {
+${object.name}::${object.name}(ExecutionContext *context) : ${object.type}(context) {
   ${classInheritCode}
 }
 
-void bind${object.name}(std::unique_ptr<JSContext> &context) {
+void bind${object.name}(std::unique_ptr<ExecutionContext> &context) {
   auto *constructor = ${object.name}::instance(context.get());
-  context->defineGlobalProperty("${globalBindingName}", constructor->classObject);
+  context->defineGlobalProperty("${globalBindingName}", constructor->jsObject);
   ${specialBind}
 }
 
-JSValue ${object.name}::instanceConstructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
+JSValue ${object.name}::instanceConstructor(JSContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   ${constructorCode}
 }
 ${propSource.join('\n')}
@@ -453,7 +456,7 @@ export function generateCppSource(blob: Blob) {
  */
 
 #include "${blob.filename}.h"
-#include "bridge_qjs.h"
+#include "page.h"
 #include "bindings/qjs/qjs_patch.h"
 
 namespace kraken::binding::qjs {

@@ -13,7 +13,7 @@ namespace kraken::binding::qjs {
 class BlobBuilder;
 class BlobInstance;
 
-void bindBlob(std::unique_ptr<JSContext>& context);
+void bindBlob(std::unique_ptr<ExecutionContext>& context);
 
 class Blob : public HostClass {
  public:
@@ -21,20 +21,22 @@ class Blob : public HostClass {
   OBJECT_INSTANCE(Blob);
 
   Blob() = delete;
-  explicit Blob(JSContext* context);
+  explicit Blob(ExecutionContext* context);
 
-  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
-  static JSValue arrayBuffer(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue slice(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue text(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue arrayBuffer(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue slice(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue text(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
  private:
   friend BlobInstance;
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(type);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(size);
 
-  ObjectFunction m_arrayBuffer{m_context, m_prototypeObject, "arrayBuffer", arrayBuffer, 0};
-  ObjectFunction m_slice{m_context, m_prototypeObject, "slice", slice, 3};
-  ObjectFunction m_text{m_context, m_prototypeObject, "text", text, 0};
+  DEFINE_PROTOTYPE_FUNCTION(arrayBuffer, 0);
+  DEFINE_PROTOTYPE_FUNCTION(slice, 3);
+  DEFINE_PROTOTYPE_FUNCTION(text, 0);
 };
 
 class BlobInstance : public Instance {
@@ -51,7 +53,6 @@ class BlobInstance : public Instance {
   int32_t size();
 
  private:
-  DEFINE_HOST_CLASS_PROPERTY(2, type, size);
   size_t _size;
   std::string mimeType{""};
   std::vector<uint8_t> _data;
@@ -63,8 +64,8 @@ class BlobInstance : public Instance {
 
 class BlobBuilder {
  public:
-  void append(JSContext& context, JSValue& value);
-  void append(JSContext& context, BlobInstance* blob);
+  void append(ExecutionContext& context, JSValue& value);
+  void append(ExecutionContext& context, BlobInstance* blob);
 
   std::vector<uint8_t> finalize();
 

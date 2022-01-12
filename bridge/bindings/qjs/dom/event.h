@@ -50,37 +50,48 @@ namespace kraken::binding::qjs {
 #define EVENT_LONG_PRESS "longpress"
 #define EVENT_SCALE "scale"
 
-void bindEvent(std::unique_ptr<JSContext>& context);
+void bindEvent(std::unique_ptr<ExecutionContext>& context);
 
 class EventInstance;
 
-using EventCreator = EventInstance* (*)(JSContext* context, void* nativeEvent);
+using EventCreator = EventInstance* (*)(ExecutionContext* context, void* nativeEvent);
 
 class Event : public HostClass {
  public:
   static JSClassID kEventClassID;
 
-  JSValue instanceConstructor(QjsContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
   Event() = delete;
-  explicit Event(JSContext* context);
+  explicit Event(ExecutionContext* context);
 
-  static EventInstance* buildEventInstance(std::string& eventType, JSContext* context, void* nativeEvent, bool isCustomEvent);
+  static EventInstance* buildEventInstance(std::string& eventType, ExecutionContext* context, void* nativeEvent, bool isCustomEvent);
   static void defineEvent(const std::string& eventType, EventCreator creator);
 
   OBJECT_INSTANCE(Event);
 
-  static JSValue stopPropagation(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue stopImmediatePropagation(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue preventDefault(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue initEvent(QjsContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue stopPropagation(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue stopImmediatePropagation(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue preventDefault(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue initEvent(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
  private:
   static std::unordered_map<std::string, EventCreator> m_eventCreatorMap;
 
-  ObjectFunction m_stopPropagation{m_context, m_prototypeObject, "stopPropagation", stopPropagation, 0};
-  ObjectFunction m_stopImmediatePropagation{m_context, m_prototypeObject, "immediatePropagation", stopImmediatePropagation, 0};
-  ObjectFunction m_preventDefault{m_context, m_prototypeObject, "preventDefault", preventDefault, 1};
-  ObjectFunction m_initEvent{m_context, m_prototypeObject, "initEvent", initEvent, 3};
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(type);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(bubbles);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(cancelable);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(timestamp);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(defaultPrevented);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(target);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(srcElement);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(currentTarget);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(returnValue);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(cancelBubble);
+
+  DEFINE_PROTOTYPE_FUNCTION(stopPropagation, 0);
+  DEFINE_PROTOTYPE_FUNCTION(stopImmediatePropagation, 0);
+  DEFINE_PROTOTYPE_FUNCTION(preventDefault, 1);
+  DEFINE_PROTOTYPE_FUNCTION(initEvent, 3);
 
   friend EventInstance;
 };
@@ -123,8 +134,6 @@ class EventInstance : public Instance {
   bool m_propagationImmediatelyStopped{false};
 
  private:
-  DEFINE_HOST_CLASS_PROPERTY(10, type, bubbles, cancelable, timestamp, defaultPrevented, target, srcElement, currentTarget, returnValue, cancelBubble)
-
   static void finalizer(JSRuntime* rt, JSValue val);
   friend Event;
 };

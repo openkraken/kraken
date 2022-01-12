@@ -3,12 +3,10 @@
  * Author: Kraken Team.
  */
 
-import 'dart:ffi';
-
 import 'package:flutter/scheduler.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/kraken.dart';
 import 'package:kraken/launcher.dart';
 
 // Children of the <head> element all have display:none
@@ -25,56 +23,34 @@ const String NOSCRIPT = 'NOSCRIPT';
 const String SCRIPT = 'SCRIPT';
 
 class HeadElement extends Element {
-  HeadElement(int targetId, Pointer<NativeEventTarget>   nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  HeadElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
 }
+
+const String _REL_STYLESHEET = 'stylesheet';
 
 class LinkElement extends Element {
-  LinkElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
-}
-
-class MetaElement extends Element {
-  MetaElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
-}
-
-class TitleElement extends Element {
-  TitleElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
-}
-
-class NoScriptElement extends Element {
-  NoScriptElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
-}
-
-const String _JAVASCRIPT_MIME = 'text/javascript';
-const String _JAVASCRIPT_MODULE = 'module';
-
-class ScriptElement extends Element {
-  ScriptElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle) {
-  }
-
-  String type = _JAVASCRIPT_MIME;
+  LinkElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
+  String? rel;
 
   @override
   void setProperty(String key, dynamic value) {
     super.setProperty(key, value);
-    if (key == 'src') {
+    if (key == 'href') {
       _fetchBundle(value);
-    } else if (key == 'type') {
-      type = value.toString().toLowerCase().trim();
+    } else if (key == 'rel') {
+      rel = value.toString().toLowerCase().trim();
     }
   }
 
-  void _fetchBundle(String src) async {
-    // Must
-    if (src.isNotEmpty && isConnected && (type == _JAVASCRIPT_MIME || type == _JAVASCRIPT_MODULE)) {
+  void _fetchBundle(String url) async {
+    if (url.isNotEmpty && rel == _REL_STYLESHEET && isConnected) {
       try {
-        KrakenBundle bundle = await KrakenBundle.getBundle(src, contextId: elementManager.contextId);
-        await bundle.eval(elementManager.contextId);
+        KrakenBundle bundle = KrakenBundle.fromUrl(url);
+        await bundle.resolve(contextId);
+        await bundle.eval(contextId);
+
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_LOAD));
@@ -92,10 +68,87 @@ class ScriptElement extends Element {
   @override
   void connectedCallback() async {
     super.connectedCallback();
+    String? url = getProperty('href');
+    if (url != null) {
+      _fetchBundle(url);
+    }
+  }
+}
+
+class MetaElement extends Element {
+  MetaElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
+}
+
+class TitleElement extends Element {
+  TitleElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
+}
+
+class NoScriptElement extends Element {
+  NoScriptElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
+}
+
+const String _MIME_TEXT_JAVASCRIPT = 'text/javascript';
+const String _MIME_APPLICATION_JAVASCRIPT = 'application/javascript';
+const String _MIME_X_APPLICATION_JAVASCRIPT = 'application/x-javascript';
+const String _JAVASCRIPT_MODULE = 'module';
+
+class ScriptElement extends Element {
+  ScriptElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle) {
+  }
+
+  String type = _MIME_TEXT_JAVASCRIPT;
+
+  @override
+  void setProperty(String key, dynamic value) {
+    super.setProperty(key, value);
+    if (key == 'src') {
+      _fetchBundle(value);
+    } else if (key == 'type') {
+      type = value.toString().toLowerCase().trim();
+    }
+  }
+
+  void _fetchBundle(String src) async {
+    int? contextId = ownerDocument.contextId;
+    if (contextId == null) return;
+    // Must
+    if (src.isNotEmpty && isConnected && (
+        type == _MIME_TEXT_JAVASCRIPT
+          || type == _MIME_APPLICATION_JAVASCRIPT
+          || type == _MIME_X_APPLICATION_JAVASCRIPT
+          || type == _JAVASCRIPT_MODULE
+    )) {
+      try {
+        KrakenBundle bundle = KrakenBundle.fromUrl(src);
+        await bundle.resolve(contextId);
+        await bundle.eval(contextId);
+        // Successful load.
+        SchedulerBinding.instance!.addPostFrameCallback((_) {
+          dispatchEvent(Event(EVENT_LOAD));
+        });
+      } catch(e) {
+        // An error occurred.
+        SchedulerBinding.instance!.addPostFrameCallback((_) {
+          dispatchEvent(Event(EVENT_ERROR));
+        });
+      }
+      SchedulerBinding.instance!.scheduleFrame();
+    }
+  }
+
+  @override
+  void connectedCallback() async {
+    super.connectedCallback();
+    int? contextId = ownerDocument.contextId;
+    if (contextId == null) return;
     String? src = getProperty('src');
     if (src != null) {
       _fetchBundle(src);
-    } else if (type == _JAVASCRIPT_MIME || type == _JAVASCRIPT_MODULE){
+    } else if (type == _MIME_TEXT_JAVASCRIPT || type == _JAVASCRIPT_MODULE){
       // Eval script context: <script> console.log(1) </script>
       StringBuffer buffer = StringBuffer();
       childNodes.forEach((node) {
@@ -105,11 +158,11 @@ class ScriptElement extends Element {
       });
       String script = buffer.toString();
       if (script.isNotEmpty) {
-        int contextId = elementManager.contextId;
         KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
         if (controller != null) {
-          KrakenBundle bundle = await KrakenBundle.getBundle(controller.href, contentOverride: script, contextId: contextId);
-          await bundle.eval(elementManager.contextId);
+          KrakenBundle bundle = KrakenBundle.fromContent(script, url: controller.href);
+          bundle.resolve(contextId);
+          await bundle.eval(contextId);
         }
       }
     }
@@ -119,8 +172,8 @@ class ScriptElement extends Element {
 const String _CSS_MIME = 'text/css';
 
 class StyleElement extends Element {
-  StyleElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, defaultStyle: _defaultStyle);
+  StyleElement(EventTargetContext? context)
+      : super(context, defaultStyle: _defaultStyle);
   String type = _CSS_MIME;
   CSSStyleSheet? _styleSheet;
 
@@ -131,6 +184,7 @@ class StyleElement extends Element {
       type = value.toString().toLowerCase().trim();
     }
   }
+
   @override
   void connectedCallback() {
     if (type == _CSS_MIME) {
@@ -142,7 +196,7 @@ class StyleElement extends Element {
       });
       String style = buffer.toString();
       _styleSheet = CSSStyleSheet(style);
-      elementManager.addStyleSheet(_styleSheet!);
+      ownerDocument.addStyleSheet(_styleSheet!);
     }
     super.connectedCallback();
   }
@@ -150,7 +204,7 @@ class StyleElement extends Element {
   @override
   void disconnectedCallback() {
     if (_styleSheet != null) {
-      elementManager.removeStyleSheet(_styleSheet!);
+      ownerDocument.removeStyleSheet(_styleSheet!);
     }
     super.disconnectedCallback();
   }

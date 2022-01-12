@@ -287,4 +287,90 @@ describe('Position fixed', () => {
     cont.style.position = 'static';
     await snapshot();
   });
+
+  it('should work with parent zIndex of parent fixed element larger than zIndex of child fixed element', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          position: 'fixed',
+          width: '200px',
+          height: '200px',
+          background: 'yellow',
+          zIndex: 1000,
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            position: 'fixed',
+            width: '100px',
+            height: '100px',
+            'background-color': 'green',
+            zIndex: 100,
+          },
+        }),
+      ]
+    );
+
+    document.body.appendChild(div);
+
+    await snapshot();
+  });
+
+  it('should work with parent zIndex of parent fixed element larger than zIndex of child fixed element in nested container', async () => {
+    let div;
+    div = createElement('div', {
+       style: {
+       }
+    }, [
+      createElement(
+        'div',
+        {
+            style: {
+            position: 'fixed',
+            width: '200px',
+            height: '200px',
+            background: 'yellow',
+            zIndex: 1000,
+            },
+        },
+        [
+            createElement('div', {
+            style: {
+                position: 'fixed',
+                width: '100px',
+                height: '100px',
+                display: 'flex',
+                'background-color': 'green',
+                zIndex: 100,
+            },
+            }),
+        ]
+      )
+    ]);
+
+    document.body.appendChild(div);
+
+    await snapshot();
+  });
+
+  it('should work with percentage offset', async () => {
+    let div1 = createElement(
+      'div',
+      {
+        style: {
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          width: '100px',
+          height: '100px',
+          backgroundColor: 'green'
+       },
+      });
+    
+    BODY.appendChild(div1);
+    await snapshot();
+  });
 });

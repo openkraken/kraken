@@ -176,7 +176,6 @@ async function simulateSwipe(startX: number, startY: number, endX: number, endY:
     let progress = i / totalCount;
     let diffX = diffXPerSecond * 100 * ease.transformInternal(progress);
     let diffY = diffYPerSecond * 100 * ease.transformInternal(progress);
-    await sleep(pointerMoveDelay);
     params.push([startX + diffX, startY + diffY, PointerChange.move])
   }
 
@@ -192,7 +191,7 @@ async function simulatePointDown(x: number, y: number, pointer: number = 0) {
 }
 
 // Simulate an point up action.
-async function simulatePoinrUp(x: number, y: number, pointer: number = 0) {
+async function simulatePointUp(x: number, y: number, pointer: number = 0) {
   await simulatePointer([
     [x, y, PointerChange.up],
   ], pointer);
@@ -228,5 +227,5 @@ Object.assign(global, {
   sleep,
   snapshot,
   simulatePointDown,
-  simulatePoinrUp,
+  simulatePointUp,
 });

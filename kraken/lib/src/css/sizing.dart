@@ -15,7 +15,7 @@ import 'package:kraken/rendering.dart';
 /// - min-width
 /// - min-height
 
-mixin CSSSizingMixin on RenderStyleBase {
+mixin CSSSizingMixin on RenderStyle {
 
   // https://drafts.csswg.org/css-sizing-3/#preferred-size-properties
   // Name: width, height
@@ -28,9 +28,10 @@ mixin CSSSizingMixin on RenderStyleBase {
   // Canonical order: per grammar
   // Animation type: by computed value type, recursing into fit-content()
   CSSLengthValue? _width;
-  CSSLengthValue get width {
-    return _width ?? CSSLengthValue.auto;
-  }
+
+  @override
+  CSSLengthValue get width =>  _width ?? CSSLengthValue.auto;
+
   set width(CSSLengthValue? value) {
     // Negative value is invalid, auto value is parsed at layout stage.
     if ((value != null && value.value != null && value.value! < 0) || width == value) {
@@ -41,9 +42,10 @@ mixin CSSSizingMixin on RenderStyleBase {
   }
 
   CSSLengthValue? _height;
-  CSSLengthValue get height {
-    return _height ?? CSSLengthValue.auto;
-  }
+
+  @override
+  CSSLengthValue get height => _height ?? CSSLengthValue.auto;
+
   set height(CSSLengthValue? value) {
     // Negative value is invalid, auto value is parsed at layout stage.
     if ((value != null && value.value != null && value.value! < 0) || height == value) {
@@ -64,9 +66,10 @@ mixin CSSSizingMixin on RenderStyleBase {
   // Canonical order: per grammar
   // Animatable: by computed value, recursing into fit-content()
   CSSLengthValue? _minWidth;
-  CSSLengthValue get minWidth {
-    return _minWidth ?? CSSLengthValue.auto;
-  }
+
+  @override
+  CSSLengthValue get minWidth =>  _minWidth ?? CSSLengthValue.auto;
+
   set minWidth(CSSLengthValue? value) {
     // Negative value is invalid, auto value is parsed at layout stage.
     if ((value != null && value.value != null && value.value! < 0) || minWidth == value) {
@@ -77,9 +80,10 @@ mixin CSSSizingMixin on RenderStyleBase {
   }
 
   CSSLengthValue? _minHeight;
-  CSSLengthValue get minHeight {
-    return _minHeight ?? CSSLengthValue.auto;
-  }
+
+  @override
+  CSSLengthValue get minHeight => _minHeight ?? CSSLengthValue.auto;
+
   set minHeight(CSSLengthValue? value) {
     // Negative value is invalid, auto value is parsed at layout stage.
     if ((value != null && value.value != null && value.value! < 0) || minHeight == value) {
@@ -100,9 +104,10 @@ mixin CSSSizingMixin on RenderStyleBase {
   // Canonical order: per grammar
   // Animatable: by computed value, recursing into fit-content()
   CSSLengthValue? _maxWidth;
-  CSSLengthValue get maxWidth {
-    return _maxWidth ?? CSSLengthValue.none;
-  }
+
+  @override
+  CSSLengthValue get maxWidth => _maxWidth ?? CSSLengthValue.none;
+
   set maxWidth(CSSLengthValue? value) {
     // Negative value is invalid, auto value is parsed at layout stage.
     if ((value != null && value.value != null && value.value! < 0) || maxWidth == value) {
@@ -113,15 +118,54 @@ mixin CSSSizingMixin on RenderStyleBase {
   }
 
   CSSLengthValue? _maxHeight;
+
+  @override
   CSSLengthValue get maxHeight {
     return _maxHeight ?? CSSLengthValue.none;
   }
+
   set maxHeight(CSSLengthValue? value) {
     // Negative value is invalid, auto value is parsed at layout stage.
     if ((value != null && value.value != null && value.value! < 0) || maxHeight == value) {
       return;
     }
     _maxHeight = value;
+    _markSelfAndParentNeedsLayout();
+  }
+
+  // Intrinsic width of replaced element.
+  double? _intrinsicWidth;
+  @override
+  double? get intrinsicWidth {
+    return _intrinsicWidth;
+  }
+  set intrinsicWidth(double? value) {
+    if (_intrinsicWidth == value) return;
+    _intrinsicWidth = value;
+    _markSelfAndParentNeedsLayout();
+  }
+
+  // Intrinsic height of replaced element.
+  double? _intrinsicHeight;
+  @override
+  double? get intrinsicHeight {
+    return _intrinsicHeight;
+  }
+  set intrinsicHeight(double? value) {
+    if (_intrinsicHeight == value) return;
+    _intrinsicHeight = value;
+    _markSelfAndParentNeedsLayout();
+  }
+
+  // Aspect ratio of replaced element.
+  double? _intrinsicRatio;
+  @override
+  double? get intrinsicRatio {
+    return _intrinsicRatio;
+  }
+  set intrinsicRatio(double? value) {
+    if (_intrinsicRatio == value) return;
+    _intrinsicRatio = value;
     _markSelfAndParentNeedsLayout();
   }
 
@@ -136,34 +180,4 @@ mixin CSSSizingMixin on RenderStyleBase {
     }
   }
 
-  // Whether current node should stretch children's height
-  static bool isStretchChildHeight(RenderStyle renderStyle, RenderStyle childRenderStyle) {
-    bool isStretch = false;
-    bool isFlex = renderStyle.renderBoxModel is RenderFlexLayout;
-    bool isHorizontalDirection = false;
-    bool isAlignItemsStretch = false;
-    bool isFlexNoWrap = false;
-    bool isChildAlignSelfStretch = false;
-    bool isChildStretchSelf = false;
-    if (isFlex) {
-      isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
-      isAlignItemsStretch = renderStyle.effectiveAlignItems == AlignItems.stretch;
-      isFlexNoWrap = renderStyle.flexWrap != FlexWrap.wrap &&
-        childRenderStyle.flexWrap != FlexWrap.wrapReverse;
-      isChildAlignSelfStretch = childRenderStyle.alignSelf == AlignSelf.stretch;
-      isChildStretchSelf = childRenderStyle.alignSelf != AlignSelf.auto ?
-        isChildAlignSelfStretch : isAlignItemsStretch;
-    }
-
-    CSSLengthValue marginTop = childRenderStyle.marginTop;
-    CSSLengthValue marginBottom = childRenderStyle.marginBottom;
-
-    // Display as block if flex vertical layout children and stretch children
-    if (!marginTop.isAuto && !marginBottom.isAuto &&
-      isFlex && isHorizontalDirection && isFlexNoWrap && isChildStretchSelf) {
-      isStretch = true;
-    }
-
-    return isStretch;
-  }
 }

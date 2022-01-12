@@ -18,7 +18,10 @@ const _1Q = _1cm / 40; // 1Q = 1/40th of 1cm
 const _1pc = _1in / 6; // 1pc = 1/6th of 1in
 const _1pt = _1in / 72; // 1pt = 1/72th of 1in
 
-final _lengthRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?px|rpx|vw|vh|vmin|vmax|rem|em|in|cm|mm|pc|pt$', caseSensitive: false);
+final String _unitRegStr = '(px|rpx|vw|vh|vmin|vmax|rem|em|in|cm|mm|pc|pt)';
+final _lengthRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?' + _unitRegStr + r'$', caseSensitive: false);
+final _negativeZeroRegExp = RegExp(r'^-(0+)?(\.0+)?' + _unitRegStr + r'$', caseSensitive: false);
+final _nonNegativeLengthRegExp = RegExp(r'^[+]?(\d+)?(\.\d+)?' + _unitRegStr + r'$', caseSensitive: false);
 
 enum CSSLengthType {
   // absolute units
@@ -121,14 +124,46 @@ class CSSLengthValue {
         bool isPositioned = positionType == CSSPositionType.absolute ||
           positionType == CSSPositionType.fixed;
 
-        RenderStyle? parentRenderStyle = renderStyle!.parent;
-
-        // Percentage relative width priority: logical width > renderer width
-        double? relativeParentWidth = isPositioned ?
-          parentRenderStyle?.paddingBoxLogicalWidth ?? parentRenderStyle?.paddingBoxWidth :
-          parentRenderStyle?.contentBoxLogicalWidth ?? parentRenderStyle?.contentBoxWidth;
-
         RenderBoxModel? renderBoxModel = renderStyle!.renderBoxModel;
+        // Should access the renderStyle of renderBoxModel parent but not renderStyle parent
+        // cause the element of renderStyle parent may not equal to containing block.
+        RenderStyle? parentRenderStyle;
+        if (renderBoxModel?.parent is RenderBoxModel) {
+          RenderBoxModel parentRenderBoxModel = renderBoxModel?.parent as RenderBoxModel;
+          // Get the renderStyle of outer scrolling box cause the renderStyle of scrolling
+          // content box is only a fraction of the complete renderStyle.
+          parentRenderStyle = parentRenderBoxModel.isScrollingContentBox
+            ? (parentRenderBoxModel.parent as RenderBoxModel).renderStyle
+            : parentRenderBoxModel.renderStyle;
+        }
+
+        // Constraints is calculated before layout, the layouted size is identical to the tight constraints
+        // if constraints is tight, so it's safe to use the tight constraints as the parent size to resolve
+        // the child percentage length to save one extra layout to wait for parent layout complete.
+
+        // Percentage relative width priority: tight constraints width > renderer width > logical width
+        double? parentPaddingBoxWidth = parentRenderStyle?.paddingBoxConstraintsWidth
+          ?? parentRenderStyle?.paddingBoxWidth
+          ?? parentRenderStyle?.paddingBoxLogicalWidth;
+        double? parentContentBoxWidth = parentRenderStyle?.contentBoxConstraintsWidth
+          ?? parentRenderStyle?.contentBoxWidth
+          ?? parentRenderStyle?.contentBoxLogicalWidth;
+        // Percentage relative height priority: tight constraints height > renderer height > logical height
+        double? parentPaddingBoxHeight = parentRenderStyle?.paddingBoxConstraintsHeight
+          ?? parentRenderStyle?.paddingBoxHeight
+          ?? parentRenderStyle?.paddingBoxLogicalHeight;
+        double? parentContentBoxHeight = parentRenderStyle?.contentBoxConstraintsHeight
+          ?? parentRenderStyle?.contentBoxHeight
+          ?? parentRenderStyle?.contentBoxLogicalHeight;
+
+        // Positioned element is positioned relative to the padding box of its containing block
+        // while the others relative to the content box.
+        double? relativeParentWidth = isPositioned
+          ? parentPaddingBoxWidth
+          : parentContentBoxWidth;
+        double? relativeParentHeight = isPositioned
+          ? parentPaddingBoxHeight
+          : parentContentBoxHeight;
 
         switch (propertyName) {
           case FONT_SIZE:
@@ -173,11 +208,6 @@ class CSSLengthValue {
             // The percentage height of positioned element and flex item resolves against the rendered height
             // of parent, mark parent as needs relayout if rendered height is not ready yet.
             if (isPositioned || isGrandParentFlexLayout) {
-              // Percentage relative height priority: logical height > renderer height
-              double? relativeParentHeight = isPositioned ?
-                parentRenderStyle?.paddingBoxLogicalHeight ?? parentRenderStyle?.paddingBoxHeight :
-                parentRenderStyle?.contentBoxLogicalHeight ?? parentRenderStyle?.contentBoxHeight;
-
               if (relativeParentHeight  != null) {
                 _computedValue = value! * relativeParentHeight;
               } else {
@@ -240,8 +270,6 @@ class CSSLengthValue {
           case TOP:
           case BOTTOM:
             // Offset of positioned element starts from the edge of padding box of containing block.
-            double? parentPaddingBoxHeight = parentRenderStyle?.paddingBoxHeight ??
-              parentRenderStyle?.paddingBoxLogicalHeight;
             if (parentPaddingBoxHeight != null) {
               _computedValue = value! * parentPaddingBoxHeight;
             } else {
@@ -249,14 +277,13 @@ class CSSLengthValue {
               if (renderBoxModel != null) {
                 renderBoxModel.markParentNeedsRelayout();
               }
+              // Set as initial value, use infinity as auto value.
               _computedValue = double.infinity;
             }
             break;
           case LEFT:
           case RIGHT:
             // Offset of positioned element starts from the edge of padding box of containing block.
-            double? parentPaddingBoxWidth = parentRenderStyle?.paddingBoxWidth ??
-              parentRenderStyle?.paddingBoxLogicalWidth;
             if (parentPaddingBoxWidth != null) {
               _computedValue = value! * parentPaddingBoxWidth;
             } else {
@@ -266,7 +293,8 @@ class CSSLengthValue {
               }
               _computedValue = double.infinity;
             }
-          break;
+            break;
+
           case TRANSLATE:
           case BACKGROUND_SIZE:
           case BORDER_TOP_LEFT_RADIUS:
@@ -277,26 +305,16 @@ class CSSLengthValue {
             // Percentages for the vertical axis refer to the height of the box.
             double? borderBoxWidth = renderStyle!.borderBoxWidth ?? renderStyle!.borderBoxLogicalWidth;
             double? borderBoxHeight = renderStyle!.borderBoxHeight ?? renderStyle!.borderBoxLogicalHeight;
-            if (axisType == Axis.horizontal) {
-              if (borderBoxWidth != null) {
-                _computedValue = value! * borderBoxWidth;
-              } else {
-                // Mark parent to relayout to get renderer height of parent.
-                if (renderBoxModel != null) {
-                  renderBoxModel.markParentNeedsRelayout();
-                }
-                _computedValue = 0;
-              }
-            } else if (axisType == Axis.vertical) {
-              if (borderBoxHeight != null) {
-                _computedValue = value! * borderBoxHeight;
-              } else {
-                // Mark parent to relayout to get renderer height of parent.
-                if (renderBoxModel != null) {
-                  renderBoxModel.markParentNeedsRelayout();
-                }
-                _computedValue = 0;
-              }
+            double? borderBoxDimension = axisType == Axis.horizontal ? borderBoxWidth : borderBoxHeight;
+
+            if (borderBoxDimension != null) {
+              _computedValue = value! * borderBoxDimension;
+            } else {
+              _computedValue = propertyName == TRANSLATE
+              // Transform will be cached once resolved, so avoid resolve if width not defined.
+              // Use double.infinity to indicate percentage not resolved.
+                ? double.infinity
+                : 0;
             }
           break;
         }
@@ -335,7 +353,7 @@ class CSSLengthValue {
   }
 
   bool get isNotAuto {
-    return type != CSSLengthType.AUTO;
+    return !isAuto;
   }
 
   bool get isNone {
@@ -404,7 +422,18 @@ class CSSLength {
   }
 
   static bool isLength(String? value) {
-    return value != null && (value == ZERO || _lengthRegExp.hasMatch(value));
+    return value != null && (
+      value == ZERO
+      || _lengthRegExp.hasMatch(value)
+    );
+  }
+
+  static bool isNonNegativeLength(String? value) {
+    return value != null && (
+      value == ZERO
+      || _negativeZeroRegExp.hasMatch(value) // Negative zero is considered to be equal to zero.
+      || _nonNegativeLengthRegExp.hasMatch(value)
+    );
   }
 
   static CSSLengthValue? resolveLength(String text, RenderStyle? renderStyle, String propertyName) {
@@ -503,9 +532,7 @@ class CSSLength {
             // Using fallback value if not match user agent-defined environment variable: env(xxx, 50px).
             return parseLength(notations[0].args[1], renderStyle, propertyName, axisType);
         }
-
       }
-      // TODO: impl CSS Variables.
     }
 
     if (value == 0) {
