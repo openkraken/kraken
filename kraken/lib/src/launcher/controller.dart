@@ -1077,14 +1077,23 @@ class KrakenController {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_LOAD_START);
     }
 
+    // If bundle not configured at dart side, url can be obtained from env or native side.
+    if (bundle == null) {
+      String? envUrl = (getBundleURLFromEnv() ?? getBundlePathFromEnv());
+      // Load url from native side (Java,Objective-C).
+      if (envUrl == null && methodChannel is KrakenNativeChannel) {
+        envUrl = await (methodChannel as KrakenNativeChannel).getUrl();
+      }
+      if (envUrl != null) {
+        bundle = KrakenBundle.fromUrl(envUrl);
+      }
+    } else if (bundle.src.isEmpty && bundle.content == null && bundle.bytecode == null) {
+      // Do nothing if bundle is empty.
+      return;
+    }
+
     // Load bundle need push curret href to history.
     if (bundle != null) {
-      String? url = bundle.uri.toString().isEmpty
-          ? (getBundleURLFromEnv() ?? getBundlePathFromEnv())
-          : href;
-      if (url == null && methodChannel is KrakenNativeChannel) {
-        url = await (methodChannel as KrakenNativeChannel).getUrl();
-      }
       _addHistory(bundle);
       this.bundle = bundle;
     }
