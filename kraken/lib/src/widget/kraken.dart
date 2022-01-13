@@ -251,6 +251,15 @@ class _KrakenState extends State<Kraken> with RouteAware {
       NextFocusIntent: CallbackAction<NextFocusIntent>(onInvoke: _handleNextFocus),
       PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(onInvoke: _handlePreviousFocus),
 
+      // Action to delete text.
+      DeleteTextIntent: CallbackAction<DeleteTextIntent>(onInvoke: _handleDeleteText),
+
+      // Action of hot keys control/command + (X, C, V, A).
+      SelectAllTextIntent: CallbackAction<SelectAllTextIntent>(onInvoke: _handleSelectAllText),
+      CopySelectionTextIntent: CallbackAction<CopySelectionTextIntent>(onInvoke: _handleCopySelectionText),
+      CutSelectionTextIntent: CallbackAction<CutSelectionTextIntent>(onInvoke: _handleCutSelectionText),
+      PasteTextIntent: CallbackAction<PasteTextIntent>(onInvoke: _handlePasteText),
+
       // Action of mouse move hotkeys.
       MoveSelectionRightByLineTextIntent: CallbackAction<MoveSelectionRightByLineTextIntent>(onInvoke: _handleMoveSelectionRightByLineText),
       MoveSelectionLeftByLineTextIntent: CallbackAction<MoveSelectionLeftByLineTextIntent>(onInvoke: _handleMoveSelectionLeftByLineText),
@@ -542,6 +551,56 @@ class _KrakenState extends State<Kraken> with RouteAware {
       // None editable exists, focus the previous widget.
     } else {
       _focusNode.previousFocus();
+    }
+  }
+
+  void _handleDeleteText(DeleteTextIntent intent) {
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.delete(SelectionChangedCause.keyboard);
+      }
+    }
+  }
+
+  void _handleSelectAllText(SelectAllTextIntent intent) {
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.selectAll(SelectionChangedCause.keyboard);
+      }
+    }
+  }
+
+  void _handleCopySelectionText(CopySelectionTextIntent intent) {
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.copySelection();
+      }
+    }
+  }
+
+  void _handleCutSelectionText(CutSelectionTextIntent intent) {
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.cutSelection(SelectionChangedCause.keyboard);
+      }
+    }
+  }
+
+  void _handlePasteText(PasteTextIntent intent) {
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.pasteText(SelectionChangedCause.keyboard);
+      }
     }
   }
 
