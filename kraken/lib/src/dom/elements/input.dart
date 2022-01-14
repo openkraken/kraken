@@ -810,7 +810,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     WidgetDelegate? widgetDelegate = ownerDocument.widgetDelegate;
 
     if (_selectionControls == null) {
-      _selectionOverlay?.hide();
+      _selectionOverlay?.dispose();
       _selectionOverlay = null;
     } else if (widgetDelegate != null) {
       if (_selectionOverlay == null) {
