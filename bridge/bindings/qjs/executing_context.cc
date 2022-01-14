@@ -44,7 +44,6 @@ JSClassID ExecutionContextGCTracker::contextGcTrackerClassId{0};
 ExecutionContext::ExecutionContext(int32_t contextId, const JSExceptionHandler& handler, void* owner)
     : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false), uniqueId(context_unique_id++) {
   // @FIXME: maybe contextId will larger than MAX_JS_CONTEXT
-  KRAKEN_LOG(VERBOSE) << "Create new ExectionContext " << this;
   valid_contexts[contextId] = true;
   if (contextId > running_context_list)
     running_context_list = contextId;
@@ -149,7 +148,6 @@ ExecutionContext::~ExecutionContext() {
   }
 #endif
   m_ctx = nullptr;
-  KRAKEN_LOG(VERBOSE) << "Free ExectionContext " << this;
 }
 
 bool ExecutionContext::evaluateJavaScript(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) {
