@@ -14,9 +14,9 @@ namespace kraken::binding::qjs {
 
 std::once_flag kWindowInitOnceFlag;
 
-void bindWindow(std::unique_ptr<ExecutionContext>& context) {
+void bindWindow(ExecutionContext* context) {
   // Set globalThis and Window's prototype to EventTarget's prototype to support EventTarget methods in global.
-  auto* windowConstructor = new Window(context.get());
+  auto* windowConstructor = new Window(context);
   JS_SetPrototype(context->ctx(), context->global(), windowConstructor->prototype());
   context->defineGlobalProperty("Window", windowConstructor->jsObject);
 

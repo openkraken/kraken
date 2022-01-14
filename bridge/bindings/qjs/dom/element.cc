@@ -19,8 +19,8 @@ namespace kraken::binding::qjs {
 
 std::once_flag kElementInitOnceFlag;
 
-void bindElement(std::unique_ptr<ExecutionContext>& context) {
-  auto* constructor = Element::instance(context.get());
+void bindElement(ExecutionContext* context) {
+  auto* constructor = Element::instance(context);
   //  auto* domRectConstructor = BoundingClientRect
   context->defineGlobalProperty("Element", constructor->jsObject);
   context->defineGlobalProperty("HTMLElement", JS_DupValue(context->ctx(), constructor->jsObject));

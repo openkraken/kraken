@@ -16,7 +16,7 @@ TEST(MouseEvent, init) {
     logCalled = true;
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
   const char* code = "let mouseEvent = new MouseEvent('click', {clientX: 10, clientY: 20}); console.log(mouseEvent.clientX);";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
 

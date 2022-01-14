@@ -19,7 +19,7 @@ TEST(Window, instanceofEventTarget) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
   const char* code = "console.log(window instanceof EventTarget)";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
 
@@ -39,7 +39,7 @@ requestAnimationFrame(() => {
 )";
 
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
-  TEST_runLoop(bridge->getContext().get());
+  TEST_runLoop(bridge->getContext());
 }
 
 TEST(Window, cancelAnimationFrame) {
@@ -55,5 +55,5 @@ cancelAnimationFrame(id);
 )";
 
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
-  TEST_runLoop(bridge->getContext().get());
+  TEST_runLoop(bridge->getContext());
 }

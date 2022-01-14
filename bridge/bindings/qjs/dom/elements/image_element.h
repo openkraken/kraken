@@ -10,7 +10,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindImageElement(std::unique_ptr<ExecutionContext>& context);
+void bindImageElement(ExecutionContext* context);
 
 class ImageElementInstance;
 class ImageElement : public Element {

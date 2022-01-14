@@ -107,9 +107,8 @@ void disposePage(int32_t contextId) {
     return;
 
   auto* page = static_cast<kraken::KrakenPage*>(kraken::KrakenPage::pageContextPool[contextId]);
-  // In order to avoid accessing pageContextPool when the page is being released. We need to clear the value in pageContextPool before releasing.
-  kraken::KrakenPage::pageContextPool[contextId] = nullptr;
   delete page;
+  kraken::KrakenPage::pageContextPool[contextId] = nullptr;
 }
 
 int32_t allocateNewPage(int32_t targetContextId) {
@@ -142,7 +141,7 @@ bool checkPage(int32_t contextId, void* context) {
   if (kraken::KrakenPage::pageContextPool[contextId] == nullptr)
     return false;
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
-  return page->getContext().get() == context;
+  return page->getContext() == context;
 }
 
 void evaluateScripts(int32_t contextId, NativeString* code, const char* bundleFilename, int startLine) {

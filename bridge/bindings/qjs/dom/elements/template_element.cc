@@ -14,8 +14,8 @@ TemplateElement::TemplateElement(ExecutionContext* context) : Element(context) {
   JS_SetPrototype(m_ctx, m_prototypeObject, Element::instance(m_context)->prototype());
 }
 
-void bindTemplateElement(std::unique_ptr<ExecutionContext>& context) {
-  auto* constructor = TemplateElement::instance(context.get());
+void bindTemplateElement(ExecutionContext* context) {
+  auto* constructor = TemplateElement::instance(context);
   context->defineGlobalProperty("HTMLTemplateElement", constructor->jsObject);
 }
 

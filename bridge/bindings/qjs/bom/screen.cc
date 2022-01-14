@@ -7,8 +7,8 @@
 
 namespace kraken::binding::qjs {
 
-void bindScreen(std::unique_ptr<ExecutionContext>& context) {
-  auto* screen = new Screen(context.get());
+void bindScreen(ExecutionContext* context) {
+  auto* screen = new Screen(context);
   context->defineGlobalProperty("screen", screen->jsObject);
 }
 

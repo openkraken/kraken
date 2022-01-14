@@ -945,16 +945,14 @@ class KrakenController {
 
   Future<void> unload() async {
     assert(!_view._disposed, 'Kraken have already disposed');
-    _module.dispose();
-    _view.dispose();
-
     // Should clear previous page cached ui commands
     clearUICommand(_view.contextId);
 
     // Wait for next microtask to make sure C++ native Elements are GC collected.
     Completer completer = Completer();
     Future.microtask(() {
-      disposePage(_view.contextId);
+      _module.dispose();
+      _view.dispose();
 
       allocateNewPage(_view.contextId);
 
@@ -963,7 +961,10 @@ class KrakenController {
           enableDebug: _view.enableDebug,
           contextId: _view.contextId,
           rootController: this,
-          navigationDelegate: _view.navigationDelegate);
+          navigationDelegate: _view.navigationDelegate,
+          gestureListener: _view.gestureListener,
+          widgetDelegate: _view.widgetDelegate
+      );
 
       _module = KrakenModuleController(this, _view.contextId);
 

@@ -19,7 +19,7 @@ TEST(EventTarget, addEventListener) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
   const char* code = "let div = document.createElement('div'); function f(){ console.log(1234); }; div.addEventListener('click', f); div.dispatchEvent(new Event('click'));";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
 
@@ -34,7 +34,7 @@ TEST(EventTarget, removeEventListener) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
   const char* code =
       "let div = document.createElement('div'); function f(){ console.log(1234); }; div.addEventListener('click', f); div.removeEventListener('click', f); div.dispatchEvent(new Event('click'));";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
@@ -54,7 +54,7 @@ TEST(EventTarget, setNoEventTargetProperties) {
     errorCalled = true;
   });
 
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
   const char* code = "let div = document.createElement('div'); div._a = { name: 1}; console.log(div._a); document.body.appendChild(div);";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   EXPECT_EQ(errorCalled, false);
@@ -71,7 +71,7 @@ TEST(EventTarget, propertyEventHandler) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
   const char* code =
       "let div = document.createElement('div'); "
       "div.onclick = function() { return 1234; };"
@@ -91,7 +91,7 @@ TEST(EventTarget, setUnExpectedAttributeEventHandler) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
   const char* code =
       "let div = document.createElement('div'); "
       "div.onclick = function() { return 1234; };"
@@ -114,7 +114,7 @@ TEST(EventTarget, propertyEventOnWindow) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
   const char* code =
       "window.onclick = function() { console.log(1234); };"
       "window.dispatchEvent(new Event('click'));";
@@ -134,7 +134,7 @@ TEST(EventTarget, asyncFunctionCallback) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
   std::string code = R"(
     const img = document.createElement('img');
     img.style.width = '100px';
@@ -176,7 +176,7 @@ TEST(EventTarget, ClassInheritEventTarget) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
   std::string code = std::string(R"(
 class Sample extends EventTarget {
   constructor() {
@@ -211,7 +211,7 @@ TEST(EventTarget, dispatchEventOnGC) {
     EXPECT_STREQ(message.c_str(), "1234");
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
   std::string code = std::string(R"(
 {
 // Wrap div in a block scope will be freed by GC
@@ -238,7 +238,7 @@ setTimeout(() => {});
   // Run gc to trigger eventTarget been disposed by GC.
   JS_RunGC(context->runtime());
 
-  TEST_runLoop(context.get());
+  TEST_runLoop(context);
 
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);

@@ -14,7 +14,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindElement(std::unique_ptr<ExecutionContext>& context);
+void bindElement(ExecutionContext* context);
 
 class ElementInstance;
 

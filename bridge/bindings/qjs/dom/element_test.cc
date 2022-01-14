@@ -19,7 +19,7 @@ TEST(Element, setAttribute) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
   const char* code =
       "let div = document.createElement('div');"
       "div.setAttribute('hello', 1234);"
@@ -41,7 +41,7 @@ TEST(Element, getAttribute) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
   const char* code =
       "let div = document.createElement('div');"
       "let string = 'helloworld';"
@@ -66,7 +66,7 @@ TEST(Element, setAttributeWithHTML) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
   const char* code =
       "let div = document.createElement('div');"
       "div.innerHTML = '<img src=\"https://miniapp-nikestore-demo.oss-cn-beijing.aliyuncs.com/white_shoes_v1.png\" style=\"width:100%;height:auto;\">';";
@@ -85,7 +85,7 @@ TEST(Element, instanceofNode) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
   const char* code =
       "let div = document.createElement('div');"
       "console.log(div instanceof Node)";
@@ -106,7 +106,7 @@ TEST(Element, instanceofEventTarget) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
   const char* code =
       "let div = document.createElement('div');"
       "console.log(div instanceof EventTarget)";
@@ -129,13 +129,13 @@ TEST(Element, stringifyBoundingClientRect) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
 
   NativeBoundingClientRect nativeRect{
       10.0, 20.0, 30.0, 40.0, 10.0, 20.0, 30.0, 40.0,
   };
 
-  auto* clientRect = new BoundingClientRect(context.get(), &nativeRect);
+  auto* clientRect = new BoundingClientRect(context, &nativeRect);
   context->defineGlobalProperty("boundingClient", clientRect->jsObject);
 
   const char* code = "console.log(JSON.stringify(boundingClient))";
