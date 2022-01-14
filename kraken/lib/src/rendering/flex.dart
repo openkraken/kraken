@@ -556,7 +556,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       CSSPositionedLayout.applyPositionedChildOffset(this, child);
       // Position of positioned element affect the scroll size of container.
       extendMaxScrollableSize(child);
-      ensureBoxSizeLargerThanScrollableSize();
     }
 
     // Set offset of sticky element on each layout.
@@ -1406,8 +1405,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     );
     size = getBoxSize(layoutContentSize);
 
-    _setMaxScrollableSizeForFlex(_runMetrics);
-
     // Set auto value of min-width and min-height based on size of flex items.
     if (_isHorizontalFlexDirection) {
       autoMinWidth = _getMainAxisAutoSize(_runMetrics);
@@ -1556,8 +1553,10 @@ class RenderFlexLayout extends RenderLayoutBox {
         }
 
         Size childScrollableSize = child.size;
-        double? childMarginTop = 0;
-        double? childMarginLeft = 0;
+
+        double childOffsetX = 0;
+        double childOffsetY = 0;
+
         if (child is RenderBoxModel) {
           RenderStyle childRenderStyle = child.renderStyle;
           CSSOverflowType overflowX = childRenderStyle.effectiveOverflowX;
@@ -1567,17 +1566,34 @@ class RenderFlexLayout extends RenderLayoutBox {
               overflowY == CSSOverflowType.visible) {
             childScrollableSize = child.scrollableSize;
           }
-          childMarginTop = childRenderStyle.marginTop.computedValue;
-          childMarginLeft = childRenderStyle.marginLeft.computedValue;
+
+          // Scrollable overflow area is defined in the following spec
+          // which includes transform offset.
+          // https://www.w3.org/TR/css-overflow-3/#scrollable-overflow-region
+          childOffsetX += childRenderStyle.marginLeft.computedValue;
+          childOffsetY += childRenderStyle.marginTop.computedValue;
+
+          Offset? relativeOffset = CSSPositionedLayout.getRelativeOffset(childRenderStyle);
+          if (relativeOffset != null) {
+            childOffsetX += relativeOffset.dx;
+            childOffsetY += relativeOffset.dy;
+          }
+
+          final Matrix4 transform = child.getEffectiveTransform();
+          final Offset? transformOffset = MatrixUtils.getAsTranslation(transform);
+          if (transformOffset != null) {
+            childOffsetX += transformOffset.dx;
+            childOffsetY += transformOffset.dy;
+          }
         }
 
         scrollableMainSizeOfChildren.add(preSiblingsMainSize +
             (_isHorizontalFlexDirection
-                ? childScrollableSize.width + childMarginLeft
-                : childScrollableSize.height + childMarginTop));
+                ? childScrollableSize.width + childOffsetX
+                : childScrollableSize.height + childOffsetY));
         scrollableCrossSizeOfChildren.add(_isHorizontalFlexDirection
-            ? childScrollableSize.height + childMarginTop
-            : childScrollableSize.width + childMarginLeft);
+              ? childScrollableSize.height + childOffsetY
+              : childScrollableSize.width + childOffsetX);
         runChildrenList.add(child);
       }
 
@@ -1965,6 +1981,8 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       crossAxisOffset += runCrossAxisExtent + runBetweenSpace;
     }
+
+    _setMaxScrollableSizeForFlex(_runMetrics);
   }
 
   // Whether need to stretch child in the cross axis according to alignment property and child cross length.

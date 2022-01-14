@@ -1023,9 +1023,7 @@ class RenderBoxModel extends RenderBox
         renderStyle.paddingTop.computedValue +
         renderStyle.paddingBottom.computedValue);
 
-    if (clipX || clipY) {
-      setUpOverflowScroller(scrollableSize, scrollableViewportSize);
-    }
+    setUpOverflowScroller(scrollableSize, scrollableViewportSize);
 
     if (positionedHolder != null &&
         renderStyle.position != CSSPositionType.sticky) {
@@ -1143,23 +1141,6 @@ class RenderBoxModel extends RenderBox
     EdgeInsets? resolvedPadding = renderStyle.padding.resolve(TextDirection.ltr);
     paintDecoration(context, offset, resolvedPadding);
     _chainPaintOverflow(context, offset);
-  }
-
-  // For scrolling box, the minimum width and height should not less than scrollableSize
-  void ensureBoxSizeLargerThanScrollableSize() {
-    if (isScrollingContentBox) {
-      double newBoxWidth = size.width;
-      double newBoxHeight = size.height;
-
-      if (scrollableSize.width > newBoxWidth) {
-        newBoxWidth = scrollableSize.width;
-      }
-      if (scrollableSize.height > newBoxHeight) {
-        newBoxHeight = scrollableSize.height;
-      }
-
-      size = Size(newBoxWidth, newBoxHeight);
-    }
   }
 
   void _chainPaintOverflow(PaintingContext context, Offset offset) {

@@ -195,7 +195,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       CSSPositionedLayout.applyPositionedChildOffset(this, child);
       // Position of positioned element affect the scroll size of container.
       extendMaxScrollableSize(child);
-      ensureBoxSizeLargerThanScrollableSize();
     }
 
     // Set offset of sticky element on each layout.
@@ -474,8 +473,6 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     size = getBoxSize(layoutContentSize);
 
-    _setMaxScrollableSizeForFlow(_runMetrics);
-
     autoMinWidth = _getMainAxisAutoSize(_runMetrics);
     autoMinHeight = _getCrossAxisAutoSize(_runMetrics);
   }
@@ -669,6 +666,8 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       crossAxisOffset += runCrossAxisExtent + runBetweenSpace;
     }
+
+    _setMaxScrollableSizeForFlow(_runMetrics);
   }
 
   // Compute distance to baseline of flow layout.
@@ -863,8 +862,10 @@ class RenderFlowLayout extends RenderLayoutBox {
         }
 
         Size childScrollableSize = child.size;
-        double? childMarginTop = 0;
-        double? childMarginLeft = 0;
+
+        double childOffsetX = 0;
+        double childOffsetY = 0;
+
         if (child is RenderBoxModel) {
           RenderStyle childRenderStyle = child.renderStyle;
           CSSOverflowType overflowX = childRenderStyle.effectiveOverflowX;
@@ -874,14 +875,31 @@ class RenderFlowLayout extends RenderLayoutBox {
               overflowY == CSSOverflowType.visible) {
             childScrollableSize = child.scrollableSize;
           }
-          childMarginTop = _getChildMarginTop(child);
-          childMarginLeft = childRenderStyle.marginLeft.computedValue;
+
+          // Scrollable overflow area is defined in the following spec
+          // which includes transform offset.
+          // https://www.w3.org/TR/css-overflow-3/#scrollable-overflow-region
+          childOffsetX += childRenderStyle.marginLeft.computedValue;
+          childOffsetY += _getChildMarginTop(child);
+
+          Offset? relativeOffset = CSSPositionedLayout.getRelativeOffset(childRenderStyle);
+          if (relativeOffset != null) {
+            childOffsetX += relativeOffset.dx;
+            childOffsetY += relativeOffset.dy;
+          }
+
+          final Matrix4 transform = child.getEffectiveTransform();
+          final Offset? transformOffset = MatrixUtils.getAsTranslation(transform);
+          if (transformOffset != null) {
+            childOffsetX += transformOffset.dx;
+            childOffsetY += transformOffset.dy;
+          }
         }
 
         scrollableMainSizeOfChildren.add(
-            preSiblingsMainSize + childScrollableSize.width + childMarginLeft);
+            preSiblingsMainSize + childScrollableSize.width + childOffsetX);
         scrollableCrossSizeOfChildren
-            .add(childScrollableSize.height + childMarginTop);
+            .add(childScrollableSize.height + childOffsetY);
         runChildrenList.add(child);
       }
 

@@ -164,6 +164,12 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
   }
 
   void setUpOverflowScroller(Size scrollableSize, Size viewportSize) {
+    // Recycler layout not need repaintBoundary and scroll/pointer listeners,
+    // ignoring overflowX or overflowY sets, which handle it self.
+    if (this is RenderSliverListLayout) {
+      return;
+    }
+
     _scrollableSize = scrollableSize;
     _viewportSize = viewportSize;
     if (_scrollOffsetX != null) {
