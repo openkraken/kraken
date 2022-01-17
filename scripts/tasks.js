@@ -601,6 +601,10 @@ task('build-linux-kraken-lib', (done) => {
     stdio: 'inherit'
   });
 
+  const libkrakenPath = path.join(paths.bridge, 'build/linux/lib/libkraken.so');
+  // Patch libkraken.so's runtime path.
+  execSync(`chrpath --replace \\$ORIGIN ${libkrakenPath}`, { stdio: 'inherit' });
+
   done();
 });
 
