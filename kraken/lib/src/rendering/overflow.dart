@@ -207,12 +207,14 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
       // Overflow should not cover border.
       Offset clipOffset = offset + Offset(borderEdge.left, borderEdge.top);
       final Rect clipRect = clipOffset & paddingBoxSize;
-      context.canvas.save();
-      context.canvas.clipRect(clipRect);
+      Canvas canvas = context.canvas;
+
+      canvas.save();
+      canvas.clipRect(clipRect);
 
       callback(context, offset);
 
-      context.canvas.restore();
+      canvas.restore();
       return;
     }
 

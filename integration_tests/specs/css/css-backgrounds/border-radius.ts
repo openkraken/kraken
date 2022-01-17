@@ -27,6 +27,64 @@ describe('border_radius', () => {
     await snapshot();
   });
 
+  it('works with overflow hidden', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          'border-radius': '10px',
+          backgroundColor: 'green',
+          width: '100px',
+          height: '100px',
+          padding: '10px',
+          overflow: 'hidden'
+        },
+      }, [
+          createElement('div', {
+              style: {
+                width: '100px',
+                height: '250px',
+                backgroundColor: 'yellow'
+              }
+          })
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it('works with overflow clip', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          'border-radius': '10px',
+          backgroundColor: 'green',
+          width: '100px',
+          height: '100px',
+          padding: '10px',
+          overflow: 'clip'
+        },
+      }, [
+          createElement('div', {
+              style: {
+                width: '100px',
+                height: '250px',
+                backgroundColor: 'yellow'
+              }
+          })
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
   it('works with image', async () => {
     let image;
     image = createElement(
@@ -35,6 +93,45 @@ describe('border_radius', () => {
         src: 'assets/100x100-green.png',
         style: {
           'border-radius': '20px',
+        },
+      },
+    );
+    BODY.appendChild(image);
+
+    await snapshot(0.1);
+  });
+
+  it('works with image width border', async () => {
+    let image;
+    image = createElement(
+      'img',
+      {
+        src: 'assets/100x100-green.png',
+        style: {
+          'border-radius': '30px',
+          border: '10px solid red',
+          width: '100px',
+          height: '100px',
+        },
+      },
+    );
+    BODY.appendChild(image);
+
+    await snapshot(0.1);
+  });
+
+  it('works with image width border and padding', async () => {
+    let image;
+    image = createElement(
+      'img',
+      {
+        src: 'assets/100x100-green.png',
+        style: {
+          'border-radius': '30px',
+          border: '10px solid red',
+          padding: '10px',
+          width: '100px',
+          height: '100px',
         },
       },
     );

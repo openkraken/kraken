@@ -133,7 +133,9 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
       && this is RenderIntrinsic
       && renderStyle.intrinsicRatio != null;
 
-    if (isClipOverflowContent || isClipRenderIntrinsic) {
+    bool isClipContent = isClipOverflowContent || isClipRenderIntrinsic;
+
+    if (isClipContent) {
       context.canvas.save();
 
       RRect rRect;
@@ -163,7 +165,7 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
 
     callback(context, offset);
 
-    if (isClipRenderIntrinsic) {
+    if (isClipContent) {
       context.canvas.restore();
     }
   }
