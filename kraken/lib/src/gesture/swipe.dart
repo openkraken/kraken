@@ -43,7 +43,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
     this.onSwipe,
-  }) : super(debugOwner: debugOwner, supportedDevices: supportedDevices);
+  }) : super(debugOwner: debugOwner);
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
   /// Configure the behavior of offsets sent to [onStart].
