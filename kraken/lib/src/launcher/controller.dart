@@ -111,6 +111,8 @@ class KrakenViewController
     this.navigationDelegate,
     this.gestureListener,
     this.widgetDelegate,
+    // Viewport won't change when kraken page reload, should reuse previous page's viewportBox.
+    RenderViewportBox? originalViewport
   }) {
     if (enableDebug) {
       debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
@@ -128,11 +130,18 @@ class KrakenViewController
       PerformanceTiming.instance().mark(PERF_CREATE_VIEWPORT_START);
     }
 
-    viewport = RenderViewportBox(
+    if (originalViewport != null) {
+      // Should update to newlast controller.
+      originalViewport.controller = rootController;
+      viewport = originalViewport;
+    } else {
+      viewport = RenderViewportBox(
         background: background,
         viewportSize: Size(viewportWidth, viewportHeight),
         gestureListener: gestureListener,
-        controller: rootController);
+        controller: rootController
+      );
+    }
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_VIEWPORT_END);
@@ -957,13 +966,14 @@ class KrakenController {
       allocateNewPage(_view.contextId);
 
       _view = KrakenViewController(view.viewportWidth, view.viewportHeight,
-          background: _view.background,
-          enableDebug: _view.enableDebug,
-          contextId: _view.contextId,
-          rootController: this,
-          navigationDelegate: _view.navigationDelegate,
-          gestureListener: _view.gestureListener,
-          widgetDelegate: _view.widgetDelegate
+        background: _view.background,
+        enableDebug: _view.enableDebug,
+        contextId: _view.contextId,
+        rootController: this,
+        navigationDelegate: _view.navigationDelegate,
+        gestureListener: _view.gestureListener,
+        widgetDelegate: _view.widgetDelegate,
+        originalViewport: _view.viewport
       );
 
       _module = KrakenModuleController(this, _view.contextId);

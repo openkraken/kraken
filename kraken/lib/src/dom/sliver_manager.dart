@@ -98,7 +98,7 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
       if (index < renderNodes.length) {
         renderNodes
             .elementAt(index)
-            .disposeRenderObject();
+            .disposeRenderObject(deep: true);
         return;
       }
     }

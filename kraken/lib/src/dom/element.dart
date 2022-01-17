@@ -701,13 +701,16 @@ class Element extends Node
 
   /// Release any resources held by [renderBoxModel].
   @override
-  void disposeRenderObject() {
+  void disposeRenderObject({ bool deep = false }) {
     if (renderBoxModel == null) return;
 
     willDetachRenderer();
 
-    for (Node child in childNodes) {
-      child.disposeRenderObject();
+    // Dispose all renderObject when deep.
+    if (deep) {
+      for (Node child in childNodes) {
+        child.disposeRenderObject(deep: true);
+      }
     }
 
     didDetachRenderer();
