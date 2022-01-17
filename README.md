@@ -13,8 +13,7 @@
 2. Open with kraken
 
     ```shell
-    # kraken [localfile|URL]
-    $ kraken https://raw.githubusercontent.com/openkraken/kraken/master/kraken/example/assets/bundle.js
+    $ kraken run https://raw.githubusercontent.com/openkraken/kraken/master/kraken/example/assets/bundle.js
     ```
 
 ## 💌 Why kraken
