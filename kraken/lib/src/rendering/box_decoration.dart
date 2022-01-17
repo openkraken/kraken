@@ -74,11 +74,14 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
   }
 
   void paintDecoration(
-      PaintingContext context, Offset offset, EdgeInsets? padding) {
+      PaintingContext context, Offset offset, PaintingContextCallback callback) {
     CSSBoxDecoration? decoration = renderStyle.decoration;
     DecorationPosition decorationPosition = renderStyle.decorationPosition;
     ImageConfiguration imageConfiguration = renderStyle.imageConfiguration;
-    if (decoration == null) return;
+
+    if (decoration == null) return callback(context, offset);
+
+    EdgeInsets? padding = renderStyle.padding.resolve(TextDirection.ltr);
     _painter ??=
         BoxDecorationPainter(padding, renderStyle, markNeedsPaint);
 
@@ -118,6 +121,50 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     if (decorationPosition == DecorationPosition.foreground) {
       _painter!.paint(context.canvas, offset, filledConfiguration);
       if (decoration.isComplex) context.setIsComplexHint();
+    }
+
+    // Content of renderBox are effected by border-radius in the following cases:
+    // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
+    bool isClipOverflowContent = renderStyle.borderRadius != null
+      && (renderStyle.effectiveOverflowX != CSSOverflowType.visible
+      || renderStyle.effectiveOverflowY != CSSOverflowType.visible);
+
+    bool isClipRenderIntrinsic = renderStyle.borderRadius != null
+      && this is RenderIntrinsic
+      && renderStyle.intrinsicRatio != null;
+
+    if (isClipOverflowContent || isClipRenderIntrinsic) {
+      context.canvas.save();
+
+      RRect rRect;
+      Rect rect = offset & size;
+      BorderRadius borderRadius = renderStyle.decoration!.borderRadius as BorderRadius;
+      RRect borderRRect = borderRadius.toRRect(rect);
+      // A borderRadius can only be given for a uniform Border in Flutter.
+      double? borderTop = renderStyle.borderTopWidth?.computedValue;
+      RRect paddingRRect = borderTop != null
+        ? borderRRect.deflate(borderTop)
+        : borderRRect;
+
+      // The content of box with overflow values other than visible is trimmed to the padding edge curve.
+      if (isClipOverflowContent) {
+        rRect = paddingRRect;
+
+      // The content of replaced elements is always trimmed to the content edge curve.
+      } else {
+        // @TODO: Currently only support clip uniform padding for replaced element.
+        double paddingTop = renderStyle.paddingTop.computedValue;
+        RRect contentRRect = paddingRRect.deflate(paddingTop);
+        rRect = contentRRect;
+      }
+
+      context.canvas.clipRRect(rRect);
+    }
+
+    callback(context, offset);
+
+    if (isClipRenderIntrinsic) {
+      context.canvas.restore();
     }
   }
 

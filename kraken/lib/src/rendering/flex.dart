@@ -1568,17 +1568,22 @@ class RenderFlexLayout extends RenderLayoutBox {
           }
 
           // Scrollable overflow area is defined in the following spec
-          // which includes transform offset.
+          // which includes margin, position and transform offset.
           // https://www.w3.org/TR/css-overflow-3/#scrollable-overflow-region
+
+          // Add offset of margin.
           childOffsetX += childRenderStyle.marginLeft.computedValue;
           childOffsetY += childRenderStyle.marginTop.computedValue;
 
+          // Add offset of position relative.
+          // Offset of position absolute and fixed is added in layout stage of positioned renderBox.
           Offset? relativeOffset = CSSPositionedLayout.getRelativeOffset(childRenderStyle);
           if (relativeOffset != null) {
             childOffsetX += relativeOffset.dx;
             childOffsetY += relativeOffset.dy;
           }
 
+          // Add offset of transform.
           final Matrix4 transform = child.getEffectiveTransform();
           final Offset? transformOffset = MatrixUtils.getAsTranslation(transform);
           if (transformOffset != null) {

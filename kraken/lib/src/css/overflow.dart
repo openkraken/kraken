@@ -121,6 +121,7 @@ mixin ElementOverflowMixin on ElementBase {
       bool shouldScrolling = false;
       switch(overflowX) {
         case CSSOverflowType.hidden:
+          // @TODO: Content of overflow hidden can be scrolled programmatically.
           _scrollableX = null;
           break;
         case CSSOverflowType.clip:
@@ -162,6 +163,7 @@ mixin ElementOverflowMixin on ElementBase {
       bool shouldScrolling = false;
       switch(overflowY) {
         case CSSOverflowType.hidden:
+          // @TODO: Content of overflow hidden can be scrolled programmatically.
           _scrollableY = null;
           break;
         case CSSOverflowType.clip:

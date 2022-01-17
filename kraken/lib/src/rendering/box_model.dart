@@ -1138,9 +1138,7 @@ class RenderBoxModel extends RenderBox
   }
 
   void _chainPaintDecoration(PaintingContext context, Offset offset) {
-    EdgeInsets? resolvedPadding = renderStyle.padding.resolve(TextDirection.ltr);
-    paintDecoration(context, offset, resolvedPadding);
-    _chainPaintOverflow(context, offset);
+    paintDecoration(context, offset, _chainPaintOverflow);
   }
 
   void _chainPaintOverflow(PaintingContext context, Offset offset) {

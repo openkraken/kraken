@@ -32,25 +32,13 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
       return false;
     }
 
-    // The content of replaced elements is always trimmed to the content edge curve.
-    // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
-    List<Radius>? borderRadius = renderStyle.borderRadius;
-    if (borderRadius != null) {
-      // Only clip when content of replaced element is loaded.
-      if (renderBoxModel is RenderIntrinsic && renderStyle.intrinsicRatio != null) {
-        return true;
-      }
-    }
-
     // Overflow value other than 'visible' always need to clip content.
     // https://www.w3.org/TR/css-overflow-3/#overflow-properties
     CSSOverflowType effectiveOverflowX = renderStyle.effectiveOverflowX;
     if (effectiveOverflowX != CSSOverflowType.visible) {
       Size scrollableSize = renderBoxModel.scrollableSize;
       Size scrollableViewportSize = renderBoxModel.scrollableViewportSize;
-      if (scrollableSize.width > scrollableViewportSize.width ||
-        borderRadius != null
-      ) {
+      if (scrollableSize.width > scrollableViewportSize.width) {
         return true;
       }
     }
@@ -67,25 +55,13 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
       return false;
     }
 
-    // The content of replaced elements is always trimmed to the content edge curve.
-    // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
-    List<Radius>? borderRadius = renderStyle.borderRadius;
-    if (borderRadius != null) {
-      // Only clip when content of replaced element is loaded.
-      if (renderBoxModel is RenderIntrinsic && renderStyle.intrinsicRatio != null) {
-        return true;
-      }
-    }
-
     // Overflow value other than 'visible' always need to clip content.
     // https://www.w3.org/TR/css-overflow-3/#overflow-properties
     CSSOverflowType effectiveOverflowY = renderStyle.effectiveOverflowY;
     if (effectiveOverflowY != CSSOverflowType.visible) {
       Size scrollableSize = renderBoxModel.scrollableSize;
       Size scrollableViewportSize = renderBoxModel.scrollableViewportSize;
-      if (scrollableSize.height > scrollableViewportSize.height ||
-        borderRadius != null
-      ) {
+      if (scrollableSize.height > scrollableViewportSize.height) {
         return true;
       }
     }
@@ -207,12 +183,45 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
   final LayerHandle<ClipRRectLayer> _clipRRectLayer = LayerHandle<ClipRRectLayer>();
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
-  void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, BoxDecoration? decoration, PaintingContextCallback callback) {
+  void paintOverflow(
+    PaintingContext context,
+    Offset offset,
+    EdgeInsets borderEdge,
+    BoxDecoration? decoration,
+    PaintingContextCallback callback
+  ) {
     if (clipX == false && clipY == false) return callback(context, offset);
+
+    Size paddingBoxSize = Size(
+      size.width - borderEdge.right - borderEdge.left,
+      size.height - borderEdge.bottom - borderEdge.top,
+    );
+
+    // Use canvas clipRect to clip overflow content when overflow content
+    // is hidden.
+    if (renderStyle.effectiveOverflowX == CSSOverflowType.hidden ||
+      renderStyle.effectiveOverflowY == CSSOverflowType.hidden ||
+      renderStyle.effectiveOverflowX == CSSOverflowType.clip ||
+      renderStyle.effectiveOverflowY == CSSOverflowType.clip
+    ) {
+      // Overflow should not cover border.
+      Offset clipOffset = offset + Offset(borderEdge.left, borderEdge.top);
+      final Rect clipRect = clipOffset & paddingBoxSize;
+      context.canvas.save();
+      context.canvas.clipRect(clipRect);
+
+      callback(context, offset);
+
+      context.canvas.restore();
+      return;
+    }
+
+    // Paint content in separate layer when overflow content can be manually scrolled
+    // to improve scroll performance.
     final double paintOffsetX = _paintOffsetX;
     final double paintOffsetY = _paintOffsetY;
     final Offset paintOffset = Offset(paintOffsetX, paintOffsetY);
-    // Overflow should not cover border
+    // Overflow should not cover border.
     Rect clipRect = Offset(borderEdge.left, borderEdge.top) & Size(
       size.width - borderEdge.right - borderEdge.left,
       size.height - borderEdge.bottom - borderEdge.top,
