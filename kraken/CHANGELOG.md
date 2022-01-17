@@ -1,3 +1,10 @@
+## 0.10.0+3
+
+**Bug Fixed**
+
++ Fix empty screen when page reload. https://github.com/openkraken/kraken/pull/1109
++ Fix linux dynamic rpath. https://github.com/openkraken/kraken/pull/1111
+
 ## 0.10.0+2
 
 **Bug Fixed**
