@@ -155,10 +155,6 @@ void TEST_initWindow(int32_t contextId, void* nativePtr) {}
 void TEST_initDocument(int32_t contextId, void* nativePtr) {}
 
 #if ENABLE_PROFILE
-struct NativePerformanceEntryList {
-  uint64_t* entries;
-  int32_t length;
-};
 NativePerformanceEntryList* TEST_getPerformanceEntries(int32_t) {}
 #endif
 
@@ -302,7 +298,7 @@ void TEST_mockDartMethods(OnJSError onJSError) {
   };
 
 #if ENABLE_PROFILE
-  mockMethods.emplace_pack(reinterpret_cast<uint64_t>(TEST_getPerformanceEntries));
+  mockMethods.emplace_back(reinterpret_cast<uint64_t>(TEST_getPerformanceEntries));
 #else
   mockMethods.emplace_back(0);
 #endif
