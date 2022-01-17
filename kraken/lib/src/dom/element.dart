@@ -706,10 +706,6 @@ class Element extends Node
 
     willDetachRenderer();
 
-    for (Node child in childNodes) {
-      child.disposeRenderObject();
-    }
-
     didDetachRenderer();
 
     // Call dispose method of renderBoxModel when it is detached from tree.
