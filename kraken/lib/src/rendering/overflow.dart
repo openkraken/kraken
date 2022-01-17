@@ -197,18 +197,18 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
       size.height - borderEdge.bottom - borderEdge.top,
     );
 
-    // Use canvas clipRect to clip overflow content when overflow content
-    // is hidden.
-    if (renderStyle.effectiveOverflowX == CSSOverflowType.hidden ||
-      renderStyle.effectiveOverflowY == CSSOverflowType.hidden ||
-      renderStyle.effectiveOverflowX == CSSOverflowType.clip ||
-      renderStyle.effectiveOverflowY == CSSOverflowType.clip
+    // Use canvas clipRect to clip overflow when content can not be scroll
+    // in both direction.
+    if (renderStyle.effectiveOverflowX != CSSOverflowType.auto
+      && renderStyle.effectiveOverflowX != CSSOverflowType.scroll
+      && renderStyle.effectiveOverflowY != CSSOverflowType.auto
+      && renderStyle.effectiveOverflowY != CSSOverflowType.scroll
     ) {
       // Overflow should not cover border.
       Offset clipOffset = offset + Offset(borderEdge.left, borderEdge.top);
       final Rect clipRect = clipOffset & paddingBoxSize;
-      Canvas canvas = context.canvas;
 
+      Canvas canvas = context.canvas;
       canvas.save();
       canvas.clipRect(clipRect);
 
