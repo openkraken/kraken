@@ -27,15 +27,46 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 
 flutter_ios_podfile_setup
 
+def config_valid_archs(config)
+  valid_archs = %W[arm64 arm64e]
+  if config.name == 'Debug'
+    valid_archs << 'x86_64'
+  end
+  config.build_settings['VALID_ARCHS'] = valid_archs.join(' ')
+  if config.name == 'Debug'
+    config.build_settings['VALID_ARCHS[sdk=iphonesimulator*]'] = 'x86_64'
+  end
+end
+
+def add_simulator_arch(project)
+  require 'xcodeproj'
+  xcproject = Xcodeproj::Project.open(project)
+  xcproject.native_targets.each do |target|
+    target.build_configurations.each do |configuration|
+      config_valid_archs(configuration)
+    end
+  end
+  xcproject.save
+end
+
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  add_simulator_arch("./Runner.xcodeproj")
 end
 
 post_install do |installer|
+  installer.pods_project.build_configurations.each do |config|
+    config_valid_archs(config) 
+  end
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    target.build_configurations.each do |config|
+      config_valid_archs(config) 
+    end
   end
+  installer.pods_project.save
 end
+
