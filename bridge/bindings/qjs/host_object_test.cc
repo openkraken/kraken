@@ -54,8 +54,8 @@ TEST(HostObject, defineProperty) {
     EXPECT_STREQ(message.c_str(), "{f: ƒ (), foo: 1}");
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
-  auto& context = bridge->getContext();
-  auto* sampleObject = new SampleObject(context.get());
+  auto context = bridge->getContext();
+  auto* sampleObject = new SampleObject(context);
   JSValue object = sampleObject->jsObject;
   context->defineGlobalProperty("o", object);
   const char* code = "o.foo++; console.log(o);";
@@ -76,8 +76,8 @@ TEST(ObjectProperty, worksWithProxy) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto& context = bridge->getContext();
-  auto* sampleObject = new SampleObject(context.get());
+  auto context = bridge->getContext();
+  auto* sampleObject = new SampleObject(context);
   JSValue object = sampleObject->jsObject;
   context->defineGlobalProperty("o", object);
   std::string code = std::string(R"(
@@ -105,8 +105,8 @@ TEST(HostObject, defineFunction) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto& context = bridge->getContext();
-  auto* sampleObject = new SampleObject(context.get());
+  auto context = bridge->getContext();
+  auto* sampleObject = new SampleObject(context);
   JSValue object = sampleObject->jsObject;
   context->defineGlobalProperty("o", object);
   const char* code = "console.log(o.f(10))";
@@ -146,8 +146,8 @@ TEST(ExoticHostObject, overriteGetterSetter) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto& context = bridge->getContext();
-  auto* sampleObject = new SampleExoticHostObject(context.get());
+  auto context = bridge->getContext();
+  auto* sampleObject = new SampleExoticHostObject(context);
   JSValue object = sampleObject->jsObject;
   context->defineGlobalProperty("o", object);
   const char* code = "console.log(o.abc)";

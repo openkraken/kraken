@@ -945,16 +945,14 @@ class KrakenController {
 
   Future<void> unload() async {
     assert(!_view._disposed, 'Kraken have already disposed');
-    _module.dispose();
-    _view.dispose();
-
     // Should clear previous page cached ui commands
     clearUICommand(_view.contextId);
 
     // Wait for next microtask to make sure C++ native Elements are GC collected.
     Completer completer = Completer();
     Future.microtask(() {
-      disposePage(_view.contextId);
+      _module.dispose();
+      _view.dispose();
 
       allocateNewPage(_view.contextId);
 
@@ -963,7 +961,10 @@ class KrakenController {
           enableDebug: _view.enableDebug,
           contextId: _view.contextId,
           rootController: this,
-          navigationDelegate: _view.navigationDelegate);
+          navigationDelegate: _view.navigationDelegate,
+          gestureListener: _view.gestureListener,
+          widgetDelegate: _view.widgetDelegate
+      );
 
       _module = KrakenModuleController(this, _view.contextId);
 
@@ -1077,14 +1078,23 @@ class KrakenController {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_LOAD_START);
     }
 
+    // If bundle not configured at dart side, url can be obtained from env or native side.
+    if (bundle == null) {
+      String? envUrl = (getBundleURLFromEnv() ?? getBundlePathFromEnv());
+      // Load url from native side (Java,Objective-C).
+      if (envUrl == null && methodChannel is KrakenNativeChannel) {
+        envUrl = await (methodChannel as KrakenNativeChannel).getUrl();
+      }
+      if (envUrl != null) {
+        bundle = KrakenBundle.fromUrl(envUrl);
+      }
+    } else if (bundle.src.isEmpty && bundle.content == null && bundle.bytecode == null) {
+      // Do nothing if bundle is empty.
+      return;
+    }
+
     // Load bundle need push curret href to history.
     if (bundle != null) {
-      String? url = bundle.uri.toString().isEmpty
-          ? (getBundleURLFromEnv() ?? getBundlePathFromEnv())
-          : href;
-      if (url == null && methodChannel is KrakenNativeChannel) {
-        url = await (methodChannel as KrakenNativeChannel).getUrl();
-      }
       _addHistory(bundle);
       this.bundle = bundle;
     }

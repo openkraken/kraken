@@ -13,7 +13,7 @@ namespace kraken::binding::qjs {
 class BlobBuilder;
 class BlobInstance;
 
-void bindBlob(std::unique_ptr<ExecutionContext>& context);
+void bindBlob(ExecutionContext* context);
 
 class Blob : public HostClass {
  public:

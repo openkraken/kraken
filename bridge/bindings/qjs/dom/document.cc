@@ -55,8 +55,8 @@ void traverseNode(NodeInstance* node, TraverseHandler handler) {
 
 std::once_flag kDocumentInitOnceFlag;
 
-void bindDocument(std::unique_ptr<ExecutionContext>& context) {
-  auto* documentConstructor = Document::instance(context.get());
+void bindDocument(ExecutionContext* context) {
+  auto* documentConstructor = Document::instance(context);
   context->defineGlobalProperty("Document", documentConstructor->jsObject);
   JSValue documentInstance = JS_CallConstructor(context->ctx(), documentConstructor->jsObject, 0, nullptr);
   context->defineGlobalProperty("document", documentInstance);

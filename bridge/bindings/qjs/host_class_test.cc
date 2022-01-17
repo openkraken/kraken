@@ -72,9 +72,9 @@ TEST(HostClass, newInstance) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto& context = bridge->getContext();
-  auto* sampleObject = new SampleClass(context.get());
-  auto* parentObject = ParentClass::instance(context.get());
+  auto context = bridge->getContext();
+  auto* sampleObject = new SampleClass(context);
+  auto* parentObject = ParentClass::instance(context);
   context->defineGlobalProperty("SampleClass", sampleObject->jsObject);
   context->defineGlobalProperty("ParentClass", parentObject->jsObject);
   const char* code = "let obj = new SampleClass(1,2,3,4); console.log(obj.f())";
@@ -95,9 +95,9 @@ TEST(HostClass, instanceOf) {
     errorCalled = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   });
-  auto& context = bridge->getContext();
-  auto* sampleObject = new SampleClass(context.get());
-  auto* parentObject = ParentClass::instance(context.get());
+  auto context = bridge->getContext();
+  auto* sampleObject = new SampleClass(context);
+  auto* parentObject = ParentClass::instance(context);
   // Test for C API
   context->defineGlobalProperty("SampleClass", sampleObject->jsObject);
   context->defineGlobalProperty("ParentClass", parentObject->jsObject);
@@ -126,10 +126,10 @@ TEST(HostClass, inheritance) {
     errorCalled = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   });
-  auto& context = bridge->getContext();
-  auto* sampleObject = new SampleClass(context.get());
+  auto context = bridge->getContext();
+  auto* sampleObject = new SampleClass(context);
 
-  auto* parentObject = ParentClass::instance(context.get());
+  auto* parentObject = ParentClass::instance(context);
   context->defineGlobalProperty("ParentClass", parentObject->jsObject);
 
   context->defineGlobalProperty("SampleClass", sampleObject->jsObject);
@@ -154,10 +154,10 @@ TEST(HostClass, inherintanceInJavaScript) {
     errorCalled = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   });
-  auto& context = bridge->getContext();
-  auto* sampleObject = new SampleClass(context.get());
+  auto context = bridge->getContext();
+  auto* sampleObject = new SampleClass(context);
 
-  auto* parentObject = ParentClass::instance(context.get());
+  auto* parentObject = ParentClass::instance(context);
   context->defineGlobalProperty("ParentClass", parentObject->jsObject);
 
   context->defineGlobalProperty("SampleClass", sampleObject->jsObject);
@@ -193,8 +193,8 @@ TEST(HostClass, haveFunctionProtoMethods) {
     errorCalled = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   });
-  auto& context = bridge->getContext();
-  auto* parentObject = ParentClass::instance(context.get());
+  auto context = bridge->getContext();
+  auto* parentObject = ParentClass::instance(context);
   context->defineGlobalProperty("ParentClass", parentObject->jsObject);
 
   const char* code = R"(
@@ -222,14 +222,14 @@ TEST(HostClass, multipleInstance) {
     errorCalled = true;
     KRAKEN_LOG(VERBOSE) << errmsg;
   });
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
 
-  auto* parentObject = ParentClass::instance(context.get());
+  auto* parentObject = ParentClass::instance(context);
   context->defineGlobalProperty("ParentClass", parentObject->jsObject);
 
   // Test for C API 1
   {
-    auto* sampleObject = new SampleClass(context.get());
+    auto* sampleObject = new SampleClass(context);
     context->defineGlobalProperty("SampleClass1", sampleObject->jsObject);
     JSValue args[] = {};
     JSValue object = JS_CallConstructor(context->ctx(), sampleObject->jsObject, 0, args);
@@ -240,7 +240,7 @@ TEST(HostClass, multipleInstance) {
 
   // Test for C API 2
   {
-    auto* sampleObject = new SampleClass(context.get());
+    auto* sampleObject = new SampleClass(context);
     context->defineGlobalProperty("SampleClass2", sampleObject->jsObject);
     JSValue args[] = {};
     JSValue object = JS_CallConstructor(context->ctx(), sampleObject->jsObject, 0, args);
@@ -250,7 +250,7 @@ TEST(HostClass, multipleInstance) {
   }
 
   {
-    auto* sampleObject = new SampleClass(context.get());
+    auto* sampleObject = new SampleClass(context);
     context->defineGlobalProperty("SampleClass3", sampleObject->jsObject);
     JSValue args[] = {};
     JSValue object = JS_CallConstructor(context->ctx(), sampleObject->jsObject, 0, args);
@@ -260,7 +260,7 @@ TEST(HostClass, multipleInstance) {
   }
 
   {
-    auto* sampleObject = new SampleClass(context.get());
+    auto* sampleObject = new SampleClass(context);
     context->defineGlobalProperty("SampleClass4", sampleObject->jsObject);
     JSValue args[] = {};
     JSValue object = JS_CallConstructor(context->ctx(), sampleObject->jsObject, 0, args);
@@ -367,8 +367,8 @@ TEST(HostClass, exoticClass) {
     EXPECT_STREQ(message.c_str(), "10");
   };
 
-  auto& context = bridge->getContext();
-  auto* constructor = new ExoticClass(context.get());
+  auto context = bridge->getContext();
+  auto* constructor = new ExoticClass(context);
   context->defineGlobalProperty("ExoticClass", constructor->jsObject);
 
   std::string code =
@@ -395,8 +395,8 @@ TEST(HostClass, setExoticClassProperty) {
     EXPECT_STREQ(message.c_str(), "200");
   };
 
-  auto& context = bridge->getContext();
-  auto* constructor = new ExoticClass(context.get());
+  auto context = bridge->getContext();
+  auto* constructor = new ExoticClass(context);
   context->defineGlobalProperty("ExoticClass", constructor->jsObject);
 
   std::string code =

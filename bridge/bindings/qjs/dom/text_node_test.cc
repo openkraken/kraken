@@ -19,7 +19,7 @@ TEST(TextNode, instanceofNode) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
   const char* code =
       "let text = document.createTextNode('1234');"
       "console.log(text instanceof Node, text instanceof Text);";

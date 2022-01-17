@@ -30,7 +30,7 @@ JSValue print(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* arg
   return JS_UNDEFINED;
 }
 
-void bindConsole(std::unique_ptr<ExecutionContext>& context) {
+void bindConsole(ExecutionContext* context) {
   QJS_GLOBAL_BINDING_FUNCTION(context, print, "__kraken_print__", 2);
 }
 

@@ -26,7 +26,7 @@ class NativeEventTarget;
 class CSSStyleDeclaration;
 class StyleDeclarationInstance;
 
-void bindEventTarget(std::unique_ptr<ExecutionContext>& context);
+void bindEventTarget(ExecutionContext* context);
 
 class EventTarget : public HostClass {
  public:

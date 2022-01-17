@@ -287,9 +287,9 @@ mixin CSSTextMixin on RenderStyle {
   TextOverflow get textOverflow {
     return _textOverflow;
   }
-  set textOverflow(TextOverflow value) {
+  set textOverflow(TextOverflow? value) {
     if (_textOverflow == value) return;
-    _textOverflow = value;
+    _textOverflow = value ?? TextOverflow.clip;
     // Non inheritable style change should only update text node in direct children.
     _markTextNeedsLayout();
   }

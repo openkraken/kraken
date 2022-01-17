@@ -1,3 +1,11 @@
+## 0.10.0+1
+
+**Bug Fixed**
+
++ Fix stack overflow when working with multiple thread. https://github.com/openkraken/kraken/pull/1086
++ Fix sepeated setting of style is invalid. https://github.com/openkraken/kraken/pull/1088
+
+
 ## 0.10.0
 
 **Break Changes**

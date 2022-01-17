@@ -10,8 +10,8 @@ namespace kraken::binding::qjs {
 
 std::once_flag kBlobInitOnceFlag;
 
-void bindBlob(std::unique_ptr<ExecutionContext>& context) {
-  auto* constructor = Blob::instance(context.get());
+void bindBlob(ExecutionContext* context) {
+  auto* constructor = Blob::instance(context);
   context->defineGlobalProperty("Blob", constructor->jsObject);
 }
 

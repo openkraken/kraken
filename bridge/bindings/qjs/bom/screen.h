@@ -21,7 +21,7 @@ class Screen : public HostObject {
   DEFINE_READONLY_PROPERTY(height);
 };
 
-void bindScreen(std::unique_ptr<ExecutionContext>& context);
+void bindScreen(ExecutionContext* context);
 
 }  // namespace kraken::binding::qjs
 

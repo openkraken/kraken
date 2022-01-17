@@ -424,8 +424,8 @@ ${object.name}::${object.name}(ExecutionContext *context) : ${object.type}(conte
   ${classInheritCode}
 }
 
-void bind${object.name}(std::unique_ptr<ExecutionContext> &context) {
-  auto *constructor = ${object.name}::instance(context.get());
+void bind${object.name}(ExecutionContext* context) {
+  auto *constructor = ${object.name}::instance(context);
   context->defineGlobalProperty("${globalBindingName}", constructor->jsObject);
   ${specialBind}
 }

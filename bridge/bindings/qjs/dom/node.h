@@ -13,7 +13,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindNode(std::unique_ptr<ExecutionContext>& context);
+void bindNode(ExecutionContext* context);
 
 enum NodeType { ELEMENT_NODE = 1, TEXT_NODE = 3, COMMENT_NODE = 8, DOCUMENT_NODE = 9, DOCUMENT_TYPE_NODE = 10, DOCUMENT_FRAGMENT_NODE = 11 };
 

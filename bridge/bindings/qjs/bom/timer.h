@@ -34,7 +34,7 @@ class DOMTimer : public GarbageCollected<DOMTimer> {
   JSValue m_callback;
 };
 
-void bindTimer(std::unique_ptr<ExecutionContext>& context);
+void bindTimer(ExecutionContext* context);
 
 }  // namespace kraken::binding::qjs
 

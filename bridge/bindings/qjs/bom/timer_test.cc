@@ -37,7 +37,7 @@ console.log('1234');
 )";
 
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
-  TEST_runLoop(bridge->getContext().get());
+  TEST_runLoop(bridge->getContext());
   disposePage(0);
 }
 
@@ -63,6 +63,6 @@ clearTimeout(timer);
 )";
 
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
-  TEST_runLoop(bridge->getContext().get());
+  TEST_runLoop(bridge->getContext());
   disposePage(0);
 }
