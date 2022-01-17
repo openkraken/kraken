@@ -24,8 +24,8 @@ static std::atomic<int32_t> globalEventTargetId{0};
 std::once_flag kEventTargetInitFlag;
 #define GetPropertyCallPreFix "_getProperty_"
 
-void bindEventTarget(std::unique_ptr<ExecutionContext>& context) {
-  auto* constructor = EventTarget::instance(context.get());
+void bindEventTarget(ExecutionContext* context) {
+  auto* constructor = EventTarget::instance(context);
   // Set globalThis and Window's prototype to EventTarget's prototype to support EventTarget methods in global.
   JS_SetPrototype(context->ctx(), context->global(), constructor->jsObject);
   context->defineGlobalProperty("EventTarget", constructor->jsObject);

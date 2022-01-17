@@ -9,8 +9,8 @@
 
 namespace kraken::binding::qjs {
 
-void bindDocumentFragment(std::unique_ptr<ExecutionContext>& context) {
-  auto* constructor = DocumentFragment::instance(context.get());
+void bindDocumentFragment(ExecutionContext* context) {
+  auto* constructor = DocumentFragment::instance(context);
   context->defineGlobalProperty("DocumentFragment", constructor->jsObject);
 }
 

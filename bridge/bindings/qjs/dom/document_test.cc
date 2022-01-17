@@ -19,7 +19,7 @@ TEST(Document, createTextNode) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
   const char* code =
       "let div = document.createElement('div');"
       "div.setAttribute('hello', 1234);"
@@ -43,7 +43,7 @@ TEST(Document, instanceofNode) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
   const char* code = "console.log(document instanceof Node, document instanceof Document, document instanceof EventTarget)";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   EXPECT_EQ(errorCalled, false);
@@ -59,14 +59,14 @@ TEST(Document, createElementShouldWorkWithMultipleContext) {
 
   {
     auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {});
-    auto& context = bridge->getContext();
+    auto context = bridge->getContext();
     bridge->evaluateScript(code, strlen(code), "vm://", 0);
     bridge1 = bridge.release();
   }
 
   {
     auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {});
-    auto& context = bridge->getContext();
+    auto context = bridge->getContext();
     const char* code = "(() => { let img = document.createElement('img'); document.body.appendChild(img);  })();";
     bridge->evaluateScript(code, strlen(code), "vm://", 0);
   }

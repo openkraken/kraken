@@ -20,7 +20,7 @@ TEST(ModuleManager, shouldThrowErrorWhenBadJSON) {
   });
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {};
 
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
 
   std::string code = std::string(R"(
 let object = {

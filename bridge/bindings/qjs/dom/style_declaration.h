@@ -11,7 +11,7 @@
 namespace kraken::binding::qjs {
 
 class EventTargetInstance;
-void bindCSSStyleDeclaration(std::unique_ptr<ExecutionContext>& context);
+void bindCSSStyleDeclaration(ExecutionContext* context);
 
 template <typename CharacterType>
 inline bool isASCIILower(CharacterType character) {

@@ -10,7 +10,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindConsole(std::unique_ptr<ExecutionContext>& context);
+void bindConsole(ExecutionContext* context);
 
 }
 

@@ -13,8 +13,8 @@ std::once_flag kCommentInitFlag;
 
 JSClassID Comment::kCommentClassId{0};
 
-void bindCommentNode(std::unique_ptr<ExecutionContext>& context) {
-  auto* constructor = Comment::instance(context.get());
+void bindCommentNode(ExecutionContext* context) {
+  auto* constructor = Comment::instance(context);
   context->defineGlobalProperty("Comment", constructor->jsObject);
 }
 

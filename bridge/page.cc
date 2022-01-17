@@ -56,7 +56,7 @@ KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : c
 #if ENABLE_PROFILE
   auto jsContextStartTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 #endif
-  m_context = binding::qjs::createJSContext(contextId, handler, this);
+  m_context = new ExecutionContext(contextId, handler, this);
 
 #if ENABLE_PROFILE
   auto nativePerformance = Performance::instance(m_context.get())->m_nativePerformance;
@@ -133,7 +133,7 @@ void KrakenPage::invokeModuleEvent(NativeString* moduleName, const char* eventTy
   if (rawEvent != nullptr) {
     std::string type = std::string(eventType);
     auto* event = static_cast<RawEvent*>(rawEvent)->bytes;
-    EventInstance* eventInstance = Event::buildEventInstance(type, m_context.get(), event, false);
+    EventInstance* eventInstance = Event::buildEventInstance(type, m_context, event, false);
     eventObject = eventInstance->jsObject;
   }
 
@@ -212,7 +212,8 @@ KrakenPage::~KrakenPage() {
     disposeCallback(this);
   }
 #endif
-  pageContextPool[contextId] = nullptr;
+  delete m_context;
+  KrakenPage::pageContextPool[contextId] = nullptr;
 }
 
 void KrakenPage::reportError(const char* errmsg) {

@@ -111,7 +111,7 @@ ${addIndent(nativeStructPropsCode.join('\n'), 2)}
   }
 
   let constructorHeader = `\n
-void bind${object.name}(std::unique_ptr<ExecutionContext> &context);
+void bind${object.name}(ExecutionContext *context);
 
 class ${object.name}Instance;
 

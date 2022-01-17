@@ -11,8 +11,8 @@
 
 namespace kraken::binding::qjs {
 
-void bindPerformance(std::unique_ptr<ExecutionContext>& context) {
-  auto* performance = Performance::instance(context.get());
+void bindPerformance(ExecutionContext* context) {
+  auto* performance = Performance::instance(context);
   context->defineGlobalProperty("performance", performance->jsObject);
 }
 

@@ -11,7 +11,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindTemplateElement(std::unique_ptr<ExecutionContext>& context);
+void bindTemplateElement(ExecutionContext* context);
 class TemplateElementInstance;
 
 class TemplateElement : public Element {

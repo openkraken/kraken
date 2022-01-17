@@ -10,7 +10,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindDocumentFragment(std::unique_ptr<ExecutionContext>& context);
+void bindDocumentFragment(ExecutionContext* context);
 
 class DocumentFragment : public Node {
  public:

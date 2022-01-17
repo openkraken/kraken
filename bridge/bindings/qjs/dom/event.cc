@@ -13,8 +13,8 @@ namespace kraken::binding::qjs {
 
 std::once_flag kEventInitOnceFlag;
 
-void bindEvent(std::unique_ptr<ExecutionContext>& context) {
-  auto* constructor = Event::instance(context.get());
+void bindEvent(ExecutionContext* context) {
+  auto* constructor = Event::instance(context);
   context->defineGlobalProperty("Event", constructor->jsObject);
 }
 

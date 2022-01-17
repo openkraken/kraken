@@ -50,7 +50,7 @@ namespace kraken::binding::qjs {
 #define EVENT_LONG_PRESS "longpress"
 #define EVENT_SCALE "scale"
 
-void bindEvent(std::unique_ptr<ExecutionContext>& context);
+void bindEvent(ExecutionContext* context);
 
 class EventInstance;
 

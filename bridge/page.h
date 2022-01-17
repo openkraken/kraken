@@ -43,7 +43,7 @@ class KrakenPage final {
   uint8_t* dumpByteCode(const char* script, size_t length, const char* url, size_t* byteLength);
   void evaluateByteCode(uint8_t* bytes, size_t byteLength);
 
-  [[nodiscard]] const std::unique_ptr<kraken::binding::qjs::ExecutionContext>& getContext() const { return m_context; }
+  [[nodiscard]] kraken::binding::qjs::ExecutionContext* getContext() const { return m_context; }
 
   void invokeModuleEvent(NativeString* moduleName, const char* eventType, void* event, NativeString* extra);
   void reportError(const char* errmsg);
@@ -55,7 +55,9 @@ class KrakenPage final {
   JSBridgeDisposeCallback disposeCallback{nullptr};
 #endif
  private:
-  std::unique_ptr<binding::qjs::ExecutionContext> m_context;
+  // FIXME: we must to use raw pointer instead of unique_ptr because we needs to access m_context when dispose page.
+  // TODO: Raw pointer is dangerous and just works but it's fragile. We needs refactor this for more stable and maintainable.
+  binding::qjs::ExecutionContext* m_context;
   JSExceptionHandler m_handler;
 };
 

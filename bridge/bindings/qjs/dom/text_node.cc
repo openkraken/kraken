@@ -11,8 +11,8 @@ namespace kraken::binding::qjs {
 
 std::once_flag kTextNodeInitFlag;
 
-void bindTextNode(std::unique_ptr<ExecutionContext>& context) {
-  auto* constructor = TextNode::instance(context.get());
+void bindTextNode(ExecutionContext* context) {
+  auto* constructor = TextNode::instance(context);
   context->defineGlobalProperty("Text", constructor->jsObject);
 }
 

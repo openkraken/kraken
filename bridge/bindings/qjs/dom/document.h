@@ -13,7 +13,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindDocument(std::unique_ptr<ExecutionContext>& context);
+void bindDocument(ExecutionContext* context);
 
 using TraverseHandler = std::function<bool(NodeInstance*)>;
 

@@ -13,8 +13,8 @@ ImageElement::ImageElement(ExecutionContext* context) : Element(context) {
   JS_SetPrototype(m_ctx, m_prototypeObject, Element::instance(m_context)->prototype());
 }
 
-void bindImageElement(std::unique_ptr<ExecutionContext>& context) {
-  auto* constructor = ImageElement::instance(context.get());
+void bindImageElement(ExecutionContext* context) {
+  auto* constructor = ImageElement::instance(context);
   context->defineGlobalProperty("HTMLImageElement", constructor->jsObject);
   context->defineGlobalProperty("Image", JS_DupValue(context->ctx(), constructor->jsObject));
 }

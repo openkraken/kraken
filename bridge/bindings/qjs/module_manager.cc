@@ -162,7 +162,7 @@ JSValue flushUICommand(JSContext* ctx, JSValueConst this_val, int argc, JSValueC
   return JS_NULL;
 }
 
-void bindModuleManager(std::unique_ptr<ExecutionContext>& context) {
+void bindModuleManager(ExecutionContext* context) {
   QJS_GLOBAL_BINDING_FUNCTION(context, krakenModuleListener, "__kraken_module_listener__", 1);
   QJS_GLOBAL_BINDING_FUNCTION(context, krakenInvokeModule, "__kraken_invoke_module__", 3);
   QJS_GLOBAL_BINDING_FUNCTION(context, flushUICommand, "__kraken_flush_ui_command__", 0);

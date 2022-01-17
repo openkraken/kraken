@@ -16,7 +16,7 @@ struct ModuleContext {
   list_head link;
 };
 
-void bindModuleManager(std::unique_ptr<ExecutionContext>& context);
+void bindModuleManager(ExecutionContext* context);
 void handleInvokeModuleUnexpectedCallback(void* callbackContext, int32_t contextId, NativeString* errmsg, NativeString* json);
 }  // namespace kraken::binding::qjs
 
