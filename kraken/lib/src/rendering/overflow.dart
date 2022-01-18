@@ -68,32 +68,6 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
     return false;
   }
 
-  bool get enableScrollX {
-    CSSOverflowType effectiveOverflowX = renderStyle.effectiveOverflowX;
-    switch (effectiveOverflowX) {
-      case CSSOverflowType.hidden:
-      case CSSOverflowType.auto:
-      case CSSOverflowType.scroll:
-        return true;
-      case CSSOverflowType.clip:
-      case CSSOverflowType.visible:
-        return false;
-    }
-  }
-
-  bool get enableScrollY {
-    CSSOverflowType effectiveOverflowY = renderStyle.effectiveOverflowY;
-    switch (effectiveOverflowY) {
-      case CSSOverflowType.hidden:
-      case CSSOverflowType.auto:
-      case CSSOverflowType.scroll:
-        return true;
-      case CSSOverflowType.clip:
-      case CSSOverflowType.visible:
-        return false;
-    }
-  }
-
   Size? _scrollableSize;
   Size? _viewportSize;
 
@@ -192,32 +166,6 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
   ) {
     if (clipX == false && clipY == false) return callback(context, offset);
 
-    Size paddingBoxSize = Size(
-      size.width - borderEdge.right - borderEdge.left,
-      size.height - borderEdge.bottom - borderEdge.top,
-    );
-
-    // Use canvas clipRect to clip overflow when content can not be scroll
-    // in both direction.
-    if (renderStyle.effectiveOverflowX != CSSOverflowType.auto
-      && renderStyle.effectiveOverflowX != CSSOverflowType.scroll
-      && renderStyle.effectiveOverflowY != CSSOverflowType.auto
-      && renderStyle.effectiveOverflowY != CSSOverflowType.scroll
-    ) {
-      // Overflow should not cover border.
-      Offset clipOffset = offset + Offset(borderEdge.left, borderEdge.top);
-      final Rect clipRect = clipOffset & paddingBoxSize;
-
-      Canvas canvas = context.canvas;
-      canvas.save();
-      canvas.clipRect(clipRect);
-
-      callback(context, offset);
-
-      canvas.restore();
-      return;
-    }
-
     // Paint content in separate layer when overflow content can be manually scrolled
     // to improve scroll performance.
     final double paintOffsetX = _paintOffsetX;
@@ -234,18 +182,23 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
         callback(context, offset + paintOffset);
       };
 
-      // It needs to create new layer to clip children in case children has its own layer
-      // for all overflow value which is not visible (auto/scroll/hidden/clip).
-      bool _needsCompositing = true;
+      // If current or its descendants has a compositing layer caused by styles
+      // (eg. transform, opacity, overflow...), then it needs to create a new layer
+      // or else the clip in the older layer will not work.
+      bool _needsCompositing = needsCompositing;
 
       if (decoration != null && decoration.borderRadius != null) {
         BorderRadius radius = decoration.borderRadius as BorderRadius;
-        RRect clipRRect = RRect.fromRectAndCorners(clipRect,
-          topLeft: radius.topLeft,
-          topRight: radius.topRight,
-          bottomLeft: radius.bottomLeft,
-          bottomRight: radius.bottomRight
-        );
+        Rect rect = offset & size;
+        RRect borderRRect = radius.toRRect(rect);
+        // A borderRadius can only be given for a uniform Border in Flutter.
+        // https://github.com/flutter/flutter/issues/12583
+        double? borderTop = renderStyle.borderTopWidth?.computedValue;
+        // Border-radius clip rect should not include border.
+        RRect clipRRect = borderTop != null
+          ? borderRRect.deflate(borderTop)
+          : borderRRect;
+
         _clipRRectLayer.layer = context.pushClipRRect(_needsCompositing, offset, clipRect, clipRRect, painter, oldLayer: _clipRRectLayer.layer);
       } else {
         _clipRectLayer.layer = context.pushClipRect(_needsCompositing, offset, clipRect, painter, oldLayer: _clipRectLayer.layer);

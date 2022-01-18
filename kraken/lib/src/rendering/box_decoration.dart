@@ -123,22 +123,17 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
       if (decoration.isComplex) context.setIsComplexHint();
     }
 
-    // Content of renderBox are effected by border-radius in the following cases:
+    // The content of replaced elements is always trimmed to the content edge curve.
     // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
-    bool isClipOverflowContent = renderStyle.borderRadius != null
-      && (renderStyle.effectiveOverflowX != CSSOverflowType.visible
-      || renderStyle.effectiveOverflowY != CSSOverflowType.visible);
-
-    bool isClipRenderIntrinsic = renderStyle.borderRadius != null
+    bool isBorderRadiusClipReplaced = renderStyle.borderRadius != null
       && this is RenderIntrinsic
       && renderStyle.intrinsicRatio != null;
 
-    bool isClipContent = isClipOverflowContent || isClipRenderIntrinsic;
+    bool needClip = isBorderRadiusClipReplaced;
 
-    if (isClipContent) {
+    if (needClip) {
       context.canvas.save();
 
-      RRect rRect;
       Rect rect = offset & size;
       BorderRadius borderRadius = renderStyle.decoration!.borderRadius as BorderRadius;
       RRect borderRRect = borderRadius.toRRect(rect);
@@ -148,24 +143,15 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
         ? borderRRect.deflate(borderTop)
         : borderRRect;
 
-      // The content of box with overflow values other than visible is trimmed to the padding edge curve.
-      if (isClipOverflowContent) {
-        rRect = paddingRRect;
-
-      // The content of replaced elements is always trimmed to the content edge curve.
-      } else {
-        // @TODO: Currently only support clip uniform padding for replaced element.
-        double paddingTop = renderStyle.paddingTop.computedValue;
-        RRect contentRRect = paddingRRect.deflate(paddingTop);
-        rRect = contentRRect;
-      }
-
-      context.canvas.clipRRect(rRect);
+      // @TODO: Currently only support clip uniform padding for replaced element.
+      double paddingTop = renderStyle.paddingTop.computedValue;
+      RRect contentRRect = paddingRRect.deflate(paddingTop);
+      context.canvas.clipRRect(contentRRect);
     }
 
     callback(context, offset);
 
-    if (isClipContent) {
+    if (needClip) {
       context.canvas.restore();
     }
   }
