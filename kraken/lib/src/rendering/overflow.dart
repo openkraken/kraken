@@ -87,7 +87,7 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
       Size scrollableSize = renderBoxModel.scrollableSize;
       Size scrollableViewportSize = renderBoxModel.scrollableViewportSize;
       // Border-radius always to clip inner content when overflow is not visible.
-      if (scrollableSize.width > scrollableViewportSize.width
+      if (scrollableSize.height > scrollableViewportSize.height
         || borderRadius != null
       ) {
         return true;
