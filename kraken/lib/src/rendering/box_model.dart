@@ -567,7 +567,10 @@ class RenderBoxModel extends RenderBox
   }) : super();
 
   @override
-  bool get alwaysNeedsCompositing => opacityAlwaysNeedsCompositing();
+  bool get alwaysNeedsCompositing {
+    return intersectionObserverAlwaysNeedsCompositing() ||
+      opacityAlwaysNeedsCompositing();
+  }
 
   RenderPositionPlaceholder? renderPositionPlaceholder;
 

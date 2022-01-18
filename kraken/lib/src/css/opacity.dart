@@ -31,9 +31,6 @@ mixin CSSOpacityMixin on RenderStyle {
     _opacity = value;
     int alpha = ui.Color.getAlphaFromOpacity(_opacity);
     renderBoxModel!.alpha = alpha;
-    if (alpha != 0 && alpha != 255) {
-      renderBoxModel?.markNeedsCompositingBitsUpdate();
-    }
 
     // Opacity effect the stacking context.
     RenderBoxModel? parentRenderer = parent?.renderBoxModel;
