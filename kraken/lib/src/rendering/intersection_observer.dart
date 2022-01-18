@@ -28,7 +28,7 @@ mixin RenderIntersectionObserverMixin on RenderBox {
 
   final LayerHandle<IntersectionObserverLayer> _intersectionObserverLayer = LayerHandle<IntersectionObserverLayer>();
 
-  bool intersectionObserverAlwaysNeedsCompositing() => _intersectionObserverLayer.layer != null;
+  bool intersectionObserverAlwaysNeedsCompositing() => _listeners != null && _listeners!.isNotEmpty;
 
   /// A list of event handlers
   List<IntersectionChangeCallback>? _listeners;
