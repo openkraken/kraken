@@ -135,6 +135,11 @@ ExecutionContext::~ExecutionContext() {
     }
   }
 
+  // Should free unhandled pending exceptions.
+  JSValue exception = JS_GetException(m_ctx);
+  handleException(&exception);
+  JS_FreeValue(m_ctx, exception);
+
   JS_FreeValue(m_ctx, globalObject);
   JS_FreeContext(m_ctx);
 
