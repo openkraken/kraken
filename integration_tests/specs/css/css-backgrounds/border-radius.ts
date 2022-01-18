@@ -27,6 +27,78 @@ describe('border_radius', () => {
     await snapshot();
   });
 
+  it('works with overflow and child image of transform', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          'border-radius': '20px',
+          backgroundColor: 'blue',
+          width: '100px',
+          border: '5px solid black',
+          height: '100px',
+          overflow: 'hidden'
+        },
+      }, [
+        createElement('div', {
+          style: {
+            backgroundColor: 'red',
+          }
+        }, [
+          createElement('img', {
+            src: 'assets/100x100-green.png',
+            style: {
+                width: '100px',
+                height: '250px',
+                borderRadius: '30px',
+                transform: 'translate(20px, 20px)'
+            }
+          })
+        ])
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot(0.1);
+  });
+
+  it('works with overflow and child image of no transform', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          'border-radius': '20px',
+          backgroundColor: 'blue',
+          width: '100px',
+          border: '5px solid black',
+          height: '100px',
+          overflow: 'hidden'
+        },
+      }, [
+        createElement('div', {
+          style: {
+            backgroundColor: 'red',
+          }
+        }, [
+          createElement('img', {
+            src: 'assets/100x100-green.png',
+            style: {
+                width: '100px',
+                height: '250px',
+                borderRadius: '30px',
+            }
+          })
+        ])
+      ]
+    );
+    BODY.appendChild(div);
+
+    await snapshot(0.1);
+  });
+
   it('works with overflow hidden', async () => {
     let div;
     div = createElement(

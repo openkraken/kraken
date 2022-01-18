@@ -123,37 +123,7 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
       if (decoration.isComplex) context.setIsComplexHint();
     }
 
-    // The content of replaced elements is always trimmed to the content edge curve.
-    // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
-    bool isBorderRadiusClipReplaced = renderStyle.borderRadius != null
-      && this is RenderIntrinsic
-      && renderStyle.intrinsicRatio != null;
-
-    bool needClip = isBorderRadiusClipReplaced;
-
-    if (needClip) {
-      context.canvas.save();
-
-      Rect rect = offset & size;
-      BorderRadius borderRadius = renderStyle.decoration!.borderRadius as BorderRadius;
-      RRect borderRRect = borderRadius.toRRect(rect);
-      // A borderRadius can only be given for a uniform Border in Flutter.
-      double? borderTop = renderStyle.borderTopWidth?.computedValue;
-      RRect paddingRRect = borderTop != null
-        ? borderRRect.deflate(borderTop)
-        : borderRRect;
-
-      // @TODO: Currently only support clip uniform padding for replaced element.
-      double paddingTop = renderStyle.paddingTop.computedValue;
-      RRect contentRRect = paddingRRect.deflate(paddingTop);
-      context.canvas.clipRRect(contentRRect);
-    }
-
     callback(context, offset);
-
-    if (needClip) {
-      context.canvas.restore();
-    }
   }
 
   void debugBoxDecorationProperties(DiagnosticPropertiesBuilder properties) {

@@ -32,13 +32,27 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
       return false;
     }
 
+    List<Radius>? borderRadius = renderBoxModel.renderStyle.borderRadius;
+
+    // The content of replaced elements is always trimmed to the content edge curve.
+    // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
+    if( borderRadius != null
+      && this is RenderIntrinsic
+      && renderStyle.intrinsicRatio != null
+    ) {
+      return true;
+    }
+
     // Overflow value other than 'visible' always need to clip content.
     // https://www.w3.org/TR/css-overflow-3/#overflow-properties
     CSSOverflowType effectiveOverflowX = renderStyle.effectiveOverflowX;
     if (effectiveOverflowX != CSSOverflowType.visible) {
       Size scrollableSize = renderBoxModel.scrollableSize;
       Size scrollableViewportSize = renderBoxModel.scrollableViewportSize;
-      if (scrollableSize.width > scrollableViewportSize.width) {
+      // Border-radius always to clip inner content when overflow is not visible.
+      if (scrollableSize.width > scrollableViewportSize.width
+        || borderRadius != null
+      ) {
         return true;
       }
     }
@@ -55,13 +69,27 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
       return false;
     }
 
+    List<Radius>? borderRadius = renderStyle.borderRadius;
+
+    // The content of replaced elements is always trimmed to the content edge curve.
+    // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
+    if( borderRadius != null
+      && this is RenderIntrinsic
+      && renderStyle.intrinsicRatio != null
+    ) {
+      return true;
+    }
+
     // Overflow value other than 'visible' always need to clip content.
     // https://www.w3.org/TR/css-overflow-3/#overflow-properties
     CSSOverflowType effectiveOverflowY = renderStyle.effectiveOverflowY;
     if (effectiveOverflowY != CSSOverflowType.visible) {
       Size scrollableSize = renderBoxModel.scrollableSize;
       Size scrollableViewportSize = renderBoxModel.scrollableViewportSize;
-      if (scrollableSize.height > scrollableViewportSize.height) {
+      // Border-radius always to clip inner content when overflow is not visible.
+      if (scrollableSize.width > scrollableViewportSize.width
+        || borderRadius != null
+      ) {
         return true;
       }
     }
@@ -166,8 +194,6 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
   ) {
     if (clipX == false && clipY == false) return callback(context, offset);
 
-    // Paint content in separate layer when overflow content can be manually scrolled
-    // to improve scroll performance.
     final double paintOffsetX = _paintOffsetX;
     final double paintOffsetY = _paintOffsetY;
     final Offset paintOffset = Offset(paintOffsetX, paintOffsetY);
@@ -189,16 +215,23 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
 
       if (decoration != null && decoration.borderRadius != null) {
         BorderRadius radius = decoration.borderRadius as BorderRadius;
-        Rect rect = offset & size;
+        Rect rect = Offset(0, 0) & size;
         RRect borderRRect = radius.toRRect(rect);
         // A borderRadius can only be given for a uniform Border in Flutter.
         // https://github.com/flutter/flutter/issues/12583
         double? borderTop = renderStyle.borderTopWidth?.computedValue;
-        // Border-radius clip rect should not include border.
+        // The content of overflow is trimmed to the padding edge curve.
+        // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
         RRect clipRRect = borderTop != null
           ? borderRRect.deflate(borderTop)
           : borderRRect;
 
+        // The content of replaced elements is trimmed to the content edge curve.
+        if (this is RenderIntrinsic) {
+          // @TODO: Currently only support clip uniform padding for replaced element.
+          double paddingTop = renderStyle.paddingTop.computedValue;
+          clipRRect = clipRRect.deflate(paddingTop);
+        }
         _clipRRectLayer.layer = context.pushClipRRect(_needsCompositing, offset, clipRect, clipRRect, painter, oldLayer: _clipRRectLayer.layer);
       } else {
         _clipRectLayer.layer = context.pushClipRect(_needsCompositing, offset, clipRect, painter, oldLayer: _clipRectLayer.layer);
