@@ -70,10 +70,7 @@ JSValue Window::postMessage(JSContext* ctx, JSValue this_val, int argc, JSValue*
   JS_SetPropertyStr(ctx, messageEventInitValue, "origin", messageOriginValue);
 
   JSValue messageType = JS_NewString(ctx, "message");
-  JSValue arguments[] = {
-    messageType,
-    messageEventInitValue
-  };
+  JSValue arguments[] = {messageType, messageEventInitValue};
 
   JSValue messageEventValue = JS_CallConstructor(ctx, MessageEvent::instance(window->m_context)->jsObject, 2, arguments);
   auto* event = static_cast<MessageEventInstance*>(JS_GetOpaque(messageEventValue, Event::kEventClassID));
