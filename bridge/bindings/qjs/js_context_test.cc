@@ -17,7 +17,7 @@ TEST(Context, postMessage) {
   static bool logCalled = false;
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
-    EXPECT_STREQ(message.c_str(), "{\"data\":1234} *");
+    EXPECT_STREQ(message.c_str(), "{\"data\":1234} ");
   };
 
   std::string code = std::string(R"(

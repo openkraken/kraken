@@ -58,14 +58,16 @@ JSValue Window::scrollBy(JSContext* ctx, JSValue this_val, int argc, JSValue* ar
 
 JSValue Window::postMessage(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   JSValue messageValue = argv[0];
-  // TODO: convert originValue to current src.
-  JSValue originValue = argv[1];
   JSValue globalObjectValue = JS_GetGlobalObject(ctx);
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(globalObjectValue, Window::classId()));
 
   JSValue messageEventInitValue = JS_NewObject(ctx);
+
+  // TODO: convert originValue to current src.
+  JSValue messageOriginValue = JS_NewString(ctx, "");
+
   JS_SetPropertyStr(ctx, messageEventInitValue, "data", JS_DupValue(ctx, messageValue));
-  JS_SetPropertyStr(ctx, messageEventInitValue, "origin", JS_DupValue(ctx, originValue));
+  JS_SetPropertyStr(ctx, messageEventInitValue, "origin", messageOriginValue);
 
   JSValue messageType = JS_NewString(ctx, "message");
   JSValue arguments[] = {
@@ -81,6 +83,7 @@ JSValue Window::postMessage(JSContext* ctx, JSValue this_val, int argc, JSValue*
   JS_FreeValue(ctx, messageEventValue);
   JS_FreeValue(ctx, messageEventInitValue);
   JS_FreeValue(ctx, globalObjectValue);
+  JS_FreeValue(ctx, messageOriginValue);
   return JS_NULL;
 }
 
