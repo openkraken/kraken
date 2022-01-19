@@ -65,7 +65,7 @@ abstract class KrakenBundle {
   late ByteData rawBundle;
   // JS Content in UTF-8 bytes.
   Uint8List? bytecode;
-  // JS Content in HTML.
+  // HTML String.
   String? html;
   // JS Content is String.
   String? content;
