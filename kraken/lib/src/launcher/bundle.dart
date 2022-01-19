@@ -125,6 +125,8 @@ abstract class KrakenBundle {
         evaluateScripts(contextId, content!, src, lineOffset);
       } else if (bytecode != null) {
         evaluateQuickjsByteCode(contextId, bytecode!);
+      } else if (html != null) {
+        parseHTML(contextId, html!);
       }
 
       // For javascript code, HTML or bytecode from networks and hardware disk.
