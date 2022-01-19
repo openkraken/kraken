@@ -12,6 +12,26 @@ TEST(Context, isValid) {
   EXPECT_EQ(bridge->getContext()->isValid(), true);
 }
 
+TEST(Context, postMessage) {
+  auto bridge = TEST_init();
+  static bool logCalled = false;
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(), "{\"data\":1234} *");
+  };
+
+  std::string code = std::string(R"(
+window.onmessage = (message) => {
+  console.log(JSON.stringify(message.data), message.origin);
+};
+window.postMessage({
+  data: 1234
+}, '*');
+)");
+  bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
+  EXPECT_EQ(logCalled, true);
+}
+
 TEST(Context, evalWithError) {
   static bool errorHandlerExecuted = false;
   auto errorHandler = [](int32_t contextId, const char* errmsg) {

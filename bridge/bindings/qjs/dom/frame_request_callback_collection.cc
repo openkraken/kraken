@@ -22,6 +22,8 @@ void FrameCallback::fire(double highResTimeStamp) {
   JSValue arguments[] = {JS_NewFloat64(m_ctx, highResTimeStamp)};
 
   JSValue returnValue = JS_Call(m_ctx, m_callback, JS_UNDEFINED, 1, arguments);
+
+  context->drainPendingPromiseJobs();
   JS_FreeValue(m_ctx, m_callback);
 
   if (JS_IsException(returnValue)) {

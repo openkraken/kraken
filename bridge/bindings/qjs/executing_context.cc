@@ -135,10 +135,13 @@ ExecutionContext::~ExecutionContext() {
     }
   }
 
-  // Should free unhandled pending exceptions.
+  // Check if current context have unhandled exceptions.
   JSValue exception = JS_GetException(m_ctx);
-  handleException(&exception);
-  JS_FreeValue(m_ctx, exception);
+  if (JS_IsObject(exception) || JS_IsException(exception)) {
+    // There must be bugs in native functions from call stack frame. Someone needs to fix it if throws.
+    reportError(exception);
+    assert_m(false, "Unhandled exception found when dispose JSContext.");
+  }
 
   JS_FreeValue(m_ctx, globalObject);
   JS_FreeContext(m_ctx);
