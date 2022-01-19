@@ -65,7 +65,9 @@ abstract class KrakenBundle {
   late ByteData rawBundle;
   // JS Content in UTF-8 bytes.
   Uint8List? bytecode;
-  // JS Content is String
+  // JS Content in HTML.
+  String? html;
+  // JS Content is String.
   String? content;
   // JS line offset, default to 0.
   int lineOffset = 0;
@@ -106,6 +108,9 @@ abstract class KrakenBundle {
     return RawBundle.fromBytecode(bytecode, url);
   }
 
+  static KrakenBundle fromHTML(String html, { String url = '' }) {
+    return RawBundle.fromHTML(html, url);
+  }
 
   Future<void> eval(int? contextId) async {
     if (!isResolved) await resolve(contextId);
@@ -155,6 +160,11 @@ class RawBundle extends KrakenBundle {
   RawBundle.fromBytecode(Uint8List bytecode, String url)
       : super(url) {
     this.bytecode = bytecode;
+  }
+
+  RawBundle.fromHTML(String html, String url)
+      : super(url) {
+    this.html = html;
   }
 
   @override
