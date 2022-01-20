@@ -787,6 +787,8 @@ class KrakenController {
 
   UriParser? uriParser;
 
+  bool disabledJavaScript;
+
   late RenderObjectElement rootFlutterElement;
 
   static KrakenController? getControllerOfJSContextId(int? contextId) {
@@ -858,6 +860,7 @@ class KrakenController {
     this.httpClientInterceptor,
     this.devToolsService,
     this.uriParser,
+    this.disabledJavaScript = false
   })  : _name = name,
         _gestureListener = gestureListener {
     if (kProfileMode) {

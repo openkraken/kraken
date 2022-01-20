@@ -57,6 +57,9 @@ class WidgetDelegate {
 }
 
 class Kraken extends StatefulWidget {
+
+  final bool disabledJavaScript;
+
   // The background color for viewport, default to transparent.
   final Color? background;
 
@@ -224,7 +227,8 @@ class Kraken extends StatefulWidget {
     // Callback functions when loading Javascript scripts failed.
     this.onLoadError,
     this.animationController,
-    this.onJSError
+    this.onJSError,
+    this.disabledJavaScript = false,
   }) : super(key: key);
 
   @override
@@ -923,7 +927,8 @@ This situation often happened when you trying creating kraken when FlutterView n
         devToolsService: _krakenWidget.devToolsService,
         httpClientInterceptor: _krakenWidget.httpClientInterceptor,
         widgetDelegate: _widgetDelegate,
-        uriParser: _krakenWidget.uriParser
+        uriParser: _krakenWidget.uriParser,
+        disabledJavaScript: _krakenWidget.disabledJavaScript,
     );
 
     OnControllerCreated? onControllerCreated = _krakenWidget.onControllerCreated;
