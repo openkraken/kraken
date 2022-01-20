@@ -94,7 +94,7 @@ class CSSBoxDecoration extends BoxDecoration {
   final BoxBorder? border;
 
   @override
-  final BorderRadiusGeometry? borderRadius;
+  final BorderRadius? borderRadius;
 
   @override
   final List<KrakenBoxShadow>? boxShadow;
@@ -108,11 +108,13 @@ class CSSBoxDecoration extends BoxDecoration {
   @override
   final BoxShape shape;
 
+  bool get hasBorderRadius => borderRadius != null || borderRadius != BorderRadius.zero;
+
   CSSBoxDecoration clone({
     Color? color,
     DecorationImage? image,
     BoxBorder? border,
-    BorderRadiusGeometry? borderRadius,
+    BorderRadius? borderRadius,
     List<KrakenBoxShadow>? boxShadow,
     Gradient? gradient,
     BlendMode? backgroundBlendMode,

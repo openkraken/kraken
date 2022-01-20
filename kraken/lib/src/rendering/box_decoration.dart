@@ -130,8 +130,8 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     if (renderStyle.backgroundOrigin != null)
       properties.add(DiagnosticsProperty(
           'backgroundOrigin', renderStyle.backgroundOrigin));
-    BoxDecoration? _decoration = renderStyle.decoration;
-    if (_decoration != null && _decoration.borderRadius != null)
+    CSSBoxDecoration? _decoration = renderStyle.decoration;
+    if (_decoration != null && _decoration.hasBorderRadius)
       properties
           .add(DiagnosticsProperty('borderRadius', _decoration.borderRadius));
     if (_decoration != null && _decoration.image != null)

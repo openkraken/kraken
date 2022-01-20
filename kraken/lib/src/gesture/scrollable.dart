@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:kraken/css.dart';
 
 import 'gesture_detector.dart';
 import 'monodrag.dart';
@@ -381,7 +382,7 @@ mixin RenderOverflowMixin on RenderBox {
   final LayerHandle<ClipRRectLayer> _clipRRectLayer = LayerHandle<ClipRRectLayer>();
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
-  void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, BoxDecoration? decoration, PaintingContextCallback callback) {
+  void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, CSSBoxDecoration? decoration, PaintingContextCallback callback) {
     if (clipX == false && clipY == false) return callback(context, offset);
     final double paintOffsetX = _paintOffsetX;
     final double paintOffsetY = _paintOffsetY;
@@ -401,8 +402,8 @@ mixin RenderOverflowMixin on RenderBox {
       // for all overflow value which is not visible (auto/scroll/hidden/clip).
       bool _needsCompositing = true;
 
-      if (decoration != null && decoration.borderRadius != null) {
-        BorderRadius radius = decoration.borderRadius as BorderRadius;
+      if (decoration != null && decoration.hasBorderRadius) {
+        BorderRadius radius = decoration.borderRadius!;
         RRect clipRRect = RRect.fromRectAndCorners(clipRect,
             topLeft: radius.topLeft,
             topRight: radius.topRight,
