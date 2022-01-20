@@ -108,7 +108,7 @@ class CSSBoxDecoration extends BoxDecoration {
   @override
   final BoxShape shape;
 
-  bool get hasBorderRadius => borderRadius != null || borderRadius != BorderRadius.zero;
+  bool get hasBorderRadius => borderRadius != null && borderRadius != BorderRadius.zero;
 
   CSSBoxDecoration clone({
     Color? color,
