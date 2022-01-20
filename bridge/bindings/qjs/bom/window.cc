@@ -58,21 +58,29 @@ JSValue Window::scrollBy(JSContext* ctx, JSValue this_val, int argc, JSValue* ar
 
 JSValue Window::postMessage(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   JSValue messageValue = argv[0];
-  JSValue originValue = argv[1];
   JSValue globalObjectValue = JS_GetGlobalObject(ctx);
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(globalObjectValue, Window::classId()));
 
   JSValue messageEventInitValue = JS_NewObject(ctx);
-  JS_SetPropertyStr(ctx, messageEventInitValue, "data", JS_DupValue(ctx, messageValue));
-  JS_SetPropertyStr(ctx, originValue, "origin", JS_DupValue(ctx, originValue));
 
-  JSValue messageEventValue = JS_CallConstructor(ctx, MessageEvent::instance(window->m_context)->jsObject, 1, &messageEventInitValue);
+  // TODO: convert originValue to current src.
+  JSValue messageOriginValue = JS_NewString(ctx, "");
+
+  JS_SetPropertyStr(ctx, messageEventInitValue, "data", JS_DupValue(ctx, messageValue));
+  JS_SetPropertyStr(ctx, messageEventInitValue, "origin", messageOriginValue);
+
+  JSValue messageType = JS_NewString(ctx, "message");
+  JSValue arguments[] = {messageType, messageEventInitValue};
+
+  JSValue messageEventValue = JS_CallConstructor(ctx, MessageEvent::instance(window->m_context)->jsObject, 2, arguments);
   auto* event = static_cast<MessageEventInstance*>(JS_GetOpaque(messageEventValue, Event::kEventClassID));
   window->dispatchEvent(event);
 
+  JS_FreeValue(ctx, messageType);
   JS_FreeValue(ctx, messageEventValue);
   JS_FreeValue(ctx, messageEventInitValue);
   JS_FreeValue(ctx, globalObjectValue);
+  JS_FreeValue(ctx, messageOriginValue);
   return JS_NULL;
 }
 
