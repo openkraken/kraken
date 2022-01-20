@@ -1502,6 +1502,9 @@ class Element extends Node
       addEventResponder(_renderBoxModel);
       if (_hasIntersectionObserverEvent(eventHandlers)) {
         _renderBoxModel.addIntersectionChangeListener(handleIntersectionChange);
+        // Mark the compositing state for this render object as dirty
+        // cause it will create new layer.
+        _renderBoxModel.markNeedsCompositingBitsUpdate();
       }
     }
   }
