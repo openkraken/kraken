@@ -128,6 +128,40 @@ describe('border_radius', () => {
     await snapshot();
   });
 
+  it('works with overflow hidden and child of opacity', async (done) => {
+    let div;
+    let item;
+    div = createElement(
+      'div',
+      {
+        style: {
+          'border-radius': '10px',
+          backgroundColor: 'green',
+          width: '100px',
+          height: '100px',
+          padding: '10px',
+          overflow: 'hidden'
+        },
+      }, [
+          (item = createElement('div', {
+              style: {
+                width: '100px',
+                height: '250px',
+                backgroundColor: 'yellow',
+              }
+          }))
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    setTimeout(async () => {
+      item.style.opacity = 0.5;
+      await snapshot();
+      done();
+    }, 1000);
+  });
+
   it('works with overflow clip', async () => {
     let div;
     div = createElement(
