@@ -310,7 +310,28 @@ class CSSBorderSide {
 class CSSBorderRadius {
   final CSSLengthValue x;
   final CSSLengthValue y;
+
   const CSSBorderRadius(this.x, this.y);
+
+  Radius get computedRadius => Radius.elliptical(x.computedValue, y.computedValue);
+
+  @override
+  int get hashCode => super.hashCode;
+
+  @override
+  bool operator ==(Object? other) {
+    return other is CSSBorderRadius && other.x == x && other.y == y;
+  }
+
+  @override
+  String toString() {
+    if (x == CSSLengthValue.zero && y == CSSLengthValue.zero) {
+      return 'CSSBorderRadius.zero';
+    } else {
+      return 'CSSBorderRadius($x, $y)';
+    }
+  }
+
   static CSSBorderRadius zero = CSSBorderRadius(CSSLengthValue.zero, CSSLengthValue.zero);
   static CSSBorderRadius? parseBorderRadius(String radius, RenderStyle renderStyle, String propertyName) {
     if (radius.isNotEmpty) {
@@ -326,10 +347,6 @@ class CSSBorderRadius {
       }
     }
     return null;
-  }
-
-  Radius get computedRadius {
-    return Radius.elliptical(x.computedValue, y.computedValue);
   }
 }
 
