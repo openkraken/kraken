@@ -34,6 +34,12 @@ mixin CSSTransformMixin on RenderStyle {
     _transform = value;
     _transformMatrix = null;
 
+    // Mark the compositing state for this render object as dirty
+    // cause it will create new layer when transform is valid.
+    if (value != null) {
+      renderBoxModel?.markNeedsCompositingBitsUpdate();
+    }
+
     // Transform effect the stacking context.
     RenderBoxModel? parentRenderer = parent?.renderBoxModel;
     if (parentRenderer is RenderLayoutBox) {

@@ -431,10 +431,8 @@ class RenderLayoutBox extends RenderBoxModel
     }
     double maxScrollableX = scrollableSize.width;
     double maxScrollableY = scrollableSize.height;
-    if (childRenderStyle.left.isNotAuto) {
-      maxScrollableX = math.max(maxScrollableX,
-          childRenderStyle.left.computedValue + childScrollableSize!.width);
-    }
+    maxScrollableX = math.max(maxScrollableX,
+        childRenderStyle.left.computedValue + childScrollableSize!.width);
 
     if (childRenderStyle.right.isNotAuto) {
       if (isScrollingContentBox &&
@@ -452,10 +450,8 @@ class RenderLayoutBox extends RenderBoxModel
       }
     }
 
-    if (childRenderStyle.top.isNotAuto) {
-      maxScrollableY = math.max(maxScrollableY,
-          childRenderStyle.top.computedValue + childScrollableSize!.height);
-    }
+    maxScrollableY = math.max(maxScrollableY,
+        childRenderStyle.top.computedValue + childScrollableSize.height);
     if (childRenderStyle.bottom.isNotAuto) {
       if (isScrollingContentBox &&
           (parent as RenderBoxModel).heightSizeType == BoxSizeType.specified) {
@@ -571,7 +567,10 @@ class RenderBoxModel extends RenderBox
   }) : super();
 
   @override
-  bool get alwaysNeedsCompositing => opacityAlwaysNeedsCompositing();
+  bool get alwaysNeedsCompositing {
+    return intersectionObserverAlwaysNeedsCompositing() ||
+      opacityAlwaysNeedsCompositing();
+  }
 
   RenderPositionPlaceholder? renderPositionPlaceholder;
 
@@ -688,10 +687,6 @@ class RenderBoxModel extends RenderBox
       // Copy overflow
       ..scrollListener = scrollListener
       ..scrollablePointerListener = scrollablePointerListener
-      ..clipX = clipX
-      ..clipY = clipY
-      ..enableScrollX = enableScrollX
-      ..enableScrollY = enableScrollY
       ..scrollOffsetX = scrollOffsetX
       ..scrollOffsetY = scrollOffsetY
 
@@ -721,10 +716,12 @@ class RenderBoxModel extends RenderBox
     return currentBox.parent is RenderViewportBox;
   }
 
-  // Auto value for min-width
+  // Auto value for min-width which equals to the total width of children
+  // which is in flow (excluding position absolute/fixed).
   double autoMinWidth = 0;
 
-  // Auto value for min-height
+  // Auto value for min-height which equals to the total width of children
+  // which is in flow (excluding position absolute/fixed).
   double autoMinHeight = 0;
 
   // Whether it needs relayout due to percentage calculation.
@@ -1021,17 +1018,15 @@ class RenderBoxModel extends RenderBox
 
   // Hooks when content box had layout.
   void didLayout() {
-    if (clipX || clipY) {
-      scrollableViewportSize = Size(
-        _contentSize!.width +
-          renderStyle.paddingLeft.computedValue +
-          renderStyle.paddingRight.computedValue,
-        _contentSize!.height +
-          renderStyle.paddingTop.computedValue +
-          renderStyle.paddingBottom.computedValue);
+    scrollableViewportSize = Size(
+      _contentSize!.width +
+        renderStyle.paddingLeft.computedValue +
+        renderStyle.paddingRight.computedValue,
+      _contentSize!.height +
+        renderStyle.paddingTop.computedValue +
+        renderStyle.paddingBottom.computedValue);
 
-      setUpOverflowScroller(scrollableSize, scrollableViewportSize);
-    }
+    setUpOverflowScroller(scrollableSize, scrollableViewportSize);
 
     if (positionedHolder != null &&
         renderStyle.position != CSSPositionType.sticky) {
@@ -1153,26 +1148,7 @@ class RenderBoxModel extends RenderBox
   }
 
   void _chainPaintDecoration(PaintingContext context, Offset offset) {
-    EdgeInsets? resolvedPadding = renderStyle.padding.resolve(TextDirection.ltr);
-    paintDecoration(context, offset, resolvedPadding);
-    _chainPaintOverflow(context, offset);
-  }
-
-  // For scrolling box, the minimum width and height should not less than scrollableSize
-  void ensureBoxSizeLargerThanScrollableSize() {
-    if (isScrollingContentBox) {
-      double newBoxWidth = size.width;
-      double newBoxHeight = size.height;
-
-      if (scrollableSize.width > newBoxWidth) {
-        newBoxWidth = scrollableSize.width;
-      }
-      if (scrollableSize.height > newBoxHeight) {
-        newBoxHeight = scrollableSize.height;
-      }
-
-      size = Size(newBoxWidth, newBoxHeight);
-    }
+    paintDecoration(context, offset, _chainPaintOverflow);
   }
 
   void _chainPaintOverflow(PaintingContext context, Offset offset) {
