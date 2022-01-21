@@ -15,8 +15,11 @@ class HTMLView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // dom.Document document = parse(data);
+
     return Kraken(
-      bundle: KrakenBundle.fromHTML(data),
+      bundle: KrakenBundle.fromHTML('<div>aaa</div>'),
+      disabledJavaScript: true,
     );
   }
 }

@@ -19,6 +19,9 @@ import 'from_native.dart';
 import 'native_types.dart';
 import 'dynamic_library.dart';
 
+import 'package:html/parser.dart' show parse;
+import 'package:html/dom.dart' as dom;
+
 // Steps for using dart:ffi to call a C function from Dart:
 // 1. Import dart:ffi.
 // 2. Create a typedef with the FFI type signature of the C function.
@@ -210,13 +213,17 @@ void parseHTML(int contextId, String code, { disabledJavaScript = false }) {
     return;
   }
 
-  Pointer<Utf8> nativeCode = code.toNativeUtf8();
-  try {
-    _parseHTML(contextId, nativeCode, code.length);
-  } catch (e, stack) {
-    print('$e\n$stack');
+  if (disabledJavaScript) {
+    dom.Document document = parse(code);
+  } else {
+    Pointer<Utf8> nativeCode = code.toNativeUtf8();
+    try {
+      _parseHTML(contextId, nativeCode, code.length);
+    } catch (e, stack) {
+      print('$e\n$stack');
+    }
+    malloc.free(nativeCode);
   }
-  malloc.free(nativeCode);
 }
 
 // Register initJsEngine
