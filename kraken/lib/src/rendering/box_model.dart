@@ -1059,13 +1059,16 @@ class RenderBoxModel extends RenderBox
     throw FlutterError('Please impl performPaint of $runtimeType.');
   }
 
+  bool get shouldPaint => !renderStyle.isVisibilityHidden;
+
   @override
   void paint(PaintingContext context, Offset offset) {
     if (kProfileMode && PerformanceTiming.enabled()) {
       childPaintDuration = 0;
       PerformanceTiming.instance().mark(PERF_PAINT_START, uniqueId: hashCode);
     }
-    if (renderStyle.isVisibilityHidden) {
+
+    if (!shouldPaint) {
       if (kProfileMode && PerformanceTiming.enabled()) {
         PerformanceTiming.instance().mark(PERF_PAINT_END, uniqueId: hashCode);
       }

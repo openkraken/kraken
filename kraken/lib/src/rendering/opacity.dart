@@ -12,7 +12,6 @@ mixin RenderOpacityMixin on RenderBox {
 
   int alpha = ui.Color.getAlphaFromOpacity(1.0);
 
-
   final LayerHandle<OpacityLayer> _opacityLayer = LayerHandle<OpacityLayer>();
 
   void disposeOpacityLayer() {
@@ -24,6 +23,13 @@ mixin RenderOpacityMixin on RenderBox {
     if (alpha == 255) {
       _opacityLayer.layer = null;
       // No need to keep the layer. We'll create a new one if necessary.
+      callback(context, offset);
+      return;
+    }
+
+    if (alpha == 0) {
+      // Clip to empty, ignoring all drawing in canvas.
+      context.canvas.clipRect(Rect.zero);
       callback(context, offset);
       return;
     }
