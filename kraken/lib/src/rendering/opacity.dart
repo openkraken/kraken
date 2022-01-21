@@ -20,16 +20,10 @@ mixin RenderOpacityMixin on RenderBox {
 
   void paintOpacity(PaintingContext context, Offset offset,
       PaintingContextCallback callback) {
+
     if (alpha == 255) {
       _opacityLayer.layer = null;
       // No need to keep the layer. We'll create a new one if necessary.
-      callback(context, offset);
-      return;
-    }
-
-    if (alpha == 0) {
-      // Clip to empty, ignoring all drawing in canvas.
-      context.canvas.clipRect(Rect.zero);
       callback(context, offset);
       return;
     }

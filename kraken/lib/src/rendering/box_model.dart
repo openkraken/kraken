@@ -1104,9 +1104,13 @@ class RenderBoxModel extends RenderBox
     }
   }
 
-  void paintBoxModel(PaintingContext context, Offset offset) {
+  void paintNothing(PaintingContext context, Offset offset) {}
 
-    if (isScrollingContentBox) {
+  void paintBoxModel(PaintingContext context, Offset offset) {
+    // If opacity to zero, only paint intersection observer.
+    if (alpha == 0) {
+      paintIntersectionObserver(context, offset, paintNothing);
+    } else if (isScrollingContentBox) {
       // Scrolling content box should only size painted.
       performPaint(context, offset);
     } else {
