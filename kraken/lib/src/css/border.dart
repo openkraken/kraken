@@ -316,7 +316,7 @@ class CSSBorderRadius {
   Radius get computedRadius => Radius.elliptical(x.computedValue, y.computedValue);
 
   @override
-  int get hashCode => super.hashCode;
+  int get hashCode => hashValues(x, y);
 
   @override
   bool operator ==(Object? other) {

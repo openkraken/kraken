@@ -380,7 +380,7 @@ class CSSLengthValue {
     return (other == null && (type == CSSLengthType.UNKNOWN || type == CSSLengthType.INITIAL)) ||
         (other is CSSLengthValue
         && other.value == value
-        && other.type == type);
+        && (isZero || other.type == type));
   }
 
   @override
