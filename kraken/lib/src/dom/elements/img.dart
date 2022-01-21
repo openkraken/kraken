@@ -136,7 +136,7 @@ class ImageElement extends Element {
 
   double get width {
     // Width calc priority: style > property > intrinsic.
-    double? borderBoxWidth = _styleWidth
+    double borderBoxWidth = _styleWidth
       ?? _propertyWidth
       ?? renderStyle.getWidthByIntrinsicRatio();
 
@@ -145,7 +145,7 @@ class ImageElement extends Element {
 
   double get height {
     // Height calc priority: style > property > intrinsic.
-    double? borderBoxHeight = _styleHeight
+    double borderBoxHeight = _styleHeight
       ?? _propertyHeight
       ?? renderStyle.getHeightByIntrinsicRatio();
 
