@@ -6,9 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/widget.dart';
 
-class HTMLViewState<T extends StatefulWidget> extends KrakenState<T> {
 
-}
 
 class HTMLView extends StatefulWidget {
   final String data;

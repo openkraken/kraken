@@ -243,6 +243,25 @@ class Kraken extends StatefulWidget {
 
 }
 
+class HTMLViewState<T extends StatefulWidget> extends KrakenState<T> {
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+        child: FocusableActionDetector(
+            actions: _actionMap,
+            focusNode: _focusNode,
+            onFocusChange: _handleFocusChange,
+            // TODO: _HTMLViewRenderObjectWidget
+            child: Text('text'),
+            // child: _KrakenRenderObjectWidget(
+            //   context.widget as HTMLViewState,
+            //   widgetDelegate,
+            // )
+        )
+    );
+  }
+}
+
 class WebviewState<T extends StatefulWidget> extends KrakenState<T> {
   @override
   void didChangeDependencies() {
@@ -272,6 +291,21 @@ class WebviewState<T extends StatefulWidget> extends KrakenState<T> {
       (widget as Kraken).routeObserver!.unsubscribe(this);
     }
     super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+        child: FocusableActionDetector(
+            actions: _actionMap,
+            focusNode: _focusNode,
+            onFocusChange: _handleFocusChange,
+            child: _KrakenRenderObjectWidget(
+              context.widget as Kraken,
+              widgetDelegate,
+            )
+        )
+    );
   }
 }
 
@@ -321,21 +355,6 @@ abstract class KrakenState<T extends StatefulWidget> extends State<T> with Route
       ExtendSelectionLeftByWordTextIntent: CallbackAction<ExtendSelectionLeftByWordTextIntent>(onInvoke: _handleExtendSelectionLeftByWordText),
       ExtendSelectionRightByWordTextIntent: CallbackAction<ExtendSelectionRightByWordTextIntent>(onInvoke: _handleExtendSelectionRightByWordText),
     };
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return RepaintBoundary(
-        child: FocusableActionDetector(
-            actions: _actionMap,
-            focusNode: _focusNode,
-            onFocusChange: _handleFocusChange,
-            child: _KrakenRenderObjectWidget(
-              context.widget as Kraken,
-              widgetDelegate,
-            )
-        )
-    );
   }
 
   WidgetDelegate get widgetDelegate {
