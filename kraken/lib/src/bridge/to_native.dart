@@ -205,10 +205,11 @@ void evaluateQuickjsByteCode(int contextId, Uint8List bytes) {
   malloc.free(byteData);
 }
 
-void parseHTML(int contextId, String code) {
+void parseHTML(int contextId, String code, { disabledJavaScript = false }) {
   if (KrakenController.getControllerOfJSContextId(contextId) == null) {
     return;
   }
+
   Pointer<Utf8> nativeCode = code.toNativeUtf8();
   try {
     _parseHTML(contextId, nativeCode, code.length);
@@ -526,11 +527,11 @@ void flushUICommand() {
         switch (commandType) {
           case UICommandType.createElement:
             controller.view.createElement(
-                id, nativePtr.cast<NativeEventTarget>(), command.args[0]);
+                id, command.args[0], nativePtr.cast<NativeEventTarget>());
             break;
           case UICommandType.createTextNode:
             controller.view.createTextNode(
-                id, nativePtr.cast<NativeEventTarget>(), command.args[0]);
+                id, command.args[0], nativePtr.cast<NativeEventTarget>());
             break;
           case UICommandType.createComment:
             controller.view

@@ -126,7 +126,8 @@ abstract class KrakenBundle {
       } else if (bytecode != null) {
         evaluateQuickjsByteCode(contextId, bytecode!);
       } else if (html != null) {
-        parseHTML(contextId, html!);
+        KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
+        parseHTML(contextId, html!, disabledJavaScript: controller!.disabledJavaScript);
       }
 
       // For javascript code, HTML or bytecode from networks and hardware disk.
