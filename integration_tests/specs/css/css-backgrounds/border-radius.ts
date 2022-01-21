@@ -71,6 +71,24 @@ describe('border_radius', () => {
     await snapshot();
   });
 
+  it('should work with percentage of one value on element of width and height not equal', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '100px',
+          backgroundColor: 'green',
+          borderRadius: '100%'
+        },
+      },
+    );
+
+    BODY.appendChild(div);
+    await snapshot();
+  });
+
   it('should work with percentage of two values', async () => {
     let div;
     div = createElement(
