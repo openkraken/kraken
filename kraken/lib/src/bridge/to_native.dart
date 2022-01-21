@@ -208,6 +208,25 @@ void evaluateQuickjsByteCode(int contextId, Uint8List bytes) {
   malloc.free(byteData);
 }
 
+int targetID = 300;
+
+void traverseHTML(KrakenController controller, dom.Node node, int parentTargetId) {
+  print(node.nodeType);
+  node.nodes.forEach((node) {
+    targetID++;
+
+    if (node.nodeType == dom.Node.ELEMENT_NODE) {
+      controller.view.createElement(targetID, (node as dom.Element).localName!, null);
+    } else if (node.nodeType == dom.Node.TEXT_NODE) {
+      controller.view.createTextNode(targetID, (node as dom.Text).data, null);
+    }
+
+    controller.view.insertAdjacentNode(targetID, 'afterend', parentTargetId);
+
+    traverseHTML(controller, node, targetID);
+  });
+}
+
 void parseHTML(int contextId, String code, { disabledJavaScript = false }) {
   if (KrakenController.getControllerOfJSContextId(contextId) == null) {
     return;
@@ -215,6 +234,10 @@ void parseHTML(int contextId, String code, { disabledJavaScript = false }) {
 
   if (disabledJavaScript) {
     dom.Document document = parse(code);
+    KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
+    document.nodes.forEach((node) {
+      traverseHTML(controller, node, -1);
+    });
   } else {
     Pointer<Utf8> nativeCode = code.toNativeUtf8();
     try {
