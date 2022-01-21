@@ -134,24 +134,24 @@ mixin CSSSizingMixin on RenderStyle {
   }
 
   // Intrinsic width of replaced element.
-  double? _intrinsicWidth;
+  double _intrinsicWidth = 0;
   @override
-  double? get intrinsicWidth {
+  double get intrinsicWidth {
     return _intrinsicWidth;
   }
-  set intrinsicWidth(double? value) {
+  set intrinsicWidth(double value) {
     if (_intrinsicWidth == value) return;
     _intrinsicWidth = value;
     _markSelfAndParentNeedsLayout();
   }
 
   // Intrinsic height of replaced element.
-  double? _intrinsicHeight;
+  double _intrinsicHeight = 0;
   @override
-  double? get intrinsicHeight {
+  double get intrinsicHeight {
     return _intrinsicHeight;
   }
-  set intrinsicHeight(double? value) {
+  set intrinsicHeight(double value) {
     if (_intrinsicHeight == value) return;
     _intrinsicHeight = value;
     _markSelfAndParentNeedsLayout();

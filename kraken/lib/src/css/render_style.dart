@@ -126,8 +126,8 @@ abstract class RenderStyle {
   CSSOverflowType get effectiveOverflowX;
   CSSOverflowType get effectiveOverflowY;
   double? get intrinsicRatio;
-  double? get intrinsicWidth;
-  double? get intrinsicHeight;
+  double get intrinsicWidth;
+  double get intrinsicHeight;
 
   // Flex
   FlexDirection get flexDirection;
@@ -1105,11 +1105,26 @@ class CSSRenderStyle
   @override
   double getHeightByIntrinsicRatio() {
     double contentBoxHeight;
-    if (width.computedValue != 0 && intrinsicWidth != null && intrinsicWidth != 0) {
-      double contentBoxWidth = deflatePaddingBorderWidth(width.computedValue);
-      contentBoxHeight = contentBoxWidth * (intrinsicHeight ?? 0) / intrinsicWidth!;
+    double borderBoxWidth = width.isAuto
+      ? wrapPaddingBorderWidth(intrinsicWidth) : width.computedValue;
+    if (minWidth.isNotAuto && borderBoxWidth < minWidth.computedValue) {
+      borderBoxWidth = minWidth.computedValue;
+    }
+    if (maxWidth.isNotNone && borderBoxWidth > maxWidth.computedValue) {
+      borderBoxWidth = maxWidth.computedValue;
+    }
+
+    if (borderBoxWidth != 0 && intrinsicWidth != 0) {
+      double contentBoxWidth = deflatePaddingBorderWidth(borderBoxWidth);
+      contentBoxHeight = contentBoxWidth * intrinsicHeight / intrinsicWidth;
     } else {
-      contentBoxHeight = intrinsicHeight ?? 0;
+      contentBoxHeight = intrinsicHeight;
+      if (!minHeight.isAuto && contentBoxHeight < minHeight.computedValue) {
+        contentBoxHeight = minHeight.computedValue;
+      }
+      if (!maxHeight.isNone && contentBoxHeight > maxHeight.computedValue) {
+        contentBoxHeight = maxHeight.computedValue;
+      }
     }
 
     double borderBoxHeight = wrapPaddingBorderHeight(contentBoxHeight);
@@ -1121,11 +1136,27 @@ class CSSRenderStyle
   @override
   double getWidthByIntrinsicRatio() {
     double contentBoxWidth;
-    if (height.computedValue != 0 && intrinsicHeight != null && intrinsicHeight != 0) {
-      double contentBoxHeight = deflatePaddingBorderHeight(height.computedValue);
-      contentBoxWidth = contentBoxHeight * (intrinsicWidth ?? 0) / intrinsicHeight!;
+
+    double borderBoxHeight = height.isAuto
+      ? wrapPaddingBorderHeight(intrinsicHeight) : height.computedValue;
+    if (!minHeight.isAuto && borderBoxHeight < minHeight.computedValue) {
+      borderBoxHeight = minHeight.computedValue;
+    }
+    if (!maxHeight.isNone && borderBoxHeight > maxHeight.computedValue) {
+      borderBoxHeight = maxHeight.computedValue;
+    }
+
+    if (borderBoxHeight != 0 && intrinsicHeight != 0) {
+      double contentBoxHeight = deflatePaddingBorderHeight(borderBoxHeight);
+      contentBoxWidth = contentBoxHeight * intrinsicWidth / intrinsicHeight;
     } else {
-      contentBoxWidth = intrinsicWidth ?? 0;
+      contentBoxWidth = intrinsicWidth;
+      if (minWidth.isNotAuto && contentBoxWidth < minWidth.computedValue) {
+        contentBoxWidth = minWidth.computedValue;
+      }
+      if (maxWidth.isNotNone && contentBoxWidth > maxWidth.computedValue) {
+        contentBoxWidth = maxWidth.computedValue;
+      }
     }
 
     double borderBoxWidth = wrapPaddingBorderWidth(contentBoxWidth);
@@ -1201,9 +1232,9 @@ class CSSRenderStyle
   double wrapPaddingBorderHeight(double contentBoxHeight) {
     return contentBoxHeight
       + paddingTop.computedValue
-        + paddingTop.computedValue
-        + border.top
-        + border.bottom;
+      + paddingBottom.computedValue
+      + border.top
+      + border.bottom;
   }
 
   // Add padding and border to content-box width to get border-box width.
@@ -1219,7 +1250,7 @@ class CSSRenderStyle
   double deflatePaddingBorderHeight(double borderBoxHeight) {
     return borderBoxHeight
       - paddingTop.computedValue
-      - paddingTop.computedValue
+      - paddingBottom.computedValue
       - border.top
       - border.bottom;
   }

@@ -397,7 +397,7 @@ describe('Tags img', () => {
     image = createElement(
       'img',
       {
-        src: 'assets/css3.png',
+        src: 'assets/100x100-green.png',
         style: {
           border: '10px solid black',
           padding: '20px',
@@ -414,7 +414,7 @@ describe('Tags img', () => {
     image = createElement(
       'img',
       {
-        src: 'assets/css3.png',
+        src: 'assets/100x100-green.png',
         style: {
           border: '10px solid black',
           padding: '20px',
@@ -432,7 +432,7 @@ describe('Tags img', () => {
     image = createElement(
       'img',
       {
-        src: 'assets/css3.png',
+        src: 'assets/100x100-green.png',
         style: {
           border: '10px solid black',
           padding: '20px',
@@ -450,7 +450,7 @@ describe('Tags img', () => {
     image = createElement(
       'img',
       {
-        src: 'assets/css3.png',
+        src: 'assets/100x100-green.png',
         style: {
           border: '10px solid black',
           padding: '20px',

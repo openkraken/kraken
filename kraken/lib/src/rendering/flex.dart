@@ -348,7 +348,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         childRenderStyle.width.isAuto) {
       double transferredSize = childRenderStyle.height.isNotAuto
           ? childRenderStyle.height.computedValue * childRenderStyle.intrinsicRatio!
-          : childRenderStyle.intrinsicWidth!;
+          : childRenderStyle.intrinsicWidth;
       minMainSize = math.min(contentSize, transferredSize);
     } else if (child is RenderIntrinsic &&
         childRenderStyle.intrinsicRatio != null &&
@@ -356,7 +356,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         childRenderStyle.height.isAuto) {
       double transferredSize = childRenderStyle.width.isNotAuto
           ? childRenderStyle.width.computedValue / childRenderStyle.intrinsicRatio!
-          : childRenderStyle.intrinsicHeight!;
+          : childRenderStyle.intrinsicHeight;
       minMainSize = math.min(contentSize, transferredSize);
     } else if (child is RenderBoxModel) {
       double? specifiedMainSize = _isHorizontalFlexDirection
