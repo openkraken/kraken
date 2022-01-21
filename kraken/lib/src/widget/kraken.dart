@@ -244,6 +244,10 @@ class Kraken extends StatefulWidget {
 }
 
 class HTMLViewState<T extends StatefulWidget> extends KrakenState<T> {
+  String html = '';
+
+  HTMLViewState(this.html);
+
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
@@ -252,7 +256,7 @@ class HTMLViewState<T extends StatefulWidget> extends KrakenState<T> {
             focusNode: _focusNode,
             onFocusChange: _handleFocusChange,
             // TODO: _HTMLViewRenderObjectWidget
-            child: Text('text'),
+            child: Text(html),
             // child: _KrakenRenderObjectWidget(
             //   context.widget as HTMLViewState,
             //   widgetDelegate,

@@ -9,10 +9,8 @@ import 'package:kraken/widget.dart';
 class HTMLView extends StatefulWidget {
   final String data;
 
-  HTMLView(
-    this.data,
-  );
+  HTMLView(this.data);
 
   @override
-  HTMLViewState<HTMLView> createState() => HTMLViewState<HTMLView>();
+  HTMLViewState<HTMLView> createState() => HTMLViewState<HTMLView>(data);
 }
