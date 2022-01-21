@@ -135,33 +135,21 @@ class ImageElement extends Element {
   }
 
   double get width {
-    double? width = _styleWidth ?? _propertyWidth;
+    // Width calc priority: style > property > intrinsic.
+    double? borderBoxWidth = _styleWidth
+      ?? _propertyWidth
+      ?? renderStyle.getWidthByIntrinsicRatio();
 
-    if (width == null) {
-      width = naturalWidth;
-      double? height = _styleHeight ?? _propertyHeight;
-
-      if (height != null && naturalHeight != 0) {
-        width = height * naturalWidth / naturalHeight;
-      }
-    }
-
-    return width;
+    return borderBoxWidth;
   }
 
   double get height {
-    double? height = _styleHeight ?? _propertyHeight;
+    // Height calc priority: style > property > intrinsic.
+    double? borderBoxHeight = _styleHeight
+      ?? _propertyHeight
+      ?? renderStyle.getHeightByIntrinsicRatio();
 
-    if (height == null) {
-      height = naturalHeight;
-      double? width = _styleWidth ?? _propertyWidth;
-
-      if (width != null && naturalWidth != 0) {
-        height = width * naturalHeight / naturalWidth;
-      }
-    }
-
-    return height;
+    return borderBoxHeight;
   }
 
   // Read the original image width of loaded image.

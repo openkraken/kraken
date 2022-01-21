@@ -1101,34 +1101,37 @@ class CSSRenderStyle
       - paddingBottom.computedValue;
   }
 
-  // Get height of replaced element by intrinsic ratio if height is not defined
+  // Get height of replaced element by intrinsic ratio if height is not defined.
   @override
   double getHeightByIntrinsicRatio() {
-    double? realWidth = width.isAuto ? intrinsicWidth : width.computedValue;
-    if (minWidth.isNotAuto && realWidth! < minWidth.computedValue) {
-      realWidth = minWidth.computedValue;
+    double contentBoxHeight;
+    if (width.computedValue != 0 && intrinsicWidth != 0) {
+      double contentBoxWidth = deflatePaddingBorderWidth(width.computedValue);
+      contentBoxHeight = contentBoxWidth * (intrinsicHeight ?? 0) / intrinsicWidth!;
+    } else {
+      contentBoxHeight = intrinsicHeight ?? 0;
     }
-    if (maxWidth.isNotNone && realWidth! > maxWidth.computedValue) {
-      realWidth = maxWidth.computedValue;
-    }
-    double realHeight = realWidth! * intrinsicRatio!;
-    return realHeight;
+
+    double borderBoxHeight = wrapPaddingBorderHeight(contentBoxHeight);
+
+    return borderBoxHeight;
   }
 
-  // Get width of replaced element by intrinsic ratio if width is not defined
+  // Get width of replaced element by intrinsic ratio if width is not defined.
   @override
   double getWidthByIntrinsicRatio() {
-    double? realHeight = height.isAuto ? intrinsicHeight : height.computedValue;
-    if (!minHeight.isAuto && realHeight! < minHeight.computedValue) {
-      realHeight = minHeight.computedValue;
+    double contentBoxWidth;
+    if (height.computedValue != 0 && intrinsicHeight != 0) {
+      double contentBoxHeight = deflatePaddingBorderHeight(height.computedValue);
+      contentBoxWidth = contentBoxHeight * (intrinsicWidth ?? 0) / intrinsicHeight!;
+    } else {
+      contentBoxWidth = intrinsicWidth ?? 0;
     }
-    if (!maxHeight.isNone && realHeight! > maxHeight.computedValue) {
-      realHeight = maxHeight.computedValue;
-    }
-    double realWidth = realHeight! / intrinsicRatio!;
-    return realWidth;
-  }
 
+    double borderBoxWidth = wrapPaddingBorderWidth(contentBoxWidth);
+
+    return borderBoxWidth;
+  }
 
   @override
   void visitChildren<T extends RenderStyle>(RenderStyleVisitor<T> visitor) {
@@ -1192,6 +1195,42 @@ class CSSRenderStyle
       parentRenderStyle = parentRenderStyle.parent;
     }
     return false;
+  }
+
+  // Add padding and border to content-box height to get border-box height.
+  double wrapPaddingBorderHeight(double contentBoxHeight) {
+    return contentBoxHeight
+      + paddingTop.computedValue
+        + paddingTop.computedValue
+        + border.top
+        + border.bottom;
+  }
+
+  // Add padding and border to content-box width to get border-box width.
+  double wrapPaddingBorderWidth(double contentBoxWidth) {
+    return contentBoxWidth
+      + paddingLeft.computedValue
+      + paddingRight.computedValue
+      + border.left
+      + border.right;
+  }
+
+  // Subtract padding and border to border-box height to get content-box height.
+  double deflatePaddingBorderHeight(double borderBoxHeight) {
+    return borderBoxHeight
+      - paddingTop.computedValue
+      - paddingTop.computedValue
+      - border.top
+      - border.bottom;
+  }
+
+  // Subtract padding and border to border-box width to get content-box width.
+  double deflatePaddingBorderWidth(double borderBoxWidth) {
+    return borderBoxWidth
+      - paddingLeft.computedValue
+      - paddingRight.computedValue
+      - border.left
+      - border.right;
   }
 }
 
