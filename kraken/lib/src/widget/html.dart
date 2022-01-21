@@ -6,7 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/widget.dart';
 
-class HTMLView extends StatelessWidget {
+class HTMLViewState<T extends StatefulWidget> extends KrakenState<T> {
+
+}
+
+class HTMLView extends StatefulWidget {
   final String data;
 
   HTMLView(
@@ -14,6 +18,8 @@ class HTMLView extends StatelessWidget {
   );
 
   @override
+  HTMLViewState<HTMLView> createState() => HTMLViewState<HTMLView>();
+
   Widget build(BuildContext context) {
     // dom.Document document = parse(data);
 

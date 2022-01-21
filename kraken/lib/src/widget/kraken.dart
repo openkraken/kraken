@@ -239,10 +239,43 @@ class Kraken extends StatefulWidget {
   }
 
   @override
-  _KrakenState createState() => _KrakenState();
+  WebviewState<Kraken> createState() => WebviewState<Kraken>();
 
 }
-class _KrakenState extends State<Kraken> with RouteAware {
+
+class WebviewState<T extends StatefulWidget> extends KrakenState<T> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if ((widget as Kraken).routeObserver != null) {
+      (widget as Kraken).routeObserver!.subscribe(this, ModalRoute.of(context)!);
+    }
+  }
+
+  // Resume call timer and callbacks when kraken widget change to visible.
+  @override
+  void didPopNext() {
+    assert((widget as Kraken).controller != null);
+    (widget as Kraken).controller!.resume();
+  }
+
+  // Pause all timer and callbacks when kraken widget has been invisible.
+  @override
+  void didPushNext() {
+    assert((widget as Kraken).controller != null);
+    (widget as Kraken).controller!.pause();
+  }
+
+  @override
+  void dispose() {
+    if ((widget as Kraken).routeObserver != null) {
+      (widget as Kraken).routeObserver!.unsubscribe(this);
+    }
+    super.dispose();
+  }
+}
+
+abstract class KrakenState<T extends StatefulWidget> extends State<T> with RouteAware {
   Map<Type, Action<Intent>>? _actionMap;
 
   final FocusNode _focusNode = FocusNode();
@@ -326,37 +359,6 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _requestFocus() {
     _focusNode.requestFocus();
   }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (widget.routeObserver != null) {
-      widget.routeObserver!.subscribe(this, ModalRoute.of(context)!);
-    }
-  }
-
-  // Resume call timer and callbacks when kraken widget change to visible.
-  @override
-  void didPopNext() {
-    assert(widget.controller != null);
-    widget.controller!.resume();
-  }
-
-  // Pause all timer and callbacks when kraken widget has been invisible.
-  @override
-  void didPushNext() {
-    assert(widget.controller != null);
-    widget.controller!.pause();
-  }
-
-  @override
-  void dispose() {
-    if (widget.routeObserver != null) {
-      widget.routeObserver!.unsubscribe(this);
-    }
-    super.dispose();
-  }
-
 
   // Get the target platform.
   TargetPlatform _getTargetPlatform() {
