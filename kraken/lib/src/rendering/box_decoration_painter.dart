@@ -324,7 +324,7 @@ class BoxDecorationPainter extends BoxPainter {
   void paintBackground(
     Canvas canvas, Offset offset, ImageConfiguration configuration) {
     assert(configuration.size != null);
-    Offset baseOffset = Offset(0, 0);
+    Offset baseOffset = Offset.zero;
 
     final TextDirection? textDirection = configuration.textDirection;
     bool hasLocalAttachment = _hasLocalBackgroundImage();
@@ -335,12 +335,12 @@ class BoxDecorationPainter extends BoxPainter {
     _paintBackgroundColor(canvas, backgroundColorRect, textDirection);
 
     // Background image of background-attachment local scroll with content
-    Offset backgrundImageOffset = hasLocalAttachment ? offset : baseOffset;
+    Offset backgroundImageOffset = hasLocalAttachment ? offset : baseOffset;
     // Rect of background image
     Rect backgroundClipRect =
-    _getBackgroundClipRect(backgrundImageOffset, configuration);
+    _getBackgroundClipRect(backgroundImageOffset, configuration);
     Rect backgroundOriginRect =
-    _getBackgroundOriginRect(backgrundImageOffset, configuration);
+    _getBackgroundOriginRect(backgroundImageOffset, configuration);
     Rect backgroundImageRect =
     backgroundClipRect.intersect(backgroundOriginRect);
     _paintBackgroundImage(canvas, backgroundImageRect, configuration);
@@ -463,9 +463,7 @@ class BoxDecorationPainter extends BoxPainter {
   }
 
   @override
-  String toString() {
-    return 'BoxPainter for $_decoration';
-  }
+  String toString() => 'BoxPainter for $_decoration';
 }
 
 /// Forked from flutter of [DecorationImagePainter] Class.
@@ -844,4 +842,3 @@ Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, Im
 // Forked from flutter with no modification:
 // https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/decoration_image.dart#L621
 Rect _scaleRect(Rect rect, double scale) => Rect.fromLTRB(rect.left * scale, rect.top * scale, rect.right * scale, rect.bottom * scale);
-

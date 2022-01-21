@@ -74,11 +74,14 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
   }
 
   void paintDecoration(
-      PaintingContext context, Offset offset, EdgeInsets? padding) {
+      PaintingContext context, Offset offset, PaintingContextCallback callback) {
     CSSBoxDecoration? decoration = renderStyle.decoration;
     DecorationPosition decorationPosition = renderStyle.decorationPosition;
     ImageConfiguration imageConfiguration = renderStyle.imageConfiguration;
-    if (decoration == null) return;
+
+    if (decoration == null) return callback(context, offset);
+
+    EdgeInsets? padding = renderStyle.padding.resolve(TextDirection.ltr);
     _painter ??=
         BoxDecorationPainter(padding, renderStyle, markNeedsPaint);
 
@@ -119,6 +122,8 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
       _painter!.paint(context.canvas, offset, filledConfiguration);
       if (decoration.isComplex) context.setIsComplexHint();
     }
+
+    callback(context, offset);
   }
 
   void debugBoxDecorationProperties(DiagnosticPropertiesBuilder properties) {
