@@ -1105,7 +1105,7 @@ class CSSRenderStyle
   @override
   double getHeightByIntrinsicRatio() {
     double contentBoxHeight;
-    if (width.computedValue != 0 && intrinsicWidth != 0) {
+    if (width.computedValue != 0 && intrinsicWidth != null && intrinsicWidth != 0) {
       double contentBoxWidth = deflatePaddingBorderWidth(width.computedValue);
       contentBoxHeight = contentBoxWidth * (intrinsicHeight ?? 0) / intrinsicWidth!;
     } else {
@@ -1121,7 +1121,7 @@ class CSSRenderStyle
   @override
   double getWidthByIntrinsicRatio() {
     double contentBoxWidth;
-    if (height.computedValue != 0 && intrinsicHeight != 0) {
+    if (height.computedValue != 0 && intrinsicHeight != null && intrinsicHeight != 0) {
       double contentBoxHeight = deflatePaddingBorderHeight(height.computedValue);
       contentBoxWidth = contentBoxHeight * (intrinsicWidth ?? 0) / intrinsicHeight!;
     } else {

@@ -391,4 +391,77 @@ describe('Tags img', () => {
       flutterContainer.appendChild(div);
     }
   });
+
+  it('works with padding border exist and width height not exist', async () => {
+    let image;
+    image = createElement(
+      'img',
+      {
+        src: 'assets/css3.png',
+        style: {
+          border: '10px solid black',
+          padding: '20px',
+        },
+      },
+    );
+    BODY.appendChild(image);
+
+    await snapshot(0.1);
+  });
+
+  it('works with padding border width exist and height not exist', async () => {
+    let image;
+    image = createElement(
+      'img',
+      {
+        src: 'assets/css3.png',
+        style: {
+          border: '10px solid black',
+          padding: '20px',
+          width: '250px',
+        },
+      },
+    );
+    BODY.appendChild(image);
+
+    await snapshot(0.1);
+  });
+
+  it('works with padding border height exist and width not exist', async () => {
+    let image;
+    image = createElement(
+      'img',
+      {
+        src: 'assets/css3.png',
+        style: {
+          border: '10px solid black',
+          padding: '20px',
+          height: '100px',
+        },
+      },
+    );
+    BODY.appendChild(image);
+
+    await snapshot(0.1);
+  });
+
+  it('works with padding border width height both exist', async () => {
+    let image;
+    image = createElement(
+      'img',
+      {
+        src: 'assets/css3.png',
+        style: {
+          border: '10px solid black',
+          padding: '20px',
+          width: '350px',
+          height: '150px',
+        },
+      },
+    );
+    BODY.appendChild(image);
+
+    await snapshot(0.1);
+  });
+
 });
