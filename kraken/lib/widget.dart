@@ -6,4 +6,4 @@
 export 'src/widget/kraken.dart';
 export 'src/widget/widget_to_element_adaptor.dart';
 export 'src/widget/element_to_widget_adaptor.dart';
-export 'src/widget/html.dart';
+export 'src/widget/html_view.dart';
