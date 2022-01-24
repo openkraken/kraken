@@ -126,10 +126,10 @@ abstract class KrakenViewController
       viewport = originalViewport;
     } else {
       viewport = RenderViewportBox(
-          background: background,
-          viewportSize: Size(viewportWidth, viewportHeight),
-          gestureListener: gestureListener,
-          controller: rootController
+        background: background,
+        viewportSize: Size(viewportWidth, viewportHeight),
+        gestureListener: gestureListener,
+        controller: rootController
       );
     }
 

@@ -50,31 +50,6 @@ class _HTMLViewRenderObjectWidget extends SingleChildRenderObjectWidget {
 This situation often happened when you trying creating kraken when FlutterView not initialized.''');
     }
 
-    // KrakenController controller = KrakenController(
-    //   shortHash(_krakenWidget.hashCode),
-    //   viewportWidth,
-    //   viewportHeight,
-    //   background: _krakenWidget.background,
-    //   showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
-    //   bundle: _krakenWidget.bundle,
-    //   onLoad: _krakenWidget.onLoad,
-    //   onLoadError: _krakenWidget.onLoadError,
-    //   onJSError: _krakenWidget.onJSError,
-    //   methodChannel: _krakenWidget.javaScriptChannel,
-    //   gestureListener: _krakenWidget.gestureListener,
-    //   navigationDelegate: _krakenWidget.navigationDelegate,
-    //   devToolsService: _krakenWidget.devToolsService,
-    //   httpClientInterceptor: _krakenWidget.httpClientInterceptor,
-    //   widgetDelegate: _widgetDelegate,
-    //   uriParser: _krakenWidget.uriParser,
-    //   disabledJavaScript: _krakenWidget.disabledJavaScript,
-    // );
-    //
-    // OnControllerCreated? onControllerCreated = _krakenWidget.onControllerCreated;
-    // if (onControllerCreated != null) {
-    //   onControllerCreated(controller);
-    // }
-
     HTMLViewController view = HTMLViewController(
       viewportWidth,
       viewportHeight,
