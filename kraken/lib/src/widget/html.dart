@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/widget.dart';
 
-class HTMLViewState<T extends StatefulWidget> extends KrakenState<T> {
+class HTMLViewState extends KrakenState<HTMLView> {
   final String html;
 
   HTMLViewState(this.html);
@@ -36,5 +36,5 @@ class HTMLView extends StatefulWidget {
   HTMLView(this.data);
 
   @override
-  HTMLViewState<HTMLView> createState() => HTMLViewState<HTMLView>(data);
+  HTMLViewState createState() => HTMLViewState(data);
 }
