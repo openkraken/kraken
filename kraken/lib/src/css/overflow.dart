@@ -65,18 +65,30 @@ mixin CSSOverflowMixin on RenderStyle {
     _overflowY = value;
   }
 
+  // As specified, except with visible/clip computing to auto/hidden (respectively)
+  // if one of overflow-x or overflow-y is neither visible nor clip.
+  // https://www.w3.org/TR/css-overflow-3/#propdef-overflow-x
   @override
   CSSOverflowType get effectiveOverflowX {
     if (overflowX == CSSOverflowType.visible && overflowY != CSSOverflowType.visible) {
       return CSSOverflowType.auto;
     }
+    if (overflowX == CSSOverflowType.clip && overflowY != CSSOverflowType.clip) {
+      return CSSOverflowType.hidden;
+    }
     return overflowX;
   }
 
+  // As specified, except with visible/clip computing to auto/hidden (respectively)
+  // if one of overflow-x or overflow-y is neither visible nor clip.
+  // https://www.w3.org/TR/css-overflow-3/#propdef-overflow-y
   @override
   CSSOverflowType get effectiveOverflowY {
     if (overflowY == CSSOverflowType.visible && overflowX != CSSOverflowType.visible) {
       return CSSOverflowType.auto;
+    }
+    if (overflowY == CSSOverflowType.clip && overflowX != CSSOverflowType.clip) {
+      return CSSOverflowType.hidden;
     }
     return overflowY;
   }
@@ -113,9 +125,6 @@ mixin ElementOverflowMixin on ElementBase {
   void updateRenderBoxModelWithOverflowX(ScrollListener scrollListener) {
     if (renderBoxModel is RenderSliverListLayout) {
       RenderSliverListLayout renderBoxModel = this.renderBoxModel as RenderSliverListLayout;
-      // Recycler layout not need repaintBoundary and scroll/pointer listeners,
-      // ignoring overflowX or overflowY sets, which handle it self.
-      renderBoxModel.clipX = false;
       renderBoxModel.scrollOffsetX = renderBoxModel.axis == Axis.horizontal
           ? renderBoxModel.scrollable.position : null;
     } else if (renderBoxModel != null) {
@@ -124,30 +133,21 @@ mixin ElementOverflowMixin on ElementBase {
       bool shouldScrolling = false;
       switch(overflowX) {
         case CSSOverflowType.hidden:
+          // @TODO: Content of overflow hidden can be scrolled programmatically.
           _scrollableX = null;
-          renderBoxModel.clipX = true;
-          // Overflow hidden can be scrolled programmatically.
-          renderBoxModel.enableScrollX = true;
           break;
         case CSSOverflowType.clip:
           _scrollableX = null;
-          renderBoxModel.clipX = true;
-          // Overflow clip can't scrolled programmatically.
-          renderBoxModel.enableScrollX = false;
           break;
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
           _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right, scrollListener: scrollListener);
           shouldScrolling = true;
-          renderBoxModel.clipX = true;
-          renderBoxModel.enableScrollX = true;
           renderBoxModel.scrollOffsetX = _scrollableX!.position;
           break;
         case CSSOverflowType.visible:
         default:
           _scrollableX = null;
-          renderBoxModel.clipX = false;
-          renderBoxModel.enableScrollX = false;
           break;
       }
 
@@ -167,9 +167,6 @@ mixin ElementOverflowMixin on ElementBase {
   void updateRenderBoxModelWithOverflowY(ScrollListener scrollListener) {
     if (renderBoxModel is RenderSliverListLayout) {
       RenderSliverListLayout renderBoxModel = this.renderBoxModel as RenderSliverListLayout;
-      // Recycler layout not need repaintBoundary and scroll/pointer listeners,
-      // ignoring overflowX or overflowY sets, which handle it self.
-      renderBoxModel.clipY = false;
       renderBoxModel.scrollOffsetY = renderBoxModel.axis == Axis.vertical
           ? renderBoxModel.scrollable.position : null;
     } else if (renderBoxModel != null) {
@@ -178,28 +175,21 @@ mixin ElementOverflowMixin on ElementBase {
       bool shouldScrolling = false;
       switch(overflowY) {
         case CSSOverflowType.hidden:
+          // @TODO: Content of overflow hidden can be scrolled programmatically.
           _scrollableY = null;
-          renderBoxModel.clipY = true;
-          renderBoxModel.enableScrollY = true;
           break;
         case CSSOverflowType.clip:
           _scrollableY = null;
-          renderBoxModel.clipY = true;
-          renderBoxModel.enableScrollY = false;
           break;
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
           _scrollableY = KrakenScrollable(axisDirection: AxisDirection.down, scrollListener: scrollListener);
           shouldScrolling = true;
-          renderBoxModel.clipY = true;
-          renderBoxModel.enableScrollY = true;
           renderBoxModel.scrollOffsetY = _scrollableY!.position;
           break;
         case CSSOverflowType.visible:
         default:
           _scrollableY = null;
-          renderBoxModel.clipY = false;
-          renderBoxModel.enableScrollY = false;
           break;
       }
 

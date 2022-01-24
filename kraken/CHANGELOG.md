@@ -1,3 +1,19 @@
+## 0.10.0+3
+
+**Bug Fixed**
+
++ Fix empty screen when page reload. https://github.com/openkraken/kraken/pull/1109
++ Fix linux dynamic rpath. https://github.com/openkraken/kraken/pull/1111
+
+## 0.10.0+2
+
+**Bug Fixed**
+
++ Fix error when set empty string to textOverflow. https://github.com/openkraken/kraken/pull/1095
++ Fix input delete key binding. https://github.com/openkraken/kraken/pull/1096
++ Fix load kraken bundle from env and native side. https://github.com/openkraken/kraken/pull/1098
++ Fix crash when reload page. https://github.com/openkraken/kraken/pull/1102
+
 ## 0.10.0+1
 
 **Bug Fixed**

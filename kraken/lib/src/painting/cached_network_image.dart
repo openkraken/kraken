@@ -68,13 +68,16 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
 
     Uri uri = Uri.parse(url);
     Uint8List? bytes;
-    try {
-      HttpCacheObject? cacheObject = await cacheController.getCacheObject(uri);
-      bytes = await cacheObject.toBinaryContent();
-    } catch (error, stackTrace) {
-      print('Error while reading cache, $error\n$stackTrace');
-    }
 
+    if (HttpCacheController.mode != HttpCacheMode.NO_CACHE) {
+      try {
+        HttpCacheObject? cacheObject = await cacheController.getCacheObject(uri);
+        bytes = await cacheObject.toBinaryContent();
+      } catch (error, stackTrace) {
+        print('Error while reading cache, $error\n$stackTrace');
+      }
+    }
+    
     // Fallback to network
     bytes ??= await fetchFile(key, chunkEvents, cacheController);
 

@@ -132,11 +132,11 @@ final Pointer<NativeFunction<NativeInvokeModule>> _nativeInvokeModule = Pointer.
 // Register reloadApp
 typedef NativeReloadApp = Void Function(Int32 contextId);
 
-void _reloadApp(int contextId) {
+void _reloadApp(int contextId) async {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
 
   try {
-    controller.reload();
+    await controller.reload();
   } catch (e, stack) {
     print('Dart Error: $e\n$stack');
   }

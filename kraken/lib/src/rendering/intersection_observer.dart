@@ -25,9 +25,10 @@ typedef IntersectionChangeCallback = void Function(
 
 mixin RenderIntersectionObserverMixin on RenderBox {
   IntersectionChangeCallback? _onIntersectionChange;
-  // IntersectionObserverLayer? intersectionObserverLayer;
 
   IntersectionObserverLayer? _intersectionObserverLayer;
+
+  bool intersectionObserverAlwaysNeedsCompositing() => _listeners != null && _listeners!.isNotEmpty;
 
   /// A list of event handlers
   List<IntersectionChangeCallback>? _listeners;

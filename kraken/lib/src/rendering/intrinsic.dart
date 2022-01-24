@@ -26,19 +26,6 @@ class RenderIntrinsic extends RenderBoxModel
     return heightDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
   }
 
-  // The content of replaced elements is always trimmed to the content edge curve.
-  // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
-  @override
-  bool get clipX {
-    // Only clip when content of replaced element is loaded.
-    return renderStyle.borderRadius != null && renderStyle.intrinsicRatio != null;
-  }
-
-  @override
-  bool get clipY {
-    return renderStyle.borderRadius != null && renderStyle.intrinsicRatio != null;
-  }
-
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderLayoutParentData) {
@@ -129,8 +116,9 @@ class RenderIntrinsic extends RenderBoxModel
   /// override it to layout box model paint.
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (renderStyle.isVisibilityHidden) return;
-    paintBoxModel(context, offset);
+    if (shouldPaint) {
+      paintBoxModel(context, offset);
+    }
   }
 
   @override

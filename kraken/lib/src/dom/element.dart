@@ -701,13 +701,16 @@ class Element extends Node
 
   /// Release any resources held by [renderBoxModel].
   @override
-  void disposeRenderObject() {
+  void disposeRenderObject({ bool deep = false }) {
     if (renderBoxModel == null) return;
 
     willDetachRenderer();
 
-    for (Node child in childNodes) {
-      child.disposeRenderObject();
+    // Dispose all renderObject when deep.
+    if (deep) {
+      for (Node child in childNodes) {
+        child.disposeRenderObject(deep: true);
+      }
     }
 
     didDetachRenderer();
@@ -1502,6 +1505,9 @@ class Element extends Node
       addEventResponder(_renderBoxModel);
       if (_hasIntersectionObserverEvent(eventHandlers)) {
         _renderBoxModel.addIntersectionChangeListener(handleIntersectionChange);
+        // Mark the compositing state for this render object as dirty
+        // cause it will create new layer.
+        _renderBoxModel.markNeedsCompositingBitsUpdate();
       }
     }
   }

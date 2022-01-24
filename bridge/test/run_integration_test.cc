@@ -31,12 +31,12 @@ std::string readTestSpec() {
 // Very useful to fix bridge bugs.
 TEST(IntegrationTest, runSpecs) {
   auto bridge = TEST_init();
-  auto& context = bridge->getContext();
+  auto context = bridge->getContext();
 
   std::string code = readTestSpec();
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
 
   executeTest(context->getContextId(), [](int32_t contextId, NativeString* status) -> void* { KRAKEN_LOG(VERBOSE) << "done"; });
 
-  TEST_runLoop(context.get());
+  TEST_runLoop(context);
 }

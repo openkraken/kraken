@@ -141,7 +141,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   void attachTo(Element parent, {RenderBox? after}) {}
 
   /// Release any resources held by referenced render object.
-  void disposeRenderObject() {}
+  void disposeRenderObject({ bool deep = false}) {}
 
   /// Release any resources held by this node.
   @override
