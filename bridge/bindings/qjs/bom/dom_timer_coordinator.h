@@ -8,12 +8,12 @@
 
 #include <quickjs/quickjs.h>
 #include <unordered_map>
-#include "bindings/qjs/executing_context.h"
 #include <vector>
 
 namespace kraken::binding::qjs {
 
 class DOMTimer;
+class ExecutionContext;
 
 // Maintains a set of DOMTimers for a given page
 // DOMTimerCoordinator assigns IDs to timers; these IDs are

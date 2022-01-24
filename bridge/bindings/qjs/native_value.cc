@@ -15,6 +15,21 @@ namespace kraken::binding::qjs {
 #define AnonymousFunctionCallPreFix "_anonymous_fn_"
 #define AsyncAnonymousFunctionCallPreFix "_anonymous_async_fn_"
 
+NativeString* NativeString::clone() {
+  auto* newNativeString = new NativeString();
+  auto* newString = new uint16_t[length];
+
+  memcpy(newString, string, length * sizeof(uint16_t));
+  newNativeString->string = newString;
+  newNativeString->length = length;
+  return newNativeString;
+}
+
+void NativeString::free() {
+  delete[] string;
+}
+
+
 NativeValue Native_NewNull() {
   return (NativeValue){0, .u = {.int64 = 0}, NativeTag::TAG_NULL};
 }

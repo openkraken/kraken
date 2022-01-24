@@ -57,9 +57,6 @@ Event* Event::create(JSContext* ctx, NativeEvent* nativeEvent) {
   return event;
 }
 
-Event::Event() {
-
-}
 Event::Event(NativeEvent* nativeEvent): nativeEvent(nativeEvent) {}
 Event::Event(JSValue eventType, JSValue eventInit) {
 

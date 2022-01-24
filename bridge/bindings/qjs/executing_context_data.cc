@@ -5,6 +5,7 @@
 
 
 #include "executing_context_data.h"
+#include "executing_context.h"
 
 namespace kraken::binding::qjs {
 
@@ -26,8 +27,8 @@ JSValue ExecutionContextData::prototypeForType(const WrapperTypeInfo* type) {
 }
 
 JSValue ExecutionContextData::constructorForIdSlowCase(const WrapperTypeInfo* type) {
-  JSRuntime* runtime = m_context.runtime();
-  JSContext* ctx = m_context.ctx();
+  JSRuntime* runtime = m_context->runtime();
+  JSContext* ctx = m_context->ctx();
 
   assert(type->classId == 0 || !JS_HasClassId(runtime, type->classId));
 
@@ -38,14 +39,14 @@ JSValue ExecutionContextData::constructorForIdSlowCase(const WrapperTypeInfo* ty
   JSClassDef def{};
   def.class_name = type->className;
   def.call = type->callFunc;
-  JS_NewClass(m_context.runtime(), type->classId, &def);
+  JS_NewClass(m_context->runtime(), type->classId, &def);
 
   // Create class object and prototype object.
-  JSValue classObject = m_constructorMap[type] = JS_NewObjectClass(m_context.ctx(), type->classId);
-  JSValue prototypeObject = m_prototypeMap[type] = JS_NewObject(m_context.ctx());
+  JSValue classObject = m_constructorMap[type] = JS_NewObjectClass(m_context->ctx(), type->classId);
+  JSValue prototypeObject = m_prototypeMap[type] = JS_NewObject(m_context->ctx());
 
   // Make constructor function inherit to Function.prototype
-  JSValue functionConstructor = JS_GetPropertyStr(ctx, m_context.global(), "Function");
+  JSValue functionConstructor = JS_GetPropertyStr(ctx, m_context->global(), "Function");
   JSValue functionPrototype = JS_GetPropertyStr(ctx, functionConstructor, "prototype");
   JS_SetPrototype(ctx, classObject, functionPrototype);
   JS_FreeValue(ctx, functionPrototype);
@@ -59,7 +60,7 @@ JSValue ExecutionContextData::constructorForIdSlowCase(const WrapperTypeInfo* ty
   // Inherit to parentClass.
   if (type->parent_class != nullptr) {
     assert(m_prototypeMap.count(type->parent_class) > 0);
-    JS_SetPrototype(m_context.ctx(), prototypeObject, m_prototypeMap[type->parent_class]);
+    JS_SetPrototype(m_context->ctx(), prototypeObject, m_prototypeMap[type->parent_class]);
   }
 
   // Configure to be called as a constructor.

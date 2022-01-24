@@ -192,9 +192,6 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/heap_hashmap.h
     bindings/qjs/native_value.cc
     bindings/qjs/native_value.h
-    bindings/qjs/host_object.h
-    bindings/qjs/host_object.cc
-    bindings/qjs/host_class.h
     bindings/qjs/qjs_patch.cc
     bindings/qjs/qjs_patch.h
     bindings/qjs/module_manager.cc

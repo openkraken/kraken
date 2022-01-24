@@ -6,7 +6,6 @@
 #ifndef KRAKEN_BRIDGE_EXPORT_H
 #define KRAKEN_BRIDGE_EXPORT_H
 
-#include <cstdint>
 #include <thread>
 
 #include "dart_methods.h"
@@ -23,13 +22,7 @@
 KRAKEN_EXPORT
 std::thread::id getUIThreadId();
 
-struct NativeString {
-  const uint16_t* string;
-  uint32_t length;
-
-  NativeString* clone();
-  void free();
-};
+typedef struct void* NativeString*;
 
 struct NativeByteCode {
   uint8_t* bytes;
@@ -43,11 +36,6 @@ struct KrakenInfo {
   const char* app_version{nullptr};
   const char* app_revision{nullptr};
   const char* system_name{nullptr};
-};
-
-struct NativeScreen {
-  double width;
-  double height;
 };
 
 enum UICommand {

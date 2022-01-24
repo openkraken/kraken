@@ -20,8 +20,7 @@ list(APPEND KRAKEN_UNIT_TEST_SOURCE
   ./bindings/qjs/bom/timer_test.cc
   ./bindings/qjs/bom/console_test.cc
   ./bindings/qjs/qjs_patch_test.cc
-  ./bindings/qjs/host_object_test.cc
-  ./bindings/qjs/host_class_test.cc
+  ./bindings/qjs/garbage_collected_test.cc
   ./bindings/qjs/dom/event_target_test.cc
   ./bindings/qjs/module_manager_test.cc
   ./bindings/qjs/dom/node_test.cc

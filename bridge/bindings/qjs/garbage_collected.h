@@ -70,7 +70,7 @@ class GarbageCollected {
   FORCE_INLINE JSValue toQuickJS() { return jsObject; };
 
   FORCE_INLINE JSContext* ctx() { return m_ctx; };
-  FORCE_INLINE ExecutionContext* context() { return static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx)); };
+  FORCE_INLINE ExecutionContext* context() const { return static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx)); };
 
  protected:
   JSValue jsObject{JS_NULL};

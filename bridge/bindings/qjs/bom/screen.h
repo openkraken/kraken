@@ -12,6 +12,11 @@
 
 namespace kraken::binding::qjs {
 
+struct NativeScreen {
+  double width;
+  double height;
+};
+
 class Screen : public HostObject {
  public:
   explicit Screen(ExecutionContext* context) : HostObject(context, "Screen"){};

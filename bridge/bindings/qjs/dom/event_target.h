@@ -6,12 +6,10 @@
 #ifndef KRAKENBRIDGE_EVENT_TARGET_H
 #define KRAKENBRIDGE_EVENT_TARGET_H
 
-#include "bindings/qjs/dom/event.h"
-#include "bindings/qjs/executing_context.h"
-#include "bindings/qjs/garbage_collected.h"
-#include "bindings/qjs/heap_hashmap.h"
 #include "bindings/qjs/native_value.h"
-#include "bindings/qjs/qjs_patch.h"
+#include "bindings/qjs/executing_context.h"
+#include "bindings/qjs/heap_hashmap.h"
+#include "bindings/qjs/context_macros.h"
 #include "event_listener_map.h"
 
 #if UNIT_TEST
@@ -23,7 +21,7 @@ namespace kraken::binding::qjs {
 class EventTarget;
 class NativeEventTarget;
 class CSSStyleDeclaration;
-class StyleDeclarationInstance;
+class Event;
 
 void bindEventTarget(std::unique_ptr<ExecutionContext>& context);
 

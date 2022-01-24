@@ -6,7 +6,8 @@
 #ifndef KRAKENBRIDGE_EVENT_H
 #define KRAKENBRIDGE_EVENT_H
 
-#include "bindings/qjs/host_class.h"
+#include "bindings/qjs/executing_context.h"
+#include "bindings/qjs/context_macros.h"
 
 namespace kraken::binding::qjs {
 
@@ -81,7 +82,6 @@ class Event : public GarbageCollected<Event> {
   static JSValue constructor(ExecutionContext* context);
   static JSValue prototype(ExecutionContext* context);
 
-  explicit Event();
   explicit Event(NativeEvent* nativeEvent);
   explicit Event(JSValue eventType, JSValue eventInit);
 

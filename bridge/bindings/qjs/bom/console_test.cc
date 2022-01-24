@@ -8,8 +8,6 @@
 #include "kraken_test_env.h"
 #include "page.h"
 
-std::once_flag kGlobalClassIdFlag;
-
 TEST(Console, rawPrintShouldWork) {
   static bool logExecuted = false;
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {

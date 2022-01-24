@@ -7,16 +7,17 @@
 #define KRAKENBRIDGE_CONTEXT_DATA_H
 
 #include <unordered_map>
-#include "executing_context.h"
 #include "wrapper_type_info.h"
 
 namespace kraken::binding::qjs {
+
+class ExecutionContext;
 
 // Used to hold data that is associated with a single ExecutionContext object, and
 // has a 1:1 relationship with ExecutionContext.
 class ExecutionContextData final {
  public:
-  explicit ExecutionContextData(ExecutionContext& context): m_context(context) {};
+  explicit ExecutionContextData(ExecutionContext* context): m_context(context) {};
   ExecutionContextData(const ExecutionContextData&) = delete;
   ExecutionContextData& operator=(const ExecutionContextData&) = delete;
 
@@ -30,7 +31,7 @@ class ExecutionContextData final {
   std::unordered_map<const WrapperTypeInfo*, JSValue> m_constructorMap;
   std::unordered_map<const WrapperTypeInfo*, JSValue> m_prototypeMap;
 
-  ExecutionContext& m_context;
+  ExecutionContext* m_context;
 };
 
 

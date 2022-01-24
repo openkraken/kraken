@@ -12,6 +12,7 @@
 #include "document.h"
 #include "element.h"
 #include "event.h"
+#include "custom_event.h"
 #include "kraken_bridge.h"
 
 namespace kraken::binding::qjs {
@@ -451,11 +452,10 @@ void NativeEventTarget::dispatchEventImpl(NativeEventTarget* nativeEventTarget, 
   // NativeEvent members are memory aligned corresponding to NativeEvent.
   // So we can reinterpret_cast raw bytes pointer to NativeEvent type directly.
   auto* nativeEvent = reinterpret_cast<NativeEvent*>(raw->bytes);
-  Event* event = Event::create();
-//  Event* event = Event::buildEventInstance(eventType, context, nativeEvent, isCustomEvent == 1);
-//  eventInstance->nativeEvent->target = eventTarget;
-//  eventTarget->dispatchEvent(eventInstance);
-//  JS_FreeValue(context->ctx(), eventInstance->jsObject);
+  Event* event = isCustomEvent == 1 ? CustomEvent::create(context->ctx(), reinterpret_cast<NativeCustomEvent*>(nativeEvent)) : Event::create(context->ctx(), nativeEvent);
+  event->nativeEvent->target = eventTarget;
+  eventTarget->dispatchEvent(event);
+  JS_FreeValue(context->ctx(), event->toQuickJS());
 }
 
 }  // namespace kraken::binding::qjs

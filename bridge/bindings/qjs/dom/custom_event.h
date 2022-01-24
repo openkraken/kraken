@@ -21,19 +21,22 @@ class CustomEvent : public Event {
  public:
   static JSClassID classId;
   static CustomEvent* create(JSContext* ctx, JSValue eventType, JSValue init);
+  static CustomEvent* create(JSContext* ctx, NativeCustomEvent* nativeCustomEvent);
   static JSValue constructor(ExecutionContext* context);
   static JSValue prototype(ExecutionContext* context);
+
+  CustomEvent(JSValue eventType, JSValue init);
+  CustomEvent(NativeCustomEvent* nativeEvent);
 
   void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const override;
   void dispose() const override;
 
-//  CustomEvent() = delete;
-//  explicit CustomEvent(JSValue eventType, JSValue eventInit);
-
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(detail);
   DEFINE_FUNCTION(initCustomEvent);
 
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(detail);
+
  private:
+  NativeCustomEvent* m_nativeCustomEvent{nullptr};
   JSValue m_detail{JS_NULL};
 };
 

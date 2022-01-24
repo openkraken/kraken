@@ -6,8 +6,6 @@
 #ifndef KRAKENBRIDGE_FOUNDATION_UI_COMMAND_BUFFER_H_
 #define KRAKENBRIDGE_FOUNDATION_UI_COMMAND_BUFFER_H_
 
-#include "include/kraken_bridge.h"
-
 namespace foundation {
 
 class UICommandBuffer {

@@ -16,14 +16,13 @@
 #include <memory>
 #include <mutex>
 #include <unordered_map>
-#include "bindings/qjs/bom/dom_timer_coordinator.h"
 #include "foundation/ui_command_buffer.h"
-#include "garbage_collected.h"
-#include "js_context_macros.h"
-#include "kraken_foundation.h"
 #include "executing_context_data.h"
+#include "garbage_collected.h"
+#include "kraken_foundation.h"
 #include "qjs_patch.h"
 #include "wrapper_type_info.h"
+#include "bindings/qjs/bom/dom_timer_coordinator.h"
 
 using JSExceptionHandler = std::function<void(int32_t contextId, const char* message)>;
 
@@ -32,7 +31,7 @@ namespace kraken::binding::qjs {
 static std::once_flag kinitJSClassIDFlag;
 
 class ExecutionContext;
-struct DOMTimerCallbackContext;
+class Document;
 
 std::string jsAtomToStdString(JSContext* ctx, JSAtom atom);
 
@@ -95,7 +94,7 @@ class ExecutionContext {
   // not be used after the ExecutionContext is destroyed.
   DOMTimerCoordinator* timers();
 
-  FORCE_INLINE DocumentInstance* document() { return m_document; };
+  FORCE_INLINE Document* document() { return m_document; };
   FORCE_INLINE foundation::UICommandBuffer* uiCommandBuffer() { return &m_commandBuffer; };
 
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func);
@@ -126,12 +125,11 @@ class ExecutionContext {
   JSValue globalObject{JS_NULL};
   bool ctxInvalid_{false};
   JSContext* m_ctx{nullptr};
-  DocumentInstance* m_document{nullptr};
+  Document* m_document{nullptr};
   DOMTimerCoordinator m_timers;
   ExecutionContextGCTracker* m_gcTracker{nullptr};
   ExecutionContextData m_data{this};
   foundation::UICommandBuffer m_commandBuffer{contextId};
-  friend DocumentInstance;
 };
 
 // The read object's method or properties via Proxy, we should redirect this_val from Proxy into target property of

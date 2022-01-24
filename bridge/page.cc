@@ -79,25 +79,25 @@ KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : c
   bindTextNode(m_context);
   bindCommentNode(m_context);
   bindElement(m_context);
-  bindAnchorElement(m_context);
-  bindCanvasElement(m_context);
-  bindImageElement(m_context);
-  bindInputElement(m_context);
-  bindObjectElement(m_context);
-  bindScriptElement(m_context);
-  bindTemplateElement(m_context);
+//  bindAnchorElement(m_context);
+//  bindCanvasElement(m_context);
+//  bindImageElement(m_context);
+//  bindInputElement(m_context);
+//  bindObjectElement(m_context);
+//  bindScriptElement(m_context);
+//  bindTemplateElement(m_context);
   bindCSSStyleDeclaration(m_context);
-  bindCloseEvent(m_context);
-  bindGestureEvent(m_context);
-  bindInputEvent(m_context);
-  bindIntersectionChangeEvent(m_context);
-  bindMediaErrorEvent(m_context);
-  bindMouseEvent(m_context);
-  bindMessageEvent(m_context);
-  bindPopStateEvent(m_context);
-  bindTouchEvent(m_context);
+//  bindCloseEvent(m_context);
+//  bindGestureEvent(m_context);
+//  bindInputEvent(m_context);
+//  bindIntersectionChangeEvent(m_context);
+//  bindMediaErrorEvent(m_context);
+//  bindMouseEvent(m_context);
+//  bindMessageEvent(m_context);
+//  bindPopStateEvent(m_context);
+//  bindTouchEvent(m_context);
   bindDocument(m_context);
-  bindPerformance(m_context);
+//  bindPerformance(m_context);
 
 #if ENABLE_PROFILE
   nativePerformance.mark(PERF_JS_NATIVE_METHOD_INIT_END);
@@ -119,22 +119,22 @@ bool KrakenPage::parseHTML(const char* code, size_t length) {
   if (!m_context->isValid())
     return false;
   JSValue bodyValue = JS_GetPropertyStr(m_context->ctx(), m_context->document()->jsObject, "body");
-  auto* body = static_cast<ElementInstance*>(JS_GetOpaque(bodyValue, Element::classId()));
+  auto* body = static_cast<Element*>(JS_GetOpaque(bodyValue, Element::classId));
   HTMLParser::parseHTML(code, length, body);
   JS_FreeValue(m_context->ctx(), bodyValue);
   return true;
 }
 
-void KrakenPage::invokeModuleEvent(NativeString* moduleName, const char* eventType, void* rawEvent, NativeString* extra) {
+void KrakenPage::invokeModuleEvent(NativeString* moduleName, const char* eventType, void* ptr, NativeString* extra) {
   if (!m_context->isValid())
     return;
 
   JSValue eventObject = JS_NULL;
-  if (rawEvent != nullptr) {
+  if (ptr != nullptr) {
     std::string type = std::string(eventType);
-    auto* event = static_cast<RawEvent*>(rawEvent)->bytes;
-    EventInstance* eventInstance = Event::buildEventInstance(type, m_context.get(), event, false);
-    eventObject = eventInstance->jsObject;
+    auto* rawEvent = static_cast<RawEvent*>(ptr)->bytes;
+    Event* event = Event::create(m_context->ctx(), reinterpret_cast<NativeEvent*>(rawEvent));
+    eventObject = event->toQuickJS();
   }
 
   JSValue moduleNameValue = JS_NewUnicodeString(m_context->runtime(), m_context->ctx(), moduleName->string, moduleName->length);

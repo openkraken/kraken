@@ -6,7 +6,10 @@
 #ifndef KRAKENBRIDGE_NATIVE_VALUE_H
 #define KRAKENBRIDGE_NATIVE_VALUE_H
 
-#include "executing_context.h"
+#include <cinttypes>
+#include <quickjs/quickjs.h>
+#include <quickjs/list.h>
+#include <string>
 
 enum NativeTag {
   TAG_STRING = 0,
@@ -23,6 +26,16 @@ enum NativeTag {
 enum class JSPointerType { AsyncContextContext = 0, NativeFunctionContext = 1, NativeBoundingClientRect = 2, NativeCanvasRenderingContext2D = 3, NativeEventTarget = 4 };
 
 namespace kraken::binding::qjs {
+
+struct NativeString {
+  const uint16_t* string;
+  uint32_t length;
+
+  NativeString* clone();
+  void free();
+};
+
+class ExecutionContext;
 
 // Exchange data struct between dart and C++
 struct NativeValue {

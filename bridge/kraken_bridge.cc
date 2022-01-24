@@ -257,17 +257,3 @@ int32_t profileModeEnabled() {
   return 0;
 #endif
 }
-
-NativeString* NativeString::clone() {
-  auto* newNativeString = new NativeString();
-  auto* newString = new uint16_t[length];
-
-  memcpy(newString, string, length * sizeof(uint16_t));
-  newNativeString->string = newString;
-  newNativeString->length = length;
-  return newNativeString;
-}
-
-void NativeString::free() {
-  delete[] string;
-}

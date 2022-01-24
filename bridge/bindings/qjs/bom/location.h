@@ -18,7 +18,8 @@ class Location : public GarbageCollected<Location> {
  public:
   static JSClassID classId;
   static Location* create(JSContext* ctx);
-  static JSValue reload(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+
+  DEFINE_FUNCTION(reload);
 
   void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const override;
   void dispose() const override;
