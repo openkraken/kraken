@@ -35,7 +35,6 @@ Blob* Blob::create(JSContext* ctx) {
   // Let eventTarget instance inherit EventTarget prototype methods.
   JS_SetPrototype(ctx, blob->toQuickJS(), prototype);
   return blob;
-
 }
 Blob* Blob::create(JSContext* ctx, std::vector<uint8_t>&& data) {
   return create(ctx);
@@ -259,9 +258,6 @@ uint8_t* Blob::bytes() {
 }
 
 void Blob::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {}
-void Blob::dispose() const {
-
-}
-
+void Blob::dispose() const {}
 
 }  // namespace kraken::binding::qjs

@@ -6,8 +6,8 @@
 #ifndef KRAKENBRIDGE_EVENT_H
 #define KRAKENBRIDGE_EVENT_H
 
-#include "bindings/qjs/executing_context.h"
 #include "bindings/qjs/context_macros.h"
+#include "bindings/qjs/executing_context.h"
 
 namespace kraken::binding::qjs {
 
@@ -108,10 +108,11 @@ class Event : public GarbageCollected<Event> {
   inline void cancelled(bool v) { m_cancelled = v; }
   inline const bool propagationImmediatelyStopped() { return m_propagationImmediatelyStopped; }
 
-  void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const override;
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
   void dispose() const override;
 
   NativeEvent* nativeEvent{nullptr};
+
  private:
   static std::unordered_map<std::string, EventCreator> m_eventCreatorMap;
   bool m_cancelled{false};
@@ -132,11 +133,7 @@ auto eventCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_
   return event->toQuickJS();
 };
 
-const WrapperTypeInfo eventTypeInfo = {
-    "Event",
-    nullptr,
-    eventCreator
-};
+const WrapperTypeInfo eventTypeInfo = {"Event", nullptr, eventCreator};
 
 }  // namespace kraken::binding::qjs
 

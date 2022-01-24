@@ -57,10 +57,8 @@ Event* Event::create(JSContext* ctx, NativeEvent* nativeEvent) {
   return event;
 }
 
-Event::Event(NativeEvent* nativeEvent): nativeEvent(nativeEvent) {}
-Event::Event(JSValue eventType, JSValue eventInit) {
-
-}
+Event::Event(NativeEvent* nativeEvent) : nativeEvent(nativeEvent) {}
+Event::Event(JSValue eventType, JSValue eventInit) {}
 
 JSValue Event::constructor(ExecutionContext* context) {
   return context->contextData()->constructorForType(&eventTypeInfo);
@@ -134,7 +132,7 @@ IMPL_PROPERTY_GETTER(Event, cancelBubble)(JSContext* ctx, JSValue this_val, int 
   return JS_NewBool(ctx, event->cancelled());
 }
 
-//Event* Event::buildEvent(JSValue eventType, JSContext* ctx, void* nativeEvent, bool isCustomEvent) {
+// Event* Event::buildEvent(JSValue eventType, JSContext* ctx, void* nativeEvent, bool isCustomEvent) {
 //  Event* event;
 //  if (isCustomEvent) {
 //    event = CustomEvent::create(ctx, reinterpret_cast<NativeCustomEvent*>(nativeEvent), eventType);

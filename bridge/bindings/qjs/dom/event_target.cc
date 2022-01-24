@@ -9,10 +9,10 @@
 #include "bindings/qjs/bom/window.h"
 #include "bindings/qjs/dom/text_node.h"
 #include "bindings/qjs/qjs_patch.h"
+#include "custom_event.h"
 #include "document.h"
 #include "element.h"
 #include "event.h"
-#include "custom_event.h"
 #include "kraken_bridge.h"
 
 namespace kraken::binding::qjs {
@@ -200,9 +200,7 @@ bool EventTarget::internalDispatchEvent(Event* event) {
      handler), so must take extra care */
     JS_DupValue(m_ctx, handler);
 
-    JSValue arguments[] = {
-      event->toQuickJS()
-    };
+    JSValue arguments[] = {event->toQuickJS()};
 
     // The third params `thisObject` to null equals global object.
     JSValue returnedValue = JS_Call(m_ctx, handler, JS_NULL, 1, arguments);

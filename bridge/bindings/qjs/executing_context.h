@@ -16,13 +16,13 @@
 #include <memory>
 #include <mutex>
 #include <unordered_map>
-#include "foundation/ui_command_buffer.h"
+#include "bindings/qjs/bom/dom_timer_coordinator.h"
 #include "executing_context_data.h"
+#include "foundation/ui_command_buffer.h"
 #include "garbage_collected.h"
 #include "kraken_foundation.h"
 #include "qjs_patch.h"
 #include "wrapper_type_info.h"
-#include "bindings/qjs/bom/dom_timer_coordinator.h"
 
 using JSExceptionHandler = std::function<void(int32_t contextId, const char* message)>;
 
@@ -154,7 +154,8 @@ static JSValue handleCallThisOnProxy(JSContext* ctx, JSValueConst this_val, int 
 
 class ObjectProperty {
   KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(ObjectProperty);
-public:
+
+ public:
   ObjectProperty() = delete;
 
   // Define an property on object with a JSValue.
@@ -164,7 +165,7 @@ public:
 
   JSValue value() const { return m_value; }
 
-private:
+ private:
   JSValue m_value{JS_NULL};
 };
 

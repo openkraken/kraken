@@ -6,9 +6,9 @@
 #ifndef KRAKENBRIDGE_NATIVE_VALUE_H
 #define KRAKENBRIDGE_NATIVE_VALUE_H
 
-#include <cinttypes>
-#include <quickjs/quickjs.h>
 #include <quickjs/list.h>
+#include <quickjs/quickjs.h>
+#include <cinttypes>
 #include <string>
 
 enum NativeTag {

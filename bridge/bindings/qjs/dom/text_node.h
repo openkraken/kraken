@@ -47,11 +47,7 @@ auto textNodeCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst th
   return textNode->toQuickJS();
 };
 
-const WrapperTypeInfo textNodeType = {
-    "TextNode",
-    &nodeTypeInfo,
-    textNodeCreator
-};
+const WrapperTypeInfo textNodeType = {"TextNode", &nodeTypeInfo, textNodeCreator};
 
 }  // namespace kraken::binding::qjs
 

@@ -6,8 +6,8 @@
 #ifndef KRAKENBRIDGE_WRAPPER_TYPE_INFO_H
 #define KRAKENBRIDGE_WRAPPER_TYPE_INFO_H
 
-#include <quickjs/quickjs.h>
 #include <assert.h>
+#include <quickjs/quickjs.h>
 #include "bindings/qjs/qjs_patch.h"
 #include "include/kraken_foundation.h"
 
@@ -22,8 +22,7 @@ class WrapperTypeInfo final {
   bool equals(const WrapperTypeInfo* that) const { return this == that; }
 
   bool isSubclass(const WrapperTypeInfo* that) const {
-    for (const WrapperTypeInfo* current = this; current;
-         current = current->parent_class) {
+    for (const WrapperTypeInfo* current = this; current; current = current->parent_class) {
       if (current == that)
         return true;
     }
@@ -37,6 +36,6 @@ class WrapperTypeInfo final {
   JSClassID classId{0};
 };
 
-}
+}  // namespace kraken::binding::qjs
 
 #endif  // KRAKENBRIDGE_WRAPPER_TYPE_INFO_H

@@ -368,7 +368,6 @@ void installPropertyGetter(ExecutionContext* context, JSValue thisObject, const 
   JS_FreeValue(context->ctx(), getter);
 }
 
-
 DOMTimerCoordinator* ExecutionContext::timers() {
   return &m_timers;
 }

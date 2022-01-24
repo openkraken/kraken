@@ -25,9 +25,9 @@ class Blob : public GarbageCollected<Blob> {
   static JSValue constructor(ExecutionContext* context);
   static JSValue prototype(ExecutionContext* context);
 
-  Blob() {};
-  Blob(std::vector<uint8_t>&& data): _size(data.size()), _data(std::move(data)) {};
-  Blob(std::vector<uint8_t>&& data, std::string& mime): mimeType(mime), _size(data.size()), _data(std::move(data)) {};
+  Blob(){};
+  Blob(std::vector<uint8_t>&& data) : _size(data.size()), _data(std::move(data)){};
+  Blob(std::vector<uint8_t>&& data, std::string& mime) : mimeType(mime), _size(data.size()), _data(std::move(data)){};
 
   DEFINE_FUNCTION(arrayBuffer);
   DEFINE_FUNCTION(slice);
@@ -41,7 +41,7 @@ class Blob : public GarbageCollected<Blob> {
   DEFINE_PROTOTYPE_READONLY_PROPERTY(type);
   DEFINE_PROTOTYPE_READONLY_PROPERTY(size);
 
-  void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const override;
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
   void dispose() const override;
 
  private:
@@ -111,11 +111,7 @@ auto blobCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_v
   return blob->toQuickJS();
 };
 
-const WrapperTypeInfo blobTypeInfo = {
-    "Blob",
-    nullptr,
-    blobCreator
-};
+const WrapperTypeInfo blobTypeInfo = {"Blob", nullptr, blobCreator};
 
 }  // namespace kraken::binding::qjs
 

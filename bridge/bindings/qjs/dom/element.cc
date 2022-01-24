@@ -185,7 +185,7 @@ JSValue Element::prototype(ExecutionContext* context) {
   return context->contextData()->prototypeForType(&elementTypeInfo);
 }
 
-//JSValue Element::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
+// JSValue Element::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
 //  if (argc == 0)
 //    return JS_ThrowTypeError(ctx, "Illegal constructor");
 //  JSValue tagName = argv[0];
@@ -643,11 +643,11 @@ IMPL_PROPERTY_SETTER(Element, outerHTML)(JSContext* ctx, JSValue this_val, int a
   return JS_NULL;
 }
 
-//JSClassID Element::classId {
+// JSClassID Element::classId {
 //  return Element::classId;
 //}
 
-//Element::~Element() {}
+// Element::~Element() {}
 
 JSValue Element::internalGetTextContent() {
   JSValue array = JS_NewArray(m_ctx);
@@ -887,7 +887,7 @@ void Element::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
   NodeInstance::trace(rt, val, mark_func);
 }
 
-//Element::Element(Element* element, std::string tagName, bool shouldAddUICommand): Node() {
+// Element::Element(Element* element, std::string tagName, bool shouldAddUICommand): Node() {
 //  m_attributes = makeGarbageCollected<ElementAttributes>()->initialize(m_ctx, &ElementAttributes::classId);
 //  JSValue arguments[] = {jsObject};
 //  JSValue style = JS_CallConstructor(m_ctx, CSSStyleDeclaration::instance(m_context)->jsObject, 1, arguments);
@@ -907,12 +907,8 @@ StyleDeclarationInstance* Element::style() {
   return m_style;
 }
 
-void Element::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
-
-}
-void Element::dispose() const {
-
-}
+void Element::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {}
+void Element::dispose() const {}
 
 IMPL_PROPERTY_GETTER(BoundingClientRect, x)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));

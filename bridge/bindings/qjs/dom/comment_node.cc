@@ -10,8 +10,8 @@
 namespace kraken::binding::qjs {
 
 void bindCommentNode(std::unique_ptr<ExecutionContext>& context) {
-//  auto* constructor = Comment::instance(context.get());
-//  context->defineGlobalProperty("Comment", constructor->jsObject);
+  //  auto* constructor = Comment::instance(context.get());
+  //  context->defineGlobalProperty("Comment", constructor->jsObject);
 }
 
 JSClassID Comment::classId{0};
@@ -26,10 +26,9 @@ Comment* Comment::create(JSContext* ctx) {
   JS_SetPrototype(ctx, comment->toQuickJS(), prototype);
 
   return comment;
-
 }
 
-//Comment::Comment(ExecutionContext* context) : Node(context, "Comment") {
+// Comment::Comment(ExecutionContext* context) : Node(context, "Comment") {
 //  std::call_once(kCommentInitFlag, []() { JS_NewClassID(&kCommentClassId); });
 //  JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
 //}

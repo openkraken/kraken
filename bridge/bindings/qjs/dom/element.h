@@ -7,8 +7,8 @@
 #define KRAKENBRIDGE_ELEMENT_H
 
 #include <unordered_map>
-#include "bindings/qjs/garbage_collected.h"
 #include "bindings/qjs/executing_context.h"
+#include "bindings/qjs/garbage_collected.h"
 #include "node.h"
 #include "style_declaration.h"
 
@@ -126,6 +126,7 @@ class Element : public Node {
  protected:
   StyleDeclarationInstance* m_style{nullptr};
   ElementAttributes* m_attributes{nullptr};
+
  private:
   std::string m_tagName;
   void _notifyNodeRemoved(Node* node) override;
@@ -155,13 +156,13 @@ auto elementCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst thi
   Element* element = Element::create(ctx);
 
   auto* document = context->document();
-//  auto* Document = Document::instance(context);
-//  if (Document->isCustomElement(name)) {
-//    return JS_CallConstructor(ctx, Document->getElementConstructor(context, name), argc, argv);
-//  }
-//
-//  auto* element = new Element(this, name, true);
-//  return element->jsObject;
+  //  auto* Document = Document::instance(context);
+  //  if (Document->isCustomElement(name)) {
+  //    return JS_CallConstructor(ctx, Document->getElementConstructor(context, name), argc, argv);
+  //  }
+  //
+  //  auto* element = new Element(this, name, true);
+  //  return element->jsObject;
 };
 
 const WrapperTypeInfo elementTypeInfo = {"Element", &nodeTypeInfo, elementCreator};

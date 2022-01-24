@@ -6,7 +6,6 @@
 #ifndef KRAKENBRIDGE_FOUNDATION_H
 #define KRAKENBRIDGE_FOUNDATION_H
 
-#include <cstdint>
 #include <atomic>
 #include <cassert>
 #include <codecvt>

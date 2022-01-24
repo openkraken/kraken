@@ -36,8 +36,10 @@ class GarbageCollected {
  public:
   using ParentMostGarbageCollectedType = T;
 
-  template<typename P> P* initialize(JSContext* ctx, JSClassID* classId);
-  template<typename P> P* initialize(JSContext* ctx, JSClassID* classId, JSClassExoticMethods* exoticMethods);
+  template <typename P>
+  P* initialize(JSContext* ctx, JSClassID* classId);
+  template <typename P>
+  P* initialize(JSContext* ctx, JSClassID* classId, JSClassExoticMethods* exoticMethods);
 
   // Must use MakeGarbageCollected.
   void* operator new(size_t) = delete;
@@ -93,7 +95,8 @@ class MakeGarbageCollectedTrait {
 };
 
 template <typename T>
-template <typename P> P* GarbageCollected<T>::initialize(JSContext* ctx, JSClassID* classId, JSClassExoticMethods* exoticMethods) {
+template <typename P>
+P* GarbageCollected<T>::initialize(JSContext* ctx, JSClassID* classId, JSClassExoticMethods* exoticMethods) {
   JSRuntime* runtime = JS_GetRuntime(ctx);
 
   /// When classId is 0, it means this class are not initialized. We should create a JSClassDef to describe the behavior of this class and associate with classID.
@@ -143,7 +146,8 @@ template <typename P> P* GarbageCollected<T>::initialize(JSContext* ctx, JSClass
 }
 
 template <typename T>
-template <typename P> P* GarbageCollected<T>::initialize(JSContext* ctx, JSClassID* classId) {
+template <typename P>
+P* GarbageCollected<T>::initialize(JSContext* ctx, JSClassID* classId) {
   return initialize<P>(ctx, classId, nullptr);
 }
 

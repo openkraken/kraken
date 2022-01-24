@@ -21,7 +21,7 @@ class Location : public GarbageCollected<Location> {
 
   DEFINE_FUNCTION(reload);
 
-  void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const override;
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
   void dispose() const override;
 };
 
@@ -36,11 +36,7 @@ auto locationCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst th
   return location->toQuickJS();
 };
 
-const WrapperTypeInfo locationTypeInfo = {
-    "Location",
-    nullptr,
-    locationCreator
-};
+const WrapperTypeInfo locationTypeInfo = {"Location", nullptr, locationCreator};
 
 }  // namespace kraken::binding::qjs
 

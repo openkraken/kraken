@@ -9,12 +9,13 @@
 //#include "kraken_test_env.h"
 //#include "page.h"
 //
-//namespace kraken::binding::qjs {
+// namespace kraken::binding::qjs {
 //
-//class ParentClass : public HostClass {
+// class ParentClass : public HostClass {
 // public:
 //  explicit ParentClass(ExecutionContext* context) : HostClass(context, "ParentClass") {}
-//  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValueConst* argv) override { return HostClass::instanceConstructor(ctx, func_obj, this_val, argc, argv); }
+//  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValueConst* argv) override { return HostClass::instanceConstructor(ctx, func_obj, this_val, argc, argv);
+//  }
 //
 //  OBJECT_INSTANCE(ParentClass);
 //
@@ -24,10 +25,10 @@
 //  ObjectFunction m_foo{m_context, m_prototypeObject, "foo", foo, 0};
 //};
 //
-//class SampleClass;
-//static JSClassID kSampleClassId{0};
+// class SampleClass;
+// static JSClassID kSampleClassId{0};
 //
-//class SampleClassInstance : public Instance {
+// class SampleClassInstance : public Instance {
 // public:
 //  explicit SampleClassInstance(HostClass* sampleClass) : Instance(sampleClass, "SampleClass", nullptr, kSampleClassId, finalizer){};
 //
@@ -41,8 +42,8 @@
 //  }
 //};
 //
-//std::once_flag kSampleClassOnceFlag;
-//class SampleClass : public ParentClass {
+// std::once_flag kSampleClassOnceFlag;
+// class SampleClass : public ParentClass {
 // public:
 //  explicit SampleClass(ExecutionContext* context) : ParentClass(context) {
 //    std::call_once(kSampleClassOnceFlag, []() { JS_NewClassID(&kSampleClassId); });
@@ -61,7 +62,7 @@
 //  ObjectFunction m_f{m_context, m_prototypeObject, "f", f, 0};
 //};
 //
-//TEST(HostClass, newInstance) {
+// TEST(HostClass, newInstance) {
 //  bool static errorCalled = false;
 //  bool static logCalled = false;
 //  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
@@ -84,7 +85,7 @@
 //  EXPECT_EQ(logCalled, true);
 //}
 //
-//TEST(HostClass, instanceOf) {
+// TEST(HostClass, instanceOf) {
 //  bool static errorCalled = false;
 //  bool static logCalled = false;
 //  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
@@ -115,7 +116,7 @@
 //  EXPECT_EQ(logCalled, true);
 //}
 //
-//TEST(HostClass, inheritance) {
+// TEST(HostClass, inheritance) {
 //  bool static errorCalled = false;
 //  bool static logCalled = false;
 //  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
@@ -143,7 +144,7 @@
 //  EXPECT_EQ(logCalled, true);
 //}
 //
-//TEST(HostClass, inherintanceInJavaScript) {
+// TEST(HostClass, inherintanceInJavaScript) {
 //  bool static errorCalled = false;
 //  bool static logCalled = false;
 //  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
@@ -163,7 +164,7 @@
 //  context->defineGlobalProperty("SampleClass", sampleObject->jsObject);
 //
 //  const char* code = R"(
-//class Demo extends SampleClass {
+// class Demo extends SampleClass {
 //  constructor(name) {
 //    super();
 //    this.name = name;
@@ -173,8 +174,8 @@
 //    return this.name.toUpperCase();
 //  }
 //}
-//let demo = new Demo('test');
-//console.log(demo.getName(), demo.f(), demo.foo());
+// let demo = new Demo('test');
+// console.log(demo.getName(), demo.f(), demo.foo());
 //)";
 //  context->evaluateJavaScript(code, strlen(code), "vm://", 0);
 //
@@ -182,7 +183,7 @@
 //  EXPECT_EQ(logCalled, true);
 //}
 //
-//TEST(HostClass, haveFunctionProtoMethods) {
+// TEST(HostClass, haveFunctionProtoMethods) {
 //  bool static errorCalled = false;
 //  bool static logCalled = false;
 //  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
@@ -198,7 +199,7 @@
 //  context->defineGlobalProperty("ParentClass", parentObject->jsObject);
 //
 //  const char* code = R"(
-//class Demo extends ParentClass {
+// class Demo extends ParentClass {
 //  constructor(name) {
 //    super();
 //    this.name = name;
@@ -208,7 +209,7 @@
 //    return this.name.toUpperCase();
 //  }
 //}
-//console.log(Demo.call);
+// console.log(Demo.call);
 //)";
 //  context->evaluateJavaScript(code, strlen(code), "vm://", 0);
 //
@@ -216,7 +217,7 @@
 //  EXPECT_EQ(logCalled, true);
 //}
 //
-//TEST(HostClass, multipleInstance) {
+// TEST(HostClass, multipleInstance) {
 //  bool static errorCalled = false;
 //  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
 //    errorCalled = true;
@@ -272,10 +273,10 @@
 //  EXPECT_EQ(errorCalled, false);
 //}
 //
-//std::once_flag kExoticClassOnceFlag;
+// std::once_flag kExoticClassOnceFlag;
 //
-//class ExoticClassInstance;
-//class ExoticClass : public HostClass {
+// class ExoticClassInstance;
+// class ExoticClass : public HostClass {
 // public:
 //  static JSClassID exoticClassID;
 //  ExoticClass() = delete;
@@ -288,10 +289,10 @@
 //  friend ExoticClassInstance;
 //};
 //
-//JSClassID ExoticClass::exoticClassID{0};
-//static bool exoticClassFreed = false;
+// JSClassID ExoticClass::exoticClassID{0};
+// static bool exoticClassFreed = false;
 //
-//class ExoticClassInstance : public Instance {
+// class ExoticClassInstance : public Instance {
 // public:
 //  ExoticClassInstance() = delete;
 //  static JSClassExoticMethods methods;
@@ -349,13 +350,13 @@
 //  double classValue{100.0};
 //};
 //
-//JSClassExoticMethods ExoticClassInstance::methods{nullptr, nullptr, nullptr, nullptr, nullptr, getProperty, setProperty};
+// JSClassExoticMethods ExoticClassInstance::methods{nullptr, nullptr, nullptr, nullptr, nullptr, getProperty, setProperty};
 //
-//JSValue ExoticClass::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
+// JSValue ExoticClass::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
 //  return (new ExoticClassInstance(this))->jsObject;
 //}
 //
-//TEST(HostClass, exoticClass) {
+// TEST(HostClass, exoticClass) {
 //  bool static errorCalled = false;
 //  bool static logCalled = false;
 //  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
@@ -383,7 +384,7 @@
 //  EXPECT_EQ(logCalled, true);
 //}
 //
-//TEST(HostClass, setExoticClassProperty) {
+// TEST(HostClass, setExoticClassProperty) {
 //  bool static errorCalled = false;
 //  bool static logCalled = false;
 //  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
@@ -423,11 +424,11 @@
 //#include "kraken_test_env.h"
 //#include "page.h"
 //
-//namespace kraken::binding::qjs {
+// namespace kraken::binding::qjs {
 //
-//static bool isSampleFree = false;
+// static bool isSampleFree = false;
 //
-//class SampleObject : public HostObject {
+// class SampleObject : public HostObject {
 // public:
 //  explicit SampleObject(ExecutionContext* context) : HostObject(context, "SampleObject"){};
 //  ~SampleObject() { isSampleFree = true; }
@@ -459,7 +460,7 @@
 //  ObjectFunction m_f{m_context, jsObject, "f", f, 1};
 //};
 //
-//TEST(HostObject, defineProperty) {
+// TEST(HostObject, defineProperty) {
 //  bool static logCalled = false;
 //  bool static errorCalled = false;
 //  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
@@ -479,7 +480,7 @@
 //  EXPECT_EQ(errorCalled, false);
 //}
 //
-//TEST(ObjectProperty, worksWithProxy) {
+// TEST(ObjectProperty, worksWithProxy) {
 //  bool static logCalled = false;
 //  bool static errorCalled = false;
 //  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
@@ -495,12 +496,12 @@
 //  JSValue object = sampleObject->jsObject;
 //  context->defineGlobalProperty("o", object);
 //  std::string code = std::string(R"(
-//let p = new Proxy(o, {
+// let p = new Proxy(o, {
 //    get(target, key, receiver) {
 //      return Reflect.get(target, key, receiver);
 //    }
 //});
-//console.log(p.foo);
+// console.log(p.foo);
 //)");
 //  bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
 //
@@ -508,7 +509,7 @@
 //  EXPECT_EQ(errorCalled, false);
 //}
 //
-//TEST(HostObject, defineFunction) {
+// TEST(HostObject, defineFunction) {
 //  bool static logCalled = false;
 //  bool static errorCalled = false;
 //  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
@@ -531,7 +532,7 @@
 //  EXPECT_EQ(isSampleFree, true);
 //}
 //
-//class SampleExoticHostObject : public ExoticHostObject {
+// class SampleExoticHostObject : public ExoticHostObject {
 // public:
 //  explicit SampleExoticHostObject(ExecutionContext* context) : ExoticHostObject(context, "SampleObject"){};
 //  ~SampleExoticHostObject() { isSampleFree = true; }
@@ -542,14 +543,14 @@
 // private:
 //};
 //
-//JSValue SampleExoticHostObject::getProperty(JSContext* ctx, JSValue obj, JSAtom atom, JSValue receiver) {
+// JSValue SampleExoticHostObject::getProperty(JSContext* ctx, JSValue obj, JSAtom atom, JSValue receiver) {
 //  return JS_NewFloat64(ctx, 100.0);
 //}
-//int SampleExoticHostObject::setProperty(JSContext* ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver, int flags) {
+// int SampleExoticHostObject::setProperty(JSContext* ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver, int flags) {
 //  return 0;
 //}
 //
-//TEST(ExoticHostObject, overriteGetterSetter) {
+// TEST(ExoticHostObject, overriteGetterSetter) {
 //  bool static logCalled = false;
 //  bool static errorCalled = false;
 //  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {

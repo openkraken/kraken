@@ -17,7 +17,7 @@ class ExecutionContext;
 // has a 1:1 relationship with ExecutionContext.
 class ExecutionContextData final {
  public:
-  explicit ExecutionContextData(ExecutionContext* context): m_context(context) {};
+  explicit ExecutionContextData(ExecutionContext* context) : m_context(context){};
   ExecutionContextData(const ExecutionContextData&) = delete;
   ExecutionContextData& operator=(const ExecutionContextData&) = delete;
 
@@ -34,7 +34,6 @@ class ExecutionContextData final {
   ExecutionContext* m_context;
 };
 
-
-}
+}  // namespace kraken::binding::qjs
 
 #endif  // KRAKENBRIDGE_CONTEXT_DATA_H

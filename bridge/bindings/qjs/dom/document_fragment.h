@@ -29,11 +29,7 @@ auto documentFragmentCreator = [](JSContext* ctx, JSValueConst func_obj, JSValue
   return eventTarget->toQuickJS();
 };
 
-const WrapperTypeInfo documentFragmentInfo = {
-    "DocumentFragment",
-    &nodeTypeInfo,
-    documentFragmentCreator
-};
+const WrapperTypeInfo documentFragmentInfo = {"DocumentFragment", &nodeTypeInfo, documentFragmentCreator};
 
 }  // namespace kraken::binding::qjs
 

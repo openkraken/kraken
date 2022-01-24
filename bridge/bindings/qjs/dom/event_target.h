@@ -6,10 +6,10 @@
 #ifndef KRAKENBRIDGE_EVENT_TARGET_H
 #define KRAKENBRIDGE_EVENT_TARGET_H
 
-#include "bindings/qjs/native_value.h"
+#include "bindings/qjs/context_macros.h"
 #include "bindings/qjs/executing_context.h"
 #include "bindings/qjs/heap_hashmap.h"
-#include "bindings/qjs/context_macros.h"
+#include "bindings/qjs/native_value.h"
 #include "event_listener_map.h"
 
 #if UNIT_TEST
@@ -80,7 +80,8 @@ class EventTarget : public GarbageCollected<EventTarget> {
   static void copyNodeProperties(EventTarget* newNode, EventTarget* referenceNode);
 
   NativeEventTarget* nativeEventTarget{new NativeEventTarget(this)};
-private:
+
+ private:
   static int hasProperty(JSContext* ctx, JSValueConst obj, JSAtom atom);
   static JSValue getProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);
   static int setProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);

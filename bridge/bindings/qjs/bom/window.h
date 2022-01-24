@@ -17,7 +17,6 @@ void bindWindow(std::unique_ptr<ExecutionContext>& context);
 
 class Window : public EventTarget {
  public:
-
   Window();
 
   static JSClassID classId;
@@ -42,7 +41,7 @@ class Window : public EventTarget {
 
   DEFINE_PROTOTYPE_PROPERTY(onerror);
 
-  void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const override;
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
 
  private:
   Document* document();

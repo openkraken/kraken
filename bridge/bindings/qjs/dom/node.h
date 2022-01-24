@@ -77,7 +77,7 @@ class Node : public EventTarget {
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
   void dispose() const override;
 
-protected:
+ protected:
   NodeJob nodeLink{this};
 
   void refer();
@@ -93,7 +93,8 @@ protected:
 
   virtual void _notifyNodeRemoved(Node* node);
   virtual void _notifyNodeInsert(Node* node);
-private:
+
+ private:
   ObjectProperty m_childNodes{context(), jsObject, "childNodes", childNodes};
   void ensureDetached(Node* node);
 
@@ -101,15 +102,9 @@ private:
   static JSValue copyNodeValue(JSContext* ctx, Node* node);
 };
 
-auto nodeCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {
-  return JS_ThrowTypeError(ctx, "Illegal constructor");
-};
+auto nodeCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue { return JS_ThrowTypeError(ctx, "Illegal constructor"); };
 
-const WrapperTypeInfo nodeTypeInfo = {
-    "Node",
-    &eventTargetTypeInfo,
-    nodeCreator
-};
+const WrapperTypeInfo nodeTypeInfo = {"Node", &eventTargetTypeInfo, nodeCreator};
 
 }  // namespace kraken::binding::qjs
 

@@ -6,9 +6,9 @@
 #ifndef KRAKENBRIDGE_STYLE_DECLARATION_H
 #define KRAKENBRIDGE_STYLE_DECLARATION_H
 
-#include "bindings/qjs/garbage_collected.h"
 #include "bindings/qjs/context_macros.h"
 #include "bindings/qjs/dom/event_target.h"
+#include "bindings/qjs/garbage_collected.h"
 
 namespace kraken::binding::qjs {
 
@@ -44,7 +44,6 @@ class CSSStyleDeclaration : public GarbageCollected<CSSStyleDeclaration> {
   DEFINE_FUNCTION(getPropertyValue);
 
  private:
-
   static int hasProperty(JSContext* ctx, JSValueConst obj, JSAtom atom);
   static int setProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
   static JSValue getProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);

@@ -3,9 +3,9 @@
  * Author: Kraken Team.
  */
 
-#include "bindings/qjs/qjs_patch.h"
-#include "bindings/qjs/native_value.h"
 #include "custom_event.h"
+#include "bindings/qjs/native_value.h"
+#include "bindings/qjs/qjs_patch.h"
 #include "kraken_bridge.h"
 
 #include <utility>
@@ -49,7 +49,7 @@ CustomEvent* CustomEvent::create(JSContext* ctx, JSValue eventType, JSValue init
   return event;
 }
 
-CustomEvent * CustomEvent::create(JSContext* ctx, NativeCustomEvent* nativeCustomEvent) {
+CustomEvent* CustomEvent::create(JSContext* ctx, NativeCustomEvent* nativeCustomEvent) {
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
   JSValue prototype = context->contextData()->prototypeForType(&eventTypeInfo);
 
@@ -69,7 +69,7 @@ JSValue CustomEvent::prototype(ExecutionContext* context) {
   return context->contextData()->prototypeForType(&customEventTypeInfo);
 }
 
-CustomEvent::CustomEvent(JSValue eventType, JSValue eventInit): Event(eventType, eventInit) {
+CustomEvent::CustomEvent(JSValue eventType, JSValue eventInit) : Event(eventType, eventInit) {
   if (!JS_IsNull(eventInit)) {
     JSAtom detailKey = JS_NewAtom(m_ctx, "detail");
     if (JS_HasProperty(m_ctx, eventInit, detailKey)) {
@@ -81,7 +81,7 @@ CustomEvent::CustomEvent(JSValue eventType, JSValue eventInit): Event(eventType,
   }
 }
 
-CustomEvent::CustomEvent(NativeCustomEvent* nativeEvent): m_nativeCustomEvent(nativeEvent), Event(reinterpret_cast<NativeEvent*>(nativeEvent)) {
+CustomEvent::CustomEvent(NativeCustomEvent* nativeEvent) : m_nativeCustomEvent(nativeEvent), Event(reinterpret_cast<NativeEvent*>(nativeEvent)) {
   m_detail = JS_NewUnicodeString(m_runtime, m_ctx, nativeEvent->detail->string, nativeEvent->detail->length);
 }
 

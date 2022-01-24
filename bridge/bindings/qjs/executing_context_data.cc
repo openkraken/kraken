@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 
-
 #include "executing_context_data.h"
 #include "executing_context.h"
 
@@ -72,4 +71,4 @@ JSValue ExecutionContextData::constructorForIdSlowCase(const WrapperTypeInfo* ty
   return classObject;
 }
 
-}
+}  // namespace kraken::binding::qjs

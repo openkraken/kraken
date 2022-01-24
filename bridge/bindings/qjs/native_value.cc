@@ -29,7 +29,6 @@ void NativeString::free() {
   delete[] string;
 }
 
-
 NativeValue Native_NewNull() {
   return (NativeValue){0, .u = {.int64 = 0}, NativeTag::TAG_NULL};
 }

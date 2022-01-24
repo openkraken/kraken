@@ -28,7 +28,7 @@ class CustomEvent : public Event {
   CustomEvent(JSValue eventType, JSValue init);
   CustomEvent(NativeCustomEvent* nativeEvent);
 
-  void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const override;
+  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
   void dispose() const override;
 
   DEFINE_FUNCTION(initCustomEvent);
@@ -40,7 +40,7 @@ class CustomEvent : public Event {
   JSValue m_detail{JS_NULL};
 };
 
-//class CustomEventInstance : public EventInstance {
+// class CustomEventInstance : public EventInstance {
 // public:
 //  explicit CustomEventInstance(CustomEvent* jsCustomEvent, JSAtom CustomEventType, JSValue eventInit);
 //  explicit CustomEventInstance(CustomEvent* jsCustomEvent, NativeCustomEvent* nativeCustomEvent);
@@ -69,11 +69,7 @@ auto customEventCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst
   return customEvent->toQuickJS();
 };
 
-const WrapperTypeInfo customEventTypeInfo = {
-    "CustomEvent",
-    &eventTypeInfo,
-    customEventCreator
-};
+const WrapperTypeInfo customEventTypeInfo = {"CustomEvent", &eventTypeInfo, customEventCreator};
 
 }  // namespace kraken::binding::qjs
 

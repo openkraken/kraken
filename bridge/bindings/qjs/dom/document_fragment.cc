@@ -18,7 +18,7 @@ JSValue DocumentFragment::constructor(ExecutionContext* context) {
   return context->contextData()->constructorForType(&documentFragmentInfo);
 }
 
-DocumentFragment * DocumentFragment::create(JSContext* ctx) {
+DocumentFragment* DocumentFragment::create(JSContext* ctx) {
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
   JSValue prototype = context->contextData()->prototypeForType(&documentFragmentInfo);
   auto* documentFragment = makeGarbageCollected<DocumentFragment>()->initialize<DocumentFragment>(ctx, &classId);

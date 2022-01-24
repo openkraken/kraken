@@ -21,12 +21,12 @@ class Comment : public Node {
   static JSValue constructor(ExecutionContext* context);
   static JSValue prototype(ExecutionContext* context);
 
-//  static JSClassID kCommentClassId;
-//  static JSClassID classId();
-//  Comment() = delete;
-//  explicit Comment(ExecutionContext* context);
+  //  static JSClassID kCommentClassId;
+  //  static JSClassID classId();
+  //  Comment() = delete;
+  //  explicit Comment(ExecutionContext* context);
 
-//  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  //  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
  private:
   DEFINE_PROTOTYPE_READONLY_PROPERTY(data);
@@ -36,18 +36,12 @@ class Comment : public Node {
   friend CommentInstance;
 };
 
-auto commentCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {
-};
+auto commentCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {};
 
-
-const WrapperTypeInfo commentTypeInfo = {
-    "Comment",
-    &nodeTypeInfo,
-    commentCreator
-};
+const WrapperTypeInfo commentTypeInfo = {"Comment", &nodeTypeInfo, commentCreator};
 
 //
-//class CommentInstance : public NodeInstance {
+// class CommentInstance : public NodeInstance {
 // public:
 //  CommentInstance() = delete;
 //  explicit CommentInstance(Comment* comment);

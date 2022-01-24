@@ -20,16 +20,15 @@ using TraverseHandler = std::function<bool(Node*)>;
 void traverseNode(Node* node, TraverseHandler handler);
 
 class DocumentCookie {
-public:
+ public:
   DocumentCookie() = default;
 
   std::string getCookie();
   void setCookie(std::string& str);
 
-private:
+ private:
   std::unordered_map<std::string, std::string> cookiePairs;
 };
-
 
 class Document : public Node {
  public:
@@ -66,7 +65,6 @@ class Document : public Node {
   void dispose() const override;
 
  private:
-
   void removeElementById(JSAtom id, Element* element);
   void addElementById(JSAtom id, Element* element);
   Element* getDocumentElement();
@@ -83,15 +81,9 @@ class Document : public Node {
   std::unordered_map<std::string, Element*> elementConstructorMap;
 };
 
-auto documentCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {
-  return JS_ThrowTypeError(ctx, "Illegal constructor");
-};
+auto documentCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue { return JS_ThrowTypeError(ctx, "Illegal constructor"); };
 
-const WrapperTypeInfo documentTypeInfo = {
-    "Document",
-    &nodeTypeInfo,
-    documentCreator
-};
+const WrapperTypeInfo documentTypeInfo = {"Document", &nodeTypeInfo, documentCreator};
 
 }  // namespace kraken::binding::qjs
 
