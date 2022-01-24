@@ -243,29 +243,6 @@ class Kraken extends StatefulWidget {
 
 }
 
-class HTMLViewState<T extends StatefulWidget> extends KrakenState<T> {
-  final String html;
-
-  HTMLViewState(this.html);
-
-  @override
-  Widget build(BuildContext context) {
-    return RepaintBoundary(
-        child: FocusableActionDetector(
-            actions: _actionMap,
-            focusNode: _focusNode,
-            onFocusChange: _handleFocusChange,
-            // TODO: _HTMLViewRenderObjectWidget
-            child: Text(html),
-            // child: _KrakenRenderObjectWidget(
-            //   context.widget as HTMLViewState,
-            //   widgetDelegate,
-            // )
-        )
-    );
-  }
-}
-
 class WebviewState<T extends StatefulWidget> extends KrakenState<T> {
   @override
   void didChangeDependencies() {
@@ -303,7 +280,7 @@ class WebviewState<T extends StatefulWidget> extends KrakenState<T> {
         child: FocusableActionDetector(
             actions: _actionMap,
             focusNode: _focusNode,
-            onFocusChange: _handleFocusChange,
+            onFocusChange: handleFocusChange,
             child: _KrakenRenderObjectWidget(
               context.widget as Kraken,
               widgetDelegate,
@@ -317,6 +294,10 @@ abstract class KrakenState<T extends StatefulWidget> extends State<T> with Route
   Map<Type, Action<Intent>>? _actionMap;
 
   final FocusNode _focusNode = FocusNode();
+
+  Map<Type, Action<Intent>>? get actionMap => _actionMap;
+  FocusNode get focusNode => _focusNode;
+
 
   @override
   void initState() {
@@ -504,7 +485,7 @@ abstract class KrakenState<T extends StatefulWidget> extends State<T> with Route
   }
 
   // Handle focus change of focusNode.
-  void _handleFocusChange(bool focused) {
+  void handleFocusChange(bool focused) {
     dom.Element rootElement = _findRootElement();
     List<dom.Element> focusableElements = _findFocusableElements(rootElement);
     if (focusableElements.isNotEmpty) {
