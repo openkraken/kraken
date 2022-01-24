@@ -130,7 +130,6 @@ mixin ElementOverflowMixin on ElementBase {
     } else if (renderBoxModel != null) {
       RenderBoxModel renderBoxModel = this.renderBoxModel!;
       CSSOverflowType overflowX = renderStyle.effectiveOverflowX;
-      bool shouldScrolling = false;
       switch(overflowX) {
         case CSSOverflowType.hidden:
           // @TODO: Content of overflow hidden can be scrolled programmatically.
@@ -142,7 +141,6 @@ mixin ElementOverflowMixin on ElementBase {
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
           _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right, scrollListener: scrollListener);
-          shouldScrolling = true;
           renderBoxModel.scrollOffsetX = _scrollableX!.position;
           break;
         case CSSOverflowType.visible:
@@ -153,14 +151,6 @@ mixin ElementOverflowMixin on ElementBase {
 
       renderBoxModel.scrollListener = scrollListener;
       renderBoxModel.scrollablePointerListener = _scrollablePointerListener;
-
-      if (renderBoxModel is RenderLayoutBox) {
-        if (shouldScrolling) {
-          _attachScrollingContentBox();
-        } else {
-          _detachScrollingContentBox();
-        }
-      }
     }
   }
 
@@ -172,7 +162,6 @@ mixin ElementOverflowMixin on ElementBase {
     } else if (renderBoxModel != null) {
       RenderBoxModel renderBoxModel = this.renderBoxModel!;
       CSSOverflowType overflowY = renderStyle.effectiveOverflowY;
-      bool shouldScrolling = false;
       switch(overflowY) {
         case CSSOverflowType.hidden:
           // @TODO: Content of overflow hidden can be scrolled programmatically.
@@ -184,7 +173,6 @@ mixin ElementOverflowMixin on ElementBase {
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
           _scrollableY = KrakenScrollable(axisDirection: AxisDirection.down, scrollListener: scrollListener);
-          shouldScrolling = true;
           renderBoxModel.scrollOffsetY = _scrollableY!.position;
           break;
         case CSSOverflowType.visible:
@@ -195,14 +183,6 @@ mixin ElementOverflowMixin on ElementBase {
 
       renderBoxModel.scrollListener = scrollListener;
       renderBoxModel.scrollablePointerListener = _scrollablePointerListener;
-
-      if (renderBoxModel is RenderLayoutBox) {
-        if (shouldScrolling) {
-          _attachScrollingContentBox();
-        } else {
-          _detachScrollingContentBox();
-        }
-      }
     }
   }
 
@@ -287,14 +267,14 @@ mixin ElementOverflowMixin on ElementBase {
   }
 
   void updateScrollingContentBox() {
-    _detachScrollingContentBox();
-    _attachScrollingContentBox();
+    detachScrollingContentBox();
+    attachScrollingContentBox();
   }
 
   // Create two repaintBoundary for an overflow scroll container.
   // Outer repaintBoundary avoid repaint of parent and sibling renderObjects when scrolling.
   // Inner repaintBoundary avoid repaint of child renderObjects when scrolling.
-  void _attachScrollingContentBox() {
+  void attachScrollingContentBox() {
     RenderLayoutBox outerLayoutBox = renderBoxModel as RenderLayoutBox;
     RenderLayoutBox? scrollingContentBox = outerLayoutBox.renderScrollingContent;
     if (scrollingContentBox != null) {
@@ -318,7 +298,7 @@ mixin ElementOverflowMixin on ElementBase {
     });
   }
 
-  void _detachScrollingContentBox() {
+  void detachScrollingContentBox() {
     RenderLayoutBox outerLayoutBox = renderBoxModel as RenderLayoutBox;
     RenderLayoutBox? scrollingContentBox = outerLayoutBox.renderScrollingContent;
     if (scrollingContentBox == null) return;

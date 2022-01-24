@@ -941,6 +941,19 @@ class Element extends Node
         if (effectiveOverflowY != oldEffectiveOverflowY) {
           updateRenderBoxModelWithOverflowY(_handleScroll);
         }
+        CSSOverflowType effectiveOverflowX = renderStyle.effectiveOverflowX;
+
+        if (renderBoxModel is RenderLayoutBox) {
+          // Create two repaintBoundary for scroll container if any direction is scrollable.
+          bool shouldScrolling = (effectiveOverflowX == CSSOverflowType.auto || effectiveOverflowX == CSSOverflowType.scroll)
+            || (effectiveOverflowY == CSSOverflowType.auto || effectiveOverflowY == CSSOverflowType.scroll);
+
+          if (shouldScrolling) {
+            attachScrollingContentBox();
+          } else {
+            detachScrollingContentBox();
+          }
+        }
         break;
       case OVERFLOW_Y:
         CSSOverflowType oldEffectiveOverflowX = renderStyle.effectiveOverflowX;
@@ -952,6 +965,19 @@ class Element extends Node
         CSSOverflowType effectiveOverflowX = renderStyle.effectiveOverflowX;
         if (effectiveOverflowX != oldEffectiveOverflowX) {
           updateRenderBoxModelWithOverflowX(_handleScroll);
+        }
+        CSSOverflowType effectiveOverflowY = renderStyle.effectiveOverflowY;
+
+        if (renderBoxModel is RenderLayoutBox) {
+          // Create two repaintBoundary for scroll container if any direction is scrollable.
+          bool shouldScrolling = (effectiveOverflowX == CSSOverflowType.auto || effectiveOverflowX == CSSOverflowType.scroll)
+            || (effectiveOverflowY == CSSOverflowType.auto || effectiveOverflowY == CSSOverflowType.scroll);
+
+          if (shouldScrolling) {
+            attachScrollingContentBox();
+          } else {
+            detachScrollingContentBox();
+          }
         }
         break;
       case OPACITY:
