@@ -1633,13 +1633,16 @@ class RenderFlexLayout extends RenderLayoutBox {
         renderStyle.effectiveOverflowX != CSSOverflowType.visible ||
         renderStyle.effectiveOverflowY != CSSOverflowType.visible;
 
-    // No need to add padding for scrolling content box.
-    double maxScrollableMainSizeOfChildren = isScrollContainer
-        ? maxScrollableMainSizeOfLines
-        : (_isHorizontalFlexDirection
-            ? container.renderStyle.paddingLeft.computedValue
-            : container.renderStyle.paddingTop.computedValue) +
-        maxScrollableMainSizeOfLines;
+    double verticalPadding = container.renderStyle.paddingTop.computedValue
+      + container.renderStyle.paddingBottom.computedValue;
+    double horizontalPadding = container.renderStyle.paddingLeft.computedValue
+      + container.renderStyle.paddingRight.computedValue;
+    double mainAxisPadding = _isHorizontalFlexDirection ? horizontalPadding : verticalPadding;
+    double crossAxisPadding = _isHorizontalFlexDirection ? verticalPadding : horizontalPadding;
+
+    // Need to include padding for scroll container.
+    double maxScrollableMainSizeOfChildren = maxScrollableMainSizeOfLines
+      + (isScrollContainer ? mainAxisPadding : 0);
 
     // Max scrollable cross size of all lines.
     double maxScrollableCrossSizeOfLines =
@@ -1647,13 +1650,9 @@ class RenderFlexLayout extends RenderLayoutBox {
       return curr > next ? curr : next;
     });
 
-    // No need to add padding for scrolling content box.
-    double maxScrollableCrossSizeOfChildren = isScrollContainer
-        ? maxScrollableCrossSizeOfLines
-        : (_isHorizontalFlexDirection
-            ? container.renderStyle.paddingTop.computedValue
-            : container.renderStyle.paddingLeft.computedValue) +
-        maxScrollableCrossSizeOfLines;
+    // Need to include padding for scroll container.
+    double maxScrollableCrossSizeOfChildren = maxScrollableCrossSizeOfLines
+      + (isScrollContainer ? crossAxisPadding : 0);
 
     double containerContentWidth = size.width -
         container.renderStyle.effectiveBorderLeftWidth.computedValue -
