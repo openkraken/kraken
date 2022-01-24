@@ -239,37 +239,37 @@ class Kraken extends StatefulWidget {
   }
 
   @override
-  WebviewState<Kraken> createState() => WebviewState<Kraken>();
+  WebviewState createState() => WebviewState();
 
 }
 
-class WebviewState<T extends StatefulWidget> extends KrakenState<T> {
+class WebviewState extends KrakenState<Kraken> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if ((widget as Kraken).routeObserver != null) {
-      (widget as Kraken).routeObserver!.subscribe(this, ModalRoute.of(context)!);
+    if (widget.routeObserver != null) {
+      widget.routeObserver!.subscribe(this, ModalRoute.of(context)!);
     }
   }
 
   // Resume call timer and callbacks when kraken widget change to visible.
   @override
   void didPopNext() {
-    assert((widget as Kraken).controller != null);
-    (widget as Kraken).controller!.resume();
+    assert(widget.controller != null);
+    widget.controller!.resume();
   }
 
   // Pause all timer and callbacks when kraken widget has been invisible.
   @override
   void didPushNext() {
-    assert((widget as Kraken).controller != null);
-    (widget as Kraken).controller!.pause();
+    assert(widget.controller != null);
+    widget.controller!.pause();
   }
 
   @override
   void dispose() {
-    if ((widget as Kraken).routeObserver != null) {
-      (widget as Kraken).routeObserver!.unsubscribe(this);
+    if (widget.routeObserver != null) {
+      widget.routeObserver!.unsubscribe(this);
     }
     super.dispose();
   }
