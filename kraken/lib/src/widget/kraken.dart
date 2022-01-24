@@ -244,7 +244,7 @@ class Kraken extends StatefulWidget {
 }
 
 class HTMLViewState<T extends StatefulWidget> extends KrakenState<T> {
-  String html = '';
+  final String html;
 
   HTMLViewState(this.html);
 
