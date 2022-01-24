@@ -377,7 +377,7 @@ class MediaError extends Event {
 /// reference: https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent
 class MessageEvent extends Event {
   /// The data sent by the message emitter.
-  final String data;
+  final dynamic data;
 
   /// A USVString representing the origin of the message emitter.
   final String origin;
@@ -387,7 +387,7 @@ class MessageEvent extends Event {
   @override
   Pointer<RawNativeMessageEvent> toRaw([int methodLength = 0]) {
     List<int> methods = [
-      stringToNativeString(data).address,
+      stringToNativeString(jsonEncode(data)).address,
       stringToNativeString(origin).address
     ];
 
