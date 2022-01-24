@@ -299,7 +299,11 @@ class HTMLViewController extends KrakenViewController {
   HTMLViewController(
     viewportWidth,
     viewportHeight, {
-      background, enableDebug, rootController, navigationDelegate, widgetDelegate
+      background,
+      enableDebug,
+      rootController,
+      navigationDelegate,
+      widgetDelegate
     }
   ): super(
     viewportWidth,
