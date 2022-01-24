@@ -34,7 +34,9 @@ private:
 class Document : public Node {
  public:
   static JSClassID classId;
-  Document* create(JSContext* ctx);
+  static Document* create(JSContext* ctx);
+  static JSValue constructor(ExecutionContext* context);
+  static JSValue prototype(ExecutionContext* context);
   explicit Document();
 
   DEFINE_FUNCTION(createEvent);
@@ -73,14 +75,6 @@ class Document : public Node {
   std::unique_ptr<DocumentCookie> m_cookie;
 
   ScriptAnimationController* m_scriptAnimationController;
-//  DEFINE_PROTOTYPE_FUNCTION(createEvent, 1);
-//  DEFINE_PROTOTYPE_FUNCTION(createElement, 1);
-//  DEFINE_PROTOTYPE_FUNCTION(createDocumentFragment, 0);
-//  DEFINE_PROTOTYPE_FUNCTION(createTextNode, 1);
-//  DEFINE_PROTOTYPE_FUNCTION(createComment, 1);
-//  DEFINE_PROTOTYPE_FUNCTION(getElementById, 1);
-//  DEFINE_PROTOTYPE_FUNCTION(getElementsByTagName, 1);
-//  DEFINE_PROTOTYPE_FUNCTION(getElementsByClassName, 1);
 
   void defineElement(const std::string& tagName, Element* constructor);
 

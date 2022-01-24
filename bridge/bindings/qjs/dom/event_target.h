@@ -59,6 +59,8 @@ class EventTarget : public GarbageCollected<EventTarget> {
   EventTarget();
   static JSClassID classId;
   static EventTarget* create(JSContext* ctx);
+  static JSValue constructor(ExecutionContext* context);
+  static JSValue prototype(ExecutionContext* context);
 
   DEFINE_FUNCTION(addEventListener);
   DEFINE_FUNCTION(removeEventListener);
@@ -67,7 +69,7 @@ class EventTarget : public GarbageCollected<EventTarget> {
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
   void dispose() const override;
 
-  virtual bool dispatchEvent(EventInstance* event);
+  virtual bool dispatchEvent(Event* event);
   FORCE_INLINE int32_t eventTargetId() const { return m_eventTargetId; }
 
  protected:
@@ -86,7 +88,7 @@ private:
   static int setProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
   static int deleteProperty(JSContext* ctx, JSValueConst obj, JSAtom prop);
 
-  bool internalDispatchEvent(EventInstance* eventInstance);
+  bool internalDispatchEvent(Event* event);
 
   int32_t m_eventTargetId;
   // EventListener handlers registered with addEventListener API.

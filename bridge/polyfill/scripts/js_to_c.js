@@ -68,11 +68,11 @@ ${getPolyFillJavaScriptSource(source)}
 void initKraken${outputName}(kraken::KrakenPage *page) {
   ${getPolyfillEvalCall()}
 }
-`;
+  `;
 
-function convertJSToCpp(code, outputName) {
-  return getPolyFillSource(code, outputName);
-}
+  function convertJSToCpp(code, outputName) {
+    return getPolyFillSource(code, outputName);
+  }
 
 let source = argv.s;
 let output = argv.o;

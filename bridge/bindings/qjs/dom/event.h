@@ -52,49 +52,9 @@ namespace kraken::binding::qjs {
 
 void bindEvent(std::unique_ptr<ExecutionContext>& context);
 
-class EventInstance;
+class Event;
 
-using EventCreator = EventInstance* (*)(ExecutionContext* context, void* nativeEvent);
-
-class Event : public HostClass {
- public:
-  static JSClassID kEventClassID;
-
-  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
-  Event() = delete;
-  explicit Event(ExecutionContext* context);
-
-  static EventInstance* buildEventInstance(std::string& eventType, ExecutionContext* context, void* nativeEvent, bool isCustomEvent);
-  static void defineEvent(const std::string& eventType, EventCreator creator);
-
-  OBJECT_INSTANCE(Event);
-
-  static JSValue stopPropagation(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue stopImmediatePropagation(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue preventDefault(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  static JSValue initEvent(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-
- private:
-  static std::unordered_map<std::string, EventCreator> m_eventCreatorMap;
-
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(type);
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(bubbles);
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(cancelable);
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(timestamp);
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(defaultPrevented);
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(target);
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(srcElement);
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(currentTarget);
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(returnValue);
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(cancelBubble);
-
-  DEFINE_PROTOTYPE_FUNCTION(stopPropagation, 0);
-  DEFINE_PROTOTYPE_FUNCTION(stopImmediatePropagation, 0);
-  DEFINE_PROTOTYPE_FUNCTION(preventDefault, 1);
-  DEFINE_PROTOTYPE_FUNCTION(initEvent, 3);
-
-  friend EventInstance;
-};
+using EventCreator = Event* (*)(JSContext* ctx, void* nativeEvent);
 
 struct NativeEvent {
   NativeString* type{nullptr};
@@ -113,29 +73,69 @@ struct RawEvent {
   int64_t length;
 };
 
-class EventInstance : public Instance {
+class Event : public GarbageCollected<Event> {
  public:
-  EventInstance() = delete;
-  ~EventInstance() override { delete nativeEvent; }
+  static JSClassID classId;
+  static Event* create(JSContext* ctx);
+  static Event* create(JSContext* ctx, NativeEvent* nativeEvent);
+  static JSValue constructor(ExecutionContext* context);
+  static JSValue prototype(ExecutionContext* context);
 
-  static EventInstance* fromNativeEvent(Event* event, NativeEvent* nativeEvent);
-  NativeEvent* nativeEvent{nullptr};
+  explicit Event();
+  explicit Event(NativeEvent* nativeEvent);
+  explicit Event(JSValue eventType, JSValue eventInit);
+
+  static void defineEvent(const std::string& eventType, EventCreator creator);
+
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(type);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(bubbles);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(cancelable);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(timestamp);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(defaultPrevented);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(target);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(srcElement);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(currentTarget);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(returnValue);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(cancelBubble);
+
+  DEFINE_FUNCTION(stopPropagation);
+  DEFINE_FUNCTION(stopImmediatePropagation);
+  DEFINE_FUNCTION(preventDefault);
+  DEFINE_FUNCTION(initEvent);
 
   inline const bool propagationStopped() { return m_propagationStopped; }
   inline const bool cancelled() { return m_cancelled; }
   inline void cancelled(bool v) { m_cancelled = v; }
   inline const bool propagationImmediatelyStopped() { return m_propagationImmediatelyStopped; }
 
- protected:
-  explicit EventInstance(Event* jsEvent, JSAtom eventType, JSValue eventInit);
-  explicit EventInstance(Event* jsEvent, NativeEvent* nativeEvent);
+  void trace(JSRuntime *rt, JSValue val, JS_MarkFunc *mark_func) const override;
+  void dispose() const override;
+
+  NativeEvent* nativeEvent{nullptr};
+ private:
+  static std::unordered_map<std::string, EventCreator> m_eventCreatorMap;
   bool m_cancelled{false};
   bool m_propagationStopped{false};
   bool m_propagationImmediatelyStopped{false};
+};
 
- private:
-  static void finalizer(JSRuntime* rt, JSValue val);
-  friend Event;
+auto eventCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {
+  if (argc < 1) {
+    return JS_ThrowTypeError(ctx, "Failed to construct 'Event': 1 argument required, but only 0 present.");
+  }
+
+  JSValue eventTypeValue = argv[0];
+  auto nativeEventType = jsValueToNativeString(ctx, eventTypeValue);
+  auto* nativeEvent = new NativeEvent{nativeEventType.release()};
+
+  auto* event = Event::create(ctx, nativeEvent);
+  return event->toQuickJS();
+};
+
+const WrapperTypeInfo eventTypeInfo = {
+    "Event",
+    nullptr,
+    eventCreator
 };
 
 }  // namespace kraken::binding::qjs

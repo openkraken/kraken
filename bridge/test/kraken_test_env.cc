@@ -275,7 +275,7 @@ void TEST_runLoop(ExecutionContext* context) {
   }
 }
 
-void TEST_dispatchEvent(EventTargetInstance* eventTarget, const std::string type) {
+void TEST_dispatchEvent(EventTarget* eventTarget, const std::string type) {
   NativeEventTarget* nativeEventTarget = new NativeEventTarget(eventTarget);
   auto nativeEventType = stringToNativeString(type);
   NativeEvent* nativeEvent = new NativeEvent();

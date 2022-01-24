@@ -21,7 +21,7 @@ std::unique_ptr<kraken::KrakenPage> TEST_init(OnJSError onJsError);
 std::unique_ptr<kraken::KrakenPage> TEST_init();
 std::unique_ptr<kraken::KrakenPage> TEST_allocateNewPage();
 void TEST_runLoop(ExecutionContext* context);
-void TEST_dispatchEvent(EventTargetInstance* eventTarget, const std::string type);
+void TEST_dispatchEvent(EventTarget* eventTarget, const std::string type);
 void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv);
 
 #endif  // KRAKENBRIDGE_TEST_KRAKEN_TEST_ENV_H_

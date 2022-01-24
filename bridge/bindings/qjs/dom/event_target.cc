@@ -20,9 +20,8 @@ static std::atomic<int32_t> globalEventTargetId{0};
 #define GetPropertyCallPreFix "_getProperty_"
 
 void bindEventTarget(std::unique_ptr<ExecutionContext>& context) {
-  auto* contextData = context->contextData();
-  JSValue constructor = contextData->constructorForType(&eventTargetTypeInfo);
-  JSValue prototypeObject = contextData->prototypeForType(&eventTargetTypeInfo);
+  JSValue constructor = EventTarget::constructor(context.get());
+  JSValue prototypeObject = EventTarget::prototype(context.get());
 
   INSTALL_FUNCTION(EventTarget, prototypeObject, addEventListener, 3);
   INSTALL_FUNCTION(EventTarget, prototypeObject, removeEventListener, 2);
@@ -42,7 +41,7 @@ IMPL_FUNCTION(EventTarget, addEventListener)(JSContext* ctx, JSValue this_val, i
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: type and listener are required.");
   }
 
-  auto* eventTarget = static_cast<EventTarget*>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
+  auto* eventTarget = static_cast<EventTarget*>(JS_GetOpaque(this_val, EventTarget::classId));
   if (eventTarget == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
@@ -80,7 +79,7 @@ IMPL_FUNCTION(EventTarget, removeEventListener)(JSContext* ctx, JSValue this_val
     return JS_ThrowTypeError(ctx, "Failed to removeEventListener: at least type and listener are required.");
   }
 
-  auto* eventTarget = static_cast<EventTarget*>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
+  auto* eventTarget = static_cast<EventTarget*>(JS_GetOpaque(this_val, EventTarget::classId));
   if (eventTarget == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
@@ -121,14 +120,14 @@ IMPL_FUNCTION(EventTarget, dispatchEvent)(JSContext* ctx, JSValue this_val, int 
     return JS_ThrowTypeError(ctx, "Failed to dispatchEvent: first arguments should be an event object");
   }
 
-  auto* eventTarget = static_cast<EventTarget*>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
+  auto* eventTarget = static_cast<EventTarget*>(JS_GetOpaque(this_val, EventTarget::classId));
   if (eventTarget == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to addEventListener: this is not an EventTarget object.");
   }
 
   JSValue eventValue = argv[0];
-  auto eventInstance = reinterpret_cast<EventInstance*>(JS_GetOpaque(eventValue, JSValueGetClassId(eventValue)));
-  return JS_NewBool(ctx, eventTarget->dispatchEvent(eventInstance));
+  auto event = reinterpret_cast<Event*>(JS_GetOpaque(eventValue, EventTarget::classId));
+  return JS_NewBool(ctx, eventTarget->dispatchEvent(event));
 }
 
 EventTarget* EventTarget::create(JSContext* ctx) {
@@ -142,7 +141,15 @@ EventTarget* EventTarget::create(JSContext* ctx) {
   return eventTarget;
 }
 
-bool EventTarget::dispatchEvent(EventInstance* event) {
+JSValue EventTarget::constructor(ExecutionContext* context) {
+  return context->contextData()->constructorForType(&eventTargetTypeInfo);
+}
+
+JSValue EventTarget::prototype(ExecutionContext* context) {
+  return context->contextData()->prototypeForType(&eventTargetTypeInfo);
+}
+
+bool EventTarget::dispatchEvent(Event* event) {
   std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(event->nativeEvent->type->string), event->nativeEvent->type->length);
   std::string eventType = toUTF8(u16EventType);
 
@@ -154,14 +161,14 @@ bool EventTarget::dispatchEvent(EventInstance* event) {
   // Bubble event to root event target.
   if (event->nativeEvent->bubbles == 1 && !event->propagationStopped()) {
     auto node = reinterpret_cast<Node*>(this);
-    auto* parent = static_cast<Node*>(JS_GetOpaque(node->parentNode, Node::classId(node->parentNode)));
+    auto* parent = static_cast<Node*>(JS_GetOpaque(node->parentNode, JSValueGetClassId(node->parentNode)));
 
     if (parent != nullptr) {
       parent->dispatchEvent(event);
     } else {
       // Window does not inherit from Node, so it is not in the Node tree and needs to continue passing to the Window when it bubbles to Document.
       JSValue globalObjectValue = JS_GetGlobalObject(m_ctx);
-      auto* window = static_cast<Window*>(JS_GetOpaque(globalObjectValue, Window::classId()));
+      auto* window = static_cast<Window*>(JS_GetOpaque(globalObjectValue, JSValueGetClassId(globalObjectValue)));
       window->internalDispatchEvent(event);
       JS_FreeValue(m_ctx, globalObjectValue);
     }
@@ -172,28 +179,32 @@ bool EventTarget::dispatchEvent(EventInstance* event) {
   return event->cancelled();
 }
 
-bool EventTarget::internalDispatchEvent(EventInstance* eventInstance) {
-  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(eventInstance->nativeEvent->type->string), eventInstance->nativeEvent->type->length);
+bool EventTarget::internalDispatchEvent(Event* event) {
+  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(event->nativeEvent->type->string), event->nativeEvent->type->length);
   std::string eventTypeStr = toUTF8(u16EventType);
   JSAtom eventType = JS_NewAtom(m_ctx, eventTypeStr.c_str());
 
   // Modify the currentTarget to this.
-  eventInstance->nativeEvent->currentTarget = this;
+  event->nativeEvent->currentTarget = this;
 
   // Dispatch event listeners writen by addEventListener
-  auto _dispatchEvent = [&eventInstance, this](JSValue handler) {
+  auto _dispatchEvent = [&event, this](JSValue handler) {
     if (!JS_IsFunction(m_ctx, handler))
       return;
 
-    if (eventInstance->propagationImmediatelyStopped())
+    if (event->propagationImmediatelyStopped())
       return;
 
     /* 'handler' might be destroyed when calling itself (if it frees the
      handler), so must take extra care */
     JS_DupValue(m_ctx, handler);
 
+    JSValue arguments[] = {
+      event->toQuickJS()
+    };
+
     // The third params `thisObject` to null equals global object.
-    JSValue returnedValue = JS_Call(m_ctx, handler, JS_NULL, 1, &eventInstance->jsObject);
+    JSValue returnedValue = JS_Call(m_ctx, handler, JS_NULL, 1, arguments);
 
     JS_FreeValue(m_ctx, handler);
     context()->handleException(&returnedValue);
@@ -214,15 +225,15 @@ bool EventTarget::internalDispatchEvent(EventInstance* eventInstance) {
     bool specialErrorEventHanding = eventTypeStr == "error";
 
     if (specialErrorEventHanding) {
-      auto _dispatchErrorEvent = [&eventInstance, this, eventTypeStr](JSValue handler) {
-        JSValue error = JS_GetPropertyStr(m_ctx, eventInstance->jsObject, "error");
+      auto _dispatchErrorEvent = [&event, this, eventTypeStr](JSValue handler) {
+        JSValue error = JS_GetPropertyStr(m_ctx, event->toQuickJS(), "error");
         JSValue messageValue = JS_GetPropertyStr(m_ctx, error, "message");
         JSValue lineNumberValue = JS_GetPropertyStr(m_ctx, error, "lineNumber");
         JSValue fileNameValue = JS_GetPropertyStr(m_ctx, error, "fileName");
         JSValue columnValue = JS_NewUint32(m_ctx, 0);
 
         JSValue args[]{messageValue, fileNameValue, lineNumberValue, columnValue, error};
-        JS_Call(m_ctx, handler, eventInstance->jsObject, 5, args);
+        JS_Call(m_ctx, handler, event->toQuickJS(), 5, args);
         context()->drainPendingPromiseJobs();
 
         JS_FreeValue(m_ctx, error);
@@ -241,11 +252,11 @@ bool EventTarget::internalDispatchEvent(EventInstance* eventInstance) {
 
   // do not dispatch event when event has been canceled
   // true is prevented.
-  return eventInstance->cancelled();
+  return event->cancelled();
 }
 
 int EventTarget::hasProperty(JSContext* ctx, JSValue obj, JSAtom atom) {
-  auto* eventTarget = static_cast<EventTarget*>(JS_GetOpaque(obj, JSValueGetClassId(obj)));
+  auto* eventTarget = static_cast<EventTarget*>(JS_GetOpaque(obj, EventTarget::classId));
   JSValue prototype = eventTarget->context()->contextData()->prototypeForType(&eventTargetTypeInfo);
 
   if (JS_HasProperty(ctx, prototype, atom))
@@ -303,7 +314,7 @@ JSValue EventTarget::getProperty(JSContext* ctx, JSValue obj, JSAtom atom, JSVal
 }
 
 int EventTarget::setProperty(JSContext* ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver, int flags) {
-  auto* eventTarget = static_cast<EventTarget*>(JS_GetOpaque(obj, JSValueGetClassId(obj)));
+  auto* eventTarget = static_cast<EventTarget*>(JS_GetOpaque(obj, EventTarget::classId));
   JSValue prototype = JS_GetPrototype(ctx, eventTarget->jsObject);
 
   // Check there are setter functions on prototype.
@@ -440,10 +451,11 @@ void NativeEventTarget::dispatchEventImpl(NativeEventTarget* nativeEventTarget, 
   // NativeEvent members are memory aligned corresponding to NativeEvent.
   // So we can reinterpret_cast raw bytes pointer to NativeEvent type directly.
   auto* nativeEvent = reinterpret_cast<NativeEvent*>(raw->bytes);
-  EventInstance* eventInstance = Event::buildEventInstance(eventType, context, nativeEvent, isCustomEvent == 1);
-  eventInstance->nativeEvent->target = eventTarget;
-  eventTarget->dispatchEvent(eventInstance);
-  JS_FreeValue(context->ctx(), eventInstance->jsObject);
+  Event* event = Event::create();
+//  Event* event = Event::buildEventInstance(eventType, context, nativeEvent, isCustomEvent == 1);
+//  eventInstance->nativeEvent->target = eventTarget;
+//  eventTarget->dispatchEvent(eventInstance);
+//  JS_FreeValue(context->ctx(), eventInstance->jsObject);
 }
 
 }  // namespace kraken::binding::qjs

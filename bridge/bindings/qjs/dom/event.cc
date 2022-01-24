@@ -11,135 +11,170 @@
 
 namespace kraken::binding::qjs {
 
-std::once_flag kEventInitOnceFlag;
-
 void bindEvent(std::unique_ptr<ExecutionContext>& context) {
-  auto* constructor = Event::instance(context.get());
-  context->defineGlobalProperty("Event", constructor->jsObject);
+  JSValue constructor = Event::constructor(context.get());
+  JSValue prototype = Event::prototype(context.get());
+
+  // Install readonly properties.
+  INSTALL_READONLY_PROPERTY(Event, prototype, type);
+  INSTALL_READONLY_PROPERTY(Event, prototype, bubbles);
+  INSTALL_READONLY_PROPERTY(Event, prototype, cancelable);
+  INSTALL_READONLY_PROPERTY(Event, prototype, timestamp);
+  INSTALL_READONLY_PROPERTY(Event, prototype, bubbles);
+  INSTALL_READONLY_PROPERTY(Event, prototype, defaultPrevented);
+  INSTALL_READONLY_PROPERTY(Event, prototype, target);
+  INSTALL_READONLY_PROPERTY(Event, prototype, srcElement);
+  INSTALL_READONLY_PROPERTY(Event, prototype, currentTarget);
+  INSTALL_READONLY_PROPERTY(Event, prototype, returnValue);
+  INSTALL_READONLY_PROPERTY(Event, prototype, cancelBubble);
+
+  // Install functions
+  INSTALL_FUNCTION(Event, prototype, stopPropagation, 0);
+  INSTALL_FUNCTION(Event, prototype, stopImmediatePropagation, 0);
+  INSTALL_FUNCTION(Event, prototype, preventDefault, 1);
+  INSTALL_FUNCTION(Event, prototype, initEvent, 3);
+
+  context->defineGlobalProperty("Event", constructor);
 }
 
-JSClassID Event::kEventClassID{0};
+JSClassID Event::classId{0};
 
-Event::Event(ExecutionContext* context) : HostClass(context, "Event") {
-  std::call_once(kEventInitOnceFlag, []() { JS_NewClassID(&kEventClassID); });
+Event* Event::create(JSContext* ctx) {
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  JSValue prototype = context->contextData()->prototypeForType(&eventTypeInfo);
+
+  auto* event = makeGarbageCollected<Event>()->initialize<Event>(ctx, &classId);
+
+  // Let eventTarget instance inherit EventTarget prototype methods.
+  JS_SetPrototype(ctx, event->toQuickJS(), prototype);
+
+  return event;
 }
 
-JSValue Event::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
-  if (argc < 1) {
-    return JS_ThrowTypeError(ctx, "Failed to construct 'Event': 1 argument required, but only 0 present.");
-  }
+Event* Event::create(JSContext* ctx, NativeEvent* nativeEvent) {
+  auto* event = create(ctx);
+  event->nativeEvent = nativeEvent;
+  return event;
+}
 
-  JSValue eventTypeValue = argv[0];
-  std::string eventType = jsValueToStdString(ctx, eventTypeValue);
+Event::Event() {
 
-  auto* nativeEvent = new NativeEvent{stringToNativeString(eventType).release()};
-  auto* event = Event::buildEventInstance(eventType, m_context, nativeEvent, false);
-  return event->jsObject;
+}
+Event::Event(NativeEvent* nativeEvent): nativeEvent(nativeEvent) {}
+Event::Event(JSValue eventType, JSValue eventInit) {
+
+}
+
+JSValue Event::constructor(ExecutionContext* context) {
+  return context->contextData()->constructorForType(&eventTypeInfo);
+}
+
+JSValue Event::prototype(ExecutionContext* context) {
+  return context->contextData()->prototypeForType(&eventTypeInfo);
 }
 
 std::unordered_map<std::string, EventCreator> Event::m_eventCreatorMap{};
 
 IMPL_PROPERTY_GETTER(Event, type)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
+  auto* eventInstance = static_cast<Event*>(JS_GetOpaque(this_val, Event::classId));
   return JS_NewUnicodeString(eventInstance->context()->runtime(), eventInstance->context()->ctx(), eventInstance->nativeEvent->type->string, eventInstance->nativeEvent->type->length);
 }
 
 IMPL_PROPERTY_GETTER(Event, bubbles)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
-  return JS_NewBool(ctx, eventInstance->nativeEvent->bubbles);
+  auto* event = static_cast<Event*>(JS_GetOpaque(this_val, Event::classId));
+  return JS_NewBool(ctx, event->nativeEvent->bubbles);
 }
 
 IMPL_PROPERTY_GETTER(Event, cancelable)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
-  return JS_NewBool(ctx, eventInstance->nativeEvent->cancelable);
+  auto* event = static_cast<Event*>(JS_GetOpaque(this_val, Event::classId));
+  return JS_NewBool(ctx, event->nativeEvent->cancelable);
 }
 
 IMPL_PROPERTY_GETTER(Event, timestamp)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
-  return JS_NewInt64(ctx, eventInstance->nativeEvent->timeStamp);
+  auto* event = static_cast<Event*>(JS_GetOpaque(this_val, Event::classId));
+  return JS_NewInt64(ctx, event->nativeEvent->timeStamp);
 }
 
 IMPL_PROPERTY_GETTER(Event, defaultPrevented)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
-  return JS_NewBool(ctx, eventInstance->cancelled());
+  auto* event = static_cast<Event*>(JS_GetOpaque(this_val, Event::classId));
+  return JS_NewBool(ctx, event->cancelled());
 }
 
 IMPL_PROPERTY_GETTER(Event, target)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
-  if (eventInstance->nativeEvent->target != nullptr) {
-    auto instance = reinterpret_cast<EventTargetInstance*>(eventInstance->nativeEvent->target);
-    return JS_DupValue(ctx, instance->jsObject);
+  auto* event = static_cast<Event*>(JS_GetOpaque(this_val, Event::classId));
+  if (event->nativeEvent->target != nullptr) {
+    auto eventTarget = reinterpret_cast<EventTarget*>(event->nativeEvent->target);
+    return JS_DupValue(ctx, eventTarget->toQuickJS());
   }
   return JS_NULL;
 }
 
 IMPL_PROPERTY_GETTER(Event, srcElement)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
-  if (eventInstance->nativeEvent->target != nullptr) {
-    auto instance = reinterpret_cast<EventTargetInstance*>(eventInstance->nativeEvent->target);
-    return JS_DupValue(ctx, instance->jsObject);
+  auto* event = static_cast<Event*>(JS_GetOpaque(this_val, Event::classId));
+  if (event->nativeEvent->target != nullptr) {
+    auto eventTarget = reinterpret_cast<EventTarget*>(event->nativeEvent->target);
+    return JS_DupValue(ctx, eventTarget->toQuickJS());
   }
   return JS_NULL;
 }
 
 IMPL_PROPERTY_GETTER(Event, currentTarget)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
-  if (eventInstance->nativeEvent->currentTarget != nullptr) {
-    auto instance = reinterpret_cast<EventTargetInstance*>(eventInstance->nativeEvent->currentTarget);
-    return JS_DupValue(ctx, instance->jsObject);
+  auto* event = static_cast<Event*>(JS_GetOpaque(this_val, Event::classId));
+  if (event->nativeEvent->currentTarget != nullptr) {
+    auto eventTarget = reinterpret_cast<EventTarget*>(event->nativeEvent->currentTarget);
+    return JS_DupValue(ctx, eventTarget->toQuickJS());
   }
   return JS_NULL;
 }
 
 IMPL_PROPERTY_GETTER(Event, returnValue)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
-  return JS_NewBool(ctx, !eventInstance->cancelled());
+  auto* event = static_cast<Event*>(JS_GetOpaque(this_val, Event::classId));
+  return JS_NewBool(ctx, !event->cancelled());
 }
 
 IMPL_PROPERTY_GETTER(Event, cancelBubble)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
-  return JS_NewBool(ctx, eventInstance->cancelled());
+  auto* event = static_cast<Event*>(JS_GetOpaque(this_val, Event::classId));
+  return JS_NewBool(ctx, event->cancelled());
 }
 
-EventInstance* Event::buildEventInstance(std::string& eventType, ExecutionContext* context, void* nativeEvent, bool isCustomEvent) {
-  EventInstance* eventInstance;
-  if (isCustomEvent) {
-    eventInstance = new CustomEventInstance(CustomEvent::instance(context), reinterpret_cast<NativeCustomEvent*>(nativeEvent));
-  } else if (m_eventCreatorMap.count(eventType) > 0) {
-    eventInstance = m_eventCreatorMap[eventType](context, nativeEvent);
-  } else {
-    eventInstance = EventInstance::fromNativeEvent(Event::instance(context), static_cast<NativeEvent*>(nativeEvent));
-  }
-
-  return eventInstance;
-}
+//Event* Event::buildEvent(JSValue eventType, JSContext* ctx, void* nativeEvent, bool isCustomEvent) {
+//  Event* event;
+//  if (isCustomEvent) {
+//    event = CustomEvent::create(ctx, reinterpret_cast<NativeCustomEvent*>(nativeEvent), eventType);
+//  } else if (m_eventCreatorMap.count(eventType) > 0) {
+//    event = m_eventCreatorMap[eventType](ctx, nativeEvent);
+//  } else {
+//    event = Event::create(ctx, static_cast<NativeEvent*>(nativeEvent));
+//  }
+//  return event;
+//}
 
 void Event::defineEvent(const std::string& eventType, EventCreator creator) {
   m_eventCreatorMap[eventType] = creator;
 }
 
-JSValue Event::stopPropagation(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* event = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
+IMPL_FUNCTION(Event, stopPropagation)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* event = static_cast<Event*>(JS_GetOpaque(this_val, Event::classId));
   event->m_propagationStopped = true;
   return JS_NULL;
 }
 
-JSValue Event::stopImmediatePropagation(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* event = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
+IMPL_FUNCTION(Event, stopImmediatePropagation)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* event = static_cast<Event*>(JS_GetOpaque(this_val, Event::classId));
   event->m_propagationStopped = true;
   event->m_propagationImmediatelyStopped = true;
   return JS_NULL;
 }
 
-JSValue Event::preventDefault(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* event = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
+IMPL_FUNCTION(Event, preventDefault)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* event = static_cast<Event*>(JS_GetOpaque(this_val, Event::classId));
   if (event->nativeEvent->cancelable) {
     event->m_cancelled = true;
   }
   return JS_NULL;
 }
 
-JSValue Event::initEvent(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_FUNCTION(Event, initEvent)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Failed to initEvent required, but only 0 present.");
   }
@@ -159,7 +194,7 @@ JSValue Event::initEvent(JSContext* ctx, JSValue this_val, int argc, JSValue* ar
     return JS_ThrowTypeError(ctx, "Failed to initEvent: type should be a string.");
   }
 
-  auto* event = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
+  auto* event = static_cast<Event*>(JS_GetOpaque(this_val, Event::classId));
   event->nativeEvent->type = jsValueToNativeString(ctx, typeValue).release();
 
   if (!JS_IsNull(bubblesValue)) {
@@ -171,41 +206,10 @@ JSValue Event::initEvent(JSContext* ctx, JSValue this_val, int argc, JSValue* ar
   return JS_NULL;
 }
 
-EventInstance* EventInstance::fromNativeEvent(Event* event, NativeEvent* nativeEvent) {
-  return new EventInstance(event, nativeEvent);
-}
+void Event::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {}
 
-EventInstance::EventInstance(Event* event, NativeEvent* nativeEvent) : nativeEvent(nativeEvent), Instance(event, "Event", nullptr, Event::kEventClassID, finalizer) {}
-EventInstance::EventInstance(Event* jsEvent, JSAtom eventType, JSValue eventInit) : Instance(jsEvent, "Event", nullptr, Event::kEventClassID, finalizer) {
-  JSValue v = JS_AtomToValue(m_ctx, eventType);
-  nativeEvent = new NativeEvent{jsValueToNativeString(m_ctx, v).release()};
-  JS_FreeValue(m_ctx, v);
-
-  auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-  nativeEvent->timeStamp = ms.count();
-
-  if (!JS_IsNull(eventInit)) {
-    ;
-    JSAtom bubblesKey = JS_NewAtom(m_ctx, "bubbles");
-    if (JS_HasProperty(m_ctx, eventInit, bubblesKey)) {
-      nativeEvent->bubbles = JS_ToBool(m_ctx, JS_GetProperty(m_ctx, eventInit, bubblesKey));
-    }
-    JS_FreeAtom(m_ctx, bubblesKey);
-
-    JSAtom cancelableKey = JS_NewAtom(m_ctx, "cancelable");
-    if (JS_HasProperty(m_ctx, eventInit, cancelableKey)) {
-      nativeEvent->cancelable = JS_ToBool(m_ctx, JS_GetProperty(m_ctx, eventInit, cancelableKey));
-    }
-    JS_FreeAtom(m_ctx, cancelableKey);
-  }
-}
-
-void EventInstance::finalizer(JSRuntime* rt, JSValue val) {
-  auto* event = static_cast<EventInstance*>(JS_GetOpaque(val, Event::kEventClassID));
-  if (event->context()->isValid()) {
-    JS_FreeValue(event->m_ctx, event->jsObject);
-  }
-  delete event;
+void Event::dispose() const {
+  delete nativeEvent;
 }
 
 }  // namespace kraken::binding::qjs

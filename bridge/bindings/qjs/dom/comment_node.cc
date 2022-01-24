@@ -9,23 +9,30 @@
 
 namespace kraken::binding::qjs {
 
-std::once_flag kCommentInitFlag;
-
-JSClassID Comment::kCommentClassId{0};
-
 void bindCommentNode(std::unique_ptr<ExecutionContext>& context) {
-  auto* constructor = Comment::instance(context.get());
-  context->defineGlobalProperty("Comment", constructor->jsObject);
+//  auto* constructor = Comment::instance(context.get());
+//  context->defineGlobalProperty("Comment", constructor->jsObject);
 }
 
-JSClassID Comment::classId() {
-  return kCommentClassId;
+JSClassID Comment::classId{0};
+
+Comment* Comment::create(JSContext* ctx) {
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  auto* comment = makeGarbageCollected<Comment>()->initialize<Comment>(ctx, &classId);
+
+  JSValue prototype = context->contextData()->prototypeForType(&commentTypeInfo);
+
+  // Let eventTarget instance inherit EventTarget prototype methods.
+  JS_SetPrototype(ctx, comment->toQuickJS(), prototype);
+
+  return comment;
+
 }
 
-Comment::Comment(ExecutionContext* context) : Node(context, "Comment") {
-  std::call_once(kCommentInitFlag, []() { JS_NewClassID(&kCommentClassId); });
-  JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
-}
+//Comment::Comment(ExecutionContext* context) : Node(context, "Comment") {
+//  std::call_once(kCommentInitFlag, []() { JS_NewClassID(&kCommentClassId); });
+//  JS_SetPrototype(m_ctx, m_prototypeObject, Node::instance(m_context)->prototype());
+//}
 
 JSValue Comment::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
   return (new CommentInstance(this))->jsObject;

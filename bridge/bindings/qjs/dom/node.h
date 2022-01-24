@@ -91,7 +91,6 @@ protected:
   virtual void internalSetTextContent(JSValue content);
   JSValue internalReplaceChild(Node* newChild, Node* oldChild);
 
-
   virtual void _notifyNodeRemoved(Node* node);
   virtual void _notifyNodeInsert(Node* node);
 private:

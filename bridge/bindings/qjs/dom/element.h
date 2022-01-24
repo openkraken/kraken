@@ -8,7 +8,7 @@
 
 #include <unordered_map>
 #include "bindings/qjs/garbage_collected.h"
-#include "bindings/qjs/host_object.h"
+#include "bindings/qjs/executing_context.h"
 #include "node.h"
 #include "style_declaration.h"
 
@@ -74,6 +74,8 @@ class Element : public Node {
  public:
   static JSClassID classId;
   static Element* create(JSContext* ctx);
+  static JSValue constructor(ExecutionContext* context);
+  static JSValue prototype(ExecutionContext* context);
 
   DEFINE_FUNCTION(getBoundingClientRect);
   DEFINE_FUNCTION(hasAttribute);
@@ -135,11 +137,6 @@ class Element : public Node {
 
   static JSClassExoticMethods exoticMethods;
   friend class Node;
-};
-
-struct PersistElement {
-  Element* element;
-  list_head link;
 };
 
 auto elementCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {

@@ -8,90 +8,74 @@
 
 namespace kraken::binding::qjs {
 
-std::once_flag kBlobInitOnceFlag;
-
 void bindBlob(std::unique_ptr<ExecutionContext>& context) {
-  auto* constructor = Blob::instance(context.get());
-  context->defineGlobalProperty("Blob", constructor->jsObject);
+  JSValue constructor = context->contextData()->constructorForType(&blobTypeInfo);
+  JSValue prototype = context->contextData()->prototypeForType(&blobTypeInfo);
+
+  // Install methods on prototype.
+  INSTALL_FUNCTION(Blob, prototype, arrayBuffer, 0);
+  INSTALL_FUNCTION(Blob, prototype, slice, 3);
+  INSTALL_FUNCTION(Blob, prototype, text, 0);
+
+  // Install readonly properties.
+  INSTALL_READONLY_PROPERTY(Blob, prototype, type);
+  INSTALL_READONLY_PROPERTY(Blob, prototype, size);
+
+  context->defineGlobalProperty("Blob", constructor);
 }
 
-Blob::Blob(ExecutionContext* context) : HostClass(context, "Blob") {
-  std::call_once(kBlobInitOnceFlag, []() { JS_NewClassID(&kBlobClassID); });
+JSClassID Blob::classID{0};
+
+Blob* Blob::create(JSContext* ctx) {
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  auto* blob = makeGarbageCollected<Blob>()->initialize<Blob>(ctx, &classID);
+
+  JSValue prototype = context->contextData()->prototypeForType(&blobTypeInfo);
+
+  // Let eventTarget instance inherit EventTarget prototype methods.
+  JS_SetPrototype(ctx, blob->toQuickJS(), prototype);
+  return blob;
+
+}
+Blob* Blob::create(JSContext* ctx, std::vector<uint8_t>&& data) {
+  return create(ctx);
+}
+Blob* Blob::create(JSContext* ctx, std::vector<uint8_t>&& data, std::string& mime) {
+  return create(ctx);
 }
 
-JSClassID Blob::kBlobClassID{0};
+JSValue Blob::constructor(ExecutionContext* context) {
+  return context->contextData()->constructorForType(&blobTypeInfo);
+}
 
-JSValue Blob::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
-  BlobBuilder builder;
-  auto constructor = static_cast<Blob*>(JS_GetOpaque(func_obj, ExecutionContext::kHostClassClassId));
-  if (argc == 0) {
-    auto blob = new BlobInstance(constructor);
-    return blob->jsObject;
-  }
-
-  JSValue arrayValue = argv[0];
-  JSValue optionValue = JS_UNDEFINED;
-
-  if (argc > 1) {
-    optionValue = argv[1];
-  }
-
-  if (!JS_IsArray(ctx, arrayValue)) {
-    return JS_ThrowTypeError(ctx, "Failed to construct 'Blob': The provided value cannot be converted to a sequence");
-  }
-
-  if (argc == 1 || JS_IsUndefined(optionValue)) {
-    builder.append(*constructor->m_context, arrayValue);
-    auto blob = new BlobInstance(constructor, builder.finalize());
-    return blob->jsObject;
-  }
-
-  if (!JS_IsObject(optionValue)) {
-    return JS_ThrowTypeError(ctx,
-                             "Failed to construct 'Blob': parameter 2 ('options') "
-                             "is not an object");
-  }
-
-  JSAtom mimeTypeKey = JS_NewAtom(ctx, "type");
-
-  JSValue mimeTypeValue = JS_GetProperty(ctx, optionValue, mimeTypeKey);
-  builder.append(*constructor->m_context, mimeTypeValue);
-  const char* cMineType = JS_ToCString(ctx, mimeTypeValue);
-  std::string mimeType = std::string(cMineType);
-
-  auto* blob = new BlobInstance(constructor, builder.finalize(), mimeType);
-
-  JS_FreeValue(ctx, mimeTypeValue);
-  JS_FreeCString(ctx, mimeType.c_str());
-  JS_FreeAtom(ctx, mimeTypeKey);
-
-  return blob->jsObject;
+JSValue Blob::prototype(ExecutionContext* context) {
+  return context->contextData()->prototypeForType(&blobTypeInfo);
 }
 
 IMPL_PROPERTY_GETTER(Blob, type)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* blobInstance = static_cast<BlobInstance*>(JS_GetOpaque(this_val, Blob::kBlobClassID));
-  return JS_NewString(blobInstance->m_ctx, blobInstance->mimeType.empty() ? "" : blobInstance->mimeType.c_str());
+  auto* blob = static_cast<Blob*>(JS_GetOpaque(this_val, Blob::classID));
+  return JS_NewString(blob->m_ctx, blob->mimeType.empty() ? "" : blob->mimeType.c_str());
 }
 
 IMPL_PROPERTY_GETTER(Blob, size)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* blobInstance = static_cast<BlobInstance*>(JS_GetOpaque(this_val, Blob::kBlobClassID));
-  return JS_NewFloat64(blobInstance->m_ctx, blobInstance->_size);
+  auto* blob = static_cast<Blob*>(JS_GetOpaque(this_val, Blob::classID));
+  return JS_NewFloat64(blob->m_ctx, blob->_size);
 }
 
-JSValue Blob::arrayBuffer(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_FUNCTION(Blob, arrayBuffer)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   JSValue resolving_funcs[2];
   JSValue promise = JS_NewPromiseCapability(ctx, resolving_funcs);
 
-  auto blob = static_cast<BlobInstance*>(JS_GetOpaque(this_val, Blob::kBlobClassID));
+  auto blob = static_cast<Blob*>(JS_GetOpaque(this_val, Blob::classID));
 
   JS_DupValue(ctx, blob->jsObject);
 
-  auto* promiseContext = new PromiseContext{blob, blob->m_context, resolving_funcs[0], resolving_funcs[1], promise};
+  auto* promiseContext = new PromiseContext{blob, blob->context(), resolving_funcs[0], resolving_funcs[1], promise};
   auto callback = [](void* callbackContext, int32_t contextId, const char* errmsg) {
     if (!isContextValid(contextId))
       return;
     auto* promiseContext = static_cast<PromiseContext*>(callbackContext);
-    auto* blob = static_cast<BlobInstance*>(promiseContext->data);
+    auto* blob = static_cast<Blob*>(promiseContext->data);
     JSContext* ctx = blob->m_ctx;
 
     JSValue arrayBuffer = JS_NewArrayBuffer(
@@ -114,7 +98,7 @@ JSValue Blob::arrayBuffer(JSContext* ctx, JSValue this_val, int argc, JSValue* a
     list_del(&promiseContext->link);
     delete promiseContext;
   };
-  list_add_tail(&promiseContext->link, &blob->m_context->promise_job_list);
+  list_add_tail(&promiseContext->link, &blob->context()->promise_job_list);
 
   // TODO: remove setTimeout
   getDartMethod()->setTimeout(promiseContext, blob->context()->getContextId(), callback, 0);
@@ -122,12 +106,12 @@ JSValue Blob::arrayBuffer(JSContext* ctx, JSValue this_val, int argc, JSValue* a
   return promise;
 }
 
-JSValue Blob::slice(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_FUNCTION(Blob, slice)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   JSValue startValue = argv[0];
   JSValue endValue = argv[1];
   JSValue contentTypeValue = argv[2];
 
-  auto* blob = static_cast<BlobInstance*>(JS_GetOpaque(this_val, Blob::kBlobClassID));
+  auto* blob = static_cast<Blob*>(JS_GetOpaque(this_val, Blob::classID));
   int32_t start = 0;
   int32_t end = blob->_data.size();
   std::string mimeType = blob->mimeType;
@@ -147,31 +131,31 @@ JSValue Blob::slice(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   }
 
   if (start == 0 && end == blob->_data.size()) {
-    auto newBlob = new BlobInstance(reinterpret_cast<Blob*>(blob->m_hostClass), std::move(blob->_data), mimeType);
-    return newBlob->jsObject;
+    auto* newBlob = Blob::create(ctx, std::move(blob->_data), mimeType);
+    return newBlob->toQuickJS();
   }
   std::vector<uint8_t> newData;
   newData.reserve(blob->_data.size() - (end - start));
   newData.insert(newData.begin(), blob->_data.begin() + start, blob->_data.end() - (blob->_data.size() - end));
 
-  auto newBlob = new BlobInstance(reinterpret_cast<Blob*>(blob->m_hostClass), std::move(newData), mimeType);
-  return newBlob->jsObject;
+  auto* newBlob = Blob::create(ctx, std::move(newData), mimeType);
+  return newBlob->toQuickJS();
 }
 
-JSValue Blob::text(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+IMPL_FUNCTION(Blob, text)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   JSValue resolving_funcs[2];
   JSValue promise = JS_NewPromiseCapability(ctx, resolving_funcs);
 
-  auto blob = static_cast<BlobInstance*>(JS_GetOpaque(this_val, Blob::kBlobClassID));
+  auto blob = static_cast<Blob*>(JS_GetOpaque(this_val, Blob::classID));
   JS_DupValue(ctx, blob->jsObject);
 
-  auto* promiseContext = new PromiseContext{blob, blob->m_context, resolving_funcs[0], resolving_funcs[1], promise};
+  auto* promiseContext = new PromiseContext{blob, blob->context(), resolving_funcs[0], resolving_funcs[1], promise};
   auto callback = [](void* callbackContext, int32_t contextId, const char* errmsg) {
     if (!isContextValid(contextId))
       return;
 
     auto* promiseContext = static_cast<PromiseContext*>(callbackContext);
-    auto* blob = static_cast<BlobInstance*>(promiseContext->data);
+    auto* blob = static_cast<Blob*>(promiseContext->data);
     JSContext* ctx = blob->m_ctx;
 
     JSValue text = JS_NewStringLen(ctx, reinterpret_cast<const char*>(blob->bytes()), blob->size());
@@ -193,19 +177,14 @@ JSValue Blob::text(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
     list_del(&promiseContext->link);
     delete promiseContext;
   };
-  list_add_tail(&promiseContext->link, &blob->m_context->promise_job_list);
+  list_add_tail(&promiseContext->link, &blob->context()->promise_job_list);
 
   getDartMethod()->setTimeout(promiseContext, blob->context()->getContextId(), callback, 0);
 
   return promise;
 }
 
-void BlobInstance::finalize(JSRuntime* rt, JSValue val) {
-  auto* eventTarget = static_cast<BlobInstance*>(JS_GetOpaque(val, Blob::kBlobClassID));
-  delete eventTarget;
-}
-
-void BlobBuilder::append(ExecutionContext& context, BlobInstance* blob) {
+void BlobBuilder::append(ExecutionContext& context, Blob* blob) {
   std::vector<uint8_t> blobData = blob->_data;
   _data.reserve(_data.size() + blobData.size());
   _data.insert(_data.end(), blobData.begin(), blobData.end());
@@ -234,11 +213,11 @@ void BlobBuilder::append(ExecutionContext& context, JSValue& value) {
       JS_FreeValue(context.ctx(), v);
     }
   } else if (JS_IsObject(value)) {
-    if (JS_IsInstanceOf(context.ctx(), value, Blob::instance(&context)->jsObject)) {
-      auto blob = static_cast<BlobInstance*>(JS_GetOpaque(value, Blob::kBlobClassID));
+    if (JS_IsInstanceOf(context.ctx(), value, Blob::constructor(&context))) {
+      auto blob = static_cast<Blob*>(JS_GetOpaque(value, Blob::classID));
       if (blob == nullptr)
         return;
-      if (std::string(blob->m_name) == "Blob") {
+      if (std::string(blob->getHumanReadableName()) == "Blob") {
         std::vector<uint8_t> blobData = blob->_data;
         _data.reserve(_data.size() + blobData.size());
         _data.insert(_data.end(), blobData.begin(), blobData.end());
@@ -271,11 +250,18 @@ std::vector<uint8_t> BlobBuilder::finalize() {
   return std::move(_data);
 }
 
-int32_t BlobInstance::size() {
+int32_t Blob::size() {
   return _data.size();
 }
 
-uint8_t* BlobInstance::bytes() {
+uint8_t* Blob::bytes() {
   return _data.data();
 }
+
+void Blob::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {}
+void Blob::dispose() const {
+
+}
+
+
 }  // namespace kraken::binding::qjs

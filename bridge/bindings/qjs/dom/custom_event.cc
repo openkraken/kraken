@@ -12,8 +12,52 @@
 namespace kraken::binding::qjs {
 
 void bindCustomEvent(std::unique_ptr<ExecutionContext>& context) {
-  auto* constructor = CustomEvent::instance(context.get());
-  context->defineGlobalProperty("CustomEvent", constructor->jsObject);
+//  auto* constructor = CustomEvent::instance(context.get());
+//  context->defineGlobalProperty("CustomEvent", constructor->jsObject);
+}
+
+JSClassID CustomEvent::classId{0};
+
+CustomEvent* CustomEvent::create(JSContext* ctx, JSValue eventType, JSValue init) {
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  JSValue prototype = context->contextData()->prototypeForType(&eventTypeInfo);
+
+  auto* event = makeGarbageCollected<CustomEvent>()->initialize<CustomEvent>(ctx, &classId);
+
+  if (!JS_IsNull(init)) {
+    JSAtom detailKey = JS_NewAtom(ctx, "detail");
+    if (JS_HasProperty(ctx, init, detailKey)) {
+      JSValue detailValue = JS_GetProperty(ctx, init, detailKey);
+      event->m_detail = JS_DupValue(ctx, detailValue);
+      JS_FreeValue(ctx, detailValue);
+    }
+    JS_FreeAtom(ctx, detailKey);
+  }
+
+  // Let eventTarget instance inherit EventTarget prototype methods.
+  JS_SetPrototype(ctx, event->toQuickJS(), prototype);
+
+  return event;
+}
+
+JSValue CustomEvent::constructor(ExecutionContext* context) {
+  return context->contextData()->constructorForType(&customEventTypeInfo);
+}
+
+JSValue CustomEvent::prototype(ExecutionContext* context) {
+  return context->contextData()->prototypeForType(&customEventTypeInfo);
+}
+
+CustomEvent::CustomEvent(JSValue eventType, JSValue eventInit) {
+  if (!JS_IsNull(eventInit)) {
+    JSAtom detailKey = JS_NewAtom(m_ctx, "detail");
+    if (JS_HasProperty(m_ctx, eventInit, detailKey)) {
+      JSValue detailValue = JS_GetProperty(m_ctx, eventInit, detailKey);
+      m_detail.value(detailValue);
+      JS_FreeValue(m_ctx, detailValue);
+    }
+    JS_FreeAtom(m_ctx, detailKey);
+  }
 }
 
 JSValue CustomEvent::initCustomEvent(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -46,22 +90,7 @@ JSValue CustomEvent::initCustomEvent(JSContext* ctx, JSValue this_val, int argc,
 }
 
 JSValue CustomEvent::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
-  if (argc < 1) {
-    return JS_ThrowTypeError(ctx, "Failed to construct 'CustomEvent': 1 argument required, but only 0 present.");
-  }
 
-  JSValue typeArgsValue = argv[0];
-  JSValue customEventInit = JS_NULL;
-
-  if (argc == 2) {
-    customEventInit = argv[1];
-  }
-
-  JSAtom typeAtom = JS_ValueToAtom(m_ctx, typeArgsValue);
-  auto* customEvent = new CustomEventInstance(CustomEvent::instance(context()), typeAtom, customEventInit);
-  JS_FreeAtom(m_ctx, typeAtom);
-
-  return customEvent->jsObject;
 }
 
 IMPL_PROPERTY_GETTER(CustomEvent, detail)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {

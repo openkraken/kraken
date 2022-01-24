@@ -18,7 +18,7 @@ inline std::string trim(std::string& str) {
   return str;
 }
 
-void HTMLParser::traverseHTML(NodeInstance* root, GumboNode* node) {
+void HTMLParser::traverseHTML(Node* root, GumboNode* node) {
   ExecutionContext* context = root->context();
   JSContext* ctx = context->ctx();
 

@@ -15,6 +15,8 @@ namespace kraken::binding::qjs {
 template <typename T>
 class MakeGarbageCollectedTrait;
 
+class ExecutionContext;
+
 /**
  * Base class for GC managed objects. Only descendent types of `GarbageCollected`
  * can be constructed using `MakeGarbageCollected()`. Must be inherited from as
@@ -67,8 +69,8 @@ class GarbageCollected {
 
   FORCE_INLINE JSValue toQuickJS() { return jsObject; };
 
-  FORCE_INLINE JSContext* ctx() { return m_ctx; }
-  FORCE_INLINE ExecutionContext* context() const { return static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx)); };
+  FORCE_INLINE JSContext* ctx() { return m_ctx; };
+  FORCE_INLINE ExecutionContext* context() { return static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx)); };
 
  protected:
   JSValue jsObject{JS_NULL};

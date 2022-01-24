@@ -53,14 +53,32 @@ void traverseNode(Node* node, TraverseHandler handler) {
   }
 }
 
-std::once_flag kDocumentInitOnceFlag;
-
 void bindDocument(std::unique_ptr<ExecutionContext>& context) {
+  JSValue classObject = Document::constructor(context.get());
+  JSValue prototype = Document::prototype(context.get());
 
-//  auto* documentConstructor = Document::instance(context.get());
-//  context->defineGlobalProperty("Document", documentConstructor->jsObject);
-//  JSValue documentInstance = JS_CallConstructor(context->ctx(), documentConstructor->jsObject, 0, nullptr);
-//  context->defineGlobalProperty("document", documentInstance);
+  // Install methods on prototype.
+  INSTALL_FUNCTION(Document, prototype, createEvent, 1);
+  INSTALL_FUNCTION(Document, prototype, createElement, 1);
+  INSTALL_FUNCTION(Document, prototype, createDocumentFragment, 0);
+  INSTALL_FUNCTION(Document, prototype, createTextNode, 1);
+  INSTALL_FUNCTION(Document, prototype, createComment, 1);
+  INSTALL_FUNCTION(Document, prototype, getElementById, 1);
+  INSTALL_FUNCTION(Document, prototype, getElementsByTagName, 1);
+  INSTALL_FUNCTION(Document, prototype, getElementsByClassName, 1);
+
+  // Install readonly properties on prototype.
+  INSTALL_READONLY_PROPERTY(Document, prototype, nodeName);
+  INSTALL_READONLY_PROPERTY(Document, prototype, all);
+  INSTALL_READONLY_PROPERTY(Document, prototype, documentElement);
+  INSTALL_READONLY_PROPERTY(Document, prototype, children);
+  INSTALL_READONLY_PROPERTY(Document, prototype, head);
+
+  // Install properties on prototype.
+  INSTALL_PROPERTY(Document, prototype, cookie);
+  INSTALL_PROPERTY(Document, prototype, body);
+
+  context->defineGlobalProperty("Document", classObject);
 }
 
 JSClassID Document::classId{0};
@@ -73,6 +91,14 @@ Document* Document::create(JSContext* ctx) {
   JS_SetPrototype(ctx, document->toQuickJS(), prototype);
 
   return document;
+}
+
+JSValue Document::constructor(ExecutionContext* context) {
+  return context->contextData()->constructorForType(&documentTypeInfo);
+}
+
+JSValue Document::prototype(ExecutionContext* context) {
+  return context->contextData()->prototypeForType(&documentTypeInfo);
 }
 
 Document::Document() : Node() {
@@ -154,8 +180,8 @@ IMPL_FUNCTION(Document, createEvent)(JSContext* ctx, JSValue this_val, int argc,
     auto nativeEvent = new NativeEvent{nativeEventType.release()};
 
     auto document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
-    auto e = Event::buildEventInstance(eventType, document->context(), nativeEvent, false);
-    return e->jsObject;
+    Event* event = Event::create(ctx, nativeEvent);
+    return event->toQuickJS();
   } else {
     return JS_NULL;
   }
@@ -172,12 +198,12 @@ IMPL_FUNCTION(Document, createElement)(JSContext* ctx, JSValue this_val, int arg
   }
 
   auto document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
-  std::string tagName = jsValueToStdString(ctx, tagNameValue);
-  JSValue constructor = static_cast<Document*>(document->prototype())->getElementConstructor(document->m_context, tagName);
-
-  JSValue element = JS_CallConstructor(ctx, constructor, argc, argv);
-  return element;
+//  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+//  std::string tagName = jsValueToStdString(ctx, tagNameValue);
+//  JSValue constructor = static_cast<Document*>(document->prototype())->getElementConstructor(document->context(), tagName);
+//
+//  JSValue element = JS_CallConstructor(ctx, constructor, argc, argv);
+//  return element;
 }
 
 IMPL_FUNCTION(Document, createTextNode)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -186,7 +212,7 @@ IMPL_FUNCTION(Document, createTextNode)(JSContext* ctx, JSValue this_val, int ar
   }
 
   auto* document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
-  JSValue textNode = JS_CallConstructor(ctx, TextNode::instance(document->m_context)->jsObject, argc, argv);
+  JSValue textNode = JS_CallConstructor(ctx, TextNode::constructor(document->context()), argc, argv);
   return textNode;
 }
 
