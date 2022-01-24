@@ -65,55 +65,45 @@ abstract class DevToolsService {
   void dispose();
 }
 
-// An kraken View Controller designed for multiple kraken view control.
-class KrakenViewController
+abstract class KrakenViewController
     implements WidgetsBindingObserver, ElementsBindingObserver {
+
   static Map<int, Pointer<NativeEventTarget>> documentNativePtrMap = {};
   static Map<int, Pointer<NativeEventTarget>> windowNativePtrMap = {};
 
+  // Index value which identify javascript runtime context.
+  late int _contextId;
+  int get contextId => _contextId;
+
   KrakenController rootController;
 
-  // The methods of the KrakenNavigateDelegation help you implement custom behaviors that are triggered
-  // during a kraken view's process of loading, and completing a navigation request.
-  KrakenNavigationDelegate? navigationDelegate;
-
   GestureListener? gestureListener;
-
-  double _viewportWidth;
-  double get viewportWidth => _viewportWidth;
-  set viewportWidth(double value) {
-    if (value != _viewportWidth) {
-      _viewportWidth = value;
-      viewport.viewportSize = Size(_viewportWidth, _viewportHeight);
-    }
-  }
-
-  double _viewportHeight;
-  double get viewportHeight => _viewportHeight;
-  set viewportHeight(double value) {
-    if (value != _viewportHeight) {
-      _viewportHeight = value;
-      viewport.viewportSize = Size(_viewportWidth, _viewportHeight);
-    }
-  }
 
   Color? background;
 
   WidgetDelegate? widgetDelegate;
 
+  // The methods of the KrakenNavigateDelegation help you implement custom behaviors that are triggered
+  // during a kraken view's process of loading, and completing a navigation request.
+  KrakenNavigationDelegate? navigationDelegate;
+
+  late Document document;
+  late Window window;
+
   KrakenViewController(
-    this._viewportWidth,
-    this._viewportHeight, {
-    this.background,
-    this.enableDebug = false,
-    int? contextId,
-    required this.rootController,
-    this.navigationDelegate,
-    this.gestureListener,
-    this.widgetDelegate,
-    // Viewport won't change when kraken page reload, should reuse previous page's viewportBox.
-    RenderViewportBox? originalViewport
-  }) {
+    viewportWidth,
+    viewportHeight, {
+      this.background,
+      this.enableDebug = false,
+      required this.rootController,
+      this.navigationDelegate,
+      this.widgetDelegate,
+      int? contextId,
+      gestureListener,
+      // Viewport won't change when kraken page reload, should reuse previous page's viewportBox.
+      RenderViewportBox? originalViewport
+    }
+  ) : _viewportWidth = viewportWidth, _viewportHeight = viewportHeight {
     if (enableDebug) {
       debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
       debugPaintSizeEnabled = true;
@@ -136,10 +126,10 @@ class KrakenViewController
       viewport = originalViewport;
     } else {
       viewport = RenderViewportBox(
-        background: background,
-        viewportSize: Size(viewportWidth, viewportHeight),
-        gestureListener: gestureListener,
-        controller: rootController
+          background: background,
+          viewportSize: Size(viewportWidth, viewportHeight),
+          gestureListener: gestureListener,
+          controller: rootController
       );
     }
 
@@ -159,12 +149,11 @@ class KrakenViewController
       gestureListener: gestureListener,
       widgetDelegate: widgetDelegate,
     );
-    _setEventTarget(DOCUMENT_ID, document);
 
     window = Window(
-        EventTargetContext(_contextId, windowNativePtrMap[_contextId]!),
-        document);
-    _setEventTarget(WINDOW_ID, window);
+      EventTargetContext(_contextId, windowNativePtrMap[_contextId]!),
+      document
+    );
 
     // Listeners need to be registered to window in order to dispatch events on demand.
     if (gestureListener != null) {
@@ -186,21 +175,177 @@ class KrakenViewController
     }
   }
 
-  // Index value which identify javascript runtime context.
-  late int _contextId;
-  int get contextId => _contextId;
+  ui.WindowPadding _prevViewInsets = ui.window.viewInsets;
+  late RenderViewportBox viewport;
+
+  static double FOCUS_VIEWINSET_BOTTOM_OVERALL = 32;
+
+  RenderObject getRootRenderObject() {
+    return viewport;
+  }
+
+  double _viewportWidth;
+  double get viewportWidth => _viewportWidth;
+  set viewportWidth(double value) {
+    if (value != _viewportWidth) {
+      _viewportWidth = value;
+      viewport.viewportSize = Size(_viewportWidth, _viewportHeight);
+    }
+  }
+
+  double _viewportHeight;
+  double get viewportHeight => _viewportHeight;
+  set viewportHeight(double value) {
+    if (value != _viewportHeight) {
+      _viewportHeight = value;
+      viewport.viewportSize = Size(_viewportWidth, _viewportHeight);
+    }
+  }
 
   // Enable print debug message when rendering.
   bool enableDebug;
+
+  @override
+  void didChangeAccessibilityFeatures() {
+    // TODO: implement didChangeAccessibilityFeatures
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+  }
+
+  @override
+  void didChangeLocales(List<Locale>? locales) {
+    // TODO: implement didChangeLocales
+  }
+
+  @override
+  void didChangeMetrics() {
+    double bottomInset =
+        ui.window.viewInsets.bottom / ui.window.devicePixelRatio;
+    if (_prevViewInsets.bottom > ui.window.viewInsets.bottom) {
+      // Hide keyboard
+      viewport.bottomInset = bottomInset;
+    } else {
+      bool shouldScrollByToCenter = false;
+      InputElement? focusInputElement = InputElement.focusInputElement;
+      if (focusInputElement != null) {
+        RenderBox? renderer = focusInputElement.renderer;
+        if (renderer != null && renderer.hasSize) {
+          Offset focusOffset = renderer.localToGlobal(Offset.zero);
+          // FOCUS_VIEWINSET_BOTTOM_OVERALL to meet border case.
+          if (focusOffset.dy >
+              viewportHeight - bottomInset - FOCUS_VIEWINSET_BOTTOM_OVERALL) {
+            shouldScrollByToCenter = true;
+          }
+        }
+      }
+      // Show keyboard
+      viewport.bottomInset = bottomInset;
+      if (shouldScrollByToCenter) {
+        SchedulerBinding.instance!.addPostFrameCallback((_) {
+          window.scrollBy(0, bottomInset);
+        });
+      }
+    }
+    _prevViewInsets = ui.window.viewInsets;
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    // TODO: implement didChangePlatformBrightness
+  }
+
+  @override
+  void didChangeTextScaleFactor() {
+    // TODO: implement didChangeTextScaleFactor
+  }
+
+  @override
+  void didHaveMemoryPressure() {
+    // TODO: implement didHaveMemoryPressure
+  }
+
+  @override
+  Future<bool> didPopRoute() async {
+    // TODO: implement didPopRoute
+    return false;
+  }
+
+  @override
+  Future<bool> didPushRoute(String route) async {
+    // TODO: implement didPushRoute
+    return false;
+  }
+
+  @override
+  Future<bool> didPushRouteInformation(
+      RouteInformation routeInformation) async {
+    // TODO: implement didPushRouteInformation
+    return false;
+  }
+
+  void _setupObserver() {
+    if (ElementsBinding.instance != null) {
+      ElementsBinding.instance!.addObserver(this);
+    } else if (WidgetsBinding.instance != null) {
+      WidgetsBinding.instance!.addObserver(this);
+    }
+  }
+}
+
+class HTMLViewController extends KrakenViewController {
+  HTMLViewController(
+    viewportWidth,
+    viewportHeight, {
+      background, enableDebug, rootController, navigationDelegate, widgetDelegate
+    }
+  ): super(
+    viewportWidth,
+    viewportHeight,
+    background: background,
+    enableDebug: enableDebug,
+    rootController: rootController,
+    navigationDelegate: navigationDelegate,
+    widgetDelegate: widgetDelegate,
+  );
+}
+
+// An kraken View Controller designed for multiple kraken view control.
+class WebViewController extends KrakenViewController {
+  WebViewController(
+    viewportWidth,
+    viewportHeight, {
+    background,
+    enableDebug,
+    int? contextId,
+    required rootController,
+    navigationDelegate,
+    gestureListener,
+    widgetDelegate,
+    // Viewport won't change when kraken page reload, should reuse previous page's viewportBox.
+    RenderViewportBox? originalViewport
+  }): super(
+    viewportWidth,
+    viewportHeight,
+    background: background,
+    enableDebug: enableDebug,
+      contextId: contextId,
+      rootController: rootController,
+      navigationDelegate: navigationDelegate,
+      gestureListener: gestureListener,
+      widgetDelegate: widgetDelegate,
+      originalViewport: originalViewport
+  ) {
+    _setEventTarget(DOCUMENT_ID, document);
+    _setEventTarget(WINDOW_ID, window);
+  }
 
   // Kraken have already disposed.
   bool _disposed = false;
 
   bool get disposed => _disposed;
-
-  late RenderViewportBox viewport;
-  late Document document;
-  late Window window;
 
   void shiftFocus(EventTarget target) {
     // TODO: get focus for other element which need to get focus.
@@ -215,14 +360,6 @@ class KrakenViewController
   void evaluateJavaScripts(String code, [String source = 'vm://']) {
     assert(!_disposed, 'Kraken have already disposed');
     evaluateScripts(_contextId, code, source);
-  }
-
-  void _setupObserver() {
-    if (ElementsBinding.instance != null) {
-      ElementsBinding.instance!.addObserver(this);
-    } else if (WidgetsBinding.instance != null) {
-      WidgetsBinding.instance!.addObserver(this);
-    }
   }
 
   void _teardownObserver() {
@@ -343,7 +480,7 @@ class KrakenViewController
     return completer.future;
   }
 
-  void createElement(
+  EventTarget createElement(
       int targetId, String tagName, [Pointer<NativeEventTarget>? nativePtr]) {
     if (kProfileMode) {
       PerformanceTiming.instance()
@@ -358,9 +495,11 @@ class KrakenViewController
       PerformanceTiming.instance()
           .mark(PERF_CREATE_ELEMENT_END, uniqueId: targetId);
     }
+
+    return element;
   }
 
-  void createTextNode(
+  Node createTextNode(
       int targetId, String data, [Pointer<NativeEventTarget>? nativePtr]) {
     if (kProfileMode) {
       PerformanceTiming.instance()
@@ -373,6 +512,8 @@ class KrakenViewController
       PerformanceTiming.instance()
           .mark(PERF_CREATE_TEXT_NODE_END, uniqueId: targetId);
     }
+
+    return textNode;
   }
 
   void createComment(int targetId, [Pointer<NativeEventTarget>? nativePtr]) {
@@ -674,94 +815,6 @@ class KrakenViewController
     _removeTarget(targetId);
     target.dispose();
   }
-
-  RenderObject getRootRenderObject() {
-    return viewport;
-  }
-
-  @override
-  void didChangeAccessibilityFeatures() {
-    // TODO: implement didChangeAccessibilityFeatures
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    // TODO: implement didChangeAppLifecycleState
-  }
-
-  @override
-  void didChangeLocales(List<Locale>? locales) {
-    // TODO: implement didChangeLocales
-  }
-
-  ui.WindowPadding _prevViewInsets = ui.window.viewInsets;
-  static double FOCUS_VIEWINSET_BOTTOM_OVERALL = 32;
-
-  @override
-  void didChangeMetrics() {
-    double bottomInset =
-        ui.window.viewInsets.bottom / ui.window.devicePixelRatio;
-    if (_prevViewInsets.bottom > ui.window.viewInsets.bottom) {
-      // Hide keyboard
-      viewport.bottomInset = bottomInset;
-    } else {
-      bool shouldScrollByToCenter = false;
-      InputElement? focusInputElement = InputElement.focusInputElement;
-      if (focusInputElement != null) {
-        RenderBox? renderer = focusInputElement.renderer;
-        if (renderer != null && renderer.hasSize) {
-          Offset focusOffset = renderer.localToGlobal(Offset.zero);
-          // FOCUS_VIEWINSET_BOTTOM_OVERALL to meet border case.
-          if (focusOffset.dy >
-              viewportHeight - bottomInset - FOCUS_VIEWINSET_BOTTOM_OVERALL) {
-            shouldScrollByToCenter = true;
-          }
-        }
-      }
-      // Show keyboard
-      viewport.bottomInset = bottomInset;
-      if (shouldScrollByToCenter) {
-        SchedulerBinding.instance!.addPostFrameCallback((_) {
-          window.scrollBy(0, bottomInset);
-        });
-      }
-    }
-    _prevViewInsets = ui.window.viewInsets;
-  }
-
-  @override
-  void didChangePlatformBrightness() {
-    // TODO: implement didChangePlatformBrightness
-  }
-
-  @override
-  void didChangeTextScaleFactor() {
-    // TODO: implement didChangeTextScaleFactor
-  }
-
-  @override
-  void didHaveMemoryPressure() {
-    // TODO: implement didHaveMemoryPressure
-  }
-
-  @override
-  Future<bool> didPopRoute() async {
-    // TODO: implement didPopRoute
-    return false;
-  }
-
-  @override
-  Future<bool> didPushRoute(String route) async {
-    // TODO: implement didPushRoute
-    return false;
-  }
-
-  @override
-  Future<bool> didPushRouteInformation(
-      RouteInformation routeInformation) async {
-    // TODO: implement didPushRouteInformation
-    return false;
-  }
 }
 
 // An controller designed to control kraken's functional modules.
@@ -871,7 +924,7 @@ class KrakenController {
     _methodChannel = methodChannel;
     KrakenMethodChannel.setJSMethodCallCallback(this);
 
-    _view = KrakenViewController(
+    _view = WebViewController(
       viewportWidth,
       viewportHeight,
       background: background,
@@ -921,9 +974,9 @@ class KrakenController {
     }
   }
 
-  late KrakenViewController _view;
+  late WebViewController _view;
 
-  KrakenViewController get view {
+  WebViewController get view {
     return _view;
   }
 
@@ -968,7 +1021,7 @@ class KrakenController {
 
       allocateNewPage(_view.contextId);
 
-      _view = KrakenViewController(view.viewportWidth, view.viewportHeight,
+      _view = WebViewController(view.viewportWidth, view.viewportHeight,
         background: _view.background,
         enableDebug: _view.enableDebug,
         contextId: _view.contextId,

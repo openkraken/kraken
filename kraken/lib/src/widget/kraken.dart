@@ -239,11 +239,11 @@ class Kraken extends StatefulWidget {
   }
 
   @override
-  WebviewState createState() => WebviewState();
+  WebViewState createState() => WebViewState();
 
 }
 
-class WebviewState extends KrakenState<Kraken> {
+class WebViewState extends KrakenState<Kraken> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
