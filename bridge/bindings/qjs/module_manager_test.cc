@@ -45,7 +45,8 @@ TEST(ModuleManager, invokeModuleError) {
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {});
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
-    EXPECT_STREQ(message.c_str(), "Error {message: 'kraken://', stack: '    at __kraken_invoke_module__ (native)\n"
+    EXPECT_STREQ(message.c_str(),
+                 "Error {message: 'kraken://', stack: '    at __kraken_invoke_module__ (native)\n"
                  "    at f (vm://:9)\n"
                  "    at <eval> (vm://:11)\n"
                  "'}");
@@ -69,6 +70,5 @@ f();
 
   EXPECT_EQ(logCalled, true);
 }
-
 
 }  // namespace kraken::binding::qjs
