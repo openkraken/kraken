@@ -1450,10 +1450,8 @@ class RenderBoxModel extends RenderBox
     if (renderPositionPlaceholder != null)
       properties.add(
           DiagnosticsProperty('renderPositionHolder', renderPositionPlaceholder));
-    if (renderStyle.intrinsicWidth != null)
-      properties.add(DiagnosticsProperty('intrinsicWidth', renderStyle.intrinsicWidth));
-    if (renderStyle.intrinsicHeight != null)
-      properties.add(DiagnosticsProperty('intrinsicHeight', renderStyle.intrinsicHeight));
+    properties.add(DiagnosticsProperty('intrinsicWidth', renderStyle.intrinsicWidth));
+    properties.add(DiagnosticsProperty('intrinsicHeight', renderStyle.intrinsicHeight));
     if (renderStyle.intrinsicRatio != null)
       properties.add(DiagnosticsProperty('intrinsicRatio', renderStyle.intrinsicRatio));
 
