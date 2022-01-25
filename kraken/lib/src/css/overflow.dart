@@ -266,15 +266,33 @@ mixin ElementOverflowMixin on ElementBase {
     }
   }
 
+  // Update renderBox according to overflow value.
+  void updateOverflowRenderBox() {
+    CSSOverflowType effectiveOverflowY = renderStyle.effectiveOverflowY;
+    CSSOverflowType effectiveOverflowX = renderStyle.effectiveOverflowX;
+
+    if (renderBoxModel is RenderLayoutBox) {
+      // Create two repaintBoundary for scroll container if any direction is scrollable.
+      bool shouldScrolling = (effectiveOverflowX == CSSOverflowType.auto || effectiveOverflowX == CSSOverflowType.scroll)
+        || (effectiveOverflowY == CSSOverflowType.auto || effectiveOverflowY == CSSOverflowType.scroll);
+
+      if (shouldScrolling) {
+        _attachScrollingContentBox();
+      } else {
+        _detachScrollingContentBox();
+      }
+    }
+  }
+
   void updateScrollingContentBox() {
-    detachScrollingContentBox();
-    attachScrollingContentBox();
+    _detachScrollingContentBox();
+    _attachScrollingContentBox();
   }
 
   // Create two repaintBoundary for an overflow scroll container.
   // Outer repaintBoundary avoid repaint of parent and sibling renderObjects when scrolling.
   // Inner repaintBoundary avoid repaint of child renderObjects when scrolling.
-  void attachScrollingContentBox() {
+  void _attachScrollingContentBox() {
     RenderLayoutBox outerLayoutBox = renderBoxModel as RenderLayoutBox;
     RenderLayoutBox? scrollingContentBox = outerLayoutBox.renderScrollingContent;
     if (scrollingContentBox != null) {
@@ -298,7 +316,7 @@ mixin ElementOverflowMixin on ElementBase {
     });
   }
 
-  void detachScrollingContentBox() {
+  void _detachScrollingContentBox() {
     RenderLayoutBox outerLayoutBox = renderBoxModel as RenderLayoutBox;
     RenderLayoutBox? scrollingContentBox = outerLayoutBox.renderScrollingContent;
     if (scrollingContentBox == null) return;

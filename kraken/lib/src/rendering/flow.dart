@@ -1326,17 +1326,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
   }
 
-  static bool _isPlaceholderPositioned(RenderObject child) {
-    if (child is RenderPositionPlaceholder) {
-      RenderBoxModel realDisplayedBox = child.positioned!;
-      RenderLayoutParentData parentData = realDisplayedBox.parentData as RenderLayoutParentData;
-      if (parentData.isPositioned) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
