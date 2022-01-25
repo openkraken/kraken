@@ -189,7 +189,7 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
     PaintingContext context,
     Offset offset,
     EdgeInsets borderEdge,
-    BoxDecoration? decoration,
+    CSSBoxDecoration? decoration,
     PaintingContextCallback callback
   ) {
     if (clipX == false && clipY == false) return callback(context, offset);
@@ -213,9 +213,9 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
       // or else the clip in the older layer will not work.
       bool _needsCompositing = needsCompositing;
 
-      if (decoration != null && decoration.borderRadius != null) {
-        BorderRadius radius = decoration.borderRadius as BorderRadius;
-        Rect rect = Offset(0, 0) & size;
+      if (decoration != null && decoration.hasBorderRadius) {
+        BorderRadius radius = decoration.borderRadius!;
+        Rect rect = Offset.zero & size;
         RRect borderRRect = radius.toRRect(rect);
         // A borderRadius can only be given for a uniform Border in Flutter.
         // https://github.com/flutter/flutter/issues/12583

@@ -58,17 +58,17 @@ class BoxDecorationPainter extends BoxPainter {
     Canvas canvas, Rect rect, Paint? paint, TextDirection? textDirection) {
     switch (_decoration.shape) {
       case BoxShape.circle:
-        assert(_decoration.borderRadius == null);
+        assert(!_decoration.hasBorderRadius);
         final Offset center = rect.center;
         final double radius = rect.shortestSide / 2.0;
         canvas.drawCircle(center, radius, paint!);
         break;
       case BoxShape.rectangle:
-        if (_decoration.borderRadius == null) {
+        if (!_decoration.hasBorderRadius) {
           canvas.drawRect(rect, paint!);
         } else {
           canvas.drawRRect(
-            _decoration.borderRadius!.resolve(textDirection).toRRect(rect),
+            _decoration.borderRadius!.toRRect(rect),
             paint!);
         }
         break;
@@ -113,14 +113,14 @@ class BoxDecorationPainter extends BoxPainter {
     // Path of box shadow including blur rect
     Path shadowBlurPath;
 
-    if (_decoration.borderRadius == null) {
+    if (!_decoration.hasBorderRadius) {
       borderPath = Path()..addRect(rect);
       shadowPath = Path()..addRect(shadowRect);
       shadowBlurPath = Path()..addRect(shadowBlurRect);
     } else {
       borderPath = Path()
         ..addRRect(
-          _decoration.borderRadius!.resolve(textDirection).toRRect(rect));
+          _decoration.borderRadius!.toRRect(rect));
       shadowPath = Path()
         ..addRRect(_decoration.borderRadius!
           .resolve(textDirection)
@@ -164,10 +164,10 @@ class BoxDecorationPainter extends BoxPainter {
     );
 
     Path paddingBoxPath;
-    if (_decoration.borderRadius == null) {
+    if (!_decoration.hasBorderRadius) {
       paddingBoxPath = Path()..addRect(paddingBoxRect);
     } else {
-      RRect borderBoxRRect = _decoration.borderRadius!.resolve(textDirection).toRRect(rect);
+      RRect borderBoxRRect = _decoration.borderRadius!.toRRect(rect);
       // A borderRadius can only be given for a uniform Border in Flutter.
       // https://github.com/flutter/flutter/issues/12583
       double uniformBorderWidth = renderStyle.effectiveBorderTopWidth.computedValue;
@@ -180,9 +180,10 @@ class BoxDecorationPainter extends BoxPainter {
     Rect shadowOffsetRect = paddingBoxRect
       .shift(Offset(boxShadow.offset.dx, boxShadow.offset.dy))
       .deflate(boxShadow.spreadRadius);
-    Path shadowOffsetPath = _decoration.borderRadius == null ?
-      (Path()..addRect(shadowOffsetRect)) :
-      (Path()..addRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(shadowOffsetRect)));
+    Path shadowOffsetPath = _decoration.hasBorderRadius ?
+      (Path()..addRRect(_decoration.borderRadius!.toRRect(shadowOffsetRect))) :
+      (Path()..addRect(shadowOffsetRect));
+
     Path innerShadowPath = Path.combine(PathOperation.difference, paddingBoxPath, shadowOffsetPath);
 
     // 2. Create shadow rect in four directions and get the difference path
@@ -257,9 +258,9 @@ class BoxDecorationPainter extends BoxPainter {
       offsetRect = paddingBoxRect
         .shift(Offset(boxShadow.offset.dx, paddingBoxSize.height + boxShadow.offset.dy - boxShadow.spreadRadius));
     }
-    Path offsetRectPath = _decoration.borderRadius == null ?
-      (Path()..addRect(offsetRect)) :
-      (Path()..addRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(offsetRect)));
+    Path offsetRectPath = _decoration.hasBorderRadius ?
+      (Path()..addRRect(_decoration.borderRadius!.toRRect(offsetRect))) :
+      (Path()..addRect(offsetRect));
 
     Path outerBorderPath = Path.combine(PathOperation.difference, offsetRectPath, paddingBoxPath);
     return outerBorderPath;
@@ -301,11 +302,9 @@ class BoxDecorationPainter extends BoxPainter {
         clipPath = Path()..addOval(rect);
         break;
       case BoxShape.rectangle:
-        if (_decoration.borderRadius != null)
+        if (_decoration.hasBorderRadius)
           clipPath = Path()
-            ..addRRect(_decoration.borderRadius!
-              .resolve(configuration.textDirection)
-              .toRRect(rect));
+            ..addRRect(_decoration.borderRadius!.toRRect(rect));
         break;
     }
     _imagePainter!.paint(canvas, rect, clipPath, configuration);
@@ -325,7 +324,7 @@ class BoxDecorationPainter extends BoxPainter {
   void paintBackground(
     Canvas canvas, Offset offset, ImageConfiguration configuration) {
     assert(configuration.size != null);
-    Offset baseOffset = Offset(0, 0);
+    Offset baseOffset = Offset.zero;
 
     final TextDirection? textDirection = configuration.textDirection;
     bool hasLocalAttachment = _hasLocalBackgroundImage();
@@ -336,12 +335,12 @@ class BoxDecorationPainter extends BoxPainter {
     _paintBackgroundColor(canvas, backgroundColorRect, textDirection);
 
     // Background image of background-attachment local scroll with content
-    Offset backgrundImageOffset = hasLocalAttachment ? offset : baseOffset;
+    Offset backgroundImageOffset = hasLocalAttachment ? offset : baseOffset;
     // Rect of background image
     Rect backgroundClipRect =
-    _getBackgroundClipRect(backgrundImageOffset, configuration);
+    _getBackgroundClipRect(backgroundImageOffset, configuration);
     Rect backgroundOriginRect =
-    _getBackgroundOriginRect(backgrundImageOffset, configuration);
+    _getBackgroundOriginRect(backgroundImageOffset, configuration);
     Rect backgroundImageRect =
     backgroundClipRect.intersect(backgroundOriginRect);
     _paintBackgroundImage(canvas, backgroundImageRect, configuration);
@@ -456,7 +455,7 @@ class BoxDecorationPainter extends BoxPainter {
       canvas,
       rect,
       shape: _decoration.shape,
-      borderRadius: _decoration.borderRadius as BorderRadius?,
+      borderRadius: _decoration.borderRadius,
       textDirection: configuration.textDirection,
     );
 
@@ -464,9 +463,7 @@ class BoxDecorationPainter extends BoxPainter {
   }
 
   @override
-  String toString() {
-    return 'BoxPainter for $_decoration';
-  }
+  String toString() => 'BoxPainter for $_decoration';
 }
 
 /// Forked from flutter of [DecorationImagePainter] Class.
@@ -845,4 +842,3 @@ Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, Im
 // Forked from flutter with no modification:
 // https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/decoration_image.dart#L621
 Rect _scaleRect(Rect rect, double scale) => Rect.fromLTRB(rect.left * scale, rect.top * scale, rect.right * scale, rect.bottom * scale);
-

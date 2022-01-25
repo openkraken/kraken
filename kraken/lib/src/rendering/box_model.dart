@@ -1157,7 +1157,7 @@ class RenderBoxModel extends RenderBox
         renderStyle.effectiveBorderTopWidth.computedValue,
         renderStyle.effectiveBorderRightWidth.computedValue,
         renderStyle.effectiveBorderLeftWidth.computedValue);
-    BoxDecoration? decoration = renderStyle.decoration;
+    CSSBoxDecoration? decoration = renderStyle.decoration;
 
     bool hasLocalAttachment = _hasLocalBackgroundImage(renderStyle);
     if (hasLocalAttachment) {
