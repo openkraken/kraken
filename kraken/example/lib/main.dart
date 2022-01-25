@@ -89,12 +89,14 @@ class _MyHomePageState extends State<MyBrowser> {
         body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: _kraken = Kraken(
-          devToolsService: ChromeDevToolsService(),
-          viewportWidth: viewportSize.width - queryData.padding.horizontal,
-          viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
-          bundle: KrakenBundle.fromUrl('assets://assets/bundle.js'),
-        ),
+        // child: _kraken = Kraken(
+        //   devToolsService: ChromeDevToolsService(),
+        //   viewportWidth: viewportSize.width - queryData.padding.horizontal,
+        //   viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
+        //   bundle: KrakenBundle.fromUrl('http://127.0.0.1:3300/kraken_debug_server.js'),
+        //   // disabledJavaScript: true,
+        // ),
+          child: HTMLView('<div>aaa<span>bbb</span></div>'),
     ));
   }
 }
