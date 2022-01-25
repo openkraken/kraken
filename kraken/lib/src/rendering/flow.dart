@@ -943,8 +943,8 @@ class RenderFlowLayout extends RenderLayoutBox {
         renderStyle.effectiveOverflowY != CSSOverflowType.visible;
 
     // Padding in the end direction of axis should be included in scroll container.
-    double maxScrollableMainSizeOfChildren = maxScrollableMainSizeOfLines
-      + renderStyle.paddingLeft.computedValue
+    double maxScrollableMainSizeOfChildren =
+      maxScrollableMainSizeOfLines + renderStyle.paddingLeft.computedValue
       + (isScrollContainer ? renderStyle.paddingRight.computedValue : 0);
 
     // Max scrollable cross size of all lines.
@@ -954,9 +954,9 @@ class RenderFlowLayout extends RenderLayoutBox {
     });
 
     // Padding in the end direction of axis should be included in scroll container.
-    double maxScrollableCrossSizeOfChildren = maxScrollableCrossSizeOfLines
-      + renderStyle.paddingTop.computedValue
-    + (isScrollContainer ? renderStyle.paddingBottom.computedValue : 0);
+    double maxScrollableCrossSizeOfChildren =
+      maxScrollableCrossSizeOfLines + renderStyle.paddingTop.computedValue
+      + (isScrollContainer ? renderStyle.paddingBottom.computedValue : 0);
 
     double maxScrollableMainSize = math.max(
         size.width -
