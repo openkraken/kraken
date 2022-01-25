@@ -244,6 +244,9 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     // Set children offset based on alignment properties.
     _setChildrenOffset(_runMetrics);
+
+    // Set the size of scrollable overflow area for flow layout.
+    _setMaxScrollableSize(_runMetrics, children);
   }
 
   // Layout children in normal flow order to calculate metrics of lines according to its constraints
@@ -484,7 +487,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       contentHeight: 0,
     );
     setMaxScrollableSize(layoutContentSize);
-    size = getBoxSize(layoutContentSize);
+    size = scrollableSize = getBoxSize(layoutContentSize);
   }
 
   // Set children offset based on alignment properties.
@@ -666,8 +669,6 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       crossAxisOffset += runCrossAxisExtent + runBetweenSpace;
     }
-
-    _setMaxScrollableSizeForFlow(_runMetrics);
   }
 
   // Compute distance to baseline of flow layout.
@@ -837,7 +838,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   // Set the size of scrollable overflow area for flow layout.
   // https://drafts.csswg.org/css-overflow-3/#scrollable
-  void _setMaxScrollableSizeForFlow(List<_RunMetrics> runMetrics) {
+  void _setMaxScrollableSize(List<_RunMetrics> runMetrics, List<RenderBox> children) {
     // Scrollable main size collection of each line.
     List<double> scrollableMainSizeOfLines = [];
     // Scrollable cross size collection of each line.
@@ -881,8 +882,10 @@ class RenderFlowLayout extends RenderLayoutBox {
           // https://www.w3.org/TR/css-overflow-3/#scrollable-overflow-region
 
           // Add offset of margin.
-          childOffsetX += childRenderStyle.marginLeft.computedValue;
-          childOffsetY += _getChildMarginTop(child);
+          childOffsetX += childRenderStyle.marginLeft.computedValue
+            + childRenderStyle.marginRight.computedValue;
+          childOffsetY += _getChildMarginTop(child)
+            + _getChildMarginBottom(child);
 
           // Add offset of position relative.
           // Offset of position absolute and fixed is added in layout stage of positioned renderBox.
@@ -939,14 +942,10 @@ class RenderFlowLayout extends RenderLayoutBox {
         renderStyle.effectiveOverflowX != CSSOverflowType.visible ||
         renderStyle.effectiveOverflowY != CSSOverflowType.visible;
 
-    double verticalPadding = container.renderStyle.paddingTop.computedValue
-      + container.renderStyle.paddingBottom.computedValue;
-    double horizontalPadding = container.renderStyle.paddingLeft.computedValue
-      + container.renderStyle.paddingRight.computedValue;
-
-    // Need to include padding for scroll container.
+    // Padding in the end direction of axis should be included in scroll container.
     double maxScrollableMainSizeOfChildren = maxScrollableMainSizeOfLines
-      + (isScrollContainer ? horizontalPadding : 0);
+      + renderStyle.paddingLeft.computedValue
+      + (isScrollContainer ? renderStyle.paddingRight.computedValue : 0);
 
     // Max scrollable cross size of all lines.
     double maxScrollableCrossSizeOfLines =
@@ -954,9 +953,10 @@ class RenderFlowLayout extends RenderLayoutBox {
       return curr > next ? curr : next;
     });
 
-    // Need to include padding for scroll container.
+    // Padding in the end direction of axis should be included in scroll container.
     double maxScrollableCrossSizeOfChildren = maxScrollableCrossSizeOfLines
-      + (isScrollContainer ? verticalPadding : 0);
+      + renderStyle.paddingTop.computedValue
+    + (isScrollContainer ? renderStyle.paddingBottom.computedValue : 0);
 
     double maxScrollableMainSize = math.max(
         size.width -
@@ -1324,6 +1324,17 @@ class RenderFlowLayout extends RenderLayoutBox {
         }
       }
     }
+  }
+
+  static bool _isPlaceholderPositioned(RenderObject child) {
+    if (child is RenderPositionPlaceholder) {
+      RenderBoxModel realDisplayedBox = child.positioned!;
+      RenderLayoutParentData parentData = realDisplayedBox.parentData as RenderLayoutParentData;
+      if (parentData.isPositioned) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @override
