@@ -107,13 +107,6 @@ This situation often happened when you trying creating kraken when FlutterView n
 class _HTMLViewRenderObjectElement extends SingleChildRenderObjectElement {
   _HTMLViewRenderObjectElement(_HTMLViewRenderObjectWidget widget) : super(widget);
 
-  @override
-  void mount(Element? parent, Object? newSlot) async {
-    super.mount(parent, newSlot);
-
-    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller!;
-  }
-
   // RenderObjects created by HTMLView are manager by HTMLView itself. There are no needs to operate renderObjects on _KrakenRenderObjectElement.
   @override
   void insertRenderObjectChild(RenderObject child, Object? slot) {}
