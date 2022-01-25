@@ -88,6 +88,7 @@ var p = new Promise(function (resolve, reject) {
   EXPECT_EQ(errorHandlerExecuted, true);
   EXPECT_EQ(logCalled, true);
   EXPECT_EQ(logIndex, 3);
+  kraken::KrakenPage::consoleMessageHandler = nullptr;
 }
 
 TEST(Context, unrejectPromiseErrorWithMultipleContext) {
