@@ -11,6 +11,9 @@ export const navigator = {
     const logicalProcessors = kraken.invokeModule('DeviceInfo', 'getHardwareConcurrency');
     return parseInt(logicalProcessors);
   },
+  get platform() {
+    return ''
+  },
   getDeviceInfo() {
     return new Promise((resolve, reject) => {
       kraken.invokeModule('DeviceInfo', 'getDeviceInfo', null, (e, data) => {

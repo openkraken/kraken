@@ -49,6 +49,50 @@ TEST(Context, unrejectPromiseError) {
   EXPECT_EQ(errorHandlerExecuted, true);
 }
 
+TEST(Context, unrejectPromiseWillTriggerUnhandledRejectionEvent) {
+  static bool errorHandlerExecuted = false;
+  static bool logCalled = false;
+  auto errorHandler = [](int32_t contextId, const char* errmsg) {
+    errorHandlerExecuted = true;
+    EXPECT_STREQ(errmsg,
+                 "TypeError: cannot read property 'forceNullError' of null\n"
+                 "    at <anonymous> (file://:12)\n"
+                 "    at Promise (native)\n"
+                 "    at <eval> (file://:14)\n");
+  };
+  auto bridge = TEST_init(errorHandler);
+  static int logIndex = 0;
+  static std::string logs[] = {
+      "Unhandled Promise Rejection: TypeError: cannot read property 'forceNullError' of null",
+      "unhandled event {promise: Promise {...}, reason: Error {...}}",
+      "error event cannot read property 'forceNullError' of null"
+  };
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(logs[logIndex++].c_str(), message.c_str());
+  };
+
+  std::string code = R"(
+window.onunhandledrejection = (e) => {
+  console.log('unhandled event', e);
+};
+window.onerror = (e) => {
+  console.log('error event', e);
+}
+
+var p = new Promise(function (resolve, reject) {
+  var nullObject = null;
+  // Raise a TypeError: Cannot read property 'forceNullError' of null
+  var x = nullObject.forceNullError();
+  resolve();
+});
+)";
+  bridge->evaluateScript(code.c_str(), code.size(), "file://", 0);
+  EXPECT_EQ(errorHandlerExecuted, true);
+  EXPECT_EQ(logCalled, true);
+  EXPECT_EQ(logIndex, 3);
+}
+
 TEST(Context, unrejectPromiseErrorWithMultipleContext) {
   static bool errorHandlerExecuted = false;
   static int32_t errorCalledCount = 0;
