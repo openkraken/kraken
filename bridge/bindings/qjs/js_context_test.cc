@@ -94,9 +94,7 @@ var p = new Promise(function (resolve, reject) {
 TEST(Context, handledRejectionWillNotTriggerUnHandledRejectionEvent) {
   static bool errorHandlerExecuted = false;
   static bool logCalled = false;
-  auto errorHandler = [](int32_t contextId, const char* errmsg) {
-    errorHandlerExecuted = true;
-  };
+  auto errorHandler = [](int32_t contextId, const char* errmsg) { errorHandlerExecuted = true; };
   auto bridge = TEST_init(errorHandler);
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
@@ -132,13 +130,9 @@ generateRejectedPromise(true);
 TEST(Context, unhandledRejectionEventWillTriggerWhenNotHandled) {
   static bool errorHandlerExecuted = false;
   static bool logCalled = false;
-  auto errorHandler = [](int32_t contextId, const char* errmsg) {
-    errorHandlerExecuted = true;
-  };
+  auto errorHandler = [](int32_t contextId, const char* errmsg) { errorHandlerExecuted = true; };
   auto bridge = TEST_init(errorHandler);
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
-    logCalled = true;
-  };
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { logCalled = true; };
 
   std::string code = R"(
 window.addEventListener('unhandledrejection', event => {
@@ -165,13 +159,9 @@ generateRejectedPromise(true);
 TEST(Context, handledRejectionEventWillTriggerWhenUnHandledRejectHandled) {
   static bool errorHandlerExecuted = false;
   static bool logCalled = false;
-  auto errorHandler = [](int32_t contextId, const char* errmsg) {
-    errorHandlerExecuted = true;
-  };
+  auto errorHandler = [](int32_t contextId, const char* errmsg) { errorHandlerExecuted = true; };
   auto bridge = TEST_init(errorHandler);
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
-    logCalled = true;
-  };
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { logCalled = true; };
 
   std::string code = R"(
 window.addEventListener('unhandledrejection', event => {

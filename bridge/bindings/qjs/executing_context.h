@@ -20,9 +20,9 @@
 #include "foundation/ui_command_buffer.h"
 #include "garbage_collected.h"
 #include "js_context_macros.h"
-#include "rejected_promises.h"
 #include "kraken_foundation.h"
 #include "qjs_patch.h"
+#include "rejected_promises.h"
 
 using JSExceptionHandler = std::function<void(int32_t contextId, const char* message)>;
 
