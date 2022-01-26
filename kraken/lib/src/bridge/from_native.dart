@@ -93,21 +93,23 @@ String invokeModule(
 
   try {
     void invokeModuleCallback({String ?error, dynamic data}) {
-      if (error != null) {
-        Pointer<Utf8> errmsgPtr = error.toNativeUtf8();
-        callback(callbackContext, contextId, errmsgPtr, nullptr);
-        malloc.free(errmsgPtr);
-      } else {
-        Pointer<NativeString> dataPtr = stringToNativeString(jsonEncode(data));
-        callback(callbackContext, contextId, nullptr, dataPtr);
-        freeNativeString(dataPtr);
-      }
+      // To make sure Promise then() and catch() executed before Promise callback called at JavaScript side. 
+      // We should make callback always async.
+      Future.microtask(() {
+        if (error != null) {
+          Pointer<Utf8> errmsgPtr = error.toNativeUtf8();
+          callback(callbackContext, contextId, errmsgPtr, nullptr);
+          malloc.free(errmsgPtr);
+        } else {
+          Pointer<NativeString> dataPtr = stringToNativeString(jsonEncode(data));
+          callback(callbackContext, contextId, nullptr, dataPtr);
+          freeNativeString(dataPtr);
+        }
+      });
     }
     result = controller.module.moduleManager.invokeModule(moduleName, method, (params != null && params != '""') ? jsonDecode(params) : null, invokeModuleCallback);
   } catch (e, stack) {
     String error = '$e\n$stack';
-    // print module error on the dart side.
-    print('$e\n$stack');
     callback(callbackContext, contextId, error.toNativeUtf8(), nullptr);
   }
 

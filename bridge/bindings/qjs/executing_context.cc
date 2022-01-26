@@ -214,7 +214,7 @@ bool ExecutionContext::handleException(JSValue* exception) {
   if (JS_IsException(*exception)) {
     JSValue error = JS_GetException(m_ctx);
     reportError(error);
-    dispatchGlobalErrorEvent(error);
+    dispatchGlobalErrorEvent(this, error);
     JS_FreeValue(m_ctx, error);
     return false;
   }
@@ -301,43 +301,89 @@ uint8_t* ExecutionContext::dumpByteCode(const char* code, uint32_t codeLength, c
   return bytes;
 }
 
-void ExecutionContext::dispatchGlobalErrorEvent(JSValueConst error) {
-  JSValue errorHandler = JS_GetPropertyStr(m_ctx, globalObject, "__global_onerror_handler__");
-  JSValue returnValue = JS_Call(m_ctx, errorHandler, globalObject, 1, &error);
-  drainPendingPromiseJobs();
-  if (JS_IsException(returnValue)) {
-    JSValue error = JS_GetException(m_ctx);
-    reportError(error);
-    JS_FreeValue(m_ctx, error);
+void ExecutionContext::dispatchGlobalErrorEvent(ExecutionContext* context, JSValueConst error) {
+  JSContext* ctx = context->ctx();
+  auto* window = static_cast<WindowInstance*>(JS_GetOpaque(context->global(), Window::classId()));
+
+  {
+    JSValue ErrorEventValue = JS_GetPropertyStr(ctx, context->global(), "ErrorEvent");
+    JSValue errorType = JS_NewString(ctx, "error");
+    JSValue errorInit = JS_NewObject(ctx);
+    JS_SetPropertyStr(ctx, errorInit, "error", JS_DupValue(ctx, error));
+    JS_SetPropertyStr(ctx, errorInit, "message", JS_GetPropertyStr(ctx, error, "message"));
+    JS_SetPropertyStr(ctx, errorInit, "lineno", JS_GetPropertyStr(ctx, error, "lineNumber"));
+    JS_SetPropertyStr(ctx, errorInit, "filename", JS_GetPropertyStr(ctx, error, "fileName"));
+    JS_SetPropertyStr(ctx, errorInit, "colno", JS_NewUint32(ctx, 0));
+    JSValue arguments[] = {
+        errorType,
+        errorInit
+    };
+    JSValue errorEventValue = JS_CallConstructor(context->ctx(), ErrorEventValue, 2, arguments);
+    if (JS_IsException(errorEventValue)) {
+      context->handleException(&errorEventValue);
+      return;
+    }
+
+    auto* errorEvent = static_cast<EventInstance*>(JS_GetOpaque(errorEventValue, Event::kEventClassID));
+    window->dispatchEvent(errorEvent);
+
+    JS_FreeValue(ctx, ErrorEventValue);
+    JS_FreeValue(ctx, errorEventValue);
+    JS_FreeValue(ctx, errorType);
+    JS_FreeValue(ctx, errorInit);
+
+    context->drainPendingPromiseJobs();
   }
-  JS_FreeValue(m_ctx, returnValue);
-  JS_FreeValue(m_ctx, errorHandler);
 }
 
-void ExecutionContext::dispatchGlobalUnhandledRejectionEvent(JSValueConst promise, JSValueConst error) {
-  JSValue errorHandler = JS_GetPropertyStr(m_ctx, globalObject, "__global_unhandled_promise_handler__");
-  JSValue arguments[] = {promise, error};
-  JSValue returnValue = JS_Call(m_ctx, errorHandler, globalObject, 2, arguments);
-  drainPendingPromiseJobs();
-  handleException(&returnValue);
-  JS_FreeValue(m_ctx, returnValue);
-  JS_FreeValue(m_ctx, errorHandler);
+static void dispatchPromiseRejectionEvent(const char* eventType, ExecutionContext* context, JSValueConst promise, JSValueConst error) {
+  JSContext* ctx = context->ctx();
+  auto* window = static_cast<WindowInstance*>(JS_GetOpaque(context->global(), Window::classId()));
+
+  // Trigger PromiseRejectionEvent(unhandledrejection) event.
+  {
+    JSValue PromiseRejectionEventValue = JS_GetPropertyStr(ctx, context->global(), "PromiseRejectionEvent");
+    JSValue errorType = JS_NewString(ctx, eventType);
+    JSValue errorInit = JS_NewObject(ctx);
+    JS_SetPropertyStr(ctx, errorInit, "promise", JS_DupValue(ctx, promise));
+    JS_SetPropertyStr(ctx, errorInit, "reason", JS_DupValue(ctx, error));
+    JSValue arguments[] = {
+        errorType,
+        errorInit
+    };
+    JSValue rejectEventValue = JS_CallConstructor(context->ctx(), PromiseRejectionEventValue, 2, arguments);
+    if (JS_IsException(rejectEventValue)) {
+      context->handleException(&rejectEventValue);
+      return;
+    }
+
+    auto* rejectEvent = static_cast<EventInstance*>(JS_GetOpaque(rejectEventValue, Event::kEventClassID));
+    window->dispatchEvent(rejectEvent);
+
+    JS_FreeValue(ctx, errorType);
+    JS_FreeValue(ctx, errorInit);
+    JS_FreeValue(ctx, rejectEventValue);
+    JS_FreeValue(ctx, PromiseRejectionEventValue);
+
+    context->drainPendingPromiseJobs();
+  }
 }
 
-void ExecutionContext::dispatchGlobalRejectionHandledEvent(JSValue promise, JSValue error) {
-  JSValue errorHandler = JS_GetPropertyStr(m_ctx, globalObject, "__global_rejection_handled_handler__");
-  JSValue arguments[] = {promise, error};
-  JSValue returnValue = JS_Call(m_ctx, errorHandler, globalObject, 2, arguments);
-  drainPendingPromiseJobs();
-  handleException(&returnValue);
-  JS_FreeValue(m_ctx, returnValue);
-  JS_FreeValue(m_ctx, errorHandler);
+void ExecutionContext::dispatchGlobalUnhandledRejectionEvent(ExecutionContext* context, JSValueConst promise, JSValueConst error) {
+  // Trigger onerror event.
+  dispatchGlobalErrorEvent(context, error);
+
+  // Trigger unhandledRejection event.
+  dispatchPromiseRejectionEvent("unhandledrejection", context, promise, error);
+}
+
+void ExecutionContext::dispatchGlobalRejectionHandledEvent(ExecutionContext* context, JSValue promise, JSValue error) {
+  // Trigger rejectionhandled event.
+  dispatchPromiseRejectionEvent("rejectionhandled", context, promise, error);
 }
 
 void ExecutionContext::promiseRejectTracker(JSContext* ctx, JSValue promise, JSValue reason, int is_handled, void* opaque) {
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
-  context->reportError(reason);
-
   // The unhandledrejection event is the promise-equivalent of the global error event, which is fired for uncaught exceptions.
   // Because a rejected promise could be handled after the fact, by attaching catch(onRejected) or then(onFulfilled, onRejected) to it,
   // the additional rejectionhandled event is needed to indicate that a promise which was previously rejected should no longer be considered unhandled.

@@ -94,11 +94,11 @@ class FetchModule extends BaseModule {
     Map<String, dynamic> options = params;
 
     _handleError(Object error, StackTrace? stackTrace) {
-      print('Error fetch for $uri, message: \n$error');
+      String errmsg = '$error';
       if (stackTrace != null) {
-        print('\n$stackTrace');
+        errmsg += '\n$stackTrace';
       }
-      callback(error: '$error\n$stackTrace');
+      callback(error: errmsg);
     }
     if (uri.host.isEmpty) {
       // No host specified in URI.

@@ -54,12 +54,13 @@ void RejectedPromises::process(ExecutionContext* context) {
 
   // Dispatch unhandled rejectionEvents.
   for (auto& entry : unhandledRejections) {
-    context->dispatchGlobalUnhandledRejectionEvent(entry.second->m_promise, entry.second->m_reason);
+    context->reportError(entry.second->m_reason);
+    context->dispatchGlobalUnhandledRejectionEvent(context, entry.second->m_promise, entry.second->m_reason);
   }
 
   // Dispatch handledRejection events.
   for (auto& entry : reportHandledRejection) {
-    context->dispatchGlobalRejectionHandledEvent(entry->m_promise, entry->m_reason);
+    context->dispatchGlobalRejectionHandledEvent(context, entry->m_promise, entry->m_reason);
   }
 }
 

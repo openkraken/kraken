@@ -114,13 +114,13 @@ class ExecutionContext {
   static JSClassID kHostObjectClassId;
   static JSClassID kHostExoticObjectClassId;
 
-  void dispatchGlobalUnhandledRejectionEvent(JSValueConst promise, JSValueConst error);
-  void dispatchGlobalRejectionHandledEvent(JSValueConst promise, JSValueConst error);
+  static void dispatchGlobalUnhandledRejectionEvent(ExecutionContext* context, JSValueConst promise, JSValueConst error);
+  static void dispatchGlobalRejectionHandledEvent(ExecutionContext* context, JSValueConst promise, JSValueConst error);
+  static void dispatchGlobalErrorEvent(ExecutionContext* context, JSValueConst error);
 
+  void reportError(JSValueConst error);
  private:
   static void promiseRejectTracker(JSContext* ctx, JSValueConst promise, JSValueConst reason, JS_BOOL is_handled, void* opaque);
-  void dispatchGlobalErrorEvent(JSValueConst error);
-  void reportError(JSValueConst error);
 
   int32_t contextId;
   JSExceptionHandler _handler;

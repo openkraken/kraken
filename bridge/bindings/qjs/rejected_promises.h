@@ -9,6 +9,7 @@
 #include <quickjs/quickjs.h>
 #include <unordered_map>
 #include <vector>
+#include <memory>
 
 namespace kraken::binding::qjs {
 
