@@ -314,10 +314,7 @@ void ExecutionContext::dispatchGlobalErrorEvent(ExecutionContext* context, JSVal
     JS_SetPropertyStr(ctx, errorInit, "lineno", JS_GetPropertyStr(ctx, error, "lineNumber"));
     JS_SetPropertyStr(ctx, errorInit, "filename", JS_GetPropertyStr(ctx, error, "fileName"));
     JS_SetPropertyStr(ctx, errorInit, "colno", JS_NewUint32(ctx, 0));
-    JSValue arguments[] = {
-        errorType,
-        errorInit
-    };
+    JSValue arguments[] = {errorType, errorInit};
     JSValue errorEventValue = JS_CallConstructor(context->ctx(), ErrorEventValue, 2, arguments);
     if (JS_IsException(errorEventValue)) {
       context->handleException(&errorEventValue);
@@ -347,10 +344,7 @@ static void dispatchPromiseRejectionEvent(const char* eventType, ExecutionContex
     JSValue errorInit = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, errorInit, "promise", JS_DupValue(ctx, promise));
     JS_SetPropertyStr(ctx, errorInit, "reason", JS_DupValue(ctx, error));
-    JSValue arguments[] = {
-        errorType,
-        errorInit
-    };
+    JSValue arguments[] = {errorType, errorInit};
     JSValue rejectEventValue = JS_CallConstructor(context->ctx(), PromiseRejectionEventValue, 2, arguments);
     if (JS_IsException(rejectEventValue)) {
       context->handleException(&rejectEventValue);

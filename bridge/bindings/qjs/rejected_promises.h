@@ -7,9 +7,9 @@
 #define KRAKENBRIDGE_BINDINGS_QJS_REJECTED_PROMISES_H_
 
 #include <quickjs/quickjs.h>
+#include <memory>
 #include <unordered_map>
 #include <vector>
-#include <memory>
 
 namespace kraken::binding::qjs {
 

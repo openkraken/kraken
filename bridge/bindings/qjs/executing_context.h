@@ -119,6 +119,7 @@ class ExecutionContext {
   static void dispatchGlobalErrorEvent(ExecutionContext* context, JSValueConst error);
 
   void reportError(JSValueConst error);
+
  private:
   static void promiseRejectTracker(JSContext* ctx, JSValueConst promise, JSValueConst reason, JS_BOOL is_handled, void* opaque);
 

@@ -62,10 +62,7 @@ TEST(Context, unrejectPromiseWillTriggerUnhandledRejectionEvent) {
   };
   auto bridge = TEST_init(errorHandler);
   static int logIndex = 0;
-  static std::string logs[] = {
-   "error event cannot read property 'forceNullError' of null",
-   "unhandled event {promise: Promise {...}, reason: Error {...}}"
-  };
+  static std::string logs[] = {"error event cannot read property 'forceNullError' of null", "unhandled event {promise: Promise {...}, reason: Error {...}}"};
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(logs[logIndex++].c_str(), message.c_str());
