@@ -280,6 +280,9 @@ void ExecutionContext::drainPendingPromiseJobs() {
       break;
     }
   }
+
+  // Throw error when promise are not handled.
+  m_rejectedPromise.process(this);
 }
 
 void ExecutionContext::defineGlobalProperty(const char* prop, JSValue value) {
@@ -311,8 +314,18 @@ void ExecutionContext::dispatchGlobalErrorEvent(JSValueConst error) {
   JS_FreeValue(m_ctx, errorHandler);
 }
 
-void ExecutionContext::dispatchGlobalPromiseRejectionEvent(JSValueConst promise, JSValueConst error) {
+void ExecutionContext::dispatchGlobalUnhandledRejectionEvent(JSValueConst promise, JSValueConst error) {
   JSValue errorHandler = JS_GetPropertyStr(m_ctx, globalObject, "__global_unhandled_promise_handler__");
+  JSValue arguments[] = {promise, error};
+  JSValue returnValue = JS_Call(m_ctx, errorHandler, globalObject, 2, arguments);
+  drainPendingPromiseJobs();
+  handleException(&returnValue);
+  JS_FreeValue(m_ctx, returnValue);
+  JS_FreeValue(m_ctx, errorHandler);
+}
+
+void ExecutionContext::dispatchGlobalRejectionHandledEvent(JSValue promise, JSValue error) {
+  JSValue errorHandler = JS_GetPropertyStr(m_ctx, globalObject, "__global_rejection_handled_handler__");
   JSValue arguments[] = {promise, error};
   JSValue returnValue = JS_Call(m_ctx, errorHandler, globalObject, 2, arguments);
   drainPendingPromiseJobs();
@@ -324,7 +337,15 @@ void ExecutionContext::dispatchGlobalPromiseRejectionEvent(JSValueConst promise,
 void ExecutionContext::promiseRejectTracker(JSContext* ctx, JSValue promise, JSValue reason, int is_handled, void* opaque) {
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
   context->reportError(reason);
-  context->dispatchGlobalPromiseRejectionEvent(promise, reason);
+
+  // The unhandledrejection event is the promise-equivalent of the global error event, which is fired for uncaught exceptions.
+  // Because a rejected promise could be handled after the fact, by attaching catch(onRejected) or then(onFulfilled, onRejected) to it,
+  // the additional rejectionhandled event is needed to indicate that a promise which was previously rejected should no longer be considered unhandled.
+  if (is_handled) {
+    context->m_rejectedPromise.trackHandledPromiseRejection(context, promise, reason);
+  } else {
+    context->m_rejectedPromise.trackUnhandledPromiseRejection(context, promise, reason);
+  }
 }
 
 DOMTimerCoordinator* ExecutionContext::timers() {

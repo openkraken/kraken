@@ -45,7 +45,7 @@ function defineGlobalProperty(key: string, value: any, isEnumerable: boolean = t
 // @ts-ignore
 window.__global_unhandled_promise_handler__ = function (promise, reason) {
   // @ts-ignore
-  const errorEvent = new ErrorEvent('error',{
+  const errorEvent = new ErrorEvent('error', {
     error: reason,
     message: reason.message,
     lineno: reason.lineNumber,
@@ -53,7 +53,7 @@ window.__global_unhandled_promise_handler__ = function (promise, reason) {
     colno: 0
   });
   // @ts-ignore
-  const rejectionEvent = new PromiseRejectionEvent('unhandledrejection',{
+  const rejectionEvent = new PromiseRejectionEvent('unhandledrejection', {
     promise,
     reason
   });
@@ -61,6 +61,18 @@ window.__global_unhandled_promise_handler__ = function (promise, reason) {
   window.dispatchEvent(rejectionEvent);
   // @ts-ignore
   window.dispatchEvent(errorEvent);
+};
+
+// Global rejection handled used by JS Engine.
+// @ts-ignore
+window.__global_rejection_handled_handler__ = function (promise, reason) {
+  // @ts-ignore
+  const rejectionEvent = new PromiseRejectionEvent('rejectionhandled', {
+    promise,
+    reason
+  });
+  // @ts-ignore
+  window.dispatchEvent(rejectionEvent);
 };
 
 // Global error handler used by JS Engine

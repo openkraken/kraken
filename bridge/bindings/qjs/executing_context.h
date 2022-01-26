@@ -20,6 +20,7 @@
 #include "foundation/ui_command_buffer.h"
 #include "garbage_collected.h"
 #include "js_context_macros.h"
+#include "rejected_promises.h"
 #include "kraken_foundation.h"
 #include "qjs_patch.h"
 
@@ -113,10 +114,12 @@ class ExecutionContext {
   static JSClassID kHostObjectClassId;
   static JSClassID kHostExoticObjectClassId;
 
+  void dispatchGlobalUnhandledRejectionEvent(JSValueConst promise, JSValueConst error);
+  void dispatchGlobalRejectionHandledEvent(JSValueConst promise, JSValueConst error);
+
  private:
   static void promiseRejectTracker(JSContext* ctx, JSValueConst promise, JSValueConst reason, JS_BOOL is_handled, void* opaque);
   void dispatchGlobalErrorEvent(JSValueConst error);
-  void dispatchGlobalPromiseRejectionEvent(JSValueConst promise, JSValueConst error);
   void reportError(JSValueConst error);
 
   int32_t contextId;
@@ -132,6 +135,7 @@ class ExecutionContext {
   DOMTimerCoordinator m_timers;
   ExecutionContextGCTracker* m_gcTracker{nullptr};
   foundation::UICommandBuffer m_commandBuffer{contextId};
+  RejectedPromises m_rejectedPromise;
 };
 
 // The read object's method or properties via Proxy, we should redirect this_val from Proxy into target property of

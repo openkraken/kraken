@@ -111,8 +111,6 @@ JSValue krakenInvokeModule(JSContext* ctx, JSValueConst this_val, int argc, JSVa
     JS_FreeValue(ctx, stringifyedValue);
   }
 
-  KRAKEN_LOG(VERBOSE) << "Invoke module " << jsValueToStdString(ctx, moduleNameValue) << " method " << jsValueToStdString(ctx, methodValue);
-
   if (getDartMethod()->invokeModule == nullptr) {
 #if FLUTTER_BACKEND
     return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_invoke_module__': dart method (invokeModule) is not registered.");
