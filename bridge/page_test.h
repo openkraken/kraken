@@ -54,7 +54,7 @@ class KrakenPageTest final {
   /// the pointer of bridge, ownership belongs to JSBridge
   KrakenPage* m_page;
   /// the pointer of JSContext, overship belongs to JSContext
-  const std::unique_ptr<binding::qjs::ExecutionContext>& m_page_context;
+  binding::qjs::ExecutionContext* m_page_context;
 };
 
 }  // namespace kraken

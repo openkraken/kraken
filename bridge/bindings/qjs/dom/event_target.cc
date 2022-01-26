@@ -15,6 +15,10 @@
 #include "event.h"
 #include "kraken_bridge.h"
 
+#if UNIT_TEST
+#include "kraken_test_env.h"
+#endif
+
 namespace kraken::binding::qjs {
 
 static std::atomic<int32_t> globalEventTargetId{0};
@@ -232,8 +236,9 @@ bool EventTarget::internalDispatchEvent(Event* event) {
         JSValue columnValue = JS_NewUint32(m_ctx, 0);
 
         JSValue args[]{messageValue, fileNameValue, lineNumberValue, columnValue, error};
-        JS_Call(m_ctx, handler, event->toQuickJS(), 5, args);
+        JSValue returnValue = JS_Call(m_ctx, handler, event->toQuickJS(), 5, args);
         context()->drainPendingPromiseJobs();
+        context()->handleException(&returnValue);
 
         JS_FreeValue(m_ctx, error);
         JS_FreeValue(m_ctx, messageValue);
@@ -431,6 +436,13 @@ void EventTarget::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) cons
 }
 
 void EventTarget::dispose() const {
+#if UNIT_TEST
+  // Callback to unit test specs before eventTarget finalized.
+  if (TEST_getEnv(m_context->uniqueId)->onEventTargetDisposed != nullptr) {
+    TEST_getEnv(m_context->uniqueId)->onEventTargetDisposed(this);
+  }
+#endif
+
   context()->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::disposeEventTarget, nullptr, false);
   getDartMethod()->flushUICommand();
   delete nativeEventTarget;
@@ -440,9 +452,22 @@ void EventTarget::copyNodeProperties(EventTarget* newNode, EventTarget* referenc
   referenceNode->m_properties.copyWith(&newNode->m_properties);
 }
 
-void NativeEventTarget::dispatchEventImpl(NativeEventTarget* nativeEventTarget, NativeString* nativeEventType, void* rawEvent, int32_t isCustomEvent) {
+void NativeEventTarget::dispatchEventImpl(int32_t contextId, NativeEventTarget* nativeEventTarget, NativeString* nativeEventType, void* rawEvent, int32_t isCustomEvent) {
   assert_m(nativeEventTarget->instance != nullptr, "NativeEventTarget should have owner");
   EventTarget* eventTarget = nativeEventTarget->instance;
+
+  auto* runtime = ExecutionContext::runtime();
+
+  // Should avoid dispatch event is ctx is invalid.
+  if (!isContextValid(contextId)) {
+    return;
+  }
+
+  // We should avoid trigger event if eventTarget are no long live on heap.
+  if (!JS_IsLiveObject(runtime, eventTarget->toQuickJS())) {
+    return;
+  }
+
   ExecutionContext* context = eventTarget->context();
   std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(nativeEventType->string), nativeEventType->length);
   std::string eventType = toUTF8(u16EventType);

@@ -12,7 +12,7 @@ namespace kraken::binding::qjs {
 
 class TextNodeInstance;
 
-void bindTextNode(std::unique_ptr<ExecutionContext>& context);
+void bindTextNode(ExecutionContext* context);
 
 class TextNode : public Node {
  public:

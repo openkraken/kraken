@@ -266,7 +266,7 @@ void KrakenPageTest::invokeExecuteTest(ExecuteCallback executeCallback) {
     callbackContext->executeCallback(callbackContext->context->getContextId(), status.get());
     return JS_NULL;
   };
-  auto* callbackContext = new ExecuteCallbackContext(m_page_context.get(), executeCallback);
+  auto* callbackContext = new ExecuteCallbackContext(m_page_context, executeCallback);
   executeTestProxyObject = JS_NewObject(m_page_context->ctx());
   JS_SetOpaque(executeTestProxyObject, callbackContext);
   JSValue callbackData[]{executeTestProxyObject};

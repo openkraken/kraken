@@ -97,7 +97,7 @@ class TextNode extends Node {
 
   // Detach renderObject of current node from parent
   @override
-  void disposeRenderObject() {
+  void disposeRenderObject({ bool deep = false }) {
     detach();
     _renderTextBox = null;
   }

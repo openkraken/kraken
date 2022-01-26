@@ -111,6 +111,8 @@ class KrakenViewController
     this.navigationDelegate,
     this.gestureListener,
     this.widgetDelegate,
+    // Viewport won't change when kraken page reload, should reuse previous page's viewportBox.
+    RenderViewportBox? originalViewport
   }) {
     if (enableDebug) {
       debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
@@ -128,11 +130,18 @@ class KrakenViewController
       PerformanceTiming.instance().mark(PERF_CREATE_VIEWPORT_START);
     }
 
-    viewport = RenderViewportBox(
+    if (originalViewport != null) {
+      // Should update to newlast controller.
+      originalViewport.controller = rootController;
+      viewport = originalViewport;
+    } else {
+      viewport = RenderViewportBox(
         background: background,
         viewportSize: Size(viewportWidth, viewportHeight),
         gestureListener: gestureListener,
-        controller: rootController);
+        controller: rootController
+      );
+    }
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_VIEWPORT_END);
@@ -193,6 +202,16 @@ class KrakenViewController
   late Document document;
   late Window window;
 
+  void shiftFocus(EventTarget target) {
+    // TODO: get focus for other element which need to get focus.
+    InputElement? inputElement = InputElement.focusInputElement;
+    if (inputElement != null && inputElement != target) {
+      inputElement.blur();
+    }
+
+    target.focus();
+  }
+
   void evaluateJavaScripts(String code, [String source = 'vm://']) {
     assert(!_disposed, 'Kraken have already disposed');
     evaluateScripts(_contextId, code, source);
@@ -236,9 +255,6 @@ class KrakenViewController
     clearUICommand(_contextId);
 
     disposePage(_contextId);
-
-    // DisposeEventTarget command will created when js context disposed, should flush them all.
-    flushUICommand();
 
     _clearTargets();
     document.dispose();
@@ -895,6 +911,13 @@ class KrakenController {
     }
   }
 
+  void dispatchEvent(Event event) {
+    EventTarget? target = event.target;
+    if (event.type == EVENT_CLICK && target != null) {
+      _view.shiftFocus(target);
+    }
+  }
+
   late KrakenViewController _view;
 
   KrakenViewController get view {
@@ -931,28 +954,27 @@ class KrakenController {
 
   Future<void> unload() async {
     assert(!_view._disposed, 'Kraken have already disposed');
-    _module.dispose();
-    _view.dispose();
-
     // Should clear previous page cached ui commands
     clearUICommand(_view.contextId);
 
-    // Wait for next microtask to make sure C++ native Elements are GC collected and generate disposeEventTarget command in the command queue.
+    // Wait for next microtask to make sure C++ native Elements are GC collected.
     Completer completer = Completer();
     Future.microtask(() {
-      disposePage(_view.contextId);
-
-      // DisposeEventTarget command will created when js context disposed, should flush them before creating new view.
-      flushUICommand();
+      _module.dispose();
+      _view.dispose();
 
       allocateNewPage(_view.contextId);
 
       _view = KrakenViewController(view.viewportWidth, view.viewportHeight,
-          background: _view.background,
-          enableDebug: _view.enableDebug,
-          contextId: _view.contextId,
-          rootController: this,
-          navigationDelegate: _view.navigationDelegate);
+        background: _view.background,
+        enableDebug: _view.enableDebug,
+        contextId: _view.contextId,
+        rootController: this,
+        navigationDelegate: _view.navigationDelegate,
+        gestureListener: _view.gestureListener,
+        widgetDelegate: _view.widgetDelegate,
+        originalViewport: _view.viewport
+      );
 
       _module = KrakenModuleController(this, _view.contextId);
 
@@ -1066,14 +1088,23 @@ class KrakenController {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_LOAD_START);
     }
 
+    // If bundle not configured at dart side, url can be obtained from env or native side.
+    if (bundle == null) {
+      String? envUrl = (getBundleURLFromEnv() ?? getBundlePathFromEnv());
+      // Load url from native side (Java,Objective-C).
+      if (envUrl == null && methodChannel is KrakenNativeChannel) {
+        envUrl = await (methodChannel as KrakenNativeChannel).getUrl();
+      }
+      if (envUrl != null) {
+        bundle = KrakenBundle.fromUrl(envUrl);
+      }
+    } else if (bundle.src.isEmpty && bundle.content == null && bundle.bytecode == null) {
+      // Do nothing if bundle is empty.
+      return;
+    }
+
     // Load bundle need push curret href to history.
     if (bundle != null) {
-      String? url = bundle.uri.toString().isEmpty
-          ? (getBundleURLFromEnv() ?? getBundlePathFromEnv())
-          : href;
-      if (url == null && methodChannel is KrakenNativeChannel) {
-        url = await (methodChannel as KrakenNativeChannel).getUrl();
-      }
       _addHistory(bundle);
       this.bundle = bundle;
     }

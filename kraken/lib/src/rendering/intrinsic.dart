@@ -26,13 +26,6 @@ class RenderIntrinsic extends RenderBoxModel
     return heightDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
   }
 
-  // Set clipX and clipY to true for background cannot overflow beyond the boundary of replaced element
-  @override
-  bool get clipX => true;
-
-  @override
-  bool get clipY => true;
-
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderLayoutParentData) {
@@ -123,8 +116,9 @@ class RenderIntrinsic extends RenderBoxModel
   /// override it to layout box model paint.
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (renderStyle.isVisibilityHidden) return;
-    paintBoxModel(context, offset);
+    if (shouldPaint) {
+      paintBoxModel(context, offset);
+    }
   }
 
   @override

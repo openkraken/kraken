@@ -81,6 +81,26 @@ describe('Text Overflow', () => {
     return snapshot();
   });
 
+  it('should work with empty string', () => {
+    const cont = createElementWithStyle(
+      'div',
+      {
+        width: '50px',
+        backgroundColor: '#f40',
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+        textOverflow: ''
+      },
+      [
+        createText('text is cliped'),
+      ]
+    );
+
+    append(BODY, cont);
+
+    return snapshot();
+  });
+
   it('should not work with ellipsis when overflow visible', () => {
 
     const cont = createElementWithStyle(
@@ -161,7 +181,7 @@ describe('Text Overflow', () => {
     await snapshot();
   });
 
-  it('should works with ellipsis of one line and lineHeight exists',() => {
+  it('should works with ellipsis of one line and lineHeight exists', () => {
     const cont = createElementWithStyle(
       'div',
       {
@@ -181,7 +201,7 @@ describe('Text Overflow', () => {
     return snapshot();
   });
 
-  it('should works with ellipsis of two line and lineHeight exists',() => {
+  it('should works with ellipsis of two line and lineHeight exists', () => {
     const cont = createElementWithStyle(
       'div',
       {

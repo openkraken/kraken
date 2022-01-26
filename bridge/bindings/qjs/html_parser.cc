@@ -141,7 +141,9 @@ void HTMLParser::parseProperty(ElementInstance* element, GumboElement* gumboElem
       JSValue setAttributeFunc = JS_GetPropertyStr(ctx, element->jsObject, "setAttribute");
       JSValue arguments[] = {key, value};
 
-      JS_Call(ctx, setAttributeFunc, element->jsObject, 2, arguments);
+      JSValue returnValue = JS_Call(ctx, setAttributeFunc, element->jsObject, 2, arguments);
+      context->drainPendingPromiseJobs();
+      context->handleException(&returnValue);
 
       JS_FreeValue(ctx, setAttributeFunc);
       JS_FreeValue(ctx, key);

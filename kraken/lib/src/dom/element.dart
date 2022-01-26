@@ -701,13 +701,16 @@ class Element extends Node
 
   /// Release any resources held by [renderBoxModel].
   @override
-  void disposeRenderObject() {
+  void disposeRenderObject({ bool deep = false }) {
     if (renderBoxModel == null) return;
 
     willDetachRenderer();
 
-    for (Node child in childNodes) {
-      child.disposeRenderObject();
+    // Dispose all renderObject when deep.
+    if (deep) {
+      for (Node child in childNodes) {
+        child.disposeRenderObject(deep: true);
+      }
     }
 
     didDetachRenderer();
@@ -1400,6 +1403,9 @@ class Element extends Node
     style.removeProperty(property, true);
   }
 
+  // The Element.getBoundingClientRect() method returns a DOMRect object providing information
+  // about the size of an element and its position relative to the viewport.
+  // https://drafts.csswg.org/cssom-view/#dom-element-getboundingclientrect
   BoundingClientRect get boundingClientRect {
     BoundingClientRect boundingClientRect = BoundingClientRect(0, 0, 0, 0, 0, 0, 0, 0);
     if (isRendererAttached) {
@@ -1411,7 +1417,7 @@ class Element extends Node
       }
 
       if (sizedBox.hasSize) {
-        Offset offset = getOffset(sizedBox);
+        Offset offset = _getOffset(sizedBox, ancestor: ownerDocument.documentElement);
         Size size = sizedBox.size;
         boundingClientRect = BoundingClientRect(
           offset.dx,
@@ -1428,33 +1434,67 @@ class Element extends Node
     return boundingClientRect;
   }
 
-  double getOffsetX() {
+  // The HTMLElement.offsetLeft read-only property returns the number of pixels that the upper left corner
+  // of the current element is offset to the left within the HTMLElement.offsetParent node.
+  // https://drafts.csswg.org/cssom-view/#dom-htmlelement-offsetleft
+  double get offsetLeft {
     double offset = 0;
     RenderBoxModel selfRenderBoxModel = renderBoxModel!;
     if (selfRenderBoxModel.attached) {
-      Offset relative = getOffset(selfRenderBoxModel);
+      Offset relative = _getOffset(selfRenderBoxModel, ancestor: offsetParent);
       offset += relative.dx;
     }
     return offset;
   }
 
-  double getOffsetY() {
+  // The HTMLElement.offsetTop read-only property returns the distance of the outer border
+  // of the current element relative to the inner border of the top of the offsetParent node.
+  // https://drafts.csswg.org/cssom-view/#dom-htmlelement-offsettop
+  double get offsetTop {
     double offset = 0;
     RenderBoxModel selfRenderBoxModel = renderBoxModel!;
     if (selfRenderBoxModel.attached) {
-      Offset relative = getOffset(selfRenderBoxModel);
+      Offset relative = _getOffset(selfRenderBoxModel, ancestor: offsetParent);
       offset += relative.dy;
     }
     return offset;
   }
 
-  Offset getOffset(RenderBox renderBox) {
+  // The HTMLElement.offsetParent read-only property returns a reference to the element
+  // which is the closest (nearest in the containment hierarchy) positioned ancestor element.
+  //  https://drafts.csswg.org/cssom-view/#dom-htmlelement-offsetparent
+  Element? get offsetParent {
+    // Returns null in the following cases.
+    // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/offsetParent
+    if (renderStyle.display == CSSDisplay.none
+      || renderStyle.position == CSSPositionType.fixed
+      || this is BodyElement
+      || this == ownerDocument.documentElement) {
+      return null;
+    }
+
+    Element? parent = parentElement;
+
+    while (parent != null) {
+      bool isNonStatic = parent.renderStyle.position != CSSPositionType.static;
+      if (parent is BodyElement || isNonStatic) {
+        break;
+      }
+      parent = parent.parentElement;
+    }
+    return parent;
+  }
+
+  // Get the offset of current element relative to specified ancestor element.
+  Offset _getOffset(RenderBox renderBox, { Element? ancestor }) {
     // Need to flush layout to get correct size.
     ownerDocument.documentElement!.renderBoxModel!.owner!.flushLayout();
 
-    Element? element = _findContainingBlock(this, ownerDocument.documentElement!);
-    element ??= ownerDocument.documentElement!;
-    return renderBox.localToGlobal(Offset.zero, ancestor: element.renderBoxModel);
+    // Returns (0, 0) when ancestor is null.
+    if (ancestor == null) {
+      return Offset.zero;
+    }
+    return renderBox.localToGlobal(Offset.zero, ancestor: ancestor.renderBoxModel);
   }
 
   void _ensureEventResponderBound() {
@@ -1465,6 +1505,9 @@ class Element extends Node
       addEventResponder(_renderBoxModel);
       if (_hasIntersectionObserverEvent(eventHandlers)) {
         _renderBoxModel.addIntersectionChangeListener(handleIntersectionChange);
+        // Mark the compositing state for this render object as dirty
+        // cause it will create new layer.
+        _renderBoxModel.markNeedsCompositingBitsUpdate();
       }
     }
   }

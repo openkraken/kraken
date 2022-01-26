@@ -431,10 +431,8 @@ class RenderLayoutBox extends RenderBoxModel
     }
     double maxScrollableX = scrollableSize.width;
     double maxScrollableY = scrollableSize.height;
-    if (childRenderStyle.left.isNotAuto) {
-      maxScrollableX = math.max(maxScrollableX,
-          childRenderStyle.left.computedValue + childScrollableSize!.width);
-    }
+    maxScrollableX = math.max(maxScrollableX,
+        childRenderStyle.left.computedValue + childScrollableSize!.width);
 
     if (childRenderStyle.right.isNotAuto) {
       if (isScrollingContentBox &&
@@ -452,10 +450,8 @@ class RenderLayoutBox extends RenderBoxModel
       }
     }
 
-    if (childRenderStyle.top.isNotAuto) {
-      maxScrollableY = math.max(maxScrollableY,
-          childRenderStyle.top.computedValue + childScrollableSize!.height);
-    }
+    maxScrollableY = math.max(maxScrollableY,
+        childRenderStyle.top.computedValue + childScrollableSize.height);
     if (childRenderStyle.bottom.isNotAuto) {
       if (isScrollingContentBox &&
           (parent as RenderBoxModel).heightSizeType == BoxSizeType.specified) {
@@ -571,7 +567,10 @@ class RenderBoxModel extends RenderBox
   }) : super();
 
   @override
-  bool get alwaysNeedsCompositing => opacityAlwaysNeedsCompositing();
+  bool get alwaysNeedsCompositing {
+    return intersectionObserverAlwaysNeedsCompositing() ||
+      opacityAlwaysNeedsCompositing();
+  }
 
   RenderPositionPlaceholder? renderPositionPlaceholder;
 
@@ -688,10 +687,6 @@ class RenderBoxModel extends RenderBox
       // Copy overflow
       ..scrollListener = scrollListener
       ..scrollablePointerListener = scrollablePointerListener
-      ..clipX = clipX
-      ..clipY = clipY
-      ..enableScrollX = enableScrollX
-      ..enableScrollY = enableScrollY
       ..scrollOffsetX = scrollOffsetX
       ..scrollOffsetY = scrollOffsetY
 
@@ -721,10 +716,12 @@ class RenderBoxModel extends RenderBox
     return currentBox.parent is RenderViewportBox;
   }
 
-  // Auto value for min-width
+  // Auto value for min-width which equals to the total width of children
+  // which is in flow (excluding position absolute/fixed).
   double autoMinWidth = 0;
 
-  // Auto value for min-height
+  // Auto value for min-height which equals to the total width of children
+  // which is in flow (excluding position absolute/fixed).
   double autoMinHeight = 0;
 
   // Whether it needs relayout due to percentage calculation.
@@ -799,7 +796,7 @@ class RenderBoxModel extends RenderBox
   }
 
   // Calculate constraints of renderBoxModel on layout stage and
-  // only needed to be excuted once on every layout.
+  // only needed to be executed once on every layout.
   BoxConstraints getConstraints() {
     // Inner scrolling content box of overflow element inherits constraints from parent
     // but has indefinite max constraints to allow children overflow
@@ -1021,17 +1018,15 @@ class RenderBoxModel extends RenderBox
 
   // Hooks when content box had layout.
   void didLayout() {
-    if (clipX || clipY) {
-      scrollableViewportSize = Size(
-        _contentSize!.width +
-          renderStyle.paddingLeft.computedValue +
-          renderStyle.paddingRight.computedValue,
-        _contentSize!.height +
-          renderStyle.paddingTop.computedValue +
-          renderStyle.paddingBottom.computedValue);
+    scrollableViewportSize = Size(
+      _contentSize!.width +
+        renderStyle.paddingLeft.computedValue +
+        renderStyle.paddingRight.computedValue,
+      _contentSize!.height +
+        renderStyle.paddingTop.computedValue +
+        renderStyle.paddingBottom.computedValue);
 
-      setUpOverflowScroller(scrollableSize, scrollableViewportSize);
-    }
+    setUpOverflowScroller(scrollableSize, scrollableViewportSize);
 
     if (positionedHolder != null &&
         renderStyle.position != CSSPositionType.sticky) {
@@ -1059,13 +1054,16 @@ class RenderBoxModel extends RenderBox
     throw FlutterError('Please impl performPaint of $runtimeType.');
   }
 
+  bool get shouldPaint => !renderStyle.isVisibilityHidden;
+
   @override
   void paint(PaintingContext context, Offset offset) {
     if (kProfileMode && PerformanceTiming.enabled()) {
       childPaintDuration = 0;
       PerformanceTiming.instance().mark(PERF_PAINT_START, uniqueId: hashCode);
     }
-    if (renderStyle.isVisibilityHidden) {
+
+    if (!shouldPaint) {
       if (kProfileMode && PerformanceTiming.enabled()) {
         PerformanceTiming.instance().mark(PERF_PAINT_END, uniqueId: hashCode);
       }
@@ -1101,9 +1099,13 @@ class RenderBoxModel extends RenderBox
     }
   }
 
-  void paintBoxModel(PaintingContext context, Offset offset) {
+  void paintNothing(PaintingContext context, Offset offset) {}
 
-    if (isScrollingContentBox) {
+  void paintBoxModel(PaintingContext context, Offset offset) {
+    // If opacity to zero, only paint intersection observer.
+    if (alpha == 0) {
+      paintIntersectionObserver(context, offset, paintNothing);
+    } else if (isScrollingContentBox) {
       // Scrolling content box should only size painted.
       performPaint(context, offset);
     } else {
@@ -1146,26 +1148,7 @@ class RenderBoxModel extends RenderBox
   }
 
   void _chainPaintDecoration(PaintingContext context, Offset offset) {
-    EdgeInsets? resolvedPadding = renderStyle.padding.resolve(TextDirection.ltr);
-    paintDecoration(context, offset, resolvedPadding);
-    _chainPaintOverflow(context, offset);
-  }
-
-  // For scrolling box, the minimum width and height should not less than scrollableSize
-  void ensureBoxSizeLargerThanScrollableSize() {
-    if (isScrollingContentBox) {
-      double newBoxWidth = size.width;
-      double newBoxHeight = size.height;
-
-      if (scrollableSize.width > newBoxWidth) {
-        newBoxWidth = scrollableSize.width;
-      }
-      if (scrollableSize.height > newBoxHeight) {
-        newBoxHeight = scrollableSize.height;
-      }
-
-      size = Size(newBoxWidth, newBoxHeight);
-    }
+    paintDecoration(context, offset, _chainPaintOverflow);
   }
 
   void _chainPaintOverflow(PaintingContext context, Offset offset) {
@@ -1174,7 +1157,7 @@ class RenderBoxModel extends RenderBox
         renderStyle.effectiveBorderTopWidth.computedValue,
         renderStyle.effectiveBorderRightWidth.computedValue,
         renderStyle.effectiveBorderLeftWidth.computedValue);
-    BoxDecoration? decoration = renderStyle.decoration;
+    CSSBoxDecoration? decoration = renderStyle.decoration;
 
     bool hasLocalAttachment = _hasLocalBackgroundImage(renderStyle);
     if (hasLocalAttachment) {
@@ -1452,6 +1435,7 @@ class RenderBoxModel extends RenderBox
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty('creatorElement', renderStyle.target));
     properties.add(DiagnosticsProperty('contentSize', _contentSize));
     properties.add(DiagnosticsProperty(
         'contentConstraints', _contentConstraints,
@@ -1466,10 +1450,8 @@ class RenderBoxModel extends RenderBox
     if (renderPositionPlaceholder != null)
       properties.add(
           DiagnosticsProperty('renderPositionHolder', renderPositionPlaceholder));
-    if (renderStyle.intrinsicWidth != null)
-      properties.add(DiagnosticsProperty('intrinsicWidth', renderStyle.intrinsicWidth));
-    if (renderStyle.intrinsicHeight != null)
-      properties.add(DiagnosticsProperty('intrinsicHeight', renderStyle.intrinsicHeight));
+    properties.add(DiagnosticsProperty('intrinsicWidth', renderStyle.intrinsicWidth));
+    properties.add(DiagnosticsProperty('intrinsicHeight', renderStyle.intrinsicHeight));
     if (renderStyle.intrinsicRatio != null)
       properties.add(DiagnosticsProperty('intrinsicRatio', renderStyle.intrinsicRatio));
 

@@ -13,7 +13,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindWindow(std::unique_ptr<ExecutionContext>& context);
+void bindWindow(ExecutionContext* context);
 
 class Window : public EventTarget {
  public:

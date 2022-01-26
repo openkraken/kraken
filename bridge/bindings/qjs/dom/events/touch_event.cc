@@ -9,8 +9,8 @@
 
 namespace kraken::binding::qjs {
 
-void bindTouchEvent(std::unique_ptr<ExecutionContext>& context) {
-  auto* constructor = TouchEvent::instance(context.get());
+void bindTouchEvent(ExecutionContext* context) {
+  auto* constructor = TouchEvent::instance(context);
   context->defineGlobalProperty("TouchEvent", constructor->jsObject);
 }
 

@@ -4,7 +4,7 @@
 
 ## 💁 Have a try
 
-1. Install Kraken CLI (macOS only currently)
+1. Install Kraken CLI (macOS, Linux only currently)
 
     ```shell
     $ npm i @openkraken/cli -g
@@ -13,8 +13,7 @@
 2. Open with kraken
 
     ```shell
-    # kraken [localfile|URL]
-    $ kraken https://raw.githubusercontent.com/openkraken/kraken/master/kraken/example/assets/bundle.js
+    $ kraken run https://raw.githubusercontent.com/openkraken/kraken/master/kraken/example/assets/bundle.js
     ```
 
 ## 💌 Why kraken
@@ -65,7 +64,7 @@ By contributing to Kraken, you agree that your contributions will be licensed un
 
 2. Building bridge
 
-    Building bridge for all supported platform (macOS, iOS, Android)
+    Building bridge for all supported platform (macOS, linux, iOS, Android)
 
     ```shell
     $ npm run build:bridge:all
@@ -77,6 +76,12 @@ By contributing to Kraken, you agree that your contributions will be licensed un
 
     ```shell
     $ npm run build:bridge:macos
+    ```
+
+    **linux**
+
+    ```shell
+    $ npm run build:bridge:linux
     ```
 
     **iOS**
@@ -103,7 +108,7 @@ By contributing to Kraken, you agree that your contributions will be licensed un
     ```shell
     $ npm test
     ```
-    
-    
+
+
 
 

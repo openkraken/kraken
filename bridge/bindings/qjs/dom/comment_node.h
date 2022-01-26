@@ -10,7 +10,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindCommentNode(std::unique_ptr<ExecutionContext>& context);
+void bindCommentNode(ExecutionContext* context);
 
 class CommentInstance;
 

@@ -186,28 +186,30 @@ class GestureManager {
   }
 
   void onDoubleClick() {
-    if (_target != null && _target!.onDoubleClick != null) {
-      _target!.onDoubleClick!(Event(EVENT_DOUBLE_CLICK));
+    Function? onDoubleClick = _target?.onDoubleClick;
+    if (onDoubleClick != null) {
+      onDoubleClick(Event(EVENT_DOUBLE_CLICK));
     }
   }
 
   void onTapUp(TapUpDetails details) {
-    if (_target != null && _target!.onClick != null) {
-      if (_target!.onClick != null) {
-        _target!.onClick!(EVENT_CLICK, details);
-      }
+    Function? onClick = _target?.onClick;
+    if (onClick != null) {
+      onClick(EVENT_CLICK, details);
     }
   }
 
   void onSwipe(Event event) {
-    if (_target != null && _target!.onSwipe != null) {
-      _target!.onSwipe!(event);
+    Function? onSwipe = _target?.onSwipe;
+    if (onSwipe != null) {
+      onSwipe(event);
     }
   }
 
   void onPanStart(DragStartDetails details) {
-    if (_target != null && _target!.onPan != null) {
-      _target!.onPan!(
+    Function? onPan = _target?.onPan;
+    if (onPan != null) {
+      onPan(
         GestureEvent(
           EVENT_PAN,
           GestureEventInit(
@@ -221,8 +223,9 @@ class GestureManager {
   }
 
   void onPanUpdate(DragUpdateDetails details) {
-    if (_target != null && _target!.onPan != null) {
-      _target!.onPan!(
+    Function? onPan = _target?.onPan;
+    if (onPan != null) {
+      onPan(
           GestureEvent(
               EVENT_PAN,
               GestureEventInit(
@@ -236,8 +239,9 @@ class GestureManager {
   }
 
   void onPanEnd(DragEndDetails details) {
-    if (_target != null && _target!.onPan != null) {
-      _target!.onPan!(
+    Function? onPan = _target?.onPan;
+    if (onPan != null) {
+      onPan(
         GestureEvent(
           EVENT_PAN,
           GestureEventInit(
@@ -251,8 +255,9 @@ class GestureManager {
   }
 
   void onScaleStart(ScaleStartDetails details) {
-    if (_target != null && _target!.onScale != null) {
-      _target!.onScale!(
+    Function? onScale = _target?.onScale;
+    if (onScale != null) {
+      onScale(
         GestureEvent(
           EVENT_SCALE,
           GestureEventInit( state: EVENT_STATE_START )
@@ -262,8 +267,9 @@ class GestureManager {
   }
 
   void onScaleUpdate(ScaleUpdateDetails details) {
-    if (_target != null && _target!.onScale != null) {
-      _target!.onScale!(
+    Function? onScale = _target?.onScale;
+    if (onScale != null) {
+      onScale(
         GestureEvent(
           EVENT_SCALE,
           GestureEventInit(
@@ -277,8 +283,9 @@ class GestureManager {
   }
 
   void onScaleEnd(ScaleEndDetails details) {
-    if (_target != null && _target!.onScale != null) {
-      _target!.onScale!(
+    Function? onScale = _target?.onScale;
+    if (onScale != null) {
+      onScale(
         GestureEvent(
           EVENT_SCALE,
           GestureEventInit( state: EVENT_STATE_END )
@@ -288,8 +295,9 @@ class GestureManager {
   }
 
   void onLongPressEnd(LongPressEndDetails details) {
-    if (_target != null && _target!.onLongPress != null) {
-      _target!.onLongPress!(
+    Function? onLongPress = _target?.onLongPress;
+    if (onLongPress != null) {
+      onLongPress(
         GestureEvent(
           EVENT_LONG_PRESS,
           GestureEventInit(

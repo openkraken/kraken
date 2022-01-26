@@ -10,7 +10,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindTouchEvent(std::unique_ptr<ExecutionContext>& context);
+void bindTouchEvent(ExecutionContext* context);
 
 struct NativeTouch {
   int64_t identifier;

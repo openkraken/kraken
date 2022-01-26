@@ -14,7 +14,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/devtools.dart';
 import 'package:ffi/ffi.dart';
-import '../bridge/platform.dart';
+import '../bridge/dynamic_library.dart';
 
 const String CONTENT_TYPE = 'Content-Type';
 const String CONTENT_LENGTH = 'Content-Length';
@@ -72,7 +72,7 @@ void _postTaskToUIThread(int contextId, Pointer<Void> context, Pointer<Void> cal
 }
 
 void attachInspector(int contextId) {
-  final DartAttachInspector _attachInspector = nativeDynamicLibrary
+  final DartAttachInspector _attachInspector = KrakenDynamicLibrary.ref
       .lookup<NativeFunction<NativeAttachInspector>>('attachInspector')
       .asFunction();
   _attachInspector(contextId);
@@ -80,7 +80,7 @@ void attachInspector(int contextId) {
 
 void initInspectorServerNativeBinding(int contextId) {
   final DartRegisterDartMethods _registerInspectorServerDartMethods =
-      nativeDynamicLibrary
+  KrakenDynamicLibrary.ref
           .lookup<NativeFunction<NativeRegisterDartMethods>>(
               'registerInspectorDartMethods')
           .asFunction();
@@ -144,7 +144,7 @@ void serverIsolateEntryPoint(SendPort isolateToMainStream) {
       } else if (data is InspectorMethodResult) {
         server!.sendToFrontend(data.id, data.result);
       } else if (data is InspectorPostTaskMessage) {
-        final DartDispatchInspectorTask _dispatchInspectorTask = nativeDynamicLibrary
+        final DartDispatchInspectorTask _dispatchInspectorTask = KrakenDynamicLibrary.ref
             .lookup<NativeFunction<NativeDispatchInspectorTask>>('dispatchInspectorTask')
             .asFunction();
         _dispatchInspectorTask(mainIsolateJSContextId, Pointer.fromAddress(data.context), Pointer.fromAddress(data.callback));

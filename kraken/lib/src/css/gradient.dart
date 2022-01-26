@@ -49,8 +49,9 @@ class CSSLinearGradient extends LinearGradient with BorderGradientMixin {
     double width = rect.width;
     double height = rect.height;
     // If width/height is null, x/y can be infinite.
-    if (width == 0 || height == 0) return ui.Gradient.linear(
-        Offset(0, 0), Offset(0, 0), colors);
+    if (width == 0 || height == 0) {
+      return ui.Gradient.linear(Offset.zero, Offset.zero, colors);
+    }
 
     double length = (sin * width).abs() + (cos * height).abs();
     double x = sin * length / width;

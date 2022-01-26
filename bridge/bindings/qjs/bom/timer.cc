@@ -219,7 +219,7 @@ static JSValue clearTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSV
   return JS_NULL;
 }
 
-void bindTimer(std::unique_ptr<ExecutionContext>& context) {
+void bindTimer(ExecutionContext* context) {
   QJS_GLOBAL_BINDING_FUNCTION(context, setTimeout, "setTimeout", 2);
   QJS_GLOBAL_BINDING_FUNCTION(context, setInterval, "setInterval", 2);
   QJS_GLOBAL_BINDING_FUNCTION(context, clearTimeout, "clearTimeout", 1);

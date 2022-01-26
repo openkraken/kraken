@@ -51,14 +51,16 @@ using namespace binding::qjs;
 std::unordered_map<std::string, NativeByteCode> KrakenPage::pluginByteCode{};
 ConsoleMessageHandler KrakenPage::consoleMessageHandler{nullptr};
 
+kraken::KrakenPage** KrakenPage::pageContextPool{nullptr};
+
 KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : contextId(contextId) {
 #if ENABLE_PROFILE
   auto jsContextStartTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 #endif
-  m_context = binding::qjs::createJSContext(contextId, handler, this);
+  m_context = new ExecutionContext(contextId, handler, this);
 
 #if ENABLE_PROFILE
-  auto nativePerformance = Performance::instance(m_context.get())->m_nativePerformance;
+  auto nativePerformance = Performance::instance(m_context)->m_nativePerformance;
   nativePerformance.mark(PERF_JS_CONTEXT_INIT_START, jsContextStartTime);
   nativePerformance.mark(PERF_JS_CONTEXT_INIT_END);
   nativePerformance.mark(PERF_JS_NATIVE_METHOD_INIT_START);
@@ -173,7 +175,7 @@ void KrakenPage::evaluateScript(const NativeString* script, const char* url, int
     return;
 
 #if ENABLE_PROFILE
-  auto nativePerformance = Performance::instance(m_context.get())->m_nativePerformance;
+  auto nativePerformance = Performance::instance(m_context)->m_nativePerformance;
   nativePerformance.mark(PERF_JS_PARSE_TIME_START);
   std::u16string patchedCode = std::u16string(u"performance.mark('js_parse_time_end');") + std::u16string(reinterpret_cast<const char16_t*>(script->string), script->length);
   m_context->evaluateJavaScript(patchedCode.c_str(), patchedCode.size(), url, startLine);
@@ -212,6 +214,8 @@ KrakenPage::~KrakenPage() {
     disposeCallback(this);
   }
 #endif
+  delete m_context;
+  KrakenPage::pageContextPool[contextId] = nullptr;
 }
 
 void KrakenPage::reportError(const char* errmsg) {

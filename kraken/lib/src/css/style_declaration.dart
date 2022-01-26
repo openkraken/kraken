@@ -437,9 +437,6 @@ class CSSStyleDeclaration {
       String? prevValue = prevValues[propertyName];
       String currentValue = pendingProperties[propertyName]!;
 
-      // Return if value has not changed.
-      if (currentValue == prevValue) return;
-
       _emitPropertyChanged(propertyName, prevValue, currentValue);
     }
   }
@@ -497,6 +494,8 @@ class CSSStyleDeclaration {
   }
 
   void _emitPropertyChanged(String property, String? original, String present) {
+    if (original == present) return;
+    
     if (onStyleChanged != null) {
       onStyleChanged!(property, original, present);
     }

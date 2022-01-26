@@ -63,6 +63,8 @@ ExecutionContext::ExecutionContext(int32_t contextId, const JSExceptionHandler& 
   if (m_runtime == nullptr) {
     m_runtime = JS_NewRuntime();
   }
+  // Avoid stack overflow when running in multiple threads.
+  JS_UpdateStackTop(m_runtime);
   m_ctx = JS_NewContext(m_runtime);
 
   timeOrigin = std::chrono::system_clock::now();
@@ -131,6 +133,14 @@ ExecutionContext::~ExecutionContext() {
       auto* job = list_entry(el, NativeFunctionContext, link);
       delete job;
     }
+  }
+
+  // Check if current context have unhandled exceptions.
+  JSValue exception = JS_GetException(m_ctx);
+  if (JS_IsObject(exception) || JS_IsException(exception)) {
+    // There must be bugs in native functions from call stack frame. Someone needs to fix it if throws.
+    reportError(exception);
+    assert_m(false, "Unhandled exception found when dispose JSContext.");
   }
 
   JS_FreeValue(m_ctx, globalObject);

@@ -33,6 +33,7 @@ typedef GetSelectionColor = Color Function();
 typedef GetCursorRadius = Radius Function();
 /// Get the text selection controls according to the target platform.
 typedef GetTextSelectionControls = TextSelectionControls Function();
+typedef OnControllerCreated = void Function(KrakenController controller);
 
 /// Delegate methods of widget
 class WidgetDelegate {
@@ -83,6 +84,9 @@ class Kraken extends StatefulWidget {
   // This is useful if you wants to pause kraken timers and callbacks when kraken widget are hidden by page route.
   // https://api.flutter.dev/flutter/widgets/RouteObserver-class.html
   final RouteObserver<ModalRoute<void>>? routeObserver;
+
+  // Trigger when kraken controller once created.
+  final OnControllerCreated? onControllerCreated;
 
   final LoadErrorHandler? onLoadError;
 
@@ -196,6 +200,7 @@ class Kraken extends StatefulWidget {
     this.viewportWidth,
     this.viewportHeight,
     this.bundle,
+    this.onControllerCreated,
     this.onLoad,
     this.navigationDelegate,
     this.javaScriptChannel,
@@ -245,6 +250,15 @@ class _KrakenState extends State<Kraken> with RouteAware {
       // Action of focus.
       NextFocusIntent: CallbackAction<NextFocusIntent>(onInvoke: _handleNextFocus),
       PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(onInvoke: _handlePreviousFocus),
+
+      // Action to delete text.
+      DeleteTextIntent: CallbackAction<DeleteTextIntent>(onInvoke: _handleDeleteText),
+
+      // Action of hot keys control/command + (X, C, V, A).
+      SelectAllTextIntent: CallbackAction<SelectAllTextIntent>(onInvoke: _handleSelectAllText),
+      CopySelectionTextIntent: CallbackAction<CopySelectionTextIntent>(onInvoke: _handleCopySelectionText),
+      CutSelectionTextIntent: CallbackAction<CutSelectionTextIntent>(onInvoke: _handleCutSelectionText),
+      PasteTextIntent: CallbackAction<PasteTextIntent>(onInvoke: _handlePasteText),
 
       // Action of mouse move hotkeys.
       MoveSelectionRightByLineTextIntent: CallbackAction<MoveSelectionRightByLineTextIntent>(onInvoke: _handleMoveSelectionRightByLineText),
@@ -537,6 +551,56 @@ class _KrakenState extends State<Kraken> with RouteAware {
       // None editable exists, focus the previous widget.
     } else {
       _focusNode.previousFocus();
+    }
+  }
+
+  void _handleDeleteText(DeleteTextIntent intent) {
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.delete(SelectionChangedCause.keyboard);
+      }
+    }
+  }
+
+  void _handleSelectAllText(SelectAllTextIntent intent) {
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.selectAll(SelectionChangedCause.keyboard);
+      }
+    }
+  }
+
+  void _handleCopySelectionText(CopySelectionTextIntent intent) {
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.copySelection();
+      }
+    }
+  }
+
+  void _handleCutSelectionText(CutSelectionTextIntent intent) {
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.cutSelection(SelectionChangedCause.keyboard);
+      }
+    }
+  }
+
+  void _handlePasteText(PasteTextIntent intent) {
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.pasteText(SelectionChangedCause.keyboard);
+      }
     }
   }
 
@@ -862,6 +926,11 @@ This situation often happened when you trying creating kraken when FlutterView n
         uriParser: _krakenWidget.uriParser
     );
 
+    OnControllerCreated? onControllerCreated = _krakenWidget.onControllerCreated;
+    if (onControllerCreated != null) {
+      onControllerCreated(controller);
+    }
+
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_INIT_END);
     }
@@ -918,10 +987,6 @@ class _KrakenRenderObjectElement extends SingleChildRenderObjectElement {
     // We should make sure every flutter elements created under kraken can be walk up to the root.
     // So we bind _KrakenRenderObjectElement into KrakenController, and widgetElements created by controller can follow this to the root.
     controller.rootFlutterElement = this;
-
-    if (controller.bundle == null || (controller.bundle?.content == null && controller.bundle?.bytecode == null && controller.bundle?.src == null)) {
-      return;
-    }
 
     await controller.loadBundle();
 

@@ -13,7 +13,10 @@ const Map<String, dynamic> _defaultStyle = {
 class HTMLElement extends Element {
   static Map<String, dynamic> defaultStyle = _defaultStyle;
   HTMLElement(EventTargetContext? context)
-      : super(context, defaultStyle: defaultStyle);
+      : super(context, defaultStyle: defaultStyle) {
+    // Since the bubbling process is in bridge, we need to globally hijack click for focus shifting, so you need to listen here.
+    addEvent(EVENT_CLICK);
+  }
 
   @override
   void addEvent(String eventType) {

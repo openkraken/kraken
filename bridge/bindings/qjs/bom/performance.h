@@ -125,7 +125,7 @@
 
 namespace kraken::binding::qjs {
 
-void bindPerformance(std::unique_ptr<ExecutionContext>& context);
+void bindPerformance(ExecutionContext* context);
 
 struct NativePerformanceEntry {
   NativePerformanceEntry(const std::string& name, const std::string& entryType, int64_t startTime, int64_t duration, int64_t uniqueId) : startTime(startTime), duration(duration), uniqueId(uniqueId) {

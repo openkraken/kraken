@@ -575,34 +575,35 @@ task('build-ios-frameworks', (done) => {
   done();
 });
 
-task('build-linux-arm64-kraken-lib', (done) => {
-
-  const archs = ['arm64'];
+task('build-linux-kraken-lib', (done) => {
   const buildType = buildMode == 'Release' ? 'Release' : 'Relwithdebinfo';
   const cmakeGeneratorTemplate = platform == 'win32' ? 'Ninja' : 'Unix Makefiles';
-  archs.forEach(arch => {
-    const soBinaryDirectory = path.join(paths.bridge, `build/linux/lib/${arch}`);
-    const bridgeCmakeDir = path.join(paths.bridge, 'cmake-build-linux-' + arch);
-    // generate project
-    execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
-    ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
-    -G "${cmakeGeneratorTemplate}" \
-    -B ${paths.bridge}/cmake-build-linux-${arch} -S ${paths.bridge}`,
-      {
-        cwd: paths.bridge,
-        stdio: 'inherit',
-        env: {
-          ...process.env,
-          KRAKEN_JS_ENGINE: targetJSEngine,
-          LIBRARY_OUTPUT_DIR: soBinaryDirectory
-        }
-      });
-
-    // build
-    execSync(`cmake --build ${bridgeCmakeDir} --target kraken -- -j 12`, {
-      stdio: 'inherit'
+ 
+  const soBinaryDirectory = path.join(paths.bridge, `build/linux/lib/`);
+  const bridgeCmakeDir = path.join(paths.bridge, 'cmake-build-linux');
+  // generate project
+  execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
+  ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
+  -G "${cmakeGeneratorTemplate}" \
+  -B ${paths.bridge}/cmake-build-linux -S ${paths.bridge}`,
+    {
+      cwd: paths.bridge,
+      stdio: 'inherit',
+      env: {
+        ...process.env,
+        KRAKEN_JS_ENGINE: targetJSEngine,
+        LIBRARY_OUTPUT_DIR: soBinaryDirectory
+      }
     });
+
+  // build
+  execSync(`cmake --build ${bridgeCmakeDir} --target kraken -- -j 12`, {
+    stdio: 'inherit'
   });
+
+  const libkrakenPath = path.join(paths.bridge, 'build/linux/lib/libkraken.so');
+  // Patch libkraken.so's runtime path.
+  execSync(`chrpath --replace \\$ORIGIN ${libkrakenPath}`, { stdio: 'inherit' });
 
   done();
 });
@@ -610,17 +611,23 @@ task('build-linux-arm64-kraken-lib', (done) => {
 task('build-android-kraken-lib', (done) => {
   let androidHome;
 
-  if (platform == 'win32') {
-    androidHome = path.join(process.env.LOCALAPPDATA, 'Android\\Sdk');
+  let ndkDir = '';
+
+  // If ANDROID_NDK_HOME env defined, use it.
+  if (process.env.ANDROID_NDK_HOME) {
+    ndkDir = process.env.ANDROID_NDK_HOME;
   } else {
-    androidHome = path.join(process.env.HOME, 'Library/Android/sdk')
-  }
+    if (platform == 'win32') {
+      androidHome = path.join(process.env.LOCALAPPDATA, 'Android\\Sdk');
+    } else {
+      androidHome = path.join(process.env.HOME, 'Library/Android/sdk')
+    }
+    const ndkVersion = '21.4.7075529';
+    ndkDir = path.join(androidHome, 'ndk', ndkVersion);
 
-  const ndkDir = path.join(androidHome, 'ndk');
-  const ndkVersion = '21.4.7075529';
-
-  if (!fs.existsSync(path.join(ndkDir, ndkVersion))) {
-    throw new Error('Android NDK version (21.4.7075529) not installed.');
+    if (!fs.existsSync(ndkDir)) {
+      throw new Error('Android NDK version (21.4.7075529) not installed.');
+    }
   }
 
   const archs = ['arm64-v8a', 'armeabi-v7a'];
@@ -654,7 +661,6 @@ task('build-android-kraken-lib', (done) => {
   archs.forEach(arch => {
     const soBinaryDirectory = path.join(paths.bridge, `build/android/lib/${arch}`);
     const bridgeCmakeDir = path.join(paths.bridge, 'cmake-build-android-' + arch);
-    const ndkDir = path.join(androidHome, 'ndk', ndkVersion);
     // generate project
     execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
     -DCMAKE_TOOLCHAIN_FILE=${path.join(ndkDir, '/build/cmake/android.toolchain.cmake')} \

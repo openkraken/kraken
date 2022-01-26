@@ -367,6 +367,8 @@ IMPL_FUNCTION(Element, toBlob)(JSContext* ctx, JSValue this_val, int argc, JSVal
         promiseContext->context->handleException(&blobValue);
       } else {
         JSValue ret = JS_Call(ctx, promiseContext->resolveFunc, promiseContext->promise, 1, &blobValue);
+        promiseContext->context->handleException(&ret);
+        promiseContext->context->drainPendingPromiseJobs();
         JS_FreeValue(ctx, ret);
       }
 
@@ -379,6 +381,8 @@ IMPL_FUNCTION(Element, toBlob)(JSContext* ctx, JSValue this_val, int argc, JSVal
       JSValue errorMessage = JS_NewString(ctx, error);
       JS_SetPropertyStr(ctx, errorObject, "message", errorMessage);
       JSValue ret = JS_Call(ctx, promiseContext->rejectFunc, promiseContext->promise, 1, &errorObject);
+      promiseContext->context->handleException(&ret);
+      promiseContext->context->drainPendingPromiseJobs();
       JS_FreeValue(ctx, errorObject);
       JS_FreeValue(ctx, ret);
     }

@@ -11,7 +11,7 @@ import 'package:vector_math/vector_math_64.dart';
 // CSS Transforms: https://drafts.csswg.org/css-transforms/
 mixin CSSTransformMixin on RenderStyle {
 
-  static Offset DEFAULT_TRANSFORM_OFFSET = Offset(0, 0);
+  static Offset DEFAULT_TRANSFORM_OFFSET = Offset.zero;
   static Alignment DEFAULT_TRANSFORM_ALIGNMENT = Alignment.center;
 
   // https://drafts.csswg.org/css-transforms-1/#propdef-transform
@@ -33,6 +33,12 @@ mixin CSSTransformMixin on RenderStyle {
     if (_transform == value) return;
     _transform = value;
     _transformMatrix = null;
+
+    // Mark the compositing state for this render object as dirty
+    // cause it will create new layer when transform is valid.
+    if (value != null) {
+      renderBoxModel?.markNeedsCompositingBitsUpdate();
+    }
 
     // Transform effect the stacking context.
     RenderBoxModel? parentRenderer = parent?.renderBoxModel;

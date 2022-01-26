@@ -355,4 +355,22 @@ describe('Position fixed', () => {
 
     await snapshot();
   });
+
+  it('should work with percentage offset', async () => {
+    let div1 = createElement(
+      'div',
+      {
+        style: {
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          width: '100px',
+          height: '100px',
+          backgroundColor: 'green'
+       },
+      });
+    
+    BODY.appendChild(div1);
+    await snapshot();
+  });
 });
