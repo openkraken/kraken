@@ -8,7 +8,7 @@
 
 #include "bindings/qjs/executing_context.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindConsole(ExecutionContext* context);
 

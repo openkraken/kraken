@@ -6,7 +6,7 @@
 #include "executing_context_data.h"
 #include "executing_context.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 JSValue ExecutionContextData::constructorForType(const WrapperTypeInfo* type) {
   auto it = m_constructorMap.find(type);
@@ -71,4 +71,4 @@ JSValue ExecutionContextData::constructorForIdSlowCase(const WrapperTypeInfo* ty
   return classObject;
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

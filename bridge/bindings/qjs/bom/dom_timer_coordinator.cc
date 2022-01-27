@@ -11,7 +11,7 @@
 #include "kraken_test_env.h"
 #endif
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 static void handleTimerCallback(DOMTimer* timer, const char* errmsg) {
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
@@ -80,4 +80,4 @@ void DOMTimerCoordinator::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_fu
   }
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

@@ -123,7 +123,7 @@
 
 #include "bindings/qjs/host_object.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindPerformance(ExecutionContext* context);
 
@@ -222,6 +222,6 @@ class Performance : public HostObject {
 #endif
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_PERFORMANCE_H

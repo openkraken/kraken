@@ -7,9 +7,8 @@
 #include "bindings/qjs/qjs_patch.h"
 #include "custom_event.h"
 #include "event_target.h"
-#include "kraken_bridge.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindEvent(std::unique_ptr<ExecutionContext>& context) {
   JSValue constructor = Event::constructor(context.get());
@@ -207,4 +206,4 @@ void Event::dispose() const {
   delete nativeEvent;
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

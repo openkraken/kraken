@@ -16,17 +16,19 @@
 #include <memory>
 #include <mutex>
 #include <unordered_map>
+#include "foundation/macros.h"
 #include "bindings/qjs/bom/dom_timer_coordinator.h"
 #include "executing_context_data.h"
 #include "foundation/ui_command_buffer.h"
 #include "garbage_collected.h"
 #include "kraken_foundation.h"
 #include "qjs_patch.h"
+#include "dart_methods.h"
 #include "wrapper_type_info.h"
 
 using JSExceptionHandler = std::function<void(int32_t contextId, const char* message)>;
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 static std::once_flag kinitJSClassIDFlag;
 
@@ -95,7 +97,8 @@ class ExecutionContext {
   DOMTimerCoordinator* timers();
 
   FORCE_INLINE Document* document() { return m_document; };
-  FORCE_INLINE foundation::UICommandBuffer* uiCommandBuffer() { return &m_commandBuffer; };
+  FORCE_INLINE UICommandBuffer* uiCommandBuffer() { return &m_commandBuffer; };
+  FORCE_INLINE std::unique_ptr<DartMethodPointer>& dartMethodPtr() { return m_dartMethodPtr; }
 
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func);
 
@@ -108,10 +111,6 @@ class ExecutionContext {
   struct list_head module_callback_job_list;
   struct list_head promise_job_list;
   struct list_head native_function_job_list;
-
-  static JSClassID kHostClassClassId;
-  static JSClassID kHostObjectClassId;
-  static JSClassID kHostExoticObjectClassId;
 
  private:
   static void promiseRejectTracker(JSContext* ctx, JSValueConst promise, JSValueConst reason, JS_BOOL is_handled, void* opaque);
@@ -129,7 +128,8 @@ class ExecutionContext {
   DOMTimerCoordinator m_timers;
   ExecutionContextGCTracker* m_gcTracker{nullptr};
   ExecutionContextData m_data{this};
-  foundation::UICommandBuffer m_commandBuffer{contextId};
+  UICommandBuffer m_commandBuffer{contextId};
+  std::unique_ptr<DartMethodPointer> m_dartMethodPtr = std::make_unique<DartMethodPointer>();
 };
 
 // The read object's method or properties via Proxy, we should redirect this_val from Proxy into target property of
@@ -194,22 +194,7 @@ class JSValueHolder {
 
 std::unique_ptr<ExecutionContext> createJSContext(int32_t contextId, const JSExceptionHandler& handler, void* owner);
 
-// Convert to string and return a full copy of NativeString from JSValue.
-std::unique_ptr<NativeString> jsValueToNativeString(JSContext* ctx, JSValue value);
-
 void buildUICommandArgs(JSContext* ctx, JSValue key, NativeString& args_01);
-
-// Encode utf-8 to utf-16, and return a full copy of NativeString.
-std::unique_ptr<NativeString> stringToNativeString(const std::string& string);
-
-// Return a full copy of NativeString form JSAtom.
-std::unique_ptr<NativeString> atomToNativeString(JSContext* ctx, JSAtom atom);
-
-// Convert to string and return a full copy of std::string from JSValue.
-std::string jsValueToStdString(JSContext* ctx, JSValue& value);
-
-// Return a full copy of std::string form JSAtom.
-std::string jsAtomToStdString(JSContext* ctx, JSAtom atom);
 
 // JS array operation utilities.
 void arrayPushValue(JSContext* ctx, JSValue array, JSValue val);
@@ -222,6 +207,6 @@ void arraySpliceValue(JSContext* ctx, JSValue array, uint32_t start, uint32_t de
 // JS object operation utilities.
 JSValue objectGetKeys(JSContext* ctx, JSValue obj);
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_JS_CONTEXT_H

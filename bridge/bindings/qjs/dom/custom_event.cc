@@ -6,11 +6,10 @@
 #include "custom_event.h"
 #include "bindings/qjs/native_value.h"
 #include "bindings/qjs/qjs_patch.h"
-#include "kraken_bridge.h"
 
 #include <utility>
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindCustomEvent(std::unique_ptr<ExecutionContext>& context) {
   JSValue constructor = context->contextData()->constructorForType(&customEventTypeInfo);
@@ -130,4 +129,4 @@ IMPL_PROPERTY_GETTER(CustomEvent, detail)(JSContext* ctx, JSValue this_val, int 
   return JS_DupValue(ctx, customEventInstance->m_detail);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

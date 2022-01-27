@@ -8,7 +8,7 @@
 
 #include "bindings/qjs/dom/element.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindImageElement(ExecutionContext* context);
 
@@ -43,6 +43,6 @@ class ImageElementInstance : public ElementInstance {
   friend ImageElement;
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_IMAGE_ELEMENTT_H

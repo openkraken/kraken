@@ -11,7 +11,7 @@
 #include "bindings/qjs/qjs_patch.h"
 #include "include/kraken_foundation.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 // This struct provides a way to store a bunch of information that is helpful
 // when creating quickjs objects. Each quickjs bindings class has exactly one static
@@ -36,6 +36,6 @@ class WrapperTypeInfo final {
   JSClassID classId{0};
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_WRAPPER_TYPE_INFO_H

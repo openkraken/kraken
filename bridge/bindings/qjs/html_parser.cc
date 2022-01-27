@@ -10,7 +10,7 @@
 
 #include <utility>
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 inline std::string trim(std::string& str) {
   str.erase(0, str.find_first_not_of(' '));  // prefixing spaces
@@ -71,7 +71,7 @@ void HTMLParser::traverseHTML(Node* root, GumboNode* node) {
   }
 }
 
-bool HTMLParser::parseHTML(std::string html, NodeInstance* rootNode) {
+bool HTMLParser::parseHTML(std::string html, Node* rootNode) {
   if (rootNode != nullptr) {
     rootNode->internalClearChild();
 
@@ -90,7 +90,7 @@ bool HTMLParser::parseHTML(std::string html, NodeInstance* rootNode) {
   return true;
 }
 
-bool HTMLParser::parseHTML(const char* code, size_t codeLength, NodeInstance* rootNode) {
+bool HTMLParser::parseHTML(const char* code, size_t codeLength, Node* rootNode) {
   std::string html = std::string(code, codeLength);
   return parseHTML(html, rootNode);
 }
@@ -122,4 +122,4 @@ void HTMLParser::parseProperty(ElementInstance* element, GumboElement* gumboElem
   }
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

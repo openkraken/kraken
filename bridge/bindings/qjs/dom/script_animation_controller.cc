@@ -11,7 +11,7 @@
 #include "kraken_test_env.h"
 #endif
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 JSClassID ScriptAnimationController::classId{0};
 
@@ -62,4 +62,4 @@ void ScriptAnimationController::cancelFrameCallback(uint32_t callbackId) {
   m_frameRequestCallbackCollection.cancelFrameCallback(callbackId);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

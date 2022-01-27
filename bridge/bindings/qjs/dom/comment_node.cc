@@ -5,9 +5,8 @@
 
 #include "comment_node.h"
 #include "document.h"
-#include "kraken_bridge.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindCommentNode(std::unique_ptr<ExecutionContext>& context) {
   //  auto* constructor = Comment::instance(context.get());
@@ -53,4 +52,4 @@ CommentInstance::CommentInstance(Comment* comment) : NodeInstance(comment, NodeT
   m_context->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::createComment, nativeEventTarget);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

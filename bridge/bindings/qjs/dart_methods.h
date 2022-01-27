@@ -11,10 +11,6 @@
 #include <memory>
 #include <thread>
 
-#define KRAKEN_EXPORT __attribute__((__visibility__("default")))
-
-struct NativeScreen;
-
 using AsyncCallback = void (*)(void* callbackContext, int32_t contextId, const char* errmsg);
 using AsyncRAFCallback = void (*)(void* callbackContext, int32_t contextId, double result, const char* errmsg);
 using AsyncModuleCallback = void (*)(void* callbackContext, int32_t contextId, NativeString* errmsg, NativeString* json);
@@ -85,15 +81,12 @@ struct DartMethodPointer {
   InitDocument initDocument{nullptr};
 };
 
-void registerDartMethods(uint64_t* methodBytes, int32_t length);
+void registerDartMethods(std::shared_ptr<DartMethodPointer> methodPointer, uint64_t* methodBytes, int32_t length);
 
 #ifdef IS_TEST
 KRAKEN_EXPORT
-void registerTestEnvDartMethods(uint64_t* methodBytes, int32_t length);
+void registerTestEnvDartMethods(std::shared_ptr<DartMethodPointer> methodPointer, uint64_t* methodBytes, int32_t length);
 #endif
-
-KRAKEN_EXPORT
-std::shared_ptr<DartMethodPointer> getDartMethod();
 
 }  // namespace kraken
 

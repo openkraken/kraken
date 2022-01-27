@@ -5,7 +5,7 @@
 
 #include "frame_request_callback_collection.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 JSClassID FrameCallback::classId{0};
 FrameCallback::FrameCallback(JSValue callback) : m_callback(callback) {}
@@ -71,4 +71,4 @@ void FrameRequestCallbackCollection::trace(JSRuntime* rt, JSValue val, JS_MarkFu
   }
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

@@ -8,7 +8,7 @@
 
 #include "executing_context.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 struct ModuleContext {
   JSValue callback;
@@ -18,6 +18,6 @@ struct ModuleContext {
 
 void bindModuleManager(ExecutionContext* context);
 void handleInvokeModuleUnexpectedCallback(void* callbackContext, int32_t contextId, NativeString* errmsg, NativeString* json);
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_MODULE_MANAGER_H

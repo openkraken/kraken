@@ -9,7 +9,7 @@
 #include "bindings/qjs/context_macros.h"
 #include "bindings/qjs/garbage_collected.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 class BlobBuilder;
 class BlobInstance;
@@ -113,6 +113,6 @@ auto blobCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_v
 
 const WrapperTypeInfo blobTypeInfo = {"Blob", nullptr, blobCreator};
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_BLOB_H

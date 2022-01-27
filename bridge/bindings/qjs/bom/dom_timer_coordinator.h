@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 class DOMTimer;
 class ExecutionContext;
@@ -37,6 +37,6 @@ class DOMTimerCoordinator {
   std::vector<DOMTimer*> m_abandonedTimers;
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_BINDINGS_QJS_BOM_DOM_TIMER_COORDINATOR_H_

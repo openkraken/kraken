@@ -8,7 +8,7 @@
 
 #include "node.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindDocumentFragment(ExecutionContext* context);
 
@@ -31,6 +31,6 @@ auto documentFragmentCreator = [](JSContext* ctx, JSValueConst func_obj, JSValue
 
 const WrapperTypeInfo documentFragmentInfo = {"DocumentFragment", &nodeTypeInfo, documentFragmentCreator};
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_DOCUMENT_FRAGMENT_H

@@ -3,11 +3,11 @@
  * Author: Kraken Team.
  */
 
-#include "polyfill.h"
-
 #include <atomic>
+
+#include "foundation/logging.h"
+#include "polyfill.h"
 #include "bindings/qjs/qjs_patch.h"
-#include "dart_methods.h"
 #include "page.h"
 
 #include "bindings/qjs/bom/blob.h"
@@ -53,11 +53,16 @@ ConsoleMessageHandler KrakenPage::consoleMessageHandler{nullptr};
 
 kraken::KrakenPage** KrakenPage::pageContextPool{nullptr};
 
-KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : contextId(contextId) {
+KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : contextId(contextId), ownerThreadId(std::this_thread::get_id()) {
 #if ENABLE_PROFILE
   auto jsContextStartTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 #endif
-  m_context = new ExecutionContext(contextId, handler, this);
+  m_context = new ExecutionContext(contextId, [this](int32_t contextId, const char* message) {
+    if (m_context->dartMethodPtr()->onJsError != nullptr) {
+      m_context->dartMethodPtr()->onJsError(contextId, message);
+    }
+    KRAKEN_LOG(ERROR) << message << std::endl;
+  }, this);
 
 #if ENABLE_PROFILE
   auto nativePerformance = Performance::instance(m_context)->m_nativePerformance;
@@ -127,7 +132,7 @@ bool KrakenPage::parseHTML(const char* code, size_t length) {
   return true;
 }
 
-void KrakenPage::invokeModuleEvent(NativeString* moduleName, const char* eventType, void* ptr, NativeString* extra) {
+void KrakenPage::invokeModuleEvent(const NativeString* moduleName, const char* eventType, void* ptr, NativeString* extra) {
   if (!m_context->isValid())
     return;
 
@@ -206,6 +211,38 @@ void KrakenPage::evaluateByteCode(uint8_t* bytes, size_t byteLength) {
   if (!m_context->isValid())
     return;
   m_context->evaluateByteCode(bytes, byteLength);
+}
+
+void KrakenPage::registerDartMethods(uint64_t* methodBytes, int32_t length) {
+  size_t i = 0;
+
+  auto& dartMethodPointer = m_context->dartMethodPtr();
+
+  dartMethodPointer->invokeModule = reinterpret_cast<InvokeModule>(methodBytes[i++]);
+  dartMethodPointer->requestBatchUpdate = reinterpret_cast<RequestBatchUpdate>(methodBytes[i++]);
+  dartMethodPointer->reloadApp = reinterpret_cast<ReloadApp>(methodBytes[i++]);
+  dartMethodPointer->setTimeout = reinterpret_cast<SetTimeout>(methodBytes[i++]);
+  dartMethodPointer->setInterval = reinterpret_cast<SetInterval>(methodBytes[i++]);
+  dartMethodPointer->clearTimeout = reinterpret_cast<ClearTimeout>(methodBytes[i++]);
+  dartMethodPointer->requestAnimationFrame = reinterpret_cast<RequestAnimationFrame>(methodBytes[i++]);
+  dartMethodPointer->cancelAnimationFrame = reinterpret_cast<CancelAnimationFrame>(methodBytes[i++]);
+  dartMethodPointer->getScreen = reinterpret_cast<GetScreen>(methodBytes[i++]);
+  dartMethodPointer->devicePixelRatio = reinterpret_cast<DevicePixelRatio>(methodBytes[i++]);
+  dartMethodPointer->platformBrightness = reinterpret_cast<PlatformBrightness>(methodBytes[i++]);
+  dartMethodPointer->toBlob = reinterpret_cast<ToBlob>(methodBytes[i++]);
+  dartMethodPointer->flushUICommand = reinterpret_cast<FlushUICommand>(methodBytes[i++]);
+  dartMethodPointer->initWindow = reinterpret_cast<InitWindow>(methodBytes[i++]);
+  dartMethodPointer->initDocument = reinterpret_cast<InitDocument>(methodBytes[i++]);
+
+#if ENABLE_PROFILE
+  methodPointer->getPerformanceEntries = reinterpret_cast<GetPerformanceEntries>(methodBytes[i++]);
+#else
+  i++;
+#endif
+
+  dartMethodPointer->onJsError = reinterpret_cast<OnJSError>(methodBytes[i++]);
+
+  assert_m(i == length, "Dart native methods count is not equal with C++ side method registrations.");
 }
 
 KrakenPage::~KrakenPage() {

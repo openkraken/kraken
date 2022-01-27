@@ -10,7 +10,7 @@
 #include "bindings/qjs/dom/event_target.h"
 #include "bindings/qjs/garbage_collected.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindCSSStyleDeclaration(std::unique_ptr<ExecutionContext>& context);
 
@@ -51,6 +51,6 @@ class CSSStyleDeclaration : public GarbageCollected<CSSStyleDeclaration> {
   std::unordered_map<std::string, std::string> m_properties;
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_STYLE_DECLARATION_H

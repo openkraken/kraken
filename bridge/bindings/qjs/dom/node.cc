@@ -9,10 +9,9 @@
 #include "document.h"
 #include "document_fragment.h"
 #include "element.h"
-#include "kraken_bridge.h"
 #include "text_node.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindNode(std::unique_ptr<ExecutionContext>& context) {
   auto* contextData = context->contextData();
@@ -580,4 +579,4 @@ void Node::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
 
 void Node::dispose() const {}
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

@@ -8,7 +8,7 @@
 
 #include "bindings/qjs/dom/element.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindTouchEvent(ExecutionContext* context);
 
@@ -113,6 +113,6 @@ class TouchEventInstance : public EventInstance {
   friend TouchEvent;
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_TOUCH_EVENTT_H

@@ -5,9 +5,8 @@
 
 #include "ui_command_buffer.h"
 #include "dart_methods.h"
-#include "include/kraken_bridge.h"
 
-namespace foundation {
+namespace kraken {
 
 UICommandBuffer::UICommandBuffer(int32_t contextId) : contextId(contextId) {}
 
@@ -73,4 +72,4 @@ void UICommandBuffer::clear() {
   update_batched = false;
 }
 
-}  // namespace foundation
+}  // namespace kraken

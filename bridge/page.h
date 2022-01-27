@@ -7,18 +7,25 @@
 #define KRAKEN_JS_QJS_BRIDGE_H_
 
 #include <quickjs/quickjs.h>
-#include "bindings/qjs/executing_context.h"
-#include "bindings/qjs/html_parser.h"
-#include "include/kraken_bridge.h"
-
 #include <atomic>
 #include <deque>
 #include <vector>
+#include <thread>
+
+#include "bindings/qjs/executing_context.h"
+#include "bindings/qjs/html_parser.h"
+#include "bindings/qjs/native_string.h"
 
 namespace kraken {
 
+struct NativeByteCode {
+  uint8_t* bytes;
+  int32_t length;
+};
+
 class KrakenPage;
 using JSBridgeDisposeCallback = void (*)(KrakenPage* bridge);
+using ConsoleMessageHandler = std::function<void(void* ctx, const std::string& message, int logLevel)>;
 
 /// KrakenPage is class which manage all js objects create by <Kraken> flutter widget.
 /// Every <Kraken> flutter widgets have a corresponding KrakenPage, and all objects created by JavaScript are stored here,
@@ -43,9 +50,11 @@ class KrakenPage final {
   uint8_t* dumpByteCode(const char* script, size_t length, const char* url, size_t* byteLength);
   void evaluateByteCode(uint8_t* bytes, size_t byteLength);
 
-  [[nodiscard]] kraken::binding::qjs::ExecutionContext* getContext() const { return m_context; }
+  void registerDartMethods(uint64_t* methodBytes, int32_t length);
 
-  void invokeModuleEvent(NativeString* moduleName, const char* eventType, void* event, NativeString* extra);
+  [[nodiscard]] ExecutionContext* getContext() const { return m_context; }
+
+  void invokeModuleEvent(const NativeString* moduleName, const char* eventType, void* event, NativeString* extra);
   void reportError(const char* errmsg);
 
   int32_t contextId;
@@ -55,9 +64,10 @@ class KrakenPage final {
   JSBridgeDisposeCallback disposeCallback{nullptr};
 #endif
  private:
+  const std::thread::id ownerThreadId;
   // FIXME: we must to use raw pointer instead of unique_ptr because we needs to access m_context when dispose page.
   // TODO: Raw pointer is dangerous and just works but it's fragile. We needs refactor this for more stable and maintainable.
-  binding::qjs::ExecutionContext* m_context;
+  ExecutionContext* m_context;
   JSExceptionHandler m_handler;
 };
 

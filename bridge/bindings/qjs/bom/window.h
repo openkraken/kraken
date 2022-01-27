@@ -11,7 +11,7 @@
 #include "bindings/qjs/executing_context.h"
 #include "bindings/qjs/wrapper_type_info.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindWindow(ExecutionContext* context);
 
@@ -58,6 +58,6 @@ auto windowCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this
 
 const WrapperTypeInfo windowTypeInfo = {"Window", &eventTargetTypeInfo, windowCreator};
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_WINDOW_H

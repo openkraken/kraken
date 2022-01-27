@@ -32,7 +32,9 @@
 #include "events/.gen/popstate_event.h"
 #include "events/touch_event.h"
 
-namespace kraken::binding::qjs {
+#define DOCUMENT_TARGET_ID -2
+
+namespace kraken {
 
 void traverseNode(Node* node, TraverseHandler handler) {
   bool shouldExit = handler(node);
@@ -632,4 +634,4 @@ void Document::dispose() const {
   }
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

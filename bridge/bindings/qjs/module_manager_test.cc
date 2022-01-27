@@ -9,7 +9,7 @@
 #include "kraken_test_env.h"
 #include "page.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 TEST(ModuleManager, shouldThrowErrorWhenBadJSON) {
   bool static errorCalled = false;
@@ -40,4 +40,4 @@ kraken.methodChannel.invokeMethod('abc', 'fn', object);
   EXPECT_EQ(errorCalled, true);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

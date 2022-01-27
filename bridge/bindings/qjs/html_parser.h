@@ -8,10 +8,10 @@
 
 #include "bindings/qjs/dom/element.h"
 #include "executing_context.h"
-#include "include/kraken_bridge.h"
+#include "foundation/native_string.h"
 #include "third_party/gumbo-parser/src/gumbo.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 class HTMLParser {
  public:
@@ -23,6 +23,6 @@ class HTMLParser {
   static void traverseHTML(Node* root, GumboNode* node);
   static void parseProperty(Element* element, GumboElement* gumboElement);
 };
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_HTML_PARSER_H

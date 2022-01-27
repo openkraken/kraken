@@ -4,7 +4,6 @@
  */
 
 #include "gtest/gtest.h"
-#include "kraken_bridge.h"
 #include "kraken_test_env.h"
 #include "page.h"
 

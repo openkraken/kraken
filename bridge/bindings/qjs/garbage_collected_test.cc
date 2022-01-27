@@ -9,7 +9,7 @@
 //#include "kraken_test_env.h"
 //#include "page.h"
 //
-// namespace kraken::binding::qjs {
+// namespace kraken {
 //
 // class ParentClass : public HostClass {
 // public:
@@ -411,7 +411,7 @@
 //  EXPECT_EQ(logCalled, true);
 //}
 //
-//}  // namespace kraken::binding::qjs
+//}  // namespace kraken
 
 ///*
 // * Copyright (C) 2021 Alibaba Inc. All rights reserved.
@@ -424,7 +424,7 @@
 //#include "kraken_test_env.h"
 //#include "page.h"
 //
-// namespace kraken::binding::qjs {
+// namespace kraken {
 //
 // static bool isSampleFree = false;
 //
@@ -573,4 +573,4 @@
 //  EXPECT_EQ(isSampleFree, true);
 //}
 //
-//}  // namespace kraken::binding::qjs
+//}  // namespace kraken

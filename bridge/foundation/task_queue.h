@@ -8,11 +8,12 @@
 
 #include <mutex>
 #include <unordered_map>
-#include "closure.h"
 #include "ref_counter.h"
 #include "ref_ptr.h"
 
-namespace foundation {
+namespace kraken {
+
+using Task = void (*)(void*);
 
 class TaskQueue : public fml::RefCountedThreadSafe<TaskQueue> {
  public:
@@ -35,6 +36,6 @@ class TaskQueue : public fml::RefCountedThreadSafe<TaskQueue> {
   FML_FRIEND_REF_COUNTED_THREAD_SAFE(TaskQueue);
 };
 
-}  // namespace foundation
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_TASK_QUEUE_H

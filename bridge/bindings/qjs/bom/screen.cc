@@ -5,7 +5,7 @@
 
 #include "screen.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindScreen(ExecutionContext* context) {
   auto* screen = new Screen(context);
@@ -32,4 +32,4 @@ IMPL_PROPERTY_GETTER(Screen, height)(JSContext* ctx, JSValue this_val, int argc,
   return JS_NewFloat64(ctx, screen->height);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

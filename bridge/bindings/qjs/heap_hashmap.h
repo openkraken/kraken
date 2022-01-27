@@ -9,7 +9,7 @@
 #include <quickjs/quickjs.h>
 #include <unordered_map>
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 template <typename K>
 class HeapHashMap {
@@ -98,6 +98,6 @@ void HeapHashMap<K>::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) c
   }
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_BINDINGS_QJS_HEAP_HASHMAP_H_

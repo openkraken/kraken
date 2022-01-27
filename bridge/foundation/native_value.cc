@@ -4,30 +4,16 @@
  */
 
 #include "native_value.h"
-#include "bindings/qjs/dom/elements/image_element.h"
+#include "bindings/qjs/executing_context.h"
 #include "bindings/qjs/qjs_patch.h"
-#include "dom/element.h"
-#include "dom/elements/.gen/canvas_element.h"
-#include "kraken_bridge.h"
+#include "bindings/qjs/dom/event_target.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
+
+using namespace kraken::binding::qjs;
 
 #define AnonymousFunctionCallPreFix "_anonymous_fn_"
 #define AsyncAnonymousFunctionCallPreFix "_anonymous_async_fn_"
-
-NativeString* NativeString::clone() {
-  auto* newNativeString = new NativeString();
-  auto* newString = new uint16_t[length];
-
-  memcpy(newString, string, length * sizeof(uint16_t));
-  newNativeString->string = newString;
-  newNativeString->length = length;
-  return newNativeString;
-}
-
-void NativeString::free() {
-  delete[] string;
-}
 
 NativeValue Native_NewNull() {
   return (NativeValue){0, .u = {.int64 = 0}, NativeTag::TAG_NULL};
@@ -161,7 +147,7 @@ NativeFunctionContext::~NativeFunctionContext() {
 
 static JSValue anonymousFunction(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv, int magic, JSValue* func_data) {
   auto id = magic;
-  auto* eventTarget = static_cast<EventTargetInstance*>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
+  auto* eventTarget = static_cast<EventT*>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
 
   std::string call_params = AnonymousFunctionCallPreFix + std::to_string(id);
 

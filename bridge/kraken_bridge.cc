@@ -3,24 +3,17 @@
  * Author: Kraken Team.
  */
 
-#include "kraken_bridge.h"
+#include <atomic>
+#include <thread>
 #include <cassert>
-#include "dart_methods.h"
+
+#include "include/kraken_bridge.h"
 #include "foundation/inspector_task_queue.h"
 #include "foundation/logging.h"
 #include "foundation/ui_task_queue.h"
-#if KRAKEN_JSC_ENGINE
-#include "bindings/jsc/KOM/performance.h"
-#elif KRAKEN_QUICK_JS_ENGINE
+#include "foundation/ui_command_buffer.h"
+#include "bindings/qjs/native_string.h"
 #include "page.h"
-#endif
-
-#if KRAKEN_JSC_ENGINE
-#include "bridge_jsc.h"
-#endif
-
-#include <atomic>
-#include <thread>
 
 #if defined(_WIN32)
 #define SYSTEM_NAME "windows"  // Windows
@@ -49,20 +42,6 @@
 std::atomic<bool> inited{false};
 std::atomic<int32_t> poolIndex{0};
 int maxPoolSize = 0;
-NativeScreen screen;
-
-std::thread::id uiThreadId;
-
-std::thread::id getUIThreadId() {
-  return uiThreadId;
-}
-
-void printError(int32_t contextId, const char* errmsg) {
-  if (kraken::getDartMethod()->onJsError != nullptr) {
-    kraken::getDartMethod()->onJsError(contextId, errmsg);
-  }
-  KRAKEN_LOG(ERROR) << errmsg << std::endl;
-}
 
 namespace {
 
@@ -86,7 +65,6 @@ int32_t searchForAvailableContextId() {
 }  // namespace
 
 void initJSPagePool(int poolSize) {
-  uiThreadId = std::this_thread::get_id();
   // When dart hot restarted, should dispose previous bridge and clear task message queue.
   if (inited) {
     disposeAllPages();
@@ -96,7 +74,7 @@ void initJSPagePool(int poolSize) {
     kraken::KrakenPage::pageContextPool[i] = nullptr;
   }
 
-  kraken::KrakenPage::pageContextPool[0] = new kraken::KrakenPage(0, printError);
+  kraken::KrakenPage::pageContextPool[0] = new kraken::KrakenPage(0, nullptr);
   inited = true;
   maxPoolSize = poolSize;
 }
@@ -122,7 +100,7 @@ int32_t allocateNewPage(int32_t targetContextId) {
 
   assert(kraken::KrakenPage::pageContextPool[targetContextId] == nullptr &&
          (std::string("can not allocate page at index") + std::to_string(targetContextId) + std::string(": page have already exist.")).c_str());
-  auto* page = new kraken::KrakenPage(targetContextId, printError);
+  auto* page = new kraken::KrakenPage(targetContextId, nullptr);
   kraken::KrakenPage::pageContextPool[targetContextId] = page;
   return targetContextId;
 }
@@ -144,7 +122,7 @@ bool checkPage(int32_t contextId, void* context) {
   return page->getContext() == context;
 }
 
-void evaluateScripts(int32_t contextId, NativeString* code, const char* bundleFilename, int startLine) {
+void evaluateScripts(int32_t contextId, kraken::NativeString* code, const char* bundleFilename, int startLine) {
   assert(checkPage(contextId) && "evaluateScripts: contextId is not valid");
   auto context = static_cast<kraken::KrakenPage*>(getPage(contextId));
   context->evaluateScript(code, bundleFilename, startLine);
@@ -166,25 +144,27 @@ void reloadJsContext(int32_t contextId) {
   assert(checkPage(contextId) && "reloadJSContext: contextId is not valid");
   auto bridgePtr = getPage(contextId);
   auto context = static_cast<kraken::KrakenPage*>(bridgePtr);
-  auto newContext = new kraken::KrakenPage(contextId, printError);
+  auto newContext = new kraken::KrakenPage(contextId, nullptr);
   delete context;
   kraken::KrakenPage::pageContextPool[contextId] = newContext;
 }
 
-void invokeModuleEvent(int32_t contextId, NativeString* moduleName, const char* eventType, void* event, NativeString* extra) {
+void invokeModuleEvent(int32_t contextId, kraken::NativeString* moduleName, const char* eventType, void* event, kraken::NativeString* extra) {
   assert(checkPage(contextId) && "invokeEventListener: contextId is not valid");
   auto context = static_cast<kraken::KrakenPage*>(getPage(contextId));
   context->invokeModuleEvent(moduleName, eventType, event, extra);
 }
 
-void registerDartMethods(uint64_t* methodBytes, int32_t length) {
-  kraken::registerDartMethods(methodBytes, length);
+void registerDartMethods(int32_t contextId, uint64_t* methodBytes, int32_t length) {
+  assert(checkPage(contextId) && "registerDartMethods: contextId is not valid");
+  auto context = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  context->registerDartMethods(methodBytes, length);
 }
 
 NativeScreen* createScreen(double width, double height) {
-  screen.width = width;
-  screen.height = height;
-  return &screen;
+//  screen.width = width;
+//  screen.height = height;
+//  return &screen;
 }
 
 static KrakenInfo* krakenInfo{nullptr};
@@ -211,18 +191,14 @@ void dispatchUITask(int32_t contextId, void* context, void* callback) {
 }
 
 void flushUITask(int32_t contextId) {
-  foundation::UITaskQueue::instance(contextId)->flushTask();
+  kraken::UITaskQueue::instance(contextId)->flushTask();
 }
 
 void registerUITask(int32_t contextId, Task task, void* data) {
-  foundation::UITaskQueue::instance(contextId)->registerTask(task, data);
+  kraken::UITaskQueue::instance(contextId)->registerTask(task, data);
 };
 
-void flushUICommandCallback() {
-  foundation::UICommandCallbackQueue::instance()->flushCallbacks();
-}
-
-UICommandItem* getUICommandItems(int32_t contextId) {
+void* getUICommandItems(int32_t contextId) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
   if (page == nullptr)
     return nullptr;
@@ -249,7 +225,7 @@ void registerContextDisposedCallbacks(int32_t contextId, Task task, void* data) 
 }
 
 void registerPluginByteCode(uint8_t* bytes, int32_t length, const char* pluginName) {
-  kraken::KrakenPage::pluginByteCode[pluginName] = NativeByteCode{bytes, length};
+  kraken::KrakenPage::pluginByteCode[pluginName] = kraken::NativeByteCode{bytes, length};
 }
 
 int32_t profileModeEnabled() {

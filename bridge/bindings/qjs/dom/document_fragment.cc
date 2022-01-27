@@ -5,9 +5,8 @@
 
 #include "document_fragment.h"
 #include "document.h"
-#include "kraken_bridge.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindDocumentFragment(std::unique_ptr<ExecutionContext>& context) {
   JSValue classObject = context->contextData()->constructorForType(&documentFragmentInfo);
@@ -34,4 +33,4 @@ DocumentFragment::DocumentFragment() {
   context()->uiCommandBuffer()->addCommand(eventTargetId(), UICommand::createDocumentFragment, nativeEventTarget);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

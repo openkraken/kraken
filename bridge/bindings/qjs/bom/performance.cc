@@ -9,7 +9,7 @@
 
 #define PERFORMANCE_ENTRY_NONE_UNIQUE_ID -1024
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindPerformance(ExecutionContext* context) {
   auto* performance = Performance::instance(context);
@@ -580,4 +580,4 @@ Rendering: %.*fms
 
 #endif
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

@@ -5,7 +5,7 @@
 
 #include "console.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 JSValue print(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   std::stringstream stream;
@@ -34,4 +34,4 @@ void bindConsole(ExecutionContext* context) {
   QJS_GLOBAL_BINDING_FUNCTION(context, print, "__kraken_print__", 2);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

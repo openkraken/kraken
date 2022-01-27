@@ -202,7 +202,7 @@ TEST(EventTarget, wontLeakWithStringProperty) {
 }
 
 TEST(EventTarget, dispatchEventOnGC) {
-  using namespace kraken::binding::qjs;
+  using namespace kraken;
 
   bool static errorCalled = false;
   bool static logCalled = false;

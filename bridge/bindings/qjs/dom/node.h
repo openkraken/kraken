@@ -11,7 +11,7 @@
 
 #include "event_target.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 class Element;
 class Document;
@@ -106,6 +106,6 @@ auto nodeCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_v
 
 const WrapperTypeInfo nodeTypeInfo = {"Node", &eventTargetTypeInfo, nodeCreator};
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_NODE_H

@@ -9,7 +9,7 @@
 #include "bindings/qjs/dom/document_fragment.h"
 #include "bindings/qjs/dom/element.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindTemplateElement(ExecutionContext* context);
 class TemplateElementInstance;
@@ -42,6 +42,6 @@ class TemplateElementInstance : public ElementInstance {
   friend TemplateElement;
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_TEMPLATE_ELEMENTT_H

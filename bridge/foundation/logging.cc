@@ -24,7 +24,7 @@
 #include "inspector/impl/jsc_console_client_impl.h"
 #endif
 
-namespace foundation {
+namespace kraken {
 namespace {
 
 const char* const kLogSeverityNames[LOG_NUM_SEVERITIES] = {"VERBOSE", BOLD("INFO"), FYEL("WARN"), BOLD("DEBUG"), FRED("ERROR")};
@@ -141,4 +141,4 @@ void printLog(int32_t contextId, std::stringstream& stream, std::string level, v
   }
 }
 
-}  // namespace foundation
+}  // namespace kraken

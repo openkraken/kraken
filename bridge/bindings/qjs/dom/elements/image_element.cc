@@ -7,7 +7,7 @@
 #include "bindings/qjs/qjs_patch.h"
 #include "page.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 ImageElement::ImageElement(ExecutionContext* context) : Element(context) {
   JS_SetPrototype(m_ctx, m_prototypeObject, Element::instance(m_context)->prototype());
@@ -105,4 +105,4 @@ bool ImageElementInstance::dispatchEvent(EventInstance* event) {
   return result;
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

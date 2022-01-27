@@ -11,6 +11,8 @@
 #include <cinttypes>
 #include <string>
 
+namespace kraken {
+
 enum NativeTag {
   TAG_STRING = 0,
   TAG_INT = 1,
@@ -24,16 +26,6 @@ enum NativeTag {
 };
 
 enum class JSPointerType { AsyncContextContext = 0, NativeFunctionContext = 1, NativeBoundingClientRect = 2, NativeCanvasRenderingContext2D = 3, NativeEventTarget = 4 };
-
-namespace kraken::binding::qjs {
-
-struct NativeString {
-  const uint16_t* string;
-  uint32_t length;
-
-  NativeString* clone();
-  void free();
-};
 
 class ExecutionContext;
 

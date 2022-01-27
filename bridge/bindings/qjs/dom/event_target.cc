@@ -13,13 +13,12 @@
 #include "document.h"
 #include "element.h"
 #include "event.h"
-#include "kraken_bridge.h"
 
 #if UNIT_TEST
 #include "kraken_test_env.h"
 #endif
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 static std::atomic<int32_t> globalEventTargetId{0};
 #define GetPropertyCallPreFix "_getProperty_"
@@ -481,4 +480,4 @@ void NativeEventTarget::dispatchEventImpl(int32_t contextId, NativeEventTarget* 
   JS_FreeValue(context->ctx(), event->toQuickJS());
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

@@ -8,7 +8,6 @@
 #include <vector>
 #include "bindings/qjs/dom/event_target.h"
 #include "dart_methods.h"
-#include "include/kraken_bridge.h"
 #include "kraken_bridge_test.h"
 #include "page.h"
 

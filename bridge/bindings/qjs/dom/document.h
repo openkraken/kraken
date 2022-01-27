@@ -11,7 +11,7 @@
 #include "node.h"
 #include "script_animation_controller.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindDocument(ExecutionContext* context);
 
@@ -85,6 +85,6 @@ auto documentCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst th
 
 const WrapperTypeInfo documentTypeInfo = {"Document", &nodeTypeInfo, documentCreator};
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_DOCUMENT_H

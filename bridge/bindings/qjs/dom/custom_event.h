@@ -8,7 +8,7 @@
 
 #include "event.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindCustomEvent(ExecutionContext* context);
 
@@ -71,6 +71,6 @@ auto customEventCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst
 
 const WrapperTypeInfo customEventTypeInfo = {"CustomEvent", &eventTypeInfo, customEventCreator};
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CUSTOM_EVENT_H

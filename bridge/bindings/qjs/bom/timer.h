@@ -10,7 +10,7 @@
 #include "bindings/qjs/garbage_collected.h"
 #include "dom_timer_coordinator.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 class DOMTimer : public GarbageCollected<DOMTimer> {
  public:
@@ -36,6 +36,6 @@ class DOMTimer : public GarbageCollected<DOMTimer> {
 
 void bindTimer(ExecutionContext* context);
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_TIMER_H

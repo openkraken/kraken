@@ -8,7 +8,7 @@
 
 #include "node.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindCommentNode(ExecutionContext* context);
 
@@ -50,6 +50,6 @@ const WrapperTypeInfo commentTypeInfo = {"Comment", &nodeTypeInfo, commentCreato
 //  friend Comment;
 //};
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_COMMENT_NODE_H

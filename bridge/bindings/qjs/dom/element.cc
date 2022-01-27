@@ -15,7 +15,7 @@
 #include "kraken_test_env.h"
 #endif
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 const std::string ATTR_ID = "id";
 const std::string ATTR_CLASS = "class";
@@ -981,4 +981,4 @@ IMPL_PROPERTY_GETTER(BoundingClientRect, left)(JSContext* ctx, JSValue this_val,
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->left);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

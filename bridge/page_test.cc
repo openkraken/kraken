@@ -281,4 +281,18 @@ void KrakenPageTest::invokeExecuteTest(ExecuteCallback executeCallback) {
   executeTestCallback = JS_NULL;
 }
 
+void KrakenPageTest::registerTestEnvDartMethods(uint64_t* methodBytes, int32_t length) {
+  size_t i = 0;
+
+  auto& dartMethodPtr = m_page_context->dartMethodPtr();
+
+  dartMethodPtr->onJsError = reinterpret_cast<OnJSError>(methodBytes[i++]);
+  dartMethodPtr->matchImageSnapshot = reinterpret_cast<MatchImageSnapshot>(methodBytes[i++]);
+  dartMethodPtr->environment = reinterpret_cast<Environment>(methodBytes[i++]);
+  dartMethodPtr->simulatePointer = reinterpret_cast<SimulatePointer>(methodBytes[i++]);
+  dartMethodPtr->simulateInputText = reinterpret_cast<SimulateInputText>(methodBytes[i++]);
+
+  assert_m(i == length, "Dart native methods count is not equal with C++ side method registrations.");
+}
+
 }  // namespace kraken

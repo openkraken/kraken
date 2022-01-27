@@ -8,7 +8,7 @@
 #include "bindings/qjs/qjs_patch.h"
 #include "page.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 TemplateElement::TemplateElement(ExecutionContext* context) : Element(context) {
   JS_SetPrototype(m_ctx, m_prototypeObject, Element::instance(m_context)->prototype());
@@ -38,4 +38,4 @@ void TemplateElementInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mar
   ElementInstance::trace(rt, val, mark_func);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

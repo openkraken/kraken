@@ -9,7 +9,7 @@
 #include "bindings/qjs/context_macros.h"
 #include "bindings/qjs/executing_context.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 #define EVENT_CLICK "click"
 #define EVENT_INPUT "input"
@@ -135,6 +135,6 @@ auto eventCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_
 
 const WrapperTypeInfo eventTypeInfo = {"Event", nullptr, eventCreator};
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_EVENT_H

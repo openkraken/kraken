@@ -117,7 +117,7 @@ TEST(Element, instanceofEventTarget) {
 }
 
 TEST(Element, stringifyBoundingClientRect) {
-  using namespace kraken::binding::qjs;
+  using namespace kraken;
 
   bool static errorCalled = false;
   bool static logCalled = false;

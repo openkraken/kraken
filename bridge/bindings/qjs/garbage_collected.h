@@ -10,7 +10,7 @@
 #include "include/kraken_foundation.h"
 #include "qjs_patch.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 template <typename T>
 class MakeGarbageCollectedTrait;
@@ -159,6 +159,6 @@ T* makeGarbageCollected(Args&&... args) {
   return MakeGarbageCollectedTrait<T>::allocate(std::forward<Args>(args)...);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_GARBAGE_COLLECTED_H

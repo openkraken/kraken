@@ -15,7 +15,7 @@ namespace kraken {
 
 struct ImageSnapShotContext {
   JSValue callback;
-  binding::qjs::ExecutionContext* context;
+  ExecutionContext* context;
   list_head link;
 };
 
@@ -45,6 +45,7 @@ class KrakenPageTest final {
   bool evaluateTestScripts(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine);
   bool parseTestHTML(const uint16_t* code, size_t codeLength);
   void invokeExecuteTest(ExecuteCallback executeCallback);
+  void registerTestEnvDartMethods(uint64_t* methodBytes, int32_t length);
 
   JSValue executeTestCallback{JS_NULL};
   JSValue executeTestProxyObject{JS_NULL};
@@ -54,7 +55,7 @@ class KrakenPageTest final {
   /// the pointer of bridge, ownership belongs to JSBridge
   KrakenPage* m_page;
   /// the pointer of JSContext, overship belongs to JSContext
-  binding::qjs::ExecutionContext* m_page_context;
+  ExecutionContext* m_page_context;
 };
 
 }  // namespace kraken

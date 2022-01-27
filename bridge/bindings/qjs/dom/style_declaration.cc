@@ -5,9 +5,8 @@
 
 #include "style_declaration.h"
 #include "event_target.h"
-#include "kraken_bridge.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 std::once_flag kinitCSSStyleDeclarationFlag;
 
@@ -271,4 +270,4 @@ void StyleDeclaration::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func)
   JS_MarkValue(rt, ownerEventTarget->jsObject, mark_func);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

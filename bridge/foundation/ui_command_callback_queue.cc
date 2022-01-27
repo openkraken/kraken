@@ -3,9 +3,7 @@
  * Author: Kraken Team.
  */
 
-#include "kraken_bridge.h"
-
-namespace foundation {
+namespace kraken {
 
 UICommandCallbackQueue* UICommandCallbackQueue::instance() {
   static UICommandCallbackQueue* queue = nullptr;
@@ -29,4 +27,4 @@ void UICommandCallbackQueue::registerCallback(const Callback& callback, void* da
   queue.emplace_back(item);
 }
 
-}  // namespace foundation
+}  // namespace kraken

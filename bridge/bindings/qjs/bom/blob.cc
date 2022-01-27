@@ -6,7 +6,7 @@
 #include "blob.h"
 #include "dart_methods.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindBlob(std::unique_ptr<ExecutionContext>& context) {
   JSValue constructor = context->contextData()->constructorForType(&blobTypeInfo);
@@ -260,4 +260,4 @@ uint8_t* Blob::bytes() {
 void Blob::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {}
 void Blob::dispose() const {}
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

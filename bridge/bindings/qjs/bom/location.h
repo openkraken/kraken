@@ -10,7 +10,7 @@
 #include "bindings/qjs/garbage_collected.h"
 #include "bindings/qjs/wrapper_type_info.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindLocation(std::unique_ptr<ExecutionContext>& context);
 
@@ -38,6 +38,6 @@ auto locationCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst th
 
 const WrapperTypeInfo locationTypeInfo = {"Location", nullptr, locationCreator};
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_LOCATION_H

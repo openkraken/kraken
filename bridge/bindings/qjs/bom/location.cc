@@ -7,7 +7,7 @@
 #include <utility>
 #include "dart_methods.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindLocation(std::unique_ptr<ExecutionContext>& context) {
   auto* contextData = context->contextData();
@@ -42,4 +42,4 @@ void Location::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
 
 void Location::dispose() const {}
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

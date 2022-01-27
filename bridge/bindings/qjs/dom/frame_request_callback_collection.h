@@ -8,7 +8,7 @@
 
 #include "bindings/qjs/executing_context.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 // |FrameCallback| is an interface type which generalizes callbacks which are
 // invoked when a script-based animation needs to be resampled.
@@ -41,7 +41,7 @@ class FrameRequestCallbackCollection final {
   std::vector<FrameCallback*> m_abandonedCallbacks;
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 class frame_request_callback_collection {};
 

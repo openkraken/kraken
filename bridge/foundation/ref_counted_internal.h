@@ -8,7 +8,6 @@
 #define FLUTTER_FML_MEMORY_REF_COUNTED_INTERNAL_H_
 
 #include <atomic>
-#include "include/kraken_bridge.h"
 #include "logging.h"
 
 namespace fml {
@@ -76,8 +75,6 @@ class RefCountedThreadSafeBase {
   mutable bool adoption_required_;
   mutable bool destruction_started_;
 #endif
-
-  KRAKEN_DISALLOW_COPY_AND_ASSIGN(RefCountedThreadSafeBase);
 };
 
 inline RefCountedThreadSafeBase::RefCountedThreadSafeBase()

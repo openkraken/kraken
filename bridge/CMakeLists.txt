@@ -83,8 +83,8 @@ endif()
 list(APPEND BRIDGE_SOURCE
   kraken_bridge.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_foundation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/dart_methods.h
+  foundation/macros.h
   foundation/logging.cc
   foundation/logging.h
   foundation/colors.h
@@ -98,10 +98,11 @@ list(APPEND BRIDGE_SOURCE
   foundation/inspector_task_queue.cc
   foundation/task_queue.cc
   foundation/task_queue.h
+  foundation/native_value.cc
+  foundation/native_value.h
   foundation/ui_command_buffer.cc
   foundation/ui_command_buffer.h
   foundation/ui_command_callback_queue.cc
-  foundation/closure.h
   dart_methods.cc
   polyfill/dist/polyfill.cc
   )
@@ -193,8 +194,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/executing_context_data.h
     bindings/qjs/wrapper_type_info.h
     bindings/qjs/heap_hashmap.h
-    bindings/qjs/native_value.cc
-    bindings/qjs/native_value.h
+    bindings/qjs/native_string.cc
+    bindings/qjs/native_string.h
     bindings/qjs/qjs_patch.cc
     bindings/qjs/qjs_patch.h
     bindings/qjs/module_manager.cc
@@ -288,7 +289,7 @@ endif ()
 
 list(APPEND PUBLIC_HEADER
   include/kraken_bridge.h
-  )
+)
 
 add_library(kraken SHARED ${BRIDGE_SOURCE})
 add_library(kraken_static STATIC ${BRIDGE_SOURCE})

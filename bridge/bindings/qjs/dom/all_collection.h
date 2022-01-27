@@ -9,7 +9,7 @@
 #include "bindings/qjs/host_object.h"
 #include "node.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 class AllCollection : public HostObject {
  public:
@@ -27,6 +27,6 @@ class AllCollection : public HostObject {
   std::vector<NodeInstance*> m_nodes;
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_ALL_COLLECTION_H

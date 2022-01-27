@@ -12,7 +12,7 @@
 #include "node.h"
 #include "style_declaration.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindElement(ExecutionContext* context);
 
@@ -190,6 +190,6 @@ class BoundingClientRect : public GarbageCollected<BoundingClientRect> {
   NativeBoundingClientRect* m_nativeBoundingClientRect{nullptr};
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_ELEMENT_H

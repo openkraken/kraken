@@ -5,7 +5,7 @@
 
 #include "all_collection.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 JSValue AllCollection::item(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
@@ -76,4 +76,4 @@ IMPL_PROPERTY_GETTER(AllCollection, length)(JSContext* ctx, JSValue this_val, in
   return JS_NewUint32(ctx, collection->m_nodes.size());
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

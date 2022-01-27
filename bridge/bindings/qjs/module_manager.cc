@@ -7,7 +7,7 @@
 #include "page.h"
 #include "qjs_patch.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 JSValue krakenModuleListener(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (argc < 1) {
@@ -168,4 +168,4 @@ void bindModuleManager(ExecutionContext* context) {
   QJS_GLOBAL_BINDING_FUNCTION(context, flushUICommand, "__kraken_flush_ui_command__", 0);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

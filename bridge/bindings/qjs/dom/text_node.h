@@ -8,7 +8,7 @@
 
 #include "node.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 class TextNodeInstance;
 
@@ -49,6 +49,6 @@ auto textNodeCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst th
 
 const WrapperTypeInfo textNodeType = {"TextNode", &nodeTypeInfo, textNodeCreator};
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_TEXT_NODE_H

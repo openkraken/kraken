@@ -10,7 +10,7 @@
 #include "bindings/qjs/qjs_patch.h"
 #include "dart_methods.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 void bindWindow(std::unique_ptr<ExecutionContext>& context) {
   auto* contextData = context->contextData();
@@ -271,4 +271,4 @@ IMPL_PROPERTY_GETTER(Window, self)(JSContext* ctx, JSValue this_val, int argc, J
   return JS_GetGlobalObject(ctx);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

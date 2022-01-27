@@ -5,9 +5,8 @@
 
 #include "text_node.h"
 #include "document.h"
-#include "kraken_bridge.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 std::once_flag kTextNodeInitFlag;
 
@@ -84,4 +83,4 @@ void TextNode::internalSetTextContent(JSValue content) {
   std::unique_ptr<NativeString> args_02 = jsValueToNativeString(m_ctx, content);
   context()->uiCommandBuffer()->addCommand(eventTargetId(), UICommand::setProperty, *args_01, *args_02, nullptr);
 }
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

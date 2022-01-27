@@ -12,7 +12,7 @@
 #include "kraken_test_env.h"
 #endif
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 DOMTimer::DOMTimer(JSValue callback) : m_callback(callback) {}
 
@@ -225,4 +225,4 @@ void bindTimer(ExecutionContext* context) {
   QJS_GLOBAL_BINDING_FUNCTION(context, clearTimeout, "clearTimeout", 1);
   QJS_GLOBAL_BINDING_FUNCTION(context, clearTimeout, "clearInterval", 1);
 }
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

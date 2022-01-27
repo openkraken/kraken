@@ -10,7 +10,7 @@
 #include "bindings/qjs/host_object.h"
 #include "dart_methods.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 struct NativeScreen {
   double width;
@@ -28,7 +28,7 @@ class Screen : public HostObject {
 
 void bindScreen(ExecutionContext* context);
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 class screen {};
 

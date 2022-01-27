@@ -16,7 +16,7 @@
 void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv);
 #endif
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 class EventTarget;
 class NativeEventTarget;
@@ -25,7 +25,7 @@ class Event;
 
 void bindEventTarget(ExecutionContext* context);
 
-using NativeDispatchEvent = void (*)(NativeEventTarget* nativeEventTarget, NativeString* eventType, void* nativeEvent, int32_t isCustomEvent);
+using NativeDispatchEvent = void (*)(int32_t contextId, NativeEventTarget* nativeEventTarget, NativeString* eventType, void* nativeEvent, int32_t isCustomEvent);
 using CallNativeMethods = void (*)(void* nativePtr, NativeValue* returnValue, NativeString* method, int32_t argc, NativeValue* argv);
 
 struct NativeEventTarget {
@@ -112,6 +112,6 @@ auto eventTargetCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst
 
 const WrapperTypeInfo eventTargetTypeInfo = {"EventTarget", nullptr, eventTargetCreator};
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_EVENT_TARGET_H

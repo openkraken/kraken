@@ -6,7 +6,49 @@
 #ifndef KRAKENBRIDGE_FOUNDATION_UI_COMMAND_BUFFER_H_
 #define KRAKENBRIDGE_FOUNDATION_UI_COMMAND_BUFFER_H_
 
-namespace foundation {
+#include <vector>
+#include <cinttypes>
+#include "native_value.h"
+#include "bindings/qjs/native_string.h"
+
+namespace kraken {
+
+enum UICommand {
+  createElement,
+  createTextNode,
+  createComment,
+  disposeEventTarget,
+  addEvent,
+  removeNode,
+  insertAdjacentNode,
+  setStyle,
+  setProperty,
+  removeProperty,
+  cloneNode,
+  removeEvent,
+  createDocumentFragment,
+};
+
+struct UICommandItem {
+  UICommandItem(int32_t id, int32_t type, NativeString args_01, NativeString args_02, void* nativePtr)
+    : type(type),
+      string_01(reinterpret_cast<int64_t>(args_01.string)),
+      args_01_length(args_01.length),
+      string_02(reinterpret_cast<int64_t>(args_02.string)),
+      args_02_length(args_02.length),
+      id(id),
+      nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
+  UICommandItem(int32_t id, int32_t type, NativeString args_01, void* nativePtr)
+    : type(type), string_01(reinterpret_cast<int64_t>(args_01.string)), args_01_length(args_01.length), id(id), nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
+  UICommandItem(int32_t id, int32_t type, void* nativePtr) : type(type), id(id), nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
+  int32_t type;
+  int32_t id;
+  int32_t args_01_length{0};
+  int32_t args_02_length{0};
+  int64_t string_01{0};
+  int64_t string_02{0};
+  int64_t nativePtr{0};
+};
 
 class UICommandBuffer {
  public:
@@ -26,6 +68,6 @@ class UICommandBuffer {
   std::vector<UICommandItem> queue;
 };
 
-}  // namespace foundation
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_FOUNDATION_UI_COMMAND_BUFFER_H_
