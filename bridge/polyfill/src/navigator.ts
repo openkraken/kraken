@@ -14,6 +14,12 @@ export const navigator = {
   get platform() {
     return kraken.invokeModule('Navigator', 'getPlatform');
   },
+  get appName() {
+    return kraken.invokeModule('Navigator', 'getAppName');
+  },
+  get appVersion() {
+    return kraken.invokeModule('Navigator', 'getAppVersion');
+  },
   getDeviceInfo() {
     return new Promise((resolve, reject) => {
       kraken.invokeModule('DeviceInfo', 'getDeviceInfo', null, (e, data) => {

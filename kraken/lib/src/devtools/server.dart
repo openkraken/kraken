@@ -311,11 +311,10 @@ class IsolateInspectorServer {
 
   void onRequestVersion(HttpRequest request) {
     request.response.headers.clear();
-    KrakenInfo krakenInfo = getKrakenInfo();
     _writeJSONObject(request, {
-      'Browser': 'Kraken/${krakenInfo.appVersion}',
+      'Browser': '${NavigatorModule.getAppName()}/${NavigatorModule.getAppVersion()}',
       'Protocol-Version': '1.3',
-      'User-Agent': krakenInfo.userAgent,
+      'User-Agent': NavigatorModule.getUserAgent(),
     });
   }
 

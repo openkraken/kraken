@@ -48,7 +48,7 @@ class FetchModule extends BaseModule {
   static String _getDefaultUserAgent() {
     if (_defaultUserAgent == null) {
       try {
-        _defaultUserAgent = getKrakenInfo().userAgent;
+        _defaultUserAgent = NavigatorModule.getUserAgent();
       } catch (error) {
         // Ignore if dynamic library is missing.
         return fallbackUserAgent;
