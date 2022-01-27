@@ -9,7 +9,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/src/module/navigator.dart';

@@ -2,7 +2,7 @@ import 'dart:io' show Platform;
 import 'package:kraken/bridge.dart';
 import 'package:kraken/src/module/module_manager.dart';
 
-String _customUserAgent;
+String? _customUserAgent;
 
 class NavigatorModule extends BaseModule {
   @override
@@ -45,7 +45,7 @@ class NavigatorModule extends BaseModule {
 
   static String getUserAgent() {
     if (_customUserAgent != null) {
-      return _customUserAgent;
+      return _customUserAgent!;
     }
     return getDefaultUserAgent();
   }
