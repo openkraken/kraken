@@ -45,7 +45,6 @@ class SpaceSplitString {
   std::vector<std::string> m_szData;
 };
 
-
 // TODO: refactor for better W3C standard support and higher performance.
 // https://dom.spec.whatwg.org/#interface-namednodemap
 class NamedNodeMap : public GarbageCollected<NamedNodeMap> {

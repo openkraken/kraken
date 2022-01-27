@@ -98,7 +98,6 @@ IMPL_FUNCTION(CSSStyleDeclaration, removeProperty)(JSContext* ctx, JSValue this_
   return JS_UNDEFINED;
 }
 
-
 IMPL_FUNCTION(CSSStyleDeclaration, getPropertyValue)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1)
     return JS_ThrowTypeError(ctx, "Failed to execute 'getPropertyValue' on 'CSSStyleDeclaration': 1 arguments required, but only 0 present.");
@@ -159,7 +158,6 @@ JSValue StyleDeclaration::getPropertyValue(std::string& name) {
   return JS_NewString(m_ctx, "");
 }
 
-
 void parseRules(std::string& source, ParseRuleCallback callback, void* context) {
   uint32_t idx = 0;
   uint32_t start = idx;
@@ -196,7 +194,6 @@ void parseRules(std::string& source, ParseRuleCallback callback, void* context) 
 }
 
 void StyleDeclaration::setCssText(std::string& cssText) {
-
   parseRules(
       cssText,
       [](void* p, std::string& key, std::string& value) {
@@ -263,7 +260,6 @@ JSValue StyleDeclaration::getObjectProperty(JSContext* ctx, JSValue obj, JSAtom 
   JS_FreeCString(ctx, cname);
   return result;
 }
-
 
 JSClassExoticMethods StyleDeclaration::m_exoticMethods{
     nullptr, nullptr, nullptr, nullptr, nullptr, getObjectProperty, setObjectProperty,

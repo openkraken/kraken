@@ -103,7 +103,7 @@ void HTMLParser::parseProperty(ElementInstance* element, GumboElement* gumboElem
   for (int j = 0; j < attributes->length; ++j) {
     auto* attribute = (GumboAttribute*)attributes->data[j]
 
-    std::string strName = attribute->name;
+                      std::string strName = attribute->name;
     std::string strValue = attribute->value;
 
     JSValue key = JS_NewString(ctx, strName.c_str());
