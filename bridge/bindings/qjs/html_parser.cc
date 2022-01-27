@@ -101,54 +101,24 @@ void HTMLParser::parseProperty(ElementInstance* element, GumboElement* gumboElem
 
   GumboVector* attributes = &gumboElement->attributes;
   for (int j = 0; j < attributes->length; ++j) {
-    auto* attribute = (GumboAttribute*)attributes->data[j];
+    auto* attribute = (GumboAttribute*)attributes->data[j]
 
-    if (strcmp(attribute->name, "style") == 0) {
-      std::vector<std::string> arrStyles;
-      std::string::size_type prev_pos = 0, pos = 0;
-      std::string strStyles = attribute->value;
+    std::string strName = attribute->name;
+    std::string strValue = attribute->value;
 
-      while ((pos = strStyles.find(';', pos)) != std::string::npos) {
-        arrStyles.push_back(strStyles.substr(prev_pos, pos - prev_pos));
-        prev_pos = ++pos;
-      }
-      arrStyles.push_back(strStyles.substr(prev_pos, pos - prev_pos));
+    JSValue key = JS_NewString(ctx, strName.c_str());
+    JSValue value = JS_NewString(ctx, strValue.c_str());
 
-      auto* style = element->style();
+    JSValue setAttributeFunc = JS_GetPropertyStr(ctx, element->jsObject, "setAttribute");
+    JSValue arguments[] = {key, value};
 
-      for (auto& s : arrStyles) {
-        std::string::size_type position = s.find(':');
-        if (position != std::basic_string<char>::npos) {
-          std::string styleKey = s.substr(0, position);
-          trim(styleKey);
+    JSValue returnValue = JS_Call(ctx, setAttributeFunc, element->jsObject, 2, arguments);
+    context->drainPendingPromiseJobs();
+    context->handleException(&returnValue);
 
-          std::string styleValue = s.substr(position + 1, s.length());
-          trim(styleValue);
-
-          JSValue newStyleValue = JS_NewString(ctx, styleValue.c_str());
-          style->internalSetProperty(styleKey, newStyleValue);
-          JS_FreeValue(ctx, newStyleValue);
-        }
-      }
-
-    } else {
-      std::string strName = attribute->name;
-      std::string strValue = attribute->value;
-
-      JSValue key = JS_NewString(ctx, strName.c_str());
-      JSValue value = JS_NewString(ctx, strValue.c_str());
-
-      JSValue setAttributeFunc = JS_GetPropertyStr(ctx, element->jsObject, "setAttribute");
-      JSValue arguments[] = {key, value};
-
-      JSValue returnValue = JS_Call(ctx, setAttributeFunc, element->jsObject, 2, arguments);
-      context->drainPendingPromiseJobs();
-      context->handleException(&returnValue);
-
-      JS_FreeValue(ctx, setAttributeFunc);
-      JS_FreeValue(ctx, key);
-      JS_FreeValue(ctx, value);
-    }
+    JS_FreeValue(ctx, setAttributeFunc);
+    JS_FreeValue(ctx, key);
+    JS_FreeValue(ctx, value);
   }
 }
 

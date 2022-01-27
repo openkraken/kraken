@@ -45,27 +45,27 @@ class SpaceSplitString {
   std::vector<std::string> m_szData;
 };
 
+
 // TODO: refactor for better W3C standard support and higher performance.
-class ElementAttributes : public GarbageCollected<ElementAttributes> {
+// https://dom.spec.whatwg.org/#interface-namednodemap
+class NamedNodeMap : public GarbageCollected<NamedNodeMap> {
  public:
   static JSClassID classId;
 
-  FORCE_INLINE const char* getHumanReadableName() const override { return "ElementAttributes"; }
+  FORCE_INLINE const char* getHumanReadableName() const override { return "NamedNodeMap"; }
 
   void dispose() const override;
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
 
-  JSValue getAttribute(const std::string& name);
-  JSValue setAttribute(const std::string& name, JSValue value);
-  bool hasAttribute(std::string& name);
-  void removeAttribute(std::string& name);
-  void copyWith(ElementAttributes* attributes);
-  std::shared_ptr<SpaceSplitString> className();
+  JSValue getNamedItem(const std::string& name);
+  JSValue setNamedItem(const std::string& name, JSValue value);
+  bool hasNamedItem(std::string& name);
+  void removeNamedItem(std::string& name);
+  void copyWith(NamedNodeMap* attributes);
   std::string toString();
 
  private:
-  std::unordered_map<std::string, JSValue> m_attributes;
-  std::shared_ptr<SpaceSplitString> m_className{std::make_shared<SpaceSplitString>("")};
+  std::unordered_map<std::string, JSValue> m_map;
 };
 
 bool isJavaScriptExtensionElementInstance(ExecutionContext* context, JSValue instance);
@@ -104,7 +104,9 @@ class Element : public Node {
   DEFINE_PROTOTYPE_READONLY_PROPERTY(children);
   DEFINE_PROTOTYPE_READONLY_PROPERTY(attributes);
 
+  DEFINE_PROTOTYPE_PROPERTY(id);
   DEFINE_PROTOTYPE_PROPERTY(className);
+  DEFINE_PROTOTYPE_PROPERTY(style);
   DEFINE_PROTOTYPE_PROPERTY(innerHTML);
   DEFINE_PROTOTYPE_PROPERTY(outerHTML);
   DEFINE_PROTOTYPE_PROPERTY(scrollTop);
@@ -113,6 +115,7 @@ class Element : public Node {
   JSValue internalGetTextContent() override;
   void internalSetTextContent(JSValue content) override;
 
+  std::string className();
   std::shared_ptr<SpaceSplitString> classNames();
   std::string tagName();
   std::string getRegisteredTagName();
@@ -126,9 +129,10 @@ class Element : public Node {
  protected:
   StyleDeclarationInstance* m_style{nullptr};
   ElementAttributes* m_attributes{nullptr};
+  std::string m_tagName;
+  std::string m_className;
 
  private:
-  std::string m_tagName;
   void _notifyNodeRemoved(Node* node) override;
   void _notifyChildRemoved();
   void _notifyNodeInsert(Node* insertNode) override;

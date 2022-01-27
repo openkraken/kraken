@@ -33,22 +33,22 @@ class CSSStyleDeclaration : public GarbageCollected<CSSStyleDeclaration> {
 
   CSSStyleDeclaration();
 
-  bool internalSetProperty(std::string& name, JSValue value);
-  void internalRemoveProperty(std::string& name);
-  JSValue internalGetPropertyValue(std::string& name);
+  bool setProperty(std::string& name, JSValue value);
+  void removeProperty(std::string& name);
+  JSValue getPropertyValue(std::string& name);
+  void setCssText(std::string& cssText);
   std::string toString();
-  void copyWith(CSSStyleDeclaration* instance);
+  void copyWith(CSSStyleDeclaration* style);
 
   DEFINE_FUNCTION(setProperty);
   DEFINE_FUNCTION(removeProperty);
   DEFINE_FUNCTION(getPropertyValue);
 
  private:
-  static int hasProperty(JSContext* ctx, JSValueConst obj, JSAtom atom);
-  static int setProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
-  static JSValue getProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);
-
-  std::unordered_map<std::string, std::string> properties;
+  static int hasObjectProperty(JSContext* ctx, JSValueConst obj, JSAtom atom);
+  static int setObjectProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
+  static JSValue getObjectProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);
+  std::unordered_map<std::string, std::string> m_properties;
 };
 
 }  // namespace kraken::binding::qjs

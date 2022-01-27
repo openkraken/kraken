@@ -17,6 +17,10 @@
 
 namespace kraken::binding::qjs {
 
+const std::string ATTR_ID = "id";
+const std::string ATTR_CLASS = "class";
+const std::string ATTR_STYLE = "style";
+
 void bindElement(std::unique_ptr<ExecutionContext>& context) {
   JSValue classObject = Element::constructor(context.get());
   JSValue prototype = Element::prototype(context.get());
@@ -54,7 +58,9 @@ void bindElement(std::unique_ptr<ExecutionContext>& context) {
   INSTALL_READONLY_PROPERTY(Element, prototype, attributes);
 
   // Install properties.
+  INSTALL_PROPERTY(Element, prototype, id);
   INSTALL_PROPERTY(Element, prototype, className);
+  INSTALL_PROPERTY(Element, prototype, style);
   INSTALL_PROPERTY(Element, prototype, innerHTML);
   INSTALL_PROPERTY(Element, prototype, outerHTML);
   INSTALL_PROPERTY(Element, prototype, scrollTop);
@@ -83,22 +89,23 @@ bool isJavaScriptExtensionElementInstance(ExecutionContext* context, JSValue ins
   return false;
 }
 
-JSClassID ElementAttributes::classId{0};
-JSValue ElementAttributes::getAttribute(const std::string& name) {
+JSClassID NamedNodeMap::classId{0};
+
+JSValue NamedNodeMap::getNamedItem(const std::string& name) {
   bool numberIndex = isNumberIndex(name);
 
   if (numberIndex) {
     return JS_NULL;
   }
 
-  return JS_DupValue(m_ctx, m_attributes[name]);
+  return JS_DupValue(m_ctx, m_map[name]);
 }
 
-JSValue ElementAttributes::setAttribute(const std::string& name, JSValue value) {
+JSValue NamedNodeMap::setNamedItem(const std::string& name, JSValue value) {
   bool numberIndex = isNumberIndex(name);
 
   if (numberIndex) {
-    return JS_ThrowTypeError(m_ctx, "Failed to execute 'setAttribute' on 'Element': '%s' is not a valid attribute name.", name.c_str());
+    return JS_ThrowTypeError(m_ctx, "Failed to execute 'setNamedItem' on 'NamedNodeMap': '%s' is not a valid item name.", name.c_str());
   }
 
   if (name == "class") {
@@ -106,48 +113,44 @@ JSValue ElementAttributes::setAttribute(const std::string& name, JSValue value) 
     m_className->set(classNameString);
   }
 
-  // If attribute exists, should free the previous value.
-  if (m_attributes.count(name) > 0) {
-    JS_FreeValue(m_ctx, m_attributes[name]);
+  // If item exists, should free the previous value.
+  if (m_map.count(name) > 0) {
+    JS_FreeValue(m_ctx, m_map[name]);
   }
 
-  m_attributes[name] = JS_DupValue(m_ctx, value);
+  m_map[name] = JS_DupValue(m_ctx, value);
 
   return JS_NULL;
 }
 
-bool ElementAttributes::hasAttribute(std::string& name) {
+bool NamedNodeMap::hasNamedItem(std::string& name) {
   bool numberIndex = isNumberIndex(name);
 
   if (numberIndex) {
     return false;
   }
 
-  return m_attributes.count(name) > 0;
+  return m_map.count(name) > 0;
 }
 
-void ElementAttributes::removeAttribute(std::string& name) {
-  JSValue value = m_attributes[name];
+void NamedNodeMap::removeNamedItem(std::string& name) {
+  JSValue value = m_map[name];
   JS_FreeValue(m_ctx, value);
-  m_attributes.erase(name);
+  m_map.erase(name);
 }
 
-void ElementAttributes::copyWith(ElementAttributes* attributes) {
-  for (auto& attr : attributes->m_attributes) {
-    m_attributes[attr.first] = JS_DupValue(m_ctx, attr.second);
+void NamedNodeMap::copyWith(NamedNodeMap* map) {
+  for (auto& item : map->m_map) {
+    m_map[item.first] = JS_DupValue(m_ctx, item.second);
   }
 }
 
-std::shared_ptr<SpaceSplitString> ElementAttributes::className() {
-  return m_className;
-}
-
-std::string ElementAttributes::toString() {
+std::string NamedNodeMap::toString() {
   std::string s;
 
-  for (auto& attr : m_attributes) {
-    s += attr.first + "=";
-    const char* pstr = JS_ToCString(m_ctx, attr.second);
+  for (auto& item : m_map) {
+    s += item.first + "=";
+    const char* pstr = JS_ToCString(m_ctx, item.second);
     s += "\"" + std::string(pstr) + "\"";
     JS_FreeCString(m_ctx, pstr);
   }
@@ -155,14 +158,15 @@ std::string ElementAttributes::toString() {
   return s;
 }
 
-void ElementAttributes::dispose() const {
-  for (auto& attr : m_attributes) {
-    JS_FreeValueRT(m_runtime, attr.second);
+void NamedNodeMap::dispose() const {
+  for (auto& item : m_map) {
+    JS_FreeValueRT(m_runtime, item.second);
   }
 }
-void ElementAttributes::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
-  for (auto& attr : m_attributes) {
-    JS_MarkValue(rt, attr.second, mark_func);
+
+void NamedNodeMap::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
+  for (auto& item : m_map) {
+    JS_MarkValue(rt, item.second, mark_func);
   }
 }
 
@@ -220,7 +224,7 @@ IMPL_FUNCTION(Element, hasAttribute)(JSContext* ctx, JSValue this_val, int argc,
   JSValue nameValue = argv[0];
 
   if (!JS_IsString(nameValue)) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'setAttribute' on 'Element': name attribute is not valid.");
+    return JS_ThrowTypeError(ctx, "Failed to execute 'hasAttribute' on 'Element': name attribute is not valid.");
   }
 
   auto* element = static_cast<Element*>(JS_GetOpaque(this_val, Element::classId));
@@ -229,7 +233,7 @@ IMPL_FUNCTION(Element, hasAttribute)(JSContext* ctx, JSValue this_val, int argc,
   const char* cname = JS_ToCString(ctx, nameValue);
   std::string name = std::string(cname);
 
-  JSValue result = JS_NewBool(ctx, attributes->hasAttribute(name));
+  JSValue result = JS_NewBool(ctx, attributes->hasNamedItem(name));
   JS_FreeCString(ctx, cname);
 
   return result;
@@ -253,15 +257,20 @@ IMPL_FUNCTION(Element, setAttribute)(JSContext* ctx, JSValue this_val, int argc,
 
   auto* attributes = element->m_attributes;
 
-  if (attributes->hasAttribute(name)) {
-    JSValue oldAttribute = attributes->getAttribute(name);
-    JSValue exception = attributes->setAttribute(name, attributeValue);
+  if (name == ATTR_STYLE) {
+    auto* style = element->m_style;
+    style->setCssText(jsValueToStdString(ctx, attributeValue));
+  }
+
+  if (attributes->hasNamedItem(name)) {
+    JSValue oldAttribute = attributes->getNamedItem(name);
+    JSValue exception = attributes->setNamedItem(name, attributeValue);
     if (JS_IsException(exception))
       return exception;
     element->_didModifyAttribute(name, oldAttribute, attributeValue);
     JS_FreeValue(ctx, oldAttribute);
   } else {
-    JSValue exception = attributes->setAttribute(name, attributeValue);
+    JSValue exception = attributes->setNamedItem(name, attributeValue);
     if (JS_IsException(exception))
       return exception;
     element->_didModifyAttribute(name, JS_NULL, attributeValue);
@@ -293,8 +302,8 @@ IMPL_FUNCTION(Element, getAttribute)(JSContext* ctx, JSValue this_val, int argc,
 
   auto* attributes = element->m_attributes;
 
-  if (attributes->hasAttribute(name)) {
-    return attributes->getAttribute(name);
+  if (attributes->hasNamedItem(name)) {
+    return attributes->getNamedItem(name);
   }
 
   return JS_NULL;
@@ -315,9 +324,9 @@ IMPL_FUNCTION(Element, removeAttribute)(JSContext* ctx, JSValue this_val, int ar
   std::string name = jsValueToStdString(ctx, nameValue);
   auto* attributes = element->m_attributes;
 
-  if (attributes->hasAttribute(name)) {
-    JSValue targetValue = attributes->getAttribute(name);
-    element->m_attributes->removeAttribute(name);
+  if (attributes->hasNamedItem(name)) {
+    JSValue targetValue = attributes->getNamedItem(name);
+    attributes->removeNamedItem(name);
     element->_didModifyAttribute(name, targetValue, JS_NULL);
     JS_FreeValue(ctx, targetValue);
 
@@ -450,14 +459,35 @@ IMPL_PROPERTY_GETTER(Element, tagName)(JSContext* ctx, JSValue this_val, int arg
 
 IMPL_PROPERTY_GETTER(Element, className)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<Element*>(JS_GetOpaque(this_val, Element::classId));
-  return element->m_attributes->getAttribute("class");
+  return element->getAttribute(ATTR_CLASS);
 }
+
 IMPL_PROPERTY_SETTER(Element, className)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<Element*>(JS_GetOpaque(this_val, Element::classId));
-  element->m_attributes->setAttribute("class", argv[0]);
-  std::unique_ptr<NativeString> args_01 = stringToNativeString("class");
-  std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
-  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+  element->setAttribute(ATTR_CLASS, argv[0]);
+  return JS_NULL;
+}
+
+IMPL_PROPERTY_GETTER(Element, id)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* element = static_cast<Element*>(JS_GetOpaque(this_val, Element::classId));
+  return element->getAttribute(ATTR_ID;
+}
+
+IMPL_PROPERTY_SETTER(Element, id)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* element = static_cast<Element*>(JS_GetOpaque(this_val, Element::classId));
+  element->setAttribute(ATTR_ID, argv[0]);
+  return JS_NULL;
+}
+
+IMPL_PROPERTY_GETTER(Element, style)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* element = static_cast<Element*>(JS_GetOpaque(this_val, Element::classId));
+  // The style property must return a CSS declaration block object.
+  return element->m_style;
+}
+
+IMPL_PROPERTY_SETTER(Element, style)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* element = static_cast<Element*>(JS_GetOpaque(this_val, Element::classId));
+  element->setAttribute(ATTR_STYLE, argv[0]);
   return JS_NULL;
 }
 
@@ -525,6 +555,7 @@ IMPL_PROPERTY_GETTER(Element, scrollTop)(JSContext* ctx, JSValue this_val, int a
   NativeValue args[] = {Native_NewInt32(static_cast<int32_t>(ViewModuleProperty::scrollTop))};
   return element->callNativeMethods("getViewModuleProperty", 1, args);
 }
+
 IMPL_PROPERTY_SETTER(Element, scrollTop)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<Element*>(JS_GetOpaque(this_val, Element::classId));
@@ -624,6 +655,7 @@ IMPL_PROPERTY_GETTER(Element, innerHTML)(JSContext* ctx, JSValue this_val, int a
   auto* element = static_cast<Element*>(JS_GetOpaque(this_val, Element::classId));
   return JS_NewString(ctx, element->innerHTML().c_str());
 }
+
 IMPL_PROPERTY_SETTER(Element, innerHTML)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<Element*>(JS_GetOpaque(this_val, Element::classId));
   const char* chtml = JS_ToCString(ctx, argv[0]);
@@ -643,6 +675,7 @@ IMPL_PROPERTY_GETTER(Element, outerHTML)(JSContext* ctx, JSValue this_val, int a
   auto* element = static_cast<Element*>(JS_GetOpaque(this_val, Element::classId));
   return JS_NewString(ctx, element->outerHTML().c_str());
 }
+
 IMPL_PROPERTY_SETTER(Element, outerHTML)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NULL;
 }
@@ -821,9 +854,8 @@ void Element::_notifyNodeRemoved(NodeInstance* insertionNode) {
 }
 
 void Element::_notifyChildRemoved() {
-  std::string prop = "id";
-  if (m_attributes->hasAttribute(prop)) {
-    JSValue idValue = m_attributes->getAttribute(prop);
+  if (m_attributes->hasNamedItem(ATTR_ID)) {
+    JSValue idValue = m_attributes->getNamedItem(ATTR_ID);
     JSAtom id = JS_ValueToAtom(m_ctx, idValue);
     document()->removeElementById(id, this);
     JS_FreeValue(m_ctx, idValue);
@@ -846,9 +878,8 @@ void Element::_notifyNodeInsert(NodeInstance* insertNode) {
 }
 
 void Element::_notifyChildInsert() {
-  std::string prop = "id";
-  if (m_attributes->hasAttribute(prop)) {
-    JSValue idValue = m_attributes->getAttribute(prop);
+  if (m_attributes->hasNamedItem(ATTR_ID)) {
+    JSValue idValue = m_attributes->getNamedItem(ATTR_ID);
     JSAtom id = JS_ValueToAtom(m_ctx, idValue);
     document()->addElementById(id, this);
     JS_FreeValue(m_ctx, idValue);
@@ -857,7 +888,7 @@ void Element::_notifyChildInsert() {
 }
 
 void Element::_didModifyAttribute(std::string& name, JSValue oldId, JSValue newId) {
-  if (name == "id") {
+  if (name == ATTR_ID) {
     _beforeUpdateId(oldId, newId);
   }
 }
@@ -892,7 +923,7 @@ void Element::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
 }
 
 // Element::Element(Element* element, std::string tagName, bool shouldAddUICommand): Node() {
-//  m_attributes = makeGarbageCollected<ElementAttributes>()->initialize(m_ctx, &ElementAttributes::classId);
+//  m_attributes = makeGarbageCollected<NamedNodeMap>()->initialize(m_ctx, &NamedNodeMap::classId);
 //  JSValue arguments[] = {jsObject};
 //  JSValue style = JS_CallConstructor(m_ctx, CSSStyleDeclaration::instance(m_context)->jsObject, 1, arguments);
 //  m_style = static_cast<StyleDeclarationInstance*>(JS_GetOpaque(style, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
@@ -906,10 +937,6 @@ void Element::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
 //}
 
 JSClassExoticMethods Element::exoticMethods{nullptr, nullptr, nullptr, nullptr, hasProperty, getProperty, setProperty};
-
-StyleDeclarationInstance* Element::style() {
-  return m_style;
-}
 
 void Element::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {}
 void Element::dispose() const {}
