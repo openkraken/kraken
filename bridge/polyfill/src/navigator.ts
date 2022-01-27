@@ -12,7 +12,7 @@ export const navigator = {
     return parseInt(logicalProcessors);
   },
   get platform() {
-    return ''
+    return kraken.invokeModule('Navigator', 'getPlatform');
   },
   getDeviceInfo() {
     return new Promise((resolve, reject) => {
