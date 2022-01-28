@@ -225,6 +225,14 @@ class ProxyHttpClientRequest extends HttpClientRequest {
     _httpHeaders.forEach(backendRequest.headers.set);
     _httpHeaders.clear();
 
+    // Assign configs for backend request.
+    backendRequest
+        ..bufferOutput = bufferOutput
+        ..contentLength = contentLength
+        ..followRedirects = followRedirects
+        ..persistentConnection = persistentConnection
+        ..maxRedirects = maxRedirects;
+
     _backendRequest = backendRequest;
     return backendRequest;
   }
