@@ -61,6 +61,8 @@ NativeValue Native_NewJSON(ExecutionContext* context, JSValue& value);
 NativeValue jsValueToNativeValue(JSContext* ctx, JSValue& value);
 JSValue nativeValueToJSValue(ExecutionContext* context, NativeValue& value);
 
+std::string nativeStringToStdString(NativeString* nativeString);
+
 }  // namespace kraken::binding::qjs
 
 #endif  // KRAKENBRIDGE_NATIVE_VALUE_H
