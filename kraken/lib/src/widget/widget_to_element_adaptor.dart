@@ -261,6 +261,16 @@ abstract class WidgetElement extends dom.Element {
 
     renderObjectElement = adaptor.attachToRenderTree(rootFlutterElement.owner!, (parentFlutterElement ?? rootFlutterElement) as RenderObjectElement, parentFlutterElement == null);
   }
+
+  void deactivate() {
+    assert(renderObjectElement != null);
+    deactivateRecursively(renderObjectElement!);
+  }
+
+  void deactivateRecursively(Element element) {
+    element.deactivate();
+    element.visitChildren(deactivateRecursively);
+  }
 }
 
 class _KrakenAdapterWidget extends StatefulWidget {
