@@ -878,6 +878,12 @@ class _KrakenState extends State<Kraken> with RouteAware {
     }
     return result;
   }
+
+  @override
+  void deactivate() {
+    // TODO: implement deactivate
+    super.deactivate();
+  }
 }
 
 class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
