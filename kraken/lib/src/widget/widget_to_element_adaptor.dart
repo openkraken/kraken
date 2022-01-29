@@ -247,9 +247,9 @@ abstract class WidgetElement extends dom.Element {
     RenderObjectElement rootFlutterElement = ownerDocument.controller.rootFlutterElement;
 
     KrakenRenderObjectToWidgetAdapter adaptor = KrakenRenderObjectToWidgetAdapter(
-        child: widget,
-        container: renderBoxModel as ContainerRenderObjectMixin<RenderBox,
-            ContainerBoxParentData<RenderBox>>
+      child: widget,
+      container: renderBoxModel as ContainerRenderObjectMixin<RenderBox,
+        ContainerBoxParentData<RenderBox>>
     );
 
     Element? parentFlutterElement;
