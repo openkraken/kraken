@@ -13,6 +13,8 @@
 
 namespace kraken {
 
+class ExecutionContext;
+
 enum UICommand {
   createElement,
   createTextNode,
@@ -53,7 +55,7 @@ struct UICommandItem {
 class UICommandBuffer {
  public:
   UICommandBuffer() = delete;
-  explicit UICommandBuffer(int32_t contextId);
+  explicit UICommandBuffer(ExecutionContext* context);
   void addCommand(int32_t id, int32_t type, void* nativePtr, bool batchedUpdate);
   void addCommand(int32_t id, int32_t type, void* nativePtr);
   void addCommand(int32_t id, int32_t type, NativeString& args_01, NativeString& args_02, void* nativePtr);
@@ -63,7 +65,7 @@ class UICommandBuffer {
   void clear();
 
  private:
-  int32_t contextId;
+  ExecutionContext *m_context{nullptr};
   std::atomic<bool> update_batched{false};
   std::vector<UICommandItem> queue;
 };

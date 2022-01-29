@@ -17,14 +17,13 @@
 #include <mutex>
 #include <unordered_map>
 #include "foundation/macros.h"
-#include "bindings/qjs/bom/dom_timer_coordinator.h"
 #include "executing_context_data.h"
 #include "foundation/ui_command_buffer.h"
-#include "garbage_collected.h"
-#include "kraken_foundation.h"
-#include "qjs_patch.h"
-#include "dart_methods.h"
-#include "wrapper_type_info.h"
+#include "bindings/qjs/garbage_collected.h"
+//#include "garbage_collected.h"
+//#include "qjs_patch.h"
+//#include "dart_methods.h"
+//#include "wrapper_type_info.h"
 
 using JSExceptionHandler = std::function<void(int32_t contextId, const char* message)>;
 
@@ -82,7 +81,7 @@ class ExecutionContext {
   JSValue global();
   JSContext* ctx();
   static JSRuntime* runtime();
-  int32_t getContextId() const;
+  FORCE_INLINE int32_t getContextId() const { return contextId; };
   void* getOwner();
   bool handleException(JSValue* exc);
   void drainPendingPromiseJobs();

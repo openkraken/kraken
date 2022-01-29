@@ -16,21 +16,21 @@ list(APPEND KRAKEN_TEST_SOURCE
 list(APPEND KRAKEN_UNIT_TEST_SOURCE
   ./test/kraken_test_env.cc
   ./test/kraken_test_env.h
-  ./bindings/qjs/js_context_test.cc
-  ./bindings/qjs/bom/timer_test.cc
-  ./bindings/qjs/bom/console_test.cc
-  ./bindings/qjs/qjs_patch_test.cc
-  ./bindings/qjs/garbage_collected_test.cc
-  ./bindings/qjs/dom/event_target_test.cc
-  ./bindings/qjs/module_manager_test.cc
-  ./bindings/qjs/dom/node_test.cc
-  ./bindings/qjs/dom/event_test.cc
-  ./bindings/qjs/dom/element_test.cc
-  ./bindings/qjs/dom/document_test.cc
-  ./bindings/qjs/dom/text_node_test.cc
-  ./bindings/qjs/bom/window_test.cc
-  ./bindings/qjs/dom/custom_event_test.cc
-  ./bindings/qjs/module_manager_test.cc
+  ./bindings/qjs/executing_context_test.cc
+#  ./bindings/qjs/bom/timer_test.cc
+#  ./bindings/qjs/bom/console_test.cc
+#  ./bindings/qjs/qjs_patch_test.cc
+#  ./bindings/qjs/garbage_collected_test.cc
+#  ./bindings/qjs/dom/event_target_test.cc
+#  ./bindings/qjs/module_manager_test.cc
+#  ./bindings/qjs/dom/node_test.cc
+#  ./bindings/qjs/dom/event_test.cc
+#  ./bindings/qjs/dom/element_test.cc
+#  ./bindings/qjs/dom/document_test.cc
+#  ./bindings/qjs/dom/text_node_test.cc
+#  ./bindings/qjs/bom/window_test.cc
+#  ./bindings/qjs/dom/custom_event_test.cc
+#  ./bindings/qjs/module_manager_test.cc
 )
 
 ### kraken_unit_test executable

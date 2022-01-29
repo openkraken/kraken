@@ -6,7 +6,6 @@
 #ifndef KRAKENBRIDGE_INSPECTOR_TASK_QUEUE_H
 #define KRAKENBRIDGE_INSPECTOR_TASK_QUEUE_H
 
-#include "kraken_foundation.h"
 #include "task_queue.h"
 
 namespace kraken {

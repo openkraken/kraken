@@ -9,7 +9,6 @@
 #include <assert.h>
 #include <quickjs/quickjs.h>
 #include "bindings/qjs/qjs_patch.h"
-#include "include/kraken_foundation.h"
 
 namespace kraken {
 

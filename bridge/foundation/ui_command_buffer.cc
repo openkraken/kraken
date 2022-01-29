@@ -4,15 +4,16 @@
  */
 
 #include "ui_command_buffer.h"
-#include "dart_methods.h"
+#include "bindings/qjs/dart_methods.h"
+#include "bindings/qjs/executing_context.h"
 
 namespace kraken {
 
-UICommandBuffer::UICommandBuffer(int32_t contextId) : contextId(contextId) {}
+UICommandBuffer::UICommandBuffer(ExecutionContext *context) : m_context(context) {}
 
 void UICommandBuffer::addCommand(int32_t id, int32_t type, void* nativePtr, bool batchedUpdate) {
   if (batchedUpdate) {
-    kraken::getDartMethod()->requestBatchUpdate(contextId);
+    m_context->dartMethodPtr()->requestBatchUpdate(m_context->getContextId());
     update_batched = true;
   }
 
@@ -23,7 +24,7 @@ void UICommandBuffer::addCommand(int32_t id, int32_t type, void* nativePtr, bool
 void UICommandBuffer::addCommand(int32_t id, int32_t type, void* nativePtr) {
   if (!update_batched) {
 #if FLUTTER_BACKEND
-    kraken::getDartMethod()->requestBatchUpdate(contextId);
+    m_context->dartMethodPtr()->requestBatchUpdate(m_context->getContextId());
 #endif
     update_batched = true;
   }
@@ -35,7 +36,7 @@ void UICommandBuffer::addCommand(int32_t id, int32_t type, void* nativePtr) {
 void UICommandBuffer::addCommand(int32_t id, int32_t type, NativeString& args_01, void* nativePtr) {
   if (!update_batched) {
 #if FLUTTER_BACKEND
-    kraken::getDartMethod()->requestBatchUpdate(contextId);
+    m_context->dartMethodPtr()->requestBatchUpdate(m_context->getContextId());
     update_batched = true;
 #endif
   }
@@ -47,7 +48,7 @@ void UICommandBuffer::addCommand(int32_t id, int32_t type, NativeString& args_01
 void UICommandBuffer::addCommand(int32_t id, int32_t type, NativeString& args_01, NativeString& args_02, void* nativePtr) {
 #if FLUTTER_BACKEND
   if (!update_batched) {
-    kraken::getDartMethod()->requestBatchUpdate(contextId);
+    m_context->dartMethodPtr()->requestBatchUpdate(m_context->getContextId());
     update_batched = true;
   }
 #endif

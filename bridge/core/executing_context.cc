@@ -189,11 +189,6 @@ bool ExecutionContext::isValid() const {
   return !ctxInvalid_;
 }
 
-int32_t ExecutionContext::getContextId() const {
-  assert(!ctxInvalid_ && "context has been released");
-  return contextId;
-}
-
 void* ExecutionContext::getOwner() {
   assert(!ctxInvalid_ && "context has been released");
   return owner;

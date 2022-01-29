@@ -101,7 +101,6 @@ list(APPEND BRIDGE_SOURCE
   foundation/native_value.h
   foundation/ui_command_buffer.cc
   foundation/ui_command_buffer.h
-  foundation/ui_command_callback_queue.cc
   polyfill/dist/polyfill.cc
   )
 
@@ -198,86 +197,6 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/qjs_patch.h
     bindings/qjs/dart_methods.cc
     bindings/qjs/dart_methods.h
-    bindings/qjs/module_manager.cc
-    bindings/qjs/module_manager.h
-    bindings/qjs/html_parser.cc
-    bindings/qjs/html_parser.h
-    bindings/qjs/bom/console.cc
-    bindings/qjs/bom/console.h
-    bindings/qjs/bom/screen.cc
-    bindings/qjs/bom/screen.h
-    bindings/qjs/bom/timer.cc
-    bindings/qjs/bom/timer.h
-    bindings/qjs/bom/dom_timer_coordinator.cc
-    bindings/qjs/bom/dom_timer_coordinator.h
-    bindings/qjs/dom/frame_request_callback_collection.cc
-    bindings/qjs/dom/frame_request_callback_collection.h
-    bindings/qjs/dom/event_listener_map.cc
-    bindings/qjs/dom/event_listener_map.h
-    bindings/qjs/dom/script_animation_controller.cc
-    bindings/qjs/dom/script_animation_controller.h
-    bindings/qjs/dom/event_target.cc
-    bindings/qjs/dom/event_target.h
-    bindings/qjs/dom/event.cc
-    bindings/qjs/dom/event.h
-    bindings/qjs/dom/node.h
-    bindings/qjs/dom/node.cc
-    bindings/qjs/dom/element.cc
-    bindings/qjs/dom/element.h
-    bindings/qjs/dom/document.cc
-    bindings/qjs/dom/document.h
-    bindings/qjs/dom/text_node.cc
-    bindings/qjs/dom/text_node.h
-    bindings/qjs/dom/comment_node.cc
-    bindings/qjs/dom/comment_node.h
-    bindings/qjs/dom/document_fragment.cc
-    bindings/qjs/dom/document_fragment.h
-    bindings/qjs/dom/style_declaration.cc
-    bindings/qjs/dom/style_declaration.h
-    bindings/qjs/dom/elements/.gen/canvas_element.cc
-    bindings/qjs/dom/elements/.gen/canvas_element.h
-    bindings/qjs/dom/elements/image_element.cc
-    bindings/qjs/dom/elements/image_element.h
-    bindings/qjs/dom/elements/.gen/input_element.cc
-    bindings/qjs/dom/elements/.gen/input_element.h
-    bindings/qjs/dom/elements/.gen/anchor_element.cc
-    bindings/qjs/dom/elements/.gen/anchor_element.h
-    bindings/qjs/dom/elements/.gen/object_element.cc
-    bindings/qjs/dom/elements/.gen/object_element.h
-    bindings/qjs/dom/elements/.gen/script_element.cc
-    bindings/qjs/dom/elements/.gen/script_element.h
-    bindings/qjs/dom/elements/template_element.cc
-    bindings/qjs/dom/elements/template_element.h
-    bindings/qjs/dom/events/.gen/close_event.h
-    bindings/qjs/dom/events/.gen/close_event.cc
-    bindings/qjs/dom/events/.gen/gesture_event.cc
-    bindings/qjs/dom/events/.gen/gesture_event.h
-    bindings/qjs/dom/events/.gen/input_event.cc
-    bindings/qjs/dom/events/.gen/input_event.h
-    bindings/qjs/dom/events/.gen/popstate_event.cc
-    bindings/qjs/dom/events/.gen/popstate_event.h
-    bindings/qjs/dom/events/.gen/intersection_change.cc
-    bindings/qjs/dom/events/.gen/intersection_change.h
-    bindings/qjs/dom/events/.gen/media_error_event.cc
-    bindings/qjs/dom/events/.gen/media_error_event.h
-    bindings/qjs/dom/events/.gen/mouse_event.cc
-    bindings/qjs/dom/events/.gen/mouse_event.h
-    bindings/qjs/dom/events/.gen/message_event.h
-    bindings/qjs/dom/events/.gen/message_event.cc
-    bindings/qjs/dom/events/touch_event.cc
-    bindings/qjs/dom/events/touch_event.h
-    bindings/qjs/bom/blob.cc
-    bindings/qjs/bom/blob.h
-    bindings/qjs/bom/location.h
-    bindings/qjs/bom/location.cc
-    bindings/qjs/bom/window.cc
-    bindings/qjs/bom/window.h
-    bindings/qjs/bom/performance.cc
-    bindings/qjs/bom/performance.h
-    bindings/qjs/dom/custom_event.cc
-    bindings/qjs/dom/custom_event.h
-    bindings/qjs/dom/all_collection.cc
-    bindings/qjs/dom/all_collection.h
 
     # Core sources
     core/dom/character_data.cc
