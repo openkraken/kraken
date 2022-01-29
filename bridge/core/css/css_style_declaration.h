@@ -3,8 +3,8 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKENBRIDGE_STYLE_DECLARATION_H
-#define KRAKENBRIDGE_STYLE_DECLARATION_H
+#ifndef KRAKENBRIDGE_CSS_STYLE_DECLARATION_H
+#define KRAKENBRIDGE_CSS_STYLE_DECLARATION_H
 
 #include "bindings/qjs/context_macros.h"
 #include "bindings/qjs/dom/event_target.h"
@@ -53,4 +53,4 @@ class CSSStyleDeclaration : public GarbageCollected<CSSStyleDeclaration> {
 
 }  // namespace kraken
 
-#endif  // KRAKENBRIDGE_STYLE_DECLARATION_H
+#endif  // KRAKENBRIDGE_CSS_STYLE_DECLARATION_H

@@ -3,8 +3,8 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKENBRIDGE_TEMPLATE_ELEMENT_H
-#define KRAKENBRIDGE_TEMPLATE_ELEMENT_H
+#ifndef KRAKENBRIDGE_HTML_TEMPLATE_ELEMENT_H
+#define KRAKENBRIDGE_HTML_TEMPLATE_ELEMENT_H
 
 #include "bindings/qjs/dom/document_fragment.h"
 #include "bindings/qjs/dom/element.h"

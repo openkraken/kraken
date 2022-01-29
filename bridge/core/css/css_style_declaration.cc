@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-#include "style_declaration.h"
+#include "css_style_declaration.h"
 #include "event_target.h"
 
 namespace kraken {

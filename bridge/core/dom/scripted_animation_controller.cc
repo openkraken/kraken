@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-#include "script_animation_controller.h"
+#include "scripted_animation_controller.h"
 #include "dart_methods.h"
 #include "frame_request_callback_collection.h"
 

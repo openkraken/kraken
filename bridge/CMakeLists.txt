@@ -83,7 +83,6 @@ endif()
 list(APPEND BRIDGE_SOURCE
   kraken_bridge.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/dart_methods.h
   foundation/macros.h
   foundation/logging.cc
   foundation/logging.h
@@ -103,7 +102,6 @@ list(APPEND BRIDGE_SOURCE
   foundation/ui_command_buffer.cc
   foundation/ui_command_buffer.h
   foundation/ui_command_callback_queue.cc
-  dart_methods.cc
   polyfill/dist/polyfill.cc
   )
 
@@ -198,6 +196,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/native_string.h
     bindings/qjs/qjs_patch.cc
     bindings/qjs/qjs_patch.h
+    bindings/qjs/dart_methods.cc
+    bindings/qjs/dart_methods.h
     bindings/qjs/module_manager.cc
     bindings/qjs/module_manager.h
     bindings/qjs/html_parser.cc
@@ -278,6 +278,22 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/dom/custom_event.h
     bindings/qjs/dom/all_collection.cc
     bindings/qjs/dom/all_collection.h
+
+    # Core sources
+    core/dom/character_data.cc
+    core/dom/character_data.h
+    core/dom/comment.cc
+    core/dom/comment.h
+    core/dom/node.cc
+    core/dom/node.h
+    core/dom/events/custom_event.cc
+    core/dom/events/custom_event.h
+    core/dom/events/event.h
+    core/dom/events/event.cc
+    core/dom/events/event_listener_map.cc
+    core/dom/events/event_listener_map.h
+    core/dom/events/event_target.cc
+    core/dom/events/event_target.h
     )
 
   # Quickjs use __builtin_frame_address() to get stack pointer, we should add follow options to get it work with -O2

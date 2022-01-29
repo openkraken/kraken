@@ -9,7 +9,7 @@
 #include "element.h"
 #include "frame_request_callback_collection.h"
 #include "node.h"
-#include "script_animation_controller.h"
+#include "scripted_animation_controller.h"
 
 namespace kraken {
 

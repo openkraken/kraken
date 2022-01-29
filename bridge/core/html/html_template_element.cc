@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-#include "template_element.h"
+#include "html_template_element.h"
 #include "bindings/qjs/dom/text_node.h"
 #include "bindings/qjs/qjs_patch.h"
 #include "page.h"

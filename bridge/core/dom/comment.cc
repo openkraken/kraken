@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-#include "comment_node.h"
+#include "comment.h"
 #include "document.h"
 
 namespace kraken {

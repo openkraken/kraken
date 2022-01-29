@@ -3,8 +3,8 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKENBRIDGE_COMMENT_NODE_H
-#define KRAKENBRIDGE_COMMENT_NODE_H
+#ifndef KRAKENBRIDGE_COMMENT_H
+#define KRAKENBRIDGE_COMMENT_H
 
 #include "node.h"
 
@@ -52,4 +52,4 @@ const WrapperTypeInfo commentTypeInfo = {"Comment", &nodeTypeInfo, commentCreato
 
 }  // namespace kraken
 
-#endif  // KRAKENBRIDGE_COMMENT_NODE_H
+#endif  // KRAKENBRIDGE_COMMENT_H

@@ -9,8 +9,8 @@
 #include "bindings/qjs/context_macros.h"
 #include "bindings/qjs/executing_context.h"
 #include "bindings/qjs/heap_hashmap.h"
-#include "bindings/qjs/native_value.h"
-#include "event_listener_map.h"
+//#include "bindings/qjs/native_value.h"
+//#include "event_listener_map.h"
 
 #if UNIT_TEST
 void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv);

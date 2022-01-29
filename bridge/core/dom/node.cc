@@ -5,7 +5,7 @@
 
 #include "node.h"
 #include "bindings/qjs/qjs_patch.h"
-#include "comment_node.h"
+#include "comment.h"
 #include "document.h"
 #include "document_fragment.h"
 #include "element.h"
