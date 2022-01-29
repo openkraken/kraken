@@ -252,6 +252,8 @@ abstract class WidgetElement extends dom.Element {
         ContainerBoxParentData<RenderBox>>
     );
 
+    ownerDocument.controller.view.addWidgetElement(this);
+
     Element? parentFlutterElement;
     if (parentNode is WidgetElement) {
       parentFlutterElement = (parentNode as WidgetElement).renderObjectElement;
