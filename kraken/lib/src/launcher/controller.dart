@@ -257,6 +257,7 @@ class KrakenViewController
     disposePage(_contextId);
 
     _clearTargets();
+    _clearWidgetElements();
     document.dispose();
     window.dispose();
     _disposed = true;
@@ -280,6 +281,18 @@ class KrakenViewController
     return null;
   }
 
+  void addWidgetElement(WidgetElement widgetElement) {
+    _widgetElements.add(widgetElement);
+  }
+
+  void removeWidgetElement(WidgetElement widgetElement) {
+    _widgetElements.remove(widgetElement);
+  }
+
+  void _clearWidgetElements() {
+    _widgetElements.clear();
+  }
+
   T? _getEventTargetById<T>(int targetId) {
     EventTarget? target = _eventTargets[targetId];
     if (target is T)
@@ -294,21 +307,12 @@ class KrakenViewController
 
   void _removeTarget(int targetId) {
     if (_eventTargets.containsKey(targetId)) {
-
-      EventTarget? target = _eventTargets[targetId];
-      if (target is WidgetElement) {
-        _widgetElements.add(target);
-      }
-
       _eventTargets.remove(targetId);
     }
   }
 
   void _setEventTarget(int targetId, EventTarget target) {
     _eventTargets[targetId] = target;
-    if (target is WidgetElement) {
-      _widgetElements.add(target);
-    }
   }
 
   void _clearTargets() {
