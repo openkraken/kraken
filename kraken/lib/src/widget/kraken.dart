@@ -881,7 +881,9 @@ class _KrakenState extends State<Kraken> with RouteAware {
 
   @override
   void deactivate() {
-    // TODO: implement deactivate
+    widget.controller!.view.widgetElements.forEach((element) {
+      (element as WidgetElement).deactivate();
+    });
     super.deactivate();
   }
 }
