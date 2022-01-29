@@ -1,3 +1,11 @@
+## 0.10.0+4
+
+**Bug Fixed**
+
++ Fix HttpCache error on linux platform. https://github.com/openkraken/kraken/pull/1113
++ Fix exception leak cause globalObject not fully freed. https://github.com/openkraken/kraken/pull/1117
++ Fix border radius of one percentage value. https://github.com/openkraken/kraken/pull/1121
+
 ## 0.10.0+3
 
 **Bug Fixed**
