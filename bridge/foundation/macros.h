@@ -40,5 +40,4 @@
   TypeName() = delete;                                  \
   KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(TypeName)
 
-
 #endif  // KRAKENBRIDGE_MACROS_H

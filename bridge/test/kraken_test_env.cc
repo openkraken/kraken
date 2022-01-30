@@ -12,21 +12,21 @@
 //#include "page.h"
 //
 //#if defined(__linux__) || defined(__APPLE__)
-//static int64_t get_time_ms(void) {
+// static int64_t get_time_ms(void) {
 //  struct timespec ts;
 //  clock_gettime(CLOCK_MONOTONIC, &ts);
 //  return (uint64_t)ts.tv_sec * 1000 + (ts.tv_nsec / 1000000);
 //}
 //#else
 ///* more portable, but does not work if the date is updated */
-//static int64_t get_time_ms(void) {
+// static int64_t get_time_ms(void) {
 //  struct timeval tv;
 //  gettimeofday(&tv, NULL);
 //  return (int64_t)tv.tv_sec * 1000 + (tv.tv_usec / 1000);
 //}
 //#endif
 //
-//typedef struct {
+// typedef struct {
 //  struct list_head link;
 //  int64_t timeout;
 //  DOMTimer* timer;
@@ -35,7 +35,7 @@
 //  AsyncCallback func;
 //} JSOSTimer;
 //
-//typedef struct {
+// typedef struct {
 //  struct list_head link;
 //  FrameCallback* callback;
 //  int32_t contextId;
@@ -43,30 +43,30 @@
 //  int32_t callbackId;
 //} JSFrameCallback;
 //
-//typedef struct JSThreadState {
+// typedef struct JSThreadState {
 //  std::unordered_map<int32_t, JSOSTimer*> os_timers; /* list of timer.link */
 //  std::unordered_map<int32_t, JSFrameCallback*> os_frameCallbacks;
 //} JSThreadState;
 //
-//static void unlink_timer(JSThreadState* ts, JSOSTimer* th) {
+// static void unlink_timer(JSThreadState* ts, JSOSTimer* th) {
 //  ts->os_timers.erase(th->timer->timerId());
 //}
 //
-//static void unlink_callback(JSThreadState* ts, JSFrameCallback* th) {
+// static void unlink_callback(JSThreadState* ts, JSFrameCallback* th) {
 //  ts->os_frameCallbacks.erase(th->callbackId);
 //}
 //
-//NativeString* TEST_invokeModule(void* callbackContext, int32_t contextId, NativeString* moduleName, NativeString* method, NativeString* params, AsyncModuleCallback callback) {
+// NativeString* TEST_invokeModule(void* callbackContext, int32_t contextId, NativeString* moduleName, NativeString* method, NativeString* params, AsyncModuleCallback callback) {
 //  return nullptr;
 //};
 //
-//void TEST_requestBatchUpdate(int32_t contextId){};
+// void TEST_requestBatchUpdate(int32_t contextId){};
 //
-//void TEST_reloadApp(int32_t contextId) {}
+// void TEST_reloadApp(int32_t contextId) {}
 //
-//int32_t timerId = 0;
+// int32_t timerId = 0;
 //
-//int32_t TEST_setTimeout(DOMTimer* timer, int32_t contextId, AsyncCallback callback, int32_t timeout) {
+// int32_t TEST_setTimeout(DOMTimer* timer, int32_t contextId, AsyncCallback callback, int32_t timeout) {
 //  JSRuntime* rt = JS_GetRuntime(timer->ctx());
 //  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
 //  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
@@ -83,7 +83,7 @@
 //  return id;
 //}
 //
-//int32_t TEST_setInterval(DOMTimer* timer, int32_t contextId, AsyncCallback callback, int32_t timeout) {
+// int32_t TEST_setInterval(DOMTimer* timer, int32_t contextId, AsyncCallback callback, int32_t timeout) {
 //  JSRuntime* rt = JS_GetRuntime(timer->ctx());
 //  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
 //  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
@@ -100,9 +100,9 @@
 //  return id;
 //}
 //
-//int32_t callbackId = 0;
+// int32_t callbackId = 0;
 //
-//uint32_t TEST_requestAnimationFrame(FrameCallback* frameCallback, int32_t contextId, AsyncRAFCallback handler) {
+// uint32_t TEST_requestAnimationFrame(FrameCallback* frameCallback, int32_t contextId, AsyncRAFCallback handler) {
 //  JSRuntime* rt = JS_GetRuntime(frameCallback->ctx());
 //  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(frameCallback->ctx()));
 //  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
@@ -119,48 +119,48 @@
 //  return id;
 //}
 //
-//void TEST_cancelAnimationFrame(int32_t contextId, int32_t id) {
+// void TEST_cancelAnimationFrame(int32_t contextId, int32_t id) {
 //  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
 //  auto* context = page->getContext();
 //  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(context->runtime()));
 //  ts->os_frameCallbacks.erase(id);
 //}
 //
-//void TEST_clearTimeout(int32_t contextId, int32_t timerId) {
+// void TEST_clearTimeout(int32_t contextId, int32_t timerId) {
 //  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
 //  auto* context = page->getContext();
 //  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(context->runtime()));
 //  ts->os_timers.erase(timerId);
 //}
 //
-//NativeScreen* TEST_getScreen(int32_t contextId) {
+// NativeScreen* TEST_getScreen(int32_t contextId) {
 //  return nullptr;
 //};
 //
-//double TEST_devicePixelRatio(int32_t contextId) {
+// double TEST_devicePixelRatio(int32_t contextId) {
 //  return 1.0;
 //}
 //
-//NativeString* TEST_platformBrightness(int32_t contextId) {
+// NativeString* TEST_platformBrightness(int32_t contextId) {
 //  return nullptr;
 //}
 //
-//void TEST_toBlob(void* callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId, double devicePixelRatio) {}
+// void TEST_toBlob(void* callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId, double devicePixelRatio) {}
 //
-//void TEST_flushUICommand() {}
+// void TEST_flushUICommand() {}
 //
-//void TEST_initWindow(int32_t contextId, void* nativePtr) {}
+// void TEST_initWindow(int32_t contextId, void* nativePtr) {}
 //
-//void TEST_initDocument(int32_t contextId, void* nativePtr) {}
+// void TEST_initDocument(int32_t contextId, void* nativePtr) {}
 //
 //#if ENABLE_PROFILE
-//NativePerformanceEntryList* TEST_getPerformanceEntries(int32_t) {}
+// NativePerformanceEntryList* TEST_getPerformanceEntries(int32_t) {}
 //#endif
 //
-//std::once_flag testInitOnceFlag;
-//static int32_t inited{false};
+// std::once_flag testInitOnceFlag;
+// static int32_t inited{false};
 //
-//std::unique_ptr<kraken::KrakenPage> TEST_init(OnJSError onJsError) {
+// std::unique_ptr<kraken::KrakenPage> TEST_init(OnJSError onJsError) {
 //  uint32_t contextId;
 //  if (inited) {
 //    contextId = allocateNewPage(-1);
@@ -182,17 +182,17 @@
 //  return std::unique_ptr<kraken::KrakenPage>(page);
 //}
 //
-//std::unique_ptr<kraken::KrakenPage> TEST_init() {
+// std::unique_ptr<kraken::KrakenPage> TEST_init() {
 //  return TEST_init(nullptr);
 //}
 //
-//std::unique_ptr<kraken::KrakenPage> TEST_allocateNewPage() {
+// std::unique_ptr<kraken::KrakenPage> TEST_allocateNewPage() {
 //  uint32_t newContextId = allocateNewPage(-1);
 //  initTestFramework(newContextId);
 //  return std::unique_ptr<kraken::KrakenPage>(static_cast<kraken::KrakenPage*>(getPage(newContextId)));
 //}
 //
-//static bool jsPool(ExecutionContext* context) {
+// static bool jsPool(ExecutionContext* context) {
 //  JSRuntime* rt = context->runtime();
 //  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
 //  int64_t cur_time, delay;
@@ -238,7 +238,7 @@
 //  return false;
 //}
 //
-//void TEST_runLoop(ExecutionContext* context) {
+// void TEST_runLoop(ExecutionContext* context) {
 //  for (;;) {
 //    context->drainPendingPromiseJobs();
 //    if (jsPool(context))
@@ -246,7 +246,7 @@
 //  }
 //}
 //
-//void TEST_dispatchEvent(int32_t contextId, EventTarget* eventTarget, const std::string type) {
+// void TEST_dispatchEvent(int32_t contextId, EventTarget* eventTarget, const std::string type) {
 //  NativeEventTarget* nativeEventTarget = new NativeEventTarget(eventTarget);
 //  auto nativeEventType = stringToNativeString(type);
 //  NativeString* rawEventType = nativeEventType.release();
@@ -258,10 +258,10 @@
 //  NativeEventTarget::dispatchEventImpl(contextId, nativeEventTarget, rawEventType, rawEvent, false);
 //}
 //
-//void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv) {}
+// void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv) {}
 //
-//std::unordered_map<int32_t, std::shared_ptr<UnitTestEnv>> unitTestEnvMap;
-//std::shared_ptr<UnitTestEnv> TEST_getEnv(int32_t contextUniqueId) {
+// std::unordered_map<int32_t, std::shared_ptr<UnitTestEnv>> unitTestEnvMap;
+// std::shared_ptr<UnitTestEnv> TEST_getEnv(int32_t contextUniqueId) {
 //  if (unitTestEnvMap.count(contextUniqueId) == 0) {
 //    unitTestEnvMap[contextUniqueId] = std::make_shared<UnitTestEnv>();
 //  }
@@ -269,7 +269,7 @@
 //  return unitTestEnvMap[contextUniqueId];
 //}
 //
-//void TEST_registerEventTargetDisposedCallback(int32_t contextUniqueId, TEST_OnEventTargetDisposed callback) {
+// void TEST_registerEventTargetDisposedCallback(int32_t contextUniqueId, TEST_OnEventTargetDisposed callback) {
 //  if (unitTestEnvMap.count(contextUniqueId) == 0) {
 //    unitTestEnvMap[contextUniqueId] = std::make_shared<UnitTestEnv>();
 //  }
@@ -277,7 +277,7 @@
 //  unitTestEnvMap[contextUniqueId]->onEventTargetDisposed = callback;
 //}
 //
-//void TEST_mockDartMethods(OnJSError onJSError) {
+// void TEST_mockDartMethods(OnJSError onJSError) {
 //  std::vector<uint64_t> mockMethods{
 //      reinterpret_cast<uint64_t>(TEST_invokeModule),
 //      reinterpret_cast<uint64_t>(TEST_requestBatchUpdate),

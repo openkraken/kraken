@@ -9,7 +9,7 @@
 
 namespace kraken {
 
-UICommandBuffer::UICommandBuffer(ExecutionContext *context) : m_context(context) {}
+UICommandBuffer::UICommandBuffer(ExecutionContext* context) : m_context(context) {}
 
 void UICommandBuffer::addCommand(int32_t id, int32_t type, void* nativePtr, bool batchedUpdate) {
   if (batchedUpdate) {

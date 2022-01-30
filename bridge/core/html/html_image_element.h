@@ -8,12 +8,12 @@
 //
 //#include "bindings/qjs/dom/element.h"
 //
-//namespace kraken {
+// namespace kraken {
 //
-//void bindImageElement(ExecutionContext* context);
+// void bindImageElement(ExecutionContext* context);
 //
-//class ImageElementInstance;
-//class ImageElement : public Element {
+// class ImageElementInstance;
+// class ImageElement : public Element {
 // public:
 //  ImageElement() = delete;
 //  explicit ImageElement(ExecutionContext* context);
@@ -32,7 +32,7 @@
 //  friend ImageElementInstance;
 //};
 //
-//class ImageElementInstance : public ElementInstance {
+// class ImageElementInstance : public ElementInstance {
 // public:
 //  ImageElementInstance() = delete;
 //  explicit ImageElementInstance(ImageElement* element);

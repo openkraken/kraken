@@ -6,11 +6,11 @@
 #ifndef KRAKENBRIDGE_EVENT_TARGET_H
 #define KRAKENBRIDGE_EVENT_TARGET_H
 
-#include "foundation/macros.h"
-#include "bindings/qjs/macros.h"
 #include "bindings/qjs/heap_hashmap.h"
+#include "bindings/qjs/macros.h"
 #include "core/executing_context.h"
 #include "event_listener_map.h"
+#include "foundation/macros.h"
 
 #if UNIT_TEST
 void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv);

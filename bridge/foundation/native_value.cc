@@ -5,8 +5,8 @@
 
 #include "native_value.h"
 #include "bindings/qjs/qjs_patch.h"
-#include "core/executing_context.h"
 #include "core/dom/events/event_target.h"
+#include "core/executing_context.h"
 
 namespace kraken {
 
@@ -121,13 +121,13 @@ NativeValue jsValueToNativeValue(JSContext* ctx, JSValue& value) {
     auto* functionContext = new NativeFunctionContext{context, value};
     return Native_NewPtr(JSPointerType::NativeFunctionContext, functionContext);
   } else if (JS_IsObject(value)) {
-//    auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
-//    if (JS_IsInstanceOf(ctx, value, ImageElement::instance(context)->jsObject)) {
-//      auto* imageElementInstance = static_cast<ImageElementInstance*>(JS_GetOpaque(value, Element::classId()));
-//      return Native_NewPtr(JSPointerType::NativeEventTarget, imageElementInstance->nativeEventTarget);
-//    }
+    //    auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+    //    if (JS_IsInstanceOf(ctx, value, ImageElement::instance(context)->jsObject)) {
+    //      auto* imageElementInstance = static_cast<ImageElementInstance*>(JS_GetOpaque(value, Element::classId()));
+    //      return Native_NewPtr(JSPointerType::NativeEventTarget, imageElementInstance->nativeEventTarget);
+    //    }
 
-//    return Native_NewJSON(context, value);
+    //    return Native_NewJSON(context, value);
   }
 
   return Native_NewNull();
@@ -144,19 +144,19 @@ NativeFunctionContext::~NativeFunctionContext() {
 }
 
 static JSValue anonymousFunction(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv, int magic, JSValue* func_data) {
-//  auto id = magic;
-//  auto* eventTarget = static_cast<EventTarget*>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
-//
-//  std::string call_params = AnonymousFunctionCallPreFix + std::to_string(id);
-//
-//  auto* arguments = new NativeValue[argc];
-//  for (int i = 0; i < argc; i++) {
-//    arguments[i] = jsValueToNativeValue(ctx, argv[i]);
-//  }
-//
-//  JSValue returnValue = eventTarget->callNativeMethods(call_params.c_str(), argc, arguments);
-//  delete[] arguments;
-//  return returnValue;
+  //  auto id = magic;
+  //  auto* eventTarget = static_cast<EventTarget*>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
+  //
+  //  std::string call_params = AnonymousFunctionCallPreFix + std::to_string(id);
+  //
+  //  auto* arguments = new NativeValue[argc];
+  //  for (int i = 0; i < argc; i++) {
+  //    arguments[i] = jsValueToNativeValue(ctx, argv[i]);
+  //  }
+  //
+  //  JSValue returnValue = eventTarget->callNativeMethods(call_params.c_str(), argc, arguments);
+  //  delete[] arguments;
+  //  return returnValue;
 }
 
 void anonymousAsyncCallback(void* callbackContext, NativeValue* nativeValue, int32_t contextId, const char* errmsg) {
@@ -191,31 +191,31 @@ void anonymousAsyncCallback(void* callbackContext, NativeValue* nativeValue, int
 }
 
 static JSValue anonymousAsyncFunction(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv, int magic, JSValue* func_data) {
-//  JSValue resolving_funcs[2];
-//  JSValue promise = JS_NewPromiseCapability(ctx, resolving_funcs);
-//
-//  auto id = magic;
-//  auto* eventTarget = static_cast<EventTargetInstance*>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
-//  auto* context = eventTarget->context();
-//
-//  auto* promiseContext = new PromiseContext{eventTarget, context, resolving_funcs[0], resolving_funcs[1], promise};
-//  list_add_tail(&promiseContext->link, &context->promise_job_list);
-//
-//  std::string call_params = AsyncAnonymousFunctionCallPreFix + std::to_string(id);
-//
-//  auto* arguments = new NativeValue[argc + 3];
-//
-//  arguments[0] = Native_NewInt32(context->getContextId());
-//  arguments[1] = Native_NewPtr(JSPointerType::AsyncContextContext, promiseContext);
-//  arguments[2] = Native_NewPtr(JSPointerType::AsyncContextContext, reinterpret_cast<void*>(anonymousAsyncCallback));
-//  for (int i = 0; i < argc; i++) {
-//    arguments[i + 3] = jsValueToNativeValue(ctx, argv[i]);
-//  }
-//
-//  eventTarget->callNativeMethods(call_params.c_str(), argc + 3, arguments);
-//  delete[] arguments;
-//
-//  return promise;
+  //  JSValue resolving_funcs[2];
+  //  JSValue promise = JS_NewPromiseCapability(ctx, resolving_funcs);
+  //
+  //  auto id = magic;
+  //  auto* eventTarget = static_cast<EventTargetInstance*>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
+  //  auto* context = eventTarget->context();
+  //
+  //  auto* promiseContext = new PromiseContext{eventTarget, context, resolving_funcs[0], resolving_funcs[1], promise};
+  //  list_add_tail(&promiseContext->link, &context->promise_job_list);
+  //
+  //  std::string call_params = AsyncAnonymousFunctionCallPreFix + std::to_string(id);
+  //
+  //  auto* arguments = new NativeValue[argc + 3];
+  //
+  //  arguments[0] = Native_NewInt32(context->getContextId());
+  //  arguments[1] = Native_NewPtr(JSPointerType::AsyncContextContext, promiseContext);
+  //  arguments[2] = Native_NewPtr(JSPointerType::AsyncContextContext, reinterpret_cast<void*>(anonymousAsyncCallback));
+  //  for (int i = 0; i < argc; i++) {
+  //    arguments[i + 3] = jsValueToNativeValue(ctx, argv[i]);
+  //  }
+  //
+  //  eventTarget->callNativeMethods(call_params.c_str(), argc + 3, arguments);
+  //  delete[] arguments;
+  //
+  //  return promise;
 }
 
 JSValue nativeValueToJSValue(ExecutionContext* context, NativeValue& value) {
@@ -249,14 +249,14 @@ JSValue nativeValueToJSValue(ExecutionContext* context, NativeValue& value) {
     case NativeTag::TAG_POINTER: {
       auto* ptr = value.u.ptr;
       int ptrType = (int)value.float64;
-//      if (ptrType == static_cast<int64_t>(JSPointerType::NativeBoundingClientRect)) {
-//        return (new BoundingClientRect(context, static_cast<NativeBoundingClientRect*>(ptr)))->jsObject;
-//      } else if (ptrType == static_cast<int64_t>(JSPointerType::NativeCanvasRenderingContext2D)) {
-//        return (new CanvasRenderingContext2D(context, static_cast<NativeCanvasRenderingContext2D*>(ptr)))->jsObject;
-//      } else if (ptrType == static_cast<int64_t>(JSPointerType::NativeEventTarget)) {
-//        auto* nativeEventTarget = static_cast<NativeEventTarget*>(ptr);
-//        return JS_DupValue(context->ctx(), nativeEventTarget->instance->jsObject);
-//      }
+      //      if (ptrType == static_cast<int64_t>(JSPointerType::NativeBoundingClientRect)) {
+      //        return (new BoundingClientRect(context, static_cast<NativeBoundingClientRect*>(ptr)))->jsObject;
+      //      } else if (ptrType == static_cast<int64_t>(JSPointerType::NativeCanvasRenderingContext2D)) {
+      //        return (new CanvasRenderingContext2D(context, static_cast<NativeCanvasRenderingContext2D*>(ptr)))->jsObject;
+      //      } else if (ptrType == static_cast<int64_t>(JSPointerType::NativeEventTarget)) {
+      //        auto* nativeEventTarget = static_cast<NativeEventTarget*>(ptr);
+      //        return JS_DupValue(context->ctx(), nativeEventTarget->instance->jsObject);
+      //      }
     }
     case NativeTag::TAG_FUNCTION: {
       int64_t functionId = value.u.int64;
@@ -270,4 +270,4 @@ JSValue nativeValueToJSValue(ExecutionContext* context, NativeValue& value) {
   return JS_NULL;
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

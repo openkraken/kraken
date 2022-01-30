@@ -4,9 +4,9 @@
  */
 
 #include "kraken_bridge_test.h"
-#include "page_test.h"
-#include "bindings/qjs/native_string_utils.h"
 #include <atomic>
+#include "bindings/qjs/native_string_utils.h"
+#include "page_test.h"
 
 std::unordered_map<int, kraken::KrakenPageTest*> bridgeTestPool = std::unordered_map<int, kraken::KrakenPageTest*>();
 

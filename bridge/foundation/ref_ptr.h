@@ -13,8 +13,8 @@
 #include <utility>
 
 #include "logging.h"
-#include "ref_ptr_internal.h"
 #include "macros.h"
+#include "ref_ptr_internal.h"
 
 namespace fml {
 

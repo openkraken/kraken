@@ -33,18 +33,18 @@ constexpr LogSeverity LOG_NUM_SEVERITIES = 5;
 constexpr LogSeverity LOG_FATAL = 6;
 
 class LogMessageVoidify {
-public:
+ public:
   void operator&(std::ostream&) {}
 };
 
 class LogMessage {
-  public:
+ public:
   LogMessage(LogSeverity severity, const char* file, int line, const char* condition);
   ~LogMessage();
 
   std::ostream& stream() { return stream_; }
 
-  private:
+ private:
   std::ostringstream stream_;
   const LogSeverity severity_;
   const char* file_;

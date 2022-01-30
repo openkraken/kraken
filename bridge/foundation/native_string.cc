@@ -1,7 +1,7 @@
 /*
-* Copyright (C) 2021 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2021 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #include "native_string.h"
 #include <string>
@@ -22,5 +22,4 @@ void NativeString::free() {
   delete[] string;
 }
 
-
-}
+}  // namespace kraken

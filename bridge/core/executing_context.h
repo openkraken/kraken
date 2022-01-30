@@ -16,13 +16,13 @@
 #include <memory>
 #include <mutex>
 #include <unordered_map>
+#include "bindings/qjs/garbage_collected.h"
 #include "foundation/macros.h"
 #include "foundation/ui_command_buffer.h"
-#include "bindings/qjs/garbage_collected.h"
 
+#include "dart_methods.h"
 #include "executing_context_data.h"
 #include "frame/dom_timer_coordinator.h"
-#include "dart_methods.h"
 
 using JSExceptionHandler = std::function<void(int32_t contextId, const char* message)>;
 

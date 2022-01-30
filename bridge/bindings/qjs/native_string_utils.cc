@@ -30,7 +30,6 @@ std::unique_ptr<NativeString> jsValueToNativeString(JSContext* ctx, JSValue valu
   return ptr;
 }
 
-
 std::unique_ptr<NativeString> stringToNativeString(const std::string& string) {
   std::u16string utf16;
   fromUTF8(string, utf16);
@@ -61,6 +60,4 @@ std::string jsAtomToStdString(JSContext* ctx, JSAtom atom) {
   return str;
 }
 
-
-
-}
+}  // namespace kraken

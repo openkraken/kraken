@@ -5,9 +5,9 @@
 //
 //#include "html_all_collection.h"
 //
-//namespace kraken {
+// namespace kraken {
 //
-//JSValue AllCollection::item(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+// JSValue AllCollection::item(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
 //  if (argc < 1) {
 //    return JS_NULL;
 //  }
@@ -23,7 +23,7 @@
 //  auto node = collection->m_nodes[index];
 //  return node->jsObject;
 //}
-//JSValue AllCollection::add(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+// JSValue AllCollection::add(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
 //  if (argc < 1) {
 //    return JS_ThrowTypeError(ctx, "Failed to execute add() on HTMLAllCollection: 1 arguments required.");
 //  }
@@ -50,7 +50,7 @@
 //
 //  return JS_NULL;
 //}
-//JSValue AllCollection::remove(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+// JSValue AllCollection::remove(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
 //  if (argc < 1) {
 //    return JS_ThrowTypeError(ctx, "Failed to execute remove() on HTMLAllCollection: 1 arguments required.");
 //  }
@@ -61,7 +61,7 @@
 //  collection->m_nodes.erase(collection->m_nodes.begin() + index);
 //  return JS_NULL;
 //}
-//void AllCollection::internalAdd(NodeInstance* node, NodeInstance* before) {
+// void AllCollection::internalAdd(NodeInstance* node, NodeInstance* before) {
 //  if (before != nullptr) {
 //    auto it = std::find(m_nodes.begin(), m_nodes.end(), before);
 //    m_nodes.erase(it);
@@ -71,7 +71,7 @@
 //  }
 //}
 //
-//IMPL_PROPERTY_GETTER(AllCollection, length)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+// IMPL_PROPERTY_GETTER(AllCollection, length)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
 //  auto* collection = static_cast<AllCollection*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
 //  return JS_NewUint32(ctx, collection->m_nodes.size());
 //}

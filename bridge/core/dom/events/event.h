@@ -6,8 +6,8 @@
 #ifndef KRAKENBRIDGE_EVENT_H
 #define KRAKENBRIDGE_EVENT_H
 
-#include "bindings/qjs/macros.h"
 #include "bindings/qjs/executing_context.h"
+#include "bindings/qjs/macros.h"
 
 namespace kraken {
 

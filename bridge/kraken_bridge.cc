@@ -4,15 +4,15 @@
  */
 
 #include <atomic>
-#include <thread>
 #include <cassert>
+#include <thread>
 
-#include "include/kraken_bridge.h"
+#include "bindings/qjs/native_string_utils.h"
 #include "foundation/inspector_task_queue.h"
 #include "foundation/logging.h"
-#include "foundation/ui_task_queue.h"
 #include "foundation/ui_command_buffer.h"
-#include "bindings/qjs/native_string_utils.h"
+#include "foundation/ui_task_queue.h"
+#include "include/kraken_bridge.h"
 #include "page.h"
 
 #if defined(_WIN32)
@@ -162,9 +162,9 @@ void registerDartMethods(int32_t contextId, uint64_t* methodBytes, int32_t lengt
 }
 
 NativeScreen* createScreen(double width, double height) {
-//  screen.width = width;
-//  screen.height = height;
-//  return &screen;
+  //  screen.width = width;
+  //  screen.height = height;
+  //  return &screen;
 }
 
 static KrakenInfo* krakenInfo{nullptr};

@@ -5,12 +5,12 @@
 
 #include <utility>
 
-#include "event_target.h"
 #include "bindings/qjs/qjs_patch.h"
-#include "custom_event.h"
-#include "event.h"
 #include "core/dom/node.h"
 #include "core/frame/window.h"
+#include "custom_event.h"
+#include "event.h"
+#include "event_target.h"
 
 #if UNIT_TEST
 #include "kraken_test_env.h"

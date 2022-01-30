@@ -7,10 +7,10 @@
 #define KRAKENBRIDGE_NATIVE_STRING_UTILS_H
 
 #include <quickjs/quickjs.h>
-#include <string>
-#include <memory>
-#include <locale>
 #include <codecvt>
+#include <locale>
+#include <memory>
+#include <string>
 
 #include "foundation/native_string.h"
 
@@ -47,6 +47,6 @@ void fromUTF8(const std::string& source, std::basic_string<T, std::char_traits<T
   result = convertor.from_bytes(source);
 }
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_NATIVE_STRING_UTILS_H

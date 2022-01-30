@@ -1,7 +1,7 @@
 /*
-* Copyright (C) 2019 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #ifndef KRAKENBRIDGE_BINDING_INITIALIZER_H
 #define KRAKENBRIDGE_BINDING_INITIALIZER_H
@@ -9,7 +9,6 @@
 namespace kraken {
 
 void initBinding();
-
 
 //  bindConsole(m_context);
 //  bindTimer(m_context);
@@ -46,6 +45,6 @@ void initBinding();
 //  bindDocument(m_context);
 //  bindPerformance(m_context);
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_BINDING_INITIALIZER_H
