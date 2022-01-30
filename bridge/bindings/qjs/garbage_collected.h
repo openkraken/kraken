@@ -7,7 +7,8 @@
 #define KRAKENBRIDGE_GARBAGE_COLLECTED_H
 
 #include <quickjs/quickjs.h>
-#include "include/kraken_foundation.h"
+
+#include "foundation/macros.h"
 #include "qjs_patch.h"
 
 namespace kraken {

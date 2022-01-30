@@ -12,9 +12,8 @@
 #include <vector>
 #include <thread>
 
-#include "bindings/qjs/executing_context.h"
-#include "bindings/qjs/html_parser.h"
-#include "bindings/qjs/native_string.h"
+#include "foundation/native_string.h"
+#include "core/executing_context.h"
 
 namespace kraken {
 
@@ -51,6 +50,7 @@ class KrakenPage final {
   void evaluateByteCode(uint8_t* bytes, size_t byteLength);
 
   void registerDartMethods(uint64_t* methodBytes, int32_t length);
+  std::thread::id currentThread() const;
 
   [[nodiscard]] ExecutionContext* getContext() const { return m_context; }
 

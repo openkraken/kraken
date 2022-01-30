@@ -12,7 +12,7 @@
 #include "foundation/logging.h"
 #include "foundation/ui_task_queue.h"
 #include "foundation/ui_command_buffer.h"
-#include "bindings/qjs/native_string.h"
+#include "bindings/qjs/native_string_utils.h"
 #include "page.h"
 
 #if defined(_WIN32)
@@ -186,7 +186,8 @@ void setConsoleMessageHandler(ConsoleMessageHandler handler) {
 }
 
 void dispatchUITask(int32_t contextId, void* context, void* callback) {
-  assert(std::this_thread::get_id() == getUIThreadId());
+  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  assert(std::this_thread::get_id() == page->currentThread());
   reinterpret_cast<void (*)(void*)>(callback)(context);
 }
 

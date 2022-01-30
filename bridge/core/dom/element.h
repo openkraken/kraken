@@ -7,10 +7,8 @@
 #define KRAKENBRIDGE_ELEMENT_H
 
 #include <unordered_map>
-#include "bindings/qjs/executing_context.h"
 #include "bindings/qjs/garbage_collected.h"
 #include "node.h"
-#include "style_declaration.h"
 
 namespace kraken {
 

@@ -9,7 +9,7 @@
 #include <vector>
 #include <cinttypes>
 #include "native_value.h"
-#include "bindings/qjs/native_string.h"
+#include "bindings/qjs/native_string_utils.h"
 
 namespace kraken {
 

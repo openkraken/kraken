@@ -6,7 +6,7 @@
 #ifndef KRAKENBRIDGE_CSS_STYLE_DECLARATION_H
 #define KRAKENBRIDGE_CSS_STYLE_DECLARATION_H
 
-#include "bindings/qjs/context_macros.h"
+#include "bindings/qjs/macros.h"
 #include "bindings/qjs/dom/event_target.h"
 #include "bindings/qjs/garbage_collected.h"
 

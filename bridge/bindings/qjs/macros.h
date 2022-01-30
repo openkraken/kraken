@@ -3,8 +3,8 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKENBRIDGE_CONTEXT_MACROS_H
-#define KRAKENBRIDGE_CONTEXT_MACROS_H
+#ifndef KRAKENBRIDGE_BINDING_MACROS_H
+#define KRAKENBRIDGE_BINDING_MACROS_H
 
 #define QJS_GLOBAL_BINDING_FUNCTION(context, function, name, argc)     \
   {                                                                    \
@@ -52,4 +52,4 @@
     static JSValue setter(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv); \
   };
 
-#endif  // KRAKENBRIDGE_CONTEXT_MACROS_H
+#endif  // KRAKENBRIDGE_BINDING_MACROS_H

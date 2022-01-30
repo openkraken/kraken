@@ -6,11 +6,11 @@
 #ifndef KRAKENBRIDGE_EVENT_TARGET_H
 #define KRAKENBRIDGE_EVENT_TARGET_H
 
-#include "bindings/qjs/context_macros.h"
-#include "bindings/qjs/executing_context.h"
+#include "foundation/macros.h"
+#include "bindings/qjs/macros.h"
 #include "bindings/qjs/heap_hashmap.h"
-//#include "bindings/qjs/native_value.h"
-//#include "event_listener_map.h"
+#include "core/executing_context.h"
+#include "event_listener_map.h"
 
 #if UNIT_TEST
 void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv);
@@ -71,8 +71,9 @@ class EventTarget : public GarbageCollected<EventTarget> {
   virtual bool dispatchEvent(Event* event);
   FORCE_INLINE int32_t eventTargetId() const { return m_eventTargetId; }
 
- protected:
   JSValue callNativeMethods(const char* method, int32_t argc, NativeValue* argv);
+
+ protected:
   JSValue getNativeProperty(const char* prop);
 
   // Used for legacy "onEvent" attribute APIs.

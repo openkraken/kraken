@@ -6,9 +6,8 @@
 #ifndef KRAKENBRIDGE_PAGE_TEST_H
 #define KRAKENBRIDGE_PAGE_TEST_H
 
-#include "bindings/qjs/dom/document.h"
-#include "bindings/qjs/html_parser.h"
 #include "kraken_bridge_test.h"
+#include "core/executing_context.h"
 #include "page.h"
 
 namespace kraken {

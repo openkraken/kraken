@@ -3,25 +3,18 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKENBRIDGE_NATIVE_STRING_H
-#define KRAKENBRIDGE_NATIVE_STRING_H
+#ifndef KRAKENBRIDGE_NATIVE_STRING_UTILS_H
+#define KRAKENBRIDGE_NATIVE_STRING_UTILS_H
 
 #include <quickjs/quickjs.h>
-#include <cinttypes>
 #include <string>
 #include <memory>
 #include <locale>
 #include <codecvt>
 
+#include "foundation/native_string.h"
+
 namespace kraken {
-
-struct NativeString {
-  const uint16_t* string;
-  uint32_t length;
-
-  NativeString* clone();
-  void free();
-};
 
 // Convert to string and return a full copy of NativeString from JSValue.
 std::unique_ptr<NativeString> jsValueToNativeString(JSContext* ctx, JSValue value);
@@ -56,6 +49,4 @@ void fromUTF8(const std::string& source, std::basic_string<T, std::char_traits<T
 
 }
 
-class native_string {};
-
-#endif  // KRAKENBRIDGE_NATIVE_STRING_H
+#endif  // KRAKENBRIDGE_NATIVE_STRING_UTILS_H

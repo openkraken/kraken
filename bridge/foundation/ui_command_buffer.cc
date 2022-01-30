@@ -4,8 +4,8 @@
  */
 
 #include "ui_command_buffer.h"
-#include "bindings/qjs/dart_methods.h"
-#include "bindings/qjs/executing_context.h"
+#include "core/dart_methods.h"
+#include "core/executing_context.h"
 
 namespace kraken {
 

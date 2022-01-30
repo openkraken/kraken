@@ -9,7 +9,7 @@
 #include <set>
 #include <utility>
 
-#include "event_target.h"
+#include "events/event_target.h"
 
 namespace kraken {
 

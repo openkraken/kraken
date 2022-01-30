@@ -6,7 +6,7 @@
 #ifndef KRAKENBRIDGE_BLOB_H
 #define KRAKENBRIDGE_BLOB_H
 
-#include "bindings/qjs/context_macros.h"
+#include "bindings/qjs/macros.h"
 #include "bindings/qjs/garbage_collected.h"
 
 namespace kraken {

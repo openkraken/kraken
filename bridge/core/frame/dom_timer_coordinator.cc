@@ -4,7 +4,8 @@
  */
 
 #include "dom_timer_coordinator.h"
-#include "dart_methods.h"
+#include "core/dart_methods.h"
+#include "core/executing_context.h"
 #include "timer.h"
 
 #if UNIT_TEST

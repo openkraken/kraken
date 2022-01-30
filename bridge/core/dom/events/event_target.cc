@@ -3,16 +3,14 @@
  * Author: Kraken Team.
  */
 
-#include "event_target.h"
-
 #include <utility>
-#include "bindings/qjs/bom/window.h"
-#include "bindings/qjs/dom/text_node.h"
+
+#include "event_target.h"
 #include "bindings/qjs/qjs_patch.h"
 #include "custom_event.h"
-#include "document.h"
-#include "element.h"
 #include "event.h"
+#include "core/dom/node.h"
+#include "core/frame/window.h"
 
 #if UNIT_TEST
 #include "kraken_test_env.h"

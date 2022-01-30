@@ -4,49 +4,16 @@
  */
 
 #include <atomic>
+#include <unordered_map>
 
+#include <core/dart_methods.h>
 #include "foundation/logging.h"
 #include "polyfill.h"
-#include "bindings/qjs/qjs_patch.h"
+#include "bindings/qjs/binding_initializer.h"
 #include "page.h"
 
-//#include "bindings/qjs/bom/blob.h"
-//#include "bindings/qjs/bom/console.h"
-//#include "bindings/qjs/bom/location.h"
-//#include "bindings/qjs/bom/performance.h"
-//#include "bindings/qjs/bom/screen.h"
-//#include "bindings/qjs/bom/timer.h"
-//#include "bindings/qjs/bom/window.h"
-//#include "bindings/qjs/dom/comment_node.h"
-//#include "bindings/qjs/dom/custom_event.h"
-//#include "bindings/qjs/dom/document.h"
-//#include "bindings/qjs/dom/document_fragment.h"
-//#include "bindings/qjs/dom/element.h"
-//#include "bindings/qjs/dom/elements/.gen/anchor_element.h"
-//#include "bindings/qjs/dom/elements/.gen/canvas_element.h"
-//#include "bindings/qjs/dom/elements/.gen/input_element.h"
-//#include "bindings/qjs/dom/elements/.gen/object_element.h"
-//#include "bindings/qjs/dom/elements/.gen/script_element.h"
-//#include "bindings/qjs/dom/elements/image_element.h"
-//#include "bindings/qjs/dom/elements/template_element.h"
-//#include "bindings/qjs/dom/event.h"
-//#include "bindings/qjs/dom/event_target.h"
-//#include "bindings/qjs/dom/events/.gen/close_event.h"
-//#include "bindings/qjs/dom/events/.gen/gesture_event.h"
-//#include "bindings/qjs/dom/events/.gen/input_event.h"
-//#include "bindings/qjs/dom/events/.gen/intersection_change.h"
-//#include "bindings/qjs/dom/events/.gen/media_error_event.h"
-//#include "bindings/qjs/dom/events/.gen/message_event.h"
-//#include "bindings/qjs/dom/events/.gen/mouse_event.h"
-//#include "bindings/qjs/dom/events/.gen/popstate_event.h"
-//#include "bindings/qjs/dom/events/touch_event.h"
-//#include "bindings/qjs/dom/style_declaration.h"
-//#include "bindings/qjs/dom/text_node.h"
-//#include "bindings/qjs/module_manager.h"
 
 namespace kraken {
-
-using namespace binding::qjs;
 
 std::unordered_map<std::string, NativeByteCode> KrakenPage::pluginByteCode{};
 ConsoleMessageHandler KrakenPage::consoleMessageHandler{nullptr};
@@ -71,40 +38,7 @@ KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : c
   nativePerformance.mark(PERF_JS_NATIVE_METHOD_INIT_START);
 #endif
 
-//  bindConsole(m_context);
-//  bindTimer(m_context);
-//  bindScreen(m_context);
-//  bindModuleManager(m_context);
-//  bindEventTarget(m_context);
-//  bindBlob(m_context);
-//  bindLocation(m_context);
-//  bindWindow(m_context);
-//  bindEvent(m_context);
-//  bindCustomEvent(m_context);
-//  bindNode(m_context);
-//  bindDocumentFragment(m_context);
-//  bindTextNode(m_context);
-//  bindCommentNode(m_context);
-//  bindElement(m_context);
-  //  bindAnchorElement(m_context);
-  //  bindCanvasElement(m_context);
-  //  bindImageElement(m_context);
-  //  bindInputElement(m_context);
-  //  bindObjectElement(m_context);
-  //  bindScriptElement(m_context);
-  //  bindTemplateElement(m_context);
-//  bindCSSStyleDeclaration(m_context);
-  //  bindCloseEvent(m_context);
-  //  bindGestureEvent(m_context);
-  //  bindInputEvent(m_context);
-  //  bindIntersectionChangeEvent(m_context);
-  //  bindMediaErrorEvent(m_context);
-  //  bindMouseEvent(m_context);
-  //  bindMessageEvent(m_context);
-  //  bindPopStateEvent(m_context);
-  //  bindTouchEvent(m_context);
-//  bindDocument(m_context);
-  //  bindPerformance(m_context);
+  initBinding();
 
 #if ENABLE_PROFILE
   nativePerformance.mark(PERF_JS_NATIVE_METHOD_INIT_END);
@@ -243,6 +177,10 @@ void KrakenPage::registerDartMethods(uint64_t* methodBytes, int32_t length) {
   dartMethodPointer->onJsError = reinterpret_cast<OnJSError>(methodBytes[i++]);
 
   assert_m(i == length, "Dart native methods count is not equal with C++ side method registrations.");
+}
+
+std::thread::id KrakenPage::currentThread() const {
+  return ownerThreadId;
 }
 
 KrakenPage::~KrakenPage() {

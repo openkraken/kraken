@@ -6,7 +6,6 @@
 #ifndef KRAKEN_BRIDGE_TEST_EXPORT_H
 #define KRAKEN_BRIDGE_TEST_EXPORT_H
 
-#include <cstdint>
 #include "kraken_bridge.h"
 
 KRAKEN_EXPORT_C
@@ -20,6 +19,6 @@ KRAKEN_EXPORT_C
 void executeTest(int32_t contextId, ExecuteCallback executeCallback);
 
 KRAKEN_EXPORT_C
-void registerTestEnvDartMethods(uint64_t* methodBytes, int32_t length);
+void registerTestEnvDartMethods(int32_t contextId, uint64_t* methodBytes, int32_t length);
 
 #endif

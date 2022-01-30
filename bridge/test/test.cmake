@@ -16,7 +16,7 @@ list(APPEND KRAKEN_TEST_SOURCE
 list(APPEND KRAKEN_UNIT_TEST_SOURCE
   ./test/kraken_test_env.cc
   ./test/kraken_test_env.h
-  ./bindings/qjs/executing_context_test.cc
+  ./core/executing_context_test.cc
 #  ./bindings/qjs/bom/timer_test.cc
 #  ./bindings/qjs/bom/console_test.cc
 #  ./bindings/qjs/qjs_patch_test.cc

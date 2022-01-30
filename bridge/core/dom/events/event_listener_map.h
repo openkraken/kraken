@@ -8,7 +8,6 @@
 
 #include <quickjs/quickjs.h>
 #include <vector>
-#include "include/kraken_foundation.h"
 
 namespace kraken {
 

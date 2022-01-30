@@ -6,7 +6,6 @@
 #ifndef KRAKENBRIDGE_TIMER_H
 #define KRAKENBRIDGE_TIMER_H
 
-#include "bindings/qjs/executing_context.h"
 #include "bindings/qjs/garbage_collected.h"
 #include "dom_timer_coordinator.h"
 

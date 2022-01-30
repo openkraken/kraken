@@ -10,7 +10,7 @@
 #include <quickjs/quickjs.h>
 #include <cinttypes>
 #include <string>
-#include "bindings/qjs/native_string.h"
+#include "bindings/qjs/native_string_utils.h"
 
 namespace kraken {
 

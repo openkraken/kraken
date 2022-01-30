@@ -87,6 +87,8 @@ list(APPEND BRIDGE_SOURCE
   foundation/logging.cc
   foundation/logging.h
   foundation/colors.h
+  foundation/native_string.cc
+  foundation/native_string.h
   foundation/ref_counted_internal.h
   foundation/ref_counter.h
   foundation/ref_ptr.h
@@ -184,35 +186,40 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   list(APPEND BRIDGE_SOURCE
     page.cc
     page.h
+
+    # Binding files
+    bindings/qjs/binding_initializer.cc
+    bindings/qjs/binding_initializer.h
     bindings/qjs/garbage_collected.h
-    bindings/qjs/executing_context.cc
-    bindings/qjs/executing_context.h
-    bindings/qjs/executing_context_data.cc
-    bindings/qjs/executing_context_data.h
     bindings/qjs/wrapper_type_info.h
     bindings/qjs/heap_hashmap.h
-    bindings/qjs/native_string.cc
-    bindings/qjs/native_string.h
+    bindings/qjs/native_string_utils.cc
+    bindings/qjs/native_string_utils.h
     bindings/qjs/qjs_patch.cc
     bindings/qjs/qjs_patch.h
-    bindings/qjs/dart_methods.cc
-    bindings/qjs/dart_methods.h
+    core/dart_methods.h
 
     # Core sources
-    core/dom/character_data.cc
-    core/dom/character_data.h
-    core/dom/comment.cc
-    core/dom/comment.h
-    core/dom/node.cc
-    core/dom/node.h
-    core/dom/events/custom_event.cc
-    core/dom/events/custom_event.h
-    core/dom/events/event.h
-    core/dom/events/event.cc
-    core/dom/events/event_listener_map.cc
-    core/dom/events/event_listener_map.h
-    core/dom/events/event_target.cc
-    core/dom/events/event_target.h
+    core/executing_context.cc
+    core/executing_context.h
+    core/executing_context_data.cc
+    core/executing_context_data.h
+    core/frame/dom_timer_coordinator.cc
+    core/frame/dom_timer_coordinator.h
+#    core/dom/character_data.cc
+#    core/dom/character_data.h
+#    core/dom/comment.cc
+#    core/dom/comment.h
+#    core/dom/node.cc
+#    core/dom/node.h
+#    core/dom/events/custom_event.cc
+#    core/dom/events/custom_event.h
+#    core/dom/events/event.h
+#    core/dom/events/event.cc
+#    core/dom/events/event_listener_map.cc
+#    core/dom/events/event_listener_map.h
+#    core/dom/events/event_target.cc
+#    core/dom/events/event_target.h
     )
 
   # Quickjs use __builtin_frame_address() to get stack pointer, we should add follow options to get it work with -O2

@@ -3,25 +3,10 @@
  * Author: Kraken Team.
  */
 
-#include "native_string.h"
+#include "native_string_utils.h"
 #include "bindings/qjs/qjs_patch.h"
 
 namespace kraken {
-
-
-NativeString* NativeString::clone() {
-  auto* newNativeString = new NativeString();
-  auto* newString = new uint16_t[length];
-
-  memcpy(newString, string, length * sizeof(uint16_t));
-  newNativeString->string = newString;
-  newNativeString->length = length;
-  return newNativeString;
-}
-
-void NativeString::free() {
-  delete[] string;
-}
 
 std::unique_ptr<NativeString> jsValueToNativeString(JSContext* ctx, JSValue value) {
   bool isValueString = true;
