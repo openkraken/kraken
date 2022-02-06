@@ -6,7 +6,7 @@
 #include "dom_timer_coordinator.h"
 #include "core/dart_methods.h"
 #include "core/executing_context.h"
-#include "timer.h"
+#include "dom_timer.h"
 
 #if UNIT_TEST
 #include "kraken_test_env.h"

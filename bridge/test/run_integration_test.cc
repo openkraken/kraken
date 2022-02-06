@@ -5,6 +5,7 @@
 
 #include <fstream>
 #include "gtest/gtest.h"
+#include "foundation/logging.h"
 #include "kraken_bridge_test.h"
 #include "kraken_test_env.h"
 #include "page.h"
@@ -36,7 +37,10 @@ TEST(IntegrationTest, runSpecs) {
   std::string code = readTestSpec();
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
 
-  executeTest(context->getContextId(), [](int32_t contextId, NativeString* status) -> void* { KRAKEN_LOG(VERBOSE) << "done"; });
+  executeTest(context->getContextId(), [](int32_t contextId, NativeString* status) -> void* {
+    KRAKEN_LOG(VERBOSE) << "done";
+    return nullptr;
+  });
 
   TEST_runLoop(context);
 }

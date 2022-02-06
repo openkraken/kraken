@@ -10,7 +10,6 @@ namespace kraken {
 
 void initBinding();
 
-
 //  bindConsole(m_context);
 //  bindTimer(m_context);
 //  bindScreen(m_context);

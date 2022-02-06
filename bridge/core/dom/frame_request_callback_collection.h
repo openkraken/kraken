@@ -6,7 +6,7 @@
 #ifndef KRAKENBRIDGE_BINDINGS_QJS_BOM_FRAME_REQUEST_CALLBACK_COLLECTION_H_
 #define KRAKENBRIDGE_BINDINGS_QJS_BOM_FRAME_REQUEST_CALLBACK_COLLECTION_H_
 
-#include "bindings/qjs/executing_context.h"
+#include "core/executing_context.h"
 
 namespace kraken {
 

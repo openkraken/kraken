@@ -3,8 +3,8 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKENBRIDGE_TIMER_H
-#define KRAKENBRIDGE_TIMER_H
+#ifndef KRAKENBRIDGE_DOM_TIMER_H
+#define KRAKENBRIDGE_DOM_TIMER_H
 
 #include "bindings/qjs/garbage_collected.h"
 #include "dom_timer_coordinator.h"
@@ -33,8 +33,6 @@ class DOMTimer : public GarbageCollected<DOMTimer> {
   JSValue m_callback;
 };
 
-void bindTimer(ExecutionContext* context);
-
 }  // namespace kraken
 
-#endif  // KRAKENBRIDGE_TIMER_H
+#endif  // KRAKENBRIDGE_DOM_TIMER_H

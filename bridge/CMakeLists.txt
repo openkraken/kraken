@@ -197,15 +197,28 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/native_string_utils.h
     bindings/qjs/qjs_patch.cc
     bindings/qjs/qjs_patch.h
-    core/dart_methods.h
+    bindings/qjs/qjs_function.cc
+    bindings/qjs/qjs_function.h
+    bindings/qjs/script_value.cc
+    bindings/qjs/script_value.h
+    bindings/qjs/exception_state.cc
+    bindings/qjs/exception_state.h
+
+    bindings/qjs/timer.cc
+    bindings/qjs/timer.h
 
     # Core sources
     core/executing_context.cc
     core/executing_context.h
     core/executing_context_data.cc
     core/executing_context_data.h
+    core/dart_methods.h
+    core/frame/dom_timer.cc
+    core/frame/dom_timer.h
     core/frame/dom_timer_coordinator.cc
     core/frame/dom_timer_coordinator.h
+    core/frame/window_or_worker_global_scope.cc
+    core/frame/window_or_worker_global_scope.h
 #    core/dom/character_data.cc
 #    core/dom/character_data.h
 #    core/dom/comment.cc
