@@ -7,6 +7,7 @@
 #define KRAKENBRIDGE_GARBAGE_COLLECTED_H
 
 #include <quickjs/quickjs.h>
+#include <memory>
 
 #include "foundation/macros.h"
 #include "qjs_patch.h"

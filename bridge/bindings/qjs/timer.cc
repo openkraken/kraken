@@ -1,100 +1,11 @@
 /*
- * Copyright (C) 2021 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
- */
+* Copyright (C) 2021 Alibaba Inc. All rights reserved.
+* Author: Kraken Team.
+*/
 
 #include "timer.h"
-#include "bindings/qjs/garbage_collected.h"
-#include "bindings/qjs/qjs_patch.h"
-#include "dart_methods.h"
-
-#if UNIT_TEST
-#include "kraken_test_env.h"
-#endif
 
 namespace kraken {
-
-DOMTimer::DOMTimer(JSValue callback) : m_callback(callback) {}
-
-JSClassID DOMTimer::classId{0};
-
-void DOMTimer::fire() {
-  // 'callback' might be destroyed when calling itself (if it frees the handler), so must take extra care.
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
-  if (!JS_IsFunction(m_ctx, m_callback))
-    return;
-
-  JS_DupValue(m_ctx, m_callback);
-  JSValue returnValue = JS_Call(m_ctx, m_callback, JS_UNDEFINED, 0, nullptr);
-  JS_FreeValue(m_ctx, m_callback);
-
-  if (JS_IsException(returnValue)) {
-    context->handleException(&returnValue);
-  }
-
-  JS_FreeValue(m_ctx, returnValue);
-}
-
-void DOMTimer::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
-  JS_MarkValue(rt, m_callback, mark_func);
-}
-
-void DOMTimer::dispose() const {
-  JS_FreeValueRT(m_runtime, m_callback);
-}
-
-int32_t DOMTimer::timerId() {
-  return m_timerId;
-}
-
-void DOMTimer::setTimerId(int32_t timerId) {
-  m_timerId = timerId;
-}
-
-static void handleTimerCallback(DOMTimer* timer, const char* errmsg) {
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
-
-  if (errmsg != nullptr) {
-    JSValue exception = JS_ThrowTypeError(timer->ctx(), "%s", errmsg);
-    context->handleException(&exception);
-    return;
-  }
-
-  if (context->timers()->getTimerById(timer->timerId()) == nullptr)
-    return;
-
-  // Trigger timer callbacks.
-  timer->fire();
-
-  // Executing pending async jobs.
-  context->drainPendingPromiseJobs();
-}
-
-static void handleTransientCallback(void* ptr, int32_t contextId, const char* errmsg) {
-  auto* timer = static_cast<DOMTimer*>(ptr);
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
-
-  if (!checkPage(contextId, context))
-    return;
-  if (!context->isValid())
-    return;
-
-  handleTimerCallback(timer, errmsg);
-
-  context->timers()->removeTimeoutById(timer->timerId());
-}
-
-static void handlePersistentCallback(void* ptr, int32_t contextId, const char* errmsg) {
-  auto* timer = static_cast<DOMTimer*>(ptr);
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
-
-  if (!checkPage(contextId, context))
-    return;
-  if (!context->isValid())
-    return;
-
-  handleTimerCallback(timer, errmsg);
-}
 
 static JSValue setTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (argc < 1) {
@@ -130,9 +41,9 @@ static JSValue setTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSVal
 #endif
 
   // Create a timer object to keep track timer callback.
-  auto* timer = makeGarbageCollected<DOMTimer>(JS_DupValue(ctx, callbackValue))->initialize(context->ctx(), &DOMTimer::classId);
+  auto* timer = makeGarbageCollected<DOMTimer>(JS_DupValue(ctx, callbackValue))->initialize<DOMTimer>(context->ctx(), &DOMTimer::classId);
 
-  auto timerId = getDartMethod()->setTimeout(timer, context->getContextId(), handleTransientCallback, timeout);
+  auto timerId = context->dartMethodPtr()->setTimeout(timer, context->getContextId(), handleTransientCallback, timeout);
 
   // Register timerId.
   timer->setTimerId(timerId);
@@ -174,14 +85,14 @@ static JSValue setInterval(JSContext* ctx, JSValueConst this_val, int argc, JSVa
     return JS_ThrowTypeError(ctx, "Failed to execute 'setTimeout': parameter 2 (timeout) only can be a number or undefined.");
   }
 
-  if (getDartMethod()->setInterval == nullptr) {
+  if (context->dartMethodPtr()->setInterval == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'setInterval': dart method (setInterval) is not registered.");
   }
 
   // Create a timer object to keep track timer callback.
-  auto* timer = makeGarbageCollected<DOMTimer>(JS_DupValue(ctx, callbackValue))->initialize(context->ctx(), &DOMTimer::classId);
+  auto* timer = makeGarbageCollected<DOMTimer>(JS_DupValue(ctx, callbackValue))->initialize<DOMTimer>(context->ctx(), &DOMTimer::classId);
 
-  uint32_t timerId = getDartMethod()->setInterval(timer, context->getContextId(), handlePersistentCallback, timeout);
+  uint32_t timerId = context->dartMethodPtr()->setInterval(timer, context->getContextId(), handlePersistentCallback, timeout);
 
   // Register timerId.
   timer->setTimerId(timerId);
@@ -209,20 +120,21 @@ static JSValue clearTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSV
   int32_t id;
   JS_ToInt32(ctx, &id, timeIdValue);
 
-  if (getDartMethod()->clearTimeout == nullptr) {
+  if (context->dartMethodPtr()->clearTimeout == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'clearTimeout': dart method (clearTimeout) is not registered.");
   }
 
-  getDartMethod()->clearTimeout(context->getContextId(), id);
+  context->dartMethodPtr()->clearTimeout(context->getContextId(), id);
 
   context->timers()->removeTimeoutById(id);
   return JS_NULL;
 }
 
 void bindTimer(ExecutionContext* context) {
-  QJS_GLOBAL_BINDING_FUNCTION(context, setTimeout, "setTimeout", 2);
-  QJS_GLOBAL_BINDING_FUNCTION(context, setInterval, "setInterval", 2);
-  QJS_GLOBAL_BINDING_FUNCTION(context, clearTimeout, "clearTimeout", 1);
-  QJS_GLOBAL_BINDING_FUNCTION(context, clearTimeout, "clearInterval", 1);
+  //  QJS_GLOBAL_BINDING_FUNCTION(context, setTimeout, "setTimeout", 2);
+  //  QJS_GLOBAL_BINDING_FUNCTION(context, setInterval, "setInterval", 2);
+  //  QJS_GLOBAL_BINDING_FUNCTION(context, clearTimeout, "clearTimeout", 1);
+  //  QJS_GLOBAL_BINDING_FUNCTION(context, clearTimeout, "clearInterval", 1);
 }
-}  // namespace kraken
+
+}
