@@ -4,9 +4,9 @@
  */
 
 #include "rejected_promises.h"
-#include "executing_context.h"
+#include "core/executing_context.h"
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 RejectedPromises::Message::Message(ExecutionContext* context, JSValue promise, JSValue reason)
     : m_runtime(context->runtime()), m_promise(JS_DupValue(context->ctx(), promise)), m_reason(JS_DupValue(context->ctx(), reason)) {}

@@ -11,6 +11,7 @@
 
 #include "foundation/macros.h"
 #include "qjs_patch.h"
+#include "visitor.h"
 
 namespace kraken {
 
@@ -55,7 +56,7 @@ class GarbageCollected {
    * This Trace method must be override by objects inheriting from
    * GarbageCollected.
    */
-  virtual void trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) const = 0;
+  virtual void trace(Visitor* visitor) const = 0;
 
   /**
    * Called before underline JavaScript object been collected by GC.
@@ -81,6 +82,7 @@ class GarbageCollected {
   JSContext* m_ctx{nullptr};
   JSRuntime* m_runtime{nullptr};
   GarbageCollected(){};
+  GarbageCollected(JSContext* ctx): m_runtime(JS_GetRuntime(ctx)), m_ctx(ctx) {};
   friend class MakeGarbageCollectedTrait<T>;
 };
 
@@ -102,7 +104,7 @@ P* GarbageCollected<T>::initialize(JSContext* ctx, JSClassID* classId, JSClassEx
   JSRuntime* runtime = JS_GetRuntime(ctx);
 
   /// When classId is 0, it means this class are not initialized. We should create a JSClassDef to describe the behavior of this class and associate with classID.
-  /// ClassId should be a static value to make sure JSClassDef when this class are created at the first class.
+  /// ClassId should be a static toQuickJS to make sure JSClassDef when this class are created at the first class.
   if (*classId == 0 || !JS_HasClassId(runtime, *classId)) {
     /// Allocate a new unique classID from QuickJS.
     JS_NewClassID(classId);
@@ -116,7 +118,8 @@ P* GarbageCollected<T>::initialize(JSContext* ctx, JSClassID* classId, JSClassEx
     /// which member of their class should be collected by GC.
     def.gc_mark = [](JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) {
       auto* object = static_cast<P*>(JS_GetOpaque(val, JSValueGetClassId(val)));
-      object->trace(rt, val, mark_func);
+      Visitor visitor{rt, mark_func};
+      object->trace(&visitor);
     };
 
     /// Define custom behavior when call getProperty, setProperty on object.

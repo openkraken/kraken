@@ -16,7 +16,14 @@ class ScriptValue final {
   KRAKEN_DISALLOW_NEW();
 
  public:
-  explicit ScriptValue(JSContext* ctx, JSValue value) : m_ctx(ctx), m_value(value){};
+  explicit ScriptValue(JSContext* ctx, JSValue value) : m_ctx(ctx), m_value(JS_DupValue(ctx, value)){};
+  ~ScriptValue() {
+    JS_FreeValue(m_ctx, m_value);
+  }
+  bool isEmpty();
+  JSValue toQuickJS();
+
+  bool isException();
 
  private:
   JSContext* m_ctx{nullptr};

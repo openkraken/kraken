@@ -11,7 +11,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace kraken::binding::qjs {
+namespace kraken {
 
 class ExecutionContext;
 

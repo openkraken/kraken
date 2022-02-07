@@ -5,7 +5,6 @@
 
 #include "native_value.h"
 #include "bindings/qjs/qjs_patch.h"
-#include "core/dom/events/event_target.h"
 #include "core/executing_context.h"
 
 namespace kraken {

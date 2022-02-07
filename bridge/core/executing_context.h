@@ -17,13 +17,14 @@
 #include <mutex>
 #include <unordered_map>
 #include "bindings/qjs/garbage_collected.h"
+#include "bindings/qjs/rejected_promises.h"
+#include "bindings/qjs/script_value.h"
 #include "foundation/macros.h"
 #include "foundation/ui_command_buffer.h"
 
 #include "dart_methods.h"
 #include "executing_context_data.h"
 #include "frame/dom_timer_coordinator.h"
-#include "rejected_promises.h"
 
 using JSExceptionHandler = std::function<void(int32_t contextId, const char* message)>;
 
@@ -56,7 +57,7 @@ class ExecutionContextGCTracker : public GarbageCollected<ExecutionContextGCTrac
  public:
   static JSClassID contextGcTrackerClassId;
 
-  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
+  void trace(Visitor* visitor) const override;
   void dispose() const override;
 
  private:
@@ -82,6 +83,8 @@ class ExecutionContext {
   FORCE_INLINE int32_t getContextId() const { return contextId; };
   void* getOwner();
   bool handleException(JSValue* exc);
+  bool handleException(ScriptValue* exc);
+  void reportError(JSValueConst error);
   void drainPendingPromiseJobs();
   void defineGlobalProperty(const char* prop, JSValueConst value);
   ExecutionContextData* contextData();
@@ -97,7 +100,7 @@ class ExecutionContext {
   FORCE_INLINE UICommandBuffer* uiCommandBuffer() { return &m_commandBuffer; };
   FORCE_INLINE std::unique_ptr<DartMethodPointer>& dartMethodPtr() { return m_dartMethodPtr; }
 
-  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func);
+  void trace(Visitor* visitor);
 
   std::chrono::time_point<std::chrono::system_clock> timeOrigin;
   std::unordered_map<std::string, void*> constructorMap;

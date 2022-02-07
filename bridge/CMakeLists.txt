@@ -190,6 +190,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     # Binding files
     bindings/qjs/binding_initializer.cc
     bindings/qjs/binding_initializer.h
+    bindings/qjs/member_installer.cc
+    bindings/qjs/member_installer.h
     bindings/qjs/garbage_collected.h
     bindings/qjs/wrapper_type_info.h
     bindings/qjs/heap_hashmap.h
@@ -203,9 +205,12 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/script_value.h
     bindings/qjs/exception_state.cc
     bindings/qjs/exception_state.h
-
-    bindings/qjs/timer.cc
-    bindings/qjs/timer.h
+    bindings/qjs/visitor.cc
+    bindings/qjs/visitor.h
+    bindings/qjs/rejected_promises.h
+    bindings/qjs/rejected_promises.cc
+    bindings/qjs/qjs_window.cc
+    bindings/qjs/qjs_window.h
 
     # Core sources
     core/executing_context.cc

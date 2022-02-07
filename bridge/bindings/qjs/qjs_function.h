@@ -7,6 +7,7 @@
 #define KRAKENBRIDGE_QJS_FUNCTION_H
 
 #include "garbage_collected.h"
+#include "script_value.h"
 
 namespace kraken {
 
@@ -14,15 +15,16 @@ namespace kraken {
 class QJSFunction : public GarbageCollected<QJSFunction> {
  public:
   static QJSFunction* create(JSContext* ctx, JSValue function) { return makeGarbageCollected<QJSFunction>(ctx, function); }
+  explicit QJSFunction(JSContext* ctx, JSValue function) : m_function(JS_DupValue(ctx, function)), GarbageCollected<QJSFunction>(ctx) {};
 
-  explicit QJSFunction(JSContext* ctx, JSValue function) : m_function(JS_DupValue(ctx, function)){};
+  bool isFunction(JSContext* ctx);
+
+  // Performs "invoke".
+  // https://webidl.spec.whatwg.org/#invoke-a-callback-function
+  ScriptValue invoke(JSContext* ctx, int32_t argc, ScriptValue* arguments);
 
   const char* getHumanReadableName() const override;
-
-  [[nodiscard]]
-
-  void
-  trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
+  void trace(Visitor* visitor) const override;
   void dispose() const override;
 
  private:

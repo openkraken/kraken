@@ -40,7 +40,7 @@ KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : c
   nativePerformance.mark(PERF_JS_NATIVE_METHOD_INIT_START);
 #endif
 
-  initBinding();
+  installBindings(m_context->ctx());
 
 #if ENABLE_PROFILE
   nativePerformance.mark(PERF_JS_NATIVE_METHOD_INIT_END);

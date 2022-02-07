@@ -3,7 +3,13 @@
  * Author: Kraken Team.
  */
 
-#include "timer.h"
+#include "qjs_window.h"
+#include <quickjs/quickjs.h>
+#include "qjs_function.h"
+#include "exception_state.h"
+#include "member_installer.h"
+#include "core/executing_context.h"
+#include "core/frame/window_or_worker_global_scope.h"
 
 namespace kraken {
 
@@ -34,21 +40,14 @@ static JSValue setTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSVal
     return JS_ThrowTypeError(ctx, "Failed to execute 'setTimeout': parameter 2 (timeout) only can be a number or undefined.");
   }
 
-#if FLUTTER_BACKEND
-  if (getDartMethod()->setTimeout == nullptr) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'setTimeout': dart method (setTimeout) is not registered.");
+  QJSFunction* handler = QJSFunction::create(ctx, callbackValue);
+  ExceptionState exceptionState;
+
+  int32_t timerId = WindowOrWorkerGlobalScope::setTimeout(context, handler, timeout, &exceptionState);
+
+  if (exceptionState.hasException()) {
+    return exceptionState.toQuickJS();
   }
-#endif
-
-  // Create a timer object to keep track timer callback.
-  auto* timer = makeGarbageCollected<DOMTimer>(JS_DupValue(ctx, callbackValue))->initialize<DOMTimer>(context->ctx(), &DOMTimer::classId);
-
-  auto timerId = context->dartMethodPtr()->setTimeout(timer, context->getContextId(), handleTransientCallback, timeout);
-
-  // Register timerId.
-  timer->setTimerId(timerId);
-
-  context->timers()->installNewTimer(context, timerId, timer);
 
   // `-1` represents ffi error occurred.
   if (timerId == -1) {
@@ -85,18 +84,13 @@ static JSValue setInterval(JSContext* ctx, JSValueConst this_val, int argc, JSVa
     return JS_ThrowTypeError(ctx, "Failed to execute 'setTimeout': parameter 2 (timeout) only can be a number or undefined.");
   }
 
-  if (context->dartMethodPtr()->setInterval == nullptr) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'setInterval': dart method (setInterval) is not registered.");
+  QJSFunction* handler = QJSFunction::create(ctx, callbackValue);
+  ExceptionState exception;
+  int32_t timerId = WindowOrWorkerGlobalScope::setInterval(context, handler, timeout, &exception);
+
+  if (exception.hasException()) {
+    return exception.toQuickJS();
   }
-
-  // Create a timer object to keep track timer callback.
-  auto* timer = makeGarbageCollected<DOMTimer>(JS_DupValue(ctx, callbackValue))->initialize<DOMTimer>(context->ctx(), &DOMTimer::classId);
-
-  uint32_t timerId = context->dartMethodPtr()->setInterval(timer, context->getContextId(), handlePersistentCallback, timeout);
-
-  // Register timerId.
-  timer->setTimerId(timerId);
-  context->timers()->installNewTimer(context, timerId, timer);
 
   if (timerId == -1) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'setInterval': dart method (setInterval) got unexpected error.");
@@ -120,21 +114,26 @@ static JSValue clearTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSV
   int32_t id;
   JS_ToInt32(ctx, &id, timeIdValue);
 
-  if (context->dartMethodPtr()->clearTimeout == nullptr) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'clearTimeout': dart method (clearTimeout) is not registered.");
+  ExceptionState exception;
+  WindowOrWorkerGlobalScope::clearTimeout(context, id, &exception);
+
+  if (exception.hasException()) {
+    return exception.toQuickJS();
   }
 
-  context->dartMethodPtr()->clearTimeout(context->getContextId(), id);
-
-  context->timers()->removeTimeoutById(id);
   return JS_NULL;
 }
 
-void bindTimer(ExecutionContext* context) {
-  //  QJS_GLOBAL_BINDING_FUNCTION(context, setTimeout, "setTimeout", 2);
-  //  QJS_GLOBAL_BINDING_FUNCTION(context, setInterval, "setInterval", 2);
-  //  QJS_GLOBAL_BINDING_FUNCTION(context, clearTimeout, "clearTimeout", 1);
-  //  QJS_GLOBAL_BINDING_FUNCTION(context, clearTimeout, "clearInterval", 1);
+void QJSWindow::installGlobalFunctions(JSContext* ctx) {
+  std::initializer_list<MemberInstaller::FunctionConfig> functionConfig {
+    {"setTimeout", setTimeout, 2, combinePropFlags(JSPropFlag::enumerable, JSPropFlag::writable, JSPropFlag::configurable)},
+    {"setInterval", setInterval, 2, combinePropFlags(JSPropFlag::enumerable, JSPropFlag::writable, JSPropFlag::configurable)},
+    {"clearTimeout", clearTimeout, 0, combinePropFlags(JSPropFlag::enumerable, JSPropFlag::writable, JSPropFlag::configurable)},
+  };
+
+  JSValue globalObject = JS_GetGlobalObject(ctx);
+  MemberInstaller::installFunctions(ctx, globalObject, functionConfig);
+  JS_FreeValue(ctx, globalObject);
 }
 
-}  // namespace kraken
+}

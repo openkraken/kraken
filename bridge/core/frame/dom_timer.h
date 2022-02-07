@@ -7,6 +7,7 @@
 #define KRAKENBRIDGE_DOM_TIMER_H
 
 #include "bindings/qjs/garbage_collected.h"
+#include "bindings/qjs/qjs_function.h"
 #include "dom_timer_coordinator.h"
 
 namespace kraken {
@@ -14,7 +15,7 @@ namespace kraken {
 class DOMTimer : public GarbageCollected<DOMTimer> {
  public:
   static JSClassID classId;
-  DOMTimer(JSValue callback);
+  DOMTimer(QJSFunction* callback);
 
   // Trigger timer callback.
   void fire();
@@ -24,13 +25,13 @@ class DOMTimer : public GarbageCollected<DOMTimer> {
 
   [[nodiscard]] FORCE_INLINE const char* getHumanReadableName() const override { return "DOMTimer"; }
 
-  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
+  void trace(Visitor* visitor) const override;
   void dispose() const override;
 
  private:
   int32_t m_timerId{-1};
   int32_t m_isInterval{false};
-  JSValue m_callback;
+  QJSFunction* m_callback;
 };
 
 }  // namespace kraken

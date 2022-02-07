@@ -65,7 +65,7 @@ class EventTarget : public GarbageCollected<EventTarget> {
   DEFINE_FUNCTION(removeEventListener);
   DEFINE_FUNCTION(dispatchEvent);
 
-  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
+  void trace(Visitor* visitor) const override;
   void dispose() const override;
 
   virtual bool dispatchEvent(Event* event);

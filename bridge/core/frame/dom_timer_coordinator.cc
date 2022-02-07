@@ -66,15 +66,15 @@ DOMTimer* DOMTimerCoordinator::getTimerById(int32_t timerId) {
   return m_activeTimers[timerId];
 }
 
-void DOMTimerCoordinator::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
+void DOMTimerCoordinator::trace(Visitor* visitor) {
   for (auto& timer : m_activeTimers) {
-    JS_MarkValue(rt, timer.second->toQuickJS(), mark_func);
+    visitor->trace(timer.second->toQuickJS());
   }
 
   // Recycle all abandoned timers.
   if (!m_abandonedTimers.empty()) {
     for (auto& timer : m_abandonedTimers) {
-      JS_MarkValue(rt, timer->toQuickJS(), mark_func);
+      visitor->trace(timer->toQuickJS());
     }
     // All abandoned timers should be freed at the sweep stage.
     m_abandonedTimers.clear();

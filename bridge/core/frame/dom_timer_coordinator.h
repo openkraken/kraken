@@ -9,6 +9,7 @@
 #include <quickjs/quickjs.h>
 #include <unordered_map>
 #include <vector>
+#include "bindings/qjs/visitor.h"
 
 namespace kraken {
 
@@ -30,7 +31,7 @@ class DOMTimerCoordinator {
   void* removeTimeoutById(int32_t timerId);
   DOMTimer* getTimerById(int32_t timerId);
 
-  void trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func);
+  void trace(Visitor* visitor);
 
  private:
   std::unordered_map<int, DOMTimer*> m_activeTimers;

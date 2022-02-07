@@ -6,6 +6,9 @@
 #ifndef KRAKEN_DART_METHODS_H_
 #define KRAKEN_DART_METHODS_H_
 
+/// Functions implements at dart side, including timer, Rendering and module API.
+/// Communicate via Dart FFI.
+
 #include "kraken_bridge.h"
 
 #include <memory>
