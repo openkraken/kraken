@@ -508,4 +508,72 @@ describe('scrollable-size', () => {
     div.scrollTo(2000, 2000);
     await snapshot(0.2);
   });
+
+  it('scrollable size should include padding of flow layout', async (done) => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+           height: '300px',
+           border: '10px solid black',
+           padding: '30px',
+           overflow: 'scroll',
+           backgroundColor: 'yellow'
+         },
+      },
+      [
+        createElement('div', {
+          style: {
+            margin: '20px',
+            width: '500px',
+            height: '400px',
+            background: 'green',
+          }
+        })
+      ]
+    );
+    BODY.appendChild(div);
+
+    requestAnimationFrame(async () => {
+       div.scrollTo(1000, 1000);
+       await snapshot();
+       done();
+    });
+  });
+
+  it('scrollable size should include padding of flex layout', async (done) => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+           display: 'flex',
+           border: '10px solid black',
+           height: '300px',
+           padding: '30px',
+           overflow: 'scroll',
+           backgroundColor: 'yellow'
+         },
+      },
+      [
+        createElement('div', {
+          style: {
+            margin: '20px',
+            width: '500px',
+            height: '400px',
+            background: 'green',
+            flexShrink: 0,
+          }
+        })
+      ]
+    );
+    BODY.appendChild(div);
+
+    requestAnimationFrame(async () => {
+       div.scrollTo(1000, 1000);
+       await snapshot();
+       done();
+    });
+  });
 });

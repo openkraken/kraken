@@ -941,6 +941,7 @@ class Element extends Node
         if (effectiveOverflowY != oldEffectiveOverflowY) {
           updateRenderBoxModelWithOverflowY(_handleScroll);
         }
+        updateOverflowRenderBox();
         break;
       case OVERFLOW_Y:
         CSSOverflowType oldEffectiveOverflowX = renderStyle.effectiveOverflowX;
@@ -953,6 +954,7 @@ class Element extends Node
         if (effectiveOverflowX != oldEffectiveOverflowX) {
           updateRenderBoxModelWithOverflowX(_handleScroll);
         }
+        updateOverflowRenderBox();
         break;
       case OPACITY:
         renderStyle.opacity = value;
