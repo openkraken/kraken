@@ -21,7 +21,8 @@ class QJSFunction : public GarbageCollected<QJSFunction> {
 
   [[nodiscard]]
 
-  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
+  void
+  trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
   void dispose() const override;
 
  private:

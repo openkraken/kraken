@@ -6,11 +6,11 @@
 #include <sys/time.h>
 #include <vector>
 
-#include "kraken_test_env.h"
-#include "kraken_bridge_test.h"
-#include "foundation/native_string.h"
-#include "core/frame/dom_timer.h"
 #include "core/dom/frame_request_callback_collection.h"
+#include "core/frame/dom_timer.h"
+#include "foundation/native_string.h"
+#include "kraken_bridge_test.h"
+#include "kraken_test_env.h"
 #include "page.h"
 
 #if defined(__linux__) || defined(__APPLE__)
@@ -248,7 +248,6 @@ void TEST_runLoop(kraken::ExecutionContext* context) {
   }
 }
 
-
 void TEST_mockDartMethods(int32_t contextId, OnJSError onJSError) {
   std::vector<uint64_t> mockMethods{
       reinterpret_cast<uint64_t>(TEST_invokeModule),
@@ -278,7 +277,7 @@ void TEST_mockDartMethods(int32_t contextId, OnJSError onJSError) {
   registerDartMethods(contextId, mockMethods.data(), mockMethods.size());
 }
 
-//void TEST_dispatchEvent(int32_t contextId, EventTarget* eventTarget, const std::string type) {
+// void TEST_dispatchEvent(int32_t contextId, EventTarget* eventTarget, const std::string type) {
 //  NativeEventTarget* nativeEventTarget = new NativeEventTarget(eventTarget);
 //  auto nativeEventType = stringToNativeString(type);
 //  NativeString* rawEventType = nativeEventType.release();
@@ -290,10 +289,10 @@ void TEST_mockDartMethods(int32_t contextId, OnJSError onJSError) {
 //  NativeEventTarget::dispatchEventImpl(contextId, nativeEventTarget, rawEventType, rawEvent, false);
 //}
 //
-//void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv) {}
+// void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv) {}
 //
-//std::unordered_map<int32_t, std::shared_ptr<UnitTestEnv>> unitTestEnvMap;
-//std::shared_ptr<UnitTestEnv> TEST_getEnv(int32_t contextUniqueId) {
+// std::unordered_map<int32_t, std::shared_ptr<UnitTestEnv>> unitTestEnvMap;
+// std::shared_ptr<UnitTestEnv> TEST_getEnv(int32_t contextUniqueId) {
 //  if (unitTestEnvMap.count(contextUniqueId) == 0) {
 //    unitTestEnvMap[contextUniqueId] = std::make_shared<UnitTestEnv>();
 //  }
@@ -301,7 +300,7 @@ void TEST_mockDartMethods(int32_t contextId, OnJSError onJSError) {
 //  return unitTestEnvMap[contextUniqueId];
 //}
 //
-//void TEST_registerEventTargetDisposedCallback(int32_t contextUniqueId, TEST_OnEventTargetDisposed callback) {
+// void TEST_registerEventTargetDisposedCallback(int32_t contextUniqueId, TEST_OnEventTargetDisposed callback) {
 //  if (unitTestEnvMap.count(contextUniqueId) == 0) {
 //    unitTestEnvMap[contextUniqueId] = std::make_shared<UnitTestEnv>();
 //  }

@@ -1,7 +1,7 @@
 /*
-* Copyright (C) 2021 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2021 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #include "timer.h"
 
@@ -137,4 +137,4 @@ void bindTimer(ExecutionContext* context) {
   //  QJS_GLOBAL_BINDING_FUNCTION(context, clearTimeout, "clearInterval", 1);
 }
 
-}
+}  // namespace kraken
