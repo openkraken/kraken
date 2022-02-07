@@ -1,10 +1,9 @@
 /*
-* Copyright (C) 2019 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #include "binding_initializer.h"
-
 
 //#include "bindings/qjs/bom/blob.h"
 //#include "bindings/qjs/bom/console.h"
@@ -42,8 +41,6 @@
 
 namespace kraken {
 
-void initBinding() {
+void initBinding() {}
 
-}
-
-}
+}  // namespace kraken

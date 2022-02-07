@@ -6,8 +6,8 @@
 #ifndef KRAKENBRIDGE_CONTEXT_DATA_H
 #define KRAKENBRIDGE_CONTEXT_DATA_H
 
-#include <unordered_map>
 #include <quickjs/quickjs.h>
+#include <unordered_map>
 #include "bindings/qjs/wrapper_type_info.h"
 
 namespace kraken {

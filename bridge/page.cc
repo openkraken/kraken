@@ -7,11 +7,10 @@
 #include <unordered_map>
 
 #include <core/dart_methods.h>
-#include "foundation/logging.h"
-#include "polyfill.h"
 #include "bindings/qjs/binding_initializer.h"
+#include "foundation/logging.h"
 #include "page.h"
-
+#include "polyfill.h"
 
 namespace kraken {
 
@@ -24,12 +23,15 @@ KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : c
 #if ENABLE_PROFILE
   auto jsContextStartTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 #endif
-  m_context = new ExecutionContext(contextId, [this](int32_t contextId, const char* message) {
-    if (m_context->dartMethodPtr()->onJsError != nullptr) {
-      m_context->dartMethodPtr()->onJsError(contextId, message);
-    }
-    KRAKEN_LOG(ERROR) << message << std::endl;
-  }, this);
+  m_context = new ExecutionContext(
+      contextId,
+      [this](int32_t contextId, const char* message) {
+        if (m_context->dartMethodPtr()->onJsError != nullptr) {
+          m_context->dartMethodPtr()->onJsError(contextId, message);
+        }
+        KRAKEN_LOG(ERROR) << message << std::endl;
+      },
+      this);
 
 #if ENABLE_PROFILE
   auto nativePerformance = Performance::instance(m_context)->m_nativePerformance;
@@ -57,56 +59,56 @@ KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : c
 }
 
 bool KrakenPage::parseHTML(const char* code, size_t length) {
-//  if (!m_context->isValid())
-//    return false;
-//  JSValue bodyValue = JS_GetPropertyStr(m_context->ctx(), m_context->document()->jsObject, "body");
-//  auto* body = static_cast<Element*>(JS_GetOpaque(bodyValue, Element::classId));
-//  HTMLParser::parseHTML(code, length, body);
-//  JS_FreeValue(m_context->ctx(), bodyValue);
-//  return true;
+  //  if (!m_context->isValid())
+  //    return false;
+  //  JSValue bodyValue = JS_GetPropertyStr(m_context->ctx(), m_context->document()->jsObject, "body");
+  //  auto* body = static_cast<Element*>(JS_GetOpaque(bodyValue, Element::classId));
+  //  HTMLParser::parseHTML(code, length, body);
+  //  JS_FreeValue(m_context->ctx(), bodyValue);
+  //  return true;
 }
 
 void KrakenPage::invokeModuleEvent(const NativeString* moduleName, const char* eventType, void* ptr, NativeString* extra) {
-//  if (!m_context->isValid())
-//    return;
-//
-//  JSValue eventObject = JS_NULL;
-//  if (ptr != nullptr) {
-//    std::string type = std::string(eventType);
-//    auto* rawEvent = static_cast<RawEvent*>(ptr)->bytes;
-//    Event* event = Event::create(m_context->ctx(), reinterpret_cast<NativeEvent*>(rawEvent));
-//    eventObject = event->toQuickJS();
-//  }
-//
-//  JSValue moduleNameValue = JS_NewUnicodeString(m_context->runtime(), m_context->ctx(), moduleName->string, moduleName->length);
-//  JSValue extraObject = JS_NULL;
-//  if (extra != nullptr) {
-//    std::u16string u16Extra = std::u16string(reinterpret_cast<const char16_t*>(extra->string), extra->length);
-//    std::string extraString = toUTF8(u16Extra);
-//    extraObject = JS_ParseJSON(m_context->ctx(), extraString.c_str(), extraString.size(), "");
-//  }
-//
-//  {
-//    struct list_head *el, *el1;
-//    list_for_each_safe(el, el1, &m_context->module_job_list) {
-//      auto* module = list_entry(el, ModuleContext, link);
-//      JSValue callback = module->callback;
-//
-//      JSValue arguments[] = {moduleNameValue, eventObject, extraObject};
-//      JSValue returnValue = JS_Call(m_context->ctx(), callback, m_context->global(), 3, arguments);
-//      m_context->handleException(&returnValue);
-//      JS_FreeValue(m_context->ctx(), returnValue);
-//    }
-//  }
-//
-//  JS_FreeValue(m_context->ctx(), moduleNameValue);
-//
-//  if (rawEvent != nullptr) {
-//    JS_FreeValue(m_context->ctx(), eventObject);
-//  }
-//  if (extra != nullptr) {
-//    JS_FreeValue(m_context->ctx(), extraObject);
-//  }
+  //  if (!m_context->isValid())
+  //    return;
+  //
+  //  JSValue eventObject = JS_NULL;
+  //  if (ptr != nullptr) {
+  //    std::string type = std::string(eventType);
+  //    auto* rawEvent = static_cast<RawEvent*>(ptr)->bytes;
+  //    Event* event = Event::create(m_context->ctx(), reinterpret_cast<NativeEvent*>(rawEvent));
+  //    eventObject = event->toQuickJS();
+  //  }
+  //
+  //  JSValue moduleNameValue = JS_NewUnicodeString(m_context->runtime(), m_context->ctx(), moduleName->string, moduleName->length);
+  //  JSValue extraObject = JS_NULL;
+  //  if (extra != nullptr) {
+  //    std::u16string u16Extra = std::u16string(reinterpret_cast<const char16_t*>(extra->string), extra->length);
+  //    std::string extraString = toUTF8(u16Extra);
+  //    extraObject = JS_ParseJSON(m_context->ctx(), extraString.c_str(), extraString.size(), "");
+  //  }
+  //
+  //  {
+  //    struct list_head *el, *el1;
+  //    list_for_each_safe(el, el1, &m_context->module_job_list) {
+  //      auto* module = list_entry(el, ModuleContext, link);
+  //      JSValue callback = module->callback;
+  //
+  //      JSValue arguments[] = {moduleNameValue, eventObject, extraObject};
+  //      JSValue returnValue = JS_Call(m_context->ctx(), callback, m_context->global(), 3, arguments);
+  //      m_context->handleException(&returnValue);
+  //      JS_FreeValue(m_context->ctx(), returnValue);
+  //    }
+  //  }
+  //
+  //  JS_FreeValue(m_context->ctx(), moduleNameValue);
+  //
+  //  if (rawEvent != nullptr) {
+  //    JS_FreeValue(m_context->ctx(), eventObject);
+  //  }
+  //  if (extra != nullptr) {
+  //    JS_FreeValue(m_context->ctx(), extraObject);
+  //  }
 }
 
 void KrakenPage::evaluateScript(const NativeString* script, const char* url, int startLine) {

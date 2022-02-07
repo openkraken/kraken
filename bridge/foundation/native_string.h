@@ -1,7 +1,7 @@
 /*
-* Copyright (C) 2021 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2021 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #ifndef KRAKENBRIDGE_NATIVE_STRING_H
 #define KRAKENBRIDGE_NATIVE_STRING_H
@@ -18,6 +18,6 @@ struct NativeString {
   void free();
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_NATIVE_STRING_H

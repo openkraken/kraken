@@ -8,9 +8,9 @@
 //
 //#include "bindings/qjs/garbage_collected.h"
 //
-//namespace kraken {
+// namespace kraken {
 //
-//class HTMLAllCollection : public HostObject {
+// class HTMLAllCollection : public HostObject {
 // public:
 //  AllCollection(ExecutionContext* context) : HostObject(context, "AllCollection"){};
 //
