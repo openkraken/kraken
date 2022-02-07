@@ -23,6 +23,7 @@
 #include "dart_methods.h"
 #include "executing_context_data.h"
 #include "frame/dom_timer_coordinator.h"
+#include "rejected_promises.h"
 
 using JSExceptionHandler = std::function<void(int32_t contextId, const char* message)>;
 
@@ -108,11 +109,12 @@ class ExecutionContext {
   struct list_head promise_job_list;
   struct list_head native_function_job_list;
 
+  static void dispatchGlobalUnhandledRejectionEvent(ExecutionContext* context, JSValueConst promise, JSValueConst error);
+  static void dispatchGlobalRejectionHandledEvent(ExecutionContext* context, JSValueConst promise, JSValueConst error);
+  static void dispatchGlobalErrorEvent(ExecutionContext* context, JSValueConst error);
+
  private:
   static void promiseRejectTracker(JSContext* ctx, JSValueConst promise, JSValueConst reason, JS_BOOL is_handled, void* opaque);
-  void dispatchGlobalErrorEvent(JSValueConst error);
-  void dispatchGlobalPromiseRejectionEvent(JSValueConst promise, JSValueConst error);
-  void reportError(JSValueConst error);
 
   int32_t contextId;
   JSExceptionHandler _handler;
@@ -126,6 +128,7 @@ class ExecutionContext {
   ExecutionContextData m_data{this};
   UICommandBuffer m_commandBuffer{this};
   std::unique_ptr<DartMethodPointer> m_dartMethodPtr = std::make_unique<DartMethodPointer>();
+  RejectedPromises m_rejectedPromise;
 };
 
 // The read object's method or properties via Proxy, we should redirect this_val from Proxy into target property of

@@ -197,5 +197,14 @@ void main() {
       expect(response!.headers.value('cache-hits'), 'HIT');
       expect(response.headers.value('x-custom-header'), 'hello-world');
     });
+
+    test('Work with followRedirects: false', () async {
+      var req = await httpClient.openUrl('GET',
+          server.getUri('301'));
+      req.followRedirects = false;
+      var res = await req.close();
+
+      expect(res.statusCode, 301);
+    });
   });
 }

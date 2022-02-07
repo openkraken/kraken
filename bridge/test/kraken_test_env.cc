@@ -59,6 +59,12 @@ static void unlink_callback(JSThreadState* ts, JSFrameCallback* th) {
 }
 
 NativeString* TEST_invokeModule(void* callbackContext, int32_t contextId, NativeString* moduleName, NativeString* method, NativeString* params, AsyncModuleCallback callback) {
+  std::string module = nativeStringToStdString(moduleName);
+
+  if (module == "throwError") {
+    callback(callbackContext, contextId, nativeStringToStdString(method).c_str(), nullptr);
+  }
+
   return nullptr;
 };
 

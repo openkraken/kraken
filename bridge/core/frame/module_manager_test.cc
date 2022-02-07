@@ -40,4 +40,35 @@ kraken.methodChannel.invokeMethod('abc', 'fn', object);
   EXPECT_EQ(errorCalled, true);
 }
 
-}  // namespace kraken
+TEST(ModuleManager, invokeModuleError) {
+  bool static logCalled = false;
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {});
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(),
+                 "Error {message: 'kraken://', stack: '    at __kraken_invoke_module__ (native)\n"
+                 "    at f (vm://:9)\n"
+                 "    at <eval> (vm://:11)\n"
+                 "'}");
+  };
+
+  auto context = bridge->getContext();
+
+  std::string code = std::string(R"(
+function f() {
+  kraken.invokeModule('throwError', 'kraken://', null, (e, error) => {
+    if (e) {
+      console.log(e);
+    } else {
+      console.log('test failed');
+    }
+  });
+}
+f();
+)");
+  context->evaluateJavaScript(code.c_str(), code.size(), "vm://", 0);
+
+  EXPECT_EQ(logCalled, true);
+}
+
+}  // namespace kraken::binding::qjs

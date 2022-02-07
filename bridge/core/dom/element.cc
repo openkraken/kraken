@@ -386,9 +386,8 @@ IMPL_FUNCTION(Element, toBlob)(JSContext* ctx, JSValue this_val, int argc, JSVal
       JS_FreeValue(ctx, argumentsArray);
       JS_FreeValue(ctx, arrayBuffer);
     } else {
-      JSValue errorObject = JS_NewError(ctx);
-      JSValue errorMessage = JS_NewString(ctx, error);
-      JS_SetPropertyStr(ctx, errorObject, "message", errorMessage);
+      JS_ThrowInternalError(ctx, "%s", error);
+      JSValue errorObject = JS_GetException(ctx);
       JSValue ret = JS_Call(ctx, promiseContext->rejectFunc, promiseContext->promise, 1, &errorObject);
       promiseContext->context->handleException(&ret);
       promiseContext->context->drainPendingPromiseJobs();

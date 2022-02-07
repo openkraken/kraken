@@ -9,9 +9,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/painting.dart';
+import 'package:kraken/src/module/navigator.dart';
 import 'package:quiver/collection.dart';
 
 /// This class allows user to customize Kraken's image loading.
@@ -310,7 +310,7 @@ ImageProvider defaultCachedProviderFactory(
 ImageProvider defaultNetworkProviderFactory(
     Uri uri, ImageProviderParams params) {
   NetworkImage networkImage = NetworkImage(uri.toString(), headers: {
-    HttpHeaders.userAgentHeader: getKrakenInfo().userAgent,
+    HttpHeaders.userAgentHeader: NavigatorModule.getUserAgent(),
     HttpHeaderContext:
         (params as CachedNetworkImageProviderParams).contextId.toString(),
   });

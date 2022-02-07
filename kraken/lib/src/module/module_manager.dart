@@ -30,7 +30,6 @@ class ModuleManager {
       defineModule((ModuleManager? moduleManager) => AsyncStorageModule(moduleManager));
       defineModule((ModuleManager? moduleManager) => ClipBoardModule(moduleManager));
       defineModule((ModuleManager? moduleManager) => ConnectionModule(moduleManager));
-      defineModule((ModuleManager? moduleManager) => DeviceInfoModule(moduleManager));
       defineModule((ModuleManager? moduleManager) => FetchModule(moduleManager));
       defineModule((ModuleManager? moduleManager) => MethodChannelModule(moduleManager));
       defineModule((ModuleManager? moduleManager) => NavigationModule(moduleManager));
