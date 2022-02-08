@@ -35,6 +35,9 @@ jobs:
       - name: Upload Snapshots
         run: node scripts/upload_snapshots.js
         continue-on-error: true
+        env:
+          OSS_AK: ${{ secrets.OSS_AK }}
+          OSS_SK: ${{ secrets.OSS_SK }}
       - name: Check on failures
         if: steps.test.outcome != 'success'
         run: exit 1
