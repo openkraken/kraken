@@ -328,7 +328,7 @@ class HttpCacheObject {
             value = kvTuple.sublist(1).join(':');
           }
 
-          List<String> values = responseHeaders[key] ??= <String>[];
+          List<String> values = (responseHeaders[key] ??= <String>[]);
           values.add(value.trim());
         }
       }
