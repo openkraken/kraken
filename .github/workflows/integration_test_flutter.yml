@@ -18,4 +18,18 @@ jobs:
     - name: Check on failures
       if: steps.test.outcome != 'success'
       run: exit 1
+  integration_test_github_hosted:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Test
+        run: npm test
+        id: test
+        continue-on-error: true
+      - name: Upload Snapshots
+        run: node scripts/upload_snapshots.js
+        continue-on-error: true
+      - name: Check on failures
+        if: steps.test.outcome != 'success'
+        run: exit 1
 
