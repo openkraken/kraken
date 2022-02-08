@@ -26,6 +26,8 @@ jobs:
       - uses: subosito/flutter-action@v1
         with:
           flutter-version: '2.5.3'
+      - name: Turn on desktop
+        run: flutter config --enable-macos-desktop
       - name: Run Test
         run: npm test
         id: test
