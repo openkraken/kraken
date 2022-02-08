@@ -65,7 +65,7 @@ class TestHttpClientInterceptor implements HttpClientInterceptor {
       HttpClientRequest request, HttpClientResponse response) async {
     if (request.headers.value('x-test-id') == 'afterResponse-001') {
       return HttpClientStreamResponse(response, responseHeaders: {
-        'x-test-after-response': 'modified',
+        'x-test-after-response': ['modified'],
       });
     }
     return response;
