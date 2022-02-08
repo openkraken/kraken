@@ -4,6 +4,7 @@
  */
 
 #include "executing_context.h"
+#include "polyfill.h"
 
 namespace kraken {
 
@@ -21,7 +22,7 @@ std::unique_ptr<ExecutionContext> createJSContext(int32_t contextId, const JSExc
 
 static JSRuntime* m_runtime{nullptr};
 
-void ExecutionContextGCTracker::trace(Visitor* visitor) const {
+void ExecutionContextGCTracker::trace(GCVisitor* visitor) const {
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
   context->trace(visitor);
 }
@@ -31,6 +32,14 @@ JSClassID ExecutionContextGCTracker::contextGcTrackerClassId{0};
 
 ExecutionContext::ExecutionContext(int32_t contextId, const JSExceptionHandler& handler, void* owner)
     : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false), uniqueId(context_unique_id++) {
+#if ENABLE_PROFILE
+  auto jsContextStartTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+  auto nativePerformance = Performance::instance(m_context)->m_nativePerformance;
+  nativePerformance.mark(PERF_JS_CONTEXT_INIT_START, jsContextStartTime);
+  nativePerformance.mark(PERF_JS_CONTEXT_INIT_END);
+  nativePerformance.mark(PERF_JS_NATIVE_METHOD_INIT_START);
+#endif
+
   // @FIXME: maybe contextId will larger than MAX_JS_CONTEXT
   valid_contexts[contextId] = true;
   if (contextId > running_context_list)
@@ -63,6 +72,24 @@ ExecutionContext::ExecutionContext(int32_t contextId, const JSExceptionHandler& 
   JS_DefinePropertyValueStr(m_ctx, globalObject, "_gc_tracker_", m_gcTracker->toQuickJS(), JS_PROP_NORMAL);
 
   runningContexts++;
+
+  // Register all built-in native bindings.
+  installBindings(m_ctx);
+
+#if ENABLE_PROFILE
+  nativePerformance.mark(PERF_JS_NATIVE_METHOD_INIT_END);
+  nativePerformance.mark(PERF_JS_POLYFILL_INIT_START);
+#endif
+
+  initKrakenPolyFill(this);
+
+  for (auto& p : pluginByteCode) {
+    evaluateByteCode(p.second.bytes, p.second.length);
+  }
+
+#if ENABLE_PROFILE
+  nativePerformance.mark(PERF_JS_POLYFILL_INIT_END);
+#endif
 }
 
 ExecutionContext::~ExecutionContext() {
@@ -236,12 +263,12 @@ void ExecutionContext::reportError(JSValueConst error) {
     messageLength += 4 + strlen(stack);
     char message[messageLength];
     sprintf(message, "%s: %s\n%s", type, title, stack);
-    _handler(contextId, message);
+    _handler(this, message);
   } else {
     messageLength += 3;
     char message[messageLength];
     sprintf(message, "%s: %s", type, title);
-    _handler(contextId, message);
+    _handler(this, message);
   }
 
   JS_FreeValue(m_ctx, errorTypeValue);
@@ -362,6 +389,8 @@ void ExecutionContext::dispatchGlobalRejectionHandledEvent(ExecutionContext* con
   dispatchPromiseRejectionEvent("rejectionhandled", context, promise, error);
 }
 
+std::unordered_map<std::string, NativeByteCode> ExecutionContext::pluginByteCode{};
+
 void ExecutionContext::promiseRejectTracker(JSContext* ctx, JSValue promise, JSValue reason, int is_handled, void* opaque) {
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
   // The unhandledrejection event is the promise-equivalent of the global error event, which is fired for uncaught exceptions.
@@ -425,8 +454,17 @@ DOMTimerCoordinator* ExecutionContext::timers() {
   return &m_timers;
 }
 
-void ExecutionContext::trace(Visitor* visitor) {
+ModuleListenerContainer* ExecutionContext::moduleListeners() {
+  return &m_moduleListeners;
+}
+
+ModuleCallbackCoordinator* ExecutionContext::moduleCallbacks() {
+  return &m_moduleCallbacks;
+}
+
+void ExecutionContext::trace(GCVisitor* visitor) {
   m_timers.trace(visitor);
+  m_moduleListeners.trace(visitor);
 }
 
 void buildUICommandArgs(JSContext* ctx, JSValue key, NativeString& args_01) {

@@ -5,7 +5,7 @@
 
 #include <utility>
 
-#include "bindings/qjs/qjs_patch.h"
+#include "bindings/qjs/qjs_engine_patch.h"
 #include "core/dom/node.h"
 #include "core/frame/window.h"
 #include "custom_event.h"

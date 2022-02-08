@@ -24,7 +24,7 @@ class QJSFunction : public GarbageCollected<QJSFunction> {
   ScriptValue invoke(JSContext* ctx, int32_t argc, ScriptValue* arguments);
 
   const char* getHumanReadableName() const override;
-  void trace(Visitor* visitor) const override;
+  void trace(GCVisitor* visitor) const override;
   void dispose() const override;
 
  private:

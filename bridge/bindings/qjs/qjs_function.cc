@@ -34,7 +34,7 @@ const char* QJSFunction::getHumanReadableName() const {
   return "QJSFunction";
 }
 
-void QJSFunction::trace(Visitor* visitor) const {
+void QJSFunction::trace(GCVisitor* visitor) const {
   visitor->trace(m_function);
 }
 

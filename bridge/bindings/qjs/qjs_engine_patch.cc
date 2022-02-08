@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-#include "qjs_patch.h"
+#include "qjs_engine_patch.h"
 #include <quickjs/cutils.h>
 #include <quickjs/list.h>
 #include <cstring>

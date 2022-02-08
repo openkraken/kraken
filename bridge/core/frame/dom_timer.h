@@ -25,7 +25,7 @@ class DOMTimer : public GarbageCollected<DOMTimer> {
 
   [[nodiscard]] FORCE_INLINE const char* getHumanReadableName() const override { return "DOMTimer"; }
 
-  void trace(Visitor* visitor) const override;
+  void trace(GCVisitor* visitor) const override;
   void dispose() const override;
 
  private:

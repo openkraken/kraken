@@ -4,7 +4,7 @@
  */
 
 #include "native_value.h"
-#include "bindings/qjs/qjs_patch.h"
+#include "bindings/qjs/qjs_engine_patch.h"
 #include "core/executing_context.h"
 
 namespace kraken {

@@ -10,8 +10,8 @@
 #include <memory>
 
 #include "foundation/macros.h"
-#include "qjs_patch.h"
-#include "visitor.h"
+#include "gc_visitor.h"
+#include "qjs_engine_patch.h"
 
 namespace kraken {
 
@@ -56,7 +56,7 @@ class GarbageCollected {
    * This Trace method must be override by objects inheriting from
    * GarbageCollected.
    */
-  virtual void trace(Visitor* visitor) const = 0;
+  virtual void trace(GCVisitor* visitor) const = 0;
 
   /**
    * Called before underline JavaScript object been collected by GC.
@@ -118,7 +118,7 @@ P* GarbageCollected<T>::initialize(JSContext* ctx, JSClassID* classId, JSClassEx
     /// which member of their class should be collected by GC.
     def.gc_mark = [](JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) {
       auto* object = static_cast<P*>(JS_GetOpaque(val, JSValueGetClassId(val)));
-      Visitor visitor{rt, mark_func};
+      GCVisitor visitor{rt, mark_func};
       object->trace(&visitor);
     };
 

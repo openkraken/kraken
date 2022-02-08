@@ -8,7 +8,7 @@
 
 #include <assert.h>
 #include <quickjs/quickjs.h>
-#include "bindings/qjs/qjs_patch.h"
+#include "bindings/qjs/qjs_engine_patch.h"
 
 namespace kraken {
 

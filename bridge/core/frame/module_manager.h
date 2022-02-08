@@ -6,18 +6,18 @@
 #ifndef KRAKENBRIDGE_MODULE_MANAGER_H
 #define KRAKENBRIDGE_MODULE_MANAGER_H
 
-#include "executing_context.h"
+#include "bindings/qjs/exception_state.h"
+#include "bindings/qjs/qjs_function.h"
+#include "module_callback.h"
 
 namespace kraken {
 
-struct ModuleContext {
-  JSValue callback;
-  ExecutionContext* context;
-  list_head link;
+class ModuleManager {
+ public:
+  static ScriptValue invokeModule(ExecutionContext* context, ScriptValue& moduleName, ScriptValue& method, ScriptValue& params, QJSFunction* callback, ExceptionState* exception);
+  static void addModuleListener(ExecutionContext* context, QJSFunction* handler, ExceptionState* exception);
 };
 
-void bindModuleManager(ExecutionContext* context);
-void handleInvokeModuleUnexpectedCallback(void* callbackContext, int32_t contextId, NativeString* errmsg, NativeString* json);
 }  // namespace kraken
 
 #endif  // KRAKENBRIDGE_MODULE_MANAGER_H

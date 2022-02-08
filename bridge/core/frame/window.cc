@@ -7,7 +7,7 @@
 #include "bindings/qjs/dom/document.h"
 #include "bindings/qjs/dom/events/.gen/message_event.h"
 #include "bindings/qjs/garbage_collected.h"
-#include "bindings/qjs/qjs_patch.h"
+#include "bindings/qjs/qjs_engine_patch.h"
 #include "dart_methods.h"
 
 namespace kraken {

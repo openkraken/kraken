@@ -10,8 +10,8 @@ add_subdirectory(./third_party/googletest)
 add_subdirectory(./third_party/benchmark)
 
 list(APPEND KRAKEN_TEST_SOURCE
-  page_test.cc
-  page_test.h
+  test/kraken_test_context.cc
+  test/kraken_test_context.h
 )
 list(APPEND KRAKEN_UNIT_TEST_SOURCE
   ./test/kraken_test_env.cc

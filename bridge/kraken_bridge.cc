@@ -13,7 +13,7 @@
 #include "foundation/ui_command_buffer.h"
 #include "foundation/ui_task_queue.h"
 #include "include/kraken_bridge.h"
-#include "page.h"
+#include "core/page.h"
 
 #if defined(_WIN32)
 #define SYSTEM_NAME "windows"  // Windows
@@ -226,7 +226,7 @@ void registerContextDisposedCallbacks(int32_t contextId, Task task, void* data) 
 }
 
 void registerPluginByteCode(uint8_t* bytes, int32_t length, const char* pluginName) {
-  kraken::KrakenPage::pluginByteCode[pluginName] = kraken::NativeByteCode{bytes, length};
+  kraken::ExecutionContext::pluginByteCode[pluginName] = kraken::NativeByteCode{bytes, length};
 }
 
 int32_t profileModeEnabled() {

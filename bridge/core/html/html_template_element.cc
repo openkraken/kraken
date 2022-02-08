@@ -5,7 +5,7 @@
 
 #include "html_template_element.h"
 #include "bindings/qjs/dom/text_node.h"
-#include "bindings/qjs/qjs_patch.h"
+#include "bindings/qjs/qjs_engine_patch.h"
 #include "page.h"
 
 namespace kraken {

@@ -19,19 +19,27 @@
 #include "bindings/qjs/garbage_collected.h"
 #include "bindings/qjs/rejected_promises.h"
 #include "bindings/qjs/script_value.h"
+#include "bindings/qjs/binding_initializer.h"
 #include "foundation/macros.h"
 #include "foundation/ui_command_buffer.h"
 
 #include "dart_methods.h"
 #include "executing_context_data.h"
 #include "frame/dom_timer_coordinator.h"
-
-using JSExceptionHandler = std::function<void(int32_t contextId, const char* message)>;
+#include "frame/module_listener_container.h"
+#include "frame/module_callback_coordinator.h"
 
 namespace kraken {
 
+struct NativeByteCode {
+  uint8_t* bytes;
+  int32_t length;
+};
+
 class ExecutionContext;
 class Document;
+
+using JSExceptionHandler = std::function<void(ExecutionContext* context, const char* message)>;
 
 std::string jsAtomToStdString(JSContext* ctx, JSAtom atom);
 
@@ -57,7 +65,7 @@ class ExecutionContextGCTracker : public GarbageCollected<ExecutionContextGCTrac
  public:
   static JSClassID contextGcTrackerClassId;
 
-  void trace(Visitor* visitor) const override;
+  void trace(GCVisitor* visitor) const override;
   void dispose() const override;
 
  private:
@@ -96,11 +104,17 @@ class ExecutionContext {
   // not be used after the ExecutionContext is destroyed.
   DOMTimerCoordinator* timers();
 
+  // Gets the ModuleListeners which registered by `kraken.addModuleListener API`.
+  ModuleListenerContainer* moduleListeners();
+
+  // Gets the ModuleCallbacks which from the 4th parameter of `kraken.invokeModule` function.
+  ModuleCallbackCoordinator* moduleCallbacks();
+
   FORCE_INLINE Document* document() { return m_document; };
   FORCE_INLINE UICommandBuffer* uiCommandBuffer() { return &m_commandBuffer; };
   FORCE_INLINE std::unique_ptr<DartMethodPointer>& dartMethodPtr() { return m_dartMethodPtr; }
 
-  void trace(Visitor* visitor);
+  void trace(GCVisitor* visitor);
 
   std::chrono::time_point<std::chrono::system_clock> timeOrigin;
   std::unordered_map<std::string, void*> constructorMap;
@@ -116,6 +130,9 @@ class ExecutionContext {
   static void dispatchGlobalRejectionHandledEvent(ExecutionContext* context, JSValueConst promise, JSValueConst error);
   static void dispatchGlobalErrorEvent(ExecutionContext* context, JSValueConst error);
 
+  // Bytecodes which registered by kraken plugins.
+  static std::unordered_map<std::string, NativeByteCode> pluginByteCode;
+
  private:
   static void promiseRejectTracker(JSContext* ctx, JSValueConst promise, JSValueConst reason, JS_BOOL is_handled, void* opaque);
 
@@ -127,6 +144,8 @@ class ExecutionContext {
   JSContext* m_ctx{nullptr};
   Document* m_document{nullptr};
   DOMTimerCoordinator m_timers;
+  ModuleListenerContainer m_moduleListeners;
+  ModuleCallbackCoordinator m_moduleCallbacks;
   ExecutionContextGCTracker* m_gcTracker{nullptr};
   ExecutionContextData m_data{this};
   UICommandBuffer m_commandBuffer{this};

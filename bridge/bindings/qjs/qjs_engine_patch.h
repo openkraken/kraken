@@ -3,8 +3,8 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKENBRIDGE_QJS_PATCH_H
-#define KRAKENBRIDGE_QJS_PATCH_H
+#ifndef KRAKENBRIDGE_QJS_ENGINE_PATCH_H
+#define KRAKENBRIDGE_QJS_ENGINE_PATCH_H
 
 #include <quickjs/list.h>
 #include <quickjs/quickjs.h>
@@ -110,4 +110,4 @@ JSValue JS_GetProxyTarget(JSValue value);
 }
 #endif
 
-#endif  // KRAKENBRIDGE_QJS_PATCH_H
+#endif  // KRAKENBRIDGE_QJS_ENGINE_PATCH_H

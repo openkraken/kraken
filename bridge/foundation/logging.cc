@@ -7,7 +7,7 @@
 #include <algorithm>
 #include "colors.h"
 
-#include "page.h"
+#include "core/page.h"
 
 #if defined(IS_ANDROID)
 #include <android/log.h>

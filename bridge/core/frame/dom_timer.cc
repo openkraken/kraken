@@ -5,7 +5,7 @@
 
 #include "dom_timer.h"
 #include "bindings/qjs/garbage_collected.h"
-#include "bindings/qjs/qjs_patch.h"
+#include "bindings/qjs/qjs_engine_patch.h"
 #include "core/executing_context.h"
 
 #if UNIT_TEST
@@ -30,7 +30,7 @@ void DOMTimer::fire() {
   }
 }
 
-void DOMTimer::trace(Visitor* visitor) const {
+void DOMTimer::trace(GCVisitor* visitor) const {
   m_callback->trace(visitor);
 }
 

@@ -6,6 +6,9 @@
 #include "gtest/gtest.h"
 #include "kraken_test_env.h"
 #include "page.h"
+#include "include/kraken_bridge.h"
+
+using namespace kraken;
 
 TEST(Context, isValid) {
   auto bridge = TEST_init();

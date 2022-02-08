@@ -4,7 +4,7 @@
  */
 
 #include "event.h"
-#include "bindings/qjs/qjs_patch.h"
+#include "bindings/qjs/qjs_engine_patch.h"
 #include "custom_event.h"
 #include "event_target.h"
 

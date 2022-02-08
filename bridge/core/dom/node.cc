@@ -4,7 +4,7 @@
  */
 
 #include "node.h"
-#include "bindings/qjs/qjs_patch.h"
+#include "bindings/qjs/qjs_engine_patch.h"
 #include "comment.h"
 #include "document.h"
 #include "document_fragment.h"

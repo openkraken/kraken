@@ -17,11 +17,6 @@
 
 namespace kraken {
 
-struct NativeByteCode {
-  uint8_t* bytes;
-  int32_t length;
-};
-
 class KrakenPage;
 using JSBridgeDisposeCallback = void (*)(KrakenPage* bridge);
 using ConsoleMessageHandler = std::function<void(void* ctx, const std::string& message, int logLevel)>;
@@ -37,9 +32,6 @@ class KrakenPage final {
   KrakenPage() = delete;
   KrakenPage(int32_t jsContext, const JSExceptionHandler& handler);
   ~KrakenPage();
-
-  // Bytecodes which registered by kraken plugins.
-  static std::unordered_map<std::string, NativeByteCode> pluginByteCode;
 
   // evaluate JavaScript source codes in standard mode.
   void evaluateScript(const NativeString* script, const char* url, int startLine);

@@ -9,10 +9,14 @@
 /// Functions implements at dart side, including timer, Rendering and module API.
 /// Communicate via Dart FFI.
 
-#include "kraken_bridge.h"
-
 #include <memory>
 #include <thread>
+
+#include "foundation/native_string.h"
+#include "core/frame/screen.h"
+
+namespace kraken {
+
 
 using AsyncCallback = void (*)(void* callbackContext, int32_t contextId, const char* errmsg);
 using AsyncRAFCallback = void (*)(void* callbackContext, int32_t contextId, double result, const char* errmsg);
@@ -56,7 +60,7 @@ struct MousePointer {
 using SimulatePointer = void (*)(MousePointer**, int32_t length, int32_t pointer);
 using SimulateInputText = void (*)(NativeString* nativeString);
 
-namespace kraken {
+
 struct DartMethodPointer {
   DartMethodPointer() = default;
   InvokeModule invokeModule{nullptr};

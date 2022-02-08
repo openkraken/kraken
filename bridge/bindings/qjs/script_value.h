@@ -6,22 +6,47 @@
 #ifndef KRAKENBRIDGE_SCRIPT_VALUE_H
 #define KRAKENBRIDGE_SCRIPT_VALUE_H
 
+#include <memory>
 #include <quickjs/quickjs.h>
 #include "foundation/macros.h"
+#include "foundation/native_string.h"
+#include "exception_state.h"
 
 namespace kraken {
 
-// ScriptValue is a QuickJS JSValue wrapper which hold all information to hide out QuickJS running details.
+// ScriptValue is a stack allocate only QuickJS JSValue wrapper which hold all information to hide out QuickJS running details.
 class ScriptValue final {
+  // ScriptValue should only allocate at stack.
   KRAKEN_DISALLOW_NEW();
-
  public:
+  // Create an errorObject from string error message.
+  static ScriptValue createErrorObject(JSContext* ctx, const char* errmsg);
+  // Create an object from JSON string.
+  static ScriptValue createJSONObject(JSContext* ctx, const char* jsonString, size_t length);
+  // Create from NativeString
+  static ScriptValue fromNativeString(JSContext* ctx, NativeString* nativeString);
+
+  // Create an empty ScriptValue;
+  static ScriptValue Empty(JSContext* ctx);
+  // Wrap an Quickjs JSValue to ScriptValue.
   explicit ScriptValue(JSContext* ctx, JSValue value) : m_ctx(ctx), m_value(JS_DupValue(ctx, value)){};
+  explicit ScriptValue(JSContext* ctx): m_ctx(ctx) {};
+
+  ScriptValue& operator=(const ScriptValue& other) {
+    if (&other != this) {
+      m_value = JS_DupValue(m_ctx, other.m_value);
+    }
+    return *this;
+  };
+
   ~ScriptValue() {
     JS_FreeValue(m_ctx, m_value);
   }
   bool isEmpty();
   JSValue toQuickJS();
+  // Create a new ScriptValue from call JSON.stringify to current value.
+  ScriptValue toJSONStringify(ExceptionState* exception);
+  std::unique_ptr<NativeString> toNativeString();
 
   bool isException();
 

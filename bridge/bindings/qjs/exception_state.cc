@@ -27,6 +27,10 @@ void ExceptionState::throwException(JSContext* ctx, ErrorType type, const char* 
   }
 }
 
+void ExceptionState::throwException(JSContext* ctx, JSValue exception) {
+  m_exception = JS_DupValue(ctx, exception);
+}
+
 bool ExceptionState::hasException() {
   return !JS_IsNull(m_exception);
 }

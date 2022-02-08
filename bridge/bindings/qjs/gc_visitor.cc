@@ -3,11 +3,11 @@
  * Author: Kraken Team.
  */
 
-#include "visitor.h"
+#include "gc_visitor.h"
 
 namespace kraken {
 
-void Visitor::trace(JSValue value) {
+void GCVisitor::trace(JSValue value) {
   JS_MarkValue(m_runtime, value, m_markFunc);
 }
 

@@ -1,4 +1,3 @@
-import 'es6-promise/dist/es6-promise.auto';
 // import './dom';
 // import './query-selector';
 import { console } from './console';

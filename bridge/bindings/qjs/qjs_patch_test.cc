@@ -3,9 +3,9 @@
  * Author: Kraken Team.
  */
 
-#include "qjs_patch.h"
 #include <codecvt>
 #include "gtest/gtest.h"
+#include "qjs_engine_patch.h"
 
 TEST(JS_ToUnicode, asciiWords) {
   JSRuntime* runtime = JS_NewRuntime();

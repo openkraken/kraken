@@ -34,8 +34,6 @@ static void handleTransientCallback(void* ptr, int32_t contextId, const char* er
   auto* timer = static_cast<DOMTimer*>(ptr);
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
 
-  if (!checkPage(contextId, context))
-    return;
   if (!context->isValid())
     return;
 
@@ -66,7 +64,7 @@ DOMTimer* DOMTimerCoordinator::getTimerById(int32_t timerId) {
   return m_activeTimers[timerId];
 }
 
-void DOMTimerCoordinator::trace(Visitor* visitor) {
+void DOMTimerCoordinator::trace(GCVisitor* visitor) {
   for (auto& timer : m_activeTimers) {
     visitor->trace(timer.second->toQuickJS());
   }

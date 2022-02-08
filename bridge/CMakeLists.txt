@@ -184,9 +184,6 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   list(APPEND BRIDGE_LINK_LIBS quickjs)
 
   list(APPEND BRIDGE_SOURCE
-    page.cc
-    page.h
-
     # Binding files
     bindings/qjs/binding_initializer.cc
     bindings/qjs/binding_initializer.h
@@ -197,24 +194,30 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/heap_hashmap.h
     bindings/qjs/native_string_utils.cc
     bindings/qjs/native_string_utils.h
-    bindings/qjs/qjs_patch.cc
-    bindings/qjs/qjs_patch.h
+    bindings/qjs/qjs_engine_patch.cc
+    bindings/qjs/qjs_engine_patch.h
     bindings/qjs/qjs_function.cc
     bindings/qjs/qjs_function.h
     bindings/qjs/script_value.cc
     bindings/qjs/script_value.h
     bindings/qjs/exception_state.cc
     bindings/qjs/exception_state.h
-    bindings/qjs/visitor.cc
-    bindings/qjs/visitor.h
+    bindings/qjs/gc_visitor.cc
+    bindings/qjs/gc_visitor.h
     bindings/qjs/rejected_promises.h
     bindings/qjs/rejected_promises.cc
     bindings/qjs/qjs_window.cc
     bindings/qjs/qjs_window.h
+    bindings/qjs/qjs_page.cc
+    bindings/qjs/qjs_page.h
+    bindings/qjs/qjs_module_manager.cc
+    bindings/qjs/qjs_module_manager.h
 
     # Core sources
     core/executing_context.cc
     core/executing_context.h
+    core/page.h
+    core/page.cc
     core/executing_context_data.cc
     core/executing_context_data.h
     core/dart_methods.h
@@ -224,6 +227,18 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/frame/dom_timer_coordinator.h
     core/frame/window_or_worker_global_scope.cc
     core/frame/window_or_worker_global_scope.h
+    core/frame/module_listener.cc
+    core/frame/module_listener.h
+    core/frame/module_listener_container.cc
+    core/frame/module_listener_container.h
+    core/frame/module_manager.cc
+    core/frame/module_manager.h
+    core/frame/module_callback.cc
+    core/frame/module_callback.h
+    core/frame/module_callback_coordinator.cc
+    core/frame/module_callback_coordinator.h
+    core/dom/frame_request_callback_collection.cc
+    core/dom/frame_request_callback_collection.h
 #    core/dom/character_data.cc
 #    core/dom/character_data.h
 #    core/dom/comment.cc

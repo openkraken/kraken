@@ -31,8 +31,6 @@ static void handleTransientCallback(void* ptr, int32_t contextId, const char* er
   auto* timer = static_cast<DOMTimer*>(ptr);
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
 
-  if (!checkPage(contextId, context))
-    return;
   if (!context->isValid())
     return;
 
@@ -45,8 +43,6 @@ static void handlePersistentCallback(void* ptr, int32_t contextId, const char* e
   auto* timer = static_cast<DOMTimer*>(ptr);
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
 
-  if (!checkPage(contextId, context))
-    return;
   if (!context->isValid())
     return;
 

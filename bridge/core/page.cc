@@ -14,58 +14,30 @@
 
 namespace kraken {
 
-std::unordered_map<std::string, NativeByteCode> KrakenPage::pluginByteCode{};
 ConsoleMessageHandler KrakenPage::consoleMessageHandler{nullptr};
 
 kraken::KrakenPage** KrakenPage::pageContextPool{nullptr};
 
 KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : contextId(contextId), ownerThreadId(std::this_thread::get_id()) {
-#if ENABLE_PROFILE
-  auto jsContextStartTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-#endif
   m_context = new ExecutionContext(
       contextId,
-      [this](int32_t contextId, const char* message) {
-        if (m_context->dartMethodPtr()->onJsError != nullptr) {
-          m_context->dartMethodPtr()->onJsError(contextId, message);
+      [](ExecutionContext* context, const char* message) {
+        if (context->dartMethodPtr()->onJsError != nullptr) {
+          context->dartMethodPtr()->onJsError(context->getContextId(), message);
         }
         KRAKEN_LOG(ERROR) << message << std::endl;
       },
       this);
-
-#if ENABLE_PROFILE
-  auto nativePerformance = Performance::instance(m_context)->m_nativePerformance;
-  nativePerformance.mark(PERF_JS_CONTEXT_INIT_START, jsContextStartTime);
-  nativePerformance.mark(PERF_JS_CONTEXT_INIT_END);
-  nativePerformance.mark(PERF_JS_NATIVE_METHOD_INIT_START);
-#endif
-
-  installBindings(m_context->ctx());
-
-#if ENABLE_PROFILE
-  nativePerformance.mark(PERF_JS_NATIVE_METHOD_INIT_END);
-  nativePerformance.mark(PERF_JS_POLYFILL_INIT_START);
-#endif
-
-  initKrakenPolyFill(this);
-
-  for (auto& p : pluginByteCode) {
-    evaluateByteCode(p.second.bytes, p.second.length);
-  }
-
-#if ENABLE_PROFILE
-  nativePerformance.mark(PERF_JS_POLYFILL_INIT_END);
-#endif
 }
 
 bool KrakenPage::parseHTML(const char* code, size_t length) {
-  //  if (!m_context->isValid())
-  //    return false;
-  //  JSValue bodyValue = JS_GetPropertyStr(m_context->ctx(), m_context->document()->jsObject, "body");
-  //  auto* body = static_cast<Element*>(JS_GetOpaque(bodyValue, Element::classId));
-  //  HTMLParser::parseHTML(code, length, body);
-  //  JS_FreeValue(m_context->ctx(), bodyValue);
-  //  return true;
+  //    if (!m_context->isValid())
+  //      return false;
+  //    JSValue bodyValue = JS_GetPropertyStr(m_context->ctx(), m_context->document()->jsObject, "body");
+  //    auto* body = static_cast<Element*>(JS_GetOpaque(bodyValue, Element::classId));
+  //    HTMLParser::parseHTML(code, length, body);
+  //    JS_FreeValue(m_context->ctx(), bodyValue);
+  //    return true;
 }
 
 void KrakenPage::invokeModuleEvent(const NativeString* moduleName, const char* eventType, void* ptr, NativeString* extra) {
@@ -196,7 +168,7 @@ KrakenPage::~KrakenPage() {
 }
 
 void KrakenPage::reportError(const char* errmsg) {
-  m_handler(m_context->getContextId(), errmsg);
+  m_handler(m_context, errmsg);
 }
 
 }  // namespace kraken

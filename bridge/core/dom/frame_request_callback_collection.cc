@@ -33,8 +33,8 @@ void FrameCallback::fire(double highResTimeStamp) {
   JS_FreeValue(m_ctx, returnValue);
 }
 
-void FrameCallback::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
-  JS_MarkValue(rt, m_callback, mark_func);
+void FrameCallback::trace(GCVisitor* visitor) const {
+  visitor->trace(m_callback);
 }
 
 void FrameCallback::dispose() const {

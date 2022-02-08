@@ -6,10 +6,6 @@
 #ifndef KRAKENBRIDGE_SCREEN_H
 #define KRAKENBRIDGE_SCREEN_H
 
-#include "bindings/qjs/executing_context.h"
-#include "bindings/qjs/host_object.h"
-#include "dart_methods.h"
-
 namespace kraken {
 
 struct NativeScreen {
@@ -17,16 +13,16 @@ struct NativeScreen {
   double height;
 };
 
-class Screen : public HostObject {
- public:
-  explicit Screen(ExecutionContext* context) : HostObject(context, "Screen"){};
+//class Screen : public HostObject {
+// public:
+//  explicit Screen(ExecutionContext* context) : HostObject(context, "Screen"){};
+//
+// private:
+//  DEFINE_READONLY_PROPERTY(width);
+//  DEFINE_READONLY_PROPERTY(height);
+//};
 
- private:
-  DEFINE_READONLY_PROPERTY(width);
-  DEFINE_READONLY_PROPERTY(height);
-};
-
-void bindScreen(ExecutionContext* context);
+//void bindScreen(ExecutionContext* context);
 
 }  // namespace kraken
 

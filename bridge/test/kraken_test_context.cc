@@ -3,22 +3,38 @@
  * Author: Kraken Team.
  */
 
-#include "page_test.h"
+#include "kraken_test_context.h"
 #include "testframework.h"
 
 namespace kraken {
 
-bool KrakenPageTest::evaluateTestScripts(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) {
-  if (!m_page_context->isValid())
-    return false;
-  return m_page_context->evaluateJavaScript(code, codeLength, sourceURL, startLine);
+KrakenTestContext::KrakenTestContext(ExecutionContext* context) : m_context(context) {
+  //  bridge->owner = this;
+  //  bridge->disposeCallback = [](KrakenPage* bridge) { delete static_cast<KrakenPageTest*>(bridge->owner); };
+  //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, executeTest, "__kraken_execute_test__", 1);
+  //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, matchImageSnapshot, "__kraken_match_image_snapshot__", 3);
+  //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, environment, "__kraken_environment__", 0);
+  //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, simulatePointer, "__kraken_simulate_pointer__", 1);
+  //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, simulateInputText, "__kraken_simulate_inputtext__", 1);
+  //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, triggerGlobalError, "__kraken_trigger_global_error__", 0);
+  //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, parseHTML, "__kraken_parse_html__", 1);
+
+  //  initKrakenTestFramework(bridge);
+  //  init_list_head(&image_link);
 }
 
-bool KrakenPageTest::parseTestHTML(const uint16_t* code, size_t codeLength) {
-  if (!m_page_context->isValid())
+
+bool KrakenTestContext::evaluateTestScripts(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) {
+  if (!m_context->isValid())
     return false;
-  std::string utf8Code = toUTF8(std::u16string(reinterpret_cast<const char16_t*>(code), codeLength));
-  return m_page->parseHTML(utf8Code.c_str(), utf8Code.length());
+  return m_context->evaluateJavaScript(code, codeLength, sourceURL, startLine);
+}
+
+bool KrakenTestContext::parseTestHTML(const uint16_t* code, size_t codeLength) {
+//  if (!m_page_context->isValid())
+//    return false;
+//  std::string utf8Code = toUTF8(std::u16string(reinterpret_cast<const char16_t*>(code), codeLength));
+//  return m_page->parseHTML(utf8Code.c_str(), utf8Code.length());
 }
 
 static JSValue executeTest(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
@@ -32,9 +48,8 @@ static JSValue executeTest(JSContext* ctx, JSValueConst this_val, int argc, JSVa
     return JS_ThrowTypeError(ctx, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.");
   }
   auto bridge = static_cast<KrakenPage*>(context->getOwner());
-  auto bridgeTest = static_cast<KrakenPageTest*>(bridge->owner);
-  JS_DupValue(ctx, callback);
-  bridgeTest->executeTestCallback = callback;
+  auto bridgeTest = static_cast<KrakenTestContext*>(bridge->owner);
+  bridgeTest->m_executeTestCallback = ScriptValue(ctx, callback);
   return JS_NULL;
 }
 
@@ -112,99 +127,100 @@ static JSValue environment(JSContext* ctx, JSValueConst this_val, int argc, JSVa
 }
 
 static JSValue simulatePointer(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-  //  if (getDartMethod()->simulatePointer == nullptr) {
-  //    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_pointer__': dart method(simulatePointer) is not registered.");
-  //  }
-  //
-  //  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
-  //
-  //  JSValue inputArrayValue = argv[0];
-  //  if (!JS_IsObject(inputArrayValue)) {
-  //    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_pointer__': first arguments should be an array.");
-  //  }
-  //
-  //  JSValue pointerValue = argv[1];
-  //  if (!JS_IsNumber(pointerValue)) {
-  //    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_pointer__': second arguments should be an number.");
-  //  }
-  //
-  //  uint32_t length;
-  //  JSValue lengthValue = JS_GetPropertyStr(ctx, inputArrayValue, "length");
-  //  JS_ToUint32(ctx, &length, lengthValue);
-  //  JS_FreeValue(ctx, lengthValue);
-  //
-  //  auto** mousePointerList = new MousePointer*[length];
-  //
-  //  for (int i = 0; i < length; i++) {
-  //    auto mouse = new MousePointer();
-  //    JSValue params = JS_GetPropertyUint32(ctx, inputArrayValue, i);
-  //    mouse->contextId = context->getContextId();
-  //    JSValue xValue = JS_GetPropertyUint32(ctx, params, 0);
-  //    JSValue yValue = JS_GetPropertyUint32(ctx, params, 1);
-  //    JSValue changeValue = JS_GetPropertyUint32(ctx, params, 2);
-  //
-  //    double x;
-  //    double y;
-  //    double change;
-  //
-  //    JS_ToFloat64(ctx, &x, xValue);
-  //    JS_ToFloat64(ctx, &y, yValue);
-  //    JS_ToFloat64(ctx, &change, changeValue);
-  //
-  //    mouse->x = x;
-  //    mouse->y = y;
-  //    mouse->change = change;
-  //    mousePointerList[i] = mouse;
-  //
-  //    JS_FreeValue(ctx, params);
-  //    JS_FreeValue(ctx, xValue);
-  //    JS_FreeValue(ctx, yValue);
-  //    JS_FreeValue(ctx, changeValue);
-  //  }
-  //
-  //  uint32_t pointer;
-  //  JS_ToUint32(ctx, &pointer, pointerValue);
-  //
-  //  getDartMethod()->simulatePointer(mousePointerList, length, pointer);
-  //
-  //  delete[] mousePointerList;
-  //
-  //  return JS_NULL;
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  if (context->dartMethodPtr()->simulatePointer == nullptr) {
+    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_pointer__': dart method(simulatePointer) is not registered.");
+  }
+
+  JSValue inputArrayValue = argv[0];
+  if (!JS_IsObject(inputArrayValue)) {
+    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_pointer__': first arguments should be an array.");
+  }
+
+  JSValue pointerValue = argv[1];
+  if (!JS_IsNumber(pointerValue)) {
+    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_pointer__': second arguments should be an number.");
+  }
+
+  uint32_t length;
+  JSValue lengthValue = JS_GetPropertyStr(ctx, inputArrayValue, "length");
+  JS_ToUint32(ctx, &length, lengthValue);
+  JS_FreeValue(ctx, lengthValue);
+
+  auto** mousePointerList = new MousePointer*[length];
+
+  for (int i = 0; i < length; i++) {
+    auto mouse = new MousePointer();
+    JSValue params = JS_GetPropertyUint32(ctx, inputArrayValue, i);
+    mouse->contextId = context->getContextId();
+    JSValue xValue = JS_GetPropertyUint32(ctx, params, 0);
+    JSValue yValue = JS_GetPropertyUint32(ctx, params, 1);
+    JSValue changeValue = JS_GetPropertyUint32(ctx, params, 2);
+
+    double x;
+    double y;
+    double change;
+
+    JS_ToFloat64(ctx, &x, xValue);
+    JS_ToFloat64(ctx, &y, yValue);
+    JS_ToFloat64(ctx, &change, changeValue);
+
+    mouse->x = x;
+    mouse->y = y;
+    mouse->change = change;
+    mousePointerList[i] = mouse;
+
+    JS_FreeValue(ctx, params);
+    JS_FreeValue(ctx, xValue);
+    JS_FreeValue(ctx, yValue);
+    JS_FreeValue(ctx, changeValue);
+  }
+
+  uint32_t pointer;
+  JS_ToUint32(ctx, &pointer, pointerValue);
+
+  context->dartMethodPtr()->simulatePointer(mousePointerList, length, pointer);
+
+  delete[] mousePointerList;
+
+  return JS_NULL;
 }
 
-static JSValue simulateInputText(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv){
-    //  if (getDartMethod()->simulateInputText == nullptr) {
-    //    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_keypress__': dart method(simulateInputText) is not registered.");
-    //  }
-    //
-    //  JSValue& charStringValue = argv[0];
-    //
-    //  if (!JS_IsString(charStringValue)) {
-    //    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_keypress__': first arguments should be a string");
-    //  }
-    //
-    //  std::unique_ptr<NativeString> nativeString = kraken::jsValueToNativeString(ctx, charStringValue);
-    //  getDartMethod()->simulateInputText(nativeString.get());
-    //  nativeString->free();
-    //  return JS_NULL;
+static JSValue simulateInputText(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  if (context->dartMethodPtr()->simulateInputText == nullptr) {
+    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_keypress__': dart method(simulateInputText) is not registered.");
+  }
+
+  JSValue& charStringValue = argv[0];
+
+  if (!JS_IsString(charStringValue)) {
+    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_keypress__': first arguments should be a string");
+  }
+
+  std::unique_ptr<NativeString> nativeString = kraken::jsValueToNativeString(ctx, charStringValue);
+  void* p = static_cast<void*>(nativeString.get());
+  context->dartMethodPtr()->simulateInputText(static_cast<NativeString*>(p));
+  nativeString->free();
+  return JS_NULL;
 };
 
 static JSValue parseHTML(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-  //  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
-  //
-  //  if (argc == 1) {
-  //    JSValue& html = argv[0];
-  //
-  //    std::string strHTML = jsValueToStdString(ctx, html);
-  //
-  //    JSValue bodyValue = JS_GetPropertyStr(context->ctx(), context->document()->jsObject, "body");
-  //    auto* body = static_cast<ElementInstance*>(JS_GetOpaque(bodyValue, Element::classId()));
-  //    HTMLParser::parseHTML(strHTML, body);
-  //
-  //    JS_FreeValue(ctx, bodyValue);
-  //  }
-  //
-  //  return JS_NULL;
+//  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+//
+//  if (argc == 1) {
+//    JSValue& html = argv[0];
+//
+//    std::string strHTML = jsValueToStdString(ctx, html);
+//
+//    JSValue bodyValue = JS_GetPropertyStr(context->ctx(), context->document()->jsObject, "body");
+//    auto* body = static_cast<ElementInstance*>(JS_GetOpaque(bodyValue, Element::classId()));
+//    HTMLParser::parseHTML(strHTML, body);
+//
+//    JS_FreeValue(ctx, bodyValue);
+//  }
+//
+//  return JS_NULL;
 }
 
 static JSValue triggerGlobalError(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
@@ -221,21 +237,6 @@ static JSValue triggerGlobalError(JSContext* ctx, JSValueConst this_val, int arg
   return JS_NULL;
 }
 
-KrakenPageTest::KrakenPageTest(KrakenPage* bridge) : m_page(bridge), m_page_context(bridge->getContext()) {
-  //  bridge->owner = this;
-  //  bridge->disposeCallback = [](KrakenPage* bridge) { delete static_cast<KrakenPageTest*>(bridge->owner); };
-  //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, executeTest, "__kraken_execute_test__", 1);
-  //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, matchImageSnapshot, "__kraken_match_image_snapshot__", 3);
-  //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, environment, "__kraken_environment__", 0);
-  //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, simulatePointer, "__kraken_simulate_pointer__", 1);
-  //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, simulateInputText, "__kraken_simulate_inputtext__", 1);
-  //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, triggerGlobalError, "__kraken_trigger_global_error__", 0);
-  //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, parseHTML, "__kraken_parse_html__", 1);
-
-  //  initKrakenTestFramework(bridge);
-  //  init_list_head(&image_link);
-}
-
 struct ExecuteCallbackContext {
   ExecuteCallbackContext() = delete;
 
@@ -244,7 +245,7 @@ struct ExecuteCallbackContext {
   ExecutionContext* context;
 };
 
-void KrakenPageTest::invokeExecuteTest(ExecuteCallback executeCallback) {
+void KrakenTestContext::invokeExecuteTest(ExecuteCallback executeCallback) {
   //  if (JS_IsNull(executeTestCallback)) {
   //    return;
   //  }
@@ -280,10 +281,10 @@ void KrakenPageTest::invokeExecuteTest(ExecuteCallback executeCallback) {
   //  executeTestCallback = JS_NULL;
 }
 
-void KrakenPageTest::registerTestEnvDartMethods(uint64_t* methodBytes, int32_t length) {
+void KrakenTestContext::registerTestEnvDartMethods(uint64_t* methodBytes, int32_t length) {
   size_t i = 0;
 
-  auto& dartMethodPtr = m_page_context->dartMethodPtr();
+  auto& dartMethodPtr = m_context->dartMethodPtr();
 
   dartMethodPtr->onJsError = reinterpret_cast<OnJSError>(methodBytes[i++]);
   dartMethodPtr->matchImageSnapshot = reinterpret_cast<MatchImageSnapshot>(methodBytes[i++]);

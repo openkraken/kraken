@@ -5,7 +5,7 @@
 
 #include "custom_event.h"
 #include "bindings/qjs/native_value.h"
-#include "bindings/qjs/qjs_patch.h"
+#include "bindings/qjs/qjs_engine_patch.h"
 
 #include <utility>
 
