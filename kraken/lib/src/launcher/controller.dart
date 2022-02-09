@@ -264,7 +264,6 @@ class KrakenViewController
   }
 
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
-  List<WidgetElement> widgetElements = [];
 
   T? getEventTargetById<T>(int targetId) {
     return _getEventTargetById(targetId);
@@ -281,16 +280,20 @@ class KrakenViewController
     return null;
   }
 
+  final List<WidgetElement> _widgetElements = [];
+
+  List<WidgetElement> get widgetElements => _widgetElements;
+
   void addWidgetElement(WidgetElement widgetElement) {
-    widgetElements.add(widgetElement);
+    _widgetElements.add(widgetElement);
   }
 
   void removeWidgetElement(WidgetElement widgetElement) {
-    widgetElements.remove(widgetElement);
+    _widgetElements.remove(widgetElement);
   }
 
   void _clearWidgetElements() {
-    widgetElements.clear();
+    _widgetElements.clear();
   }
 
   T? _getEventTargetById<T>(int targetId) {
