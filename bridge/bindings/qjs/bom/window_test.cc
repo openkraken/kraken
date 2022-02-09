@@ -77,3 +77,18 @@ window.postMessage({
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
   EXPECT_EQ(logCalled, true);
 }
+
+TEST(Window, location) {
+  auto bridge = TEST_init();
+  static bool logCalled = false;
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(), "true true");
+  };
+
+  std::string code = std::string(R"(
+    console.log(window.location !== undefined, window.location === document.location);
+  )");
+  bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
+  EXPECT_EQ(logCalled, true);
+}
