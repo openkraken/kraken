@@ -4,10 +4,12 @@ import {
   FunctionArguments,
   FunctionArgumentType,
   FunctionDeclaration,
+  FunctionObject,
   PropsDeclaration,
-  PropsDeclarationKind
+  PropsDeclarationKind,
+  ReturnType
 } from "./declaration";
-import {addIndent} from "./utils";
+import {addIndent, getClassName} from "./utils";
 
 function generateHostObjectSource(object: ClassObject) {
   let propSource: string[] = generatePropsSource(object, PropType.hostObject);
@@ -186,7 +188,7 @@ function generateArgumentsTypeCheck(index: number, argv: FunctionArguments, m: F
   return '';
 }
 
-function generateMethodArgumentsCheck(m: FunctionDeclaration, object: ClassObject) {
+function generateMethodArgumentsCheck(m: FunctionDeclaration, object: ClassObject | FunctionObject) {
   if (m.args.length == 0) return '';
 
   let requiredArgsCount = 0;
@@ -200,7 +202,7 @@ function generateMethodArgumentsCheck(m: FunctionDeclaration, object: ClassObjec
   }
 
   return `  if (argc < ${requiredArgsCount}) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '${m.name}' on '${object.name}': ${requiredArgsCount} argument required, but %d present.", argc);
+    return JS_ThrowTypeError(ctx, "Failed to execute '${m.name}' : ${requiredArgsCount} argument required, but %d present.", argc);
   }
   ${argsCheck.join('\n  ')}
 `;
@@ -448,18 +450,94 @@ function generateObjectSource(object: ClassObject) {
   return null;
 }
 
+function generateFunctionValueInit(object: FunctionObject) {
+  return object.declare.args.map((a, i) => {
+    let head = `ScriptValue ${a.name} = `;
+    if (a.required) {
+      head += `ScriptValue(ctx, argv[${i}]);`;
+    } else {
+      head += `ScriptValue(ctx, JS_NULL);
+  if (argc > ${i}) {
+  ${a.name} = ScriptValue(ctx, argv[${i}]);
+}`;
+    }
+
+    return head;
+  });
+}
+
+function generateCoreModuleCall(blob: Blob, object: FunctionObject) {
+  let params = object.declare.args.map(a => `${a.name}`);
+  let coreClassName = blob.filename[4].toUpperCase() + blob.filename.slice(5);
+  let returnValue = '';
+
+  if (object.declare.returnType != ReturnType.void) {
+    returnValue = 'ScriptValue returnValue = '
+  }
+
+  return `
+auto context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+ExceptionState exception;
+
+${returnValue}${coreClassName}::${object.declare.name}(context, ${params.join(', ')}, &exception);
+
+if (exception.hasException()) {
+  return exception.toQuickJS();
+}
+
+${returnValue && 'return returnValue'}
+
+  `;
+}
+
+function generateFunctionSource(blob: Blob, object: FunctionObject) {
+  let paramCheck = generateMethodArgumentsCheck(object.declare, object);
+  let varInit = generateFunctionValueInit(object);
+  let moduleCall = generateCoreModuleCall(blob, object);
+  return `static JSValue ${object.declare.name}(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+${paramCheck}
+${varInit.join('\n')}
+${moduleCall}
+}`;
+}
+
 export function generateCppSource(blob: Blob) {
-  let sources = blob.objects.map(o => generateObjectSource(o));
+  let installList: string[] = [];
+
+  let sources = blob.objects.map(o => {
+    if (o instanceof FunctionObject) {
+      installList.push(` {"${o.declare.name}", ${o.declare.name}, ${o.declare.args.length}, combinePropFlags(JSPropFlag::enumerable, JSPropFlag::writable, JSPropFlag::configurable)},`);
+      return generateFunctionSource(blob, o);
+    }
+    return '';
+  });
+
   return `/*
  * Copyright (C) 2021 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
 
 #include "${blob.filename}.h"
-#include "page.h"
-#include "bindings/qjs/qjs_patch.h"
+#include "bindings/qjs/member_installer.h"
+#include "bindings/qjs/qjs_function.h"
+#include "core/${blob.implement}.h"
 
-namespace kraken::binding::qjs {
-  ${sources.join('')}
+namespace kraken {
+
+${sources}
+
+void ${getClassName(blob)}::install(JSContext* ctx) {
+  installGlobalFunctions(ctx);
+}
+
+void ${getClassName(blob)}::installGlobalFunctions(JSContext* ctx) {
+  std::initializer_list<MemberInstaller::FunctionConfig> functionConfig {
+    ${installList.join(',\n')}
+  };
+
+  JSValue globalObject = JS_GetGlobalObject(ctx);
+  MemberInstaller::installFunctions(ctx, globalObject, functionConfig);
+  JS_FreeValue(ctx, globalObject);
+}
 }`;
 }

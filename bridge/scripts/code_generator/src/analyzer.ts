@@ -1,19 +1,23 @@
-import ts, {HeritageClause, ScriptTarget} from 'typescript';
+import ts, {HeritageClause, ScriptTarget, VariableStatement} from 'typescript';
 import {Blob} from './blob';
 import {
   ClassObject,
   FunctionArguments,
   FunctionArgumentType,
   FunctionDeclaration,
+  FunctionObject,
   PropsDeclaration,
-  PropsDeclarationKind
+  PropsDeclarationKind,
+  ReturnType
 } from './declaration';
 import {generatorSource} from './generator';
 
 export function analyzer(blob: Blob) {
   let code = blob.raw;
   const sourceFile = ts.createSourceFile(blob.source, blob.raw, ScriptTarget.ES2020);
-  blob.objects = sourceFile.statements.map(statement => walkProgram(statement)).filter(o => o instanceof ClassObject) as ClassObject[];
+  blob.objects = sourceFile.statements.map(statement => walkProgram(statement)).filter(o => {
+    return o instanceof ClassObject || o instanceof FunctionObject;
+  }) as (FunctionObject | ClassObject)[];
   return generatorSource(blob);
 }
 
@@ -46,6 +50,14 @@ function getPropKind(type: ts.TypeNode): PropsDeclarationKind {
     }
   }
   return PropsDeclarationKind.object;
+}
+
+function getFunctionReturnType(keyword: ts.TypeNode): ReturnType {
+  switch (keyword.kind) {
+    case ts.SyntaxKind.VoidKeyword:
+      return ReturnType.void;
+  }
+  return ReturnType.null;
 }
 
 function getPropName(propName: ts.PropertyName) {
@@ -148,6 +160,23 @@ function walkProgram(statement: ts.Statement) {
       });
 
       return obj;
+    }
+    case ts.SyntaxKind.VariableStatement: {
+      let declaration = (statement as VariableStatement).declarationList.declarations[0];
+      let methodName = (declaration.name as ts.Identifier).text;
+      let type = declaration.type;
+      let functionObject = new FunctionObject();
+
+      functionObject.declare = new FunctionDeclaration();
+      if (type?.kind == ts.SyntaxKind.FunctionType) {
+        functionObject.declare.args = (type as ts.FunctionTypeNode).parameters.map(param => paramsNodeToArguments(param));
+        functionObject.declare.returnType = getFunctionReturnType((type as ts.FunctionTypeNode).type);
+        functionObject.declare.name = methodName.toString();
+      }
+
+      console.log(functionObject);
+
+      return functionObject;
     }
   }
 

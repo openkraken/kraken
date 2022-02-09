@@ -38,6 +38,10 @@ bool ScriptValue::isEmpty() {
   return JS_IsNull(m_value);
 }
 
+bool ScriptValue::isString() {
+  return JS_IsString(m_value);
+}
+
 JSValue ScriptValue::toQuickJS() {
   return m_value;
 }
@@ -58,6 +62,10 @@ ScriptValue ScriptValue::toJSONStringify(ExceptionState* exception) {
 
 std::unique_ptr<NativeString> ScriptValue::toNativeString() {
   return jsValueToNativeString(m_ctx, m_value);
+}
+
+std::string ScriptValue::toCString() {
+  return jsValueToStdString(m_ctx, m_value);
 }
 
 bool ScriptValue::isException() {

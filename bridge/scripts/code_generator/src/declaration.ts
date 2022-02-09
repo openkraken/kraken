@@ -27,8 +27,14 @@ export class PropsDeclaration {
   readonly: boolean;
 }
 
+export enum ReturnType {
+  void,
+  null
+}
+
 export class FunctionDeclaration extends PropsDeclaration {
-  args: FunctionArguments[]
+  args: FunctionArguments[];
+  returnType: ReturnType;
 }
 
 export class ClassObject {
@@ -36,4 +42,8 @@ export class ClassObject {
   type: string;
   props: PropsDeclaration[] = [];
   methods: FunctionDeclaration[] = [];
+}
+
+export class FunctionObject {
+  declare: FunctionDeclaration
 }

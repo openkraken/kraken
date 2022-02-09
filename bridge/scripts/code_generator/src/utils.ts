@@ -1,3 +1,5 @@
+import {Blob} from './blob';
+
 export function addIndent(str: String, space: number) {
   let lines = str.split('\n');
   lines = lines.map(l => {
@@ -7,4 +9,8 @@ export function addIndent(str: String, space: number) {
     return l;
   });
   return lines.join('\n');
+}
+
+export function getClassName(blob: Blob) {
+  return `QJS${blob.filename[4].toUpperCase() + blob.filename.slice(5)}`;
 }

@@ -4,34 +4,19 @@
  */
 
 #include "console.h"
+#include <sstream>
+#include "foundation/logging.h"
 
 namespace kraken {
 
-JSValue print(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+void Console::__kraken_print__(ExecutionContext* context, ScriptValue& logValue, ScriptValue& levelValue, ExceptionState* exception) {
   std::stringstream stream;
-  JSValue log = argv[0];
-  if (JS_IsString(log)) {
-    const char* buffer = JS_ToCString(ctx, log);
-    stream << buffer;
-    JS_FreeCString(ctx, buffer);
-  } else {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'print': log must be string.");
-  }
 
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
-  const char* logLevel = "info";
-  JSValue level = argv[1];
-  if (JS_IsString(level)) {
-    logLevel = JS_ToCString(ctx, level);
-    JS_FreeCString(ctx, logLevel);
-  }
+  std::string buffer = logValue.toCString();
+  stream << buffer;
 
-  foundation::printLog(context->getContextId(), stream, logLevel, nullptr);
-  return JS_UNDEFINED;
-}
-
-void bindConsole(ExecutionContext* context) {
-  QJS_GLOBAL_BINDING_FUNCTION(context, print, "__kraken_print__", 2);
+  std::string logLevel = levelValue.isEmpty() ? "info" : levelValue.toCString();
+  printLog(context->getContextId(), stream, logLevel, nullptr);
 }
 
 }  // namespace kraken

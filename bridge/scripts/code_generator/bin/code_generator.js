@@ -30,19 +30,22 @@ let files = glob.sync("**/*.d.ts", {
 });
 
 let blobs = files.map(file => {
-  let filename = file.replace('.d.ts', '');
-  return new Blob(path.join(source, file), dist, filename);
-});
+  let filename = 'qjs_' + file.split('/').slice(-1)[0].replace('.d.ts', '');
+  let implement = file.replace(path.join(__dirname, '../../')).replace('.d.ts', '');
+  return new Blob(path.join(source, file), dist, filename, implement);
+}).filter(blob => blob.filename === 'qjs_console');
 
 for (let i = 0; i < blobs.length; i ++) {
   let b = blobs[i];
   let result = analyzer(b);
 
   if (!fs.existsSync(b.dist)) {
-    fs.mkdirSync(b.dist);
+    fs.mkdirSync(b.dist, {recursive: true});
   }
 
-  fs.writeFileSync(path.join(b.dist, b.filename) + '.h', result.header);
-  fs.writeFileSync(path.join(b.dist, b.filename) + '.cc', result.source);
+  let genFilePath = path.join(b.dist, b.filename);
+
+  fs.writeFileSync(genFilePath + '.h', result.header);
+  fs.writeFileSync(genFilePath + '.cc', result.source);
 }
 

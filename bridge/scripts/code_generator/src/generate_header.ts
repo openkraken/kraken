@@ -1,7 +1,7 @@
-import {ClassObject, PropsDeclaration, PropsDeclarationKind} from "./declaration";
+import {ClassObject, FunctionObject, PropsDeclaration, PropsDeclarationKind} from "./declaration";
 import {uniqBy} from "lodash";
 import {Blob} from "./blob";
-import {addIndent} from "./utils";
+import {addIndent, getClassName} from "./utils";
 
 function generatePropsHeader(object: ClassObject, type: PropType) {
   let propsDefine = '';
@@ -157,9 +157,14 @@ function generateObjectHeader(object: ClassObject) {
   return null;
 }
 
-export function generateCppHeader(blob: Blob) {
-  let headers = blob.objects.map(o => generateObjectHeader(o));
+function generateFunctionHeader(blob: Blob, object: FunctionObject) {
+  return `class QJS${blob.filename[0].toUpperCase() + blob.filename.slice(1)} final {
+ public:
+  static void installGlobalFunctions(JSContext* ctx);
+};`;
+}
 
+export function generateCppHeader(blob: Blob) {
   return `/*
  * Copyright (C) 2021 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -168,10 +173,17 @@ export function generateCppHeader(blob: Blob) {
 #ifndef KRAKENBRIDGE_${blob.filename.toUpperCase()}_H
 #define KRAKENBRIDGE_${blob.filename.toUpperCase()}_H
 
-#include "bindings/qjs/dom/element.h"
+#include <quickjs/quickjs.h>
 
-namespace kraken::binding::qjs {
-${headers.join('')}
+namespace kraken {
+
+class ${getClassName(blob)} final {
+ public:
+  static void install(JSContext* ctx);
+ private:
+  static void installGlobalFunctions(JSContext* ctx);
+};
+
 }
 
 #endif //KRAKENBRIDGE_${blob.filename.toUpperCase()}T_H

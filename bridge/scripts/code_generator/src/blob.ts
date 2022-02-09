@@ -1,17 +1,19 @@
 import fs from 'fs';
-import {ClassObject} from "./declaration";
+import {ClassObject, FunctionObject} from "./declaration";
 
 export class Blob {
   raw: string;
   dist: string;
   source: string;
   filename: string;
-  objects: ClassObject[];
+  implement: string;
+  objects: (ClassObject | FunctionObject)[];
 
-  constructor(source: string, dist: string, filename: string) {
+  constructor(source: string, dist: string, filename: string, implement: string) {
     this.source = source;
     this.raw = fs.readFileSync(source, {encoding: 'utf-8'});
     this.dist = dist;
     this.filename = filename;
+    this.implement = implement;
   }
 }

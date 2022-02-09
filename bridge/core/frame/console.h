@@ -3,15 +3,19 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKENBRIDGE_CONSOLE_H
-#define KRAKENBRIDGE_CONSOLE_H
+#ifndef KRAKE_CONSOLE_H
+#define KRAKE_CONSOLE_H
 
-#include "bindings/qjs/executing_context.h"
+#include "bindings/qjs/script_value.h"
+#include "core/executing_context.h"
 
 namespace kraken {
 
-void bindConsole(ExecutionContext* context);
+class Console final {
+ public:
+  static void __kraken_print__(ExecutionContext* context, ScriptValue& log, ScriptValue& level, ExceptionState* exception);
+};
 
 }
 
-#endif  // KRAKENBRIDGE_CONSOLE_H
+#endif  // KRAKE_CONSOLE_H

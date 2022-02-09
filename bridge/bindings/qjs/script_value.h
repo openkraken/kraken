@@ -43,10 +43,12 @@ class ScriptValue final {
     JS_FreeValue(m_ctx, m_value);
   }
   bool isEmpty();
+  bool isString();
   JSValue toQuickJS();
   // Create a new ScriptValue from call JSON.stringify to current value.
   ScriptValue toJSONStringify(ExceptionState* exception);
   std::unique_ptr<NativeString> toNativeString();
+  std::string toCString();
 
   bool isException();
 

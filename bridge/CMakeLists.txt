@@ -34,14 +34,9 @@ execute_process(
 ) # g
 
 execute_process(
-  COMMAND bash "-c" "node bin/code_generator -s ../../bindings/qjs/dom/elements -d ../../bindings/qjs/dom/elements/.gen"
+  COMMAND bash "-c" "node bin/code_generator -s ../../core -d ../../out"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/scripts/code_generator
 ) # generate elements code
-
-execute_process(
-  COMMAND bash "-c" "node bin/code_generator -s ../../bindings/qjs/dom/events -d ../../bindings/qjs/dom/events/.gen"
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/scripts/code_generator
-) # generate events code
 
 execute_process(
   COMMAND bash "-c" "read dart_sdk < <(type -p dart) && echo $\{dart_sdk%/*\}/cache/dart-sdk/include | xargs"
@@ -142,6 +137,7 @@ list(APPEND GUMBO_PARSER
 
 list(APPEND BRIDGE_INCLUDE
   ${CMAKE_CURRENT_LIST_DIR}/foundation
+  ${CMAKE_CURRENT_LIST_DIR}/out
   ${CMAKE_CURRENT_LIST_DIR}
   ${CMAKE_CURRENT_LIST_DIR}/include
   ${CMAKE_CURRENT_LIST_DIR}/polyfill/dist
@@ -221,6 +217,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/executing_context_data.cc
     core/executing_context_data.h
     core/dart_methods.h
+    core/frame/console.cc
+    core/frame/console.h
     core/frame/dom_timer.cc
     core/frame/dom_timer.h
     core/frame/dom_timer_coordinator.cc
@@ -253,6 +251,12 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
 #    core/dom/events/event_listener_map.h
 #    core/dom/events/event_target.cc
 #    core/dom/events/event_target.h
+    )
+
+  # Gen sources.
+  list(APPEND BRIDGE_SOURCE
+    out/qjs_console.cc
+    out/qjs_console.h
     )
 
   # Quickjs use __builtin_frame_address() to get stack pointer, we should add follow options to get it work with -O2

@@ -38,19 +38,19 @@ bool KrakenTestContext::parseTestHTML(const uint16_t* code, size_t codeLength) {
 }
 
 static JSValue executeTest(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-  JSValue& callback = argv[0];
-  auto context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
-  if (!JS_IsObject(callback)) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.");
-  }
-
-  if (!JS_IsFunction(ctx, callback)) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.");
-  }
-  auto bridge = static_cast<KrakenPage*>(context->getOwner());
-  auto bridgeTest = static_cast<KrakenTestContext*>(bridge->owner);
-  bridgeTest->m_executeTestCallback = ScriptValue(ctx, callback);
-  return JS_NULL;
+//  JSValue& callback = argv[0];
+//  auto context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+//  if (!JS_IsObject(callback)) {
+//    return JS_ThrowTypeError(ctx, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.");
+//  }
+//
+//  if (!JS_IsFunction(ctx, callback)) {
+//    return JS_ThrowTypeError(ctx, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.");
+//  }
+//  auto bridge = static_cast<KrakenPage*>(context->getOwner());
+//  auto bridgeTest = static_cast<KrakenTestContext*>(bridge->owner);
+//  bridgeTest->m_executeTestCallback = ScriptValue(ctx, callback);
+//  return JS_NULL;
 }
 
 static JSValue matchImageSnapshot(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
