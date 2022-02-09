@@ -462,12 +462,11 @@ class KrakenRenderParagraph extends RenderBox
 
     // @FIXME: Layout twice will hurt performance, ideally this logic should be done
     // in flutter text engine.
-    // Layout each line of the paragraph indivisually to
+    // Layout each line of the paragraph individually to
     // place each line according to W3C line-height rule.
     if (lineHeight != null) {
       _relayoutMultiLineText();
     }
-
   }
 
   @override
