@@ -257,7 +257,7 @@ class KrakenViewController
     disposePage(_contextId);
 
     _clearTargets();
-    _clearWidgetElements();
+
     document.dispose();
     window.dispose();
     _disposed = true;
@@ -297,10 +297,6 @@ class KrakenViewController
     _widgetElements.remove(widgetElement);
   }
 
-  void _clearWidgetElements() {
-    _widgetElements.clear();
-  }
-
   T? _getEventTargetById<T>(int targetId) {
     EventTarget? target = _eventTargets[targetId];
     if (target is T)
@@ -326,6 +322,7 @@ class KrakenViewController
   void _clearTargets() {
     // Set current eventTargets to a new object, clean old targets by gc.
     _eventTargets = <int, EventTarget>{};
+    _widgetElements.clear();
   }
 
   // export Uint8List bytes from rendered result.
