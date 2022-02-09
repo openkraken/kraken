@@ -6,6 +6,7 @@
 #include "binding_initializer.h"
 
 #include "qjs_window.h"
+#include "qjs_module_manager.h"
 
 //#include "bindings/qjs/bom/blob.h"
 //#include "bindings/qjs/bom/console.h"
@@ -45,6 +46,8 @@ namespace kraken {
 
 void installBindings(JSContext* ctx) {
   QJSWindow::installGlobalFunctions(ctx);
+  QJSModuleManager::installGlobalFunctions(ctx);
+
 }
 
 }  // namespace kraken

@@ -156,6 +156,7 @@ static JSValue anonymousFunction(JSContext* ctx, JSValueConst this_val, int argc
   //  JSValue returnValue = eventTarget->callNativeMethods(call_params.c_str(), argc, arguments);
   //  delete[] arguments;
   //  return returnValue;
+  return JS_NULL;
 }
 
 void anonymousAsyncCallback(void* callbackContext, NativeValue* nativeValue, int32_t contextId, const char* errmsg) {
@@ -215,6 +216,7 @@ static JSValue anonymousAsyncFunction(JSContext* ctx, JSValueConst this_val, int
   //  delete[] arguments;
   //
   //  return promise;
+  return JS_NULL;
 }
 
 JSValue nativeValueToJSValue(ExecutionContext* context, NativeValue& value) {

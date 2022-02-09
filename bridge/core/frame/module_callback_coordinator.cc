@@ -8,11 +8,11 @@
 namespace kraken {
 
 void ModuleCallbackCoordinator::addModuleCallbacks(ModuleCallback* callback) {
-  list_add_tail(&m_listeners, &callback->link);
+  list_add_tail(&m_listeners, &callback->linker.link);
 }
 
 void ModuleCallbackCoordinator::removeModuleCallbacks(ModuleCallback* callback) {
-  list_del(&callback->link);
+  list_del(&callback->linker.link);
 }
 
 ModuleCallbackCoordinator::ModuleCallbackCoordinator() {
@@ -23,8 +23,8 @@ void ModuleCallbackCoordinator::trace(GCVisitor* visitor) {
   {
     struct list_head *el, *el1;
     list_for_each_safe(el, el1, &m_listeners) {
-      auto* callback = list_entry(el, ModuleCallback, link);
-      visitor->trace(callback->toQuickJS());
+      auto* linker = list_entry(el, ModuleCallbackLinker, link);
+      visitor->trace(linker->ptr->toQuickJS());
     }
   }
 }

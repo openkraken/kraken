@@ -12,6 +12,15 @@
 
 namespace kraken {
 
+class ModuleCallback;
+
+// In C++ code, We can not use offsetof to access members of structures or classes that are not Plain Old Data Structures.
+// So we use struct which support offsetof.
+struct ModuleCallbackLinker {
+  ModuleCallback* ptr;
+  list_head link;
+};
+
 // ModuleCallback is an asynchronous callback function, usually from the 4th parameter of `kraken.invokeModule` function.
 // When the asynchronous operation on the Dart side ends, the callback is will called and to return to the JS executing environment.
 class ModuleCallback : public GarbageCollected<ModuleCallback> {
@@ -23,12 +32,11 @@ class ModuleCallback : public GarbageCollected<ModuleCallback> {
   void trace(GCVisitor*visitor) const override;
   void dispose() const override;
 
-  list_head link;
+  ModuleCallbackLinker linker{this};
 
 private:
   QJSFunction* m_function{nullptr};
 };
-
 
 
 }

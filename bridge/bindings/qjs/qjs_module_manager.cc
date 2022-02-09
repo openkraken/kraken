@@ -10,7 +10,6 @@
 
 namespace kraken {
 
-
 JSValue krakenModuleListener(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_module_listener__': 1 parameter required, but only 0 present.");
@@ -34,9 +33,6 @@ JSValue krakenModuleListener(JSContext* ctx, JSValueConst this_val, int argc, JS
   if (exception.hasException()) {
     return exception.toQuickJS();
   }
-
-//  auto* link = new ModuleContext{JS_DupValue(ctx, callbackValue), context};
-//  list_add_tail(&link->link, &context->module_job_list);
 
   return JS_NULL;
 }
@@ -72,21 +68,10 @@ JSValue krakenInvokeModule(JSContext* ctx, JSValueConst this_val, int argc, JSVa
   return result.toQuickJS();
 }
 
-JSValue flushUICommand(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
-
-  if (context->dartMethodPtr()->flushUICommand == nullptr) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.");
-  }
-  context->dartMethodPtr()->flushUICommand();
-  return JS_NULL;
-}
-
 void QJSModuleManager::installGlobalFunctions(JSContext* ctx) {
   std::initializer_list<MemberInstaller::FunctionConfig> functionConfig {
     {"__kraken_module_listener__", krakenModuleListener, 1, combinePropFlags(JSPropFlag::enumerable, JSPropFlag::writable, JSPropFlag::configurable)},
     {"__kraken_invoke_module__", krakenInvokeModule, 3, combinePropFlags(JSPropFlag::enumerable, JSPropFlag::writable, JSPropFlag::configurable)},
-    {"__kraken_flush_ui_command__", flushUICommand, 0, combinePropFlags(JSPropFlag::enumerable, JSPropFlag::writable, JSPropFlag::configurable)},
   };
 
   JSValue globalObject = JS_GetGlobalObject(ctx);

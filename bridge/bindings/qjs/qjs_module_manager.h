@@ -17,8 +17,4 @@ class QJSModuleManager final {
 
 }
 
-//
-//void bindModuleManager(ExecutionContext* context);
-//void handleInvokeModuleUnexpectedCallback(void* callbackContext, int32_t contextId, NativeString* errmsg, NativeString* json);
-
 #endif  // KRAKENBRIDGE_QJS_MODULE_MANAGER_H
