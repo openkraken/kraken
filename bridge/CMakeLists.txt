@@ -197,6 +197,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/host_class.h
     bindings/qjs/qjs_patch.cc
     bindings/qjs/qjs_patch.h
+    bindings/qjs/rejected_promises.cc
+    bindings/qjs/rejected_promises.h
     bindings/qjs/module_manager.cc
     bindings/qjs/module_manager.h
     bindings/qjs/html_parser.cc

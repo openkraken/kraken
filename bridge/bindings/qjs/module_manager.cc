@@ -30,7 +30,7 @@ JSValue krakenModuleListener(JSContext* ctx, JSValueConst this_val, int argc, JS
   return JS_NULL;
 }
 
-void handleInvokeModuleTransientCallback(void* callbackContext, int32_t contextId, NativeString* errmsg, NativeString* json) {
+void handleInvokeModuleTransientCallback(void* callbackContext, int32_t contextId, const char* errmsg, NativeString* json) {
   auto* moduleContext = static_cast<ModuleContext*>(callbackContext);
   ExecutionContext* context = moduleContext->context;
 
@@ -53,9 +53,8 @@ void handleInvokeModuleTransientCallback(void* callbackContext, int32_t contextI
   JSValue callback = moduleContext->callback;
   JSValue returnValue;
   if (errmsg != nullptr) {
-    JSValue errorMessage = JS_NewUnicodeString(context->runtime(), ctx, errmsg->string, errmsg->length);
-    JSValue errorObject = JS_NewError(ctx);
-    JS_DefinePropertyValue(ctx, errorObject, JS_NewAtom(ctx, "message"), errorMessage, JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
+    JS_ThrowInternalError(ctx, "%s", errmsg);
+    JSValue errorObject = JS_GetException(ctx);
     JSValue arguments[] = {errorObject};
     returnValue = JS_Call(ctx, callback, context->global(), 1, arguments);
     JS_FreeValue(ctx, errorObject);
@@ -76,7 +75,7 @@ void handleInvokeModuleTransientCallback(void* callbackContext, int32_t contextI
   list_del(&moduleContext->link);
 }
 
-void handleInvokeModuleUnexpectedCallback(void* callbackContext, int32_t contextId, NativeString* errmsg, NativeString* json) {
+void handleInvokeModuleUnexpectedCallback(void* callbackContext, int32_t contextId, const char* errmsg, NativeString* json) {
   static_assert("Unexpected module callback, please check your invokeModule implementation on the dart side.");
 }
 

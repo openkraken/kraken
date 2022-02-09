@@ -6,7 +6,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:kraken/bridge.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/module.dart';
 import 'package:meta/meta.dart';
@@ -48,7 +47,7 @@ class FetchModule extends BaseModule {
   static String _getDefaultUserAgent() {
     if (_defaultUserAgent == null) {
       try {
-        _defaultUserAgent = getKrakenInfo().userAgent;
+        _defaultUserAgent = NavigatorModule.getUserAgent();
       } catch (error) {
         // Ignore if dynamic library is missing.
         return fallbackUserAgent;
@@ -94,11 +93,11 @@ class FetchModule extends BaseModule {
     Map<String, dynamic> options = params;
 
     _handleError(Object error, StackTrace? stackTrace) {
-      print('Error fetch for $uri, message: \n$error');
+      String errmsg = '$error';
       if (stackTrace != null) {
-        print('\n$stackTrace');
+        errmsg += '\n$stackTrace';
       }
-      callback(error: '$error\n$stackTrace');
+      callback(error: errmsg);
     }
     if (uri.host.isEmpty) {
       // No host specified in URI.

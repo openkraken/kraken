@@ -1,3 +1,20 @@
+## 0.10.0+5
+
+**Bug Fixed**
+
++ Fix WebSocket dev server error. https://github.com/openkraken/kraken/pull/1131
++ Fix image intrinsic size not correct which include padding and border. https://github.com/openkraken/kraken/pull/1127
++ Fix unhandledPromiseRejection event. https://github.com/openkraken/kraken/pull/1137
++ Fix fetch API request options. https://github.com/openkraken/kraken/pull/1139
+
+## 0.10.0+4
+
+**Bug Fixed**
+
++ Fix HttpCache error on linux platform. https://github.com/openkraken/kraken/pull/1113
++ Fix exception leak cause globalObject not fully freed. https://github.com/openkraken/kraken/pull/1117
++ Fix border radius of one percentage value. https://github.com/openkraken/kraken/pull/1121
+
 ## 0.10.0+3
 
 **Bug Fixed**

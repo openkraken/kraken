@@ -79,9 +79,9 @@ void freeNativeString(Pointer<NativeString> pointer) {
 
 // Register InvokeModule
 typedef NativeAsyncModuleCallback = Void Function(
-    Pointer<Void> callbackContext, Int32 contextId, Pointer<NativeString> errmsg,  Pointer<NativeString> json);
+    Pointer<Void> callbackContext, Int32 contextId, Pointer<Utf8> errmsg,  Pointer<NativeString> json);
 typedef DartAsyncModuleCallback = void Function(
-    Pointer<Void> callbackContext, int contextId, Pointer<NativeString> errmsg, Pointer<NativeString> json);
+    Pointer<Void> callbackContext, int contextId, Pointer<Utf8> errmsg, Pointer<NativeString> json);
 
 typedef NativeInvokeModule = Pointer<NativeString> Function(Pointer<Void> callbackContext,
     Int32 contextId, Pointer<NativeString> module, Pointer<NativeString> method, Pointer<NativeString> params, Pointer<NativeFunction<NativeAsyncModuleCallback>>);
@@ -93,22 +93,24 @@ String invokeModule(
 
   try {
     void invokeModuleCallback({String ?error, dynamic data}) {
-      if (error != null) {
-        Pointer<NativeString> errmsgPtr = stringToNativeString(error);
-        callback(callbackContext, contextId, errmsgPtr, nullptr);
-        freeNativeString(errmsgPtr);
-      } else {
-        Pointer<NativeString> dataPtr = stringToNativeString(jsonEncode(data));
-        callback(callbackContext, contextId, nullptr, dataPtr);
-        freeNativeString(dataPtr);
-      }
+      // To make sure Promise then() and catch() executed before Promise callback called at JavaScript side. 
+      // We should make callback always async.
+      Future.microtask(() {
+        if (error != null) {
+          Pointer<Utf8> errmsgPtr = error.toNativeUtf8();
+          callback(callbackContext, contextId, errmsgPtr, nullptr);
+          malloc.free(errmsgPtr);
+        } else {
+          Pointer<NativeString> dataPtr = stringToNativeString(jsonEncode(data));
+          callback(callbackContext, contextId, nullptr, dataPtr);
+          freeNativeString(dataPtr);
+        }
+      });
     }
     result = controller.module.moduleManager.invokeModule(moduleName, method, (params != null && params != '""') ? jsonDecode(params) : null, invokeModuleCallback);
   } catch (e, stack) {
     String error = '$e\n$stack';
-    // print module error on the dart side.
-    print('$e\n$stack');
-    callback(callbackContext, contextId, stringToNativeString(error), nullptr);
+    callback(callbackContext, contextId, error.toNativeUtf8(), nullptr);
   }
 
   return result;

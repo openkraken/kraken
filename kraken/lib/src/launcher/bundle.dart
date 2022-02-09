@@ -176,7 +176,7 @@ class NetworkBundle extends KrakenBundle {
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
     Uri baseUrl = Uri.parse(controller.href);
     NetworkAssetBundle bundle = NetworkAssetBundle(controller.uriParser!.resolve(baseUrl, Uri.parse(src)), contextId: contextId, additionalHttpHeaders: additionalHttpHeaders);
-    bundle.httpClient.userAgent = getKrakenInfo().userAgent;
+    bundle.httpClient.userAgent = NavigatorModule.getUserAgent();
     String absoluteURL = src;
     rawBundle = await bundle.load(absoluteURL);
     contentType = bundle.contentType;

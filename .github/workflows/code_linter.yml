@@ -1,7 +1,9 @@
 name: Run Code Linter
 
-on: [push]
-
+on:
+  push:
+    paths:
+      - 'bridge/**'
 jobs:
   check_merge_conflict:
     runs-on: ubuntu-latest

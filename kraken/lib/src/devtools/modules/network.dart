@@ -131,7 +131,7 @@ class NetworkRequestWillBeSentEvent extends InspectorEvent {
   final String loaderId;
   final String url;
   final String requestMethod;
-  final Map<String, String> headers;
+  final Map<String, List<String>> headers;
   final int timestamp;
 
   NetworkRequestWillBeSentEvent({
@@ -172,7 +172,7 @@ class NetworkResponseReceivedEvent extends InspectorEvent {
   final String requestId;
   final String loaderId;
   final String url;
-  final Map<String, String> headers;
+  final Map<String, List<String>> headers;
   final int status;
   final String statusText;
   final String mimeType;
@@ -248,10 +248,10 @@ class NetworkLoadingFinishedEvent extends InspectorEvent {
 
 }
 
-Map<String, String> _getHttpHeaders(HttpHeaders headers) {
-  Map<String, String> map = {};
-  headers.forEach((String name, values) {
-    map[name] = headers.value(name) ?? '';
+Map<String, List<String>> _getHttpHeaders(HttpHeaders headers) {
+  Map<String, List<String>> map = {};
+  headers.forEach((String name, List<String> values) {
+    map[name] = values;
   });
   return map;
 }

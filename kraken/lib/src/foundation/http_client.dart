@@ -171,13 +171,13 @@ class ProxyHttpClient implements HttpClient {
   Future<HttpClientRequest> deleteUrl(Uri url) => _openUrl('delete', url);
 }
 
-HttpHeaders createHttpHeaders({ Map<String, String>? initialHeaders }) {
+HttpHeaders createHttpHeaders({ Map<String, List<String>>? initialHeaders }) {
   return _HttpHeaders(initialHeaders: initialHeaders);
 }
 
 class _HttpHeaders implements HttpHeaders {
-  final Map<String, dynamic> _headers = <String, Object>{};
-  _HttpHeaders({ Map<String, String>? initialHeaders }) {
+  final Map<String, List<String>> _headers = <String, List<String>>{};
+  _HttpHeaders({ Map<String, List<String>>? initialHeaders }) {
     if (initialHeaders != null) {
       _headers.addAll(initialHeaders);
     }
@@ -206,9 +206,9 @@ class _HttpHeaders implements HttpHeaders {
 
   @override
   ContentType? get contentType {
-    String? value = _headers[HttpHeaders.contentTypeHeader];
-    if (value != null) {
-      return ContentType.parse(value);
+    String? val = value(HttpHeaders.contentTypeHeader);
+    if (val != null) {
+      return ContentType.parse(val);
     } else {
       return null;
     }
@@ -225,10 +225,10 @@ class _HttpHeaders implements HttpHeaders {
 
   @override
   DateTime? get date {
-    String? value = _headers[HttpHeaders.dateHeader];
-    if (value != null) {
+    String? val = value(HttpHeaders.dateHeader);
+    if (val != null) {
       try {
-        return HttpDate.parse(value);
+        return HttpDate.parse(val);
       } on Exception {
         return null;
       }
@@ -248,7 +248,7 @@ class _HttpHeaders implements HttpHeaders {
   }
 
   @override
-  DateTime? get expires => tryParseHttpDate(_headers[HttpHeaders.expiresHeader] ?? '');
+  DateTime? get expires => tryParseHttpDate(value(HttpHeaders.expiresHeader) ?? '');
 
   @override
   set expires(DateTime? _expires) {
@@ -258,7 +258,7 @@ class _HttpHeaders implements HttpHeaders {
   }
 
   @override
-  String? get host => _headers[HttpHeaders.hostHeader];
+  String? get host => value(HttpHeaders.hostHeader);
 
   @override
   set host(String? _host) {
@@ -268,10 +268,10 @@ class _HttpHeaders implements HttpHeaders {
 
   @override
   DateTime? get ifModifiedSince {
-    String? value = _headers[HttpHeaders.ifModifiedSinceHeader];
-    if (value != null) {
+    String? val = value(HttpHeaders.ifModifiedSinceHeader);
+    if (val != null) {
       try {
-        return HttpDate.parse(value);
+        return HttpDate.parse(val);
       } on Exception {
         return null;
       }
@@ -298,14 +298,15 @@ class _HttpHeaders implements HttpHeaders {
 
   @override
   List<String> operator [](String name) {
-    String? v = value(name);
-    if (v != null) return [v];
-    return [];
+    return _headers[name] ?? [];
   }
 
   @override
   void add(String name, Object value, {bool preserveHeaderCase = false}) {
-    set(name, value, preserveHeaderCase: preserveHeaderCase);
+    if (!preserveHeaderCase) {
+      name = name.toLowerCase();
+    }
+    _addAll(name, value);
   }
 
   @override
@@ -315,9 +316,7 @@ class _HttpHeaders implements HttpHeaders {
 
   @override
   void forEach(void Function(String name, List<String> values) action) {
-    _headers.forEach((key, value) {
-      action(key, [value.toString()]);
-    });
+    _headers.forEach(action);
   }
 
   @override
@@ -325,7 +324,10 @@ class _HttpHeaders implements HttpHeaders {
 
   @override
   void remove(String name, Object value) {
-    removeAll(name);
+    List<String>? values = _headers[name];
+    if (values != null) {
+      values.remove(value);
+    }
   }
 
   @override
@@ -338,23 +340,62 @@ class _HttpHeaders implements HttpHeaders {
     if (!preserveHeaderCase) {
       name = name.toLowerCase();
     }
-    _headers[name] = value;
+    _headers.remove(name);
+    _addAll(name, value);
   }
 
   @override
   String? value(String name) {
-    Object? val = _headers[name];
-    return val?.toString();
+    name = name.toLowerCase();
+    List<String>? values = _headers[name];
+    if (values == null) return null;
+    assert(values.isNotEmpty);
+    if (values.length > 1) {
+      throw HttpException('More than one value for header $name');
+    }
+    return values[0];
+  }
+
+
+  void _addAll(String name, value) {
+    if (value is Iterable) {
+      for (var v in value) {
+        _addValue(name, v);
+      }
+    } else {
+      _addValue(name, value);
+    }
+  }
+
+  void _addValue(String name, Object value) {
+    List<String> values = (_headers[name] ??= <String>[]);
+    values.add(_valueToString(value));
+  }
+
+  String _valueToString(Object value) {
+    if (value is DateTime) {
+      return HttpDate.format(value);
+    } else if (value is String) {
+      return value;
+    } else {
+      return value.toString();
+    }
   }
 
   @override
   String toString() {
     StringBuffer sb = StringBuffer();
-    _headers.forEach((String name, dynamic value) {
-      sb..write(name)
-        ..write(': ')
-        ..write(value)
-        ..write('\n');
+    bool hasValue = false;
+    _headers.forEach((String name, List<String> values) {
+      values.forEach((String value) {
+        if (hasValue) {
+          sb.write('\n');
+        }
+        sb..write(name)
+          ..write(': ')
+          ..write(value);
+        hasValue = true;
+      });
     });
     return sb.toString();
   }

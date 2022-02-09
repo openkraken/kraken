@@ -272,4 +272,9 @@ JSValue nativeValueToJSValue(ExecutionContext* context, NativeValue& value) {
   return JS_NULL;
 }
 
+std::string nativeStringToStdString(NativeString* nativeString) {
+  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(nativeString->string), nativeString->length);
+  return toUTF8(u16EventType);
+}
+
 }  // namespace kraken::binding::qjs
