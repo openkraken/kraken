@@ -150,7 +150,7 @@ class RenderTextBox extends RenderBox
     return null;
   }
 
-  TextSpan get _textSpan {
+  TextSpan get textSpan {
     String clippedText = _getClippedText(_trimmedData);
     // FIXME(yuanyan): do not create text span every time.
     return CSSTextMixin.createTextSpan(clippedText, renderStyle);
@@ -304,7 +304,7 @@ class RenderTextBox extends RenderBox
     if (paragraph != null) {
       paragraph.overflow = renderStyle.effectiveTextOverflow;
       paragraph.textAlign = renderStyle.textAlign;
-      paragraph.text = _textSpan;
+      paragraph.text = textSpan;
       paragraph.maxLines = _maxLines;
       paragraph.lineHeight = _lineHeight;
       paragraph.layout(constraints, parentUsesSize: true);

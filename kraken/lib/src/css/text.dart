@@ -36,7 +36,7 @@ mixin CSSTextMixin on RenderStyle {
     if (_color == value) return;
     _color = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    _markChildrenNeedsLayout(renderBoxModel!, COLOR);
+    _markChildrenNeedsPaint(renderBoxModel!, COLOR);
   }
 
   // Current not update the dependent property relative to the color.
@@ -122,7 +122,7 @@ mixin CSSTextMixin on RenderStyle {
     if (_fontStyle == value) return;
     _fontStyle = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    _markChildrenNeedsLayout(renderBoxModel!, FONT_STYLE);
+    _markChildrenNeedsPaint(renderBoxModel!, FONT_STYLE);
   }
 
   List<String>? _fontFamily;
@@ -260,7 +260,7 @@ mixin CSSTextMixin on RenderStyle {
     if (_textShadow == value) return;
     _textShadow = value;
     // Update all the children text with specified style property not set due to style inheritance.
-     _markChildrenNeedsLayout(renderBoxModel!, TEXT_SHADOW);
+     _markChildrenNeedsPaint(renderBoxModel!, TEXT_SHADOW);
   }
 
   WhiteSpace? _whiteSpace;
@@ -402,6 +402,26 @@ mixin CSSTextMixin on RenderStyle {
       } else if (child is RenderTextBox) {
         KrakenRenderParagraph renderParagraph = child.child as KrakenRenderParagraph;
         renderParagraph.markNeedsLayout();
+      }
+    });
+  }
+
+  // Mark nested children text as needs paint.
+  // Inheritable style change should loop nest children to update text node with specified style property
+  // not set in its parent.
+  void _markChildrenNeedsPaint(RenderBoxModel renderBoxModel, String styleProperty) {
+    renderBoxModel.visitChildren((RenderObject child) {
+      if (child is RenderBoxModel) {
+        // Only need to update child text when style property is not set.
+        if (child.renderStyle.target.style[styleProperty].isEmpty) {
+          _markChildrenNeedsLayout(child, styleProperty);
+        }
+      } else if (child is RenderTextBox) {
+        KrakenRenderParagraph renderParagraph = child.child as KrakenRenderParagraph;
+        // Need to manually layout text before text paint cause textSpan changed.
+        renderParagraph.text = child.textSpan;
+        renderParagraph.layoutText();
+        renderParagraph.markNeedsPaint();
       }
     });
   }

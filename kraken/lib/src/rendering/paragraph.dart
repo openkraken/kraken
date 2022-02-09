@@ -455,8 +455,7 @@ class KrakenRenderParagraph extends RenderBox
     }
   }
 
-  @override
-  void performLayout() {
+  void layoutText() {
     final BoxConstraints constraints = this.constraints;
     _layoutTextWithConstraints(constraints);
     _computeLineMetrics();
@@ -468,6 +467,12 @@ class KrakenRenderParagraph extends RenderBox
     if (lineHeight != null) {
       _relayoutMultiLineText();
     }
+
+  }
+
+  @override
+  void performLayout() {
+    layoutText();
 
     // We grab _textPainter.size and _textPainter.didExceedMaxLines here because
     // assigning to `size` will trigger us to validate our intrinsic sizes,
