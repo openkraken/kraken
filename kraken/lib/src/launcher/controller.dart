@@ -282,6 +282,7 @@ class KrakenViewController
 
   final List<WidgetElement> _widgetElements = [];
 
+  // Save all WidgetElement to manager life cycle.
   List<WidgetElement> get widgetElements => _widgetElements;
 
   void addWidgetElement(WidgetElement widgetElement) {
