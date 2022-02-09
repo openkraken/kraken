@@ -174,6 +174,7 @@ void anonymousAsyncCallback(void* callbackContext, NativeValue* nativeValue, int
     JSValue value = nativeValueToJSValue(promiseContext->context, *nativeValue);
     JSValue returnValue = JS_Call(context->ctx(), promiseContext->resolveFunc, context->global(), 1, &value);
     context->drainPendingPromiseJobs();
+    context->handleException(&returnValue);
     JS_FreeValue(context->ctx(), value);
     JS_FreeValue(context->ctx(), returnValue);
   } else if (errmsg != nullptr) {
@@ -181,6 +182,7 @@ void anonymousAsyncCallback(void* callbackContext, NativeValue* nativeValue, int
     JS_DefinePropertyValueStr(context->ctx(), error, "message", JS_NewString(context->ctx(), errmsg), JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
     JSValue returnValue = JS_Call(context->ctx(), promiseContext->rejectFunc, context->global(), 1, &error);
     context->drainPendingPromiseJobs();
+    context->handleException(&returnValue);
     JS_FreeValue(context->ctx(), error);
     JS_FreeValue(context->ctx(), returnValue);
   }
@@ -268,6 +270,11 @@ JSValue nativeValueToJSValue(ExecutionContext* context, NativeValue& value) {
     }
   }
   return JS_NULL;
+}
+
+std::string nativeStringToStdString(NativeString* nativeString) {
+  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(nativeString->string), nativeString->length);
+  return toUTF8(u16EventType);
 }
 
 }  // namespace kraken::binding::qjs

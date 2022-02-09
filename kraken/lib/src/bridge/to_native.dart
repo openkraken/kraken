@@ -30,12 +30,6 @@ import 'package:html/dom.dart' as dom;
 // 5. Get a reference to the C function, and put it into a variable.
 // 6. Call the C function.
 
-String? _krakenUserAgent;
-
-void setKrakenUserAgent(String userAgent) {
-  _krakenUserAgent = userAgent;
-}
-
 class KrakenInfo {
   final Pointer<NativeKrakenInfo> _nativeKrakenInfo;
 
@@ -59,11 +53,6 @@ class KrakenInfo {
   String get systemName {
     if (_nativeKrakenInfo.ref.system_name == nullptr) return '';
     return _nativeKrakenInfo.ref.system_name.toDartString();
-  }
-
-  String get userAgent {
-    return _krakenUserAgent ??
-        '$appName/$appVersion ($systemName; $appName/$appRevision)';
   }
 }
 

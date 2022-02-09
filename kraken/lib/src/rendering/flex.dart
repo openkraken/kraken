@@ -348,7 +348,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         childRenderStyle.width.isAuto) {
       double transferredSize = childRenderStyle.height.isNotAuto
           ? childRenderStyle.height.computedValue * childRenderStyle.intrinsicRatio!
-          : childRenderStyle.intrinsicWidth!;
+          : childRenderStyle.intrinsicWidth;
       minMainSize = math.min(contentSize, transferredSize);
     } else if (child is RenderIntrinsic &&
         childRenderStyle.intrinsicRatio != null &&
@@ -356,7 +356,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         childRenderStyle.height.isAuto) {
       double transferredSize = childRenderStyle.width.isNotAuto
           ? childRenderStyle.width.computedValue / childRenderStyle.intrinsicRatio!
-          : childRenderStyle.intrinsicHeight!;
+          : childRenderStyle.intrinsicHeight;
       minMainSize = math.min(contentSize, transferredSize);
     } else if (child is RenderBoxModel) {
       double? specifiedMainSize = _isHorizontalFlexDirection
@@ -437,9 +437,9 @@ class RenderFlexLayout extends RenderLayoutBox {
       return false;
     }
     if (_isHorizontalFlexDirection) {
-      return renderBoxModel.clipX;
+      return renderBoxModel.renderStyle.overflowX != CSSOverflowType.visible;
     } else {
-      return renderBoxModel.clipY;
+      return renderBoxModel.renderStyle.overflowY != CSSOverflowType.visible;
     }
   }
 
@@ -556,7 +556,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       CSSPositionedLayout.applyPositionedChildOffset(this, child);
       // Position of positioned element affect the scroll size of container.
       extendMaxScrollableSize(child);
-      ensureBoxSizeLargerThanScrollableSize();
     }
 
     // Set offset of sticky element on each layout.
@@ -612,6 +611,9 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     // Set children offset based on flex alignment properties.
     _setChildrenOffset(_runMetrics, _runSpacingMap);
+
+    // Set the size of scrollable overflow area for flex layout.
+    _setMaxScrollableSize(_runMetrics);
   }
 
   // Layout position placeholder.
@@ -1406,8 +1408,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     );
     size = getBoxSize(layoutContentSize);
 
-    _setMaxScrollableSizeForFlex(_runMetrics);
-
     // Set auto value of min-width and min-height based on size of flex items.
     if (_isHorizontalFlexDirection) {
       autoMinWidth = _getMainAxisAutoSize(_runMetrics);
@@ -1425,7 +1425,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       contentHeight: 0,
     );
     setMaxScrollableSize(layoutContentSize);
-    size = getBoxSize(layoutContentSize);
+    size = scrollableSize = getBoxSize(layoutContentSize);
   }
 
   // Record the main size of all lines.
@@ -1529,7 +1529,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   // Set the size of scrollable overflow area for flex layout.
   // https://drafts.csswg.org/css-overflow-3/#scrollable
-  void _setMaxScrollableSizeForFlex(List<_RunMetrics> _runMetrics) {
+  void _setMaxScrollableSize(List<_RunMetrics> _runMetrics) {
     // Scrollable main size collection of each line.
     List<double> scrollableMainSizeOfLines = [];
     // Scrollable cross size collection of each line.
@@ -1556,8 +1556,10 @@ class RenderFlexLayout extends RenderLayoutBox {
         }
 
         Size childScrollableSize = child.size;
-        double? childMarginTop = 0;
-        double? childMarginLeft = 0;
+
+        double childOffsetX = 0;
+        double childOffsetY = 0;
+
         if (child is RenderBoxModel) {
           RenderStyle childRenderStyle = child.renderStyle;
           CSSOverflowType overflowX = childRenderStyle.effectiveOverflowX;
@@ -1567,17 +1569,41 @@ class RenderFlexLayout extends RenderLayoutBox {
               overflowY == CSSOverflowType.visible) {
             childScrollableSize = child.scrollableSize;
           }
-          childMarginTop = childRenderStyle.marginTop.computedValue;
-          childMarginLeft = childRenderStyle.marginLeft.computedValue;
+
+          // Scrollable overflow area is defined in the following spec
+          // which includes margin, position and transform offset.
+          // https://www.w3.org/TR/css-overflow-3/#scrollable-overflow-region
+
+          // Add offset of margin.
+          childOffsetX += childRenderStyle.marginLeft.computedValue
+            + childRenderStyle.marginRight.computedValue;
+          childOffsetY += childRenderStyle.marginTop.computedValue
+            + childRenderStyle.marginBottom.computedValue;
+
+          // Add offset of position relative.
+          // Offset of position absolute and fixed is added in layout stage of positioned renderBox.
+          Offset? relativeOffset = CSSPositionedLayout.getRelativeOffset(childRenderStyle);
+          if (relativeOffset != null) {
+            childOffsetX += relativeOffset.dx;
+            childOffsetY += relativeOffset.dy;
+          }
+
+          // Add offset of transform.
+          final Matrix4 transform = child.getEffectiveTransform();
+          final Offset? transformOffset = MatrixUtils.getAsTranslation(transform);
+          if (transformOffset != null) {
+            childOffsetX += transformOffset.dx;
+            childOffsetY += transformOffset.dy;
+          }
         }
 
         scrollableMainSizeOfChildren.add(preSiblingsMainSize +
             (_isHorizontalFlexDirection
-                ? childScrollableSize.width + childMarginLeft
-                : childScrollableSize.height + childMarginTop));
+                ? childScrollableSize.width + childOffsetX
+                : childScrollableSize.height + childOffsetY));
         scrollableCrossSizeOfChildren.add(_isHorizontalFlexDirection
-            ? childScrollableSize.height + childMarginTop
-            : childScrollableSize.width + childMarginLeft);
+              ? childScrollableSize.height + childOffsetY
+              : childScrollableSize.width + childOffsetX);
         runChildrenList.add(child);
       }
 
@@ -1612,13 +1638,10 @@ class RenderFlexLayout extends RenderLayoutBox {
         renderStyle.effectiveOverflowX != CSSOverflowType.visible ||
         renderStyle.effectiveOverflowY != CSSOverflowType.visible;
 
-    // No need to add padding for scrolling content box.
-    double maxScrollableMainSizeOfChildren = isScrollContainer
-        ? maxScrollableMainSizeOfLines
-        : (_isHorizontalFlexDirection
-            ? container.renderStyle.paddingLeft.computedValue
-            : container.renderStyle.paddingTop.computedValue) +
-        maxScrollableMainSizeOfLines;
+    // Padding in the end direction of axis should be included in scroll container.
+    double maxScrollableMainSizeOfChildren =
+      maxScrollableMainSizeOfLines + flowAwareMainAxisPadding()
+      + (isScrollContainer ? flowAwareMainAxisPadding(isEnd: true) : 0);
 
     // Max scrollable cross size of all lines.
     double maxScrollableCrossSizeOfLines =
@@ -1626,13 +1649,10 @@ class RenderFlexLayout extends RenderLayoutBox {
       return curr > next ? curr : next;
     });
 
-    // No need to add padding for scrolling content box.
-    double maxScrollableCrossSizeOfChildren = isScrollContainer
-        ? maxScrollableCrossSizeOfLines
-        : (_isHorizontalFlexDirection
-            ? container.renderStyle.paddingTop.computedValue
-            : container.renderStyle.paddingLeft.computedValue) +
-        maxScrollableCrossSizeOfLines;
+    // Padding in the end direction of axis should be included in scroll container.
+    double maxScrollableCrossSizeOfChildren =
+      maxScrollableCrossSizeOfLines + flowAwareCrossAxisPadding()
+      + (isScrollContainer ? flowAwareCrossAxisPadding(isEnd: true) : 0);
 
     double containerContentWidth = size.width -
         container.renderStyle.effectiveBorderLeftWidth.computedValue -

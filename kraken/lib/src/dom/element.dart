@@ -941,6 +941,7 @@ class Element extends Node
         if (effectiveOverflowY != oldEffectiveOverflowY) {
           updateRenderBoxModelWithOverflowY(_handleScroll);
         }
+        updateOverflowRenderBox();
         break;
       case OVERFLOW_Y:
         CSSOverflowType oldEffectiveOverflowX = renderStyle.effectiveOverflowX;
@@ -953,6 +954,7 @@ class Element extends Node
         if (effectiveOverflowX != oldEffectiveOverflowX) {
           updateRenderBoxModelWithOverflowX(_handleScroll);
         }
+        updateOverflowRenderBox();
         break;
       case OPACITY:
         renderStyle.opacity = value;
@@ -1505,6 +1507,9 @@ class Element extends Node
       addEventResponder(_renderBoxModel);
       if (_hasIntersectionObserverEvent(eventHandlers)) {
         _renderBoxModel.addIntersectionChangeListener(handleIntersectionChange);
+        // Mark the compositing state for this render object as dirty
+        // cause it will create new layer.
+        _renderBoxModel.markNeedsCompositingBitsUpdate();
       }
     }
   }
@@ -1548,8 +1553,8 @@ class Element extends Node
 
     SchedulerBinding.instance!.addPostFrameCallback((_) async {
       Uint8List captured;
-      RenderBoxModel? _renderBoxModel = renderBoxModel;
-      if (_renderBoxModel!.hasSize && _renderBoxModel.size.isEmpty) {
+      RenderBoxModel _renderBoxModel = renderBoxModel!;
+      if (_renderBoxModel.hasSize && _renderBoxModel.size.isEmpty) {
         // Return a blob with zero length.
         captured = Uint8List(0);
       } else {
@@ -1560,7 +1565,8 @@ class Element extends Node
 
       completer.complete(captured);
       forceToRepaintBoundary = false;
-      renderBoxModel!.owner!.flushLayout();
+      // May be disposed before this callback.
+      _renderBoxModel.owner?.flushLayout();
     });
     SchedulerBinding.instance!.scheduleFrame();
 

@@ -7,19 +7,24 @@ export const navigator = {
   get userAgent() {
     return kraken.invokeModule('Navigator', 'getUserAgent');
   },
-  get hardwareConcurrency() {
-    const logicalProcessors = kraken.invokeModule('DeviceInfo', 'getHardwareConcurrency');
-    return parseInt(logicalProcessors);
+  get platform() {
+    return kraken.invokeModule('Navigator', 'getPlatform');
   },
-  getDeviceInfo() {
-    return new Promise((resolve, reject) => {
-      kraken.invokeModule('DeviceInfo', 'getDeviceInfo', null, (e, data) => {
-        if (e) {
-          return reject(e);
-        }
-        resolve(data);
-      });
-    });
+  get language() {
+    return kraken.invokeModule('Navigator', 'getLanguage');
+  },
+  get languages() {
+    return JSON.parse(kraken.invokeModule('Navigator', 'getLanguages'));
+  },
+  get appName() {
+    return kraken.invokeModule('Navigator', 'getAppName');
+  },
+  get appVersion() {
+    return kraken.invokeModule('Navigator', 'getAppVersion');
+  },
+  get hardwareConcurrency() {
+    const logicalProcessors = kraken.invokeModule('Navigator', 'getHardwareConcurrency');
+    return parseInt(logicalProcessors);
   },
   clipboard: {
     readText() {

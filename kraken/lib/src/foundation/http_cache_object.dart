@@ -307,8 +307,8 @@ class HttpCacheObject {
     _valid = false;
   }
 
-  Map<String, String> _getResponseHeaders() {
-    Map<String, String> responseHeaders = {};
+  Map<String, List<String>> _getResponseHeaders() {
+    Map<String, List<String>> responseHeaders = {};
 
     // Read headers from cache.
     if (headers != null) {
@@ -328,27 +328,28 @@ class HttpCacheObject {
             value = kvTuple.sublist(1).join(':');
           }
 
-          responseHeaders[key] = value.trim();
+          List<String> values = (responseHeaders[key] ??= <String>[]);
+          values.add(value.trim());
         }
       }
     }
 
     // Override cache control http headers.
     if (eTag != null) {
-      responseHeaders[HttpHeaders.etagHeader] = eTag!;
+      responseHeaders[HttpHeaders.etagHeader] = [eTag!];
     }
     if (expiredTime != null) {
-      responseHeaders[HttpHeaders.expiresHeader] = HttpDate.format(expiredTime!);
+      responseHeaders[HttpHeaders.expiresHeader] = [HttpDate.format(expiredTime!)];
     }
     if (contentLength != null) {
-      responseHeaders[HttpHeaders.contentLengthHeader] = contentLength.toString();
+      responseHeaders[HttpHeaders.contentLengthHeader] = [contentLength.toString()];
     }
     if (lastModified != null) {
-      responseHeaders[HttpHeaders.lastModifiedHeader] = HttpDate.format(lastModified!);
+      responseHeaders[HttpHeaders.lastModifiedHeader] = [HttpDate.format(lastModified!)];
     }
 
     // Mark cache hit flag.
-    responseHeaders[_httpHeaderCacheHits] = _httpCacheHit;
+    responseHeaders[_httpHeaderCacheHits] = [_httpCacheHit];
 
     return responseHeaders;
   }

@@ -232,8 +232,9 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
         JSValue columnValue = JS_NewUint32(m_ctx, 0);
 
         JSValue args[]{messageValue, fileNameValue, lineNumberValue, columnValue, error};
-        JS_Call(m_ctx, handler, eventInstance->jsObject, 5, args);
+        JSValue returnValue = JS_Call(m_ctx, handler, eventInstance->jsObject, 5, args);
         m_context->drainPendingPromiseJobs();
+        m_context->handleException(&returnValue);
 
         JS_FreeValue(m_ctx, error);
         JS_FreeValue(m_ctx, messageValue);

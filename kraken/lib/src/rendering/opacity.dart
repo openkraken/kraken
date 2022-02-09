@@ -12,7 +12,6 @@ mixin RenderOpacityMixin on RenderBox {
 
   int alpha = ui.Color.getAlphaFromOpacity(1.0);
 
-
   final LayerHandle<OpacityLayer> _opacityLayer = LayerHandle<OpacityLayer>();
 
   void disposeOpacityLayer() {
@@ -21,6 +20,7 @@ mixin RenderOpacityMixin on RenderBox {
 
   void paintOpacity(PaintingContext context, Offset offset,
       PaintingContextCallback callback) {
+
     if (alpha == 255) {
       _opacityLayer.layer = null;
       // No need to keep the layer. We'll create a new one if necessary.

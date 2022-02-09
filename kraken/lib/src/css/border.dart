@@ -310,26 +310,45 @@ class CSSBorderSide {
 class CSSBorderRadius {
   final CSSLengthValue x;
   final CSSLengthValue y;
+
   const CSSBorderRadius(this.x, this.y);
+
+  Radius get computedRadius => Radius.elliptical(x.computedValue, y.computedValue);
+
+  @override
+  int get hashCode => hashValues(x, y);
+
+  @override
+  bool operator ==(Object? other) {
+    return other is CSSBorderRadius && other.x == x && other.y == y;
+  }
+
+  @override
+  String toString() {
+    if (x == CSSLengthValue.zero && y == CSSLengthValue.zero) {
+      return 'CSSBorderRadius.zero';
+    } else {
+      return 'CSSBorderRadius($x, $y)';
+    }
+  }
+
   static CSSBorderRadius zero = CSSBorderRadius(CSSLengthValue.zero, CSSLengthValue.zero);
   static CSSBorderRadius? parseBorderRadius(String radius, RenderStyle renderStyle, String propertyName) {
     if (radius.isNotEmpty) {
       // border-top-left-radius: horizontal vertical
       List<String> values = radius.split(_splitRegExp);
-      if (values.length == 1) {
-        CSSLengthValue circular = CSSLength.parseLength(values[0], renderStyle, propertyName, Axis.horizontal);
-        return CSSBorderRadius(circular, circular);
-      } else if (values.length == 2) {
-        CSSLengthValue x = CSSLength.parseLength(values[0], renderStyle, propertyName, Axis.horizontal);
-        CSSLengthValue y = CSSLength.parseLength(values[1], renderStyle, propertyName, Axis.vertical);
+      if (values.length == 1 || values.length == 2) {
+        String horizontalRadius = values[0];
+        // The first value is the horizontal radius, the second the vertical radius.
+        // If the second value is omitted it is copied from the first.
+        // https://www.w3.org/TR/css-backgrounds-3/#border-radius
+        String verticalRadius = values.length == 1 ? values[0] : values[1];
+        CSSLengthValue x = CSSLength.parseLength(horizontalRadius, renderStyle, propertyName, Axis.horizontal);
+        CSSLengthValue y = CSSLength.parseLength(verticalRadius, renderStyle, propertyName, Axis.vertical);
         return CSSBorderRadius(x, y);
       }
     }
     return null;
-  }
-
-  Radius get computedRadius {
-    return Radius.elliptical(x.computedValue, y.computedValue);
   }
 }
 

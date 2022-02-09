@@ -48,6 +48,7 @@ enum CSSLengthType {
 class CSSLengthValue {
   final double? value;
   final CSSLengthType type;
+
   CSSLengthValue(this.value, this.type, [this.renderStyle, this.propertyName, this.axisType]) {
     if (propertyName != null) {
       if (type == CSSLengthType.EM) {
@@ -57,13 +58,14 @@ class CSSLengthValue {
       }
     }
   }
-  static CSSLengthValue zero = CSSLengthValue(0, CSSLengthType.PX);
-  static CSSLengthValue auto = CSSLengthValue(null, CSSLengthType.AUTO);
-  static CSSLengthValue initial = CSSLengthValue(null, CSSLengthType.INITIAL);
-  static CSSLengthValue unknow = CSSLengthValue(null, CSSLengthType.UNKNOWN);
+
+  static final CSSLengthValue zero = CSSLengthValue(0, CSSLengthType.PX);
+  static final CSSLengthValue auto = CSSLengthValue(null, CSSLengthType.AUTO);
+  static final CSSLengthValue initial = CSSLengthValue(null, CSSLengthType.INITIAL);
+  static final CSSLengthValue unknown = CSSLengthValue(null, CSSLengthType.UNKNOWN);
   // Used in https://www.w3.org/TR/css-inline-3/#valdef-line-height-normal
-  static CSSLengthValue normal = CSSLengthValue(null, CSSLengthType.NORMAL);
-  static CSSLengthValue none = CSSLengthValue(null, CSSLengthType.NONE);
+  static final CSSLengthValue normal = CSSLengthValue(null, CSSLengthType.NORMAL);
+  static final CSSLengthValue none = CSSLengthValue(null, CSSLengthType.NONE);
 
   // Length is applied in horizontal or vertical direction.
   Axis? axisType;
@@ -378,7 +380,7 @@ class CSSLengthValue {
     return (other == null && (type == CSSLengthType.UNKNOWN || type == CSSLengthType.INITIAL)) ||
         (other is CSSLengthValue
         && other.value == value
-        && other.type == type);
+        && (isZero || other.type == type));
   }
 
   @override
@@ -538,7 +540,7 @@ class CSSLength {
     if (value == 0) {
       return _cachedParsedLength[text] = CSSLengthValue.zero;
     } else if (value == null) {
-      return _cachedParsedLength[text] = CSSLengthValue.unknow;
+      return _cachedParsedLength[text] = CSSLengthValue.unknown;
     } else if (unit == CSSLengthType.PX){
       return _cachedParsedLength[text] = CSSLengthValue(value, unit);
     } else {

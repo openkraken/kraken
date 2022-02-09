@@ -1,7 +1,9 @@
 name: Bridge Compile Test
 
-on: [push]
-
+on:
+  push:
+    paths:
+      - 'bridge/**'
 jobs:
   build_for_android:
     runs-on: ubuntu-latest

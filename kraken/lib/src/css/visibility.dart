@@ -21,9 +21,7 @@ mixin CSSVisibilityMixin on RenderStyle {
   @override
   Visibility get visibility => _visibility;
 
-  bool get isVisibilityHidden {
-    return _visibility == Visibility.hidden;
-  }
+  bool get isVisibilityHidden => _visibility == Visibility.hidden;
 
   static Visibility resolveVisibility(String value) {
     switch(value) {
