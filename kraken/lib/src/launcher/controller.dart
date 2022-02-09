@@ -311,7 +311,11 @@ class KrakenViewController
 
   void _removeTarget(int targetId) {
     if (_eventTargets.containsKey(targetId)) {
-      _eventTargets.remove(targetId);
+      EventTarget? target = _eventTargets.remove(targetId);
+
+      if (target is WidgetElement) {
+        _removeWidgetElement(target);
+      }
     }
   }
 
@@ -690,9 +694,6 @@ class KrakenViewController
     Node? target = _getEventTargetById<Node>(targetId);
     if (target == null) return;
 
-    if (target is WidgetElement) {
-      _removeWidgetElement(target);
-    }
     _removeTarget(targetId);
     target.dispose();
   }
