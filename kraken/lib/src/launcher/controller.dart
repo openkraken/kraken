@@ -264,7 +264,7 @@ class KrakenViewController
   }
 
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
-  List<EventTarget> widgetElements = [];
+  List<WidgetElement> widgetElements = [];
 
   T? getEventTargetById<T>(int targetId) {
     return _getEventTargetById(targetId);
