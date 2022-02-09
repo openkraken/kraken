@@ -64,4 +64,4 @@ void RejectedPromises::process(ExecutionContext* context) {
   }
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

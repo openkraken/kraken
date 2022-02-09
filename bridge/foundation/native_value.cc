@@ -276,4 +276,4 @@ std::string nativeStringToStdString(NativeString* nativeString) {
   return toUTF8(u16EventType);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

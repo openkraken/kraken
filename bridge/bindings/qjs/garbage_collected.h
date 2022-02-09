@@ -82,7 +82,7 @@ class GarbageCollected {
   JSContext* m_ctx{nullptr};
   JSRuntime* m_runtime{nullptr};
   GarbageCollected(){};
-  GarbageCollected(JSContext* ctx): m_runtime(JS_GetRuntime(ctx)), m_ctx(ctx) {};
+  GarbageCollected(JSContext* ctx) : m_runtime(JS_GetRuntime(ctx)), m_ctx(ctx){};
   friend class MakeGarbageCollectedTrait<T>;
 };
 

@@ -13,7 +13,7 @@ namespace kraken {
 // Use GCVisitor to keep track gc managed members in C++ class.
 class GCVisitor final {
  public:
-  explicit GCVisitor(JSRuntime* rt, JS_MarkFunc* markFunc): m_runtime(rt), m_markFunc(markFunc) {};
+  explicit GCVisitor(JSRuntime* rt, JS_MarkFunc* markFunc) : m_runtime(rt), m_markFunc(markFunc){};
 
   void trace(JSValue value);
 
@@ -22,6 +22,6 @@ class GCVisitor final {
   JS_MarkFunc* m_markFunc{nullptr};
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_GC_VISITOR_H

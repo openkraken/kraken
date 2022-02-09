@@ -12,9 +12,9 @@ void ModuleListenerContainer::addModuleListener(ModuleListener* listener) {
 }
 
 void ModuleListenerContainer::trace(GCVisitor* visitor) {
-  for(auto& listener: m_listeners) {
+  for (auto& listener : m_listeners) {
     visitor->trace(listener->toQuickJS());
   }
 }
 
-}
+}  // namespace kraken

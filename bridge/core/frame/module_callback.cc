@@ -7,7 +7,7 @@
 
 namespace kraken {
 
-ModuleCallback::ModuleCallback(QJSFunction* function): m_function(function) {}
+ModuleCallback::ModuleCallback(QJSFunction* function) : m_function(function) {}
 
 QJSFunction* ModuleCallback::value() {
   return m_function;
@@ -21,4 +21,4 @@ void ModuleCallback::dispose() const {
   m_function->dispose();
 }
 
-}
+}  // namespace kraken

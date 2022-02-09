@@ -5,9 +5,9 @@
 
 #include "binding_initializer.h"
 
-#include "qjs_window.h"
-#include "qjs_module_manager.h"
 #include "qjs_console.h"
+#include "qjs_module_manager.h"
+#include "qjs_window.h"
 
 namespace kraken {
 

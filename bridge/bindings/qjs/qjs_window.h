@@ -15,6 +15,6 @@ class QJSWindow final {
   static void installGlobalFunctions(JSContext* ctx);
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_QJS_WINDOW_H

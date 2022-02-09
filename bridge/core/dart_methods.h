@@ -12,11 +12,10 @@
 #include <memory>
 #include <thread>
 
-#include "foundation/native_string.h"
 #include "core/frame/screen.h"
+#include "foundation/native_string.h"
 
 namespace kraken {
-
 
 using AsyncCallback = void (*)(void* callbackContext, int32_t contextId, const char* errmsg);
 using AsyncRAFCallback = void (*)(void* callbackContext, int32_t contextId, double result, const char* errmsg);
@@ -59,7 +58,6 @@ struct MousePointer {
 };
 using SimulatePointer = void (*)(MousePointer**, int32_t length, int32_t pointer);
 using SimulateInputText = void (*)(NativeString* nativeString);
-
 
 struct DartMethodPointer {
   DartMethodPointer() = default;

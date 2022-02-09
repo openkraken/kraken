@@ -9,7 +9,6 @@
 
 namespace kraken {
 
-
 ScriptValue ScriptValue::createErrorObject(JSContext* ctx, const char* errmsg) {
   JS_ThrowInternalError(ctx, "%s", errmsg);
   JSValue errorObject = JS_GetException(ctx);
@@ -72,4 +71,4 @@ bool ScriptValue::isException() {
   return JS_IsException(m_value);
 }
 
-}
+}  // namespace kraken

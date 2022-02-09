@@ -16,14 +16,14 @@ namespace kraken {
 class ModuleListener : public GarbageCollected<ModuleListener> {
  public:
   explicit ModuleListener(QJSFunction* function);
- private:
 
-  void trace(GCVisitor*visitor) const override;
+ private:
+  void trace(GCVisitor* visitor) const override;
   void dispose() const override;
 
   QJSFunction* m_function{nullptr};
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_MODULE_LISTENER_H

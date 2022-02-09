@@ -18,7 +18,7 @@ ScriptValue QJSFunction::invoke(JSContext* ctx, int32_t argc, ScriptValue* argum
 
   JSValue argv[std::max(1, argc)];
 
-  for(int i = 0; i < argc; i ++) {
+  for (int i = 0; i < argc; i++) {
     argv[0 + i] = arguments[i].toQuickJS();
   }
 
@@ -41,4 +41,4 @@ void QJSFunction::trace(GCVisitor* visitor) const {
 void QJSFunction::dispose() const {
   JS_FreeValueRT(m_runtime, m_function);
 }
-}
+}  // namespace kraken

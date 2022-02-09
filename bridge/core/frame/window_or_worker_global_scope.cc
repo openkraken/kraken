@@ -49,7 +49,6 @@ static void handlePersistentCallback(void* ptr, int32_t contextId, const char* e
   handleTimerCallback(timer, errmsg);
 }
 
-
 int WindowOrWorkerGlobalScope::setTimeout(ExecutionContext* context, QJSFunction* handler, int32_t timeout, ExceptionState* exception) {
 #if FLUTTER_BACKEND
   if (context->dartMethodPtr()->setTimeout == nullptr) {
@@ -100,4 +99,4 @@ void WindowOrWorkerGlobalScope::clearTimeout(ExecutionContext* context, int32_t 
   context->timers()->removeTimeoutById(timerId);
 }
 
-}
+}  // namespace kraken

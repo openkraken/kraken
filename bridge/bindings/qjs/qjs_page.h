@@ -15,6 +15,6 @@ class QJSPage final {
   static void installGlobalFunctions(JSContext* ctx);
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_QJS_PAGE_H

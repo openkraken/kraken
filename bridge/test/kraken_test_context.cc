@@ -23,7 +23,6 @@ KrakenTestContext::KrakenTestContext(ExecutionContext* context) : m_context(cont
   //  init_list_head(&image_link);
 }
 
-
 bool KrakenTestContext::evaluateTestScripts(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) {
   if (!m_context->isValid())
     return false;
@@ -31,26 +30,26 @@ bool KrakenTestContext::evaluateTestScripts(const uint16_t* code, size_t codeLen
 }
 
 bool KrakenTestContext::parseTestHTML(const uint16_t* code, size_t codeLength) {
-//  if (!m_page_context->isValid())
-//    return false;
-//  std::string utf8Code = toUTF8(std::u16string(reinterpret_cast<const char16_t*>(code), codeLength));
-//  return m_page->parseHTML(utf8Code.c_str(), utf8Code.length());
+  //  if (!m_page_context->isValid())
+  //    return false;
+  //  std::string utf8Code = toUTF8(std::u16string(reinterpret_cast<const char16_t*>(code), codeLength));
+  //  return m_page->parseHTML(utf8Code.c_str(), utf8Code.length());
 }
 
 static JSValue executeTest(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-//  JSValue& callback = argv[0];
-//  auto context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
-//  if (!JS_IsObject(callback)) {
-//    return JS_ThrowTypeError(ctx, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.");
-//  }
-//
-//  if (!JS_IsFunction(ctx, callback)) {
-//    return JS_ThrowTypeError(ctx, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.");
-//  }
-//  auto bridge = static_cast<KrakenPage*>(context->getOwner());
-//  auto bridgeTest = static_cast<KrakenTestContext*>(bridge->owner);
-//  bridgeTest->m_executeTestCallback = ScriptValue(ctx, callback);
-//  return JS_NULL;
+  //  JSValue& callback = argv[0];
+  //  auto context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  //  if (!JS_IsObject(callback)) {
+  //    return JS_ThrowTypeError(ctx, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.");
+  //  }
+  //
+  //  if (!JS_IsFunction(ctx, callback)) {
+  //    return JS_ThrowTypeError(ctx, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.");
+  //  }
+  //  auto bridge = static_cast<KrakenPage*>(context->getOwner());
+  //  auto bridgeTest = static_cast<KrakenTestContext*>(bridge->owner);
+  //  bridgeTest->m_executeTestCallback = ScriptValue(ctx, callback);
+  //  return JS_NULL;
 }
 
 static JSValue matchImageSnapshot(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
@@ -206,21 +205,21 @@ static JSValue simulateInputText(JSContext* ctx, JSValueConst this_val, int argc
 };
 
 static JSValue parseHTML(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-//  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
-//
-//  if (argc == 1) {
-//    JSValue& html = argv[0];
-//
-//    std::string strHTML = jsValueToStdString(ctx, html);
-//
-//    JSValue bodyValue = JS_GetPropertyStr(context->ctx(), context->document()->jsObject, "body");
-//    auto* body = static_cast<ElementInstance*>(JS_GetOpaque(bodyValue, Element::classId()));
-//    HTMLParser::parseHTML(strHTML, body);
-//
-//    JS_FreeValue(ctx, bodyValue);
-//  }
-//
-//  return JS_NULL;
+  //  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  //
+  //  if (argc == 1) {
+  //    JSValue& html = argv[0];
+  //
+  //    std::string strHTML = jsValueToStdString(ctx, html);
+  //
+  //    JSValue bodyValue = JS_GetPropertyStr(context->ctx(), context->document()->jsObject, "body");
+  //    auto* body = static_cast<ElementInstance*>(JS_GetOpaque(bodyValue, Element::classId()));
+  //    HTMLParser::parseHTML(strHTML, body);
+  //
+  //    JS_FreeValue(ctx, bodyValue);
+  //  }
+  //
+  //  return JS_NULL;
 }
 
 static JSValue triggerGlobalError(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {

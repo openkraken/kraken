@@ -4,8 +4,8 @@
  */
 
 #include "module_manager.h"
-#include "module_callback.h"
 #include "core/executing_context.h"
+#include "module_callback.h"
 
 namespace kraken {
 
@@ -31,9 +31,7 @@ void handleInvokeModuleTransientCallback(void* ptr, int32_t contextId, const cha
 
   if (errmsg != nullptr) {
     ScriptValue errorObject = ScriptValue::createErrorObject(ctx, errmsg);
-    ScriptValue arguments[] = {
-      errorObject
-    };
+    ScriptValue arguments[] = {errorObject};
     ScriptValue returnValue = moduleContext->callback->value()->invoke(ctx, 1, arguments);
     if (returnValue.isException()) {
       context->handleException(&returnValue);
@@ -42,9 +40,7 @@ void handleInvokeModuleTransientCallback(void* ptr, int32_t contextId, const cha
     std::u16string argumentString = std::u16string(reinterpret_cast<const char16_t*>(json->string), json->length);
     std::string utf8Arguments = toUTF8(argumentString);
     ScriptValue jsonObject = ScriptValue::createJSONObject(ctx, utf8Arguments.c_str(), utf8Arguments.size());
-    ScriptValue arguments[] = {
-      jsonObject
-    };
+    ScriptValue arguments[] = {jsonObject};
     ScriptValue returnValue = moduleContext->callback->value()->invoke(ctx, 1, arguments);
     if (returnValue.isException()) {
       context->handleException(&returnValue);

@@ -6,14 +6,13 @@
 #ifndef KRAKENBRIDGE_MODULE_LISTENER_CONTAINER_H
 #define KRAKENBRIDGE_MODULE_LISTENER_CONTAINER_H
 
-#include "module_listener.h"
 #include <forward_list>
+#include "module_listener.h"
 
 namespace kraken {
 
 class ModuleListenerContainer final {
  public:
-
   void addModuleListener(ModuleListener* listener);
   void trace(GCVisitor* visitor);
 
@@ -21,6 +20,6 @@ class ModuleListenerContainer final {
   std::forward_list<ModuleListener*> m_listeners;
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_MODULE_LISTENER_CONTAINER_H

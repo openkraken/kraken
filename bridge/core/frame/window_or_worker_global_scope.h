@@ -6,9 +6,9 @@
 #ifndef KRAKENBRIDGE_WINDOW_OR_WORKER_GLOBAL_SCROPE_H
 #define KRAKENBRIDGE_WINDOW_OR_WORKER_GLOBAL_SCROPE_H
 
-#include "core/executing_context.h"
-#include "bindings/qjs/qjs_function.h"
 #include "bindings/qjs/exception_state.h"
+#include "bindings/qjs/qjs_function.h"
+#include "core/executing_context.h"
 
 namespace kraken {
 

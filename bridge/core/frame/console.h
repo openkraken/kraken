@@ -16,6 +16,6 @@ class Console final {
   static void __kraken_print__(ExecutionContext* context, ScriptValue& log, ScriptValue& level, ExceptionState* exception);
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKE_CONSOLE_H

@@ -15,6 +15,6 @@ class QJSModuleManager final {
   static void installGlobalFunctions(JSContext* ctx);
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_QJS_MODULE_MANAGER_H

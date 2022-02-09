@@ -8,10 +8,10 @@
 
 #include "core/dom/frame_request_callback_collection.h"
 #include "core/frame/dom_timer.h"
+#include "core/page.h"
 #include "foundation/native_string.h"
 #include "kraken_bridge_test.h"
 #include "kraken_test_env.h"
-#include "core/page.h"
 
 #if defined(__linux__) || defined(__APPLE__)
 static int64_t get_time_ms(void) {
@@ -258,21 +258,21 @@ void TEST_runLoop(kraken::ExecutionContext* context) {
 
 void TEST_mockDartMethods(int32_t contextId, OnJSError onJSError) {
   std::vector<uint64_t> mockMethods{
-    reinterpret_cast<uint64_t>(TEST_invokeModule),
-    reinterpret_cast<uint64_t>(TEST_requestBatchUpdate),
-    reinterpret_cast<uint64_t>(TEST_reloadApp),
-    reinterpret_cast<uint64_t>(TEST_setTimeout),
-    reinterpret_cast<uint64_t>(TEST_setInterval),
-    reinterpret_cast<uint64_t>(TEST_clearTimeout),
-    reinterpret_cast<uint64_t>(TEST_requestAnimationFrame),
-    reinterpret_cast<uint64_t>(TEST_cancelAnimationFrame),
-    reinterpret_cast<uint64_t>(TEST_getScreen),
-    reinterpret_cast<uint64_t>(TEST_devicePixelRatio),
-    reinterpret_cast<uint64_t>(TEST_platformBrightness),
-    reinterpret_cast<uint64_t>(TEST_toBlob),
-    reinterpret_cast<uint64_t>(TEST_flushUICommand),
-    reinterpret_cast<uint64_t>(TEST_initWindow),
-    reinterpret_cast<uint64_t>(TEST_initDocument),
+      reinterpret_cast<uint64_t>(TEST_invokeModule),
+      reinterpret_cast<uint64_t>(TEST_requestBatchUpdate),
+      reinterpret_cast<uint64_t>(TEST_reloadApp),
+      reinterpret_cast<uint64_t>(TEST_setTimeout),
+      reinterpret_cast<uint64_t>(TEST_setInterval),
+      reinterpret_cast<uint64_t>(TEST_clearTimeout),
+      reinterpret_cast<uint64_t>(TEST_requestAnimationFrame),
+      reinterpret_cast<uint64_t>(TEST_cancelAnimationFrame),
+      reinterpret_cast<uint64_t>(TEST_getScreen),
+      reinterpret_cast<uint64_t>(TEST_devicePixelRatio),
+      reinterpret_cast<uint64_t>(TEST_platformBrightness),
+      reinterpret_cast<uint64_t>(TEST_toBlob),
+      reinterpret_cast<uint64_t>(TEST_flushUICommand),
+      reinterpret_cast<uint64_t>(TEST_initWindow),
+      reinterpret_cast<uint64_t>(TEST_initDocument),
   };
 
 #if ENABLE_PROFILE
@@ -285,7 +285,7 @@ void TEST_mockDartMethods(int32_t contextId, OnJSError onJSError) {
   registerDartMethods(contextId, mockMethods.data(), mockMethods.size());
 }
 
-}
+}  // namespace kraken
 
 // void TEST_dispatchEvent(int32_t contextId, EventTarget* eventTarget, const std::string type) {
 //  NativeEventTarget* nativeEventTarget = new NativeEventTarget(eventTarget);

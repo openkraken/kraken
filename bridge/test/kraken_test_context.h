@@ -6,9 +6,9 @@
 #ifndef KRAKENBRIDGE_KRAKEN_TEST_CONTEXT_H
 #define KRAKENBRIDGE_KRAKEN_TEST_CONTEXT_H
 
+#include "bindings/qjs/qjs_function.h"
 #include "core/executing_context.h"
 #include "core/page.h"
-#include "bindings/qjs/qjs_function.h"
 #include "kraken_bridge_test.h"
 
 namespace kraken {
@@ -30,8 +30,8 @@ class KrakenTestContext final {
   void invokeExecuteTest(ExecuteCallback executeCallback);
   void registerTestEnvDartMethods(uint64_t* methodBytes, int32_t length);
 
-//  ScriptValue m_executeTestCallback{m_context->ctx()};
-//  ScriptValue m_executeTestProxyObject{m_context->ctx()};
+  //  ScriptValue m_executeTestCallback{m_context->ctx()};
+  //  ScriptValue m_executeTestProxyObject{m_context->ctx()};
 
  private:
   /// the pointer of JSContext, ownership belongs to JSContext

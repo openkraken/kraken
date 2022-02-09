@@ -13,7 +13,7 @@ struct NativeScreen {
   double height;
 };
 
-//class Screen : public HostObject {
+// class Screen : public HostObject {
 // public:
 //  explicit Screen(ExecutionContext* context) : HostObject(context, "Screen"){};
 //
@@ -22,7 +22,7 @@ struct NativeScreen {
 //  DEFINE_READONLY_PROPERTY(height);
 //};
 
-//void bindScreen(ExecutionContext* context);
+// void bindScreen(ExecutionContext* context);
 
 }  // namespace kraken
 

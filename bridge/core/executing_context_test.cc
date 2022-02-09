@@ -4,9 +4,9 @@
  */
 
 #include "gtest/gtest.h"
+#include "include/kraken_bridge.h"
 #include "kraken_test_env.h"
 #include "page.h"
-#include "include/kraken_bridge.h"
 
 using namespace kraken;
 

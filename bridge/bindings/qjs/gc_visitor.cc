@@ -11,4 +11,4 @@ void GCVisitor::trace(JSValue value) {
   JS_MarkValue(m_runtime, value, m_markFunc);
 }
 
-}
+}  // namespace kraken

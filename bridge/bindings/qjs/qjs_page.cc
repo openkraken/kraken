@@ -7,8 +7,6 @@
 
 namespace kraken {
 
-void QJSPage::installGlobalFunctions(JSContext* ctx) {
+void QJSPage::installGlobalFunctions(JSContext* ctx) {}
 
-}
-
-}
+}  // namespace kraken

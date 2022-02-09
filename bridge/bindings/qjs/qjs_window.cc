@@ -5,11 +5,11 @@
 
 #include "qjs_window.h"
 #include <quickjs/quickjs.h>
-#include "qjs_function.h"
-#include "exception_state.h"
-#include "member_installer.h"
 #include "core/executing_context.h"
 #include "core/frame/window_or_worker_global_scope.h"
+#include "exception_state.h"
+#include "member_installer.h"
+#include "qjs_function.h"
 
 namespace kraken {
 
@@ -125,10 +125,10 @@ static JSValue clearTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSV
 }
 
 void QJSWindow::installGlobalFunctions(JSContext* ctx) {
-  std::initializer_list<MemberInstaller::FunctionConfig> functionConfig {
-    {"setTimeout", setTimeout, 2, combinePropFlags(JSPropFlag::enumerable, JSPropFlag::writable, JSPropFlag::configurable)},
-    {"setInterval", setInterval, 2, combinePropFlags(JSPropFlag::enumerable, JSPropFlag::writable, JSPropFlag::configurable)},
-    {"clearTimeout", clearTimeout, 0, combinePropFlags(JSPropFlag::enumerable, JSPropFlag::writable, JSPropFlag::configurable)},
+  std::initializer_list<MemberInstaller::FunctionConfig> functionConfig{
+      {"setTimeout", setTimeout, 2, combinePropFlags(JSPropFlag::enumerable, JSPropFlag::writable, JSPropFlag::configurable)},
+      {"setInterval", setInterval, 2, combinePropFlags(JSPropFlag::enumerable, JSPropFlag::writable, JSPropFlag::configurable)},
+      {"clearTimeout", clearTimeout, 0, combinePropFlags(JSPropFlag::enumerable, JSPropFlag::writable, JSPropFlag::configurable)},
   };
 
   JSValue globalObject = JS_GetGlobalObject(ctx);
@@ -136,4 +136,4 @@ void QJSWindow::installGlobalFunctions(JSContext* ctx) {
   JS_FreeValue(ctx, globalObject);
 }
 
-}
+}  // namespace kraken

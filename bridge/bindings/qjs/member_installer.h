@@ -12,12 +12,7 @@
 namespace kraken {
 
 // Flags for object properties.
-enum JSPropFlag {
-  normal = JS_PROP_NORMAL,
-  writable = JS_PROP_WRITABLE,
-  enumerable = JS_PROP_ENUMERABLE,
-  configurable = JS_PROP_CONFIGURABLE
-};
+enum JSPropFlag { normal = JS_PROP_NORMAL, writable = JS_PROP_WRITABLE, enumerable = JS_PROP_ENUMERABLE, configurable = JS_PROP_CONFIGURABLE };
 
 // Combine multiple prop flags.
 int combinePropFlags(JSPropFlag a, JSPropFlag b);
@@ -30,7 +25,7 @@ class MemberInstaller {
     AttributeConfig& operator=(const AttributeConfig&) = delete;
     const char* name;
     JSValue value;
-    int flag; // Flags for object properties.
+    int flag;  // Flags for object properties.
   };
 
   struct FunctionConfig {
@@ -38,13 +33,13 @@ class MemberInstaller {
     const char* name;
     JSCFunction* function;
     size_t length;
-    int flag; // Flags for object properties.
+    int flag;  // Flags for object properties.
   };
 
   static void installAttributes(JSContext* ctx, JSValue root, std::initializer_list<AttributeConfig>);
   static void installFunctions(JSContext* ctx, JSValue root, std::initializer_list<FunctionConfig>);
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_MEMBER_INSTALLER_H

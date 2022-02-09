@@ -315,65 +315,65 @@ uint8_t* ExecutionContext::dumpByteCode(const char* code, uint32_t codeLength, c
 }
 
 void ExecutionContext::dispatchGlobalErrorEvent(ExecutionContext* context, JSValueConst error) {
-//  JSContext* ctx = context->ctx();
-//  auto* window = static_cast<Window*>(JS_GetOpaque(context->global(), Window::classId()));
-//
-//  {
-//    JSValue ErrorEventValue = JS_GetPropertyStr(ctx, context->global(), "ErrorEvent");
-//    JSValue errorType = JS_NewString(ctx, "error");
-//    JSValue errorInit = JS_NewObject(ctx);
-//    JS_SetPropertyStr(ctx, errorInit, "error", JS_DupValue(ctx, error));
-//    JS_SetPropertyStr(ctx, errorInit, "message", JS_GetPropertyStr(ctx, error, "message"));
-//    JS_SetPropertyStr(ctx, errorInit, "lineno", JS_GetPropertyStr(ctx, error, "lineNumber"));
-//    JS_SetPropertyStr(ctx, errorInit, "filename", JS_GetPropertyStr(ctx, error, "fileName"));
-//    JS_SetPropertyStr(ctx, errorInit, "colno", JS_NewUint32(ctx, 0));
-//    JSValue arguments[] = {errorType, errorInit};
-//    JSValue errorEventValue = JS_CallConstructor(context->ctx(), ErrorEventValue, 2, arguments);
-//    if (JS_IsException(errorEventValue)) {
-//      context->handleException(&errorEventValue);
-//      return;
-//    }
-//
-//    auto* errorEvent = static_cast<EventInstance*>(JS_GetOpaque(errorEventValue, Event::kEventClassID));
-//    window->dispatchEvent(errorEvent);
-//
-//    JS_FreeValue(ctx, ErrorEventValue);
-//    JS_FreeValue(ctx, errorEventValue);
-//    JS_FreeValue(ctx, errorType);
-//    JS_FreeValue(ctx, errorInit);
-//
-//    context->drainPendingPromiseJobs();
-//  }
+  //  JSContext* ctx = context->ctx();
+  //  auto* window = static_cast<Window*>(JS_GetOpaque(context->global(), Window::classId()));
+  //
+  //  {
+  //    JSValue ErrorEventValue = JS_GetPropertyStr(ctx, context->global(), "ErrorEvent");
+  //    JSValue errorType = JS_NewString(ctx, "error");
+  //    JSValue errorInit = JS_NewObject(ctx);
+  //    JS_SetPropertyStr(ctx, errorInit, "error", JS_DupValue(ctx, error));
+  //    JS_SetPropertyStr(ctx, errorInit, "message", JS_GetPropertyStr(ctx, error, "message"));
+  //    JS_SetPropertyStr(ctx, errorInit, "lineno", JS_GetPropertyStr(ctx, error, "lineNumber"));
+  //    JS_SetPropertyStr(ctx, errorInit, "filename", JS_GetPropertyStr(ctx, error, "fileName"));
+  //    JS_SetPropertyStr(ctx, errorInit, "colno", JS_NewUint32(ctx, 0));
+  //    JSValue arguments[] = {errorType, errorInit};
+  //    JSValue errorEventValue = JS_CallConstructor(context->ctx(), ErrorEventValue, 2, arguments);
+  //    if (JS_IsException(errorEventValue)) {
+  //      context->handleException(&errorEventValue);
+  //      return;
+  //    }
+  //
+  //    auto* errorEvent = static_cast<EventInstance*>(JS_GetOpaque(errorEventValue, Event::kEventClassID));
+  //    window->dispatchEvent(errorEvent);
+  //
+  //    JS_FreeValue(ctx, ErrorEventValue);
+  //    JS_FreeValue(ctx, errorEventValue);
+  //    JS_FreeValue(ctx, errorType);
+  //    JS_FreeValue(ctx, errorInit);
+  //
+  //    context->drainPendingPromiseJobs();
+  //  }
 }
 
 static void dispatchPromiseRejectionEvent(const char* eventType, ExecutionContext* context, JSValueConst promise, JSValueConst error) {
-//  JSContext* ctx = context->ctx();
-//  auto* window = static_cast<WindowInstance*>(JS_GetOpaque(context->global(), Window::classId()));
-//
-//  // Trigger PromiseRejectionEvent(unhandledrejection) event.
-//  {
-//    JSValue PromiseRejectionEventValue = JS_GetPropertyStr(ctx, context->global(), "PromiseRejectionEvent");
-//    JSValue errorType = JS_NewString(ctx, eventType);
-//    JSValue errorInit = JS_NewObject(ctx);
-//    JS_SetPropertyStr(ctx, errorInit, "promise", JS_DupValue(ctx, promise));
-//    JS_SetPropertyStr(ctx, errorInit, "reason", JS_DupValue(ctx, error));
-//    JSValue arguments[] = {errorType, errorInit};
-//    JSValue rejectEventValue = JS_CallConstructor(context->ctx(), PromiseRejectionEventValue, 2, arguments);
-//    if (JS_IsException(rejectEventValue)) {
-//      context->handleException(&rejectEventValue);
-//      return;
-//    }
-//
-//    auto* rejectEvent = static_cast<EventInstance*>(JS_GetOpaque(rejectEventValue, Event::kEventClassID));
-//    window->dispatchEvent(rejectEvent);
-//
-//    JS_FreeValue(ctx, errorType);
-//    JS_FreeValue(ctx, errorInit);
-//    JS_FreeValue(ctx, rejectEventValue);
-//    JS_FreeValue(ctx, PromiseRejectionEventValue);
-//
-//    context->drainPendingPromiseJobs();
-//  }
+  //  JSContext* ctx = context->ctx();
+  //  auto* window = static_cast<WindowInstance*>(JS_GetOpaque(context->global(), Window::classId()));
+  //
+  //  // Trigger PromiseRejectionEvent(unhandledrejection) event.
+  //  {
+  //    JSValue PromiseRejectionEventValue = JS_GetPropertyStr(ctx, context->global(), "PromiseRejectionEvent");
+  //    JSValue errorType = JS_NewString(ctx, eventType);
+  //    JSValue errorInit = JS_NewObject(ctx);
+  //    JS_SetPropertyStr(ctx, errorInit, "promise", JS_DupValue(ctx, promise));
+  //    JS_SetPropertyStr(ctx, errorInit, "reason", JS_DupValue(ctx, error));
+  //    JSValue arguments[] = {errorType, errorInit};
+  //    JSValue rejectEventValue = JS_CallConstructor(context->ctx(), PromiseRejectionEventValue, 2, arguments);
+  //    if (JS_IsException(rejectEventValue)) {
+  //      context->handleException(&rejectEventValue);
+  //      return;
+  //    }
+  //
+  //    auto* rejectEvent = static_cast<EventInstance*>(JS_GetOpaque(rejectEventValue, Event::kEventClassID));
+  //    window->dispatchEvent(rejectEvent);
+  //
+  //    JS_FreeValue(ctx, errorType);
+  //    JS_FreeValue(ctx, errorInit);
+  //    JS_FreeValue(ctx, rejectEventValue);
+  //    JS_FreeValue(ctx, PromiseRejectionEventValue);
+  //
+  //    context->drainPendingPromiseJobs();
+  //  }
 }
 
 void ExecutionContext::dispatchGlobalUnhandledRejectionEvent(ExecutionContext* context, JSValueConst promise, JSValueConst error) {

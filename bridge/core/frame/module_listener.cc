@@ -7,7 +7,7 @@
 
 namespace kraken {
 
-ModuleListener::ModuleListener(QJSFunction* function): m_function(function) {}
+ModuleListener::ModuleListener(QJSFunction* function) : m_function(function) {}
 
 void ModuleListener::trace(GCVisitor* visitor) const {
   m_function->trace(visitor);
@@ -17,4 +17,4 @@ void ModuleListener::dispose() const {
   m_function->dispose();
 }
 
-}
+}  // namespace kraken

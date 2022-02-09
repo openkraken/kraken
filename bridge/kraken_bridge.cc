@@ -8,12 +8,12 @@
 #include <thread>
 
 #include "bindings/qjs/native_string_utils.h"
+#include "core/page.h"
 #include "foundation/inspector_task_queue.h"
 #include "foundation/logging.h"
 #include "foundation/ui_command_buffer.h"
 #include "foundation/ui_task_queue.h"
 #include "include/kraken_bridge.h"
-#include "core/page.h"
 
 #if defined(_WIN32)
 #define SYSTEM_NAME "windows"  // Windows

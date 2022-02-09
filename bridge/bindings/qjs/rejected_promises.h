@@ -39,6 +39,6 @@ class RejectedPromises {
   std::vector<std::unique_ptr<Message>> m_reportHandledRejection;
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_BINDINGS_QJS_REJECTED_PROMISES_H_

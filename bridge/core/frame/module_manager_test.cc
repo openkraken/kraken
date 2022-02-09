@@ -71,4 +71,4 @@ f();
   EXPECT_EQ(logCalled, true);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken

@@ -4,9 +4,9 @@
  */
 
 #include "qjs_module_manager.h"
+#include "core/frame/module_manager.h"
 #include "member_installer.h"
 #include "qjs_function.h"
-#include "core/frame/module_manager.h"
 
 namespace kraken {
 
@@ -69,9 +69,9 @@ JSValue krakenInvokeModule(JSContext* ctx, JSValueConst this_val, int argc, JSVa
 }
 
 void QJSModuleManager::installGlobalFunctions(JSContext* ctx) {
-  std::initializer_list<MemberInstaller::FunctionConfig> functionConfig {
-    {"__kraken_module_listener__", krakenModuleListener, 1, combinePropFlags(JSPropFlag::enumerable, JSPropFlag::writable, JSPropFlag::configurable)},
-    {"__kraken_invoke_module__", krakenInvokeModule, 3, combinePropFlags(JSPropFlag::enumerable, JSPropFlag::writable, JSPropFlag::configurable)},
+  std::initializer_list<MemberInstaller::FunctionConfig> functionConfig{
+      {"__kraken_module_listener__", krakenModuleListener, 1, combinePropFlags(JSPropFlag::enumerable, JSPropFlag::writable, JSPropFlag::configurable)},
+      {"__kraken_invoke_module__", krakenInvokeModule, 3, combinePropFlags(JSPropFlag::enumerable, JSPropFlag::writable, JSPropFlag::configurable)},
   };
 
   JSValue globalObject = JS_GetGlobalObject(ctx);
@@ -79,4 +79,4 @@ void QJSModuleManager::installGlobalFunctions(JSContext* ctx) {
   JS_FreeValue(ctx, globalObject);
 }
 
-}
+}  // namespace kraken

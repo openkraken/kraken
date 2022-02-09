@@ -6,9 +6,9 @@
 #ifndef KRAKENBRIDGE_MODULE_CALLBACK_H
 #define KRAKENBRIDGE_MODULE_CALLBACK_H
 
+#include <quickjs/list.h>
 #include "bindings/qjs/garbage_collected.h"
 #include "bindings/qjs/qjs_function.h"
-#include <quickjs/list.h>
 
 namespace kraken {
 
@@ -29,16 +29,15 @@ class ModuleCallback : public GarbageCollected<ModuleCallback> {
 
   QJSFunction* value();
 
-  void trace(GCVisitor*visitor) const override;
+  void trace(GCVisitor* visitor) const override;
   void dispose() const override;
 
   ModuleCallbackLinker linker{this};
 
-private:
+ private:
   QJSFunction* m_function{nullptr};
 };
 
-
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_MODULE_CALLBACK_H

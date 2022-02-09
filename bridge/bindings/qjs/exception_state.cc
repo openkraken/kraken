@@ -8,11 +8,11 @@
 namespace kraken {
 
 void ExceptionState::throwException(JSContext* ctx, ErrorType type, const char* message) {
-  switch(type) {
+  switch (type) {
     case ErrorType::TypeError:
       m_exception = JS_ThrowTypeError(ctx, "%s", message);
       break;
-    case InternalError :
+    case InternalError:
       m_exception = JS_ThrowInternalError(ctx, "%s", message);
       break;
     case RangeError:
@@ -39,4 +39,4 @@ JSValue ExceptionState::toQuickJS() {
   return m_exception;
 }
 
-}
+}  // namespace kraken
