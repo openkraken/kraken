@@ -293,7 +293,7 @@ class KrakenViewController
     _widgetElements.add(widgetElement);
   }
 
-  void removeWidgetElement(WidgetElement widgetElement) {
+  void _removeWidgetElement(WidgetElement widgetElement) {
     _widgetElements.remove(widgetElement);
   }
 
@@ -694,7 +694,7 @@ class KrakenViewController
     if (target == null) return;
 
     if (target is WidgetElement) {
-      removeWidgetElement(target);
+      _removeWidgetElement(target);
     }
     _removeTarget(targetId);
     target.dispose();
