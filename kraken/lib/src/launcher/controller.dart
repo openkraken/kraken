@@ -280,10 +280,14 @@ class KrakenViewController
     return null;
   }
 
+  // Save all WidgetElement to manager life cycle.
   final List<WidgetElement> _widgetElements = [];
 
-  // Save all WidgetElement to manager life cycle.
-  List<WidgetElement> get widgetElements => _widgetElements;
+  void deactivateWidgetElements() {
+    _widgetElements.forEach((element) {
+      element.deactivate();
+    });
+  }
 
   void addWidgetElement(WidgetElement widgetElement) {
     _widgetElements.add(widgetElement);
