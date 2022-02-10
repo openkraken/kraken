@@ -1,3 +1,13 @@
+## 0.10.1
+
+**Bug Fixed**
+
++ Fix custom flutter widget when kraken disposed.  https://github.com/openkraken/kraken/pull/1142
++ Fix scrollable size should include padding. https://github.com/openkraken/kraken/pull/1135
++ Fix http request doesn't support multiple headers. https://github.com/openkraken/kraken/pull/1148
++ Fix document.location is undefined. https://github.com/openkraken/kraken/pull/1150
+
+
 ## 0.10.0+5
 
 **Bug Fixed**
