@@ -1128,7 +1128,9 @@ class KrakenController {
   Future<void> evalBundle() async {
     assert(!_view._disposed, 'Kraken have already disposed');
     if (bundle != null) {
-      await bundle!.eval(_view.contextId);
+      int? contextId = _view.contextId;
+      await bundle!.resolve(contextId);
+      await bundle!.eval(contextId);
       // trigger DOMContentLoaded event
       module.requestAnimationFrame((_) {
         Event event = Event(EVENT_DOM_CONTENT_LOADED);

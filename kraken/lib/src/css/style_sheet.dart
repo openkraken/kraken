@@ -20,6 +20,10 @@ class CSSStyleSheet implements StyleSheet {
   List<CSSRule> cssRules = [];
 
   CSSStyleSheet(String text, { this.disabled = false, this.herf }) {
+    addRules(text);
+  }
+
+  addRules(String text) {
     List<CSSRule> rules = CSSParser.parseRules(text, parentStyleSheet: this);
     cssRules.addAll(rules);
   }

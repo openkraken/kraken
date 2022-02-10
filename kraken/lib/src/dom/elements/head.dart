@@ -123,14 +123,19 @@ class ScriptElement extends Element {
           || type == _JAVASCRIPT_MODULE
     )) {
       try {
-        KrakenBundle bundle = KrakenBundle.fromUrl(src);
+        // Resolve uri.
+        String baseUrl = ownerDocument.controller.href;
+        Uri baseUri = Uri.parse(baseUrl);
+        Uri uri = ownerDocument.controller.uriParser!.resolve(baseUri, Uri.parse(src));
+        // Load and evaluate using kraken bundle.
+        KrakenBundle bundle = KrakenBundle.fromUrl(uri.toString());
         await bundle.resolve(contextId);
         await bundle.eval(contextId);
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_LOAD));
         });
-      } catch(e) {
+      } catch (e) {
         // An error occurred.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_ERROR));
@@ -150,18 +155,12 @@ class ScriptElement extends Element {
       _fetchBundle(src);
     } else if (type == _MIME_TEXT_JAVASCRIPT || type == _JAVASCRIPT_MODULE){
       // Eval script context: <script> console.log(1) </script>
-      StringBuffer buffer = StringBuffer();
-      childNodes.forEach((node) {
-        if (node is TextNode) {
-          buffer.write(node.data);
-        }
-      });
-      String script = buffer.toString();
-      if (script.isNotEmpty) {
+      String? script = _collectElementChildText(this);
+      if (script != null && script.isNotEmpty) {
         KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
         if (controller != null) {
           KrakenBundle bundle = KrakenBundle.fromContent(script, url: controller.href);
-          bundle.resolve(contextId);
+          await bundle.resolve(contextId);
           await bundle.eval(contextId);
         }
       }
@@ -178,6 +177,28 @@ class StyleElement extends Element {
   CSSStyleSheet? _styleSheet;
 
   @override
+  Node appendChild(Node child) {
+    Node ret = super.appendChild(child);
+    String? text = _collectElementChildText(this);
+    if (text != null) {
+      _styleSheet?.addRules(text);
+      ownerDocument.recalculateDocumentStyle();
+    }
+    return ret;
+  }
+
+  @override
+  Node insertBefore(Node child, Node referenceNode) {
+    Node ret = super.insertBefore(child, referenceNode);
+    String? text = _collectElementChildText(this);
+    if (text != null) {
+      _styleSheet?.addRules(text);
+      ownerDocument.recalculateDocumentStyle();
+    }
+    return ret;
+  }
+
+  @override
   void setProperty(String key, dynamic value) {
     super.setProperty(key, value);
     if (key == 'type') {
@@ -188,15 +209,9 @@ class StyleElement extends Element {
   @override
   void connectedCallback() {
     if (type == _CSS_MIME) {
-      StringBuffer buffer = StringBuffer();
-       childNodes.forEach((node) {
-        if (node is TextNode) {
-          buffer.write(node.data);
-        }
-      });
-      String style = buffer.toString();
-      _styleSheet = CSSStyleSheet(style);
-      ownerDocument.addStyleSheet(_styleSheet!);
+      String? style = _collectElementChildText(this);
+      // Always create CSSStyleSheet instance.
+      ownerDocument.addStyleSheet(_styleSheet = CSSStyleSheet(style ?? ''));
     }
     super.connectedCallback();
   }
@@ -207,5 +222,19 @@ class StyleElement extends Element {
       ownerDocument.removeStyleSheet(_styleSheet!);
     }
     super.disconnectedCallback();
+  }
+}
+
+String? _collectElementChildText(Element el) {
+  StringBuffer buffer = StringBuffer();
+  el.childNodes.forEach((node) {
+    if (node is TextNode) {
+      buffer.write(node.data);
+    }
+  });
+  if (buffer.isNotEmpty) {
+    return buffer.toString();
+  } else {
+    return null;
   }
 }

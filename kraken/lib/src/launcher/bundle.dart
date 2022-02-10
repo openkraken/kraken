@@ -79,15 +79,17 @@ abstract class KrakenBundle {
 
   @mustCallSuper
   Future<void> resolve(int? contextId) async {
-    uri = Uri.parse(src);
-    if (contextId != null) {
+    if (isResolved) return;
+
+    // Source is input by user, do not trust it's a valid URL.
+    uri = Uri.tryParse(src);
+    if (contextId != null && uri != null) {
       KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
       if (controller != null && !isAssetAbsolutePath(src)) {
         uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri!);
       }
+      isResolved = true;
     }
-
-    isResolved = true;
   }
 
   static KrakenBundle fromUrl(String url, { Map<String, String>? additionalHttpHeaders }) {
@@ -108,7 +110,10 @@ abstract class KrakenBundle {
 
 
   Future<void> eval(int? contextId) async {
-    if (!isResolved) await resolve(contextId);
+    if (!isResolved) {
+      debugPrint('The kraken bundle $this is not resolved to evaluate.');
+      return;
+    }
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_START);
