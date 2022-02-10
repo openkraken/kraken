@@ -1368,18 +1368,17 @@ class Element extends Node
 
     if (key == _CLASS_NAME) {
       className = value;
-    } else {
-      properties[key] = value;
     }
+
+    properties[key] = value;
   }
 
   @mustCallSuper
   dynamic getProperty(String key) {
     if (key == _CLASS_NAME) {
       return className;
-    } else {
-      return properties[key];
     }
+    return properties[key];
   }
 
   @mustCallSuper
@@ -1388,9 +1387,8 @@ class Element extends Node
       _removeInlineStyle();
     } else if (key == _CLASS_NAME) {
       className = EMPTY_STRING;
-    } else {
-      properties.remove(key);
     }
+    properties.remove(key);
   }
 
   void _removeInlineStyle() {
