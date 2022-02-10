@@ -541,20 +541,21 @@ void flushUICommand() {
       UICommandType commandType = command.type;
       int id = command.id;
       Pointer nativePtr = command.nativePtr;
+      EventTargetContext eventTargetContext = EventTargetContext(controller.view.contextId, nativePtr.cast<NativeEventTarget>());
 
       try {
         switch (commandType) {
           case UICommandType.createElement:
             controller.view.createElement(
-                id, command.args[0], nativePtr.cast<NativeEventTarget>());
+                id, command.args[0], eventTargetContext);
             break;
           case UICommandType.createTextNode:
             controller.view.createTextNode(
-                id, command.args[0], nativePtr.cast<NativeEventTarget>());
+                id, command.args[0], eventTargetContext);
             break;
           case UICommandType.createComment:
             controller.view
-                .createComment(id, nativePtr.cast<NativeEventTarget>());
+                .createComment(id, eventTargetContext);
             break;
           case UICommandType.disposeEventTarget:
             controller.view.disposeEventTarget(id);

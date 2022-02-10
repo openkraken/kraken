@@ -485,7 +485,7 @@ class WebViewController extends KrakenViewController {
   }
 
   EventTarget createElement(
-      int targetId, String tagName, [Pointer<NativeEventTarget>? nativePtr]) {
+      int targetId, String tagName, [EventTargetContext? eventTargetContext]) {
     if (kProfileMode) {
       PerformanceTiming.instance()
           .mark(PERF_CREATE_ELEMENT_START, uniqueId: targetId);
@@ -493,7 +493,7 @@ class WebViewController extends KrakenViewController {
     assert(!_existsTarget(targetId),
         'ERROR: Can not create element with same id "$targetId"');
     Element element = document.createElement(
-        tagName.toUpperCase(), nativePtr == null ? null : EventTargetContext(_contextId, nativePtr));
+        tagName.toUpperCase(), eventTargetContext);
     _setEventTarget(targetId, element);
     if (kProfileMode) {
       PerformanceTiming.instance()
@@ -504,13 +504,13 @@ class WebViewController extends KrakenViewController {
   }
 
   Node createTextNode(
-      int targetId, String data, [Pointer<NativeEventTarget>? nativePtr]) {
+      int targetId, String data, [EventTargetContext? eventTargetContext]) {
     if (kProfileMode) {
       PerformanceTiming.instance()
           .mark(PERF_CREATE_TEXT_NODE_START, uniqueId: targetId);
     }
     TextNode textNode = document.createTextNode(
-        data, nativePtr == null ? null : EventTargetContext(_contextId, nativePtr));
+        data, eventTargetContext);
     _setEventTarget(targetId, textNode);
     if (kProfileMode) {
       PerformanceTiming.instance()
@@ -520,13 +520,13 @@ class WebViewController extends KrakenViewController {
     return textNode;
   }
 
-  void createComment(int targetId, [Pointer<NativeEventTarget>? nativePtr]) {
+  void createComment(int targetId, [EventTargetContext? eventTargetContext]) {
     if (kProfileMode) {
       PerformanceTiming.instance()
           .mark(PERF_CREATE_COMMENT_START, uniqueId: targetId);
     }
     Comment comment =
-        document.createComment(nativePtr == null ? null : EventTargetContext(_contextId, nativePtr));
+        document.createComment(eventTargetContext);
     _setEventTarget(targetId, comment);
     if (kProfileMode) {
       PerformanceTiming.instance()
