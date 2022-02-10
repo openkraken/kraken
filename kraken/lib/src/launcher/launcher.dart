@@ -42,9 +42,8 @@ void launch({
 
     controller.view.attachTo(RendererBinding.instance!.renderView);
 
-    await controller.loadBundle(bundle: bundle);
-
-    await controller.evalBundle();
+    await controller.load();
+    await controller.eval();
   }
 
   // window.physicalSize are Size.zero when app first loaded. This only happened on Android and iOS physical devices with release build.

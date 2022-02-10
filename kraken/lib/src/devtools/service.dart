@@ -34,8 +34,10 @@ void spawnIsolateInspectorServer(ChromeDevToolsService devTool, KrakenController
   serverIsolateReceivePort.listen((data) {
     if (data is SendPort) {
       devTool._isolateServerPort = data;
-      String bundleURL = controller.bundle?.uri.toString() ?? '<EmbedBundle>';
-      devTool._isolateServerPort!.send(InspectorServerInit(controller.view.contextId, port, '0.0.0.0', bundleURL));
+      controller.bundle.then((KrakenBundle? bundle) {
+        String bundleURL = bundle?.uri.toString() ?? '<EmbedBundle>';
+        devTool._isolateServerPort!.send(InspectorServerInit(controller.view.contextId, port, '0.0.0.0', bundleURL));
+      });
     } else if (data is InspectorFrontEndMessage) {
       devTool.uiInspector!.messageRouter(data.id, data.module, data.method, data.params);
     } else if (data is InspectorServerStart) {

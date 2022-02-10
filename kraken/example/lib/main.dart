@@ -64,7 +64,7 @@ class _MyHomePageState extends State<MyBrowser> {
             controller: textEditingController,
             onSubmitted: (value) {
               textEditingController.text = value;
-              _kraken?.loadBundle(KrakenBundle.fromUrl(value));
+              _kraken?.redirectTo(KrakenBundle.fromUrl(value));
             },
             decoration: InputDecoration(
               hintText: 'Enter a app url',

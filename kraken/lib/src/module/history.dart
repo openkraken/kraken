@@ -5,6 +5,7 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:async';
+import 'dart:io';
 
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
@@ -30,6 +31,19 @@ class HistoryModule extends BaseModule {
     if (_previousStack.isEmpty) return '';
     return _previousStack.first.bundle.src;
   }
+
+  Uri get referrer {
+    KrakenBundle? bundle = currentBundle;
+    if (bundle is NetworkBundle) {
+      return Uri.parse(href);
+    } else if (bundle is AssetsBundle) {
+      return Directory(href).uri;
+    } else {
+      return KrakenController.fallbackBundleUri();
+    }
+  }
+
+  KrakenBundle? get currentBundle => _previousStack.first.bundle;
 
   set bundle(KrakenBundle bundle) {
     HistoryItem history = HistoryItem(bundle, null, true);

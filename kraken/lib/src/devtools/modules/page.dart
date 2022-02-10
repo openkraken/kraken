@@ -198,7 +198,7 @@ class InspectPageModule extends UIInspectorModule {
   String get name => 'Page';
 
   @override
-  void receiveFromFrontend(int? id, String method, Map<String, dynamic>? params) {
+  void receiveFromFrontend(int? id, String method, Map<String, dynamic>? params) async {
     switch (method) {
       case 'startScreencast':
         sendToFrontend(id, null);
@@ -214,7 +214,7 @@ class InspectPageModule extends UIInspectorModule {
         break;
       case 'getResourceContent':
         sendToFrontend(id, JSONEncodableMap({
-          'content': devtoolsService.controller?.bundle?.content,
+          'content': (await devtoolsService.controller?.bundle)!.content,
           'base64Encoded': false
         }));
         break;

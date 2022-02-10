@@ -4,7 +4,6 @@
  */
 import 'dart:io';
 import 'dart:ui';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
@@ -127,68 +126,13 @@ class Kraken extends StatefulWidget {
     defineElement(tagName.toUpperCase(), creator);
   }
 
+  @deprecated
   loadBundle(KrakenBundle bundle) async {
-    await controller!.unload();
-    await controller!.loadBundle(
-        bundle: bundle
-    );
-    _evalBundle(controller!, animationController);
+    await redirectTo(bundle);
   }
 
-  @deprecated
-  loadContent(String bundleContent) async {
-    await controller!.unload();
-    await controller!.loadBundle(
-        bundle: KrakenBundle.fromContent(bundleContent)
-    );
-    _evalBundle(controller!, animationController);
-  }
-
-  @deprecated
-  loadByteCode(Uint8List bundleByteCode) async {
-    await controller!.unload();
-    await controller!.loadBundle(
-        bundle: KrakenBundle.fromBytecode(bundleByteCode)
-    );
-    _evalBundle(controller!, animationController);
-  }
-
-  @deprecated
-  loadURL(String bundleURL, { String? bundleContent, Uint8List? bundleByteCode }) async {
-    await controller!.unload();
-
-    KrakenBundle bundle;
-    if (bundleByteCode != null) {
-      bundle = KrakenBundle.fromBytecode(bundleByteCode, url: bundleURL);
-    } else if (bundleContent != null) {
-      bundle = KrakenBundle.fromContent(bundleContent, url: bundleURL);
-    } else {
-      bundle = KrakenBundle.fromUrl(bundleURL);
-    }
-
-    await controller!.loadBundle(
-        bundle: bundle
-    );
-    _evalBundle(controller!, animationController);
-  }
-
-  @deprecated
-  loadPath(String bundlePath, { String? bundleContent, Uint8List? bundleByteCode }) async {
-    await controller!.unload();
-
-    KrakenBundle bundle;
-    if (bundleByteCode != null) {
-      bundle = KrakenBundle.fromBytecode(bundleByteCode, url: bundlePath);
-    } else if (bundleContent != null) {
-      bundle = KrakenBundle.fromContent(bundleContent, url: bundlePath);
-    } else {
-      bundle = KrakenBundle.fromUrl(bundlePath);
-    }
-
-    await controller!.loadBundle(
-        bundle: bundle
-    );
-    _evalBundle(controller!, animationController);
+  redirectTo(KrakenBundle bundle) async {
+    await controller!.redirectTo(bundle);
   }
 
   reload() async {
@@ -988,8 +932,7 @@ class _KrakenRenderObjectElement extends SingleChildRenderObjectElement {
     // So we bind _KrakenRenderObjectElement into KrakenController, and widgetElements created by controller can follow this to the root.
     controller.rootFlutterElement = this;
 
-    await controller.loadBundle();
-
+    await controller.load();
     _evalBundle(controller, widget._krakenWidget.animationController);
   }
 
@@ -1011,10 +954,10 @@ void _evalBundle(KrakenController controller, AnimationController? animationCont
   if (animationController != null) {
     animationController.addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.completed) {
-        controller.evalBundle();
+        controller.eval();
       }
     });
   } else {
-    await controller.evalBundle();
+    await controller.eval();
   }
 }
