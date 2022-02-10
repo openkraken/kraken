@@ -11,6 +11,8 @@
 
 namespace kraken {
 
+class ExecutingContext;
+
 // Flags for object properties.
 enum JSPropFlag { normal = JS_PROP_NORMAL, writable = JS_PROP_WRITABLE, enumerable = JS_PROP_ENUMERABLE, configurable = JS_PROP_CONFIGURABLE };
 
@@ -24,8 +26,10 @@ class MemberInstaller {
   struct AttributeConfig {
     AttributeConfig& operator=(const AttributeConfig&) = delete;
     const char* name;
-    JSValue value;
-    int flag;  // Flags for object properties.
+    JSCFunction* getter{nullptr};
+    JSCFunction* setter{nullptr};
+    JSValue value{JS_NULL};
+    int flag{JS_PROP_C_W_E};  // Flags for object properties.
   };
 
   struct FunctionConfig {
@@ -33,11 +37,11 @@ class MemberInstaller {
     const char* name;
     JSCFunction* function;
     size_t length;
-    int flag;  // Flags for object properties.
+    int flag{JS_PROP_C_W_E};  // Flags for object properties.
   };
 
-  static void installAttributes(JSContext* ctx, JSValue root, std::initializer_list<AttributeConfig>);
-  static void installFunctions(JSContext* ctx, JSValue root, std::initializer_list<FunctionConfig>);
+  static void installAttributes(ExecutingContext* context, JSValue root, std::initializer_list<AttributeConfig>);
+  static void installFunctions(ExecutingContext* context, JSValue root, std::initializer_list<FunctionConfig>);
 };
 
 }  // namespace kraken

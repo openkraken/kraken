@@ -4,30 +4,30 @@
  */
 
 #include "blob.h"
-#include "dart_methods.h"
+//#include "dart_methods.h"
 
 namespace kraken {
 
-void bindBlob(std::unique_ptr<ExecutionContext>& context) {
-  JSValue constructor = context->contextData()->constructorForType(&blobTypeInfo);
-  JSValue prototype = context->contextData()->prototypeForType(&blobTypeInfo);
-
-  // Install methods on prototype.
-  INSTALL_FUNCTION(Blob, prototype, arrayBuffer, 0);
-  INSTALL_FUNCTION(Blob, prototype, slice, 3);
-  INSTALL_FUNCTION(Blob, prototype, text, 0);
-
-  // Install readonly properties.
-  INSTALL_READONLY_PROPERTY(Blob, prototype, type);
-  INSTALL_READONLY_PROPERTY(Blob, prototype, size);
-
-  context->defineGlobalProperty("Blob", constructor);
-}
+//void bindBlob(std::unique_ptr<ExecutionContext>& context) {
+//  JSValue constructor = context->contextData()->constructorForType(&blobTypeInfo);
+//  JSValue prototype = context->contextData()->prototypeForType(&blobTypeInfo);
+//
+//  // Install methods on prototype.
+//  INSTALL_FUNCTION(Blob, prototype, arrayBuffer, 0);
+//  INSTALL_FUNCTION(Blob, prototype, slice, 3);
+//  INSTALL_FUNCTION(Blob, prototype, text, 0);
+//
+//  // Install readonly properties.
+//  INSTALL_READONLY_PROPERTY(Blob, prototype, type);
+//  INSTALL_READONLY_PROPERTY(Blob, prototype, size);
+//
+//  context->defineGlobalProperty("Blob", constructor);
+//}
 
 JSClassID Blob::classID{0};
 
 Blob* Blob::create(JSContext* ctx) {
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx));
   auto* blob = makeGarbageCollected<Blob>()->initialize<Blob>(ctx, &classID);
 
   JSValue prototype = context->contextData()->prototypeForType(&blobTypeInfo);
@@ -43,11 +43,11 @@ Blob* Blob::create(JSContext* ctx, std::vector<uint8_t>&& data, std::string& mim
   return create(ctx);
 }
 
-JSValue Blob::constructor(ExecutionContext* context) {
+JSValue Blob::constructor(ExecutingContext* context) {
   return context->contextData()->constructorForType(&blobTypeInfo);
 }
 
-JSValue Blob::prototype(ExecutionContext* context) {
+JSValue Blob::prototype(ExecutingContext* context) {
   return context->contextData()->prototypeForType(&blobTypeInfo);
 }
 
@@ -183,13 +183,13 @@ IMPL_FUNCTION(Blob, text)(JSContext* ctx, JSValue this_val, int argc, JSValue* a
   return promise;
 }
 
-void BlobBuilder::append(ExecutionContext& context, Blob* blob) {
+void BlobBuilder::append(ExecutingContext& context, Blob* blob) {
   std::vector<uint8_t> blobData = blob->_data;
   _data.reserve(_data.size() + blobData.size());
   _data.insert(_data.end(), blobData.begin(), blobData.end());
 }
 
-void BlobBuilder::append(ExecutionContext& context, JSValue& value) {
+void BlobBuilder::append(ExecutingContext& context, JSValue& value) {
   if (JS_IsString(value)) {
     const char* buffer = JS_ToCString(context.ctx(), value);
     std::string str = std::string(buffer);
@@ -257,7 +257,7 @@ uint8_t* Blob::bytes() {
   return _data.data();
 }
 
-void Blob::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {}
+void Blob::trace(GCVisitor* visitor) const {}
 void Blob::dispose() const {}
 
 }  // namespace kraken

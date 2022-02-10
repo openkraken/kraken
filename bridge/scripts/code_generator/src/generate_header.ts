@@ -177,11 +177,13 @@ export function generateCppHeader(blob: Blob) {
 
 namespace kraken {
 
+class ExecutingContext;
+
 class QJS${getClassName(blob)} final {
  public:
-  static void install(JSContext* ctx);
+  static void install(ExecutionContext* context);
  private:
-  static void installGlobalFunctions(JSContext* ctx);
+  static void installGlobalFunctions(ExecutionContext* context);
 };
 
 }

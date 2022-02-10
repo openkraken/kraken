@@ -18,7 +18,7 @@ namespace kraken {
 template <typename T>
 class MakeGarbageCollectedTrait;
 
-class ExecutionContext;
+class ExecutingContext;
 
 /**
  * Base class for GC managed objects. Only descendent types of `GarbageCollected`
@@ -75,7 +75,7 @@ class GarbageCollected {
   FORCE_INLINE JSValue toQuickJS() { return jsObject; };
 
   FORCE_INLINE JSContext* ctx() { return m_ctx; };
-  FORCE_INLINE ExecutionContext* context() const { return static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx)); };
+  FORCE_INLINE ExecutingContext* context() const { return static_cast<ExecutingContext*>(JS_GetContextOpaque(m_ctx)); };
 
  protected:
   JSValue jsObject{JS_NULL};

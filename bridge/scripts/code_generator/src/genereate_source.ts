@@ -15,7 +15,7 @@ import {capitalize, camelCase} from 'lodash';
 function generateHostObjectSource(object: ClassObject) {
   let propSource: string[] = generatePropsSource(object, PropType.hostObject);
   let methodsSource: string[] = generateMethodsSource(object, PropType.hostObject);
-  return `${object.name}::${object.name}(ExecutionContext *context,
+  return `${object.name}::${object.name}(ExecutingContext *context,
                                                    Native${object.name} *nativePtr)
   : HostObject(context, "${object.name}"), m_nativePtr(nativePtr) {
 }
@@ -60,7 +60,7 @@ function getPropsVars(object: ClassObject, type: PropType) {
   let classId = '';
   if (type == PropType.hostObject) {
     instanceName = 'object';
-    classId = 'ExecutionContext::kHostObjectClassId';
+    classId = 'ExecutingContext::kHostObjectClassId';
   } else if (type == PropType.Element) {
     instanceName = 'element';
     classId = 'Element::classId()';
@@ -427,11 +427,11 @@ function generateHostClassSource(object: ClassObject) {
   }
 
   return `
-${object.name}::${object.name}(ExecutionContext *context) : ${object.type}(context) {
+${object.name}::${object.name}(ExecutingContext *context) : ${object.type}(context) {
   ${classInheritCode}
 }
 
-void bind${object.name}(ExecutionContext* context) {
+void bind${object.name}(ExecutingContext* context) {
   auto *constructor = ${object.name}::instance(context);
   context->defineGlobalProperty("${globalBindingName}", constructor->jsObject);
   ${specialBind}
@@ -501,7 +501,7 @@ function generateCoreModuleCall(blob: Blob, object: FunctionObject) {
   }
 
   return addIndent(`
-auto context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+auto context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx));
 ExceptionState exception;
 
 ${returnValue}${coreClassName}::${object.declare.name}(context, ${params.join(', ')}, &exception);
@@ -528,7 +528,7 @@ export function generateCppSource(blob: Blob) {
 
   let sources = blob.objects.map(o => {
     if (o instanceof FunctionObject) {
-      installList.push(` {"${o.declare.name}", ${o.declare.name}, ${o.declare.args.length}, combinePropFlags(JSPropFlag::enumerable, JSPropFlag::writable, JSPropFlag::configurable)},`);
+      installList.push(` {"${o.declare.name}", ${o.declare.name}, ${o.declare.args.length}},`);
       return generateFunctionSource(blob, o);
     }
     return '';
@@ -542,24 +542,23 @@ export function generateCppSource(blob: Blob) {
 #include "${blob.filename}.h"
 #include "bindings/qjs/member_installer.h"
 #include "bindings/qjs/qjs_function.h"
+#include "core/executing_context.h"
 #include "core/${blob.implement}.h"
 
 namespace kraken {
 
 ${sources.join('\n')}
 
-void QJS${getClassName(blob)}::install(JSContext* ctx) {
-  installGlobalFunctions(ctx);
+void QJS${getClassName(blob)}::install(ExecutingContext* context) {
+  installGlobalFunctions(context);
 }
 
-void QJS${getClassName(blob)}::installGlobalFunctions(JSContext* ctx) {
+void QJS${getClassName(blob)}::installGlobalFunctions(ExecutingContext* context) {
   std::initializer_list<MemberInstaller::FunctionConfig> functionConfig {
     ${installList.join('\n')}
   };
 
-  JSValue globalObject = JS_GetGlobalObject(ctx);
-  MemberInstaller::installFunctions(ctx, globalObject, functionConfig);
-  JS_FreeValue(ctx, globalObject);
+  MemberInstaller::installFunctions(context, context->global(), functionConfig);
 }
 }`;
 }

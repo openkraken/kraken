@@ -18,7 +18,7 @@ static JSValue setTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSVal
     return JS_ThrowTypeError(ctx, "Failed to execute 'setTimeout': 1 argument required, but only 0 present.");
   }
 
-  auto context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  auto context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx));
   JSValue callbackValue = argv[0];
   JSValue timeoutValue = argv[1];
 
@@ -62,7 +62,7 @@ static JSValue setInterval(JSContext* ctx, JSValueConst this_val, int argc, JSVa
     return JS_ThrowTypeError(ctx, "Failed to execute 'setInterval': 1 argument required, but only 0 present.");
   }
 
-  auto context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  auto context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx));
   JSValue callbackValue = argv[0];
   JSValue timeoutValue = argv[1];
 
@@ -104,7 +104,7 @@ static JSValue clearTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSV
     return JS_ThrowTypeError(ctx, "Failed to execute 'clearTimeout': 1 argument required, but only 0 present.");
   }
 
-  auto context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  auto context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx));
 
   JSValue timeIdValue = argv[0];
   if (!JS_IsNumber(timeIdValue)) {
@@ -124,16 +124,14 @@ static JSValue clearTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSV
   return JS_NULL;
 }
 
-void QJSWindow::installGlobalFunctions(JSContext* ctx) {
+void QJSWindow::installGlobalFunctions(ExecutingContext* context) {
   std::initializer_list<MemberInstaller::FunctionConfig> functionConfig{
-      {"setTimeout", setTimeout, 2, combinePropFlags(JSPropFlag::enumerable, JSPropFlag::writable, JSPropFlag::configurable)},
-      {"setInterval", setInterval, 2, combinePropFlags(JSPropFlag::enumerable, JSPropFlag::writable, JSPropFlag::configurable)},
-      {"clearTimeout", clearTimeout, 0, combinePropFlags(JSPropFlag::enumerable, JSPropFlag::writable, JSPropFlag::configurable)},
+      {"setTimeout", setTimeout, 2},
+      {"setInterval", setInterval, 2},
+      {"clearTimeout", clearTimeout, 0},
   };
 
-  JSValue globalObject = JS_GetGlobalObject(ctx);
-  MemberInstaller::installFunctions(ctx, globalObject, functionConfig);
-  JS_FreeValue(ctx, globalObject);
+  MemberInstaller::installFunctions(context, context->global(), functionConfig);
 }
 
 }  // namespace kraken

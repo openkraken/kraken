@@ -10,7 +10,9 @@
 
 namespace kraken {
 
-void installBindings(JSContext* ctx);
+class ExecutingContext;
+
+void installBindings(ExecutingContext* context);
 
 }  // namespace kraken
 

@@ -206,6 +206,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/qjs_window.h
     bindings/qjs/qjs_page.cc
     bindings/qjs/qjs_page.h
+    bindings/qjs/qjs_blob.cc
+    bindings/qjs/qjs_blob.h
 
     # Core sources
     core/executing_context.cc
@@ -215,6 +217,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/executing_context_data.cc
     core/executing_context_data.h
     core/dart_methods.h
+    core/fileapi/blob.h
+    core/fileapi/blob.cc
     core/frame/console.cc
     core/frame/console.h
     core/frame/dom_timer.cc

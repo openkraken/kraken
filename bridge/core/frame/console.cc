@@ -9,7 +9,7 @@
 
 namespace kraken {
 
-void Console::__kraken_print__(ExecutionContext* context, ScriptValue& logValue, ScriptValue& levelValue, ExceptionState* exception) {
+void Console::__kraken_print__(ExecutingContext* context, ScriptValue& logValue, ScriptValue& levelValue, ExceptionState* exception) {
   std::stringstream stream;
 
   std::string buffer = logValue.toCString();

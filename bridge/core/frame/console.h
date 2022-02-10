@@ -13,7 +13,7 @@ namespace kraken {
 
 class Console final {
  public:
-  static void __kraken_print__(ExecutionContext* context, ScriptValue& log, ScriptValue& level, ExceptionState* exception);
+  static void __kraken_print__(ExecutingContext* context, ScriptValue& log, ScriptValue& level, ExceptionState* exception);
 };
 
 }  // namespace kraken

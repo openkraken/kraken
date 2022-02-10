@@ -10,13 +10,13 @@
 namespace kraken {
 
 struct ModuleContext {
-  ExecutionContext* context;
+  ExecutingContext* context;
   ModuleCallback* callback;
 };
 
 void handleInvokeModuleTransientCallback(void* ptr, int32_t contextId, const char* errmsg, NativeString* json) {
   auto* moduleContext = static_cast<ModuleContext*>(ptr);
-  ExecutionContext* context = moduleContext->context;
+  ExecutingContext* context = moduleContext->context;
 
   if (!context->isValid())
     return;
@@ -55,7 +55,7 @@ void handleInvokeModuleUnexpectedCallback(void* callbackContext, int32_t context
   static_assert("Unexpected module callback, please check your invokeModule implementation on the dart side.");
 }
 
-ScriptValue ModuleManager::__kraken_invoke_module__(ExecutionContext* context, ScriptValue& moduleNameValue, ScriptValue& methodValue, ScriptValue& paramsValue, QJSFunction* callback, ExceptionState* exception) {
+ScriptValue ModuleManager::__kraken_invoke_module__(ExecutingContext* context, ScriptValue& moduleNameValue, ScriptValue& methodValue, ScriptValue& paramsValue, QJSFunction* callback, ExceptionState* exception) {
   std::unique_ptr<NativeString> moduleName = moduleNameValue.toNativeString();
   std::unique_ptr<NativeString> method = methodValue.toNativeString();
   std::unique_ptr<NativeString> params;
@@ -103,7 +103,7 @@ ScriptValue ModuleManager::__kraken_invoke_module__(ExecutionContext* context, S
   return resultString;
 }
 
-void ModuleManager::__kraken_add_module_listener__(ExecutionContext* context, QJSFunction* handler, ExceptionState* exception) {
+void ModuleManager::__kraken_add_module_listener__(ExecutingContext* context, QJSFunction* handler, ExceptionState* exception) {
   auto* listener = makeGarbageCollected<ModuleListener>(handler);
   context->moduleListeners()->addModuleListener(listener);
 }

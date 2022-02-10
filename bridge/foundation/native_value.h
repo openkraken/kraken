@@ -28,7 +28,7 @@ enum NativeTag {
 
 enum class JSPointerType { AsyncContextContext = 0, NativeFunctionContext = 1, NativeBoundingClientRect = 2, NativeCanvasRenderingContext2D = 3, NativeEventTarget = 4 };
 
-class ExecutionContext;
+class ExecutingContext;
 
 // Exchange data struct between dart and C++
 struct NativeValue {
@@ -48,10 +48,10 @@ static void call_native_function(NativeFunctionContext* functionContext, int32_t
 
 struct NativeFunctionContext {
   CallNativeFunction call;
-  NativeFunctionContext(ExecutionContext* context, JSValue callback);
+  NativeFunctionContext(ExecutingContext* context, JSValue callback);
   ~NativeFunctionContext();
   JSValue m_callback{JS_NULL};
-  ExecutionContext* m_context{nullptr};
+  ExecutingContext* m_context{nullptr};
   JSContext* m_ctx{nullptr};
   list_head link;
 };
@@ -63,9 +63,9 @@ NativeValue Native_NewFloat64(double value);
 NativeValue Native_NewBool(bool value);
 NativeValue Native_NewInt32(int32_t value);
 NativeValue Native_NewPtr(JSPointerType pointerType, void* ptr);
-NativeValue Native_NewJSON(ExecutionContext* context, JSValue& value);
+NativeValue Native_NewJSON(ExecutingContext* context, JSValue& value);
 NativeValue jsValueToNativeValue(JSContext* ctx, JSValue& value);
-JSValue nativeValueToJSValue(ExecutionContext* context, NativeValue& value);
+JSValue nativeValueToJSValue(ExecutingContext* context, NativeValue& value);
 
 std::string nativeStringToStdString(NativeString* nativeString);
 

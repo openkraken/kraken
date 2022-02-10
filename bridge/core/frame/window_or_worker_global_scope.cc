@@ -9,7 +9,7 @@
 namespace kraken {
 
 static void handleTimerCallback(DOMTimer* timer, const char* errmsg) {
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
+  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(timer->ctx()));
 
   if (errmsg != nullptr) {
     JSValue exception = JS_ThrowTypeError(timer->ctx(), "%s", errmsg);
@@ -29,7 +29,7 @@ static void handleTimerCallback(DOMTimer* timer, const char* errmsg) {
 
 static void handleTransientCallback(void* ptr, int32_t contextId, const char* errmsg) {
   auto* timer = static_cast<DOMTimer*>(ptr);
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
+  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(timer->ctx()));
 
   if (!context->isValid())
     return;
@@ -41,7 +41,7 @@ static void handleTransientCallback(void* ptr, int32_t contextId, const char* er
 
 static void handlePersistentCallback(void* ptr, int32_t contextId, const char* errmsg) {
   auto* timer = static_cast<DOMTimer*>(ptr);
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
+  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(timer->ctx()));
 
   if (!context->isValid())
     return;
@@ -49,7 +49,7 @@ static void handlePersistentCallback(void* ptr, int32_t contextId, const char* e
   handleTimerCallback(timer, errmsg);
 }
 
-int WindowOrWorkerGlobalScope::setTimeout(ExecutionContext* context, QJSFunction* handler, int32_t timeout, ExceptionState* exception) {
+int WindowOrWorkerGlobalScope::setTimeout(ExecutingContext* context, QJSFunction* handler, int32_t timeout, ExceptionState* exception) {
 #if FLUTTER_BACKEND
   if (context->dartMethodPtr()->setTimeout == nullptr) {
     exception->throwException(context->ctx(), ErrorType::InternalError, "Failed to execute 'setTimeout': dart method (setTimeout) is not registered.");
@@ -70,7 +70,7 @@ int WindowOrWorkerGlobalScope::setTimeout(ExecutionContext* context, QJSFunction
   return timerId;
 }
 
-int WindowOrWorkerGlobalScope::setInterval(ExecutionContext* context, QJSFunction* handler, int32_t timeout, ExceptionState* exception) {
+int WindowOrWorkerGlobalScope::setInterval(ExecutingContext* context, QJSFunction* handler, int32_t timeout, ExceptionState* exception) {
   if (context->dartMethodPtr()->setInterval == nullptr) {
     exception->throwException(context->ctx(), ErrorType::InternalError, "Failed to execute 'setInterval': dart method (setInterval) is not registered.");
     return -1;
@@ -88,7 +88,7 @@ int WindowOrWorkerGlobalScope::setInterval(ExecutionContext* context, QJSFunctio
   return timerId;
 }
 
-void WindowOrWorkerGlobalScope::clearTimeout(ExecutionContext* context, int32_t timerId, ExceptionState* exception) {
+void WindowOrWorkerGlobalScope::clearTimeout(ExecutingContext* context, int32_t timerId, ExceptionState* exception) {
   if (context->dartMethodPtr()->clearTimeout == nullptr) {
     exception->throwException(context->ctx(), ErrorType::InternalError, "Failed to execute 'clearTimeout': dart method (clearTimeout) is not registered.");
     return;

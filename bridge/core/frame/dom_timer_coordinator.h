@@ -14,7 +14,7 @@
 namespace kraken {
 
 class DOMTimer;
-class ExecutionContext;
+class ExecutingContext;
 
 // Maintains a set of DOMTimers for a given page
 // DOMTimerCoordinator assigns IDs to timers; these IDs are
@@ -24,7 +24,7 @@ class ExecutionContext;
 class DOMTimerCoordinator {
  public:
   // Creates and installs a new timer. Returns the assigned ID.
-  void installNewTimer(ExecutionContext* context, int32_t timerId, DOMTimer* timer);
+  void installNewTimer(ExecutingContext* context, int32_t timerId, DOMTimer* timer);
 
   // Removes and disposes the timer with the specified ID, if any. This may
   // destroy the timer.

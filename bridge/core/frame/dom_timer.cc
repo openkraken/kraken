@@ -19,7 +19,7 @@ DOMTimer::DOMTimer(QJSFunction* callback) : m_callback(callback) {}
 JSClassID DOMTimer::classId{0};
 
 void DOMTimer::fire() {
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
+  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(m_ctx));
   if (!m_callback->isFunction(m_ctx))
     return;
 

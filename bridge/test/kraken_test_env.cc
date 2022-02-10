@@ -78,7 +78,7 @@ int32_t timerId = 0;
 
 int32_t TEST_setTimeout(kraken::DOMTimer* timer, int32_t contextId, AsyncCallback callback, int32_t timeout) {
   JSRuntime* rt = JS_GetRuntime(timer->ctx());
-  auto* context = static_cast<kraken::ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
+  auto* context = static_cast<kraken::ExecutingContext*>(JS_GetContextOpaque(timer->ctx()));
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
   JSOSTimer* th = static_cast<JSOSTimer*>(js_mallocz(context->ctx(), sizeof(*th)));
   th->timeout = get_time_ms() + timeout;
@@ -95,7 +95,7 @@ int32_t TEST_setTimeout(kraken::DOMTimer* timer, int32_t contextId, AsyncCallbac
 
 int32_t TEST_setInterval(kraken::DOMTimer* timer, int32_t contextId, AsyncCallback callback, int32_t timeout) {
   JSRuntime* rt = JS_GetRuntime(timer->ctx());
-  auto* context = static_cast<kraken::ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
+  auto* context = static_cast<kraken::ExecutingContext*>(JS_GetContextOpaque(timer->ctx()));
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
   JSOSTimer* th = static_cast<JSOSTimer*>(js_mallocz(context->ctx(), sizeof(*th)));
   th->timeout = get_time_ms() + timeout;
@@ -114,7 +114,7 @@ int32_t callbackId = 0;
 
 uint32_t TEST_requestAnimationFrame(kraken::FrameCallback* frameCallback, int32_t contextId, AsyncRAFCallback handler) {
   JSRuntime* rt = JS_GetRuntime(frameCallback->ctx());
-  auto* context = static_cast<kraken::ExecutionContext*>(JS_GetContextOpaque(frameCallback->ctx()));
+  auto* context = static_cast<kraken::ExecutingContext*>(JS_GetContextOpaque(frameCallback->ctx()));
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
   JSFrameCallback* th = static_cast<JSFrameCallback*>(js_mallocz(context->ctx(), sizeof(*th)));
   th->handler = handler;
@@ -202,7 +202,7 @@ std::unique_ptr<kraken::KrakenPage> TEST_allocateNewPage() {
   return std::unique_ptr<kraken::KrakenPage>(static_cast<kraken::KrakenPage*>(getPage(newContextId)));
 }
 
-static bool jsPool(kraken::ExecutionContext* context) {
+static bool jsPool(kraken::ExecutingContext* context) {
   JSRuntime* rt = context->runtime();
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
   int64_t cur_time, delay;
@@ -248,7 +248,7 @@ static bool jsPool(kraken::ExecutionContext* context) {
   return false;
 }
 
-void TEST_runLoop(kraken::ExecutionContext* context) {
+void TEST_runLoop(kraken::ExecutingContext* context) {
   for (;;) {
     context->drainPendingPromiseJobs();
     if (jsPool(context))

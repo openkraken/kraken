@@ -4,6 +4,7 @@
  */
 
 #include "binding_initializer.h"
+#include "core/executing_context.h"
 
 #include "qjs_console.h"
 #include "qjs_module_manager.h"
@@ -11,10 +12,10 @@
 
 namespace kraken {
 
-void installBindings(JSContext* ctx) {
-  QJSWindow::installGlobalFunctions(ctx);
-  QJSModuleManager::install(ctx);
-  QJSConsole::install(ctx);
+void installBindings(ExecutingContext* context) {
+  QJSWindow::installGlobalFunctions(context);
+  QJSModuleManager::install(context);
+  QJSConsole::install(context);
 }
 
 }  // namespace kraken

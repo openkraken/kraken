@@ -13,13 +13,13 @@
 
 namespace kraken {
 
-class ExecutionContext;
+class ExecutingContext;
 
 class RejectedPromises {
  public:
   class Message {
    public:
-    Message(ExecutionContext* context, JSValue promise, JSValue reason);
+    Message(ExecutingContext* context, JSValue promise, JSValue reason);
     ~Message();
 
     JSRuntime* m_runtime{nullptr};
@@ -28,11 +28,11 @@ class RejectedPromises {
   };
 
   // Keeping track unhandled promise rejection in current context, and throw unhandledRejection error
-  void trackUnhandledPromiseRejection(ExecutionContext* context, JSValue promise, JSValue reason);
+  void trackUnhandledPromiseRejection(ExecutingContext* context, JSValue promise, JSValue reason);
   // When unhandled promise are handled in the future, should trigger a handledRejection event.
-  void trackHandledPromiseRejection(ExecutionContext* context, JSValue promise, JSValue reason);
+  void trackHandledPromiseRejection(ExecutingContext* context, JSValue promise, JSValue reason);
   // Trigger events after promise executed.
-  void process(ExecutionContext* context);
+  void process(ExecutingContext* context);
 
  private:
   std::unordered_map<void*, std::unique_ptr<Message>> m_unhandledRejections;

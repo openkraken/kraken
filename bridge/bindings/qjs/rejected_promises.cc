@@ -8,7 +8,7 @@
 
 namespace kraken {
 
-RejectedPromises::Message::Message(ExecutionContext* context, JSValue promise, JSValue reason)
+RejectedPromises::Message::Message(ExecutingContext* context, JSValue promise, JSValue reason)
     : m_runtime(context->runtime()), m_promise(JS_DupValue(context->ctx(), promise)), m_reason(JS_DupValue(context->ctx(), reason)) {}
 
 RejectedPromises::Message::~Message() {
@@ -16,7 +16,7 @@ RejectedPromises::Message::~Message() {
   JS_FreeValueRT(m_runtime, m_reason);
 }
 
-void RejectedPromises::trackUnhandledPromiseRejection(ExecutionContext* context, JSValue promise, JSValue reason) {
+void RejectedPromises::trackUnhandledPromiseRejection(ExecutingContext* context, JSValue promise, JSValue reason) {
   void* ptr = JS_VALUE_GET_PTR(promise);
   if (m_unhandledRejections.count(ptr) == 0) {
     m_unhandledRejections[ptr] = std::make_unique<Message>(context, promise, reason);
@@ -24,7 +24,7 @@ void RejectedPromises::trackUnhandledPromiseRejection(ExecutionContext* context,
   // One promise will never have more than one unhandled rejection.
 }
 
-void RejectedPromises::trackHandledPromiseRejection(ExecutionContext* context, JSValue promise, JSValue reason) {
+void RejectedPromises::trackHandledPromiseRejection(ExecutingContext* context, JSValue promise, JSValue reason) {
   void* ptr = JS_VALUE_GET_PTR(promise);
 
   // Unhandled promise are handled in a sync script call. It's file so we remove the recording of this promise.
@@ -36,7 +36,7 @@ void RejectedPromises::trackHandledPromiseRejection(ExecutionContext* context, J
   }
 }
 
-void RejectedPromises::process(ExecutionContext* context) {
+void RejectedPromises::process(ExecutingContext* context) {
   // Copy m_unhandledRejections to avoid endless recursion call.
   std::unordered_map<void*, std::unique_ptr<Message>> unhandledRejections;
   for (auto& entry : m_unhandledRejections) {

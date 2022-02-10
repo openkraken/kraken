@@ -44,7 +44,7 @@ class KrakenPage final {
   void registerDartMethods(uint64_t* methodBytes, int32_t length);
   std::thread::id currentThread() const;
 
-  [[nodiscard]] ExecutionContext* getContext() const { return m_context; }
+  [[nodiscard]] ExecutingContext* getContext() const { return m_context; }
 
   void invokeModuleEvent(const NativeString* moduleName, const char* eventType, void* event, NativeString* extra);
   void reportError(const char* errmsg);
@@ -59,7 +59,7 @@ class KrakenPage final {
   const std::thread::id ownerThreadId;
   // FIXME: we must to use raw pointer instead of unique_ptr because we needs to access m_context when dispose page.
   // TODO: Raw pointer is dangerous and just works but it's fragile. We needs refactor this for more stable and maintainable.
-  ExecutionContext* m_context;
+  ExecutingContext* m_context;
   JSExceptionHandler m_handler;
 };
 

@@ -19,9 +19,9 @@ ConsoleMessageHandler KrakenPage::consoleMessageHandler{nullptr};
 kraken::KrakenPage** KrakenPage::pageContextPool{nullptr};
 
 KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : contextId(contextId), ownerThreadId(std::this_thread::get_id()) {
-  m_context = new ExecutionContext(
+  m_context = new ExecutingContext(
       contextId,
-      [](ExecutionContext* context, const char* message) {
+      [](ExecutingContext* context, const char* message) {
         if (context->dartMethodPtr()->onJsError != nullptr) {
           context->dartMethodPtr()->onJsError(context->getContextId(), message);
         }

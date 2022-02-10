@@ -26,7 +26,7 @@ namespace kraken {
 std::unique_ptr<KrakenPage> TEST_init(OnJSError onJsError);
 std::unique_ptr<KrakenPage> TEST_init();
 std::unique_ptr<KrakenPage> TEST_allocateNewPage();
-void TEST_runLoop(ExecutionContext* context);
+void TEST_runLoop(ExecutingContext* context);
 void TEST_mockDartMethods(int32_t contextId, OnJSError onJSError);
 
 }  // namespace kraken

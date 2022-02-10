@@ -15,14 +15,14 @@ namespace kraken {
 
 struct ImageSnapShotContext {
   JSValue callback;
-  ExecutionContext* context;
+  ExecutingContext* context;
   list_head link;
 };
 
 class KrakenTestContext final {
  public:
   explicit KrakenTestContext() = delete;
-  explicit KrakenTestContext(ExecutionContext* context);
+  explicit KrakenTestContext(ExecutingContext* context);
 
   /// Evaluate JavaScript source code with build-in test frameworks, use in test only.
   bool evaluateTestScripts(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine);
@@ -35,7 +35,7 @@ class KrakenTestContext final {
 
  private:
   /// the pointer of JSContext, ownership belongs to JSContext
-  ExecutionContext* m_context{nullptr};
+  ExecutingContext* m_context{nullptr};
 };
 
 }  // namespace kraken

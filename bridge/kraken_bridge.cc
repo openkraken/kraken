@@ -226,7 +226,7 @@ void registerContextDisposedCallbacks(int32_t contextId, Task task, void* data) 
 }
 
 void registerPluginByteCode(uint8_t* bytes, int32_t length, const char* pluginName) {
-  kraken::ExecutionContext::pluginByteCode[pluginName] = kraken::NativeByteCode{bytes, length};
+  kraken::ExecutingContext::pluginByteCode[pluginName] = kraken::NativeByteCode{bytes, length};
 }
 
 int32_t profileModeEnabled() {

@@ -58,7 +58,7 @@ NativeValue Native_NewInt32(int32_t value) {
   };
 }
 
-NativeValue Native_NewJSON(ExecutionContext* context, JSValue& value) {
+NativeValue Native_NewJSON(ExecutingContext* context, JSValue& value) {
   JSValue stringifiedValue = JS_JSONStringify(context->ctx(), value, JS_UNDEFINED, JS_UNDEFINED);
   if (JS_IsException(stringifiedValue))
     return Native_NewNull();
@@ -116,7 +116,7 @@ NativeValue jsValueToNativeValue(JSContext* ctx, JSValue& value) {
     NativeString* string = jsValueToNativeString(ctx, value).release();
     return Native_NewString(string);
   } else if (JS_IsFunction(ctx, value)) {
-    auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+    auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx));
     auto* functionContext = new NativeFunctionContext{context, value};
     return Native_NewPtr(JSPointerType::NativeFunctionContext, functionContext);
   } else if (JS_IsObject(value)) {
@@ -132,7 +132,7 @@ NativeValue jsValueToNativeValue(JSContext* ctx, JSValue& value) {
   return Native_NewNull();
 }
 
-NativeFunctionContext::NativeFunctionContext(ExecutionContext* context, JSValue callback) : m_context(context), m_ctx(context->ctx()), m_callback(callback), call(call_native_function) {
+NativeFunctionContext::NativeFunctionContext(ExecutingContext* context, JSValue callback) : m_context(context), m_ctx(context->ctx()), m_callback(callback), call(call_native_function) {
   JS_DupValue(context->ctx(), callback);
   list_add_tail(&link, &m_context->native_function_job_list);
 };
@@ -219,7 +219,7 @@ static JSValue anonymousAsyncFunction(JSContext* ctx, JSValueConst this_val, int
   return JS_NULL;
 }
 
-JSValue nativeValueToJSValue(ExecutionContext* context, NativeValue& value) {
+JSValue nativeValueToJSValue(ExecutingContext* context, NativeValue& value) {
   switch (value.tag) {
     case NativeTag::TAG_STRING: {
       auto* string = static_cast<NativeString*>(value.u.ptr);

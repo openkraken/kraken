@@ -10,9 +10,11 @@
 
 namespace kraken {
 
+class ExecutingContext;
+
 class QJSWindow final {
  public:
-  static void installGlobalFunctions(JSContext* ctx);
+  static void installGlobalFunctions(ExecutingContext* ctx);
 };
 
 }  // namespace kraken

@@ -11,7 +11,7 @@ JSClassID FrameCallback::classId{0};
 FrameCallback::FrameCallback(JSValue callback) : m_callback(callback) {}
 
 void FrameCallback::fire(double highResTimeStamp) {
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
+  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(m_ctx));
   if (!JS_IsFunction(m_ctx, m_callback))
     return;
 

@@ -36,10 +36,10 @@ struct NativeByteCode {
   int32_t length;
 };
 
-class ExecutionContext;
+class ExecutingContext;
 class Document;
 
-using JSExceptionHandler = std::function<void(ExecutionContext* context, const char* message)>;
+using JSExceptionHandler = std::function<void(ExecutingContext* context, const char* message)>;
 
 std::string jsAtomToStdString(JSContext* ctx, JSAtom atom);
 
@@ -52,7 +52,7 @@ static inline bool isNumberIndex(const std::string& name) {
 
 struct PromiseContext {
   void* data;
-  ExecutionContext* context;
+  ExecutingContext* context;
   JSValue resolveFunc;
   JSValue rejectFunc;
   JSValue promise;
@@ -74,11 +74,11 @@ class ExecutionContextGCTracker : public GarbageCollected<ExecutionContextGCTrac
 // An environment in which script can execute. This class exposes the common
 // properties of script execution environments on the kraken.
 // Window : Document : ExecutionContext = 1 : 1 : 1 at any point in time.
-class ExecutionContext {
+class ExecutingContext {
  public:
-  ExecutionContext() = delete;
-  ExecutionContext(int32_t contextId, const JSExceptionHandler& handler, void* owner);
-  ~ExecutionContext();
+  ExecutingContext() = delete;
+  ExecutingContext(int32_t contextId, const JSExceptionHandler& handler, void* owner);
+  ~ExecutingContext();
 
   bool evaluateJavaScript(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine);
   bool evaluateJavaScript(const char16_t* code, size_t length, const char* sourceURL, int startLine);
@@ -126,9 +126,9 @@ class ExecutionContext {
   struct list_head promise_job_list;
   struct list_head native_function_job_list;
 
-  static void dispatchGlobalUnhandledRejectionEvent(ExecutionContext* context, JSValueConst promise, JSValueConst error);
-  static void dispatchGlobalRejectionHandledEvent(ExecutionContext* context, JSValueConst promise, JSValueConst error);
-  static void dispatchGlobalErrorEvent(ExecutionContext* context, JSValueConst error);
+  static void dispatchGlobalUnhandledRejectionEvent(ExecutingContext* context, JSValueConst promise, JSValueConst error);
+  static void dispatchGlobalRejectionHandledEvent(ExecutingContext* context, JSValueConst promise, JSValueConst error);
+  static void dispatchGlobalErrorEvent(ExecutingContext* context, JSValueConst error);
 
   // Bytecodes which registered by kraken plugins.
   static std::unordered_map<std::string, NativeByteCode> pluginByteCode;
@@ -153,26 +153,6 @@ class ExecutionContext {
   RejectedPromises m_rejectedPromise;
 };
 
-// The read object's method or properties via Proxy, we should redirect this_val from Proxy into target property of
-// proxy object.
-static JSValue handleCallThisOnProxy(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv, int data_len, JSValueConst* data) {
-  JSValue f = data[0];
-  JSValue result;
-  if (JS_IsProxy(this_val)) {
-    result = JS_Call(ctx, f, JS_GetProxyTarget(this_val), argc, argv);
-  } else {
-    // If this_val is undefined or null, this_val should set to globalThis.
-    if (JS_IsUndefined(this_val) || JS_IsNull(this_val)) {
-      this_val = JS_GetGlobalObject(ctx);
-      result = JS_Call(ctx, f, this_val, argc, argv);
-      JS_FreeValue(ctx, this_val);
-    } else {
-      result = JS_Call(ctx, f, this_val, argc, argv);
-    }
-  }
-  return result;
-}
-
 class ObjectProperty {
   KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(ObjectProperty);
 
@@ -180,7 +160,7 @@ class ObjectProperty {
   ObjectProperty() = delete;
 
   // Define an property on object with a JSValue.
-  explicit ObjectProperty(ExecutionContext* context, JSValueConst thisObject, const char* property, JSValue value) : m_value(value) {
+  explicit ObjectProperty(ExecutingContext* context, JSValueConst thisObject, const char* property, JSValue value) : m_value(value) {
     JS_DefinePropertyValueStr(context->ctx(), thisObject, property, value, JS_PROP_ENUMERABLE);
   }
 
@@ -191,29 +171,11 @@ class ObjectProperty {
 };
 
 // Property define helpers
-void installFunctionProperty(ExecutionContext* context, JSValueConst thisObject, const char* functionName, JSCFunction function, int argc);
-void installPropertyGetterSetter(ExecutionContext* context, JSValueConst thisObject, const char* property, JSCFunction getterFunction, JSCFunction setterFunction);
-void installPropertyGetter(ExecutionContext* context, JSValueConst thisObject, const char* property, JSCFunction getterFunction);
+void installFunctionProperty(ExecutingContext* context, JSValueConst thisObject, const char* functionName, JSCFunction function, int argc);
+void installPropertyGetterSetter(ExecutingContext* context, JSValueConst thisObject, const char* property, JSCFunction getterFunction, JSCFunction setterFunction);
+void installPropertyGetter(ExecutingContext* context, JSValueConst thisObject, const char* property, JSCFunction getterFunction);
 
-class JSValueHolder {
- public:
-  JSValueHolder() = delete;
-  explicit JSValueHolder(JSContext* ctx, JSValue value) : m_value(value), m_ctx(ctx){};
-  ~JSValueHolder() { JS_FreeValue(m_ctx, m_value); }
-  inline void value(JSValue value) {
-    if (!JS_IsNull(m_value)) {
-      JS_FreeValue(m_ctx, m_value);
-    }
-    m_value = JS_DupValue(m_ctx, value);
-  };
-  inline JSValue value() const { return JS_DupValue(m_ctx, m_value); }
-
- private:
-  JSContext* m_ctx{nullptr};
-  JSValue m_value{JS_NULL};
-};
-
-std::unique_ptr<ExecutionContext> createJSContext(int32_t contextId, const JSExceptionHandler& handler, void* owner);
+std::unique_ptr<ExecutingContext> createJSContext(int32_t contextId, const JSExceptionHandler& handler, void* owner);
 
 void buildUICommandArgs(JSContext* ctx, JSValue key, NativeString& args_01);
 

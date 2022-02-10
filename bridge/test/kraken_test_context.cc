@@ -8,7 +8,7 @@
 
 namespace kraken {
 
-KrakenTestContext::KrakenTestContext(ExecutionContext* context) : m_context(context) {
+KrakenTestContext::KrakenTestContext(ExecutingContext* context) : m_context(context) {
   //  bridge->owner = this;
   //  bridge->disposeCallback = [](KrakenPage* bridge) { delete static_cast<KrakenPageTest*>(bridge->owner); };
   //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, executeTest, "__kraken_execute_test__", 1);
@@ -126,7 +126,7 @@ static JSValue environment(JSContext* ctx, JSValueConst this_val, int argc, JSVa
 }
 
 static JSValue simulatePointer(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx));
   if (context->dartMethodPtr()->simulatePointer == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_pointer__': dart method(simulatePointer) is not registered.");
   }
@@ -186,7 +186,7 @@ static JSValue simulatePointer(JSContext* ctx, JSValueConst this_val, int argc, 
 }
 
 static JSValue simulateInputText(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx));
   if (context->dartMethodPtr()->simulateInputText == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_keypress__': dart method(simulateInputText) is not registered.");
   }
@@ -223,7 +223,7 @@ static JSValue parseHTML(JSContext* ctx, JSValueConst this_val, int argc, JSValu
 }
 
 static JSValue triggerGlobalError(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx));
 
   JSValue globalErrorFunc = JS_GetPropertyStr(ctx, context->global(), "triggerGlobalError");
 
@@ -239,9 +239,9 @@ static JSValue triggerGlobalError(JSContext* ctx, JSValueConst this_val, int arg
 struct ExecuteCallbackContext {
   ExecuteCallbackContext() = delete;
 
-  explicit ExecuteCallbackContext(ExecutionContext* context, ExecuteCallback executeCallback) : executeCallback(executeCallback), context(context){};
+  explicit ExecuteCallbackContext(ExecutingContext* context, ExecuteCallback executeCallback) : executeCallback(executeCallback), context(context){};
   ExecuteCallback executeCallback;
-  ExecutionContext* context;
+  ExecutingContext* context;
 };
 
 void KrakenTestContext::invokeExecuteTest(ExecuteCallback executeCallback) {

@@ -14,9 +14,9 @@ namespace kraken {
 
 class WindowOrWorkerGlobalScope {
  public:
-  static int setTimeout(ExecutionContext* context, QJSFunction* handler, int32_t timeout, ExceptionState* exception);
-  static int setInterval(ExecutionContext* context, QJSFunction* handler, int32_t timeout, ExceptionState* exception);
-  static void clearTimeout(ExecutionContext* context, int32_t timerId, ExceptionState* exception);
+  static int setTimeout(ExecutingContext* context, QJSFunction* handler, int32_t timeout, ExceptionState* exception);
+  static int setInterval(ExecutingContext* context, QJSFunction* handler, int32_t timeout, ExceptionState* exception);
+  static void clearTimeout(ExecutingContext* context, int32_t timerId, ExceptionState* exception);
 };
 
 }  // namespace kraken

@@ -15,7 +15,7 @@
 namespace kraken {
 
 static void handleTimerCallback(DOMTimer* timer, const char* errmsg) {
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
+  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(timer->ctx()));
 
   if (errmsg != nullptr) {
     JSValue exception = JS_ThrowTypeError(timer->ctx(), "%s", errmsg);
@@ -32,7 +32,7 @@ static void handleTimerCallback(DOMTimer* timer, const char* errmsg) {
 
 static void handleTransientCallback(void* ptr, int32_t contextId, const char* errmsg) {
   auto* timer = static_cast<DOMTimer*>(ptr);
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
+  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(timer->ctx()));
 
   if (!context->isValid())
     return;
@@ -42,7 +42,7 @@ static void handleTransientCallback(void* ptr, int32_t contextId, const char* er
   context->timers()->removeTimeoutById(timer->timerId());
 }
 
-void DOMTimerCoordinator::installNewTimer(ExecutionContext* context, int32_t timerId, DOMTimer* timer) {
+void DOMTimerCoordinator::installNewTimer(ExecutingContext* context, int32_t timerId, DOMTimer* timer) {
   m_activeTimers[timerId] = timer;
 }
 

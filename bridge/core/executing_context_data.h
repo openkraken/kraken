@@ -12,13 +12,13 @@
 
 namespace kraken {
 
-class ExecutionContext;
+class ExecutingContext;
 
 // Used to hold data that is associated with a single ExecutionContext object, and
 // has a 1:1 relationship with ExecutionContext.
 class ExecutionContextData final {
  public:
-  explicit ExecutionContextData(ExecutionContext* context) : m_context(context){};
+  explicit ExecutionContextData(ExecutingContext* context) : m_context(context){};
   ExecutionContextData(const ExecutionContextData&) = delete;
   ExecutionContextData& operator=(const ExecutionContextData&) = delete;
 
@@ -32,7 +32,7 @@ class ExecutionContextData final {
   std::unordered_map<const WrapperTypeInfo*, JSValue> m_constructorMap;
   std::unordered_map<const WrapperTypeInfo*, JSValue> m_prototypeMap;
 
-  ExecutionContext* m_context;
+  ExecutingContext* m_context;
 };
 
 }  // namespace kraken
