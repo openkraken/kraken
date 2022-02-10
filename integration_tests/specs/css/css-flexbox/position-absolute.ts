@@ -252,4 +252,40 @@ describe('flexbox-position-absolute', () => {
 
     await snapshot();
   });
+
+  it('positioned child of no left and right should reposition when its size changed', async (done) => {
+    let child;
+    let div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'yellow',
+          textAlign: 'center'
+        },
+      }, [
+        (child = createElement('div', {
+          style: {
+            position: 'absolute',
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'green'
+          }
+        }))
+      ]
+    );
+    document.body.appendChild(div);
+
+    requestAnimationFrame(async () => {
+      child.style.width = '50px';
+      await snapshot();
+      done();
+    });
+
+    await snapshot();
+  });
 });
