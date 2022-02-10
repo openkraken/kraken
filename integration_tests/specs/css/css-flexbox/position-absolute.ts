@@ -288,4 +288,40 @@ describe('flexbox-position-absolute', () => {
 
     await snapshot();
   });
+
+  it('positioned image of no left and right should reposition when its size changed', async (done) => {  
+    let img;
+    let div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100px',
+          height: '100px',
+          backgroundColor: 'yellow'
+        },
+      }, [
+        (img = createElement('img', {
+          src: 'assets/100x100-green.png',
+          loading: 'lazy',
+          style: {
+            position: 'absolute',
+            width: '80px',
+            height: '80px',
+          }
+        }))
+      ]
+    );
+    document.body.appendChild(div);
+
+    img.addEventListener('load', async () => {
+      await snapshot();
+      done();
+    });
+
+    await snapshot();
+  });
+
 });
