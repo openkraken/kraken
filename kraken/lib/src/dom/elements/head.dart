@@ -176,25 +176,36 @@ class StyleElement extends Element {
   String type = _CSS_MIME;
   CSSStyleSheet? _styleSheet;
 
+  void _recalculateStyle() {
+    String? text = _collectElementChildText(this);
+    if (text != null) {
+      if (_styleSheet != null) {
+        _styleSheet!.replaceSync(text);
+        ownerDocument.recalculateDocumentStyle();
+      } else {
+        ownerDocument.addStyleSheet(_styleSheet = CSSStyleSheet(text));
+      }
+    }
+  }
+
   @override
   Node appendChild(Node child) {
     Node ret = super.appendChild(child);
-    String? text = _collectElementChildText(this);
-    if (text != null) {
-      _styleSheet?.addRules(text);
-      ownerDocument.recalculateDocumentStyle();
-    }
+    _recalculateStyle();
     return ret;
   }
 
   @override
   Node insertBefore(Node child, Node referenceNode) {
     Node ret = super.insertBefore(child, referenceNode);
-    String? text = _collectElementChildText(this);
-    if (text != null) {
-      _styleSheet?.addRules(text);
-      ownerDocument.recalculateDocumentStyle();
-    }
+    _recalculateStyle();
+    return ret;
+  }
+
+  @override
+  Node removeChild(Node child) {
+    Node ret = super.removeChild(child);
+    _recalculateStyle();
     return ret;
   }
 
@@ -209,9 +220,7 @@ class StyleElement extends Element {
   @override
   void connectedCallback() {
     if (type == _CSS_MIME) {
-      String? style = _collectElementChildText(this);
-      // Always create CSSStyleSheet instance.
-      ownerDocument.addStyleSheet(_styleSheet = CSSStyleSheet(style ?? ''));
+      _recalculateStyle();
     }
     super.connectedCallback();
   }
