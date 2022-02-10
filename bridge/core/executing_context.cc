@@ -96,34 +96,6 @@ ExecutionContext::~ExecutionContext() {
   valid_contexts[contextId] = false;
   ctxInvalid_ = true;
 
-  // Manual free nodes bound by each other.
-  //  {
-  //    struct list_head *el, *el1;
-  //    list_for_each_safe(el, el1, &node_job_list) {
-  //      auto* node = list_entry(el, NodeJob, link);
-  //      JS_FreeValue(m_ctx, node->nodeInstance->jsObject);
-  //    }
-  //  }
-  //
-  //  // Manual free moduleListener
-  //  {
-  //    struct list_head *el, *el1;
-  //    list_for_each_safe(el, el1, &module_job_list) {
-  //      auto* module = list_entry(el, ModuleContext, link);
-  //      JS_FreeValue(m_ctx, module->callback);
-  //      delete module;
-  //    }
-  //  }
-  //
-  //  {
-  //    struct list_head *el, *el1;
-  //    list_for_each_safe(el, el1, &module_callback_job_list) {
-  //      auto* module = list_entry(el, ModuleContext, link);
-  //      JS_FreeValue(m_ctx, module->callback);
-  //      delete module;
-  //    }
-  //  }
-
   // Free unresolved promise.
   {
     struct list_head *el, *el1;

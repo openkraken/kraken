@@ -17,8 +17,8 @@ list(APPEND KRAKEN_UNIT_TEST_SOURCE
   ./test/kraken_test_env.cc
   ./test/kraken_test_env.h
   ./core/executing_context_test.cc
-#  ./bindings/qjs/bom/timer_test.cc
-#  ./bindings/qjs/bom/console_test.cc
+  ./core/frame/console_test.cc
+  #  ./bindings/qjs/bom/timer_test.cc
 #  ./bindings/qjs/qjs_patch_test.cc
 #  ./bindings/qjs/garbage_collected_test.cc
 #  ./bindings/qjs/dom/event_target_test.cc

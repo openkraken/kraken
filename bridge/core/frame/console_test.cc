@@ -6,7 +6,8 @@
 #include "console.h"
 #include "gtest/gtest.h"
 #include "kraken_test_env.h"
-#include "page.h"
+
+using namespace kraken;
 
 TEST(Console, rawPrintShouldWork) {
   static bool logExecuted = false;

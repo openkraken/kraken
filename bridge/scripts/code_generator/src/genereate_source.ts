@@ -10,6 +10,7 @@ import {
   ReturnType
 } from "./declaration";
 import {addIndent, getClassName} from "./utils";
+import {capitalize, camelCase} from 'lodash';
 
 function generateHostObjectSource(object: ClassObject) {
   let propSource: string[] = generatePropsSource(object, PropType.hostObject);
@@ -183,6 +184,10 @@ function generateArgumentsTypeCheck(index: number, argv: FunctionArguments, m: F
     return `if (!JS_IsBool(argv[${index}])) {
     return JS_ThrowTypeError(ctx, "Failed to execute ${m.name}: ${index + 1}st arguments is not Boolean.");
   }`
+  } else if (argv.type === FunctionArgumentType.function) {
+    return `if (!JS_IsFunction(ctx, argv[${index}])) {
+    return JS_ThrowTypeError(ctx, "Failed to execute ${m.name}: ${index + 1}st arguments is not Function.");
+  }`;
   }
 
   return '';
@@ -451,31 +456,51 @@ function generateObjectSource(object: ClassObject) {
 }
 
 function generateFunctionValueInit(object: FunctionObject) {
-  return object.declare.args.map((a, i) => {
-    let head = `ScriptValue ${a.name} = `;
-    if (a.required) {
-      head += `ScriptValue(ctx, argv[${i}]);`;
-    } else {
-      head += `ScriptValue(ctx, JS_NULL);
-  if (argc > ${i}) {
-  ${a.name} = ScriptValue(ctx, argv[${i}]);
-}`;
+  function generateValueInitHead(argument: FunctionArguments) {
+    if (argument.type === FunctionArgumentType.function) {
+      return `QJSFunction* ${argument.name} = `;
     }
+    return `ScriptValue ${argument.name} = `;
+  }
 
-    return head;
+  function generateRequiredInitBody(argument: FunctionArguments, argsIndex: number) {
+    if (argument.type === FunctionArgumentType.function) {
+      return `QJSFunction::create(ctx, argv[${argsIndex}])`;
+    }
+    return `ScriptValue(ctx, argv[${argsIndex}]);`;
+  }
+
+  function generateInitBody(argument: FunctionArguments, argsIndex: number) {
+    if (argument.type === FunctionArgumentType.function) {
+      return `nullptr;
+if (argc > ${argsIndex} && JS_IsFunction(ctx, argv[${argsIndex}])) {
+  ${argument.name} = QJSFunction::create(ctx, argv[${argsIndex}]);
+}`;
+    } else {
+      return `ScriptValue(ctx, JS_NULL);
+if (argc > ${argsIndex}) {
+  ${argument.name} = ScriptValue(ctx, argv[${argsIndex}]);
+}`
+    }
+  }
+
+  return object.declare.args.map((a, i) => {
+    let initHead = generateValueInitHead(a);
+    let initBody = a.required ? generateRequiredInitBody(a, i) : generateInitBody(a, i);
+    return addIndent(initHead + initBody, 2);
   });
 }
 
 function generateCoreModuleCall(blob: Blob, object: FunctionObject) {
   let params = object.declare.args.map(a => `${a.name}`);
-  let coreClassName = blob.filename[4].toUpperCase() + blob.filename.slice(5);
+  let coreClassName = getClassName(blob);
   let returnValue = '';
 
   if (object.declare.returnType != ReturnType.void) {
     returnValue = 'ScriptValue returnValue = '
   }
 
-  return `
+  return addIndent(`
 auto context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
 ExceptionState exception;
 
@@ -484,10 +509,7 @@ ${returnValue}${coreClassName}::${object.declare.name}(context, ${params.join(',
 if (exception.hasException()) {
   return exception.toQuickJS();
 }
-
-${returnValue && 'return returnValue'}
-
-  `;
+${returnValue && 'return returnValue.toQuickJS();'}`, 2);
 }
 
 function generateFunctionSource(blob: Blob, object: FunctionObject) {
@@ -524,15 +546,15 @@ export function generateCppSource(blob: Blob) {
 
 namespace kraken {
 
-${sources}
+${sources.join('\n')}
 
-void ${getClassName(blob)}::install(JSContext* ctx) {
+void QJS${getClassName(blob)}::install(JSContext* ctx) {
   installGlobalFunctions(ctx);
 }
 
-void ${getClassName(blob)}::installGlobalFunctions(JSContext* ctx) {
+void QJS${getClassName(blob)}::installGlobalFunctions(JSContext* ctx) {
   std::initializer_list<MemberInstaller::FunctionConfig> functionConfig {
-    ${installList.join(',\n')}
+    ${installList.join('\n')}
   };
 
   JSValue globalObject = JS_GetGlobalObject(ctx);

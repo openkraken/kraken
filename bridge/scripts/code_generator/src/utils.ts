@@ -1,4 +1,5 @@
 import {Blob} from './blob';
+import {camelCase} from 'lodash';
 
 export function addIndent(str: String, space: number) {
   let lines = str.split('\n');
@@ -12,5 +13,7 @@ export function addIndent(str: String, space: number) {
 }
 
 export function getClassName(blob: Blob) {
-  return `QJS${blob.filename[4].toUpperCase() + blob.filename.slice(5)}`;
+  let raw = camelCase(blob.filename[4].toUpperCase() + blob.filename.slice(5));
+
+  return `${raw[0].toUpperCase() + raw.slice(1)}`;
 }

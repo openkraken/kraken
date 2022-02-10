@@ -20,8 +20,6 @@ void MemberInstaller::installAttributes(JSContext* ctx, JSValue root, std::initi
   }
 }
 
-int compilePropFlags();
-
 void MemberInstaller::installFunctions(JSContext* ctx, JSValue root, std::initializer_list<FunctionConfig> config) {
   for (auto& c : config) {
     JSValue function = JS_NewCFunction(ctx, c.function, c.name, c.length);

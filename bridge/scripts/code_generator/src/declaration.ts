@@ -2,6 +2,7 @@ export enum FunctionArgumentType {
   string,
   number,
   boolean,
+  function,
   union
 }
 

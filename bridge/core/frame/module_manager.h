@@ -14,8 +14,8 @@ namespace kraken {
 
 class ModuleManager {
  public:
-  static ScriptValue invokeModule(ExecutionContext* context, ScriptValue& moduleName, ScriptValue& method, ScriptValue& params, QJSFunction* callback, ExceptionState* exception);
-  static void addModuleListener(ExecutionContext* context, QJSFunction* handler, ExceptionState* exception);
+  static ScriptValue __kraken_invoke_module__(ExecutionContext* context, ScriptValue& moduleName, ScriptValue& method, ScriptValue& params, QJSFunction* callback, ExceptionState* exception);
+  static void __kraken_add_module_listener__(ExecutionContext* context, QJSFunction* handler, ExceptionState* exception);
 };
 
 }  // namespace kraken

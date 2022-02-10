@@ -85,6 +85,13 @@ function getParameterType(type: ts.TypeNode) {
     return FunctionArgumentType.number;
   } else if (type.kind === ts.SyntaxKind.BooleanKeyword) {
     return FunctionArgumentType.boolean;
+  } else if (type.kind === ts.SyntaxKind.TypeReference) {
+    let typeReference: ts.TypeReference = type as unknown as ts.TypeReference;
+    // @ts-ignore
+    let identifier = (typeReference.typeName as ts.Identifier).text;
+    if (identifier === 'Function') {
+      return FunctionArgumentType.function;
+    }
   }
   return FunctionArgumentType.union;
 }
@@ -173,8 +180,6 @@ function walkProgram(statement: ts.Statement) {
         functionObject.declare.returnType = getFunctionReturnType((type as ts.FunctionTypeNode).type);
         functionObject.declare.name = methodName.toString();
       }
-
-      console.log(functionObject);
 
       return functionObject;
     }
