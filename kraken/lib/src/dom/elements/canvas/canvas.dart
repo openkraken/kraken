@@ -205,19 +205,19 @@ class CanvasElement extends Element {
   }
 
   @override
-  getProperty(String key) {
-    switch(key) {
+  String? getAttribute(String key) {
+    switch (key) {
       case 'width':
-        return attrWidth;
+        return '$attrWidth';
       case 'height':
-        return attrHeight;
+        return '$attrHeight';
     }
 
-    return super.getProperty(key);
+    return super.getAttribute(key);
   }
 
   @override
-  dynamic handleJSCall(String method, List argv) {
+  handleJSCall(String method, List argv) {
     switch(method) {
       case 'getContext':
         return getContext(argv[0]).nativeCanvasRenderingContext2D;
@@ -236,8 +236,8 @@ class CanvasElement extends Element {
   }
 
   @override
-  void setProperty(String key, value) {
-    super.setProperty(key, value);
+  void setAttribute(String key, value) {
+    super.setAttribute(key, value);
     // TODO:
     // When the user agent is to set bitmap dimensions to width and height, it must run these steps:
     //

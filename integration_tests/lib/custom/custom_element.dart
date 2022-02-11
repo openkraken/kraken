@@ -78,7 +78,7 @@ class SampleElement extends dom.Element {
 
   @override
   getProperty(String key) {
-    switch(key) {
+    switch (key) {
       case 'ping':
         return 'pong';
       case '_fake':

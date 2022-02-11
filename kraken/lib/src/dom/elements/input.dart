@@ -216,7 +216,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   // to ease in and out.
   static const Duration _fadeDuration = Duration(milliseconds: 250);
 
-  String get placeholderText => properties['placeholder'] ?? '';
+  String get placeholderText => attributes['placeholder'] ?? '';
 
   TextSpan get placeholderTextSpan {
     // TODO: support ::placeholder pseudo element
@@ -245,12 +245,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   @override
-  getProperty(String key) {
+  String? getAttribute(String key) {
     switch(key) {
       // @TODO: Apply algorithm of input element property width.
       case 'width':
       case 'height':
-        return 0.0;
+        return '0';
       case 'value':
         return _getValue();
       case 'accept':
@@ -269,13 +269,13 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       case 'minlength':
       case 'maxlength':
       case 'size':
-        return properties[jsMethodToKey(key)];
+        return attributes[jsMethodToKey(key)];
       case 'placeholder':
         return placeholderText;
       case 'type':
         return _getType();
     }
-    return super.getProperty(key);
+    return super.getAttribute(key);
   }
 
   @override
@@ -324,8 +324,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
     addChild(createRenderBox());
 
-    if (properties.containsKey(VALUE)) {
-      setProperty(VALUE, properties[VALUE]);
+    if (attributes.containsKey(VALUE)) {
+      setAttribute(VALUE, attributes[VALUE] ?? '');
     }
 
     SchedulerBinding.instance!.addPostFrameCallback((_) {
@@ -524,7 +524,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   TextInputAction _textInputAction = TextInputAction.done;
 
   void activeTextInput() {
-    _inputValueAtBegin = properties[VALUE];
+    _inputValueAtBegin = attributes[VALUE];
 
     _textInputConfiguration ??= TextInputConfiguration(
       inputType: _textInputType,
@@ -777,7 +777,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
 
     // Sync value to input element property
-    properties[VALUE] = text;
+    attributes[VALUE] = text;
     if (userInteraction) {
       // TODO: return the string containing the input data that was added to the element,
       // which MAY be null if it doesn't apply.
@@ -931,11 +931,11 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   @override
-  void setProperty(String key, value) {
-    super.setProperty(key, value);
+  void setAttribute(String key, String value) {
+    super.setAttribute(key, value);
 
     if (key == VALUE) {
-      String text = value?.toString() ?? '';
+      String text = value;
       TextRange composing = _textSelectionDelegate._textEditingValue.composing;
       TextSelection selection = TextSelection.collapsed(offset: text.length);
       TextEditingValue newTextEditingValue = TextEditingValue(
@@ -948,15 +948,15 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       // Update placeholder text.
       _rebuildTextSpan();
     } else if (key == 'autofocus') {
-      _autoFocus = value != null;
+      _autoFocus = value.isNotEmpty;
     } else if (key == 'type') {
       _setType(value);
     } else if (key == 'inputmode') {
       _setInputMode(value);
     } else if (key == 'maxlength') {
-      value = int.tryParse(value);
-      if (value > 0) {
-        _maxLength = value;
+      int? intValue = int.tryParse(value);
+      if (intValue != null && intValue > 0) {
+        _maxLength = intValue;
       }
     }
   }

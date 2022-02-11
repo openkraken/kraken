@@ -185,7 +185,7 @@ abstract class WidgetElement extends dom.Element {
     isDefaultRepaintBoundary: isDefaultRepaintBoundary,
   ) {
     WidgetsFlutterBinding.ensureInitialized();
-    _state = _KrakenAdapterWidgetState(this, properties, childNodes);
+    _state = _KrakenAdapterWidgetState(this, attributes, childNodes);
     _widget = _KrakenAdapterWidget(_state!);
   }
 
@@ -204,18 +204,18 @@ abstract class WidgetElement extends dom.Element {
   }
 
   @override
-  void removeProperty(String key) {
-    super.removeProperty(key);
+  void removeAttribute(String key) {
+    super.removeAttribute(key);
     if (_state != null) {
-      _state!.onAttributeChanged(properties);
+      _state!.onAttributeChanged(attributes);
     }
   }
 
   @override
-  void setProperty(String key, dynamic value) {
-    super.setProperty(key, value);
+  void setAttribute(String key, dynamic value) {
+    super.setAttribute(key, value);
     if (_state != null) {
-      _state!.onAttributeChanged(properties);
+      _state!.onAttributeChanged(attributes);
     }
   }
 

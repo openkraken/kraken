@@ -453,8 +453,8 @@ class KrakenViewController
         newElement.setInlineStyle(key, value);
       });
       // Copy element attributes.
-      originalTarget.properties.forEach((key, value) {
-        newElement.setProperty(key, value);
+      originalTarget.attributes.forEach((key, value) {
+        newElement.setAttribute(key, value);
       });
     }
   }
@@ -531,47 +531,59 @@ class KrakenViewController
     }
   }
 
-  void setProperty(int targetId, String key, dynamic value) {
+  @deprecated
+  void setProperty(int targetId, String key, String value) {
+    setAttribute(targetId, key, value);
+  }
+
+  void setAttribute(int targetId, String key, String value) {
     if (kProfileMode) {
-      PerformanceTiming.instance()
-          .mark(PERF_SET_PROPERTIES_START, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_SET_PROPERTIES_START, uniqueId: targetId);
     }
 
-    assert(
-        _existsTarget(targetId), 'targetId: $targetId key: $key value: $value');
+    assert(_existsTarget(targetId), 'targetId: $targetId key: $key value: $value');
     Node target = _getEventTargetById<Node>(targetId)!;
 
     if (target is Element) {
-      // Only Element has properties.
-      target.setProperty(key, value);
-    } else if (target is TextNode && key == 'data' || key == 'nodeValue') {
-      (target as TextNode).data = value;
+      // Only element has properties.
+      target.setAttribute(key, value);
+    } else if (target is TextNode && (key == 'data' || key == 'nodeValue')) {
+      target.data = value;
     } else {
-      debugPrint(
-          'Only element has properties, try setting $key to Node(#$targetId).');
+      debugPrint('Only element has properties, try setting $key to Node(#$targetId).');
     }
 
     if (kProfileMode) {
-      PerformanceTiming.instance()
-          .mark(PERF_SET_PROPERTIES_END, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_SET_PROPERTIES_END, uniqueId: targetId);
     }
   }
 
-  dynamic getProperty(int targetId, String key) {
+  @deprecated
+  getProperty(int targetId, String key) {
+    return getAttribute(targetId, key);
+  }
+
+  String? getAttribute(int targetId, String key) {
     assert(_existsTarget(targetId), 'targetId: $targetId key: $key');
     Node target = _getEventTargetById<Node>(targetId)!;
 
     if (target is Element) {
-      // Only Element has properties
-      return target.getProperty(key);
-    } else if (target is TextNode && key == 'data' || key == 'nodeValue') {
-      return (target as TextNode).data;
+      // Only element has attributes.
+      return target.getAttribute(key);
+    } else if (target is TextNode && (key == 'data' || key == 'nodeValue')) {
+      // @TODO: property is not attribute.
+      return target.data;
     } else {
       return null;
     }
   }
 
+  @deprecated
   void removeProperty(int targetId, String key) {
+    removeAttribute(targetId, key);
+  }
+
+  void removeAttribute(int targetId, String key) {
     if (kProfileMode) {
       PerformanceTiming.instance()
           .mark(PERF_SET_PROPERTIES_START, uniqueId: targetId);
@@ -580,12 +592,13 @@ class KrakenViewController
     Node target = _getEventTargetById<Node>(targetId)!;
 
     if (target is Element) {
-      target.removeProperty(key);
-    } else if (target is TextNode && key == 'data' || key == 'nodeValue') {
-      (target as TextNode).data = '';
+      target.removeAttribute(key);
+    } else if (target is TextNode && (key == 'data' || key == 'nodeValue')) {
+      // @TODO: property is not attribute.
+      target.data = '';
     } else {
       debugPrint(
-          'Only element has properties, try removing $key from Node(#$targetId).');
+          'Only element has attributes, try removing $key from Node(#$targetId).');
     }
     if (kProfileMode) {
       PerformanceTiming.instance()

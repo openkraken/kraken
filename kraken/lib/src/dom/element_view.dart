@@ -31,15 +31,13 @@ mixin ElementViewMixin on ElementBase {
   @override
   dynamic handleJSCall(String method, List<dynamic> argv) {
     Element element = (this as Element);
-    switch(method) {
+    switch (method) {
       case 'getViewModuleProperty':
         return _getViewModuleProperty(element, argv[0]);
       case 'setViewModuleProperty':
         return _setViewModuleProperty(element, argv[0], argv[1]);
       case 'getBoundingClientRect':
         return _getBoundingClientRect(element);
-      case 'getStringValueProperty':
-        return _getStringValueProperty(element, argv[0]);
       case 'click':
         return _click(element);
       case 'scroll':
@@ -115,13 +113,6 @@ mixin ElementViewMixin on ElementBase {
   static Pointer<NativeBoundingClientRect> _getBoundingClientRect(Element element) {
     element.flushLayout();
     return element.boundingClientRect.toNative();
-  }
-
-  static Pointer<NativeString> _getStringValueProperty(Element element, String key) {
-    element.flushLayout();
-    var value = element.getProperty(key);
-    String valueInString = value == null ? '' : value.toString();
-    return stringToNativeString(valueInString);
   }
 
   static void _click(Element element) {

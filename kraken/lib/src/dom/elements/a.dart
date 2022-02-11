@@ -124,7 +124,7 @@ class AnchorElement extends Element {
   }
 
   @override
-  getProperty(String key) {
+  getAttribute(String key) {
     switch (key) {
       case 'pathname':
         return pathname;
@@ -147,13 +147,13 @@ class AnchorElement extends Element {
       case 'protocol':
         return protocol;
       default:
-        return super.getProperty(key);
+        return super.getAttribute(key);
     }
   }
 
   @override
-  void setProperty(String key, dynamic value) {
-    super.setProperty(key, value);
+  void setAttribute(String key, dynamic value) {
+    super.setAttribute(key, value);
     switch (key) {
       case 'href':
         _href = value;

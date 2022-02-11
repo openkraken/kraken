@@ -35,8 +35,8 @@ class LinkElement extends Element {
   String? rel;
 
   @override
-  void setProperty(String key, dynamic value) {
-    super.setProperty(key, value);
+  void setAttribute(String key, dynamic value) {
+    super.setAttribute(key, value);
     if (key == 'href') {
       _fetchBundle(value);
     } else if (key == 'rel') {
@@ -68,7 +68,7 @@ class LinkElement extends Element {
   @override
   void connectedCallback() async {
     super.connectedCallback();
-    String? url = getProperty('href');
+    String? url = getAttribute('href');
     if (url != null) {
       _fetchBundle(url);
     }
@@ -103,8 +103,8 @@ class ScriptElement extends Element {
   String type = _MIME_TEXT_JAVASCRIPT;
 
   @override
-  void setProperty(String key, dynamic value) {
-    super.setProperty(key, value);
+  void setAttribute(String key, dynamic value) {
+    super.setAttribute(key, value);
     if (key == 'src') {
       _fetchBundle(value);
     } else if (key == 'type') {
@@ -150,7 +150,7 @@ class ScriptElement extends Element {
     super.connectedCallback();
     int? contextId = ownerDocument.contextId;
     if (contextId == null) return;
-    String? src = getProperty('src');
+    String? src = getAttribute('src');
     if (src != null) {
       _fetchBundle(src);
     } else if (type == _MIME_TEXT_JAVASCRIPT || type == _JAVASCRIPT_MODULE){
@@ -210,8 +210,8 @@ class StyleElement extends Element {
   }
 
   @override
-  void setProperty(String key, dynamic value) {
-    super.setProperty(key, value);
+  void setAttribute(String key, dynamic value) {
+    super.setAttribute(key, value);
     if (key == 'type') {
       type = value.toString().toLowerCase().trim();
     }

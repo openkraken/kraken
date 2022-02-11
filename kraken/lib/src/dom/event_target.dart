@@ -65,10 +65,10 @@ void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> re
     try {
       if (method.startsWith(GetPropertyCallPreFix) && values.isEmpty) {
         String key = method.substring(GetPropertyCallPreFix.length);
-        dynamic result = (eventTarget as Element).getProperty(key);
+        var result = eventTarget.getProperty(key);
         toNativeValue(returnedValue, result);
       } else {
-        dynamic result = eventTarget.handleJSCall(method, values);
+        var result = eventTarget.handleJSCall(method, values);
         toNativeValue(returnedValue, result);
       }
     } catch (e, stack) {
@@ -148,7 +148,15 @@ abstract class EventTarget {
   }
 
   @mustCallSuper
-  dynamic handleJSCall(String method, List<dynamic> argv) {}
+  handleJSCall(String method, List argv) {}
+
+
+  // The default get property, can return any types.
+  // Property is not attribute, eg. `el.foo vs el.getAttribute('foo')`.
+  // Any event target can have it's specific getProperty override.
+  getProperty(String propertyName) {
+    return null;
+  }
 
   @mustCallSuper
   void dispose() {

@@ -325,8 +325,8 @@ enum UICommandType {
   removeNode,
   insertAdjacentNode,
   setStyle,
-  setProperty,
-  removeProperty,
+  setAttribute,
+  removeAttribute,
   cloneNode,
   removeEvent,
   createDocumentFragment,
@@ -552,14 +552,14 @@ void flushUICommand() {
             controller.view.setInlineStyle(id, key, value);
             pendingStylePropertiesTargets[id] = true;
             break;
-          case UICommandType.setProperty:
+          case UICommandType.setAttribute:
             String key = command.args[0];
             String value = command.args[1];
-            controller.view.setProperty(id, key, value);
+            controller.view.setAttribute(id, key, value);
             break;
-          case UICommandType.removeProperty:
+          case UICommandType.removeAttribute:
             String key = command.args[0];
-            controller.view.removeProperty(id, key);
+            controller.view.removeAttribute(id, key);
             break;
           case UICommandType.createDocumentFragment:
             controller.view.createDocumentFragment(

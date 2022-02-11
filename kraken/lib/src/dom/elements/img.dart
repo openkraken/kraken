@@ -52,7 +52,7 @@ class ImageElement extends Element {
   // A boolean value which indicates whether or not the image has completely loaded.
   bool complete = false;
 
-  bool get _shouldLazyLoading => properties['loading'] == 'lazy';
+  bool get _shouldLazyLoading => attributes['loading'] == 'lazy';
   ImageStreamCompleterHandle? _completerHandle;
 
   ImageElement(EventTargetContext? context)
@@ -259,8 +259,8 @@ class ImageElement extends Element {
   }
 
   @override
-  void removeProperty(String key) {
-    super.removeProperty(key);
+  void removeAttribute(String key) {
+    super.removeAttribute(key);
     if (key == 'src') {
       _stopListeningStream(keepStreamAlive: true);
     } else if (key == 'loading' && _isInLazyLoading && _cachedImageProvider == null) {
@@ -289,7 +289,7 @@ class ImageElement extends Element {
   }
 
   Uri? _resolveSrc() {
-    String? src = properties['src'];
+    String? src = attributes['src'];
     if (src != null && src.isNotEmpty) {
       Uri base = Uri.parse(ownerDocument.controller.href);
       return ownerDocument.controller.uriParser!.resolve(base, Uri.parse(src));
@@ -407,9 +407,9 @@ class ImageElement extends Element {
   }
 
   @override
-  void setProperty(String key, dynamic value) {
-    bool propertyChanged = properties[key] != value;
-    super.setProperty(key, value);
+  void setAttribute(String key, dynamic value) {
+    bool propertyChanged = attributes[key] != value;
+    super.setAttribute(key, value);
     if (key == 'src' && propertyChanged) {
       final Uri? resolvedUri = _resolvedUri =  _resolveSrc();
       // Update image source if image already attached except image is lazy loading.
@@ -430,18 +430,18 @@ class ImageElement extends Element {
   }
 
   @override
-  dynamic getProperty(String key) {
+  String? getAttribute(String key) {
     switch (key) {
       case WIDTH:
-        return width;
+        return '$width';
       case HEIGHT:
-        return height;
+        return '$height';
       case NATURAL_WIDTH:
-        return naturalWidth;
+        return '$naturalWidth';
       case NATURAL_HEIGHT:
-        return naturalHeight;
+        return '$naturalHeight';
     }
-    return super.getProperty(key);
+    return super.getAttribute(key);
   }
 
   void _stylePropertyChanged(String property, String? original, String present) {

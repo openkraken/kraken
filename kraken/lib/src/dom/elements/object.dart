@@ -48,15 +48,15 @@ class ObjectElement extends Element implements ObjectElementHost {
 
   Future initElementClient() async {
     try {
-      await _objectElementClient.initElementClient(properties);
+      await _objectElementClient.initElementClient(attributes);
     } catch (error, stackTrace) {
       print('$error\n$stackTrace');
     }
   }
 
   @override
-  void setProperty(String key, value) {
-    super.setProperty(key, value);
+  void setAttribute(String key, value) {
+    super.setAttribute(key, value);
     switch (key) {
       case 'type':
         _objectElementClient.setProperty(key, value);

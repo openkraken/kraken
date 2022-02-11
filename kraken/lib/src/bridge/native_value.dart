@@ -105,8 +105,7 @@ dynamic fromNativeValue(Pointer<NativeValue> nativeValue) {
   }
 }
 
-void toNativeValue(Pointer<NativeValue> target, dynamic value) {
-
+void toNativeValue(Pointer<NativeValue> target, value) {
   if (value == null) {
     target.ref.tag = JSValueType.TAG_NULL.index;
   } else if (value is int) {

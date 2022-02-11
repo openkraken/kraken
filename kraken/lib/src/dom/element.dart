@@ -86,13 +86,15 @@ class Element extends Node
         ElementEventMixin,
         ElementOverflowMixin {
 
-  final Map<String, dynamic> properties = <String, dynamic>{};
 
   // Default to unknown, assign by [createElement], used by inspector.
   String tagName = UNKNOWN;
 
   /// Is element an intrinsic box.
   final bool _isIntrinsicBox;
+
+  // The attrs.
+  final Map<String, String> attributes = <String, String>{};
 
   /// The style of the element, not inline style.
   late CSSStyleDeclaration style;
@@ -105,9 +107,7 @@ class Element extends Node
 
   /// The Element.classList is a read-only property that returns a collection of the class attributes of the element.
   final List<String> _classList = [];
-  List<String> get classList {
-    return _classList;
-  }
+  List<String> get classList => _classList;
 
   set className(String className) {
     _classList.clear();
@@ -660,7 +660,7 @@ class Element extends Node
 
     renderStyle.detach();
     style.dispose();
-    properties.clear();
+    attributes.clear();
     disposeScrollable();
 
     super.dispose();
@@ -872,6 +872,32 @@ class Element extends Node
         break;
     }
     return containingBlockRenderBox;
+  }
+
+  @mustCallSuper
+  String? getAttribute(String qualifiedName) {
+    return attributes[qualifiedName];
+  }
+
+  @mustCallSuper
+  void setAttribute(String qualifiedName, String value) {
+    print('$qualifiedName $value');
+    if (_STYLE_PROPERTY == qualifiedName) {
+      // @TODO: Parse inline style css text.
+    } else if (_CLASS_NAME == qualifiedName) {
+      className = value;
+    }
+    attributes[qualifiedName] = value;
+  }
+
+  @mustCallSuper
+  void removeAttribute(String qualifiedName) {
+    if (qualifiedName == _STYLE_PROPERTY) {
+      _removeInlineStyle();
+    } else if (qualifiedName == _CLASS_NAME) {
+      className = EMPTY_STRING;
+    }
+    attributes.remove(qualifiedName);
   }
 
   // FIXME: only compatible with kraken plugins
@@ -1358,37 +1384,6 @@ class Element extends Node
     children.forEach((Element child) {
       child.recalculateNestedStyle();
     });
-  }
-
-  @mustCallSuper
-  void setProperty(String key, dynamic value) {
-    if (value == null || value == EMPTY_STRING) {
-      return removeProperty(key);
-    }
-
-    if (key == _CLASS_NAME) {
-      className = value;
-    }
-
-    properties[key] = value;
-  }
-
-  @mustCallSuper
-  dynamic getProperty(String key) {
-    if (key == _CLASS_NAME) {
-      return className;
-    }
-    return properties[key];
-  }
-
-  @mustCallSuper
-  void removeProperty(String key) {
-    if (key == _STYLE_PROPERTY) {
-      _removeInlineStyle();
-    } else if (key == _CLASS_NAME) {
-      className = EMPTY_STRING;
-    }
-    properties.remove(key);
   }
 
   void _removeInlineStyle() {
