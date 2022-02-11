@@ -50,21 +50,28 @@ class _HTMLViewRenderObjectWidget extends SingleChildRenderObjectWidget {
 This situation often happened when you trying creating kraken when FlutterView not initialized.''');
     }
 
-    HTMLViewController view = HTMLViewController(
+    KrakenController controller = KrakenController(
+      shortHash(_krakenWidget.hashCode),
       viewportWidth,
       viewportHeight,
-      background: null,
-      enableDebug: false,
-      rootController: null,
-      navigationDelegate: KrakenNavigationDelegate(),
+      background: _krakenWidget.background,
+      showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
+      devToolsService: _krakenWidget.devToolsService,
+      httpClientInterceptor: _krakenWidget.httpClientInterceptor,
       widgetDelegate: _widgetDelegate,
+      uriParser: _krakenWidget.uriParser,
     );
+
+    OnControllerCreated? onControllerCreated = _krakenWidget.onControllerCreated;
+    if (onControllerCreated != null) {
+      onControllerCreated(controller);
+    }
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_INIT_END);
     }
 
-    return view.getRootRenderObject();
+    return controller.view.getRootRenderObject();
   }
 
   @override
@@ -154,9 +161,28 @@ class HTMLView extends StatefulWidget {
   // the height of krakenWidget.
   final double? viewportHeight;
 
+  // The background color for viewport, default to transparent.
+  final Color? background;
+
+  // Open a service to support Chrome DevTools for debugging.
+  // https://github.com/openkraken/devtools
+  final DevToolsService? devToolsService;
+
+  final HttpClientInterceptor? httpClientInterceptor;
+
+  final UriParser? uriParser;
+
+  // Trigger when kraken controller once created.
+  final OnControllerCreated? onControllerCreated;
+
   HTMLView(this.data, {
     this.viewportWidth,
     this.viewportHeight,
+    this.background,
+    this.devToolsService,
+    this.httpClientInterceptor,
+    this.uriParser,
+    this.onControllerCreated
   });
 
   @override
