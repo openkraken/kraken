@@ -132,7 +132,7 @@ class InspectCSSModule extends UIInspectorModule {
     return CSSStyle(
       // Absent for user agent stylesheet and user-specified stylesheet rules.
       // Use hash code id to identity which element the rule belongs to.
-      styleSheetId: element.ownerDocument.controller.view.getTargetIdByEventTarget(element),
+      styleSheetId: element.hashCode,
       cssProperties: cssProperties,
       shorthandEntries: <ShorthandEntry>[],
       cssText: cssText,
