@@ -94,7 +94,6 @@ class _MyHomePageState extends State<MyBrowser> {
         //   viewportWidth: viewportSize.width - queryData.padding.horizontal,
         //   viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
         //   bundle: KrakenBundle.fromUrl('http://127.0.0.1:3300/kraken_debug_server.js'),
-        //   // disabledJavaScript: true,
         // ),
           child: HTMLView('<div>aaa<span>bbb</span></div>'),
     ));

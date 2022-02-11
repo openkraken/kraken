@@ -18,8 +18,9 @@ class Document extends Node {
   GestureListener? gestureListener;
   WidgetDelegate? widgetDelegate;
 
-  Document(EventTargetContext? context,
+  Document(
   {
+    EventTargetContext? context,
     required this.viewport,
     required this.controller,
     this.gestureListener,

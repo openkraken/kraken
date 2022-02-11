@@ -136,21 +136,6 @@ abstract class ViewController {
 
     element_registry.defineBuiltInElements();
 
-    document = Document(
-      // EventTargetContext(_contextId, documentNativePtrMap[_contextId]!),
-      null,
-      viewport: viewport,
-      controller: rootController,
-      gestureListener: gestureListener,
-      widgetDelegate: widgetDelegate,
-    );
-
-    window = Window(
-      // EventTargetContext(_contextId, windowNativePtrMap[_contextId]!),
-      null,
-      document
-    );
-
     // Listeners need to be registered to window in order to dispatch events on demand.
     if (gestureListener != null) {
       if (gestureListener!.onTouchStart != null) {
@@ -218,7 +203,18 @@ class HTMLViewController extends ViewController {
     rootController: rootController,
     navigationDelegate: navigationDelegate,
     widgetDelegate: widgetDelegate,
-  );
+  ) {
+    document = Document(
+      viewport: viewport,
+      controller: rootController,
+      gestureListener: gestureListener,
+      widgetDelegate: widgetDelegate,
+    );
+
+    window = Window(
+      document
+    );
+  }
 }
 
 // An Kraken View Controller designed for multiple kraken view control.
@@ -247,6 +243,19 @@ class KrakenViewController extends ViewController implements WidgetsBindingObser
       widgetDelegate: widgetDelegate,
       originalViewport: originalViewport
   ) {
+    document = Document(
+      context: EventTargetContext(_contextId, documentNativePtrMap[_contextId]!),
+      viewport: viewport,
+      controller: rootController,
+      gestureListener: gestureListener,
+      widgetDelegate: widgetDelegate,
+    );
+
+    window = Window(
+      document,
+      context: EventTargetContext(_contextId, windowNativePtrMap[_contextId]!)
+    );
+
     _setEventTarget(DOCUMENT_ID, document);
     _setEventTarget(WINDOW_ID, window);
 
