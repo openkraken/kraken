@@ -28,10 +28,10 @@ class WrapperTypeInfo final {
     return false;
   }
 
-  const char* className;
-  const WrapperTypeInfo* parent_class;
-  JSClassCall* callFunc;
-
+  const char* className{nullptr};
+  const WrapperTypeInfo* parent_class{nullptr};
+  JSClassCall* callFunc{nullptr};
+  JSClassExoticMethods *exoticMethods{nullptr};
   JSClassID classId{0};
 };
 

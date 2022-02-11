@@ -18,8 +18,8 @@ class QJSBlob final {
  public:
   static void install(ExecutingContext* context);
 
-  static const WrapperTypeInfo* getWrapperTypeInfo() {
-    return &m_wrapperTypeInfo;
+  static WrapperTypeInfo* getWrapperTypeInfo() {
+    return const_cast<WrapperTypeInfo*>(&m_wrapperTypeInfo);
   }
 
  private:
@@ -29,10 +29,10 @@ class QJSBlob final {
   static void installPrototypeMethods(ExecutingContext* context);
   static void installPrototypeProperties(ExecutingContext* context);
   static void installConstructor(ExecutingContext* context);
+
+  friend class Blob;
 };
 
 }
-
-class qjs_blob {};
 
 #endif  // KRAKENBRIDGE_QJS_BLOB_H

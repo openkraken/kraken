@@ -41,6 +41,10 @@ bool ScriptValue::isString() {
   return JS_IsString(m_value);
 }
 
+bool ScriptValue::isArray() {
+  return JS_IsArray(m_ctx, m_value);
+}
+
 JSValue ScriptValue::toQuickJS() {
   return m_value;
 }

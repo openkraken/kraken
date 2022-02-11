@@ -186,6 +186,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/member_installer.cc
     bindings/qjs/member_installer.h
     bindings/qjs/garbage_collected.h
+    bindings/qjs/script_wrappable.cc
+    bindings/qjs/script_wrappable.h
     bindings/qjs/wrapper_type_info.h
     bindings/qjs/heap_hashmap.h
     bindings/qjs/native_string_utils.cc

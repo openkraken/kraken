@@ -77,7 +77,7 @@ int WindowOrWorkerGlobalScope::setInterval(ExecutingContext* context, QJSFunctio
   }
 
   // Create a timer object to keep track timer callback.
-  auto* timer = makeGarbageCollected<DOMTimer>(handler)->initialize<DOMTimer>(context->ctx(), &DOMTimer::classId);
+  auto* timer = makeGarbageCollected<DOMTimer>(handler)->initializeQuickJSObject<DOMTimer>(context->ctx(), &DOMTimer::classId);
 
   uint32_t timerId = context->dartMethodPtr()->setInterval(timer, context->getContextId(), handlePersistentCallback, timeout);
 

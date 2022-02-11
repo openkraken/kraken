@@ -6,35 +6,32 @@
 #ifndef KRAKENBRIDGE_BLOB_H
 #define KRAKENBRIDGE_BLOB_H
 
-#include "bindings/qjs/garbage_collected.h"
-#include "bindings/qjs/macros.h"
 #include <string>
 #include <vector>
+#include "bindings/qjs/macros.h"
+#include "bindings/qjs/qjs_blob.h"
+#include "bindings/qjs/script_wrappable.h"
 
 namespace kraken {
 
 class BlobBuilder;
 
-class Blob : public GarbageCollected<Blob> {
+class Blob : public ScriptWrappable {
+  DEFINE_WRAPPERTYPEINFO();
  public:
-  static JSClassID classID;
   static Blob* create(JSContext* ctx);
   static Blob* create(JSContext* ctx, std::vector<uint8_t>&& data);
   static Blob* create(JSContext* ctx, std::vector<uint8_t>&& data, std::string& mime);
-  static JSValue constructor(ExecutingContext* context);
-  static JSValue prototype(ExecutingContext* context);
 
-  Blob(){};
-  Blob(std::vector<uint8_t>&& data) : _size(data.size()), _data(std::move(data)){};
-  Blob(std::vector<uint8_t>&& data, std::string& mime) : mimeType(mime), _size(data.size()), _data(std::move(data)){};
+  Blob() = delete;
+  explicit Blob(JSContext* ctx);
+  explicit Blob(JSContext* ctx, std::vector<uint8_t>&& data) : _size(data.size()), _data(std::move(data)), ScriptWrappable(ctx) {};
+  explicit Blob(JSContext* ctx, std::vector<uint8_t>&& data, std::string& mime) : mimeType(mime), _size(data.size()), _data(std::move(data)), ScriptWrappable(ctx){};
 
   /// get an pointer of bytes data from JSBlob
   uint8_t* bytes();
   /// get bytes data's length
   int32_t size();
-
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(type);
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(size);
 
   void trace(GCVisitor* visitor) const override;
   void dispose() const override;
@@ -44,11 +41,12 @@ class Blob : public GarbageCollected<Blob> {
   std::string mimeType;
   std::vector<uint8_t> _data;
   friend BlobBuilder;
+  friend QJSBlob;
 };
 
 class BlobBuilder {
  public:
-  void append(ExecutingContext& context, JSValue& value);
+  void append(ExecutingContext& context, ScriptValue& value);
   void append(ExecutingContext& context, Blob* blob);
 
   std::vector<uint8_t> finalize();
