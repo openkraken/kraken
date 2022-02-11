@@ -65,11 +65,7 @@ abstract class DevToolsService {
   void dispose();
 }
 
-abstract class KrakenViewController
-    implements WidgetsBindingObserver, ElementsBindingObserver {
-
-  static Map<int, Pointer<NativeEventTarget>> documentNativePtrMap = {};
-  static Map<int, Pointer<NativeEventTarget>> windowNativePtrMap = {};
+abstract class ViewController {
 
   // Index value which identify javascript runtime context.
   late int _contextId;
@@ -90,7 +86,7 @@ abstract class KrakenViewController
   late Document document;
   late Window window;
 
-  KrakenViewController(
+  ViewController(
     viewportWidth,
     viewportHeight, {
       this.background,
@@ -138,12 +134,11 @@ abstract class KrakenViewController
       PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_INIT_START);
     }
 
-    _setupObserver();
-
     element_registry.defineBuiltInElements();
 
     document = Document(
-      EventTargetContext(_contextId, documentNativePtrMap[_contextId]!),
+      // EventTargetContext(_contextId, documentNativePtrMap[_contextId]!),
+      null,
       viewport: viewport,
       controller: rootController,
       gestureListener: gestureListener,
@@ -151,7 +146,8 @@ abstract class KrakenViewController
     );
 
     window = Window(
-      EventTargetContext(_contextId, windowNativePtrMap[_contextId]!),
+      // EventTargetContext(_contextId, windowNativePtrMap[_contextId]!),
+      null,
       document
     );
 
@@ -178,8 +174,6 @@ abstract class KrakenViewController
   ui.WindowPadding _prevViewInsets = ui.window.viewInsets;
   late RenderViewportBox viewport;
 
-  static double FOCUS_VIEWINSET_BOTTOM_OVERALL = 32;
-
   RenderObject getRootRenderObject() {
     return viewport;
   }
@@ -204,98 +198,9 @@ abstract class KrakenViewController
 
   // Enable print debug message when rendering.
   bool enableDebug;
-
-  @override
-  void didChangeAccessibilityFeatures() {
-    // TODO: implement didChangeAccessibilityFeatures
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    // TODO: implement didChangeAppLifecycleState
-  }
-
-  @override
-  void didChangeLocales(List<Locale>? locales) {
-    // TODO: implement didChangeLocales
-  }
-
-  @override
-  void didChangeMetrics() {
-    double bottomInset =
-        ui.window.viewInsets.bottom / ui.window.devicePixelRatio;
-    if (_prevViewInsets.bottom > ui.window.viewInsets.bottom) {
-      // Hide keyboard
-      viewport.bottomInset = bottomInset;
-    } else {
-      bool shouldScrollByToCenter = false;
-      InputElement? focusInputElement = InputElement.focusInputElement;
-      if (focusInputElement != null) {
-        RenderBox? renderer = focusInputElement.renderer;
-        if (renderer != null && renderer.hasSize) {
-          Offset focusOffset = renderer.localToGlobal(Offset.zero);
-          // FOCUS_VIEWINSET_BOTTOM_OVERALL to meet border case.
-          if (focusOffset.dy >
-              viewportHeight - bottomInset - FOCUS_VIEWINSET_BOTTOM_OVERALL) {
-            shouldScrollByToCenter = true;
-          }
-        }
-      }
-      // Show keyboard
-      viewport.bottomInset = bottomInset;
-      if (shouldScrollByToCenter) {
-        SchedulerBinding.instance!.addPostFrameCallback((_) {
-          window.scrollBy(0, bottomInset);
-        });
-      }
-    }
-    _prevViewInsets = ui.window.viewInsets;
-  }
-
-  @override
-  void didChangePlatformBrightness() {
-    // TODO: implement didChangePlatformBrightness
-  }
-
-  @override
-  void didChangeTextScaleFactor() {
-    // TODO: implement didChangeTextScaleFactor
-  }
-
-  @override
-  void didHaveMemoryPressure() {
-    // TODO: implement didHaveMemoryPressure
-  }
-
-  @override
-  Future<bool> didPopRoute() async {
-    // TODO: implement didPopRoute
-    return false;
-  }
-
-  @override
-  Future<bool> didPushRoute(String route) async {
-    // TODO: implement didPushRoute
-    return false;
-  }
-
-  @override
-  Future<bool> didPushRouteInformation(
-      RouteInformation routeInformation) async {
-    // TODO: implement didPushRouteInformation
-    return false;
-  }
-
-  void _setupObserver() {
-    if (ElementsBinding.instance != null) {
-      ElementsBinding.instance!.addObserver(this);
-    } else if (WidgetsBinding.instance != null) {
-      WidgetsBinding.instance!.addObserver(this);
-    }
-  }
 }
 
-class HTMLViewController extends KrakenViewController {
+class HTMLViewController extends ViewController {
   HTMLViewController(
     viewportWidth,
     viewportHeight, {
@@ -316,9 +221,9 @@ class HTMLViewController extends KrakenViewController {
   );
 }
 
-// An kraken View Controller designed for multiple kraken view control.
-class WebViewController extends KrakenViewController {
-  WebViewController(
+// An Kraken View Controller designed for multiple kraken view control.
+class KrakenViewController extends ViewController implements WidgetsBindingObserver, ElementsBindingObserver  {
+  KrakenViewController(
     viewportWidth,
     viewportHeight, {
     background,
@@ -344,7 +249,14 @@ class WebViewController extends KrakenViewController {
   ) {
     _setEventTarget(DOCUMENT_ID, document);
     _setEventTarget(WINDOW_ID, window);
+
+    _setupObserver();
   }
+
+  static double FOCUS_VIEWINSET_BOTTOM_OVERALL = 32;
+
+  static Map<int, Pointer<NativeEventTarget>> documentNativePtrMap = {};
+  static Map<int, Pointer<NativeEventTarget>> windowNativePtrMap = {};
 
   // Kraken have already disposed.
   bool _disposed = false;
@@ -819,6 +731,95 @@ class WebViewController extends KrakenViewController {
     _removeTarget(targetId);
     target.dispose();
   }
+
+  @override
+  void didChangeAccessibilityFeatures() {
+    // TODO: implement didChangeAccessibilityFeatures
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+  }
+
+  @override
+  void didChangeLocales(List<Locale>? locales) {
+    // TODO: implement didChangeLocales
+  }
+
+  @override
+  void didChangeMetrics() {
+    double bottomInset =
+        ui.window.viewInsets.bottom / ui.window.devicePixelRatio;
+    if (_prevViewInsets.bottom > ui.window.viewInsets.bottom) {
+      // Hide keyboard
+      viewport.bottomInset = bottomInset;
+    } else {
+      bool shouldScrollByToCenter = false;
+      InputElement? focusInputElement = InputElement.focusInputElement;
+      if (focusInputElement != null) {
+        RenderBox? renderer = focusInputElement.renderer;
+        if (renderer != null && renderer.hasSize) {
+          Offset focusOffset = renderer.localToGlobal(Offset.zero);
+          // FOCUS_VIEWINSET_BOTTOM_OVERALL to meet border case.
+          if (focusOffset.dy >
+              viewportHeight - bottomInset - FOCUS_VIEWINSET_BOTTOM_OVERALL) {
+            shouldScrollByToCenter = true;
+          }
+        }
+      }
+      // Show keyboard
+      viewport.bottomInset = bottomInset;
+      if (shouldScrollByToCenter) {
+        SchedulerBinding.instance!.addPostFrameCallback((_) {
+          window.scrollBy(0, bottomInset);
+        });
+      }
+    }
+    _prevViewInsets = ui.window.viewInsets;
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    // TODO: implement didChangePlatformBrightness
+  }
+
+  @override
+  void didChangeTextScaleFactor() {
+    // TODO: implement didChangeTextScaleFactor
+  }
+
+  @override
+  void didHaveMemoryPressure() {
+    // TODO: implement didHaveMemoryPressure
+  }
+
+  @override
+  Future<bool> didPopRoute() async {
+    // TODO: implement didPopRoute
+    return false;
+  }
+
+  @override
+  Future<bool> didPushRoute(String route) async {
+    // TODO: implement didPushRoute
+    return false;
+  }
+
+  @override
+  Future<bool> didPushRouteInformation(
+      RouteInformation routeInformation) async {
+    // TODO: implement didPushRouteInformation
+    return false;
+  }
+
+  void _setupObserver() {
+    if (ElementsBinding.instance != null) {
+      ElementsBinding.instance!.addObserver(this);
+    } else if (WidgetsBinding.instance != null) {
+      WidgetsBinding.instance!.addObserver(this);
+    }
+  }
 }
 
 // An controller designed to control kraken's functional modules.
@@ -837,7 +838,11 @@ class KrakenModuleController with TimerMixin, ScheduleFrameMixin {
   }
 }
 
-class KrakenController {
+abstract class Controller {
+
+}
+
+class KrakenController extends Controller {
   static final SplayTreeMap<int, KrakenController?> _controllerMap =
       SplayTreeMap();
   static final Map<String, int> _nameIdMap = {};
@@ -928,7 +933,7 @@ class KrakenController {
     _methodChannel = methodChannel;
     KrakenMethodChannel.setJSMethodCallCallback(this);
 
-    _view = WebViewController(
+    _view = KrakenViewController(
       viewportWidth,
       viewportHeight,
       background: background,
@@ -978,9 +983,9 @@ class KrakenController {
     }
   }
 
-  late WebViewController _view;
+  late KrakenViewController _view;
 
-  WebViewController get view {
+  KrakenViewController get view {
     return _view;
   }
 
@@ -1025,7 +1030,7 @@ class KrakenController {
 
       allocateNewPage(_view.contextId);
 
-      _view = WebViewController(view.viewportWidth, view.viewportHeight,
+      _view = KrakenViewController(view.viewportWidth, view.viewportHeight,
         background: _view.background,
         enableDebug: _view.enableDebug,
         contextId: _view.contextId,
