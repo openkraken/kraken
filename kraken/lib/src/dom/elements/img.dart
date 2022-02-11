@@ -430,18 +430,23 @@ class ImageElement extends Element {
   }
 
   @override
-  String? getAttribute(String key) {
-    switch (key) {
+  getProperty(String name) {
+    switch (name) {
       case WIDTH:
-        return '$width';
+        return width;
       case HEIGHT:
-        return '$height';
+        return height;
       case NATURAL_WIDTH:
-        return '$naturalWidth';
+        return naturalWidth;
       case NATURAL_HEIGHT:
-        return '$naturalHeight';
+        return naturalHeight;
     }
-    return super.getAttribute(key);
+    return super.getProperty(name);
+  }
+
+  @override
+  String? getAttribute(String key) {
+    return getProperty(key)?.toString() ?? super.getAttribute(key);
   }
 
   void _stylePropertyChanged(String property, String? original, String present) {

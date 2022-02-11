@@ -245,12 +245,22 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   @override
-  String? getAttribute(String key) {
-    switch(key) {
+  String? getAttribute(String qualifiedName) {
+    var propertyValue = getProperty(qualifiedName);
+    if (propertyValue != null) {
+      return '$propertyValue';
+    } else {
+      return super.getAttribute(qualifiedName);
+    }
+  }
+
+  @override
+  getProperty(String key) {
+    switch (key) {
       // @TODO: Apply algorithm of input element property width.
       case 'width':
       case 'height':
-        return '0';
+        return 0.0;
       case 'value':
         return _getValue();
       case 'accept':
@@ -275,7 +285,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       case 'type':
         return _getType();
     }
-    return super.getAttribute(key);
+    return super.getProperty(key);
   }
 
   @override
