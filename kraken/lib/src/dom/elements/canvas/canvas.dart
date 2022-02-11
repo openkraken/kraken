@@ -205,15 +205,20 @@ class CanvasElement extends Element {
   }
 
   @override
-  String? getAttribute(String key) {
+  getProperty(String key) {
     switch (key) {
       case 'width':
-        return '$attrWidth';
+        return attrWidth;
       case 'height':
-        return '$attrHeight';
+        return attrHeight;
     }
 
-    return super.getAttribute(key);
+    return super.getProperty(key);
+  }
+
+  @override
+  String? getAttribute(String key) {
+    return getProperty(key)?.toString() ?? super.getAttribute(key);
   }
 
   @override
