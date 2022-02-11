@@ -92,8 +92,8 @@ String invokeModule(
   String result = '';
 
   try {
-    void invokeModuleCallback({String ?error, dynamic data}) {
-      // To make sure Promise then() and catch() executed before Promise callback called at JavaScript side. 
+    void invokeModuleCallback({String ?error, data}) {
+      // To make sure Promise then() and catch() executed before Promise callback called at JavaScript side.
       // We should make callback always async.
       Future.microtask(() {
         if (error != null) {

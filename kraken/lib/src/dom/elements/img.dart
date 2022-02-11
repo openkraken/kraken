@@ -407,7 +407,7 @@ class ImageElement extends Element {
   }
 
   @override
-  void setAttribute(String key, dynamic value) {
+  void setAttribute(String key, value) {
     bool propertyChanged = attributes[key] != value;
     super.setAttribute(key, value);
     if (key == 'src' && propertyChanged) {

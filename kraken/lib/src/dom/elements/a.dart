@@ -157,7 +157,7 @@ class AnchorElement extends Element {
   }
 
   @override
-  void setAttribute(String key, dynamic value) {
+  void setAttribute(String key, value) {
     super.setAttribute(key, value);
     switch (key) {
       case 'href':

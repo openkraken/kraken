@@ -212,7 +212,7 @@ abstract class WidgetElement extends dom.Element {
   }
 
   @override
-  void setAttribute(String key, dynamic value) {
+  void setAttribute(String key, value) {
     super.setAttribute(key, value);
     if (_state != null) {
       _state!.onAttributeChanged(attributes);

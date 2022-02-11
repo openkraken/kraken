@@ -92,7 +92,7 @@ class CanvasElement extends Element {
   }
 
   // RenderingContext? getContext(DOMString contextId, optional any options = null);
-  CanvasRenderingContext2D getContext(String contextId, {dynamic options}) {
+  CanvasRenderingContext2D getContext(String contextId, {options}) {
     switch (contextId) {
       case '2d':
         if (painter.context == null) {

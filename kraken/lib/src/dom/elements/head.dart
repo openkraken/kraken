@@ -35,7 +35,7 @@ class LinkElement extends Element {
   String? rel;
 
   @override
-  void setAttribute(String key, dynamic value) {
+  void setAttribute(String key, value) {
     super.setAttribute(key, value);
     if (key == 'href') {
       _fetchBundle(value);
@@ -103,7 +103,7 @@ class ScriptElement extends Element {
   String type = _MIME_TEXT_JAVASCRIPT;
 
   @override
-  void setAttribute(String key, dynamic value) {
+  void setAttribute(String key, value) {
     super.setAttribute(key, value);
     if (key == 'src') {
       _fetchBundle(value);
@@ -210,7 +210,7 @@ class StyleElement extends Element {
   }
 
   @override
-  void setAttribute(String key, dynamic value) {
+  void setAttribute(String key, value) {
     super.setAttribute(key, value);
     if (key == 'type') {
       type = value.toString().toLowerCase().trim();

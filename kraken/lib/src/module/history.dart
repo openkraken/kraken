@@ -119,7 +119,7 @@ class HistoryModule extends BaseModule {
     await navigationModule.goTo(targetUrl);
   }
 
-  void _dispatchPopStateEvent(dynamic state) {
+  void _dispatchPopStateEvent(state) {
     PopStateEventInit init = PopStateEventInit(state);
     PopStateEvent popStateEvent = PopStateEvent(init);
     moduleManager!.controller.view.window.dispatchEvent(popStateEvent);

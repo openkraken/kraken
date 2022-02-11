@@ -47,7 +47,7 @@ class NavigationModule extends BaseModule {
   }
 
   @override
-  String invoke(String method, dynamic params, callback) {
+  String invoke(String method, params, callback) {
     if (method == 'goTo') {
       assert(params is String, 'URL must be string.');
       goTo(params);

@@ -57,7 +57,7 @@ class ConnectionModule extends BaseModule {
   void dispose() {}
 
   @override
-  String invoke(String method, dynamic params, InvokeModuleCallback callback) {
+  String invoke(String method, params, InvokeModuleCallback callback) {
     switch (method) {
       case 'getConnectivity': {
         getConnectivity((Map json) {

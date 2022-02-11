@@ -904,7 +904,7 @@ class Element extends Node
 
   // FIXME: only compatible with kraken plugins
   @deprecated
-  void setStyle(String property, dynamic value) {
+  void setStyle(String property, value) {
     setRenderStyle(property, value);
   }
 
@@ -938,7 +938,7 @@ class Element extends Node
     }
   }
 
-  void setRenderStyleProperty(String name, dynamic value) {
+  void setRenderStyleProperty(String name, value) {
     // Memorize the variable value to renderStyle object.
     if (CSSVariable.isVariable(name)) {
       renderStyle.setCSSVariable(name, value.toString());
@@ -1303,7 +1303,7 @@ class Element extends Node
 
   void _applyDefaultStyle(CSSStyleDeclaration style) {
     if (_defaultStyle.isNotEmpty) {
-      _defaultStyle.forEach((propertyName, dynamic value) {
+      _defaultStyle.forEach((propertyName, value) {
         style.setProperty(propertyName, value);
       });
     }
@@ -1311,7 +1311,7 @@ class Element extends Node
 
   void _applyInlineStyle(CSSStyleDeclaration style) {
     if (inlineStyle.isNotEmpty) {
-      inlineStyle.forEach((propertyName, dynamic value) {
+      inlineStyle.forEach((propertyName, value) {
         // Force inline style to be applied as important priority.
         style.setProperty(propertyName, value, true);
       });

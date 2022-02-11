@@ -62,7 +62,7 @@ class AsyncStorageModule extends BaseModule {
   }
 
   @override
-  String invoke(String method, dynamic params, InvokeModuleCallback callback) {
+  String invoke(String method, params, InvokeModuleCallback callback) {
     switch (method) {
       case 'getItem':
         AsyncStorageModule.getItem(params).then((String? value) {
