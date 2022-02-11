@@ -96,6 +96,9 @@ class Element extends Node
   // The attrs.
   final Map<String, String> attributes = <String, String>{};
 
+  @deprecated
+  Map<String, dynamic> get properties => attributes;
+
   /// The style of the element, not inline style.
   late CSSStyleDeclaration style;
 

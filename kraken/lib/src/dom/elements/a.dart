@@ -124,7 +124,7 @@ class AnchorElement extends Element {
   }
 
   @override
-  getAttribute(String key) {
+  String? getAttribute(String key) {
     switch (key) {
       case 'pathname':
         return pathname;

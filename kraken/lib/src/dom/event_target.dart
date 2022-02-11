@@ -154,9 +154,9 @@ abstract class EventTarget {
   // The default get property, can return any types.
   // Property is not attribute, eg. `el.foo vs el.getAttribute('foo')`.
   // Any event target can have it's specific getProperty override.
-  getProperty(String propertyName) {
-    return null;
-  }
+  getProperty(String propertyName) => null;
+  void setProperty(String propertyName, value) {}
+  void removeProperty(String propertyName) {}
 
   @mustCallSuper
   void dispose() {
