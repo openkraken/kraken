@@ -440,6 +440,9 @@ class ImageElement extends Element {
         return naturalWidth;
       case NATURAL_HEIGHT:
         return naturalHeight;
+      case 'src':
+      case 'loading':
+        return attributes[name];
     }
     return super.getProperty(name);
   }

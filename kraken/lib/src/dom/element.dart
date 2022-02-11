@@ -884,7 +884,6 @@ class Element extends Node
 
   @mustCallSuper
   void setAttribute(String qualifiedName, String value) {
-    print('$qualifiedName $value');
     if (_STYLE_PROPERTY == qualifiedName) {
       // @TODO: Parse inline style css text.
     } else if (_CLASS_NAME == qualifiedName) {
