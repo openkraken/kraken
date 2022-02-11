@@ -19,9 +19,6 @@ import 'from_native.dart';
 import 'native_types.dart';
 import 'dynamic_library.dart';
 
-import 'package:html/parser.dart' show parse;
-import 'package:html/dom.dart' as dom;
-
 // Steps for using dart:ffi to call a C function from Dart:
 // 1. Import dart:ffi.
 // 2. Create a typedef with the FFI type signature of the C function.
@@ -197,45 +194,18 @@ void evaluateQuickjsByteCode(int contextId, Uint8List bytes) {
   malloc.free(byteData);
 }
 
-int targetID = 300;
-
-void traverseHTML(KrakenController controller, dom.Node node, int parentTargetId) {
-  print(node.nodeType);
-  node.nodes.forEach((node) {
-    targetID++;
-
-    if (node.nodeType == dom.Node.ELEMENT_NODE) {
-      controller.view.createElement(targetID, (node as dom.Element).localName!, null);
-    } else if (node.nodeType == dom.Node.TEXT_NODE) {
-      controller.view.createTextNode(targetID, (node as dom.Text).data, null);
-    }
-
-    controller.view.insertAdjacentNode(targetID, 'afterend', parentTargetId);
-
-    traverseHTML(controller, node, targetID);
-  });
-}
-
-void parseHTML(int contextId, String code, { disabledJavaScript = false }) {
+void parseHTML(int contextId, String code) {
   if (KrakenController.getControllerOfJSContextId(contextId) == null) {
     return;
   }
 
-  if (disabledJavaScript) {
-    dom.Document document = parse(code);
-    KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
-    document.nodes.forEach((node) {
-      traverseHTML(controller, node, -1);
-    });
-  } else {
-    Pointer<Utf8> nativeCode = code.toNativeUtf8();
-    try {
-      _parseHTML(contextId, nativeCode, code.length);
-    } catch (e, stack) {
-      print('$e\n$stack');
-    }
-    malloc.free(nativeCode);
+  Pointer<Utf8> nativeCode = code.toNativeUtf8();
+  try {
+    _parseHTML(contextId, nativeCode, code.length);
+  } catch (e, stack) {
+    print('$e\n$stack');
   }
+  malloc.free(nativeCode);
 }
 
 // Register initJsEngine
