@@ -293,6 +293,7 @@ describe('flexbox-position-absolute', () => {
     const imageURL = 'assets/100x100-green.png';
     const img = document.createElement('img');
     img.style.position = 'absolute';
+    img.style.border = '5px solid black';
     img.style.width = '80px';
     img.style.height = '80px';
     img.setAttribute('loading', 'lazy');
