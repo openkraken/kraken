@@ -47,7 +47,15 @@ class ImageElement extends Element {
   int _frameCount = 0;
 
   bool _isListeningStream = false;
-  bool _isInLazyLoading = false;
+
+  bool get _isInLazyLoading {
+    RenderIntrinsic? renderIntrinsic;
+    if (renderBoxModel != null) {
+      renderIntrinsic = renderBoxModel as RenderIntrinsic;
+    }
+    return renderIntrinsic != null && renderIntrinsic.isLazyRendering;
+  }
+
   // https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-complete-dev
   // A boolean value which indicates whether or not the image has completely loaded.
   bool complete = false;
@@ -76,10 +84,11 @@ class ImageElement extends Element {
     if (!_isInLazyLoading || _renderImage == null) {
       // Image dimensions (width or height) should specified for performance when lazy-load.
       if (_shouldLazyLoading) {
-        _isInLazyLoading = true;
+        RenderIntrinsic renderIntrinsic = renderBoxModel! as RenderIntrinsic;
+        renderIntrinsic.isLazyRendering = true;
 
         // When detach renderer, all listeners will be cleared.
-        renderBoxModel!.addIntersectionChangeListener(_handleIntersectionChange);
+        renderIntrinsic.addIntersectionChangeListener(_handleIntersectionChange);
       } else {
         _loadImage();
       }
@@ -182,13 +191,12 @@ class ImageElement extends Element {
     // When appear
     if (entry.isIntersecting) {
       // Once appear remove the listener
-      _resetLazyLoading();
+      _removeIntersectionChangeListener();
       _loadImage();
     }
   }
 
-  void _resetLazyLoading() {
-    _isInLazyLoading = false;
+  void _removeIntersectionChangeListener() {
     renderBoxModel!.removeIntersectionChangeListener(_handleIntersectionChange);
   }
 
@@ -264,7 +272,7 @@ class ImageElement extends Element {
     if (key == 'src') {
       _stopListeningStream(keepStreamAlive: true);
     } else if (key == 'loading' && _isInLazyLoading && _cachedImageProvider == null) {
-      _resetLazyLoading();
+      _removeIntersectionChangeListener();
       _stopListeningStream(keepStreamAlive: true);
     }
   }
@@ -369,6 +377,11 @@ class ImageElement extends Element {
       forceToRepaintBoundary = true;
     }
 
+    if (renderBoxModel != null) {
+      RenderIntrinsic renderIntrinsic = renderBoxModel! as RenderIntrinsic;
+      renderIntrinsic.isLazyRendering = false;
+    }
+
     _attachImage();
     _resizeImage();
   }
@@ -419,7 +432,7 @@ class ImageElement extends Element {
         _precacheImage();
       }
     } else if (key == 'loading' && propertyChanged && _isInLazyLoading) {
-      _resetLazyLoading();
+      _removeIntersectionChangeListener();
     } else if (key == WIDTH) {
       _propertyWidth = CSSNumber.parseNumber(value);
       _resolveImage(_resolvedUri, updateImageProvider: true);

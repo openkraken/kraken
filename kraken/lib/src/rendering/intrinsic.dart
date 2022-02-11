@@ -26,6 +26,9 @@ class RenderIntrinsic extends RenderBoxModel
     return heightDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
   }
 
+  // Whether the renderObject of replaced element is lazy rendering.
+  bool isLazyRendering = false;
+
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderLayoutParentData) {
@@ -116,6 +119,13 @@ class RenderIntrinsic extends RenderBoxModel
   /// override it to layout box model paint.
   @override
   void paint(PaintingContext context, Offset offset) {
+    // Should not paint other style such as box decoration when renderObject
+    // is in lazy loading and not rendered yet.
+    if (isLazyRendering) {
+      paintIntersectionObserver(context, offset, performPaint);
+      return;
+    }
+
     if (shouldPaint) {
       paintBoxModel(context, offset);
     }
