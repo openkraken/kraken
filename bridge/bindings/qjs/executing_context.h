@@ -33,6 +33,7 @@ static std::once_flag kinitJSClassIDFlag;
 class WindowInstance;
 class DocumentInstance;
 class ExecutionContext;
+class EventInstance;
 struct DOMTimerCallbackContext;
 
 std::string jsAtomToStdString(JSContext* ctx, JSAtom atom);
@@ -119,6 +120,9 @@ class ExecutionContext {
   static void dispatchGlobalErrorEvent(ExecutionContext* context, JSValueConst error);
 
   void reportError(JSValueConst error);
+  void reportErrorEvent(EventInstance* errorEvent);
+  void dispatchErrorEvent(EventInstance* errorEvent);
+  void dispatchErrorEventInternal(EventInstance* errorEvent);
 
  private:
   static void promiseRejectTracker(JSContext* ctx, JSValueConst promise, JSValueConst reason, JS_BOOL is_handled, void* opaque);
@@ -129,6 +133,7 @@ class ExecutionContext {
   JSValue globalObject{JS_NULL};
   bool ctxInvalid_{false};
   JSContext* m_ctx{nullptr};
+  bool m_inDispatchErrorEvent_{false};
   friend WindowInstance;
   friend DocumentInstance;
   WindowInstance* m_window{nullptr};

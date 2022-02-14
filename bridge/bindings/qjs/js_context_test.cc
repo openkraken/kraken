@@ -26,6 +26,21 @@ TEST(Context, evalWithError) {
   EXPECT_EQ(errorHandlerExecuted, true);
 }
 
+TEST(Context, recursionThrowError) {
+  static bool errorHandlerExecuted = false;
+  auto errorHandler = [](int32_t contextId, const char* errmsg) {
+    errorHandlerExecuted = true;
+  };
+  auto bridge = TEST_init(errorHandler);
+  const char* code = "addEventListener('error', (evt) => {\n"
+      "  console.log('tagName', evt.target.tagName());\n"
+      "});\n"
+      "\n"
+      "throw Error('foo');";
+  bridge->evaluateScript(code, strlen(code), "file://", 0);
+  EXPECT_EQ(errorHandlerExecuted, true);
+}
+
 TEST(Context, unrejectPromiseError) {
   static bool errorHandlerExecuted = false;
   auto errorHandler = [](int32_t contextId, const char* errmsg) {
