@@ -276,7 +276,6 @@ void ExecutionContext::reportErrorEvent(EventInstance* errorEvent) {
   JS_FreeValue(m_ctx, error);
 }
 
-
 void ExecutionContext::dispatchErrorEvent(EventInstance* errorEvent) {
   if (m_inDispatchErrorEvent_) {
     return;
@@ -287,7 +286,8 @@ void ExecutionContext::dispatchErrorEvent(EventInstance* errorEvent) {
 }
 
 void ExecutionContext::dispatchErrorEventInternal(EventInstance* errorEvent) {
-  if (m_window == nullptr) return;
+  if (m_window == nullptr)
+    return;
 
   assert(!m_inDispatchErrorEvent_);
   m_inDispatchErrorEvent_ = true;

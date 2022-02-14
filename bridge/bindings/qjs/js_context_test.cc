@@ -28,11 +28,10 @@ TEST(Context, evalWithError) {
 
 TEST(Context, recursionThrowError) {
   static bool errorHandlerExecuted = false;
-  auto errorHandler = [](int32_t contextId, const char* errmsg) {
-    errorHandlerExecuted = true;
-  };
+  auto errorHandler = [](int32_t contextId, const char* errmsg) { errorHandlerExecuted = true; };
   auto bridge = TEST_init(errorHandler);
-  const char* code = "addEventListener('error', (evt) => {\n"
+  const char* code =
+      "addEventListener('error', (evt) => {\n"
       "  console.log('tagName', evt.target.tagName());\n"
       "});\n"
       "\n"
