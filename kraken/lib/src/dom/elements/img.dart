@@ -324,8 +324,36 @@ class ImageElement extends Element {
 
     ImageProvider? provider = _cachedImageProvider;
     if (updateImageProvider || provider == null) {
-      // When cachedWidth or cachedHeight is not null, KrakenResizeImage will be returned.
-      provider = _cachedImageProvider = getImageProvider(resolvedUri, cachedWidth: cachedWidth, cachedHeight: cachedHeight);
+      BoxFit boxFit = renderBoxModel!.renderStyle.objectFit;
+      // Resized image needs to maintain its aspect ratio when object-fit is contain/cover.
+      if ((boxFit == BoxFit.cover || boxFit == BoxFit.contain)
+        && cachedWidth != null && cachedHeight != null
+      ) {
+        // Image resized base (width/height) is determined by both image natural size ratio and
+        // image container size ratio.
+        // https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/box_fit.dart#L152
+        if (naturalWidth != 0 && naturalHeight != 0) {
+          if (boxFit == BoxFit.contain) {
+            if (cachedWidth / cachedHeight > naturalWidth / naturalHeight) {
+              provider = _cachedImageProvider = getImageProvider(resolvedUri, cachedHeight: cachedHeight);
+            } else {
+              provider = _cachedImageProvider = getImageProvider(resolvedUri, cachedWidth: cachedWidth);
+            }
+          } else if (boxFit == BoxFit.cover) {
+            if (cachedWidth / cachedHeight > naturalWidth / naturalHeight) {
+              provider = _cachedImageProvider = getImageProvider(resolvedUri, cachedWidth: cachedWidth);
+            } else {
+              provider = _cachedImageProvider = getImageProvider(resolvedUri, cachedHeight: cachedHeight);
+            }
+          }
+        } else {
+          // Do not resize image when image is not resolved before cause image resized base (width/height)
+          // can not be determined in this case.
+          provider = _cachedImageProvider = getImageProvider(resolvedUri);
+        }
+      } else {
+        provider = _cachedImageProvider = getImageProvider(resolvedUri, cachedWidth: cachedWidth, cachedHeight: cachedHeight);
+      }
     }
     if (provider == null) return;
 
