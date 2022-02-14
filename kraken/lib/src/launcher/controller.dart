@@ -185,8 +185,8 @@ abstract class ViewController {
   bool enableDebug;
 }
 
-class HTMLViewController extends ViewController {
-  HTMLViewController(
+class HTMLViewViewController extends ViewController {
+  HTMLViewViewController(
     viewportWidth,
     viewportHeight, {
       background,
@@ -847,35 +847,39 @@ class KrakenModuleController with TimerMixin, ScheduleFrameMixin {
   }
 }
 
+
 abstract class Controller {
 
-}
-
-class KrakenController extends Controller {
-  static final SplayTreeMap<int, KrakenController?> _controllerMap =
-      SplayTreeMap();
-  static final Map<String, int> _nameIdMap = {};
 
   UriParser? uriParser;
 
   late RenderObjectElement rootFlutterElement;
 
-  static KrakenController? getControllerOfJSContextId(int? contextId) {
-    if (!_controllerMap.containsKey(contextId)) {
-      return null;
+  Controller(
+    String? name, {
+      this.uriParser
     }
+  );
 
-    return _controllerMap[contextId];
-  }
 
-  static SplayTreeMap<int, KrakenController?> getControllerMap() {
-    return _controllerMap;
-  }
+}
 
-  static KrakenController? getControllerOfName(String name) {
-    if (!_nameIdMap.containsKey(name)) return null;
-    int? contextId = _nameIdMap[name];
-    return getControllerOfJSContextId(contextId);
+class HTMLViewController extends Controller {
+  HTMLViewController(String? name, { UriParser? uriParser, }) : super(name, uriParser: uriParser);
+
+}
+
+class KrakenController extends Controller {
+  String? _name;
+  String? get name => _name;
+  set name(String? value) {
+    if (value == null) return;
+    if (_name != null) {
+      int? contextId = _nameIdMap[_name];
+      _nameIdMap.remove(_name);
+      _nameIdMap[value] = contextId!;
+    }
+    _name = value;
   }
 
   WidgetDelegate? widgetDelegate;
@@ -897,19 +901,28 @@ class KrakenController extends Controller {
 
   KrakenMethodChannel? get methodChannel => _methodChannel;
 
-  String? _name;
-  String? get name => _name;
-  set name(String? value) {
-    if (value == null) return;
-    if (_name != null) {
-      int? contextId = _nameIdMap[_name];
-      _nameIdMap.remove(_name);
-      _nameIdMap[value] = contextId!;
+  final GestureListener? _gestureListener;
+
+  static final Map<String, int> _nameIdMap = {};
+  static final SplayTreeMap<int, KrakenController?> _controllerMap = SplayTreeMap();
+
+  static KrakenController? getControllerOfJSContextId(int? contextId) {
+    if (!_controllerMap.containsKey(contextId)) {
+      return null;
     }
-    _name = value;
+
+    return _controllerMap[contextId];
   }
 
-  final GestureListener? _gestureListener;
+  static SplayTreeMap<int, KrakenController?> getControllerMap() {
+    return _controllerMap;
+  }
+
+  static KrakenController? getControllerOfName(String name) {
+    if (!_nameIdMap.containsKey(name)) return null;
+    int? contextId = _nameIdMap[name];
+    return getControllerOfJSContextId(contextId);
+  }
 
   KrakenController(
     String? name,
@@ -928,9 +941,9 @@ class KrakenController extends Controller {
     this.onJSError,
     this.httpClientInterceptor,
     this.devToolsService,
-    this.uriParser,
-  })  : _name = name,
-        _gestureListener = gestureListener {
+    UriParser? uriParser,
+  }) : _gestureListener = gestureListener,
+        super(name, uriParser: uriParser) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_PROPERTY_INIT);
       PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_INIT_START);
