@@ -223,7 +223,7 @@ JSValue Element::setAttribute(JSContext* ctx, JSValue this_val, int argc, JSValu
   std::unique_ptr<NativeString> args_01 = stringToNativeString(name);
   std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, attributeValue);
 
-  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setAttribute, *args_01, *args_02, nullptr);
 
   JS_FreeValue(ctx, attributeValue);
 
@@ -275,7 +275,7 @@ JSValue Element::removeAttribute(JSContext* ctx, JSValue this_val, int argc, JSV
     JS_FreeValue(ctx, targetValue);
 
     std::unique_ptr<NativeString> args_01 = stringToNativeString(name);
-    element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::removeProperty, *args_01, nullptr);
+    element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::removeAttribute, *args_01, nullptr);
   }
 
   return JS_NULL;
@@ -409,7 +409,7 @@ IMPL_PROPERTY_SETTER(Element, className)(JSContext* ctx, JSValue this_val, int a
   element->m_attributes->setAttribute("class", argv[0]);
   std::unique_ptr<NativeString> args_01 = stringToNativeString("class");
   std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
-  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setAttribute, *args_01, *args_02, nullptr);
   return JS_NULL;
 }
 

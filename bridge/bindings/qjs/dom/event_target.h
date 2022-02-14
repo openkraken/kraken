@@ -107,8 +107,8 @@ class EventTargetInstance : public Instance {
   // https://html.spec.whatwg.org/C/#event-handler-attributes
   EventHandlerMap m_eventHandlerMap{m_ctx};
 
-  // When javascript code set a property on EventTarget instance, EventTarget::setProperty callback will be called when
-  // property are not defined by Object.defineProperty or setProperty.
+  // When javascript code set a property on EventTarget instance, EventTarget::setAttribute callback will be called when
+  // property are not defined by Object.defineProperty or setAttribute.
   // We store there values in here.
   EventTargetProperties m_properties{m_ctx};
 

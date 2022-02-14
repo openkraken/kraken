@@ -314,6 +314,11 @@ bool Document::isCustomElement(const std::string& tagName) {
   return elementConstructorMap.count(tagName) > 0;
 }
 
+IMPL_PROPERTY_GETTER(Document, location)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
+  return JS_GetPropertyStr(ctx, document->m_context->global(), "location");
+}
+
 IMPL_PROPERTY_GETTER(Document, nodeName)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   return JS_NewString(ctx, "#document");
 }
