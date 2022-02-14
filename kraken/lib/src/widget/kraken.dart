@@ -33,7 +33,7 @@ typedef GetSelectionColor = Color Function();
 typedef GetCursorRadius = Radius Function();
 /// Get the text selection controls according to the target platform.
 typedef GetTextSelectionControls = TextSelectionControls Function();
-typedef OnControllerCreated = void Function(KrakenController controller);
+typedef OnControllerCreated = void Function(Controller controller);
 
 /// Delegate methods of widget
 class WidgetDelegate {
@@ -847,7 +847,7 @@ abstract class KrakenState<T extends StatefulWidget> extends State<T> with Route
   dom.Element _findRootElement() {
     RenderObject? _rootRenderObject = context.findRenderObject();
     RenderViewportBox? renderViewportBox = _findRenderViewportBox(_rootRenderObject!);
-    KrakenController controller = (renderViewportBox as RenderObjectWithControllerMixin).controller!;
+    Controller controller = (renderViewportBox as RenderObjectWithControllerMixin).controller!;
     dom.Element documentElement = controller.view.document.documentElement!;
     return documentElement;
   }
@@ -947,7 +947,7 @@ This situation often happened when you trying creating kraken when FlutterView n
   @override
   void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {
     super.updateRenderObject(context, renderObject);
-    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller!;
+    Controller controller = (renderObject as RenderObjectWithControllerMixin).controller!;
     controller.name = shortHash(_krakenWidget.hashCode);
 
     bool viewportWidthHasChanged = controller.view.viewportWidth != _krakenWidget.viewportWidth;
@@ -971,7 +971,7 @@ This situation often happened when you trying creating kraken when FlutterView n
 
   @override
   void didUnmountRenderObject(covariant RenderObject renderObject) {
-    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller!;
+    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller as KrakenController;
     controller.dispose();
   }
 
@@ -988,15 +988,17 @@ class _KrakenRenderObjectElement extends SingleChildRenderObjectElement {
   void mount(Element? parent, Object? newSlot) async {
     super.mount(parent, newSlot);
 
-    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller!;
+    Controller controller = (renderObject as RenderObjectWithControllerMixin).controller!;
 
     // We should make sure every flutter elements created under kraken can be walk up to the root.
     // So we bind _KrakenRenderObjectElement into KrakenController, and widgetElements created by controller can follow this to the root.
     controller.rootFlutterElement = this;
 
-    await controller.loadBundle();
+    if (controller is KrakenController) {
+      await controller.loadBundle();
 
-    _evalBundle(controller, widget._krakenWidget.animationController);
+      _evalBundle(controller, widget._krakenWidget.animationController);
+    }
   }
 
   // RenderObjects created by kraken are manager by kraken itself. There are no needs to operate renderObjects on _KrakenRenderObjectElement.

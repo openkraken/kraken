@@ -41,8 +41,10 @@ void spawnIsolateInspectorServer(ChromeDevToolsService devTool, KrakenController
     } else if (data is InspectorServerStart) {
       devTool.uiInspector!.onServerStart(port);
     } else if (data is InspectorPostTaskMessage) {
-      if (devTool.isReloading) return;
-      dispatchUITask(controller.view.contextId, Pointer.fromAddress(data.context), Pointer.fromAddress(data.callback));
+      if (controller is KrakenController) {
+        if (devTool.isReloading) return;
+        dispatchUITask(controller.view.contextId, Pointer.fromAddress(data.context), Pointer.fromAddress(data.callback));
+      }
     }
   });
 

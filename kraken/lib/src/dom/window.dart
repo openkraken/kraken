@@ -23,7 +23,7 @@ class Window extends EventTarget {
   }
 
   void _open(String url) {
-    KrakenController rootController = document.controller.view.rootController;
+    KrakenController rootController = document.controller.view.rootController as KrakenController;
     String? sourceUrl = rootController.href;
 
     document.controller.view.handleNavigationAction(sourceUrl, url, KrakenNavigationType.navigate);

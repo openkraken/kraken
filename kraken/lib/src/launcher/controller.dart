@@ -67,11 +67,7 @@ abstract class DevToolsService {
 
 abstract class ViewController {
 
-  // Index value which identify javascript runtime context.
-  late int _contextId;
-  int get contextId => _contextId;
-
-  KrakenController rootController;
+  Controller rootController;
 
   GestureListener? gestureListener;
 
@@ -85,6 +81,41 @@ abstract class ViewController {
 
   late Document document;
   late Window window;
+
+  // Hooks for DevTools.
+  VoidCallback? debugDOMTreeChanged;
+  void _debugDOMTreeChanged() {
+    VoidCallback? f = debugDOMTreeChanged;
+    if (f != null) {
+      f();
+    }
+  }
+
+  // Kraken have already disposed.
+  bool _disposed = false;
+  bool get disposed => _disposed;
+
+  // Dispose controller and recycle all resources.
+  @mustCallSuper
+  void dispose() {
+    // FIXME: for break circle reference
+    viewport.controller = null;
+    debugDOMTreeChanged = null;
+
+    document.dispose();
+    window.dispose();
+    _disposed = true;
+  }
+
+  void shiftFocus(EventTarget target) {
+    // TODO: get focus for other element which need to get focus.
+    InputElement? inputElement = InputElement.focusInputElement;
+    if (inputElement != null && inputElement != target) {
+      inputElement.blur();
+    }
+
+    target.focus();
+  }
 
   ViewController(
     viewportWidth,
@@ -103,17 +134,6 @@ abstract class ViewController {
     if (enableDebug) {
       debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
       debugPaintSizeEnabled = true;
-    }
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT);
-      PerformanceTiming.instance().mark(PERF_BRIDGE_INIT_START);
-    }
-
-    _contextId = contextId ?? initBridge();
-
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_BRIDGE_INIT_END);
-      PerformanceTiming.instance().mark(PERF_CREATE_VIEWPORT_START);
     }
 
     if (originalViewport != null) {
@@ -243,6 +263,19 @@ class KrakenViewController extends ViewController implements WidgetsBindingObser
       widgetDelegate: widgetDelegate,
       originalViewport: originalViewport
   ) {
+
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT);
+      PerformanceTiming.instance().mark(PERF_BRIDGE_INIT_START);
+    }
+
+    _contextId = contextId ?? initBridge();
+
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_BRIDGE_INIT_END);
+      PerformanceTiming.instance().mark(PERF_CREATE_VIEWPORT_START);
+    }
+
     document = Document(
       context: EventTargetContext(_contextId, documentNativePtrMap[_contextId]!),
       viewport: viewport,
@@ -267,20 +300,9 @@ class KrakenViewController extends ViewController implements WidgetsBindingObser
   static Map<int, Pointer<NativeEventTarget>> documentNativePtrMap = {};
   static Map<int, Pointer<NativeEventTarget>> windowNativePtrMap = {};
 
-  // Kraken have already disposed.
-  bool _disposed = false;
-
-  bool get disposed => _disposed;
-
-  void shiftFocus(EventTarget target) {
-    // TODO: get focus for other element which need to get focus.
-    InputElement? inputElement = InputElement.focusInputElement;
-    if (inputElement != null && inputElement != target) {
-      inputElement.blur();
-    }
-
-    target.focus();
-  }
+  // Index value which identify javascript runtime context.
+  late int _contextId;
+  int get contextId => _contextId;
 
   void evaluateJavaScripts(String code, [String source = 'vm://']) {
     assert(!_disposed, 'Kraken have already disposed');
@@ -305,7 +327,10 @@ class KrakenViewController extends ViewController implements WidgetsBindingObser
   }
 
   // Dispose controller and recycle all resources.
+  @override
   void dispose() {
+    super.dispose();
+
     // FIXME: for break circle reference
     viewport.controller = null;
 
@@ -692,15 +717,6 @@ class KrakenViewController extends ViewController implements WidgetsBindingObser
     }
   }
 
-  // Hooks for DevTools.
-  VoidCallback? debugDOMTreeChanged;
-  void _debugDOMTreeChanged() {
-    VoidCallback? f = debugDOMTreeChanged;
-    if (f != null) {
-      f();
-    }
-  }
-
   Future<void> handleNavigationAction(String? sourceUrl, String targetUrl,
       KrakenNavigationType navigationType) async {
     KrakenNavigationAction action =
@@ -715,10 +731,10 @@ class KrakenViewController extends ViewController implements WidgetsBindingObser
 
       switch (action.navigationType) {
         case KrakenNavigationType.navigate:
-          await rootController.reload(url: action.target);
+          await (rootController as KrakenController).reload(url: action.target);
           break;
         case KrakenNavigationType.reload:
-          await rootController.reload(url: action.source!);
+          await (rootController as KrakenController).reload(url: action.source!);
           break;
         default:
         // Navigate and other type, do nothing.
@@ -849,30 +865,100 @@ class KrakenModuleController with TimerMixin, ScheduleFrameMixin {
 
 
 abstract class Controller {
+  String? _name;
+  String? get name => _name;
 
+  @mustCallSuper
+  set name(String? value) {
+    if (value == null) return;
+    _name = value;
+  }
+
+  WidgetDelegate? widgetDelegate;
 
   UriParser? uriParser;
 
+  final DevToolsService? devToolsService;
+  final GestureListener? gestureListener;
+
   late RenderObjectElement rootFlutterElement;
+
+  late ViewController _view;
+
+  ViewController get view {
+    return _view;
+  }
+
+  @mustCallSuper
+  void dispose() {
+    _view.dispose();
+
+    if (devToolsService != null) {
+      devToolsService!.dispose();
+    }
+  }
 
   Controller(
     String? name, {
-      this.uriParser
+      this.uriParser,
+      this.devToolsService,
+      this.gestureListener,
+      this.widgetDelegate,
     }
-  );
+  )  : _name = name {
+    uriParser ??= UriParser();
 
-
+    // TODO: support devTools for HTMLView.
+    // if (devToolsService != null) {
+    //   devToolsService!.init(this);
+    // }
+  }
 }
 
 class HTMLViewController extends Controller {
-  HTMLViewController(String? name, { UriParser? uriParser, }) : super(name, uriParser: uriParser);
+  @override
+  HTMLViewViewController get view {
+    return _view as HTMLViewViewController;
+  }
 
+  HTMLViewController(
+      String? name,
+      double viewportWidth,
+      double viewportHeight, {
+        bool showPerformanceOverlay = false,
+        enableDebug = false,
+        Color? background,
+        GestureListener? gestureListener,
+        KrakenNavigationDelegate? navigationDelegate,
+        WidgetDelegate? widgetDelegate,
+        final DevToolsService? devToolsService,
+        UriParser? uriParser
+      }) : super(name, uriParser: uriParser, widgetDelegate: widgetDelegate, devToolsService: devToolsService) {
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_CONTROLLER_PROPERTY_INIT);
+      PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_INIT_START);
+    }
+
+    _view = HTMLViewViewController(
+      viewportWidth,
+      viewportHeight,
+      background: background,
+      enableDebug: enableDebug,
+      rootController: this,
+      navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate(),
+      widgetDelegate: widgetDelegate,
+    );
+
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_INIT_END);
+    }
+  }
 }
 
 class KrakenController extends Controller {
-  String? _name;
-  String? get name => _name;
+  @override
   set name(String? value) {
+    super.name = value;
     if (value == null) return;
     if (_name != null) {
       int? contextId = _nameIdMap[_name];
@@ -882,7 +968,11 @@ class KrakenController extends Controller {
     _name = value;
   }
 
-  WidgetDelegate? widgetDelegate;
+  late KrakenModuleController _module;
+
+  KrakenModuleController get module {
+    return _module;
+  }
 
   KrakenBundle? bundle;
 
@@ -894,14 +984,11 @@ class KrakenController extends Controller {
   // Error handler when got javascript error when evaluate javascript codes.
   JSErrorHandler? onJSError;
 
-  final DevToolsService? devToolsService;
   final HttpClientInterceptor? httpClientInterceptor;
 
   KrakenMethodChannel? _methodChannel;
 
   KrakenMethodChannel? get methodChannel => _methodChannel;
-
-  final GestureListener? _gestureListener;
 
   static final Map<String, int> _nameIdMap = {};
   static final SplayTreeMap<int, KrakenController?> _controllerMap = SplayTreeMap();
@@ -924,6 +1011,11 @@ class KrakenController extends Controller {
     return getControllerOfJSContextId(contextId);
   }
 
+  @override
+  KrakenViewController get view {
+    return _view as KrakenViewController;
+  }
+
   KrakenController(
     String? name,
     double viewportWidth,
@@ -934,16 +1026,15 @@ class KrakenController extends Controller {
     GestureListener? gestureListener,
     KrakenNavigationDelegate? navigationDelegate,
     KrakenMethodChannel? methodChannel,
-    this.widgetDelegate,
+    WidgetDelegate? widgetDelegate,
     this.bundle,
     this.onLoad,
     this.onLoadError,
     this.onJSError,
     this.httpClientInterceptor,
-    this.devToolsService,
+    final DevToolsService? devToolsService,
     UriParser? uriParser,
-  }) : _gestureListener = gestureListener,
-        super(name, uriParser: uriParser) {
+  }) : super(name, uriParser: uriParser, devToolsService: devToolsService, widgetDelegate: widgetDelegate) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_PROPERTY_INIT);
       PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_INIT_START);
@@ -959,7 +1050,7 @@ class KrakenController extends Controller {
       enableDebug: enableDebug,
       rootController: this,
       navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate(),
-      gestureListener: _gestureListener,
+      gestureListener: gestureListener,
       widgetDelegate: widgetDelegate,
     );
 
@@ -967,7 +1058,9 @@ class KrakenController extends Controller {
       PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_INIT_END);
     }
 
-    final int contextId = _view.contextId;
+    final int contextId = view.contextId;
+
+    _module = KrakenModuleController(this, contextId);
 
     _module = KrakenModuleController(this, contextId);
 
@@ -988,10 +1081,8 @@ class KrakenController extends Controller {
 
     setupHttpOverrides(httpClientInterceptor, contextId: contextId);
 
-    uriParser ??= UriParser();
-
     if (devToolsService != null) {
-      devToolsService!.init(this);
+      devToolsService.init(this);
     }
   }
 
@@ -1000,18 +1091,6 @@ class KrakenController extends Controller {
     if (event.type == EVENT_CLICK && target != null) {
       _view.shiftFocus(target);
     }
-  }
-
-  late KrakenViewController _view;
-
-  KrakenViewController get view {
-    return _view;
-  }
-
-  late KrakenModuleController _module;
-
-  KrakenModuleController get module {
-    return _module;
   }
 
   final Queue<HistoryItem> previousHistoryStack = Queue();
@@ -1023,7 +1102,7 @@ class KrakenController extends Controller {
     } else if (bundle is AssetsBundle) {
       return Directory(href).uri;
     } else {
-      return fallbackBundleUri(_view.contextId);
+      return fallbackBundleUri(view.contextId);
     }
   }
 
@@ -1037,30 +1116,30 @@ class KrakenController extends Controller {
   }
 
   Future<void> unload() async {
-    assert(!_view._disposed, 'Kraken have already disposed');
+    assert(!view._disposed, 'Kraken have already disposed');
     // Should clear previous page cached ui commands
-    clearUICommand(_view.contextId);
+    clearUICommand(view.contextId);
 
     // Wait for next microtask to make sure C++ native Elements are GC collected.
     Completer completer = Completer();
     Future.microtask(() {
       _module.dispose();
-      _view.dispose();
+      view.dispose();
 
-      allocateNewPage(_view.contextId);
+      allocateNewPage(view.contextId);
 
       _view = KrakenViewController(view.viewportWidth, view.viewportHeight,
-        background: _view.background,
-        enableDebug: _view.enableDebug,
-        contextId: _view.contextId,
+        background: view.background,
+        enableDebug: view.enableDebug,
+        contextId: view.contextId,
         rootController: this,
-        navigationDelegate: _view.navigationDelegate,
-        gestureListener: _view.gestureListener,
-        widgetDelegate: _view.widgetDelegate,
-        originalViewport: _view.viewport
+        navigationDelegate: view.navigationDelegate,
+        gestureListener: view.gestureListener,
+        widgetDelegate: view.widgetDelegate,
+        originalViewport: view.viewport
       );
 
-      _module = KrakenModuleController(this, _view.contextId);
+      _module = KrakenModuleController(this, view.contextId);
 
       completer.complete();
     });
@@ -1086,7 +1165,7 @@ class KrakenController extends Controller {
 
   // reload current kraken view.
   Future<void> reload({String? url}) async {
-    assert(!_view._disposed, 'Kraken have already disposed');
+    assert(!view._disposed, 'Kraken have already disposed');
 
     if (devToolsService != null) {
       devToolsService!.willReload();
@@ -1130,11 +1209,13 @@ class KrakenController extends Controller {
     module.resumeInterval();
   }
 
+  @override
   void dispose() {
-    _view.dispose();
+    super.dispose();
+    view.dispose();
     _module.dispose();
-    _controllerMap[_view.contextId] = null;
-    _controllerMap.remove(_view.contextId);
+    _controllerMap[view.contextId] = null;
+    _controllerMap.remove(view.contextId);
     _nameIdMap.remove(name);
 
     if (devToolsService != null) {
@@ -1166,7 +1247,7 @@ class KrakenController extends Controller {
 
   // preload javascript source and cache it.
   Future<void> loadBundle({KrakenBundle? bundle}) async {
-    assert(!_view._disposed, 'Kraken have already disposed');
+    assert(!view._disposed, 'Kraken have already disposed');
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_LOAD_START);
@@ -1212,7 +1293,7 @@ class KrakenController extends Controller {
   Future<void> evalBundle() async {
     assert(!_view._disposed, 'Kraken have already disposed');
     if (bundle != null) {
-      await bundle!.eval(_view.contextId);
+      await bundle!.eval((_view as KrakenViewController).contextId);
       // trigger DOMContentLoaded event
       module.requestAnimationFrame((_) {
         Event event = Event(EVENT_DOM_CONTENT_LOADED);
@@ -1238,5 +1319,5 @@ class KrakenController extends Controller {
 
 mixin RenderObjectWithControllerMixin {
   // Kraken controller reference which control all kraken created renderObjects.
-  KrakenController? controller;
+  Controller? controller;
 }

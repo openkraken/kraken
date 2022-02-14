@@ -18,7 +18,7 @@ class RenderViewportBox extends RenderProxyBox
     RenderBox? child,
     this.gestureListener,
     this.background,
-    required KrakenController controller,
+    required Controller controller,
   })  : _viewportSize = viewportSize,
         super(child) {
     if (gestureListener != null && gestureListener!.onDrag != null) {

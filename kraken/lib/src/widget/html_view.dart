@@ -49,15 +49,14 @@ class _HTMLViewRenderObjectWidget extends SingleChildRenderObjectWidget {
       throw FlutterError('''Can't get viewportSize from window. Please set viewportWidth and viewportHeight manually.
 This situation often happened when you trying creating kraken when FlutterView not initialized.''');
     }
-
-    KrakenController controller = KrakenController(
+print(_krakenWidget.data);
+    HTMLViewController controller = HTMLViewController(
       shortHash(_krakenWidget.hashCode),
       viewportWidth,
       viewportHeight,
       background: _krakenWidget.background,
       showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
       devToolsService: _krakenWidget.devToolsService,
-      httpClientInterceptor: _krakenWidget.httpClientInterceptor,
       widgetDelegate: _widgetDelegate,
       uriParser: _krakenWidget.uriParser,
     );
@@ -77,7 +76,7 @@ This situation often happened when you trying creating kraken when FlutterView n
   @override
   void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {
     super.updateRenderObject(context, renderObject);
-    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller!;
+    HTMLViewController controller = (renderObject as RenderObjectWithControllerMixin).controller as HTMLViewController;
     controller.name = shortHash(_krakenWidget.hashCode);
 
     bool viewportWidthHasChanged = controller.view.viewportWidth != _krakenWidget.viewportWidth;
@@ -101,7 +100,7 @@ This situation often happened when you trying creating kraken when FlutterView n
 
   @override
   void didUnmountRenderObject(covariant RenderObject renderObject) {
-    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller!;
+    HTMLViewController controller = (renderObject as RenderObjectWithControllerMixin).controller as HTMLViewController;
     controller.dispose();
   }
 
@@ -133,14 +132,12 @@ class HTMLViewState extends KrakenState<HTMLView> {
 
   @override
   Widget build(BuildContext context) {
-    // print('context.widget=${context.widget}');
     return RepaintBoundary(
         child: FocusableActionDetector(
             actions: actionMap,
             focusNode: focusNode,
             onFocusChange: handleFocusChange,
             // TODO: _HTMLViewRenderObjectWidget
-            // child: Text(html),
             child: _HTMLViewRenderObjectWidget(
               context.widget as HTMLView,
               widgetDelegate,
