@@ -236,7 +236,7 @@ TEST(Context, unrejectPromiseErrorWithMultipleContext) {
   bridge->evaluateScript(code, strlen(code), "file://", 0);
   bridge2->evaluateScript(code, strlen(code), "file://", 0);
   EXPECT_EQ(errorHandlerExecuted, true);
-  EXPECT_EQ(errorCalledCount, 2);
+  EXPECT_EQ(errorCalledCount, 4);
 }
 
 TEST(Context, accessGetUICommandItemsAfterDisposed) {
