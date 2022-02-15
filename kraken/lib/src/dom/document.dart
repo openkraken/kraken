@@ -14,7 +14,7 @@ import 'package:kraken/widget.dart';
 class Document extends Node {
 
   final RenderViewportBox viewport;
-  KrakenController controller;
+  Controller controller;
   GestureListener? gestureListener;
   WidgetDelegate? widgetDelegate;
 

@@ -12,6 +12,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:kraken/foundation.dart';
+import 'package:kraken/src/launcher/controller.dart';
 
 class CachedNetworkImageKey {
   CachedNetworkImageKey({
@@ -37,13 +38,13 @@ class CachedNetworkImageKey {
 }
 
 class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
-  const CachedNetworkImage(this.url, {this.scale = 1.0, this.headers, this.contextId});
+  const CachedNetworkImage(this.url, {this.scale = 1.0, this.headers, this.controller});
 
   final String url;
 
   final double scale;
 
-  final int? contextId;
+  final Controller? controller;
 
   final Map<String, String>? headers;
 
@@ -64,7 +65,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
 
   Future<Uint8List> loadFile(CachedNetworkImageKey key, StreamController<ImageChunkEvent> chunkEvents) async {
     HttpCacheController cacheController = HttpCacheController.instance(
-        getOrigin(getReferrer(contextId)));
+        getOrigin(getReferrer(controller)));
 
     Uri uri = Uri.parse(url);
     Uint8List? bytes;
@@ -77,7 +78,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
         print('Error while reading cache, $error\n$stackTrace');
       }
     }
-    
+
     // Fallback to network
     bytes ??= await fetchFile(key, chunkEvents, cacheController);
 

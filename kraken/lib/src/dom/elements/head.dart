@@ -48,8 +48,8 @@ class LinkElement extends Element {
     if (url.isNotEmpty && rel == _REL_STYLESHEET && isConnected) {
       try {
         KrakenBundle bundle = KrakenBundle.fromUrl(url);
-        await bundle.resolve(contextId);
-        await bundle.eval(contextId);
+        await bundle.resolve(ownerDocument.controller);
+        await bundle.eval(ownerDocument.controller);
 
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
@@ -113,7 +113,7 @@ class ScriptElement extends Element {
   }
 
   void _fetchBundle(String src) async {
-    int? contextId = ownerDocument.contextId;
+    Controller controller = ownerDocument.controller;
     if (contextId == null) return;
     // Must
     if (src.isNotEmpty && isConnected && (
@@ -124,8 +124,8 @@ class ScriptElement extends Element {
     )) {
       try {
         KrakenBundle bundle = KrakenBundle.fromUrl(src);
-        await bundle.resolve(contextId);
-        await bundle.eval(contextId);
+        await bundle.resolve(controller);
+        await bundle.eval(controller);
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_LOAD));
@@ -143,8 +143,8 @@ class ScriptElement extends Element {
   @override
   void connectedCallback() async {
     super.connectedCallback();
-    int? contextId = ownerDocument.contextId;
-    if (contextId == null) return;
+    Controller controller = ownerDocument.controller;
+
     String? src = getProperty('src');
     if (src != null) {
       _fetchBundle(src);
@@ -158,12 +158,9 @@ class ScriptElement extends Element {
       });
       String script = buffer.toString();
       if (script.isNotEmpty) {
-        KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
-        if (controller != null) {
-          KrakenBundle bundle = KrakenBundle.fromContent(script, url: controller.href);
-          bundle.resolve(contextId);
-          await bundle.eval(contextId);
-        }
+        KrakenBundle bundle = KrakenBundle.fromContent(script, url: controller.href);
+        bundle.resolve(controller);
+        await bundle.eval(controller);
       }
     }
   }

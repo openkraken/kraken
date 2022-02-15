@@ -11,6 +11,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/module.dart';
 import 'package:meta/meta.dart';
+import 'package:kraken/src/launcher/controller.dart';
 
 typedef EventHandler = void Function(Event event);
 

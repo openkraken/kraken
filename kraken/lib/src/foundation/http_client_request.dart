@@ -8,6 +8,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
+import 'package:kraken/kraken.dart';
 
 import 'http_cache.dart';
 import 'http_cache_object.dart';
@@ -109,19 +110,20 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
   @override
   Future<HttpClientResponse> close() async {
-    int? contextId = KrakenHttpOverrides.getContextHeader(headers);
+    Controller? controller = KrakenHttpOverrides.getControllerFromHeader(headers);
     HttpClientRequest request = this;
 
-    if (contextId != null) {
+    if (controller != null) {
       // Set the default origin and referrer.
-      Uri referrer = getReferrer(contextId);
+      Uri referrer = getReferrer(controller);
       headers.set(HttpHeaders.refererHeader, referrer.toString());
       String origin = getOrigin(referrer);
       headers.set(_HttpHeadersOrigin, origin);
 
       HttpClientInterceptor? clientInterceptor;
-      if (_httpOverrides.hasInterceptor(contextId)) {
-        clientInterceptor = _httpOverrides.getInterceptor(contextId);
+      //TODO: add HTMLViewController.
+      if (controller is KrakenController && _httpOverrides.hasInterceptor(controller.view.contextId)) {
+        clientInterceptor = _httpOverrides.getInterceptor(controller.view.contextId);
       }
 
       // Step 1: Handle request.

@@ -32,7 +32,7 @@ const int WINDOW_ID = -1;
 const int DOCUMENT_ID = -2;
 
 // Error handler when load bundle failed.
-typedef LoadHandler = void Function(KrakenController controller);
+typedef LoadHandler = void Function(Controller controller);
 typedef LoadErrorHandler = void Function(FlutterError error, StackTrace stack);
 typedef JSErrorHandler = void Function(String message);
 typedef PendingCallback = void Function();
@@ -203,6 +203,37 @@ abstract class ViewController {
 
   // Enable print debug message when rendering.
   bool enableDebug;
+
+  Future<void> handleNavigationAction(String? sourceUrl, String targetUrl,
+      KrakenNavigationType navigationType) async {
+    KrakenNavigationAction action =
+    KrakenNavigationAction(sourceUrl, targetUrl, navigationType);
+
+    KrakenNavigationDelegate _delegate = navigationDelegate!;
+
+    try {
+      KrakenNavigationActionPolicy policy =
+      await _delegate.dispatchDecisionHandler(action);
+      if (policy == KrakenNavigationActionPolicy.cancel) return;
+
+      switch (action.navigationType) {
+        case KrakenNavigationType.navigate:
+          await rootController.reload(url: action.target);
+          break;
+        case KrakenNavigationType.reload:
+          await rootController.reload(url: action.source!);
+          break;
+        default:
+        // Navigate and other type, do nothing.
+      }
+    } catch (e, stack) {
+      if (_delegate.errorHandler != null) {
+        _delegate.errorHandler!(e, stack);
+      } else {
+        print('Kraken navigation failed: $e\n$stack');
+      }
+    }
+  }
 }
 
 class HTMLViewViewController extends ViewController {
@@ -717,37 +748,6 @@ class KrakenViewController extends ViewController implements WidgetsBindingObser
     }
   }
 
-  Future<void> handleNavigationAction(String? sourceUrl, String targetUrl,
-      KrakenNavigationType navigationType) async {
-    KrakenNavigationAction action =
-        KrakenNavigationAction(sourceUrl, targetUrl, navigationType);
-
-    KrakenNavigationDelegate _delegate = navigationDelegate!;
-
-    try {
-      KrakenNavigationActionPolicy policy =
-          await _delegate.dispatchDecisionHandler(action);
-      if (policy == KrakenNavigationActionPolicy.cancel) return;
-
-      switch (action.navigationType) {
-        case KrakenNavigationType.navigate:
-          await (rootController as KrakenController).reload(url: action.target);
-          break;
-        case KrakenNavigationType.reload:
-          await (rootController as KrakenController).reload(url: action.source!);
-          break;
-        default:
-        // Navigate and other type, do nothing.
-      }
-    } catch (e, stack) {
-      if (_delegate.errorHandler != null) {
-        _delegate.errorHandler!(e, stack);
-      } else {
-        print('Kraken navigation failed: $e\n$stack');
-      }
-    }
-  }
-
   // Call from JS Bridge before JS side eventTarget object been Garbage collected.
   void disposeEventTarget(int targetId) {
     Node? target = _getEventTargetById<Node>(targetId);
@@ -889,6 +889,19 @@ abstract class Controller {
     return _view;
   }
 
+  late KrakenModuleController _module;
+
+  KrakenModuleController get module {
+    return _module;
+  }
+
+  KrakenBundle? bundle;
+
+  LoadHandler? onLoad;
+
+  // Error handler when load bundle failed.
+  LoadErrorHandler? onLoadError;
+
   @mustCallSuper
   void dispose() {
     _view.dispose();
@@ -898,12 +911,184 @@ abstract class Controller {
     }
   }
 
+  void dispatchEvent(Event event) {
+    EventTarget? target = event.target;
+    if (event.type == EVENT_CLICK && target != null) {
+      _view.shiftFocus(target);
+    }
+  }
+
+  final Queue<HistoryItem> previousHistoryStack = Queue();
+  final Queue<HistoryItem> nextHistoryStack = Queue();
+
+  Uri get referrer {
+    if (bundle is NetworkBundle) {
+      return Uri.parse(href);
+    } else if (bundle is AssetsBundle) {
+      return Directory(href).uri;
+    } else {
+      return fallbackBundleUri(hashCode);
+    }
+  }
+
+  static Uri fallbackBundleUri([int? id]) {
+    // The fallback origin uri, like `vm://bundle/0`
+    return Uri(scheme: 'vm', host: 'bundle', path: id != null ? '$id' : null);
+  }
+
+  void setNavigationDelegate(KrakenNavigationDelegate delegate) {
+    _view.navigationDelegate = delegate;
+  }
+
+  @mustCallSuper
+  Future<void> unload() async {
+    assert(!view._disposed, 'Kraken have already disposed');
+
+    // Wait for next microtask to make sure C++ native Elements are GC collected.
+    Completer completer = Completer();
+    Future.microtask(() {
+      _module.dispose();
+      view.dispose();
+
+      // _view = KrakenViewController(view.viewportWidth, view.viewportHeight,
+      //     background: view.background,
+      //     enableDebug: view.enableDebug,
+      //     contextId: view.contextId,
+      //     rootController: this,
+      //     navigationDelegate: view.navigationDelegate,
+      //     gestureListener: view.gestureListener,
+      //     widgetDelegate: view.widgetDelegate,
+      //     originalViewport: view.viewport
+      // );
+      //
+      // _module = KrakenModuleController(this, view.contextId);
+
+      completer.complete();
+    });
+
+    return completer.future;
+  }
+
+  String get origin => Uri.parse(href).origin;
+
+  KrakenMethodChannel? _methodChannel;
+
+  KrakenMethodChannel? get methodChannel => _methodChannel;
+
+  // If bundle not configured at dart side, url can be obtained from env or native side.
+  Future<KrakenBundle?> get getDefaultBundle async {
+    String? envUrl = (getBundleURLFromEnv() ?? getBundlePathFromEnv());
+    // Load url from native side (Java,Objective-C).
+    if (envUrl == null && methodChannel is KrakenNativeChannel) {
+      envUrl = await (methodChannel as KrakenNativeChannel).getUrl();
+    }
+    if (envUrl != null) {
+      bundle = KrakenBundle.fromUrl(envUrl);
+    }
+  }
+
+  // preload javascript source and cache it.
+  Future<void> loadBundle(KrakenBundle bundle) async {
+    assert(!view._disposed, 'Kraken have already disposed');
+
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_JS_BUNDLE_LOAD_START);
+    }
+
+    if (bundle.src.isEmpty && bundle.content == null && bundle.bytecode == null) {
+      // Do nothing if bundle is empty.
+      return;
+    }
+
+    // Load bundle need push curret href to history.
+    _addHistory(bundle);
+    this.bundle = bundle;
+
+    if (onLoadError != null) {
+      try {
+        await bundle.resolve(this);
+      } catch (e, stack) {
+        onLoadError!(FlutterError(e.toString()), stack);
+      }
+    } else {
+      await bundle.resolve(this);
+    }
+
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_JS_BUNDLE_LOAD_END);
+    }
+  }
+
+  // execute preloaded javascript source
+  Future<void> evalBundle() async {
+    assert(!_view._disposed, 'Kraken have already disposed');
+    if (bundle != null) {
+      await bundle!.eval(this);
+      // trigger DOMContentLoaded event
+      module.requestAnimationFrame((_) {
+        Event event = Event(EVENT_DOM_CONTENT_LOADED);
+        EventTarget window = view.window;
+        window.dispatchEvent(event);
+        // @HACK: window.load should trigger after all image had loaded.
+        // Someone needs to fix this in the future.
+        module.requestAnimationFrame((_) {
+          Event event = Event(EVENT_LOAD);
+          window.dispatchEvent(event);
+        });
+      });
+
+      if (onLoad != null) {
+        // DOM element are created at next frame, so we should trigger onload callback in the next frame.
+        module.requestAnimationFrame((_) {
+          onLoad!(this);
+        });
+      }
+    }
+  }
+
+  String get href {
+    HistoryModule historyModule =
+    module.moduleManager.getModule<HistoryModule>('History')!;
+    return historyModule.href;
+  }
+
+  set href(String value) {
+    _addHistory(KrakenBundle.fromUrl(value));
+  }
+
+  _addHistory(KrakenBundle bundle) {
+    HistoryModule historyModule =
+    module.moduleManager.getModule<HistoryModule>('History')!;
+    historyModule.bundle = bundle;
+  }
+
+  @mustCallSuper
+  // reload current kraken view.
+  Future<void> reload({String? url}) async {
+    assert(!view._disposed, 'Kraken have already disposed');
+
+    if (devToolsService != null) {
+      devToolsService!.willReload();
+    }
+
+    await unload();
+    await loadBundle(KrakenBundle.fromUrl(url ?? href));
+    await evalBundle();
+
+    if (devToolsService != null) {
+      devToolsService!.didReload();
+    }
+  }
+
   Controller(
     String? name, {
       this.uriParser,
       this.devToolsService,
       this.gestureListener,
       this.widgetDelegate,
+      this.bundle,
+      this.onLoad,
+      this.onLoadError
     }
   )  : _name = name {
     uriParser ??= UriParser();
@@ -968,27 +1153,10 @@ class KrakenController extends Controller {
     _name = value;
   }
 
-  late KrakenModuleController _module;
-
-  KrakenModuleController get module {
-    return _module;
-  }
-
-  KrakenBundle? bundle;
-
-  LoadHandler? onLoad;
-
-  // Error handler when load bundle failed.
-  LoadErrorHandler? onLoadError;
-
   // Error handler when got javascript error when evaluate javascript codes.
   JSErrorHandler? onJSError;
 
   final HttpClientInterceptor? httpClientInterceptor;
-
-  KrakenMethodChannel? _methodChannel;
-
-  KrakenMethodChannel? get methodChannel => _methodChannel;
 
   static final Map<String, int> _nameIdMap = {};
   static final SplayTreeMap<int, KrakenController?> _controllerMap = SplayTreeMap();
@@ -1016,6 +1184,15 @@ class KrakenController extends Controller {
     return _view as KrakenViewController;
   }
 
+  @override
+  Future<void> unload() async {
+    super.unload();
+    // Should clear previous page cached ui commands
+    clearUICommand(view.contextId);
+
+    allocateNewPage(view.contextId);
+  }
+
   KrakenController(
     String? name,
     double viewportWidth,
@@ -1027,14 +1204,14 @@ class KrakenController extends Controller {
     KrakenNavigationDelegate? navigationDelegate,
     KrakenMethodChannel? methodChannel,
     WidgetDelegate? widgetDelegate,
-    this.bundle,
-    this.onLoad,
-    this.onLoadError,
+    KrakenBundle? bundle,
+    LoadHandler? onLoad,
+    LoadErrorHandler? onLoadError,
     this.onJSError,
     this.httpClientInterceptor,
     final DevToolsService? devToolsService,
     UriParser? uriParser,
-  }) : super(name, uriParser: uriParser, devToolsService: devToolsService, widgetDelegate: widgetDelegate) {
+  }) : super(name, bundle: bundle, onLoad: onLoad, onLoadError: onLoadError, uriParser: uriParser, devToolsService: devToolsService, widgetDelegate: widgetDelegate) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_PROPERTY_INIT);
       PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_INIT_START);
@@ -1062,12 +1239,10 @@ class KrakenController extends Controller {
 
     _module = KrakenModuleController(this, contextId);
 
-    _module = KrakenModuleController(this, contextId);
-
     if (bundle != null) {
       HistoryModule historyModule =
           module.moduleManager.getModule<HistoryModule>('History')!;
-      historyModule.bundle = bundle!;
+      historyModule.bundle = bundle;
     }
 
     assert(!_controllerMap.containsKey(contextId),
@@ -1083,100 +1258,6 @@ class KrakenController extends Controller {
 
     if (devToolsService != null) {
       devToolsService.init(this);
-    }
-  }
-
-  void dispatchEvent(Event event) {
-    EventTarget? target = event.target;
-    if (event.type == EVENT_CLICK && target != null) {
-      _view.shiftFocus(target);
-    }
-  }
-
-  final Queue<HistoryItem> previousHistoryStack = Queue();
-  final Queue<HistoryItem> nextHistoryStack = Queue();
-
-  Uri get referrer {
-    if (bundle is NetworkBundle) {
-      return Uri.parse(href);
-    } else if (bundle is AssetsBundle) {
-      return Directory(href).uri;
-    } else {
-      return fallbackBundleUri(view.contextId);
-    }
-  }
-
-  static Uri fallbackBundleUri(int id) {
-    // The fallback origin uri, like `vm://bundle/0`
-    return Uri(scheme: 'vm', host: 'bundle', path: '$id');
-  }
-
-  void setNavigationDelegate(KrakenNavigationDelegate delegate) {
-    _view.navigationDelegate = delegate;
-  }
-
-  Future<void> unload() async {
-    assert(!view._disposed, 'Kraken have already disposed');
-    // Should clear previous page cached ui commands
-    clearUICommand(view.contextId);
-
-    // Wait for next microtask to make sure C++ native Elements are GC collected.
-    Completer completer = Completer();
-    Future.microtask(() {
-      _module.dispose();
-      view.dispose();
-
-      allocateNewPage(view.contextId);
-
-      _view = KrakenViewController(view.viewportWidth, view.viewportHeight,
-        background: view.background,
-        enableDebug: view.enableDebug,
-        contextId: view.contextId,
-        rootController: this,
-        navigationDelegate: view.navigationDelegate,
-        gestureListener: view.gestureListener,
-        widgetDelegate: view.widgetDelegate,
-        originalViewport: view.viewport
-      );
-
-      _module = KrakenModuleController(this, view.contextId);
-
-      completer.complete();
-    });
-
-    return completer.future;
-  }
-
-  String get href {
-    HistoryModule historyModule =
-        module.moduleManager.getModule<HistoryModule>('History')!;
-    return historyModule.href;
-  }
-
-  set href(String value) {
-    _addHistory(KrakenBundle.fromUrl(value));
-  }
-
-  _addHistory(KrakenBundle bundle) {
-    HistoryModule historyModule =
-        module.moduleManager.getModule<HistoryModule>('History')!;
-    historyModule.bundle = bundle;
-  }
-
-  // reload current kraken view.
-  Future<void> reload({String? url}) async {
-    assert(!view._disposed, 'Kraken have already disposed');
-
-    if (devToolsService != null) {
-      devToolsService!.willReload();
-    }
-
-    await unload();
-    await loadBundle(bundle: KrakenBundle.fromUrl(url ?? href));
-    await evalBundle();
-
-    if (devToolsService != null) {
-      devToolsService!.didReload();
     }
   }
 
@@ -1241,79 +1322,6 @@ class KrakenController extends Controller {
     if (value == null) return;
     // Set bundleURL should set the url to history module.
     href = value;
-  }
-
-  String get origin => Uri.parse(href).origin;
-
-  // preload javascript source and cache it.
-  Future<void> loadBundle({KrakenBundle? bundle}) async {
-    assert(!view._disposed, 'Kraken have already disposed');
-
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_JS_BUNDLE_LOAD_START);
-    }
-
-    // If bundle not configured at dart side, url can be obtained from env or native side.
-    if (bundle == null) {
-      String? envUrl = (getBundleURLFromEnv() ?? getBundlePathFromEnv());
-      // Load url from native side (Java,Objective-C).
-      if (envUrl == null && methodChannel is KrakenNativeChannel) {
-        envUrl = await (methodChannel as KrakenNativeChannel).getUrl();
-      }
-      if (envUrl != null) {
-        bundle = KrakenBundle.fromUrl(envUrl);
-      }
-    } else if (bundle.src.isEmpty && bundle.content == null && bundle.bytecode == null) {
-      // Do nothing if bundle is empty.
-      return;
-    }
-
-    // Load bundle need push curret href to history.
-    if (bundle != null) {
-      _addHistory(bundle);
-      this.bundle = bundle;
-    }
-
-    if (onLoadError != null) {
-      try {
-        await bundle?.resolve(view.contextId);
-      } catch (e, stack) {
-        onLoadError!(FlutterError(e.toString()), stack);
-      }
-    } else {
-      await bundle?.resolve(view.contextId);
-    }
-
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_JS_BUNDLE_LOAD_END);
-    }
-  }
-
-  // execute preloaded javascript source
-  Future<void> evalBundle() async {
-    assert(!_view._disposed, 'Kraken have already disposed');
-    if (bundle != null) {
-      await bundle!.eval((_view as KrakenViewController).contextId);
-      // trigger DOMContentLoaded event
-      module.requestAnimationFrame((_) {
-        Event event = Event(EVENT_DOM_CONTENT_LOADED);
-        EventTarget window = view.window;
-        window.dispatchEvent(event);
-        // @HACK: window.load should trigger after all image had loaded.
-        // Someone needs to fix this in the future.
-        module.requestAnimationFrame((_) {
-          Event event = Event(EVENT_LOAD);
-          window.dispatchEvent(event);
-        });
-      });
-
-      if (onLoad != null) {
-        // DOM element are created at next frame, so we should trigger onload callback in the next frame.
-        module.requestAnimationFrame((_) {
-          onLoad!(this);
-        });
-      }
-    }
   }
 }
 

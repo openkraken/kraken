@@ -13,6 +13,7 @@ import 'package:kraken/foundation.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/src/module/navigator.dart';
 import 'package:quiver/collection.dart';
+import 'package:kraken/src/launcher/controller.dart';
 
 /// This class allows user to customize Kraken's image loading.
 
@@ -24,9 +25,9 @@ class ImageProviderParams {
 }
 
 class CachedNetworkImageProviderParams extends ImageProviderParams {
-  int? contextId;
+  Controller? controller;
 
-  CachedNetworkImageProviderParams(this.contextId,
+  CachedNetworkImageProviderParams(this.controller,
       {int? cachedWidth, int? cachedHeight})
       : super(cachedWidth: cachedWidth, cachedHeight: cachedHeight);
 }
@@ -123,7 +124,7 @@ ImageType parseImageUrl(Uri resolvedUri, {cache = 'auto'}) {
 }
 
 ImageProvider? getImageProvider(Uri resolvedUri,
-    {int? contextId, cache = 'auto', int? cachedWidth, int? cachedHeight}) {
+    {Controller? controller, cache = 'auto', int? cachedWidth, int? cachedHeight}) {
   ImageType imageType = parseImageUrl(resolvedUri, cache: cache);
   ImageProviderFactory factory = _getImageProviderFactory(imageType);
 
@@ -131,12 +132,12 @@ ImageProvider? getImageProvider(Uri resolvedUri,
     case ImageType.cached:
       return factory(
           resolvedUri,
-          CachedNetworkImageProviderParams(contextId,
+          CachedNetworkImageProviderParams(controller,
               cachedWidth: cachedWidth, cachedHeight: cachedHeight));
     case ImageType.network:
       return factory(
           resolvedUri,
-          CachedNetworkImageProviderParams(contextId,
+          CachedNetworkImageProviderParams(controller,
               cachedWidth: cachedWidth, cachedHeight: cachedHeight));
     case ImageType.file:
       File file = File.fromUri(resolvedUri);
@@ -303,7 +304,7 @@ ImageProvider defaultCachedProviderFactory(
       params.cachedWidth,
       params.cachedHeight,
       CachedNetworkImage(uri.toString(),
-          contextId: (params as CachedNetworkImageProviderParams).contextId));
+          controller: (params as CachedNetworkImageProviderParams).controller));
 }
 
 /// default ImageProviderFactory implementation of [ImageType.network]
@@ -312,7 +313,7 @@ ImageProvider defaultNetworkProviderFactory(
   NetworkImage networkImage = NetworkImage(uri.toString(), headers: {
     HttpHeaders.userAgentHeader: NavigatorModule.getUserAgent(),
     HttpHeaderContext:
-        (params as CachedNetworkImageProviderParams).contextId.toString(),
+        ((params as CachedNetworkImageProviderParams).controller as KrakenController).view.contextId.toString(),
   });
   return KrakenResizeImage.resizeIfNeeded(
       params.cachedWidth, params.cachedHeight, networkImage);

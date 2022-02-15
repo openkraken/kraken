@@ -80,13 +80,10 @@ abstract class KrakenBundle {
   ContentType contentType = ContentType.binary;
 
   @mustCallSuper
-  Future<void> resolve(int? contextId) async {
+  Future<void> resolve(Controller controller) async {
     uri = Uri.parse(src);
-    if (contextId != null) {
-      KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
-      if (controller != null && !isAssetAbsolutePath(src)) {
-        uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri!);
-      }
+    if (!isAssetAbsolutePath(src)) {
+      uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri!);
     }
 
     isResolved = true;
@@ -112,14 +109,15 @@ abstract class KrakenBundle {
     return RawBundle.fromHTML(html, url);
   }
 
-  Future<void> eval(int? contextId) async {
-    if (!isResolved) await resolve(contextId);
+  Future<void> eval(Controller controller) async {
+    if (!isResolved) await resolve(controller);
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_START);
     }
 
-    if (contextId != null) {
+    if (controller is KrakenController) {
+      int contextId = controller.view.contextId;
       // For raw javascript code or bytecode from API directly.
       if (content != null) {
         evaluateScripts(contextId, content!, src, lineOffset);
@@ -146,6 +144,8 @@ abstract class KrakenBundle {
         // eval JavaScript.
         evaluateScripts(contextId, code, src, lineOffset);
       }
+    } else {
+      //TODO: HTMLView eval bundle.
     }
 
     if (kProfileMode) {
@@ -171,8 +171,8 @@ class RawBundle extends KrakenBundle {
   }
 
   @override
-  Future<void> resolve(int? contextId) async {
-    super.resolve(contextId);
+  Future<void> resolve(Controller controller) async {
+    super.resolve(controller);
     isResolved = true;
   }
 }
@@ -184,11 +184,10 @@ class NetworkBundle extends KrakenBundle {
   Map<String, String>? additionalHttpHeaders = {};
 
   @override
-  Future<void> resolve(int? contextId) async {
-    super.resolve(contextId);
-    KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
+  Future<void> resolve(Controller controller) async {
+    super.resolve(controller);
     Uri baseUrl = Uri.parse(controller.href);
-    NetworkAssetBundle bundle = NetworkAssetBundle(controller.uriParser!.resolve(baseUrl, Uri.parse(src)), contextId: contextId, additionalHttpHeaders: additionalHttpHeaders);
+    NetworkAssetBundle bundle = NetworkAssetBundle(controller.uriParser!.resolve(baseUrl, Uri.parse(src)), controller: controller, additionalHttpHeaders: additionalHttpHeaders);
     bundle.httpClient.userAgent = NavigatorModule.getUserAgent();
     String absoluteURL = src;
     rawBundle = await bundle.load(absoluteURL);
@@ -209,12 +208,12 @@ String _resolveStringFromData(ByteData data) {
 class NetworkAssetBundle extends AssetBundle {
   /// Creates an network asset bundle that resolves asset keys as URLs relative
   /// to the given base URL.
-  NetworkAssetBundle(Uri baseUrl, {int? contextId, Map<String, String>? additionalHttpHeaders })
+  NetworkAssetBundle(Uri baseUrl, {this.controller, Map<String, String>? additionalHttpHeaders })
       : _baseUrl = baseUrl,
         _additionalHttpHeaders = additionalHttpHeaders,
         httpClient = HttpClient();
 
-  int? contextId;
+  Controller? controller;
   final Uri _baseUrl;
   final HttpClient httpClient;
   final Map<String, String>? _additionalHttpHeaders;
@@ -230,8 +229,8 @@ class NetworkAssetBundle extends AssetBundle {
       _additionalHttpHeaders?.forEach(request.headers.set);
     }
 
-    if (contextId != null) {
-      KrakenHttpOverrides.setContextHeader(request.headers, contextId!);
+    if (controller is KrakenController) {
+      KrakenHttpOverrides.setContextHeader(request.headers, (controller as KrakenController).view.contextId);
     }
 
     final HttpClientResponse response = await request.close();
@@ -267,8 +266,8 @@ class AssetsBundle extends KrakenBundle {
       : super(url);
 
   @override
-  Future<KrakenBundle> resolve(int? contextId) async {
-    super.resolve(contextId);
+  Future<KrakenBundle> resolve(Controller controller) async {
+    super.resolve(controller);
     // JSBundle get default bundle manifest.
     manifest = AppManifest();
     if (isAssetAbsolutePath(src)) {

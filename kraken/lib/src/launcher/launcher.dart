@@ -42,7 +42,11 @@ void launch({
 
     controller.view.attachTo(RendererBinding.instance!.renderView);
 
-    await controller.loadBundle(bundle: bundle);
+    if (bundle == null) {
+      await controller.loadBundle((await controller.getDefaultBundle)!);
+    } else {
+      await controller.loadBundle(bundle);
+    }
 
     await controller.evalBundle();
   }

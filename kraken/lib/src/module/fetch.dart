@@ -71,9 +71,9 @@ class FetchModule extends BaseModule {
         }
       }
 
-      // Set ContextID Header
+      // Set controller hascode Header
       if (moduleManager != null) {
-        request.headers.set(HttpHeaderContext, moduleManager!.contextId.toString());
+        request.headers.set(HttpHeaderContext, moduleManager!.controller.hashCode.toString());
       }
 
       if (data is List<int>) {

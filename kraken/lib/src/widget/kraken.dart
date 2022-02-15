@@ -129,27 +129,21 @@ class Kraken extends StatefulWidget {
 
   loadBundle(KrakenBundle bundle) async {
     await controller!.unload();
-    await controller!.loadBundle(
-        bundle: bundle
-    );
+    await controller!.loadBundle(bundle);
     _evalBundle(controller!, animationController);
   }
 
   @deprecated
   loadContent(String bundleContent) async {
     await controller!.unload();
-    await controller!.loadBundle(
-        bundle: KrakenBundle.fromContent(bundleContent)
-    );
+    await controller!.loadBundle(KrakenBundle.fromContent(bundleContent));
     _evalBundle(controller!, animationController);
   }
 
   @deprecated
   loadByteCode(Uint8List bundleByteCode) async {
     await controller!.unload();
-    await controller!.loadBundle(
-        bundle: KrakenBundle.fromBytecode(bundleByteCode)
-    );
+    await controller!.loadBundle(KrakenBundle.fromBytecode(bundleByteCode));
     _evalBundle(controller!, animationController);
   }
 
@@ -166,9 +160,7 @@ class Kraken extends StatefulWidget {
       bundle = KrakenBundle.fromUrl(bundleURL);
     }
 
-    await controller!.loadBundle(
-        bundle: bundle
-    );
+    await controller!.loadBundle(bundle);
     _evalBundle(controller!, animationController);
   }
 
@@ -185,9 +177,7 @@ class Kraken extends StatefulWidget {
       bundle = KrakenBundle.fromUrl(bundlePath);
     }
 
-    await controller!.loadBundle(
-        bundle: bundle
-    );
+    await controller!.loadBundle(bundle);
     _evalBundle(controller!, animationController);
   }
 
@@ -994,11 +984,9 @@ class _KrakenRenderObjectElement extends SingleChildRenderObjectElement {
     // So we bind _KrakenRenderObjectElement into KrakenController, and widgetElements created by controller can follow this to the root.
     controller.rootFlutterElement = this;
 
-    if (controller is KrakenController) {
-      await controller.loadBundle();
+    await controller.loadBundle((await controller.getDefaultBundle)!);
 
-      _evalBundle(controller, widget._krakenWidget.animationController);
-    }
+    _evalBundle(controller, widget._krakenWidget.animationController);
   }
 
   // RenderObjects created by kraken are manager by kraken itself. There are no needs to operate renderObjects on _KrakenRenderObjectElement.
@@ -1013,7 +1001,7 @@ class _KrakenRenderObjectElement extends SingleChildRenderObjectElement {
   _KrakenRenderObjectWidget get widget => super.widget as _KrakenRenderObjectWidget;
 }
 
-void _evalBundle(KrakenController controller, AnimationController? animationController) async {
+void _evalBundle(Controller controller, AnimationController? animationController) async {
   // Execute JavaScript scripts will block the Flutter UI Threads.
   // Listen for animationController listener to make sure to execute Javascript after route transition had completed.
   if (animationController != null) {

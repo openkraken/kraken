@@ -179,7 +179,7 @@ class CSSColorStop {
 class CSSBackgroundImage {
   List<CSSFunctionalNotation> functions;
   RenderStyle renderStyle;
-  KrakenController controller;
+  Controller controller;
   CSSBackgroundImage(this.functions, this.renderStyle, this.controller);
 
   ImageProvider? get image {
@@ -195,7 +195,7 @@ class CSSBackgroundImage {
         Uri uri = Uri.parse(url);
         if (url.isNotEmpty) {
           uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri);
-          return getImageProvider(uri, contextId: controller.view.contextId);
+          return getImageProvider(uri, controller: controller);
         }
       }
     }
@@ -487,7 +487,7 @@ class CSSBackground {
     }
   }
 
-  static resolveBackgroundImage(String present, RenderStyle renderStyle, String property, KrakenController controller) {
+  static resolveBackgroundImage(String present, RenderStyle renderStyle, String property, Controller controller) {
     List<CSSFunctionalNotation> functions = CSSFunction.parseFunction(present);
     return CSSBackgroundImage(functions, renderStyle, controller);
   }

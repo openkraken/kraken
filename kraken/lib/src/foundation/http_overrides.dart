@@ -19,6 +19,11 @@ class KrakenHttpOverrides extends HttpOverrides {
     return _instance!;
   }
 
+  static Controller? getControllerFromHeader(HttpHeaders headers) {
+    // TODO: Get controller from headers.
+    return KrakenController('', 100, 100);
+  }
+
   static int? getContextHeader(HttpHeaders headers) {
     String? intVal = headers.value(HttpHeaderContext);
     if (intVal == null) {
@@ -99,11 +104,9 @@ String getOrigin(Uri uri) {
 }
 
 // @TODO: Remove controller dependency.
-Uri getReferrer(int? contextId) {
-  KrakenController? controller = KrakenController
-      .getControllerOfJSContextId(contextId);
+Uri getReferrer(Controller? controller) {
   if (controller != null) {
     return controller.referrer;
   }
-  return KrakenController.fallbackBundleUri(contextId ?? 0);
+  return Controller.fallbackBundleUri(controller.hashCode);
 }

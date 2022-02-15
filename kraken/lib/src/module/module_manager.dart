@@ -18,14 +18,14 @@ typedef NewModuleCreator = BaseModule Function(ModuleManager);
 typedef ModuleCreator = BaseModule Function(ModuleManager? moduleManager);
 
 class ModuleManager {
-  final int contextId;
+  final int? _contextId;
   final KrakenController controller;
 
   static final Map<String, ModuleCreator> _creatorMap = {};
   static bool inited = false;
   final Map<String, BaseModule> _moduleMap = {};
 
-  ModuleManager(this.controller, this.contextId) {
+  ModuleManager(this.controller, [int? contextId]) : _contextId = contextId {
     if (!inited) {
       defineModule((ModuleManager? moduleManager) => AsyncStorageModule(moduleManager));
       defineModule((ModuleManager? moduleManager) => ClipBoardModule(moduleManager));
@@ -59,7 +59,9 @@ class ModuleManager {
   }
 
   void emitModuleEvent(String moduleName, {Event? event, Object? data}) {
-    bridge.emitModuleEvent(contextId, moduleName, event, jsonEncode(data));
+    if (_contextId != null) {
+      bridge.emitModuleEvent(_contextId!, moduleName, event, jsonEncode(data));
+    }
   }
 
   String invokeModule(String moduleName, String method, dynamic params, InvokeModuleCallback callback) {
