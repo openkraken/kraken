@@ -290,6 +290,8 @@ class KrakenResizeImage extends ResizeImage {
     if (cacheWidth != null && cacheHeight != null
       && (objectFit == BoxFit.contain || objectFit == BoxFit.cover)
     ) {
+      // When targetWidth or targetHeight is not set at the same time,
+      // image will be resized according to its aspect radio.
       if (objectFit == BoxFit.contain) {
         if (cacheWidth / cacheHeight > naturalWidth / naturalHeight) {
           targetHeight = cacheHeight;
