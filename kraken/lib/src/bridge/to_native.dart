@@ -510,7 +510,7 @@ void flushUICommand() {
       UICommandType commandType = command.type;
       int id = command.id;
       Pointer nativePtr = command.nativePtr;
-
+      print(command);
       try {
         switch (commandType) {
           case UICommandType.createElement:
