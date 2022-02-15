@@ -66,6 +66,13 @@ IMPL_PROPERTY_GETTER(Event, defaultPrevented)(JSContext* ctx, JSValue this_val, 
 
 IMPL_PROPERTY_GETTER(Event, target)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
+
+  // Hack: m_context->window() are not real global object, which are strict equal to globalThis.
+  // But we configure m_context->window() to simulate globalThis and can access all global properties and methods.
+  if (eventInstance->nativeEvent->target == eventInstance->m_context->window()) {
+    return JS_DupValue(ctx, eventInstance->m_context->global());
+  }
+
   if (eventInstance->nativeEvent->target != nullptr) {
     auto instance = reinterpret_cast<EventTargetInstance*>(eventInstance->nativeEvent->target);
     return JS_DupValue(ctx, instance->jsObject);
@@ -75,6 +82,14 @@ IMPL_PROPERTY_GETTER(Event, target)(JSContext* ctx, JSValue this_val, int argc, 
 
 IMPL_PROPERTY_GETTER(Event, srcElement)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
+
+  // Hack: m_context->window() are not real global object, which are strict equal to globalThis.
+  // But we configure m_context->window() to simulate globalThis and can access all global properties and methods.
+  if (eventInstance->nativeEvent->target == eventInstance->m_context->window()) {
+    return JS_DupValue(ctx, eventInstance->m_context->global());
+  }
+
+
   if (eventInstance->nativeEvent->target != nullptr) {
     auto instance = reinterpret_cast<EventTargetInstance*>(eventInstance->nativeEvent->target);
     return JS_DupValue(ctx, instance->jsObject);
@@ -84,6 +99,13 @@ IMPL_PROPERTY_GETTER(Event, srcElement)(JSContext* ctx, JSValue this_val, int ar
 
 IMPL_PROPERTY_GETTER(Event, currentTarget)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
+
+  // Hack: m_context->window() are not real global object, which are strict equal to globalThis.
+  // But we configure m_context->window() to simulate globalThis and can access all global properties and methods.
+  if (eventInstance->nativeEvent->target == eventInstance->m_context->window()) {
+    return JS_DupValue(ctx, eventInstance->m_context->global());
+  }
+
   if (eventInstance->nativeEvent->currentTarget != nullptr) {
     auto instance = reinterpret_cast<EventTargetInstance*>(eventInstance->nativeEvent->currentTarget);
     return JS_DupValue(ctx, instance->jsObject);

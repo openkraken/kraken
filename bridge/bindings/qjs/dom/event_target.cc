@@ -149,6 +149,7 @@ JSValue EventTarget::dispatchEvent(JSContext* ctx, JSValue this_val, int argc, J
 
   JSValue eventValue = argv[0];
   auto eventInstance = reinterpret_cast<EventInstance*>(JS_GetOpaque(eventValue, EventTarget::classId(eventValue)));
+  eventInstance->nativeEvent->target = eventTargetInstance;
   return JS_NewBool(ctx, eventTargetInstance->dispatchEvent(eventInstance));
 }
 
@@ -187,9 +188,8 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
   std::string eventTypeStr = toUTF8(u16EventType);
   JSAtom eventType = JS_NewAtom(m_ctx, eventTypeStr.c_str());
 
-  // Modify the currentTarget and target to this.
-  // https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/dom/events/event_target.cc;l=713;drc=197ed39fa22e5ce84a2ea31aef039b5179a549ff;bpv=1;bpt=1
-  eventInstance->nativeEvent->currentTarget = eventInstance->nativeEvent->target = this;
+  // Modify the currentTarget to this.
+  eventInstance->nativeEvent->currentTarget = this;
 
   // Dispatch event listeners writen by addEventListener
   auto _dispatchEvent = [&eventInstance, this](JSValue handler) {
