@@ -1,4 +1,4 @@
-xdescribe('Background linear-gradient', () => {
+describe('Background linear-gradient', () => {
   it('linear-gradient', async () => {
     var div1 = document.createElement('div');
     Object.assign(div1.style, {
@@ -25,7 +25,7 @@ xdescribe('Background linear-gradient', () => {
   });
 
 
-  it('linear-gradient and remove', async (done) => {
+  xit('linear-gradient and remove', async (done) => {
     var div1 = document.createElement('div');
     Object.assign(div1.style, {
       width: '200px',
