@@ -16,12 +16,15 @@ import 'package:kraken/foundation.dart';
 class CachedNetworkImageKey {
   CachedNetworkImageKey({
     required this.url,
-    required this.scale
+    required this.scale,
+    required this.objectFit
   });
 
   final String url;
 
   final double scale;
+
+  final BoxFit objectFit;
 
   @override
   bool operator ==(Object other) {
@@ -29,21 +32,24 @@ class CachedNetworkImageKey {
       return false;
     return other is CachedNetworkImageKey
         && other.url == url
-        && other.scale == scale;
+        && other.scale == scale
+        && other.objectFit == objectFit;
   }
 
   @override
-  int get hashCode => hashValues(url, scale);
+  int get hashCode => hashValues(url, scale, objectFit);
 }
 
 class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
-  const CachedNetworkImage(this.url, {this.scale = 1.0, this.headers, this.contextId});
+  const CachedNetworkImage(this.url, {this.scale = 1.0, this.objectFit = BoxFit.fill, this.headers, this.contextId});
 
   final String url;
 
   final double scale;
 
   final int? contextId;
+
+  final BoxFit objectFit;
 
   final Map<String, String>? headers;
 
@@ -77,7 +83,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
         print('Error while reading cache, $error\n$stackTrace');
       }
     }
-    
+
     // Fallback to network
     bytes ??= await fetchFile(key, chunkEvents, cacheController);
 
@@ -136,7 +142,8 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
   Future<CachedNetworkImageKey> obtainKey(ImageConfiguration configuration) {
     return SynchronousFuture<CachedNetworkImageKey>(CachedNetworkImageKey(
       url: url,
-      scale: scale
+      scale: scale,
+      objectFit: objectFit,
     ));
   }
 

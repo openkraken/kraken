@@ -344,6 +344,7 @@ ImageProvider defaultCachedProviderFactory(
     params.cachedHeight,
     params.objectFit,
     CachedNetworkImage(uri.toString(),
+        objectFit: params.objectFit ?? BoxFit.fill,
         contextId: (params as CachedNetworkImageProviderParams).contextId)
   );
 }
