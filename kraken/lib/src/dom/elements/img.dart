@@ -333,7 +333,7 @@ class ImageElement extends Element {
         resolvedUri,
         cachedWidth: cachedWidth,
         cachedHeight: cachedHeight,
-        objectFit: objectFit
+//        objectFit: objectFit
       );
     }
     if (provider == null) return;

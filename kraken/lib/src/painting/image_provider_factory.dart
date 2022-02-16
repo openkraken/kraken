@@ -279,7 +279,7 @@ class KrakenResizeImage extends ResizeImage {
 
     double naturalWidth = descriptor.width.toDouble();
     double naturalHeight = descriptor.height.toDouble();
-    _imageNaturalSize[key] = Size(descriptor.width.toDouble(), descriptor.height.toDouble());
+    _imageNaturalSize[key] = Size(naturalWidth, naturalHeight);
 
     int? targetWidth;
     int? targetHeight;
