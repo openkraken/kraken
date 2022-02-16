@@ -21,12 +21,12 @@ class TextNode extends Node {
   static const String NORMAL_SPACE = '\u0020';
   // The text string.
   String? _data;
-  String get data => (_data == null || _data!.isEmpty) ? '' : _data!;
+  String get data => _data ?? '';
 
   set data(String? newData) {
     assert(newData != null);
 
-    String oldData = _data!;
+    String oldData = data;
     if (oldData == newData) return;
 
     _data = newData;
