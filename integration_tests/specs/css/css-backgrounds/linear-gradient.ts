@@ -1,4 +1,4 @@
-describe('Background linear-gradient', () => {
+xdescribe('Background linear-gradient', () => {
   it('linear-gradient', async () => {
     var div1 = document.createElement('div');
     Object.assign(div1.style, {
