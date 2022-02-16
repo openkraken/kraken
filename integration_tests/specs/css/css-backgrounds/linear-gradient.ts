@@ -43,7 +43,7 @@ describe('Background linear-gradient', () => {
     });
   });
 
-  xit('conic-gradient', async () => {
+  it('conic-gradient', async () => {
     var div2 = document.createElement('div');
     Object.assign(div2.style, {
       width: '200px',
