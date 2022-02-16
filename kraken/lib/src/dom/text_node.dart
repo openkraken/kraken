@@ -33,7 +33,7 @@ class TextNode extends Node {
 
     // Empty string of textNode should not attach to render tree.
     if (oldData.isNotEmpty && newData!.isEmpty) {
-      detach();
+      _detachRenderTextBox();
     } else if (oldData.isEmpty && newData!.isNotEmpty) {
       attachTo(parentElement!);
     } else {
@@ -87,7 +87,7 @@ class TextNode extends Node {
   }
 
   // Detach renderObject of current node from parent
-  void detach() {
+  void _detachRenderTextBox() {
     if (isRendererAttached) {
       RenderTextBox renderTextBox = _renderTextBox!;
       ContainerRenderObjectMixin parent = renderTextBox.parent as ContainerRenderObjectMixin;
@@ -97,8 +97,8 @@ class TextNode extends Node {
 
   // Detach renderObject of current node from parent
   @override
-  void disposeRenderObject({ bool deep = false }) {
-    detach();
+  void unmountRenderObject({ bool deep = false }) {
+    _detachRenderTextBox();
     _renderTextBox = null;
   }
 
@@ -114,7 +114,7 @@ class TextNode extends Node {
   void dispose() {
     super.dispose();
 
-    disposeRenderObject();
+    unmountRenderObject();
 
     assert(_renderTextBox == null);
   }

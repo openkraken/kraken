@@ -646,21 +646,10 @@ class Element extends Node
   @override
   void dispose() {
     if (isRendererAttached) {
-      disposeRenderObject();
+      unmountRenderObject();
     }
 
-    RenderBoxModel? _renderBoxModel = renderBoxModel;
-    Element? _parentElement = parentElement;
-
-    // Call dispose method of renderBoxModel when GC auto dispose element
-    if (_renderBoxModel != null) {
-      _renderBoxModel.dispose();
-    }
-
-    if (_parentElement != null) {
-      _parentElement.removeChild(this);
-    }
-
+    parentElement?.removeChild(this);
     renderStyle.detach();
     style.dispose();
     attributes.clear();
@@ -702,9 +691,9 @@ class Element extends Node
     }
   }
 
-  /// Release any resources held by [renderBoxModel].
+  /// Unmount [renderBoxModel].
   @override
-  void disposeRenderObject({ bool deep = false }) {
+  void unmountRenderObject({ bool deep = false }) {
     if (renderBoxModel == null) return;
 
     willDetachRenderer();
@@ -712,14 +701,19 @@ class Element extends Node
     // Dispose all renderObject when deep.
     if (deep) {
       for (Node child in childNodes) {
-        child.disposeRenderObject(deep: true);
+        child.unmountRenderObject(deep: true);
       }
     }
 
     didDetachRenderer();
 
-    // Call dispose method of renderBoxModel when it is detached from tree.
-    renderBoxModel!.dispose();
+    // Ensure pending layout/compositeBitsUpdate/paint render object to be finished.
+    SchedulerBinding.instance!.addPostFrameCallback(_disposeRenderBoxModel);
+  }
+
+  // Call dispose method of renderBoxModel when it is detached from tree.
+  void _disposeRenderBoxModel([_]) {
+    renderBoxModel?.dispose();
     renderBoxModel = null;
   }
 
@@ -778,7 +772,7 @@ class Element extends Node
     // Only append node types which is visible in RenderObject tree
     // Only remove childNode when it has parent
     if (child.isRendererAttached) {
-      child.disposeRenderObject();
+      child.unmountRenderObject();
     }
     // Update renderStyle tree.
     if (child is Element) {
@@ -915,7 +909,7 @@ class Element extends Node
 
     // Destroy renderer of element when display is changed to none.
     if (presentDisplay == CSSDisplay.none) {
-      disposeRenderObject();
+      unmountRenderObject();
       return;
     }
 
@@ -1549,6 +1543,12 @@ class Element extends Node
     SchedulerBinding.instance!.addPostFrameCallback((_) async {
       Uint8List captured;
       RenderBoxModel _renderBoxModel = renderBoxModel!;
+
+      // If prev flush paint with error, render object keeps NEEDS-PAINT flag,
+      // will cause layer not exists.
+      assert(!_renderBoxModel.debugNeedsPaint, () {
+        debugPrint('Failed toBlob at $this, flush painting may raise error.');
+      });
       if (_renderBoxModel.hasSize && _renderBoxModel.size.isEmpty) {
         // Return a blob with zero length.
         captured = Uint8List(0);
