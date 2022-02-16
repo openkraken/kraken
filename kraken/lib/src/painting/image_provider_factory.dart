@@ -312,10 +312,10 @@ class KrakenResizeImage extends ResizeImage {
 
     // Resize image size should not be larger than its natural size.
     if (!allowUpscaling) {
-      if (targetWidth != null && targetWidth > descriptor.width) {
+      if (targetWidth != null && targetWidth > descriptor.width * window.devicePixelRatio) {
         targetWidth = descriptor.width;
       }
-      if (targetHeight != null && targetHeight > descriptor.height) {
+      if (targetHeight != null && targetHeight > descriptor.height * window.devicePixelRatio) {
         targetHeight = descriptor.height;
       }
     }
