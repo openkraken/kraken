@@ -12,7 +12,7 @@ describe('Background linear-gradient', () => {
     await snapshot(div1);
   });
 
-  fit('linear-gradient with many right brackets', async () => {
+  xit('linear-gradient with many right brackets', async () => {
     var div1 = document.createElement('div');
     Object.assign(div1.style, {
       width: '200px',
@@ -25,7 +25,7 @@ describe('Background linear-gradient', () => {
   });
 
 
-  fit('linear-gradient and remove', async (done) => {
+  it('linear-gradient and remove', async (done) => {
     var div1 = document.createElement('div');
     Object.assign(div1.style, {
       width: '200px',

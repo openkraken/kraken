@@ -1,4 +1,4 @@
-describe('object-fit', () => {
+fdescribe('object-fit', () => {
   it('should works with fill of image when width is larger than heigth', async () => {
     let image;
     image = createElement(
