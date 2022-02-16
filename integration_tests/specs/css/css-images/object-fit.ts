@@ -159,7 +159,7 @@ describe('object-fit', () => {
     await snapshot(0.1);
   });
 
-  fit('should works with contain of image aspect ratio smaller than size aspect ratio when width is smaller than heigth', async () => {
+  it('should works with contain of image aspect ratio smaller than size aspect ratio when width is smaller than heigth', async () => {
     let image;
     image = createElement(
       'img',
@@ -179,7 +179,7 @@ describe('object-fit', () => {
     await snapshot(0.1);
   });
 
-  fit('should works with contain of image aspect ratio larger than size aspect ratio  when width is smaller than heigth', async () => {
+  it('should works with contain of image aspect ratio larger than size aspect ratio  when width is smaller than heigth', async () => {
     let image;
     image = createElement(
       'img',

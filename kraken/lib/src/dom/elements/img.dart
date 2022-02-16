@@ -360,7 +360,6 @@ class ImageElement extends Element {
   // Callback when image are loaded, encoded and available to use.
   // This callback may fire multiple times when image have multiple frames (such as an animated GIF).
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
-    print('imageInfo----------- $imageInfo');
     _replaceImage(info: imageInfo);
     _frameCount++;
 
