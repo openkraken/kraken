@@ -1,4 +1,4 @@
-fdescribe('object-fit', () => {
+describe('object-fit', () => {
   it('should works with fill of image when width is larger than heigth', async () => {
     let image;
     image = createElement(
@@ -59,7 +59,7 @@ fdescribe('object-fit', () => {
     await snapshot(0.1);
   });
 
-  it('should works with cover of image aspect ratio larger than size aspect ratio  when width is larger than heigth', async () => {
+  fit('should works with cover of image aspect ratio larger than size aspect ratio  when width is larger than heigth', async () => {
     let image;
     image = createElement(
       'img',
@@ -99,7 +99,7 @@ fdescribe('object-fit', () => {
     await snapshot(0.1);
   });
 
-  it('should works with cover of image aspect ratio larger than size aspect ratio  when width is smaller than heigth', async () => {
+  fit('should works with cover of image aspect ratio larger than size aspect ratio  when width is smaller than heigth', async () => {
     let image;
     image = createElement(
       'img',
@@ -139,7 +139,7 @@ fdescribe('object-fit', () => {
     await snapshot(0.1);
   });
 
-  it('should works with contain of image aspect ratio larger than size aspect ratio  when width is larger than heigth', async () => {
+  fit('should works with contain of image aspect ratio larger than size aspect ratio  when width is larger than heigth', async () => {
     let image;
     image = createElement(
       'img',
@@ -179,7 +179,7 @@ fdescribe('object-fit', () => {
     await snapshot(0.1);
   });
 
-  it('should works with contain of image aspect ratio larger than size aspect ratio  when width is smaller than heigth', async () => {
+  fit('should works with contain of image aspect ratio larger than size aspect ratio  when width is smaller than heigth', async () => {
     let image;
     image = createElement(
       'img',
