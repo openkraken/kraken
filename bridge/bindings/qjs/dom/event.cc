@@ -4,11 +4,11 @@
  */
 
 #include "event.h"
+#include "bindings/qjs/bom/window.h"
 #include "bindings/qjs/qjs_patch.h"
 #include "custom_event.h"
 #include "event_target.h"
 #include "kraken_bridge.h"
-#include "bindings/qjs/bom/window.h"
 
 namespace kraken::binding::qjs {
 
