@@ -49,7 +49,7 @@ class _HTMLViewRenderObjectWidget extends SingleChildRenderObjectWidget {
       throw FlutterError('''Can't get viewportSize from window. Please set viewportWidth and viewportHeight manually.
 This situation often happened when you trying creating kraken when FlutterView not initialized.''');
     }
-print(_krakenWidget.data);
+    print(_krakenWidget.bundle);
     HTMLViewController controller = HTMLViewController(
       shortHash(_krakenWidget.hashCode),
       viewportWidth,
@@ -126,9 +126,9 @@ class _HTMLViewRenderObjectElement extends SingleChildRenderObjectElement {
 }
 
 class HTMLViewState extends KrakenState<HTMLView> {
-  final String html;
+  final KrakenBundle bundle;
 
-  HTMLViewState(this.html);
+  HTMLViewState(this.bundle);
 
   @override
   Widget build(BuildContext context) {
@@ -149,8 +149,8 @@ class HTMLViewState extends KrakenState<HTMLView> {
 
 class HTMLView extends StatefulWidget {
 
-  // the string of HTML.
-  final String data;
+  // the bundle of HTML.
+  final KrakenBundle bundle;
 
   // the width of krakenWidget.
   final double? viewportWidth;
@@ -172,7 +172,8 @@ class HTMLView extends StatefulWidget {
   // Trigger when kraken controller once created.
   final OnControllerCreated? onControllerCreated;
 
-  HTMLView(this.data, {
+  HTMLView({
+    required this.bundle,
     this.viewportWidth,
     this.viewportHeight,
     this.background,
@@ -183,5 +184,5 @@ class HTMLView extends StatefulWidget {
   });
 
   @override
-  HTMLViewState createState() => HTMLViewState(data);
+  HTMLViewState createState() => HTMLViewState(bundle);
 }
