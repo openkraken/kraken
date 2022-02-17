@@ -1017,13 +1017,12 @@ class KrakenController {
     return completer.future;
   }
 
-  Uri? get current {
-    HistoryModule historyModule =
-    module.moduleManager.getModule<HistoryModule>('History')!;
+  Uri? get _uri {
+    HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
     return historyModule.stackTop?.resolvedUri;
   }
 
-  String get currentUrl => current?.toString() ?? '';
+  String get url => _uri?.toString() ?? '';
 
   _addHistory(KrakenBundle bundle) {
     HistoryModule historyModule =
@@ -1063,6 +1062,12 @@ class KrakenController {
 
     if (devToolsService != null) {
       devToolsService!.didReload();
+    }
+  }
+
+  String? getResourceContent(String? url) {
+    if (url == this.url) {
+      return entrypoint?.content;
     }
   }
 
@@ -1107,7 +1112,7 @@ class KrakenController {
     }
   }
 
-  String get origin => Uri.parse(currentUrl).origin;
+  String get origin => Uri.parse(url).origin;
 
   Future<void> executeEntrypoint({
     bool shouldResolve = true,

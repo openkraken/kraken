@@ -213,8 +213,9 @@ class InspectPageModule extends UIInspectorModule {
         handleScreencastFrameAck(params!);
         break;
       case 'getResourceContent':
+        String? url = params!['url'];
         sendToFrontend(id, JSONEncodableMap({
-          'content': (await devtoolsService.controller?.entrypoint)!.content,
+          'content': devtoolsService.controller?.getResourceContent(url),
           'base64Encoded': false
         }));
         break;

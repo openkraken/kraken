@@ -156,7 +156,7 @@ class ScriptElement extends Element {
     )) {
       try {
         // Resolve uri.
-        String baseUrl = ownerDocument.controller.currentUrl;
+        String baseUrl = ownerDocument.controller.url;
         Uri baseUri = Uri.parse(baseUrl);
         Uri uri = ownerDocument.controller.uriParser!.resolve(baseUri, Uri.parse(src));
         // Load and evaluate using kraken bundle.
@@ -192,7 +192,7 @@ class ScriptElement extends Element {
       if (script != null && script.isNotEmpty) {
         KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
         if (controller != null) {
-          KrakenBundle bundle = KrakenBundle.fromContent(script, url: controller.currentUrl);
+          KrakenBundle bundle = KrakenBundle.fromContent(script, url: controller.url);
           await bundle.resolve(contextId);
           bundle.eval(contextId);
         }

@@ -149,8 +149,8 @@ class InspectorDocument extends JSONEncodable {
         'nodeName': '#document',
         'childNodeCount': 1,
         'children': [child.toJson()],
-        'baseURL': owner.controller.currentUrl,
-        'documentURL': owner.controller.currentUrl,
+        'baseURL': owner.controller.url,
+        'documentURL': owner.controller.url,
       },
     };
   }

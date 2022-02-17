@@ -126,7 +126,7 @@ class HistoryModule extends BaseModule {
       Uri currentUri = Uri.parse(currentUrl);
 
       Uri uri = Uri.parse(url!);
-      uri = controller.uriParser!.resolve(Uri.parse(controller.currentUrl), uri);
+      uri = controller.uriParser!.resolve(Uri.parse(controller.url), uri);
 
       if (uri.host.isNotEmpty && uri.host != currentUri.host) {
         print('Failed to execute \'pushState\' on \'History\': '
@@ -152,7 +152,7 @@ class HistoryModule extends BaseModule {
       Uri currentUri = Uri.parse(currentUrl);
 
       Uri uri = Uri.parse(url!);
-      uri = controller.uriParser!.resolve(Uri.parse(controller.currentUrl), uri);
+      uri = controller.uriParser!.resolve(Uri.parse(controller.url), uri);
 
       if (uri.host.isNotEmpty && uri.host != currentUri.host) {
         print('Failed to execute \'pushState\' on \'History\': '
