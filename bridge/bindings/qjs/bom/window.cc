@@ -63,11 +63,9 @@ JSValue Window::postMessage(JSContext* ctx, JSValue this_val, int argc, JSValue*
 
   JSValue messageEventInitValue = JS_NewObject(ctx);
 
-  // TODO: convert originValue to current src.
-  JSValue messageOriginValue = JS_NewString(ctx, "");
-
   JS_SetPropertyStr(ctx, messageEventInitValue, "data", JS_DupValue(ctx, messageValue));
-  JS_SetPropertyStr(ctx, messageEventInitValue, "origin", messageOriginValue);
+  // TODO: convert originValue to current src.
+  JS_SetPropertyStr(ctx, messageEventInitValue, "origin", JS_NewString(ctx, ""));
 
   JSValue messageType = JS_NewString(ctx, "message");
   JSValue arguments[] = {messageType, messageEventInitValue};
@@ -80,7 +78,6 @@ JSValue Window::postMessage(JSContext* ctx, JSValue this_val, int argc, JSValue*
   JS_FreeValue(ctx, messageEventValue);
   JS_FreeValue(ctx, messageEventInitValue);
   JS_FreeValue(ctx, globalObjectValue);
-  JS_FreeValue(ctx, messageOriginValue);
   return JS_NULL;
 }
 
