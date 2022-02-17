@@ -22,19 +22,18 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 /// laptops, desktop screens up to QHD, low-end tablets such as Kindle Fire).
 const double _kLowDprLimit = 2.0;
 
-class CachedAssetBundleImageKey {
-  /// Creates the key for an [CachedAssetImage] or [CachedAssetBundleImageProvider].
+// Forked from Flutter [AssetBundleImageKey] Class, add objectFit key.
+// https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/image_provider.dart#L594
+class KrakenAssetBundleImageKey {
+  /// Creates the key for an [KrakenAssetImage] or [KrakenAssetBundleImageProvider].
   ///
   /// The arguments must not be null.
-  const CachedAssetBundleImageKey({
+  const KrakenAssetBundleImageKey({
     required this.bundle,
     required this.name,
     required this.scale,
     required this.objectFit,
-  }) : assert(bundle != null),
-      assert(name != null),
-      assert(scale != null),
-      assert(objectFit != null);
+  });
 
   /// The bundle from which the image will be obtained.
   ///
@@ -55,7 +54,7 @@ class CachedAssetBundleImageKey {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    return other is CachedAssetBundleImageKey
+    return other is KrakenAssetBundleImageKey
       && other.bundle == bundle
       && other.name == name
       && other.scale == scale
@@ -66,24 +65,22 @@ class CachedAssetBundleImageKey {
   int get hashCode => hashValues(bundle, name, scale, objectFit);
 }
 
-/// A subclass of [ImageProvider] that knows about [AssetBundle]s.
-///
-/// This factors out the common logic of [AssetBundle]-based [ImageProvider]
-/// classes, simplifying what subclasses must implement to just [obtainKey].
-abstract class CachedAssetBundleImageProvider extends ImageProvider<CachedAssetBundleImageKey> {
+// Forked from Flutter [AssetBundleImageProvider] Class, add objectFit key.
+// https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/image_provider.dart#L640
+abstract class KrakenAssetBundleImageProvider extends ImageProvider<KrakenAssetBundleImageKey> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const CachedAssetBundleImageProvider();
+  const KrakenAssetBundleImageProvider();
 
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
   /// image.
   @override
-  ImageStreamCompleter load(CachedAssetBundleImageKey key, DecoderCallback decode) {
+  ImageStreamCompleter load(KrakenAssetBundleImageKey key, DecoderCallback decode) {
     InformationCollector? collector;
     assert(() {
       collector = () sync* {
         yield DiagnosticsProperty<ImageProvider>('Image provider', this);
-        yield DiagnosticsProperty<CachedAssetBundleImageKey>('Image key', key);
+        yield DiagnosticsProperty<KrakenAssetBundleImageKey>('Image key', key);
       };
       return true;
     }());
@@ -100,7 +97,7 @@ abstract class CachedAssetBundleImageProvider extends ImageProvider<CachedAssetB
   ///
   /// This function is used by [load].
   @protected
-  Future<ui.Codec> _loadAsync(CachedAssetBundleImageKey key, DecoderCallback decode) async {
+  Future<ui.Codec> _loadAsync(KrakenAssetBundleImageKey key, DecoderCallback decode) async {
     ByteData? data;
     // Hot reload/restart could change whether an asset bundle or key in a
     // bundle are available, or if it is a network backed bundle.
@@ -110,6 +107,7 @@ abstract class CachedAssetBundleImageProvider extends ImageProvider<CachedAssetB
       PaintingBinding.instance!.imageCache!.evict(key);
       rethrow;
     }
+    // ignore: unnecessary_null_comparison
     if (data == null) {
       PaintingBinding.instance!.imageCache!.evict(key);
       throw StateError('Unable to read data');
@@ -118,19 +116,21 @@ abstract class CachedAssetBundleImageProvider extends ImageProvider<CachedAssetB
   }
 }
 
-class CachedAssetImage extends CachedAssetBundleImageProvider {
+// Forked from Flutter [AssetImage] Class, add objectFit key.
+// https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/image_resolution.dart#L244
+class KrakenAssetImage extends KrakenAssetBundleImageProvider {
   /// Creates an object that fetches an image from an asset bundle.
   ///
   /// The [assetName] argument must not be null. It should name the main asset
   /// from the set of images to choose from. The [package] argument must be
   /// non-null when fetching an asset that is included in package. See the
   /// documentation for the [AssetImage] class itself for details.
-  const CachedAssetImage(
+  const KrakenAssetImage(
       this.assetName, {
       this.bundle,
       this.package,
       this.objectFit = BoxFit.fill,
-    }) : assert(assetName != null);
+    });
 
   /// The name of the main asset from the set of images to choose from. See the
   /// documentation for the [AssetImage] class itself for details.
@@ -161,7 +161,7 @@ class CachedAssetImage extends CachedAssetBundleImageProvider {
   static const double _naturalResolution = 1.0;
 
   @override
-  Future<CachedAssetBundleImageKey> obtainKey(ImageConfiguration configuration) {
+  Future<KrakenAssetBundleImageKey> obtainKey(ImageConfiguration configuration) {
     // This function tries to return a SynchronousFuture if possible. We do this
     // because otherwise showing an image would always take at least one frame,
     // which would be sad. (This code is called from inside build/layout/paint,
@@ -169,8 +169,8 @@ class CachedAssetImage extends CachedAssetBundleImageProvider {
     // that we resolve each future in a new call frame, and thus not in this
     // build/layout/paint sequence.)
     final AssetBundle chosenBundle = bundle ?? configuration.bundle ?? rootBundle;
-    Completer<CachedAssetBundleImageKey>? completer;
-    Future<CachedAssetBundleImageKey>? result;
+    Completer<KrakenAssetBundleImageKey>? completer;
+    Future<KrakenAssetBundleImageKey>? result;
 
     chosenBundle.loadStructuredData<Map<String, List<String>>?>(_kAssetManifestFileName, _manifestParser).then<void>(
         (Map<String, List<String>>? manifest) {
@@ -180,7 +180,7 @@ class CachedAssetImage extends CachedAssetBundleImageProvider {
           manifest == null ? null : manifest[keyName],
         )!;
         final double chosenScale = _parseScale(chosenName);
-        final CachedAssetBundleImageKey key = CachedAssetBundleImageKey(
+        final KrakenAssetBundleImageKey key = KrakenAssetBundleImageKey(
           bundle: chosenBundle,
           name: chosenName,
           scale: chosenScale,
@@ -196,7 +196,7 @@ class CachedAssetImage extends CachedAssetBundleImageProvider {
           // just after loadStructuredData returned (which means it provided us
           // with a SynchronousFuture). Let's return a SynchronousFuture
           // ourselves.
-          result = SynchronousFuture<CachedAssetBundleImageKey>(key);
+          result = SynchronousFuture<KrakenAssetBundleImageKey>(key);
         }
       },
     ).catchError((Object error, StackTrace stack) {
@@ -213,7 +213,7 @@ class CachedAssetImage extends CachedAssetBundleImageProvider {
     }
     // The code above hasn't yet run its "then" handler yet. Let's prepare a
     // completer for it to use when it does run.
-    completer = Completer<CachedAssetBundleImageKey>();
+    completer = Completer<KrakenAssetBundleImageKey>();
     return completer.future;
   }
 
