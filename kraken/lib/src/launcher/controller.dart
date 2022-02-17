@@ -876,7 +876,7 @@ class KrakenController {
   final GestureListener? _gestureListener;
 
   // The kraken view entrypoint bundle.
-  final KrakenBundle? entrypoint;
+  KrakenBundle? entrypoint;
 
   KrakenController(
     String? name,
@@ -929,7 +929,7 @@ class KrakenController {
     if (entrypoint != null) {
       HistoryModule historyModule =
           module.moduleManager.getModule<HistoryModule>('History')!;
-      historyModule.bundle = entrypoint!;
+      historyModule.add(entrypoint!);
     }
 
     assert(!_controllerMap.containsKey(contextId),
@@ -1017,16 +1017,18 @@ class KrakenController {
     return completer.future;
   }
 
-  String get currentBundleUrl {
+  Uri? get current {
     HistoryModule historyModule =
-        module.moduleManager.getModule<HistoryModule>('History')!;
-    return historyModule.currentBundleUrl;
+    module.moduleManager.getModule<HistoryModule>('History')!;
+    return historyModule.stackTop?.resolvedUri;
   }
+
+  String get currentUrl => current?.toString() ?? '';
 
   _addHistory(KrakenBundle bundle) {
     HistoryModule historyModule =
         module.moduleManager.getModule<HistoryModule>('History')!;
-    historyModule.bundle = bundle;
+    historyModule.add(bundle);
   }
 
   Future<void> reload() async {
@@ -1052,7 +1054,11 @@ class KrakenController {
     }
 
     await unload();
+
+    // Update entrypoint.
+    entrypoint = bundle;
     _addHistory(bundle);
+
     await executeEntrypoint();
 
     if (devToolsService != null) {
@@ -1101,7 +1107,7 @@ class KrakenController {
     }
   }
 
-  String get origin => Uri.parse(currentBundleUrl).origin;
+  String get origin => Uri.parse(currentUrl).origin;
 
   Future<void> executeEntrypoint({
     bool shouldResolve = true,

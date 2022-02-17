@@ -79,6 +79,13 @@ abstract class KrakenBundle {
 
   bool get isEmpty => src.isEmpty && content == null && bytecode == null;
 
+  Uri? get resolvedUri {
+    if (isResolved) {
+      return _uri;
+    }
+    return null;
+  }
+
   @mustCallSuper
   Future<void> resolve(int? contextId) async {
     if (isResolved) return;
@@ -88,7 +95,7 @@ abstract class KrakenBundle {
     if (contextId != null && _uri != null) {
       KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
       if (controller != null && !isAssetAbsolutePath(src)) {
-        _uri = controller.uriParser!.resolve(Uri.parse(controller.currentBundleUrl), _uri!);
+        _uri = controller.uriParser!.resolve(Uri.parse(controller.currentUrl), _uri!);
       }
       isResolved = true;
     }
@@ -186,7 +193,7 @@ class NetworkBundle extends KrakenBundle {
   Future<void> resolve(int? contextId) async {
     super.resolve(contextId);
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
-    Uri baseUrl = Uri.parse(controller.currentBundleUrl);
+    Uri baseUrl = Uri.parse(controller.currentUrl);
     NetworkAssetBundle bundle = NetworkAssetBundle(controller.uriParser!.resolve(baseUrl, Uri.parse(src)), contextId: contextId, additionalHttpHeaders: additionalHttpHeaders);
     bundle.httpClient.userAgent = NavigatorModule.getUserAgent();
     String absoluteURL = src;

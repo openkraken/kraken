@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
@@ -124,7 +125,7 @@ class ScriptElement extends Element {
     )) {
       try {
         // Resolve uri.
-        String baseUrl = ownerDocument.controller.currentBundleUrl;
+        String baseUrl = ownerDocument.controller.currentUrl;
         Uri baseUri = Uri.parse(baseUrl);
         Uri uri = ownerDocument.controller.uriParser!.resolve(baseUri, Uri.parse(src));
         // Load and evaluate using kraken bundle.
@@ -135,8 +136,9 @@ class ScriptElement extends Element {
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_LOAD));
         });
-      } catch (e) {
+      } catch (e, st) {
         // An error occurred.
+        debugPrint('Failed to load script: $src, reason: $e\n$st');
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_ERROR));
         });
@@ -159,7 +161,7 @@ class ScriptElement extends Element {
       if (script != null && script.isNotEmpty) {
         KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
         if (controller != null) {
-          KrakenBundle bundle = KrakenBundle.fromContent(script, url: controller.currentBundleUrl);
+          KrakenBundle bundle = KrakenBundle.fromContent(script, url: controller.currentUrl);
           await bundle.resolve(contextId);
           bundle.eval(contextId);
         }

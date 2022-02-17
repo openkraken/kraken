@@ -6,7 +6,7 @@ class LocationModule extends BaseModule {
 
   LocationModule(ModuleManager? moduleManager) : super(moduleManager);
 
-  String get href => moduleManager!.controller.currentBundleUrl;
+  String get href => moduleManager!.controller.currentUrl;
 
   @override
   String invoke(String method, params, InvokeModuleCallback callback) {

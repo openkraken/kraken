@@ -101,6 +101,6 @@ String getOrigin(Uri uri) {
 // @TODO: Remove controller dependency.
 Uri getEntrypointUri(int? contextId) {
   KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
-  String url = controller?.currentBundleUrl ?? '';
+  String url = controller?.currentUrl ?? '';
   return Uri.tryParse(url) ?? KrakenController.fallbackBundleUri(contextId ?? 0);
 }

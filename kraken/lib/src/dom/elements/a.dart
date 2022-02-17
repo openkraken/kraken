@@ -102,7 +102,7 @@ class AnchorElement extends Element {
 
     String? href = _href;
     if (href.isNotEmpty) {
-      String baseUrl = ownerDocument.controller.currentBundleUrl;
+      String baseUrl = ownerDocument.controller.currentUrl;
       Uri baseUri = Uri.parse(baseUrl);
       Uri resolvedUri = ownerDocument.controller.uriParser!.resolve(baseUri, Uri.parse(href));
       ownerDocument.controller.view.handleNavigationAction(
