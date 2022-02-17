@@ -6,14 +6,11 @@ class LocationModule extends BaseModule {
 
   LocationModule(ModuleManager? moduleManager) : super(moduleManager);
 
-  String get href {
-    HistoryModule historyModule = moduleManager!.getModule<HistoryModule>('History')!;
-    return historyModule.href;
-  }
+  String get href => moduleManager!.controller.currentUrl;
 
   @override
   String invoke(String method, params, InvokeModuleCallback callback) {
-    switch(method) {
+    switch (method) {
       case 'getHref':
         return href;
       default:
@@ -22,6 +19,5 @@ class LocationModule extends BaseModule {
   }
 
   @override
-  void dispose() {
-  }
+  void dispose() {}
 }

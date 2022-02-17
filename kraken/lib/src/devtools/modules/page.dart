@@ -214,7 +214,7 @@ class InspectPageModule extends UIInspectorModule {
         break;
       case 'getResourceContent':
         sendToFrontend(id, JSONEncodableMap({
-          'content': (await devtoolsService.controller?.bundle)!.content,
+          'content': (await devtoolsService.controller?.entrypoint)!.content,
           'base64Encoded': false
         }));
         break;

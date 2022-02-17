@@ -38,7 +38,7 @@ class NavigationModule extends BaseModule {
 
   // Navigate kraken page to target Url.
   Future<void> goTo(String targetUrl) async {
-    String? sourceUrl = moduleManager!.controller.href;
+    String? sourceUrl = moduleManager!.controller.currentUrl;
 
     Uri targetUri = Uri.parse(targetUrl);
     Uri sourceUri = Uri.parse(sourceUrl);

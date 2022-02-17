@@ -64,7 +64,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
 
   Future<Uint8List> loadFile(CachedNetworkImageKey key, StreamController<ImageChunkEvent> chunkEvents) async {
     HttpCacheController cacheController = HttpCacheController.instance(
-        getOrigin(getReferrer(contextId)));
+        getOrigin(getEntrypointUri(contextId)));
 
     Uri uri = Uri.parse(url);
     Uint8List? bytes;
@@ -77,7 +77,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
         print('Error while reading cache, $error\n$stackTrace');
       }
     }
-    
+
     // Fallback to network
     bytes ??= await fetchFile(key, chunkEvents, cacheController);
 

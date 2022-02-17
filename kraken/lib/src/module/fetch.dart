@@ -34,7 +34,7 @@ class FetchModule extends BaseModule {
     final Uri parsedUri = Uri.parse(input);
 
     if (moduleManager != null) {
-      Uri base = Uri.parse(moduleManager!.controller.href);
+      Uri base = Uri.parse(moduleManager!.controller.currentUrl);
       UriParser uriParser = moduleManager!.controller.uriParser!;
       return uriParser.resolve(base, parsedUri);
     } else {

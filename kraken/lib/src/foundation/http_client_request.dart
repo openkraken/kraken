@@ -114,7 +114,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
     if (contextId != null) {
       // Set the default origin and referrer.
-      Uri referrer = getReferrer(contextId);
+      Uri referrer = getEntrypointUri(contextId);
       headers.set(HttpHeaders.refererHeader, referrer.toString());
       String origin = getOrigin(referrer);
       headers.set(_HttpHeadersOrigin, origin);
