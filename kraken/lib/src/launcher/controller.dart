@@ -876,7 +876,7 @@ class KrakenController {
   final GestureListener? _gestureListener;
 
   // The kraken view entrypoint bundle.
-  KrakenBundle? entrypoint;
+  KrakenBundle? _entrypoint;
 
   KrakenController(
     String? name,
@@ -889,7 +889,7 @@ class KrakenController {
     GestureListener? gestureListener,
     KrakenNavigationDelegate? navigationDelegate,
     KrakenMethodChannel? methodChannel,
-    this.entrypoint,
+    KrakenBundle? entrypoint,
     this.widgetDelegate,
     this.onLoad,
     this.onLoadError,
@@ -898,6 +898,7 @@ class KrakenController {
     this.devToolsService,
     this.uriParser,
   })  : _name = name,
+        _entrypoint = entrypoint,
         _gestureListener = gestureListener {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_PROPERTY_INIT);
@@ -1055,7 +1056,7 @@ class KrakenController {
     await unload();
 
     // Update entrypoint.
-    entrypoint = bundle;
+    _entrypoint = bundle;
     _addHistory(bundle);
 
     await executeEntrypoint();
@@ -1067,7 +1068,7 @@ class KrakenController {
 
   String? getResourceContent(String? url) {
     if (url == this.url) {
-      return entrypoint?.content;
+      return _entrypoint?.content;
     }
   }
 
@@ -1119,12 +1120,12 @@ class KrakenController {
     bool shouldEvaluate = true,
     AnimationController? animationController
   }) async {
-    if (entrypoint != null && shouldResolve) {
+    if (_entrypoint != null && shouldResolve) {
       await _resolveEntrypoint();
-      if (entrypoint!.isResolved && shouldEvaluate) {
+      if (_entrypoint!.isResolved && shouldEvaluate) {
         _evaluateEntrypoint(animationController: animationController);
       } else {
-        throw FlutterError('Unable to resolve $entrypoint');
+        throw FlutterError('Unable to resolve $_entrypoint');
       }
     } else {
       throw FlutterError('Entrypoint is empty.');
@@ -1140,7 +1141,7 @@ class KrakenController {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_LOAD_START);
     }
 
-    KrakenBundle? bundleToLoad = entrypoint;
+    KrakenBundle? bundleToLoad = _entrypoint;
     if (bundleToLoad == null || bundleToLoad.isEmpty) {
       // Do nothing if bundle is empty.
       return;
@@ -1174,8 +1175,8 @@ class KrakenController {
     }
 
     assert(!_view._disposed, 'Kraken have already disposed');
-    if (entrypoint != null) {
-      entrypoint!.eval(_view.contextId);
+    if (_entrypoint != null) {
+      _entrypoint!.eval(_view.contextId);
       // trigger DOMContentLoaded event
       module.requestAnimationFrame((_) {
         Event event = Event(EVENT_DOM_CONTENT_LOADED);
