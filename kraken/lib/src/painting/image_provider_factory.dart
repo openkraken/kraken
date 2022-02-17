@@ -398,6 +398,7 @@ ImageProvider defaultAssetsProvider(Uri uri, ImageProviderParams params) {
     params.cachedWidth,
     params.cachedHeight,
     params.objectFit,
-    AssetImage(uri.toString())
+    CachedAssetImage(uri.toString(),
+      objectFit: params.objectFit ?? BoxFit.fill)
   );
 }

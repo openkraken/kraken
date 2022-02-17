@@ -6,4 +6,5 @@
  */
 
 export 'src/painting/cached_network_image.dart';
+export 'src/painting/cached_asset_image.dart';
 export 'src/painting/image_provider_factory.dart';
