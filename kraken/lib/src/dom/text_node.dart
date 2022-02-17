@@ -12,29 +12,27 @@ const String RETURN_CHAR = '\r';
 const String TAB_CHAR = '\t';
 
 class TextNode extends Node {
+  static const String NORMAL_SPACE = '\u0020';
+
   TextNode(this._data, EventTargetContext? context)
       : super(NodeType.TEXT_NODE, context);
 
   // Must be existed after text node is attached, and all text update will after text attached.
   RenderTextBox? _renderTextBox;
 
-  static const String NORMAL_SPACE = '\u0020';
   // The text string.
-  String? _data;
-  String get data => _data ?? '';
-
-  set data(String? newData) {
-    assert(newData != null);
-
+  String _data = '';
+  String get data => _data;
+  set data(String newData) {
     String oldData = data;
     if (oldData == newData) return;
 
     _data = newData;
 
     // Empty string of textNode should not attach to render tree.
-    if (oldData.isNotEmpty && newData!.isEmpty) {
+    if (oldData.isNotEmpty && newData.isEmpty) {
       _detachRenderTextBox();
-    } else if (oldData.isEmpty && newData!.isNotEmpty) {
+    } else if (oldData.isEmpty && newData.isNotEmpty) {
       attachTo(parentElement!);
     } else {
       _applyTextStyle();
@@ -74,7 +72,7 @@ class TextNode extends Node {
   @override
   void attachTo(Element parent, { RenderBox? after }) {
     // Empty string of TextNode should not attach to render tree.
-    if (_data == null || _data!.isEmpty) return;
+    if (_data.isEmpty) return;
 
     createRenderer();
 
