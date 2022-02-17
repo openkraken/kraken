@@ -31,13 +31,13 @@ class KrakenFileImageKey {
     if (other.runtimeType != runtimeType)
       return false;
     return other is KrakenFileImageKey
-        && other.file == file
-        && other.scale == scale
-        && other.objectFit == objectFit;
+      && other.file.path == file.path
+      && other.scale == scale
+      && other.objectFit == objectFit;
   }
 
   @override
-  int get hashCode => hashValues(file, scale, objectFit);
+  int get hashCode => hashValues(file.path, scale, objectFit);
 }
 
 // Forked from Flutter [FileImage] Class, add objectFit key.
@@ -78,8 +78,6 @@ class KrakenFileImage extends ImageProvider<KrakenFileImageKey> {
   }
 
   Future<ui.Codec> _loadAsync(KrakenFileImageKey key, DecoderCallback decode) async {
-    assert(key == this);
-
     final Uint8List bytes = await file.readAsBytes();
 
     if (bytes.lengthInBytes == 0) {
@@ -90,18 +88,4 @@ class KrakenFileImage extends ImageProvider<KrakenFileImageKey> {
 
     return decode(bytes);
   }
-
-  @override
-  bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is KrakenFileImage
-      && other.file.path == file.path
-      && other.scale == scale
-      && other.objectFit == objectFit;
-  }
-
-  @override
-  int get hashCode => hashValues(file.path, scale, objectFit);
-
 }

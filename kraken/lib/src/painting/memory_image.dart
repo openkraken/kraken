@@ -37,7 +37,7 @@ class KrakenMemoryImageKey {
   }
 
   @override
-  int get hashCode => hashValues(bytes, scale, objectFit);
+  int get hashCode => hashValues(bytes.hashCode, scale, objectFit);
 }
 
 // Forked from Flutter [FileImage] Class, add objectFit key.
@@ -88,22 +88,6 @@ class KrakenMemoryImage extends ImageProvider<KrakenMemoryImageKey> {
   }
 
   Future<ui.Codec> _loadAsync(KrakenMemoryImageKey key, DecoderCallback decode) {
-    assert(key == this);
-
     return decode(bytes);
   }
-
-  @override
-  bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is KrakenMemoryImage
-      && other.bytes == bytes
-      && other.scale == scale
-      && other.objectFit == objectFit;
-  }
-
-  @override
-  int get hashCode => hashValues(bytes.hashCode, scale, objectFit);
-
 }

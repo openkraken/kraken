@@ -393,7 +393,7 @@ ImageProvider? defaultFileProviderFactory(Uri uri, ImageProviderParams params) {
     params.cachedWidth,
     params.cachedHeight,
     params.objectFit,
-    KrakenFileImage((params as FileImageProviderParams).file)
+    KrakenFileImage((params as FileImageProviderParams).file, objectFit: params.objectFit)
   );
 }
 
@@ -404,7 +404,7 @@ ImageProvider? defaultDataUrlProviderFactory(
     params.cachedWidth,
     params.cachedHeight,
     params.objectFit,
-    KrakenMemoryImage((params as DataUrlImageProviderParams).bytes)
+    KrakenMemoryImage((params as DataUrlImageProviderParams).bytes, objectFit: params.objectFit)
   );
 }
 
@@ -420,7 +420,6 @@ ImageProvider defaultAssetsProvider(Uri uri, ImageProviderParams params) {
     params.cachedWidth,
     params.cachedHeight,
     params.objectFit,
-    KrakenAssetImage(uri.toString(),
-      objectFit: params.objectFit)
+    KrakenAssetImage(uri.toString(), objectFit: params.objectFit)
   );
 }
