@@ -245,16 +245,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   @override
-  String? getAttribute(String qualifiedName) {
-    var propertyValue = getProperty(qualifiedName);
-    if (propertyValue != null) {
-      return '$propertyValue';
-    } else {
-      return super.getAttribute(qualifiedName);
-    }
-  }
-
-  @override
   getProperty(String key) {
     switch (key) {
       // @TODO: Apply algorithm of input element property width.
@@ -279,7 +269,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       case 'minlength':
       case 'maxlength':
       case 'size':
-        return attributes[jsMethodToKey(key)];
+        return attributes[key];
       case 'placeholder':
         return placeholderText;
       case 'type':
@@ -941,8 +931,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   @override
-  void setAttribute(String key, String value) {
-    super.setAttribute(key, value);
+  void setProperty(String key, value) {
+    super.setProperty(key, value);
 
     if (key == VALUE) {
       String text = value;

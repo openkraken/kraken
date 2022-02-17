@@ -33,20 +33,34 @@ const String _REL_STYLESHEET = 'stylesheet';
 class LinkElement extends Element {
   LinkElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
-  String? rel;
 
+  // Supported properties:
+  // - href
+  // - rel
   @override
-  void setAttribute(String key, value) {
-    super.setAttribute(key, value);
-    if (key == 'href') {
-      _fetchBundle(value);
-    } else if (key == 'rel') {
-      rel = value.toString().toLowerCase().trim();
+  void setProperty(String key, value) {
+    super.setProperty(key, value);
+    switch (key) {
+      case 'href':
+        _fetchBundle(value);
+        break;
     }
   }
 
+  @override
+  getProperty(String key) {
+    switch (key) {
+      case 'href':
+      case 'rel':
+        return attributes[key];
+    }
+    return super.getProperty(key);
+  }
+
+  String? get _rel => attributes['rel'];
+
   void _fetchBundle(String url) async {
-    if (url.isNotEmpty && rel == _REL_STYLESHEET && isConnected) {
+    if (url.isNotEmpty && _rel == _REL_STYLESHEET && isConnected) {
       try {
         KrakenBundle bundle = KrakenBundle.fromUrl(url);
         await bundle.resolve(contextId);
@@ -101,16 +115,33 @@ class ScriptElement extends Element {
       : super(context, defaultStyle: _defaultStyle) {
   }
 
-  String type = _MIME_TEXT_JAVASCRIPT;
+  String _type = _MIME_TEXT_JAVASCRIPT;
+
+  // Supported properties:
+  // - src
+  // - type
+  @override
+  void setProperty(String key, value) {
+    super.setProperty(key, value);
+    switch (key) {
+      case 'src':
+        _fetchBundle(value);
+        break;
+      case 'type':
+        _type = value.toString();
+        break;
+    }
+  }
 
   @override
-  void setAttribute(String key, value) {
-    super.setAttribute(key, value);
-    if (key == 'src') {
-      _fetchBundle(value);
-    } else if (key == 'type') {
-      type = value.toString().toLowerCase().trim();
+  getProperty(String key) {
+    switch (key) {
+      case 'src':
+      case 'type':
+        return attributes[key];
     }
+
+    return super.getProperty(key);
   }
 
   void _fetchBundle(String src) async {
@@ -118,10 +149,10 @@ class ScriptElement extends Element {
     if (contextId == null) return;
     // Must
     if (src.isNotEmpty && isConnected && (
-        type == _MIME_TEXT_JAVASCRIPT
-          || type == _MIME_APPLICATION_JAVASCRIPT
-          || type == _MIME_X_APPLICATION_JAVASCRIPT
-          || type == _JAVASCRIPT_MODULE
+        _type == _MIME_TEXT_JAVASCRIPT
+          || _type == _MIME_APPLICATION_JAVASCRIPT
+          || _type == _MIME_X_APPLICATION_JAVASCRIPT
+          || _type == _JAVASCRIPT_MODULE
     )) {
       try {
         // Resolve uri.
@@ -155,7 +186,7 @@ class ScriptElement extends Element {
     String? src = getAttribute('src');
     if (src != null) {
       _fetchBundle(src);
-    } else if (type == _MIME_TEXT_JAVASCRIPT || type == _JAVASCRIPT_MODULE){
+    } else if (_type == _MIME_TEXT_JAVASCRIPT || _type == _JAVASCRIPT_MODULE){
       // Eval script context: <script> console.log(1) </script>
       String? script = _collectElementChildText(this);
       if (script != null && script.isNotEmpty) {
@@ -175,7 +206,7 @@ const String _CSS_MIME = 'text/css';
 class StyleElement extends Element {
   StyleElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
-  String type = _CSS_MIME;
+  String _type = _CSS_MIME;
   CSSStyleSheet? _styleSheet;
 
   void _recalculateStyle() {
@@ -212,16 +243,16 @@ class StyleElement extends Element {
   }
 
   @override
-  void setAttribute(String key, value) {
-    super.setAttribute(key, value);
+  void setProperty(String key, value) {
+    super.setProperty(key, value);
     if (key == 'type') {
-      type = value.toString().toLowerCase().trim();
+      _type = value.toString();
     }
   }
 
   @override
   void connectedCallback() {
-    if (type == _CSS_MIME) {
+    if (_type == _CSS_MIME) {
       _recalculateStyle();
     }
     super.connectedCallback();

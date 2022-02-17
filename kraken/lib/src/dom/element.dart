@@ -884,6 +884,9 @@ class Element extends Node
       className = value;
     }
     attributes[qualifiedName] = value;
+
+    // Sync value to property.
+    setProperty(qualifiedName, value);
   }
 
   @mustCallSuper

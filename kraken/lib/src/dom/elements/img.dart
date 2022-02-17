@@ -407,18 +407,17 @@ class ImageElement extends Element {
   }
 
   @override
-  void setAttribute(String key, value) {
-    bool propertyChanged = attributes[key] != value;
-    super.setAttribute(key, value);
-    if (key == 'src' && propertyChanged) {
-      final Uri? resolvedUri = _resolvedUri =  _resolveSrc();
+  void setProperty(String key, value) {
+    super.setProperty(key, value);
+    if (key == 'src') {
+      final Uri? resolvedUri = _resolvedUri = _resolveSrc();
       // Update image source if image already attached except image is lazy loading.
       if (isRendererAttached && !_isInLazyLoading) {
         _resolveImage(resolvedUri, updateImageProvider: true);
       } else {
         _precacheImage();
       }
-    } else if (key == 'loading' && propertyChanged && _isInLazyLoading) {
+    } else if (key == 'loading' && _isInLazyLoading) {
       _resetLazyLoading();
     } else if (key == WIDTH) {
       _propertyWidth = CSSNumber.parseNumber(value);
@@ -445,11 +444,6 @@ class ImageElement extends Element {
         return attributes[name];
     }
     return super.getProperty(name);
-  }
-
-  @override
-  String? getAttribute(String key) {
-    return getProperty(key)?.toString() ?? super.getAttribute(key);
   }
 
   void _stylePropertyChanged(String property, String? original, String present) {

@@ -176,23 +176,19 @@ class CanvasElement extends Element {
   }
 
   /// Element attribute width
-  double _attrWidth = ELEMENT_DEFAULT_WIDTH_IN_PIXEL;
-  double get attrWidth => _attrWidth;
-  set attrWidth(double? value) {
-    if (value != null && value != _attrWidth) {
-      _attrWidth = value;
-      resize();
+  double get _attrWidth {
+    if (attributes.containsKey(WIDTH)) {
+      return double.tryParse(attributes[WIDTH]!) ?? 0.0;
     }
+    return ELEMENT_DEFAULT_WIDTH_IN_PIXEL;
   }
 
   /// Element attribute height
-  double _attrHeight = ELEMENT_DEFAULT_HEIGHT_IN_PIXEL;
-  double get attrHeight => _attrHeight;
-  set attrHeight(double? value) {
-    if (value != null && value != _attrHeight) {
-      _attrHeight = value;
-      resize();
+  double get _attrHeight {
+    if (attributes.containsKey(HEIGHT)) {
+      return double.tryParse(attributes[HEIGHT]!) ?? 0.0;
     }
+    return ELEMENT_DEFAULT_HEIGHT_IN_PIXEL;
   }
 
   void _styleChangedListener(String key, String? original, String present) {
@@ -208,22 +204,46 @@ class CanvasElement extends Element {
   getProperty(String key) {
     switch (key) {
       case 'width':
-        return attrWidth;
+        return _attrWidth;
       case 'height':
-        return attrHeight;
+        return _attrHeight;
+      default:
+        return super.getProperty(key);
     }
-
-    return super.getProperty(key);
   }
 
+
   @override
-  String? getAttribute(String key) {
-    return getProperty(key)?.toString() ?? super.getAttribute(key);
+  void setProperty(String key, value) {
+    super.setProperty(key, value);
+    switch (key) {
+      // When the user agent is to set bitmap dimensions to width and height, it must run these steps:
+      case WIDTH:
+      case HEIGHT:
+        // 1. Reset the rendering context to its default state.
+        context2d?.dispose();
+        context2d = null;
+        // 2. Resize the output bitmap to the new width and height and clear it to transparent black.
+        resize();
+        // 3. Let canvas be the canvas element to which the rendering context's canvas attribute was initialized.
+        context2d = CanvasRenderingContext2D();
+        // 4. If the numeric value of canvas's width content attribute differs from width,
+        // then set canvas's width content attribute to the shortest possible string representing width as
+        // a valid non-negative integer.
+        //
+        // 5. If the numeric value of canvas's height content attribute differs from height,
+        // then set canvas's height content attribute to the shortest possible string representing height as
+        // a valid non-negative integer.
+        if (value.toString() != attributes[key]) {
+          attributes[key] = '0';
+        }
+        break;
+    }
   }
 
   @override
   handleJSCall(String method, List argv) {
-    switch(method) {
+    switch (method) {
       case 'getContext':
         return getContext(argv[0]).nativeCanvasRenderingContext2D;
     }
@@ -237,37 +257,6 @@ class CanvasElement extends Element {
     // If not getContext and element is disposed that context is not existed.
     if (painter.context != null) {
       painter.context!.dispose();
-    }
-  }
-
-  @override
-  void setAttribute(String key, value) {
-    super.setAttribute(key, value);
-    // TODO:
-    // When the user agent is to set bitmap dimensions to width and height, it must run these steps:
-    //
-    // 1. Reset the rendering context to its default state.
-    //
-    // 2. Resize the output bitmap to the new width and height and clear it to transparent black.
-    //
-    // 3. Let canvas be the canvas element to which the rendering context's canvas attribute was initialized.
-    //
-    // 4. If the numeric value of canvas's width content attribute differs from width,
-    // then set canvas's width content attribute to the shortest possible string representing width as
-    // a valid non-negative integer.
-    //
-    // 5. If the numeric value of canvas's height content attribute differs from height,
-    // then set canvas's height content attribute to the shortest possible string representing height as
-    // a valid non-negative integer.
-    switch (key) {
-      case WIDTH:
-        // The width of the coordinate space in CSS pixels. Defaults to 300.
-        attrWidth = double.tryParse(value);
-        break;
-      case HEIGHT:
-        // The height of the coordinate space in CSS pixels. Defaults to 150.
-        attrHeight = double.tryParse(value);
-        break;
     }
   }
 }

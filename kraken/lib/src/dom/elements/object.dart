@@ -55,17 +55,24 @@ class ObjectElement extends Element implements ObjectElementHost {
   }
 
   @override
-  void setAttribute(String key, value) {
-    super.setAttribute(key, value);
+  void setProperty(String key, value) {
+    super.setProperty(key, value);
     switch (key) {
       case 'type':
-        _objectElementClient.setProperty(key, value);
-        break;
       case 'data':
         _objectElementClient.setProperty(key, value);
         break;
+    }
+  }
+
+  @override
+  getProperty(String key) {
+    switch (key) {
+      case 'type':
+      case 'data':
+        return _objectElementClient.getProperty(key);
       default:
-        break;
+        return super.getProperty(key);
     }
   }
 
