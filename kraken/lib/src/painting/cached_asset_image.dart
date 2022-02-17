@@ -23,7 +23,7 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 const double _kLowDprLimit = 2.0;
 
 class CachedAssetBundleImageKey {
-  /// Creates the key for an [AssetImage] or [CachedAssetBundleImageProvider].
+  /// Creates the key for an [CachedAssetImage] or [CachedAssetBundleImageProvider].
   ///
   /// The arguments must not be null.
   const CachedAssetBundleImageKey({

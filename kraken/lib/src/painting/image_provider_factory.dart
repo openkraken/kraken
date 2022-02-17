@@ -19,16 +19,16 @@ import 'package:quiver/collection.dart';
 class ImageProviderParams {
   int? cachedWidth;
   int? cachedHeight;
-  BoxFit? objectFit;
+  BoxFit objectFit = BoxFit.fill;
 
-  ImageProviderParams({this.cachedWidth, this.cachedHeight, this.objectFit});
+  ImageProviderParams({this.cachedWidth, this.cachedHeight, required this.objectFit});
 }
 
 class CachedNetworkImageProviderParams extends ImageProviderParams {
   int? contextId;
 
   CachedNetworkImageProviderParams(this.contextId,
-      {int? cachedWidth, int? cachedHeight, BoxFit? objectFit})
+      {int? cachedWidth, int? cachedHeight, BoxFit objectFit = BoxFit.fill})
       : super(cachedWidth: cachedWidth, cachedHeight: cachedHeight, objectFit: objectFit);
 }
 
@@ -36,7 +36,7 @@ class FileImageProviderParams extends ImageProviderParams {
   File file;
 
   FileImageProviderParams(this.file,
-      {int? cachedWidth, int? cachedHeight, BoxFit? objectFit})
+      {int? cachedWidth, int? cachedHeight, BoxFit objectFit = BoxFit.fill})
       : super(cachedWidth: cachedWidth, cachedHeight: cachedHeight, objectFit: objectFit);
 }
 
@@ -44,7 +44,7 @@ class DataUrlImageProviderParams extends ImageProviderParams {
   Uint8List bytes;
 
   DataUrlImageProviderParams(this.bytes,
-      {int? cachedWidth, int? cachedHeight, BoxFit? objectFit})
+      {int? cachedWidth, int? cachedHeight, BoxFit objectFit = BoxFit.fill})
       : super(cachedWidth: cachedWidth, cachedHeight: cachedHeight, objectFit: objectFit);
 }
 
@@ -126,7 +126,7 @@ ImageType parseImageUrl(Uri resolvedUri, {cache = 'auto'}) {
 }
 
 ImageProvider? getImageProvider(Uri resolvedUri,
-    {int? contextId, cache = 'auto', int? cachedWidth, int? cachedHeight, BoxFit? objectFit}) {
+    {int? contextId, cache = 'auto', BoxFit objectFit = BoxFit.fill, int? cachedWidth, int? cachedHeight}) {
   ImageType imageType = parseImageUrl(resolvedUri, cache: cache);
   ImageProviderFactory factory = _getImageProviderFactory(imageType);
 
@@ -284,14 +284,12 @@ class KrakenResizeImage extends ResizeImage {
     int? targetWidth;
     int? targetHeight;
 
-    // Image resized base (width/height) is determined by both image natural size ratio and
-    // image container size ratio.
-    // https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/box_fit.dart#L152
-    if (cacheWidth != null && cacheHeight != null
-      && (objectFit == BoxFit.contain || objectFit == BoxFit.cover)
-    ) {
+    // Image will be resized according to its aspect radio if object-fit is not fill.
+    // https://www.w3.org/TR/css-images-3/#propdef-object-fit
+    if (cacheWidth != null && cacheHeight != null && objectFit != BoxFit.fill) {
       // When targetWidth or targetHeight is not set at the same time,
       // image will be resized according to its aspect radio.
+      // https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/box_fit.dart#L152
       if (objectFit == BoxFit.contain) {
         if (cacheWidth / cacheHeight > naturalWidth / naturalHeight) {
           targetHeight = cacheHeight;
@@ -303,6 +301,30 @@ class KrakenResizeImage extends ResizeImage {
           targetWidth = cacheWidth;
         } else {
           targetHeight = cacheHeight;
+        }
+
+      // Image should maintain its aspect radio and not resized if object-fit is none.
+      } else if (objectFit == BoxFit.none) {
+        targetWidth = descriptor.width;
+        targetHeight = descriptor.height;
+
+      // If image size is smaller than its natural size when object-fit is contain,
+      // scale-down is parsed as none, otherwise parsed as contain.
+      } else if (objectFit == BoxFit.scaleDown) {
+        if (cacheWidth / cacheHeight > naturalWidth / naturalHeight) {
+          if (cacheHeight > descriptor.height * window.devicePixelRatio) {
+            targetWidth = descriptor.width;
+            targetHeight = descriptor.height;
+          } else {
+            targetHeight = cacheHeight;
+          }
+        } else {
+          if (cacheWidth > descriptor.width * window.devicePixelRatio) {
+            targetWidth = descriptor.width;
+            targetHeight = descriptor.height;
+          } else {
+            targetWidth = cacheWidth;
+          }
         }
       }
     } else {
@@ -344,7 +366,7 @@ ImageProvider defaultCachedProviderFactory(
     params.cachedHeight,
     params.objectFit,
     CachedNetworkImage(uri.toString(),
-        objectFit: params.objectFit ?? BoxFit.fill,
+        objectFit: params.objectFit,
         contextId: (params as CachedNetworkImageProviderParams).contextId)
   );
 }
@@ -399,6 +421,6 @@ ImageProvider defaultAssetsProvider(Uri uri, ImageProviderParams params) {
     params.cachedHeight,
     params.objectFit,
     CachedAssetImage(uri.toString(),
-      objectFit: params.objectFit ?? BoxFit.fill)
+      objectFit: params.objectFit)
   );
 }
