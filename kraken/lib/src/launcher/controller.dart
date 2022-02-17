@@ -10,12 +10,13 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart' show RenderObjectElement;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart'
-    show RouteInformation, WidgetsBinding, WidgetsBindingObserver;
+    show RouteInformation, WidgetsBinding, WidgetsBindingObserver, AnimationController;
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
@@ -685,7 +686,7 @@ class KrakenViewController
 
       switch (action.navigationType) {
         case KrakenNavigationType.navigate:
-          await rootController.redirectTo(KrakenBundle.fromUrl(action.target));
+          await rootController.load(KrakenBundle.fromUrl(action.target));
           break;
         case KrakenNavigationType.reload:
           await rootController.reload();
@@ -874,17 +875,21 @@ class KrakenController {
 
   final GestureListener? _gestureListener;
 
+  // The kraken view entrypoint bundle.
+  final KrakenBundle? entrypoint;
+
   KrakenController(
     String? name,
     double viewportWidth,
     double viewportHeight, {
     bool showPerformanceOverlay = false,
     bool enableDebug = false,
+    bool autoExecuteEntrypoint = true,
     Color? background,
     GestureListener? gestureListener,
     KrakenNavigationDelegate? navigationDelegate,
     KrakenMethodChannel? methodChannel,
-    KrakenBundle? bundle,
+    this.entrypoint,
     this.widgetDelegate,
     this.onLoad,
     this.onLoadError,
@@ -921,10 +926,10 @@ class KrakenController {
 
     _module = KrakenModuleController(this, contextId);
 
-    if (bundle != null) {
+    if (entrypoint != null) {
       HistoryModule historyModule =
           module.moduleManager.getModule<HistoryModule>('History')!;
-      historyModule.bundle = bundle;
+      historyModule.bundle = entrypoint!;
     }
 
     assert(!_controllerMap.containsKey(contextId),
@@ -942,6 +947,10 @@ class KrakenController {
 
     if (devToolsService != null) {
       devToolsService!.init(this);
+    }
+
+    if (autoExecuteEntrypoint) {
+      executeEntrypoint();
     }
   }
 
@@ -966,12 +975,6 @@ class KrakenController {
 
   final Queue<HistoryItem> previousHistoryStack = Queue();
   final Queue<HistoryItem> nextHistoryStack = Queue();
-
-  Uri get referrer {
-    HistoryModule historyModule =
-      module.moduleManager.getModule<HistoryModule>('History')!;
-    return historyModule.referrer;
-  }
 
   static Uri fallbackBundleUri([int? id]) {
     // The fallback origin uri, like `vm://bundle/0`
@@ -1014,14 +1017,10 @@ class KrakenController {
     return completer.future;
   }
 
-  String get href {
+  String get currentBundleUrl {
     HistoryModule historyModule =
         module.moduleManager.getModule<HistoryModule>('History')!;
-    return historyModule.href;
-  }
-
-  set href(String value) {
-    _addHistory(KrakenBundle.fromUrl(value));
+    return historyModule.currentBundleUrl;
   }
 
   _addHistory(KrakenBundle bundle) {
@@ -1038,15 +1037,14 @@ class KrakenController {
     }
 
     await unload();
-    await load();
-    await eval();
+    await executeEntrypoint();
 
     if (devToolsService != null) {
       devToolsService!.didReload();
     }
   }
 
-  Future<void> redirectTo(KrakenBundle bundle) async {
+  Future<void> load(KrakenBundle bundle) async {
     assert(!_view._disposed, 'Kraken have already disposed');
 
     if (devToolsService != null) {
@@ -1055,8 +1053,7 @@ class KrakenController {
 
     await unload();
     _addHistory(bundle);
-    await load();
-    await eval();
+    await executeEntrypoint();
 
     if (devToolsService != null) {
       devToolsService!.didReload();
@@ -1104,69 +1101,47 @@ class KrakenController {
     }
   }
 
-  @deprecated
-  String? get bundlePath => href;
+  String get origin => Uri.parse(currentBundleUrl).origin;
 
-  @deprecated
-  set bundlePath(String? value) {
-    if (value == null) return;
-    // Set bundlePath should set the path to history module.
-    href = value;
-  }
-
-  @deprecated
-  String? get bundleURL => href;
-
-  @deprecated
-  set bundleURL(String? value) {
-    if (value == null) return;
-    // Set bundleURL should set the url to history module.
-    href = value;
-  }
-
-  String get origin => Uri.parse(href).origin;
-
-  Future<KrakenBundle?> get bundle async {
-    HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
-    KrakenBundle? current = historyModule.currentBundle;
-
-    if (current == null) {
-      // If bundle not configured at dart side, url can be obtained from env or native side.
-      String? envUrl = getBundleURLFromEnv() ?? getBundlePathFromEnv();
-      // Load url from native side (Java,Objective-C).
-      if (envUrl == null && methodChannel is KrakenNativeChannel) {
-        envUrl = await (methodChannel as KrakenNativeChannel).getUrl();
+  Future<void> executeEntrypoint({
+    bool shouldResolve = true,
+    bool shouldEvaluate = true,
+    AnimationController? animationController
+  }) async {
+    if (entrypoint != null && shouldResolve) {
+      await _resolveEntrypoint();
+      if (entrypoint!.isResolved && shouldEvaluate) {
+        _evaluateEntrypoint(animationController: animationController);
+      } else {
+        throw FlutterError('Unable to resolve $entrypoint');
       }
-      if (envUrl != null) {
-        current = KrakenBundle.fromUrl(envUrl);
-      }
+    } else {
+      throw FlutterError('Entrypoint is empty.');
     }
-    return current;
   }
 
-  // preload javascript source and cache it.
-  Future<void> load() async {
+  // Resolve the entrypoint bundle.
+  // In general you should use executeEntrypoint, which including resolving and evaluating.
+  Future<void> _resolveEntrypoint() async {
     assert(!_view._disposed, 'Kraken have already disposed');
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_LOAD_START);
     }
 
-    KrakenBundle? bundleToLoad = await bundle;
-
-    if (bundleToLoad == null || (bundleToLoad.src.isEmpty && bundleToLoad.content == null && bundleToLoad.bytecode == null)) {
+    KrakenBundle? bundleToLoad = entrypoint;
+    if (bundleToLoad == null || bundleToLoad.isEmpty) {
       // Do nothing if bundle is empty.
       return;
     }
 
-    if (onLoadError != null) {
-      try {
-        await bundleToLoad.resolve(view.contextId);
-      } catch (e, stack) {
+    // Resolve the bundle, including network download or other fetching ways.
+    try {
+      await bundleToLoad.resolve(view.contextId);
+    } catch (e, stack) {
+      if (onLoadError != null) {
         onLoadError!(FlutterError(e.toString()), stack);
       }
-    } else {
-      await bundleToLoad.resolve(view.contextId);
     }
 
     if (kProfileMode) {
@@ -1174,12 +1149,22 @@ class KrakenController {
     }
   }
 
-  // execute preloaded javascript source
-  Future<void> eval() async {
+  // Execute the content from entrypoint bundle.
+  void _evaluateEntrypoint({ AnimationController? animationController }) {
+    // @HACK: Execute JavaScript scripts will block the Flutter UI Threads.
+    // Listen for animationController listener to make sure to execute Javascript after route transition had completed.
+    if (animationController != null) {
+      animationController.addStatusListener((AnimationStatus status) {
+        if (status == AnimationStatus.completed) {
+          _evaluateEntrypoint();
+        }
+      });
+      return;
+    }
+
     assert(!_view._disposed, 'Kraken have already disposed');
-    KrakenBundle? bundleToLoad = await bundle;
-    if (bundleToLoad != null) {
-      await bundleToLoad.eval(_view.contextId);
+    if (entrypoint != null) {
+      entrypoint!.eval(_view.contextId);
       // trigger DOMContentLoaded event
       module.requestAnimationFrame((_) {
         Event event = Event(EVENT_DOM_CONTENT_LOADED);

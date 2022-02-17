@@ -49,7 +49,7 @@ class LinkElement extends Element {
       try {
         KrakenBundle bundle = KrakenBundle.fromUrl(url);
         await bundle.resolve(contextId);
-        await bundle.eval(contextId);
+        bundle.eval(contextId);
 
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
@@ -124,13 +124,13 @@ class ScriptElement extends Element {
     )) {
       try {
         // Resolve uri.
-        String baseUrl = ownerDocument.controller.href;
+        String baseUrl = ownerDocument.controller.currentBundleUrl;
         Uri baseUri = Uri.parse(baseUrl);
         Uri uri = ownerDocument.controller.uriParser!.resolve(baseUri, Uri.parse(src));
         // Load and evaluate using kraken bundle.
         KrakenBundle bundle = KrakenBundle.fromUrl(uri.toString());
         await bundle.resolve(contextId);
-        await bundle.eval(contextId);
+        bundle.eval(contextId);
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_LOAD));
@@ -159,9 +159,9 @@ class ScriptElement extends Element {
       if (script != null && script.isNotEmpty) {
         KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
         if (controller != null) {
-          KrakenBundle bundle = KrakenBundle.fromContent(script, url: controller.href);
+          KrakenBundle bundle = KrakenBundle.fromContent(script, url: controller.currentBundleUrl);
           await bundle.resolve(contextId);
-          await bundle.eval(contextId);
+          bundle.eval(contextId);
         }
       }
     }

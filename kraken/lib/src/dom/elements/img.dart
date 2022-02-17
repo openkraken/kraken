@@ -291,7 +291,7 @@ class ImageElement extends Element {
   Uri? _resolveSrc() {
     String? src = attributes['src'];
     if (src != null && src.isNotEmpty) {
-      Uri base = Uri.parse(ownerDocument.controller.href);
+      Uri base = Uri.parse(ownerDocument.controller.currentBundleUrl);
       return ownerDocument.controller.uriParser!.resolve(base, Uri.parse(src));
     }
     return null;

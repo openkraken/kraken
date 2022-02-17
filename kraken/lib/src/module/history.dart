@@ -5,7 +5,6 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:async';
-import 'dart:io';
 
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
@@ -27,23 +26,15 @@ class HistoryModule extends BaseModule {
   Queue<HistoryItem> get _previousStack => moduleManager!.controller.previousHistoryStack;
   Queue<HistoryItem> get _nextStack => moduleManager!.controller.nextHistoryStack;
 
-  String get href {
-    if (_previousStack.isEmpty) return '';
-    return _previousStack.first.bundle.src;
-  }
-
-  Uri get referrer {
-    KrakenBundle? bundle = currentBundle;
-    if (bundle is NetworkBundle) {
-      return Uri.parse(href);
-    } else if (bundle is AssetsBundle) {
-      return Directory(href).uri;
+  KrakenBundle? get currentBundle {
+    if (_previousStack.isNotEmpty) {
+      return null;
     } else {
-      return KrakenController.fallbackBundleUri();
+      return _previousStack.first.bundle;
     }
   }
 
-  KrakenBundle? get currentBundle => _previousStack.first.bundle;
+  String get currentBundleUrl => currentBundle?.toString() ?? '';
 
   set bundle(KrakenBundle bundle) {
     HistoryItem history = HistoryItem(bundle, null, true);
@@ -137,7 +128,7 @@ class HistoryModule extends BaseModule {
       Uri currentUri = Uri.parse(currentUrl);
 
       Uri uri = Uri.parse(url!);
-      uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri);
+      uri = controller.uriParser!.resolve(Uri.parse(controller.currentBundleUrl), uri);
 
       if (uri.host.isNotEmpty && uri.host != currentUri.host) {
         print('Failed to execute \'pushState\' on \'History\': '
@@ -163,7 +154,7 @@ class HistoryModule extends BaseModule {
       Uri currentUri = Uri.parse(currentUrl);
 
       Uri uri = Uri.parse(url!);
-      uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri);
+      uri = controller.uriParser!.resolve(Uri.parse(controller.currentBundleUrl), uri);
 
       if (uri.host.isNotEmpty && uri.host != currentUri.host) {
         print('Failed to execute \'pushState\' on \'History\': '

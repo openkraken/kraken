@@ -99,11 +99,8 @@ String getOrigin(Uri uri) {
 }
 
 // @TODO: Remove controller dependency.
-Uri getReferrer(int? contextId) {
-  KrakenController? controller = KrakenController
-      .getControllerOfJSContextId(contextId);
-  if (controller != null) {
-    return controller.referrer;
-  }
-  return KrakenController.fallbackBundleUri(contextId ?? 0);
+Uri getEntrypointUri(int? contextId) {
+  KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
+  String url = controller?.currentBundleUrl ?? '';
+  return Uri.tryParse(url) ?? KrakenController.fallbackBundleUri(contextId ?? 0);
 }
