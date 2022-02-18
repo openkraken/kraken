@@ -31,7 +31,7 @@ class ImageElement extends Element {
 
   ImageStream? _cachedImageStream;
   ImageInfo? _cachedImageInfo;
-  Uri? _resolvedUri;
+  Uri? _resolvedSource;
 
   // Width and height set through property.
   double? _propertyWidth;
@@ -91,7 +91,7 @@ class ImageElement extends Element {
     // Try to attach image if image is cached.
     _attachImage();
     _resizeImage();
-    _resolveImage(_resolvedUri);
+    _resolveImage(_resolvedSource);
     _listenToStream();
   }
 
@@ -134,22 +134,22 @@ class ImageElement extends Element {
     _imageProviderKey = null;
   }
 
-  double get width {
+  int get width {
     // Width calc priority: style > property > intrinsic.
     double borderBoxWidth = _styleWidth
       ?? _propertyWidth
       ?? renderStyle.getWidthByIntrinsicRatio();
 
-    return borderBoxWidth;
+    return borderBoxWidth.round();
   }
 
-  double get height {
+  int get height {
     // Height calc priority: style > property > intrinsic.
     double borderBoxHeight = _styleHeight
       ?? _propertyHeight
       ?? renderStyle.getHeightByIntrinsicRatio();
 
-    return borderBoxHeight;
+    return borderBoxHeight.round();
   }
 
   // Read the original image width of loaded image.
@@ -236,8 +236,8 @@ class ImageElement extends Element {
 
     // Try to update image size if image already resolved.
     // Set size to RenderImage is needs, to avoid makeNeedsLayout when update image.
-    _renderImage?.width = width;
-    _renderImage?.height = height;
+    _renderImage?.width = width.toDouble();
+    _renderImage?.height = height.toDouble();
 
     if (naturalWidth == 0.0 || naturalHeight == 0.0) {
       renderStyle.intrinsicRatio = null;
@@ -286,15 +286,6 @@ class ImageElement extends Element {
 
     _cachedImageStream?.removeListener(_getListener());
     _isListeningStream = false;
-  }
-
-  Uri? _resolveSrc() {
-    String? src = attributes['src'];
-    if (src != null && src.isNotEmpty) {
-      Uri base = Uri.parse(ownerDocument.controller.url);
-      return ownerDocument.controller.uriParser!.resolve(base, Uri.parse(src));
-    }
-    return null;
   }
 
   void _updateSourceStream(ImageStream newStream) {
@@ -377,7 +368,8 @@ class ImageElement extends Element {
   // obtain the cached imageStream from imageCache instead of obtaining resources from I/O.
   void _precacheImage() async {
     final ImageConfiguration config = ImageConfiguration.empty;
-    final Uri? resolvedUri = _resolvedUri = _resolveSrc();
+    _resolveSource(src);
+    final Uri? resolvedUri = _resolvedSource;
     if (resolvedUri == null) return;
     final ImageProvider? provider = _cachedImageProvider = getImageProvider(resolvedUri);
     if (provider == null) return;
@@ -406,44 +398,54 @@ class ImageElement extends Element {
     stream.addListener(listener);
   }
 
-  @override
-  void setProperty(String key, value) {
-    super.setProperty(key, value);
-    if (key == 'src') {
-      final Uri? resolvedUri = _resolvedUri = _resolveSrc();
-      // Update image source if image already attached except image is lazy loading.
-      if (isRendererAttached && !_isInLazyLoading) {
-        _resolveImage(resolvedUri, updateImageProvider: true);
-      } else {
-        _precacheImage();
-      }
-    } else if (key == 'loading' && _isInLazyLoading) {
-      _resetLazyLoading();
-    } else if (key == WIDTH) {
-      _propertyWidth = CSSNumber.parseNumber(value);
-      _resolveImage(_resolvedUri, updateImageProvider: true);
-    } else if (key == HEIGHT) {
-      _propertyHeight = CSSNumber.parseNumber(value);
-      _resolveImage(_resolvedUri, updateImageProvider: true);
+  String get src => _resolvedSource?.toString() ?? '';
+  set src(String value) {
+    internalSetAttribute('src', value);
+    _resolveSource(value);
+    // Update image source if image already attached except image is lazy loading.
+    if (isRendererAttached && !_isInLazyLoading) {
+      _resolveImage(_resolvedSource, updateImageProvider: true);
+    } else {
+      _precacheImage();
     }
   }
 
-  @override
-  getProperty(String name) {
-    switch (name) {
-      case WIDTH:
-        return width;
-      case HEIGHT:
-        return height;
-      case NATURAL_WIDTH:
-        return naturalWidth;
-      case NATURAL_HEIGHT:
-        return naturalHeight;
-      case 'src':
-      case 'loading':
-        return attributes[name];
+  // ReadOnly additional property.
+  bool get loading => hasAttribute('loading');
+  set loading(bool value) {
+    if (value) {
+      internalSetAttribute('loading', '');
+    } else {
+      removeAttribute('loading');
     }
-    return super.getProperty(name);
+
+    if (_isInLazyLoading) {
+      _resetLazyLoading();
+    }
+  }
+
+  set width(int value) {
+    if (value.isNegative) value = 0;
+    internalSetAttribute('width', value.toString());
+    _propertyWidth = value.toDouble();
+    _resolveImage(_resolvedSource, updateImageProvider: true);
+  }
+
+  set height(int value) {
+    if (value.isNegative) value = 0;
+    internalSetAttribute('height', value.toString());
+    _propertyHeight = value.toDouble();
+    _resolveImage(_resolvedSource, updateImageProvider: true);
+  }
+
+  void _resolveSource(String source) {
+    String base = ownerDocument.controller.url;
+    try {
+      _resolvedSource = ownerDocument.controller.uriParser!.resolve(Uri.parse(base), Uri.parse(source));
+    } finally {
+      // Ignoring the failure of resolving, but to remove the resolved hyperlink.
+      _resolvedSource = null;
+    }
   }
 
   void _stylePropertyChanged(String property, String? original, String present) {
@@ -461,7 +463,7 @@ class ImageElement extends Element {
         _styleHeight = resolveStyleHeight == double.infinity ? null : resolveStyleHeight;
       }
       // Resize image
-      _resolveImage(_resolvedUri, updateImageProvider: true);
+      _resolveImage(_resolvedSource, updateImageProvider: true);
     } else if (property == OBJECT_FIT && _renderImage != null) {
       _renderImage!.fit = renderBoxModel!.renderStyle.objectFit;
     } else if (property == OBJECT_POSITION && _renderImage != null) {

@@ -555,11 +555,6 @@ class KrakenViewController
     }
   }
 
-  @deprecated
-  void setProperty(int targetId, String key, String value) {
-    setAttribute(targetId, key, value);
-  }
-
   void setAttribute(int targetId, String key, String value) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_SET_PROPERTIES_START, uniqueId: targetId);

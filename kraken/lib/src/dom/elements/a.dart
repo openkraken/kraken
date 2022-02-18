@@ -30,14 +30,12 @@ class AnchorElement extends Element {
     }
   }
 
-  String get _target => attributes['target'] ?? _TARGET_SELF;
-
   KrakenNavigationType _getNavigationType(String scheme) {
     switch (scheme.toLowerCase()) {
       case 'http':
       case 'https':
       case 'file':
-        if (_target == _TARGET_SELF) {
+        if (target.isEmpty || target == _TARGET_SELF) {
           return KrakenNavigationType.reload;
         }
     }
@@ -45,6 +43,7 @@ class AnchorElement extends Element {
     return KrakenNavigationType.navigate;
   }
 
+  // Reference: https://www.w3.org/TR/2011/WD-html5-author-20110809/the-a-element.html
   // Supported properties:
   // - href: the address of the hyperlink.
   // - target: Specifies how the content of the open target URL is displayed to the user.
@@ -61,81 +60,35 @@ class AnchorElement extends Element {
   // - attribute DOMString search;
   // - attribute DOMString hash;
   // The IDL attribute relList must reflect the rel content attribute.
-  @override
-  getProperty(String key) {
-    switch (key) {
-      // The IDL attributes href, target, rel, media, hreflang, and type,
-      // must reflect the respective content attributes of the same name.
-      case 'href':
-      case 'target':
-      case 'rel':
-      case 'type':
-        return _DOMString(attributes[key]);
-
-      // The a element also supports the complement of URL decomposition IDL attributes,
-      // protocol, host, port, hostname, pathname, search, and hash.
-      // These must follow the rules given for URL decomposition IDL attributes,
-      // with the input being the result of resolving the element's href attribute relative
-      // to the element, if there is such an attribute and resolving it is successful, or
-      // the empty string otherwise; and the common setter action being the same as setting
-      // the element's href attribute to the new output value.
-      case 'protocol':
-        return _protocol;
-      case 'host':
-        return _host;
-      case 'hostname':
-        return _hostname;
-      case 'port':
-        return _port;
-      case 'pathname':
-        return _pathname;
-      case 'search':
-        return _search;
-      case 'hash':
-        return _hash;
-      default:
-        super.getProperty(key);
-    }
+  String get href => _resolvedHyperlink?.toString() ?? '';
+  set href(String value) {
+    internalSetAttribute('href', value);
+    _resolveHyperlink(value);
+    // Set href will not reflect to attribute href.
   }
 
-  @override
-  void setProperty(String key, value) {
-    super.setProperty(key, value);
-    switch (key) {
-      case 'href':
-        _resolveHyperlink();
-        break;
-      case 'protocol':
-        _protocol = value;
-        break;
-      case 'host':
-        _host = value;
-        break;
-      case 'hostname':
-        _hostname = value;
-        break;
-      case 'port':
-        _port = value;
-        break;
-      case 'pathname':
-        _pathname = value;
-        break;
-      case 'search':
-        _search = value;
-        break;
-      case 'hash':
-        _hash = value;
-        break;
-    }
+  String get target => _DOMString(getAttribute('target'));
+  set target(String value) {
+    internalSetAttribute('target', value);
   }
 
-  String get _protocol => _DOMString(_resolvedHyperlink?.scheme) + ':';
-  set _protocol(String value) {
+  String get rel => _DOMString(getAttribute('rel'));
+  set rel(String value) {
+    internalSetAttribute('rel', value);
+  }
+
+  String get type => _DOMString(getAttribute('type'));
+  set type(String value) {
+    internalSetAttribute('type', value);
+  }
+
+  String get protocol => _DOMString(_resolvedHyperlink?.scheme) + ':';
+  set protocol(String value) {
     if (_resolvedHyperlink == null) return;
 
     if (!value.endsWith(':')) {
       value += ':';
-      attributes['protocol'] = value;
+      internalSetAttribute('protocol', value);
     }
 
     // Remove the ending `:`
@@ -144,7 +97,7 @@ class AnchorElement extends Element {
     _reflectToAttributeHref();
   }
 
-  String get _host {
+  String get host {
     String? host;
     Uri? resolved = _resolvedHyperlink;
     if (resolved != null) {
@@ -152,10 +105,10 @@ class AnchorElement extends Element {
     }
     return _DOMString(host);
   }
-  set _host(String value) {
+  set host(String value) {
     if (_resolvedHyperlink == null) return;
     String host = value;
-    String port = _port;
+    String port = this.port;
 
     // If input host including port.
     if (value.contains(':')) {
@@ -168,15 +121,15 @@ class AnchorElement extends Element {
     _reflectToAttributeHref();
   }
 
-  String get _hostname => _DOMString(_resolvedHyperlink?.host);
-  set _hostname(String value) {
+  String get hostname => _DOMString(_resolvedHyperlink?.host);
+  set hostname(String value) {
     if (_resolvedHyperlink == null) return;
     _resolvedHyperlink = _resolvedHyperlink!.replace(host: value);
     _reflectToAttributeHref();
   }
 
-  String get _port => _DOMString(_resolvedHyperlink?.port.toString());
-  set _port(String value) {
+  String get port => _DOMString(_resolvedHyperlink?.port.toString());
+  set port(String value) {
     if (_resolvedHyperlink == null) return;
     int? port = int.tryParse(value);
     if (port != null) {
@@ -185,14 +138,14 @@ class AnchorElement extends Element {
     }
   }
 
-  String get _pathname => _DOMString(_resolvedHyperlink?.path);
-  set _pathname(String value) {
+  String get pathname => _DOMString(_resolvedHyperlink?.path);
+  set pathname(String value) {
     if (_resolvedHyperlink == null) return;
     _resolvedHyperlink = _resolvedHyperlink!.replace(path: value);
     _reflectToAttributeHref();
   }
 
-  String get _search {
+  String get search {
     String? search;
     String? query = _resolvedHyperlink?.query;
     if (query != null && query.isNotEmpty) {
@@ -200,7 +153,7 @@ class AnchorElement extends Element {
     }
     return _DOMString(search);
   }
-  set _search(String value) {
+  set search(String value) {
     if (_resolvedHyperlink == null) return;
     // Remove starting `?`.
     if (value.startsWith('?')) {
@@ -211,8 +164,8 @@ class AnchorElement extends Element {
     _reflectToAttributeHref();
   }
 
-  String get _hash => _DOMString(_resolvedHyperlink?.fragment);
-  set _hash(String value) {
+  String get hash => _DOMString(_resolvedHyperlink?.fragment);
+  set hash(String value) {
     if (_resolvedHyperlink == null) return;
     _resolvedHyperlink = _resolvedHyperlink!.replace(fragment: value);
     _reflectToAttributeHref();
@@ -225,22 +178,20 @@ class AnchorElement extends Element {
 
   Uri? _resolvedHyperlink;
   // Resolve the href into uri entity, for convenience of URL decomposition IDL attributes to get value.
-  void _resolveHyperlink() {
-    String? href = attributes['href'];
-    if (href != null) {
-      String base = ownerDocument.controller.url;
-      try {
-        _resolvedHyperlink = ownerDocument.controller.uriParser!.resolve(Uri.parse(base), Uri.parse(href));
-      } finally {
-        // Ignoring the failure of resolving.
-      }
+  void _resolveHyperlink(String href) {
+    String base = ownerDocument.controller.url;
+    try {
+      _resolvedHyperlink = ownerDocument.controller.uriParser!.resolve(Uri.parse(base), Uri.parse(href));
+    } finally {
+      // Ignoring the failure of resolving, but to remove the resolved hyperlink.
+      _resolvedHyperlink = null;
     }
   }
 
   // If URL decomposition IDL attributes changed, we should sync href attribute to changed value.
   void _reflectToAttributeHref() {
     if (_resolvedHyperlink != null) {
-      attributes['href'] = _resolvedHyperlink.toString();
+      internalSetAttribute('href', _resolvedHyperlink.toString());
     }
   }
 }

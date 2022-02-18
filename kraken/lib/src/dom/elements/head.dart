@@ -30,37 +30,55 @@ class HeadElement extends Element {
 
 const String _REL_STYLESHEET = 'stylesheet';
 
+// https://www.w3.org/TR/2011/WD-html5-author-20110809/the-link-element.html#the-link-element
 class LinkElement extends Element {
   LinkElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
 
-  // Supported properties:
-  // - href
-  // - rel
-  @override
-  void setProperty(String key, value) {
-    super.setProperty(key, value);
-    switch (key) {
-      case 'href':
-        _fetchBundle(value);
-        break;
+  Uri? _resolvedHyperlink;
+
+  bool get disabled => getAttribute('disabled') != null;
+  set disabled(bool value) {
+    if (value) {
+      internalSetAttribute('disabled', '');
+    } else {
+      removeAttribute('disabled');
     }
   }
 
-  @override
-  getProperty(String key) {
-    switch (key) {
-      case 'href':
-      case 'rel':
-        return attributes[key];
-    }
-    return super.getProperty(key);
+  String get href => _resolvedHyperlink?.toString() ?? '';
+  set href(String value) {
+    internalSetAttribute('href', value);
+    _resolveHyperlink();
+    _fetchBundle();
   }
 
-  String? get _rel => attributes['rel'];
+  String get rel => getAttribute('rel') ?? '';
+  set rel(String value) {
+    internalSetAttribute('rel', value);
+  }
 
-  void _fetchBundle(String url) async {
-    if (url.isNotEmpty && _rel == _REL_STYLESHEET && isConnected) {
+  String get type => getAttribute('type') ?? '';
+  set type(String value) {
+    internalSetAttribute('type', value);
+  }
+
+  void _resolveHyperlink() {
+    String? href = getAttribute('href');
+    if (href != null) {
+      String base = ownerDocument.controller.url;
+      try {
+        _resolvedHyperlink = ownerDocument.controller.uriParser!.resolve(Uri.parse(base), Uri.parse(href));
+      } finally {
+        // Ignoring the failure of resolving, but to remove the resolved hyperlink.
+        _resolvedHyperlink = null;
+      }
+    }
+  }
+
+  void _fetchBundle() async {
+    if (_resolvedHyperlink != null && rel == _REL_STYLESHEET && isConnected) {
+      String url = _resolvedHyperlink.toString();
       try {
         KrakenBundle bundle = KrakenBundle.fromUrl(url);
         await bundle.resolve(contextId);
@@ -70,7 +88,7 @@ class LinkElement extends Element {
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_LOAD));
         });
-      } catch(e) {
+      } catch (e) {
         // An error occurred.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_ERROR));
@@ -83,9 +101,8 @@ class LinkElement extends Element {
   @override
   void connectedCallback() async {
     super.connectedCallback();
-    String? url = getAttribute('href');
-    if (url != null) {
-      _fetchBundle(url);
+    if (_resolvedHyperlink != null) {
+      _fetchBundle();
     }
   }
 }
@@ -110,41 +127,70 @@ const String _MIME_APPLICATION_JAVASCRIPT = 'application/javascript';
 const String _MIME_X_APPLICATION_JAVASCRIPT = 'application/x-javascript';
 const String _JAVASCRIPT_MODULE = 'module';
 
+// https://www.w3.org/TR/2011/WD-html5-author-20110809/the-link-element.html
 class ScriptElement extends Element {
   ScriptElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle) {
   }
 
-  String _type = _MIME_TEXT_JAVASCRIPT;
+  final String _type = _MIME_TEXT_JAVASCRIPT;
 
-  // Supported properties:
-  // - src
-  // - type
-  @override
-  void setProperty(String key, value) {
-    super.setProperty(key, value);
-    switch (key) {
-      case 'src':
-        _fetchBundle(value);
-        break;
-      case 'type':
-        _type = value.toString();
-        break;
+  Uri? _resolvedSource;
+
+  String get src => _resolvedSource?.toString() ?? '';
+  set src(String value) {
+    internalSetAttribute('src', value);
+    _resolveSource(value);
+    _fetchAndExecuteSource();
+    // Set src will not reflect to attribute src.
+  }
+
+  // @TODO: implement async.
+  bool get async => getAttribute('async') != null;
+  set async(bool value) {
+    if (value) {
+      internalSetAttribute('async', '');
+    } else {
+      removeAttribute('async');
     }
   }
 
-  @override
-  getProperty(String key) {
-    switch (key) {
-      case 'src':
-      case 'type':
-        return attributes[key];
+  // @TODO: implement defer.
+  bool get defer => getAttribute('defer') != null;
+  set defer(bool value) {
+    if (value) {
+      internalSetAttribute('defer', '');
+    } else {
+      removeAttribute('defer');
     }
-
-    return super.getProperty(key);
   }
 
-  void _fetchBundle(String src) async {
+  String get type => getAttribute('type') ?? '';
+  set type(String value) {
+    internalSetAttribute('type', value);
+  }
+
+  String get charset => getAttribute('charset') ?? '';
+  set charset(String value) {
+    internalSetAttribute('charset', value);
+  }
+
+  String get text => getAttribute('text') ?? '';
+  set text(String value) {
+    internalSetAttribute('text', value);
+  }
+
+  void _resolveSource(String source) {
+    String base = ownerDocument.controller.url;
+    try {
+      _resolvedSource = ownerDocument.controller.uriParser!.resolve(Uri.parse(base), Uri.parse(source));
+    } finally {
+      // Ignoring the failure of resolving, but to remove the resolved hyperlink.
+      _resolvedSource = null;
+    }
+  }
+
+  void _fetchAndExecuteSource() async {
     int? contextId = ownerDocument.contextId;
     if (contextId == null) return;
     // Must
@@ -155,12 +201,7 @@ class ScriptElement extends Element {
           || _type == _JAVASCRIPT_MODULE
     )) {
       try {
-        // Resolve uri.
-        String baseUrl = ownerDocument.controller.url;
-        Uri baseUri = Uri.parse(baseUrl);
-        Uri uri = ownerDocument.controller.uriParser!.resolve(baseUri, Uri.parse(src));
-        // Load and evaluate using kraken bundle.
-        KrakenBundle bundle = KrakenBundle.fromUrl(uri.toString());
+        KrakenBundle bundle = KrakenBundle.fromUrl(src.toString());
         await bundle.resolve(contextId);
         bundle.eval(contextId);
         // Successful load.
@@ -183,9 +224,8 @@ class ScriptElement extends Element {
     super.connectedCallback();
     int? contextId = ownerDocument.contextId;
     if (contextId == null) return;
-    String? src = getAttribute('src');
-    if (src != null) {
-      _fetchBundle(src);
+    if (src.isNotEmpty) {
+      _fetchAndExecuteSource();
     } else if (_type == _MIME_TEXT_JAVASCRIPT || _type == _JAVASCRIPT_MODULE){
       // Eval script context: <script> console.log(1) </script>
       String? script = _collectElementChildText(this);
@@ -203,11 +243,17 @@ class ScriptElement extends Element {
 
 const String _CSS_MIME = 'text/css';
 
+// https://www.w3.org/TR/2011/WD-html5-author-20110809/the-style-element.html
 class StyleElement extends Element {
   StyleElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
-  String _type = _CSS_MIME;
+  final String _type = _CSS_MIME;
   CSSStyleSheet? _styleSheet;
+
+  String get type => getAttribute('type') ?? '';
+  set type(String value) {
+    internalSetAttribute('type', value);
+  }
 
   void _recalculateStyle() {
     String? text = _collectElementChildText(this);
@@ -240,14 +286,6 @@ class StyleElement extends Element {
     Node ret = super.removeChild(child);
     _recalculateStyle();
     return ret;
-  }
-
-  @override
-  void setProperty(String key, value) {
-    super.setProperty(key, value);
-    if (key == 'type') {
-      _type = value.toString();
-    }
   }
 
   @override

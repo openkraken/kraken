@@ -76,39 +76,31 @@ class SampleElement extends dom.Element {
   SampleElement(dom.EventTargetContext? context)
       : super(context);
 
-  @override
-  getProperty(String key) {
-    switch (key) {
-      case 'ping':
-        return 'pong';
-      case '_fake':
-        return 1234;
-      case 'fn':
-        return (List<dynamic> args) {
-          return List.generate(args.length, (index) {
-            return args[index] * 2;
-          });
-        };
-      case 'asyncFn':
-        return (List<dynamic> argv) async {
-          Completer<dynamic> completer = Completer();
-          Timer(Duration(seconds: 1), () {
-            completer.complete(argv[0]);
-          });
-          return completer.future;
-        };
-      case 'asyncFnFailed':
-        return (List<dynamic> args) async {
-          Completer<String> completer = Completer();
-          Timer(Duration(milliseconds: 100), () {
-            completer.completeError(AssertionError('Asset error'));
-          });
-          return completer.future;
-        };
-      default:
-        return super.getProperty(key);
-    }
-  }
+  String get ping => 'pong';
+
+  int get fake => 1234;
+
+  Function get fn => (List<dynamic> args) {
+    return List.generate(args.length, (index) {
+      return args[index] * 2;
+    });
+  };
+
+  Function get asyncFn => (List<dynamic> argv) async {
+    Completer<dynamic> completer = Completer();
+    Timer(Duration(seconds: 1), () {
+    completer.complete(argv[0]);
+    });
+    return completer.future;
+  };
+
+  Function get asyncFnFailed => (List<dynamic> args) async {
+    Completer<String> completer = Completer();
+    Timer(Duration(milliseconds: 100), () {
+    completer.completeError(AssertionError('Asset error'));
+    });
+    return completer.future;
+  };
 }
 
 void defineKrakenCustomElements() {

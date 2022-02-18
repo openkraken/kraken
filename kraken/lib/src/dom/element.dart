@@ -96,9 +96,6 @@ class Element extends Node
   // The attrs.
   final Map<String, String> attributes = <String, String>{};
 
-  @deprecated
-  Map<String, dynamic> get properties => attributes;
-
   /// The style of the element, not inline style.
   late CSSStyleDeclaration style;
 
@@ -883,10 +880,11 @@ class Element extends Node
     } else if (_CLASS_NAME == qualifiedName) {
       className = value;
     }
-    attributes[qualifiedName] = value;
+    internalSetAttribute(qualifiedName, value);
+  }
 
-    // Sync value to property.
-    setProperty(qualifiedName, value);
+  void internalSetAttribute(String qualifiedName, String value) {
+    attributes[qualifiedName] = value;
   }
 
   @mustCallSuper
@@ -897,6 +895,11 @@ class Element extends Node
       className = EMPTY_STRING;
     }
     attributes.remove(qualifiedName);
+  }
+
+  @mustCallSuper
+  bool hasAttribute(String qualifiedName) {
+    return attributes.containsKey(qualifiedName);
   }
 
   // FIXME: only compatible with kraken plugins

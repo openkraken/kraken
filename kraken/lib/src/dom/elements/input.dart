@@ -144,6 +144,7 @@ class EditableTextDelegate implements TextSelectionDelegate {
   }
 }
 
+// https://www.w3.org/TR/2011/WD-html5-author-20110809/the-input-element.html
 class InputElement extends Element implements TextInputClient, TickerProvider {
   static InputElement? focusInputElement;
 
@@ -181,8 +182,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   TextDirection textDirection;
   int minLines;
   int maxLines;
-
-  bool _autoFocus = false;
 
   final KrakenScrollable _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right);
 
@@ -244,38 +243,145 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     return value.text;
   }
 
-  @override
-  getProperty(String key) {
-    switch (key) {
-      // @TODO: Apply algorithm of input element property width.
-      case 'width':
-      case 'height':
-        return 0.0;
-      case 'value':
-        return _getValue();
-      case 'accept':
-      case 'autocomplete':
-      case 'autofocus':
-      case 'required':
-      case 'readonly':
-      case 'pattern':
-      case 'step':
-      case 'name':
-      case 'multiple':
-      case 'checked':
-      case 'disabled':
-      case 'min':
-      case 'max':
-      case 'minlength':
-      case 'maxlength':
-      case 'size':
-        return attributes[key];
-      case 'placeholder':
-        return placeholderText;
-      case 'type':
-        return _getType();
+  // @TODO: Apply algorithm of input element property width/height.
+  int get width => int.tryParse(getAttribute('width') ?? '') ?? 0;
+  set width(int value) {
+    if (value < 0) value = 0;
+    internalSetAttribute('width', value.toString());
+  }
+
+  int get height => int.tryParse(getAttribute('height') ?? '') ?? 0;
+  set height(int value) {
+    if (value < 0) value = 0;
+    internalSetAttribute('height', value.toString());
+  }
+
+  String get value => _getValue();
+  set value(String text) {
+    internalSetAttribute('value', text);
+    TextRange composing = _textSelectionDelegate._textEditingValue.composing;
+    TextSelection selection = TextSelection.collapsed(offset: text.length);
+    TextEditingValue newTextEditingValue = TextEditingValue(
+      text: text,
+      selection: selection,
+      composing: composing,
+    );
+    _formatAndSetValue(newTextEditingValue);
+  }
+
+  String get accept => getAttribute('accept') ?? '';
+  set accept(String value) {
+    internalSetAttribute('accept', value);
+  }
+
+  String get autocomplete => getAttribute('autocomplete') ?? '';
+  set autocomplete(String value) {
+    internalSetAttribute('autocomplete', value);
+  }
+
+  bool get autofocus => hasAttribute('autofocus');
+  set autofocus(bool value) {
+    if (value) {
+      internalSetAttribute('autofocus', '');
+    } else {
+      removeAttribute('autofocus');
     }
-    return super.getProperty(key);
+  }
+
+  bool get required => hasAttribute('required');
+  set required(bool value) {
+    if (value) {
+      internalSetAttribute('required', '');
+    } else {
+      removeAttribute('required');
+    }
+  }
+
+  bool get readOnly => hasAttribute('readonly');
+  set readOnly(bool value) {
+    if (value) {
+      internalSetAttribute('readonly', '');
+    } else {
+      removeAttribute('readonly');
+    }
+  }
+
+  String get pattern => getAttribute('pattern') ?? '';
+  set pattern(String value) {
+    internalSetAttribute('pattern', value);
+  }
+
+  String get step => getAttribute('step') ?? '';
+  set step(String value) {
+    internalSetAttribute('step', value);
+  }
+
+  String get name => getAttribute('name') ?? '';
+  set name(String value) {
+    internalSetAttribute('name', value);
+  }
+
+  bool get multiple => hasAttribute('multiple');
+  set multiple(bool value) {
+    if (value) {
+      internalSetAttribute('multiple', '');
+    } else {
+      removeAttribute('multiple');
+    }
+  }
+
+  bool get checked => hasAttribute('checked');
+  set checked(bool value) {
+    if (value) {
+      internalSetAttribute('checked', '');
+    } else {
+      removeAttribute('checked');
+    }
+  }
+
+  bool get disabled => hasAttribute('disabled');
+  set disabled(bool value) {
+    if (value) {
+      internalSetAttribute('disabled', '');
+    } else {
+      removeAttribute('disabled');
+    }
+  }
+
+  String get min => getAttribute('min') ?? '';
+  set min(String value) {
+    internalSetAttribute('min', value);
+  }
+
+  String get max => getAttribute('max') ?? '';
+  set max(String value) {
+    internalSetAttribute('max', value);
+  }
+
+  int get maxLength => int.tryParse(getAttribute('maxlength') ?? '') ?? 0;
+  set maxLength(int value) {
+    if (value.isNegative) value = 0;
+    internalSetAttribute('maxlength', value.toString());
+  }
+
+  String get placeholder => getAttribute('placeholder') ?? '';
+  set placeholder(String value) {
+    internalSetAttribute('placeholder', value);
+    // Update placeholder text.
+    _rebuildTextSpan();
+  }
+
+  String get type => getAttribute('type') ?? '';
+  set type(String value) {
+    internalSetAttribute('type', value);
+    _setType(value);
+  }
+
+  // Additional inputmode.
+  String get mode => getAttribute('mode') ?? '';
+  set mode(String value) {
+    internalSetAttribute('mode', value);
+    _setInputMode(value);
   }
 
   @override
@@ -329,7 +435,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
 
     SchedulerBinding.instance!.addPostFrameCallback((_) {
-      if (_autoFocus) {
+      if (autofocus) {
         InputElement.setFocus(this);
       }
     });
@@ -567,7 +673,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   bool get multiLine => maxLines > 1;
   bool get _hasFocus => InputElement.focusInputElement == this;
   // The Number.MAX_SAFE_INTEGER constant represents the maximum safe integer in JavaScript (2^53 - 1).
-  int _maxLength = 9007199254740992;
+  final int _maxLength = 9007199254740992;
 
   RenderEditable createRenderEditable() {
     _actualText ??= _buildTextSpan();
@@ -930,37 +1036,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
   }
 
-  @override
-  void setProperty(String key, value) {
-    super.setProperty(key, value);
-
-    if (key == VALUE) {
-      String text = value;
-      TextRange composing = _textSelectionDelegate._textEditingValue.composing;
-      TextSelection selection = TextSelection.collapsed(offset: text.length);
-      TextEditingValue newTextEditingValue = TextEditingValue(
-        text: text,
-        selection: selection,
-        composing: composing,
-      );
-      _formatAndSetValue(newTextEditingValue);
-    } else if (key == 'placeholder') {
-      // Update placeholder text.
-      _rebuildTextSpan();
-    } else if (key == 'autofocus') {
-      _autoFocus = value.isNotEmpty;
-    } else if (key == 'type') {
-      _setType(value);
-    } else if (key == 'inputmode') {
-      _setInputMode(value);
-    } else if (key == 'maxlength') {
-      int? intValue = int.tryParse(value);
-      if (intValue != null && intValue > 0) {
-        _maxLength = intValue;
-      }
-    }
-  }
-
   TextInputType _textInputType = TextInputType.text;
   TextInputType get textInputType => _textInputType;
   set textInputType(TextInputType value) {
@@ -993,21 +1068,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         break;
       // @TODO: more types.
     }
-  }
-  String _getType() {
-    if (textInputType == TextInputType.text) {
-      return 'text';
-    } else if (textInputType == TextInputType.number) {
-      return 'number';
-    } else if (textInputType == TextInputType.phone) {
-      return 'tel';
-    } else if (textInputType == TextInputType.emailAddress) {
-      return 'email';
-    } else if (textInputType == TextInputType.text && obscureText) {
-      return 'password';
-    }
-    // @TODO: more types.
-    return '';
   }
 
   bool _hideVirtualKeyboard = false;
