@@ -59,6 +59,10 @@ class Window : public EventTarget {
   friend WindowInstance;
 };
 
+// Hack: m_context->window() are not real global object, which are strict equal to globalThis.
+// But we configure m_context->window() to simulate globalThis and can access all global properties and methods.
+JSValue ensureWindowIsGlobal(EventTargetInstance* target);
+
 class WindowInstance : public EventTargetInstance {
  public:
   WindowInstance() = delete;
