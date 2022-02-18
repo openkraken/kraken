@@ -930,7 +930,7 @@ class KrakenController {
     if (entrypoint != null) {
       HistoryModule historyModule =
           module.moduleManager.getModule<HistoryModule>('History')!;
-      historyModule.add(entrypoint!);
+      historyModule.add(entrypoint);
     }
 
     assert(!_controllerMap.containsKey(contextId),
