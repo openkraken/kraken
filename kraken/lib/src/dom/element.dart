@@ -52,14 +52,14 @@ enum BoxSizeType {
 
 mixin ElementBase on Node {
   RenderLayoutBox? _renderLayoutBox;
-  RenderIntrinsic? _renderIntrinsic;
-  RenderBoxModel? get renderBoxModel => _renderLayoutBox ?? _renderIntrinsic;
+  RenderReplaced? _renderReplaced;
+  RenderBoxModel? get renderBoxModel => _renderLayoutBox ?? _renderReplaced;
   set renderBoxModel(RenderBoxModel? value) {
     if (value == null) {
-      _renderIntrinsic = null;
+      _renderReplaced = null;
       _renderLayoutBox = null;
-    } else if (value is RenderIntrinsic) {
-      _renderIntrinsic = value;
+    } else if (value is RenderReplaced) {
+      _renderReplaced = value;
     } else if (value is RenderLayoutBox) {
       _renderLayoutBox = value;
     } else {
@@ -91,8 +91,9 @@ class Element extends Node
   // Default to unknown, assign by [createElement], used by inspector.
   String tagName = UNKNOWN;
 
-  /// Is element an intrinsic box.
-  final bool _isIntrinsicBox;
+  // Is element an replaced element.
+  // https://drafts.csswg.org/css-display/#replaced-element
+  final bool _isReplaceElement;
 
   /// The style of the element, not inline style.
   late CSSStyleDeclaration style;
@@ -151,11 +152,11 @@ class Element extends Node
     {
       Map<String, dynamic>? defaultStyle,
       // Whether element allows children.
-      bool isIntrinsicBox = false,
+      bool isReplaceElement = false,
       bool isDefaultRepaintBoundary = false
     })
     : _defaultStyle = defaultStyle ?? const {},
-      _isIntrinsicBox = isIntrinsicBox,
+      _isReplaceElement = isReplaceElement,
       _isDefaultRepaintBoundary = isDefaultRepaintBoundary,
       super(NodeType.ELEMENT_NODE, context) {
 
@@ -183,8 +184,8 @@ class Element extends Node
 
   void _updateRenderBoxModel() {
     RenderBoxModel nextRenderBoxModel;
-    if (_isIntrinsicBox) {
-      nextRenderBoxModel = _createRenderIntrinsic(isRepaintBoundary: isRepaintBoundary, previousIntrinsic: _renderIntrinsic);
+    if (_isReplaceElement) {
+      nextRenderBoxModel = _createRenderReplaced(isRepaintBoundary: isRepaintBoundary, previousReplaced: _renderReplaced);
     } else {
       nextRenderBoxModel = _createRenderLayout(isRepaintBoundary: isRepaintBoundary, previousRenderLayoutBox: _renderLayoutBox);
     }
@@ -212,42 +213,42 @@ class Element extends Node
     }
   }
 
-  RenderIntrinsic _createRenderIntrinsic({
-    RenderIntrinsic? previousIntrinsic,
+  RenderReplaced _createRenderReplaced({
+    RenderReplaced? previousReplaced,
     bool isRepaintBoundary = false
   }) {
-    RenderIntrinsic nextIntrinsic;
+    RenderReplaced nextReplaced;
 
-    if (previousIntrinsic == null) {
+    if (previousReplaced == null) {
       if (isRepaintBoundary) {
-        nextIntrinsic = RenderRepaintBoundaryIntrinsic(
+        nextReplaced = RenderRepaintBoundaryReplaced(
           renderStyle,
         );
       } else {
-        nextIntrinsic = RenderIntrinsic(
+        nextReplaced = RenderReplaced(
           renderStyle,
         );
       }
     } else {
-      if (previousIntrinsic is RenderRepaintBoundaryIntrinsic) {
+      if (previousReplaced is RenderRepaintBoundaryReplaced) {
         if (isRepaintBoundary) {
-          // RenderRepaintBoundaryIntrinsic --> RenderRepaintBoundaryIntrinsic
-          nextIntrinsic = previousIntrinsic;
+          // RenderRepaintBoundaryReplaced --> RenderRepaintBoundaryReplaced
+          nextReplaced = previousReplaced;
         } else {
-          // RenderRepaintBoundaryIntrinsic --> RenderIntrinsic
-          nextIntrinsic = previousIntrinsic.toIntrinsic();
+          // RenderRepaintBoundaryReplaced --> RenderReplaced
+          nextReplaced = previousReplaced.toReplaced();
         }
       } else {
         if (isRepaintBoundary) {
-          // RenderIntrinsic --> RenderRepaintBoundaryIntrinsic
-          nextIntrinsic = previousIntrinsic.toRepaintBoundaryIntrinsic();
+          // RenderReplaced --> RenderRepaintBoundaryReplaced
+          nextReplaced = previousReplaced.toRepaintBoundaryIntrinsic();
         } else {
-          // RenderIntrinsic --> RenderIntrinsic
-          nextIntrinsic = previousIntrinsic;
+          // RenderReplaced --> RenderReplaced
+          nextReplaced = previousReplaced;
         }
       }
     }
-    return nextIntrinsic;
+    return nextReplaced;
   }
 
   // Create renderLayoutBox if type changed and copy children if there has previous renderLayoutBox.
@@ -635,8 +636,8 @@ class Element extends Node
       } else {
         _renderLayoutBox!.add(child);
       }
-    } else if (_renderIntrinsic != null) {
-      _renderIntrinsic!.child = child;
+    } else if (_renderReplaced != null) {
+      _renderReplaced!.child = child;
     }
   }
 

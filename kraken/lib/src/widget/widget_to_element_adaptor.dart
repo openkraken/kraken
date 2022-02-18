@@ -173,7 +173,7 @@ abstract class WidgetElement extends dom.Element {
 
   WidgetElement(dom.EventTargetContext? context, {
     Map<String, dynamic>? defaultStyle,
-    bool isIntrinsicBox = false,
+    bool isReplaceElement = false,
     // WidgetElement Adds repaintBoundary by default to prevent the internal paint process from affecting the outside.
     // If a lot of WidgetElement is used in a scene, you need to modify the default repaintBoundary according to the scene analysis.
     // Otherwise it will cause performance problems by creating most layers.
@@ -181,7 +181,7 @@ abstract class WidgetElement extends dom.Element {
   }) : super(
     context,
     defaultStyle: defaultStyle,
-    isIntrinsicBox: isIntrinsicBox,
+    isReplaceElement: isReplaceElement,
     isDefaultRepaintBoundary: isDefaultRepaintBoundary,
   ) {
     WidgetsFlutterBinding.ensureInitialized();

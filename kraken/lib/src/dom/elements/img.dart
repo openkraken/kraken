@@ -49,11 +49,11 @@ class ImageElement extends Element {
   bool _isListeningStream = false;
 
   bool get _isInLazyLoading {
-    RenderIntrinsic? renderIntrinsic;
+    RenderReplaced? renderReplaced;
     if (renderBoxModel != null) {
-      renderIntrinsic = renderBoxModel as RenderIntrinsic;
+      renderReplaced = renderBoxModel as RenderReplaced;
     }
-    return renderIntrinsic != null && renderIntrinsic.isInLazyRendering;
+    return renderReplaced != null && renderReplaced.isInLazyRendering;
   }
 
   // https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-complete-dev
@@ -66,7 +66,7 @@ class ImageElement extends Element {
   ImageElement(EventTargetContext? context)
       : super(
       context,
-      isIntrinsicBox: true,
+      isReplaceElement: true,
       defaultStyle: _defaultStyle) {
   }
 
@@ -84,11 +84,11 @@ class ImageElement extends Element {
     if (!_isInLazyLoading || _renderImage == null) {
       // Image dimensions (width or height) should specified for performance when lazy-load.
       if (_shouldLazyLoading) {
-        RenderIntrinsic renderIntrinsic = renderBoxModel! as RenderIntrinsic;
-        renderIntrinsic.isInLazyRendering = true;
+        RenderReplaced renderReplaced = renderBoxModel! as RenderReplaced;
+        renderReplaced.isInLazyRendering = true;
 
         // When detach renderer, all listeners will be cleared.
-        renderIntrinsic.addIntersectionChangeListener(_handleIntersectionChange);
+        renderReplaced.addIntersectionChangeListener(_handleIntersectionChange);
       } else {
         _loadImage();
       }
@@ -378,8 +378,8 @@ class ImageElement extends Element {
     }
 
     if (renderBoxModel != null) {
-      RenderIntrinsic renderIntrinsic = renderBoxModel! as RenderIntrinsic;
-      renderIntrinsic.isInLazyRendering = false;
+      RenderReplaced renderReplaced = renderBoxModel! as RenderReplaced;
+      renderReplaced.isInLazyRendering = false;
     }
 
     _attachImage();

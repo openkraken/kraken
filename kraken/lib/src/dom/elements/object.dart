@@ -36,7 +36,7 @@ class ObjectElement extends Element implements ObjectElementHost {
   late ObjectElementClient _objectElementClient;
 
   ObjectElement(EventTargetContext? context)
-      : super(context, defaultStyle: _objectStyle, isIntrinsicBox: true) {
+      : super(context, defaultStyle: _objectStyle, isReplaceElement: true) {
     initObjectClient();
     initElementClient();
   }

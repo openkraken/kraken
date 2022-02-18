@@ -10,9 +10,12 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 
-class RenderIntrinsic extends RenderBoxModel
+/// RenderBox of a replaced element whose content is outside the scope of the CSS formatting model,
+/// such as an image or embedded document.
+/// https://drafts.csswg.org/css-display/#replaced-element
+class RenderReplaced extends RenderBoxModel
     with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
-  RenderIntrinsic(CSSRenderStyle renderStyle) : super(renderStyle: renderStyle);
+  RenderReplaced(CSSRenderStyle renderStyle) : super(renderStyle: renderStyle);
 
   @override
   BoxSizeType get widthSizeType {
@@ -154,10 +157,10 @@ class RenderIntrinsic extends RenderBoxModel
     }
   }
 
-  RenderRepaintBoundaryIntrinsic toRepaintBoundaryIntrinsic() {
+  RenderRepaintBoundaryReplaced toRepaintBoundaryIntrinsic() {
     RenderObject? childRenderObject = child;
     child = null;
-    RenderRepaintBoundaryIntrinsic newChild = RenderRepaintBoundaryIntrinsic(renderStyle);
+    RenderRepaintBoundaryReplaced newChild = RenderRepaintBoundaryReplaced(renderStyle);
     newChild.child = childRenderObject as RenderBox?;
     return copyWith(newChild);
   }
@@ -171,16 +174,16 @@ class RenderIntrinsic extends RenderBoxModel
   }
 }
 
-class RenderRepaintBoundaryIntrinsic extends RenderIntrinsic {
-  RenderRepaintBoundaryIntrinsic(CSSRenderStyle renderStyle) : super(renderStyle);
+class RenderRepaintBoundaryReplaced extends RenderReplaced {
+  RenderRepaintBoundaryReplaced(CSSRenderStyle renderStyle) : super(renderStyle);
 
   @override
   bool get isRepaintBoundary => true;
 
-  RenderIntrinsic toIntrinsic() {
+  RenderReplaced toReplaced() {
     RenderObject? childRenderObject = child;
     child = null;
-    RenderIntrinsic newChild = RenderIntrinsic(renderStyle);
+    RenderReplaced newChild = RenderReplaced(renderStyle);
     newChild.child = childRenderObject as RenderBox?;
     return copyWith(newChild);
   }
