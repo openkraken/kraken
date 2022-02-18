@@ -149,6 +149,7 @@ JSValue EventTarget::dispatchEvent(JSContext* ctx, JSValue this_val, int argc, J
 
   JSValue eventValue = argv[0];
   auto eventInstance = reinterpret_cast<EventInstance*>(JS_GetOpaque(eventValue, EventTarget::classId(eventValue)));
+  eventInstance->nativeEvent->target = eventTargetInstance;
   return JS_NewBool(ctx, eventTargetInstance->dispatchEvent(eventInstance));
 }
 

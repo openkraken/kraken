@@ -25,6 +25,13 @@ void bindWindow(ExecutionContext* context) {
   context->defineGlobalProperty("__window__", window->jsObject);
 }
 
+JSValue ensureWindowIsGlobal(EventTargetInstance* target) {
+  if (target == target->context()->window()) {
+    return target->context()->global();
+  }
+  return target->jsObject;
+}
+
 JSClassID Window::kWindowClassId{0};
 
 Window::Window(ExecutionContext* context) : EventTarget(context, "Window") {
