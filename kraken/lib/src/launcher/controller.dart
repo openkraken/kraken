@@ -985,6 +985,8 @@ abstract class Controller {
     if (envUrl != null) {
       bundle = KrakenBundle.fromUrl(envUrl);
     }
+
+    return bundle;
   }
 
   // preload javascript source and cache it.
@@ -1110,6 +1112,7 @@ class HTMLViewController extends Controller {
       String? name,
       double viewportWidth,
       double viewportHeight, {
+        KrakenBundle? bundle,
         bool showPerformanceOverlay = false,
         enableDebug = false,
         Color? background,
@@ -1118,7 +1121,7 @@ class HTMLViewController extends Controller {
         WidgetDelegate? widgetDelegate,
         final DevToolsService? devToolsService,
         UriParser? uriParser
-      }) : super(name, uriParser: uriParser, widgetDelegate: widgetDelegate, devToolsService: devToolsService) {
+      }) : super(name, bundle: bundle, uriParser: uriParser, widgetDelegate: widgetDelegate, devToolsService: devToolsService) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_PROPERTY_INIT);
       PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_INIT_START);
@@ -1248,6 +1251,7 @@ class KrakenController extends Controller {
     assert(!_controllerMap.containsKey(contextId),
         'found exist contextId of KrakenController, contextId: $contextId');
     _controllerMap[contextId] = this;
+
     assert(!_nameIdMap.containsKey(name),
         'found exist name of KrakenController, name: $name');
     if (name != null) {

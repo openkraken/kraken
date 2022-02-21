@@ -49,11 +49,12 @@ class _HTMLViewRenderObjectWidget extends SingleChildRenderObjectWidget {
       throw FlutterError('''Can't get viewportSize from window. Please set viewportWidth and viewportHeight manually.
 This situation often happened when you trying creating kraken when FlutterView not initialized.''');
     }
-    print(_krakenWidget.bundle);
+
     HTMLViewController controller = HTMLViewController(
       shortHash(_krakenWidget.hashCode),
       viewportWidth,
       viewportHeight,
+      bundle: _krakenWidget.bundle,
       background: _krakenWidget.background,
       showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
       devToolsService: _krakenWidget.devToolsService,

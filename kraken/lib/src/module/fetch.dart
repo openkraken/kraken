@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:kraken/foundation.dart';
+import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 import 'package:meta/meta.dart';
 
@@ -73,7 +74,7 @@ class FetchModule extends BaseModule {
 
       // Set controller hascode Header
       if (moduleManager != null) {
-        request.headers.set(HttpHeaderContext, moduleManager!.controller.hashCode.toString());
+        request.headers.set(HttpHeaderContext, (moduleManager!.controller as KrakenController).view.contextId);
       }
 
       if (data is List<int>) {
