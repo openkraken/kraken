@@ -286,7 +286,7 @@ class KrakenResizeImage extends ResizeImage {
 
     // Image will be resized according to its aspect radio if object-fit is not fill.
     // https://www.w3.org/TR/css-images-3/#propdef-object-fit
-    if (cacheWidth != null && cacheHeight != null && objectFit != BoxFit.fill) {
+    if (cacheWidth != null && cacheHeight != null) {
       // When targetWidth or targetHeight is not set at the same time,
       // image will be resized according to its aspect radio.
       // https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/box_fit.dart#L152
@@ -296,7 +296,11 @@ class KrakenResizeImage extends ResizeImage {
         } else {
           targetWidth = cacheWidth;
         }
-      } else if (objectFit == BoxFit.cover) {
+
+      // Resized image should maintain its intrinsic aspect radio event if object-fit is fill
+      // which behaves just like object-fit cover otherwise the cached resized image with
+      // distorted aspect ratio will not work when object-fit changes to not fill.
+      } else if (objectFit == BoxFit.fill || objectFit == BoxFit.cover) {
         if (cacheWidth / cacheHeight > naturalWidth / naturalHeight) {
           targetWidth = cacheWidth;
         } else {
@@ -366,7 +370,6 @@ ImageProvider defaultCachedProviderFactory(
     params.cachedHeight,
     params.objectFit,
     CachedNetworkImage(uri.toString(),
-        objectFit: params.objectFit,
         contextId: (params as CachedNetworkImageProviderParams).contextId)
   );
 }
@@ -393,7 +396,7 @@ ImageProvider? defaultFileProviderFactory(Uri uri, ImageProviderParams params) {
     params.cachedWidth,
     params.cachedHeight,
     params.objectFit,
-    KrakenFileImage((params as FileImageProviderParams).file, objectFit: params.objectFit)
+    FileImage((params as FileImageProviderParams).file)
   );
 }
 
@@ -404,7 +407,7 @@ ImageProvider? defaultDataUrlProviderFactory(
     params.cachedWidth,
     params.cachedHeight,
     params.objectFit,
-    KrakenMemoryImage((params as DataUrlImageProviderParams).bytes, objectFit: params.objectFit)
+    MemoryImage((params as DataUrlImageProviderParams).bytes)
   );
 }
 
@@ -420,6 +423,6 @@ ImageProvider defaultAssetsProvider(Uri uri, ImageProviderParams params) {
     params.cachedWidth,
     params.cachedHeight,
     params.objectFit,
-    KrakenAssetImage(uri.toString(), objectFit: params.objectFit)
+    AssetImage(uri.toString())
   );
 }

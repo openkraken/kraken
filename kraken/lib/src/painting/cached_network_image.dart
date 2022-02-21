@@ -16,15 +16,12 @@ import 'package:kraken/foundation.dart';
 class CachedNetworkImageKey {
   CachedNetworkImageKey({
     required this.url,
-    required this.scale,
-    required this.objectFit
+    required this.scale
   });
 
   final String url;
 
   final double scale;
-
-  final BoxFit objectFit;
 
   @override
   bool operator ==(Object other) {
@@ -32,24 +29,21 @@ class CachedNetworkImageKey {
       return false;
     return other is CachedNetworkImageKey
         && other.url == url
-        && other.scale == scale
-        && other.objectFit == objectFit;
+        && other.scale == scale;
   }
 
   @override
-  int get hashCode => hashValues(url, scale, objectFit);
+  int get hashCode => hashValues(url, scale);
 }
 
 class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
-  const CachedNetworkImage(this.url, {this.scale = 1.0, this.objectFit = BoxFit.fill, this.headers, this.contextId});
+  const CachedNetworkImage(this.url, {this.scale = 1.0, this.headers, this.contextId});
 
   final String url;
 
   final double scale;
 
   final int? contextId;
-
-  final BoxFit objectFit;
 
   final Map<String, String>? headers;
 
@@ -142,8 +136,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
   Future<CachedNetworkImageKey> obtainKey(ImageConfiguration configuration) {
     return SynchronousFuture<CachedNetworkImageKey>(CachedNetworkImageKey(
       url: url,
-      scale: scale,
-      objectFit: objectFit,
+      scale: scale
     ));
   }
 
