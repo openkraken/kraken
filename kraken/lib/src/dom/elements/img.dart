@@ -53,6 +53,9 @@ class ImageElement extends Element {
   bool complete = false;
 
   bool get _shouldLazyLoading => properties['loading'] == 'lazy';
+
+  bool get _shouldScaling => properties['scaling'] == 'scale';
+
   ImageStreamCompleterHandle? _completerHandle;
 
   ImageElement(EventTargetContext? context)
@@ -319,8 +322,8 @@ class ImageElement extends Element {
     if (resolvedUri == null) return;
 
     // Try to make sure that this image can be encoded into a smaller size.
-    int? cachedWidth = width > 0 && width.isFinite ? (width * ui.window.devicePixelRatio).toInt() : null;
-    int? cachedHeight = height > 0 && height.isFinite ? (height * ui.window.devicePixelRatio).toInt() : null;
+    int? cachedWidth = _shouldScaling && width > 0 && width.isFinite ? (width * ui.window.devicePixelRatio).toInt() : null;
+    int? cachedHeight = _shouldScaling && height > 0 && height.isFinite ? (height * ui.window.devicePixelRatio).toInt() : null;
 
     ImageProvider? provider = _cachedImageProvider;
     if (updateImageProvider || provider == null) {
