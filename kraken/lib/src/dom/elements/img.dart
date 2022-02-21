@@ -324,11 +324,8 @@ class ImageElement extends Element {
 
     ImageProvider? provider = _cachedImageProvider;
     if (updateImageProvider || provider == null) {
-      // Resized image needs to maintain its aspect ratio when object-fit is contain/cover.
-      BoxFit objectFit = BoxFit.fill;
-      if (renderBoxModel != null) {
-        objectFit = renderBoxModel!.renderStyle.objectFit;
-      }
+      // Image should be resized based on different ratio according to object-fit value.
+      BoxFit objectFit = renderStyle.objectFit;
       provider = _cachedImageProvider = getImageProvider(
         resolvedUri,
         objectFit: objectFit,
