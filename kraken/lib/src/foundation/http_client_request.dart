@@ -34,7 +34,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   final HttpHeaders _httpHeaders = createHttpHeaders();
 
   ProxyHttpClientRequest(String method, Uri uri, KrakenHttpOverrides httpOverrides, HttpClient nativeHttpClient) :
-    _method = method,
+    _method = method.toLowerCase(),
     _uri = uri,
     _httpOverrides = httpOverrides,
     _nativeHttpClient = nativeHttpClient;
@@ -113,11 +113,26 @@ class ProxyHttpClientRequest extends HttpClientRequest {
     HttpClientRequest request = this;
 
     if (contextId != null) {
-      // Set the default origin and referrer.
+      // Standard reference: https://datatracker.ietf.org/doc/html/rfc7231#section-5.5.2
+      //   Most general-purpose user agents do not send the
+      //   Referer header field when the referring resource is a local "file" or
+      //   "data" URI.  A user agent MUST NOT send a Referer header field in an
+      //   unsecured HTTP request if the referring page was received with a
+      //   secure protocol.
       Uri referrer = getReferrer(contextId);
-      headers.set(HttpHeaders.refererHeader, referrer.toString());
+      bool isUnsafe = referrer.isScheme('https') && !uri.isScheme('https');
+      bool isLocalRequest = uri.isScheme('file') || uri.isScheme('data') || uri.isScheme('assets');
+      if (!isUnsafe && !isLocalRequest) {
+        headers.set(HttpHeaders.refererHeader, referrer.toString());
+      }
+
+      // Standard reference: https://fetch.spec.whatwg.org/#origin-header
+      // `if request’s method is neither `GET` nor `HEAD`, then follow referrer policy to append origin.`
+      // @TODO: Apply referrer policy.
       String origin = getOrigin(referrer);
-      headers.set(_HttpHeadersOrigin, origin);
+      if (method != 'get' && method != 'head') {
+        headers.set(_HttpHeadersOrigin, origin);
+      }
 
       HttpClientInterceptor? clientInterceptor;
       if (_httpOverrides.hasInterceptor(contextId)) {
