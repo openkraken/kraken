@@ -50,6 +50,7 @@ JSValue Window::open(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) 
 }
 JSValue Window::scrollTo(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
 #if FLUTTER_BACKEND
+  getDartMethod()->flushUICommand();
   auto window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, Window::classId()));
   NativeValue arguments[] = {jsValueToNativeValue(ctx, argv[0]), jsValueToNativeValue(ctx, argv[1])};
   return window->callNativeMethods("scroll", 2, arguments);
