@@ -4,6 +4,7 @@
  */
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/kraken.dart';
 
 const String HTML = 'HTML';
 const Map<String, dynamic> _defaultStyle = {
@@ -23,5 +24,17 @@ class HTMLElement extends Element {
     // Scroll event not working on html.
     if (eventType == EVENT_SCROLL) return;
     super.addEvent(eventType);
+  }
+
+  @override
+  void dispatchEvent(Event event) {
+    KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
+    if (event.type == SCROLL) {
+      // https://www.w3.org/TR/2014/WD-DOM-Level-3-Events-20140925/#event-type-scroll
+      // When dispatched on the Document element, this event type must bubble to the Window object.
+      controller?.view.window.dispatchEvent(event);
+    } else {
+      super.dispatchEvent(event);
+    }
   }
 }
