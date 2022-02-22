@@ -1653,14 +1653,14 @@ void _removeFixedChild(RenderBoxModel childRenderBoxModel, RenderLayoutBox rootR
 // Double: Any valid input, or 0.0.
 T attributeToProperty<T>(String value) {
   // The most using type.
-  if (T is String) {
+  if (T == String) {
     return value as T;
-  } else if (T is bool) {
+  } else if (T == bool) {
     return true as T;
-  } else if (T is int) {
+  } else if (T == int) {
     return (int.tryParse(value) ?? 0) as T;
-  } else if (T is double) {
-    return (double.tryParse(value) ?? 0) as T;
+  } else if (T == double) {
+    return (double.tryParse(value) ?? 0.0) as T;
   } else {
     return value as T;
   }
