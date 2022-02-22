@@ -232,6 +232,15 @@ class CanvasElement extends Element {
   }
 
   @override
+  void setAttribute(String qualifiedName, String value) {
+    super.setAttribute(qualifiedName, value);
+    switch (qualifiedName) {
+      case 'width': width = attributeToProperty<int>(value); break;
+      case 'height': height = attributeToProperty<int>(value); break;
+    }
+  }
+
+  @override
   handleJSCall(String method, List argv) {
     switch (method) {
       case 'getContext':

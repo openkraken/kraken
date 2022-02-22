@@ -512,6 +512,11 @@ getObjectProperty(Object object, String key) {
       case 'naturalHeight': return object.naturalHeight;
       case 'complete': return object.complete;
     }
+  } else if (object is CanvasElement) {
+    switch (key) {
+      case 'width': return object.width;
+      case 'height': return object.height;
+    }
   }
 
   if (object is Element) {
