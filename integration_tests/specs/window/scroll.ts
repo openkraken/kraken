@@ -77,7 +77,6 @@ describe('window scroll API', () => {
     document.body.appendChild(container);
 
     function scrollListener() {
-      console.log('scrollListener')
       done();
     }
 
