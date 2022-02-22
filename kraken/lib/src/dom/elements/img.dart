@@ -63,6 +63,17 @@ class ImageElement extends Element {
   }
 
   @override
+  void setAttribute(String qualifiedName, String value) {
+    super.setAttribute(qualifiedName, value);
+    switch (qualifiedName) {
+      case 'src': src = attributeToProperty<String>(value); break;
+      case 'loading': loading = attributeToProperty<bool>(value); break;
+      case 'width': width = attributeToProperty<int>(value); break;
+      case 'height': height = attributeToProperty<int>(value); break;
+    }
+  }
+
+  @override
   void willAttachRenderer() {
     super.willAttachRenderer();
     style.addStyleChangeListener(_stylePropertyChanged);
@@ -442,7 +453,7 @@ class ImageElement extends Element {
     String base = ownerDocument.controller.url;
     try {
       _resolvedSource = ownerDocument.controller.uriParser!.resolve(Uri.parse(base), Uri.parse(source));
-    } finally {
+    } catch (_) {
       // Ignoring the failure of resolving, but to remove the resolved hyperlink.
       _resolvedSource = null;
     }

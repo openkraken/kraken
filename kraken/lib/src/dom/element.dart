@@ -24,6 +24,7 @@ final RegExp _splitRegExp = RegExp(r'\s+');
 const String _ONE_SPACE = ' ';
 const String _STYLE_PROPERTY = 'style';
 const String _CLASS_NAME = 'class';
+const String _CLASS_LIST = 'classList';
 
 /// Defined by W3C Standard,
 /// Most element's default width is 300 in pixel,
@@ -1642,5 +1643,25 @@ void _removeFixedChild(RenderBoxModel childRenderBoxModel, RenderLayoutBox rootR
   List<RenderBoxModel> fixedChildren = rootRenderLayoutBox.fixedChildren;
   if (fixedChildren.contains(childRenderBoxModel)) {
     fixedChildren.remove(childRenderBoxModel);
+  }
+}
+
+// Reflect attribute type as property.
+// String: Any input.
+// Bool: Any input is true.
+// Int: Any valid input, or 0.
+// Double: Any valid input, or 0.0.
+T attributeToProperty<T>(String value) {
+  // The most using type.
+  if (T is String) {
+    return value as T;
+  } else if (T is bool) {
+    return true as T;
+  } else if (T is int) {
+    return (int.tryParse(value) ?? 0) as T;
+  } else if (T is double) {
+    return (double.tryParse(value) ?? 0) as T;
+  } else {
+    return value as T;
   }
 }

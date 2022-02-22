@@ -37,6 +37,17 @@ class LinkElement extends Element {
 
   Uri? _resolvedHyperlink;
 
+  @override
+  void setAttribute(String qualifiedName, String value) {
+    super.setAttribute(qualifiedName, value);
+    switch (qualifiedName) {
+      case 'disabled': disabled = attributeToProperty<bool>(value); break;
+      case 'rel': rel = attributeToProperty<String>(value); break;
+      case 'href': href = attributeToProperty<String>(value); break;
+      case 'type': type = attributeToProperty<String>(value); break;
+    }
+  }
+
   bool get disabled => getAttribute('disabled') != null;
   set disabled(bool value) {
     if (value) {
@@ -69,7 +80,7 @@ class LinkElement extends Element {
       String base = ownerDocument.controller.url;
       try {
         _resolvedHyperlink = ownerDocument.controller.uriParser!.resolve(Uri.parse(base), Uri.parse(href));
-      } finally {
+      } catch (_) {
         // Ignoring the failure of resolving, but to remove the resolved hyperlink.
         _resolvedHyperlink = null;
       }
@@ -136,6 +147,19 @@ class ScriptElement extends Element {
   final String _type = _MIME_TEXT_JAVASCRIPT;
 
   Uri? _resolvedSource;
+
+  @override
+  void setAttribute(String qualifiedName, String value) {
+    super.setAttribute(qualifiedName, value);
+    switch (qualifiedName) {
+      case 'src': src = attributeToProperty<String>(value); break;
+      case 'async': async = attributeToProperty<bool>(value); break;
+      case 'defer': defer = attributeToProperty<bool>(value); break;
+      case 'type': type = attributeToProperty<String>(value); break;
+      case 'charset': charset = attributeToProperty<String>(value); break;
+      case 'text': text = attributeToProperty<String>(value); break;
+    }
+  }
 
   String get src => _resolvedSource?.toString() ?? '';
   set src(String value) {
@@ -249,6 +273,14 @@ class StyleElement extends Element {
       : super(context, defaultStyle: _defaultStyle);
   final String _type = _CSS_MIME;
   CSSStyleSheet? _styleSheet;
+
+  @override
+  void setAttribute(String qualifiedName, String value) {
+    super.setAttribute(qualifiedName, value);
+    switch (qualifiedName) {
+      case 'type': type = attributeToProperty<String>(value); break;
+    }
+  }
 
   String get type => getAttribute('type') ?? '';
   set type(String value) {

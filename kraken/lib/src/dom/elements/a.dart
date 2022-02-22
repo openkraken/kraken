@@ -43,6 +43,25 @@ class AnchorElement extends Element {
     return KrakenNavigationType.navigate;
   }
 
+  @override
+  void setAttribute(String qualifiedName, String value) {
+    super.setAttribute(qualifiedName, value);
+    // Reflect setAttribute to properties.
+    switch (qualifiedName) {
+      case 'href': href = value; break;
+      case 'target': target = value; break;
+      case 'rel': rel = value; break;
+      case 'type': type = value; break;
+      case 'protocol': protocol = value; break;
+      case 'host': host = value; break;
+      case 'hostname': hostname = value; break;
+      case 'port': port = value; break;
+      case 'pathname': pathname = value; break;
+      case 'search': search = value; break;
+      case 'hash': hash = value; break;
+    }
+  }
+
   // Reference: https://www.w3.org/TR/2011/WD-html5-author-20110809/the-a-element.html
   // Supported properties:
   // - href: the address of the hyperlink.
@@ -182,7 +201,7 @@ class AnchorElement extends Element {
     String base = ownerDocument.controller.url;
     try {
       _resolvedHyperlink = ownerDocument.controller.uriParser!.resolve(Uri.parse(base), Uri.parse(href));
-    } finally {
+    } catch (_) {
       // Ignoring the failure of resolving, but to remove the resolved hyperlink.
       _resolvedHyperlink = null;
     }
