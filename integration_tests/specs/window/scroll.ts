@@ -82,6 +82,6 @@ describe('window scroll API', () => {
 
     window.addEventListener('scroll', scrollListener);
 
-    requestAnimationFrame(async () => window.scrollTo(0, 100));
+    window.scrollTo(0, 100)
   });
 });
