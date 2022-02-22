@@ -93,7 +93,6 @@ class ImageElement extends Element {
     _constructImage();
     // Try to attach image if image is cached.
     _attachImage();
-    _resizeImage();
     _resolveImage(_resolvedUri);
     _listenToStream();
   }
@@ -223,8 +222,6 @@ class ImageElement extends Element {
   }
 
   void _resizeImage() {
-    assert(isRendererAttached);
-
     if (_styleWidth == null && _propertyWidth != null) {
       // The intrinsic width of the image in pixels. Must be an integer without a unit.
       renderStyle.width = CSSLengthValue(_propertyWidth, CSSLengthType.PX);
@@ -322,8 +319,8 @@ class ImageElement extends Element {
     if (resolvedUri == null) return;
 
     // Try to make sure that this image can be encoded into a smaller size.
-    int? cachedWidth = _shouldScaling && width > 0 && width.isFinite ? (width * ui.window.devicePixelRatio).toInt() : null;
-    int? cachedHeight = _shouldScaling && height > 0 && height.isFinite ? (height * ui.window.devicePixelRatio).toInt() : null;
+    int? cachedWidth = width > 0 && width.isFinite ? (width * ui.window.devicePixelRatio).toInt() : null;
+    int? cachedHeight = height > 0 && height.isFinite ? (height * ui.window.devicePixelRatio).toInt() : null;
 
     ImageProvider? provider = _cachedImageProvider;
     if (updateImageProvider || provider == null) {
@@ -431,10 +428,18 @@ class ImageElement extends Element {
       _resetLazyLoading();
     } else if (key == WIDTH) {
       _propertyWidth = CSSNumber.parseNumber(value);
-      _resolveImage(_resolvedUri, updateImageProvider: true);
+      if (_shouldScaling) {
+        _resolveImage(_resolvedUri, updateImageProvider: true);
+      } else {
+        _resizeImage();
+      }
     } else if (key == HEIGHT) {
       _propertyHeight = CSSNumber.parseNumber(value);
-      _resolveImage(_resolvedUri, updateImageProvider: true);
+      if (_shouldScaling) {
+        _resolveImage(_resolvedUri, updateImageProvider: true);
+      } else {
+        _resizeImage();
+      }
     }
   }
 
@@ -468,7 +473,11 @@ class ImageElement extends Element {
         _styleHeight = resolveStyleHeight == double.infinity ? null : resolveStyleHeight;
       }
       // Resize image
-      _resolveImage(_resolvedUri, updateImageProvider: true);
+      if (_shouldScaling) {
+        _resolveImage(_resolvedUri, updateImageProvider: true);
+      } else {
+        _resizeImage();
+      }
     } else if (property == OBJECT_FIT && _renderImage != null) {
       _renderImage!.fit = renderBoxModel!.renderStyle.objectFit;
     } else if (property == OBJECT_POSITION && _renderImage != null) {
