@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:test/test.dart';
 import 'package:kraken/foundation.dart';
 
+import '../../local_http_server.dart';
+
 void main() {
 
   group('HttpHeaders', () {
@@ -51,6 +53,32 @@ void main() {
       headers.add('content-type', 'another-value');
 
       expect(headers['content-type'], ['x-application/vnd.foo', 'another-value']);
+    });
+  });
+
+  group('HttpRequest', () {
+    var server = LocalHttpServer.getInstance();
+    int contextId = 3;
+    HttpOverrides.global = null;
+    setupHttpOverrides(null, contextId: contextId);
+    HttpClient httpClient = HttpClient();
+
+    test('Origin', () async {
+      var request = await httpClient.openUrl('POST',
+          server.getUri('plain_text'));
+      KrakenHttpOverrides.setContextHeader(request.headers, contextId);
+      await request.close();
+
+      assert(request.headers.value('origin') != null);
+    });
+
+    test('Referrer', () async {
+      var request = await httpClient.openUrl('POST',
+          server.getUri('plain_text'));
+      KrakenHttpOverrides.setContextHeader(request.headers, contextId);
+      await request.close();
+
+      assert(request.headers.value('referer') != null);
     });
   });
 }

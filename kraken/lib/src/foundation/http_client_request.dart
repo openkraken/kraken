@@ -34,7 +34,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   final HttpHeaders _httpHeaders = createHttpHeaders();
 
   ProxyHttpClientRequest(String method, Uri uri, KrakenHttpOverrides httpOverrides, HttpClient nativeHttpClient) :
-    _method = method.toLowerCase(),
+    _method = method.toUpperCase(),
     _uri = uri,
     _httpOverrides = httpOverrides,
     _nativeHttpClient = nativeHttpClient;
@@ -130,7 +130,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
       // `if request’s method is neither `GET` nor `HEAD`, then follow referrer policy to append origin.`
       // @TODO: Apply referrer policy.
       String origin = getOrigin(referrer);
-      if (method != 'get' && method != 'head') {
+      if (method != 'GET' && method != 'HEAD') {
         headers.set(_HttpHeadersOrigin, origin);
       }
 
