@@ -15,6 +15,10 @@ import 'package:kraken/rendering.dart';
 const String IMAGE = 'IMG';
 const String NATURAL_WIDTH = 'naturalWidth';
 const String NATURAL_HEIGHT = 'naturalHeight';
+const String LOADING = 'loading';
+const String SCALING = 'scaling';
+const String LAZY = 'lazy';
+const String SCALE = 'scale';
 
 // FIXME: should be inline default.
 const Map<String, dynamic> _defaultStyle = {
@@ -52,9 +56,21 @@ class ImageElement extends Element {
   // A boolean value which indicates whether or not the image has completely loaded.
   bool complete = false;
 
-  bool get _shouldLazyLoading => properties['loading'] == 'lazy';
+  // The attribute directs the user agent to fetch a resource immediately or to defer fetching
+  // until some conditions associated with the element are met, according to the attribute's
+  // current state.
+  // https://html.spec.whatwg.org/multipage/urls-and-fetching.html#lazy-loading-attributes
+  bool get _shouldLazyLoading => properties[LOADING] == LAZY;
 
-  bool get _shouldScaling => properties['scaling'] == 'scale';
+  // Custom attribute defined by Kraken, used to scale the origin image down to fit the box model
+  // to reduce the image size which will save the image painting time significantly when the image
+  // size is too large.
+  //
+  // Note this attribute should be set with caution cause scaling the image size will invalidate
+  // the image cache when width or height is changed and add more images to the cache.
+  // So the best practice to improve image painting performance is scaling the image manually before
+  // used in source code rather than relying Kraken to do the scaling job.
+  bool get _shouldScaling => properties[SCALING] == SCALE;
 
   ImageStreamCompleterHandle? _completerHandle;
 
