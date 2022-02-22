@@ -385,29 +385,29 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   @override
-  void setAttribute(String qualifiedName, String value) {
-    super.setAttribute(qualifiedName, value);
+  void setAttribute(String qualifiedName, String val) {
+    super.setAttribute(qualifiedName, val);
     switch (qualifiedName) {
-      case 'width': width = attributeToProperty<int>(value); break;
-      case 'height': height = attributeToProperty<int>(value); break;
-      case 'value': value = attributeToProperty<String>(value); break;
-      case 'accept': accept = attributeToProperty<String>(value); break;
-      case 'autocomplete': autocomplete = attributeToProperty<String>(value); break;
-      case 'autofocus': autofocus = attributeToProperty<bool>(value); break;
-      case 'required': required = attributeToProperty<bool>(value); break;
-      case 'readonly': readOnly = attributeToProperty<bool>(value); break;
-      case 'pattern': pattern = attributeToProperty<String>(value); break;
-      case 'step': step = attributeToProperty<String>(value); break;
-      case 'name': name = attributeToProperty<String>(value); break;
-      case 'multiple': multiple = attributeToProperty<bool>(value); break;
-      case 'checked': checked = attributeToProperty<bool>(value); break;
-      case 'disabled': disabled = attributeToProperty<bool>(value); break;
-      case 'min': min = attributeToProperty<String>(value); break;
-      case 'max': max = attributeToProperty<String>(value); break;
-      case 'maxlength': maxLength = attributeToProperty<int>(value); break;
-      case 'placeholder': placeholder = attributeToProperty<String>(value); break;
-      case 'type': type = attributeToProperty<String>(value); break;
-      case 'mode': mode = attributeToProperty<String>(value); break;
+      case 'width': width = attributeToProperty<int>(val); break;
+      case 'height': height = attributeToProperty<int>(val); break;
+      case 'value': value = attributeToProperty<String>(val); break;
+      case 'accept': accept = attributeToProperty<String>(val); break;
+      case 'autocomplete': autocomplete = attributeToProperty<String>(val); break;
+      case 'autofocus': autofocus = attributeToProperty<bool>(val); break;
+      case 'required': required = attributeToProperty<bool>(val); break;
+      case 'readonly': readOnly = attributeToProperty<bool>(val); break;
+      case 'pattern': pattern = attributeToProperty<String>(val); break;
+      case 'step': step = attributeToProperty<String>(val); break;
+      case 'name': name = attributeToProperty<String>(val); break;
+      case 'multiple': multiple = attributeToProperty<bool>(val); break;
+      case 'checked': checked = attributeToProperty<bool>(val); break;
+      case 'disabled': disabled = attributeToProperty<bool>(val); break;
+      case 'min': min = attributeToProperty<String>(val); break;
+      case 'max': max = attributeToProperty<String>(val); break;
+      case 'maxlength': maxLength = attributeToProperty<int>(val); break;
+      case 'placeholder': placeholder = attributeToProperty<String>(val); break;
+      case 'type': type = attributeToProperty<String>(val); break;
+      case 'mode': mode = attributeToProperty<String>(val); break;
     }
   }
 
