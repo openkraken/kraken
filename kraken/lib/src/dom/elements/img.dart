@@ -306,6 +306,7 @@ class ImageElement extends Element {
       _cachedImageStream?.removeListener(_getListener());
     }
 
+    complete = false;
     _frameCount = 0;
     _cachedImageStream = newStream;
 
@@ -385,6 +386,7 @@ class ImageElement extends Element {
     final ImageProvider? provider = _cachedImageProvider = getImageProvider(resolvedUri);
     if (provider == null) return;
     _imageProviderKey = await provider.obtainKey(ImageConfiguration.empty);
+    complete = false;
     _frameCount = 0;
     final ImageStream stream = provider.resolve(config);
     ImageStreamListener? listener;

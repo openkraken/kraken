@@ -507,6 +507,10 @@ getObjectProperty(Object object, String key) {
       case 'loading': return object.loading;
       case 'width': return object.width;
       case 'height': return object.height;
+      // Read only.
+      case 'naturalWidth': return object.naturalWidth;
+      case 'naturalHeight': return object.naturalHeight;
+      case 'complete': return object.complete;
     }
   }
 

@@ -208,7 +208,7 @@ class ScriptElement extends Element {
     String base = ownerDocument.controller.url;
     try {
       _resolvedSource = ownerDocument.controller.uriParser!.resolve(Uri.parse(base), Uri.parse(source));
-    } finally {
+    } catch (_) {
       // Ignoring the failure of resolving, but to remove the resolved hyperlink.
       _resolvedSource = null;
     }
