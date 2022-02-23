@@ -143,6 +143,7 @@ mixin ElementBinding implements BindingObject {
       case 'scroll': return scroll(castToType<double>(args[0]), castToType<double>(args[1]));
       case 'scrollBy': return scrollBy(castToType<double>(args[0]), castToType<double>(args[1]));
       case 'scrollTo': return scrollTo(castToType<double>(args[0]), castToType<double>(args[1]));
+      case 'click': return click();
     }
   }
 
