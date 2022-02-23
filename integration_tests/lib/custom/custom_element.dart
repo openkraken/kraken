@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart' as dom;
 import 'package:kraken/widget.dart';
 import 'package:waterfall_flow/waterfall_flow.dart';
@@ -72,9 +73,19 @@ class ContainerWidgetElement extends WidgetElement {
   }
 }
 
-class SampleElement extends dom.Element {
+class SampleElement extends dom.Element implements BindingObject {
   SampleElement(dom.EventTargetContext? context)
       : super(context);
+
+  getProperty(String key) {
+    switch (key) {
+      case 'ping': return ping;
+      case 'fake': return fake;
+      case 'fn': return fn;
+      case 'asyncFn': return asyncFn;
+      case 'asyncFnFailed': return asyncFnFailed;
+    }
+  }
 
   String get ping => 'pong';
 
@@ -89,7 +100,7 @@ class SampleElement extends dom.Element {
   Function get asyncFn => (List<dynamic> argv) async {
     Completer<dynamic> completer = Completer();
     Timer(Duration(seconds: 1), () {
-    completer.complete(argv[0]);
+      completer.complete(argv[0]);
     });
     return completer.future;
   };
@@ -97,7 +108,7 @@ class SampleElement extends dom.Element {
   Function get asyncFnFailed => (List<dynamic> args) async {
     Completer<String> completer = Completer();
     Timer(Duration(milliseconds: 100), () {
-    completer.completeError(AssertionError('Asset error'));
+      completer.completeError(AssertionError('Asset error'));
     });
     return completer.future;
   };
