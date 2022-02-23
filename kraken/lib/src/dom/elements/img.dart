@@ -15,6 +15,10 @@ import 'package:kraken/rendering.dart';
 const String IMAGE = 'IMG';
 const String NATURAL_WIDTH = 'naturalWidth';
 const String NATURAL_HEIGHT = 'naturalHeight';
+const String LOADING = 'loading';
+const String SCALING = 'scaling';
+const String LAZY = 'lazy';
+const String SCALE = 'scale';
 
 // FIXME: should be inline default.
 const Map<String, dynamic> _defaultStyle = {
@@ -52,7 +56,22 @@ class ImageElement extends Element {
   // A boolean value which indicates whether or not the image has completely loaded.
   bool complete = false;
 
-  bool get _shouldLazyLoading => properties['loading'] == 'lazy';
+  // The attribute directs the user agent to fetch a resource immediately or to defer fetching
+  // until some conditions associated with the element are met, according to the attribute's
+  // current state.
+  // https://html.spec.whatwg.org/multipage/urls-and-fetching.html#lazy-loading-attributes
+  bool get _shouldLazyLoading => properties[LOADING] == LAZY;
+
+  // Custom attribute defined by Kraken, used to scale the origin image down to fit the box model
+  // to reduce the image size which will save the image painting time significantly when the image
+  // size is too large.
+  //
+  // Note this attribute should be set with caution cause scaling the image size will invalidate
+  // the image cache when width or height is changed and add more images to the cache.
+  // So the best practice to improve image painting performance is scaling the image manually before
+  // used in source code rather than relying Kraken to do the scaling job.
+  bool get _shouldScaling => properties[SCALING] == SCALE;
+
   ImageStreamCompleterHandle? _completerHandle;
 
   ImageElement(EventTargetContext? context)
@@ -90,7 +109,6 @@ class ImageElement extends Element {
     _constructImage();
     // Try to attach image if image is cached.
     _attachImage();
-    _resizeImage();
     _resolveImage(_resolvedUri);
     _listenToStream();
   }
@@ -220,8 +238,6 @@ class ImageElement extends Element {
   }
 
   void _resizeImage() {
-    assert(isRendererAttached);
-
     if (_styleWidth == null && _propertyWidth != null) {
       // The intrinsic width of the image in pixels. Must be an integer without a unit.
       renderStyle.width = CSSLengthValue(_propertyWidth, CSSLengthType.PX);
@@ -324,8 +340,14 @@ class ImageElement extends Element {
 
     ImageProvider? provider = _cachedImageProvider;
     if (updateImageProvider || provider == null) {
-      // When cachedWidth or cachedHeight is not null, KrakenResizeImage will be returned.
-      provider = _cachedImageProvider = getImageProvider(resolvedUri, cachedWidth: cachedWidth, cachedHeight: cachedHeight);
+      // Image should be resized based on different ratio according to object-fit value.
+      BoxFit objectFit = renderStyle.objectFit;
+      provider = _cachedImageProvider = getImageProvider(
+        resolvedUri,
+        objectFit: objectFit,
+        cachedWidth: cachedWidth,
+        cachedHeight: cachedHeight,
+      );
     }
     if (provider == null) return;
 
@@ -422,10 +444,18 @@ class ImageElement extends Element {
       _resetLazyLoading();
     } else if (key == WIDTH) {
       _propertyWidth = CSSNumber.parseNumber(value);
-      _resolveImage(_resolvedUri, updateImageProvider: true);
+      if (_shouldScaling) {
+        _resolveImage(_resolvedUri, updateImageProvider: true);
+      } else {
+        _resizeImage();
+      }
     } else if (key == HEIGHT) {
       _propertyHeight = CSSNumber.parseNumber(value);
-      _resolveImage(_resolvedUri, updateImageProvider: true);
+      if (_shouldScaling) {
+        _resolveImage(_resolvedUri, updateImageProvider: true);
+      } else {
+        _resizeImage();
+      }
     }
   }
 
@@ -459,7 +489,11 @@ class ImageElement extends Element {
         _styleHeight = resolveStyleHeight == double.infinity ? null : resolveStyleHeight;
       }
       // Resize image
-      _resolveImage(_resolvedUri, updateImageProvider: true);
+      if (_shouldScaling) {
+        _resolveImage(_resolvedUri, updateImageProvider: true);
+      } else {
+        _resizeImage();
+      }
     } else if (property == OBJECT_FIT && _renderImage != null) {
       _renderImage!.fit = renderBoxModel!.renderStyle.objectFit;
     } else if (property == OBJECT_POSITION && _renderImage != null) {
