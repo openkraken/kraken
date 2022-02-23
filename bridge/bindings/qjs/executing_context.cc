@@ -270,6 +270,31 @@ void ExecutionContext::reportError(JSValueConst error) {
   JS_FreeCString(m_ctx, type);
 }
 
+void ExecutionContext::reportErrorEvent(EventInstance* errorEvent) {
+  JSValue error = JS_GetPropertyStr(m_ctx, errorEvent->jsObject, "error");
+  reportError(error);
+  JS_FreeValue(m_ctx, error);
+}
+
+void ExecutionContext::dispatchErrorEvent(EventInstance* errorEvent) {
+  if (m_inDispatchErrorEvent_) {
+    return;
+  }
+
+  dispatchErrorEventInternal(errorEvent);
+  reportErrorEvent(errorEvent);
+}
+
+void ExecutionContext::dispatchErrorEventInternal(EventInstance* errorEvent) {
+  if (m_window == nullptr)
+    return;
+
+  assert(!m_inDispatchErrorEvent_);
+  m_inDispatchErrorEvent_ = true;
+  m_window->dispatchEvent(errorEvent);
+  m_inDispatchErrorEvent_ = false;
+}
+
 void ExecutionContext::drainPendingPromiseJobs() {
   // should executing pending promise jobs.
   JSContext* pctx;
@@ -306,7 +331,7 @@ void ExecutionContext::dispatchGlobalErrorEvent(ExecutionContext* context, JSVal
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(context->global(), Window::classId()));
 
   {
-    JSValue ErrorEventValue = JS_GetPropertyStr(ctx, context->global(), "ErrorEvent");
+    JSValue errorEventConstructor = JS_GetPropertyStr(ctx, context->global(), "ErrorEvent");
     JSValue errorType = JS_NewString(ctx, "error");
     JSValue errorInit = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, errorInit, "error", JS_DupValue(ctx, error));
@@ -315,16 +340,17 @@ void ExecutionContext::dispatchGlobalErrorEvent(ExecutionContext* context, JSVal
     JS_SetPropertyStr(ctx, errorInit, "filename", JS_GetPropertyStr(ctx, error, "fileName"));
     JS_SetPropertyStr(ctx, errorInit, "colno", JS_NewUint32(ctx, 0));
     JSValue arguments[] = {errorType, errorInit};
-    JSValue errorEventValue = JS_CallConstructor(context->ctx(), ErrorEventValue, 2, arguments);
+    JSValue errorEventValue = JS_CallConstructor(context->ctx(), errorEventConstructor, 2, arguments);
     if (JS_IsException(errorEventValue)) {
       context->handleException(&errorEventValue);
       return;
     }
 
     auto* errorEvent = static_cast<EventInstance*>(JS_GetOpaque(errorEventValue, Event::kEventClassID));
-    window->dispatchEvent(errorEvent);
+    errorEvent->nativeEvent->target = window;
+    context->dispatchErrorEvent(errorEvent);
 
-    JS_FreeValue(ctx, ErrorEventValue);
+    JS_FreeValue(ctx, errorEventConstructor);
     JS_FreeValue(ctx, errorEventValue);
     JS_FreeValue(ctx, errorType);
     JS_FreeValue(ctx, errorInit);
@@ -352,6 +378,7 @@ static void dispatchPromiseRejectionEvent(const char* eventType, ExecutionContex
     }
 
     auto* rejectEvent = static_cast<EventInstance*>(JS_GetOpaque(rejectEventValue, Event::kEventClassID));
+    rejectEvent->nativeEvent->target = window;
     window->dispatchEvent(rejectEvent);
 
     JS_FreeValue(ctx, errorType);

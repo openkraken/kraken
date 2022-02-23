@@ -602,7 +602,6 @@ class RenderBoxModel extends RenderBox
   BoxConstraints? _contentConstraints;
 
   BoxConstraints? get contentConstraints {
-    assert(_contentConstraints != null);
     return _contentConstraints;
   }
 
