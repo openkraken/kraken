@@ -148,9 +148,6 @@ abstract class EventTarget extends BindingObject {
     return eventHandlers;
   }
 
-  // @mustCallSuper
-  // handleJSCall(String method, List argv) {}
-
   @mustCallSuper
   void dispose() {
     if (kProfileMode) {

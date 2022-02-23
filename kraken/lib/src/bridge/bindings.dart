@@ -73,7 +73,7 @@ mixin WindowBinding implements BindingObject {
 
 // https://www.w3.org/TR/cssom-view-1/#extensions-to-the-htmlelement-interface
 // https://www.w3.org/TR/cssom-view-1/#extension-to-the-element-interface
-mixin ElementBinding {
+mixin ElementBinding implements BindingObject {
   // Extensions to the HTMLElement Interface
   int get offsetTop;
   int get offsetLeft;
@@ -140,11 +140,20 @@ mixin ElementBinding {
   _invokeElementMethod(String method, List args) {
     switch (method) {
       case 'getBoundingClientRect': return getBoundingClientRect().toNative();
-      case 'scroll': return scroll(args[0], args[1]);
-      case 'scrollBy': return scrollBy(args[0], args[1]);
-      case 'scrollTo': return scrollTo(args[0], args[1]);
+      case 'scroll': return scroll(castToType<double>(args[0]), castToType<double>(args[1]));
+      case 'scrollBy': return scrollBy(castToType<double>(args[0]), castToType<double>(args[1]));
+      case 'scrollTo': return scrollTo(castToType<double>(args[0]), castToType<double>(args[1]));
     }
   }
+
+  @override
+  getProperty(String key) => _getElementProperty(key);
+
+  @override
+  void setProperty(String key, value) => _setElementProperty(key, value);
+
+  @override
+  invokeMethod(String method, List args) => _invokeElementMethod(method, args);
 }
 
 // @NOTE: Following code could be auto generated.
