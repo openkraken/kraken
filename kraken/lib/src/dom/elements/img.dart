@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/painting.dart';
@@ -26,7 +27,7 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 // The HTMLImageElement.
-class ImageElement extends Element {
+class ImageElement extends Element with ImageElementBinding {
   // The render box to draw image.
   KrakenRenderImage? _renderImage;
 
@@ -60,7 +61,7 @@ class ImageElement extends Element {
   // until some conditions associated with the element are met, according to the attribute's
   // current state.
   // https://html.spec.whatwg.org/multipage/urls-and-fetching.html#lazy-loading-attributes
-  bool get _shouldLazyLoading => attributes[LOADING] == LAZY;
+  bool get _shouldLazyLoading => getAttribute(LOADING) == LAZY;
 
   // Custom attribute defined by Kraken, used to scale the origin image down to fit the box model
   // to reduce the image size which will save the image painting time significantly when the image
@@ -70,7 +71,7 @@ class ImageElement extends Element {
   // the image cache when width or height is changed and add more images to the cache.
   // So the best practice to improve image painting performance is scaling the image manually before
   // used in source code rather than relying Kraken to do the scaling job.
-  bool get _shouldScaling => attributes[SCALING] == SCALE;
+  bool get _shouldScaling => getAttribute(SCALING) == SCALE;
 
   ImageStreamCompleterHandle? _completerHandle;
 
@@ -89,6 +90,7 @@ class ImageElement extends Element {
       case 'loading': loading = attributeToProperty<bool>(value); break;
       case 'width': width = attributeToProperty<int>(value); break;
       case 'height': height = attributeToProperty<int>(value); break;
+      case 'scaling': scaling = attributeToProperty<String>(value); break;
     }
   }
 
@@ -163,6 +165,7 @@ class ImageElement extends Element {
     _imageProviderKey = null;
   }
 
+  @override
   int get width {
     // Width calc priority: style > property > intrinsic.
     double borderBoxWidth = _styleWidth
@@ -172,6 +175,7 @@ class ImageElement extends Element {
     return borderBoxWidth.round();
   }
 
+  @override
   int get height {
     // Height calc priority: style > property > intrinsic.
     double borderBoxHeight = _styleHeight
@@ -183,28 +187,30 @@ class ImageElement extends Element {
 
   // Read the original image width of loaded image.
   // The getter must be called after image had loaded, otherwise will return 0.0.
-  double get naturalWidth {
+  @override
+  int get naturalWidth {
     ImageProvider? imageProvider = _cachedImageProvider;
     if (imageProvider is KrakenResizeImage) {
       Size? size = KrakenResizeImage.getImageNaturalSize(_imageProviderKey);
       if (size != null) {
-        return size.width;
+        return size.width.toInt();
       }
     }
-    return image?.width.toDouble() ?? 0;
+    return image?.width ?? 0;
   }
 
   // Read the original image height of loaded image.
   // The getter must be called after image had loaded, otherwise will return 0.0.
-  double get naturalHeight {
+  @override
+  int get naturalHeight {
     ImageProvider? imageProvider = _cachedImageProvider;
     if (imageProvider is KrakenResizeImage) {
       Size? size = KrakenResizeImage.getImageNaturalSize(_imageProviderKey);
       if (size != null) {
-        return size.height;
+        return size.height.toInt();
       }
     }
-    return image?.height.toDouble() ?? 0;
+    return image?.height ?? 0;
   }
 
   void _handleIntersectionChange(IntersectionObserverEntry entry) {
@@ -258,8 +264,8 @@ class ImageElement extends Element {
       renderStyle.height = CSSLengthValue(_propertyHeight, CSSLengthType.PX);
     }
 
-    renderStyle.intrinsicWidth = naturalWidth;
-    renderStyle.intrinsicHeight = naturalHeight;
+    renderStyle.intrinsicWidth = naturalWidth.toDouble();
+    renderStyle.intrinsicHeight = naturalHeight.toDouble();
 
     // Try to update image size if image already resolved.
     // Set size to RenderImage is needs, to avoid makeNeedsLayout when update image.
@@ -433,7 +439,18 @@ class ImageElement extends Element {
     stream.addListener(listener);
   }
 
+  @override
+  String get scaling => getAttribute(SCALING) ?? '';
+
+  @override
+  set scaling(String value) {
+    internalSetAttribute(SCALING, value);
+  }
+
+  @override
   String get src => _resolvedSource?.toString() ?? '';
+
+  @override
   set src(String value) {
     internalSetAttribute('src', value);
     _resolveSource(value);
@@ -446,7 +463,10 @@ class ImageElement extends Element {
   }
 
   // ReadOnly additional property.
+  @override
   bool get loading => hasAttribute('loading');
+
+  @override
   set loading(bool value) {
     if (value) {
       internalSetAttribute('loading', '');
@@ -455,6 +475,7 @@ class ImageElement extends Element {
     }
   }
 
+  @override
   set width(int value) {
     if (value.isNegative) value = 0;
     internalSetAttribute('width', value.toString());
@@ -466,6 +487,7 @@ class ImageElement extends Element {
     }
   }
 
+  @override
   set height(int value) {
     if (value.isNegative) value = 0;
     internalSetAttribute('height', value.toString());

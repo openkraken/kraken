@@ -95,7 +95,7 @@ IMPL_PROPERTY_SETTER(ImageElement, scaling)(JSContext* ctx, JSValue this_val, in
   std::string key = "scaling";
   std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
   std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
-  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setAttribute, *args_01, *args_02, nullptr);
   return JS_NULL;
 }
 

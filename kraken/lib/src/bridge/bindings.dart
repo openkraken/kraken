@@ -547,11 +547,13 @@ mixin ImageElementBinding on ElementBinding implements BindingObject {
   int get height;
   set height(int value);
 
+  String get scaling;
+  set scaling(String value);
+
   // Read only.
   int get naturalWidth;
   int get naturalHeight;
   bool get complete;
-
 
   // Bindings.
   @override
@@ -561,6 +563,7 @@ mixin ImageElementBinding on ElementBinding implements BindingObject {
       case 'loading': return loading;
       case 'width': return width;
       case 'height': return height;
+      case 'scaling': return scaling;
       case 'naturalWidth': return naturalWidth;
       case 'naturalHeight': return naturalHeight;
       case 'complete': return complete;
@@ -575,6 +578,7 @@ mixin ImageElementBinding on ElementBinding implements BindingObject {
       case 'loading': loading = castToType<bool>(value); break;
       case 'width': width = castToType<int>(value); break;
       case 'height': height = castToType<int>(value); break;
+      case 'scaling': scaling = castToType<String>(value); break;
       default: return _setElementProperty(key, value);
     }
   }
