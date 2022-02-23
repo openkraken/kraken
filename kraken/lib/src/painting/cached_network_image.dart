@@ -77,7 +77,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
         print('Error while reading cache, $error\n$stackTrace');
       }
     }
-    
+
     // Fallback to network
     bytes ??= await fetchFile(key, chunkEvents, cacheController);
 

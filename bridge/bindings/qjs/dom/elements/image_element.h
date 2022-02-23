@@ -29,6 +29,7 @@ class ImageElement : public Element {
   DEFINE_PROTOTYPE_PROPERTY(height);
   DEFINE_PROTOTYPE_PROPERTY(src);
   DEFINE_PROTOTYPE_PROPERTY(loading);
+  DEFINE_PROTOTYPE_PROPERTY(scaling);
   friend ImageElementInstance;
 };
 
