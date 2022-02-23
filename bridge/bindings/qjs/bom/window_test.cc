@@ -79,9 +79,7 @@ window.postMessage({
     EXPECT_EQ(logCalled, true);
   }
   // Use block scope to release previous page, and allocate new page.
-  {
-    TEST_init();
-  }
+  { TEST_init(); }
 }
 
 TEST(Window, location) {
