@@ -85,6 +85,19 @@ IMPL_PROPERTY_SETTER(ImageElement, loading)(JSContext* ctx, JSValue this_val, in
   element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setAttribute, *args_01, *args_02, nullptr);
   return JS_NULL;
 }
+IMPL_PROPERTY_GETTER(ImageElement, scaling)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  getDartMethod()->flushUICommand();
+  auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
+  return element->getNativeProperty("scaling");
+}
+IMPL_PROPERTY_SETTER(ImageElement, scaling)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
+  std::string key = "scaling";
+  std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
+  std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
+  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+  return JS_NULL;
+}
 
 ImageElementInstance::ImageElementInstance(ImageElement* element) : ElementInstance(element, "img", true) {
   // Protect image instance util load or error event triggered.

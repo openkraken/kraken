@@ -59,14 +59,15 @@ cancelAnimationFrame(id);
 }
 
 TEST(Window, postMessage) {
-  auto bridge = TEST_init();
-  static bool logCalled = false;
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
-    logCalled = true;
-    EXPECT_STREQ(message.c_str(), "{\"data\":1234} ");
-  };
+  {
+    auto bridge = TEST_init();
+    static bool logCalled = false;
+    kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+      logCalled = true;
+      EXPECT_STREQ(message.c_str(), "{\"data\":1234} ");
+    };
 
-  std::string code = std::string(R"(
+    std::string code = std::string(R"(
 window.onmessage = (message) => {
   console.log(JSON.stringify(message.data), message.origin);
 };
@@ -74,8 +75,13 @@ window.postMessage({
   data: 1234
 }, '*');
 )");
-  bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
-  EXPECT_EQ(logCalled, true);
+    bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
+    EXPECT_EQ(logCalled, true);
+  }
+  // Use block scope to release previous page, and allocate new page.
+  {
+    TEST_init();
+  }
 }
 
 TEST(Window, location) {
