@@ -4,7 +4,6 @@
  */
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/kraken.dart';
 
 const String HTML = 'HTML';
 const Map<String, dynamic> _defaultStyle = {
