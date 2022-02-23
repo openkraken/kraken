@@ -123,6 +123,7 @@ bool KrakenPage::parseHTML(const char* code, size_t length) {
   JSContext* ctx = m_context->ctx();
   int32_t len = arrayGetLength(ctx, documentElement->childNodes);
 
+  // Remove all Nodes including body and head.
   if (documentElement != nullptr) {
     for (int i = len - 1; i >= 0; i--) {
       JSValue v = JS_GetPropertyUint32(ctx, documentElement->childNodes, i);
@@ -136,8 +137,8 @@ bool KrakenPage::parseHTML(const char* code, size_t length) {
     JS_FreeValue(ctx, documentElement->jsObject);
   }
 
-
   HTMLParser::parseHTML(code, length, documentElement);
+  
   return true;
 }
 
