@@ -482,12 +482,12 @@ class _KrakenState extends State<Kraken> with RouteAware {
       dom.Element? focusedElement = _findFocusedElement(focusableElements);
       // Currently only input element is focusable.
       if (focused) {
-        if (dom.InputElement.focusInputElement == null) {
-          (focusableElements[0] as dom.InputElement).focus();
+        if (dom.TextFormControlElement.focusedTextFormControlElement == null) {
+          (focusableElements[0] as dom.TextFormControlElement).focus();
         }
       } else {
         if (focusedElement != null) {
-          (focusedElement as dom.InputElement).blur();
+          (focusedElement as dom.TextFormControlElement).blur();
         }
       }
     }
@@ -502,7 +502,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
       // None focusable element is focused, focus the first focusable element.
       if (focusedElement == null) {
         _focusNode.requestFocus();
-        (focusableElements[0] as dom.InputElement).focus();
+        (focusableElements[0] as dom.TextFormControlElement).focus();
 
         // Some focusable element is focused, focus the next element, if it is the last focusable element,
         // then focus the next widget.
@@ -510,11 +510,11 @@ class _KrakenState extends State<Kraken> with RouteAware {
         int idx = focusableElements.indexOf(focusedElement);
         if (idx == focusableElements.length - 1) {
           _focusNode.nextFocus();
-          (focusableElements[focusableElements.length - 1] as dom.InputElement).blur();
+          (focusableElements[focusableElements.length - 1] as dom.TextFormControlElement).blur();
         } else {
           _focusNode.requestFocus();
-          (focusableElements[idx] as dom.InputElement).blur();
-          (focusableElements[idx + 1] as dom.InputElement).focus();
+          (focusableElements[idx] as dom.TextFormControlElement).blur();
+          (focusableElements[idx + 1] as dom.TextFormControlElement).focus();
         }
       }
 
@@ -533,7 +533,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
       // None editable is focused, focus the last editable.
       if (focusedElement == null) {
         _focusNode.requestFocus();
-        (focusableElements[focusableElements.length - 1] as dom.InputElement).focus();
+        (focusableElements[focusableElements.length - 1] as dom.TextFormControlElement).focus();
 
         // Some editable is focused, focus the previous editable, if it is the first editable,
         // then focus the previous widget.
@@ -541,11 +541,11 @@ class _KrakenState extends State<Kraken> with RouteAware {
         int idx = focusableElements.indexOf(focusedElement);
         if (idx == 0) {
           _focusNode.previousFocus();
-          (focusableElements[0] as dom.InputElement).blur();
+          (focusableElements[0] as dom.TextFormControlElement).blur();
         } else {
           _focusNode.requestFocus();
-          (focusableElements[idx] as dom.InputElement).blur();
-          (focusableElements[idx - 1] as dom.InputElement).focus();
+          (focusableElements[idx] as dom.TextFormControlElement).blur();
+          (focusableElements[idx - 1] as dom.TextFormControlElement).focus();
         }
       }
       // None editable exists, focus the previous widget.
@@ -557,7 +557,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleDeleteText(DeleteTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.delete(SelectionChangedCause.keyboard);
       }
@@ -567,7 +567,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleSelectAllText(SelectAllTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.selectAll(SelectionChangedCause.keyboard);
       }
@@ -577,7 +577,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleCopySelectionText(CopySelectionTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.copySelection();
       }
@@ -587,7 +587,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleCutSelectionText(CutSelectionTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.cutSelection(SelectionChangedCause.keyboard);
       }
@@ -597,7 +597,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handlePasteText(PasteTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.pasteText(SelectionChangedCause.keyboard);
       }
@@ -607,7 +607,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleMoveSelectionRightByLineText(MoveSelectionRightByLineTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
         // Make caret visible while moving cursor.
@@ -619,7 +619,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleMoveSelectionLeftByLineText(MoveSelectionLeftByLineTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
         // Make caret visible while moving cursor.
@@ -631,7 +631,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleMoveSelectionRightByWordText(MoveSelectionRightByWordTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.moveSelectionRightByWord(SelectionChangedCause.keyboard);
         // Make caret visible while moving cursor.
@@ -643,7 +643,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleMoveSelectionLeftByWordText(MoveSelectionLeftByWordTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.moveSelectionLeftByWord(SelectionChangedCause.keyboard);
         // Make caret visible while moving cursor.
@@ -655,7 +655,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleMoveSelectionUpText(MoveSelectionUpTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.moveSelectionUp(SelectionChangedCause.keyboard);
         // Make caret visible while moving cursor.
@@ -667,7 +667,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleMoveSelectionDownText(MoveSelectionDownTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.moveSelectionDown(SelectionChangedCause.keyboard);
         // Make caret visible while moving cursor.
@@ -679,7 +679,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleMoveSelectionLeftText(MoveSelectionLeftTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.moveSelectionLeft(SelectionChangedCause.keyboard);
         // Make caret visible while moving cursor.
@@ -691,7 +691,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleMoveSelectionRightText(MoveSelectionRightTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.moveSelectionRight(SelectionChangedCause.keyboard);
         // Make caret visible while moving cursor.
@@ -703,7 +703,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleMoveSelectionToEndText(MoveSelectionToEndTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.moveSelectionToEnd(SelectionChangedCause.keyboard);
         // Make caret visible while moving cursor.
@@ -715,7 +715,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleMoveSelectionToStartText(MoveSelectionToStartTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.moveSelectionToStart(SelectionChangedCause.keyboard);
         // Make caret visible while moving cursor.
@@ -727,7 +727,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleExtendSelectionLeftText(ExtendSelectionLeftTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.extendSelectionLeft(SelectionChangedCause.keyboard);
       }
@@ -737,7 +737,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleExtendSelectionRightText(ExtendSelectionRightTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.extendSelectionRight(SelectionChangedCause.keyboard);
       }
@@ -747,7 +747,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleExtendSelectionUpText(ExtendSelectionUpTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.extendSelectionUp(SelectionChangedCause.keyboard);
       }
@@ -757,7 +757,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleExtendSelectionDownText(ExtendSelectionDownTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.extendSelectionDown(SelectionChangedCause.keyboard);
       }
@@ -767,7 +767,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleExtendSelectionToEndText(ExpandSelectionToEndTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.expandSelectionToEnd(SelectionChangedCause.keyboard);
       }
@@ -777,7 +777,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleExtendSelectionToStartText(ExpandSelectionToStartTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.expandSelectionToStart(SelectionChangedCause.keyboard);
       }
@@ -787,7 +787,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleExtendSelectionLeftByLineText(ExpandSelectionLeftByLineTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.expandSelectionLeftByLine(SelectionChangedCause.keyboard);
       }
@@ -797,7 +797,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleExtendSelectionRightByLineText(ExpandSelectionRightByLineTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.expandSelectionRightByLine(SelectionChangedCause.keyboard);
       }
@@ -807,7 +807,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleExtendSelectionLeftByWordText(ExtendSelectionLeftByWordTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.extendSelectionLeftByWord(SelectionChangedCause.keyboard);
       }
@@ -817,7 +817,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
   void _handleExtendSelectionRightByWordText(ExtendSelectionRightByWordTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      RenderEditable? focusedRenderEditable = (focusedElement as dom.InputElement).renderEditable;
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.extendSelectionRightByWord(SelectionChangedCause.keyboard);
       }
@@ -851,7 +851,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
     List<dom.Element> result = [];
     traverseElement(element, (dom.Element child) {
       // Currently only input element is focusable.
-      if (child is dom.InputElement) {
+      if (child is dom.TextFormControlElement) {
         result.add(child);
       }
     });
@@ -869,7 +869,7 @@ class _KrakenState extends State<Kraken> with RouteAware {
     if (focusableElements.isNotEmpty) {
       // Currently only input element is focusable.
       for (dom.Element inputElement in focusableElements) {
-        RenderEditable? renderEditable = (inputElement as dom.InputElement).renderEditable;
+        RenderEditable? renderEditable = (inputElement as dom.TextFormControlElement).renderEditable;
         if (renderEditable != null && renderEditable.hasFocus) {
           result = inputElement;
           break;

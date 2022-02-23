@@ -204,7 +204,7 @@ class KrakenViewController
 
   void shiftFocus(EventTarget target) {
     // TODO: get focus for other element which need to get focus.
-    InputElement? inputElement = InputElement.focusInputElement;
+    TextFormControlElement? inputElement = TextFormControlElement.focusedTextFormControlElement;
     if (inputElement != null && inputElement != target) {
       inputElement.blur();
     }
@@ -729,9 +729,9 @@ class KrakenViewController
       viewport.bottomInset = bottomInset;
     } else {
       bool shouldScrollByToCenter = false;
-      InputElement? focusInputElement = InputElement.focusInputElement;
-      if (focusInputElement != null) {
-        RenderBox? renderer = focusInputElement.renderer;
+      TextFormControlElement? focusedTextFormControlElement = TextFormControlElement.focusedTextFormControlElement;
+      if (focusedTextFormControlElement != null) {
+        RenderBox? renderer = focusedTextFormControlElement.renderer;
         if (renderer != null && renderer.hasSize) {
           Offset focusOffset = renderer.localToGlobal(Offset.zero);
           // FOCUS_VIEWINSET_BOTTOM_OVERALL to meet border case.
