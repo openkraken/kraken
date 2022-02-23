@@ -80,23 +80,6 @@ bool HTMLParser::parseHTML(std::string html, NodeInstance* rootNode) {
       size_t html_length = html.length();
       auto* htmlTree = gumbo_parse_with_options(&kGumboDefaultOptions, html.c_str(), html_length);
 
-      ExecutionContext* context = rootNode->context();
-      JSContext* ctx = context->ctx();
-      ElementInstance* documentElement = rootNode->document()->getDocumentElement();
-      int32_t len = arrayGetLength(ctx, documentElement->childNodes);
-      if (documentElement != nullptr) {
-        for (int i = len - 1; i >= 0; i--) {
-          JSValue v = JS_GetPropertyUint32(ctx, documentElement->childNodes, i);
-          auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(v, Node::classId(v)));
-          if (nodeInstance->nodeType == NodeType::ELEMENT_NODE) {
-            documentElement->internalRemoveChild(nodeInstance);
-          }
-          JS_FreeValue(ctx, v);
-        }
-
-        JS_FreeValue(ctx, documentElement->jsObject);
-      }
-
       traverseHTML(rootNode, htmlTree->root);
       // Free gumbo parse nodes.
       gumbo_destroy_output(&kGumboDefaultOptions, htmlTree);

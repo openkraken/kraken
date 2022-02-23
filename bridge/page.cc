@@ -118,10 +118,26 @@ KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : c
 bool KrakenPage::parseHTML(const char* code, size_t length) {
   if (!m_context->isValid())
     return false;
-  JSValue bodyValue = JS_GetPropertyStr(m_context->ctx(), m_context->document()->jsObject, "body");
-  auto* body = static_cast<ElementInstance*>(JS_GetOpaque(bodyValue, Element::classId()));
-  HTMLParser::parseHTML(code, length, body);
-  JS_FreeValue(m_context->ctx(), bodyValue);
+
+  ElementInstance* documentElement = m_context->document()->getDocumentElement();
+  JSContext* ctx = m_context->ctx();
+  int32_t len = arrayGetLength(ctx, documentElement->childNodes);
+
+  if (documentElement != nullptr) {
+    for (int i = len - 1; i >= 0; i--) {
+      JSValue v = JS_GetPropertyUint32(ctx, documentElement->childNodes, i);
+      auto* nodeInstance = static_cast<NodeInstance*>(JS_GetOpaque(v, Node::classId(v)));
+      if (nodeInstance->nodeType == NodeType::ELEMENT_NODE) {
+        documentElement->internalRemoveChild(nodeInstance);
+      }
+      JS_FreeValue(ctx, v);
+    }
+
+    JS_FreeValue(ctx, documentElement->jsObject);
+  }
+
+
+  HTMLParser::parseHTML(code, length, documentElement);
   return true;
 }
 
