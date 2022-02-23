@@ -246,8 +246,6 @@ class ImageElement extends Element {
   }
 
   void _resizeImage() {
-    assert(isRendererAttached);
-
     if (_styleWidth == null && _propertyWidth != null) {
       // The intrinsic width of the image in pixels. Must be an integer without a unit.
       renderStyle.width = CSSLengthValue(_propertyWidth, CSSLengthType.PX);
