@@ -234,10 +234,16 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
+    this.defaultStyle,
+    this.isIntrinsicBox,
   }) : super(context, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
     _textSelectionDelegate = EditableTextDelegate(this);
     scrollOffsetX = _scrollableX.position;
   }
+
+  Map<String, dynamic>? defaultStyle;
+  // Whether element allows children.
+  bool? isIntrinsicBox = false;
 
   String _getValue() {
     TextEditingValue value = _textSelectionDelegate._textEditingValue;

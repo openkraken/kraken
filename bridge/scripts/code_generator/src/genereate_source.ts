@@ -372,6 +372,8 @@ function elementNameToTagName(name: string): string {
       return 'img';
     case 'InputElement':
       return 'input';
+    case 'TextareaElement':
+      return 'textarea';
     case 'ObjectElement':
       return 'object';
     case 'ScriptElement':

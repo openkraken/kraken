@@ -18,6 +18,7 @@
 #include "elements/.gen/anchor_element.h"
 #include "elements/.gen/canvas_element.h"
 #include "elements/.gen/input_element.h"
+#include "elements/.gen/textarea_element.h"
 #include "elements/.gen/object_element.h"
 #include "elements/.gen/script_element.h"
 #include "elements/template_element.h"
@@ -72,6 +73,7 @@ Document::Document(ExecutionContext* context) : Node(context, "Document") {
     defineElement("a", AnchorElement::instance(m_context));
     defineElement("canvas", CanvasElement::instance(m_context));
     defineElement("input", InputElement::instance(m_context));
+    defineElement("textarea", TextareaElement::instance(m_context));
     defineElement("object", ObjectElement::instance(m_context));
     defineElement("script", ScriptElement::instance(m_context));
     defineElement("template", TemplateElement::instance(m_context));

@@ -30,6 +30,7 @@ export 'src/dom/elements/body.dart';
 export 'src/dom/elements/canvas/canvas.dart';
 export 'src/dom/elements/img.dart';
 export 'src/dom/elements/input.dart';
+export 'src/dom/elements/textarea.dart';
 export 'src/dom/elements/object.dart';
 export 'src/dom/elements/head.dart';
 export 'src/dom/elements/html.dart';
