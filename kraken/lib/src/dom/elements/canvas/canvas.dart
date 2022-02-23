@@ -55,7 +55,7 @@ class CanvasElement extends Element {
   CanvasElement(EventTargetContext? context)
       : super(
           context,
-          isReplaceElement: true,
+          isReplacedElement: true,
           isDefaultRepaintBoundary: true,
           defaultStyle: _defaultStyle,
         ) {

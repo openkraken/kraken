@@ -234,7 +234,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
-  }) : super(context, defaultStyle: _defaultStyle, isReplaceElement: true) {
+  }) : super(context, defaultStyle: _defaultStyle, isReplacedElement: true) {
     _textSelectionDelegate = EditableTextDelegate(this);
     scrollOffsetX = _scrollableX.position;
   }

@@ -93,7 +93,7 @@ class Element extends Node
 
   // Is element an replaced element.
   // https://drafts.csswg.org/css-display/#replaced-element
-  final bool _isReplaceElement;
+  final bool _isReplacedElement;
 
   /// The style of the element, not inline style.
   late CSSStyleDeclaration style;
@@ -151,12 +151,11 @@ class Element extends Node
     EventTargetContext? context,
     {
       Map<String, dynamic>? defaultStyle,
-      // Whether element allows children.
-      bool isReplaceElement = false,
+      bool isReplacedElement = false,
       bool isDefaultRepaintBoundary = false
     })
     : _defaultStyle = defaultStyle ?? const {},
-      _isReplaceElement = isReplaceElement,
+      _isReplacedElement = isReplacedElement,
       _isDefaultRepaintBoundary = isDefaultRepaintBoundary,
       super(NodeType.ELEMENT_NODE, context) {
 
@@ -184,7 +183,7 @@ class Element extends Node
 
   void _updateRenderBoxModel() {
     RenderBoxModel nextRenderBoxModel;
-    if (_isReplaceElement) {
+    if (_isReplacedElement) {
       nextRenderBoxModel = _createRenderReplaced(isRepaintBoundary: isRepaintBoundary, previousReplaced: _renderReplaced);
     } else {
       nextRenderBoxModel = _createRenderLayout(isRepaintBoundary: isRepaintBoundary, previousRenderLayoutBox: _renderLayoutBox);

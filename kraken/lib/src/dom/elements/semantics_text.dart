@@ -68,7 +68,7 @@ class BRElement extends Element {
   RenderLineBreak? _renderLineBreak;
 
   BRElement(EventTargetContext? context)
-      : super(context, isReplaceElement: true);
+      : super(context, isReplacedElement: true);
 
   @override
   RenderBoxModel? get renderBoxModel => _renderLineBreak;

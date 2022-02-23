@@ -66,7 +66,7 @@ class ImageElement extends Element {
   ImageElement(EventTargetContext? context)
       : super(
       context,
-      isReplaceElement: true,
+      isReplacedElement: true,
       defaultStyle: _defaultStyle) {
   }
 
