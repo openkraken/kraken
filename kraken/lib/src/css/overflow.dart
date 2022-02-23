@@ -11,8 +11,6 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/rendering.dart';
 
-import '../../bridge.dart';
-
 // CSS Overflow: https://drafts.csswg.org/css-overflow-3/
 
 enum CSSOverflowType {
@@ -112,7 +110,7 @@ mixin CSSOverflowMixin on RenderStyle {
   }
 }
 
-mixin ElementOverflowMixin on ElementBase implements ElementBinding {
+mixin ElementOverflowMixin on ElementBase {
   // The duration time for element scrolling to a significant place.
   static const SCROLL_DURATION = Duration(milliseconds: 250);
 
@@ -343,7 +341,6 @@ mixin ElementOverflowMixin on ElementBase implements ElementBinding {
     }
   }
 
-  @override
   double get scrollTop {
     KrakenScrollable? scrollableY = _getScrollable(Axis.vertical);
     if (scrollableY != null) {
@@ -351,13 +348,22 @@ mixin ElementOverflowMixin on ElementBase implements ElementBinding {
     }
     return 0.0;
   }
-
-  @override
   set scrollTop(double value) {
-    internalScrollTo(y: value);
+    _scrollTo(y: value);
   }
 
-  @override
+  void scroll(double x, double y) {
+    _scrollTo(x: x, y: y, withAnimation: false);
+  }
+
+  void scrollBy(double x, double y) {
+    _scrollBy(dx: x, dy: y, withAnimation: false);
+  }
+
+  void scrollTo(double x, double y) {
+    _scrollTo(x: x, y: y, withAnimation: false);
+  }
+
   double get scrollLeft {
     KrakenScrollable? scrollableX = _getScrollable(Axis.horizontal);
     if (scrollableX != null) {
@@ -365,13 +371,10 @@ mixin ElementOverflowMixin on ElementBase implements ElementBinding {
     }
     return 0.0;
   }
-
-  @override
   set scrollLeft(double value) {
-    internalScrollTo(x: value);
+    _scrollTo(x: value);
   }
 
-  @override
   int get scrollHeight {
     KrakenScrollable? scrollable = _getScrollable(Axis.vertical);
     if (scrollable?.position?.maxScrollExtent != null) {
@@ -383,7 +386,6 @@ mixin ElementOverflowMixin on ElementBase implements ElementBinding {
     return scrollContainerSize.height.toInt();
   }
 
-  @override
   int get scrollWidth {
     KrakenScrollable? scrollable = _getScrollable(Axis.horizontal);
     if (scrollable?.position?.maxScrollExtent != null) {
@@ -393,19 +395,14 @@ mixin ElementOverflowMixin on ElementBase implements ElementBinding {
     return scrollContainerSize.width.toInt();
   }
 
-  @override
   int get clientTop => renderBoxModel?.renderStyle.effectiveBorderTopWidth.computedValue.toInt() ?? 0;
 
-  @override
   int get clientLeft => renderBoxModel?.renderStyle.effectiveBorderLeftWidth.computedValue.toInt() ?? 0;
 
-  @override
   int get clientWidth => renderBoxModel?.clientWidth ?? 0;
 
-  @override
   int get clientHeight => renderBoxModel?.clientHeight ?? 0;
 
-  @override
   int get offsetWidth {
     RenderBoxModel? renderBox = renderBoxModel;
     if (renderBox == null) {
@@ -414,7 +411,6 @@ mixin ElementOverflowMixin on ElementBase implements ElementBinding {
     return renderBox.hasSize ? renderBox.size.width.toInt() : 0;
   }
 
-  @override
   int get offsetHeight {
     RenderBoxModel? renderBox = renderBoxModel;
     if (renderBox == null) {
@@ -423,7 +419,7 @@ mixin ElementOverflowMixin on ElementBase implements ElementBinding {
     return renderBox.hasSize ? renderBox.size.height.toInt() : 0;
   }
 
-  void internalScrollBy({ double dx = 0.0, double dy = 0.0, bool? withAnimation }) {
+  void _scrollBy({ double dx = 0.0, double dy = 0.0, bool? withAnimation }) {
     if (dx != 0) {
       _scroll(scrollLeft + dx, Axis.horizontal, withAnimation: withAnimation);
     }
@@ -432,7 +428,8 @@ mixin ElementOverflowMixin on ElementBase implements ElementBinding {
     }
   }
 
-  void internalScrollTo({ double? x, double? y, bool? withAnimation }) {
+
+  void _scrollTo({ double? x, double? y, bool? withAnimation }) {
     if (x != null) {
       _scroll(x, Axis.horizontal, withAnimation: withAnimation);
     }

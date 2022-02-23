@@ -7,7 +7,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/painting.dart';
@@ -27,7 +26,7 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 // The HTMLImageElement.
-class ImageElement extends Element with ImageElementBinding {
+class ImageElement extends Element {
   // The render box to draw image.
   KrakenRenderImage? _renderImage;
 
@@ -165,7 +164,6 @@ class ImageElement extends Element with ImageElementBinding {
     _imageProviderKey = null;
   }
 
-  @override
   int get width {
     // Width calc priority: style > property > intrinsic.
     double borderBoxWidth = _styleWidth
@@ -175,7 +173,6 @@ class ImageElement extends Element with ImageElementBinding {
     return borderBoxWidth.round();
   }
 
-  @override
   int get height {
     // Height calc priority: style > property > intrinsic.
     double borderBoxHeight = _styleHeight
@@ -187,7 +184,6 @@ class ImageElement extends Element with ImageElementBinding {
 
   // Read the original image width of loaded image.
   // The getter must be called after image had loaded, otherwise will return 0.0.
-  @override
   int get naturalWidth {
     ImageProvider? imageProvider = _cachedImageProvider;
     if (imageProvider is KrakenResizeImage) {
@@ -201,7 +197,6 @@ class ImageElement extends Element with ImageElementBinding {
 
   // Read the original image height of loaded image.
   // The getter must be called after image had loaded, otherwise will return 0.0.
-  @override
   int get naturalHeight {
     ImageProvider? imageProvider = _cachedImageProvider;
     if (imageProvider is KrakenResizeImage) {
@@ -439,18 +434,12 @@ class ImageElement extends Element with ImageElementBinding {
     stream.addListener(listener);
   }
 
-  @override
   String get scaling => getAttribute(SCALING) ?? '';
-
-  @override
   set scaling(String value) {
     internalSetAttribute(SCALING, value);
   }
 
-  @override
   String get src => _resolvedSource?.toString() ?? '';
-
-  @override
   set src(String value) {
     internalSetAttribute('src', value);
     _resolveSource(value);
@@ -463,10 +452,7 @@ class ImageElement extends Element with ImageElementBinding {
   }
 
   // ReadOnly additional property.
-  @override
   bool get loading => hasAttribute('loading');
-
-  @override
   set loading(bool value) {
     if (value) {
       internalSetAttribute('loading', '');
@@ -475,7 +461,6 @@ class ImageElement extends Element with ImageElementBinding {
     }
   }
 
-  @override
   set width(int value) {
     if (value.isNegative) value = 0;
     internalSetAttribute('width', value.toString());
@@ -487,7 +472,6 @@ class ImageElement extends Element with ImageElementBinding {
     }
   }
 
-  @override
   set height(int value) {
     if (value.isNegative) value = 0;
     internalSetAttribute('height', value.toString());

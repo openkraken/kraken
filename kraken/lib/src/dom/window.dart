@@ -7,12 +7,11 @@ import 'dart:ui';
 import 'package:kraken/dom.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
-import 'package:kraken/bridge.dart';
 
 
 const String WINDOW = 'WINDOW';
 
-class Window extends EventTarget with WindowBinding {
+class Window extends EventTarget {
   final Document document;
 
   Window(EventTargetContext context, this.document) : super(context) {
@@ -22,7 +21,6 @@ class Window extends EventTarget with WindowBinding {
     };
   }
 
-  @override
   void open(String url) {
     KrakenController rootController = document.controller.view.rootController;
     String? sourceUrl = rootController.url;
@@ -30,26 +28,20 @@ class Window extends EventTarget with WindowBinding {
     document.controller.view.handleNavigationAction(sourceUrl, url, KrakenNavigationType.navigate);
   }
 
-  @override
-  double get scrollX {
-    return document.documentElement!.scrollLeft;
-  }
+  double get scrollX => document.documentElement!.scrollLeft;
 
-  @override
-  double get scrollY {
-    return document.documentElement!.scrollTop;
-  }
+  double get scrollY => document.documentElement!.scrollTop;
 
-  @override
   void scrollTo(double x, double y) {
-    document.documentElement!.flushLayout();
-    document.documentElement!.internalScrollTo(x: x, y: y, withAnimation: false);
+    document.documentElement!
+      ..flushLayout()
+      ..scrollTo(x, y);
   }
 
-  @override
   void scrollBy(double x, double y) {
-    document.documentElement!.flushLayout();
-    document.documentElement!.internalScrollBy(dx: x, dy: y, withAnimation: false);
+    document.documentElement!
+      ..flushLayout()
+      ..scrollBy(x, y);
   }
 
   void addEvent(String eventType) {

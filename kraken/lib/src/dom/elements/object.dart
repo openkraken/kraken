@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 import 'package:flutter/rendering.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 
@@ -31,7 +30,7 @@ _DefaultObjectElementClient _DefaultObjectElementClientFactory(ObjectElementHost
 }
 
 ///https://developer.mozilla.org/en-US/docs/Web/HTML/Element/object
-class ObjectElement extends Element implements ObjectElementHost, ObjectElementBinding {
+class ObjectElement extends Element implements ObjectElementHost {
 
   late ObjectElementClientFactory _objectElementClientFactory;
   late ObjectElementClient _objectElementClient;
@@ -75,7 +74,6 @@ class ObjectElement extends Element implements ObjectElementHost, ObjectElementB
     _objectElementClient.setProperty('data', value);
   }
 
-  @override
   handleJSCall(String method, List argv) {
     return _objectElementClient.handleJSCall(method, argv);
   }

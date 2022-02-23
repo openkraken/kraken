@@ -31,9 +31,8 @@ class HeadElement extends Element {
 const String _REL_STYLESHEET = 'stylesheet';
 
 // https://www.w3.org/TR/2011/WD-html5-author-20110809/the-link-element.html#the-link-element
-class LinkElement extends Element with LinkElementBinding {
-  LinkElement(EventTargetContext? context)
-      : super(context, defaultStyle: _defaultStyle);
+class LinkElement extends Element {
+  LinkElement(EventTargetContext? context) : super(context, defaultStyle: _defaultStyle);
 
   Uri? _resolvedHyperlink;
 
@@ -48,9 +47,7 @@ class LinkElement extends Element with LinkElementBinding {
     }
   }
 
-  @override
   bool get disabled => getAttribute('disabled') != null;
-  @override
   set disabled(bool value) {
     if (value) {
       internalSetAttribute('disabled', '');
@@ -59,25 +56,19 @@ class LinkElement extends Element with LinkElementBinding {
     }
   }
 
-  @override
   String get href => _resolvedHyperlink?.toString() ?? '';
-  @override
   set href(String value) {
     internalSetAttribute('href', value);
     _resolveHyperlink();
     _fetchBundle();
   }
 
-  @override
   String get rel => getAttribute('rel') ?? '';
-  @override
   set rel(String value) {
     internalSetAttribute('rel', value);
   }
 
-  @override
   String get type => getAttribute('type') ?? '';
-  @override
   set type(String value) {
     internalSetAttribute('type', value);
   }
@@ -147,7 +138,7 @@ const String _MIME_X_APPLICATION_JAVASCRIPT = 'application/x-javascript';
 const String _JAVASCRIPT_MODULE = 'module';
 
 // https://www.w3.org/TR/2011/WD-html5-author-20110809/the-link-element.html
-class ScriptElement extends Element with ScriptElementBinding {
+class ScriptElement extends Element {
   ScriptElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle) {
   }
@@ -169,9 +160,7 @@ class ScriptElement extends Element with ScriptElementBinding {
     }
   }
 
-  @override
   String get src => _resolvedSource?.toString() ?? '';
-  @override
   set src(String value) {
     internalSetAttribute('src', value);
     _resolveSource(value);
@@ -180,9 +169,7 @@ class ScriptElement extends Element with ScriptElementBinding {
   }
 
   // @TODO: implement async.
-  @override
   bool get async => getAttribute('async') != null;
-  @override
   set async(bool value) {
     if (value) {
       internalSetAttribute('async', '');
@@ -192,9 +179,7 @@ class ScriptElement extends Element with ScriptElementBinding {
   }
 
   // @TODO: implement defer.
-  @override
   bool get defer => getAttribute('defer') != null;
-  @override
   set defer(bool value) {
     if (value) {
       internalSetAttribute('defer', '');
@@ -203,23 +188,17 @@ class ScriptElement extends Element with ScriptElementBinding {
     }
   }
 
-  @override
   String get type => getAttribute('type') ?? '';
-  @override
   set type(String value) {
     internalSetAttribute('type', value);
   }
 
-  @override
   String get charset => getAttribute('charset') ?? '';
-  @override
   set charset(String value) {
     internalSetAttribute('charset', value);
   }
 
-  @override
   String get text => getAttribute('text') ?? '';
-  @override
   set text(String value) {
     internalSetAttribute('text', value);
   }
@@ -288,7 +267,7 @@ class ScriptElement extends Element with ScriptElementBinding {
 const String _CSS_MIME = 'text/css';
 
 // https://www.w3.org/TR/2011/WD-html5-author-20110809/the-style-element.html
-class StyleElement extends Element with StyleElementBinding {
+class StyleElement extends Element {
   StyleElement(EventTargetContext? context)
       : super(context, defaultStyle: _defaultStyle);
   final String _type = _CSS_MIME;
@@ -302,9 +281,7 @@ class StyleElement extends Element with StyleElementBinding {
     }
   }
 
-  @override
   String get type => getAttribute('type') ?? '';
-  @override
   set type(String value) {
     internalSetAttribute('type', value);
   }

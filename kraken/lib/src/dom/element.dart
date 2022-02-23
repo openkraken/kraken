@@ -12,7 +12,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
@@ -84,8 +83,7 @@ abstract class Element
     extends Node
     with ElementBase,
          ElementEventMixin,
-         ElementOverflowMixin,
-         ElementBinding {
+         ElementOverflowMixin {
   // Default to unknown, assign by [createElement], used by inspector.
   String tagName = UNKNOWN;
 
@@ -107,10 +105,8 @@ abstract class Element
   /// The Element.classList is a read-only property that returns a collection of the class attributes of the element.
   final List<String> _classList = [];
 
-  @override
   List<String> get classList => _classList;
 
-  @override
   set className(String className) {
     _classList.clear();
     List<String> classList = className.split(_splitRegExp);
@@ -120,7 +116,6 @@ abstract class Element
     recalculateStyle();
   }
 
-  @override
   String get className => _classList.join(_ONE_SPACE);
 
   final bool _isDefaultRepaintBoundary;
@@ -439,23 +434,7 @@ abstract class Element
     style.reset();
   }
 
-  @override
   BoundingClientRect getBoundingClientRect() => boundingClientRect;
-
-  @override
-  void scroll(double x, double y) {
-    internalScrollTo(x: x, y: y, withAnimation: false);
-  }
-
-  @override
-  void scrollBy(double x, double y) {
-    internalScrollBy(dx: x, dy: y, withAnimation: false);
-  }
-
-  @override
-  void scrollTo(double x, double y) {
-    internalScrollTo(x: x, y: y, withAnimation: false);
-  }
 
   bool _shouldConsumeScrollTicker = false;
   void _consumeScrollTicker(_) {
@@ -1456,7 +1435,6 @@ abstract class Element
   // The HTMLElement.offsetLeft read-only property returns the number of pixels that the upper left corner
   // of the current element is offset to the left within the HTMLElement.offsetParent node.
   // https://drafts.csswg.org/cssom-view/#dom-htmlelement-offsetleft
-  @override
   int get offsetLeft {
     int offset = 0;
     RenderBoxModel selfRenderBoxModel = renderBoxModel!;
@@ -1470,7 +1448,6 @@ abstract class Element
   // The HTMLElement.offsetTop read-only property returns the distance of the outer border
   // of the current element relative to the inner border of the top of the offsetParent node.
   // https://drafts.csswg.org/cssom-view/#dom-htmlelement-offsettop
-  @override
   int get offsetTop {
     int offset = 0;
     RenderBoxModel selfRenderBoxModel = renderBoxModel!;
@@ -1557,7 +1534,6 @@ abstract class Element
     }
   }
 
-  @override
   void click() {
     flushLayout();
     Event clickEvent = MouseEvent(EVENT_CLICK, MouseEventInit(bubbles: true, cancelable: true));

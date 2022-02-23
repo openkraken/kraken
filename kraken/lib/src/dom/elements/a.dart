@@ -10,7 +10,7 @@ import 'package:kraken/module.dart';
 const String ANCHOR = 'A';
 const String _TARGET_SELF = 'self';
 
-class AnchorElement extends Element implements AnchorElementBinding {
+class AnchorElement extends Element {
   AnchorElement(EventTargetContext? context)
       : super(context) {
     addEvent(EVENT_CLICK);
@@ -79,44 +79,30 @@ class AnchorElement extends Element implements AnchorElementBinding {
   // - attribute DOMString search;
   // - attribute DOMString hash;
   // The IDL attribute relList must reflect the rel content attribute.
-  @override
   String get href => _resolvedHyperlink?.toString() ?? '';
 
-  @override
   set href(String value) {
     internalSetAttribute('href', value);
     _resolveHyperlink(value);
     // Set href will not reflect to attribute href.
   }
 
-  @override
   String get target => _DOMString(getAttribute('target'));
-
-  @override
   set target(String value) {
     internalSetAttribute('target', value);
   }
 
-  @override
   String get rel => _DOMString(getAttribute('rel'));
-
-  @override
   set rel(String value) {
     internalSetAttribute('rel', value);
   }
 
-  @override
   String get type => _DOMString(getAttribute('type'));
-
-  @override
   set type(String value) {
     internalSetAttribute('type', value);
   }
 
-  @override
   String get protocol => _DOMString(_resolvedHyperlink?.scheme) + ':';
-
-  @override
   set protocol(String value) {
     if (_resolvedHyperlink == null) return;
 
@@ -131,7 +117,6 @@ class AnchorElement extends Element implements AnchorElementBinding {
     _reflectToAttributeHref();
   }
 
-  @override
   String get host {
     String? host;
     Uri? resolved = _resolvedHyperlink;
@@ -141,7 +126,6 @@ class AnchorElement extends Element implements AnchorElementBinding {
     return _DOMString(host);
   }
 
-  @override
   set host(String value) {
     if (_resolvedHyperlink == null) return;
     String host = value;
@@ -158,20 +142,14 @@ class AnchorElement extends Element implements AnchorElementBinding {
     _reflectToAttributeHref();
   }
 
-  @override
   String get hostname => _DOMString(_resolvedHyperlink?.host);
-
-  @override
   set hostname(String value) {
     if (_resolvedHyperlink == null) return;
     _resolvedHyperlink = _resolvedHyperlink!.replace(host: value);
     _reflectToAttributeHref();
   }
 
-  @override
   String get port => _DOMString(_resolvedHyperlink?.port.toString());
-
-  @override
   set port(String value) {
     if (_resolvedHyperlink == null) return;
     int? port = int.tryParse(value);
@@ -181,17 +159,13 @@ class AnchorElement extends Element implements AnchorElementBinding {
     }
   }
 
-  @override
   String get pathname => _DOMString(_resolvedHyperlink?.path);
-
-  @override
   set pathname(String value) {
     if (_resolvedHyperlink == null) return;
     _resolvedHyperlink = _resolvedHyperlink!.replace(path: value);
     _reflectToAttributeHref();
   }
 
-  @override
   String get search {
     String? search;
     String? query = _resolvedHyperlink?.query;
@@ -200,8 +174,6 @@ class AnchorElement extends Element implements AnchorElementBinding {
     }
     return _DOMString(search);
   }
-
-  @override
   set search(String value) {
     if (_resolvedHyperlink == null) return;
     // Remove starting `?`.
@@ -213,10 +185,7 @@ class AnchorElement extends Element implements AnchorElementBinding {
     _reflectToAttributeHref();
   }
 
-  @override
   String get hash => _DOMString(_resolvedHyperlink?.fragment);
-
-  @override
   set hash(String value) {
     if (_resolvedHyperlink == null) return;
     _resolvedHyperlink = _resolvedHyperlink!.replace(fragment: value);

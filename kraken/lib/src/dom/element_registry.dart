@@ -10,7 +10,7 @@ final Map<String, ElementCreator> _elementRegistry = {};
 
 void defineElement(String name, ElementCreator creator) {
   if (_elementRegistry.containsKey(name)) {
-    throw Exception('A element with name "$name" has already been defined.');
+    throw Exception('An element with name "$name" has already been defined.');
   }
   _elementRegistry[name] = creator;
 }

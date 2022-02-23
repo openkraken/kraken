@@ -22,26 +22,8 @@ abstract class BindingObject {
 }
 
 // https://www.w3.org/TR/cssom-view-1/#extensions-to-the-window-interface
-mixin WindowBinding implements BindingObject {
-  // browsing context
-  // void moveTo(long x, long y);
-  // void moveBy(long x, long y);
-  // void resizeTo(long x, long y);
-  // void resizeBy(long x, long y);
-
-  // viewport
-  // int get innerWidth;
-  // int get innerHeight;
-
-  // viewport scrolling
-  double get scrollX;
-  // [Replaceable] readonly attribute double pageXOffset;
-  double get scrollY;
-  // [Replaceable] readonly attribute double pageYOffset;
-
-  void scrollTo(double x, double y);
-  void scrollBy(double x, double y);
-  void open(String url);
+class WindowBinding extends Window implements BindingObject {
+  WindowBinding(EventTargetContext context, Document document) : super(context, document);
 
   @override
   dynamic getProperty(String key) {
@@ -73,39 +55,7 @@ mixin WindowBinding implements BindingObject {
 
 // https://www.w3.org/TR/cssom-view-1/#extensions-to-the-htmlelement-interface
 // https://www.w3.org/TR/cssom-view-1/#extension-to-the-element-interface
-mixin ElementBinding implements BindingObject {
-  // Extensions to the HTMLElement Interface
-  int get offsetTop;
-  int get offsetLeft;
-  int get offsetWidth;
-  int get offsetHeight;
-
-  // Extensions to the Element Interface
-  BoundingClientRect getBoundingClientRect();
-  void scroll(double x, double y);
-  void scrollTo(double x, double y);
-  void scrollBy(double x, double y);
-  void click();
-
-  double get scrollTop;
-  set scrollTop(double value);
-
-  double get scrollLeft;
-  set scrollLeft(double value);
-
-  int get scrollWidth;
-  int get scrollHeight;
-  int get clientTop;
-  int get clientLeft;
-  int get clientWidth;
-  int get clientHeight;
-
-  // class
-  String get className;
-  set className(String value);
-
-  List<String> get classList;
-
+mixin ElementProperties on Element {
   _getElementProperty(String key) {
     switch (key) {
       case 'offsetTop': return offsetLeft;
@@ -146,7 +96,9 @@ mixin ElementBinding implements BindingObject {
       case 'click': return click();
     }
   }
+}
 
+mixin DefaultElementBinding on ElementProperties implements BindingObject {
   @override
   getProperty(String key) => _getElementProperty(key);
 
@@ -157,8 +109,14 @@ mixin ElementBinding implements BindingObject {
   invokeMethod(String method, List args) => _invokeElementMethod(method, args);
 }
 
+class DivElementBinding extends DivElement with ElementProperties, DefaultElementBinding implements BindingObject {
+  DivElementBinding(EventTargetContext? context) : super(context);
+}
+
 // @NOTE: Following code could be auto generated.
-mixin CanvasElementBinding on ElementBinding implements BindingObject {
+class CanvasElementBinding extends CanvasElement with ElementProperties implements BindingObject {
+  CanvasElementBinding(EventTargetContext? context) : super(context);
+
   // Bindings.
   @override
   getProperty(String key) {
@@ -185,81 +143,10 @@ mixin CanvasElementBinding on ElementBinding implements BindingObject {
       default: return _invokeElementMethod(method, args);
     }
   }
-
-  // Interface of CanvasElement.
-  int get width;
-  set width(int value);
-
-  int get height;
-  set height(int value);
-
-  // RenderingContext? getContext(DOMString contextId, optional any options = null);
-  CanvasRenderingContext2D getContext(String contextId);
 }
 
-mixin InputElementBinding on ElementBinding implements BindingObject {
-  int get width;
-  set width(int value);
-
-  int get height;
-  set height(int value);
-
-  String get value;
-  set value(String text);
-
-  String get accept;
-  set accept(String value);
-
-  String get autocomplete;
-  set autocomplete(String value);
-
-  bool get autofocus;
-  set autofocus(bool value);
-
-  bool get required;
-  set required(bool value);
-
-  bool get readOnly;
-  set readOnly(bool value);
-
-  String get pattern;
-  set pattern(String value);
-
-  String get step;
-  set step(String value);
-
-  String get name;
-  set name(String value);
-
-  bool get multiple;
-  set multiple(bool value);
-
-  bool get checked;
-  set checked(bool value);
-
-  bool get disabled;
-  set disabled(bool value);
-
-  String get min;
-  set min(String value);
-
-  String get max;
-  set max(String value);
-
-  int get maxLength;
-  set maxLength(int value);
-
-  String get placeholder;
-  set placeholder(String value);
-
-  String get type;
-  set type(String value);
-
-  String get mode;
-  set mode(String value);
-
-  void focus();
-  void blur();
+class InputElementBinding extends InputElement with ElementProperties implements BindingObject {
+  InputElementBinding(EventTargetContext? context) : super(context);
 
   // Bindings.
   @override
@@ -326,8 +213,8 @@ mixin InputElementBinding on ElementBinding implements BindingObject {
   }
 }
 
-mixin ObjectElementBinding on ElementBinding implements BindingObject {
-  dynamic handleJSCall(String method, List args);
+class ObjectElementBinding extends ObjectElement with ElementProperties implements BindingObject {
+  ObjectElementBinding(EventTargetContext? context) : super(context);
 
   // Bindings.
   @override
@@ -351,39 +238,8 @@ mixin ObjectElementBinding on ElementBinding implements BindingObject {
   }
 }
 
-mixin AnchorElementBinding on ElementBinding implements BindingObject {
-  String get href;
-  set href(String value);
-
-  String get target;
-  set target(String value);
-
-  String get rel;
-  set rel(String value);
-
-  String get type;
-  set type(String value);
-
-  String get protocol;
-  set protocol(String value);
-
-  String get host;
-  set host(String value);
-
-  String get hostname;
-  set hostname(String value);
-
-  String get port;
-  set port(String value);
-
-  String get pathname;
-  set pathname(String value);
-
-  String get search;
-  set search(String value);
-
-  String get hash;
-  set hash(String value);
+class AnchorElementBinding extends AnchorElement with ElementProperties implements BindingObject {
+  AnchorElementBinding(EventTargetContext? context) : super(context);
 
   // Bindings.
   @override
@@ -428,18 +284,8 @@ mixin AnchorElementBinding on ElementBinding implements BindingObject {
   }
 }
 
-mixin LinkElementBinding on ElementBinding implements BindingObject {
-  bool get disabled;
-  set disabled(bool value);
-
-  String get rel;
-  set rel(String value);
-
-  String get href;
-  set href(String value);
-
-  String get type;
-  set type(String value);
+class LinkElementBinding extends LinkElement with ElementProperties implements BindingObject {
+  LinkElementBinding(EventTargetContext? context) : super(context);
 
   // Bindings.
   @override
@@ -471,24 +317,8 @@ mixin LinkElementBinding on ElementBinding implements BindingObject {
 }
 
 
-mixin ScriptElementBinding on ElementBinding implements BindingObject {
-  String get src;
-  set src(String value);
-
-  bool get async;
-  set async(bool value);
-
-  bool get defer;
-  set defer(bool value);
-
-  String get type;
-  set type(String value);
-
-  String get charset;
-  set charset(String value);
-
-  String get text;
-  set text(String value);
+class ScriptElementBinding extends ScriptElement with ElementProperties implements BindingObject {
+  ScriptElementBinding(EventTargetContext? context) : super(context);
 
   // Bindings.
   @override
@@ -523,9 +353,8 @@ mixin ScriptElementBinding on ElementBinding implements BindingObject {
   }
 }
 
-mixin StyleElementBinding on ElementBinding implements BindingObject {
-  String get type;
-  set type(String value);
+class StyleElementBinding extends StyleElement with ElementProperties implements BindingObject {
+  StyleElementBinding(EventTargetContext? context) : super(context);
 
   // Bindings.
   @override
@@ -550,26 +379,8 @@ mixin StyleElementBinding on ElementBinding implements BindingObject {
   }
 }
 
-mixin ImageElementBinding on ElementBinding implements BindingObject {
-  String get src;
-  set src(String value);
-
-  bool get loading;
-  set loading(bool value);
-
-  int get width;
-  set width(int value);
-
-  int get height;
-  set height(int value);
-
-  String get scaling;
-  set scaling(String value);
-
-  // Read only.
-  int get naturalWidth;
-  int get naturalHeight;
-  bool get complete;
+class ImageElementBinding extends ImageElement with ElementProperties implements BindingObject {
+  ImageElementBinding(EventTargetContext? context) : super(context);
 
   // Bindings.
   @override

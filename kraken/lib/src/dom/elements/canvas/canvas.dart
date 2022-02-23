@@ -37,7 +37,7 @@ class RenderCanvasPaint extends RenderCustomPaint {
         );
 }
 
-class CanvasElement extends Element with CanvasElementBinding {
+class CanvasElement extends Element {
   final ChangeNotifier repaintNotifier = ChangeNotifier();
   /// The painter that paints before the children.
   late CanvasPainter painter;
@@ -91,7 +91,6 @@ class CanvasElement extends Element with CanvasElementBinding {
     renderCustomPaint = null;
   }
 
-  @override
   CanvasRenderingContext2D getContext(String contextId, { options }) {
     switch (contextId) {
       case '2d':
@@ -176,7 +175,6 @@ class CanvasElement extends Element with CanvasElementBinding {
   }
 
   /// Element property width.
-  @override
   int get width {
     String? attrWidth = getAttribute(WIDTH);
     if (attrWidth != null) {
@@ -185,13 +183,11 @@ class CanvasElement extends Element with CanvasElementBinding {
       return _ELEMENT_DEFAULT_WIDTH_IN_PIXEL;
     }
   }
-  @override
   set width(int value) {
     _setDimensions(value, null);
   }
 
   /// Element property height.
-  @override
   int get height {
     String? attrHeight = getAttribute(HEIGHT);
     if (attrHeight != null) {
@@ -200,7 +196,6 @@ class CanvasElement extends Element with CanvasElementBinding {
       return _ELEMENT_DEFAULT_HEIGHT_IN_PIXEL;
     }
   }
-  @override
   set height(int value) {
     _setDimensions(null, value);
   }
