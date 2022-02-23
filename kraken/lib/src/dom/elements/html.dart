@@ -28,13 +28,12 @@ class HTMLElement extends Element {
 
   @override
   void dispatchEvent(Event event) {
-    KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
     if (event.type == SCROLL) {
       // https://www.w3.org/TR/2014/WD-DOM-Level-3-Events-20140925/#event-type-scroll
       // When dispatched on the Document element, this event type must bubble to the Window object.
-      controller?.view.window.dispatchEvent(event);
-    } else {
-      super.dispatchEvent(event);
+      event.bubbles = true;
     }
+
+    super.dispatchEvent(event);
   }
 }
