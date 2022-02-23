@@ -223,3 +223,82 @@ mixin ObjectElementBinding on ElementBinding implements BindingObject {
         ?? _invokeElementMethod(method, args);
   }
 }
+
+mixin AnchorElementBinding on ElementBinding implements BindingObject {
+  String get href;
+  set href(String value);
+
+  String get target;
+  set target(String value);
+
+  String get rel;
+  set rel(String value);
+
+  String get type;
+  set type(String value);
+
+  String get protocol;
+  set protocol(String value);
+
+  String get host;
+  set host(String value);
+
+  String get hostname;
+  set hostname(String value);
+
+  String get port;
+  set port(String value);
+
+  String get pathname;
+  set pathname(String value);
+
+  String get search;
+  set search(String value);
+
+  String get hash;
+  set hash(String value);
+
+  // Bindings.
+  @override
+  getProperty(String key) {
+    switch (key) {
+      case 'href': return href;
+      case 'target': return target;
+      case 'rel': return rel;
+      case 'type': return type;
+      case 'protocol': return protocol;
+      case 'host': return host;
+      case 'hostname': return hostname;
+      case 'port': return port;
+      case 'pathname': return pathname;
+      case 'search': return search;
+      case 'hash': return hash;
+      default: return _getElementProperty(key);
+    }
+  }
+
+  @override
+  void setProperty(String key, value) {
+    switch (key) {
+      case 'href': href = value; break;
+      case 'target': target = value; break;
+      case 'rel': rel = value; break;
+      case 'type': type = value; break;
+      case 'protocol': protocol = value; break;
+      case 'host': host = value; break;
+      case 'hostname': hostname = value; break;
+      case 'port': port = value; break;
+      case 'pathname': pathname = value; break;
+      case 'search': search = value; break;
+      case 'hash': hash = value; break;
+      default: return _setElementProperty(key, value);
+    }
+  }
+
+  @override
+  invokeMethod(String method, List args) {
+    return _invokeElementMethod(method, args);
+  }
+}
+
+
