@@ -138,7 +138,7 @@ bool KrakenPage::parseHTML(const char* code, size_t length) {
   }
 
   HTMLParser::parseHTML(code, length, documentElement);
-  
+
   return true;
 }
 
