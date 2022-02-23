@@ -18,9 +18,9 @@
 #include "elements/.gen/anchor_element.h"
 #include "elements/.gen/canvas_element.h"
 #include "elements/.gen/input_element.h"
-#include "elements/.gen/textarea_element.h"
 #include "elements/.gen/object_element.h"
 #include "elements/.gen/script_element.h"
+#include "elements/.gen/textarea_element.h"
 #include "elements/template_element.h"
 
 #include "events/.gen/close_event.h"
