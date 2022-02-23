@@ -14,6 +14,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' show TextSelectionOverlay, TextSelectionControls, ClipboardStatusNotifier;
+import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
@@ -145,7 +146,7 @@ class EditableTextDelegate implements TextSelectionDelegate {
 }
 
 // https://www.w3.org/TR/2011/WD-html5-author-20110809/the-input-element.html
-class InputElement extends Element implements TextInputClient, TickerProvider {
+class InputElement extends Element implements TextInputClient, TickerProvider, InputElementBinding {
   static InputElement? focusInputElement;
 
   static void clearFocus() {
@@ -244,19 +245,28 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   // @TODO: Apply algorithm of input element property width/height.
+  @override
   int get width => int.tryParse(getAttribute('width') ?? '') ?? 0;
+
+  @override
   set width(int value) {
     if (value < 0) value = 0;
     internalSetAttribute('width', value.toString());
   }
 
+  @override
   int get height => int.tryParse(getAttribute('height') ?? '') ?? 0;
+
+  @override
   set height(int value) {
     if (value < 0) value = 0;
     internalSetAttribute('height', value.toString());
   }
 
+  @override
   String get value => _getValue();
+
+  @override
   set value(String text) {
     internalSetAttribute('value', text);
     TextRange composing = _textSelectionDelegate._textEditingValue.composing;
@@ -269,17 +279,26 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     _formatAndSetValue(newTextEditingValue);
   }
 
+  @override
   String get accept => getAttribute('accept') ?? '';
+
+  @override
   set accept(String value) {
     internalSetAttribute('accept', value);
   }
 
+  @override
   String get autocomplete => getAttribute('autocomplete') ?? '';
+
+  @override
   set autocomplete(String value) {
     internalSetAttribute('autocomplete', value);
   }
 
+  @override
   bool get autofocus => hasAttribute('autofocus');
+
+  @override
   set autofocus(bool value) {
     if (value) {
       internalSetAttribute('autofocus', '');
@@ -288,7 +307,10 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
   }
 
+  @override
   bool get required => hasAttribute('required');
+
+  @override
   set required(bool value) {
     if (value) {
       internalSetAttribute('required', '');
@@ -297,7 +319,10 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
   }
 
+  @override
   bool get readOnly => hasAttribute('readonly');
+
+  @override
   set readOnly(bool value) {
     if (value) {
       internalSetAttribute('readonly', '');
@@ -306,22 +331,34 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
   }
 
+  @override
   String get pattern => getAttribute('pattern') ?? '';
+
+  @override
   set pattern(String value) {
     internalSetAttribute('pattern', value);
   }
 
+  @override
   String get step => getAttribute('step') ?? '';
+
+  @override
   set step(String value) {
     internalSetAttribute('step', value);
   }
 
+  @override
   String get name => getAttribute('name') ?? '';
+
+  @override
   set name(String value) {
     internalSetAttribute('name', value);
   }
 
+  @override
   bool get multiple => hasAttribute('multiple');
+
+  @override
   set multiple(bool value) {
     if (value) {
       internalSetAttribute('multiple', '');
@@ -330,7 +367,10 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
   }
 
+  @override
   bool get checked => hasAttribute('checked');
+
+  @override
   set checked(bool value) {
     if (value) {
       internalSetAttribute('checked', '');
@@ -339,7 +379,10 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
   }
 
+  @override
   bool get disabled => hasAttribute('disabled');
+
+  @override
   set disabled(bool value) {
     if (value) {
       internalSetAttribute('disabled', '');
@@ -348,37 +391,55 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
   }
 
+  @override
   String get min => getAttribute('min') ?? '';
+
+  @override
   set min(String value) {
     internalSetAttribute('min', value);
   }
 
+  @override
   String get max => getAttribute('max') ?? '';
+
+  @override
   set max(String value) {
     internalSetAttribute('max', value);
   }
 
+  @override
   int get maxLength => int.tryParse(getAttribute('maxlength') ?? '') ?? 0;
+
+  @override
   set maxLength(int value) {
     if (value.isNegative) value = 0;
     internalSetAttribute('maxlength', value.toString());
   }
 
+  @override
   String get placeholder => getAttribute('placeholder') ?? '';
+
+  @override
   set placeholder(String value) {
     internalSetAttribute('placeholder', value);
     // Update placeholder text.
     _rebuildTextSpan();
   }
 
+  @override
   String get type => getAttribute('type') ?? '';
+
+  @override
   set type(String value) {
     internalSetAttribute('type', value);
     _setType(value);
   }
 
   // Additional inputmode.
+  @override
   String get mode => getAttribute('mode') ?? '';
+
+  @override
   set mode(String value) {
     internalSetAttribute('mode', value);
     _setInputMode(value);

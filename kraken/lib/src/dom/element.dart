@@ -106,8 +106,11 @@ abstract class Element
 
   /// The Element.classList is a read-only property that returns a collection of the class attributes of the element.
   final List<String> _classList = [];
+
+  @override
   List<String> get classList => _classList;
 
+  @override
   set className(String className) {
     _classList.clear();
     List<String> classList = className.split(_splitRegExp);
@@ -116,6 +119,8 @@ abstract class Element
     }
     recalculateStyle();
   }
+
+  @override
   String get className => _classList.join(_ONE_SPACE);
 
   final bool _isDefaultRepaintBoundary;

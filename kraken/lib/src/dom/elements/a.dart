@@ -48,17 +48,17 @@ class AnchorElement extends Element implements AnchorElementBinding {
     super.setAttribute(qualifiedName, value);
     // Reflect setAttribute to properties.
     switch (qualifiedName) {
-      case 'href': href = value; break;
-      case 'target': target = value; break;
-      case 'rel': rel = value; break;
-      case 'type': type = value; break;
-      case 'protocol': protocol = value; break;
-      case 'host': host = value; break;
-      case 'hostname': hostname = value; break;
-      case 'port': port = value; break;
-      case 'pathname': pathname = value; break;
-      case 'search': search = value; break;
-      case 'hash': hash = value; break;
+      case 'href': href = attributeToProperty<String>(value); break;
+      case 'target': target = attributeToProperty<String>(value); break;
+      case 'rel': rel = attributeToProperty<String>(value); break;
+      case 'type': type = attributeToProperty<String>(value); break;
+      case 'protocol': protocol = attributeToProperty<String>(value); break;
+      case 'host': host = attributeToProperty<String>(value); break;
+      case 'hostname': hostname = attributeToProperty<String>(value); break;
+      case 'port': port = attributeToProperty<String>(value); break;
+      case 'pathname': pathname = attributeToProperty<String>(value); break;
+      case 'search': search = attributeToProperty<String>(value); break;
+      case 'hash': hash = attributeToProperty<String>(value); break;
     }
   }
 
