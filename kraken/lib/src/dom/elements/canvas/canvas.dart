@@ -15,8 +15,8 @@ import 'package:kraken/rendering.dart';
 import 'canvas_context_2d.dart';
 
 const String CANVAS = 'CANVAS';
-const double _ELEMENT_DEFAULT_WIDTH_IN_PIXEL = 300.0;
-const double _ELEMENT_DEFAULT_HEIGHT_IN_PIXEL = 150.0;
+const int _ELEMENT_DEFAULT_WIDTH_IN_PIXEL = 300;
+const int _ELEMENT_DEFAULT_HEIGHT_IN_PIXEL = 150;
 
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
@@ -37,7 +37,7 @@ class RenderCanvasPaint extends RenderCustomPaint {
         );
 }
 
-class CanvasElement extends Element {
+class CanvasElement extends Element with CanvasElementBinding {
   final ChangeNotifier repaintNotifier = ChangeNotifier();
   /// The painter that paints before the children.
   late CanvasPainter painter;
@@ -91,8 +91,8 @@ class CanvasElement extends Element {
     renderCustomPaint = null;
   }
 
-  // RenderingContext? getContext(DOMString contextId, optional any options = null);
-  CanvasRenderingContext2D getContext(String contextId, {options}) {
+  @override
+  CanvasRenderingContext2D getContext(String contextId, { options }) {
     switch (contextId) {
       case '2d':
         if (painter.context == null) {
@@ -129,8 +129,8 @@ class CanvasElement extends Element {
 
     // [width/height] has default value, should not be null.
     if (height == null && width == null) {
-      width = this.width;
-      height = this.height;
+      width = this.width.toDouble();
+      height = this.height.toDouble();
     } else if (width == null && height != null) {
       width = this.height / height * this.width;
     } else if (width != null && height == null) {
@@ -176,24 +176,32 @@ class CanvasElement extends Element {
   }
 
   /// Element property width.
-  double get width {
-    if (hasAttribute(WIDTH)) {
-      return double.tryParse(getAttribute(WIDTH)!) ?? 0.0;
+  @override
+  int get width {
+    String? attrWidth = getAttribute(WIDTH);
+    if (attrWidth != null) {
+      return attributeToProperty<int>(attrWidth);
+    } else {
+      return _ELEMENT_DEFAULT_WIDTH_IN_PIXEL;
     }
-    return _ELEMENT_DEFAULT_WIDTH_IN_PIXEL;
   }
-  set width(num value) {
+  @override
+  set width(int value) {
     _setDimensions(value, null);
   }
 
   /// Element property height.
-  double get height {
-    if (hasAttribute(HEIGHT)) {
-      return double.tryParse(getAttribute(HEIGHT)!) ?? 0.0;
+  @override
+  int get height {
+    String? attrHeight = getAttribute(HEIGHT);
+    if (attrHeight != null) {
+      return attributeToProperty<int>(attrHeight);
+    } else {
+      return _ELEMENT_DEFAULT_HEIGHT_IN_PIXEL;
     }
-    return _ELEMENT_DEFAULT_HEIGHT_IN_PIXEL;
   }
-  set height(num value) {
+  @override
+  set height(int value) {
     _setDimensions(null, value);
   }
 
@@ -238,16 +246,6 @@ class CanvasElement extends Element {
       case 'width': width = attributeToProperty<int>(value); break;
       case 'height': height = attributeToProperty<int>(value); break;
     }
-  }
-
-  @override
-  handleJSCall(String method, List argv) {
-    switch (method) {
-      case 'getContext':
-        return getContext(argv[0]).nativeCanvasRenderingContext2D;
-    }
-
-    return super.handleJSCall(method, argv);
   }
 
   @override

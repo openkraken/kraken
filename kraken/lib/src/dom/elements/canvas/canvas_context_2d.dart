@@ -85,7 +85,7 @@ class CanvasRenderingContext2D {
 
   final Map<String, dynamic> _rawProperties = {};
 
-  dynamic handleJSCall(String method, List<dynamic> argv) {
+  handleJSCall(String method, List argv) {
     String operation = method.substring(0, 3);
 
     if (operation == 'set') {
@@ -94,7 +94,7 @@ class CanvasRenderingContext2D {
       return _rawProperties[jsMethodToKey(method)];
     }
 
-    switch(method) {
+    switch (method) {
       case 'setFillStyle':
         Color? color = CSSColor.parseColor(argv[0]);
         if (color != null) fillStyle = color;
@@ -246,7 +246,7 @@ class CanvasRenderingContext2D {
         translate(argv[0], argv[1]);
         break;
       default:
-        assert(false, 'Unknown js method: $method');
+        assert(false, 'Unknown method: $method');
         return null;
     }
   }

@@ -15,11 +15,16 @@ void defineElement(String name, ElementCreator creator) {
   _elementRegistry[name] = creator;
 }
 
+class _UnknownElement extends Element {
+  _UnknownElement(EventTargetContext? context) : super(context);
+}
+
 Element createElement(String name, EventTargetContext? context){
   ElementCreator? creator = _elementRegistry[name];
   if (creator == null) {
-    print('ERROR: unexpected element type "$name"');
-    return Element(context);
+    print('Unexpected element "$name"');
+
+    return _UnknownElement(context);
   }
 
   Element element = creator(context);
@@ -89,7 +94,7 @@ void defineBuiltInElements() {
   defineElement(BUTTON, (context) => ButtonElement(context));
   defineElement(INPUT, (context) => InputElement(context));
   // Edits
-  defineElement(DEL, (context) => DelElement(context));     
+  defineElement(DEL, (context) => DelElement(context));
   defineElement(INS, (context) => InsElement(context));
   // Head
   defineElement(HEAD, (context) => HeadElement(context));

@@ -34,7 +34,7 @@ void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> re
     int id = int.parse(method.substring(AnonymousFunctionCallPreFix.length));
     AnonymousNativeFunction fn = getAnonymousNativeFunctionFromId(id)!;
     try {
-      dynamic result = fn(values);
+      var result = fn(values);
       toNativeValue(returnedValue, result);
     } catch (e, stack) {
       print('$e\n$stack');
@@ -65,10 +65,10 @@ void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> re
     try {
       if (method.startsWith(GetPropertyCallPreFix) && values.isEmpty) {
         String key = method.substring(GetPropertyCallPreFix.length);
-        var result = getObjectProperty(eventTarget, key);
+        var result = eventTarget.getProperty(key);
         toNativeValue(returnedValue, result);
       } else {
-        var result = eventTarget.handleJSCall(method, values);
+        var result = eventTarget.invokeMethod(method, values);
         toNativeValue(returnedValue, result);
       }
     } catch (e, stack) {
@@ -78,6 +78,7 @@ void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> re
   }
 }
 
+// @TODO: Should be deleted.
 String jsMethodToKey(String method) {
   return method[3].toLowerCase() + method.substring(4);
 }
@@ -90,7 +91,7 @@ class EventTargetContext {
   const EventTargetContext(this.contextId, this.pointer);
 }
 
-abstract class EventTarget {
+abstract class EventTarget extends BindingObject {
   static final SplayTreeMap<int, EventTarget> _nativeMap = SplayTreeMap();
   static EventTarget getEventTargetByPointer(Pointer<NativeEventTarget> pointer) {
     EventTarget? target = _nativeMap[pointer.address];
@@ -147,8 +148,8 @@ abstract class EventTarget {
     return eventHandlers;
   }
 
-  @mustCallSuper
-  handleJSCall(String method, List argv) {}
+  // @mustCallSuper
+  // handleJSCall(String method, List argv) {}
 
   @mustCallSuper
   void dispose() {

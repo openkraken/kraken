@@ -422,19 +422,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   @override
-  handleJSCall(String method, List argv) {
-    switch(method) {
-      case 'focus':
-        focus();
-        break;
-      case 'blur':
-        blur();
-        break;
-    }
-    return super.handleJSCall(method, argv);
-  }
-
-  @override
   void didAttachRenderer() {
     super.didAttachRenderer();
 

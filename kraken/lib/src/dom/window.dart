@@ -7,10 +7,12 @@ import 'dart:ui';
 import 'package:kraken/dom.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
+import 'package:kraken/bridge.dart';
+
 
 const String WINDOW = 'WINDOW';
 
-class Window extends EventTarget {
+class Window extends EventTarget with WindowBinding {
   final Document document;
 
   Window(EventTargetContext context, this.document) : super(context) {
@@ -20,29 +22,34 @@ class Window extends EventTarget {
     };
   }
 
-  void _open(String url) {
+  @override
+  void open(String url) {
     KrakenController rootController = document.controller.view.rootController;
     String? sourceUrl = rootController.url;
 
     document.controller.view.handleNavigationAction(sourceUrl, url, KrakenNavigationType.navigate);
   }
 
-  double scrollX() {
+  @override
+  double get scrollX {
     return document.documentElement!.scrollLeft;
   }
 
-  double scrollY() {
+  @override
+  double get scrollY {
     return document.documentElement!.scrollTop;
   }
 
-  void scrollTo(num x, num y) {
+  @override
+  void scrollTo(double x, double y) {
     document.documentElement!.flushLayout();
-    document.documentElement!.scrollTo(x: x, y: y, withAnimation: false);
+    document.documentElement!.internalScrollTo(x: x, y: y, withAnimation: false);
   }
 
-  void scrollBy(num x, num y) {
+  @override
+  void scrollBy(double x, double y) {
     document.documentElement!.flushLayout();
-    document.documentElement!.scrollBy(dx: x, dy: y, withAnimation: false);
+    document.documentElement!.internalScrollBy(dx: x, dy: y, withAnimation: false);
   }
 
   void addEvent(String eventType) {
@@ -64,25 +71,6 @@ class Window extends EventTarget {
         // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/VisualViewport.cpp#L61
         document.documentElement!.addEvent(eventType);
         break;
-    }
-  }
-
-  @override
-  dynamic handleJSCall(String method, List<dynamic> argv) {
-    switch(method) {
-      case 'scroll':
-      case 'scrollTo':
-        return scrollTo(argv[0], argv[1]);
-      case 'scrollBy':
-        return scrollBy(argv[0], argv[1]);
-      case 'scrollX':
-        return scrollX();
-      case 'scrollY':
-        return scrollY();
-      case 'open':
-        return _open(argv[0]);
-      default:
-        super.handleJSCall(method, argv);
     }
   }
 }

@@ -12,19 +12,19 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/widget.dart';
-import 'package:kraken/src/dom/element_event.dart';
-import 'package:kraken/src/dom/element_view.dart';
 import 'package:meta/meta.dart';
+
+import 'element_event.dart';
 
 final RegExp _splitRegExp = RegExp(r'\s+');
 const String _ONE_SPACE = ' ';
 const String _STYLE_PROPERTY = 'style';
 const String _CLASS_NAME = 'class';
-const String _CLASS_LIST = 'classList';
 
 /// Defined by W3C Standard,
 /// Most element's default width is 300 in pixel,
@@ -80,14 +80,12 @@ typedef GetViewportSize = Size Function();
 /// Get the render box model of current element.
 typedef GetRenderBoxModel = RenderBoxModel? Function();
 
-class Element extends Node
-    with
-        ElementBase,
-        ElementViewMixin,
-        ElementEventMixin,
-        ElementOverflowMixin {
-
-
+abstract class Element
+    extends Node
+    with ElementBase,
+         ElementEventMixin,
+         ElementOverflowMixin,
+         ElementBinding {
   // Default to unknown, assign by [createElement], used by inspector.
   String tagName = UNKNOWN;
 
@@ -436,6 +434,24 @@ class Element extends Node
     style.reset();
   }
 
+  @override
+  BoundingClientRect getBoundingClientRect() => boundingClientRect;
+
+  @override
+  void scroll(double x, double y) {
+    internalScrollTo(x: x, y: y, withAnimation: false);
+  }
+
+  @override
+  void scrollBy(double x, double y) {
+    internalScrollBy(dx: x, dy: y, withAnimation: false);
+  }
+
+  @override
+  void scrollTo(double x, double y) {
+    internalScrollTo(x: x, y: y, withAnimation: false);
+  }
+
   bool _shouldConsumeScrollTicker = false;
   void _consumeScrollTicker(_) {
     if (_shouldConsumeScrollTicker && eventHandlers.containsKey(EVENT_SCROLL)) {
@@ -643,11 +659,10 @@ class Element extends Node
 
   @override
   void dispose() {
-    if (isRendererAttached) {
-      unmountRenderObject();
-    }
+    assert(isRendererAttached == false && parentNode == null, () {
+      debugPrint('Should unmount $this before calling dispose.');
+    });
 
-    parentElement?.removeChild(this);
     renderStyle.detach();
     style.dispose();
     attributes.clear();
@@ -1407,6 +1422,7 @@ class Element extends Node
   BoundingClientRect get boundingClientRect {
     BoundingClientRect boundingClientRect = BoundingClientRect(0, 0, 0, 0, 0, 0, 0, 0);
     if (isRendererAttached) {
+      flushLayout();
       RenderBox sizedBox = renderBoxModel!;
       // Force flush layout.
       if (!sizedBox.hasSize) {
@@ -1435,12 +1451,13 @@ class Element extends Node
   // The HTMLElement.offsetLeft read-only property returns the number of pixels that the upper left corner
   // of the current element is offset to the left within the HTMLElement.offsetParent node.
   // https://drafts.csswg.org/cssom-view/#dom-htmlelement-offsetleft
-  double get offsetLeft {
-    double offset = 0;
+  @override
+  int get offsetLeft {
+    int offset = 0;
     RenderBoxModel selfRenderBoxModel = renderBoxModel!;
     if (selfRenderBoxModel.attached) {
       Offset relative = _getOffset(selfRenderBoxModel, ancestor: offsetParent);
-      offset += relative.dx;
+      offset += relative.dx.toInt();
     }
     return offset;
   }
@@ -1448,12 +1465,13 @@ class Element extends Node
   // The HTMLElement.offsetTop read-only property returns the distance of the outer border
   // of the current element relative to the inner border of the top of the offsetParent node.
   // https://drafts.csswg.org/cssom-view/#dom-htmlelement-offsettop
-  double get offsetTop {
-    double offset = 0;
+  @override
+  int get offsetTop {
+    int offset = 0;
     RenderBoxModel selfRenderBoxModel = renderBoxModel!;
     if (selfRenderBoxModel.attached) {
       Offset relative = _getOffset(selfRenderBoxModel, ancestor: offsetParent);
-      offset += relative.dy;
+      offset += relative.dy.toInt();
     }
     return offset;
   }
@@ -1534,7 +1552,9 @@ class Element extends Node
     }
   }
 
+  @override
   void click() {
+    flushLayout();
     Event clickEvent = MouseEvent(EVENT_CLICK, MouseEventInit(bubbles: true, cancelable: true));
     // If element not in tree, click is fired and only response to itself.
     dispatchEvent(clickEvent);
