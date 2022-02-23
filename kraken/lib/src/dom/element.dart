@@ -664,9 +664,9 @@ abstract class Element
 
   @override
   void dispose() {
-    assert(isRendererAttached == false && parentNode == null, () {
-      debugPrint('Should unmount $this before calling dispose.');
-    });
+    parentElement?.removeChild(this);
+
+    assert(isRendererAttached == false && parentNode == null, 'Should unmount $this before calling dispose.');
 
     renderStyle.detach();
     style.dispose();

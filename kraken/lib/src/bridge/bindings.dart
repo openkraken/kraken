@@ -56,11 +56,17 @@ mixin WindowBinding implements BindingObject {
     switch (method) {
       case 'scroll':
       case 'scrollTo':
-        return scrollTo(args[0], args[1]);
+        return scrollTo(
+          castToType<double>(args[0]),
+          castToType<double>(args[1])
+        );
       case 'scrollBy':
-        return scrollBy(args[0], args[1]);
+        return scrollBy(
+            castToType<double>(args[0]),
+            castToType<double>(args[1])
+        );
       case 'open':
-        return open(args[0]);
+        return open(castToType<String>(args[0]));
     }
   }
 }
@@ -165,7 +171,7 @@ mixin CanvasElementBinding on ElementBinding implements BindingObject {
   @override
   invokeMethod(String method, List args) {
     switch (method) {
-      case 'getContext': return getContext(args[0]).nativeCanvasRenderingContext2D;
+      case 'getContext': return getContext(castToType<String>(args[0])).nativeCanvasRenderingContext2D;
       default: return _invokeElementMethod(method, args);
     }
   }
@@ -605,13 +611,29 @@ String _castToString(value) {
 }
 
 bool _castToBool(value) {
-  return value != null && value != 0 && !(value is String && value.isEmpty);
+  if (value is bool) {
+    return value;
+  } else {
+    return value != null && value != 0 && !(value is String && value.isEmpty);
+  }
 }
 
 int _castToInt(value) {
-  return int.tryParse(value.toString()) ?? 0;
+  if (value is int) {
+    return value;
+  } else if (value is double) {
+    return value.toInt();
+  } else {
+    return int.tryParse(value.toString()) ?? 0;
+  }
 }
 
 double _castToDouble(value) {
-  return double.tryParse(value.toString()) ?? 0.0;
+  if (value is double) {
+    return value;
+  } else if (value is int) {
+    return value.toDouble();
+  } else {
+    return double.tryParse(value.toString()) ?? 0.0;
+  }
 }
