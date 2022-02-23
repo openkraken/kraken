@@ -453,38 +453,28 @@ class ImageElement extends Element {
     } else {
       removeAttribute('loading');
     }
-
-    if (_isInLazyLoading) {
-      _resetLazyLoading();
-    } else if (key == WIDTH) {
-      _propertyWidth = CSSNumber.parseNumber(value);
-      if (_shouldScaling) {
-        _resolveImage(_resolvedUri, updateImageProvider: true);
-      } else {
-        _resizeImage();
-      }
-    } else if (key == HEIGHT) {
-      _propertyHeight = CSSNumber.parseNumber(value);
-      if (_shouldScaling) {
-        _resolveImage(_resolvedUri, updateImageProvider: true);
-      } else {
-        _resizeImage();
-      }
-    }
   }
 
   set width(int value) {
     if (value.isNegative) value = 0;
     internalSetAttribute('width', value.toString());
     _propertyWidth = value.toDouble();
-    _resolveImage(_resolvedSource, updateImageProvider: true);
+    if (_shouldScaling) {
+      _resolveImage(_resolvedSource, updateImageProvider: true);
+    } else {
+      _resizeImage();
+    }
   }
 
   set height(int value) {
     if (value.isNegative) value = 0;
     internalSetAttribute('height', value.toString());
     _propertyHeight = value.toDouble();
-    _resolveImage(_resolvedSource, updateImageProvider: true);
+    if (_shouldScaling) {
+      _resolveImage(_resolvedSource, updateImageProvider: true);
+    } else {
+      _resizeImage();
+    }
   }
 
   void _resolveSource(String source) {
