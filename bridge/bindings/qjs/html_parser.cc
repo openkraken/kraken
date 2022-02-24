@@ -23,8 +23,6 @@ void HTMLParser::traverseHTML(NodeInstance* root, GumboNode* node) {
   JSContext* ctx = context->ctx();
 
   const GumboVector* children = &node->v.element.children;
-  KRAKEN_LOG(VERBOSE) << "!!!!!!!=";
-  KRAKEN_LOG(VERBOSE) << gumbo_normalized_tagname(node->v.element.tag);
   for (int i = 0; i < children->length; ++i) {
     auto* child = (GumboNode*)children->data[i];
 
@@ -97,17 +95,12 @@ bool HTMLParser::parseHTML(std::string html, NodeInstance* rootNode, bool isEntr
               gumbo_tag_from_original_text(&piece);
               tagName = std::string(piece.data, piece.length);
             }
-            KRAKEN_LOG(VERBOSE) << "tagName=";
-            KRAKEN_LOG(VERBOSE) << tagName;
+
             if (tagName.compare("body") == 0) {
-              KRAKEN_LOG(VERBOSE) << "111";
-//              root = child;
               traverseHTML(rootNode, child);
               gumbo_destroy_output(&kGumboDefaultOptions, htmlTree);
               return true;
               break;
-            } else {
-              KRAKEN_LOG(VERBOSE) << "222";
             }
           }
         }
