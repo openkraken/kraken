@@ -207,19 +207,19 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     _scrollOffsetX = value;
     _scrollOffsetX!.removeListener(_scrollXListener);
     _scrollOffsetX!.addListener(_scrollXListener);
-    _renderInputLeaderLayer?.markNeedsLayout();
+    _renderTextControlLeaderLayer?.markNeedsLayout();
   }
 
   void _scrollXListener() {
-    _renderInputLeaderLayer?.markNeedsPaint();
+    _renderTextControlLeaderLayer?.markNeedsPaint();
   }
 
   bool obscureText = false;
   bool autoCorrect = true;
   late EditableTextDelegate _textSelectionDelegate;
   TextSpan? _actualText;
-  RenderInputLeaderLayer? _renderInputLeaderLayer;
-  RenderInputBox? _renderInputBox;
+  RenderTextControlLeaderLayer? _renderTextControlLeaderLayer;
+  RenderTextControl? _renderTextControl;
 
   final LayerLink _toolbarLayerLink = LayerLink();
   RenderEditable? renderEditable;
@@ -368,24 +368,24 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
   void _onStyleChanged(String property, String? original, String present) {
 
-    if (_renderInputLeaderLayer != null && isRendererAttached) {
+    if (_renderTextControlLeaderLayer != null && isRendererAttached) {
       CSSRenderStyle renderStyle = renderBoxModel!.renderStyle;
       if (property == HEIGHT) {
-        _renderInputLeaderLayer!.markNeedsLayout();
+        _renderTextControlLeaderLayer!.markNeedsLayout();
 
       } else if (property == LINE_HEIGHT && renderStyle.height.isAuto) {
-        _renderInputLeaderLayer!.markNeedsLayout();
-        // It needs to mark _renderInputBox as needsLayout manually cause
+        _renderTextControlLeaderLayer!.markNeedsLayout();
+        // It needs to mark _renderTextControl as needsLayout manually cause
         // line-height change will not affect constraints which will in turn
-        // make _renderInputBox jump layout stage when _renderInputLeaderLayer performs layout.
-        _renderInputBox!.markNeedsLayout();
+        // make _renderTextControl jump layout stage when _renderTextControlLeaderLayer performs layout.
+        _renderTextControl!.markNeedsLayout();
 
       // It needs to judge width in style here cause
       // width in renderStyle may be set in node attach.
       } else if (property == FONT_SIZE && style[WIDTH].isEmpty) {
         double fontSize = renderStyle.fontSize.computedValue;
         renderStyle.width = CSSLengthValue(fontSize * _FONT_SIZE_RATIO, CSSLengthType.PX);
-        _renderInputLeaderLayer!.markNeedsLayout();
+        _renderTextControlLeaderLayer!.markNeedsLayout();
       }
     }
     // @TODO: Filter style properties that used by text span.
@@ -624,20 +624,21 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     return renderEditable!;
   }
 
-  RenderInputLeaderLayer createRenderBox() {
+  RenderTextControlLeaderLayer createRenderBox() {
     assert(renderBoxModel is RenderIntrinsic);
     RenderEditable renderEditable = createRenderEditable();
 
-    _renderInputBox = RenderInputBox(
+    _renderTextControl = RenderTextControl(
       child: renderEditable,
     );
-    _renderInputLeaderLayer = RenderInputLeaderLayer(
+    _renderTextControlLeaderLayer = RenderTextControlLeaderLayer(
       link: _toolbarLayerLink,
-      child: _renderInputBox,
+      child: _renderTextControl,
       scrollableX: _scrollableX,
       renderEditable: renderEditable,
+      isMultiline: isMultiline,
     );
-    return _renderInputLeaderLayer!;
+    return _renderTextControlLeaderLayer!;
   }
 
   @override
@@ -1266,89 +1267,3 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   }
 }
 
-/// RenderLeaderLayer of input element used for toolbar overlay to float with.
-class RenderInputLeaderLayer extends RenderLeaderLayer {
-  RenderInputLeaderLayer({
-    required LayerLink link,
-    RenderInputBox? child,
-    required this.scrollableX,
-    this.renderEditable,
-  }) : super(link: link, child: child);
-
-  RenderEditable? renderEditable;
-
-  KrakenScrollable scrollableX;
-
-  void _pointerListener(PointerEvent event) {
-    if (event is PointerDownEvent) {
-      scrollableX.handlePointerDown(event);
-    }
-  }
-
-  @override
-  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
-    super.handleEvent(event, entry);
-    _pointerListener(event);
-  }
-
-  Offset? get _offset {
-    RenderIntrinsic renderIntrinsic = parent as RenderIntrinsic;
-    RenderStyle renderStyle = renderIntrinsic.renderStyle;
-
-    double intrinsicInputHeight = renderEditable!.preferredLineHeight
-      + renderStyle.paddingTop.computedValue + renderStyle.paddingBottom.computedValue
-      + renderStyle.effectiveBorderTopWidth.computedValue + renderStyle.effectiveBorderBottomWidth.computedValue;
-
-    // Make render editable vertically center.
-    double dy;
-    if (renderStyle.height.isNotAuto) {
-      dy = (renderStyle.height.computedValue - intrinsicInputHeight) / 2;
-    } else if (renderStyle.lineHeight.type != CSSLengthType.NORMAL &&
-      renderStyle.lineHeight.computedValue > intrinsicInputHeight) {
-      dy = (renderStyle.lineHeight.computedValue - intrinsicInputHeight) /2;
-    } else {
-      dy = 0;
-    }
-    return Offset(0, dy);
-  }
-
-  // Note paint override can not be done in RenderInputBox cause input toolbar
-  // paints relative to the perferred height of textPainter.
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    final Offset transformedOffset = offset.translate(_offset!.dx, _offset!.dy);
-    super.paint(context, transformedOffset);
-  }
-}
-
-class RenderInputBox extends RenderProxyBox {
-  RenderInputBox({
-    required RenderEditable child,
-  }) : super(child);
-
-  @override
-  void performLayout() {
-    if (child != null) {
-      child!.layout(constraints, parentUsesSize: true);
-      Size childSize = child!.size;
-      double width = constraints.maxWidth != double.infinity ?
-        constraints.maxWidth : childSize.width;
-
-      RenderInputLeaderLayer renderLeaderLayer = parent as RenderInputLeaderLayer;
-      RenderIntrinsic renderIntrinsic = renderLeaderLayer.parent as RenderIntrinsic;
-      RenderStyle renderStyle = renderIntrinsic.renderStyle;
-
-      double height;
-      // Height priority: height > max(line-height, child height) > child height
-      if (constraints.maxHeight != double.infinity) {
-        height = constraints.maxHeight;
-      } else  {
-        height = math.max(renderStyle.lineHeight.computedValue, childSize.height);
-      }
-
-      size = Size(width, height);
-    } else {
-      size = computeSizeForNoChild(constraints);
-    }
-  }
-}
