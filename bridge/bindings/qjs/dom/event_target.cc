@@ -22,8 +22,8 @@ namespace kraken::binding::qjs {
 
 static std::atomic<int32_t> globalEventTargetId{0};
 std::once_flag kEventTargetInitFlag;
-#define GetPropertyCallPreFix "_g_"
-#define SetPropertyCallPreFix "_s_"
+#define GetPropertyMagic "%g"
+#define SetPropertyMagic "%s"
 
 void bindEventTarget(ExecutionContext* context) {
   auto* constructor = EventTarget::instance(context);
@@ -450,15 +450,14 @@ void EventTargetInstance::finalize(JSRuntime* rt, JSValue val) {
 }
 
 JSValue EventTargetInstance::getNativeProperty(const char* prop) {
-  std::string method = GetPropertyCallPreFix + std::string(prop);
-  JSValue result = callNativeMethods(method.c_str(), 0, nullptr);
-  return result;
+  getDartMethod()->flushUICommand();
+  NativeValue args[] = {Native_NewCString(prop)};
+  return callNativeMethods(GetPropertyMagic, 1, args);
 }
 
 void EventTargetInstance::setNativeProperty(const char* prop, NativeValue value) {
-  std::string method = SetPropertyCallPreFix + std::string(prop);
-  NativeValue args[] = {value};
-  callNativeMethods(method.c_str(), 1, args);
+  NativeValue args[] = {Native_NewCString(prop), value};
+  callNativeMethods(SetPropertyMagic, 2, args);
 }
 
 // JSValues are stored in this class are no visible to QuickJS GC.
