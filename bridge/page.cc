@@ -24,6 +24,7 @@
 #include "bindings/qjs/dom/elements/.gen/anchor_element.h"
 #include "bindings/qjs/dom/elements/.gen/canvas_element.h"
 #include "bindings/qjs/dom/elements/.gen/input_element.h"
+#include "bindings/qjs/dom/elements/.gen/textarea_element.h"
 #include "bindings/qjs/dom/elements/.gen/object_element.h"
 #include "bindings/qjs/dom/elements/.gen/script_element.h"
 #include "bindings/qjs/dom/elements/.gen/textarea_element.h"
@@ -84,6 +85,7 @@ KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : c
   bindCanvasElement(m_context);
   bindImageElement(m_context);
   bindInputElement(m_context);
+  bindTextareaElement(m_context);
   bindObjectElement(m_context);
   bindScriptElement(m_context);
   bindTemplateElement(m_context);
