@@ -97,9 +97,7 @@ bool HTMLParser::parseHTML(std::string html, NodeInstance* rootNode, bool isEntr
             }
 
             if (tagName.compare("body") == 0) {
-              traverseHTML(rootNode, child);
-              gumbo_destroy_output(&kGumboDefaultOptions, htmlTree);
-              return true;
+              root = child;
               break;
             }
           }
