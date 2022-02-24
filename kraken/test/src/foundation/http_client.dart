@@ -80,5 +80,19 @@ void main() {
 
       assert(request.headers.value('referer') != null);
     });
+
+    test('Large content', () async {
+      var request = await httpClient.openUrl('POST',
+          server.getUri('plain_text'));
+      KrakenHttpOverrides.setContextHeader(request.headers, contextId);
+      // Mocked 3M file.
+      var data = List<int>.generate(3034764, (i) => i);
+      request.headers.set(HttpHeaders.contentLengthHeader, data.length);
+      await request.addStream(Stream.value(data));
+      request.add([13, 10, 13, 10]); // End of file, double CRLF.
+      await request.close();
+
+      // No error is ok.
+    });
   });
 }
