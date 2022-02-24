@@ -7,6 +7,12 @@
 // provide interface such as property setter/getter, call a property as function.
 import 'package:kraken/dom.dart';
 
+// Cast any input type to determined type.
+T _castToType<T>(value) {
+  assert(value is T, '$value is not or not a subtype of $T');
+  return value as T;
+}
+
 abstract class BindingObject {
   // Get a property, eg:
   //   console.log(el.foo);
@@ -39,16 +45,16 @@ class WindowBinding extends Window implements BindingObject {
       case 'scroll':
       case 'scrollTo':
         return scrollTo(
-          castToType<double>(args[0]),
-          castToType<double>(args[1])
+          _castToType<double>(args[0]),
+          _castToType<double>(args[1])
         );
       case 'scrollBy':
         return scrollBy(
-            castToType<double>(args[0]),
-            castToType<double>(args[1])
+            _castToType<double>(args[0]),
+            _castToType<double>(args[1])
         );
       case 'open':
-        return open(castToType<String>(args[0]));
+        return open(_castToType<String>(args[0]));
     }
   }
 }
@@ -58,7 +64,7 @@ class WindowBinding extends Window implements BindingObject {
 mixin ElementProperties on Element {
   _getElementProperty(String key) {
     switch (key) {
-      case 'offsetTop': return offsetLeft;
+      case 'offsetTop': return offsetTop;
       case 'offsetLeft': return offsetLeft;
       case 'offsetWidth': return offsetWidth;
       case 'offsetHeight': return offsetHeight;
@@ -80,19 +86,19 @@ mixin ElementProperties on Element {
 
   void _setElementProperty(String key, value) {
     switch (key) {
-      case 'scrollTop': scrollTop = castToType<double>(value); break;
-      case 'scrollLeft': scrollTop = castToType<double>(value); break;
+      case 'scrollTop': scrollTop = _castToType<double>(value); break;
+      case 'scrollLeft': scrollLeft = _castToType<double>(value); break;
 
-      case 'className': className = castToType<String>(value); break;
+      case 'className': className = _castToType<String>(value); break;
     }
   }
 
   _invokeElementMethod(String method, List args) {
     switch (method) {
       case 'getBoundingClientRect': return getBoundingClientRect().toNative();
-      case 'scroll': return scroll(castToType<double>(args[0]), castToType<double>(args[1]));
-      case 'scrollBy': return scrollBy(castToType<double>(args[0]), castToType<double>(args[1]));
-      case 'scrollTo': return scrollTo(castToType<double>(args[0]), castToType<double>(args[1]));
+      case 'scroll': return scroll(_castToType<double>(args[0]), _castToType<double>(args[1]));
+      case 'scrollBy': return scrollBy(_castToType<double>(args[0]), _castToType<double>(args[1]));
+      case 'scrollTo': return scrollTo(_castToType<double>(args[0]), _castToType<double>(args[1]));
       case 'click': return click();
     }
   }
@@ -130,8 +136,8 @@ class CanvasElementBinding extends CanvasElement with ElementProperties implemen
   @override
   void setProperty(String key, value) {
     switch (key) {
-      case 'width': width = castToType<int>(value); break;
-      case 'height': height = castToType<int>(value); break;
+      case 'width': width = _castToType<int>(value); break;
+      case 'height': height = _castToType<int>(value); break;
       default: return _setElementProperty(key, value);
     }
   }
@@ -139,7 +145,7 @@ class CanvasElementBinding extends CanvasElement with ElementProperties implemen
   @override
   invokeMethod(String method, List args) {
     switch (method) {
-      case 'getContext': return getContext(castToType<String>(args[0])).nativeCanvasRenderingContext2D;
+      case 'getContext': return getContext(_castToType<String>(args[0])).nativeCanvasRenderingContext2D;
       default: return _invokeElementMethod(method, args);
     }
   }
@@ -179,26 +185,26 @@ class InputElementBinding extends InputElement with ElementProperties implements
   @override
   void setProperty(String key, val) {
     switch (key) {
-      case 'width': width = castToType<int>(val); break;
-      case 'height': height = castToType<int>(val); break;
-      case 'value': value = castToType<String>(val); break;
-      case 'accept': accept = castToType<String>(val); break;
-      case 'autocomplete': autocomplete = castToType<String>(val); break;
-      case 'autofocus': autofocus = castToType<bool>(val); break;
-      case 'required': required = castToType<bool>(val); break;
-      case 'readonly': readOnly = castToType<bool>(val); break;
-      case 'pattern': pattern = castToType<String>(val); break;
-      case 'step': step = castToType<String>(val); break;
-      case 'name': name = castToType<String>(val); break;
-      case 'multiple': multiple = castToType<bool>(val); break;
-      case 'checked': checked = castToType<bool>(val); break;
-      case 'disabled': disabled = castToType<bool>(val); break;
-      case 'min': min = castToType<String>(val); break;
-      case 'max': max = castToType<String>(val); break;
-      case 'maxlength': maxLength = castToType<int>(val); break;
-      case 'placeholder': placeholder = castToType<String>(val); break;
-      case 'type': type = castToType<String>(val); break;
-      case 'mode': mode = castToType<String>(val); break;
+      case 'width': width = _castToType<int>(val); break;
+      case 'height': height = _castToType<int>(val); break;
+      case 'value': value = _castToType<String>(val); break;
+      case 'accept': accept = _castToType<String>(val); break;
+      case 'autocomplete': autocomplete = _castToType<String>(val); break;
+      case 'autofocus': autofocus = _castToType<bool>(val); break;
+      case 'required': required = _castToType<bool>(val); break;
+      case 'readonly': readOnly = _castToType<bool>(val); break;
+      case 'pattern': pattern = _castToType<String>(val); break;
+      case 'step': step = _castToType<String>(val); break;
+      case 'name': name = _castToType<String>(val); break;
+      case 'multiple': multiple = _castToType<bool>(val); break;
+      case 'checked': checked = _castToType<bool>(val); break;
+      case 'disabled': disabled = _castToType<bool>(val); break;
+      case 'min': min = _castToType<String>(val); break;
+      case 'max': max = _castToType<String>(val); break;
+      case 'maxlength': maxLength = _castToType<int>(val); break;
+      case 'placeholder': placeholder = _castToType<String>(val); break;
+      case 'type': type = _castToType<String>(val); break;
+      case 'mode': mode = _castToType<String>(val); break;
       default: return _setElementProperty(key, value);
     }
   }
@@ -263,17 +269,17 @@ class AnchorElementBinding extends AnchorElement with ElementProperties implemen
   @override
   void setProperty(String key, value) {
     switch (key) {
-      case 'href': href = castToType<String>(value); break;
-      case 'target': target = castToType<String>(value); break;
-      case 'rel': rel = castToType<String>(value); break;
-      case 'type': type = castToType<String>(value); break;
-      case 'protocol': protocol = castToType<String>(value); break;
-      case 'host': host = castToType<String>(value); break;
-      case 'hostname': hostname = castToType<String>(value); break;
-      case 'port': port = castToType<String>(value); break;
-      case 'pathname': pathname = castToType<String>(value); break;
-      case 'search': search = castToType<String>(value); break;
-      case 'hash': hash = castToType<String>(value); break;
+      case 'href': href = _castToType<String>(value); break;
+      case 'target': target = _castToType<String>(value); break;
+      case 'rel': rel = _castToType<String>(value); break;
+      case 'type': type = _castToType<String>(value); break;
+      case 'protocol': protocol = _castToType<String>(value); break;
+      case 'host': host = _castToType<String>(value); break;
+      case 'hostname': hostname = _castToType<String>(value); break;
+      case 'port': port = _castToType<String>(value); break;
+      case 'pathname': pathname = _castToType<String>(value); break;
+      case 'search': search = _castToType<String>(value); break;
+      case 'hash': hash = _castToType<String>(value); break;
       default: return _setElementProperty(key, value);
     }
   }
@@ -302,10 +308,10 @@ class LinkElementBinding extends LinkElement with ElementProperties implements B
   @override
   void setProperty(String key, value) {
     switch (key) {
-      case 'disabled': disabled = castToType<bool>(value); break;
-      case 'rel': rel = castToType<String>(value); break;
-      case 'href': href = castToType<String>(value); break;
-      case 'type': type = castToType<String>(value); break;
+      case 'disabled': disabled = _castToType<bool>(value); break;
+      case 'rel': rel = _castToType<String>(value); break;
+      case 'href': href = _castToType<String>(value); break;
+      case 'type': type = _castToType<String>(value); break;
       default: return _setElementProperty(key, value);
     }
   }
@@ -337,12 +343,12 @@ class ScriptElementBinding extends ScriptElement with ElementProperties implemen
   @override
   void setProperty(String key, value) {
     switch (key) {
-      case 'src': src = castToType<String>(value); break;
-      case 'async': async = castToType<bool>(value); break;
-      case 'defer': defer = castToType<bool>(value); break;
-      case 'type': type = castToType<String>(value); break;
-      case 'charset': charset = castToType<String>(value); break;
-      case 'text': text = castToType<String>(value); break;
+      case 'src': src = _castToType<String>(value); break;
+      case 'async': async = _castToType<bool>(value); break;
+      case 'defer': defer = _castToType<bool>(value); break;
+      case 'type': type = _castToType<String>(value); break;
+      case 'charset': charset = _castToType<String>(value); break;
+      case 'text': text = _castToType<String>(value); break;
       default: return _setElementProperty(key, value);
     }
   }
@@ -368,7 +374,7 @@ class StyleElementBinding extends StyleElement with ElementProperties implements
   @override
   void setProperty(String key, value) {
     switch (key) {
-      case 'type': type = castToType<String>(value); break;
+      case 'type': type = _castToType<String>(value); break;
       default: return _setElementProperty(key, value);
     }
   }
@@ -401,11 +407,11 @@ class ImageElementBinding extends ImageElement with ElementProperties implements
   @override
   void setProperty(String key, value) {
     switch (key) {
-      case 'src': src = castToType<String>(value); break;
-      case 'loading': loading = castToType<bool>(value); break;
-      case 'width': width = castToType<int>(value); break;
-      case 'height': height = castToType<int>(value); break;
-      case 'scaling': scaling = castToType<String>(value); break;
+      case 'src': src = _castToType<String>(value); break;
+      case 'loading': loading = _castToType<bool>(value); break;
+      case 'width': width = _castToType<int>(value); break;
+      case 'height': height = _castToType<int>(value); break;
+      case 'scaling': scaling = _castToType<String>(value); break;
       default: return _setElementProperty(key, value);
     }
   }
@@ -413,48 +419,5 @@ class ImageElementBinding extends ImageElement with ElementProperties implements
   @override
   invokeMethod(String method, List args) {
     return _invokeElementMethod(method, args);
-  }
-}
-
-// Cast any input type to determined type.
-T castToType<T>(value) {
-  switch (T) {
-    case String: return _castToString(value) as T;
-    case bool: return _castToBool(value)  as T;
-    case int: return _castToInt(value) as T;
-    case double: return _castToDouble(value) as T;
-    default: return value as T;
-  }
-}
-
-String _castToString(value) {
-  return value == null ? '' : value.toString();
-}
-
-bool _castToBool(value) {
-  if (value is bool) {
-    return value;
-  } else {
-    return value != null && value != 0 && !(value is String && value.isEmpty);
-  }
-}
-
-int _castToInt(value) {
-  if (value is int) {
-    return value;
-  } else if (value is double) {
-    return value.toInt();
-  } else {
-    return int.tryParse(value.toString()) ?? 0;
-  }
-}
-
-double _castToDouble(value) {
-  if (value is double) {
-    return value;
-  } else if (value is int) {
-    return value.toDouble();
-  } else {
-    return double.tryParse(value.toString()) ?? 0.0;
   }
 }
