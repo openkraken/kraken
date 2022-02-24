@@ -136,19 +136,51 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
 
   let setterCode = '';
   if (object.type == 'Element') {
-    setterCode = `std::string key = "${p.name}";
-  std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
-  std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
-  element->m_context->uiCommandBuffer()
-    ->addCommand(${instanceName}->m_eventTargetId, UICommand::setAttribute, *args_01, *args_02, nullptr);
-  return JS_NULL;`;
+    switch (p.kind) {
+      case 1: // string
+        setterCode = `JSValue value = argv[0];
+  JSValue stringValue = JS_ToString(ctx, value);
+  element->setNativeProperty("${p.name}", jsValueToNativeValue(ctx, stringValue));
+  JS_FreeValue(ctx, stringValue);
+  return JS_DupValue(ctx, value);`;
+        break;
+      case 2: // double
+        setterCode = `double floatValue = 0;
+  JSValue value = argv[0];
+  JS_ToFloat64(ctx, &floatValue, value);
+  NativeValue nativeValue = Native_NewFloat64(floatValue);
+  element->setNativeProperty("${p.name}", nativeValue);
+  return JS_DupValue(ctx, value);`;
+        break;
+      case 3: // int
+        setterCode = `int32_t intValue = 0;
+  JSValue value = argv[0];
+  JS_ToInt32(ctx, &intValue, value);
+  NativeValue nativeValue = Native_NewInt32(intValue);
+  element->setNativeProperty("${p.name}", nativeValue);`;
+        break;
+      case 4: // boolean
+        setterCode = `JSValue value = argv[0];
+  bool boolValue = JS_ToBool(ctx, value);
+  NativeValue nativeValue = Native_NewBool(boolValue);
+  element->setNativeProperty("${p.name}", nativeValue);
+  return JS_DupValue(ctx, value);`;
+        break;
+      case 5: // object
+      case 6: // function
+      default:
+        setterCode = `JSValue value = argv[0];
+  element->setNativeProperty("${p.name}", jsValueToNativeValue(ctx, value));
+  return JS_DupValue(ctx, value);`;
+        break;
+    }
+
   } else {
     setterCode = `NativeValue arguments[] = {
     jsValueToNativeValue(ctx, argv[0])
   };
   return ${instanceName}->callNativeMethods("set${p.name[0].toUpperCase() + p.name.substring(1)}", 1, arguments);`;
   }
-
 
   return `IMPL_PROPERTY_SETTER(${className}, ${p.name})(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *${instanceName} = static_cast<${classSubFix} *>(JS_GetOpaque(this_val, ${classId}));

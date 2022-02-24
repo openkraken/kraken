@@ -460,8 +460,10 @@ IMPL_PROPERTY_GETTER(Element, scrollTop)(JSContext* ctx, JSValue this_val, int a
 }
 IMPL_PROPERTY_SETTER(Element, scrollTop)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
+  double floatValue = 0;
   JSValue value = argv[0];
-  NativeValue nativeValue = jsValueToNativeValue(ctx, value);
+  JS_ToFloat64(ctx, &floatValue, value);
+  NativeValue nativeValue = Native_NewFloat64(floatValue);
   element->setNativeProperty("scrollTop", nativeValue);
   return JS_DupValue(ctx, value);
 }
@@ -472,8 +474,10 @@ IMPL_PROPERTY_GETTER(Element, scrollLeft)(JSContext* ctx, JSValue this_val, int 
 }
 IMPL_PROPERTY_SETTER(Element, scrollLeft)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
+  double floatValue = 0;
   JSValue value = argv[0];
-  NativeValue nativeValue = jsValueToNativeValue(ctx, value);
+  JS_ToFloat64(ctx, &floatValue, value);
+  NativeValue nativeValue = Native_NewFloat64(floatValue);
   element->setNativeProperty("scrollLeft", nativeValue);
   return JS_DupValue(ctx, value);
 }

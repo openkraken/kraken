@@ -68,7 +68,7 @@ dynamic fromNativeValue(Pointer<NativeValue> nativeValue) {
   if (nativeValue == nullptr) return null;
 
   JSValueType type = JSValueType.values[nativeValue.ref.tag];
-  switch(type) {
+  switch (type) {
     case JSValueType.TAG_STRING:
       Pointer<NativeString> nativeString = Pointer.fromAddress(nativeValue.ref.u);
       String result = nativeStringToString(nativeString);

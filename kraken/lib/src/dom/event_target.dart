@@ -63,20 +63,20 @@ void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> re
     toNativeValue(returnedValue, null);
   } else {
     EventTarget eventTarget = EventTarget.getEventTargetByPointer(nativeEventTarget.cast<NativeEventTarget>());
+    var result;
     try {
       if (method == GetPropertyMagic && argc == 1) {
-        String key = values[0];
-        var result = eventTarget.getProperty(key);
-        toNativeValue(returnedValue, result);
+        result = eventTarget.getProperty(values[0]);
       } else if (method == SetPropertyMagic && argc == 2) {
         eventTarget.setProperty(values[0], values[1]);
+        result = null;
       } else {
-        var result = eventTarget.invokeMethod(method, values);
-        toNativeValue(returnedValue, result);
+        result = eventTarget.invokeMethod(method, values);
       }
     } catch (e, stack) {
       print('$e\n$stack');
-      toNativeValue(returnedValue, null);
+    } finally {
+      toNativeValue(returnedValue, result);
     }
   }
 }
