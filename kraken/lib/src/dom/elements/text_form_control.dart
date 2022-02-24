@@ -144,6 +144,26 @@ class EditableTextDelegate implements TextSelectionDelegate {
 }
 
 class TextFormControlElement extends Element implements TextInputClient, TickerProvider {
+
+  TextFormControlElement(EventTargetContext? context, {
+    this.isMultiline = false,
+    this.defaultStyle,
+    this.isIntrinsicBox,
+  }) : super(context, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
+    _textSelectionDelegate = EditableTextDelegate(this);
+    scrollOffsetX = _scrollableX.position;
+    _textInputType = isMultiline ? TextInputType.multiline : TextInputType.text;
+  }
+
+  bool isMultiline;
+  int? get _maxLines {
+    if (isMultiline) {
+      return null;
+    } else {
+      return 1;
+    }
+  }
+
   static TextFormControlElement? focusedTextFormControlElement;
 
   static void clearFocus() {
@@ -175,12 +195,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(false);
   AnimationController? _cursorBlinkOpacityController;
   int _obscureShowCharTicksPending = 0;
-
-  TextAlign textAlign;
-  TextDirection textDirection;
-  int minLines;
-  int maxLines;
-
   bool _autoFocus = false;
 
   final KrakenScrollable _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right);
@@ -227,18 +241,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   }
 
   TextInputConfiguration? _textInputConfiguration;
-
-  TextFormControlElement(EventTargetContext? context, {
-    this.textAlign = TextAlign.left,
-    this.textDirection = TextDirection.ltr,
-    this.minLines = 1,
-    this.maxLines = 1,
-    this.defaultStyle,
-    this.isIntrinsicBox,
-  }) : super(context, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
-    _textSelectionDelegate = EditableTextDelegate(this);
-    scrollOffsetX = _scrollableX.position;
-  }
 
   Map<String, dynamic>? defaultStyle;
   // Whether element allows children.
@@ -535,7 +537,9 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       inputType: _textInputType,
       obscureText: obscureText,
       autocorrect: autoCorrect,
-      inputAction: _textInputAction, // newline to multilines
+      inputAction: _textInputType == TextInputType.multiline
+        ? TextInputAction.newline
+        : TextInputAction.done,
       textCapitalization: TextCapitalization.none,
       keyboardAppearance: Brightness.light,
     );
@@ -569,7 +573,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     _stopCursorTimer();
   }
 
-  bool get multiLine => maxLines > 1;
   bool get _hasFocus => TextFormControlElement.focusedTextFormControlElement == this;
   // The Number.MAX_SAFE_INTEGER constant represents the maximum safe integer in JavaScript (2^53 - 1).
   int _maxLength = 9007199254740992;
@@ -595,12 +598,12 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       text: text,
       cursorColor: cursorColor,
       showCursor: _cursorVisibilityNotifier,
-      maxLines: maxLines,
-      minLines: minLines,
+      maxLines: _maxLines,
+      minLines: 1,
       expands: false,
       textScaleFactor: 1.0,
-      textAlign: textAlign,
-      textDirection: textDirection,
+      textAlign: renderStyle.textAlign,
+      textDirection: TextDirection.ltr,
       selection: blurSelection, // Default to blur
       selectionColor: selectionColor,
       offset: scrollOffsetX!,
@@ -640,6 +643,13 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   @override
   void performAction(TextInputAction action) {
     switch (action) {
+      case TextInputAction.newline:
+        // If this is a multiline EditableText, do nothing for a "newline"
+        // action; The newline is already inserted. Otherwise, finalize
+        // editing.
+        if (!isMultiline)
+          TextFormControlElement.clearFocus();
+        break;
       case TextInputAction.done:
         TextFormControlElement.clearFocus();
         break;
@@ -967,6 +977,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   }
 
   TextInputType _textInputType = TextInputType.text;
+
   TextInputType get textInputType => _textInputType;
   set textInputType(TextInputType value) {
     if (value != _textInputType) {
@@ -1127,13 +1138,29 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     final double additionalOffset;
     final Offset unitOffset;
 
-    additionalOffset = rect.width >= editableSize.width
-    // Center `rect` if it's oversized.
-      ? editableSize.width / 2 - rect.center.dx
-    // Valid additional offsets range from (rect.right - size.width)
-    // to (rect.left). Pick the closest one if out of range.
-      : 0.0.clamp(rect.right - editableSize.width, rect.left);
-    unitOffset = const Offset(1, 0);
+    if (!isMultiline) {
+      additionalOffset = rect.width >= editableSize.width
+      // Center `rect` if it's oversized.
+        ? editableSize.width / 2 - rect.center.dx
+      // Valid additional offsets range from (rect.right - size.width)
+      // to (rect.left). Pick the closest one if out of range.
+        : 0.0.clamp(rect.right - editableSize.width, rect.left);
+      unitOffset = const Offset(1, 0);
+    } else {
+      // The caret is vertically centered within the line. Expand the caret's
+      // height so that it spans the line because we're going to ensure that the
+      // entire expanded caret is scrolled into view.
+      final Rect expandedRect = Rect.fromCenter(
+        center: rect.center,
+        width: rect.width,
+        height: math.max(rect.height, renderEditable!.preferredLineHeight),
+      );
+
+      additionalOffset = expandedRect.height >= editableSize.height
+        ? editableSize.height / 2 - expandedRect.center.dy
+        : 0.0.clamp(expandedRect.bottom - editableSize.height, expandedRect.top);
+      unitOffset = const Offset(0, 1);
+    }
 
     // No overscrolling when encountering tall fonts/scripts that extend past
     // the ascent.

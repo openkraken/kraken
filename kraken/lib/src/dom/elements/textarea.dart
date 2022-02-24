@@ -15,6 +15,6 @@ const Map<String, dynamic> _defaultStyle = {
 // @TODO Implement textarea attributes and multiline editing for textarea.
 class TextareaElement extends TextFormControlElement {
   TextareaElement(EventTargetContext? context)
-    : super(context, defaultStyle: _defaultStyle, isIntrinsicBox: true);
+    : super(context, isMultiline: true, defaultStyle: _defaultStyle, isIntrinsicBox: true);
 }
 
