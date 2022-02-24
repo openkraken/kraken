@@ -94,6 +94,7 @@ class EventTargetInstance : public Instance {
 
   JSValue callNativeMethods(const char* method, int32_t argc, NativeValue* argv);
   JSValue getNativeProperty(const char* prop);
+  void setNativeProperty(const char* prop, NativeValue value);
 
   NativeEventTarget* nativeEventTarget{new NativeEventTarget(this)};
 

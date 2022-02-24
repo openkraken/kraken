@@ -1437,6 +1437,9 @@ abstract class Element
   // https://drafts.csswg.org/cssom-view/#dom-htmlelement-offsetleft
   int get offsetLeft {
     int offset = 0;
+    if (!isRendererAttached) {
+      return offset;
+    }
     RenderBoxModel selfRenderBoxModel = renderBoxModel!;
     if (selfRenderBoxModel.attached) {
       Offset relative = _getOffset(selfRenderBoxModel, ancestor: offsetParent);
@@ -1450,6 +1453,9 @@ abstract class Element
   // https://drafts.csswg.org/cssom-view/#dom-htmlelement-offsettop
   int get offsetTop {
     int offset = 0;
+    if (!isRendererAttached) {
+      return offset;
+    }
     RenderBoxModel selfRenderBoxModel = renderBoxModel!;
     if (selfRenderBoxModel.attached) {
       Offset relative = _getOffset(selfRenderBoxModel, ancestor: offsetParent);

@@ -19,9 +19,15 @@ typedef NativeAsyncAnonymousFunctionCallback = Void Function(
 typedef DartAsyncAnonymousFunctionCallback = void Function(Pointer<Void> callbackContext, Pointer<NativeValue> nativeValue, int contextId, Pointer<Utf8> errmsg);
 
 // We have some integrated built-in behavior starting with string prefix reuse the callNativeMethod implements.
-final String AnonymousFunctionCallPreFix = '_anonymous_fn_';
-final String AsyncAnonymousFunctionCallPreFix = '_anonymous_async_fn_';
-final String GetPropertyCallPreFix = '_getProperty_';
+const String AnonymousFunctionCallPreFix = '_anonymous_fn_';
+const String AsyncAnonymousFunctionCallPreFix = '_anonymous_async_fn_';
+const String GetPropertyCallPreFix = '_g_';
+const String SetPropertyCallPreFix = '_s_';
+
+// 0 is preserved.
+const int MAGIC_GET_PROPERTY = 1;
+const int MAGIC_SET_PROPERTY = 2;
+const int MAGIC_INVOKE_METHOD = 3;
 
 void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> returnedValue, Pointer<NativeString> nativeMethod, int argc, Pointer<NativeValue> argv) {
   String method = nativeStringToString(nativeMethod);
@@ -63,10 +69,13 @@ void _callNativeMethods(Pointer<Void> nativeEventTarget, Pointer<NativeValue> re
   } else {
     EventTarget eventTarget = EventTarget.getEventTargetByPointer(nativeEventTarget.cast<NativeEventTarget>());
     try {
-      if (method.startsWith(GetPropertyCallPreFix) && values.isEmpty) {
+      if (method.startsWith(GetPropertyCallPreFix)) {
         String key = method.substring(GetPropertyCallPreFix.length);
         var result = eventTarget.getProperty(key);
         toNativeValue(returnedValue, result);
+      } else if (method.startsWith(SetPropertyCallPreFix)) {
+        String key = method.substring(SetPropertyCallPreFix.length);
+
       } else {
         var result = eventTarget.invokeMethod(method, values);
         toNativeValue(returnedValue, result);

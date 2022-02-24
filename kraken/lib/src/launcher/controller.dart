@@ -151,7 +151,7 @@ class KrakenViewController
 
     _setupObserver();
 
-    element_registry.defineBuiltInElements();
+    defineBuiltInBindingElements();
 
     document = Document(
       EventTargetContext(_contextId, documentNativePtrMap[_contextId]!),
