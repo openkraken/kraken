@@ -311,7 +311,7 @@ function generateEventConstructorCode(object: ClassObject) {
   }
 
   auto *nativeEvent = new Native${object.name}();
-  nativeEvent->nativeEvent.type = jsValueToNativeString(ctx, eventTypeValue).release();
+  nativeEvent->nativeEvent.type = reinterpret_cast<int64_t>(jsValueToNativeString(ctx, eventTypeValue).release());
 
   ${generateEventInstanceConstructorCode(object)}
 

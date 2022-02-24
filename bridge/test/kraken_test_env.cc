@@ -161,7 +161,9 @@ void TEST_initWindow(int32_t contextId, void* nativePtr) {}
 void TEST_initDocument(int32_t contextId, void* nativePtr) {}
 
 #if ENABLE_PROFILE
-NativePerformanceEntryList* TEST_getPerformanceEntries(int32_t) {}
+NativePerformanceEntryList* TEST_getPerformanceEntries(int32_t) {
+  return nullptr;
+}
 #endif
 
 std::once_flag testInitOnceFlag;
@@ -258,7 +260,7 @@ void TEST_dispatchEvent(int32_t contextId, EventTargetInstance* eventTarget, con
   auto nativeEventType = stringToNativeString(type);
   NativeString* rawEventType = nativeEventType.release();
 
-  NativeEvent* nativeEvent = new NativeEvent{rawEventType};
+  NativeEvent* nativeEvent = new NativeEvent{reinterpret_cast<int64_t>(rawEventType)};
 
   RawEvent* rawEvent = new RawEvent{reinterpret_cast<uint64_t*>(nativeEvent)};
 

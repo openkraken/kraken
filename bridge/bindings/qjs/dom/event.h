@@ -53,6 +53,7 @@ namespace kraken::binding::qjs {
 void bindEvent(ExecutionContext* context);
 
 class EventInstance;
+class EventTargetInstance;
 
 using EventCreator = EventInstance* (*)(ExecutionContext* context, void* nativeEvent);
 
@@ -97,15 +98,15 @@ class Event : public HostClass {
 };
 
 struct NativeEvent {
-  NativeString* type{nullptr};
+  int64_t type{0};
   int64_t bubbles{0};
   int64_t cancelable{0};
   int64_t timeStamp{0};
   int64_t defaultPrevented{0};
   // The pointer address of target EventTargetInstance object.
-  void* target{nullptr};
+  int64_t target{0};
   // The pointer address of current target EventTargetInstance object.
-  void* currentTarget{nullptr};
+  int64_t currentTarget{0};
 };
 
 struct RawEvent {
@@ -125,6 +126,12 @@ class EventInstance : public Instance {
   inline const bool cancelled() { return m_cancelled; }
   inline void cancelled(bool v) { m_cancelled = v; }
   inline const bool propagationImmediatelyStopped() { return m_propagationImmediatelyStopped; }
+  inline NativeString* type() { return reinterpret_cast<NativeString*>(nativeEvent->type); };
+  void setType(NativeString* type) const;
+  inline EventTargetInstance* target() { return reinterpret_cast<EventTargetInstance*>(nativeEvent->target); }
+  void setTarget(EventTargetInstance* target) const;
+  inline EventTargetInstance* currentTarget() { return reinterpret_cast<EventTargetInstance*>(nativeEvent->currentTarget); }
+  void setCurrentTarget(EventTargetInstance* target) const;
 
  protected:
   explicit EventInstance(Event* jsEvent, JSAtom eventType, JSValue eventInit);

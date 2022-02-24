@@ -151,7 +151,7 @@ JSValue Document::createEvent(JSContext* ctx, JSValue this_val, int argc, JSValu
   std::string eventType = std::string(c_eventType);
   if (eventType == "Event") {
     std::unique_ptr<NativeString> nativeEventType = jsValueToNativeString(ctx, eventTypeValue);
-    auto nativeEvent = new NativeEvent{nativeEventType.release()};
+    auto nativeEvent = new NativeEvent{reinterpret_cast<int64_t>(nativeEventType.release())};
 
     auto document = static_cast<DocumentInstance*>(JS_GetOpaque(this_val, Document::classId()));
     auto e = Event::buildEventInstance(eventType, document->context(), nativeEvent, false);
