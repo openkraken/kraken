@@ -377,14 +377,22 @@ JSValue Element::click(JSContext* ctx, JSValue this_val, int argc, JSValue* argv
 JSValue Element::scroll(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  NativeValue arguments[] = {jsValueToNativeValue(ctx, argv[0]), jsValueToNativeValue(ctx, argv[1])};
+  double arg0 = 0;
+  double arg1 = 0;
+  JS_ToFloat64(ctx, &arg0, argv[0]);
+  JS_ToFloat64(ctx, &arg1, argv[1]);
+  NativeValue arguments[] = {Native_NewFloat64(arg0), Native_NewFloat64(arg1)};
   return element->callNativeMethods("scroll", 2, arguments);
 }
 
 JSValue Element::scrollBy(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  NativeValue arguments[] = {jsValueToNativeValue(ctx, argv[0]), jsValueToNativeValue(ctx, argv[1])};
+  double arg0 = 0;
+  double arg1 = 0;
+  JS_ToFloat64(ctx, &arg0, argv[0]);
+  JS_ToFloat64(ctx, &arg1, argv[1]);
+  NativeValue arguments[] = {Native_NewFloat64(arg0), Native_NewFloat64(arg1)};
   return element->callNativeMethods("scrollBy", 2, arguments);
 }
 
@@ -401,17 +409,22 @@ IMPL_PROPERTY_GETTER(Element, tagName)(JSContext* ctx, JSValue this_val, int arg
 }
 
 IMPL_PROPERTY_GETTER(Element, className)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  getDartMethod()->flushUICommand();
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->m_attributes->getAttribute("class");
+  return element->getNativeProperty("className");
 }
 IMPL_PROPERTY_SETTER(Element, className)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  element->m_attributes->setAttribute("class", argv[0]);
-  std::unique_ptr<NativeString> args_01 = stringToNativeString("class");
-  std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
-  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setAttribute, *args_01, *args_02, nullptr);
+  JSValue value = argv[0];
 
-  return JS_NULL;
+  // @TODO: Remove this line.
+  element->m_attributes->setAttribute("class", value);
+
+  const char* string = JS_ToCString(ctx, value);
+  NativeValue nativeValue = Native_NewCString(string);
+  element->setNativeProperty("className", nativeValue);
+  JS_FreeCString(ctx, string);
+  return JS_DupValue(ctx, value);
 }
 
 IMPL_PROPERTY_GETTER(Element, offsetLeft)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
