@@ -582,9 +582,9 @@ IMPL_PROPERTY_SETTER(Element, innerHTML)(JSContext* ctx, JSValue this_val, int a
 
   if (element->hasNodeFlag(NodeInstance::NodeFlag::IsTemplateElement)) {
     auto* templateElement = static_cast<TemplateElementInstance*>(element);
-    HTMLParser::parseHTML(chtml, strlen(chtml), templateElement->content());
+    HTMLParser::parseHTML(chtml, strlen(chtml), templateElement->content(), false);
   } else {
-    HTMLParser::parseHTML(chtml, strlen(chtml), element);
+    HTMLParser::parseHTML(chtml, strlen(chtml), element, false);
   }
 
   JS_FreeCString(ctx, chtml);

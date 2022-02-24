@@ -23,6 +23,8 @@ void HTMLParser::traverseHTML(NodeInstance* root, GumboNode* node) {
   JSContext* ctx = context->ctx();
 
   const GumboVector* children = &node->v.element.children;
+  KRAKEN_LOG(VERBOSE) << "!!!!!!!=";
+  KRAKEN_LOG(VERBOSE) << gumbo_normalized_tagname(node->v.element.tag);
   for (int i = 0; i < children->length; ++i) {
     auto* child = (GumboNode*)children->data[i];
 
@@ -71,7 +73,7 @@ void HTMLParser::traverseHTML(NodeInstance* root, GumboNode* node) {
   }
 }
 
-bool HTMLParser::parseHTML(std::string html, NodeInstance* rootNode) {
+bool HTMLParser::parseHTML(std::string html, NodeInstance* rootNode, bool isEntry) {
   if (rootNode != nullptr) {
     rootNode->internalClearChild();
 
@@ -80,7 +82,38 @@ bool HTMLParser::parseHTML(std::string html, NodeInstance* rootNode) {
       size_t html_length = html.length();
       auto* htmlTree = gumbo_parse_with_options(&kGumboDefaultOptions, html.c_str(), html_length);
 
-      traverseHTML(rootNode, htmlTree->root);
+      GumboNode* root = htmlTree->root;
+      if (!isEntry) {
+        // Find body.
+        const GumboVector* children = &htmlTree->root->v.element.children;
+        for (int i = 0; i < children->length; ++i) {
+          auto* child = (GumboNode*)children->data[i];
+          if (child->type == GUMBO_NODE_ELEMENT) {
+            std::string tagName;
+            if (child->v.element.tag != GUMBO_TAG_UNKNOWN) {
+              tagName = gumbo_normalized_tagname(child->v.element.tag);
+            } else {
+              GumboStringPiece piece = child->v.element.original_tag;
+              gumbo_tag_from_original_text(&piece);
+              tagName = std::string(piece.data, piece.length);
+            }
+            KRAKEN_LOG(VERBOSE) << "tagName=";
+            KRAKEN_LOG(VERBOSE) << tagName;
+            if (tagName.compare("body") == 0) {
+              KRAKEN_LOG(VERBOSE) << "111";
+//              root = child;
+              traverseHTML(rootNode, child);
+              gumbo_destroy_output(&kGumboDefaultOptions, htmlTree);
+              return true;
+              break;
+            } else {
+              KRAKEN_LOG(VERBOSE) << "222";
+            }
+          }
+        }
+      }
+
+      traverseHTML(rootNode, root);
       // Free gumbo parse nodes.
       gumbo_destroy_output(&kGumboDefaultOptions, htmlTree);
     }
@@ -91,9 +124,9 @@ bool HTMLParser::parseHTML(std::string html, NodeInstance* rootNode) {
   return true;
 }
 
-bool HTMLParser::parseHTML(const char* code, size_t codeLength, NodeInstance* rootNode) {
+bool HTMLParser::parseHTML(const char* code, size_t codeLength, NodeInstance* rootNode, bool isEntry) {
   std::string html = std::string(code, codeLength);
-  return parseHTML(html, rootNode);
+  return parseHTML(html, rootNode, isEntry);
 }
 
 void HTMLParser::parseProperty(ElementInstance* element, GumboElement* gumboElement) {
