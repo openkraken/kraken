@@ -67,10 +67,10 @@ class EditableTextDelegate implements TextSelectionDelegate {
   @override
   void bringIntoView(TextPosition position) {
     RenderEditable renderEditable = _inputElement.renderEditable!;
-    KrakenScrollable _scrollableX = _inputElement._scrollableX;
+    KrakenScrollable _scrollable = _inputElement._scrollable;
     final Rect localRect = renderEditable.getLocalRectForCaret(position);
     final RevealedOffset targetOffset = _inputElement._getOffsetToRevealCaret(localRect);
-    _scrollableX.position!.jumpTo(targetOffset.offset);
+    _scrollable.position!.jumpTo(targetOffset.offset);
     renderEditable.showOnScreen(rect: targetOffset.rect);
   }
 
@@ -151,8 +151,11 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     this.isIntrinsicBox,
   }) : super(context, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
     _textSelectionDelegate = EditableTextDelegate(this);
-    scrollOffsetX = _scrollableX.position;
     _textInputType = isMultiline ? TextInputType.multiline : TextInputType.text;
+    _scrollable = KrakenScrollable(
+      axisDirection: isMultiline ? AxisDirection.down : AxisDirection.right
+    );
+    scrollOffset = _scrollable.position;
   }
 
   bool isMultiline;
@@ -163,33 +166,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       return 1;
     }
   }
-
-  static TextFormControlElement? focusedTextFormControlElement;
-
-  static void clearFocus() {
-    if (TextFormControlElement.focusedTextFormControlElement != null) {
-      TextFormControlElement.focusedTextFormControlElement!.blurInput();
-    }
-
-    TextFormControlElement.focusedTextFormControlElement = null;
-  }
-
-  static void setFocus(TextFormControlElement textFormControlElement) {
-    if (TextFormControlElement.focusedTextFormControlElement != textFormControlElement) {
-      // Focus kraken widget to get focus from other widgets.
-      WidgetDelegate? widgetDelegate = textFormControlElement.ownerDocument.widgetDelegate;
-      if (widgetDelegate != null) {
-        widgetDelegate.requestFocus();
-      }
-
-      clearFocus();
-      TextFormControlElement.focusedTextFormControlElement = textFormControlElement;
-      textFormControlElement.focusInput();
-    }
-  }
-
-  static String obscuringCharacter = '•';
-
   Timer? _cursorTimer;
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(false);
@@ -197,16 +173,16 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   int _obscureShowCharTicksPending = 0;
   bool _autoFocus = false;
 
-  final KrakenScrollable _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right);
+  late KrakenScrollable _scrollable;
 
-  ViewportOffset? get scrollOffsetX => _scrollOffsetX;
-  ViewportOffset? _scrollOffsetX = ViewportOffset.zero();
-  set scrollOffsetX(ViewportOffset? value) {
+  ViewportOffset get scrollOffset => _scrollOffset;
+  late ViewportOffset _scrollOffset = ViewportOffset.zero();
+  set scrollOffset(ViewportOffset? value) {
     if (value == null) return;
-    if (value == _scrollOffsetX) return;
-    _scrollOffsetX = value;
-    _scrollOffsetX!.removeListener(_scrollXListener);
-    _scrollOffsetX!.addListener(_scrollXListener);
+    if (value == _scrollOffset) return;
+    _scrollOffset = value;
+    _scrollOffset.removeListener(_scrollXListener);
+    _scrollOffset.addListener(_scrollXListener);
     _renderTextControlLeaderLayer?.markNeedsLayout();
   }
 
@@ -250,6 +226,32 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     TextEditingValue value = _textSelectionDelegate._textEditingValue;
     return value.text;
   }
+
+  static TextFormControlElement? focusedTextFormControlElement;
+
+  static void clearFocus() {
+    if (TextFormControlElement.focusedTextFormControlElement != null) {
+      TextFormControlElement.focusedTextFormControlElement!.blurInput();
+    }
+
+    TextFormControlElement.focusedTextFormControlElement = null;
+  }
+
+  static void setFocus(TextFormControlElement textFormControlElement) {
+    if (TextFormControlElement.focusedTextFormControlElement != textFormControlElement) {
+      // Focus kraken widget to get focus from other widgets.
+      WidgetDelegate? widgetDelegate = textFormControlElement.ownerDocument.widgetDelegate;
+      if (widgetDelegate != null) {
+        widgetDelegate.requestFocus();
+      }
+
+      clearFocus();
+      TextFormControlElement.focusedTextFormControlElement = textFormControlElement;
+      textFormControlElement.focusInput();
+    }
+  }
+
+  static String obscuringCharacter = '•';
 
   @override
   getProperty(String key) {
@@ -425,7 +427,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   Size getTextSize() {
     final Size textSize = (TextPainter(
       text: renderEditable!.text,
-      maxLines: 1,
+      maxLines: _maxLines,
       textDirection: TextDirection.ltr)
       ..layout())
       .size;
@@ -475,7 +477,8 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       Offset _selectEndPosition = Offset(touch.screenX, touch.screenY);
 
       // Disable text selection and enable scrolling when text size is larger than input size.
-      if (_textSize!.width > renderEditable!.size.width) {
+      if (_textSize!.width > renderEditable!.size.width
+       || _textSize!.height > renderEditable!.size.height) {
         if (event.type == EVENT_TOUCH_END && _selectStartPosition == _selectEndPosition) {
           renderEditable!.selectPositionAt(
             from: _selectStartPosition!,
@@ -607,7 +610,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       textDirection: TextDirection.ltr,
       selection: blurSelection, // Default to blur
       selectionColor: selectionColor,
-      offset: scrollOffsetX!,
+      offset: scrollOffset,
       readOnly: false,
       forceLine: true,
       onCaretChanged: _handleCaretChanged,
@@ -635,7 +638,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     _renderTextControlLeaderLayer = RenderTextControlLeaderLayer(
       link: _toolbarLayerLink,
       child: _renderTextControl,
-      scrollableX: _scrollableX,
+      scrollable: _scrollable,
       renderEditable: renderEditable,
       isMultiline: isMultiline,
     );
@@ -1122,7 +1125,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   void scrollToCaret() {
     SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
       final RevealedOffset targetOffset = _getOffsetToRevealCaret(_currentCaretRect!);
-      _scrollableX.position!.animateTo(targetOffset.offset, duration: _caretAnimationDuration, curve: _caretAnimationCurve);
+      _scrollable.position!.animateTo(targetOffset.offset, duration: _caretAnimationDuration, curve: _caretAnimationCurve);
     });
   }
 
@@ -1166,13 +1169,13 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
     // No overscrolling when encountering tall fonts/scripts that extend past
     // the ascent.
-    final double targetOffset = (additionalOffset + _scrollableX.position!.pixels)
+    final double targetOffset = (additionalOffset + _scrollable.position!.pixels)
       .clamp(
-      _scrollableX.position!.minScrollExtent,
-      _scrollableX.position!.maxScrollExtent,
+      _scrollable.position!.minScrollExtent,
+      _scrollable.position!.maxScrollExtent,
     );
 
-    final double offsetDelta = _scrollableX.position!.pixels - targetOffset;
+    final double offsetDelta = _scrollable.position!.pixels - targetOffset;
     return RevealedOffset(rect: rect.shift(unitOffset * offsetDelta), offset: targetOffset);
   }
 

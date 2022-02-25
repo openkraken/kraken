@@ -15,20 +15,20 @@ class RenderTextControlLeaderLayer extends RenderLeaderLayer {
   RenderTextControlLeaderLayer({
     required LayerLink link,
     RenderTextControl? child,
-    required this.scrollableX,
+    required this.scrollable,
     this.renderEditable,
     this.isMultiline = false,
   }) : super(link: link, child: child);
 
   RenderEditable? renderEditable;
 
-  KrakenScrollable scrollableX;
+  KrakenScrollable scrollable;
 
   bool isMultiline;
 
   void _pointerListener(PointerEvent event) {
     if (event is PointerDownEvent) {
-      scrollableX.handlePointerDown(event);
+      scrollable.handlePointerDown(event);
     }
   }
 
