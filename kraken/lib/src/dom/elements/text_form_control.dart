@@ -447,7 +447,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       if (touches.length > 1) return;
 
       Touch touch = touches.item(0);
-      _selectStartPosition = Offset(touch.clientX, touch.clientY);
+      _selectStartPosition = Offset(touch.screenX, touch.screenY);
 
       TouchEvent e = event;
       if (e.touches.length == 1) {
@@ -472,7 +472,8 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       if (touches.length > 1) return;
 
       Touch touch = touches.item(0);
-      Offset _selectEndPosition = Offset(touch.clientX, touch.clientY);
+      Offset _selectEndPosition = Offset(touch.screenX, touch.screenY);
+
       // Disable text selection and enable scrolling when text size is larger than input size.
       if (_textSize!.width > renderEditable!.size.width) {
         if (event.type == EVENT_TOUCH_END && _selectStartPosition == _selectEndPosition) {
