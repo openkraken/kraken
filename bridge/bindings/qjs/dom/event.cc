@@ -33,7 +33,11 @@ JSValue Event::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue thi
   JSValue eventTypeValue = argv[0];
   std::string eventType = jsValueToStdString(ctx, eventTypeValue);
 
+#if ANDROID_32_BIT
   auto* nativeEvent = new NativeEvent{reinterpret_cast<int64_t>(stringToNativeString(eventType).release())};
+#else
+  auto* nativeEvent = new NativeEvent{stringToNativeString(eventType).release()};
+#endif
   auto* event = Event::buildEventInstance(eventType, m_context, nativeEvent, false);
   return event->jsObject;
 }
@@ -177,18 +181,36 @@ EventInstance* EventInstance::fromNativeEvent(Event* event, NativeEvent* nativeE
   return new EventInstance(event, nativeEvent);
 }
 
-void EventInstance::setType(NativeString* type) const { nativeEvent->type = reinterpret_cast<int64_t>(type); }
+void EventInstance::setType(NativeString* type) const {
+#if ANDROID_32_BIT
+  nativeEvent->type = reinterpret_cast<int64_t>(type);
+#else
+  nativeEvent->type = type;
+#endif
+}
 void EventInstance::setTarget(EventTargetInstance* target) const {
+#if ANDROID_32_BIT
   nativeEvent->target = reinterpret_cast<int64_t>(target);
+#else
+  nativeEvent->target = target;
+#endif
 }
 void EventInstance::setCurrentTarget(EventTargetInstance* currentTarget) const {
+#if ANDROID_32_BIT
   nativeEvent->currentTarget = reinterpret_cast<int64_t>(currentTarget);
+#else
+  nativeEvent->currentTarget = currentTarget;
+#endif
 }
 
 EventInstance::EventInstance(Event* event, NativeEvent* nativeEvent) : nativeEvent(nativeEvent), Instance(event, "Event", nullptr, Event::kEventClassID, finalizer) {}
 EventInstance::EventInstance(Event* jsEvent, JSAtom eventType, JSValue eventInit) : Instance(jsEvent, "Event", nullptr, Event::kEventClassID, finalizer) {
   JSValue v = JS_AtomToValue(m_ctx, eventType);
+#if ANDROID_32_BIT
   nativeEvent = new NativeEvent{reinterpret_cast<int64_t>(jsValueToNativeString(m_ctx, v).release())};
+#else
+  nativeEvent = new NativeEvent{jsValueToNativeString(m_ctx, v).release()};
+#endif
   JS_FreeValue(m_ctx, v);
 
   auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());

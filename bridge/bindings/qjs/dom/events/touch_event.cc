@@ -117,7 +117,11 @@ JSValue TouchEvent::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValu
   }
 
   auto* nativeEvent = new NativeTouchEvent();
+#if ANDROID_32_BIT
   nativeEvent->nativeEvent.type = reinterpret_cast<int64_t>(jsValueToNativeString(ctx, eventTypeValue).release());
+#else
+  nativeEvent->nativeEvent.type = jsValueToNativeString(ctx, eventTypeValue).release();
+#endif
 
   if (JS_IsObject(eventInit)) {
     JSAtom touchesAtom = JS_NewAtom(m_ctx, "touches");

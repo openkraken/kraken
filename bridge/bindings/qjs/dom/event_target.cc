@@ -149,7 +149,11 @@ JSValue EventTarget::dispatchEvent(JSContext* ctx, JSValue this_val, int argc, J
 
   JSValue eventValue = argv[0];
   auto eventInstance = reinterpret_cast<EventInstance*>(JS_GetOpaque(eventValue, EventTarget::classId(eventValue)));
+#if ANDROID_32_BIT
   eventInstance->nativeEvent->target = reinterpret_cast<int64_t>(eventTargetInstance);
+#else
+  eventInstance->nativeEvent->target = eventTargetInstance;
+#endif
   return JS_NewBool(ctx, eventTargetInstance->dispatchEvent(eventInstance));
 }
 

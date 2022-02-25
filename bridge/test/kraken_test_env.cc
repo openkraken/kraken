@@ -260,7 +260,11 @@ void TEST_dispatchEvent(int32_t contextId, EventTargetInstance* eventTarget, con
   auto nativeEventType = stringToNativeString(type);
   NativeString* rawEventType = nativeEventType.release();
 
+#if ANDROID_32_BIT
   NativeEvent* nativeEvent = new NativeEvent{reinterpret_cast<int64_t>(rawEventType)};
+#else
+  NativeEvent* nativeEvent = new NativeEvent{rawEventType};
+#endif
 
   RawEvent* rawEvent = new RawEvent{reinterpret_cast<uint64_t*>(nativeEvent)};
 
