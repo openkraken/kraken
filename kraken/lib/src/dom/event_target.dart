@@ -9,6 +9,8 @@ import 'package:kraken/foundation.dart';
 import 'package:kraken/module.dart';
 import 'package:meta/meta.dart';
 
+import 'dart:ffi';
+
 typedef EventHandler = void Function(Event event);
 
 abstract class EventTarget extends BindingObject with _Focusable {

@@ -203,7 +203,7 @@ class NativeTouch extends Struct {
   @Int64()
   external int identifier;
 
-  external Pointer<NativeEventTarget> target;
+  external Pointer<NativeBindingObject> target;
 
   @Double()
   external double clientX;
@@ -274,7 +274,7 @@ class NativeBoundingClientRect extends Struct {
 
 typedef NativeDispatchEvent = Void Function(
     Int32 contextId,
-    Pointer<NativeEventTarget> nativeEventTarget,
+    Pointer<NativeBindingObject> nativeBindingObject,
     Pointer<NativeString> eventType,
     Pointer<Void> nativeEvent,
     Int32 isCustomEvent);
@@ -287,12 +287,9 @@ typedef NativeCallNativeMethods = Void Function(
 
 class NativeBindingObject extends Struct {
   external Pointer<Void> instance;
+  external Pointer<NativeFunction<NativeDispatchEvent>> dispatchEvent;
   // Shared method called by JS side.
   external Pointer<NativeFunction> callNativeMethods;
-}
-
-class NativeEventTarget extends Struct {
-  external Pointer<NativeFunction<NativeDispatchEvent>> dispatchEvent;
 }
 
 typedef NativeCanvasGetContext = Pointer<NativeCanvasRenderingContext2D> Function(

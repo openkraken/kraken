@@ -103,23 +103,22 @@ void invokeModuleEvent(
 
 typedef DartDispatchEvent = void Function(
   int contextId,
-  Pointer<NativeEventTarget> nativeEventTarget,
+  Pointer<NativeBindingObject> nativeBindingObject,
   Pointer<NativeString> eventType,
   Pointer<Void> nativeEvent,
   int isCustomEvent
 );
 
 void emitUIEvent(
-    int contextId, Pointer<NativeEventTarget> nativeEventTarget, Event event) {
+    int contextId, Pointer<NativeBindingObject> nativeBindingObject, Event event) {
   if (KrakenController.getControllerOfJSContextId(contextId) == null) {
     return;
   }
-  DartDispatchEvent dispatchEvent =
-      nativeEventTarget.ref.dispatchEvent.asFunction();
+  DartDispatchEvent dispatchEvent = nativeBindingObject.ref.dispatchEvent.asFunction();
   Pointer<Void> rawEvent = event.toRaw().cast<Void>();
   bool isCustomEvent = event is CustomEvent;
   Pointer<NativeString> eventTypeString = stringToNativeString(event.type);
-  dispatchEvent(contextId, nativeEventTarget, eventTypeString, rawEvent, isCustomEvent ? 1 : 0);
+  dispatchEvent(contextId, nativeBindingObject, eventTypeString, rawEvent, isCustomEvent ? 1 : 0);
   freeNativeString(eventTypeString);
 }
 
