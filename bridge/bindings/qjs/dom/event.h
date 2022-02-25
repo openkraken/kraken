@@ -150,7 +150,7 @@ class EventInstance : public Instance {
 #endif
   };
   void setType(NativeString* type) const;
-  FORCE_INLINE EventTargetInstance* target() {return reinterpret_cast<EventTargetInstance*>(nativeEvent->target);}
+  FORCE_INLINE EventTargetInstance* target() { return reinterpret_cast<EventTargetInstance*>(nativeEvent->target); }
   void setTarget(EventTargetInstance* target) const;
   FORCE_INLINE EventTargetInstance* currentTarget() { return reinterpret_cast<EventTargetInstance*>(nativeEvent->currentTarget); }
   void setCurrentTarget(EventTargetInstance* target) const;
