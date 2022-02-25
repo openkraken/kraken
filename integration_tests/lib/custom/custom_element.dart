@@ -1,12 +1,12 @@
 import 'dart:async';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart' as dom;
+import 'package:kraken/foundation.dart';
 import 'package:kraken/widget.dart';
 import 'package:waterfall_flow/waterfall_flow.dart';
 import 'package:flutter/material.dart';
 
 class WaterfallFlowWidgetElement extends WidgetElement {
-  WaterfallFlowWidgetElement(dom.EventTargetContext? context) :
+  WaterfallFlowWidgetElement(BindingContext? context) :
         super(context);
 
   List<Widget> _children = [];
@@ -35,7 +35,7 @@ class WaterfallFlowWidgetElement extends WidgetElement {
 }
 
 class TextWidgetElement extends WidgetElement {
-  TextWidgetElement(dom.EventTargetContext? context) :
+  TextWidgetElement(BindingContext? context) :
         super(context);
 
   @override
@@ -45,7 +45,7 @@ class TextWidgetElement extends WidgetElement {
 }
 
 class ImageWidgetElement extends WidgetElement {
-  ImageWidgetElement(dom.EventTargetContext? context) :
+  ImageWidgetElement(BindingContext? context) :
         super(context);
 
   @override
@@ -55,7 +55,7 @@ class ImageWidgetElement extends WidgetElement {
 }
 
 class ContainerWidgetElement extends WidgetElement {
-  ContainerWidgetElement(dom.EventTargetContext? context) :
+  ContainerWidgetElement(BindingContext? context) :
         super(context);
 
   @override
@@ -74,7 +74,7 @@ class ContainerWidgetElement extends WidgetElement {
 }
 
 class SampleElement extends dom.Element implements BindingObject {
-  SampleElement(dom.EventTargetContext? context)
+  SampleElement(BindingContext? context)
       : super(context);
 
   getProperty(String key) {
@@ -115,19 +115,19 @@ class SampleElement extends dom.Element implements BindingObject {
 }
 
 void defineKrakenCustomElements() {
-  Kraken.defineCustomElement('waterfall-flow', (dom.EventTargetContext? context) {
+  Kraken.defineCustomElement('waterfall-flow', (BindingContext? context) {
     return WaterfallFlowWidgetElement(context);
   });
-  Kraken.defineCustomElement('flutter-container', (dom.EventTargetContext? context) {
+  Kraken.defineCustomElement('flutter-container', (BindingContext? context) {
     return ContainerWidgetElement(context);
   });
-  Kraken.defineCustomElement('sample-element', (dom.EventTargetContext? context) {
+  Kraken.defineCustomElement('sample-element', (BindingContext? context) {
     return SampleElement(context);
   });
-  Kraken.defineCustomElement('flutter-text', (dom.EventTargetContext? context) {
+  Kraken.defineCustomElement('flutter-text', (BindingContext? context) {
     return TextWidgetElement(context);
   });
-  Kraken.defineCustomElement('flutter-asset-image', (dom.EventTargetContext? context) {
+  Kraken.defineCustomElement('flutter-asset-image', (BindingContext? context) {
     return ImageWidgetElement(context);
   });
 }

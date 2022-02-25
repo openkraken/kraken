@@ -69,8 +69,8 @@ abstract class DevToolsService {
 // An kraken View Controller designed for multiple kraken view control.
 class KrakenViewController
     implements WidgetsBindingObserver, ElementsBindingObserver {
-  static Map<int, Pointer<NativeEventTarget>> documentNativePtrMap = {};
-  static Map<int, Pointer<NativeEventTarget>> windowNativePtrMap = {};
+  static Map<int, Pointer<NativeBindingObject>> documentNativePtrMap = {};
+  static Map<int, Pointer<NativeBindingObject>> windowNativePtrMap = {};
 
   KrakenController rootController;
 
@@ -151,10 +151,10 @@ class KrakenViewController
 
     _setupObserver();
 
-    defineBuiltInBindingElements();
+    defineBuiltInElements();
 
     document = Document(
-      EventTargetContext(_contextId, documentNativePtrMap[_contextId]!),
+      BindingContext(_contextId, documentNativePtrMap[_contextId]!),
       viewport: viewport,
       controller: rootController,
       gestureListener: gestureListener,
@@ -163,7 +163,7 @@ class KrakenViewController
     _setEventTarget(DOCUMENT_ID, document);
 
     window = Window(
-        EventTargetContext(_contextId, windowNativePtrMap[_contextId]!),
+        BindingContext(_contextId, windowNativePtrMap[_contextId]!),
         document);
     _setEventTarget(WINDOW_ID, window);
 
@@ -368,7 +368,7 @@ class KrakenViewController
   }
 
   void createElement(
-      int targetId, Pointer<NativeEventTarget> nativePtr, String tagName) {
+      int targetId, Pointer<NativeBindingObject> nativePtr, String tagName) {
     if (kProfileMode) {
       PerformanceTiming.instance()
           .mark(PERF_CREATE_ELEMENT_START, uniqueId: targetId);
@@ -376,7 +376,7 @@ class KrakenViewController
     assert(!_existsTarget(targetId),
         'ERROR: Can not create element with same id "$targetId"');
     Element element = document.createElement(
-        tagName.toUpperCase(), EventTargetContext(_contextId, nativePtr));
+        tagName.toUpperCase(), BindingContext(_contextId, nativePtr));
     _setEventTarget(targetId, element);
     if (kProfileMode) {
       PerformanceTiming.instance()
@@ -385,13 +385,13 @@ class KrakenViewController
   }
 
   void createTextNode(
-      int targetId, Pointer<NativeEventTarget> nativePtr, String data) {
+      int targetId, Pointer<NativeBindingObject> nativePtr, String data) {
     if (kProfileMode) {
       PerformanceTiming.instance()
           .mark(PERF_CREATE_TEXT_NODE_START, uniqueId: targetId);
     }
     TextNode textNode = document.createTextNode(
-        data, EventTargetContext(_contextId, nativePtr));
+        data, BindingContext(_contextId, nativePtr));
     _setEventTarget(targetId, textNode);
     if (kProfileMode) {
       PerformanceTiming.instance()
@@ -399,13 +399,13 @@ class KrakenViewController
     }
   }
 
-  void createComment(int targetId, Pointer<NativeEventTarget> nativePtr) {
+  void createComment(int targetId, Pointer<NativeBindingObject> nativePtr) {
     if (kProfileMode) {
       PerformanceTiming.instance()
           .mark(PERF_CREATE_COMMENT_START, uniqueId: targetId);
     }
     Comment comment =
-        document.createComment(EventTargetContext(_contextId, nativePtr));
+        document.createComment(BindingContext(_contextId, nativePtr));
     _setEventTarget(targetId, comment);
     if (kProfileMode) {
       PerformanceTiming.instance()
@@ -414,13 +414,13 @@ class KrakenViewController
   }
 
   void createDocumentFragment(
-      int targetId, Pointer<NativeEventTarget> nativePtr) {
+      int targetId, Pointer<NativeBindingObject> nativePtr) {
     if (kProfileMode) {
       PerformanceTiming.instance()
           .mark(PERF_CREATE_DOCUMENT_FRAGMENT_START, uniqueId: targetId);
     }
     DocumentFragment fragment = document
-        .createDocumentFragment(EventTargetContext(_contextId, nativePtr));
+        .createDocumentFragment(BindingContext(_contextId, nativePtr));
     _setEventTarget(targetId, fragment);
     if (kProfileMode) {
       PerformanceTiming.instance()

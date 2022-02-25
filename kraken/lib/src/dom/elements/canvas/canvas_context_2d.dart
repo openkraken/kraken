@@ -12,6 +12,7 @@ import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:kraken/bridge.dart';
+import 'package:kraken/foundation.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -44,31 +45,32 @@ class CanvasRenderingContext2DSettings {
 
 typedef CanvasAction = void Function(Canvas, Size);
 
-void _callNativeMethods(Pointer<Void> nativePtr, Pointer<NativeValue> returnedValue, Pointer<NativeString> nativeMethod, int argc, Pointer<NativeValue> argv) {
-  String method = nativeStringToString(nativeMethod);
-  List<dynamic> values = List.generate(argc, (i) {
-    Pointer<NativeValue> nativeValue = argv.elementAt(i);
-    return fromNativeValue(nativeValue);
-  });
+// void _callNativeMethods(Pointer<Void> nativePtr, Pointer<NativeValue> returnedValue, Pointer<NativeString> nativeMethod, int argc, Pointer<NativeValue> argv) {
+//   String method = nativeStringToString(nativeMethod);
+//   List<dynamic> values = List.generate(argc, (i) {
+//     Pointer<NativeValue> nativeValue = argv.elementAt(i);
+//     return fromNativeValue(nativeValue);
+//   });
+//
+//   CanvasRenderingContext2D renderingContext2D = CanvasRenderingContext2D.getCanvasRenderContext2DOfNativePtr(nativePtr.cast<NativeCanvasRenderingContext2D>());
+//   try {
+//     dynamic result = renderingContext2D.handleJSCall(method, values);
+//     toNativeValue(returnedValue, result);
+//   } catch (e, stack) {
+//     print('$e\n$stack');
+//     toNativeValue(returnedValue, null);
+//   }
+// }
 
-  CanvasRenderingContext2D renderingContext2D = CanvasRenderingContext2D.getCanvasRenderContext2DOfNativePtr(nativePtr.cast<NativeCanvasRenderingContext2D>());
-  try {
-    dynamic result = renderingContext2D.handleJSCall(method, values);
-    toNativeValue(returnedValue, result);
-  } catch (e, stack) {
-    print('$e\n$stack');
-    toNativeValue(returnedValue, null);
-  }
-}
-
-class CanvasRenderingContext2D {
+class CanvasRenderingContext2D extends BindingObject {
   final Pointer<NativeCanvasRenderingContext2D> nativeCanvasRenderingContext2D;
 
-  CanvasRenderingContext2D() : nativeCanvasRenderingContext2D = malloc.allocate<NativeCanvasRenderingContext2D>(sizeOf<NativeCanvasRenderingContext2D>()) {
+  CanvasRenderingContext2D()
+      : nativeCanvasRenderingContext2D = malloc.allocate<NativeCanvasRenderingContext2D>(sizeOf<NativeCanvasRenderingContext2D>()) {
     _settings = CanvasRenderingContext2DSettings();
 
-    nativeCanvasRenderingContext2D.ref.callNativeMethods = Pointer.fromFunction(_callNativeMethods);
-    _nativeMap[nativeCanvasRenderingContext2D.address] = this;
+    // nativeCanvasRenderingContext2D.ref.callNativeMethods = Pointer.fromFunction(_callNativeMethods);
+    // _nativeMap[nativeCanvasRenderingContext2D.address] = this;
   }
 
   static final SplayTreeMap<int, CanvasRenderingContext2D> _nativeMap = SplayTreeMap();
@@ -81,174 +83,6 @@ class CanvasRenderingContext2D {
 
   void dispose() {
     _nativeMap.remove(nativeCanvasRenderingContext2D.address);
-  }
-
-  final Map<String, dynamic> _rawProperties = {};
-
-  handleJSCall(String method, List argv) {
-    String operation = method.substring(0, 3);
-
-    if (operation == 'set') {
-      _rawProperties[jsMethodToKey(method)] = argv[0];
-    } else if (operation == 'get') {
-      return _rawProperties[jsMethodToKey(method)];
-    }
-
-    switch (method) {
-      case 'setFillStyle':
-        Color? color = CSSColor.parseColor(argv[0]);
-        if (color != null) fillStyle = color;
-        break;
-      case 'setDirection':
-        direction = parseDirection(argv[0]);
-        break;
-      case 'setFont':
-        font = argv[0];
-        break;
-      case 'setStrokeStyle':
-        Color? color = CSSColor.parseColor(argv[0]);
-        if (color != null) strokeStyle = color;
-        break;
-      case 'setLineCap':
-        lineCap = parseLineCap(argv[0]);
-        break;
-      case 'setLineDashOffset':
-        lineDashOffset = argv[0];
-        break;
-      case 'setLineJoin':
-        lineJoin = parseLineJoin(argv[0]);
-        break;
-      case 'setLineWidth':
-        lineWidth = argv[0];
-        break;
-      case 'setMiterLimit':
-        miterLimit = argv[0];
-        break;
-      case 'setTextAlign':
-        textAlign = parseTextAlign(argv[0]);
-        break;
-      case 'setTextBaseline':
-        textBaseline = parseTextBaseline(argv[0]);
-        break;
-      case 'arc':
-        arc(argv[0], argv[1], argv[2], argv[3], argv[4], anticlockwise : argv[5] == 1 ? true : false);
-        break;
-      case 'arcTo':
-        arcTo(argv[0], argv[1], argv[2], argv[3], argv[4]);
-        break;
-      case 'fillRect':
-        fillRect(argv[0], argv[1], argv[2], argv[3]);
-        break;
-      case 'clearRect':
-        clearRect(argv[0], argv[1], argv[2], argv[3]);
-        break;
-      case 'strokeRect':
-        strokeRect(argv[0], argv[1], argv[2], argv[3]);
-        break;
-      case 'fillText':
-        double maxWidth = argv[3];
-        if (!maxWidth.isNaN) {
-          fillText(argv[0], argv[1], argv[2], maxWidth: maxWidth);
-        } else {
-          fillText(argv[0], argv[1], argv[2]);
-        }
-        break;
-      case 'strokeText':
-        double maxWidth = argv[3];
-        if (!maxWidth.isNaN) {
-          strokeText(argv[0], argv[1], argv[2], maxWidth: maxWidth);
-        } else {
-          strokeText(argv[0], argv[1], argv[2]);
-        }
-        break;
-      case 'save':
-        save();
-        break;
-      case 'restore':
-        restore();
-        break;
-      case 'beginPath':
-        beginPath();
-        break;
-      case 'bezierCurveTo':
-        bezierCurveTo(argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
-        break;
-      case 'clip':
-        PathFillType fillType = argv[0] == EVENODD ? PathFillType.evenOdd : PathFillType.nonZero;
-        clip(fillType);
-        break;
-      case 'closePath':
-        closePath();
-        break;
-      case 'drawImage':
-        ImageElement imageElement = EventTarget.getEventTargetByPointer(argv[0]) as ImageElement;
-        num sx = 0.0, sy = 0.0, sWidth = 0.0, sHeight = 0.0, dx = 0.0, dy = 0.0, dWidth = 0.0, dHeight = 0.0;
-
-        if (argv.length == 3) {
-          dx = argv[1];
-          dy = argv[2];
-        } else if (argv.length == 5) {
-          dx = argv[1];
-          dy = argv[2];
-          dWidth = argv[3];
-          dHeight = argv[4];
-        } else if (argv.length == 9) {
-          sx = argv[1];
-          sy = argv[2];
-          sWidth = argv[3];
-          sHeight = argv[4];
-          dx = argv[5];
-          dy = argv[6];
-          dWidth = argv[7];
-          dHeight = argv[8];
-        }
-
-        drawImage(argv.length, imageElement.image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-        break;
-      case 'ellipse':
-        ellipse(argv[0], argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], anticlockwise : argv[7] == 1 ? true : false);
-        break;
-      case 'fill':
-        PathFillType fillType = argv[0] == EVENODD ? PathFillType.evenOdd : PathFillType.nonZero;
-        fill(fillType);
-        break;
-      case 'lineTo':
-        lineTo(argv[0], argv[1]);
-        break;
-      case 'moveTo':
-        moveTo(argv[0], argv[1]);
-        break;
-      case 'quadraticCurveTo':
-        quadraticCurveTo(argv[0], argv[1], argv[2], argv[3]);
-        break;
-      case 'rect':
-        rect(argv[0], argv[1], argv[2], argv[3]);
-        break;
-      case 'rotate':
-        rotate(argv[0]);
-        break;
-      case 'resetTransform':
-        resetTransform();
-        break;
-      case 'scale':
-        scale(argv[0], argv[1]);
-        break;
-      case 'stroke':
-        stroke();
-        break;
-      case 'setTransform':
-        setTransform(argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
-        break;
-      case 'transform':
-        transform(argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
-        break;
-      case 'translate':
-        translate(argv[0], argv[1]);
-        break;
-      default:
-        assert(false, 'Unknown method: $method');
-        return null;
-    }
   }
 
   late CanvasRenderingContext2DSettings _settings;

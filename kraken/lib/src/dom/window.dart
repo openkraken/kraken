@@ -5,8 +5,10 @@
 import 'dart:ui';
 
 import 'package:kraken/dom.dart';
+import 'package:kraken/foundation.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
+
 
 
 const String WINDOW = 'WINDOW';
@@ -14,11 +16,39 @@ const String WINDOW = 'WINDOW';
 class Window extends EventTarget {
   final Document document;
 
-  Window(EventTargetContext context, this.document) : super(context) {
+  Window(BindingContext? context, this.document) : super(context) {
     window.onPlatformBrightnessChanged = () {
       ColorSchemeChangeEvent event = ColorSchemeChangeEvent((window.platformBrightness == Brightness.light) ? 'light' : 'dart');
       dispatchEvent(event);
     };
+  }
+
+  // https://www.w3.org/TR/cssom-view-1/#extensions-to-the-window-interface
+  @override
+  getProperty(String key) {
+    switch (key) {
+      case 'scrollX': return scrollX;
+      case 'scrollY': return scrollY;
+    }
+  }
+
+  @override
+  invokeMethod(String method, List args) {
+    switch (method) {
+      case 'scroll':
+      case 'scrollTo':
+        return scrollTo(
+            castToType<double>(args[0]),
+            castToType<double>(args[1])
+        );
+      case 'scrollBy':
+        return scrollBy(
+            castToType<double>(args[0]),
+            castToType<double>(args[1])
+        );
+      case 'open':
+        return open(castToType<String>(args[0]));
+    }
   }
 
   void open(String url) {
@@ -45,7 +75,7 @@ class Window extends EventTarget {
   }
 
   void addEvent(String eventType) {
-    if (eventHandlers.containsKey(eventType)) return; // Only listen once.
+    if (hasEventListener(eventType)) return; // Only listen once.
 
     switch (eventType) {
       case EVENT_COLOR_SCHEME_CHANGE:

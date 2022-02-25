@@ -11,7 +11,7 @@ const String ANCHOR = 'A';
 const String _TARGET_SELF = 'self';
 
 class AnchorElement extends Element {
-  AnchorElement(EventTargetContext? context)
+  AnchorElement([BindingContext? context])
       : super(context) {
     addEvent(EVENT_CLICK);
   }
@@ -41,6 +41,43 @@ class AnchorElement extends Element {
     }
 
     return KrakenNavigationType.navigate;
+  }
+
+  // Bindings.
+  @override
+  getProperty(String key) {
+    switch (key) {
+      case 'href': return href;
+      case 'target': return target;
+      case 'rel': return rel;
+      case 'type': return type;
+      case 'protocol': return protocol;
+      case 'host': return host;
+      case 'hostname': return hostname;
+      case 'port': return port;
+      case 'pathname': return pathname;
+      case 'search': return search;
+      case 'hash': return hash;
+      default: return super.getProperty(key);
+    }
+  }
+
+  @override
+  void setProperty(String key, value) {
+    switch (key) {
+      case 'href': href = castToType<String>(value); break;
+      case 'target': target = castToType<String>(value); break;
+      case 'rel': rel = castToType<String>(value); break;
+      case 'type': type = castToType<String>(value); break;
+      case 'protocol': protocol = castToType<String>(value); break;
+      case 'host': host = castToType<String>(value); break;
+      case 'hostname': hostname = castToType<String>(value); break;
+      case 'port': port = castToType<String>(value); break;
+      case 'pathname': pathname = castToType<String>(value); break;
+      case 'search': search = castToType<String>(value); break;
+      case 'hash': hash = castToType<String>(value); break;
+      default: super.setProperty(key, value);
+    }
   }
 
   @override

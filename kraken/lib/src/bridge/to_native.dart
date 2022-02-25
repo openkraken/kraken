@@ -515,15 +515,15 @@ void flushUICommand() {
         switch (commandType) {
           case UICommandType.createElement:
             controller.view.createElement(
-                id, nativePtr.cast<NativeEventTarget>(), command.args[0]);
+                id, nativePtr.cast<NativeBindingObject>(), command.args[0]);
             break;
           case UICommandType.createTextNode:
             controller.view.createTextNode(
-                id, nativePtr.cast<NativeEventTarget>(), command.args[0]);
+                id, nativePtr.cast<NativeBindingObject>(), command.args[0]);
             break;
           case UICommandType.createComment:
             controller.view
-                .createComment(id, nativePtr.cast<NativeEventTarget>());
+                .createComment(id, nativePtr.cast<NativeBindingObject>());
             break;
           case UICommandType.disposeEventTarget:
             controller.view.disposeEventTarget(id);
@@ -563,7 +563,7 @@ void flushUICommand() {
             break;
           case UICommandType.createDocumentFragment:
             controller.view.createDocumentFragment(
-                id, nativePtr.cast<NativeEventTarget>());
+                id, nativePtr.cast<NativeBindingObject>());
             break;
           default:
             break;

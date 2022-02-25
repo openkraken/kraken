@@ -4,6 +4,7 @@
  */
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/foundation.dart';
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element#demarcating_edits
 const String DEL = 'DEL';
@@ -18,11 +19,11 @@ const Map<String, dynamic> _delDefaultStyle = {
 };
 
 class DelElement extends Element {
-  DelElement(EventTargetContext? context)
+  DelElement([BindingContext? context])
       : super(context, defaultStyle: _delDefaultStyle);
 }
 
 class InsElement extends Element {
-  InsElement(EventTargetContext? context)
+  InsElement([BindingContext? context])
       : super(context, defaultStyle: _insDefaultStyle);
 }

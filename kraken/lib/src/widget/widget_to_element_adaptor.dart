@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/dom.dart' as dom;
+import 'package:kraken/foundation.dart';
 
 import 'element_to_widget_adaptor.dart';
 
@@ -171,7 +172,7 @@ abstract class WidgetElement extends dom.Element {
   late Widget _widget;
   _KrakenAdapterWidgetState? _state;
 
-  WidgetElement(dom.EventTargetContext? context, {
+  WidgetElement(BindingContext? context, {
     Map<String, dynamic>? defaultStyle,
     bool isIntrinsicBox = false,
     // WidgetElement Adds repaintBoundary by default to prevent the internal paint process from affecting the outside.

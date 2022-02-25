@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/foundation.dart';
 
 const String WHITE_SPACE_CHAR = ' ';
 const String NEW_LINE_CHAR = '\n';
@@ -14,8 +15,7 @@ const String TAB_CHAR = '\t';
 class TextNode extends Node {
   static const String NORMAL_SPACE = '\u0020';
 
-  TextNode(this._data, EventTargetContext? context)
-      : super(NodeType.TEXT_NODE, context);
+  TextNode(this._data, [BindingContext? context]) : super(NodeType.TEXT_NODE, context);
 
   // Must be existed after text node is attached, and all text update will after text attached.
   RenderTextBox? _renderTextBox;

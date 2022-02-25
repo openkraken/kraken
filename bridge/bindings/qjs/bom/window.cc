@@ -52,7 +52,11 @@ JSValue Window::scrollTo(JSContext* ctx, JSValue this_val, int argc, JSValue* ar
 #if FLUTTER_BACKEND
   getDartMethod()->flushUICommand();
   auto window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, Window::classId()));
-  NativeValue arguments[] = {jsValueToNativeValue(ctx, argv[0]), jsValueToNativeValue(ctx, argv[1])};
+  double arg0 = 0;
+  double arg1 = 0;
+  JS_ToFloat64(ctx, &arg0, argv[0]);
+  JS_ToFloat64(ctx, &arg1, argv[1]);
+  NativeValue arguments[] = {Native_NewFloat64(arg0), Native_NewFloat64(arg1)};
   return window->callNativeMethods("scroll", 2, arguments);
 #else
   return JS_UNDEFINED;
@@ -61,7 +65,11 @@ JSValue Window::scrollTo(JSContext* ctx, JSValue this_val, int argc, JSValue* ar
 JSValue Window::scrollBy(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, Window::classId()));
-  NativeValue arguments[] = {jsValueToNativeValue(ctx, argv[0]), jsValueToNativeValue(ctx, argv[1])};
+  double arg0 = 0;
+  double arg1 = 0;
+  JS_ToFloat64(ctx, &arg0, argv[0]);
+  JS_ToFloat64(ctx, &arg1, argv[1]);
+  NativeValue arguments[] = {Native_NewFloat64(arg0), Native_NewFloat64(arg1)};
   return window->callNativeMethods("scrollBy", 2, arguments);
 }
 

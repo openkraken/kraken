@@ -14,6 +14,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/foundation.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/widget.dart';
 import 'package:meta/meta.dart';
@@ -146,7 +147,7 @@ abstract class Element
   }
 
   Element(
-    EventTargetContext? context,
+    BindingContext? context,
     {
       Map<String, dynamic>? defaultStyle,
       // Whether element allows children.
@@ -178,6 +179,58 @@ abstract class Element
     }
     _updateRenderBoxModel();
     return renderBoxModel!;
+  }
+
+  // https://www.w3.org/TR/cssom-view-1/#extensions-to-the-htmlelement-interface
+  // https://www.w3.org/TR/cssom-view-1/#extension-to-the-element-interface
+  @override
+  getProperty(String key) {
+    switch (key) {
+      case 'offsetTop': return offsetTop;
+      case 'offsetLeft': return offsetLeft;
+      case 'offsetWidth': return offsetWidth;
+      case 'offsetHeight': return offsetHeight;
+
+      case 'scrollTop': return scrollTop;
+      case 'scrollLeft': return scrollLeft;
+      case 'scrollWidth': return scrollWidth;
+      case 'scrollHeight': return scrollHeight;
+
+      case 'clientTop': return clientTop;
+      case 'clientLeft': return clientLeft;
+      case 'clientWidth': return clientWidth;
+      case 'clientHeight': return clientHeight;
+
+      case 'className': return className;
+      case 'classList': return classList;
+
+      default: return super.getProperty(key);
+    }
+  }
+
+  @override
+  void setProperty(String key, value) {
+    switch (key) {
+      case 'scrollTop': scrollTop = castToType<double>(value); break;
+      case 'scrollLeft': scrollLeft = castToType<double>(value); break;
+
+      case 'className': className = castToType<String>(value); break;
+
+      default: super.setProperty(key, value);
+    }
+  }
+
+  @override
+  invokeMethod(String method, List args) {
+    switch (method) {
+      case 'getBoundingClientRect': return getBoundingClientRect().toNative();
+      case 'scroll': return scroll(castToType<double>(args[0]), castToType<double>(args[1]));
+      case 'scrollBy': return scrollBy(castToType<double>(args[0]), castToType<double>(args[1]));
+      case 'scrollTo': return scrollTo(castToType<double>(args[0]), castToType<double>(args[1]));
+      case 'click': return click();
+
+      default: super.invokeMethod(method, args);
+    }
   }
 
   void _updateRenderBoxModel() {
@@ -438,7 +491,7 @@ abstract class Element
 
   bool _shouldConsumeScrollTicker = false;
   void _consumeScrollTicker(_) {
-    if (_shouldConsumeScrollTicker && eventHandlers.containsKey(EVENT_SCROLL)) {
+    if (_shouldConsumeScrollTicker && hasEventListener(EVENT_SCROLL)) {
       _dispatchScrollEvent();
       _shouldConsumeScrollTicker = false;
     }
@@ -1507,7 +1560,7 @@ abstract class Element
     if (_renderBoxModel != null) {
       // Make sure pointer responder bind.
       addEventResponder(_renderBoxModel);
-      if (_hasIntersectionObserverEvent(eventHandlers)) {
+      if (_hasIntersectionObserverEvent(getEventHandlers())) {
         _renderBoxModel.addIntersectionChangeListener(handleIntersectionChange);
         // Mark the compositing state for this render object as dirty
         // cause it will create new layer.
@@ -1517,24 +1570,24 @@ abstract class Element
   }
 
   void addEvent(String eventType) {
-    if (eventHandlers.containsKey(eventType)) return; // Only listen once.
+    if (hasEventListener(eventType)) return; // Only listen once.
     addEventListener(eventType, dispatchEvent);
     _ensureEventResponderBound();
   }
 
   void removeEvent(String eventType) {
-    if (!eventHandlers.containsKey(eventType)) return; // Only listen once.
+    if (!hasEventListener(eventType)) return; // Only listen once.
     removeEventListener(eventType, dispatchEvent);
 
     RenderBoxModel? selfRenderBoxModel = renderBoxModel;
     if (selfRenderBoxModel != null) {
-      if (eventHandlers.isEmpty) {
+      if (getEventHandlers().isEmpty) {
         // Remove pointer responder if there is no event handler.
         removeEventResponder(selfRenderBoxModel);
       }
 
       // Remove listener when no intersection related event
-      if (_isIntersectionObserverEvent(eventType) && !_hasIntersectionObserverEvent(eventHandlers)) {
+      if (_isIntersectionObserverEvent(eventType) && !_hasIntersectionObserverEvent(getEventHandlers())) {
         selfRenderBoxModel.removeIntersectionChangeListener(handleIntersectionChange);
       }
     }

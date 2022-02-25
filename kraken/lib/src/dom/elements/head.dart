@@ -9,6 +9,7 @@ import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/launcher.dart';
+import 'package:kraken/foundation.dart';
 
 // Children of the <head> element all have display:none
 const Map<String, dynamic> _defaultStyle = {
@@ -24,7 +25,7 @@ const String NOSCRIPT = 'NOSCRIPT';
 const String SCRIPT = 'SCRIPT';
 
 class HeadElement extends Element {
-  HeadElement(EventTargetContext? context)
+  HeadElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 }
 
@@ -32,9 +33,33 @@ const String _REL_STYLESHEET = 'stylesheet';
 
 // https://www.w3.org/TR/2011/WD-html5-author-20110809/the-link-element.html#the-link-element
 class LinkElement extends Element {
-  LinkElement(EventTargetContext? context) : super(context, defaultStyle: _defaultStyle);
+  LinkElement([BindingContext? context]) : super(context, defaultStyle: _defaultStyle);
 
   Uri? _resolvedHyperlink;
+
+
+  // Bindings.
+  @override
+  getProperty(String key) {
+    switch (key) {
+      case 'disabled': return disabled;
+      case 'rel': return rel;
+      case 'href': return href;
+      case 'type': return type;
+      default: return super.getProperty(key);
+    }
+  }
+
+  @override
+  void setProperty(String key, value) {
+    switch (key) {
+      case 'disabled': disabled = castToType<bool>(value); break;
+      case 'rel': rel = castToType<String>(value); break;
+      case 'href': href = castToType<String>(value); break;
+      case 'type': type = castToType<String>(value); break;
+      default: super.setProperty(key, value);
+    }
+  }
 
   @override
   void setAttribute(String qualifiedName, String value) {
@@ -118,17 +143,17 @@ class LinkElement extends Element {
 }
 
 class MetaElement extends Element {
-  MetaElement(EventTargetContext? context)
+  MetaElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class TitleElement extends Element {
-  TitleElement(EventTargetContext? context)
+  TitleElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class NoScriptElement extends Element {
-  NoScriptElement(EventTargetContext? context)
+  NoScriptElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 }
 
@@ -139,13 +164,40 @@ const String _JAVASCRIPT_MODULE = 'module';
 
 // https://www.w3.org/TR/2011/WD-html5-author-20110809/the-link-element.html
 class ScriptElement extends Element {
-  ScriptElement(EventTargetContext? context)
+  ScriptElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle) {
   }
 
   final String _type = _MIME_TEXT_JAVASCRIPT;
 
   Uri? _resolvedSource;
+
+  // Bindings.
+  @override
+  getProperty(String key) {
+    switch (key) {
+      case 'src': return src;
+      case 'async': return async;
+      case 'defer': return defer;
+      case 'type': return type;
+      case 'charset': return charset;
+      case 'text': return text;
+      default: return super.getProperty(key);
+    }
+  }
+
+  @override
+  void setProperty(String key, value) {
+    switch (key) {
+      case 'src': src = castToType<String>(value); break;
+      case 'async': async = castToType<bool>(value); break;
+      case 'defer': defer = castToType<bool>(value); break;
+      case 'type': type = castToType<String>(value); break;
+      case 'charset': charset = castToType<String>(value); break;
+      case 'text': text = castToType<String>(value); break;
+      default: super.setProperty(key, value);
+    }
+  }
 
   @override
   void setAttribute(String qualifiedName, String value) {
@@ -268,10 +320,27 @@ const String _CSS_MIME = 'text/css';
 
 // https://www.w3.org/TR/2011/WD-html5-author-20110809/the-style-element.html
 class StyleElement extends Element {
-  StyleElement(EventTargetContext? context)
+  StyleElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
   final String _type = _CSS_MIME;
   CSSStyleSheet? _styleSheet;
+
+  // Bindings.
+  @override
+  getProperty(String key) {
+    switch (key) {
+      case 'type': return type;
+      default: return super.getProperty(key);
+    }
+  }
+
+  @override
+  void setProperty(String key, value) {
+    switch (key) {
+      case 'type': type = castToType<String>(value); break;
+      default: super.setProperty(key, value);
+    }
+  }
 
   @override
   void setAttribute(String qualifiedName, String value) {

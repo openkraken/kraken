@@ -18,14 +18,12 @@ class Document extends Node {
   GestureListener? gestureListener;
   WidgetDelegate? widgetDelegate;
 
-  Document(EventTargetContext? context,
-  {
+  Document(context, {
     required this.viewport,
     required this.controller,
     this.gestureListener,
     this.widgetDelegate,
-  })
-  : super(NodeType.DOCUMENT_NODE, context);
+  }) : super(NodeType.DOCUMENT_NODE, context);
 
   @override
   String get nodeName => '#document';
@@ -95,7 +93,7 @@ class Document extends Node {
   }
 
   addEvent(String eventType) {
-    if (eventHandlers.containsKey(eventType)) return; // Only listen once.
+    if (hasEventListener(eventType)) return; // Only listen once.
 
     switch (eventType) {
       case EVENT_SCROLL:
@@ -109,25 +107,25 @@ class Document extends Node {
     }
   }
 
-  Element createElement(String type, EventTargetContext? context) {
+  Element createElement(String type, [context]) {
     Element element = element_registry.createElement(type, context);
     element.ownerDocument = this;
     return element;
   }
 
-  TextNode createTextNode(String data, EventTargetContext? context) {
+  TextNode createTextNode(String data, [context]) {
     TextNode textNode = TextNode(data, context);
     textNode.ownerDocument = this;
     return textNode;
   }
 
-  DocumentFragment createDocumentFragment(EventTargetContext? context) {
+  DocumentFragment createDocumentFragment([context]) {
     DocumentFragment documentFragment = DocumentFragment(context);
     documentFragment.ownerDocument = this;
     return documentFragment;
   }
 
-  Comment createComment(EventTargetContext? context) {
+  Comment createComment([context]) {
     Comment comment = Comment(context);
     comment.ownerDocument = this;
     return comment;

@@ -1,3 +1,5 @@
+type int64 = number;
+
 interface HostObject {}
 interface Element {}
 
@@ -45,7 +47,7 @@ interface CanvasRenderingContext2D extends HostObject {
 }
 
 interface CanvasElement extends Element {
-  width: string;
-  height: string;
+  width: int64;
+  height: int64;
   getContext: (contextType: string) => CanvasRenderingContext2D;
 }

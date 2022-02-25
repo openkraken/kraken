@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/foundation.dart';
 
 const String OBJECT = 'OBJECT';
 const String PARAM = 'PARAM';
@@ -21,7 +22,7 @@ const Map<String, dynamic> _paramStyle = {
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/param
 class ParamElement extends Element {
-  ParamElement(EventTargetContext? context)
+  ParamElement([BindingContext? context])
       : super(context, defaultStyle: _paramStyle);
 }
 
@@ -35,7 +36,7 @@ class ObjectElement extends Element implements ObjectElementHost {
   late ObjectElementClientFactory _objectElementClientFactory;
   late ObjectElementClient _objectElementClient;
 
-  ObjectElement(EventTargetContext? context)
+  ObjectElement([BindingContext? context])
       : super(context, defaultStyle: _objectStyle, isIntrinsicBox: true) {
     initObjectClient();
     initElementClient();
@@ -52,6 +53,11 @@ class ObjectElement extends Element implements ObjectElementHost {
     } catch (error, stackTrace) {
       print('$error\n$stackTrace');
     }
+  }
+
+  @override
+  invokeMethod(String method, List args) {
+    return handleJSCall(method, args) ?? super.invokeMethod(method, args);
   }
 
   @override

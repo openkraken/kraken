@@ -138,14 +138,16 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
   if (object.type == 'Element') {
     switch (p.kind) {
       case 1: // string
-        setterCode = `JSValue value = argv[0];
-  JSValue stringValue = JS_ToString(ctx, value);
-  element->setNativeProperty("${p.name}", jsValueToNativeValue(ctx, stringValue));
-  JS_FreeValue(ctx, stringValue);
-  return JS_DupValue(ctx, value);`;
+        setterCode = `getDartMethod()->flushUICommand();
+  JSValue value = argv[0];
+  const char* stringValue = JS_ToCString(ctx, value);
+  element->setNativeProperty("${p.name}", Native_NewCString(stringValue));
+  JS_FreeCString(ctx, stringValue);
+  return JS_DupValue(ctx, value);;`;
         break;
       case 2: // double
-        setterCode = `double floatValue = 0;
+        setterCode = `getDartMethod()->flushUICommand();
+  double floatValue = 0;
   JSValue value = argv[0];
   JS_ToFloat64(ctx, &floatValue, value);
   NativeValue nativeValue = Native_NewFloat64(floatValue);
@@ -153,14 +155,17 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
   return JS_DupValue(ctx, value);`;
         break;
       case 3: // int
-        setterCode = `int32_t intValue = 0;
+        setterCode = `getDartMethod()->flushUICommand();
+  int32_t intValue = 0;
   JSValue value = argv[0];
   JS_ToInt32(ctx, &intValue, value);
   NativeValue nativeValue = Native_NewInt32(intValue);
-  element->setNativeProperty("${p.name}", nativeValue);`;
+  element->setNativeProperty("${p.name}", nativeValue);
+  return JS_DupValue(ctx, value);`;
         break;
       case 4: // boolean
-        setterCode = `JSValue value = argv[0];
+        setterCode = `getDartMethod()->flushUICommand();
+  JSValue value = argv[0];
   bool boolValue = JS_ToBool(ctx, value);
   NativeValue nativeValue = Native_NewBool(boolValue);
   element->setNativeProperty("${p.name}", nativeValue);
@@ -169,12 +174,12 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
       case 5: // object
       case 6: // function
       default:
-        setterCode = `JSValue value = argv[0];
+        setterCode = `getDartMethod()->flushUICommand();
+  JSValue value = argv[0];
   element->setNativeProperty("${p.name}", jsValueToNativeValue(ctx, value));
   return JS_DupValue(ctx, value);`;
         break;
     }
-
   } else {
     setterCode = `NativeValue arguments[] = {
     jsValueToNativeValue(ctx, argv[0])

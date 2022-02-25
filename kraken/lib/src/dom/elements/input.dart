@@ -16,6 +16,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' show TextSelectionOverlay, TextSelectionControls, ClipboardStatusNotifier;
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/foundation.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/widget.dart';
@@ -228,7 +229,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   TextInputConfiguration? _textInputConfiguration;
 
-  InputElement(EventTargetContext? context, {
+  InputElement({
+    BindingContext? context,
     this.textAlign = TextAlign.left,
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
@@ -236,6 +238,70 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }) : super(context, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
     _textSelectionDelegate = EditableTextDelegate(this);
     scrollOffsetX = _scrollableX.position;
+  }
+
+  // Bindings.
+  @override
+  getProperty(String key) {
+    switch (key) {
+      case 'width': return width;
+      case 'height': return height;
+      case 'value': return value;
+      case 'accept': return accept;
+      case 'autocomplete': return autocomplete;
+      case 'autofocus': return autofocus;
+      case 'required': return required;
+      case 'readonly': return readOnly;
+      case 'pattern': return pattern;
+      case 'step': return step;
+      case 'name': return name;
+      case 'multiple': return multiple;
+      case 'checked': return checked;
+      case 'disabled': return disabled;
+      case 'min': return min;
+      case 'max': return max;
+      case 'maxlength': return maxLength;
+      case 'placeholder': return placeholder;
+      case 'type': return type;
+      case 'mode': return mode;
+      default: return super.getProperty(key);
+    }
+  }
+
+  @override
+  void setProperty(String key, val) {
+    switch (key) {
+      case 'width': width = castToType<int>(val); break;
+      case 'height': height = castToType<int>(val); break;
+      case 'value': value = castToType<String>(val); break;
+      case 'accept': accept = castToType<String>(val); break;
+      case 'autocomplete': autocomplete = castToType<String>(val); break;
+      case 'autofocus': autofocus = castToType<bool>(val); break;
+      case 'required': required = castToType<bool>(val); break;
+      case 'readonly': readOnly = castToType<bool>(val); break;
+      case 'pattern': pattern = castToType<String>(val); break;
+      case 'step': step = castToType<String>(val); break;
+      case 'name': name = castToType<String>(val); break;
+      case 'multiple': multiple = castToType<bool>(val); break;
+      case 'checked': checked = castToType<bool>(val); break;
+      case 'disabled': disabled = castToType<bool>(val); break;
+      case 'min': min = castToType<String>(val); break;
+      case 'max': max = castToType<String>(val); break;
+      case 'maxlength': maxLength = castToType<int>(val); break;
+      case 'placeholder': placeholder = castToType<String>(val); break;
+      case 'type': type = castToType<String>(val); break;
+      case 'mode': mode = castToType<String>(val); break;
+      default: super.setProperty(key, value);
+    }
+  }
+
+  @override
+  invokeMethod(String method, List args) {
+    switch (method) {
+      case 'focus': return focus();
+      case 'blur': return blur();
+      default: return super.invokeMethod(method, args);
+    }
   }
 
   String _getValue() {

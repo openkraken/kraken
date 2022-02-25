@@ -11,6 +11,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/foundation.dart';
 
 import 'canvas_context_2d.dart';
 
@@ -46,13 +47,13 @@ class CanvasElement extends Element {
   RenderCustomPaint? renderCustomPaint;
 
   static Pointer<NativeCanvasRenderingContext2D> _getContext(
-      Pointer<NativeEventTarget> nativeCanvasElement, Pointer<NativeString> contextId) {
-    CanvasElement canvasElement = EventTarget.getEventTargetByPointer(nativeCanvasElement) as CanvasElement;
+      Pointer<NativeBindingObject> nativeCanvasElement, Pointer<NativeString> contextId) {
+    CanvasElement canvasElement = BindingObjectBridge.getBindingObject(nativeCanvasElement) as CanvasElement;
     canvasElement.getContext(nativeStringToString(contextId));
     return canvasElement.painter.context!.nativeCanvasRenderingContext2D;
   }
 
-  CanvasElement(EventTargetContext? context)
+  CanvasElement([BindingContext? context])
       : super(
           context,
           isIntrinsicBox: true,
@@ -64,6 +65,33 @@ class CanvasElement extends Element {
 
   // Currently only 2d rendering context for canvas is supported.
   CanvasRenderingContext2D? context2d;
+
+  // Bindings.
+  @override
+  getProperty(String key) {
+    switch (key) {
+      case 'width': return width;
+      case 'height': return height;
+      default: return super.getProperty(key);
+    }
+  }
+
+  @override
+  void setProperty(String key, value) {
+    switch (key) {
+      case 'width': width = castToType<int>(value); break;
+      case 'height': height = castToType<int>(value); break;
+      default: super.setProperty(key, value);
+    }
+  }
+
+  @override
+  invokeMethod(String method, List args) {
+    switch (method) {
+      case 'getContext': return getContext(castToType<String>(args[0])).nativeCanvasRenderingContext2D;
+      default: return super.invokeMethod(method, args);
+    }
+  }
 
   @override
   void willAttachRenderer() {
@@ -78,12 +106,6 @@ class CanvasElement extends Element {
   }
 
   @override
-  void didAttachRenderer() {
-    super.didAttachRenderer();
-    context2d ??= CanvasRenderingContext2D();
-  }
-
-  @override
   void didDetachRenderer() {
     super.didDetachRenderer();
     style.removeStyleChangeListener(_styleChangedListener);
@@ -91,8 +113,8 @@ class CanvasElement extends Element {
     renderCustomPaint = null;
   }
 
-  CanvasRenderingContext2D getContext(String contextId, { options }) {
-    switch (contextId) {
+  CanvasRenderingContext2D getContext(String type, { options }) {
+    switch (type) {
       case '2d':
         if (painter.context == null) {
           context2d ??= CanvasRenderingContext2D();
@@ -101,7 +123,7 @@ class CanvasElement extends Element {
         }
         return painter.context!;
       default:
-        throw FlutterError('CanvasRenderingContext $contextId not supported!');
+        throw FlutterError('CanvasRenderingContext $type not supported!');
     }
   }
 

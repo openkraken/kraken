@@ -4,6 +4,7 @@
  */
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/foundation.dart';
 
 const String BODY = 'BODY';
 
@@ -12,7 +13,7 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class BodyElement extends Element {
-  BodyElement(EventTargetContext? context)
+  BodyElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 
   @override

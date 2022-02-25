@@ -285,14 +285,18 @@ typedef NativeCallNativeMethods = Void Function(
     Int32 argc,
     Pointer<NativeValue> argv);
 
-class NativeEventTarget extends Struct {
+class NativeBindingObject extends Struct {
   external Pointer<Void> instance;
+  // Shared method called by JS side.
+  external Pointer<NativeFunction> callNativeMethods;
+}
+
+class NativeEventTarget extends Struct {
   external Pointer<NativeFunction<NativeDispatchEvent>> dispatchEvent;
-  external Pointer<NativeFunction<NativeCallNativeMethods>> callNativeMethods;
 }
 
 typedef NativeCanvasGetContext = Pointer<NativeCanvasRenderingContext2D> Function(
-    Pointer<NativeEventTarget> nativeCanvasElement, Pointer<NativeString> contextId);
+    Pointer<NativeBindingObject> nativeCanvasElement, Pointer<NativeString> contextId);
 
 class NativeCanvasRenderingContext2D extends Struct {
   external Pointer<NativeFunction<NativeCallNativeMethods>> callNativeMethods;

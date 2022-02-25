@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/foundation.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/rendering.dart';
 
@@ -74,11 +75,39 @@ class ImageElement extends Element {
 
   ImageStreamCompleterHandle? _completerHandle;
 
-  ImageElement(EventTargetContext? context)
+  ImageElement([BindingContext? context])
       : super(
       context,
       isIntrinsicBox: true,
       defaultStyle: _defaultStyle) {
+  }
+
+  // Bindings.
+  @override
+  getProperty(String key) {
+    switch (key) {
+      case 'src': return src;
+      case 'loading': return loading;
+      case 'width': return width;
+      case 'height': return height;
+      case 'scaling': return scaling;
+      case 'naturalWidth': return naturalWidth;
+      case 'naturalHeight': return naturalHeight;
+      case 'complete': return complete;
+      default: return super.getProperty(key);
+    }
+  }
+
+  @override
+  void setProperty(String key, value) {
+    switch (key) {
+      case 'src': src = castToType<String>(value); break;
+      case 'loading': loading = castToType<bool>(value); break;
+      case 'width': width = castToType<int>(value); break;
+      case 'height': height = castToType<int>(value); break;
+      case 'scaling': scaling = castToType<String>(value); break;
+      default: super.setProperty(key, value);
+    }
   }
 
   @override

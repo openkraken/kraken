@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:kraken/widget.dart';
 
@@ -101,8 +102,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
     return _children;
   }
 
-  Node(this.nodeType, EventTargetContext? context)
-      : super(context);
+  Node(this.nodeType, [BindingContext? context]) : super(context);
 
   // If node is on the tree, the root parent is body.
   bool get isConnected {
