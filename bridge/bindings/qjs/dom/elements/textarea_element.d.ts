@@ -3,9 +3,13 @@ interface Element {}
 
 // https://html.spec.whatwg.org/multipage/form-elements.html#the-textarea-element
 interface TextareaElement extends Element {
+  defaultValue: string;
+  value: string;
+  cols: number;
+  rows: number;
+  wrap: string;
   autofocus: boolean;
   autocomplete: string;
-  cols: number;
   disabled: boolean;
   minlength: number;
   maxlength: number;
@@ -13,8 +17,6 @@ interface TextareaElement extends Element {
   placeholder: string;
   readonly: boolean;
   required: boolean;
-  rows: number;
-  wrap: string;
   focus(): void;
   blur(): void;
 }

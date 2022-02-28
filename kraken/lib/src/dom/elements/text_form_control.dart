@@ -21,6 +21,7 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/widget.dart';
 
 const String VALUE = 'value';
+const String DEFAULT_VALUE = 'defaultValue';
 
 /// https://www.w3.org/TR/css-sizing-3/#intrinsic-sizes
 /// For boxes without a preferred aspect ratio:
@@ -332,10 +333,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     }
 
     addChild(createRenderBox());
-
-    if (properties.containsKey(VALUE)) {
-      setProperty(VALUE, properties[VALUE]);
-    }
 
     SchedulerBinding.instance!.addPostFrameCallback((_) {
       if (_autoFocus) {
@@ -954,7 +951,8 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   void setProperty(String key, value) {
     super.setProperty(key, value);
 
-    if (key == VALUE) {
+    if (key == VALUE || key == DEFAULT_VALUE) {
+      value = properties[VALUE] ?? properties[DEFAULT_VALUE];
       String text = value?.toString() ?? '';
       TextRange composing = _textSelectionDelegate._textEditingValue.composing;
       TextSelection selection = TextSelection.collapsed(offset: text.length);

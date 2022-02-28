@@ -4,6 +4,7 @@ interface Element {}
 interface InputElement extends Element {
   width: number;
   height: number;
+  defaultValue: string;
   value: string;
   accept: string;
   autocomplete: string;
