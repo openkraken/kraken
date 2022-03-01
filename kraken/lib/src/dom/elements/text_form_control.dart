@@ -33,6 +33,7 @@ const String DEFAULT_VALUE = 'defaultValue';
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
   BORDER: '1px solid #767676',
+  BACKGROUND_COLOR: '#fff',
 };
 
 // The default width ratio to multiple for calculating the default width of input
