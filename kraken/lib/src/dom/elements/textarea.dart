@@ -6,6 +6,8 @@ import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 
 const String TEXTAREA = 'TEXTAREA';
+const String ROWS = 'rows';
+const String COLS = 'cols';
 
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
@@ -17,12 +19,21 @@ class TextareaElement extends TextFormControlElement {
     : super(context, isMultiline: true, defaultStyle: _defaultStyle, isIntrinsicBox: true);
 
   @override
-  void didAttachRenderer() {
-    super.didAttachRenderer();
+  double? get defaultWidth {
+    // cols defaults to 20.
+    // https://html.spec.whatwg.org/multipage/form-elements.html#attr-textarea-cols
+    return avgCharWidth * double.parse(properties[COLS] ?? '20');
+  }
 
-    if (!properties.containsKey(VALUE) && !properties.containsKey(DEFAULT_VALUE)) {
-      setProperty(DEFAULT_VALUE, textContent);
-    }
+  @override
+  double? get defaultHeight {
+    // rows defaults to 2.
+    // https://html.spec.whatwg.org/multipage/form-elements.html#attr-textarea-rows
+    double computedLineHeight = renderStyle.lineHeight != CSSLengthValue.normal
+      ? renderStyle.lineHeight.computedValue
+      : 1.2 * renderStyle.fontSize.computedValue;
+
+    return computedLineHeight * double.parse(properties[ROWS] ?? '2');
   }
 
   // Text content of textarea acts as default value when defaultValue property is not set.
@@ -36,5 +47,15 @@ class TextareaElement extends TextFormControlElement {
     }
     return str;
   }
+
+  @override
+  void didAttachRenderer() {
+    super.didAttachRenderer();
+
+    if (!properties.containsKey(VALUE) && !properties.containsKey(DEFAULT_VALUE)) {
+      setProperty(DEFAULT_VALUE, textContent);
+    }
+  }
+
 }
 

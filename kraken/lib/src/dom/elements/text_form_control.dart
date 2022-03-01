@@ -326,10 +326,12 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     AnimationController animationController = _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     animationController.addListener(_onCursorColorTick);
 
-    // Set default width of input when width is not set in style.
+    // Set default width/height when width/height is not set in style.
     if (renderBoxModel!.renderStyle.width.isAuto) {
-      double fontSize = renderBoxModel!.renderStyle.fontSize.computedValue;
-      renderBoxModel!.renderStyle.width = CSSLengthValue(fontSize * _FONT_SIZE_RATIO, CSSLengthType.PX);
+      renderBoxModel!.renderStyle.width = CSSLengthValue(defaultWidth, CSSLengthType.PX);
+    }
+    if (renderBoxModel!.renderStyle.height.isAuto && defaultHeight != null) {
+      renderBoxModel!.renderStyle.height = CSSLengthValue(defaultHeight, CSSLengthType.PX);
     }
 
     addChild(createRenderBox());
@@ -372,7 +374,10 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       if (property == HEIGHT) {
         _renderTextControlLeaderLayer!.markNeedsLayout();
 
-      } else if (property == LINE_HEIGHT && renderStyle.height.isAuto) {
+      } else if (property == LINE_HEIGHT && style[HEIGHT].isEmpty) {
+        if (defaultHeight != null) {
+          renderStyle.height = CSSLengthValue(defaultHeight, CSSLengthType.PX);
+        }
         _renderTextControlLeaderLayer!.markNeedsLayout();
         // It needs to mark _renderTextControl as needsLayout manually cause
         // line-height change will not affect constraints which will in turn
@@ -382,8 +387,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       // It needs to judge width in style here cause
       // width in renderStyle may be set in node attach.
       } else if (property == FONT_SIZE && style[WIDTH].isEmpty) {
-        double fontSize = renderStyle.fontSize.computedValue;
-        renderStyle.width = CSSLengthValue(fontSize * _FONT_SIZE_RATIO, CSSLengthType.PX);
+        renderStyle.width = CSSLengthValue(defaultWidth, CSSLengthType.PX);
         _renderTextControlLeaderLayer!.markNeedsLayout();
       }
     }
@@ -405,7 +409,14 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   }
 
   TextSpan _buildTextSpan({ String? text, Color? color }) {
-    return CSSTextMixin.createTextSpan(text ?? '', renderStyle, color: color);
+    return CSSTextMixin.createTextSpan(text ?? '', renderStyle,
+      color: color,
+      // For multiline editing, lineHeight works for inner text in the element,
+      // so it needs to set line-height of textSpan for RenderEditable to use.
+      height: isMultiline && renderStyle.lineHeight != CSSLengthValue.normal
+      ? renderStyle.lineHeight.computedValue / renderStyle.fontSize.computedValue
+      : null
+    );
   }
 
   TextSpan _buildPasswordTextSpan(String text) {
@@ -422,14 +433,48 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
   // Get the text size of input by layouting manually cause RenderEditable does not expose textPainter.
   Size getTextSize() {
-    final Size textSize = (TextPainter(
+    TextPainter textPainter = TextPainter(
       text: renderEditable!.text,
       maxLines: _maxLines,
-      textDirection: TextDirection.ltr)
-      ..layout())
-      .size;
-    return textSize;
+      textDirection: TextDirection.ltr
+    );
+
+    textPainter.layout();
+
+    return textPainter.size;
   }
+
+  // The average width of characters in a font family.
+  // Flutter does not expose avgCharWidth of font metrics, so it fallbacks to
+  // so use width of '0' as WebKit did.
+  // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/rendering/RenderTextControl.cpp#L142
+  double get avgCharWidth {
+    TextStyle textStyle = TextStyle(
+      fontFamilyFallback: renderStyle.fontFamily,
+      fontSize: renderStyle.fontSize.computedValue,
+      textBaseline: CSSText.getTextBaseLine(),
+      package: CSSText.getFontPackage(),
+      locale: CSSText.getLocale(),
+    );
+    TextPainter painter = TextPainter(
+      text: TextSpan(
+        text: '0',
+        style: textStyle,
+      ),
+      textDirection: TextDirection.ltr
+    );
+    painter.layout();
+
+    List<LineMetrics> lineMetrics = painter.computeLineMetrics();
+
+    return lineMetrics[0].width;
+  }
+
+  // Must override in subClasses.
+  double? get defaultWidth => null;
+
+  // Must override in subClasses.
+  double? get defaultHeight => null;
 
   Size? _textSize;
 
