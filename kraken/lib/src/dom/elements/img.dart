@@ -242,6 +242,7 @@ class ImageElement extends Element {
   }
 
   void _onImageError(Object exception, StackTrace? stackTrace) {
+    print('$exception\n$stackTrace');
     dispatchEvent(Event(EVENT_ERROR));
   }
 
@@ -403,6 +404,9 @@ class ImageElement extends Element {
       RenderReplaced renderReplaced = renderBoxModel! as RenderReplaced;
       renderReplaced.isInLazyRendering = false;
     }
+
+    // Image may be detached when image frame loaded.
+    if (!isRendererAttached) return;
 
     _attachImage();
     _resizeImage();
