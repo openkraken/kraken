@@ -23,22 +23,11 @@ import 'package:kraken/widget.dart';
 const String VALUE = 'value';
 const String DEFAULT_VALUE = 'defaultValue';
 
-/// https://www.w3.org/TR/css-sizing-3/#intrinsic-sizes
-/// For boxes without a preferred aspect ratio:
-/// If the available space is definite in the appropriate dimension, use the stretch fit into that size in that dimension.
-///
-/// Otherwise, if the box has a <length> as its computed minimum size (min-width/min-height) in that dimension, use that size.
-//
-/// Otherwise, use 300px for the width and/or 150px for the height as needed.
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
   BORDER: '1px solid #767676',
   BACKGROUND_COLOR: '#fff',
 };
-
-// The default width ratio to multiple for calculating the default width of input
-// when width is not set.
-const int _FONT_SIZE_RATIO = 10;
 
 typedef ValueChanged<T> = void Function(T value);
 // The time it takes for the cursor to fade from fully opaque to fully
@@ -672,7 +661,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   }
 
   RenderTextControlLeaderLayer createRenderBox() {
-    assert(renderBoxModel is RenderIntrinsic);
     RenderEditable renderEditable = createRenderEditable();
 
     _renderTextControl = RenderTextControl(

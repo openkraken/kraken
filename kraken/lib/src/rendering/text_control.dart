@@ -48,25 +48,25 @@ class RenderTextControlLeaderLayer extends RenderLeaderLayer {
     RenderIntrinsic renderIntrinsic = parent as RenderIntrinsic;
     RenderStyle renderStyle = renderIntrinsic.renderStyle;
 
-    double intrinsicInputHeight = renderEditable!.preferredLineHeight
+    double intrinsicHeight = renderEditable!.preferredLineHeight
       + renderStyle.paddingTop.computedValue + renderStyle.paddingBottom.computedValue
       + renderStyle.effectiveBorderTopWidth.computedValue + renderStyle.effectiveBorderBottomWidth.computedValue;
 
-    // Editable area should align to the center vertically for input element which
+    // Editable area should align to the center vertically for text control element which
     // does not support multiline editing.
     double dy;
     if (renderStyle.height.isNotAuto) {
-      dy = (renderStyle.height.computedValue - intrinsicInputHeight) / 2;
+      dy = (renderStyle.height.computedValue - intrinsicHeight) / 2;
     } else if (renderStyle.lineHeight.type != CSSLengthType.NORMAL &&
-      renderStyle.lineHeight.computedValue > intrinsicInputHeight) {
-      dy = (renderStyle.lineHeight.computedValue - intrinsicInputHeight) /2;
+      renderStyle.lineHeight.computedValue > intrinsicHeight) {
+      dy = (renderStyle.lineHeight.computedValue - intrinsicHeight) /2;
     } else {
       dy = 0;
     }
     return Offset(0, dy);
   }
 
-  // Note paint override can not be done in RenderTextControl cause input toolbar
+  // Note paint override can not be done in RenderTextControl cause text control toolbar
   // paints relative to the perferred height of textPainter.
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -86,12 +86,19 @@ class RenderTextControl extends RenderProxyBox {
     if (child != null) {
       child!.layout(constraints, parentUsesSize: true);
       Size childSize = child!.size;
-      double width = constraints.maxWidth != double.infinity ?
-      constraints.maxWidth : childSize.width;
 
       RenderTextControlLeaderLayer renderLeaderLayer = parent as RenderTextControlLeaderLayer;
       RenderIntrinsic renderIntrinsic = renderLeaderLayer.parent as RenderIntrinsic;
       RenderStyle renderStyle = renderIntrinsic.renderStyle;
+
+      double width;
+      if (constraints.maxWidth != double.infinity) {
+        width = constraints.maxWidth;
+      } else {
+        width = childSize.width
+          - renderStyle.paddingLeft.computedValue - renderStyle.paddingRight.computedValue
+          - renderStyle.effectiveBorderLeftWidth.computedValue - renderStyle.effectiveBorderRightWidth.computedValue;
+      }
 
       double height;
       // Height priority: height > max(line-height, child height) > child height
@@ -99,6 +106,9 @@ class RenderTextControl extends RenderProxyBox {
         height = constraints.maxHeight;
       } else  {
         height = math.max(renderStyle.lineHeight.computedValue, childSize.height);
+        height = height
+          - renderStyle.paddingTop.computedValue - renderStyle.paddingBottom.computedValue
+          - renderStyle.effectiveBorderTopWidth.computedValue - renderStyle.effectiveBorderBottomWidth.computedValue;
       }
 
       size = Size(width, height);
