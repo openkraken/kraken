@@ -247,6 +247,9 @@ class ImageElement extends Element {
   }
 
   void _resizeImage() {
+    // Only need to resize image after image is fully loaded.
+    if (!complete) return;
+
     if (_styleWidth == null && _propertyWidth != null) {
       // The intrinsic width of the image in pixels. Must be an integer without a unit.
       renderStyle.width = CSSLengthValue(_propertyWidth, CSSLengthType.PX);
@@ -463,14 +466,14 @@ class ImageElement extends Element {
       _propertyWidth = CSSNumber.parseNumber(value);
       if (_shouldScaling) {
         _resolveImage(_resolvedUri, updateImageProvider: true);
-      } else if (complete) { // Only need to resize image after image is fully loaded.
+      } else {
         _resizeImage();
       }
     } else if (key == HEIGHT) {
       _propertyHeight = CSSNumber.parseNumber(value);
       if (_shouldScaling) {
         _resolveImage(_resolvedUri, updateImageProvider: true);
-      } else if (complete) { // Only need to resize image after image is fully loaded.
+      } else {
         _resizeImage();
       }
     }
@@ -508,7 +511,7 @@ class ImageElement extends Element {
       // Resize image
       if (_shouldScaling) {
         _resolveImage(_resolvedUri, updateImageProvider: true);
-      } else if (complete) { // Only need to resize image after image is fully loaded.
+      } else {
         _resizeImage();
       }
     } else if (property == OBJECT_FIT && _renderImage != null) {

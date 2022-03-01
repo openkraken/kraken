@@ -240,7 +240,7 @@ class Element extends Node
       } else {
         if (isRepaintBoundary) {
           // RenderReplaced --> RenderRepaintBoundaryReplaced
-          nextReplaced = previousReplaced.toRepaintBoundaryIntrinsic();
+          nextReplaced = previousReplaced.toRepaintBoundaryReplaced();
         } else {
           // RenderReplaced --> RenderReplaced
           nextReplaced = previousReplaced;
