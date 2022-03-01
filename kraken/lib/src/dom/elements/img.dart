@@ -234,6 +234,7 @@ class ImageElement extends Element {
   }
 
   void _onImageError(Object exception, StackTrace? stackTrace) {
+    print('$exception\n$stackTrace');
     dispatchEvent(Event(EVENT_ERROR));
   }
 
@@ -390,6 +391,9 @@ class ImageElement extends Element {
     if (_frameCount > 2) {
       forceToRepaintBoundary = true;
     }
+
+    // Image may be detached when image frame loaded.
+    if (!isRendererAttached) return;
 
     _attachImage();
     _resizeImage();
