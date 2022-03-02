@@ -22,8 +22,7 @@ namespace kraken::binding::qjs {
 
 static std::atomic<int32_t> globalEventTargetId{0};
 std::once_flag kEventTargetInitFlag;
-#define GetPropertyMagic "%g"
-#define SetPropertyMagic "%s"
+
 
 void bindEventTarget(ExecutionContext* context) {
   auto* constructor = EventTarget::instance(context);

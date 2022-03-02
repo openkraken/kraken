@@ -19,6 +19,9 @@
 void TEST_invokeBindingMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv);
 #endif
 
+#define GetPropertyMagic "%g"
+#define SetPropertyMagic "%s"
+
 namespace kraken::binding::qjs {
 
 class EventTargetInstance;

@@ -84,6 +84,7 @@ void _invokeBindingMethod(Pointer<Void> nativeBindingObject, Pointer<NativeValue
 
 abstract class BindingBridge {
   static final Pointer<NativeFunction<NativeInvokeBindingMethod>> _nativeInvokeBindingMethod = Pointer.fromFunction(_invokeBindingMethod);
+  static  Pointer<NativeFunction<NativeInvokeBindingMethod>> get nativeInvokeBindingMethod => _nativeInvokeBindingMethod;
 
   static final SplayTreeMap<int, BindingObject> _nativeObjects = SplayTreeMap();
 
@@ -96,15 +97,20 @@ abstract class BindingBridge {
   }
 
   static void _bindObject(BindingObject object) {
-    Pointer<NativeBindingObject>? nativeBindingObject = castToType<Pointer<NativeBindingObject>?>(object.pointer);
+    Pointer? nativeBindingObject = castToType<Pointer?>(object.pointer);
     if (nativeBindingObject != null) {
-      nativeBindingObject.ref.invokeBindingMethod = _nativeInvokeBindingMethod;
       _nativeObjects[nativeBindingObject.address] = object;
+      if (nativeBindingObject is Pointer<NativeBindingObject>) {
+        nativeBindingObject.ref.invokeBindingMethod = _nativeInvokeBindingMethod;
+      } else if (nativeBindingObject is Pointer<NativeCanvasRenderingContext2D>){
+        // @TODO: Remove it.
+        nativeBindingObject.ref.invokeBindingMethod = _nativeInvokeBindingMethod;
+      }
     }
   }
 
   static void _unbindObject(BindingObject object) {
-    Pointer<NativeBindingObject>? nativeBindingObject = castToType<Pointer<NativeBindingObject>?>(object.pointer);
+    Pointer? nativeBindingObject = castToType<Pointer?>(object.pointer);
     if (nativeBindingObject != null) {
       _nativeObjects.remove(nativeBindingObject.address);
     }

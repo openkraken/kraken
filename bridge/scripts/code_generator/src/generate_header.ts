@@ -71,6 +71,9 @@ public:
 
   JSValue invokeBindingMethod(const char* method, int32_t argc,
                           NativeValue *argv);
+  // @TODO: Should remove it.
+  JSValue getBindingProperty(const char* prop);
+  void setBindingProperty(const char* prop, NativeValue value);
 
 
   ${methodsDefine.join('\n  ')}

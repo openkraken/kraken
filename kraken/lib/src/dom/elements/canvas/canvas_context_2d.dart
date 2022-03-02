@@ -2,14 +2,12 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'dart:collection';
 import 'dart:core';
 import 'dart:ffi';
 import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:ffi/ffi.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/foundation.dart';
@@ -45,53 +43,245 @@ class CanvasRenderingContext2DSettings {
 
 typedef CanvasAction = void Function(Canvas, Size);
 
-// void _callNativeMethods(Pointer<Void> nativePtr, Pointer<NativeValue> returnedValue, Pointer<NativeString> nativeMethod, int argc, Pointer<NativeValue> argv) {
-//   String method = nativeStringToString(nativeMethod);
-//   List<dynamic> values = List.generate(argc, (i) {
-//     Pointer<NativeValue> nativeValue = argv.elementAt(i);
-//     return fromNativeValue(nativeValue);
-//   });
-//
-//   CanvasRenderingContext2D renderingContext2D = CanvasRenderingContext2D.getCanvasRenderContext2DOfNativePtr(nativePtr.cast<NativeCanvasRenderingContext2D>());
-//   try {
-//     dynamic result = renderingContext2D.handleJSCall(method, values);
-//     toNativeValue(returnedValue, result);
-//   } catch (e, stack) {
-//     print('$e\n$stack');
-//     toNativeValue(returnedValue, null);
-//   }
-// }
-
 class CanvasRenderingContext2D extends BindingObject {
-  final Pointer<NativeCanvasRenderingContext2D> nativeCanvasRenderingContext2D;
+  CanvasRenderingContext2D(this.canvas) : _pointer = malloc.allocate<NativeCanvasRenderingContext2D>(
+      sizeOf<NativeCanvasRenderingContext2D>()), super();
 
-  CanvasRenderingContext2D()
-      : nativeCanvasRenderingContext2D = malloc.allocate<NativeCanvasRenderingContext2D>(sizeOf<NativeCanvasRenderingContext2D>()) {
-    _settings = CanvasRenderingContext2DSettings();
+  final Pointer<NativeCanvasRenderingContext2D> _pointer;
 
-    // nativeCanvasRenderingContext2D.ref.callNativeMethods = Pointer.fromFunction(_callNativeMethods);
-    // _nativeMap[nativeCanvasRenderingContext2D.address] = this;
-  }
+  @override
+  get pointer => _pointer;
 
-  static final SplayTreeMap<int, CanvasRenderingContext2D> _nativeMap = SplayTreeMap();
+  @override
+  get contextId => canvas.contextId;
 
-  static CanvasRenderingContext2D getCanvasRenderContext2DOfNativePtr(Pointer<NativeCanvasRenderingContext2D> nativePtr) {
-    CanvasRenderingContext2D? renderingContext = _nativeMap[nativePtr.address];
-    if (renderingContext == null) throw FlutterError('Can not get nativeRenderingContext2D from pointer: $nativePtr');
-    return renderingContext;
+  Pointer<NativeCanvasRenderingContext2D> toNative() {
+    return pointer;
   }
 
   @override
-  void dispose() {
-    super.dispose();
-    _nativeMap.remove(nativeCanvasRenderingContext2D.address);
+  invokeBindingMethod(String method, List args) {
+    // @NOTE: Bridge not guarantee that input type number is double.
+    switch (method) {
+      case 'arc': return arc(
+          castToType<num>(args[0]).toDouble(),
+          castToType<num>(args[1]).toDouble(),
+          castToType<num>(args[2]).toDouble(),
+          castToType<num>(args[3]).toDouble(),
+          castToType<num>(args[4]).toDouble(),
+          anticlockwise : args[5] == 1 ? true : false);
+      case 'arcTo':  return arcTo(
+          castToType<num>(args[0]).toDouble(),
+          castToType<num>(args[1]).toDouble(),
+          castToType<num>(args[2]).toDouble(),
+          castToType<num>(args[3]).toDouble(),
+          castToType<num>(args[4]).toDouble()
+      );
+      case 'fillRect': return fillRect(
+          castToType<num>(args[0]).toDouble(),
+          castToType<num>(args[1]).toDouble(),
+          castToType<num>(args[2]).toDouble(),
+          castToType<num>(args[3]).toDouble()
+      );
+      case 'clearRect': return clearRect(
+          castToType<num>(args[0]).toDouble(),
+          castToType<num>(args[1]).toDouble(),
+          castToType<num>(args[2]).toDouble(),
+          castToType<num>(args[3]).toDouble());
+      case 'strokeRect': return strokeRect(
+          castToType<num>(args[0]).toDouble(),
+          castToType<num>(args[1]).toDouble(),
+          castToType<num>(args[2]).toDouble(),
+          castToType<num>(args[3]).toDouble());
+      case 'fillText':
+        double maxWidth = castToType<num>(args[3]).toDouble();
+        if (!maxWidth.isNaN) {
+          return fillText(
+              castToType<String>(args[0]),
+              castToType<num>(args[1]).toDouble(),
+              castToType<num>(args[2]).toDouble(),
+              maxWidth: maxWidth);
+        } else {
+          return fillText(castToType<String>(args[0]),
+            castToType<num>(args[1]).toDouble(),
+            castToType<num>(args[2]).toDouble());
+        }
+      case 'strokeText':
+        double maxWidth = castToType<num>(args[3]).toDouble();
+      if (!maxWidth.isNaN) {
+        return strokeText(castToType<String>(args[0]),
+            castToType<num>(args[1]).toDouble(),
+            castToType<num>(args[2]).toDouble(),
+            maxWidth: maxWidth);
+      } else {
+        return strokeText(castToType<String>(args[0]),
+            castToType<num>(args[1]).toDouble(),
+            castToType<num>(args[2]).toDouble());
+      }
+      case 'save': return save();
+      case 'restore': return restore();
+      case 'beginPath': return beginPath();
+      case 'bezierCurveTo': return bezierCurveTo(
+          castToType<num>(args[0]).toDouble(),
+          castToType<num>(args[1]).toDouble(),
+          castToType<num>(args[2]).toDouble(),
+          castToType<num>(args[3]).toDouble(),
+          castToType<num>(args[4]).toDouble(),
+          castToType<num>(args[5]).toDouble());
+      case 'clip':
+        PathFillType fillType = castToType<String>(args[0]) == EVENODD ? PathFillType.evenOdd : PathFillType.nonZero;
+        return clip(fillType);
+      case 'closePath': return closePath();
+      case 'drawImage':
+        BindingObject imageElement = BindingBridge.getBindingObject(args[0]);
+        if (imageElement is ImageElement) {
+          double sx = 0.0,
+              sy = 0.0,
+              sWidth = 0.0,
+              sHeight = 0.0,
+              dx = 0.0,
+              dy = 0.0,
+              dWidth = 0.0,
+              dHeight = 0.0;
+
+          if (args.length == 3) {
+            dx = castToType<num>(args[1]).toDouble();
+            dy = castToType<num>(args[2]).toDouble();
+          } else if (args.length == 5) {
+            dx = castToType<num>(args[1]).toDouble();
+            dy = castToType<num>(args[2]).toDouble();
+            dWidth = castToType<num>(args[3]).toDouble();
+            dHeight = castToType<num>(args[4]).toDouble();
+          } else if (args.length == 9) {
+            sx = castToType<num>(args[1]).toDouble();
+            sy = castToType<num>(args[2]).toDouble();
+            sWidth = castToType<num>(args[3]).toDouble();
+            sHeight = castToType<num>(args[4]).toDouble();
+            dx = castToType<num>(args[5]).toDouble();
+            dy = castToType<num>(args[6]).toDouble();
+            dWidth = castToType<num>(args[7]).toDouble();
+            dHeight = castToType<num>(args[8]).toDouble();
+          }
+
+          return drawImage(
+              args.length,
+              imageElement.image,
+              sx,
+              sy,
+              sWidth,
+              sHeight,
+              dx,
+              dy,
+              dWidth,
+              dHeight);
+        }
+        break;
+      case 'ellipse':
+        return ellipse(
+            castToType<num>(args[0]).toDouble(),
+            castToType<num>(args[1]).toDouble(),
+            castToType<num>(args[2]).toDouble(),
+            castToType<num>(args[3]).toDouble(),
+            castToType<num>(args[4]).toDouble(),
+            castToType<num>(args[5]).toDouble(),
+            castToType<num>(args[6]).toDouble(),
+            anticlockwise : args[7] == 1 ? true : false);
+      case 'fill':
+         PathFillType fillType = args[0] == EVENODD ? PathFillType.evenOdd : PathFillType.nonZero;
+         return fill(fillType);
+      case 'lineTo': return lineTo(
+        castToType<num>(args[0]).toDouble(),
+        castToType<num>(args[1]).toDouble());
+      case 'moveTo': return moveTo(
+        castToType<num>(args[0]).toDouble(),
+        castToType<num>(args[1]).toDouble());
+      case 'quadraticCurveTo': return quadraticCurveTo(
+          castToType<num>(args[0]).toDouble(),
+          castToType<num>(args[1]).toDouble(),
+          castToType<num>(args[2]).toDouble(),
+          castToType<num>(args[3]).toDouble());
+      case 'rect': return rect(
+          castToType<num>(args[0]).toDouble(),
+          castToType<num>(args[1]).toDouble(),
+          castToType<num>(args[2]).toDouble(),
+          castToType<num>(args[3]).toDouble());
+      case 'rotate': return rotate(castToType<num>(args[0]).toDouble());
+      case 'resetTransform': return resetTransform();
+      case 'scale': return scale(
+          castToType<num>(args[0]).toDouble(),
+          castToType<num>(args[1]).toDouble()
+      );
+      case 'stroke': return stroke();
+      case 'setTransform': return setTransform(
+          castToType<num>(args[0]).toDouble(),
+          castToType<num>(args[1]).toDouble(),
+          castToType<num>(args[2]).toDouble(),
+          castToType<num>(args[3]).toDouble(),
+          castToType<num>(args[4]).toDouble(),
+          castToType<num>(args[5]).toDouble()
+      );
+      case 'transform': return transform(
+          castToType<num>(args[0]).toDouble(),
+          castToType<num>(args[1]).toDouble(),
+          castToType<num>(args[2]).toDouble(),
+          castToType<num>(args[3]).toDouble(),
+          castToType<num>(args[4]).toDouble(),
+          castToType<num>(args[5]).toDouble()
+      );
+      case 'translate': return translate(
+        castToType<num>(args[0]).toDouble(),
+        castToType<num>(args[1]).toDouble());
+      default: return super.invokeBindingMethod(method, args);
+    }
   }
 
-  late CanvasRenderingContext2DSettings _settings;
+  @override
+  void setBindingProperty(String key, value) {
+    switch (key) {
+      case 'fillStyle':
+        Color? color = CSSColor.parseColor(castToType<String>(value));
+        if (color != null) fillStyle = color;
+        break;
+      case 'direction': direction = parseDirection(castToType<String>(value)); break;
+      case 'font': font = castToType<String>(value); break;
+      case 'strokeStyle':
+        Color? color = CSSColor.parseColor(castToType<String>(value));
+        if (color != null) strokeStyle = color;
+        break;
+      case 'lineCap': lineCap = parseLineCap(castToType<String>(value)); break;
+      case 'lineDashOffset': lineDashOffset = castToType<double>(value); break;
+      case 'lineJoin': lineJoin = parseLineJoin(castToType<String>(value)); break;
+      case 'lineWidth': lineWidth = castToType<double>(value); break;
+      case 'miterLimit': miterLimit = castToType<double>(value); break;
+      case 'textAlign': textAlign = parseTextAlign(castToType<String>(value)); break;
+      case 'textBaseline': textBaseline = parseTextBaseline(castToType<String>(value)); break;
+      default: super.setBindingProperty(key, value);
+    }
+  }
+
+  @override
+  getBindingProperty(String key) {
+    switch (key) {
+      case 'fillStyle': return CSSColor.convertToHex(fillStyle);
+      case 'direction': return direction.toString();
+      case 'font': return font;
+      case 'strokeStyle': return CSSColor.convertToHex(strokeStyle);
+      case 'lineCap': return lineCap;
+      case 'lineDashOffset': return lineDashOffset;
+      case 'lineJoin': return lineJoin;
+      case 'lineWidth': return lineWidth;
+      case 'miterLimit': return miterLimit;
+      case 'textAlign': return textAlign.toString();
+      case 'textBaseline': return textBaseline.toString();
+      default: return super.getBindingProperty(key);
+    }
+  }
+
+  final CanvasRenderingContext2DSettings _settings = CanvasRenderingContext2DSettings();
 
   CanvasRenderingContext2DSettings getContextAttributes() => _settings;
 
-  late CanvasElement canvas;
+  CanvasElement canvas;
   // HACK: We need record the current matrix state because flutter canvas not export resetTransform now.
   // https://github.com/flutter/engine/pull/25449
   Matrix4 _matrix = Matrix4.identity();
@@ -305,21 +495,21 @@ class CanvasRenderingContext2D extends BindingObject {
     return path2d.path.contains(Offset(x, y));
   }
 
-  void arc(num x, num y, num radius, num startAngle, num endAngle, {bool anticlockwise = false}) {
+  void arc(double x, double y, double radius, double startAngle, double endAngle, {bool anticlockwise = false}) {
     addAction((Canvas canvas, Size size) {
-      path2d.arc(x.toDouble(), y.toDouble(), radius.toDouble(), startAngle.toDouble(), endAngle.toDouble(), anticlockwise: anticlockwise);
+      path2d.arc(x, y, radius, startAngle, endAngle, anticlockwise: anticlockwise);
     });
   }
 
-  void arcTo(num x1, num y1, num x2, num y2, num radius) {
+  void arcTo(double x1, double y1, double x2, double y2, double radius) {
     addAction((Canvas canvas, Size size) {
-      path2d.arcTo(x1.toDouble(), y1.toDouble(), x2.toDouble(), y2.toDouble(), radius.toDouble());
+      path2d.arcTo(x1, y1, x2, y2, radius);
     });
   }
 
-  void bezierCurveTo(num cp1x, num cp1y, num cp2x, num cp2y, num x, num y) {
+  void bezierCurveTo(double cp1x, double cp1y, double cp2x, double cp2y, double x, double y) {
     addAction((Canvas canvas, Size size) {
-      path2d.bezierCurveTo(cp1x.toDouble(), cp1y.toDouble(), cp2x.toDouble(), cp2y.toDouble(), x.toDouble(), y.toDouble());
+      path2d.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
     });
   }
 
@@ -329,13 +519,13 @@ class CanvasRenderingContext2D extends BindingObject {
     });
   }
 
-  void drawImage(int argumentCount, Image? img, num sx, num sy, num sWidth, num sHeight, num dx, num dy, num dWidth, num dHeight) {
+  void drawImage(int argumentCount, Image? img, double sx, double sy, double sWidth, double sHeight, double dx, double dy, double dWidth, double dHeight) {
     if (img == null) return;
 
     addAction((Canvas canvas, Size size) {
       // ctx.drawImage(image, dx, dy);
       if (argumentCount == 3) {
-        canvas.drawImage(img, Offset(dx.toDouble(), dy.toDouble()), Paint());
+        canvas.drawImage(img, Offset(dx, dy), Paint());
       } else {
         if (argumentCount == 5) {
           // ctx.drawImage(image, dx, dy, dWidth, dHeight);
@@ -346,40 +536,40 @@ class CanvasRenderingContext2D extends BindingObject {
         }
 
         canvas.drawImageRect(img,
-            Rect.fromLTWH(sx.toDouble(), sy.toDouble(), sWidth.toDouble(), sHeight.toDouble()),
-            Rect.fromLTWH(dx.toDouble(), dy.toDouble(), dWidth.toDouble(), dHeight.toDouble()),
+            Rect.fromLTWH(sx, sy, sWidth, sHeight),
+            Rect.fromLTWH(dx, dy, dWidth, dHeight),
             Paint());
       }
     });
   }
 
-  void ellipse(num x, num y, num radiusX, num radiusY, num rotation, num startAngle, num endAngle, {bool anticlockwise = false}) {
+  void ellipse(double x, double y, double radiusX, double radiusY, double rotation, double startAngle, double endAngle, {bool anticlockwise = false}) {
     addAction((Canvas canvas, Size size) {
-      path2d.ellipse(x.toDouble(), y.toDouble(), radiusX.toDouble(), radiusY.toDouble(), rotation.toDouble(), startAngle.toDouble(), endAngle.toDouble(), anticlockwise: anticlockwise);
+      path2d.ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise: anticlockwise);
     });
   }
 
-  void lineTo(num x, num y) {
+  void lineTo(double x, double y) {
     addAction((Canvas canvas, Size size) {
-      path2d.lineTo(x.toDouble(), y.toDouble());
+      path2d.lineTo(x, y);
     });
   }
 
-  void moveTo(num x, num y) {
+  void moveTo(double x, double y) {
     addAction((Canvas canvas, Size size) {
-      path2d.moveTo(x.toDouble(), y.toDouble());
+      path2d.moveTo(x, y);
     });
   }
 
-  void quadraticCurveTo(num cpx, num cpy, num x, num y) {
+  void quadraticCurveTo(double cpx, double cpy, double x, double y) {
     addAction((Canvas canvas, Size size) {
-      path2d.quadraticCurveTo(cpx.toDouble(), cpy.toDouble(), x.toDouble(), y.toDouble());
+      path2d.quadraticCurveTo(cpx, cpy, x, y);
     });
   }
 
-  void rect(num x, num y, num w, num h) {
+  void rect(double x, double y, double w, double h) {
     addAction((Canvas canvas, Size size) {
-      path2d.rect(x.toDouble(), y.toDouble(), w.toDouble(), h.toDouble());
+      path2d.rect(x, y, w, h);
     });
   }
 
@@ -437,19 +627,19 @@ class CanvasRenderingContext2D extends BindingObject {
   StrokeJoin get lineJoin => _lineJoin;
 
   double _lineWidth = 1.0; // (default 1)
-  set lineWidth(num? value) {
+  set lineWidth(double? value) {
     if (value == null) return;
     addAction((Canvas canvas, Size size) {
-      _lineWidth = value.toDouble();
+      _lineWidth = value;
     });
   }
   double get lineWidth => _lineWidth;
 
   double _miterLimit = 10.0; // (default 10)
-  set miterLimit(num? value) {
+  set miterLimit(double? value) {
     if (value == null) return;
     addAction((Canvas canvas, Size size) {
-      _miterLimit = value.toDouble();
+      _miterLimit = value;
     });
   }
   double get miterLimit => _miterLimit;
@@ -464,25 +654,25 @@ class CanvasRenderingContext2D extends BindingObject {
     _lineDash = segments;
   }
 
-  void translate(num x, num y) {
-    _matrix.translate(x.toDouble(), y.toDouble());
+  void translate(double x, double y) {
+    _matrix.translate(x, y);
     addAction((Canvas canvas, Size size) {
-      canvas.translate(x.toDouble(), y.toDouble());
+      canvas.translate(x, y);
     });
   }
 
-  void rotate(num angle) {
-    _matrix.setRotationZ(angle.toDouble());
+  void rotate(double angle) {
+    _matrix.setRotationZ(angle);
     addAction((Canvas canvas, Size size) {
-      canvas.rotate(angle.toDouble());
+      canvas.rotate(angle);
     });
   }
 
   // transformations (default transform is the identity matrix)
-  void scale(num x, num y) {
-    _matrix.scale(x.toDouble(), y.toDouble());
+  void scale(double x, double y) {
+    _matrix.scale(x, y);
     addAction((Canvas canvas, Size size) {
-      canvas.scale(x.toDouble(), y.toDouble());
+      canvas.scale(x, y);
     });
   }
 
@@ -491,7 +681,7 @@ class CanvasRenderingContext2D extends BindingObject {
   }
 
   // https://github.com/WebKit/WebKit/blob/a77a158d4e2086fbe712e488ed147e8a54d44d3c/Source/WebCore/html/canvas/CanvasRenderingContext2DBase.cpp#L843
-  void setTransform(num a, num b, num c, num d, num e, num f) {
+  void setTransform(double a, double b, double c, double d, double e, double f) {
     resetTransform();
     transform(a, b, c, d, e, f);
   }
@@ -505,7 +695,7 @@ class CanvasRenderingContext2D extends BindingObject {
     });
   }
 
-  void transform(num a, num b, num c, num d, num e, num f) {
+  void transform(double a, double b, double c, double d, double e, double f) {
     // Matrix3
     // [ a c e
     //   b d f
@@ -517,16 +707,16 @@ class CanvasRenderingContext2D extends BindingObject {
     //   e, f, 1, 0,
     //   0, 0, 0, 1 ]
     final Float64List m4storage = Float64List(16);
-    m4storage[0] = a.toDouble();
-    m4storage[1] = b.toDouble();
+    m4storage[0] = a;
+    m4storage[1] = b;
     m4storage[2] = 0.0;
     m4storage[3] = 0.0;
-    m4storage[4] = c.toDouble();
-    m4storage[5] = d.toDouble();
+    m4storage[4] = c;
+    m4storage[5] = d;
     m4storage[6] = 0.0;
     m4storage[7] = 0.0;
-    m4storage[8] = e.toDouble();
-    m4storage[9] = f.toDouble();
+    m4storage[8] = e;
+    m4storage[9] = f;
     m4storage[10] = 1.0;
     m4storage[11] = 0.0;
     m4storage[12] = 0.0;
@@ -574,8 +764,8 @@ class CanvasRenderingContext2D extends BindingObject {
     throw UnimplementedError();
   }
 
-  void clearRect(num x, num y, num w, num h) {
-    Rect rect = Rect.fromLTWH(x.toDouble(), y.toDouble(), w.toDouble(), h.toDouble());
+  void clearRect(double x, double y, double w, double h) {
+    Rect rect = Rect.fromLTWH(x, y, w, h);
     addAction((Canvas canvas, Size size) {
       // Must saveLayer before clear avoid there is a "black" background
       Paint paint = Paint()
@@ -585,16 +775,16 @@ class CanvasRenderingContext2D extends BindingObject {
     });
   }
 
-  void fillRect(num x, num y, num w, num h) {
-    Rect rect = Rect.fromLTWH(x.toDouble(), y.toDouble(), w.toDouble(), h.toDouble());
+  void fillRect(double x, double y, double w, double h) {
+    Rect rect = Rect.fromLTWH(x, y, w, h);
     addAction((Canvas canvas, Size size) {
       Paint paint = Paint()..color = fillStyle;
       canvas.drawRect(rect, paint);
     });
   }
 
-  void strokeRect(num x, num y, num w, num h) {
-    Rect rect = Rect.fromLTWH(x.toDouble(), y.toDouble(), w.toDouble(), h.toDouble());
+  void strokeRect(double x, double y, double w, double h) {
+    Rect rect = Rect.fromLTWH(x, y, w, h);
     addAction((Canvas canvas, Size size) {
       Paint paint = Paint()
         ..color = strokeStyle
@@ -667,35 +857,35 @@ class CanvasRenderingContext2D extends BindingObject {
     }
   }
 
-  void fillText(String text, num x, num y, {num? maxWidth}) {
+  void fillText(String text, double x, double y, {double? maxWidth}) {
     addAction((Canvas canvas, Size size) {
       TextPainter textPainter = _getTextPainter(text, fillStyle);
       if (maxWidth != null) {
         // FIXME: should scale down to a smaller font size in order to fit the text in the specified width.
-        textPainter.layout(maxWidth: maxWidth.toDouble());
+        textPainter.layout(maxWidth: maxWidth);
       } else {
         textPainter.layout();
       }
       // Paint text start with baseline.
       double offsetToBaseline = textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
-      textPainter.paint(canvas, Offset(x.toDouble(), y - offsetToBaseline) - _getAlignOffset(textPainter.width));
+      textPainter.paint(canvas, Offset(x, y - offsetToBaseline) - _getAlignOffset(textPainter.width));
     });
   }
 
 
-  void strokeText(String text, num x, num y, {num? maxWidth}) {
+  void strokeText(String text, double x, double y, {double? maxWidth}) {
     addAction((Canvas canvas, Size size) {
       TextPainter textPainter = _getTextPainter(text, strokeStyle, shouldStrokeText: true);
       if (maxWidth != null) {
         // FIXME: should scale down to a smaller font size in order to fit the text in the specified width.
-        textPainter.layout(maxWidth: maxWidth.toDouble());
+        textPainter.layout(maxWidth: maxWidth);
       } else {
         textPainter.layout();
       }
 
       double offsetToBaseline = textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
       // Paint text start with baseline.
-      textPainter.paint(canvas, Offset(x.toDouble(), y - offsetToBaseline) - _getAlignOffset(textPainter.width));
+      textPainter.paint(canvas, Offset(x, y - offsetToBaseline) - _getAlignOffset(textPainter.width));
     });
   }
 

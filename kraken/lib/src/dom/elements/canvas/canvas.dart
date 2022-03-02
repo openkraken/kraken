@@ -23,8 +23,8 @@ const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
 };
 
-final Pointer<NativeFunction<NativeCanvasGetContext>> nativeGetContext =
-    Pointer.fromFunction(CanvasElement._getContext);
+// final Pointer<NativeFunction<NativeCanvasGetContext>> nativeGetContext =
+//     Pointer.fromFunction(CanvasElement._getContext);
 
 class RenderCanvasPaint extends RenderCustomPaint {
   @override
@@ -46,12 +46,12 @@ class CanvasElement extends Element {
   // The custom paint render object.
   RenderCustomPaint? renderCustomPaint;
 
-  static Pointer<NativeCanvasRenderingContext2D> _getContext(
-      Pointer<NativeBindingObject> nativeCanvasElement, Pointer<NativeString> contextId) {
-    CanvasElement canvasElement = BindingBridge.getBindingObject(nativeCanvasElement) as CanvasElement;
-    canvasElement.getContext(nativeStringToString(contextId));
-    return canvasElement.painter.context!.nativeCanvasRenderingContext2D;
-  }
+  // static Pointer<NativeCanvasRenderingContext2D> _getContext(
+  //     Pointer<NativeBindingObject> nativeCanvasElement, Pointer<NativeString> contextId) {
+  //   CanvasElement canvasElement = BindingBridge.getBindingObject(nativeCanvasElement) as CanvasElement;
+  //   canvasElement.getContext(nativeStringToString(contextId));
+  //   return canvasElement.painter.context!.nativeCanvasRenderingContext2D;
+  // }
 
   CanvasElement([BindingContext? context])
       : super(
@@ -88,7 +88,7 @@ class CanvasElement extends Element {
   @override
   invokeBindingMethod(String method, List args) {
     switch (method) {
-      case 'getContext': return getContext(castToType<String>(args[0])).nativeCanvasRenderingContext2D;
+      case 'getContext': return getContext(castToType<String>(args[0])).toNative();
       default: return super.invokeBindingMethod(method, args);
     }
   }
@@ -117,8 +117,7 @@ class CanvasElement extends Element {
     switch (type) {
       case '2d':
         if (painter.context == null) {
-          context2d ??= CanvasRenderingContext2D();
-          context2d!.canvas = this;
+          context2d ??= CanvasRenderingContext2D(this);
           painter.context = context2d;
         }
         return painter.context!;
@@ -230,7 +229,7 @@ class CanvasElement extends Element {
     // 2. Resize the output bitmap to the new width and height and clear it to transparent black.
     resize();
     // 3. Let canvas be the canvas element to which the rendering context's canvas attribute was initialized.
-    context2d = CanvasRenderingContext2D();
+    context2d = CanvasRenderingContext2D(this);
     // 4. If the numeric value of canvas's width content attribute differs from width,
     // then set canvas's width content attribute to the shortest possible string representing width as
     // a valid non-negative integer.
