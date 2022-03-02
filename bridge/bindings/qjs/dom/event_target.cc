@@ -23,7 +23,6 @@ namespace kraken::binding::qjs {
 static std::atomic<int32_t> globalEventTargetId{0};
 std::once_flag kEventTargetInitFlag;
 
-
 void bindEventTarget(ExecutionContext* context) {
   auto* constructor = EventTarget::instance(context);
   // Set globalThis and Window's prototype to EventTarget's prototype to support EventTarget methods in global.
