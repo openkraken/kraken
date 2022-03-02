@@ -105,7 +105,7 @@ ImageElementInstance::ImageElementInstance(ImageElement* element) : ElementInsta
 }
 
 bool ImageElementInstance::dispatchEvent(EventInstance* event) {
-  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(event->nativeEvent->type->string), event->nativeEvent->type->length);
+  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(event->type()->string), event->type()->length);
   std::string eventType = toUTF8(u16EventType);
   bool result = EventTargetInstance::dispatchEvent(event);
 

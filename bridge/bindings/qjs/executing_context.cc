@@ -347,7 +347,7 @@ void ExecutionContext::dispatchGlobalErrorEvent(ExecutionContext* context, JSVal
     }
 
     auto* errorEvent = static_cast<EventInstance*>(JS_GetOpaque(errorEventValue, Event::kEventClassID));
-    errorEvent->nativeEvent->target = window;
+    errorEvent->setTarget(window);
     context->dispatchErrorEvent(errorEvent);
 
     JS_FreeValue(ctx, errorEventConstructor);
@@ -378,7 +378,7 @@ static void dispatchPromiseRejectionEvent(const char* eventType, ExecutionContex
     }
 
     auto* rejectEvent = static_cast<EventInstance*>(JS_GetOpaque(rejectEventValue, Event::kEventClassID));
-    rejectEvent->nativeEvent->target = window;
+    rejectEvent->setTarget(window);
     window->dispatchEvent(rejectEvent);
 
     JS_FreeValue(ctx, errorType);

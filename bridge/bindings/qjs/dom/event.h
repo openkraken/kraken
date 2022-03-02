@@ -53,6 +53,7 @@ namespace kraken::binding::qjs {
 void bindEvent(ExecutionContext* context);
 
 class EventInstance;
+class EventTargetInstance;
 
 using EventCreator = EventInstance* (*)(ExecutionContext* context, void* nativeEvent);
 
@@ -96,6 +97,21 @@ class Event : public HostClass {
   friend EventInstance;
 };
 
+// Dart generated nativeEvent member are force align to 64-bit system. So all members in NativeEvent should have 64 bit width.
+#if ANDROID_32_BIT
+struct NativeEvent {
+  int64_t type{0};
+  int64_t bubbles{0};
+  int64_t cancelable{0};
+  int64_t timeStamp{0};
+  int64_t defaultPrevented{0};
+  // The pointer address of target EventTargetInstance object.
+  int64_t target{0};
+  // The pointer address of current target EventTargetInstance object.
+  int64_t currentTarget{0};
+};
+#else
+// Use pointer instead of int64_t on 64 bit system can help compiler to choose best register for better running performance.
 struct NativeEvent {
   NativeString* type{nullptr};
   int64_t bubbles{0};
@@ -107,6 +123,7 @@ struct NativeEvent {
   // The pointer address of current target EventTargetInstance object.
   void* currentTarget{nullptr};
 };
+#endif
 
 struct RawEvent {
   uint64_t* bytes;
@@ -121,10 +138,22 @@ class EventInstance : public Instance {
   static EventInstance* fromNativeEvent(Event* event, NativeEvent* nativeEvent);
   NativeEvent* nativeEvent{nullptr};
 
-  inline const bool propagationStopped() { return m_propagationStopped; }
-  inline const bool cancelled() { return m_cancelled; }
-  inline void cancelled(bool v) { m_cancelled = v; }
-  inline const bool propagationImmediatelyStopped() { return m_propagationImmediatelyStopped; }
+  FORCE_INLINE const bool propagationStopped() { return m_propagationStopped; }
+  FORCE_INLINE const bool cancelled() { return m_cancelled; }
+  FORCE_INLINE void cancelled(bool v) { m_cancelled = v; }
+  FORCE_INLINE const bool propagationImmediatelyStopped() { return m_propagationImmediatelyStopped; }
+  FORCE_INLINE NativeString* type() {
+#if ANDROID_32_BIT
+    return reinterpret_cast<NativeString*>(nativeEvent->type);
+#else
+    return nativeEvent->type;
+#endif
+  };
+  void setType(NativeString* type) const;
+  FORCE_INLINE EventTargetInstance* target() { return reinterpret_cast<EventTargetInstance*>(nativeEvent->target); }
+  void setTarget(EventTargetInstance* target) const;
+  FORCE_INLINE EventTargetInstance* currentTarget() { return reinterpret_cast<EventTargetInstance*>(nativeEvent->currentTarget); }
+  void setCurrentTarget(EventTargetInstance* target) const;
 
  protected:
   explicit EventInstance(Event* jsEvent, JSAtom eventType, JSValue eventInit);
