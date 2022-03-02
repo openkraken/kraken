@@ -48,7 +48,7 @@ class CanvasElement extends Element {
 
   static Pointer<NativeCanvasRenderingContext2D> _getContext(
       Pointer<NativeBindingObject> nativeCanvasElement, Pointer<NativeString> contextId) {
-    CanvasElement canvasElement = BindingObjectBridge.getBindingObject(nativeCanvasElement) as CanvasElement;
+    CanvasElement canvasElement = BindingBridge.getBindingObject(nativeCanvasElement) as CanvasElement;
     canvasElement.getContext(nativeStringToString(contextId));
     return canvasElement.painter.context!.nativeCanvasRenderingContext2D;
   }

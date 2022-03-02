@@ -28,7 +28,7 @@ std::unique_ptr<kraken::KrakenPage> TEST_init();
 std::unique_ptr<kraken::KrakenPage> TEST_allocateNewPage();
 void TEST_runLoop(ExecutionContext* context);
 void TEST_dispatchEvent(int32_t contextId, EventTargetInstance* eventTarget, const std::string type);
-void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv);
+void TEST_invokeBindingMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv);
 void TEST_registerEventTargetDisposedCallback(int32_t contextUniqueId, TEST_OnEventTargetDisposed callback);
 void TEST_mockDartMethods(OnJSError onJSError);
 std::shared_ptr<UnitTestEnv> TEST_getEnv(int32_t contextUniqueId);

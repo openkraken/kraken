@@ -16,7 +16,7 @@
 #include "event_listener_map.h"
 
 #if UNIT_TEST
-void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv);
+void TEST_invokeBindingMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv);
 #endif
 
 namespace kraken::binding::qjs {
@@ -53,7 +53,7 @@ class EventTarget : public HostClass {
 };
 
 using NativeDispatchEvent = void (*)(int32_t contextId, NativeEventTarget* nativeEventTarget, NativeString* eventType, void* nativeEvent, int32_t isCustomEvent);
-using CallNativeMethods = void (*)(void* nativePtr, NativeValue* returnValue, NativeString* method, int32_t argc, NativeValue* argv);
+using InvokeBindingMethod = void (*)(void* nativePtr, NativeValue* returnValue, NativeString* method, int32_t argc, NativeValue* argv);
 
 struct NativeEventTarget {
   NativeEventTarget() = delete;
@@ -64,9 +64,9 @@ struct NativeEventTarget {
   EventTargetInstance* instance{nullptr};
   NativeDispatchEvent dispatchEvent{nullptr};
 #if UNIT_TEST
-  CallNativeMethods callNativeMethods{reinterpret_cast<CallNativeMethods>(TEST_callNativeMethod)};
+  InvokeBindingMethod invokeBindingMethod{reinterpret_cast<InvokeBindingMethod>(TEST_invokeBindingMethod)};
 #else
-  CallNativeMethods callNativeMethods{nullptr};
+  InvokeBindingMethod invokeBindingMethod{nullptr};
 #endif
 };
 
@@ -92,9 +92,10 @@ class EventTargetInstance : public Instance {
   static inline JSClassID classId();
   inline int32_t eventTargetId() const { return m_eventTargetId; }
 
-  JSValue callNativeMethods(const char* method, int32_t argc, NativeValue* argv);
-  JSValue getNativeProperty(const char* prop);
-  void setNativeProperty(const char* prop, NativeValue value);
+  // @TODO: Should move to BindingObject.
+  JSValue invokeBindingMethod(const char* method, int32_t argc, NativeValue* argv);
+  JSValue getBindingProperty(const char* prop);
+  void setBindingProperty(const char* prop, NativeValue value);
 
   NativeEventTarget* nativeEventTarget{new NativeEventTarget(this)};
 

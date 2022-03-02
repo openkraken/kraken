@@ -61,7 +61,7 @@ function generateHostObjectHeader(object: ClassObject) {
 
   return `\n
 struct Native${object.name} {
-  CallNativeMethods callNativeMethods{nullptr};
+  InvokeBindingMethod invokeBindingMethod{nullptr};
 };
 
 class ${object.name} : public ${object.type} {
@@ -69,7 +69,7 @@ public:
   ${object.name}() = delete;
   explicit ${object.name}(ExecutionContext *context, Native${object.name} *nativePtr);
 
-  JSValue callNativeMethods(const char* method, int32_t argc,
+  JSValue invokeBindingMethod(const char* method, int32_t argc,
                           NativeValue *argv);
 
 

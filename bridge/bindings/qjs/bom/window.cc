@@ -46,7 +46,7 @@ JSClassID Window::classId() {
 JSValue Window::open(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, Window::classId()));
   NativeValue arguments[] = {jsValueToNativeValue(ctx, argv[0])};
-  return window->callNativeMethods("open", 1, arguments);
+  return window->invokeBindingMethod("open", 1, arguments);
 }
 JSValue Window::scrollTo(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
 #if FLUTTER_BACKEND
@@ -57,7 +57,7 @@ JSValue Window::scrollTo(JSContext* ctx, JSValue this_val, int argc, JSValue* ar
   JS_ToFloat64(ctx, &arg0, argv[0]);
   JS_ToFloat64(ctx, &arg1, argv[1]);
   NativeValue arguments[] = {Native_NewFloat64(arg0), Native_NewFloat64(arg1)};
-  return window->callNativeMethods("scroll", 2, arguments);
+  return window->invokeBindingMethod("scroll", 2, arguments);
 #else
   return JS_UNDEFINED;
 #endif
@@ -70,7 +70,7 @@ JSValue Window::scrollBy(JSContext* ctx, JSValue this_val, int argc, JSValue* ar
   JS_ToFloat64(ctx, &arg0, argv[0]);
   JS_ToFloat64(ctx, &arg1, argv[1]);
   NativeValue arguments[] = {Native_NewFloat64(arg0), Native_NewFloat64(arg1)};
-  return window->callNativeMethods("scrollBy", 2, arguments);
+  return window->invokeBindingMethod("scrollBy", 2, arguments);
 }
 
 JSValue Window::postMessage(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -210,12 +210,12 @@ IMPL_PROPERTY_GETTER(Window, parent)(JSContext* ctx, JSValue this_val, int argc,
 
 IMPL_PROPERTY_GETTER(Window, scrollX)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
-  return window->callNativeMethods("scrollX", 0, nullptr);
+  return window->invokeBindingMethod("scrollX", 0, nullptr);
 }
 
 IMPL_PROPERTY_GETTER(Window, scrollY)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
-  return window->callNativeMethods("scrollY", 0, nullptr);
+  return window->invokeBindingMethod("scrollY", 0, nullptr);
 }
 
 IMPL_PROPERTY_GETTER(Window, onerror)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {

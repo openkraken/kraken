@@ -278,9 +278,9 @@ typedef NativeDispatchEvent = Void Function(
     Pointer<NativeString> eventType,
     Pointer<Void> nativeEvent,
     Int32 isCustomEvent);
-typedef NativeCallNativeMethods = Void Function(
+typedef NativeInvokeBindingMethod = Void Function(
     Pointer<Void> nativePtr,
-    Pointer<NativeValue> returnedValue,
+    Pointer<NativeValue> returnValue,
     Pointer<NativeString> method,
     Int32 argc,
     Pointer<NativeValue> argv);
@@ -289,14 +289,16 @@ class NativeBindingObject extends Struct {
   external Pointer<Void> instance;
   external Pointer<NativeFunction<NativeDispatchEvent>> dispatchEvent;
   // Shared method called by JS side.
-  external Pointer<NativeFunction> callNativeMethods;
+  external Pointer<NativeFunction> invokeBindingMethod;
+  external Pointer<NativeFunction> setBindingProperty;
+  external Pointer<NativeFunction> getBindingProperty;
 }
 
 typedef NativeCanvasGetContext = Pointer<NativeCanvasRenderingContext2D> Function(
     Pointer<NativeBindingObject> nativeCanvasElement, Pointer<NativeString> contextId);
 
 class NativeCanvasRenderingContext2D extends Struct {
-  external Pointer<NativeFunction<NativeCallNativeMethods>> callNativeMethods;
+  external Pointer<NativeFunction<NativeInvokeBindingMethod>> callNativeMethods;
 }
 
 class NativePerformanceEntry extends Struct {

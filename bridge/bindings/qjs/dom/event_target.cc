@@ -337,7 +337,7 @@ JSValue EventTargetInstance::getProperty(JSContext* ctx, JSValue obj, JSAtom ato
       JS_FreeCString(eventTarget->m_ctx, cmethod);
       return JS_UNDEFINED;
     }
-    JSValue result = eventTarget->getNativeProperty(cmethod);
+    JSValue result = eventTarget->getBindingProperty(cmethod);
     JS_FreeCString(ctx, cmethod);
     return result;
   }
@@ -392,9 +392,9 @@ int EventTargetInstance::deleteProperty(JSContext* ctx, JSValue obj, JSAtom prop
   return 0;
 }
 
-JSValue EventTargetInstance::callNativeMethods(const char* method, int32_t argc, NativeValue* argv) {
-  if (nativeEventTarget->callNativeMethods == nullptr) {
-    return JS_ThrowTypeError(m_ctx, "Failed to call native dart methods: callNativeMethods not initialized.");
+JSValue EventTargetInstance::invokeBindingMethod(const char* method, int32_t argc, NativeValue* argv) {
+  if (nativeEventTarget->invokeBindingMethod == nullptr) {
+    return JS_ThrowTypeError(m_ctx, "Failed to call native dart methods: invokeBindingMethod not initialized.");
   }
 
   std::u16string methodString;
@@ -403,7 +403,7 @@ JSValue EventTargetInstance::callNativeMethods(const char* method, int32_t argc,
   NativeString m{reinterpret_cast<const uint16_t*>(methodString.c_str()), static_cast<uint32_t>(methodString.size())};
 
   NativeValue nativeValue{};
-  nativeEventTarget->callNativeMethods(nativeEventTarget, &nativeValue, &m, argc, argv);
+  nativeEventTarget->invokeBindingMethod(nativeEventTarget, &nativeValue, &m, argc, argv);
   JSValue returnValue = nativeValueToJSValue(m_context, nativeValue);
   return returnValue;
 }
@@ -449,15 +449,15 @@ void EventTargetInstance::finalize(JSRuntime* rt, JSValue val) {
   delete eventTarget;
 }
 
-JSValue EventTargetInstance::getNativeProperty(const char* prop) {
+JSValue EventTargetInstance::getBindingProperty(const char* prop) {
   getDartMethod()->flushUICommand();
   NativeValue args[] = {Native_NewCString(prop)};
-  return callNativeMethods(GetPropertyMagic, 1, args);
+  return invokeBindingMethod(GetPropertyMagic, 1, args);
 }
 
-void EventTargetInstance::setNativeProperty(const char* prop, NativeValue value) {
+void EventTargetInstance::setBindingProperty(const char* prop, NativeValue value) {
   NativeValue args[] = {Native_NewCString(prop), value};
-  callNativeMethods(SetPropertyMagic, 2, args);
+  invokeBindingMethod(SetPropertyMagic, 2, args);
 }
 
 // JSValues are stored in this class are no visible to QuickJS GC.

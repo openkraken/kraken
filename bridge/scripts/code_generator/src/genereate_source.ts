@@ -16,10 +16,10 @@ function generateHostObjectSource(object: ClassObject) {
                                                    Native${object.name} *nativePtr)
   : HostObject(context, "${object.name}"), m_nativePtr(nativePtr) {
 }
-JSValue ${object.name}::callNativeMethods(const char *method, int32_t argc,
+JSValue ${object.name}::invokeBindingMethod(const char *method, int32_t argc,
                                                NativeValue *argv) {
-  if (m_nativePtr->callNativeMethods == nullptr) {
-    return JS_ThrowTypeError(m_ctx, "Failed to call native dart methods: callNativeMethods not initialized.");
+  if (m_nativePtr->invokeBindingMethod == nullptr) {
+    return JS_ThrowTypeError(m_ctx, "Failed to call native dart methods: invokeBindingMethod not initialized.");
   }
 
   std::u16string methodString;
@@ -31,7 +31,7 @@ JSValue ${object.name}::callNativeMethods(const char *method, int32_t argc,
   };
 
   NativeValue nativeValue{};
-  m_nativePtr->callNativeMethods(m_nativePtr, &nativeValue, &m, argc, argv);
+  m_nativePtr->invokeBindingMethod(m_nativePtr, &nativeValue, &m, argc, argv);
   JSValue returnValue = nativeValueToJSValue(m_context, nativeValue);
   return returnValue;
 }
@@ -105,10 +105,10 @@ function generatePropsGetter(object: ClassObject, type: PropType, p: PropsDeclar
   ${qjsCallFunc};`;
   } else if (object.type === 'HostObject') {
     getterCode = `auto *${instanceName} = static_cast<${classSubFix} *>(JS_GetOpaque(this_val, ${classId}));
-  return ${instanceName}->callNativeMethods("get${p.name[0].toUpperCase() + p.name.substring(1)}", 0, nullptr);`;
+  return ${instanceName}->invokeBindingMethod("get${p.name[0].toUpperCase() + p.name.substring(1)}", 0, nullptr);`;
   } else {
     getterCode = `auto *${instanceName} = static_cast<${classSubFix} *>(JS_GetOpaque(this_val, ${classId}));
-  return ${instanceName}->getNativeProperty("${p.name}");`;
+  return ${instanceName}->getBindingProperty("${p.name}");`;
   }
 
   let flushUICommandCode = '';
@@ -141,7 +141,7 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
         setterCode = `getDartMethod()->flushUICommand();
   JSValue value = argv[0];
   const char* stringValue = JS_ToCString(ctx, value);
-  element->setNativeProperty("${p.name}", Native_NewCString(stringValue));
+  element->setBindingProperty("${p.name}", Native_NewCString(stringValue));
   JS_FreeCString(ctx, stringValue);
   return JS_DupValue(ctx, value);;`;
         break;
@@ -151,7 +151,7 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
   JSValue value = argv[0];
   JS_ToFloat64(ctx, &floatValue, value);
   NativeValue nativeValue = Native_NewFloat64(floatValue);
-  element->setNativeProperty("${p.name}", nativeValue);
+  element->setBindingProperty("${p.name}", nativeValue);
   return JS_DupValue(ctx, value);`;
         break;
       case 3: // int
@@ -160,7 +160,7 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
   JSValue value = argv[0];
   JS_ToInt32(ctx, &intValue, value);
   NativeValue nativeValue = Native_NewInt32(intValue);
-  element->setNativeProperty("${p.name}", nativeValue);
+  element->setBindingProperty("${p.name}", nativeValue);
   return JS_DupValue(ctx, value);`;
         break;
       case 4: // boolean
@@ -168,7 +168,7 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
   JSValue value = argv[0];
   bool boolValue = JS_ToBool(ctx, value);
   NativeValue nativeValue = Native_NewBool(boolValue);
-  element->setNativeProperty("${p.name}", nativeValue);
+  element->setBindingProperty("${p.name}", nativeValue);
   return JS_DupValue(ctx, value);`;
         break;
       case 5: // object
@@ -176,7 +176,7 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
       default:
         setterCode = `getDartMethod()->flushUICommand();
   JSValue value = argv[0];
-  element->setNativeProperty("${p.name}", jsValueToNativeValue(ctx, value));
+  element->setBindingProperty("${p.name}", jsValueToNativeValue(ctx, value));
   return JS_DupValue(ctx, value);`;
         break;
     }
@@ -184,7 +184,7 @@ function generatePropsSetter(object: ClassObject, type: PropType, p: PropsDeclar
     setterCode = `NativeValue arguments[] = {
     jsValueToNativeValue(ctx, argv[0])
   };
-  return ${instanceName}->callNativeMethods("set${p.name[0].toUpperCase() + p.name.substring(1)}", 1, arguments);`;
+  return ${instanceName}->invokeBindingMethod("set${p.name[0].toUpperCase() + p.name.substring(1)}", 1, arguments);`;
   }
 
   return `IMPL_PROPERTY_SETTER(${className}, ${p.name})(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) {
@@ -302,7 +302,7 @@ ${optionalArguments.join('\n  ')}
   getDartMethod()->flushUICommand();
 ${callArgumentsCode}
   auto *${instanceName} = static_cast<${classSubFix} *>(JS_GetOpaque(this_val, ${classId}));
-  return ${instanceName}->callNativeMethods("${m.name}", ${m.args.length}, ${m.args.length > 0 ? 'arguments' : 'nullptr'});`;
+  return ${instanceName}->invokeBindingMethod("${m.name}", ${m.args.length}, ${m.args.length > 0 ? 'arguments' : 'nullptr'});`;
       }
 
       if (polymorphism) {

@@ -28,8 +28,8 @@ int initBridge() {
   // Register methods first to share ptrs for bridge polyfill.
   registerDartMethodsToCpp();
 
-  // Setup binding object.
-  BindingObjectBridge.setup();
+  // Setup binding bridge.
+  BindingBridge.setup();
 
   if (kProfileMode) {
     PerformanceTiming.instance().mark(PERF_BRIDGE_REGISTER_DART_METHOD_END);

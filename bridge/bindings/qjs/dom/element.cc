@@ -162,7 +162,7 @@ JSValue Element::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue t
 JSValue Element::getBoundingClientRect(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   getDartMethod()->flushUICommand();
-  return element->callNativeMethods("getBoundingClientRect", 0, nullptr);
+  return element->invokeBindingMethod("getBoundingClientRect", 0, nullptr);
 }
 
 JSValue Element::hasAttribute(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -364,7 +364,7 @@ JSValue Element::click(JSContext* ctx, JSValue this_val, int argc, JSValue* argv
 #if FLUTTER_BACKEND
   getDartMethod()->flushUICommand();
   auto element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->callNativeMethods("click", 0, nullptr);
+  return element->invokeBindingMethod("click", 0, nullptr);
 #elif UNIT_TEST
   auto element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   TEST_dispatchEvent(element->m_contextId, element, "click");
@@ -382,7 +382,7 @@ JSValue Element::scroll(JSContext* ctx, JSValue this_val, int argc, JSValue* arg
   JS_ToFloat64(ctx, &arg0, argv[0]);
   JS_ToFloat64(ctx, &arg1, argv[1]);
   NativeValue arguments[] = {Native_NewFloat64(arg0), Native_NewFloat64(arg1)};
-  return element->callNativeMethods("scroll", 2, arguments);
+  return element->invokeBindingMethod("scroll", 2, arguments);
 }
 
 JSValue Element::scrollBy(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -393,7 +393,7 @@ JSValue Element::scrollBy(JSContext* ctx, JSValue this_val, int argc, JSValue* a
   JS_ToFloat64(ctx, &arg0, argv[0]);
   JS_ToFloat64(ctx, &arg1, argv[1]);
   NativeValue arguments[] = {Native_NewFloat64(arg0), Native_NewFloat64(arg1)};
-  return element->callNativeMethods("scrollBy", 2, arguments);
+  return element->invokeBindingMethod("scrollBy", 2, arguments);
 }
 
 IMPL_PROPERTY_GETTER(Element, nodeName)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -411,7 +411,7 @@ IMPL_PROPERTY_GETTER(Element, tagName)(JSContext* ctx, JSValue this_val, int arg
 IMPL_PROPERTY_GETTER(Element, className)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->getNativeProperty("className");
+  return element->getBindingProperty("className");
 }
 IMPL_PROPERTY_SETTER(Element, className)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
@@ -422,54 +422,54 @@ IMPL_PROPERTY_SETTER(Element, className)(JSContext* ctx, JSValue this_val, int a
 
   const char* string = JS_ToCString(ctx, value);
   NativeValue nativeValue = Native_NewCString(string);
-  element->setNativeProperty("className", nativeValue);
+  element->setBindingProperty("className", nativeValue);
   JS_FreeCString(ctx, string);
   return JS_DupValue(ctx, value);
 }
 
 IMPL_PROPERTY_GETTER(Element, offsetLeft)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->getNativeProperty("offsetLeft");
+  return element->getBindingProperty("offsetLeft");
 }
 
 IMPL_PROPERTY_GETTER(Element, offsetTop)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->getNativeProperty("offsetTop");
+  return element->getBindingProperty("offsetTop");
 }
 
 IMPL_PROPERTY_GETTER(Element, offsetWidth)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->getNativeProperty("offsetWidth");
+  return element->getBindingProperty("offsetWidth");
 }
 
 IMPL_PROPERTY_GETTER(Element, offsetHeight)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->getNativeProperty("offsetHeight");
+  return element->getBindingProperty("offsetHeight");
 }
 
 IMPL_PROPERTY_GETTER(Element, clientWidth)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->getNativeProperty("clientWidth");
+  return element->getBindingProperty("clientWidth");
 }
 
 IMPL_PROPERTY_GETTER(Element, clientHeight)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->getNativeProperty("clientHeight");
+  return element->getBindingProperty("clientHeight");
 }
 
 IMPL_PROPERTY_GETTER(Element, clientTop)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->getNativeProperty("clientTop");
+  return element->getBindingProperty("clientTop");
 }
 
 IMPL_PROPERTY_GETTER(Element, clientLeft)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->getNativeProperty("clientLeft");
+  return element->getBindingProperty("clientLeft");
 }
 
 IMPL_PROPERTY_GETTER(Element, scrollTop)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->getNativeProperty("scrollTop");
+  return element->getBindingProperty("scrollTop");
 }
 IMPL_PROPERTY_SETTER(Element, scrollTop)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
@@ -477,13 +477,13 @@ IMPL_PROPERTY_SETTER(Element, scrollTop)(JSContext* ctx, JSValue this_val, int a
   JSValue value = argv[0];
   JS_ToFloat64(ctx, &floatValue, value);
   NativeValue nativeValue = Native_NewFloat64(floatValue);
-  element->setNativeProperty("scrollTop", nativeValue);
+  element->setBindingProperty("scrollTop", nativeValue);
   return JS_DupValue(ctx, value);
 }
 
 IMPL_PROPERTY_GETTER(Element, scrollLeft)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->getNativeProperty("scrollLeft");
+  return element->getBindingProperty("scrollLeft");
 }
 IMPL_PROPERTY_SETTER(Element, scrollLeft)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
@@ -491,18 +491,18 @@ IMPL_PROPERTY_SETTER(Element, scrollLeft)(JSContext* ctx, JSValue this_val, int 
   JSValue value = argv[0];
   JS_ToFloat64(ctx, &floatValue, value);
   NativeValue nativeValue = Native_NewFloat64(floatValue);
-  element->setNativeProperty("scrollLeft", nativeValue);
+  element->setBindingProperty("scrollLeft", nativeValue);
   return JS_DupValue(ctx, value);
 }
 
 IMPL_PROPERTY_GETTER(Element, scrollHeight)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->getNativeProperty("scrollHeight");
+  return element->getBindingProperty("scrollHeight");
 }
 
 IMPL_PROPERTY_GETTER(Element, scrollWidth)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->getNativeProperty("scrollWidth");
+  return element->getBindingProperty("scrollWidth");
 }
 
 // Definition for firstElementChild

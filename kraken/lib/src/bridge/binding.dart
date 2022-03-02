@@ -24,7 +24,7 @@ typedef NativeAsyncAnonymousFunctionCallback = Void Function(
 typedef DartAsyncAnonymousFunctionCallback = void Function(Pointer<Void> callbackContext, Pointer<NativeValue> nativeValue, int contextId, Pointer<Utf8> errmsg);
 
 // This function receive calling from binding side.
-void _callNativeMethods(Pointer<Void> nativeBindingObject, Pointer<NativeValue> returnedValue, Pointer<NativeString> nativeMethod, int argc, Pointer<NativeValue> argv) {
+void _invokeBindingMethod(Pointer<Void> nativeBindingObject, Pointer<NativeValue> returnValue, Pointer<NativeString> nativeMethod, int argc, Pointer<NativeValue> argv) {
   String method = nativeStringToString(nativeMethod);
   List<dynamic> values = List.generate(argc, (i) {
     Pointer<NativeValue> nativeValue = argv.elementAt(i);
@@ -36,10 +36,10 @@ void _callNativeMethods(Pointer<Void> nativeBindingObject, Pointer<NativeValue> 
     AnonymousNativeFunction fn = getAnonymousNativeFunctionFromId(id)!;
     try {
       var result = fn(values);
-      toNativeValue(returnedValue, result);
+      toNativeValue(returnValue, result);
     } catch (e, stack) {
       print('$e\n$stack');
-      toNativeValue(returnedValue, null);
+      toNativeValue(returnValue, null);
     }
     removeAnonymousNativeFunctionFromId(id);
   } else if (method.startsWith(AsyncAnonymousFunctionCallPreFix)) {
@@ -60,9 +60,10 @@ void _callNativeMethods(Pointer<Void> nativeBindingObject, Pointer<NativeValue> 
       removeAsyncAnonymousNativeFunctionFromId(id);
     });
 
-    toNativeValue(returnedValue, null);
+    toNativeValue(returnValue, null);
   } else {
-    BindingObject bindingObject = BindingObjectBridge.getBindingObject(nativeBindingObject.cast<NativeBindingObject>());
+    // @TODO: Should not share the same binding method, and separate by magic.
+    BindingObject bindingObject = BindingBridge.getBindingObject(nativeBindingObject.cast<NativeBindingObject>());
     var result;
     try {
       if (method == GetPropertyMagic && argc == 1) {
@@ -76,13 +77,13 @@ void _callNativeMethods(Pointer<Void> nativeBindingObject, Pointer<NativeValue> 
     } catch (e, stack) {
       print('$e\n$stack');
     } finally {
-      toNativeValue(returnedValue, result);
+      toNativeValue(returnValue, result);
     }
   }
 }
 
-abstract class BindingObjectBridge {
-  static final Pointer<NativeFunction<NativeCallNativeMethods>> _nativeCallNativeMethods = Pointer.fromFunction(_callNativeMethods);
+abstract class BindingBridge {
+  static final Pointer<NativeFunction<NativeInvokeBindingMethod>> _nativeInvokeBindingMethod = Pointer.fromFunction(_invokeBindingMethod);
 
   static final SplayTreeMap<int, BindingObject> _nativeObjects = SplayTreeMap();
 
@@ -97,7 +98,7 @@ abstract class BindingObjectBridge {
   static void _bindObject(BindingObject object) {
     Pointer<NativeBindingObject>? nativeBindingObject = castToType<Pointer<NativeBindingObject>?>(object.pointer);
     if (nativeBindingObject != null) {
-      nativeBindingObject.ref.callNativeMethods = _nativeCallNativeMethods;
+      nativeBindingObject.ref.invokeBindingMethod = _nativeInvokeBindingMethod;
       _nativeObjects[nativeBindingObject.address] = object;
     }
   }

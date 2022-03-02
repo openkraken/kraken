@@ -26,7 +26,7 @@ JSValue ImageElement::instanceConstructor(JSContext* ctx, JSValue func_obj, JSVa
 IMPL_PROPERTY_GETTER(ImageElement, width)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->getNativeProperty("width");
+  return element->getBindingProperty("width");
 }
 IMPL_PROPERTY_SETTER(ImageElement, width)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
@@ -39,7 +39,7 @@ IMPL_PROPERTY_SETTER(ImageElement, width)(JSContext* ctx, JSValue this_val, int 
 IMPL_PROPERTY_GETTER(ImageElement, height)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->getNativeProperty("height");
+  return element->getBindingProperty("height");
 }
 IMPL_PROPERTY_SETTER(ImageElement, height)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
@@ -52,17 +52,17 @@ IMPL_PROPERTY_SETTER(ImageElement, height)(JSContext* ctx, JSValue this_val, int
 IMPL_PROPERTY_GETTER(ImageElement, naturalWidth)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->getNativeProperty("naturalWidth");
+  return element->getBindingProperty("naturalWidth");
 }
 IMPL_PROPERTY_GETTER(ImageElement, naturalHeight)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->getNativeProperty("naturalHeight");
+  return element->getBindingProperty("naturalHeight");
 }
 IMPL_PROPERTY_GETTER(ImageElement, src)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->getNativeProperty("src");
+  return element->getBindingProperty("src");
 }
 IMPL_PROPERTY_SETTER(ImageElement, src)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
@@ -75,7 +75,7 @@ IMPL_PROPERTY_SETTER(ImageElement, src)(JSContext* ctx, JSValue this_val, int ar
 IMPL_PROPERTY_GETTER(ImageElement, loading)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->getNativeProperty("loading");
+  return element->getBindingProperty("loading");
 }
 IMPL_PROPERTY_SETTER(ImageElement, loading)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
@@ -88,7 +88,7 @@ IMPL_PROPERTY_SETTER(ImageElement, loading)(JSContext* ctx, JSValue this_val, in
 IMPL_PROPERTY_GETTER(ImageElement, scaling)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   getDartMethod()->flushUICommand();
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  return element->getNativeProperty("scaling");
+  return element->getBindingProperty("scaling");
 }
 IMPL_PROPERTY_SETTER(ImageElement, scaling)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* element = static_cast<ImageElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
