@@ -13,8 +13,6 @@
 
 namespace foundation {
 
-
-
 typedef int LogSeverity;
 
 // Default log levels. Negative values can be used for verbose log levels.

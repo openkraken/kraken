@@ -7,10 +7,10 @@
 #define KRAKENBRIDGE_TEST_KRAKEN_TEST_ENV_H_
 
 #include <memory>
-#include "foundation/logging.h"
 #include "bindings/qjs/bom/timer.h"
 #include "bindings/qjs/dom/event_target.h"
 #include "bindings/qjs/dom/frame_request_callback_collection.h"
+#include "foundation/logging.h"
 #include "include/dart_methods.h"
 #include "page.h"
 
