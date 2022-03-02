@@ -309,7 +309,9 @@ if (${IS_ANDROID})
 
   add_definitions(-DIS_ANDROID=1)
   list(APPEND BRIDGE_LINK_LIBS ${log-lib})
-endif ()
+elseif(${IS_IOS})
+  add_definitions(-DIS_IOS=1)
+endif()
 
 ### Kraken
 target_include_directories(kraken PRIVATE
