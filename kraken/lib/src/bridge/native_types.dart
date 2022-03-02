@@ -290,8 +290,6 @@ class NativeBindingObject extends Struct {
   external Pointer<NativeFunction<NativeDispatchEvent>> dispatchEvent;
   // Shared method called by JS side.
   external Pointer<NativeFunction> invokeBindingMethod;
-  external Pointer<NativeFunction> setBindingProperty;
-  external Pointer<NativeFunction> getBindingProperty;
 }
 
 typedef NativeCanvasGetContext = Pointer<NativeCanvasRenderingContext2D> Function(

@@ -81,7 +81,9 @@ class CanvasRenderingContext2D extends BindingObject {
     return renderingContext;
   }
 
+  @override
   void dispose() {
+    super.dispose();
     _nativeMap.remove(nativeCanvasRenderingContext2D.address);
   }
 

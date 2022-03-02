@@ -394,7 +394,7 @@ int EventTargetInstance::deleteProperty(JSContext* ctx, JSValue obj, JSAtom prop
 
 JSValue EventTargetInstance::invokeBindingMethod(const char* method, int32_t argc, NativeValue* argv) {
   if (nativeEventTarget->invokeBindingMethod == nullptr) {
-    return JS_ThrowTypeError(m_ctx, "Failed to call native dart methods: invokeBindingMethod not initialized.");
+    return JS_ThrowTypeError(m_ctx, "Failed to call dart method: invokeBindingMethod not initialized.");
   }
 
   std::u16string methodString;
@@ -456,6 +456,8 @@ JSValue EventTargetInstance::getBindingProperty(const char* prop) {
 }
 
 void EventTargetInstance::setBindingProperty(const char* prop, NativeValue value) {
+  // If not flush UICommands, the element may not be created.
+  getDartMethod()->flushUICommand();
   NativeValue args[] = {Native_NewCString(prop), value};
   invokeBindingMethod(SetPropertyMagic, 2, args);
 }

@@ -24,8 +24,6 @@ import 'package:kraken/gesture.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/widget.dart';
-import 'package:kraken/src/dom/element_registry.dart' as element_registry;
-
 
 import 'bundle.dart';
 
@@ -123,7 +121,7 @@ class KrakenViewController
       PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT);
       PerformanceTiming.instance().mark(PERF_BRIDGE_INIT_START);
     }
-
+    BindingBridge.setup();
     _contextId = contextId ?? initBridge();
 
     if (kProfileMode) {

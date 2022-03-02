@@ -27,11 +27,15 @@ abstract class BindingObject {
 
   // Bind dart side object method to receive invoking from native side.
   void _bind() {
-    bind??(this);
+    if (bind != null) {
+      bind!(this);
+    }
   }
 
   void _unbind() {
-    unbind??(this);
+    if (unbind != null) {
+      unbind!(this);
+    }
   }
 
   // Get a property, eg:
