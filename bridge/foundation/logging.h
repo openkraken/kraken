@@ -18,13 +18,12 @@ namespace foundation {
 typedef int LogSeverity;
 
 // Default log levels. Negative values can be used for verbose log levels.
-constexpr LogSeverity _LOG_VERBOSE = 0;
-constexpr LogSeverity _LOG_INFO = 1;
-constexpr LogSeverity _LOG_WARN = 2;
-constexpr LogSeverity _LOG_DEBUG = 3;
-constexpr LogSeverity _LOG_ERROR = 4;
-constexpr LogSeverity _LOG_NUM_SEVERITIES = 5;
-constexpr LogSeverity _LOG_FATAL = 6;
+constexpr LogSeverity VERBOSE = 0;
+constexpr LogSeverity INFO = 1;
+constexpr LogSeverity WARN = 2;
+constexpr LogSeverity DEBUG = 3;
+constexpr LogSeverity ERROR = 4;
+constexpr LogSeverity FATAL = 5;
 
 class LogMessageVoidify {
  public:
@@ -49,13 +48,13 @@ class LogMessage {
 
 void printLog(int32_t contextId, std::stringstream& stream, std::string level, void* ctx);
 
-#define KRAKEN_LOG_STREAM(severity) ::foundation::LogMessage(::foundation::_LOG_##severity, __FILE__, __LINE__, nullptr).stream()
+#define KRAKEN_LOG_STREAM(severity) ::foundation::LogMessage(::foundation::severity, __FILE__, __LINE__, nullptr).stream()
 
 #define KRAKEN_LAZY_STREAM(stream, condition) !(condition) ? (void)0 : foundation::LogMessageVoidify() & (stream)
 
 #define KRAKEN_LOG(severity) KRAKEN_LAZY_STREAM(KRAKEN_LOG_STREAM(severity), true)
 
-#define KRAKEN_CHECK(condition) KRAKEN_LAZY_STREAM(::foundation::LogMessage(::foundation::_LOG_FATAL, __FILE__, __LINE__, #condition).stream(), !(condition))
+#define KRAKEN_CHECK(condition) KRAKEN_LAZY_STREAM(::foundation::LogMessage(::foundation::FATAL, __FILE__, __LINE__, #condition).stream(), !(condition))
 
 }  // namespace foundation
 
