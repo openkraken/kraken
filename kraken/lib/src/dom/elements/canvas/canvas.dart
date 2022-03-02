@@ -3,11 +3,8 @@
  * Author: Kraken Team.
  */
 
-import 'dart:ffi';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
@@ -22,9 +19,6 @@ const int _ELEMENT_DEFAULT_HEIGHT_IN_PIXEL = 150;
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
 };
-
-// final Pointer<NativeFunction<NativeCanvasGetContext>> nativeGetContext =
-//     Pointer.fromFunction(CanvasElement._getContext);
 
 class RenderCanvasPaint extends RenderCustomPaint {
   @override
@@ -45,13 +39,6 @@ class CanvasElement extends Element {
 
   // The custom paint render object.
   RenderCustomPaint? renderCustomPaint;
-
-  // static Pointer<NativeCanvasRenderingContext2D> _getContext(
-  //     Pointer<NativeBindingObject> nativeCanvasElement, Pointer<NativeString> contextId) {
-  //   CanvasElement canvasElement = BindingBridge.getBindingObject(nativeCanvasElement) as CanvasElement;
-  //   canvasElement.getContext(nativeStringToString(contextId));
-  //   return canvasElement.painter.context!.nativeCanvasRenderingContext2D;
-  // }
 
   CanvasElement([BindingContext? context])
       : super(
