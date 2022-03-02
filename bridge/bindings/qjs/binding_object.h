@@ -5,12 +5,6 @@
 #ifndef KRAKENBRIDGE_BINDING_OBJECT_H
 #define KRAKENBRIDGE_BINDING_OBJECT_H
 
+class binding_object {};
 
-
-class binding_object {
-
-};
-
-
-
-#endif //KRAKENBRIDGE_BINDING_OBJECT_H
+#endif  // KRAKENBRIDGE_BINDING_OBJECT_H
