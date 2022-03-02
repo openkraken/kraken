@@ -67,12 +67,12 @@ void _invokeBindingMethod(Pointer<Void> nativeBindingObject, Pointer<NativeValue
     var result;
     try {
       if (method == GetPropertyMagic && argc == 1) {
-        result = bindingObject.getProperty(values[0]);
+        result = bindingObject.getBindingProperty(values[0]);
       } else if (method == SetPropertyMagic && argc == 2) {
-        bindingObject.setProperty(values[0], values[1]);
+        bindingObject.setBindingProperty(values[0], values[1]);
         result = null;
       } else {
-        result = bindingObject.invokeMethod(method, values);
+        result = bindingObject.invokeBindingMethod(method, values);
       }
     } catch (e, stack) {
       print('$e\n$stack');

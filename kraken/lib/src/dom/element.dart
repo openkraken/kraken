@@ -184,7 +184,7 @@ abstract class Element
   // https://www.w3.org/TR/cssom-view-1/#extensions-to-the-htmlelement-interface
   // https://www.w3.org/TR/cssom-view-1/#extension-to-the-element-interface
   @override
-  getProperty(String key) {
+  getBindingProperty(String key) {
     switch (key) {
       case 'offsetTop': return offsetTop;
       case 'offsetLeft': return offsetLeft;
@@ -204,24 +204,24 @@ abstract class Element
       case 'className': return className;
       case 'classList': return classList;
 
-      default: return super.getProperty(key);
+      default: return super.getBindingProperty(key);
     }
   }
 
   @override
-  void setProperty(String key, value) {
+  void setBindingProperty(String key, value) {
     switch (key) {
       case 'scrollTop': scrollTop = castToType<double>(value); break;
       case 'scrollLeft': scrollLeft = castToType<double>(value); break;
 
       case 'className': className = castToType<String>(value); break;
 
-      default: super.setProperty(key, value);
+      default: super.setBindingProperty(key, value);
     }
   }
 
   @override
-  invokeMethod(String method, List args) {
+  invokeBindingMethod(String method, List args) {
     switch (method) {
       case 'getBoundingClientRect': return getBoundingClientRect().toNative();
       case 'scroll': return scroll(castToType<double>(args[0]), castToType<double>(args[1]));
@@ -229,7 +229,7 @@ abstract class Element
       case 'scrollTo': return scrollTo(castToType<double>(args[0]), castToType<double>(args[1]));
       case 'click': return click();
 
-      default: super.invokeMethod(method, args);
+      default: super.invokeBindingMethod(method, args);
     }
   }
 

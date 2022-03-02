@@ -68,28 +68,28 @@ class CanvasElement extends Element {
 
   // Bindings.
   @override
-  getProperty(String key) {
+  getBindingProperty(String key) {
     switch (key) {
       case 'width': return width;
       case 'height': return height;
-      default: return super.getProperty(key);
+      default: return super.getBindingProperty(key);
     }
   }
 
   @override
-  void setProperty(String key, value) {
+  void setBindingProperty(String key, value) {
     switch (key) {
       case 'width': width = castToType<int>(value); break;
       case 'height': height = castToType<int>(value); break;
-      default: super.setProperty(key, value);
+      default: super.setBindingProperty(key, value);
     }
   }
 
   @override
-  invokeMethod(String method, List args) {
+  invokeBindingMethod(String method, List args) {
     switch (method) {
       case 'getContext': return getContext(castToType<String>(args[0])).nativeCanvasRenderingContext2D;
-      default: return super.invokeMethod(method, args);
+      default: return super.invokeBindingMethod(method, args);
     }
   }
 

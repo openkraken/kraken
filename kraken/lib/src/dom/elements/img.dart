@@ -84,7 +84,7 @@ class ImageElement extends Element {
 
   // Bindings.
   @override
-  getProperty(String key) {
+  getBindingProperty(String key) {
     switch (key) {
       case 'src': return src;
       case 'loading': return loading;
@@ -94,19 +94,19 @@ class ImageElement extends Element {
       case 'naturalWidth': return naturalWidth;
       case 'naturalHeight': return naturalHeight;
       case 'complete': return complete;
-      default: return super.getProperty(key);
+      default: return super.getBindingProperty(key);
     }
   }
 
   @override
-  void setProperty(String key, value) {
+  void setBindingProperty(String key, value) {
     switch (key) {
       case 'src': src = castToType<String>(value); break;
       case 'loading': loading = castToType<bool>(value); break;
       case 'width': width = castToType<int>(value); break;
       case 'height': height = castToType<int>(value); break;
       case 'scaling': scaling = castToType<String>(value); break;
-      default: super.setProperty(key, value);
+      default: super.setBindingProperty(key, value);
     }
   }
 

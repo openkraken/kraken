@@ -77,7 +77,7 @@ class SampleElement extends dom.Element implements BindingObject {
   SampleElement(BindingContext? context)
       : super(context);
 
-  getProperty(String key) {
+  getBindingProperty(String key) {
     switch (key) {
       case 'ping': return ping;
       case 'fake': return fake;

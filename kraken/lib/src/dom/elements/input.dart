@@ -242,7 +242,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   // Bindings.
   @override
-  getProperty(String key) {
+  getBindingProperty(String key) {
     switch (key) {
       case 'width': return width;
       case 'height': return height;
@@ -264,12 +264,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       case 'placeholder': return placeholder;
       case 'type': return type;
       case 'mode': return mode;
-      default: return super.getProperty(key);
+      default: return super.getBindingProperty(key);
     }
   }
 
   @override
-  void setProperty(String key, val) {
+  void setBindingProperty(String key, val) {
     switch (key) {
       case 'width': width = castToType<int>(val); break;
       case 'height': height = castToType<int>(val); break;
@@ -291,16 +291,16 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       case 'placeholder': placeholder = castToType<String>(val); break;
       case 'type': type = castToType<String>(val); break;
       case 'mode': mode = castToType<String>(val); break;
-      default: super.setProperty(key, value);
+      default: super.setBindingProperty(key, value);
     }
   }
 
   @override
-  invokeMethod(String method, List args) {
+  invokeBindingMethod(String method, List args) {
     switch (method) {
       case 'focus': return focus();
       case 'blur': return blur();
-      default: return super.invokeMethod(method, args);
+      default: return super.invokeBindingMethod(method, args);
     }
   }
 

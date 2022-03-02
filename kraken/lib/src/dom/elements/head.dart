@@ -40,24 +40,24 @@ class LinkElement extends Element {
 
   // Bindings.
   @override
-  getProperty(String key) {
+  getBindingProperty(String key) {
     switch (key) {
       case 'disabled': return disabled;
       case 'rel': return rel;
       case 'href': return href;
       case 'type': return type;
-      default: return super.getProperty(key);
+      default: return super.getBindingProperty(key);
     }
   }
 
   @override
-  void setProperty(String key, value) {
+  void setBindingProperty(String key, value) {
     switch (key) {
       case 'disabled': disabled = castToType<bool>(value); break;
       case 'rel': rel = castToType<String>(value); break;
       case 'href': href = castToType<String>(value); break;
       case 'type': type = castToType<String>(value); break;
-      default: super.setProperty(key, value);
+      default: super.setBindingProperty(key, value);
     }
   }
 
@@ -174,7 +174,7 @@ class ScriptElement extends Element {
 
   // Bindings.
   @override
-  getProperty(String key) {
+  getBindingProperty(String key) {
     switch (key) {
       case 'src': return src;
       case 'async': return async;
@@ -182,12 +182,12 @@ class ScriptElement extends Element {
       case 'type': return type;
       case 'charset': return charset;
       case 'text': return text;
-      default: return super.getProperty(key);
+      default: return super.getBindingProperty(key);
     }
   }
 
   @override
-  void setProperty(String key, value) {
+  void setBindingProperty(String key, value) {
     switch (key) {
       case 'src': src = castToType<String>(value); break;
       case 'async': async = castToType<bool>(value); break;
@@ -195,7 +195,7 @@ class ScriptElement extends Element {
       case 'type': type = castToType<String>(value); break;
       case 'charset': charset = castToType<String>(value); break;
       case 'text': text = castToType<String>(value); break;
-      default: super.setProperty(key, value);
+      default: super.setBindingProperty(key, value);
     }
   }
 
@@ -327,18 +327,18 @@ class StyleElement extends Element {
 
   // Bindings.
   @override
-  getProperty(String key) {
+  getBindingProperty(String key) {
     switch (key) {
       case 'type': return type;
-      default: return super.getProperty(key);
+      default: return super.getBindingProperty(key);
     }
   }
 
   @override
-  void setProperty(String key, value) {
+  void setBindingProperty(String key, value) {
     switch (key) {
       case 'type': type = castToType<String>(value); break;
-      default: super.setProperty(key, value);
+      default: super.setBindingProperty(key, value);
     }
   }
 

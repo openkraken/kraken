@@ -45,7 +45,7 @@ class AnchorElement extends Element {
 
   // Bindings.
   @override
-  getProperty(String key) {
+  getBindingProperty(String key) {
     switch (key) {
       case 'href': return href;
       case 'target': return target;
@@ -58,12 +58,12 @@ class AnchorElement extends Element {
       case 'pathname': return pathname;
       case 'search': return search;
       case 'hash': return hash;
-      default: return super.getProperty(key);
+      default: return super.getBindingProperty(key);
     }
   }
 
   @override
-  void setProperty(String key, value) {
+  void setBindingProperty(String key, value) {
     switch (key) {
       case 'href': href = castToType<String>(value); break;
       case 'target': target = castToType<String>(value); break;
@@ -76,7 +76,7 @@ class AnchorElement extends Element {
       case 'pathname': pathname = castToType<String>(value); break;
       case 'search': search = castToType<String>(value); break;
       case 'hash': hash = castToType<String>(value); break;
-      default: super.setProperty(key, value);
+      default: super.setBindingProperty(key, value);
     }
   }
 

@@ -56,8 +56,8 @@ class ObjectElement extends Element implements ObjectElementHost {
   }
 
   @override
-  invokeMethod(String method, List args) {
-    return handleJSCall(method, args) ?? super.invokeMethod(method, args);
+  invokeBindingMethod(String method, List args) {
+    return handleJSCall(method, args) ?? super.invokeBindingMethod(method, args);
   }
 
   @override

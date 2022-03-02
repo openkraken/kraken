@@ -25,7 +25,7 @@ class Window extends EventTarget {
 
   // https://www.w3.org/TR/cssom-view-1/#extensions-to-the-window-interface
   @override
-  getProperty(String key) {
+  getBindingProperty(String key) {
     switch (key) {
       case 'scrollX': return scrollX;
       case 'scrollY': return scrollY;
@@ -33,7 +33,7 @@ class Window extends EventTarget {
   }
 
   @override
-  invokeMethod(String method, List args) {
+  invokeBindingMethod(String method, List args) {
     switch (method) {
       case 'scroll':
       case 'scrollTo':

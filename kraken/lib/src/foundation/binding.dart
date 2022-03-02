@@ -36,15 +36,15 @@ abstract class BindingObject {
 
   // Get a property, eg:
   //   console.log(el.foo);
-  dynamic getProperty(String key) {}
+  dynamic getBindingProperty(String key) {}
 
   // Set a property, eg:
   //   el.foo = 'bar';
-  void setProperty(String key, value) {}
+  void setBindingProperty(String key, value) {}
 
   // Call a method, eg:
   //   el.getContext('2x');
-  dynamic invokeMethod(String method, List args) {}
+  dynamic invokeBindingMethod(String method, List args) {}
 
   @mustCallSuper
   void dispose() {
