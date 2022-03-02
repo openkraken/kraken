@@ -263,7 +263,7 @@ class CanvasRenderingContext2D extends BindingObject {
   getBindingProperty(String key) {
     switch (key) {
       case 'fillStyle': return CSSColor.convertToHex(fillStyle);
-      case 'direction': return direction.toString();
+      case 'direction': return _textDirectionInString;
       case 'font': return font;
       case 'strokeStyle': return CSSColor.convertToHex(strokeStyle);
       case 'lineCap': return lineCap;
@@ -385,6 +385,12 @@ class CanvasRenderingContext2D extends BindingObject {
     });
   }
   TextDirection get direction => _direction;
+  String get _textDirectionInString {
+    switch (_direction) {
+      case TextDirection.ltr: return 'ltr';
+      case TextDirection.rtl: return 'rtl';
+    }
+  }
 
   Map<String, String?> _fontProperties = {};
   double? _fontSize;
