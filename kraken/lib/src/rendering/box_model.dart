@@ -651,6 +651,14 @@ class RenderBoxModel extends RenderBox
     }
   }
 
+  // Line height of renderBoxModel itself, should override to get the multiplied
+  // line height for elements with multiline such as <textarea>.
+  double? get lineHeight {
+    return renderStyle.lineHeight.type != CSSLengthType.NORMAL
+      ? renderStyle.lineHeight.computedValue
+      : null;
+  }
+
   // Cache all the fixed children of renderBoxModel of root element
   List<RenderBoxModel> fixedChildren = [];
 

@@ -118,19 +118,15 @@ class RenderFlowLayout extends RenderLayoutBox {
   }
 
   double? _getLineHeight(RenderBox child) {
-    CSSLengthValue? lineHeight;
+    double? lineHeight;
     if (child is RenderTextBox) {
-      lineHeight = renderStyle.lineHeight;
+      lineHeight = child.lineHeight;
     } else if (child is RenderBoxModel) {
-      lineHeight = child.renderStyle.lineHeight;
+      lineHeight = child.lineHeight;
     } else if (child is RenderPositionPlaceholder) {
-      lineHeight = child.positioned!.renderStyle.lineHeight;
+      lineHeight = child.positioned!.lineHeight;
     }
-
-    if (lineHeight != null && lineHeight.type != CSSLengthType.NORMAL) {
-      return lineHeight.computedValue;
-    }
-    return null;
+    return lineHeight;
   }
 
   @override
@@ -385,10 +381,9 @@ class RenderFlowLayout extends RenderLayoutBox {
         double? lineHeight = _getLineHeight(child);
         // Leading space between content box and virtual box of child.
         double childLeading = 0;
-        if (child is! RenderTextBox && lineHeight != null) {
+        if (lineHeight != null) {
           childLeading = lineHeight - childSize.height;
         }
-
         // When baseline of children not found, use boundary of margin bottom as baseline.
         double childAscent = _getChildAscent(child);
 
@@ -610,6 +605,8 @@ class RenderFlowLayout extends RenderLayoutBox {
           // Leading between height of line box's content area and line height of line box.
           double lineBoxLeading = 0;
           double? lineBoxHeight = _getLineHeight(this);
+          // @TODO line-height of layout should add the line-height of multiple line child
+          // rather than exclude it.
           if (child is! RenderTextBox && lineBoxHeight != null) {
             lineBoxLeading = lineBoxHeight - runCrossAxisExtent;
           }
@@ -628,7 +625,7 @@ class RenderFlowLayout extends RenderLayoutBox {
                   childSize!.height -
                   childLeading / 2;
               break;
-          // @TODO: Vertical align middle needs to caculate the baseline of the parent box plus
+          // @TODO: Vertical align middle needs to calculate the baseline of the parent box plus
           //  half the x-height of the parent from W3C spec currently flutter lack the api to calculate x-height of glyph.
           //  case VerticalAlign.middle:
           //  break;

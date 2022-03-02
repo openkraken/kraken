@@ -75,16 +75,16 @@ class KrakenRenderParagraph extends RenderBox
 
   final TextPainter _textPainter;
 
-  /// The text painter of each line
+  // The text painter of each line
   late List<TextPainter> _lineTextPainters;
 
-  /// The line mertics of paragraph
-  late List<ui.LineMetrics> _lineMetrics;
+  // The line mertics of paragraph
+  late List<ui.LineMetrics> lineMetrics;
 
-  /// The vertical offset of each line
+  // The vertical offset of each line
   late List<double> _lineOffset;
 
-  /// The line height of paragraph
+  // The line height of paragraph
   double? _lineHeight;
   double? get lineHeight => _lineHeight;
   set lineHeight(double? value) {
@@ -92,7 +92,7 @@ class KrakenRenderParagraph extends RenderBox
     _lineHeight = value;
   }
 
-  /// The text to display.
+  // The text to display.
   TextSpan get text => _textPainter.text as TextSpan;
 
   set text(TextSpan value) {
@@ -240,7 +240,7 @@ class KrakenRenderParagraph extends RenderBox
   /// Compute distance to baseline of first text line
   double computeDistanceToFirstLineBaseline() {
     double firstLineOffset = _lineOffset[0];
-    ui.LineMetrics firstLineMetrics = _lineMetrics[0];
+    ui.LineMetrics firstLineMetrics = lineMetrics[0];
 
     // Use the baseline of the last line as paragraph baseline.
     return text.text == '' ? 0.0 : (firstLineOffset + firstLineMetrics.ascent);
@@ -249,7 +249,7 @@ class KrakenRenderParagraph extends RenderBox
   /// Compute distance to baseline of last text line
   double computeDistanceToLastLineBaseline() {
     double lastLineOffset = _lineOffset[_lineOffset.length - 1];
-    ui.LineMetrics lastLineMetrics = _lineMetrics[_lineMetrics.length - 1];
+    ui.LineMetrics lastLineMetrics = lineMetrics[lineMetrics.length - 1];
 
     // Use the baseline of the last line as paragraph baseline.
     return text.text == '' ? 0.0 : (lastLineOffset + lastLineMetrics.ascent);
@@ -380,13 +380,13 @@ class KrakenRenderParagraph extends RenderBox
   // Compute line metrics and line offset according to line-height spec.
   // https://www.w3.org/TR/css-inline-3/#inline-height
   void _computeLineMetrics() {
-    _lineMetrics = _textPainter.computeLineMetrics();
+    lineMetrics = _textPainter.computeLineMetrics();
     // Leading of each line
     List<double> _lineLeading = [];
 
     _lineOffset = [];
-    for (int i = 0; i < _lineMetrics.length; i++) {
-      ui.LineMetrics lineMetric = _lineMetrics[i];
+    for (int i = 0; i < lineMetrics.length; i++) {
+      ui.LineMetrics lineMetric = lineMetrics[i];
       // Do not add line height in the case of textOverflow ellipsis
       // cause height of line metric equals to 0.
       double leading = lineHeight != null && lineMetric.height != 0
@@ -395,7 +395,7 @@ class KrakenRenderParagraph extends RenderBox
       _lineLeading.add(leading);
       // Offset of previous line
       double preLineBottom = i > 0
-        ? _lineOffset[i - 1] + _lineMetrics[i - 1].height + _lineLeading[i - 1] / 2
+        ? _lineOffset[i - 1] + lineMetrics[i - 1].height + _lineLeading[i - 1] / 2
         : 0;
       double offset = preLineBottom + leading / 2;
       _lineOffset.add(offset);
@@ -406,8 +406,8 @@ class KrakenRenderParagraph extends RenderBox
   double _getParagraphHeight() {
     double paragraphHeight = 0;
     // Height of paragraph
-    for (int i = 0; i < _lineMetrics.length; i++) {
-      ui.LineMetrics lineMetric = _lineMetrics[i];
+    for (int i = 0; i < lineMetrics.length; i++) {
+      ui.LineMetrics lineMetric = lineMetrics[i];
       // Do not add line height in the case of textOverflow ellipsis
       // cause height of line metric equals to 0.
       double height = lineHeight != null && lineMetric.height != 0 ?

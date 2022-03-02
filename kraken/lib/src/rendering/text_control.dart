@@ -10,6 +10,49 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/rendering.dart';
 
+class RenderTextControlMultiline extends RenderIntrinsic {
+  RenderTextControlMultiline(CSSRenderStyle renderStyle,) : super(
+    renderStyle,
+  );
+
+  @override
+  RenderIntrinsic toRepaintBoundaryIntrinsic() {
+    RenderObject? childRenderObject = child;
+    child = null;
+    RenderRepaintBoundaryTextControlMultiline newChild = RenderRepaintBoundaryTextControlMultiline(renderStyle);
+    newChild.child = childRenderObject as RenderBox?;
+    return copyWith(newChild);
+  }
+
+  @override
+  double? get lineHeight {
+    TextareaElement textareaElement = renderStyle.target as TextareaElement;
+
+    double computedLineHeight = renderStyle.lineHeight != CSSLengthValue.normal
+      ? renderStyle.lineHeight.computedValue
+      : 1.2 * renderStyle.fontSize.computedValue;
+
+    return computedLineHeight * double.parse(textareaElement.properties[ROWS] ?? '2');
+  }
+}
+
+class RenderRepaintBoundaryTextControlMultiline extends RenderTextControlMultiline {
+  RenderRepaintBoundaryTextControlMultiline(CSSRenderStyle renderStyle,) : super(
+    renderStyle,
+  );
+
+  @override
+  bool get isRepaintBoundary => true;
+
+  RenderTextControlMultiline toIntrinsic() {
+    RenderObject? childRenderObject = child;
+    child = null;
+    RenderTextControlMultiline newChild = RenderTextControlMultiline(renderStyle);
+    newChild.child = childRenderObject as RenderBox?;
+    return copyWith(newChild);
+  }
+}
+
 /// RenderLeaderLayer of [TextFormControlElement] used for toolbar overlay
 /// which includes [Cut], [Copy], [Paste], [Select All] shortcuts to float with.
 class RenderTextControlLeaderLayer extends RenderLeaderLayer {

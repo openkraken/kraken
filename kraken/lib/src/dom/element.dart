@@ -51,17 +51,17 @@ enum BoxSizeType {
 }
 
 mixin ElementBase on Node {
-  RenderLayoutBox? _renderLayoutBox;
-  RenderIntrinsic? _renderIntrinsic;
-  RenderBoxModel? get renderBoxModel => _renderLayoutBox ?? _renderIntrinsic;
+  RenderLayoutBox? renderLayoutBox;
+  RenderIntrinsic? renderIntrinsic;
+  RenderBoxModel? get renderBoxModel => renderLayoutBox ?? renderIntrinsic;
   set renderBoxModel(RenderBoxModel? value) {
     if (value == null) {
-      _renderIntrinsic = null;
-      _renderLayoutBox = null;
+      renderIntrinsic = null;
+      renderLayoutBox = null;
     } else if (value is RenderIntrinsic) {
-      _renderIntrinsic = value;
+      renderIntrinsic = value;
     } else if (value is RenderLayoutBox) {
-      _renderLayoutBox = value;
+      renderLayoutBox = value;
     } else {
       if (!kReleaseMode) throw FlutterError('Unknown RenderBoxModel value.');
     }
@@ -184,9 +184,9 @@ class Element extends Node
   void _updateRenderBoxModel() {
     RenderBoxModel nextRenderBoxModel;
     if (_isIntrinsicBox) {
-      nextRenderBoxModel = _createRenderIntrinsic(isRepaintBoundary: isRepaintBoundary, previousIntrinsic: _renderIntrinsic);
+      nextRenderBoxModel = _createRenderIntrinsic(isRepaintBoundary: isRepaintBoundary, previousIntrinsic: renderIntrinsic);
     } else {
-      nextRenderBoxModel = _createRenderLayout(isRepaintBoundary: isRepaintBoundary, previousRenderLayoutBox: _renderLayoutBox);
+      nextRenderBoxModel = _createRenderLayout(isRepaintBoundary: isRepaintBoundary, previousRenderLayoutBox: renderLayoutBox);
     }
 
     RenderBox? previousRenderBoxModel = renderBoxModel;
@@ -212,6 +212,18 @@ class Element extends Node
     }
   }
 
+  RenderIntrinsic createRenderIntrinsic() {
+    return RenderIntrinsic(
+      renderStyle,
+    );
+  }
+
+  RenderIntrinsic createRenderRepaintBoundaryIntrinsic() {
+    return RenderRepaintBoundaryIntrinsic(
+      renderStyle,
+    );
+  }
+
   RenderIntrinsic _createRenderIntrinsic({
     RenderIntrinsic? previousIntrinsic,
     bool isRepaintBoundary = false
@@ -220,13 +232,9 @@ class Element extends Node
 
     if (previousIntrinsic == null) {
       if (isRepaintBoundary) {
-        nextIntrinsic = RenderRepaintBoundaryIntrinsic(
-          renderStyle,
-        );
+        nextIntrinsic = createRenderRepaintBoundaryIntrinsic();
       } else {
-        nextIntrinsic = RenderIntrinsic(
-          renderStyle,
-        );
+        nextIntrinsic = createRenderIntrinsic();
       }
     } else {
       if (previousIntrinsic is RenderRepaintBoundaryIntrinsic) {
@@ -421,7 +429,7 @@ class Element extends Node
     _renderBoxModel.clearIntersectionChangeListeners();
 
     // Remove fixed children from root when element disposed.
-    _removeFixedChild(_renderBoxModel, ownerDocument.documentElement!._renderLayoutBox!);
+    _removeFixedChild(_renderBoxModel, ownerDocument.documentElement!.renderLayoutBox!);
 
     // Remove renderBox.
     _renderBoxModel.detachFromContainingBlock();
@@ -570,7 +578,7 @@ class Element extends Node
       RenderBoxModel _renderBoxModel = renderBoxModel!;
       // Remove fixed children before convert to non repaint boundary renderObject
       if (currentPosition != CSSPositionType.fixed) {
-        _removeFixedChild(_renderBoxModel, ownerDocument.documentElement!._renderLayoutBox!);
+        _removeFixedChild(_renderBoxModel, ownerDocument.documentElement!.renderLayoutBox!);
       }
 
       // Find the renderBox of its containing block.
@@ -589,7 +597,7 @@ class Element extends Node
 
       // Add fixed children after convert to repaint boundary renderObject.
       if (currentPosition == CSSPositionType.fixed) {
-        _addFixedChild(renderBoxModel!, ownerDocument.documentElement!._renderLayoutBox!);
+        _addFixedChild(renderBoxModel!, ownerDocument.documentElement!.renderLayoutBox!);
       }
     }
 
@@ -628,15 +636,15 @@ class Element extends Node
   }
 
   void addChild(RenderBox child) {
-    if (_renderLayoutBox != null) {
-      RenderLayoutBox? scrollingContentBox = _renderLayoutBox!.renderScrollingContent;
+    if (renderLayoutBox != null) {
+      RenderLayoutBox? scrollingContentBox = renderLayoutBox!.renderScrollingContent;
       if (scrollingContentBox != null) {
         scrollingContentBox.add(child);
       } else {
-        _renderLayoutBox!.add(child);
+        renderLayoutBox!.add(child);
       }
-    } else if (_renderIntrinsic != null) {
-      _renderIntrinsic!.child = child;
+    } else if (renderIntrinsic != null) {
+      renderIntrinsic!.child = child;
     }
   }
 
@@ -681,7 +689,7 @@ class Element extends Node
     if (parentElement?.renderStyle.display == CSSDisplay.sliver) {
       // Sliver should not create renderer here, but need to trigger
       // render sliver list dynamical rebuild child by element tree.
-      parentElement?._renderLayoutBox?.markNeedsLayout();
+      parentElement?.renderLayoutBox?.markNeedsLayout();
     } else {
       willAttachRenderer();
     }
@@ -724,13 +732,13 @@ class Element extends Node
   void ensureChildAttached() {
     if (isRendererAttached) {
       for (Node child in childNodes) {
-        if (_renderLayoutBox != null && !child.isRendererAttached) {
+        if (renderLayoutBox != null && !child.isRendererAttached) {
           RenderBox? after;
-          RenderLayoutBox? scrollingContentBox = _renderLayoutBox!.renderScrollingContent;
+          RenderLayoutBox? scrollingContentBox = renderLayoutBox!.renderScrollingContent;
           if (scrollingContentBox != null) {
             after = scrollingContentBox.lastChild;
           } else {
-            after = _renderLayoutBox!.lastChild;
+            after = renderLayoutBox!.lastChild;
           }
 
           child.attachTo(this, after: after);
@@ -749,16 +757,16 @@ class Element extends Node
       child.renderStyle.parent = renderStyle;
     }
 
-    RenderLayoutBox? renderLayoutBox = _renderLayoutBox;
+    RenderLayoutBox? _renderLayoutBox = renderLayoutBox;
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
-      if (!child.isRendererAttached && renderLayoutBox != null && this is! WidgetElement) {
+      if (!child.isRendererAttached && _renderLayoutBox != null && this is! WidgetElement) {
         RenderBox? after;
-        RenderLayoutBox? scrollingContentBox = renderLayoutBox.renderScrollingContent;
+        RenderLayoutBox? scrollingContentBox = _renderLayoutBox.renderScrollingContent;
         if (scrollingContentBox != null) {
           after = scrollingContentBox.lastChild;
         } else {
-          after = renderLayoutBox.lastChild;
+          after = _renderLayoutBox.lastChild;
         }
 
         child.attachTo(this, after: after);
@@ -863,12 +871,12 @@ class Element extends Node
         //    the padding boxes of the first and the last inline boxes generated for that element.
         //    In CSS 2.1, if the inline element is split across multiple lines, the containing block is undefined.
         //  2. Otherwise, the containing block is formed by the padding edge of the ancestor.
-        containingBlockRenderBox = _findContainingBlock(this, ownerDocument.documentElement!)?._renderLayoutBox;
+        containingBlockRenderBox = _findContainingBlock(this, ownerDocument.documentElement!)?.renderLayoutBox;
         break;
       case CSSPositionType.fixed:
         // If the element has 'position: fixed', the containing block is established by the viewport
         // in the case of continuous media or the page area in the case of paged media.
-        containingBlockRenderBox = ownerDocument.documentElement!._renderLayoutBox;
+        containingBlockRenderBox = ownerDocument.documentElement!.renderLayoutBox;
         break;
     }
     return containingBlockRenderBox;
