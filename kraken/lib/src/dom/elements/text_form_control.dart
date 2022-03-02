@@ -186,7 +186,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   late EditableTextDelegate _textSelectionDelegate;
   TextSpan? _actualText;
   RenderTextControlLeaderLayer? _renderTextControlLeaderLayer;
-  RenderTextControl? _renderTextControl;
 
   final LayerLink _toolbarLayerLink = LayerLink();
   RenderEditable? renderEditable;
@@ -369,10 +368,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
           renderStyle.height = CSSLengthValue(defaultHeight, CSSLengthType.PX);
         }
         _renderTextControlLeaderLayer!.markNeedsLayout();
-        // It needs to mark _renderTextControl as needsLayout manually cause
-        // line-height change will not affect constraints which will in turn
-        // make _renderTextControl jump layout stage when _renderTextControlLeaderLayer performs layout.
-        _renderTextControl!.markNeedsLayout();
 
       // It needs to judge width in style here cause
       // width in renderStyle may be set in node attach.
@@ -663,14 +658,10 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   RenderTextControlLeaderLayer createRenderBox() {
     RenderEditable renderEditable = createRenderEditable();
 
-    _renderTextControl = RenderTextControl(
-      child: renderEditable,
-    );
     _renderTextControlLeaderLayer = RenderTextControlLeaderLayer(
       link: _toolbarLayerLink,
-      child: _renderTextControl,
+      child: renderEditable,
       scrollable: _scrollable,
-      renderEditable: renderEditable,
       isMultiline: isMultiline,
     );
     return _renderTextControlLeaderLayer!;

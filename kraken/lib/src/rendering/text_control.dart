@@ -10,17 +10,15 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/rendering.dart';
 
-/// RenderLeaderLayer of [TextFormControlElement] used for toolbar overlay to float with.
+/// RenderLeaderLayer of [TextFormControlElement] used for toolbar overlay
+/// which includes [Cut], [Copy], [Paste], [Select All] shortcuts to float with.
 class RenderTextControlLeaderLayer extends RenderLeaderLayer {
   RenderTextControlLeaderLayer({
     required LayerLink link,
-    RenderTextControl? child,
+    RenderEditable? child,
     required this.scrollable,
-    this.renderEditable,
     this.isMultiline = false,
   }) : super(link: link, child: child);
-
-  RenderEditable? renderEditable;
 
   KrakenScrollable scrollable;
 
@@ -48,7 +46,7 @@ class RenderTextControlLeaderLayer extends RenderLeaderLayer {
     RenderIntrinsic renderIntrinsic = parent as RenderIntrinsic;
     RenderStyle renderStyle = renderIntrinsic.renderStyle;
 
-    double intrinsicHeight = renderEditable!.preferredLineHeight
+    double intrinsicHeight = (child as RenderEditable).preferredLineHeight
       + renderStyle.paddingTop.computedValue + renderStyle.paddingBottom.computedValue
       + renderStyle.effectiveBorderTopWidth.computedValue + renderStyle.effectiveBorderBottomWidth.computedValue;
 
@@ -66,29 +64,15 @@ class RenderTextControlLeaderLayer extends RenderLeaderLayer {
     return Offset(0, dy);
   }
 
-  // Note paint override can not be done in RenderTextControl cause text control toolbar
-  // paints relative to the perferred height of textPainter.
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    final Offset transformedOffset = offset.translate(_offset!.dx, _offset!.dy);
-    super.paint(context, transformedOffset);
-  }
-}
-
-/// RenderBox of [TextFormControlElement].
-class RenderTextControl extends RenderProxyBox {
-  RenderTextControl({
-    required RenderEditable child,
-  }) : super(child);
-
   @override
   void performLayout() {
+    super.performLayout();
+
     if (child != null) {
       child!.layout(constraints, parentUsesSize: true);
       Size childSize = child!.size;
 
-      RenderTextControlLeaderLayer renderLeaderLayer = parent as RenderTextControlLeaderLayer;
-      RenderIntrinsic renderIntrinsic = renderLeaderLayer.parent as RenderIntrinsic;
+      RenderIntrinsic renderIntrinsic = parent as RenderIntrinsic;
       RenderStyle renderStyle = renderIntrinsic.renderStyle;
 
       double width;
@@ -116,5 +100,12 @@ class RenderTextControl extends RenderProxyBox {
       size = computeSizeForNoChild(constraints);
     }
   }
-}
 
+  // Note paint override can not be done in RenderTextControl cause text control toolbar
+  // paints relative to the perferred height of textPainter.
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final Offset transformedOffset = offset.translate(_offset!.dx, _offset!.dy);
+    super.paint(context, transformedOffset);
+  }
+}
