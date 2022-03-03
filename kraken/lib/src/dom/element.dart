@@ -696,9 +696,9 @@ abstract class Element
 
   @override
   void dispose() {
-    parentElement?.removeChild(this);
+    parentNode?.removeChild(this);
 
-    assert(isRendererAttached == false && parentNode == null, 'Should unmount $this before calling dispose.');
+    assert(isRendererAttached == false, 'Should unmount $this before calling dispose.');
 
     renderStyle.detach();
     style.dispose();
@@ -811,18 +811,13 @@ abstract class Element
   @override
   @mustCallSuper
   Node removeChild(Node child) {
-    // Not remove node type which is not present in RenderObject tree such as Comment
-    // Only append node types which is visible in RenderObject tree
-    // Only remove childNode when it has parent
-    if (child.isRendererAttached) {
-      child.unmountRenderObject();
-    }
+    super.removeChild(child);
+
     // Update renderStyle tree.
     if (child is Element) {
       child.renderStyle.detach();
     }
 
-    super.removeChild(child);
     return child;
   }
 

@@ -213,6 +213,14 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
 
   @mustCallSuper
   Node removeChild(Node child) {
+
+    // Not remove node type which is not present in RenderObject tree such as Comment
+    // Only append node types which is visible in RenderObject tree
+    // Only remove childNode when it has parent
+    if (child.isRendererAttached) {
+      child.unmountRenderObject();
+    }
+
     if (childNodes.contains(child)) {
       bool isConnected = child.isConnected;
       childNodes.remove(child);
