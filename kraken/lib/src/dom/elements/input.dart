@@ -260,7 +260,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       case 'disabled': return disabled;
       case 'min': return min;
       case 'max': return max;
-      case 'maxlength': return maxLength;
+      case 'maxLength': return maxLength;
       case 'placeholder': return placeholder;
       case 'type': return type;
       case 'mode': return mode;
@@ -271,9 +271,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   @override
   void setBindingProperty(String key, val) {
     switch (key) {
-      case 'width': width = castToType<int>(val); break;
-      case 'height': height = castToType<int>(val); break;
-      case 'value': value = castToType<String>(val); break;
+      case 'width': width = castToType<num>(val).toInt(); break;
+      case 'height': height = castToType<num>(val).toInt(); break;
+      case 'value': value = castToType<String?>(val); break;
       case 'accept': accept = castToType<String>(val); break;
       case 'autocomplete': autocomplete = castToType<String>(val); break;
       case 'autofocus': autofocus = castToType<bool>(val); break;
@@ -287,7 +287,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       case 'disabled': disabled = castToType<bool>(val); break;
       case 'min': min = castToType<String>(val); break;
       case 'max': max = castToType<String>(val); break;
-      case 'maxlength': maxLength = castToType<int>(val); break;
+      case 'maxLength': maxLength = castToType<num>(val).toInt(); break;
       case 'placeholder': placeholder = castToType<String>(val); break;
       case 'type': type = castToType<String>(val); break;
       case 'mode': mode = castToType<String>(val); break;
@@ -324,7 +324,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   String get value => _getValue();
 
-  set value(String text) {
+  set value(String? text) {
+    text ??= '';
+    if (text.length > _maxLength) {
+      // Slice to max length.
+      text = text.substring(0, _maxLength);
+    }
     internalSetAttribute('value', text);
     TextRange composing = _textSelectionDelegate._textEditingValue.composing;
     TextSelection selection = TextSelection.collapsed(offset: text.length);
@@ -425,9 +430,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     internalSetAttribute('max', value);
   }
 
-  int get maxLength => int.tryParse(getAttribute('maxlength') ?? '') ?? 0;
+  int get maxLength => int.tryParse(getAttribute('maxlength') ?? '') ?? -1; // Default to -1.
   set maxLength(int value) {
-    if (value.isNegative) value = 0;
+    if (value.isNegative || value == 0) value = -1;
     internalSetAttribute('maxlength', value.toString());
   }
 
@@ -471,7 +476,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       case 'disabled': disabled = attributeToProperty<bool>(val); break;
       case 'min': min = attributeToProperty<String>(val); break;
       case 'max': max = attributeToProperty<String>(val); break;
-      case 'maxlength': maxLength = attributeToProperty<int>(val); break;
+      case 'maxLength': maxLength = attributeToProperty<int>(val); break;
       case 'placeholder': placeholder = attributeToProperty<String>(val); break;
       case 'type': type = attributeToProperty<String>(val); break;
       case 'mode': mode = attributeToProperty<String>(val); break;
@@ -753,8 +758,11 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   bool get multiLine => maxLines > 1;
   bool get _hasFocus => InputElement.focusInputElement == this;
-  // The Number.MAX_SAFE_INTEGER constant represents the maximum safe integer in JavaScript (2^53 - 1).
-  final int _maxLength = 9007199254740992;
+  int get _maxLength {
+    if (maxLength > 0) return maxLength;
+    // The Number.MAX_SAFE_INTEGER constant represents the maximum safe integer in JavaScript (2^53 - 1).
+    return 9007199254740992;
+  }
 
   RenderEditable createRenderEditable() {
     _actualText ??= _buildTextSpan();

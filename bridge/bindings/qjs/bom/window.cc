@@ -210,12 +210,12 @@ IMPL_PROPERTY_GETTER(Window, parent)(JSContext* ctx, JSValue this_val, int argc,
 
 IMPL_PROPERTY_GETTER(Window, scrollX)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
-  return window->invokeBindingMethod("scrollX", 0, nullptr);
+  return window->getBindingProperty("scrollX");
 }
 
 IMPL_PROPERTY_GETTER(Window, scrollY)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
-  return window->invokeBindingMethod("scrollY", 0, nullptr);
+  return window->getBindingProperty("scrollY");
 }
 
 IMPL_PROPERTY_GETTER(Window, onerror)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {

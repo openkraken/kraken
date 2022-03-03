@@ -29,6 +29,7 @@ class Window extends EventTarget {
     switch (key) {
       case 'scrollX': return scrollX;
       case 'scrollY': return scrollY;
+      default: return super.getBindingProperty(key);
     }
   }
 
@@ -48,6 +49,7 @@ class Window extends EventTarget {
         );
       case 'open':
         return open(castToType<String>(args[0]));
+      default: return super.invokeBindingMethod(method, args);
     }
   }
 
