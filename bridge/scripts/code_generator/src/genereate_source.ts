@@ -358,7 +358,11 @@ function generateEventConstructorCode(object: ClassObject) {
   }
 
   auto *nativeEvent = new Native${object.name}();
+#if ANDROID_32_BIT
+  nativeEvent->nativeEvent.type = reinterpret_cast<int64_t>(jsValueToNativeString(ctx, eventTypeValue).release());
+#else
   nativeEvent->nativeEvent.type = jsValueToNativeString(ctx, eventTypeValue).release();
+#endif
 
   ${generateEventInstanceConstructorCode(object)}
 

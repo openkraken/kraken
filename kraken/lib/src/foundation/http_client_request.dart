@@ -170,8 +170,10 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
       request = await _createBackendClientRequest();
       // Send the real data to backend client.
-      request.add(_data);
-      _data.clear();
+      if (_data.isNotEmpty) {
+        await request.addStream(Stream.value(_data));
+        _data.clear();
+      }
 
       // Step 4: Lifecycle of shouldInterceptRequest
       HttpClientResponse? response;
@@ -222,8 +224,11 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
     } else {
       request = await _createBackendClientRequest();
-      request.add(_data);
-      _data.clear();
+      // Not using request.add, because large data will cause core exception.
+      if (_data.isNotEmpty) {
+        await request.addStream(Stream.value(_data));
+        _data.clear();
+      }
     }
 
     return _requestQueue.add(request.close);
